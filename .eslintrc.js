@@ -7,14 +7,14 @@ but you can't do it with {parser: 'babel-eslint'}: https://github.com/typescript
 */
 
 module.exports = {
-  parser: "babel-eslint", //optional: @typescript-eslint/parser can be here but impossible to use with babel-eslint
+  parser: "@typescript-eslint/parser", //babel-eslint
   parserOptions: {
     sourceType: "module",
     ecmaFeatures: {
       jsx: true
     }
   },
-  extends: ["airbnb", "prettier"],
+  extends: ["airbnb", "prettier", "plugin:@typescript-eslint/recommended"],
   env: {
     es6: true,
     node: true,
@@ -24,25 +24,24 @@ module.exports = {
     DEV_SERVER: true,
     API_DOMAIN: true
   },
-  plugins: ["json", "prettier"],
+  plugins: ["@typescript-eslint", "json", "prettier"],
   rules: {
+    "@typescript-eslint/ban-ts-ignore": "off",
     "prettier/prettier": ["error"],
-    "react/destructuring-assignment": 0,
-    // "react/jsx-max-props-per-line": [1, { maximum: 1 }], //it doesn't work with prettier, you can remove prettier from rules: 'prettier/prettier'...
-    // "react/jsx-first-prop-new-line": [1, "multiline"], //it doesn't work with prettier, you can remove prettier from rules: 'prettier/prettier'...
-    "react/prop-types": 0,
-    "react/prefer-stateless-function": 0,
-    "react/react-in-jsx-scope": 0,
-    "react/jsx-props-no-spreading": 0,
-    "react/jsx-curly-newline": 0, //it conflicts with prettier
-    "react/jsx-wrap-multilines": ["error", { arrow: true, return: true, declaration: true }],
     "no-underscore-dangle": 0,
     "no-unused-expressions": ["error", { allowShortCircuit: true }],
     "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
     "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
-    "no-alert": process.env.NODE_ENV === "production" ? "error" : "off",
     "no-plusplus": 0,
     "class-methods-use-this": 0,
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        js: "never",
+        ts: "never"
+      }
+    ],
     "max-len": [
       "warn",
       {
