@@ -7,12 +7,13 @@
   "scripts": {
     "test": "npm run lint",
     "serve": "./node_modules/.bin/webpack-dev-server --hot --open --config webpack.devServer.js",
-    "build-prod": "./node_modules/.bin/webpack --mode production --config webpack.prod.js",
-    "build-dev": "./node_modules/.bin/webpack --mode development --config webpack.dev.js",
+    "webpack-build-prod": "./node_modules/.bin/webpack --mode production --config webpack.prod.js",
+    "webpack-build-dev": "./node_modules/.bin/webpack --mode development --config webpack.dev.js",
     "lint": "npm run lint-code && npm run lint-styles",
     "lint-code": "./node_modules/.bin/eslint --fix --cache ./**/*.{js,jsx,ts,tsx,json}",
     "lint-styles": "./node_modules/.bin/stylelint --fix --cache ./**/*.{css,scss,less}",
-    "lint-md": "./node_modules/.bin/markdownlint --fix **/*.md --ignore node_modules"
+    "lint-md": "./node_modules/.bin/markdownlint --fix **/*.md --ignore node_modules",
+    "build": "tsc --listEmittedFiles"
   },
   "repository": {
     "type": "git",
@@ -40,6 +41,7 @@
     "@babel/preset-env": "^7.8.4",
     "@babel/preset-react": "^7.8.3",
     "@babel/preset-typescript": "^7.8.3",
+    "@types/react": "^16.9.19",
     "@typescript-eslint/eslint-plugin": "^2.19.0",
     "@typescript-eslint/parser": "^2.19.0",
     "autoprefixer": "^9.7.4",

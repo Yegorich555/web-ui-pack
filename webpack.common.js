@@ -1,4 +1,4 @@
-/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable */
 // console.clear(); // TODO: watchFix => it doesn't work properly since VSCode-terminal has bug: https://github.com/microsoft/vscode/issues/75141
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
@@ -20,7 +20,7 @@ const enableSourceMap = false;
 module.exports = function(_env, argv) {
   const isDevServer = argv.$0.indexOf("webpack-dev-server") !== -1;
   const mode = argv.mode || (isDevServer ? "development" : "production");
-  //const isDevMode = mode !== "production";
+  // const isDevMode = mode !== "production";
 
   process.env.NODE_ENV = mode; // it resolves issues in postcss.config.js (since Define plugin is loaded only after reading config-files)
   const result = {

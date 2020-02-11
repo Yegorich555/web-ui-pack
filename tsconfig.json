@@ -3,10 +3,13 @@
     "outDir": "./lib",
     "target": "es6",
     "module": "es6",
+    "moduleResolution":"Node",
     "jsx": "react",
+    "jsxFactory": "JSXcreateElement",
     "declaration": true,
+    "removeComments": true,
     "esModuleInterop": true,
-    "strict": true,
+    "strict": true
   },
   "include": ["src/*"],
   "exclude": ["node_modules", "build", ".vscode", "lib"]

@@ -26,6 +26,8 @@ module.exports = {
   },
   plugins: ["@typescript-eslint", "json", "prettier"],
   rules: {
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-filename-extension": [1, { extensions: [".tsx", ".jsx"] }],
     "@typescript-eslint/ban-ts-ignore": "off",
     "prettier/prettier": ["error"],
     "no-underscore-dangle": 0,
@@ -55,9 +57,20 @@ module.exports = {
         ignoreTemplateLiterals: true,
         ignoreRegExpLiterals: true
       }
+    ],
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        js: "never",
+        jsx: "never",
+        ts: "never",
+        tsx: "never"
+      }
     ]
   },
   settings: {
+    "import/extensions": [".ts", ".js", ".jsx", ".tsx", ".json"],
     "import/resolver": {
       alias: {
         map: Object.keys(pathAlias).map(key => [key, pathAlias[key]]),
