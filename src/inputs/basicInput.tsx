@@ -1,22 +1,38 @@
-import JSXcreateElement from "../JSXcreateElement";
+/* eslint-disable max-classes-per-file */
+import React from "react"; // todo remove this during the compilation
 
-export type ValidateFunction<T> = (v: T) => true | string;
+export type Validation<T> = {
+  // (v: T) => true | string;
+  test: (v: T) => boolean;
+  msg: string;
+};
+
+export type Validations<T> = {
+  [key: string]: Validation<T>;
+};
+
+let _id = 1;
 
 export default abstract class BasicInput<T> {
+  static getUniqueId(): string {
+    return `uipack_${++_id}`;
+  }
+
   isEmpty = (v: T): boolean => v == null;
 
   get initValue(): T {
     return (null as unknown) as T;
   }
 
-  // todo maybe place in common config.file?
-  get defaultValidations(): Map<string, ValidateFunction<T>> {
-    const map = new Map<string, ValidateFunction<T>>();
-    // todo check terser-minimizing for 'required'
-    map.set("required", v => this.isEmpty(v) || "This field is required"); // todo: make it replaceable
-    return map;
-  }
+  defaultValidations = {
+    required: { test: (v: T): boolean => !this.isEmpty(v), msg: "This field is required" }
+  }; // todo intellisense to properties doesn't work when cast to exact type: as Validations<T>;
 
+  private _value = this.initValue;
+
+  get currentValue(): T {
+    return this._value;
+  }
   // constructor() {
   //   this.state = {
   //     value: this.defaultValue !== undefined ? this.defaultValue : this.constructor.initValue,
@@ -124,18 +140,27 @@ export default abstract class BasicInput<T> {
   //   this.props.onBlur && this.props.onBlur(e || { target: { value } });
   // }
 
-  // abstract renderInput(): HTMLElement;
+  abstract renderInput(id: string, value: T): React.ReactElement | HTMLElement;
 
   //   renderBefore() {
   //     return null;
   //   }
 
   render(): React.ReactComponentElement<"label"> | HTMLLabelElement {
-    // return React.createElement("div");
-    return <label>test</label>;
+    const id = BasicInput.getUniqueId(); // todo generate auto or from props
+    return (
+      <label htmlFor={id}>
+        {/* todo required mark here */}
+        <span>Label here</span>
+        <fieldset>{this.renderInput(id, this.currentValue)}</fieldset>
+        {/* todo aria-invalid here */}
+        <span>Error message here</span>
+      </label>
+    );
+
     // return (
     //   <label
-    //     id={labelId}
+    //     // id={labelId}
     //     htmlFor={id}
     //     className={[
     //       styles.control,
@@ -151,7 +176,7 @@ export default abstract class BasicInput<T> {
     //     </span>
 
     //     {this.props.description ? <div className={styles.description}>{this.props.description}</div> : null}
-    //     <fieldset>{this.renderInput && this.renderInput(id, labelId, this.state.value)}</fieldset>
+    //     <fieldset>{this.renderInput(id, labelId, this.state.value)}</fieldset>
     //     {!this.state.isValid && this.state.errorMessage && !this.props.disableValidation ? (
     //       <span className={styles.errorMessage}>{this.state.errorMessage}</span>
     //     ) : null}
