@@ -70,7 +70,6 @@ module.exports = {
     ]
   },
   settings: {
-    "import/extensions": [".ts", ".js", ".jsx", ".tsx", ".json"],
     "import/resolver": {
       alias: {
         map: Object.keys(pathAlias).map(key => [key, pathAlias[key]]),
