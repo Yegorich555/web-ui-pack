@@ -6,13 +6,13 @@
     "module": "ESNext",
     "moduleResolution": "Node",
     "jsx": "react",
-    "jsxFactory": "Core.WebUIPackRenderElement",
+    "jsxFactory": "Core.renderElement",
     "declaration": true,
     "removeComments": true,
     "esModuleInterop": true,
     "strict": true,
-    "allowJs": true,
+    "allowJs": true
   },
   "include": ["src/*"],
-  "exclude": ["node_modules", "build", ".vscode", "lib"]
+  "exclude": ["node_modules", "build", ".vscode", "lib", "src/implementLater/JSXcreateElement.ts"]
 }

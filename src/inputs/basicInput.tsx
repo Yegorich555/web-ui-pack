@@ -1,9 +1,8 @@
-/* eslint import/no-unresolved: [2, { caseSensitive: false }] */
 import Core from "../core";
 
 export interface BasicInputProps<T> {
   id?: string | number;
-  name: string; // todo without form name is not required
+  name?: string; // todo without form name is not required
 }
 
 let _id = 1;
