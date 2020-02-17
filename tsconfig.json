@@ -1,15 +1,17 @@
 {
   "compilerOptions": {
     "outDir": "./lib",
+    "noEmitOnError": true,
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "Node",
     "jsx": "react",
-    "jsxFactory": "React.createElement",
+    "jsxFactory": "Core.WebUIPackRenderElement",
     "declaration": true,
     "removeComments": true,
     "esModuleInterop": true,
-    "strict": true
+    "strict": true,
+    "allowJs": true,
   },
   "include": ["src/*"],
   "exclude": ["node_modules", "build", ".vscode", "lib"]

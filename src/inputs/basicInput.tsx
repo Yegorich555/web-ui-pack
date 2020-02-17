@@ -1,19 +1,14 @@
-/* eslint-disable max-classes-per-file */
-import React from "react"; // todo remove this during the compilation
+/* eslint import/no-unresolved: [2, { caseSensitive: false }] */
+import Core from "../core";
 
-export type Validation<T> = {
-  // (v: T) => true | string;
-  test: (v: T) => boolean;
-  msg: string;
-};
-
-export type Validations<T> = {
-  [key: string]: Validation<T>;
-};
+export interface BasicInputProps<T> {
+  id?: string | number;
+  name: string; // todo without form name is not required
+}
 
 let _id = 1;
 
-export default abstract class BasicInput<T> {
+export abstract class BasicInput<T> extends Core.Component<BasicInputProps<T>> {
   static getUniqueId(): string {
     return `uipack_${++_id}`;
   }
@@ -140,16 +135,16 @@ export default abstract class BasicInput<T> {
   //   this.props.onBlur && this.props.onBlur(e || { target: { value } });
   // }
 
-  abstract renderInput(id: string, value: T): React.ReactElement | HTMLElement;
+  abstract renderInput(id: string | number, value: T): Core.Element;
 
-  //   renderBefore() {
-  //     return null;
-  //   }
+  // //   renderBefore() {
+  // //     return null;
+  // //   }
 
-  render(): React.ReactComponentElement<"label"> | HTMLLabelElement {
-    const id = BasicInput.getUniqueId(); // todo generate auto or from props
+  render(): Core.Element {
+    const id = this.props.id ?? BasicInput.getUniqueId();
     return (
-      <label htmlFor={id}>
+      <label htmlFor={id as string}>
         {/* todo required mark here */}
         <span>Label here</span>
         <fieldset>{this.renderInput(id, this.currentValue)}</fieldset>
@@ -157,30 +152,30 @@ export default abstract class BasicInput<T> {
         <span>Error message here</span>
       </label>
     );
-
-    // return (
-    //   <label
-    //     // id={labelId}
-    //     htmlFor={id}
-    //     className={[
-    //       styles.control,
-    //       !this.state.isValid ? styles.isInvalid : null,
-    //       this.props.className,
-    //       this.controlClassName
-    //     ]}
-    //     {...this.controlProps}
-    //   >
-    //     {this.renderBefore()}
-    //     <span className={this.hasRequired && !this.props.hideRequiredMark ? styles.required : null}>
-    //       {this.props.label}
-    //     </span>
-
-    //     {this.props.description ? <div className={styles.description}>{this.props.description}</div> : null}
-    //     <fieldset>{this.renderInput(id, labelId, this.state.value)}</fieldset>
-    //     {!this.state.isValid && this.state.errorMessage && !this.props.disableValidation ? (
-    //       <span className={styles.errorMessage}>{this.state.errorMessage}</span>
-    //     ) : null}
-    //   </label>
-    // );
   }
+  // return (
+  //   <label
+  //     // id={labelId}
+  //     htmlFor={id}
+  //     className={[
+  //       styles.control,
+  //       !this.state.isValid ? styles.isInvalid : null,
+  //       this.props.className,
+  //       this.controlClassName
+  //     ]}
+  //     {...this.controlProps}
+  //   >
+  //     {this.renderBefore()}
+  //     <span className={this.hasRequired && !this.props.hideRequiredMark ? styles.required : null}>
+  //       {this.props.label}
+  //     </span>
+
+  //     {this.props.description ? <div className={styles.description}>{this.props.description}</div> : null}
+  //     <fieldset>{this.renderInput(id, labelId, this.state.value)}</fieldset>
+  //     {!this.state.isValid && this.state.errorMessage && !this.props.disableValidation ? (
+  //       <span className={styles.errorMessage}>{this.state.errorMessage}</span>
+  //     ) : null}
+  //   </label>
+  // );
+  // }
 }
