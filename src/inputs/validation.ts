@@ -3,6 +3,10 @@ export type Validation<T, setVType> = {
   msg: string | ((setV: number | string) => string);
 };
 
-export type Validations<T, setVType> = {
+export interface Validations<T, setVType> {
   [key: string]: Validation<T, setVType>;
-};
+}
+
+export interface ValidationProps {
+  [key: string]: boolean;
+}

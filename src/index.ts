@@ -2,6 +2,7 @@
 
 import Core from "./core";
 
+export * from "./inputs/validation";
 export * from "./inputs/basicInput";
 export default Core;
 

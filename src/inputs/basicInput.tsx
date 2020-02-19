@@ -1,31 +1,63 @@
 import Core from "../core";
+import { ValidationProps } from "./validation";
+
+// export interface BasicInputValidations<T, setV> extends Validations<T, setV> {
+//   required;
+// }
+
+export interface BasicInputValidationProps extends ValidationProps {
+  required: boolean; // todo string?
+}
 
 export interface BasicInputProps<T> {
-  id?: string | number;
-  name?: string; // todo without form name is not required
+  htmlId?: string | number; // todo point that htmlId should be predefined
+  htmlName?: string;
+  // todo using modelMapping instead js-key mapping
+  name?: string;
+  initValue?: T;
+  validations: BasicInputValidationProps;
+}
+
+export interface BasicInputState<T> {
+  value: T;
 }
 
 let _id = 1;
 
-export abstract class BasicInput<T> extends Core.Component<BasicInputProps<T>> {
+// todo PureComponent? or shouldComponentUpdate
+export default abstract class BasicInput<ValueType> extends Core.Component<
+  BasicInputProps<ValueType>,
+  BasicInputState<ValueType>
+> {
   static getUniqueId(): string {
     return `uipack_${++_id}`;
   }
 
-  isEmpty = (v: T): boolean => v == null;
+  // todo abstract static?
+  isEmpty = (v: ValueType): boolean => v == null;
 
-  get initValue(): T {
-    return (null as unknown) as T;
+  // todo abstract static?
+  get initValue(): ValueType {
+    return (null as unknown) as ValueType;
   }
 
+  // todo static or typed?
   defaultValidations = {
-    required: { test: (v: T): boolean => !this.isEmpty(v), msg: "This field is required" }
-  }; // todo intellisense to properties doesn't work when cast to exact type: as Validations<T>;
+    required: { test: (v: ValueType): boolean => !this.isEmpty(v), msg: "This field is required" }
+  };
 
   private _value = this.initValue;
 
-  get currentValue(): T {
+  get currentValue(): ValueType {
+    // todo remove getter???
     return this._value;
+  }
+
+  htmlId: string | number;
+
+  constructor(props: BasicInputProps<ValueType>) {
+    super(props);
+    this.htmlId = this.props.htmlId ?? BasicInput.getUniqueId();
   }
   // constructor() {
   //   this.state = {
@@ -59,10 +91,6 @@ export abstract class BasicInput<T> extends Core.Component<BasicInputProps<T>> {
   //     return this.props.validations && this.props.validations.required;
   //   }
 
-  //   get currentValue() {
-  //     return this.state.value;
-  //   }
-
   //   get validationProps() {
   //     return this.props.validations;
   //   }
@@ -79,6 +107,10 @@ export abstract class BasicInput<T> extends Core.Component<BasicInputProps<T>> {
   //     return UnifyValidations(v, defRebind);
   //   };
 
+  validate = (): ValueType | false => {
+    // todo implement
+    return false;
+  };
   //   validate = v => {
   //     const propsValidations = this.validationProps;
   //     if (!propsValidations || this.props.disableValidation) {
@@ -134,19 +166,18 @@ export abstract class BasicInput<T> extends Core.Component<BasicInputProps<T>> {
   //   this.props.onBlur && this.props.onBlur(e || { target: { value } });
   // }
 
-  abstract renderInput(id: string | number, value: T): Core.Element;
+  abstract renderInput(id: string | number, value: ValueType): Core.Element;
 
-  // //   renderBefore() {
-  // //     return null;
-  // //   }
+  //   renderBefore() {
+  //     return null;
+  //   }
 
   render(): Core.Element {
-    const id = this.props.id ?? BasicInput.getUniqueId();
     return (
-      <label htmlFor={id as string}>
+      <label htmlFor={this.htmlId as string}>
         {/* todo required mark here */}
         <span>Label here</span>
-        <fieldset>{this.renderInput(id, this.currentValue)}</fieldset>
+        <fieldset>{this.renderInput(this.htmlId as string, this.state.value)}</fieldset>
         {/* todo aria-invalid here */}
         <span>Error message here</span>
       </label>
