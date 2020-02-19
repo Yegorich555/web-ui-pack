@@ -4,7 +4,7 @@
 import React from "react";
 
 declare module Core {
-  export class Component<Props, State> extends React.Component<Props, State> {}
+  export class Component<Props, State> extends React.PureComponent<Props, State> {}
   export type Element = React.ReactElement; // ReactChild
   export type Node = React.ReactNode;
   /* eslint-disable @typescript-eslint/no-explicit-any */
