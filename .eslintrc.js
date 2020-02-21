@@ -37,14 +37,6 @@ module.exports = {
     "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
     "no-plusplus": 0,
     "class-methods-use-this": 0,
-    "import/extensions": [
-      "error",
-      "ignorePackages",
-      {
-        js: "never",
-        ts: "never"
-      }
-    ],
     "max-len": [
       "warn",
       {
@@ -68,8 +60,17 @@ module.exports = {
         ts: "never",
         tsx: "never"
       }
-    ]
+    ],
+    "@typescript-eslint/explicit-function-return-type": "off"
   },
+  overrides: [
+    {
+      files: ["*.ts", ".tsx"],
+      rules: {
+        "@typescript-eslint/explicit-function-return-type": "error"
+      }
+    }
+  ],
   settings: {
     "import/resolver": {
       alias: {
