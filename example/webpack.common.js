@@ -8,11 +8,11 @@ const CleanPlugin = require("clean-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const path = require("path");
 
-const pathAlias = require("./webpack.alias");
+const pathAlias = require("../webpack.alias");
 
-const srcPath = path.resolve(__dirname, "./test/");
-const destPath = path.resolve(__dirname, "./build/"); // ('../Api/wwwroot')
-const assetsPath = "./test";
+const srcPath = path.resolve(__dirname, "../example/");
+const destPath = path.resolve(__dirname, "./build/");
+const assetsPath = "./";
 const filesThreshold = 8196; // (bytes) threshold for compression, url-loader plugins
 const enableSourceMap = false;
 
@@ -27,7 +27,7 @@ module.exports = function(_env, argv) {
     stats: {
       children: false // disable console.info for node_modules/*
     },
-    entry: path.resolve(srcPath, "webpack-ui.js"), // entryPoint for webpack; it can be object with key-value pairs for multibuild (https://webpack.js.org/concepts/entry-points/)
+    entry: path.resolve(srcPath, "main.jsx"), // entryPoint for webpack; it can be object with key-value pairs for multibuild (https://webpack.js.org/concepts/entry-points/)
     output: {
       path: destPath,
       filename: "[name].js",
