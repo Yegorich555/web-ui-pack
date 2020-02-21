@@ -1,6 +1,7 @@
 import Core from "../core";
 import { ValidationProps } from "./validation";
-
+import FormInputsCollection from "../forms/formInputsCollection";
+import Form from "../forms/form";
 // export interface BasicInputValidations<T, setV> extends Validations<T, setV> {
 //   required;
 // }
@@ -20,6 +21,7 @@ export interface BasicInputProps<T> {
 
 export interface BasicInputState<T> {
   value: T;
+  isValid: boolean;
 }
 
 let _id = 1;
@@ -29,83 +31,84 @@ export default abstract class BasicInput<ValueType> extends Core.Component<
   BasicInputProps<ValueType>,
   BasicInputState<ValueType>
 > {
+  // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146
+  ["constructor"]: typeof BasicInput;
+
   static getUniqueId(): string {
     return `uipack_${++_id}`;
   }
 
-  // todo abstract static?
-  isEmpty = (v: ValueType): boolean => v == null;
-
-  // todo abstract static?
-  get initValue(): ValueType {
-    return (null as unknown) as ValueType;
+  static isEmpty<ValueType>(v: ValueType): boolean {
+    return v == null;
   }
+
+  static defaultInitValue = null;
 
   // todo static or typed?
   defaultValidations = {
-    required: { test: (v: ValueType): boolean => !this.isEmpty(v), msg: "This field is required" }
+    required: { test: (v: ValueType): boolean => !this.constructor.isEmpty(v), msg: "This field is required" }
   };
 
-  private _value = this.initValue;
-
+  // todo remove getter???
   get currentValue(): ValueType {
-    // todo remove getter???
-    return this._value;
+    return this.state.value;
   }
 
-  htmlId: string | number;
+  get initValue(): ValueType {
+    if (this.isChanged) {
+      return this.currentValue;
+    }
+    if (this.props && this.props.initValue !== undefined) {
+      return this.props.initValue;
+    }
+    if (this.props.name && this.form) {
+      const v = this.form.getInitValue<ValueType>(this.props.name);
+      if (v !== undefined) {
+        return v;
+      }
+    }
+    return (this.constructor.defaultInitValue as unknown) as ValueType;
+  }
+
+  isChanged = false;
+  form: Form<unknown> | undefined;
+  // todo htmlId canBe redefined
+  htmlId = this.props.htmlId ?? BasicInput.getUniqueId();
+
+  toJSON(): BasicInput<ValueType> {
+    const result = {} as BasicInput<ValueType>;
+    Object.keys(result).forEach(key => {
+      if (key !== "form") {
+        // @ts-ignore
+        result[key] = this[key];
+      } else {
+        // @ts-ignore
+        result.form = "[formObject]";
+      }
+    });
+
+    return result;
+  }
+
+  state: BasicInputState<ValueType> = {
+    value: (this.constructor.defaultInitValue as unknown) as ValueType,
+    isValid: true // todo if this has *required* this is already invalid
+  };
 
   constructor(props: BasicInputProps<ValueType>) {
     super(props);
+    // todo if name isChanged but input is not: we must update initValue
+    if (this.props?.name) {
+      this.form = FormInputsCollection.tryRegisterInput(this);
+    }
     this.htmlId = this.props.htmlId ?? BasicInput.getUniqueId();
-  }
-  // constructor() {
-  //   this.state = {
-  //     value: this.defaultValue !== undefined ? this.defaultValue : this.constructor.initValue,
-  //     isValid: true
-  //   };
-  //   this.provideValueCallback = this.provideValueCallback.bind(this); // Such bind is important for inheritance and using super...():
-  //   this.props.provideValue && this.props.provideValue(this.provideValueCallback);
-  //   this.props.resetValue &&
-  //     this.props.resetValue(() => {
-  //       this.setState({ value: this.constructor.initValue });
-  //     });
-  //   this.props.validate && this.props.validate(() => this.validate(this.state.value));
-  //   this.renderInput = this.renderInput.bind(this); // Such bind is important for inheritance and using super...(): https://stackoverflow.com/questions/46869503/es6-arrow-functions-trigger-super-outside-of-function-or-class-error
-  //   this.renderBefore = this.renderBefore.bind(this); // Such bind is important for inheritance and using super...(): https://stackoverflow.com/questions/46869503/es6-arrow-functions-trigger-super-outside-of-function-or-class-error
-  //   this.prepareValidations = memoize(this._prepareValidations);
-  // }
 
-  //   get defaultValue() {
-  //     const { name, defaultModel, defaultValue } = this.props;
-  //     if (name) {
-  //       const model = defaultModel !== undefined ? defaultModel : this.props.formDefaultModel;
-  //       if (model) {
-  //         return lodashGet(model, name);
-  //       }
-  //     }
-  //     return defaultValue;
-  //   }
+    this.state.value = this.initValue;
+  }
 
   //   get hasRequired() {
   //     return this.props.validations && this.props.validations.required;
   //   }
-
-  //   get validationProps() {
-  //     return this.props.validations;
-  //   }
-
-  //   // wrapped with memoise
-  //   _prepareValidations = v => {
-  //     this.prev = v;
-  //     const def = this.constructor.defaultValidations;
-  //     const defRebind = {};
-  //     Object.keys(def).forEach(key => {
-  //       defRebind[key] = def[key].bind(this);
-  //     });
-
-  //     return UnifyValidations(v, defRebind);
-  //   };
 
   validate = (): ValueType | false => {
     // todo implement
@@ -171,6 +174,10 @@ export default abstract class BasicInput<ValueType> extends Core.Component<
   //   renderBefore() {
   //     return null;
   //   }
+
+  componentWillUnmount(): void {
+    FormInputsCollection.tryRemoveInput(this);
+  }
 
   render(): Core.Element {
     return (
