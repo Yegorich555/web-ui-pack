@@ -26,6 +26,7 @@ module.exports = {
   },
   plugins: ["@typescript-eslint", "json", "prettier"],
   rules: {
+    "lines-between-class-members": "off",
     "react/react-in-jsx-scope": "off",
     "react/jsx-filename-extension": [1, { extensions: [".tsx", ".jsx"] }],
     "@typescript-eslint/ban-ts-ignore": "off",
