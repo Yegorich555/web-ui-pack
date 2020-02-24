@@ -1,10 +1,11 @@
-// export { default as TextInput } from "./inputs/textInput";
-
 import Core from "./core";
 
-export * from "./inputs/validation";
-export * from "./inputs/basicInput";
 export default Core;
 
-// import { BasicInput } from "./inputs/basicInput";
-// Core.BasicInput = BasicInput;
+export * from "./inputs/validation";
+
+export { default as BasicInput } from "./inputs/basicInput";
+export * from "./inputs/basicInput";
+
+export { default as Form } from "./forms/form";
+export * from "./forms/form";
