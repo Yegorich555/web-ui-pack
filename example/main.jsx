@@ -1,4 +1,4 @@
-// import "./styles/main.scss";
+import "./styles/main.scss";
 import React, { Component } from "react";
 import ReactDom from "react-dom";
 import Form from "../lib/forms/form";

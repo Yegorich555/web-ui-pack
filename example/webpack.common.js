@@ -5,7 +5,6 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CaseSensitivePathsPlugin = require("case-sensitive-paths-webpack-plugin");
 const FriendlyErrorsWebpackPlugin = require("friendly-errors-webpack-plugin");
 const CleanPlugin = require("clean-webpack-plugin");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
 const path = require("path");
 
 const pathAlias = require("../webpack.alias");
@@ -74,56 +73,13 @@ module.exports = function(_env, argv) {
         },
         // rule for images
         {
-          test: /\.(png|jpe?g|gif|webp)(\?.*)?$/, // optional: optimizing images via pngo etc.
+          test: /\.(png|jpe?g|gif|webp)(\?.*)?$/,
           exclude: /(node_modules)/,
           use: [
             {
-              loader: "url-loader", // it converts images that have size less 'limit' option into inline base64-css-format
+              loader: "file-loader", // it converts images that have size less 'limit' option into inline base64-css-format
               options: {
-                name: "images/[name].[ext]",
-                limit: filesThreshold // if file-size more then limit, file-loader copies one into outputPath
-                // by default it uses fallback: 'file-loader'
-                // optional: fallback: 'responsive-loader' //it converts image to multiple images using srcset (IE isn't supported): https://caniuse.com/#search=srcset
-              }
-            }
-          ]
-        },
-        // rule for svg-images
-        {
-          test: /\.(svg)(\?.*)?$/, // for reducing file-size: OptimizeCSSAssetsPlugin > cssnano > SVGO, that congigured in webpack.prod.js
-          exclude: /(node_modules)|(fonts\\.+\.svg)(\?.*)?/,
-          use: [
-            {
-              loader: "svg-url-loader", // despite url-loader that converts images into base64 format it converts images to native svg-css format
-              options: {
-                limit: filesThreshold,
-                name: "images/[name].[ext]" // if file-size more then limit, [file-loader] copies ones into outputPath
-              }
-            }
-          ]
-        },
-        // rule for fonts
-        {
-          test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/i,
-          use: [
-            {
-              loader: "url-loader",
-              options: {
-                limit: filesThreshold,
-                name: "fonts/[name].[ext]" // if file-size more then limit, [file-loader] copies ones into outputPath
-              }
-            }
-          ]
-        },
-        // special rule for fonts in svg-format
-        {
-          test: /(fonts\\.+\.svg)(\?.*)?$/i, // for reducing file-size: OptimizeCSSAssetsPlugin > cssnano > SVGO, that congigured in webpack.prod.js
-          use: [
-            {
-              loader: "svg-url-loader", // despite url-loader that converts images into base64 format it converts images to native svg-css format
-              options: {
-                limit: filesThreshold,
-                name: "fonts/[name].[ext]" // if file-size more then limit,  [file-loader] copies ones into outputPath
+                name: "[name].[ext]"
               }
             }
           ]
@@ -137,13 +93,12 @@ module.exports = function(_env, argv) {
             {
               loader: "sass-loader", // it compiles Sass to CSS, using Node Sass by default
               options: {
-                prependData: '@import "variables";', // inject this import by default in each scss-file
+                //prependData: '@import "variables";', // inject this import by default in each scss-file
                 sassOptions: {
                   includePaths: [path.resolve(__dirname, "src/styles")]
                 }
               }
-            },
-            "postcss-loader" // it provides adding vendor prefixes to CSS rules using values from Can I Use (see postcss.config.js in the project)
+            }
           ]
         }
       ]
@@ -163,15 +118,6 @@ module.exports = function(_env, argv) {
         template: path.resolve(srcPath, "index.html")
       }),
       new CleanPlugin.CleanWebpackPlugin(), // it cleans output folder before extracting files
-      new CopyWebpackPlugin([
-        {
-          // it copies files like images, fonts etc. from 'public' path to 'destPath' (since not every file will be injected into css and js)
-          from: assetsPath,
-          to: destPath,
-          toType: "dir",
-          ignore: [".DS_Store"]
-        }
-      ]),
       new webpack.ProgressPlugin(), // it shows progress of building
       new webpack.ProvidePlugin({
         React: "react" // optional: react. it adds [import React from 'react'] as ES6 module to every file into the project

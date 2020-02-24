@@ -1,7 +1,6 @@
 /* eslint-disable */
 const merge = require("webpack-merge");
 const CleanPlugin = require("clean-webpack-plugin");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
 const dev = require("./webpack.dev");
 const assets = require("./webpack.common").assetsPath;
 
@@ -13,7 +12,6 @@ module.exports = (env, argv) => {
   }
   // remove plugins because these aren't required for devServer
   remove(a => a instanceof CleanPlugin.CleanWebpackPlugin);
-  remove(a => a instanceof CopyWebpackPlugin);
 
   const result = merge(devConfig, {
     devServer: {
