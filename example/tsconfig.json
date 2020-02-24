@@ -1,5 +1,11 @@
 {
   "extends": "../tsconfig.json",
-  "include": ["/*"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "web-ui-pack": ["../lib/index"]
+    }
+  },
+  "include": ["./*"],
   "exclude": ["node_modules", "build", ".vscode"]
 }
