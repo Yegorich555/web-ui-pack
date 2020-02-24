@@ -173,9 +173,8 @@ export default class Form<ModelType> extends Core.Component<FormProps<ModelType>
     FormInputsCollection.removeForm(this);
   }
 
-  // todo does it makes sense: in 90% percent it will be overrided
   renderTitle = (title: string | Core.Element): Core.Element => {
-    return <h3>{title}</h3>;
+    return <h2>{title}</h2>;
   };
 
   renderButtonSubmit = (defProps: ButtonSubmitProps, textSubmit: string | Core.Element): Core.Element => {
