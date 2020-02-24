@@ -1,4 +1,54 @@
+*:focus {
+  outline: 2px solid #f18a1c;
+  outline-offset: 2px;
+}
+
 .uiform {
-  max-width: 300px;
-  margin: auto;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 1em;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+  border: solid 1px #cfcfcf;
+  border-radius: 3px;
+}
+
+.uiform > * {
+  padding: 0;
+  margin: 0;
+}
+
+.uiform > * + * {
+  margin-top: 1em;
+}
+
+.uiform > *:first-child {
+  font-weight: bold;
+}
+
+.uiform > *:last-child {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.uiform [type="submit"] {
+  cursor: pointer;
+  padding: 0.5em 1em;
+  margin: 0;
+  position: relative;
+  color: white;
+  background-color: #26608e;
+  border: solid 1px #26608e;
+  border-radius: 3px;
+}
+
+.uiform [type="submit"]:hover {
+  color: white;
+  background-color: #00a5d4;
+  border-color: #00a5d4;
+}
+
+.uiform [type="submit"][disabled] {
+  cursor: default;
+  cursor: not-allowed;
 }
