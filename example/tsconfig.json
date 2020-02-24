@@ -3,7 +3,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "web-ui-pack": ["../lib/index"]
+      "web-ui-pack": ["../lib"],
+      "web-ui-pack/*": ["../lib/*"]
     }
   },
   "include": ["./*"],

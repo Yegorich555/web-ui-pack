@@ -89,4 +89,6 @@ typings/
 
 .eslintcache
 .stylelintcache
-lib/
+lib/*
+!lib/styles
+

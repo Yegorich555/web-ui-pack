@@ -2,6 +2,7 @@ import "./styles/main.scss";
 import { Component } from "react";
 import ReactDom from "react-dom";
 import { Form } from "web-ui-pack";
+import "web-ui-pack/styles/form.css";
 
 class AppContainer extends Component {
   constructor(props) {
