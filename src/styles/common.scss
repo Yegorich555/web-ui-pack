@@ -1,0 +1,29 @@
+//todo remove common.scss file
+
+*:focus {
+  // stylelint-disable plugin/no-unsupported-browser-features
+  outline: 2px solid #f18a1c;
+  outline-offset: 2px;
+  // stylelint-enable plugin/no-unsupported-browser-features
+}
+
+button,
+input[type="button"],
+input[type="reset"],
+input[type="submit"],
+[tabIndex="0"] {
+  cursor: pointer;
+}
+
+button[disabled],
+input[disabled],
+textarea[disabled],
+[tabIndex="0"][disabled] {
+  cursor: default;
+  cursor: not-allowed;
+}
+
+//todo move to inputs
+::placeholder {
+  text-overflow: ellipsis;
+}
