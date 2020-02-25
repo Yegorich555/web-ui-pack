@@ -12,6 +12,8 @@
     "lint-code": "./node_modules/.bin/eslint --fix --cache ./**/*.{js,jsx,ts,tsx,json}",
     "lint-styles": "./node_modules/.bin/stylelint --fix --cache ./**/*.{css,scss,less}",
     "lint-md": "./node_modules/.bin/markdownlint --fix **/*.md --ignore node_modules",
+    "build-sass": "node-sass src/styles/form.scss lib/styles/form.css --output-style expanded",
+    "build-css": "postcss lib/styles/*.css --replace --config postcss.confg.js --no-map",
     "build": "tsc --listEmittedFiles"
   },
   "repository": {
@@ -44,6 +46,7 @@
     "@types/react": "^16.9.19",
     "@typescript-eslint/eslint-plugin": "^2.19.0",
     "@typescript-eslint/parser": "^2.19.0",
+    "autoprefixer": "^9.7.4",
     "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.6",
     "babel-plugin-jsx-classnames-advanced": "^1.0.2",
@@ -66,6 +69,10 @@
     "markdownlint": "^0.19.0",
     "markdownlint-cli": "^0.22.0",
     "node-sass": "^4.13.1",
+    "postcss": "^7.0.27",
+    "postcss-cli": "^7.1.0",
+    "postcss-node-sass": "^2.1.8",
+    "postcss-scss": "^2.0.0",
     "prettier": "^1.19.1",
     "prettier-eslint": "^9.0.1",
     "react": "^16.12.0",
