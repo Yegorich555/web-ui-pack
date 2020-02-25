@@ -3,8 +3,8 @@ import BasicInput from "../inputs/basicInput";
 import FormInputsCollection from "./formInputsCollection";
 
 export type FormProps<ModelType> = {
-  className: string;
-  autoComplete: "on" | "off";
+  className?: string;
+  autoComplete?: "on" | "off";
   initModel?: ModelType;
   onValidSubmit: (model: ModelType) => Promise<string | { message: string }>;
   title?: string | Core.Element;
@@ -52,9 +52,17 @@ export type ButtonSubmitProps = {
 };
 
 export default class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormState> {
+  // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146
+  ["constructor"]: typeof Form;
+
   static promiseDelayMs: 400;
   static isValidateUntilFirstError: true;
   static errOneRequired: "At least one value is required";
+  // react.defaultProps works with > ver16.4.6
+  static defaultProps: Partial<FormProps<unknown>> = {
+    autoComplete: "off", // todo check if defaultProps works
+    textSubmit: "SUBMIT"
+  };
 
   isUnMounted = false;
   domEl: HTMLFormElement | undefined;
@@ -102,7 +110,7 @@ export default class Form<ModelType> extends Core.Component<FormProps<ModelType>
       const v = input.validate();
       if (v === false) {
         hasError = true;
-        if (Form.isValidateUntilFirstError) {
+        if (this.constructor.isValidateUntilFirstError) {
           break;
         }
       } else {
@@ -119,7 +127,7 @@ export default class Form<ModelType> extends Core.Component<FormProps<ModelType>
 
     if (!Object.keys(model).length) {
       // todo onErrorEvent
-      this.setState({ error: Form.errOneRequired });
+      this.setState({ error: this.constructor.errOneRequired });
       return false;
     }
 
@@ -151,7 +159,7 @@ export default class Form<ModelType> extends Core.Component<FormProps<ModelType>
     }
 
     this.isWaitSubmitFinished = true;
-    PromiseWait(result, Form.promiseDelayMs)
+    PromiseWait(result, this.constructor.promiseDelayMs)
       .catch(ex => {
         console.warn(ex);
         if (!this.isUnMounted) {
@@ -200,7 +208,7 @@ export default class Form<ModelType> extends Core.Component<FormProps<ModelType>
         className={this.props.className}
         onSubmit={this.onSubmit}
         ref={this.setDomEl}
-        autoComplete={this.props.autoComplete || "off"}
+        autoComplete={this.props.autoComplete || this.constructor.defaultProps.autoComplete}
         noValidate
       >
         {this.props.title ? this.renderTitle(this.props.title) : null}
@@ -214,7 +222,7 @@ export default class Form<ModelType> extends Core.Component<FormProps<ModelType>
               // disabled={this.props.disabled}
               // isPending={this.state.isPending}
             },
-            this.props.textSubmit ?? "SUBMIT"
+            this.props.textSubmit || (this.constructor.defaultProps.textSubmit as string)
           )
         )}
       </form>

@@ -29,6 +29,7 @@ module.exports = {
     "lines-between-class-members": "off",
     "react/react-in-jsx-scope": "off",
     "react/jsx-filename-extension": [1, { extensions: [".tsx", ".jsx"] }],
+    "react/static-property-placement": "off",
     "@typescript-eslint/ban-ts-ignore": "off",
     "prettier/prettier": ["error"],
     "no-underscore-dangle": 0,
