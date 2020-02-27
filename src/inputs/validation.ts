@@ -3,10 +3,12 @@ export type Validation<T, setVType> = {
   msg: string | ((setV: number | string) => string);
 };
 
-export interface Validations<T, setVType> {
-  [key: string]: Validation<T, setVType>;
+export interface Validations<T> {
+  [key: string]: Validation<T, unknown>;
 }
 
 export interface ValidationProps {
   [key: string]: boolean;
 }
+
+export const MessageRequired = "This field is required";

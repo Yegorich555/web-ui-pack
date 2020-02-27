@@ -1,18 +1,30 @@
-// /* eslint-disable max-classes-per-file */
-// import React from "react"; // todo remove this during the compilation
-// import BasicInput from "./basicInput";
+/* eslint-disable max-classes-per-file */
+import Core from "../core";
+import BasicInput, { BasicInputValidations } from "./basicInput";
+import { MessageRequired } from "./validation";
 
-// export default class TextInput extends BasicInput<string> {
-//   renderInput(id: string, value: string): React.ReactComponentElement<"input"> | HTMLElement {
-//     return <input id={id} value={value} />;
-//     // throw new Error("Method not implemented.");
-//   }
+export class TextInputValidations extends BasicInputValidations<string> {
+  required = {
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    test: TextInput.isEmpty,
+    msg: MessageRequired
+  };
+}
 
-//   // isEmpty = (v: string): boolean => v == null || v.trim() === "";
-//   // get initValue(): string {
-//   //   return "";
-//   // }
-// }
+export default class TextInput extends BasicInput<string> {
+  /** @inheritdoc */
+  static isEmpty(v: string): boolean {
+    return v == null || v === "";
+  }
 
-// // TextInput.defaultValidations.required.msg = "This message is overrided";
-// // TextInput.defaultValidations = TextInputValidations
+  static defaultInitValue = "";
+  static defaultValidations = new TextInputValidations();
+
+  renderInput(id: string | number, value: string): Core.Element {
+    return <input id={id as string} value={value} />;
+  }
+}
+
+TextInput.defaultValidations.required.msg = "This message is overrided";
+TextInput.defaultValidations.required.test = v => v == null;
+TextInput.defaultValidations.required.test("str");

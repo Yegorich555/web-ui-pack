@@ -1,10 +1,16 @@
+/* eslint-disable max-classes-per-file */
 import Core from "../core";
-import { ValidationProps } from "./validation";
+import { ValidationProps, Validations, Validation } from "./validation";
 import FormInputsCollection from "../forms/formInputsCollection";
 import Form from "../forms/form";
 // export interface BasicInputValidations<T, setV> extends Validations<T, setV> {
 //   required;
 // }
+
+export abstract class BasicInputValidations<ValueType> implements Validations<ValueType> {
+  [key: string]: Validation<ValueType, unknown>;
+  abstract required: Validation<ValueType, unknown>;
+}
 
 export interface BasicInputValidationProps extends ValidationProps {
   required: boolean; // todo string?
@@ -38,16 +44,15 @@ export default abstract class BasicInput<ValueType> extends Core.Component<
     return `uipack_${++_id}`;
   }
 
-  static isEmpty<ValueType>(v: ValueType): boolean {
+  /**
+   * Function that form uses in validation.required and collecting info
+   * @param v checked value
+   */
+  static isEmpty(v: unknown): boolean {
     return v == null;
   }
 
   static defaultInitValue = null;
-
-  // todo static or typed?
-  defaultValidations = {
-    required: { test: (v: ValueType): boolean => !this.constructor.isEmpty(v), msg: "This field is required" }
-  };
 
   // todo remove getter???
   get currentValue(): ValueType {
