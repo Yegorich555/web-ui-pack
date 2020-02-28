@@ -13,4 +13,6 @@ export interface ValidationProps {
 
 export const ValidationMessages = {
   required: "This field is required",
+  minText: (setV: number): string => `Min length is ${setV} characters`,
+  maxText: (setV: number): string => `Max length is ${setV} characters`
 };

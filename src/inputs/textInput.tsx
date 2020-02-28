@@ -9,6 +9,14 @@ export class TextInputValidations extends BaseInputValidations<string> {
     test: TextInput.isEmpty,
     msg: ValidationMessages.required
   };
+  min = {
+    test: (v: string, setV: number) => v.length >= setV,
+    msg: ValidationMessages.minText
+  };
+  max = {
+    test: (v: string, setV: number) => v.length <= setV,
+    msg: ValidationMessages.maxText
+  };
 }
 
 export type TextInputValidationProps = BaseInputValidationProps;
