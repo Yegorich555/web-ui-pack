@@ -11,4 +11,6 @@ export interface ValidationProps {
   [key: string]: boolean;
 }
 
-export const MessageRequired = "This field is required";
+export const ValidationMessages = {
+  required: "This field is required",
+};

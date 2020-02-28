@@ -7,7 +7,7 @@ export class TextInputValidations extends BaseInputValidations<string> {
   required = {
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     test: TextInput.isEmpty,
-    msg: MessageRequired
+    msg: ValidationMessages.required
   };
 }
 
