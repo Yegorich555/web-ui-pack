@@ -1,5 +1,5 @@
 import Core from "../core";
-import BasicInput from "../inputs/basicInput";
+import BaseInput from "../inputs/baseInput";
 import FormInputsCollection from "./formInputsCollection";
 
 export type FormProps<ModelType> = {
@@ -22,7 +22,7 @@ function PromiseWait<T>(promise: Promise<T>, ms = 400): Promise<T> {
   });
 }
 
-function isInputChildren<T>(node: Core.Node | Core.Node[], input: BasicInput<T>): boolean {
+function isInputChildren<T>(node: Core.Node | Core.Node[], input: BaseInput<T>): boolean {
   if (Array.isArray(node)) {
     return node.some(nodeChild => isInputChildren(nodeChild, input));
   }
@@ -34,7 +34,7 @@ function isInputChildren<T>(node: Core.Node | Core.Node[], input: BasicInput<T>)
   if (!type) {
     return false;
   }
-  if (!(type?.prototype instanceof BasicInput)) {
+  if (!(type?.prototype instanceof BaseInput)) {
     return false;
   }
   if (type === input.constructor) {
@@ -74,7 +74,7 @@ export default class Form<ModelType> extends Core.Component<FormProps<ModelType>
    * Input adds itself to collection via FormInputsCollection
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  inputs: BasicInput<any>[] = [];
+  inputs: BaseInput<any>[] = [];
 
   isWaitSubmitFinished = false;
   state: FormState = {
@@ -96,7 +96,7 @@ export default class Form<ModelType> extends Core.Component<FormProps<ModelType>
     return undefined;
   }
 
-  isInputChildren<ModelValueType>(input: BasicInput<ModelValueType>): boolean {
+  isInputChildren<ModelValueType>(input: BaseInput<ModelValueType>): boolean {
     return isInputChildren(this.props.children, input);
   }
 

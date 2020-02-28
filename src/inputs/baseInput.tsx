@@ -7,25 +7,25 @@ import Form from "../forms/form";
 //   required;
 // }
 
-export abstract class BasicInputValidations<ValueType> implements Validations<ValueType> {
+export abstract class BaseInputValidations<ValueType> implements Validations<ValueType> {
   [key: string]: Validation<ValueType, unknown>;
   abstract required: Validation<ValueType, unknown>;
 }
 
-export interface BasicInputValidationProps extends ValidationProps {
+export interface BaseInputValidationProps extends ValidationProps {
   required: boolean; // todo string?
 }
 
-export interface BasicInputProps<T> {
+export interface BaseInputProps<T> {
   htmlId?: string | number; // todo point that htmlId should be predefined
   htmlName?: string;
   // todo using modelMapping instead js-key mapping
   name?: string;
   initValue?: T;
-  validations: BasicInputValidationProps;
+  validations: BaseInputValidationProps;
 }
 
-export interface BasicInputState<T> {
+export interface BaseInputState<T> {
   value: T;
   isValid: boolean;
 }
@@ -33,12 +33,13 @@ export interface BasicInputState<T> {
 let _id = 1;
 
 // todo PureComponent? or shouldComponentUpdate
-export default abstract class BasicInput<ValueType> extends Core.Component<
-  BasicInputProps<ValueType>,
-  BasicInputState<ValueType>
-> {
+export default abstract class BaseInput<
+  ValueType,
+  Props extends BaseInputProps<ValueType>,
+  State extends BaseInputState<ValueType>
+> extends Core.Component<Props, State> {
   // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146
-  ["constructor"]: typeof BasicInput;
+  ["constructor"]: typeof BaseInput;
 
   static getUniqueId(): string {
     return `uipack_${++_id}`;
@@ -64,10 +65,10 @@ export default abstract class BasicInput<ValueType> extends Core.Component<
       return this.currentValue;
     }
     if (this.props && this.props.initValue !== undefined) {
-      return this.props.initValue;
+      return this.props.initValue as ValueType;
     }
     if (this.props.name && this.form) {
-      const v = this.form.getInitValue<ValueType>(this.props.name);
+      const v = this.form.getInitValue<ValueType>(this.props.name as string);
       if (v !== undefined) {
         return v;
       }
@@ -78,10 +79,10 @@ export default abstract class BasicInput<ValueType> extends Core.Component<
   isChanged = false;
   form: Form<unknown> | undefined;
   // todo htmlId canBe redefined
-  htmlId = this.props.htmlId ?? BasicInput.getUniqueId();
+  htmlId = this.props.htmlId ?? BaseInput.getUniqueId();
 
-  toJSON(): BasicInput<ValueType> {
-    const result = {} as BasicInput<ValueType>;
+  toJSON(): unknown {
+    const result = {};
     Object.keys(result).forEach(key => {
       if (key !== "form") {
         // @ts-ignore
@@ -95,18 +96,18 @@ export default abstract class BasicInput<ValueType> extends Core.Component<
     return result;
   }
 
-  state: BasicInputState<ValueType> = {
+  state = {
     value: (this.constructor.defaultInitValue as unknown) as ValueType,
     isValid: true // todo if this has *required* this is already invalid
-  };
+  } as State;
 
-  constructor(props: BasicInputProps<ValueType>) {
+  constructor(props: Props) {
     super(props);
     // todo if name isChanged but input is not: we must update initValue
     if (this.props?.name) {
       this.form = FormInputsCollection.tryRegisterInput(this);
     }
-    this.htmlId = this.props.htmlId ?? BasicInput.getUniqueId();
+    this.htmlId = this.props.htmlId ?? BaseInput.getUniqueId();
 
     this.state.value = this.initValue;
   }
