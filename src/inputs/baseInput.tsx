@@ -82,17 +82,9 @@ export default abstract class BaseInput<
   htmlId = this.props.htmlId ?? BaseInput.getUniqueId();
 
   toJSON(): unknown {
-    const result = {};
-    Object.keys(result).forEach(key => {
-      if (key !== "form") {
-        // @ts-ignore
-        result[key] = this[key];
-      } else {
-        // @ts-ignore
-        result.form = "[formObject]";
-      }
-    });
-
+    const result = { ...this };
+    // @ts-ignore
+    result.form = this.form ? "[formObject]" : undefined;
     return result;
   }
 
