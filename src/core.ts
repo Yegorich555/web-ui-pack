@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-namespace */
-/* eslint-disable @typescript-eslint/prefer-namespace-keyword */
-/* eslint-disable react/prefer-stateless-function */
 import React from "react";
 
 // this is just ts-types
@@ -13,6 +11,9 @@ declare module Core {
   export function renderElement(type: any, props?: object | null, ...children: any[]): {};
   /* eslint-enable @typescript-eslint/no-explicit-any */
   export type FormEvent = React.FormEvent<HTMLFormElement>;
+  export type DomFocusEvent = React.FocusEvent<HTMLInputElement>;
+  export type DomChangeEvent = React.ChangeEvent<HTMLInputElement>;
+  export type Ref = React.Ref<HTMLInputElement>;
 }
 
 // this is just js-functionality

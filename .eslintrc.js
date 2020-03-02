@@ -31,6 +31,7 @@ module.exports = {
     "react/jsx-filename-extension": [1, { extensions: [".tsx", ".jsx"] }],
     "react/static-property-placement": "off",
     "@typescript-eslint/ban-ts-ignore": "off",
+    "@typescript-eslint/prefer-namespace-keyword": "off",
     "prettier/prettier": ["error"],
     "no-underscore-dangle": 0,
     "no-unused-expressions": ["error", { allowShortCircuit: true }],

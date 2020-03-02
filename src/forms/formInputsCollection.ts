@@ -1,5 +1,5 @@
 import Form from "./form";
-import BaseInput from "../inputs/baseInput";
+import BaseInput, { BaseInputState, BaseInputProps } from "../inputs/baseInput";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const hashSet = new Set<Form<any>>();
@@ -14,7 +14,7 @@ export default class FormInputsCollection {
   /**
    * Only inputs that has props.name can be added
    */
-  static tryRegisterInput<T>(input: BaseInput<T>): Form<unknown> | undefined {
+  static tryRegisterInput<T>(input: BaseInput<T, BaseInputProps<T>, BaseInputState<T>>): Form<unknown> | undefined {
     // eslint-disable-next-line no-restricted-syntax
     for (const form of hashSet) {
       if (form.isInputChildren(input)) {
@@ -24,7 +24,7 @@ export default class FormInputsCollection {
     }
     return undefined;
   }
-  static tryRemoveInput<T>(input: BaseInput<T>): void {
+  static tryRemoveInput<T>(input: BaseInput<T, BaseInputProps<T>, BaseInputState<T>>): void {
     // eslint-disable-next-line no-restricted-syntax
     for (const form of hashSet) {
       const index = form.inputs.indexOf(input);

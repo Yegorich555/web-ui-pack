@@ -3,31 +3,46 @@ import Core from "../core";
 import { ValidationProps, Validations, Validation } from "./validation";
 import FormInputsCollection from "../forms/formInputsCollection";
 import Form from "../forms/form";
-// export interface BasicInputValidations<T, setV> extends Validations<T, setV> {
-//   required;
-// }
 
 export abstract class BaseInputValidations<ValueType> implements Validations<ValueType> {
-  [key: string]: Validation<ValueType, unknown>;
-  abstract required: Validation<ValueType, unknown>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: Validation<ValueType, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  abstract required: Validation<ValueType, any>;
 }
 
 export interface BaseInputValidationProps extends ValidationProps {
-  required: boolean; // todo string?
+  required?: boolean | string;
 }
 
 export interface BaseInputProps<T> {
-  htmlId?: string | number; // todo point that htmlId should be predefined
+  /**
+   * Html Id attribute. InitValue: impossible replace this after component-init
+   */
+  id?: string | number;
   htmlName?: string;
+  className: string;
+  label?: string;
   // todo using modelMapping instead js-key mapping
   name?: string;
   initValue?: T;
-  validations: BaseInputValidationProps;
+  validations?: BaseInputValidationProps;
+  onChanged: (value: T, event: Core.DomChangeEvent) => void;
+  onBlured: (value: T, event: Core.DomFocusEvent) => void;
+  autoFocus?: boolean;
 }
 
 export interface BaseInputState<T> {
   value: T;
-  isValid: boolean;
+  isInvalid: boolean;
+  error?: string;
+}
+
+export interface RenderInputProps {
+  id: string; // todo maybe use string | number
+  "aria-invalid": boolean;
+  "aria-required": boolean;
+  ref?: Core.Ref;
 }
 
 let _id = 1;
@@ -49,21 +64,14 @@ export default abstract class BaseInput<
    * Function that form uses in validation.required and collecting info
    * @param v checked value
    */
-  static isEmpty(v: unknown): boolean {
+  static isEmpty<ValueType>(v: ValueType): boolean {
     return v == null;
   }
 
-  static defaultInitValue = null;
-
-  // todo remove getter???
-  get currentValue(): ValueType {
-    return this.state.value;
-  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static defaultInitValue: any = null;
 
   get initValue(): ValueType {
-    if (this.isChanged) {
-      return this.currentValue;
-    }
     if (this.props && this.props.initValue !== undefined) {
       return this.props.initValue as ValueType;
     }
@@ -76,10 +84,25 @@ export default abstract class BaseInput<
     return (this.constructor.defaultInitValue as unknown) as ValueType;
   }
 
+  get value(): ValueType {
+    return this.state.value;
+  }
+  /**
+   * Validation rules that attached to the input. You can extend ones directly via
+   * {theInput}.defaultValidations.required.msg = "Please fill this input"
+   * {theInput}.defaultValidations.required.test = v=> v!=null
+   * {theInput}.defaultValidations.myRule = {
+   *     test: v && v.length === 5
+   *     msg: 'Only 5 characters is allowed'
+   *  }
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static defaultValidations: BaseInputValidations<any>;
+
+  id: string | number = this.props.id != null ? (this.props.id as string | number) : this.constructor.getUniqueId();
   isChanged = false;
-  form: Form<unknown> | undefined;
-  // todo htmlId canBe redefined
-  htmlId = this.props.htmlId ?? BaseInput.getUniqueId();
+  form?: Form<unknown>;
+  domInputEl?: HTMLInputElement;
 
   toJSON(): unknown {
     const result = { ...this };
@@ -89,128 +112,147 @@ export default abstract class BaseInput<
   }
 
   state = {
-    value: (this.constructor.defaultInitValue as unknown) as ValueType,
-    isValid: true // todo if this has *required* this is already invalid
+    value: (this.constructor.defaultInitValue as unknown) as ValueType
   } as State;
 
   constructor(props: Props) {
     super(props);
-    // todo if name isChanged but input is not: we must update initValue
+    /* todo 
+     initRequiredValues as id, initModel, initValue can be dynamic and in this case 
+     we must detect changes and reinit logic
+    */
     if (this.props?.name) {
       this.form = FormInputsCollection.tryRegisterInput(this);
     }
-    this.htmlId = this.props.htmlId ?? BaseInput.getUniqueId();
-
     this.state.value = this.initValue;
+
+    // Such bind is important for inheritance and using super...(): https://stackoverflow.com/questions/46869503/es6-arrow-functions-trigger-super-outside-of-function-or-class-error
+    this.gotChange = this.gotChange.bind(this);
+    this.gotBlur = this.gotBlur.bind(this);
   }
 
-  //   get hasRequired() {
-  //     return this.props.validations && this.props.validations.required;
-  //   }
+  get isRequired() {
+    return !!(this.props.validations?.required || false);
+  }
 
-  validate = (): ValueType | false => {
-    // todo implement
+  // todo return error message to form?
+  validate = (): boolean => {
+    const validations = this.constructor.defaultValidations;
+    const { value } = this.state; // todo value trim() here and validateByChange should ignore trimming
+
+    if (!validations || !this.props.validations) {
+      return true;
+    }
+    // checking is invalid
+    const setRules = this.props.validations as BaseInputValidationProps;
+
+    function findFailedRuleKey(ruleKey: keyof BaseInputValidationProps): boolean {
+      const setV = setRules[ruleKey];
+      // todo what if "" | 0 is not ignoring by setup
+      if (setV == null || setV === false) {
+        return false;
+      }
+      const definedValidation = validations[ruleKey];
+      if (!definedValidation) {
+        console.warn(`Props [${ruleKey}] is set but it wasn't found in defaultValidations`, setRules, validations);
+        return false;
+      }
+      if (!definedValidation.test(value, setV)) {
+        return true;
+      }
+      return false;
+    }
+
+    // validate for required first
+    const failedRuleKey =
+      (this.isRequired && findFailedRuleKey("required") && "required") ||
+      // rule 'required' is fine go check others
+      Object.keys(setRules).find(findFailedRuleKey);
+
+    if (!failedRuleKey) {
+      if (this.state.error) {
+        this.setState({ error: undefined });
+      }
+      return true;
+    }
+
+    // defining error message
+    let error = "";
+    const failedSetV = setRules[failedRuleKey];
+    // todo string for overriding default message can be setV
+    if (typeof failedSetV === "string") {
+      error = failedSetV;
+    } else {
+      const defaultMsg = validations[failedRuleKey].msg;
+      if (typeof defaultMsg === "function") {
+        error = (defaultMsg as (setV: unknown) => string)(failedSetV);
+      } else {
+        error = defaultMsg;
+      }
+    }
+
+    this.setState({ error }); // todo bypass "Please provide a valid value"
+
     return false;
   };
-  //   validate = v => {
-  //     const propsValidations = this.validationProps;
-  //     if (!propsValidations || this.props.disableValidation) {
-  //       return true;
-  //     }
 
-  //     const validations = this.prepareValidations(propsValidations);
-  //     const value = typeof v === "string" ? v.trim() : v;
+  gotChange(value: ValueType, e: Core.DomChangeEvent): void {
+    if (value !== this.state.value) {
+      this.setState({ value }, () => {
+        this.props.onChanged && this.props.onChanged(value, e);
+      });
+      // todo: this.props.validateOnChange && this.validate(value);
+    }
+  }
 
-  //     const self = this;
-  //     function updateError(message) {
-  //       self.setState({
-  //         isValid: false,
-  //         errorMessage: message === "" ? null : message || __ln("Please provide a valid value")
-  //       });
-  //     }
+  gotBlur(value: ValueType, e: Core.DomFocusEvent): void {
+    if (value !== this.state.value) {
+      this.setState({ value }, () => {
+        this.props.onBlured && this.props.onBlured(value, e);
+      });
+    }
+    this.validate();
+  }
 
-  //     const isEmpty = this.constructor.isEmpty(value);
-  //     const isValid = Object.keys(validations).every(key => {
-  //       const validation = validations[key];
-  //       // fire validations only if value isNotEmpty
-  //       const result = !isEmpty || key === "required" ? validation(value) : true;
-  //       if (result !== true) {
-  //         updateError(result);
-  //         return false;
-  //       }
-  //       return true;
-  //     });
-
-  //     isValid && this.setState({ isValid: true });
-
-  //     return isValid;
-  //   };
-
-  //   provideValueCallback() {
-  //     const v = this.currentValue;
-  //     return this.constructor.isEmpty(v) ? undefined : v;
-  //   }
-
-  //   handleChange(value, event, setStateCallback) {
-  //     if (value !== this.state.value) {
-  //       this.setState({ value }, setStateCallback);
-  //       this.props.validateOnChange && this.validate(value);
-  //       this.props.onChange && this.props.onChange(value, event);
-  //     }
-  //   }
-
-  // handleBlur(value, e): void {
-  //   if (value !== this.state.value) {
-  //     this.setState({ value });
-  //     this.validate(value);
-  //   }
-  //   this.props.onBlur && this.props.onBlur(e || { target: { value } });
-  // }
-
-  abstract renderInput(id: string | number, value: ValueType): Core.Element;
+  abstract renderInput(inputProps: RenderInputProps, value: ValueType): Core.Element;
 
   //   renderBefore() {
   //     return null;
   //   }
+
+  // todo move this logic to BaseComponent
+  componentDidMount(): void {
+    this.props.autoFocus && this.domInputEl && this.domInputEl.focus();
+  }
 
   componentWillUnmount(): void {
     FormInputsCollection.tryRemoveInput(this);
   }
 
   render(): Core.Element {
+    const { isRequired } = this;
     return (
-      <label htmlFor={this.htmlId as string}>
-        {/* todo required mark here */}
-        <span>Label here</span>
-        <fieldset>{this.renderInput(this.htmlId as string, this.state.value)}</fieldset>
-        {/* todo aria-invalid here */}
-        <span>Error message here</span>
+      <label htmlFor={this.id as string} className={this.props.className} data-required={isRequired || null}>
+        <span>{this.props.label}</span>
+        <span>
+          {this.renderInput(
+            {
+              ref: this.props.autoFocus
+                ? el => {
+                    this.domInputEl = el as HTMLInputElement;
+                  }
+                : null,
+              id: this.id as string,
+              "aria-invalid": this.state.isInvalid,
+              "aria-required": isRequired
+            },
+            this.state.value
+          )}
+        </span>
+        {/* wait: update to aria-errormessage when NVDA supports it: https://github.com/nvaccess/nvda/issues/8318 */}
+        {/* todo: implement tooltip for this case */}
+        {this.state.error ? <span role="alert">{this.state.error}</span> : null}
       </label>
     );
   }
-  // return (
-  //   <label
-  //     // id={labelId}
-  //     htmlFor={id}
-  //     className={[
-  //       styles.control,
-  //       !this.state.isValid ? styles.isInvalid : null,
-  //       this.props.className,
-  //       this.controlClassName
-  //     ]}
-  //     {...this.controlProps}
-  //   >
-  //     {this.renderBefore()}
-  //     <span className={this.hasRequired && !this.props.hideRequiredMark ? styles.required : null}>
-  //       {this.props.label}
-  //     </span>
-
-  //     {this.props.description ? <div className={styles.description}>{this.props.description}</div> : null}
-  //     <fieldset>{this.renderInput(id, labelId, this.state.value)}</fieldset>
-  //     {!this.state.isValid && this.state.errorMessage && !this.props.disableValidation ? (
-  //       <span className={styles.errorMessage}>{this.state.errorMessage}</span>
-  //     ) : null}
-  //   </label>
-  // );
-  // }
 }

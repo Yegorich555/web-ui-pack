@@ -1,6 +1,12 @@
 /* eslint-disable max-classes-per-file */
 import Core from "../core";
-import BaseInput, { BaseInputValidations, BaseInputProps, BaseInputState, BaseInputValidationProps } from "./baseInput";
+import BaseInput, {
+  BaseInputValidations,
+  BaseInputProps,
+  BaseInputState,
+  BaseInputValidationProps,
+  RenderInputProps
+} from "./baseInput";
 import { ValidationMessages } from "./validation";
 
 export class TextInputValidations extends BaseInputValidations<string> {
@@ -25,8 +31,8 @@ export type TextInputState = BaseInputState<string>;
 
 export default class TextInput extends BaseInput<string, TextInputProps, TextInputState> {
   /** @inheritdoc */
-  static isEmpty(v: string): boolean {
-    return v == null || v === "";
+  static isEmpty<ValueType>(v: ValueType): boolean {
+    return v == null || ((v as unknown) as string) === "";
   }
 
   /** @inheritdoc */
@@ -35,9 +41,20 @@ export default class TextInput extends BaseInput<string, TextInputProps, TextInp
   /** @inheritdoc */
   static defaultValidations = new TextInputValidations();
 
+  handleChange = (e: Core.DomChangeEvent) => {
+    this.gotChange(e.target.value, e);
+  };
+
+  // todo check is blur when click on label
+  handleBlur = (e: Core.DomFocusEvent) => {
+    console.warn("blur");
+    this.gotBlur(e.target.value, e);
+  };
+
   /** @inheritdoc */
-  renderInput(id: string | number, value: string): Core.Element {
-    return <input id={id as string} value={value} />;
+  renderInput(props: RenderInputProps, value: string): Core.Element {
+    // eslint-disable-next-line react/jsx-props-no-spreading
+    return <input {...props} value={value} onChange={this.handleChange} onBlur={this.handleBlur} />;
   }
 }
 

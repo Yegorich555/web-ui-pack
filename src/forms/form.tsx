@@ -1,5 +1,5 @@
 import Core from "../core";
-import BaseInput from "../inputs/baseInput";
+import BaseInput, { BaseInputProps } from "../inputs/baseInput";
 import FormInputsCollection from "./formInputsCollection";
 
 export type FormProps<ModelType> = {
@@ -22,7 +22,8 @@ function PromiseWait<T>(promise: Promise<T>, ms = 400): Promise<T> {
   });
 }
 
-function isInputChildren<T>(node: Core.Node | Core.Node[], input: BaseInput<T>): boolean {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isInputChildren<T>(node: Core.Node | Core.Node[], input: BaseInput<T, BaseInputProps<T>, any>): boolean {
   if (Array.isArray(node)) {
     return node.some(nodeChild => isInputChildren(nodeChild, input));
   }
@@ -74,7 +75,7 @@ export default class Form<ModelType> extends Core.Component<FormProps<ModelType>
    * Input adds itself to collection via FormInputsCollection
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  inputs: BaseInput<any>[] = [];
+  inputs: BaseInput<unknown, any, any>[] = [];
 
   isWaitSubmitFinished = false;
   state: FormState = {
@@ -96,7 +97,8 @@ export default class Form<ModelType> extends Core.Component<FormProps<ModelType>
     return undefined;
   }
 
-  isInputChildren<ModelValueType>(input: BaseInput<ModelValueType>): boolean {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  isInputChildren<ModelValueType>(input: BaseInput<ModelValueType, BaseInputProps<ModelValueType>, any>): boolean {
     return isInputChildren(this.props.children, input);
   }
 
@@ -107,8 +109,8 @@ export default class Form<ModelType> extends Core.Component<FormProps<ModelType>
     const { inputs } = this;
     for (let i = 0; i < inputs.length; ++i) {
       const input = inputs[i];
-      const v = input.validate();
-      if (v === false) {
+      const isValid = input.validate();
+      if (isValid === false) {
         hasError = true;
         if (this.constructor.isValidateUntilFirstError) {
           break;
@@ -119,7 +121,7 @@ export default class Form<ModelType> extends Core.Component<FormProps<ModelType>
         // todo option: don't attach notRequired&emptyValues
         // todo option: don't attach valuesThatWasn't changed
         // @ts-ignore
-        if (key) model[key] = v;
+        if (key) model[key] = input.value;
       }
     }
 
