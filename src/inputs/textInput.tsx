@@ -1,12 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import Core from "../core";
-import BaseInput, {
-  BaseInputValidations,
-  BaseInputProps,
-  BaseInputState,
-  BaseInputValidationProps,
-  RenderInputProps
-} from "./baseInput";
+import BaseInput, { BaseInputValidations, BaseInputProps, BaseInputState, BaseInputValidationProps } from "./baseInput";
 import { ValidationMessages } from "./validation";
 
 export class TextInputValidations extends BaseInputValidations<string> {
@@ -31,8 +25,16 @@ export interface TextInputValidationProps extends BaseInputValidationProps {
 }
 
 export interface TextInputProps extends BaseInputProps<string> {
-  validations: TextInputValidationProps;
+  validations?: TextInputValidationProps;
+  htmlInputProps?: Pick<
+    Core.HTMLAttributes<HTMLInputElement>,
+    Exclude<
+      keyof Core.HTMLAttributes<HTMLInputElement>,
+      "id" | "onChange" | "onBlur" | "aria-invalid" | "aria-required" | "value"
+    >
+  >;
 }
+
 export type TextInputState = BaseInputState<string>;
 
 export default class TextInput extends BaseInput<string, TextInputProps, TextInputState> {
@@ -57,18 +59,23 @@ export default class TextInput extends BaseInput<string, TextInputProps, TextInp
     this.gotBlur(e.target.value, e);
   };
 
+  /** Override this method for customizing input-rendering */
+  renderInput(defProps: Core.HTMLAttributes<HTMLInputElement>, value: string): Core.Element {
+    // eslint-disable-next-line react/jsx-props-no-spreading
+    return <input {...defProps} value={value} />;
+  }
+
   /** @inheritdoc */
-  renderInput(props: RenderInputProps, value: string): Core.Element {
-    return (
-      <input
-        // eslint-disable-next-line react/jsx-props-no-spreading
-        {...props}
-        maxLength={this.props.validations?.max}
-        value={value}
-        onChange={this.handleChange}
-        onBlur={this.handleBlur}
-      />
-    );
+  getRenderedInput(id: string | number, value: string): Core.Element {
+    const defProps = {
+      ...this.props.htmlInputProps,
+      id,
+      onChange: this.handleChange,
+      onBlur: this.handleBlur,
+      "aria-invalid": this.state.isInvalid,
+      "aria-required": this.isRequired
+    } as Core.HTMLAttributes<HTMLInputElement>;
+    return this.renderInput(defProps, value);
   }
 }
 

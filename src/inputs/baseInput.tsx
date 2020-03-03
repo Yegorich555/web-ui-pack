@@ -22,17 +22,14 @@ export interface BaseInputProps<T> {
    * Html Id attribute. InitValue: impossible to replace this after component-init
    */
   id?: string | number;
-  htmlName?: string;
   className: string;
   label?: string;
-  // todo using modelMapping instead js-key mapping
   name?: string;
   initValue?: T;
   validations?: BaseInputValidationProps;
   onChanged: (value: T, event: Core.DomChangeEvent) => void;
   onBlured: (value: T, event: Core.DomFocusEvent) => void;
   autoFocus?: boolean;
-  placeholder?: string;
 }
 
 export interface BaseInputState<T> {
@@ -40,15 +37,6 @@ export interface BaseInputState<T> {
   isInvalid: boolean;
   error?: string;
 }
-
-export interface RenderInputProps {
-  id: string; // todo maybe use string | number
-  "aria-invalid": boolean;
-  "aria-required": boolean;
-  ref?: Core.Ref;
-  placeholder?: string;
-}
-
 let _id = 1;
 
 // todo PureComponent? or shouldComponentUpdate
@@ -106,7 +94,10 @@ export default abstract class BaseInput<
   id: string | number = this.props.id != null ? (this.props.id as string | number) : this.constructor.getUniqueId();
   isChanged = false;
   form?: Form<unknown>;
-  domInputEl?: HTMLInputElement;
+  domEl: HTMLLabelElement | undefined;
+  setDomEl = (el: HTMLLabelElement): void => {
+    this.domEl = el;
+  };
 
   toJSON(): unknown {
     const result = { ...this };
@@ -200,6 +191,7 @@ export default abstract class BaseInput<
     return false;
   };
 
+  /** This method input must fire after onChange of value is happened */
   gotChange(value: ValueType, e: Core.DomChangeEvent): void {
     if (value !== this.state.value) {
       this.setState({ value }, () => {
@@ -209,6 +201,7 @@ export default abstract class BaseInput<
     }
   }
 
+  /** This method input must fire after focus is lost */
   gotBlur(value: ValueType, e: Core.DomFocusEvent): void {
     if (value !== this.state.value) {
       this.setState({ value }, () => {
@@ -218,7 +211,7 @@ export default abstract class BaseInput<
     this.validate();
   }
 
-  abstract renderInput(inputProps: RenderInputProps, value: ValueType): Core.Element;
+  abstract getRenderedInput(id: string | number, value: ValueType): Core.Element;
 
   //   renderBefore() {
   //     return null;
@@ -226,7 +219,9 @@ export default abstract class BaseInput<
 
   // todo move this logic to BaseComponent
   componentDidMount(): void {
-    this.props.autoFocus && this.domInputEl && this.domInputEl.focus();
+    if (this.props.autoFocus && this.domEl) {
+      this.domEl.focus(); // focus automatically fired from label to input
+    }
   }
 
   componentWillUnmount(): void {
@@ -235,25 +230,16 @@ export default abstract class BaseInput<
 
   render(): Core.Element {
     const { isRequired } = this;
+    const { id } = this;
     return (
-      <label htmlFor={this.id as string} className={this.props.className} data-required={isRequired || null}>
+      <label
+        htmlFor={id as string}
+        className={this.props.className}
+        data-required={isRequired || null}
+        ref={this.setDomEl}
+      >
         <span>{this.props.label}</span>
-        <span>
-          {this.renderInput(
-            {
-              ref: this.props.autoFocus
-                ? el => {
-                    this.domInputEl = el as HTMLInputElement;
-                  }
-                : null,
-              id: this.id as string,
-              "aria-invalid": this.state.isInvalid,
-              "aria-required": isRequired,
-              placeholder: this.props.placeholder
-            },
-            this.state.value
-          )}
-        </span>
+        <span>{this.getRenderedInput(id, this.state.value)}</span>
         {/* wait: update to aria-errormessage when NVDA supports it: https://github.com/nvaccess/nvda/issues/8318 */}
         {/* todo: implement tooltip for this case */}
         {this.state.error ? <span role="alert">{this.state.error}</span> : null}

@@ -6,6 +6,7 @@ import React from "react";
 declare module Core {
   export class Component<Props, State> extends React.PureComponent<Props, State> {}
   export type Element = React.ReactElement; // ReactChild
+  export type HTMLAttributes<T> = React.HTMLAttributes<T>;
   export type Node = React.ReactNode;
   /* eslint-disable @typescript-eslint/no-explicit-any */
   export function renderElement(type: any, props?: object | null, ...children: any[]): {};
