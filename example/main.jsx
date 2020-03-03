@@ -15,7 +15,7 @@ class AppContainer extends Component {
       <>
         <h1>WebUIPack Examples</h1>
         <Form title="Form1" className="uiform">
-          <TextInput label="TextInput" />
+          <TextInput label="TextInput" initValue="init_value" name="first" validations={{ required: true }} />
         </Form>
       </>
     );

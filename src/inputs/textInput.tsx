@@ -25,8 +25,14 @@ export class TextInputValidations extends BaseInputValidations<string> {
   };
 }
 
-export type TextInputValidationProps = BaseInputValidationProps;
-export type TextInputProps = BaseInputProps<string>;
+export interface TextInputValidationProps extends BaseInputValidationProps {
+  min?: number;
+  max?: number;
+}
+
+export interface TextInputProps extends BaseInputProps<string> {
+  validations: TextInputValidationProps;
+}
 export type TextInputState = BaseInputState<string>;
 
 export default class TextInput extends BaseInput<string, TextInputProps, TextInputState> {
@@ -53,8 +59,16 @@ export default class TextInput extends BaseInput<string, TextInputProps, TextInp
 
   /** @inheritdoc */
   renderInput(props: RenderInputProps, value: string): Core.Element {
-    // eslint-disable-next-line react/jsx-props-no-spreading
-    return <input {...props} value={value} onChange={this.handleChange} onBlur={this.handleBlur} />;
+    return (
+      <input
+        // eslint-disable-next-line react/jsx-props-no-spreading
+        {...props}
+        maxLength={this.props.validations?.max}
+        value={value}
+        onChange={this.handleChange}
+        onBlur={this.handleBlur}
+      />
+    );
   }
 }
 

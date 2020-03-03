@@ -143,14 +143,14 @@ export default class Form<ModelType> extends Core.Component<FormProps<ModelType>
       return;
     }
 
-    const { onValidSubmit } = this.props;
-    if (!onValidSubmit) {
-      console.warn("WebUIPack.Form: props.onValidSubmit is not attached");
+    const validateResult = this.validate();
+    if (validateResult === false) {
       return;
     }
 
-    const validateResult = this.validate();
-    if (validateResult === false) {
+    const { onValidSubmit } = this.props;
+    if (!onValidSubmit) {
+      console.warn("WebUIPack.Form: props.onValidSubmit is not attached");
       return;
     }
 

@@ -8,11 +8,6 @@ export interface Validations<T> {
   [key: string]: Validation<T, any>;
 }
 
-export interface ValidationProps {
-  // todo string for overriding default message can be setV
-  [key: string]: boolean | number | string | undefined | null;
-}
-
 export const ValidationMessages = {
   required: "This field is required",
   minText: (setV: number): string => `Min length is ${setV} characters`,

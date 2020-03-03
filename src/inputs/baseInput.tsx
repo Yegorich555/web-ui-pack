@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import Core from "../core";
-import { ValidationProps, Validations, Validation } from "./validation";
+import { Validations, Validation } from "./validation";
 import FormInputsCollection from "../forms/formInputsCollection";
 import Form from "../forms/form";
 
@@ -11,13 +11,15 @@ export abstract class BaseInputValidations<ValueType> implements Validations<Val
   abstract required: Validation<ValueType, any>;
 }
 
-export interface BaseInputValidationProps extends ValidationProps {
+export interface BaseInputValidationProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
   required?: boolean | string;
 }
 
 export interface BaseInputProps<T> {
   /**
-   * Html Id attribute. InitValue: impossible replace this after component-init
+   * Html Id attribute. InitValue: impossible to replace this after component-init
    */
   id?: string | number;
   htmlName?: string;
@@ -30,6 +32,7 @@ export interface BaseInputProps<T> {
   onChanged: (value: T, event: Core.DomChangeEvent) => void;
   onBlured: (value: T, event: Core.DomFocusEvent) => void;
   autoFocus?: boolean;
+  placeholder?: string;
 }
 
 export interface BaseInputState<T> {
@@ -43,6 +46,7 @@ export interface RenderInputProps {
   "aria-invalid": boolean;
   "aria-required": boolean;
   ref?: Core.Ref;
+  placeholder?: string;
 }
 
 let _id = 1;
@@ -244,7 +248,8 @@ export default abstract class BaseInput<
                 : null,
               id: this.id as string,
               "aria-invalid": this.state.isInvalid,
-              "aria-required": isRequired
+              "aria-required": isRequired,
+              placeholder: this.props.placeholder
             },
             this.state.value
           )}
