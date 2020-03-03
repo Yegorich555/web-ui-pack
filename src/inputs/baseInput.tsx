@@ -34,7 +34,6 @@ export interface BaseInputProps<T> {
 
 export interface BaseInputState<T> {
   value: T;
-  isInvalid: boolean;
   error?: string;
 }
 let _id = 1;

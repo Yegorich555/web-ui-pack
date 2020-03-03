@@ -53,9 +53,7 @@ export default class TextInput extends BaseInput<string, TextInputProps, TextInp
     this.gotChange(e.target.value, e);
   };
 
-  // todo check is blur when click on label
   handleBlur = (e: Core.DomFocusEvent) => {
-    console.warn("blur");
     this.gotBlur(e.target.value, e);
   };
 
@@ -72,7 +70,7 @@ export default class TextInput extends BaseInput<string, TextInputProps, TextInp
       id,
       onChange: this.handleChange,
       onBlur: this.handleBlur,
-      "aria-invalid": this.state.isInvalid,
+      "aria-invalid": !!this.state.error,
       "aria-required": this.isRequired
     } as Core.HTMLAttributes<HTMLInputElement>;
     return this.renderInput(defProps, value);
