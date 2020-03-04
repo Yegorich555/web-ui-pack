@@ -131,13 +131,13 @@ export default abstract class BaseInput<
     return !!(this.props.validations?.required || false);
   }
 
-  // todo return error message to form?
-  validate = (): boolean => {
+  // todo move it to static function
+  checkIsInvalid = (): false | string => {
     const validations = this.constructor.defaultValidations;
     const { value } = this.state; // todo value trim() here and validateByChange should ignore trimming
 
     if (!validations || !this.props.validations) {
-      return true;
+      return false;
     }
     // checking is invalid
     const setRules = this.props.validations as BaseInputValidationProps;
@@ -166,10 +166,7 @@ export default abstract class BaseInput<
       Object.keys(setRules).find(findFailedRuleKey);
 
     if (!failedRuleKey) {
-      if (this.state.error) {
-        this.setState({ error: undefined });
-      }
-      return true;
+      return false;
     }
 
     // defining error message
@@ -186,10 +183,16 @@ export default abstract class BaseInput<
         error = defaultMsg;
       }
     }
+    return error || `Invalid field for key [${failedRuleKey}]`;
+  };
 
-    this.setState({ error }); // todo bypass "Please provide a valid value"
-
-    return false;
+  validate = (): boolean => {
+    const errorMsg = this.checkIsInvalid();
+    const error = errorMsg || undefined;
+    if (error !== this.state.error) {
+      this.setState({ error });
+    }
+    return !!errorMsg;
   };
 
   /** This method input must fire after onChange of value is happened */
@@ -204,9 +207,8 @@ export default abstract class BaseInput<
 
   onFocusLeft = (value: ValueType, e: Core.DomFocusEvent) => {
     if (value !== this.state.value) {
-      this.setState({ value }, () => {
+      this.setState({ value, error: this.checkIsInvalid() || undefined }, () => {
         this.props.onFocusLeft && this.props.onFocusLeft(this.state.value, e);
-        this.validate(); // todo improve this because it creates 2 setState events
       });
     }
     this.props.onFocusLeft && this.props.onFocusLeft(this.state.value, e);
