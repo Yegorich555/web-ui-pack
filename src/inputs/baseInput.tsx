@@ -203,7 +203,6 @@ export default abstract class BaseInput<
   }
 
   onFocusLeft = (value: ValueType, e: Core.DomFocusEvent) => {
-    console.warn("onFocusLeft");
     if (value !== this.state.value) {
       this.setState({ value }, () => {
         this.props.onFocusLeft && this.props.onFocusLeft(this.state.value, e);

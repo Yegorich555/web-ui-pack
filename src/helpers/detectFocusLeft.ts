@@ -3,12 +3,9 @@ let waitMouseUpFunction: (() => void) | undefined;
 let timeoutRef: NodeJS.Timeout | undefined;
 
 document.addEventListener("mousedown", () => {
-  console.clear();
-  console.warn("got mousedown");
   waitMouseUp = true;
 });
 document.addEventListener("mouseup", () => {
-  console.warn("got mouseup");
   waitMouseUp = false;
   waitMouseUpFunction && waitMouseUpFunction();
   waitMouseUpFunction = undefined;
