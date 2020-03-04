@@ -75,7 +75,7 @@ export default class Form<ModelType> extends Core.Component<FormProps<ModelType>
    * Input adds itself to collection via FormInputsCollection
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  inputs: BaseInput<unknown, any, any>[] = [];
+  inputs: BaseInput<any, any, any>[] = [];
 
   isWaitSubmitFinished = false;
   state: FormState = {

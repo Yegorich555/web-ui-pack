@@ -3,6 +3,7 @@ import Core from "../core";
 import { Validations, Validation } from "./validation";
 import FormInputsCollection from "../forms/formInputsCollection";
 import Form from "../forms/form";
+import detectFocusLeft from "../helpers/detectFocusLeft";
 
 export abstract class BaseInputValidations<ValueType> implements Validations<ValueType> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -28,7 +29,7 @@ export interface BaseInputProps<T> {
   initValue?: T;
   validations?: BaseInputValidationProps;
   onChanged: (value: T, event: Core.DomChangeEvent) => void;
-  onBlured: (value: T, event: Core.DomFocusEvent) => void;
+  onFocusLeft: (value: T, event: Core.DomFocusEvent) => void;
   autoFocus?: boolean;
 }
 
@@ -115,6 +116,7 @@ export default abstract class BaseInput<
      initRequiredValues as id, initModel, initValue can be dynamic and in this case 
      we must detect changes and reinit logic
     */
+    // todo validate during the creation if initValue is wrong
     if (this.props?.name) {
       this.form = FormInputsCollection.tryRegisterInput(this);
     }
@@ -200,21 +202,25 @@ export default abstract class BaseInput<
     }
   }
 
-  /** This method input must fire after focus is lost */
-  gotBlur(value: ValueType, e: Core.DomFocusEvent): void {
+  onFocusLeft = (value: ValueType, e: Core.DomFocusEvent) => {
+    console.warn("onFocusLeft");
     if (value !== this.state.value) {
       this.setState({ value }, () => {
-        this.props.onBlured && this.props.onBlured(value, e);
+        this.props.onFocusLeft && this.props.onFocusLeft(this.state.value, e);
+        this.validate(); // todo improve this because it creates 2 setState events
       });
     }
-    this.validate();
+    this.props.onFocusLeft && this.props.onFocusLeft(this.state.value, e);
+  };
+
+  /** This method input must fire after focus is lost */
+  gotBlur(value: ValueType, e: Core.DomFocusEvent): void {
+    // todo check this for dropdown
+    detectFocusLeft(this.domEl as HTMLElement, () => this.onFocusLeft(value, e));
   }
 
+  /** Implement this method and bind gotBlur and gotChange */
   abstract getRenderedInput(id: string | number, value: ValueType): Core.Element;
-
-  //   renderBefore() {
-  //     return null;
-  //   }
 
   // todo move this logic to BaseComponent
   componentDidMount(): void {
