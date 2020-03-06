@@ -37,7 +37,7 @@ export interface BaseInputState<T> {
   value: T;
   error?: string;
 }
-let _id = 1;
+let _id = 0;
 
 // todo PureComponent? or shouldComponentUpdate
 export default abstract class BaseInput<
@@ -195,7 +195,7 @@ export default abstract class BaseInput<
     return !!errorMsg;
   };
 
-  /** This method input must fire after onChange of value is happened */
+  /** Input must fire this method after onChange of value is happened */
   gotChange(value: ValueType, e: Core.DomChangeEvent): void {
     if (value !== this.state.value) {
       this.setState({ value }, () => {
@@ -214,7 +214,7 @@ export default abstract class BaseInput<
     this.props.onFocusLeft && this.props.onFocusLeft(this.state.value, e);
   };
 
-  /** This method input must fire after focus is lost */
+  /** Input must fire this method after focus is lost */
   gotBlur(value: ValueType, e: Core.DomFocusEvent): void {
     // todo check this for dropdown
     detectFocusLeft(this.domEl as HTMLElement, () => this.onFocusLeft(value, e));
