@@ -2,23 +2,23 @@
 import Core from "../core";
 import { Validations, Validation } from "./validation";
 import FormInputsCollection from "../forms/formInputsCollection";
-import Form from "../forms/form";
+import { Form } from "../forms/form";
 import detectFocusLeft from "../helpers/detectFocusLeft";
 
-export abstract class BaseInputValidations<ValueType> implements Validations<ValueType> {
+export abstract class BaseControlValidations<ValueType> implements Validations<ValueType> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: Validation<ValueType, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   abstract required: Validation<ValueType, any>;
 }
 
-export interface BaseInputValidationProps {
+export interface BaseControlValidationProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
   required?: boolean | string;
 }
 
-export interface BaseInputProps<T> {
+export interface BaseControlProps<T> {
   /**
    * Html Id attribute. InitValue: impossible to replace this after component-init
    */
@@ -27,26 +27,26 @@ export interface BaseInputProps<T> {
   label?: string;
   name?: string;
   initValue?: T;
-  validations?: BaseInputValidationProps;
+  validations?: BaseControlValidationProps;
   onChanged: (value: T, event: Core.DomChangeEvent) => void;
   onFocusLeft: (value: T, event: Core.DomFocusEvent) => void;
   autoFocus?: boolean;
 }
 
-export interface BaseInputState<T> {
+export interface BaseControlState<T> {
   value: T;
   error?: string;
 }
-let _id = 1;
+let _id = 0;
 
 // todo PureComponent? or shouldComponentUpdate
-export default abstract class BaseInput<
+export abstract class BaseControl<
   ValueType,
-  Props extends BaseInputProps<ValueType>,
-  State extends BaseInputState<ValueType>
+  Props extends BaseControlProps<ValueType>,
+  State extends BaseControlState<ValueType>
 > extends Core.Component<Props, State> {
   // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146
-  ["constructor"]: typeof BaseInput;
+  ["constructor"]: typeof BaseControl;
 
   static getUniqueId(): string {
     return `uipack_${++_id}`;
@@ -89,7 +89,7 @@ export default abstract class BaseInput<
    *  }
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static defaultValidations: BaseInputValidations<any>;
+  static defaultValidations: BaseControlValidations<any>;
 
   id: string | number = this.props.id != null ? (this.props.id as string | number) : this.constructor.getUniqueId();
   isChanged = false;
@@ -140,9 +140,9 @@ export default abstract class BaseInput<
       return false;
     }
     // checking is invalid
-    const setRules = this.props.validations as BaseInputValidationProps;
+    const setRules = this.props.validations as BaseControlValidationProps;
 
-    function findFailedRuleKey(ruleKey: keyof BaseInputValidationProps): boolean {
+    function findFailedRuleKey(ruleKey: keyof BaseControlValidationProps): boolean {
       const setV = setRules[ruleKey];
       // todo what if "" | 0 is not ignoring by setup
       if (setV == null || setV === false) {
@@ -195,7 +195,7 @@ export default abstract class BaseInput<
     return !!errorMsg;
   };
 
-  /** This method input must fire after onChange of value is happened */
+  /** Input must fire this method after onChange of value is happened */
   gotChange(value: ValueType, e: Core.DomChangeEvent): void {
     if (value !== this.state.value) {
       this.setState({ value }, () => {
@@ -214,7 +214,7 @@ export default abstract class BaseInput<
     this.props.onFocusLeft && this.props.onFocusLeft(this.state.value, e);
   };
 
-  /** This method input must fire after focus is lost */
+  /** Input must fire this method after focus is lost */
   gotBlur(value: ValueType, e: Core.DomFocusEvent): void {
     // todo check this for dropdown
     detectFocusLeft(this.domEl as HTMLElement, () => this.onFocusLeft(value, e));

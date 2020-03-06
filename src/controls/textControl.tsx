@@ -1,12 +1,18 @@
 /* eslint-disable max-classes-per-file */
 import Core from "../core";
-import BaseInput, { BaseInputValidations, BaseInputProps, BaseInputState, BaseInputValidationProps } from "./baseInput";
+import {
+  BaseControl,
+  BaseControlValidations,
+  BaseControlProps,
+  BaseControlState,
+  BaseControlValidationProps
+} from "./baseControl";
 import { ValidationMessages } from "./validation";
 
-export class TextInputValidations extends BaseInputValidations<string> {
+export class TextControlValidations extends BaseControlValidations<string> {
   required = {
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    test: TextInput.isEmpty,
+    test: TextControl.isEmpty,
     msg: ValidationMessages.required
   };
   min = {
@@ -19,13 +25,13 @@ export class TextInputValidations extends BaseInputValidations<string> {
   };
 }
 
-export interface TextInputValidationProps extends BaseInputValidationProps {
+export interface TextControlValidationProps extends BaseControlValidationProps {
   min?: number;
   max?: number;
 }
 
-export interface TextInputProps extends BaseInputProps<string> {
-  validations?: TextInputValidationProps;
+export interface TextControlProps extends BaseControlProps<string> {
+  validations?: TextControlValidationProps;
   htmlInputProps?: Pick<
     Core.HTMLAttributes<HTMLInputElement>,
     Exclude<
@@ -35,9 +41,9 @@ export interface TextInputProps extends BaseInputProps<string> {
   >;
 }
 
-export type TextInputState = BaseInputState<string>;
+export type TextInputState = BaseControlState<string>;
 
-export default class TextInput extends BaseInput<string, TextInputProps, TextInputState> {
+export class TextControl extends BaseControl<string, TextControlProps, TextInputState> {
   /** @inheritdoc */
   static isEmpty<ValueType>(v: ValueType): boolean {
     return v == null || ((v as unknown) as string) === "";
@@ -47,7 +53,7 @@ export default class TextInput extends BaseInput<string, TextInputProps, TextInp
   static defaultInitValue = "";
 
   /** @inheritdoc */
-  static defaultValidations = new TextInputValidations();
+  static defaultValidations = new TextControlValidations();
 
   handleChange = (e: Core.DomChangeEvent) => {
     this.gotChange(e.target.value, e);
@@ -76,7 +82,3 @@ export default class TextInput extends BaseInput<string, TextInputProps, TextInp
     return this.renderInput(defProps, value);
   }
 }
-
-TextInput.defaultValidations.required.msg = "This message is overrided";
-TextInput.defaultValidations.required.test = v => v == null;
-TextInput.defaultValidations.required.test("str");
