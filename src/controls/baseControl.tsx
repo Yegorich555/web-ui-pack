@@ -60,18 +60,25 @@ export abstract class BaseControl<
     return v == null;
   }
 
+  /**
+   * Default value that assigned to input if no props.initValue, form.props.initModel specified
+   */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static defaultInitValue: any = null;
 
   get initValue(): ValueType {
-    if (this.props && this.props.initValue !== undefined) {
-      return this.props.initValue as ValueType;
+    let definedValue: ValueType | undefined;
+    if (this.props.initValue !== undefined) {
+      definedValue = this.props.initValue as ValueType;
     }
     if (this.props.name && this.form) {
       const v = this.form.getInitValue<ValueType>(this.props.name as string);
       if (v !== undefined) {
-        return v;
+        definedValue = v;
       }
+    }
+    if (definedValue !== undefined && !this.constructor.isEmpty(definedValue)) {
+      return definedValue;
     }
     return (this.constructor.defaultInitValue as unknown) as ValueType;
   }
@@ -79,6 +86,7 @@ export abstract class BaseControl<
   get value(): ValueType {
     return this.state.value;
   }
+
   /**
    * Validation rules that attached to the input. You can extend ones directly via
    * {theInput}.defaultValidations.required.msg = "Please fill this input"
