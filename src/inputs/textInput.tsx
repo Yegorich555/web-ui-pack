@@ -76,7 +76,3 @@ export default class TextInput extends BaseInput<string, TextInputProps, TextInp
     return this.renderInput(defProps, value);
   }
 }
-
-TextInput.defaultValidations.required.msg = "This message is overrided";
-TextInput.defaultValidations.required.test = v => v == null;
-TextInput.defaultValidations.required.test("str");
