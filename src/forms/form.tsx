@@ -1,5 +1,5 @@
 import Core from "../core";
-import BaseInput, { BaseInputProps } from "../inputs/baseInput";
+import { BaseControl, BaseControlProps } from "../controls/baseControl";
 import FormInputsCollection from "./formInputsCollection";
 
 export type FormProps<ModelType> = {
@@ -23,7 +23,7 @@ function PromiseWait<T>(promise: Promise<T>, ms = 400): Promise<T> {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isInputChildren<T>(node: Core.Node | Core.Node[], input: BaseInput<T, BaseInputProps<T>, any>): boolean {
+function isInputChildren<T>(node: Core.Node | Core.Node[], input: BaseControl<T, BaseControlProps<T>, any>): boolean {
   if (Array.isArray(node)) {
     return node.some(nodeChild => isInputChildren(nodeChild, input));
   }
@@ -35,7 +35,7 @@ function isInputChildren<T>(node: Core.Node | Core.Node[], input: BaseInput<T, B
   if (!type) {
     return false;
   }
-  if (!(type?.prototype instanceof BaseInput)) {
+  if (!(type?.prototype instanceof BaseControl)) {
     return false;
   }
   if (type === input.constructor) {
@@ -52,7 +52,7 @@ export type ButtonSubmitProps = {
   type: "submit";
 };
 
-export default class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormState> {
+export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormState> {
   // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146
   ["constructor"]: typeof Form;
 
@@ -75,7 +75,7 @@ export default class Form<ModelType> extends Core.Component<FormProps<ModelType>
    * Input adds itself to collection via FormInputsCollection
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  inputs: BaseInput<any, any, any>[] = [];
+  inputs: BaseControl<any, any, any>[] = [];
 
   isWaitSubmitFinished = false;
   state: FormState = {
@@ -98,7 +98,7 @@ export default class Form<ModelType> extends Core.Component<FormProps<ModelType>
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  isInputChildren<ModelValueType>(input: BaseInput<ModelValueType, BaseInputProps<ModelValueType>, any>): boolean {
+  isInputChildren<ModelValueType>(input: BaseControl<ModelValueType, BaseControlProps<ModelValueType>, any>): boolean {
     return isInputChildren(this.props.children, input);
   }
 
