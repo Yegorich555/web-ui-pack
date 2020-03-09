@@ -4,7 +4,7 @@ import { BaseControl } from "../controls/baseControl";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const hashSet = new Set<Form<any>>();
 
-export default class FormInputsCollection {
+export default class FormControls {
   static registerForm<T>(form: Form<T>): void {
     hashSet.add(form);
   }
