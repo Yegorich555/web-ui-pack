@@ -22,14 +22,18 @@ function PromiseWait<T>(promise: Promise<T>, ms = 400): Promise<T> {
   });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isInputChildren<T>(node: Core.Node | Core.Node[], input: BaseControl<T, BaseControlProps<T>, any>): boolean {
+function isInputChildren<T>(
+  node: Core.Node | Core.Node[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  input: BaseControl<T, BaseControlProps<T, any>, any>
+): boolean {
   if (Array.isArray(node)) {
     return node.some(nodeChild => isInputChildren(nodeChild, input));
   }
   if (!node) {
     return false;
   }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const type = (node as Core.Element)?.type as any | { prototype: unknown };
   if (!type) {
@@ -97,8 +101,10 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
     return undefined;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  isInputChildren<ModelValueType>(input: BaseControl<ModelValueType, BaseControlProps<ModelValueType>, any>): boolean {
+  isInputChildren<ModelValueType>(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    input: BaseControl<ModelValueType, BaseControlProps<ModelValueType, any>, any>
+  ): boolean {
     return isInputChildren(this.props.children, input);
   }
 

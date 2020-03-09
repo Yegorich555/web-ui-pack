@@ -1,5 +1,5 @@
 import { Form } from "./form";
-import { BaseControl, BaseControlState, BaseControlProps } from "../controls/baseControl";
+import { BaseControl } from "../controls/baseControl";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const hashSet = new Set<Form<any>>();
@@ -15,7 +15,8 @@ export default class FormInputsCollection {
    * Only inputs that has props.name can be added
    */
   static tryRegisterInput<T>(
-    input: BaseControl<T, BaseControlProps<T>, BaseControlState<T>>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    input: BaseControl<T, any, any>
   ): Form<unknown> | undefined {
     // eslint-disable-next-line no-restricted-syntax
     for (const form of hashSet) {
@@ -26,7 +27,9 @@ export default class FormInputsCollection {
     }
     return undefined;
   }
-  static tryRemoveInput<T>(input: BaseControl<T, BaseControlProps<T>, BaseControlState<T>>): void {
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static tryRemoveInput<T>(input: BaseControl<T, any, any>): void {
     // eslint-disable-next-line no-restricted-syntax
     for (const form of hashSet) {
       const index = form.inputs.indexOf(input);
