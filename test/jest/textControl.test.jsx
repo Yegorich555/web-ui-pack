@@ -59,4 +59,18 @@ describe("textControl", () => {
     expect(new TextControl({ initValue: null }).state.value).toBe("");
     expect(new TextControl({ initValue: "str" }).state.value).toBe("str");
   });
+
+  test("emptyValue", () => {
+    const previous = TextControl.emptyValue;
+    TextControl.emptyValue = "";
+    expect(new TextControl({}).value).toBe("");
+    expect(new TextControl({ initValue: "str" }).value).toBe("str");
+    expect(new TextControl({ initValue: null }).value).toBe("");
+
+    TextControl.emptyValue = null;
+    expect(new TextControl({}).value).toBe(null);
+    expect(new TextControl({ initValue: "str" }).value).toBe("str");
+    expect(new TextControl({ initValue: "" }).value).toBe(null);
+    TextControl.emptyValue = previous;
+  });
 });

@@ -61,6 +61,13 @@ export abstract class BaseControl<
   }
 
   /**
+   * Default value that control must return if isEmpty
+   * If setup 'null' textControl returns 'null' instead of empty-string
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static emptyValue: any = null;
+
+  /**
    * Default value that assigned to input if no props.initValue, form.props.initModel specified
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -84,7 +91,8 @@ export abstract class BaseControl<
   }
 
   get value(): ValueType {
-    return this.state.value;
+    const { value } = this.state;
+    return this.constructor.isEmpty(value) ? this.constructor.emptyValue : value;
   }
 
   /**

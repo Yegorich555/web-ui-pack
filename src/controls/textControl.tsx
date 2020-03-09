@@ -50,6 +50,9 @@ export class TextControl extends BaseControl<string, TextControlProps, TextInput
   }
 
   /** @inheritdoc */
+  static emptyValue = null;
+
+  /** @inheritdoc */
   static defaultInitValue = "";
 
   /** @inheritdoc */
