@@ -32,6 +32,7 @@ module.exports = {
     "react/static-property-placement": "off",
     "@typescript-eslint/ban-ts-ignore": "off",
     "@typescript-eslint/prefer-namespace-keyword": "off",
+    "@typescript-eslint/no-explicit-any": ["error", { ignoreRestArgs: true }],
     "prettier/prettier": ["error"],
     "no-underscore-dangle": 0,
     "no-unused-expressions": ["error", { allowShortCircuit: true }],

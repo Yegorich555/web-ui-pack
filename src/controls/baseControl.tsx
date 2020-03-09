@@ -18,7 +18,7 @@ export interface BaseControlValidationProps {
   required?: boolean | string;
 }
 
-export interface BaseControlProps<T> {
+export interface BaseControlProps<TValue, TControl> {
   /**
    * Html Id attribute. InitValue: impossible to replace this after component-init
    */
@@ -26,10 +26,10 @@ export interface BaseControlProps<T> {
   className: string;
   label?: string;
   name?: string;
-  initValue?: T;
+  initValue?: TValue;
   validations?: BaseControlValidationProps;
-  onChanged: (value: T, event: Core.DomChangeEvent) => void;
-  onFocusLeft: (value: T, event: Core.DomFocusEvent) => void;
+  onChanged: (value: TValue, control: TControl) => void;
+  onFocusLeft: (value: TValue, control: TControl) => void;
   autoFocus?: boolean;
 }
 
@@ -41,9 +41,10 @@ let _id = 0;
 
 // todo PureComponent? or shouldComponentUpdate
 export abstract class BaseControl<
-  ValueType,
-  Props extends BaseControlProps<ValueType>,
-  State extends BaseControlState<ValueType>
+  TValue,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Props extends BaseControlProps<TValue, any>,
+  State extends BaseControlState<TValue>
 > extends Core.Component<Props, State> {
   // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146
   ["constructor"]: typeof BaseControl;
@@ -56,7 +57,7 @@ export abstract class BaseControl<
    * Function that form uses in validation.required and collecting info
    * @param v checked value
    */
-  static isEmpty<ValueType>(v: ValueType): boolean {
+  static isEmpty<TValue>(v: TValue): boolean {
     return v == null;
   }
 
@@ -73,13 +74,13 @@ export abstract class BaseControl<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static defaultInitValue: any = null;
 
-  get initValue(): ValueType {
-    let definedValue: ValueType | undefined;
+  get initValue(): TValue {
+    let definedValue: TValue | undefined;
     if (this.props.initValue !== undefined) {
-      definedValue = this.props.initValue as ValueType;
+      definedValue = this.props.initValue as TValue;
     }
     if (this.props.name && this.form) {
-      const v = this.form.getInitValue<ValueType>(this.props.name as string);
+      const v = this.form.getInitValue<TValue>(this.props.name as string);
       if (v !== undefined) {
         definedValue = v;
       }
@@ -87,10 +88,10 @@ export abstract class BaseControl<
     if (definedValue !== undefined && !this.constructor.isEmpty(definedValue)) {
       return definedValue;
     }
-    return (this.constructor.defaultInitValue as unknown) as ValueType;
+    return (this.constructor.defaultInitValue as unknown) as TValue;
   }
 
-  get value(): ValueType {
+  get value(): TValue {
     const { value } = this.state;
     return this.constructor.isEmpty(value) ? this.constructor.emptyValue : value;
   }
@@ -123,7 +124,7 @@ export abstract class BaseControl<
   }
 
   state = {
-    value: (this.constructor.defaultInitValue as unknown) as ValueType
+    value: (this.constructor.defaultInitValue as unknown) as TValue
   } as State;
 
   constructor(props: Props) {
@@ -150,7 +151,7 @@ export abstract class BaseControl<
   // todo move it to static function
   checkIsInvalid = (): false | string => {
     const validations = this.constructor.defaultValidations;
-    const { value } = this.state; // todo value trim() here and validateByChange should ignore trimming
+    const { value } = this.state;
 
     if (!validations || !this.props.validations) {
       return false;
@@ -212,32 +213,32 @@ export abstract class BaseControl<
   };
 
   /** Input must fire this method after onChange of value is happened */
-  gotChange(value: ValueType, e: Core.DomChangeEvent): void {
+  gotChange(value: TValue): void {
     if (value !== this.state.value) {
       this.setState({ value }, () => {
-        this.props.onChanged && this.props.onChanged(value, e);
+        this.props.onChanged && this.props.onChanged(value, this);
       });
       // todo: this.props.validateOnChange && this.validate(value);
     }
   }
 
-  onFocusLeft = (value: ValueType, e: Core.DomFocusEvent) => {
+  onFocusLeft = (value: TValue) => {
     if (value !== this.state.value) {
       this.setState({ value, error: this.checkIsInvalid() || undefined }, () => {
-        this.props.onFocusLeft && this.props.onFocusLeft(this.state.value, e);
+        this.props.onFocusLeft && this.props.onFocusLeft(this.state.value, this);
       });
     }
-    this.props.onFocusLeft && this.props.onFocusLeft(this.state.value, e);
+    this.props.onFocusLeft && this.props.onFocusLeft(this.state.value, this);
   };
 
   /** Input must fire this method after focus is lost */
-  gotBlur(value: ValueType, e: Core.DomFocusEvent): void {
+  gotBlur(value: TValue): void {
     // todo check this for dropdown
-    detectFocusLeft(this.domEl as HTMLElement, () => this.onFocusLeft(value, e));
+    detectFocusLeft(this.domEl as HTMLElement, () => this.onFocusLeft(value));
   }
 
   /** Implement this method and bind gotBlur and gotChange */
-  abstract getRenderedInput(id: string | number, value: ValueType): Core.Element;
+  abstract getRenderedInput(id: string | number, value: TValue): Core.Element;
 
   // todo move this logic to BaseComponent
   componentDidMount(): void {

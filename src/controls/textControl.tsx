@@ -30,7 +30,7 @@ export interface TextControlValidationProps extends BaseControlValidationProps {
   max?: number;
 }
 
-export interface TextControlProps extends BaseControlProps<string> {
+export interface TextControlProps extends BaseControlProps<string, TextControl> {
   validations?: TextControlValidationProps;
   htmlInputProps?: Pick<
     Core.HTMLAttributes<HTMLInputElement>,
@@ -45,7 +45,7 @@ export type TextInputState = BaseControlState<string>;
 
 export class TextControl extends BaseControl<string, TextControlProps, TextInputState> {
   /** @inheritdoc */
-  static isEmpty<ValueType>(v: ValueType): boolean {
+  static isEmpty<TValue>(v: TValue): boolean {
     return v == null || ((v as unknown) as string) === "";
   }
 
