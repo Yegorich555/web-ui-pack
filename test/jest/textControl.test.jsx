@@ -1,7 +1,7 @@
 /* eslint-disable jest/expect-expect */
 import React from "react";
 import { render, unmountComponentAtNode } from "react-dom";
-import { act } from "react-dom/test-utils";
+import reactTestUtils from "react-dom/test-utils";
 import { TextControl } from "web-ui-pack";
 
 let container = null;
@@ -18,13 +18,34 @@ afterEach(() => {
 });
 
 function testRender(smt) {
-  act(() => {
+  reactTestUtils.act(() => {
     render(smt, container);
   });
   return expect(container.innerHTML);
 }
 
 describe("textControl", () => {
+  test("initValue", () => {
+    expect(new TextControl({}).state.value).toBe("");
+    expect(new TextControl({ initValue: undefined }).state.value).toBe("");
+    expect(new TextControl({ initValue: null }).state.value).toBe("");
+    expect(new TextControl({ initValue: "str" }).state.value).toBe("str");
+  });
+
+  const previous = TextControl.emptyValue;
+  test("emptyValue", () => {
+    TextControl.emptyValue = "";
+    expect(new TextControl({}).value).toBe("");
+    expect(new TextControl({ initValue: "str" }).value).toBe("str");
+    expect(new TextControl({ initValue: null }).value).toBe("");
+
+    TextControl.emptyValue = null;
+    expect(new TextControl({}).value).toBe(null);
+    expect(new TextControl({ initValue: "str" }).value).toBe("str");
+    expect(new TextControl({ initValue: "" }).value).toBe(null);
+  });
+  TextControl.emptyValue = previous;
+
   test("render according to props", () => {
     // todo make id is changable
     testRender(<TextControl id={1} />).toMatchInlineSnapshot(
@@ -53,24 +74,46 @@ describe("textControl", () => {
       `"<label for=\\"1\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"value here\\"></span></label>"`
     );
   });
-  test("initValue", () => {
-    expect(new TextControl({}).state.value).toBe("");
-    expect(new TextControl({ initValue: undefined }).state.value).toBe("");
-    expect(new TextControl({ initValue: null }).state.value).toBe("");
-    expect(new TextControl({ initValue: "str" }).state.value).toBe("str");
-  });
 
-  test("emptyValue", () => {
-    const previous = TextControl.emptyValue;
-    TextControl.emptyValue = "";
-    expect(new TextControl({}).value).toBe("");
-    expect(new TextControl({ initValue: "str" }).value).toBe("str");
-    expect(new TextControl({ initValue: null }).value).toBe("");
+  /**
+   * @param {Element} input
+   * @param {string} text
+   */
+  function userTypeText(input, text) {
+    // it's possible for react but it doesn't provide full userInteractivity
+    // input.value = "v";
+    // reactTestUtils.Simulate.change(input);
+    for (let i = 0; i < text.length; ++i) {
+      const keyCode = text.charCodeAt(i);
+      reactTestUtils.act(() => {
+        input.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, keyCode }));
+        input.dispatchEvent(new KeyboardEvent("keypress", { bubbles: true, keyCode }));
+        input.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true, keyCode }));
+        // eslint-disable-next-line no-param-reassign
+        input.value += text[i];
+        reactTestUtils.Simulate.change(input);
+        // it's actual only for react; in js-native onChange happens by onBlur
+        // input.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+    }
+  }
 
-    TextControl.emptyValue = null;
-    expect(new TextControl({}).value).toBe(null);
-    expect(new TextControl({ initValue: "str" }).value).toBe("str");
-    expect(new TextControl({ initValue: "" }).value).toBe(null);
-    TextControl.emptyValue = previous;
+  test("onChange event", () => {
+    const mockOnChanged = jest.fn();
+    reactTestUtils.act(() => {
+      render(<TextControl key={2} onChanged={mockOnChanged} initValue="test" />, container);
+    });
+    const input = document.querySelector("input");
+    expect(input.value).toBe("test");
+    input.value = "";
+
+    userTypeText(input, "v");
+    expect(mockOnChanged).toHaveBeenCalledTimes(1);
+    expect(mockOnChanged.mock.calls[0][0]).toBe("v");
+    expect(input.value).toBe("v");
+
+    input.value = "";
+    userTypeText(input, " text");
+    expect(input.value).toBe("text");
   });
 });

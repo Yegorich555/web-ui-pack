@@ -59,11 +59,12 @@ export class TextControl extends BaseControl<string, TextControlProps, TextInput
   static defaultValidations = new TextControlValidations();
 
   handleChange = (e: Core.DomChangeEvent) => {
-    this.gotChange(e.target.value, e);
+    this.gotChange(e.target.value.trimStart());
   };
 
   handleBlur = (e: Core.DomFocusEvent) => {
-    this.gotBlur(e.target.value, e);
+    // todo wrong for textArea
+    this.gotBlur(e.target.value.trim());
   };
 
   /** Override this method for customizing input-rendering */
