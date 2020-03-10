@@ -4,6 +4,10 @@ import { render, unmountComponentAtNode } from "react-dom";
 import reactTestUtils from "react-dom/test-utils";
 import { TextControl } from "web-ui-pack";
 
+const lastCall = jestFn => {
+  return jestFn.mock.calls[jestFn.mock.calls.length - 1];
+};
+
 let container = null;
 beforeEach(() => {
   container = document.createElement("div");
@@ -120,8 +124,7 @@ describe("textControl", () => {
 
     userTypeText(input, "v");
     expect(mockOnChanged).toHaveBeenCalledTimes(1);
-    expect(mockOnChanged.mock.calls[0][0]).toBe("v");
-    expect(mockOnChanged.mock.calls[0][1]).toBe(ref);
+    expect(mockOnChanged).toHaveBeenCalledWith("v", ref);
     expect(input.value).toBe("v");
 
     input.value = "";
@@ -153,7 +156,54 @@ describe("textControl", () => {
 
     await new Promise(r => setTimeout(r, 101));
     expect(mockFocusLeft).toHaveBeenCalledTimes(1);
-    expect(mockFocusLeft.mock.calls[0][0]).toBe("text");
-    expect(mockFocusLeft.mock.calls[0][1]).toBe(ref);
+    expect(mockFocusLeft).toHaveBeenCalledWith("text", ref);
+  });
+
+  test("validation", () => {
+    let ref = null;
+    reactTestUtils.act(() => {
+      render(
+        <TextControl
+          id={1}
+          ref={el => {
+            ref = el;
+          }}
+        />,
+        container
+      );
+    });
+    const input = document.querySelector("input");
+    const goUpdate = jest.spyOn(ref, "goUpdate");
+
+    // test no-validations
+    userTypeText(input, " v");
+    expect(goUpdate).toHaveBeenCalledTimes(2);
+    expect(lastCall(goUpdate)[0]).toBe("v");
+    expect(ref.state.error).toBe(undefined);
+
+    // test validations required
+    reactTestUtils.act(() => {
+      render(
+        <TextControl
+          id={1}
+          ref={el => {
+            ref = el;
+          }}
+          validations={{ required: true }}
+        />,
+        container
+      );
+    });
+
+    input.value = "";
+    userTypeText(input, " ");
+    expect(goUpdate).toHaveBeenCalledTimes(3);
+    expect(lastCall(goUpdate)[0]).toBe("");
+    expect(ref.state.error).toBe(TextControl.defaultValidations.required.msg);
+    expect(container.innerHTML).toMatchInlineSnapshot(
+      `"<label for=\\"1\\" data-required=\\"true\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"true\\" aria-required=\\"true\\" value=\\"\\"></span><span role=\\"alert\\">This field is required</span></label>"`
+    );
+
+    // todo validate min/max
   });
 });

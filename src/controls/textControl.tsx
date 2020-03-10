@@ -12,7 +12,7 @@ import { ValidationMessages } from "./validation";
 export class TextControlValidations extends BaseControlValidations<string> {
   required = {
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    test: TextControl.isEmpty,
+    test: (v?: string) => !TextControl.isEmpty(v),
     msg: ValidationMessages.required
   };
   min = {

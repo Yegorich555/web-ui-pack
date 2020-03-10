@@ -12,7 +12,7 @@ module.exports = api => {
                 node: "current"
               }
             }
-          : null
+          : {}
       ]
     ],
     plugins: [

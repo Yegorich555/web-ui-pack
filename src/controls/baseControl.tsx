@@ -109,7 +109,7 @@ export abstract class BaseControl<
   static defaultValidations: BaseControlValidations<any>;
 
   id: string | number = this.props.id != null ? (this.props.id as string | number) : this.constructor.getUniqueId();
-  isChanged = false;
+  // todo: isChanged = false;
   form?: Form<unknown>;
   domEl: HTMLLabelElement | undefined;
   setDomEl = (el: HTMLLabelElement): void => {
@@ -148,26 +148,28 @@ export abstract class BaseControl<
     return !!(this.props.validations?.required || false);
   }
 
-  // todo move it to static function
-  checkIsInvalid = (): false | string => {
-    const validations = this.constructor.defaultValidations;
-    const { value } = this.state;
+  static checkIsInvalid<TValue>(value?: TValue, propsValidations?: BaseControlValidationProps): false | string {
+    const validations = this.defaultValidations;
 
-    if (!validations || !this.props.validations) {
+    if (!propsValidations) {
       return false;
     }
     // checking is invalid
-    const setRules = this.props.validations as BaseControlValidationProps;
+    const setRules = propsValidations as BaseControlValidationProps;
+    const debugName = this.constructor.name;
 
-    function findFailedRuleKey(ruleKey: keyof BaseControlValidationProps): boolean {
+    function isRuleFailed(ruleKey: keyof BaseControlValidationProps): boolean {
       const setV = setRules[ruleKey];
-      // todo what if "" | 0 is not ignoring by setup
       if (setV == null || setV === false) {
         return false;
       }
       const definedValidation = validations[ruleKey];
       if (!definedValidation) {
-        console.warn(`Props [${ruleKey}] is set but it wasn't found in defaultValidations`, setRules, validations);
+        console.warn(
+          `Props validations.${ruleKey} is set but isn't found in ${debugName}.defaultValidations`,
+          setRules,
+          validations
+        );
         return false;
       }
       if (!definedValidation.test(value, setV)) {
@@ -177,11 +179,7 @@ export abstract class BaseControl<
     }
 
     // validate for required first
-    const failedRuleKey =
-      (this.isRequired && findFailedRuleKey("required") && "required") ||
-      // rule 'required' is fine go check others
-      Object.keys(setRules).find(findFailedRuleKey);
-
+    const failedRuleKey = isRuleFailed("required") ? "required" : Object.keys(setRules).find(isRuleFailed);
     if (!failedRuleKey) {
       return false;
     }
@@ -201,36 +199,34 @@ export abstract class BaseControl<
       }
     }
     return error || `Invalid field for key [${failedRuleKey}]`;
+  }
+
+  /** Function is fired when value changed or re-validation is required */
+  goUpdate = (value: TValue, callback?: () => void): boolean => {
+    const error = this.constructor.checkIsInvalid(value, this.props.validations) || undefined;
+    if (value !== this.state.value || error !== this.state.error) {
+      this.setState({ value, error }, callback);
+    } else {
+      callback && callback();
+    }
+    return !!error;
   };
 
+  // todo validateOnInit?, validateOnValueChange?
+  /** Fire validation and return true if isValid */
   validate = (): boolean => {
-    const errorMsg = this.checkIsInvalid();
-    const error = errorMsg || undefined;
-    if (error !== this.state.error) {
-      this.setState({ error });
-    }
-    return !!errorMsg;
+    return this.goUpdate(this.value);
   };
 
   /** Input must fire this method after onChange of value is happened */
   gotChange(value: TValue): void {
-    if (value !== this.state.value) {
-      this.setState({ value }, () => {
-        this.props.onChanged && this.props.onChanged(value, this);
-      });
-      // todo: this.props.validateOnChange && this.validate(value);
-    }
+    // todo: this.props.validateOnChange;
+    this.goUpdate(value, () => this.props.onChanged && this.props.onChanged(value, this));
   }
 
+  /** Function is fired when control completely lost focus */
   onFocusLeft = (value: TValue) => {
-    // todo if validateByChange is disabled we must validate input
-    if (value !== this.state.value) {
-      this.setState({ value, error: this.checkIsInvalid() || undefined }, () => {
-        this.props.onFocusLeft && this.props.onFocusLeft(this.state.value, this);
-      });
-    } else {
-      this.props.onFocusLeft && this.props.onFocusLeft(this.state.value, this);
-    }
+    this.goUpdate(value, () => this.props.onFocusLeft && this.props.onFocusLeft(value, this));
   };
 
   /** Input must fire this method after focus is lost */
