@@ -234,7 +234,6 @@ describe("textControl", () => {
       );
     });
 
-    input.value = "";
     userTypeText(input, " ");
     expect(goUpdate).toHaveBeenCalledTimes(3);
     expect(lastCall(goUpdate)[0]).toBe("");
