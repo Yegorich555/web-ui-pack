@@ -98,10 +98,21 @@ describe("textControl", () => {
     }
   }
 
-  test("onChange event", () => {
+  test("onChanged event", () => {
     const mockOnChanged = jest.fn();
+    let ref = null;
     reactTestUtils.act(() => {
-      render(<TextControl key={2} onChanged={mockOnChanged} initValue="test" />, container);
+      render(
+        <TextControl
+          ref={el => {
+            ref = el;
+          }}
+          key={2}
+          onChanged={mockOnChanged}
+          initValue="test"
+        />,
+        container
+      );
     });
     const input = document.querySelector("input");
     expect(input.value).toBe("test");
@@ -110,10 +121,39 @@ describe("textControl", () => {
     userTypeText(input, "v");
     expect(mockOnChanged).toHaveBeenCalledTimes(1);
     expect(mockOnChanged.mock.calls[0][0]).toBe("v");
+    expect(mockOnChanged.mock.calls[0][1]).toBe(ref);
     expect(input.value).toBe("v");
 
     input.value = "";
     userTypeText(input, " text");
     expect(input.value).toBe("text");
+  });
+
+  test("onFocusLeft event", async () => {
+    const mockFocusLeft = jest.fn();
+    let ref = null;
+    reactTestUtils.act(() => {
+      render(
+        <TextControl
+          ref={el => {
+            ref = el;
+          }}
+          key={3}
+          onFocusLeft={mockFocusLeft}
+        />,
+        container
+      );
+    });
+    const input = document.querySelector("input");
+
+    userTypeText(input, "text ");
+    reactTestUtils.act(() => {
+      input.dispatchEvent(new FocusEvent("blur", { bubbles: true }));
+    });
+
+    await new Promise(r => setTimeout(r, 101));
+    expect(mockFocusLeft).toHaveBeenCalledTimes(1);
+    expect(mockFocusLeft.mock.calls[0][0]).toBe("text");
+    expect(mockFocusLeft.mock.calls[0][1]).toBe(ref);
   });
 });

@@ -223,12 +223,14 @@ export abstract class BaseControl<
   }
 
   onFocusLeft = (value: TValue) => {
+    // todo if validateByChange is disabled we must validate input
     if (value !== this.state.value) {
       this.setState({ value, error: this.checkIsInvalid() || undefined }, () => {
         this.props.onFocusLeft && this.props.onFocusLeft(this.state.value, this);
       });
+    } else {
+      this.props.onFocusLeft && this.props.onFocusLeft(this.state.value, this);
     }
-    this.props.onFocusLeft && this.props.onFocusLeft(this.state.value, this);
   };
 
   /** Input must fire this method after focus is lost */
