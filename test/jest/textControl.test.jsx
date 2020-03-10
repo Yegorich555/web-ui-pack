@@ -84,9 +84,8 @@ describe("textControl", () => {
    * @param {string} text
    */
   function userTypeText(input, text) {
-    // it's possible for react but it doesn't provide full userInteractivity
-    // input.value = "v";
-    // reactTestUtils.Simulate.change(input);
+    // eslint-disable-next-line no-param-reassign
+    input.value = "";
     for (let i = 0; i < text.length; ++i) {
       const keyCode = text.charCodeAt(i);
       reactTestUtils.act(() => {
@@ -102,14 +101,14 @@ describe("textControl", () => {
     }
   }
 
-  test("onChanged event", () => {
+  test("onChanged event", async () => {
     const mockOnChanged = jest.fn();
-    let ref = null;
+    let control = null;
     reactTestUtils.act(() => {
       render(
         <TextControl
           ref={el => {
-            ref = el;
+            control = el;
           }}
           key={2}
           onChanged={mockOnChanged}
@@ -120,16 +119,53 @@ describe("textControl", () => {
     });
     const input = document.querySelector("input");
     expect(input.value).toBe("test");
-    input.value = "";
 
     userTypeText(input, "v");
     expect(mockOnChanged).toHaveBeenCalledTimes(1);
-    expect(mockOnChanged).toHaveBeenCalledWith("v", ref);
+    expect(mockOnChanged).toHaveBeenCalledWith("v", control);
     expect(input.value).toBe("v");
 
-    input.value = "";
+    // check trimStart
+    mockOnChanged.mockClear();
+    userTypeText(input, " ");
+    expect(mockOnChanged).toHaveBeenCalledTimes(1); // new event because previous value wasn't [""]
+    expect(mockOnChanged).toHaveBeenCalledWith("", control);
+    expect(input.value).toBe("");
+
+    mockOnChanged.mockClear();
+    userTypeText(input, " ");
+    expect(mockOnChanged).toHaveBeenCalledTimes(0); // no firing event because no changes
+    expect(input.value).toBe("");
+
     userTypeText(input, " text");
     expect(input.value).toBe("text");
+
+    // check onChanged when trim() by onBlur
+    mockOnChanged.mockClear();
+    userTypeText(input, "tv ");
+    expect(mockOnChanged).toHaveBeenCalledTimes(3);
+
+    mockOnChanged.mockClear();
+    reactTestUtils.act(() => {
+      input.dispatchEvent(new FocusEvent("blur", { bubbles: true }));
+    });
+
+    await new Promise(r => setTimeout(r, 101));
+    expect(mockOnChanged).toHaveBeenCalledTimes(1); // onChanged must be fired because 'tv ' is trimmed to 'tv' by onBlur
+    expect(mockOnChanged).toHaveBeenCalledWith("tv", control);
+
+    // check NO onChanged when nothing trim by onBlur
+    mockOnChanged.mockClear();
+    userTypeText(input, "tv");
+    expect(mockOnChanged).toHaveBeenCalledTimes(2);
+
+    mockOnChanged.mockClear();
+    reactTestUtils.act(() => {
+      input.dispatchEvent(new FocusEvent("blur", { bubbles: true }));
+    });
+
+    await new Promise(r => setTimeout(r, 101));
+    expect(mockOnChanged).toHaveBeenCalledTimes(0); // onChanged must not to be fired because there is no trimming (value changing)
   });
 
   test("onFocusLeft event", async () => {
@@ -154,6 +190,7 @@ describe("textControl", () => {
       input.dispatchEvent(new FocusEvent("blur", { bubbles: true }));
     });
 
+    // todo check change event before gotBlur is happened
     await new Promise(r => setTimeout(r, 101));
     expect(mockFocusLeft).toHaveBeenCalledTimes(1);
     expect(mockFocusLeft).toHaveBeenCalledWith("text", ref);

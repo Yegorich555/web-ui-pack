@@ -28,7 +28,9 @@ export interface BaseControlProps<TValue, TControl> {
   name?: string;
   initValue?: TValue;
   validations?: BaseControlValidationProps;
+  /** Event happens when value is changed */
   onChanged: (value: TValue, control: TControl) => void;
+  /** Event happens when control completely lost focus */
   onFocusLeft: (value: TValue, control: TControl) => void;
   autoFocus?: boolean;
 }
@@ -134,7 +136,7 @@ export abstract class BaseControl<
      we must detect changes and reinit logic
     */
     // todo validate during the creation if initValue is wrong
-    if (this.props?.name) {
+    if (this.props.name) {
       this.form = FormControls.tryRegisterInput(this);
     }
     this.state.value = this.initValue;
@@ -215,13 +217,19 @@ export abstract class BaseControl<
   // todo validateOnInit?, validateOnValueChange?
   /** Fire validation and return true if isValid */
   validate = (): boolean => {
-    return this.goUpdate(this.value);
+    return this.goUpdate(this.state.value);
   };
 
   /** Input must fire this method after onChange of value is happened */
   gotChange(value: TValue): void {
     // todo: this.props.validateOnChange;
-    this.goUpdate(value, () => this.props.onChanged && this.props.onChanged(value, this));
+    const prevValue = this.state.value;
+    this.goUpdate(value, () => {
+      // it requires when value is trimmed but we must update UI
+      if (prevValue !== this.state.value) {
+        this.props.onChanged && this.props.onChanged(value, this);
+      }
+    });
   }
 
   /** Function is fired when control completely lost focus */
