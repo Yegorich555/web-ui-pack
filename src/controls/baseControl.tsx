@@ -51,6 +51,9 @@ export abstract class BaseControl<
   // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146
   ["constructor"]: typeof BaseControl;
 
+  /** Timeout that used for preventing focus-debounce when labelOnClick > onBlur > onFocus happens */
+  static focusDebounce = 100;
+
   static getUniqueId(): string {
     return `uipack_${++_id}`;
   }
@@ -240,7 +243,7 @@ export abstract class BaseControl<
   /** Input must fire this method after focus is lost */
   gotBlur(value: TValue): void {
     // todo check this for dropdown
-    detectFocusLeft(this.domEl as HTMLElement, () => this.onFocusLeft(value));
+    detectFocusLeft(this.domEl as HTMLElement, () => this.onFocusLeft(value), this.constructor.focusDebounce);
   }
 
   /** Implement this method and bind gotBlur and gotChange */

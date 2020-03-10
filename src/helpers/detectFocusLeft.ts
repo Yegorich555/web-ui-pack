@@ -11,14 +11,14 @@ document.addEventListener("mouseup", () => {
   waitMouseUpFunction = undefined;
 });
 
-export default function detectFocusLeft(control: HTMLElement, callback: () => void): void {
+export default function detectFocusLeft(control: HTMLElement, callback: () => void, timeoutMs = 100): void {
   function stopTimeout(): void {
     timeoutRef && clearTimeout(timeoutRef);
     timeoutRef = undefined;
     control.removeEventListener("focusin", stopTimeout);
   }
   function runTimeout(): void {
-    timeoutRef = setTimeout(callback, 100);
+    timeoutRef = setTimeout(callback, timeoutMs);
     control.addEventListener("focusin", stopTimeout);
   }
 

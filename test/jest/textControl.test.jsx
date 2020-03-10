@@ -4,6 +4,9 @@ import { render, unmountComponentAtNode } from "react-dom";
 import reactTestUtils from "react-dom/test-utils";
 import { TextControl } from "web-ui-pack";
 
+TextControl.focusDebounce = 0;
+const waitBlurDebounce = () => new Promise(r => setTimeout(r, TextControl.focusDebounce));
+
 const lastCall = jestFn => {
   return jestFn.mock.calls[jestFn.mock.calls.length - 1];
 };
@@ -150,7 +153,7 @@ describe("textControl", () => {
       input.dispatchEvent(new FocusEvent("blur", { bubbles: true }));
     });
 
-    await new Promise(r => setTimeout(r, 101));
+    await waitBlurDebounce();
     expect(mockOnChanged).toHaveBeenCalledTimes(1); // onChanged must be fired because 'tv ' is trimmed to 'tv' by onBlur
     expect(mockOnChanged).toHaveBeenCalledWith("tv", control);
 
@@ -164,7 +167,7 @@ describe("textControl", () => {
       input.dispatchEvent(new FocusEvent("blur", { bubbles: true }));
     });
 
-    await new Promise(r => setTimeout(r, 101));
+    await waitBlurDebounce();
     expect(mockOnChanged).toHaveBeenCalledTimes(0); // onChanged must not to be fired because there is no trimming (value changing)
   });
 
@@ -190,8 +193,7 @@ describe("textControl", () => {
       input.dispatchEvent(new FocusEvent("blur", { bubbles: true }));
     });
 
-    // todo check change event before gotBlur is happened
-    await new Promise(r => setTimeout(r, 101));
+    await waitBlurDebounce();
     expect(mockFocusLeft).toHaveBeenCalledTimes(1);
     expect(mockFocusLeft).toHaveBeenCalledWith("text", ref);
   });
