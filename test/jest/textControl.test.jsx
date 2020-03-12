@@ -31,6 +31,7 @@ function testRender(smt) {
   return expect(container.innerHTML);
 }
 
+// todo check static properties are overrided!
 describe("textControl", () => {
   test("initValue", () => {
     expect(new TextControl({}).state.value).toBe("");
@@ -234,14 +235,65 @@ describe("textControl", () => {
       );
     });
 
+    goUpdate.mockClear();
     userTypeText(input, " ");
-    expect(goUpdate).toHaveBeenCalledTimes(3);
+    expect(goUpdate).toHaveBeenCalledTimes(1);
     expect(lastCall(goUpdate)[0]).toBe("");
     expect(ref.state.error).toBe(TextControl.defaultValidations.required.msg);
     expect(container.innerHTML).toMatchInlineSnapshot(
       `"<label for=\\"1\\" data-required=\\"true\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"true\\" aria-required=\\"true\\" value=\\"\\"></span><span role=\\"alert\\">This field is required</span></label>"`
     );
 
-    // todo validate min/max
+    // test validations.min
+    reactTestUtils.act(() => {
+      render(
+        <TextControl
+          id={1}
+          ref={el => {
+            ref = el;
+          }}
+          validations={{ min: 2 }}
+        />,
+        container
+      );
+    });
+    goUpdate.mockClear();
+    userTypeText(input, "d");
+    expect(ref.state.error).toBe(TextControl.defaultValidations.min.msg(2));
+    expect(container.innerHTML).toMatchInlineSnapshot(
+      `"<label for=\\"1\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"true\\" aria-required=\\"false\\" value=\\"d\\"></span><span role=\\"alert\\">Min length is 2 characters</span></label>"`
+    );
+    userTypeText(input, "dv");
+    expect(ref.state.error).toBe(undefined);
+    expect(container.innerHTML).toMatchInlineSnapshot(
+      `"<label for=\\"1\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"dv\\"></span></label>"`
+    );
+
+    // test validations.max
+    reactTestUtils.act(() => {
+      render(
+        <TextControl
+          id={1}
+          ref={el => {
+            ref = el;
+          }}
+          validations={{ max: 2 }}
+        />,
+        container
+      );
+    });
+    goUpdate.mockClear();
+    userTypeText(input, "d");
+    expect(ref.state.error).toBe(undefined);
+    expect(container.innerHTML).toMatchInlineSnapshot(
+      `"<label for=\\"1\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"d\\"></span></label>"`
+    );
+    userTypeText(input, "dvt");
+    expect(ref.state.error).toBe(TextControl.defaultValidations.max.msg(2));
+    expect(container.innerHTML).toMatchInlineSnapshot(
+      `"<label for=\\"1\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"true\\" aria-required=\\"false\\" value=\\"dvt\\"></span><span role=\\"alert\\">Max length is 2 characters</span></label>"`
+    );
+
+    // end validations
   });
 });
