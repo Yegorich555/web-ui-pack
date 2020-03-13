@@ -4,7 +4,7 @@ import { render, unmountComponentAtNode } from "react-dom";
 import reactTestUtils from "react-dom/test-utils";
 import { TextControl } from "web-ui-pack";
 
-TextControl.commonOptions.focusDebounce = 0;
+TextControl.common.focusDebounce = 0;
 const waitBlurDebounce = () => new Promise(r => setTimeout(r, TextControl.focusDebounce));
 async function dispatchOnBlur(element) {
   reactTestUtils.act(() => {
@@ -299,19 +299,19 @@ describe("textControl", () => {
 
     // test validateOnChange=false
     userTypeText(input, "12");
-    TextControl.commonOptions.validateOnChange = false;
+    TextControl.common.validateOnChange = false;
     expect(ref.state.error).toBe(undefined);
     userTypeText(input, "123");
     expect(ref.state.error).toBe(undefined);
 
     // test also validateOnBlur=false
-    TextControl.commonOptions.validateOnBlur = false;
+    TextControl.common.validateOnBlur = false;
     userTypeText(input, "123");
     expect(ref.state.error).toBe(undefined);
     await dispatchOnBlur(input);
     expect(ref.state.error).toBeDefined();
-    TextControl.commonOptions.validateOnChange = true;
-    TextControl.commonOptions.validateOnBlur = true;
+    TextControl.common.validateOnChange = true;
+    TextControl.common.validateOnBlur = true;
 
     // end validations
   });

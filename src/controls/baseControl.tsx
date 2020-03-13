@@ -55,7 +55,7 @@ export abstract class BaseControl<
    * Options that common for every control
    * if you need to redefine options for particular control just redefine this one in inheritted control
    */
-  static commonOptions = {
+  static common = {
     getUniqueId(): string {
       return `uipack_${++_id}`;
     },
@@ -123,7 +123,7 @@ export abstract class BaseControl<
   static defaultValidations: BaseControlValidations<any>;
 
   id: string | number =
-    this.props.id != null ? (this.props.id as string | number) : this.constructor.commonOptions.getUniqueId();
+    this.props.id != null ? (this.props.id as string | number) : this.constructor.common.getUniqueId();
   // todo: isChanged = false;
   form?: Form<unknown>;
   domEl: HTMLLabelElement | undefined;
@@ -245,7 +245,7 @@ export abstract class BaseControl<
 
   /** Input must fire this method after onChange of value is happened */
   gotChange(value: TValue): void {
-    this.setValue(value, undefined, !this.constructor.commonOptions.validateOnChange);
+    this.setValue(value, undefined, !this.constructor.common.validateOnChange);
   }
 
   /** Function is fired when control completely lost focus */
@@ -253,18 +253,14 @@ export abstract class BaseControl<
     this.setValue(
       value,
       () => this.props.onFocusLeft && this.props.onFocusLeft(value, this),
-      !this.constructor.commonOptions.validateOnFocusLeft
+      !this.constructor.common.validateOnFocusLeft
     );
   };
 
   /** Input must fire this method after focus is lost */
   gotBlur(value: TValue): void {
     // todo check this for dropdown
-    detectFocusLeft(
-      this.domEl as HTMLElement,
-      () => this.onFocusLeft(value),
-      this.constructor.commonOptions.focusDebounce
-    );
+    detectFocusLeft(this.domEl as HTMLElement, () => this.onFocusLeft(value), this.constructor.common.focusDebounce);
   }
 
   /** Implement this method and bind gotBlur and gotChange */
