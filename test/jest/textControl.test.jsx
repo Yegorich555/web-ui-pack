@@ -6,6 +6,13 @@ import { TextControl } from "web-ui-pack";
 
 TextControl.focusDebounce = 0;
 const waitBlurDebounce = () => new Promise(r => setTimeout(r, TextControl.focusDebounce));
+async function dispatchOnBlur(element) {
+  reactTestUtils.act(() => {
+    element.dispatchEvent(new FocusEvent("blur", { bubbles: true }));
+  });
+
+  await waitBlurDebounce();
+}
 
 const lastCall = jestFn => {
   return jestFn.mock.calls[jestFn.mock.calls.length - 1];
@@ -190,16 +197,12 @@ describe("textControl", () => {
     const input = document.querySelector("input");
 
     userTypeText(input, "text ");
-    reactTestUtils.act(() => {
-      input.dispatchEvent(new FocusEvent("blur", { bubbles: true }));
-    });
-
-    await waitBlurDebounce();
+    await dispatchOnBlur(input);
     expect(mockFocusLeft).toHaveBeenCalledTimes(1);
     expect(mockFocusLeft).toHaveBeenCalledWith("text", ref);
   });
 
-  test("validation", () => {
+  test("validation", async () => {
     let ref = null;
     reactTestUtils.act(() => {
       render(
@@ -213,12 +216,12 @@ describe("textControl", () => {
       );
     });
     const input = document.querySelector("input");
-    const goUpdate = jest.spyOn(ref, "goUpdate");
+    const setValue = jest.spyOn(ref, "setValue");
 
     // test no-validations
     userTypeText(input, " v");
-    expect(goUpdate).toHaveBeenCalledTimes(2);
-    expect(lastCall(goUpdate)[0]).toBe("v");
+    expect(setValue).toHaveBeenCalledTimes(2);
+    expect(lastCall(setValue)[0]).toBe("v");
     expect(ref.state.error).toBe(undefined);
 
     // test validations required
@@ -235,10 +238,10 @@ describe("textControl", () => {
       );
     });
 
-    goUpdate.mockClear();
+    setValue.mockClear();
     userTypeText(input, " ");
-    expect(goUpdate).toHaveBeenCalledTimes(1);
-    expect(lastCall(goUpdate)[0]).toBe("");
+    expect(setValue).toHaveBeenCalledTimes(1);
+    expect(lastCall(setValue)[0]).toBe("");
     expect(ref.state.error).toBe(TextControl.defaultValidations.required.msg);
     expect(container.innerHTML).toMatchInlineSnapshot(
       `"<label for=\\"1\\" data-required=\\"true\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"true\\" aria-required=\\"true\\" value=\\"\\"></span><span role=\\"alert\\">This field is required</span></label>"`
@@ -257,7 +260,7 @@ describe("textControl", () => {
         container
       );
     });
-    goUpdate.mockClear();
+    setValue.mockClear();
     userTypeText(input, "d");
     expect(ref.state.error).toBe(TextControl.defaultValidations.min.msg(2));
     expect(container.innerHTML).toMatchInlineSnapshot(
@@ -282,7 +285,7 @@ describe("textControl", () => {
         container
       );
     });
-    goUpdate.mockClear();
+    setValue.mockClear();
     userTypeText(input, "d");
     expect(ref.state.error).toBe(undefined);
     expect(container.innerHTML).toMatchInlineSnapshot(
@@ -293,6 +296,22 @@ describe("textControl", () => {
     expect(container.innerHTML).toMatchInlineSnapshot(
       `"<label for=\\"1\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"true\\" aria-required=\\"false\\" value=\\"dvt\\"></span><span role=\\"alert\\">Max length is 2 characters</span></label>"`
     );
+
+    // test validateOnChange=false
+    userTypeText(input, "12");
+    TextControl.commonOptions.validateOnChange = false;
+    expect(ref.state.error).toBe(undefined);
+    userTypeText(input, "123");
+    expect(ref.state.error).toBe(undefined);
+
+    // test also validateOnBlur=false
+    TextControl.commonOptions.validateOnBlur = false;
+    userTypeText(input, "123");
+    expect(ref.state.error).toBe(undefined);
+    await dispatchOnBlur(input);
+    expect(ref.state.error).toBeDefined();
+    TextControl.commonOptions.validateOnChange = true;
+    TextControl.commonOptions.validateOnBlur = true;
 
     // end validations
   });

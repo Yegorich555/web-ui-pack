@@ -51,6 +51,17 @@ export abstract class BaseControl<
   // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146
   ["constructor"]: typeof BaseControl;
 
+  /**
+   * Options that common for every control
+   * if you need to redefine options for particular control just redefine this one in inheritted control
+   */
+  static commonOptions = {
+    /** Set 'true' if need to validate when user changed value */
+    validateOnChange: true,
+    /** Set 'true' if need to validate when control lost focus */
+    validateOnFocusLeft: true
+  };
+
   /** Timeout that used for preventing focus-debounce when labelOnClick > onBlur > onFocus happens */
   static focusDebounce = 100;
 
@@ -206,38 +217,44 @@ export abstract class BaseControl<
     return error || `Invalid field for key [${failedRuleKey}]`;
   }
 
-  /** Function is fired when value changed or re-validation is required */
-  goUpdate = (value: TValue, callback?: () => void): boolean => {
-    const error = this.constructor.checkIsInvalid(value, this.props.validations) || undefined;
-    if (value !== this.state.value || error !== this.state.error) {
-      this.setState({ value, error }, callback);
+  /**
+   * Function is fired when value changed or re-validation is required
+   * @return true if isValid
+   */
+  setValue = (value: TValue, callback?: () => void, skipValidation?: boolean): boolean => {
+    const error = skipValidation
+      ? this.state.error
+      : this.constructor.checkIsInvalid(value, this.props.validations) || undefined;
+
+    const valueIsChanged = value !== this.state.value;
+    if (valueIsChanged || error !== this.state.error) {
+      this.setState({ value, error }, () => {
+        valueIsChanged && this.props.onChanged && this.props.onChanged(value, this);
+        callback && callback();
+      });
     } else {
       callback && callback();
     }
     return !!error;
   };
 
-  // todo validateOnInit?, validateOnValueChange?
-  /** Fire validation and return true if isValid */
+  /** Fire validation, update state and return true if isValid */
   validate = (): boolean => {
-    return this.goUpdate(this.state.value);
+    return this.setValue(this.state.value);
   };
 
   /** Input must fire this method after onChange of value is happened */
   gotChange(value: TValue): void {
-    // todo: this.props.validateOnChange;
-    const prevValue = this.state.value;
-    this.goUpdate(value, () => {
-      // it requires when value is trimmed but we must update UI
-      if (prevValue !== this.state.value) {
-        this.props.onChanged && this.props.onChanged(value, this);
-      }
-    });
+    this.setValue(value, undefined, !this.constructor.commonOptions.validateOnChange);
   }
 
   /** Function is fired when control completely lost focus */
   onFocusLeft = (value: TValue) => {
-    this.goUpdate(value, () => this.props.onFocusLeft && this.props.onFocusLeft(value, this));
+    this.setValue(
+      value,
+      () => this.props.onFocusLeft && this.props.onFocusLeft(value, this),
+      !this.constructor.commonOptions.validateOnFocusLeft
+    );
   };
 
   /** Input must fire this method after focus is lost */
