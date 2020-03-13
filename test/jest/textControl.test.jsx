@@ -1,4 +1,3 @@
-/* eslint-disable jest/expect-expect */
 import React from "react";
 import { render, unmountComponentAtNode } from "react-dom";
 import reactTestUtils from "react-dom/test-utils";
@@ -47,19 +46,19 @@ describe("textControl", () => {
     expect(new TextControl({ initValue: "str" }).state.value).toBe("str");
   });
 
-  const previous = TextControl.emptyValue;
+  const previous = TextControl.returnEmptyValue;
   test("emptyValue", () => {
-    TextControl.emptyValue = "";
+    TextControl.returnEmptyValue = "";
     expect(new TextControl({}).value).toBe("");
     expect(new TextControl({ initValue: "str" }).value).toBe("str");
     expect(new TextControl({ initValue: null }).value).toBe("");
 
-    TextControl.emptyValue = null;
+    TextControl.returnEmptyValue = null;
     expect(new TextControl({}).value).toBe(null);
     expect(new TextControl({ initValue: "str" }).value).toBe("str");
     expect(new TextControl({ initValue: "" }).value).toBe(null);
   });
-  TextControl.emptyValue = previous;
+  TextControl.returnEmptyValue = previous;
 
   test("render according to props", () => {
     // todo make id is changable
