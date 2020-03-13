@@ -1,0 +1,62 @@
+// import React from "react";
+import { render, unmountComponentAtNode } from "react-dom";
+import reactTestUtils from "react-dom/test-utils";
+import { BaseControl } from "web-ui-pack";
+
+BaseControl.common.focusDebounce = 0;
+const waitBlurDebounce = () => new Promise(r => setTimeout(r, BaseControl.common.focusDebounce));
+export async function dispatchOnBlur(element) {
+  reactTestUtils.act(() => {
+    element.dispatchEvent(new FocusEvent("blur", { bubbles: true }));
+  });
+
+  await waitBlurDebounce();
+}
+
+export function lastCall(jestFn) {
+  return jestFn.mock.calls[jestFn.mock.calls.length - 1];
+}
+
+export function initDom() {
+  const container = {
+    render: el => {
+      reactTestUtils.act(() => {
+        render(el, container.domEl);
+      });
+    },
+    expectRender: el => {
+      container.render(el);
+      return expect(container.domEl.innerHTML);
+    },
+    /**
+     * @param {Element} input
+     * @param {string} text
+     */
+    userTypeText(input, text) {
+      // eslint-disable-next-line no-param-reassign
+      input.value = "";
+      for (let i = 0; i < text.length; ++i) {
+        const keyCode = text.charCodeAt(i);
+        reactTestUtils.act(() => {
+          input.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, keyCode }));
+          input.dispatchEvent(new KeyboardEvent("keypress", { bubbles: true, keyCode }));
+          input.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true, keyCode }));
+          // eslint-disable-next-line no-param-reassign
+          input.value += text[i];
+          reactTestUtils.Simulate.change(input);
+          // it's actual only for react; in js-native onChange happens by onBlur
+          // input.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+      }
+    },
+    domEl: undefined,
+    destroyDom: () => {
+      unmountComponentAtNode(container.domEl);
+      container.domEl.remove();
+      container.domEl = null;
+    }
+  };
+  container.domEl = document.createElement("div");
+  document.body.appendChild(container.domEl);
+  return container;
+}
