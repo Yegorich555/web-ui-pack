@@ -4,7 +4,7 @@ import { render, unmountComponentAtNode } from "react-dom";
 import reactTestUtils from "react-dom/test-utils";
 import { TextControl } from "web-ui-pack";
 
-TextControl.focusDebounce = 0;
+TextControl.commonOptions.focusDebounce = 0;
 const waitBlurDebounce = () => new Promise(r => setTimeout(r, TextControl.focusDebounce));
 async function dispatchOnBlur(element) {
   reactTestUtils.act(() => {

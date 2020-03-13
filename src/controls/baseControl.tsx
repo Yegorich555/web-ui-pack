@@ -56,18 +56,16 @@ export abstract class BaseControl<
    * if you need to redefine options for particular control just redefine this one in inheritted control
    */
   static commonOptions = {
+    getUniqueId(): string {
+      return `uipack_${++_id}`;
+    },
     /** Set 'true' if need to validate when user changed value */
     validateOnChange: true,
     /** Set 'true' if need to validate when control lost focus */
-    validateOnFocusLeft: true
+    validateOnFocusLeft: true,
+    /** Timeout that used for preventing focus-debounce when labelOnClick > onBlur > onFocus happens */
+    focusDebounce: 100
   };
-
-  /** Timeout that used for preventing focus-debounce when labelOnClick > onBlur > onFocus happens */
-  static focusDebounce = 100;
-
-  static getUniqueId(): string {
-    return `uipack_${++_id}`;
-  }
 
   /**
    * Function that form uses in validation.required and collecting info
@@ -124,7 +122,8 @@ export abstract class BaseControl<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static defaultValidations: BaseControlValidations<any>;
 
-  id: string | number = this.props.id != null ? (this.props.id as string | number) : this.constructor.getUniqueId();
+  id: string | number =
+    this.props.id != null ? (this.props.id as string | number) : this.constructor.commonOptions.getUniqueId();
   // todo: isChanged = false;
   form?: Form<unknown>;
   domEl: HTMLLabelElement | undefined;
@@ -261,7 +260,11 @@ export abstract class BaseControl<
   /** Input must fire this method after focus is lost */
   gotBlur(value: TValue): void {
     // todo check this for dropdown
-    detectFocusLeft(this.domEl as HTMLElement, () => this.onFocusLeft(value), this.constructor.focusDebounce);
+    detectFocusLeft(
+      this.domEl as HTMLElement,
+      () => this.onFocusLeft(value),
+      this.constructor.commonOptions.focusDebounce
+    );
   }
 
   /** Implement this method and bind gotBlur and gotChange */
