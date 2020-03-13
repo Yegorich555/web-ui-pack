@@ -226,10 +226,10 @@ export abstract class BaseControl<
       ? this.state.error
       : this.constructor.checkIsInvalid(value, this.props.validations) || undefined;
 
-    const valueIsChanged = value !== this.state.value;
-    if (valueIsChanged || error !== this.state.error) {
+    const isValueChanged = value !== this.state.value;
+    if (isValueChanged || error !== this.state.error) {
       this.setState({ value, error }, () => {
-        valueIsChanged && this.props.onChanged && this.props.onChanged(value, this);
+        isValueChanged && this.props.onChanged && this.props.onChanged(value, this);
         callback && callback();
       });
     } else {
@@ -240,6 +240,7 @@ export abstract class BaseControl<
 
   /** Fire validation, update state and return true if isValid */
   validate = (): boolean => {
+    // todo check this when form fires validation
     return this.setValue(this.state.value);
   };
 

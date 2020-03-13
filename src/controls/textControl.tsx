@@ -64,11 +64,7 @@ export class TextControl extends BaseControl<string, TextControlProps, TextInput
 
   handleBlur = (e: Core.DomFocusEvent) => {
     // todo trimming is wrong for textArea
-    const newValue = e.target.value.trim();
-    if (newValue !== this.state.value) {
-      this.gotChange(newValue);
-    }
-    this.gotBlur(newValue);
+    this.gotBlur(e.target.value.trim());
   };
 
   /** Override this method for customizing input-rendering */
