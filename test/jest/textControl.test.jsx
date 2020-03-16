@@ -2,17 +2,14 @@ import React from "react";
 import { TextControl } from "web-ui-pack";
 import * as h from "./testHelper";
 
-let mainBlock;
 let dom = h.initDom(); // assignment only for Intellisense
 beforeAll(() => {
   dom = h.initDom();
-  mainBlock = dom.domEl;
 });
 
 afterAll(() => {
   dom.destroyDom();
   dom = null;
-  mainBlock = null;
 });
 
 // todo check static properties are overrided!
@@ -193,7 +190,7 @@ describe("textControl", () => {
     expect(setValue).toHaveBeenCalledTimes(1);
     expect(h.lastCall(setValue)[0]).toBe("");
     expect(ref.state.error).toBe(TextControl.defaultValidations.required.msg);
-    expect(mainBlock.innerHTML).toMatchInlineSnapshot(
+    expect(dom.element.innerHTML).toMatchInlineSnapshot(
       `"<label for=\\"1\\" data-required=\\"true\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"true\\" aria-required=\\"true\\" value=\\"\\"></span><span role=\\"alert\\">This field is required</span></label>"`
     );
 
@@ -211,12 +208,12 @@ describe("textControl", () => {
     setValue.mockClear();
     dom.userTypeText(input, "d");
     expect(ref.state.error).toBe(TextControl.defaultValidations.min.msg(2));
-    expect(mainBlock.innerHTML).toMatchInlineSnapshot(
+    expect(dom.element.innerHTML).toMatchInlineSnapshot(
       `"<label for=\\"1\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"true\\" aria-required=\\"false\\" value=\\"d\\"></span><span role=\\"alert\\">Min length is 2 characters</span></label>"`
     );
     dom.userTypeText(input, "dv");
     expect(ref.state.error).toBe(undefined);
-    expect(mainBlock.innerHTML).toMatchInlineSnapshot(
+    expect(dom.element.innerHTML).toMatchInlineSnapshot(
       `"<label for=\\"1\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"dv\\"></span></label>"`
     );
 
@@ -229,18 +226,18 @@ describe("textControl", () => {
         }}
         validations={{ max: 2 }}
       />,
-      mainBlock
+      dom.element
     );
 
     setValue.mockClear();
     dom.userTypeText(input, "d");
     expect(ref.state.error).toBe(undefined);
-    expect(mainBlock.innerHTML).toMatchInlineSnapshot(
+    expect(dom.element.innerHTML).toMatchInlineSnapshot(
       `"<label for=\\"1\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"d\\"></span></label>"`
     );
     dom.userTypeText(input, "dvt");
     expect(ref.state.error).toBe(TextControl.defaultValidations.max.msg(2));
-    expect(mainBlock.innerHTML).toMatchInlineSnapshot(
+    expect(dom.element.innerHTML).toMatchInlineSnapshot(
       `"<label for=\\"1\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"true\\" aria-required=\\"false\\" value=\\"dvt\\"></span><span role=\\"alert\\">Max length is 2 characters</span></label>"`
     );
 

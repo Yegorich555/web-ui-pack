@@ -21,12 +21,12 @@ export function initDom() {
   const container = {
     render: el => {
       reactTestUtils.act(() => {
-        render(el, container.domEl);
+        render(el, container.element);
       });
     },
     expectRender: el => {
       container.render(el);
-      return expect(container.domEl.innerHTML);
+      return expect(container.element.innerHTML);
     },
     /**
      * @param {Element} input
@@ -49,14 +49,14 @@ export function initDom() {
         });
       }
     },
-    domEl: undefined,
+    element: undefined,
     destroyDom: () => {
-      unmountComponentAtNode(container.domEl);
-      container.domEl.remove();
-      container.domEl = null;
+      unmountComponentAtNode(container.element);
+      container.element.remove();
+      container.element = null;
     }
   };
-  container.domEl = document.createElement("div");
-  document.body.appendChild(container.domEl);
+  container.element = document.createElement("div");
+  document.body.appendChild(container.element);
   return container;
 }
