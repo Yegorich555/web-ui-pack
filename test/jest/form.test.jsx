@@ -1,0 +1,133 @@
+/* eslint-disable prefer-rest-params */
+import React from "react";
+import { Form, TextControl, FormControls } from "web-ui-pack";
+import * as h from "./testHelper";
+
+let dom = h.initDom(); // assignment only for Intellisense
+beforeAll(() => {
+  dom = h.initDom();
+});
+
+afterAll(() => {
+  dom.destroyDom();
+  dom = null;
+});
+
+describe("form", () => {
+  const spyRegisterForm = jest.spyOn(FormControls, "registerForm");
+  test("render according to props", () => {
+    dom
+      .expectRender(<Form />)
+      .toMatchInlineSnapshot(
+        `"<form autocomplete=\\"off\\" novalidate=\\"\\"><div><button type=\\"submit\\">SUBMIT</button></div></form>"`
+      );
+    dom
+      .expectRender(<Form autoComplete="on" />)
+      .toMatchInlineSnapshot(
+        `"<form autocomplete=\\"on\\" novalidate=\\"\\"><div><button type=\\"submit\\">SUBMIT</button></div></form>"`
+      );
+
+    dom
+      .expectRender(<Form className="someClass" />)
+      .toMatchInlineSnapshot(
+        `"<form autocomplete=\\"off\\" novalidate=\\"\\" class=\\"someClass\\"><div><button type=\\"submit\\">SUBMIT</button></div></form>"`
+      );
+    dom
+      .expectRender(<Form title="Some title here" />)
+      .toMatchInlineSnapshot(
+        `"<form autocomplete=\\"off\\" novalidate=\\"\\"><h2>Some title here</h2><div><button type=\\"submit\\">SUBMIT</button></div></form>"`
+      );
+    dom
+      .expectRender(<Form textSubmit="Click Me" />)
+      .toMatchInlineSnapshot(
+        `"<form autocomplete=\\"off\\" novalidate=\\"\\"><div><button type=\\"submit\\">Click Me</button></div></form>"`
+      );
+    dom
+      .expectRender(
+        <Form
+          textSubmit={
+            // eslint-disable-next-line react/jsx-wrap-multilines
+            <>
+              <span>Click</span>
+              <span> Me</span>
+            </>
+          }
+        />
+      )
+      .toMatchInlineSnapshot(
+        `"<form autocomplete=\\"off\\" novalidate=\\"\\"><div><button type=\\"submit\\"><span>Click</span><span> Me</span></button></div></form>"`
+      );
+    dom
+      .expectRender(
+        <Form title="Some title here">
+          <div>Some box here</div>
+        </Form>
+      )
+      .toMatchInlineSnapshot(
+        `"<form autocomplete=\\"off\\" novalidate=\\"\\"><h2>Some title here</h2><div>Some box here</div><div><button type=\\"submit\\">SUBMIT</button></div></form>"`
+      );
+  });
+
+  test("integration with TextControl", async () => {
+    let form = null;
+    let control = null;
+
+    dom
+      .expectRender(
+        <Form
+          title="Title here"
+          ref={el => {
+            form = el;
+          }}
+        >
+          <TextControl />
+        </Form>
+      )
+      .toMatchInlineSnapshot(
+        `"<form autocomplete=\\"off\\" novalidate=\\"\\"><h2>Title here</h2><label for=\\"uipack_1\\"><span></span><span><input id=\\"uipack_1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\"></span></label><div><button type=\\"submit\\">SUBMIT</button></div></form>"`
+      );
+    // todo: why doesn't this work after the second render
+    const spySubmit = jest.spyOn(form, "onSubmit");
+    const spyValidate = jest.spyOn(form, "validate");
+
+    expect(FormControls.forms.size).toBe(1);
+    // js-Set doesn't have values accessed by index
+    expect(FormControls.forms.values().next().value).toBe(form);
+    expect(form.inputs.length).toBe(0); // 0 - because there is no name for textControl
+
+    dom.render(
+      <Form
+        ref={el => {
+          form = el;
+        }}
+      >
+        <TextControl
+          key={1}
+          // todo if name changed we can update input because it wasn't changed
+          name="postalCode"
+          ref={el => {
+            control = el;
+          }}
+        />
+      </Form>
+    );
+
+    // checking form and input registration
+    expect(spyRegisterForm).toHaveBeenCalledTimes(1);
+    expect(form.inputs.length).toBe(1);
+    expect(form.inputs[0]).toBe(control);
+
+    // checking submit-call
+    const btnSubmit = dom.element.querySelector("button[type='submit']");
+    expect(btnSubmit).toBeDefined();
+
+    dom.dispatchEvent(btnSubmit, new MouseEvent("click", { bubbles: true }));
+    expect(spySubmit).toHaveBeenCalledTimes(1);
+    expect(spyValidate).toHaveBeenCalledTimes(1);
+    expect(spyValidate).toHaveLastReturnedWith(false);
+    expect(form.state.error).toBe(Form.errOneRequired);
+    expect(dom.element.innerHTML).toMatchInlineSnapshot(
+      `"<form autocomplete=\\"off\\" novalidate=\\"\\"><label for=\\"uipack_2\\"><span></span><span><input id=\\"uipack_2\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\"></span></label><div>At least one value is required</div><div><button type=\\"submit\\">SUBMIT</button></div></form>"`
+    );
+  });
+});

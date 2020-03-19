@@ -79,7 +79,7 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
    * Input adds itself to collection via FormInputsCollection
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  inputs: BaseControl<any, any, any>[] = [];
+  inputs: BaseControl<any, BaseControlProps<any, any>, any>[] = [];
 
   isWaitSubmitFinished = false;
   state: FormState = {
@@ -108,9 +108,17 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
     return isInputChildren(this.props.children, input);
   }
 
+  setError = (error: string | undefined) => {
+    if (error !== this.state.error) {
+      // todo onErrorEvent
+      this.setState({ error });
+    }
+  };
+
   validate = (): ModelType | false => {
     const model = {} as ModelType;
     let hasError = false;
+    let isAllEmpty = true;
 
     const { inputs } = this;
     for (let i = 0; i < inputs.length; ++i) {
@@ -123,19 +131,26 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
         }
       } else {
         // todo nested name as obj.some.name without lodash
-        const key = input.props?.name;
+        const key = input.props.name;
         // todo option: don't attach notRequired&emptyValues
         // todo option: don't attach valuesThatWasn't changed
-        // @ts-ignore
-        if (key) model[key] = input.value;
+        if (key) {
+          if (isAllEmpty && !input.constructor.isEmpty(input.value)) {
+            isAllEmpty = false;
+          }
+          // @ts-ignore
+          model[key] = input.value;
+        }
       }
     }
-
-    if (hasError) return false;
-
-    if (!Object.keys(model).length) {
-      // todo onErrorEvent
-      this.setState({ error: this.constructor.errOneRequired });
+    if (hasError) {
+      // disable form-error because input has one
+      this.setError(undefined);
+      return false;
+    }
+    if (isAllEmpty) {
+      // todo auto disable error when inputsValueChanged?
+      this.setError(this.constructor.errOneRequired);
       return false;
     }
 

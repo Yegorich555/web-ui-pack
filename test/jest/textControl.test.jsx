@@ -241,6 +241,9 @@ describe("textControl", () => {
       `"<label for=\\"1\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"true\\" aria-required=\\"false\\" value=\\"dvt\\"></span><span role=\\"alert\\">Max length is 2 characters</span></label>"`
     );
 
+    // checking direct calling functions
+    expect(ref.validate()).toBe(false);
+
     // test validateOnChange=false
     dom.userTypeText(input, "12");
     TextControl.common.validateOnChange = false;
@@ -248,7 +251,7 @@ describe("textControl", () => {
     dom.userTypeText(input, "123");
     expect(ref.state.error).toBe(undefined);
 
-    // test also validateOnBlur=false
+    // test validateOnBlur=false
     TextControl.common.validateOnBlur = false;
     dom.userTypeText(input, "123");
     expect(ref.state.error).toBe(undefined);

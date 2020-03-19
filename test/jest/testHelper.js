@@ -49,6 +49,11 @@ export function initDom() {
         });
       }
     },
+    dispatchEvent(element, event) {
+      reactTestUtils.act(() => {
+        element.dispatchEvent(event);
+      });
+    },
     element: undefined,
     destroyDom: () => {
       unmountComponentAtNode(container.element);

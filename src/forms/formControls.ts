@@ -5,6 +5,10 @@ import { BaseControl } from "../controls/baseControl";
 const hashSet = new Set<Form<any>>();
 
 export default class FormControls {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static get forms(): Set<Form<any>> {
+    return hashSet;
+  }
   static registerForm<T>(form: Form<T>): void {
     hashSet.add(form);
   }
