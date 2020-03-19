@@ -60,9 +60,9 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
   // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146
   ["constructor"]: typeof Form;
 
-  static promiseDelayMs: 400;
-  static isValidateUntilFirstError: true;
-  static errOneRequired: "At least one value is required";
+  static promiseDelayMs = 400;
+  static isValidateUntilFirstError = true;
+  static errOneRequired = "At least one value is required";
   // react.defaultProps works with > ver16.4.6
   static defaultProps: Partial<FormProps<unknown>> = {
     autoComplete: "off", // todo check if defaultProps works
