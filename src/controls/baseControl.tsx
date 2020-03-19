@@ -234,12 +234,11 @@ export abstract class BaseControl<
     } else {
       callback && callback();
     }
-    return !!error;
+    return !error;
   };
 
   /** Fire validation, update state and return true if isValid */
   validate = (): boolean => {
-    // todo check this when form fires validation
     return this.setValue(this.state.value);
   };
 
