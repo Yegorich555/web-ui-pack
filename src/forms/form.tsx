@@ -65,7 +65,7 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
   static errOneRequired = "At least one value is required";
   // react.defaultProps works with > ver16.4.6
   static defaultProps: Partial<FormProps<unknown>> = {
-    autoComplete: "off", // todo check if defaultProps works
+    autoComplete: "off",
     textSubmit: "SUBMIT"
   };
 
