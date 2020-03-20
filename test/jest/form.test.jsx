@@ -1,6 +1,6 @@
 /* eslint-disable prefer-rest-params */
 import React from "react";
-import { Form, TextControl, FormControls } from "web-ui-pack";
+import { Form, TextControl, FormControls as FormsStore } from "web-ui-pack";
 import * as h from "./testHelper";
 
 let dom = h.initDom(); // assignment only for Intellisense
@@ -14,8 +14,8 @@ afterAll(() => {
 });
 
 describe("form", () => {
-  const spyRegisterForm = jest.spyOn(FormControls, "registerForm");
-  const spyRegisterInput = jest.spyOn(FormControls, "tryRegisterInput");
+  const spyRegisterForm = jest.spyOn(FormsStore, "registerForm");
+  const spyRegisterInput = jest.spyOn(FormsStore, "tryRegisterInput");
   test("render according to props", () => {
     dom
       .expectRender(<Form />)
@@ -91,9 +91,9 @@ describe("form", () => {
     const spySubmit = jest.spyOn(form, "onSubmit");
     const spyValidate = jest.spyOn(form, "validate");
 
-    expect(FormControls.forms.size).toBe(1);
+    expect(FormsStore.forms.size).toBe(1);
     // js-Set doesn't have values accessed by index
-    expect(FormControls.forms.values().next().value).toBe(form);
+    expect(FormsStore.forms.values().next().value).toBe(form);
     expect(form.inputs.length).toBe(0); // 0 - because there is no name for textControl
 
     dom.render(
@@ -180,15 +180,15 @@ describe("form", () => {
   });
 
   test("removing from FormsStore byUnMount", () => {
-    const spyRemoveForm = jest.spyOn(FormControls, "removeForm");
-    const spyRemoveInput = jest.spyOn(FormControls, "tryRemoveInput");
+    const spyRemoveForm = jest.spyOn(FormsStore, "removeForm");
+    const spyRemoveInput = jest.spyOn(FormsStore, "tryRemoveInput");
     dom.render(<Form />);
     expect(spyRemoveInput).toBeCalledTimes(1);
-    expect(FormControls.forms.values().next().value.inputs.length).toBe(0);
+    expect(FormsStore.forms.values().next().value.inputs.length).toBe(0);
 
     dom.render(<div />);
     expect(spyRemoveForm).toBeCalledTimes(1);
-    expect(FormControls.forms.values().next().value).toBeUndefined();
+    expect(FormsStore.forms.values().next().value).toBeUndefined();
   });
 
   test("multipleForms", () => {
@@ -202,7 +202,7 @@ describe("form", () => {
         </Form>
       </>
     );
-    const iForms = FormControls.forms.values();
+    const iForms = FormsStore.forms.values();
     let { inputs } = iForms.next().value;
     expect(inputs.length).toBe(1);
     expect(inputs[0].props.name).toBe("postalCode");

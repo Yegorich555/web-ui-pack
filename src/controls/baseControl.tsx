@@ -1,7 +1,7 @@
 /* eslint-disable max-classes-per-file */
 import Core from "../core";
 import { Validations, Validation } from "./validation";
-import FormControls from "../forms/formControls";
+import FormsStore from "../forms/formsStore";
 import { Form } from "../forms/form";
 import detectFocusLeft from "../helpers/detectFocusLeft";
 
@@ -149,7 +149,7 @@ export abstract class BaseControl<
     */
     // todo validate during the creation if initValue is wrong
     if (this.props.name) {
-      this.form = FormControls.tryRegisterInput(this);
+      this.form = FormsStore.tryRegisterInput(this);
     }
     this.state.value = this.initValue;
 
@@ -272,7 +272,7 @@ export abstract class BaseControl<
   }
 
   componentWillUnmount(): void {
-    FormControls.tryRemoveInput(this);
+    FormsStore.tryRemoveInput(this);
   }
 
   render(): Core.Element {

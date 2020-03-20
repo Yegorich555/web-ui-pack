@@ -1,6 +1,6 @@
 import Core from "../core";
 import { BaseControl, BaseControlProps } from "../controls/baseControl";
-import FormControls from "./formControls";
+import FormsStore from "./formsStore";
 
 export type FormProps<ModelType> = {
   className?: string;
@@ -90,7 +90,7 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
   constructor(props: FormProps<ModelType>) {
     super(props);
     // todo if props.initModel is changed => update inputs
-    FormControls.registerForm(this);
+    FormsStore.registerForm(this);
   }
 
   getInitValue<ValueType>(name: string): ValueType | undefined {
@@ -201,7 +201,7 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
 
   componentWillUnmount(): void {
     this.isUnMounted = true;
-    FormControls.removeForm(this);
+    FormsStore.removeForm(this);
   }
 
   renderTitle = (title: string | Core.Element): Core.Element => {
