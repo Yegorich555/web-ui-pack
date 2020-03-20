@@ -25,13 +25,16 @@ export default class FormControls {
     // eslint-disable-next-line no-restricted-syntax
     for (const form of hashSet) {
       if (form.isInputChildren(input)) {
+        // todo we can check duplicates of names
         form.inputs.push(input);
         return form;
       }
     }
+
     console.warn(
-      `Form for input with name='${input.props.name}' is not defined. If you use Control without Form. Remove useless props.name`
+      `Form for input with name='${input.props.name}' is not defined. If you use Control without Form remove useless props.name`
     );
+
     return undefined;
   }
 

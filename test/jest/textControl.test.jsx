@@ -262,6 +262,7 @@ describe("textControl", () => {
 
     // end validations
   });
+
   test("useless name", () => {
     dom.render(<div />);
     let control;
