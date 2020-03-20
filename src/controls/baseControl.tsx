@@ -92,8 +92,7 @@ export abstract class BaseControl<
     let definedValue: TValue | undefined;
     if (this.props.initValue !== undefined) {
       definedValue = this.props.initValue as TValue;
-    }
-    if (this.props.name && this.form) {
+    } else if (this.props.name && this.form) {
       const v = this.form.getInitValue<TValue>(this.props.name as string);
       if (v !== undefined) {
         definedValue = v;
