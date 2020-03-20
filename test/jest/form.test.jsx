@@ -15,6 +15,7 @@ afterAll(() => {
 
 describe("form", () => {
   const spyRegisterForm = jest.spyOn(FormControls, "registerForm");
+  const spyRegisterInput = jest.spyOn(FormControls, "tryRegisterInput");
   test("render according to props", () => {
     dom
       .expectRender(<Form />)
@@ -115,9 +116,10 @@ describe("form", () => {
     // checking form and input registration
     expect(spyRegisterForm).toHaveBeenCalledTimes(1);
     expect(form.inputs.length).toBe(1);
+    expect(spyRegisterInput).toHaveBeenCalledTimes(1);
     expect(form.inputs[0]).toBe(control);
 
-    // checking submit-call
+    // checking submit-firing
     const btnSubmit = dom.element.querySelector("button[type='submit']");
     expect(btnSubmit).toBeDefined();
 
@@ -129,5 +131,84 @@ describe("form", () => {
     expect(dom.element.innerHTML).toMatchInlineSnapshot(
       `"<form autocomplete=\\"off\\" novalidate=\\"\\"><label for=\\"uipack_2\\"><span></span><span><input id=\\"uipack_2\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\"></span></label><div>At least one value is required</div><div><button type=\\"submit\\">SUBMIT</button></div></form>"`
     );
+
+    // checking submit-callback and model-generating
+    const onValidSubmit = jest.fn();
+    dom.render(
+      <Form
+        ref={el => {
+          form = el;
+        }}
+        onValidSubmit={onValidSubmit}
+      >
+        <TextControl
+          key={1}
+          name="postalCode"
+          ref={el => {
+            control = el;
+          }}
+        />
+      </Form>
+    );
+    const input = document.querySelector("input");
+    dom.userTypeText(input, "t");
+    dom.dispatchEvent(btnSubmit, new MouseEvent("click", { bubbles: true }));
+    expect(onValidSubmit).toBeCalledTimes(1);
+    expect(onValidSubmit.mock.calls[0][0]).toEqual({ postalCode: "t" });
+
+    // todo check nested model here
+
+    // checking init-model
+    onValidSubmit.mockReset();
+    dom.render(
+      <Form initModel={{ postalCode: "some" }}>
+        <TextControl key={2} name="postalCode" />
+      </Form>
+    );
+    expect(document.querySelector("input").value).toBe("some");
+
+    // checking init-value
+    dom.render(
+      <Form initModel={{ postalCode: "some" }} onValidSubmit={onValidSubmit}>
+        <TextControl key={3} name="postalCode" initValue="another" />
+      </Form>
+    );
+    expect(document.querySelector("input").value).toBe("another");
+
+    dom.dispatchEvent(btnSubmit, new MouseEvent("click", { bubbles: true }));
+    expect(onValidSubmit.mock.calls[0][0]).toEqual({ postalCode: "another" });
+  });
+
+  test("removing from FormsStore byUnMount", () => {
+    const spyRemoveForm = jest.spyOn(FormControls, "removeForm");
+    const spyRemoveInput = jest.spyOn(FormControls, "tryRemoveInput");
+    dom.render(<Form />);
+    expect(spyRemoveInput).toBeCalledTimes(1);
+    expect(FormControls.forms.values().next().value.inputs.length).toBe(0);
+
+    dom.render(<div />);
+    expect(spyRemoveForm).toBeCalledTimes(1);
+    expect(FormControls.forms.values().next().value).toBeUndefined();
+  });
+
+  test("multipleForms", () => {
+    dom.render(
+      <>
+        <Form>
+          <TextControl name="postalCode" />
+        </Form>
+        <Form>
+          <TextControl name="postalCode2" />
+        </Form>
+      </>
+    );
+    const iForms = FormControls.forms.values();
+    let { inputs } = iForms.next().value;
+    expect(inputs.length).toBe(1);
+    expect(inputs[0].props.name).toBe("postalCode");
+
+    inputs = iForms.next().value.inputs;
+    expect(inputs.length).toBe(1);
+    expect(inputs[0].props.name).toBe("postalCode2");
   });
 });
