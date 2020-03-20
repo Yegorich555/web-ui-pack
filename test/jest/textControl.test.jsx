@@ -262,4 +262,23 @@ describe("textControl", () => {
 
     // end validations
   });
+  test("useless name", () => {
+    dom.render(<div />);
+    let control;
+
+    const prevConsole = console.warn;
+    console.warn = jest.fn();
+
+    dom.render(
+      <TextControl
+        name="firstName"
+        ref={el => {
+          control = el;
+        }}
+      />
+    );
+
+    expect(control.form).toBeUndefined();
+    console.warn = prevConsole;
+  });
 });

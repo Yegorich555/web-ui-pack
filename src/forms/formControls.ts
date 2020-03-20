@@ -29,6 +29,9 @@ export default class FormControls {
         return form;
       }
     }
+    console.warn(
+      `Form for input with name='${input.props.name}' is not defined. If you use Control without Form. Remove useless props.name`
+    );
     return undefined;
   }
 
