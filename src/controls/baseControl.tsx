@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import Core from "../core";
-import { Validations, Validation } from "./validation";
+import { Validations, Validation, ValidationMessages } from "./validation";
 import FormsStore from "../forms/formsStore";
 import { Form } from "../forms/form";
 import detectFocusLeft from "../helpers/detectFocusLeft";
@@ -119,7 +119,13 @@ export abstract class BaseControl<
    *  }
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static defaultValidations: BaseControlValidations<any>;
+  static defaultValidations: BaseControlValidations<any> = {
+    required: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      test: (v?: any) => !BaseControl.isEmpty(v),
+      msg: ValidationMessages.required
+    }
+  };
 
   id: string | number =
     this.props.id != null ? (this.props.id as string | number) : this.constructor.common.getUniqueId();
