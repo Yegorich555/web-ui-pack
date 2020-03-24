@@ -270,7 +270,6 @@ export abstract class BaseControl<
   /** Implement this method and bind gotBlur and gotChange */
   abstract getRenderedInput(id: string | number, value: TValue): Core.Element;
 
-  // todo move this logic to BaseComponent
   componentDidMount(): void {
     if (this.props.autoFocus && this.domEl) {
       this.domEl.focus(); // focus automatically fired from label to input

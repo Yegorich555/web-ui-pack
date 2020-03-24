@@ -1,6 +1,6 @@
 import React from "react";
 import { TextControl } from "web-ui-pack";
-import * as h from "./testHelper";
+import * as h from "../testHelper";
 
 let dom = h.initDom(); // assignment only for Intellisense
 beforeAll(() => {

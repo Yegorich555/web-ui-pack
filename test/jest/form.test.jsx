@@ -1,7 +1,7 @@
 /* eslint-disable prefer-rest-params */
 import React from "react";
 import { Form, TextControl, FormControls as FormsStore } from "web-ui-pack";
-import * as h from "./testHelper";
+import * as h from "../testHelper";
 
 let dom = h.initDom(); // assignment only for Intellisense
 beforeAll(() => {
@@ -211,4 +211,10 @@ describe("form", () => {
     expect(inputs.length).toBe(1);
     expect(inputs[0].props.name).toBe("postalCode2");
   });
+
+  test("covering isInputChildren", () => {});
+
+  test("isValidateUntilFirstError", () => {});
+
+  test("onValidSubmit-Promise", () => {});
 });
