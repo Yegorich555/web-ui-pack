@@ -1,9 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const path = require("path");
-
 const rootDir = process.cwd();
 const moduleNameMapper = {
-  "web-ui-pack": path.join(rootDir, "lib")
+  "web-ui-pack": `${rootDir}/lib`
 };
 
 module.exports = {
@@ -27,8 +25,8 @@ module.exports = {
       displayName: "browser-behavior",
       testMatch: [`${__dirname}/browser/**/*.test.[jt]s?(x)`],
       moduleNameMapper,
-      preset: "jest-puppeteer"
-      //  testEnvironment: `${__dirname}/jest-env-puppeteer-jsdom.js`
+      preset: "jest-puppeteer",
+      testEnvironment: `${__dirname}/browser/jest-env-puppeteer.js`
     }
   ]
 };

@@ -8,4 +8,3 @@ window.renderIt = function renderIt(el) {
 };
 
 window.React = React;
-window.renderIt(<div id="main">Hello</div>);
