@@ -10,10 +10,10 @@ function getCallerFile() {
     Error.prepareStackTrace = (_err, stack) => {
       return stack;
     };
-    // const currentfile = err.stack.shift().getFileName();
+    const currentfile = err.stack.shift().getFileName();
     while (err.stack.length) {
       callerfile = err.stack.shift().getFileName();
-      // if (currentfile !== callerfile) break;
+      if (currentfile !== callerfile) break;
     }
     // eslint-disable-next-line no-empty
   } catch (e) {}
