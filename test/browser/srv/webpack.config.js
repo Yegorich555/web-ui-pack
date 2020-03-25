@@ -2,9 +2,7 @@
 
 module.exports = {
   mode: "development",
-  stats: {
-    children: false // disable console.info for node_modules/*
-  },
+  stats: "errors-only",
   entry: require("path").join(__dirname, "./entry.jsx"),
   output: {
     path: __dirname,
