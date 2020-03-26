@@ -1,9 +1,4 @@
 // todo ES6 import doesn't work with puppeteer.evaluate
-/*
- * ES6 import doesn't work with puppeteer.evaluate
- */
-
-// import { TextControl } from "web-ui-pack";
 const { TextControl } = require("web-ui-pack");
 
 describe("baseControl", () => {
