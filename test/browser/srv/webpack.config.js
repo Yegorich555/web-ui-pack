@@ -1,12 +1,16 @@
 /* eslint-disable global-require */
 
 module.exports = {
-  mode: "development",
+  mode: "none",
   stats: "errors-only",
   entry: require("path").join(__dirname, "./entry.jsx"),
   output: {
     path: __dirname,
     filename: "bundle.js"
+  },
+  resolve: {
+    alias: require("../../../webpack.alias"),
+    extensions: [".js", ".jsx", ".ts", ".tsx"] // using import without file-extensions
   },
   module: {
     rules: [

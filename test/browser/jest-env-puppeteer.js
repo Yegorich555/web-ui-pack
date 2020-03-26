@@ -45,8 +45,11 @@ class PuppeteerEnvironment extends Env {
     };
 
     await page.injectFile(require.resolve("./srv/bundle.js"));
-    // await injectFile(page, require.resolve("./srv/bundle.js"));
-    // page.render = el => page.evaluate(() => renderIt(el));
+
+    this.global.pageExt = page;
+    // declare empty document for avoiding wrong-test-bug in detectFocusLeft
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    this.global.document = { addEventListener: () => {} };
   }
 }
 

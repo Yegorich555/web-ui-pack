@@ -1,14 +1,17 @@
+// todo ES6 import doesn't work with puppeteer.evaluate
+/*
+ * ES6 import doesn't work with puppeteer.evaluate
+ */
+
+// import { TextControl } from "web-ui-pack";
+const { TextControl } = require("web-ui-pack");
+
 describe("baseControl", () => {
   test("autoFocus", async () => {
-    await page.evaluate(() => {
-      renderIt(<span>Test</span>);
+    const id = await page.evaluate(() => {
+      renderIt(<TextControl id="someId" autoFocus />);
+      return document.activeElement.id;
     });
-    // await page.render(<span>Test</span>);
-    // console.warn("gotInside", document);
-    // eslint-disable-next-line global-require
-    // const TextControl = require("web-ui-pack");
-    // dom.render(<TextControl id="textId" autoFocus />);
-    // const activeElement = await page.evaluate(() => document.activeElement);
-    // expect(activeElement.id).toBe("textId");
+    expect(id).toBe("someId");
   });
 });

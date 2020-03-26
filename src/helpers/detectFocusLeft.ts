@@ -2,9 +2,11 @@ let waitMouseUp = false;
 let waitMouseUpFunction: (() => void) | undefined;
 let timeoutRef: NodeJS.Timeout | undefined;
 
+// todo check mousedown with touch-screen
 document.addEventListener("mousedown", () => {
   waitMouseUp = true;
 });
+
 document.addEventListener("mouseup", () => {
   waitMouseUp = false;
   waitMouseUpFunction && waitMouseUpFunction();
