@@ -32,3 +32,6 @@ node_modules
 assets/
 public/
 lib/
+
+test/**/bundle.js
+.eslintrc.js
