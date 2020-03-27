@@ -3,6 +3,7 @@ module.exports = {
   plugins: ["jest"],
   rules: {
     "jest/expect-expect": "off",
+    "jest/no-commented-out-tests": "off",
     "@typescript-eslint/no-var-requires": "off"
   }
 };

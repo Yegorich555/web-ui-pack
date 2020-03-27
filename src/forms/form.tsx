@@ -1,6 +1,7 @@
 import Core from "../core";
 import { BaseControl, BaseControlProps } from "../controls/baseControl";
 import FormsStore from "./formsStore";
+import promiseWait from "../helpers/promiseWait";
 
 export type FormProps<ModelType> = {
   className?: string;
@@ -14,12 +15,6 @@ export type FormProps<ModelType> = {
 export interface FormState {
   isPending: boolean;
   error: string | undefined;
-}
-
-function PromiseWait<T>(promise: Promise<T>, ms = 400): Promise<T> {
-  return new Promise(resolve => {
-    return setTimeout(() => resolve(promise), ms);
-  });
 }
 
 function isInputChildren<T>(
@@ -182,7 +177,7 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
     }
 
     this.isWaitSubmitFinished = true;
-    PromiseWait(result, this.constructor.promiseDelayMs)
+    promiseWait(result, this.constructor.promiseDelayMs)
       .catch(ex => {
         console.warn(ex);
         if (!this.isUnMounted) {
