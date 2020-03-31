@@ -44,7 +44,7 @@ describe("detectFocusLeft", () => {
     expect(id).toBe("c1");
   });
 
-  test("focusDebounce behavior", async () => {
+  test("focusDebounce with mouse", async () => {
     const id = await page.evaluate(() => {
       window.wasLeft = false;
       window.wasBlur = false;

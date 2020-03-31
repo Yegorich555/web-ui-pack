@@ -23,11 +23,9 @@ document.addEventListener("mouseup", () => {
  */
 export default function detectFocusLeft(wrapper: HTMLElement, callback: () => void, focusDebounceMs = 100): void {
   function stopTimeout(): void {
-    if (timeoutRef) {
-      clearTimeout(timeoutRef);
-      timeoutRef = undefined;
-      wrapper.removeEventListener("focusin", stopTimeout);
-    }
+    clearTimeout(timeoutRef as NodeJS.Timeout);
+    timeoutRef = undefined;
+    wrapper.removeEventListener("focusin", stopTimeout);
   }
   function runTimeout(): void {
     timeoutRef = setTimeout(() => {
@@ -40,6 +38,10 @@ export default function detectFocusLeft(wrapper: HTMLElement, callback: () => vo
   if (waitMouseUp) {
     waitMouseUpFunction = runTimeout;
   } else {
+    /**
+     * in this case we can fire callback immediately
+     * but for cases when label.onClick fires programmatically we must wait for 'focusin'
+     */
     runTimeout();
   }
 }

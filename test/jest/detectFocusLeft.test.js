@@ -33,11 +33,8 @@ describe("detectFocusLeft", () => {
     const fn = jest.fn();
     // firing other.focus() is not required because detectFocusLeft should be inside onBlur event
     detectFocusLeft(el, fn);
-
-    // todo maybe we don't need to wait for timeout
     expect(setTimeout).toBeCalledTimes(1);
     expect(fn).not.toBeCalled();
-    // *end todo
 
     jest.advanceTimersToNextTimer();
     expect(fn).toBeCalledTimes(1);
