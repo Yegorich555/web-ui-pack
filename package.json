@@ -7,7 +7,7 @@
   "scripts": {
     "test": "npm run pretest-build && jest --coverage --coverageReporters=text --config test/jest.config.js",
     "test-minify": "node ./test/minification/start.js",
-    "pretest-build": "./node_modules/.bin/webpack --config test/browser/srv/webpack.config.js && npm run build",
+    "pretest-build": "npm run build && webpack --config test/browser/srv/webpack.config.js",
     "coverage": "npm run test -- --coverageReporters=text-lcov | coveralls",
     "example": "./node_modules/.bin/webpack-dev-server --hot --open --config example/webpack.devServer.js",
     "webpack-build-dev": "./node_modules/.bin/webpack --mode development --config example/webpack.dev.js",
