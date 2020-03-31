@@ -5,6 +5,7 @@ const Env = require("jest-environment-puppeteer");
 function getCallerFile() {
   const originalFunc = Error.prepareStackTrace;
   let callerfile;
+
   try {
     const err = new Error();
     Error.prepareStackTrace = (_err, stack) => {
@@ -17,7 +18,9 @@ function getCallerFile() {
     }
     // eslint-disable-next-line no-empty
   } catch (e) {}
+
   Error.prepareStackTrace = originalFunc;
+
   return callerfile;
 }
 
@@ -50,6 +53,9 @@ class PuppeteerEnvironment extends Env {
     // declare empty document for avoiding wrong-test-bug in detectFocusLeft
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     this.global.document = { addEventListener: () => {} };
+
+    // todo listen for console.error and console.warn
+    // page.on('console', msg => console.log('PAGE LOG:', msg.text()));
   }
 }
 
