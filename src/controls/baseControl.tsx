@@ -23,15 +23,15 @@ export interface BaseControlProps<TValue, TControl> {
    * Html Id attribute. InitValue: impossible to replace this after component-init
    */
   id?: string | number;
-  className: string;
+  className?: string;
   label?: string;
   name?: string;
   initValue?: TValue;
   validations?: BaseControlValidationProps;
   /** Event happens when value is changed */
-  onChanged: (value: TValue, control: TControl) => void;
+  onChanged?: (value: TValue, control: TControl) => void;
   /** Event happens when control completely lost focus */
-  onFocusLeft: (value: TValue, control: TControl) => void;
+  onFocusLeft?: (value: TValue, control: TControl) => void;
   autoFocus?: boolean;
 }
 
