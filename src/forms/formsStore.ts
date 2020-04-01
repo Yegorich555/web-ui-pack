@@ -1,6 +1,6 @@
 import { Form } from "./form";
 import { BaseControl } from "../controls/baseControl";
-import isControlChild from "../helpers/isControlChild";
+import isComponentChild from "../helpers/isComponentChild";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const hashSet = new Set<Form<any>>();
@@ -25,7 +25,7 @@ export default class FormsStore {
   ): Form<unknown> | undefined {
     // eslint-disable-next-line no-restricted-syntax
     for (const form of hashSet) {
-      if (isControlChild(form.props.children, input)) {
+      if (isComponentChild(form.props.children, input)) {
         // todo we can check duplicates of names
         form.inputs.push(input);
         return form;
@@ -33,7 +33,7 @@ export default class FormsStore {
     }
 
     console.warn(
-      `Form for input with name='${input.props.name}' is not defined. If you use Control without Form remove useless props.name`
+      `Form for control with name='${input.props.name}' is not defined. If you use Control without Form remove useless props.name`
     );
 
     return undefined;
