@@ -30,6 +30,7 @@ module.exports = {
     "react/react-in-jsx-scope": "off",
     "react/jsx-filename-extension": [1, { extensions: [".tsx", ".jsx"] }],
     "react/static-property-placement": "off",
+    "react/prop-types": "off",
     "@typescript-eslint/ban-ts-ignore": "off",
     "@typescript-eslint/prefer-namespace-keyword": "off",
     "@typescript-eslint/no-explicit-any": ["error", { ignoreRestArgs: true }],
