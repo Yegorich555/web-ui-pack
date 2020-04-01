@@ -17,35 +17,6 @@ export interface FormState {
   error: string | undefined;
 }
 
-function isInputChildren<T>(
-  node: Core.Node | Core.Node[],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  input: BaseControl<T, BaseControlProps<T, any>, any>
-): boolean {
-  if (Array.isArray(node)) {
-    return node.some(nodeChild => isInputChildren(nodeChild, input));
-  }
-  if (!node) {
-    return false;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const type = (node as Core.Element)?.type as any | { prototype: unknown };
-  if (!type) {
-    return false;
-  }
-  if (!(type?.prototype instanceof BaseControl)) {
-    return false;
-  }
-  if (type === input.constructor) {
-    const { props } = node as Core.Element;
-    if (props && input.props && props.name === input.props.name) {
-      return true;
-    }
-  }
-  return false;
-}
-
 // todo do we need export?
 export type ButtonSubmitProps = {
   type: "submit";
@@ -71,7 +42,7 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
   };
 
   /**
-   * Input adds itself to collection via FormInputsCollection
+   * Input adds itself to collection via FormsStore
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputs: BaseControl<any, BaseControlProps<any, any>, any>[] = [];
@@ -94,13 +65,6 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
       return this.props.initModel[name] as ValueType;
     }
     return undefined;
-  }
-
-  isInputChildren<ModelValueType>(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    input: BaseControl<ModelValueType, BaseControlProps<ModelValueType, any>, any>
-  ): boolean {
-    return isInputChildren(this.props.children, input);
   }
 
   setError = (error: string | undefined) => {

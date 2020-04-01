@@ -1,5 +1,6 @@
 import { Form } from "./form";
 import { BaseControl } from "../controls/baseControl";
+import isControlChild from "../helpers/isControlChild";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const hashSet = new Set<Form<any>>();
@@ -24,7 +25,7 @@ export default class FormsStore {
   ): Form<unknown> | undefined {
     // eslint-disable-next-line no-restricted-syntax
     for (const form of hashSet) {
-      if (form.isInputChildren(input)) {
+      if (isControlChild(form.props.children, input)) {
         // todo we can check duplicates of names
         form.inputs.push(input);
         return form;
