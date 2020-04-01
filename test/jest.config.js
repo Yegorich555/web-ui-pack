@@ -1,7 +1,6 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const rootDir = process.cwd();
 const moduleNameMapper = {
-  "web-ui-pack": `${rootDir}/lib`
+  "^web-ui-pack/(.*)": `${rootDir}/lib/$1`
 };
 
 module.exports = {
