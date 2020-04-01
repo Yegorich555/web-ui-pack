@@ -2,8 +2,6 @@ import Core from "./core";
 
 export default Core;
 
-export { default as detectFocusLeft } from "./helpers/detectFocusLeft";
-export { default as promiseWait } from "./helpers/promiseWait";
 export * from "./forms/form";
 export { default as FormControls } from "./forms/formsStore";
 export * from "./controls/validation";

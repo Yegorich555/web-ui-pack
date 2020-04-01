@@ -1,4 +1,4 @@
-import { detectFocusLeft } from "web-ui-pack";
+import detectFocusLeft from "web-ui-pack/helpers/detectFocusLeft";
 
 jest.useFakeTimers();
 
@@ -22,7 +22,7 @@ afterAll(() => {
   jest.clearAllTimers();
 });
 
-describe("detectFocusLeft", () => {
+describe("helper.detectFocusLeft", () => {
   it("ordinary browser behavior", () => {
     const spyAddEvent = jest.spyOn(el, "addEventListener");
     const spyRemoveEvent = jest.spyOn(el, "removeEventListener");

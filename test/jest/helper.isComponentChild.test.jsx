@@ -32,7 +32,7 @@ afterAll(() => {
   dom = null;
 });
 
-describe("helper.isControlChild", () => {
+describe("helper.isComponentlChild", () => {
   it("zero node or props.name", () => {
     expect(isComponentChild(null)).toBe(false);
     expect(isComponentChild({}, {})).toBe(false);
