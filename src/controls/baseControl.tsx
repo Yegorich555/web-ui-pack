@@ -136,7 +136,7 @@ export abstract class BaseControl<
     this.domEl = el;
   };
 
-  toJSON(): unknown {
+  toJSON(): this {
     const result = { ...this };
     // @ts-ignore
     result.form = this.form ? "[formObject]" : undefined;

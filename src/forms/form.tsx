@@ -7,14 +7,21 @@ export type FormProps<ModelType> = {
   className?: string;
   autoComplete?: "on" | "off";
   initModel?: ModelType;
-  onValidSubmit: (model: ModelType) => Promise<string | { message: string }>;
+  /**
+   * Submit event that is fired if form is valid and provides model based on props.name of each control inside the form
+   * - If you return string or Promise type of Promise.then(v:string).catch(v:string | {message:string} | Error)
+   * in this case success-window will be opened with this message
+   * - If you return Promise then spinner (loader) will be shown
+   */
+  onValidSubmit: (model: ModelType) => string | Promise<string | { message: string }>;
   title?: string | Core.Element;
   textSubmit?: string | Core.Element;
 };
 
 export interface FormState {
   isPending: boolean;
-  error: string | undefined;
+  error?: string;
+  success?: string;
 }
 
 // todo do we need export?
@@ -49,8 +56,7 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
 
   isWaitSubmitFinished = false;
   state: FormState = {
-    isPending: false,
-    error: undefined
+    isPending: false
   };
 
   constructor(props: FormProps<ModelType>) {
@@ -69,7 +75,6 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
 
   setError = (error: string | undefined) => {
     if (error !== this.state.error) {
-      // todo onErrorEvent
       this.setState({ error });
     }
   };
@@ -116,7 +121,30 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
     return model;
   };
 
-  onSubmit = (e: Core.FormEvent): void => {
+  /**
+   * Show submit result if got a message; see props.onValidSubmit for details
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  tryShowSubmitResult = (success?: any, error?: any): void => {
+    const newState: FormState = { isPending: false, success: undefined, error: undefined };
+    if (success && typeof success === "string") {
+      newState.success = success;
+    } else if (error) {
+      if (error && typeof error === "string") {
+        newState.error = error;
+      } else if (error.message && typeof error.message === "string") {
+        newState.error = error.message;
+      }
+    }
+    if (newState.success || newState.error) {
+      this.setState(newState);
+    }
+  };
+
+  /**
+   * Submit event that validates inputs, collect model and fires props.onValidSubmit
+   */
+  submit = (e: Core.FormEvent): void => {
     e.preventDefault();
 
     if (this.isWaitSubmitFinished) {
@@ -137,24 +165,32 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
     const result = onValidSubmit(validateResult);
     const isPromise = result instanceof Promise;
     if (!isPromise) {
+      this.tryShowSubmitResult(result);
       return;
     }
 
     this.isWaitSubmitFinished = true;
-    promiseWait(result, this.constructor.promiseDelayMs)
-      .catch(ex => {
-        console.warn(ex);
+    this.setState({ isPending: true, error: undefined, success: undefined });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    promiseWait(result as Promise<any>, this.constructor.promiseDelayMs)
+      .then(v => {
         if (!this.isUnMounted) {
-          // todo  const formError = this.props.catchResponse && this.props.catchResponse(ex);
-          //   if (formError) {
-          //     this.setState({ formError });
-          //   }
+          this.tryShowSubmitResult(v);
+        }
+        return v;
+      })
+      .catch((ex: Error | string) => {
+        console.error(ex);
+        if (!this.isUnMounted) {
+          this.tryShowSubmitResult(undefined, ex);
         }
       })
       .finally(() => {
         this.isWaitSubmitFinished = false;
-        // todo success message ?
-        !this.isUnMounted && this.setState({ isPending: false });
+        if (!this.isUnMounted && this.state.isPending) {
+          this.setState({ isPending: false });
+        }
       });
   };
 
@@ -178,24 +214,25 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
     return <div>{buttonSubmit}</div>;
   };
 
-  // todo it can be a big object and complex component
-  renderError = (msg: string): Core.Element => {
+  // todo popup window for this case
+  renderMessage = (msg: string, isError: boolean): Core.Element => {
     return <div>{msg}</div>;
   };
 
   render(): Core.Element {
     // todo ability to redefine-renderForm
+    const msg = this.state.error || this.state.success;
     return (
       <form
         className={this.props.className}
-        onSubmit={this.onSubmit}
+        onSubmit={this.submit}
         ref={this.setDomEl}
         autoComplete={this.props.autoComplete || this.constructor.defaultProps.autoComplete}
         noValidate
       >
         {this.props.title ? this.renderTitle(this.props.title) : null}
         {this.props.children}
-        {this.state.error ? this.renderError(this.state.error) : null}
+        {msg ? this.renderMessage(msg, !!this.state.error) : null}
         {this.renderButtonsGroup(
           this.renderButtonSubmit(
             {

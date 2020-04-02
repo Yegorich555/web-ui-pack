@@ -17,6 +17,35 @@ export function lastCall(jestFn) {
   return jestFn.mock.calls[jestFn.mock.calls.length - 1];
 }
 
+export function mockSetState(el) {
+  return jest.fn((state, callback) =>
+    setTimeout(() => {
+      Object.assign(el.state, state);
+      callback && callback();
+    })
+  );
+}
+
+const origConsoleWarn = console.warn;
+export function mockConsoleWarn() {
+  console.warn = jest.fn();
+}
+
+export function unMockConsoleWarn() {
+  console.warn = origConsoleWarn;
+}
+
+export function wrapConsoleWarn(fn) {
+  mockConsoleWarn();
+  try {
+    fn();
+  } catch (ex) {
+    unMockConsoleWarn();
+    throw ex;
+  }
+  unMockConsoleWarn();
+}
+
 export function initDom() {
   const container = {
     render: el => {

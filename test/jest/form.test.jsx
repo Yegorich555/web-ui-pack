@@ -88,7 +88,7 @@ describe("form", () => {
         `"<form autocomplete=\\"off\\" novalidate=\\"\\"><h2>Title here</h2><label for=\\"uipack_1\\"><span></span><span><input id=\\"uipack_1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\"></span></label><div><button type=\\"submit\\">SUBMIT</button></div></form>"`
       );
     // todo: why doesn't this work after the second render
-    const spySubmit = jest.spyOn(form, "onSubmit");
+    const spySubmit = jest.spyOn(form, "submit");
     const spyValidate = jest.spyOn(form, "validate");
 
     expect(FormsStore.forms.size).toBe(1);
@@ -212,9 +212,143 @@ describe("form", () => {
     expect(inputs[0].props.name).toBe("postalCode2");
   });
 
-  test("covering isInputChildren", () => {});
+  test("validation: invalid control", () => {
+    jest.useFakeTimers();
+    const controlProps = { name: "txt", validations: { required: true } };
+    const controlProps2 = { name: "txt2", validations: { required: true } };
+    const form = new Form({
+      children: [
+        { type: TextControl, props: controlProps },
+        { type: TextControl, props: controlProps2 }
+      ]
+    });
+    form.setState = h.mockSetState(form);
+    const spyFormSetError = jest.spyOn(form, "setError");
 
-  test("isValidateUntilFirstError", () => {});
+    const control = new TextControl(controlProps);
+    control.setState = h.mockSetState(control);
+    expect(form.inputs.length).toBe(1);
 
-  test("onValidSubmit-Promise", () => {});
+    const control2 = new TextControl(controlProps2);
+    control2.setState = h.mockSetState(control2);
+    expect(form.inputs.length).toBe(2);
+
+    Form.isValidateUntilFirstError = true;
+    const modelOrFalse = form.validate();
+    expect(modelOrFalse).toBe(false);
+    expect(form.setState).not.toBeCalled();
+    expect(form.state.error).not.toBeDefined();
+    expect(control.setState).toBeCalled();
+    jest.advanceTimersToNextTimer();
+    expect(control.state.error).toBeDefined();
+    expect(control2.state.error).toBeUndefined();
+    expect(spyFormSetError).toBeCalledTimes(1);
+
+    Form.isValidateUntilFirstError = false;
+    expect(form.validate()).toBe(false);
+    jest.advanceTimersToNextTimer();
+    expect(control.state.error).toBeDefined();
+    expect(control2.state.error).toBeDefined();
+  });
+
+  test("submit", async () => {
+    jest.useFakeTimers();
+    const e = { preventDefault: () => {} };
+    const controlProps = { name: "txt", initValue: "val" };
+    const onValidSubmit = jest.fn(() => "good");
+    const form = new Form({ onValidSubmit, children: { type: TextControl, props: controlProps } });
+    form.setState = h.mockSetState(form);
+    const control = new TextControl(controlProps);
+    control.setState = h.mockSetState(control);
+    expect(form.inputs.length).toBe(1);
+
+    form.submit(e);
+    expect(onValidSubmit).toBeCalledTimes(1);
+    expect(onValidSubmit).toHaveBeenCalledWith({ txt: "val" });
+    jest.advanceTimersToNextTimer();
+    expect(form.state.success).toBe("good");
+
+    // testing console.warn
+    form.props.onValidSubmit = null;
+    h.wrapConsoleWarn(() => {
+      form.submit(e);
+      expect(console.warn).toBeCalledTimes(1);
+    });
+
+    // testing tryShowSubmitResult
+    form.setState.mockClear();
+
+    form.tryShowSubmitResult();
+    expect(form.setState).not.toBeCalled();
+
+    form.tryShowSubmitResult(null, { message: true });
+    expect(form.setState).not.toBeCalled();
+
+    form.tryShowSubmitResult("good");
+    expect(form.setState).toHaveBeenLastCalledWith({ isPending: false, success: "good", error: undefined });
+
+    form.tryShowSubmitResult(null, "bad");
+    expect(form.setState).toHaveBeenLastCalledWith({ isPending: false, success: undefined, error: "bad" });
+
+    form.tryShowSubmitResult(null, { message: "bad2" });
+    expect(form.setState).toHaveBeenLastCalledWith({ isPending: false, success: undefined, error: "bad2" });
+
+    // testing onValidSubmit returns promise
+    form.setState({ isPending: false, error: null, success: null });
+    jest.advanceTimersByTime();
+    jest.useRealTimers(); // jest fakeTimers doesn't work inside promise
+    Form.promiseDelayMs = 1;
+    const spyOnShowResult = jest.spyOn(form, "tryShowSubmitResult");
+
+    // promise.resolve
+    form.props.onValidSubmit = jest.fn(() => Promise.resolve("good"));
+    form.submit(e);
+    expect(form.setState).toHaveBeenLastCalledWith({ isPending: true });
+    form.submit(e); // no new submit if previous wasn't finished
+    expect(form.props.onValidSubmit).toBeCalledTimes(1);
+    await new Promise(resolve => setTimeout(resolve, 1));
+    expect(spyOnShowResult).toHaveBeenLastCalledWith("good");
+
+    // promise.reject
+    const consoleErr = console.error;
+    console.error = () => {};
+    form.props.onValidSubmit = jest.fn(() => Promise.reject("bad"));
+    form.submit(e);
+    expect(form.setState).toHaveBeenLastCalledWith({ isPending: true });
+    await new Promise(resolve => setTimeout(resolve, 1));
+    expect(spyOnShowResult).toHaveBeenLastCalledWith(undefined, "bad");
+    console.error = consoleErr;
+    // todo expectRender here
+
+    // testing when submitted and UnMounted before promise finished
+    // promise.resolve
+    form.props.onValidSubmit = jest.fn(() => Promise.resolve("good"));
+    form.submit(e);
+    form.setState.mockClear();
+    form.componentWillUnmount();
+    await new Promise(resolve => setTimeout(resolve, 1));
+    expect(form.setState).not.toBeCalled();
+
+    // promise.reject
+    console.error = () => {};
+    form.props.onValidSubmit = jest.fn(() => Promise.reject("bad"));
+    form.submit(e);
+    form.setState.mockClear();
+    form.componentWillUnmount();
+    await new Promise(resolve => setTimeout(resolve, 1));
+    expect(form.setState).not.toBeCalled();
+    console.error = consoleErr;
+  });
+
+  test("control without name", () => {
+    const form = new Form({});
+    form.inputs.push(new TextControl({}));
+    h.mockConsoleWarn();
+    form.inputs.push(new TextControl({ name: "here", initValue: 5 }));
+    h.unMockConsoleWarn();
+    const model = form.validate();
+    expect(model).toEqual({ here: 5 });
+  });
+
+  // todo defaultProps
 });
