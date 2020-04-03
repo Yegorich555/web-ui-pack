@@ -58,14 +58,21 @@ export class TextControl extends BaseControl<string, TextControlProps, TextInput
   /** @inheritdoc */
   static defaultValidations = new TextControlValidations();
 
-  handleChange = (e: Core.DomChangeEvent) => {
-    this.gotChange(e.target.value.trimStart());
-  };
+  constructor(props: TextControlProps) {
+    super(props);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleBlur = this.handleBlur.bind(this);
+    this.getRenderedInput = this.getRenderedInput.bind(this);
+  }
 
-  handleBlur = (e: Core.DomFocusEvent) => {
+  handleChange(e: Core.DomChangeEvent) {
+    this.gotChange(e.target.value.trimStart());
+  }
+
+  handleBlur(e: Core.DomFocusEvent) {
     // todo trimming is wrong for textArea
     this.gotBlur(e.target.value.trim());
-  };
+  }
 
   /** Override this method for customizing input-rendering */
   renderInput(defProps: Core.HTMLAttributes<HTMLInputElement>, value: string): Core.Element {

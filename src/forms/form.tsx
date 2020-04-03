@@ -63,6 +63,15 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
     super(props);
     // todo if props.initModel is changed => update inputs
     FormsStore.registerForm(this);
+    this.getInitValue = this.getInitValue.bind(this);
+    this.setError = this.setError.bind(this);
+    this.validate = this.validate.bind(this);
+    this.tryShowSubmitResult = this.tryShowSubmitResult.bind(this);
+    this.submit = this.submit.bind(this);
+    this.renderTitle = this.renderTitle.bind(this);
+    this.renderButtonSubmit = this.renderButtonSubmit.bind(this);
+    this.renderButtonsGroup = this.renderButtonsGroup.bind(this);
+    this.renderMessage = this.renderMessage.bind(this);
   }
 
   getInitValue<ValueType>(name: string): ValueType | undefined {
@@ -73,13 +82,13 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
     return undefined;
   }
 
-  setError = (error: string | undefined) => {
+  setError(error: string | undefined) {
     if (error !== this.state.error) {
       this.setState({ error });
     }
-  };
+  }
 
-  validate = (): ModelType | false => {
+  validate(): ModelType | false {
     const model = {} as ModelType;
     let hasError = false;
     let isAllEmpty = true;
@@ -119,13 +128,13 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
     }
 
     return model;
-  };
+  }
 
   /**
    * Show submit result if got a message; see props.onValidSubmit for details
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tryShowSubmitResult = (success?: any, error?: any): void => {
+  tryShowSubmitResult(success?: any, error?: any): void {
     const newState: FormState = { isPending: false, success: undefined, error: undefined };
     if (success && typeof success === "string") {
       newState.success = success;
@@ -139,12 +148,12 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
     if (newState.success || newState.error) {
       this.setState(newState);
     }
-  };
+  }
 
   /**
    * Submit event that validates inputs, collect model and fires props.onValidSubmit
    */
-  submit = (e: Core.FormEvent): void => {
+  submit(e: Core.FormEvent): void {
     e.preventDefault();
 
     if (this.isWaitSubmitFinished) {
@@ -192,32 +201,32 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
           this.setState({ isPending: false });
         }
       });
-  };
+  }
 
   componentWillUnmount(): void {
     this.isUnMounted = true;
     FormsStore.removeForm(this);
   }
 
-  renderTitle = (title: string | Core.Element): Core.Element => {
+  renderTitle(title: string | Core.Element): Core.Element {
     return <h2>{title}</h2>;
-  };
+  }
 
-  renderButtonSubmit = (defProps: ButtonSubmitProps, textSubmit: string | Core.Element): Core.Element => {
+  renderButtonSubmit(defProps: ButtonSubmitProps, textSubmit: string | Core.Element): Core.Element {
     return (
       // eslint-disable-next-line react/button-has-type, react/jsx-props-no-spreading
       <button {...defProps}>{textSubmit}</button>
     );
-  };
+  }
 
-  renderButtonsGroup = (buttonSubmit: Core.Element): Core.Element => {
+  renderButtonsGroup(buttonSubmit: Core.Element): Core.Element {
     return <div>{buttonSubmit}</div>;
-  };
+  }
 
   // todo popup window for this case
-  renderMessage = (msg: string, isError: boolean): Core.Element => {
+  renderMessage(msg: string, isError: boolean): Core.Element {
     return <div>{msg}</div>;
-  };
+  }
 
   render(): Core.Element {
     // todo ability to redefine-renderForm

@@ -162,6 +162,11 @@ export abstract class BaseControl<
     // Such bind is important for inheritance and using super...(): https://stackoverflow.com/questions/46869503/es6-arrow-functions-trigger-super-outside-of-function-or-class-error
     this.gotChange = this.gotChange.bind(this);
     this.gotBlur = this.gotBlur.bind(this);
+    this.renderError = this.renderError.bind(this);
+    this.setValue = this.setValue.bind(this);
+    this.validate = this.validate.bind(this);
+    this.onFocusLeft = this.onFocusLeft.bind(this);
+    this.renderError = this.renderError.bind(this);
   }
 
   get isRequired() {
@@ -225,7 +230,7 @@ export abstract class BaseControl<
    * Function is fired when value changed or re-validation is required
    * @return true if isValid
    */
-  setValue = (value: TValue, callback?: () => void, skipValidation?: boolean): boolean => {
+  setValue(value: TValue, callback?: () => void, skipValidation?: boolean): boolean {
     const error = skipValidation
       ? this.state.error
       : this.constructor.checkIsInvalid(value, this.props.validations) || undefined;
@@ -240,12 +245,12 @@ export abstract class BaseControl<
       callback && callback();
     }
     return !error;
-  };
+  }
 
   /** Fire validation, update state and return true if isValid */
-  validate = (): boolean => {
+  validate(): boolean {
     return this.setValue(this.state.value);
-  };
+  }
 
   /** Input must fire this method after onChange of value is happened */
   gotChange(value: TValue): void {
@@ -253,16 +258,16 @@ export abstract class BaseControl<
   }
 
   /** Function is fired when control completely lost focus */
-  onFocusLeft = (value: TValue) => {
+  onFocusLeft(value: TValue) {
     this.setValue(
       value,
       () => this.props.onFocusLeft && this.props.onFocusLeft(value, this),
       !this.constructor.common.validateOnFocusLeft
     );
-  };
+  }
 
   /** Input must fire this method after focus is lost */
-  gotBlur(value: TValue): void {
+  gotBlur(value: TValue) {
     // todo check this for dropdown
     detectFocusLeft(this.domEl as HTMLElement, () => this.onFocusLeft(value), this.constructor.common.focusDebounce);
   }
@@ -280,6 +285,11 @@ export abstract class BaseControl<
     FormsStore.tryRemoveInput(this);
   }
 
+  renderError(error: string): Core.Element {
+    /* todo: implement tooltip for this case */
+    return <span role="alert">{error}</span>;
+  }
+
   render(): Core.Element {
     const { isRequired } = this;
     const { id } = this;
@@ -291,10 +301,9 @@ export abstract class BaseControl<
         ref={this.setDomEl}
       >
         <span>{this.props.label}</span>
-        <span>{this.getRenderedInput(id, this.state.value)}</span>
         {/* wait: update to aria-errormessage when NVDA supports it: https://github.com/nvaccess/nvda/issues/8318 */}
-        {/* todo: implement tooltip for this case */}
-        {this.state.error ? <span role="alert">{this.state.error}</span> : null}
+        <span>{this.getRenderedInput(id, this.state.value)}</span>
+        {this.state.error ? this.renderError(this.state.error) : null}
       </label>
     );
   }
