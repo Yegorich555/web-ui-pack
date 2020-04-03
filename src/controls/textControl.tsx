@@ -63,6 +63,7 @@ export class TextControl extends BaseControl<string, TextControlProps, TextInput
     this.handleChange = this.handleChange.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
     this.getRenderedInput = this.getRenderedInput.bind(this);
+    this.renderInput = this.renderInput.bind(this);
   }
 
   handleChange(e: Core.DomChangeEvent) {
