@@ -14,7 +14,9 @@ afterAll(() => {
   dom = null;
   console.warn = prevConsole;
 });
+
 describe("baseControl", () => {
+  h.testComponentFuncBind(BaseControl);
   test("useless name", () => {
     // BaseControl is abstract but for testing it's fine
     const control = new BaseControl({ name: "someName" });

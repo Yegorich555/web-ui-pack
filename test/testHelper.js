@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-export */
 // import React from "react";
 import { render, unmountComponentAtNode } from "react-dom";
 import reactTestUtils from "react-dom/test-utils";
@@ -44,6 +45,46 @@ export function wrapConsoleWarn(fn) {
     throw ex;
   }
   unMockConsoleWarn();
+}
+
+export function testComponentFuncBind(Type) {
+  describe("componentFuncBind", () => {
+    const skipNames = [
+      "constructor",
+      "componentDidMount",
+      "componentDidCatch",
+      "componentWillUnmount",
+      "shouldComponentUpdate",
+      "render",
+      "toJSON",
+      "setDomEl"
+    ];
+    const arrowRegex = /^[^{]+?=>/;
+    const protoNames = Object.getOwnPropertyNames(Type.prototype)
+      .filter(a => !skipNames.includes(a))
+      .filter(a => typeof Object.getOwnPropertyDescriptor(Type.prototype, a).value === "function");
+
+    const obj = new Type({});
+    const objNames = Object.getOwnPropertyNames(obj)
+      .filter(a => !skipNames.includes(a))
+      .filter(a => typeof Object.getOwnPropertyDescriptor(obj, a).value === "function");
+
+    it("no arrow functions", () => {
+      // doesn't for work for deep-inheritted: const arrowFunc = objNames.filter(a => !protoNames.includes(a));
+      const arrowFunc = objNames.filter(a => arrowRegex.test(obj[a].toString()));
+      expect(arrowFunc).toHaveLength(0);
+    });
+
+    it("each function are bound", () => {
+      const notBoundFunc = protoNames.filter(a => !objNames.includes(a));
+      expect(notBoundFunc).toHaveLength(0);
+    });
+    obj.componentWillUnmount();
+  });
+}
+
+export function testStaticInheritence() {
+  // todo check if static options doen't influent on prototype
 }
 
 export function initDom() {

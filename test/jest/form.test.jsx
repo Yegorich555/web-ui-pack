@@ -14,6 +14,7 @@ afterAll(() => {
 });
 
 describe("form", () => {
+  h.testComponentFuncBind(Form);
   const spyRegisterForm = jest.spyOn(FormsStore, "registerForm");
   const spyRegisterInput = jest.spyOn(FormsStore, "tryRegisterInput");
   test("render according to props", () => {
