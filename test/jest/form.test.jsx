@@ -350,5 +350,17 @@ describe("form", () => {
     expect(model).toEqual({ here: 5 });
   });
 
-  // todo defaultProps
+  test("defaultProps", () => {
+    const form = new Form({});
+    form.props.textSubmit = null;
+    const spyOnRenderBtnSubmit = jest.spyOn(form, "renderButtonSubmit");
+    form.render();
+    expect(spyOnRenderBtnSubmit.mock.calls[0][1]).toBe(Form.defaultProps.textSubmit);
+
+    dom
+      .expectRender(<Form autoComplete={null} />)
+      .toMatchInlineSnapshot(
+        `"<form autocomplete=\\"off\\" novalidate=\\"\\"><div><button type=\\"submit\\">SUBMIT</button></div></form>"`
+      );
+  });
 });
