@@ -40,9 +40,9 @@ const transformSCSS = new stream.Transform({
 
 exports.default = function compile() {
   // remove styles folder
-  fs.rmdirSync("lib/styles", {
-    recursive: true
-  });
+  // fs.rmdirSync("lib/styles", {
+  //   recursive: true
+  // });
 
   return gulp
     .src("./src/styles/*.scss")
