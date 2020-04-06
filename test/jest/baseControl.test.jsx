@@ -37,12 +37,13 @@ describe("baseControl", () => {
 
   test("checkIsInvalid", () => {
     // checking - rule is not defined
-    expect(BaseControl.checkIsInvalid(2, { someRule: true })).toBe(false);
-    expect(typeof BaseControl.checkIsInvalid(null, { required: true })).toBe("string");
-    expect(BaseControl.checkIsInvalid(null, { required: "msg" })).toBe("msg");
+    const checkIsInvalid = (v, prop) => BaseControl.common.checkIsInvalid(v, BaseControl.defaultValidations, prop);
+    expect(checkIsInvalid(2, { someRule: true })).toBe(false);
+    expect(typeof checkIsInvalid(null, { required: true })).toBe("string");
+    expect(checkIsInvalid(null, { required: "msg" })).toBe("msg");
     // checking errorMsg is not defined
     BaseControl.defaultValidations.required.msg = null;
-    expect(typeof BaseControl.checkIsInvalid(null, { required: true })).toBe("string");
+    expect(typeof checkIsInvalid(null, { required: true })).toBe("string");
   });
 
   test("autofocus", () => {

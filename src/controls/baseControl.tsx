@@ -64,7 +64,64 @@ export abstract class BaseControl<
     /** Set 'true' if need to validate when control lost focus */
     validateOnFocusLeft: true,
     /** Timeout that used for preventing focus-debounce when labelOnClick > onBlur > onFocus happens */
-    focusDebounce: 100
+    focusDebounce: 100,
+    /** Check if value is Invalid; return false if isValid or string-error-message  */
+    checkIsInvalid<TValue>(
+      value: TValue,
+      defaultValidations: BaseControlValidations<TValue>,
+      propsValidations?: BaseControlValidationProps
+    ): false | string {
+      const validations = defaultValidations;
+
+      if (!propsValidations) {
+        return false;
+      }
+      // checking is invalid
+      const setRules = propsValidations as BaseControlValidationProps;
+      const debugName = this.constructor.name;
+
+      function isRuleFailed(ruleKey: keyof BaseControlValidationProps): boolean {
+        const setV = setRules[ruleKey];
+        if (setV == null || setV === false) {
+          return false;
+        }
+        const definedValidation = validations[ruleKey];
+        if (!definedValidation) {
+          console.warn(
+            `Props validations.${ruleKey} is set but isn't found in ${debugName}.defaultValidations`,
+            setRules,
+            validations
+          );
+          return false;
+        }
+        if (!definedValidation.test(value, setV)) {
+          return true;
+        }
+        return false;
+      }
+
+      // validate for required first
+      const failedRuleKey = isRuleFailed("required") ? "required" : Object.keys(setRules).find(isRuleFailed);
+      if (!failedRuleKey) {
+        return false;
+      }
+
+      // defining error message
+      let error = "";
+      const failedSetV = setRules[failedRuleKey];
+      // todo string for overriding default message can be setV
+      if (typeof failedSetV === "string") {
+        error = failedSetV;
+      } else {
+        const defaultMsg = validations[failedRuleKey].msg;
+        if (typeof defaultMsg === "function") {
+          error = (defaultMsg as (setV: unknown) => string)(failedSetV);
+        } else {
+          error = defaultMsg;
+        }
+      }
+      return error || `Invalid field for key [${failedRuleKey}]`;
+    }
   };
 
   /**
@@ -173,59 +230,6 @@ export abstract class BaseControl<
     return !!(this.props.validations?.required || false);
   }
 
-  static checkIsInvalid<TValue>(value?: TValue, propsValidations?: BaseControlValidationProps): false | string {
-    const validations = this.defaultValidations;
-
-    if (!propsValidations) {
-      return false;
-    }
-    // checking is invalid
-    const setRules = propsValidations as BaseControlValidationProps;
-    const debugName = this.constructor.name;
-
-    function isRuleFailed(ruleKey: keyof BaseControlValidationProps): boolean {
-      const setV = setRules[ruleKey];
-      if (setV == null || setV === false) {
-        return false;
-      }
-      const definedValidation = validations[ruleKey];
-      if (!definedValidation) {
-        console.warn(
-          `Props validations.${ruleKey} is set but isn't found in ${debugName}.defaultValidations`,
-          setRules,
-          validations
-        );
-        return false;
-      }
-      if (!definedValidation.test(value, setV)) {
-        return true;
-      }
-      return false;
-    }
-
-    // validate for required first
-    const failedRuleKey = isRuleFailed("required") ? "required" : Object.keys(setRules).find(isRuleFailed);
-    if (!failedRuleKey) {
-      return false;
-    }
-
-    // defining error message
-    let error = "";
-    const failedSetV = setRules[failedRuleKey];
-    // todo string for overriding default message can be setV
-    if (typeof failedSetV === "string") {
-      error = failedSetV;
-    } else {
-      const defaultMsg = validations[failedRuleKey].msg;
-      if (typeof defaultMsg === "function") {
-        error = (defaultMsg as (setV: unknown) => string)(failedSetV);
-      } else {
-        error = defaultMsg;
-      }
-    }
-    return error || `Invalid field for key [${failedRuleKey}]`;
-  }
-
   /**
    * Function is fired when value changed or re-validation is required
    * @return true if isValid
@@ -233,7 +237,8 @@ export abstract class BaseControl<
   setValue(value: TValue, callback?: () => void, skipValidation?: boolean): boolean {
     const error = skipValidation
       ? this.state.error
-      : this.constructor.checkIsInvalid(value, this.props.validations) || undefined;
+      : this.constructor.common.checkIsInvalid(value, this.constructor.defaultValidations, this.props.validations) ||
+        undefined;
 
     const isValueChanged = value !== this.state.value;
     if (isValueChanged || error !== this.state.error) {
