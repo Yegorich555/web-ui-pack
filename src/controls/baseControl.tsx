@@ -33,6 +33,7 @@ export interface BaseControlProps<TValue, TControl> {
   /** Event happens when control completely lost focus */
   onFocusLeft?: (value: TValue, control: TControl) => void;
   autoFocus?: boolean;
+  disabled?: boolean;
 }
 
 export interface BaseControlState<T> {
@@ -52,8 +53,8 @@ export abstract class BaseControl<
   ["constructor"]: typeof BaseControl;
 
   /**
-   * Options that common for every control
-   * if you need to redefine options for particular control just redefine this one in inheritted control
+   * Options that common for every inherited control
+   * if you need to redefine options for particular control just redefine this one in inherited control
    */
   static common = {
     getUniqueId(): string {
@@ -300,10 +301,13 @@ export abstract class BaseControl<
     const { id } = this;
     return (
       <label
+        ref={this.setDomEl}
         htmlFor={id as string}
         className={this.props.className}
         data-required={isRequired || null}
-        ref={this.setDomEl}
+        // @ts-ignore
+        disabled={this.props.disabled}
+        data-invalid={!!this.state.error}
       >
         <span>{this.props.label}</span>
         {/* wait: update to aria-errormessage when NVDA supports it: https://github.com/nvaccess/nvda/issues/8318 */}

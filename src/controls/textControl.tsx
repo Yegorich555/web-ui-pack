@@ -36,7 +36,7 @@ export interface TextControlProps extends BaseControlProps<string, TextControl> 
     Core.HTMLAttributes<HTMLInputElement>,
     Exclude<
       keyof Core.HTMLAttributes<HTMLInputElement>,
-      "id" | "onChange" | "onBlur" | "aria-invalid" | "aria-required" | "value"
+      "id" | "onChange" | "onBlur" | "aria-invalid" | "aria-required" | "value" | "disabled"
     >
   >;
 }
@@ -93,7 +93,8 @@ export class TextControl extends BaseControl<string, TextControlProps, TextInput
       onChange: this.handleChange,
       onBlur: this.handleBlur,
       "aria-invalid": !!this.state.error,
-      "aria-required": this.isRequired
+      "aria-required": this.isRequired,
+      disabled: this.props.disabled
     } as Core.HTMLAttributes<HTMLInputElement>;
     return this.renderInput(defProps, value);
   }

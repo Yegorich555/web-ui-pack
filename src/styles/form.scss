@@ -16,7 +16,7 @@
       font-weight: bold;
     }
     //button-submit-group
-    *:last-child {
+    &*:last-child {
       // stylelint-disable-next-line plugin/no-unsupported-browser-features
       display: flex;
       justify-content: center;
