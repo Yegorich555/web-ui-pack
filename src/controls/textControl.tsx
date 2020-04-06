@@ -50,6 +50,10 @@ export class TextControl extends BaseControl<string, TextControlProps, TextInput
   }
 
   /** @inheritdoc */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static returnEmptyValue: any = null;
+
+  /** @inheritdoc */
   static emptyValue = null;
 
   /** @inheritdoc */

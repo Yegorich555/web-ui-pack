@@ -15,7 +15,7 @@ afterAll(() => {
 // todo check static properties are overrided!
 describe("textControl", () => {
   h.testComponentFuncBind(TextControl);
-
+  h.testStaticInheritence(TextControl);
   test("initValue", () => {
     expect(new TextControl({}).state.value).toBe("");
     expect(new TextControl({ initValue: undefined }).state.value).toBe("");
