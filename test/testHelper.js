@@ -83,8 +83,24 @@ export function testComponentFuncBind(Type) {
   });
 }
 
-export function testStaticInheritence() {
-  // todo check if static options doen't influent on prototype
+export function testStaticInheritence(Type) {
+  describe("componentStatic", () => {
+    const skipNames = [
+      "length", //
+      "prototype",
+      "name",
+      "common"
+    ];
+    const stat = Object.getOwnPropertyNames(Type) //
+      .filter(a => !skipNames.includes(a));
+    const statProto = Object.getOwnPropertyNames(Object.getPrototypeOf(Type)) //
+      .filter(a => !skipNames.includes(a));
+
+    it("overrides static", () => {
+      const arrowNotOverrided = statProto.filter(a => !stat.includes(a));
+      expect(arrowNotOverrided).toHaveLength(0);
+    });
+  });
 }
 
 export function initDom() {
