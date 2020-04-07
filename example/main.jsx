@@ -23,6 +23,12 @@ class AppContainer extends Component {
             name="first"
             validations={{ required: true }}
           />
+          <TextControl //
+            className="uiBaseControl"
+            label="TextInput 2"
+            name="second"
+            validations={{ required: true }}
+          />
         </Form>
       </>
     );
