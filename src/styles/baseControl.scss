@@ -2,9 +2,13 @@
 $padding: 0.7em; //todo css-var
 $activeColor: #1976d2; //todo css-var
 $background: white; //todo css-var
+$errorTextColor: var(--controlErrorTextColor, #b70000); //#f44336;
+$errorColor: var(--controlErrorFrameColor, red);
+$labelColor: $activeColor;
+$borderRadius: 3px;
 
 .uiBaseControl {
-  margin-top: 1em;
+  margin-top: 2em;
   display: block;
   //text of label
   > *:first-child {
@@ -37,20 +41,22 @@ $background: white; //todo css-var
     display: block;
     position: relative;
     border: 1px solid #bdbdbd; //todo css-var
-    border-radius: 3px; //todo css-var
+    border-radius: $borderRadius;
     padding: 1px; //fix for border-scaling
   }
-  &:hover > *:nth-child(2) {
-    box-shadow: 0 0 4px 0 $activeColor; //todo css-var
-  }
-  input {
+  input,
+  [contenteditable="true"] {
     font: inherit;
     padding: $padding;
     border: none;
-    width: 100%;
+    border-radius: $borderRadius;
     box-sizing: border-box;
-    transition: box-shadow 200ms cubic-bezier(0, 0, 0.2, 1) 0ms;
     background: $background;
+    transition: box-shadow 200ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+    // fix for border-scaling
+    // stylelint-disable-next-line plugin/no-unsupported-browser-features
+    width: calc(100% + 2px);
+    margin: -1px;
   }
 
   //common properties
@@ -67,13 +73,31 @@ $background: white; //todo css-var
     cursor: default;
     cursor: not-allowed;
   }
+
+  //frames
+  &:hover > *:nth-child(2) {
+    box-shadow: 0 0 4px 0 $activeColor;
+  }
+  &[data-invalid="true"]:hover > *:nth-child(2) {
+    box-shadow: 0 0 4px 0 $errorColor;
+  }
+  &[data-invalid="true"] input,
+  [contenteditable="true"] {
+    box-shadow: 0 0 2px 1px $errorColor;
+  }
+
   *:focus {
-    transition: box-shadow 200ms cubic-bezier(0, 0, 0.2, 1) 0ms;
     box-shadow: 0 0 3px 2px $activeColor;
     // stylelint-disable-next-line plugin/no-unsupported-browser-features
     outline: none;
   }
-  &[data-invalid="true"] *:focus {
-    box-shadow: 0 0 3px 2px red;
+  &[data-invalid="true"] input:focus,
+  [contenteditable="true"]:focus {
+    box-shadow: 0 0 3px 2px $errorColor;
+  }
+
+  [role="alert"] {
+    font: inherit;
+    color: $errorTextColor;
   }
 }
