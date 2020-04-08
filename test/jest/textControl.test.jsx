@@ -78,6 +78,11 @@ describe("textControl", () => {
       .toMatchInlineSnapshot(
         `"<label for=\\"1\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"value here\\"></span></label>"`
       );
+    dom
+      .expectRender(<TextControl key={1} id={1} disabled />)
+      .toMatchInlineSnapshot(
+        `"<label for=\\"1\\" disabled=\\"\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"value here\\" disabled=\\"\\"></span></label>"`
+      );
   });
 
   test("onChanged event", async () => {
@@ -193,7 +198,7 @@ describe("textControl", () => {
     expect(h.lastCall(setValue)[0]).toBe("");
     expect(ref.state.error).toBe(TextControl.defaultValidations.required.msg);
     expect(dom.element.innerHTML).toMatchInlineSnapshot(
-      `"<label for=\\"1\\" data-required=\\"true\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"true\\" aria-required=\\"true\\" value=\\"\\"></span><span role=\\"alert\\">This field is required</span></label>"`
+      `"<label for=\\"1\\" data-required=\\"true\\" data-invalid=\\"true\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"true\\" aria-required=\\"true\\" value=\\"\\"></span><span role=\\"alert\\">This field is required</span></label>"`
     );
 
     // test validations.min
@@ -211,7 +216,7 @@ describe("textControl", () => {
     dom.userTypeText(input, "d");
     expect(ref.state.error).toBe(TextControl.defaultValidations.min.msg(2));
     expect(dom.element.innerHTML).toMatchInlineSnapshot(
-      `"<label for=\\"1\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"true\\" aria-required=\\"false\\" value=\\"d\\"></span><span role=\\"alert\\">Min length is 2 characters</span></label>"`
+      `"<label for=\\"1\\" data-invalid=\\"true\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"true\\" aria-required=\\"false\\" value=\\"d\\"></span><span role=\\"alert\\">Min length is 2 characters</span></label>"`
     );
     dom.userTypeText(input, "dv");
     expect(ref.state.error).toBe(undefined);
@@ -240,7 +245,7 @@ describe("textControl", () => {
     dom.userTypeText(input, "dvt");
     expect(ref.state.error).toBe(TextControl.defaultValidations.max.msg(2));
     expect(dom.element.innerHTML).toMatchInlineSnapshot(
-      `"<label for=\\"1\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"true\\" aria-required=\\"false\\" value=\\"dvt\\"></span><span role=\\"alert\\">Max length is 2 characters</span></label>"`
+      `"<label for=\\"1\\" data-invalid=\\"true\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"true\\" aria-required=\\"false\\" value=\\"dvt\\"></span><span role=\\"alert\\">Max length is 2 characters</span></label>"`
     );
 
     // checking direct calling functions

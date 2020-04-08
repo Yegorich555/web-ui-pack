@@ -307,7 +307,7 @@ export abstract class BaseControl<
         data-required={isRequired || null}
         // @ts-ignore
         disabled={this.props.disabled}
-        data-invalid={!!this.state.error}
+        data-invalid={!!this.state.error || null}
       >
         <span>{this.props.label}</span>
         {/* wait: update to aria-errormessage when NVDA supports it: https://github.com/nvaccess/nvda/issues/8318 */}
