@@ -22,6 +22,7 @@ class AppContainer extends Component {
             initValue="init_value"
             name="first"
             validations={{ required: true }}
+            disabled
           />
           <TextControl //
             className="uiBaseControl"

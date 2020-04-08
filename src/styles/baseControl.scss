@@ -1,11 +1,13 @@
 /* stylelint-disable no-descending-specificity */
-$padding: 0.7em; //todo css-var
-$activeColor: #1976d2; //todo css-var
-$background: white; //todo css-var
+$padding: 0.7em; //var(--controlPadding, 0.7em);
+$focusColor: var(--controlFocusColor, #1976d2);
+$labelColor: var(--controlLabelColor, #1359a0);
+$background: var(--controlBackground, white);
+$backgroundDisabled: var(--controlDisabledBackground, #ebebe3);
+$textColorDisabled: var(--controlDisabledTextColor, #737373);
 $errorTextColor: var(--controlErrorTextColor, #b70000); //#f44336;
 $errorColor: var(--controlErrorFrameColor, red);
-$labelColor: $activeColor;
-$borderRadius: 3px;
+$borderRadius: var(--borderRadius, 3px);
 
 .uiBaseControl {
   margin-top: 2em;
@@ -17,22 +19,19 @@ $borderRadius: 3px;
     z-index: 1;
     margin: 0 ($padding - 0.2em);
     padding: 0 0.2em;
-    transform: translateY(-$padding + 0.2em);
-    color: $activeColor;
+    transform: translateY(0.2em - $padding);
+    color: $labelColor;
     background: $background;
-    font: inherit;
-    // font-size: smaller;
     transition: transform 200ms cubic-bezier(0, 0, 0.2, 1) 0ms;
   }
   //asterisk-mark
   &[data-required="true"] > *:first-child {
-    padding-right: 1em;
     &::after {
       content: "*";
       font-size: larger;
       font-weight: bolder;
-      position: absolute;
-      padding-left: 0.2em;
+      line-height: 0;
+      padding: 0 0.2em;
     }
   }
 
@@ -69,14 +68,18 @@ $borderRadius: 3px;
   ::placeholder {
     text-overflow: ellipsis;
   }
-  input[disabled] {
+  input[disabled],
+  [contenteditable="true"][disabled] {
     cursor: default;
     cursor: not-allowed;
+    color: $textColorDisabled;
+    //todo background: $backgroundDisabled;
   }
 
+  //todo border and other frames for input only
   //frames
   &:hover > *:nth-child(2) {
-    box-shadow: 0 0 4px 0 $activeColor;
+    box-shadow: 0 0 4px 0 $focusColor;
   }
   &[data-invalid="true"]:hover > *:nth-child(2) {
     box-shadow: 0 0 4px 0 $errorColor;
@@ -87,7 +90,7 @@ $borderRadius: 3px;
   }
 
   *:focus {
-    box-shadow: 0 0 3px 2px $activeColor;
+    box-shadow: 0 0 3px 2px $focusColor;
     // stylelint-disable-next-line plugin/no-unsupported-browser-features
     outline: none;
   }
