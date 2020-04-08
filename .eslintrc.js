@@ -31,6 +31,7 @@ module.exports = {
     "react/jsx-filename-extension": [1, { extensions: [".tsx", ".jsx"] }],
     "react/static-property-placement": "off",
     "react/prop-types": "off",
+    "react/jsx-props-no-spreading": "off",
     "@typescript-eslint/ban-ts-ignore": "off",
     "@typescript-eslint/prefer-namespace-keyword": "off",
     "@typescript-eslint/no-explicit-any": "off", //["error", { ignoreRestArgs: true, }],

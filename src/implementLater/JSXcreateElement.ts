@@ -1,5 +1,5 @@
 const JSXcreateElement = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-inner-declarations
+  // eslint-disable-next-line no-inner-declarations
   createElement<T extends HTMLElement>(tag: string, attrs?: object, ...children: any[]): HTMLElement {
     const element = document.createElement(tag) as T;
     attrs &&

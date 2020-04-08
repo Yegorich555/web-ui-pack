@@ -2,11 +2,9 @@ import { Form } from "./form";
 import { BaseControl } from "../controls/baseControl";
 import isComponentChild from "../helpers/isComponentChild";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const hashSet = new Set<Form<any>>();
 
 export default class FormsStore {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static get forms(): Set<Form<any>> {
     return hashSet;
   }
@@ -19,10 +17,7 @@ export default class FormsStore {
   /**
    * Only inputs that has props.name can be added
    */
-  static tryRegisterInput<T>(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    input: BaseControl<T, any, any>
-  ): Form<unknown> | undefined {
+  static tryRegisterInput<T>(input: BaseControl<T, any, any>): Form<unknown> | undefined {
     // eslint-disable-next-line no-restricted-syntax
     for (const form of hashSet) {
       if (isComponentChild(form.props.children, input)) {
@@ -39,7 +34,6 @@ export default class FormsStore {
     return undefined;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static tryRemoveInput<T>(input: BaseControl<T, any, any>): void {
     // eslint-disable-next-line no-restricted-syntax
     for (const form of hashSet) {

@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-props-no-spreading */
 import React from "react";
 import isComponentChild from "web-ui-pack/helpers/isComponentChild";
 import Core from "web-ui-pack";

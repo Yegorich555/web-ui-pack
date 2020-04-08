@@ -8,9 +8,7 @@ declare module Core {
   export type Element = React.ReactElement; // ReactChild
   export type HTMLAttributes<T> = React.HTMLAttributes<T>;
   export type Node = React.ReactNode;
-  /* eslint-disable @typescript-eslint/no-explicit-any */
   export function renderElement(type: any, props?: object | null, ...children: any[]): {};
-  /* eslint-enable @typescript-eslint/no-explicit-any */
   export type FormEvent = React.FormEvent<HTMLFormElement>;
   export type DomFocusEvent = React.FocusEvent<HTMLInputElement>;
   export type DomChangeEvent = React.ChangeEvent<HTMLInputElement>;

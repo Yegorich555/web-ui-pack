@@ -52,7 +52,6 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
   /**
    * Input adds itself to collection via FormsStore
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputs: BaseControl<any, BaseControlProps<any, any>, any>[] = [];
 
   isWaitSubmitFinished = false;
@@ -130,7 +129,6 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
   /**
    * Show submit result if got a message; see props.onValidSubmit for details
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tryShowSubmitResult(success?: any, error?: any): void {
     const newState: FormState = { isPending: false, success: undefined, error: undefined };
     if (success && typeof success === "string") {
@@ -178,7 +176,6 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
     this.isWaitSubmitFinished = true;
     this.setState({ isPending: true, error: undefined, success: undefined });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     promiseWait(result as Promise<any>, this.constructor.promiseDelayMs)
       .then(v => {
         if (!this.isUnMounted) {
@@ -210,10 +207,7 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
   }
 
   renderButtonSubmit(defProps: ButtonSubmitProps, textSubmit: string | Core.Element): Core.Element {
-    return (
-      // eslint-disable-next-line react/button-has-type, react/jsx-props-no-spreading
-      <button {...defProps}>{textSubmit}</button>
-    );
+    return <button {...defProps}>{textSubmit}</button>;
   }
 
   renderButtonsGroup(buttonSubmit: Core.Element): Core.Element {

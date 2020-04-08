@@ -50,8 +50,7 @@ export class TextControl extends BaseControl<string, TextControlProps, TextInput
   }
 
   /** @inheritdoc */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static returnEmptyValue: any = null;
+  static returnEmptyValue: string | null | undefined = null;
 
   /** @inheritdoc */
   static emptyValue = null;
@@ -81,7 +80,6 @@ export class TextControl extends BaseControl<string, TextControlProps, TextInput
 
   /** Override this method for customizing input-rendering */
   renderInput(defProps: Core.HTMLAttributes<HTMLInputElement>, value: string): Core.Element {
-    // eslint-disable-next-line react/jsx-props-no-spreading
     return <input {...defProps} value={value} />;
   }
 

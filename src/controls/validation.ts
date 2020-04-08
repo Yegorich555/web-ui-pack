@@ -4,7 +4,6 @@ export type Validation<T, setVType> = {
 };
 
 export interface Validations<T> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: Validation<T, any>;
 }
 

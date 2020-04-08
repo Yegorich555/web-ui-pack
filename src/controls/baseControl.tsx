@@ -6,14 +6,11 @@ import { Form } from "../forms/form";
 import detectFocusLeft from "../helpers/detectFocusLeft";
 
 export abstract class BaseControlValidations<ValueType> implements Validations<ValueType> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: Validation<ValueType, any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   abstract required: Validation<ValueType, any>;
 }
 
 export interface BaseControlValidationProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
   required?: boolean | string;
 }
@@ -45,7 +42,6 @@ let _id = 0;
 // todo PureComponent? or shouldComponentUpdate
 export abstract class BaseControl<
   TValue,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Props extends BaseControlProps<TValue, any>,
   State extends BaseControlState<TValue>
 > extends Core.Component<Props, State> {
@@ -137,13 +133,11 @@ export abstract class BaseControl<
    * Default value that control must return if isEmpty
    * If setup 'null' textControl returns 'null' instead of empty-string
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static returnEmptyValue: any = null;
 
   /**
    * Default value that assigned to input if no props.initValue, form.props.initModel specified
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static defaultInitValue: any = null;
 
   get initValue(): TValue {
@@ -176,10 +170,8 @@ export abstract class BaseControl<
    *     msg: 'Only 5 characters is allowed'
    *  }
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static defaultValidations: BaseControlValidations<any> = {
     required: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       test: (v?: any) => !BaseControl.isEmpty(v),
       msg: ValidationMessages.required
     }
@@ -196,8 +188,7 @@ export abstract class BaseControl<
 
   toJSON(): this {
     const result = { ...this };
-    // @ts-ignore
-    result.form = this.form ? "[formObject]" : undefined;
+    result.form = this.form ? (("[formObject]" as unknown) as Form<unknown>) : undefined;
     return result;
   }
 
