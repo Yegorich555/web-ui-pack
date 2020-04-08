@@ -2,6 +2,7 @@ import Core from "../core";
 import { BaseControl, BaseControlProps } from "../controls/baseControl";
 import FormsStore from "./formsStore";
 import promiseWait from "../helpers/promiseWait";
+import nestedProperty from "../helpers/nestedProperty";
 
 export type FormProps<ModelType> = {
   className?: string;
@@ -76,8 +77,7 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
 
   getInitValue<ValueType>(name: string): ValueType | undefined {
     if (this.props && this.props.initModel) {
-      // @ts-ignore
-      return this.props.initModel[name] as ValueType;
+      return nestedProperty.get<ModelType, ValueType>(this.props.initModel, name);
     }
     return undefined;
   }
@@ -103,7 +103,6 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
           break;
         }
       } else {
-        // todo nested name as obj.some.name without lodash
         const key = input.props.name;
         // todo option: don't attach notRequired&emptyValues
         // todo option: don't attach valuesThatWasn't changed
@@ -111,8 +110,7 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
           if (isAllEmpty && !input.constructor.isEmpty(input.value)) {
             isAllEmpty = false;
           }
-          // @ts-ignore
-          model[key] = input.value;
+          nestedProperty.set(model, key, input.value);
         }
       }
     }
@@ -122,7 +120,6 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
       return false;
     }
     if (isAllEmpty) {
-      // todo auto disable error when inputsValueChanged?
       this.setError(this.constructor.errOneRequired);
       return false;
     }

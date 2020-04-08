@@ -33,7 +33,7 @@ module.exports = {
     "react/prop-types": "off",
     "@typescript-eslint/ban-ts-ignore": "off",
     "@typescript-eslint/prefer-namespace-keyword": "off",
-    "@typescript-eslint/no-explicit-any": ["error", { ignoreRestArgs: true }],
+    "@typescript-eslint/no-explicit-any": "off", //["error", { ignoreRestArgs: true, }],
     "prettier/prettier": ["error"],
     "no-underscore-dangle": 0,
     "no-unused-expressions": ["error", { allowShortCircuit: true }],

@@ -157,8 +157,6 @@ describe("form", () => {
     expect(onValidSubmit).toBeCalledTimes(1);
     expect(onValidSubmit.mock.calls[0][0]).toEqual({ postalCode: "t" });
 
-    // todo check nested model here
-
     // checking init-model
     onValidSubmit.mockReset();
     dom.render(
@@ -349,6 +347,16 @@ describe("form", () => {
     h.unMockConsoleWarn();
     const model = form.validate();
     expect(model).toEqual({ here: 5 });
+  });
+
+  test("control with nestedName", () => {
+    const childrenProps = { name: "addr.street" };
+    const form = new Form({ initModel: { addr: { street: "st" } }, children: { props: childrenProps } });
+    const control = new TextControl(childrenProps);
+    expect(control.value).toBe("st");
+    control.state.value = "nom";
+    const model = form.validate();
+    expect(model).toEqual({ addr: { street: "nom" } });
   });
 
   test("defaultProps", () => {

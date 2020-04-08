@@ -13,6 +13,6 @@
     "strict": true,
     "allowJs": true
   },
-  "include": ["src/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "build", ".vscode", "lib", "src/implementLater/JSXcreateElement.ts"]
 }
