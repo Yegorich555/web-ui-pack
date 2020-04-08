@@ -78,25 +78,25 @@ $borderRadius: var(--borderRadius, 3px);
 
   //todo border and other frames for input only
   //frames
-  &:hover > *:nth-child(2) {
-    box-shadow: 0 0 4px 0 $focusColor;
-  }
-  &[data-invalid="true"]:hover > *:nth-child(2) {
-    box-shadow: 0 0 4px 0 $errorColor;
-  }
-  &[data-invalid="true"] input,
-  [contenteditable="true"] {
-    box-shadow: 0 0 2px 1px $errorColor;
-  }
-
   *:focus {
     box-shadow: 0 0 3px 2px $focusColor;
     // stylelint-disable-next-line plugin/no-unsupported-browser-features
     outline: none;
   }
-  &[data-invalid="true"] input:focus,
-  [contenteditable="true"]:focus {
-    box-shadow: 0 0 3px 2px $errorColor;
+  &:hover > *:nth-child(2) {
+    box-shadow: 0 0 4px 0 $focusColor;
+  }
+  &[data-invalid="true"] {
+    &:hover > *:nth-child(2) {
+      box-shadow: 0 0 4px 0 $errorColor;
+    }
+    input,
+    [contenteditable="true"] {
+      box-shadow: 0 0 2px 1px $errorColor;
+    }
+    *:focus {
+      box-shadow: 0 0 3px 2px $errorColor;
+    }
   }
 
   [role="alert"] {
