@@ -7,6 +7,7 @@ import nestedProperty from "../helpers/nestedProperty";
 export type FormProps<ModelType> = {
   className?: string;
   autoComplete?: "on" | "off";
+  /** model that attached to control via control.props.name. This is InitProp - impossible to replace after component-init */
   initModel?: ModelType;
   /**
    * Submit event that is fired if form is valid and provides model based on props.name of each control inside the form
@@ -16,6 +17,7 @@ export type FormProps<ModelType> = {
    */
   onValidSubmit: (model: ModelType) => string | Promise<string | { message: string }>;
   title?: string | Core.Element;
+  /** Text or Component for button-submit */
   textSubmit?: string | Core.Element;
 };
 
@@ -34,8 +36,21 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
   // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146
   ["constructor"]: typeof Form;
 
+  /**
+   * Min timeout before promise from onValidSubmit will resolved;
+   * usefull for avoiding blinking of loader-spinner when promise resolves very fast
+   * used web-ui-pack/helpers/promiseWait under the hood;
+   * Default: 400 ms
+   */
   static promiseDelayMs = 400;
+  /**
+   * Set true for skipping validation for other controls when found first invalid control;
+   * Default: true
+   */
   static isValidateUntilFirstError = true;
+  /**
+   * ErrorMessage when an all control are empty
+   */
   static errOneRequired = "At least one value is required";
   // react.defaultProps works with > ver16.4.6
   static defaultProps: Partial<FormProps<unknown>> = {
@@ -50,9 +65,9 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
   };
 
   /**
-   * Input adds itself to collection via FormsStore
+   * Controls that the form has as a child; adds automatically via web-ui-pack.FormsStore when control-constructor is fired
    */
-  inputs: BaseControl<any, BaseControlProps<any, any>, any>[] = [];
+  controls: BaseControl<any, BaseControlProps<any, any>, any>[] = [];
 
   isWaitSubmitFinished = false;
   state: FormState = {
@@ -92,7 +107,7 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
     let hasError = false;
     let isAllEmpty = true;
 
-    const { inputs } = this;
+    const { controls: inputs } = this;
     for (let i = 0; i < inputs.length; ++i) {
       const input = inputs[i];
       const isValid = input.validate();
@@ -207,6 +222,7 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
   }
 
   renderButtonSubmit(defProps: ButtonSubmitProps, textSubmit: string | Core.Element): Core.Element {
+    // eslint-disable-next-line react/button-has-type
     return <button {...defProps}>{textSubmit}</button>;
   }
 

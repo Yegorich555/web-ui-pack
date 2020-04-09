@@ -16,19 +16,20 @@ export interface BaseControlValidationProps {
 }
 
 export interface BaseControlProps<TValue, TControl> {
-  /**
-   * Html Id attribute. InitValue: impossible to replace this after component-init
-   */
+  /** Html attribute. This is InitProp - impossible to replace after component-init */
   id?: string | number;
   className?: string;
   label?: string;
+  /** prop-key for form-model. This is InitProp - impossible to replace after component-init */
   name?: string;
+  /** value that attached to control. This is InitProp - impossible to replace after component-init */
   initValue?: TValue;
   validations?: BaseControlValidationProps;
   /** Event happens when value is changed */
   onChanged?: (value: TValue, control: TControl) => void;
   /** Event happens when control completely lost focus */
   onFocusLeft?: (value: TValue, control: TControl) => void;
+  /** Html attribute. This is InitProp - impossible to replace after component-init */
   autoFocus?: boolean;
   disabled?: boolean;
 }
@@ -50,15 +51,15 @@ export abstract class BaseControl<
 
   /**
    * Options that common for every inherited control
-   * if you need to redefine options for particular control just redefine this one in inherited control
+   * if you need to redefine options for particular control just define this one in inherited control
    */
   static common = {
     getUniqueId(): string {
       return `uipack_${++_id}`;
     },
-    /** Set 'true' if need to validate when user changed value */
+    /** Auto-validation when user changed value; Default: true */
     validateOnChange: true,
-    /** Set 'true' if need to validate when control lost focus */
+    /** Auto-validation when control lost focus; Default: true */
     validateOnFocusLeft: true,
     /** Timeout that used for preventing focus-debounce when labelOnClick > onBlur > onFocus happens */
     focusDebounce: 100,
@@ -122,22 +123,19 @@ export abstract class BaseControl<
   };
 
   /**
-   * Function that form uses in validation.required and collecting info
-   * @param v checked value
+   * Function for validation.required and for returning emptyValue (@see returnEmptyValue)
+   * @param v The value to check
    */
   static isEmpty<TValue>(v: TValue): boolean {
     return v == null;
   }
 
   /**
-   * Default value that control must return if isEmpty
-   * If setup 'null' textControl returns 'null' instead of empty-string
+   * Default value that control must return if .isEmpty
+   * If set 'null' TextControl will return 'null' instead of empty-string
    */
   static returnEmptyValue: any = null;
-
-  /**
-   * Default value that assigned to input if no props.initValue, form.props.initModel specified
-   */
+  /** Default value that assigned to input if no props.initValue, form.props.initModel specified */
   static defaultInitValue: any = null;
 
   get initValue(): TValue {

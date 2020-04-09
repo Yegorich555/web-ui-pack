@@ -1,10 +1,10 @@
 import Core from "../core";
 
 /**
- * Check if component placed inside the node;
+ * Check if component is placed inside the node;
  * @param node Node or Component inside that search for component
- * @param component Component that expected to be placed inside the Node
- * @returns true if Component is placed inside the Node
+ * @param component The Component that expected to be placed inside the Node
+ * @returns true if the Component is placed inside the Node
  */
 export default function isComponentChild(
   node: Core.Node | Core.Node[] | undefined,

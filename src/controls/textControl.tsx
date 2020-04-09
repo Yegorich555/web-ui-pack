@@ -69,10 +69,12 @@ export class TextControl extends BaseControl<string, TextControlProps, TextInput
     this.renderInput = this.renderInput.bind(this);
   }
 
+  /** onChange event of the input */
   handleChange(e: Core.DomChangeEvent) {
     this.gotChange(e.target.value.trimStart());
   }
 
+  /** onBlur event of the input */
   handleBlur(e: Core.DomFocusEvent) {
     // todo trimming is wrong for textArea
     this.gotBlur(e.target.value.trim());

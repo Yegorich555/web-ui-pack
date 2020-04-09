@@ -95,7 +95,7 @@ describe("form", () => {
     expect(FormsStore.forms.size).toBe(1);
     // js-Set doesn't have values accessed by index
     expect(FormsStore.forms.values().next().value).toBe(form);
-    expect(form.inputs.length).toBe(0); // 0 - because there is no name for textControl
+    expect(form.controls.length).toBe(0); // 0 - because there is no name for textControl
 
     dom.render(
       <Form
@@ -116,9 +116,9 @@ describe("form", () => {
 
     // checking form and input registration
     expect(spyRegisterForm).toHaveBeenCalledTimes(1);
-    expect(form.inputs.length).toBe(1);
+    expect(form.controls.length).toBe(1);
     expect(spyRegisterInput).toHaveBeenCalledTimes(1);
-    expect(form.inputs[0]).toBe(control);
+    expect(form.controls[0]).toBe(control);
 
     // checking submit-firing
     const btnSubmit = dom.element.querySelector("button[type='submit']");
@@ -183,7 +183,7 @@ describe("form", () => {
     const spyRemoveInput = jest.spyOn(FormsStore, "tryRemoveInput");
     dom.render(<Form />);
     expect(spyRemoveInput).toBeCalledTimes(1);
-    expect(FormsStore.forms.values().next().value.inputs.length).toBe(0);
+    expect(FormsStore.forms.values().next().value.controls.length).toBe(0);
 
     dom.render(<div />);
     expect(spyRemoveForm).toBeCalledTimes(1);
@@ -202,13 +202,13 @@ describe("form", () => {
       </>
     );
     const iForms = FormsStore.forms.values();
-    let { inputs } = iForms.next().value;
-    expect(inputs.length).toBe(1);
-    expect(inputs[0].props.name).toBe("postalCode");
+    let { controls } = iForms.next().value;
+    expect(controls.length).toBe(1);
+    expect(controls[0].props.name).toBe("postalCode");
 
-    inputs = iForms.next().value.inputs;
-    expect(inputs.length).toBe(1);
-    expect(inputs[0].props.name).toBe("postalCode2");
+    controls = iForms.next().value.controls;
+    expect(controls.length).toBe(1);
+    expect(controls[0].props.name).toBe("postalCode2");
   });
 
   test("validation: invalid control", () => {
@@ -226,11 +226,11 @@ describe("form", () => {
 
     const control = new TextControl(controlProps);
     control.setState = h.mockSetState(control);
-    expect(form.inputs.length).toBe(1);
+    expect(form.controls.length).toBe(1);
 
     const control2 = new TextControl(controlProps2);
     control2.setState = h.mockSetState(control2);
-    expect(form.inputs.length).toBe(2);
+    expect(form.controls.length).toBe(2);
 
     Form.isValidateUntilFirstError = true;
     const modelOrFalse = form.validate();
@@ -259,7 +259,7 @@ describe("form", () => {
     form.setState = h.mockSetState(form);
     const control = new TextControl(controlProps);
     control.setState = h.mockSetState(control);
-    expect(form.inputs.length).toBe(1);
+    expect(form.controls.length).toBe(1);
 
     form.submit(e);
     expect(onValidSubmit).toBeCalledTimes(1);
@@ -341,9 +341,9 @@ describe("form", () => {
 
   test("control without name", () => {
     const form = new Form({});
-    form.inputs.push(new TextControl({}));
+    form.controls.push(new TextControl({}));
     h.mockConsoleWarn();
-    form.inputs.push(new TextControl({ name: "here", initValue: 5 }));
+    form.controls.push(new TextControl({ name: "here", initValue: 5 }));
     h.unMockConsoleWarn();
     const model = form.validate();
     expect(model).toEqual({ here: 5 });

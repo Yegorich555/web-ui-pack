@@ -22,7 +22,7 @@ export default class FormsStore {
     for (const form of hashSet) {
       if (isComponentChild(form.props.children, input)) {
         // todo we can check duplicates of names
-        form.inputs.push(input);
+        form.controls.push(input);
         return form;
       }
     }
@@ -37,9 +37,9 @@ export default class FormsStore {
   static tryRemoveInput<T>(input: BaseControl<T, any, any>): void {
     // eslint-disable-next-line no-restricted-syntax
     for (const form of hashSet) {
-      const index = form.inputs.indexOf(input);
+      const index = form.controls.indexOf(input);
       if (index !== -1) {
-        form.inputs.splice(index, 1);
+        form.controls.splice(index, 1);
         return;
       }
     }
