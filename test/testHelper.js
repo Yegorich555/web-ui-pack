@@ -104,6 +104,14 @@ export function testStaticInheritence(Type) {
   });
 }
 
+export function testControlCommon(Type) {
+  testComponentFuncBind(Type);
+  testStaticInheritence(Type);
+  test("returnEmptyValue & isEmpty", () => {
+    expect(Type.isEmpty(Type.returnEmptyValue)).toBe(true);
+  });
+}
+
 export function initDom() {
   const container = {
     render: el => {
