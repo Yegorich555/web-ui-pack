@@ -36,6 +36,14 @@ describe("baseControl", () => {
     expect(BaseControl.isEmpty(undefined)).toBe(true);
   });
 
+  test("isChanged", () => {
+    const control = new BaseControl({ initValue: "v" });
+    expect(control.state.value).toBe("v");
+    expect(control.isChanged).toBe(false);
+    control.state.value = "d";
+    expect(control.isChanged).toBe(true);
+  });
+
   test("checkIsInvalid", () => {
     // checking - rule is not defined
     const checkIsInvalid = (v, prop) => BaseControl.common.checkIsInvalid(v, BaseControl.defaultValidations, prop);

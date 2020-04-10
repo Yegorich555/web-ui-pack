@@ -176,13 +176,18 @@ export abstract class BaseControl<
     return (this.constructor.defaultInitValue as unknown) as TValue;
   }
 
+  /** @readonly Returns the currentValue. For changing @see .setValue(...) */
   get value(): Readonly<TValue> {
     const { value } = this.state;
     return this.constructor.isEmpty(value) ? this.constructor.returnEmptyValue : value;
   }
 
+  /** @readonly Returns if the currentValue is different from the initValue */
+  get isChanged() {
+    return this.state.value !== this.initValue;
+  }
+
   _id: string | number = this.constructor.common.getUniqueId();
-  // todo: isChanged = false;
   form?: Form<unknown>;
 
   toJSON(): this {
@@ -280,7 +285,7 @@ export abstract class BaseControl<
     if (super.shouldComponentUpdate(nextProps, nextState, nextContext)) {
       return true;
     }
-    // validations required is tied with aria-required
+    // validations.required is tied with aria-required
     if (this.props.validations?.required !== nextProps.validations?.required) {
       return true;
     }
