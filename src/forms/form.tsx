@@ -1,3 +1,4 @@
+/* eslint-disable no-continue */
 import Core from "../core";
 import { BaseControl, BaseControlProps } from "../controls/baseControl";
 import FormsStore from "./formsStore";
@@ -6,7 +7,11 @@ import nestedProperty from "../helpers/nestedProperty";
 import { BaseComponent, BaseComponentProps } from "../baseComponent";
 
 export interface FormProps<ModelType> extends Omit<BaseComponentProps, "autoFocus"> {
+  /** Html attribute; Default: "off" */
   autoComplete?: "on" | "off";
+  title?: string | Core.Element;
+  /** Text or Component for button-submit; Default: "SUBMIT" */
+  textSubmit?: string | Core.Element;
   /** model that attached to control via control.props.name. This is InitProp - impossible to replace after component-init */
   initModel?: ModelType;
   /**
@@ -16,9 +21,11 @@ export interface FormProps<ModelType> extends Omit<BaseComponentProps, "autoFocu
    * - If you return Promise then spinner (loader) will be shown
    */
   onValidSubmit: (model: ModelType) => string | Promise<string | { message: string }>;
-  title?: string | Core.Element;
-  /** Text or Component for button-submit */
-  textSubmit?: string | Core.Element;
+  /**
+   * Provide onValidSubmit(model) only with changed values (skip model[props] that wasn't changed);
+   * Default: false
+   */
+  isCollectOnlyChanges?: boolean;
 }
 
 export interface FormState {
@@ -41,6 +48,7 @@ export class Form<ModelType> extends BaseComponent<FormProps<ModelType>, FormSta
   static excludedRenderProps: Readonly<Array<keyof (FormProps<unknown> & BaseComponentProps)>> = [
     "initModel", //
     "onValidSubmit",
+    "isCollectOnlyChanges",
     ...BaseComponent.excludedRenderProps // autoFocus is useless but removing is overhelmed
   ];
 
@@ -56,22 +64,25 @@ export class Form<ModelType> extends BaseComponent<FormProps<ModelType>, FormSta
    * Default: true
    */
   static isValidateUntilFirstError = true;
-  /**
-   * ErrorMessage when an all control are empty
-   */
+  /** ErrorMessage when an all control are empty */
   static errOneRequired = "At least one value is required";
+  /**
+   * Provide onValidSubmit(model) without notRequired Null-values (via control.isEmpty)
+   * Default: false
+   */
+  static isSkipNotRequiredNulls = false;
+
   // react.defaultProps works with > ver16.4.6
   static defaultProps: Partial<FormProps<unknown>> = {
     autoComplete: "off",
     textSubmit: "SUBMIT"
   };
-  /**
-   * Controls that the form has as a child; adds automatically via web-ui-pack.FormsStore when control-constructor is fired
-   */
+  /** Controls that the form has as a child; adds automatically via web-ui-pack/FormsStore when control-constructor is fired */
   controls: BaseControl<any, BaseControlProps<any, any>, any>[] = [];
+  // todo provide method resetForm()
 
-  isUnMounted = false;
-  isWaitSubmitFinished = false;
+  _isUnMounted = false;
+  _isWaitSubmitFinished = false;
   state: FormState = {
     isPending: false
   };
@@ -120,13 +131,20 @@ export class Form<ModelType> extends BaseComponent<FormProps<ModelType>, FormSta
         }
       } else {
         const key = input.props.name;
-        // todo option: don't attach notRequired&emptyValues
-        // todo option: don't attach valuesThatWasn't changed
         if (key) {
-          if (isAllEmpty && !input.constructor.isEmpty(input.value)) {
+          if (this.props.isCollectOnlyChanges && !input.isChanged) {
+            continue;
+          }
+          const { value } = input;
+          const isEmpty = input.constructor.isEmpty(input.state.value);
+          if (isEmpty) {
+            if (this.constructor.isSkipNotRequiredNulls && !input.isRequired) {
+              continue;
+            }
+          } else {
             isAllEmpty = false;
           }
-          nestedProperty.set(model, key, input.value);
+          nestedProperty.set(model, key, value);
         }
       }
     }
@@ -161,14 +179,13 @@ export class Form<ModelType> extends BaseComponent<FormProps<ModelType>, FormSta
       this.setState(newState);
     }
   }
-
   /**
    * Submit event that validates inputs, collect model and fires props.onValidSubmit
    */
   submit(e: Core.FormEvent): void {
     e.preventDefault();
 
-    if (this.isWaitSubmitFinished) {
+    if (this._isWaitSubmitFinished) {
       return;
     }
 
@@ -183,6 +200,8 @@ export class Form<ModelType> extends BaseComponent<FormProps<ModelType>, FormSta
       return;
     }
 
+    // todo tryCatch here for providing error
+    // todo after submit we must reset changes
     const result = onValidSubmit(validateResult);
     const isPromise = result instanceof Promise;
     if (!isPromise) {
@@ -190,32 +209,32 @@ export class Form<ModelType> extends BaseComponent<FormProps<ModelType>, FormSta
       return;
     }
 
-    this.isWaitSubmitFinished = true;
+    this._isWaitSubmitFinished = true;
     this.setState({ isPending: true, error: undefined, success: undefined });
 
     promiseWait(result as Promise<any>, this.constructor.promiseDelayMs)
       .then(v => {
-        if (!this.isUnMounted) {
+        if (!this._isUnMounted) {
           this.tryShowSubmitResult(v);
         }
         return v;
       })
       .catch((ex: Error | string) => {
         console.error(ex);
-        if (!this.isUnMounted) {
+        if (!this._isUnMounted) {
           this.tryShowSubmitResult(undefined, ex);
         }
       })
       .finally(() => {
-        this.isWaitSubmitFinished = false;
-        if (!this.isUnMounted && this.state.isPending) {
+        this._isWaitSubmitFinished = false;
+        if (!this._isUnMounted && this.state.isPending) {
           this.setState({ isPending: false });
         }
       });
   }
 
   componentWillUnmount(): void {
-    this.isUnMounted = true;
+    this._isUnMounted = true;
     FormsStore.removeForm(this);
   }
 

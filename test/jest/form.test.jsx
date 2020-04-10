@@ -317,7 +317,7 @@ describe("form", () => {
     await new Promise(resolve => setTimeout(resolve, 1));
     expect(spyOnShowResult).toHaveBeenLastCalledWith(undefined, "bad");
     console.error = consoleErr;
-    // todo expectRender here
+    // todo expectRender here when popup will be implemented
 
     // testing when submitted and UnMounted before promise finished
     // promise.resolve
@@ -371,5 +371,40 @@ describe("form", () => {
       .toMatchInlineSnapshot(
         `"<form autocomplete=\\"off\\" novalidate=\\"\\"><div><button type=\\"submit\\">SUBMIT</button></div></form>"`
       );
+  });
+
+  test("prop.isCollectOnlyChanges", () => {
+    const childrenProps = { name: "changed", initValue: 1 };
+    const childrenProps2 = { name: "notChanged", initValue: 2 };
+    const form = new Form({
+      isCollectOnlyChanges: true,
+      children: [{ props: childrenProps }, { props: childrenProps2 }]
+    });
+    const control = new TextControl(childrenProps);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const control2 = new TextControl(childrenProps2);
+
+    control.state.value = 999;
+    expect(form.validate()).toEqual({ changed: 999 });
+    form.props.isCollectOnlyChanges = false;
+    expect(form.validate()).toEqual({ changed: 999, notChanged: 2 });
+    // todo after submit we must reset changes
+  });
+
+  test("static.isSkipNotRequiredNulls", () => {
+    const childrenProps = { name: "postalCode", initValue: null };
+    const childrenProps2 = { name: "email", initValue: "@", validations: { required: true } };
+    Form.isSkipNotRequiredNulls = true;
+    const form = new Form({
+      children: [{ props: childrenProps }, { props: childrenProps2 }]
+    });
+    const control = new TextControl(childrenProps);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const control2 = new TextControl(childrenProps2);
+
+    expect(TextControl.isEmpty(control.state.value)).toBe(true);
+    expect(form.validate()).toEqual({ email: "@" });
+    Form.isSkipNotRequiredNulls = false;
+    expect(form.validate()).toEqual({ email: "@", postalCode: null });
   });
 });
