@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React from "react";
 import { BaseControl } from "web-ui-pack";
 import * as h from "../testHelper";
@@ -44,23 +45,5 @@ describe("baseControl", () => {
     // checking errorMsg is not defined
     BaseControl.defaultValidations.required.msg = null;
     expect(typeof checkIsInvalid(null, { required: true })).toBe("string");
-  });
-
-  test("autofocus", () => {
-    // checking if autoFocus behavior works without errors
-    const fn = jest.fn();
-    class Control extends BaseControl {
-      getRenderedInput() {
-        return null;
-      }
-
-      componentDidMount() {
-        super.componentDidMount();
-        fn();
-      }
-    }
-
-    dom.render(<Control autoFocus />);
-    expect(fn).toBeCalledTimes(1);
   });
 });

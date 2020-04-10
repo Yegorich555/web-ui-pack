@@ -4,6 +4,7 @@ import { Validations, Validation, ValidationMessages } from "./validation";
 import FormsStore from "../forms/formsStore";
 import { Form } from "../forms/form";
 import detectFocusLeft from "../helpers/detectFocusLeft";
+import { BaseComponent, BaseComponentProps } from "../baseComponent";
 
 export abstract class BaseControlValidations<ValueType> implements Validations<ValueType> {
   [key: string]: Validation<ValueType, any>;
@@ -15,22 +16,21 @@ export interface BaseControlValidationProps {
   required?: boolean | string;
 }
 
-export interface BaseControlProps<TValue, TControl> {
-  /** Html attribute. This is InitProp - impossible to replace after component-init */
+export interface BaseControlProps<TValue, TControl> extends BaseComponentProps {
+  // todo change this
+  /** Html attribute. This is InitProp - replacing after component-init doesn't have effect */
   id?: string | number;
-  className?: string;
   label?: string;
-  /** prop-key for form-model. This is InitProp - impossible to replace after component-init */
+  /** prop-key for form-model. Changing doesn't have effect on initValue from form.initModel */
   name?: string;
-  /** value that attached to control. This is InitProp - impossible to replace after component-init */
+  /** value that attached to control. This is InitProp - replacing after component-init doesn't have effect */
   initValue?: TValue;
+  /** validation rules for the control */
   validations?: BaseControlValidationProps;
   /** Event happens when value is changed */
   onChanged?: (value: TValue, control: TControl) => void;
   /** Event happens when control completely lost focus */
   onFocusLeft?: (value: TValue, control: TControl) => void;
-  /** Html attribute. This is InitProp - impossible to replace after component-init */
-  autoFocus?: boolean;
   disabled?: boolean;
 }
 
@@ -40,14 +40,24 @@ export interface BaseControlState<T> {
 }
 let _id = 0;
 
-// todo PureComponent? or shouldComponentUpdate
 export abstract class BaseControl<
   TValue,
   Props extends BaseControlProps<TValue, any>,
   State extends BaseControlState<TValue>
-> extends Core.Component<Props, State> {
+> extends BaseComponent<Props, State> {
   // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146
+  // @ts-ignore
   ["constructor"]: typeof BaseControl;
+
+  /** @inheritdoc */
+  static excludedRenderProps: Readonly<Array<keyof BaseControlProps<unknown, unknown>>> = [
+    "initValue", //
+    "validations",
+    "onChanged",
+    "onFocusLeft",
+    "id",
+    ...BaseComponent.excludedRenderProps
+  ];
 
   /**
    * Options that common for every inherited control
@@ -60,7 +70,7 @@ export abstract class BaseControl<
     /** Auto-validation when user changed value; Default: true */
     validateOnChange: true,
     /** Auto-validation when control lost focus; Default: true */
-    validateOnFocusLeft: true,
+    validateOnFocusLeft: true, // todo remove as property
     /** Timeout that used for preventing focus-debounce when labelOnClick > onBlur > onFocus happens */
     focusDebounce: 100,
     /** Check if value is Invalid; return false if isValid or string-error-message  */
@@ -76,7 +86,7 @@ export abstract class BaseControl<
       }
       // checking is invalid
       const setRules = propsValidations as BaseControlValidationProps;
-      const debugName = this.constructor.name;
+      const debugName = this.constructor.name; // todo possible is wrong
 
       function isRuleFailed(ruleKey: keyof BaseControlValidationProps): boolean {
         const setV = setRules[ruleKey];
@@ -137,8 +147,23 @@ export abstract class BaseControl<
   static returnEmptyValue: any = null;
   /** Default value that assigned to input if no props.initValue, form.props.initModel specified */
   static defaultInitValue: any = null;
+  /**
+   * Validation rules that attached to the control. You can extend ones directly via
+   * {control}.defaultValidations.required.msg = "Please fill this input"
+   * {control}.defaultValidations.required.test = v=> v!=null
+   * {control}.defaultValidations.myRule = {
+   *     test: v && v.length === 5
+   *     msg: 'Only 5 characters is allowed'
+   *  }
+   */
+  static defaultValidations: BaseControlValidations<any> = {
+    required: {
+      test: (v?: any) => !BaseControl.isEmpty(v),
+      msg: ValidationMessages.required
+    }
+  };
 
-  get initValue(): TValue {
+  get initValue(): Readonly<TValue> {
     let definedValue: TValue | undefined;
     if (this.props.initValue !== undefined) {
       definedValue = this.props.initValue as TValue;
@@ -154,35 +179,15 @@ export abstract class BaseControl<
     return (this.constructor.defaultInitValue as unknown) as TValue;
   }
 
-  get value(): TValue {
+  get value(): Readonly<TValue> {
     const { value } = this.state;
     return this.constructor.isEmpty(value) ? this.constructor.returnEmptyValue : value;
   }
-
-  /**
-   * Validation rules that attached to the input. You can extend ones directly via
-   * {theInput}.defaultValidations.required.msg = "Please fill this input"
-   * {theInput}.defaultValidations.required.test = v=> v!=null
-   * {theInput}.defaultValidations.myRule = {
-   *     test: v && v.length === 5
-   *     msg: 'Only 5 characters is allowed'
-   *  }
-   */
-  static defaultValidations: BaseControlValidations<any> = {
-    required: {
-      test: (v?: any) => !BaseControl.isEmpty(v),
-      msg: ValidationMessages.required
-    }
-  };
 
   id: string | number =
     this.props.id != null ? (this.props.id as string | number) : this.constructor.common.getUniqueId();
   // todo: isChanged = false;
   form?: Form<unknown>;
-  domEl: HTMLLabelElement | undefined;
-  setDomEl = (el: HTMLLabelElement): void => {
-    this.domEl = el;
-  };
 
   toJSON(): this {
     const result = { ...this };
@@ -270,14 +275,20 @@ export abstract class BaseControl<
   /** Implement this method and bind gotBlur and gotChange */
   abstract getRenderedInput(id: string | number, value: TValue): Core.Element;
 
-  componentDidMount(): void {
-    if (this.props.autoFocus && this.domEl) {
-      this.domEl.focus(); // focus automatically fired from label to input
-    }
-  }
-
   componentWillUnmount(): void {
     FormsStore.tryRemoveInput(this);
+  }
+
+  /** @inheritdoc */
+  shouldComponentUpdate(nextProps: Readonly<Props>, nextState: Readonly<State>, nextContext: any): boolean {
+    if (super.shouldComponentUpdate(nextProps, nextState, nextContext)) {
+      return true;
+    }
+    // validations required is tied with aria-required
+    if (this.props.validations?.required !== nextProps.validations?.required) {
+      return true;
+    }
+    return false;
   }
 
   renderError(error: string): Core.Element {

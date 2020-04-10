@@ -79,7 +79,7 @@ export function testComponentFuncBind(Type) {
       const notBoundFunc = protoNames.filter(a => !objNames.includes(a));
       expect(notBoundFunc).toHaveLength(0);
     });
-    obj.componentWillUnmount();
+    obj.componentWillUnmount && obj.componentWillUnmount();
   });
 }
 
@@ -89,7 +89,8 @@ export function testStaticInheritence(Type) {
       "length", //
       "prototype",
       "name",
-      "common"
+      "common",
+      "excludedRenderProps"
     ];
     const stat = Object.getOwnPropertyNames(Type) //
       .filter(a => !skipNames.includes(a));
@@ -109,6 +110,11 @@ export function initDom() {
       reactTestUtils.act(() => {
         render(el, container.element);
       });
+    },
+    /** wait for render is finished; apply jest.useFakeTimers before this function */
+    renderWait: el => {
+      container.render(el);
+      jest.advanceTimersToNextTimer();
     },
     expectRender: el => {
       container.render(el);

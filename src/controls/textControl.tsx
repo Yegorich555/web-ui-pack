@@ -31,8 +31,10 @@ export interface TextControlValidationProps extends BaseControlValidationProps {
 }
 
 export interface TextControlProps extends BaseControlProps<string, TextControl> {
+  /** @inheritdoc */
   validations?: TextControlValidationProps;
   htmlInputProps?: Pick<
+    // todo maybe delete this
     Core.HTMLAttributes<HTMLInputElement>,
     Exclude<
       keyof Core.HTMLAttributes<HTMLInputElement>,

@@ -4,7 +4,8 @@ import React from "react";
 // this is just ts-types
 // @ts-ignore
 declare module Core {
-  export class Component<Props, State> extends React.PureComponent<Props, State> {}
+  // eslint-disable-next-line react/prefer-stateless-function
+  export class Component<Props, State> extends React.Component<Props, State> {}
   export type Element = React.ReactElement; // ReactChild
   export type HTMLAttributes<T> = React.HTMLAttributes<T>;
   export type Node = React.ReactNode;

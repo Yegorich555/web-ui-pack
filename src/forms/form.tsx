@@ -3,9 +3,9 @@ import { BaseControl, BaseControlProps } from "../controls/baseControl";
 import FormsStore from "./formsStore";
 import promiseWait from "../helpers/promiseWait";
 import nestedProperty from "../helpers/nestedProperty";
+import { BaseComponent, BaseComponentProps } from "../baseComponent";
 
-export type FormProps<ModelType> = {
-  className?: string;
+export interface FormProps<ModelType> extends Omit<BaseComponentProps, "autoFocus"> {
   autoComplete?: "on" | "off";
   /** model that attached to control via control.props.name. This is InitProp - impossible to replace after component-init */
   initModel?: ModelType;
@@ -19,7 +19,7 @@ export type FormProps<ModelType> = {
   title?: string | Core.Element;
   /** Text or Component for button-submit */
   textSubmit?: string | Core.Element;
-};
+}
 
 export interface FormState {
   isPending: boolean;
@@ -32,9 +32,17 @@ export type ButtonSubmitProps = {
   type: "submit";
 };
 
-export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormState> {
+export class Form<ModelType> extends BaseComponent<FormProps<ModelType>, FormState> {
   // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146
+  // @ts-ignore
   ["constructor"]: typeof Form;
+
+  /** @inheritdoc */
+  static excludedRenderProps: Readonly<Array<keyof (FormProps<unknown> & BaseComponentProps)>> = [
+    "initModel", //
+    "onValidSubmit",
+    ...BaseComponent.excludedRenderProps // autoFocus is useless but removing is overhelmed
+  ];
 
   /**
    * Min timeout before promise from onValidSubmit will resolved;
@@ -57,18 +65,12 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
     autoComplete: "off",
     textSubmit: "SUBMIT"
   };
-
-  isUnMounted = false;
-  domEl: HTMLFormElement | undefined;
-  setDomEl = (el: HTMLFormElement): void => {
-    this.domEl = el;
-  };
-
   /**
    * Controls that the form has as a child; adds automatically via web-ui-pack.FormsStore when control-constructor is fired
    */
   controls: BaseControl<any, BaseControlProps<any, any>, any>[] = [];
 
+  isUnMounted = false;
   isWaitSubmitFinished = false;
   state: FormState = {
     isPending: false
@@ -253,7 +255,6 @@ export class Form<ModelType> extends Core.Component<FormProps<ModelType>, FormSt
           this.renderButtonSubmit(
             {
               type: "submit"
-              // onBlur={this.handleBtnBlur}
               // disabled={this.props.disabled}
               // isPending={this.state.isPending}
             },
