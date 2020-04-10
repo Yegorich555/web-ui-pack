@@ -177,7 +177,7 @@ export abstract class BaseControl<
     return (this.constructor.defaultInitValue as unknown) as TValue;
   }
 
-  /** @readonly Returns the currentValue. For changing @see .setValue(...) */
+  /** @readonly Returns the currentValue. For changing @see BaseControl.setValue */
   get value(): Readonly<TValue> {
     const { value } = this.state;
     return this.constructor.isEmpty(value) ? this.constructor.returnEmptyValue : value;
@@ -188,7 +188,7 @@ export abstract class BaseControl<
     return this.state.value !== this.initValue;
   }
 
-  /** @readonly Returns true if the currentValue is empty/null. @see prototype.isEmpty */
+  /** @readonly Returns true if the currentValue is empty/null. @see constructor.isEmpty */
   get isEmpty(): boolean {
     return this.constructor.isEmpty(this.state.value);
   }
