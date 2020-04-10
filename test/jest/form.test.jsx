@@ -402,7 +402,7 @@ describe("form", () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const control2 = new TextControl(childrenProps2);
 
-    expect(TextControl.isEmpty(control.state.value)).toBe(true);
+    expect(control.isEmpty).toBe(true);
     expect(form.validate()).toEqual({ email: "@" });
     Form.isSkipNotRequiredNulls = false;
     expect(form.validate()).toEqual({ email: "@", postalCode: null });

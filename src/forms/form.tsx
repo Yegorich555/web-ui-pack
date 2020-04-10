@@ -135,8 +135,7 @@ export class Form<ModelType> extends BaseComponent<FormProps<ModelType>, FormSta
           if (this.props.isCollectOnlyChanges && !input.isChanged) {
             continue;
           }
-          const { value } = input;
-          const isEmpty = input.constructor.isEmpty(input.state.value);
+          const { value, isEmpty } = input;
           if (isEmpty) {
             if (this.constructor.isSkipNotRequiredNulls && !input.isRequired) {
               continue;

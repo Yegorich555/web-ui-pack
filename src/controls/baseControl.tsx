@@ -130,7 +130,8 @@ export abstract class BaseControl<
   };
 
   /**
-   * Function for validation.required and for returning emptyValue (@see returnEmptyValue)
+   * Returns true if the value is empty/null
+   * Uses for validation.required, instance.isEmpty, instance.initValue etc.
    * @param v The value to check
    */
   static isEmpty<TValue>(v: TValue): boolean {
@@ -182,9 +183,14 @@ export abstract class BaseControl<
     return this.constructor.isEmpty(value) ? this.constructor.returnEmptyValue : value;
   }
 
-  /** @readonly Returns if the currentValue is different from the initValue */
-  get isChanged() {
+  /** @readonly Returns true if the currentValue is different from the initValue */
+  get isChanged(): boolean {
     return this.state.value !== this.initValue;
+  }
+
+  /** @readonly Returns true if the currentValue is empty/null. @see prototype.isEmpty */
+  get isEmpty(): boolean {
+    return this.constructor.isEmpty(this.state.value);
   }
 
   _id: string | number = this.constructor.common.getUniqueId();
