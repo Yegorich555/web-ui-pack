@@ -70,7 +70,7 @@ export abstract class BaseControl<
     /** Auto-validation when user changed value; Default: true */
     validateOnChange: true,
     /** Auto-validation when control lost focus; Default: true */
-    validateOnFocusLeft: true, // todo remove as property
+    validateOnFocusLeft: true,
     /** Timeout that used for preventing focus-debounce when labelOnClick > onBlur > onFocus happens */
     focusDebounce: 100,
     /** Check if value is Invalid; return false if isValid or string-error-message  */
@@ -116,8 +116,7 @@ export abstract class BaseControl<
 
       // defining error message
       let error = "";
-      const failedSetV = setRules[failedRuleKey];
-      // todo string for overriding default message can be setV
+      const failedSetV = setRules[failedRuleKey] as keyof BaseControlValidationProps;
       if (typeof failedSetV === "string") {
         error = failedSetV;
       } else {

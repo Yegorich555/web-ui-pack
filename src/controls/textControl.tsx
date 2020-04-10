@@ -34,7 +34,7 @@ export interface TextControlProps extends BaseControlProps<string, TextControl> 
   /** @inheritdoc */
   validations?: TextControlValidationProps;
   htmlInputProps?: Pick<
-    // todo maybe delete this
+    // todo maybe delete this: placeholder???
     Core.HTMLAttributes<HTMLInputElement>,
     Exclude<
       keyof Core.HTMLAttributes<HTMLInputElement>,
@@ -78,7 +78,6 @@ export class TextControl extends BaseControl<string, TextControlProps, TextInput
 
   /** onBlur event of the input */
   handleBlur(e: Core.DomFocusEvent) {
-    // todo trimming is wrong for textArea
     this.gotBlur(e.target.value.trim());
   }
 
