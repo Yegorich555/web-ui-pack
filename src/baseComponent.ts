@@ -40,7 +40,10 @@ export abstract class BaseComponent<Props extends BaseComponentProps, State> ext
     }
   }
 
-  /** @inheritdoc */
+  /**
+   * Implemented comparison of the props that are not mentioned in static excludedRenderProps:[];
+   * state comparison recommended to implement before setState is fired
+   */
   shouldComponentUpdate(nextProps: Readonly<Props>, nextState: Readonly<State>, nextContext: any): boolean {
     if (this.state !== nextState || this.context !== nextContext) {
       return true;
