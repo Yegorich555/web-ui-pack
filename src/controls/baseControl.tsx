@@ -17,8 +17,7 @@ export interface BaseControlValidationProps {
 }
 
 export interface BaseControlProps<TValue, TControl> extends BaseComponentProps {
-  // todo change this
-  /** Html attribute. This is InitProp - replacing after component-init doesn't have effect */
+  /** Html attribute */
   id?: string | number;
   label?: string;
   /** prop-key for form-model. Changing doesn't have effect on initValue from form.initModel */
@@ -55,7 +54,6 @@ export abstract class BaseControl<
     "validations",
     "onChanged",
     "onFocusLeft",
-    "id",
     ...BaseComponent.excludedRenderProps
   ];
 
@@ -183,8 +181,7 @@ export abstract class BaseControl<
     return this.constructor.isEmpty(value) ? this.constructor.returnEmptyValue : value;
   }
 
-  id: string | number =
-    this.props.id != null ? (this.props.id as string | number) : this.constructor.common.getUniqueId();
+  _id: string | number = this.constructor.common.getUniqueId();
   // todo: isChanged = false;
   form?: Form<unknown>;
 
@@ -297,7 +294,7 @@ export abstract class BaseControl<
 
   render(): Core.Element {
     const { isRequired } = this;
-    const { id } = this;
+    const id = (this.props.id || this._id) as string | number;
     return (
       <label
         ref={this.setDomEl}
