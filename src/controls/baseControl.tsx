@@ -20,7 +20,7 @@ export interface BaseControlProps<TValue, TControl> extends BaseComponentProps {
   /** Html attribute; Default `uipack_${++i}` */
   id?: string | number;
   label?: string;
-  /** Prop-key for form-model */
+  /** Prop-key for form-model, if you want to set html attribute @see htmlInputProps */
   name?: string;
   /** Value that attached to control */
   initValue?: TValue;
