@@ -54,4 +54,67 @@ describe("baseControl", () => {
     BaseControl.defaultValidations.required.msg = null;
     expect(typeof checkIsInvalid(null, { required: true })).toBe("string");
   });
+
+  test("changingInitProps", () => {
+    jest.useFakeTimers();
+    const spyRender = jest.fn();
+    let ctrl;
+    class Test extends BaseControl {
+      constructor(props) {
+        super(props);
+        ctrl = this;
+      }
+      getRenderedInput = () => {
+        spyRender(this.state.value);
+        return null;
+      };
+    }
+    dom.render(<Test initValue={5} />);
+    expect(spyRender).toBeCalledTimes(1);
+    expect(spyRender).toHaveBeenLastCalledWith(5);
+
+    dom.render(<Test initValue={7} />);
+    expect(spyRender).toBeCalledTimes(2);
+    expect(spyRender).toHaveBeenLastCalledWith(7);
+
+    // no form - no updates by name
+    spyRender.mockClear();
+    dom.render(<Test initValue={7} name="addr" />);
+    expect(spyRender).not.toBeCalled();
+
+    // reset control
+    dom.render(<Test />);
+    spyRender.mockClear();
+
+    const spyInitValue = jest.fn();
+    ctrl.form = {
+      getInitValue(name) {
+        spyInitValue(name);
+        if (name === "addr2") {
+          return "sm2";
+        }
+        return "sm";
+      }
+    };
+
+    dom.render(<Test name="addr2" />);
+    expect(spyRender).toBeCalledTimes(1);
+    expect(spyRender).toHaveBeenLastCalledWith("sm2");
+    expect(spyInitValue).toBeCalledTimes(1);
+    expect(spyInitValue).toHaveBeenLastCalledWith("addr2");
+
+    // no changes - no updates
+    dom.render(<Test initValue={1} name="addr" />);
+    spyRender.mockClear();
+    dom.render(<Test initValue={1} name="addr" />);
+    expect(spyRender).not.toBeCalled();
+
+    // isChanged - no updates
+    ctrl.state.value = "d";
+    expect(ctrl.isChanged).toBe(true);
+    dom.render(<Test initValue={999} />);
+    expect(spyRender).not.toBeCalled();
+
+    jest.useRealTimers();
+  });
 });

@@ -17,19 +17,20 @@ export interface BaseControlValidationProps {
 }
 
 export interface BaseControlProps<TValue, TControl> extends BaseComponentProps {
-  /** Html attribute */
+  /** Html attribute; Default `uipack_${++i}` */
   id?: string | number;
   label?: string;
-  /** prop-key for form-model. Changing doesn't have effect on initValue from form.initModel */
+  /** Prop-key for form-model */
   name?: string;
-  /** value that attached to control. This is InitProp - replacing after component-init doesn't have effect */
+  /** Value that attached to control */
   initValue?: TValue;
-  /** validation rules for the control */
+  /** Validation rules for the control */
   validations?: BaseControlValidationProps;
   /** Event happens when value is changed */
   onChanged?: (value: TValue, control: TControl) => void;
   /** Event happens when control completely lost focus */
   onFocusLeft?: (value: TValue, control: TControl) => void;
+  /** Html attribute */
   disabled?: boolean;
 }
 
@@ -50,7 +51,8 @@ export abstract class BaseControl<
 
   /** @inheritdoc */
   static excludedRenderProps: Readonly<Array<keyof BaseControlProps<unknown, unknown>>> = [
-    "initValue", //
+    "initValue",
+    "name",
     "validations",
     "onChanged",
     "onFocusLeft",
@@ -161,12 +163,12 @@ export abstract class BaseControl<
     }
   };
 
-  get initValue(): Readonly<TValue> {
+  getInitValue(props: Props): Readonly<TValue> {
     let definedValue: TValue | undefined;
-    if (this.props.initValue !== undefined) {
-      definedValue = this.props.initValue as TValue;
-    } else if (this.props.name && this.form) {
-      const v = this.form.getInitValue<TValue>(this.props.name as string);
+    if (props.initValue !== undefined) {
+      definedValue = props.initValue as TValue;
+    } else if (props.name && this.form) {
+      const v = this.form.getInitValue<TValue>(props.name as string);
       if (v !== undefined) {
         definedValue = v;
       }
@@ -185,7 +187,7 @@ export abstract class BaseControl<
 
   /** @readonly Returns true if the currentValue is different from the initValue */
   get isChanged(): boolean {
-    return this.state.value !== this.initValue;
+    return this.state.value !== this.getInitValue(this.props);
   }
 
   /** @readonly Returns true if the currentValue is empty/null. @see constructor.isEmpty */
@@ -208,14 +210,11 @@ export abstract class BaseControl<
 
   constructor(props: Props) {
     super(props);
-    /* todo 
-     initRequiredValues as id, initModel, initValue can be dynamic and in this case 
-     we must detect changes and reinit logic
-    */
     // todo validate during the creation if initValue is wrong
     this.form = FormsStore.tryRegisterControl(this);
-    }
-    this.state.value = this.initValue;
+
+    this.getInitValue = this.getInitValue.bind(this);
+    this.state.value = this.getInitValue(props);
 
     // Such bind is important for inheritance and using super...(): https://stackoverflow.com/questions/46869503/es6-arrow-functions-trigger-super-outside-of-function-or-class-error
     this.gotChange = this.gotChange.bind(this);
@@ -287,6 +286,15 @@ export abstract class BaseControl<
 
   /** @inheritdoc */
   shouldComponentUpdate(nextProps: Readonly<Props>, nextState: Readonly<State>, nextContext: any): boolean {
+    // try to update init value if it's not changed
+    if (nextProps !== this.props && !this.isChanged) {
+      const value = this.getInitValue(nextProps);
+      if (value !== this.state.value) {
+        this.state.value = value;
+        return true;
+      }
+    }
+    // otherwise use base logic
     if (super.shouldComponentUpdate(nextProps, nextState, nextContext)) {
       return true;
     }

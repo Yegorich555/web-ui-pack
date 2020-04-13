@@ -26,10 +26,10 @@ export default class FormsStore {
         return form;
       }
     }
-
-    console.warn(
-      `Form for control with name='${input.props.name}' is not defined. If you use Control without Form remove useless props.name`
-    );
+    input.props.name &&
+      console.warn(
+        `Form for control with name='${input.props.name}' is not defined. If you use Control without Form remove useless props.name`
+      );
 
     return undefined;
   }

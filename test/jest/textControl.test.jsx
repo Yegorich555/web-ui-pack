@@ -12,7 +12,6 @@ afterAll(() => {
   dom = null;
 });
 
-// todo check static properties are overrided!
 describe("textControl", () => {
   h.testControlCommon(TextControl);
   test("initValue", () => {
@@ -37,7 +36,6 @@ describe("textControl", () => {
   TextControl.returnEmptyValue = previous;
 
   test("render according to props", () => {
-    // todo make id is changable
     dom
       .expectRender(<TextControl id={1} />)
       .toMatchInlineSnapshot(
@@ -71,7 +69,6 @@ describe("textControl", () => {
         `"<label for=\\"1\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\"></span></label>"`
       );
     // key points that input is new: we need this for reinit-component
-    // todo make initValue is changable
     dom
       .expectRender(<TextControl key={1} id={1} initValue="value here" />)
       .toMatchInlineSnapshot(
@@ -80,7 +77,7 @@ describe("textControl", () => {
     dom
       .expectRender(<TextControl key={1} id={1} disabled />)
       .toMatchInlineSnapshot(
-        `"<label for=\\"1\\" disabled=\\"\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"value here\\" disabled=\\"\\"></span></label>"`
+        `"<label for=\\"1\\" disabled=\\"\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\" disabled=\\"\\"></span></label>"`
       );
   });
 
