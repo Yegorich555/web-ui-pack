@@ -114,6 +114,7 @@ export function testControlCommon(Type) {
 
 export function initDom() {
   const container = {
+    act: fn => reactTestUtils.act(fn),
     render: el => {
       reactTestUtils.act(() => {
         render(el, container.element);
