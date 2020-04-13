@@ -12,7 +12,7 @@ export interface FormProps<ModelType> extends Omit<BaseComponentProps, "autoFocu
   title?: string | Core.Element;
   /** Text or Component for button-submit; Default: "SUBMIT" */
   textSubmit?: string | Core.Element;
-  /** model that attached to control via control.props.name. This is InitProp - impossible to replace after component-init */
+  /** Model that attached to controls via control.props.name */
   initModel?: ModelType;
   /**
    * Submit event that is fired if form is valid and provides model based on props.name of each control inside the form
@@ -46,7 +46,7 @@ export class Form<ModelType> extends BaseComponent<FormProps<ModelType>, FormSta
 
   /** @inheritdoc */
   static excludedRenderProps: Readonly<Array<keyof (FormProps<unknown> & BaseComponentProps)>> = [
-    "initModel", //
+    "initModel",
     "onValidSubmit",
     "isCollectOnlyChanges",
     ...BaseComponent.excludedRenderProps // autoFocus is useless but removing is overhelmed
@@ -89,8 +89,8 @@ export class Form<ModelType> extends BaseComponent<FormProps<ModelType>, FormSta
 
   constructor(props: FormProps<ModelType>) {
     super(props);
-    // todo if props.initModel is changed => update inputs
     FormsStore.registerForm(this);
+
     this.getInitValue = this.getInitValue.bind(this);
     this.setError = this.setError.bind(this);
     this.validate = this.validate.bind(this);
@@ -102,6 +102,7 @@ export class Form<ModelType> extends BaseComponent<FormProps<ModelType>, FormSta
     this.renderMessage = this.renderMessage.bind(this);
   }
 
+  /** Get initValue for control by pointed name */
   getInitValue<ValueType>(name: string): ValueType | undefined {
     if (this.props && this.props.initModel) {
       return nestedProperty.get<ModelType, ValueType>(this.props.initModel, name);
@@ -235,6 +236,32 @@ export class Form<ModelType> extends BaseComponent<FormProps<ModelType>, FormSta
   componentWillUnmount(): void {
     this._isUnMounted = true;
     FormsStore.removeForm(this);
+  }
+
+  /** @inheritdoc */
+  shouldComponentUpdate(
+    nextProps: Readonly<FormProps<ModelType>>,
+    nextState: Readonly<FormState>,
+    nextContext: any
+  ): boolean {
+    // try to update init value if it's not changed
+    if (nextProps.initModel !== this.props.initModel) {
+      const prevProps = this.props;
+
+      this.controls.forEach(ctrl => {
+        if (!ctrl.isChanged && ctrl.props.initValue === undefined) {
+          // @ts-ignore
+          this.props = nextProps;
+          const nextValue = ctrl.getInitValue(ctrl.props);
+          ctrl.setValue(nextValue, undefined, true);
+          // @ts-ignore
+          this.props = prevProps;
+        }
+      });
+    }
+
+    // otherwise use base logic
+    return super.shouldComponentUpdate(nextProps, nextState, nextContext);
   }
 
   renderTitle(title: string | Core.Element): Core.Element {

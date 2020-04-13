@@ -357,6 +357,48 @@ describe("form", () => {
     expect(model).toEqual({ addr: { street: "nom" } });
   });
 
+  test("updateInitModel => updateControl", () => {
+    const childrenProps = [
+      { name: "changed" },
+      { name: "notChanged", initValue: 2 },
+      { name: "ready" },
+      { name: "ready2" }
+    ];
+    const children = childrenProps.map(props => ({ props }));
+
+    const form = new Form({ children });
+    const controls = childrenProps.map(p => new TextControl(p));
+    controls[0].state.value = 1;
+    expect(controls[0].isChanged).toBe(true);
+    const spySetState = controls.map(c => {
+      // eslint-disable-next-line no-param-reassign
+      c.setState = jest.fn();
+      return c.setState;
+    });
+
+    const should = form.shouldComponentUpdate(
+      {
+        children,
+        initModel: {
+          changed: "a",
+          notChanged: "b",
+          ready: "c",
+          ready2: "d"
+        }
+      },
+      form.state
+    );
+    expect(should).toBe(false);
+    expect(spySetState[0]).not.toBeCalled();
+    expect(spySetState[1]).not.toBeCalled();
+
+    expect(spySetState[2]).toBeCalledTimes(1);
+    expect(spySetState[2].mock.calls[0][0]).toEqual({ value: "c", error: undefined });
+
+    expect(spySetState[3]).toBeCalledTimes(1);
+    expect(spySetState[3].mock.calls[0][0]).toEqual({ value: "d", error: undefined });
+  });
+
   test("defaultProps", () => {
     const form = new Form({});
     form.props.textSubmit = null;
