@@ -15,9 +15,9 @@ export default class FormsStore {
     hashSet.delete(form);
   }
   /**
-   * Only inputs that has props.name can be added
+   * Find form and register control as children of form
    */
-  static tryRegisterInput<T>(input: BaseControl<T, any, any>): Form<unknown> | undefined {
+  static tryRegisterControl<T>(input: BaseControl<T, any, any>): Form<unknown> | undefined {
     // eslint-disable-next-line no-restricted-syntax
     for (const form of hashSet) {
       if (isComponentChild(form.props.children, input)) {
@@ -34,7 +34,7 @@ export default class FormsStore {
     return undefined;
   }
 
-  static tryRemoveInput<T>(input: BaseControl<T, any, any>): void {
+  static tryRemoveControl<T>(input: BaseControl<T, any, any>): void {
     // eslint-disable-next-line no-restricted-syntax
     for (const form of hashSet) {
       const index = form.controls.indexOf(input);

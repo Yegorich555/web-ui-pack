@@ -16,7 +16,7 @@ afterAll(() => {
 describe("form", () => {
   h.testComponentFuncBind(Form);
   const spyRegisterForm = jest.spyOn(FormsStore, "registerForm");
-  const spyRegisterInput = jest.spyOn(FormsStore, "tryRegisterInput");
+  const spyRegisterControl = jest.spyOn(FormsStore, "tryRegisterControl");
   test("render according to props", () => {
     dom
       .expectRender(<Form />)
@@ -105,7 +105,7 @@ describe("form", () => {
       >
         <TextControl
           key={1}
-          // todo if name changed we can update input because it wasn't changed
+          // todo if name changed we can update control because it wasn't changed
           name="postalCode"
           ref={el => {
             control = el;
@@ -114,10 +114,10 @@ describe("form", () => {
       </Form>
     );
 
-    // checking form and input registration
+    // checking form and control registration
     expect(spyRegisterForm).toHaveBeenCalledTimes(1);
     expect(form.controls.length).toBe(1);
-    expect(spyRegisterInput).toHaveBeenCalledTimes(1);
+    expect(spyRegisterControl).toHaveBeenCalledTimes(1);
     expect(form.controls[0]).toBe(control);
 
     // checking submit-firing
@@ -180,9 +180,9 @@ describe("form", () => {
 
   test("removing from FormsStore byUnMount", () => {
     const spyRemoveForm = jest.spyOn(FormsStore, "removeForm");
-    const spyRemoveInput = jest.spyOn(FormsStore, "tryRemoveInput");
+    const spyRemoveControl = jest.spyOn(FormsStore, "tryRemoveControl");
     dom.render(<Form />);
-    expect(spyRemoveInput).toBeCalledTimes(1);
+    expect(spyRemoveControl).toBeCalledTimes(1);
     expect(FormsStore.forms.values().next().value.controls.length).toBe(0);
 
     dom.render(<div />);

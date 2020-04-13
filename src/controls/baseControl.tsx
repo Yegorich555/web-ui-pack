@@ -213,8 +213,7 @@ export abstract class BaseControl<
      we must detect changes and reinit logic
     */
     // todo validate during the creation if initValue is wrong
-    if (this.props.name) {
-      this.form = FormsStore.tryRegisterInput(this);
+    this.form = FormsStore.tryRegisterControl(this);
     }
     this.state.value = this.initValue;
 
@@ -283,7 +282,7 @@ export abstract class BaseControl<
   abstract getRenderedInput(id: string | number, value: TValue): Core.Element;
 
   componentWillUnmount(): void {
-    FormsStore.tryRemoveInput(this);
+    FormsStore.tryRemoveControl(this);
   }
 
   /** @inheritdoc */
