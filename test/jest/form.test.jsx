@@ -95,7 +95,7 @@ describe("form", () => {
     expect(FormsStore.forms.size).toBe(1);
     // js-Set doesn't have values accessed by index
     expect(FormsStore.forms.values().next().value).toBe(form);
-    expect(form.controls.length).toBe(0); // 0 - because there is no name for textControl
+    expect(form.controls.length).toBe(1);
 
     dom.render(
       <Form
@@ -104,8 +104,6 @@ describe("form", () => {
         }}
       >
         <TextControl
-          key={1}
-          // todo if name changed we can update control because it wasn't changed
           name="postalCode"
           ref={el => {
             control = el;
@@ -130,7 +128,7 @@ describe("form", () => {
     expect(spyValidate).toHaveLastReturnedWith(false);
     expect(form.state.error).toBe(Form.errOneRequired);
     expect(dom.element.innerHTML).toMatchInlineSnapshot(
-      `"<form autocomplete=\\"off\\" novalidate=\\"\\"><label for=\\"uipack_2\\"><span></span><span><input id=\\"uipack_2\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\"></span></label><div>At least one value is required</div><div><button type=\\"submit\\">SUBMIT</button></div></form>"`
+      `"<form autocomplete=\\"off\\" novalidate=\\"\\"><label for=\\"uipack_1\\"><span></span><span><input id=\\"uipack_1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\"></span></label><div>At least one value is required</div><div><button type=\\"submit\\">SUBMIT</button></div></form>"`
     );
 
     // checking submit-callback and model-generating
