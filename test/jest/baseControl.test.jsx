@@ -64,10 +64,10 @@ describe("baseControl", () => {
         super(props);
         ctrl = this;
       }
-      getRenderedInput = () => {
+      renderInput() {
         spyRender(this.state.value);
         return null;
-      };
+      }
     }
     dom.render(<Test initValue={5} />);
     expect(spyRender).toBeCalledTimes(1);

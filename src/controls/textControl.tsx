@@ -1,5 +1,4 @@
 /* eslint-disable max-classes-per-file */
-import Core from "../core";
 import {
   BaseControl,
   BaseControlValidations,
@@ -26,26 +25,20 @@ export class TextControlValidations extends BaseControlValidations<string> {
 }
 
 export interface TextControlValidationProps extends BaseControlValidationProps {
+  /** Min length */
   min?: number;
+  /** Max length */
   max?: number;
 }
 
 export interface TextControlProps extends BaseControlProps<string, TextControl> {
   /** @inheritdoc */
   validations?: TextControlValidationProps;
-  htmlInputProps?: Pick<
-    // todo maybe delete this: placeholder???
-    Core.HTMLAttributes<HTMLInputElement>,
-    Exclude<
-      keyof Core.HTMLAttributes<HTMLInputElement>,
-      "id" | "onChange" | "onBlur" | "aria-invalid" | "aria-required" | "value" | "disabled"
-    >
-  >;
 }
 
-export type TextInputState = BaseControlState<string>;
+export type TextControlState = BaseControlState<string>;
 
-export class TextControl extends BaseControl<string, TextControlProps, TextInputState> {
+export class TextControl extends BaseControl<string, TextControlProps, TextControlState> {
   /** @inheritdoc */
   static isEmpty<TValue>(v: TValue): boolean {
     return v == null || ((v as unknown) as string) === "";
@@ -59,41 +52,4 @@ export class TextControl extends BaseControl<string, TextControlProps, TextInput
 
   /** @inheritdoc */
   static defaultValidations = new TextControlValidations();
-
-  constructor(props: TextControlProps) {
-    super(props);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleBlur = this.handleBlur.bind(this);
-    this.getRenderedInput = this.getRenderedInput.bind(this);
-    this.renderInput = this.renderInput.bind(this);
-  }
-
-  /** onChange event of the input */
-  handleChange(e: Core.DomChangeEvent) {
-    this.gotChange(e.target.value.trimStart());
-  }
-
-  /** onBlur event of the input */
-  handleBlur(e: Core.DomFocusEvent) {
-    this.gotBlur(e.target.value.trim());
-  }
-
-  /** Override this method for customizing input-rendering */
-  renderInput(defProps: Core.HTMLAttributes<HTMLInputElement>, value: string): Core.Element {
-    return <input {...defProps} value={value} />;
-  }
-
-  /** @inheritdoc */
-  getRenderedInput(id: string | number, value: string): Core.Element {
-    const defProps = {
-      ...this.props.htmlInputProps,
-      id,
-      onChange: this.handleChange,
-      onBlur: this.handleBlur,
-      "aria-invalid": !!this.state.error,
-      "aria-required": this.isRequired,
-      disabled: this.props.disabled
-    } as Core.HTMLAttributes<HTMLInputElement>;
-    return this.renderInput(defProps, value);
-  }
 }

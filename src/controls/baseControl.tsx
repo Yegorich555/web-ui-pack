@@ -17,6 +17,14 @@ export interface BaseControlValidationProps {
 }
 
 export interface BaseControlProps<TValue, TControl> extends BaseComponentProps {
+  htmlInputProps?: Pick<
+    // todo maybe delete this: placeholder???
+    Core.HTMLAttributes<HTMLInputElement>,
+    Exclude<
+      keyof Core.HTMLAttributes<HTMLInputElement>,
+      "id" | "onChange" | "onBlur" | "aria-invalid" | "aria-required" | "value" | "disabled"
+    >
+  >;
   /** Html attribute; Default `uipack_${++i}` */
   id?: string | number;
   label?: string;
@@ -224,6 +232,10 @@ export abstract class BaseControl<
     this.validate = this.validate.bind(this);
     this.onFocusLeft = this.onFocusLeft.bind(this);
     this.renderError = this.renderError.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleInputBlur = this.handleInputBlur.bind(this);
+    this.renderInput = this.renderInput.bind(this);
+    this.getInputValue = this.getInputValue.bind(this);
   }
 
   get isRequired() {
@@ -257,7 +269,7 @@ export abstract class BaseControl<
     return this.setValue(this.state.value);
   }
 
-  /** Input must fire this method after onChange of value is happened */
+  /** Function is fired when inputIsChanged and we must update state */
   gotChange(value: TValue): void {
     this.setValue(value, undefined, !this.constructor.common.validateOnChange);
   }
@@ -277,8 +289,17 @@ export abstract class BaseControl<
     detectFocusLeft(this.domEl as HTMLElement, () => this.onFocusLeft(value), this.constructor.common.focusDebounce);
   }
 
-  /** Implement this method and bind gotBlur and gotChange */
-  abstract getRenderedInput(id: string | number, value: TValue): Core.Element;
+  /** onChange event of the input */
+  handleInputChange(e: Core.DomChangeEvent) {
+    // todo check if string is expected
+    this.gotChange((e.target.value.trimStart() as unknown) as TValue);
+  }
+
+  /** onBlur event of the input */
+  handleInputBlur(e: Core.DomFocusEvent) {
+    // todo check if string is expected
+    this.gotBlur((e.target.value.trim() as unknown) as TValue);
+  }
 
   componentWillUnmount(): void {
     FormsStore.tryRemoveControl(this);
@@ -310,6 +331,16 @@ export abstract class BaseControl<
     return <span role="alert">{error}</span>;
   }
 
+  /** Override this method for providing truly string value for the input */
+  getInputValue(value: TValue): string {
+    return value == null ? "" : ((value as unknown) as string);
+  }
+
+  /** Override this method for customizing input-rendering */
+  renderInput(defProps: Core.HTMLAttributes<HTMLInputElement>): Core.Element {
+    return <input {...defProps} />;
+  }
+
   render(): Core.Element {
     const { isRequired } = this;
     const id = (this.props.id || this._id) as string | number;
@@ -324,8 +355,19 @@ export abstract class BaseControl<
         data-invalid={!!this.state.error || null}
       >
         <span>{this.props.label}</span>
-        {/* wait: update to aria-errormessage when NVDA supports it: https://github.com/nvaccess/nvda/issues/8318 */}
-        <span>{this.getRenderedInput(id, this.state.value)}</span>
+        {/* wait: update for aria-errormessage when NVDA supports it: https://github.com/nvaccess/nvda/issues/8318 */}
+        <span>
+          {this.renderInput({
+            ...this.props.htmlInputProps,
+            id,
+            onChange: this.handleInputChange,
+            onBlur: this.handleInputBlur,
+            "aria-invalid": !!this.state.error,
+            "aria-required": this.isRequired,
+            disabled: this.props.disabled,
+            value: this.getInputValue(this.state.value)
+          } as Core.HTMLAttributes<HTMLInputElement>)}
+        </span>
         {this.state.error ? this.renderError(this.state.error) : null}
       </label>
     );
