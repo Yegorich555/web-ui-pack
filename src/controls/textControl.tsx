@@ -31,7 +31,7 @@ export interface TextControlValidationProps extends BaseControlValidationProps {
   max?: number;
 }
 
-export interface TextControlProps extends BaseControlProps<string, TextControl> {
+export interface TextControlProps extends BaseControlProps<string> {
   /** @inheritdoc */
   validations?: TextControlValidationProps;
 }

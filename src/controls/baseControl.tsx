@@ -16,7 +16,7 @@ export interface BaseControlValidationProps {
   required?: boolean | string;
 }
 
-export interface BaseControlProps<TValue, TControl> extends BaseComponentProps {
+export interface BaseControlProps<TValue> extends BaseComponentProps {
   htmlInputProps?: Pick<
     // todo maybe delete this: placeholder???
     Core.HTMLAttributes<HTMLInputElement>,
@@ -35,9 +35,9 @@ export interface BaseControlProps<TValue, TControl> extends BaseComponentProps {
   /** Validation rules for the control */
   validations?: BaseControlValidationProps;
   /** Event happens when value is changed */
-  onChanged?: (value: TValue, control: TControl) => void;
+  onChanged?: <TControl>(value: TValue, control: TControl) => void;
   /** Event happens when control completely lost focus */
-  onFocusLeft?: (value: TValue, control: TControl) => void;
+  onFocusLeft?: <TControl>(value: TValue, control: TControl) => void;
   /** Html attribute */
   disabled?: boolean;
 }
@@ -50,7 +50,7 @@ let _id = 0;
 
 export abstract class BaseControl<
   TValue,
-  Props extends BaseControlProps<TValue, any>,
+  Props extends BaseControlProps<TValue>,
   State extends BaseControlState<TValue>
 > extends BaseComponent<Props, State> {
   // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146
@@ -58,7 +58,7 @@ export abstract class BaseControl<
   ["constructor"]: typeof BaseControl;
 
   /** @inheritdoc */
-  static excludedRenderProps: Readonly<Array<keyof BaseControlProps<unknown, unknown>>> = [
+  static excludedRenderProps: Readonly<Array<keyof BaseControlProps<unknown>>> = [
     "initValue",
     "name",
     "validations",
