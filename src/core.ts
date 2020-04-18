@@ -14,6 +14,12 @@ declare module Core {
   export type DomFocusEvent = React.FocusEvent<HTMLInputElement>;
   export type DomChangeEvent = React.ChangeEvent<HTMLInputElement>;
   export type Ref = React.Ref<HTMLInputElement>;
+  export type HTMLLabelProps = React.DetailedHTMLProps<React.LabelHTMLAttributes<HTMLLabelElement>, HTMLLabelElement>;
+  export type HTMLDivProps = React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
+  export type HTMLFieldsetProps = React.DetailedHTMLProps<
+    React.HTMLAttributes<HTMLFieldSetElement>,
+    HTMLFieldSetElement
+  >;
 }
 
 // this is just js-functionality

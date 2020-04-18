@@ -4,47 +4,68 @@ $focusColor: var(--controlFocusColor, #1976d2);
 $labelColor: var(--controlLabelColor, #1359a0);
 $background: var(--controlBackground, white);
 $backgroundDisabled: var(--controlDisabledBackground, #ebebe3);
-$textColorDisabled: var(--controlDisabledTextColor, #737373);
+$textColorDisabled: var(--controlDisabledTextColor, inherit); // #737373);
 $errorTextColor: var(--controlErrorTextColor, #b70000); //#f44336;
 $errorColor: var(--controlErrorFrameColor, red);
 $borderRadius: var(--borderRadius, 3px);
+$border: var(--controlBorder, 2px solid #bdbdbd);
 
 .uiBaseControl {
-  margin-top: 2em;
+  //margin-top: 2em;
+  margin-top: 2.5em;
   display: block;
-  //text of label
-  > *:first-child {
-    display: block;
-    position: absolute;
-    z-index: 1;
-    margin: 0 ($padding - 0.2em);
-    padding: 0 0.2em;
-    transform: translateY(0.2em - $padding);
-    color: $labelColor;
-    background: $background;
-    transition: transform 200ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+  fieldset {
+    padding: 0;
+    margin: 0;
+    position: relative;
+    border: $border;
+    border-radius: $borderRadius;
   }
-  //asterisk-mark
-  &[data-required="true"] > *:first-child {
-    &::after {
-      content: "*";
-      font-size: larger;
-      font-weight: bolder;
-      line-height: 0;
-      padding: 0 0.2em;
+
+  legend {
+    height: 0;
+    padding: 0;
+    margin: 0 ($padding - 0.1em);
+    color: $labelColor;
+    &[aria-hidden="true"] {
+      visibility: hidden;
+      display: none;
     }
   }
 
-  //wrapper for input
-  > *:nth-child(2) {
+  label {
     display: block;
-    position: relative;
-    border: 1px solid #bdbdbd; //todo css-var
-    border-radius: $borderRadius;
-    padding: 1px; //fix for border-scaling
+    > span {
+      display: block;
+      position: absolute;
+      z-index: 1;
+      transition: transform 200ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+      color: $labelColor;
+      top: -1.4em;
+      margin: 0;
+      // background: $background;
+      // margin: 0 ($padding - 0.1em);
+      // transform: translateY(-$padding);
+    }
   }
+
+  //asterisk-mark
+  &[data-required="true"] {
+    legend,
+    label > span {
+      &::after {
+        content: "*";
+        font-size: larger;
+        font-weight: bolder;
+        line-height: 0;
+        padding: 0 0.2em;
+      }
+    }
+  }
+
   input,
   [contenteditable="true"] {
+    color: inherit;
     font: inherit;
     padding: $padding;
     border: none;
@@ -52,7 +73,6 @@ $borderRadius: var(--borderRadius, 3px);
     box-sizing: border-box;
     background: $background;
     transition: box-shadow 200ms cubic-bezier(0, 0, 0.2, 1) 0ms;
-    // fix for border-scaling
     // stylelint-disable-next-line plugin/no-unsupported-browser-features
     width: calc(100% + 2px);
     margin: -1px;
@@ -65,37 +85,43 @@ $borderRadius: var(--borderRadius, 3px);
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
   ::placeholder {
     text-overflow: ellipsis;
   }
-  input[disabled],
-  [contenteditable="true"][disabled] {
-    cursor: default;
-    cursor: not-allowed;
-    color: $textColorDisabled;
-    //todo background: $backgroundDisabled;
-  }
 
-  //todo border and other frames for input only
-  //frames
-  *:focus {
-    box-shadow: 0 0 3px 2px $focusColor;
-    // stylelint-disable-next-line plugin/no-unsupported-browser-features
-    outline: none;
-  }
-  &:hover > *:nth-child(2) {
-    box-shadow: 0 0 4px 0 $focusColor;
-  }
-  &[data-invalid="true"] {
-    &:hover > *:nth-child(2) {
-      box-shadow: 0 0 4px 0 $errorColor;
+  &[disabled] {
+    fieldset {
+      color: $textColorDisabled;
     }
     input,
     [contenteditable="true"] {
-      box-shadow: 0 0 2px 1px $errorColor;
+      background: $backgroundDisabled;
+      cursor: default;
+      cursor: not-allowed;
+    }
+  }
+
+  //frames
+  *:focus {
+    box-shadow: 0 0 3px 1px $focusColor;
+    // stylelint-disable-next-line plugin/no-unsupported-browser-features
+    outline: none;
+  }
+  fieldset:hover {
+    //border-color: $focusColor;
+    box-shadow: 0 0 4px 0 $focusColor;
+  }
+  &[data-invalid="true"] {
+    fieldset {
+      border-color: $errorColor;
+      box-shadow: 0 0 3px 0px $errorColor;
+      &:hover {
+        box-shadow: 0 0 3px 1px $errorColor;
+      }
     }
     *:focus {
-      box-shadow: 0 0 3px 2px $errorColor;
+      box-shadow: 0 0 3px 1px $errorColor;
     }
   }
 

@@ -39,45 +39,45 @@ describe("textControl", () => {
     dom
       .expectRender(<TextControl id={1} />)
       .toMatchInlineSnapshot(
-        `"<label for=\\"1\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\"></span></label>"`
+        `"<div><fieldset><label><span></span><input aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\"></label></fieldset></div>"`
       );
     dom
       .expectRender(<TextControl id={1} label="Some Label" />)
       .toMatchInlineSnapshot(
-        `"<label for=\\"1\\"><span>Some Label</span><span><input id=\\"1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\"></span></label>"`
+        `"<div><fieldset><legend aria-hidden=\\"true\\">Some Label</legend><label><span>Some Label</span><input aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\"></label></fieldset></div>"`
       );
     dom
       .expectRender(<TextControl id={1} name="Your Name" />)
       .toMatchInlineSnapshot(
-        `"<label for=\\"1\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\"></span></label>"`
+        `"<div><fieldset><label><span></span><input aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\"></label></fieldset></div>"`
       );
     dom
       .expectRender(<TextControl id={1} htmlInputProps={{ placeholder: "placeholder text here" }} />)
       .toMatchInlineSnapshot(
-        `"<label for=\\"1\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\" placeholder=\\"placeholder text here\\"></span></label>"`
+        `"<div><fieldset><label><span></span><input aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\" placeholder=\\"placeholder text here\\"></label></fieldset></div>"`
       );
     // checking data-required='true' when validations required: true
     dom
       .expectRender(<TextControl id={1} validations={{ required: true }} />)
       .toMatchInlineSnapshot(
-        `"<label for=\\"1\\" data-required=\\"true\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"false\\" aria-required=\\"true\\" value=\\"\\"></span></label>"`
+        `"<div data-required=\\"true\\"><fieldset><label><span></span><input aria-invalid=\\"false\\" aria-required=\\"true\\" value=\\"\\"></label></fieldset></div>"`
       );
     // checking data-required='false' when validations required: false
     dom
       .expectRender(<TextControl id={1} validations={{ required: false }} />)
       .toMatchInlineSnapshot(
-        `"<label for=\\"1\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\"></span></label>"`
+        `"<div><fieldset><label><span></span><input aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\"></label></fieldset></div>"`
       );
     // key points that input is new: we need this for reinit-component
     dom
       .expectRender(<TextControl key={1} id={1} initValue="value here" />)
       .toMatchInlineSnapshot(
-        `"<label for=\\"1\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"value here\\"></span></label>"`
+        `"<div><fieldset><label><span></span><input aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"value here\\"></label></fieldset></div>"`
       );
     dom
       .expectRender(<TextControl key={1} id={1} disabled />)
       .toMatchInlineSnapshot(
-        `"<label for=\\"1\\" disabled=\\"\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\" disabled=\\"\\"></span></label>"`
+        `"<div disabled=\\"\\"><fieldset disabled=\\"\\"><label><span></span><input aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\"></label></fieldset></div>"`
       );
   });
 
@@ -194,7 +194,7 @@ describe("textControl", () => {
     expect(h.lastCall(setValue)[0]).toBe("");
     expect(ref.state.error).toBe(TextControl.defaultValidations.required.msg);
     expect(dom.element.innerHTML).toMatchInlineSnapshot(
-      `"<label for=\\"1\\" data-required=\\"true\\" data-invalid=\\"true\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"true\\" aria-required=\\"true\\" value=\\"\\"></span><span role=\\"alert\\">This field is required</span></label>"`
+      `"<div data-required=\\"true\\" data-invalid=\\"true\\"><fieldset><label><span></span><input aria-invalid=\\"true\\" aria-required=\\"true\\" value=\\"\\" aria-describedby=\\"err16\\"></label></fieldset><div role=\\"alert\\" id=\\"err16\\">This field is required</div></div>"`
     );
 
     // test validations.min
@@ -212,12 +212,12 @@ describe("textControl", () => {
     dom.userTypeText(input, "d");
     expect(ref.state.error).toBe(TextControl.defaultValidations.min.msg(2));
     expect(dom.element.innerHTML).toMatchInlineSnapshot(
-      `"<label for=\\"1\\" data-invalid=\\"true\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"true\\" aria-required=\\"false\\" value=\\"d\\"></span><span role=\\"alert\\">Min length is 2 characters</span></label>"`
+      `"<div data-invalid=\\"true\\"><fieldset><label><span></span><input aria-invalid=\\"true\\" aria-required=\\"false\\" value=\\"d\\" aria-describedby=\\"err16\\"></label></fieldset><div role=\\"alert\\" id=\\"err16\\">Min length is 2 characters</div></div>"`
     );
     dom.userTypeText(input, "dv");
     expect(ref.state.error).toBe(undefined);
     expect(dom.element.innerHTML).toMatchInlineSnapshot(
-      `"<label for=\\"1\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"dv\\"></span></label>"`
+      `"<div><fieldset><label><span></span><input aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"dv\\"></label></fieldset></div>"`
     );
 
     // test validations.max
@@ -236,12 +236,12 @@ describe("textControl", () => {
     dom.userTypeText(input, "d");
     expect(ref.state.error).toBe(undefined);
     expect(dom.element.innerHTML).toMatchInlineSnapshot(
-      `"<label for=\\"1\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"d\\"></span></label>"`
+      `"<div><fieldset><label><span></span><input aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"d\\"></label></fieldset></div>"`
     );
     dom.userTypeText(input, "dvt");
     expect(ref.state.error).toBe(TextControl.defaultValidations.max.msg(2));
     expect(dom.element.innerHTML).toMatchInlineSnapshot(
-      `"<label for=\\"1\\" data-invalid=\\"true\\"><span></span><span><input id=\\"1\\" aria-invalid=\\"true\\" aria-required=\\"false\\" value=\\"dvt\\"></span><span role=\\"alert\\">Max length is 2 characters</span></label>"`
+      `"<div data-invalid=\\"true\\"><fieldset><label><span></span><input aria-invalid=\\"true\\" aria-required=\\"false\\" value=\\"dvt\\" aria-describedby=\\"err16\\"></label></fieldset><div role=\\"alert\\" id=\\"err16\\">Max length is 2 characters</div></div>"`
     );
 
     // checking direct calling functions

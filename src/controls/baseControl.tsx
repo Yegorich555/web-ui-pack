@@ -22,11 +22,9 @@ export interface BaseControlProps<TValue> extends BaseComponentProps {
     Core.HTMLAttributes<HTMLInputElement>,
     Exclude<
       keyof Core.HTMLAttributes<HTMLInputElement>,
-      "id" | "onChange" | "onBlur" | "aria-invalid" | "aria-required" | "value" | "disabled"
+      "onChange" | "onBlur" | "aria-invalid" | "aria-required" | "value" | "disabled"
     >
   >;
-  /** Html attribute; Default `uipack_${++i}` */
-  id?: string | number;
   label?: string;
   /** Prop-key for form-model, if you want to set html attribute @see htmlInputProps */
   name?: string;
@@ -46,8 +44,8 @@ export interface BaseControlState<T> {
   value: T;
   error?: string;
 }
-let _id = 0;
 
+let _id = 0;
 export abstract class BaseControl<
   TValue,
   Props extends BaseControlProps<TValue>,
@@ -72,8 +70,9 @@ export abstract class BaseControl<
    * if you need to redefine options for particular control just define this one in inherited control
    */
   static common = {
-    getUniqueId(): string {
-      return `uipack_${++_id}`;
+    /** Returns unique id-attribute for the error-message; requires only for accessibility */
+    getUniqueIdError(): string {
+      return `err${++_id}`;
     },
     /** Auto-validation when user changed value; Default: true */
     validateOnChange: true,
@@ -171,22 +170,6 @@ export abstract class BaseControl<
     }
   };
 
-  getInitValue(props: Props): Readonly<TValue> {
-    let definedValue: TValue | undefined;
-    if (props.initValue !== undefined) {
-      definedValue = props.initValue as TValue;
-    } else if (props.name && this.form) {
-      const v = this.form.getInitValue<TValue>(props.name as string);
-      if (v !== undefined) {
-        definedValue = v;
-      }
-    }
-    if (definedValue !== undefined && !this.constructor.isEmpty(definedValue)) {
-      return definedValue;
-    }
-    return (this.constructor.defaultInitValue as unknown) as TValue;
-  }
-
   /** @readonly Returns the currentValue. For changing @see BaseControl.setValue */
   get value(): Readonly<TValue> {
     const { value } = this.state;
@@ -203,7 +186,12 @@ export abstract class BaseControl<
     return this.constructor.isEmpty(this.state.value);
   }
 
-  _id: string | number = this.constructor.common.getUniqueId();
+  /** @readonly Returns true if the props.validations.required is true */
+  get isRequired(): boolean {
+    return !!(this.props.validations?.required || false);
+  }
+
+  _idError: string = this.constructor.common.getUniqueIdError();
   form?: Form<unknown>;
 
   toJSON(): this {
@@ -225,8 +213,8 @@ export abstract class BaseControl<
     this.state.value = this.getInitValue(props);
 
     // Such bind is important for inheritance and using super...(): https://stackoverflow.com/questions/46869503/es6-arrow-functions-trigger-super-outside-of-function-or-class-error
-    this.gotChange = this.gotChange.bind(this);
-    this.gotBlur = this.gotBlur.bind(this);
+    // this.gotChange = this.gotChange.bind(this);
+    // this.gotBlur = this.gotBlur.bind(this);
     this.renderError = this.renderError.bind(this);
     this.setValue = this.setValue.bind(this);
     this.validate = this.validate.bind(this);
@@ -236,10 +224,23 @@ export abstract class BaseControl<
     this.handleInputBlur = this.handleInputBlur.bind(this);
     this.renderInput = this.renderInput.bind(this);
     this.getInputValue = this.getInputValue.bind(this);
+    this.getControlProps = this.getControlProps.bind(this);
   }
 
-  get isRequired() {
-    return !!(this.props.validations?.required || false);
+  getInitValue(props: Props): Readonly<TValue> {
+    let definedValue: TValue | undefined;
+    if (props.initValue !== undefined) {
+      definedValue = props.initValue as TValue;
+    } else if (props.name && this.form) {
+      const v = this.form.getInitValue<TValue>(props.name as string);
+      if (v !== undefined) {
+        definedValue = v;
+      }
+    }
+    if (definedValue !== undefined && !this.constructor.isEmpty(definedValue)) {
+      return definedValue;
+    }
+    return (this.constructor.defaultInitValue as unknown) as TValue;
   }
 
   /**
@@ -269,36 +270,35 @@ export abstract class BaseControl<
     return this.setValue(this.state.value);
   }
 
-  /** Function is fired when inputIsChanged and we must update state */
-  gotChange(value: TValue): void {
-    this.setValue(value, undefined, !this.constructor.common.validateOnChange);
-  }
+  // /** Function is fired when inputIsChanged and we must update state */
+  // gotChange(value: TValue): void {
+  //   this.setValue(value, undefined, !this.constructor.common.validateOnChange);
+  // }
 
   /** Function is fired when control completely lost focus */
-  onFocusLeft(value: TValue) {
+  onFocusLeft(inputValue: string | TValue): void {
     this.setValue(
-      value,
-      () => this.props.onFocusLeft && this.props.onFocusLeft(value, this),
+      (inputValue as unknown) as TValue,
+      () => this.props.onFocusLeft && this.props.onFocusLeft((inputValue as unknown) as TValue, this),
       !this.constructor.common.validateOnFocusLeft
     );
   }
 
-  /** Input must fire this method after focus is lost */
-  gotBlur(value: TValue) {
-    // todo check this for dropdown
-    detectFocusLeft(this.domEl as HTMLElement, () => this.onFocusLeft(value), this.constructor.common.focusDebounce);
-  }
+  // /** Input must fire this method after focus is lost */
+  // gotBlur(value: TValue) {
+  //   detectFocusLeft(this.domEl as HTMLElement, () => this.onFocusLeft(value), this.constructor.common.focusDebounce);
+  // }
 
   /** onChange event of the input */
-  handleInputChange(e: Core.DomChangeEvent) {
-    // todo check if string is expected
-    this.gotChange((e.target.value.trimStart() as unknown) as TValue);
+  handleInputChange(e: Core.DomChangeEvent): void {
+    const value = (e.target.value.trimStart() as unknown) as TValue;
+    this.setValue(value, undefined, !this.constructor.common.validateOnChange);
   }
 
   /** onBlur event of the input */
-  handleInputBlur(e: Core.DomFocusEvent) {
-    // todo check if string is expected
-    this.gotBlur((e.target.value.trim() as unknown) as TValue);
+  handleInputBlur(e: Core.DomFocusEvent): void {
+    const value = e.target.value.trim();
+    detectFocusLeft(this.domEl as HTMLElement, () => this.onFocusLeft(value), this.constructor.common.focusDebounce);
   }
 
   componentWillUnmount(): void {
@@ -326,9 +326,13 @@ export abstract class BaseControl<
     return false;
   }
 
-  renderError(error: string): Core.Element {
+  renderError(error: string, errorId: string): Core.Element {
     /* todo: implement tooltip for this case */
-    return <span role="alert">{error}</span>;
+    return (
+      <div role="alert" id={errorId}>
+        {error}
+      </div>
+    );
   }
 
   /** Override this method for providing truly string value for the input */
@@ -338,38 +342,46 @@ export abstract class BaseControl<
 
   /** Override this method for customizing input-rendering */
   renderInput(defProps: Core.HTMLAttributes<HTMLInputElement>): Core.Element {
-    return <input {...defProps} />;
+    return (
+      // eslint-disable-next-line jsx-a11y/label-has-associated-control
+      <label>
+        <span>{this.props.label}</span>
+        <input {...defProps} />
+      </label>
+    );
+  }
+
+  /** Props of the div that is wrapper of the input and the top-element of the control */
+  getControlProps(isRequired: boolean): Core.HTMLDivProps {
+    return {
+      ref: this.setDomEl,
+      className: this.props.className,
+      // @ts-ignore
+      disabled: this.props.disabled,
+      "data-required": isRequired || null,
+      "data-invalid": !!this.state.error || null
+    };
   }
 
   render(): Core.Element {
     const { isRequired } = this;
-    const id = (this.props.id || this._id) as string | number;
     return (
-      <label
-        ref={this.setDomEl}
-        htmlFor={id as string}
-        className={this.props.className}
-        data-required={isRequired || null}
-        // @ts-ignore
-        disabled={this.props.disabled}
-        data-invalid={!!this.state.error || null}
-      >
-        <span>{this.props.label}</span>
-        {/* wait: update for aria-errormessage when NVDA supports it: https://github.com/nvaccess/nvda/issues/8318 */}
-        <span>
+      <div {...this.getControlProps(isRequired)}>
+        <fieldset disabled={this.props.disabled}>
+          {this.props.label ? <legend aria-hidden="true">{this.props.label}</legend> : null}
+          {/* wait: update for aria-errormessage when NVDA supports it: https://github.com/nvaccess/nvda/issues/8318 */}
           {this.renderInput({
             ...this.props.htmlInputProps,
-            id,
             onChange: this.handleInputChange,
             onBlur: this.handleInputBlur,
             "aria-invalid": !!this.state.error,
             "aria-required": this.isRequired,
-            disabled: this.props.disabled,
+            "aria-describedby": this.state.error ? this._idError : null,
             value: this.getInputValue(this.state.value)
           } as Core.HTMLAttributes<HTMLInputElement>)}
-        </span>
-        {this.state.error ? this.renderError(this.state.error) : null}
-      </label>
+        </fieldset>
+        {this.state.error ? this.renderError(this.state.error, this._idError) : null}
+      </div>
     );
   }
 }

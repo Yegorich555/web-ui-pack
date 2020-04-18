@@ -4,7 +4,7 @@ const { TextControl } = require("web-ui-pack");
 describe("baseControl", () => {
   test("autoFocus", async () => {
     const id = await page.evaluate(() => {
-      renderIt(<TextControl id="someId" autoFocus />);
+      renderIt(<TextControl htmlInputProps={{ id: "someId" }} autoFocus />);
       return document.activeElement.id;
     });
     expect(id).toBe("someId");

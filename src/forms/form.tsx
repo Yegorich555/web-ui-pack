@@ -6,7 +6,7 @@ import promiseWait from "../helpers/promiseWait";
 import nestedProperty from "../helpers/nestedProperty";
 import { BaseComponent, BaseComponentProps } from "../baseComponent";
 
-export interface FormProps<ModelType> extends Omit<BaseComponentProps, "autoFocus"> {
+export interface FormProps<ModelType> extends BaseComponentProps {
   /** Html attribute; Default: "off" */
   autoComplete?: "on" | "off";
   title?: string | Core.Element;
