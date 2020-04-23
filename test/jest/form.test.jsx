@@ -86,7 +86,7 @@ describe("form", () => {
         </Form>
       )
       .toMatchInlineSnapshot(
-        `"<form autocomplete=\\"off\\" novalidate=\\"\\"><h2>Title here</h2><label for=\\"uipack_1\\"><span></span><span><input id=\\"uipack_1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\"></span></label><div><button type=\\"submit\\">SUBMIT</button></div></form>"`
+        `"<form autocomplete=\\"off\\" novalidate=\\"\\"><h2>Title here</h2><div><fieldset><label><span></span><input aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\"></label></fieldset></div><div><button type=\\"submit\\">SUBMIT</button></div></form>"`
       );
     // todo: why doesn't this work after the second render
     const spySubmit = jest.spyOn(form, "submit");
@@ -128,7 +128,7 @@ describe("form", () => {
     expect(spyValidate).toHaveLastReturnedWith(false);
     expect(form.state.error).toBe(Form.errOneRequired);
     expect(dom.element.innerHTML).toMatchInlineSnapshot(
-      `"<form autocomplete=\\"off\\" novalidate=\\"\\"><label for=\\"uipack_1\\"><span></span><span><input id=\\"uipack_1\\" aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\"></span></label><div>At least one value is required</div><div><button type=\\"submit\\">SUBMIT</button></div></form>"`
+      `"<form autocomplete=\\"off\\" novalidate=\\"\\"><div><fieldset><label><span></span><input aria-invalid=\\"false\\" aria-required=\\"false\\" value=\\"\\"></label></fieldset></div><div>At least one value is required</div><div><button type=\\"submit\\">SUBMIT</button></div></form>"`
     );
 
     // checking submit-callback and model-generating
