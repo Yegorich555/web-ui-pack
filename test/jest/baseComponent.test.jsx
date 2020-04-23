@@ -19,7 +19,7 @@ describe("baseComponent", () => {
   h.testComponentFuncBind(BaseComponent);
 
   test("autofocus", () => {
-    // checking if autoFocus behavior works without errors
+    // checking if autoFocus behavior works without errors other checking possible only with puppeteer
     const fn = jest.fn();
     class Some extends BaseComponent {
       componentDidMount() {
@@ -38,6 +38,16 @@ describe("baseComponent", () => {
     expect(fn).toBeCalledTimes(1);
     dom.renderWait(<Some key={1} autoFocus isAttach />);
     expect(fn).toBeCalledTimes(2);
+
+    class NoFocus extends BaseComponent {
+      render() {
+        return <div ref={this.setDomEl} />;
+      }
+    }
+
+    // testing not-focusable element
+    const fnConsole = h.wrapConsoleWarn(() => dom.render(<NoFocus autoFocus />));
+    expect(fnConsole).toBeCalledTimes(1);
   });
 
   test("shouldComponentUpdate", () => {

@@ -1,4 +1,5 @@
 import Core from "./core";
+import focusFirst from "./helpers/focusFirst";
 
 function isPropsChanged<T extends Record<string, any>>(
   v1: T,
@@ -17,7 +18,7 @@ function isPropsChanged<T extends Record<string, any>>(
 export interface BaseComponentProps {
   /** Html attribute */
   className?: string;
-  /** Html attribute. This is InitProp - replacing after component-init doesn't have effect */
+  /** AutoFocus for the first focusable element. This is InitProp - replacing after component-init doesn't have effect */
   autoFocus?: boolean;
 }
 
@@ -36,7 +37,9 @@ export abstract class BaseComponent<Props extends BaseComponentProps, State> ext
   /** @inheritdoc */
   componentDidMount(): void {
     if (this.props.autoFocus && this.domEl) {
-      this.domEl.focus();
+      if (!focusFirst(this.domEl)) {
+        console.warn("Focusable element not found");
+      }
     }
   }
 

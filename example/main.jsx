@@ -1,9 +1,11 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import "./styles/main.scss";
 import { Component } from "react";
 import ReactDom from "react-dom";
 import { Form, TextControl } from "web-ui-pack";
 import "web-ui-pack/styles/form.css";
-import "web-ui-pack/styles/baseControl.css";
+// import "web-ui-pack/styles/baseControl.css";
+import "../src/styles/baseControl.scss";
 
 class AppContainer extends Component {
   constructor(props) {
