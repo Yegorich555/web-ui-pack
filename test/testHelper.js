@@ -30,6 +30,7 @@ export function mockSetState(el) {
 const origConsoleWarn = console.warn;
 export function mockConsoleWarn() {
   console.warn = jest.fn();
+  return console.warn;
 }
 
 export function unMockConsoleWarn() {
@@ -37,7 +38,7 @@ export function unMockConsoleWarn() {
 }
 
 export function wrapConsoleWarn(fn) {
-  mockConsoleWarn();
+  const mockConsole = mockConsoleWarn();
   try {
     fn();
   } catch (ex) {
@@ -45,6 +46,7 @@ export function wrapConsoleWarn(fn) {
     throw ex;
   }
   unMockConsoleWarn();
+  return mockConsole;
 }
 
 export function testComponentFuncBind(Type) {

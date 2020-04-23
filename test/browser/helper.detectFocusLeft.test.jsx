@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/no-autofocus */
-const { detectFocusLeft } = require("web-ui-pack");
+const detectFocusLeft = require("web-ui-pack/helpers/detectFocusLeft");
 
 beforeAll(async () => {
   await page.evaluate(() => {
@@ -25,7 +25,7 @@ beforeAll(async () => {
   });
 });
 
-describe("detectFocusLeft", () => {
+describe("helper.detectFocusLeft", () => {
   test("ordinary behavior", async () => {
     let id = await page.evaluate(() => document.activeElement.id);
     expect(id).toBe("c1");
