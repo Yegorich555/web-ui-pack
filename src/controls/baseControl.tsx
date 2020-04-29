@@ -343,8 +343,7 @@ export abstract class BaseControl<
   /** Override this method for customizing input-rendering */
   renderInput(defProps: Core.HTMLAttributes<HTMLInputElement>): Core.Element {
     return (
-      // eslint-disable-next-line jsx-a11y/label-has-associated-control
-      <label>
+      <label htmlFor={defProps.id}>
         <span>{this.props.label}</span>
         <input {...defProps} />
       </label>
