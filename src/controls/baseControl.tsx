@@ -247,7 +247,12 @@ export abstract class BaseControl<
    * Function is fired when value changed or re-validation is required
    * @return true if isValid
    */
-  setValue(value: TValue, callback?: () => void, skipValidation?: boolean): boolean {
+  setValue(
+    value: TValue,
+    callback?: () => void,
+    skipValidation?: boolean,
+    nextState?: Pick<State, keyof State>
+  ): boolean {
     const error = skipValidation
       ? this.state.error
       : this.constructor.common.checkIsInvalid(value, this.constructor.defaultValidations, this.props.validations) ||
@@ -255,7 +260,7 @@ export abstract class BaseControl<
 
     const isValueChanged = value !== this.state.value;
     if (isValueChanged || error !== this.state.error) {
-      this.setState({ value, error }, () => {
+      this.setState({ value, error, ...nextState } as Pick<State, keyof State>, () => {
         isValueChanged && this.props.onChanged && this.props.onChanged(value, this);
         callback && callback();
       });
@@ -270,11 +275,6 @@ export abstract class BaseControl<
     return this.setValue(this.state.value);
   }
 
-  // /** Function is fired when inputIsChanged and we must update state */
-  // gotChange(value: TValue): void {
-  //   this.setValue(value, undefined, !this.constructor.common.validateOnChange);
-  // }
-
   /** Function is fired when control completely lost focus */
   onFocusLeft(inputValue: string | TValue): void {
     this.setValue(
@@ -283,11 +283,6 @@ export abstract class BaseControl<
       !this.constructor.common.validateOnFocusLeft
     );
   }
-
-  // /** Input must fire this method after focus is lost */
-  // gotBlur(value: TValue) {
-  //   detectFocusLeft(this.domEl as HTMLElement, () => this.onFocusLeft(value), this.constructor.common.focusDebounce);
-  // }
 
   /** onChange event of the input */
   handleInputChange(e: Core.DomChangeEvent): void {
@@ -299,6 +294,11 @@ export abstract class BaseControl<
   handleInputBlur(e: Core.DomFocusEvent): void {
     const value = e.target.value.trim();
     detectFocusLeft(this.domEl as HTMLElement, () => this.onFocusLeft(value), this.constructor.common.focusDebounce);
+  }
+
+  componentDidMount() {
+    this.domEl && this.domEl.addEventListener("focusin", () => console.warn("focusIn"));
+    this.domEl && this.domEl.addEventListener("focusout", () => console.warn("focusout"));
   }
 
   componentWillUnmount(): void {

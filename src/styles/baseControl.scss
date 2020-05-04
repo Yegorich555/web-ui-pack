@@ -1,5 +1,5 @@
 /* stylelint-disable no-descending-specificity */
-$padding: 0.7em; //var(--controlPadding, 0.7em);
+$padding: var(--controlPadding, 0.7em);
 $focusColor: var(--controlFocusColor, #1976d2);
 $labelColor: var(--controlLabelColor, #1359a0);
 $background: var(--controlBackground, white);
@@ -8,7 +8,7 @@ $textColorDisabled: var(--controlDisabledTextColor, inherit); // #737373);
 $errorTextColor: var(--controlErrorTextColor, #b70000); //#f44336;
 $errorColor: var(--controlErrorFrameColor, red);
 $borderRadius: var(--borderRadius, 3px);
-$border: var(--controlBorder, 2px solid #bdbdbd);
+$border: var(--controlBorder, 1px solid #bdbdbd);
 
 .uiBaseControl {
   //margin-top: 2em;
@@ -25,7 +25,7 @@ $border: var(--controlBorder, 2px solid #bdbdbd);
   legend {
     height: 0;
     padding: 0;
-    margin: 0 ($padding - 0.1em);
+    margin: 0;
     color: $labelColor;
     &[aria-hidden="true"] {
       visibility: hidden;
@@ -73,9 +73,7 @@ $border: var(--controlBorder, 2px solid #bdbdbd);
     box-sizing: border-box;
     background: $background;
     transition: box-shadow 200ms cubic-bezier(0, 0, 0.2, 1) 0ms;
-    // stylelint-disable-next-line plugin/no-unsupported-browser-features
-    width: calc(100% + 2px);
-    margin: -1px;
+    width: 100%;
   }
 
   //common properties
@@ -128,5 +126,42 @@ $border: var(--controlBorder, 2px solid #bdbdbd);
   [role="alert"] {
     font: inherit;
     color: $errorTextColor;
+  }
+}
+
+//part of comboBox
+$selectBackground: var(--controlMenuSelectBackground, #aecfea);
+$selectTextColor: var(--controlSelectTextColor, black);
+$itemHoverBackground: var(--controlMenuItemHoverBackground, #599dd4);
+$itemHoverTextColor: var(--controlMenuItemHoverTextColor, white);
+.uiBaseControl {
+  ul {
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+    position: absolute;
+    left: 0;
+    z-index: 100;
+    border-radius: $borderRadius;
+    overflow: auto;
+    background: $background;
+    max-height: 180px;
+    min-width: 100%;
+    border: $border;
+    box-sizing: border-box;
+    > li {
+      padding: $padding;
+      &[aria-selected] {
+        cursor: pointer;
+        &:hover {
+          background: $itemHoverBackground;
+          color: $itemHoverTextColor;
+        }
+      }
+      &[aria-selected="true"] {
+        background: $selectBackground;
+        color: $selectTextColor;
+      }
+    }
   }
 }

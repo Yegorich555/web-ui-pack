@@ -13,9 +13,12 @@ declare module Core {
   export type FormEvent = React.FormEvent<HTMLFormElement>;
   export type DomFocusEvent = React.FocusEvent<HTMLInputElement>;
   export type DomChangeEvent = React.ChangeEvent<HTMLInputElement>;
+  export type DomKeyboardEvent = React.KeyboardEvent<HTMLElement>;
+  export type DomMouseEvent = React.MouseEvent<HTMLElement>;
   export type Ref = React.Ref<HTMLInputElement>;
   export type HTMLLabelProps = React.DetailedHTMLProps<React.LabelHTMLAttributes<HTMLLabelElement>, HTMLLabelElement>;
   export type HTMLDivProps = React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
+  export type HTMLLiProps = React.DetailedHTMLProps<React.HTMLAttributes<HTMLLIElement>, HTMLLIElement>;
   export type HTMLFieldsetProps = React.DetailedHTMLProps<
     React.HTMLAttributes<HTMLFieldSetElement>,
     HTMLFieldSetElement
