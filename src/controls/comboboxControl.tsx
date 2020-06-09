@@ -56,6 +56,12 @@ export class ComboboxControl<
   /** Text for listbox when displayed no items */
   static textNoItems: string | undefined = "No Items";
 
+  /** Aria-label for arrow-button when need to show options */
+  static textAriaBtnShow: string | undefined = "Show options";
+
+  /** Aria-label for arrow-button when need to hide options */
+  static textAriaBtnHide: string | undefined = "Hide options";
+
   /** @inheritdoc */
   static isEmpty<TValue>(v: TValue): boolean {
     return v === undefined;
@@ -100,10 +106,16 @@ export class ComboboxControl<
     this.handleMenuClick = this.handleMenuClick.bind(this);
     this.handleKeyDown = this.handleKeyDown.bind(this);
     this.setValueAndClose = this.setValueAndClose.bind(this);
+    this.handleButtonMenuClick = this.handleButtonMenuClick.bind(this);
   }
 
   get options(): ComboboxOption[] {
     return (this.props.options as ComboboxOption[]) || [];
+  }
+
+  handleButtonMenuClick(): void {
+    this.setState({ isOpen: !this.state.isOpen });
+    // todo setValueAndClose
   }
 
   /**
@@ -129,7 +141,7 @@ export class ComboboxControl<
 
   /** @inheritdoc */
   handleInputChange(e: Core.DomChangeEvent): void {
-    // we don't use default logic because input changing makes effect only on search
+    // we don't use default logic because input-changing makes effect only on search
     const inputValue = e.target.value.trimStart();
     if (inputValue !== this.state.inputValue || !this.state.isOpen) {
       this.setState({ inputValue, isOpen: true, select: SelectDirection.first });
@@ -144,7 +156,7 @@ export class ComboboxControl<
     }
   }
 
-  // onKeyDown event of the control
+  /* onKeyDown event of the control */
   handleKeyDown(e: Core.DomKeyboardEvent): void {
     // todo how to clear control without esc
     type NS = Pick<State, keyof State>;
@@ -320,6 +332,14 @@ export class ComboboxControl<
             aria-owns={listboxId} // ARIA 1.1 combobox pattern
             aria-controls={listboxId} // ARIA 1.0 combobox pattern
             aria-haspopup="listbox"
+          />
+          <button
+            type="button"
+            onClick={this.handleButtonMenuClick}
+            // prevents focus-behavior
+            onMouseDown={e => e.preventDefault()}
+            tabIndex={-1}
+            aria-label={this.state.isOpen ? this.constructor.textAriaBtnShow : this.constructor.textAriaBtnShow}
           />
         </label>
         {this.state.isOpen ? this.renderPopup(listboxId) : null}

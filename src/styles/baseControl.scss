@@ -186,4 +186,29 @@ $itemHoverTextColor: var(--controlMenuItemHoverTextColor, white);
       }
     }
   }
+  input[role="combobox"] {
+    padding-right: 3em;
+  }
+
+  input + button {
+    position: absolute;
+    height: 100%;
+    right: 0;
+    top: 0;
+    background: none;
+    cursor: pointer;
+    border: none;
+    border-top-right-radius: $borderRadius;
+    border-bottom-right-radius: $borderRadius;
+    @include iconBefore($icon-dropdown);
+    &::before {
+      display: inline-block;
+      padding: 0 0.4em;
+      font-size: larger;
+    }
+  }
+
+  input[aria-expanded="true"] + button::before {
+    transform: rotate(180deg);
+  }
 }
