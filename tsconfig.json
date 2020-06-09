@@ -14,5 +14,5 @@
     "allowJs": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "build", ".vscode", "lib", "src/implementLater/JSXcreateElement.ts"]
+  "exclude": ["node_modules", "build", ".vscode", "lib", "src/implementLater/JSXcreateElement.ts", "icomoon"]
 }

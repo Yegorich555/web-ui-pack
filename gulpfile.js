@@ -11,7 +11,7 @@ const postcssConfig = require("./postcss.config");
 
 const transformSCSS = new stream.Transform({
   objectMode: true,
-  transform: function transformer(file, encoding, cb) {
+  transform: async function transformer(file, encoding, cb) {
     if (file.isNull()) {
       // return empty file
       cb(null, file);
@@ -23,7 +23,7 @@ const transformSCSS = new stream.Transform({
 
       // postcss changing
       const plugins = Object.keys(postcssConfig.plugins).map(key => require(key));
-      result = postcss(plugins).process(result.css);
+      result = await postcss(plugins).process(result.css);
 
       file.contents = Buffer.from(result.css, encoding);
       // replace extension

@@ -27,6 +27,7 @@ module.exports = {
   plugins: ["@typescript-eslint", "json", "prettier"],
   rules: {
     "lines-between-class-members": ["error", "always", { exceptAfterSingleLine: true }],
+    "react/no-access-state-in-setstate": "off",
     "react/react-in-jsx-scope": "off",
     "react/jsx-filename-extension": [1, { extensions: [".tsx", ".jsx"] }],
     "react/static-property-placement": "off",

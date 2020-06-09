@@ -1,3 +1,14 @@
+@import "src/styles/icomoon/variables.scss";
+$icon-font-family: "webuipack";
+@font-face {
+  font-family: "#{$icon-font-family}";
+  // src: url("src/styles/icomoon/#{$icomoon-font-path}/#{$icomoon-font-family}.woff") format("woff");
+  src: url("./icomoon/#{$icomoon-font-path}/#{$icomoon-font-family}.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
 /* stylelint-disable no-descending-specificity */
 $padding: var(--controlPadding, 0.7em);
 $focusColor: var(--controlFocusColor, #1976d2);
@@ -9,6 +20,16 @@ $errorTextColor: var(--controlErrorTextColor, #b70000); //#f44336;
 $errorColor: var(--controlErrorFrameColor, red);
 $borderRadius: var(--borderRadius, 3px);
 $border: var(--controlBorder, 1px solid #bdbdbd);
+
+@mixin iconBefore($name) {
+  &::before {
+    font-family: "#{$icon-font-family}" !important;
+    content: $name;
+    /* Better Font Rendering =========== */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
 
 .uiBaseControl {
   //margin-top: 2em;

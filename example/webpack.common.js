@@ -73,7 +73,7 @@ module.exports = function(_env, argv) {
         },
         // rule for images
         {
-          test: /\.(png|jpe?g|gif|webp)(\?.*)?$/,
+          test: /\.(png|jpe?g|gif|webp|woff)(\?.*)?$/,
           exclude: /(node_modules)/,
           use: [
             {
