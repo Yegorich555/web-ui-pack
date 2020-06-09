@@ -134,6 +134,7 @@ $selectBackground: var(--controlMenuSelectBackground, #aecfea);
 $selectTextColor: var(--controlSelectTextColor, black);
 $itemHoverBackground: var(--controlMenuItemHoverBackground, #599dd4);
 $itemHoverTextColor: var(--controlMenuItemHoverTextColor, white);
+/* stylelint-disable-next-line no-duplicate-selector */
 .uiBaseControl {
   ul {
     padding: 0;

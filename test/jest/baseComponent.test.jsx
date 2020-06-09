@@ -26,6 +26,7 @@ describe("baseComponent", () => {
         super.componentDidMount();
         fn();
       }
+
       render() {
         if (this.props.isAttach) {
           return <input ref={this.setDomEl} />;
@@ -59,6 +60,7 @@ describe("baseComponent", () => {
         this.state = {};
         el = this;
       }
+
       render() {
         fn();
         return <div {...this.props} {...this.state} />;

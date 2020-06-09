@@ -1,5 +1,3 @@
-import Core from "../core";
-
 /**
  * Search first focusable element (parent or children) and set focus
  * @param element

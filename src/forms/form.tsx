@@ -77,6 +77,7 @@ export class Form<ModelType> extends BaseComponent<FormProps<ModelType>, FormSta
     autoComplete: "off",
     textSubmit: "SUBMIT"
   };
+
   /** Controls that the form has as a child; adds automatically via web-ui-pack/FormsStore when control-constructor is fired */
   controls: BaseControl<any, BaseControlProps<any>, any>[] = [];
   // todo provide method resetForm()
@@ -179,6 +180,7 @@ export class Form<ModelType> extends BaseComponent<FormProps<ModelType>, FormSta
       this.setState(newState);
     }
   }
+
   /**
    * Submit event that validates inputs, collect model and fires props.onValidSubmit
    */

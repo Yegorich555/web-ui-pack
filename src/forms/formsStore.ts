@@ -8,12 +8,15 @@ export default class FormsStore {
   static get forms(): Set<Form<any>> {
     return hashSet;
   }
+
   static registerForm<T>(form: Form<T>): void {
     hashSet.add(form);
   }
+
   static removeForm<T>(form: Form<T>): void {
     hashSet.delete(form);
   }
+
   /**
    * Find form and register control as children of form
    */

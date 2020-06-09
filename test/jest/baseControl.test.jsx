@@ -64,6 +64,7 @@ describe("baseControl", () => {
         super(props);
         ctrl = this;
       }
+
       renderInput() {
         spyRender(this.state.value);
         return null;

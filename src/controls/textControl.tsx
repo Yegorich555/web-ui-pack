@@ -14,10 +14,12 @@ export class TextControlValidations extends BaseControlValidations<string> {
     test: (v?: string) => !TextControl.isEmpty(v),
     msg: ValidationMessages.required
   };
+
   min = {
     test: (v: string, setV: number) => v.length >= setV,
     msg: ValidationMessages.minText
   };
+
   max = {
     test: (v: string, setV: number) => v.length <= setV,
     msg: ValidationMessages.maxText

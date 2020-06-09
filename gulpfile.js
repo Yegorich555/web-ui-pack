@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const gulp = require("gulp");
 const stream = require("stream");
-const fs = require("fs");
+// const fs = require("fs");
 const sass = require("node-sass");
 const postcss = require("postcss");
 const postcssConfig = require("./postcss.config");
