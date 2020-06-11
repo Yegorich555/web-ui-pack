@@ -115,13 +115,12 @@ export class ComboboxControl<
   }
 
   handleButtonMenuClick(): void {
+    focusFirst(this.domEl as HTMLElement);
     const { isOpen } = this.state;
     if (!isOpen) {
-      focusFirst(this.domEl as HTMLElement);
       this.setState({ isOpen: true, select: SelectDirection.current });
     } else {
-      const v = this._selectedItem ? this.options[this._selectedItem.index].value : this.constructor.defaultInitValue;
-      this.setValueAndClose(v);
+      this.setValueAndClose(this.state.value);
     }
   }
 
