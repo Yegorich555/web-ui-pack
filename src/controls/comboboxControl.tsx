@@ -30,7 +30,8 @@ const enum SelectDirection {
   first,
   last,
   next,
-  previous
+  previous,
+  current
 }
 
 export interface ComboboxControlState<TValue> extends BaseControlState<TValue> {
@@ -114,19 +115,23 @@ export class ComboboxControl<
   }
 
   handleButtonMenuClick(): void {
-    this.setState({ isOpen: !this.state.isOpen });
-    // todo setValueAndClose
+    const { isOpen } = this.state;
+    if (!isOpen) {
+      focusFirst(this.domEl as HTMLElement);
+      this.setState({ isOpen: true, select: SelectDirection.current });
+    } else {
+      const v = this._selectedItem ? this.options[this._selectedItem.index].value : this.constructor.defaultInitValue;
+      this.setValueAndClose(v);
+    }
   }
 
   /**
-   * Function is fired when value changed or re-validation is required
+   * Function is fired when popup isClosing and we must select value;
    * @return true if isValid
    */
-  setValueAndClose(value: TValue | undefined): boolean {
-    return this.setValue(value as TValue, undefined, false, { isOpen: false, inputValue: undefined } as Pick<
-      State,
-      keyof State
-    >);
+  setValueAndClose(value: TValue): boolean {
+    this.setState({ isOpen: false, inputValue: undefined });
+    return this.setValue(value);
   }
 
   /** @inheritdoc */
@@ -180,12 +185,13 @@ export class ComboboxControl<
       if (this.state.isOpen) {
         e.preventDefault();
         const v = this._selectedItem ? this.options[this._selectedItem.index].value : this.constructor.defaultInitValue;
-        this.setValueAndClose(v as TValue);
+        this.setValueAndClose(v);
       }
       return;
     } else if (e.keyCode === 27) {
       // esc
-      this.setValueAndClose(this.constructor.defaultInitValue);
+      e.preventDefault();
+      this.setValueAndClose((this.constructor.defaultInitValue as unknown) as TValue);
       return;
       // todo optional reset to previous
     }
@@ -250,6 +256,17 @@ export class ComboboxControl<
         i = 0;
       } else if (this.state.select === SelectDirection.last) {
         i = last;
+      } else if (this.state.select === SelectDirection.current) {
+        i = options.findIndex(v => v.value === this.state.value);
+        if (i === -1) {
+          i = 0;
+          if (!this.isEmpty) {
+            console.error(
+              `Combobox. Current value '${this.state.value}' doesn't match with options`,
+              this.props.options
+            );
+          }
+        }
       } else {
         i = this._selectedItem?.index || 0;
         if (this.state.select === SelectDirection.previous) {
