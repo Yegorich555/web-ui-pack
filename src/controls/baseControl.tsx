@@ -177,21 +177,21 @@ export abstract class BaseControl<
   }
 
   /** @readonly Returns true if the currentValue is different from the initValue */
-  get isChanged(): boolean {
+  get isChanged(): Readonly<boolean> {
     return this.state.value !== this.getInitValue(this.props);
   }
 
   /** @readonly Returns true if the currentValue is empty/null. @see constructor.isEmpty */
-  get isEmpty(): boolean {
+  get isEmpty(): Readonly<boolean> {
     return this.constructor.isEmpty(this.state.value);
   }
 
   /** @readonly Returns true if the props.validations.required is true */
-  get isRequired(): boolean {
+  get isRequired(): Readonly<boolean> {
     return !!(this.props.validations?.required || false);
   }
 
-  _idError: string = this.constructor.common.getUniqueIdError();
+  private _idError: Readonly<string> = this.constructor.common.getUniqueIdError();
   form?: Form<unknown>;
 
   toJSON(): this {
@@ -247,12 +247,7 @@ export abstract class BaseControl<
    * Function is fired when value changed or re-validation is required
    * @return true if isValid
    */
-  setValue(
-    value: TValue,
-    callback?: () => void,
-    skipValidation?: boolean,
-    nextState?: Pick<State, keyof State>
-  ): boolean {
+  setValue(value: TValue, callback?: () => void, skipValidation?: boolean): boolean {
     const error = skipValidation
       ? this.state.error
       : this.constructor.common.checkIsInvalid(value, this.constructor.defaultValidations, this.props.validations) ||
@@ -260,7 +255,7 @@ export abstract class BaseControl<
 
     const isValueChanged = value !== this.state.value;
     if (isValueChanged || error !== this.state.error) {
-      this.setState({ value, error, ...nextState } as Pick<State, keyof State>, () => {
+      this.setState({ value, error }, () => {
         isValueChanged && this.props.onChanged && this.props.onChanged(value, this);
         callback && callback();
       });
@@ -294,11 +289,6 @@ export abstract class BaseControl<
   handleInputBlur(e: Core.DomFocusEvent): void {
     const value = e.target.value.trim();
     detectFocusLeft(this.domEl as HTMLElement, () => this.onFocusLeft(value), this.constructor.common.focusDebounce);
-  }
-
-  componentDidMount() {
-    this.domEl && this.domEl.addEventListener("focusin", () => console.warn("focusIn"));
-    this.domEl && this.domEl.addEventListener("focusout", () => console.warn("focusout"));
   }
 
   componentWillUnmount(): void {

@@ -42,8 +42,8 @@ export type TextControlState = BaseControlState<string>;
 
 export class TextControl extends BaseControl<string, TextControlProps, TextControlState> {
   /** @inheritdoc */
-  static isEmpty<TValue>(v: TValue): boolean {
-    return v == null || ((v as unknown) as string) === "";
+  static isEmpty<TValue>(v: TValue | string): boolean {
+    return v == null || v === "";
   }
 
   /** @inheritdoc */

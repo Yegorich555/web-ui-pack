@@ -81,9 +81,10 @@ export class Form<ModelType> extends BaseComponent<FormProps<ModelType>, FormSta
   /** Controls that the form has as a child; adds automatically via web-ui-pack/FormsStore when control-constructor is fired */
   controls: BaseControl<any, BaseControlProps<any>, any>[] = [];
   // todo provide method resetForm()
+  // todo provide onChangedForm for usage "on the fly"
 
-  _isUnMounted = false;
-  _isWaitSubmitFinished = false;
+  private _isUnMounted = false;
+  private _isWaitSubmitFinished = false;
   state: FormState = {
     isPending: false
   };
