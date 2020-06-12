@@ -219,8 +219,8 @@ export class ComboboxControl<
   componentDidUpdate() {
     const selectedItem = this._selectedItem && this.domEl?.querySelector(`#${this._selectedItem.id}`);
     if (selectedItem) {
-      // todo maybe check if visible
-      selectedItem.scrollIntoView();
+      if (selectedItem.scrollIntoViewIfNeeded) selectedItem.scrollIntoViewIfNeeded(false);
+      else selectedItem.scrollIntoView();
     }
   }
 
