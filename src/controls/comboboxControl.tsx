@@ -134,13 +134,14 @@ export class ComboboxControl<
   }
 
   /** @inheritdoc */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onFocusLeft(inputValue: string): void {
-    // todo enter-key or click must selectOption
-    // if (this.state.inputValue || this.state.isOpen) {
-    //   this.setState({ inputValue: undefined, isOpen: false });
-    // }
-    // const found = this.options.find(o => this.constructor.filterOptions(o, inputValue.toLowerCase(), inputValue));
-    // super.onFocusLeft(found?.value);
+    let v = this.state.value;
+    if (this.state.isOpen) {
+      v = this._selectedItem ? this.options[this._selectedItem.index].value : this.constructor.defaultInitValue;
+      this.setState({ isOpen: false, inputValue: undefined });
+    }
+    super.onFocusLeft(v);
   }
 
   /** @inheritdoc */
