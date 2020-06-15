@@ -10,7 +10,7 @@ module.exports = {
   testPathIgnorePatterns: ["/node_modules/", `.eslintrc.js$`, `config.js$`],
   coverageDirectory: "coverage", // {root}/coverage
   collectCoverage: true,
-  collectCoverageFrom: ["lib/**/*.{js,jsx}"],
+  collectCoverageFrom: ["lib/**/*.{js,jsx}", "!**/icomoon/**"],
   moduleNameMapper,
   projects: [
     {

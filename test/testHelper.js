@@ -57,6 +57,7 @@ export function testComponentFuncBind(Type) {
       "componentDidCatch",
       "componentWillUnmount",
       "shouldComponentUpdate",
+      "componentDidUpdate",
       "render",
       "toJSON",
       "setDomEl"

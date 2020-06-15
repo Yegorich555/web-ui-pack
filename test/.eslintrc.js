@@ -8,6 +8,7 @@ module.exports = {
     "@typescript-eslint/no-empty-function": "off",
     "no-return-assign": "off",
     "max-classes-per-file": "off",
-    "prefer-promise-reject-errors": "off"
+    "prefer-promise-reject-errors": "off",
+    "@typescript-eslint/no-unused-vars": ["error", { varsIgnorePattern: "React" }]
   }
 };

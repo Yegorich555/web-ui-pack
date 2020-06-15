@@ -1,22 +1,22 @@
 {
   "name": "web-ui-pack",
   "version": "0.0.1",
-  "description": "Must-have config for Webpack 4",
+  "description": "Web package with UI elements",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
     "test": "npm run pretest-build && jest --coverage --coverageReporters=text --config test/jest.config.js",
     "test-minify": "node ./test/minification/start.js",
-    "pretest-build": "npm run build && webpack --config test/browser/srv/webpack.config.js",
+    "pretest-build": "npm run build-сode && webpack --config test/browser/srv/webpack.config.js",
     "coverage": "npm run test -- --coverageReporters=text-lcov | coveralls",
     "example": "./node_modules/.bin/webpack-dev-server --hot --open --config example/webpack.devServer.js",
-    "webpack-build-dev": "./node_modules/.bin/webpack --mode development --config example/webpack.dev.js",
-    "lint": "npm run lint-code && npm run lint-styles",
     "lint-code": "./node_modules/.bin/eslint --fix --cache ./**/*.{js,jsx,ts,tsx,json}",
     "lint-styles": "./node_modules/.bin/stylelint --fix --cache ./**/*.{css,scss,less}",
     "lint-md": "./node_modules/.bin/markdownlint --fix **/*.md --ignore node_modules",
+    "lint": "npm run lint-code && npm run lint-styles",
     "build-styles": "gulp",
-    "build": "gulp && tsc --listEmittedFiles --incremental"
+    "build-сode": "tsc --listEmittedFiles --incremental",
+    "build": "gulp && build-сode"
   },
   "repository": {
     "type": "git",
