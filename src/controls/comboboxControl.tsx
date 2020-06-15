@@ -73,12 +73,13 @@ export class ComboboxControl<
 
   /** Text for listbox when displayed no items */
   static textNoItems: string | undefined = "No Items";
-
   /** Aria-label for arrow-button when need to show options */
   static textAriaBtnShow: string | undefined = "Show options";
-
   /** Aria-label for arrow-button when need to hide options */
   static textAriaBtnHide: string | undefined = "Hide options";
+
+  /** ESC-key behavior: set @false for reset to initValue; set @true for clearing value; Default: true */
+  static shouldEscClear = true;
 
   /** @inheritdoc */
   static isEmpty<TValue>(v: TValue): boolean {
@@ -106,7 +107,7 @@ export class ComboboxControl<
   }
 
   /**
-   * Returns id-attribute for every list-option. It always must return same id for same option.
+   * Returns id-attribute for every list-option. It always must return the same id for the same option.
    * Note: @index refer to the real order in props.options
    */
   static getOptionId(option: ComboboxOption, index: number) {
@@ -219,14 +220,15 @@ export class ComboboxControl<
     } else if (e.keyCode === 27) {
       // esc
       e.preventDefault();
-      this.setValueAndClose((this.constructor.defaultInitValue as unknown) as TValue);
+      const rstValue = this.constructor.shouldEscClear
+        ? this.constructor.defaultInitValue
+        : this.getInitValue(this.props);
+      this.setValueAndClose((rstValue as unknown) as TValue);
       return;
-      // todo optional reset to previous
     }
 
     if (nextState) {
       e.preventDefault();
-      // todo prevent useless setState
       this.setState(nextState);
     }
   }
