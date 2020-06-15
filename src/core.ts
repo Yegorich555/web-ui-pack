@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 /* eslint-disable @typescript-eslint/no-namespace */
 import React from "react";
 
@@ -23,6 +24,7 @@ declare module Core {
     React.HTMLAttributes<HTMLFieldSetElement>,
     HTMLFieldSetElement
   >;
+  let Fragment: React.ReactFragment;
 }
 
 // this is just js-functionality
@@ -31,5 +33,6 @@ declare module Core {
 const Core = {};
 Core.renderElement = React.createElement;
 Core.Component = React.Component;
+Core.Fragment = React.Fragment;
 
 export default Core;

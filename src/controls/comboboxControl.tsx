@@ -378,7 +378,8 @@ export class ComboboxControl<
 
     return (
       // @ts-ignore
-      <>
+      // todo watchFix: https://github.com/Microsoft/TypeScript/issues/20469
+      <Core.Fragment>
         <label htmlFor={defProps.id}>
           <span>{this.props.label}</span>
           <input
@@ -403,7 +404,7 @@ export class ComboboxControl<
           />
         </label>
         {this.state.isOpen ? this.renderPopup(listboxId) : null}
-      </>
+      </Core.Fragment>
     );
   }
 }
