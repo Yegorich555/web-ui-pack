@@ -96,7 +96,8 @@ export class ComboboxControl<
     return `li${index}`;
   }
 
-  _selectedItem: { id: string; index: number } | undefined;
+  private _selectedItem: { id: string; index: number } | undefined;
+  private _userClearedInput = false;
 
   constructor(props: Props) {
     super(props);
@@ -106,6 +107,7 @@ export class ComboboxControl<
     this.handleInputFocus = this.handleInputFocus.bind(this);
     this.handleMenuClick = this.handleMenuClick.bind(this);
     this.handleKeyDown = this.handleKeyDown.bind(this);
+    this.closePopup = this.closePopup.bind(this);
     this.setValueAndClose = this.setValueAndClose.bind(this);
     this.handleButtonMenuClick = this.handleButtonMenuClick.bind(this);
   }
@@ -124,12 +126,18 @@ export class ComboboxControl<
     }
   }
 
+  /** Close popup and clear local-state */
+  closePopup() {
+    this._selectedItem = undefined;
+    this.setState({ isOpen: false, inputValue: undefined });
+  }
+
   /**
    * Function is fired when popup isClosing and we must select value;
    * @return true if isValid
    */
   setValueAndClose(value: TValue): boolean {
-    this.setState({ isOpen: false, inputValue: undefined });
+    this.closePopup();
     return this.setValue(value);
   }
 
@@ -139,7 +147,7 @@ export class ComboboxControl<
     let v = this.state.value;
     if (this.state.isOpen) {
       v = this._selectedItem ? this.options[this._selectedItem.index].value : this.constructor.defaultInitValue;
-      this.setState({ isOpen: false, inputValue: undefined });
+      this.closePopup();
     }
     super.onFocusLeft(v);
   }
@@ -163,23 +171,26 @@ export class ComboboxControl<
 
   /* onKeyDown event of the control */
   handleKeyDown(e: Core.DomKeyboardEvent): void {
-    // todo how to clear control without esc
     type NS = Pick<State, keyof State>;
     let nextState: NS | null = null;
     if (e.keyCode === 38) {
       // up
-      nextState = { select: SelectDirection.previous, isOpen: true } as NS;
+      const select = this._selectedItem ? SelectDirection.previous : SelectDirection.last;
+      nextState = { select, isOpen: true } as NS;
     } else if (e.keyCode === 40) {
       // down
-      nextState = { select: SelectDirection.next, isOpen: true } as NS;
+      const select = this._selectedItem ? SelectDirection.next : SelectDirection.first;
+      nextState = { select, isOpen: true } as NS;
     } else if (e.keyCode === 36) {
-      // todo optional home/end behavior for input
-      // todo home/end for isOpen
       // home
-      nextState = { select: SelectDirection.first } as NS;
+      if (this.state.isOpen) {
+        nextState = { select: SelectDirection.first } as NS;
+      }
     } else if (e.keyCode === 35) {
       // end
-      nextState = { select: SelectDirection.last } as NS;
+      if (this.state.isOpen) {
+        nextState = { select: SelectDirection.last } as NS;
+      }
     } else if (e.keyCode === 13) {
       // enter
       if (this.state.isOpen) {
@@ -224,6 +235,15 @@ export class ComboboxControl<
     }
   }
 
+  /** @inheritdoc */
+  shouldComponentUpdate(nextProps: Readonly<Props>, nextState: Readonly<State>, nextContext: any): boolean {
+    this._userClearedInput =
+      nextState.inputValue === "" && this.state.inputValue != null && !!this.state.inputValue.length;
+
+    // otherwise use base logic
+    return super.shouldComponentUpdate(nextProps, nextState, nextContext);
+  }
+
   /** Override this method for customizing popupContent-rendering */
   renderPopupContent(options: ComboboxOption[], inputValue: string | undefined): Core.Element[] {
     const createProps = (o: ComboboxOption, i: number) => ({
@@ -249,7 +269,9 @@ export class ComboboxControl<
     }
 
     // focus-selected behavior for menu-items
-    if (itemArgs.length) {
+    if (this._userClearedInput) {
+      this._selectedItem = undefined;
+    } else if (itemArgs.length) {
       let i = 0;
       const last = itemArgs.length - 1;
       if (this.state.select === SelectDirection.first) {
@@ -313,8 +335,7 @@ export class ComboboxControl<
 
   /** @inheritdoc */
   getInputValue(value: TValue): string {
-    if (this.state.inputValue) {
-      // todo this is wrong: impossible to clear value
+    if (this.state.inputValue != null) {
       return this.state.inputValue;
     }
     if (value === undefined) {
