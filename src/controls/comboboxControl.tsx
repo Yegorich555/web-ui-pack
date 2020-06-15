@@ -22,7 +22,24 @@ export type ComboboxOption = {
   text: string;
 };
 
+type HtmlInputProps = BaseControlProps<any>["htmlInputProps"];
+
 export interface ComboboxControlProps<TValue> extends BaseControlProps<TValue> {
+  htmlInputProps?: Pick<
+    HtmlInputProps,
+    Exclude<
+      keyof HtmlInputProps,
+      | "onFocus"
+      | "autoComplete"
+      | "aria-autocomplete"
+      | "aria-activedescendant"
+      | "role"
+      | "aria-expanded"
+      | "aria-owns"
+      | "aria-controls"
+      | "aria-haspopup"
+    >
+  >;
   options?: ComboboxOption[];
 }
 
@@ -360,7 +377,6 @@ export class ComboboxControl<
           <span>{this.props.label}</span>
           <input
             {...defProps}
-            // todo exclude props from htmlInputProps
             onFocus={this.handleInputFocus}
             autoComplete="off" // todo maybe "new-password"
             aria-autocomplete="list"
