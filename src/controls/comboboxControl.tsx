@@ -238,7 +238,11 @@ export class ComboboxControl<
 
     if (id) {
       const option = this.options.find((o, i) => this.constructor.getOptionId(o, i) === id);
-      // todo warn
+      if (!option) {
+        console.warn(
+          "ComboboxControl. Impossible to find option. Constructor.getOptionId(option, index) must be pure-function"
+        );
+      }
       this.setValueAndClose(option?.value);
     }
   }
