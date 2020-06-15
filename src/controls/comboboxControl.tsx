@@ -73,10 +73,6 @@ export class ComboboxControl<
 
   /** Text for listbox when displayed no items */
   static textNoItems: string | undefined = "No Items";
-  /** Aria-label for arrow-button when need to show options */
-  static textAriaBtnShow: string | undefined = "Show options";
-  /** Aria-label for arrow-button when need to hide options */
-  static textAriaBtnHide: string | undefined = "Hide options";
 
   /** ESC-key behavior: set @false for reset to initValue; set @true for clearing value; Default: true */
   static shouldEscClear = true;
@@ -183,7 +179,10 @@ export class ComboboxControl<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handleInputFocus(e: Core.DomChangeEvent): void {
     if (!this.state.isOpen) {
-      this.setState({ isOpen: true, select: SelectDirection.first });
+      setTimeout(() => {
+        // timeout fixes 'no reading label/input when popup shows immediately because of aria-activedescendant has effect
+        this.setState({ isOpen: true, select: SelectDirection.first });
+      }, 50);
     }
   }
 
@@ -375,7 +374,8 @@ export class ComboboxControl<
   /** @inheritdoc */
   renderInput(defProps: Core.HTMLAttributes<HTMLInputElement>): Core.Element {
     const listboxId = this.constructor.getUniqueListboxId(defProps.id);
-
+    // renderPopup requires first because it has definition _selectItem that affects on input
+    const popup = this.state.isOpen ? this.renderPopup(listboxId) : null;
     return (
       // @ts-ignore
       // todo watchFix: https://github.com/Microsoft/TypeScript/issues/20469
@@ -394,16 +394,18 @@ export class ComboboxControl<
             aria-controls={listboxId} // ARIA 1.0 combobox pattern
             aria-haspopup="listbox"
           />
+          {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
           <button
             type="button"
             onClick={this.handleButtonMenuClick}
             // prevents focus-behavior
             onMouseDown={e => e.preventDefault()}
             tabIndex={-1}
-            aria-label={this.state.isOpen ? this.constructor.textAriaBtnShow : this.constructor.textAriaBtnShow}
+            // this button useless for disabled users because it doesn't get focus
+            aria-hidden="true"
           />
         </label>
-        {this.state.isOpen ? this.renderPopup(listboxId) : null}
+        {popup}
       </Core.Fragment>
     );
   }
