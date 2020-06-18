@@ -368,7 +368,7 @@ export class ComboboxControl<
       return curOption.text;
     }
     console.warn(`ComboboxControl. The value [${value}] is not found among the props.options [${this.props.options}]`);
-    return "";
+    return (value as any).toString ? (value as any).toString() : ((value as unknown) as string);
   }
 
   /** @inheritdoc */
