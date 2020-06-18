@@ -6,6 +6,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "test": "npm run pretest-build && jest --coverage --coverageReporters=text --config test/jest.config.js",
+    "test-single": "jest --config test/jest.config.js --coverage=false",
     "test-minify": "node ./test/minification/start.js",
     "pretest-build": "npm run build-code && webpack --config test/browser/srv/webpack.config.js",
     "coverage": "npm run test -- --coverageReporters=text-lcov | coveralls",

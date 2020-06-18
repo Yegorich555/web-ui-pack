@@ -122,6 +122,7 @@ export function initDom() {
       reactTestUtils.act(() => {
         render(el, container.element);
       });
+      return container.element;
     },
     /** wait for render is finished; apply jest.useFakeTimers before this function */
     renderWait: el => {
