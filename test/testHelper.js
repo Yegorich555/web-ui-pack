@@ -115,6 +115,15 @@ export function testControlCommon(Type) {
   });
 }
 
+export const keys = {
+  Enter: 13,
+  Esc: 27,
+  ArrowUp: 38,
+  ArrowLeft: 37,
+  ArrowRight: 39,
+  ArrowDown: 40
+};
+
 export function initDom() {
   const container = {
     act: fn => reactTestUtils.act(fn),
@@ -154,11 +163,32 @@ export function initDom() {
         });
       }
     },
-    dispatchEvent(element, event) {
+    userPressKey(elementOrSelector, keyCode) {
+      if (typeof elementOrSelector === "string") {
+        // eslint-disable-next-line no-param-reassign
+        elementOrSelector = document.querySelector(elementOrSelector);
+      }
+      const key = Object.keys(keys).find(k => keys[k] === keyCode);
       reactTestUtils.act(() => {
-        element.dispatchEvent(event);
+        elementOrSelector.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, keyCode, key }));
+        elementOrSelector.dispatchEvent(new KeyboardEvent("keypress", { bubbles: true, keyCode, key }));
+        elementOrSelector.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true, keyCode, key }));
       });
     },
+    dispatchEvent(elementOrSelector, event) {
+      if (typeof elementOrSelector === "string") {
+        // eslint-disable-next-line no-param-reassign
+        elementOrSelector = document.querySelector(elementOrSelector);
+      }
+      if (elementOrSelector.type === "focus") {
+        elementOrSelector.focus();
+        return;
+      }
+      reactTestUtils.act(() => {
+        elementOrSelector.dispatchEvent(event);
+      });
+    },
+
     element: undefined,
     destroyDom: () => {
       unmountComponentAtNode(container.element);
