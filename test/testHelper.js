@@ -180,6 +180,17 @@ export function initDom() {
         elementOrSelector.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true, keyCode, key }));
       });
     },
+    userClick(elementOrSelector) {
+      if (typeof elementOrSelector === "string") {
+        // eslint-disable-next-line no-param-reassign
+        elementOrSelector = document.querySelector(elementOrSelector);
+      }
+      reactTestUtils.act(() => {
+        elementOrSelector.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+        elementOrSelector.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+        elementOrSelector.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      });
+    },
     dispatchEvent(elementOrSelector, event) {
       if (typeof elementOrSelector === "string") {
         // eslint-disable-next-line no-param-reassign
