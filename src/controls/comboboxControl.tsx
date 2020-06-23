@@ -314,10 +314,6 @@ export class ComboboxControl<
           i = options.findIndex(v => v.value === this.state.value);
           if (i === -1) {
             i = 0;
-            console.error(
-              `Combobox. Current value '${this.state.value}' doesn't match with options`,
-              this.props.options
-            );
           }
         }
       } else {
@@ -377,7 +373,7 @@ export class ComboboxControl<
       return curOption.text;
     }
     console.warn(`ComboboxControl. The value [${value}] is not found among the props.options [${this.props.options}]`);
-    return (value as any).toString ? (value as any).toString() : ((value as unknown) as string);
+    return value == null ? "" : `${value}`;
   }
 
   /** @inheritdoc */
