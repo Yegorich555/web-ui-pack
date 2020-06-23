@@ -71,10 +71,10 @@ export class ComboboxControl<
     ...BaseControl.excludedRenderProps
   ];
 
-  /** Text for listbox when displayed no items */
+  /** Text for listbox when no items are displayed */
   static textNoItems: string | undefined = "No Items";
 
-  /** ESC-key behavior: set @false for reset to initValue; set @true for clearing value; Default: true */
+  /** ESC-key behavior: set @false to reset to initValue; set @true for clearing value; Default: true */
   static shouldEscClear = true;
 
   /** @inheritdoc */
@@ -112,6 +112,7 @@ export class ComboboxControl<
 
   private _selectedItem: { id: string; index: number } | undefined;
   private _userClearedInput = false;
+  private _isFocus = false;
 
   constructor(props: Props) {
     super(props);
@@ -131,10 +132,14 @@ export class ComboboxControl<
   }
 
   handleButtonMenuClick(): void {
-    focusFirst(this.domEl as HTMLElement);
     const { isOpen } = this.state;
     if (!isOpen) {
-      this.setState({ isOpen: true, select: SelectDirection.current });
+      if (!this._isFocus) {
+        // expected handleInputFocus with fixing of control-reading
+        focusFirst(this.domEl as HTMLElement);
+      } else {
+        this.setState({ isOpen: true, select: SelectDirection.current });
+      }
     } else {
       this.setValueAndClose(this.state.value);
     }
@@ -158,6 +163,7 @@ export class ComboboxControl<
   /** @inheritdoc */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onFocusLeft(inputValue: string): void {
+    this._isFocus = false;
     let v = this.state.value;
     if (this.state.isOpen) {
       v = this._selectedItem ? this.options[this._selectedItem.index].value : this.constructor.defaultInitValue;
@@ -178,6 +184,7 @@ export class ComboboxControl<
   /** onFocus event of the input */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handleInputFocus(e: Core.DomChangeEvent): void {
+    this._isFocus = true;
     if (!this.state.isOpen) {
       setTimeout(() => {
         // timeout fixes 'no reading label/input when popup shows immediately because of aria-activedescendant has effect'
