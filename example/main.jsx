@@ -42,6 +42,7 @@ class AppContainer extends Component {
             className="uiBaseControl"
             label="Combo"
             name="comb"
+            initValue={3}
             options={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map(v => ({ text: `Value ${v}`, value: v }))}
           />
         </Form>

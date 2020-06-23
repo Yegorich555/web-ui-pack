@@ -180,8 +180,8 @@ export class ComboboxControl<
   handleInputFocus(e: Core.DomChangeEvent): void {
     if (!this.state.isOpen) {
       setTimeout(() => {
-        // timeout fixes 'no reading label/input when popup shows immediately because of aria-activedescendant has effect
-        this.setState({ isOpen: true, select: SelectDirection.first });
+        // timeout fixes 'no reading label/input when popup shows immediately because of aria-activedescendant has effect'
+        this.setState({ isOpen: true, select: SelectDirection.current });
       }, 50);
     }
   }
@@ -301,10 +301,12 @@ export class ComboboxControl<
       } else if (this.state.select === SelectDirection.last) {
         i = last;
       } else if (this.state.select === SelectDirection.current) {
-        i = options.findIndex(v => v.value === this.state.value);
-        if (i === -1) {
+        if (this.isEmpty) {
           i = 0;
-          if (!this.isEmpty) {
+        } else {
+          i = options.findIndex(v => v.value === this.state.value);
+          if (i === -1) {
+            i = 0;
             console.error(
               `Combobox. Current value '${this.state.value}' doesn't match with options`,
               this.props.options
