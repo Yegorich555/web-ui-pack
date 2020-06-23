@@ -2,6 +2,8 @@ import React from "react";
 import { ComboboxControl } from "web-ui-pack";
 import * as h from "../testHelper";
 
+// todo full-test focus behavior in puppeteer
+
 let dom = h.initDom(); // assignment only for Intellisense
 beforeAll(() => {
   dom = h.initDom();
@@ -105,16 +107,15 @@ describe("comboboxControl", () => {
       const mockChanged = jest.fn();
       const mockFocusLeft = jest.fn();
       dom.render(<ComboboxControl options={options} onChanged={mockChanged} onFocusLeft={mockFocusLeft} />);
-      document.querySelector("input").focus();
+      const input = document.querySelector("input");
+      input.focus();
       jest.runAllTimers();
 
       expect(scrollIntoViewMock).toBeCalledTimes(1);
       expect(document.querySelector('[aria-selected="true"]')).toBeTruthy();
       expect(document.querySelector('[aria-selected="true"]').textContent).toBe("t1");
-      expect(document.querySelector("input").getAttribute("aria-activedescendant")).toBe(
-        document.querySelector('[aria-selected="true"]').id
-      );
-      expect(document.activeElement).toBe(document.querySelector("input"));
+      expect(input.getAttribute("aria-activedescendant")).toBe(document.querySelector('[aria-selected="true"]').id);
+      expect(document.activeElement).toBe(input);
       expect(dom.element.innerHTML).toMatchInlineSnapshot(
         `"<div><fieldset><label><span></span><input aria-invalid=\\"false\\" aria-required=\\"false\\" autocomplete=\\"off\\" aria-autocomplete=\\"list\\" role=\\"combobox\\" aria-expanded=\\"true\\" aria-owns=\\"lb\\" aria-controls=\\"lb\\" aria-haspopup=\\"listbox\\" value=\\"\\" aria-activedescendant=\\"li0\\"><button type=\\"button\\" tabindex=\\"-1\\" aria-hidden=\\"true\\"></button></label><ul id=\\"lb\\" role=\\"listbox\\"><li id=\\"li0\\" role=\\"option\\" aria-selected=\\"true\\">t1</li><li id=\\"li1\\" role=\\"option\\" aria-selected=\\"false\\">t2</li></ul></fieldset></div>"`
       );
@@ -137,15 +138,12 @@ describe("comboboxControl", () => {
       const mockFocusLeft = jest.fn();
       dom.render(<ComboboxControl key={1} options={options} onChanged={mockChanged} onFocusLeft={mockFocusLeft} />);
       dom.userTypeText(document.querySelector("input"), "t");
-      jest.runAllTimers();
-
       expect(dom.element.innerHTML).toMatchInlineSnapshot(
         `"<div><fieldset><label><span></span><input aria-invalid=\\"false\\" aria-required=\\"false\\" autocomplete=\\"off\\" aria-autocomplete=\\"list\\" role=\\"combobox\\" aria-expanded=\\"true\\" aria-owns=\\"lb\\" aria-controls=\\"lb\\" aria-haspopup=\\"listbox\\" value=\\"t\\" aria-activedescendant=\\"li0\\"><button type=\\"button\\" tabindex=\\"-1\\" aria-hidden=\\"true\\"></button></label><ul id=\\"lb\\" role=\\"listbox\\"><li id=\\"li0\\" role=\\"option\\" aria-selected=\\"true\\">t1</li><li id=\\"li1\\" role=\\"option\\" aria-selected=\\"false\\">t2</li></ul></fieldset></div>"`
       );
 
       // close by enter
       dom.userPressKey("input", h.keys.Enter);
-      jest.runAllTimers();
       expect(mockChanged).toBeCalledTimes(1);
       expect(mockChanged.mock.calls[0][0]).toBe(1);
       expect(mockFocusLeft).not.toBeCalled();
@@ -176,8 +174,6 @@ describe("comboboxControl", () => {
 
       // close without selection (by button click)
       dom.dispatchEvent("button", new MouseEvent("click", { bubbles: true }));
-      jest.runAllTimers();
-
       expect(document.activeElement).toBe(input);
       expect(mockChanged).not.toBeCalled();
       expect(mockFocusLeft).not.toBeCalled();
@@ -188,10 +184,70 @@ describe("comboboxControl", () => {
 
       // open again
       dom.dispatchEvent("button", new MouseEvent("click", { bubbles: true }));
-      jest.runAllTimers();
       expect(dom.element.innerHTML).toMatchInlineSnapshot(
         `"<div><fieldset><label><span></span><input aria-invalid=\\"false\\" aria-required=\\"false\\" autocomplete=\\"off\\" aria-autocomplete=\\"list\\" role=\\"combobox\\" aria-expanded=\\"true\\" aria-owns=\\"lb\\" aria-controls=\\"lb\\" aria-haspopup=\\"listbox\\" value=\\"\\" aria-activedescendant=\\"li0\\"><button type=\\"button\\" tabindex=\\"-1\\" aria-hidden=\\"true\\"></button></label><ul id=\\"lb\\" role=\\"listbox\\"><li id=\\"li0\\" role=\\"option\\" aria-selected=\\"true\\">t1</li><li id=\\"li1\\" role=\\"option\\" aria-selected=\\"false\\">t2</li></ul></fieldset></div>"`
       );
+
+      // select second item from menu
+      dom.dispatchEvent("li:nth-child(2)", new MouseEvent("click", { bubbles: true }));
+      expect(mockChanged).toBeCalledTimes(1);
+      expect(mockChanged.mock.calls[0][0]).toBe(2);
+      expect(mockFocusLeft).not.toBeCalled();
+      expect(document.querySelector("input").value).toBe("t2");
+      expect(dom.element.innerHTML).toMatchInlineSnapshot(
+        `"<div><fieldset><label><span></span><input aria-invalid=\\"false\\" aria-required=\\"false\\" autocomplete=\\"off\\" aria-autocomplete=\\"list\\" role=\\"combobox\\" aria-expanded=\\"false\\" aria-owns=\\"lb\\" aria-controls=\\"lb\\" aria-haspopup=\\"listbox\\" value=\\"t2\\"><button type=\\"button\\" tabindex=\\"-1\\" aria-hidden=\\"true\\"></button></label></fieldset></div>"`
+      );
+    });
+
+    test("whole keyboard interaction", () => {
+      const mockChanged = jest.fn();
+      const mockFocusLeft = jest.fn();
+      dom.render(
+        <ComboboxControl
+          key={3}
+          options={[
+            { text: "tg3", value: 11 },
+            { text: "tr1", value: 22 },
+            { text: "tr2", value: 33 }
+          ]}
+          initValue={22}
+          onChanged={mockChanged}
+          onFocusLeft={mockFocusLeft}
+        />
+      );
+      const input = document.querySelector("input");
+      input.focus();
+      jest.runAllTimers();
+      expect(document.querySelector("ul")).toBeTruthy();
+      expect(document.querySelectorAll("li").length).toBe(3);
+      expect(document.querySelector("li:nth-child(2)").getAttribute("aria-selected")).toBe("true");
+
+      dom.userTypeText(input, "tr");
+      expect(document.querySelectorAll("li").length).toBe(2);
+      expect(document.querySelector("li").getAttribute("aria-selected")).toBe("true");
+
+      // case when user removes text
+      dom.userTypeText(input, "");
+      expect(document.querySelectorAll("li").length).toBe(3);
+      expect(document.querySelector("[aria-selected='true']")).toBeFalsy();
+      expect(document.querySelector("[aria-activedescendant]")).toBeFalsy();
+
+      dom.userTypeText(input, "v");
+      expect(document.querySelectorAll("li").length).toBe(1);
+      expect(document.querySelector("li").textContent).toBe(ComboboxControl.textNoItems);
+      expect(dom.element.innerHTML).toMatchInlineSnapshot(
+        `"<div><fieldset><label><span></span><input aria-invalid=\\"false\\" aria-required=\\"false\\" autocomplete=\\"off\\" aria-autocomplete=\\"list\\" role=\\"combobox\\" aria-expanded=\\"true\\" aria-owns=\\"lb\\" aria-controls=\\"lb\\" aria-haspopup=\\"listbox\\" value=\\"v\\"><button type=\\"button\\" tabindex=\\"-1\\" aria-hidden=\\"true\\"></button></label><ul id=\\"lb\\" role=\\"listbox\\"><li role=\\"option\\" aria-selected=\\"false\\" aria-disabled=\\"true\\">No Items</li></ul></fieldset></div>"`
+      );
+
+      // enter when no selectedItem => resetInput
+      dom.userPressKey(input, h.keys.Enter);
+      expect(document.querySelector("ul")).toBeFalsy();
+      expect(mockChanged).toBeCalledTimes(1);
+      expect(mockChanged.mock.calls[0][0]).toBe(ComboboxControl.defaultInitValue);
+      expect(mockFocusLeft).not.toBeCalled();
+      expect(document.querySelector("input").value).toBe("");
+
+      // todo test keyDown/up, esc
     });
   });
 });

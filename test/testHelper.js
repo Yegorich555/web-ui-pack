@@ -162,6 +162,11 @@ export function initDom() {
           // input.dispatchEvent(new Event("change", { bubbles: true }));
         });
       }
+      if (!text.length) {
+        reactTestUtils.act(() => {
+          reactTestUtils.Simulate.change(input);
+        });
+      }
     },
     userPressKey(elementOrSelector, keyCode) {
       if (typeof elementOrSelector === "string") {
