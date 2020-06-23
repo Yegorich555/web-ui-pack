@@ -118,6 +118,8 @@ export function testControlCommon(Type) {
 export const keys = {
   Enter: 13,
   Esc: 27,
+  End: 35,
+  Home: 36,
   ArrowUp: 38,
   ArrowLeft: 37,
   ArrowRight: 39,
