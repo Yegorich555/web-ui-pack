@@ -266,9 +266,7 @@ export class ComboboxControl<
 
   /** @inheritdoc */
   shouldComponentUpdate(nextProps: Readonly<Props>, nextState: Readonly<State>, nextContext: any): boolean {
-    this._userClearedInput =
-      nextState.inputValue === "" && this.state.inputValue != null && !!this.state.inputValue.length;
-
+    this._userClearedInput = nextState.inputValue === "" && this.state.inputValue !== nextState.inputValue;
     // otherwise use base logic
     return super.shouldComponentUpdate(nextProps, nextState, nextContext);
   }
