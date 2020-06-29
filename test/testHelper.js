@@ -145,28 +145,32 @@ export function initDom() {
       return expect(container.element.innerHTML);
     },
     /**
-     * @param {Element} input
+     * @param {Element} inputOrSelector
      * @param {string} text
      */
-    userTypeText(input, text) {
+    userTypeText(inputOrSelector, text) {
+      if (typeof inputOrSelector === "string") {
+        // eslint-disable-next-line no-param-reassign
+        inputOrSelector = document.querySelector(inputOrSelector);
+      }
       // eslint-disable-next-line no-param-reassign
-      input.value = "";
+      inputOrSelector.value = "";
       for (let i = 0; i < text.length; ++i) {
         const keyCode = text.charCodeAt(i);
         reactTestUtils.act(() => {
-          input.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, keyCode }));
-          input.dispatchEvent(new KeyboardEvent("keypress", { bubbles: true, keyCode }));
-          input.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true, keyCode }));
+          inputOrSelector.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, keyCode }));
+          inputOrSelector.dispatchEvent(new KeyboardEvent("keypress", { bubbles: true, keyCode }));
+          inputOrSelector.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true, keyCode }));
           // eslint-disable-next-line no-param-reassign
-          input.value += text[i];
-          reactTestUtils.Simulate.change(input);
+          inputOrSelector.value += text[i];
+          reactTestUtils.Simulate.change(inputOrSelector);
           // it's actual only for react; in js-native onChange happens by onBlur
           // input.dispatchEvent(new Event("change", { bubbles: true }));
         });
       }
       if (!text.length) {
         reactTestUtils.act(() => {
-          reactTestUtils.Simulate.change(input);
+          reactTestUtils.Simulate.change(inputOrSelector);
         });
       }
     },
@@ -200,11 +204,13 @@ export function initDom() {
       }
       if (elementOrSelector.type === "focus") {
         elementOrSelector.focus();
-        return;
+      } else if (elementOrSelector.type === "blur") {
+        elementOrSelector.blur();
+      } else {
+        reactTestUtils.act(() => {
+          elementOrSelector.dispatchEvent(event);
+        });
       }
-      reactTestUtils.act(() => {
-        elementOrSelector.dispatchEvent(event);
-      });
     },
 
     element: undefined,
