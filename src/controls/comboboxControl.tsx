@@ -274,7 +274,7 @@ export class ComboboxControl<
   }
 
   /** Override this method for customizing popupContent-rendering */
-  renderPopupContent(options: ComboboxOption[], inputValue: string | undefined): Core.Element[] {
+  renderPopupContent(options: ComboboxOption[], inputValue: string | undefined): Core.Element[] | null {
     const createProps = (o: ComboboxOption, i: number) => ({
       props: {
         id: this.constructor.getOptionId(o, i),
@@ -322,10 +322,9 @@ export class ComboboxControl<
           if (--i < 0) {
             i = last;
           }
-        } else if (this.state.select === SelectDirection.next) {
-          if (++i > last) {
-            i = 0;
-          }
+          // if (this.state.select === SelectDirection.next) {
+        } else if (++i > last) {
+          i = 0;
         }
       }
       itemArgs[i].props["aria-selected"] = true;
@@ -339,16 +338,21 @@ export class ComboboxControl<
           </li>
         ];
       }
+      return null;
     }
     return itemArgs.map(v => <li {...v.props}>{v.text}</li>);
   }
 
   /** Override this method for customizing popup-rendering */
-  renderPopup(id: string): Core.Element {
+  renderPopup(id: string): Core.Element | null {
+    const content = this.renderPopupContent(this.options, this.state.inputValue);
+    if (!content) {
+      return null;
+    }
     return (
       // eslint-disable-next-line jsx-a11y/click-events-have-key-events
       <ul id={id} role="listbox" onClick={this.handleMenuClick}>
-        {this.renderPopupContent(this.options, this.state.inputValue)}
+        {content}
       </ul>
     );
   }

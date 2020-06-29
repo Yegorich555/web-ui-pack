@@ -7,6 +7,7 @@ import "web-ui-pack/styles/form.css";
 // import "web-ui-pack/styles/baseControl.css";
 import "../src/styles/baseControl.scss";
 
+ComboboxControl.textNoItems = "";
 class AppContainer extends Component {
   constructor(props) {
     super(props);
