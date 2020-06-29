@@ -2,9 +2,6 @@ import React from "react";
 import { ComboboxControl } from "web-ui-pack";
 import * as h from "../testHelper";
 
-// todo check "click by button set focus on input" in puppeteer
-// todo check "scrollIntoViewIfNeeded" in puppeteer
-
 let dom = h.initDom(); // assignment only for Intellisense
 beforeAll(() => {
   dom = h.initDom();
