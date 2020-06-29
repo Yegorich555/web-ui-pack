@@ -112,7 +112,7 @@ export class ComboboxControl<
 
   private _selectedItem: { id: string; index: number } | undefined;
   private _userClearedInput = false;
-  private _isFocus = false;
+  private _isFocused = false;
 
   constructor(props: Props) {
     super(props);
@@ -134,7 +134,7 @@ export class ComboboxControl<
   handleButtonMenuClick(): void {
     const { isOpen } = this.state;
     if (!isOpen) {
-      if (!this._isFocus) {
+      if (!this._isFocused) {
         // expected handleInputFocus with fixing of control-reading
         focusFirst(this.domEl as HTMLElement);
       } else {
@@ -163,7 +163,7 @@ export class ComboboxControl<
   /** @inheritdoc */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onFocusLeft(inputValue: string): void {
-    this._isFocus = false;
+    this._isFocused = false;
     let v = this.state.value;
     if (this.state.isOpen) {
       v = this._selectedItem ? this.options[this._selectedItem.index].value : this.constructor.defaultInitValue;
@@ -184,7 +184,7 @@ export class ComboboxControl<
   /** onFocus event of the input */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handleInputFocus(e: Core.DomChangeEvent): void {
-    this._isFocus = true;
+    this._isFocused = true;
     if (!this.state.isOpen) {
       setTimeout(() => {
         // timeout fixes 'no reading label/input when popup shows immediately because of aria-activedescendant has effect'
@@ -241,10 +241,9 @@ export class ComboboxControl<
 
   // onClick event of the popup
   handleMenuClick(e: Core.DomMouseEvent): void {
-    focusFirst(this.domEl as HTMLElement);
-    const { id } = e.target as HTMLElement;
+    const { id, tagName } = e.target as HTMLElement;
 
-    if (id) {
+    if (id && tagName === "LI") {
       const option = this.options.find((o, i) => this.constructor.getOptionId(o, i) === id);
       if (!option) {
         console.warn(
@@ -349,7 +348,13 @@ export class ComboboxControl<
     }
     return (
       // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-      <ul id={id} role="listbox" onClick={this.handleMenuClick}>
+      <ul
+        id={id}
+        role="listbox"
+        onClick={this.handleMenuClick}
+        // prevents focus-behavior
+        onMouseDown={e => e.preventDefault()}
+      >
         {content}
       </ul>
     );
