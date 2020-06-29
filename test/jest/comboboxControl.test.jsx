@@ -105,9 +105,17 @@ describe("comboboxControl", () => {
     window.HTMLElement.prototype.scrollIntoView = scrollIntoViewMock;
 
     test("popup by focus", () => {
+      let refEl;
       const mockChanged = jest.fn();
       const mockFocusLeft = jest.fn();
-      dom.render(<ComboboxControl options={options} onChanged={mockChanged} onFocusLeft={mockFocusLeft} />);
+      dom.render(
+        <ComboboxControl
+          ref={el => (refEl = el)}
+          options={options}
+          onChanged={mockChanged}
+          onFocusLeft={mockFocusLeft}
+        />
+      );
       const input = document.querySelector("input");
       input.focus();
       jest.runAllTimers();
@@ -122,16 +130,35 @@ describe("comboboxControl", () => {
       );
 
       // close by blur
-      dom.dispatchEvent("input", new FocusEvent("blur", { bubbles: true }));
+      input.blur();
       jest.runAllTimers();
+      expect(document.activeElement).not.toBe(input);
       expect(mockChanged).toBeCalledTimes(1);
       expect(mockChanged.mock.calls[0][0]).toBe(1);
       expect(mockFocusLeft).toBeCalledTimes(1);
       expect(mockFocusLeft.mock.calls[0][0]).toBe(1);
-      expect(document.querySelector("input").value).toBe("t1");
+      expect(input.value).toBe("t1");
       expect(dom.element.innerHTML).toMatchInlineSnapshot(
         `"<div><fieldset><label><span></span><input aria-invalid=\\"false\\" aria-required=\\"false\\" autocomplete=\\"off\\" aria-autocomplete=\\"list\\" role=\\"combobox\\" aria-expanded=\\"false\\" aria-owns=\\"lb\\" aria-controls=\\"lb\\" aria-haspopup=\\"listbox\\" value=\\"t1\\"><button type=\\"button\\" tabindex=\\"-1\\" aria-hidden=\\"true\\"></button></label></fieldset></div>"`
       );
+
+      // open again
+      mockFocusLeft.mockClear();
+      mockChanged.mockClear();
+      scrollIntoViewMock.mockClear();
+      input.focus();
+      jest.runAllTimers();
+      expect(document.activeElement).toBe(input);
+      expect(scrollIntoViewMock).toBeCalledTimes(1);
+      expect(document.querySelector('[aria-selected="true"]')).toBeTruthy();
+      expect(document.querySelector('[aria-selected="true"]').textContent).toBe("t1");
+
+      // check if re-focus doesn't make re-update state
+      const spySetState = jest.spyOn(refEl, "setState");
+      // firing directly because re-focus logic doesn't work in simulation properly
+      refEl.handleInputFocus();
+      jest.runAllTimers();
+      expect(spySetState).not.toBeCalled();
     });
 
     test("popup by inputChange", () => {
@@ -317,7 +344,7 @@ describe("comboboxControl", () => {
       dom.userPressKey(input, h.keys.End);
       expect(document.querySelector("ul")).toBeFalsy();
 
-      // checking reset to null
+      // checking reset to null (via Esc)
       ComboboxControl.shouldEscClear = true;
       mockChanged.mockClear();
       dom.userPressKey(input, h.keys.Esc);
@@ -334,6 +361,30 @@ describe("comboboxControl", () => {
       expect(input.value).toBe("tr1");
 
       expect(mockFocusLeft).not.toBeCalled();
+
+      // checking reset to null (via removing text and pressing enter)
+      jest.clearAllMocks();
+      dom.userTypeText(input, ""); // removing text
+      dom.userPressKey(input, h.keys.Enter); // submit noSelected=>clearsInput
+      jest.runAllTimers();
+      expect(document.querySelector("ul")).toBeFalsy();
+      expect(input.value).toBe("");
+      input.blur(); // blur does nothing with changing value because it was closed by Enter
+      jest.runAllTimers();
+      expect(mockChanged).toBeCalledTimes(1);
+      expect(mockChanged.mock.calls[0][0]).toBe(ComboboxControl.defaultInitValue);
+      expect(mockFocusLeft).toBeCalledTimes(1);
+      expect(mockFocusLeft.mock.calls[0][0]).toBe(ComboboxControl.defaultInitValue);
+
+      // checking reset to null (via removing text and focus-blur)
+      jest.clearAllMocks();
+      input.focus();
+      dom.userTypeText(input, ""); // removing text
+      input.blur(); // blur does nothing with changing value because it was closed by Enter
+      jest.runAllTimers();
+      expect(mockChanged).not.toBeCalled();
+      expect(mockFocusLeft).toBeCalledTimes(1);
+      expect(mockFocusLeft.mock.calls[0][0]).toBe(ComboboxControl.defaultInitValue);
     });
 
     test("value not found in options", () => {
@@ -405,10 +456,18 @@ describe("comboboxControl", () => {
       jest.runAllTimers();
       expect(document.querySelector("ul")).toBeTruthy();
 
+      // expect nothing because wasn't click on menu-item
+      dom.userClick("ul");
+      jest.runAllTimers();
+      expect(document.querySelector("ul")).toBeTruthy();
+
       dom.userClick("li");
       jest.runAllTimers();
       expect(ref.state.error).toBeFalsy();
       expect(ref.value).toBe("some");
+
+      // no changes in text => no new setState
+      dom.userTypeText(document.querySelector("input"), "t1");
     });
 
     test("options without text", () => {
@@ -430,6 +489,24 @@ describe("comboboxControl", () => {
         expect(document.querySelector("li:nth-child(2)").textContent).toBe("");
       });
       expect(mockfn2).toBeCalledTimes(2);
+    });
+
+    test("option textNoItems", () => {
+      ComboboxControl.textNoItems = "";
+      dom.render(<ComboboxControl options={[{ value: "t1", text: "test" }]} initValue="t1" />);
+      dom.userTypeText("input", "v");
+      expect(document.querySelector("li")).toBeFalsy();
+    });
+
+    test("no update when user tries to put space-first", () => {
+      let ref = null;
+      dom.render(<ComboboxControl key={1} ref={el => (ref = el)} options={[{ text: "t1", value: "some" }]} />);
+      const spyState = jest.spyOn(ref, "setState");
+      dom.userTypeText("input", "");
+      expect(document.querySelector("ul")).toBeTruthy();
+      expect(spyState).toBeCalledTimes(1);
+      dom.userTypeText("input", " ");
+      expect(spyState).toBeCalledTimes(1);
     });
   });
 });
