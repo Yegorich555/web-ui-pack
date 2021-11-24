@@ -9,7 +9,7 @@ export default function promiseWait<T>(promise: Promise<T>, ms: number): Promise
   let catchErr: Error;
   return new Promise((resolve, reject) => {
     setTimeout(() => (catchErr ? reject(catchErr) : resolve(promise)), ms);
-    promise.catch(err => {
+    promise.catch((err) => {
       catchErr = err;
       return err;
     });

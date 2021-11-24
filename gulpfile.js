@@ -22,7 +22,7 @@ const transformSCSS = new stream.Transform({
       let result = sass.renderSync({ data: scss, sourceComments: false, sourceMap: false, outputStyle: "expanded" });
 
       // postcss changing
-      const plugins = Object.keys(postcssConfig.plugins).map(key => require(key));
+      const plugins = Object.keys(postcssConfig.plugins).map((key) => require(key));
       result = await postcss(plugins).process(result.css);
 
       file.contents = Buffer.from(result.css, encoding);
@@ -35,7 +35,7 @@ const transformSCSS = new stream.Transform({
     }
     console.log("STYLES:", file.path);
     cb(null, file);
-  }
+  },
 });
 
 exports.default = function compile() {
@@ -44,8 +44,5 @@ exports.default = function compile() {
   //   recursive: true
   // });
 
-  return gulp
-    .src("./src/styles/*.scss")
-    .pipe(transformSCSS)
-    .pipe(gulp.dest("./lib/styles"));
+  return gulp.src("./src/styles/*.scss").pipe(transformSCSS).pipe(gulp.dest("./lib/styles"));
 };

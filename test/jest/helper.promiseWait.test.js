@@ -23,7 +23,7 @@ describe("helper.promiseWait", () => {
     const fn = jest.fn();
 
     promiseWait(
-      Promise.resolve(5).then(v => {
+      Promise.resolve(5).then((v) => {
         fnNested(v);
         return v;
       }),
@@ -35,7 +35,7 @@ describe("helper.promiseWait", () => {
     expect(fn).not.toBeCalled();
     expect(fnNested).toBeCalled();
     // jest.advanceTimersToNextTimer();
-    await new Promise(resolve => setTimeout(resolve, 1));
+    await new Promise((resolve) => setTimeout(resolve, 1));
     expect(fn).toBeCalledTimes(1);
     expect(fn).toHaveBeenCalledWith(5);
   });
@@ -43,14 +43,13 @@ describe("helper.promiseWait", () => {
   test("rejects value", async () => {
     // jest.useFakeTimers();
     const fn = jest.fn();
-    // eslint-disable-next-line prefer-promise-reject-errors
     promiseWait(Promise.reject("error"), 1).catch(fn);
 
     // expect(setTimeout).toBeCalled();
     await Promise.resolve();
     expect(fn).not.toBeCalled();
     // jest.advanceTimersToNextTimer();
-    await new Promise(resolve => setTimeout(resolve, 1));
+    await new Promise((resolve) => setTimeout(resolve, 1));
     expect(fn).toBeCalledTimes(1);
     expect(fn).toBeCalledWith("error");
   });
@@ -58,26 +57,26 @@ describe("helper.promiseWait", () => {
   test("wait if resolved before", async () => {
     const fn = jest.fn();
     const fnNested = jest.fn();
-    const mainPromise = new Promise(resolve => setTimeout(resolve, 1)).then(fnNested);
+    const mainPromise = new Promise((resolve) => setTimeout(resolve, 1)).then(fnNested);
     promiseWait(mainPromise, 5).then(fn);
 
-    await new Promise(resolve => setTimeout(resolve, 1));
+    await new Promise((resolve) => setTimeout(resolve, 1));
     expect(fnNested).toBeCalled();
     expect(fn).not.toBeCalled();
-    await new Promise(resolve => setTimeout(resolve, 5));
+    await new Promise((resolve) => setTimeout(resolve, 5));
     expect(fn).toBeCalled();
   });
 
   test("no-wait more if time exceeded", async () => {
     const fn = jest.fn();
     const fnNested = jest.fn();
-    const mainPromise = new Promise(resolve => setTimeout(resolve, 5)).then(fnNested);
+    const mainPromise = new Promise((resolve) => setTimeout(resolve, 5)).then(fnNested);
     promiseWait(mainPromise, 1).then(fn);
 
-    await new Promise(resolve => setTimeout(resolve, 1));
+    await new Promise((resolve) => setTimeout(resolve, 1));
     expect(fnNested).not.toBeCalled();
     expect(fn).not.toBeCalled();
-    await new Promise(resolve => setTimeout(resolve, 5));
+    await new Promise((resolve) => setTimeout(resolve, 5));
     expect(fn).toBeCalled();
     expect(fnNested).toBeCalled();
   });

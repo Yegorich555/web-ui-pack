@@ -2,6 +2,8 @@ module.exports = {
   extends: ["plugin:jest/recommended"],
   plugins: ["jest"],
   rules: {
+    "no-param-reassign": "off",
+    "no-promise-executor-return": "off",
     "jest/expect-expect": "off",
     "jest/no-commented-out-tests": "off",
     "@typescript-eslint/no-var-requires": "off",
@@ -9,6 +11,7 @@ module.exports = {
     "no-return-assign": "off",
     "max-classes-per-file": "off",
     "prefer-promise-reject-errors": "off",
-    "@typescript-eslint/no-unused-vars": ["error", { varsIgnorePattern: "React" }]
-  }
+    "@typescript-eslint/no-unused-vars": ["error", { varsIgnorePattern: "React" }],
+    "import/no-extraneous-dependencies": "off",
+  },
 };

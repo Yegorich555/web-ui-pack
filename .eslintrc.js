@@ -11,21 +11,22 @@ module.exports = {
   parserOptions: {
     sourceType: "module",
     ecmaFeatures: {
-      jsx: true
-    }
+      jsx: true,
+    },
   },
   extends: ["airbnb", "prettier", "plugin:@typescript-eslint/recommended"],
   env: {
     es6: true,
     node: true,
-    browser: true
+    browser: true,
   },
   globals: {
     DEV_SERVER: true,
-    API_DOMAIN: true
+    API_DOMAIN: true,
   },
   plugins: ["@typescript-eslint", "json", "prettier"],
   rules: {
+    "import/no-extraneous-dependencies": "off",
     "lines-between-class-members": ["error", "always", { exceptAfterSingleLine: true }],
     "react/no-access-state-in-setstate": "off",
     "react/react-in-jsx-scope": "off",
@@ -55,8 +56,8 @@ module.exports = {
         ignoreUrls: true,
         ignoreStrings: true,
         ignoreTemplateLiterals: true,
-        ignoreRegExpLiterals: true
-      }
+        ignoreRegExpLiterals: true,
+      },
     ],
     "import/extensions": [
       "error",
@@ -65,25 +66,25 @@ module.exports = {
         js: "never",
         jsx: "never",
         ts: "never",
-        tsx: "never"
-      }
+        tsx: "never",
+      },
     ],
-    "@typescript-eslint/explicit-function-return-type": "off"
+    "@typescript-eslint/explicit-function-return-type": "off",
   },
   overrides: [
     {
       files: ["*.ts", ".tsx"],
       rules: {
-        "@typescript-eslint/explicit-function-return-type": "error"
-      }
-    }
+        "@typescript-eslint/explicit-function-return-type": "error",
+      },
+    },
   ],
   settings: {
     "import/resolver": {
       alias: {
-        map: Object.keys(pathAlias).map(key => [key, pathAlias[key]]),
-        extensions: [".ts", ".js", ".jsx", ".tsx", ".json"]
-      }
-    }
-  }
+        map: Object.keys(pathAlias).map((key) => [key, pathAlias[key]]),
+        extensions: [".ts", ".js", ".jsx", ".tsx", ".json"],
+      },
+    },
+  },
 };

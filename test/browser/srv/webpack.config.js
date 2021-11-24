@@ -6,11 +6,11 @@ module.exports = {
   entry: require("path").join(__dirname, "./entry.jsx"),
   output: {
     path: __dirname,
-    filename: "bundle.js"
+    filename: "bundle.js",
   },
   resolve: {
     alias: require("../../../webpack.alias"),
-    extensions: [".js", ".jsx", ".ts", ".tsx"] // using import without file-extensions
+    extensions: [".js", ".jsx", ".ts", ".tsx"], // using import without file-extensions
   },
   module: {
     rules: [
@@ -18,9 +18,9 @@ module.exports = {
         test: /\.(js|jsx|ts|tsx)$/,
         exclude: /node_modules/,
         use: [
-          "babel-loader" // transpile *.js, *.jsx, *.ts, *.tsx to result according to .browserlistrc and babel.config.js files
-        ]
-      }
-    ]
-  }
+          "babel-loader", // transpile *.js, *.jsx, *.ts, *.tsx to result according to .browserlistrc and babel.config.js files
+        ],
+      },
+    ],
+  },
 };

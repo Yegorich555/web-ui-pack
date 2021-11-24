@@ -1,6 +1,6 @@
 const rootDir = process.cwd();
 const moduleNameMapper = {
-  "^web-ui-pack/(.*)": `${rootDir}/lib/$1`
+  "^web-ui-pack/(.*)": `${rootDir}/lib/$1`,
 };
 
 // details here: https://jestjs.io/docs/configuration
@@ -21,7 +21,7 @@ module.exports = {
       rootDir,
       displayName: "general",
       testMatch: [`${__dirname}/jest/**/*.test.[jt]s?(x)`],
-      moduleNameMapper
+      moduleNameMapper,
     },
     {
       rootDir,
@@ -29,7 +29,7 @@ module.exports = {
       testMatch: [`${__dirname}/browser/**/*.test.[jt]s?(x)`],
       moduleNameMapper,
       preset: "jest-puppeteer",
-      testEnvironment: `${__dirname}/browser/jest-env-puppeteer.js`
-    }
-  ]
+      testEnvironment: `${__dirname}/browser/jest-env-puppeteer.js`,
+    },
+  ],
 };

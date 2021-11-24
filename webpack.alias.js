@@ -7,5 +7,5 @@ const srcPath = path.resolve(__dirname, "./src/");
 
 module.exports = {
   "@": srcPath, // alias is '@/[name]' for js
-  "web-ui-pack": path.resolve(__dirname, "lib")
+  "web-ui-pack": path.resolve(__dirname, "lib"),
 };

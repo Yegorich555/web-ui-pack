@@ -49,26 +49,26 @@ export function testComponentFuncBind(Type) {
       "componentDidUpdate",
       "render",
       "toJSON",
-      "setDomEl"
+      "setDomEl",
     ];
     const arrowRegex = /^[^{]+?=>/;
     const protoNames = Object.getOwnPropertyNames(Type.prototype)
-      .filter(a => !skipNames.includes(a))
-      .filter(a => typeof Object.getOwnPropertyDescriptor(Type.prototype, a).value === "function");
+      .filter((a) => !skipNames.includes(a))
+      .filter((a) => typeof Object.getOwnPropertyDescriptor(Type.prototype, a).value === "function");
 
     const obj = new Type({});
     const objNames = Object.getOwnPropertyNames(obj)
-      .filter(a => !skipNames.includes(a))
-      .filter(a => typeof Object.getOwnPropertyDescriptor(obj, a).value === "function");
+      .filter((a) => !skipNames.includes(a))
+      .filter((a) => typeof Object.getOwnPropertyDescriptor(obj, a).value === "function");
 
     it("no arrow functions", () => {
       // doesn't for work for deep-inheritted: const arrowFunc = objNames.filter(a => !protoNames.includes(a));
-      const arrowFunc = objNames.filter(a => arrowRegex.test(obj[a].toString()));
+      const arrowFunc = objNames.filter((a) => arrowRegex.test(obj[a].toString()));
       expect(arrowFunc).toHaveLength(0);
     });
 
     it("each function are bound", () => {
-      const notBoundFunc = protoNames.filter(a => !objNames.includes(a));
+      const notBoundFunc = protoNames.filter((a) => !objNames.includes(a));
       expect(notBoundFunc).toHaveLength(0);
     });
     obj.componentWillUnmount && obj.componentWillUnmount();
@@ -82,15 +82,15 @@ export function testStaticInheritence(Type) {
       "prototype",
       "name",
       "common",
-      "excludedRenderProps"
+      "excludedRenderProps",
     ];
     const stat = Object.getOwnPropertyNames(Type) //
-      .filter(a => !skipNames.includes(a));
+      .filter((a) => !skipNames.includes(a));
     const statProto = Object.getOwnPropertyNames(Object.getPrototypeOf(Type)) //
-      .filter(a => !skipNames.includes(a));
+      .filter((a) => !skipNames.includes(a));
 
     it("overrides static", () => {
-      const arrowNotOverrided = statProto.filter(a => !stat.includes(a));
+      const arrowNotOverrided = statProto.filter((a) => !stat.includes(a));
       expect(arrowNotOverrided).toHaveLength(0);
     });
   });
@@ -112,24 +112,24 @@ export const keys = {
   ArrowUp: 38,
   ArrowLeft: 37,
   ArrowRight: 39,
-  ArrowDown: 40
+  ArrowDown: 40,
 };
 
 export function initDom() {
   const container = {
-    act: fn => reactTestUtils.act(fn),
-    render: el => {
+    act: (fn) => reactTestUtils.act(fn),
+    render: (el) => {
       reactTestUtils.act(() => {
         render(el, container.element);
       });
       return container.element;
     },
     /** wait for render is finished; apply jest.useFakeTimers before this function */
-    renderWait: el => {
+    renderWait: (el) => {
       container.render(el);
       jest.advanceTimersToNextTimer();
     },
-    expectRender: el => {
+    expectRender: (el) => {
       container.render(el);
       return expect(container.element.innerHTML);
     },
@@ -139,10 +139,8 @@ export function initDom() {
      */
     userTypeText(inputOrSelector, text) {
       if (typeof inputOrSelector === "string") {
-        // eslint-disable-next-line no-param-reassign
         inputOrSelector = document.querySelector(inputOrSelector);
       }
-      // eslint-disable-next-line no-param-reassign
       inputOrSelector.value = "";
       for (let i = 0; i < text.length; ++i) {
         const keyCode = text.charCodeAt(i);
@@ -150,7 +148,6 @@ export function initDom() {
           inputOrSelector.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, keyCode }));
           inputOrSelector.dispatchEvent(new KeyboardEvent("keypress", { bubbles: true, keyCode }));
           inputOrSelector.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true, keyCode }));
-          // eslint-disable-next-line no-param-reassign
           inputOrSelector.value += text[i];
           reactTestUtils.Simulate.change(inputOrSelector);
           // it's actual only for react; in js-native onChange happens by onBlur
@@ -165,10 +162,9 @@ export function initDom() {
     },
     userPressKey(elementOrSelector, keyCode) {
       if (typeof elementOrSelector === "string") {
-        // eslint-disable-next-line no-param-reassign
         elementOrSelector = document.querySelector(elementOrSelector);
       }
-      const key = Object.keys(keys).find(k => keys[k] === keyCode);
+      const key = Object.keys(keys).find((k) => keys[k] === keyCode);
       reactTestUtils.act(() => {
         elementOrSelector.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, keyCode, key }));
         elementOrSelector.dispatchEvent(new KeyboardEvent("keypress", { bubbles: true, keyCode, key }));
@@ -177,7 +173,6 @@ export function initDom() {
     },
     userClick(elementOrSelector) {
       if (typeof elementOrSelector === "string") {
-        // eslint-disable-next-line no-param-reassign
         elementOrSelector = document.querySelector(elementOrSelector);
       }
       reactTestUtils.act(() => {
@@ -188,7 +183,6 @@ export function initDom() {
     },
     dispatchEvent(elementOrSelector, event) {
       if (typeof elementOrSelector === "string") {
-        // eslint-disable-next-line no-param-reassign
         elementOrSelector = document.querySelector(elementOrSelector);
       }
       if (elementOrSelector.type === "focus") {
@@ -207,7 +201,7 @@ export function initDom() {
       unmountComponentAtNode(container.element);
       container.element.remove();
       container.element = null;
-    }
+    },
   };
   container.element = document.createElement("div");
   document.body.appendChild(container.element);

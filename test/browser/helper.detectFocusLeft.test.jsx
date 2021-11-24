@@ -38,9 +38,7 @@ describe("helper.detectFocusLeft", () => {
 
     // ordinary click on the label
     await page.click("#ctrl");
-    id = await page.evaluate(() => {
-      return document.activeElement.id;
-    });
+    id = await page.evaluate(() => document.activeElement.id);
     expect(id).toBe("c1");
   });
 

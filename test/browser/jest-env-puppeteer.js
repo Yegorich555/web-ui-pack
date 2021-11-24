@@ -8,9 +8,7 @@ function getCallerFile() {
 
   try {
     const err = new Error();
-    Error.prepareStackTrace = (_err, stack) => {
-      return stack;
-    };
+    Error.prepareStackTrace = (_err, stack) => stack;
     const currentfile = err.stack.shift().getFileName();
     while (err.stack.length) {
       callerfile = err.stack.shift().getFileName();
@@ -51,7 +49,6 @@ class PuppeteerEnvironment extends Env {
 
     this.global.pageExt = page;
     // declare empty document for avoiding wrong-test-bug in detectFocusLeft
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
     this.global.document = { addEventListener: () => {} };
 
     // todo listen for console.error and console.warn

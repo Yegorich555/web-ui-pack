@@ -35,7 +35,7 @@ const nestedProperty = {
       prop = prop[propKeys[i]];
     }
     return prop;
-  }
+  },
 };
 
 export default nestedProperty;

@@ -10,11 +10,7 @@ class AppContainer extends Component {
   }
 
   render() {
-    return (
-      <>
-        <h1>WebUIPack Examples</h1>
-      </>
-    );
+    return <h1>WebUIPack Examples</h1>;
   }
 }
 
