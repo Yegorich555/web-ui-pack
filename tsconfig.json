@@ -5,8 +5,6 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "Node",
-    "jsx": "react",
-    "jsxFactory": "Core.renderElement",
     "declaration": true,
     "removeComments": false,
     "esModuleInterop": true,
@@ -14,5 +12,5 @@
     "allowJs": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "build", ".vscode", "lib", "src/implementLater/JSXcreateElement.ts", "icomoon"]
+  "exclude": ["node_modules", "build", ".vscode", "lib", "icomoon"]
 }

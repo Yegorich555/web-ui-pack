@@ -3,6 +3,9 @@ const moduleNameMapper = {
   "^web-ui-pack/(.*)": `${rootDir}/lib/$1`
 };
 
+// details here: https://jestjs.io/docs/configuration
+
+/** @type {import('@jest/types').Config.InitialOptions} */
 module.exports = {
   verbose: true,
   rootDir,
@@ -12,6 +15,7 @@ module.exports = {
   collectCoverage: true,
   collectCoverageFrom: ["lib/**/*.{js,jsx}", "!**/icomoon/**"],
   moduleNameMapper,
+  testEnvironment: "jsdom",
   projects: [
     {
       rootDir,

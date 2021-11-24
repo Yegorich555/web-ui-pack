@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
 import detectFocusLeft from "web-ui-pack/helpers/detectFocusLeft";
 
 jest.useFakeTimers();

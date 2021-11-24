@@ -2,17 +2,6 @@
 // import React from "react";
 import { render, unmountComponentAtNode } from "react-dom";
 import reactTestUtils from "react-dom/test-utils";
-import { BaseControl } from "web-ui-pack";
-
-BaseControl.common.focusDebounce = 0;
-const waitBlurDebounce = () => new Promise(r => setTimeout(r, BaseControl.common.focusDebounce));
-export async function dispatchOnBlur(element) {
-  reactTestUtils.act(() => {
-    element.dispatchEvent(new FocusEvent("blur", { bubbles: true }));
-  });
-
-  await waitBlurDebounce();
-}
 
 export function lastCall(jestFn) {
   return jestFn.mock.calls[jestFn.mock.calls.length - 1];
