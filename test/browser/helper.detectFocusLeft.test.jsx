@@ -31,7 +31,7 @@ describe("helper.detectFocusLeft", () => {
 
     // click outside the control
     await page.click("#c2");
-    await page.waitFor(20);
+    await page.waitForTimeout(20);
     expect(await page.evaluate(() => window.wasBlur)).toBe(true);
     expect(await page.evaluate(() => window.wasLeft)).toBe(true);
 
@@ -52,7 +52,7 @@ describe("helper.detectFocusLeft", () => {
     // click on the label
     await page.click("#text", { delay: 5 });
     expect(await page.evaluate(() => window.wasBlur)).toBe(true);
-    await page.waitFor(20);
+    await page.waitForTimeout(20);
     expect(await page.evaluate(() => window.wasLeft)).toBe(false);
   });
 
@@ -67,7 +67,7 @@ describe("helper.detectFocusLeft", () => {
     // tap on the label
     await page.tap("#text");
     expect(await page.evaluate(() => window.wasBlur)).toBe(true);
-    await page.waitFor(20);
+    await page.waitForTimeout(20);
     expect(await page.evaluate(() => window.wasLeft)).toBe(false);
   });
 });
