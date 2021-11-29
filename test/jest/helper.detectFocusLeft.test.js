@@ -3,7 +3,8 @@
  */
 import detectFocusLeft from "web-ui-pack/helpers/detectFocusLeft";
 
-jest.useFakeTimers();
+// use legacy accprding to https://stackoverflow.com/questions/68016538/matcher-error-received-value-must-be-a-mock-or-spy-function
+jest.useFakeTimers("legacy");
 
 let el = document.createElement("input");
 let other = document.createElement("input");
