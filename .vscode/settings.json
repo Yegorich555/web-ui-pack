@@ -3,13 +3,11 @@
   "path-autocomplete.includeExtension": true,
   "path-autocomplete.extensionOnImport": true,
   "path-autocomplete.excludedItems": {
+    //todo read path-alias from tsconfig.json
     "**/*.+(ts|js|jsx|tsx)": { "when": "**" }, // ignore js files because VSCode works fine with ones
     "**/*.map": { "when": "**" }, // always ignore *.map files
     "**/{.git,node_modules}": { "when": "**" }, // always ignore .git and node_modules folders
     "**/*": { "when": "**/*.+(less|css|scss|sass)" } //exclude for css files because VSCode works fine with ones
-  },
-  "path-autocomplete.pathMappings": {
-    "web-ui-pack": "${folder}/lib"
   },
   "stylelint.enable": true,
   "css.validate": false,
@@ -30,10 +28,8 @@
     "source.fixAll.stylelint": true
   },
   "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
-  "editor.formatOnType": false,
   "editor.formatOnSave": false,
   "editor.formatOnPaste": true,
-
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
@@ -68,6 +64,5 @@
   "[less]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
-  },
-  "git.ignoreLimitWarning": true
+  }
 }

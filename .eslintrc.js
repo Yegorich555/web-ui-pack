@@ -1,20 +1,18 @@
-const pathAlias = require("./webpack.alias");
-
-/* 
+/*
 tslint won't be supported: https://github.com/palantir/tslint/issues/4534
 you should use typescript-eslint/eslint-plugin: https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin
 but you can't do it with {parser: 'babel-eslint'}: https://github.com/typescript-eslint/typescript-eslint#what-about-babel-and-babel-eslint
 */
-
+/** @type {import("eslint").Linter.Config} */
 module.exports = {
-  parser: "@typescript-eslint/parser", //babel-eslint
+  parser: "@typescript-eslint/parser",
   parserOptions: {
     sourceType: "module",
     ecmaFeatures: {
       jsx: true,
     },
   },
-  extends: ["airbnb", "prettier", "plugin:@typescript-eslint/recommended"],
+  extends: ["eslint:recommended", "airbnb", "prettier", "plugin:@typescript-eslint/recommended"],
   env: {
     es6: true,
     node: true,
@@ -24,7 +22,7 @@ module.exports = {
     DEV_SERVER: true,
     API_DOMAIN: true,
   },
-  plugins: ["@typescript-eslint", "json", "prettier"],
+  plugins: ["json", "prettier", "import", "@typescript-eslint", "unused-imports"],
   rules: {
     "import/no-extraneous-dependencies": "off",
     "lines-between-class-members": ["error", "always", { exceptAfterSingleLine: true }],
@@ -69,21 +67,15 @@ module.exports = {
         tsx: "never",
       },
     ],
-    "@typescript-eslint/explicit-function-return-type": "off",
   },
-  overrides: [
-    {
-      files: ["*.ts", ".tsx"],
-      rules: {
-        "@typescript-eslint/explicit-function-return-type": "error",
-      },
-    },
-  ],
   settings: {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"],
+    },
     "import/resolver": {
-      alias: {
-        map: Object.keys(pathAlias).map((key) => [key, pathAlias[key]]),
-        extensions: [".ts", ".js", ".jsx", ".tsx", ".json"],
+      typescript: {
+        alwaysTryTypes: true, // always try to resolve types under `<root>@types` directory even it doesn't contain any source code, like `@types/unist`
+        project: ["./tsconfig.json"],
       },
     },
   },

@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/no-autofocus */
 const detectFocusLeft = require("web-ui-pack/helpers/detectFocusLeft");
 
 beforeAll(async () => {

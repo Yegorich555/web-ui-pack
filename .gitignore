@@ -90,5 +90,6 @@ typings/
 .eslintcache
 .stylelintcache
 lib
+dist
 
 test/browser/srv/bundle.js

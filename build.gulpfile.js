@@ -1,6 +1,6 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable global-require */
 /* eslint-disable import/no-dynamic-require */
-/* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-var-requires */
 const gulp = require("gulp");
 const stream = require("stream");
@@ -40,9 +40,9 @@ const transformSCSS = new stream.Transform({
 
 exports.default = function compile() {
   // remove styles folder
-  // fs.rmdirSync("lib/styles", {
+  // fs.rmdirSync("dist/styles", {
   //   recursive: true
   // });
 
-  return gulp.src("./src/styles/*.scss").pipe(transformSCSS).pipe(gulp.dest("./lib/styles"));
+  return gulp.src("./src/styles/*.scss").pipe(transformSCSS).pipe(gulp.dest("./dist/styles"));
 };

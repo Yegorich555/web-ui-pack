@@ -1,6 +1,6 @@
 const rootDir = process.cwd();
 const moduleNameMapper = {
-  "^web-ui-pack/(.*)": `${rootDir}/lib/$1`,
+  "^web-ui-pack/(.*)": `${rootDir}/dist/$1`,
 };
 
 // details here: https://jestjs.io/docs/configuration
@@ -13,7 +13,7 @@ module.exports = {
   testPathIgnorePatterns: ["/node_modules/", `.eslintrc.js$`, `config.js$`],
   coverageDirectory: "coverage", // {root}/coverage
   collectCoverage: true,
-  collectCoverageFrom: ["lib/**/*.{js,jsx}", "!**/icomoon/**"],
+  collectCoverageFrom: ["dist/**/*.{js,jsx}", "!**/icomoon/**"],
   moduleNameMapper,
   testEnvironment: "jsdom",
   projects: [

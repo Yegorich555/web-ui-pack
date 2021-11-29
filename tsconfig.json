@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
-    "outDir": "./lib",
+    "outDir": "./dist",
     "noEmitOnError": true,
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "Node",
+    "jsx": "react",
     "declaration": true,
     "removeComments": false,
     "esModuleInterop": true,
@@ -12,5 +13,5 @@
     "allowJs": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "build", ".vscode", "lib", "icomoon"]
+  "exclude": ["node_modules", "build", ".vscode", "lib", "dist", "icomoon"]
 }
