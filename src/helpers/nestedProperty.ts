@@ -1,7 +1,7 @@
 const nestedProperty = {
   /**
    * Sets the value at path of object. If a portion of path doesn’t exist it’s created.
-   *
+   * nestedProperty.set(obj, "value.nestedValue", 1) as obj.value.nestedValue = 1;
    * @param object The object to modify.
    * @param path The path of the property to set.
    * @param value The value to set.
@@ -20,7 +20,7 @@ const nestedProperty = {
   },
   /**
    * Gets the property value at path of object.
-   *
+   * nestedProperty.get(obj, "nestedValue1.nestVal2") returns value from obj.nestedValue1.nestVal2
    * @param object The object to query.
    * @param path The path of the property to get.
    * @return Returns the resolved value.

@@ -1,9 +1,9 @@
 /**
- * Search first focusable element (parent or children) and set focus
+ * Set focus on parent itself or first possible element inside
  * @param element
  * @return {Boolean} true if focus is fired
  */
-export default function focusFirst(element: HTMLElement | { focus: () => void }): boolean {
+export default function focusFirst(element: HTMLElement | Pick<HTMLElement, "focus">): boolean {
   if (element instanceof HTMLElement) {
     const prev = document.activeElement;
     const tryFocus = (el: HTMLElement): boolean => {
