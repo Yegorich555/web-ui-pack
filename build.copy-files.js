@@ -6,7 +6,8 @@ const path = require("path");
   "./package.json", //
   "./package-lock.json",
   "./.npmignore",
-] //
-  .forEach((f) => {
-    fs.copyFileSync(f, path.resolve("./dist", f));
-  });
+  "./README.md",
+  "./LICENSE.md",
+].forEach((f) => {
+  fs.copyFileSync(f, path.resolve("./dist", f));
+});
