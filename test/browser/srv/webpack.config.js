@@ -1,12 +1,9 @@
 // const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 const path = require("path");
-const webpack = require("webpack");
-
-const mode = "development"; // : "production");
 
 /** @type {import('webpack').Configuration} */
 module.exports = {
-  mode,
+  mode: "development",
   stats: {
     children: false, // disable console.info for node_modules/*
     modules: false,
@@ -48,12 +45,4 @@ module.exports = {
       },
     ],
   },
-  plugins: [
-    new webpack.DefinePlugin({
-      // it adds custom Global definition to the project like BASE_URL for index.html
-      "process.env": {
-        NODE_ENV: JSON.stringify(mode),
-      },
-    }),
-  ],
 };

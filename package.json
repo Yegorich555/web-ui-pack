@@ -5,11 +5,10 @@
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
-    "test": "npm run pretest-build && jest --coverage --coverageReporters=text --config test/jest.config.js",
-    "test-single": "jest --config test/jest.config.js --coverage=false",
-    "test-minify": "node ./test/minification/start.js",
-    "pretest-build": "npm run build-code && webpack --config test/browser/srv/webpack.config.js",
-    "coverage": "npm run test -- --coverageReporters=text-lcov | coveralls",
+    "test": "npm run build-all && jest --config test/jest.config.js --coverage --coverageReporters=text",
+    "test-single": "jest --config test\\jest.config.js --coverage=false",
+    "test-minify": "node .\\test\\minification\\start.js",
+    "coverage": "npm run test -- --coverageReporters=lcov && coveralls < coverage\\lcov.info && shx rm -rf .\\coverage && echo \nCoverage: published\n",
     "start": "npm run example",
     "example": ".\\node_modules\\.bin\\webpack serve --config example/webpack.devServer.js",
     "lint-code": ".\\node_modules\\.bin\\eslint --fix --cache ./**/*.{js,jsx,ts,tsx,json}",
@@ -18,7 +17,9 @@
     "lint": "npm run lint-code && npm run lint-styles",
     "build-styles": "gulp",
     "build-code": "tsc --listEmittedFiles --incremental && node .\\build.copy-files.js",
-    "build": "gulp -f .\\build.gulpfile.js && npm run build-code"
+    "build": "gulp -f .\\build.gulpfile.js && npm run build-code",
+    "build-all": "npm run build && webpack --config test\\browser\\srv\\webpack.config.js",
+    "postpublish": "npm run coverage"
   },
   "repository": {
     "type": "git",
@@ -64,6 +65,7 @@
     "babel-plugin-jsx-classnames-advanced": "^1.0.2",
     "case-sensitive-paths-webpack-plugin": "^2.4.0",
     "clean-webpack-plugin": "^4.0.0",
+    "coveralls": "^3.1.1",
     "css-loader": "^6.5.1",
     "eslint": "^8.3.0",
     "eslint-config-airbnb": "^19.0.1",
@@ -97,6 +99,7 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "sass-loader": "^12.3.0",
+    "shx": "^0.3.3",
     "style-loader": "^3.3.1",
     "stylelint": "^14.1.0",
     "stylelint-config-prettier": "^9.0.3",

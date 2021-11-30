@@ -93,3 +93,5 @@ lib
 dist
 
 test/browser/srv/bundle.js
+
+.coveralls.yml
