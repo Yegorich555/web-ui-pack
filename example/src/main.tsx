@@ -2,8 +2,7 @@
 import "./styles/main.scss";
 import React, { Component } from "react";
 import ReactDom from "react-dom";
-import WebUIPack from "web-ui-pack";
-import focusFirst from "web-ui-pack/helpers/focusFirst.js";
+import focusFirst from "web-ui-pack/helpers/focusFirst";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Props {}
@@ -15,7 +14,7 @@ class AppContainer extends Component<Props> {
   }
 
   render() {
-    return <h1 ref={(el) => el && focusFirst(el)}>WebUIPack Examples {WebUIPack.todo}</h1>;
+    return <h1 ref={(el) => el && focusFirst(el)}>WebUIPack Examples</h1>;
   }
 }
 

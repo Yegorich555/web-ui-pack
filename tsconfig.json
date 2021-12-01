@@ -12,6 +12,7 @@
     "strict": true,
     "allowJs": true
   },
+  "files": ["src/index.ts"],
   "include": ["src/**/*"],
   "exclude": ["node_modules", "build", ".vscode", "lib", "dist", "icomoon"]
 }

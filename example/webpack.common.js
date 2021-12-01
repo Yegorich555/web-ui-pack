@@ -3,7 +3,6 @@ const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CaseSensitivePathsPlugin = require("case-sensitive-paths-webpack-plugin");
-const CleanPlugin = require("clean-webpack-plugin");
 const path = require("path");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 
@@ -36,6 +35,7 @@ module.exports = function (env, argv) {
       filename: "[name].js",
       chunkFilename: "[name].js",
       publicPath: "/", // url that should be used for providing assets
+      clean: true,
     },
     resolve: {
       extensions: [".js", ".jsx", ".ts", ".tsx"], // using import without file-extensions
@@ -97,9 +97,6 @@ module.exports = function (env, argv) {
           NODE_ENV: JSON.stringify(mode),
           BASE_URL: '"/"',
         },
-        "global.DEV": JSON.stringify(isDevMode),
-        "global.DEBUG": JSON.stringify(false),
-        "global.VERBOSE": JSON.stringify(false),
       }),
       new CaseSensitivePathsPlugin(), // it fixes bugs between OS in caseSensitivePaths (since Windows isn't CaseSensitive but Linux is)
       new HtmlWebpackPlugin({
@@ -120,7 +117,6 @@ module.exports = function (env, argv) {
         filename: isDevMode ? "[name].css" : "[name].[contenthash].css",
         chunkFilename: isDevMode ? "[id].css" : "[id].[contenthash].css",
       }),
-      new CleanPlugin.CleanWebpackPlugin(), // it cleans output folder before extracting files
       // it copies files like images, fonts etc. from 'public' path to 'destPath' (since not every file will be injected into css and js)
       new webpack.ProgressPlugin(), // it shows progress of building
       new webpack.ProvidePlugin({

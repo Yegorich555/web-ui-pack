@@ -3,8 +3,8 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "web-ui-pack": ["../dist"],
-      "web-ui-pack/*": ["../dist/*"],
+      "web-ui-pack": ["../src"],
+      "web-ui-pack/*": ["../src/*"],
     }
   },
   "include": ["./*", "src/main.tsx"],
