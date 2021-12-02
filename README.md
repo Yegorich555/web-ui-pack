@@ -32,9 +32,11 @@ Coming soon
 ### Helpers
 
 use `import detectFocusLeft from "web-ui-pack/helpers/detectFocusLeft"` etc.
+or use `import { detectFocusLeft } from "web-ui-pack"`
 
 - [**detectFocusLeft**(wrapper: HTMLElement, callback: () => void, focusDebounceMs = 100)](#helpers) ⇒ `Fix focus-throtling when you click on Label that tied with Input`
 - [**focusFirst**(element: HTMLElement)](#helpers) ⇒ `Set focus on parent itself or first possible element inside`
 - [**nestedProperty.set**](#helpers) ⇒ `nestedProperty.set(obj, "value.nestedValue", 1) sets obj.value.nestedValue = 1`
 - [**nestedProperty.get**](#helpers) ⇒ `nestedProperty.get(obj, "nestedValue1.nestVal2") returns value from obj.nestedValue1.nestVal2`
 - [**promiseWait**(promise: Promise, ms: number)](#helpers) ⇒ `Produce Promise during for "no less than pointed time"; it helps for avoding spinner blinking during the very fast api-request in case: pending > waitResponse > resetPending`
+- [**stringPrettify**(text: string, changeKebabCase = false)](#helpers) ⇒ `Changes camelCase, snakeCase, kebaCase text to user-friendly`

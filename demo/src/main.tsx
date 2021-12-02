@@ -2,7 +2,7 @@ import "./styles/main.scss";
 import React, { Component } from "react";
 import ReactDom from "react-dom";
 import { BrowserRouter, Routes, Route, Navigate, NavLink } from "react-router-dom";
-import focusFirst from "web-ui-pack/helpers/focusFirst";
+import { focusFirst, stringPrettify } from "web-ui-pack";
 import PopupView from "./components/popupView";
 import styles from "./main.scss";
 
@@ -13,11 +13,6 @@ interface IRoute {
 }
 
 const routes: IRoute[] = [{ path: "/popup", el: PopupView }];
-
-function snakeCaseToUpperCaseFirst(s: string): string {
-  const rs = s.replace(/([A-Z])/g, " $1");
-  return rs.charAt(0).toUpperCase() + rs.slice(1);
-}
 
 class AppContainer extends Component {
   render() {
@@ -30,7 +25,7 @@ class AppContainer extends Component {
               {routes.map((r) => (
                 <li key={r.path}>
                   <NavLink to={r.path} className={({ isActive }) => (isActive ? styles.activeLink : "")}>
-                    {r.label || snakeCaseToUpperCaseFirst(r.path.replace("/", ""))}
+                    {r.label || stringPrettify(r.path.replace("/", ""))}
                   </NavLink>
                 </li>
               ))}

@@ -1,7 +1,7 @@
 /* eslint-disable import/prefer-default-export */
-import WUPBaseElement from "./baseElement";
+import { IWUPBaseElement } from "./baseElement";
 
-export class WUPPopupElement extends WUPBaseElement {
+export class WUPPopupElement extends HTMLDivElement implements IWUPBaseElement {
   options = {};
 }
 
