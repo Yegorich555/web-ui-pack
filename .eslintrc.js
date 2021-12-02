@@ -19,8 +19,7 @@ module.exports = {
     browser: true,
   },
   globals: {
-    DEV_SERVER: true,
-    API_DOMAIN: true,
+    DEV: true,
   },
   plugins: ["json", "prettier", "import", "@typescript-eslint", "unused-imports"],
   rules: {
@@ -32,12 +31,15 @@ module.exports = {
     "react/static-property-placement": "off",
     "react/prop-types": "off",
     "react/jsx-props-no-spreading": "off",
+    // watch bug: https://github.com/airbnb/javascript/pull/2501
+    "react/function-component-definition": [2, { namedComponents: "function-declaration" }],
     "@typescript-eslint/ban-ts-ignore": "off",
     "@typescript-eslint/prefer-namespace-keyword": "off",
     "@typescript-eslint/no-explicit-any": "off", //["error", { ignoreRestArgs: true, }],
     "prettier/prettier": ["error"],
     "no-return-assign": ["error", "except-parens"],
     "no-underscore-dangle": 0,
+    "unused-imports/no-unused-imports": "error",
     "no-unused-expressions": ["error", { allowShortCircuit: true }],
     "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
     "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",

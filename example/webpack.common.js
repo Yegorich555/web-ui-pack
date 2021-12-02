@@ -70,14 +70,22 @@ module.exports = function (env, argv) {
               loader: "css-loader", // it interprets @import and url() like import/require() and it resolves them (you can use [import *.css] into *.js).
               options: {
                 modules: {
-                  auto: /\.module\.\w+$/, // enable css-modules option for files *.module*.
+                  // every style-file is css-module by default except folder styles/**/*
+                  auto: (function () {
+                    class MyReg extends RegExp {
+                      test(str) {
+                        return !str.includes("styles");
+                      }
+                    }
+                    return new MyReg();
+                  })(),
                 },
               },
             },
             {
               loader: "sass-loader", // it compiles Sass to CSS, using Node Sass by default
               options: {
-                // additionalData: '@import "variables";', // inject this import by default in each scss-file
+                additionalData: '@import "variables";', // inject this import by default in each scss-file
                 sassOptions: {
                   includePaths: [path.resolve(__dirname, "src/styles")], // using pathes as root
                 },

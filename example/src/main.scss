@@ -1,0 +1,66 @@
+$h1Height: 40px;
+
+h1 {
+  height: $h1Height;
+  line-height: $h1Height;
+  padding: 0;
+  margin: 0;
+  border-bottom: 1px solid #eaeef3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $headerBgColor;
+  color: $headerColor;
+}
+
+.page {
+  display: flex;
+  flex-direction: row;
+  height: calc(100vh - #{$h1Height} - 1px);
+  overflow: auto;
+
+  > .leftBar {
+    border: $borderStyle;
+    border-top: none;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    min-width: 150px;
+    padding: 10px;
+
+    > div:last-child {
+      margin-top: auto;
+    }
+
+    > ul {
+      padding: 0;
+      margin: 0;
+
+      a {
+        border-radius: $borderRadius;
+        display: block;
+        padding: 10px;
+        text-decoration: none;
+
+        &:hover {
+          color: $hoverColor;
+          background: $hoverBgColor;
+        }
+      }
+
+      .activeLink {
+        color: $activeLinkColor;
+        background-color: $activeLinkBgColor;
+
+        &:hover {
+          background-color: $activeLinkHoverBgColor;
+        }
+      }
+    }
+  }
+
+  > .leftBar + main {
+    padding: 10px;
+    width: 100%;
+  }
+}
