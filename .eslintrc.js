@@ -23,6 +23,8 @@ module.exports = {
   },
   plugins: ["json", "prettier", "import", "@typescript-eslint", "unused-imports"],
   rules: {
+    "no-shadow": "off",
+    "@typescript-eslint/no-shadow": ["error"],
     "import/no-extraneous-dependencies": "off",
     "lines-between-class-members": ["error", "always", { exceptAfterSingleLine: true }],
     "react/no-access-state-in-setstate": "off",
@@ -36,6 +38,7 @@ module.exports = {
     "@typescript-eslint/ban-ts-ignore": "off",
     "@typescript-eslint/prefer-namespace-keyword": "off",
     "@typescript-eslint/no-explicit-any": "off", //["error", { ignoreRestArgs: true, }],
+    "@typescript-eslint/no-namespace": "off",
     "prettier/prettier": ["error"],
     "no-return-assign": ["error", "except-parens"],
     "no-underscore-dangle": 0,
