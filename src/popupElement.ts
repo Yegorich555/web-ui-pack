@@ -21,7 +21,7 @@ interface IPopupOptions {
    * */
   offset: [number, number, number, number] | [number, number];
   /** Returns element according to this one need to check overflow; {body} by default */
-  toFitElement: () => HTMLElement & Pick<HTMLElement, "offsetWidth" | "offsetHeight">;
+  toFitElement: HTMLElement;
   /** Set minWidth 100% of targetWidth */
   minWidthByTarget: boolean;
   /** Set minHeight 100% of targetWidth */
@@ -35,7 +35,7 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
     placement: WUPPopupElement.Placements.bottom.start,
     placementAlt: [WUPPopupElement.Placements.bottom.start.adjust],
     offset: [0, 0],
-    toFitElement: () => document.body,
+    toFitElement: document.body,
     minWidthByTarget: false,
     minHeightByTarget: false,
   };
@@ -103,73 +103,78 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
     t.el = this.target as HTMLElement;
 
     if (
-      force ||
-      // issue: it's wrong if minWidth, minHeight etc. is changed and doesn't affect on layout sizes directly
-      !this.#prev ||
-      this.#prev.top !== t.top ||
-      this.#prev.left !== t.left ||
-      this.#prev.width !== t.width ||
-      this.#prev.height !== t.height
+      !(
+        force ||
+        // issue: it's wrong if minWidth, minHeight etc. is changed and doesn't affect on layout sizes directly
+        !this.#prev ||
+        this.#prev.top !== t.top ||
+        this.#prev.left !== t.left ||
+        this.#prev.width !== t.width ||
+        this.#prev.height !== t.height
+      )
     ) {
-      const fitEl = this.options.toFitElement?.call(this) || document.body;
-      const fit = getBoundingInternalRect(fitEl) as IBoundingRect;
-      fit.el = fitEl;
-
-      if (this.options.minWidthByTarget) {
-        this.style.minWidth = `${t.width}px`;
-      } else if (this.style.minWidth) {
-        this.style.minWidth = "";
-      }
-
-      if (this.options.minHeightByTarget) {
-        this.style.minHeight = `${t.height}px`;
-      } else if (this.style.minHeight) {
-        this.style.minHeight = "";
-      }
-
-      const me: IPlaceMeRect = {
-        w: this.offsetWidth, // clientWidth doesn't include border-size
-        h: this.offsetHeight,
-        el: this,
-        offset: {
-          top: this.options.offset[0],
-          right: this.options.offset[1],
-          bottom: this.options.offset[2] ?? this.options.offset[0],
-          left: this.options.offset[3] ?? this.options.offset[1],
-        },
-      };
-      let pos = this.options.placement(t, me, fit);
-
-      const hasOveflow = (p: { top: number; left: number }): boolean =>
-        p.left < fit.left ||
-        p.top < fit.top ||
-        p.left + this.offsetWidth > fit.right ||
-        p.top + this.offsetHeight > fit.bottom;
-
-      // try another positions
-      if (hasOveflow(pos)) {
-        const isDefined = this.options.placementAlt.some((alt) => {
-          const p = alt(t, me, fit);
-          if (!hasOveflow(p)) {
-            pos = p;
-            return true;
-          }
-          return false;
-        });
-
-        // adjust if alternate positions don't fit
-        if (!isDefined) {
-          pos = popupAdjust(pos, me, fit, true);
-        }
-      }
-      console.warn(pos);
-      // todo issue: if target partially overflowed we should select opposite direction => useScrollInto view in this case if scroll exists
-      this.style.top = `${pos.top}px`;
-      this.style.left = `${pos.left}px`;
-      // we can't remove maxWidth, maxHeight because maxWidth can affect on maxHeight and calculations will be wrong
-      this.style.maxWidth = `${Math.min(pos.maxWidth || pos.freeWidth, this.#userSizes.maxWidth)}px`;
-      this.style.maxHeight = `${Math.min(pos.maxHeight || pos.freeHeight, this.#userSizes.maxHeight)}px`;
+      return;
     }
+
+    if (this.options.minWidthByTarget) {
+      this.style.minWidth = `${t.width}px`;
+    } else if (this.style.minWidth) {
+      this.style.minWidth = "";
+    }
+
+    if (this.options.minHeightByTarget) {
+      this.style.minHeight = `${t.height}px`;
+    } else if (this.style.minHeight) {
+      this.style.minHeight = "";
+    }
+
+    const fitEl = this.options.toFitElement || document.body;
+    const fit = getBoundingInternalRect(fitEl) as IBoundingRect;
+    fit.el = fitEl;
+
+    const me: IPlaceMeRect = {
+      w: this.offsetWidth, // clientWidth doesn't include border-size
+      h: this.offsetHeight,
+      el: this,
+      offset: {
+        top: this.options.offset[0],
+        right: this.options.offset[1],
+        bottom: this.options.offset[2] ?? this.options.offset[0],
+        left: this.options.offset[3] ?? this.options.offset[1],
+      },
+    };
+    let pos = this.options.placement(t, me, fit);
+
+    const hasOveflow = (p: { top: number; left: number }): boolean =>
+      p.left < fit.left ||
+      p.top < fit.top ||
+      p.left + this.offsetWidth > fit.right ||
+      p.top + this.offsetHeight > fit.bottom;
+
+    // try another positions
+    if (hasOveflow(pos)) {
+      const isDefined = this.options.placementAlt.some((alt) => {
+        const p = alt(t, me, fit);
+        if (!hasOveflow(p)) {
+          pos = p;
+          return true;
+        }
+        return false;
+      });
+
+      // adjust if alternate positions don't fit
+      if (!isDefined) {
+        pos = popupAdjust(pos, me, fit, true);
+      }
+    }
+    console.warn(pos);
+    // todo issue: if target partially overflowed we should select opposite direction => useScrollInto view in this case if scroll exists
+    this.style.top = `${pos.top}px`;
+    this.style.left = `${pos.left}px`;
+    // we can't remove maxWidth, maxHeight because maxWidth can affect on maxHeight and calculations will be wrong
+    this.style.maxWidth = `${Math.min(pos.maxWidth || pos.freeWidth, this.#userSizes.maxWidth)}px`;
+    this.style.maxHeight = `${Math.min(pos.maxHeight || pos.freeHeight, this.#userSizes.maxHeight)}px`;
+
     this.#prev = t;
   };
 }
