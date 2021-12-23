@@ -100,6 +100,7 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
 
     if (
       force ||
+      // issue: it's wrong if minWidth, minHeight etc. is changed and doesn't affect on layout sizes directly
       !this.#prev ||
       this.#prev.top !== t.top ||
       this.#prev.left !== t.left ||
@@ -142,7 +143,6 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
 
         // adjust if alternate positions don't fit
         if (!isDefined) {
-          // todo it works wrong with minSize > freeSize >>> popup overflows the target
           pos = popupAdjust(pos, me, fit, true);
         }
       }

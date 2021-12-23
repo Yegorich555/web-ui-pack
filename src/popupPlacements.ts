@@ -15,6 +15,8 @@ export interface IPlacementResult {
   left: number;
   freeWidth: number;
   freeHeight: number;
+  maxFreeWidth: number;
+  maxFreeHeight: number;
   maxWidth?: number | null;
   maxHeight?: number | null;
 }
@@ -44,11 +46,11 @@ export function getBoundingInternalRect(el: HTMLElement): DOMRect {
 }
 
 // fire when we have an overflow and we need to adjust position/size to fit layout
-export function popupAdjust(
+function popupAdjustInternal(
   prev: IPlacementResult,
   me: IPlaceMeRect,
   fit: IBoundingRect,
-  ignoreFreeWidth = false
+  ignoreAlign = false
 ): IPlacementResult {
   const { freeWidth, freeHeight } = prev;
   // decline calc if we have minSize > than available field; in this case we must select opossite or something that fit better
@@ -57,10 +59,13 @@ export function popupAdjust(
   const minHeight = stringPixelsToNumber(minH);
   // reject calc since minSize > availableSize
   if (minWidth > freeWidth || minHeight > freeHeight) {
-    if (!ignoreFreeWidth) {
-      return prev;
+    if (ignoreAlign) {
+      // todo we can look position through Placements
+      const n = { ...prev, freeHeight: prev.maxFreeHeight, freeWidth: prev.maxFreeWidth };
+      // issue: it doesn't work if both minH&minW > freeH&freeW
+      return popupAdjustInternal(n, me, fit, false);
     }
-    console.warn("WUP.Popup. Don't enough space for positioning because minWidth and/or minHeight affects on");
+    return prev;
   }
 
   // decline calc if availableField is very small; in this case we must select opossite or something that fit better
@@ -87,7 +92,25 @@ export function popupAdjust(
     top = Math.min(top, fit.bottom - (maxHeight || me.h));
   }
 
-  return { top, left, maxWidth, maxHeight, freeHeight, freeWidth };
+  return {
+    top,
+    left,
+    maxWidth,
+    maxHeight,
+    freeHeight,
+    freeWidth,
+    maxFreeWidth: prev.maxFreeWidth,
+    maxFreeHeight: prev.maxFreeHeight,
+  };
+}
+
+export function popupAdjust(
+  prev: IPlacementResult,
+  me: IPlaceMeRect,
+  fit: IBoundingRect,
+  ignoreAlign = false
+): IPlacementResult {
+  return popupAdjustInternal(prev, me, fit, ignoreAlign);
 }
 
 export type IBoundingRect = DOMRect & { el: HTMLElement };
@@ -107,16 +130,17 @@ export interface IPlacementAlign {
 /** Set of rules related to specific edge of targetElement; use bottom.start to place bottomStart */
 export interface IPlacementEdge {
   (target: IBoundingRect, me: IPlaceMeRect, fit: IBoundingRect):
-    | { top: number; freeHeight?: number }
-    | { left: number; freeWidth?: number };
+    | { top: number; freeHeight: number; maxFreeHeight: number }
+    | { left: number; freeWidth: number };
   start: IPlacementAlign;
 }
 
-// todo make bottom == bottomStart to avoid issues
-const bottom = <IPlacementEdge>function bottom(el, me, fit) {
+const bottom = <IPlacementEdge>function bottom(el, me, fit): ReturnType<IPlacementEdge> {
+  const freeHeight = fit.bottom - (el.bottom + me.offset.bottom);
   return {
     top: el.bottom + me.offset.bottom,
-    freeHeight: fit.bottom - (el.bottom + me.offset.bottom),
+    freeHeight,
+    maxFreeHeight: freeHeight,
   };
 };
 
@@ -124,12 +148,14 @@ bottom.start = <IPlacementAlign>function bottomStart(el, me, fit) {
   const prev = bottom(el, me, fit) as IPlacementResult;
   prev.left = el.left;
   prev.freeWidth = fit.right - el.left;
+  prev.maxFreeWidth = fit.width;
   return prev;
 };
 
 bottom.start.adjust = (el, me, fit) => popupAdjust(bottom.start(el, me, fit), me, fit);
 
 export const PopupPlacements = {
+  // todo make bottom == bottomStart to avoid issues
   bottom,
 };
 
