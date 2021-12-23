@@ -1,4 +1,4 @@
-export * from "./popupElement";
+// export * from "./popupElement";
 
 export { default as detectFocusLeft } from "./helpers/detectFocusLeft";
 export { default as focusFirst } from "./helpers/focusFirst";

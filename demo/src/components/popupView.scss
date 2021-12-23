@@ -1,0 +1,56 @@
+.popupViewExtraScroll {
+  overflow: auto;
+  max-height: 200px;
+  background-color: beige;
+  position: relative;
+
+  border-top: 3px solid black;
+  border-right: 4px solid black;
+  border-bottom: 5px solid black;
+  border-left: 6px solid black;
+  margin: 2px;
+  padding: 2px;
+}
+
+.popupContent {
+  background: purple;
+  border: none;
+  text-overflow: ellipsis;
+  // todo how to make popup to be the same width as target ?
+  min-width: 180px;
+  min-height: 80px;
+}
+
+.popupView {
+  padding: 14px;
+  position: relative;
+  background: var(--basicBgColor, #e5e5e5);
+  height: 200px;
+  max-width: 300px;
+  overflow: auto;
+  margin: auto;
+
+  > div {
+    display: flex;
+
+    &:last-of-type {
+      margin-top: auto;
+    }
+  }
+}
+
+.middle {
+  height: 180px;
+  justify-content: center;
+}
+
+.rightTop {
+  margin-left: auto;
+}
+
+.bodyOverlowRight {
+  position: absolute;
+  right: 30px;
+  bottom: 30px;
+  width: 60px;
+}
