@@ -1,7 +1,4 @@
 /* eslint-disable no-use-before-define */
-/* eslint-disable import/prefer-default-export */
-/* eslint-disable prefer-destructuring */
-/* eslint-disable no-param-reassign */
 
 export type IPlaceMeRect = {
   w: number;
