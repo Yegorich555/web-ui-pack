@@ -7,8 +7,8 @@ function PopupContent() {
       class={styles.popupContent}
       ref={(el) => {
         if (el) {
-          // eslint-disable-next-line no-param-reassign
-          el.options.placementFitElement = () => el.parentElement as HTMLElement;
+          el.options.toFitElement = () => document.querySelector("#toFitMe") as HTMLElement;
+          el.options.minWidthByTarget = true;
           el.updatePosition(true);
         }
       }}
@@ -20,11 +20,13 @@ function PopupContent() {
 
 export default function PopupView() {
   return (
-    <div className={styles.popupViewExtraScroll}>
-      <button type="button" className={styles.bodyOverlowRight}>
-        clickMe
-      </button>
-      <PopupContent />
+    <div className={styles.popupViewExtraScroll} id="toFitMe">
+      <div style={{ position: "relative" }}>
+        <button type="button" className={styles.bodyOverlowRight}>
+          clickMe
+        </button>
+        <PopupContent />
+      </div>
       <div className={styles.popupView}>
         <div>
           <button type="button" className={styles.leftTop}>

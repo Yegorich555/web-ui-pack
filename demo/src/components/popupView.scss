@@ -17,8 +17,8 @@
   border: none;
   text-overflow: ellipsis;
   // todo how to make popup to be the same width as target ?
-  min-width: 180px;
-  min-height: 30px;
+  // min-width: 180px;
+  // min-height: 30px;
 }
 
 .popupView {
@@ -51,6 +51,7 @@
 .bodyOverlowRight {
   position: absolute;
   right: 30px;
-  bottom: 30px;
-  width: 60px;
+  // bottom: 30px;
+  width: 250px;
+  z-index: 1;
 }

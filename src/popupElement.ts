@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-/* eslint-disable import/prefer-default-export */
 import { IWUPBaseElement, JSXCustomProps } from "./baseElement";
 import {
   getBoundingInternalRect,
@@ -21,9 +19,13 @@ interface IPopupOptions {
    *
    *  [top, right, bottom, left] or [top/bottom, right/left] in px
    * */
-  placementOffset: [number, number, number, number] | [number, number];
+  offset: [number, number, number, number] | [number, number];
   /** Returns element according to this one need to check overflow; {body} by default */
-  placementFitElement: () => HTMLElement & Pick<HTMLElement, "offsetWidth" | "offsetHeight">;
+  toFitElement: () => HTMLElement & Pick<HTMLElement, "offsetWidth" | "offsetHeight">;
+  /** Set minWidth 100% of targetWidth */
+  minWidthByTarget: boolean;
+  /** Set minHeight 100% of targetWidth */
+  minHeightByTarget: boolean;
 }
 
 export default class WUPPopupElement extends HTMLElement implements IWUPBaseElement {
@@ -32,8 +34,10 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
   options: IPopupOptions = {
     placement: WUPPopupElement.Placements.bottom.start,
     placementAlt: [WUPPopupElement.Placements.bottom.start.adjust],
-    placementOffset: [0, 0],
-    placementFitElement: () => document.body,
+    offset: [0, 0],
+    toFitElement: () => document.body,
+    minWidthByTarget: false,
+    minHeightByTarget: false,
   };
 
   target?: HTMLElement | null;
@@ -107,19 +111,31 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
       this.#prev.width !== t.width ||
       this.#prev.height !== t.height
     ) {
-      const fitEl = this.options.placementFitElement?.call(this) || document.body;
+      const fitEl = this.options.toFitElement?.call(this) || document.body;
       const fit = getBoundingInternalRect(fitEl) as IBoundingRect;
       fit.el = fitEl;
+
+      if (this.options.minWidthByTarget) {
+        this.style.minWidth = `${t.width}px`;
+      } else if (this.style.minWidth) {
+        this.style.minWidth = "";
+      }
+
+      if (this.options.minHeightByTarget) {
+        this.style.minHeight = `${t.height}px`;
+      } else if (this.style.minHeight) {
+        this.style.minHeight = "";
+      }
 
       const me: IPlaceMeRect = {
         w: this.offsetWidth, // clientWidth doesn't include border-size
         h: this.offsetHeight,
         el: this,
         offset: {
-          top: this.options.placementOffset[0],
-          right: this.options.placementOffset[1],
-          bottom: this.options.placementOffset[2] ?? this.options.placementOffset[0],
-          left: this.options.placementOffset[3] ?? this.options.placementOffset[1],
+          top: this.options.offset[0],
+          right: this.options.offset[1],
+          bottom: this.options.offset[2] ?? this.options.offset[0],
+          left: this.options.offset[3] ?? this.options.offset[1],
         },
       };
       let pos = this.options.placement(t, me, fit);
