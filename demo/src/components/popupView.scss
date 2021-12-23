@@ -2,7 +2,7 @@
   overflow: auto;
   max-height: 200px;
   background-color: beige;
-  // position: relative;
+  position: relative;
 
   border-top: 3px solid black;
   border-right: 4px solid black;
@@ -49,8 +49,8 @@
 
 .bodyOverlowRight {
   position: absolute;
-  right: -10px;
+  right: 30px;
   bottom: 30px;
-  width: 250px;
+  // width: 250px;
   z-index: 1;
 }

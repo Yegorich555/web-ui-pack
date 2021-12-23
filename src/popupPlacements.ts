@@ -1,28 +1,35 @@
 /* eslint-disable no-use-before-define */
 
-export type IPlaceMeRect = {
+export interface IPlaceMeRect {
   w: number;
   h: number;
   el: HTMLElement;
   offset: { top: number; right: number; bottom: number; left: number };
-};
-
-export interface IPlacementResult {
-  top: number;
-  left: number;
-  freeWidth: number;
-  freeHeight: number;
-  maxFreeWidth: number;
-  maxFreeHeight: number;
-  maxWidth?: number | null;
-  maxHeight?: number | null;
 }
+
+interface IPlacementXResult {
+  left: number;
+  maxW?: number | null;
+
+  freeW: number;
+  maxFreeW: number;
+}
+
+interface IPlacementYResult {
+  top: number;
+  maxH?: number | null;
+
+  freeH: number;
+  maxFreeH: number;
+}
+
+export interface IPlacementResult extends IPlacementXResult, IPlacementYResult {}
 
 export function stringPixelsToNumber(styleValue: string): number {
   return +(/([0-9]+)/.exec(styleValue)?.[0] || 0);
 }
 
-/* returns rectangular without borders and scroll */
+/* Returns bounding rectangular without borders and scroll */
 export function getBoundingInternalRect(el: HTMLElement): DOMRect {
   const { borderTopWidth, borderLeftWidth } = getComputedStyle(el);
   let { left, top } = el.getBoundingClientRect();
@@ -42,14 +49,14 @@ export function getBoundingInternalRect(el: HTMLElement): DOMRect {
   return r;
 }
 
-// fire when we have an overflow and we need to adjust position/size to fit layout
+/* Adjust position/size to fit layout */
 function popupAdjustInternal(
   prev: IPlacementResult,
   me: IPlaceMeRect,
   fit: IBoundingRect,
   ignoreAlign = false
 ): IPlacementResult {
-  const { freeWidth, freeHeight } = prev;
+  const { freeW: freeWidth, freeH: freeHeight } = prev;
   // decline calc if we have minSize > than available field; in this case we must select opossite or something that fit better
   const { minWidth: minW, minHeight: minH } = getComputedStyle(me.el);
   const minWidth = stringPixelsToNumber(minW);
@@ -58,7 +65,7 @@ function popupAdjustInternal(
   if (minWidth > freeWidth || minHeight > freeHeight) {
     if (ignoreAlign) {
       // todo we can look position through Placements
-      const n = { ...prev, freeHeight: prev.maxFreeHeight, freeWidth: prev.maxFreeWidth };
+      const n = { ...prev, freeHeight: prev.maxFreeH, freeWidth: prev.maxFreeW };
       // issue: it doesn't work if both minH&minW > freeH&freeW
       return popupAdjustInternal(n, me, fit, false);
     }
@@ -92,12 +99,12 @@ function popupAdjustInternal(
   return {
     top,
     left,
-    maxWidth,
-    maxHeight,
-    freeHeight,
-    freeWidth,
-    maxFreeWidth: prev.maxFreeWidth,
-    maxFreeHeight: prev.maxFreeHeight,
+    maxW: maxWidth,
+    maxH: maxHeight,
+    freeH: freeHeight,
+    freeW: freeWidth,
+    maxFreeW: prev.maxFreeW,
+    maxFreeH: prev.maxFreeH,
   };
 }
 
@@ -110,42 +117,41 @@ export function popupAdjust(
   return popupAdjustInternal(prev, me, fit, ignoreAlign);
 }
 
-export type IBoundingRect = DOMRect & { el: HTMLElement };
-
-/** Extra rule to place to fit layout via set maxWdith, maxHeight and shifting position */
-export interface IPlacementAdjust {
-  (target: IBoundingRect, me: IPlaceMeRect, fit: IBoundingRect): IPlacementResult;
+export interface IBoundingRect extends DOMRect {
+  el: HTMLElement;
 }
 
 /** Ordinary placement rule */
-export interface IPlacementAlign {
+export interface IPlacementFunction {
   (target: IBoundingRect, me: IPlaceMeRect, fit: IBoundingRect): IPlacementResult;
-  /** Extra rule to place to fit layout via set maxWdith, maxHeight and shifting position */
-  adjust: IPlacementAdjust;
+}
+
+/** Ordinary placement rule with nested [adjust] rule */
+export interface IPlacementAlign extends IPlacementFunction {
+  /** Extra rule to fit layout via set maxWdith, maxHeight and shifting position */
+  adjust: IPlacementFunction;
 }
 
 /** Set of rules related to specific edge of targetElement; use bottom.start to place bottomStart */
 export interface IPlacementEdge {
-  (target: IBoundingRect, me: IPlaceMeRect, fit: IBoundingRect):
-    | { top: number; freeHeight: number; maxFreeHeight: number }
-    | { left: number; freeWidth: number };
+  (target: IBoundingRect, me: IPlaceMeRect, fit: IBoundingRect): IPlacementXResult | IPlacementYResult;
   start: IPlacementAlign;
 }
 
 const bottom = <IPlacementEdge>function bottom(el, me, fit): ReturnType<IPlacementEdge> {
-  const freeHeight = fit.bottom - (el.bottom + me.offset.bottom);
+  const freeH = fit.bottom - (el.bottom + me.offset.bottom);
   return {
     top: el.bottom + me.offset.bottom,
-    freeHeight,
-    maxFreeHeight: freeHeight,
+    freeH,
+    maxFreeH: freeH,
   };
 };
 
 bottom.start = <IPlacementAlign>function bottomStart(el, me, fit) {
   const prev = bottom(el, me, fit) as IPlacementResult;
   prev.left = el.left;
-  prev.freeWidth = fit.right - el.left;
-  prev.maxFreeWidth = fit.width;
+  prev.freeW = fit.right - el.left;
+  prev.maxFreeW = fit.width;
   return prev;
 };
 

@@ -2,8 +2,7 @@ import { IWUPBaseElement, JSXCustomProps } from "./baseElement";
 import {
   getBoundingInternalRect,
   IBoundingRect,
-  IPlacementAdjust,
-  IPlacementAlign,
+  IPlacementFunction,
   IPlaceMeRect,
   popupAdjust,
   PopupPlacements,
@@ -12,19 +11,19 @@ import {
 
 interface IPopupOptions {
   /** Placement rule; example Placements.bottom.start  Placements.bottom.start.adjust */
-  placement: IPlacementAlign | IPlacementAdjust;
+  placement: IPlacementFunction;
   /** Alternate when pointed placement doesn't fit the layout */
-  placementAlt: Array<IPlacementAlign | IPlacementAdjust>;
+  placementAlt: Array<IPlacementFunction>;
   /** Alternative of margin for targetElement related to popup
-   *
+
    *  [top, right, bottom, left] or [top/bottom, right/left] in px
    * */
   offset: [number, number, number, number] | [number, number];
   /** Returns element according to this one need to check overflow; {body} by default */
   toFitElement: HTMLElement;
-  /** Set minWidth 100% of targetWidth */
+  /** Sets minWidth 100% of targetWidth */
   minWidthByTarget: boolean;
-  /** Set minHeight 100% of targetWidth */
+  /** Sets minHeight 100% of targetWidth */
   minHeightByTarget: boolean;
 }
 
@@ -172,8 +171,8 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
     this.style.top = `${pos.top}px`;
     this.style.left = `${pos.left}px`;
     // we can't remove maxWidth, maxHeight because maxWidth can affect on maxHeight and calculations will be wrong
-    this.style.maxWidth = `${Math.min(pos.maxWidth || pos.freeWidth, this.#userSizes.maxWidth)}px`;
-    this.style.maxHeight = `${Math.min(pos.maxHeight || pos.freeHeight, this.#userSizes.maxHeight)}px`;
+    this.style.maxWidth = `${Math.min(pos.maxW || pos.freeW, this.#userSizes.maxWidth)}px`;
+    this.style.maxHeight = `${Math.min(pos.maxH || pos.freeH, this.#userSizes.maxHeight)}px`;
 
     /* re-calc requires to avoid case when popup unexpectedly affects on layout:
       layout bug: Yscroll appears/disappears when display:flex; heigth:100vh > position:absolute; right:-10px
