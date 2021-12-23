@@ -167,15 +167,18 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
         pos = popupAdjust(pos, me, fit, true);
       }
     }
+
     console.warn(pos);
-    // todo issue: if target partially overflowed we should select opposite direction => useScrollInto view in this case if scroll exists
     this.style.top = `${pos.top}px`;
     this.style.left = `${pos.left}px`;
     // we can't remove maxWidth, maxHeight because maxWidth can affect on maxHeight and calculations will be wrong
     this.style.maxWidth = `${Math.min(pos.maxWidth || pos.freeWidth, this.#userSizes.maxWidth)}px`;
     this.style.maxHeight = `${Math.min(pos.maxHeight || pos.freeHeight, this.#userSizes.maxHeight)}px`;
 
-    this.#prev = t;
+    /* re-calc requires to avoid case when popup unexpectedly affects on layout:
+      layout bug: Yscroll appears/disappears when display:flex; heigth:100vh > position:absolute; right:-10px
+    */
+    this.#prev = t.el.getBoundingClientRect();
   };
 }
 

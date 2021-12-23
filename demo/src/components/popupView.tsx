@@ -8,7 +8,7 @@ function PopupContent() {
       ref={(el) => {
         if (el) {
           el.options.toFitElement = document.querySelector("#toFitMe") as HTMLElement;
-          el.options.minWidthByTarget = true;
+          // el.options.minWidthByTarget = true;
           el.updatePosition(true);
         }
       }}
@@ -21,12 +21,10 @@ function PopupContent() {
 export default function PopupView() {
   return (
     <div className={styles.popupViewExtraScroll} id="toFitMe">
-      <div style={{ position: "relative" }}>
-        <button type="button" className={styles.bodyOverlowRight}>
-          clickMe
-        </button>
-        <PopupContent />
-      </div>
+      <button type="button" className={styles.bodyOverlowRight}>
+        clickMe
+      </button>
+      <PopupContent />
       <div className={styles.popupView}>
         <div>
           <button type="button" className={styles.leftTop}>

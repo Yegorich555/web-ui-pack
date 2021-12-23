@@ -2,7 +2,7 @@
   overflow: auto;
   max-height: 200px;
   background-color: beige;
-  position: relative;
+  // position: relative;
 
   border-top: 3px solid black;
   border-right: 4px solid black;
@@ -16,7 +16,6 @@
   background: purple;
   border: none;
   text-overflow: ellipsis;
-  // todo how to make popup to be the same width as target ?
   // min-width: 180px;
   // min-height: 30px;
 }
@@ -50,8 +49,8 @@
 
 .bodyOverlowRight {
   position: absolute;
-  right: 30px;
-  // bottom: 30px;
+  right: -10px;
+  bottom: 30px;
   width: 250px;
   z-index: 1;
 }
