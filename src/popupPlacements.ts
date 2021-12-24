@@ -7,7 +7,7 @@ export interface IPlaceMeRect {
   offset: { top: number; right: number; bottom: number; left: number };
 }
 
-interface IPlacementXResult {
+export interface IPlacementXResult {
   left: number;
   maxW?: number | null;
 
@@ -16,7 +16,7 @@ interface IPlacementXResult {
   maxFreeH: number;
 }
 
-interface IPlacementYResult {
+export interface IPlacementYResult {
   top: number;
   maxH?: number | null;
 
@@ -109,7 +109,6 @@ function popupAdjustInternal(
     maxFreeH: this.maxFreeH,
   };
 }
-
 export function popupAdjust(
   this: IPlacementResult,
   me: IPlaceMeRect,
@@ -118,16 +117,13 @@ export function popupAdjust(
 ): IPlacementResult {
   return popupAdjustInternal.call(this, me, fit, ignoreAlign);
 }
-
 export interface IBoundingRect extends DOMRect {
   el: HTMLElement;
 }
-
 /** Ordinary placement rule */
 export interface IPlacementFunction {
   (target: IBoundingRect, me: IPlaceMeRect, fit: IBoundingRect): IPlacementResult;
 }
-
 /** Ordinary placement rule with nested [adjust] rule */
 export interface IPlacementAlign extends IPlacementFunction {
   /** Extra rule to fit layout via set maxWdith, maxHeight and shifting position */
