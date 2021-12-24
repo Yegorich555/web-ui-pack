@@ -82,6 +82,8 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
 
   #userSizes = { maxWidth: Number.MAX_SAFE_INTEGER, maxHeight: Number.MAX_SAFE_INTEGER };
   private show() {
+    // todo develop animation
+
     // it works only when styles is defined before popup is open
     const style = getComputedStyle(this);
     this.#userSizes = {
@@ -163,11 +165,12 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
 
       // adjust if alternate positions don't fit
       if (!isDefined) {
-        pos = popupAdjust(pos, me, fit, true);
+        pos = popupAdjust.call(pos, me, fit, true);
       }
     }
 
     console.warn(pos);
+    // todo use translate instead of top/left
     this.style.top = `${pos.top}px`;
     this.style.left = `${pos.left}px`;
     // we can't remove maxWidth, maxHeight because maxWidth can affect on maxHeight and calculations will be wrong

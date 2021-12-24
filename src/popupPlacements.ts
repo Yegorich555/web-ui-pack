@@ -13,6 +13,7 @@ interface IPlacementXResult {
 
   freeW: number;
   maxFreeW: number;
+  maxFreeH: number;
 }
 
 interface IPlacementYResult {
@@ -20,6 +21,7 @@ interface IPlacementYResult {
   maxH?: number | null;
 
   freeH: number;
+  maxFreeW: number;
   maxFreeH: number;
 }
 
@@ -51,12 +53,12 @@ export function getBoundingInternalRect(el: HTMLElement): DOMRect {
 
 /* Adjust position/size to fit layout */
 function popupAdjustInternal(
-  prev: IPlacementResult,
+  this: IPlacementResult,
   me: IPlaceMeRect,
   fit: IBoundingRect,
   ignoreAlign = false
 ): IPlacementResult {
-  const { freeW: freeWidth, freeH: freeHeight } = prev;
+  const { freeW: freeWidth, freeH: freeHeight } = this;
   // decline calc if we have minSize > than available field; in this case we must select opossite or something that fit better
   const { minWidth: minW, minHeight: minH } = getComputedStyle(me.el);
   const minWidth = stringPixelsToNumber(minW);
@@ -65,22 +67,22 @@ function popupAdjustInternal(
   if (minWidth > freeWidth || minHeight > freeHeight) {
     if (ignoreAlign) {
       // todo we can look position through Placements
-      const n = { ...prev, freeHeight: prev.maxFreeH, freeWidth: prev.maxFreeW };
+      const n = { ...this, freeHeight: this.maxFreeH, freeWidth: this.maxFreeW };
       // issue: it doesn't work if both minH&minW > freeH&freeW
-      return popupAdjustInternal(n, me, fit, false);
+      return popupAdjustInternal.call(n, me, fit, false);
     }
-    return prev;
+    return this;
   }
 
   // decline calc if availableField is very small; in this case we must select opossite or something that fit better
   if ((freeWidth <= 5 && minWidth > 0) || (freeHeight <= 5 && minHeight > 0)) {
-    return prev;
+    return this;
   }
 
   const maxWidth = me.w > freeWidth ? Math.max(minWidth, freeWidth) : null;
   const maxHeight = me.h > freeHeight ? Math.max(minHeight, freeHeight) : null;
 
-  let { left, top } = prev;
+  let { left, top } = this;
   // to fit by X
   if (left < fit.left) {
     left = fit.left;
@@ -103,18 +105,18 @@ function popupAdjustInternal(
     maxH: maxHeight,
     freeH: freeHeight,
     freeW: freeWidth,
-    maxFreeW: prev.maxFreeW,
-    maxFreeH: prev.maxFreeH,
+    maxFreeW: this.maxFreeW,
+    maxFreeH: this.maxFreeH,
   };
 }
 
 export function popupAdjust(
-  prev: IPlacementResult,
+  this: IPlacementResult,
   me: IPlaceMeRect,
   fit: IBoundingRect,
   ignoreAlign = false
 ): IPlacementResult {
-  return popupAdjustInternal(prev, me, fit, ignoreAlign);
+  return popupAdjustInternal.call(this, me, fit, ignoreAlign);
 }
 
 export interface IBoundingRect extends DOMRect {
@@ -136,6 +138,8 @@ export interface IPlacementAlign extends IPlacementFunction {
 export interface IPlacementEdge {
   (target: IBoundingRect, me: IPlaceMeRect, fit: IBoundingRect): IPlacementXResult | IPlacementYResult;
   start: IPlacementAlign;
+  middle: IPlacementAlign;
+  end: IPlacementAlign;
 }
 
 const bottom = <IPlacementEdge>function bottom(el, me, fit): ReturnType<IPlacementEdge> {
@@ -144,23 +148,46 @@ const bottom = <IPlacementEdge>function bottom(el, me, fit): ReturnType<IPlaceme
     top: el.bottom + me.offset.bottom,
     freeH,
     maxFreeH: freeH,
+    maxFreeW: fit.width,
   };
 };
-
-bottom.start = <IPlacementAlign>function bottomStart(el, me, fit) {
-  const prev = bottom(el, me, fit) as IPlacementResult;
-  prev.left = el.left;
-  prev.freeW = fit.right - el.left;
-  prev.maxFreeW = fit.width;
-  return prev;
+bottom.start = <IPlacementAlign>function bs(this: IPlacementResult, el, _me, fit) {
+  this.left = el.left;
+  this.freeW = fit.right - el.left;
+  return this;
 };
-
-bottom.start.adjust = (el, me, fit) => popupAdjust(bottom.start(el, me, fit), me, fit);
+bottom.middle = <IPlacementAlign>function bm(this: IPlacementResult, el, me, fit) {
+  this.left = el.left + (el.width - me.w) / 2;
+  this.freeW = fit.right - el.left;
+  return this;
+};
+bottom.end = <IPlacementAlign>function be(this: IPlacementResult, el, me, fit) {
+  // we can't assign r.right directly because rectangular doesn't include scrollWidth
+  this.left = el.right - me.w;
+  this.freeW = fit.right - el.left;
+  return this;
+};
 
 export const PopupPlacements = {
-  // todo make bottom == bottomStart to avoid issues
+  // todo use bottom as bottomStart to avoid missleading
   bottom,
 };
+
+Object.keys(PopupPlacements).forEach((kp) => {
+  const p = PopupPlacements[kp];
+  Object.keys(p).forEach((key) => {
+    const prevFn = p[key];
+    // eslint-disable-next-line func-names
+    p[key] = <IPlacementAlign>function (el, me, fit) {
+      return prevFn.call(p(el, me, fit), el, me, fit);
+    };
+    const v = p[key];
+    // adding .adjust to each IPlacementAlign
+    v.adjust = (el, me, fit) => popupAdjust.call(v(el, me, fit), me, fit);
+  });
+});
+
+console.warn(PopupPlacements);
 
 // static PlacementsOld: {
 //   [key in
