@@ -142,7 +142,7 @@ export interface IPlacementEdge {
   end: IPlacementAlign;
 }
 
-const bottom = <IPlacementEdge>function b(el, me, fit): ReturnType<IPlacementEdge> {
+const bottom = <IPlacementEdge>function bottom(el, me, fit): ReturnType<IPlacementEdge> {
   const freeH = fit.bottom - (el.bottom + me.offset.bottom);
   return {
     top: el.bottom + me.offset.bottom,
@@ -151,17 +151,17 @@ const bottom = <IPlacementEdge>function b(el, me, fit): ReturnType<IPlacementEdg
     maxFreeW: fit.width,
   };
 };
-bottom.start = <IPlacementAlign>function bs(this: IPlacementResult, el, _me, fit) {
+bottom.start = <IPlacementAlign>function bottomStart(this: IPlacementResult, el, _me, fit) {
   this.left = el.left;
   this.freeW = fit.right - el.left;
   return this;
 };
-bottom.middle = <IPlacementAlign>function bm(this: IPlacementResult, el, me, fit) {
+bottom.middle = <IPlacementAlign>function bottomMiddle(this: IPlacementResult, el, me, fit) {
   this.left = el.left + (el.width - me.w) / 2;
   this.freeW = fit.width;
   return this;
 };
-bottom.end = <IPlacementAlign>function be(this: IPlacementResult, el, me, fit) {
+bottom.end = <IPlacementAlign>function bottomEnd(this: IPlacementResult, el, me, fit) {
   // we can't assign r.right directly because rectangular doesn't include scrollWidth
   this.left = el.right - me.w;
   this.freeW = fit.left - el.right;
@@ -169,20 +169,27 @@ bottom.end = <IPlacementAlign>function be(this: IPlacementResult, el, me, fit) {
 };
 
 export const PopupPlacements = {
-  // todo use bottom as bottomStart to avoid missleading
   bottom,
 };
 
 Object.keys(PopupPlacements).forEach((kp) => {
+  // change bottom = bottom.middle to avoid user mistakes
+  const def = PopupPlacements[kp];
+  // eslint-disable-next-line func-names
+  PopupPlacements[kp] = (<IPlacementAlign>function (el, me, fit) {
+    return def.middle.call(def(el, me, fit), el, me, fit);
+  }) as unknown as IPlacementEdge;
   const p = PopupPlacements[kp];
-  Object.keys(p).forEach((key) => {
-    const prevFn = p[key];
+
+  Object.keys(def).forEach((key) => {
+    const prevFn = def[key];
+    // set context for each function
     // eslint-disable-next-line func-names
     p[key] = <IPlacementAlign>function (el, me, fit) {
-      return prevFn.call(p(el, me, fit), el, me, fit);
+      return prevFn.call(def(el, me, fit), el, me, fit);
     };
     const v = p[key];
-    // adding .adjust to each IPlacementAlign
+    // add .adjust to each IPlacementAlign
     v.adjust = (el, me, fit) => popupAdjust.call(v(el, me, fit), me, fit);
   });
 });
