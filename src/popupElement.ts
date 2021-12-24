@@ -51,6 +51,8 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
         z-index: 99999;
         margin: 0!important;
         box-sizing: border-box;
+        top: 0;
+        left: 0;
 
         overflow: hidden;
         border: 1px solid var(--popup-border-color, var(--border-color, #e1e1e1));
@@ -170,9 +172,10 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
     }
 
     console.warn(pos);
-    // todo use translate instead of top/left
-    this.style.top = `${pos.top}px`;
-    this.style.left = `${pos.left}px`;
+    // transform has performance benefits in comparison with positioning
+    this.style.transform = `translate(${pos.left}px, ${pos.top}px)`;
+    // this.style.top = `${pos.top}px`;
+    // this.style.left = `${pos.left}px`;
     // we can't remove maxWidth, maxHeight because maxWidth can affect on maxHeight and calculations will be wrong
     this.style.maxWidth = `${Math.min(pos.maxW || pos.freeW, this.#userSizes.maxWidth)}px`;
     this.style.maxHeight = `${Math.min(pos.maxH || pos.freeH, this.#userSizes.maxHeight)}px`;
