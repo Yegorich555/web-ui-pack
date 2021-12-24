@@ -142,7 +142,7 @@ export interface IPlacementEdge {
   end: IPlacementAlign;
 }
 
-const bottom = <IPlacementEdge>function bottom(el, me, fit): ReturnType<IPlacementEdge> {
+const bottom = <IPlacementEdge>function b(el, me, fit): ReturnType<IPlacementEdge> {
   const freeH = fit.bottom - (el.bottom + me.offset.bottom);
   return {
     top: el.bottom + me.offset.bottom,
@@ -158,13 +158,13 @@ bottom.start = <IPlacementAlign>function bs(this: IPlacementResult, el, _me, fit
 };
 bottom.middle = <IPlacementAlign>function bm(this: IPlacementResult, el, me, fit) {
   this.left = el.left + (el.width - me.w) / 2;
-  this.freeW = fit.right - el.left;
+  this.freeW = fit.width;
   return this;
 };
 bottom.end = <IPlacementAlign>function be(this: IPlacementResult, el, me, fit) {
   // we can't assign r.right directly because rectangular doesn't include scrollWidth
   this.left = el.right - me.w;
-  this.freeW = fit.right - el.left;
+  this.freeW = fit.left - el.right;
   return this;
 };
 
