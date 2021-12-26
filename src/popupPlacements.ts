@@ -177,9 +177,35 @@ bottom.start = top.start;
 bottom.middle = top.middle;
 bottom.end = top.end;
 
+const left = <IPlacementEdge>function left(el, me, fit): ReturnType<IPlacementEdge> {
+  const freeW = el.left - me.offset.left - fit.left;
+  return {
+    left: el.left - me.offset.left - me.w,
+    freeW,
+    maxFreeH: fit.height,
+    maxFreeW: freeW,
+  };
+};
+left.start = <IPlacementAlign>function xStart(this: IPlacementResult, el, _me, fit) {
+  this.top = el.top;
+  this.freeH = fit.bottom - el.top;
+  return this;
+};
+left.middle = <IPlacementAlign>function xMiddle(this: IPlacementResult, el, me, fit) {
+  this.top = el.top + (el.height - me.h) / 2;
+  this.freeH = fit.height;
+  return this;
+};
+left.end = <IPlacementAlign>function xEnd(this: IPlacementResult, el, me, fit) {
+  this.top = el.bottom - me.h;
+  this.freeH = fit.top - el.bottom;
+  return this;
+};
+
 export const PopupPlacements = {
   top,
   bottom,
+  left,
 };
 
 Object.keys(PopupPlacements).forEach((kp) => {
