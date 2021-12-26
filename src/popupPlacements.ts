@@ -139,7 +139,7 @@ export interface IPlacementEdge {
 }
 
 const top = <IPlacementEdge>function top(el, me, fit): ReturnType<IPlacementEdge> {
-  const freeH = fit.top - me.offset.top - el.top;
+  const freeH = el.top - me.offset.top - fit.top;
   return {
     top: el.top - me.offset.top - me.h,
     freeH,
