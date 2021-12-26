@@ -31,8 +31,8 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
   static Placements = PopupPlacements;
 
   options: IPopupOptions = {
-    placement: WUPPopupElement.Placements.bottom.start,
-    placementAlt: [WUPPopupElement.Placements.bottom.start.adjust],
+    placement: WUPPopupElement.Placements.top.start,
+    placementAlt: [WUPPopupElement.Placements.top.start.adjust],
     offset: [0, 0],
     toFitElement: document.body,
     minWidthByTarget: false,

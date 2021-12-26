@@ -138,8 +138,34 @@ export interface IPlacementEdge {
   end: IPlacementAlign;
 }
 
+const top = <IPlacementEdge>function top(el, me, fit): ReturnType<IPlacementEdge> {
+  const freeH = fit.top - me.offset.top - el.top;
+  return {
+    top: el.top - me.offset.top - me.h,
+    freeH,
+    maxFreeH: freeH,
+    maxFreeW: fit.width,
+  };
+};
+top.start = <IPlacementAlign>function yStart(this: IPlacementResult, el, _me, fit) {
+  this.left = el.left;
+  this.freeW = fit.right - el.left;
+  return this;
+};
+top.middle = <IPlacementAlign>function yMiddle(this: IPlacementResult, el, me, fit) {
+  this.left = el.left + (el.width - me.w) / 2;
+  this.freeW = fit.width;
+  return this;
+};
+top.end = <IPlacementAlign>function yEnd(this: IPlacementResult, el, me, fit) {
+  // we can't assign r.right directly because rectangular doesn't include scrollWidth
+  this.left = el.right - me.w;
+  this.freeW = fit.left - el.right;
+  return this;
+};
+
 const bottom = <IPlacementEdge>function bottom(el, me, fit): ReturnType<IPlacementEdge> {
-  const freeH = fit.bottom - (el.bottom + me.offset.bottom);
+  const freeH = fit.bottom + me.offset.bottom - el.bottom;
   return {
     top: el.bottom + me.offset.bottom,
     freeH,
@@ -147,24 +173,12 @@ const bottom = <IPlacementEdge>function bottom(el, me, fit): ReturnType<IPlaceme
     maxFreeW: fit.width,
   };
 };
-bottom.start = <IPlacementAlign>function bottomStart(this: IPlacementResult, el, _me, fit) {
-  this.left = el.left;
-  this.freeW = fit.right - el.left;
-  return this;
-};
-bottom.middle = <IPlacementAlign>function bottomMiddle(this: IPlacementResult, el, me, fit) {
-  this.left = el.left + (el.width - me.w) / 2;
-  this.freeW = fit.width;
-  return this;
-};
-bottom.end = <IPlacementAlign>function bottomEnd(this: IPlacementResult, el, me, fit) {
-  // we can't assign r.right directly because rectangular doesn't include scrollWidth
-  this.left = el.right - me.w;
-  this.freeW = fit.left - el.right;
-  return this;
-};
+bottom.start = top.start;
+bottom.middle = top.middle;
+bottom.end = top.end;
 
 export const PopupPlacements = {
+  top,
   bottom,
 };
 
@@ -194,12 +208,6 @@ console.warn(PopupPlacements);
 
 // static PlacementsOld: {
 //   [key in
-//     | "bottomStart"
-//     | "bottomMiddle"
-//     | "bottomEnd"
-//     | "topStart"
-//     | "topMiddle"
-//     | "topEnd"
 //     | "leftStart"
 //     | "leftMiddle"
 //     | "leftEnd"
@@ -207,63 +215,11 @@ console.warn(PopupPlacements);
 //     | "rightMiddle"
 //     | "rightEnd"]: IPlacement;
 // } = {
-//   bottomStart: (el) => ({
-//     top: el.bottom,
-//     left: el.left,
-//     alt: [
-//       WUPPopupElement.Placements.bottomEnd,
-//       WUPPopupElement.Placements.topStart,
-//       WUPPopupElement.Placements.topEnd,
-//     ],
-//   }),
-//   bottomMiddle: (el, me) => ({ top: el.bottom, left: el.left + (el.width - me.w) / 2 }),
-//   // we can't assign r.right directly because rectangular doesn't include scrollWidth
-//   bottomEnd: (el, me) => ({ top: el.bottom, left: el.left + el.width - me.w }),
-
-//   topStart: (el, me) => ({ top: el.top - me.h, left: el.left }),
-//   topMiddle: (el, me) => ({ top: el.top - me.h, left: el.left + (el.width - me.w) / 2 }),
-//   topEnd: (el, me) => ({ top: el.top - me.h, left: el.left + el.width - me.w }),
-
 //   leftStart: (el, me) => ({ top: el.top, left: el.left - me.w }),
 //   leftMiddle: (el, me) => ({ top: el.top + Math.ceil((el.height - me.h) / 2), left: el.left - me.w }),
 //   leftEnd: (el, me) => ({ top: el.bottom - me.h, left: el.left - me.w }),
 
 //   rightStart: (el) => ({ top: el.top, left: el.right }),
-//   // rightMiddle: (el, me) => ({ top: el.top + (el.height - me.h) / 2, left: el.right }),
-//   rightMiddle: (el, me) => ({
-//     top: el.top + Math.ceil((el.height - me.h) / 2),
-//     left: el.right,
-//     alt: [
-//       WUPPopupElement.Placements.rightStart.adjust,
-//       WUPPopupElement.Placements.rightEnd,
-//       WUPPopupElement.Placements.adjust,
-//       // WUPPopupElement.Placements.right,
-//       // (el, me) => {
-//       //   const pos = WUPPopupElement.Placements.rightMiddle(el, me);
-//       //   if (pos.left+me.w > document.body)
-//       // },
-
-//       // WUPPopupElement.Placements.leftMiddle,
-//       // WUPPopupElement.Placements.leftStart,
-//       // WUPPopupElement.Placements.leftEnd,
-//       // // WUPPopupElement.Placements.left,
-
-//       // WUPPopupElement.Placements.topMiddle,
-//       // WUPPopupElement.Placements.topStart,
-//       // WUPPopupElement.Placements.topEnd,
-//       // // WUPPopupElement.Placements.top,
-
-//       // WUPPopupElement.Placements.bottomMiddle,
-//       // WUPPopupElement.Placements.bottomStart,
-//       // WUPPopupElement.Placements.bottomEnd,
-//       // WUPPopupElement.Placements.bottom,
-
-//       // (el, me) => {
-//       //   if (el.left > document.body.offsetWidth - el.right) {
-//       //     const pos = WUPPopupElement.Placements.leftMiddle;
-//       //   }
-//       // },
-//     ],
-//   }),
+//   rightMiddle: (el, me) => ({ top: el.top + (el.height - me.h) / 2, left: el.right }),
 //   rightEnd: (el, me) => ({ top: el.bottom - me.h, left: el.right }),
 // };
