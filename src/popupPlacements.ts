@@ -202,14 +202,28 @@ left.end = <IPlacementAlign>function xEnd(this: IPlacementResult, el, me, fit) {
   return this;
 };
 
+const right = <IPlacementEdge>function right(el, me, fit): ReturnType<IPlacementEdge> {
+  const freeW = el.left - me.offset.left - fit.left;
+  return {
+    left: el.right + me.offset.right,
+    freeW,
+    maxFreeH: fit.height,
+    maxFreeW: freeW,
+  };
+};
+right.start = left.start;
+right.middle = left.middle;
+right.end = left.end;
+
 export const PopupPlacements = {
   top,
   bottom,
   left,
+  right,
 };
 
 Object.keys(PopupPlacements).forEach((kp) => {
-  // change bottom = bottom.middle to avoid user mistakes
+  // changing bottom = bottom.middle to avoid user mistakes
   const def = PopupPlacements[kp];
   // eslint-disable-next-line func-names
   PopupPlacements[kp] = (<IPlacementAlign>function (el, me, fit) {
@@ -219,33 +233,15 @@ Object.keys(PopupPlacements).forEach((kp) => {
 
   Object.keys(def).forEach((key) => {
     const prevFn = def[key];
-    // set context for each function
+    // setting context for each function
     // eslint-disable-next-line func-names
     p[key] = <IPlacementAlign>function (el, me, fit) {
       return prevFn.call(def(el, me, fit), el, me, fit);
     };
     const v = p[key];
-    // add .adjust to each IPlacementAlign
+    // adding .adjust to each IPlacementAlign
     v.adjust = (el, me, fit) => popupAdjust.call(v(el, me, fit), me, fit);
   });
 });
 
 console.warn(PopupPlacements);
-
-// static PlacementsOld: {
-//   [key in
-//     | "leftStart"
-//     | "leftMiddle"
-//     | "leftEnd"
-//     | "rightStart"
-//     | "rightMiddle"
-//     | "rightEnd"]: IPlacement;
-// } = {
-//   leftStart: (el, me) => ({ top: el.top, left: el.left - me.w }),
-//   leftMiddle: (el, me) => ({ top: el.top + Math.ceil((el.height - me.h) / 2), left: el.left - me.w }),
-//   leftEnd: (el, me) => ({ top: el.bottom - me.h, left: el.left - me.w }),
-
-//   rightStart: (el) => ({ top: el.top, left: el.right }),
-//   rightMiddle: (el, me) => ({ top: el.top + (el.height - me.h) / 2, left: el.right }),
-//   rightEnd: (el, me) => ({ top: el.bottom - me.h, left: el.right }),
-// };
