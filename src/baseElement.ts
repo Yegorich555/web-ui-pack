@@ -9,6 +9,7 @@ export default abstract class WUPBaseElement extends HTMLElement implements IWUP
 }
 
 export type JSXCustomProps<T> = React.DetailedHTMLProps<
+  // todo write babel-transform className > class
   Omit<React.HTMLAttributes<T>, "className"> & { class?: string | undefined },
   T
 >;

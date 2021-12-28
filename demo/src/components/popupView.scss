@@ -1,19 +1,23 @@
 .popupViewExtraScroll {
   overflow: auto;
   max-height: 200px;
-  background-color: beige;
   position: relative;
 
-  border-top: 3px solid black;
-  border-right: 4px solid black;
-  border-bottom: 5px solid black;
-  border-left: 6px solid black;
-  margin: 2px;
-  padding: 2px;
+  // border-top: 3px solid black;
+  // border-right: 4px solid black;
+  // border-bottom: 5px solid black;
+  // border-left: 6px solid black;
+  // margin: 2px;
+  // padding: 2px;
+  border: $borderStyle;
+
+  display: flex;
+  justify-content: center;
 }
 
 .popupContent {
   background: purple;
+  color: white;
   border: none;
   text-overflow: ellipsis;
   // min-width: 180px;
@@ -38,19 +42,8 @@
   }
 }
 
-.middle {
-  height: 180px;
-  justify-content: center;
-}
-
-.rightTop {
-  margin-left: auto;
-}
-
-.bodyOverlowRight {
-  position: absolute;
-  right: 30px;
-  bottom: 30px;
-  // width: 250px;
-  z-index: 1;
+.trg {
+  height: 120px;
+  width: 300px;
+  margin: 20px auto 100px auto;
 }

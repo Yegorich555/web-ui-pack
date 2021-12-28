@@ -21,33 +21,50 @@ function PopupContent() {
 export default function PopupView() {
   return (
     <div className={styles.popupViewExtraScroll} id="toFitMe">
-      <button type="button" className={styles.bodyOverlowRight}>
-        clickMe
+      <button id="trg" type="button" className={styles.trg}>
+        target
+        <br />
+        <small>inside scrollable parent</small>
       </button>
-      <PopupContent />
-      <div className={styles.popupView}>
-        <div>
-          <button type="button" className={styles.leftTop}>
-            clickMe
-          </button>
-          {/* <PopupContent /> */}
-          <button type="button" className={styles.rightTop}>
-            clickMe
-          </button>
-          {/* <PopupContent /> */}
-        </div>
-        <div className={styles.middle}>Some ordinary content</div>
-        <div>
-          <button type="button" className={styles.leftTop}>
-            clickMe
-          </button>
-          {/* <PopupContent /> */}
-          <button type="button" className={styles.rightTop}>
-            clickMe
-          </button>
-          {/* <PopupContent /> */}
-        </div>
-      </div>
+      <wup-popup class={styles.popupContent} target="#trg" placement="top-start">
+        top.start
+      </wup-popup>
+      <wup-popup class={styles.popupContent} target="#trg" placement="top-middle">
+        top.middle
+      </wup-popup>
+      <wup-popup class={styles.popupContent} target="#trg" placement="top-end">
+        top.end
+      </wup-popup>
+
+      <wup-popup class={styles.popupContent} target="#trg" placement="right-start">
+        right.start
+      </wup-popup>
+      <wup-popup class={styles.popupContent} target="#trg" placement="right-middle">
+        right.middle
+      </wup-popup>
+      <wup-popup class={styles.popupContent} target="#trg" placement="right-end">
+        right.end
+      </wup-popup>
+
+      <wup-popup class={styles.popupContent} target="#trg" placement="bottom-start">
+        bottom.start
+      </wup-popup>
+      <wup-popup class={styles.popupContent} target="#trg" placement="bottom-middle">
+        bottom.middle
+      </wup-popup>
+      <wup-popup class={styles.popupContent} target="#trg" placement="bottom-end">
+        bottom.end
+      </wup-popup>
+
+      <wup-popup class={styles.popupContent} target="#trg" placement="left-start">
+        left.start
+      </wup-popup>
+      <wup-popup class={styles.popupContent} target="#trg" placement="left-middle">
+        left.middle
+      </wup-popup>
+      <wup-popup class={styles.popupContent} target="#trg" placement="left-end">
+        left.end
+      </wup-popup>
     </div>
   );
 }
