@@ -11,11 +11,9 @@ import {
 } from "./popupPlacements";
 
 interface IPopupOptions {
-  /** Anchor realative to popup is placed.
-   * If target not found previousSibling will be attached.
+  /** Anchor that popup uses for placement. If target not found previousSibling will be attached.
    *
-   * attr target="{querySelector}" has hire priority than .options.target
-   *  */
+   * attr target="{querySelector}" has hire priority than .options.target */
   target?: HTMLElement | null;
   /** Placement rule relative to target; example Placements.bottom.start or Placements.bottom.start.adjust */
   placement: IPlacementFunction;
@@ -23,8 +21,7 @@ interface IPopupOptions {
   placementAlt: Array<IPlacementFunction>;
   /** Alternative of margin for targetElement related to popup
 
-   *  [top, right, bottom, left] or [top/bottom, right/left] in px
-   * */
+   *  [top, right, bottom, left] or [top/bottom, right/left] in px */
   offset: [number, number, number, number] | [number, number];
   /** Inside edges of fitElement popup is positioned and can't overflow fitElement; {body} by default */
   toFitElement: HTMLElement;
