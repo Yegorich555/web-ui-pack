@@ -10,11 +10,6 @@ import {
   stringPixelsToNumber,
 } from "./popupPlacements";
 
-interface IPopupState {
-  /** Current state; you can re-define it to override default => showOnInit */
-  isOpened?: boolean;
-}
-
 interface IPopupOptions {
   /** Anchor realative to that popup is placed.
    * If target not found previousSibling will be attached.
@@ -63,7 +58,7 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
     "right-end": PopupPlacements.right.end.adjust,
   };
 
-  options: IPopupOptions = {
+  $options: IPopupOptions = {
     target: undefined,
     placement: WUPPopupElement.Placements.top.middle,
     // todo how to setup alt via attrs
@@ -74,9 +69,8 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
     minHeightByTarget: false,
   };
 
-  state: IPopupState = {
-    isOpened: undefined,
-  };
+  /** Current state; you can re-define it to override default => showOnInit */
+  $isOpened?: boolean;
 
   constructor() {
     super();
@@ -109,15 +103,15 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
   connectedCallback() {
     const a = this.getAttribute("show");
     if (a) {
-      this.state.isOpened = a === "true";
+      this.$isOpened = a === "true";
     }
-    if (this.state.isOpened !== false) {
-      this.show();
+    if (this.$isOpened !== false) {
+      this.$show();
     }
   }
 
   disconnectedCallback() {
-    this.hide();
+    this.$hide();
   }
 
   /* array of attribute names to monitor for changes */
@@ -132,7 +126,7 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
   }
 
   /** Defining target when onShow */
-  defineTarget(): HTMLElement | null {
+  #defineTarget(): HTMLElement | null {
     const attrTrg = this.getAttribute("target");
     if (attrTrg) {
       const t = document.querySelector(attrTrg);
@@ -142,8 +136,8 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
       console.error(`${this.tagName}. Target not found for '${attrTrg}'`);
     }
 
-    if (this.options.target) {
-      return this.options.target;
+    if (this.$options.target) {
+      return this.$options.target;
     }
 
     const t = this.previousElementSibling;
@@ -151,7 +145,7 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
       return t;
     }
     console.error(`${this.tagName}. Target is not defined`);
-    return this.options.target || null;
+    return this.$options.target || null;
   }
 
   #reqId?: number;
@@ -159,15 +153,15 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
   #placements: Array<IPlacementFunction> = [];
   #prev?: DOMRect;
   /** Show popup if target defined */
-  show() {
-    this.options.target = this.defineTarget();
-    if (!this.options.target) {
+  $show() {
+    this.$options.target = this.#defineTarget();
+    if (!this.$options.target) {
       return;
     }
-    this.hide();
+    this.$hide();
 
     const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.PlacementAttrs;
-    this.options.placement = (pAttr && WUPPopupElement.PlacementAttrs[pAttr]) || this.options.placement;
+    this.$options.placement = (pAttr && WUPPopupElement.PlacementAttrs[pAttr]) || this.$options.placement;
 
     // it works only when styles is defined before popup is open
     const style = getComputedStyle(this);
@@ -178,11 +172,11 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
 
     // init array of possible solutions to position + align popup
     this.#placements = [
-      this.options.placement,
-      ...this.options.placementAlt,
-      (t, me, fit) => popupAdjust.call(this.options.placement(t, me, fit), me, fit, true),
+      this.$options.placement,
+      ...this.$options.placementAlt,
+      (t, me, fit) => popupAdjust.call(this.$options.placement(t, me, fit), me, fit, true),
       ...Object.keys(PopupPlacements)
-        .filter((k) => PopupPlacements[k].middle !== this.options.placement)
+        .filter((k) => PopupPlacements[k].middle !== this.$options.placement)
         .map(
           (k) =>
             <IPlacementFunction>((t, me, fit) => popupAdjust.call(PopupPlacements[k].middle(t, me, fit), me, fit, true))
@@ -191,9 +185,8 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
 
     const goUpdate = () => {
       this.#updatePosition();
-      this.state.isOpened = true;
+      this.$isOpened = true;
       // todo develop animation
-      // todo possible blink effect on show close show again
       this.style.opacity = "1";
       this.#reqId = window.requestAnimationFrame(goUpdate);
     };
@@ -202,17 +195,17 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
   }
 
   /** Hide popup */
-  hide() {
+  $hide() {
     this.#reqId && window.cancelAnimationFrame(this.#reqId);
     this.style.opacity = "0";
-    this.state.isOpened = false;
+    this.$isOpened = false;
     this.#prev = undefined;
   }
 
   /** Update position of popup. Call this method in cases when you changed options */
   #updatePosition = () => {
-    const t = (this.options.target as HTMLElement).getBoundingClientRect() as IBoundingRect;
-    t.el = this.options.target as HTMLElement;
+    const t = (this.$options.target as HTMLElement).getBoundingClientRect() as IBoundingRect;
+    t.el = this.$options.target as HTMLElement;
     if (
       // issue: it's wrong if minWidth, minHeight etc. is changed and doesn't affect on layout sizes directly
       !(
@@ -226,19 +219,19 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
       return;
     }
 
-    if (this.options.minWidthByTarget) {
+    if (this.$options.minWidthByTarget) {
       this.style.minWidth = `${t.width}px`;
     } else if (this.style.minWidth) {
       this.style.minWidth = "";
     }
 
-    if (this.options.minHeightByTarget) {
+    if (this.$options.minHeightByTarget) {
       this.style.minHeight = `${t.height}px`;
     } else if (this.style.minHeight) {
       this.style.minHeight = "";
     }
 
-    const fitEl = this.options.toFitElement || document.body;
+    const fitEl = this.$options.toFitElement || document.body;
     const fit = getBoundingInternalRect(fitEl) as IBoundingRect;
     fit.el = fitEl;
 
@@ -247,10 +240,10 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
       h: this.offsetHeight,
       el: this,
       offset: {
-        top: this.options.offset[0],
-        right: this.options.offset[1],
-        bottom: this.options.offset[2] ?? this.options.offset[0],
-        left: this.options.offset[3] ?? this.options.offset[1],
+        top: this.$options.offset[0],
+        right: this.$options.offset[1],
+        bottom: this.$options.offset[2] ?? this.$options.offset[0],
+        left: this.$options.offset[3] ?? this.$options.offset[1],
       },
     };
 

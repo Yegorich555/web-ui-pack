@@ -7,9 +7,9 @@ function PopupContent() {
       class={styles.popupContent}
       ref={(el) => {
         if (el) {
-          el.options.toFitElement = document.querySelector("#toFitMe") as HTMLElement;
+          el.$options.toFitElement = document.querySelector("#toFitMe") as HTMLElement;
           // el.options.minWidthByTarget = true;
-          el.updatePosition(true);
+          el.$show();
         }
       }}
     >

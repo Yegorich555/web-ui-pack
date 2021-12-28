@@ -1,10 +1,10 @@
 export interface IWUPBaseElement {
-  options: Record<string, any>;
+  $options: Record<string, any>;
   // abstract resources: Record<string, any>;
 }
 
 export default abstract class WUPBaseElement extends HTMLElement implements IWUPBaseElement {
-  abstract options: Record<string, any>;
+  abstract $options: Record<string, any>;
   // abstract resources: Record<string, any>;
 }
 
