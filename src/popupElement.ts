@@ -11,14 +11,13 @@ import {
 } from "./popupPlacements";
 
 interface IPopupOptions {
-  /** Anchor realative to that popup is placed.
+  /** Anchor realative to popup is placed.
    * If target not found previousSibling will be attached.
-   * Popup defines target onShow
    *
    * attr target="{querySelector}" has hire priority than .options.target
    *  */
   target?: HTMLElement | null;
-  /** Placement rule; example Placements.bottom.start  Placements.bottom.start.adjust */
+  /** Placement rule relative to target; example Placements.bottom.start or Placements.bottom.start.adjust */
   placement: IPlacementFunction;
   /** Alternate when pointed placement doesn't fit the layout */
   placementAlt: Array<IPlacementFunction>;
@@ -27,7 +26,7 @@ interface IPopupOptions {
    *  [top, right, bottom, left] or [top/bottom, right/left] in px
    * */
   offset: [number, number, number, number] | [number, number];
-  /** Returns element according to this one need to check overflow; {body} by default */
+  /** Inside edges of fitElement popup is positioned and can't overflow fitElement; {body} by default */
   toFitElement: HTMLElement;
   /** Sets minWidth 100% of targetWidth */
   minWidthByTarget: boolean;
@@ -72,7 +71,7 @@ export default class WUPPopupElement extends WUPBaseElement {
     minHeightByTarget: false,
   };
 
-  /** Current state; you can re-define it to override default => showOnInit */
+  /** Current state; you can re-define it to override default showOnInit behavior */
   $isOpened?: boolean;
 
   constructor() {
@@ -154,7 +153,7 @@ export default class WUPPopupElement extends WUPBaseElement {
   #userSizes = { maxWidth: Number.MAX_SAFE_INTEGER, maxHeight: Number.MAX_SAFE_INTEGER };
   #placements: Array<IPlacementFunction> = [];
   #prev?: DOMRect;
-  /** Show popup if target defined */
+  /** Shows popup if target defined */
   $show() {
     this.$options.target = this.#defineTarget();
     if (!this.$options.target) {
@@ -292,7 +291,7 @@ declare global {
          * attr target="" has hire priority than .options.target
          *  */
         target?: string;
-        /** Placement rule (relative to target); applied on show method. Fire show again if placement is changed */
+        /** Placement rule (relative to target); applied on show(). Fire show again if you changed options after show() */
         placement?: keyof typeof WUPPopupElement.PlacementAttrs;
         /** Behavior onInit; Default is true */
         show?: "true" | "false";
