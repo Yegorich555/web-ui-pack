@@ -65,9 +65,9 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
 
   options: IPopupOptions = {
     target: undefined,
-    placement: WUPPopupElement.Placements.left.start,
+    placement: WUPPopupElement.Placements.top.middle,
     // todo how to setup alt via attrs
-    placementAlt: [WUPPopupElement.Placements.left.start.adjust],
+    placementAlt: [WUPPopupElement.Placements.top.middle.adjust, WUPPopupElement.Placements.bottom.middle.adjust],
     offset: [0, 0],
     toFitElement: document.body,
     minWidthByTarget: false,
@@ -254,16 +254,17 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
       },
     };
 
-    const hasOveflow = (p: { top: number; left: number }): boolean =>
+    const hasOveflow = (p: IPlacementResult): boolean =>
       p.left < fit.left ||
       p.top < fit.top ||
-      // todo this.offsetWidth is wrong because we can change it by maxWidth
-      p.left + this.offsetWidth > fit.right ||
-      p.top + this.offsetHeight > fit.bottom;
+      p.left + Math.min(me.w, p.maxW || Number.MAX_SAFE_INTEGER) > fit.right ||
+      p.top + Math.min(me.h, p.maxH || Number.MAX_SAFE_INTEGER) > fit.bottom;
 
     let pos: IPlacementResult = <IPlacementResult>{};
     const isOk = this.#placements.some((pfn) => {
       pos = pfn(t, me, fit);
+      pos.maxFreeW = Math.min(pos.maxW || pos.freeW, this.#userSizes.maxWidth);
+      pos.maxFreeH = Math.min(pos.maxW || pos.freeW, this.#userSizes.maxWidth);
       return !hasOveflow(pos);
     });
     !isOk && console.error(`${this.tagName}. Impossible to place popup without overflow`);

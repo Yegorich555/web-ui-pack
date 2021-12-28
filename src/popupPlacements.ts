@@ -9,19 +9,27 @@ export interface IPlaceMeRect {
 
 export interface IPlacementXResult {
   left: number;
+  /** Size restriction that must be applied to element; calculated in .adjust() and based on userDefined minSize */
   maxW?: number | null;
 
+  /** Available space including alignment start/left/middle */
   freeW: number;
+  /** The whole available space (excluding alignment start/left/middle) */
   maxFreeW: number;
+  /** The whole available space (excluding alignment start/left/middle) */
   maxFreeH: number;
 }
 
 export interface IPlacementYResult {
   top: number;
+  /** Size restriction that must be applied to element; calculated in .adjust() and based on userDefined minSize */
   maxH?: number | null;
 
+  /** Available space including alignment start/left/middle */
   freeH: number;
+  /** The whole available space (excluding alignment start/left/middle) */
   maxFreeW: number;
+  /** The whole available space (excluding alignment start/left/middle) */
   maxFreeH: number;
 }
 
