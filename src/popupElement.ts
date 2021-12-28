@@ -90,7 +90,7 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
         box-sizing: border-box;
         top: 0;
         left: 0;
-        visibility: 0;
+        opacity: 0;
 
         overflow: hidden;
         border: 1px solid var(--popup-border-color, var(--border-color, #e1e1e1));
@@ -194,7 +194,7 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
       this.state.isOpened = true;
       // todo develop animation
       // todo possible blink effect on show close show again
-      this.style.visibility = "1";
+      this.style.opacity = "1";
       this.#reqId = window.requestAnimationFrame(goUpdate);
     };
 
@@ -204,7 +204,7 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
   /** Hide popup */
   hide() {
     this.#reqId && window.cancelAnimationFrame(this.#reqId);
-    this.style.visibility = "0";
+    this.style.opacity = "0";
     this.state.isOpened = false;
     this.#prev = undefined;
   }
