@@ -3,18 +3,24 @@ import {
   getBoundingInternalRect,
   IBoundingRect,
   IPlacementFunction,
+  IPlacementResult,
   IPlaceMeRect,
   popupAdjust,
   PopupPlacements,
   stringPixelsToNumber,
 } from "./popupPlacements";
 
+interface IPopupState {
+  /** Current state; you can re-define it to override default => showOnInit */
+  isOpened?: boolean;
+}
+
 interface IPopupOptions {
-  /** querySelector to find target - anchor that popup uses for placement.
+  /** Anchor realative to that popup is placed.
    * If target not found previousSibling will be attached.
    * Popup defines target onShow
    *
-   * attr target="" has hire priority than .options.target
+   * attr target="{querySelector}" has hire priority than .options.target
    *  */
   target?: HTMLElement | null;
   /** Placement rule; example Placements.bottom.start  Placements.bottom.start.adjust */
@@ -40,7 +46,7 @@ interface IPopupOptions {
 }
 
 export default class WUPPopupElement extends HTMLElement implements IWUPBaseElement {
-  // todo static method show(target, options)
+  // todo static method show(text, options)
   static Placements = PopupPlacements;
   static PlacementAttrs = {
     "top-start": PopupPlacements.top.start.adjust,
@@ -58,7 +64,7 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
   };
 
   options: IPopupOptions = {
-    // target: undefined,
+    target: undefined,
     placement: WUPPopupElement.Placements.left.start,
     // todo how to setup alt via attrs
     placementAlt: [WUPPopupElement.Placements.left.start.adjust],
@@ -66,6 +72,10 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
     toFitElement: document.body,
     minWidthByTarget: false,
     minHeightByTarget: false,
+  };
+
+  state: IPopupState = {
+    isOpened: undefined,
   };
 
   constructor() {
@@ -97,11 +107,28 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
 
   /** Browser calls this method when the element is added to the document */
   connectedCallback() {
-    this.show();
+    const a = this.getAttribute("show");
+    if (a) {
+      this.state.isOpened = a === "true";
+    }
+    if (this.state.isOpened !== false) {
+      this.show();
+    }
   }
 
   disconnectedCallback() {
-    this.close();
+    this.hide();
+  }
+
+  /* array of attribute names to monitor for changes */
+  static get observedAttributes() {
+    return ["target", "placement", "show"];
+  }
+
+  // (name: string, oldValue: string, newValue: string)
+  /* called when one of attributes listed above is modified */
+  attributeChangedCallback() {
+    this.connectedCallback();
   }
 
   /** Defining target when onShow */
@@ -129,13 +156,15 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
 
   #reqId?: number;
   #userSizes = { maxWidth: Number.MAX_SAFE_INTEGER, maxHeight: Number.MAX_SAFE_INTEGER };
+  #placements: Array<IPlacementFunction> = [];
+  #prev?: DOMRect;
   /** Show popup if target defined */
   show() {
     this.options.target = this.defineTarget();
     if (!this.options.target) {
       return;
     }
-    this.close();
+    this.hide();
 
     const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.PlacementAttrs;
     this.options.placement = (pAttr && WUPPopupElement.PlacementAttrs[pAttr]) || this.options.placement;
@@ -147,31 +176,46 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
       maxHeight: stringPixelsToNumber(style.maxHeight) || Number.MAX_SAFE_INTEGER,
     };
 
+    // init array of possible solutions to position + align popup
+    this.#placements = [
+      this.options.placement,
+      ...this.options.placementAlt,
+      (t, me, fit) => popupAdjust.call(this.options.placement(t, me, fit), me, fit, true),
+      ...Object.keys(PopupPlacements)
+        .filter((k) => PopupPlacements[k].middle !== this.options.placement)
+        .map(
+          (k) =>
+            <IPlacementFunction>((t, me, fit) => popupAdjust.call(PopupPlacements[k].middle(t, me, fit), me, fit, true))
+        ),
+    ];
+
     const goUpdate = () => {
-      this.updatePosition(false);
+      this.#updatePosition();
+      this.state.isOpened = true;
+      // todo develop animation
+      // todo possible blink effect on show close show again
+      this.style.visibility = "1";
       this.#reqId = window.requestAnimationFrame(goUpdate);
     };
 
     goUpdate();
-    // todo develop animation
-    this.style.visibility = "1";
   }
 
-  close() {
+  /** Hide popup */
+  hide() {
     this.#reqId && window.cancelAnimationFrame(this.#reqId);
     this.style.visibility = "0";
+    this.state.isOpened = false;
+    this.#prev = undefined;
   }
 
-  #prev?: DOMRect;
   /** Update position of popup. Call this method in cases when you changed options */
-  updatePosition = (force = true) => {
+  #updatePosition = () => {
     const t = (this.options.target as HTMLElement).getBoundingClientRect() as IBoundingRect;
     t.el = this.options.target as HTMLElement;
-
     if (
+      // issue: it's wrong if minWidth, minHeight etc. is changed and doesn't affect on layout sizes directly
       !(
-        force ||
-        // issue: it's wrong if minWidth, minHeight etc. is changed and doesn't affect on layout sizes directly
         !this.#prev ||
         this.#prev.top !== t.top ||
         this.#prev.left !== t.left ||
@@ -209,43 +253,30 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
         left: this.options.offset[3] ?? this.options.offset[1],
       },
     };
-    let pos = this.options.placement(t, me, fit);
 
     const hasOveflow = (p: { top: number; left: number }): boolean =>
       p.left < fit.left ||
       p.top < fit.top ||
+      // todo this.offsetWidth is wrong because we can change it by maxWidth
       p.left + this.offsetWidth > fit.right ||
       p.top + this.offsetHeight > fit.bottom;
 
-    // try another positions
-    if (hasOveflow(pos)) {
-      const isDefined = this.options.placementAlt.some((alt) => {
-        const p = alt(t, me, fit);
-        if (!hasOveflow(p)) {
-          pos = p;
-          return true;
-        }
-        return false;
-      });
-
-      // adjust if alternate positions don't fit
-      if (!isDefined) {
-        pos = popupAdjust.call(pos, me, fit, true);
-      }
-    }
+    let pos: IPlacementResult = <IPlacementResult>{};
+    const isOk = this.#placements.some((pfn) => {
+      pos = pfn(t, me, fit);
+      return !hasOveflow(pos);
+    });
+    !isOk && console.error(`${this.tagName}. Impossible to place popup without overflow`);
 
     console.warn(pos);
     // transform has performance benefits in comparison with positioning
     this.style.transform = `translate(${pos.left}px, ${pos.top}px)`;
-    // this.style.top = `${pos.top}px`;
-    // this.style.left = `${pos.left}px`;
     // we can't remove maxWidth, maxHeight because maxWidth can affect on maxHeight and calculations will be wrong
     this.style.maxWidth = `${Math.min(pos.maxW || pos.freeW, this.#userSizes.maxWidth)}px`;
     this.style.maxHeight = `${Math.min(pos.maxH || pos.freeH, this.#userSizes.maxHeight)}px`;
 
     /* re-calc requires to avoid case when popup unexpectedly affects on layout:
-      layout bug: Yscroll appears/disappears when display:flex; heigth:100vh > position:absolute; right:-10px
-    */
+      layout bug: Yscroll appears/disappears when display:flex; heigth:100vh > position:absolute; right:-10px */
     this.#prev = t.el.getBoundingClientRect();
   };
 }
@@ -258,8 +289,17 @@ declare global {
   namespace JSX {
     interface IntrinsicElements {
       [tagName]: JSXCustomProps<WUPPopupElement> & {
+        /** QuerySelector to find target - anchor that popup uses for placement.
+         * If target not found previousSibling will be attached.
+         * Popup defines target when onShow
+         *
+         * attr target="" has hire priority than .options.target
+         *  */
         target?: string;
+        /** Placement rule (relative to target); applied on show method. Fire show again if placement is changed */
         placement?: keyof typeof WUPPopupElement.PlacementAttrs;
+        /** Behavior onInit; Default is true */
+        show?: "true" | "false";
       };
     }
   }

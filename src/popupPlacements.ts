@@ -66,7 +66,6 @@ function popupAdjustInternal(
   // reject calc since minSize > availableSize
   if (minWidth > freeWidth || minHeight > freeHeight) {
     if (ignoreAlign) {
-      // todo we can look position through Placements
       const n = { ...this, freeHeight: this.maxFreeH, freeWidth: this.maxFreeW };
       // issue: it doesn't work if both minH&minW > freeH&freeW
       return popupAdjustInternal.call(n, me, fit, false);
