@@ -1,4 +1,4 @@
-import { IWUPBaseElement, JSXCustomProps } from "./baseElement";
+import WUPBaseElement, { JSXCustomProps } from "./baseElement";
 import {
   getBoundingInternalRect,
   IBoundingRect,
@@ -40,7 +40,7 @@ interface IPopupOptions {
   // todo check inherritance with overriding options
 }
 
-export default class WUPPopupElement extends HTMLElement implements IWUPBaseElement {
+export default class WUPPopupElement extends WUPBaseElement {
   // todo static method show(text, options)
   static Placements = PopupPlacements;
   static PlacementAttrs = {
@@ -62,7 +62,10 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
     target: undefined,
     placement: WUPPopupElement.Placements.top.middle,
     // todo how to setup alt via attrs
-    placementAlt: [WUPPopupElement.Placements.top.middle.adjust, WUPPopupElement.Placements.bottom.middle.adjust],
+    placementAlt: [
+      WUPPopupElement.Placements.top.middle.adjust, //
+      WUPPopupElement.Placements.bottom.middle.adjust,
+    ],
     offset: [0, 0],
     toFitElement: document.body,
     minWidthByTarget: false,
@@ -99,8 +102,8 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
     root.appendChild(document.createElement("slot"));
   }
 
-  /** Browser calls this method when the element is added to the document */
-  connectedCallback() {
+  gotReady() {
+    super.gotReady();
     const a = this.getAttribute("show");
     if (a) {
       this.$isOpened = a === "true";
@@ -114,15 +117,14 @@ export default class WUPPopupElement extends HTMLElement implements IWUPBaseElem
     this.$hide();
   }
 
-  /* array of attribute names to monitor for changes */
+  /* Array of attribute names to monitor for changes */
   static get observedAttributes() {
     return ["target", "placement", "show"];
   }
 
-  // (name: string, oldValue: string, newValue: string)
-  /* called when one of attributes listed above is modified */
-  attributeChangedCallback() {
-    this.connectedCallback();
+  gotAttributeChanged(name: string, oldValue: string, newValue: string) {
+    super.gotAttributeChanged(name, oldValue, newValue);
+    this.gotReady();
   }
 
   /** Defining target when onShow */
