@@ -46,8 +46,14 @@ export interface IPopupOptions {
   // possible cases: hide, placeOpposite
 
   // todo implement showCase https://stackoverflow.com/questions/39359740/what-are-enum-flags-in-typescript
-  /** Case when popup need to show; You can use `showCase=PopupShowCases.onFocus | PopupShowCases.onClick` to join cases */
+  /** Case when popup need to show; You can use `showCase=PopupShowCases.onFocus | PopupShowCases.onClick` to join cases
+   *
+   * Default is PopupShowCases.always */
   showCase: PopupShowCases;
+  /** Timeout in ms before popup shows on hover of target; Default is 200ms */
+  hoverShowTimeout: number;
+  /** Timeout in ms before popup hides on mouse-leave of target; Default is 500ms  */
+  hoverHideTimeout: number;
 
   // todo check inherritance with overriding options
 }
@@ -81,7 +87,9 @@ export default class WUPPopupElement extends WUPBaseElement {
     toFitElement: document.body,
     minWidthByTarget: false,
     minHeightByTarget: false,
-    showCase: PopupShowCases.onClick,
+    showCase: PopupShowCases.onClick | PopupShowCases.onHover,
+    hoverShowTimeout: 200,
+    hoverHideTimeout: 500,
   };
 
   /** Current state; you can re-define it to override default showOnInit behavior */
@@ -112,6 +120,10 @@ export default class WUPPopupElement extends WUPBaseElement {
     const root = this.attachShadow({ mode: "open" });
     root.appendChild(style);
     root.appendChild(document.createElement("slot"));
+
+    // todo all methods should be bind
+    this.$show = this.$show.bind(this);
+    this.$hide = this.$hide.bind(this);
   }
 
   gotReady() {
@@ -135,11 +147,44 @@ export default class WUPPopupElement extends WUPBaseElement {
       if (!t) {
         disableErrors = !disableErrors; // suppress errors again
         setTimeout(applyShowCase, 200); // try again because target can be undefined in time
-      } else if (showCase & PopupShowCases.onClick) {
-        const onClick = () => (!this.$isOpened ? this.$show() : this.$hide());
-        t.addEventListener("click", onClick);
-        this.#disposeTargetEvents.push(() => t.removeEventListener("click", onClick));
+        return;
       }
+
+      // todo implement $onWillHide with hideCase and ability to prevent closing ???
+      // todo if showOnHover need to prevent hideOnClick
+
+      if (showCase & PopupShowCases.onClick) {
+        const ev = () => (!this.$isOpened ? this.$show() : this.$hide());
+        t.addEventListener("click", ev);
+        this.#disposeTargetEvents.push(() => t.removeEventListener("click", ev));
+      }
+      if (showCase & PopupShowCases.onHover) {
+        let isMouseIn = false;
+        let timeout: ReturnType<typeof setTimeout> | undefined;
+
+        const ev = (ms: number) => {
+          timeout && clearTimeout(timeout);
+          if ((isMouseIn && !this.$isOpened) || (!isMouseIn && this.$isOpened))
+            timeout = setTimeout(() => (isMouseIn ? this.$show() : this.$hide()), ms);
+          else timeout = undefined;
+        };
+
+        const show = () => {
+          isMouseIn = true;
+          ev(this.$options.hoverShowTimeout);
+        };
+
+        const hide = () => {
+          isMouseIn = false;
+          ev(this.$options.hoverHideTimeout);
+        };
+
+        t.addEventListener("mouseenter", show);
+        t.addEventListener("mouseleave", hide);
+        this.#disposeTargetEvents.push(() => t.removeEventListener("mouseenter", show));
+        this.#disposeTargetEvents.push(() => t.removeEventListener("mouseleave", hide));
+      }
+      // todo detect outsideClick also
     };
     showCase && applyShowCase();
   }
@@ -155,8 +200,6 @@ export default class WUPPopupElement extends WUPBaseElement {
 
   gotAttributeChanged(name: string, oldValue: string, newValue: string) {
     super.gotAttributeChanged(name, oldValue, newValue);
-
-    // if attr 'target' is changed
     name === "target" && this.$init();
   }
 
