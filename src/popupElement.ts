@@ -10,7 +10,19 @@ import {
   stringPixelsToNumber,
 } from "./popupPlacements";
 
-interface IPopupOptions {
+export const enum PopupShowCases {
+  // todo add outsideClick event
+  /** Show when it's added to document; to hide just remove popup from document (outsideClick event can be helpful) */
+  always = 0,
+  /** On mouseHover event of target; hide by onMouseLeave */
+  onHover = 1,
+  /** On focus event of target or focus of target.children; hide by onBlur */
+  onFocus = 1 << 1,
+  /** On click event of target; hide by click-again on target or click outside popup */
+  onClick = 1 << 2,
+}
+
+export interface IPopupOptions {
   /** Anchor that popup uses for placement. If target not found previousSibling will be attached.
    *
    * attr target="{querySelector}" has hire priority than .options.target */
@@ -32,6 +44,10 @@ interface IPopupOptions {
 
   // todo overflow behavior when target partially hidden by scrollable parent
   // possible cases: hide, placeOpposite
+
+  // todo implement showCase https://stackoverflow.com/questions/39359740/what-are-enum-flags-in-typescript
+  /** Case when popup need to show; You can use `showCase=PopupShowCases.onFocus | PopupShowCases.onClick` to join cases */
+  showCase: PopupShowCases;
 
   // todo check inherritance with overriding options
 }
@@ -57,7 +73,6 @@ export default class WUPPopupElement extends WUPBaseElement {
   $options: IPopupOptions = {
     target: undefined,
     placement: WUPPopupElement.Placements.top.middle,
-    // todo how to setup alt via attrs
     placementAlt: [
       WUPPopupElement.Placements.top.middle.adjust, //
       WUPPopupElement.Placements.bottom.middle.adjust,
@@ -66,6 +81,7 @@ export default class WUPPopupElement extends WUPBaseElement {
     toFitElement: document.body,
     minWidthByTarget: false,
     minHeightByTarget: false,
+    showCase: PopupShowCases.onClick,
   };
 
   /** Current state; you can re-define it to override default showOnInit behavior */
@@ -100,13 +116,32 @@ export default class WUPPopupElement extends WUPBaseElement {
 
   gotReady() {
     super.gotReady();
-    const a = this.getAttribute("show");
-    if (a) {
-      this.$isOpened = a === "true";
-    }
-    if (this.$isOpened !== false) {
-      this.$show();
-    }
+    this.$init();
+  }
+
+  #disposeTargetEvents: Array<() => void> = [];
+  $init() {
+    // remove possible previous event listeners
+    this.#disposeTargetEvents.forEach((f) => f());
+    this.#disposeTargetEvents.length = 0;
+
+    const { showCase } = this.$options;
+    (this.$isOpened || !showCase) && this.$show();
+
+    let disableErrors = false;
+    const applyShowCase = () => {
+      const t = this.#defineTarget(disableErrors);
+      this.$options.target = t;
+      if (!t) {
+        disableErrors = !disableErrors; // suppress errors again
+        setTimeout(applyShowCase, 200); // try again because target can be undefined in time
+      } else if (showCase & PopupShowCases.onClick) {
+        const onClick = () => (!this.$isOpened ? this.$show() : this.$hide());
+        t.addEventListener("click", onClick);
+        this.#disposeTargetEvents.push(() => t.removeEventListener("click", onClick));
+      }
+    };
+    showCase && applyShowCase();
   }
 
   disconnectedCallback() {
@@ -115,23 +150,25 @@ export default class WUPPopupElement extends WUPBaseElement {
 
   /* Array of attribute names to monitor for changes */
   static get observedAttributes() {
-    return ["target", "placement", "show"];
+    return ["target", "placement"];
   }
 
   gotAttributeChanged(name: string, oldValue: string, newValue: string) {
     super.gotAttributeChanged(name, oldValue, newValue);
-    this.gotReady();
+
+    // if attr 'target' is changed
+    name === "target" && this.$init();
   }
 
   /** Defining target when onShow */
-  #defineTarget(): HTMLElement | null {
+  #defineTarget(disableErrors = false): HTMLElement | null {
     const attrTrg = this.getAttribute("target");
     if (attrTrg) {
       const t = document.querySelector(attrTrg);
       if (t instanceof HTMLElement) {
         return t;
       }
-      console.error(`${this.tagName}. Target not found for '${attrTrg}'`);
+      !disableErrors && console.error(`${this.tagName}. Target not found for '${attrTrg}'`);
     }
 
     if (this.$options.target) {
@@ -142,8 +179,8 @@ export default class WUPPopupElement extends WUPBaseElement {
     if (t instanceof HTMLElement) {
       return t;
     }
-    console.error(`${this.tagName}. Target is not defined`);
-    return this.$options.target || null;
+    !disableErrors && !attrTrg && console.error(`${this.tagName}. Target is not defined`);
+    return null;
   }
 
   #reqId?: number;
@@ -172,7 +209,9 @@ export default class WUPPopupElement extends WUPBaseElement {
     this.#placements = [
       this.$options.placement,
       ...this.$options.placementAlt,
+      // try to adjust with ignore alignment options
       (t, me, fit) => popupAdjust.call(this.$options.placement(t, me, fit), me, fit, true),
+      // try to adjust with other placements and ignoring alignment options
       ...Object.keys(PopupPlacements)
         .filter((k) => PopupPlacements[k].middle !== this.$options.placement)
         .map(
@@ -267,7 +306,7 @@ export default class WUPPopupElement extends WUPBaseElement {
     this.style.maxWidth = `${Math.min(pos.maxW || pos.freeW, this.#userSizes.maxWidth)}px`;
     this.style.maxHeight = `${Math.min(pos.maxH || pos.freeH, this.#userSizes.maxHeight)}px`;
 
-    /* re-calc requires to avoid case when popup unexpectedly affects on layout:
+    /* re-calc is required to avoid case when popup unexpectedly affects on layout:
       layout bug: Yscroll appears/disappears when display:flex; heigth:100vh > position:absolute; right:-10px */
     this.#prev = t.el.getBoundingClientRect();
   };
@@ -288,10 +327,8 @@ declare global {
          * attr target="" has hire priority than .options.target
          *  */
         target?: string;
-        /** Placement rule (relative to target); applied on show(). Fire show again if you changed options after show() */
+        /** Placement rule (relative to target); applied on show(). Call show() again to apply changed options */
         placement?: keyof typeof WUPPopupElement.PlacementAttrs;
-        /** Behavior onInit; Default is true */
-        show?: "true" | "false";
       };
     }
   }
