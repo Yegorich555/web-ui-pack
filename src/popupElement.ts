@@ -98,7 +98,7 @@ export default class WUPPopupElement extends WUPBaseElement {
     toFitElement: document.body,
     minWidthByTarget: false,
     minHeightByTarget: false,
-    showCase: PopupShowCases.onClick | PopupShowCases.onHover,
+    showCase: PopupShowCases.onClick,
     hoverShowTimeout: 200,
     hoverHideTimeout: 500,
   };
@@ -172,10 +172,21 @@ export default class WUPPopupElement extends WUPBaseElement {
 
       // onClick
       if (showCase & PopupShowCases.onClick) {
-        const ev = () =>
-          !this.$isOpened
-            ? this.$show(PopupShowCases.onHover)
-            : this.#showCase && this.$hide(this.#showCase, PopupShowCases.onClick);
+        const ev = () => {
+          if (!this.$isOpened) {
+            this.$show(PopupShowCases.onClick);
+            const bodyClick = (e: MouseEvent) => {
+              const isClickInside = e.target === t || t.contains(e.target as HTMLElement);
+              this.$hide(this.#showCase || 0, isClickInside ? PopupShowCases.onClick : PopupHideCases.onOutsideClick);
+              !this.$isOpened && document.body.removeEventListener("click", bodyClick);
+            };
+            setTimeout(() => document.body.addEventListener("click", bodyClick), 200);
+            this.#disposeTargetEvents.push(() => document.body.removeEventListener("click", bodyClick));
+          } else {
+            this.$hide(this.#showCase || 0, PopupShowCases.onClick);
+          }
+        };
+
         t.addEventListener("click", ev);
         this.#disposeTargetEvents.push(() => t.removeEventListener("click", ev));
       }
@@ -215,7 +226,6 @@ export default class WUPPopupElement extends WUPBaseElement {
       }
 
       // todo onFocus
-      // todo outsideClick
       // todo custom events onClosing, onClose, onShowing, onShow
     };
     showCase && applyShowCase();
