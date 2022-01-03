@@ -11,15 +11,22 @@ import {
 } from "./popupPlacements";
 
 export const enum PopupShowCases {
-  // todo add outsideClick event
   /** Show when it's added to document; to hide just remove popup from document (outsideClick event can be helpful) */
   always = 0,
   /** On mouseHover event of target; hide by onMouseLeave */
   onHover = 1,
+  // todo implement
   /** On focus event of target or focus of target.children; hide by onBlur */
   onFocus = 1 << 1,
-  /** On click event of target; hide by click-again on target or click outside popup */
+  /** On click event of target; hide by click anywhere */
   onClick = 1 << 2,
+}
+
+// todo test: PopupHideCase more than PopupShowCase
+export const enum PopupHideCases {
+  onOutsideClick = 1 << 3,
+  /** When another event is fired onShow() or it's called programatically */
+  onShowAgain = 1 << 4,
 }
 
 export interface IPopupOptions {
@@ -45,7 +52,6 @@ export interface IPopupOptions {
   // todo overflow behavior when target partially hidden by scrollable parent
   // possible cases: hide, placeOpposite
 
-  // todo implement showCase https://stackoverflow.com/questions/39359740/what-are-enum-flags-in-typescript
   /** Case when popup need to show; You can use `showCase=PopupShowCases.onFocus | PopupShowCases.onClick` to join cases
    *
    * Default is PopupShowCases.always */
@@ -61,7 +67,7 @@ export interface IPopupOptions {
 export default class WUPPopupElement extends WUPBaseElement {
   // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146
   // eslint-disable-next-line no-use-before-define
-  ["constructor"]: typeof WUPPopupElement;
+  // ["constructor"]: typeof WUPPopupElement;
 
   // todo static method show(text, options)
   static placements = PopupPlacements;
@@ -97,7 +103,14 @@ export default class WUPPopupElement extends WUPBaseElement {
     hoverHideTimeout: 500,
   };
 
-  $options: IPopupOptions = this.constructor.defaults;
+  /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
+  protected get ctr(): typeof WUPPopupElement {
+    return this.constructor as typeof WUPPopupElement;
+  }
+
+  get $options(): IPopupOptions {
+    return this.ctr.defaults;
+  }
 
   /** Current state; re-define it to override showOnInit behavior */
   $isOpened?: boolean;
@@ -145,7 +158,7 @@ export default class WUPPopupElement extends WUPBaseElement {
     this.#disposeTargetEvents.length = 0;
 
     const { showCase } = this.$options;
-    (this.$isOpened || !showCase) && this.$show();
+    (this.$isOpened || !showCase) && this.$show(PopupShowCases.always);
 
     let disableErrors = false;
     const applyShowCase = () => {
@@ -157,14 +170,17 @@ export default class WUPPopupElement extends WUPBaseElement {
         return;
       }
 
-      // todo implement $onWillHide with hideCase and ability to prevent closing ???
-      // todo if showOnHover need to prevent hideOnClick
-
+      // onClick
       if (showCase & PopupShowCases.onClick) {
-        const ev = () => (!this.$isOpened ? this.$show() : this.$hide());
+        const ev = () =>
+          !this.$isOpened
+            ? this.$show(PopupShowCases.onHover)
+            : this.#showCase && this.$hide(this.#showCase, PopupShowCases.onClick);
         t.addEventListener("click", ev);
         this.#disposeTargetEvents.push(() => t.removeEventListener("click", ev));
       }
+
+      // onHover
       if (showCase & PopupShowCases.onHover) {
         let isMouseIn = false;
         let timeout: ReturnType<typeof setTimeout> | undefined;
@@ -172,7 +188,13 @@ export default class WUPPopupElement extends WUPBaseElement {
         const ev = (ms: number) => {
           timeout && clearTimeout(timeout);
           if ((isMouseIn && !this.$isOpened) || (!isMouseIn && this.$isOpened))
-            timeout = setTimeout(() => (isMouseIn ? this.$show() : this.$hide()), ms);
+            timeout = setTimeout(
+              () =>
+                isMouseIn
+                  ? this.$show(PopupShowCases.onHover)
+                  : this.#showCase && this.$hide(this.#showCase, PopupShowCases.onHover),
+              ms
+            );
           else timeout = undefined;
         };
 
@@ -191,13 +213,16 @@ export default class WUPPopupElement extends WUPBaseElement {
         this.#disposeTargetEvents.push(() => t.removeEventListener("mouseenter", show));
         this.#disposeTargetEvents.push(() => t.removeEventListener("mouseleave", hide));
       }
-      // todo detect outsideClick also
+
+      // todo onFocus
+      // todo outsideClick
+      // todo custom events onClosing, onClose, onShowing, onShow
     };
     showCase && applyShowCase();
   }
 
   disconnectedCallback() {
-    this.$hide();
+    this.#showCase && this.$hide(this.#showCase, PopupShowCases.always);
   }
 
   /* Array of attribute names to monitor for changes */
@@ -205,9 +230,16 @@ export default class WUPPopupElement extends WUPBaseElement {
     return ["target", "placement"];
   }
 
-  gotAttributeChanged(name: string, oldValue: string, newValue: string) {
+  // eslint-disable-next-line consistent-return
+  gotAttributeChanged(name: string, oldValue: string, newValue: string): void {
     super.gotAttributeChanged(name, oldValue, newValue);
-    name === "target" && this.$init();
+    // eslint-disable-next-line default-case
+    switch (name) {
+      case "target":
+        return this.$init();
+      case "placement":
+        return this.$show();
+    }
   }
 
   /** Defining target when onShow */
@@ -233,17 +265,20 @@ export default class WUPPopupElement extends WUPBaseElement {
     return null;
   }
 
-  #reqId?: number;
+  #frameId?: number;
   #userSizes = { maxWidth: Number.MAX_SAFE_INTEGER, maxHeight: Number.MAX_SAFE_INTEGER };
   #placements: Array<IPlacementFunction> = [];
-  #prev?: DOMRect;
+  #prevRect?: DOMRect;
+  #showCase?: PopupShowCases;
+
   /** Shows popup if target defined */
-  $show() {
+  $show(showCase?: PopupShowCases) {
     this.$options.target = this.#defineTarget();
     if (!this.$options.target) {
       return;
     }
-    this.$hide();
+    this.#showCase && this.$hide(this.#showCase, PopupHideCases.onShowAgain);
+    this.#showCase = showCase;
 
     const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.placementAttrs;
     this.$options.placement = (pAttr && WUPPopupElement.placementAttrs[pAttr]) || this.$options.placement;
@@ -275,18 +310,28 @@ export default class WUPPopupElement extends WUPBaseElement {
       this.$isOpened = true;
       // todo develop animation
       this.style.opacity = "1";
-      this.#reqId = window.requestAnimationFrame(goUpdate);
+      this.#frameId = window.requestAnimationFrame(goUpdate);
     };
 
     goUpdate();
   }
 
   /** Hide popup */
-  $hide() {
-    this.#reqId && window.cancelAnimationFrame(this.#reqId);
+  $hide(): void;
+  /** Hide popup. @showCase as previous reason of show(); @hideCase as reason of hide() */
+  $hide(showCase: PopupShowCases, hideCase: PopupShowCases | PopupHideCases | null): void;
+  /** Override this method to use custom behavior */
+  $hide(showCase?: PopupShowCases, hideCase?: PopupShowCases | PopupHideCases | null): void {
+    // eslint-disable-next-line eqeqeq
+    if (showCase != hideCase && showCase && hideCase && hideCase !== PopupHideCases.onOutsideClick) {
+      // prevent closing if another event; only showOnHover >> hideOnLeave etc.
+      return;
+    }
+    this.#frameId && window.cancelAnimationFrame(this.#frameId);
     this.style.opacity = "0";
     this.$isOpened = false;
-    this.#prev = undefined;
+    this.#showCase = undefined;
+    this.#prevRect = undefined;
   }
 
   /** Update position of popup. Call this method in cases when you changed options */
@@ -296,11 +341,11 @@ export default class WUPPopupElement extends WUPBaseElement {
     if (
       // issue: it's wrong if minWidth, minHeight etc. is changed and doesn't affect on layout sizes directly
       !(
-        !this.#prev ||
-        this.#prev.top !== t.top ||
-        this.#prev.left !== t.left ||
-        this.#prev.width !== t.width ||
-        this.#prev.height !== t.height
+        !this.#prevRect ||
+        this.#prevRect.top !== t.top ||
+        this.#prevRect.left !== t.left ||
+        this.#prevRect.width !== t.width ||
+        this.#prevRect.height !== t.height
       )
     ) {
       return;
@@ -358,7 +403,7 @@ export default class WUPPopupElement extends WUPBaseElement {
 
     /* re-calc is required to avoid case when popup unexpectedly affects on layout:
       layout bug: Yscroll appears/disappears when display:flex; heigth:100vh > position:absolute; right:-10px */
-    this.#prev = t.el.getBoundingClientRect();
+    this.#prevRect = t.el.getBoundingClientRect();
   };
 }
 
