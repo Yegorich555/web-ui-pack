@@ -24,7 +24,8 @@ module.exports = {
   plugins: ["json", "prettier", "import", "@typescript-eslint", "unused-imports"],
   rules: {
     "no-shadow": "off",
-    "@typescript-eslint/no-shadow": ["error"],
+    "@typescript-eslint/no-shadow": "error",
+    "@typescript-eslint/ban-ts-comment": "off",
     "import/no-extraneous-dependencies": "off",
     "lines-between-class-members": ["error", "always", { exceptAfterSingleLine: true }],
     "react/no-access-state-in-setstate": "off",

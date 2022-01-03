@@ -1,4 +1,7 @@
 export default abstract class WUPBaseElement extends HTMLElement {
+  // watch-fix: https://github.com/microsoft/TypeScript/issues/34516
+  // static abstract defaults: Record<string, any>;
+
   /** Options that applied to element */
   abstract $options: Record<string, any>;
 

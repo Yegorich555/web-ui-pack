@@ -55,13 +55,17 @@ export interface IPopupOptions {
   /** Timeout in ms before popup hides on mouse-leave of target; Default is 500ms  */
   hoverHideTimeout: number;
 
-  // todo check inherritance with overriding options
+  // todo check inherritance with overriding options & re-assign to custom-tag
 }
 
 export default class WUPPopupElement extends WUPBaseElement {
+  // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146
+  // eslint-disable-next-line no-use-before-define
+  ["constructor"]: typeof WUPPopupElement;
+
   // todo static method show(text, options)
-  static Placements = PopupPlacements;
-  static PlacementAttrs = {
+  static placements = PopupPlacements;
+  static placementAttrs = {
     "top-start": PopupPlacements.top.start.adjust,
     "top-middle": PopupPlacements.top.middle.adjust,
     "top-end": PopupPlacements.top.end.adjust,
@@ -76,12 +80,13 @@ export default class WUPPopupElement extends WUPBaseElement {
     "right-end": PopupPlacements.right.end.adjust,
   };
 
-  $options: IPopupOptions = {
+  /** Default options. Change it to configure default behavior */
+  static defaults: IPopupOptions = {
     target: undefined,
-    placement: WUPPopupElement.Placements.top.middle,
+    placement: WUPPopupElement.placements.top.middle,
     placementAlt: [
-      WUPPopupElement.Placements.top.middle.adjust, //
-      WUPPopupElement.Placements.bottom.middle.adjust,
+      WUPPopupElement.placements.top.middle.adjust, //
+      WUPPopupElement.placements.bottom.middle.adjust,
     ],
     offset: [0, 0],
     toFitElement: document.body,
@@ -92,7 +97,9 @@ export default class WUPPopupElement extends WUPBaseElement {
     hoverHideTimeout: 500,
   };
 
-  /** Current state; you can re-define it to override default showOnInit behavior */
+  $options: IPopupOptions = this.constructor.defaults;
+
+  /** Current state; re-define it to override showOnInit behavior */
   $isOpened?: boolean;
 
   constructor() {
@@ -238,8 +245,8 @@ export default class WUPPopupElement extends WUPBaseElement {
     }
     this.$hide();
 
-    const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.PlacementAttrs;
-    this.$options.placement = (pAttr && WUPPopupElement.PlacementAttrs[pAttr]) || this.$options.placement;
+    const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.placementAttrs;
+    this.$options.placement = (pAttr && WUPPopupElement.placementAttrs[pAttr]) || this.$options.placement;
 
     // it works only when styles is defined before popup is open
     const style = getComputedStyle(this);
@@ -371,7 +378,7 @@ declare global {
          *  */
         target?: string;
         /** Placement rule (relative to target); applied on show(). Call show() again to apply changed options */
-        placement?: keyof typeof WUPPopupElement.PlacementAttrs;
+        placement?: keyof typeof WUPPopupElement.placementAttrs;
       };
     }
   }
