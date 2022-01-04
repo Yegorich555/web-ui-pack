@@ -9,3 +9,8 @@ h1 {
   margin-bottom: 20px;
   text-align: center;
 }
+
+*:focus {
+  outline: 2px solid $focusFrameColor;
+  outline-offset: -2px;
+}
