@@ -15,8 +15,7 @@ export const enum PopupShowCases {
   always = 0,
   /** On mouseHover event of target; hide by onMouseLeave */
   onHover = 1,
-  // todo implement
-  /** On focus event of target or focus of target.children; hide by onBlur (and onClick if PopupShowCases.onClick included) */
+  /** On focusIn event of target; hide by focusOut (also on click if PopupShowCases.onClick included) */
   onFocus = 1 << 1,
   /** On click event of target; hide by click anywhere */
   onClick = 1 << 2,
