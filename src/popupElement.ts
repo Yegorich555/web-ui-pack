@@ -16,7 +16,7 @@ export const enum PopupShowCases {
   /** On mouseHover event of target; hide by onMouseLeave */
   onHover = 1,
   // todo implement
-  /** On focus event of target or focus of target.children; hide by onBlur */
+  /** On focus event of target or focus of target.children; hide by onBlur (and onClick if PopupShowCases.onClick included) */
   onFocus = 1 << 1,
   /** On click event of target; hide by click anywhere */
   onClick = 1 << 2,
@@ -98,7 +98,7 @@ export default class WUPPopupElement extends WUPBaseElement {
     toFitElement: document.body,
     minWidthByTarget: false,
     minHeightByTarget: false,
-    showCase: PopupShowCases.onClick,
+    showCase: PopupShowCases.onClick | PopupShowCases.onFocus,
     hoverShowTimeout: 200,
     hoverHideTimeout: 500,
   };
@@ -170,6 +170,7 @@ export default class WUPPopupElement extends WUPBaseElement {
         return;
       }
 
+      let preventClickAfterFocus = false;
       // onClick
       if (showCase & PopupShowCases.onClick) {
         const ev = () => {
@@ -180,9 +181,9 @@ export default class WUPPopupElement extends WUPBaseElement {
               this.$hide(this.#showCase || 0, isClickInside ? PopupShowCases.onClick : PopupHideCases.onOutsideClick);
               !this.$isOpened && document.body.removeEventListener("click", bodyClick);
             };
-            setTimeout(() => document.body.addEventListener("click", bodyClick), 200);
+            setTimeout(() => this.$isOpened && document.body.addEventListener("click", bodyClick), 200);
             this.#disposeTargetEvents.push(() => document.body.removeEventListener("click", bodyClick));
-          } else {
+          } else if (!preventClickAfterFocus) {
             this.$hide(this.#showCase || 0, PopupShowCases.onClick);
           }
         };
@@ -194,19 +195,19 @@ export default class WUPPopupElement extends WUPBaseElement {
       // onHover
       if (showCase & PopupShowCases.onHover) {
         let isMouseIn = false;
-        let timeout: ReturnType<typeof setTimeout> | undefined;
+        let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
         const ev = (ms: number) => {
-          timeout && clearTimeout(timeout);
+          timeoutId && clearTimeout(timeoutId);
           if ((isMouseIn && !this.$isOpened) || (!isMouseIn && this.$isOpened))
-            timeout = setTimeout(
+            timeoutId = setTimeout(
               () =>
                 isMouseIn
                   ? this.$show(PopupShowCases.onHover)
-                  : this.#showCase && this.$hide(this.#showCase, PopupShowCases.onHover),
+                  : this.$hide(this.#showCase || 0, PopupShowCases.onHover),
               ms
             );
-          else timeout = undefined;
+          else timeoutId = undefined;
         };
 
         const show = () => {
@@ -225,7 +226,28 @@ export default class WUPPopupElement extends WUPBaseElement {
         this.#disposeTargetEvents.push(() => t.removeEventListener("mouseleave", hide));
       }
 
-      // todo onFocus
+      // onFocus
+      if (showCase & PopupShowCases.onFocus) {
+        // for cases when you click on Label that tied with Input you get the following behavior: inputOnBlur > labelOnFocus > inputOnFocus
+        let timeoutId: ReturnType<typeof setTimeout> | undefined;
+        const focus = () => {
+          timeoutId && clearTimeout(timeoutId);
+          timeoutId = undefined;
+          !this.$isOpened && this.$show(PopupShowCases.onFocus);
+          preventClickAfterFocus = true;
+          setTimeout(() => (preventClickAfterFocus = false), 200);
+        };
+        // todo check it via tests
+        const blur = () => {
+          if (this.$isOpened) {
+            timeoutId = setTimeout(() => this.$hide(this.#showCase || 0, PopupShowCases.onFocus), 100);
+          }
+        };
+        t.addEventListener("focus", focus);
+        t.addEventListener("blur", blur);
+        this.#disposeTargetEvents.push(() => t.removeEventListener("focus", focus));
+        this.#disposeTargetEvents.push(() => t.removeEventListener("blur", blur));
+      }
       // todo custom events onClosing, onClose, onShowing, onShow
     };
     showCase && applyShowCase();
@@ -332,11 +354,18 @@ export default class WUPPopupElement extends WUPBaseElement {
   $hide(showCase: PopupShowCases, hideCase: PopupShowCases | PopupHideCases | null): void;
   /** Override this method to use custom behavior */
   $hide(showCase?: PopupShowCases, hideCase?: PopupShowCases | PopupHideCases | null): void {
-    // eslint-disable-next-line eqeqeq
-    if (showCase != hideCase && showCase && hideCase && hideCase !== PopupHideCases.onOutsideClick) {
+    if (
+      // eslint-disable-next-line eqeqeq
+      showCase != hideCase &&
+      showCase &&
+      hideCase &&
+      hideCase !== PopupHideCases.onOutsideClick &&
+      !(showCase === PopupShowCases.onFocus && hideCase === PopupShowCases.onClick)
+    ) {
       // prevent closing if another event; only showOnHover >> hideOnLeave etc.
       return;
     }
+
     this.#frameId && window.cancelAnimationFrame(this.#frameId);
     this.style.opacity = "0";
     this.$isOpened = false;
