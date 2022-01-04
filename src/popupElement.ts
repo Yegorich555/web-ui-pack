@@ -98,7 +98,7 @@ export default class WUPPopupElement extends WUPBaseElement {
     toFitElement: document.body,
     minWidthByTarget: false,
     minHeightByTarget: false,
-    showCase: PopupShowCases.onClick | PopupShowCases.onFocus,
+    showCase: PopupShowCases.onFocus, // | PopupShowCases.onFocus,
     hoverShowTimeout: 200,
     hoverHideTimeout: 500,
   };
@@ -135,8 +135,10 @@ export default class WUPPopupElement extends WUPBaseElement {
         padding: var(--popup-padding, var(--padding, 6px));
         box-shadow: var(--popup-shadow, 0 1px 4px 0 rgb(0 0 0 0.2));
       }
+      :host:focus { outline: 0; }
     `;
 
+    // todo remove outline 0 if onFocusBehavior: none
     const root = this.attachShadow({ mode: "open" });
     root.appendChild(style);
     root.appendChild(document.createElement("slot"));
@@ -153,6 +155,7 @@ export default class WUPPopupElement extends WUPBaseElement {
 
   #disposeTargetEvents: Array<() => void> = [];
   $init() {
+    this.setAttribute("tabindex", "-1");
     // remove possible previous event listeners
     this.#disposeTargetEvents.forEach((f) => f());
     this.#disposeTargetEvents.length = 0;
@@ -177,7 +180,8 @@ export default class WUPPopupElement extends WUPBaseElement {
           if (!this.$isOpened) {
             this.$show(PopupShowCases.onClick);
             const bodyClick = (e: MouseEvent) => {
-              const isClickInside = e.target === t || t.contains(e.target as HTMLElement);
+              const et = e.target as HTMLElement;
+              const isClickInside = et === t || t.contains(et) || e.target === this || this.contains(et);
               this.$hide(this.#showCase || 0, isClickInside ? PopupShowCases.onClick : PopupHideCases.onOutsideClick);
               !this.$isOpened && document.body.removeEventListener("click", bodyClick);
             };
@@ -237,16 +241,22 @@ export default class WUPPopupElement extends WUPBaseElement {
           preventClickAfterFocus = true;
           setTimeout(() => (preventClickAfterFocus = false), 200);
         };
-        // todo check it via tests
+        // todo check it properly via tests
         const blur = () => {
           if (this.$isOpened) {
-            timeoutId = setTimeout(() => this.$hide(this.#showCase || 0, PopupShowCases.onFocus), 100);
+            timeoutId = setTimeout(() => {
+              // checking where is focus should be because focus can be moved into console etc.
+              const a = document.activeElement;
+              // todo add $options.onFocusBehavior: moveBack, none
+              const isStillFocused = a === t || a === this || !t.contains(a) || !this.contains(a);
+              this.$isOpened && !isStillFocused && this.$hide(this.#showCase || 0, PopupShowCases.onFocus);
+            }, 100);
           }
         };
-        t.addEventListener("focus", focus);
-        t.addEventListener("blur", blur);
-        this.#disposeTargetEvents.push(() => t.removeEventListener("focus", focus));
-        this.#disposeTargetEvents.push(() => t.removeEventListener("blur", blur));
+        t.addEventListener("focusin", focus);
+        t.addEventListener("focusout", blur);
+        this.#disposeTargetEvents.push(() => t.removeEventListener("focusin", focus));
+        this.#disposeTargetEvents.push(() => t.removeEventListener("focusout", blur));
       }
       // todo custom events onClosing, onClose, onShowing, onShow
     };
