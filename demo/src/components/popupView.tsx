@@ -29,7 +29,7 @@ export default function PopupView() {
       <wup-popup class={styles.popupContent} target="#trg" placement="top-start">
         top.start
       </wup-popup>
-      <wup-popup class={styles.popupContent} target="#trg" placement="top-middle">
+      {/* <wup-popup class={styles.popupContent} target="#trg" placement="top-middle">
         top.middle
       </wup-popup>
       <wup-popup class={styles.popupContent} target="#trg" placement="top-end">
@@ -64,7 +64,7 @@ export default function PopupView() {
       </wup-popup>
       <wup-popup class={styles.popupContent} target="#trg" placement="left-end">
         left.end
-      </wup-popup>
+      </wup-popup> */}
     </div>
   );
 }
