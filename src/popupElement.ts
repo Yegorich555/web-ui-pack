@@ -22,12 +22,16 @@ export const enum PopupShowCases {
   onClick = 1 << 2,
 }
 
-// todo test: PopupHideCase more than PopupShowCase
 export const enum PopupHideCases {
-  onOutsideClick = 1 << 3,
+  /** When $show() is fired again; possible by firing $show() or changing attr `placement` */
+  onShowAgain = 0,
+  /** When $hide() is fired programmatically */
+  onFireHide,
+  onMouseLeave,
+  onFocusOut,
+  onOutsideClick,
   onPopupClick,
-  /** When another event is fired onShow() or it's called programatically */
-  onShowAgain,
+  onTargetClick,
 }
 
 export interface IPopupOptions {
@@ -109,7 +113,7 @@ export default class WUPPopupElement extends WUPBaseElement {
   }
 
   /** Hide popup */
-  $hide = () => this.hide(this.#showCase, PopupShowCases.always);
+  $hide = () => this.hide(this.#showCase, PopupHideCases.onFireHide);
   /** Show popup */
   $show = () => this.show(PopupShowCases.always);
   /** Current state */
@@ -192,6 +196,7 @@ export default class WUPPopupElement extends WUPBaseElement {
               // case possible when hide() overrided and clickOnTarget doesn't affect on hide()
               if (this.#isOpened && t !== eBody.target && !t.contains(eBody.target)) {
                 const isMeClick = this === eBody.target || this.contains(eBody.target);
+                t.focus(); // todo we need to define previous focusable element because it can be inside target
                 this.hide(this.#showCase, isMeClick ? PopupHideCases.onPopupClick : PopupHideCases.onOutsideClick);
               }
 
@@ -204,7 +209,7 @@ export default class WUPPopupElement extends WUPBaseElement {
 
             this.#targetEvents.push(removeEv);
           } else if (!preventClickAfterFocus) {
-            this.hide(this.#showCase, PopupShowCases.onClick);
+            this.hide(this.#showCase, PopupHideCases.onTargetClick);
           }
         };
         this.#targetEvents.push(onEvent(t, "click", onTargetClick));
@@ -217,7 +222,8 @@ export default class WUPPopupElement extends WUPBaseElement {
           timeoutId && clearTimeout(timeoutId);
           if ((isMouseIn && !this.#isOpened) || (!isMouseIn && this.#isOpened))
             timeoutId = setTimeout(
-              () => (isMouseIn ? this.show(PopupShowCases.onHover) : this.hide(this.#showCase, PopupShowCases.onHover)),
+              () =>
+                isMouseIn ? this.show(PopupShowCases.onHover) : this.hide(this.#showCase, PopupHideCases.onMouseLeave),
               ms
             );
           else timeoutId = undefined;
@@ -229,6 +235,7 @@ export default class WUPPopupElement extends WUPBaseElement {
 
       // onFocus
       if (showCase & PopupShowCases.onFocus) {
+        // todo prevent popupGotFocus we need to return focus back: mouseDown > e.preventDefault to suppress focus if no tabIndex and it's not inside click
         // todo check behavior
         // for cases when you click on Label that tied with Input you get the following behavior: inputOnBlur > labelOnFocus > inputOnFocus
         let timeoutId: ReturnType<typeof setTimeout> | undefined;
@@ -260,7 +267,7 @@ export default class WUPPopupElement extends WUPBaseElement {
               // checking where is focus should be because focus can be moved into console etc.
               const a = document.activeElement;
               const isStillFocused = a === t || a === this || !t.contains(a) || !this.contains(a);
-              !isStillFocused && this.hide(this.#showCase, PopupShowCases.onFocus);
+              !isStillFocused && this.hide(this.#showCase, PopupHideCases.onFocusOut);
               this.removeEventListener("focus", onMeFocus);
               document.body.removeEventListener("focusout", onFocusOut);
             }, 100);
@@ -276,10 +283,6 @@ export default class WUPPopupElement extends WUPBaseElement {
     applyShowCase(false);
   }
 
-  protected disconnectedCallback() {
-    this.#showCase && this.hide(this.#showCase, PopupShowCases.always);
-  }
-
   /* Array of attribute names to monitor for changes */
   static get observedAttributes() {
     return ["target", "placement"];
@@ -287,14 +290,8 @@ export default class WUPPopupElement extends WUPBaseElement {
 
   protected gotAttributeChanged(name: string, oldValue: string, newValue: string): void {
     super.gotAttributeChanged(name, oldValue, newValue);
-    switch (name) {
-      case "target":
-        return this.init();
-      case "placement":
-        return (this.#isOpened && this.show(this.#showCase || 0)) || undefined;
-      default:
-        return undefined;
-    }
+    if (name === "target") this.init();
+    else if (name === "placement") this.#isOpened && this.show(this.#showCase || 0);
   }
 
   /** Defining target when onShow */
@@ -326,11 +323,11 @@ export default class WUPPopupElement extends WUPBaseElement {
   #prevRect?: DOMRect;
   #showCase?: PopupShowCases;
 
-  /** Shows popup if target defined */
-  protected show(showCase: PopupShowCases) {
+  /** Shows popup if target defined; returns true if successful */
+  protected show(showCase: PopupShowCases): boolean {
     this.$options.target = this.#defineTarget();
     if (!this.$options.target) {
-      return;
+      return false;
     }
     this.hide(this.#showCase, PopupHideCases.onShowAgain);
     this.#showCase = showCase;
@@ -369,18 +366,17 @@ export default class WUPPopupElement extends WUPBaseElement {
     };
 
     goUpdate();
+    return true;
   }
 
   /** Override this method to prevent hiding; @showCase as previous reason of show(); @hideCase as reason of hide() */
-  protected canHide(showCase: PopupShowCases | undefined, hideCase: PopupShowCases | PopupHideCases): boolean {
-    // prevent if showOnFocus and hideByClick
-    if (showCase === PopupShowCases.onFocus && hideCase === PopupShowCases.onClick) return false;
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected canHide(showCase: PopupShowCases | undefined, hideCase: PopupHideCases): boolean {
     return true;
   }
 
   /** Hide popup. @showCase as previous reason of show(); @hideCase as reason of hide() */
-  protected hide(showCase: PopupShowCases | undefined, hideCase: PopupShowCases | PopupHideCases): void {
+  protected hide(showCase: PopupShowCases | undefined, hideCase: PopupHideCases): void {
     if (!this.canHide(showCase, hideCase)) return;
 
     this.#frameId && window.cancelAnimationFrame(this.#frameId);
