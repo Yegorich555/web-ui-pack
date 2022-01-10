@@ -15,7 +15,7 @@ document.addEventListener("mouseup", () => {
 /**
  * This function helps to define is competely focus lost or not.
  * For cases when you click on Label that tied with Input you get the following behavior:
- * inputOnBlur > labelOnFocus > inputOnFocus.
+ * mouseDown > inputOnBlur > labelOnFocus > mouseUp > inputOnFocus.
  * Fire this function by onBlur event of an Input
  * @param wrapper Element (Label) that wrapes Input
  * @param callback Function that will be invoked if focus is completely left
