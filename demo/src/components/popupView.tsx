@@ -21,11 +21,16 @@ function PopupContent() {
 export default function PopupView() {
   return (
     <div className={styles.popupViewExtraScroll} id="toFitMe">
-      <button id="trg" type="button" className={styles.trg}>
+      {/* <button id="trg" type="button" className={styles.trg}>
         target
         <br />
         <small>inside scrollable parent</small>
-      </button>
+      </button> */}
+      <label id="trg">
+        <span>This is label with input</span>
+        <input />
+        <button>Click me</button>
+      </label>
       <wup-popup class={styles.popupContent} target="#trg" placement="top-start">
         top.start
       </wup-popup>
