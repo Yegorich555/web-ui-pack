@@ -210,18 +210,26 @@ export default class WUPPopupElement extends WUPBaseElement {
       let preventClickAfterFocus = false;
       // onClick
       if (showCase & PopupShowCases.onClick) {
+        // fix when labelOnClick > inputOnClick
+        let wasOutsideClick = false;
         onShowEvent(document.body, "click", (e) => {
           // filter click from target because we have target event for this
           if (t !== e.target && !t.contains(e.target)) {
             const isMeClick = this === e.target || this.contains(e.target);
             isMeClick && t.focus(); // todo we need to define previous focusable element because it can be inside target
-            this.hide(this.#showCase, isMeClick ? PopupHideCases.onPopupClick : PopupHideCases.onOutsideClick);
+            if (!isMeClick) {
+              this.hide(this.#showCase, PopupHideCases.onOutsideClick);
+              wasOutsideClick = true;
+              setTimeout(() => (wasOutsideClick = false), 50);
+            } else {
+              this.hide(this.#showCase, PopupHideCases.onPopupClick);
+            }
           }
         });
 
         let timeoutId: ReturnType<typeof setTimeout> | undefined;
         appendEvent(t, "click", () => {
-          if (timeoutId) {
+          if (timeoutId || wasOutsideClick) {
             return;
           }
           if (!this.#isOpened) {
