@@ -212,7 +212,9 @@ export default class WUPPopupElement extends WUPBaseElement {
       if (showCase & PopupShowCases.onClick) {
         // fix when labelOnClick > inputOnClick
         let wasOutsideClick = false;
-        onShowEvent(document.body, "click", (e) => {
+        onShowEvent(document, "click", (e) => {
+          preventClickAfterFocus = false;
+
           // filter click from target because we have target event for this
           if (t !== e.target && !t.contains(e.target)) {
             const isMeClick = this === e.target || this.contains(e.target);
