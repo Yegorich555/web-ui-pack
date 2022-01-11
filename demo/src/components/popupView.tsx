@@ -26,12 +26,22 @@ export default function PopupView() {
         <br />
         <small>inside scrollable parent</small>
       </button> */}
-      <label id="trg">
-        <span>This is label with input</span>
-        <input />
-        <button>Click me</button>
-      </label>
+      <div>
+        <label id="trg">
+          <span>This is label with input inside</span>
+          <input />
+          <button>Click me</button>
+        </label>
+      </div>
       <wup-popup class={styles.popupContent} target="#trg" placement="top-start">
+        top.start
+      </wup-popup>
+
+      <div>
+        <label htmlFor="trg2">This is label with input outside</label>
+        <input id="trg2" />
+      </div>
+      <wup-popup class={styles.popupContent} target="#trg2" placement="top-start">
         top.start
       </wup-popup>
       {/* <wup-popup class={styles.popupContent} target="#trg" placement="top-middle">

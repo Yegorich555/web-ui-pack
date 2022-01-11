@@ -1,6 +1,7 @@
 import WUPBaseElement, { JSXCustomProps } from "./baseElement";
 import onEvent, { TypeOnEvent } from "./helpers/onEvent";
 import onFocusGot from "./helpers/onFocusGot";
+import onFocusLost from "./helpers/onFocusLost";
 import {
   getBoundingInternalRect,
   IBoundingRect,
@@ -220,6 +221,7 @@ export default class WUPPopupElement extends WUPBaseElement {
 
         let timeoutId: ReturnType<typeof setTimeout> | undefined;
         appendEvent(t, "click", () => {
+          // console.warn("click");
           if (timeoutId) {
             return;
           }
@@ -248,38 +250,31 @@ export default class WUPPopupElement extends WUPBaseElement {
         };
 
         appendEvent(t, "mouseenter", () => ev(this.$options.hoverShowTimeout, true));
+        // todo eventRequired only onShow event
         appendEvent(t, "mouseleave", () => ev(this.$options.hoverHideTimeout, false));
       }
 
-      // todo implossible to close by clickOnLabel when is already show
       // onFocus
       if (showCase & PopupShowCases.onFocus) {
         // todo prevent popupGotFocus => we need to return focus back: mouseDown > e.preventDefault to suppress focus if no tabIndex and it's not inside click
 
-        let removeMouseDown: null | (() => void) = null;
-        const mouseDown = () => {
-          preventClickAfterFocus = false;
-          removeMouseDown?.call(this);
-          removeMouseDown = null;
-        };
-
         const focus = () => {
+          // console.warn("onFocusGot");
           if (!this.#isOpened && this.show(PopupShowCases.onFocus)) {
             preventClickAfterFocus = true;
-            removeMouseDown = appendEvent(document.body, "mousedown", mouseDown);
           }
         };
         this.#targetEvents.push(onFocusGot(t, focus));
 
         const blur = ({ relatedTarget }: FocusEvent) => {
           if (this.#isOpened) {
-            const isFocused = (a: Element | null) => a && (a === t || a === this || t.contains(a) || this.contains(a));
-            const isStillFocused = isFocused(document.activeElement) || isFocused(relatedTarget as Element);
-            !isStillFocused && this.hide(this.#showCase, PopupHideCases.onFocusOut);
+            const isFocused = (a: Element | null) => a && (a === this || this.contains(a));
+            const isToMe = isFocused(document.activeElement) || isFocused(relatedTarget as Element);
+            !isToMe && this.hide(this.#showCase, PopupHideCases.onFocusOut);
           }
         };
-
-        onShowEvent(t, "focusout", blur);
+        // todo eventRequired only onShow event
+        this.#targetEvents.push(onFocusLost(t, blur));
       }
       // todo custom events onClosing, onShowing
       // todo redefine addEventListener to add customEvents

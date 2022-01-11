@@ -12,7 +12,13 @@
   border: $borderStyle;
 
   display: flex;
+  flex-direction: column;
   justify-content: center;
+  padding: 10px;
+
+  > * {
+    margin-top: 10px;
+  }
 }
 
 .popupContent {
