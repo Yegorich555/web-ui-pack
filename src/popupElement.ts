@@ -67,6 +67,8 @@ export interface IPopupOptions {
   hoverShowTimeout: number;
   /** Timeout in ms before popup hides on mouse-leave of target; Default is 500ms  */
   hoverHideTimeout: number;
+  /** Debounce option for onFocustLost event; More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost; Default is 100ms */
+  focusDebounceMs?: number;
   // todo check inherritance with overriding options & re-assign to custom-tag
 }
 
@@ -272,7 +274,7 @@ export default class WUPPopupElement extends WUPBaseElement {
             preventClickAfterFocus = true;
           }
         };
-        this.#targetEvents.push(onFocusGot(t, focus));
+        this.#targetEvents.push(onFocusGot(t, focus, { debounceMs: this.$options.focusDebounceMs }));
 
         const blur = ({ relatedTarget }: FocusEvent) => {
           if (this.#isOpened) {
@@ -282,7 +284,7 @@ export default class WUPPopupElement extends WUPBaseElement {
           }
         };
         // todo eventRequired only onShow event
-        this.#targetEvents.push(onFocusLost(t, blur));
+        this.#targetEvents.push(onFocusLost(t, blur, { debounceMs: this.$options.focusDebounceMs }));
       }
       // todo custom events onClosing, onShowing
       // todo redefine addEventListener to add customEvents
