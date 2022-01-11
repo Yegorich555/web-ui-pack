@@ -188,17 +188,22 @@ export default class WUPPopupElement extends WUPBaseElement {
     };
 
     // add event by popup.onShow and remove by onHide
-    const onShowEvent = <K extends keyof HTMLElementEventMap>(...args: Parameters<TypeOnEvent<K>>) => {
+    const onShowEventBasic = (ev: () => () => void) => {
       let forRemove: () => void;
       const r1 = appendEvent(this, "show", () => {
-        forRemove = appendEvent(...args);
+        forRemove = ev();
         r1(); // self-removing
       });
       const r2 = appendEvent(this, "hide", () => {
-        forRemove && forRemove();
+        forRemove?.call(this);
         r2(); // self-removing
-        onShowEvent(...args);
+        // apply again
+        onShowEventBasic(ev);
       });
+    };
+
+    const onShowEvent = <K extends keyof HTMLElementEventMap>(...args: Parameters<TypeOnEvent<K>>) => {
+      onShowEventBasic(() => appendEvent(...args));
     };
 
     const applyShowCase = (isAgain: boolean) => {
@@ -261,8 +266,7 @@ export default class WUPPopupElement extends WUPBaseElement {
         };
 
         appendEvent(t, "mouseenter", () => ev(this.$options.hoverShowTimeout, true));
-        // todo eventRequired only onShow event
-        appendEvent(t, "mouseleave", () => ev(this.$options.hoverHideTimeout, false));
+        onShowEvent(t, "mouseleave", () => ev(this.$options.hoverHideTimeout, false));
       }
 
       // onFocus
@@ -283,8 +287,8 @@ export default class WUPPopupElement extends WUPBaseElement {
             !isToMe && this.hide(this.#showCase, PopupHideCases.onFocusOut);
           }
         };
-        // todo eventRequired only onShow event
-        this.#targetEvents.push(onFocusLost(t, blur, { debounceMs: this.$options.focusDebounceMs }));
+
+        onShowEventBasic(() => onFocusLost(t, blur, { debounceMs: this.$options.focusDebounceMs }));
       }
       // todo custom events onClosing, onShowing
       // todo redefine addEventListener to add customEvents
