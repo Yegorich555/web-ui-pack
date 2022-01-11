@@ -218,13 +218,13 @@ export default class WUPPopupElement extends WUPBaseElement {
           // filter click from target because we have target event for this
           if (t !== e.target && !t.contains(e.target)) {
             const isMeClick = this === e.target || this.contains(e.target);
-            isMeClick && t.focus(); // todo we need to define previous focusable element because it can be inside target
-            if (!isMeClick) {
+            if (isMeClick) {
+              t.focus(); // todo we need to define previous focusable element because it can be inside target
+              this.hide(this.#showCase, PopupHideCases.onPopupClick);
+            } else {
               this.hide(this.#showCase, PopupHideCases.onOutsideClick);
               wasOutsideClick = true;
               setTimeout(() => (wasOutsideClick = false), 50);
-            } else {
-              this.hide(this.#showCase, PopupHideCases.onPopupClick);
             }
           }
         });
