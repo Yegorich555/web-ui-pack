@@ -214,14 +214,13 @@ export default class WUPPopupElement extends WUPBaseElement {
           // filter click from target because we have target event for this
           if (t !== e.target && !t.contains(e.target)) {
             const isMeClick = this === e.target || this.contains(e.target);
-            t.focus(); // todo we need to define previous focusable element because it can be inside target
+            isMeClick && t.focus(); // todo we need to define previous focusable element because it can be inside target
             this.hide(this.#showCase, isMeClick ? PopupHideCases.onPopupClick : PopupHideCases.onOutsideClick);
           }
         });
 
         let timeoutId: ReturnType<typeof setTimeout> | undefined;
         appendEvent(t, "click", () => {
-          // console.warn("click");
           if (timeoutId) {
             return;
           }
@@ -259,7 +258,6 @@ export default class WUPPopupElement extends WUPBaseElement {
         // todo prevent popupGotFocus => we need to return focus back: mouseDown > e.preventDefault to suppress focus if no tabIndex and it's not inside click
 
         const focus = () => {
-          // console.warn("onFocusGot");
           if (!this.#isOpened && this.show(PopupShowCases.onFocus)) {
             preventClickAfterFocus = true;
           }
