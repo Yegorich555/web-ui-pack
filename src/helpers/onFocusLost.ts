@@ -9,7 +9,9 @@
 8. MemoryLeaking: Removing listener should unsubscribe for other ones
  */
 
-let mouseDownEl: HTMLElement | undefined;
+import onEvent from "./onEvent";
+
+let isMouseDown = false;
 let rstEvent: undefined | (() => void);
 let rstCnt = 0;
 const onMouseUp: Array<() => void> = [];
@@ -18,26 +20,24 @@ function setEvent(): void {
   if (rstEvent) {
     return;
   }
-  const mousedown = ({ target, defaultPrevented }: MouseEvent) => {
-    if (!defaultPrevented) {
-      mouseDownEl = target as HTMLElement;
-    }
-  };
-  document.addEventListener("mousedown", mousedown);
+
+  const r1 = onEvent(document, "mousedown", ({ defaultPrevented }) => (isMouseDown = !defaultPrevented));
+
   const mouseup = () => {
     onMouseUp.forEach((f) => f());
     onMouseUp.length = 0;
-    mouseDownEl = undefined;
+    isMouseDown = false;
   };
-  document.addEventListener("mouseup", mouseup);
+  // click fires after mouseup but provides better mechanism
+  const r2 = onEvent(document, "click", mouseup);
 
   if (!rstEvent) {
     rstEvent = () => {
       --rstCnt;
       if (rstCnt === 0) {
         onMouseUp.length = 0;
-        document.removeEventListener("mousedown", mousedown);
-        document.removeEventListener("mouseup", mouseup);
+        r1();
+        r2();
       }
     };
   }
@@ -72,15 +72,13 @@ export default function onFocusLost(
     // eslint-disable-next-line no-use-before-define
     el.removeEventListener("focusout", focusout);
     rstEvent?.call(el);
-    console.error("removeOnFocusLost");
   };
   const focusout = (e: FocusEvent) => {
-    if (mouseDownEl) {
-      // todo wait for focusin
+    if (isMouseDown) {
       // mouseDown Label > mouseUp Label > click Label (without mouseMove) > focusin Input > click Input
-      // if mouseDown.target === mouseUp.target >> click target
-      // if clickTarget tied with input >>> clickInput
-      onMouseUp.push(() => setTimeout(() => focusout(e), 100));
+      // if mouseDown.target === mouseUp.target >> click target; if clickTarget tied with input >>> clickInput
+      // timeout requires to wait for next document.activeElement to be defined
+      onMouseUp.push(() => setTimeout(() => focusout(e), options?.debounceMs || 100));
       return;
     }
     const isFocused = (a: Element | null) => a && (el === a || el.contains(a));
