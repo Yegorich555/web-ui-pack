@@ -1,3 +1,4 @@
+import { focusFirst } from ".";
 import WUPBaseElement, { JSXCustomProps } from "./baseElement";
 import onEvent, { onEventType } from "./helpers/onEvent";
 import onFocusGot from "./helpers/onFocusGot";
@@ -83,10 +84,8 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
         padding: var(--popup-padding, var(--padding, 6px));
         box-shadow: var(--popup-shadow, 0 1px 4px 0 rgb(0 0 0 0.2));
       }
-      :host:focus { outline: 0; }
     `;
 
-    // todo remove outline 0 if onFocusBehavior: none
     const root = this.attachShadow({ mode: "open" });
     root.appendChild(style);
     root.appendChild(document.createElement("slot"));
@@ -104,8 +103,6 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
   #isOpened = false;
   #targetEvents: Array<() => void> = [];
   protected init() {
-    // todo remove tabindex -1
-    this.setAttribute("tabindex", "-1"); // required to handle onClick onFocus behavior
     this.#targetEvents.forEach((f) => f()); // remove possible previous event listeners
     this.#targetEvents.length = 0;
 
@@ -163,6 +160,13 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
       if (showCase & WUPPopup.ShowCases.onClick) {
         // fix when labelOnClick > inputOnClick
         let wasOutsideClick = false;
+        let lastActive: HTMLElement | null = null;
+        onShowEvent(document, "focusin", ({ target }) => {
+          const isMe = this === target || this.contains(target);
+          if (!isMe) {
+            lastActive = target;
+          }
+        });
         onShowEvent(document, "click", (e) => {
           preventClickAfterFocus = false;
 
@@ -170,7 +174,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
           if (t !== e.target && !t.contains(e.target)) {
             const isMeClick = this === e.target || this.contains(e.target);
             if (isMeClick) {
-              t.focus(); // todo we need to define previous focusable element because it can be inside target
+              focusFirst(lastActive || t);
               this.hide(this.#showCase, WUPPopup.HideCases.onPopupClick);
             } else {
               this.hide(this.#showCase, WUPPopup.HideCases.onOutsideClick);
@@ -187,6 +191,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
           }
           if (!this.#isOpened) {
             this.show(WUPPopup.ShowCases.onClick);
+            lastActive = document.activeElement as HTMLElement;
           } else if (!preventClickAfterFocus) {
             this.hide(this.#showCase, WUPPopup.HideCases.onTargetClick);
           }
@@ -217,8 +222,6 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
 
       // onFocus
       if (showCase & WUPPopup.ShowCases.onFocus) {
-        // todo prevent popupGotFocus => we need to return focus back: mouseDown > e.preventDefault to suppress focus if no tabIndex and it's not inside click
-
         const focus = () => {
           if (!this.#isOpened && this.show(WUPPopup.ShowCases.onFocus)) {
             preventClickAfterFocus = true;
@@ -452,4 +455,3 @@ declare global {
 }
 
 // todo custom events $onClosing, $onShowing
-// todo rewrite custom events to $....
