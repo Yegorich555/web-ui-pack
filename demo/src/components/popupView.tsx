@@ -10,6 +10,8 @@ function PopupContent() {
           el.$options.toFitElement = document.querySelector("#toFitMe") as HTMLElement;
           // el.options.minWidthByTarget = true;
           el.$show();
+          el.addEventListener("$show", (e) => console.warn("show", e.target));
+          // el.dispatchEvent("$show", { cancelable: false, bubbles: false, composed: false });
         }
       }}
     >

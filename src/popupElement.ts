@@ -1,7 +1,8 @@
 import WUPBaseElement, { JSXCustomProps } from "./baseElement";
-import onEvent, { TypeOnEvent } from "./helpers/onEvent";
+import onEvent, { onEventType } from "./helpers/onEvent";
 import onFocusGot from "./helpers/onFocusGot";
 import onFocusLost from "./helpers/onFocusLost";
+import { WUPPopup } from "./popupElement.types";
 import {
   getBoundingInternalRect,
   IBoundingRect,
@@ -13,72 +14,12 @@ import {
   stringPixelsToNumber,
 } from "./popupPlacements";
 
-export const enum PopupShowCases {
-  /** Show when it's added to document; to hide just remove popup from document (outsideClick event can be helpful) */
-  always = 0,
-  /** On mouseHover event of target; hide by onMouseLeave */
-  onHover = 1,
-  /** On focusIn event of target; hide by focusOut (also on click if PopupShowCases.onClick included) */
-  onFocus = 1 << 1,
-  /** On click event of target; hide by click anywhere */
-  onClick = 1 << 2,
-}
-
-export const enum PopupHideCases {
-  /** When $show() is fired again; possible by firing $show() or changing attr `placement` */
-  onShowAgain = 0,
-  /** When $hide() is fired programmatically */
-  onFireHide,
-  onMouseLeave,
-  onFocusOut,
-  onOutsideClick,
-  onPopupClick,
-  onTargetClick,
-}
-
-export interface IPopupOptions {
-  /** Anchor that popup uses for placement. If target not found previousSibling will be attached.
-   *
-   * attr target="{querySelector}" has hire priority than .options.target */
-  target?: HTMLElement | null;
-  /** Placement rule relative to target; example Placements.bottom.start or Placements.bottom.start.adjust */
-  placement: IPlacementFunction;
-  /** Alternate when pointed placement doesn't fit the layout */
-  placementAlt: Array<IPlacementFunction>;
-  /** Alternative of margin for targetElement related to popup
-
-   *  [top, right, bottom, left] or [top/bottom, right/left] in px */
-  offset: [number, number, number, number] | [number, number];
-  /** Inside edges of fitElement popup is positioned and can't overflow fitElement; {body} by default */
-  toFitElement: HTMLElement;
-  /** Sets minWidth 100% of targetWidth */
-  minWidthByTarget: boolean;
-  /** Sets minHeight 100% of targetWidth */
-  minHeightByTarget: boolean;
-
-  // todo overflow behavior when target partially hidden by scrollable parent
-  // possible cases: hide, placeOpposite
-
-  /** Case when popup need to show; You can use `showCase=PopupShowCases.onFocus | PopupShowCases.onClick` to join cases
-   *
-   * Default is PopupShowCases.always */
-  showCase: PopupShowCases;
-  /** Timeout in ms before popup shows on hover of target; Default is 200ms */
-  hoverShowTimeout: number;
-  /** Timeout in ms before popup hides on mouse-leave of target; Default is 500ms  */
-  hoverHideTimeout: number;
-  /** Debounce option for onFocustLost event; More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost; Default is 100ms */
-  focusDebounceMs?: number;
-  // todo check inherritance with overriding options & re-assign to custom-tag
-}
-
-export default class WUPPopupElement extends WUPBaseElement {
+export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   protected get ctr(): typeof WUPPopupElement {
     return this.constructor as typeof WUPPopupElement;
   }
 
-  // todo static method show(text, options)
   static placements = PopupPlacements;
   static placementAttrs = {
     "top-start": PopupPlacements.top.start.adjust,
@@ -96,7 +37,7 @@ export default class WUPPopupElement extends WUPBaseElement {
   };
 
   /** Default options. Change it to configure default behavior */
-  static defaults: IPopupOptions = {
+  static defaults: WUPPopup.Options = {
     target: undefined,
     placement: WUPPopupElement.placements.top.middle,
     placementAlt: [
@@ -107,20 +48,17 @@ export default class WUPPopupElement extends WUPBaseElement {
     toFitElement: document.body,
     minWidthByTarget: false,
     minHeightByTarget: false,
-    showCase: PopupShowCases.onClick | PopupShowCases.onFocus,
+    showCase: WUPPopup.ShowCases.onClick | WUPPopup.ShowCases.onFocus,
     hoverShowTimeout: 200,
     hoverHideTimeout: 500,
   };
 
-  get $options(): IPopupOptions {
+  get $options(): WUPPopup.Options {
     return this.ctr.defaults;
   }
 
-  /** Hide popup */
-  $hide = () => this.hide(this.#showCase, PopupHideCases.onFireHide);
-  /** Show popup */
-  $show = () => this.show(PopupShowCases.always);
-  /** Current state */
+  $hide = () => this.hide(this.#showCase, WUPPopup.HideCases.onFireHide);
+  $show = () => this.show(WUPPopup.ShowCases.always);
   get $isOpened(): boolean {
     return this.#isOpened;
   }
@@ -166,19 +104,22 @@ export default class WUPPopupElement extends WUPBaseElement {
   #isOpened = false;
   #targetEvents: Array<() => void> = [];
   protected init() {
+    // todo remove tabindex -1
     this.setAttribute("tabindex", "-1"); // required to handle onClick onFocus behavior
     this.#targetEvents.forEach((f) => f()); // remove possible previous event listeners
     this.#targetEvents.length = 0;
 
     const { showCase } = this.$options;
     if (!showCase) {
-      this.show(PopupShowCases.always);
+      this.show(WUPPopup.ShowCases.always);
       return;
     }
 
     // add event to dispose collection and return self-remove method
-    const appendEvent = <K extends keyof HTMLElementEventMap>(...args: Parameters<TypeOnEvent<K>>) => {
-      const forRemove = onEvent(...args);
+    const appendEvent = <K extends keyof WUPPopup.PopupEventMap>(
+      ...args: Parameters<onEventType<K, WUPPopup.PopupEventMap>>
+    ) => {
+      const forRemove = onEvent<K, WUPPopup.PopupEventMap>(...args);
       this.#targetEvents.push(forRemove);
 
       return () => {
@@ -190,11 +131,12 @@ export default class WUPPopupElement extends WUPBaseElement {
     // add event by popup.onShow and remove by onHide
     const onShowEventBasic = (ev: () => () => void) => {
       let forRemove: () => void;
-      const r1 = appendEvent(this, "show", () => {
+      // todo rewrite it from eventListener to direct logic to avoid redundant event endpoints in debugger
+      const r1 = appendEvent(this, "$show", () => {
         forRemove = ev();
         r1(); // self-removing
       });
-      const r2 = appendEvent(this, "hide", () => {
+      const r2 = appendEvent(this, "$hide", () => {
         forRemove?.call(this);
         r2(); // self-removing
         // apply again
@@ -202,7 +144,9 @@ export default class WUPPopupElement extends WUPBaseElement {
       });
     };
 
-    const onShowEvent = <K extends keyof HTMLElementEventMap>(...args: Parameters<TypeOnEvent<K>>) => {
+    const onShowEvent = <K extends keyof HTMLElementEventMap>(
+      ...args: Parameters<onEventType<K, WUPPopup.PopupEventMap>>
+    ) => {
       onShowEventBasic(() => appendEvent(...args));
     };
 
@@ -216,7 +160,7 @@ export default class WUPPopupElement extends WUPBaseElement {
 
       let preventClickAfterFocus = false;
       // onClick
-      if (showCase & PopupShowCases.onClick) {
+      if (showCase & WUPPopup.ShowCases.onClick) {
         // fix when labelOnClick > inputOnClick
         let wasOutsideClick = false;
         onShowEvent(document, "click", (e) => {
@@ -227,9 +171,9 @@ export default class WUPPopupElement extends WUPBaseElement {
             const isMeClick = this === e.target || this.contains(e.target);
             if (isMeClick) {
               t.focus(); // todo we need to define previous focusable element because it can be inside target
-              this.hide(this.#showCase, PopupHideCases.onPopupClick);
+              this.hide(this.#showCase, WUPPopup.HideCases.onPopupClick);
             } else {
-              this.hide(this.#showCase, PopupHideCases.onOutsideClick);
+              this.hide(this.#showCase, WUPPopup.HideCases.onOutsideClick);
               wasOutsideClick = true;
               setTimeout(() => (wasOutsideClick = false), 50);
             }
@@ -242,9 +186,9 @@ export default class WUPPopupElement extends WUPBaseElement {
             return;
           }
           if (!this.#isOpened) {
-            this.show(PopupShowCases.onClick);
+            this.show(WUPPopup.ShowCases.onClick);
           } else if (!preventClickAfterFocus) {
-            this.hide(this.#showCase, PopupHideCases.onTargetClick);
+            this.hide(this.#showCase, WUPPopup.HideCases.onTargetClick);
           }
           // fix when labelOnClick > inputOnClick
           timeoutId = setTimeout(() => (timeoutId = undefined), 50);
@@ -252,14 +196,16 @@ export default class WUPPopupElement extends WUPBaseElement {
       }
 
       // onHover
-      if (showCase & PopupShowCases.onHover) {
+      if (showCase & WUPPopup.ShowCases.onHover) {
         let timeoutId: ReturnType<typeof setTimeout> | undefined;
         const ev = (ms: number, isMouseIn: boolean) => {
           timeoutId && clearTimeout(timeoutId);
           if ((isMouseIn && !this.#isOpened) || (!isMouseIn && this.#isOpened))
             timeoutId = setTimeout(
               () =>
-                isMouseIn ? this.show(PopupShowCases.onHover) : this.hide(this.#showCase, PopupHideCases.onMouseLeave),
+                isMouseIn
+                  ? this.show(WUPPopup.ShowCases.onHover)
+                  : this.hide(this.#showCase, WUPPopup.HideCases.onMouseLeave),
               ms
             );
           else timeoutId = undefined;
@@ -270,11 +216,11 @@ export default class WUPPopupElement extends WUPBaseElement {
       }
 
       // onFocus
-      if (showCase & PopupShowCases.onFocus) {
+      if (showCase & WUPPopup.ShowCases.onFocus) {
         // todo prevent popupGotFocus => we need to return focus back: mouseDown > e.preventDefault to suppress focus if no tabIndex and it's not inside click
 
         const focus = () => {
-          if (!this.#isOpened && this.show(PopupShowCases.onFocus)) {
+          if (!this.#isOpened && this.show(WUPPopup.ShowCases.onFocus)) {
             preventClickAfterFocus = true;
           }
         };
@@ -284,14 +230,12 @@ export default class WUPPopupElement extends WUPBaseElement {
           if (this.#isOpened) {
             const isFocused = (a: Element | null) => a && (a === this || this.contains(a));
             const isToMe = isFocused(document.activeElement) || isFocused(relatedTarget as Element);
-            !isToMe && this.hide(this.#showCase, PopupHideCases.onFocusOut);
+            !isToMe && this.hide(this.#showCase, WUPPopup.HideCases.onFocusOut);
           }
         };
 
         onShowEventBasic(() => onFocusLost(t, blur, { debounceMs: this.$options.focusDebounceMs }));
       }
-      // todo custom events onClosing, onShowing
-      // todo redefine addEventListener to add customEvents
     };
 
     applyShowCase(false);
@@ -335,10 +279,10 @@ export default class WUPPopupElement extends WUPBaseElement {
   #userSizes = { maxWidth: Number.MAX_SAFE_INTEGER, maxHeight: Number.MAX_SAFE_INTEGER };
   #placements: Array<IPlacementFunction> = [];
   #prevRect?: DOMRect;
-  #showCase?: PopupShowCases;
+  #showCase?: WUPPopup.ShowCases;
 
   /** Shows popup if target defined; returns true if successful */
-  protected show(showCase: PopupShowCases): boolean {
+  protected show(showCase: WUPPopup.ShowCases): boolean {
     this.$options.target = this.#defineTarget();
     if (!this.$options.target) {
       return false;
@@ -346,7 +290,7 @@ export default class WUPPopupElement extends WUPBaseElement {
     console.warn("show", showCase);
     const wasHidden = !this.#isOpened;
 
-    this.#isOpened && this.hide(this.#showCase, PopupHideCases.onShowAgain);
+    this.#isOpened && this.hide(this.#showCase, WUPPopup.HideCases.onShowAgain);
     this.#showCase = showCase;
 
     const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.placementAttrs;
@@ -383,19 +327,20 @@ export default class WUPPopupElement extends WUPBaseElement {
     };
 
     goUpdate();
-    wasHidden && this.dispatchEvent(new Event("show", { cancelable: false, bubbles: false, composed: false }));
+    wasHidden &&
+      (this as WUPPopup.Element).dispatchEvent("$show", { cancelable: false, bubbles: false, composed: false });
 
     return true;
   }
 
   /** Override this method to prevent hiding; @showCase as previous reason of show(); @hideCase as reason of hide() */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected canHide(showCase: PopupShowCases | undefined, hideCase: PopupHideCases): boolean {
+  protected canHide(showCase: WUPPopup.ShowCases | undefined, hideCase: WUPPopup.HideCases): boolean {
     return true;
   }
 
   /** Hide popup. @showCase as previous reason of show(); @hideCase as reason of hide() */
-  protected hide(showCase: PopupShowCases | undefined, hideCase: PopupHideCases): void {
+  protected hide(showCase: WUPPopup.ShowCases | undefined, hideCase: WUPPopup.HideCases): void {
     console.warn("hide", hideCase);
     if (!this.canHide(showCase, hideCase)) return;
     const wasShown = this.#isOpened;
@@ -406,7 +351,8 @@ export default class WUPPopupElement extends WUPBaseElement {
     this.#showCase = undefined;
     this.#prevRect = undefined;
 
-    wasShown && this.dispatchEvent(new Event("hide", { cancelable: false, bubbles: false, composed: false }));
+    wasShown &&
+      (this as WUPPopup.Element).dispatchEvent("$hide", { cancelable: false, bubbles: false, composed: false });
   }
 
   /** Update position of popup. Call this method in cases when you changed options */
@@ -482,6 +428,7 @@ export default class WUPPopupElement extends WUPBaseElement {
   };
 }
 
+// todo check inherritance with overriding options & re-assign to custom-tag
 const tagName = "wup-popup";
 customElements.define(tagName, WUPPopupElement);
 
@@ -489,7 +436,7 @@ customElements.define(tagName, WUPPopupElement);
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: JSXCustomProps<WUPPopupElement> & {
+      [tagName]: JSXCustomProps<WUPPopup.Element> & {
         /** QuerySelector to find target - anchor that popup uses for placement.
          * If target not found previousSibling will be attached.
          * Popup defines target when onShow
@@ -503,3 +450,6 @@ declare global {
     }
   }
 }
+
+// todo custom events $onClosing, $onShowing
+// todo rewrite custom events to $....

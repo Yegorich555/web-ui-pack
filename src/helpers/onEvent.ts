@@ -1,45 +1,50 @@
-export type TypeOnEvent<K extends keyof HTMLElementEventMap> = (
-  el: HTMLElement | Node,
-  type: K | string,
-  listener: (
-    this: HTMLElement | Node,
-    e: HTMLElementEventMap[K] & {
-      target: HTMLElement;
-      currentTarget: HTMLElement;
-    }
-  ) => any,
-  options?: boolean | AddEventListenerOptions
-) => () => void;
-
+/* eslint-disable no-use-before-define */
 /** Apply el.addEventListener and return el.removeEventListener function;
  *
  * Despite on addEventListener target & currentTarget is always HTMLElement otherwise it's not fired
  */
-export default function onEvent<K extends keyof HTMLElementEventMap>(
+export default function onEvent<K extends keyof M, M extends HTMLElementEventMap = HTMLElementEventMap>(
   el: HTMLElement | Node,
-  type: K | string,
+  type: K,
   listener: (
     this: HTMLElement | Node,
-    e: HTMLElementEventMap[K] & {
+    e: M[K] & {
       target: HTMLElement;
       currentTarget: HTMLElement;
     }
   ) => any,
   options?: boolean | AddEventListenerOptions
 ) {
-  function wrapper(this: HTMLElement, e: HTMLElementEventMap[K]) {
+  const remove = () => el.removeEventListener(type as string, wrapper);
+
+  function wrapper(this: HTMLElement, e: Event) {
     if (e.target instanceof Node) {
       listener.call(
         el,
-        e as HTMLElementEventMap[K] & {
+        e as unknown as M[K] & {
           target: HTMLElement;
           currentTarget: HTMLElement;
         }
       );
-      (options as AddEventListenerOptions)?.once &&
-        el.removeEventListener(type, wrapper as EventListenerOrEventListenerObject);
+      (options as AddEventListenerOptions)?.once && remove();
     }
   }
-  el.addEventListener(type, wrapper as EventListenerOrEventListenerObject, options);
-  return () => el.removeEventListener(type, wrapper as EventListenerOrEventListenerObject);
+  el.addEventListener(type as string, wrapper as unknown as EventListener, options);
+  return remove;
 }
+
+export type onEventType<
+  K extends keyof M,
+  M extends HTMLElementEventMap | Record<string, Event> = HTMLElementEventMap
+> = (
+  el: HTMLElement | Node,
+  type: K,
+  listener: (
+    this: HTMLElement | Node,
+    e: M[K] & {
+      target: HTMLElement;
+      currentTarget: HTMLElement;
+    }
+  ) => any,
+  options?: boolean | AddEventListenerOptions
+) => () => void;

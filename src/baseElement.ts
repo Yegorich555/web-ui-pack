@@ -28,6 +28,13 @@ export default abstract class WUPBaseElement extends HTMLElement {
   protected attributeChangedCallback(name: string, oldValue: string, newValue: string) {
     this.#isReady && this.gotAttributeChanged(name, oldValue, newValue);
   }
+
+  dispatchEvent(type: string, eventInit?: EventInit): boolean;
+  dispatchEvent(event: Event): boolean;
+  dispatchEvent(ev: Event | string, eventInit?: EventInit): boolean {
+    if (typeof ev === "string") ev = new Event(ev, eventInit);
+    return super.dispatchEvent(ev as Event);
+  }
 }
 
 export type JSXCustomProps<T> = React.DetailedHTMLProps<
