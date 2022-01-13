@@ -1,4 +1,5 @@
 import WUPBaseElement from "./baseElement";
+import { onEventType } from "./helpers/onEvent";
 import { IPlacementFunction } from "./popupPlacements";
 
 export namespace WUPPopup {
@@ -6,7 +7,7 @@ export namespace WUPPopup {
     /** Show when it's added to document; to hide just remove popup from document (outsideClick event can be helpful) */
     always = 0,
     /** On mouseHover event of target; hide by onMouseLeave */
-    onHover = 1,
+    onHover = 1, // todo check onHover on mobileDevices; maybe onTouch instead ?
     /** On focusIn event of target; hide by focusOut (also on click if PopupShowCases.onClick included) */
     onFocus = 1 << 1,
     /** On click event of target; hide by click anywhere */
@@ -66,6 +67,7 @@ export namespace WUPPopup {
   }
 
   export interface Element extends WUPBaseElement {
+    /** Options. Call $show/$hide to reinit and apply option-changes after element is appended to document */
     $options: WUPPopup.Options;
     /** Show popup */
     $show: () => void;
@@ -84,5 +86,11 @@ export namespace WUPPopup {
     ): void;
     // disallow custom events to avoid mistakes
     // addEventListener(...args: Parameters<HTMLElement["addEventListener"]>): void;
+
+    appendEvent<K extends keyof WUPPopup.PopupEventMap>(
+      ...args: Parameters<onEventType<K, WUPPopup.PopupEventMap>>
+    ): () => void;
+    // eslint-disable-next-line no-use-before-define
+    appendEvent<K extends keyof M, M extends HTMLElementEventMap>(...args: Parameters<onEventType<K, M>>): () => void;
   }
 }

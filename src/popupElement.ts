@@ -1,6 +1,6 @@
 import { focusFirst } from ".";
 import WUPBaseElement, { JSXCustomProps } from "./baseElement";
-import onEvent, { onEventType } from "./helpers/onEvent";
+import { onEventType } from "./helpers/onEvent";
 import onFocusGot from "./helpers/onFocusGot";
 import onFocusLost from "./helpers/onFocusLost";
 import { WUPPopup } from "./popupElement.types";
@@ -58,8 +58,16 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     return this.ctr.defaults;
   }
 
-  $hide = () => this.hide(this.#showCase, WUPPopup.HideCases.onFireHide);
-  $show = () => this.show(WUPPopup.ShowCases.always);
+  $hide() {
+    this.init();
+    return this.hide(this.#showCase, WUPPopup.HideCases.onFireHide);
+  }
+
+  $show() {
+    this.init();
+    return this.show(WUPPopup.ShowCases.always);
+  }
+
   get $isOpened(): boolean {
     return this.#isOpened;
   }
@@ -89,10 +97,6 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     const root = this.attachShadow({ mode: "open" });
     root.appendChild(style);
     root.appendChild(document.createElement("slot"));
-
-    // todo all methods should be bind
-    this.show = this.show.bind(this);
-    this.hide = this.hide.bind(this);
   }
 
   protected gotReady() {
@@ -101,10 +105,8 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
   }
 
   #isOpened = false;
-  #targetEvents: Array<() => void> = [];
   protected init() {
-    this.#targetEvents.forEach((f) => f()); // remove possible previous event listeners
-    this.#targetEvents.length = 0;
+    this.removeEvents();
 
     const { showCase } = this.$options;
     if (!showCase) {
@@ -113,17 +115,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     }
 
     // add event to dispose collection and return self-remove method
-    const appendEvent = <K extends keyof WUPPopup.PopupEventMap>(
-      ...args: Parameters<onEventType<K, WUPPopup.PopupEventMap>>
-    ) => {
-      const forRemove = onEvent<K, WUPPopup.PopupEventMap>(...args);
-      this.#targetEvents.push(forRemove);
-
-      return () => {
-        forRemove();
-        this.#targetEvents.splice(this.#targetEvents.indexOf(forRemove), 1);
-      };
-    };
+    const { appendEvent } = this as WUPPopup.Element;
 
     // add event by popup.onShow and remove by onHide
     const onShowEventBasic = (ev: () => () => void) => {
@@ -141,10 +133,10 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
       });
     };
 
-    const onShowEvent = <K extends keyof HTMLElementEventMap>(
+    const onShowEvent = <K extends keyof WUPPopup.PopupEventMap>(
       ...args: Parameters<onEventType<K, WUPPopup.PopupEventMap>>
     ) => {
-      onShowEventBasic(() => appendEvent(...args));
+      onShowEventBasic(() => appendEvent<K>(...args));
     };
 
     const applyShowCase = (isAgain: boolean) => {
@@ -227,7 +219,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
             preventClickAfterFocus = true;
           }
         };
-        this.#targetEvents.push(onFocusGot(t, focus, { debounceMs: this.$options.focusDebounceMs }));
+        this.disposeLst.push(onFocusGot(t, focus, { debounceMs: this.$options.focusDebounceMs }));
 
         const blur = ({ relatedTarget }: FocusEvent) => {
           if (this.#isOpened) {
