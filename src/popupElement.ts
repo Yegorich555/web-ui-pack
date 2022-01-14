@@ -120,9 +120,9 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     // add callback by popup.onShow and remove by onHide
     const onShowEventBasic = (ev: () => () => void) => {
       // todo rewrite it from eventListener to direct logic to avoid redundant event endpoints in debugger
-      appendEvent(this, "$show", ev, { once: true, passive: true });
+      appendEvent(this, "$show", ev, { once: true });
       // apply again
-      appendEvent(this, "$hide", () => onShowEventBasic(ev), { once: true, passive: true });
+      appendEvent(this, "$hide", () => onShowEventBasic(ev), { once: true });
     };
 
     // add event by popup.onShow and remove by onHide
@@ -268,7 +268,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
 
   /** Shows popup if target defined; returns true if successful */
   protected show(showCase: WUPPopup.ShowCases): boolean {
-    this.$options.target = this.#defineTarget();
+    this.$options.target = this.$options.target || this.#defineTarget();
     if (!this.$options.target) {
       return false;
     }

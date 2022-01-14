@@ -52,14 +52,16 @@ export default abstract class WUPBaseElement extends HTMLElement {
   }
 
   protected disposeLst: Array<() => void> = [];
-  /** Add event listener and remove after component removed */
+  /** Add event listener and remove after component removed; @options.passive=true by default */
   appendEvent<
     T extends keyof E,
     K extends HTMLElement | Document,
     E extends HTMLElementEventMap & Record<keyof E, Event>
   >(...args: Parameters<onEventType<T, K, E>>): () => void {
+    args[3] = <AddEventListenerOptions>{ passive: true, ...(args[3] as AddEventListenerOptions) };
+
     // self-removing when option.once
-    if ((args[3] as AddEventListenerOptions)?.once) {
+    if (args[3].once) {
       const listener = args[2];
       args[2] = function wrapper(...args2) {
         const v = listener.call(this, ...args2);
