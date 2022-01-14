@@ -22,7 +22,7 @@ export default abstract class WUPBaseElement extends HTMLElement {
   /** Fired when element is removed from document */
   protected gotRemoved() {
     this.#isReady = false;
-    this.removeEvents();
+    this.dispose();
   }
 
   /** Browser calls this method when the element is added to the document */
@@ -44,7 +44,7 @@ export default abstract class WUPBaseElement extends HTMLElement {
     this.#isReady && this.gotAttributeChanged(name, oldValue, newValue);
   }
 
-  dispatchEvent(type: string, eventInit?: EventInit): boolean;
+  dispatchEvent<K extends keyof HTMLElementEventMap>(type: K, eventInit?: EventInit): boolean;
   dispatchEvent(event: Event): boolean;
   dispatchEvent(ev: Event | string, eventInit?: EventInit): boolean {
     if (typeof ev === "string") ev = new Event(ev, eventInit);
@@ -52,22 +52,40 @@ export default abstract class WUPBaseElement extends HTMLElement {
   }
 
   protected disposeLst: Array<() => void> = [];
-  /** Add event listener and push to disposeLst */
-  appendEvent<K extends keyof M, M extends HTMLElementEventMap>(...args: Parameters<onEventType<K, M>>): () => void {
-    // todo once doesn't work in this case
-    const forRemove = onEvent<K, M>(...args);
-    this.disposeLst.push(forRemove);
-
-    return () => {
-      forRemove();
-      this.disposeLst.splice(this.disposeLst.indexOf(forRemove), 1);
+  /** Add event listener and remove after component removed */
+  appendEvent<
+    T extends keyof E,
+    K extends HTMLElement | Document,
+    E extends HTMLElementEventMap & Record<keyof E, Event>
+  >(...args: Parameters<onEventType<T, K, E>>): () => void {
+    // self-removing when option.once
+    if ((args[3] as AddEventListenerOptions)?.once) {
+      const listener = args[2];
+      args[2] = function wrapper(...args2) {
+        const v = listener.call(this, ...args2);
+        remove();
+        return v;
+      };
+    }
+    // @ts-ignore
+    const r = onEvent(...args);
+    this.disposeLst.push(r);
+    const remove = () => {
+      r();
+      this.disposeLst.splice(this.disposeLst.indexOf(r), 1);
     };
+
+    return remove;
   }
 
-  /** Remove events that was appended */
-  protected removeEvents() {
+  /** Remove events/functions that was appended */
+  protected dispose() {
     this.disposeLst.forEach((f) => f()); // remove possible previous event listeners
     this.disposeLst.length = 0;
+  }
+
+  contains(other: unknown): boolean {
+    return other instanceof Node && this.contains(other);
   }
 }
 
@@ -76,3 +94,37 @@ export type JSXCustomProps<T> = React.DetailedHTMLProps<
   Omit<React.HTMLAttributes<T>, "className"> & { class?: string | undefined },
   T
 >;
+
+export namespace WUPBase {
+  export interface IBaseElement<E extends HTMLElementEventMap & Record<keyof E, Event>> extends WUPBaseElement {
+    dispatchEvent(type: keyof E, eventInitDict?: EventInit): boolean;
+    dispatchEvent(event: E[keyof E]): boolean;
+    addEventListener<K extends keyof E>(
+      type: K,
+      listener: (this: WUPBaseElement, ev: E[K]) => any,
+      options?: boolean | AddEventListenerOptions
+    ): void;
+    addEventListener(
+      type: string,
+      listener: EventListenerOrEventListenerObject,
+      options?: boolean | AddEventListenerOptions
+    ): void;
+    removeEventListener<K extends keyof E>(
+      type: K,
+      listener: (this: WUPBaseElement, ev: E[K]) => any,
+      options?: boolean | EventListenerOptions
+    ): void;
+    removeEventListener(
+      type: string,
+      listener: EventListenerOrEventListenerObject,
+      options?: boolean | EventListenerOptions
+    ): void;
+
+    appendEvent<T extends keyof E, K extends HTMLElement | Document>(
+      ...args: Parameters<onEventType<T, K, E>>
+    ): () => void;
+    appendEvent<T extends keyof E2, K extends HTMLElement | Document, E2 extends E = E>(
+      ...args: Parameters<onEventType<T, K, E2>>
+    ): () => void;
+  }
+}

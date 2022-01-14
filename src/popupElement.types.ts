@@ -1,5 +1,4 @@
-import WUPBaseElement from "./baseElement";
-import { onEventType } from "./helpers/onEvent";
+import { WUPBase } from "./baseElement";
 import { IPlacementFunction } from "./popupPlacements";
 
 export namespace WUPPopup {
@@ -66,31 +65,14 @@ export namespace WUPPopup {
     $hide: Event;
   }
 
-  export interface Element extends WUPBaseElement {
+  export interface Element extends WUPBase.IBaseElement<PopupEventMap> {
     /** Options. Call $show/$hide to reinit and apply option-changes after element is appended to document */
-    $options: WUPPopup.Options;
+    $options: Options;
     /** Show popup */
     $show: () => void;
     /** Hide popup */
     $hide: () => void;
     /** Current state */
     readonly $isOpened: boolean;
-
-    dispatchEvent(type: keyof PopupEventMap, eventInitDict?: EventInit): boolean;
-    dispatchEvent(event: Event): boolean;
-
-    addEventListener<K extends keyof PopupEventMap>(
-      type: K,
-      listener: (this: Element, ev: PopupEventMap[K]) => void,
-      options?: Parameters<HTMLElement["addEventListener"]>[2]
-    ): void;
-    // disallow custom events to avoid mistakes
-    // addEventListener(...args: Parameters<HTMLElement["addEventListener"]>): void;
-
-    appendEvent<K extends keyof WUPPopup.PopupEventMap>(
-      ...args: Parameters<onEventType<K, WUPPopup.PopupEventMap>>
-    ): () => void;
-    // eslint-disable-next-line no-use-before-define
-    appendEvent<K extends keyof M, M extends HTMLElementEventMap>(...args: Parameters<onEventType<K, M>>): () => void;
   }
 }

@@ -1,6 +1,5 @@
 import { focusFirst } from ".";
 import WUPBaseElement, { JSXCustomProps } from "./baseElement";
-import { onEventType } from "./helpers/onEvent";
 import onFocusGot from "./helpers/onFocusGot";
 import onFocusLost from "./helpers/onFocusLost";
 import { WUPPopup } from "./popupElement.types";
@@ -99,14 +98,15 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     root.appendChild(document.createElement("slot"));
   }
 
-  protected gotReady() {
+  override gotReady() {
     super.gotReady();
     this.init();
   }
 
   #isOpened = false;
   protected init() {
-    this.removeEvents();
+    // remove previously added event
+    this.dispose();
 
     const { showCase } = this.$options;
     if (!showCase) {
@@ -117,27 +117,17 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     // add event to dispose collection and return self-remove method
     const { appendEvent } = this as WUPPopup.Element;
 
-    // add event by popup.onShow and remove by onHide
+    // add callback by popup.onShow and remove by onHide
     const onShowEventBasic = (ev: () => () => void) => {
-      let forRemove: () => void;
       // todo rewrite it from eventListener to direct logic to avoid redundant event endpoints in debugger
-      const r1 = appendEvent(this, "$show", () => {
-        forRemove = ev();
-        r1(); // self-removing
-      });
-      const r2 = appendEvent(this, "$hide", () => {
-        forRemove?.call(this);
-        r2(); // self-removing
-        // apply again
-        onShowEventBasic(ev);
-      });
+      appendEvent(this, "$show", ev, { once: true, passive: true });
+      // apply again
+      appendEvent(this, "$hide", () => onShowEventBasic(ev), { once: true, passive: true });
     };
 
-    const onShowEvent = <K extends keyof WUPPopup.PopupEventMap>(
-      ...args: Parameters<onEventType<K, WUPPopup.PopupEventMap>>
-    ) => {
-      onShowEventBasic(() => appendEvent<K>(...args));
-    };
+    // add event by popup.onShow and remove by onHide
+    const onShowEvent = (...args: Parameters<WUPPopup.Element["appendEvent"]>) =>
+      onShowEventBasic(() => appendEvent(...args));
 
     const applyShowCase = (isAgain: boolean) => {
       const t = this.#defineTarget(!isAgain);
@@ -156,15 +146,15 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
         onShowEvent(document, "focusin", ({ target }) => {
           const isMe = this === target || this.contains(target);
           if (!isMe) {
-            lastActive = target;
+            lastActive = target as HTMLElement;
           }
         });
-        onShowEvent(document, "click", (e) => {
+        onShowEvent(document, "click", ({ target }) => {
           preventClickAfterFocus = false;
 
           // filter click from target because we have target event for this
-          if (t !== e.target && !t.contains(e.target)) {
-            const isMeClick = this === e.target || this.contains(e.target);
+          if (t !== target && !(target instanceof Node && t.contains(target))) {
+            const isMeClick = this === target || this.contains(target);
             if (isMeClick) {
               focusFirst(lastActive || t);
               this.hide(this.#showCase, WUPPopup.HideCases.onPopupClick);
@@ -241,7 +231,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     return ["target", "placement"];
   }
 
-  protected gotAttributeChanged(name: string, oldValue: string, newValue: string): void {
+  override gotAttributeChanged(name: string, oldValue: string, newValue: string): void {
     super.gotAttributeChanged(name, oldValue, newValue);
     if (name === "target") this.init();
     else if (name === "placement") this.#isOpened && this.show(this.#showCase || 0);
