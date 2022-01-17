@@ -143,9 +143,8 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
             lastActive = target as HTMLElement;
           }
         });
+        onShowEvent(document, "mousedown", () => (preventClickAfterFocus = false));
         onShowEvent(document, "click", ({ target }) => {
-          preventClickAfterFocus = false;
-
           // filter click from target because we have target event for this
           if (t !== target && !(target instanceof Node && t.contains(target))) {
             const isMeClick = this === target || this.includes(target);
@@ -200,7 +199,6 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
       if (showCase & WUPPopup.ShowCases.onFocus) {
         const focus = () => {
           if (!this.#isOpened && this.show(WUPPopup.ShowCases.onFocus)) {
-            // todo it's wrong if setFocus via keyboard
             preventClickAfterFocus = true;
           }
         };
