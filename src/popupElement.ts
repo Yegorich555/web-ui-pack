@@ -37,8 +37,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
   };
 
   /** Default options. Change it to configure default behavior */
-  static defaults: WUPPopup.Options = {
-    target: undefined,
+  static defaults: Omit<WUPPopup.Options, "target"> = {
     placement: WUPPopupElement.placements.top.middle,
     placementAlt: [
       WUPPopupElement.placements.top.middle.adjust, //
@@ -53,7 +52,12 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     hoverHideTimeout: 500,
   };
 
-  $options = { ...this.ctr.defaults };
+  // #todo testCase: options properly clones defaults
+  $options: WUPPopup.Options = {
+    ...this.ctr.defaults,
+    placementAlt: [...this.ctr.defaults.placementAlt],
+    offset: [...this.ctr.defaults.offset],
+  };
 
   $hide() {
     this.init();
