@@ -61,7 +61,13 @@ export namespace WUPPopup {
   }
 
   export interface PopupEventMap extends HTMLElementEventMap {
+    /** Fires before show is happened; can be prevented via e.preventDefault() */
+    $willShow: Event;
+    /** Fires after popup is shown */
     $show: Event;
+    /** Fires before hide is happened; can be prevented via e.preventDefault() */
+    $willHide: Event;
+    /** Fires after popup is hidden */
     $hide: Event;
   }
 

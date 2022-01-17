@@ -266,14 +266,33 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
   #prevRect?: DOMRect;
   #showCase?: WUPPopup.ShowCases;
 
-  /** Shows popup if target defined; returns true if successful */
-  protected show(showCase: WUPPopup.ShowCases): boolean {
-    this.$options.target = this.$options.target || this.#defineTarget();
+  /** Override this method to prevent showing; this method fires beofre willShow event;
+   * @param showCase as reason of show()
+   * @return true if successful */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected canShow(showCase: WUPPopup.ShowCases): boolean {
     if (!this.$options.target) {
       return false;
     }
-    console.warn("show", showCase);
+    return true;
+  }
+
+  /** Shows popup if target defined; returns true if successful */
+  protected show(showCase: WUPPopup.ShowCases): boolean {
+    console.warn("willShow", showCase);
+    this.$options.target = this.$options.target || this.#defineTarget();
+    if (!this.canShow(showCase)) {
+      return false;
+    }
+
     const wasHidden = !this.#isOpened;
+    if (wasHidden) {
+      const e = new Event("$willShow", { cancelable: true, bubbles: false, composed: false });
+      (this as WUPPopup.Element).dispatchEvent(e);
+      if (e.defaultPrevented) {
+        return false;
+      }
+    }
 
     this.#isOpened && this.hide(this.#showCase, WUPPopup.HideCases.onShowAgain);
     this.#showCase = showCase;
@@ -312,23 +331,40 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     };
 
     goUpdate();
-    wasHidden &&
-      (this as WUPPopup.Element).dispatchEvent("$show", { cancelable: false, bubbles: false, composed: false });
+
+    if (wasHidden) {
+      // run async to dispose internal resources first: possible dev-side-issues
+      setTimeout(() => {
+        (this as WUPPopup.Element).dispatchEvent("$show", { cancelable: false, bubbles: false, composed: false });
+      });
+    }
 
     return true;
   }
 
-  /** Override this method to prevent hiding; @showCase as previous reason of show(); @hideCase as reason of hide() */
+  /** Override this method to prevent hiding; method calls before $willHide event
+   * @param showCase as previous reason of show();
+   * @param hideCase as reason of hide()
+   * @return true if successful */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected canHide(showCase: WUPPopup.ShowCases | undefined, hideCase: WUPPopup.HideCases): boolean {
     return true;
   }
 
   /** Hide popup. @showCase as previous reason of show(); @hideCase as reason of hide() */
-  protected hide(showCase: WUPPopup.ShowCases | undefined, hideCase: WUPPopup.HideCases): void {
-    console.warn("hide", hideCase);
-    if (!this.canHide(showCase, hideCase)) return;
+  protected hide(showCase: WUPPopup.ShowCases | undefined, hideCase: WUPPopup.HideCases): boolean {
+    console.warn("willHide", hideCase);
+    if (!this.canHide(showCase, hideCase)) return false;
+
     const wasShown = this.#isOpened;
+    if (wasShown) {
+      // todo restict event through typeof keyof
+      const e = new Event("$willHide", { cancelable: true, bubbles: false, composed: false });
+      (this as WUPPopup.Element).dispatchEvent(e);
+      if (e.defaultPrevented) {
+        return false;
+      }
+    }
 
     this.#frameId && window.cancelAnimationFrame(this.#frameId);
     this.style.opacity = "0";
@@ -336,8 +372,14 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     this.#showCase = undefined;
     this.#prevRect = undefined;
 
-    wasShown &&
-      (this as WUPPopup.Element).dispatchEvent("$hide", { cancelable: false, bubbles: false, composed: false });
+    if (wasShown) {
+      // run async to dispose internal resources first: possible dev-side-issues
+      setTimeout(() => {
+        (this as WUPPopup.Element).dispatchEvent("$hide", { cancelable: false, bubbles: false, composed: false });
+      });
+    }
+
+    return true;
   }
 
   /** Update position of popup. Call this method in cases when you changed options */
@@ -421,17 +463,26 @@ customElements.define(tagName, WUPPopupElement);
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: JSXCustomProps<WUPPopup.Element> & {
-        /** QuerySelector to find target - anchor that popup uses for placement.
-         * If target not found previousSibling will be attached.
-         * Popup defines target when onShow
-         *
-         * attr target="" has hire priority than .options.target
-         *  */
-        target?: string;
-        /** Placement rule (relative to target); applied on show(). Call show() again to apply changed options */
-        placement?: keyof typeof WUPPopupElement.placementAttrs;
-      };
+      [tagName]: JSXCustomProps<WUPPopup.Element> &
+        Partial<{
+          /** QuerySelector to find target - anchor that popup uses for placement.
+           * If target not found previousSibling will be attached.
+           * Popup defines target when onShow
+           *
+           * attr `target` has hire priority than ref.options.target
+           *  */
+          target: string;
+          /** Placement rule (relative to target); applied on show(). Call show() again to apply changed options */
+          placement: keyof typeof WUPPopupElement.placementAttrs;
+          /** SyntheticEvent is not supported. Use ref.addEventListener('$show') instead */
+          onShow: never;
+          /** SyntheticEvent is not supported. Use ref.addEventListener('$hide') instead */
+          onHide: never;
+          /** SyntheticEvent is not supported. Use ref.addEventListener('$willHide') instead */
+          onWillHide: never;
+          /** SyntheticEvent is not supported. Use ref.addEventListener('$willShow') instead */
+          onWillShow: never;
+        }>;
     }
   }
 }
