@@ -22,7 +22,7 @@ export default function onEvent<
   const remove = () => el.removeEventListener(type as string, wrapper);
 
   function wrapper(this: K, e: Event) {
-    if (!e.target || !e.currentTarget) {
+    if (e.target && e.currentTarget) {
       listener.call(
         el,
         e as E[T] & {
