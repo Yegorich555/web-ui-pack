@@ -103,6 +103,8 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     this.init();
   }
 
+  #onShowCallbacks: Array<() => () => void> = [];
+  #onHideCallbacks: Array<() => void> = [];
   #isOpened = false;
   protected init() {
     // remove previously added event
@@ -117,17 +119,9 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     // add event to dispose collection and return self-remove method
     const { appendEvent } = this as WUPPopup.Element;
 
-    // add callback by popup.onShow and remove by onHide
-    const onShowEventBasic = (ev: () => () => void) => {
-      // todo rewrite it from eventListener to direct logic to avoid redundant event endpoints in debugger
-      appendEvent(this, "$show", ev, { once: true });
-      // apply again
-      appendEvent(this, "$hide", () => onShowEventBasic(ev), { once: true });
-    };
-
     // add event by popup.onShow and remove by onHide
     const onShowEvent = (...args: Parameters<WUPPopup.Element["appendEvent"]>) =>
-      onShowEventBasic(() => appendEvent(...args));
+      this.#onShowCallbacks.push(() => appendEvent(...args));
 
     const applyShowCase = (isAgain: boolean) => {
       const t = this.#defineTarget(!isAgain);
@@ -144,7 +138,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
         let wasOutsideClick = false;
         let lastActive: HTMLElement | null = null;
         onShowEvent(document, "focusin", ({ target }) => {
-          const isMe = this === target || this.contains(target);
+          const isMe = this === target || this.includes(target);
           if (!isMe) {
             lastActive = target as HTMLElement;
           }
@@ -154,7 +148,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
 
           // filter click from target because we have target event for this
           if (t !== target && !(target instanceof Node && t.contains(target))) {
-            const isMeClick = this === target || this.contains(target);
+            const isMeClick = this === target || this.includes(target);
             if (isMeClick) {
               focusFirst(lastActive || t);
               this.hide(this.#showCase, WUPPopup.HideCases.onPopupClick);
@@ -213,13 +207,13 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
 
         const blur = ({ relatedTarget }: FocusEvent) => {
           if (this.#isOpened) {
-            const isFocused = (a: Element | null) => a && (a === this || this.contains(a));
+            const isFocused = (a: Element | null) => a && (a === this || this.includes(a));
             const isToMe = isFocused(document.activeElement) || isFocused(relatedTarget as Element);
             !isToMe && this.hide(this.#showCase, WUPPopup.HideCases.onFocusOut);
           }
         };
 
-        onShowEventBasic(() => onFocusLost(t, blur, { debounceMs: this.$options.focusDebounceMs }));
+        this.#onShowCallbacks.push(() => onFocusLost(t, blur, { debounceMs: this.$options.focusDebounceMs }));
       }
     };
 
@@ -333,6 +327,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     goUpdate();
 
     if (wasHidden) {
+      this.#onHideCallbacks = this.#onShowCallbacks.map((f) => f());
       // run async to dispose internal resources first: possible dev-side-issues
       setTimeout(() => {
         (this as WUPPopup.Element).dispatchEvent("$show", { cancelable: false, bubbles: false, composed: false });
@@ -373,6 +368,8 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     this.#prevRect = undefined;
 
     if (wasShown) {
+      this.#onHideCallbacks.forEach((f) => f());
+      this.#onHideCallbacks = [];
       // run async to dispose internal resources first: possible dev-side-issues
       setTimeout(() => {
         (this as WUPPopup.Element).dispatchEvent("$hide", { cancelable: false, bubbles: false, composed: false });

@@ -36,7 +36,7 @@ export default function PopupView() {
         </label>
       </div>
       <wup-popup class={styles.popupContent} target="#trg" placement="top-start">
-        top.start
+        top.start t1
       </wup-popup>
 
       <div>
@@ -44,7 +44,7 @@ export default function PopupView() {
         <input id="trg2" />
       </div>
       <wup-popup class={styles.popupContent} target="#trg2" placement="top-start">
-        top.start
+        top.start t2
       </wup-popup>
       {/* <wup-popup class={styles.popupContent} target="#trg" placement="top-middle">
         top.middle
