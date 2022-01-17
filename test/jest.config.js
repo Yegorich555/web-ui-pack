@@ -15,13 +15,14 @@ module.exports = {
   collectCoverage: true,
   collectCoverageFrom: ["dist/**/*.{js,jsx}", "!**/icomoon/**"],
   moduleNameMapper,
-  testEnvironment: "jsdom",
+  testEnvironment: "jsdom", // https://jestjs.io/docs/configuration#testenvironment-string
   projects: [
     {
       rootDir,
       displayName: "general",
       testMatch: [`${__dirname}/jest/**/*.test.[jt]s?(x)`],
       moduleNameMapper,
+      testEnvironment: "jsdom",
     },
     {
       rootDir,

@@ -4,6 +4,7 @@
 
 - Added [helpers](https://github.com/Yegorich555/web-ui-pack#helpers)
   - `stringPrettify`
+  - `onEvent`
 
 ## 0.0.2 (Nov 30, 2021)
 

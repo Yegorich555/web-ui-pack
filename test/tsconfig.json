@@ -7,6 +7,7 @@
       "web-ui-pack/*": ["../dist/*"]
     }
   },
-  "include": ["./**/*"],
+  "files": ["../dist/index.js"],
+  "include": ["../dist/*"],
   "exclude": ["node_modules", "build", ".vscode"]
 }
