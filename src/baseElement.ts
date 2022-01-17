@@ -11,7 +11,7 @@ export default abstract class WUPBaseElement extends HTMLElement {
     super();
 
     this.appendEvent = this.appendEvent.bind(this);
-    this.contains = this.contains.bind(this);
+    this.includes = this.includes.bind(this);
     this.dispose = this.dispose.bind(this);
 
     // autoBind all other functions
@@ -96,8 +96,9 @@ export default abstract class WUPBaseElement extends HTMLElement {
     this.disposeLst.length = 0;
   }
 
-  contains(other: unknown): boolean {
-    return other instanceof Node && this.contains(other);
+  /** Returns true if el is instance of Node and contains pointer element */
+  includes(el: unknown): boolean {
+    return el instanceof Node && this.contains(el);
   }
 }
 
