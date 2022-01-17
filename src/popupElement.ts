@@ -86,6 +86,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
         top: 0;
         left: 0;
         opacity: 0;
+        display: none;
 
         overflow: hidden;
         border: 1px solid var(--popup-border-color, var(--border-color, #e1e1e1));
@@ -109,8 +110,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
   #onHideCallbacks: Array<() => void> = [];
   #isOpened = false;
   protected init() {
-    // remove previously added event
-    this.dispose();
+    this.dispose(); // remove previously added event
 
     const { showCase } = this.$options;
     if (!showCase) {
@@ -118,9 +118,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
       return;
     }
 
-    // add event to dispose collection and return self-remove method
     const { appendEvent } = this as WUPPopup.Element;
-
     // add event by popup.onShow and remove by onHide
     const onShowEvent = (...args: Parameters<WUPPopup.Element["appendEvent"]>) =>
       this.#onShowCallbacks.push(() => appendEvent(...args));
@@ -202,17 +200,17 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
       if (showCase & WUPPopup.ShowCases.onFocus) {
         const focus = () => {
           if (!this.#isOpened && this.show(WUPPopup.ShowCases.onFocus)) {
+            // todo it's wrong if setFocus via keyboard
             preventClickAfterFocus = true;
           }
         };
         this.disposeLst.push(onFocusGot(t, focus, { debounceMs: this.$options.focusDebounceMs }));
 
-        // todo clickByMe fires focus to body and doesn't return focus back to target
         const blur = ({ relatedTarget }: FocusEvent) => {
           if (this.#isOpened) {
-            const isFocused = (a: Element | null) => a && (a === this || this.includes(a));
-            const isToMe = isFocused(document.activeElement) || isFocused(relatedTarget as Element);
-            !isToMe && this.hide(this.#showCase, WUPPopup.HideCases.onFocusOut);
+            const isToMe = this === document.activeElement || this === relatedTarget;
+            const isToMeInside = !isToMe && this.includes(document.activeElement || relatedTarget);
+            !isToMe && !isToMeInside && this.hide(this.#showCase, WUPPopup.HideCases.onFocusOut);
           }
         };
 
@@ -321,13 +319,14 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
 
     const goUpdate = () => {
       this.#updatePosition();
-      this.#isOpened = true;
       // todo develop animation
-      this.style.opacity = "1";
       this.#frameId = window.requestAnimationFrame(goUpdate);
     };
 
+    this.style.display = "block";
     goUpdate();
+    this.style.opacity = "1";
+    this.#isOpened = true;
 
     if (wasHidden) {
       this.#onHideCallbacks = this.#onShowCallbacks.map((f) => f());
@@ -366,6 +365,8 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
 
     this.#frameId && window.cancelAnimationFrame(this.#frameId);
     this.style.opacity = "0";
+    this.style.display = "none";
+
     this.#isOpened = false;
     this.#showCase = undefined;
     this.#prevRect = undefined;
@@ -492,5 +493,3 @@ declare global {
     }
   }
 }
-
-// todo custom events $onClosing, $onShowing
