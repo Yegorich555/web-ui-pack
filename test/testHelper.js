@@ -1,3 +1,4 @@
+/* eslint-disable no-prototype-builtins */
 /* eslint-disable jest/no-export */
 // import React from "react";
 import { render, unmountComponentAtNode } from "react-dom";
@@ -70,6 +71,12 @@ export function testComponentFuncBind(Type) {
     it("each function are bound", () => {
       const notBoundFunc = protoNames.filter((a) => !objNames.includes(a));
       expect(notBoundFunc).toHaveLength(0);
+      // one more test
+      const notBoundFunc2 = protoNames.filter(
+        // re-binding impossible if it was previosly: https://stackoverflow.com/questions/35686850/determine-if-a-javascript-function-is-a-bound-function
+        (k) => typeof obj[k] === "function" && !obj[k].bind({}).hasOwnProperty("prototype")
+      );
+      expect(notBoundFunc2).toHaveLength(0);
     });
     obj.componentWillUnmount && obj.componentWillUnmount();
   });

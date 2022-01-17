@@ -1,17 +1,28 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-
 import onEvent, { onEventType } from "./helpers/onEvent";
 
 export default abstract class WUPBaseElement extends HTMLElement {
-  // watch-fix: https://github.com/microsoft/TypeScript/issues/34516
-  // static abstract defaults: Record<string, any>;
-
   /** Options that applied to element */
   abstract $options: Record<string, any>;
 
-  // todo autoBind all functions inside
+  constructor() {
+    super();
+
+    this.appendEvent = this.appendEvent.bind(this);
+    this.contains = this.contains.bind(this);
+    this.dispose = this.dispose.bind(this);
+
+    // autoBind all other functions
+    const p = this.constructor.prototype;
+    Object.getOwnPropertyNames(p).forEach((k) => {
+      if (k !== "constructor" && typeof Object.getOwnPropertyDescriptor(p, k)?.value === "function") {
+        // @ts-ignore
+        this[k] = this[k].bind(this);
+      }
+    });
+  }
 
   #isReady = false;
   /** Fired when element is added to document */
@@ -28,7 +39,7 @@ export default abstract class WUPBaseElement extends HTMLElement {
   /** Browser calls this method when the element is added to the document */
   protected connectedCallback() {
     // async requires otherwise attributeChangedCallback doesn't set immediately
-    setTimeout(() => this.gotReady());
+    setTimeout(this.gotReady);
   }
 
   /** Browser calls this method when the element is removed from the document;
@@ -59,7 +70,6 @@ export default abstract class WUPBaseElement extends HTMLElement {
     E extends HTMLElementEventMap & Record<keyof E, Event>
   >(...args: Parameters<onEventType<T, K, E>>): () => void {
     args[3] = <AddEventListenerOptions>{ passive: true, ...(args[3] as AddEventListenerOptions) };
-
     // self-removing when option.once
     if (args[3].once) {
       const listener = args[2];
