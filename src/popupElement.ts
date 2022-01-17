@@ -280,8 +280,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
 
     const wasHidden = !this.#isOpened;
     if (wasHidden) {
-      const e = new Event("$willShow", { cancelable: true, bubbles: false, composed: false });
-      (this as WUPPopup.Element).dispatchEvent(e);
+      const e = (this as WUPPopup.Element).fireEvent("$willShow", { cancelable: true });
       if (e.defaultPrevented) {
         return false;
       }
@@ -329,9 +328,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     if (wasHidden) {
       this.#onHideCallbacks = this.#onShowCallbacks.map((f) => f());
       // run async to dispose internal resources first: possible dev-side-issues
-      setTimeout(() => {
-        (this as WUPPopup.Element).dispatchEvent("$show", { cancelable: false, bubbles: false, composed: false });
-      });
+      setTimeout(() => (this as WUPPopup.Element).fireEvent("$show", { cancelable: false }));
     }
 
     return true;
@@ -353,9 +350,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
 
     const wasShown = this.#isOpened;
     if (wasShown) {
-      // todo restict event through typeof keyof
-      const e = new Event("$willHide", { cancelable: true, bubbles: false, composed: false });
-      (this as WUPPopup.Element).dispatchEvent(e);
+      const e = (this as WUPPopup.Element).fireEvent("$willHide", { cancelable: true });
       if (e.defaultPrevented) {
         return false;
       }
@@ -373,9 +368,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
       this.#onHideCallbacks.forEach((f) => f());
       this.#onHideCallbacks = [];
       // run async to dispose internal resources first: possible dev-side-issues
-      setTimeout(() => {
-        (this as WUPPopup.Element).dispatchEvent("$hide", { cancelable: false, bubbles: false, composed: false });
-      });
+      setTimeout(() => (this as WUPPopup.Element).fireEvent("$hide", { cancelable: false }));
     }
 
     return true;

@@ -71,7 +71,8 @@ export namespace WUPPopup {
     $hide: Event;
   }
 
-  export interface Element extends WUPBase.IBaseElement<PopupEventMap> {
+  export interface Element<T extends PopupEventMap & Record<keyof T, Event> = PopupEventMap>
+    extends WUPBase.IBaseElement<T> {
     /** Options. Call $show/$hide to reinit and apply option-changes after element is appended to document */
     $options: Options;
     /** Show popup */

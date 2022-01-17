@@ -62,6 +62,13 @@ export default abstract class WUPBaseElement extends HTMLElement {
     return super.dispatchEvent(ev as Event);
   }
 
+  /** Calls dispatchEvent and returns created event */
+  fireEvent<K extends keyof HTMLElementEventMap>(type: K, eventInit?: EventInit): Event {
+    const ev = new Event(type, eventInit);
+    super.dispatchEvent(ev as Event);
+    return ev;
+  }
+
   protected disposeLst: Array<() => void> = [];
   /** Add event listener and remove after component removed; @options.passive=true by default */
   appendEvent<
@@ -109,6 +116,10 @@ export type JSXCustomProps<T> = React.DetailedHTMLProps<
 >;
 
 export namespace WUPBase {
+  // export interface IEvent<T extends HTMLElementEventMap> extends Event {
+  //   // eslint-disable-next-line @typescript-eslint/no-misused-new
+  //   new (type: keyof T, eventInitDict?: EventInit): IEvent<T>;
+  // }
   export interface IBaseElement<E extends HTMLElementEventMap & Record<keyof E, Event>> extends WUPBaseElement {
     dispatchEvent(type: keyof E, eventInitDict?: EventInit): boolean;
     dispatchEvent(event: E[keyof E]): boolean;
@@ -133,6 +144,7 @@ export namespace WUPBase {
       options?: boolean | EventListenerOptions
     ): void;
 
+    fireEvent(type: keyof E, eventInitDict?: EventInit): Event;
     appendEvent<T extends keyof E, K extends HTMLElement | Document>(
       ...args: Parameters<onEventType<T, K, E>>
     ): () => void;
