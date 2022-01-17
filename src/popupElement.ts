@@ -53,9 +53,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     hoverHideTimeout: 500,
   };
 
-  get $options(): WUPPopup.Options {
-    return this.ctr.defaults;
-  }
+  $options = { ...this.ctr.defaults };
 
   $hide() {
     this.init();
@@ -205,6 +203,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
         };
         this.disposeLst.push(onFocusGot(t, focus, { debounceMs: this.$options.focusDebounceMs }));
 
+        // todo clickByMe fires focus to body and doesn't return focus back to target
         const blur = ({ relatedTarget }: FocusEvent) => {
           if (this.#isOpened) {
             const isFocused = (a: Element | null) => a && (a === this || this.includes(a));
