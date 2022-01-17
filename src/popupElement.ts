@@ -449,6 +449,12 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
       layout bug: Yscroll appears/disappears when display:flex; heigth:100vh > position:absolute; right:-10px */
     this.#prevRect = t.el.getBoundingClientRect();
   };
+
+  protected override dispose(): void {
+    this.#onHideCallbacks.forEach((f) => f());
+    this.#onHideCallbacks = [];
+    this.#onShowCallbacks = [];
+  }
 }
 
 // todo check inherritance with overriding options & re-assign to custom-tag
