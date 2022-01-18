@@ -77,7 +77,6 @@ describe("helper.onFocusLost", () => {
 
     // click outside
     await page.click("#c2", { delay: 5 });
-    expect(await page.evaluate(() => window.gotLeft)).toBe(0);
     await page.waitForTimeout(debounceMs + 5);
     expect(await page.evaluate(() => window.gotLeft)).toBe(1);
   });
