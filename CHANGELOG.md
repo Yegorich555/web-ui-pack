@@ -6,6 +6,7 @@
   - `stringPrettify`
   - `onEvent`
   - `onFocusLost`
+- Removed helper `detectFocusLeft` in favor `onFocusLost`
 
 ## 0.0.2 (Nov 30, 2021)
 

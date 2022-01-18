@@ -49,7 +49,7 @@ class PuppeteerEnvironment extends Env {
 
     this.global.pageExt = page;
     // declare empty document for avoiding wrong-test-bug in detectFocusLeft
-    this.global.document = { addEventListener: () => {} };
+    // this.global.document = { addEventListener: () => {} };
 
     // todo listen for console.error and console.warn
     // page.on('console', msg => console.log('PAGE LOG:', msg.text()));
