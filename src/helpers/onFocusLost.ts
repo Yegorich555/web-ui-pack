@@ -1,14 +1,3 @@
-/* todo unit-tests > cases:
-1. Set focus, Click outside - focusLost
-2. Click in, Click in again, Click on children (focusable/not focusable) - focus stay
-3. Click on dev.console - focusStay
-4. Click on label>input - focusStay
-5. MouseDown,mouseUp on label tied with input - focusStay, because label throughs focus to input
-6. MouseDown on label, mouseMove, mouseUp on label - focusLost
-7. Check options: once
-8. MemoryLeaking: Removing listener should unsubscribe for other ones
- */
-
 import onEvent from "./onEvent";
 
 let isMouseDown = false;
@@ -21,7 +10,9 @@ function setEvent(): void {
     return;
   }
 
-  const r1 = onEvent(document, "mousedown", ({ defaultPrevented }) => (isMouseDown = !defaultPrevented));
+  const r1 = onEvent(document, "mousedown", ({ defaultPrevented }) => (isMouseDown = !defaultPrevented), {
+    passive: true,
+  });
 
   const mouseup = () => {
     onMouseUp.forEach((f) => f());
@@ -29,15 +20,15 @@ function setEvent(): void {
     isMouseDown = false;
   };
   // click fires after mouseup but provides better mechanism
-  const r2 = onEvent(document, "click", mouseup);
+  const r2 = onEvent(document, "click", mouseup, { passive: true });
 
   if (!rstEvent) {
     rstEvent = () => {
-      --rstCnt;
-      if (rstCnt === 0) {
+      if (--rstCnt === 0) {
         onMouseUp.length = 0;
         r1();
         r2();
+        rstEvent = undefined;
       }
     };
   }
@@ -56,22 +47,22 @@ interface onFocusLostOptions extends AddEventListenerOptions {
 }
 
 /** Fires when element/children completely lost focus.
- * This event checks next focused/active element and isn't fired several times.
- * @param el HTMLElement to apply `.addEventListener`
+ * This event checks next focused/active element and isn't fired several times when focus goes between children.
+ * @param element HTMLElement to apply `.addEventListener`
  * @param listener Callback invoked on event
  * @param options OnFocusLostOptions
  * @return Callback with `.removeEventListener`. Call it to remove listener
  * */
 export default function onFocusLost(
-  el: HTMLElement,
+  element: HTMLElement,
   listener: (this: HTMLElement, ev: HTMLElementEventMap["focusout"]) => any,
   options?: onFocusLostOptions
 ): () => void {
   setEvent();
   const remove = () => {
     // eslint-disable-next-line no-use-before-define
-    el.removeEventListener("focusout", focusout);
-    rstEvent?.call(el);
+    element.removeEventListener("focusout", focusout);
+    rstEvent?.call(element);
   };
   const focusout = (e: FocusEvent) => {
     if (isMouseDown) {
@@ -81,14 +72,14 @@ export default function onFocusLost(
       onMouseUp.push(() => setTimeout(() => focusout(e), options?.debounceMs || 100));
       return;
     }
-    const isFocused = (a: Element | null) => a && (el === a || el.contains(a));
+    const isFocused = (a: Element | null) => a && (element === a || element.contains(a));
     const isStillFocused = e.relatedTarget instanceof Element && isFocused(e.relatedTarget);
     if (!isStillFocused && !isFocused(document.activeElement)) {
-      listener.call(el, e);
+      listener.call(element, e);
       options?.once && remove();
     }
   };
 
-  el.addEventListener("focusout", focusout, { ...options, once: false });
+  element.addEventListener("focusout", focusout, { ...options, once: false });
   return remove;
 }

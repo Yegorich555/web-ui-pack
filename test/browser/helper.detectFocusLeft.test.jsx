@@ -1,4 +1,4 @@
-const detectFocusLeft = require("web-ui-pack/helpers/detectFocusLeft");
+const detectFocusLeft = require("web-ui-pack/helpers/detectFocusLeft").default;
 
 beforeAll(async () => {
   await page.evaluate(() => {
