@@ -93,5 +93,23 @@ describe("helper.onFocusLost", () => {
     expect(await page.evaluate(() => window.gotLeft)).toBe(1);
   });
 
-  // todo focus via tab-keys
+  test("focus via tab-keys (keyboard)", async () => {
+    await page.evaluate(() => (window.gotLeft = 0));
+    await page.click("#c1");
+
+    // focus next
+    await page.keyboard.press("Tab");
+    expect(await page.evaluate(() => document.activeElement.id)).toBe("btn");
+    expect(await page.evaluate(() => window.gotLeft)).toBe(0);
+    // return focus back
+    await page.keyboard.down("Shift");
+    await page.keyboard.press("Tab");
+    await page.keyboard.up("Shift");
+    expect(await page.evaluate(() => document.activeElement.id)).toBe("c1");
+    expect(await page.evaluate(() => window.gotLeft)).toBe(0);
+    // focus out of label
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    expect(await page.evaluate(() => window.gotLeft)).toBe(1);
+  });
 });
