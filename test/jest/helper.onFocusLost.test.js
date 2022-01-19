@@ -23,7 +23,7 @@ afterEach(() => {
 
 describe("helper.onFocusLost", () => {
   test("memory leaking", () => {
-    const fn = jest.fn().mockClear();
+    const fn = jest.fn();
     const spyOn = jest.spyOn(document, "addEventListener");
     const spyOff = jest.spyOn(document, "removeEventListener");
     const spyOnEl = jest.spyOn(el, "addEventListener");
@@ -76,7 +76,7 @@ describe("helper.onFocusLost", () => {
   });
 
   test("ordinary behavior", () => {
-    const fn = jest.fn().mockClear();
+    const fn = jest.fn();
     const remove = onFocusLost(el, fn);
 
     el.focus();
@@ -136,7 +136,7 @@ describe("helper.onFocusLost", () => {
     const div = document.body.appendChild(document.createElement("div"));
     const in1 = div.appendChild(document.createElement("input"));
     const in2 = div.appendChild(document.createElement("input"));
-    const fn = jest.fn().mockClear();
+    const fn = jest.fn();
     const remove = onFocusLost(div, fn);
 
     in1.focus();
@@ -158,7 +158,7 @@ describe("helper.onFocusLost", () => {
   });
 
   test("simulate mouseDown > mouseUp", () => {
-    const fn = jest.fn().mockClear();
+    const fn = jest.fn();
     const remove = onFocusLost(el, fn, { debounceMs: 50 });
 
     el.focus();
