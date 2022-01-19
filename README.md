@@ -15,7 +15,7 @@ Web package with custom high scalable WebComponents and helpers
 - Focus on scalability (every component is developed to easy inherit and redefine/extend default logic)
 - Built-in css-variables to use custom color-themes
 - Optimized for webpack (in build included only in-use components and helpers)
-- Zero dependancy (we don't need to wait for bug-fixing on another packages)
+- Zero dependancy (we don't need to wait for bug-fixing of another packages)
 - Always 100% test coverage via e2e and unit tests (it's must-have and always will be so)
 
 ## Installing
