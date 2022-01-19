@@ -7,10 +7,7 @@ let el = document.createElement("input");
 let other = document.createElement("input");
 beforeAll(() => {
   el = document.body.appendChild(document.createElement("input"));
-  el.id = 1;
-
   other = document.body.appendChild(document.createElement("input"));
-  other.id = 2;
 });
 
 afterAll(() => {
@@ -53,13 +50,16 @@ describe("helper.onFocusLost", () => {
     spyOff.mockClear();
     spyOnEl.mockClear();
     spyOffEl.mockClear();
-    onFocusLost(el, fn, { once: true });
+    onFocusLost(el, fn, { once: true, debounceMs: 1 });
 
     el.focus();
     other.dispatchEvent(new Event("mousedown", { bubbles: true }));
+    el.blur();
     other.dispatchEvent(new Event("mouseup", { bubbles: true }));
     other.dispatchEvent(new Event("click", { bubbles: true }));
     other.focus();
+    jest.advanceTimersToNextTimer();
+    expect(fn).toBeCalledTimes(1);
 
     expect(spyOn).toBeCalled();
     expect(spyOnEl).toBeCalled();
@@ -112,20 +112,24 @@ describe("helper.onFocusLost", () => {
     other.focus();
     expect(fn).not.toBeCalled();
     expect(fn2).not.toBeCalled();
-    // other complex click-focus tests see in ./browser/helper.onFocus.test
+    // other complex click-focus tests see in ./browser/helper.onFocusLost.test
   });
 
   // case possible when user moves focus into dev-console
   test("focusout but activeElement stay", () => {
+    // todo it doesn't work because globals are different
     const { document } = new JSDOM().window;
     const in1 = document.body.appendChild(document.createElement("input"));
     const in2 = document.body.appendChild(document.createElement("input"));
+    // checking if new DOM works properly
+    // expect(in1 instanceof Node).toBeTruthy();
+    // expect(in2 instanceof Node).toBeTruthy();
     in2.focus();
     expect(document.activeElement).toBe(in2);
 
     const fn = jest.fn();
     const remove = onFocusLost(in1, fn);
-    // hook for simulation for case when activeElement is not changed
+    // hook for simulation case when activeElement is not changed
     Object.defineProperty(document, "activeElement", {
       get() {
         return in1;
