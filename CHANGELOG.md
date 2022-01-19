@@ -5,6 +5,7 @@
 - Added [helpers](https://github.com/Yegorich555/web-ui-pack#helpers)
   - `stringPrettify`
   - `onEvent`
+  - `onFocusGot`
   - `onFocusLost`
 - Removed helper `detectFocusLeft` in favor `onFocusLost`
 
