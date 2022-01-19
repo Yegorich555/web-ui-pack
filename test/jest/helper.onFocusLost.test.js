@@ -1,22 +1,23 @@
-import { JSDOM } from "jsdom";
 import onFocusLost from "web-ui-pack/helpers/onFocusLost";
 
 jest.useFakeTimers();
 
 let el = document.createElement("input");
 let other = document.createElement("input");
-beforeAll(() => {
+
+beforeEach(() => {
   el = document.body.appendChild(document.createElement("input"));
   other = document.body.appendChild(document.createElement("input"));
 });
 
-afterAll(() => {
+afterEach(() => {
   el.remove();
   el = null;
   other.remove();
   other = null;
   jest.clearAllTimers();
   jest.clearAllMocks();
+  jest.restoreAllMocks();
   document.body.innerHTML = "";
 });
 
@@ -117,29 +118,17 @@ describe("helper.onFocusLost", () => {
 
   // case possible when user moves focus into dev-console
   test("focusout but activeElement stay", () => {
-    // todo it doesn't work because globals are different
-    const { document } = new JSDOM().window;
     const in1 = document.body.appendChild(document.createElement("input"));
-    const in2 = document.body.appendChild(document.createElement("input"));
-    // checking if new DOM works properly
-    // expect(in1 instanceof Node).toBeTruthy();
-    // expect(in2 instanceof Node).toBeTruthy();
-    in2.focus();
-    expect(document.activeElement).toBe(in2);
+    in1.focus();
+    expect(document.activeElement).toBe(in1);
 
     const fn = jest.fn();
     const remove = onFocusLost(in1, fn);
     // hook for simulation case when activeElement is not changed
-    Object.defineProperty(document, "activeElement", {
-      get() {
-        return in1;
-      },
-    });
-    expect(document.activeElement).toBe(in1);
-    in2.focus();
+    jest.spyOn(document, "activeElement", "get").mockImplementation(() => in1);
+    in1.blur();
     expect(document.activeElement).toBe(in1);
     expect(fn).not.toBeCalled();
-
     remove();
   });
 
