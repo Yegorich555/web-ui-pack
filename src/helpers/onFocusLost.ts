@@ -72,8 +72,8 @@ export default function onFocusLost(
       onMouseUp.push(() => setTimeout(() => focusout(e), options?.debounceMs || 100));
       return;
     }
-    const isFocused = (a: Element | null) => a && (element === a || element.contains(a));
-    const isStillFocused = e.relatedTarget instanceof Element && isFocused(e.relatedTarget);
+    const isFocused = (a: Node | null) => a && (element === a || element.contains(a));
+    const isStillFocused = e.relatedTarget instanceof Node && isFocused(e.relatedTarget);
     if (!isStillFocused && !isFocused(document.activeElement)) {
       listener.call(element, e);
       options?.once && remove();

@@ -148,6 +148,12 @@ describe("helper.onFocusLost", () => {
     expect(document.activeElement).not.toBe(in2);
     expect(fn).toBeCalledTimes(1);
 
+    in1.focus();
+    expect(document.activeElement).toBe(in1);
+    in1.blur();
+    expect(document.activeElement).not.toBe(in1);
+    expect(fn).toBeCalledTimes(2);
+
     remove();
   });
 
