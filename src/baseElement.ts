@@ -91,7 +91,8 @@ export default abstract class WUPBaseElement extends HTMLElement {
     this.disposeLst.push(r);
     const remove = () => {
       r();
-      this.disposeLst.splice(this.disposeLst.indexOf(r), 1);
+      const i = this.disposeLst.indexOf(r);
+      i !== -1 && this.disposeLst.splice(i, 1);
     };
 
     return remove;
