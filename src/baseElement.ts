@@ -3,25 +3,25 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import onEvent, { onEventType } from "./helpers/onEvent";
 
+/** Basic abstract class for every component in web-ui-pack */
 export default abstract class WUPBaseElement extends HTMLElement {
   /** Options that applied to element */
   abstract $options: Record<string, any>;
 
   constructor() {
     super();
-
-    this.appendEvent = this.appendEvent.bind(this);
-    this.includes = this.includes.bind(this);
-    this.dispose = this.dispose.bind(this);
-
-    // autoBind all other functions
-    const p = this.constructor.prototype;
-    Object.getOwnPropertyNames(p).forEach((k) => {
-      if (k !== "constructor" && typeof Object.getOwnPropertyDescriptor(p, k)?.value === "function") {
-        // @ts-ignore
-        this[k] = this[k].bind(this);
-      }
-    });
+    // autoBind functions
+    const bindAll = (p: unknown) => {
+      Object.getOwnPropertyNames(p).forEach((s) => {
+        const k = s as keyof Omit<WUPBaseElement, keyof HTMLElement>;
+        if (s !== "constructor" && typeof Object.getOwnPropertyDescriptor(p, s)?.value === "function") {
+          this[k] = this[k].bind(this);
+        }
+      });
+    };
+    bindAll(WUPBaseElement.prototype);
+    // todo it doesn't work for middle prototype between WUPBaseElement > Middle > PopupElement
+    // bindAll(Object.getPrototypeOf(this));
   }
 
   #isReady = false;

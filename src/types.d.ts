@@ -7,4 +7,5 @@ type ObjectKeys<T> =
 
 interface ObjectConstructor {
   keys<T>(o: T): ObjectKeys<T>;
+  getOwnPropertyNames<T>(o: T): (keyof T | "constructor")[];
 }
