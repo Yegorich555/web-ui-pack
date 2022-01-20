@@ -39,62 +39,90 @@ export function wrapConsoleWarn(fn) {
   return mockConsole;
 }
 
-export function testComponentFuncBind(Type) {
+/** @type Set<string> */
+const skipNames = new Set();
+Object.getOwnPropertyNames(HTMLElement.prototype).forEach((a) => {
+  if (typeof Object.getOwnPropertyDescriptor(HTMLElement.prototype, a).value === "function") {
+    skipNames.add(a);
+  }
+});
+
+function findOwnFunctions(obj, proto) {
+  const result = Object.getOwnPropertyNames(proto)
+    .filter((a) => !skipNames.has(a))
+    .filter((a) => typeof Object.getOwnPropertyDescriptor(proto, a).value === "function")
+    .map((k) => ({
+      name: k,
+      isArrow: false,
+      isBound: obj[k].name.startsWith("bound ") && !obj[k].hasOwnProperty("prototype"),
+    }));
+  return result;
+}
+
+export function findAllFunctions(obj) {
+  // const proto = Object.getPrototypeOf(obj);
+  // const result = findOwnFunctions(obj, proto);
+  /** @type ReturnType<typeof findOwnFunctions(obj, proto)> */
+  const result = [];
+  const search = (v) => {
+    const proto = Object.getPrototypeOf(v);
+    if (!!proto && !Object.prototype.hasOwnProperty.call(proto, "__proto__")) {
+      result.push(...findOwnFunctions(obj, proto));
+      search(proto);
+    }
+  };
+
+  search(obj);
+
+  // find arrow functions
+  const arrowRegex = /^[^{]+?=>/;
+  Object.getOwnPropertyNames(obj)
+    .filter((a) => !skipNames.has(a))
+    .filter((a) => typeof Object.getOwnPropertyDescriptor(obj, a).value === "function")
+    .filter((a) => arrowRegex.test(obj[a].toString()))
+    .forEach((k) =>
+      result.push({
+        name: k,
+        isArrow: true,
+        isBound: true, // it's not actually true but for testing it's ok
+      })
+    );
+
+  return {
+    all: result,
+    names: result.map((r) => r.name),
+    arrow: result.filter((r) => r.isArrow).map((r) => r.name),
+    bound: result.filter((r) => r.isBound && !r.isArrow).map((r) => r.name),
+    notBound: result.filter((r) => !r.isBound && !r.isArrow).map((r) => r.name),
+  };
+}
+
+export function testComponentFuncBind(obj) {
   describe("componentFuncBind", () => {
-    const skipNames = [
-      "constructor",
-      "componentDidMount",
-      "componentDidCatch",
-      "componentWillUnmount",
-      "shouldComponentUpdate",
-      "componentDidUpdate",
-      "render",
-      "toJSON",
-      "setDomEl",
-    ];
-    const arrowRegex = /^[^{]+?=>/;
-    const protoNames = Object.getOwnPropertyNames(Type.prototype)
-      .filter((a) => !skipNames.includes(a))
-      .filter((a) => typeof Object.getOwnPropertyDescriptor(Type.prototype, a).value === "function");
-
-    const obj = new Type({});
-    const objNames = Object.getOwnPropertyNames(obj)
-      .filter((a) => !skipNames.includes(a))
-      .filter((a) => typeof Object.getOwnPropertyDescriptor(obj, a).value === "function");
-
+    const fns = findAllFunctions(obj);
     it("no arrow functions", () => {
       // doesn't for work for deep-inheritted: const arrowFunc = objNames.filter(a => !protoNames.includes(a));
-      const arrowFunc = objNames.filter((a) => arrowRegex.test(obj[a].toString()));
-      expect(arrowFunc).toHaveLength(0);
+      expect(fns.arrow).toHaveLength(0);
     });
 
     it("each function are bound", () => {
-      const notBoundFunc = protoNames.filter((a) => !objNames.includes(a));
-      expect(notBoundFunc).toHaveLength(0);
-      // one more test
-      const notBoundFunc2 = protoNames.filter(
-        // re-binding impossible if it was previosly: https://stackoverflow.com/questions/35686850/determine-if-a-javascript-function-is-a-bound-function
-        (k) => typeof obj[k] === "function" && !obj[k].bind({}).hasOwnProperty("prototype")
-      );
-      expect(notBoundFunc2).toHaveLength(0);
+      expect(fns.notBound).toHaveLength(0);
     });
-    obj.componentWillUnmount && obj.componentWillUnmount();
   });
 }
 
+const skipNamesStatic = new Set([
+  "length", //
+  "prototype",
+  "name",
+]);
+
 export function testStaticInheritence(Type) {
   describe("componentStatic", () => {
-    const skipNames = [
-      "length", //
-      "prototype",
-      "name",
-      "common",
-      "excludedRenderProps",
-    ];
     const stat = Object.getOwnPropertyNames(Type) //
-      .filter((a) => !skipNames.includes(a));
+      .filter((a) => !skipNamesStatic.includes(a));
     const statProto = Object.getOwnPropertyNames(Object.getPrototypeOf(Type)) //
-      .filter((a) => !skipNames.includes(a));
+      .filter((a) => !skipNamesStatic.includes(a));
 
     it("overrides static", () => {
       const arrowNotOverrided = statProto.filter((a) => !stat.includes(a));
