@@ -1,4 +1,4 @@
-// export * from "./popupElement";
+export { default as WUPBaseElement } from "./baseElement";
 
 export { default as focusFirst } from "./helpers/focusFirst";
 export { default as nestedProperty } from "./helpers/nestedProperty";

@@ -14,7 +14,10 @@ export default abstract class WUPBaseElement extends HTMLElement {
     const bindAll = (p: unknown) => {
       Object.getOwnPropertyNames(p).forEach((s) => {
         const k = s as keyof Omit<WUPBaseElement, keyof HTMLElement>;
-        if (s !== "constructor" && typeof Object.getOwnPropertyDescriptor(p, s)?.value === "function") {
+        if (
+          s !== "constructor" &&
+          typeof (Object.getOwnPropertyDescriptor(p, s) as PropertyDescriptor).value === "function"
+        ) {
           this[k] = this[k].bind(this);
         }
       });
@@ -90,9 +93,11 @@ export default abstract class WUPBaseElement extends HTMLElement {
     const r = onEvent(...args);
     this.disposeLst.push(r);
     const remove = () => {
-      r();
       const i = this.disposeLst.indexOf(r);
-      i !== -1 && this.disposeLst.splice(i, 1);
+      if (i !== -1) {
+        r();
+        this.disposeLst.splice(i, 1);
+      }
     };
 
     return remove;

@@ -40,7 +40,7 @@ export function wrapConsoleWarn(fn) {
 }
 
 /** @type Set<string> */
-const skipNames = new Set();
+const skipNames = new Set(["apply", "bind", "call", "toString"]);
 Object.getOwnPropertyNames(HTMLElement.prototype).forEach((a) => {
   if (typeof Object.getOwnPropertyDescriptor(HTMLElement.prototype, a).value === "function") {
     skipNames.add(a);
