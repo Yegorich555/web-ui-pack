@@ -20,8 +20,8 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     return this.constructor as typeof WUPPopupElement;
   }
 
-  static placements = PopupPlacements;
-  static placementAttrs = {
+  static $placements = PopupPlacements;
+  static $placementAttrs = {
     "top-start": PopupPlacements.top.start.adjust,
     "top-middle": PopupPlacements.top.middle.adjust,
     "top-end": PopupPlacements.top.end.adjust,
@@ -37,11 +37,11 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
   };
 
   /** Default options. Change it to configure default behavior */
-  static defaults: Omit<WUPPopup.Options, "target"> = {
-    placement: WUPPopupElement.placements.top.middle,
+  static $defaults: Omit<WUPPopup.Options, "target"> = {
+    placement: WUPPopupElement.$placements.top.middle,
     placementAlt: [
-      WUPPopupElement.placements.top.middle.adjust, //
-      WUPPopupElement.placements.bottom.middle.adjust,
+      WUPPopupElement.$placements.top.middle.adjust, //
+      WUPPopupElement.$placements.bottom.middle.adjust,
     ],
     offset: [0, 0],
     toFitElement: document.body,
@@ -52,11 +52,11 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     hoverHideTimeout: 500,
   };
 
-  // #todo testCase: options properly clones defaults
+  // todo placement-issue: rightMiddle doesn't work if right side will reduce ???
   $options: WUPPopup.Options = {
-    ...this.ctr.defaults,
-    placementAlt: [...this.ctr.defaults.placementAlt],
-    offset: [...this.ctr.defaults.offset],
+    ...this.ctr.$defaults,
+    placementAlt: [...this.ctr.$defaults.placementAlt],
+    offset: [...this.ctr.$defaults.offset],
   };
 
   $hide() {
@@ -110,7 +110,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
   #onHideCallbacks: Array<() => void> = [];
   #isOpened = false;
   protected init() {
-    this.dispose(); // remove previously added event
+    this.dispose(); // remove previously added events
 
     const { showCase } = this.$options;
     if (!showCase) {
@@ -289,8 +289,8 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     this.#isOpened && this.hide(this.#showCase, WUPPopup.HideCases.onShowAgain);
     this.#showCase = showCase;
 
-    const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.placementAttrs;
-    this.$options.placement = (pAttr && WUPPopupElement.placementAttrs[pAttr]) || this.$options.placement;
+    const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.$placementAttrs;
+    this.$options.placement = (pAttr && WUPPopupElement.$placementAttrs[pAttr]) || this.$options.placement;
 
     // it works only when styles is defined before popup is open
     const style = getComputedStyle(this);
@@ -345,7 +345,6 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
 
   /** Hide popup. @showCase as previous reason of show(); @hideCase as reason of hide() */
   protected hide(showCase: WUPPopup.ShowCases | undefined, hideCase: WUPPopup.HideCases): boolean {
-    console.warn("willHide", hideCase);
     if (!this.canHide(showCase, hideCase)) return false;
 
     const wasShown = this.#isOpened;
@@ -434,7 +433,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     });
     !isOk && console.error(`${this.tagName}. Impossible to place popup without overflow`);
 
-    console.warn(pos);
+    // console.warn(pos);
     // transform has performance benefits in comparison with positioning
     this.style.transform = `translate(${pos.left}px, ${pos.top}px)`;
     // we can't remove maxWidth, maxHeight because maxWidth can affect on maxHeight and calculations will be wrong
@@ -445,6 +444,11 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
       layout bug: Yscroll appears/disappears when display:flex; heigth:100vh > position:absolute; right:-10px */
     this.#prevRect = t.el.getBoundingClientRect();
   };
+
+  protected override gotRemoved() {
+    super.gotRemoved();
+    this.#isOpened = false;
+  }
 
   protected override dispose(): void {
     this.#onHideCallbacks.forEach((f) => f());
@@ -471,7 +475,7 @@ declare global {
            *  */
           target: string;
           /** Placement rule (relative to target); applied on show(). Call show() again to apply changed options */
-          placement: keyof typeof WUPPopupElement.placementAttrs;
+          placement: keyof typeof WUPPopupElement.$placementAttrs;
           /** SyntheticEvent is not supported. Use ref.addEventListener('$show') instead */
           onShow: never;
           /** SyntheticEvent is not supported. Use ref.addEventListener('$hide') instead */

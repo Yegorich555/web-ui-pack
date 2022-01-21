@@ -250,5 +250,3 @@ Object.keys(PopupPlacements).forEach((kp) => {
     v.adjust = (t, me, fit) => popupAdjust.call(v(t, me, fit), me, fit);
   });
 });
-
-console.warn(PopupPlacements);
