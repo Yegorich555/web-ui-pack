@@ -15,7 +15,7 @@ export default abstract class WUPBaseElement extends HTMLElement {
       const p = Object.getPrototypeOf(t);
       if (p !== HTMLElement.prototype) {
         Object.getOwnPropertyNames(p).forEach((s) => {
-          const k = s as keyof Omit<WUPBaseElement, keyof HTMLElement>;
+          const k = s as keyof Omit<WUPBaseElement, keyof HTMLElement | "$isReady">;
           if (
             s !== "constructor" &&
             typeof (Object.getOwnPropertyDescriptor(p, s) as PropertyDescriptor).value === "function"
@@ -27,6 +27,11 @@ export default abstract class WUPBaseElement extends HTMLElement {
       }
     };
     bindAll(this);
+  }
+
+  /** Returns true if element is appended (result of setTimeout on connectedCallback) */
+  get $isReady() {
+    return this.#isReady;
   }
 
   #isReady = false;

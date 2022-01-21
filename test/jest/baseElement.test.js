@@ -89,13 +89,14 @@ describe("baseElement", () => {
   });
 
   test("fireEvent", () => {
-    let listenClick = 0;
-    el.addEventListener("click", () => (listenClick += 1));
+    const fn = jest.fn();
+    el.addEventListener("click", fn);
 
     const ev = el.fireEvent("click", { bubbles: true });
     expect(ev).toBeInstanceOf(Event);
     expect(ev.bubbles).toBeTruthy();
-    expect(listenClick).toBe(1);
+    expect(fn).toHaveBeenCalledTimes(1);
+    expect(fn.mock.calls[0][0]).toBe(ev);
   });
 
   test("appendEvent", () => {
@@ -197,6 +198,7 @@ describe("baseElement", () => {
     el.addEventListener("click", fn);
     el.dispatchEvent(new Event("click"));
     expect(fn).toBeCalledTimes(1);
+    expect(fn.mock.calls[0][0]).toBeInstanceOf(Event);
 
     expect(() => el.dispatchEvent("click")).not.toThrow();
     expect(fn).toBeCalledTimes(2);
