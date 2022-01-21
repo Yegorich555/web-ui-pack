@@ -60,13 +60,20 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
   };
 
   $hide() {
-    this.init();
-    return this.hide(this.#showCase, WUPPopup.HideCases.onFireHide);
+    const f = () => this.#isOpened && this.hide(this.#showCase, WUPPopup.HideCases.onFireHide);
+    // timeout - possible when el is created but not attached to document yet
+    // eslint-disable-next-line no-unused-expressions
+    this.$isReady ? f() : setTimeout(f);
   }
 
   $show() {
-    this.init();
-    return this.show(WUPPopup.ShowCases.always);
+    if (this.$isReady) {
+      this.init(); // required to reinit assuming options are changed
+      this.show(WUPPopup.ShowCases.always);
+    } else {
+      // possible when el is created but not attached to document yet
+      setTimeout(() => this.show(WUPPopup.ShowCases.always));
+    }
   }
 
   get $isOpened(): boolean {
@@ -272,7 +279,11 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
 
   /** Shows popup if target defined; returns true if successful */
   protected show(showCase: WUPPopup.ShowCases): boolean {
-    console.warn("willShow", showCase);
+    if (!this.$isReady) {
+      console.error(`${this.tagName}. Impossible to show. Element is not appended to document`);
+      return false;
+    }
+
     this.$options.target = this.$options.target || this.#defineTarget();
     if (!this.canShow(showCase)) {
       return false;

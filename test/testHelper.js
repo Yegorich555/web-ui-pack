@@ -27,6 +27,16 @@ export function unMockConsoleWarn() {
   console.warn = origConsoleWarn;
 }
 
+const origConsoleError = console.error;
+export function mockConsoleError() {
+  console.error = jest.fn();
+  return console.error;
+}
+
+export function unMockConsoleError() {
+  console.error = origConsoleError;
+}
+
 export function wrapConsoleWarn(fn) {
   const mockConsole = mockConsoleWarn();
   try {
