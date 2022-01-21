@@ -10,21 +10,23 @@ export default abstract class WUPBaseElement extends HTMLElement {
 
   constructor() {
     super();
-    // autoBind functions
-    const bindAll = (p: unknown) => {
-      Object.getOwnPropertyNames(p).forEach((s) => {
-        const k = s as keyof Omit<WUPBaseElement, keyof HTMLElement>;
-        if (
-          s !== "constructor" &&
-          typeof (Object.getOwnPropertyDescriptor(p, s) as PropertyDescriptor).value === "function"
-        ) {
-          this[k] = this[k].bind(this);
-        }
-      });
+    // autoBind functions (recursive until HMTLElement)
+    const bindAll = (t: unknown) => {
+      const p = Object.getPrototypeOf(t);
+      if (p !== HTMLElement.prototype) {
+        Object.getOwnPropertyNames(p).forEach((s) => {
+          const k = s as keyof Omit<WUPBaseElement, keyof HTMLElement>;
+          if (
+            s !== "constructor" &&
+            typeof (Object.getOwnPropertyDescriptor(p, s) as PropertyDescriptor).value === "function"
+          ) {
+            this[k] = this[k].bind(this);
+          }
+        });
+        bindAll(p);
+      }
     };
-    bindAll(WUPBaseElement.prototype);
-    // todo it doesn't work for middle prototype between WUPBaseElement > Middle > PopupElement
-    // bindAll(Object.getPrototypeOf(this));
+    bindAll(this);
   }
 
   #isReady = false;

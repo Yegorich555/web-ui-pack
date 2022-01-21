@@ -42,7 +42,7 @@ export function wrapConsoleWarn(fn) {
 const skipNames = new Set(["apply", "bind", "call", "toString", "click", "focus", "blur"]);
 function setHTMLProps(t) {
   const proto = Object.getPrototypeOf(t);
-  if (!!proto && !Object.prototype.hasOwnProperty.call(proto, "__proto__")) {
+  if (proto && !Object.prototype.hasOwnProperty.call(proto, "__proto__")) {
     Object.getOwnPropertyNames(proto).forEach((a) => {
       if (typeof Object.getOwnPropertyDescriptor(proto, a).value === "function") {
         skipNames.add(a);
