@@ -39,13 +39,19 @@ export function wrapConsoleWarn(fn) {
   return mockConsole;
 }
 
-/** @type Set<string> */
-const skipNames = new Set(["apply", "bind", "call", "toString"]);
-Object.getOwnPropertyNames(HTMLElement.prototype).forEach((a) => {
-  if (typeof Object.getOwnPropertyDescriptor(HTMLElement.prototype, a).value === "function") {
-    skipNames.add(a);
+const skipNames = new Set(["apply", "bind", "call", "toString", "click", "focus", "blur"]);
+function setHTMLProps(t) {
+  const proto = Object.getPrototypeOf(t);
+  if (!!proto && !Object.prototype.hasOwnProperty.call(proto, "__proto__")) {
+    Object.getOwnPropertyNames(proto).forEach((a) => {
+      if (typeof Object.getOwnPropertyDescriptor(proto, a).value === "function") {
+        skipNames.add(a);
+      }
+    });
+    setHTMLProps(proto);
   }
-});
+}
+setHTMLProps(HTMLElement.prototype);
 
 function findOwnFunctions(obj, proto) {
   const result = Object.getOwnPropertyNames(proto)
