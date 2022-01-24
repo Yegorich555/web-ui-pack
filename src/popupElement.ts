@@ -68,7 +68,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
 
   $show() {
     if (this.$isReady) {
-      this.init(); // required to reinit assuming options are changed
+      this.init(true); // required to reinit assuming options are changed
       this.show(WUPPopup.ShowCases.always);
     } else {
       // possible when el is created but not attached to document yet
@@ -108,7 +108,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     root.appendChild(document.createElement("slot"));
   }
 
-  override gotReady() {
+  protected override gotReady() {
     super.gotReady();
     this.init();
   }
@@ -116,11 +116,12 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
   #onShowCallbacks: Array<() => () => void> = [];
   #onHideCallbacks: Array<() => void> = [];
   #isOpened = false;
-  protected init() {
+  /** Fired after gotReady() and $show() (to reinit according to options) */
+  protected init(preventShow = false) {
     this.dispose(); // remove previously added events
 
     const { showCase } = this.$options;
-    if (!showCase) {
+    if (!showCase && !preventShow) {
       this.show(WUPPopup.ShowCases.always);
       return;
     }
@@ -283,13 +284,14 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
       console.error(`${this.tagName}. Impossible to show. Element is not appended to document`);
       return false;
     }
+    const wasHidden = !this.#isOpened;
+    this.#isOpened && this.hide(this.#showCase, WUPPopup.HideCases.onShowAgain);
 
     this.$options.target = this.$options.target || this.#defineTarget();
     if (!this.canShow(showCase)) {
       return false;
     }
 
-    const wasHidden = !this.#isOpened;
     if (wasHidden) {
       const e = (this as WUPPopup.Element).fireEvent("$willShow", { cancelable: true });
       if (e.defaultPrevented) {
@@ -297,7 +299,6 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
       }
     }
 
-    this.#isOpened && this.hide(this.#showCase, WUPPopup.HideCases.onShowAgain);
     this.#showCase = showCase;
 
     const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.$placementAttrs;

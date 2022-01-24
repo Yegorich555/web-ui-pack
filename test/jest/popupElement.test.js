@@ -137,7 +137,18 @@ describe("popupElement", () => {
     expect(onShow).not.toBeCalled(); // because target is null
     expect(err).toBeCalledTimes(1); // expected that user will be notified
 
-    // todo onHide event expected if item is hidden after $onShow not succesful
+    // onHide expected by $show-success > $show-failed
+    a.$options.target = trg;
+    a.$show();
+    expect(a.$isOpened).toBeTruthy();
+    onHide.mockClear();
+    a.$options.target = null;
+    const spyShow = jest.spyOn(a, "show").mockClear();
+    a.$show(); // to apply options
+    expect(spyShow).toBeCalledTimes(1);
+    expect(a.$isOpened).toBeFalsy(); // because target is not defined
+    jest.advanceTimersToNextTimer(); // onHide has timeout
+    expect(onHide).toBeCalledTimes(1); // because it was shown with target and hidden with the next show without target
 
     // try createElement when target is null by init
     err.mockClear();
@@ -177,13 +188,13 @@ describe("popupElement", () => {
     document.body.appendChild(el);
     jest.advanceTimersToNextTimer();
     expect(el.$show).not.toThrow();
-    expect(el.$isOpened).toBeTruthy(); // because $show() is async method
+    expect(el.$isOpened).toBeTruthy();
   });
 
-  // todo implewment
+  // todo implement
   // test("attr `target`", () => {});
 
-  // todo implewment
+  // todo implement
   // test("$hide()/$show()", () => {
   //   el.$options.showCase = 0; // always
   // });
