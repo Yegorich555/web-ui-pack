@@ -121,8 +121,8 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     this.dispose(); // remove previously added events
 
     const { showCase } = this.$options;
-    if (!showCase && !preventShow) {
-      this.show(WUPPopup.ShowCases.always);
+    if (!showCase) {
+      !preventShow && this.show(WUPPopup.ShowCases.always);
       return;
     }
 

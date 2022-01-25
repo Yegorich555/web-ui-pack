@@ -161,6 +161,21 @@ describe("popupElement", () => {
     expect(err).toBeCalledTimes(1); // no target byOpen > console.warn
   });
 
+  test("$hide()/$show()", () => {
+    el.$options.showCase = 0; // always
+    expect(el.$isOpened).toBeTruthy();
+    el.$hide();
+    expect(el.$isOpened).toBeFalsy();
+    el.$show();
+    expect(el.$isOpened).toBeTruthy();
+
+    el.remove();
+    el.$hide();
+    el.$show();
+    expect(el.$isOpened).toBeFalsy();
+    // other cases in test(`options.$target`) and test(`remove`)
+  });
+
   // todo implement
   // test("$options.showCase", () => {});
 
@@ -193,9 +208,4 @@ describe("popupElement", () => {
 
   // todo implement
   // test("attr `target`", () => {});
-
-  // todo implement
-  // test("$hide()/$show()", () => {
-  //   el.$options.showCase = 0; // always
-  // });
 });
