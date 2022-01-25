@@ -200,7 +200,8 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
         };
 
         appendEvent(t, "mouseenter", () => ev(this.$options.hoverShowTimeout, true));
-        onShowEvent(t, "mouseleave", () => ev(this.$options.hoverHideTimeout, false));
+        // with onShowEvent it doesn't work properly (because filtered by timeout)
+        appendEvent(t, "mouseleave", () => ev(this.$options.hoverHideTimeout, false));
       }
 
       // onFocus

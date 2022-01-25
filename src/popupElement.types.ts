@@ -52,11 +52,11 @@ export namespace WUPPopup {
      *
      * Default is PopupShowCases.always */
     showCase: ShowCases;
-    /** Timeout in ms before popup shows on hover of target; Default is 200ms */
+    /** Timeout in ms before popup shows on hover of target (for ShowCases.onHover); Default is 200ms */
     hoverShowTimeout: number;
-    /** Timeout in ms before popup hides on mouse-leave of target; Default is 500ms  */
+    /** Timeout in ms before popup hides on mouse-leave of target (for ShowCases.onHover); Default is 500ms  */
     hoverHideTimeout: number;
-    /** Debounce option for onFocustLost event; More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost; Default is 100ms */
+    /** Debounce option for onFocustLost event (for ShowCases.onFocus); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost; Default is 100ms */
     focusDebounceMs?: number;
   }
 

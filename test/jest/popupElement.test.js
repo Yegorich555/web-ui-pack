@@ -6,14 +6,6 @@ jest.useFakeTimers();
 let el;
 /** @type HTMLElement */
 let trg; // target for popup
-beforeAll(() => {
-  // todo it doesn't work
-  // h.mockConsoleWarn();
-});
-
-afterAll(() => {
-  // h.unMockConsoleWarn();
-});
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -65,12 +57,13 @@ describe("popupElement", () => {
     Object.keys(prev).forEach((k) => {
       WUPPopupElement.$defaults[k] = defVal;
     });
+    /** @type typeof el */
     const a = document.createElement(el.tagName);
     const skipped = Object.keys(a.$options) //
       .filter((k) => a.$options[k] !== defVal && !(a.$options[k]?.length === 1 && a.$options[k][0] === 3456));
     expect(skipped).toHaveLength(0);
 
-    // rollback
+    // it rollback to previous
     WUPPopupElement.$defaults = prev;
   });
 
@@ -161,6 +154,48 @@ describe("popupElement", () => {
     expect(err).toBeCalledTimes(1); // no target byOpen > console.warn
   });
 
+  test("$options.showCase", () => {
+    el.$options.target = trg;
+    // always
+    el.remove();
+    document.body.appendChild(el);
+    el.$options.showCase = 0; // always
+    jest.advanceTimersToNextTimer(); // onReady has timeout
+    expect(el.$isOpened).toBeTruthy();
+
+    // only hover
+    el.remove();
+    document.body.appendChild(el);
+    el.$options.showCase = 1; // onHover
+    jest.advanceTimersToNextTimer(); // onReady has timeout
+    expect(el.$isOpened).toBeFalsy();
+
+    const show = jest.spyOn(el, "show");
+    trg.dispatchEvent(new Event("mouseenter"));
+    jest.advanceTimersByTime(el.$options.hoverShowTimeout); // event listener has timeout
+    expect(show).toBeCalledTimes(1);
+    expect(el.$isOpened).toBeTruthy();
+
+    trg.dispatchEvent(new Event("mouseleave"));
+    jest.advanceTimersByTime(el.$options.hoverHideTimeout); // event listener has timeout
+    expect(el.$isOpened).toBeFalsy();
+
+    show.mockClear();
+    trg.dispatchEvent(new Event("mouseenter"));
+    trg.dispatchEvent(new Event("mouseleave"));
+    trg.dispatchEvent(new Event("mouseenter"));
+    trg.dispatchEvent(new Event("mouseleave"));
+    jest.advanceTimersToNextTimer(el.$options.hoverShowTimeout + el.$options.hoverHideTimeout); // event listener has timeout
+    expect(el.$isOpened).toBeFalsy();
+    expect(show).not.toBeCalled();
+
+    // todo onlyFocus
+    // todo onlyClick
+    // todo mix all
+  });
+
+  // todo check all options
+
   test("$hide()/$show()", () => {
     el.$options.showCase = 0; // always
     expect(el.$isOpened).toBeTruthy();
@@ -175,9 +210,6 @@ describe("popupElement", () => {
     expect(el.$isOpened).toBeFalsy();
     // other cases in test(`options.$target`) and test(`remove`)
   });
-
-  // todo implement
-  // test("$options.showCase", () => {});
 
   test("remove", () => {
     const dispose = jest.spyOn(el, "dispose");
@@ -214,7 +246,7 @@ describe("popupElement", () => {
       return me;
     });
 
-    /** @type WUPPopupElement */
+    /** @type typeof el */
     const a = document.createElement(el.tagName);
     a.$options.target = trg;
     a.$options.showCase = 0b11111111; // all
@@ -234,7 +266,6 @@ describe("popupElement", () => {
       // checking if removed every listener that was added
       const onCalls = s.on.mock.calls.map((c, i) => `${c[0]} ${s.on.mock.instances[i] || s.itemName}`);
       const offCalls = s.off.mock.calls.map((c, i) => `${c[0]} ${s.off.mock.instances[i] || s.itemName}`);
-      console.warn(s.itemName, { onCalls, offCalls });
       expect(onCalls).toEqual(offCalls);
     });
   });
