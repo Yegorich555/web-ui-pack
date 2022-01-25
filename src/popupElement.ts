@@ -463,6 +463,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
   }
 
   protected override dispose(): void {
+    super.dispose();
     this.#onHideCallbacks.forEach((f) => f());
     this.#onHideCallbacks = [];
     this.#onShowCallbacks = [];
@@ -470,6 +471,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
 }
 
 // todo check inherritance with overriding options & re-assign to custom-tag
+// todo extend document.createElement("wup-popup")
 const tagName = "wup-popup";
 customElements.define(tagName, WUPPopupElement);
 

@@ -180,8 +180,6 @@ describe("popupElement", () => {
   // test("$options.showCase", () => {});
 
   test("remove", () => {
-    // todo check if all events are destroyed for different cases
-
     const dispose = jest.spyOn(el, "dispose");
     expect(el.$isOpened).toBeTruthy();
     el.remove();
@@ -204,6 +202,41 @@ describe("popupElement", () => {
     jest.advanceTimersToNextTimer();
     expect(el.$show).not.toThrow();
     expect(el.$isOpened).toBeTruthy();
+  });
+
+  test("memoryLeaking", () => {
+    const spy = [document, document.body, HTMLElement.prototype, trg].map((s) => {
+      const me = {
+        on: jest.spyOn(s, "addEventListener"),
+        off: jest.spyOn(s, "removeEventListener"),
+        itemName: s.toString(),
+      };
+      return me;
+    });
+
+    /** @type WUPPopupElement */
+    const a = document.createElement(el.tagName);
+    a.$options.target = trg;
+    a.$options.showCase = 0b11111111; // all
+    document.body.appendChild(a);
+    jest.advanceTimersToNextTimer(); // onReady has timeout
+    expect(a.$isOpened).toBeFalsy(); // no events from target
+
+    const called = spy.filter((v) => v.on.mock.calls.length).map((v) => v.on.mock.calls[0]);
+    expect(called).not.toHaveLength(0); // test if event listeners were added
+
+    a.$show(); // it will add extra events
+    expect(a.$isOpened).toBeTruthy();
+    expect(spy[0].on).toBeCalled(); // expected that we have events for document
+
+    a.remove();
+    spy.forEach((s) => {
+      // checking if removed every listener that was added
+      const onCalls = s.on.mock.calls.map((c, i) => `${c[0]} ${s.on.mock.instances[i] || s.itemName}`);
+      const offCalls = s.off.mock.calls.map((c, i) => `${c[0]} ${s.off.mock.instances[i] || s.itemName}`);
+      console.warn(s.itemName, { onCalls, offCalls });
+      expect(onCalls).toEqual(offCalls);
+    });
   });
 
   // todo implement
