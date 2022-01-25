@@ -155,44 +155,179 @@ describe("popupElement", () => {
   });
 
   test("$options.showCase", () => {
-    el.$options.target = trg;
-    // always
-    el.remove();
-    document.body.appendChild(el);
-    el.$options.showCase = 0; // always
-    jest.advanceTimersToNextTimer(); // onReady has timeout
-    expect(el.$isOpened).toBeTruthy();
+    const a = document.createElement(el.tagName);
+    a.$options.target = trg;
+
+    const spyShow = jest.spyOn(a, "show");
+    const spyHide = jest.spyOn(a, "hide");
 
     // only hover
-    el.remove();
-    document.body.appendChild(el);
-    el.$options.showCase = 1; // onHover
+    document.body.appendChild(a);
+    a.$options.showCase = 1; // onHover
     jest.advanceTimersToNextTimer(); // onReady has timeout
-    expect(el.$isOpened).toBeFalsy();
+    expect(a.$isOpened).toBeFalsy();
 
-    const show = jest.spyOn(el, "show");
     trg.dispatchEvent(new Event("mouseenter"));
-    jest.advanceTimersByTime(el.$options.hoverShowTimeout); // event listener has timeout
-    expect(show).toBeCalledTimes(1);
-    expect(el.$isOpened).toBeTruthy();
+    jest.advanceTimersByTime(a.$options.hoverShowTimeout); // event listener has timeout
+    expect(spyShow).toBeCalledTimes(1);
+    expect(a.$isOpened).toBeTruthy();
+    expect(spyShow).toHaveBeenLastCalledWith(1);
 
     trg.dispatchEvent(new Event("mouseleave"));
-    jest.advanceTimersByTime(el.$options.hoverHideTimeout); // event listener has timeout
-    expect(el.$isOpened).toBeFalsy();
+    jest.advanceTimersByTime(a.$options.hoverHideTimeout); // event listener has timeout
+    expect(a.$isOpened).toBeFalsy();
+    expect(spyHide).toHaveBeenLastCalledWith(1, 2);
 
-    show.mockClear();
+    jest.clearAllMocks();
     trg.dispatchEvent(new Event("mouseenter"));
     trg.dispatchEvent(new Event("mouseleave"));
     trg.dispatchEvent(new Event("mouseenter"));
     trg.dispatchEvent(new Event("mouseleave"));
-    jest.advanceTimersToNextTimer(el.$options.hoverShowTimeout + el.$options.hoverHideTimeout); // event listener has timeout
-    expect(el.$isOpened).toBeFalsy();
-    expect(show).not.toBeCalled();
+    jest.advanceTimersToNextTimer(a.$options.hoverShowTimeout + a.$options.hoverHideTimeout); // event listener has timeout
+    expect(a.$isOpened).toBeFalsy();
+    expect(spyShow).not.toBeCalled();
 
-    // todo onlyFocus
-    // todo onlyClick
-    // todo mix all
+    // onlyFocus
+    a.remove();
+    document.body.appendChild(a);
+    a.$options.showCase = 1 << 1; // onFocus
+    jest.advanceTimersToNextTimer(); // onReady has timeout
+    expect(a.$isOpened).toBeFalsy();
+
+    trg.dispatchEvent(new Event("focusin"));
+    const trgInput = trg.appendChild(document.createElement("input"));
+    const trgInput2 = trg.appendChild(document.createElement("input"));
+    expect(a.$isOpened).toBeTruthy();
+    expect(spyShow).toBeCalledTimes(1);
+    expect(spyShow).lastCalledWith(1 << 1);
+    trg.dispatchEvent(new Event("focusout"));
+    expect(spyShow).toBeCalledTimes(1); // no new triggers because focus stay
+    // jest.advanceTimersToNextTimer(); // focusLost has timeout
+    expect(a.$isOpened).toBeFalsy();
+
+    // checking focusin-throttling
+    jest.clearAllMocks();
+    trgInput.focus();
+    expect(a.$isOpened).toBeTruthy();
+    trgInput2.focus();
+    trgInput.focus();
+    expect(a.$isOpened).toBeTruthy();
+    expect(spyHide).not.toBeCalled(); // because div haven't been lost focus
+    trgInput.blur();
+    expect(a.$isOpened).toBeFalsy();
+    expect(spyShow).toBeCalledTimes(1); // checking if throttling-filter works
+    expect(spyShow).lastCalledWith(1 << 1); // checking if throttling-filter works
+    expect(spyHide).lastCalledWith(1 << 1, 3); // because div haven't been lost focus
+
+    // onlyClick
+    jest.clearAllMocks();
+    a.remove();
+    document.body.appendChild(a);
+    a.$options.showCase = 1 << 2; // onClick
+    jest.advanceTimersToNextTimer(); // onReady has timeout
+    expect(a.$isOpened).toBeFalsy();
+
+    trg.dispatchEvent(new Event("click", { bubbles: true }));
+    expect(a.$isOpened).toBeTruthy();
+    trg.dispatchEvent(new Event("click", { bubbles: true }));
+    expect(a.$isOpened).toBeTruthy(); // because previous event is skipped (due to debounceTimeout)
+    expect(spyShow).toHaveBeenCalledTimes(1);
+    expect(spyShow).lastCalledWith(1 << 2);
+    jest.advanceTimersByTime(50); // onClick has debounce timeout
+
+    trg.dispatchEvent(new Event("click", { bubbles: true }));
+    expect(a.$isOpened).toBeFalsy();
+    expect(spyHide).toHaveBeenCalledTimes(1);
+    expect(spyHide).lastCalledWith(1 << 2, 6);
+    jest.advanceTimersByTime(50); // onClick has debounce timeout
+
+    trgInput.dispatchEvent(new Event("click", { bubbles: true }));
+    expect(a.$isOpened).toBeTruthy(); // click on input inside
+    jest.advanceTimersByTime(50); // onClick has debounce timeout
+
+    a.dispatchEvent(new Event("click", { bubbles: true }));
+    expect(a.$isOpened).toBeFalsy(); // click onMe == close
+    expect(spyHide).lastCalledWith(1 << 2, 5);
+
+    trgInput2.dispatchEvent(new Event("click", { bubbles: true }));
+    expect(a.$isOpened).toBeTruthy(); // click on input2 inside
+    jest.advanceTimersByTime(50); // onClick has debounce timeout
+
+    document.body.dispatchEvent(new Event("click", { bubbles: true }));
+    expect(a.$isOpened).toBeFalsy(); // click outside == close
+    expect(spyHide).lastCalledWith(1 << 2, 4);
+
+    // test all: onHover | onFocus | onClick
+    jest.clearAllTimers();
+    jest.clearAllMocks();
+    a.remove();
+    document.activeElement?.blur();
+    document.body.appendChild(a);
+    a.$options.showCase = 0b111111111;
+    jest.advanceTimersToNextTimer(); // onReady has timeout
+    expect(a.$isOpened).toBeFalsy();
+
+    // open by mouseenter-click-focus
+    trgInput.dispatchEvent(new Event("mouseenter", { bubbles: true }));
+    jest.advanceTimersByTime(a.$options.hoverShowTimeout); // mouseenter has debounce timeout
+    expect(a.$isOpened).toBeTruthy();
+    expect(spyShow).lastCalledWith(1);
+    trgInput.dispatchEvent(new Event("mousedown", { bubbles: true }));
+    trgInput.focus();
+    trgInput.dispatchEvent(new Event("mouseup", { bubbles: true }));
+    expect(a.$isOpened).toBeTruthy(); // no changes in state
+    trgInput.dispatchEvent(new Event("click", { bubbles: true }));
+    expect(a.$isOpened).toBeTruthy(); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
+    // close by blur
+    trgInput.blur();
+    expect(a.$isOpened).toBeFalsy(); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
+    expect(spyHide).lastCalledWith(1, 3);
+
+    // close by mouseleave
+    trgInput.dispatchEvent(new Event("mouseenter", { bubbles: true }));
+    jest.advanceTimersByTime(a.$options.hoverShowTimeout); // mouseenter has debounce timeout
+    trgInput.dispatchEvent(new Event("mouseleave", { bubbles: true }));
+    jest.advanceTimersByTime(a.$options.hoverHideTimeout); // mouseenter has debounce timeout
+    expect(a.$isOpened).toBeFalsy(); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
+    expect(spyHide).lastCalledWith(1, 2);
+
+    // open again by click
+    trgInput.dispatchEvent(new Event("click", { bubbles: true }));
+    jest.advanceTimersByTime(50); // click has debounce timeout
+    expect(a.$isOpened).toBeTruthy(); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
+    expect(spyShow).lastCalledWith(1 << 2);
+
+    // close by click again
+    trgInput.dispatchEvent(new Event("click", { bubbles: true }));
+    jest.advanceTimersByTime(50);
+    expect(a.$isOpened).toBeFalsy();
+    expect(spyHide).lastCalledWith(1 << 2, 6);
+    trgInput.blur();
+    spyShow.mockClear();
+
+    // simulate click-focus without mouseenter
+    // jest.advanceTimersByTime(el.$options.focusDebounceMs);
+    trgInput.dispatchEvent(new Event("touchstart", { bubbles: true })); // just for coverage 100%
+    trgInput.dispatchEvent(new Event("mousedown", { bubbles: true }));
+    expect(a.$isOpened).toBeFalsy();
+    trgInput.focus();
+    expect(spyShow).lastCalledWith(1 << 1);
+    expect(a.$isOpened).toBeTruthy(); // show by focus
+    trgInput.dispatchEvent(new Event("mouseup", { bubbles: true }));
+    trgInput.dispatchEvent(new Event("click", { bubbles: true }));
+    jest.advanceTimersByTime(50);
+    expect(a.$isOpened).toBeTruthy(); // stay opened because wasOpened by focus from click)
+
+    // simulate mouse-click again
+    trgInput.dispatchEvent(new Event("mousedown", { bubbles: true }));
+    trgInput.dispatchEvent(new Event("mouseup", { bubbles: true }));
+    trgInput.dispatchEvent(new Event("click", { bubbles: true }));
+    jest.advanceTimersByTime(50);
+    expect(a.$isOpened).toBeFalsy(); // 2nd click will close (but if click is fired without mousedown it doesn't work)
+    expect(spyHide).lastCalledWith(1 << 1, 6);
   });
+
+  // todo e2e cases: clickOnLabel with input - single event
 
   // todo check all options
 
@@ -208,6 +343,8 @@ describe("popupElement", () => {
     el.$hide();
     el.$show();
     expect(el.$isOpened).toBeFalsy();
+    // todo check private methods canShow, canHide
+
     // other cases in test(`options.$target`) and test(`remove`)
   });
 

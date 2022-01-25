@@ -5,7 +5,7 @@ export namespace WUPPopup {
   export const enum ShowCases {
     /** Show when it's added to document; to hide just remove popup from document (outsideClick event can be helpful) */
     always = 0,
-    /** On mouseHover event of target; hide by onMouseLeave */
+    /** On mouseEnter event of target; hide by mouseLeave; if popup shown by mouseEnter it can'be closed by click (onHover partially suppress onClick case)  */
     onHover = 1, // todo check onHover on mobileDevices; maybe onTouch instead ?
     /** On focusIn event of target; hide by focusOut (also on click if PopupShowCases.onClick included) */
     onFocus = 1 << 1,

@@ -139,7 +139,9 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
         return;
       }
 
+      // todo it doesn't work if new clickEvent fired programmatically
       let preventClickAfterFocus = false;
+      let openedByHover = false;
       // onClick
       if (showCase & WUPPopup.ShowCases.onClick) {
         // fix when labelOnClick > inputOnClick
@@ -151,6 +153,8 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
             lastActive = target as HTMLElement;
           }
         });
+
+        onShowEvent(document, "touchstart", () => (preventClickAfterFocus = false));
         onShowEvent(document, "mousedown", () => (preventClickAfterFocus = false));
         onShowEvent(document, "click", ({ target }) => {
           // filter click from target because we have target event for this
@@ -169,7 +173,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
 
         let timeoutId: ReturnType<typeof setTimeout> | undefined;
         appendEvent(t, "click", () => {
-          if (timeoutId || wasOutsideClick) {
+          if (timeoutId || wasOutsideClick || openedByHover) {
             return;
           }
           if (!this.#isOpened) {
@@ -188,6 +192,8 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
         let timeoutId: ReturnType<typeof setTimeout> | undefined;
         const ev = (ms: number, isMouseIn: boolean) => {
           timeoutId && clearTimeout(timeoutId);
+          openedByHover = isMouseIn;
+          preventClickAfterFocus = false; // fixes case when click fired without mousedown
           if ((isMouseIn && !this.#isOpened) || (!isMouseIn && this.#isOpened))
             timeoutId = setTimeout(
               () =>
@@ -198,7 +204,6 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
             );
           else timeoutId = undefined;
         };
-
         appendEvent(t, "mouseenter", () => ev(this.$options.hoverShowTimeout, true));
         // with onShowEvent it doesn't work properly (because filtered by timeout)
         appendEvent(t, "mouseleave", () => ev(this.$options.hoverHideTimeout, false));
@@ -218,6 +223,9 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
             const isToMe = this === document.activeElement || this === relatedTarget;
             const isToMeInside = !isToMe && this.includes(document.activeElement || relatedTarget);
             !isToMe && !isToMeInside && this.hide(this.#showCase, WUPPopup.HideCases.onFocusOut);
+            if (!this.$isOpened) {
+              openedByHover = false;
+            }
           }
         };
 

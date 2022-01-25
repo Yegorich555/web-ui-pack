@@ -4,10 +4,6 @@
 import { render, unmountComponentAtNode } from "react-dom";
 import reactTestUtils from "react-dom/test-utils";
 
-export function lastCall(jestFn) {
-  return jestFn.mock.calls[jestFn.mock.calls.length - 1];
-}
-
 export function mockSetState(el) {
   return jest.fn((state, callback) =>
     setTimeout(() => {
