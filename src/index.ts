@@ -2,6 +2,7 @@ export { default as WUPBaseElement } from "./baseElement";
 
 export { default as focusFirst } from "./helpers/focusFirst";
 export { default as nestedProperty } from "./helpers/nestedProperty";
+export { default as observer } from "./helpers/observer";
 export { default as onEvent } from "./helpers/onEvent";
 export { default as onFocusGot } from "./helpers/onFocusGot";
 export { default as onFocusLost } from "./helpers/onFocusLost";
