@@ -5,27 +5,76 @@
 // todo single call listener for many changes in time: how to provide listener in this case ?
 
 const symObserved = Symbol("__observed");
-export type IObserved<T extends object = object> = T & {
-  readonly [symObserved]: IObserved;
-};
-type IPropCallback<T> = <K extends keyof T>(event: { prev: T[K]; next: T[K]; prop: K; target: T }) => void;
-interface IStored {
-  propListeners: Array<IPropCallback<any>>;
+export namespace Observer {
+  export type Observed<T extends object = object> = T & {
+    readonly [symObserved]: Observed;
+  };
+
+  export type DateEvent<T extends Date = Date> = {
+    prev: number;
+    next: number;
+    prop: "valueOf";
+    target: T;
+  };
+
+  export type BasicPropEvent<T, K extends keyof T> = {
+    prev: T[K] | undefined;
+    next: T[K] | undefined;
+    prop: K;
+    target: T;
+  };
+
+  export type PropEvent<T, K extends keyof T> = T extends Date ? DateEvent<T> : BasicPropEvent<T, K>;
+  export type PropCallback<T> = <K extends keyof T>(event: PropEvent<T, K>) => void;
 }
 
-const observeSet = new WeakMap<IObserved, IStored>();
+interface IStored {
+  propListeners: Array<Observer.PropCallback<any>>;
+}
 
+type PartialDateEvent = Omit<Observer.PropEvent<Date, "valueOf">, "target">;
+type PartialPropEvent<T extends object> = Omit<Observer.BasicPropEvent<T, keyof T>, "target" | "prop"> & {
+  prop: string | symbol;
+};
+
+// required to avoid prototypeExtending
+const dateWatchKeys = new Set([
+  "setDate",
+  "setFullYear",
+  "setHours",
+  "setMilliseconds",
+  "setMinutes",
+  "setMonth",
+  "setSeconds",
+  "setTime",
+  "setUTCDate",
+  "setUTCFullYear",
+  "setUTCHours",
+  "setUTCMilliseconds",
+  "setUTCMinutes",
+  "setUTCMonth",
+  "setUTCSeconds",
+  "setYear",
+]);
+const observeSet = new WeakMap<Observer.Observed, IStored>();
 const observer = {
   /** Make observable object; @see Proxy */
-  make<T extends object>(obj: T): IObserved<T> {
-    const prevProxy = (obj as IObserved)[symObserved];
+  make<T extends object>(obj: T): Observer.Observed<T> {
+    const prevProxy = (obj as Observer.Observed)[symObserved];
     if (prevProxy) {
-      return prevProxy as IObserved<T>;
+      return prevProxy as Observer.Observed<T>;
     }
 
+    const isDate = obj instanceof Date;
+
     const propListeners: IStored["propListeners"] = [];
+    const propChanged = <K extends keyof T>(e: PartialDateEvent | PartialPropEvent<T>) => {
+      // eslint-disable-next-line no-use-before-define
+      (e as Observer.PropEvent<T, K>).target = proxy;
+      propListeners.forEach((f) => f(e as Observer.PropEvent<T, K>));
+    };
     // const isArray = Array.isArray(obj);
-    const proxy = new Proxy(obj, {
+    const proxyHandler: ProxyHandler<typeof obj> = {
       set(_t, prop, next) {
         const prev = obj[prop as keyof T];
         // @ts-ignore
@@ -37,27 +86,42 @@ const observer = {
           } else {
             isChanged = (prev as any).valueOf() !== (next as any).valueOf();
           }
-          if (isChanged) {
-            propListeners.forEach((f) => f({ prev, next, prop: prop as keyof T, target: proxy }));
-          }
+          isChanged && propChanged({ prev, next, prop });
         }
         // console.warn("test", arguments);
         return r;
       },
       deleteProperty(t, prop) {
-        const prev = t[prop as keyof T];
-        propListeners.forEach((f) => f({ prev, next: undefined, prop: prop as keyof T, target: proxy }));
+        if (!isDate) {
+          const prev = t[prop as keyof T];
+          propChanged({ prev, next: undefined, prop });
+        }
         return true;
       },
-      // it's fix for proxy-wrapped
-      // check with this
-      // https://learn.javascript.ru/proxy#zaschischyonnye-svoystva-s-lovushkoy-deleteproperty-i-drugimi
-      // get() {
-      //   // @ts-ignore
-      //   const v = Reflect.get(...arguments);
-      //   return typeof v === "function" ? v.bind(obj) : v;
-      // },
-    }) as IObserved<T>;
+    };
+    if (isDate) {
+      proxyHandler.get = function get(t, prop) {
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/ban-types
+        const v = Reflect.get(...arguments) as Function;
+        if (typeof v === "function") {
+          if (dateWatchKeys.has(prop as string)) {
+            return (...args: any[]) => {
+              const prev = (obj as Date).valueOf();
+              const r = v.apply(obj as Date, args);
+              const next = (obj as Date).valueOf();
+              if (prev !== next) {
+                propChanged({ prev, next, prop: "valueOf" });
+              }
+              return r;
+            };
+          }
+          return v.bind(t);
+        }
+        return v;
+      };
+    }
+    const proxy = new Proxy(obj, proxyHandler) as Observer.Observed<T>;
 
     Object.defineProperty(proxy, symObserved, { get: () => proxy });
 
@@ -67,8 +131,8 @@ const observer = {
   },
 
   onPropChanged<T extends object>(
-    target: IObserved<T>,
-    callback: IPropCallback<T>
+    target: Observer.Observed<T>,
+    callback: Observer.PropCallback<T>
     // options: { once?: boolean }
   ) {
     const o = observeSet.get(target);

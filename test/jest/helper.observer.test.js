@@ -207,6 +207,25 @@ describe("helper.onObjectChanged", () => {
     expect(fn).lastCalledWith({ prev: 1, next: 0, target: arr, prop: "length" });
   });
 
-  // todo check if date.setTime changes properly
-  // todo check how Object.assign works
+  test("for date", () => {
+    const dt = observer.make(new Date());
+    const fn = jest.fn();
+    observer.onPropChanged(dt, fn);
+
+    let prev = dt.valueOf();
+    let next = dt.setHours(0, 0, 0, 0);
+    expect(fn).toBeCalledTimes(1);
+    expect(fn).toBeCalledWith({ prev, next, target: dt, prop: "valueOf" });
+
+    fn.mockClear();
+    prev = dt.valueOf();
+    next = dt.setDate(12);
+    expect(fn).toBeCalledTimes(1);
+    expect(fn).toBeCalledWith({ prev, next, target: dt, prop: "valueOf" });
+
+    expect(() => dt.getTime()).not.toThrow();
+    expect(() => dt.getFullYear()).not.toThrow();
+  });
+
+  // todo check Object.assign
 });
