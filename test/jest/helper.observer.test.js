@@ -152,12 +152,13 @@ describe("helper.observer", () => {
   });
 
   test("this context", () => {
-    const v = {
-      _testMe: 4,
+    class TestClass {
+      #testMe = 4;
       callMe() {
-        return this._testMe;
-      },
-    };
+        return this.#testMe;
+      }
+    }
+    const v = new TestClass();
     const obj = observer.make(v);
     const fn = jest.fn();
     observer.onPropChanged(obj, fn);
@@ -301,7 +302,7 @@ describe("helper.observer", () => {
     expect(fn2).lastCalledWith({ props: ["length"], target: arr });
   });
 
-  test("for date (valueof)", () => {
+  test("for Date (valueof)", () => {
     let obj = observer.make(new Date());
     const fn = jest.fn();
     const fn2 = jest.fn();
@@ -346,6 +347,34 @@ describe("helper.observer", () => {
     expect(fn).not.toBeCalled();
     jest.advanceTimersToNextTimer();
     expect(fn2).not.toBeCalled();
+  });
+
+  test("for Set, Map", () => {
+    const fn = jest.fn();
+    // for Set
+    const set = observer.make(new Set());
+    observer.onPropChanged(set, fn);
+
+    expect(() => set.add("s1")).not.toThrow();
+    expect(set.has("s1")).toBeTruthy();
+    expect(fn).toBeCalledTimes(1);
+
+    expect(set.clear).not.toThrow();
+    expect(set.has("s1")).toBeFalsy();
+    expect(fn).toBeCalledTimes(2);
+
+    // for Map
+    fn.mockClear();
+    const map = observer.make(new Map());
+    observer.onPropChanged(map, fn);
+
+    expect(() => map.set("k1", 111)).not.toThrow();
+    expect(map.has("k1", 111)).toBeTruthy();
+    expect(fn).toBeCalledTimes(1);
+
+    expect(() => map.clear()).not.toThrow();
+    expect(set.has("k1")).toBeFalsy();
+    expect(fn).toBeCalledTimes(2);
   });
 
   test("Object.assign", () => {

@@ -51,25 +51,51 @@ type PrivateObserved<T extends object> = Observer.Observed<T> & {
   readonly [symObserved]: PrivateObserved<T>;
 };
 
+type WatchItem<T> = {
+  is: (obj: unknown) => boolean;
+  keys: Set<keyof T>;
+  getVal: (obj: T) => any;
+  propKey: keyof T;
+};
+const watchSet: Array<WatchItem<any>> = [
+  <WatchItem<Date>>{
+    is: (obj: unknown) => obj instanceof Date,
+    keys: new Set([
+      "setDate",
+      "setFullYear",
+      "setHours",
+      "setMilliseconds",
+      "setMinutes",
+      "setMonth",
+      "setSeconds",
+      "setTime",
+      "setUTCDate",
+      "setUTCFullYear",
+      "setUTCHours",
+      "setUTCMilliseconds",
+      "setUTCMinutes",
+      "setUTCMonth",
+      "setUTCSeconds",
+      "setYear",
+    ]),
+    getVal: (obj) => obj.valueOf(),
+    propKey: "valueOf",
+  },
+  <WatchItem<Set<unknown>>>{
+    is: (obj: unknown) => obj instanceof Set || obj instanceof WeakSet,
+    keys: new Set(["add", "delete", "clear"]),
+    getVal: (obj) => obj.size,
+    propKey: "size",
+  },
+  <WatchItem<Map<unknown, unknown>>>{
+    is: (obj: unknown) => obj instanceof Map || obj instanceof WeakMap,
+    keys: new Set(["set", "delete", "clear"]),
+    getVal: (obj) => obj.size,
+    propKey: "size",
+  },
+];
+
 // required to avoid prototypeExtending
-const dateWatchKeys = new Set([
-  "setDate",
-  "setFullYear",
-  "setHours",
-  "setMilliseconds",
-  "setMinutes",
-  "setMonth",
-  "setSeconds",
-  "setTime",
-  "setUTCDate",
-  "setUTCFullYear",
-  "setUTCHours",
-  "setUTCMilliseconds",
-  "setUTCMinutes",
-  "setUTCMonth",
-  "setUTCSeconds",
-  "setYear",
-]);
 const observeSet = new WeakMap<Observer.Observed, IStored>();
 
 function appenCallback<T extends Observer.Observed<object>, K extends keyof IStored>(
@@ -180,21 +206,22 @@ const observer = {
         return true;
       },
     };
-    if (isDate) {
-      proxyHandler.get = function get(t, prop) {
-        // @ts-ignore
+
+    const watchObj = watchSet.find((v) => v.is(obj));
+    if (watchObj) {
+      proxyHandler.get = function get(t, prop, receiver) {
         // eslint-disable-next-line @typescript-eslint/ban-types
-        const v = Reflect.get(...arguments) as Function;
+        const v = Reflect.get(t, prop, receiver) as Function;
         // wrap if listeners exists
-        if (hasListeners() && typeof v === "function") {
-          if (dateWatchKeys.has(prop as string)) {
+        if (typeof v === "function") {
+          if (hasListeners() && watchObj.keys.has(prop)) {
             return (...args: any[]) => {
-              const prev = (obj as Date).valueOf();
-              const r = v.apply(obj as Date, args);
-              const next = (obj as Date).valueOf();
+              const prev = watchObj.getVal(obj);
+              const r = v.apply(obj, args);
+              const next = watchObj.getVal(obj);
               // Date possible to be NaN;
               if (prev !== next && !isBothNaN(prev, next)) {
-                propChanged({ prev, next, prop: "valueOf" });
+                propChanged({ prev, next, prop: watchObj.propKey as string });
               }
               return r;
             };
@@ -233,14 +260,13 @@ const observer = {
   },
 };
 
-// const raw = { date: new Date(), period: 3, internal: { val: "str" } };
-// const obj = observer.make(raw);
-// observer.onPropChanged(obj, (e) => console.warn(e));
-// observer.onChanged(obj, (e) => console.warn(e));
-// obj.period = 5;
-
-// const test = obj.internal;
-// console.warn(test);
+const st = new Set<number>();
+const obs = observer.make(st);
+observer.onChanged(obs, (e) => console.warn("changed", e));
+// st.add(2);
+obs.add(1); // todo fix types
+console.warn(obs.has(1));
+window.test = obs;
 
 Object.seal(observer);
 export default observer;
