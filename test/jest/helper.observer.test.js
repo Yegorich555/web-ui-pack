@@ -130,6 +130,27 @@ describe("helper.observer", () => {
     expect(fn).lastCalledWith({ prev: "str", next: undefined, target: obj, prop: "addedProp" });
   });
 
+  test("remove listeners", () => {
+    const obj = observer.make({ val: 1 });
+    const fn = jest.fn();
+    const fn2 = jest.fn();
+    const r1 = observer.onPropChanged(obj, fn);
+    const r2 = observer.onChanged(obj, fn2);
+
+    r1();
+
+    obj.val = 123;
+    jest.advanceTimersToNextTimer();
+    expect(fn).not.toBeCalled(); // because removed
+    expect(fn2).toBeCalledTimes(1);
+
+    jest.clearAllMocks();
+    obj.val = 3; // => onPropChanged
+    r2(); // checking before timer callback is fired
+    expect(jest.advanceTimersToNextTimer).not.toThrow(); // => onChanged after timeout (checking if no exceptions here)
+    expect(fn2).not.toBeCalled();
+  });
+
   test("this context", () => {
     const v = {
       _testMe: 4,
@@ -357,10 +378,10 @@ describe("helper.observer", () => {
     expect(observer.isObserved(obj)).toBeTruthy();
 
     // on empty callback
-    observer.onPropChanged(obj);
+    expect(() => observer.onPropChanged(obj)).toThrow();
     expect(() => (obj.v = 2)).not.toThrow();
     // on empty callback
-    observer.onChanged(obj);
+    expect(() => observer.onChanged(obj)).toThrow();
     jest.advanceTimersToNextTimer(); // onChanged has timeout
     expect(() => (obj.v = 3)).not.toThrow();
 
@@ -368,6 +389,42 @@ describe("helper.observer", () => {
     expect(() => observer.onChanged({ v: 1 })).toThrow(); // throw because notObserved
   });
 
-  // todo check collission with changing props on several observed
-  // todo check observer on Map/Set
+  test("collission on several", () => {
+    const obj1 = observer.make({ v: 1 });
+    const onChange1 = jest.fn();
+    const onPropChange1 = jest.fn();
+    observer.onChanged(obj1, onChange1);
+    observer.onPropChanged(obj1, onPropChange1);
+
+    const obj2 = observer.make({ v: 2 });
+    const onChange2 = jest.fn();
+    const onPropChange2 = jest.fn();
+    observer.onChanged(obj2, onChange2);
+    observer.onPropChanged(obj2, onPropChange2);
+
+    obj1.v = 999;
+    jest.advanceTimersToNextTimer();
+    jest.advanceTimersToNextTimer();
+    expect(onChange1).toBeCalledTimes(1);
+    expect(onPropChange1).toBeCalledTimes(1);
+    expect(obj1.v).toBe(999);
+    expect(onChange2).not.toBeCalled();
+    expect(onPropChange2).not.toBeCalled();
+    expect(obj2.v).toBe(2);
+
+    jest.clearAllMocks();
+    obj1.v = "s1";
+    obj2.v = "s2";
+    jest.advanceTimersToNextTimer();
+    jest.advanceTimersToNextTimer();
+    expect(onChange1).toBeCalledTimes(1);
+    expect(onChange1).toBeCalledWith({ props: ["v"], target: obj1 });
+    expect(onPropChange1).toBeCalledTimes(1);
+    expect(onPropChange1).toBeCalledWith({ prev: 999, next: "s1", prop: "v", target: obj1 });
+
+    expect(onChange2).toBeCalledTimes(1);
+    expect(onChange2).toBeCalledWith({ props: ["v"], target: obj2 });
+    expect(onPropChange2).toBeCalledTimes(1);
+    expect(onPropChange2).toBeCalledWith({ prev: 2, next: "s2", prop: "v", target: obj2 });
+  });
 });

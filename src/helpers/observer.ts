@@ -72,13 +72,38 @@ const dateWatchKeys = new Set([
 ]);
 const observeSet = new WeakMap<Observer.Observed, IStored>();
 
+function appenCallback<T extends Observer.Observed<object>, K extends keyof IStored>(
+  target: T,
+  callback: IStored[K][0],
+  setKey: K
+) {
+  const o = observeSet.get(target);
+  if (!o) {
+    throw new Error("Observer. Only observed objects expected. Use make() before");
+  }
+  if (!callback) {
+    throw new Error("Observer. Callback is missed");
+  }
+  const arr = o[setKey];
+  arr.push(callback as unknown as any);
+
+  return () => {
+    const i = arr.indexOf(callback as unknown as any);
+    if (i > -1) {
+      arr.splice(i, 1);
+    }
+  };
+}
+
 /** Helper to detect object changes;
  * @example
  * const raw = { date: new Date(), period: 3 };
  * const obj = observer.make(raw);
- * observer.onPropChanged(obj, (e) => console.warn(e));
- * observer.onChanged(obj, (e) => console.warn(e));
+ * const removeListener = observer.onPropChanged(obj, (e) => console.warn(e));
+ * const removeListener2 = observer.onChanged(obj, (e) => console.warn(e));
  * obj.period = 5;
+ * removeListener();
+ * removeListener2();
  */
 const observer = {
   /** Returns @true if object is observed (is applied observer.make()) */
@@ -113,12 +138,16 @@ const observer = {
         // empty timeout filters bunch of changes to single event
         timeoutId = setTimeout(() => {
           timeoutId = undefined;
-          const ev: Observer.ObjectEvent<Observer.Observed<T>> = {
-            props: changedProps,
-            // eslint-disable-next-line no-use-before-define
-            target: proxy,
-          };
-          listeners.forEach((f) => f(ev));
+
+          if (listeners.length) {
+            const ev: Observer.ObjectEvent<Observer.Observed<T>> = {
+              props: changedProps,
+              // eslint-disable-next-line no-use-before-define
+              target: proxy,
+            };
+            listeners.forEach((f) => f(ev));
+          }
+
           changedProps = [];
         });
       }
@@ -183,30 +212,24 @@ const observer = {
     return proxy;
   },
 
-  /** Listen for any props changing on the object; callback is called per each prop-changing */
+  /** Listen for any props changing on the object; callback is called per each prop-changing
+   * @returns callback to removeListener */
   onPropChanged<T extends Observer.Observed<object>>(
     target: T,
     callback: Observer.PropCallback<T>
     // options: { once?: boolean }
   ) {
-    const o = observeSet.get(target);
-    if (!o) {
-      throw new Error("Only Observed objects expected. Use make() before");
-    }
-    callback && o.propListeners.push(callback);
+    return appenCallback(target, callback, "propListeners");
   },
 
-  /** Listen for any changing on the object; callback is called single time per bunch of props-changing */
+  /** Listen for any changing on the object; callback is called single time per bunch of props-changing
+   * @returns callback to removeListener */
   onChanged<T extends Observer.Observed<object>>(
     target: T,
     callback: Observer.Callback<T>
     // options: { once?: boolean }
   ) {
-    const o = observeSet.get(target);
-    if (!o) {
-      throw new Error("Only Observed objects expected. Use make() before");
-    }
-    callback && o.listeners.push(callback);
+    return appenCallback(target, callback, "listeners");
   },
 };
 
