@@ -8,7 +8,7 @@ const isBothNaN = (a: any, b: any) => a !== a && b !== b;
 export namespace Observer {
   export type Observed<T extends object = object> = {
     // todo recursive
-    [K in keyof T]: T[K] extends object ? Observed<T[K]> : T[K];
+    [K in keyof T]: T[K] extends Record<string, unknown> ? Observed<T[K]> : T[K];
   };
 
   export type DateEvent<T extends Date = Date> = {
