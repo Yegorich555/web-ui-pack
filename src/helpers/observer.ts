@@ -3,33 +3,67 @@
 
 /** const a = NaN; a !== a; // true */
 // eslint-disable-next-line no-self-compare
-const isBothNaN = (a: any, b: any) => a !== a && b !== b;
+const isBothNaN = (a: unknown, b: unknown) => a !== a && b !== b;
+
+type Func = (...args: any[]) => any;
 
 export namespace Observer {
+  export interface IObserver {
+    /** Returns @true if object is observed (is applied observer.make()) */
+    isObserved<T extends object>(obj: T): boolean;
+    /** Make observable object to detect changes; @see Proxy */
+    make<T extends object>(obj: T): Observer.Observed<T>;
+    /** Listen for any props changing on the object; callback is called per each prop-changing
+     * @returns callback to removeListener */
+    onPropChanged<T extends Observer.Observed<object>>(
+      target: T,
+      callback: Observer.PropCallback<T> // options: { once?: boolean }
+    ): () => void;
+    /** Listen for any changing on the object; callback is called single time per bunch of props-changing
+     * @returns callback to removeListener */
+    onChanged<T extends Observer.Observed<object>>(
+      target: T,
+      callback: Observer.Callback<T>
+      // options: { once?: boolean }
+    ): () => void;
+  }
   export type Observed<T extends object = object> = {
     // todo recursive
     [K in keyof T]: T[K] extends Record<string, unknown> ? Observed<T[K]> : T[K];
   };
 
-  export type DateEvent<T extends Date = Date> = {
-    prev: number;
-    next: number;
-    prop: "valueOf";
-    target: T;
-  };
-
   export type BasicPropEvent<T, K extends keyof T> = {
-    prev: T[K] | undefined;
-    next: T[K] | undefined;
+    /** Previous value */
+    prev: T[K] extends Func ? ReturnType<T[K]> : T[K] | undefined;
+    /** Current/next value */
+    next: T[K] extends Func ? ReturnType<T[K]> : T[K] | undefined;
+    /** Prop that is changed; For arrays it can be `length`, for Set,MapSet - `size` */
     prop: K;
+    /** Object to that prop related */
     target: T;
   };
 
-  export type PropEvent<T, K extends keyof T> = T extends Date ? DateEvent<T> : BasicPropEvent<T, K>;
+  export type DateEvent<T extends Date> = BasicPropEvent<T, "valueOf">;
+  export type MapSetEvent<T extends Set<any> | Map<any, any>> = BasicPropEvent<T, "size">;
+  // todo fix for WeakMap
+  export type WeakEvent<T extends WeakSet<object> | WeakMap<object, any>> = BasicPropEvent<T, "has">;
+
+  // prettier-ignore
+  export type PropEvent<T, K extends keyof T> =
+      T extends Date ? DateEvent<T>
+    : T extends Set<any> | Map<any, any> ? MapSetEvent<T>
+    : T extends WeakSet<object> | WeakMap<object, any> ? WeakEvent<T>
+    : BasicPropEvent<T, K>;
+
   export type PropCallback<T> = <K extends keyof T>(event: PropEvent<T, K>) => void;
 
   export type ObjectEvent<T> = {
-    props: Array<keyof T | "valueOf">;
+    // prettier-ignore
+    props:
+      T extends Date ? Array<"valueOf">
+    : T extends Set<any> | Map<any, any> ? Array<"size">
+    : T extends WeakSet<object> | WeakMap<object, any> ? Array<"has">
+    : Array<keyof T>;
     target: T;
   };
 
@@ -40,11 +74,6 @@ interface IStored {
   propListeners: Array<Observer.PropCallback<any>>;
   listeners: Array<Observer.Callback<any>>;
 }
-
-type PartialDateEvent = Omit<Observer.PropEvent<Date, "valueOf">, "target">;
-type PartialPropEvent<T extends object> = Omit<Observer.BasicPropEvent<T, keyof T>, "target" | "prop"> & {
-  prop: string | symbol;
-};
 
 const symObserved = Symbol("__observed");
 type PrivateObserved<T extends object> = Observer.Observed<T> & {
@@ -131,12 +160,10 @@ function appenCallback<T extends Observer.Observed<object>, K extends keyof ISto
  * removeListener();
  * removeListener2();
  */
-const observer = {
-  /** Returns @true if object is observed (is applied observer.make()) */
+const observer: Observer.IObserver = {
   isObserved<T extends object>(obj: T): boolean {
     return !!(obj as PrivateObserved<T>)[symObserved];
   },
-  /** Make observable object to detect changes; @see Proxy */
   make<T extends object>(obj: T): Observer.Observed<T> {
     const prevProxy = (obj as PrivateObserved<T>)[symObserved];
     if (prevProxy) {
@@ -151,7 +178,7 @@ const observer = {
     let changedProps: Array<keyof T> = [];
     let timeoutId: ReturnType<typeof setTimeout> | undefined | number;
 
-    const propChanged = <K extends keyof T>(e: PartialDateEvent | PartialPropEvent<T>) => {
+    const propChanged = <K extends keyof T>(e: Omit<Observer.BasicPropEvent<any, any>, "target">) => {
       // eslint-disable-next-line no-use-before-define
       (e as Observer.PropEvent<T, K>).target = proxy;
       // todo wrap in tryCatch
@@ -167,7 +194,7 @@ const observer = {
 
           if (listeners.length) {
             const ev: Observer.ObjectEvent<Observer.Observed<T>> = {
-              props: changedProps,
+              props: changedProps as any,
               // eslint-disable-next-line no-use-before-define
               target: proxy,
             };
@@ -181,7 +208,7 @@ const observer = {
 
     const proxyHandler: ProxyHandler<typeof obj> = {
       set(_t, prop, next) {
-        const prev = obj[prop as keyof T];
+        const prev = obj[prop as keyof T] as any;
         // @ts-ignore
         const r = Reflect.set(...arguments);
         if (hasListeners()) {
@@ -189,10 +216,7 @@ const observer = {
           if (prev == null || next == null) {
             isChanged = prev !== next;
           } else {
-            // todo check when value NaN: in this case
-            // var a = NaN;
-            // a !== a; // true
-            isChanged = (prev as any).valueOf() !== (next as any).valueOf();
+            isChanged = prev.valueOf() !== (next as any).valueOf() && !isBothNaN(prev, next);
           }
           isChanged && propChanged({ prev, next, prop });
         }
@@ -210,8 +234,7 @@ const observer = {
     const watchObj = watchSet.find((v) => v.is(obj));
     if (watchObj) {
       proxyHandler.get = function get(t, prop, receiver) {
-        // eslint-disable-next-line @typescript-eslint/ban-types
-        const v = Reflect.get(t, prop, receiver) as Function;
+        const v = Reflect.get(t, prop, receiver) as Func;
         // wrap if listeners exists
         if (typeof v === "function") {
           if (hasListeners() && watchObj.keys.has(prop)) {
@@ -239,8 +262,6 @@ const observer = {
     return proxy;
   },
 
-  /** Listen for any props changing on the object; callback is called per each prop-changing
-   * @returns callback to removeListener */
   onPropChanged<T extends Observer.Observed<object>>(
     target: T,
     callback: Observer.PropCallback<T>
@@ -249,8 +270,6 @@ const observer = {
     return appenCallback(target, callback, "propListeners");
   },
 
-  /** Listen for any changing on the object; callback is called single time per bunch of props-changing
-   * @returns callback to removeListener */
   onChanged<T extends Observer.Observed<object>>(
     target: T,
     callback: Observer.Callback<T>
@@ -260,13 +279,9 @@ const observer = {
   },
 };
 
-const st = new Set<number>();
-const obs = observer.make(st);
-observer.onChanged(obs, (e) => console.warn("changed", e));
-// st.add(2);
-obs.add(1); // todo fix types
-console.warn(obs.has(1));
-window.test = obs;
+// observer.onPropChanged(observer.make(new Date()), (e) => console.warn(e.prev));
+// observer.onPropChanged(observer.make(new Set()), (e) => console.warn(e.prev));
+// observer.onChanged(observer.make(new Set()), (e) => console.warn(e.props.forEach((v) => v === "size")));
 
 Object.seal(observer);
 export default observer;
