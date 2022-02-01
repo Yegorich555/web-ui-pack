@@ -358,10 +358,21 @@ describe("helper.observer", () => {
     expect(() => set.add("s1")).not.toThrow();
     expect(set.has("s1")).toBeTruthy();
     expect(fn).toBeCalledTimes(1);
+    // watch jest issue with Set/Map equality: https://github.com/facebook/jest/issues/7975
+    expect(fn).toBeCalledWith(expect.objectContaining({ prev: 0, next: 1, prop: "size" }));
+    expect(fn.mock.calls[0][0].target).toBe(set);
 
+    // set the same not to be called
+    fn.mockClear();
+    expect(() => set.add("s1")).not.toThrow();
+    expect(fn).not.toBeCalled();
+
+    fn.mockClear();
     expect(set.clear).not.toThrow();
     expect(set.has("s1")).toBeFalsy();
-    expect(fn).toBeCalledTimes(2);
+    expect(fn).toBeCalledTimes(1);
+    expect(fn).toBeCalledWith(expect.objectContaining({ prev: 1, next: 0, prop: "size" }));
+    expect(fn.mock.calls[0][0].target).toBe(set);
 
     // for Map
     fn.mockClear();
@@ -371,10 +382,24 @@ describe("helper.observer", () => {
     expect(() => map.set("k1", 111)).not.toThrow();
     expect(map.has("k1", 111)).toBeTruthy();
     expect(fn).toBeCalledTimes(1);
+    expect(fn).toBeCalledWith(expect.objectContaining({ prev: 0, next: 1, prop: "size" }));
+    expect(fn.mock.calls[0][0].target).toBe(map);
 
+    fn.mockClear();
     expect(() => map.clear()).not.toThrow();
     expect(set.has("k1")).toBeFalsy();
-    expect(fn).toBeCalledTimes(2);
+    expect(fn).toBeCalledTimes(1);
+    expect(fn).toBeCalledWith(expect.objectContaining({ prev: 1, next: 0, prop: "size" }));
+    expect(fn.mock.calls[0][0].target).toBe(map);
+
+    fn.mockClear();
+    const weakSet = new WeakSet();
+    const obj = observer.make({ weakSet });
+    observer.onPropChanged(obj, fn);
+    const ref = {};
+    expect(() => weakSet.add(ref)).not.toThrow();
+    expect(weakSet.has(ref)).toBeTruthy();
+    expect(fn).not.toBeCalled(); // because WeakSet & WeakMap not supported
   });
 
   test("Object.assign", () => {

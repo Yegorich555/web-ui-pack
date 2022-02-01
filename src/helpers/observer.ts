@@ -45,14 +45,11 @@ export namespace Observer {
 
   export type DateEvent<T extends Date> = BasicPropEvent<T, "valueOf">;
   export type MapSetEvent<T extends Set<any> | Map<any, any>> = BasicPropEvent<T, "size">;
-  // todo fix for WeakMap
-  export type WeakEvent<T extends WeakSet<object> | WeakMap<object, any>> = BasicPropEvent<T, "has">;
 
   // prettier-ignore
   export type PropEvent<T, K extends keyof T> =
       T extends Date ? DateEvent<T>
     : T extends Set<any> | Map<any, any> ? MapSetEvent<T>
-    : T extends WeakSet<object> | WeakMap<object, any> ? WeakEvent<T>
     : BasicPropEvent<T, K>;
 
   export type PropCallback<T> = <K extends keyof T>(event: PropEvent<T, K>) => void;
@@ -62,7 +59,6 @@ export namespace Observer {
     props:
       T extends Date ? Array<"valueOf">
     : T extends Set<any> | Map<any, any> ? Array<"size">
-    : T extends WeakSet<object> | WeakMap<object, any> ? Array<"has">
     : Array<keyof T>;
     target: T;
   };
@@ -86,9 +82,10 @@ type WatchItem<T> = {
   getVal: (obj: T) => any;
   propKey: keyof T;
 };
+
 const watchSet: Array<WatchItem<any>> = [
   <WatchItem<Date>>{
-    is: (obj: unknown) => obj instanceof Date,
+    is: (obj) => obj instanceof Date,
     keys: new Set([
       "setDate",
       "setFullYear",
@@ -111,13 +108,13 @@ const watchSet: Array<WatchItem<any>> = [
     propKey: "valueOf",
   },
   <WatchItem<Set<unknown>>>{
-    is: (obj: unknown) => obj instanceof Set || obj instanceof WeakSet,
+    is: (obj) => obj instanceof Set,
     keys: new Set(["add", "delete", "clear"]),
     getVal: (obj) => obj.size,
     propKey: "size",
   },
   <WatchItem<Map<unknown, unknown>>>{
-    is: (obj: unknown) => obj instanceof Map || obj instanceof WeakMap,
+    is: (obj) => obj instanceof Map,
     keys: new Set(["set", "delete", "clear"]),
     getVal: (obj) => obj.size,
     propKey: "size",
@@ -282,6 +279,10 @@ const observer: Observer.IObserver = {
 // observer.onPropChanged(observer.make(new Date()), (e) => console.warn(e.prev));
 // observer.onPropChanged(observer.make(new Set()), (e) => console.warn(e.prev));
 // observer.onChanged(observer.make(new Set()), (e) => console.warn(e.props.forEach((v) => v === "size")));
+
+// const set = observer.make(new Set());
+// observer.onPropChanged(set, (e) => console.warn(e.target === set));
+// set.add(1);
 
 Object.seal(observer);
 export default observer;
