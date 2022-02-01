@@ -324,20 +324,20 @@ describe("helper.observer", () => {
 
     // date as part of object
     jest.clearAllMocks();
-    const prevDateVal = new Date(Date.now() - 1);
     obj = observer.make({
-      dateVal: prevDateVal,
+      dateVal: new Date(Date.now() - 1),
     });
+    const prevDateVal = obj.dateVal; // it's important because wrapped to proxy
     observer.onPropChanged(obj, fn);
     observer.onChanged(obj, fn2);
     const dtVal = Date.now();
-    const dt = new Date(dtVal);
 
     // date (valueof and ref) is changed
-    obj.dateVal = new Date(dtVal);
+    const nextDateVal = new Date(dtVal);
+    obj.dateVal = nextDateVal;
     expect(obj.dateVal.valueOf()).toBe(dtVal);
     expect(fn).toBeCalledTimes(1);
-    expect(fn).lastCalledWith({ prev: prevDateVal, next: dt, target: obj, prop: "dateVal" });
+    expect(fn).lastCalledWith({ prev: prevDateVal, next: nextDateVal, target: obj, prop: "dateVal" });
     jest.advanceTimersToNextTimer();
     expect(fn2).toBeCalledTimes(1);
     expect(fn2).lastCalledWith({ props: ["dateVal"], target: obj });
@@ -480,5 +480,80 @@ describe("helper.observer", () => {
     expect(onChange2).toBeCalledWith({ props: ["v"], target: obj2 });
     expect(onPropChange2).toBeCalledTimes(1);
     expect(onPropChange2).toBeCalledWith({ prev: 2, next: "s2", prop: "v", target: obj2 });
+  });
+
+  test("recursive", () => {
+    const obj = observer.make({ val: 1, inObj: { val: "sIn" } });
+    const fn = jest.fn();
+    const fn2 = jest.fn();
+    observer.onPropChanged(obj, fn);
+    observer.onChanged(obj, fn2);
+
+    obj.inObj.val = 999;
+    expect(fn).toBeCalledTimes(1);
+    expect(fn).toBeCalledWith({ prev: obj.inObj, next: obj.inObj, prop: "inObj", target: obj });
+    jest.advanceTimersToNextTimer();
+    expect(fn2).toBeCalledTimes(1);
+    expect(fn2).toBeCalledWith({ props: ["inObj"], target: obj });
+
+    const fnIn = jest.fn();
+    const fnIn2 = jest.fn();
+    const r1 = observer.onPropChanged(obj.inObj, fnIn);
+    const r2 = observer.onChanged(obj.inObj, fnIn2);
+    obj.inObj.val = 123;
+    expect(fnIn).toBeCalledTimes(1);
+    expect(fnIn).toBeCalledWith({ prev: 999, next: 123, prop: "val", target: obj.inObj });
+    jest.advanceTimersToNextTimer();
+    expect(fnIn2).toBeCalledTimes(1);
+    expect(fnIn2).toBeCalledWith({ props: ["val"], target: obj.inObj });
+    r1();
+    r2();
+
+    // checking how it works for newProp
+    // todo delete obj.inObj2;
+    obj.inObj2 = {};
+    expect(observer.isObserved(obj.inObj2)).toBeTruthy();
+    jest.clearAllMocks();
+    jest.clearAllTimers();
+    obj.inObj2.v2 = 123;
+    expect(fn).toBeCalledTimes(1);
+    expect(fn).toBeCalledWith({ prev: obj.inObj2, next: obj.inObj2, prop: "inObj2", target: obj });
+    jest.advanceTimersToNextTimer();
+    expect(fn2).toBeCalledTimes(1);
+    expect(fn2).toBeCalledWith({ props: ["inObj2"], target: obj });
+
+    // todo check assign previously observed to observed
+    // todo check if it's removed from parent
+  });
+
+  test("same on several parents", () => {
+    // checking single refObj with several parents
+    const obj1 = observer.make({ ref: { val: 1 } });
+    const { ref } = obj1;
+    const obj2 = observer.make({ ref });
+
+    expect(observer.isObserved(ref)).toBeTruthy();
+    jest.clearAllMocks();
+    jest.clearAllTimers();
+    const fn = jest.fn();
+    const fn2 = jest.fn();
+    const fnRef = jest.fn();
+    const fnRef2 = jest.fn();
+    observer.onPropChanged(obj1, fn);
+    observer.onChanged(obj1, fn2);
+    observer.onPropChanged(obj2, fnRef);
+    observer.onChanged(obj2, fnRef2);
+
+    ref.value = 99;
+    expect(fn).toBeCalledTimes(1);
+    expect(fn).toBeCalledWith({ prev: ref, next: ref, prop: "ref", target: obj1 });
+    expect(fnRef).toBeCalledTimes(1);
+    expect(fnRef).toBeCalledWith({ prev: ref, next: ref, prop: "ref", target: obj2 });
+    jest.advanceTimersToNextTimer();
+    jest.advanceTimersToNextTimer();
+    expect(fn2).toBeCalledTimes(1);
+    expect(fn2).toBeCalledWith({ props: ["ref"], target: obj1 });
+    expect(fnRef2).toBeCalledTimes(1);
+    expect(fnRef2).toBeCalledWith({ props: ["ref"], target: obj2 });
   });
 });
