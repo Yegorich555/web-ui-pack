@@ -10,6 +10,15 @@ const arrRemove = <T>(arr: Array<T>, item: T) => {
     arr.splice(i, 1);
   }
 };
+const some = <K, V>(m: Map<K, V>, predicate: (key: K, val: V) => boolean): boolean => {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const [key, value] of m.entries()) {
+    if (predicate(key, value)) {
+      return true;
+    }
+  }
+  return false;
+};
 
 type Func = (...args: any[]) => any;
 
@@ -75,7 +84,7 @@ export namespace Observer {
 interface Ref<T extends Observer.Observed<object>> {
   propListeners: Array<Observer.PropCallback<T>>;
   listeners: Array<Observer.Callback<T>>;
-  parentRefs: Array<{ key: any; ref: Ref<any> }>;
+  parentRefs: Map<Ref<any>, string>;
   hasListeners: () => boolean;
   hasObjListeners: () => boolean;
   onPropChanged: (e: Observer.PropEvent<T, keyof T>) => void;
@@ -157,13 +166,15 @@ function appenCallback<T extends Observer.Observed<object>, K extends "listeners
 
 function make<T extends object>(
   obj: T,
-  parentRef: { key: any; ref: Ref<Observer.Observed<any>> } | undefined
+  parentRef: { key: string; ref: Ref<Observer.Observed<any>> } | undefined
 ): Observer.Observed<T> {
   const isAssigned = (obj as PrivateObserved<T>)[symObserved];
   if (isAssigned) {
-    // todo change parentRefs to Map
-    if (parentRef && !isAssigned.parentRefs.some((p) => p === parentRef)) {
-      isAssigned.parentRefs.push(parentRef);
+    if (parentRef) {
+      if (isAssigned.parentRefs.has(parentRef.ref)) {
+        throw new Error("Observer. Wrong assignment: parentRef must be unique");
+      }
+      isAssigned.parentRefs.set(parentRef.ref, parentRef.key);
     }
     return obj;
   }
@@ -171,10 +182,10 @@ function make<T extends object>(
   const ref: Ref<Observer.Observed<T>> = {
     propListeners: [],
     listeners: [],
-    parentRefs: parentRef ? [parentRef] : [],
+    parentRefs: parentRef ? new Map([[parentRef.ref, parentRef.key]]) : new Map(),
     hasListeners: () =>
-      !!ref.listeners.length || !!ref.propListeners.length || ref.parentRefs.some((p) => p.ref.hasListeners()),
-    hasObjListeners: () => !!ref.listeners.length || ref.parentRefs.some((p) => p.ref.hasObjListeners()),
+      !!ref.listeners.length || !!ref.propListeners.length || some(ref.parentRefs, (r) => r.hasListeners()),
+    hasObjListeners: () => !!ref.listeners.length || some(ref.parentRefs, (r) => r.hasObjListeners()),
     onPropChanged: (e) => {
       // eslint-disable-next-line no-use-before-define
       const target = proxy as Observer.Observed<any>;
@@ -185,16 +196,16 @@ function make<T extends object>(
       e.target = target; // required to reassign and propagate event through parents
 
       ref.propListeners.forEach((f) => f(e));
-      ref.parentRefs.forEach((p) => {
+      ref.parentRefs.forEach((key, r) => {
         // console.warn("test", { prev: target[p.key], next: target[p.key], prop: p.key, target });
-        p.ref.onPropChanged({ ...e, prop: p.key, target: null });
+        r.onPropChanged({ ...e, prop: key, target: null });
       });
     },
     onChanged: (e) => {
       // eslint-disable-next-line no-use-before-define
       e.target = proxy; // required to reassign and propagate event through parents
       ref.listeners.forEach((f) => f(e));
-      ref.parentRefs.forEach((p) => p.ref.onChanged({ ...e, props: [p.key] }));
+      ref.parentRefs.forEach((key, r) => r.onChanged({ ...e, props: [key] }));
     },
   };
 
@@ -255,7 +266,7 @@ function make<T extends object>(
         //   );
         // }
         if (next instanceof Object && typeof next !== "function") {
-          next = make(next, { key: prop, ref });
+          next = make(next, { key: prop as string, ref });
           Reflect.set(t, prop, next);
         }
       }
