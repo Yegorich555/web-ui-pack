@@ -1,3 +1,4 @@
+/* eslint-disable no-self-assign */
 import observer from "web-ui-pack/helpers/observer";
 
 beforeEach(() => {
@@ -441,6 +442,19 @@ describe("helper.observer", () => {
 
     expect(() => observer.onPropChanged({ v: 1 })).toThrow(); // throw because notObserved
     expect(() => observer.onChanged({ v: 1 })).toThrow(); // throw because notObserved
+
+    // checking assign again
+    jest.clearAllMocks();
+    jest.clearAllTimers();
+    const ref = { val: 1 };
+    obj.ref = ref;
+    expect(() => (obj.ref = ref)).not.toThrow();
+    expect(() => (obj.ref = obj.ref)).not.toThrow();
+    const fn = jest.fn();
+    observer.onChanged(obj, fn);
+    obj.ref += 1;
+    jest.advanceTimersToNextTimer();
+    expect(fn).toBeCalledTimes(1);
   });
 
   test("collission on several", () => {
@@ -535,8 +549,52 @@ describe("helper.observer", () => {
     expect(fn2).not.toBeCalled(); // because it doesn't tied with obj anymore
     expect(fnIn).toBeCalled();
     expect(fnIn2).toBeCalled();
-    // todo check assign previously observed to observed
-    // todo check if it's removed from parent
+  });
+
+  test("recusrive; change parent/unassign/reassign", () => {
+    const obj1 = observer.make({ ref: { val: 1 } });
+    const { ref } = obj1;
+    const fn = jest.fn();
+    const fn2 = jest.fn();
+    observer.onPropChanged(obj1, fn);
+    observer.onChanged(obj1, fn2);
+    ref.val += 1;
+    jest.advanceTimersToNextTimer();
+    expect(fn).toBeCalled();
+    expect(fn2).toBeCalled();
+
+    obj1.ref = {};
+    expect(observer.isObserved(ref)).toBeTruthy();
+    jest.clearAllMocks();
+    jest.clearAllTimers();
+    const fnRef = jest.fn();
+    const fnRef2 = jest.fn();
+    observer.onPropChanged(obj1.ref, fnRef);
+    observer.onChanged(obj1.ref, fnRef2);
+    const fnRefOrig = jest.fn();
+    observer.onChanged(ref, fnRefOrig);
+    ref.val += 1;
+    jest.advanceTimersToNextTimer();
+    expect(fnRefOrig).toBeCalled();
+    expect(fnRef).not.toBeCalled(); // because previous ref was removed from object
+    expect(fnRef2).not.toBeCalled();
+    expect(fn).not.toBeCalled();
+    expect(fn2).not.toBeCalled();
+
+    // assign again to another object
+    jest.clearAllMocks();
+    const obj2 = observer.make({});
+    obj2.ref = ref;
+    expect(observer.isObserved(obj2.ref)).toBeTruthy();
+    const fnObj2 = jest.fn();
+    observer.onChanged(obj2, fnObj2);
+    ref.val += 3;
+    jest.advanceTimersToNextTimer();
+    expect(fnRefOrig).toBeCalled();
+    expect(fn).not.toBeCalled(); // because previous ref was removed from object
+    expect(fn2).not.toBeCalled();
+    expect(fnRef).not.toBeCalled();
+    expect(fnRef2).not.toBeCalled();
   });
 
   test("same on several parents", () => {

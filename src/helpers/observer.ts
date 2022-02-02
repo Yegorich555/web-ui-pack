@@ -43,7 +43,6 @@ export namespace Observer {
     ): () => void;
   }
   export type Observed<T extends object = object> = {
-    // todo recursive
     [K in keyof T]: T[K] extends Record<string, unknown> ? Observed<T[K]> : T[K];
   };
 
@@ -171,9 +170,9 @@ function make<T extends object>(
   const isAssigned = (obj as PrivateObserved<T>)[symObserved];
   if (isAssigned) {
     if (parentRef) {
-      if (isAssigned.parentRefs.has(parentRef.ref)) {
-        throw new Error("Observer. Wrong assignment: parentRef must be unique");
-      }
+      // if (isAssigned.parentRefs.has(parentRef.ref)) {
+      //   throw new Error("Observer. Wrong assignment: parentRef must be unique");
+      // }
       isAssigned.parentRefs.set(parentRef.ref, parentRef.key);
     }
     return obj;
@@ -196,10 +195,7 @@ function make<T extends object>(
       e.target = target; // required to reassign and propagate event through parents
 
       ref.propListeners.forEach((f) => f(e));
-      ref.parentRefs.forEach((key, r) => {
-        // console.warn("test", { prev: target[p.key], next: target[p.key], prop: p.key, target });
-        r.onPropChanged({ ...e, prop: key, target: null });
-      });
+      ref.parentRefs.forEach((key, r) => r.onPropChanged({ ...e, prop: key, target: null }));
     },
     onChanged: (e) => {
       // eslint-disable-next-line no-use-before-define
@@ -240,12 +236,16 @@ function make<T extends object>(
   let isReady = false;
   const proxyHandler: ProxyHandler<typeof obj> = {
     set(t, prop, next) {
-      const prev = t[prop as keyof T] as any;
-      // @ts-ignore
-      const isOk = Reflect.set(...arguments);
       if (!isReady) {
-        return isOk;
+        // @ts-ignore
+        return Reflect.set(...arguments);
       }
+      const prev = t[prop as keyof T] as any;
+      // eslint-disable-next-line no-use-before-define
+      const prevProxy = typeof prev !== "function" && (proxy[prop as keyof T] as unknown as PrivateObserved);
+      // @ts-ignore
+
+      const isOk = Reflect.set(...arguments);
       if (isOk && ref.hasListeners()) {
         let isChanged = false;
         if (prev == null || next == null) {
@@ -257,14 +257,8 @@ function make<T extends object>(
       }
 
       if (isOk && prev !== next) {
-        // todo implement unassign
-        // if (isObserved(prev)) {
-        //   const pRef = (prev as PrivateObserved)[symObserved].parentRefs;
-        //   arrRemove(
-        //     pRef,
-        //     pRef.find((p) => p.key === prop)
-        //   );
-        // }
+        prevProxy && isObserved(prevProxy) && prevProxy[symObserved].parentRefs.delete(ref);
+
         if (next instanceof Object && typeof next !== "function") {
           next = make(next, { key: prop as string, ref });
           Reflect.set(t, prop, next);
@@ -360,22 +354,6 @@ const observer: Observer.IObserver = {
     return appenCallback(target, callback, "listeners");
   },
 };
-
-// const obj = observer.make({ ref: { val: 1 } });
-// const { ref } = obj;
-// // debugger;
-// const obj2 = observer.make({ ref });
-// // observer.onPropChanged(obj, (e) => console.warn("prop: 1st", e));
-// observer.onChanged(obj, (e) => console.warn("obj: 1st", e));
-
-// observer.onPropChanged(obj2, (e) => console.warn("prop: 2nd", e));
-// observer.onChanged(obj2, (e) => console.warn("obj: 2nd", e));
-// ref.val = 2;
-// console.warn(ref[symObserved]);
-
-// const obj = observer.make({ val: 1, inObj: { val: 123 } });
-// observer.onChanged(obj, (e) => console.warn(e));
-// obj.inObj.val = 999;
 
 Object.seal(observer);
 export default observer;
