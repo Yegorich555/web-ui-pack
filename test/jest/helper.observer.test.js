@@ -1,8 +1,20 @@
 /* eslint-disable no-self-assign */
 import observer from "web-ui-pack/helpers/observer";
 
+// watchfix jest issue unhandledRejection handler is not testable: https://github.com/facebook/jest/issues/5620
+const catchIn = () => {};
+beforeAll(() => {
+  process.on("unhandledRejection", catchIn);
+  // window.addEventListener("unhandledrejection", catchIn);
+});
+afterAll(() => {
+  process.off("unhandledRejection", catchIn);
+  // window.removeEventListener("unhandledrejection", catchIn);
+});
+
 beforeEach(() => {
-  jest.useFakeTimers();
+  // https://stackoverflow.com/questions/51126786/jest-fake-timers-with-promises
+  jest.useFakeTimers(); // legacy required to work with Promises correctly
   jest.clearAllMocks();
   jest.clearAllTimers();
 });
@@ -452,9 +464,30 @@ describe("helper.observer", () => {
     expect(() => (obj.ref = obj.ref)).not.toThrow();
     const fn = jest.fn();
     observer.onChanged(obj, fn);
+    expect(observer.isObserved(obj.ref)).toBeTruthy();
     obj.ref += 1;
+    // todo check with this obj.ref.val += 1;
     jest.advanceTimersToNextTimer();
     expect(fn).toBeCalledTimes(1);
+  });
+
+  test("exception in event > callback doesn't affect on another", async () => {
+    await Promise.resolve();
+    const obj = observer.make({ ref: { val: 1 } });
+    observer.onPropChanged(obj.ref, () => {
+      throw new Error("Test prop message");
+    });
+    observer.onChanged(obj.ref, () => {
+      throw new Error("Test message");
+    });
+    const fn = jest.fn();
+    const fn2 = jest.fn();
+    observer.onPropChanged(obj, fn);
+    observer.onChanged(obj, fn2);
+    obj.ref.val += 1;
+    jest.advanceTimersToNextTimer();
+    expect(fn).toBeCalledTimes(1);
+    expect(fn2).toBeCalledTimes(1);
   });
 
   test("collission on several", () => {

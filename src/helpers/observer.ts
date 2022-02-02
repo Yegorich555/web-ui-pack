@@ -20,6 +20,11 @@ const some = <K, V>(m: Map<K, V>, predicate: (key: K, val: V) => boolean): boole
   return false;
 };
 
+const pathThrough = <R>(fn: () => R): Promise<R> =>
+  new Promise((resolve) => {
+    resolve(fn());
+  });
+
 type Func = (...args: any[]) => any;
 
 export namespace Observer {
@@ -177,6 +182,7 @@ function make<T extends object>(
     }
     return obj;
   }
+
   const isDate = obj instanceof Date;
   const ref: Ref<Observer.Observed<T>> = {
     propListeners: [],
@@ -194,13 +200,13 @@ function make<T extends object>(
       }
       e.target = target; // required to reassign and propagate event through parents
 
-      ref.propListeners.forEach((f) => f(e));
+      ref.propListeners.forEach((f) => pathThrough(() => f(e)));
       ref.parentRefs.forEach((key, r) => r.onPropChanged({ ...e, prop: key, target: null }));
     },
     onChanged: (e) => {
       // eslint-disable-next-line no-use-before-define
       e.target = proxy; // required to reassign and propagate event through parents
-      ref.listeners.forEach((f) => f(e));
+      ref.listeners.forEach((f) => pathThrough(() => f(e)));
       ref.parentRefs.forEach((key, r) => r.onChanged({ ...e, props: [key] }));
     },
   };
@@ -211,7 +217,6 @@ function make<T extends object>(
   const propChanged = <K extends keyof T>(e: Omit<Observer.BasicPropEvent<any, any>, "target">) => {
     // eslint-disable-next-line no-use-before-define
     (e as Observer.PropEvent<T, K>).target = proxy;
-    // todo wrap in tryCatch
     ref.onPropChanged(e as Observer.PropEvent<T, K>);
     if (ref.hasObjListeners()) {
       changedProps.push(e.prop as keyof T);
@@ -354,6 +359,13 @@ const observer: Observer.IObserver = {
     return appenCallback(target, callback, "listeners");
   },
 };
+
+// const obj = observer.make({ ref: { val: 1 } });
+// observer.onPropChanged(obj.ref, () => {
+//   throw new Error("TestMe");
+// });
+// observer.onPropChanged(obj.ref, console.warn);
+// obj.ref.val += 1;
 
 Object.seal(observer);
 export default observer;
