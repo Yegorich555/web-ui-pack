@@ -510,7 +510,6 @@ describe("helper.observer", () => {
     r2();
 
     // checking how it works for newProp
-    // todo delete obj.inObj2;
     obj.inObj2 = {};
     expect(observer.isObserved(obj.inObj2)).toBeTruthy();
     jest.clearAllMocks();
@@ -522,6 +521,20 @@ describe("helper.observer", () => {
     expect(fn2).toBeCalledTimes(1);
     expect(fn2).toBeCalledWith({ props: ["inObj2"], target: obj });
 
+    // checking delete
+    const { inObj } = obj;
+    delete obj.inObj; // it will fire events
+    jest.clearAllMocks();
+    jest.clearAllTimers();
+    expect(observer.isObserved(inObj)).toBeTruthy();
+    observer.onPropChanged(obj.inObj, fnIn);
+    observer.onChanged(obj.inObj, fnIn2);
+    inObj.txt = "345"; // expected that previousParent not tied anymore
+    jest.advanceTimersToNextTimer();
+    expect(fn).not.toBeCalled(); // because it doesn't tied with obj anymore
+    expect(fn2).not.toBeCalled(); // because it doesn't tied with obj anymore
+    expect(fnIn).toBeCalled();
+    expect(fnIn2).toBeCalled();
     // todo check assign previously observed to observed
     // todo check if it's removed from parent
   });

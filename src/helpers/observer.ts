@@ -25,7 +25,7 @@ type Func = (...args: any[]) => any;
 export namespace Observer {
   export interface IObserver {
     /** Returns @true if object is observed (is applied observer.make()) */
-    isObserved<T extends object>(obj: T): boolean;
+    isObserved(obj: any): boolean;
     /** Make observable object to detect changes; @see Proxy */
     make<T extends object>(obj: T): Observer.Observed<T>;
     /** Listen for any props changing on the object; callback is called per each prop-changing
@@ -96,8 +96,8 @@ type PrivateObserved<T extends object = object> = Observer.Observed<T> & {
   readonly [symObserved]: Ref<Observer.Observed<T>>;
 };
 
-function isObserved<T extends object>(obj: T): boolean {
-  return obj && !!(obj as PrivateObserved<T>)[symObserved];
+function isObserved(obj: any): boolean {
+  return obj && !!(obj as PrivateObserved)[symObserved];
 }
 // type Ref<T extends object> = PrivateObserved<T>[typeof symObserved];
 
@@ -274,10 +274,15 @@ function make<T extends object>(
       return isOk;
     },
     deleteProperty(t, prop) {
-      // todo implement delete property
+      const prev = t[prop as keyof T];
       if (!isDate && ref.hasListeners()) {
-        const prev = t[prop as keyof T];
         propChanged({ prev, next: undefined, prop });
+      }
+
+      if (prev instanceof Object && typeof prev !== "function") {
+        // eslint-disable-next-line no-use-before-define
+        const v = proxy[prop as keyof T] as unknown as PrivateObserved;
+        isObserved(v) && v[symObserved].parentRefs.delete(ref);
       }
       return true;
     },
