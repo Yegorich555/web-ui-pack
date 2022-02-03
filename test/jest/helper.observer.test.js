@@ -362,6 +362,17 @@ describe("helper.observer", () => {
     expect(fn).not.toBeCalled();
     jest.advanceTimersToNextTimer();
     expect(fn2).not.toBeCalled();
+
+    jest.clearAllMocks();
+    obj.dateVal = new Date("NaN here");
+    expect(fn).toBeCalledTimes(1);
+    jest.advanceTimersToNextTimer();
+    expect(fn2).toBeCalledTimes(1);
+    jest.clearAllMocks();
+    obj.dateVal = new Date("NaN again here");
+    expect(fn).not.toBeCalled();
+    jest.advanceTimersToNextTimer();
+    expect(fn2).not.toBeCalled();
   });
 
   test("for Set, Map", () => {
@@ -465,22 +476,29 @@ describe("helper.observer", () => {
     expect(() => observer.onChanged({ v: 1 })).toThrow(); // throw because notObserved
 
     // checking assign again
-    jest.clearAllMocks();
     jest.clearAllTimers();
-    const ref = { val: 1 };
-    obj.ref = ref;
-
-    // try to assign again
-    expect(() => (obj.ref = ref)).not.toThrow();
-    expect(() => (obj.ref = obj.ref)).not.toThrow();
-    expect(observer.isObserved(ref)).toBeFalsy();
-    expect(ref).not.toBe(obj.ref); // IMPORTANT: because after assigning it's converted to proxy object
     const fn = jest.fn();
     observer.onChanged(obj, fn);
+    const raw = { val: 1 };
+    obj.ref = raw;
+    jest.advanceTimersToNextTimer();
+    expect(fn).toBeCalledTimes(1);
+    jest.clearAllMocks();
+
+    // try to assign again
+    expect(() => (obj.ref = raw)).not.toThrow();
+    jest.advanceTimersToNextTimer();
+    expect(fn).toBeCalledTimes(1); // because stored proxy-object but assigned raw
+    expect(() => (obj.ref = obj.ref)).not.toThrow();
+    jest.advanceTimersToNextTimer();
+    expect(fn).toBeCalledTimes(1); // stay the same because no changes
+    expect(observer.isObserved(raw)).toBeFalsy();
+    expect(raw).not.toBe(obj.ref); // IMPORTANT: because after assigning it's converted to proxy object
+
     expect(observer.isObserved(obj.ref)).toBeTruthy();
     obj.ref.val += 1;
     jest.advanceTimersToNextTimer();
-    expect(fn).toBeCalledTimes(1);
+    expect(fn).toBeCalledTimes(2);
   });
 
   test("exception in event > callback doesn't affect on another", async () => {

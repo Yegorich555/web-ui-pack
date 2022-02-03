@@ -57,12 +57,18 @@ const raw = { date: new Date(), period: 3, nestedObj: rawNestedObj, arr: ["a"] }
 const obj = observer.make(raw);
 const removeListener = observer.onPropChanged(obj, (e) => console.warn("prop changed", e)); // calls per each changing
 const removeListener2 = observer.onChanged(obj, (e) => console.warn("object changed", e)); // calls once after changing of bunch props
-obj.period = 5;
-obj.date.setHours(0, 0, 0, 0);
-obj.nestedObj.val = 2;
-obj.arr.push("b");
+obj.period = 5; // fire onPropChanged
+obj.date.setHours(0, 0, 0, 0); // fire onPropChanged
+obj.nestedObj.val = 2; // fire onPropChanged
+obj.arr.push("b"); // fire onPropChanged
+
+obj.nestedObj = rawNestedObj; // fire onPropChanged
+obj.nestedObj = rawNestedObj; // WARNING: it fire events again because rawNestedObj !== obj.nestedObj
+
 removeListener(); // unsubscribe
 removeListener2(); // unsubscribe
+
+// before timeout will be fired onChanged (single time)
 setTimeout(() => {
   console.warn("WARNING: raw vs observable", {
     equal: raw === obj,
@@ -83,3 +89,4 @@ setTimeout(() => {
 - Every object assigned to `observed` is converted to `observed` also
 - When you change array in most cases you get changing `length`; also `sort`/`reverse` triggers events
 - WeakMap and WeakSet isn't supported
+- All objects compares by `valueOf()`

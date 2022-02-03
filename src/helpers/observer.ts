@@ -25,6 +25,8 @@ const pathThrough = <R>(fn: () => R): Promise<R> =>
     resolve(fn());
   });
 
+const isObject = (obj: any) => obj instanceof Object && !(obj instanceof Function);
+
 type Func = (...args: any[]) => any;
 
 export namespace Observer {
@@ -252,14 +254,16 @@ function make<T extends object>(
         if (prev == null || next == null) {
           isChanged = prev !== next;
         } else {
-          isChanged = prev.valueOf() !== (next as any).valueOf() && !isBothNaN(prev, next);
+          const a = prev.valueOf();
+          const b = (next as any).valueOf();
+          isChanged = a !== b && !isBothNaN(a, b);
         }
         isChanged && propChanged({ prev, next, prop });
       }
 
       if (isOk && prev !== next) {
         prevRef && prevRef.parentRefs.delete(ref);
-        if (next instanceof Object && typeof next !== "function") {
+        if (isObject(next)) {
           next = make(next, { key: prop as string, ref });
           Reflect.set(t, prop, next);
         }
@@ -273,10 +277,11 @@ function make<T extends object>(
         propChanged({ prev, next: undefined, prop });
       }
 
-      if (prev instanceof Object && typeof prev !== "function") {
+      // remove parent from this object
+      if (isObject(prev)) {
         // eslint-disable-next-line no-use-before-define
         const v = proxy[prop as keyof T] as unknown as Observer.Observed;
-        lstObserved.get(v)?.parentRefs.delete(ref);
+        (lstObserved.get(v) as Ref<object>).parentRefs.delete(ref);
       }
       return true;
     },
@@ -313,7 +318,7 @@ function make<T extends object>(
   if (!isDate) {
     Object.keys(obj).forEach((k) => {
       const v = obj[k] as any;
-      if (v instanceof Object && typeof v !== "function") {
+      if (isObject(v)) {
         proxy[k] = make(v, { ref, key: k }) as never;
       }
     });
