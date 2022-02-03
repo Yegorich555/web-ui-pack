@@ -324,7 +324,7 @@ function make<T extends object>(
 
 /** Helper to detect object changes;
  * @example
- * const raw = { date: new Date(), period: 3 };
+ * const raw = { date: new Date(), period: 3, nestedObj: { val: 1} };
  * const obj = observer.make(raw);
  * const removeListener = observer.onPropChanged(obj, (e) => console.warn(e));
  * const removeListener2 = observer.onChanged(obj, (e) => console.warn(e));

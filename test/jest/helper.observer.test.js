@@ -5,7 +5,7 @@ import observer from "web-ui-pack/helpers/observer";
 const catchIn = () => console.warn("got");
 
 beforeAll(() => {
-  // todo hook on jest env
+  // todo hook on jest env doesn't work
   process.on("unhandledRejection", catchIn);
   // window.addEventListener("unhandledrejection", catchIn);
 });
