@@ -128,7 +128,7 @@ export type JSXCustomProps<T> = React.DetailedHTMLProps<
   T
 >;
 
-export namespace WUPBase {
+export namespace WUP {
   // export interface IEvent<T extends HTMLElementEventMap> extends Event {
   //   // eslint-disable-next-line @typescript-eslint/no-misused-new
   //   new (type: keyof T, eventInitDict?: EventInit): IEvent<T>;

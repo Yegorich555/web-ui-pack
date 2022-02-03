@@ -1,4 +1,4 @@
-import { WUPBase } from "./baseElement";
+import { WUP } from "./baseElement";
 import { IPlacementFunction } from "./popupPlacements";
 
 export namespace WUPPopup {
@@ -72,7 +72,7 @@ export namespace WUPPopup {
   }
 
   export interface Element<T extends PopupEventMap & Record<keyof T, Event> = PopupEventMap>
-    extends WUPBase.IBaseElement<T> {
+    extends WUP.IBaseElement<T> {
     /** Options. Call $show/$hide to reinit and apply option-changes after element is appended to document */
     $options: Options;
     /** Show popup */

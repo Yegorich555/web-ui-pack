@@ -34,7 +34,7 @@ function setEvent(): void {
   }
 }
 
-interface onFocusLostOptions extends AddEventListenerOptions {
+export interface onFocusLostOptions extends AddEventListenerOptions {
   /** Required to prevent debounce when user clicks on label tied with input;
    * In this case events labelClick > inputFocusout > inputClick > inputFocusin is fired
    *

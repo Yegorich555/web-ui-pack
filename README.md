@@ -33,7 +33,7 @@ Coming soon
 ### Helpers
 
 use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
-or `import { focusFirst } from "web-ui-pack"`
+**WARN**: don't use `import {focusFirst} from "web-ui-pack;` because in this case the whole web-ui-pack module traps in compilation of dev-bundle and increases time of compilation
 
 - [**focusFirst**(element: HTMLElement)](#helpers) ⇒ `Set focus on parent itself or first possible element inside`
 - [**nestedProperty.set**](#helpers) ⇒ `nestedProperty.set(obj, "value.nestedValue", 1) sets obj.value.nestedValue = 1`
@@ -76,7 +76,7 @@ setTimeout(() => {
     isObjObserved: observer.isObserved(obj),
   });
   // because after assigning to observable it converted to observable also
-  console.warn("WARNING: rawNestedObj vs observable",  {
+  console.warn("WARNING: rawNestedObj vs observable", {
     equal: rawNestedObj === obj.nestedObj,
     isRawObserved: observer.isObserved(rawNestedObj),
     isNestedObserved: observer.isObserved(obj.nestedObj),
@@ -89,4 +89,4 @@ setTimeout(() => {
 - Every object assigned to `observed` is converted to `observed` also
 - When you change array in most cases you get changing `length`; also `sort`/`reverse` triggers events
 - WeakMap and WeakSet isn't supported
-- All objects compares by `valueOf()`
+- All objects compares by `valueOf()` so you maybe interested in custom valueOf to avoid unexpected issues
