@@ -29,17 +29,17 @@ type Func = (...args: any[]) => any;
 
 export namespace Observer {
   export interface IObserver {
-    /** Returns @true if object is observed (is applied observer.make()) */
+    /** Returns @true if object is observed (converted via observer.make()) */
     isObserved(obj: any): boolean;
     /** Make observable object to detect changes; @see Proxy */
     make<T extends object>(obj: T): Observer.Observed<T>;
-    /** Listen for any props changing on the object; callback is called per each prop-changing
+    /** Listen for any props changing on the observed; callback is called per each prop-changing
      * @returns callback to removeListener */
     onPropChanged<T extends Observer.Observed<object>>(
       target: T,
       callback: Observer.PropCallback<T> // options: { once?: boolean }
     ): () => void;
-    /** Listen for any changing on the object; callback is called single time per bunch of props-changing
+    /** Listen for any changing on the observed; callback is called single time per bunch of props-changing
      * @returns callback to removeListener */
     onChanged<T extends Observer.Observed<object>>(
       target: T,
@@ -95,15 +95,11 @@ interface Ref<T extends Observer.Observed<object>> {
   onChanged: (ev: Observer.ObjectEvent<T>) => void;
 }
 
-const symObserved = Symbol("__observed");
-type PrivateObserved<T extends object = object> = Observer.Observed<T> & {
-  readonly [symObserved]: Ref<Observer.Observed<T>>;
-};
+const lstObserved = new WeakMap<Observer.Observed, Ref<Observer.Observed<object>>>();
 
 function isObserved(obj: any): boolean {
-  return obj && !!(obj as PrivateObserved)[symObserved];
+  return obj && lstObserved.has(obj);
 }
-// type Ref<T extends object> = PrivateObserved<T>[typeof symObserved];
 
 type WatchItem<T> = {
   is: (obj: unknown) => boolean;
@@ -151,28 +147,28 @@ const watchSet: Array<WatchItem<any>> = [
 ];
 
 function appenCallback<T extends Observer.Observed<object>, K extends "listeners" | "propListeners">(
-  target: T,
+  proxy: T,
   callback: K extends "propListeners" ? Observer.PropCallback<T> : Observer.Callback<T>,
   setKey: K
 ) {
-  const o = (target as PrivateObserved<object>)[symObserved];
+  const o = lstObserved.get(proxy);
   if (!o) {
     throw new Error("Observer. Only observed objects expected. Use make() before");
   }
   if (!callback) {
     throw new Error("Observer. Callback is missed");
   }
-  const arr = o[setKey];
-  arr.push(callback as unknown as any);
+  const listeners = o[setKey];
+  listeners.push(callback as unknown as any);
 
-  return () => arrRemove(arr, callback as unknown as any);
+  return () => arrRemove(listeners, callback as unknown as any);
 }
 
 function make<T extends object>(
   obj: T,
   parentRef: { key: string; ref: Ref<Observer.Observed<any>> } | undefined
 ): Observer.Observed<T> {
-  const isAssigned = (obj as PrivateObserved<T>)[symObserved];
+  const isAssigned = lstObserved.get(obj);
   if (isAssigned) {
     if (parentRef) {
       // if (isAssigned.parentRefs.has(parentRef.ref)) {
@@ -246,10 +242,10 @@ function make<T extends object>(
         return Reflect.set(...arguments);
       }
       const prev = t[prop as keyof T] as any;
-      // eslint-disable-next-line no-use-before-define
-      const prevProxy = typeof prev !== "function" && (proxy[prop as keyof T] as unknown as PrivateObserved);
+      const prevRef =
+        // eslint-disable-next-line no-use-before-define
+        typeof prev !== "function" && lstObserved.get(proxy[prop as keyof T] as unknown as Observer.Observed);
       // @ts-ignore
-
       const isOk = Reflect.set(...arguments);
       if (isOk && ref.hasListeners()) {
         let isChanged = false;
@@ -262,8 +258,7 @@ function make<T extends object>(
       }
 
       if (isOk && prev !== next) {
-        prevProxy && isObserved(prevProxy) && prevProxy[symObserved].parentRefs.delete(ref);
-
+        prevRef && prevRef.parentRefs.delete(ref);
         if (next instanceof Object && typeof next !== "function") {
           next = make(next, { key: prop as string, ref });
           Reflect.set(t, prop, next);
@@ -280,8 +275,8 @@ function make<T extends object>(
 
       if (prev instanceof Object && typeof prev !== "function") {
         // eslint-disable-next-line no-use-before-define
-        const v = proxy[prop as keyof T] as unknown as PrivateObserved;
-        isObserved(v) && v[symObserved].parentRefs.delete(ref);
+        const v = proxy[prop as keyof T] as unknown as Observer.Observed;
+        lstObserved.get(v)?.parentRefs.delete(ref);
       }
       return true;
     },
@@ -312,9 +307,8 @@ function make<T extends object>(
     };
   }
 
-  const proxy = new Proxy(obj, proxyHandler) as PrivateObserved<T>;
-  Object.defineProperty(proxy, symObserved, { get: () => ref });
-
+  const proxy = new Proxy(obj, proxyHandler);
+  lstObserved.set(proxy, ref as Ref<object>);
   // scan recursive
   if (!isDate) {
     Object.keys(obj).forEach((k) => {
@@ -324,7 +318,7 @@ function make<T extends object>(
       }
     });
   }
-  isReady = true; // required to avoid double make on same proxy
+  isReady = true; // required to avoid double make() on same proxy
   return proxy;
 }
 
@@ -359,13 +353,6 @@ const observer: Observer.IObserver = {
     return appenCallback(target, callback, "listeners");
   },
 };
-
-// const obj = observer.make({ ref: { val: 1 } });
-// observer.onPropChanged(obj.ref, () => {
-//   throw new Error("TestMe");
-// });
-// observer.onPropChanged(obj.ref, console.warn);
-// obj.ref.val += 1;
 
 Object.seal(observer);
 export default observer;

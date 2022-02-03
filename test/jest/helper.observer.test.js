@@ -2,8 +2,10 @@
 import observer from "web-ui-pack/helpers/observer";
 
 // watchfix jest issue unhandledRejection handler is not testable: https://github.com/facebook/jest/issues/5620
-const catchIn = () => {};
+const catchIn = () => console.warn("got");
+
 beforeAll(() => {
+  // todo hook on jest env
   process.on("unhandledRejection", catchIn);
   // window.addEventListener("unhandledrejection", catchIn);
 });
@@ -441,8 +443,15 @@ describe("helper.observer", () => {
 
   test("method isObserver(), exceptions etc.", () => {
     expect(observer.isObserved({ v: 1 })).toBeFalsy(); // on notObserved object
-    const obj = observer.make({ v: 1 });
+    const prev = { v: 1 };
+    const obj = observer.make(prev);
     expect(observer.isObserved(obj)).toBeTruthy();
+    expect(prev).not.toBe(obj); // IMPORTANT: because after assigning it's converted to proxy object
+    expect(observer.isObserved(prev)).toBeFalsy();
+
+    const next = {};
+    obj.next = next;
+    expect(observer.isObserved(obj.next)).toBeTruthy();
 
     // on empty callback
     expect(() => observer.onPropChanged(obj)).toThrow();
@@ -460,13 +469,16 @@ describe("helper.observer", () => {
     jest.clearAllTimers();
     const ref = { val: 1 };
     obj.ref = ref;
+
+    // try to assign again
     expect(() => (obj.ref = ref)).not.toThrow();
     expect(() => (obj.ref = obj.ref)).not.toThrow();
+    expect(observer.isObserved(ref)).toBeFalsy();
+    expect(ref).not.toBe(obj.ref); // IMPORTANT: because after assigning it's converted to proxy object
     const fn = jest.fn();
     observer.onChanged(obj, fn);
     expect(observer.isObserved(obj.ref)).toBeTruthy();
-    obj.ref += 1;
-    // todo check with this obj.ref.val += 1;
+    obj.ref.val += 1;
     jest.advanceTimersToNextTimer();
     expect(fn).toBeCalledTimes(1);
   });
