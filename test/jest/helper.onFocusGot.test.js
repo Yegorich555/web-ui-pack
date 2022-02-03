@@ -1,4 +1,4 @@
-import onFocusGot from "web-ui-pack/helpers/onFocusGot";
+import { onFocusGot } from "web-ui-pack";
 
 jest.useFakeTimers();
 

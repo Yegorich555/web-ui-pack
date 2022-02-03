@@ -23,6 +23,7 @@ module.exports = {
       displayName: "general",
       testMatch: [`${__dirname}/jest/**/*.test.[jt]s?(x)`],
       moduleNameMapper,
+      modulePathIgnorePatterns: [`${rootDir}/package.json`],
       testEnvironment: "jsdom",
     },
     {

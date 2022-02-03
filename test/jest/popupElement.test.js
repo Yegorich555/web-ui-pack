@@ -1,4 +1,4 @@
-import WUPPopupElement from "web-ui-pack/popupElement";
+import { WUPPopupElement } from "web-ui-pack";
 import * as h from "../testHelper";
 
 jest.useFakeTimers();

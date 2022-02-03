@@ -1,4 +1,4 @@
-import onEvent from "web-ui-pack/helpers/onEvent";
+import { onEvent } from "web-ui-pack";
 
 describe("helper.onEvent", () => {
   test("ordinary behavior", () => {

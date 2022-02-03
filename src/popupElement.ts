@@ -1,4 +1,4 @@
-import { focusFirst } from ".";
+import focusFirst from "./helpers/focusFirst";
 import WUPBaseElement, { JSXCustomProps } from "./baseElement";
 import onFocusGot from "./helpers/onFocusGot";
 import onFocusLost from "./helpers/onFocusLost";

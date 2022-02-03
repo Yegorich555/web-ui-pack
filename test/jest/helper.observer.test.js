@@ -1,5 +1,5 @@
 /* eslint-disable no-self-assign */
-import observer from "web-ui-pack/helpers/observer";
+import { observer } from "web-ui-pack";
 
 // watchfix jest issue unhandledRejection handler is not testable: https://github.com/facebook/jest/issues/5620
 const catchIn = () => console.warn("got");

@@ -1,4 +1,4 @@
-import onFocusLost from "web-ui-pack/helpers/onFocusLost";
+import { onFocusLost } from "web-ui-pack";
 
 jest.useFakeTimers();
 

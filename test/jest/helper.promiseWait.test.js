@@ -1,11 +1,11 @@
-import promiseWait from "web-ui-pack/helpers/promiseWait";
+import { promiseWait } from "web-ui-pack";
 
 describe("helper.promiseWait", () => {
   // todo jest.fakeTimers bug: https://github.com/facebook/jest/issues/9719
   /* test("jest bug", async () => {
     jest.useFakeTimers();
     const fn = jest.fn();
-    
+
     const mainPromise = Promise.resolve(5);
     const waitPromise = new Promise(resolve => setTimeout(() => resolve(mainPromise), 100));
     //const waitPromise = new Promise(resolve => setTimeout(() => resolve(5), 100)).then(fn);
