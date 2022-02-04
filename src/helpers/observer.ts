@@ -1,4 +1,4 @@
-/* eslint-disable prefer-rest-params */
+/* eslint-disable no-use-before-define, prefer-rest-params */
 // discussions here https://stackoverflow.com/questions/5100376/how-to-watch-for-array-changes
 
 /** const a = NaN; a !== a; // true */
@@ -187,10 +187,11 @@ function make<T extends object>(
     listeners: [],
     parentRefs: parentRef ? new Map([[parentRef.ref, parentRef.key]]) : new Map(),
     hasListeners: () =>
-      !!ref.listeners.length || !!ref.propListeners.length || some(ref.parentRefs, (r) => r.hasListeners()),
+      !!ref.listeners.length || //
+      !!ref.propListeners.length || //
+      some(ref.parentRefs, (r) => r.hasListeners()),
     hasObjListeners: () => !!ref.listeners.length || some(ref.parentRefs, (r) => r.hasObjListeners()),
     onPropChanged: (e) => {
-      // eslint-disable-next-line no-use-before-define
       const target = proxy as Observer.Observed<any>;
       if (e.target === null) {
         e.prev = target[e.prop];
@@ -202,7 +203,6 @@ function make<T extends object>(
       ref.parentRefs.forEach((key, r) => r.onPropChanged({ ...e, prop: key, target: null }));
     },
     onChanged: (e) => {
-      // eslint-disable-next-line no-use-before-define
       e.target = proxy; // required to reassign and propagate event through parents
       ref.listeners.forEach((f) => pathThrough(() => f(e)));
       ref.parentRefs.forEach((key, r) => r.onChanged({ ...e, props: [key] }));
@@ -213,7 +213,6 @@ function make<T extends object>(
   let timeoutId: ReturnType<typeof setTimeout> | undefined | number;
 
   const propChanged = <K extends keyof T>(e: Omit<Observer.BasicPropEvent<any, any>, "target">) => {
-    // eslint-disable-next-line no-use-before-define
     (e as Observer.PropEvent<T, K>).target = proxy;
     ref.onPropChanged(e as Observer.PropEvent<T, K>);
     if (ref.hasObjListeners()) {
@@ -227,7 +226,6 @@ function make<T extends object>(
 
         const ev: Observer.ObjectEvent<Observer.Observed<T>> = {
           props: changedProps as any,
-          // eslint-disable-next-line no-use-before-define
           target: proxy,
         };
         ref.onChanged(ev);
@@ -238,41 +236,41 @@ function make<T extends object>(
   };
   let isReady = false;
   const proxyHandler: ProxyHandler<typeof obj> = {
-    set(t, prop, next) {
+    set(t, prop, next, receiver) {
       if (!isReady) {
-        // @ts-ignore
-        return Reflect.set(...arguments);
+        return Reflect.set(t, prop, next, receiver);
       }
+
       const prev = t[prop as keyof T] as any;
-      const prevRef =
-        // eslint-disable-next-line no-use-before-define
-        typeof prev !== "function" && lstObserved.get(proxy[prop as keyof T] as unknown as Observer.Observed);
-      // @ts-ignore
-      const isOk = Reflect.set(...arguments);
+      if (prev !== next) {
+        // todo optimize for `Prev is a proxy of Next`
+        // checking isObject required to avoid getter-cast for function
+        const prevRef = isObject(prev) && lstObserved.get(proxy[prop as keyof T] as unknown as Observer.Observed);
+        prevRef && prevRef.parentRefs.delete(ref);
+        if (isObject(next)) {
+          next = make(next, { key: prop as string, ref });
+        }
+      }
+
+      const isOk = Reflect.set(t, prop, next, receiver);
       if (isOk && ref.hasListeners()) {
         let isChanged = false;
         if (prev == null || next == null) {
           isChanged = prev !== next;
         } else {
           const a = prev.valueOf();
-          const b = (next as any).valueOf();
+          const b = next.valueOf();
           isChanged = a !== b && !isBothNaN(a, b);
         }
-        isChanged && propChanged({ prev, next, prop });
-      }
 
-      if (isOk && prev !== next) {
-        prevRef && prevRef.parentRefs.delete(ref);
-        if (isObject(next)) {
-          next = make(next, { key: prop as string, ref });
-          Reflect.set(t, prop, next);
-        }
+        isChanged && propChanged({ prev, next, prop });
       }
 
       return isOk;
     },
     deleteProperty(t, prop) {
       const prev = t[prop as keyof T];
+      debugger;
       if (!isDate && ref.hasListeners()) {
         propChanged({ prev, next: undefined, prop });
       }
@@ -358,6 +356,11 @@ const observer: Observer.IObserver = {
     return appenCallback(target, callback, "listeners");
   },
 };
+
+// const obj = observer.make({ val: 1 });
+// observer.onPropChanged(obj, console.warn);
+// obj.addedProp = "str";
+// delete obj.addedProp;
 
 Object.seal(observer);
 export default observer;

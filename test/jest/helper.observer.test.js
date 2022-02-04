@@ -131,10 +131,25 @@ describe("helper.observer", () => {
     expect(fn2).lastCalledWith({ props: ["boolVal", "stringVal"], target: obj });
   });
 
+  test("onChanged onPropChanged doesn't affect on each other", () => {
+    let obj = observer.make({ val: 1 });
+    const fn = jest.fn();
+    observer.onPropChanged(obj, fn);
+    delete obj.val;
+    expect(fn).toBeCalledTimes(1);
+
+    fn.mockClear();
+    obj = observer.make({ v: 1 });
+    observer.onChanged(obj, fn);
+    obj.v += 1;
+    jest.advanceTimersToNextTimer();
+    expect(fn).toBeCalledTimes(1);
+  });
+
   test("assign/delete property", () => {
     const obj = observer.make({ val: 1 });
     const fn = jest.fn();
-    observer.onPropChanged(obj, fn);
+    const remove = observer.onPropChanged(obj, fn);
 
     obj.addedProp = "str";
     expect(fn).toBeCalledTimes(1);
@@ -143,6 +158,12 @@ describe("helper.observer", () => {
     delete obj.addedProp;
     expect(fn).toBeCalledTimes(2);
     expect(fn).lastCalledWith({ prev: "str", next: undefined, target: obj, prop: "addedProp" });
+
+    // test case for coverage
+    remove();
+    fn.mockClear();
+    delete obj.val;
+    expect(fn).not.toBeCalled();
   });
 
   test("remove listeners", () => {
@@ -350,9 +371,10 @@ describe("helper.observer", () => {
     // date (valueof and ref) is changed
     const nextDateVal = new Date(dtVal);
     obj.dateVal = nextDateVal;
+    expect(obj.dateVal !== nextDateVal).toBeTruthy(); // because Date converts into observed
     expect(obj.dateVal.valueOf()).toBe(dtVal);
     expect(fn).toBeCalledTimes(1);
-    expect(fn).lastCalledWith({ prev: prevDateVal, next: nextDateVal, target: obj, prop: "dateVal" });
+    expect(fn).lastCalledWith({ prev: prevDateVal, next: obj.dateVal, target: obj, prop: "dateVal" });
     jest.advanceTimersToNextTimer();
     expect(fn2).toBeCalledTimes(1);
     expect(fn2).lastCalledWith({ props: ["dateVal"], target: obj });
