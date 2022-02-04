@@ -3,7 +3,6 @@ import * as h from "../testHelper";
 
 const testAttr = "testattr";
 class TestElement extends WUPBaseElement {
-  $options = {};
   static get observedAttributes() {
     return [testAttr];
   }
@@ -206,5 +205,42 @@ describe("baseElement", () => {
     fn.mockClear();
     expect(() => el.dispatchEvent("click", { bubbles: true })).not.toThrow();
     expect(fn.mock.calls[0][0].bubbles).toBeTruthy();
+  });
+
+  test("gotOptionsChanged", () => {
+    class Test extends WUPBaseElement {
+      static observedOptions = new Set(["t1", "t2"]);
+
+      gotOptionsChanged() {}
+    }
+    customElements.define("test-opt-el", Test);
+    const tst = document.body.appendChild(document.createElement("test-opt-el"));
+    const fn = jest.spyOn(tst, "gotOptionsChanged");
+    jest.advanceTimersToNextTimer();
+    expect(tst.$isReady).toBeTruthy();
+
+    tst.$options = {};
+    expect(fn).not.toBeCalled();
+    tst.$options = { t1: 1, t2: 2 };
+    expect(fn).toBeCalledTimes(1);
+    expect(fn).toBeCalledWith({ props: ["t1", "t2"], target: tst.$options });
+
+    fn.mockClear();
+    tst.$options.t1 += 1;
+    jest.advanceTimersToNextTimer(); // because of observer collect it via timeout
+    expect(fn).toBeCalledTimes(1);
+    expect(fn).toBeCalledWith({ props: ["t1"], target: tst.$options });
+
+    fn.mockClear();
+    tst.$options.another = "s";
+    expect(fn).not.toBeCalled();
+    tst.$options = { ...tst.$options, another: "s2" };
+    expect(fn).not.toBeCalled();
+
+    expect(() => (tst.$options = null)).toThrow();
+
+    // test when no observedOptions
+    expect(el.$isReady).toBeTruthy();
+    el.$options = { v: 1 };
   });
 });

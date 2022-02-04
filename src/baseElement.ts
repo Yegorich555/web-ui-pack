@@ -1,15 +1,53 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import observer, { Observer } from "./helpers/observer";
 import onEvent, { onEventType } from "./helpers/onEvent";
 
 /** Basic abstract class for every component in web-ui-pack */
 export default abstract class WUPBaseElement extends HTMLElement {
+  /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
+  protected get ctr(): typeof WUPBaseElement {
+    return this.constructor as typeof WUPBaseElement;
+  }
+
+  /** Options that need to watch for changes; use gotOptionsChanged() */
+  static observedOptions: Set<keyof Record<string, any>>;
+
+  #opts: Record<string, any> = {};
   /** Options that applied to element */
-  abstract $options: Record<string, any>;
+  get $options(): Record<string, any> {
+    return this.#opts;
+  }
+
+  set $options(v) {
+    const watched = this.ctr.observedOptions;
+    if (!watched?.size) {
+      this.#opts = v;
+    } else {
+      if (!v) {
+        throw new Error("$options can't be empty");
+      }
+      const prev = this.#opts;
+      this.#opts = observer.make(v);
+      if (this.#isReady && prev.valueOf() !== v.valueOf()) {
+        const props: string[] = [];
+        // eslint-disable-next-line no-restricted-syntax
+        for (const [k] of this.ctr.observedOptions.entries()) {
+          if (this.$options[k] !== prev[k]) {
+            props.push(k);
+          }
+        }
+
+        props.length && this.gotOptionsChanged({ props, target: this.#opts });
+        observer.onChanged(this.#opts, (e) => e.props.some((p) => watched.has(p)) && this.gotOptionsChanged(e));
+      }
+    }
+  }
 
   constructor() {
     super();
+
     // autoBind functions (recursive until HMTLElement)
     const bindAll = (t: unknown) => {
       const p = Object.getPrototypeOf(t);
@@ -45,6 +83,9 @@ export default abstract class WUPBaseElement extends HTMLElement {
     this.#isReady = false;
     this.dispose();
   }
+
+  /** Fired when element isReady and at least one of observedOptions is changed */
+  protected gotOptionsChanged(e: Observer.ObjectEvent<Record<string, any>>) {}
 
   /** Browser calls this method when the element is added to the document */
   protected connectedCallback() {
