@@ -9,3 +9,5 @@ interface ObjectConstructor {
   keys<T>(o: T): ObjectKeys<T>;
   getOwnPropertyNames<T>(o: T): (keyof T | "constructor")[];
 }
+
+type Func = (...args: any[]) => any;

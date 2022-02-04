@@ -1,6 +1,7 @@
 /* eslint-disable no-use-before-define, prefer-rest-params */
 // discussions here https://stackoverflow.com/questions/5100376/how-to-watch-for-array-changes
 
+// #region Helpers
 /** const a = NaN; a !== a; // true */
 // eslint-disable-next-line no-self-compare
 const isBothNaN = (a: unknown, b: unknown) => a !== a && b !== b;
@@ -27,8 +28,9 @@ const pathThrough = <R>(fn: () => R): Promise<R> =>
 
 const isObject = (obj: any) => obj instanceof Object && !(obj instanceof Function);
 
-type Func = (...args: any[]) => any;
+// #endregion
 
+// #region Types
 export namespace Observer {
   export interface IObserver {
     /** Returns @true if object is observed (converted via observer.make()) */
@@ -97,12 +99,6 @@ interface Ref<T extends Observer.Observed<object>> {
   onChanged: (ev: Observer.ObjectEvent<T>) => void;
 }
 
-const lstObserved = new WeakMap<Observer.Observed, Ref<Observer.Observed<object>>>();
-
-function isObserved(obj: any): boolean {
-  return obj && lstObserved.has(obj);
-}
-
 type WatchItem<T> = {
   is: (obj: unknown) => boolean;
   keys: Set<keyof T>;
@@ -110,6 +106,8 @@ type WatchItem<T> = {
   propKey: keyof T;
 };
 
+// #endregion
+// #region Functions
 const watchSet: Array<WatchItem<any>> = [
   <WatchItem<Date>>{
     is: (obj) => obj instanceof Date,
@@ -148,6 +146,15 @@ const watchSet: Array<WatchItem<any>> = [
   },
 ];
 
+/** list with pair <Proxy, Ref>; Ref is bunch of arrays, callbacks etc. */
+const lstObserved = new WeakMap<Observer.Observed, Ref<Observer.Observed<object>>>();
+/** list with pair <RawObject, Proxy>; */
+const lstObjProxy = new WeakMap<object, Observer.Observed>();
+
+function isObserved(obj: any): boolean {
+  return obj && lstObserved.has(obj);
+}
+
 function appenCallback<T extends Observer.Observed<object>, K extends "listeners" | "propListeners">(
   proxy: T,
   callback: K extends "propListeners" ? Observer.PropCallback<T> : Observer.Callback<T>,
@@ -170,7 +177,9 @@ function make<T extends object>(
   obj: T,
   parentRef: { key: string; ref: Ref<Observer.Observed<any>> } | undefined
 ): Observer.Observed<T> {
-  const isAssigned = lstObserved.get(obj);
+  // checking if object is already observed
+  const prevProxy = lstObjProxy.get(obj);
+  const isAssigned = lstObserved.get(prevProxy || obj);
   if (isAssigned) {
     if (parentRef) {
       // if (isAssigned.parentRefs.has(parentRef.ref)) {
@@ -178,7 +187,7 @@ function make<T extends object>(
       // }
       isAssigned.parentRefs.set(parentRef.ref, parentRef.key);
     }
-    return obj;
+    return (prevProxy as Observer.Observed<T>) || obj;
   }
 
   const isDate = obj instanceof Date;
@@ -243,10 +252,9 @@ function make<T extends object>(
 
       const prev = t[prop as keyof T] as any;
       if (prev !== next) {
-        // todo optimize for `Prev is a proxy of Next`
-        // checking isObject required to avoid getter-cast for function
-        const prevRef = isObject(prev) && lstObserved.get(proxy[prop as keyof T] as unknown as Observer.Observed);
-        prevRef && prevRef.parentRefs.delete(ref);
+        // prev can be Proxy or Raw
+        // next can be Proxy or Raw
+        lstObserved.get(prev)?.parentRefs.delete(ref);
         if (isObject(next)) {
           next = make(next, { key: prop as string, ref });
         }
@@ -290,7 +298,7 @@ function make<T extends object>(
     proxyHandler.get = function get(t, prop, receiver) {
       const v = Reflect.get(t, prop, receiver) as Func;
       // wrap if listeners exists
-      if (typeof v === "function") {
+      if (v instanceof Function) {
         if (watchObj.keys.has(prop) && ref.hasListeners()) {
           return (...args: any[]) => {
             const prev = watchObj.getVal(t);
@@ -309,21 +317,26 @@ function make<T extends object>(
       return v;
     };
   }
-
   const proxy = new Proxy(obj, proxyHandler);
   lstObserved.set(proxy, ref as Ref<object>);
-  // scan recursive
-  if (!isDate) {
-    Object.keys(obj).forEach((k) => {
-      const v = obj[k] as any;
-      if (isObject(v)) {
-        proxy[k] = make(v, { ref, key: k }) as never;
-      }
-    });
+  lstObjProxy.set(obj, proxy);
+  if (isObject(obj) && obj.valueOf() === obj) {
+    proxy.valueOf = () => obj.valueOf;
   }
+
+  // scan recursive
+  // it doesn't required becayse object keys is null: if (!isDate && !(obj instanceof Map || obj instanceof Set)) {
+  Object.keys(obj).forEach((k) => {
+    const v = obj[k] as any;
+    if (isObject(v)) {
+      proxy[k] = make(v, { ref, key: k }) as never;
+    }
+  });
+  // }
   isReady = true; // required to avoid double make() on same proxy
   return proxy;
 }
+// #endregion
 
 /** Helper to detect object changes;
  * @example
@@ -356,11 +369,6 @@ const observer: Observer.IObserver = {
     return appenCallback(target, callback, "listeners");
   },
 };
-
-// const obj = observer.make({ val: 1 });
-// observer.onPropChanged(obj, console.warn);
-// obj.addedProp = "str";
-// delete obj.addedProp;
 
 Object.seal(observer);
 export default observer;

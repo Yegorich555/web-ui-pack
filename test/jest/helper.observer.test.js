@@ -506,21 +506,35 @@ describe("helper.observer", () => {
     jest.advanceTimersToNextTimer();
     expect(fn).toBeCalledTimes(1);
     jest.clearAllMocks();
+    expect(raw !== obj.ref).toBeTruthy(); // IMPORTANT: because after assigning it's converted to proxy object
 
     // try to assign again
     expect(() => (obj.ref = raw)).not.toThrow();
+    expect(raw !== obj.ref).toBeTruthy(); // IMPORTANT: because after assigning it's converted to proxy object
     jest.advanceTimersToNextTimer();
-    expect(fn).toBeCalledTimes(1); // because stored proxy-object but assigned raw
+    expect(fn).not.toBeCalled(); // IMPORTANT: because stored proxy-object but assigned raw that has proxy
+    jest.clearAllMocks();
+    // try to assign again
     expect(() => (obj.ref = obj.ref)).not.toThrow();
     jest.advanceTimersToNextTimer();
-    expect(fn).toBeCalledTimes(1); // stay the same because no changes
+    expect(fn).not.toBeCalled(); // stay the same because no changes
     expect(observer.isObserved(raw)).toBeFalsy();
-    expect(raw).not.toBe(obj.ref); // IMPORTANT: because after assigning it's converted to proxy object
+    expect(raw !== obj.ref).toBeTruthy(); // IMPORTANT: because after assigning it's converted to proxy object
 
+    // try basic logic
     expect(observer.isObserved(obj.ref)).toBeTruthy();
     obj.ref.val += 1;
     jest.advanceTimersToNextTimer();
-    expect(fn).toBeCalledTimes(2);
+    expect(fn).toBeCalledTimes(1);
+
+    // checking observer make on the same object returns previous observedItem
+    const a = observer.make(raw);
+    const b = observer.make(raw);
+    expect(a === b).toBeTruthy();
+    expect(a.valueOf() === raw.valueOf()).toBeTruthy();
+    const dt = new Date();
+    const d = observer.make(dt);
+    expect(d.valueOf() === dt.valueOf()).toBeTruthy();
   });
 
   test("exception in event > callback doesn't affect on another", async () => {

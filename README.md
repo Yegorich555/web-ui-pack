@@ -72,12 +72,14 @@ removeListener2(); // unsubscribe
 setTimeout(() => {
   console.warn("WARNING: raw vs observable", {
     equal: raw === obj,
+    equalByValueOf: raw.valueOf() === obj.valueOf(),
     isRawObserved: observer.isObserved(raw),
     isObjObserved: observer.isObserved(obj),
   });
   // because after assigning to observable it converted to observable also
   console.warn("WARNING: rawNestedObj vs observable", {
     equal: rawNestedObj === obj.nestedObj,
+    equalByValueOf: rawNestedObj.valueOf() === obj.nestedObj.valueOf(),
     isRawObserved: observer.isObserved(rawNestedObj),
     isNestedObserved: observer.isObserved(obj.nestedObj),
   });
