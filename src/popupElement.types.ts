@@ -48,9 +48,10 @@ export namespace WUPPopup {
     // todo overflow behavior when target partially hidden by scrollable parent
     // possible cases: hide, placeOpposite
 
-    /** Case when popup need to show; You can use `showCase=PopupShowCases.onFocus | PopupShowCases.onClick` to join cases
-     *
-     * Default is PopupShowCases.always */
+    /** Case when popup need to show; default is `onClick`
+     * @example
+     * showCase=WUPPopup.ShowCases.onFocus | WUPPopup.ShowCases.onClick // to join cases
+     * */
     showCase: ShowCases;
     /** Timeout in ms before popup shows on hover of target (for ShowCases.onHover); Default is 200ms */
     hoverShowTimeout: number;
@@ -73,9 +74,8 @@ export namespace WUPPopup {
 
   export interface Element<T extends PopupEventMap & Record<keyof T, Event> = PopupEventMap>
     extends WUP.IBaseElement<T> {
-    /** Options. Call $show/$hide to reinit and apply option-changes after element is appended to document */
     $options: Options;
-    /** Show popup */
+    /** Show popup; it disables option.showCase and enables by $hide() */
     $show: () => void;
     /** Hide popup */
     $hide: () => void;
