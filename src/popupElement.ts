@@ -53,25 +53,16 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
   };
 
   // todo placement-issue: rightMiddle doesn't work if right side will reduce ???
-  #opts: WUPPopup.Options = {
+  $options: WUPPopup.Options = {
     ...this.ctr.$defaults,
     placementAlt: [...this.ctr.$defaults.placementAlt],
     offset: [...this.ctr.$defaults.offset],
   };
 
-  get $options() {
-    return super.$options as WUPPopup.Options;
-  }
-
-  set $options(v) {
-    this.#opts = v;
-    super.$options = v;
-  }
-
   $hide() {
     const f = () => {
       if (this.#isOpened && this.hide(this.#showCase, WUPPopup.HideCases.onFireHide)) {
-        this.#opts.showCase !== WUPPopup.ShowCases.always && this.init(); // re-init to applyShowCase
+        this._opts.showCase !== WUPPopup.ShowCases.always && this.init(); // re-init to applyShowCase
       }
     };
     // timeout - possible when el is created but not attached to document yet
@@ -95,7 +86,6 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
 
   constructor() {
     super();
-    this.$options = this.#opts;
 
     const style = document.createElement("style");
     style.textContent = `
@@ -139,7 +129,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
   protected init() {
     this.dispose(); // remove previously added events
 
-    const { showCase } = this.#opts;
+    const { showCase } = this._opts;
     if (!showCase /* always */) {
       this.show(WUPPopup.ShowCases.always);
       return;
@@ -152,7 +142,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
 
     const applyShowCase = (isAgain: boolean) => {
       const t = this.#defineTarget(!isAgain);
-      this.#opts.target = t;
+      this._opts.target = t;
       if (!t) {
         !isAgain && setTimeout(() => applyShowCase(true), 200); // try again because target can be undefined in time
         return;
@@ -223,9 +213,9 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
             );
           else timeoutId = undefined;
         };
-        appendEvent(t, "mouseenter", () => ev(this.#opts.hoverShowTimeout, true));
+        appendEvent(t, "mouseenter", () => ev(this._opts.hoverShowTimeout, true));
         // use only appendEvent; with onShowEvent it doesn't work properly (because filtered by timeout)
-        appendEvent(t, "mouseleave", () => ev(this.#opts.hoverHideTimeout, false));
+        appendEvent(t, "mouseleave", () => ev(this._opts.hoverHideTimeout, false));
       }
 
       // onFocus
@@ -235,7 +225,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
             preventClickAfterFocus = true;
           }
         };
-        this.disposeLst.push(onFocusGot(t, focus, { debounceMs: this.#opts.focusDebounceMs }));
+        this.disposeLst.push(onFocusGot(t, focus, { debounceMs: this._opts.focusDebounceMs }));
 
         const blur = ({ relatedTarget }: FocusEvent) => {
           if (this.#isOpened) {
@@ -248,7 +238,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
           }
         };
 
-        this.#onShowCallbacks.push(() => onFocusLost(t, blur, { debounceMs: this.#opts.focusDebounceMs }));
+        this.#onShowCallbacks.push(() => onFocusLost(t, blur, { debounceMs: this._opts.focusDebounceMs }));
       }
     };
 
@@ -260,7 +250,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     return ["target", "placement"];
   }
 
-  override gotAttributeChanged(name: string, oldValue: string, newValue: string): void {
+  protected override gotAttributeChanged(name: string, oldValue: string, newValue: string): void {
     super.gotAttributeChanged(name, oldValue, newValue);
     if (name === "target") this.init();
     else if (name === "placement") this.#isOpened && this.show(this.#showCase || 0);
@@ -277,8 +267,8 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
       !disableErrors && console.error(`${this.tagName}. Target not found for '${attrTrg}'`);
     }
 
-    if (this.#opts.target) {
-      return this.#opts.target;
+    if (this._opts.target) {
+      return this._opts.target;
     }
 
     const t = this.previousElementSibling;
@@ -300,7 +290,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
    * @return true if successful */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected canShow(showCase: WUPPopup.ShowCases): boolean {
-    if (!this.#opts.target) {
+    if (!this._opts.target) {
       return false;
     }
     return true;
@@ -315,7 +305,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     const wasHidden = !this.#isOpened;
     this.#isOpened && this.hide(this.#showCase, WUPPopup.HideCases.onShowAgain);
 
-    this.#opts.target = this.#opts.target || this.#defineTarget();
+    this._opts.target = this._opts.target || this.#defineTarget();
     if (!this.canShow(showCase)) {
       return false;
     }
@@ -330,7 +320,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     this.#showCase = showCase;
 
     const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.$placementAttrs;
-    this.#opts.placement = (pAttr && WUPPopupElement.$placementAttrs[pAttr]) || this.#opts.placement;
+    this._opts.placement = (pAttr && WUPPopupElement.$placementAttrs[pAttr]) || this._opts.placement;
 
     // it works only when styles is defined before popup is open
     const style = getComputedStyle(this);
@@ -341,13 +331,13 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
 
     // init array of possible solutions to position + align popup
     this.#placements = [
-      this.#opts.placement,
-      ...this.#opts.placementAlt,
+      this._opts.placement,
+      ...this._opts.placementAlt,
       // try to adjust with ignore alignment options
-      (t, me, fit) => popupAdjust.call(this.#opts.placement(t, me, fit), me, fit, true),
+      (t, me, fit) => popupAdjust.call(this._opts.placement(t, me, fit), me, fit, true),
       // try to adjust with other placements and ignoring alignment options
       ...Object.keys(PopupPlacements)
-        .filter((k) => PopupPlacements[k].middle !== this.#opts.placement)
+        .filter((k) => PopupPlacements[k].middle !== this._opts.placement)
         .map(
           (k) =>
             <IPlacementFunction>((t, me, fit) => popupAdjust.call(PopupPlacements[k].middle(t, me, fit), me, fit, true))
@@ -415,8 +405,8 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
 
   /** Update position of popup. Call this method in cases when you changed options */
   #updatePosition = () => {
-    const t = (this.#opts.target as HTMLElement).getBoundingClientRect() as IBoundingRect;
-    t.el = this.#opts.target as HTMLElement;
+    const t = (this._opts.target as HTMLElement).getBoundingClientRect() as IBoundingRect;
+    t.el = this._opts.target as HTMLElement;
     if (
       // issue: it's wrong if minWidth, minHeight etc. is changed and doesn't affect on layout sizes directly
       !(
@@ -430,19 +420,19 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
       return;
     }
 
-    if (this.#opts.minWidthByTarget) {
+    if (this._opts.minWidthByTarget) {
       this.style.minWidth = `${t.width}px`;
     } else if (this.style.minWidth) {
       this.style.minWidth = "";
     }
 
-    if (this.#opts.minHeightByTarget) {
+    if (this._opts.minHeightByTarget) {
       this.style.minHeight = `${t.height}px`;
     } else if (this.style.minHeight) {
       this.style.minHeight = "";
     }
 
-    const fitEl = this.#opts.toFitElement || document.body;
+    const fitEl = this._opts.toFitElement || document.body;
     const fit = getBoundingInternalRect(fitEl) as IBoundingRect;
     fit.el = fitEl;
 
@@ -451,10 +441,10 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
       h: this.offsetHeight,
       el: this,
       offset: {
-        top: this.#opts.offset[0],
-        right: this.#opts.offset[1],
-        bottom: this.#opts.offset[2] ?? this.#opts.offset[0],
-        left: this.#opts.offset[3] ?? this.#opts.offset[1],
+        top: this._opts.offset[0],
+        right: this._opts.offset[1],
+        bottom: this._opts.offset[2] ?? this._opts.offset[0],
+        left: this._opts.offset[3] ?? this._opts.offset[1],
       },
     };
 

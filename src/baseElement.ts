@@ -13,37 +13,8 @@ export default abstract class WUPBaseElement extends HTMLElement {
 
   /** Options that need to watch for changes; use gotOptionsChanged() */
   static observedOptions: Set<keyof Record<string, any>>;
-
-  #opts: Record<string, any> = {};
   /** Options that applied to element */
-  get $options(): Record<string, any> {
-    return this.#opts;
-  }
-
-  set $options(v) {
-    const watched = this.ctr.observedOptions;
-    if (!watched?.size) {
-      this.#opts = v;
-    } else {
-      if (!v) {
-        throw new Error("$options can't be empty");
-      }
-      const prev = this.#opts;
-      this.#opts = observer.make(v);
-      if (this.#isReady && prev.valueOf() !== v.valueOf()) {
-        const props: string[] = [];
-        // eslint-disable-next-line no-restricted-syntax
-        for (const [k] of this.ctr.observedOptions.entries()) {
-          if (this.$options[k] !== prev[k]) {
-            props.push(k);
-          }
-        }
-
-        props.length && this.gotOptionsChanged({ props, target: this.#opts });
-        observer.onChanged(this.#opts, (e) => e.props.some((p) => watched.has(p)) && this.gotOptionsChanged(e));
-      }
-    }
-  }
+  abstract $options: Record<string, any>;
 
   constructor() {
     super();
@@ -54,10 +25,8 @@ export default abstract class WUPBaseElement extends HTMLElement {
       if (p !== HTMLElement.prototype) {
         Object.getOwnPropertyNames(p).forEach((s) => {
           const k = s as keyof Omit<WUPBaseElement, keyof HTMLElement | "$isReady">;
-          if (
-            s !== "constructor" &&
-            typeof (Object.getOwnPropertyDescriptor(p, s) as PropertyDescriptor).value === "function"
-          ) {
+          const desc = Object.getOwnPropertyDescriptor(p, s) as PropertyDescriptor;
+          if (desc.value instanceof Function && s !== "constructor") {
             this[k] = this[k].bind(this);
           }
         });
@@ -65,6 +34,50 @@ export default abstract class WUPBaseElement extends HTMLElement {
       }
     };
     bindAll(this);
+
+    setTimeout(() => {
+      // cast options to observed
+      const prev = this.$options;
+      Object.defineProperty(this, "$options", {
+        set: this.#setOptions,
+        get: () => this._opts,
+      });
+      this._opts = prev;
+      this.#setOptions(prev);
+    });
+  }
+
+  protected _opts: Record<string, any> = {};
+  #setOptions(v: Record<string, any>) {
+    const watched = this.ctr.observedOptions;
+    if (!watched?.size) {
+      this._opts = v;
+    } else {
+      if (!v) {
+        throw new Error("$options can't be empty");
+      }
+      const prev = this._opts;
+
+      this._opts = observer.make(v);
+      observer.onChanged(
+        this._opts,
+        (e) => this.#isReady && e.props.some((p) => watched.has(p)) && this.gotOptionsChanged(e)
+      );
+
+      if (this.#isReady) {
+        if (prev.valueOf() !== v.valueOf()) {
+          const props: string[] = [];
+          // eslint-disable-next-line no-restricted-syntax
+          for (const [k] of this.ctr.observedOptions.entries()) {
+            if (this._opts[k] !== prev[k]) {
+              props.push(k);
+            }
+          }
+
+          props.length && this.gotOptionsChanged({ props, target: this._opts });
+        }
+      }
+    }
   }
 
   /** Returns true if element is appended (result of setTimeout on connectedCallback) */
@@ -207,3 +220,5 @@ export namespace WUP {
     ): () => void;
   }
 }
+
+// todo make all props not-enumerable (beside starts with $...): https://stackoverflow.com/questions/34517538/setting-an-es6-class-getter-to-enumerable

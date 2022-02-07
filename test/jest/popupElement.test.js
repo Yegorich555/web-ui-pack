@@ -1,4 +1,5 @@
 import { WUPPopupElement } from "web-ui-pack";
+import all from "web-ui-pack/popupElement.types";
 import * as h from "../testHelper";
 
 jest.useFakeTimers();
@@ -39,6 +40,8 @@ describe("popupElement", () => {
 
   // WARN: after this method static $defaults can be changed
   test("changing $options != changing static.$defaults", () => {
+    expect(all).toBeUndefined(); // just for coverage
+
     Object.keys(el.$options).forEach((k) => {
       if (typeof el.$options[k] !== "object" || el.$options[k] instanceof Element) {
         el.$options[k] = 1234;
@@ -49,7 +52,6 @@ describe("popupElement", () => {
     expect(affected).toHaveLength(0);
   });
 
-  // todo check static inherritance
   test("static.$defaults === $options", () => {
     const defVal = [3456];
     const prev = WUPPopupElement.$defaults;
@@ -127,6 +129,7 @@ describe("popupElement", () => {
     document.body.prepend(a); // prepend to previousElementSibling = null
     expect(a.previousElementSibling).toBeNull();
     jest.advanceTimersToNextTimer(); // onReady has timeout
+
     expect(onShow).not.toBeCalled(); // because target is null
     expect(err).toBeCalledTimes(1); // expected that user will be notified
 
@@ -327,10 +330,6 @@ describe("popupElement", () => {
     expect(spyHide).lastCalledWith(1 << 1, 6);
   });
 
-  // todo e2e cases: clickOnLabel with input - single event
-
-  // todo check all options
-
   test("$hide()/$show()", () => {
     el.$options.showCase = 0; // always
     expect(el.$isOpened).toBeTruthy();
@@ -344,6 +343,7 @@ describe("popupElement", () => {
     el.$show();
     expect(el.$isOpened).toBeFalsy();
     // todo check private methods canShow, canHide
+    // todo check if $hide after show doesn't destroy events
 
     // other cases in test(`options.$target`) and test(`remove`)
   });
@@ -394,7 +394,7 @@ describe("popupElement", () => {
     const called = spy.filter((v) => v.on.mock.calls.length).map((v) => v.on.mock.calls[0]);
     expect(called).not.toHaveLength(0); // test if event listeners were added
 
-    a.$show(); // it will add extra events
+    trg.click(); // it will add extra events
     expect(a.$isOpened).toBeTruthy();
     expect(spy[0].on).toBeCalled(); // expected that we have events for document
 
@@ -407,6 +407,15 @@ describe("popupElement", () => {
     });
   });
 
-  // todo implement
-  // test("attr `target`", () => {});
+  /**
+     todo e2e cases:
+     clickOnLabel with input - single event
+     options.placement
+     check options.placementAlt
+     options.minWidthByTarget;
+     options.minHeightByTarget;
+
+     todo unit cases:
+     test("attr `target`", () => {});
+   */
 });

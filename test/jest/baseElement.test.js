@@ -209,6 +209,7 @@ describe("baseElement", () => {
 
   test("gotOptionsChanged", () => {
     class Test extends WUPBaseElement {
+      $options = {};
       static observedOptions = new Set(["t1", "t2"]);
 
       gotOptionsChanged() {}
