@@ -90,5 +90,5 @@ setTimeout(() => {
 
 - Every object assigned to `observed` is converted to `observed` also
 - When you change array in most cases you get changing `length`; also `sort`/`reverse` triggers events
-- WeakMap and WeakSet isn't supported
+- WeakMap, WeakSet, HTMLElement are not supported
 - All objects compares by `valueOf()` so you maybe interested in custom valueOf to avoid unexpected issues

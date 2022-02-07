@@ -26,7 +26,7 @@ const pathThrough = <R>(fn: () => R): Promise<R> =>
     resolve(fn());
   });
 
-const isObject = (obj: any) => obj instanceof Object && !(obj instanceof Function);
+const isObject = (obj: any) => obj instanceof Object && !(obj instanceof Function) && !(obj instanceof HTMLElement);
 
 // #endregion
 
@@ -321,6 +321,7 @@ function make<T extends object>(
   lstObserved.set(proxy, ref as Ref<object>);
   lstObjProxy.set(obj, proxy);
   if (isObject(obj) && obj.valueOf() === obj) {
+    // todo possible error if object isn't extensible
     Object.defineProperty(proxy, "valueOf", { value: () => obj.valueOf, enumerable: false });
   }
 
