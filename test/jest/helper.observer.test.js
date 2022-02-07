@@ -726,4 +726,17 @@ describe("helper.observer", () => {
     expect(fnRef2).toBeCalledTimes(1);
     expect(fnRef2).toBeCalledWith({ props: ["ref"], target: obj2 });
   });
+
+  test("valueOf is equal; Object keys are same", () => {
+    let raw = { v: 1 };
+    let obj = observer.make(raw);
+    expect(obj.valueOf() === raw.valueOf()).toBeTruthy();
+    expect(Object.keys(raw)).toEqual(Object.keys(obj));
+
+    raw = { s: "str", valueOf: () => 5 };
+    obj = observer.make(raw);
+    expect(obj.valueOf() === raw.valueOf()).toBeTruthy();
+    expect(Object.keys(raw)).toHaveLength(2);
+    expect(Object.keys(obj)).toHaveLength(2);
+  });
 });

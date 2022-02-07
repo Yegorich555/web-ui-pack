@@ -321,7 +321,7 @@ function make<T extends object>(
   lstObserved.set(proxy, ref as Ref<object>);
   lstObjProxy.set(obj, proxy);
   if (isObject(obj) && obj.valueOf() === obj) {
-    proxy.valueOf = () => obj.valueOf;
+    Object.defineProperty(proxy, "valueOf", { value: () => obj.valueOf, enumerable: false });
   }
 
   // scan recursive
