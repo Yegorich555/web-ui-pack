@@ -14,7 +14,7 @@ import {
   stringPixelsToNumber,
 } from "./popupPlacements";
 
-export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
+class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   protected get ctr(): typeof WUPPopupElement {
     return this.constructor as typeof WUPPopupElement;
@@ -490,6 +490,8 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     this.#onShowCallbacks = [];
   }
 }
+// such cast-type required to avoid indirect implementation of interface
+export default WUPPopupElement as unknown as WUPPopup.Element;
 
 // todo check inherritance with overriding options & re-assign to custom-tag
 // todo extend document.createElement("wup-popup")
