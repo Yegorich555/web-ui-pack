@@ -142,6 +142,22 @@ describe("popupElement", () => {
     jest.advanceTimersByTime(1);
     expect(a.$isOpened).toBeFalsy();
     expect(onHide).toBeCalledTimes(1);
+
+    // coverage for initTimer
+    jest.clearAllMocks();
+    jest.clearAllTimers();
+    const err = h.mockConsoleError();
+    const a2 = document.createElement(el.tagName);
+    a2.$options.showCase = 1 << 2; // click
+    const init2 = jest.spyOn(a2, "init");
+    document.body.prepend(a2);
+    jest.advanceTimersToNextTimer(); // wait for ready
+    expect(init2).toBeCalledTimes(1);
+    jest.advanceTimersToNextTimer(); // wait applyShowCase_again
+    expect(a2.$options.target == null).toBeTruthy();
+    expect(a2.$isOpened).toBeFalsy();
+    expect(err).toBeCalledTimes(1);
+    h.unMockConsoleError();
   });
 
   test("$options.target", () => {
@@ -399,6 +415,12 @@ describe("popupElement", () => {
     // todo check if $hide after show doesn't destroy events
 
     // other cases in test(`options.$target`) and test(`remove`)
+  });
+
+  test("attrs", () => {
+    const a = document.createElement(el.tagName);
+    document.prepend(a);
+    throw new Error("Have not implemented yet");
   });
 
   test("remove", () => {

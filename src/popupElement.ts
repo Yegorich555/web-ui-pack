@@ -118,6 +118,7 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
   #onShowCallbacks: Array<() => () => void> = [];
   #onHideCallbacks: Array<() => void> = [];
   #isOpened = false;
+  #initTimer?: ReturnType<typeof setTimeout>;
   /** Fired after gotReady() and $show() (to reinit according to options) */
   protected init() {
     this.dispose(); // remove previously added events
@@ -133,14 +134,8 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
     const onShowEvent = (...args: Parameters<WUPPopup.Element["appendEvent"]>) =>
       this.#onShowCallbacks.push(() => appendEvent(...args));
 
-    const applyShowCase = (isAgain: boolean) => {
-      const t = this.#defineTarget(!isAgain);
+    const applyShowCase = (t: HTMLElement) => {
       this._opts.target = t;
-      if (!t) {
-        !isAgain && setTimeout(() => applyShowCase(true), 200); // try again because target can be undefined in time
-        return;
-      }
-
       // todo it doesn't work if new clickEvent fired programmatically
       let preventClickAfterFocus = false;
       let openedByHover = false;
@@ -235,7 +230,16 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
       }
     };
 
-    applyShowCase(false);
+    const t = this.#defineTarget(true);
+    if (t) {
+      applyShowCase(t);
+    } else {
+      this.#initTimer = setTimeout(() => {
+        const t2 = this.#defineTarget();
+        t2 && applyShowCase(t2);
+        this.#initTimer = undefined;
+      }, 200); // try again because target can be undefined in time
+    }
   }
 
   static observedOptions: Set<keyof WUPPopup.Options> = new Set(["showCase", "target"]);
@@ -485,6 +489,8 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
 
   protected override dispose(): void {
     super.dispose();
+    this.#initTimer && clearTimeout(this.#initTimer);
+    this.#initTimer = undefined;
     this.#onHideCallbacks.forEach((f) => f());
     this.#onHideCallbacks = [];
     this.#onShowCallbacks = [];
