@@ -115,11 +115,6 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     this.init();
   }
 
-  static observedOptions: Set<keyof WUPPopup.Options> = new Set(["showCase", "target"]);
-  protected override gotOptionsChanged() {
-    if (!this.#isOpened) this.init(); // possible only if popup is hidden
-  }
-
   #onShowCallbacks: Array<() => () => void> = [];
   #onHideCallbacks: Array<() => void> = [];
   #isOpened = false;
@@ -243,6 +238,12 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     applyShowCase(false);
   }
 
+  static observedOptions: Set<keyof WUPPopup.Options> = new Set(["showCase", "target"]);
+  protected override gotOptionsChanged() {
+    this.$isOpened && this.hide(this.#showCase, WUPPopup.HideCases.onOptionChange);
+    this.init(); // possible only if popup is hidden
+  }
+
   /* Array of attribute names to monitor for changes */
   static get observedAttributes() {
     return ["target", "placement"];
@@ -250,8 +251,12 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
 
   protected override gotAttributeChanged(name: string, oldValue: string, newValue: string): void {
     super.gotAttributeChanged(name, oldValue, newValue);
-    if (name === "target") this.init();
-    else if (name === "placement") this.#isOpened && this.show(this.#showCase || 0);
+    if (name === "target") {
+      this.$isOpened && this.hide(this.#showCase, WUPPopup.HideCases.onOptionChange);
+      this.init(); // possible only if popup is hidden
+    } else if (name === "placement") {
+      this.#isOpened && this.show(this.#showCase || 0);
+    }
   }
 
   /** Defines target on show */

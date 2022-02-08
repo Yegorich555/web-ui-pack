@@ -111,7 +111,7 @@ describe("popupElement", () => {
     a.addEventListener("$show", onShow);
     a.addEventListener("$hide", onHide);
 
-    document.body.appendChild(a);
+    document.body.appendChild(a); // event gotReady here
     jest.advanceTimersToNextTimer(); // onReady has timeout
 
     expect(a.$options.target).toBeDefined(); // target wasn't pointed but defined as previousSibling
@@ -120,6 +120,7 @@ describe("popupElement", () => {
     jest.advanceTimersToNextTimer(); // for listenerCallback withTimeout
     expect(onShow).toBeCalledTimes(1);
     expect(onShow.mock.calls[0][0]).toBeInstanceOf(Event);
+    expect(a.$isOpened).toBeTruthy();
     expect(onHide).not.toBeCalled();
 
     a.$options.target = null;
@@ -155,6 +156,16 @@ describe("popupElement", () => {
     jest.advanceTimersToNextTimer(); // onReady has timeout
     expect(onShow).not.toBeCalled(); // because target is null
     expect(err).toBeCalledTimes(1); // no target byOpen > console.warn
+
+    // check if changing on the fly >>> reinit event
+    a.$options.target = trg;
+    jest.advanceTimersToNextTimer(); // $options.onChanged has timeout
+    expect(a.$isOpened).toBeTruthy();
+    a.$options.showCase = 1 << 2; // onClick
+    jest.advanceTimersToNextTimer(); // $options.onChanged has timeout
+    expect(a.$isOpened).toBeFalsy(); // because option changed
+    trg.click(); // checking if new showCase works
+    expect(a.$isOpened).toBeTruthy();
   });
 
   test("$options.showCase", () => {

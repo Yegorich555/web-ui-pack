@@ -23,6 +23,8 @@ export namespace WUPPopup {
     onOutsideClick,
     onPopupClick,
     onTargetClick,
+    /** When options or attributes changes */
+    onOptionChange,
   }
 
   export interface Options {
