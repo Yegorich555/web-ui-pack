@@ -80,14 +80,19 @@ describe("popupElement", () => {
     const show = jest.spyOn(a, "show");
     const onShow = jest.fn();
     const onHide = jest.fn();
+    const onWillShow = jest.fn();
+    const onWillHide = jest.fn();
     a.addEventListener("$show", onShow);
     a.addEventListener("$hide", onHide);
+    a.addEventListener("$willShow", onWillShow);
+    a.addEventListener("$willHide", onWillHide);
 
     expect(gotReady).toBeCalledTimes(0);
     expect(init).toBeCalledTimes(0);
     expect(show).toBeCalledTimes(0);
     expect(a.$isOpened).toBeFalsy();
     expect(onShow).toBeCalledTimes(0);
+    expect(onWillShow).toBeCalledTimes(0);
 
     document.body.appendChild(a);
     jest.advanceTimersToNextTimer(); // onReady has timeout
@@ -97,9 +102,46 @@ describe("popupElement", () => {
     expect(show).toBeCalledTimes(1); // showCase = always so expected element to show
     expect(a.$isOpened).toBeTruthy();
     jest.advanceTimersToNextTimer(); // for listenerCallback withTimeout
-    jest.advanceTimersToNextTimer(); // for listenerCallback withTimeout
     expect(onShow).toBeCalledTimes(1);
     expect(onShow.mock.calls[0][0]).toBeInstanceOf(Event);
+    expect(onWillShow).toBeCalledTimes(1);
+    expect(onWillShow.mock.calls[0][0]).toBeInstanceOf(Event);
+    expect(onHide).not.toBeCalled();
+    expect(onWillHide).not.toBeCalled();
+
+    // testing events
+    a.$hide();
+    expect(a.$isOpened).toBeFalsy();
+    jest.advanceTimersByTime(1);
+    expect(onHide).toBeCalledTimes(1);
+    expect(onWillHide).toBeCalledTimes(1);
+
+    jest.clearAllMocks();
+    const r = (e) => e.preventDefault();
+    a.addEventListener("$willShow", r);
+    a.$show();
+    jest.advanceTimersByTime(1);
+    expect(onWillShow).toBeCalledTimes(1);
+    expect(a.$isOpened).toBeFalsy(); // because of prevented
+    expect(onShow).not.toBeCalled();
+    a.removeEventListener("$willShow", r); // remove event
+    a.$show();
+    jest.advanceTimersByTime(1);
+    expect(a.$isOpened).toBeTruthy();
+    expect(onShow).toBeCalled();
+
+    a.addEventListener("$willHide", r);
+    jest.clearAllMocks();
+    a.$hide();
+    jest.advanceTimersByTime(1);
+    expect(onWillHide).toBeCalledTimes(1);
+    expect(a.$isOpened).toBeTruthy(); // because of prevented
+    expect(onHide).not.toBeCalled();
+    a.removeEventListener("$willHide", r); // remove event
+    a.$hide();
+    jest.advanceTimersByTime(1);
+    expect(a.$isOpened).toBeFalsy();
+    expect(onHide).toBeCalledTimes(1);
   });
 
   test("$options.target", () => {
