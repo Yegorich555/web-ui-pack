@@ -99,11 +99,9 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
         opacity: 0;
         display: none;
 
-        overflow: hidden;
-        border: 1px solid var(--popup-border-color, var(--border-color, #e1e1e1));
-        border-radius: var(--popup-border-radius, var(--border-radius, 9px));
-        padding: var(--popup-padding, var(--padding, 6px));
-        box-shadow: var(--popup-shadow, 0 1px 4px 0 rgb(0 0 0 0.2));
+        // overflow: hidden;
+        border-radius: var(--border-radius, 9px);
+        padding: 4px;
       }
     `;
 
