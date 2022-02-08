@@ -1,6 +1,7 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+// eslint-disable-next-line max-classes-per-file
 import observer, { Observer } from "./helpers/observer";
 import onEvent, { onEventType } from "./helpers/onEvent";
 
@@ -12,7 +13,7 @@ export default abstract class WUPBaseElement extends HTMLElement {
   }
 
   /** Options that need to watch for changes; use gotOptionsChanged() */
-  static observedOptions: Set<keyof Record<string, any>>;
+  static observedOptions?: Set<keyof Record<string, any>>;
   /** Options that applied to element */
   abstract $options: Record<string, any>;
 
@@ -40,43 +41,57 @@ export default abstract class WUPBaseElement extends HTMLElement {
       const prev = this.$options;
       Object.defineProperty(this, "$options", {
         set: this.#setOptions,
-        get: () => this._opts,
+        get: () => {
+          const watched = this.ctr.observedOptions;
+          if (!watched?.size) {
+            return this._opts;
+          }
+          // cast to observed only if option was retrieved: to optimize init-performance
+          if (!this.#optsObserved) {
+            this.#optsObserved = observer.make(this._opts);
+            this.#removeObserved = observer.onChanged(this.#optsObserved, (e) => {
+              this.#isReady && e.props.some((p) => watched.has(p)) && this.gotOptionsChanged(e);
+            });
+          }
+
+          return this.#optsObserved;
+        },
       });
       this._opts = prev;
       this.#setOptions(prev);
     });
   }
 
+  /* rawOptions despite on $options is observer */
   protected _opts: Record<string, any> = {};
+  #optsObserved?: Observer.Observed<Record<string, any>>;
+  #removeObserved?: Func;
   #setOptions(v: Record<string, any>) {
-    const watched = this.ctr.observedOptions;
-    if (!watched?.size) {
-      this._opts = v;
-    } else {
-      if (!v) {
-        throw new Error("$options can't be empty");
-      }
-      const prev = this._opts;
+    if (!v) {
+      throw new Error("$options can't be empty");
+    }
+    const prev = this._opts;
+    this._opts = v;
 
-      this._opts = observer.make(v);
-      observer.onChanged(
-        this._opts,
-        (e) => this.#isReady && e.props.some((p) => watched.has(p)) && this.gotOptionsChanged(e)
-      );
+    // unsubscribe from previous events here
+    this.#removeObserved?.call(this);
+    this.#optsObserved = undefined;
+    this.#removeObserved = undefined;
 
-      if (this.#isReady) {
-        if (prev.valueOf() !== v.valueOf()) {
-          const props: string[] = [];
-          // eslint-disable-next-line no-restricted-syntax
-          for (const [k] of this.ctr.observedOptions.entries()) {
-            if (this._opts[k] !== prev[k]) {
-              props.push(k);
-            }
-          }
+    if (!this.ctr.observedOptions?.size) {
+      return;
+    }
 
-          props.length && this.gotOptionsChanged({ props, target: this._opts });
+    if (this.#isReady && prev.valueOf() !== v.valueOf()) {
+      const props: string[] = [];
+      // eslint-disable-next-line no-restricted-syntax
+      for (const [k] of this.ctr.observedOptions.entries()) {
+        if (this._opts[k] !== prev[k]) {
+          props.push(k);
         }
       }
+
+      props.length && this.gotOptionsChanged({ props, target: this._opts });
     }
   }
 

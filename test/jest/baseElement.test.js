@@ -3,6 +3,7 @@ import * as h from "../testHelper";
 
 const testAttr = "testattr";
 class TestElement extends WUPBaseElement {
+  $options = {};
   static get observedAttributes() {
     return [testAttr];
   }
@@ -221,7 +222,8 @@ describe("baseElement", () => {
     expect(tst.$isReady).toBeTruthy();
 
     tst.$options = {};
-    expect(fn).not.toBeCalled();
+    const old = tst.$options;
+    expect(fn).not.toBeCalled(); // because observedOptions not
     tst.$options = { t1: 1, t2: 2 };
     expect(fn).toBeCalledTimes(1);
     expect(fn).toBeCalledWith({ props: ["t1", "t2"], target: tst.$options });
@@ -231,6 +233,12 @@ describe("baseElement", () => {
     jest.advanceTimersToNextTimer(); // because of observer collect it via timeout
     expect(fn).toBeCalledTimes(1);
     expect(fn).toBeCalledWith({ props: ["t1"], target: tst.$options });
+
+    // check if changing old options affects on elemet
+    fn.mockClear();
+    old.t1 = "no";
+    jest.advanceTimersToNextTimer(); // because of observer collect it via timeout
+    expect(fn).not.toBeCalled(); // because listeners to object that not assigned must be destroyed
 
     fn.mockClear();
     tst.$options.another = "s";
@@ -243,5 +251,19 @@ describe("baseElement", () => {
     // test when no observedOptions
     expect(el.$isReady).toBeTruthy();
     el.$options = { v: 1 };
+
+    // eslint-disable-next-line no-self-compare
+    expect(el.$options === el.$options).toBeTruthy(); // just for coverage when observedOptions is empty
+    class T2 extends WUPBaseElement {
+      $options = {};
+      static observedOptions = new Set(["to"]);
+    }
+    const fnT2 = jest.spyOn(T2.prototype, "gotOptionsChanged");
+    customElements.define("t2-test", T2);
+    const t2 = document.body.appendChild(document.createElement("t2-test"));
+    jest.advanceTimersToNextTimer();
+    t2.$options.to = "str";
+    jest.advanceTimersToNextTimer();
+    expect(fnT2).toBeCalled(); // just for coverage when observedOptions is empty
   });
 });
