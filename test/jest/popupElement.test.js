@@ -77,7 +77,7 @@ describe("popupElement", () => {
 
     const gotReady = jest.spyOn(a, "gotReady");
     const init = jest.spyOn(a, "init");
-    const show = jest.spyOn(a, "show");
+    const show = jest.spyOn(a, "goShow");
     const onShow = jest.fn();
     const onHide = jest.fn();
     const onWillShow = jest.fn();
@@ -202,7 +202,7 @@ describe("popupElement", () => {
     expect(a.$isOpened).toBeTruthy();
     onHide.mockClear();
     a.$options.target = null;
-    const spyShow = jest.spyOn(a, "show").mockClear();
+    const spyShow = jest.spyOn(a, "goShow").mockClear();
     expect(a.$show).toThrow(); // to apply options - throw error because target is not defined
     expect(spyShow).toBeCalledTimes(1);
     expect(a.$isOpened).toBeFalsy(); // because target is not defined
@@ -233,8 +233,8 @@ describe("popupElement", () => {
     const a = document.createElement(el.tagName);
     a.$options.target = trg;
 
-    const spyShow = jest.spyOn(a, "show");
-    const spyHide = jest.spyOn(a, "hide");
+    const spyShow = jest.spyOn(a, "goShow");
+    const spyHide = jest.spyOn(a, "goHide");
 
     // only hover
     document.body.appendChild(a);

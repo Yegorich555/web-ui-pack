@@ -62,7 +62,7 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
   $hide() {
     const f = () => {
       // isReady possible false when you fire $hide on disposed element
-      if (this.$isReady && this.#isOpened && this.hide(this.#showCase, WUPPopup.HideCases.onFireHide)) {
+      if (this.$isReady && this.#isOpened && this.goHide(this.#showCase, WUPPopup.HideCases.onFireHide)) {
         this._opts.showCase !== WUPPopup.ShowCases.always && this.init(); // re-init to applyShowCase
       }
     };
@@ -77,7 +77,7 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
         throw new Error(`${this.tagName}. Impossible to show: isn't appended to document`);
       } else {
         this.dispose(); // remove events
-        this.show(WUPPopup.ShowCases.always);
+        this.goShow(WUPPopup.ShowCases.always);
       }
     };
 
@@ -130,7 +130,7 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
 
     const { showCase } = this._opts;
     if (!showCase /* always */) {
-      this.show(WUPPopup.ShowCases.always);
+      this.goShow(WUPPopup.ShowCases.always);
       return;
     }
 
@@ -172,9 +172,9 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
           const isMeClick = this === target || this.includes(target);
           if (isMeClick) {
             focusFirst(lastActive || t);
-            this.hide(this.#showCase, WUPPopup.HideCases.onPopupClick);
+            this.goHide(this.#showCase, WUPPopup.HideCases.onPopupClick);
           } else {
-            this.hide(this.#showCase, WUPPopup.HideCases.onOutsideClick);
+            this.goHide(this.#showCase, WUPPopup.HideCases.onOutsideClick);
             wasOutsideClick = true;
             setTimeout(() => (wasOutsideClick = false), 50);
           }
@@ -188,9 +188,9 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
         }
         if (!this.#isOpened) {
           lastActive = document.activeElement as HTMLElement;
-          this.show(WUPPopup.ShowCases.onClick);
+          this.goShow(WUPPopup.ShowCases.onClick);
         } else if (!preventClickAfterFocus) {
-          this.hide(this.#showCase, WUPPopup.HideCases.onTargetClick);
+          this.goHide(this.#showCase, WUPPopup.HideCases.onTargetClick);
         }
         // fix when labelOnClick > inputOnClick
         timeoutId = setTimeout(() => (timeoutId = undefined), 50);
@@ -208,8 +208,8 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
           timeoutId = setTimeout(
             () =>
               isMouseIn
-                ? this.show(WUPPopup.ShowCases.onHover)
-                : this.hide(this.#showCase, WUPPopup.HideCases.onMouseLeave),
+                ? this.goShow(WUPPopup.ShowCases.onHover)
+                : this.goHide(this.#showCase, WUPPopup.HideCases.onMouseLeave),
             ms
           );
         else timeoutId = undefined;
@@ -222,7 +222,7 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
     // onFocus
     if (showCase & WUPPopup.ShowCases.onFocus) {
       const focus = () => {
-        if (!this.#isOpened && this.show(WUPPopup.ShowCases.onFocus)) {
+        if (!this.#isOpened && this.goShow(WUPPopup.ShowCases.onFocus)) {
           preventClickAfterFocus = true;
         }
       };
@@ -232,7 +232,7 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
         if (this.#isOpened) {
           const isToMe = this === document.activeElement || this === relatedTarget;
           const isToMeInside = !isToMe && this.includes(document.activeElement || relatedTarget);
-          !isToMe && !isToMeInside && this.hide(this.#showCase, WUPPopup.HideCases.onFocusOut);
+          !isToMe && !isToMeInside && this.goHide(this.#showCase, WUPPopup.HideCases.onFocusOut);
           if (!this.$isOpened) {
             openedByHover = false;
           }
@@ -244,7 +244,7 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
   }
 
   #reinit() {
-    this.$isOpened && this.hide(this.#showCase, WUPPopup.HideCases.onOptionChange);
+    this.$isOpened && this.goHide(this.#showCase, WUPPopup.HideCases.onOptionChange);
     this.init(); // possible only if popup is hidden
   }
 
@@ -305,9 +305,9 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
   }
 
   /** Shows popup if target defined; returns true if successful */
-  protected show(showCase: WUPPopup.ShowCases): boolean {
+  protected goShow(showCase: WUPPopup.ShowCases): boolean {
     const wasHidden = !this.#isOpened;
-    this.#isOpened && this.hide(this.#showCase, WUPPopup.HideCases.onShowAgain);
+    this.#isOpened && this.goHide(this.#showCase, WUPPopup.HideCases.onShowAgain);
 
     if (!this._opts.target) {
       const { el, err } = this.#defineTarget();
@@ -383,7 +383,7 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
   }
 
   /** Hide popup. @showCase as previous reason of show(); @hideCase as reason of hide() */
-  protected hide(showCase: WUPPopup.ShowCases | undefined, hideCase: WUPPopup.HideCases): boolean {
+  protected goHide(showCase: WUPPopup.ShowCases | undefined, hideCase: WUPPopup.HideCases): boolean {
     if (!this.canHide(showCase, hideCase)) return false;
 
     const wasShown = this.#isOpened;
@@ -535,4 +535,3 @@ declare global {
 }
 
 // todo when showCase = focus. need to show if target isAlreadyFocused
-// todo rename methods show/hide to goShow/goHide to avoid confusions with $show/$hide
