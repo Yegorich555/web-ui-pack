@@ -59,6 +59,9 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
     offset: [...this.ctr.$defaults.offset],
   };
 
+  // todo how to avoid such override ?
+  protected override _opts = this.$options;
+
   $hide() {
     const f = () => {
       // isReady possible false when you fire $hide on disposed element
@@ -300,7 +303,6 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
    * @return true if successful */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected canShow(showCase: WUPPopup.ShowCases): boolean {
-    // todo options type doesn't work in TS
     return true;
   }
 

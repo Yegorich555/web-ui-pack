@@ -62,7 +62,7 @@ export default abstract class WUPBaseElement extends HTMLElement {
     });
   }
 
-  /* rawOptions despite on $options is observer */
+  /* rawOptions ($options is observed) */
   protected _opts: Record<string, any> = {};
   #optsObserved?: Observer.Observed<Record<string, any>>;
   #removeObserved?: Func;
