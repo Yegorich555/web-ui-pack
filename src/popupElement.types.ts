@@ -28,7 +28,7 @@ export namespace WUPPopup {
   }
 
   export interface Options {
-    /** Anchor that popup uses for placement. If target not found previousSibling will be attached.
+    /** Anchor that popup uses for placement. If attr.target and $options.target are empty previousSibling will be attached.
      *
      * attr target="{querySelector}" has hire priority than .options.target */
     target?: HTMLElement | null;

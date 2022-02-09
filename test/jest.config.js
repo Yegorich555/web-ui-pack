@@ -15,6 +15,7 @@ module.exports = {
   collectCoverage: true,
   collectCoverageFrom: ["dist/**/*.{js,jsx}", "!**/icomoon/**"],
   coverageProvider: "v8", // https://jestjs.io/docs/configuration#coverageprovider-string
+  coverageReporters: ["text", "html"],
   moduleNameMapper,
   testEnvironment: "jsdom", // https://jestjs.io/docs/configuration#testenvironment-string
   projects: [

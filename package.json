@@ -6,8 +6,8 @@
   "types": "index.d.ts",
   "scripts": {
     "pretest": "npm run build && webpack --config test\\browser\\srv\\webpack.config.js",
-    "test": "jest --config test/jest.config.js --coverage --coverageReporters=text",
-    "test-single": "jest --config test\\jest.config.js --coverage=false",
+    "test": "jest --config test/jest.config.js --coverage",
+    "test-single": "jest --config test\\jest.config.js --coverage=true",
     "test-minify": "node .\\test\\minification\\start.js",
     "coverage": "npm test -- --coverageReporters=lcov && coveralls < coverage\\lcov.info && shx rm -rf .\\coverage && echo \nCoverage: published\n",
     "start": ".\\node_modules\\.bin\\webpack serve --open --config demo/webpack.devServer.js",

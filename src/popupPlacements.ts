@@ -140,8 +140,11 @@ export interface IPlacementAlign extends IPlacementFunction {
 /** Set of rules related to specific edge of targetElement; use bottom.start to place bottomStart */
 export interface IPlacementEdge {
   (target: IBoundingRect, me: IPlaceMeRect, fit: IBoundingRect): IPlacementXResult | IPlacementYResult;
+  /** align by start of edge of target */
   start: IPlacementAlign;
+  /** align by middle of target */
   middle: IPlacementAlign;
+  /** align by end of edge of target */
   end: IPlacementAlign;
 }
 
@@ -223,9 +226,13 @@ right.middle = left.middle;
 right.end = left.end;
 
 export const PopupPlacements = {
+  /** place above of target */
   top,
+  /** place bellow of target */
   bottom,
+  /** place at left side of target */
   left,
+  /** place at right side of target */
   right,
 };
 

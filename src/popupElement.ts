@@ -1,5 +1,5 @@
 import focusFirst from "./helpers/focusFirst";
-import WUPBaseElement, { JSXCustomProps } from "./baseElement";
+import WUPBaseElement, { JSXCustomProps, WUP } from "./baseElement";
 import onFocusGot from "./helpers/onFocusGot";
 import onFocusLost from "./helpers/onFocusLost";
 import { WUPPopup } from "./popupElement.types";
@@ -61,23 +61,28 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
 
   $hide() {
     const f = () => {
-      if (this.#isOpened && this.hide(this.#showCase, WUPPopup.HideCases.onFireHide)) {
+      // isReady possible false when you fire $hide on disposed element
+      if (this.$isReady && this.#isOpened && this.hide(this.#showCase, WUPPopup.HideCases.onFireHide)) {
         this._opts.showCase !== WUPPopup.ShowCases.always && this.init(); // re-init to applyShowCase
       }
     };
     // timeout - possible when el is created but not attached to document yet
     // eslint-disable-next-line no-unused-expressions
-    this.$isReady ? f() : setTimeout(f);
+    this.$isReady ? f() : setTimeout(f, 1); // 1ms need to wait forReady
   }
 
   $show() {
-    if (this.$isReady) {
-      this.dispose(); // remove events
-      this.show(WUPPopup.ShowCases.always);
-    } else {
-      // possible when el is created but not attached to document yet
-      setTimeout(() => this.show(WUPPopup.ShowCases.always));
-    }
+    const f = () => {
+      if (!this.$isReady) {
+        throw new Error(`${this.tagName}. Impossible to show: isn't appended to document`);
+      } else {
+        this.dispose(); // remove events
+        this.show(WUPPopup.ShowCases.always);
+      }
+    };
+
+    // eslint-disable-next-line no-unused-expressions
+    this.$isReady ? f() : setTimeout(f, 1); // 1ms need to wait forReady
   }
 
   get $isOpened(): boolean {
@@ -134,118 +139,119 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
     const onShowEvent = (...args: Parameters<WUPPopup.Element["appendEvent"]>) =>
       this.#onShowCallbacks.push(() => appendEvent(...args));
 
-    const applyShowCase = (t: HTMLElement) => {
-      this._opts.target = t;
-      // todo it doesn't work if new clickEvent fired programmatically
-      let preventClickAfterFocus = false;
-      let openedByHover = false;
-      // onClick
-      if (showCase & WUPPopup.ShowCases.onClick) {
-        // fix when labelOnClick > inputOnClick
-        let wasOutsideClick = false;
-        let lastActive: HTMLElement | null = null;
-        onShowEvent(document, "focusin", ({ target }) => {
-          const isMe = this === target || this.includes(target);
-          if (!isMe) {
-            lastActive = target as HTMLElement;
-          }
-        });
-
-        onShowEvent(document, "touchstart", () => (preventClickAfterFocus = false));
-        onShowEvent(document, "mousedown", () => (preventClickAfterFocus = false));
-        onShowEvent(document, "click", ({ target }) => {
-          // filter click from target because we have target event for this
-          if (t !== target && !(target instanceof Node && t.contains(target))) {
-            const isMeClick = this === target || this.includes(target);
-            if (isMeClick) {
-              focusFirst(lastActive || t);
-              this.hide(this.#showCase, WUPPopup.HideCases.onPopupClick);
-            } else {
-              this.hide(this.#showCase, WUPPopup.HideCases.onOutsideClick);
-              wasOutsideClick = true;
-              setTimeout(() => (wasOutsideClick = false), 50);
-            }
-          }
-        });
-
-        let timeoutId: ReturnType<typeof setTimeout> | undefined;
-        appendEvent(t, "click", () => {
-          if (timeoutId || wasOutsideClick || openedByHover) {
-            return;
-          }
-          if (!this.#isOpened) {
-            this.show(WUPPopup.ShowCases.onClick);
-            lastActive = document.activeElement as HTMLElement;
-          } else if (!preventClickAfterFocus) {
-            this.hide(this.#showCase, WUPPopup.HideCases.onTargetClick);
-          }
-          // fix when labelOnClick > inputOnClick
-          timeoutId = setTimeout(() => (timeoutId = undefined), 50);
-        });
-      }
-
-      // onHover
-      if (showCase & WUPPopup.ShowCases.onHover) {
-        let timeoutId: ReturnType<typeof setTimeout> | undefined;
-        const ev = (ms: number, isMouseIn: boolean) => {
-          timeoutId && clearTimeout(timeoutId);
-          openedByHover = isMouseIn;
-          preventClickAfterFocus = false; // fixes case when click fired without mousedown
-          if ((isMouseIn && !this.#isOpened) || (!isMouseIn && this.#isOpened))
-            timeoutId = setTimeout(
-              () =>
-                isMouseIn
-                  ? this.show(WUPPopup.ShowCases.onHover)
-                  : this.hide(this.#showCase, WUPPopup.HideCases.onMouseLeave),
-              ms
-            );
-          else timeoutId = undefined;
-        };
-        appendEvent(t, "mouseenter", () => ev(this._opts.hoverShowTimeout, true));
-        // use only appendEvent; with onShowEvent it doesn't work properly (because filtered by timeout)
-        appendEvent(t, "mouseleave", () => ev(this._opts.hoverHideTimeout, false));
-      }
-
-      // onFocus
-      if (showCase & WUPPopup.ShowCases.onFocus) {
-        const focus = () => {
-          if (!this.#isOpened && this.show(WUPPopup.ShowCases.onFocus)) {
-            preventClickAfterFocus = true;
-          }
-        };
-        this.disposeLst.push(onFocusGot(t, focus, { debounceMs: this._opts.focusDebounceMs }));
-
-        const blur = ({ relatedTarget }: FocusEvent) => {
-          if (this.#isOpened) {
-            const isToMe = this === document.activeElement || this === relatedTarget;
-            const isToMeInside = !isToMe && this.includes(document.activeElement || relatedTarget);
-            !isToMe && !isToMeInside && this.hide(this.#showCase, WUPPopup.HideCases.onFocusOut);
-            if (!this.$isOpened) {
-              openedByHover = false;
-            }
-          }
-        };
-
-        this.#onShowCallbacks.push(() => onFocusLost(t, blur, { debounceMs: this._opts.focusDebounceMs }));
-      }
-    };
-
-    const t = this.#defineTarget(true);
-    if (t) {
-      applyShowCase(t);
-    } else {
+    // apply showCase
+    const { el: t, err } = this.#defineTarget();
+    if (!t) {
       this.#initTimer = setTimeout(() => {
-        const t2 = this.#defineTarget();
-        t2 && applyShowCase(t2);
-        this.#initTimer = undefined;
-      }, 200); // try again because target can be undefined in time
+        throw new Error(err);
+      }, 200); // timeout because of target can be undefined in time
+      return;
+    }
+
+    this._opts.target = t;
+    // todo it doesn't work if new clickEvent fired programmatically
+    let preventClickAfterFocus = false;
+    let openedByHover = false;
+    // onClick
+    if (showCase & WUPPopup.ShowCases.onClick) {
+      // fix when labelOnClick > inputOnClick
+      let wasOutsideClick = false;
+      let lastActive: HTMLElement | null = null;
+      onShowEvent(document, "focusin", ({ target }) => {
+        const isMe = this === target || this.includes(target);
+        if (!isMe) {
+          lastActive = target as HTMLElement;
+        }
+      });
+
+      onShowEvent(document, "touchstart", () => (preventClickAfterFocus = false));
+      onShowEvent(document, "mousedown", () => (preventClickAfterFocus = false));
+      onShowEvent(document, "click", ({ target }) => {
+        // filter click from target because we have target event for this
+        if (t !== target && !(target instanceof Node && t.contains(target))) {
+          const isMeClick = this === target || this.includes(target);
+          if (isMeClick) {
+            focusFirst(lastActive || t);
+            this.hide(this.#showCase, WUPPopup.HideCases.onPopupClick);
+          } else {
+            this.hide(this.#showCase, WUPPopup.HideCases.onOutsideClick);
+            wasOutsideClick = true;
+            setTimeout(() => (wasOutsideClick = false), 50);
+          }
+        }
+      });
+
+      let timeoutId: ReturnType<typeof setTimeout> | undefined;
+      appendEvent(t, "click", () => {
+        if (timeoutId || wasOutsideClick || openedByHover) {
+          return;
+        }
+        if (!this.#isOpened) {
+          lastActive = document.activeElement as HTMLElement;
+          this.show(WUPPopup.ShowCases.onClick);
+        } else if (!preventClickAfterFocus) {
+          this.hide(this.#showCase, WUPPopup.HideCases.onTargetClick);
+        }
+        // fix when labelOnClick > inputOnClick
+        timeoutId = setTimeout(() => (timeoutId = undefined), 50);
+      });
+    }
+
+    // onHover
+    if (showCase & WUPPopup.ShowCases.onHover) {
+      let timeoutId: ReturnType<typeof setTimeout> | undefined;
+      const ev = (ms: number, isMouseIn: boolean) => {
+        timeoutId && clearTimeout(timeoutId);
+        openedByHover = isMouseIn;
+        preventClickAfterFocus = false; // fixes case when click fired without mousedown
+        if ((isMouseIn && !this.#isOpened) || (!isMouseIn && this.#isOpened))
+          timeoutId = setTimeout(
+            () =>
+              isMouseIn
+                ? this.show(WUPPopup.ShowCases.onHover)
+                : this.hide(this.#showCase, WUPPopup.HideCases.onMouseLeave),
+            ms
+          );
+        else timeoutId = undefined;
+      };
+      appendEvent(t, "mouseenter", () => ev(this._opts.hoverShowTimeout, true));
+      // use only appendEvent; with onShowEvent it doesn't work properly (because filtered by timeout)
+      appendEvent(t, "mouseleave", () => ev(this._opts.hoverHideTimeout, false));
+    }
+
+    // onFocus
+    if (showCase & WUPPopup.ShowCases.onFocus) {
+      const focus = () => {
+        if (!this.#isOpened && this.show(WUPPopup.ShowCases.onFocus)) {
+          preventClickAfterFocus = true;
+        }
+      };
+      this.disposeLst.push(onFocusGot(t, focus, { debounceMs: this._opts.focusDebounceMs }));
+
+      const blur = ({ relatedTarget }: FocusEvent) => {
+        if (this.#isOpened) {
+          const isToMe = this === document.activeElement || this === relatedTarget;
+          const isToMeInside = !isToMe && this.includes(document.activeElement || relatedTarget);
+          !isToMe && !isToMeInside && this.hide(this.#showCase, WUPPopup.HideCases.onFocusOut);
+          if (!this.$isOpened) {
+            openedByHover = false;
+          }
+        }
+      };
+
+      this.#onShowCallbacks.push(() => onFocusLost(t, blur, { debounceMs: this._opts.focusDebounceMs }));
     }
   }
 
-  static observedOptions: Set<keyof WUPPopup.Options> = new Set(["showCase", "target"]);
-  protected override gotOptionsChanged() {
+  #reinit() {
     this.$isOpened && this.hide(this.#showCase, WUPPopup.HideCases.onOptionChange);
     this.init(); // possible only if popup is hidden
+  }
+
+  static observedOptions: Set<keyof WUPPopup.Options> = new Set(["showCase", "target", "placement"]);
+  protected override gotOptionsChanged(e: WUP.OptionEvent) {
+    super.gotOptionsChanged(e);
+    this.#reinit();
   }
 
   /* Array of attribute names to monitor for changes */
@@ -253,37 +259,34 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
     return ["target", "placement"];
   }
 
+  #attrTimer?: number;
   protected override gotAttributeChanged(name: string, oldValue: string, newValue: string): void {
     super.gotAttributeChanged(name, oldValue, newValue);
-    if (name === "target") {
-      this.$isOpened && this.hide(this.#showCase, WUPPopup.HideCases.onOptionChange);
-      this.init(); // possible only if popup is hidden
-    } else if (name === "placement") {
-      this.#isOpened && this.show(this.#showCase || 0);
-    }
+    // debounce filter
+    this.#attrTimer && clearTimeout(this.#attrTimer);
+    this.#attrTimer = window.setTimeout(() => this.#reinit());
   }
 
-  /** Defines target on show */
-  #defineTarget(disableErrors = false): HTMLElement | null {
+  /** Defines target on show; Returns HtmlElement | Error */
+  #defineTarget(): { el: HTMLElement; err?: undefined } | { err: string; el?: undefined } {
     const attrTrg = this.getAttribute("target");
     if (attrTrg) {
-      const t = document.querySelector(attrTrg);
-      if (t instanceof HTMLElement) {
-        return t;
+      const el = document.querySelector(attrTrg);
+      if (el instanceof HTMLElement) {
+        return { el };
       }
-      !disableErrors && console.error(`${this.tagName}. Target not found for '${attrTrg}'`);
+      return { err: `${this.tagName}. Target not found for '${attrTrg}'` };
     }
 
     if (this._opts.target) {
-      return this._opts.target;
+      return { el: this._opts.target };
     }
 
-    const t = this.previousElementSibling;
-    if (t instanceof HTMLElement) {
-      return t;
+    const el = this.previousElementSibling;
+    if (el instanceof HTMLElement) {
+      return { el };
     }
-    !disableErrors && !attrTrg && console.error(`${this.tagName}. Target is not defined`);
-    return null;
+    return { err: `${this.tagName}. Target is not defined` };
   }
 
   #frameId?: number;
@@ -297,25 +300,24 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
    * @return true if successful */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected canShow(showCase: WUPPopup.ShowCases): boolean {
-    if (!this._opts.target) {
-      return false;
-    }
+    // todo options type doesn't work in TS
     return true;
   }
 
   /** Shows popup if target defined; returns true if successful */
   protected show(showCase: WUPPopup.ShowCases): boolean {
-    if (!this.$isReady) {
-      console.error(`${this.tagName}. Impossible to show. Element is not appended to document`);
-      return false;
-    }
     const wasHidden = !this.#isOpened;
     this.#isOpened && this.hide(this.#showCase, WUPPopup.HideCases.onShowAgain);
 
-    this._opts.target = this._opts.target || this.#defineTarget();
-    if (!this.canShow(showCase)) {
-      return false;
+    if (!this._opts.target) {
+      const { el, err } = this.#defineTarget();
+      this._opts.target = el || null;
+      if (err) {
+        throw new Error(err);
+      }
     }
+
+    if (!this.canShow(showCase)) return false;
 
     if (wasHidden) {
       const e = (this as WUPPopup.Element).fireEvent("$willShow", { cancelable: true });
@@ -511,8 +513,8 @@ declare global {
       [tagName]: JSXCustomProps<WUPPopup.Element> &
         Partial<{
           /** QuerySelector to find target - anchor that popup uses for placement.
-           * If target not found previousSibling will be attached.
-           * Popup defines target when onShow
+           * If attr.target and $options.target are empty previousSibling will be attached.
+           * Popup defines target on show()
            *
            * attr `target` has hire priority than ref.options.target
            *  */
@@ -531,3 +533,6 @@ declare global {
     }
   }
 }
+
+// todo when showCase = focus. need to show if target isAlreadyFocused
+// todo rename methods show/hide to goShow/goHide to avoid confusions with $show/$hide

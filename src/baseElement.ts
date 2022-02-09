@@ -113,7 +113,7 @@ export default abstract class WUPBaseElement extends HTMLElement {
   }
 
   /** Fired when element isReady and at least one of observedOptions is changed */
-  protected gotOptionsChanged(e: Observer.ObjectEvent<Record<string, any>>) {}
+  protected gotOptionsChanged(e: WUP.OptionEvent) {}
 
   /** Browser calls this method when the element is added to the document */
   protected connectedCallback() {
@@ -198,6 +198,10 @@ export type JSXCustomProps<T> = React.DetailedHTMLProps<
 >;
 
 export namespace WUP {
+  export type OptionEvent<T extends Record<string, any> = Record<string, any>> = {
+    props: Array<Extract<keyof T, string>>;
+    target: T;
+  };
   // export interface IEvent<T extends HTMLElementEventMap> extends Event {
   //   // eslint-disable-next-line @typescript-eslint/no-misused-new
   //   new (type: keyof T, eventInitDict?: EventInit): IEvent<T>;

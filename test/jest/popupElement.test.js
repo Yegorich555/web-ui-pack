@@ -23,7 +23,7 @@ beforeEach(() => {
 afterEach(() => {
   el.remove();
   trg.remove();
-  h.unMockConsoleWarn();
+  h.unMockConsoleError();
   h.unMockConsoleWarn();
   document.body.innerHTML = "";
 });
@@ -146,22 +146,29 @@ describe("popupElement", () => {
     // coverage for initTimer
     jest.clearAllMocks();
     jest.clearAllTimers();
-    const err = h.mockConsoleError();
+    /** @type typeof el */
     const a2 = document.createElement(el.tagName);
     a2.$options.showCase = 1 << 2; // click
     const init2 = jest.spyOn(a2, "init");
     document.body.prepend(a2);
     jest.advanceTimersToNextTimer(); // wait for ready
     expect(init2).toBeCalledTimes(1);
-    jest.advanceTimersToNextTimer(); // wait applyShowCase_again
+    expect(jest.advanceTimersToNextTimer).toThrow(); // wait for error by timeout
     expect(a2.$options.target == null).toBeTruthy();
     expect(a2.$isOpened).toBeFalsy();
-    expect(err).toBeCalledTimes(1);
-    h.unMockConsoleError();
+
+    // applyShowCase after timer
+    // a2.remove();
+    // document.body.prepend(a2);
+    // a2.$options.target = null;
+    // jest.advanceTimersByTime(2); // wait for ready and applyShowCase-timer-start
+    // a2.$options.target = trg;
+    // jest.advanceTimersToNextTimer();
+    // trg.click();
+    // expect(a2.$isOpened).toBeTruthy();
   });
 
   test("$options.target", () => {
-    const err = h.mockConsoleError();
     let a = document.createElement(el.tagName);
     a.$options.showCase = 0; // always
     const onShow = jest.fn();
@@ -184,13 +191,10 @@ describe("popupElement", () => {
     a.$options.target = null;
     a.remove();
     onShow.mockClear();
-    expect(err).not.toBeCalled();
     document.body.prepend(a); // prepend to previousElementSibling = null
     expect(a.previousElementSibling).toBeNull();
-    jest.advanceTimersToNextTimer(); // onReady has timeout
-
+    expect(jest.advanceTimersToNextTimer).toThrow(); // onReady has timeout and it throws exception
     expect(onShow).not.toBeCalled(); // because target is null
-    expect(err).toBeCalledTimes(1); // expected that user will be notified
 
     // onHide expected by $show-success > $show-failed
     a.$options.target = trg;
@@ -199,21 +203,19 @@ describe("popupElement", () => {
     onHide.mockClear();
     a.$options.target = null;
     const spyShow = jest.spyOn(a, "show").mockClear();
-    a.$show(); // to apply options
+    expect(a.$show).toThrow(); // to apply options - throw error because target is not defined
     expect(spyShow).toBeCalledTimes(1);
     expect(a.$isOpened).toBeFalsy(); // because target is not defined
     jest.advanceTimersToNextTimer(); // onHide has timeout
     expect(onHide).toBeCalledTimes(1); // because it was shown with target and hidden with the next show without target
 
     // try createElement when target is null by init
-    err.mockClear();
     onShow.mockClear();
     a = document.createElement(el.tagName);
     a.$options.showCase = 0;
     document.body.prepend(a); // prepend to previousElementSibling = null
-    jest.advanceTimersToNextTimer(); // onReady has timeout
+    expect(jest.advanceTimersToNextTimer).toThrow(); // onReady has timeout; throw error because target is not defined
     expect(onShow).not.toBeCalled(); // because target is null
-    expect(err).toBeCalledTimes(1); // no target byOpen > console.warn
 
     // check if changing on the fly >>> reinit event
     a.$options.target = trg;
@@ -227,6 +229,7 @@ describe("popupElement", () => {
   });
 
   test("$options.showCase", () => {
+    /** @type typeof el */
     const a = document.createElement(el.tagName);
     a.$options.target = trg;
 
@@ -291,6 +294,21 @@ describe("popupElement", () => {
     expect(spyShow).lastCalledWith(1 << 1); // checking if throttling-filter works
     expect(spyHide).lastCalledWith(1 << 1, 3); // because div haven't been lost focus
 
+    // focus moves to element inside popup > no-hide
+    /** @type typeof el */
+    let a2 = document.body.appendChild(document.createElement(el.tagName));
+    const a2Input = a2.appendChild(document.createElement("input"));
+    a2.$options.showCase = 1 << 1;
+    a2.$options.target = trgInput;
+    jest.advanceTimersToNextTimer();
+    trgInput.focus();
+    expect(a2.$isOpened).toBeTruthy();
+    let f = jest.spyOn(document, "activeElement", "get").mockReturnValue(null);
+    a2Input.focus();
+    jest.advanceTimersToNextTimer(); // focusLost has debounce
+    expect(a2.$isOpened).toBeTruthy();
+    f.mockRestore();
+
     // onlyClick
     jest.clearAllMocks();
     a.remove();
@@ -328,6 +346,23 @@ describe("popupElement", () => {
     document.body.dispatchEvent(new Event("click", { bubbles: true }));
     expect(a.$isOpened).toBeFalsy(); // click outside == close
     expect(spyHide).lastCalledWith(1 << 2, 4);
+
+    // check focus on target on hide
+    document.activeElement.blur();
+    f = jest.spyOn(document, "activeElement", "get").mockReturnValue(null);
+    /** @type typeof el */
+    a2 = document.body.appendChild(document.createElement(el.tagName));
+    a2.$options.showCase = 1 << 2;
+    a2.$options.target = trgInput;
+    jest.advanceTimersToNextTimer();
+    trgInput.click();
+    expect(a2.$isOpened).toBeTruthy();
+    const onFocus = jest.spyOn(trgInput, "focus");
+    a2.click();
+    expect(a2.$isOpened).toBeFalsy();
+    expect(onFocus).toBeCalled();
+    f.mockRestore();
+    a2.remove();
 
     // test all: onHover | onFocus | onClick
     jest.clearAllTimers();
@@ -399,6 +434,32 @@ describe("popupElement", () => {
     expect(spyHide).lastCalledWith(1 << 1, 6);
   });
 
+  test("$options.minWidthByTarget/minHeightByTarget", () => {
+    // just for coverage
+    /** @type typeof el */
+    const a = document.createElement(el.tagName);
+    a.$options.showCase = 0; // always
+    a.$options.minWidthByTarget = true;
+    a.$options.minHeightByTarget = true;
+    document.body.append(a);
+    jest.advanceTimersToNextTimer(); // wait for ready/init
+    // WARN: layout impossible to test with unit; all layout tests see in e2e
+    expect(a.style.minWidth).toBeDefined();
+    expect(a.style.minHeight).toBeDefined();
+
+    jest.clearAllTimers();
+    const a2 = document.createElement(el.tagName);
+    a2.$options.showCase = 0; // always
+    a2.style.minWidth = `${1}px`;
+    a2.style.minHeight = `${2}px`;
+    a2.$options.toFitElement = null;
+    document.body.append(a2);
+    jest.advanceTimersToNextTimer(); // wait for ready/init
+    expect(a.style.minWidth).toBeDefined();
+    expect(a.style.minHeight).toBeDefined();
+    jest.clearAllTimers();
+  });
+
   test("$hide()/$show()", () => {
     el.$options.showCase = 0; // always
     expect(el.$isOpened).toBeTruthy();
@@ -411,16 +472,76 @@ describe("popupElement", () => {
     el.$hide();
     el.$show();
     expect(el.$isOpened).toBeFalsy();
-    // todo check private methods canShow, canHide
-    // todo check if $hide after show doesn't destroy events
+
+    // check when showCase != 0
+    jest.clearAllTimers();
+    el.$options.showCase = 1 << 2; // onClick
+    document.body.append(el);
+    jest.advanceTimersToNextTimer(); // wait for ready
+    trg.click();
+    expect(el.$isOpened).toBeTruthy(); // checking if click-listener works
+    el.$show();
+
+    el.$show();
+    trg.click();
+    expect(el.$isOpened).toBeTruthy(); // checking if click-listener is off because was opened by manual $show
+    el.$hide();
+    expect(el.$isOpened).toBeFalsy(); // checking if click-listener is off because was opened by manual $show
+    trg.click();
+    expect(el.$isOpened).toBeTruthy(); // checking if events works again
+
+    /** @type typeof el */
+    const a = document.createElement(el.tagName);
+    a.$options.showCase = 0;
+    document.body.append(a);
+    expect(a.$isReady).toBeFalsy();
+    expect(a.$hide).not.toThrow();
+    jest.advanceTimersByTime(1);
+
+    // test timeouts inside $show
+    a.remove();
+    expect(a.$show).not.toThrow();
+    expect(() => jest.advanceTimersByTime(1)).toThrow(); // because isReady still false
+    a.$show();
+    document.body.append(a);
+    expect(() => jest.advanceTimersByTime(1)).not.toThrow(); // because isReady true
+    expect(a.$isOpened).toBeTruthy();
+
+    // checking canHide method
+    a.canHide = () => false;
+    a.$hide();
+    expect(a.$isOpened).toBeTruthy();
+    a.canHide = () => true;
+    a.$hide();
+    expect(a.$isOpened).toBeFalsy();
+
+    a.canShow = () => false;
+    a.$show();
+    expect(a.$isOpened).toBeFalsy();
+    a.canShow = () => true;
+    a.$show();
+    expect(a.$isOpened).toBeTruthy();
 
     // other cases in test(`options.$target`) and test(`remove`)
   });
 
   test("attrs", () => {
+    /** @type typeof el */
     const a = document.createElement(el.tagName);
-    document.prepend(a);
-    throw new Error("Have not implemented yet");
+    a.$options.showCase = 0;
+    document.body.prepend(a);
+    h.mockConsoleError();
+    expect(() => jest.advanceTimersByTime(1000)).toThrow(); // because of target not defined
+    jest.clearAllMocks();
+    expect(a.$isOpened).toBeFalsy();
+    expect(a.$options.target == null).toBeTruthy();
+
+    // attr 'target'
+    a.setAttribute("target", `#${trg.getAttribute("id")}`);
+    a.setAttribute("placement", "top-start");
+    jest.advanceTimersToNextTimer();
+    expect(a.$options.target).toBeDefined();
+    expect(a.$isOpened).toBeTruthy();
   });
 
   test("remove", () => {
@@ -432,20 +553,26 @@ describe("popupElement", () => {
     expect(el.$isReady).toBeFalsy();
 
     // try to open when element not appended
-    const err = h.mockConsoleError();
     expect(el.$show).not.toThrow();
     expect(el.$isOpened).toBeFalsy(); // because $show() is async method
-    expect(jest.advanceTimersToNextTimer).not.toThrow(); // wait for tryShow
+    expect(jest.advanceTimersToNextTimer).toThrow(); // wait for tryShow
     expect(el.$isReady).toBeFalsy();
-    expect(err).toBeCalledTimes(1); // because still isNotReady
     expect(el.$isOpened).toBeFalsy(); // because $show() is async method
 
     // try to append and open
-    err.mockClear();
     document.body.appendChild(el);
     jest.advanceTimersToNextTimer();
     expect(el.$show).not.toThrow();
     expect(el.$isOpened).toBeTruthy();
+
+    // coverage: check if initTimer is destroyed
+    /** @type typeof el */
+    const a = document.createElement(el.tagName);
+    document.body.prepend(a);
+    jest.advanceTimersToNextTimer(); // wait for ready
+    a.$options.target = trg;
+    jest.advanceTimersByTime(1); // wait for #initTimer to be defined
+    a.remove();
   });
 
   test("memoryLeaking", () => {
@@ -466,7 +593,7 @@ describe("popupElement", () => {
     jest.advanceTimersToNextTimer(); // onReady has timeout
     expect(a.$isOpened).toBeFalsy(); // no events from target
 
-    const called = spy.filter((v) => v.on.mock.calls.length).map((v) => v.on.mock.calls[0]);
+    const called = spy.map((v) => v.on.mock.calls[0]).filter((v) => v);
     expect(called).not.toHaveLength(0); // test if event listeners were added
 
     trg.click(); // it will add extra events
