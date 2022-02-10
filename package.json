@@ -89,7 +89,7 @@
     "markdownlint": "^0.24.0",
     "markdownlint-cli": "^0.30.0",
     "mini-css-extract-plugin": "^2.4.5",
-    "node-sass": "^6.0.1",
+    "node-sass": "^7.0.0",
     "postcss": "^8.3.11",
     "postcss-font-base64": "^1.0.5",
     "postcss-import": "^14.0.2",
