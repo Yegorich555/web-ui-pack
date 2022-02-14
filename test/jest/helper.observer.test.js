@@ -1,24 +1,14 @@
-/* eslint-disable no-self-assign */
 import { observer } from "web-ui-pack";
 
 // watchfix jest issue unhandledRejection handler is not testable: https://github.com/facebook/jest/issues/5620
-const catchIn = () => console.warn("got");
-
-beforeAll(() => {
-  // todo hook on jest env doesn't work
-  process.on("unhandledRejection", catchIn);
-  // window.addEventListener("unhandledrejection", catchIn);
-});
-afterAll(() => {
-  process.off("unhandledRejection", catchIn);
-  // window.removeEventListener("unhandledrejection", catchIn);
-});
+process.on("unhandledRejection", (err) => console.warn("unhandledRejection", err));
 
 beforeEach(() => {
   // https://stackoverflow.com/questions/51126786/jest-fake-timers-with-promises
   jest.useFakeTimers(); // legacy required to work with Promises correctly
   jest.clearAllMocks();
   jest.clearAllTimers();
+  unhandledReject.reset();
 });
 
 describe("helper.observer", () => {
@@ -515,6 +505,7 @@ describe("helper.observer", () => {
     expect(fn).not.toBeCalled(); // IMPORTANT: because stored proxy-object but assigned raw that has proxy
     jest.clearAllMocks();
     // try to assign again
+    // eslint-disable-next-line no-self-assign
     expect(() => (obj.ref = obj.ref)).not.toThrow();
     jest.advanceTimersToNextTimer();
     expect(fn).not.toBeCalled(); // stay the same because no changes
@@ -538,14 +529,16 @@ describe("helper.observer", () => {
   });
 
   test("exception in event > callback doesn't affect on another", async () => {
-    await Promise.resolve();
     const obj = observer.make({ ref: { val: 1 } });
+    const unhandled = unhandledReject.spy(jest.fn());
     observer.onPropChanged(obj.ref, () => {
-      throw new Error("Test prop message");
+      throw new Error("Test prop message"); // UnhandledPromiseRejectionWarning
     });
+
     observer.onChanged(obj.ref, () => {
-      throw new Error("Test message");
+      throw new Error("Test message"); // UnhandledPromiseRejectionWarning
     });
+
     const fn = jest.fn();
     const fn2 = jest.fn();
     observer.onPropChanged(obj, fn);
@@ -554,6 +547,7 @@ describe("helper.observer", () => {
     jest.advanceTimersToNextTimer();
     expect(fn).toBeCalledTimes(1);
     expect(fn2).toBeCalledTimes(1);
+    expect(unhandled).toBeCalledTimes(2);
   });
 
   test("collission on several", () => {

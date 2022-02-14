@@ -1,6 +1,9 @@
 module.exports = {
   extends: ["plugin:jest/recommended"],
   plugins: ["jest"],
+  globals: {
+    unhandledReject: true,
+  },
   rules: {
     "jsx-a11y/no-autofocus": "off",
     "no-param-reassign": "off",

@@ -616,8 +616,7 @@ describe("popupElement", () => {
      check options.placementAlt
      options.minWidthByTarget;
      options.minHeightByTarget;
-
-     todo unit cases:
-     test("attr `target`", () => {});
    */
+
+  // todo UnhandledPromiseRejectionWarning: Error: WUP-POPUP. Target is not defined - how to catch it
 });
