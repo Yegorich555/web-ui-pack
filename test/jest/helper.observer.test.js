@@ -1,14 +1,11 @@
 import { observer } from "web-ui-pack";
-
-// watchfix jest issue unhandledRejection handler is not testable: https://github.com/facebook/jest/issues/5620
-process.on("unhandledRejection", (err) => console.warn("unhandledRejection", err));
+import * as h from "../testHelper";
 
 beforeEach(() => {
   // https://stackoverflow.com/questions/51126786/jest-fake-timers-with-promises
   jest.useFakeTimers(); // legacy required to work with Promises correctly
   jest.clearAllMocks();
   jest.clearAllTimers();
-  unhandledReject.reset();
 });
 
 describe("helper.observer", () => {
@@ -528,9 +525,9 @@ describe("helper.observer", () => {
     expect(d.valueOf() === dt.valueOf()).toBeTruthy();
   });
 
-  test("exception in event > callback doesn't affect on another", async () => {
+  test("exception in event > callback doesn't affect on another", () => {
     const obj = observer.make({ ref: { val: 1 } });
-    const unhandled = unhandledReject.spy(jest.fn());
+    h.handleRejection();
     observer.onPropChanged(obj.ref, () => {
       throw new Error("Test prop message"); // UnhandledPromiseRejectionWarning
     });
@@ -547,7 +544,6 @@ describe("helper.observer", () => {
     jest.advanceTimersToNextTimer();
     expect(fn).toBeCalledTimes(1);
     expect(fn2).toBeCalledTimes(1);
-    expect(unhandled).toBeCalledTimes(2);
   });
 
   test("collission on several", () => {

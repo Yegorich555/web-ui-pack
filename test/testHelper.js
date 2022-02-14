@@ -254,3 +254,17 @@ export function initDom() {
   document.body.appendChild(container.element);
   return container;
 }
+
+/** Handle process.on("unhandledRejection"); @type jest.MockedFunction;
+ * WARN: it can't provide mock.calls because processFires after test-execution
+ */
+export function handleRejection() {
+  const fn = jest.fn();
+  const rst = fn.mockClear;
+  fn.mockClear = () => {
+    rst();
+    global.setUnhandledReject(null);
+  };
+  global.setUnhandledReject(fn);
+  return fn;
+}

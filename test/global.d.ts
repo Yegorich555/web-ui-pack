@@ -2,15 +2,11 @@
 export interface JustForGlobal {}
 
 declare global {
-  const unhandledReject: typeof console.error; // jest.Mock<void, [Error]>;
-
-  interface Window {
-    unhandledReject: typeof console.error; // jest.Mock<void, [Error]>;
-  }
+  const setUnhandledReject: (fn: typeof console.error) => void;
 
   namespace NodeJS {
     interface Global {
-      unhandledReject: typeof console.error; // jest.Mock<void, [Error]>;
+      setUnhandledReject: (fn: typeof console.error) => void;
     }
   }
 }
