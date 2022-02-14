@@ -25,16 +25,16 @@ class JsdomEnvironment extends Env {
     const Orig = this.global.Promise;
     // redefine default promise to handle exceptions
     const Promise = function promiseHandler(fnArg) {
-      // const fn = (resolve, reject) => {
-      //   try {
-      //     return fnArg(resolve, reject);
-      //   } catch (err) {
-      //     // todo such wrapper affects on Promise chaining p.then.catch (catch will never fired but should)
-      //     return unhandledReject(err);
-      //   }
-      // };
+      const fn = (resolve, reject) => {
+        try {
+          return fnArg(resolve, reject);
+        } catch (err) {
+          // todo such wrapper affects on Promise chaining p.then.catch (catch will never fired but should)
+          return unhandledReject(err);
+        }
+      };
       // todo such wrapper affects on Promise chaining p.then.catch (catch will never fired but should)
-      return new Orig(fnArg).catch((err) => unhandledReject(err));
+      return new Orig(fn); // .catch((err) => unhandledReject(err));
     };
 
     const excl = new Set(["name", "length"]);
