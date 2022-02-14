@@ -197,6 +197,7 @@ describe("popupElement", () => {
     expect(onShow).not.toBeCalled(); // because target is null
 
     // onHide expected by $show-success > $show-failed
+    h.handleRejection(); // target is not defined and in this case observer gets exception from callback
     a.$options.target = trg;
     a.$show();
     expect(a.$isOpened).toBeTruthy();
