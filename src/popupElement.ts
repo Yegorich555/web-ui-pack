@@ -11,6 +11,16 @@ import {
   WUPPopupPlace,
 } from "./popupPlacements";
 
+/** PopupElement
+ * @example
+ * const el = document.createElement('wup-popup');
+ * el.$options.showCase = WUPPopup.ShowCases.onClick | WUPPopup.ShowCases.onFocus;
+ * el.$options.target = document.querySelector('button');
+ * el.$options.placement = WUPPopupElement.$placements.$top.$middle.$adjust;
+ * document.body.append(el);
+ * // or
+ * <wup-popup target="#targetId" placement="top-start">Some content here</wup-popup>
+ */
 export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   protected get ctr(): typeof WUPPopupElement {
@@ -333,7 +343,9 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.$placementAttrs;
     this._opts.placement = (pAttr && WUPPopupElement.$placementAttrs[pAttr]) || this._opts.placement;
 
-    // it works only when styles is defined before popup is open
+    // it works only when styles is defined before popup is opened
+    this.style.maxWidth = "";
+    this.style.maxHeight = "";
     const style = getComputedStyle(this);
     this.#userSizes = {
       maxWidth: stringPixelsToNumber(style.maxWidth) || Number.MAX_SAFE_INTEGER,
@@ -470,13 +482,13 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     let pos: WUPPopupPlace.Result = <WUPPopupPlace.Result>{};
     const isOk = this.#placements.some((pfn) => {
       pos = pfn(t, me, fit);
+      // todo looks like this is redundant logic because it applies below
       pos.maxFreeW = Math.min(pos.maxW || pos.freeW, this.#userSizes.maxWidth);
-      pos.maxFreeH = Math.min(pos.maxW || pos.freeW, this.#userSizes.maxWidth);
+      pos.maxFreeH = Math.min(pos.maxH || pos.freeH, this.#userSizes.maxHeight);
       return !hasOveflow(pos);
     });
     !isOk && console.error(`${this.tagName}. Impossible to place popup without overflow`);
 
-    // console.warn(pos);
     // transform has performance benefits in comparison with positioning
     this.style.transform = `translate(${pos.left}px, ${pos.top}px)`;
     // we can't remove maxWidth, maxHeight because maxWidth can affect on maxHeight and calculations will be wrong

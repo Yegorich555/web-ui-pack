@@ -8,12 +8,45 @@ let el;
 /** @type HTMLElement */
 let trg; // target for popup
 
+// simulate layout
 beforeEach(() => {
+  jest.spyOn(document.body, "getBoundingClientRect").mockReturnValue({
+    x: 0,
+    y: 0,
+    top: 0,
+    left: 0,
+    bottom: 400,
+    height: 400,
+    width: 600,
+    right: 600,
+    toJSON: () => "",
+  });
+  jest.spyOn(document.body, "clientHeight", "get").mockReturnValue(400);
+  jest.spyOn(document.body, "clientWidth", "get").mockReturnValue(600);
+
   jest.clearAllMocks();
   jest.clearAllTimers();
   trg = document.body.appendChild(document.createElement("div"));
   trg.append("some text");
   trg.setAttribute("id", "targetId");
+
+  // simulate layout
+  const height = 50;
+  const width = 100;
+  const x = 140;
+  const y = 100;
+  jest.spyOn(trg, "getBoundingClientRect").mockReturnValue({
+    x,
+    left: x,
+    y,
+    top: y,
+    bottom: y + height,
+    right: x + width,
+    height,
+    width,
+    toJSON: () => "",
+  });
+
   el = document.createElement("wup-popup");
   el.$options.showCase = 0; // always
   document.body.appendChild(el);
@@ -616,6 +649,57 @@ describe("popupElement", () => {
       const offCalls = s.off.mock.calls.map((c, i) => `${c[0]} ${s.off.mock.instances[i] || s.itemName}`);
       expect(onCalls).toEqual(offCalls);
     });
+  });
+
+  test("position", async () => {
+    expect(el.$isOpened).toBeTruthy(); // checking prev-state
+    el.$options.placementAlt = [];
+
+    el.$options.placement = WUPPopupElement.$placements.$top.$start.$adjust;
+    jest.advanceTimersByTime(10);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(140px, 100px); opacity: 1; max-width: 460px; max-height: 100px;\\"></wup-popup>"`
+    );
+
+    el.$options.placement = WUPPopupElement.$placements.$top.$middle.$adjust;
+    jest.advanceTimersByTime(10);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(190px, 100px); opacity: 1; max-width: 600px; max-height: 100px;\\"></wup-popup>"`
+    );
+    // el.style.maxWidth = el.style.maxHeight = "";
+    // el.$options.placement = WUPPopupElement.$placements.$top.$end.$adjust;
+    // jest.advanceTimersByTime(10);
+    // expect(el.outerHTML).toMatchInlineSnapshot();
+
+    // el.$options.placement = WUPPopupElement.$placements.$right.$start.$adjust;
+    // jest.advanceTimersByTime(10);
+    // expect(el.outerHTML).toMatchInlineSnapshot();
+    // el.$options.placement = WUPPopupElement.$placements.$right.$middle.$adjust;
+    // jest.advanceTimersByTime(10);
+    // expect(el.outerHTML).toMatchInlineSnapshot();
+    // el.$options.placement = WUPPopupElement.$placements.$right.$end.$adjust;
+    // jest.advanceTimersByTime(10);
+    // expect(el.outerHTML).toMatchInlineSnapshot();
+
+    // el.$options.placement = WUPPopupElement.$placements.$bottom.$start.$adjust;
+    // jest.advanceTimersByTime(10);
+    // expect(el.outerHTML).toMatchInlineSnapshot();
+    // el.$options.placement = WUPPopupElement.$placements.$bottom.$middle.$adjust;
+    // jest.advanceTimersByTime(10);
+    // expect(el.outerHTML).toMatchInlineSnapshot();
+    // el.$options.placement = WUPPopupElement.$placements.$bottom.$end.$adjust;
+    // jest.advanceTimersByTime(10);
+    // expect(el.outerHTML).toMatchInlineSnapshot();
+
+    // el.$options.placement = WUPPopupElement.$placements.$left.$start.$adjust;
+    // jest.advanceTimersByTime(10);
+    // expect(el.outerHTML).toMatchInlineSnapshot();
+    // el.$options.placement = WUPPopupElement.$placements.$left.$middle.$adjust;
+    // jest.advanceTimersByTime(10);
+    // expect(el.outerHTML).toMatchInlineSnapshot();
+    // el.$options.placement = WUPPopupElement.$placements.$left.$end.$adjust;
+    // jest.advanceTimersByTime(10);
+    // expect(el.outerHTML).toMatchInlineSnapshot();
   });
 
   /**
