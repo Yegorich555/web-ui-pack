@@ -251,7 +251,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     this.init(); // possible only if popup is hidden
   }
 
-  static observedOptions: Set<keyof WUPPopup.Options> = new Set(["showCase", "target", "placement"]);
+  static observedOptions = new Set<keyof WUPPopup.Options>(["showCase", "target", "placement", "placementAlt"]);
   protected override gotOptionsChanged(e: WUP.OptionEvent) {
     super.gotOptionsChanged(e);
     this.#reinit();
