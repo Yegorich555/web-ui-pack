@@ -508,8 +508,13 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
 const tagName = "wup-popup";
 customElements.define(tagName, WUPPopupElement);
 
-// add element to tsx/jsx intellisense
 declare global {
+  // add element to document.createElement
+  interface HTMLElementTagNameMap {
+    [tagName]: WUPPopupElement;
+  }
+
+  // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
       [tagName]: JSXCustomProps<WUPPopup.Element> &
@@ -536,4 +541,5 @@ declare global {
   }
 }
 
-// todo when showCase = focus. need to show if target isAlreadyFocused
+// todo when showCase = focus. need to show() if target isAlreadyFocused
+// todo WUPPopupElement.attach(target, options) - attach to target but render only by show
