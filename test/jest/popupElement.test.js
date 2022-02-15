@@ -666,10 +666,11 @@ describe("popupElement", () => {
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style=\\"display: block; transform: translate(190px, 100px); opacity: 1; max-width: 600px; max-height: 100px;\\"></wup-popup>"`
     );
-    // el.style.maxWidth = el.style.maxHeight = "";
-    // el.$options.placement = WUPPopupElement.$placements.$top.$end.$adjust;
-    // jest.advanceTimersByTime(10);
-    // expect(el.outerHTML).toMatchInlineSnapshot();
+    el.$options.placement = WUPPopupElement.$placements.$top.$end.$adjust;
+    jest.advanceTimersByTime(10);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(240px, 100px); opacity: 1; max-width: 240px; max-height: 100px;\\"></wup-popup>"`
+    );
 
     // el.$options.placement = WUPPopupElement.$placements.$right.$start.$adjust;
     // jest.advanceTimersByTime(10);

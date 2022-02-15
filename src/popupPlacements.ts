@@ -167,7 +167,7 @@ $top.$middle = <WUPPopupPlace.AlignFunc>function yMiddle(this: WUPPopupPlace.Res
 $top.$end = <WUPPopupPlace.AlignFunc>function yEnd(this: WUPPopupPlace.Result, t, me, fit) {
   // we can't assign r.right directly because rectangular doesn't include scrollWidth
   this.left = t.right - me.w;
-  this.freeW = fit.left - t.right;
+  this.freeW = t.right - fit.left;
   return this;
 };
 
