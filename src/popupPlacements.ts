@@ -134,21 +134,21 @@ export interface IPlacementFunction {
 /** Ordinary placement rule with nested [adjust] rule */
 export interface IPlacementAlign extends IPlacementFunction {
   /** Extra rule to fit layout via set maxWdith, maxHeight and shifting position */
-  adjust: IPlacementFunction;
+  $adjust: IPlacementFunction;
 }
 
 /** Set of rules related to specific edge of targetElement; use bottom.start to place bottomStart */
 export interface IPlacementEdge {
   (target: IBoundingRect, me: IPlaceMeRect, fit: IBoundingRect): IPlacementXResult | IPlacementYResult;
   /** align by start of edge of target */
-  start: IPlacementAlign;
+  $start: IPlacementAlign;
   /** align by middle of target */
-  middle: IPlacementAlign;
+  $middle: IPlacementAlign;
   /** align by end of edge of target */
-  end: IPlacementAlign;
+  $end: IPlacementAlign;
 }
 
-const top = <IPlacementEdge>function top(t, me, fit): ReturnType<IPlacementEdge> {
+const $top = <IPlacementEdge>function top(t, me, fit): ReturnType<IPlacementEdge> {
   const freeH = t.top - me.offset.top - fit.top;
   return {
     top: t.top - me.offset.top - me.h,
@@ -157,24 +157,24 @@ const top = <IPlacementEdge>function top(t, me, fit): ReturnType<IPlacementEdge>
     maxFreeW: fit.width,
   };
 };
-top.start = <IPlacementAlign>function yStart(this: IPlacementResult, t, _me, fit) {
+$top.$start = <IPlacementAlign>function yStart(this: IPlacementResult, t, _me, fit) {
   this.left = t.left;
   this.freeW = fit.right - t.left;
   return this;
 };
-top.middle = <IPlacementAlign>function yMiddle(this: IPlacementResult, t, me, fit) {
+$top.$middle = <IPlacementAlign>function yMiddle(this: IPlacementResult, t, me, fit) {
   this.left = t.left + (t.width - me.w) / 2;
   this.freeW = fit.width;
   return this;
 };
-top.end = <IPlacementAlign>function yEnd(this: IPlacementResult, t, me, fit) {
+$top.$end = <IPlacementAlign>function yEnd(this: IPlacementResult, t, me, fit) {
   // we can't assign r.right directly because rectangular doesn't include scrollWidth
   this.left = t.right - me.w;
   this.freeW = fit.left - t.right;
   return this;
 };
 
-const bottom = <IPlacementEdge>function bottom(t, me, fit): ReturnType<IPlacementEdge> {
+const $bottom = <IPlacementEdge>function bottom(t, me, fit): ReturnType<IPlacementEdge> {
   const freeH = fit.bottom + me.offset.bottom - t.bottom;
   return {
     top: t.bottom + me.offset.bottom,
@@ -183,11 +183,11 @@ const bottom = <IPlacementEdge>function bottom(t, me, fit): ReturnType<IPlacemen
     maxFreeW: fit.width,
   };
 };
-bottom.start = top.start;
-bottom.middle = top.middle;
-bottom.end = top.end;
+$bottom.$start = $top.$start;
+$bottom.$middle = $top.$middle;
+$bottom.$end = $top.$end;
 
-const left = <IPlacementEdge>function left(t, me, fit): ReturnType<IPlacementEdge> {
+const $left = <IPlacementEdge>function left(t, me, fit): ReturnType<IPlacementEdge> {
   const freeW = t.left - me.offset.left - fit.left;
   return {
     left: t.left - me.offset.left - me.w,
@@ -196,23 +196,23 @@ const left = <IPlacementEdge>function left(t, me, fit): ReturnType<IPlacementEdg
     maxFreeW: freeW,
   };
 };
-left.start = <IPlacementAlign>function xStart(this: IPlacementResult, t, _me, fit) {
+$left.$start = <IPlacementAlign>function xStart(this: IPlacementResult, t, _me, fit) {
   this.top = t.top;
   this.freeH = fit.bottom - t.top;
   return this;
 };
-left.middle = <IPlacementAlign>function xMiddle(this: IPlacementResult, t, me, fit) {
+$left.$middle = <IPlacementAlign>function xMiddle(this: IPlacementResult, t, me, fit) {
   this.top = t.top + (t.height - me.h) / 2;
   this.freeH = fit.height;
   return this;
 };
-left.end = <IPlacementAlign>function xEnd(this: IPlacementResult, t, me, fit) {
+$left.$end = <IPlacementAlign>function xEnd(this: IPlacementResult, t, me, fit) {
   this.top = t.bottom - me.h;
   this.freeH = fit.top - t.bottom;
   return this;
 };
 
-const right = <IPlacementEdge>function right(t, me, fit): ReturnType<IPlacementEdge> {
+const $right = <IPlacementEdge>function right(t, me, fit): ReturnType<IPlacementEdge> {
   const freeW = t.left - me.offset.left - fit.left;
   return {
     left: t.right + me.offset.right,
@@ -221,19 +221,19 @@ const right = <IPlacementEdge>function right(t, me, fit): ReturnType<IPlacementE
     maxFreeW: freeW,
   };
 };
-right.start = left.start;
-right.middle = left.middle;
-right.end = left.end;
+$right.$start = $left.$start;
+$right.$middle = $left.$middle;
+$right.$end = $left.$end;
 
 export const PopupPlacements = {
   /** place above of target */
-  top,
+  $top,
   /** place bellow of target */
-  bottom,
+  $bottom,
   /** place at left side of target */
-  left,
+  $left,
   /** place at right side of target */
-  right,
+  $right,
 };
 
 Object.keys(PopupPlacements).forEach((kp) => {
@@ -241,7 +241,7 @@ Object.keys(PopupPlacements).forEach((kp) => {
   const def = PopupPlacements[kp];
   // eslint-disable-next-line func-names
   PopupPlacements[kp] = (<IPlacementAlign>function (t, me, fit) {
-    return def.middle.call(def(t, me, fit), t, me, fit);
+    return def.$middle.call(def(t, me, fit), t, me, fit);
   }) as unknown as IPlacementEdge;
   const p = PopupPlacements[kp];
 
@@ -254,6 +254,6 @@ Object.keys(PopupPlacements).forEach((kp) => {
     };
     const v = p[key];
     // adding .adjust to each IPlacementAlign
-    v.adjust = (t, me, fit) => popupAdjust.call(v(t, me, fit), me, fit);
+    v.$adjust = (t, me, fit) => popupAdjust.call(v(t, me, fit), me, fit);
   });
 });

@@ -14,7 +14,7 @@ import {
   stringPixelsToNumber,
 } from "./popupPlacements";
 
-class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
+export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   protected get ctr(): typeof WUPPopupElement {
     return this.constructor as typeof WUPPopupElement;
@@ -22,26 +22,26 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
 
   static $placements = PopupPlacements;
   static $placementAttrs = {
-    "top-start": PopupPlacements.top.start.adjust,
-    "top-middle": PopupPlacements.top.middle.adjust,
-    "top-end": PopupPlacements.top.end.adjust,
-    "bottom-start": PopupPlacements.bottom.start.adjust,
-    "bottom-middle": PopupPlacements.bottom.middle.adjust,
-    "bottom-end": PopupPlacements.bottom.end.adjust,
-    "left-start": PopupPlacements.left.start.adjust,
-    "left-middle": PopupPlacements.left.middle.adjust,
-    "left-end": PopupPlacements.left.end.adjust,
-    "right-start": PopupPlacements.right.start.adjust,
-    "right-middle": PopupPlacements.right.middle.adjust,
-    "right-end": PopupPlacements.right.end.adjust,
+    "top-start": PopupPlacements.$top.$start.$adjust,
+    "top-middle": PopupPlacements.$top.$middle.$adjust,
+    "top-end": PopupPlacements.$top.$end.$adjust,
+    "bottom-start": PopupPlacements.$bottom.$start.$adjust,
+    "bottom-middle": PopupPlacements.$bottom.$middle.$adjust,
+    "bottom-end": PopupPlacements.$bottom.$end.$adjust,
+    "left-start": PopupPlacements.$left.$start.$adjust,
+    "left-middle": PopupPlacements.$left.$middle.$adjust,
+    "left-end": PopupPlacements.$left.$end.$adjust,
+    "right-start": PopupPlacements.$right.$start.$adjust,
+    "right-middle": PopupPlacements.$right.$middle.$adjust,
+    "right-end": PopupPlacements.$right.$end.$adjust,
   };
 
   /** Default options. Change it to configure default behavior */
   static $defaults: Omit<WUPPopup.Options, "target"> = {
-    placement: WUPPopupElement.$placements.top.middle,
+    placement: WUPPopupElement.$placements.$top.$middle,
     placementAlt: [
-      WUPPopupElement.$placements.top.middle.adjust, //
-      WUPPopupElement.$placements.bottom.middle.adjust,
+      WUPPopupElement.$placements.$top.$middle.$adjust, //
+      WUPPopupElement.$placements.$bottom.$middle.$adjust,
     ],
     offset: [0, 0],
     toFitElement: document.body,
@@ -348,10 +348,12 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
       (t, me, fit) => popupAdjust.call(this._opts.placement(t, me, fit), me, fit, true),
       // try to adjust with other placements and ignoring alignment options
       ...Object.keys(PopupPlacements)
-        .filter((k) => PopupPlacements[k].middle !== this._opts.placement)
+        .filter((k) => PopupPlacements[k].$middle !== this._opts.placement)
         .map(
           (k) =>
-            <IPlacementFunction>((t, me, fit) => popupAdjust.call(PopupPlacements[k].middle(t, me, fit), me, fit, true))
+            <IPlacementFunction>(
+              ((t, me, fit) => popupAdjust.call(PopupPlacements[k].$middle(t, me, fit), me, fit, true))
+            )
         ),
     ];
 
@@ -500,8 +502,6 @@ class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
     this.#onShowCallbacks = [];
   }
 }
-// such cast-type required to avoid indirect implementation of interface
-export default WUPPopupElement as unknown as WUPPopup.Element;
 
 // todo check inherritance with overriding options & re-assign to custom-tag
 // todo extend document.createElement("wup-popup")
