@@ -672,35 +672,53 @@ describe("popupElement", () => {
       `"<wup-popup style=\\"display: block; transform: translate(240px, 100px); opacity: 1; max-width: 240px; max-height: 100px;\\"></wup-popup>"`
     );
 
-    // el.$options.placement = WUPPopupElement.$placements.$right.$start.$adjust;
-    // jest.advanceTimersByTime(10);
-    // expect(el.outerHTML).toMatchInlineSnapshot();
-    // el.$options.placement = WUPPopupElement.$placements.$right.$middle.$adjust;
-    // jest.advanceTimersByTime(10);
-    // expect(el.outerHTML).toMatchInlineSnapshot();
-    // el.$options.placement = WUPPopupElement.$placements.$right.$end.$adjust;
-    // jest.advanceTimersByTime(10);
-    // expect(el.outerHTML).toMatchInlineSnapshot();
+    el.$options.placement = WUPPopupElement.$placements.$bottom.$start.$adjust;
+    jest.advanceTimersByTime(10);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(140px, 150px); opacity: 1; max-width: 460px; max-height: 250px;\\"></wup-popup>"`
+    );
+    el.$options.placement = WUPPopupElement.$placements.$bottom.$middle.$adjust;
+    jest.advanceTimersByTime(10);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(190px, 150px); opacity: 1; max-width: 600px; max-height: 250px;\\"></wup-popup>"`
+    );
+    el.$options.placement = WUPPopupElement.$placements.$bottom.$end.$adjust;
+    jest.advanceTimersByTime(10);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(240px, 150px); opacity: 1; max-width: 240px; max-height: 250px;\\"></wup-popup>"`
+    );
 
-    // el.$options.placement = WUPPopupElement.$placements.$bottom.$start.$adjust;
-    // jest.advanceTimersByTime(10);
-    // expect(el.outerHTML).toMatchInlineSnapshot();
-    // el.$options.placement = WUPPopupElement.$placements.$bottom.$middle.$adjust;
-    // jest.advanceTimersByTime(10);
-    // expect(el.outerHTML).toMatchInlineSnapshot();
-    // el.$options.placement = WUPPopupElement.$placements.$bottom.$end.$adjust;
-    // jest.advanceTimersByTime(10);
-    // expect(el.outerHTML).toMatchInlineSnapshot();
+    el.$options.placement = WUPPopupElement.$placements.$left.$start.$adjust;
+    jest.advanceTimersByTime(10);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(140px, 100px); opacity: 1; max-width: 140px; max-height: 300px;\\"></wup-popup>"`
+    );
+    el.$options.placement = WUPPopupElement.$placements.$left.$middle.$adjust;
+    jest.advanceTimersByTime(10);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(140px, 125px); opacity: 1; max-width: 140px; max-height: 400px;\\"></wup-popup>"`
+    );
+    el.$options.placement = WUPPopupElement.$placements.$left.$end.$adjust;
+    jest.advanceTimersByTime(10);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(140px, 150px); opacity: 1; max-width: 140px; max-height: 150px;\\"></wup-popup>"`
+    );
 
-    // el.$options.placement = WUPPopupElement.$placements.$left.$start.$adjust;
-    // jest.advanceTimersByTime(10);
-    // expect(el.outerHTML).toMatchInlineSnapshot();
-    // el.$options.placement = WUPPopupElement.$placements.$left.$middle.$adjust;
-    // jest.advanceTimersByTime(10);
-    // expect(el.outerHTML).toMatchInlineSnapshot();
-    // el.$options.placement = WUPPopupElement.$placements.$left.$end.$adjust;
-    // jest.advanceTimersByTime(10);
-    // expect(el.outerHTML).toMatchInlineSnapshot();
+    el.$options.placement = WUPPopupElement.$placements.$right.$start.$adjust;
+    jest.advanceTimersByTime(10);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(240px, 100px); opacity: 1; max-width: 140px; max-height: 300px;\\"></wup-popup>"`
+    );
+    el.$options.placement = WUPPopupElement.$placements.$right.$middle.$adjust;
+    jest.advanceTimersByTime(10);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(240px, 125px); opacity: 1; max-width: 140px; max-height: 400px;\\"></wup-popup>"`
+    );
+    el.$options.placement = WUPPopupElement.$placements.$right.$end.$adjust;
+    jest.advanceTimersByTime(10);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(240px, 150px); opacity: 1; max-width: 140px; max-height: 150px;\\"></wup-popup>"`
+    );
   });
 
   /**

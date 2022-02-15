@@ -205,7 +205,7 @@ $left.$middle = <WUPPopupPlace.AlignFunc>function xMiddle(this: WUPPopupPlace.Re
 };
 $left.$end = <WUPPopupPlace.AlignFunc>function xEnd(this: WUPPopupPlace.Result, t, me, fit) {
   this.top = t.bottom - me.h;
-  this.freeH = fit.top - t.bottom;
+  this.freeH = t.bottom - fit.top;
   return this;
 };
 
