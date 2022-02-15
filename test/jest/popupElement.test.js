@@ -169,6 +169,7 @@ describe("popupElement", () => {
   });
 
   test("$options.target", () => {
+    /** @type typeof el */
     let a = document.createElement(el.tagName);
     a.$options.showCase = 0; // always
     const onShow = jest.fn();
@@ -193,7 +194,7 @@ describe("popupElement", () => {
     onShow.mockClear();
     document.body.prepend(a); // prepend to previousElementSibling = null
     expect(a.previousElementSibling).toBeNull();
-    expect(jest.advanceTimersToNextTimer).toThrow(); // onReady has timeout and it throws exception
+    expect(() => jest.advanceTimersByTime(1000)).toThrow(); // onReady has timeout and it throws exception
     expect(onShow).not.toBeCalled(); // because target is null
 
     // onHide expected by $show-success > $show-failed
@@ -211,11 +212,14 @@ describe("popupElement", () => {
     expect(onHide).toBeCalledTimes(1); // because it was shown with target and hidden with the next show without target
 
     // try createElement when target is null by init
+    a.removeEventListener("$show", onShow);
     onShow.mockClear();
+    /** @type typeof el */
     a = document.createElement(el.tagName);
+    a.addEventListener("$show", onShow);
     a.$options.showCase = 0;
     document.body.prepend(a); // prepend to previousElementSibling = null
-    expect(jest.advanceTimersToNextTimer).toThrow(); // onReady has timeout; throw error because target is not defined
+    expect(() => jest.advanceTimersByTime(1000)).toThrow(); // onReady has timeout; throw error because target is not defined
     expect(onShow).not.toBeCalled(); // because target is null
 
     // check if changing on the fly >>> reinit event
@@ -531,7 +535,6 @@ describe("popupElement", () => {
     const a = document.createElement(el.tagName);
     a.$options.showCase = 0;
     document.body.prepend(a);
-    h.mockConsoleError();
     expect(() => jest.advanceTimersByTime(1000)).toThrow(); // because of target not defined
     jest.clearAllMocks();
     expect(a.$isOpened).toBeFalsy();
@@ -543,6 +546,11 @@ describe("popupElement", () => {
     jest.advanceTimersToNextTimer();
     expect(a.$options.target).toBeDefined();
     expect(a.$isOpened).toBeTruthy();
+
+    const svg = document.body.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "svg"));
+    svg.setAttribute("id", "svgId");
+    a.setAttribute("target", "#svgId");
+    expect(() => jest.advanceTimersByTime(1000)).toThrow(); // because of target is defined but not HTMLELement
   });
 
   test("remove", () => {
@@ -618,6 +626,4 @@ describe("popupElement", () => {
      options.minWidthByTarget;
      options.minHeightByTarget;
    */
-
-  // todo UnhandledPromiseRejectionWarning: Error: WUP-POPUP. Target is not defined - how to catch it
 });

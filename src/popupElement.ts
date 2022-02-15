@@ -125,8 +125,20 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
   #isOpened = false;
   #initTimer?: ReturnType<typeof setTimeout>;
   /** Fired after gotReady() and $show() (to reinit according to options) */
-  protected init() {
+  protected init(isTryAgain = false) {
     this.dispose(); // remove previously added events
+
+    const { el: t, err } = this.#defineTarget();
+    if (!t) {
+      this._opts.target = null;
+      if (isTryAgain) {
+        throw new Error(err);
+      }
+
+      this.#initTimer = setTimeout(() => this.init(true), 200); // timeout because of target can be undefined in time
+      return;
+    }
+    this._opts.target = t;
 
     const { showCase } = this._opts;
     if (!showCase /* always */) {
@@ -140,15 +152,6 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
       this.#onShowCallbacks.push(() => appendEvent(...args));
 
     // apply showCase
-    const { el: t, err } = this.#defineTarget();
-    if (!t) {
-      this.#initTimer = setTimeout(() => {
-        throw new Error(err);
-      }, 200); // timeout because of target can be undefined in time
-      return;
-    }
-
-    this._opts.target = t;
     // todo it doesn't work if new clickEvent fired programmatically
     let preventClickAfterFocus = false;
     let openedByHover = false;
@@ -275,7 +278,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
       if (el instanceof HTMLElement) {
         return { el };
       }
-      return { err: `${this.tagName}. Target not found for '${attrTrg}'` };
+      return { err: `${this.tagName}. Target as HTMLElement not found for '${attrTrg}'` };
     }
 
     if (this._opts.target) {
