@@ -5,13 +5,10 @@ import onFocusLost from "./helpers/onFocusLost";
 import { WUPPopup } from "./popupElement.types";
 import {
   getBoundingInternalRect,
-  IBoundingRect,
-  IPlacementFunction,
-  IPlacementResult,
-  IPlaceMeRect,
   popupAdjust,
   PopupPlacements,
   stringPixelsToNumber,
+  WUPPopupPlace,
 } from "./popupPlacements";
 
 export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
@@ -294,7 +291,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
 
   #frameId?: number;
   #userSizes = { maxWidth: Number.MAX_SAFE_INTEGER, maxHeight: Number.MAX_SAFE_INTEGER };
-  #placements: Array<IPlacementFunction> = [];
+  #placements: Array<WUPPopupPlace.PlaceFunc> = [];
   #prevRect?: DOMRect;
   #showCase?: WUPPopup.ShowCases;
 
@@ -351,7 +348,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
         .filter((k) => PopupPlacements[k].$middle !== this._opts.placement)
         .map(
           (k) =>
-            <IPlacementFunction>(
+            <WUPPopupPlace.PlaceFunc>(
               ((t, me, fit) => popupAdjust.call(PopupPlacements[k].$middle(t, me, fit), me, fit, true))
             )
         ),
@@ -418,7 +415,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
 
   /** Update position of popup. Call this method in cases when you changed options */
   #updatePosition = () => {
-    const t = (this._opts.target as HTMLElement).getBoundingClientRect() as IBoundingRect;
+    const t = (this._opts.target as HTMLElement).getBoundingClientRect() as WUPPopupPlace.Rect;
     t.el = this._opts.target as HTMLElement;
     if (
       // issue: it's wrong if minWidth, minHeight etc. is changed and doesn't affect on layout sizes directly
@@ -446,10 +443,10 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     }
 
     const fitEl = this._opts.toFitElement || document.body;
-    const fit = getBoundingInternalRect(fitEl) as IBoundingRect;
+    const fit = getBoundingInternalRect(fitEl) as WUPPopupPlace.Rect;
     fit.el = fitEl;
 
-    const me: IPlaceMeRect = {
+    const me: WUPPopupPlace.MeRect = {
       w: this.offsetWidth, // clientWidth doesn't include border-size
       h: this.offsetHeight,
       el: this,
@@ -461,13 +458,13 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
       },
     };
 
-    const hasOveflow = (p: IPlacementResult): boolean =>
+    const hasOveflow = (p: WUPPopupPlace.Result): boolean =>
       p.left < fit.left ||
       p.top < fit.top ||
       p.left + Math.min(me.w, p.maxW || Number.MAX_SAFE_INTEGER) > fit.right ||
       p.top + Math.min(me.h, p.maxH || Number.MAX_SAFE_INTEGER) > fit.bottom;
 
-    let pos: IPlacementResult = <IPlacementResult>{};
+    let pos: WUPPopupPlace.Result = <WUPPopupPlace.Result>{};
     const isOk = this.#placements.some((pfn) => {
       pos = pfn(t, me, fit);
       pos.maxFreeW = Math.min(pos.maxW || pos.freeW, this.#userSizes.maxWidth);

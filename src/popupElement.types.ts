@@ -1,5 +1,5 @@
 import { WUP } from "./baseElement";
-import { IPlacementFunction } from "./popupPlacements";
+import { WUPPopupPlace } from "./popupPlacements";
 
 export namespace WUPPopup {
   export const enum ShowCases {
@@ -33,9 +33,9 @@ export namespace WUPPopup {
      * attr target="{querySelector}" has hire priority than .options.target */
     target?: HTMLElement | null;
     /** Placement rule relative to target; example Placements.bottom.start or Placements.bottom.start.adjust */
-    placement: IPlacementFunction;
+    placement: WUPPopupPlace.PlaceFunc;
     /** Alternate when pointed placement doesn't fit the layout */
-    placementAlt: Array<IPlacementFunction>;
+    placementAlt: Array<WUPPopupPlace.PlaceFunc>;
     /** Alternative of margin for targetElement related to popup
 
    *  [top, right, bottom, left] or [top/bottom, right/left] in px */

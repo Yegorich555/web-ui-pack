@@ -1,39 +1,59 @@
 /* eslint-disable no-use-before-define */
+export namespace WUPPopupPlace {
+  export interface XResult {
+    left: number;
+    /** Size restriction that must be applied to element; calculated in .adjust() and based on userDefined minSize */
+    maxW?: number | null;
+    /** Available space including alignment start/left/middle */
+    freeW: number;
+    /** The whole available space (excluding alignment start/left/middle) */
+    maxFreeW: number;
+    /** The whole available space (excluding alignment start/left/middle) */
+    maxFreeH: number;
+  }
+  export interface YResult {
+    top: number;
+    /** Size restriction that must be applied to element; calculated in .adjust() and based on userDefined minSize */
+    maxH?: number | null;
+    /** Available space including alignment start/left/middle */
+    freeH: number;
+    /** The whole available space (excluding alignment start/left/middle) */
+    maxFreeW: number;
+    /** The whole available space (excluding alignment start/left/middle) */
+    maxFreeH: number;
+  }
+  export interface Result extends XResult, YResult {}
 
-export interface IPlaceMeRect {
-  w: number;
-  h: number;
-  el: HTMLElement;
-  offset: { top: number; right: number; bottom: number; left: number };
+  export interface Rect extends DOMRect {
+    el: HTMLElement;
+  }
+  export interface MeRect {
+    w: number;
+    h: number;
+    el: HTMLElement;
+    offset: { top: number; right: number; bottom: number; left: number };
+  }
+
+  /** Ordinary placement rule */
+  export interface PlaceFunc {
+    (target: Rect, me: MeRect, fit: Rect): Result;
+  }
+  /** Ordinary placement rule with nested [adjust] rule */
+  export interface AlignFunc extends PlaceFunc {
+    /** Extra rule to fit layout via set maxWdith, maxHeight and shifting position */
+    $adjust: PlaceFunc;
+  }
+  /** Set of rules related to specific edge of targetElement; use bottom.start to place bottomStart */
+  export interface EdgeFunc {
+    (target: Rect, me: MeRect, fit: Rect): XResult | YResult;
+    /** align by start of edge of target */
+    $start: AlignFunc;
+    /** align by middle of target */
+    $middle: AlignFunc;
+    /** align by end of edge of target */
+    $end: AlignFunc;
+  }
 }
-
-export interface IPlacementXResult {
-  left: number;
-  /** Size restriction that must be applied to element; calculated in .adjust() and based on userDefined minSize */
-  maxW?: number | null;
-
-  /** Available space including alignment start/left/middle */
-  freeW: number;
-  /** The whole available space (excluding alignment start/left/middle) */
-  maxFreeW: number;
-  /** The whole available space (excluding alignment start/left/middle) */
-  maxFreeH: number;
-}
-
-export interface IPlacementYResult {
-  top: number;
-  /** Size restriction that must be applied to element; calculated in .adjust() and based on userDefined minSize */
-  maxH?: number | null;
-
-  /** Available space including alignment start/left/middle */
-  freeH: number;
-  /** The whole available space (excluding alignment start/left/middle) */
-  maxFreeW: number;
-  /** The whole available space (excluding alignment start/left/middle) */
-  maxFreeH: number;
-}
-
-export interface IPlacementResult extends IPlacementXResult, IPlacementYResult {}
 
 export function stringPixelsToNumber(styleValue: string): number {
   return +(/([0-9]+)/.exec(styleValue)?.[0] || 0);
@@ -61,11 +81,11 @@ export function getBoundingInternalRect(el: HTMLElement): DOMRect {
 
 /* Adjust position/size to fit layout */
 function popupAdjustInternal(
-  this: IPlacementResult,
-  me: IPlaceMeRect,
-  fit: IBoundingRect,
+  this: WUPPopupPlace.Result,
+  me: WUPPopupPlace.MeRect,
+  fit: WUPPopupPlace.Rect,
   ignoreAlign = false
-): IPlacementResult {
+): WUPPopupPlace.Result {
   const { freeW: freeWidth, freeH: freeHeight } = this;
   // decline calc if we have minSize > than available field; in this case we must select opossite or something that fit better
   const { minWidth: minW, minHeight: minH } = getComputedStyle(me.el);
@@ -117,38 +137,15 @@ function popupAdjustInternal(
   };
 }
 export function popupAdjust(
-  this: IPlacementResult,
-  me: IPlaceMeRect,
-  fit: IBoundingRect,
+  this: WUPPopupPlace.Result,
+  me: WUPPopupPlace.MeRect,
+  fit: WUPPopupPlace.Rect,
   ignoreAlign = false
-): IPlacementResult {
+): WUPPopupPlace.Result {
   return popupAdjustInternal.call(this, me, fit, ignoreAlign);
 }
-export interface IBoundingRect extends DOMRect {
-  el: HTMLElement;
-}
-/** Ordinary placement rule */
-export interface IPlacementFunction {
-  (target: IBoundingRect, me: IPlaceMeRect, fit: IBoundingRect): IPlacementResult;
-}
-/** Ordinary placement rule with nested [adjust] rule */
-export interface IPlacementAlign extends IPlacementFunction {
-  /** Extra rule to fit layout via set maxWdith, maxHeight and shifting position */
-  $adjust: IPlacementFunction;
-}
 
-/** Set of rules related to specific edge of targetElement; use bottom.start to place bottomStart */
-export interface IPlacementEdge {
-  (target: IBoundingRect, me: IPlaceMeRect, fit: IBoundingRect): IPlacementXResult | IPlacementYResult;
-  /** align by start of edge of target */
-  $start: IPlacementAlign;
-  /** align by middle of target */
-  $middle: IPlacementAlign;
-  /** align by end of edge of target */
-  $end: IPlacementAlign;
-}
-
-const $top = <IPlacementEdge>function top(t, me, fit): ReturnType<IPlacementEdge> {
+const $top = <WUPPopupPlace.EdgeFunc>function top(t, me, fit): ReturnType<WUPPopupPlace.EdgeFunc> {
   const freeH = t.top - me.offset.top - fit.top;
   return {
     top: t.top - me.offset.top - me.h,
@@ -157,24 +154,24 @@ const $top = <IPlacementEdge>function top(t, me, fit): ReturnType<IPlacementEdge
     maxFreeW: fit.width,
   };
 };
-$top.$start = <IPlacementAlign>function yStart(this: IPlacementResult, t, _me, fit) {
+$top.$start = <WUPPopupPlace.AlignFunc>function yStart(this: WUPPopupPlace.Result, t, _me, fit) {
   this.left = t.left;
   this.freeW = fit.right - t.left;
   return this;
 };
-$top.$middle = <IPlacementAlign>function yMiddle(this: IPlacementResult, t, me, fit) {
+$top.$middle = <WUPPopupPlace.AlignFunc>function yMiddle(this: WUPPopupPlace.Result, t, me, fit) {
   this.left = t.left + (t.width - me.w) / 2;
   this.freeW = fit.width;
   return this;
 };
-$top.$end = <IPlacementAlign>function yEnd(this: IPlacementResult, t, me, fit) {
+$top.$end = <WUPPopupPlace.AlignFunc>function yEnd(this: WUPPopupPlace.Result, t, me, fit) {
   // we can't assign r.right directly because rectangular doesn't include scrollWidth
   this.left = t.right - me.w;
   this.freeW = fit.left - t.right;
   return this;
 };
 
-const $bottom = <IPlacementEdge>function bottom(t, me, fit): ReturnType<IPlacementEdge> {
+const $bottom = <WUPPopupPlace.EdgeFunc>function bottom(t, me, fit): ReturnType<WUPPopupPlace.EdgeFunc> {
   const freeH = fit.bottom + me.offset.bottom - t.bottom;
   return {
     top: t.bottom + me.offset.bottom,
@@ -187,7 +184,7 @@ $bottom.$start = $top.$start;
 $bottom.$middle = $top.$middle;
 $bottom.$end = $top.$end;
 
-const $left = <IPlacementEdge>function left(t, me, fit): ReturnType<IPlacementEdge> {
+const $left = <WUPPopupPlace.EdgeFunc>function left(t, me, fit): ReturnType<WUPPopupPlace.EdgeFunc> {
   const freeW = t.left - me.offset.left - fit.left;
   return {
     left: t.left - me.offset.left - me.w,
@@ -196,23 +193,23 @@ const $left = <IPlacementEdge>function left(t, me, fit): ReturnType<IPlacementEd
     maxFreeW: freeW,
   };
 };
-$left.$start = <IPlacementAlign>function xStart(this: IPlacementResult, t, _me, fit) {
+$left.$start = <WUPPopupPlace.AlignFunc>function xStart(this: WUPPopupPlace.Result, t, _me, fit) {
   this.top = t.top;
   this.freeH = fit.bottom - t.top;
   return this;
 };
-$left.$middle = <IPlacementAlign>function xMiddle(this: IPlacementResult, t, me, fit) {
+$left.$middle = <WUPPopupPlace.AlignFunc>function xMiddle(this: WUPPopupPlace.Result, t, me, fit) {
   this.top = t.top + (t.height - me.h) / 2;
   this.freeH = fit.height;
   return this;
 };
-$left.$end = <IPlacementAlign>function xEnd(this: IPlacementResult, t, me, fit) {
+$left.$end = <WUPPopupPlace.AlignFunc>function xEnd(this: WUPPopupPlace.Result, t, me, fit) {
   this.top = t.bottom - me.h;
   this.freeH = fit.top - t.bottom;
   return this;
 };
 
-const $right = <IPlacementEdge>function right(t, me, fit): ReturnType<IPlacementEdge> {
+const $right = <WUPPopupPlace.EdgeFunc>function right(t, me, fit): ReturnType<WUPPopupPlace.EdgeFunc> {
   const freeW = t.left - me.offset.left - fit.left;
   return {
     left: t.right + me.offset.right,
@@ -240,20 +237,20 @@ Object.keys(PopupPlacements).forEach((kp) => {
   // changing bottom = bottom.middle to avoid user mistakes
   const def = PopupPlacements[kp];
   // eslint-disable-next-line func-names
-  PopupPlacements[kp] = (<IPlacementAlign>function (t, me, fit) {
+  PopupPlacements[kp] = (<WUPPopupPlace.AlignFunc>function (t, me, fit) {
     return def.$middle.call(def(t, me, fit), t, me, fit);
-  }) as unknown as IPlacementEdge;
+  }) as unknown as WUPPopupPlace.EdgeFunc;
   const p = PopupPlacements[kp];
 
   Object.keys(def).forEach((key) => {
     const prevFn = def[key];
     // setting context for each function
     // eslint-disable-next-line func-names
-    p[key] = <IPlacementAlign>function (t, me, fit) {
+    p[key] = <WUPPopupPlace.AlignFunc>function (t, me, fit) {
       return prevFn.call(def(t, me, fit), t, me, fit);
     };
     const v = p[key];
-    // adding .adjust to each IPlacementAlign
+    // adding .adjust to each WUPPopupPlace.AlignFunc
     v.$adjust = (t, me, fit) => popupAdjust.call(v(t, me, fit), me, fit);
   });
 });
