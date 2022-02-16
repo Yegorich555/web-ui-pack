@@ -86,13 +86,14 @@ function popupAdjustInternal(
   fit: WUPPopupPlace.Rect,
   ignoreAlign = false
 ): WUPPopupPlace.Result {
-  const { freeW: freeWidth, freeH: freeHeight } = this;
+  const { freeW, freeH } = this;
   // decline calc if we have minSize > than available field; in this case we must select opossite or something that fit better
+  // todo we can useMemo to avoid extra recalc on several methods adjust. but how to memoize only single bunch of items
   const { minWidth: minW, minHeight: minH } = getComputedStyle(me.el);
   const minWidth = stringPixelsToNumber(minW);
   const minHeight = stringPixelsToNumber(minH);
   // reject calc since minSize > availableSize
-  if (minWidth > freeWidth || minHeight > freeHeight) {
+  if (minWidth > freeW || minHeight > freeH) {
     if (ignoreAlign) {
       const n = { ...this, freeHeight: this.maxFreeH, freeWidth: this.maxFreeW };
       // issue: it doesn't work if both minH&minW > freeH&freeW
@@ -102,12 +103,12 @@ function popupAdjustInternal(
   }
 
   // decline calc if availableField is very small; in this case we must select opossite or something that fit better
-  if ((freeWidth <= 5 && minWidth > 0) || (freeHeight <= 5 && minHeight > 0)) {
+  if ((freeW <= 5 && minWidth > 0) || (freeH <= 5 && minHeight > 0)) {
     return this;
   }
 
-  const maxWidth = me.w > freeWidth ? Math.max(minWidth, freeWidth) : null;
-  const maxHeight = me.h > freeHeight ? Math.max(minHeight, freeHeight) : null;
+  const maxWidth = me.w > freeW ? Math.max(minWidth, freeW) : null;
+  const maxHeight = me.h > freeH ? Math.max(minHeight, freeH) : null;
 
   let { left, top } = this;
   // to fit by X
@@ -130,8 +131,8 @@ function popupAdjustInternal(
     left,
     maxW: maxWidth,
     maxH: maxHeight,
-    freeH: freeHeight,
-    freeW: freeWidth,
+    freeH,
+    freeW,
     maxFreeW: this.maxFreeW,
     maxFreeH: this.maxFreeH,
   };
@@ -172,7 +173,7 @@ $top.$end = <WUPPopupPlace.AlignFunc>function yEnd(this: WUPPopupPlace.Result, t
 };
 
 const $bottom = <WUPPopupPlace.EdgeFunc>function bottom(t, me, fit): ReturnType<WUPPopupPlace.EdgeFunc> {
-  const freeH = fit.bottom + me.offset.bottom - t.bottom;
+  const freeH = fit.bottom - me.offset.bottom - t.bottom;
   return {
     top: t.bottom + me.offset.bottom,
     freeH,
@@ -210,7 +211,7 @@ $left.$end = <WUPPopupPlace.AlignFunc>function xEnd(this: WUPPopupPlace.Result, 
 };
 
 const $right = <WUPPopupPlace.EdgeFunc>function right(t, me, fit): ReturnType<WUPPopupPlace.EdgeFunc> {
-  const freeW = t.left - me.offset.left - fit.left;
+  const freeW = fit.right - t.right - me.offset.right;
   return {
     left: t.right + me.offset.right,
     freeW,

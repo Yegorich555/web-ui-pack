@@ -23,12 +23,12 @@ function PopupContent() {
 export default function PopupView() {
   return (
     <div className={styles.popupViewExtraScroll} id="toFitMe">
-      {/* <button id="trg" type="button" className={styles.trg}>
+      <button id="trg" type="button" className={styles.trg} ref={(el) => el && setTimeout(() => el.click(), 200)}>
         target
         <br />
         <small>inside scrollable parent</small>
-      </button> */}
-      <div>
+      </button>
+      {/* <div>
         <label id="trg">
           <span>This is label with input inside</span>
           <input />
@@ -45,21 +45,24 @@ export default function PopupView() {
       </div>
       <wup-popup class={styles.popupContent} target="#trg2" placement="top-start">
         top.start t2
+      </wup-popup> */}
+      {/* <wup-popup class={styles.popupContent} target="#trg" placement="top-start">
+        top.start
       </wup-popup>
-      {/* <wup-popup class={styles.popupContent} target="#trg" placement="top-middle">
+      <wup-popup class={styles.popupContent} target="#trg" placement="top-middle">
         top.middle
       </wup-popup>
       <wup-popup class={styles.popupContent} target="#trg" placement="top-end">
         top.end
-      </wup-popup>
+      </wup-popup> */}
 
-      <wup-popup class={styles.popupContent} target="#trg" placement="right-start">
+      {/* <wup-popup class={styles.popupContent} target="#trg" placement="right-start">
         right.start
-      </wup-popup>
+      </wup-popup> */}
       <wup-popup class={styles.popupContent} target="#trg" placement="right-middle">
         right.middle
       </wup-popup>
-      <wup-popup class={styles.popupContent} target="#trg" placement="right-end">
+      {/* <wup-popup class={styles.popupContent} target="#trg" placement="right-end">
         right.end
       </wup-popup>
 

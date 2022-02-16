@@ -20,6 +20,9 @@ import {
  * document.body.append(el);
  * // or
  * <wup-popup target="#targetId" placement="top-start">Some content here</wup-popup>
+ *
+ * @tutorial Troubleshooting:
+ * You can set minWidth, minHeight to prevent squizing of popup or don't use placement .$adjust
  */
 export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
@@ -59,7 +62,6 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     hoverHideTimeout: 500,
   };
 
-  // todo placement-issue: rightMiddle doesn't work if right side will reduce ???
   $options: WUPPopup.Options = {
     ...this.ctr.$defaults,
     placementAlt: [...this.ctr.$defaults.placementAlt],
@@ -448,13 +450,13 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     if (this._opts.minWidthByTarget) {
       this.style.minWidth = `${t.width}px`;
     } else if (this.style.minWidth) {
-      this.style.minWidth = "";
+      this.style.minWidth = ""; // resetting is required to get default size
     }
 
     if (this._opts.minHeightByTarget) {
       this.style.minHeight = `${t.height}px`;
     } else if (this.style.minHeight) {
-      this.style.minHeight = "";
+      this.style.minHeight = ""; // resetting is required to get default size
     }
 
     const fitEl = this._opts.toFitElement || document.body;
@@ -482,9 +484,6 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     let pos: WUPPopupPlace.Result = <WUPPopupPlace.Result>{};
     const isOk = this.#placements.some((pfn) => {
       pos = pfn(t, me, fit);
-      // todo looks like this is redundant logic because it applies below
-      pos.maxFreeW = Math.min(pos.maxW || pos.freeW, this.#userSizes.maxWidth);
-      pos.maxFreeH = Math.min(pos.maxH || pos.freeH, this.#userSizes.maxHeight);
       return !hasOveflow(pos);
     });
     !isOk && console.error(`${this.tagName}. Impossible to place popup without overflow`);
@@ -492,6 +491,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     // transform has performance benefits in comparison with positioning
     this.style.transform = `translate(${pos.left}px, ${pos.top}px)`;
     // we can't remove maxWidth, maxHeight because maxWidth can affect on maxHeight and calculations will be wrong
+    // maxW/H can be null if adjust is not applied
     this.style.maxWidth = `${Math.min(pos.maxW || pos.freeW, this.#userSizes.maxWidth)}px`;
     this.style.maxHeight = `${Math.min(pos.maxH || pos.freeH, this.#userSizes.maxHeight)}px`;
 
@@ -555,3 +555,4 @@ declare global {
 
 // todo when showCase = focus. need to show() if target isAlreadyFocused
 // todo WUPPopupElement.attach(target, options) - attach to target but render only by show
+// todo instead of display: block, display:none we can set display:none. and remove display on show! the same for opacity
