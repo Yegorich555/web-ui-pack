@@ -479,7 +479,9 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
       p.left < fit.left ||
       p.top < fit.top ||
       p.left + Math.min(me.w, p.maxW || Number.MAX_SAFE_INTEGER) > fit.right ||
-      p.top + Math.min(me.h, p.maxH || Number.MAX_SAFE_INTEGER) > fit.bottom;
+      p.top + Math.min(me.h, p.maxH || Number.MAX_SAFE_INTEGER) > fit.bottom ||
+      p.freeH === 0 ||
+      p.freeW === 0;
 
     let pos: WUPPopupPlace.Result = <WUPPopupPlace.Result>{};
     const isOk = this.#placements.some((pfn) => {

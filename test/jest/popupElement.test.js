@@ -752,9 +752,8 @@ describe("popupElement", () => {
     el.$options.placement = WUPPopupElement.$placements.$top.$start;
     el.$options.placementAlt = [WUPPopupElement.$placements.$bottom.$start];
     jest.advanceTimersByTime(10);
-    // todo wrong because maxHeight==0 must be avoided
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"display: block; transform: translate(140px, 0px); opacity: 1; max-width: 460px; max-height: 0px;\\"></wup-popup>"`
+      `"<wup-popup style=\\"display: block; transform: translate(140px, 50px); opacity: 1; max-width: 460px; max-height: 350px;\\"></wup-popup>"`
     );
   });
 
