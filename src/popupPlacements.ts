@@ -60,12 +60,12 @@ export function stringPixelsToNumber(styleValue: string): number {
 }
 
 /* Returns bounding rectangular without borders and scroll */
-export function getBoundingInternalRect(el: HTMLElement): DOMRect {
+export function getBoundingInternalRect(el: HTMLElement): Omit<DOMRect, "toJSON"> {
   const { borderTopWidth, borderLeftWidth } = getComputedStyle(el);
   let { left, top } = el.getBoundingClientRect();
   top += stringPixelsToNumber(borderTopWidth);
   left += stringPixelsToNumber(borderLeftWidth);
-  const r: DOMRect = {
+  const r: Omit<DOMRect, "toJSON"> = {
     top,
     left,
     right: left + el.clientWidth,
@@ -74,7 +74,6 @@ export function getBoundingInternalRect(el: HTMLElement): DOMRect {
     height: el.clientHeight,
     x: left,
     y: top,
-    toJSON: () => JSON.stringify(r),
   };
   return r;
 }
@@ -92,6 +91,7 @@ function popupAdjustInternal(
   const { minWidth: minW, minHeight: minH } = getComputedStyle(me.el);
   const minWidth = stringPixelsToNumber(minW);
   const minHeight = stringPixelsToNumber(minH);
+
   // reject calc since minSize > availableSize
   if (minWidth > freeW || minHeight > freeH) {
     if (ignoreAlign) {
@@ -99,11 +99,6 @@ function popupAdjustInternal(
       // issue: it doesn't work if both minH&minW > freeH&freeW
       return popupAdjustInternal.call(n, me, fit, false);
     }
-    return this;
-  }
-
-  // decline calc if availableField is very small; in this case we must select opossite or something that fit better
-  if ((freeW <= 5 && minWidth > 0) || (freeH <= 5 && minHeight > 0)) {
     return this;
   }
 
@@ -252,6 +247,8 @@ Object.keys(PopupPlacements).forEach((kp) => {
     };
     const v = p[key];
     // adding .adjust to each WUPPopupPlace.AlignFunc
-    v.$adjust = (t, me, fit) => popupAdjust.call(v(t, me, fit), me, fit);
+    v.$adjust = function adjust(t, me, fit) {
+      return popupAdjust.call(v(t, me, fit), me, fit);
+    };
   });
 });

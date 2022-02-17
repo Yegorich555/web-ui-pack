@@ -734,26 +734,59 @@ describe("popupElement", () => {
 
     const height = 50;
     const width = 100;
-    const x = 140;
-    const y = 0;
-    jest.spyOn(trg, "getBoundingClientRect").mockRestore();
-    jest.spyOn(trg, "getBoundingClientRect").mockReturnValue({
-      x,
-      left: x,
-      y,
-      top: y,
-      bottom: y + height,
-      right: x + width,
-      height,
-      width,
-      toJSON: () => "",
-    });
+    let x = 140;
+    let y = 0;
+    const trgRect = { x, left: x, y, top: y, bottom: y + height, right: x + width, height, width, toJSON: () => "" };
+    jest.spyOn(trg, "getBoundingClientRect").mockReturnValue(trgRect);
 
     el.$options.placement = WUPPopupElement.$placements.$top.$start;
     el.$options.placementAlt = [WUPPopupElement.$placements.$bottom.$start];
     jest.advanceTimersByTime(10);
+    // no place at the top so at the bottom is expected
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style=\\"display: block; transform: translate(140px, 50px); opacity: 1; max-width: 460px; max-height: 350px;\\"></wup-popup>"`
+    );
+
+    // just for coverage: tesing ignoreAlign in popupAdjustInternal()
+    el.$options.placementAlt = [];
+    // el.style.minHeight = "10px"; // watchfix: https://github.com/jsdom/jsdom/issues/2986
+    const orig = window.getComputedStyle;
+    jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
+      if (elem === el) {
+        return { minWidth: "10px", minHeight: "10px" };
+      }
+      return orig(elem);
+    });
+
+    jest.advanceTimersByTime(10);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(190px, 50px); opacity: 1; max-width: 600px; max-height: 350px;\\"></wup-popup>"`
+    );
+
+    // cover calc maxHeight by freeHeight in popupAdjustInternal()
+    y = 11; // so freeH < me.H but freeH > minHeight
+    jest.spyOn(el, "offsetHeight", "get").mockReturnValue(y + 1);
+    trgRect.y = y;
+    trgRect.top = y;
+    trgRect.bottom = height + y;
+    el.$options.placement = WUPPopupElement.$placements.$top.$start.$adjust;
+    // expected right or bottom position because at left/top not enough space
+    jest.advanceTimersByTime(10);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(140px, 0px); opacity: 1; max-width: 460px; max-height: 11px;\\"></wup-popup>"`
+    );
+
+    // cover calc maxWidth by freeWidth in popupAdjustInternal()
+    x = 12; // so freeW < me.W but freeW > minWidth
+    jest.spyOn(el, "offsetWidth", "get").mockReturnValue(x + 1);
+    trgRect.x = x;
+    trgRect.left = x;
+    trgRect.right = width + x;
+    el.$options.placement = WUPPopupElement.$placements.$left.$start.$adjust;
+    // expected right or bottom position because at left/top not enough space
+    jest.advanceTimersByTime(10);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(0px, 11px); opacity: 1; max-width: 12px; max-height: 389px;\\"></wup-popup>"`
     );
   });
 
