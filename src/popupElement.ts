@@ -25,7 +25,7 @@ import {
  * You can set minWidth, minHeight to prevent squizing of popup or don't use placement .$adjust
  */
 export default class WUPPopupElement<
-  Events extends WUPPopup.PopupEventMap = WUPPopup.PopupEventMap
+  Events extends WUPPopup.EventMap = WUPPopup.EventMap
 > extends WUPBaseElement<Events> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   // @ts-ignore

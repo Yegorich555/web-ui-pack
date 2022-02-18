@@ -63,7 +63,7 @@ export namespace WUPPopup {
     focusDebounceMs?: number;
   }
 
-  export interface PopupEventMap extends WUP.EventMap {
+  export interface EventMap extends WUP.EventMap {
     /** Fires before show is happened; can be prevented via e.preventDefault() */
     $willShow: Event;
     /** Fires after popup is shown */
