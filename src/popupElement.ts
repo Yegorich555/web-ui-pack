@@ -24,8 +24,11 @@ import {
  * @tutorial Troubleshooting:
  * You can set minWidth, minHeight to prevent squizing of popup or don't use placement .$adjust
  */
-export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.Element {
+export default class WUPPopupElement<
+  Events extends WUPPopup.PopupEventMap = WUPPopup.PopupEventMap
+> extends WUPBaseElement<Events> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
+  // @ts-ignore
   protected get ctr(): typeof WUPPopupElement {
     return this.constructor as typeof WUPPopupElement;
   }
@@ -158,10 +161,9 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
       return;
     }
 
-    const { appendEvent } = this as WUPPopup.Element;
     // add event by popup.onShow and remove by onHide
-    const onShowEvent = (...args: Parameters<WUPPopup.Element["appendEvent"]>) =>
-      this.#onShowCallbacks.push(() => appendEvent(...args));
+    const onShowEvent = (...args: Parameters<WUPPopupElement["appendEvent"]>) =>
+      this.#onShowCallbacks.push(() => this.appendEvent(...args));
 
     // apply showCase
     // todo it doesn't work if new clickEvent fired programmatically
@@ -197,7 +199,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
       });
 
       let timeoutId: ReturnType<typeof setTimeout> | undefined;
-      appendEvent(t, "click", () => {
+      this.appendEvent(t, "click", () => {
         if (timeoutId || wasOutsideClick || openedByHover) {
           return;
         }
@@ -229,9 +231,9 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
           );
         else timeoutId = undefined;
       };
-      appendEvent(t, "mouseenter", () => ev(this._opts.hoverShowTimeout, true));
+      this.appendEvent(t, "mouseenter", () => ev(this._opts.hoverShowTimeout, true));
       // use only appendEvent; with onShowEvent it doesn't work properly (because filtered by timeout)
-      appendEvent(t, "mouseleave", () => ev(this._opts.hoverHideTimeout, false));
+      this.appendEvent(t, "mouseleave", () => ev(this._opts.hoverHideTimeout, false));
     }
 
     // onFocus
@@ -334,7 +336,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     if (!this.canShow(showCase)) return false;
 
     if (wasHidden) {
-      const e = (this as WUPPopup.Element).fireEvent("$willShow", { cancelable: true });
+      const e = this.fireEvent("$willShow", { cancelable: true });
       if (e.defaultPrevented) {
         return false;
       }
@@ -385,7 +387,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
     if (wasHidden) {
       this.#onHideCallbacks = this.#onShowCallbacks.map((f) => f());
       // run async to dispose internal resources first: possible dev-side-issues
-      setTimeout(() => (this as WUPPopup.Element).fireEvent("$show", { cancelable: false }));
+      setTimeout(() => this.fireEvent("$show", { cancelable: false }));
     }
 
     return true;
@@ -406,7 +408,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
 
     const wasShown = this.#isOpened;
     if (wasShown) {
-      const e = (this as WUPPopup.Element).fireEvent("$willHide", { cancelable: true });
+      const e = this.fireEvent("$willHide", { cancelable: true });
       if (e.defaultPrevented) {
         return false;
       }
@@ -424,7 +426,7 @@ export default class WUPPopupElement extends WUPBaseElement implements WUPPopup.
       this.#onHideCallbacks.forEach((f) => f());
       this.#onHideCallbacks = [];
       // run async to dispose internal resources first: possible dev-side-issues
-      setTimeout(() => (this as WUPPopup.Element).fireEvent("$hide", { cancelable: false }));
+      setTimeout(() => this.fireEvent("$hide", { cancelable: false }));
     }
 
     return true;
@@ -531,7 +533,7 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: JSXCustomProps<WUPPopup.Element> &
+      [tagName]: JSXCustomProps<WUPPopupElement> &
         Partial<{
           /** QuerySelector to find target - anchor that popup uses for placement.
            * If attr.target and $options.target are empty previousSibling will be attached.

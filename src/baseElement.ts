@@ -6,7 +6,7 @@ import observer, { Observer } from "./helpers/observer";
 import onEvent, { onEventType } from "./helpers/onEvent";
 
 /** Basic abstract class for every component in web-ui-pack */
-export default abstract class WUPBaseElement extends HTMLElement {
+export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.EventMap> extends HTMLElement {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   protected get ctr(): typeof WUPBaseElement {
     return this.constructor as typeof WUPBaseElement;
@@ -134,16 +134,35 @@ export default abstract class WUPBaseElement extends HTMLElement {
     this.#isReady && this.gotAttributeChanged(name, oldValue, newValue);
   }
 
-  dispatchEvent<K extends keyof HTMLElementEventMap>(type: K, eventInit?: EventInit): boolean;
+  dispatchEvent<K extends keyof Events>(type: K, eventInit?: EventInit): boolean;
   dispatchEvent(event: Event): boolean;
   dispatchEvent(ev: Event | string, eventInit?: EventInit): boolean {
     if (typeof ev === "string") ev = new Event(ev, eventInit);
     return super.dispatchEvent(ev as Event);
   }
 
+  // todo how to change  listener: (this: WUPBaseElement) to generic ?
+  /* eslint-disable max-len */
+  // prettier-ignore
+  addEventListener<K extends keyof Events>(type: K, listener: (this: WUPBaseElement, ev: Events[K]) => any, options?: boolean | AddEventListenerOptions): void;
+  // prettier-ignore
+  addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+  addEventListener(type: any, listener: any, options?: any): void {
+    return super.addEventListener(type, listener, options); // todo remove via decorators ???
+  }
+
+  // prettier-ignore
+  removeEventListener<K extends keyof Events>(type: K, listener: (this: WUPBaseElement, ev: Events[K]) => any, options?: boolean | EventListenerOptions): void;
+  // prettier-ignore
+  removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+  removeEventListener(type: any, listener: any, options?: any): void {
+    return super.removeEventListener(type, listener, options); // todo remove via decorators ???
+  }
+  /* eslint-enable max-len */
+
   /** Calls dispatchEvent and returns created event */
-  fireEvent<K extends keyof HTMLElementEventMap>(type: K, eventInit?: EventInit): Event {
-    const ev = new Event(type, eventInit);
+  fireEvent<K extends keyof Events>(type: K, eventInit?: EventInit): Event {
+    const ev = new Event(type as string, eventInit);
     super.dispatchEvent(ev as Event);
     return ev;
   }
@@ -153,7 +172,7 @@ export default abstract class WUPBaseElement extends HTMLElement {
   appendEvent<
     T extends keyof E,
     K extends HTMLElement | Document,
-    E extends HTMLElementEventMap & Record<keyof E, Event>
+    E extends HTMLElementEventMap & Record<string, Event>
   >(...args: Parameters<onEventType<T, K, E>>): () => void {
     args[3] = <AddEventListenerOptions>{ passive: true, ...(args[3] as AddEventListenerOptions) };
     // self-removing when option.once
@@ -202,42 +221,7 @@ export namespace WUP {
     props: Array<Extract<keyof T, string>>;
     target: T;
   };
-  // export interface IEvent<T extends HTMLElementEventMap> extends Event {
-  //   // eslint-disable-next-line @typescript-eslint/no-misused-new
-  //   new (type: keyof T, eventInitDict?: EventInit): IEvent<T>;
-  // }
-  export interface IBaseElement<E extends HTMLElementEventMap & Record<keyof E, Event>> extends WUPBaseElement {
-    dispatchEvent(type: keyof E, eventInitDict?: EventInit): boolean;
-    dispatchEvent(event: E[keyof E]): boolean;
-    addEventListener<K extends keyof E>(
-      type: K,
-      listener: (this: WUPBaseElement, ev: E[K]) => any,
-      options?: boolean | AddEventListenerOptions
-    ): void;
-    addEventListener(
-      type: string,
-      listener: EventListenerOrEventListenerObject,
-      options?: boolean | AddEventListenerOptions
-    ): void;
-    removeEventListener<K extends keyof E>(
-      type: K,
-      listener: (this: WUPBaseElement, ev: E[K]) => any,
-      options?: boolean | EventListenerOptions
-    ): void;
-    removeEventListener(
-      type: string,
-      listener: EventListenerOrEventListenerObject,
-      options?: boolean | EventListenerOptions
-    ): void;
-
-    fireEvent(type: keyof E, eventInitDict?: EventInit): Event;
-    appendEvent<T extends keyof E, K extends HTMLElement | Document>(
-      ...args: Parameters<onEventType<T, K, E>>
-    ): () => void;
-    appendEvent<T extends keyof E2, K extends HTMLElement | Document, E2 extends E = E>(
-      ...args: Parameters<onEventType<T, K, E2>>
-    ): () => void;
-  }
+  export type EventMap<T = HTMLElementEventMap> = HTMLElementEventMap & Record<keyof T, Event>;
 }
 
 // todo make all props not-enumerable (beside starts with $...): https://stackoverflow.com/questions/34517538/setting-an-es6-class-getter-to-enumerable

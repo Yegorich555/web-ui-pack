@@ -788,14 +788,22 @@ describe("popupElement", () => {
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style=\\"display: block; transform: translate(0px, 11px); opacity: 1; max-width: 12px; max-height: 389px;\\"></wup-popup>"`
     );
-  });
 
-  /**
-     todo e2e cases:
-     clickOnLabel with input - single event
-     options.placement
-     check options.placementAlt
-     options.minWidthByTarget;
-     options.minHeightByTarget;
-   */
+    // test case when not enough space
+    jest.spyOn(el, "offsetHeight", "get").mockReturnValue(1000);
+    jest.spyOn(el, "offsetWidth", "get").mockReturnValue(1000);
+    jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
+      if (elem === el) {
+        return { minWidth: "1000px", minHeight: "1000px" };
+      }
+      return orig(elem);
+    });
+    el.$options.placement = WUPPopupElement.$placements.$left.$start;
+    h.mockConsoleError();
+    jest.advanceTimersByTime(10);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(112px, -464px); opacity: 1; max-width: 488px; max-height: 400px;\\"></wup-popup>"`
+    );
+    h.unMockConsoleError();
+  });
 });

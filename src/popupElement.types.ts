@@ -63,7 +63,7 @@ export namespace WUPPopup {
     focusDebounceMs?: number;
   }
 
-  export interface PopupEventMap extends HTMLElementEventMap {
+  export interface PopupEventMap extends WUP.EventMap {
     /** Fires before show is happened; can be prevented via e.preventDefault() */
     $willShow: Event;
     /** Fires after popup is shown */
@@ -74,8 +74,7 @@ export namespace WUPPopup {
     $hide: Event;
   }
 
-  export interface Element<T extends PopupEventMap & Record<keyof T, Event> = PopupEventMap>
-    extends WUP.IBaseElement<T> {
+  export interface Element {
     $options: Options;
     /** Show popup; it disables option.showCase and enables by $hide() */
     $show: () => void;
