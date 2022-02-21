@@ -225,12 +225,12 @@ export default class WUPPopupElement<
 
     // onFocus
     if (showCase & WUPPopup.ShowCases.onFocus) {
-      const focus = () => {
+      const onFocused = () => {
         if (!this.#isOpened && this.goShow(WUPPopup.ShowCases.onFocus)) {
           preventClickAfterFocus = true;
         }
       };
-      this.disposeLst.push(onFocusGot(t, focus, { debounceMs: this._opts.focusDebounceMs }));
+      this.disposeLst.push(onFocusGot(t, onFocused, { debounceMs: this._opts.focusDebounceMs }));
 
       const blur = ({ relatedTarget }: FocusEvent) => {
         if (this.#isOpened) {
@@ -244,6 +244,13 @@ export default class WUPPopupElement<
       };
 
       this.#onShowCallbacks.push(() => onFocusLost(t, blur, { debounceMs: this._opts.focusDebounceMs }));
+      if (
+        document.activeElement === t ||
+        (document.activeElement instanceof HTMLElement && t.contains(document.activeElement))
+      ) {
+        onFocused();
+        preventClickAfterFocus = false;
+      }
     }
   }
 
@@ -542,5 +549,5 @@ declare global {
   }
 }
 
-// todo when showCase = focus. need to show() if target isAlreadyFocused
 // todo WUPPopupElement.attach(target, options) - attach to target but render only by show
+// todo develop arrow icon

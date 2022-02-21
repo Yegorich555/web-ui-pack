@@ -332,6 +332,17 @@ describe("popupElement", () => {
     expect(spyShow).lastCalledWith(1 << 1); // checking if throttling-filter works
     expect(spyHide).lastCalledWith(1 << 1, 3); // because div haven't been lost focus
 
+    // when showCase = focus. need to show() if target isAlreadyFocused
+    a.remove();
+    trg.setAttribute("tabindex", "0");
+    trg.focus();
+    expect(document.activeElement.id).toBe("targetId");
+    document.body.appendChild(a);
+    a.$options.showCase = 1 << 1; // onFocus
+    jest.advanceTimersToNextTimer(); // onReady has timeout
+    expect(a.$isOpened).toBeTruthy(); // because of trg is alreadyFocused
+    trg.removeAttribute("tabindex");
+
     // focus moves to element inside popup > no-hide
     /** @type typeof el */
     let a2 = document.body.appendChild(document.createElement(el.tagName));
