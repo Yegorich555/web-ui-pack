@@ -470,14 +470,16 @@ describe("popupElement", () => {
     expect(spyShow).lastCalledWith(1 << 1);
     expect(a.$isOpened).toBeTruthy(); // show by focus
     trgInput.dispatchEvent(new Event("mouseup", { bubbles: true }));
-    trgInput.dispatchEvent(new Event("click", { bubbles: true }));
+    const ev = new MouseEvent("click", { bubbles: true });
+    ev.pageX = 20; // required otherwise it's filtered from synthetic events
+    trgInput.dispatchEvent(ev);
     jest.advanceTimersByTime(50);
     expect(a.$isOpened).toBeTruthy(); // stay opened because wasOpened by focus from click)
 
     // simulate mouse-click again
     trgInput.dispatchEvent(new Event("mousedown", { bubbles: true }));
     trgInput.dispatchEvent(new Event("mouseup", { bubbles: true }));
-    trgInput.dispatchEvent(new Event("click", { bubbles: true }));
+    trgInput.dispatchEvent(ev);
     jest.advanceTimersByTime(50);
     expect(a.$isOpened).toBeFalsy(); // 2nd click will close (but if click is fired without mousedown it doesn't work)
     expect(spyHide).lastCalledWith(1 << 1, 6);

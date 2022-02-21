@@ -23,16 +23,11 @@ function PopupContent() {
 export default function PopupView() {
   return (
     <div className={styles.popupViewExtraScroll} id="toFitMe">
-      <button id="trg" type="button" className={styles.trg} ref={(el) => el && setTimeout(() => el.click(), 200)}>
-        target
-        <br />
-        <small>inside scrollable parent</small>
-      </button>
-      {/* <div>
-        <label id="trg">
+      <div>
+        <label id="trg" htmlFor="i1">
           <span>This is label with input inside</span>
-          <input />
-          <button>Click me</button>
+          <input id="i1" />
+          <button type="button">Click me</button>
         </label>
       </div>
       <wup-popup class={styles.popupContent} target="#trg" placement="top-start">
@@ -40,12 +35,19 @@ export default function PopupView() {
       </wup-popup>
 
       <div>
+        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
         <label htmlFor="trg2">This is label with input outside</label>
         <input id="trg2" />
       </div>
       <wup-popup class={styles.popupContent} target="#trg2" placement="top-start">
         top.start t2
-      </wup-popup> */}
+      </wup-popup>
+
+      {/* <button id="trg" type="button" className={styles.trg} ref={(el) => el && setTimeout(() => el.click(), 200)}>
+        target
+        <br />
+        <small>inside scrollable parent</small>
+      </button>
       <wup-popup class={styles.popupContent} target="#trg" placement="top-start">
         top.start
       </wup-popup>
@@ -84,7 +86,7 @@ export default function PopupView() {
       </wup-popup>
       <wup-popup class={styles.popupContent} target="#trg" placement="left-end">
         left.end
-      </wup-popup>
+      </wup-popup> */}
     </div>
   );
 }

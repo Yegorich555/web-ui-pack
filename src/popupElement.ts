@@ -153,7 +153,6 @@ export default class WUPPopupElement<
       this.#onShowCallbacks.push(() => this.appendEvent(...args));
 
     // apply showCase
-    // todo it doesn't work if new clickEvent fired programmatically
     let preventClickAfterFocus = false;
     let openedByHover = false;
     // onClick
@@ -168,9 +167,8 @@ export default class WUPPopupElement<
         }
       });
 
-      onShowEvent(document, "touchstart", () => (preventClickAfterFocus = false));
-      onShowEvent(document, "mousedown", () => (preventClickAfterFocus = false));
       onShowEvent(document, "click", ({ target }) => {
+        preventClickAfterFocus = false; // mostly it doesn't make sense but maybe it's possible
         // filter click from target because we have target event for this
         if (t !== target && !(target instanceof Node && t.contains(target))) {
           const isMeClick = this === target || this.includes(target);
@@ -186,10 +184,16 @@ export default class WUPPopupElement<
       });
 
       let timeoutId: ReturnType<typeof setTimeout> | undefined;
-      this.appendEvent(t, "click", () => {
+      this.appendEvent(t, "click", (e) => {
+        if (!e.pageX) {
+          // pageX is null if it was fired programmatically
+          preventClickAfterFocus = false; // test-case: focus without click > show....click programatically on target > it should hide
+        }
+
         if (timeoutId || wasOutsideClick || openedByHover) {
           return;
         }
+
         if (!this.#isOpened) {
           lastActive = document.activeElement as HTMLElement;
           this.goShow(WUPPopup.ShowCases.onClick);
@@ -207,7 +211,6 @@ export default class WUPPopupElement<
       const ev = (ms: number, isMouseIn: boolean) => {
         timeoutId && clearTimeout(timeoutId);
         openedByHover = isMouseIn;
-        preventClickAfterFocus = false; // fixes case when click fired without mousedown
         if ((isMouseIn && !this.#isOpened) || (!isMouseIn && this.#isOpened))
           timeoutId = setTimeout(
             () =>
@@ -227,7 +230,18 @@ export default class WUPPopupElement<
     if (showCase & WUPPopup.ShowCases.onFocus) {
       const onFocused = () => {
         if (!this.#isOpened && this.goShow(WUPPopup.ShowCases.onFocus)) {
-          preventClickAfterFocus = true;
+          if (showCase & WUPPopup.ShowCases.onClick) {
+            preventClickAfterFocus = true;
+            /* eslint-disable no-use-before-define */
+            const r1 = this.appendEvent(document, "touchstart", () => rst());
+            const r2 = this.appendEvent(document, "mousedown", () => rst());
+            /* eslint-enable no-use-before-define */
+            const rst = () => {
+              preventClickAfterFocus = false;
+              r1();
+              r2();
+            };
+          }
         }
       };
       this.disposeLst.push(onFocusGot(t, onFocused, { debounceMs: this._opts.focusDebounceMs }));
@@ -244,10 +258,10 @@ export default class WUPPopupElement<
       };
 
       this.#onShowCallbacks.push(() => onFocusLost(t, blur, { debounceMs: this._opts.focusDebounceMs }));
-      if (
+      const isAlreadyFocused =
         document.activeElement === t ||
-        (document.activeElement instanceof HTMLElement && t.contains(document.activeElement))
-      ) {
+        (document.activeElement instanceof HTMLElement && t.contains(document.activeElement));
+      if (isAlreadyFocused) {
         onFocused();
         preventClickAfterFocus = false;
       }
