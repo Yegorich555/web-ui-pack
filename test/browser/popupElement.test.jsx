@@ -9,7 +9,6 @@ beforeEach(async () => {
     WUPPopupElement.$defaults.placement = WUPPopupElement.$placements.$top.$start;
     WUPPopupElement.$defaults.placementAlt = [WUPPopupElement.$placements.$bottom.$start];
     WUPPopupElement.$defaults.showCase = 4; // onClick;
-    // todo re-render doesn't remove previous elements ???
     renderIt(
       <label key={Date.now()}>
         <span>Label text</span>
@@ -38,7 +37,7 @@ describe("popupElement", () => {
     // bug: toMatchInlineSnapshot doesn't work
     // checking placement
     expect(t.html).toBe(
-      '<wup-popup style="display: block; transform: translate(72.4219px, 29px); max-width: 735.578px; max-height: 579px; opacity: 1;">Popup text</wup-popup>'
+      '<wup-popup style="display: block; transform: translate(72.4219px, 29px); max-width: 735.578px; max-height: 579px;">Popup text</wup-popup>'
     );
     await page.click("label"); // click again should hide
     await page.waitForTimeout(1); // timeout required because of debounceFilters
@@ -47,7 +46,7 @@ describe("popupElement", () => {
     expect(t.gotShow).toBe(1);
     expect(t.gotHide).toBe(1);
     expect(t.html).toBe(
-      '<wup-popup style="display: none; transform: translate(72.4219px, 29px); max-width: 735.578px; max-height: 579px; opacity: 0;">Popup text</wup-popup>'
+      '<wup-popup style="transform: translate(72.4219px, 29px); max-width: 735.578px; max-height: 579px;">Popup text</wup-popup>'
     );
   });
 
@@ -96,7 +95,7 @@ describe("popupElement", () => {
     await page.waitForTimeout(1); // timeout required because of debounceFilters
     const t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML }));
     expect(t.html).toBe(
-      '<wup-popup style="display: block; min-width: 177px; min-height: 21px; transform: translate(72.4219px, 29px); max-width: 735.578px; max-height: 579px; opacity: 1;">Popup text</wup-popup>'
+      '<wup-popup style="display: block; min-width: 177px; min-height: 21px; transform: translate(72.4219px, 29px); max-width: 735.578px; max-height: 579px;">Popup text</wup-popup>'
     );
   });
 });

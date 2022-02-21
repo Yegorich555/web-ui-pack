@@ -5,6 +5,11 @@
 import observer, { Observer } from "./helpers/observer";
 import onEvent, { onEventType } from "./helpers/onEvent";
 
+// theoritcally such single appending is faster than using :host inside shadowComponent
+const appendedStyles = new Set<string>();
+const styleElement = document.createElement("style");
+document.head.prepend(styleElement);
+
 /** Basic abstract class for every component in web-ui-pack */
 export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.EventMap> extends HTMLElement {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
@@ -14,6 +19,10 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
 
   /** Options that need to watch for changes; use gotOptionsChanged() */
   static observedOptions?: Set<keyof Record<string, any>>;
+
+  /** StyleContent related to component */
+  static style = "";
+
   /** Options that applied to element */
   abstract $options: Record<string, any>;
 
@@ -36,6 +45,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     };
     bindAll(this);
 
+    // setup options to be observable
     setTimeout(() => {
       // cast options to observed
       const prev = this.$options;
@@ -60,6 +70,18 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
       this._opts = prev;
       this.#setOptions(prev);
     });
+
+    // setup styles
+    if (!appendedStyles.has(this.tagName)) {
+      const s = Object.getPrototypeOf(this).constructor.style as string;
+      if (s) {
+        styleElement.append(s.replace(/:host/g, `${this.tagName}`));
+      }
+      appendedStyles.add(this.tagName);
+    }
+    // setup shadow
+    const root = this.attachShadow({ mode: "open" });
+    root.appendChild(document.createElement("slot"));
   }
 
   /* rawOptions ($options is observed) */

@@ -46,7 +46,7 @@ export default function PopupView() {
       <wup-popup class={styles.popupContent} target="#trg2" placement="top-start">
         top.start t2
       </wup-popup> */}
-      {/* <wup-popup class={styles.popupContent} target="#trg" placement="top-start">
+      <wup-popup class={styles.popupContent} target="#trg" placement="top-start">
         top.start
       </wup-popup>
       <wup-popup class={styles.popupContent} target="#trg" placement="top-middle">
@@ -54,15 +54,15 @@ export default function PopupView() {
       </wup-popup>
       <wup-popup class={styles.popupContent} target="#trg" placement="top-end">
         top.end
-      </wup-popup> */}
+      </wup-popup>
 
-      {/* <wup-popup class={styles.popupContent} target="#trg" placement="right-start">
+      <wup-popup class={styles.popupContent} target="#trg" placement="right-start">
         right.start
-      </wup-popup> */}
+      </wup-popup>
       <wup-popup class={styles.popupContent} target="#trg" placement="right-middle">
         right.middle
       </wup-popup>
-      {/* <wup-popup class={styles.popupContent} target="#trg" placement="right-end">
+      <wup-popup class={styles.popupContent} target="#trg" placement="right-end">
         right.end
       </wup-popup>
 
@@ -84,7 +84,7 @@ export default function PopupView() {
       </wup-popup>
       <wup-popup class={styles.popupContent} target="#trg" placement="left-end">
         left.end
-      </wup-popup> */}
+      </wup-popup>
     </div>
   );
 }

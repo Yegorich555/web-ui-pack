@@ -20,9 +20,10 @@ import {
  * document.body.append(el);
  * // or
  * <wup-popup target="#targetId" placement="top-start">Some content here</wup-popup>
- *
  * @tutorial Troubleshooting:
- * You can set minWidth, minHeight to prevent squizing of popup or don't use placement .$adjust
+ * * By default all rules set with $adjust. If you need place opposite instead of resizing an element - use without adjust (options placement, placementAlt)
+ * * You can set minWidth, minHeight to prevent squizing of popup or don't use placement .$adjust
+ * * Don't override display style (this css-rule is busy)
  */
 export default class WUPPopupElement<
   Events extends WUPPopup.EventMap = WUPPopup.EventMap
@@ -65,6 +66,19 @@ export default class WUPPopupElement<
     hoverHideTimeout: 500,
   };
 
+  static style = `
+      :host {
+        display: none;
+        position: fixed!important;
+        z-index: 99999;
+        margin: 0!important;
+        box-sizing: border-box;
+        top: 0;
+        left: 0;
+        border-radius: var(--border-radius, 6px);
+        padding: 4px;
+      }`;
+
   $options: WUPPopup.Options = {
     ...this.ctr.$defaults,
     placementAlt: [...this.ctr.$defaults.placementAlt],
@@ -101,32 +115,6 @@ export default class WUPPopupElement<
 
   get $isOpened(): boolean {
     return this.#isOpened;
-  }
-
-  constructor() {
-    super();
-
-    const style = document.createElement("style");
-    style.textContent = `
-      :host {
-        position: fixed!important;
-        z-index: 99999;
-        margin: 0!important;
-        box-sizing: border-box;
-        top: 0;
-        left: 0;
-        opacity: 0;
-        display: none;
-
-        // overflow: hidden;
-        border-radius: var(--border-radius, 9px);
-        padding: 4px;
-      }
-    `;
-
-    const root = this.attachShadow({ mode: "open" });
-    root.appendChild(style);
-    root.appendChild(document.createElement("slot"));
   }
 
   protected override gotReady() {
@@ -359,7 +347,7 @@ export default class WUPPopupElement<
     this.#placements = [
       this._opts.placement,
       ...this._opts.placementAlt,
-      // try to adjust with ignore alignment options
+      // try to adjust with ignoring alignment options
       (t, me, fit) => popupAdjust.call(this._opts.placement(t, me, fit), me, fit, true),
       // try to adjust with other placements and ignoring alignment options
       ...Object.keys(PopupPlacements)
@@ -380,7 +368,6 @@ export default class WUPPopupElement<
 
     this.style.display = "block";
     goUpdate();
-    this.style.opacity = "1";
     this.#isOpened = true;
 
     if (wasHidden) {
@@ -414,9 +401,7 @@ export default class WUPPopupElement<
     }
 
     this.#frameId && window.cancelAnimationFrame(this.#frameId);
-    this.style.opacity = "0";
-    this.style.display = "none";
-    // todo remove all inline styles ?
+    this.style.display = "";
 
     this.#isOpened = false;
     this.#showCase = undefined;
@@ -559,4 +544,3 @@ declare global {
 
 // todo when showCase = focus. need to show() if target isAlreadyFocused
 // todo WUPPopupElement.attach(target, options) - attach to target but render only by show
-// todo instead of display: block, display:none we can set display:none. and remove display on show! the same for opacity

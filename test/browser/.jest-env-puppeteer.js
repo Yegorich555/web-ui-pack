@@ -49,7 +49,7 @@ class PuppeteerEnvironment extends Env {
 
     this.global.pageExt = page;
     this.global.HTMLElement = function fakeHTMLElement() {};
-    this.global.document = {};
+    this.global.document = { createElement: () => {}, head: { prepend: () => {} } };
     this.global.customElements = {
       define: function fake() {},
     };
