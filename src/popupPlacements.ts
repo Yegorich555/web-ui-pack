@@ -78,6 +78,15 @@ export function getBoundingInternalRect(el: HTMLElement): Omit<DOMRect, "toJSON"
   return r;
 }
 
+/** memoized function to get minSize from computedStyle */
+function computeMinSize(me: WUPPopupPlace.MeRect & { minSize?: { minWidth: number; minHeight: number } }) {
+  if (!me.minSize) {
+    const { minWidth: minW, minHeight: minH } = getComputedStyle(me.el);
+    me.minSize = { minWidth: stringPixelsToNumber(minW), minHeight: stringPixelsToNumber(minH) };
+  }
+  return me.minSize;
+}
+
 /* Adjust position/size to fit layout */
 function popupAdjustInternal(
   this: WUPPopupPlace.Result,
@@ -86,13 +95,9 @@ function popupAdjustInternal(
   ignoreAlign = false
 ): WUPPopupPlace.Result {
   const { freeW, freeH } = this;
-  // decline calc if we have minSize > than available field; in this case we must select opossite or something that fit better
-  // todo we can useMemo to avoid extra recalc on several methods adjust. but how to memoize only single bunch of items
-  const { minWidth: minW, minHeight: minH } = getComputedStyle(me.el);
-  const minWidth = stringPixelsToNumber(minW);
-  const minHeight = stringPixelsToNumber(minH);
+  const { minWidth, minHeight } = computeMinSize(me);
 
-  // reject calc since minSize > availableSize
+  // reject calc since minSize > availableSize; in this case we must select opossite or something that fit better
   if (minWidth > freeW || minHeight > freeH) {
     if (ignoreAlign) {
       const n = { ...this, freeHeight: this.maxFreeH, freeWidth: this.maxFreeW };
