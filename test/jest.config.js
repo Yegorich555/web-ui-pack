@@ -34,7 +34,7 @@ module.exports = {
       testMatch: [`${__dirname}/browser/**/*.test.[jt]s?(x)`],
       moduleNameMapper,
       preset: "jest-puppeteer",
-      testEnvironment: `${__dirname}/browser/jest-env-puppeteer.js`,
+      testEnvironment: `${__dirname}/browser/.jest-env-puppeteer.js`,
     },
   ],
 };

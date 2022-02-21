@@ -71,7 +71,6 @@ export default class WUPPopupElement<
     offset: [...this.ctr.$defaults.offset],
   };
 
-  // todo how to avoid such override ?
   protected override _opts = this.$options;
 
   $hide() {
@@ -417,6 +416,7 @@ export default class WUPPopupElement<
     this.#frameId && window.cancelAnimationFrame(this.#frameId);
     this.style.opacity = "0";
     this.style.display = "none";
+    // todo remove all inline styles ?
 
     this.#isOpened = false;
     this.#showCase = undefined;
@@ -544,13 +544,13 @@ declare global {
           target: string;
           /** Placement rule (relative to target); applied on show(). Call show() again to apply changed options */
           placement: keyof typeof WUPPopupElement.$placementAttrs;
-          /** SyntheticEvent is not supported. Use ref.addEventListener('$show') instead */
+          /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$show') instead */
           onShow: never;
-          /** SyntheticEvent is not supported. Use ref.addEventListener('$hide') instead */
+          /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$hide') instead */
           onHide: never;
-          /** SyntheticEvent is not supported. Use ref.addEventListener('$willHide') instead */
+          /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willHide') instead */
           onWillHide: never;
-          /** SyntheticEvent is not supported. Use ref.addEventListener('$willShow') instead */
+          /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willShow') instead */
           onWillShow: never;
         }>;
     }

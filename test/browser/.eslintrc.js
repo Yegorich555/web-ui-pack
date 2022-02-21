@@ -6,6 +6,9 @@ module.exports = {
     jestPuppeteer: true,
     renderIt: true,
   },
+  rules: {
+    "jsx-a11y/label-has-associated-control": "off",
+  },
   settings: {
     "import/resolver": {
       typescript: {
