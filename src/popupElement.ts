@@ -1,3 +1,4 @@
+// eslint-disable-next-line max-classes-per-file
 import focusFirst from "./helpers/focusFirst";
 import WUPBaseElement, { JSXCustomProps, WUP } from "./baseElement";
 import onFocusGot from "./helpers/onFocusGot";
@@ -11,15 +12,23 @@ import {
   WUPPopupPlace,
 } from "./popupPlacements";
 
+export const { ShowCases } = WUPPopup;
+
 /** PopupElement
  * @example
  * const el = document.createElement('wup-popup');
- * el.$options.showCase = WUPPopup.ShowCases.onClick | WUPPopup.ShowCases.onFocus;
+ * el.$options.showCase = ShowCases.onClick | ShowCases.onFocus;
  * el.$options.target = document.querySelector('button');
- * el.$options.placement = WUPPopupElement.$placements.$top.$middle.$adjust;
+ * el.$options.placement = WUPPopupElement.$placements.$top.$middle;
+ * el.$options.placementAlt = [
+ *  WUPPopupElement.$placements.$bottom.$middle,
+ *  WUPPopupElement.$placements.$bottom.$middle.$adjust, // adjust means 'Reduce popup to fit layout`
+ * ];
  * document.body.append(el);
  * // or
- * <wup-popup target="#targetId" placement="top-start">Some content here</wup-popup>
+ * <button id="btn1">Target</button>
+ * // You can skip pointing attribute 'target' if popup appended after target
+ * <wup-popup target="#btn1" placement="top-start">Some content here</wup-popup>
  * @tutorial Troubleshooting:
  * * By default all rules set with $adjust. If you need place opposite instead of resizing an element - use without adjust (options placement, placementAlt)
  * * You can set minWidth, minHeight to prevent squizing of popup or don't use placement .$adjust
@@ -61,7 +70,7 @@ export default class WUPPopupElement<
     toFitElement: document.body,
     minWidthByTarget: false,
     minHeightByTarget: false,
-    showCase: WUPPopup.ShowCases.onClick,
+    showCase: ShowCases.onClick,
     hoverShowTimeout: 200,
     hoverHideTimeout: 500,
   };
@@ -525,8 +534,6 @@ export default class WUPPopupElement<
   }
 }
 
-// todo check inherritance with overriding options & re-assign to custom-tag
-// todo extend document.createElement("wup-popup")
 const tagName = "wup-popup";
 customElements.define(tagName, WUPPopupElement);
 

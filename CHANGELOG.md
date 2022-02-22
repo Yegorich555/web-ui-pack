@@ -1,8 +1,9 @@
 # Changelog
 
-## 0.0.x
+## 0.0.3
 
-- Added [helpers](https://github.com/Yegorich555/web-ui-pack#helpers)
+- Added [`popupElement`](README.md#popupelement)
+- Added [helpers](README.md#helpers)
   - `stringPrettify`
   - `onEvent`
   - `onFocusGot`
@@ -12,7 +13,7 @@
 
 ## 0.0.2 (Nov 30, 2021)
 
-- Added [helpers](https://github.com/Yegorich555/web-ui-pack#helpers)
+- Added [helpers](README.md#helpers)
   - `detectFocusLeft`
   - `focusFirst`
   - `nestedProperty.set/get`
