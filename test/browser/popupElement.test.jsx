@@ -6,8 +6,10 @@ let testEl;
 beforeEach(async () => {
   await page.evaluate(() => {
     document.activeElement && document.activeElement.blur();
-    WUPPopupElement.$defaults.placement = WUPPopupElement.$placements.$top.$start;
-    WUPPopupElement.$defaults.placementAlt = [WUPPopupElement.$placements.$bottom.$start];
+    WUPPopupElement.$defaults.placement = [
+      WUPPopupElement.$placements.$top.$start,
+      WUPPopupElement.$placements.$bottom.$start,
+    ];
     WUPPopupElement.$defaults.showCase = 4; // onClick;
     renderIt(
       <label key={Date.now()}>

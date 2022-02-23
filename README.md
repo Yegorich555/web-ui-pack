@@ -1,6 +1,6 @@
 # ![logo](/demo/src/assets/logo-small.png) web-ui-pack
 
-Web package with custom high scalable [WebComponents](#components) and [helpers](#helpers)
+Web package with high scalable [WebComponents](#components) and [helpers](#helpers)
 
 [![npm version](https://img.shields.io/npm/v/web-ui-pack.svg?style=flat-square)](https://www.npmjs.com/package/web-ui-pack)
 [![code coverage](https://coveralls.io/repos/github/Yegorich555/web-ui-pack/badge.svg?style=flat-square)](https://coveralls.io/github/Yegorich555/web-ui-pack)
@@ -31,7 +31,8 @@ npm install web-ui-pack
 
 ## TODO
 
-- [x] [Observer](#helpersobserver)
+- [x] [Basic helpers](#helpers)
+- [x] [Helper.Observer](#helpersobserver)
 - [x] [PopupElement](#popupelement)
 - [ ] TitleElement ?
 - [ ] FormElement, TextControl
@@ -104,11 +105,11 @@ el.$options.target = document.querySelector("button");
   every placement has align options: $start, $middle, $end (left - to align at start of target)
   also you can set $adjust to allow Reduce popup to fit layout
 */
-el.$options.placement = WUPPopupElement.$placements.$top.$middle; // place at the top of target and align by vertical line
-el.$options.placementAlt = [
+el.$options.placement = [
+  WUPPopupElement.$placements.$top.$middle; // place at the top of target and align by vertical line
   WUPPopupElement.$placements.$bottom.$middle, // place at the bottom of target and align by vertical line
   WUPPopupElement.$placements.$bottom.$middle.$adjust, // adjust means 'Reduce popup to fit layout`
-];
+]
 document.body.append(el);
 ```
 

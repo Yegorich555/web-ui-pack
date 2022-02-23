@@ -29,16 +29,15 @@ export namespace WUPPopup {
 
   export interface Options {
     /** Anchor that popup uses for placement. If attr.target and $options.target are empty previousSibling will be attached.
-     *
      * attr target="{querySelector}" has hire priority than .options.target */
     target?: HTMLElement | null;
-    /** Placement rule relative to target; example Placements.bottom.start or Placements.bottom.start.adjust */
-    placement: WUPPopupPlace.PlaceFunc;
-    /** Alternate when pointed placement doesn't fit the layout */
-    placementAlt: Array<WUPPopupPlace.PlaceFunc>;
+    /**
+     * Placement rules relative to target; example Placements.bottom.start or Placements.bottom.start.adjust
+     * Point several to define alternate behavior (when space are not enough)
+     */
+    placement: Array<WUPPopupPlace.PlaceFunc>;
     /** Alternative of margin for targetElement related to popup
-
-   *  [top, right, bottom, left] or [top/bottom, right/left] in px */
+     *  [top, right, bottom, left] or [top/bottom, right/left] in px */
     offset: [number, number, number, number] | [number, number];
     /** Inside edges of fitElement popup is positioned and can't overflow fitElement; {body} by default */
     toFitElement?: HTMLElement | null;

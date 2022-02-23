@@ -59,7 +59,7 @@ export default function PopupView() {
 
         <h3>Example 2</h3>
         <small>
-          You can change position behavior/priority with options <b>placement</b>, <b>placementAlt</b>
+          You can change position behavior/priority with option <b>placement</b>
         </small>
         <div className={styles.fitBlock} id="fit">
           <button
@@ -91,8 +91,8 @@ export default function PopupView() {
           <wup-popup
             ref={(el) => {
               if (el) {
-                el.$options.placement = WUPPopupElement.$placements.$top.$middle;
-                el.$options.placementAlt = [
+                el.$options.placement = [
+                  WUPPopupElement.$placements.$top.$middle,
                   // WUPPopupElement.$placements.$top.$middle,
                   // WUPPopupElement.$placements.$right.$middle,
                   WUPPopupElement.$placements.$bottom.$middle,
@@ -118,8 +118,10 @@ export default function PopupView() {
         <wup-popup
           ref={(el) => {
             if (el) {
-              el.$options.placement = WUPPopupElement.$placements.$top.$middle;
-              el.$options.placementAlt = [WUPPopupElement.$placements.$bottom.$middle];
+              el.$options.placement = [
+                WUPPopupElement.$placements.$top.$middle,
+                WUPPopupElement.$placements.$bottom.$middle,
+              ];
               el.$options.showCase = ShowCases.always;
             }
           }}

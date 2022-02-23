@@ -19,8 +19,8 @@ export import ShowCases = WUPPopup.ShowCases;
  * const el = document.createElement('wup-popup');
  * el.$options.showCase = ShowCases.onClick | ShowCases.onFocus;
  * el.$options.target = document.querySelector('button');
- * el.$options.placement = WUPPopupElement.$placements.$top.$middle;
- * el.$options.placementAlt = [
+ * el.$options.placement = [
+ *  WUPPopupElement.$placements.$top.$middle,
  *  WUPPopupElement.$placements.$bottom.$middle,
  *  WUPPopupElement.$placements.$bottom.$middle.$adjust, // adjust means 'Reduce popup to fit layout`
  * ];
@@ -30,7 +30,7 @@ export import ShowCases = WUPPopup.ShowCases;
  * // You can skip pointing attribute 'target' if popup appended after target
  * <wup-popup target="#btn1" placement="top-start">Some content here</wup-popup>
  * @tutorial Troubleshooting:
- * * By default all rules set with $adjust. If you need place opposite instead of resizing an element - use without adjust (options placement, placementAlt)
+ * * By default all rules set with $adjust. If you need place opposite instead of resizing an element - use without adjust (option placement)
  * * You can set minWidth, minHeight to prevent squizing of popup or don't use placement .$adjust
  * * Don't override display style (this css-rule is busy)
  */
@@ -61,9 +61,9 @@ export default class WUPPopupElement<
 
   /** Default options. Change it to configure default behavior */
   static $defaults: Omit<WUPPopup.Options, "target"> = {
-    placement: WUPPopupElement.$placements.$top.$middle,
-    placementAlt: [
-      WUPPopupElement.$placements.$top.$middle.$adjust, //
+    placement: [
+      WUPPopupElement.$placements.$top.$middle,
+      WUPPopupElement.$placements.$top.$middle.$adjust,
       WUPPopupElement.$placements.$bottom.$middle.$adjust,
     ],
     offset: [0, 0],
@@ -93,7 +93,7 @@ export default class WUPPopupElement<
 
   $options: WUPPopup.Options = {
     ...this.ctr.$defaults,
-    placementAlt: [...this.ctr.$defaults.placementAlt],
+    placement: [...this.ctr.$defaults.placement],
     offset: [...this.ctr.$defaults.offset],
   };
 
@@ -285,7 +285,7 @@ export default class WUPPopupElement<
     this.init(); // possible only if popup is hidden
   }
 
-  static observedOptions = new Set<keyof WUPPopup.Options>(["showCase", "target", "placement", "placementAlt"]);
+  static observedOptions = new Set<keyof WUPPopup.Options>(["showCase", "target", "placement"]);
   protected override gotOptionsChanged(e: WUP.OptionEvent) {
     super.gotOptionsChanged(e);
     this.#reinit();
@@ -365,7 +365,8 @@ export default class WUPPopupElement<
     this.#showCase = showCase;
 
     const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.$placementAttrs;
-    this._opts.placement = (pAttr && WUPPopupElement.$placementAttrs[pAttr]) || this._opts.placement;
+    const p = pAttr && WUPPopupElement.$placementAttrs[pAttr];
+    this._opts.placement = p ? [p] : this._opts.placement;
 
     // it works only when styles is defined before popup is opened
     this.style.maxWidth = "";
@@ -378,13 +379,12 @@ export default class WUPPopupElement<
 
     // init array of possible solutions to position + align popup
     this.#placements = [
-      this._opts.placement,
-      ...this._opts.placementAlt,
+      ...this._opts.placement,
       // try to adjust with ignoring alignment options
-      (t, me, fit) => popupAdjust.call(this._opts.placement(t, me, fit), me, fit, true),
+      (t, me, fit) => popupAdjust.call(this._opts.placement[0](t, me, fit), me, fit, true),
       // try to adjust with other placements and ignoring alignment options
       ...Object.keys(PopupPlacements)
-        .filter((k) => PopupPlacements[k].$middle !== this._opts.placement)
+        .filter((k) => PopupPlacements[k].$middle !== this._opts.placement[0])
         .map(
           (k) =>
             <WUPPopupPlace.PlaceFunc>(
@@ -575,4 +575,3 @@ declare global {
 
 // todo WUPPopupElement.attach(target, options) - attach to target but render only by show
 // todo develop arrow icon
-// todo remove placementAlt and place everything in placement
