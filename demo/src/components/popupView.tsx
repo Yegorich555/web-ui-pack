@@ -11,11 +11,9 @@ export default function PopupView() {
       </h2>
       <div className={styles.popupEx1}>
         <button id="trg" type="button" className={styles.trg}>
-          target
+          Target
           <br />
           <small>and popups with different positions</small>
-          <br />
-          <small>(try to resize window)</small>
         </button>
         <wup-popup class={styles.popup} target="#trg" placement="top-start">
           top.start

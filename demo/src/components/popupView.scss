@@ -12,6 +12,7 @@
   border-radius: $borderRadius;
   cursor: pointer;
   font-weight: bold;
+  line-height: 1.4em;
 
   height: 120px;
   width: 300px;
@@ -19,5 +20,9 @@
 
   &:hover {
     background: $basicHoverColor;
+  }
+
+  > small {
+    opacity: 0.8;
   }
 }
