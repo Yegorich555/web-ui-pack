@@ -85,10 +85,9 @@ export default class WUPPopupElement<
         margin: 0!important;
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
-        text-overflow: ellipsis;
-
         box-shadow: 0px 1px 4px 0px #00000033;
         background: white;
+        text-overflow: ellipsis;
         overflow: hidden;
       }`;
 

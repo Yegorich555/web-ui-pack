@@ -2,6 +2,10 @@ $focusFrameColor: var(--focusFrameColor, #005365);
 
 $basicTextColor: var(--basicTextColor, #232323);
 $basicBgColor: var(--basicBgColor, white);
+$bodyBgColor: var(--bodyBgColor, #f3f6f9);
+$basicActiveColor: var(--basicActiveColor, white);
+$basicActiveBgColor: var(--basicActiveColor, #009fbc);
+$basicHoverColor: var(--basicHoverColor, #028198);
 
 $hoverColor: var(--hoverColor, #028198);
 $hoverBgColor: var(--hoverColor, rgba(0, 159, 188, 0.078));
@@ -10,10 +14,11 @@ $activeLinkColor: var(--activeLinkColor, #028198);
 $activeLinkBgColor: var(--activeLinkBgColor, rgba(0, 159, 188, 0.078));
 $activeLinkHoverBgColor: var(--activeLinkHoverBgColor, rgba(0, 159, 188, 0.2));
 
-$borderRadius: var(--borderRadius, 14px);
+$borderRadius: var(--borderRadius, 6px);
 $borderColor: var(--borderColor, #e1e1e1);
 $borderWidth: var(--borderWidth, 1px);
 $borderStyle: $borderWidth solid $borderColor;
 
-$headerColor: var(--headerColor, white);
+$headerColor: var(--headerColor, #dcfaff);
 $headerBgColor: var(--headerBgColor, #218ba3);
+$headerBgColor2: var(--headerBgColor2, #38b9d6);
