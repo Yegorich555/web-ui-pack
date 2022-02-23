@@ -1,6 +1,6 @@
-# web-ui-pack
+# ![logo](/demo/src/assets/logo-small.png) web-ui-pack
 
-Web package with custom high scalable WebComponents and helpers
+Web package with custom high scalable [WebComponents](#components) and [helpers](#helpers)
 
 [![npm version](https://img.shields.io/npm/v/web-ui-pack.svg?style=flat-square)](https://www.npmjs.com/package/web-ui-pack)
 [![code coverage](https://coveralls.io/repos/github/Yegorich555/web-ui-pack/badge.svg?style=flat-square)](https://coveralls.io/github/Yegorich555/web-ui-pack)
@@ -71,7 +71,7 @@ _comming soon..._
    - In `jsx/tsx` instead of `className` use `class` attribute (React issue)
    - If you change custom attributes it will update $options, but if you change some option it doesn't update related attribute (for performance reasons). Better to avoid customAttributes at all
 4. **Inheritance**
-   - Components are developed to be easy customized and inherrited. Every rule/option/method is developed to be customized if defaultOptions are not enough. You can rewrite everything that you can imagine without digging a lot in a code. To be sure don't hesitate to take a look on *.d.ts or source code (there are enough comments to clarify even weird/difficult cases)
+   - Components are developed to be easy customized and inherrited. Every rule/option/method is developed to be customized if defaultOptions are not enough. You can rewrite everything that you can imagine without digging a lot in a code. To be sure don't hesitate to take a look on \*.d.ts or source code (there are enough comments to clarify even weird/difficult cases)
    - All Components inherrited from [WUPBaseElement](src/baseElement.ts) that extends default HTMLElement
    - All internal event-callbacks startsWith `got...` (gotReady, gotRemoved)
    - To redefine component just extend it and register with new html tag. See details in [example](#popupelement)
