@@ -5,24 +5,38 @@
 }
 
 .trg {
-  box-shadow: none;
-  color: $basicActiveColor;
-  background: $basicActiveBgColor;
-  border: $borderStyle;
-  border-radius: $borderRadius;
-  cursor: pointer;
-  font-weight: bold;
-  line-height: 1.4em;
-
   height: 120px;
   width: 300px;
-  margin: 20px auto 100px auto;
+  margin: 20px auto;
+}
 
-  &:hover {
-    background: $basicHoverColor;
+.fitBlock {
+  border: 1px solid $basicActiveBgColor;
+  border-radius: $borderRadius;
+  width: 400px;
+  height: 200px;
+  margin: 20px auto;
+}
+
+.trg2 {
+  cursor: grabbing;
+}
+
+.scrollBlock {
+  position: relative;
+  overflow-y: auto;
+  border: 1px solid $basicActiveBgColor;
+  width: 400px;
+  height: 100px;
+  margin: 20px auto;
+
+  > button {
+    display: block;
+    margin: 20px auto;
+    padding: 10px;
   }
 
-  > small {
-    opacity: 0.8;
+  > div {
+    height: 100px;
   }
 }
