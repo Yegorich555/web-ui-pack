@@ -12,7 +12,7 @@ import {
   WUPPopupPlace,
 } from "./popupPlacements";
 
-export const { ShowCases } = WUPPopup;
+export import ShowCases = WUPPopup.ShowCases;
 
 /** PopupElement
  * @example
@@ -70,7 +70,7 @@ export default class WUPPopupElement<
     toFitElement: document.body,
     minWidthByTarget: false,
     minHeightByTarget: false,
-    showCase: ShowCases.onClick,
+    showCase: WUPPopup.ShowCases.onClick,
     hoverShowTimeout: 200,
     hoverHideTimeout: 500,
   };
