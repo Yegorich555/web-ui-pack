@@ -77,15 +77,19 @@ export default class WUPPopupElement<
 
   static style = `
       :host {
+        z-index: 99999;
         display: none;
         position: fixed!important;
-        z-index: 99999;
+        top: 0; left: 0;
+        padding: 4px;
         margin: 0!important;
         box-sizing: border-box;
-        top: 0;
-        left: 0;
         border-radius: var(--border-radius, 6px);
-        padding: 4px;
+        text-overflow: ellipsis;
+
+        box-shadow: 0px 1px 4px 0px #00000033;
+        background: white;
+        overflow: hidden;
       }`;
 
   $options: WUPPopup.Options = {
