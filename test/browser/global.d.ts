@@ -6,4 +6,5 @@ export interface PageExtended extends Page {
 
 declare global {
   const pageExt: PageExtended;
+  function renderIt(): void;
 }

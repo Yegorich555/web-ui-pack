@@ -1,0 +1,42 @@
+.popupEx1 {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.trg {
+  height: 120px;
+  width: 300px;
+  margin: 20px auto;
+}
+
+.fitBlock {
+  border: 1px solid $basicActiveBgColor;
+  border-radius: $borderRadius;
+  width: 400px;
+  height: 200px;
+  margin: 20px auto;
+}
+
+.trg2 {
+  cursor: grabbing;
+}
+
+.scrollBlock {
+  position: relative;
+  overflow-y: auto;
+  border: 1px solid $basicActiveBgColor;
+  width: 400px;
+  height: 100px;
+  margin: 20px auto;
+
+  > button {
+    display: block;
+    margin: 20px auto;
+    padding: 10px;
+  }
+
+  > div {
+    height: 100px;
+  }
+}

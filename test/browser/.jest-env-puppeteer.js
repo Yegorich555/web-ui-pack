@@ -48,8 +48,14 @@ class PuppeteerEnvironment extends Env {
     await page.injectFile(require.resolve("./srv/bundle.js"));
 
     this.global.pageExt = page;
+    this.global.HTMLElement = function fakeHTMLElement() {};
+    this.global.document = { createElement: () => {}, head: { prepend: () => {} } };
+    this.global.customElements = {
+      define: function fake() {},
+    };
+
     // declare empty document for avoiding wrong-test-bug in detectFocusLeft
-    this.global.document = { addEventListener: () => {} };
+    // this.global.document = { addEventListener: () => {} };
 
     // todo listen for console.error and console.warn
     // page.on('console', msg => console.log('PAGE LOG:', msg.text()));

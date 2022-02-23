@@ -17,6 +17,7 @@ module.exports = (api) => {
     ],
     plugins: [
       "@babel/plugin-proposal-class-properties", // transforms static class properties as well as properties declared with the property initializer syntax
+      "@babel/plugin-proposal-private-methods",
       "jsx-classnames-advanced", // optional: react: this resolves className={object}
     ],
   };

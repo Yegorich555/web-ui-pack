@@ -1,0 +1,25 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "web-ui-pack": ["../src"],
+      "web-ui-pack/*": ["../src/*"]
+    },
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "outDir": "",
+    "noEmit": true, //exlcude errors in console because it should be wrapped by webpack
+    "esModuleInterop": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  },
+  "files": ["src/main.tsx"],
+  "include": ["./**/*", "src/main.tsx"],
+  "exclude": ["node_modules", "build", ".vscode"]
+}

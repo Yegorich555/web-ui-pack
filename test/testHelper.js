@@ -1,11 +1,8 @@
+/* eslint-disable no-prototype-builtins */
 /* eslint-disable jest/no-export */
 // import React from "react";
 import { render, unmountComponentAtNode } from "react-dom";
 import reactTestUtils from "react-dom/test-utils";
-
-export function lastCall(jestFn) {
-  return jestFn.mock.calls[jestFn.mock.calls.length - 1];
-}
 
 export function mockSetState(el) {
   return jest.fn((state, callback) =>
@@ -26,6 +23,16 @@ export function unMockConsoleWarn() {
   console.warn = origConsoleWarn;
 }
 
+const origConsoleError = console.error;
+export function mockConsoleError() {
+  console.error = jest.fn();
+  return console.error;
+}
+
+export function unMockConsoleError() {
+  console.error = origConsoleError;
+}
+
 export function wrapConsoleWarn(fn) {
   const mockConsole = mockConsoleWarn();
   try {
@@ -38,56 +45,96 @@ export function wrapConsoleWarn(fn) {
   return mockConsole;
 }
 
-export function testComponentFuncBind(Type) {
+const skipNames = new Set(["apply", "bind", "call", "toString", "click", "focus", "blur"]);
+function setHTMLProps(t) {
+  const proto = Object.getPrototypeOf(t);
+  if (proto && !Object.prototype.hasOwnProperty.call(proto, "__proto__")) {
+    Object.getOwnPropertyNames(proto).forEach((a) => {
+      if (typeof Object.getOwnPropertyDescriptor(proto, a).value === "function") {
+        skipNames.add(a);
+      }
+    });
+    setHTMLProps(proto);
+  }
+}
+setHTMLProps(HTMLElement.prototype);
+
+function findOwnFunctions(obj, proto) {
+  const result = Object.getOwnPropertyNames(proto)
+    .filter((a) => !skipNames.has(a))
+    .filter((a) => typeof Object.getOwnPropertyDescriptor(proto, a).value === "function")
+    .map((k) => ({
+      name: k,
+      isArrow: false,
+      isBound: obj[k].name.startsWith("bound ") && !obj[k].hasOwnProperty("prototype"),
+    }));
+  return result;
+}
+
+export function findAllFunctions(obj) {
+  // const proto = Object.getPrototypeOf(obj);
+  // const result = findOwnFunctions(obj, proto);
+  /** @type ReturnType<typeof findOwnFunctions(obj, proto)> */
+  const result = [];
+  const search = (v) => {
+    const proto = Object.getPrototypeOf(v);
+    if (!!proto && !Object.prototype.hasOwnProperty.call(proto, "__proto__")) {
+      result.push(...findOwnFunctions(obj, proto));
+      search(proto);
+    }
+  };
+
+  search(obj);
+
+  // find arrow functions
+  const arrowRegex = /^[^{]+?=>/;
+  Object.getOwnPropertyNames(obj)
+    .filter((a) => !skipNames.has(a))
+    .filter((a) => typeof Object.getOwnPropertyDescriptor(obj, a).value === "function")
+    .filter((a) => arrowRegex.test(obj[a].toString()))
+    .forEach((k) =>
+      result.push({
+        name: k,
+        isArrow: true,
+        isBound: true, // it's not actually true but for testing it's ok
+      })
+    );
+
+  return {
+    all: result,
+    names: result.map((r) => r.name),
+    arrow: result.filter((r) => r.isArrow).map((r) => r.name),
+    bound: result.filter((r) => r.isBound && !r.isArrow).map((r) => r.name),
+    notBound: result.filter((r) => !r.isBound && !r.isArrow).map((r) => r.name),
+  };
+}
+
+export function testComponentFuncBind(obj) {
   describe("componentFuncBind", () => {
-    const skipNames = [
-      "constructor",
-      "componentDidMount",
-      "componentDidCatch",
-      "componentWillUnmount",
-      "shouldComponentUpdate",
-      "componentDidUpdate",
-      "render",
-      "toJSON",
-      "setDomEl",
-    ];
-    const arrowRegex = /^[^{]+?=>/;
-    const protoNames = Object.getOwnPropertyNames(Type.prototype)
-      .filter((a) => !skipNames.includes(a))
-      .filter((a) => typeof Object.getOwnPropertyDescriptor(Type.prototype, a).value === "function");
-
-    const obj = new Type({});
-    const objNames = Object.getOwnPropertyNames(obj)
-      .filter((a) => !skipNames.includes(a))
-      .filter((a) => typeof Object.getOwnPropertyDescriptor(obj, a).value === "function");
-
+    const fns = findAllFunctions(obj);
     it("no arrow functions", () => {
       // doesn't for work for deep-inheritted: const arrowFunc = objNames.filter(a => !protoNames.includes(a));
-      const arrowFunc = objNames.filter((a) => arrowRegex.test(obj[a].toString()));
-      expect(arrowFunc).toHaveLength(0);
+      expect(fns.arrow).toHaveLength(0);
     });
 
     it("each function are bound", () => {
-      const notBoundFunc = protoNames.filter((a) => !objNames.includes(a));
-      expect(notBoundFunc).toHaveLength(0);
+      expect(fns.notBound).toHaveLength(0);
     });
-    obj.componentWillUnmount && obj.componentWillUnmount();
   });
 }
 
+const skipNamesStatic = new Set([
+  "length", //
+  "prototype",
+  "name",
+]);
+
 export function testStaticInheritence(Type) {
   describe("componentStatic", () => {
-    const skipNames = [
-      "length", //
-      "prototype",
-      "name",
-      "common",
-      "excludedRenderProps",
-    ];
     const stat = Object.getOwnPropertyNames(Type) //
-      .filter((a) => !skipNames.includes(a));
+      .filter((a) => !skipNamesStatic.includes(a));
     const statProto = Object.getOwnPropertyNames(Object.getPrototypeOf(Type)) //
-      .filter((a) => !skipNames.includes(a));
+      .filter((a) => !skipNamesStatic.includes(a));
 
     it("overrides static", () => {
       const arrowNotOverrided = statProto.filter((a) => !stat.includes(a));
@@ -206,4 +253,18 @@ export function initDom() {
   container.element = document.createElement("div");
   document.body.appendChild(container.element);
   return container;
+}
+
+/** Handle process.on("unhandledRejection"); @type jest.MockedFunction;
+ * WARN: it can't provide mock.calls because processFires after test-execution
+ */
+export function handleRejection() {
+  const fn = jest.fn();
+  const rst = fn.mockClear;
+  fn.mockClear = () => {
+    rst();
+    global.setUnhandledReject(null);
+  };
+  global.setUnhandledReject(fn);
+  return fn;
 }

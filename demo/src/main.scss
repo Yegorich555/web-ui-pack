@@ -1,0 +1,94 @@
+$h1Height: 50px;
+$navWidth: 120px;
+
+h1 {
+  height: $h1Height;
+  line-height: $h1Height;
+  padding: 0 0 0 $navWidth;
+  padding-left: $navWidth;
+  margin: 0;
+  border-bottom: 1px solid $borderColor;
+  /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
+  background: linear-gradient(270deg, $headerBgColor, #38b9d6);
+  color: $headerColor;
+  min-width: 450px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+
+  > img {
+    max-width: 40px;
+    max-height: 40px;
+    margin-right: 10px;
+  }
+
+  > a {
+    position: absolute;
+    transform: translateY(-50%);
+    top: 50%;
+    left: calc(100% - 40px);
+
+    display: flex;
+    text-decoration: none;
+
+    &:hover {
+      /* stylelint-disable-next-line scss/no-global-function-names */
+      filter: invert(0.95);
+    }
+  }
+}
+
+.page {
+  display: flex;
+  flex-direction: row;
+  height: calc(100vh - #{$h1Height} - 1px);
+  min-width: 450px;
+  overflow: auto;
+
+  > .leftBar {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    width: $navWidth;
+    background-color: $basicBgColor;
+    border: $borderStyle;
+    border-top: none;
+
+    > div:last-child {
+      margin-top: auto;
+    }
+
+    > ul {
+      padding: 0;
+      margin: 0;
+
+      a {
+        display: block;
+        padding: 10px;
+        text-decoration: none;
+
+        &:hover {
+          color: $hoverColor;
+          background: $hoverBgColor;
+        }
+      }
+
+      .activeLink {
+        color: $activeLinkColor;
+        background-color: $activeLinkBgColor;
+
+        &:hover {
+          background-color: $activeLinkHoverBgColor;
+        }
+      }
+    }
+  }
+
+  > .leftBar + main {
+    padding: 10px;
+    width: 100%;
+  }
+}

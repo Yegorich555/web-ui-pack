@@ -10,6 +10,7 @@
     "**/*": { "when": "**/*.+(less|css|scss|sass)" } //exclude for css files because VSCode works fine with ones
   },
   "stylelint.enable": true,
+  "stylelint.validate": ["css", "less", "postcss", "scss"],
   "css.validate": false,
   "less.validate": false,
   "scss.validate": false,
@@ -32,19 +33,23 @@
   "editor.formatOnPaste": true,
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "editor.wordSeparators": "`~!@%^&*()-=+[{]}\\|;:'\",.<>/?" // ability to select private props '#prop'
   },
   "[javascriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "editor.wordSeparators": "`~!@%^&*()-=+[{]}\\|;:'\",.<>/?" // ability to select private props '#prop'
   },
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "editor.wordSeparators": "`~!@%^&*()-=+[{]}\\|;:'\",.<>/?" // ability to select private props '#prop'
   },
   "[typescriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "editor.wordSeparators": "`~!@%^&*()-=+[{]}\\|;:'\",.<>/?" // ability to select private props '#prop'
   },
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",

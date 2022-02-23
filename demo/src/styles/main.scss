@@ -1,0 +1,79 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: $bodyBgColor;
+}
+
+h1 {
+  margin: auto;
+  text-align: center;
+}
+
+h2 {
+  margin: auto;
+  text-align: center;
+  margin-bottom: 10px;
+
+  > a {
+    display: inline-block;
+    position: relative;
+    padding: 4px 10px;
+    padding-right: 34px;
+    margin-right: -24px;
+    border-radius: $borderRadius;
+    text-decoration: none;
+    color: $activeLinkColor;
+
+    &:hover {
+      opacity: 0.8;
+
+      &::after {
+        content: " ";
+        display: block;
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        right: 10px;
+        top: 46%;
+        transform: translateY(-50%);
+        background: url("../assets/gitIcon.svg") no-repeat;
+        background-size: contain;
+      }
+    }
+  }
+}
+
+button {
+  box-shadow: none;
+  color: $basicActiveColor;
+  background: $basicActiveBgColor;
+  // border: $borderStyle;
+  border: none;
+  border-radius: $borderRadius;
+  cursor: pointer;
+  font-weight: bold;
+  line-height: 1.4em;
+  box-sizing: border-box;
+
+  &:hover {
+    background: $basicHoverColor;
+  }
+
+  > small {
+    opacity: 0.8;
+  }
+}
+
+h3 {
+  margin-bottom: 0.2em;
+}
+
+p {
+  margin: 0;
+  font-size: smaller;
+}
+
+*:focus {
+  outline: 2px solid $focusFrameColor;
+  outline-offset: -2px;
+}

@@ -1,4 +1,4 @@
-import nestedProperty from "web-ui-pack/helpers/nestedProperty";
+import { nestedProperty } from "web-ui-pack";
 
 describe("helper.nestedProperty", () => {
   test("set plain", () => {

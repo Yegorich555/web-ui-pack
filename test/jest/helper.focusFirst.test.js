@@ -1,7 +1,4 @@
-/**
- * @jest-environment jsdom
- */
-import focusFirst from "web-ui-pack/helpers/focusFirst";
+import { focusFirst } from "web-ui-pack";
 
 afterEach(() => {
   document.body.innerHTML = "";

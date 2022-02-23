@@ -14,14 +14,19 @@ module.exports = {
   coverageDirectory: "coverage", // {root}/coverage
   collectCoverage: true,
   collectCoverageFrom: ["dist/**/*.{js,jsx}", "!**/icomoon/**"],
+  coverageProvider: "v8", // https://jestjs.io/docs/configuration#coverageprovider-string
+  coverageReporters: ["text", "html"],
   moduleNameMapper,
-  testEnvironment: "jsdom",
+  testEnvironment: "jsdom", // https://jestjs.io/docs/configuration#testenvironment-string
   projects: [
     {
       rootDir,
       displayName: "general",
       testMatch: [`${__dirname}/jest/**/*.test.[jt]s?(x)`],
       moduleNameMapper,
+      modulePathIgnorePatterns: [`${rootDir}/package.json`],
+      testEnvironment: "jsdom",
+      setupFiles: [`${__dirname}/jest.setup.js`],
     },
     {
       rootDir,
@@ -29,7 +34,7 @@ module.exports = {
       testMatch: [`${__dirname}/browser/**/*.test.[jt]s?(x)`],
       moduleNameMapper,
       preset: "jest-puppeteer",
-      testEnvironment: `${__dirname}/browser/jest-env-puppeteer.js`,
+      testEnvironment: `${__dirname}/browser/.jest-env-puppeteer.js`,
     },
   ],
 };

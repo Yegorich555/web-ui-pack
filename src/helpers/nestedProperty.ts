@@ -7,16 +7,15 @@ const nestedProperty = {
    * @param value The value to set.
    */
   set<T extends Record<string, any>>(obj: T, path: string, value: any): void {
-    let cur = obj;
     const propKeys = path.split(".");
     let key = propKeys[0] as keyof T;
     for (let i = 0; i < propKeys.length - 1; key = propKeys[++i] as keyof T) {
-      if (!cur[key]) {
-        cur[key] = {} as T[keyof T];
+      if (!obj[key]) {
+        obj[key] = {} as T[keyof T];
       }
-      cur = cur[key];
+      obj = obj[key];
     }
-    cur[key] = value;
+    obj[key] = value;
   },
   /**
    * Gets the property value at path of object.
