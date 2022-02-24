@@ -246,10 +246,12 @@ Object.keys(PopupPlacements).forEach((kp) => {
   Object.keys(def).forEach((key) => {
     const prevFn = def[key];
     // setting context for each function
-    // eslint-disable-next-line func-names
-    p[key] = <WUPPopupPlace.AlignFunc>function (t, me, fit) {
-      return prevFn.call(def(t, me, fit), t, me, fit);
+    const fnName = kp + key; // setup name for function
+    const o = {
+      [fnName]: <WUPPopupPlace.AlignFunc>((t, me, fit) => prevFn.call(def(t, me, fit), t, me, fit)),
     };
+
+    p[key] = <WUPPopupPlace.AlignFunc>o[fnName];
     const v = p[key];
     // adding .adjust to each WUPPopupPlace.AlignFunc
     v.$adjust = function adjust(t, me, fit) {
