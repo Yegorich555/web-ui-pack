@@ -107,8 +107,8 @@ el.$options.target = document.querySelector("button");
 */
 el.$options.placement = [
   WUPPopupElement.$placements.$top.$middle; // place at the top of target and align by vertical line
-  WUPPopupElement.$placements.$bottom.$middle, // place at the bottom of target and align by vertical line
-  WUPPopupElement.$placements.$bottom.$middle.$adjust, // adjust means 'Reduce popup to fit layout`
+  WUPPopupElement.$placements.$bottom.$middle.$adjust, // adjust means 'ignore align to fit layout`
+  WUPPopupElement.$placements.$bottom.$middle.$adjust.$resizeHeight, // resize means 'allow to resize to fit layout'
 ]
 document.body.append(el);
 ```

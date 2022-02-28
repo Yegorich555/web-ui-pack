@@ -87,6 +87,11 @@ h1 {
     }
   }
 
+  main {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
   > .leftBar + main {
     padding: 10px;
     width: 100%;

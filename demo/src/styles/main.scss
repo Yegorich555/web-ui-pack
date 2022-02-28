@@ -2,6 +2,7 @@ body {
   margin: 0;
   padding: 0;
   background-color: $bodyBgColor;
+  font-size: 14px;
 }
 
 h1 {
@@ -51,9 +52,10 @@ button {
   border: none;
   border-radius: $borderRadius;
   cursor: pointer;
+  font-size: inherit;
   font-weight: bold;
-  line-height: 1.4em;
   box-sizing: border-box;
+  padding: 4px;
 
   &:hover {
     background: $basicHoverColor;
@@ -61,6 +63,7 @@ button {
 
   > small {
     opacity: 0.8;
+    font-size: 11px;
   }
 }
 

@@ -1,16 +1,9 @@
-// eslint-disable-next-line max-classes-per-file
 import focusFirst from "./helpers/focusFirst";
 import WUPBaseElement, { JSXCustomProps, WUP } from "./baseElement";
 import onFocusGot from "./helpers/onFocusGot";
 import onFocusLost from "./helpers/onFocusLost";
 import { WUPPopup } from "./popupElement.types";
-import {
-  getBoundingInternalRect,
-  popupAdjust,
-  PopupPlacements,
-  stringPixelsToNumber,
-  WUPPopupPlace,
-} from "./popupPlacements";
+import { getBoundingInternalRect, PopupPlacements, px2Number, WUPPopupPlace } from "./popupPlacements";
 
 export import ShowCases = WUPPopup.ShowCases;
 
@@ -19,10 +12,12 @@ export import ShowCases = WUPPopup.ShowCases;
  * const el = document.createElement('wup-popup');
  * el.$options.showCase = ShowCases.onClick | ShowCases.onFocus;
  * el.$options.target = document.querySelector('button');
+ * // if placement impossible according to rules rest of possible rules will be applied
  * el.$options.placement = [
  *  WUPPopupElement.$placements.$top.$middle,
  *  WUPPopupElement.$placements.$bottom.$middle,
- *  WUPPopupElement.$placements.$bottom.$middle.$adjust, // adjust means 'Reduce popup to fit layout`
+ *  WUPPopupElement.$placements.$bottom.$middle.$adjust, // adjust means 'ignore align to fit layout`
+ *  WUPPopupElement.$placements.$bottom.$middle.$adjust.$resizeHeight, // resize means 'allow to resize to fit layout'
  * ];
  * document.body.append(el);
  * // or
@@ -30,9 +25,9 @@ export import ShowCases = WUPPopup.ShowCases;
  * // You can skip pointing attribute 'target' if popup appended after target
  * <wup-popup target="#btn1" placement="top-start">Some content here</wup-popup>
  * @tutorial Troubleshooting:
- * * By default all rules set with $adjust. If you need place opposite instead of resizing an element - use without adjust (option placement)
- * * You can set minWidth, minHeight to prevent squizing of popup or don't use placement .$adjust
- * * Don't override display style (this css-rule is busy)
+ * * You can set minWidth, minHeight to prevent squizing of popup or don't use rule '.$adjust'
+ * * Don't override styles: transform, display
+ * * Don't use inline styles" maxWidth, maxHeight
  */
 export default class WUPPopupElement<
   Events extends WUPPopup.EventMap = WUPPopup.EventMap
@@ -62,15 +57,14 @@ export default class WUPPopupElement<
   /** Default options. Change it to configure default behavior */
   static $defaults: Omit<WUPPopup.Options, "target"> = {
     placement: [
-      WUPPopupElement.$placements.$top.$middle,
-      WUPPopupElement.$placements.$top.$middle.$adjust,
+      WUPPopupElement.$placements.$top.$middle.$adjust, //
       WUPPopupElement.$placements.$bottom.$middle.$adjust,
     ],
     offset: [0, 0],
     toFitElement: document.body,
     minWidthByTarget: false,
     minHeightByTarget: false,
-    showCase: WUPPopup.ShowCases.onClick,
+    showCase: ShowCases.onClick,
     hoverShowTimeout: 200,
     hoverHideTimeout: 500,
   };
@@ -327,7 +321,13 @@ export default class WUPPopupElement<
   }
 
   #frameId?: number;
-  #userSizes = { maxWidth: Number.MAX_SAFE_INTEGER, maxHeight: Number.MAX_SAFE_INTEGER };
+  #userSizes: {
+    maxW: number;
+    maxH: number;
+    minH: number;
+    minW: number;
+  } = undefined as any;
+
   #placements: Array<WUPPopupPlace.PlaceFunc> = [];
   #prevRect?: DOMRect;
   #showCase?: WUPPopup.ShowCases;
@@ -373,24 +373,39 @@ export default class WUPPopupElement<
     this.style.maxHeight = "";
     const style = getComputedStyle(this);
     this.#userSizes = {
-      maxWidth: stringPixelsToNumber(style.maxWidth) || Number.MAX_SAFE_INTEGER,
-      maxHeight: stringPixelsToNumber(style.maxHeight) || Number.MAX_SAFE_INTEGER,
+      maxW: px2Number(style.maxWidth) || Number.MAX_SAFE_INTEGER,
+      minW: Math.max(5, px2Number(style.paddingRight) + px2Number(style.paddingLeft), px2Number(style.minWidth)),
+
+      maxH: px2Number(style.maxHeight) || Number.MAX_SAFE_INTEGER,
+      minH: Math.max(5, px2Number(style.paddingTop) + px2Number(style.paddingBottom), px2Number(style.minHeight)),
     };
+
+    if (!this._opts.placement.length) {
+      this._opts.placement.push(PopupPlacements.$top.$middle.$adjust);
+    }
+    const adjustRules = this._opts.placement
+      .filter((v) => (v as WUPPopupPlace.AlignFunc).$adjust)
+      .map((v) => (v as WUPPopupPlace.AlignFunc).$adjust);
+
+    const otherRules = Object.keys(PopupPlacements)
+      .filter(
+        (k) =>
+          !this._opts.placement.includes(PopupPlacements[k].$middle) &&
+          !adjustRules.includes(PopupPlacements[k].$middle.$adjust)
+      )
+      .map((k) => PopupPlacements[k].$middle.$adjust);
 
     // init array of possible solutions to position + align popup
     this.#placements = [
       ...this._opts.placement,
-      // try to adjust with ignoring alignment options
-      (t, me, fit) => popupAdjust.call(this._opts.placement[0](t, me, fit), me, fit, true),
-      // try to adjust with other placements and ignoring alignment options
-      ...Object.keys(PopupPlacements)
-        .filter((k) => PopupPlacements[k].$middle !== this._opts.placement[0])
-        .map(
-          (k) =>
-            <WUPPopupPlace.PlaceFunc>(
-              ((t, me, fit) => popupAdjust.call(PopupPlacements[k].$middle(t, me, fit), me, fit, true))
-            )
-        ),
+      // try to use .$adjust from user defined rules
+      ...adjustRules,
+      ...adjustRules.map((v) => v.$resizeWidth),
+      ...adjustRules.map((v) => v.$resizeHeight),
+      // try to use other possible rules
+      ...otherRules,
+      ...otherRules.map((v) => v.$resizeWidth),
+      ...otherRules.map((v) => v.$resizeHeight),
     ];
 
     const goUpdate = () => {
@@ -470,20 +485,23 @@ export default class WUPPopupElement<
     if (this._opts.minWidthByTarget) {
       this.style.minWidth = `${t.width}px`;
     } else if (this.style.minWidth) {
-      this.style.minWidth = ""; // resetting is required to get default size
+      this.style.minWidth = "";
     }
 
     if (this._opts.minHeightByTarget) {
       this.style.minHeight = `${t.height}px`;
     } else if (this.style.minHeight) {
-      this.style.minHeight = ""; // resetting is required to get default size
+      this.style.minHeight = "";
     }
 
     const fitEl = this._opts.toFitElement || document.body;
     const fit = getBoundingInternalRect(fitEl) as WUPPopupPlace.Rect;
     fit.el = fitEl;
 
+    this.style.maxHeight = ""; // resetting is required to get default size
+    this.style.maxWidth = ""; // resetting is required to get default size
     const me: WUPPopupPlace.MeRect = {
+      // WARN: offsetSize is rounded so 105.2 >>> 105
       w: this.offsetWidth, // clientWidth doesn't include border-size
       h: this.offsetHeight,
       el: this,
@@ -493,29 +511,34 @@ export default class WUPPopupElement<
         bottom: this._opts.offset[2] ?? this._opts.offset[0],
         left: this._opts.offset[3] ?? this._opts.offset[1],
       },
+      minH: this.#userSizes.minH,
+      minW: this.#userSizes.minW,
     };
 
     const hasOveflow = (p: WUPPopupPlace.Result): boolean =>
       p.left < fit.left ||
       p.top < fit.top ||
-      p.left + Math.min(me.w, p.maxW || Number.MAX_SAFE_INTEGER) > fit.right ||
-      p.top + Math.min(me.h, p.maxH || Number.MAX_SAFE_INTEGER) > fit.bottom ||
-      p.freeH === 0 ||
-      p.freeW === 0;
+      p.freeW < this.#userSizes.minW ||
+      p.freeH < this.#userSizes.minH ||
+      p.left + Math.min(me.w, p.maxW || Number.MAX_SAFE_INTEGER, this.#userSizes.maxW) > fit.right ||
+      p.top + Math.min(me.h, p.maxH || Number.MAX_SAFE_INTEGER, this.#userSizes.maxH) > fit.bottom;
 
     let pos: WUPPopupPlace.Result = <WUPPopupPlace.Result>{};
     const isOk = this.#placements.some((pfn) => {
       pos = pfn(t, me, fit);
       return !hasOveflow(pos);
     });
-    !isOk && console.error(`${this.tagName}. Impossible to place popup without overflow`);
+    !isOk && console.error(`${this.tagName}. Impossible to place without overflow`);
 
     // transform has performance benefits in comparison with positioning
     this.style.transform = `translate(${pos.left}px, ${pos.top}px)`;
-    // we can't remove maxWidth, maxHeight because maxWidth can affect on maxHeight and calculations will be wrong
-    // maxW/H can be null if adjust is not applied
-    this.style.maxWidth = `${Math.min(pos.maxW || pos.freeW, this.#userSizes.maxWidth)}px`;
-    this.style.maxHeight = `${Math.min(pos.maxH || pos.freeH, this.#userSizes.maxHeight)}px`;
+    // maxW/H can be null if resize is not required
+    if (pos.maxW != null && this.#userSizes.maxW > pos.maxW) {
+      this.style.maxWidth = `${pos.maxW}px`;
+    }
+    if (pos.maxH != null && this.#userSizes.maxH > pos.maxH) {
+      this.style.maxHeight = `${pos.maxH}px`;
+    }
 
     /* re-calc is required to avoid case when popup unexpectedly affects on layout:
       layout bug: Yscroll appears/disappears when display:flex; heigth:100vh > position:absolute; right:-10px */
@@ -575,3 +598,4 @@ declare global {
 
 // todo WUPPopupElement.attach(target, options) - attach to target but render only by show
 // todo develop arrow icon
+// describe issue in readme.md: in react nearest target can be changed but popup can't detect it

@@ -32,17 +32,31 @@ export namespace WUPPopupPlace {
     h: number;
     el: HTMLElement;
     offset: { top: number; right: number; bottom: number; left: number };
+    minW: number;
+    minH: number;
   }
 
   /** Ordinary placement rule */
   export interface PlaceFunc {
     (target: Rect, me: MeRect, fit: Rect): Result;
   }
-  /** Ordinary placement rule with nested [adjust] rule */
-  export interface AlignFunc extends PlaceFunc {
-    /** Extra rule to fit layout via set maxWdith, maxHeight and shifting position */
-    $adjust: PlaceFunc;
+  /** Ordinary placement rule with nested $resize rule */
+  export interface AdjustFunc extends PlaceFunc {
+    /** Allow changing maxHeight to fit layout; setup style minHeight to avoid extra-squizing */
+    $resizeHeight: PlaceFunc;
+    /** Allow changing maxWidth; setup style minWidth to avoid extra-squizing */
+    $resizeWidth: PlaceFunc;
   }
+  /** Ordinary placement rule with nested $adjust rule */
+  export interface AlignFunc extends PlaceFunc {
+    /** Allow to break align-rules (start,middle,end) and adjust position to fit layout */
+    $adjust: AdjustFunc;
+    /** Allow changing maxHeight to fit layout; setup style minHeight to avoid extra-squizing */
+    $resizeHeight: PlaceFunc;
+    /** Allow changing maxWidth to fit layout; setup style minWidth to avoid extra-squizing */
+    $resizeWidth: PlaceFunc;
+  }
+
   /** Set of rules related to specific edge of targetElement; use bottom.start to place bottomStart */
   export interface EdgeFunc {
     (target: Rect, me: MeRect, fit: Rect): XResult | YResult;
@@ -55,16 +69,16 @@ export namespace WUPPopupPlace {
   }
 }
 
-export function stringPixelsToNumber(styleValue: string): number {
+export function px2Number(styleValue: string): number {
   return +(/([0-9]+)/.exec(styleValue)?.[0] || 0);
 }
 
-/* Returns bounding rectangular without borders and scroll */
+/* Returns bounding rectangular without borders and scroll (simulate box-sizing: border-box) */
 export function getBoundingInternalRect(el: HTMLElement): Omit<DOMRect, "toJSON"> {
   const { borderTopWidth, borderLeftWidth } = getComputedStyle(el);
   let { left, top } = el.getBoundingClientRect();
-  top += stringPixelsToNumber(borderTopWidth);
-  left += stringPixelsToNumber(borderLeftWidth);
+  top += px2Number(borderTopWidth);
+  left += px2Number(borderLeftWidth);
   const r: Omit<DOMRect, "toJSON"> = {
     top,
     left,
@@ -78,83 +92,110 @@ export function getBoundingInternalRect(el: HTMLElement): Omit<DOMRect, "toJSON"
   return r;
 }
 
-/** memoized function to get minSize from computedStyle */
-function computeMinSize(me: WUPPopupPlace.MeRect & { minSize?: { minWidth: number; minHeight: number } }) {
-  if (!me.minSize) {
-    const { minWidth: minW, minHeight: minH } = getComputedStyle(me.el);
-    me.minSize = { minWidth: stringPixelsToNumber(minW), minHeight: stringPixelsToNumber(minH) };
-  }
-  return me.minSize;
-}
+// /* Adjust position/size to fit layout */
+// function popupResizeInternal(
+//   this: WUPPopupPlace.Result,
+//   me: WUPPopupPlace.MeRect,
+//   fit: WUPPopupPlace.Rect,
+//   ignoreAlign = false
+// ): WUPPopupPlace.Result {
+//   const { freeW, freeH } = this;
+//   const { minWidth, minHeight } = computeMinSize(me);
 
-/* Adjust position/size to fit layout */
-function popupAdjustInternal(
-  this: WUPPopupPlace.Result,
-  me: WUPPopupPlace.MeRect,
-  fit: WUPPopupPlace.Rect,
-  ignoreAlign = false
-): WUPPopupPlace.Result {
-  const { freeW, freeH } = this;
-  const { minWidth, minHeight } = computeMinSize(me);
+//   // reject calc since minSize > availableSize; in this case we must select opossite or something that fit better
+//   if (minWidth > freeW || minHeight > freeH) {
+//     if (ignoreAlign) {
+//       const n = { ...this, freeHeight: this.maxFreeH, freeWidth: this.maxFreeW };
+//       // issue: it doesn't work if both minH&minW > freeH&freeW
+//       return popupResizeInternal.call(n, me, fit, false);
+//     }
+//     return this;
+//   }
 
+//   const maxWidth = me.w > freeW ? Math.max(minWidth, freeW) : null;
+//   const maxHeight = me.h > freeH ? Math.max(minHeight, freeH) : null;
+
+//   let { left, top } = this;
+//   // to fit by X
+//   if (left < fit.left) {
+//     left = fit.left;
+//   } else {
+//     // expected that width can't be > maxWidth
+//     left = Math.min(left, fit.right - (maxWidth || me.w));
+//   }
+
+//   // to fit by Y
+//   if (top < fit.top) {
+//     top = fit.top;
+//   } else {
+//     top = Math.min(top, fit.bottom - (maxHeight || me.h));
+//   }
+
+//   return {
+//     top,
+//     left,
+//     maxW: maxWidth,
+//     maxH: maxHeight,
+//     freeH,
+//     freeW,
+//     maxFreeW: this.maxFreeW,
+//     maxFreeH: this.maxFreeH,
+//   };
+// }
+
+const yAdjust = <WUPPopupPlace.AdjustFunc>function yAdjust(this: WUPPopupPlace.Result, _t, me, fit) {
+  this.top = this.top < fit.top ? fit.top : Math.min(this.top, fit.bottom - me.h);
+  return this;
+};
+
+const xAdjust = <WUPPopupPlace.AdjustFunc>function xAdjust(this: WUPPopupPlace.Result, _t, me, fit) {
+  this.left = this.left < fit.left ? fit.left : Math.min(this.left, fit.right - me.w);
+  return this;
+};
+
+const resizeHeight = <WUPPopupPlace.PlaceFunc>function resizeHeight(this: WUPPopupPlace.Result, t, me, fit) {
   // reject calc since minSize > availableSize; in this case we must select opossite or something that fit better
-  if (minWidth > freeW || minHeight > freeH) {
-    if (ignoreAlign) {
-      const n = { ...this, freeHeight: this.maxFreeH, freeWidth: this.maxFreeW };
-      // issue: it doesn't work if both minH&minW > freeH&freeW
-      return popupAdjustInternal.call(n, me, fit, false);
-    }
+  if (me.minH > this.freeH) {
+    // todo what about maxFreeH ???
     return this;
   }
 
-  const maxWidth = me.w > freeW ? Math.max(minWidth, freeW) : null;
-  const maxHeight = me.h > freeH ? Math.max(minHeight, freeH) : null;
-
-  let { left, top } = this;
-  // to fit by X
-  if (left < fit.left) {
-    left = fit.left;
-  } else {
-    // expected that width can't be > maxWidth
-    left = Math.min(left, fit.right - (maxWidth || me.w));
-  }
-
-  // to fit by Y
-  if (top < fit.top) {
-    top = fit.top;
-  } else {
-    top = Math.min(top, fit.bottom - (maxHeight || me.h));
-  }
-
-  return {
-    top,
-    left,
-    maxW: maxWidth,
-    maxH: maxHeight,
-    freeH,
-    freeW,
-    maxFreeW: this.maxFreeW,
-    maxFreeH: this.maxFreeH,
-  };
-}
-export function popupAdjust(
-  this: WUPPopupPlace.Result,
-  me: WUPPopupPlace.MeRect,
-  fit: WUPPopupPlace.Rect,
-  ignoreAlign = false
-): WUPPopupPlace.Result {
-  return popupAdjustInternal.call(this, me, fit, ignoreAlign);
-}
-
-const $top = <WUPPopupPlace.EdgeFunc>function top(t, me, fit): ReturnType<WUPPopupPlace.EdgeFunc> {
-  const freeH = t.top - me.offset.top - fit.top;
-  return {
-    top: t.top - me.offset.top - me.h,
-    freeH,
-    maxFreeH: freeH,
-    maxFreeW: fit.width,
-  };
+  const { h } = me;
+  this.maxH = me.h > this.freeH ? this.freeH : null; // set null if maxSize doesn't affect on
+  // define newHeight that will be
+  me.h = Math.min(me.h, this.freeH); // override value to use with adjust
+  yAdjust.call(this, t, me, fit);
+  me.h = h; // rollback previous value
+  return this;
 };
+
+const resizeWidth = <WUPPopupPlace.PlaceFunc>function resizeWidth(this: WUPPopupPlace.Result, t, me, fit) {
+  // reject calc since minSize > availableSize; in this case we must select opossite or something that fit better
+  if (me.minW > this.freeW) {
+    // todo what about maxFreeW ???
+    return this;
+  }
+
+  const { w } = me;
+  this.maxW = me.w > this.freeW ? this.freeW : null; // set null if maxSize doesn't affect on
+  // define newWidth that will be
+  me.w = Math.min(me.w, this.freeW); // override value to use with adjust
+  xAdjust.call(this, t, me, fit);
+  me.w = w; // rollback previous value
+  return this;
+};
+
+const $top = <WUPPopupPlace.EdgeFunc>(
+  function top(this: WUPPopupPlace.Result, t, me, fit): ReturnType<WUPPopupPlace.EdgeFunc> {
+    const freeH = t.top - me.offset.top - fit.top;
+    return {
+      top: t.top - me.offset.top - me.h,
+      freeH,
+      maxFreeH: freeH,
+      maxFreeW: fit.width,
+    };
+  }
+);
 $top.$start = <WUPPopupPlace.AlignFunc>function yStart(this: WUPPopupPlace.Result, t, _me, fit) {
   this.left = t.left;
   this.freeW = fit.right - t.left;
@@ -171,6 +212,9 @@ $top.$end = <WUPPopupPlace.AlignFunc>function yEnd(this: WUPPopupPlace.Result, t
   this.freeW = t.right - fit.left;
   return this;
 };
+$top.$start.$adjust = xAdjust;
+$top.$middle.$adjust = xAdjust;
+$top.$end.$adjust = xAdjust;
 
 const $bottom = <WUPPopupPlace.EdgeFunc>function bottom(t, me, fit): ReturnType<WUPPopupPlace.EdgeFunc> {
   const freeH = fit.bottom - me.offset.bottom - t.bottom;
@@ -209,6 +253,9 @@ $left.$end = <WUPPopupPlace.AlignFunc>function xEnd(this: WUPPopupPlace.Result, 
   this.freeH = t.bottom - fit.top;
   return this;
 };
+$left.$start.$adjust = yAdjust;
+$left.$middle.$adjust = yAdjust;
+$left.$end.$adjust = yAdjust;
 
 const $right = <WUPPopupPlace.EdgeFunc>function right(t, me, fit): ReturnType<WUPPopupPlace.EdgeFunc> {
   const freeW = fit.right - t.right - me.offset.right;
@@ -241,11 +288,11 @@ Object.keys(PopupPlacements).forEach((kp) => {
   PopupPlacements[kp] = (<WUPPopupPlace.AlignFunc>function (t, me, fit) {
     return def.$middle.call(def(t, me, fit), t, me, fit);
   }) as unknown as WUPPopupPlace.EdgeFunc;
-  const p = PopupPlacements[kp];
 
+  // setup context as call-result of parent-fn for each function
+  const p = PopupPlacements[kp];
   Object.keys(def).forEach((key) => {
     const prevFn = def[key];
-    // setting context for each function
     const fnName = kp + key; // setup name for function
     const o = {
       [fnName]: <WUPPopupPlace.AlignFunc>((t, me, fit) => prevFn.call(def(t, me, fit), t, me, fit)),
@@ -254,8 +301,20 @@ Object.keys(PopupPlacements).forEach((kp) => {
     p[key] = <WUPPopupPlace.AlignFunc>o[fnName];
     const v = p[key];
     // adding .adjust to each WUPPopupPlace.AlignFunc
-    v.$adjust = function adjust(t, me, fit) {
-      return popupAdjust.call(v(t, me, fit), me, fit);
+    v.$adjust = <WUPPopupPlace.AdjustFunc>function adjust(t, me, fit) {
+      return prevFn.$adjust.call(v(t, me, fit), t, me, fit);
+    };
+    v.$adjust.$resizeHeight = function resizeH(t, me, fit) {
+      return resizeHeight.call(v.$adjust(t, me, fit), t, me, fit);
+    };
+    v.$adjust.$resizeWidth = function resizeW(t, me, fit) {
+      return resizeWidth.call(v.$adjust(t, me, fit), t, me, fit);
+    };
+    v.$resizeHeight = function resizeH(t, me, fit) {
+      return resizeHeight.call(v(t, me, fit), t, me, fit);
+    };
+    v.$resizeWidth = function resizeW(t, me, fit) {
+      return resizeWidth.call(v(t, me, fit), t, me, fit);
     };
   });
 });
