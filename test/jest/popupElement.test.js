@@ -670,73 +670,73 @@ describe("popupElement", () => {
     el.$options.placement = [WUPPopupElement.$placements.$top.$start.$adjust];
     jest.advanceTimersByTime(10);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(140px, 100px); display: block; max-width: 460px; max-height: 100px;\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(140px, 100px); display: block;\\"></wup-popup>"`
     );
 
     el.$options.placement = [WUPPopupElement.$placements.$top.$middle.$adjust];
     jest.advanceTimersByTime(10);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(190px, 100px); display: block; max-width: 600px; max-height: 100px;\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(190px, 100px); display: block;\\"></wup-popup>"`
     );
     el.$options.placement = [WUPPopupElement.$placements.$top.$end.$adjust];
     jest.advanceTimersByTime(10);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(240px, 100px); display: block; max-width: 240px; max-height: 100px;\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(240px, 100px); display: block;\\"></wup-popup>"`
     );
 
     el.$options.placement = [WUPPopupElement.$placements.$bottom.$start.$adjust];
     jest.advanceTimersByTime(10);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(140px, 150px); display: block; max-width: 460px; max-height: 250px;\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(140px, 150px); display: block;\\"></wup-popup>"`
     );
     el.$options.placement = [WUPPopupElement.$placements.$bottom.$middle.$adjust];
     jest.advanceTimersByTime(10);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(190px, 150px); display: block; max-width: 600px; max-height: 250px;\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(190px, 150px); display: block;\\"></wup-popup>"`
     );
     el.$options.placement = [WUPPopupElement.$placements.$bottom.$end.$adjust];
     jest.advanceTimersByTime(10);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(240px, 150px); display: block; max-width: 240px; max-height: 250px;\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(240px, 150px); display: block;\\"></wup-popup>"`
     );
 
     el.$options.placement = [WUPPopupElement.$placements.$left.$start.$adjust];
     jest.advanceTimersByTime(10);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(140px, 100px); display: block; max-width: 140px; max-height: 300px;\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(140px, 100px); display: block;\\"></wup-popup>"`
     );
     el.$options.placement = [WUPPopupElement.$placements.$left.$middle.$adjust];
     jest.advanceTimersByTime(10);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(140px, 125px); display: block; max-width: 140px; max-height: 400px;\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(140px, 125px); display: block;\\"></wup-popup>"`
     );
     el.$options.placement = [WUPPopupElement.$placements.$left.$end.$adjust];
     jest.advanceTimersByTime(10);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(140px, 150px); display: block; max-width: 140px; max-height: 150px;\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(140px, 150px); display: block;\\"></wup-popup>"`
     );
 
     el.$options.placement = [WUPPopupElement.$placements.$right.$start.$adjust];
     jest.advanceTimersByTime(10);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(240px, 100px); display: block; max-width: 360px; max-height: 300px;\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(240px, 100px); display: block;\\"></wup-popup>"`
     );
     el.$options.placement = [WUPPopupElement.$placements.$right.$middle.$adjust];
     jest.advanceTimersByTime(10);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(240px, 125px); display: block; max-width: 360px; max-height: 400px;\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(240px, 125px); display: block;\\"></wup-popup>"`
     );
     el.$options.placement = [WUPPopupElement.$placements.$right.$end.$adjust];
     jest.advanceTimersByTime(10);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(240px, 150px); display: block; max-width: 360px; max-height: 150px;\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(240px, 150px); display: block;\\"></wup-popup>"`
     );
 
     // checking if $placements.$right == $placements.$right.middle etc.
     el.$options.placement = [WUPPopupElement.$placements.$right];
     jest.advanceTimersByTime(10);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(240px, 125px); display: block; max-width: 360px; max-height: 400px;\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(240px, 125px); display: block;\\"></wup-popup>"`
     );
   });
 
@@ -758,7 +758,7 @@ describe("popupElement", () => {
     jest.advanceTimersByTime(10);
     // no place at the top so at the bottom is expected
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(140px, 50px); display: block; max-width: 460px; max-height: 350px;\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(140px, 50px); display: block;\\"></wup-popup>"`
     );
 
     // just for coverage: tesing ignoreAlign in popupAdjustInternal()
@@ -774,7 +774,7 @@ describe("popupElement", () => {
 
     jest.advanceTimersByTime(10);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(190px, 50px); display: block; max-width: 600px; max-height: 350px;\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(190px, 50px); display: block;\\"></wup-popup>"`
     );
 
     // cover calc maxHeight by freeHeight in popupAdjustInternal()
@@ -784,10 +784,10 @@ describe("popupElement", () => {
     trgRect.top = y;
     trgRect.bottom = height + y;
     el.$options.placement = [WUPPopupElement.$placements.$top.$start.$adjust];
-    // expected right or bottom position because at left/top not enough space
+    // expected bottom.middle position because at left/top not enough space
     jest.advanceTimersByTime(10);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(140px, 0px); display: block; max-width: 460px; max-height: 11px;\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(190px, 61px); display: block;\\"></wup-popup>"`
     );
 
     // cover calc maxWidth by freeWidth in popupAdjustInternal()
@@ -797,10 +797,10 @@ describe("popupElement", () => {
     trgRect.left = x;
     trgRect.right = width + x;
     el.$options.placement = [WUPPopupElement.$placements.$left.$start.$adjust];
-    // expected right or bottom position because at left/top not enough space
+    // expected bottom.middle position because at left/top not enough space
     jest.advanceTimersByTime(10);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(0px, 11px); display: block; max-width: 12px; max-height: 389px;\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(55.5px, 61px); display: block;\\"></wup-popup>"`
     );
 
     // test case when not enough space
@@ -816,7 +816,7 @@ describe("popupElement", () => {
     h.mockConsoleError();
     jest.advanceTimersByTime(10);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(112px, -464px); display: block; max-width: 488px; max-height: 400px;\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(112px, 0px); display: block;\\"></wup-popup>"`
     );
     h.unMockConsoleError();
   });
