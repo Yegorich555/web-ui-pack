@@ -15,7 +15,8 @@ export default function Example3() {
           type="button"
           ref={(el) => {
             if (el) {
-              movable(el);
+              const move = movable(el);
+              move(140, 73);
             }
           }}
         >
@@ -24,6 +25,7 @@ export default function Example3() {
           <small>drag and move me</small>
         </button>
         <wup-popup
+          class={styles.scrollPopup}
           ref={(el) => {
             if (el) {
               el.$options.toFitElement = document.querySelector("#fit2") as HTMLElement;
@@ -31,7 +33,8 @@ export default function Example3() {
             }
           }}
         >
-          I must feet div with border <br />
+          I must feet div with border
+          <br /> <br /> <br /> <br /> <br />
           (option <b>toFitElement</b>)
         </wup-popup>
       </div>

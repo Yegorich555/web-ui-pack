@@ -515,30 +515,43 @@ export default class WUPPopupElement<
       minW: this.#userSizes.minW,
     };
 
-    const hasOveflow = (p: WUPPopupPlace.Result): boolean =>
+    const hasOveflow = (p: WUPPopupPlace.Result, meSize: { w: number; h: number }): boolean =>
       p.left < fit.left ||
       p.top < fit.top ||
       p.freeW < this.#userSizes.minW ||
       p.freeH < this.#userSizes.minH ||
-      p.left + Math.min(me.w, p.maxW || Number.MAX_SAFE_INTEGER, this.#userSizes.maxW) > fit.right ||
-      p.top + Math.min(me.h, p.maxH || Number.MAX_SAFE_INTEGER, this.#userSizes.maxH) > fit.bottom;
+      p.left + Math.min(meSize.w, p.maxW || Number.MAX_SAFE_INTEGER, this.#userSizes.maxW) > fit.right ||
+      p.top + Math.min(meSize.h, p.maxH || Number.MAX_SAFE_INTEGER, this.#userSizes.maxH) > fit.bottom;
 
     let pos: WUPPopupPlace.Result = <WUPPopupPlace.Result>{};
     const isOk = this.#placements.some((pfn) => {
       pos = pfn(t, me, fit);
-      return !hasOveflow(pos);
+      let ok = !hasOveflow(pos, me);
+      if (ok) {
+        // maxW/H can be null if resize is not required
+        if (pos.maxW != null && this.#userSizes.maxW > pos.maxW) {
+          this.style.maxWidth = `${pos.maxW}px`;
+        }
+        if (pos.maxH != null && this.#userSizes.maxH > pos.maxH) {
+          this.style.maxHeight = `${pos.maxH}px`;
+        }
+        // re-check because maxWidth can affect on height
+        if (this.style.maxWidth) {
+          const meSize = { w: this.offsetWidth, h: this.offsetHeight };
+          ok = !hasOveflow(pos, meSize);
+          if (!ok) {
+            // reset styles if need to look for another position
+            this.style.maxWidth = "";
+            this.style.maxHeight = "";
+          }
+        }
+      }
+      return ok;
     });
     !isOk && console.error(`${this.tagName}. Impossible to place without overflow`);
 
     // transform has performance benefits in comparison with positioning
     this.style.transform = `translate(${pos.left}px, ${pos.top}px)`;
-    // maxW/H can be null if resize is not required
-    if (pos.maxW != null && this.#userSizes.maxW > pos.maxW) {
-      this.style.maxWidth = `${pos.maxW}px`;
-    }
-    if (pos.maxH != null && this.#userSizes.maxH > pos.maxH) {
-      this.style.maxHeight = `${pos.maxH}px`;
-    }
 
     /* re-calc is required to avoid case when popup unexpectedly affects on layout:
       layout bug: Yscroll appears/disappears when display:flex; heigth:100vh > position:absolute; right:-10px */
@@ -598,4 +611,4 @@ declare global {
 
 // todo WUPPopupElement.attach(target, options) - attach to target but render only by show
 // todo develop arrow icon
-// describe issue in readme.md: in react nearest target can be changed but popup can't detect it
+// todo describe issue in readme.md: in react nearest target can be changed but popup can't detect it

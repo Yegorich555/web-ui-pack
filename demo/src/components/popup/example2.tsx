@@ -37,13 +37,6 @@ export default function Example2() {
                 WUPPopupElement.$placements.$bottom.$end.$resizeHeight,
                 WUPPopupElement.$placements.$top.$start.$resizeHeight,
                 WUPPopupElement.$placements.$top.$end.$resizeHeight,
-
-                // todo uncomment after tests and check if everything works as expected
-                // WUPPopupElement.$placements.$top.$middle,
-                // WUPPopupElement.$placements.$right.$middle,
-                // WUPPopupElement.$placements.$bottom.$middle.$adjust,
-                // WUPPopupElement.$placements.$bottom.$start,
-                // WUPPopupElement.$placements.$bottom.$end,
               ];
               el.$options.toFitElement = document.querySelector("#fit") as HTMLElement;
               el.$options.showCase = ShowCases.always;

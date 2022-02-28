@@ -92,57 +92,6 @@ export function getBoundingInternalRect(el: HTMLElement): Omit<DOMRect, "toJSON"
   return r;
 }
 
-// /* Adjust position/size to fit layout */
-// function popupResizeInternal(
-//   this: WUPPopupPlace.Result,
-//   me: WUPPopupPlace.MeRect,
-//   fit: WUPPopupPlace.Rect,
-//   ignoreAlign = false
-// ): WUPPopupPlace.Result {
-//   const { freeW, freeH } = this;
-//   const { minWidth, minHeight } = computeMinSize(me);
-
-//   // reject calc since minSize > availableSize; in this case we must select opossite or something that fit better
-//   if (minWidth > freeW || minHeight > freeH) {
-//     if (ignoreAlign) {
-//       const n = { ...this, freeHeight: this.maxFreeH, freeWidth: this.maxFreeW };
-//       // issue: it doesn't work if both minH&minW > freeH&freeW
-//       return popupResizeInternal.call(n, me, fit, false);
-//     }
-//     return this;
-//   }
-
-//   const maxWidth = me.w > freeW ? Math.max(minWidth, freeW) : null;
-//   const maxHeight = me.h > freeH ? Math.max(minHeight, freeH) : null;
-
-//   let { left, top } = this;
-//   // to fit by X
-//   if (left < fit.left) {
-//     left = fit.left;
-//   } else {
-//     // expected that width can't be > maxWidth
-//     left = Math.min(left, fit.right - (maxWidth || me.w));
-//   }
-
-//   // to fit by Y
-//   if (top < fit.top) {
-//     top = fit.top;
-//   } else {
-//     top = Math.min(top, fit.bottom - (maxHeight || me.h));
-//   }
-
-//   return {
-//     top,
-//     left,
-//     maxW: maxWidth,
-//     maxH: maxHeight,
-//     freeH,
-//     freeW,
-//     maxFreeW: this.maxFreeW,
-//     maxFreeH: this.maxFreeH,
-//   };
-// }
-
 const yAdjust = <WUPPopupPlace.AdjustFunc>function yAdjust(this: WUPPopupPlace.Result, _t, me, fit) {
   this.top = this.top < fit.top ? fit.top : Math.min(this.top, fit.bottom - me.h);
   return this;
