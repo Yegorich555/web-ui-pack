@@ -6,10 +6,6 @@ export namespace WUPPopupPlace {
     maxW?: number | null;
     /** Available space including alignment start/left/middle */
     freeW: number;
-    /** The whole available space (excluding alignment start/left/middle) */
-    maxFreeW: number;
-    /** The whole available space (excluding alignment start/left/middle) */
-    maxFreeH: number;
   }
   export interface YResult {
     top: number;
@@ -17,10 +13,6 @@ export namespace WUPPopupPlace {
     maxH?: number | null;
     /** Available space including alignment start/left/middle */
     freeH: number;
-    /** The whole available space (excluding alignment start/left/middle) */
-    maxFreeW: number;
-    /** The whole available space (excluding alignment start/left/middle) */
-    maxFreeH: number;
   }
   export interface Result extends XResult, YResult {}
 
@@ -105,7 +97,6 @@ const xAdjust = <WUPPopupPlace.AdjustFunc>function xAdjust(this: WUPPopupPlace.R
 const resizeHeight = <WUPPopupPlace.PlaceFunc>function resizeHeight(this: WUPPopupPlace.Result, t, me, fit) {
   // reject calc since minSize > availableSize; in this case we must select opossite or something that fit better
   if (me.minH > this.freeH) {
-    // todo what about maxFreeH ???
     return this;
   }
 
@@ -121,7 +112,6 @@ const resizeHeight = <WUPPopupPlace.PlaceFunc>function resizeHeight(this: WUPPop
 const resizeWidth = <WUPPopupPlace.PlaceFunc>function resizeWidth(this: WUPPopupPlace.Result, t, me, fit) {
   // reject calc since minSize > availableSize; in this case we must select opossite or something that fit better
   if (me.minW > this.freeW) {
-    // todo what about maxFreeW ???
     return this;
   }
 
@@ -140,8 +130,6 @@ const $top = <WUPPopupPlace.EdgeFunc>(
     return {
       top: t.top - me.offset.top - me.h,
       freeH,
-      maxFreeH: freeH,
-      maxFreeW: fit.width,
     };
   }
 );
@@ -170,8 +158,6 @@ const $bottom = <WUPPopupPlace.EdgeFunc>function bottom(t, me, fit): ReturnType<
   return {
     top: t.bottom + me.offset.bottom,
     freeH,
-    maxFreeH: freeH,
-    maxFreeW: fit.width,
   };
 };
 $bottom.$start = $top.$start;
@@ -183,8 +169,6 @@ const $left = <WUPPopupPlace.EdgeFunc>function left(t, me, fit): ReturnType<WUPP
   return {
     left: t.left - me.offset.left - me.w,
     freeW,
-    maxFreeH: fit.height,
-    maxFreeW: freeW,
   };
 };
 $left.$start = <WUPPopupPlace.AlignFunc>function xStart(this: WUPPopupPlace.Result, t, _me, fit) {
@@ -211,8 +195,6 @@ const $right = <WUPPopupPlace.EdgeFunc>function right(t, me, fit): ReturnType<WU
   return {
     left: t.right + me.offset.right,
     freeW,
-    maxFreeH: fit.height,
-    maxFreeW: freeW,
   };
 };
 $right.$start = $left.$start;
