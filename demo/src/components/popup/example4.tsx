@@ -5,7 +5,7 @@ import styles from "./popupView.scss";
 export default function Example4() {
   return (
     <>
-      <h3>Example 3</h3>
+      <h3>Example 4</h3>
       <small>
         To avoid such behavior change option <b>toFitElement</b> (<b>document.body</b> by default)
       </small>

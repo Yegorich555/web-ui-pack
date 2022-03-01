@@ -8,7 +8,7 @@ export default function Example2() {
     <>
       <h3>Example 2</h3>
       <small>
-        Behavior for dropdown. You can change position behavior/priority with option <b>placement</b>
+        Dropdown behavior. You can change position behavior/priority with option <b>placement</b>
       </small>
       <div className={styles.fitBlock} id="fit">
         <button
@@ -39,6 +39,8 @@ export default function Example2() {
                 WUPPopupElement.$placements.$top.$end.$resizeHeight,
               ];
               el.$options.toFitElement = document.querySelector("#fit") as HTMLElement;
+
+              // for dropdown use el.$options.showCase = ShowCases.onFocus | ShowCases.onClick;
               el.$options.showCase = ShowCases.always;
             }
           }}

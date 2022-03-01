@@ -163,14 +163,14 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     return super.dispatchEvent(ev as Event);
   }
 
-  // todo how to change  listener: (this: WUPBaseElement) to generic ?
+  // watchfix: how to change  listener: (this: WUPBaseElement) to generic: https://github.com/microsoft/TypeScript/issues/299
   /* eslint-disable max-len */
   // prettier-ignore
   addEventListener<K extends keyof Events>(type: K, listener: (this: WUPBaseElement, ev: Events[K]) => any, options?: boolean | AddEventListenerOptions): void;
   // prettier-ignore
   addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
   addEventListener(type: any, listener: any, options?: any): void {
-    return super.addEventListener(type, listener, options); // todo remove via decorators ???
+    return super.addEventListener(type, listener, options);
   }
 
   // prettier-ignore
@@ -178,7 +178,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   // prettier-ignore
   removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
   removeEventListener(type: any, listener: any, options?: any): void {
-    return super.removeEventListener(type, listener, options); // todo remove via decorators ???
+    return super.removeEventListener(type, listener, options);
   }
   /* eslint-enable max-len */
 
