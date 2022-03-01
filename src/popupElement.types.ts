@@ -45,10 +45,6 @@ export namespace WUPPopup {
     minWidthByTarget: boolean;
     /** Sets minHeight 100% of targetWidth */
     minHeightByTarget: boolean;
-
-    // todo overflow behavior when target partially hidden by scrollable parent
-    // possible cases: hide, placeOpposite
-
     /** Case when popup need to show; default is `onClick`
      * @example
      * showCase=WUPPopup.ShowCases.onFocus | WUPPopup.ShowCases.onClick // to join cases

@@ -4,6 +4,7 @@ import { ShowCases } from "web-ui-pack/popupElement";
 import styles from "./popupView.scss";
 
 export default function Example3() {
+  return null;
   return (
     <>
       <h3>Example 3</h3>

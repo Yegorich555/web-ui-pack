@@ -16,7 +16,11 @@ export namespace WUPPopupPlace {
   }
   export interface Result extends XResult, YResult {}
 
-  export interface Rect extends DOMRect {
+  type NotReadonly<T> = {
+    -readonly [P in keyof T]: T[P];
+  };
+
+  export interface Rect extends NotReadonly<DOMRect> {
     el: HTMLElement;
   }
   export interface MeRect {

@@ -4,6 +4,7 @@ import onFocusGot from "./helpers/onFocusGot";
 import onFocusLost from "./helpers/onFocusLost";
 import { WUPPopup } from "./popupElement.types";
 import { getBoundingInternalRect, PopupPlacements, px2Number, WUPPopupPlace } from "./popupPlacements";
+import findScrollParent from "./helpers/findScrollParent";
 
 export import ShowCases = WUPPopup.ShowCases;
 
@@ -331,6 +332,7 @@ export default class WUPPopupElement<
   #placements: Array<WUPPopupPlace.PlaceFunc> = [];
   #prevRect?: DOMRect;
   #showCase?: WUPPopup.ShowCases;
+  #scrollParent?: HTMLElement | null;
 
   /** Override this method to prevent show; this method fires beofre willShow event;
    * @param showCase as reason of show()
@@ -379,6 +381,7 @@ export default class WUPPopupElement<
       maxH: px2Number(style.maxHeight) || Number.MAX_SAFE_INTEGER,
       minH: Math.max(5, px2Number(style.paddingTop) + px2Number(style.paddingBottom), px2Number(style.minHeight)),
     };
+    this.#scrollParent = findScrollParent(this._opts.target as HTMLElement);
 
     if (!this._opts.placement.length) {
       this._opts.placement.push(PopupPlacements.$top.$middle.$adjust);
@@ -410,11 +413,9 @@ export default class WUPPopupElement<
 
     const goUpdate = () => {
       this.#updatePosition();
-      // todo develop animation
       this.#frameId = window.requestAnimationFrame(goUpdate);
     };
 
-    this.style.display = "block";
     goUpdate();
     this.#isOpened = true;
 
@@ -454,6 +455,7 @@ export default class WUPPopupElement<
     this.#isOpened = false;
     this.#showCase = undefined;
     this.#prevRect = undefined;
+    this.#scrollParent = undefined;
 
     if (wasShown) {
       this.#onHideCallbacks.forEach((f) => f());
@@ -498,6 +500,7 @@ export default class WUPPopupElement<
     const fit = getBoundingInternalRect(fitEl) as WUPPopupPlace.Rect;
     fit.el = fitEl;
 
+    this.style.display = "block";
     this.style.maxHeight = ""; // resetting is required to get default size
     this.style.maxWidth = ""; // resetting is required to get default size
     const me: WUPPopupPlace.MeRect = {
@@ -515,43 +518,67 @@ export default class WUPPopupElement<
       minW: this.#userSizes.minW,
     };
 
-    const hasOveflow = (p: WUPPopupPlace.Result, meSize: { w: number; h: number }): boolean =>
-      p.left < fit.left ||
-      p.top < fit.top ||
-      p.freeW < this.#userSizes.minW ||
-      p.freeH < this.#userSizes.minH ||
-      p.left + Math.min(meSize.w, p.maxW || Number.MAX_SAFE_INTEGER, this.#userSizes.maxW) > fit.right ||
-      p.top + Math.min(meSize.h, p.maxH || Number.MAX_SAFE_INTEGER, this.#userSizes.maxH) > fit.bottom;
+    // check if target hidden by scrollParent
+    let isHiddenByScroll = false;
+    if (this.#scrollParent) {
+      // WARN: scrollEl for X and Y can be different
+      const scrollRect = this.#scrollParent.getBoundingClientRect();
+      isHiddenByScroll =
+        scrollRect.top >= t.bottom ||
+        scrollRect.bottom <= t.top ||
+        scrollRect.left >= t.right ||
+        scrollRect.right <= t.left;
+      if (!isHiddenByScroll) {
+        // fix cases when target is partiallyHidden by scrollableParent
+        // todo position issue for $left.$middle
+        fit.top = scrollRect.top > t.top ? scrollRect.top : fit.top;
+        fit.bottom = scrollRect.bottom < t.bottom ? scrollRect.bottom : fit.bottom;
+        fit.left = scrollRect.left > t.left ? scrollRect.left : fit.left;
+        fit.right = scrollRect.right < t.right ? scrollRect.right : fit.right;
+      }
+    }
 
-    let pos: WUPPopupPlace.Result = <WUPPopupPlace.Result>{};
-    const isOk = this.#placements.some((pfn) => {
-      pos = pfn(t, me, fit);
-      let ok = !hasOveflow(pos, me);
-      if (ok) {
-        // maxW/H can be null if resize is not required
-        if (pos.maxW != null && this.#userSizes.maxW > pos.maxW) {
-          this.style.maxWidth = `${pos.maxW}px`;
-        }
-        if (pos.maxH != null && this.#userSizes.maxH > pos.maxH) {
-          this.style.maxHeight = `${pos.maxH}px`;
-        }
-        // re-check because maxWidth can affect on height
-        if (this.style.maxWidth) {
-          const meSize = { w: this.offsetWidth, h: this.offsetHeight };
-          ok = !hasOveflow(pos, meSize);
-          if (!ok) {
-            // reset styles if need to look for another position
-            this.style.maxWidth = "";
-            this.style.maxHeight = "";
+    if (isHiddenByScroll) {
+      this.style.display = ""; // hide popup if target hidden by scrollableParent
+    } else {
+      const hasOveflow = (p: WUPPopupPlace.Result, meSize: { w: number; h: number }): boolean =>
+        p.left < fit.left ||
+        p.top < fit.top ||
+        p.freeW < this.#userSizes.minW ||
+        p.freeH < this.#userSizes.minH ||
+        p.left + Math.min(meSize.w, p.maxW || Number.MAX_SAFE_INTEGER, this.#userSizes.maxW) > fit.right ||
+        p.top + Math.min(meSize.h, p.maxH || Number.MAX_SAFE_INTEGER, this.#userSizes.maxH) > fit.bottom;
+
+      let pos: WUPPopupPlace.Result = <WUPPopupPlace.Result>{};
+      const isOk = this.#placements.some((pfn) => {
+        pos = pfn(t, me, fit);
+        let ok = !hasOveflow(pos, me);
+        if (ok) {
+          // maxW/H can be null if resize is not required
+          if (pos.maxW != null && this.#userSizes.maxW > pos.maxW) {
+            this.style.maxWidth = `${pos.maxW}px`;
+          }
+          if (pos.maxH != null && this.#userSizes.maxH > pos.maxH) {
+            this.style.maxHeight = `${pos.maxH}px`;
+          }
+          // re-check because maxWidth can affect on height
+          if (this.style.maxWidth) {
+            const meSize = { w: this.offsetWidth, h: this.offsetHeight };
+            ok = !hasOveflow(pos, meSize);
+            if (!ok) {
+              // reset styles if need to look for another position
+              this.style.maxWidth = "";
+              this.style.maxHeight = "";
+            }
           }
         }
-      }
-      return ok;
-    });
-    !isOk && console.error(`${this.tagName}. Impossible to place without overflow`);
+        return ok;
+      });
+      !isOk && console.error(`${this.tagName}. Impossible to place without overflow`);
 
-    // transform has performance benefits in comparison with positioning
-    this.style.transform = `translate(${pos.left}px, ${pos.top}px)`;
+      // transform has performance benefits in comparison with positioning
+      this.style.transform = `translate(${pos.left}px, ${pos.top}px)`;
+    }
 
     /* re-calc is required to avoid case when popup unexpectedly affects on layout:
       layout bug: Yscroll appears/disappears when display:flex; heigth:100vh > position:absolute; right:-10px */
@@ -612,3 +639,4 @@ declare global {
 // todo WUPPopupElement.attach(target, options) - attach to target but render only by show
 // todo develop arrow icon
 // todo describe issue in readme.md: in react nearest target can be changed but popup can't detect it
+// todo develop animation
