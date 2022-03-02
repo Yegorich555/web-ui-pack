@@ -11,7 +11,6 @@ h1 {
   /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
   background: linear-gradient(270deg, $headerBgColor, #38b9d6);
   color: $headerColor;
-  min-width: 450px;
 
   display: flex;
   align-items: center;
@@ -39,14 +38,17 @@ h1 {
       filter: invert(0.95);
     }
   }
+
+  @media (max-width: 410px) {
+    padding: 0 20px;
+    justify-content: flex-start;
+  }
 }
 
 .page {
   display: flex;
   flex-direction: row;
   height: calc(100vh - #{$h1Height} - 1px);
-  min-width: 450px;
-  overflow: auto;
 
   > .leftBar {
     display: flex;
@@ -88,12 +90,15 @@ h1 {
   }
 
   main {
-    max-width: 400px;
-    margin: 0 auto;
-  }
-
-  > .leftBar + main {
+    width: calc(100vw - #{$navWidth});
+    overflow: auto;
     padding: 10px;
-    width: 100%;
+
+    /* stylelint-disable-next-line no-descending-specificity */
+    > div {
+      min-width: 450px;
+      max-width: 450px;
+      margin: 0 auto;
+    }
   }
 }

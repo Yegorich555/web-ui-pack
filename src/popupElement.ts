@@ -642,5 +642,5 @@ declare global {
 
 // todo WUPPopupElement.attach(target, options) - attach to target but render only by show
 // todo develop arrow icon
-// todo describe issue in readme.md: in react nearest target can be changed but popup can't detect it
+// todo describe issue in readme.md: in react nearest target can be changed but popup can't detect it -- for this case we need to add method $refresh()
 // todo develop animation
