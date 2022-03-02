@@ -10,6 +10,10 @@ let trg; // target for popup
 
 // simulate layout
 beforeEach(() => {
+  jest.restoreAllMocks();
+  jest.clearAllMocks();
+  jest.clearAllTimers();
+
   jest.spyOn(document.body, "getBoundingClientRect").mockReturnValue({
     x: 0,
     y: 0,
@@ -24,8 +28,6 @@ beforeEach(() => {
   jest.spyOn(document.body, "clientHeight", "get").mockReturnValue(400);
   jest.spyOn(document.body, "clientWidth", "get").mockReturnValue(600);
 
-  jest.clearAllMocks();
-  jest.clearAllTimers();
   trg = document.body.appendChild(document.createElement("div"));
   trg.append("some text");
   trg.setAttribute("id", "targetId");
@@ -858,6 +860,8 @@ describe("popupElement", () => {
     );
 
     // test case when not enough space
+    const fn = h.mockConsoleError();
+    jest.clearAllTimers();
     jest.spyOn(el, "offsetHeight", "get").mockReturnValue(1000);
     jest.spyOn(el, "offsetWidth", "get").mockReturnValue(1000);
     jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
@@ -867,11 +871,85 @@ describe("popupElement", () => {
       return orig(elem);
     });
     el.$options.placement = [WUPPopupElement.$placements.$left.$start];
-    h.mockConsoleError();
+
     jest.advanceTimersByTime(10);
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style=\\"transform: translate(112px, 0px); display: block;\\"></wup-popup>"`
     );
+    expect(fn).toBeCalledTimes(1);
     h.unMockConsoleError();
+  });
+
+  test("position with scroll", () => {
+    // make body as scrollable
+    const dy = 10;
+    const dx = 5;
+    jest.spyOn(document.body, "scrollHeight", "get").mockReturnValue(document.body.clientHeight + dy);
+    jest.spyOn(document.body, "scrollWidth", "get").mockReturnValue(document.body.clientWidth + dx);
+    const rectBody = document.body.getBoundingClientRect();
+    jest.spyOn(document.body, "getBoundingClientRect").mockReturnValue({
+      ...rectBody,
+      x: dx,
+      y: dy,
+      top: dy,
+      left: dx,
+      bottom: rectBody.height + dy,
+      right: rectBody.width + dx,
+    });
+
+    const trgRect = {
+      ...trg.getBoundingClientRect(),
+      x: 0,
+      left: 0,
+      y: 0,
+      top: 0,
+      bottom: trg.getBoundingClientRect().height,
+      right: trg.getBoundingClientRect().width,
+    };
+    jest.spyOn(trg, "getBoundingClientRect").mockReturnValue(trgRect);
+
+    // cover case when target is partiallyHidden by scrollable parent
+    el.$options.placement = [WUPPopupElement.$placements.$top.$middle];
+    jest.advanceTimersByTime(10);
+    // no place at the top
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"transform: translate(50px, 50px); display: block;\\"></wup-popup>"`
+    );
+
+    jest.spyOn(document.body, "getBoundingClientRect").mockReturnValue({
+      ...rectBody,
+      height: trgRect.height,
+      bottom: trgRect.height - dy,
+    });
+    el.$options.placement = [WUPPopupElement.$placements.$top.$middle];
+    jest.advanceTimersByTime(10);
+    // no place at the bottom
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"transform: translate(100px, 25px); display: block;\\"></wup-popup>"`
+    );
+
+    jest.spyOn(document.body, "getBoundingClientRect").mockReturnValue({
+      ...rectBody,
+      x: dx,
+      left: dx,
+    });
+    el.$options.placement = [WUPPopupElement.$placements.$top.$middle];
+    jest.advanceTimersByTime(10);
+    // no place at the left
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"transform: translate(50px, 50px); display: block;\\"></wup-popup>"`
+    );
+
+    jest.spyOn(document.body, "getBoundingClientRect").mockReturnValue({
+      ...rectBody,
+      width: trgRect.width,
+      right: trgRect.width - dx,
+    });
+    el.$options.placement = [WUPPopupElement.$placements.$top.$middle];
+    jest.advanceTimersByTime(10);
+    // no place at the right
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"transform: translate(50px, 50px); display: block;\\"></wup-popup>"`
+    );
   });
 });

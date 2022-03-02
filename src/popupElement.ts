@@ -530,11 +530,15 @@ export default class WUPPopupElement<
         scrollRect.right <= t.left;
       if (!isHiddenByScroll) {
         // fix cases when target is partiallyHidden by scrollableParent
-        // todo position issue for $left.$middle
-        fit.top = scrollRect.top > t.top ? scrollRect.top : fit.top;
-        fit.bottom = scrollRect.bottom < t.bottom ? scrollRect.bottom : fit.bottom;
-        fit.left = scrollRect.left > t.left ? scrollRect.left : fit.left;
-        fit.right = scrollRect.right < t.right ? scrollRect.right : fit.right;
+        if (scrollRect.top > t.top) {
+          fit.top = scrollRect.top;
+        } else if (scrollRect.bottom < t.bottom) {
+          fit.bottom = scrollRect.bottom;
+        } else if (scrollRect.left > t.left) {
+          fit.left = scrollRect.left;
+        } else if (scrollRect.right < t.right) {
+          fit.right = scrollRect.right;
+        }
       }
     }
 

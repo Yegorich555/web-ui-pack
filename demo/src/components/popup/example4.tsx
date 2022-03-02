@@ -17,10 +17,9 @@ export default function Example4() {
           ref={(el) => {
             if (el) {
               el.$options.placement = [
-                // todo issue here
                 WUPPopupElement.$placements.$left.$middle,
                 WUPPopupElement.$placements.$top.$middle,
-                // todo uncoment after tests
+                // uncoment after tests
                 // WUPPopupElement.$placements.$top.$middle,
                 // WUPPopupElement.$placements.$bottom.$middle,
               ];

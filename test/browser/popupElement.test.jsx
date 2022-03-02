@@ -95,7 +95,7 @@ describe("popupElement", () => {
     await page.waitForTimeout(1); // timeout required because of debounceFilters
     const t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML }));
     expect(t.html).toBe(
-      '<wup-popup style="display: block; min-width: 177px; min-height: 21px; transform: translate(72.4219px, 29px);">Popup text</wup-popup>'
+      '<wup-popup style="min-width: 177px; min-height: 21px; display: block; transform: translate(72.4219px, 29px);">Popup text</wup-popup>'
     );
   });
 });
