@@ -1,5 +1,5 @@
 // Discussion: https://stackoverflow.com/questions/35939886/find-first-scrollable-parent
-// TODO README.md
+
 /** Find first parent with active scroll X/Y */
 export default function findScrollParent(el: HTMLElement): HTMLElement | null {
   const p = el.parentElement;
