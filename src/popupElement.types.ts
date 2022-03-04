@@ -56,6 +56,8 @@ export namespace WUPPopup {
     hoverHideTimeout: number;
     /** Debounce option for onFocustLost event (for ShowCases.onFocus); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost; Default is 100ms */
     focusDebounceMs?: number;
+    /** Setup arrow class and use :before to add background-image or content */
+    arrowClass?: string;
   }
 
   export interface EventMap extends WUP.EventMap {

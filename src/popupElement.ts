@@ -83,8 +83,21 @@ export default class WUPPopupElement<
         box-shadow: 0px 1px 4px 0px #00000033;
         background: white;
         text-overflow: ellipsis;
-        overflow: hidden;
-      }`;
+        overflow: auto;
+      }
+      :host:before {
+        display: block;
+        top: 0; left: 0;
+        position: fixed;
+        width: 16px; height: 16px;
+        transform: translate(501.703px, 399.281px) rotate(-45deg);
+        box-sizing: border-box;
+
+        box-shadow: 0px 1px 4px 0px #00000033;
+        background: white;
+        //content: "";
+      }
+      `;
 
   $options: WUPPopup.Options = {
     ...this.ctr.$defaults,
@@ -122,6 +135,10 @@ export default class WUPPopupElement<
 
   get $isOpened(): boolean {
     return this.#isOpened;
+  }
+
+  get $arrowElement(): HTMLElement | null {
+    return this.#arrowElement || null;
   }
 
   protected override gotReady() {
@@ -333,6 +350,7 @@ export default class WUPPopupElement<
   #prevRect?: DOMRect;
   #showCase?: WUPPopup.ShowCases;
   #scrollParent?: HTMLElement | null;
+  #arrowElement?: HTMLElement & { _size: { w: number; h: number } };
 
   /** Override this method to prevent show; this method fires beofre willShow event;
    * @param showCase as reason of show()
@@ -383,6 +401,24 @@ export default class WUPPopupElement<
     };
     this.#scrollParent = findScrollParent(this._opts.target as HTMLElement);
 
+    // get arrowSize
+    // todo rollback after tests
+    if (!this._opts.arrowClass) {
+      const el = document.body.appendChild(document.createElement("div"));
+      el.style.left = "0";
+      el.style.top = "0";
+      el.style.position = "fixed";
+      el.style.boxShadow = style.boxShadow;
+      el.style.border = style.border;
+      el.style.backgroundColor = style.backgroundColor;
+      el.style.width = "20px";
+      el.style.height = "20px";
+      el.style.transform = "rotate(-45deg)";
+      el.className = this._opts.arrowClass || "";
+      const rect = el.getBoundingClientRect();
+      this.#arrowElement = el as unknown as HTMLElement & { _size: { w: number; h: number } };
+      this.#arrowElement._size = { w: rect.width, h: rect.height };
+    }
     if (!this._opts.placement.length) {
       this._opts.placement.push(PopupPlacements.$top.$middle.$adjust);
     }
@@ -457,6 +493,11 @@ export default class WUPPopupElement<
     this.#prevRect = undefined;
     this.#scrollParent = undefined;
 
+    if (this.#arrowElement) {
+      this.#arrowElement.remove();
+      this.#arrowElement = undefined;
+    }
+
     if (wasShown) {
       this.#onHideCallbacks.forEach((f) => f());
       this.#onHideCallbacks = [];
@@ -503,20 +544,25 @@ export default class WUPPopupElement<
     this.style.display = "block";
     this.style.maxHeight = ""; // resetting is required to get default size
     this.style.maxWidth = ""; // resetting is required to get default size
+
+    // todo offsetArrow ?
+    const arrowW = (this.#arrowElement?._size.w || 0) / 2;
+    const arrowH = (this.#arrowElement?._size.h || 0) / 2;
     const me: WUPPopupPlace.MeRect = {
       // WARN: offsetSize is rounded so 105.2 >>> 105
       w: this.offsetWidth, // clientWidth doesn't include border-size
       h: this.offsetHeight,
       el: this,
       offset: {
-        top: this._opts.offset[0],
-        right: this._opts.offset[1],
-        bottom: this._opts.offset[2] ?? this._opts.offset[0],
-        left: this._opts.offset[3] ?? this._opts.offset[1],
+        top: this._opts.offset[0] + arrowH,
+        right: this._opts.offset[1] + arrowW,
+        bottom: (this._opts.offset[2] ?? this._opts.offset[0]) + arrowH,
+        left: (this._opts.offset[3] ?? this._opts.offset[1]) + arrowW,
       },
       minH: this.#userSizes.minH,
       minW: this.#userSizes.minW,
     };
+    console.warn(me.offset);
 
     // check if target hidden by scrollParent
     let isHiddenByScroll = false;
@@ -582,6 +628,10 @@ export default class WUPPopupElement<
 
       // transform has performance benefits in comparison with positioning
       this.style.transform = `translate(${pos.left}px, ${pos.top}px)`;
+      if (this.#arrowElement) {
+        // todo calc position and orientation here
+        this.#arrowElement.style.transform = "translate(501.703px, 399.281px) rotate(-45deg)";
+      }
     }
 
     /* re-calc is required to avoid case when popup unexpectedly affects on layout:
@@ -592,6 +642,7 @@ export default class WUPPopupElement<
   protected override gotRemoved() {
     super.gotRemoved();
     this.#isOpened = false;
+    this.#arrowElement?.remove();
   }
 
   protected override dispose(): void {
@@ -641,6 +692,5 @@ declare global {
 }
 
 // todo WUPPopupElement.attach(target, options) - attach to target but render only by show
-// todo develop arrow icon
 // todo describe issue in readme.md: in react nearest target can be changed but popup can't detect it -- for this case we need to add method $refresh()
 // todo develop animation
