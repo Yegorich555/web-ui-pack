@@ -8,6 +8,10 @@ import findScrollParent from "./helpers/findScrollParent";
 
 export import ShowCases = WUPPopup.ShowCases;
 
+function degToRad(degree: number): number {
+  return (degree * Math.PI) / 180;
+}
+
 /** PopupElement
  * @example
  * const el = document.createElement('wup-popup');
@@ -350,7 +354,8 @@ export default class WUPPopupElement<
   #prevRect?: DOMRect;
   #showCase?: WUPPopup.ShowCases;
   #scrollParent?: HTMLElement | null;
-  #arrowElement?: HTMLElement & { _size: { w: number; h: number } };
+  #arrowElement?: HTMLElement;
+  #arrowSize: WUPPopupPlace.MeRect["arrow"] = undefined as any;
 
   /** Override this method to prevent show; this method fires beofre willShow event;
    * @param showCase as reason of show()
@@ -411,14 +416,31 @@ export default class WUPPopupElement<
       el.style.boxShadow = style.boxShadow;
       el.style.border = style.border;
       el.style.backgroundColor = style.backgroundColor;
-      el.style.width = "20px";
-      el.style.height = "20px";
-      el.style.transform = "rotate(-45deg)";
+      el.style.width = "30px";
+      el.style.height = "30px";
+      // todo get previous rotate angle
+      el.style.transform = "rotate(45deg)";
       el.className = this._opts.arrowClass || "";
+
+      el.style.background = "linear-gradient(#218ba3, #ff0808)"; // todo remove after tests
+
+      // get maxSize according to rotation
       const rect = el.getBoundingClientRect();
-      this.#arrowElement = el as unknown as HTMLElement & { _size: { w: number; h: number } };
-      this.#arrowElement._size = { w: rect.width, h: rect.height };
+      this.#arrowElement = el;
+      this.#arrowSize = {
+        h: el.offsetHeight,
+        w: el.offsetWidth,
+        rotatedW: rect.width,
+        rotatedH: rect.height,
+        offsetX: rect.width / 2,
+        offsetY: rect.height / 2,
+        dy: (rect.height - el.offsetHeight) / 2,
+        dx: (rect.width - el.offsetWidth) / 2,
+      };
+    } else {
+      this.#arrowSize = { offsetX: 0, offsetY: 0, h: 0, w: 0, dy: 0, dx: 0, rotatedW: 0, rotatedH: 0 };
     }
+
     if (!this._opts.placement.length) {
       this._opts.placement.push(PopupPlacements.$top.$middle.$adjust);
     }
@@ -545,24 +567,22 @@ export default class WUPPopupElement<
     this.style.maxHeight = ""; // resetting is required to get default size
     this.style.maxWidth = ""; // resetting is required to get default size
 
-    // todo offsetArrow ?
-    const arrowW = (this.#arrowElement?._size.w || 0) / 2;
-    const arrowH = (this.#arrowElement?._size.h || 0) / 2;
+    // todo $options.offsetArrow ?
     const me: WUPPopupPlace.MeRect = {
       // WARN: offsetSize is rounded so 105.2 >>> 105
       w: this.offsetWidth, // clientWidth doesn't include border-size
       h: this.offsetHeight,
       el: this,
       offset: {
-        top: this._opts.offset[0] + arrowH,
-        right: this._opts.offset[1] + arrowW,
-        bottom: (this._opts.offset[2] ?? this._opts.offset[0]) + arrowH,
-        left: (this._opts.offset[3] ?? this._opts.offset[1]) + arrowW,
+        top: this._opts.offset[0],
+        right: this._opts.offset[1],
+        bottom: this._opts.offset[2] ?? this._opts.offset[0],
+        left: this._opts.offset[3] ?? this._opts.offset[1],
       },
       minH: this.#userSizes.minH,
       minW: this.#userSizes.minW,
+      arrow: this.#arrowSize,
     };
-    console.warn(me.offset);
 
     // check if target hidden by scrollParent
     let isHiddenByScroll = false;
@@ -588,9 +608,14 @@ export default class WUPPopupElement<
       }
     }
 
+    if (this.#arrowElement) {
+      this.#arrowElement.style.display = isHiddenByScroll ? "none" : "";
+    }
+
     if (isHiddenByScroll) {
       this.style.display = ""; // hide popup if target hidden by scrollableParent
     } else {
+      // todo hasOverflow is wrong when arrow exists
       const hasOveflow = (p: WUPPopupPlace.Result, meSize: { w: number; h: number }): boolean =>
         p.left < fit.left ||
         p.top < fit.top ||
@@ -629,8 +654,35 @@ export default class WUPPopupElement<
       // transform has performance benefits in comparison with positioning
       this.style.transform = `translate(${pos.left}px, ${pos.top}px)`;
       if (this.#arrowElement) {
-        // todo calc position and orientation here
-        this.#arrowElement.style.transform = "translate(501.703px, 399.281px) rotate(-45deg)";
+        // if we have border-radius of popup we need to include in offset to prevent overflow between arrow and popup
+        const borderRadius = 6; // 6; // todo define border-radius
+        if (pos.arrowLeft == null) {
+          // todo changing size affects on offset and positioning of element previously
+          // if (this.#arrowSize.rotatedW > this.offsetWidth) {
+          //   const max = this.offsetWidth / Math.sqrt(2);
+          //   this.#arrowElement.style.maxWidth = `${max}px`;
+          //   this.#arrowElement.style.maxHeight = `${max}px`;
+          // }
+          pos.arrowLeft = t.left + t.width / 2 - me.arrow.w / 2; // attach to middle of target
+          pos.arrowLeft = Math.min(
+            Math.max(pos.arrowLeft, pos.left + me.arrow.dx + borderRadius),
+            pos.left + this.offsetWidth - me.arrow.w - me.arrow.dx - borderRadius
+          );
+        } else if (pos.arrowTop == null) {
+          // todo changing size affects on offset and positioning of element previously
+          // if (this.#arrowSize.rotatedH > this.offsetHeight) {
+          //   const max = this.offsetHeight / Math.sqrt(2);
+          //   this.#arrowElement.style.maxWidth = `${max}px`;
+          //   this.#arrowElement.style.maxHeight = `${max}px`;
+          // }
+          pos.arrowTop = t.top + t.height / 2 - me.arrow.h / 2; // attach to middle of target
+          // pos.arrowTop = pos.top + dy; // attach to top side of target
+          pos.arrowTop = Math.min(
+            Math.max(pos.arrowTop, pos.top + me.arrow.dy + borderRadius),
+            pos.top + this.offsetHeight - me.arrow.h - me.arrow.dy - borderRadius
+          );
+        }
+        this.#arrowElement.style.transform = `translate(${pos.arrowLeft}px, ${pos.arrowTop}px) rotate(${pos.arrowRotate}deg)`;
       }
     }
 

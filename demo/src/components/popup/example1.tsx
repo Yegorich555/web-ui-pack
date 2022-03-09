@@ -5,7 +5,16 @@ export default function Example1() {
     <>
       <h3>Example 1</h3>
       <div className={styles.popupEx1}>
-        <button id="trg" type="button" className={styles.trg}>
+        <button
+          id="trg"
+          type="button"
+          className={styles.trg}
+          ref={(el) =>
+            setTimeout(() => {
+              el?.click();
+            }, 100)
+          }
+        >
           Target
           <br />
           <small>
