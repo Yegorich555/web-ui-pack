@@ -16,9 +16,7 @@ export default function Example2() {
           ref={(el) => {
             if (el) {
               const move = movable(el);
-              // move(293, 0);
-              // move(310, 61); // todo issue here with arrow
-              move(312, 50); // todo issue here with arrow
+              move(293, 0);
             }
           }}
         >

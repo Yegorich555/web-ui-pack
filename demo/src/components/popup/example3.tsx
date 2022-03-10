@@ -16,10 +16,7 @@ export default function Example3() {
           ref={(el) => {
             if (el) {
               const move = movable(el);
-              // move(140, 73);
-              // move(222, 6);
-              move(140, 100);
-              el.style.transform = "translate(140px, 122px)";
+              move(140, 73);
             }
           }}
         >

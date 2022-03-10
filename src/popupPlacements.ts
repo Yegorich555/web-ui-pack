@@ -98,13 +98,13 @@ export function getBoundingInternalRect(el: HTMLElement): Omit<DOMRect, "toJSON"
 }
 
 const yAdjust = <WUPPopupPlace.AdjustFunc>function yAdjust(this: WUPPopupPlace.Result, _t, me, fit) {
-  const arrowFree = me.arrow.h;
+  const arrowFree = this.arrowAngle === 0 || this.arrowAngle === 180 ? me.arrow.h : 0;
   this.top = Math.max(fit.top - arrowFree, Math.min(this.top, fit.bottom - me.h + arrowFree));
   return this;
 };
 
 export const xAdjust = <WUPPopupPlace.AdjustFunc>function xAdjust(this: WUPPopupPlace.Result, _t, me, fit) {
-  const arrowFree = me.arrow.h;
+  const arrowFree = this.arrowAngle === 90 || this.arrowAngle === -90 ? me.arrow.h : 0;
   this.left = Math.max(fit.left - arrowFree, Math.min(this.left, fit.right - me.w + arrowFree));
   return this;
 };
