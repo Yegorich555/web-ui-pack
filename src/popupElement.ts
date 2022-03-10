@@ -63,8 +63,8 @@ export default class WUPPopupElement<
       WUPPopupElement.$placements.$bottom.$middle.$adjust,
     ],
     offset: [0, 0],
+    arrowEnable: true, // todo rollback after tests
     arrowOffset: [0.5, 0.5],
-    // todo arrowSize ?
     toFitElement: document.body,
     minWidthByTarget: false,
     minHeightByTarget: false,
@@ -396,8 +396,7 @@ export default class WUPPopupElement<
     this.#scrollParent = findScrollParent(this._opts.target as HTMLElement);
 
     // get arrowSize
-    // todo rollback after tests
-    if (!this._opts.arrowClass) {
+    if (this._opts.arrowEnable) {
       const el = document.body.appendChild(document.createElement(WUPPopupArrowElement.tagName));
       el.className = this._opts.arrowClass || "";
       el.setupStyle(`

@@ -56,6 +56,8 @@ export namespace WUPPopup {
     hoverHideTimeout: number;
     /** Debounce option for onFocustLost event (for ShowCases.onFocus); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost; Default is 100ms */
     focusDebounceMs?: number;
+    /** Set true to show arrow with popup; @false by default */
+    arrowEnable: boolean;
     /** Setup arrow class and use :before to add background-image or content */
     arrowClass?: string;
     /** Alternative of margin for targetElement related to arrow
