@@ -64,6 +64,7 @@ export default class WUPPopupElement<
     ],
     offset: [0, 0],
     arrowOffset: [0.5, 0.5],
+    // todo arrowSize ?
     toFitElement: document.body,
     minWidthByTarget: false,
     minHeightByTarget: false,
@@ -343,6 +344,7 @@ export default class WUPPopupElement<
   #scrollParent?: HTMLElement | null;
   // eslint-disable-next-line no-use-before-define
   #arrowElement?: WUPPopupArrowElement;
+  #borderRadius = 0;
 
   /** Override this method to prevent show; this method fires beofre willShow event;
    * @param showCase as reason of show()
@@ -404,6 +406,10 @@ export default class WUPPopupElement<
       `);
 
       this.#arrowElement = el;
+      this.#borderRadius = Math.max.apply(
+        this,
+        style.borderRadius.split(" ").map((s) => px2Number(s))
+      );
     }
 
     if (!this._opts.placement.length) {
@@ -636,12 +642,10 @@ export default class WUPPopupElement<
       !isOk && console.error(`${this.tagName}. Impossible to place without overflow`);
 
       if (this.#arrowElement) {
-        // if we have border-radius of popup we need to include in offset to prevent overflow between arrow and popup
-        const borderRadius = 6; // 6; // todo define border-radius
-
         // change arrowSize if it's bigger than popup
         const checkSize = (relatedSize: number) => {
-          const maxArrowSize = relatedSize - borderRadius * 2;
+          // if we have border-radius of popup we need to include in offset to prevent overflow between arrow and popup
+          const maxArrowSize = relatedSize - this.#borderRadius * 2;
           if (me.arrow.w > maxArrowSize) {
             me.arrow.w = maxArrowSize;
             me.arrow.h = maxArrowSize / 2;
@@ -655,15 +659,15 @@ export default class WUPPopupElement<
           checkSize(this.offsetWidth);
           pos.arrowLeft = t.left + t.width / 2 - me.arrow.w / 2; // attach to middle of target
           pos.arrowLeft = Math.min(
-            Math.max(pos.arrowLeft, pos.left + borderRadius), // align to popup
-            pos.left + this.offsetWidth - me.arrow.w - borderRadius // align to popup
+            Math.max(pos.arrowLeft, pos.left + this.#borderRadius), // align to popup
+            pos.left + this.offsetWidth - me.arrow.w - this.#borderRadius // align to popup
           );
         } else if (pos.arrowTop == null) {
           checkSize(this.offsetHeight);
           pos.arrowTop = t.top + t.height / 2 - me.arrow.h / 2; // attach to middle of target
           pos.arrowTop = Math.min(
-            Math.max(pos.arrowTop, pos.top + borderRadius + me.arrow.h / 2), // align to popup
-            pos.top + this.offsetHeight - borderRadius - me.arrow.w / 2 - me.arrow.h / 2 // align to popup
+            Math.max(pos.arrowTop, pos.top + this.#borderRadius + me.arrow.h / 2), // align to popup
+            pos.top + this.offsetHeight - this.#borderRadius - me.arrow.w / 2 - me.arrow.h / 2 // align to popup
           );
         }
         this.#arrowElement.style.transform = `translate(${pos.arrowLeft}px, ${pos.arrowTop}px) rotate(${pos.arrowAngle}deg)`;
