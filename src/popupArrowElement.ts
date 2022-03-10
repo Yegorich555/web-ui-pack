@@ -25,9 +25,9 @@ export default class WUPPopupArrowElement extends HTMLElement {
           wup-popup-arrow:before {
             content: "";
             display: block;
-            margin-top: calc(-50% - 1px);
-            width: calc(70.71067811865474% - 1px);
-            padding-top: calc(70.71067811865474% - 1px);
+            margin-top: -50%;
+            width: 70.71067811865474%;
+            padding-top: 70.71067811865474%;
             transform: rotate(45deg);
             box-sizing: content-box;
             box-shadow: 0 0 4px 0 #00000033;
@@ -36,7 +36,6 @@ export default class WUPPopupArrowElement extends HTMLElement {
       document.head.prepend(styleElement);
     }
     this.setupStyle = this.setupStyle.bind(this);
-
     this.attachShadow({ mode: "open" });
   }
 

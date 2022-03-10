@@ -343,7 +343,6 @@ export default class WUPPopupElement<
   #scrollParent?: HTMLElement | null;
   // eslint-disable-next-line no-use-before-define
   #arrowElement?: WUPPopupArrowElement;
-  #arrowSize: WUPPopupPlace.MeRect["arrow"] = undefined as any;
 
   /** Override this method to prevent show; this method fires beofre willShow event;
    * @param showCase as reason of show()
@@ -399,26 +398,12 @@ export default class WUPPopupElement<
     if (!this._opts.arrowClass) {
       const el = document.body.appendChild(document.createElement(WUPPopupArrowElement.tagName));
       el.className = this._opts.arrowClass || "";
-      el.style.width = "40px";
-      el.style.height = "20px";
       el.setupStyle(`
-        background-color:${"blue" || style.backgroundColor};
+        background-color:${style.backgroundColor};
         boder:${style.border};
       `);
 
       this.#arrowElement = el;
-      this.#arrowSize = {
-        h: el.offsetHeight,
-        w: el.offsetWidth,
-        offset: {
-          top: this._opts.arrowOffset[0],
-          right: this._opts.arrowOffset[1],
-          bottom: this._opts.arrowOffset[2] ?? this._opts.arrowOffset[0],
-          left: this._opts.arrowOffset[3] ?? this._opts.arrowOffset[1],
-        },
-      };
-    } else {
-      this.#arrowSize = { h: 0, w: 0, offset: { bottom: 0, left: 0, right: 0, top: 0 } };
     }
 
     if (!this._opts.placement.length) {
@@ -546,6 +531,10 @@ export default class WUPPopupElement<
     this.style.display = "block";
     this.style.maxHeight = ""; // resetting is required to get default size
     this.style.maxWidth = ""; // resetting is required to get default size
+    if (this.#arrowElement) {
+      this.#arrowElement.style.width = "";
+      this.#arrowElement.style.height = "";
+    }
 
     const me: WUPPopupPlace.MeRect = {
       // WARN: offsetSize is rounded so 105.2 >>> 105
@@ -560,7 +549,18 @@ export default class WUPPopupElement<
       },
       minH: this.#userSizes.minH,
       minW: this.#userSizes.minW,
-      arrow: this.#arrowSize,
+      arrow: this.#arrowElement
+        ? {
+            h: this.#arrowElement.offsetHeight,
+            w: this.#arrowElement.offsetWidth,
+            offset: {
+              top: this._opts.arrowOffset[0],
+              right: this._opts.arrowOffset[1],
+              bottom: this._opts.arrowOffset[2] ?? this._opts.arrowOffset[0],
+              left: this._opts.arrowOffset[3] ?? this._opts.arrowOffset[1],
+            },
+          }
+        : { h: 0, w: 0, offset: { bottom: 0, left: 0, right: 0, top: 0 } },
     };
 
     // check if target hidden by scrollParent
@@ -593,8 +593,12 @@ export default class WUPPopupElement<
 
     if (isHiddenByScroll) {
       this.style.display = ""; // hide popup if target hidden by scrollableParent
-    } else {
-      // todo hasOverflow is wrong when arrow exists
+      return;
+    }
+
+    let lastRule: WUPPopupPlace.PlaceFunc;
+
+    const process = () => {
       const hasOveflow = (p: WUPPopupPlace.Result, meSize: { w: number; h: number }): boolean =>
         p.left < fit.left ||
         p.top < fit.top ||
@@ -605,6 +609,7 @@ export default class WUPPopupElement<
 
       let pos: WUPPopupPlace.Result = <WUPPopupPlace.Result>{};
       const isOk = this.#placements.some((pfn) => {
+        lastRule = pfn;
         pos = pfn(t, me, fit);
         let ok = !hasOveflow(pos, me);
         if (ok) {
@@ -630,40 +635,45 @@ export default class WUPPopupElement<
       });
       !isOk && console.error(`${this.tagName}. Impossible to place without overflow`);
 
-      // transform has performance benefits in comparison with positioning
-      this.style.transform = `translate(${pos.left}px, ${pos.top}px)`;
       if (this.#arrowElement) {
         // if we have border-radius of popup we need to include in offset to prevent overflow between arrow and popup
         const borderRadius = 6; // 6; // todo define border-radius
+
+        // change arrowSize if it's bigger than popup
+        const checkSize = (relatedSize: number) => {
+          const maxArrowSize = relatedSize - borderRadius * 2;
+          if (me.arrow.w > maxArrowSize) {
+            me.arrow.w = maxArrowSize;
+            me.arrow.h = maxArrowSize / 2;
+            (this.#arrowElement as WUPPopupArrowElement).style.width = `${me.arrow.w}px`;
+            (this.#arrowElement as WUPPopupArrowElement).style.height = `${me.arrow.h}px`;
+            pos = lastRule(t, me, fit); // recalc position because size of arrow is changed
+          }
+        };
+
         if (pos.arrowLeft == null) {
-          // todo changing size affects on offset and positioning of element previously
-          // if (this.#arrowSize.rotatedW > this.offsetWidth) {
-          //   const max = this.offsetWidth / Math.sqrt(2);
-          //   this.#arrowElement.style.maxWidth = `${max}px`;
-          //   this.#arrowElement.style.maxHeight = `${max}px`;
-          // }
+          checkSize(this.offsetWidth);
           pos.arrowLeft = t.left + t.width / 2 - me.arrow.w / 2; // attach to middle of target
           pos.arrowLeft = Math.min(
-            Math.max(pos.arrowLeft, pos.left + borderRadius),
-            pos.left + this.offsetWidth - me.arrow.w - borderRadius
+            Math.max(pos.arrowLeft, pos.left + borderRadius), // align to popup
+            pos.left + this.offsetWidth - me.arrow.w - borderRadius // align to popup
           );
         } else if (pos.arrowTop == null) {
-          // todo changing size affects on offset and positioning of element previously
-          // if (this.#arrowSize.rotatedH > this.offsetHeight) {
-          //   const max = this.offsetHeight / Math.sqrt(2);
-          //   this.#arrowElement.style.maxWidth = `${max}px`;
-          //   this.#arrowElement.style.maxHeight = `${max}px`;
-          // }
+          checkSize(this.offsetHeight);
           pos.arrowTop = t.top + t.height / 2 - me.arrow.h / 2; // attach to middle of target
-          // pos.arrowTop = pos.top + dy; // attach to top side of target
           pos.arrowTop = Math.min(
-            Math.max(pos.arrowTop, pos.top + borderRadius + me.arrow.h / 2),
-            pos.top + this.offsetHeight - borderRadius - me.arrow.w / 2 - me.arrow.h / 2
+            Math.max(pos.arrowTop, pos.top + borderRadius + me.arrow.h / 2), // align to popup
+            pos.top + this.offsetHeight - borderRadius - me.arrow.w / 2 - me.arrow.h / 2 // align to popup
           );
         }
         this.#arrowElement.style.transform = `translate(${pos.arrowLeft}px, ${pos.arrowTop}px) rotate(${pos.arrowAngle}deg)`;
       }
-    }
+
+      // transform has performance benefits in comparison with positioning
+      this.style.transform = `translate(${pos.left}px, ${pos.top}px)`;
+    };
+
+    process();
 
     /* re-calc is required to avoid case when popup unexpectedly affects on layout:
       layout bug: Yscroll appears/disappears when display:flex; heigth:100vh > position:absolute; right:-10px */
