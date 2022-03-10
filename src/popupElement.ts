@@ -7,10 +7,7 @@ import { getBoundingInternalRect, PopupPlacements, px2Number, WUPPopupPlace } fr
 import findScrollParent from "./helpers/findScrollParent";
 
 export import ShowCases = WUPPopup.ShowCases;
-
-function degToRad(degree: number): number {
-  return (degree * Math.PI) / 180;
-}
+import WUPPopupArrowElement from "./popupArrowElement";
 
 /** PopupElement
  * @example
@@ -66,6 +63,7 @@ export default class WUPPopupElement<
       WUPPopupElement.$placements.$bottom.$middle.$adjust,
     ],
     offset: [0, 0],
+    arrowOffset: [0.5, 0.5],
     toFitElement: document.body,
     minWidthByTarget: false,
     minHeightByTarget: false,
@@ -74,9 +72,10 @@ export default class WUPPopupElement<
     hoverHideTimeout: 500,
   };
 
+  // todo change to getter otherwise memory consumption
   static style = `
       :host {
-        z-index: 99999;
+        z-index: 99998;
         display: none;
         position: fixed!important;
         top: 0; left: 0;
@@ -84,24 +83,12 @@ export default class WUPPopupElement<
         margin: 0!important;
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
-        box-shadow: 0px 1px 4px 0px #00000033;
+        box-shadow: 0 1px 4px 0 #00000033;
         background: white;
         text-overflow: ellipsis;
         overflow: auto;
       }
-      :host:before {
-        display: block;
-        top: 0; left: 0;
-        position: fixed;
-        width: 16px; height: 16px;
-        transform: translate(501.703px, 399.281px) rotate(-45deg);
-        box-sizing: border-box;
-
-        box-shadow: 0px 1px 4px 0px #00000033;
-        background: white;
-        //content: "";
-      }
-      `;
+     `;
 
   $options: WUPPopup.Options = {
     ...this.ctr.$defaults,
@@ -354,7 +341,8 @@ export default class WUPPopupElement<
   #prevRect?: DOMRect;
   #showCase?: WUPPopup.ShowCases;
   #scrollParent?: HTMLElement | null;
-  #arrowElement?: HTMLElement;
+  // eslint-disable-next-line no-use-before-define
+  #arrowElement?: WUPPopupArrowElement;
   #arrowSize: WUPPopupPlace.MeRect["arrow"] = undefined as any;
 
   /** Override this method to prevent show; this method fires beofre willShow event;
@@ -409,36 +397,28 @@ export default class WUPPopupElement<
     // get arrowSize
     // todo rollback after tests
     if (!this._opts.arrowClass) {
-      const el = document.body.appendChild(document.createElement("div"));
-      el.style.left = "0";
-      el.style.top = "0";
-      el.style.position = "fixed";
-      el.style.boxShadow = style.boxShadow;
-      el.style.border = style.border;
-      el.style.backgroundColor = style.backgroundColor;
-      el.style.width = "30px";
-      el.style.height = "30px";
-      // todo get previous rotate angle
-      el.style.transform = "rotate(45deg)";
+      const el = document.body.appendChild(document.createElement(WUPPopupArrowElement.tagName));
       el.className = this._opts.arrowClass || "";
+      el.style.width = "40px";
+      el.style.height = "20px";
+      el.setupStyle(`
+        background-color:${"blue" || style.backgroundColor};
+        boder:${style.border};
+      `);
 
-      el.style.background = "linear-gradient(#218ba3, #ff0808)"; // todo remove after tests
-
-      // get maxSize according to rotation
-      const rect = el.getBoundingClientRect();
       this.#arrowElement = el;
       this.#arrowSize = {
         h: el.offsetHeight,
         w: el.offsetWidth,
-        rotatedW: rect.width,
-        rotatedH: rect.height,
-        offsetX: rect.width / 2,
-        offsetY: rect.height / 2,
-        dy: (rect.height - el.offsetHeight) / 2,
-        dx: (rect.width - el.offsetWidth) / 2,
+        offset: {
+          top: this._opts.arrowOffset[0],
+          right: this._opts.arrowOffset[1],
+          bottom: this._opts.arrowOffset[2] ?? this._opts.arrowOffset[0],
+          left: this._opts.arrowOffset[3] ?? this._opts.arrowOffset[1],
+        },
       };
     } else {
-      this.#arrowSize = { offsetX: 0, offsetY: 0, h: 0, w: 0, dy: 0, dx: 0, rotatedW: 0, rotatedH: 0 };
+      this.#arrowSize = { h: 0, w: 0, offset: { bottom: 0, left: 0, right: 0, top: 0 } };
     }
 
     if (!this._opts.placement.length) {
@@ -567,7 +547,6 @@ export default class WUPPopupElement<
     this.style.maxHeight = ""; // resetting is required to get default size
     this.style.maxWidth = ""; // resetting is required to get default size
 
-    // todo $options.offsetArrow ?
     const me: WUPPopupPlace.MeRect = {
       // WARN: offsetSize is rounded so 105.2 >>> 105
       w: this.offsetWidth, // clientWidth doesn't include border-size
@@ -665,8 +644,8 @@ export default class WUPPopupElement<
           // }
           pos.arrowLeft = t.left + t.width / 2 - me.arrow.w / 2; // attach to middle of target
           pos.arrowLeft = Math.min(
-            Math.max(pos.arrowLeft, pos.left + me.arrow.dx + borderRadius),
-            pos.left + this.offsetWidth - me.arrow.w - me.arrow.dx - borderRadius
+            Math.max(pos.arrowLeft, pos.left + borderRadius),
+            pos.left + this.offsetWidth - me.arrow.w - borderRadius
           );
         } else if (pos.arrowTop == null) {
           // todo changing size affects on offset and positioning of element previously
@@ -678,11 +657,11 @@ export default class WUPPopupElement<
           pos.arrowTop = t.top + t.height / 2 - me.arrow.h / 2; // attach to middle of target
           // pos.arrowTop = pos.top + dy; // attach to top side of target
           pos.arrowTop = Math.min(
-            Math.max(pos.arrowTop, pos.top + me.arrow.dy + borderRadius),
-            pos.top + this.offsetHeight - me.arrow.h - me.arrow.dy - borderRadius
+            Math.max(pos.arrowTop, pos.top + borderRadius + me.arrow.h / 2),
+            pos.top + this.offsetHeight - borderRadius - me.arrow.w / 2 - me.arrow.h / 2
           );
         }
-        this.#arrowElement.style.transform = `translate(${pos.arrowLeft}px, ${pos.arrowTop}px) rotate(${pos.arrowRotate}deg)`;
+        this.#arrowElement.style.transform = `translate(${pos.arrowLeft}px, ${pos.arrowTop}px) rotate(${pos.arrowAngle}deg)`;
       }
     }
 

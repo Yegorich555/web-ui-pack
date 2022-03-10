@@ -7,7 +7,7 @@ export namespace WUPPopupPlace {
     /** Available space including alignment start/left/middle */
     freeW: number;
     arrowLeft: number;
-    arrowRotate: number;
+    arrowAngle: number;
   }
   export interface YResult {
     top: number;
@@ -16,7 +16,7 @@ export namespace WUPPopupPlace {
     /** Available space including alignment start/left/middle */
     freeH: number;
     arrowTop: number;
-    arrowRotate: number;
+    arrowAngle: number;
   }
   export interface Result extends XResult, YResult {}
 
@@ -35,14 +35,9 @@ export namespace WUPPopupPlace {
     minW: number;
     minH: number;
     arrow: {
-      offsetX: number;
-      offsetY: number;
-      dy: number;
-      dx: number;
       h: number;
       w: number;
-      rotatedW: number;
-      rotatedH: number;
+      offset: { top: number; right: number; bottom: number; left: number };
     };
   }
 
@@ -103,12 +98,14 @@ export function getBoundingInternalRect(el: HTMLElement): Omit<DOMRect, "toJSON"
 }
 
 const yAdjust = <WUPPopupPlace.AdjustFunc>function yAdjust(this: WUPPopupPlace.Result, _t, me, fit) {
-  this.top = this.top < fit.top ? fit.top : Math.min(this.top, fit.bottom - me.h);
+  const arrowFree = me.arrow.h;
+  this.top = Math.max(fit.top - arrowFree, Math.min(this.top, fit.bottom - me.h + arrowFree));
   return this;
 };
 
 export const xAdjust = <WUPPopupPlace.AdjustFunc>function xAdjust(this: WUPPopupPlace.Result, _t, me, fit) {
-  this.left = this.left < fit.left ? fit.left : Math.min(this.left, fit.right - me.w);
+  const arrowFree = me.arrow.h;
+  this.left = Math.max(fit.left - arrowFree, Math.min(this.left, fit.right - me.w + arrowFree));
   return this;
 };
 
@@ -144,12 +141,11 @@ const resizeWidth = <WUPPopupPlace.PlaceFunc>function resizeWidth(this: WUPPopup
 
 const $top = <WUPPopupPlace.EdgeFunc>(
   function top(this: WUPPopupPlace.Result, t, me, fit): ReturnType<WUPPopupPlace.EdgeFunc> {
-    const freeH = t.top - me.offset.top - fit.top;
     return {
-      top: t.top - me.offset.top - me.h - me.arrow.offsetY,
-      freeH,
-      arrowTop: t.top - me.offset.top - me.arrow.h - me.arrow.dy,
-      arrowRotate: 45,
+      top: t.top - me.offset.top - me.h - me.arrow.h,
+      freeH: t.top - me.offset.top - fit.top,
+      arrowTop: t.top - me.offset.top - me.arrow.h - me.arrow.offset.top,
+      arrowAngle: 0,
     };
   }
 );
@@ -174,12 +170,11 @@ $top.$middle.$adjust = xAdjust;
 $top.$end.$adjust = xAdjust;
 
 const $bottom = <WUPPopupPlace.EdgeFunc>function bottom(t, me, fit): ReturnType<WUPPopupPlace.EdgeFunc> {
-  const freeH = fit.bottom - me.offset.bottom - t.bottom;
   return {
-    top: t.bottom + me.offset.bottom + me.arrow.offsetY,
-    freeH,
-    arrowTop: t.bottom + me.offset.bottom + me.arrow.dy,
-    arrowRotate: 225,
+    top: t.bottom + me.offset.bottom + me.arrow.h,
+    freeH: fit.bottom - me.offset.bottom - t.bottom,
+    arrowTop: t.bottom + me.offset.bottom + me.arrow.offset.bottom,
+    arrowAngle: 180,
   };
 };
 $bottom.$start = $top.$start;
@@ -189,10 +184,10 @@ $bottom.$end = $top.$end;
 const $left = <WUPPopupPlace.EdgeFunc>function left(t, me, fit): ReturnType<WUPPopupPlace.EdgeFunc> {
   const freeW = t.left - me.offset.left - fit.left;
   return {
-    left: t.left - me.offset.left - me.w - me.arrow.offsetX,
+    left: t.left - me.offset.left - me.w - me.arrow.h,
     freeW,
-    arrowRotate: -45,
-    arrowLeft: t.left - me.offset.left - me.arrow.h - me.arrow.dx,
+    arrowAngle: -90,
+    arrowLeft: t.left - me.offset.left - me.arrow.h - (me.arrow.w - me.arrow.h) / 2 - me.arrow.offset.left,
   };
 };
 $left.$start = <WUPPopupPlace.AlignFunc>function xStart(this: WUPPopupPlace.Result, t, _me, fit) {
@@ -215,12 +210,11 @@ $left.$middle.$adjust = yAdjust;
 $left.$end.$adjust = yAdjust;
 
 const $right = <WUPPopupPlace.EdgeFunc>function right(t, me, fit): ReturnType<WUPPopupPlace.EdgeFunc> {
-  const freeW = fit.right - t.right - me.offset.right;
   return {
-    left: t.right + me.offset.right + me.arrow.offsetY,
-    freeW,
-    arrowRotate: 135,
-    arrowLeft: t.right + me.offset.right + me.arrow.dx,
+    left: t.right + me.offset.right + me.arrow.h,
+    freeW: fit.right - t.right - me.offset.right,
+    arrowAngle: 90,
+    arrowLeft: t.right + me.offset.right - (me.arrow.w - me.arrow.h) / 2 + me.arrow.offset.right,
   };
 };
 $right.$start = $left.$start;

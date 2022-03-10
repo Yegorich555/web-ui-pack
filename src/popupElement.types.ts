@@ -58,6 +58,9 @@ export namespace WUPPopup {
     focusDebounceMs?: number;
     /** Setup arrow class and use :before to add background-image or content */
     arrowClass?: string;
+    /** Alternative of margin for targetElement related to arrow
+     *  [top, right, bottom, left] or [top/bottom, right/left] in px */
+    arrowOffset: [number, number, number, number] | [number, number];
   }
 
   export interface EventMap extends WUP.EventMap {
