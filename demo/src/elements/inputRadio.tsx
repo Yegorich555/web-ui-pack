@@ -3,8 +3,9 @@ interface Props {
   items: Array<{ label: string; value: any }>;
   defaultValue: any;
   onChange: (v: any) => void;
+  label: string;
 }
-export default function InputRadio({ items, defaultValue, onChange }: Props) {
+export default function InputRadio({ items, defaultValue, onChange, label }: Props) {
   return (
     <fieldset
       onChange={(e) => {
@@ -12,6 +13,7 @@ export default function InputRadio({ items, defaultValue, onChange }: Props) {
         onChange(items[+v].value);
       }}
     >
+      <legend>{label}</legend>
       {items.map((x, i) => (
         <label key={x.value}>
           {x.label}
