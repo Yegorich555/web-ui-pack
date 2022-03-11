@@ -73,8 +73,8 @@ export default class WUPPopupElement<
     hoverHideTimeout: 500,
   };
 
-  // todo change to getter otherwise memory consumption
-  static style = `
+  static get style(): string {
+    return `
       :host {
         z-index: 99998;
         display: none;
@@ -90,6 +90,7 @@ export default class WUPPopupElement<
         overflow: auto;
       }
      `;
+  }
 
   $options: WUPPopup.Options = {
     ...this.ctr.$defaults,

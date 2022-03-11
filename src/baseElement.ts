@@ -21,7 +21,9 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   static observedOptions?: Set<keyof Record<string, any>>;
 
   /** StyleContent related to component */
-  static style = "";
+  static get style(): string {
+    return "";
+  }
 
   /** Options that applied to element */
   abstract $options: Record<string, any>;
