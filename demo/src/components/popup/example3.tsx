@@ -8,7 +8,7 @@ export default function Example3() {
     <>
       <h3>Example 3</h3>
       <small>
-        Default behavior. You can change position behavior/priority with option <b>placement</b>
+        You can change position behavior/priority with option <b>placement</b>
       </small>
       <div className={styles.fitBlock} id="fit2">
         <button

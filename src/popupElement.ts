@@ -63,7 +63,7 @@ export default class WUPPopupElement<
       WUPPopupElement.$placements.$bottom.$middle.$adjust,
     ],
     offset: [0, 0],
-    arrowEnable: true, // todo rollback after tests
+    arrowEnable: false,
     arrowOffset: [0.5, 0.5],
     toFitElement: document.body,
     minWidthByTarget: false,

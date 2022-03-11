@@ -19,7 +19,6 @@ export default function Example4() {
               el.$options.placement = [
                 WUPPopupElement.$placements.$left.$middle,
                 WUPPopupElement.$placements.$top.$middle,
-                // uncoment after tests
                 // WUPPopupElement.$placements.$top.$middle,
                 // WUPPopupElement.$placements.$bottom.$middle,
               ];
