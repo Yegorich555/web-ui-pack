@@ -5,7 +5,8 @@ import styles from "./popupView.scss";
 
 export default function Example4() {
   useEffect(() => {
-    document.querySelector("main")?.scrollTo({ top: 150 });
+    // 15-
+    document.querySelector("main")?.scrollTo({ top: 280 });
   }, []);
   return (
     <>
@@ -20,6 +21,7 @@ export default function Example4() {
           setTimeout(() => {
             el?.scrollTo({ top: 53 });
           }, 200);
+          // window.temp1 = el;
         }}
       >
         <button type="button" className={styles.trg2}>
@@ -28,6 +30,7 @@ export default function Example4() {
         <wup-popup
           ref={(el) => {
             if (el) {
+              el.test = true;
               el.$options.placement = [
                 WUPPopupElement.$placements.$left.$middle,
                 WUPPopupElement.$placements.$top.$middle,

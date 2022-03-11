@@ -340,7 +340,7 @@ export default class WUPPopupElement<
   } = undefined as any;
 
   #placements: Array<WUPPopupPlace.PlaceFunc> = [];
-  #prevRect?: DOMRect & { cnt: number };
+  #prevRect?: DOMRect;
   #showCase?: WUPPopup.ShowCases;
   #scrollParent?: HTMLElement | null;
   // eslint-disable-next-line no-use-before-define
@@ -505,7 +505,6 @@ export default class WUPPopupElement<
   #updatePosition = () => {
     const t = (this._opts.target as HTMLElement).getBoundingClientRect() as WUPPopupPlace.Rect;
     t.el = this._opts.target as HTMLElement;
-    let cnt = this.#prevRect?.cnt || 0;
     if (
       // issue: it's wrong if minWidth, minHeight etc. is changed and doesn't affect on layout sizes directly
       this.#prevRect &&
@@ -514,12 +513,7 @@ export default class WUPPopupElement<
       this.#prevRect.width === t.width &&
       this.#prevRect.height === t.height
     ) {
-      if (cnt === 2) {
-        // this is helps to fix issue when user scrolls and somehow prevRect is wrong
-        return;
-      }
-    } else {
-      cnt = 0;
+      return;
     }
 
     if (this._opts.minWidthByTarget) {
@@ -542,6 +536,7 @@ export default class WUPPopupElement<
     this.style.maxHeight = ""; // resetting is required to get default size
     this.style.maxWidth = ""; // resetting is required to get default size
     if (this.#arrowElement) {
+      this.#arrowElement.style.display = "";
       this.#arrowElement.style.width = "";
       this.#arrowElement.style.height = "";
     }
@@ -599,12 +594,11 @@ export default class WUPPopupElement<
       }
     }
 
-    if (this.#arrowElement) {
-      this.#arrowElement.style.display = isHiddenByScroll ? "none" : "";
-    }
-
     if (isHiddenByScroll) {
       this.style.display = ""; // hide popup if target hidden by scrollableParent
+      if (this.#arrowElement) {
+        this.#arrowElement.style.display = "none";
+      }
       return;
     }
 
@@ -689,8 +683,7 @@ export default class WUPPopupElement<
       layout bug: Yscroll appears/disappears when display:flex; heigth:100vh > position:absolute; right:-10px
       issue: posible with cnt==2 issue will be reproduced
       */
-    this.#prevRect = t.el.getBoundingClientRect() as DOMRect & { cnt: number };
-    this.#prevRect.cnt = ++cnt;
+    this.#prevRect = t.el.getBoundingClientRect();
   };
 
   protected override gotRemoved() {
