@@ -34,9 +34,7 @@ export default function PopupView() {
     setOpts({ arrowOffset: o });
   }
 
-  setTimeout(() => {
-    setOpts(opts);
-  });
+  setTimeout(() => setOpts(opts));
 
   return (
     <Page header="PopupElement" link="#features">

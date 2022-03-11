@@ -340,7 +340,7 @@ export default class WUPPopupElement<
   } = undefined as any;
 
   #placements: Array<WUPPopupPlace.PlaceFunc> = [];
-  #prevRect?: DOMRect;
+  #prevRect?: DOMRect & { cnt: number };
   #showCase?: WUPPopup.ShowCases;
   #scrollParent?: HTMLElement | null;
   // eslint-disable-next-line no-use-before-define
@@ -505,17 +505,21 @@ export default class WUPPopupElement<
   #updatePosition = () => {
     const t = (this._opts.target as HTMLElement).getBoundingClientRect() as WUPPopupPlace.Rect;
     t.el = this._opts.target as HTMLElement;
+    let cnt = this.#prevRect?.cnt || 0;
     if (
       // issue: it's wrong if minWidth, minHeight etc. is changed and doesn't affect on layout sizes directly
-      !(
-        !this.#prevRect ||
-        this.#prevRect.top !== t.top ||
-        this.#prevRect.left !== t.left ||
-        this.#prevRect.width !== t.width ||
-        this.#prevRect.height !== t.height
-      )
+      this.#prevRect &&
+      this.#prevRect.top === t.top &&
+      this.#prevRect.left === t.left &&
+      this.#prevRect.width === t.width &&
+      this.#prevRect.height === t.height
     ) {
-      return;
+      if (cnt === 2) {
+        // this is helps to fix issue when user scrolls and somehow prevRect is wrong
+        return;
+      }
+    } else {
+      cnt = 0;
     }
 
     if (this._opts.minWidthByTarget) {
@@ -573,23 +577,25 @@ export default class WUPPopupElement<
     let isHiddenByScroll = false;
     if (this.#scrollParent) {
       // WARN: scrollEl for X and Y can be different
-      const scrollRect = this.#scrollParent.getBoundingClientRect();
+      const scrollRect = getBoundingInternalRect(this.#scrollParent);
       isHiddenByScroll =
         scrollRect.top >= t.bottom ||
         scrollRect.bottom <= t.top ||
         scrollRect.left >= t.right ||
         scrollRect.right <= t.left;
+      // todo possible hidden by the main (parentScroll of parentScroll)
       if (!isHiddenByScroll) {
         // fix cases when target is partiallyHidden by scrollableParent
-        if (scrollRect.top > t.top) {
-          fit.top = scrollRect.top;
-        } else if (scrollRect.bottom < t.bottom) {
-          fit.bottom = scrollRect.bottom;
-        } else if (scrollRect.left > t.left) {
-          fit.left = scrollRect.left;
-        } else if (scrollRect.right < t.right) {
-          fit.right = scrollRect.right;
-        }
+        // todo uncomment after tests
+        // if (scrollRect.top > t.top) {
+        //   fit.top = scrollRect.top;
+        // } else if (scrollRect.bottom < t.bottom) {
+        //   fit.bottom = scrollRect.bottom;
+        // } else if (scrollRect.left > t.left) {
+        //   fit.left = scrollRect.left;
+        // } else if (scrollRect.right < t.right) {
+        //   fit.right = scrollRect.right;
+        // }
       }
     }
 
@@ -680,8 +686,11 @@ export default class WUPPopupElement<
     process();
 
     /* re-calc is required to avoid case when popup unexpectedly affects on layout:
-      layout bug: Yscroll appears/disappears when display:flex; heigth:100vh > position:absolute; right:-10px */
-    this.#prevRect = t.el.getBoundingClientRect();
+      layout bug: Yscroll appears/disappears when display:flex; heigth:100vh > position:absolute; right:-10px
+      issue: posible with cnt==2 issue will be reproduced
+      */
+    this.#prevRect = t.el.getBoundingClientRect() as DOMRect & { cnt: number };
+    this.#prevRect.cnt = ++cnt;
   };
 
   protected override gotRemoved() {
