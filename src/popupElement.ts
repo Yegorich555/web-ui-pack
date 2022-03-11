@@ -639,7 +639,7 @@ export default class WUPPopupElement<
         }
         return ok;
       });
-      !isOk && console.error(`${this.tagName}. Impossible to place without overflow`);
+      !isOk && console.error(`${this.tagName}. Impossible to place without overflow`, this);
 
       if (this.#arrowElement) {
         // change arrowSize if it's bigger than popup
