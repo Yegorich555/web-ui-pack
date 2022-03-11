@@ -24,13 +24,19 @@ export default function Example4() {
           // window.temp1 = el;
         }}
       >
-        <button type="button" className={styles.trg2}>
+        <button
+          type="button"
+          className={styles.trg2}
+          ref={(el) => {
+            // el.style.transform = "translate(-38px, 10px)";
+            // el.style.margin = "20px 0";
+          }}
+        >
           Target
         </button>
         <wup-popup
           ref={(el) => {
             if (el) {
-              el.test = true;
               el.$options.placement = [
                 WUPPopupElement.$placements.$left.$middle,
                 WUPPopupElement.$placements.$top.$middle,

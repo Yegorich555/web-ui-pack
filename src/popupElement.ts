@@ -408,6 +408,7 @@ export default class WUPPopupElement<
       this.#arrowElement = el;
       this.#borderRadius = Math.max.apply(
         this,
+        // todo borderRadius is '' in Firefox need to use borderBottomLeftRadius etc.
         style.borderRadius.split(" ").map((s) => px2Number(s))
       );
     }
@@ -581,16 +582,20 @@ export default class WUPPopupElement<
       // todo possible hidden by the main (parentScroll of parentScroll)
       if (!isHiddenByScroll) {
         // fix cases when target is partiallyHidden by scrollableParent
-        // todo uncomment after tests
-        // if (scrollRect.top > t.top) {
-        //   fit.top = scrollRect.top;
-        // } else if (scrollRect.bottom < t.bottom) {
-        //   fit.bottom = scrollRect.bottom;
-        // } else if (scrollRect.left > t.left) {
-        //   fit.left = scrollRect.left;
-        // } else if (scrollRect.right < t.right) {
-        //   fit.right = scrollRect.right;
-        // }
+        // todo if height/width is very small we should change another side
+        if (scrollRect.top > t.top) {
+          Object.defineProperty(t, "top", { get: () => scrollRect.top });
+          Object.defineProperty(t, "height", { get: () => t.bottom - scrollRect.top });
+        } else if (scrollRect.bottom < t.bottom) {
+          Object.defineProperty(t, "bottom", { get: () => scrollRect.bottom });
+          Object.defineProperty(t, "height", { get: () => scrollRect.bottom - t.top });
+        } else if (scrollRect.left > t.left) {
+          Object.defineProperty(t, "left", { get: () => scrollRect.left });
+          Object.defineProperty(t, "width", { get: () => t.right - scrollRect.left });
+        } else if (scrollRect.right < t.right) {
+          Object.defineProperty(t, "right", { get: () => scrollRect.right });
+          Object.defineProperty(t, "width", { get: () => scrollRect.right - t.left });
+        }
       }
     }
 
