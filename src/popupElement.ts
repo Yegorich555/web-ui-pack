@@ -342,7 +342,7 @@ export default class WUPPopupElement<
   #placements: Array<WUPPopupPlace.PlaceFunc> = [];
   #prevRect?: DOMRect;
   #showCase?: WUPPopup.ShowCases;
-  #scrollParent?: HTMLElement | null;
+  #scrollParent?: HTMLElement[];
   // eslint-disable-next-line no-use-before-define
   #arrowElement?: WUPPopupArrowElement;
   #borderRadius = 0;
@@ -394,7 +394,16 @@ export default class WUPPopupElement<
       maxH: px2Number(style.maxHeight) || Number.MAX_SAFE_INTEGER,
       minH: Math.max(5, px2Number(style.paddingTop) + px2Number(style.paddingBottom), px2Number(style.minHeight)),
     };
-    this.#scrollParent = findScrollParent(this._opts.target as HTMLElement);
+
+    this.#scrollParent = [];
+    // eslint-disable-next-line no-constant-condition
+    let l = this._opts.target;
+    while (l && l !== document.body.parentElement) {
+      const s = findScrollParent(l);
+      s && this.#scrollParent.push(s);
+      l = l.parentElement;
+    }
+    this.#scrollParent = this.#scrollParent.length ? this.#scrollParent : undefined;
 
     // get arrowSize
     if (this._opts.arrowEnable) {
@@ -570,41 +579,37 @@ export default class WUPPopupElement<
     };
 
     // check if target hidden by scrollParent
-    let isHiddenByScroll = false;
     if (this.#scrollParent) {
-      // WARN: scrollEl for X and Y can be different
-      const scrollRect = getBoundingInternalRect(this.#scrollParent);
-      isHiddenByScroll =
+      const scrollRect = getBoundingInternalRect(this.#scrollParent[0]);
+      const isHiddenByScroll =
         scrollRect.top >= t.bottom ||
         scrollRect.bottom <= t.top ||
         scrollRect.left >= t.right ||
         scrollRect.right <= t.left;
       // todo possible hidden by the main (parentScroll of parentScroll)
-      if (!isHiddenByScroll) {
-        // fix cases when target is partiallyHidden by scrollableParent
-        // todo if height/width is very small we should change another side
-        if (scrollRect.top > t.top) {
-          Object.defineProperty(t, "top", { get: () => scrollRect.top });
-          Object.defineProperty(t, "height", { get: () => t.bottom - scrollRect.top });
-        } else if (scrollRect.bottom < t.bottom) {
-          Object.defineProperty(t, "bottom", { get: () => scrollRect.bottom });
-          Object.defineProperty(t, "height", { get: () => scrollRect.bottom - t.top });
-        } else if (scrollRect.left > t.left) {
-          Object.defineProperty(t, "left", { get: () => scrollRect.left });
-          Object.defineProperty(t, "width", { get: () => t.right - scrollRect.left });
-        } else if (scrollRect.right < t.right) {
-          Object.defineProperty(t, "right", { get: () => scrollRect.right });
-          Object.defineProperty(t, "width", { get: () => scrollRect.right - t.left });
-        }
-      }
-    }
 
-    if (isHiddenByScroll) {
-      this.style.display = ""; // hide popup if target hidden by scrollableParent
-      if (this.#arrowElement) {
-        this.#arrowElement.style.display = "none";
+      if (isHiddenByScroll) {
+        this.style.display = ""; // hide popup if target hidden by scrollableParent
+        if (this.#arrowElement) {
+          this.#arrowElement.style.display = "none";
+        }
+        return;
       }
-      return;
+      // fix cases when target is partiallyHidden by scrollableParent
+      // todo if height/width is very small we should use another side
+      if (scrollRect.top > t.top) {
+        Object.defineProperty(t, "top", { get: () => scrollRect.top });
+        Object.defineProperty(t, "height", { get: () => t.bottom - scrollRect.top });
+      } else if (scrollRect.bottom < t.bottom) {
+        Object.defineProperty(t, "bottom", { get: () => scrollRect.bottom });
+        Object.defineProperty(t, "height", { get: () => scrollRect.bottom - t.top });
+      } else if (scrollRect.left > t.left) {
+        Object.defineProperty(t, "left", { get: () => scrollRect.left });
+        Object.defineProperty(t, "width", { get: () => t.right - scrollRect.left });
+      } else if (scrollRect.right < t.right) {
+        Object.defineProperty(t, "right", { get: () => scrollRect.right });
+        Object.defineProperty(t, "width", { get: () => scrollRect.right - t.left });
+      }
     }
 
     let lastRule: WUPPopupPlace.PlaceFunc;
@@ -653,7 +658,7 @@ export default class WUPPopupElement<
           const maxArrowSize = relatedSize - this.#borderRadius * 2;
           if (me.arrow.w > maxArrowSize) {
             me.arrow.w = maxArrowSize;
-            me.arrow.h = maxArrowSize / 2;
+            me.arrow.h = maxArrowSize / 2; // todo calc ratio before because user can use another !!!
             (this.#arrowElement as WUPPopupArrowElement).style.width = `${me.arrow.w}px`;
             (this.#arrowElement as WUPPopupArrowElement).style.height = `${me.arrow.h}px`;
             pos = lastRule(t, me, fit); // recalc position because size of arrow is changed

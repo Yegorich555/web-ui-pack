@@ -6,7 +6,7 @@ import styles from "./popupView.scss";
 export default function Example4() {
   useEffect(() => {
     // 15-
-    document.querySelector("main")?.scrollTo({ top: 280 });
+    document.querySelector("main")?.scrollTo({ top: 80 });
   }, []);
   return (
     <>
