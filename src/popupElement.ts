@@ -417,7 +417,6 @@ export default class WUPPopupElement<
       this.#arrowElement = el;
       this.#borderRadius = Math.max.apply(
         this,
-        // todo borderRadius is '' in Firefox need to use borderBottomLeftRadius etc.
         style.borderRadius.split(" ").map((s) => px2Number(s))
       );
     }
@@ -605,17 +604,20 @@ export default class WUPPopupElement<
       const scrollRect = getBoundingInternalRect(this.#scrollParents[0]);
 
       // fix cases when target is partiallyHidden by scrollableParent
-      // todo if height/width is very small we should use another side
+      // suggestion: if height/width is very small we can use another side
       if (scrollRect.top > t.top) {
         Object.defineProperty(t, "top", { get: () => scrollRect.top });
         Object.defineProperty(t, "height", { get: () => t.bottom - scrollRect.top });
-      } else if (scrollRect.bottom < t.bottom) {
+      }
+      if (scrollRect.bottom < t.bottom) {
         Object.defineProperty(t, "bottom", { get: () => scrollRect.bottom });
         Object.defineProperty(t, "height", { get: () => scrollRect.bottom - t.top });
-      } else if (scrollRect.left > t.left) {
+      }
+      if (scrollRect.left > t.left) {
         Object.defineProperty(t, "left", { get: () => scrollRect.left });
         Object.defineProperty(t, "width", { get: () => t.right - scrollRect.left });
-      } else if (scrollRect.right < t.right) {
+      }
+      if (scrollRect.right < t.right) {
         Object.defineProperty(t, "right", { get: () => scrollRect.right });
         Object.defineProperty(t, "width", { get: () => scrollRect.right - t.left });
       }
@@ -667,7 +669,7 @@ export default class WUPPopupElement<
           const maxArrowSize = relatedSize - this.#borderRadius * 2;
           if (me.arrow.w > maxArrowSize) {
             me.arrow.w = maxArrowSize;
-            me.arrow.h = maxArrowSize / 2; // todo calc ratio before because user can use another !!!
+            me.arrow.h = maxArrowSize / 2;
             (this.#arrowElement as WUPPopupArrowElement).style.width = `${me.arrow.w}px`;
             (this.#arrowElement as WUPPopupArrowElement).style.height = `${me.arrow.h}px`;
             pos = lastRule(t, me, fit); // recalc position because size of arrow is changed
@@ -760,3 +762,4 @@ declare global {
 // todo WUPPopupElement.attach(target, options) - attach to target but render only by show
 // todo describe issue in readme.md: in react nearest target can be changed but popup can't detect it -- for this case we need to add method $refresh()
 // todo develop animation
+// todo use attrs `top left bottom right` to show direction ???

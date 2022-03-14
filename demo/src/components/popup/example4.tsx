@@ -5,8 +5,7 @@ import styles from "./popupView.scss";
 
 export default function Example4() {
   useEffect(() => {
-    // 15-
-    document.querySelector("main")?.scrollTo({ top: 80 });
+    document.querySelector("main")?.scrollTo({ top: 380 });
   }, []);
   return (
     <>
@@ -21,15 +20,16 @@ export default function Example4() {
           setTimeout(() => {
             el?.scrollTo({ top: 53 });
           }, 200);
-          // window.temp1 = el;
         }}
       >
         <button
           type="button"
           className={styles.trg2}
           ref={(el) => {
-            // el.style.transform = "translate(-38px, 10px)";
-            // el.style.margin = "20px 0";
+            if (el) {
+              el.style.transform = "translate(-38px, 10px)";
+              el.style.margin = "20px 0";
+            }
           }}
         >
           Target
@@ -38,10 +38,10 @@ export default function Example4() {
           ref={(el) => {
             if (el) {
               el.$options.placement = [
-                WUPPopupElement.$placements.$left.$middle,
-                WUPPopupElement.$placements.$top.$middle,
+                // WUPPopupElement.$placements.$left.$middle,
                 // WUPPopupElement.$placements.$top.$middle,
-                // WUPPopupElement.$placements.$bottom.$middle,
+                WUPPopupElement.$placements.$top.$middle,
+                WUPPopupElement.$placements.$bottom.$middle,
               ];
               el.$options.showCase = ShowCases.always;
             }

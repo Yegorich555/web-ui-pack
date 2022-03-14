@@ -58,7 +58,8 @@ export namespace WUPPopup {
     focusDebounceMs?: number;
     /** Set true to show arrow with popup; @false by default */
     arrowEnable: boolean;
-    /** Setup arrow class and use :before to add background-image or content */
+    /** Setup arrow class and use :before to add background-image or content;
+     * Limitation: arrow developed with ratio 2:1(w:h). You can't change it directly. Use only :before, :after to reach you goal */
     arrowClass?: string;
     /** Alternative of margin for targetElement related to arrow
      *  [top, right, bottom, left] or [top/bottom, right/left] in px */
