@@ -408,7 +408,9 @@ export default class WUPPopupElement<
     // get arrowSize
     if (this._opts.arrowEnable) {
       const el = document.body.appendChild(document.createElement(WUPPopupArrowElement.tagName));
-      el.className = this._opts.arrowClass || "";
+      if (this._opts.arrowClass) {
+        el.className = this._opts.arrowClass;
+      }
       el.setupStyle(`
         background-color:${style.backgroundColor};
         boder:${style.border};
