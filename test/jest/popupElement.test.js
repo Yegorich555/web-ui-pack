@@ -884,8 +884,16 @@ describe("popupElement", () => {
     // make body as scrollable
     const dy = 10;
     const dx = 5;
-    jest.spyOn(document.body, "scrollHeight", "get").mockReturnValue(document.body.clientHeight + dy);
     jest.spyOn(document.body, "scrollWidth", "get").mockReturnValue(document.body.clientWidth + dx);
+    const orig = window.getComputedStyle;
+    jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
+      const o = orig(elem);
+      if (elem === document.body) {
+        o.overflowX = "auto";
+      }
+      return o;
+    });
+
     const rectBody = document.body.getBoundingClientRect();
     jest.spyOn(document.body, "getBoundingClientRect").mockReturnValue({
       ...rectBody,
@@ -908,12 +916,30 @@ describe("popupElement", () => {
     };
     jest.spyOn(trg, "getBoundingClientRect").mockReturnValue(trgRect);
 
+    // check with overflowX
+    el.$options.placement = [WUPPopupElement.$placements.$top.$middle];
+    jest.advanceTimersByTime(10);
+    // no place at the top
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"transform: translate(52.5px, 50px); display: block;\\"></wup-popup>"`
+    );
+
+    // check with overflowY
+    jest.spyOn(document.body, "scrollHeight", "get").mockReturnValue(document.body.clientHeight + dy);
+    jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
+      const o = orig(elem);
+      if (elem === document.body) {
+        o.overflowY = "auto";
+      }
+      return o;
+    });
+
     // cover case when target is partiallyHidden by scrollable parent
     el.$options.placement = [WUPPopupElement.$placements.$top.$middle];
     jest.advanceTimersByTime(10);
     // no place at the top
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(50px, 50px); display: block;\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(52.5px, 50px); display: block;\\"></wup-popup>"`
     );
 
     jest.spyOn(document.body, "getBoundingClientRect").mockReturnValue({
@@ -925,7 +951,7 @@ describe("popupElement", () => {
     jest.advanceTimersByTime(10);
     // no place at the bottom
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(100px, 25px); display: block;\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(52.5px, 10px); display: block;\\"></wup-popup>"`
     );
 
     jest.spyOn(document.body, "getBoundingClientRect").mockReturnValue({
@@ -937,7 +963,7 @@ describe("popupElement", () => {
     jest.advanceTimersByTime(10);
     // no place at the left
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(50px, 50px); display: block;\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(52.5px, 10px); display: block;\\"></wup-popup>"`
     );
 
     jest.spyOn(document.body, "getBoundingClientRect").mockReturnValue({
@@ -949,7 +975,65 @@ describe("popupElement", () => {
     jest.advanceTimersByTime(10);
     // no place at the right
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(50px, 50px); display: block;\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(52.5px, 10px); display: block;\\"></wup-popup>"`
+    );
+
+    // checking hidden by scroll > popup also hidden
+    // target hidden at the top of scrollable content
+    jest.spyOn(document.body, "getBoundingClientRect").mockReturnValue({
+      ...rectBody,
+      height: trgRect.height * 4,
+      top: trgRect.bottom,
+    });
+    el.$options.placement = [WUPPopupElement.$placements.$top.$middle];
+    jest.advanceTimersByTime(10);
+    // target hidden > popup hidden
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"transform: translate(52.5px, 10px);\\"></wup-popup>"`
+    );
+    el.$options.arrowEnable = true; // checking if arrow is hidden also
+    el.$options.placement = [WUPPopupElement.$placements.$top.$middle];
+    jest.advanceTimersByTime(10);
+    expect(document.body.outerHTML).toMatchInlineSnapshot(
+      `"<body><div id=\\"targetId\\">some text</div><wup-popup style=\\"transform: translate(52.5px, 10px);\\"></wup-popup><wup-popup-arrow style=\\"display: none;\\"></wup-popup-arrow></body>"`
+    );
+    el.$options.arrowEnable = false;
+
+    // target is partially hidden at the bottom of scrollable content
+    jest.spyOn(document.body, "getBoundingClientRect").mockReturnValue({
+      ...rectBody,
+      height: trgRect.height,
+    });
+    jest.spyOn(document.body, "clientHeight", "get").mockReturnValue(trgRect.height);
+    jest.spyOn(trg, "getBoundingClientRect").mockReturnValue({
+      ...trgRect,
+      y: trgRect.height / 2,
+      top: trgRect.height / 2,
+      bottom: trgRect.height + trgRect.height / 2,
+    });
+
+    el.$options.placement = [WUPPopupElement.$placements.$bottom.$middle];
+    jest.advanceTimersByTime(10);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"transform: translate(52.5px, 20px); display: block;\\"></wup-popup>"`
+    );
+
+    // target is partially hidden at the right of scrollable content
+    jest.spyOn(document.body, "getBoundingClientRect").mockReturnValue({
+      ...rectBody,
+      width: trgRect.width,
+    });
+    jest.spyOn(document.body, "clientWidth", "get").mockReturnValue(trgRect.width);
+    jest.spyOn(trg, "getBoundingClientRect").mockReturnValue({
+      ...trgRect,
+      x: trgRect.width / 2,
+      left: trgRect.width / 2,
+      right: trgRect.width + trgRect.width / 2,
+    });
+    el.$options.placement = [WUPPopupElement.$placements.$right.$middle];
+    jest.advanceTimersByTime(10);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"transform: translate(71.25px, 10px); display: block;\\"></wup-popup>"`
     );
   });
 });
