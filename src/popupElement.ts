@@ -668,7 +668,7 @@ export default class WUPPopupElement<
         // change arrowSize if it's bigger than popup
         const checkSize = (relatedSize: number) => {
           // if we have border-radius of popup we need to include in offset to prevent overflow between arrow and popup
-          const maxArrowSize = relatedSize - this.#borderRadius * 2;
+          const maxArrowSize = Math.max(relatedSize - this.#borderRadius * 2, 0);
           if (me.arrow.w > maxArrowSize) {
             me.arrow.w = maxArrowSize;
             me.arrow.h = maxArrowSize / 2;

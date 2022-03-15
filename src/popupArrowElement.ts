@@ -42,7 +42,7 @@ export default class WUPPopupArrowElement extends HTMLElement {
   setupStyle(str: string) {
     const styleEl = document.createElement("style");
     styleEl.textContent = `:host:before{${str}}`;
-    this.shadowRoot?.appendChild(styleEl);
+    (this.shadowRoot as ShadowRoot).appendChild(styleEl);
   }
 }
 

@@ -1036,4 +1036,75 @@ describe("popupElement", () => {
       `"<wup-popup style=\\"transform: translate(71.25px, 10px); display: block;\\"></wup-popup>"`
     );
   });
+
+  test("arrow", () => {
+    expect(el.$isOpened).toBeTruthy(); // checking prev-state
+    expect(el.$arrowElement).toBeNull();
+    el.$options.arrowEnable = true;
+
+    const orig = document.createElement;
+    jest.spyOn(document, "createElement").mockImplementation((tagName) => {
+      const elArr = orig.call(document, tagName);
+      if (tagName === "wup-popup-arrow") {
+        jest.spyOn(elArr, "offsetWidth", "get").mockReturnValue(20);
+        jest.spyOn(elArr, "offsetHeight", "get").mockReturnValue(10);
+      }
+      return elArr;
+    });
+    jest.spyOn(el, "offsetWidth", "get").mockReturnValue(40);
+    jest.spyOn(el, "offsetHeight", "get").mockReturnValue(20);
+
+    const expectIt = (placement) => {
+      el.$options.placement = [placement];
+      jest.advanceTimersByTime(10);
+      return expect(document.body.outerHTML);
+    };
+
+    expectIt(WUPPopupElement.$placements.$top.$start.$adjust).toMatchInlineSnapshot(
+      `"<body><div id=\\"targetId\\">some text</div><wup-popup style=\\"transform: translate(140px, 70px); display: block;\\"></wup-popup><wup-popup-arrow style=\\"transform: translate(154px, 89.5px) rotate(0deg);\\"></wup-popup-arrow></body>"`
+    );
+    expect(el.$arrowElement).toBeDefined();
+
+    expectIt(WUPPopupElement.$placements.$top.$middle.$adjust).toMatchInlineSnapshot(
+      `"<body><div id=\\"targetId\\">some text</div><wup-popup style=\\"transform: translate(170px, 70px); display: block;\\"></wup-popup><wup-popup-arrow style=\\"transform: translate(180px, 89.5px) rotate(0deg);\\"></wup-popup-arrow></body>"`
+    );
+    expectIt(WUPPopupElement.$placements.$top.$end.$adjust).toMatchInlineSnapshot(
+      `"<body><div id=\\"targetId\\">some text</div><wup-popup style=\\"transform: translate(200px, 70px); display: block;\\"></wup-popup><wup-popup-arrow style=\\"transform: translate(206px, 89.5px) rotate(0deg);\\"></wup-popup-arrow></body>"`
+    );
+
+    expectIt(WUPPopupElement.$placements.$bottom.$start.$adjust).toMatchInlineSnapshot(
+      `"<body><div id=\\"targetId\\">some text</div><wup-popup style=\\"transform: translate(140px, 160px); display: block;\\"></wup-popup><wup-popup-arrow style=\\"transform: translate(154px, 150.5px) rotate(180deg);\\"></wup-popup-arrow></body>"`
+    );
+    expectIt(WUPPopupElement.$placements.$bottom.$middle.$adjust).toMatchInlineSnapshot(
+      `"<body><div id=\\"targetId\\">some text</div><wup-popup style=\\"transform: translate(170px, 160px); display: block;\\"></wup-popup><wup-popup-arrow style=\\"transform: translate(180px, 150.5px) rotate(180deg);\\"></wup-popup-arrow></body>"`
+    );
+    expectIt(WUPPopupElement.$placements.$bottom.$end.$adjust).toMatchInlineSnapshot(
+      `"<body><div id=\\"targetId\\">some text</div><wup-popup style=\\"transform: translate(200px, 160px); display: block;\\"></wup-popup><wup-popup-arrow style=\\"transform: translate(206px, 150.5px) rotate(180deg);\\"></wup-popup-arrow></body>"`
+    );
+
+    expectIt(WUPPopupElement.$placements.$left.$start.$adjust).toMatchInlineSnapshot(
+      `"<body><div id=\\"targetId\\">some text</div><wup-popup style=\\"transform: translate(96px, 100px); display: block;\\"></wup-popup><wup-popup-arrow style=\\"width: 8px; height: 4px; transform: translate(133.5px, 108px) rotate(-90deg);\\"></wup-popup-arrow></body>"`
+    );
+    expectIt(WUPPopupElement.$placements.$left.$middle.$adjust).toMatchInlineSnapshot(
+      `"<body><div id=\\"targetId\\">some text</div><wup-popup style=\\"transform: translate(96px, 115px); display: block;\\"></wup-popup><wup-popup-arrow style=\\"width: 8px; height: 4px; transform: translate(133.5px, 123px) rotate(-90deg);\\"></wup-popup-arrow></body>"`
+    );
+    expectIt(WUPPopupElement.$placements.$left.$end.$adjust).toMatchInlineSnapshot(
+      `"<body><div id=\\"targetId\\">some text</div><wup-popup style=\\"transform: translate(96px, 130px); display: block;\\"></wup-popup><wup-popup-arrow style=\\"width: 8px; height: 4px; transform: translate(133.5px, 138px) rotate(-90deg);\\"></wup-popup-arrow></body>"`
+    );
+
+    expectIt(WUPPopupElement.$placements.$right.$start.$adjust).toMatchInlineSnapshot(
+      `"<body><div id=\\"targetId\\">some text</div><wup-popup style=\\"transform: translate(244px, 100px); display: block;\\"></wup-popup><wup-popup-arrow style=\\"width: 8px; height: 4px; transform: translate(238.5px, 108px) rotate(90deg);\\"></wup-popup-arrow></body>"`
+    );
+    expectIt(WUPPopupElement.$placements.$right.$middle.$adjust).toMatchInlineSnapshot(
+      `"<body><div id=\\"targetId\\">some text</div><wup-popup style=\\"transform: translate(244px, 115px); display: block;\\"></wup-popup><wup-popup-arrow style=\\"width: 8px; height: 4px; transform: translate(238.5px, 123px) rotate(90deg);\\"></wup-popup-arrow></body>"`
+    );
+    expectIt(WUPPopupElement.$placements.$right.$end.$adjust).toMatchInlineSnapshot(
+      `"<body><div id=\\"targetId\\">some text</div><wup-popup style=\\"transform: translate(244px, 130px); display: block;\\"></wup-popup><wup-popup-arrow style=\\"width: 8px; height: 4px; transform: translate(238.5px, 138px) rotate(90deg);\\"></wup-popup-arrow></body>"`
+    );
+
+    el.$options.arrowClass = "my-arrow";
+    expectIt(WUPPopupElement.$placements.$right.$end.$adjust).toMatchInlineSnapshot(
+      `"<body><div id=\\"targetId\\">some text</div><wup-popup style=\\"transform: translate(244px, 130px); display: block;\\"></wup-popup><wup-popup-arrow class=\\"my-arrow\\" style=\\"width: 8px; height: 4px; transform: translate(238.5px, 138px) rotate(90deg);\\"></wup-popup-arrow></body>"`
+    );
+  });
 });

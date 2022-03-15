@@ -98,4 +98,16 @@ describe("popupElement", () => {
       '<wup-popup style="min-width: 177px; min-height: 21px; display: block; transform: translate(72.4219px, 29px);">Popup text</wup-popup>'
     );
   });
+
+  test("arrow", async () => {
+    await page.evaluate(() => {
+      testEl.$options.arrowEnable = true;
+    });
+    await page.click("label");
+    await page.waitForTimeout(1); // timeout required because of debounceFilters
+    const t = await page.evaluate(() => ({ ...t, html: document.body.outerHTML }));
+    expect(t.html).toBe(
+      `<body><div id="app"><label><span>Label text</span><input><wup-popup style="display: block; transform: translate(72.4219px, 39px);">Popup text</wup-popup></label></div><wup-popup-arrow style="transform: translate(124.422px, 29.5px) rotate(180deg);"></wup-popup-arrow></body>`
+    );
+  });
 });
