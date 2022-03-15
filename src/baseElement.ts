@@ -225,6 +225,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   protected dispose() {
     this.disposeLst.forEach((f) => f()); // remove possible previous event listeners
     this.disposeLst.length = 0;
+    this.fireEvent("$dispose", { cancelable: false });
   }
 
   /** Returns true if el is instance of Node and contains pointer element */
@@ -244,7 +245,7 @@ export namespace WUP {
     props: Array<Extract<keyof T, string>>;
     target: T;
   };
-  export type EventMap<T = HTMLElementEventMap> = HTMLElementEventMap & Record<keyof T, Event>;
+  export type EventMap<T = HTMLElementEventMap> = HTMLElementEventMap & Record<keyof T, Event> & { $dispose: Event };
 }
 
 // todo make all props not-enumerable (beside starts with $...): https://stackoverflow.com/questions/34517538/setting-an-es6-class-getter-to-enumerable

@@ -660,7 +660,9 @@ describe("popupElement", () => {
     a.remove();
     spy.forEach((s) => {
       // checking if removed every listener that was added
-      const onCalls = s.on.mock.calls.map((c, i) => `${c[0]} ${s.on.mock.instances[i] || s.itemName}`);
+      const onCalls = s.on.mock.calls
+        .filter((c) => c[2]?.once !== true)
+        .map((c, i) => `${c[0]} ${s.on.mock.instances[i] || s.itemName}`);
       const offCalls = s.off.mock.calls.map((c, i) => `${c[0]} ${s.off.mock.instances[i] || s.itemName}`);
       expect(onCalls).toEqual(offCalls);
     });

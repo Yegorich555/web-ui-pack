@@ -1,12 +1,12 @@
-import { useEffect } from "react";
+//  import { useEffect } from "react";
 // eslint-disable-next-line import/named
 import WUPPopupElement, { ShowCases } from "web-ui-pack/popupElement";
 import styles from "./popupView.scss";
 
 export default function Example4() {
-  useEffect(() => {
-    document.querySelector("main")?.scrollTo({ top: 380 });
-  }, []);
+  // useEffect(() => {
+  //   document.querySelector("main")?.scrollTo({ top: 380 });
+  // }, []);
   return (
     <>
       <h3>Example 4</h3>
