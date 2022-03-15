@@ -11,6 +11,8 @@ import WUPPopupArrowElement from "./popupArrowElement";
 
 /** PopupElement
  * @example
+ * WUPPopupElement.$defaults.arrowEnable = true;
+ *
  * const el = document.createElement('wup-popup');
  * el.$options.showCase = ShowCases.onClick | ShowCases.onFocus;
  * el.$options.target = document.querySelector('button');

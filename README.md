@@ -93,6 +93,7 @@ import WUPPopupElement, { ShowCases } from "web-ui-pack/popupElement";
 // redefine some defaults; WARN: you can change placement rules here without changing $options per each element!!!
 WUPPopupElement.$defaults.offset = [2, 2];
 WUPPopupElement.$defaults.minWidthByTarget = true;
+WUPPopupElement.$defaults.arrowEnable = true;
 
 // create element
 const el = document.createElement("wup-popup");
