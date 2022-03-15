@@ -35,6 +35,6 @@ export default function onFocusGot(
       isLost = false;
     }
   };
-  element.addEventListener("focusin", focusin, options);
+  element.addEventListener("focusin", focusin, { passive: true, ...options });
   return remove;
 }

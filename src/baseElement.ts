@@ -198,9 +198,8 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     K extends HTMLElement | Document,
     E extends HTMLElementEventMap & Record<string, Event>
   >(...args: Parameters<onEventType<T, K, E>>): () => void {
-    args[3] = <AddEventListenerOptions>{ passive: true, ...(args[3] as AddEventListenerOptions) };
     // self-removing when option.once
-    if (args[3].once) {
+    if ((args[3] as AddEventListenerOptions)?.once) {
       const listener = args[2];
       args[2] = function wrapper(...args2) {
         const v = listener.call(this, ...args2);
