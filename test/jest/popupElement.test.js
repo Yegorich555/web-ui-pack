@@ -310,8 +310,6 @@ describe("popupElement", () => {
     expect(a.$isOpened).toBeFalsy();
 
     trg.dispatchEvent(new Event("focusin"));
-    const trgInput = trg.appendChild(document.createElement("input"));
-    const trgInput2 = trg.appendChild(document.createElement("input"));
     expect(a.$isOpened).toBeTruthy();
     expect(spyShow).toBeCalledTimes(1);
     expect(spyShow).lastCalledWith(1 << 1);
@@ -320,6 +318,8 @@ describe("popupElement", () => {
     // jest.advanceTimersToNextTimer(); // focusLost has timeout
     expect(a.$isOpened).toBeFalsy();
 
+    const trgInput = trg.appendChild(document.createElement("input"));
+    const trgInput2 = trg.appendChild(document.createElement("input"));
     // checking focusin-throttling
     jest.clearAllMocks();
     trgInput.focus();
@@ -537,11 +537,33 @@ describe("popupElement", () => {
 
     el.$show();
     trg.click();
+    jest.advanceTimersByTime(100); // click has debounce filter
     expect(el.$isOpened).toBeTruthy(); // checking if click-listener is off because was opened by manual $show
     el.$hide();
     expect(el.$isOpened).toBeFalsy(); // checking if click-listener is off because was opened by manual $show
     trg.click();
+    jest.advanceTimersByTime(100); // click has debounce filter
+
     expect(el.$isOpened).toBeTruthy(); // checking if events works again
+
+    // checking canShow/canHide with popupListenTarget
+    el.canHide = () => false;
+    trg.click();
+    jest.advanceTimersByTime(100); // click has debounce filter
+    expect(el.$isOpened).toBeTruthy();
+    el.canHide = () => true;
+    trg.click();
+    jest.advanceTimersByTime(100); // click has debounce filter
+    expect(el.$isOpened).toBeFalsy();
+
+    el.canShow = () => false;
+    trg.click();
+    jest.advanceTimersByTime(100); // click has debounce filter
+    expect(el.$isOpened).toBeFalsy();
+    el.canShow = () => true;
+    trg.click();
+    jest.advanceTimersByTime(100); // click has debounce filter
+    expect(el.$isOpened).toBeTruthy();
 
     /** @type typeof el */
     const a = document.createElement(el.tagName);
