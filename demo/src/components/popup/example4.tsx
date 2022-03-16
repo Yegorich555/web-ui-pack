@@ -15,11 +15,11 @@ export default function Example4() {
       </small>
       <div
         className={styles.scrollBlock}
-        ref={(el) => {
-          el?.scrollTo({ top: 70 });
-          setTimeout(() => {
-            el?.scrollTo({ top: 53 });
-          }, 200);
+        ref={(_el) => {
+          // el?.scrollTo({ top: 70 });
+          // setTimeout(() => {
+          //   el?.scrollTo({ top: 53 });
+          // }, 200);
         }}
       >
         <button
@@ -27,8 +27,8 @@ export default function Example4() {
           className={styles.trg2}
           ref={(el) => {
             if (el) {
-              el.style.transform = "translate(-38px, 10px)";
-              el.style.margin = "20px 0";
+              // el.style.transform = "translate(-38px, 10px)";
+              // el.style.margin = "20px 0";
             }
           }}
         >
