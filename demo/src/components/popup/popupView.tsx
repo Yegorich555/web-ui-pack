@@ -18,7 +18,7 @@ export default function PopupView() {
     Object.assign(opts, o);
     document.querySelectorAll("wup-popup").forEach((t) => {
       Object.assign(t.$options, opts);
-      t.$show(); // required because some options are not watched
+      !t.$options.showCase && t.$show(); // required because some options are not watched
     });
   }
 
