@@ -1,4 +1,4 @@
-import { WUP } from "./baseElement";
+import { WUP } from "../baseElement";
 import { WUPPopupPlace } from "./popupPlacements";
 
 export namespace WUPPopup {

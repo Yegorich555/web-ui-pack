@@ -1,7 +1,7 @@
-import WUPBaseElement, { JSXCustomProps, WUP } from "./baseElement";
+import WUPBaseElement, { JSXCustomProps, WUP } from "../baseElement";
 import { WUPPopup } from "./popupElement.types";
 import { getBoundingInternalRect, PopupPlacements, px2Number, WUPPopupPlace } from "./popupPlacements";
-import findScrollParent from "./helpers/findScrollParent";
+import findScrollParent from "../helpers/findScrollParent";
 
 export import ShowCases = WUPPopup.ShowCases;
 import WUPPopupArrowElement from "./popupArrowElement";

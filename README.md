@@ -88,7 +88,7 @@ _comming soon..._
 Typescript
 
 ```typescript
-import WUPPopupElement, { ShowCases } from "web-ui-pack/popupElement";
+import WUPPopupElement, { ShowCases } from "web-ui-pack/popup/popupElement";
 
 // redefine some defaults; WARN: you can change placement rules here without changing $options per each element!!!
 WUPPopupElement.$defaults.offset = [2, 2];

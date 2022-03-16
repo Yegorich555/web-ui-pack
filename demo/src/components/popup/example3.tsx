@@ -1,6 +1,6 @@
 import movable from "src/helpers/movable";
 // eslint-disable-next-line import/named
-import { ShowCases } from "web-ui-pack/popupElement";
+import { ShowCases } from "web-ui-pack/popup/popupElement";
 import styles from "./popupView.scss";
 
 export default function Example3() {

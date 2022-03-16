@@ -1,4 +1,4 @@
-import { JSXCustomProps } from "./baseElement";
+import { JSXCustomProps } from "../baseElement";
 
 const tag = "wup-popup-arrow";
 let styleElement: HTMLStyleElement | undefined;

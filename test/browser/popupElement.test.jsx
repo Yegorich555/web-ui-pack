@@ -1,5 +1,5 @@
 // ES5 import is required otherwise jest-env conflicts with puppeeter-env
-const WUPPopupElement = require("web-ui-pack/popupElement").default;
+const WUPPopupElement = require("web-ui-pack/popup/popupElement").default;
 
 /** @type WUPPopupElement */
 let testEl;

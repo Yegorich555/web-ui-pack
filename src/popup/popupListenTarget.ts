@@ -1,7 +1,7 @@
-import focusFirst from "./helpers/focusFirst";
-import onEvent, { onEventType } from "./helpers/onEvent";
-import onFocusGot from "./helpers/onFocusGot";
-import onFocusLost from "./helpers/onFocusLost";
+import focusFirst from "../helpers/focusFirst";
+import onEvent, { onEventType } from "../helpers/onEvent";
+import onFocusGot from "../helpers/onFocusGot";
+import onFocusLost from "../helpers/onFocusLost";
 import { WUPPopup } from "./popupElement.types";
 
 const set = new Set<HTMLElement>();

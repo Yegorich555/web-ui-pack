@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import InputRadio from "src/elements/inputRadio";
 import Page from "src/elements/page";
-import { WUPPopup } from "web-ui-pack/popupElement.types";
+import { WUPPopup } from "web-ui-pack/popup/popupElement.types";
 import Example1 from "./example1";
 import Example2 from "./example2";
 import Example3 from "./example3";
