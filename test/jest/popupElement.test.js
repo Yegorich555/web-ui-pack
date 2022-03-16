@@ -291,7 +291,7 @@ describe("popupElement", () => {
     trg.dispatchEvent(new Event("mouseleave"));
     jest.advanceTimersByTime(a.$options.hoverHideTimeout); // event listener has timeout
     expect(a.$isOpened).toBeFalsy();
-    expect(spyHide).toHaveBeenLastCalledWith(1, 2);
+    expect(spyHide).toHaveBeenLastCalledWith(2);
 
     jest.clearAllMocks();
     trg.dispatchEvent(new Event("mouseenter"));
@@ -332,7 +332,7 @@ describe("popupElement", () => {
     expect(a.$isOpened).toBeFalsy();
     expect(spyShow).toBeCalledTimes(1); // checking if throttling-filter works
     expect(spyShow).lastCalledWith(1 << 1); // checking if throttling-filter works
-    expect(spyHide).lastCalledWith(1 << 1, 3); // because div haven't been lost focus
+    expect(spyHide).lastCalledWith(3); // because div haven't been lost focus
 
     // when showCase = focus. need to show() if target isAlreadyFocused
     a.remove();
@@ -379,7 +379,7 @@ describe("popupElement", () => {
     trg.dispatchEvent(new Event("click", { bubbles: true }));
     expect(a.$isOpened).toBeFalsy();
     expect(spyHide).toHaveBeenCalledTimes(1);
-    expect(spyHide).lastCalledWith(1 << 2, 6);
+    expect(spyHide).lastCalledWith(6);
     jest.advanceTimersByTime(50); // onClick has debounce timeout
 
     trgInput.dispatchEvent(new Event("click", { bubbles: true }));
@@ -388,7 +388,7 @@ describe("popupElement", () => {
 
     a.dispatchEvent(new Event("click", { bubbles: true }));
     expect(a.$isOpened).toBeFalsy(); // click onMe == close
-    expect(spyHide).lastCalledWith(1 << 2, 5);
+    expect(spyHide).lastCalledWith(5);
 
     trgInput2.dispatchEvent(new Event("click", { bubbles: true }));
     expect(a.$isOpened).toBeTruthy(); // click on input2 inside
@@ -396,7 +396,7 @@ describe("popupElement", () => {
 
     document.body.dispatchEvent(new Event("click", { bubbles: true }));
     expect(a.$isOpened).toBeFalsy(); // click outside == close
-    expect(spyHide).lastCalledWith(1 << 2, 4);
+    expect(spyHide).lastCalledWith(4);
 
     // check focus on target on hide
     document.activeElement.blur();
@@ -439,7 +439,7 @@ describe("popupElement", () => {
     // close by blur
     trgInput.blur();
     expect(a.$isOpened).toBeFalsy(); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
-    expect(spyHide).lastCalledWith(1, 3);
+    expect(spyHide).lastCalledWith(3);
 
     // close by mouseleave
     trgInput.dispatchEvent(new Event("mouseenter", { bubbles: true }));
@@ -447,7 +447,7 @@ describe("popupElement", () => {
     trgInput.dispatchEvent(new Event("mouseleave", { bubbles: true }));
     jest.advanceTimersByTime(a.$options.hoverHideTimeout); // mouseenter has debounce timeout
     expect(a.$isOpened).toBeFalsy(); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
-    expect(spyHide).lastCalledWith(1, 2);
+    expect(spyHide).lastCalledWith(2);
 
     // open again by click
     trgInput.dispatchEvent(new Event("click", { bubbles: true }));
@@ -459,7 +459,7 @@ describe("popupElement", () => {
     trgInput.dispatchEvent(new Event("click", { bubbles: true }));
     jest.advanceTimersByTime(50);
     expect(a.$isOpened).toBeFalsy();
-    expect(spyHide).lastCalledWith(1 << 2, 6);
+    expect(spyHide).lastCalledWith(6);
     trgInput.blur();
     spyShow.mockClear();
 
@@ -484,7 +484,7 @@ describe("popupElement", () => {
     trgInput.dispatchEvent(ev);
     jest.advanceTimersByTime(50);
     expect(a.$isOpened).toBeFalsy(); // 2nd click will close (but if click is fired without mousedown it doesn't work)
-    expect(spyHide).lastCalledWith(1 << 1, 6);
+    expect(spyHide).lastCalledWith(6);
   });
 
   test("$options.minWidthByTarget/minHeightByTarget", () => {

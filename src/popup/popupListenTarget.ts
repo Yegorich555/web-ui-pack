@@ -16,15 +16,16 @@ export default function popupListenTarget(
     focusDebounceMs?: number;
   },
   /** If succesfull callback must return HTMLElement */
-  onShow: (
-    showCase: WUPPopup.ShowCases,
-    /** Fire it when element is shown outside the listener */
-    onShowRef: () => void,
-    /** Fire it when element is hidden outside the listener */
-    onHideRef: () => void
-  ) => HTMLElement | null,
+  onShow: (showCase: WUPPopup.ShowCases) => HTMLElement | null,
   onHide: (hideCase: WUPPopup.HideCases) => boolean
-): () => void {
+): {
+  /** Fire it to remove all added related eventListeners */
+  onRemoveRef: () => void;
+  /** Fire it when element is shown outside the listener */
+  onShowRef: () => void;
+  /** Fire it when element is hidden outside the listener */
+  onHideRef: () => void;
+} {
   const opts = { ...popupListenTarget.$defaults, ...options };
   const t = opts.target;
 
@@ -34,29 +35,29 @@ export default function popupListenTarget(
   const onRemoveCallbacks: Array<() => void> = [];
 
   let isShowRefFired = false;
-  function onShown() {
+  function onShowRef() {
     onShowCallbacks.forEach((f) => onHideCallbacks.push(f()));
     isShowRefFired = true;
   }
 
-  function onHidden() {
+  function onHideRef() {
     onHideCallbacks.forEach((f) => f());
     onHideCallbacks.length = 0;
   }
 
-  function onRemoved() {
+  function onRemoveRef() {
     onRemoveCallbacks.forEach((f) => f());
     onRemoveCallbacks.length = 0;
-    onHidden();
+    onHideRef();
     onShowCallbacks.length = 0;
     set.delete(openedEl as HTMLElement);
   }
 
   function show(showCase: WUPPopup.ShowCases): boolean {
     isShowRefFired = false;
-    openedEl = onShow(showCase, onShown, onHidden);
+    openedEl = onShow(showCase);
     if (openedEl) {
-      !isShowRefFired && onShown();
+      !isShowRefFired && onShowRef();
 
       if (!set.has(openedEl)) {
         set.add(openedEl);
@@ -71,7 +72,7 @@ export default function popupListenTarget(
   function hide(hideCase: WUPPopup.HideCases): boolean {
     if (onHide(hideCase)) {
       openedEl = null;
-      onHidden();
+      onHideRef();
       return true;
     }
     return false;
@@ -209,7 +210,7 @@ export default function popupListenTarget(
     }
   }
 
-  return onRemoved;
+  return { onRemoveRef, onShowRef, onHideRef };
 }
 
 popupListenTarget.$defaults = {

@@ -114,9 +114,9 @@ export default class WUPPopupElement<
     let popup: T | undefined;
 
     const attach = () => {
-      const onRemoveRef = popupListenTarget(
+      const refs = popupListenTarget(
         options,
-        (v, onShowRef, onHideRef) => {
+        (v) => {
           const isCreate = !popup;
           if (!popup) {
             // eslint-disable-next-line no-use-before-define
@@ -124,9 +124,9 @@ export default class WUPPopupElement<
             const p = popup;
 
             popup.#attach = () => {
-              p.#onRemoveRef = onRemoveRef;
               // extra function to skip useless 1st attach on init
               p.#attach = attach;
+              return refs;
             };
 
             Object.assign(popup._opts, options);
@@ -134,7 +134,7 @@ export default class WUPPopupElement<
             callback?.call(this, popup);
           }
 
-          if (!popup.goShow(v, onShowRef, onHideRef)) {
+          if (!popup.goShow(v)) {
             isCreate && popup.remove();
             return null;
           }
@@ -151,6 +151,7 @@ export default class WUPPopupElement<
           return ok;
         }
       );
+      return refs;
     };
     attach();
   }
@@ -210,43 +211,47 @@ export default class WUPPopupElement<
   #onShowRef?: () => void; // func to add eventListeners onShow
   #onHideRef?: () => void; // func to remove eventListeners that added on onShow
   #onRemoveRef?: () => void; // func to remove eventListeners
-  #attach?: () => void; // func to use alternative target
+  #attach?: () => ReturnType<typeof popupListenTarget>; // func to use alternative target
   /** Fired after gotReady() and $show() (to reinit according to options) */
   protected init(isTryAgain = false) {
     this.dispose(); // remove previously added events
 
+    let refs: ReturnType<typeof popupListenTarget>;
     if (this.#attach) {
-      this.#attach();
-      return;
-    }
+      refs = this.#attach();
+    } else {
+      const { el: t, err } = this.#defineTarget();
+      if (!t) {
+        this._opts.target = null;
+        if (isTryAgain) {
+          throw new Error(err);
+        }
 
-    const { el: t, err } = this.#defineTarget();
-    if (!t) {
-      this._opts.target = null;
-      if (isTryAgain) {
-        throw new Error(err);
+        this.#initTimer = setTimeout(() => this.init(true), 200); // timeout because of target can be undefined in time
+        return;
+      }
+      this._opts.target = t;
+
+      if (!this._opts.showCase /* always */) {
+        this.goShow(WUPPopup.ShowCases.always);
+        return;
       }
 
-      this.#initTimer = setTimeout(() => this.init(true), 200); // timeout because of target can be undefined in time
-      return;
+      refs = popupListenTarget(
+        this._opts as typeof this._opts & { target: HTMLElement },
+        (v) => {
+          if (!this.goShow(v)) {
+            return null;
+          }
+          return this as typeof this & { dispose: () => void };
+        },
+        this.goHide
+      );
     }
-    this._opts.target = t;
 
-    if (!this._opts.showCase /* always */) {
-      this.goShow(WUPPopup.ShowCases.always);
-      return;
-    }
-
-    this.#onRemoveRef = popupListenTarget(
-      this._opts as typeof this._opts & { target: HTMLElement },
-      (v, onShowRef, onHideRef) => {
-        if (!this.goShow(v, onShowRef, onHideRef)) {
-          return null;
-        }
-        return this as typeof this & { dispose: () => void };
-      },
-      this.goHide
-    );
+    this.#onShowRef = refs.onShowRef;
+    this.#onHideRef = refs.onHideRef;
+    this.#onRemoveRef = refs.onRemoveRef;
   }
 
   #reinit() {
@@ -320,7 +325,7 @@ export default class WUPPopupElement<
   }
 
   /** Shows popup if target defined; returns true if successful */
-  protected goShow(showCase: WUPPopup.ShowCases, onShowRef?: () => void, onHideRef?: () => void): boolean {
+  protected goShow(showCase: WUPPopup.ShowCases): boolean {
     const wasHidden = !this.#isOpened;
     this.#isOpened && this.goHide(WUPPopup.HideCases.onShowAgain);
 
@@ -345,8 +350,6 @@ export default class WUPPopupElement<
       }
     }
 
-    this.#onShowRef = onShowRef ?? this.#onShowRef; // required to dispose events when user use show/hide manually
-    this.#onHideRef = onHideRef ?? this.#onHideRef;
     this.#showCase = showCase;
 
     const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.$placementAttrs;
