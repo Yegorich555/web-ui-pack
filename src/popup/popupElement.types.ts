@@ -23,6 +23,8 @@ export namespace WUPPopup {
     onOutsideClick,
     onPopupClick,
     onTargetClick,
+    /** When target removed from document */
+    onTargetRemove,
     /** When options or attributes changes */
     onOptionChange,
   }

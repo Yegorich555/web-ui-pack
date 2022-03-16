@@ -2,10 +2,10 @@ import WUPBaseElement, { JSXCustomProps, WUP } from "../baseElement";
 import { WUPPopup } from "./popupElement.types";
 import { getBoundingInternalRect, PopupPlacements, px2Number, WUPPopupPlace } from "./popupPlacements";
 import findScrollParent from "../helpers/findScrollParent";
-
-export import ShowCases = WUPPopup.ShowCases;
 import WUPPopupArrowElement from "./popupArrowElement";
 import popupListenTarget from "./popupListenTarget";
+
+export import ShowCases = WUPPopup.ShowCases;
 
 /** PopupElement
  * @example
@@ -92,14 +92,68 @@ export default class WUPPopupElement<
      `;
   }
 
-  // static $attach(
-  //   options: Partial<Omit<WUPPopup.Options, "target">> & { target: HTMLElement },
-  //   callback: (el: WUPPopupElement) => void
-  // ): void {
-  //   this.$listen(options.target, options.showCase ?? this.$defaults.showCase, (el) => {
-  //     callback(el);
-  //   });
-  // }
+  /** Listen for target according to showCase and create/remove popup when it's required (by show/hide).
+   *  This helps to avoid tons of hidden popups on HTML
+   *  @example
+   *   WUPPopupElement.$attach(
+   *     {
+   *       target: document.querySelector("button") as HTMLElement,
+   *       text: "Some text here",
+   *       showCase: WUPPopup.ShowCases.onClick,
+   *     },
+   *     // (el) => el.append("Some content can be here")
+   *   );
+   * @tutorial Troubleshooting:
+   * * $attach doesn't work with showCase.always it doesn't make sense
+   */
+  static $attach<T extends WUPPopupElement>(
+    options: Partial<Omit<WUPPopup.Options, "target">> & { target: HTMLElement; text: string; tagName?: string },
+    /** Fires when popup is added to document */
+    callback?: (el: T) => void
+  ): void {
+    let popup: T | undefined;
+
+    const attach = () => {
+      const onRemoveRef = popupListenTarget(
+        options,
+        (v, onShowRef, onHideRef) => {
+          const isCreate = !popup;
+          if (!popup) {
+            // eslint-disable-next-line no-use-before-define
+            popup = document.body.appendChild(document.createElement(options.tagName ?? tagName) as T);
+            const p = popup;
+
+            popup.#attach = () => {
+              p.#onRemoveRef = onRemoveRef;
+              // extra function to skip useless 1st attach on init
+              p.#attach = attach;
+            };
+
+            Object.assign(popup._opts, options);
+            options.text && popup.append(options.text);
+            callback?.call(this, popup);
+          }
+
+          if (!popup.goShow(v, onShowRef, onHideRef)) {
+            isCreate && popup.remove();
+            return null;
+          }
+
+          return popup;
+        },
+        (v) => {
+          const ok = (popup as T).goHide(v);
+          if (ok) {
+            (popup as T).#onRemoveRef = undefined;
+            (popup as T).remove();
+            popup = undefined;
+          }
+          return ok;
+        }
+      );
+    };
+    attach();
+  }
 
   $options: WUPPopup.Options = {
     ...this.ctr.$defaults,
@@ -112,7 +166,7 @@ export default class WUPPopupElement<
   $hide() {
     const f = () => {
       // isReady possible false when you fire $hide on disposed element
-      if (this.$isReady && this.#isOpened && this.goHide(this.#showCase, WUPPopup.HideCases.onFireHide)) {
+      if (this.$isReady && this.#isOpened && this.goHide(WUPPopup.HideCases.onFireHide)) {
         this._opts.showCase !== WUPPopup.ShowCases.always && this.init(); // re-init to applyShowCase
       }
     };
@@ -124,7 +178,7 @@ export default class WUPPopupElement<
   $show() {
     const f = () => {
       if (!this.$isReady) {
-        throw new Error(`${this.tagName}. Impossible to show: isn't appended to document`);
+        throw new Error(`${this.tagName}. Impossible to show: not appended to document`);
       } else {
         this.dispose(); // remove events
         this.goShow(WUPPopup.ShowCases.always);
@@ -143,6 +197,9 @@ export default class WUPPopupElement<
     return this.#arrowElement || null;
   }
 
+  /** assign this method */
+  onTargetRemoved?: () => void;
+
   protected override gotReady() {
     super.gotReady();
     this.init();
@@ -150,12 +207,18 @@ export default class WUPPopupElement<
 
   #isOpened = false;
   #initTimer?: ReturnType<typeof setTimeout>;
-  #onShowRef?: () => void;
-  #onHideRef?: () => void;
-  #onRemoveRef?: () => void;
+  #onShowRef?: () => void; // func to add eventListeners onShow
+  #onHideRef?: () => void; // func to remove eventListeners that added on onShow
+  #onRemoveRef?: () => void; // func to remove eventListeners
+  #attach?: () => void; // func to use alternative target
   /** Fired after gotReady() and $show() (to reinit according to options) */
   protected init(isTryAgain = false) {
     this.dispose(); // remove previously added events
+
+    if (this.#attach) {
+      this.#attach();
+      return;
+    }
 
     const { el: t, err } = this.#defineTarget();
     if (!t) {
@@ -177,19 +240,17 @@ export default class WUPPopupElement<
     this.#onRemoveRef = popupListenTarget(
       this._opts as typeof this._opts & { target: HTMLElement },
       (v, onShowRef, onHideRef) => {
-        if (!this.goShow(v)) {
+        if (!this.goShow(v, onShowRef, onHideRef)) {
           return null;
         }
-        this.#onShowRef = onShowRef; // require to dispose events when user use show/hide manually
-        this.#onHideRef = onHideRef;
         return this as typeof this & { dispose: () => void };
       },
-      (v) => this.goHide(this.#showCase, v)
+      this.goHide
     );
   }
 
   #reinit() {
-    this.$isOpened && this.goHide(this.#showCase, WUPPopup.HideCases.onOptionChange);
+    this.$isOpened && this.goHide(WUPPopup.HideCases.onOptionChange);
     this.init(); // possible only if popup is hidden
   }
 
@@ -259,9 +320,9 @@ export default class WUPPopupElement<
   }
 
   /** Shows popup if target defined; returns true if successful */
-  protected goShow(showCase: WUPPopup.ShowCases): boolean {
+  protected goShow(showCase: WUPPopup.ShowCases, onShowRef?: () => void, onHideRef?: () => void): boolean {
     const wasHidden = !this.#isOpened;
-    this.#isOpened && this.goHide(this.#showCase, WUPPopup.HideCases.onShowAgain);
+    this.#isOpened && this.goHide(WUPPopup.HideCases.onShowAgain);
 
     if (!this._opts.target) {
       const { el, err } = this.#defineTarget();
@@ -269,6 +330,10 @@ export default class WUPPopupElement<
       if (err) {
         throw new Error(err);
       }
+    }
+
+    if (!(this._opts.target as HTMLElement).isConnected) {
+      throw new Error(`${this.tagName}. Target is not appended to document`);
     }
 
     if (!this.canShow(showCase)) return false;
@@ -280,6 +345,8 @@ export default class WUPPopupElement<
       }
     }
 
+    this.#onShowRef = onShowRef ?? this.#onShowRef; // required to dispose events when user use show/hide manually
+    this.#onHideRef = onHideRef ?? this.#onHideRef;
     this.#showCase = showCase;
 
     const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.$placementAttrs;
@@ -381,8 +448,8 @@ export default class WUPPopupElement<
   }
 
   /** Hide popup. @showCase as previous reason of show(); @hideCase as reason of hide() */
-  protected goHide(showCase: WUPPopup.ShowCases | undefined, hideCase: WUPPopup.HideCases): boolean {
-    if (!this.canHide(showCase, hideCase)) return false;
+  protected goHide(hideCase: WUPPopup.HideCases): boolean {
+    if (!this.canHide(this.#showCase, hideCase)) return false;
 
     const wasShown = this.#isOpened;
     if (wasShown) {
@@ -416,8 +483,17 @@ export default class WUPPopupElement<
 
   /** Update position of popup. Call this method in cases when you changed options */
   #updatePosition = () => {
-    const t = (this._opts.target as HTMLElement).getBoundingClientRect() as WUPPopupPlace.Rect;
-    t.el = this._opts.target as HTMLElement;
+    const trg = this._opts.target as HTMLElement;
+    if (!trg.isConnected) {
+      setTimeout(() => {
+        // possible false if popup removed with target
+        this.isConnected && this.goHide(WUPPopup.HideCases.onTargetRemove);
+        this.#onRemoveRef?.call(this);
+      });
+      return;
+    }
+
+    const t = trg.getBoundingClientRect() as WUPPopupPlace.Rect;
     if (
       // issue: it's wrong if minWidth, minHeight etc. is changed and doesn't affect on layout sizes directly
       this.#prevRect &&
@@ -428,6 +504,7 @@ export default class WUPPopupElement<
     ) {
       return;
     }
+    t.el = trg;
 
     if (this._opts.minWidthByTarget) {
       this.style.minWidth = `${t.width}px`;
@@ -616,6 +693,7 @@ export default class WUPPopupElement<
     super.gotRemoved();
     this.#isOpened = false;
     this.#arrowElement?.remove();
+    this.#arrowElement = undefined;
   }
 
   protected override dispose(): void {
@@ -623,6 +701,7 @@ export default class WUPPopupElement<
     this.#initTimer && clearTimeout(this.#initTimer);
     this.#initTimer = undefined;
     this.#onRemoveRef?.call(this);
+    this.#onRemoveRef = undefined;
   }
 }
 
@@ -661,11 +740,6 @@ declare global {
     }
   }
 }
-
-// const target = document.querySelector("button") as HTMLElement;
-// WUPPopupElement.$attach({ target }, (el) => {
-//   el.append("Some text here");
-// });
 
 // todo describe issue in readme.md: in react nearest target can be changed but popup can't detect it -- for this case we need to add method $refresh()
 // todo develop animation

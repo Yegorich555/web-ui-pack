@@ -1132,3 +1132,9 @@ describe("popupElement", () => {
     );
   });
 });
+
+// todo memoryLeaking: check if #updatePosition is fired again (check if hiddenByScroll also)
+// todo if target removed - document events should be removed
+// todo if popup removed - document events should be removed (only without attach)
+
+// todo check $attach with different cases
