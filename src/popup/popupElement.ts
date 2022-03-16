@@ -503,6 +503,7 @@ export default class WUPPopupElement<
         if (this.#arrowElement) {
           this.#arrowElement.style.display = "none";
         }
+        this.#prevRect = t.el.getBoundingClientRect();
         return;
       }
       const scrollRect = getBoundingInternalRect(this.#scrollParents[0]);
