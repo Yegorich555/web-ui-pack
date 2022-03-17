@@ -425,7 +425,7 @@ export default class WUPPopupElement<
     ];
 
     const goUpdate = () => {
-      this.#updatePosition();
+      this.#prevRect = this.#updatePosition();
       this.#frameId = window.requestAnimationFrame(goUpdate);
     };
 
@@ -485,15 +485,13 @@ export default class WUPPopupElement<
   }
 
   /** Update position of popup. Call this method in cases when you changed options */
-  #updatePosition = () => {
+  #updatePosition = (): DOMRect | undefined => {
     const trg = this._opts.target as HTMLElement;
     if (!trg.isConnected) {
-      setTimeout(() => {
-        // possible false if popup removed with target
-        this.isConnected && this.goHide(WUPPopup.HideCases.onTargetRemove);
-        this.#onRemoveRef?.call(this);
-      });
-      return;
+      this.#onRemoveRef?.call(this);
+      // possible false if popup removed with target
+      this.goHide(WUPPopup.HideCases.onTargetRemove);
+      return undefined;
     }
 
     const t = trg.getBoundingClientRect() as WUPPopupPlace.Rect;
@@ -505,7 +503,7 @@ export default class WUPPopupElement<
       this.#prevRect.width === t.width &&
       this.#prevRect.height === t.height
     ) {
-      return;
+      return this.#prevRect;
     }
     t.el = trg;
 
@@ -583,8 +581,7 @@ export default class WUPPopupElement<
         if (this.#arrowElement) {
           this.#arrowElement.style.display = "none";
         }
-        this.#prevRect = t.el.getBoundingClientRect();
-        return;
+        return t.el.getBoundingClientRect();
       }
       const scrollRect = getBoundingInternalRect(this.#scrollParents[0]);
 
@@ -689,7 +686,7 @@ export default class WUPPopupElement<
       layout bug: Yscroll appears/disappears when display:flex; heigth:100vh > position:absolute; right:-10px
       issue: posible with cnt==2 issue will be reproduced
       */
-    this.#prevRect = t.el.getBoundingClientRect();
+    return t.el.getBoundingClientRect();
   };
 
   protected override gotRemoved() {

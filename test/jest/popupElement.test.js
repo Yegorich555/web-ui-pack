@@ -655,14 +655,12 @@ describe("popupElement", () => {
   });
 
   test("memoryLeaking", () => {
-    const spy = [document, document.body, HTMLElement.prototype, trg].map((s) => {
-      const me = {
-        on: jest.spyOn(s, "addEventListener"),
-        off: jest.spyOn(s, "removeEventListener"),
-        itemName: s.toString(),
-      };
-      return me;
-    });
+    const spy = h.spyEventListeners([trg]);
+
+    let animateFrame;
+    const spyFrame = jest.spyOn(window, "requestAnimationFrame").mockImplementation((fn) => (animateFrame = fn));
+    const spyTrgRect = jest.spyOn(trg, "getBoundingClientRect");
+    const spyBodyRect = jest.spyOn(document.body, "getBoundingClientRect");
 
     /** @type typeof el */
     const a = document.createElement(el.tagName);
@@ -679,15 +677,48 @@ describe("popupElement", () => {
     expect(a.$isOpened).toBeTruthy();
     expect(spy[0].on).toBeCalled(); // expected that we have events for document
 
+    // checking if updatePosition was fired
+    expect(spyFrame).toBeCalledTimes(1);
+    expect(spyTrgRect).toBeCalled();
+    expect(spyBodyRect).toBeCalled();
+    spyTrgRect.mockClear();
+    spyBodyRect.mockClear();
+    animateFrame();
+    expect(spyTrgRect).toBeCalledTimes(1);
+    expect(spyBodyRect).not.toBeCalled();
+    animateFrame();
+    expect(spyTrgRect).toBeCalledTimes(2);
+    expect(spyBodyRect).not.toBeCalled();
+
     a.remove();
-    spy.forEach((s) => {
-      // checking if removed every listener that was added
-      const onCalls = s.on.mock.calls
-        .filter((c) => c[2]?.once !== true)
-        .map((c, i) => `${c[0]} ${s.on.mock.instances[i] || s.itemName}`);
-      const offCalls = s.off.mock.calls.map((c, i) => `${c[0]} ${s.off.mock.instances[i] || s.itemName}`);
-      expect(onCalls).toEqual(offCalls);
-    });
+    spy.check(); // checking if removed every listener that was added
+
+    // checking target removed > event removed
+    jest.clearAllMocks();
+    trg.remove();
+    document.body.appendChild(a);
+    jest.advanceTimersToNextTimer(); // onReady has timeout
+    expect(trg.click).toThrow(); // because target is not connected
+    document.body.appendChild(trg);
+    trg.click();
+    expect(a.$isOpened).toBeTruthy();
+
+    trg.remove();
+    animateFrame();
+    jest.advanceTimersByTime(1);
+    expect(a.$isOpened).toBeFalsy();
+    // if target removed - events should be removed
+    spy.check(); // checking if removed every listener that was added
+
+    // try return default behavior
+    document.body.appendChild(trg);
+    a.$options.target = null;
+    a.$options.target = trg; // required to rebind events
+    jest.advanceTimersByTime(1);
+    const called2 = spy.map((v) => v.on.mock.calls[0]).filter((v) => v);
+    expect(called2).not.toHaveLength(0); // test if event listeners were added
+    trg.click();
+    expect(a.$isOpened).toBeTruthy();
   });
 
   test("position", async () => {
@@ -1132,9 +1163,5 @@ describe("popupElement", () => {
     );
   });
 });
-
-// todo memoryLeaking: check if #updatePosition is fired again (check if hiddenByScroll also)
-// todo if target removed - document events should be removed
-// todo if popup removed - document events should be removed (only without attach)
 
 // todo check $attach with different cases
