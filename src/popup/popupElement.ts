@@ -94,9 +94,10 @@ export default class WUPPopupElement<
   }
 
   /** Listen for target according to showCase and create/remove popup when it's required (by show/hide).
-   *  This helps to avoid tons of hidden popups on HTML
+   *  This helps to avoid tons of hidden popups on HTML;
+   *  @returns detach-function (hide,remove popup and remove eventListeners)
    *  @example
-   *   WUPPopupElement.$attach(
+   *  const detach = WUPPopupElement.$attach(
    *     {
    *       target: document.querySelector("button") as HTMLElement,
    *       text: "Some text here",
@@ -111,7 +112,7 @@ export default class WUPPopupElement<
     options: Partial<Omit<WUPPopup.Options, "target">> & { target: HTMLElement; text: string; tagName?: string },
     /** Fires when popup is added to document */
     callback?: (el: T) => void
-  ): void {
+  ): () => void {
     let popup: T | undefined;
 
     const attach = () => {
@@ -145,7 +146,7 @@ export default class WUPPopupElement<
         (v) => {
           const ok = (popup as T).goHide(v);
           if (ok) {
-            (popup as T).#onRemoveRef = undefined;
+            (popup as T).#onRemoveRef = undefined; // required otherwise events are removed from popup
             (popup as T).remove();
             popup = undefined;
           }
@@ -154,7 +155,18 @@ export default class WUPPopupElement<
       );
       return refs;
     };
-    attach();
+    const r = attach();
+
+    function detach() {
+      if (popup) {
+        popup.$isOpened && popup.goHide(WUPPopup.HideCases.onFireHide);
+        (popup as T).remove();
+      }
+      r.onRemoveRef();
+      popup = undefined;
+    }
+
+    return detach;
   }
 
   $options: WUPPopup.Options = {
@@ -464,6 +476,7 @@ export default class WUPPopupElement<
     }
 
     this.#frameId && window.cancelAnimationFrame(this.#frameId);
+    this.#frameId = undefined;
     this.style.display = "";
 
     this.#isOpened = false;
@@ -691,6 +704,8 @@ export default class WUPPopupElement<
   };
 
   protected override gotRemoved() {
+    this.#frameId && window.cancelAnimationFrame(this.#frameId);
+    this.#frameId = undefined;
     super.gotRemoved();
     this.#isOpened = false;
     this.#arrowElement?.remove();

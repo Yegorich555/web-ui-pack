@@ -170,7 +170,7 @@ export function handleRejection() {
 
 /** @type ReturnType typeof spyEventListeners & {check: ()=>void } */
 export function spyEventListeners(otherElements) {
-  const spy = [document, document.body, HTMLElement.prototype, ...otherElements].map((s) => {
+  const spy = [document, document.body, HTMLElement.prototype, ...(otherElements ?? [])].map((s) => {
     const me = {
       on: jest.spyOn(s, "addEventListener"),
       onCalls: ["array names"],

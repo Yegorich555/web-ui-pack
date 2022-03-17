@@ -1,3 +1,4 @@
+/* eslint-disable prefer-rest-params */
 import { WUPPopupElement } from "web-ui-pack";
 import all from "web-ui-pack/popup/popupElement.types";
 import * as h from "../testHelper";
@@ -690,14 +691,18 @@ describe("popupElement", () => {
     expect(spyBodyRect).not.toBeCalled();
 
     a.remove();
+    expect(a.isConnected).toBeFalsy();
+    expect(a.$isOpened).toBeFalsy();
     spy.check(); // checking if removed every listener that was added
 
     // checking target removed > event removed
     jest.clearAllMocks();
     trg.remove();
     document.body.appendChild(a);
-    jest.advanceTimersToNextTimer(); // onReady has timeout
+    jest.advanceTimersByTime(1000); // onReady has timeout
     expect(trg.click).toThrow(); // because target is not connected
+    expect(a.goShow).toThrow(); // coverage doesn't work for code above !!!
+
     document.body.appendChild(trg);
     trg.click();
     expect(a.$isOpened).toBeTruthy();
@@ -1105,6 +1110,76 @@ describe("popupElement", () => {
       `"<body><div id=\\"targetId\\">some text</div><wup-popup style=\\"transform: translate(244px, 130px); display: block;\\"></wup-popup><wup-popup-arrow class=\\"my-arrow\\" style=\\"width: 8px; height: 4px; transform: translate(238.5px, 138px) rotate(90deg);\\"></wup-popup-arrow></body>"`
     );
   });
-});
 
-// todo check $attach with different cases
+  test("static.$attach", () => {
+    trg.remove();
+    document.body.innerHTML = "";
+    document.body.appendChild(trg);
+
+    /** @type WUPPopupElement */
+    const spy = h.spyEventListeners();
+    let popup = null;
+    let cnt = 0;
+    const spyHide = jest.spyOn(WUPPopupElement.prototype, "goHide");
+    const spyShow = jest.spyOn(WUPPopupElement.prototype, "goShow");
+
+    const detach = WUPPopupElement.$attach({ target: trg, showCase: 0b111111, text: "Me" }, (popupEl) => {
+      popup = popupEl;
+      ++cnt;
+    });
+
+    expect(popup).toBeNull();
+    trg.click();
+    expect(popup).toBeDefined();
+    expect(popup.$options.showCase).toBe(0b111111);
+    expect(popup.$options.target).toBe(trg);
+    jest.advanceTimersByTime(100); // popup has click-timeouts
+    expect(popup.isConnected).toBeTruthy();
+    expect(popup.$isOpened).toBeTruthy();
+    expect(document.body.innerHTML).toMatchInlineSnapshot(
+      `"<div id=\\"targetId\\">some text</div><wup-popup style=\\"display: block; transform: translate(190px, 100px);\\">Me</wup-popup>"`
+    );
+    expect(cnt).toBe(1);
+    expect(spyShow).toBeCalledTimes(1);
+    expect(spyHide).toBeCalledTimes(0);
+
+    trg.click();
+    expect(cnt).toBe(1);
+    jest.advanceTimersByTime(100); // popup has click-timeouts
+    expect(popup.$isOpened).toBeFalsy();
+    expect(popup.isConnected).toBeFalsy();
+    expect(document.body.innerHTML).toMatchInlineSnapshot(`"<div id=\\"targetId\\">some text</div>"`);
+    expect(spyShow).toBeCalledTimes(1);
+    expect(spyHide).toBeCalledTimes(1);
+
+    trg.click();
+    expect(cnt).toBe(2);
+    jest.advanceTimersByTime(100); // popup has click-timeouts
+    expect(popup.$isOpened).toBeTruthy();
+    expect(popup.isConnected).toBeTruthy();
+    expect(document.body.innerHTML).toMatchInlineSnapshot(
+      `"<div id=\\"targetId\\">some text</div><wup-popup style=\\"display: block; transform: translate(190px, 100px);\\">Me</wup-popup>"`
+    );
+    expect(spyShow).toBeCalledTimes(2);
+    expect(spyHide).toBeCalledTimes(1);
+
+    detach();
+    expect(detach).not.toThrow(); // checking detach again
+    expect(popup.$isOpened).toBeFalsy();
+    expect(popup.isConnected).toBeFalsy();
+    expect(document.body.innerHTML).toMatchInlineSnapshot(`"<div id=\\"targetId\\">some text</div>"`);
+    expect(spyShow).toBeCalledTimes(2);
+    expect(spyHide).toBeCalledTimes(2);
+
+    spy.check(); // checkшing memory leak
+
+    // checking when canShow = false > popup.removed
+    jest.clearAllMocks();
+    const spyCanShow = jest.spyOn(WUPPopupElement.prototype, "canShow").mockImplementation(() => false);
+    WUPPopupElement.$attach({ target: trg, showCase: 0b111111, text: "Me" }); // checking without callback
+    trg.click();
+    jest.advanceTimersByTime(100); // popup has click-timeouts
+    expect(document.body.innerHTML).toMatchInlineSnapshot(`"<div id=\\"targetId\\">some text</div>"`);
+    spyCanShow.mockRestore();
+  });
+});
