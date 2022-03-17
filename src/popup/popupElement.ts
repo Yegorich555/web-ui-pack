@@ -30,6 +30,7 @@ export import ShowCases = WUPPopup.ShowCases;
  * * You can set minWidth, minHeight to prevent squizing of popup or don't use rule '.$adjust'
  * * Don't override styles: transform, display
  * * Don't use inline styles" maxWidth, maxHeight
+ * * If target removed (when popup $isOpened) and appended again you need to update $options.target (because $options.target cleared)
  */
 export default class WUPPopupElement<
   Events extends WUPPopup.EventMap = WUPPopup.EventMap
@@ -489,7 +490,7 @@ export default class WUPPopupElement<
     const trg = this._opts.target as HTMLElement;
     if (!trg.isConnected) {
       this.#onRemoveRef?.call(this);
-      // possible false if popup removed with target
+      this._opts.target = undefined;
       this.goHide(WUPPopup.HideCases.onTargetRemove);
       return undefined;
     }

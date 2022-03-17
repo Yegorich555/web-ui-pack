@@ -193,14 +193,13 @@ describe("popupElement", () => {
     expect(a2.$isOpened).toBeFalsy();
 
     // applyShowCase after timer
-    // a2.remove();
-    // document.body.prepend(a2);
-    // a2.$options.target = null;
-    // jest.advanceTimersByTime(2); // wait for ready and applyShowCase-timer-start
-    // a2.$options.target = trg;
-    // jest.advanceTimersToNextTimer();
-    // trg.click();
-    // expect(a2.$isOpened).toBeTruthy();
+    a2.remove();
+    jest.advanceTimersByTime(1);
+    document.body.prepend(a2);
+    a2.$options.target = trg; // required to reassign otherwise target is undefined
+    jest.advanceTimersByTime(1);
+    trg.click();
+    expect(a2.$isOpened).toBeTruthy();
   });
 
   test("$options.target", () => {
