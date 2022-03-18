@@ -21,7 +21,9 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   static observedOptions?: Set<keyof Record<string, any>>;
 
   /** StyleContent related to component */
-  static style = "";
+  static get style(): string {
+    return "";
+  }
 
   /** Options that applied to element */
   abstract $options: Record<string, any>;
@@ -163,14 +165,14 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     return super.dispatchEvent(ev as Event);
   }
 
-  // todo how to change  listener: (this: WUPBaseElement) to generic ?
+  // watchfix: how to change  listener: (this: WUPBaseElement) to generic: https://github.com/microsoft/TypeScript/issues/299
   /* eslint-disable max-len */
   // prettier-ignore
   addEventListener<K extends keyof Events>(type: K, listener: (this: WUPBaseElement, ev: Events[K]) => any, options?: boolean | AddEventListenerOptions): void;
   // prettier-ignore
   addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
   addEventListener(type: any, listener: any, options?: any): void {
-    return super.addEventListener(type, listener, options); // todo remove via decorators ???
+    return super.addEventListener(type, listener, options);
   }
 
   // prettier-ignore
@@ -178,7 +180,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   // prettier-ignore
   removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
   removeEventListener(type: any, listener: any, options?: any): void {
-    return super.removeEventListener(type, listener, options); // todo remove via decorators ???
+    return super.removeEventListener(type, listener, options);
   }
   /* eslint-enable max-len */
 
@@ -196,9 +198,8 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     K extends HTMLElement | Document,
     E extends HTMLElementEventMap & Record<string, Event>
   >(...args: Parameters<onEventType<T, K, E>>): () => void {
-    args[3] = <AddEventListenerOptions>{ passive: true, ...(args[3] as AddEventListenerOptions) };
     // self-removing when option.once
-    if (args[3].once) {
+    if ((args[3] as AddEventListenerOptions)?.once) {
       const listener = args[2];
       args[2] = function wrapper(...args2) {
         const v = listener.call(this, ...args2);

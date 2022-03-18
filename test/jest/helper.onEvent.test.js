@@ -1,5 +1,9 @@
 import { onEvent } from "web-ui-pack";
 
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
 describe("helper.onEvent", () => {
   test("ordinary behavior", () => {
     const fn = jest.fn();
@@ -29,8 +33,8 @@ describe("helper.onEvent", () => {
 
   test("option.once", () => {
     const fn = jest.fn();
-    const spyOn = jest.spyOn(document, "addEventListener").mockClear();
-    const spyOff = jest.spyOn(document, "removeEventListener").mockClear();
+    const spyOn = jest.spyOn(document, "addEventListener");
+    const spyOff = jest.spyOn(document, "removeEventListener");
     const remove = onEvent(document, "click", fn, { once: true });
 
     document.dispatchEvent(new Event("click"));
@@ -47,5 +51,16 @@ describe("helper.onEvent", () => {
     expect(spyOn).toBeCalledTimes(1);
     expect(spyOff).toBeCalledTimes(2);
     expect(fn).not.toHaveBeenCalled();
+  });
+
+  test("other options", () => {
+    const fn = jest.fn();
+    const spyOn = jest.spyOn(document, "addEventListener");
+    const remove = onEvent(document, "click", fn, { passive: true });
+
+    document.dispatchEvent(new Event("click"));
+    expect(spyOn).toBeCalledTimes(1);
+    expect(fn).toBeCalledTimes(1);
+    remove();
   });
 });

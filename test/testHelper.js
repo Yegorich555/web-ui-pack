@@ -1,8 +1,5 @@
 /* eslint-disable no-prototype-builtins */
 /* eslint-disable jest/no-export */
-// import React from "react";
-import { render, unmountComponentAtNode } from "react-dom";
-import reactTestUtils from "react-dom/test-utils";
 
 export function mockSetState(el) {
   return jest.fn((state, callback) =>
@@ -123,12 +120,7 @@ export function testComponentFuncBind(obj) {
   });
 }
 
-const skipNamesStatic = new Set([
-  "length", //
-  "prototype",
-  "name",
-]);
-
+const skipNamesStatic = new Set(["length", "prototype", "name"]);
 export function testStaticInheritence(Type) {
   describe("componentStatic", () => {
     const stat = Object.getOwnPropertyNames(Type) //
@@ -162,99 +154,6 @@ export const keys = {
   ArrowDown: 40,
 };
 
-export function initDom() {
-  const container = {
-    act: (fn) => reactTestUtils.act(fn),
-    render: (el) => {
-      reactTestUtils.act(() => {
-        render(el, container.element);
-      });
-      return container.element;
-    },
-    /** wait for render is finished; apply jest.useFakeTimers before this function */
-    renderWait: (el) => {
-      container.render(el);
-      jest.advanceTimersToNextTimer();
-    },
-    expectRender: (el) => {
-      container.render(el);
-      return expect(container.element.innerHTML);
-    },
-    /**
-     * @param {Element} inputOrSelector
-     * @param {string} text
-     */
-    userTypeText(inputOrSelector, text) {
-      if (typeof inputOrSelector === "string") {
-        inputOrSelector = document.querySelector(inputOrSelector);
-      }
-      inputOrSelector.value = "";
-      for (let i = 0; i < text.length; ++i) {
-        const keyCode = text.charCodeAt(i);
-        reactTestUtils.act(() => {
-          inputOrSelector.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, keyCode }));
-          inputOrSelector.dispatchEvent(new KeyboardEvent("keypress", { bubbles: true, keyCode }));
-          inputOrSelector.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true, keyCode }));
-          inputOrSelector.value += text[i];
-          reactTestUtils.Simulate.change(inputOrSelector);
-          // it's actual only for react; in js-native onChange happens by onBlur
-          // input.dispatchEvent(new Event("change", { bubbles: true }));
-        });
-      }
-      if (!text.length) {
-        reactTestUtils.act(() => {
-          reactTestUtils.Simulate.change(inputOrSelector);
-        });
-      }
-    },
-    userPressKey(elementOrSelector, keyCode) {
-      if (typeof elementOrSelector === "string") {
-        elementOrSelector = document.querySelector(elementOrSelector);
-      }
-      const key = Object.keys(keys).find((k) => keys[k] === keyCode);
-      reactTestUtils.act(() => {
-        elementOrSelector.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, keyCode, key }));
-        elementOrSelector.dispatchEvent(new KeyboardEvent("keypress", { bubbles: true, keyCode, key }));
-        elementOrSelector.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true, keyCode, key }));
-      });
-    },
-    userClick(elementOrSelector) {
-      if (typeof elementOrSelector === "string") {
-        elementOrSelector = document.querySelector(elementOrSelector);
-      }
-      reactTestUtils.act(() => {
-        elementOrSelector.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
-        elementOrSelector.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
-        elementOrSelector.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-      });
-    },
-    dispatchEvent(elementOrSelector, event) {
-      if (typeof elementOrSelector === "string") {
-        elementOrSelector = document.querySelector(elementOrSelector);
-      }
-      if (elementOrSelector.type === "focus") {
-        elementOrSelector.focus();
-      } else if (elementOrSelector.type === "blur") {
-        elementOrSelector.blur();
-      } else {
-        reactTestUtils.act(() => {
-          elementOrSelector.dispatchEvent(event);
-        });
-      }
-    },
-
-    element: undefined,
-    destroyDom: () => {
-      unmountComponentAtNode(container.element);
-      container.element.remove();
-      container.element = null;
-    },
-  };
-  container.element = document.createElement("div");
-  document.body.appendChild(container.element);
-  return container;
-}
-
 /** Handle process.on("unhandledRejection"); @type jest.MockedFunction;
  * WARN: it can't provide mock.calls because processFires after test-execution
  */
@@ -267,4 +166,37 @@ export function handleRejection() {
   };
   global.setUnhandledReject(fn);
   return fn;
+}
+
+/** @type ReturnType typeof spyEventListeners & {check: ()=>void } */
+export function spyEventListeners(otherElements) {
+  const spy = [document, document.body, HTMLElement.prototype, ...(otherElements ?? [])].map((s) => {
+    const me = {
+      on: jest.spyOn(s, "addEventListener"),
+      onCalls: ["array names"],
+      off: jest.spyOn(s, "removeEventListener"),
+      offCalls: ["array names"],
+      itemName: s.toString(),
+    };
+    Object.defineProperty(me, "onCalls", {
+      get: () =>
+        me.on.mock.calls
+          .filter((c) => c[2]?.once !== true)
+          .map((c, i) => `${c[0]} ${me.on.mock.instances[i] || me.itemName}`)
+          .sort(),
+    });
+    Object.defineProperty(me, "offCalls", {
+      get: () => me.off.mock.calls.map((c, i) => `${c[0]} ${me.off.mock.instances[i] || me.itemName}`).sort(),
+    });
+    return me;
+  });
+
+  spy.check = () => {
+    spy.forEach((s) => {
+      // checking if removed every listener that was added
+      expect(s.onCalls).toEqual(s.offCalls);
+    });
+  };
+
+  return spy;
 }

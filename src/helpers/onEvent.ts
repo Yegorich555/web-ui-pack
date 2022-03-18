@@ -1,6 +1,6 @@
 /* eslint-disable no-use-before-define */
 
-/** Apply el.addEventListener and return el.removeEventListener function; */
+/** Apply el.addEventListener and return el.removeEventListener function; use passive:true by default; */
 export default function onEvent<
   T extends keyof E,
   K extends HTMLElement | Document,
@@ -29,7 +29,11 @@ export default function onEvent<
     );
     (options as AddEventListenerOptions)?.once && remove();
   }
-  element.addEventListener(type as string, wrapper, options);
+  element.addEventListener(
+    type as string,
+    wrapper,
+    options instanceof Object ? { passive: true, ...options } : options
+  );
   return remove;
 }
 

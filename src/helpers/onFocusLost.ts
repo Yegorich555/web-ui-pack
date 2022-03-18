@@ -80,6 +80,6 @@ export default function onFocusLost(
     }
   };
 
-  element.addEventListener("focusout", focusout, { ...options, once: false });
+  element.addEventListener("focusout", focusout, { passive: true, ...options, once: false });
   return remove;
 }

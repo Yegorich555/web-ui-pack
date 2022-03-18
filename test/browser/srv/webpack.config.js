@@ -20,7 +20,7 @@ module.exports = {
     alias: {
       "web-ui-pack": path.resolve(__dirname, "../../../dist/"),
     },
-    // todo somehow it doesn't work
+    // issue: somehow it doesn't work
     // plugins: [
     //   new TsconfigPathsPlugin({
     //     configFile: path.resolve(__dirname, "../../tsconfig.json"),

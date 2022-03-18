@@ -1,6 +1,6 @@
 # ![logo](/demo/src/assets/logo-small.png) web-ui-pack
 
-Web package with custom high scalable [WebComponents](#components) and [helpers](#helpers)
+Web package with high scalable [WebComponents](#components) and [helpers](#helpers)
 
 [![npm version](https://img.shields.io/npm/v/web-ui-pack.svg?style=flat-square)](https://www.npmjs.com/package/web-ui-pack)
 [![code coverage](https://coveralls.io/repos/github/Yegorich555/web-ui-pack/badge.svg?style=flat-square)](https://coveralls.io/github/Yegorich555/web-ui-pack)
@@ -31,7 +31,8 @@ npm install web-ui-pack
 
 ## TODO
 
-- [x] [Observer](#helpersobserver)
+- [x] [Basic helpers](#helpers)
+- [x] [Helper.Observer](#helpersobserver)
 - [x] [PopupElement](#popupelement)
 - [ ] TitleElement ?
 - [ ] FormElement, TextControl
@@ -87,11 +88,12 @@ _comming soon..._
 Typescript
 
 ```typescript
-import WUPPopupElement, { ShowCases } from "web-ui-pack/popupElement";
+import WUPPopupElement, { ShowCases } from "web-ui-pack/popup/popupElement";
 
 // redefine some defaults; WARN: you can change placement rules here without changing $options per each element!!!
 WUPPopupElement.$defaults.offset = [2, 2];
 WUPPopupElement.$defaults.minWidthByTarget = true;
+WUPPopupElement.$defaults.arrowEnable = true;
 
 // create element
 const el = document.createElement("wup-popup");
@@ -104,11 +106,11 @@ el.$options.target = document.querySelector("button");
   every placement has align options: $start, $middle, $end (left - to align at start of target)
   also you can set $adjust to allow Reduce popup to fit layout
 */
-el.$options.placement = WUPPopupElement.$placements.$top.$middle; // place at the top of target and align by vertical line
-el.$options.placementAlt = [
-  WUPPopupElement.$placements.$bottom.$middle, // place at the bottom of target and align by vertical line
-  WUPPopupElement.$placements.$bottom.$middle.$adjust, // adjust means 'Reduce popup to fit layout`
-];
+el.$options.placement = [
+  WUPPopupElement.$placements.$top.$middle; // place at the top of target and align by vertical line
+  WUPPopupElement.$placements.$bottom.$middle.$adjust, // adjust means 'ignore align to fit layout`
+  WUPPopupElement.$placements.$bottom.$middle.$adjust.$resizeHeight, // resize means 'allow to resize to fit layout'
+]
 document.body.append(el);
 ```
 
@@ -161,6 +163,7 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 **WARN**: don't use `import {focusFirst} from "web-ui-pack;` because in this case the whole web-ui-pack module traps in compilation of dev-bundle and increases time of compilation
 
 - [**focusFirst**(element: HTMLElement)](#helpers) ⇒ `Set focus on parent itself or first possible element inside`
+- [**findScrollParent**(element: HTMLElement)](#helpers) ⇒ `Find first parent with active scroll X/Y`
 - [**nestedProperty.set**](#helpers) ⇒ `nestedProperty.set(obj, "value.nestedValue", 1) sets obj.value.nestedValue = 1`
 - [**nestedProperty.get**](#helpers) ⇒ `nestedProperty.get(obj, "nestedValue1.nestVal2") returns value from obj.nestedValue1.nestVal2`
 - [**observer**](#observer) ⇒ `converts object to observable (via Proxy) to allow listen for changes`

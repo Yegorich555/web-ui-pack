@@ -1,13 +1,15 @@
 // ES5 import is required otherwise jest-env conflicts with puppeeter-env
-const WUPPopupElement = require("web-ui-pack/popupElement").default;
+const WUPPopupElement = require("web-ui-pack/popup/popupElement").default;
 
 /** @type WUPPopupElement */
 let testEl;
 beforeEach(async () => {
   await page.evaluate(() => {
     document.activeElement && document.activeElement.blur();
-    WUPPopupElement.$defaults.placement = WUPPopupElement.$placements.$top.$start;
-    WUPPopupElement.$defaults.placementAlt = [WUPPopupElement.$placements.$bottom.$start];
+    WUPPopupElement.$defaults.placement = [
+      WUPPopupElement.$placements.$top.$start,
+      WUPPopupElement.$placements.$bottom.$start,
+    ];
     WUPPopupElement.$defaults.showCase = 4; // onClick;
     renderIt(
       <label key={Date.now()}>
@@ -37,7 +39,7 @@ describe("popupElement", () => {
     // bug: toMatchInlineSnapshot doesn't work
     // checking placement
     expect(t.html).toBe(
-      '<wup-popup style="display: block; transform: translate(72.4219px, 29px); max-width: 735.578px; max-height: 579px;">Popup text</wup-popup>'
+      '<wup-popup style="display: block; transform: translate(72.4219px, 29px);">Popup text</wup-popup>'
     );
     await page.click("label"); // click again should hide
     await page.waitForTimeout(1); // timeout required because of debounceFilters
@@ -45,9 +47,7 @@ describe("popupElement", () => {
     expect(t.isOpened).toBeFalsy();
     expect(t.gotShow).toBe(1);
     expect(t.gotHide).toBe(1);
-    expect(t.html).toBe(
-      '<wup-popup style="transform: translate(72.4219px, 29px); max-width: 735.578px; max-height: 579px;">Popup text</wup-popup>'
-    );
+    expect(t.html).toBe('<wup-popup style="transform: translate(72.4219px, 29px);">Popup text</wup-popup>');
   });
 
   test("showCase: click & focus", async () => {
@@ -55,6 +55,7 @@ describe("popupElement", () => {
     await page.waitForTimeout(1); // timeout required because of debounceFilters
     let t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpened }));
     expect(t.gotShow).toBe(0);
+    expect(t.gotHide).toBe(0);
 
     await page.click("label"); // click on label fires click on input also
     await page.waitForTimeout(1); // timeout required because of debounceFilters
@@ -95,7 +96,19 @@ describe("popupElement", () => {
     await page.waitForTimeout(1); // timeout required because of debounceFilters
     const t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML }));
     expect(t.html).toBe(
-      '<wup-popup style="display: block; min-width: 177px; min-height: 21px; transform: translate(72.4219px, 29px); max-width: 735.578px; max-height: 579px;">Popup text</wup-popup>'
+      '<wup-popup style="min-width: 177px; min-height: 21px; display: block; transform: translate(72.4219px, 29px);">Popup text</wup-popup>'
+    );
+  });
+
+  test("arrow", async () => {
+    await page.evaluate(() => {
+      testEl.$options.arrowEnable = true;
+    });
+    await page.click("label");
+    await page.waitForTimeout(1); // timeout required because of debounceFilters
+    const t = await page.evaluate(() => ({ ...t, html: document.body.outerHTML }));
+    expect(t.html).toBe(
+      `<body><div id="app"><label><span>Label text</span><input><wup-popup style="display: block; transform: translate(72.4219px, 39px);">Popup text</wup-popup></label></div><wup-popup-arrow style="transform: translate(124.422px, 29.5px) rotate(180deg);"></wup-popup-arrow></body>`
     );
   });
 });

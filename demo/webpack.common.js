@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-// console.clear(); // TODO: watchFix => it doesn't work properly since VSCode-terminal has bug: https://github.com/microsoft/vscode/issues/75141
+// console.clear(); // watchFix => it doesn't work properly since VSCode-terminal has bug: https://github.com/microsoft/vscode/issues/75141
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CaseSensitivePathsPlugin = require("case-sensitive-paths-webpack-plugin");
@@ -140,7 +140,6 @@ module.exports = function (env, argv) {
             isDevServer
               ? "style-loader" // it extracts style directly into html (MiniCssExtractPlugin works incorrect with hmr and modules architecture)
               : MiniCssExtractPlugin.loader, // it extracts styles into file *.css
-            // TODO: improve plugin for splitting by files for dev purpose
             {
               loader: "css-loader", // it interprets @import and url() like import/require() and it resolves them (you can use [import *.css] into *.js).
               options: {
@@ -212,7 +211,7 @@ module.exports = function (env, argv) {
               removeScriptTypeAttributes: true,
             },
       }),
-      // todo: watchFix for update to webpack5: https://github.com/GoogleChromeLabs/preload-webpack-plugin/issues/132
+      // watchFix for update to webpack5: https://github.com/GoogleChromeLabs/preload-webpack-plugin/issues/132
       // new PreloadPlugin({
       //   // it adds 'preload' tag for async js-files: https://developer.mozilla.org/en-US/docs/Web/HTML/Preloading_content
       //   rel: "preload",

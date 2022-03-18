@@ -4,7 +4,7 @@ import React from "react";
 import ReactDom from "react-dom";
 import { BrowserRouter, Routes, Route, Navigate, NavLink } from "react-router-dom";
 import { stringPrettify } from "web-ui-pack";
-import PopupView from "./components/popupView";
+import PopupView from "./components/popup/popupView";
 
 import iconGit from "./assets/gitIcon.svg";
 import imgLogo from "./assets/logo.png";

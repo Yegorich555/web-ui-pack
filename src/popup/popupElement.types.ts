@@ -1,4 +1,4 @@
-import { WUP } from "./baseElement";
+import { WUP } from "../baseElement";
 import { WUPPopupPlace } from "./popupPlacements";
 
 export namespace WUPPopup {
@@ -23,22 +23,23 @@ export namespace WUPPopup {
     onOutsideClick,
     onPopupClick,
     onTargetClick,
+    /** When target removed from document */
+    onTargetRemove,
     /** When options or attributes changes */
     onOptionChange,
   }
 
   export interface Options {
     /** Anchor that popup uses for placement. If attr.target and $options.target are empty previousSibling will be attached.
-     *
      * attr target="{querySelector}" has hire priority than .options.target */
     target?: HTMLElement | null;
-    /** Placement rule relative to target; example Placements.bottom.start or Placements.bottom.start.adjust */
-    placement: WUPPopupPlace.PlaceFunc;
-    /** Alternate when pointed placement doesn't fit the layout */
-    placementAlt: Array<WUPPopupPlace.PlaceFunc>;
+    /**
+     * Placement rules relative to target; example Placements.bottom.start or Placements.bottom.start.adjust
+     * Point several to define alternate behavior (when space are not enough)
+     */
+    placement: Array<WUPPopupPlace.PlaceFunc>;
     /** Alternative of margin for targetElement related to popup
-
-   *  [top, right, bottom, left] or [top/bottom, right/left] in px */
+     *  [top, right, bottom, left] or [top/bottom, right/left] in px */
     offset: [number, number, number, number] | [number, number];
     /** Inside edges of fitElement popup is positioned and can't overflow fitElement; {body} by default */
     toFitElement?: HTMLElement | null;
@@ -46,10 +47,6 @@ export namespace WUPPopup {
     minWidthByTarget: boolean;
     /** Sets minHeight 100% of targetWidth */
     minHeightByTarget: boolean;
-
-    // todo overflow behavior when target partially hidden by scrollable parent
-    // possible cases: hide, placeOpposite
-
     /** Case when popup need to show; default is `onClick`
      * @example
      * showCase=WUPPopup.ShowCases.onFocus | WUPPopup.ShowCases.onClick // to join cases
@@ -61,6 +58,14 @@ export namespace WUPPopup {
     hoverHideTimeout: number;
     /** Debounce option for onFocustLost event (for ShowCases.onFocus); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost; Default is 100ms */
     focusDebounceMs?: number;
+    /** Set true to show arrow with popup; @false by default */
+    arrowEnable: boolean;
+    /** Setup arrow class and use :before to add background-image or content;
+     * Limitation: arrow developed with ratio 2:1(w:h). You can't change it directly. Use only :before, :after to reach you goal */
+    arrowClass?: string;
+    /** Alternative of margin for targetElement related to arrow
+     *  [top, right, bottom, left] or [top/bottom, right/left] in px */
+    arrowOffset: [number, number, number, number] | [number, number];
   }
 
   export interface EventMap extends WUP.EventMap {

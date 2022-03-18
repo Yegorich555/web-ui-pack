@@ -5,29 +5,26 @@
 }
 
 .trg {
-  height: 120px;
+  height: 100px;
   width: 300px;
   margin: 20px auto;
 }
 
 .fitBlock {
+  width: 100%;
+  height: 140px;
+  margin: 20px auto;
+  box-sizing: border-box;
   border: 1px solid $basicActiveBgColor;
   border-radius: $borderRadius;
-  width: 400px;
-  height: 200px;
-  margin: 20px auto;
-}
-
-.trg2 {
-  cursor: grabbing;
 }
 
 .scrollBlock {
-  position: relative;
-  overflow-y: auto;
+  // position: relative;
+  overflow: auto;
   border: 1px solid $basicActiveBgColor;
-  width: 400px;
-  height: 100px;
+  width: 100%;
+  height: 140px;
   margin: 20px auto;
 
   > button {
@@ -37,6 +34,11 @@
   }
 
   > div {
-    height: 100px;
+    height: 140px;
+    width: calc(100% + 100px);
   }
+}
+
+.scrollPopup {
+  overflow: auto;
 }
