@@ -758,5 +758,4 @@ declare global {
 }
 
 // todo describe issue in readme.md: in react nearest target can be changed but popup can't detect it -- for this case we need to add method $refresh()
-// todo develop animation
 // todo use attrs `top left bottom right` to show direction ???

@@ -6,7 +6,7 @@ export namespace WUPPopup {
     /** Show when it's added to document; to hide just remove popup from document (outsideClick event can be helpful) */
     always = 0,
     /** On mouseEnter event of target; hide by mouseLeave; if popup shown by mouseEnter it can'be closed by click (onHover partially suppress onClick case)  */
-    onHover = 1, // todo check onHover on mobileDevices; maybe onTouch instead ?
+    onHover = 1,
     /** On focusIn event of target; hide by focusOut (also on click if PopupShowCases.onClick included) */
     onFocus = 1 << 1,
     /** On click event of target; hide by click anywhere */
