@@ -90,6 +90,16 @@ export default class WUPPopupElement<
         text-overflow: ellipsis;
         overflow: auto;
       }
+      @media not all and (prefers-reduced-motion) {
+        :host,
+        :host-arrow {
+          animation: wup-popup-anim1 100ms ease-in-out;
+        }
+        @keyframes wup-popup-anim1 {
+          from {opacity: 0;}
+          to {opacity: 1;}
+        }
+      }
      `;
   }
 
