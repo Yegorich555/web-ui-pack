@@ -1109,6 +1109,11 @@ describe("popupElement", () => {
     expectIt(WUPPopupElement.$placements.$right.$end.$adjust).toMatchInlineSnapshot(
       `"<body><div id=\\"targetId\\">some text</div><wup-popup style=\\"transform: translate(244px, 130px); display: block;\\" position=\\"right\\"></wup-popup><wup-popup-arrow class=\\"my-arrow\\" style=\\"width: 8px; height: 4px; transform: translate(238.5px, 138px) rotate(90deg);\\"></wup-popup-arrow></body>"`
     );
+    // checking with nextSibling
+    document.body.appendChild(document.createElement("a"));
+    expectIt(WUPPopupElement.$placements.$right.$end.$adjust).toMatchInlineSnapshot(
+      `"<body><div id=\\"targetId\\">some text</div><wup-popup style=\\"transform: translate(244px, 130px); display: block;\\" position=\\"right\\"></wup-popup><wup-popup-arrow class=\\"my-arrow\\" style=\\"width: 8px; height: 4px; transform: translate(238.5px, 138px) rotate(90deg);\\"></wup-popup-arrow><a></a></body>"`
+    );
   });
 
   test("static.$attach", () => {

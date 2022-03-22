@@ -58,10 +58,22 @@ export namespace WUPPopup {
     hoverHideTimeout: number;
     /** Debounce option for onFocustLost event (for ShowCases.onFocus); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost; Default is 100ms */
     focusDebounceMs?: number;
-    /** Set true to show arrow with popup; @false by default */
+    /** Set true to show arrow with popup; @false by default;
+     *  Arrow is placed after popup so it's easy to access (via style @see arrowClass or popupElement.$arrowElement)
+     */
     arrowEnable: boolean;
     /** Setup arrow class and use :before to add background-image or content;
-     * Limitation: arrow developed with ratio 2:1(w:h). You can't change it directly. Use only :before, :after to reach you goal */
+     * Limitation: arrow developed with ratio 2:1(w:h). You can't change it directly. Use only :before, :after to reach you goal
+     *
+     * To customize arrow style you can use also the following scss logic
+     * @example
+     * wup-popup + wup-popup-arrow {
+     *   opacity: 0.5
+     *   &:before {
+     *      background: no-repeat url("someImageHere.png");
+     *   }
+     * }
+     *  */
     arrowClass?: string;
     /** Alternative of margin for targetElement related to arrow
      *  [top, right, bottom, left] or [top/bottom, right/left] in px */

@@ -217,7 +217,10 @@ export default class WUPPopupElement<
     return this.#isOpened;
   }
 
-  get $arrowElement(): HTMLElement | null {
+  /** Returns arrowElement if $options.arrowEnable=true
+   *
+   */
+  get $arrowElement(): WUPPopupArrowElement | null {
     return this.#arrowElement || null;
   }
 
@@ -403,7 +406,15 @@ export default class WUPPopupElement<
 
     // get arrowSize
     if (this._opts.arrowEnable) {
-      const el = document.body.appendChild(document.createElement(WUPPopupArrowElement.tagName));
+      const el = document.createElement(WUPPopupArrowElement.tagName);
+      // insert arrow after popup
+      const nextEl = this.nextSibling;
+      if (nextEl) {
+        (this.parentNode as HTMLElement).insertBefore(el, nextEl);
+      } else {
+        (this.parentNode as HTMLElement).appendChild(el);
+      }
+
       if (this._opts.arrowClass) {
         el.className = this._opts.arrowClass;
       }
