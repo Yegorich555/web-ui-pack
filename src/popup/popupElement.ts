@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 import WUPBaseElement, { JSXCustomProps, WUP } from "../baseElement";
 import { WUPPopup } from "./popupElement.types";
 import { getBoundingInternalRect, PopupPlacements, px2Number, WUPPopupPlace } from "./popupPlacements";
@@ -6,6 +7,14 @@ import WUPPopupArrowElement from "./popupArrowElement";
 import popupListenTarget from "./popupListenTarget";
 
 export import ShowCases = WUPPopup.ShowCases;
+
+type AttachOptions = Partial<Omit<WUPPopup.Options, "target">> & {
+  target: HTMLElement;
+  text: string;
+  tagName?: string;
+};
+
+const attachLst = new Map<HTMLElement, () => void>();
 
 /** PopupElement
  * @example
@@ -117,22 +126,33 @@ export default class WUPPopupElement<
    *   );
    * @tutorial Troubleshooting:
    * * $attach doesn't work with showCase.always it doesn't make sense
+   * * every new attach on the same target > re-init previous (1 attach per target is possible)
    */
   static $attach<T extends WUPPopupElement>(
-    options: Partial<Omit<WUPPopup.Options, "target">> & { target: HTMLElement; text: string; tagName?: string },
+    options: AttachOptions,
     /** Fires when popup is added to document */
     callback?: (el: T) => void
   ): () => void {
     let popup: T | undefined;
 
+    const savedDetach = attachLst.get(options.target);
+    if (savedDetach) {
+      console.warn(`${tagName.toUpperCase()}. $attach is fired again on the same target. Possible memory leak`);
+      savedDetach();
+    }
+
     const attach = () => {
+      if (popup && !popup.$options.target) {
+        popup.$options.target = options.target;
+      }
+      const opts = popup ? { ...options, ...popup.$options, target: popup.$options.target as HTMLElement } : options;
       const refs = popupListenTarget(
-        options,
+        opts,
         (v) => {
           const isCreate = !popup;
           if (!popup) {
             // eslint-disable-next-line no-use-before-define
-            popup = document.body.appendChild(document.createElement(options.tagName ?? tagName) as T);
+            popup = document.body.appendChild(document.createElement(opts.tagName ?? tagName) as T);
             const p = popup;
 
             popup.#attach = () => {
@@ -141,8 +161,8 @@ export default class WUPPopupElement<
               return refs;
             };
 
-            Object.assign(popup._opts, options);
-            options.text && popup.append(options.text);
+            Object.assign(popup._opts, opts);
+            opts.text && popup.append(opts.text);
             callback?.call(this, popup);
           }
 
@@ -163,6 +183,7 @@ export default class WUPPopupElement<
           return ok;
         }
       );
+
       return refs;
     };
     const r = attach();
@@ -174,7 +195,10 @@ export default class WUPPopupElement<
       }
       r.onRemoveRef();
       popup = undefined;
+      attachLst.delete(options.target);
     }
+
+    attachLst.set(options.target, detach);
 
     return detach;
   }
@@ -781,6 +805,5 @@ declare global {
   }
 }
 
-// todo describe issue in readme.md: in react nearest target can be changed but popup can't detect it -- for this case we need to add method $refresh()
 // todo scale animation for dropdown
 // todo isHidden doesn't work properly

@@ -1121,14 +1121,14 @@ describe("popupElement", () => {
     document.body.innerHTML = "";
     document.body.appendChild(trg);
 
-    /** @type WUPPopupElement */
     const spy = h.spyEventListeners();
+    /** @type WUPPopupElement */
     let popup = null;
     let cnt = 0;
     const spyHide = jest.spyOn(WUPPopupElement.prototype, "goHide");
     const spyShow = jest.spyOn(WUPPopupElement.prototype, "goShow");
 
-    const detach = WUPPopupElement.$attach({ target: trg, showCase: 0b111111, text: "Me" }, (popupEl) => {
+    let detach = WUPPopupElement.$attach({ target: trg, showCase: 0b111111, text: "Me" }, (popupEl) => {
       popup = popupEl;
       ++cnt;
     });
@@ -1176,15 +1176,76 @@ describe("popupElement", () => {
     expect(spyShow).toBeCalledTimes(2);
     expect(spyHide).toBeCalledTimes(2);
 
-    spy.check(); // checkшing memory leak
+    spy.check(); // checking memory leak
 
     // checking when canShow = false > popup.removed
     jest.clearAllMocks();
     const spyCanShow = jest.spyOn(WUPPopupElement.prototype, "canShow").mockImplementation(() => false);
-    WUPPopupElement.$attach({ target: trg, showCase: 0b111111, text: "Me" }); // checking without callback
+    detach = WUPPopupElement.$attach({ target: trg, showCase: 0b111111, text: "Me" }); // checking without callback
     trg.click();
     jest.advanceTimersByTime(100); // popup has click-timeouts
     expect(document.body.innerHTML).toMatchInlineSnapshot(`"<div id=\\"targetId\\">some text</div>"`);
     spyCanShow.mockRestore();
+
+    detach();
+    spy.check(); // checking memory leak
+
+    // checking several attach() on the same target
+    popup = undefined;
+    detach = WUPPopupElement.$attach({ target: trg, showCase: 0b111111, text: "Me" });
+    const warn = h.wrapConsoleWarn(
+      () =>
+        (detach = WUPPopupElement.$attach({ target: trg, showCase: 1 << 2, text: "Me2" }, (popupEl) => {
+          popup = popupEl;
+        }))
+    );
+    expect(warn).toBeCalledTimes(1);
+    trg.click();
+    // checking if rendered once
+    expect(document.body.innerHTML).toMatchInlineSnapshot(
+      `"<div id=\\"targetId\\">some text</div><wup-popup style=\\"display: block; transform: translate(190px, 100px);\\" position=\\"top\\">Me2</wup-popup>"`
+    );
+    expect(popup).toBeDefined();
+
+    // checking if options that affects on re-init can be changed in callback
+    document.body.click();
+    trg.blur();
+    expect(popup.$isOpen).toBeFalsy();
+    detach = WUPPopupElement.$attach({ target: trg, showCase: 1 << 2, text: "Me2", placement: [] }, (popupEl) => {
+      popup = popupEl;
+    });
+    trg.click();
+    expect(popup.$isOpen).toBeTruthy();
+    expect(popup.getAttribute("position")).not.toBe("bottom");
+    jest.advanceTimersByTime(1000);
+    popup.$options.placement = [WUPPopupElement.$placements.$bottom.$start.$adjust];
+    jest.advanceTimersByTime(1000);
+    expect(popup.$isOpen).toBeFalsy(); // changing options hides popup
+    trg.click();
+    expect(popup.$isOpen).toBeTruthy();
+    expect(popup.getAttribute("position")).toBe("bottom");
+
+    // checking changin target
+    const trg2 = document.body.appendChild(document.createElement("button"));
+    popup.$options.target = trg2;
+    jest.advanceTimersByTime(1000);
+    expect(popup.$isOpen).toBeFalsy(); // changing options hides popup
+    trg.click();
+    expect(popup.$isOpen).toBeFalsy(); // because target changed
+    popup.$options.target.click();
+    expect(popup.$isOpen).toBeTruthy();
+
+    // set target to null (for coverage)
+    popup.$options.target = null;
+    jest.advanceTimersByTime(1000);
+    expect(popup.$isOpen).toBeFalsy(); // changing options hides popup
+    expect(popup.$options.target).toBe(trg); // because it returns to previous
+    trg2.click();
+    expect(popup.$isOpen).toBeFalsy(); // because target changed
+    trg.click();
+    expect(popup.$isOpen).toBeTruthy();
+
+    detach();
+    spy.check(); // checking memory leak
   });
 });
