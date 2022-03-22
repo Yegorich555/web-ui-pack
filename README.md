@@ -62,7 +62,7 @@ _comming soon..._
 
 1. **Naming**
    - All components named as `WUP....Element` and `<wup-...>` (for html-tags)
-   - Public properties/options/events/methods startsWith `$...` (events `$onShow`, `$onHide`, methods `$show`, `$hide`, props like `$isOpened` etc.)
+   - Public properties/options/events/methods startsWith `$...` (events `$onShow`, `$onHide`, methods `$show`, `$hide`, props like `$isOpen` etc.)
    - Every component has at least static `$defaults` (common options for current class) and personal `$options` (per each component). See details in [example](#popupelement)
    - `$options` are observed. So changing options affects on component immediately (every component has static `observedOptions` as set of watched options)
 2. **Usage**

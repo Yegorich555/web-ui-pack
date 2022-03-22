@@ -98,6 +98,6 @@ export namespace WUPPopup {
     /** Hide popup */
     $hide: () => void;
     /** Current state */
-    readonly $isOpened: boolean;
+    readonly $isOpen: boolean;
   }
 }

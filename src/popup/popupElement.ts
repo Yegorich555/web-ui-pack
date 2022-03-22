@@ -30,7 +30,7 @@ export import ShowCases = WUPPopup.ShowCases;
  * * You can set minWidth, minHeight to prevent squizing of popup or don't use rule '.$adjust'
  * * Don't override styles: transform, display
  * * Don't use inline styles" maxWidth, maxHeight
- * * If target removed (when popup $isOpened) and appended again you need to update $options.target (because $options.target cleared)
+ * * If target removed (when popup $isOpen) and appended again you need to update $options.target (because $options.target cleared)
  */
 export default class WUPPopupElement<
   Events extends WUPPopup.EventMap = WUPPopup.EventMap
@@ -169,7 +169,7 @@ export default class WUPPopupElement<
 
     function detach() {
       if (popup) {
-        popup.$isOpened && popup.goHide(WUPPopup.HideCases.onFireHide);
+        popup.$isOpen && popup.goHide(WUPPopup.HideCases.onFireHide);
         (popup as T).remove();
       }
       r.onRemoveRef();
@@ -190,7 +190,7 @@ export default class WUPPopupElement<
   $hide() {
     const f = () => {
       // isReady possible false when you fire $hide on disposed element
-      if (this.$isReady && this.#isOpened && this.goHide(WUPPopup.HideCases.onFireHide)) {
+      if (this.$isReady && this.#isOpen && this.goHide(WUPPopup.HideCases.onFireHide)) {
         this._opts.showCase !== WUPPopup.ShowCases.always && this.init(); // re-init to applyShowCase
       }
     };
@@ -213,8 +213,8 @@ export default class WUPPopupElement<
     this.$isReady ? f() : setTimeout(f, 1); // 1ms need to wait forReady
   }
 
-  get $isOpened(): boolean {
-    return this.#isOpened;
+  get $isOpen(): boolean {
+    return this.#isOpen;
   }
 
   /** Returns arrowElement if $options.arrowEnable=true
@@ -232,7 +232,7 @@ export default class WUPPopupElement<
     this.init();
   }
 
-  #isOpened = false;
+  #isOpen = false;
   #initTimer?: ReturnType<typeof setTimeout>;
   #onShowRef?: () => void; // func to add eventListeners onShow
   #onHideRef?: () => void; // func to remove eventListeners that added on onShow
@@ -281,7 +281,7 @@ export default class WUPPopupElement<
   }
 
   #reinit() {
-    this.$isOpened && this.goHide(WUPPopup.HideCases.onOptionChange);
+    this.$isOpen && this.goHide(WUPPopup.HideCases.onOptionChange);
     this.init(); // possible only if popup is hidden
   }
 
@@ -352,8 +352,8 @@ export default class WUPPopupElement<
 
   /** Shows popup if target defined; returns true if successful */
   protected goShow(showCase: WUPPopup.ShowCases): boolean {
-    const wasHidden = !this.#isOpened;
-    this.#isOpened && this.goHide(WUPPopup.HideCases.onShowAgain);
+    const wasHidden = !this.#isOpen;
+    this.#isOpen && this.goHide(WUPPopup.HideCases.onShowAgain);
 
     if (!this._opts.target) {
       const { el, err } = this.#defineTarget();
@@ -464,7 +464,7 @@ export default class WUPPopupElement<
     };
 
     goUpdate();
-    this.#isOpened = true;
+    this.#isOpen = true;
 
     if (wasHidden) {
       this.#onShowRef?.call(this);
@@ -488,7 +488,7 @@ export default class WUPPopupElement<
   protected goHide(hideCase: WUPPopup.HideCases): boolean {
     if (!this.canHide(this.#showCase, hideCase)) return false;
 
-    const wasShown = this.#isOpened;
+    const wasShown = this.#isOpen;
     if (wasShown) {
       const e = this.fireEvent("$willHide", { cancelable: true });
       if (e.defaultPrevented) {
@@ -500,7 +500,7 @@ export default class WUPPopupElement<
     this.#frameId = undefined;
     this.style.display = "";
 
-    this.#isOpened = false;
+    this.#isOpen = false;
     this.#showCase = undefined;
     this.#prevRect = undefined;
     this.#scrollParents = undefined;
@@ -729,7 +729,7 @@ export default class WUPPopupElement<
     this.#frameId && window.cancelAnimationFrame(this.#frameId);
     this.#frameId = undefined;
     super.gotRemoved();
-    this.#isOpened = false;
+    this.#isOpen = false;
     this.#arrowElement?.remove();
     this.#arrowElement = undefined;
   }
@@ -782,3 +782,5 @@ declare global {
 }
 
 // todo describe issue in readme.md: in react nearest target can be changed but popup can't detect it -- for this case we need to add method $refresh()
+// todo scale animation for dropdown
+// todo isHidden doesn't work properly
