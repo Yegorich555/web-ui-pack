@@ -702,6 +702,7 @@ export default class WUPPopupElement<
 
       // transform has performance benefits in comparison with positioning
       this.style.transform = `translate(${pos.left}px, ${pos.top}px)`;
+      this.setAttribute("position", pos.attr);
     };
 
     process();
@@ -762,10 +763,11 @@ declare global {
           onWillHide: never;
           /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willShow') instead */
           onWillShow: never;
+          /** Result position; use this to restyle animation etc. */
+          readonly position: "top" | "left" | "bottom" | "right";
         }>;
     }
   }
 }
 
 // todo describe issue in readme.md: in react nearest target can be changed but popup can't detect it -- for this case we need to add method $refresh()
-// todo use attrs `top left bottom right` to show direction ???
