@@ -20,7 +20,8 @@ export default function Example2() {
     <>
       <h3>Example 2</h3>
       <small>
-        Dropdown behavior. You can change position behavior/priority with option <b>placement</b>
+        <b>Dropdown behavior (with custom animation).</b> You can change position behavior/priority with option{" "}
+        <b>placement</b>
       </small>
       <div className={styles.fitBlock} id="fit">
         <button
@@ -31,6 +32,8 @@ export default function Example2() {
             WUPPopupElement.$attach(
               { target: el, text: "", showCase: ShowCases.onFocus | ShowCases.onClick },
               (popup) => {
+                popup.className = styles.dropdownPopup;
+
                 popup.$options.placement = [
                   // dropdown behavior
                   WUPPopupElement.$placements.$bottom.$start,
@@ -49,15 +52,13 @@ export default function Example2() {
                 if (isLock) {
                   popup.$options.showCase = ShowCases.always;
                   popup.$show(); // to override default showCase and leave show forever
-                } else {
-                  popup.$options.showCase = ShowCases.onClick;
                 }
               }
             );
 
-            // setTimeout(() => el.click(), 100);
+            setTimeout(() => el.click(), 500); // todo comment after tests
             const move = movable(el);
-            move(293, 0);
+            move(293, 60);
           }}
         >
           Target

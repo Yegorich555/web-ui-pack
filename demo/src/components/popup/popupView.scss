@@ -42,3 +42,25 @@
 .scrollPopup {
   overflow: auto;
 }
+
+@media not all and (prefers-reduced-motion) {
+  .dropdownPopup {
+    // todo develop gracefull animation via transition & top
+    animation: grow 500ms ease-in-out;
+    transform-origin: top center;
+
+    &[position="top"] {
+      transform-origin: bottom center;
+    }
+
+    @keyframes grow {
+      0% {
+        transform: scaleY(0);
+      }
+
+      100% {
+        transform: scaleY(1);
+      }
+    }
+  }
+}

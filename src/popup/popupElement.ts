@@ -102,9 +102,9 @@ export default class WUPPopupElement<
       @media not all and (prefers-reduced-motion) {
         :host,
         :host-arrow {
-          animation: wup-popup-anim1 100ms ease-in-out;
+          animation: WUP-POPUP-anim1 100ms ease-in-out;
         }
-        @keyframes wup-popup-anim1 {
+        @keyframes WUP-POPUP-anim1 {
           from {opacity: 0;}
           to {opacity: 1;}
         }
@@ -137,7 +137,9 @@ export default class WUPPopupElement<
 
     const savedDetach = attachLst.get(options.target);
     if (savedDetach) {
-      console.warn(`${tagName.toUpperCase()}. $attach is fired again on the same target. Possible memory leak`);
+      console.warn(
+        `${tagName.toUpperCase()}. $attach is fired again on the same target. Possible memory leak. Use detach() before new attach`
+      );
       savedDetach();
     }
 
@@ -351,11 +353,13 @@ export default class WUPPopupElement<
   }
 
   #frameId?: number;
-  #userSizes: {
+  #userStyles: {
     maxW: number;
     maxH: number;
     minH: number;
     minW: number;
+    borderRadius: number;
+    waitForAnimation: false | ReturnType<typeof setTimeout>;
   } = undefined as any;
 
   #placements: Array<WUPPopupPlace.PlaceFunc> = [];
@@ -364,7 +368,6 @@ export default class WUPPopupElement<
   #scrollParents?: HTMLElement[];
   // eslint-disable-next-line no-use-before-define
   #arrowElement?: WUPPopupArrowElement;
-  #borderRadius = 0;
 
   /** Override this method to prevent show; this method fires beofre willShow event;
    * @param showCase as reason of show()
@@ -410,13 +413,28 @@ export default class WUPPopupElement<
     this.style.maxWidth = "";
     this.style.maxHeight = "";
     const style = getComputedStyle(this);
-    this.#userSizes = {
+
+    this.#userStyles = {
       maxW: px2Number(style.maxWidth) || Number.MAX_SAFE_INTEGER,
       minW: Math.max(5, px2Number(style.paddingRight) + px2Number(style.paddingLeft), px2Number(style.minWidth)),
 
       maxH: px2Number(style.maxHeight) || Number.MAX_SAFE_INTEGER,
       minH: Math.max(5, px2Number(style.paddingTop) + px2Number(style.paddingBottom), px2Number(style.minHeight)),
+
+      borderRadius: 0,
+      waitForAnimation: false,
     };
+
+    // checking if animation can affect on positioning
+    if (style.animationName !== "WUP-POPUP-anim1" && style.animationDuration) {
+      const animTime = Number.parseFloat(style.animationDuration.substring(0, style.animationDuration.length - 1));
+      if (animTime) {
+        // only for custom animation
+        this.#userStyles.waitForAnimation = setTimeout(() => {
+          this.#userStyles.waitForAnimation = false;
+        }, animTime * 1000);
+      }
+    }
 
     this.#scrollParents = [];
     // eslint-disable-next-line no-constant-condition
@@ -447,11 +465,11 @@ export default class WUPPopupElement<
         boder:${style.border};
       `);
 
-      this.#arrowElement = el;
-      this.#borderRadius = Math.max.apply(
+      this.#userStyles.borderRadius = Math.max.apply(
         this,
         style.borderRadius.split(" ").map((s) => px2Number(s))
       );
+      this.#arrowElement = el;
     }
 
     if (!this._opts.placement.length) {
@@ -528,6 +546,8 @@ export default class WUPPopupElement<
     this.#showCase = undefined;
     this.#prevRect = undefined;
     this.#scrollParents = undefined;
+    this.#userStyles.waitForAnimation && clearTimeout(this.#userStyles.waitForAnimation);
+    this.#userStyles = undefined as any;
 
     if (this.#arrowElement) {
       this.#arrowElement.remove();
@@ -602,8 +622,8 @@ export default class WUPPopupElement<
         bottom: this._opts.offset[2] ?? this._opts.offset[0],
         left: this._opts.offset[3] ?? this._opts.offset[1],
       },
-      minH: this.#userSizes.minH,
-      minW: this.#userSizes.minW,
+      minH: this.#userStyles.minH,
+      minW: this.#userStyles.minW,
       arrow: this.#arrowElement
         ? {
             h: this.#arrowElement.offsetHeight,
@@ -670,10 +690,10 @@ export default class WUPPopupElement<
       const hasOveflow = (p: WUPPopupPlace.Result, meSize: { w: number; h: number }): boolean =>
         p.left < fit.left ||
         p.top < fit.top ||
-        p.freeW < this.#userSizes.minW ||
-        p.freeH < this.#userSizes.minH ||
-        p.left + Math.min(meSize.w, p.maxW || Number.MAX_SAFE_INTEGER, this.#userSizes.maxW) > fit.right ||
-        p.top + Math.min(meSize.h, p.maxH || Number.MAX_SAFE_INTEGER, this.#userSizes.maxH) > fit.bottom;
+        p.freeW < this.#userStyles.minW ||
+        p.freeH < this.#userStyles.minH ||
+        p.left + Math.min(meSize.w, p.maxW || Number.MAX_SAFE_INTEGER, this.#userStyles.maxW) > fit.right ||
+        p.top + Math.min(meSize.h, p.maxH || Number.MAX_SAFE_INTEGER, this.#userStyles.maxH) > fit.bottom;
 
       let pos: WUPPopupPlace.Result = <WUPPopupPlace.Result>{};
       const isOk = this.#placements.some((pfn) => {
@@ -682,10 +702,10 @@ export default class WUPPopupElement<
         let ok = !hasOveflow(pos, me);
         if (ok) {
           // maxW/H can be null if resize is not required
-          if (pos.maxW != null && this.#userSizes.maxW > pos.maxW) {
+          if (pos.maxW != null && this.#userStyles.maxW > pos.maxW) {
             this.style.maxWidth = `${pos.maxW}px`;
           }
-          if (pos.maxH != null && this.#userSizes.maxH > pos.maxH) {
+          if (pos.maxH != null && this.#userStyles.maxH > pos.maxH) {
             this.style.maxHeight = `${pos.maxH}px`;
           }
           // re-check because maxWidth can affect on height
@@ -707,7 +727,7 @@ export default class WUPPopupElement<
         // change arrowSize if it's bigger than popup
         const checkSize = (relatedSize: number) => {
           // if we have border-radius of popup we need to include in offset to prevent overflow between arrow and popup
-          const maxArrowSize = Math.max(relatedSize - this.#borderRadius * 2, 0);
+          const maxArrowSize = Math.max(relatedSize - this.#userStyles.borderRadius * 2, 0);
           if (me.arrow.w > maxArrowSize) {
             me.arrow.w = maxArrowSize;
             me.arrow.h = maxArrowSize / 2;
@@ -721,22 +741,31 @@ export default class WUPPopupElement<
           checkSize(this.offsetWidth);
           pos.arrowLeft = t.left + t.width / 2 - me.arrow.w / 2; // attach to middle of target
           pos.arrowLeft = Math.min(
-            Math.max(pos.arrowLeft, pos.left + this.#borderRadius), // align to popup
-            pos.left + this.offsetWidth - me.arrow.w - this.#borderRadius // align to popup
+            Math.max(pos.arrowLeft, pos.left + this.#userStyles.borderRadius), // align to popup
+            pos.left + this.offsetWidth - me.arrow.w - this.#userStyles.borderRadius // align to popup
           );
         } else if (pos.arrowTop == null) {
           checkSize(this.offsetHeight);
           pos.arrowTop = t.top + t.height / 2 - me.arrow.h / 2; // attach to middle of target
           pos.arrowTop = Math.min(
-            Math.max(pos.arrowTop, pos.top + this.#borderRadius + me.arrow.h / 2), // align to popup
-            pos.top + this.offsetHeight - this.#borderRadius - me.arrow.w / 2 - me.arrow.h / 2 // align to popup
+            Math.max(pos.arrowTop, pos.top + this.#userStyles.borderRadius + me.arrow.h / 2), // align to popup
+            pos.top + this.offsetHeight - this.#userStyles.borderRadius - me.arrow.w / 2 - me.arrow.h / 2 // align to popup
           );
         }
         this.#arrowElement.style.transform = `translate(${pos.arrowLeft}px, ${pos.arrowTop}px) rotate(${pos.arrowAngle}deg)`;
       }
 
-      // transform has performance benefits in comparison with positioning
-      this.style.transform = `translate(${pos.left}px, ${pos.top}px)`;
+      if (this.#userStyles.waitForAnimation) {
+        this.style.left = `${pos.left}px`;
+        this.style.top = `${pos.top}px`;
+        this.style.transform = ""; // it removes previous transform from previous opened state
+      } else {
+        this.style.left = "";
+        this.style.top = "";
+        // transform has performance benefits in comparison with positioning
+        this.style.transform = `translate(${pos.left}px, ${pos.top}px)`;
+      }
+
       this.setAttribute("position", pos.attr);
     };
 
@@ -807,3 +836,4 @@ declare global {
 
 // todo scale animation for dropdown
 // todo isHidden doesn't work properly
+// todo popup overflows scrollbar of fitElement does it correct ?

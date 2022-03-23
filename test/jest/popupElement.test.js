@@ -654,7 +654,7 @@ describe("popupElement", () => {
     a.remove();
   });
 
-  test("memoryLeaking", () => {
+  test("memoryLeak", () => {
     const spy = h.spyEventListeners([trg]);
 
     let animateFrame;
@@ -1211,6 +1211,7 @@ describe("popupElement", () => {
     document.body.click();
     trg.blur();
     expect(popup.$isOpen).toBeFalsy();
+    detach();
     detach = WUPPopupElement.$attach({ target: trg, showCase: 1 << 2, text: "Me2", placement: [] }, (popupEl) => {
       popup = popupEl;
     });
@@ -1247,5 +1248,62 @@ describe("popupElement", () => {
 
     detach();
     spy.check(); // checking memory leak
+  });
+
+  test("custom animation with transform", () => {
+    el.$hide();
+    expect(el.$isOpen).toBeFalsy();
+
+    const orig = window.getComputedStyle;
+    /** @type CSSStyleDeclaration */
+    let objStyle = {};
+    jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
+      if (elem === el) {
+        return objStyle;
+      }
+      return orig(elem);
+    });
+
+    // checking with defaults
+    objStyle = { animationDuration: "0.1s", animationName: "WUP-POPUP-anim1" };
+    el.$show();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"transform: translate(190px, 100px); display: block;\\" position=\\"top\\"></wup-popup>"`
+    );
+    el.$hide();
+
+    // checking with custom animation
+    let animateFrame;
+    jest.spyOn(window, "requestAnimationFrame").mockImplementation((fn) => (animateFrame = fn));
+    objStyle = { animationDuration: "0.2s", animationName: "dropdown" };
+    el.$show();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; left: 190px; top: 100px;\\" position=\\"top\\"></wup-popup>"`
+    );
+    el.$hide(); // cover clearing animationTimer
+
+    el.$show();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"left: 190px; top: 100px; display: block;\\" position=\\"top\\"></wup-popup>"`
+    );
+    jest.advanceTimersByTime(200);
+    const v = { ...trg.getBoundingClientRect() };
+    v.height += 1;
+    v.bottom += 1;
+    jest.spyOn(trg, "getBoundingClientRect").mockReturnValueOnce(v);
+    animateFrame();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(190px, 100px);\\" position=\\"top\\"></wup-popup>"`
+    );
+
+    // checking with wrong durections
+    el.$hide();
+    objStyle = { animationDuration: "none", animationName: "test 0" };
+    el.$show();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"transform: translate(190px, 100px); display: block;\\" position=\\"top\\"></wup-popup>"`
+    );
+
+    el.remove();
   });
 });
