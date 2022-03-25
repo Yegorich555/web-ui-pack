@@ -102,13 +102,13 @@ export default class WUPPopupElement<
       @media not all and (prefers-reduced-motion) {
         :host,
         :host-arrow {
-          animation: WUP-POPUP-anim1 100ms ease-in-out;
+          animation: WUP-POPUP-anim1 300ms ease-in-out;
         }
         @keyframes WUP-POPUP-anim1 {
           from {opacity: 0;}
           to {opacity: 1;}
         }
-      }
+       }
      `;
   }
 
@@ -767,6 +767,14 @@ export default class WUPPopupElement<
       }
 
       this.setAttribute("position", pos.attr);
+
+      // todo test-case
+      const c = this.children.item(0); // take only first
+      if (c instanceof HTMLElement) {
+        // fix `maxSize inherritance doesn't work for customElements`
+        c.style.maxHeight = this.style.maxHeight;
+        c.style.maxWidth = this.style.maxWidth;
+      }
     };
 
     process();
@@ -834,6 +842,5 @@ declare global {
   }
 }
 
-// todo scale animation for dropdown
 // todo isHidden doesn't work properly
 // todo popup overflows scrollbar of fitElement does it correct ?

@@ -43,23 +43,112 @@
   overflow: auto;
 }
 
-@media not all and (prefers-reduced-motion) {
-  .dropdownPopup {
-    // todo develop gracefull animation via transition & top
-    animation: grow 500ms ease-in-out;
-    transform-origin: top center;
+// simple dropdown animation
+// @media not all and (prefers-reduced-motion) {
+// .dropdownPopup {
+//   animation: grow 500ms ease-in-out;
+//   transform-origin: top center;
 
-    &[position="top"] {
-      transform-origin: bottom center;
+//   &[position="top"] {
+//     transform-origin: bottom center;
+//   }
+
+//   @keyframes grow {
+//     0% {
+//       transform: scaleY(0);
+//     }
+
+//     100% {
+//       transform: scaleY(1);
+//     }
+//   }
+// }
+
+// difficult dropdown animation
+.dropdownPopup {
+  // reset popup defaults
+  animation: none;
+  background: none;
+  border: none;
+  padding: 0;
+  overflow: visible;
+  box-shadow: none;
+
+  $boxShadowSize: 4px;
+  $animTime: 1000ms;
+
+  > div {
+    // max-height: inherit; // css inherit doesn't work. Instead popup sets it itself
+    overflow: hidden;
+    background: inherit;
+
+    // make box-shadow visible despite on overflow: hidden
+    padding: $boxShadowSize;
+    margin: -$boxShadowSize;
+
+    @media not all and (prefers-reduced-motion) {
+      animation: shadowFix $animTime ease-in-out;
+      @keyframes shadowFix {
+        0% {
+          padding-top: 0;
+          margin-top: 0;
+        }
+
+        99% {
+          padding-top: 0;
+          margin-top: 0;
+        }
+
+        100% {
+          padding-top: $boxShadowSize;
+          margin-top: -$boxShadowSize;
+        }
+      }
     }
 
-    @keyframes grow {
-      0% {
-        transform: scaleY(0);
-      }
+    // animated div: drawer-effect
+    > div {
+      max-height: inherit;
+      max-width: inherit;
+      background: white;
+      border-radius: var(--border-radius, 6px);
+      padding: 4px;
+      box-shadow: 0 1px $boxShadowSize 0 #00000033;
+      box-sizing: border-box;
+      overflow: auto;
 
-      100% {
-        transform: scaleY(1);
+      @media not all and (prefers-reduced-motion) {
+        animation: growOn $animTime ease-in-out;
+        @keyframes growOn {
+          0% {
+            transform: translateY(calc(-100% - #{$boxShadowSize}));
+          }
+
+          100% {
+            transform: translateY(0);
+          }
+        }
+      }
+    }
+  }
+
+  &[hide] > div {
+    // todo implement logic setAttribute('hide', '') in popup
+    padding-top: 0;
+    margin-top: 0;
+
+    @media not all and (prefers-reduced-motion) {
+      > div {
+        animation: growOff $animTime ease-in-out;
+        @keyframes growOff {
+          0% {
+            transform: translateY(0);
+          }
+
+          100% {
+            transform: translateY(calc(-100% - #{$boxShadowSize}));
+          }
+        }
       }
     }
   }

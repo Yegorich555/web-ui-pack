@@ -46,7 +46,10 @@ export default function Example2() {
                   WUPPopupElement.$placements.$top.$end.$resizeHeight,
                 ];
                 popup.$options.toFitElement = document.querySelector("#fit") as HTMLElement;
-                popup.innerHTML = `I must feet div with border <br />(option <b>toFitElement</b>)`;
+                popup.innerHTML = `<div><div>I must feet div with border <br />(option <b>toFitElement</b>)
+                I must feet div with border <br />(option <b>toFitElement</b>)
+                I must feet div with border <br />(option <b>toFitElement</b>)
+                </div></div>`;
 
                 const isLock = false;
                 if (isLock) {
@@ -58,7 +61,7 @@ export default function Example2() {
 
             setTimeout(() => el.click(), 500); // todo comment after tests
             const move = movable(el);
-            move(293, 60);
+            move(293, 10); // move(293, 60);
           }}
         >
           Target
