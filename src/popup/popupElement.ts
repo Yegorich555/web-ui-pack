@@ -832,10 +832,10 @@ export default class WUPPopupElement<
       const c = this.children.item(0); // take only first
       if (c instanceof HTMLElement) {
         // fix `maxSize inherritance doesn't work for customElements`
-        if (this.style.overflowY === "visible") {
+        if (this.#userStyles.overflowY === "visible") {
           c.style.maxHeight = this.style.maxHeight;
         }
-        if (this.style.overflowX === "visible") {
+        if (this.#userStyles.overflowX === "visible") {
           c.style.maxWidth = this.style.maxWidth;
         }
       }
