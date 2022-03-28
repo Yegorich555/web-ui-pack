@@ -54,12 +54,8 @@
 //   }
 
 //   @keyframes grow {
-//     0% {
+//     from {
 //       transform: scaleY(0);
-//     }
-
-//     100% {
-//       transform: scaleY(1);
 //     }
 //   }
 // }
@@ -120,33 +116,28 @@
       @media not all and (prefers-reduced-motion) {
         animation: growOn $animTime ease-in-out;
         @keyframes growOn {
-          0% {
+          from {
             transform: translateY(calc(-100% - #{$boxShadowSize}));
-          }
-
-          100% {
-            transform: translateY(0);
           }
         }
       }
     }
   }
 
-  &[hide] > div {
-    // todo implement logic setAttribute('hide', '') in popup
-    padding-top: 0;
-    margin-top: 0;
-
+  &[hide] {
     @media not all and (prefers-reduced-motion) {
+      animation: none; // removing default animation
+      animation-duration: $animTime; // required to notify popup to wait before close
       > div {
-        animation: growOff $animTime ease-in-out;
-        @keyframes growOff {
-          0% {
-            transform: translateY(0);
-          }
+        padding-top: 0;
+        margin-top: 0;
 
-          100% {
-            transform: translateY(calc(-100% - #{$boxShadowSize}));
+        > div {
+          animation: growOff $animTime ease-in-out;
+          @keyframes growOff {
+            to {
+              transform: translateY(calc(-100% - #{$boxShadowSize}));
+            }
           }
         }
       }

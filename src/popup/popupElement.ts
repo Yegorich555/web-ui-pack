@@ -40,6 +40,8 @@ const attachLst = new Map<HTMLElement, () => void>();
  * * Don't override styles: transform, display
  * * Don't use inline styles" maxWidth, maxHeight
  * * If target removed (when popup $isOpen) and appended again you need to update $options.target (because $options.target cleared)
+ * * Popup has overflow 'auto'; If you change to 'visible' it will apply maxWidth maxHeight to first children (because popup must be restricted by maxSize to avoid layout issues)
+ * * During the closing popup has attr 'hide'
  */
 export default class WUPPopupElement<
   Events extends WUPPopup.EventMap = WUPPopup.EventMap
@@ -101,12 +103,18 @@ export default class WUPPopupElement<
       }
       @media not all and (prefers-reduced-motion) {
         :host,
-        :host-arrow {
-          animation: WUP-POPUP-anim1 300ms ease-in-out;
+        :host+:host-arrow {
+          animation: WUP-POPUP-a1 300ms ease-in-out;
         }
-        @keyframes WUP-POPUP-anim1 {
+        @keyframes WUP-POPUP-a1 {
           from {opacity: 0;}
-          to {opacity: 1;}
+        }
+        :host[hide],
+        :host[hide]+:host-arrow {
+          animation: WUP-POPUP-a2 300ms ease-in-out;
+        }
+        @keyframes WUP-POPUP-a2 {
+          to {opacity: 0;}
         }
        }
      `;
@@ -148,9 +156,12 @@ export default class WUPPopupElement<
         popup.$options.target = options.target;
       }
       const opts = popup ? { ...options, ...popup.$options, target: popup.$options.target as HTMLElement } : options;
+      let isHidding = false;
+
       const refs = popupListenTarget(
         opts,
         (v) => {
+          isHidding = false;
           const isCreate = !popup;
           if (!popup) {
             // eslint-disable-next-line no-use-before-define
@@ -175,9 +186,11 @@ export default class WUPPopupElement<
 
           return popup;
         },
-        (v) => {
-          const ok = (popup as T).goHide(v);
-          if (ok) {
+        async (v) => {
+          isHidding = true;
+          const ok = await (popup as T).goHide(v);
+          if (ok && isHidding) {
+            isHidding = true;
             (popup as T).#onRemoveRef = undefined; // required otherwise events are removed from popup
             (popup as T).remove();
             popup = undefined;
@@ -360,6 +373,8 @@ export default class WUPPopupElement<
     minW: number;
     borderRadius: number;
     waitForAnimation: false | ReturnType<typeof setTimeout>;
+    overflowY: string;
+    overflowX: string;
   } = undefined as any;
 
   #placements: Array<WUPPopupPlace.PlaceFunc> = [];
@@ -368,6 +383,7 @@ export default class WUPPopupElement<
   #scrollParents?: HTMLElement[];
   // eslint-disable-next-line no-use-before-define
   #arrowElement?: WUPPopupArrowElement;
+  #forceHide?: () => void; // fix when popup isHidding and we need to show again
 
   /** Override this method to prevent show; this method fires beofre willShow event;
    * @param showCase as reason of show()
@@ -423,10 +439,12 @@ export default class WUPPopupElement<
 
       borderRadius: 0,
       waitForAnimation: false,
+      overflowY: style.overflowY,
+      overflowX: style.overflowX,
     };
 
     // checking if animation can affect on positioning
-    if (style.animationName !== "WUP-POPUP-anim1" && style.animationDuration) {
+    if (style.animationDuration && style.animationName !== "WUP-POPUP-a1") {
       const animTime = Number.parseFloat(style.animationDuration.substring(0, style.animationDuration.length - 1));
       if (animTime) {
         // only for custom animation
@@ -527,8 +545,13 @@ export default class WUPPopupElement<
   }
 
   /** Hide popup. @showCase as previous reason of show(); @hideCase as reason of hide() */
-  protected goHide(hideCase: WUPPopup.HideCases): boolean {
+  protected goHide(hideCase: WUPPopup.HideCases): boolean | Promise<true> {
     if (!this.canHide(this.#showCase, hideCase)) return false;
+
+    if (this.#forceHide) {
+      this.#forceHide();
+      return true;
+    }
 
     const wasShown = this.#isOpen;
     if (wasShown) {
@@ -538,28 +561,65 @@ export default class WUPPopupElement<
       }
     }
 
-    this.#frameId && window.cancelAnimationFrame(this.#frameId);
-    this.#frameId = undefined;
-    this.style.display = "";
-
-    this.#isOpen = false;
-    this.#showCase = undefined;
-    this.#prevRect = undefined;
-    this.#scrollParents = undefined;
     this.#userStyles.waitForAnimation && clearTimeout(this.#userStyles.waitForAnimation);
-    this.#userStyles = undefined as any;
 
-    if (this.#arrowElement) {
-      this.#arrowElement.remove();
-      this.#arrowElement = undefined;
-    }
+    const finishHide = () => {
+      this.#isOpen = false;
+      this.#frameId && window.cancelAnimationFrame(this.#frameId);
+      this.#frameId = undefined;
+
+      this.#showCase = undefined;
+      this.#prevRect = undefined;
+      this.#scrollParents = undefined;
+      this.#userStyles = undefined as any;
+
+      this.style.display = "";
+
+      if (this.#arrowElement) {
+        this.#arrowElement.remove();
+        this.#arrowElement = undefined;
+      }
+
+      wasShown &&
+        setTimeout(() => {
+          this.fireEvent("$hide", { cancelable: false }); // run async to dispose internal resources first: possible dev-side-issues
+        });
+    };
 
     if (wasShown) {
       this.#onHideRef?.call(this);
-      // run async to dispose internal resources first: possible dev-side-issues
-      setTimeout(() => this.fireEvent("$hide", { cancelable: false }));
+
+      if (hideCase !== WUPPopup.HideCases.onShowAgain) {
+        let waitTimeout = 0;
+        let isFixTransformAnimation = false;
+
+        // waitFor only if was ordinary user-action
+        if (hideCase >= WUPPopup.HideCases.onFireHide && hideCase <= WUPPopup.HideCases.onTargetClick) {
+          this.setAttribute("hide", "");
+          const { animationDuration: aD, animationName: aN } = getComputedStyle(this);
+          waitTimeout = Number.parseFloat(aD.substring(0, aD.length - 1)) * 1000 || 0;
+          isFixTransformAnimation = aN !== "WUP-POPUP-a2";
+        }
+
+        if (waitTimeout) {
+          return new Promise((resolve) => {
+            const t = setTimeout(() => (this.#forceHide as () => void)(), waitTimeout);
+            // fix when user scrolls during the hide-animation
+            this.#userStyles.waitForAnimation = isFixTransformAnimation ? t : false;
+
+            this.#forceHide = () => {
+              this.#forceHide = undefined;
+              clearTimeout(t);
+              finishHide();
+              this.removeAttribute("hide");
+              resolve(true);
+            };
+          });
+        }
+      }
     }
 
+    finishHide();
     return true;
   }
 
@@ -584,6 +644,7 @@ export default class WUPPopupElement<
     ) {
       return this.#prevRect;
     }
+
     t.el = trg;
 
     if (this._opts.minWidthByTarget) {
@@ -768,12 +829,16 @@ export default class WUPPopupElement<
 
       this.setAttribute("position", pos.attr);
 
-      // todo test-case
+      // todo test-case;
       const c = this.children.item(0); // take only first
       if (c instanceof HTMLElement) {
         // fix `maxSize inherritance doesn't work for customElements`
-        c.style.maxHeight = this.style.maxHeight;
-        c.style.maxWidth = this.style.maxWidth;
+        if (this.style.overflowY === "visible") {
+          c.style.maxHeight = this.style.maxHeight;
+        }
+        if (this.style.overflowX === "visible") {
+          c.style.maxWidth = this.style.maxWidth;
+        }
       }
     };
 

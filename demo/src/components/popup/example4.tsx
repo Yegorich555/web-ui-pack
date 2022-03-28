@@ -15,7 +15,7 @@ export default function Example4() {
       </small>
       <div
         className={styles.scrollBlock}
-        ref={(_el) => {
+        ref={() => {
           // el?.scrollTo({ top: 70 });
           // setTimeout(() => {
           //   el?.scrollTo({ top: 53 });
