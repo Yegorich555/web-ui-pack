@@ -605,8 +605,6 @@ export default class WUPPopupElement<
           return new Promise((resolve) => {
             const t = setTimeout(() => (this.#forceHide as () => void)(), waitTimeout);
             // fix when user scrolls during the hide-animation
-            this.#userStyles.waitForAnimation = isFixTransformAnimation ? t : false;
-
             this.#forceHide = () => {
               this.#forceHide = undefined;
               clearTimeout(t);
@@ -614,6 +612,7 @@ export default class WUPPopupElement<
               this.removeAttribute("hide");
               resolve(true);
             };
+            this.#userStyles.waitForAnimation = isFixTransformAnimation ? t : false;
           });
         }
       }

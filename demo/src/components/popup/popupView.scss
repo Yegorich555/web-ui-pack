@@ -71,7 +71,7 @@
   box-shadow: none;
 
   $boxShadowSize: 4px;
-  $animTime: 1000ms;
+  $animTime: 400ms;
 
   > div {
     // max-height: inherit; // css inherit doesn't work. Instead popup sets it itself
@@ -81,23 +81,13 @@
     // make box-shadow visible despite on overflow: hidden
     padding: $boxShadowSize;
     margin: -$boxShadowSize;
-
     @media not all and (prefers-reduced-motion) {
       animation: shadowFix $animTime ease-in-out;
       @keyframes shadowFix {
-        0% {
-          padding-top: 0;
-          margin-top: 0;
-        }
-
-        99% {
-          padding-top: 0;
-          margin-top: 0;
-        }
-
-        100% {
-          padding-top: $boxShadowSize;
-          margin-top: -$boxShadowSize;
+        from,
+        to {
+          padding-top: 0; // todo similar logic for position bottom
+          margin-top: 1px;
         }
       }
     }
@@ -130,7 +120,7 @@
       animation-duration: $animTime; // required to notify popup to wait before close
       > div {
         padding-top: 0;
-        margin-top: 0;
+        margin-top: 1px;
 
         > div {
           animation: growOff $animTime ease-in-out;
