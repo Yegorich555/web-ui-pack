@@ -226,31 +226,6 @@ export default class WUPPopupElement<
 
   protected override _opts = this.$options;
 
-  constructor() {
-    super();
-
-    let h = this.style.maxHeight;
-    Object.defineProperty(this.style, "maxHeight", {
-      set: (v: string) => {
-        h = v;
-        if (this.#userStyles?.inherritY) {
-          this.#userStyles.inherritY.style.maxHeight = v;
-        }
-      },
-      get: () => h,
-    });
-    let w = this.style.maxWidth;
-    Object.defineProperty(this.style, "maxWidth", {
-      set: (v: string) => {
-        w = v;
-        if (this.#userStyles?.inherritX) {
-          this.#userStyles.inherritX.style.maxWidth = w;
-        }
-      },
-      get: () => w,
-    });
-  }
-
   $hide() {
     const f = () => {
       // isReady possible false when you fire $hide on disposed element
@@ -410,6 +385,21 @@ export default class WUPPopupElement<
   #arrowElement?: WUPPopupArrowElement;
   #forceHide?: () => void; // fix when popup isHidding and we need to show again
 
+  protected setMaxHeight(v: string) {
+    this.style.maxHeight = v;
+
+    if (this.#userStyles?.inherritY) {
+      this.#userStyles.inherritY.style.maxHeight = this.style.maxHeight;
+    }
+  }
+
+  protected setMaxWidth(v: string) {
+    this.style.maxWidth = v;
+    if (this.#userStyles?.inherritX) {
+      this.#userStyles.inherritX.style.maxWidth = this.style.maxWidth;
+    }
+  }
+
   /** Override this method to prevent show; this method fires beofre willShow event;
    * @param showCase as reason of show()
    * @return true if successful */
@@ -451,8 +441,8 @@ export default class WUPPopupElement<
     this._opts.placement = p ? [p] : this._opts.placement;
 
     // it works only when styles is defined before popup is opened
-    this.style.maxWidth = "";
-    this.style.maxHeight = "";
+    this.setMaxWidth("");
+    this.setMaxHeight("");
     const style = getComputedStyle(this);
 
     let child = this.children.item(0);
@@ -694,8 +684,8 @@ export default class WUPPopupElement<
     fit.el = fitEl;
 
     this.style.display = "block";
-    this.style.maxHeight = ""; // resetting is required to get default size
-    this.style.maxWidth = ""; // resetting is required to get default size
+    this.setMaxWidth(""); // resetting is required to get default size
+    this.setMaxHeight(""); // resetting is required to get default size
     if (this.#arrowElement) {
       this.#arrowElement.style.display = "";
       this.#arrowElement.style.width = "";
@@ -794,10 +784,10 @@ export default class WUPPopupElement<
         if (ok) {
           // maxW/H can be null if resize is not required
           if (pos.maxW != null && this.#userStyles.maxW > pos.maxW) {
-            this.style.maxWidth = `${pos.maxW}px`;
+            this.setMaxWidth(`${pos.maxW}px`);
           }
           if (pos.maxH != null && this.#userStyles.maxH > pos.maxH) {
-            this.style.maxHeight = `${pos.maxH}px`;
+            this.setMaxHeight(`${pos.maxH}px`);
           }
           // re-check because maxWidth can affect on height
           if (this.offsetHeight !== me.h || this.offsetWidth !== me.w) {
@@ -806,8 +796,8 @@ export default class WUPPopupElement<
             ok = !hasOveflow(pos, meUpdated);
             if (!ok) {
               // reset styles if need to look for another position
-              this.style.maxWidth = "";
-              this.style.maxHeight = "";
+              this.setMaxWidth("");
+              this.setMaxHeight("");
             }
           }
         }

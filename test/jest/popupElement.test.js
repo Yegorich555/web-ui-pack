@@ -1116,7 +1116,7 @@ describe("popupElement", () => {
     );
   });
 
-  test("static.$attach", () => {
+  test("static.$attach", async () => {
     trg.remove();
     document.body.innerHTML = "";
     document.body.appendChild(trg);
@@ -1150,7 +1150,8 @@ describe("popupElement", () => {
 
     trg.click();
     expect(cnt).toBe(1);
-    jest.advanceTimersByTime(100); // popup has click-timeouts
+    jest.advanceTimersByTime(100); // popup has click-timeouts and animation timeouts
+    await Promise.resolve(); // popup has hide animation
     expect(popup.$isOpen).toBeFalsy();
     expect(popup.isConnected).toBeFalsy();
     expect(document.body.innerHTML).toMatchInlineSnapshot(`"<div id=\\"targetId\\">some text</div>"`);
@@ -1268,7 +1269,7 @@ describe("popupElement", () => {
     objStyle = { animationDuration: "0.1s", animationName: "WUP-POPUP-anim1" };
     el.$show();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"transform: translate(190px, 100px); display: block;\\" position=\\"top\\"></wup-popup>"`
+      `"<wup-popup style=\\"display: block; left: 190px; top: 100px;\\" position=\\"top\\" hide=\\"\\"></wup-popup>"`
     );
     el.$hide();
 
@@ -1278,7 +1279,7 @@ describe("popupElement", () => {
     objStyle = { animationDuration: "0.2s", animationName: "dropdown" };
     el.$show();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"display: block; left: 190px; top: 100px;\\" position=\\"top\\"></wup-popup>"`
+      `"<wup-popup style=\\"left: 190px; top: 100px; display: block;\\" position=\\"top\\"></wup-popup>"`
     );
     el.$hide(); // cover clearing animationTimer
 

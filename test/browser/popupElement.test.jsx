@@ -42,7 +42,9 @@ describe("popupElement", () => {
       '<wup-popup position="bottom" style="display: block; transform: translate(72.4219px, 29px);">Popup text</wup-popup>'
     );
     await page.click("label"); // click again should hide
-    await page.waitForTimeout(1); // timeout required because of debounceFilters
+    t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
+    expect(t.isOpened).toBeTruthy(); // because animation-open works
+    await page.waitForTimeout(300); // wait for animation
     t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
     expect(t.isOpened).toBeFalsy();
     expect(t.gotShow).toBe(1);
@@ -80,7 +82,7 @@ describe("popupElement", () => {
     await page.hover("span");
     t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
     expect(t.isOpened).toBeTruthy(); // because of timeout
-    await page.waitForTimeout(501); // hoverShowTimeout is 500 by default
+    await page.waitForTimeout(501 + 300); // hoverShowTimeout is 500 by default and hide-animation is 300
     t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
     expect(t.isOpened).toBeFalsy();
 
