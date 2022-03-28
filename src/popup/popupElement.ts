@@ -41,7 +41,7 @@ const attachLst = new Map<HTMLElement, () => void>();
  * * Don't use inline styles" maxWidth, maxHeight
  * * If target removed (when popup $isOpen) and appended again you need to update $options.target (because $options.target cleared)
  * * Popup has overflow 'auto'; If you change to 'visible' it will apply maxWidth maxHeight to first children (because popup must be restricted by maxSize to avoid layout issues)
- * * During the closing popup has attr 'hide'
+ * * During the closing popup attr 'hide' is appended (for animation etc.)
  */
 export default class WUPPopupElement<
   Events extends WUPPopup.EventMap = WUPPopup.EventMap
@@ -226,6 +226,31 @@ export default class WUPPopupElement<
 
   protected override _opts = this.$options;
 
+  constructor() {
+    super();
+
+    let h = this.style.maxHeight;
+    Object.defineProperty(this.style, "maxHeight", {
+      set: (v: string) => {
+        h = v;
+        if (this.#userStyles?.inherritY) {
+          this.#userStyles.inherritY.style.maxHeight = v;
+        }
+      },
+      get: () => h,
+    });
+    let w = this.style.maxWidth;
+    Object.defineProperty(this.style, "maxWidth", {
+      set: (v: string) => {
+        w = v;
+        if (this.#userStyles?.inherritX) {
+          this.#userStyles.inherritX.style.maxWidth = w;
+        }
+      },
+      get: () => w,
+    });
+  }
+
   $hide() {
     const f = () => {
       // isReady possible false when you fire $hide on disposed element
@@ -373,8 +398,8 @@ export default class WUPPopupElement<
     minW: number;
     borderRadius: number;
     waitForAnimation: false | ReturnType<typeof setTimeout>;
-    overflowY: string;
-    overflowX: string;
+    inherritY: HTMLElement | null;
+    inherritX: HTMLElement | null;
   } = undefined as any;
 
   #placements: Array<WUPPopupPlace.PlaceFunc> = [];
@@ -430,6 +455,11 @@ export default class WUPPopupElement<
     this.style.maxHeight = "";
     const style = getComputedStyle(this);
 
+    let child = this.children.item(0);
+    if (!(child instanceof HTMLElement)) {
+      child = null;
+    }
+
     this.#userStyles = {
       maxW: px2Number(style.maxWidth) || Number.MAX_SAFE_INTEGER,
       minW: Math.max(5, px2Number(style.paddingRight) + px2Number(style.paddingLeft), px2Number(style.minWidth)),
@@ -439,8 +469,9 @@ export default class WUPPopupElement<
 
       borderRadius: 0,
       waitForAnimation: false,
-      overflowY: style.overflowY,
-      overflowX: style.overflowX,
+      // fix `maxSize inherritance doesn't work for customElements`
+      inherritY: child && style.overflowY === "visible" ? child : null,
+      inherritX: child && style.overflowX === "visible" ? child : null,
     };
 
     // checking if animation can affect on positioning
@@ -769,9 +800,10 @@ export default class WUPPopupElement<
             this.style.maxHeight = `${pos.maxH}px`;
           }
           // re-check because maxWidth can affect on height
-          if (this.style.maxWidth) {
-            const meSize = { w: this.offsetWidth, h: this.offsetHeight };
-            ok = !hasOveflow(pos, meSize);
+          if (this.offsetHeight !== me.h || this.offsetWidth !== me.w) {
+            const meUpdated = { ...me, w: this.offsetWidth, h: this.offsetHeight };
+            pos = pfn(t, meUpdated, fit);
+            ok = !hasOveflow(pos, meUpdated);
             if (!ok) {
               // reset styles if need to look for another position
               this.style.maxWidth = "";
@@ -827,18 +859,6 @@ export default class WUPPopupElement<
       }
 
       this.setAttribute("position", pos.attr);
-
-      // todo test-case;
-      const c = this.children.item(0); // take only first
-      if (c instanceof HTMLElement) {
-        // fix `maxSize inherritance doesn't work for customElements`
-        if (this.#userStyles.overflowY === "visible") {
-          c.style.maxHeight = this.style.maxHeight;
-        }
-        if (this.#userStyles.overflowX === "visible") {
-          c.style.maxWidth = this.style.maxWidth;
-        }
-      }
     };
 
     process();
@@ -901,6 +921,8 @@ declare global {
           onWillShow: never;
           /** Result position; use this to restyle animation etc. */
           readonly position: "top" | "left" | "bottom" | "right";
+          /** Hiddin state; use this to hide-animation */
+          readonly hide: "";
         }>;
     }
   }
