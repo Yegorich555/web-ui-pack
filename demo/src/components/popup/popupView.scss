@@ -43,22 +43,33 @@
   overflow: auto;
 }
 
+$dropdownAnimation: 300ms;
 // simple dropdown animation
-// @media not all and (prefers-reduced-motion) {
-// .dropdownPopup {
-//   animation: grow 500ms ease-in-out;
-//   transform-origin: top center;
+@media not all and (prefers-reduced-motion) {
+  .dropdownPopup-2 {
+    animation: drawOn $dropdownAnimation ease-in-out;
+    transform-origin: top center;
 
-//   &[position="top"] {
-//     transform-origin: bottom center;
-//   }
+    &[position="top"] {
+      transform-origin: bottom center;
+    }
 
-//   @keyframes grow {
-//     from {
-//       transform: scaleY(0);
-//     }
-//   }
-// }
+    @keyframes drawOn {
+      from {
+        transform: scaleY(0);
+      }
+    }
+    @keyframes drawOff {
+      to {
+        transform: scaleY(0);
+      }
+    }
+
+    &[hide] {
+      animation-name: drawOff;
+    }
+  }
+}
 
 // difficult dropdown animation
 .dropdownPopup {
@@ -71,7 +82,6 @@
   box-shadow: none;
 
   $boxShadowSize: 4px;
-  $animTime: 300ms;
 
   > div {
     // max-height: inherit; // css inherit doesn't work. Instead popup sets it itself
@@ -82,7 +92,7 @@
     padding: $boxShadowSize;
     margin: -$boxShadowSize;
     @media not all and (prefers-reduced-motion) {
-      animation: shadowFix $animTime ease-in-out;
+      animation: shadowFix $dropdownAnimation ease-in-out;
       @keyframes shadowFix {
         from,
         to {
@@ -104,7 +114,7 @@
       overflow: auto;
 
       @media not all and (prefers-reduced-motion) {
-        animation: growOn $animTime ease-in-out;
+        animation: growOn $dropdownAnimation ease-in-out;
         @keyframes growOn {
           from {
             transform: translateY(calc(-100% - #{$boxShadowSize}));
@@ -117,13 +127,13 @@
   &[hide] {
     @media not all and (prefers-reduced-motion) {
       animation: none; // removing default animation
-      animation-duration: $animTime; // required to notify popup to wait before close
+      animation-duration: $dropdownAnimation; // required to notify popup to wait before close
       > div {
         padding-top: 0;
         margin-top: 1px;
 
         > div {
-          animation: growOff $animTime ease-in-out;
+          animation: growOff $dropdownAnimation ease-in-out;
           @keyframes growOff {
             to {
               transform: translateY(calc(-100% - #{$boxShadowSize}));
