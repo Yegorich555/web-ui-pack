@@ -46,9 +46,12 @@ export default function Example2() {
                   WUPPopupElement.$placements.$top.$end.$resizeHeight,
                 ];
                 popup.$options.toFitElement = document.querySelector("#fit") as HTMLElement;
-                popup.innerHTML = `<div><div>I must feet div with border <br />(option <b>toFitElement</b>)
-                I must feet div with border <br />(option <b>toFitElement</b>)
-                I must feet div with border <br />(option <b>toFitElement</b>)
+                // todo how to use minHeight for dropdown when possible 1..2 items in list ?
+                popup.innerHTML = `<div><div>I must feet div with border <br/>(changed option <b>toFitElement</b>)
+                <br/>I scrollable
+                 <br/>(you can setup minHeight to avoid squizing)
+                <br/>I have a good animation
+                <br/>
                 </div></div>`;
 
                 const isLock = false;
@@ -59,9 +62,9 @@ export default function Example2() {
               }
             );
 
-            setTimeout(() => el.click(), 500); // todo comment after tests
+            // setTimeout(() => el.click(), 500);
             const move = movable(el);
-            move(291, 60);
+            move(291, 0);
           }}
         >
           Target

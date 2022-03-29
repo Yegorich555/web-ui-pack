@@ -1301,7 +1301,7 @@ describe("popupElement", () => {
       `"<wup-popup style=\\"transform: translate(190px, 100px); display: block;\\" position=\\"top\\"></wup-popup>"`
     );
 
-    // checking the same with attach !!!
+    // checking the same with attach
     /** @type WUPPopupElement */
     let popup;
     const detach = WUPPopupElement.$attach({ target: trg, showCase: 0b111111, text: "Me" }, (popupEl) => {

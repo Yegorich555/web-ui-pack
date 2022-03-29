@@ -725,13 +725,20 @@ export default class WUPPopupElement<
       let isHiddenByScroll = false;
 
       let child: DOMRect = t;
+      const vH = Math.max(document.documentElement.clientHeight, window.innerHeight);
+      const vW = Math.max(document.documentElement.clientWidth, window.innerWidth);
       for (let i = 0; i < this.#scrollParents.length; ++i) {
         const p = getBoundingInternalRect(this.#scrollParents[i]);
         isHiddenByScroll =
           p.top >= child.bottom || //
           p.bottom <= child.top ||
           p.left >= child.right ||
-          p.right <= child.left;
+          p.right <= child.left ||
+          // checking if visible in viewPort
+          child.top > vH ||
+          child.left > vW ||
+          child.bottom < 0 ||
+          child.right < 0;
 
         if (isHiddenByScroll) break;
         child = p as DOMRect;
@@ -919,5 +926,4 @@ declare global {
   }
 }
 
-// todo isHidden doesn't work properly
 // todo popup overflows scrollbar of fitElement does it correct ?
