@@ -16,7 +16,8 @@ interface IRoute {
   el: React.FunctionComponent;
 }
 
-const routes: IRoute[] = [{ path: "/popup", el: PopupView }];
+const routes: IRoute[] = [{ path: "popup", el: PopupView }];
+routes.forEach((v) => (v.path = process.env.BASE_URL + v.path));
 
 export default function AppContainer() {
   return (

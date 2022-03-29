@@ -39,7 +39,7 @@ module.exports = function (env, argv) {
       path: destPath,
       filename: "[name].js",
       chunkFilename: "[name].js",
-      publicPath: "/", // url that should be used for providing assets
+      publicPath: isDevMode ? "/" : "/web-ui-pack/", // url that should be used for providing assets
       clean: true,
     },
     resolve: {
@@ -201,7 +201,6 @@ module.exports = function (env, argv) {
       new HtmlWebpackPlugin({
         // it creates *.html with injecting js and css into template
         template: path.resolve(srcPath, "index.html"),
-        publicPath: isDevMode ? "" : "/web-ui-pack/",
         minify: isDevMode
           ? false
           : {
