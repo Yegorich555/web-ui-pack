@@ -32,6 +32,13 @@ const attachLst = new Map<HTMLElement, () => void>();
  * ];
  * document.body.append(el);
  * // or
+ * const btn = document.querySelector('button');
+ * // this is the most recomended way because $attach appends popup only by onShow and removes byHide
+ * const detach = WUPPopupElement.$attach(
+                    { target: btn, text: "Some text content here", showCase: ShowCases.onFocus | ShowCases.onClick },
+                    (popup) => { popup.className = "popup-class-here"; }
+                  )'
+ * // or
  * <button id="btn1">Target</button>
  * // You can skip pointing attribute 'target' if popup appended after target
  * <wup-popup target="#btn1" placement="top-start">Some content here</wup-popup>
@@ -616,14 +623,14 @@ export default class WUPPopupElement<
 
         // waitFor only if was ordinary user-action
         if (hideCase >= WUPPopup.HideCases.onFireHide && hideCase <= WUPPopup.HideCases.onTargetClick) {
+          this.setAttribute("hide", "");
           const { animationDuration: aD, animationName: aN } = getComputedStyle(this);
           waitTimeout = Number.parseFloat(aD.substring(0, aD.length - 1)) * 1000 || 0;
+          !waitTimeout && this.removeAttribute("hide");
           isFixTransformAnimation = aN !== "WUP-POPUP-a2";
         }
 
         if (waitTimeout) {
-          this.setAttribute("hide", "");
-
           return new Promise((resolve) => {
             const t = setTimeout(() => (this.#forceHide as () => void)(), waitTimeout);
             // fix when user scrolls during the hide-animation
@@ -926,4 +933,4 @@ declare global {
   }
 }
 
-// todo popup overflows scrollbar of fitElement does it correct ?
+// issue: popup overflows scrollbar of fitElement does it correct ?
