@@ -193,7 +193,7 @@ module.exports = function (env, argv) {
         // it adds custom Global definition to the project like BASE_URL for index.html
         "process.env": {
           NODE_ENV: JSON.stringify(mode),
-          BASE_URL: '"/"',
+          BASE_URL: isDevMode ? '"/"' : "/web-ui-pack/",
         },
         DEV: JSON.stringify(isDevMode),
       }),
@@ -201,6 +201,7 @@ module.exports = function (env, argv) {
       new HtmlWebpackPlugin({
         // it creates *.html with injecting js and css into template
         template: path.resolve(srcPath, "index.html"),
+        publicPath: isDevMode ? "" : "/web-ui-pack/",
         minify: isDevMode
           ? false
           : {
