@@ -32,34 +32,38 @@ describe("popupElement", () => {
   test("clickOnLabel with input - single event", async () => {
     await page.click("label");
     await page.waitForTimeout(1); // timeout required because of debounceFilters
-    let t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpened }));
+    let t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
     expect(t.isOpened).toBeTruthy();
     expect(t.gotShow).toBe(1);
     expect(t.gotHide).toBe(0);
     // bug: toMatchInlineSnapshot doesn't work
     // checking placement
     expect(t.html).toBe(
-      '<wup-popup style="display: block; transform: translate(72.4219px, 29px);">Popup text</wup-popup>'
+      '<wup-popup position="bottom" style="display: block; transform: translate(72.4219px, 29px);">Popup text</wup-popup>'
     );
     await page.click("label"); // click again should hide
-    await page.waitForTimeout(1); // timeout required because of debounceFilters
-    t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpened }));
+    t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
+    expect(t.isOpened).toBeTruthy(); // because animation-open works
+    await page.waitForTimeout(300); // wait for animation
+    t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
     expect(t.isOpened).toBeFalsy();
     expect(t.gotShow).toBe(1);
     expect(t.gotHide).toBe(1);
-    expect(t.html).toBe('<wup-popup style="transform: translate(72.4219px, 29px);">Popup text</wup-popup>');
+    expect(t.html).toBe(
+      '<wup-popup position="bottom" style="transform: translate(72.4219px, 29px);">Popup text</wup-popup>'
+    );
   });
 
   test("showCase: click & focus", async () => {
     await page.evaluate(() => (testEl.$options.showCase = (1 << 1) | (1 << 2)));
     await page.waitForTimeout(1); // timeout required because of debounceFilters
-    let t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpened }));
+    let t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
     expect(t.gotShow).toBe(0);
     expect(t.gotHide).toBe(0);
 
     await page.click("label"); // click on label fires click on input also
     await page.waitForTimeout(1); // timeout required because of debounceFilters
-    t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpened }));
+    t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
     expect(t.isOpened).toBeTruthy();
     expect(t.gotShow).toBe(1);
     expect(t.gotHide).toBe(0);
@@ -69,21 +73,21 @@ describe("popupElement", () => {
     await page.evaluate(() => (testEl.$options.showCase = 0b1111111));
     await page.waitForTimeout(1); // timeout required because of debounceFilters
     await page.hover("input");
-    let t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpened }));
+    let t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
     expect(t.isOpened).toBeFalsy(); // because of timeout
     await page.waitForTimeout(201); // hoverShowTimeout is 200 by default
-    t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpened }));
+    t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
     expect(t.isOpened).toBeTruthy();
 
     await page.hover("span");
-    t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpened }));
+    t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
     expect(t.isOpened).toBeTruthy(); // because of timeout
-    await page.waitForTimeout(501); // hoverShowTimeout is 500 by default
-    t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpened }));
+    await page.waitForTimeout(501 + 300); // hoverShowTimeout is 500 by default and hide-animation is 300
+    t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
     expect(t.isOpened).toBeFalsy();
 
     await page.click("label");
-    t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpened }));
+    t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
     expect(t.isOpened).toBeTruthy();
   });
 
@@ -96,7 +100,7 @@ describe("popupElement", () => {
     await page.waitForTimeout(1); // timeout required because of debounceFilters
     const t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML }));
     expect(t.html).toBe(
-      '<wup-popup style="min-width: 177px; min-height: 21px; display: block; transform: translate(72.4219px, 29px);">Popup text</wup-popup>'
+      '<wup-popup position="bottom" style="min-width: 177px; min-height: 21px; display: block; transform: translate(72.4219px, 29px);">Popup text</wup-popup>'
     );
   });
 
@@ -108,7 +112,7 @@ describe("popupElement", () => {
     await page.waitForTimeout(1); // timeout required because of debounceFilters
     const t = await page.evaluate(() => ({ ...t, html: document.body.outerHTML }));
     expect(t.html).toBe(
-      `<body><div id="app"><label><span>Label text</span><input><wup-popup style="display: block; transform: translate(72.4219px, 39px);">Popup text</wup-popup></label></div><wup-popup-arrow style="transform: translate(124.422px, 29.5px) rotate(180deg);"></wup-popup-arrow></body>`
+      '<body><div id="app"><label><span>Label text</span><input><wup-popup position="bottom" style="display: block; transform: translate(72.4219px, 39px);">Popup text</wup-popup><wup-popup-arrow style="transform: translate(124.422px, 29.5px) rotate(180deg);"></wup-popup-arrow></label></div></body>'
     );
   });
 });

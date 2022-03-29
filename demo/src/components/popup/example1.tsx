@@ -12,7 +12,7 @@ export default function Example1() {
           ref={(el) =>
             setTimeout(() => {
               el?.click();
-            }, 100)
+            }, 200)
           }
         >
           Target

@@ -42,3 +42,145 @@
 .scrollPopup {
   overflow: auto;
 }
+
+$dropdownAnimation: 300ms;
+// simple dropdown animation
+@media not all and (prefers-reduced-motion) {
+  .dropdownPopup-2 {
+    animation: drawOn $dropdownAnimation ease-in-out;
+    transform-origin: top center;
+
+    &[position="top"] {
+      transform-origin: bottom center;
+    }
+
+    @keyframes drawOn {
+      from {
+        transform: scaleY(0);
+      }
+    }
+    @keyframes drawOff {
+      to {
+        transform: scaleY(0);
+      }
+    }
+
+    &[hide] {
+      animation-name: drawOff;
+    }
+  }
+}
+
+// difficult dropdown animation
+.dropdownPopup {
+  // reset popup defaults
+  animation: none;
+  background: none;
+  border: none;
+  padding: 0;
+  overflow: visible;
+  box-shadow: none;
+
+  $boxShadowSize: 4px;
+
+  > div {
+    // max-height: inherit; // css inherit doesn't work. Instead popup sets it itself
+    overflow: hidden;
+    background: inherit;
+
+    // make box-shadow visible despite on overflow: hidden
+    padding: $boxShadowSize;
+    margin: -$boxShadowSize;
+    @media not all and (prefers-reduced-motion) {
+      animation: shadowFix $dropdownAnimation ease-in-out;
+      @keyframes shadowFix {
+        from,
+        to {
+          padding-top: 0;
+          margin-top: 1px;
+        }
+      }
+    }
+
+    // animated div: drawer-effect
+    > div {
+      max-height: inherit;
+      max-width: inherit;
+      background: white;
+      border-radius: var(--border-radius, 6px);
+      padding: 4px;
+      box-shadow: 0 1px $boxShadowSize 0 #00000033;
+      box-sizing: border-box;
+      overflow: auto;
+
+      @media not all and (prefers-reduced-motion) {
+        animation: growOn $dropdownAnimation ease-in-out;
+        @keyframes growOn {
+          from {
+            transform: translateY(calc(-100% - #{$boxShadowSize}));
+          }
+        }
+      }
+    }
+  }
+
+  &[hide] {
+    @media not all and (prefers-reduced-motion) {
+      animation: none; // removing default animation
+      animation-duration: $dropdownAnimation; // required to notify popup to wait before close
+      > div {
+        padding-top: 0;
+        margin-top: 1px;
+
+        > div {
+          animation: growOff $dropdownAnimation ease-in-out;
+          @keyframes growOff {
+            to {
+              transform: translateY(calc(-100% - #{$boxShadowSize}));
+            }
+          }
+        }
+      }
+    }
+  }
+
+  @media not all and (prefers-reduced-motion) {
+    &[position="top"] {
+      > div {
+        animation-name: shadowFixTop;
+
+        > div {
+          animation-name: growOnTop;
+        }
+      }
+
+      &[hide] > div {
+        padding-bottom: 0;
+        margin-bottom: 1px;
+
+        > div {
+          animation-name: growOffTop;
+        }
+      }
+
+      @keyframes growOnTop {
+        from {
+          transform: translateY(calc(100% - #{$boxShadowSize}));
+        }
+      }
+      @keyframes growOffTop {
+        to {
+          transform: translateY(calc(100% - #{$boxShadowSize}));
+        }
+      }
+      @keyframes shadowFixTop {
+        from,
+        to {
+          padding-bottom: 0;
+          margin-bottom: 1px;
+        }
+      }
+    }
+  }
+  // end
+}

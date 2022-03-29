@@ -1,6 +1,7 @@
 /* eslint-disable no-use-before-define */
 export namespace WUPPopupPlace {
   export interface XResult {
+    attr: "left" | "right" | "top" | "bottom";
     left: number;
     /** Size restriction that must be applied to element; calculated in .adjust() and based on userDefined minSize */
     maxW?: number | null;
@@ -10,6 +11,7 @@ export namespace WUPPopupPlace {
     arrowAngle: number;
   }
   export interface YResult {
+    attr: "left" | "right" | "top" | "bottom";
     top: number;
     /** Size restriction that must be applied to element; calculated in .adjust() and based on userDefined minSize */
     maxH?: number | null;
@@ -142,6 +144,7 @@ const resizeWidth = <WUPPopupPlace.PlaceFunc>function resizeWidth(this: WUPPopup
 const $top = <WUPPopupPlace.EdgeFunc>(
   function top(this: WUPPopupPlace.Result, t, me, fit): ReturnType<WUPPopupPlace.EdgeFunc> {
     return {
+      attr: "top",
       top: t.top - me.offset.top - me.h - me.arrow.h,
       freeH: t.top - me.offset.top - fit.top,
       arrowTop: t.top - me.offset.top - me.arrow.h - me.arrow.offset.top,
@@ -171,6 +174,7 @@ $top.$end.$adjust = xAdjust;
 
 const $bottom = <WUPPopupPlace.EdgeFunc>function bottom(t, me, fit): ReturnType<WUPPopupPlace.EdgeFunc> {
   return {
+    attr: "bottom",
     top: t.bottom + me.offset.bottom + me.arrow.h,
     freeH: fit.bottom - me.offset.bottom - t.bottom,
     arrowTop: t.bottom + me.offset.bottom + me.arrow.offset.bottom,
@@ -184,6 +188,7 @@ $bottom.$end = $top.$end;
 const $left = <WUPPopupPlace.EdgeFunc>function left(t, me, fit): ReturnType<WUPPopupPlace.EdgeFunc> {
   const freeW = t.left - me.offset.left - fit.left;
   return {
+    attr: "left",
     left: t.left - me.offset.left - me.w - me.arrow.h,
     freeW,
     arrowAngle: -90,
@@ -211,6 +216,7 @@ $left.$end.$adjust = yAdjust;
 
 const $right = <WUPPopupPlace.EdgeFunc>function right(t, me, fit): ReturnType<WUPPopupPlace.EdgeFunc> {
   return {
+    attr: "right",
     left: t.right + me.offset.right + me.arrow.h,
     freeW: fit.right - t.right - me.offset.right,
     arrowAngle: 90,

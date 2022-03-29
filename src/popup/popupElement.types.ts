@@ -6,7 +6,7 @@ export namespace WUPPopup {
     /** Show when it's added to document; to hide just remove popup from document (outsideClick event can be helpful) */
     always = 0,
     /** On mouseEnter event of target; hide by mouseLeave; if popup shown by mouseEnter it can'be closed by click (onHover partially suppress onClick case)  */
-    onHover = 1, // todo check onHover on mobileDevices; maybe onTouch instead ?
+    onHover = 1,
     /** On focusIn event of target; hide by focusOut (also on click if PopupShowCases.onClick included) */
     onFocus = 1 << 1,
     /** On click event of target; hide by click anywhere */
@@ -58,10 +58,22 @@ export namespace WUPPopup {
     hoverHideTimeout: number;
     /** Debounce option for onFocustLost event (for ShowCases.onFocus); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost; Default is 100ms */
     focusDebounceMs?: number;
-    /** Set true to show arrow with popup; @false by default */
+    /** Set true to show arrow with popup; @false by default;
+     *  Arrow is placed after popup so it's easy to access (via style @see arrowClass or popupElement.$arrowElement)
+     */
     arrowEnable: boolean;
     /** Setup arrow class and use :before to add background-image or content;
-     * Limitation: arrow developed with ratio 2:1(w:h). You can't change it directly. Use only :before, :after to reach you goal */
+     * Limitation: arrow developed with ratio 2:1(w:h). You can't change it directly. Use only :before, :after to reach you goal
+     *
+     * To customize arrow style you can use also the following scss logic
+     * @example
+     * wup-popup + wup-popup-arrow {
+     *   opacity: 0.5
+     *   &:before {
+     *      background: no-repeat url("someImageHere.png");
+     *   }
+     * }
+     *  */
     arrowClass?: string;
     /** Alternative of margin for targetElement related to arrow
      *  [top, right, bottom, left] or [top/bottom, right/left] in px */
@@ -86,6 +98,6 @@ export namespace WUPPopup {
     /** Hide popup */
     $hide: () => void;
     /** Current state */
-    readonly $isOpened: boolean;
+    readonly $isOpen: boolean;
   }
 }

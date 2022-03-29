@@ -17,7 +17,7 @@ export default function popupListenTarget(
   },
   /** If succesfull callback must return HTMLElement */
   onShow: (showCase: WUPPopup.ShowCases) => HTMLElement | null,
-  onHide: (hideCase: WUPPopup.HideCases) => boolean
+  onHide: (hideCase: WUPPopup.HideCases) => boolean | Promise<boolean>
 ): {
   /** Fire it to remove all added related eventListeners */
   onRemoveRef: () => void;
@@ -58,11 +58,7 @@ export default function popupListenTarget(
     openedEl = onShow(showCase);
     if (openedEl) {
       !isShowRefFired && onShowRef();
-
-      if (!set.has(openedEl)) {
-        set.add(openedEl);
-      }
-
+      set.add(openedEl);
       return true;
     }
 
