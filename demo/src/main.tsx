@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
 import "./styles/main.scss";
-import React from "react";
+import React, { useEffect } from "react";
 import ReactDom from "react-dom";
 import { BrowserRouter, Routes, Route, Navigate, NavLink } from "react-router-dom";
 import { stringPrettify } from "web-ui-pack";
@@ -13,13 +13,24 @@ import styles from "./main.scss";
 interface IRoute {
   label?: string;
   path: string;
+  url?: string;
   el: React.FunctionComponent;
 }
 const baseURL = process.env.BASE_URL || "/";
+
 const routes: IRoute[] = [{ path: "popup", el: PopupView }];
-routes.forEach((v) => (v.path = baseURL + v.path));
+routes.forEach((v) => (v.url = baseURL + v.path));
 
 export default function AppContainer() {
+  useEffect(() => {
+    const prevPath = window.localStorage.getItem("path");
+    if (prevPath) {
+      window.localStorage.removeItem("path");
+      const r = routes.find((v) => v.path === prevPath);
+      r && window.location.replace(r.url as string);
+    }
+  }, []);
+
   return (
     <BrowserRouter>
       <h1>
@@ -34,8 +45,8 @@ export default function AppContainer() {
           <ul>
             {routes.map((r) => (
               <li key={r.path}>
-                <NavLink to={r.path} className={({ isActive }) => (isActive ? styles.activeLink : "")}>
-                  {r.label || stringPrettify(r.path.replace(baseURL, ""))}
+                <NavLink to={r.url as string} className={({ isActive }) => (isActive ? styles.activeLink : "")}>
+                  {r.label || stringPrettify(r.path)}
                 </NavLink>
               </li>
             ))}
@@ -44,9 +55,9 @@ export default function AppContainer() {
         <main>
           <Routes>
             {routes.map((r) => (
-              <Route key={r.path} path={r.path} element={React.createElement(r.el)} />
+              <Route key={r.path} path={r.url} element={React.createElement(r.el)} />
             ))}
-            <Route path="*" element={<Navigate to={routes[0].path} />} />
+            <Route path="*" element={<Navigate to={routes[0].url as string} />} />
           </Routes>
         </main>
       </div>

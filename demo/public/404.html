@@ -1,0 +1,7 @@
+<script>
+  const domainURL = window.location.origin + "<%= process.env.BASE_URL %>";
+  const path = window.location.href.substring(domainURL.length);
+  localStorage.setItem('path', path);
+  window.location.href = domainURL;
+
+</script>
