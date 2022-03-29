@@ -15,9 +15,9 @@ interface IRoute {
   path: string;
   el: React.FunctionComponent;
 }
-
+const baseURL = process.env.BASE_URL || "/";
 const routes: IRoute[] = [{ path: "popup", el: PopupView }];
-routes.forEach((v) => (v.path = process.env.BASE_URL + v.path));
+routes.forEach((v) => (v.path = baseURL + v.path));
 
 export default function AppContainer() {
   return (
@@ -35,7 +35,7 @@ export default function AppContainer() {
             {routes.map((r) => (
               <li key={r.path}>
                 <NavLink to={r.path} className={({ isActive }) => (isActive ? styles.activeLink : "")}>
-                  {r.label || stringPrettify(r.path.replace("/", ""))}
+                  {r.label || stringPrettify(r.path.replace(baseURL, ""))}
                 </NavLink>
               </li>
             ))}
