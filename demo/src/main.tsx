@@ -2,7 +2,7 @@
 import "./styles/main.scss";
 import React, { useEffect } from "react";
 import ReactDom from "react-dom";
-import { BrowserRouter, Routes, Route, Navigate, NavLink } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, NavLink, useNavigate } from "react-router-dom";
 import { stringPrettify } from "web-ui-pack";
 import PopupView from "./components/popup/popupView";
 
@@ -22,17 +22,19 @@ const routes: IRoute[] = [{ path: "popup", el: PopupView }];
 routes.forEach((v) => (v.url = baseURL + v.path));
 
 export default function AppContainer() {
+  const navigate = useNavigate();
+
   useEffect(() => {
     const prevPath = window.localStorage.getItem("path");
     if (prevPath) {
       window.localStorage.removeItem("path");
       const r = routes.find((v) => v.path === prevPath);
-      r && window.location.replace(r.url as string);
+      r && navigate(r.url as string); // window.location.replace(r.url as string);
     }
   }, []);
 
   return (
-    <BrowserRouter>
+    <>
       <h1>
         <img src={imgLogo} alt="logo" />
         web-ui-pack
@@ -61,8 +63,13 @@ export default function AppContainer() {
           </Routes>
         </main>
       </div>
-    </BrowserRouter>
+    </>
   );
 }
 
-ReactDom.render(<AppContainer />, document.getElementById("app"));
+ReactDom.render(
+  <BrowserRouter>
+    <AppContainer />{" "}
+  </BrowserRouter>,
+  document.getElementById("app")
+);
