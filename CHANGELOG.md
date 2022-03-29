@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.3
+## 0.0.3 (Mar 29, 2022)
 
 - Added [`popupElement`](README.md#popupelement)
 - Added [helpers](README.md#helpers)
