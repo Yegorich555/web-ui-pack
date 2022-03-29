@@ -812,9 +812,11 @@ describe("popupElement", () => {
     // just for coverage: tesing ignoreAlign in popupAdjustInternal()
     // el.style.minHeight = "10px"; // watchfix: https://github.com/jsdom/jsdom/issues/2986
     const orig = window.getComputedStyle;
+    let overflowX = "auto";
+    let overflowY = "auto";
     jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
       if (elem === el) {
-        return { minWidth: "10px", minHeight: "10px" };
+        return { minWidth: "10px", minHeight: "10px", overflowX, overflowY };
       }
       return orig(elem);
     });
@@ -837,6 +839,14 @@ describe("popupElement", () => {
     expectIt([WUPPopupElement.$placements.$top.$start.$adjust.$resizeHeight]).toMatchInlineSnapshot(
       `"<wup-popup style=\\"transform: translate(140px, 0px); display: block; max-height: 11px;\\" position=\\"top\\"></wup-popup>"`
     );
+    // checking maxHeight inheritance
+    const divH = el.appendChild(document.createElement("div"));
+    overflowY = "visible";
+    expectIt([WUPPopupElement.$placements.$top.$start.$adjust.$resizeHeight]).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"transform: translate(140px, 0px); display: block; max-height: 11px;\\" position=\\"top\\"><div style=\\"max-height: 11px;\\"></div></wup-popup>"`
+    );
+    divH.remove();
+
     jest.spyOn(el, "offsetHeight", "get").mockReturnValue(y);
     // expected $top.$start without maxHeight because height == freeH
     expectIt([WUPPopupElement.$placements.$top.$start.$adjust.$resizeHeight]).toMatchInlineSnapshot(
@@ -863,6 +873,15 @@ describe("popupElement", () => {
     expectIt([WUPPopupElement.$placements.$left.$start.$adjust.$resizeWidth]).toMatchInlineSnapshot(
       `"<wup-popup style=\\"transform: translate(0px, 11px); display: block; max-width: 12px;\\" position=\\"left\\"></wup-popup>"`
     );
+
+    // checking maxHeight inheritance
+    const divW = el.appendChild(document.createElement("div"));
+    overflowX = "visible";
+    expectIt([WUPPopupElement.$placements.$left.$start.$adjust.$resizeWidth]).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"transform: translate(0px, 11px); display: block; max-width: 12px;\\" position=\\"left\\"><div style=\\"max-width: 12px;\\"></div></wup-popup>"`
+    );
+    divW.remove();
+
     expectIt([WUPPopupElement.$placements.$left.$start.$resizeWidth]).toMatchInlineSnapshot(
       `"<wup-popup style=\\"transform: translate(0px, 11px); display: block; max-width: 12px;\\" position=\\"left\\"></wup-popup>"`
     );
@@ -1259,19 +1278,63 @@ describe("popupElement", () => {
     /** @type CSSStyleDeclaration */
     let objStyle = {};
     jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
-      if (elem === el) {
+      if (elem instanceof WUPPopupElement) {
         return objStyle;
       }
       return orig(elem);
     });
 
     // checking with defaults
-    objStyle = { animationDuration: "0.1s", animationName: "WUP-POPUP-anim1" };
+    objStyle = { animationDuration: "0.3s", animationName: "WUP-POPUP-a1" };
     el.$show();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"display: block; left: 190px; top: 100px;\\" position=\\"top\\" hide=\\"\\"></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(190px, 100px); display: block;\\" position=\\"top\\"></wup-popup>"`
     );
+    objStyle = { animationDuration: "0.3s", animationName: "WUP-POPUP-a2" };
     el.$hide();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"transform: translate(190px, 100px); display: block;\\" position=\\"top\\" hide=\\"\\"></wup-popup>"`
+    );
+    objStyle = { animationDuration: "0.3s", animationName: "WUP-POPUP-a1" };
+    el.$show();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"transform: translate(190px, 100px); display: block;\\" position=\\"top\\"></wup-popup>"`
+    );
+
+    // checking the same with attach !!!
+    /** @type WUPPopupElement */
+    let popup;
+    const detach = WUPPopupElement.$attach({ target: trg, showCase: 0b111111, text: "Me" }, (popupEl) => {
+      popup = popupEl;
+    });
+    objStyle = { animationDuration: "0.3s", animationName: "WUP-POPUP-a1" };
+    trg.click();
+    expect(popup.$isOpen).toBeTruthy();
+    expect(popup.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(190px, 100px);\\" position=\\"top\\">Me</wup-popup>"`
+    );
+
+    jest.advanceTimersByTime(100); // click has debounce-filter
+    objStyle = { animationDuration: "0.3s", animationName: "WUP-POPUP-a2" };
+    trg.click();
+    expect(popup.$isOpen).toBeTruthy(); // because we are waiting for animation
+    expect(popup.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(190px, 100px);\\" position=\\"top\\" hide=\\"\\">Me</wup-popup>"`
+    );
+    jest.advanceTimersByTime(301); // click has debounce-filter
+    expect(popup.$isOpen).toBeFalsy();
+    expect(popup.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"transform: translate(190px, 100px);\\" position=\\"top\\">Me</wup-popup>"`
+    );
+
+    jest.advanceTimersByTime(100); //  click has debounce-filter
+    objStyle = { animationDuration: "0.3s", animationName: "WUP-POPUP-a1" };
+    trg.click();
+    expect(popup.$isOpen).toBeTruthy();
+    expect(popup.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"transform: translate(190px, 100px); display: block;\\" position=\\"top\\">Me</wup-popup>"`
+    );
+    detach();
 
     // checking with custom animation
     let animateFrame;
@@ -1279,7 +1342,7 @@ describe("popupElement", () => {
     objStyle = { animationDuration: "0.2s", animationName: "dropdown" };
     el.$show();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"left: 190px; top: 100px; display: block;\\" position=\\"top\\"></wup-popup>"`
+      `"<wup-popup style=\\"display: block; left: 190px; top: 100px;\\" position=\\"top\\"></wup-popup>"`
     );
     el.$hide(); // cover clearing animationTimer
 

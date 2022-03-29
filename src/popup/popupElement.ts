@@ -37,11 +37,11 @@ const attachLst = new Map<HTMLElement, () => void>();
  * <wup-popup target="#btn1" placement="top-start">Some content here</wup-popup>
  * @tutorial Troubleshooting:
  * * You can set minWidth, minHeight to prevent squizing of popup or don't use rule '.$adjust'
- * * Don't override styles: transform, display
+ * * Don't override styles: transform (possible to override only for animation), display
  * * Don't use inline styles" maxWidth, maxHeight
  * * If target removed (when popup $isOpen) and appended again you need to update $options.target (because $options.target cleared)
- * * Popup has overflow 'auto'; If you change to 'visible' it will apply maxWidth maxHeight to first children (because popup must be restricted by maxSize to avoid layout issues)
- * * During the closing popup attr 'hide' is appended (for animation etc.)
+ * * Popup has overflow 'auto'; If you change to 'visible' it will apply maxWidth/maxHeight to first children (because popup must be restricted by maxSize to avoid layout issues)
+ * * During the closing attr 'hide' is appended (only if css-animation-duration is detected)
  */
 export default class WUPPopupElement<
   Events extends WUPPopup.EventMap = WUPPopup.EventMap
@@ -190,7 +190,7 @@ export default class WUPPopupElement<
           isHidding = true;
           const ok = await (popup as T).goHide(v);
           if (ok && isHidding) {
-            isHidding = true;
+            isHidding = false;
             (popup as T).#onRemoveRef = undefined; // required otherwise events are removed from popup
             (popup as T).remove();
             popup = undefined;
@@ -574,8 +574,8 @@ export default class WUPPopupElement<
       return true;
     }
 
-    const wasShown = this.#isOpen;
-    if (wasShown) {
+    const wasShow = this.#isOpen;
+    if (wasShow) {
       const e = this.fireEvent("$willHide", { cancelable: true });
       if (e.defaultPrevented) {
         return false;
@@ -601,13 +601,13 @@ export default class WUPPopupElement<
         this.#arrowElement = undefined;
       }
 
-      wasShown &&
+      wasShow &&
         setTimeout(() => {
           this.fireEvent("$hide", { cancelable: false }); // run async to dispose internal resources first: possible dev-side-issues
         });
     };
 
-    if (wasShown) {
+    if (wasShow) {
       this.#onHideRef?.call(this);
 
       if (hideCase !== WUPPopup.HideCases.onShowAgain) {
@@ -616,13 +616,14 @@ export default class WUPPopupElement<
 
         // waitFor only if was ordinary user-action
         if (hideCase >= WUPPopup.HideCases.onFireHide && hideCase <= WUPPopup.HideCases.onTargetClick) {
-          this.setAttribute("hide", "");
           const { animationDuration: aD, animationName: aN } = getComputedStyle(this);
           waitTimeout = Number.parseFloat(aD.substring(0, aD.length - 1)) * 1000 || 0;
           isFixTransformAnimation = aN !== "WUP-POPUP-a2";
         }
 
         if (waitTimeout) {
+          this.setAttribute("hide", "");
+
           return new Promise((resolve) => {
             const t = setTimeout(() => (this.#forceHide as () => void)(), waitTimeout);
             // fix when user scrolls during the hide-animation
