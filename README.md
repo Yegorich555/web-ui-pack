@@ -16,6 +16,7 @@ Web package with high scalable [WebComponents](#components) and [helpers](#helpe
 - Built-in css-variables to use custom color-themes
 - Built-in Typescript (coverage types 100%)
 - Built-in `.jsx/.tsx` support
+- Well documented via JSDoc (use intellisense power of your editor to get details about each property/option/usage)
 - Optimized for webpack (in build included only in-use components and helpers)
 - Zero dependancy (don't need to wait for bug-fixing of another packages)
 - Always 100% test coverage via e2e and unit tests (it's must-have and always will be so)
@@ -34,7 +35,6 @@ npm install web-ui-pack
 - [x] [Basic helpers](#helpers)
 - [x] [Helper.Observer](#helpersobserver)
 - [x] [PopupElement](#popupelement)
-- [ ] TitleElement ?
 - [ ] FormElement, TextControl
 - [ ] PasswordControl
 - [ ] CheckControl
@@ -84,6 +84,8 @@ _comming soon..._
 ### PopupElement
 
 [WUPPopupElement](src/popupElement.ts), `<wup-popup />`
+
+This is **the most smart & crazy element** you've ever seen (see Demo!)
 
 Typescript
 

@@ -29,7 +29,7 @@ export default function Example2() {
           ref={(el) => {
             if (!el || btnEl) return; // ref calls every render/setState
             btnEl = el;
-            WUPPopupElement.$attach(
+            const detach = WUPPopupElement.$attach(
               { target: el, text: "", showCase: ShowCases.onFocus | ShowCases.onClick },
               (popup) => {
                 popup.className = styles.dropdownPopup;
