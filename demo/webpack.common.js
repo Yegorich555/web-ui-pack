@@ -12,7 +12,7 @@ const path = require("path");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 
 const srcPath = path.resolve(__dirname, "./src/");
-const destPath = path.resolve(__dirname, "./build/"); // ('../Api/wwwroot')
+const destPath = path.resolve(__dirname, "../docs/");
 const assetsPath = path.resolve(__dirname, "./public/");
 const filesThreshold = 8196; // (bytes) threshold for compression, url-loader plugins
 
@@ -39,7 +39,7 @@ module.exports = function (env, argv) {
       path: destPath,
       filename: "[name].js",
       chunkFilename: "[name].js",
-      publicPath: "/", // url that should be used for providing assets
+      publicPath: isDevMode ? "/" : "/web-ui-pack/", // url that should be used for providing assets
       clean: true,
     },
     resolve: {
@@ -193,7 +193,7 @@ module.exports = function (env, argv) {
         // it adds custom Global definition to the project like BASE_URL for index.html
         "process.env": {
           NODE_ENV: JSON.stringify(mode),
-          BASE_URL: '"/"',
+          BASE_URL: isDevMode ? '"/"' : "/web-ui-pack/",
         },
         DEV: JSON.stringify(isDevMode),
       }),

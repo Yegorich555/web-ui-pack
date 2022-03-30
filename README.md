@@ -54,7 +54,7 @@ npm install web-ui-pack
 
 ## Demo
 
-_comming soon..._
+You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone repo and run `npm i & npm start`
 
 ## Components
 
@@ -85,7 +85,7 @@ _comming soon..._
 
 [WUPPopupElement](src/popupElement.ts), `<wup-popup />`
 
-This is **the most smart & crazy element** you've ever seen (see Demo!)
+This is **the most smart & crazy element** you've ever seen (see [Demo](#demo))
 
 Typescript
 
