@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.4
+
+- Added helper [`onSpy`](README.md#helpers) to spy on method-call
+
 ## 0.0.3 (Mar 29, 2022)
 
 - Added [`popupElement`](README.md#popupelement)
