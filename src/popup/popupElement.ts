@@ -7,6 +7,7 @@ import WUPPopupArrowElement from "./popupArrowElement";
 import popupListenTarget from "./popupListenTarget";
 
 export import ShowCases = WUPPopup.ShowCases;
+export * from "./popupElement.types";
 
 type AttachOptions = Partial<Omit<WUPPopup.Options, "target">> & {
   target: HTMLElement;
