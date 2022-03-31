@@ -100,7 +100,7 @@ export default class WUPPopupElement<
         position: fixed!important;
         top: 0; left: 0;
         padding: 4px;
-        margin: 0!important;
+        margin: 0;
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
         box-shadow: 0 1px 4px 0 #00000033;
