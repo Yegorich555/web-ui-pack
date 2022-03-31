@@ -178,29 +178,6 @@ describe("popupElement", () => {
     jest.advanceTimersByTime(1);
     expect(a.$isOpen).toBeFalsy();
     expect(onHide).toBeCalledTimes(1);
-
-    // coverage for initTimer
-    jest.clearAllMocks();
-    jest.clearAllTimers();
-    /** @type typeof el */
-    const a2 = document.createElement(el.tagName);
-    a2.$options.showCase = 1 << 2; // click
-    const init2 = jest.spyOn(a2, "init");
-    document.body.prepend(a2);
-    jest.advanceTimersToNextTimer(); // wait for ready
-    expect(init2).toBeCalledTimes(1);
-    expect(jest.advanceTimersToNextTimer).toThrow(); // wait for error by timeout
-    expect(a2.$options.target == null).toBeTruthy();
-    expect(a2.$isOpen).toBeFalsy();
-
-    // applyShowCase after timer
-    a2.remove();
-    jest.advanceTimersByTime(1);
-    document.body.prepend(a2);
-    a2.$options.target = trg; // required to reassign otherwise target is undefined
-    jest.advanceTimersByTime(1);
-    trg.click();
-    expect(a2.$isOpen).toBeTruthy();
   });
 
   test("$options.target", () => {
@@ -643,15 +620,6 @@ describe("popupElement", () => {
     jest.advanceTimersToNextTimer();
     expect(el.$show).not.toThrow();
     expect(el.$isOpen).toBeTruthy();
-
-    // coverage: check if initTimer is destroyed
-    /** @type typeof el */
-    const a = document.createElement(el.tagName);
-    document.body.prepend(a);
-    jest.advanceTimersToNextTimer(); // wait for ready
-    a.$options.target = trg;
-    jest.advanceTimersByTime(1); // wait for #initTimer to be defined
-    a.remove();
   });
 
   test("memoryLeak", () => {
@@ -659,6 +627,7 @@ describe("popupElement", () => {
 
     let animateFrame;
     const spyFrame = jest.spyOn(window, "requestAnimationFrame").mockImplementation((fn) => (animateFrame = fn));
+    const spyFrameCancel = jest.spyOn(window, "cancelAnimationFrame").mockImplementation(() => (animateFrame = null));
     const spyTrgRect = jest.spyOn(trg, "getBoundingClientRect");
     const spyBodyRect = jest.spyOn(document.body, "getBoundingClientRect");
 
@@ -699,16 +668,23 @@ describe("popupElement", () => {
     jest.clearAllMocks();
     trg.remove();
     document.body.appendChild(a);
-    jest.advanceTimersByTime(1000); // onReady has timeout
-    expect(trg.click).toThrow(); // because target is not connected
-    expect(a.goShow).toThrow(); // coverage doesn't work for code above !!!
+    expect(() => jest.advanceTimersByTime(1000)).toThrow(); // error: Target must be appended to layout
+    trg.click();
+    expect(a.$isOpen).toBeFalsy();
+    expect(a.goShow).toThrow(); // error expected
 
     document.body.appendChild(trg);
     trg.click();
+    expect(a.$isOpen).toBeFalsy(); // because target isn't appened before initPopup
+    a.$options.target = null;
+    a.$options.target = trg; // reassignTarget
+    jest.advanceTimersByTime(1);
+    trg.click();
     expect(a.$isOpen).toBeTruthy();
 
+    spyFrameCancel.mockClear();
     trg.remove();
-    animateFrame();
+    expect(spyFrameCancel).toBeCalledTimes(1);
     jest.advanceTimersByTime(1);
     expect(a.$isOpen).toBeFalsy();
     // if target removed - events should be removed
@@ -1246,8 +1222,9 @@ describe("popupElement", () => {
     expect(popup.$isOpen).toBeTruthy();
     expect(popup.getAttribute("position")).toBe("bottom");
 
-    // checking changin target
-    const trg2 = document.body.appendChild(document.createElement("button"));
+    // checking changing target
+    const divRemove = document.body.appendChild(document.createElement("div"));
+    const trg2 = divRemove.appendChild(document.createElement("button"));
     popup.$options.target = trg2;
     jest.advanceTimersByTime(1000);
     expect(popup.$isOpen).toBeFalsy(); // changing options hides popup
@@ -1265,6 +1242,27 @@ describe("popupElement", () => {
     expect(popup.$isOpen).toBeFalsy(); // because target changed
     trg.click();
     expect(popup.$isOpen).toBeTruthy();
+
+    // checking self-removing opened popup when target turns into removed
+    let animateFrame;
+    jest.spyOn(window, "requestAnimationFrame").mockImplementation((fn) => (animateFrame = fn));
+    popup.$options.target = trg2;
+    jest.advanceTimersByTime(1000);
+    expect(popup.$isOpen).toBeFalsy(); // because target changed
+    trg2.click();
+    expect(popup.$isOpen).toBeTruthy();
+    divRemove.innerHTML = "";
+    expect(trg2.isConnected).toBeFalsy(); // because removed by innerHTML
+    animateFrame();
+    expect(popup.isConnected).toBeFalsy(); // because target is removed
+
+    // attach without target
+    expect(() => {
+      WUPPopupElement.$attach({ text: "Me" }, (popupEl) => {
+        popup = popupEl;
+        ++cnt;
+      });
+    }).toThrow(); // error: Target is required
 
     detach();
     spy.check(); // checking memory leak

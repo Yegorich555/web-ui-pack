@@ -10,7 +10,7 @@ export import ShowCases = WUPPopup.ShowCases;
 
 type AttachOptions = Partial<Omit<WUPPopup.Options, "target">> & {
   target: HTMLElement;
-  text: string;
+  text: string | undefined | null;
   tagName?: string;
 };
 
@@ -129,6 +129,8 @@ export default class WUPPopupElement<
 
   /** Listen for target according to showCase and create/remove popup when it's required (by show/hide).
    *  This helps to avoid tons of hidden popups on HTML;
+   *  Firing detach doesn't required if target removed by target.remove() or target.parent.removeChild(target);
+   *  If target is removed via changing innerHTML you should fire detach() to avoid memoryLeak
    *  @returns detach-function (hide,remove popup and remove eventListeners)
    *  @example
    *  const detach = WUPPopupElement.$attach(
@@ -137,11 +139,13 @@ export default class WUPPopupElement<
    *       text: "Some text here",
    *       showCase: WUPPopup.ShowCases.onClick,
    *     },
-   *     // (el) => el.append("Some content can be here")
+   *     // (el) => el.class = "popup-attached"
    *   );
    * @tutorial Troubleshooting:
    * * $attach doesn't work with showCase.always it doesn't make sense
    * * every new attach on the same target > re-init previous (1 attach per target is possible)
+   * * Firing detach() doesn't required if target removed by `target.remove()` or `target.parent.removeChild(target)`;
+   * * If popup is hidden and target is removed via `target.parent.innerHTML="another content"` you should fire detach() to avoid memoryLeak
    */
   static $attach<T extends WUPPopupElement>(
     options: AttachOptions,
@@ -172,22 +176,25 @@ export default class WUPPopupElement<
           const isCreate = !popup;
           if (!popup) {
             // eslint-disable-next-line no-use-before-define
-            popup = document.body.appendChild(document.createElement(opts.tagName ?? tagName) as T);
-            const p = popup;
+            const p = document.body.appendChild(document.createElement(opts.tagName ?? tagName) as T);
+            popup = p;
+            Object.assign(p._opts, opts);
+            opts.text && p.append(opts.text);
 
-            popup.#attach = () => {
+            p.#attach = () => {
               // extra function to skip useless 1st attach on init
-              p.#attach = attach;
+              p.#attach = attach; // this is required to rebind events on re-init
               return refs;
             };
 
-            Object.assign(popup._opts, opts);
-            opts.text && popup.append(opts.text);
-            callback?.call(this, popup);
+            callback?.call(this, p);
           }
 
           if (!popup.goShow(v)) {
-            isCreate && popup.remove();
+            if (isCreate) {
+              (popup as T).#onRemoveRef = undefined; // otherwise remove() destroys events
+              popup.remove();
+            }
             return null;
           }
 
@@ -197,8 +204,7 @@ export default class WUPPopupElement<
           isHidding = true;
           const ok = await (popup as T).goHide(v);
           if (ok && isHidding) {
-            isHidding = false;
-            (popup as T).#onRemoveRef = undefined; // required otherwise events are removed from popup
+            (popup as T).#onRemoveRef = undefined; // otherwise remove() destroys events
             (popup as T).remove();
             popup = undefined;
           }
@@ -270,39 +276,24 @@ export default class WUPPopupElement<
     return this.#arrowElement || null;
   }
 
-  /** assign this method */
-  onTargetRemoved?: () => void;
-
   protected override gotReady() {
     super.gotReady();
     this.init();
   }
 
   #isOpen = false;
-  #initTimer?: ReturnType<typeof setTimeout>;
-  #onShowRef?: () => void; // func to add eventListeners onShow
   #onHideRef?: () => void; // func to remove eventListeners that added on onShow
   #onRemoveRef?: () => void; // func to remove eventListeners
   #attach?: () => ReturnType<typeof popupListenTarget>; // func to use alternative target
   /** Fired after gotReady() and $show() (to reinit according to options) */
-  protected init(isTryAgain = false) {
+  protected init() {
     this.dispose(); // remove previously added events
 
     let refs: ReturnType<typeof popupListenTarget>;
     if (this.#attach) {
       refs = this.#attach();
     } else {
-      const { el: t, err } = this.#defineTarget();
-      if (!t) {
-        this._opts.target = null;
-        if (isTryAgain) {
-          throw new Error(err);
-        }
-
-        this.#initTimer = setTimeout(() => this.init(true), 200); // timeout because of target can be undefined in time
-        return;
-      }
-      this._opts.target = t;
+      this._opts.target = this.#defineTarget();
 
       if (!this._opts.showCase /* always */) {
         this.goShow(WUPPopup.ShowCases.always);
@@ -311,17 +302,11 @@ export default class WUPPopupElement<
 
       refs = popupListenTarget(
         this._opts as typeof this._opts & { target: HTMLElement },
-        (v) => {
-          if (!this.goShow(v)) {
-            return null;
-          }
-          return this as typeof this & { dispose: () => void };
-        },
+        (v) => (this.goShow(v) ? this : null),
         this.goHide
       );
     }
 
-    this.#onShowRef = refs.onShowRef;
     this.#onHideRef = refs.onHideRef;
     this.#onRemoveRef = refs.onRemoveRef;
   }
@@ -350,26 +335,27 @@ export default class WUPPopupElement<
     this.#attrTimer = window.setTimeout(() => this.#reinit());
   }
 
-  /** Defines target on show; Returns HtmlElement | Error */
-  #defineTarget(): { el: HTMLElement; err?: undefined } | { err: string; el?: undefined } {
+  /** Defines target on show; @returns HTMLElement | Error */
+  #defineTarget(): HTMLElement {
     const attrTrg = this.getAttribute("target");
     if (attrTrg) {
       const el = document.querySelector(attrTrg);
       if (el instanceof HTMLElement) {
-        return { el };
+        return el;
       }
-      return { err: `${this.tagName}. Target as HTMLElement not found for '${attrTrg}'` };
+      throw new Error(`${this.tagName}. Target as HTMLElement not found for '${attrTrg}'`);
     }
 
     if (this._opts.target) {
-      return { el: this._opts.target };
+      return this._opts.target;
     }
 
     const el = this.previousElementSibling;
     if (el instanceof HTMLElement) {
-      return { el };
+      return el;
     }
-    return { err: `${this.tagName}. Target is not defined` };
+
+    throw new Error(`${this.tagName}. Target is not defined`);
   }
 
   #frameId?: number;
@@ -420,14 +406,7 @@ export default class WUPPopupElement<
     const wasHidden = !this.#isOpen;
     this.#isOpen && this.goHide(WUPPopup.HideCases.onShowAgain);
 
-    if (!this._opts.target) {
-      const { el, err } = this.#defineTarget();
-      this._opts.target = el || null;
-      if (err) {
-        throw new Error(err);
-      }
-    }
-
+    this._opts.target = this._opts.target || this.#defineTarget();
     if (!(this._opts.target as HTMLElement).isConnected) {
       throw new Error(`${this.tagName}. Target is not appended to document`);
     }
@@ -488,7 +467,7 @@ export default class WUPPopupElement<
     while (l && l !== document.body.parentElement) {
       const s = findScrollParent(l);
       s && this.#scrollParents.push(s);
-      l = l.parentElement;
+      l = l.parentElement as HTMLElement;
     }
     this.#scrollParents = this.#scrollParents.length ? this.#scrollParents : undefined;
 
@@ -555,7 +534,6 @@ export default class WUPPopupElement<
     this.#isOpen = true;
 
     if (wasHidden) {
-      this.#onShowRef?.call(this);
       // run async to dispose internal resources first: possible dev-side-issues
       setTimeout(() => this.fireEvent("$show", { cancelable: false }));
     }
@@ -654,10 +632,10 @@ export default class WUPPopupElement<
   /** Update position of popup. Call this method in cases when you changed options */
   #updatePosition = (): DOMRect | undefined => {
     const trg = this._opts.target as HTMLElement;
+    // possible when target removed via set innerHTML (in this case remove-hook doesn't work)
     if (!trg.isConnected) {
-      this.#onRemoveRef?.call(this);
-      this._opts.target = undefined;
       this.goHide(WUPPopup.HideCases.onTargetRemove);
+      this.#attach && this.remove(); // self-removing if $attach()
       return undefined;
     }
 
@@ -886,8 +864,7 @@ export default class WUPPopupElement<
 
   protected override dispose(): void {
     super.dispose();
-    this.#initTimer && clearTimeout(this.#initTimer);
-    this.#initTimer = undefined;
+    // possible on reinit when need to rebound events
     this.#onRemoveRef?.call(this);
     this.#onRemoveRef = undefined;
   }
