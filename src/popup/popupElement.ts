@@ -9,12 +9,6 @@ import popupListenTarget from "./popupListenTarget";
 export import ShowCases = WUPPopup.ShowCases;
 export * from "./popupElement.types";
 
-type AttachOptions = Partial<Omit<WUPPopup.Options, "target">> & {
-  target: HTMLElement;
-  text: string | undefined | null;
-  tagName?: string;
-};
-
 const attachLst = new Map<HTMLElement, () => void>();
 
 /** PopupElement
@@ -149,7 +143,7 @@ export default class WUPPopupElement<
    * * If popup is hidden and target is removed via `target.parent.innerHTML="another content"` you should fire detach() to avoid memoryLeak
    */
   static $attach<T extends WUPPopupElement>(
-    options: AttachOptions,
+    options: WUPPopup.AttachOptions,
     /** Fires when popup is added to document */
     callback?: (el: T) => void
   ): () => void {
