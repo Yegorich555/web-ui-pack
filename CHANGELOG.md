@@ -1,8 +1,10 @@
 # Changelog
 
-## 0.0.4
+## 0.0.4 (Apr 1, 2022)
 
-- Fixed target-remove behavior for [`popupElement`](README.md#popupelement)
+- [`PopupElement`](README.md#popupelement)
+  - Fixed $options.offset
+  - Fixed behavior on target-remove
 - Added helper [`onSpy`](README.md#helpers) to spy on method-call
 
 ## 0.0.3 (Mar 29, 2022)
