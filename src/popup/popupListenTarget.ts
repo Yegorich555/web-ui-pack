@@ -1,12 +1,15 @@
+/* eslint-disable no-use-before-define */
 import focusFirst from "../helpers/focusFirst";
 import onEvent, { onEventType } from "../helpers/onEvent";
 import onFocusGot from "../helpers/onFocusGot";
 import onFocusLost from "../helpers/onFocusLost";
+import onSpy from "../helpers/onSpy";
 import { WUPPopup } from "./popupElement.types";
 
-const set = new Set<HTMLElement>();
-
-/** listen for target according to showCase and return onRemoveCallback (listeners that need to remove when popup removed) */
+/**
+ * listen for target according to showCase and return onRemoveCallback (listeners that need to remove when popup removed)
+ * If target removed then listeners removed
+ * */
 export default function popupListenTarget(
   options: {
     target: HTMLElement;
@@ -19,46 +22,43 @@ export default function popupListenTarget(
   onShow: (showCase: WUPPopup.ShowCases) => HTMLElement | null,
   onHide: (hideCase: WUPPopup.HideCases) => boolean | Promise<boolean>
 ): {
-  /** Fire it to remove all added related eventListeners */
+  /** Fire it when element is removed manually (to remove all added related eventListeners) */
   onRemoveRef: () => void;
-  /** Fire it when element is shown outside the listener */
-  onShowRef: () => void;
-  /** Fire it when element is hidden outside the listener */
+  /** Fire it when element is hidden manually */
   onHideRef: () => void;
 } {
   const opts = { ...popupListenTarget.$defaults, ...options };
   const t = opts.target;
+  if (!(t instanceof HTMLElement)) {
+    throw new Error("WUP-Popup. Target is required");
+  }
+  if (!t.isConnected) {
+    throw new Error("WUP-Popup. Target must be appended to layout");
+  }
 
   let openedEl: HTMLElement | null = null;
   const onShowCallbacks: Array<() => () => void> = [];
   const onHideCallbacks: Array<() => void> = [];
   const onRemoveCallbacks: Array<() => void> = [];
 
-  let isShowRefFired = false;
-  function onShowRef() {
-    onShowCallbacks.forEach((f) => onHideCallbacks.push(f()));
-    isShowRefFired = true;
-  }
-
   function onHideRef() {
     onHideCallbacks.forEach((f) => f());
     onHideCallbacks.length = 0;
   }
-
   function onRemoveRef() {
+    rstSpy();
+    rstSpy2();
+
     onRemoveCallbacks.forEach((f) => f());
     onRemoveCallbacks.length = 0;
     onHideRef();
     onShowCallbacks.length = 0;
-    set.delete(openedEl as HTMLElement);
   }
 
   function show(showCase: WUPPopup.ShowCases): boolean {
-    isShowRefFired = false;
     openedEl = onShow(showCase);
     if (openedEl) {
-      !isShowRefFired && onShowRef();
-      set.add(openedEl);
+      onShowCallbacks.forEach((f) => onHideCallbacks.push(f()));
       return true;
     }
 
@@ -73,6 +73,14 @@ export default function popupListenTarget(
     }
     return false;
   }
+
+  // try to detect if target removed
+  function hideByRemove() {
+    openedEl && hide(WUPPopup.HideCases.onTargetRemove);
+    onRemoveRef();
+  }
+  const rstSpy = onSpy(t, "remove", hideByRemove);
+  const rstSpy2 = onSpy(t.parentElement as HTMLElement, "removeChild", (child) => child === t && hideByRemove());
 
   function appendEvent<K extends keyof HTMLElementEventMap>(
     ...args: Parameters<onEventType<K, HTMLElement | Document>>
@@ -171,10 +179,8 @@ export default function popupListenTarget(
       if (!openedEl && show(WUPPopup.ShowCases.onFocus)) {
         if (opts.showCase & WUPPopup.ShowCases.onClick) {
           preventClickAfterFocus = true;
-          /* eslint-disable no-use-before-define */
           const r1 = appendEvent(document, "touchstart", () => rst());
           const r2 = appendEvent(document, "mousedown", () => rst());
-          /* eslint-enable no-use-before-define */
           const rst = () => {
             preventClickAfterFocus = false;
             r1();
@@ -206,7 +212,7 @@ export default function popupListenTarget(
     }
   }
 
-  return { onRemoveRef, onShowRef, onHideRef };
+  return { onRemoveRef, onHideRef };
 }
 
 popupListenTarget.$defaults = {

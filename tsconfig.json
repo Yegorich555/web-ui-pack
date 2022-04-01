@@ -10,7 +10,8 @@
     "removeComments": false,
     "esModuleInterop": true,
     "strict": true,
-    "allowJs": true
+    "allowJs": true,
+    "preserveConstEnums": true
   },
   "files": ["src/index.ts"],
   "include": ["src/**/*"],

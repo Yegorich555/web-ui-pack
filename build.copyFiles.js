@@ -11,7 +11,7 @@ fs.mkdirSync(out);
 
 [
   "./package.json", //
-  "./package-lock.json",
+  // "./package-lock.json",
   "./.npmignore",
   "./README.md",
   "./LICENSE.md",

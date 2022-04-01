@@ -7,12 +7,9 @@ import WUPPopupArrowElement from "./popupArrowElement";
 import popupListenTarget from "./popupListenTarget";
 
 export import ShowCases = WUPPopup.ShowCases;
-
-type AttachOptions = Partial<Omit<WUPPopup.Options, "target">> & {
-  target: HTMLElement;
-  text: string;
-  tagName?: string;
-};
+// code coverage doesn't work either: https://stackoverflow.com/questions/62493593/unable-to-ignore-block-within-react-class-components-with-istanbul-ignore-next-t
+/* c8 ignore next */
+export * from "./popupElement.types";
 
 const attachLst = new Map<HTMLElement, () => void>();
 
@@ -100,7 +97,7 @@ export default class WUPPopupElement<
         position: fixed!important;
         top: 0; left: 0;
         padding: 4px;
-        margin: 0!important;
+        margin: 0;
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
         box-shadow: 0 1px 4px 0 #00000033;
@@ -129,6 +126,8 @@ export default class WUPPopupElement<
 
   /** Listen for target according to showCase and create/remove popup when it's required (by show/hide).
    *  This helps to avoid tons of hidden popups on HTML;
+   *  Firing detach doesn't required if target removed by target.remove() or target.parent.removeChild(target);
+   *  If target is removed via changing innerHTML you should fire detach() to avoid memoryLeak
    *  @returns detach-function (hide,remove popup and remove eventListeners)
    *  @example
    *  const detach = WUPPopupElement.$attach(
@@ -137,14 +136,16 @@ export default class WUPPopupElement<
    *       text: "Some text here",
    *       showCase: WUPPopup.ShowCases.onClick,
    *     },
-   *     // (el) => el.append("Some content can be here")
+   *     // (el) => el.class = "popup-attached"
    *   );
    * @tutorial Troubleshooting:
    * * $attach doesn't work with showCase.always it doesn't make sense
    * * every new attach on the same target > re-init previous (1 attach per target is possible)
+   * * Firing detach() doesn't required if target removed by `target.remove()` or `target.parent.removeChild(target)`;
+   * * If popup is hidden and target is removed via `target.parent.innerHTML="another content"` you should fire detach() to avoid memoryLeak
    */
   static $attach<T extends WUPPopupElement>(
-    options: AttachOptions,
+    options: WUPPopup.AttachOptions,
     /** Fires when popup is added to document */
     callback?: (el: T) => void
   ): () => void {
@@ -172,22 +173,25 @@ export default class WUPPopupElement<
           const isCreate = !popup;
           if (!popup) {
             // eslint-disable-next-line no-use-before-define
-            popup = document.body.appendChild(document.createElement(opts.tagName ?? tagName) as T);
-            const p = popup;
+            const p = document.body.appendChild(document.createElement(opts.tagName ?? tagName) as T);
+            popup = p;
+            Object.assign(p._opts, opts);
+            opts.text && p.append(opts.text);
 
-            popup.#attach = () => {
+            p.#attach = () => {
               // extra function to skip useless 1st attach on init
-              p.#attach = attach;
+              p.#attach = attach; // this is required to rebind events on re-init
               return refs;
             };
 
-            Object.assign(popup._opts, opts);
-            opts.text && popup.append(opts.text);
-            callback?.call(this, popup);
+            callback?.call(this, p);
           }
 
           if (!popup.goShow(v)) {
-            isCreate && popup.remove();
+            if (isCreate) {
+              (popup as T).#onRemoveRef = undefined; // otherwise remove() destroys events
+              popup.remove();
+            }
             return null;
           }
 
@@ -197,8 +201,7 @@ export default class WUPPopupElement<
           isHidding = true;
           const ok = await (popup as T).goHide(v);
           if (ok && isHidding) {
-            isHidding = false;
-            (popup as T).#onRemoveRef = undefined; // required otherwise events are removed from popup
+            (popup as T).#onRemoveRef = undefined; // otherwise remove() destroys events
             (popup as T).remove();
             popup = undefined;
           }
@@ -270,39 +273,24 @@ export default class WUPPopupElement<
     return this.#arrowElement || null;
   }
 
-  /** assign this method */
-  onTargetRemoved?: () => void;
-
   protected override gotReady() {
     super.gotReady();
     this.init();
   }
 
   #isOpen = false;
-  #initTimer?: ReturnType<typeof setTimeout>;
-  #onShowRef?: () => void; // func to add eventListeners onShow
   #onHideRef?: () => void; // func to remove eventListeners that added on onShow
   #onRemoveRef?: () => void; // func to remove eventListeners
   #attach?: () => ReturnType<typeof popupListenTarget>; // func to use alternative target
   /** Fired after gotReady() and $show() (to reinit according to options) */
-  protected init(isTryAgain = false) {
+  protected init() {
     this.dispose(); // remove previously added events
 
     let refs: ReturnType<typeof popupListenTarget>;
     if (this.#attach) {
       refs = this.#attach();
     } else {
-      const { el: t, err } = this.#defineTarget();
-      if (!t) {
-        this._opts.target = null;
-        if (isTryAgain) {
-          throw new Error(err);
-        }
-
-        this.#initTimer = setTimeout(() => this.init(true), 200); // timeout because of target can be undefined in time
-        return;
-      }
-      this._opts.target = t;
+      this._opts.target = this.#defineTarget();
 
       if (!this._opts.showCase /* always */) {
         this.goShow(WUPPopup.ShowCases.always);
@@ -311,17 +299,11 @@ export default class WUPPopupElement<
 
       refs = popupListenTarget(
         this._opts as typeof this._opts & { target: HTMLElement },
-        (v) => {
-          if (!this.goShow(v)) {
-            return null;
-          }
-          return this as typeof this & { dispose: () => void };
-        },
+        (v) => (this.goShow(v) ? this : null),
         this.goHide
       );
     }
 
-    this.#onShowRef = refs.onShowRef;
     this.#onHideRef = refs.onHideRef;
     this.#onRemoveRef = refs.onRemoveRef;
   }
@@ -350,26 +332,27 @@ export default class WUPPopupElement<
     this.#attrTimer = window.setTimeout(() => this.#reinit());
   }
 
-  /** Defines target on show; Returns HtmlElement | Error */
-  #defineTarget(): { el: HTMLElement; err?: undefined } | { err: string; el?: undefined } {
+  /** Defines target on show; @returns HTMLElement | Error */
+  #defineTarget(): HTMLElement {
     const attrTrg = this.getAttribute("target");
     if (attrTrg) {
       const el = document.querySelector(attrTrg);
       if (el instanceof HTMLElement) {
-        return { el };
+        return el;
       }
-      return { err: `${this.tagName}. Target as HTMLElement not found for '${attrTrg}'` };
+      throw new Error(`${this.tagName}. Target as HTMLElement not found for '${attrTrg}'`);
     }
 
     if (this._opts.target) {
-      return { el: this._opts.target };
+      return this._opts.target;
     }
 
     const el = this.previousElementSibling;
     if (el instanceof HTMLElement) {
-      return { el };
+      return el;
     }
-    return { err: `${this.tagName}. Target is not defined` };
+
+    throw new Error(`${this.tagName}. Target is not defined`);
   }
 
   #frameId?: number;
@@ -420,14 +403,7 @@ export default class WUPPopupElement<
     const wasHidden = !this.#isOpen;
     this.#isOpen && this.goHide(WUPPopup.HideCases.onShowAgain);
 
-    if (!this._opts.target) {
-      const { el, err } = this.#defineTarget();
-      this._opts.target = el || null;
-      if (err) {
-        throw new Error(err);
-      }
-    }
-
+    this._opts.target = this._opts.target || this.#defineTarget();
     if (!(this._opts.target as HTMLElement).isConnected) {
       throw new Error(`${this.tagName}. Target is not appended to document`);
     }
@@ -488,7 +464,7 @@ export default class WUPPopupElement<
     while (l && l !== document.body.parentElement) {
       const s = findScrollParent(l);
       s && this.#scrollParents.push(s);
-      l = l.parentElement;
+      l = l.parentElement as HTMLElement;
     }
     this.#scrollParents = this.#scrollParents.length ? this.#scrollParents : undefined;
 
@@ -555,7 +531,6 @@ export default class WUPPopupElement<
     this.#isOpen = true;
 
     if (wasHidden) {
-      this.#onShowRef?.call(this);
       // run async to dispose internal resources first: possible dev-side-issues
       setTimeout(() => this.fireEvent("$show", { cancelable: false }));
     }
@@ -654,35 +629,33 @@ export default class WUPPopupElement<
   /** Update position of popup. Call this method in cases when you changed options */
   #updatePosition = (): DOMRect | undefined => {
     const trg = this._opts.target as HTMLElement;
+    // possible when target removed via set innerHTML (in this case remove-hook doesn't work)
     if (!trg.isConnected) {
-      this.#onRemoveRef?.call(this);
-      this._opts.target = undefined;
       this.goHide(WUPPopup.HideCases.onTargetRemove);
+      this.#attach && this.remove(); // self-removing if $attach()
       return undefined;
     }
 
-    const t = trg.getBoundingClientRect() as WUPPopupPlace.Rect;
+    const tdef = trg.getBoundingClientRect();
     if (
       // issue: it's wrong if minWidth, minHeight etc. is changed and doesn't affect on layout sizes directly
       this.#prevRect &&
-      this.#prevRect.top === t.top &&
-      this.#prevRect.left === t.left &&
-      this.#prevRect.width === t.width &&
-      this.#prevRect.height === t.height
+      this.#prevRect.top === tdef.top &&
+      this.#prevRect.left === tdef.left &&
+      this.#prevRect.width === tdef.width &&
+      this.#prevRect.height === tdef.height
     ) {
       return this.#prevRect;
     }
 
-    t.el = trg;
-
     if (this._opts.minWidthByTarget) {
-      this.style.minWidth = `${t.width}px`;
+      this.style.minWidth = `${tdef.width}px`;
     } else if (this.style.minWidth) {
       this.style.minWidth = "";
     }
 
     if (this._opts.minHeightByTarget) {
-      this.style.minHeight = `${t.height}px`;
+      this.style.minHeight = `${tdef.height}px`;
     } else if (this.style.minHeight) {
       this.style.minHeight = "";
     }
@@ -727,11 +700,21 @@ export default class WUPPopupElement<
         : { h: 0, w: 0, offset: { bottom: 0, left: 0, right: 0, top: 0 } },
     };
 
+    const t: WUPPopupPlace.Rect = {
+      el: trg,
+      top: tdef.top - me.offset.top,
+      left: tdef.left - me.offset.left,
+      right: tdef.right + me.offset.right,
+      bottom: tdef.bottom + me.offset.bottom,
+      height: 0,
+      width: 0,
+    };
+
     // check if target hidden by scrollParent
     if (this.#scrollParents) {
       let isHiddenByScroll = false;
 
-      let child: DOMRect = t;
+      let child: DOMRect | WUPPopupPlace.Rect = t;
       const vH = Math.max(document.documentElement.clientHeight, window.innerHeight);
       const vW = Math.max(document.documentElement.clientWidth, window.innerWidth);
       for (let i = 0; i < this.#scrollParents.length; ++i) {
@@ -762,23 +745,13 @@ export default class WUPPopupElement<
 
       // fix cases when target is partiallyHidden by scrollableParent
       // suggestion: if height/width is very small we can use another side
-      if (scrollRect.top > t.top) {
-        Object.defineProperty(t, "top", { get: () => scrollRect.top });
-        Object.defineProperty(t, "height", { get: () => t.bottom - scrollRect.top });
-      }
-      if (scrollRect.bottom < t.bottom) {
-        Object.defineProperty(t, "bottom", { get: () => scrollRect.bottom });
-        Object.defineProperty(t, "height", { get: () => scrollRect.bottom - t.top });
-      }
-      if (scrollRect.left > t.left) {
-        Object.defineProperty(t, "left", { get: () => scrollRect.left });
-        Object.defineProperty(t, "width", { get: () => t.right - scrollRect.left });
-      }
-      if (scrollRect.right < t.right) {
-        Object.defineProperty(t, "right", { get: () => scrollRect.right });
-        Object.defineProperty(t, "width", { get: () => scrollRect.right - t.left });
-      }
+      t.top = Math.max(scrollRect.top, t.top);
+      t.right = Math.min(scrollRect.right, t.right);
+      t.bottom = Math.min(scrollRect.bottom, t.bottom);
+      t.left = Math.max(scrollRect.left, t.left);
     }
+    t.height = t.bottom - t.top;
+    t.width = t.right - t.left;
 
     let lastRule: WUPPopupPlace.PlaceFunc;
 
@@ -886,8 +859,7 @@ export default class WUPPopupElement<
 
   protected override dispose(): void {
     super.dispose();
-    this.#initTimer && clearTimeout(this.#initTimer);
-    this.#initTimer = undefined;
+    // possible on reinit when need to rebound events
     this.#onRemoveRef?.call(this);
     this.#onRemoveRef = undefined;
   }

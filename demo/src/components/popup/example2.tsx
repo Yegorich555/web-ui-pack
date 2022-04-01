@@ -1,20 +1,85 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import movable from "src/helpers/movable";
 // eslint-disable-next-line import/named
 import WUPPopupElement, { ShowCases } from "web-ui-pack/popup/popupElement";
 import styles from "./popupView.scss";
 
-let btnEl: HTMLButtonElement | null = null;
+// example of attach - use this to avoid overhelmed layout by closed popups
+function attach(el: HTMLElement, opts: { text?: string; innerHTML?: string }) {
+  const detach = WUPPopupElement.$attach(
+    { target: el, text: opts.text, showCase: ShowCases.onFocus | ShowCases.onClick },
+    (popup) => {
+      popup.className = styles.dropdownPopup;
 
-export default function Example2() {
-  useEffect(
-    () =>
-      // reset callback
-      () => {
-        btnEl = null;
+      popup.$options.placement = [
+        // dropdown behavior
+        WUPPopupElement.$placements.$bottom.$start,
+        WUPPopupElement.$placements.$bottom.$end,
+        WUPPopupElement.$placements.$top.$start,
+        WUPPopupElement.$placements.$top.$end,
+        WUPPopupElement.$placements.$bottom.$start.$resizeHeight,
+        WUPPopupElement.$placements.$bottom.$end.$resizeHeight,
+        WUPPopupElement.$placements.$top.$start.$resizeHeight,
+        WUPPopupElement.$placements.$top.$end.$resizeHeight,
+      ];
+      popup.$options.toFitElement = document.querySelector("#fit") as HTMLElement;
+      // todo how to use minHeight for dropdown when possible 1..2 items in list ?
+      if (opts.innerHTML) {
+        popup.innerHTML = opts.innerHTML;
+      }
+
+      const isLock = false; // change it to show forever
+      if (isLock) {
+        popup.$options.showCase = ShowCases.always;
+        popup.$show(); // to override default showCase and leave show forever
+      }
+    }
+  );
+  return detach;
+}
+
+/*
+  Place useTitle hook into global place and reuse accross react-app
+  This hook helps to avoid useless renders for popup via attach-bind on listeners and render only when popup need to show
+*/
+const set = new Map<any, { el: HTMLElement; delTimeId?: number }>();
+/** Custom hook for react. it's filter for callbacks by re-render */
+function useTitle() {
+  return useCallback(
+    (innerHTML: string) =>
+      function setTitle(el: HTMLElement | null) {
+        const k = innerHTML;
+        const stored = set.get(k);
+
+        if (!el) {
+          if (stored) {
+            // detach doesn't required because listener detects it yourself
+            // timeout required because on re-render if element isn't removed ref fired twice: null..el
+            stored.delTimeId = setTimeout(() => set.delete(k));
+          }
+          return;
+        }
+
+        if (!stored) {
+          set.set(k, { el });
+          attach(el, { innerHTML });
+        } else {
+          stored.delTimeId && clearTimeout(stored.delTimeId);
+        }
       },
     []
   );
+}
+
+export default function Example2() {
+  useEffect(() => {
+    const el = document.querySelector("#btnDropdownWithAttach") as HTMLButtonElement;
+    // setTimeout(() => el.click(), 500);
+    const move = movable(el);
+    move(291, 0);
+  }, []);
+
+  const setTitle = useTitle();
 
   return (
     <>
@@ -25,47 +90,14 @@ export default function Example2() {
       </small>
       <div className={styles.fitBlock} id="fit">
         <button
+          id="btnDropdownWithAttach"
           type="button"
-          ref={(el) => {
-            if (!el || btnEl) return; // ref calls every render/setState
-            btnEl = el;
-            const detach = WUPPopupElement.$attach(
-              { target: el, text: "", showCase: ShowCases.onFocus | ShowCases.onClick },
-              (popup) => {
-                popup.className = styles.dropdownPopup;
-
-                popup.$options.placement = [
-                  // dropdown behavior
-                  WUPPopupElement.$placements.$bottom.$start,
-                  WUPPopupElement.$placements.$bottom.$end,
-                  WUPPopupElement.$placements.$top.$start,
-                  WUPPopupElement.$placements.$top.$end,
-                  WUPPopupElement.$placements.$bottom.$start.$resizeHeight,
-                  WUPPopupElement.$placements.$bottom.$end.$resizeHeight,
-                  WUPPopupElement.$placements.$top.$start.$resizeHeight,
-                  WUPPopupElement.$placements.$top.$end.$resizeHeight,
-                ];
-                popup.$options.toFitElement = document.querySelector("#fit") as HTMLElement;
-                // todo how to use minHeight for dropdown when possible 1..2 items in list ?
-                popup.innerHTML = `<div><div>I must feet div with border <br/>(changed option <b>toFitElement</b>)
+          ref={setTitle(`<div><div>I must feet div with border <br/>(changed option <b>toFitElement</b>)
                 <br/>I scrollable
-                 <br/>(you can setup minHeight to avoid squizing)
+                <br/>(you can setup minHeight to avoid squizing)
                 <br/>I have a good animation
                 <br/>
-                </div></div>`;
-
-                const isLock = false;
-                if (isLock) {
-                  popup.$options.showCase = ShowCases.always;
-                  popup.$show(); // to override default showCase and leave show forever
-                }
-              }
-            );
-
-            // setTimeout(() => el.click(), 500);
-            const move = movable(el);
-            move(291, 0);
-          }}
+                </div></div>`)}
         >
           Target
           <br />

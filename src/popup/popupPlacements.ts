@@ -22,17 +22,21 @@ export namespace WUPPopupPlace {
   }
   export interface Result extends XResult, YResult {}
 
-  type NotReadonly<T> = {
-    -readonly [P in keyof T]: T[P];
-  };
-
-  export interface Rect extends NotReadonly<DOMRect> {
+  export interface Rect {
     el: HTMLElement;
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+    width: number;
+    height: number;
   }
+
   export interface MeRect {
     w: number;
     h: number;
     el: HTMLElement;
+    /** target offset; attention: it's already applied before call of placements */
     offset: { top: number; right: number; bottom: number; left: number };
     minW: number;
     minH: number;
@@ -81,20 +85,18 @@ export function px2Number(styleValue: string): number {
 }
 
 /* Returns bounding rectangular without borders and scroll (simulate box-sizing: border-box) */
-export function getBoundingInternalRect(el: HTMLElement): Omit<DOMRect, "toJSON"> {
+export function getBoundingInternalRect(el: HTMLElement): Omit<WUPPopupPlace.Rect, "el"> {
   const { borderTopWidth, borderLeftWidth } = getComputedStyle(el);
   let { left, top } = el.getBoundingClientRect();
   top += px2Number(borderTopWidth);
   left += px2Number(borderLeftWidth);
-  const r: Omit<DOMRect, "toJSON"> = {
+  const r: Omit<WUPPopupPlace.Rect, "el"> = {
     top,
     left,
     right: left + el.clientWidth,
     bottom: top + el.clientHeight,
     width: el.clientWidth,
     height: el.clientHeight,
-    x: left,
-    y: top,
   };
   return r;
 }
@@ -145,9 +147,9 @@ const $top = <WUPPopupPlace.EdgeFunc>(
   function top(this: WUPPopupPlace.Result, t, me, fit): ReturnType<WUPPopupPlace.EdgeFunc> {
     return {
       attr: "top",
-      top: t.top - me.offset.top - me.h - me.arrow.h,
-      freeH: t.top - me.offset.top - fit.top,
-      arrowTop: t.top - me.offset.top - me.arrow.h - me.arrow.offset.top,
+      top: t.top - me.h - me.arrow.h,
+      freeH: t.top - fit.top,
+      arrowTop: t.top - me.arrow.h - me.arrow.offset.top,
       arrowAngle: 0,
     };
   }
@@ -175,9 +177,9 @@ $top.$end.$adjust = xAdjust;
 const $bottom = <WUPPopupPlace.EdgeFunc>function bottom(t, me, fit): ReturnType<WUPPopupPlace.EdgeFunc> {
   return {
     attr: "bottom",
-    top: t.bottom + me.offset.bottom + me.arrow.h,
-    freeH: fit.bottom - me.offset.bottom - t.bottom,
-    arrowTop: t.bottom + me.offset.bottom + me.arrow.offset.bottom,
+    top: t.bottom + me.arrow.h,
+    freeH: fit.bottom - t.bottom,
+    arrowTop: t.bottom + me.arrow.offset.bottom,
     arrowAngle: 180,
   };
 };
@@ -186,13 +188,13 @@ $bottom.$middle = $top.$middle;
 $bottom.$end = $top.$end;
 
 const $left = <WUPPopupPlace.EdgeFunc>function left(t, me, fit): ReturnType<WUPPopupPlace.EdgeFunc> {
-  const freeW = t.left - me.offset.left - fit.left;
+  const freeW = t.left - fit.left;
   return {
     attr: "left",
-    left: t.left - me.offset.left - me.w - me.arrow.h,
+    left: t.left - me.w - me.arrow.h,
     freeW,
     arrowAngle: -90,
-    arrowLeft: t.left - me.offset.left - me.arrow.h - (me.arrow.w - me.arrow.h) / 2 - me.arrow.offset.left,
+    arrowLeft: t.left - me.arrow.h - (me.arrow.w - me.arrow.h) / 2 - me.arrow.offset.left,
   };
 };
 $left.$start = <WUPPopupPlace.AlignFunc>function xStart(this: WUPPopupPlace.Result, t, _me, fit) {
@@ -217,10 +219,10 @@ $left.$end.$adjust = yAdjust;
 const $right = <WUPPopupPlace.EdgeFunc>function right(t, me, fit): ReturnType<WUPPopupPlace.EdgeFunc> {
   return {
     attr: "right",
-    left: t.right + me.offset.right + me.arrow.h,
-    freeW: fit.right - t.right - me.offset.right,
+    left: t.right + me.arrow.h,
+    freeW: fit.right - t.right,
     arrowAngle: 90,
-    arrowLeft: t.right + me.offset.right - (me.arrow.w - me.arrow.h) / 2 + me.arrow.offset.right,
+    arrowLeft: t.right - (me.arrow.w - me.arrow.h) / 2 + me.arrow.offset.right,
   };
 };
 $right.$start = $left.$start;

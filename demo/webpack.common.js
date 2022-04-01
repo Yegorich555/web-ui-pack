@@ -154,17 +154,12 @@ module.exports = function (env, argv) {
                     return new MyReg();
                   })(),
                   getLocalIdent: isDevMode
-                    ? (loaderContext, _localIdentName, localName, options) => {
+                    ? (() => {
                         // it simplifies classNames fo debug purpose
-                        const request = path
-                          .relative(options.context || "", loaderContext.resourcePath)
-                          .replace(`src${path.sep}`, "")
-                          .replace(".module.css", "")
-                          .replace(".module.scss", "")
-                          .replace(/\\|\//g, "-")
-                          .replace(/\./g, "_");
-                        return `${request}__${localName}`;
-                      }
+                        const getHash = MinifyCssNames();
+                        return (context, localIdentName, localName, options) =>
+                          `${localName}_${getHash(context, localIdentName, localName, options)}`;
+                      })()
                     : MinifyCssNames(
                         // minify classNames for prod-build
                         { excludePattern: /[_dD]/gi } // exclude '_','d','D' because Adblock blocks '%ad%' classNames
