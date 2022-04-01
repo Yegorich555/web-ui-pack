@@ -38,7 +38,7 @@ export namespace WUPPopup {
      * Point several to define alternate behavior (when space are not enough)
      */
     placement: Array<WUPPopupPlace.PlaceFunc>;
-    /** Alternative of margin for targetElement related to popup
+    /** Virtual margin of targetElement (relative to popup)
      *  [top, right, bottom, left] or [top/bottom, right/left] in px */
     offset: [number, number, number, number] | [number, number];
     /** Inside edges of fitElement popup is positioned and can't overflow fitElement; {body} by default */
@@ -75,7 +75,7 @@ export namespace WUPPopup {
      * }
      *  */
     arrowClass?: string;
-    /** Alternative of margin for targetElement related to arrow
+    /** Virtual margin for targetElement related to arrow
      *  [top, right, bottom, left] or [top/bottom, right/left] in px */
     arrowOffset: [number, number, number, number] | [number, number];
   }

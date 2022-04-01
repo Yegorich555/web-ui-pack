@@ -7,6 +7,7 @@ import WUPPopupArrowElement from "./popupArrowElement";
 import popupListenTarget from "./popupListenTarget";
 
 export import ShowCases = WUPPopup.ShowCases;
+/* istanbul ignore next */
 export * from "./popupElement.types";
 
 const attachLst = new Map<HTMLElement, () => void>();
@@ -634,28 +635,26 @@ export default class WUPPopupElement<
       return undefined;
     }
 
-    const t = trg.getBoundingClientRect() as WUPPopupPlace.Rect;
+    const tdef = trg.getBoundingClientRect();
     if (
       // issue: it's wrong if minWidth, minHeight etc. is changed and doesn't affect on layout sizes directly
       this.#prevRect &&
-      this.#prevRect.top === t.top &&
-      this.#prevRect.left === t.left &&
-      this.#prevRect.width === t.width &&
-      this.#prevRect.height === t.height
+      this.#prevRect.top === tdef.top &&
+      this.#prevRect.left === tdef.left &&
+      this.#prevRect.width === tdef.width &&
+      this.#prevRect.height === tdef.height
     ) {
       return this.#prevRect;
     }
 
-    t.el = trg;
-
     if (this._opts.minWidthByTarget) {
-      this.style.minWidth = `${t.width}px`;
+      this.style.minWidth = `${tdef.width}px`;
     } else if (this.style.minWidth) {
       this.style.minWidth = "";
     }
 
     if (this._opts.minHeightByTarget) {
-      this.style.minHeight = `${t.height}px`;
+      this.style.minHeight = `${tdef.height}px`;
     } else if (this.style.minHeight) {
       this.style.minHeight = "";
     }
@@ -700,11 +699,21 @@ export default class WUPPopupElement<
         : { h: 0, w: 0, offset: { bottom: 0, left: 0, right: 0, top: 0 } },
     };
 
+    const t: WUPPopupPlace.Rect = {
+      el: trg,
+      top: tdef.top - me.offset.top,
+      left: tdef.left - me.offset.left,
+      right: tdef.right + me.offset.right,
+      bottom: tdef.bottom + me.offset.bottom,
+      height: 0,
+      width: 0,
+    };
+
     // check if target hidden by scrollParent
     if (this.#scrollParents) {
       let isHiddenByScroll = false;
 
-      let child: DOMRect = t;
+      let child: DOMRect | WUPPopupPlace.Rect = t;
       const vH = Math.max(document.documentElement.clientHeight, window.innerHeight);
       const vW = Math.max(document.documentElement.clientWidth, window.innerWidth);
       for (let i = 0; i < this.#scrollParents.length; ++i) {
@@ -735,23 +744,13 @@ export default class WUPPopupElement<
 
       // fix cases when target is partiallyHidden by scrollableParent
       // suggestion: if height/width is very small we can use another side
-      if (scrollRect.top > t.top) {
-        Object.defineProperty(t, "top", { get: () => scrollRect.top });
-        Object.defineProperty(t, "height", { get: () => t.bottom - scrollRect.top });
-      }
-      if (scrollRect.bottom < t.bottom) {
-        Object.defineProperty(t, "bottom", { get: () => scrollRect.bottom });
-        Object.defineProperty(t, "height", { get: () => scrollRect.bottom - t.top });
-      }
-      if (scrollRect.left > t.left) {
-        Object.defineProperty(t, "left", { get: () => scrollRect.left });
-        Object.defineProperty(t, "width", { get: () => t.right - scrollRect.left });
-      }
-      if (scrollRect.right < t.right) {
-        Object.defineProperty(t, "right", { get: () => scrollRect.right });
-        Object.defineProperty(t, "width", { get: () => scrollRect.right - t.left });
-      }
+      t.top = Math.max(scrollRect.top, t.top);
+      t.right = Math.min(scrollRect.right, t.right);
+      t.bottom = Math.min(scrollRect.bottom, t.bottom);
+      t.left = Math.max(scrollRect.left, t.left);
     }
+    t.height = t.bottom - t.top;
+    t.width = t.right - t.left;
 
     let lastRule: WUPPopupPlace.PlaceFunc;
 
