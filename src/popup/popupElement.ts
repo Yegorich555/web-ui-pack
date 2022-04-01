@@ -7,7 +7,8 @@ import WUPPopupArrowElement from "./popupArrowElement";
 import popupListenTarget from "./popupListenTarget";
 
 export import ShowCases = WUPPopup.ShowCases;
-/* istanbul ignore next */
+// code coverage doesn't work either: https://stackoverflow.com/questions/62493593/unable-to-ignore-block-within-react-class-components-with-istanbul-ignore-next-t
+/* c8 ignore next */
 export * from "./popupElement.types";
 
 const attachLst = new Map<HTMLElement, () => void>();

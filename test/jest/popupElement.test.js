@@ -1,6 +1,6 @@
 /* eslint-disable prefer-rest-params */
 import { WUPPopupElement } from "web-ui-pack";
-import all from "web-ui-pack/popup/popupElement.types";
+import * as all from "web-ui-pack/popup/popupElement.types";
 import { WUPPopup } from "web-ui-pack/popup/popupElement";
 import * as all2 from "web-ui-pack/popup/popupElement";
 
@@ -72,7 +72,7 @@ describe("popupElement", () => {
     h.testComponentFuncBind(document.createElement("wup-popup"));
     test("re-import", () => {
       // just for coverage
-      expect(all).toBeUndefined();
+      expect(all).toBeTruthy();
       expect(all2).toBeTruthy();
       expect(Object.keys(all2).length > 0).toBe(true);
       expect(WUPPopup).toBeTruthy();
