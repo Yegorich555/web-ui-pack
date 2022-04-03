@@ -80,7 +80,7 @@ export default class WUPPopupElement<
     ],
     offset: [0, 0],
     arrowEnable: false,
-    arrowOffset: [0.5, 0.5],
+    arrowOffset: [0, 0],
     toFitElement: document.body,
     minWidthByTarget: false,
     minHeightByTarget: false,
@@ -482,10 +482,6 @@ export default class WUPPopupElement<
       if (this._opts.arrowClass) {
         el.className = this._opts.arrowClass;
       }
-      el.setupStyle(`
-        background-color:${style.backgroundColor};
-        boder:${style.border};
-      `);
 
       this.#userStyles.borderRadius = Math.max.apply(
         this,

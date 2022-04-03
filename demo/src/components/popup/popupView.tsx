@@ -10,7 +10,7 @@ import Example4 from "./example4";
 const opts: Partial<WUPPopup.Options> = {
   arrowEnable: true,
   offset: [0, 0, 0, 0],
-  arrowOffset: [0.5, 0.5, 0.5, 0.5],
+  arrowOffset: [0, 0, 0, 0],
 };
 
 export default function PopupView() {
