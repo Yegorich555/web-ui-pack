@@ -92,7 +92,7 @@ $dropdownAnimation: 300ms;
     padding: $boxShadowSize;
     margin: -$boxShadowSize;
     @media not all and (prefers-reduced-motion) {
-      animation: shadowFix $dropdownAnimation ease-in-out;
+      animation: shadowFix $dropdownAnimation ease-in-out forwards;
       @keyframes shadowFix {
         from,
         to {
@@ -114,7 +114,7 @@ $dropdownAnimation: 300ms;
       overflow: auto;
 
       @media not all and (prefers-reduced-motion) {
-        animation: growOn $dropdownAnimation ease-in-out;
+        animation: growOn $dropdownAnimation ease-in-out forwards;
         @keyframes growOn {
           from {
             transform: translateY(calc(-100% - #{$boxShadowSize}));
@@ -133,7 +133,7 @@ $dropdownAnimation: 300ms;
         margin-top: 1px;
 
         > div {
-          animation: growOff $dropdownAnimation ease-in-out;
+          animation: growOff $dropdownAnimation ease-in-out forwards;
           @keyframes growOff {
             to {
               transform: translateY(calc(-100% - #{$boxShadowSize}));

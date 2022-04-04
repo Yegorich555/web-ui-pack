@@ -108,14 +108,14 @@ export default class WUPPopupElement<
       @media not all and (prefers-reduced-motion) {
         :host,
         :host+:host-arrow {
-          animation: WUP-POPUP-a1 300ms ease-in-out;
+          animation: WUP-POPUP-a1 300ms ease-in-out forwards;
         }
         @keyframes WUP-POPUP-a1 {
           from {opacity: 0;}
         }
         :host[hide],
         :host[hide]+:host-arrow {
-          animation: WUP-POPUP-a2 300ms ease-in-out;
+          animation: WUP-POPUP-a2 300ms ease-in-out forwards;
         }
         @keyframes WUP-POPUP-a2 {
           to {opacity: 0;}
