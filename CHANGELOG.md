@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.5
+
+- [`PopupElement`](README.md#popupelement)
+  - Fixed behavior on target-remove
+  - Deprecate shadow mode
+  - Fix half-pixel issue on arrow
+
 ## 0.0.4 (Apr 1, 2022)
 
 - [`PopupElement`](README.md#popupelement)

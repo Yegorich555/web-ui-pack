@@ -68,6 +68,7 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
 2. **Usage**
    - Since tree-shaking sometimes is not smart enough don't import from `web-ui-pack` directly. Instead use `web-ui-pack/path-to-element` or setup [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free) in package.json (for webpack)
    - Every component has a good JSDoc so go ahead and read details directly during the coding
+   - Library compiled into ESNext. To avoid unexpected issues include this package into babel (use `exclude: /node_modules\/(?!(web-ui-pack)\/).*/` for babel-loader)
 3. **Limitations**
    - In `jsx/tsx` instead of `className` use `class` attribute (React issue)
    - If you change custom attributes it will update $options, but if you change some option it doesn't update related attribute (for performance reasons). Better to avoid customAttributes at all

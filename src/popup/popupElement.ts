@@ -266,9 +266,7 @@ export default class WUPPopupElement<
     return this.#isOpen;
   }
 
-  /** Returns arrowElement if $options.arrowEnable=true
-   *
-   */
+  /** Returns arrowElement if $options.arrowEnable=true and after popup $isOpen */
   get $arrowElement(): WUPPopupArrowElement | null {
     return this.#arrowElement || null;
   }
