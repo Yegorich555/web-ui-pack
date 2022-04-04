@@ -52,7 +52,7 @@ async function go() {
   await exec("cd ./dist && npm publish");
 
   // push files
-  await exec("git push && git push --tags", []);
+  await exec("git push --tags", []);
 }
 
 go();
