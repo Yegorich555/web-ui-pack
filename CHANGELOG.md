@@ -2,6 +2,7 @@
 
 ## 0.0.5
 
+- Fixed helper [`onFocusLost`](<(README.md#helpers)>): missed callback when user clicks several times fast
 - [`PopupElement`](README.md#popupelement)
   - Fixed behavior on target-remove
   - Deprecate shadow mode
