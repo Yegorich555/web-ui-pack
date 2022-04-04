@@ -81,9 +81,6 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
       }
       appendedStyles.add(this.tagName);
     }
-    // setup shadow
-    const root = this.attachShadow({ mode: "open" });
-    root.appendChild(document.createElement("slot"));
   }
 
   /* rawOptions ($options is observed) */

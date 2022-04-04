@@ -80,7 +80,7 @@ export default class WUPPopupElement<
     ],
     offset: [0, 0],
     arrowEnable: false,
-    arrowOffset: [0.5, 0.5],
+    arrowOffset: [0, 0],
     toFitElement: document.body,
     minWidthByTarget: false,
     minHeightByTarget: false,
@@ -108,14 +108,14 @@ export default class WUPPopupElement<
       @media not all and (prefers-reduced-motion) {
         :host,
         :host+:host-arrow {
-          animation: WUP-POPUP-a1 300ms ease-in-out;
+          animation: WUP-POPUP-a1 300ms ease-in-out forwards;
         }
         @keyframes WUP-POPUP-a1 {
           from {opacity: 0;}
         }
         :host[hide],
         :host[hide]+:host-arrow {
-          animation: WUP-POPUP-a2 300ms ease-in-out;
+          animation: WUP-POPUP-a2 300ms ease-in-out forwards;
         }
         @keyframes WUP-POPUP-a2 {
           to {opacity: 0;}
@@ -266,9 +266,7 @@ export default class WUPPopupElement<
     return this.#isOpen;
   }
 
-  /** Returns arrowElement if $options.arrowEnable=true
-   *
-   */
+  /** Returns arrowElement if $options.arrowEnable=true and after popup $isOpen */
   get $arrowElement(): WUPPopupArrowElement | null {
     return this.#arrowElement || null;
   }
@@ -482,10 +480,6 @@ export default class WUPPopupElement<
       if (this._opts.arrowClass) {
         el.className = this._opts.arrowClass;
       }
-      el.setupStyle(`
-        background-color:${style.backgroundColor};
-        boder:${style.border};
-      `);
 
       this.#userStyles.borderRadius = Math.max.apply(
         this,
@@ -524,11 +518,14 @@ export default class WUPPopupElement<
 
     const goUpdate = () => {
       this.#prevRect = this.#updatePosition();
-      this.#frameId = window.requestAnimationFrame(goUpdate);
+      if (this.#isOpen) {
+        // possible if hidden by target-remove
+        this.#frameId = window.requestAnimationFrame(goUpdate);
+      }
     };
 
-    goUpdate();
     this.#isOpen = true;
+    goUpdate();
 
     if (wasHidden) {
       // run async to dispose internal resources first: possible dev-side-issues

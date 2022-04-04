@@ -1,48 +1,36 @@
 import { JSXCustomProps } from "../baseElement";
 
 const tag = "wup-popup-arrow";
-let styleElement: HTMLStyleElement | undefined;
+let isFirst = true;
 
 export default class WUPPopupArrowElement extends HTMLElement {
   static tagName: "wup-popup-arrow" = tag;
 
   constructor() {
     super();
-    if (!styleElement) {
-      styleElement = document.createElement("style");
-      styleElement.textContent = `
+    if (isFirst) {
+      isFirst = false;
+      const s = document.createElement("style");
+      s.textContent = `
           wup-popup-arrow {
             z-index: 99999;
             position: fixed;
             top: 0; left: 0;
             width:1.2rem; height:0.6rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            transform-origin: center;
+            overflow: visible;
+            filter: drop-shadow(0 3px 2px #00000033);
           }
           wup-popup-arrow:before {
             content: "";
             display: block;
-            margin-top: -50%;
-            width: 70.71067811865474%;
-            padding-top: 70.71067811865474%;
-            transform: rotate(45deg);
-            box-sizing: content-box;
-            box-shadow: 0 0 4px 0 #00000033;
+            width: 100%; height: 100%;
+            clip-path: polygon(0 1px, 0 0, 100% 0, 100% 1px, 50% 100%);
+            margin-top: -1px;
+            background: white;
           }
         `;
-      document.head.prepend(styleElement);
+      document.head.prepend(s);
     }
-    this.setupStyle = this.setupStyle.bind(this);
-    this.attachShadow({ mode: "open" });
-  }
-
-  setupStyle(str: string) {
-    const styleEl = document.createElement("style");
-    styleEl.textContent = `:host:before{${str}}`;
-    (this.shadowRoot as ShadowRoot).appendChild(styleEl);
   }
 }
 

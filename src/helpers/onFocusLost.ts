@@ -64,12 +64,12 @@ export default function onFocusLost(
     element.removeEventListener("focusout", focusout);
     rstEvent?.call(element);
   };
-  const focusout = (e: FocusEvent) => {
-    if (isMouseDown) {
-      // mouseDown Label > mouseUp Label > click Label (without mouseMove) > focusin Input > click Input
-      // if mouseDown.target === mouseUp.target >> click target; if clickTarget tied with input >>> clickInput
+  const focusout = (e: FocusEvent, isNext?: true) => {
+    if (!isNext && isMouseDown) {
+      // mouseDown Label > mouseUp Label (without mouseMove) >>> click Label > focusin Input > click Input
+      // if mouseDown.target === mouseUp.target >>> click target; if clickTarget tied with input >>> clickInput
       // timeout requires to wait for next document.activeElement to be defined
-      onMouseUp.push(() => setTimeout(() => focusout(e), options?.debounceMs || 100));
+      onMouseUp.push(() => setTimeout(() => focusout(e, true), options?.debounceMs || 100));
       return;
     }
     const isFocused = (a: Node | null) => a && (element === a || element.contains(a));

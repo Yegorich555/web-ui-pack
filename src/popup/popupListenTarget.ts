@@ -161,9 +161,10 @@ export default function popupListenTarget(
       if ((isMouseIn && !openedEl) || (!isMouseIn && openedEl))
         timeoutId = setTimeout(
           () =>
-            isMouseIn
+            t.isConnected && // possible when target removed via innerHTML
+            (isMouseIn
               ? show(WUPPopup.ShowCases.onHover) //
-              : hide(WUPPopup.HideCases.onMouseLeave),
+              : hide(WUPPopup.HideCases.onMouseLeave)),
           ms
         );
       else timeoutId = undefined;
@@ -203,10 +204,9 @@ export default function popupListenTarget(
     };
 
     onShowCallbacks.push(() => onFocusLost(t, blur, { debounceMs: opts.focusDebounceMs }));
-    const isAlreadyFocused =
-      document.activeElement === t ||
-      (document.activeElement instanceof HTMLElement && t.contains(document.activeElement));
-    if (isAlreadyFocused) {
+    const a = document.activeElement;
+    if (a === t || (a instanceof HTMLElement && t.contains(a))) {
+      // isAlreadyFocused
       onFocused();
       preventClickAfterFocus = false;
     }

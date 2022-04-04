@@ -23,6 +23,12 @@ function attach(el: HTMLElement, opts: { text?: string; innerHTML?: string }) {
         WUPPopupElement.$placements.$top.$end.$resizeHeight,
       ];
       popup.$options.toFitElement = document.querySelector("#fit") as HTMLElement;
+      popup.$options.arrowEnable = false;
+      setTimeout(() => {
+        if (popup.$arrowElement) {
+          popup.$arrowElement.style.background = popup.style.background;
+        }
+      });
       // todo how to use minHeight for dropdown when possible 1..2 items in list ?
       if (opts.innerHTML) {
         popup.innerHTML = opts.innerHTML;
