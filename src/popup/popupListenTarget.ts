@@ -204,10 +204,9 @@ export default function popupListenTarget(
     };
 
     onShowCallbacks.push(() => onFocusLost(t, blur, { debounceMs: opts.focusDebounceMs }));
-    const isAlreadyFocused =
-      document.activeElement === t ||
-      (document.activeElement instanceof HTMLElement && t.contains(document.activeElement));
-    if (isAlreadyFocused) {
+    const a = document.activeElement;
+    if (a === t || (a instanceof HTMLElement && t.contains(a))) {
+      // isAlreadyFocused
       onFocused();
       preventClickAfterFocus = false;
     }
