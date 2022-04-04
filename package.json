@@ -19,7 +19,7 @@
     "lint": "npm run lint-code && npm run lint-styles && npm run lint-md",
     "build": "node .\\build.copyFiles.js && tsc --listEmittedFiles --incremental && node .\\build.fixConstEnum.js",
     "build-prod": "npm run build",
-    "go-publish": "npm run coverage && cd ./dist && npm publish"
+    "go-publish": "node ./publish.js"
   },
   "repository": {
     "type": "git",
