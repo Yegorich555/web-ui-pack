@@ -288,9 +288,15 @@ describe("popupElement", () => {
     trg.dispatchEvent(new Event("mouseleave"));
     trg.dispatchEvent(new Event("mouseenter"));
     trg.dispatchEvent(new Event("mouseleave"));
-    jest.advanceTimersToNextTimer(a.$options.hoverShowTimeout + a.$options.hoverHideTimeout); // event listener has timeout
+    jest.advanceTimersByTime(a.$options.hoverShowTimeout + a.$options.hoverHideTimeout); // event listener has timeout
     expect(a.$isOpen).toBeFalsy();
     expect(spyShow).not.toBeCalled();
+
+    trg.dispatchEvent(new Event("mouseenter"));
+    trg.remove();
+    jest.advanceTimersByTime(a.$options.hoverShowTimeout + a.$options.hoverHideTimeout); // event listener has timeout
+    expect(a.$isOpen).toBeFalsy(); // because removed
+    document.body.appendChild(trg);
 
     // onlyFocus
     a.remove();

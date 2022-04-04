@@ -520,11 +520,14 @@ export default class WUPPopupElement<
 
     const goUpdate = () => {
       this.#prevRect = this.#updatePosition();
-      this.#frameId = window.requestAnimationFrame(goUpdate);
+      if (this.#isOpen) {
+        // possible if hidden by target-remove
+        this.#frameId = window.requestAnimationFrame(goUpdate);
+      }
     };
 
-    goUpdate();
     this.#isOpen = true;
+    goUpdate();
 
     if (wasHidden) {
       // run async to dispose internal resources first: possible dev-side-issues

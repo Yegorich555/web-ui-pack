@@ -161,9 +161,10 @@ export default function popupListenTarget(
       if ((isMouseIn && !openedEl) || (!isMouseIn && openedEl))
         timeoutId = setTimeout(
           () =>
-            isMouseIn
+            t.isConnected && // possible when target removed via innerHTML
+            (isMouseIn
               ? show(WUPPopup.ShowCases.onHover) //
-              : hide(WUPPopup.HideCases.onMouseLeave),
+              : hide(WUPPopup.HideCases.onMouseLeave)),
           ms
         );
       else timeoutId = undefined;
