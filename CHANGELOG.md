@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.5
+## 0.0.5 (Apr 4, 2022)
 
 - Fixed helper [`onFocusLost`](<(README.md#helpers)>): missed callback when user clicks several times fast
 - [`PopupElement`](README.md#popupelement)
