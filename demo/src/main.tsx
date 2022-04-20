@@ -9,6 +9,7 @@ import PopupView from "./components/popup/popupView";
 import iconGit from "./assets/gitIcon.svg";
 import imgLogo from "./assets/logo.png";
 import styles from "./main.scss";
+import ControlsView from "./components/controlsView";
 
 interface IRoute {
   label?: string;
@@ -18,7 +19,11 @@ interface IRoute {
 }
 const baseURL = process.env.BASE_URL || "/";
 
-const routes: IRoute[] = [{ path: "popup", el: PopupView }];
+const routes: IRoute[] = [
+  { path: "popup", el: PopupView },
+  { path: "controls", el: ControlsView },
+];
+
 routes.forEach((v) => (v.url = baseURL + v.path));
 
 export default function AppContainer() {
@@ -59,7 +64,7 @@ export default function AppContainer() {
             {routes.map((r) => (
               <Route key={r.path} path={r.url} element={React.createElement(r.el)} />
             ))}
-            <Route path="*" element={<Navigate to={routes[0].url as string} />} />
+            <Route path="*" element={<Navigate to={routes[1].url as string} />} />
           </Routes>
         </main>
       </div>

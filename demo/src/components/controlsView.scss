@@ -1,0 +1,233 @@
+/* stylelint-disable no-descending-specificity */
+body {
+  --anim: 200ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+}
+
+.textControl {
+  display: block;
+  margin-bottom: 20px;
+  position: relative;
+  border-radius: var(--border-radius, 6px);
+  background: var(--ctrl-back, #fff);
+
+  &:focus-within {
+    outline: 2px solid var(--ctrl-focus, #009fbc);
+
+    input + * {
+      color: var(--ctrl-focus, #009fbc);
+    }
+  }
+
+  label {
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    font: inherit;
+    cursor: text;
+  }
+
+  input {
+    width: 100%;
+    margin: 0;
+    box-sizing: border-box;
+    font: inherit;
+
+    border: none;
+    background: none;
+    padding: var(--ctrl-padding, 1.4em 1em 0.6em 1em);
+    outline: none;
+
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  input + * {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 0;
+
+    margin: 0 1em;
+    padding: 0;
+    box-sizing: border-box;
+
+    max-width: calc(100% - 2 * 1em);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+
+    @media not all and (prefers-reduced-motion) {
+      transition: top var(--anim), transform var(--anim), color var(--anim);
+    }
+    transform-origin: top left;
+    transform: translateY(-50%);
+
+    font-weight: normal;
+    text-decoration: none;
+
+    color: var(--ctrl-label, #747474);
+  }
+
+  input:focus + *,
+  input:not(:placeholder-shown) + *,
+  legend {
+    top: 0.2em;
+    transform: scale(0.9);
+  }
+
+  // input:disabled {
+  //   background: #747474;
+  // }
+
+  // todo disabled here
+  // todo invalid here + aria-invalid for input
+}
+
+.slidebox {
+  margin-bottom: 10px;
+
+  label {
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    font: inherit;
+    cursor: pointer;
+    padding: var(--ctrl-slide-padding, 1em);
+    border-radius: var(--border-radius, 6px);
+
+    &:focus-within {
+      outline: 2px solid var(--ctrl-focus, #009fbc);
+
+      input + * {
+        color: var(--ctrl-focus, #009fbc);
+      }
+    }
+  }
+
+  input {
+    position: absolute;
+    height: 1px;
+    width: 1px;
+    overflow: hidden;
+    clip: rect(1px, 1px, 1px, 1px); /* from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility */
+    outline: none;
+  }
+
+  input + * {
+    box-sizing: border-box;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    font-weight: normal;
+    text-decoration: none;
+  }
+
+  input + * + * {
+    margin-left: 0.5em;
+    position: relative;
+    width: 2.8em;
+    height: 1em;
+    border-radius: 999px;
+    background: var(--ctrl-slide-back, #9f9f9f);
+
+    @media not all and (prefers-reduced-motion) {
+      transition: background-color var(--anim);
+    }
+
+    &::before {
+      content: "";
+      position: absolute;
+      height: 1.4em;
+      width: 1.4em;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--ctrl-slide-off, #fff);
+      box-shadow: 0 1px 4px 0 var(--ctrl-slide-shadow, #0003);
+      border-radius: 50%;
+
+      @media not all and (prefers-reduced-motion) {
+        transition: left var(--anim);
+      }
+    }
+  }
+
+  input:checked + * + * {
+    background-color: var(--ctrl-slide-on-back, #009fbc);
+
+    &::before {
+      background: var(--ctrl-slide-on, #fff);
+      left: calc(100% - 1.4em);
+    }
+  }
+}
+
+// reverse style
+.slideboxReverse {
+  label {
+    flex-direction: row-reverse;
+
+    input + * + * {
+      margin-left: 0;
+      margin-right: 0.5em;
+    }
+  }
+}
+
+.checkbox {
+  input + * + * {
+    height: 1.4em;
+    width: 1.4em;
+    border-radius: var(--border-sm-radius, 3px);
+    position: relative;
+    background: var(--ctrl-check-off-back, #fff);
+    box-shadow: 0 0 2px 0 var(--ctrl-check-shadow, #0003);
+
+    @media not all and (prefers-reduced-motion) {
+      transition: background-color var(--anim);
+    }
+
+    &::before {
+      content: none;
+    }
+  }
+
+  input:checked + * + * {
+    background-color: var(--ctrl-check-on-back, #009fbc);
+
+    &::before {
+      content: "";
+      height: 100%;
+      width: 100%;
+      transform: translate(-50%, -50%) scale(0.7);
+      top: 50%;
+      left: 50%;
+      border-radius: 0;
+      box-shadow: none;
+      background-color: var(--ctrl-check-on, #fff);
+
+      // clip-path: url("#checkmark");
+
+      // clip-path: path(
+      //   "M20.687,38.332c-2.072,2.072-5.434,2.072-7.505,0L1.554,26.704c-2.072-2.071-2.072-5.433,0-7.504 c2.071-2.072,5.433-2.072,7.505,0l6.928,6.927c0.523,0.522,1.372,0.522,1.896,0L36.642,7.368c2.071-2.072,5.433-2.072,7.505,0 c0.995,0.995,1.554,2.345,1.554,3.752c0,1.407-0.559,2.757-1.554,3.752L20.687,38.332z"
+      // );
+
+      // clip-path: polygon(28% 38%, 41% 53%, 75% 24%, 86% 38%, 40% 78%, 15% 50%);
+      // background: #009fbc;
+      /* background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='46' xml:space='preserve'%3E%3Cpath d='M20.687 38.332a5.308 5.308 0 0 1-7.505 0L1.554 26.704A5.306 5.306 0 1 1 9.059 19.2l6.928 6.927a1.344 1.344 0 0 0 1.896 0L36.642 7.368a5.308 5.308 0 0 1 7.505 7.504l-23.46 23.46z'/%3E%3C/svg%3E")
+        no-repeat;
+      background-size: cover; */
+      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='46' xml:space='preserve'%3E%3Cpath d='M20.687 38.332a5.308 5.308 0 0 1-7.505 0L1.554 26.704A5.306 5.306 0 1 1 9.059 19.2l6.928 6.927a1.344 1.344 0 0 0 1.896 0L36.642 7.368a5.308 5.308 0 0 1 7.505 7.504l-23.46 23.46z'/%3E%3C/svg%3E");
+      mask-size: cover;
+    }
+  }
+}
+
+.wup-hide {
+  position: absolute;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px); /* from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility */
+}
