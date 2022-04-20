@@ -37,7 +37,7 @@ export default function PopupView() {
   setTimeout(() => setOpts(opts));
 
   return (
-    <Page header="PopupElement" link="#features">
+    <Page header="PopupElement" link="#popupelement">
       <h3>Options</h3>
       <fieldset>
         <legend>Offset</legend>

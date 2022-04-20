@@ -1,10 +1,8 @@
 /* eslint-disable no-use-before-define, prefer-rest-params */
 // discussions here https://stackoverflow.com/questions/5100376/how-to-watch-for-array-changes
+import isEqual, { isBothNaN } from "./isEqual";
 
 // #region Helpers
-/** const a = NaN; a !== a; // true */
-// eslint-disable-next-line no-self-compare
-const isBothNaN = (a: unknown, b: unknown) => a !== a && b !== b;
 const arrRemove = <T>(arr: Array<T>, item: T) => {
   const i = arr.indexOf(item);
   if (i > -1) {
@@ -262,16 +260,7 @@ function make<T extends object>(
 
       const isOk = Reflect.set(t, prop, next, receiver);
       if (isOk && ref.hasListeners()) {
-        let isChanged = false;
-        if (prev == null || next == null) {
-          isChanged = prev !== next;
-        } else {
-          const a = prev.valueOf();
-          const b = next.valueOf();
-          isChanged = a !== b && !isBothNaN(a, b);
-        }
-
-        isChanged && propChanged({ prev, next, prop });
+        !isEqual(prev, next) && propChanged({ prev, next, prop });
       }
 
       return isOk;
