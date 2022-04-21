@@ -13,9 +13,19 @@ body {
   &:focus-within {
     outline: 2px solid var(--ctrl-focus, #009fbc);
 
-    input + * {
+    strong,
+    legend {
       color: var(--ctrl-focus, #009fbc);
     }
+  }
+
+  input:focus + * {
+    color: var(--ctrl-focus, #009fbc);
+  }
+
+  strong,
+  legend {
+    color: var(--ctrl-label, #5e5e5e);
   }
 
   &[disabled] {
@@ -93,8 +103,6 @@ body {
 
     font-weight: normal;
     text-decoration: none;
-
-    color: var(--ctrl-label, #5e5e5e);
   }
 
   input:focus + *,
@@ -241,6 +249,82 @@ body {
   }
 }
 
+.radioGroup {
+  padding: var(--ctrl-padding, 1.4em 1em 0.6em 1em);
+
+  fieldset {
+    border: none;
+    padding: 0;
+    margin: 0 -0.5em -0.5em;
+
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  legend,
+  strong {
+    display: block;
+    position: absolute;
+    transform-origin: top left;
+    top: 0.2em;
+    transform: scale(0.9);
+
+    margin: 0;
+    padding: 0 0.5em;
+    box-sizing: border-box;
+
+    max-width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+
+    font-weight: normal;
+    text-decoration: none;
+    cursor: default;
+  }
+
+  input {
+    position: absolute;
+    height: 1px;
+    width: 1px;
+    overflow: hidden;
+    clip: rect(1px, 1px, 1px, 1px); /* from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility */
+    outline: none;
+  }
+
+  input + * {
+    padding: 0.5em;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: flex-end;
+
+    &::after {
+      display: inline-block;
+      content: "";
+      height: 1.2em;
+      width: 1.2em;
+      border: 0.3em solid var(--ctrl-radio-back, #fff);
+      box-sizing: border-box;
+      background: var(--ctrl-radio-off, #fff);
+      box-shadow: 0 0 1px 1px var(--ctrl-radio-shadow, #0003);
+      border-radius: 50%;
+      margin: 0 0.5em;
+
+      @media not all and (prefers-reduced-motion) {
+        transition: background-color var(--anim);
+      }
+    }
+  }
+
+  input:checked + *::after {
+    background-color: var(--ctrl-radio-on, #009fbc);
+  }
+
+  input:focus + *::after {
+    box-shadow: 0 0 1px 1px var(--ctrl-focus, #009fbc);
+  }
+}
+
 .wup-hide {
   position: absolute;
   height: 1px;
@@ -248,3 +332,6 @@ body {
   overflow: hidden;
   clip: rect(1px, 1px, 1px, 1px); /* from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility */
 }
+
+// todo we have a lot of ctrl-focus vars. need to extend to be better
+// todo do we need radioElement beside RadioGroupElement ?

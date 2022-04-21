@@ -138,12 +138,12 @@ export default function ControlsView() {
           </ul> */}
         </div>
 
-        <div className={`${styles.common} ${styles.radio}`}>
+        <div className={`${styles.common} ${styles.radioGroup}`} onMouseDown={(e) => e.preventDefault()}>
           <fieldset>
             <legend>RadioGroup</legend>
             <label>
-              <span>Value 1</span>
               <input type="radio" name="w1" />
+              <span>Value 1</span>
             </label>
             <label>
               <input type="radio" name="w1" />
@@ -152,6 +152,22 @@ export default function ControlsView() {
             <label>
               <input type="radio" name="w1" />
               <span>Value 3</span>
+            </label>
+            <label>
+              <input type="radio" name="w1" />
+              <span>V4</span>
+            </label>
+            <label>
+              <input type="radio" name="w1" />
+              <span>Value 5</span>
+            </label>
+            <label>
+              <input type="radio" name="w1" />
+              <span>Value 6</span>
+            </label>
+            <label>
+              <input type="radio" name="w1" />
+              <span>Va 7</span>
             </label>
           </fieldset>
         </div>
