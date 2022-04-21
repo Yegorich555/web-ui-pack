@@ -6,7 +6,7 @@ export default function ControlsView() {
     <Page header="Controls" link="#textControl">
       <form>
         <wup-text-ctrl
-          class={styles.textControl}
+          class={`${styles.common} ${styles.textControl}`}
           ref={(el) => {
             if (el) {
               el.$options.label = "TextControl";
@@ -14,7 +14,8 @@ export default function ControlsView() {
           }}
         />
         <wup-text-ctrl
-          class={`${styles.textControl} ${styles.textControl2}`}
+          class={`${styles.common} ${styles.textControl}`}
+          disabled
           ref={(el) => {
             if (el) {
               el.$options.label = "TextControl - disabled";
@@ -22,8 +23,19 @@ export default function ControlsView() {
             }
           }}
         />
+        <wup-text-ctrl
+          class={`${styles.common} ${styles.textControl}`}
+          disabled
+          ref={(el) => {
+            if (el) {
+              el.$options.label = "TextControl - disabled";
+              el.$options.disabled = true; // todo implement disabled
+              el.$value = "some value";
+            }
+          }}
+        />
 
-        <div className={`${styles.slidebox}`}>
+        <div className={`${styles.common} ${styles.slidebox}`}>
           <label onMouseDown={(e) => e.preventDefault()}>
             <input type="checkbox" defaultChecked autoFocus />
             <strong>SlideControl</strong>
@@ -31,7 +43,15 @@ export default function ControlsView() {
           </label>
         </div>
 
-        <div className={`${styles.slidebox} ${styles.slideboxReverse}`}>
+        <div className={`${styles.common} ${styles.slidebox}`} disabled>
+          <label onMouseDown={(e) => e.preventDefault()}>
+            <input type="checkbox" defaultChecked disabled />
+            <strong>SlideControl - disabled</strong>
+            <span />
+          </label>
+        </div>
+
+        <div className={`${styles.common} ${styles.slidebox} ${styles.slideboxReverse}`}>
           <label onMouseDown={(e) => e.preventDefault()}>
             <input type="checkbox" />
             <strong>SlideControl-reverse</strong>
@@ -39,7 +59,7 @@ export default function ControlsView() {
           </label>
         </div>
 
-        <div className={`${styles.slidebox} ${styles.checkbox}`}>
+        <div className={`${styles.common} ${styles.slidebox} ${styles.checkbox}`}>
           <label onMouseDown={(e) => e.preventDefault()}>
             <input type="checkbox" defaultChecked />
             <strong>CheckControl</strong>
@@ -47,7 +67,23 @@ export default function ControlsView() {
           </label>
         </div>
 
-        <div className={`${styles.textControl} ${styles.combobox}`}>
+        <div className={`${styles.common} ${styles.slidebox} ${styles.checkbox}`}>
+          <label onMouseDown={(e) => e.preventDefault()}>
+            <input type="checkbox" defaultChecked />
+            <strong>CheckControl</strong>
+            <span />
+          </label>
+        </div>
+
+        <div className={`${styles.common} ${styles.slidebox} ${styles.checkbox}`} disabled>
+          <label onMouseDown={(e) => e.preventDefault()}>
+            <input type="checkbox" defaultChecked disabled />
+            <strong>CheckControl - disabled</strong>
+            <span />
+          </label>
+        </div>
+
+        <div className={`${styles.common} ${styles.textControl} ${styles.combobox}`}>
           <label>
             <input
               role="combobox"
@@ -72,7 +108,7 @@ export default function ControlsView() {
           <div id="err1">This field is required</div>
         </div>
 
-        <div className={`${styles.textControl} ${styles.combobox} ${styles.multiselect}`}>
+        <div className={`${styles.common} ${styles.textControl} ${styles.combobox} ${styles.multiselect}`}>
           <label>
             <span aria-hidden>Item 1</span>
             <input
@@ -99,7 +135,7 @@ export default function ControlsView() {
           </ul> */}
         </div>
 
-        <div className={`${styles.textControl} ${styles.radio}`}>
+        <div className={`${styles.common} ${styles.radio}`}>
           <fieldset>
             <legend>RadioGroup</legend>
             <label>

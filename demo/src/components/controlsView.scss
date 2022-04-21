@@ -3,7 +3,7 @@ body {
   --anim: 200ms cubic-bezier(0, 0, 0.2, 1) 0ms;
 }
 
-.textControl {
+.common {
   display: block;
   margin-bottom: 20px;
   position: relative;
@@ -18,13 +18,27 @@ body {
     }
   }
 
+  &[disabled] {
+    opacity: 0.8;
+    cursor: not-allowed;
+  }
+
   label {
     display: flex;
     align-items: center;
     box-sizing: border-box;
     font: inherit;
-    cursor: text;
+    cursor: inherit;
   }
+
+  input,
+  input + * {
+    cursor: inherit;
+  }
+}
+
+.textControl {
+  cursor: text;
 
   input {
     width: 100%;
@@ -66,7 +80,7 @@ body {
     font-weight: normal;
     text-decoration: none;
 
-    color: var(--ctrl-label, #747474);
+    color: var(--ctrl-label, #5e5e5e);
   }
 
   input:focus + *,
@@ -76,32 +90,21 @@ body {
     transform: scale(0.9);
   }
 
-  // input:disabled {
-  //   background: #747474;
-  // }
-
-  // todo disabled here
-  // todo invalid here + aria-invalid for input
+  // todo invalid + aria-invalid for input
+  // todo hover effect
+  // todo required: add asterisk to label
 }
 
 .slidebox {
   margin-bottom: 10px;
+  background: none;
+  cursor: pointer;
 
   label {
-    display: inline-flex;
-    align-items: center;
-    box-sizing: border-box;
-    font: inherit;
-    cursor: pointer;
     padding: var(--ctrl-slide-padding, 1em);
-    border-radius: var(--border-radius, 6px);
 
-    &:focus-within {
-      outline: 2px solid var(--ctrl-focus, #009fbc);
-
-      input + * {
-        color: var(--ctrl-focus, #009fbc);
-      }
+    input:focus + * {
+      color: var(--ctrl-focus, #009fbc);
     }
   }
 
@@ -121,6 +124,7 @@ body {
     white-space: nowrap;
     font-weight: normal;
     text-decoration: none;
+    color: var(--ctrl-label, #5e5e5e);
   }
 
   input + * + * {
@@ -161,6 +165,10 @@ body {
       left: calc(100% - 1.4em);
     }
   }
+
+  input:checked:disabled + * + * {
+    opacity: 0.5;
+  }
 }
 
 // reverse style
@@ -177,10 +185,9 @@ body {
 
 .checkbox {
   input + * + * {
-    height: 1.4em;
-    width: 1.4em;
+    height: 1.2em;
+    width: 1.2em;
     border-radius: var(--border-sm-radius, 3px);
-    position: relative;
     background: var(--ctrl-check-off-back, #fff);
     box-shadow: 0 0 2px 0 var(--ctrl-check-shadow, #0003);
 
@@ -194,20 +201,30 @@ body {
   }
 
   input:checked + * + * {
-    background-color: var(--ctrl-check-on-back, #009fbc);
+    position: initial;
 
     &::before {
       content: "";
-      height: 100%;
-      width: 100%;
-      transform: translate(-50%, -50%) scale(0.7);
-      top: 50%;
-      left: 50%;
+      position: initial;
+      top: initial;
+      left: initial;
       border-radius: 0;
       box-shadow: none;
+
+      display: block;
+      height: 100%;
+      width: 100%;
+
+      transform: scale(0.7);
       background-color: var(--ctrl-check-on, #fff);
+
+      -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='46' xml:space='preserve'%3E%3Cpath d='M20.687 38.332a5.308 5.308 0 0 1-7.505 0L1.554 26.704A5.306 5.306 0 1 1 9.059 19.2l6.928 6.927a1.344 1.344 0 0 0 1.896 0L36.642 7.368a5.308 5.308 0 0 1 7.505 7.504l-23.46 23.46z'/%3E%3C/svg%3E");
       mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='46' xml:space='preserve'%3E%3Cpath d='M20.687 38.332a5.308 5.308 0 0 1-7.505 0L1.554 26.704A5.306 5.306 0 1 1 9.059 19.2l6.928 6.927a1.344 1.344 0 0 0 1.896 0L36.642 7.368a5.308 5.308 0 0 1 7.505 7.504l-23.46 23.46z'/%3E%3C/svg%3E");
-      mask-size: cover;
+      -webkit-mask-size: contain;
+      mask-size: auto;
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-position: center;
     }
   }
 }
