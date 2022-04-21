@@ -7,9 +7,12 @@ export default function ControlsView() {
       <form>
         <wup-text-ctrl
           class={`${styles.common} ${styles.textControl}`}
+          invalid
           ref={(el) => {
             if (el) {
               el.$options.label = "TextControl";
+              el.$refs.input.setCustomValidity("Invalid value");
+              el.$refs.input.required = true;
             }
           }}
         />
@@ -94,7 +97,7 @@ export default function ControlsView() {
               aria-autocomplete="list"
               aria-activedescendant="itemId"
               placeholder=" "
-              aria-invalid="true"
+              // aria-invalid="true"
               aria-errormessage="err1"
             />
             <strong>ComboControl</strong>
@@ -105,7 +108,7 @@ export default function ControlsView() {
               Puns
             </li>
           </ul> */}
-          <div id="err1">This field is required</div>
+          {/* <div id="err1">This field is required</div> */}
         </div>
 
         <div className={`${styles.common} ${styles.textControl} ${styles.combobox} ${styles.multiselect}`}>

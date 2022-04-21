@@ -23,6 +23,11 @@ body {
     cursor: not-allowed;
   }
 
+  &[invalid] {
+    box-shadow: 0 0 3px 0 var(--ctrl-err-border, var(--ctrl-err, red));
+    outline-color: var(--ctrl-err-border, var(--ctrl-err, red));
+  }
+
   label {
     display: flex;
     align-items: center;
@@ -34,6 +39,15 @@ body {
   input,
   input + * {
     cursor: inherit;
+  }
+
+  input:required + * {
+    &::after {
+      content: "*";
+      font-size: larger;
+      font-weight: bolder;
+      line-height: 0;
+    }
   }
 }
 
@@ -90,9 +104,7 @@ body {
     transform: scale(0.9);
   }
 
-  // todo invalid + aria-invalid for input
   // todo hover effect
-  // todo required: add asterisk to label
 }
 
 .slidebox {
