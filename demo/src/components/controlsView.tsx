@@ -71,10 +71,10 @@ export default function ControlsView() {
           </label>
         </div>
 
-        <div className={`${styles.common} ${styles.slidebox} ${styles.checkbox}`}>
+        <div className={`${styles.common} ${styles.slidebox} ${styles.checkbox}  ${styles.checkboxReverse}`}>
           <label onMouseDown={(e) => e.preventDefault()}>
             <input type="checkbox" defaultChecked />
-            <strong>CheckControl</strong>
+            <strong>CheckControl - reverse</strong>
             <span />
           </label>
         </div>
@@ -105,8 +105,6 @@ export default function ControlsView() {
               ComboControl ComboControl ComboControl ComboControl ComboControl ComboControl ComboControl ComboControl
               ComboControl
             </strong>
-            {/* <span onMouseDown={(e) => e.preventDefault()} /> */}
-            {/* <button type="button" tabIndex={-1} aria-hidden="true" /> */}
           </label>
           {/* <ul id="menuId" role="listbox">
             <li role="option" aria-selected={false} id="itemId">
@@ -117,8 +115,13 @@ export default function ControlsView() {
         </div>
 
         <div className={`${styles.common} ${styles.textControl} ${styles.combobox} ${styles.multiselect}`}>
-          <label>
+          <label onMouseDown={(e) => !(e.target instanceof HTMLInputElement) && e.preventDefault()}>
             <span aria-hidden>Item 1</span>
+            <span aria-hidden>Some long value</span>
+            <span aria-hidden>Va 2</span>
+            <span aria-hidden>Value 3</span>
+            <span aria-hidden>ControlValue</span>
+            <span aria-hidden>ControlValue2</span>
             <input
               role="combobox"
               aria-expanded={false}
@@ -129,12 +132,11 @@ export default function ControlsView() {
               aria-activedescendant="itemId2"
               placeholder=" "
             />
-            {/* todo how to suppress reading 'blank' */}
-            {/* todo remove placeholder when no items selected */}
+            {/* todo how to suppress reading 'blank' - we need to leave extra value 'Selected 1 of 3' and made it transparent via input { opacity:0 } */}
             <strong>
-              MultiSelectControl <span className={styles["wup-hide"]}>Selected 1 of 3</span>
+              MultiSelectControl
+              {/* <span className={styles["wup-hide"]}>Selected 1 of 3</span> */}
             </strong>
-            {/* <button type="button" tabIndex={-1} aria-hidden="true" /> */}
           </label>
           {/* <ul id="menuId2" role="listbox">
             <li role="option" aria-selected={false} id="itemId2">

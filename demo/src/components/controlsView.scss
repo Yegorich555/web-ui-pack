@@ -4,6 +4,8 @@ body {
 }
 
 .common {
+  --ctrl-padding: 1.4em 1em 0.6em 1em;
+
   display: block;
   margin-bottom: 20px;
   position: relative;
@@ -78,7 +80,7 @@ body {
 
     border: none;
     background: none;
-    padding: var(--ctrl-padding, 1.4em 1em 0.6em 1em);
+    padding: var(--ctrl-padding);
     outline: none;
 
     text-overflow: ellipsis;
@@ -92,7 +94,7 @@ body {
     top: 50%;
     left: 0;
 
-    padding: var(--ctrl-padding, 1.4em 1em 0.6em 1em);
+    padding: var(--ctrl-padding);
     padding-top: 0;
     padding-bottom: 0;
     margin: 0;
@@ -258,8 +260,27 @@ body {
   }
 }
 
+.checkboxReverse {
+  label {
+    flex-direction: row-reverse;
+
+    input + * + * {
+      margin-left: 0;
+      margin-right: 0.5em;
+    }
+  }
+}
+
 .radioGroup {
-  padding: var(--ctrl-padding, 1.4em 1em 0.6em 1em);
+  --ctrl-radio-size: 16px;
+  --ctrl-radio-spot-size: 8px;
+  --ctrl-radio-back: #fff;
+  --ctrl-radio-off: #fff;
+  --ctrl-radio-on: #009fbc;
+  --ctrl-radio-border: #0003;
+  --ctrl-radio-border-size: 1px;
+
+  padding: var(--ctrl-padding);
 
   fieldset {
     border: none;
@@ -308,14 +329,14 @@ body {
     align-items: flex-end;
 
     &::after {
-      display: inline-block;
       content: "";
-      height: 1.2em;
-      width: 1.2em;
-      border: 0.3em solid var(--ctrl-radio-back, #fff);
+      // it's not relative because 1.2em of 14px provides round-pixel-issue and not always rounded items
+      width: var(--ctrl-radio-size);
+      height: var(--ctrl-radio-size);
+      border: calc((var(--ctrl-radio-size) - var(--ctrl-radio-spot-size)) / 2) solid var(--ctrl-radio-back);
       box-sizing: border-box;
-      background: var(--ctrl-radio-off, #fff);
-      box-shadow: 0 0 1px 1px var(--ctrl-radio-shadow, #0003);
+      background: var(--ctrl-radio-off);
+      box-shadow: 0 0 1px var(--ctrl-radio-border-size) var(--ctrl-radio-border);
       border-radius: 50%;
       margin: 0 0.5em;
 
@@ -326,7 +347,7 @@ body {
   }
 
   input:checked + *::after {
-    background-color: var(--ctrl-radio-on, #009fbc);
+    background-color: var(--ctrl-radio-on);
   }
 
   input:focus + *::after {
@@ -337,15 +358,11 @@ body {
 .combobox {
   label::after {
     content: "";
-    display: inline-block;
     height: 1em;
     width: 1em;
     position: absolute;
     right: 0;
-    padding: var(--ctrl-padding, 1.4em 1em 0.6em 1em);
-    // margin-top: 0;
-    // margin-bottom: 0;
-    // margin-left: 0;
+    padding: var(--ctrl-padding);
     box-sizing: content-box;
     cursor: pointer;
 
@@ -374,6 +391,25 @@ body {
   }
 }
 
+.multiselect {
+  label {
+    flex-wrap: wrap;
+    padding: var(--ctrl-padding);
+    margin: 0 -0.5em -0.5em;
+
+    input {
+      width: 0;
+      min-width: 2em;
+      padding: 0;
+      background: #f7d4f7;
+    }
+
+    > *:not(strong) {
+      padding: 0.5em;
+    }
+  }
+}
+
 .wup-hide {
   position: absolute;
   height: 1px;
@@ -384,3 +420,7 @@ body {
 
 // todo we have a lot of ctrl-focus vars. need to extend to be better
 // todo do we need radioElement beside RadioGroupElement ?
+
+// todo f
+// todo maybe apply padding to label instead of input ????
+// todo animation for checkboxes/slider onfocus (backcolor)
