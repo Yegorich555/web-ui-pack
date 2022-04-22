@@ -10,7 +10,8 @@ export default function ControlsView() {
           invalid
           ref={(el) => {
             if (el) {
-              el.$options.label = "TextControl";
+              el.$options.label =
+                "TextControl TextControl TextControlTextControl TextControl TextControl TextControl TextControl";
               el.$refs.input.setCustomValidity("Invalid value");
               el.$refs.input.required = true;
             }

@@ -895,7 +895,7 @@ declare global {
           onWillShow: never;
           /** Result position; use this to restyle animation etc. */
           readonly position: "top" | "left" | "bottom" | "right";
-          /** Hiddin state; use this to hide-animation */
+          /** Hide state; use this to hide-animation */
           readonly hide: "";
         }>;
     }
