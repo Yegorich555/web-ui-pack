@@ -87,8 +87,8 @@ export default function ControlsView() {
           </label>
         </div>
 
-        <div className={`${styles.common} ${styles.textControl} ${styles.combobox}`}>
-          <label>
+        <div className={`${styles.common} ${styles.textControl} ${styles.combobox}`} opened="true">
+          <label onMouseDown={(e) => !(e.target instanceof HTMLInputElement) && e.preventDefault()}>
             <input
               role="combobox"
               aria-expanded={false}
@@ -101,7 +101,11 @@ export default function ControlsView() {
               // aria-invalid="true"
               aria-errormessage="err1"
             />
-            <strong>ComboControl</strong>
+            <strong>
+              ComboControl ComboControl ComboControl ComboControl ComboControl ComboControl ComboControl ComboControl
+              ComboControl
+            </strong>
+            {/* <span onMouseDown={(e) => e.preventDefault()} /> */}
             {/* <button type="button" tabIndex={-1} aria-hidden="true" /> */}
           </label>
           {/* <ul id="menuId" role="listbox">
