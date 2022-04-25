@@ -5,7 +5,7 @@ export default function ControlsView() {
   return (
     <Page header="Controls" link="#textControl">
       <form>
-        <wup-text-ctrl
+        {/* <wup-text-ctrl
           class={`${styles.common} ${styles.textControl}`}
           invalid
           ref={(el) => {
@@ -37,7 +37,21 @@ export default function ControlsView() {
               el.$value = "some value";
             }
           }}
-        />
+        /> */}
+
+        <div className={`${styles.common} ${styles.textControl}`}>
+          <label onMouseDown={(e) => !(e.target instanceof HTMLInputElement) && e.preventDefault()}>
+            <span>
+              <input
+                type="text"
+                placeholder=" "
+                defaultValue="very long long very long long long long long value dsdsadasdsdas"
+              />
+              <strong>TextControl</strong>
+            </span>
+            {/* extra-span requires to properly use with after before */}
+          </label>
+        </div>
 
         <div className={`${styles.common} ${styles.slidebox}`}>
           <label onMouseDown={(e) => e.preventDefault()}>
@@ -89,22 +103,24 @@ export default function ControlsView() {
 
         <div className={`${styles.common} ${styles.textControl} ${styles.combobox}`} opened="true">
           <label onMouseDown={(e) => !(e.target instanceof HTMLInputElement) && e.preventDefault()}>
-            <input
-              role="combobox"
-              aria-expanded={false}
-              aria-haspopup="listbox"
-              aria-owns="menuId"
-              aria-controls="menuId"
-              aria-autocomplete="list"
-              aria-activedescendant="itemId"
-              placeholder=" "
-              // aria-invalid="true"
-              aria-errormessage="err1"
-            />
-            <strong>
-              ComboControl ComboControl ComboControl ComboControl ComboControl ComboControl ComboControl ComboControl
-              ComboControl
-            </strong>
+            <span>
+              <input
+                role="combobox"
+                aria-expanded={false}
+                aria-haspopup="listbox"
+                aria-owns="menuId"
+                aria-controls="menuId"
+                aria-autocomplete="list"
+                aria-activedescendant="itemId"
+                placeholder=" "
+                // aria-invalid="true"
+                aria-errormessage="err1"
+              />
+              <strong>
+                ComboControl ComboControl ComboControl ComboControl ComboControl ComboControl ComboControl ComboControl
+                ComboControl
+              </strong>
+            </span>
           </label>
           {/* <ul id="menuId" role="listbox">
             <li role="option" aria-selected={false} id="itemId">
@@ -116,27 +132,29 @@ export default function ControlsView() {
 
         <div className={`${styles.common} ${styles.textControl} ${styles.combobox} ${styles.multiselect}`}>
           <label onMouseDown={(e) => !(e.target instanceof HTMLInputElement) && e.preventDefault()}>
-            <span aria-hidden>Item 1</span>
-            <span aria-hidden>Some long value</span>
-            <span aria-hidden>Va 2</span>
-            <span aria-hidden>Value 3</span>
-            <span aria-hidden>ControlValue</span>
-            <span aria-hidden>ControlValue2</span>
-            <input
-              role="combobox"
-              aria-expanded={false}
-              aria-haspopup="listbox"
-              aria-owns="menuId2"
-              aria-controls="menuId2"
-              aria-autocomplete="list"
-              aria-activedescendant="itemId2"
-              placeholder=" "
-            />
-            {/* todo how to suppress reading 'blank' - we need to leave extra value 'Selected 1 of 3' and made it transparent via input { opacity:0 } */}
-            <strong>
-              MultiSelectControl
-              {/* <span className={styles["wup-hide"]}>Selected 1 of 3</span> */}
-            </strong>
+            <span>
+              <span aria-hidden>Item 1</span>
+              <span aria-hidden>Some long value</span>
+              <span aria-hidden>Va 2</span>
+              {/* <span aria-hidden>Value 3</span>
+              <span aria-hidden>ControlValue</span>
+              <span aria-hidden>ControlVal2</span> */}
+              <input
+                role="combobox"
+                aria-expanded={false}
+                aria-haspopup="listbox"
+                aria-owns="menuId2"
+                aria-controls="menuId2"
+                aria-autocomplete="list"
+                aria-activedescendant="itemId2"
+                placeholder=" "
+              />
+              {/* todo how to suppress reading 'blank' - we need to leave extra value 'Selected 1 of 3' and made it transparent via input { opacity:0 } */}
+              <strong>
+                MultiSelectControl
+                {/* <span className={styles["wup-hide"]}>Selected 1 of 3</span> */}
+              </strong>
+            </span>
           </label>
           {/* <ul id="menuId2" role="listbox">
             <li role="option" aria-selected={false} id="itemId2">
