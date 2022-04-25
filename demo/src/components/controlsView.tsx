@@ -136,9 +136,9 @@ export default function ControlsView() {
               <span aria-hidden>Item 1</span>
               <span aria-hidden>Some long value</span>
               <span aria-hidden>Va 2</span>
-              {/* <span aria-hidden>Value 3</span>
+              <span aria-hidden>Value 3</span>
               <span aria-hidden>ControlValue</span>
-              <span aria-hidden>ControlVal2</span> */}
+              <span aria-hidden>ControlVal2</span>
               <input
                 role="combobox"
                 aria-expanded={false}

@@ -28,6 +28,7 @@ body {
   strong,
   legend {
     color: var(--ctrl-label, #5e5e5e);
+    background: #f7d4f7;
   }
 
   &[disabled] {
@@ -53,10 +54,13 @@ body {
 
   label::before,
   label::after {
-    height: 100%;
     box-sizing: content-box;
     cursor: pointer;
     flex: 0 0 auto;
+    padding: var(--ctrl-padding);
+    padding-left: 0;
+    padding-right: 0;
+    align-self: stretch;
   }
 
   label::before {
@@ -94,12 +98,6 @@ body {
     width: 100%;
     position: relative;
   }
-
-  // label > *:not(input),
-  // label:before,
-  // label:after {
-  //   pointer-events: none;
-  // }
 
   input {
     width: 100%;
@@ -391,15 +389,14 @@ body {
 .combobox {
   label::before {
     content: "";
-    height: 1em;
     width: 1em;
     background-color: var(--ctrl-combo-down, var(--ctrl-combo-after, #5e5e5e));
   }
 
   label::after {
     content: "";
-    height: 1em;
     width: 1em;
+    min-height: 1em;
 
     background-color: var(--ctrl-combo-down, var(--ctrl-combo-after, #5e5e5e));
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m16.078 258.214 329.139 329.139c21.449 21.449 56.174 21.449 77.567 0l329.139-329.139c21.449-21.449 21.449-56.174 0-77.567s-56.174-21.449-77.567 0L384 471.003 93.644 180.647c-21.449-21.449-56.173-21.449-77.567 0s-21.449 56.173 0 77.567z'/%3E%3C/svg%3E");
@@ -440,10 +437,15 @@ body {
     > *:not(strong) {
       padding: 0.5em;
     }
+  }
 
-    strong {
-      padding: 0.5em;
-    }
+  strong {
+    padding: 0 0.5em;
+  }
+
+  input:focus + *,
+  input:not(:placeholder-shown) + * {
+    top: 0.7em;
   }
 }
 
@@ -458,5 +460,4 @@ body {
 // todo we have a lot of ctrl-focus vars. need to extend to be better
 // todo do we need radioElement beside RadioGroupElement ?
 
-// todo maybe apply padding to label instead of input ????
 // todo animation for checkboxes/slider onfocus (backcolor)
