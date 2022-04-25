@@ -1,34 +1,38 @@
 /* stylelint-disable no-descending-specificity */
-body {
-  --anim: 200ms cubic-bezier(0, 0, 0.2, 1) 0ms;
-}
-
 .common {
+  --anim: 200ms cubic-bezier(0, 0, 0.2, 1) 0ms;
   --ctrl-padding: 1.4em 1em 0.6em 1em;
+  --ctrl-focus: #009fbc;
+  --ctrl-focus-label: var(--ctrl-focus);
+  --ctrl-selected: var(--ctrl-focus);
+  --ctrl-label: #5e5e5e;
+  --ctrl-back: #fff;
+  --ctrl-border-radius: var(--border-radius, 6px);
+  --ctrl-err: red;
+  --cltr-icon: var(--ctrl-label);
 
   display: block;
   margin-bottom: 20px;
   position: relative;
-  border-radius: var(--border-radius, 6px);
-  background: var(--ctrl-back, #fff);
+  border-radius: var(--ctrl-border-radius);
+  background: var(--ctrl-back);
 
   &:focus-within {
-    outline: 2px solid var(--ctrl-focus, #009fbc);
+    outline: 2px solid var(--ctrl-focus);
 
     strong,
     legend {
-      color: var(--ctrl-focus, #009fbc);
+      color: var(--ctrl-focus-label);
     }
   }
 
   input:focus + * {
-    color: var(--ctrl-focus, #009fbc);
+    color: var(--ctrl-focus-label);
   }
 
   strong,
   legend {
-    color: var(--ctrl-label, #5e5e5e);
-    background: #f7d4f7;
+    color: var(--ctrl-label);
   }
 
   &[disabled] {
@@ -37,8 +41,8 @@ body {
   }
 
   &[invalid] {
-    box-shadow: 0 0 3px 0 var(--ctrl-err-border, var(--ctrl-err, red));
-    outline-color: var(--ctrl-err-border, var(--ctrl-err, red));
+    box-shadow: 0 0 3px 0 var(--ctrl-err-border, var(--ctrl-err));
+    outline-color: var(--ctrl-err-border, var(--ctrl-err));
   }
 
   label {
@@ -153,15 +157,25 @@ body {
 }
 
 .slidebox {
+  --ctrl-slide-padding: 1em;
+  --ctrl-slide-off-back: #9f9f9f;
+  --ctrl-slide-on-back: var(--ctrl-focus);
+  --ctrl-slide-on: #fff;
+  --ctrl-slide-off: #fff;
+  --ctrl-slide-shadow: #0003; // todo auto define for darkMode?
+  --ctrl-slide-size-h: 1em;
+  --ctrl-slide-size-w: calc(var(--ctrl-slide-size-spot) * 2);
+  --ctrl-slide-size-spot: 1.4em;
+
   margin-bottom: 10px;
   background: none;
   cursor: pointer;
 
   label {
-    padding: var(--ctrl-slide-padding, 1em);
+    padding: var(--ctrl-slide-padding);
 
     input:focus + * {
-      color: var(--ctrl-focus, #009fbc);
+      color: var(--ctrl-focus-label);
     }
   }
 
@@ -181,16 +195,16 @@ body {
     white-space: nowrap;
     font-weight: normal;
     text-decoration: none;
-    color: var(--ctrl-label, #5e5e5e);
+    color: var(--ctrl-label);
   }
 
   input + * + * {
     margin-left: 0.5em;
     position: relative;
-    width: 2.8em;
-    height: 1em;
+    width: var(--ctrl-slide-size-w);
+    height: var(--ctrl-slide-size-h);
     border-radius: 999px;
-    background: var(--ctrl-slide-back, #9f9f9f);
+    background: var(--ctrl-slide-off-back);
 
     @media not all and (prefers-reduced-motion) {
       transition: background-color var(--anim);
@@ -199,13 +213,13 @@ body {
     &::before {
       content: "";
       position: absolute;
-      height: 1.4em;
-      width: 1.4em;
+      height: var(--ctrl-slide-size-spot);
+      width: var(--ctrl-slide-size-spot);
       left: 0;
       top: 50%;
       transform: translateY(-50%);
-      background: var(--ctrl-slide-off, #fff);
-      box-shadow: 0 1px 4px 0 var(--ctrl-slide-shadow, #0003);
+      background: var(--ctrl-slide-off);
+      box-shadow: 0 1px 4px 0 var(--ctrl-slide-shadow);
       border-radius: 50%;
 
       @media not all and (prefers-reduced-motion) {
@@ -215,10 +229,10 @@ body {
   }
 
   input:checked + * + * {
-    background-color: var(--ctrl-slide-on-back, #009fbc);
+    background-color: var(--ctrl-slide-on-back);
 
     &::before {
-      background: var(--ctrl-slide-on, #fff);
+      background: var(--ctrl-slide-on);
       left: calc(100% - 1.4em);
     }
   }
@@ -241,12 +255,19 @@ body {
 }
 
 .checkbox {
+  --ctrl-check-off-back: #fff;
+  --ctrl-check-on-back: var(--ctrl-focus);
+  --ctrl-check-on: #fff;
+  --ctrl-check-radius: 3px;
+  --ctrl-check-shadow: #0003;
+  --ctrl-check-size: 1.2em;
+
   input + * + * {
-    height: 1.2em;
-    width: 1.2em;
-    border-radius: var(--border-sm-radius, 3px);
-    background: var(--ctrl-check-off-back, #fff);
-    box-shadow: 0 0 2px 0 var(--ctrl-check-shadow, #0003);
+    height: var(--ctrl-check-size);
+    width: var(--ctrl-check-size);
+    border-radius: var(--ctrl-check-radius);
+    background: var(--ctrl-check-off-back);
+    box-shadow: 0 0 2px 0 var(--ctrl-check-shadow);
 
     @media not all and (prefers-reduced-motion) {
       transition: background-color var(--anim);
@@ -259,6 +280,7 @@ body {
 
   input:checked + * + * {
     position: initial;
+    background: var(--ctrl-check-on-back);
 
     &::before {
       content: "";
@@ -273,7 +295,7 @@ body {
       width: 100%;
 
       transform: scale(0.7);
-      background-color: var(--ctrl-check-on, #fff);
+      background-color: var(--ctrl-check-on);
 
       -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='46' xml:space='preserve'%3E%3Cpath d='M20.687 38.332a5.308 5.308 0 0 1-7.505 0L1.554 26.704A5.306 5.306 0 1 1 9.059 19.2l6.928 6.927a1.344 1.344 0 0 0 1.896 0L36.642 7.368a5.308 5.308 0 0 1 7.505 7.504l-23.46 23.46z'/%3E%3C/svg%3E");
       mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='46' xml:space='preserve'%3E%3Cpath d='M20.687 38.332a5.308 5.308 0 0 1-7.505 0L1.554 26.704A5.306 5.306 0 1 1 9.059 19.2l6.928 6.927a1.344 1.344 0 0 0 1.896 0L36.642 7.368a5.308 5.308 0 0 1 7.505 7.504l-23.46 23.46z'/%3E%3C/svg%3E");
@@ -303,7 +325,7 @@ body {
   --ctrl-radio-spot-size: 8px;
   --ctrl-radio-back: #fff;
   --ctrl-radio-off: #fff;
-  --ctrl-radio-on: #009fbc;
+  --ctrl-radio-on: var(--ctrl-focus);
   --ctrl-radio-border: #0003;
   --ctrl-radio-border-size: 1px;
 
@@ -381,16 +403,22 @@ body {
     background-color: var(--ctrl-radio-on);
   }
 
-  input:focus + *::after {
-    box-shadow: 0 0 1px 1px var(--ctrl-focus, #009fbc);
+  input:focus + * {
+    color: var(--ctrl-selected);
+
+    &::after {
+      box-shadow: 0 0 1px 1px var(--ctrl-selected);
+    }
   }
 }
 
 .combobox {
+  --ctrl-combo-icon-after: var(--cltr-icon);
+
   label::before {
     content: "";
     width: 1em;
-    background-color: var(--ctrl-combo-down, var(--ctrl-combo-after, #5e5e5e));
+    background-color: var(--ctrl-combo-icon-after);
   }
 
   label::after {
@@ -398,7 +426,7 @@ body {
     width: 1em;
     min-height: 1em;
 
-    background-color: var(--ctrl-combo-down, var(--ctrl-combo-after, #5e5e5e));
+    background-color: var(--ctrl-combo-icon-after);
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m16.078 258.214 329.139 329.139c21.449 21.449 56.174 21.449 77.567 0l329.139-329.139c21.449-21.449 21.449-56.174 0-77.567s-56.174-21.449-77.567 0L384 471.003 93.644 180.647c-21.449-21.449-56.173-21.449-77.567 0s-21.449 56.173 0 77.567z'/%3E%3C/svg%3E");
     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m16.078 258.214 329.139 329.139c21.449 21.449 56.174 21.449 77.567 0l329.139-329.139c21.449-21.449 21.449-56.174 0-77.567s-56.174-21.449-77.567 0L384 471.003 93.644 180.647c-21.449-21.449-56.173-21.449-77.567 0s-21.449 56.173 0 77.567z'/%3E%3C/svg%3E");
     -webkit-mask-size: 1em;
@@ -457,7 +485,6 @@ body {
   clip: rect(1px, 1px, 1px, 1px); /* from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility */
 }
 
-// todo we have a lot of ctrl-focus vars. need to extend to be better
 // todo do we need radioElement beside RadioGroupElement ?
 
 // todo animation for checkboxes/slider onfocus (backcolor)
