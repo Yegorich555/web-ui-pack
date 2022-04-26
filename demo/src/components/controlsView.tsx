@@ -154,6 +154,7 @@ export default function ControlsView() {
                 aria-autocomplete="list"
                 aria-activedescendant="itemId2"
                 placeholder=" "
+                defaultValue="Selected 6 of 10"
               />
               {/* todo how to suppress reading 'blank' - we need to leave extra value 'Selected 1 of 3' and made it transparent via input { opacity:0 } */}
               <strong>
@@ -174,7 +175,7 @@ export default function ControlsView() {
             <span>
               <span aria-hidden>Item 1</span>
               <span aria-hidden>Some long value</span>
-              <span aria-hidden>Va 2</span>
+              <span aria-hidden>Vag 2</span>
               <input
                 role="combobox"
                 aria-expanded={false}
@@ -184,6 +185,7 @@ export default function ControlsView() {
                 aria-autocomplete="list"
                 aria-activedescendant="itemId2"
                 placeholder=" "
+                defaultValue="Selected 3 of 5"
               />
               {/* todo how to suppress reading 'blank' - we need to leave extra value 'Selected 1 of 3' and made it transparent via input { opacity:0 } */}
               <strong>
@@ -244,7 +246,7 @@ export default function ControlsView() {
             </label>
             <label>
               <input type="radio" name="w1" />
-              <span>V4</span>
+              <span>g4</span>
             </label>
             <label>
               <input type="radio" name="w1" />
