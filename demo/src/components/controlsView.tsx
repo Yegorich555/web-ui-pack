@@ -163,6 +163,64 @@ export default function ControlsView() {
           </ul> */}
         </div>
 
+        <div className={`${styles.common} ${styles.textControl} ${styles.combobox} ${styles.multiselect}`}>
+          <label onMouseDown={(e) => !(e.target instanceof HTMLInputElement) && e.preventDefault()}>
+            <span>
+              <span aria-hidden>Item 1</span>
+              <span aria-hidden>Some long value</span>
+              <span aria-hidden>Va 2</span>
+              <input
+                role="combobox"
+                aria-expanded={false}
+                aria-haspopup="listbox"
+                aria-owns="menuId2"
+                aria-controls="menuId2"
+                aria-autocomplete="list"
+                aria-activedescendant="itemId2"
+                placeholder=" "
+              />
+              {/* todo how to suppress reading 'blank' - we need to leave extra value 'Selected 1 of 3' and made it transparent via input { opacity:0 } */}
+              <strong>
+                MultiSelectControl
+                {/* <span className={styles["wup-hide"]}>Selected 1 of 3</span> */}
+              </strong>
+            </span>
+          </label>
+          {/* <ul id="menuId2" role="listbox">
+            <li role="option" aria-selected={false} id="itemId2">
+              Puns
+            </li>
+          </ul> */}
+        </div>
+
+        <div className={`${styles.common} ${styles.textControl} ${styles.combobox} ${styles.multiselect}`}>
+          {/* todo onMouseDown > prevent only when input is already focused */}
+          <label onMouseDown={(e) => !(e.target instanceof HTMLInputElement) && e.preventDefault()}>
+            <span>
+              <input
+                role="combobox"
+                aria-expanded={false}
+                aria-haspopup="listbox"
+                aria-owns="menuId2"
+                aria-controls="menuId2"
+                aria-autocomplete="list"
+                aria-activedescendant="itemId2"
+                placeholder=" "
+              />
+              {/* todo how to suppress reading 'blank' - we need to leave extra value 'Selected 1 of 3' and made it transparent via input { opacity:0 } */}
+              <strong>
+                MultiSelectControl
+                {/* <span className={styles["wup-hide"]}>Selected 1 of 3</span> */}
+              </strong>
+            </span>
+          </label>
+          {/* <ul id="menuId2" role="listbox">
+            <li role="option" aria-selected={false} id="itemId2">
+              Puns
+            </li>
+          </ul> */}
+        </div>
+
         <div className={`${styles.common} ${styles.radioGroup}`} onMouseDown={(e) => e.preventDefault()}>
           <fieldset>
             <legend>RadioGroup</legend>
