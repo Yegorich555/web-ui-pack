@@ -39,13 +39,19 @@ export default function ControlsView() {
           }}
         /> */}
 
-        <div className={`${styles.common} ${styles.textControl}`}>
+        <div className={`${styles.common} ${styles.textControl}`} invalid="true">
           <label onMouseDown={(e) => !(e.target instanceof HTMLInputElement) && e.preventDefault()}>
             <span>
               <input
                 type="text"
                 placeholder=" "
-                defaultValue="very long long very long long long long long value dsdsadasdsdas"
+                // defaultValue="very long long very long long long long long value dsdsadasdsdas"
+                ref={(el) => {
+                  if (el) {
+                    el.setCustomValidity("Invalid value");
+                    el.required = true;
+                  }
+                }}
               />
               <strong>TextControl</strong>
             </span>

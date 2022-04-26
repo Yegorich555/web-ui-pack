@@ -9,6 +9,7 @@
   --ctrl-back: #fff;
   --ctrl-border-radius: var(--border-radius, 6px);
   --ctrl-err: red;
+  --ctrl-err-border: var(--ctrl-err);
   --cltr-icon: var(--ctrl-label);
   --wup-icon-remove: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M674.515 93.949a45.925 45.925 0 0 0-65.022 0L384.001 318.981 158.509 93.487a45.928 45.928 0 0 0-65.022 0c-17.984 17.984-17.984 47.034 0 65.018l225.492 225.494L93.487 609.491c-17.984 17.984-17.984 47.034 0 65.018s47.034 17.984 65.018 0l225.492-225.492 225.492 225.492c17.984 17.984 47.034 17.984 65.018 0s17.984-47.034 0-65.018L449.015 383.999l225.492-225.494c17.521-17.521 17.521-47.034 0-64.559z'/%3E%3C/svg%3E");
   // todo button clear on controls
@@ -18,6 +19,7 @@
   position: relative;
   border-radius: var(--ctrl-border-radius);
   background: var(--ctrl-back);
+  cursor: pointer;
 
   &:focus-within {
     outline: 2px solid var(--ctrl-focus);
@@ -48,8 +50,18 @@
   }
 
   &[invalid] {
-    box-shadow: 0 0 3px 0 var(--ctrl-err-border, var(--ctrl-err));
-    outline-color: var(--ctrl-err-border, var(--ctrl-err));
+    box-shadow: 0 0 3px 0 var(--ctrl-err-border);
+    outline-color: var(--ctrl-err-border);
+  }
+
+  @media (pointer: fine), (hover) {
+    &:hover {
+      box-shadow: 0 0 3px 1px var(--ctrl-focus);
+    }
+
+    &[invalid]:hover {
+      box-shadow: 0 0 3px 1px var(--ctrl-err-border);
+    }
   }
 
   label {
@@ -159,8 +171,6 @@
     top: 0.2em;
     transform: scale(0.9);
   }
-
-  // todo hover effect
 }
 
 .slidebox {
@@ -369,7 +379,6 @@
 
     font-weight: normal;
     text-decoration: none;
-    cursor: default;
   }
 
   label {
@@ -436,11 +445,11 @@
   --ctrl-combo-icon-size: 1em;
   --ctrl-combo-icon-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m16.078 258.214 329.139 329.139c21.449 21.449 56.174 21.449 77.567 0l329.139-329.139c21.449-21.449 21.449-56.174 0-77.567s-56.174-21.449-77.567 0L384 471.003 93.644 180.647c-21.449-21.449-56.173-21.449-77.567 0s-21.449 56.173 0 77.567z'/%3E%3C/svg%3E");
 
-  // label::before {
-  //   content: "";
-  //   width: 1em;
-  //   background-color: var(--ctrl-combo-icon-after);
-  // }
+  cursor: pointer;
+
+  input {
+    cursor: text;
+  }
 
   label::after {
     content: "";
