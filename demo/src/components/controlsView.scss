@@ -43,6 +43,7 @@
   &[disabled] {
     opacity: 0.8;
     cursor: not-allowed;
+    -webkit-user-select: none;
     user-select: none;
 
     > * {
@@ -233,7 +234,7 @@
       position: absolute;
       height: var(--ctrl-slide-size-spot);
       width: var(--ctrl-slide-size-spot);
-      left: 0;
+      left: -1px; // to prevent edge-cutting on render
       top: 50%;
       transform: translateY(-50%);
       background: var(--ctrl-slide-off);
@@ -251,7 +252,7 @@
 
     &::before {
       background: var(--ctrl-slide-on);
-      left: calc(100% - 1.4em);
+      left: calc(100% - var(--ctrl-slide-size-w) + var(--ctrl-slide-size-spot) + 1px);
     }
   }
 
