@@ -893,9 +893,9 @@ declare global {
           onWillHide: never;
           /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willShow') instead */
           onWillShow: never;
-          /** Result position; use this to restyle animation etc. */
+          /** @readonly Result position; use this to restyle animation etc. */
           readonly position: "top" | "left" | "bottom" | "right";
-          /** Hide state; use this to hide-animation */
+          /** @readonly Hide state; use this to hide-animation */
           readonly hide: "";
         }>;
     }
