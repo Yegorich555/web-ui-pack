@@ -262,6 +262,20 @@ export default function ControlsView() {
             </label>
           </fieldset>
         </div>
+
+        <div className={`${styles.common} ${styles.radioGroup}`} onMouseDown={(e) => e.preventDefault()}>
+          <fieldset aria-required>
+            <legend>RadioGroup</legend>
+            <label>
+              <input type="radio" name="w2" />
+              <span>Value 1</span>
+            </label>
+            <label>
+              <input type="radio" name="w2" />
+              <span>Value 2</span>
+            </label>
+          </fieldset>
+        </div>
       </form>
     </Page>
   );

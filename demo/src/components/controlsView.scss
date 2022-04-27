@@ -106,7 +106,8 @@
     cursor: inherit;
   }
 
-  input:required + * {
+  input:required + *,
+  fieldset[aria-required] > legend {
     &::after {
       content: "*";
       font-size: larger;
