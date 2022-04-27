@@ -10,6 +10,8 @@ const appendedStyles = new Set<string>();
 const styleElement = document.createElement("style");
 document.head.prepend(styleElement);
 
+let lastUniqueNum = 0;
+
 /** Basic abstract class for every component in web-ui-pack */
 export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.EventMap> extends HTMLElement {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
@@ -23,6 +25,11 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   /** StyleContent related to component */
   static get style(): string {
     return "";
+  }
+
+  /** Get unique id for html elements; Every getter returns new id */
+  static get uniqueId(): string {
+    return `wup${++lastUniqueNum}`;
   }
 
   /** Options that applied to element */

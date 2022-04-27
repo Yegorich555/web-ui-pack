@@ -5,9 +5,9 @@ export default function ControlsView() {
   return (
     <Page header="Controls" link="#textControl">
       <form>
-        {/* <wup-text-ctrl
+        <wup-text-ctrl
+          disabled
           class={`${styles.common} ${styles.textControl}`}
-          invalid
           ref={(el) => {
             if (el) {
               el.$options.label =
@@ -19,25 +19,23 @@ export default function ControlsView() {
         />
         <wup-text-ctrl
           class={`${styles.common} ${styles.textControl}`}
-          disabled
           ref={(el) => {
             if (el) {
               el.$options.label = "TextControl - disabled";
-              el.$options.disabled = true; // todo implement disabled
+              el.$options.disabled = true;
             }
           }}
         />
         <wup-text-ctrl
           class={`${styles.common} ${styles.textControl}`}
-          disabled
           ref={(el) => {
             if (el) {
               el.$options.label = "TextControl - disabled";
-              el.$options.disabled = true; // todo implement disabled
+              el.$options.disabled = true;
               el.$value = "some value";
             }
           }}
-        /> */}
+        />
 
         <div className={`${styles.common} ${styles.textControl}`} invalid="true">
           <label onMouseDown={(e) => !(e.target instanceof HTMLInputElement) && e.preventDefault()}>
