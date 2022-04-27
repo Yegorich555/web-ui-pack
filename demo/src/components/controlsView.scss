@@ -452,7 +452,7 @@
 
   cursor: pointer;
 
-  input {
+  input:not(:placeholder-shown) {
     cursor: text;
   }
 
