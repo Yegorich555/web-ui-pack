@@ -9,6 +9,14 @@ import onEvent, { onEventType } from "./helpers/onEvent";
 // theoritcally such single appending is faster than using :host inside shadowComponent
 const appendedStyles = new Set<string>();
 const styleElement = document.createElement("style");
+/* from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility */
+styleElement.append(`.wup-hide {
+                        position: absolute;
+                        height: 1px;
+                        width: 1px;
+                        overflow: hidden;
+                        clip: rect(1px, 1px, 1px, 1px);
+                      }`);
 document.head.prepend(styleElement);
 
 let lastUniqueNum = 0;

@@ -13,7 +13,7 @@ export default class WUPPopupArrowElement extends HTMLElement {
       const s = document.createElement("style");
       s.textContent = `
           wup-popup-arrow {
-            z-index: 99999;
+            z-index: 90001;
             position: fixed;
             top: 0; left: 0;
             width:1.2rem; height:0.6rem;

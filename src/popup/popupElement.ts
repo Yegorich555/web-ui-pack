@@ -89,10 +89,11 @@ export default class WUPPopupElement<
     hoverHideTimeout: 500,
   };
 
+  /** StyleContent related to component */
   static get style(): string {
     return `
       :host {
-        z-index: 99998;
+        z-index: 90000;
         display: none;
         position: fixed!important;
         top: 0; left: 0;
@@ -326,8 +327,13 @@ export default class WUPPopupElement<
   protected override gotAttributeChanged(name: string, oldValue: string, newValue: string): void {
     super.gotAttributeChanged(name, oldValue, newValue);
     // debounce filter
-    this.#attrTimer && clearTimeout(this.#attrTimer);
-    this.#attrTimer = window.setTimeout(() => this.#reinit());
+    if (this.#attrTimer) {
+      return;
+    }
+    this.#attrTimer = window.setTimeout(() => {
+      this.#attrTimer = undefined;
+      this.#reinit();
+    });
   }
 
   /** Defines target on show; @returns HTMLElement | Error */

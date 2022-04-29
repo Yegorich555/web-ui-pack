@@ -4,16 +4,21 @@ import styles from "./controlsView.scss";
 export default function ControlsView() {
   return (
     <Page header="Controls" link="#textControl">
-      <form>
+      <form autoComplete="off">
         <wup-text-ctrl
-          disabled
+          // disabled
           class={`${styles.common} ${styles.textControl}`}
           ref={(el) => {
             if (el) {
               el.$options.label =
                 "TextControl TextControl TextControlTextControl TextControl TextControl TextControl TextControl";
-              el.$refs.input.setCustomValidity("Invalid value");
-              el.$refs.input.required = true;
+              // el.$refs.input.required = true;
+              el.$options.validations = {
+                required: true,
+                max: 10,
+                min: (v, ctrl) => v.length < 2 && "This is custom error",
+              };
+              el.$showError("Very huge big message Very huge big message Very huge big message Very huge big message");
             }
           }}
         />
@@ -22,7 +27,7 @@ export default function ControlsView() {
           ref={(el) => {
             if (el) {
               el.$options.label = "TextControl - disabled";
-              el.$options.disabled = true;
+              el.$options.readOnly = true;
             }
           }}
         />
