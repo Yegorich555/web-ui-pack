@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // eslint-disable-next-line max-classes-per-file
+import focusFirst from "./helpers/focusFirst";
 import observer, { Observer } from "./helpers/observer";
 import onEvent, { onEventType } from "./helpers/onEvent";
 
@@ -126,6 +127,11 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   /** Returns true if element is appended (result of setTimeout on connectedCallback) */
   get $isReady() {
     return this.#isReady;
+  }
+
+  /** Try to focus self or first possible children; returns true if succesful */
+  focus(): boolean {
+    return focusFirst(this);
   }
 
   #isReady = false;

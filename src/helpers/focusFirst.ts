@@ -4,13 +4,17 @@
  * @return {Boolean} true if focus is fired
  */
 export default function focusFirst(element: HTMLElement | Pick<HTMLElement, "focus">): boolean {
+  const parentElement = element;
+
   if (element instanceof HTMLElement) {
     const prev = document.activeElement;
     const tryFocus = (el: HTMLElement): boolean => {
       if (prev === el) {
         return true;
       }
-      el.focus();
+      if (parentElement !== el) {
+        el.focus();
+      }
       // such checking required because elements can be indirect disabled or hidden: <fieldset disabled><input/></fieldset>
       return document.activeElement !== prev;
     };
