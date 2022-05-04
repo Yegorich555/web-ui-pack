@@ -51,10 +51,7 @@ export default class WUPPopupElement<
   Events extends WUPPopup.EventMap = WUPPopup.EventMap
 > extends WUPBaseElement<Events> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
-  // @ts-ignore
-  protected get ctr(): typeof WUPPopupElement {
-    return this.constructor as typeof WUPPopupElement;
-  }
+  #ctr = this.constructor as typeof WUPPopupElement;
 
   static $placements = PopupPlacements;
   static $placementAttrs = {
@@ -231,9 +228,9 @@ export default class WUPPopupElement<
   }
 
   $options: WUPPopup.Options = {
-    ...this.ctr.$defaults,
-    placement: [...this.ctr.$defaults.placement],
-    offset: [...this.ctr.$defaults.offset],
+    ...this.#ctr.$defaults,
+    placement: [...this.#ctr.$defaults.placement],
+    offset: [...this.#ctr.$defaults.offset],
   };
 
   protected override _opts = this.$options;

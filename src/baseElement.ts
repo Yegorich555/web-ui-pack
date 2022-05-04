@@ -24,9 +24,7 @@ let lastUniqueNum = 0;
 /** Basic abstract class for every component in web-ui-pack */
 export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.EventMap> extends HTMLElement {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
-  protected get ctr(): typeof WUPBaseElement {
-    return this.constructor as typeof WUPBaseElement;
-  }
+  #ctr = this.constructor as typeof WUPBaseElement;
 
   /** Options that need to watch for changes; use gotOptionsChanged() */
   static observedOptions?: Set<keyof Record<string, any>>;
@@ -70,7 +68,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
       Object.defineProperty(this, "$options", {
         set: this.#setOptions,
         get: () => {
-          const watched = this.ctr.observedOptions;
+          const watched = this.#ctr.observedOptions;
           if (!watched?.size) {
             return this._opts;
           }
@@ -115,14 +113,14 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     this.#optsObserved = undefined;
     this.#removeObserved = undefined;
 
-    if (!this.ctr.observedOptions?.size) {
+    if (!this.#ctr.observedOptions?.size) {
       return;
     }
 
     if (this.#isReady && prev.valueOf() !== v.valueOf()) {
       const props: string[] = [];
       // eslint-disable-next-line no-restricted-syntax
-      for (const [k] of this.ctr.observedOptions.entries()) {
+      for (const [k] of this.#ctr.observedOptions.entries()) {
         if (this._opts[k] !== prev[k]) {
           props.push(k);
         }
