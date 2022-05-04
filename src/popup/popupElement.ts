@@ -83,6 +83,7 @@ export default class WUPPopupElement<
     arrowOffset: [0, 0],
     toFitElement: document.body,
     minWidthByTarget: false,
+    maxWidthByTarget: false,
     minHeightByTarget: false,
     showCase: ShowCases.onClick,
     hoverShowTimeout: 200,
@@ -668,7 +669,7 @@ export default class WUPPopupElement<
     fit.el = fitEl;
 
     this.style.display = "block";
-    this.setMaxWidth(""); // resetting is required to get default size
+    this.setMaxWidth(this._opts.maxWidthByTarget ? `${tdef.width}px` : ""); // resetting is required to get default size
     this.setMaxHeight(""); // resetting is required to get default size
     if (this.#arrowElement) {
       this.#arrowElement.style.display = "";

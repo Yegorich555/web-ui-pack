@@ -45,6 +45,8 @@ export namespace WUPPopup {
     toFitElement?: HTMLElement | null;
     /** Sets minWidth 100% of targetWidth */
     minWidthByTarget: boolean;
+    /** Sets maxWidth 100% of targetWidth */
+    maxWidthByTarget: boolean;
     /** Sets minHeight 100% of targetWidth */
     minHeightByTarget: boolean;
     /** Case when popup need to show; default is `onClick`

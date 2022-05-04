@@ -483,7 +483,7 @@ describe("popupElement", () => {
     expect(spyHide).lastCalledWith(6);
   });
 
-  test("$options.minWidthByTarget/minHeightByTarget", () => {
+  test("$options.minWidth/minHeight/maxWidth by target", () => {
     // just for coverage
     /** @type typeof el */
     const a = document.createElement(el.tagName);
@@ -507,6 +507,15 @@ describe("popupElement", () => {
     expect(a.style.minWidth).toBeDefined();
     expect(a.style.minHeight).toBeDefined();
     jest.clearAllTimers();
+
+    /** @type typeof el */
+    const a3 = document.createElement(el.tagName);
+    a3.$options.showCase = 0; // always
+    a3.$options.maxWidthByTarget = true;
+    document.body.append(a);
+    jest.advanceTimersToNextTimer(); // wait for ready/init
+    // WARN: layout impossible to test with unit; all layout tests see in e2e
+    expect(a3.style.maxWidth).toBeDefined();
   });
 
   test("$hide()/$show()", () => {
