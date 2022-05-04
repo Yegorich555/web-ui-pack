@@ -10,7 +10,7 @@ import onEvent, { onEventType } from "./helpers/onEvent";
 const appendedStyles = new Set<string>();
 const styleElement = document.createElement("style");
 /* from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility */
-styleElement.append(`.wup-hide {
+styleElement.append(`.wup-hidden {
                         position: absolute;
                         height: 1px;
                         width: 1px;

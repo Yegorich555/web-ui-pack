@@ -15,10 +15,10 @@ export default function ControlsView() {
               // el.$refs.input.required = true;
               el.$options.validations = {
                 required: true,
-                max: 10,
+                // max: 10,
                 min: (v, ctrl) => v.length < 2 && "This is custom error",
               };
-              el.$showError("Very huge big message Very huge big message Very huge big message Very huge big message");
+              // el.$showError("Very huge big message Very huge big message Very huge big message Very huge big message");
             }
           }}
         />

@@ -17,8 +17,10 @@ interface WUPBaseControl<T> {
   readonly $isChanged: boolean;
   /** Returns true if control is valid; to fire validation use $validate() */
   readonly $isValid: boolean;
-  /** Check validity and show error if not swtich off; canShowError is true by default */
-  $validate(canShowError?: boolean): boolean;
+  /** Check validity and show error if not swtich off; canShowError is true by default
+   * @returns errorMessage or false (if valid)
+   */
+  $validate(canShowError?: boolean): string | false;
 }
 
 export type Validation<T, ST, C extends WUPBaseControl<T> = WUPBaseControl<T>> = (
@@ -98,6 +100,13 @@ export interface TextControlOptions<T = string, V extends TextControlValidation<
   focusDebounceMs?: number;
 }
 
+export interface WUPBaseControlEventMap extends WUP.EventMap {
+  /** Fires after every UI-change (changes by user - not programmatically) */
+  $change: Event;
+  /** Fires after popup is hidden */
+  $validate: Event;
+}
+
 /**
  * @tutorial innerHTML @example
  * <label>
@@ -107,7 +116,10 @@ export interface TextControlOptions<T = string, V extends TextControlValidation<
  *   </span>
  * </label>
  */
-export default class WUPTextControl<T = string> extends WUPBaseElement implements WUPBaseControl<T> {
+export default class WUPTextControl<T = string, Events extends WUPBaseControlEventMap = WUPBaseControlEventMap>
+  extends WUPBaseElement<Events>
+  implements WUPBaseControl<T>
+{
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   // @ts-ignore
   protected get ctr(): typeof WUPTextControl {
@@ -190,6 +202,8 @@ export default class WUPTextControl<T = string> extends WUPBaseElement implement
     }
   }
 
+  $isDirty = false;
+
   get $isEmpty(): boolean {
     return this.ctr.isEmpty(this.#rawValue);
   }
@@ -198,11 +212,16 @@ export default class WUPTextControl<T = string> extends WUPBaseElement implement
     return this.ctr.isEqual(this.$value, this.#initValue);
   }
 
+  #isValid?: boolean;
   get $isValid(): boolean {
-    return this.$validate(false);
+    if (this.#isValid == null) {
+      this.goValidate(ValidateFromCases.onInit, false);
+    }
+
+    return this.#isValid as boolean;
   }
 
-  $validate(canShowError = true): boolean {
+  $validate(canShowError = true): string | false {
     return this.goValidate(ValidateFromCases.onManualCall, canShowError);
   }
 
@@ -302,18 +321,19 @@ export default class WUPTextControl<T = string> extends WUPBaseElement implement
     }
   }
 
+  #wasValid = false;
   #validTimer?: number;
-  protected goValidate(validateFromCase: ValidateFromCases, canShowError = true) {
-    // todo fire onValidate event
+  protected goValidate(fromCase: ValidateFromCases, canShowError = true): string | false {
     const vls = this._opts.validations;
     if (!vls) {
-      return true;
+      this.#isValid = true;
+      return false;
     }
 
-    let msg = "";
+    let errMsg = "";
     const v = this.$value as unknown as string;
 
-    const hasErr = Object.keys(vls).some((k) => {
+    Object.keys(vls).some((k) => {
       const vl = vls[k as "required"];
 
       let err: false | string;
@@ -329,28 +349,41 @@ export default class WUPTextControl<T = string> extends WUPBaseElement implement
       }
 
       if (err !== false) {
-        msg = err;
+        errMsg = err;
         return true;
       }
 
       return false;
     });
 
+    this.#isValid = !errMsg;
     this.#validTimer && clearTimeout(this.#validTimer);
 
-    if (hasErr) {
+    if (fromCase === ValidateFromCases.onInput && this._opts.validationCase & ValidationCases.onChangeSmart) {
+      if (errMsg) {
+        if (!this.#wasValid) {
+          canShowError = false;
+        }
+      } else {
+        this.#wasValid = true;
+      }
+    }
+
+    setTimeout(() => this.fireEvent("$validate", { cancelable: false }));
+
+    if (errMsg) {
       if (canShowError) {
-        if (validateFromCase === ValidateFromCases.onInput) {
-          this.#validTimer = window.setTimeout(() => this.goShowError(msg), this._opts.validityDebounceMs);
+        if (fromCase === ValidateFromCases.onInput) {
+          this.#validTimer = window.setTimeout(() => this.goShowError(errMsg), this._opts.validityDebounceMs);
         } else {
-          this.goShowError(msg);
+          this.goShowError(errMsg);
         }
       }
-      return false;
+      return errMsg;
     }
 
     this.goHideError();
-    return true;
+    return false;
   }
 
   protected goShowError(err: string) {
@@ -365,7 +398,7 @@ export default class WUPTextControl<T = string> extends WUPBaseElement implement
         WUPPopupElement.$placements.$bottom.$start.$resizeWidth,
         WUPPopupElement.$placements.$top.$start.$resizeWidth,
       ];
-      // todo p.$options.maxWidthByParent
+      p.$options.maxWidthByTarget = true;
       p.setAttribute("error", "");
       p.setAttribute("aria-live", "off"); // 'off' (not 'polite') because popup changes display block>none when it hidden after scrolling
       p.id = this.ctr.uniqueId;
@@ -375,7 +408,7 @@ export default class WUPTextControl<T = string> extends WUPBaseElement implement
 
       const hiddenLbl = p.appendChild(document.createElement("span"));
       hiddenLbl.textContent = `Error${this._opts.name ? ` for ${this._opts.name}` : ""}: `;
-      hiddenLbl.className = "wup-hide";
+      hiddenLbl.className = "wup-hidden";
 
       p.appendChild(document.createElement("span"));
       p.$show();
@@ -399,21 +432,19 @@ export default class WUPTextControl<T = string> extends WUPBaseElement implement
 
   #inputTimer?: number;
   protected onInput(e: Event & { currentTarget: HTMLInputElement }) {
-    // todo fire onChange event
+    this.$isDirty = true;
+
     const v = e.currentTarget.value;
     this.#validTimer && clearTimeout(this.#validTimer);
 
     const process = () => {
       this.#rawValue = v as any;
       // todo parse value here ???
-
       const c = this._opts.validationCase;
-      if (c & ValidationCases.onChange) {
-        this.goValidate(ValidateFromCases.onInput);
-      } else if (c & ValidationCases.onChangeSmart) {
-        // todo implement
+      if (c & ValidationCases.onChange || c & ValidationCases.onChangeSmart) {
         this.goValidate(ValidateFromCases.onInput);
       }
+      this.fireEvent("$change", { cancelable: false });
     };
 
     if (this._opts.debounceMs) {
@@ -477,6 +508,11 @@ declare global {
 
           /** @readonly Use [invalid] for styling */
           readonly invalid: boolean;
+
+          /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$validate') instead */
+          onValidate: never;
+          /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
+          onChange: never;
         }>;
     }
   }
