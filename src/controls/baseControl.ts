@@ -1,9 +1,9 @@
 /* eslint-disable no-use-before-define */
-import WUPBaseElement, { WUP } from "./baseElement";
-import isEqual from "./helpers/isEqual";
-import onFocusLostEv from "./helpers/onFocusLost";
+import WUPBaseElement, { WUP } from "../baseElement";
+import isEqual from "../helpers/isEqual";
+import onFocusLostEv from "../helpers/onFocusLost";
 // eslint-disable-next-line import/named
-import WUPPopupElement, { ShowCases } from "./popup/popupElement";
+import WUPPopupElement, { ShowCases } from "../popup/popupElement";
 
 export namespace WUPControlTypes {
   export const enum ValidationCases {

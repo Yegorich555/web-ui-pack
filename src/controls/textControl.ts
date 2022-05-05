@@ -1,6 +1,6 @@
 /* eslint-disable no-use-before-define */
 import WUPBaseControl, { WUPControlTypes } from "./baseControl";
-import { JSXCustomProps } from "./baseElement";
+import { JSXCustomProps } from "../baseElement";
 
 export type TextControlValidationMap = WUPControlTypes.ValidationMap & {
   min: number;
