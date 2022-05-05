@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-interface */
 /* eslint-disable no-use-before-define */
 import WUPBaseControl, { WUPControlTypes } from "./baseControl";
 import { JSXCustomProps } from "./baseElement";
@@ -8,9 +7,14 @@ export type TextControlValidationMap = WUPControlTypes.ValidationMap & {
   max: number;
 };
 
-type AllTypes = WUPControlTypes.Generics<string, TextControlValidationMap, WUPTextControl>;
-export type TextControlValidation = AllTypes["Validation"];
-export type TextControlOptions = AllTypes["Options"];
+export type TextControlAll<
+  ValueType = string, //
+  ValidationKeys extends TextControlValidationMap = TextControlValidationMap,
+  ControlType extends WUPTextControl<ValueType> = WUPTextControl<ValueType>
+> = WUPControlTypes.Generics<ValueType, ValidationKeys, ControlType>;
+
+export type TextControlValidation = TextControlAll["Validation"];
+export type TextControlOptions = TextControlAll["Options"];
 
 /**
  * @tutorial innerHTML @example
@@ -51,7 +55,7 @@ export default class WUPTextControl<
   // @ts-expect-error
   $options: Omit<TextControlOptions, "validationRules"> = {
     ...this.#ctr.$defaults,
-    // @ts-ignore
+    // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory
   };
 

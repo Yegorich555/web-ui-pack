@@ -37,7 +37,7 @@ export namespace WUPControlTypes {
     ValidationKeys extends ValidationMap,
     ControlType extends HTMLElement
   > = {
-    Validation: (value: ValueType, setValue: any, ctrl: ControlType) => false | string;
+    Validation: (value: ValueType, setValue: ValidationKeys[keyof ValidationKeys], ctrl: ControlType) => false | string;
     CustomValidation: (value: ValueType, ctrl: ControlType) => false | string;
     Options: {
       /** Title/label for control */
@@ -74,7 +74,7 @@ export namespace WUPControlTypes {
       validityDebounceMs: number;
       /** Debounce option for onFocustLost event (for validationCases.onFocusLost); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost; Default is 100ms */
       focusDebounceMs?: number;
-      /** Debounce time to wait for user finishes typing to start validate or provide onChange event
+      /** Debounce time to wait for user finishes typing to start validate and provide $change event
        *
        * Default is `0`;
        */
@@ -385,6 +385,7 @@ export default abstract class WUPBaseControl<
       ];
       p.$options.maxWidthByTarget = true;
       p.setAttribute("error", "");
+      // todo check if it works when err.msg is changed on the fly
       p.setAttribute("aria-live", "off"); // 'off' (not 'polite') because popup changes display block>none when it hidden after scrolling
       p.id = this.#ctr.uniqueId;
       this.$refInput.setAttribute("aria-describedby", p.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
