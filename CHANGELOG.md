@@ -1,12 +1,20 @@
 # Changelog
 
+## 0.0.6 (___)
+
+- [`FormControls`](README.md#controls)
+
+- [`PopupElement`](README.md#popupelement)
+  - Added option maxWidthByTarget
+  - Added promise-result for $hide()
+
 ## 0.0.5 (Apr 4, 2022)
 
 - Fixed helper [`onFocusLost`](<(README.md#helpers)>): missed callback when user clicks several times fast
 - [`PopupElement`](README.md#popupelement)
   - Fixed behavior on target-remove
-  - Deprecate shadow mode
-  - Fix half-pixel issue on arrow
+  - Deprecated shadow mode
+  - Fixed half-pixel issue on arrow
 
 ## 0.0.4 (Apr 1, 2022)
 

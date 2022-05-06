@@ -214,7 +214,7 @@ export default class WUPPopupElement<
 
     function detach() {
       if (popup) {
-        popup.$isOpen && popup.goHide(WUPPopup.HideCases.onFireHide);
+        popup.$isOpen && popup.goHide(WUPPopup.HideCases.onManuallCall);
         (popup as T).remove();
       }
       r.onRemoveRef();
@@ -227,6 +227,7 @@ export default class WUPPopupElement<
     return detach;
   }
 
+  /** All options for this popup. If you want to change common options @see WUPPopupElement.$defaults */
   $options: WUPPopup.Options = {
     ...this.#ctr.$defaults,
     placement: [...this.#ctr.$defaults.placement],
@@ -235,18 +236,22 @@ export default class WUPPopupElement<
 
   protected override _opts = this.$options;
 
+  /** Hide popup; It takes time for hidding if hide-animation is defined (vis styles) */
   $hide() {
-    const f = () => {
-      // isReady possible false when you fire $hide on disposed element
-      if (this.$isReady && this.#isOpen && this.goHide(WUPPopup.HideCases.onFireHide)) {
-        this._opts.showCase !== WUPPopup.ShowCases.always && this.init(); // re-init to applyShowCase
-      }
-    };
-    // timeout - possible when el is created but not attached to document yet
-    // eslint-disable-next-line no-unused-expressions
-    this.$isReady ? f() : setTimeout(f, 1); // 1ms need to wait forReady
+    return new Promise<void>((resolve) => {
+      const f = async () => {
+        // isReady possible false when you fire $hide on disposed element
+        if (this.$isReady && this.#isOpen && (await this.goHide(WUPPopup.HideCases.onManuallCall))) {
+          this._opts.showCase !== WUPPopup.ShowCases.always && this.init(); // re-init to applyShowCase
+        }
+        resolve();
+      };
+      // timeout - possible when el is created but not attached to document yet
+      this.$isReady ? f() : setTimeout(f, 1); // 1ms need to wait forReady
+    });
   }
 
+  /** Show popup; it disables option.showCase and enables by $hide() */
   $show() {
     const f = () => {
       if (!this.$isReady) {
@@ -257,10 +262,10 @@ export default class WUPPopupElement<
       }
     };
 
-    // eslint-disable-next-line no-unused-expressions
     this.$isReady ? f() : setTimeout(f, 1); // 1ms need to wait forReady
   }
 
+  /** Returns if popup is opened */
   get $isOpen(): boolean {
     return this.#isOpen;
   }
@@ -598,7 +603,7 @@ export default class WUPPopupElement<
         let isFixTransformAnimation = false;
 
         // waitFor only if was ordinary user-action
-        if (hideCase >= WUPPopup.HideCases.onFireHide && hideCase <= WUPPopup.HideCases.onTargetClick) {
+        if (hideCase >= WUPPopup.HideCases.onManuallCall && hideCase <= WUPPopup.HideCases.onTargetClick) {
           this.setAttribute("hide", "");
           const { animationDuration: aD, animationName: aN } = getComputedStyle(this);
           waitTimeout = Number.parseFloat(aD.substring(0, aD.length - 1)) * 1000 || 0;

@@ -17,7 +17,7 @@ export namespace WUPPopup {
     /** When $show() is fired again; possible by firing $show() or changing attr `placement` */
     onShowAgain = 0,
     /** When $hide() is fired programmatically */
-    onFireHide,
+    onManuallCall,
     onMouseLeave,
     onFocusOut,
     onOutsideClick,
@@ -97,15 +97,5 @@ export namespace WUPPopup {
     $willHide: Event;
     /** Fires after popup is hidden */
     $hide: Event;
-  }
-
-  export interface Element {
-    $options: Options;
-    /** Show popup; it disables option.showCase and enables by $hide() */
-    $show: () => void;
-    /** Hide popup */
-    $hide: () => void;
-    /** Current state */
-    readonly $isOpen: boolean;
   }
 }
