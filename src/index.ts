@@ -2,6 +2,7 @@ export { default as WUPBaseElement } from "./baseElement";
 // export * from "./baseElement"; it doesn't work with coverage
 export { default as WUPPopupElement } from "./popup/popupElement";
 export { default as WUPTextControl } from "./controls/textControl";
+export { default as WUPSelectControl } from "./controls/select";
 
 export { default as findScrollParent } from "./helpers/findScrollParent";
 export { default as focusFirst } from "./helpers/focusFirst";

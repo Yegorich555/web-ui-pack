@@ -19,7 +19,7 @@ export default function popupListenTarget(
     focusDebounceMs?: number;
   },
   /** If succesfull callback must return HTMLElement */
-  onShow: (showCase: WUPPopup.ShowCases) => HTMLElement | null,
+  onShow: (showCase: WUPPopup.ShowCases) => HTMLElement | null | Promise<HTMLElement | null>,
   onHide: (hideCase: WUPPopup.HideCases) => boolean | Promise<boolean>
 ): {
   /** Fire it when element is removed manually (to remove all added related eventListeners) */
@@ -55,8 +55,8 @@ export default function popupListenTarget(
     onShowCallbacks.length = 0;
   }
 
-  function show(showCase: WUPPopup.ShowCases): boolean {
-    openedEl = onShow(showCase);
+  async function show(showCase: WUPPopup.ShowCases): Promise<boolean> {
+    openedEl = await onShow(showCase);
     if (openedEl) {
       onShowCallbacks.forEach((f) => onHideCallbacks.push(f()));
       return true;

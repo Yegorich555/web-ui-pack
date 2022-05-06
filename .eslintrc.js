@@ -46,7 +46,7 @@ module.exports = {
     "no-return-assign": ["error", "except-parens"],
     "no-underscore-dangle": 0,
     "unused-imports/no-unused-imports": "error",
-    "no-unused-expressions": ["error", { allowShortCircuit: true }],
+    "no-unused-expressions": ["error", { allowShortCircuit: true, allowTernary: true }],
     "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
     "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
     "no-plusplus": 0,

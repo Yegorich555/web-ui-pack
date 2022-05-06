@@ -1,21 +1,29 @@
 /* eslint-disable no-use-before-define */
-import WUPBaseControl, { WUPControlTypes } from "./baseControl";
-import { JSXCustomProps } from "../baseElement";
+import WUPBaseControl, { WUPBaseControlTypes } from "./baseControl";
 
-export type TextControlValidationMap = WUPControlTypes.ValidationMap & {
-  min: number;
-  max: number;
-};
+export namespace WUPTextControlTypes {
+  export type ValidationMap = WUPBaseControlTypes.ValidationMap & {
+    min: number;
+    max: number;
+  };
 
-export type TextControlAll<
-  ValueType = string, //
-  ValidationKeys extends TextControlValidationMap = TextControlValidationMap,
-  ControlType extends WUPTextControl<ValueType> = WUPTextControl<ValueType>
-> = WUPControlTypes.Generics<ValueType, ValidationKeys, ControlType>;
+  export type Generics<
+    ValueType = string, //
+    ValidationKeys extends ValidationMap = ValidationMap,
+    ControlType extends WUPTextControl<ValueType> = WUPTextControl<ValueType>
+  > = WUPBaseControlTypes.Generics<ValueType, ValidationKeys, ControlType>;
 
-export type TextControlValidation = TextControlAll["Validation"];
-export type TextControlOptions = TextControlAll["Options"];
+  export type Validation = Generics["Validation"];
+  export type ExtraOptions = {
+    /** Debounce time to wait for user finishes typing to start validate and provide $change event
+     *
+     * Default is `0`;
+     */
+    debounceMs: number;
+  };
 
+  export type Options<T = string> = Generics<T>["Options"] & ExtraOptions;
+}
 /**
  * @tutorial innerHTML @example
  * <label>
@@ -25,10 +33,10 @@ export type TextControlOptions = TextControlAll["Options"];
  *   </span>
  * </label>
  */
-export default class WUPTextControl<
-  T = string, //
-  Events extends WUPControlTypes.EventMap = WUPControlTypes.EventMap
-> extends WUPBaseControl<T, Events> {
+export default class WUPTextControl<ValueType = string> extends WUPBaseControl<
+  ValueType,
+  WUPBaseControlTypes.EventMap
+> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextControl;
 
@@ -41,23 +49,31 @@ export default class WUPTextControl<
      `;
   }
 
+  static provideInputValue<T, C extends WUPTextControl<T>>(v: T | undefined, ctrl: C): string | Promise<string> {
+    return v != null ? (v as any).toString() : "";
+  }
+
   /** Default options - applied to every element. Change it to configure default behavior */
   // @ts-expect-error - because validation 'required' is rewritten with incompatible ctrl
-  static $defaults: TextControlOptions = {
+  static $defaults: WUPTextControlTypes.Options = {
     ...WUPBaseControl.$defaults,
+    debounceMs: 0,
     validationRules: {
-      required: WUPBaseControl.$defaults.validationRules.required as TextControlValidation,
+      required: WUPBaseControl.$defaults.validationRules.required as WUPTextControlTypes.Validation,
       min: (v, setV) => v.length < setV && `Min length is ${setV} characters`,
       max: (v, setV) => v.length > setV && `Max length is ${setV} characters`,
     },
   };
 
   // @ts-expect-error
-  $options: Omit<TextControlOptions, "validationRules"> = {
+  $options: Omit<WUPTextControlTypes.Options<ValueType>, "validationRules"> = {
     ...this.#ctr.$defaults,
     // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory
   };
+
+  // @ts-expect-error
+  protected override _opts = this.$options;
 
   constructor() {
     super();
@@ -65,7 +81,7 @@ export default class WUPTextControl<
     this.$refInput.placeholder = " ";
   }
 
-  protected gotInit() {
+  protected override renderControl() {
     this.$refInput.id = this.#ctr.uniqueId;
     this.$refLabel.setAttribute("for", this.$refInput.id);
 
@@ -73,8 +89,35 @@ export default class WUPTextControl<
     s.appendChild(this.$refInput);
     s.appendChild(this.$refTitle);
     this.appendChild(this.$refLabel);
+  }
 
+  protected override connectedCallback() {
+    super.connectedCallback();
     this.appendEvent(this.$refInput, "input", this.onInput as any);
+  }
+
+  #inputTimer?: number;
+  protected onInput(e: Event & { currentTarget: HTMLInputElement }) {
+    this._validTimer && clearTimeout(this._validTimer);
+    const v = e.currentTarget.value;
+
+    if (this._opts.debounceMs) {
+      this.#inputTimer && clearTimeout(this.#inputTimer);
+      this.#inputTimer = window.setTimeout(() => this.setValue(v as any), this._opts.debounceMs);
+    } else {
+      this.setValue(v as any);
+    }
+  }
+
+  protected override setValue(v: ValueType | undefined) {
+    super.setValue(v);
+
+    const p = this.#ctr.provideInputValue(v, this);
+    if (p instanceof Promise) {
+      p.then((s) => (this.$refInput.value = s));
+    } else {
+      this.$refInput.value = p;
+    }
   }
 }
 
@@ -90,30 +133,8 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: JSXCustomProps<WUPTextControl> &
-        Partial<{
-          /** @deprecated Title/label for control; */
-          label: string;
-          /** @deprecated Property key of model; For name 'firstName' >> model['firstName'] */
-          name: string;
-          /** @deprecated Name to autocomplete by browser; by default it's equal to [name]; to disable autocomplete point empty string */
-          autoFillName: string;
-
-          /** Disallow edit/copy value */
-          disabled: boolean;
-          /** Disallow edit value */
-          readOnly: boolean;
-          /** Focus on init */
-          autoFocus: boolean;
-
-          /** @readonly Use [invalid] for styling */
-          readonly invalid: boolean;
-
-          /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$validate') instead */
-          onValidate: never;
-          /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
-          onChange: never;
-        }>;
+      // @ts-expect-error
+      [tagName]: WUPBaseControlTypes.JSXControlProps<WUPTextControl>;
     }
   }
 }

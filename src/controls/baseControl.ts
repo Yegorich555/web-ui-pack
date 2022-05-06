@@ -1,11 +1,11 @@
 /* eslint-disable no-use-before-define */
-import WUPBaseElement, { WUP } from "../baseElement";
+import WUPBaseElement, { JSXCustomProps, WUP } from "../baseElement";
 import isEqual from "../helpers/isEqual";
 import onFocusLostEv from "../helpers/onFocusLost";
 // eslint-disable-next-line import/named
 import WUPPopupElement, { ShowCases } from "../popup/popupElement";
 
-export namespace WUPControlTypes {
+export namespace WUPBaseControlTypes {
   export const enum ValidationCases {
     /** Wait for first user-change > wait for valid > wait for invalid >> show error;
      *  When invalid: wait for valid > hide error > wait for invalid > show error
@@ -52,8 +52,8 @@ export namespace WUPControlTypes {
       readOnly?: boolean;
       /** Default/init value */
       initValue?: ValueType;
-      /** When to validate control and show error; by default onChangeSmart & onFocusLost & onSubmit.
-       *  Validation by onSubmit impossible to disable
+      /** When to validate control and show error. Validation by onSubmit impossible to disable
+       *  @defaultValue onChangeSmart | onFocusLost | onSubmit
        */
       validationCase: ValidationCases;
       /** Rules defined in control */
@@ -70,19 +70,40 @@ export namespace WUPControlTypes {
             [K in keyof ValidationKeys]?: ValidationKeys[K] | ((value: ValueType, ctrl: ControlType) => false | string);
           }
         | { [k: string]: (value: ValueType, ctrl: ControlType) => false | string };
-      /** Wait for pointed time before show error (it's sumarized with $options.debounce); WARN: hide error without debounce */
+      /** Wait for pointed time before show error (it's sumarized with $options.debounce); WARN: hide error without debounce
+       *  @defaultValue 500
+       */
       validityDebounceMs: number;
       /** Debounce option for onFocustLost event (for validationCases.onFocusLost); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost; Default is 100ms */
       focusDebounceMs?: number;
-      /** Debounce time to wait for user finishes typing to start validate and provide $change event
-       *
-       * Default is `0`;
-       */
-      debounceMs: number;
     };
   };
 
   export type Options<T = string> = Generics<T, ValidationMap, WUPBaseControl>["Options"];
+
+  export type JSXControlProps<T extends WUPBaseControl> = JSXCustomProps<T> & {
+    /** @deprecated Title/label for control; */
+    label?: string;
+    /** @deprecated Property key of model; For name 'firstName' >> model['firstName'] */
+    name?: string;
+    /** @deprecated Name to autocomplete by browser; by default it's equal to [name]; to disable autocomplete point empty string */
+    autoFillName?: string;
+
+    /** Disallow edit/copy value */
+    disabled?: boolean;
+    /** Disallow edit value */
+    readOnly?: boolean;
+    /** Focus on init */
+    autoFocus?: boolean;
+
+    /** @readonly Use [invalid] for styling */
+    readonly invalid?: boolean;
+
+    /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$validate') instead */
+    onValidate?: never;
+    /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
+    onChange?: never;
+  };
 
   export interface EventMap extends WUP.EventMap {
     /** Fires after every UI-change (changes by user - not programmatically) */
@@ -93,14 +114,15 @@ export namespace WUPControlTypes {
 }
 
 export default abstract class WUPBaseControl<
-  T = string,
-  Events extends WUPControlTypes.EventMap = WUPControlTypes.EventMap
+  ValueType = any,
+  Events extends WUPBaseControlTypes.EventMap = WUPBaseControlTypes.EventMap,
+  OptionsType extends WUPBaseControlTypes.Options<ValueType> = WUPBaseControlTypes.Options<ValueType>
 > extends WUPBaseElement<Events> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseControl;
 
   /** Options that need to watch for changes; use gotOptionsChanged() */
-  static observedOptions = new Set<keyof WUPControlTypes.Options>([
+  static observedOptions = new Set<keyof WUPBaseControlTypes.Options>([
     "label",
     "name",
     "autoFillName",
@@ -109,7 +131,7 @@ export default abstract class WUPBaseControl<
   ]);
 
   /* Array of attribute names to listen for changes */
-  static get observedAttributes(): Array<keyof WUPControlTypes.Options> {
+  static get observedAttributes(): Array<keyof WUPBaseControlTypes.Options> {
     return ["label", "name", "autoFillName", "disabled", "readOnly"];
   }
 
@@ -137,45 +159,43 @@ export default abstract class WUPBaseControl<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUPControlTypes.Options = {
-    debounceMs: 0,
+  static $defaults: WUPBaseControlTypes.Options = {
     validityDebounceMs: 500,
-    validationCase: WUPControlTypes.ValidationCases.onChangeSmart | WUPControlTypes.ValidationCases.onFocusLost,
+    validationCase: WUPBaseControlTypes.ValidationCases.onChangeSmart | WUPBaseControlTypes.ValidationCases.onFocusLost,
     validationRules: {
       required: (v, setV) => setV && this.isEmpty(v) && "This field is required",
     },
   };
 
-  $options: Omit<WUPControlTypes.Options, "validationRules"> = {
+  $options: Omit<OptionsType, "validationRules"> = {
     ...this.#ctr.$defaults,
-    // @ts-ignore
+    // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory
   };
 
   protected override _opts = this.$options;
 
-  get #initValue(): T | undefined {
+  get #initValue(): ValueType | undefined {
     return this._opts.initValue as any;
   }
 
-  #rawValue: T | undefined;
-  /** Current (parsed) value of control */
-  get $value(): T | undefined {
-    return this.#rawValue; // todo implement parse from rawValue
+  #value: ValueType | undefined;
+  /** Current value of control */
+  get $value(): ValueType | undefined {
+    return this.#value; // todo implement parse from rawValue
   }
 
-  set $value(v: T | undefined) {
-    if (!isEqual(this.#rawValue, v)) {
-      this.#rawValue = v;
-      this.$refInput.value = v ? (v as any).toString() : "";
-    }
+  set $value(v: ValueType | undefined) {
+    const was = this.$isDirty;
+    this.setValue(v);
+    this.$isDirty = was;
   }
 
   $isDirty = false;
 
   /** Returns true if value is empty string or undefined */
   get $isEmpty(): boolean {
-    return this.#ctr.isEmpty(this.#rawValue);
+    return this.#ctr.isEmpty(this.#value);
   }
 
   /** Returns if value changed (by comparisson with initValue via static.isEqual option)
@@ -189,7 +209,7 @@ export default abstract class WUPBaseControl<
   /** Returns true if control is valid; to fire validation use $validate() */
   get $isValid(): boolean {
     if (this.#isValid == null) {
-      this.goValidate(WUPControlTypes.ValidateFromCases.onInit, false);
+      this.goValidate(WUPBaseControlTypes.ValidateFromCases.onInit, false);
     }
 
     return this.#isValid as boolean;
@@ -199,7 +219,7 @@ export default abstract class WUPBaseControl<
    * @returns errorMessage or false (if valid)
    */
   $validate(canShowError = true): string | false {
-    return this.goValidate(WUPControlTypes.ValidateFromCases.onManualCall, canShowError);
+    return this.goValidate(WUPBaseControlTypes.ValidateFromCases.onManualCall, canShowError);
   }
 
   $showError(err: string): void {
@@ -260,14 +280,13 @@ export default abstract class WUPBaseControl<
     }
 
     this.#isStopAttrListen = true;
-    /* eslint-disable no-unused-expressions */
     this._opts.disabled ? this.setAttribute("disabled", "") : this.removeAttribute("disabled");
     this._opts.readOnly ? this.setAttribute("readOnly", "") : this.removeAttribute("readOnly");
-    /* eslint-enable no-unused-expressions */
     this.#isStopAttrListen = false;
   }
 
-  protected abstract gotInit(): void;
+  /** Use this to append elements; can be fired ones */
+  protected abstract renderControl(): void;
 
   protected override gotReady() {
     super.gotReady();
@@ -281,7 +300,7 @@ export default abstract class WUPBaseControl<
     if (this.#isFirstConn) {
       this.#isFirstConn = false;
 
-      this.gotInit();
+      this.renderControl();
     }
 
     // this.appendEvent be removed by dispose()
@@ -291,12 +310,12 @@ export default abstract class WUPBaseControl<
       (e) => !(e.target instanceof HTMLInputElement) && e.preventDefault()
     );
 
-    if (this._opts.validationCase & WUPControlTypes.ValidationCases.onInit) {
-      !this.$isEmpty && this.goValidate(WUPControlTypes.ValidateFromCases.onInit);
+    if (this._opts.validationCase & WUPBaseControlTypes.ValidationCases.onInit) {
+      !this.$isEmpty && this.goValidate(WUPBaseControlTypes.ValidateFromCases.onInit);
     }
-    if (this._opts.validationCase & WUPControlTypes.ValidationCases.onFocusLost) {
+    if (this._opts.validationCase & WUPBaseControlTypes.ValidationCases.onFocusLost) {
       this.disposeLst.push(
-        onFocusLostEv(this, () => this.goValidate(WUPControlTypes.ValidateFromCases.onFocusLost), {
+        onFocusLostEv(this, () => this.goValidate(WUPBaseControlTypes.ValidateFromCases.onFocusLost), {
           debounceMs: this._opts.focusDebounceMs,
         })
       );
@@ -304,8 +323,8 @@ export default abstract class WUPBaseControl<
   }
 
   #wasValid = false;
-  #validTimer?: number;
-  protected goValidate(fromCase: WUPControlTypes.ValidateFromCases, canShowError = true): string | false {
+  protected _validTimer?: number;
+  protected goValidate(fromCase: WUPBaseControlTypes.ValidateFromCases, canShowError = true): string | false {
     const vls = this._opts.validations;
     if (!vls) {
       this.#isValid = true;
@@ -320,7 +339,7 @@ export default abstract class WUPBaseControl<
 
       let err: false | string;
       if (vl instanceof Function) {
-        err = vl(v, this as unknown as WUPBaseControl<string>);
+        err = vl(v as any, this as unknown as WUPBaseControl<string>);
       } else {
         const rules = this.#ctr.$defaults.validationRules;
         const r = rules[k as "required"];
@@ -339,11 +358,11 @@ export default abstract class WUPBaseControl<
     });
 
     this.#isValid = !errMsg;
-    this.#validTimer && clearTimeout(this.#validTimer);
+    this._validTimer && clearTimeout(this._validTimer);
 
     if (
-      fromCase === WUPControlTypes.ValidateFromCases.onInput &&
-      this._opts.validationCase & WUPControlTypes.ValidationCases.onChangeSmart
+      fromCase === WUPBaseControlTypes.ValidateFromCases.onInput &&
+      this._opts.validationCase & WUPBaseControlTypes.ValidationCases.onChangeSmart
     ) {
       if (errMsg) {
         if (!this.#wasValid) {
@@ -358,11 +377,7 @@ export default abstract class WUPBaseControl<
 
     if (errMsg) {
       if (canShowError) {
-        if (fromCase === WUPControlTypes.ValidateFromCases.onInput) {
-          this.#validTimer = window.setTimeout(() => this.goShowError(errMsg), this._opts.validityDebounceMs);
-        } else {
-          this.goShowError(errMsg);
-        }
+        this._validTimer = window.setTimeout(() => this.goShowError(errMsg), this._opts.validityDebounceMs);
       }
       return errMsg;
     }
@@ -416,30 +431,15 @@ export default abstract class WUPBaseControl<
     }
   }
 
-  // todo this event is wrong for checkboxes
-  #inputTimer?: number;
-  protected onInput(e: Event & { currentTarget: HTMLInputElement }) {
+  protected setValue(v: ValueType | undefined) {
     this.$isDirty = true;
+    this.#value = v;
 
-    const v = e.currentTarget.value;
-    this.#validTimer && clearTimeout(this.#validTimer);
-
-    const process = () => {
-      this.#rawValue = v as any;
-      // todo parse value here ???
-      const c = this._opts.validationCase;
-      if (c & WUPControlTypes.ValidationCases.onChange || c & WUPControlTypes.ValidationCases.onChangeSmart) {
-        this.goValidate(WUPControlTypes.ValidateFromCases.onInput);
-      }
-      this.fireEvent("$change", { cancelable: false });
-    };
-
-    if (this._opts.debounceMs) {
-      this.#inputTimer && clearTimeout(this.#inputTimer);
-      this.#inputTimer = window.setTimeout(() => process(), this._opts.debounceMs);
-    } else {
-      process();
+    const c = this._opts.validationCase;
+    if (c & WUPBaseControlTypes.ValidationCases.onChange || c & WUPBaseControlTypes.ValidationCases.onChangeSmart) {
+      this.goValidate(WUPBaseControlTypes.ValidateFromCases.onInput);
     }
+    this.fireEvent("$change", { cancelable: false });
   }
 
   protected override gotOptionsChanged(e: WUP.OptionEvent) {
