@@ -43,7 +43,7 @@ export namespace WUPSelectControlTypes {
     Extra = ExtraOptions<ValueType>
   > = WUPTextControlTypes.Generics<ValueType, ValidationKeys, Extra & ExtraOptions<ValueType>>;
 
-  export type Validation = Generics["Validation"];
+  export type Validation<T = any> = Generics<T>["Validation"];
   export type Options<T = any> = Generics<T>["Options"];
 }
 

@@ -2,15 +2,15 @@
 import WUPBaseControl, { WUPBaseControlTypes } from "./baseControl";
 
 export namespace WUPTextControlTypes {
-  export type ValidationMap = WUPBaseControlTypes.ValidationMap & {
-    min: number;
-    max: number;
-  };
-
   export type ExtraOptions = {
     /** Debounce time to wait for user finishes typing to start validate and provide $change event
      * @defaultValue 0; */
     debounceMs: number;
+  };
+
+  export type ValidationMap = WUPBaseControlTypes.ValidationMap & {
+    min: number;
+    max: number;
   };
 
   export type Generics<
@@ -19,8 +19,7 @@ export namespace WUPTextControlTypes {
     Extra = ExtraOptions
   > = WUPBaseControlTypes.Generics<ValueType, ValidationKeys, Extra & ExtraOptions>;
 
-  export type Validation = Generics["Validation"];
-
+  export type Validation<T = string> = Generics<T>["Validation"];
   export type Options<T = string> = Generics<T>["Options"];
 }
 /**
