@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from "react";
 import movable from "src/helpers/movable";
 // eslint-disable-next-line import/named
-import WUPPopupElement, { ShowCases } from "web-ui-pack/popup/popupElement";
+import WUPPopupElement, { WUPPopup, ShowCases } from "web-ui-pack/popup/popupElement";
 import styles from "./popupView.scss";
 
 // example of attach - use this to avoid overhelmed layout by closed popups
@@ -109,6 +109,25 @@ export default function Example2() {
           <br />
           <small>drag and move me</small>
         </button>
+
+        <button type="button">
+          Target <br />
+          <small>click me</small>
+        </button>
+        <wup-popup
+          class={styles.animPopup}
+          ref={(el) => {
+            if (el) {
+              setTimeout(() => {
+                el.$options.arrowEnable = false;
+              }, 200);
+              el.$options.toFitElement = document.querySelector("#fit") as HTMLElement;
+              el.$appendAnimation(WUPPopup.Animations.drawer);
+            }
+          }}
+        >
+          I have $appendAnimation(WUPPopup.Animations.drawer)
+        </wup-popup>
       </div>
     </>
   );

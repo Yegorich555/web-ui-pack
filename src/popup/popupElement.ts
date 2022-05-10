@@ -90,6 +90,10 @@ export default class WUPPopupElement<
   /** StyleContent related to component */
   static get style(): string {
     return `
+      :root {
+        --popup-shadow-size: 4px;
+        --popup-anim: 300ms;
+      }
       :host {
         z-index: 90000;
         display: none;
@@ -99,7 +103,7 @@ export default class WUPPopupElement<
         margin: 0;
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
-        box-shadow: 0 1px 4px 0 #00000033;
+        box-shadow: 0 1px var(--popup-shadow-size) 0 #00000033;
         background: white;
         text-overflow: ellipsis;
         overflow: auto;
@@ -120,6 +124,89 @@ export default class WUPPopupElement<
           to {opacity: 0;}
         }
        }
+
+      [anim="drawer"] {
+        animation: none;
+        background: none;
+        border: none;
+        padding: 0;
+        overflow: visible;
+        box-shadow: none;
+      }
+
+      [anim="drawer"] > div {
+        overflow: hidden;
+        background: inherit;
+        /* make box-shadow visible despite on overflow: hidden */
+        padding: var(--popup-shadow-size);
+        margin: calc(-1 * var(--popup-shadow-size));
+      }
+
+      [anim="drawer"] > div > * {
+        max-height: inherit;
+        max-width: inherit;
+        background: white;
+        border-radius: var(--border-radius, 6px);
+        padding: 4px;
+        box-shadow: 0 1px var(--popup-shadow-size) 0 #00000033;
+        box-sizing: border-box;
+        overflow: auto;
+      }
+
+      @media not all and (prefers-reduced-motion) {
+          @keyframes wup-popup-shadowFix {
+              from, to {
+                padding-top: 0;
+                margin-top: 1px;
+              }
+          }
+          @keyframes wup-popup-shadowFixTop {
+            from, to {
+              padding-bottom: 0;
+              margin-bottom: 1px;
+            }
+          }
+
+          @keyframes wup-popup-growOn { from { transform: translateY(calc(-100% - var(--popup-shadow-size))); } }
+          @keyframes wup-popup-growOff { to { transform: translateY(calc(-100% - var(--popup-shadow-size))); } }
+          @keyframes wup-popup-growOnTop { from { transform: translateY(calc(100% - var(--popup-shadow-size))); } }
+          @keyframes wup-popup-growOffTop { to { transform: translateY(calc(100% - var(--popup-shadow-size))); } }
+
+          [anim="drawer"] > div {
+            animation: wup-popup-shadowFix var(--popup-anim) ease-in-out forwards;
+          }
+          [anim="drawer"] > div > * {
+            animation: wup-popup-growOn var(--popup-anim) ease-in-out forwards;
+          }
+
+          [anim="drawer"][hide] {
+            animation: none;
+            animation-duration: var(--popup-anim);
+          }
+          [anim="drawer"][hide] > div {
+            padding-top: 0;
+            margin-top: 1px;
+          }
+          [anim="drawer"][hide] > div > * {
+            animation: wup-popup-growOff var(--popup-anim) ease-in-out forwards;
+          }
+
+          [anim="drawer"][position="top"] > div {
+            animation-name: wup-popup-shadowFixTop;
+          }
+          [anim="drawer"][position="top"] > div > * {
+            animation-name: wup-popup-growOnTop;
+          }
+
+          [anim="drawer"][position="top"][hide] > div {
+            padding-bottom: 0;
+            margin-bottom: 1px;
+          }
+
+          [anim="drawer"][position="top"][hide] > div > * {
+            animation-name: wup-popup-growOffTop;
+          }
+      }
      `;
   }
 
@@ -273,6 +360,25 @@ export default class WUPPopupElement<
   /** Returns arrowElement if $options.arrowEnable=true and after popup $isOpen */
   get $arrowElement(): WUPPopupArrowElement | null {
     return this.#arrowElement || null;
+  }
+
+  /** set animation and return container; drawer-animation requires 2 extra divs */
+  $appendAnimation(type: WUPPopup.Animations): HTMLElement {
+    if (!type) {
+      this.removeAttribute("anim");
+      return this;
+    }
+
+    if (type === WUPPopup.Animations.drawer) {
+      this.setAttribute("anim", "drawer");
+      const d1 = document.createElement("div");
+      const d2 = d1.appendChild(document.createElement("div"));
+      d2.append(...this.childNodes);
+      this.appendChild(d1);
+      return d2;
+    }
+
+    throw new Error(`${this.tagName}. $appendAnimation for '${type}' is not defined`);
   }
 
   protected override gotReady() {

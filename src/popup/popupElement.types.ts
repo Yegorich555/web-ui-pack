@@ -29,6 +29,13 @@ export namespace WUPPopup {
     onOptionChange,
   }
 
+  export const enum Animations {
+    /** Via opacity */
+    default = 0,
+    /** Dropdown/drawer animation. It creates 2-extra div inside */
+    drawer,
+  }
+
   export interface Options {
     /** Anchor that popup uses for placement. If attr.target and $options.target are empty previousSibling will be attached.
      * attr target="{querySelector}" has hire priority than .options.target */

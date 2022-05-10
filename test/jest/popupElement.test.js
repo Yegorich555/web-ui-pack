@@ -605,6 +605,24 @@ describe("popupElement", () => {
     // other cases in test(`options.$target`) and test(`remove`)
   });
 
+  test("$appendAnimation", () => {
+    const container = el.$appendAnimation(0);
+    expect(container).toBe(el); // because it's default
+
+    const nested = el.$appendAnimation(1); // drawer
+    expect(nested).toBeInstanceOf(HTMLDivElement);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(190px, 100px);\\" position=\\"top\\" anim=\\"drawer\\"><div><div></div></div></wup-popup>"`
+    );
+
+    el.$options.showCase = 0; // always
+    expect(el.$isOpen).toBeTruthy();
+    el.$hide();
+    expect(el.$isOpen).toBeFalsy();
+    el.$show();
+    expect(el.$isOpen).toBeTruthy();
+  });
+
   test("attrs", () => {
     /** @type typeof el */
     const a = document.createElement(el.tagName);

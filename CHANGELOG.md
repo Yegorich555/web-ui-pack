@@ -5,6 +5,7 @@
 - [`FormControls`](README.md#controls)
 
 - [`PopupElement`](README.md#popupelement)
+  - Added method $appendAnimation() with animation-drawer
   - Added option maxWidthByTarget
   - Added promise-result for $hide()
 
