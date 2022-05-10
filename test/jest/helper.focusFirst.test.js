@@ -53,5 +53,31 @@ describe("helper.focusFirst", () => {
     expect(document.activeElement).toBe(el);
   });
 
+  test("focus on self - infinite loop", () => {
+    let i = 0;
+    class TestElement extends HTMLElement {
+      constructor() {
+        super();
+        this.focus = this.focus.bind(this);
+      }
+
+      focus() {
+        if (++i > 2) {
+          throw new Error("Infinite loop");
+        }
+        return focusFirst(this);
+      }
+    }
+    customElements.define("test-inher-el", TestElement);
+    const el = document.body.appendChild(document.createElement("test-inher-el"));
+    const inp = el.appendChild(document.createElement("input"));
+    expect(() => el.focus()).not.toThrow();
+    expect(document.activeElement).toBe(inp);
+    inp.blur();
+    i = 0;
+    expect(() => el.focus()).not.toThrow(); // checking again
+    expect(document.activeElement).toBe(inp);
+  });
+
   // testing child with invisible element see in test/browser/..
 });

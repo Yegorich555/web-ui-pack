@@ -1,10 +1,14 @@
+let last: HTMLElement | Pick<HTMLElement, "focus"> | null = null;
 /**
  * Set focus on parent itself or first possible element inside
  * @param element
  * @return {Boolean} true if focus is fired
  */
 export default function focusFirst(element: HTMLElement | Pick<HTMLElement, "focus">): boolean {
-  const parentElement = element;
+  if (last === element) {
+    return false;
+  }
+  last = element; //
 
   if (element instanceof HTMLElement) {
     const prev = document.activeElement;
@@ -12,16 +16,16 @@ export default function focusFirst(element: HTMLElement | Pick<HTMLElement, "foc
       if (prev === el) {
         return true;
       }
-      if (parentElement !== el) {
-        el.focus();
-      }
+      el.focus();
       // such checking required because elements can be indirect disabled or hidden: <fieldset disabled><input/></fieldset>
       return document.activeElement !== prev;
     };
 
     if (tryFocus(element)) {
+      last = null;
       return true;
     }
+    last = null;
     // const isVisible = (e: HTMLElement): boolean => {
     //   return e.offsetWidth > 0 || e.offsetHeight > 0 || !!(e.style?.display && e.style.display !== "none");
     // };
