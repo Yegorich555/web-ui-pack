@@ -4,6 +4,12 @@ const WUPPopupElement = require("web-ui-pack/popup/popupElement").default;
 /** @type WUPPopupElement */
 let testEl;
 beforeEach(async () => {
+  // https://github.com/puppeteer/puppeteer/blob/v5.2.1/docs/api.md#pageemulatemediafeaturesfeatures
+  await page.emulateMediaFeatures([
+    // { name: "prefers-color-scheme", value: "dark" },
+    { name: "prefers-reduced-motion", value: "no-preference" }, // allow animations
+  ]);
+
   await page.evaluate(() => {
     document.activeElement && document.activeElement.blur();
     WUPPopupElement.$defaults.placement = [
@@ -52,6 +58,17 @@ describe("popupElement", () => {
     expect(t.html).toBe(
       '<wup-popup position="bottom" style="transform: translate(72.4219px, 29px);">Popup text</wup-popup>'
     );
+
+    // checking when animation disabled
+    await page.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: "reduce" }]); // disable animations
+    await page.click("label");
+    await page.waitForTimeout(1); // timeout required because of debounceFilters
+    t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
+    expect(t.isOpened).toBeTruthy();
+    await page.click("label"); // click again should hide
+    t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
+    await page.waitForTimeout(1); // timeout required because of debounceFilters
+    expect(t.isOpened).toBeFalsy();
   });
 
   test("showCase: click & focus", async () => {
