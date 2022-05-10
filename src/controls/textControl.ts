@@ -7,13 +7,6 @@ export namespace WUPTextControlTypes {
     max: number;
   };
 
-  export type Generics<
-    ValueType = string, //
-    ValidationKeys extends ValidationMap = ValidationMap,
-    ControlType extends WUPTextControl<ValueType> = WUPTextControl<ValueType>
-  > = WUPBaseControlTypes.Generics<ValueType, ValidationKeys, ControlType>;
-
-  export type Validation = Generics["Validation"];
   export type ExtraOptions = {
     /** Debounce time to wait for user finishes typing to start validate and provide $change event
      *
@@ -22,7 +15,15 @@ export namespace WUPTextControlTypes {
     debounceMs: number;
   };
 
-  export type Options<T = string> = Generics<T>["Options"] & ExtraOptions;
+  export type Generics<
+    ValueType = string,
+    ValidationKeys extends WUPBaseControlTypes.ValidationMap = ValidationMap,
+    Extra = ExtraOptions
+  > = WUPBaseControlTypes.Generics<ValueType, ValidationKeys, Extra & ExtraOptions>;
+
+  export type Validation = Generics["Validation"];
+
+  export type Options<T = string> = Generics<T>["Options"];
 }
 /**
  * @tutorial innerHTML @example
@@ -54,25 +55,22 @@ export default class WUPTextControl<ValueType = string> extends WUPBaseControl<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  // @ts-expect-error - because validation 'required' is rewritten with incompatible ctrl
   static $defaults: WUPTextControlTypes.Options = {
     ...WUPBaseControl.$defaults,
     debounceMs: 0,
     validationRules: {
-      required: WUPBaseControl.$defaults.validationRules.required as WUPTextControlTypes.Validation,
+      required: WUPBaseControl.$defaults.validationRules.required,
       min: (v, setV) => v.length < setV && `Min length is ${setV} characters`,
       max: (v, setV) => v.length > setV && `Max length is ${setV} characters`,
     },
   };
 
-  // @ts-expect-error
   $options: Omit<WUPTextControlTypes.Options<ValueType>, "validationRules"> = {
     ...this.#ctr.$defaults,
     // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory
   };
 
-  // @ts-expect-error
   protected override _opts = this.$options;
 
   constructor() {
@@ -133,7 +131,6 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      // @ts-expect-error
       [tagName]: WUPBaseControlTypes.JSXControlProps<WUPTextControl>;
     }
   }
@@ -144,7 +141,7 @@ el.$options.name = "testMe";
 el.$options.validations = {
   required: true,
   max: 2,
-  min: (v, ctrl) => v.length > 500 && "This is error",
+  min: (v) => v.length > 500 && "This is error",
   extra: (v) => "test Me",
 };
 

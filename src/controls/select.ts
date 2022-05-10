@@ -22,34 +22,35 @@ export namespace WUPSelectControlTypes {
     onFocusLost,
   }
 
-  export type ValidationMap = WUPBaseControlTypes.ValidationMap;
-  export type Generics<
-    ValueType = any, //
-    ValidationKeys extends ValidationMap = ValidationMap,
-    ControlType extends WUPSelectControl<ValueType> = WUPSelectControl<ValueType>
-  > = WUPBaseControlTypes.Generics<ValueType, ValidationKeys, ControlType>;
-
   export type MenuItem<T> = { text: string; value: T };
   /** Use li.innerHTML to render value & return string required for input; li can be null if function calls when popup is closed */
   export type MenuItemFn<T> = { text: (value: T, li: HTMLLIElement | null, i: number) => string; value: T };
   export type MenuItemAll<T> = MenuItem<T> | MenuItemFn<T>;
   export type MenuItemsAll<T> = MenuItem<T>[] | MenuItemFn<T>[];
 
+  export type ExtraOptions<T> = {
+    /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data! */
+    items: MenuItemsAll<T> | (() => MenuItemsAll<T> | Promise<MenuItemsAll<T>>);
+    /** Wait for pointed time before show error (it's sumarized with $options.debounce); WARN: hide error without debounce
+     *  @defaultValue 0
+     */
+    validityDebounceMs: number;
+  };
+
+  export type ValidationMap = WUPBaseControlTypes.ValidationMap;
+  export type Generics<
+    ValueType = any,
+    ValidationKeys extends WUPBaseControlTypes.ValidationMap = ValidationMap,
+    Extra = ExtraOptions<ValueType>
+  > = WUPTextControlTypes.Generics<ValueType, ValidationKeys, Extra & ExtraOptions<ValueType>>;
+
   export type Validation = Generics["Validation"];
-  export type Options<T = any> = Generics<T>["Options"] &
-    WUPTextControlTypes.ExtraOptions & {
-      /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data! */
-      items: MenuItemsAll<T> | (() => MenuItemsAll<T> | Promise<MenuItemsAll<T>>);
-      /** Wait for pointed time before show error (it's sumarized with $options.debounce); WARN: hide error without debounce
-       *  @defaultValue 0
-       */
-      validityDebounceMs: number;
-    };
+  export type Options<T = any> = Generics<T>["Options"];
 }
 
 export default class WUPSelectControl<ValueType = any> extends WUPTextControl<ValueType> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
-  #ctr = this.constructor as typeof WUPSelectControl;
+  #ctr2 = this.constructor as typeof WUPSelectControl;
 
   /** StyleContent related to component */
   static get style(): string {
@@ -85,20 +86,22 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
   }
 
   /** Get rawValue for input based on argument [value] */
-  static provideInputValue<T, C extends WUPSelectControl<T>>(v: T | undefined, ctrl: C): string | Promise<string> {
+  static provideInputValue<T, C extends WUPTextControl<T>>(v: T | undefined, control: C): string | Promise<string> {
     if (v === undefined) {
       return "";
     }
+    const ctrl = control as unknown as WUPSelectControl<T>;
 
     const ctr = ctrl.constructor as typeof WUPSelectControl;
-    const r = ctr.getMenuItems<T, C>(ctrl).then((items) => {
+    const r = ctr.getMenuItems<T, WUPSelectControl<T>>(ctrl).then((items) => {
       const i = (items as WUPSelectControlTypes.MenuItemAll<any>[]).findIndex((o) => ctr.isEqual(o.value, v));
       if (i === -1) {
-        console.error(`${ctrl.tagName} '${ctr.$defaults.name}'. Value not found`, { items, value: v });
-        return `Error: value not found for ${v}` != null ? (v as any).toString() : "";
+        console.error(`${ctrl.tagName} '${ctr.$defaults.name}'. Not found in items`, { items, value: v });
+        return `Error: not found for ${v}` != null ? (v as any).toString() : "";
       }
       const item = items[i];
       if (item.text instanceof Function) {
+        // todo maybe use li insteaf of it ?
         return item.text(item.value, null, i);
       }
       return item.text;
@@ -107,19 +110,16 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     return r;
   }
 
-  // @ts-expect-error
   static $defaults: WUPSelectControlTypes.Options = {
     ...WUPTextControl.$defaults,
     debounceMs: 0,
     validityDebounceMs: 0,
     items: [],
-    validationRules: WUPBaseControl.$defaults
-      .validationRules as unknown as WUPSelectControlTypes.Options["validationRules"],
+    validationRules: WUPBaseControl.$defaults.validationRules,
   };
 
-  // @ts-expect-error
   $options: Omit<WUPSelectControlTypes.Options<ValueType>, "validationRules"> = {
-    ...this.#ctr.$defaults,
+    ...this.#ctr2.$defaults,
     // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory
   };
@@ -185,18 +185,14 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
 
   _cachedItems?: WUPSelectControlTypes.MenuItemsAll<ValueType>;
 
-  // protected renderItem(li: HTMLLIElement, i:number) {
-
-  // }
-
   protected async renderMenuItems(ul: HTMLUListElement) {
-    const arr = await this.#ctr.getMenuItems<ValueType, this>(this);
+    const arr = await this.#ctr2.getMenuItems<ValueType, this>(this);
 
     const arrLi = arr.map((o) => {
       const li = ul.appendChild(document.createElement("li"));
       li.setAttribute("role", "option");
       li.setAttribute("aria-selected", "false"); // todo implement it according to current value
-      const id = this.#ctr.uniqueId;
+      const id = this.#ctr2.uniqueId;
       li.id = id; // todo check it (maybe use more convenient id's)
       this._itemsMap.set(id, o);
       return li;
@@ -209,7 +205,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     }
   }
 
-  protected onItemClick(e: MouseEvent & { target: HTMLLIElement }) {
+  protected onMenuItemClick(e: MouseEvent & { target: HTMLLIElement }) {
     const o = this._itemsMap.get(e.target.id) as WUPSelectControlTypes.MenuItemAll<ValueType>;
 
     this.setValue(o.value);
@@ -245,7 +241,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
 
       // todo don't forget dropdown animation from example
 
-      const menuId = this.#ctr.uniqueId;
+      const menuId = this.#ctr2.uniqueId;
       const i = this.$refInput;
       i.setAttribute("aria-owns", menuId);
       i.setAttribute("aria-controls", menuId);
@@ -258,7 +254,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
       this.appendEvent(ul, "click", (e) => {
         e.stopPropagation();
         if (e.target instanceof HTMLLIElement) {
-          this.onItemClick(e as MouseEvent & { target: HTMLLIElement });
+          this.onMenuItemClick(e as MouseEvent & { target: HTMLLIElement });
         }
       });
 
@@ -311,7 +307,6 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      // @ts-expect-error
       [tagName]: WUPBaseControlTypes.JSXControlProps<WUPSelectControl>;
     }
   }
@@ -321,6 +316,6 @@ const el = document.createElement(tagName);
 el.$options.name = "testMe";
 el.$options.validations = {
   required: true,
-  min: (v, ctrl) => v.length > 500 && "This is error",
+  min: (v) => v.length > 500 && "This is error",
   extra: (v) => "test Me",
 };

@@ -32,13 +32,10 @@ export namespace WUPBaseControlTypes {
     required: boolean;
   };
 
-  export type Generics<
-    ValueType, //
-    ValidationKeys extends ValidationMap,
-    ControlType extends HTMLElement
-  > = {
-    Validation: (value: ValueType, setValue: ValidationKeys[keyof ValidationKeys], ctrl: ControlType) => false | string;
-    CustomValidation: (value: ValueType, ctrl: ControlType) => false | string;
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  export type Generics<ValueType, ValidationKeys extends ValidationMap, ExtraOptions = {}> = {
+    Validation: (value: ValueType, setValue: ValidationKeys[keyof ValidationKeys]) => false | string;
+    CustomValidation: (value: ValueType) => false | string;
     Options: {
       /** Title/label for control */
       label?: string;
@@ -58,28 +55,24 @@ export namespace WUPBaseControlTypes {
       validationCase: ValidationCases;
       /** Rules defined in control */
       validationRules: {
-        [K in keyof ValidationKeys]: (
-          value: ValueType,
-          setValue: ValidationKeys[K],
-          ctrl: ControlType
-        ) => false | string;
+        [K in keyof ValidationKeys]?: (value: ValueType, setValue: ValidationKeys[K]) => false | string;
       };
       /** Rules enabled for current control */
       validations?:
         | {
-            [K in keyof ValidationKeys]?: ValidationKeys[K] | ((value: ValueType, ctrl: ControlType) => false | string);
+            [K in keyof ValidationKeys]?: ValidationKeys[K] | ((value: ValueType) => false | string);
           }
-        | { [k: string]: (value: ValueType, ctrl: ControlType) => false | string };
+        | { [k: string]: (value: ValueType) => false | string };
       /** Wait for pointed time before show error (it's sumarized with $options.debounce); WARN: hide error without debounce
        *  @defaultValue 500
        */
       validityDebounceMs: number;
       /** Debounce option for onFocustLost event (for validationCases.onFocusLost); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost; Default is 100ms */
       focusDebounceMs?: number;
-    };
+    } & ExtraOptions;
   };
 
-  export type Options<T = string> = Generics<T, ValidationMap, WUPBaseControl>["Options"];
+  export type Options<T = string> = Generics<T, ValidationMap>["Options"];
 
   export type JSXControlProps<T extends WUPBaseControl> = JSXCustomProps<T> & {
     /** @deprecated Title/label for control; */
@@ -339,14 +332,14 @@ export default abstract class WUPBaseControl<
 
       let err: false | string;
       if (vl instanceof Function) {
-        err = vl(v as any, this as unknown as WUPBaseControl<string>);
+        err = vl(v as any);
       } else {
         const rules = this.#ctr.$defaults.validationRules;
         const r = rules[k as "required"];
         if (!r) {
           throw new Error(`${this.tagName} '${this.#ctr.$defaults.name}'. Validation rule [${vl}] is not found`);
         }
-        err = r(v, vl as boolean, this as unknown as WUPBaseControl<string>);
+        err = r(v, vl as boolean);
       }
 
       if (err !== false) {
