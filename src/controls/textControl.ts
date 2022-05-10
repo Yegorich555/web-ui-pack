@@ -9,9 +9,7 @@ export namespace WUPTextControlTypes {
 
   export type ExtraOptions = {
     /** Debounce time to wait for user finishes typing to start validate and provide $change event
-     *
-     * Default is `0`;
-     */
+     * @defaultValue 0; */
     debounceMs: number;
   };
 

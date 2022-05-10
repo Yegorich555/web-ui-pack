@@ -41,8 +41,7 @@ export interface onFocusLostOptions extends AddEventListenerOptions {
    * Troubleshooting: if click/focusout is handled somewhere during for a long time `debounceMs` must be adjusted
    * or you can prevent labelOnClick behavior via adding label.addEventListener('mousedown', (e) => e.preventDefault());
    * and implement labelClick > inputFocus yourself
-   *
-   * Default is `100ms` */
+   * @defaultValue 100ms */
   debounceMs?: number;
 }
 

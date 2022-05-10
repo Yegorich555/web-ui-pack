@@ -67,7 +67,8 @@ export namespace WUPBaseControlTypes {
        *  @defaultValue 500
        */
       validityDebounceMs: number;
-      /** Debounce option for onFocustLost event (for validationCases.onFocusLost); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost; Default is 100ms */
+      /** Debounce option for onFocustLost event (for validationCases.onFocusLost); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost;
+       * @defaultValue 100ms */
       focusDebounceMs?: number;
     } & ExtraOptions;
   };

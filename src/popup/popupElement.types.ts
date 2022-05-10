@@ -49,16 +49,20 @@ export namespace WUPPopup {
     maxWidthByTarget: boolean;
     /** Sets minHeight 100% of targetWidth */
     minHeightByTarget: boolean;
-    /** Case when popup need to show; default is `onClick`
+    /** Case when popup need to show;
+     * @defaultValue onClick
      * @example
      * showCase=WUPPopup.ShowCases.onFocus | WUPPopup.ShowCases.onClick // to join cases
      * */
     showCase: ShowCases;
-    /** Timeout in ms before popup shows on hover of target (for ShowCases.onHover); Default is 200ms */
+    /** Timeout in ms before popup shows on hover of target (for ShowCases.onHover);
+     * @defaultValue 200ms */
     hoverShowTimeout: number;
-    /** Timeout in ms before popup hides on mouse-leave of target (for ShowCases.onHover); Default is 500ms  */
+    /** Timeout in ms before popup hides on mouse-leave of target (for ShowCases.onHover);
+     * @defaultValue 500ms  */
     hoverHideTimeout: number;
-    /** Debounce option for onFocustLost event (for ShowCases.onFocus); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost; Default is 100ms */
+    /** Debounce option for onFocustLost event (for ShowCases.onFocus); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost;
+     * @defaultValue 100ms */
     focusDebounceMs?: number;
     /** Set true to show arrow with popup; @false by default;
      *  Arrow is placed after popup so it's easy to access (via style @see arrowClass or popupElement.$arrowElement)

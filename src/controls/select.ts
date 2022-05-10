@@ -32,8 +32,7 @@ export namespace WUPSelectControlTypes {
     /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data! */
     items: MenuItemsAll<T> | (() => MenuItemsAll<T> | Promise<MenuItemsAll<T>>);
     /** Wait for pointed time before show error (it's sumarized with $options.debounce); WARN: hide error without debounce
-     *  @defaultValue 0
-     */
+     *  @defaultValue 0 */
     validityDebounceMs: number;
   };
 
