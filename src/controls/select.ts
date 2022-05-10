@@ -23,14 +23,14 @@ export namespace WUPSelectControlTypes {
   }
 
   export type MenuItem<T> = { text: string; value: T };
-  /** Use li.innerHTML to render value & return string required for input; li can be null if function calls when popup is closed */
-  export type MenuItemFn<T> = { text: (value: T, li: HTMLLIElement | null, i: number) => string; value: T };
-  export type MenuItemAll<T> = MenuItem<T> | MenuItemFn<T>;
-  export type MenuItemsAll<T> = MenuItem<T>[] | MenuItemFn<T>[];
+  /** Use li.innerHTML to render value & return string required for input; */
+  export type MenuItemFn<T> = { text: (value: T, li: HTMLLIElement, i: number) => string; value: T };
+  export type MenuItemAny<T> = MenuItem<T> | MenuItemFn<T>;
+  export type MenuItems<T> = MenuItem<T>[] | MenuItemFn<T>[];
 
   export type ExtraOptions<T> = {
     /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data! */
-    items: MenuItemsAll<T> | (() => MenuItemsAll<T> | Promise<MenuItemsAll<T>>);
+    items: MenuItems<T> | (() => MenuItems<T> | Promise<MenuItems<T>>);
     /** Wait for pointed time before show error (it's sumarized with $options.debounce); WARN: hide error without debounce
      *  @defaultValue 0 */
     validityDebounceMs: number;
@@ -61,14 +61,14 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
   }
 
   /** Parse/get items from $options.items */
-  static async getMenuItems<T, C extends WUPSelectControl<T>>(ctrl: C): Promise<WUPSelectControlTypes.MenuItemsAll<T>> {
+  static async getMenuItems<T, C extends WUPSelectControl<T>>(ctrl: C): Promise<WUPSelectControlTypes.MenuItems<T>> {
     if (ctrl._cachedItems) {
       return ctrl._cachedItems;
     }
 
     const { items } = ctrl.$options;
 
-    let arr: WUPSelectControlTypes.MenuItemsAll<T>;
+    let arr: WUPSelectControlTypes.MenuItems<T>;
     if (items instanceof Function) {
       const f = items();
       if (f instanceof Promise) {
@@ -93,15 +93,17 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
 
     const ctr = ctrl.constructor as typeof WUPSelectControl;
     const r = ctr.getMenuItems<T, WUPSelectControl<T>>(ctrl).then((items) => {
-      const i = (items as WUPSelectControlTypes.MenuItemAll<any>[]).findIndex((o) => ctr.isEqual(o.value, v));
+      const i = (items as WUPSelectControlTypes.MenuItemAny<any>[]).findIndex((o) => ctr.isEqual(o.value, v));
       if (i === -1) {
         console.error(`${ctrl.tagName} '${ctr.$defaults.name}'. Not found in items`, { items, value: v });
         return `Error: not found for ${v}` != null ? (v as any).toString() : "";
       }
       const item = items[i];
       if (item.text instanceof Function) {
-        // todo maybe use li insteaf of it ?
-        return item.text(item.value, null, i);
+        const li = document.createElement("li");
+        const s = item.text(item.value, li, i);
+        li.remove();
+        return s;
       }
       return item.text;
     });
@@ -182,7 +184,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
   _itemsMap: Map<string, WUPSelectControlTypes.MenuItem<ValueType> | WUPSelectControlTypes.MenuItemFn<ValueType>> =
     new Map();
 
-  _cachedItems?: WUPSelectControlTypes.MenuItemsAll<ValueType>;
+  _cachedItems?: WUPSelectControlTypes.MenuItems<ValueType>;
 
   protected async renderMenuItems(ul: HTMLUListElement) {
     const arr = await this.#ctr2.getMenuItems<ValueType, this>(this);
@@ -205,7 +207,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
   }
 
   protected onMenuItemClick(e: MouseEvent & { target: HTMLLIElement }) {
-    const o = this._itemsMap.get(e.target.id) as WUPSelectControlTypes.MenuItemAll<ValueType>;
+    const o = this._itemsMap.get(e.target.id) as WUPSelectControlTypes.MenuItemAny<ValueType>;
 
     this.setValue(o.value);
   }
