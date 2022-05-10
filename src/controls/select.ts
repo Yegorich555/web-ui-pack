@@ -49,7 +49,7 @@ export namespace WUPSelectControlTypes {
 
 export default class WUPSelectControl<ValueType = any> extends WUPTextControl<ValueType> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
-  #ctr2 = this.constructor as typeof WUPSelectControl;
+  #ctr = this.constructor as typeof WUPSelectControl;
 
   /** StyleContent related to component */
   static get style(): string {
@@ -120,7 +120,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
   };
 
   $options: Omit<WUPSelectControlTypes.Options<ValueType>, "validationRules"> = {
-    ...this.#ctr2.$defaults,
+    ...this.#ctr.$defaults,
     // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory
   };
@@ -187,13 +187,13 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
   _cachedItems?: WUPSelectControlTypes.MenuItems<ValueType>;
 
   protected async renderMenuItems(ul: HTMLUListElement) {
-    const arr = await this.#ctr2.getMenuItems<ValueType, this>(this);
+    const arr = await this.#ctr.getMenuItems<ValueType, this>(this);
 
     const arrLi = arr.map((o) => {
       const li = ul.appendChild(document.createElement("li"));
       li.setAttribute("role", "option");
       li.setAttribute("aria-selected", "false"); // todo implement it according to current value
-      const id = this.#ctr2.uniqueId;
+      const id = this.#ctr.uniqueId;
       li.id = id; // todo check it (maybe use more convenient id's)
       this._itemsMap.set(id, o);
       return li;
@@ -240,9 +240,9 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
         WUPPopupElement.$placements.$top.$end.$resizeHeight,
       ];
 
+      p.setAttribute("menu", "");
       // todo don't forget dropdown animation from example
-
-      const menuId = this.#ctr2.uniqueId;
+      const menuId = this.#ctr.uniqueId;
       const i = this.$refInput;
       i.setAttribute("aria-owns", menuId);
       i.setAttribute("aria-controls", menuId);

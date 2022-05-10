@@ -25,8 +25,12 @@
   cursor: pointer;
 
   &:focus-within {
-    outline: 2px solid var(--ctrl-focus);
+    outline: 1px solid var(--ctrl-focus);
     z-index: 90002;
+
+    > [menu] {
+      outline: 1px solid var(--ctrl-focus);
+    }
 
     strong,
     legend {
@@ -62,10 +66,18 @@
   @media (pointer: fine), (hover) {
     &:hover {
       box-shadow: 0 0 3px 1px var(--ctrl-focus);
+
+      > [menu] {
+        box-shadow: 0 0 3px 1px var(--ctrl-focus);
+      }
     }
 
     &[invalid]:hover {
       box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+
+      > [menu] {
+        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+      }
     }
   }
 
@@ -519,6 +531,10 @@
   li[aria-selected="true"] {
     color: var(--ctrl-combo-selected);
     background: var(--ctrl-combo-selected-back);
+  }
+
+  > [menu] {
+    padding: 0;
   }
 }
 
