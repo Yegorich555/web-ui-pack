@@ -55,28 +55,23 @@ export default function popupListenTarget(
     onShowCallbacks.length = 0;
   }
 
-  async function show(showCase: WUPPopup.ShowCases): Promise<boolean> {
+  async function show(showCase: WUPPopup.ShowCases): Promise<void> {
     openedEl = await onShow(showCase);
     if (openedEl) {
       onShowCallbacks.forEach((f) => onHideCallbacks.push(f()));
-      return true;
     }
-
-    return false;
   }
 
-  function hide(hideCase: WUPPopup.HideCases): boolean {
-    if (onHide(hideCase)) {
+  async function hide(hideCase: WUPPopup.HideCases): Promise<void> {
+    if (await onHide(hideCase)) {
       openedEl = null;
       onHideRef();
-      return true;
     }
-    return false;
   }
 
   // try to detect if target removed
-  function hideByRemove() {
-    openedEl && hide(WUPPopup.HideCases.onTargetRemove);
+  async function hideByRemove() {
+    openedEl && (await hide(WUPPopup.HideCases.onTargetRemove));
     onRemoveRef();
   }
   const rstSpy = onSpy(t, "remove", hideByRemove);
@@ -192,11 +187,11 @@ export default function popupListenTarget(
     };
     onRemoveCallbacks.push(onFocusGot(t, onFocused, { debounceMs: opts.focusDebounceMs }));
 
-    const blur = ({ relatedTarget }: FocusEvent) => {
+    const blur = async ({ relatedTarget }: FocusEvent) => {
       if (openedEl) {
         const isToMe = openedEl === document.activeElement || openedEl === relatedTarget;
         const isToMeInside = !isToMe && includes(document.activeElement || relatedTarget);
-        !isToMe && !isToMeInside && hide(WUPPopup.HideCases.onFocusOut);
+        !isToMe && !isToMeInside && (await hide(WUPPopup.HideCases.onFocusOut));
         if (!openedEl) {
           openedByHover = false;
         }

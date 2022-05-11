@@ -777,7 +777,8 @@ export default class WUPPopupElement<
     fit.el = fitEl;
 
     this.style.display = "block";
-    this.setMaxWidth(this._opts.maxWidthByTarget ? `${tdef.width}px` : ""); // resetting is required to get default size
+    const _defMaxWidth = this._opts.maxWidthByTarget ? `${tdef.width}px` : "";
+    this.setMaxWidth(_defMaxWidth); // resetting is required to get default size
     this.setMaxHeight(""); // resetting is required to get default size
     if (this.#arrowElement) {
       this.#arrowElement.style.display = "";
@@ -896,7 +897,7 @@ export default class WUPPopupElement<
             ok = !hasOveflow(pos, meUpdated);
             if (!ok) {
               // reset styles if need to look for another position
-              this.setMaxWidth("");
+              this.setMaxWidth(_defMaxWidth); // resetting is required to get default size
               this.setMaxHeight("");
             }
           }
