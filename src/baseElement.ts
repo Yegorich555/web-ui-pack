@@ -41,6 +41,14 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     return `wup${++lastUniqueNum}`;
   }
 
+  /** Append style once (per tag) */
+  protected static appendStyle(tagName: string, styleContent: string) {
+    if (!appendedStyles.has(tagName)) {
+      styleContent && styleElement.append(styleContent.replace(/:host/g, `${tagName}`));
+      appendedStyles.add(tagName);
+    }
+  }
+
   /** Options that applied to element */
   abstract $options: Record<string, any>;
 
@@ -90,13 +98,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     });
 
     // setup styles
-    if (!appendedStyles.has(this.tagName)) {
-      const s = Object.getPrototypeOf(this).constructor.style as string;
-      if (s) {
-        styleElement.append(s.replace(/:host/g, `${this.tagName}`));
-      }
-      appendedStyles.add(this.tagName);
-    }
+    this.#ctr.appendStyle(this.tagName, Object.getPrototypeOf(this).constructor.style as string);
   }
 
   /* rawOptions ($options is observed) */
