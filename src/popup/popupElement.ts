@@ -87,94 +87,6 @@ export default class WUPPopupElement<
     hoverHideTimeout: 500,
   };
 
-  /** StyleContent for animation-drawer */
-  static get styleDrawer(): string {
-    return `
-      :host {
-        animation: none;
-        background: none;
-        border: none;
-        padding: 0;
-        overflow: visible;
-        box-shadow: none;
-      }
-
-      :host > div {
-        overflow: hidden;
-        background: inherit;
-        /* make box-shadow visible despite on overflow: hidden */
-        padding: var(--popup-shadow-size);
-        margin: calc(-1 * var(--popup-shadow-size));
-      }
-
-      :host > div > * {
-        max-height: inherit;
-        max-width: inherit;
-        background: white;
-        border-radius: var(--border-radius, 6px);
-        padding: 4px;
-        box-shadow: 0 1px var(--popup-shadow-size) 0 #00000033;
-        box-sizing: border-box;
-        overflow: auto;
-      }
-
-      @media not all and (prefers-reduced-motion) {
-        @keyframes wup-popup-shadowFix {
-            from, to {
-              padding-top: 0;
-              margin-top: 1px;
-            }
-        }
-        @keyframes wup-popup-shadowFixTop {
-          from, to {
-            padding-bottom: 0;
-            margin-bottom: 1px;
-          }
-        }
-
-        @keyframes wup-popup-growOn { from { transform: translateY(calc(-100% - var(--popup-shadow-size))); } }
-        @keyframes wup-popup-growOff { to { transform: translateY(calc(-100% - var(--popup-shadow-size))); } }
-        @keyframes wup-popup-growOnTop { from { transform: translateY(calc(100% - var(--popup-shadow-size))); } }
-        @keyframes wup-popup-growOffTop { to { transform: translateY(calc(100% - var(--popup-shadow-size))); } }
-
-        :host > div {
-          animation: wup-popup-shadowFix var(--popup-anim) ease-in-out forwards;
-        }
-        :host > div > * {
-          animation: wup-popup-growOn var(--popup-anim) ease-in-out forwards;
-        }
-
-        :host[hide] {
-          animation: none;
-          animation-duration: var(--popup-anim);
-        }
-        :host[hide] > div {
-          padding-top: 0;
-          margin-top: 1px;
-        }
-        :host[hide] > div > * {
-          animation: wup-popup-growOff var(--popup-anim) ease-in-out forwards;
-        }
-
-        :host[position="top"] > div {
-          animation-name: wup-popup-shadowFixTop;
-        }
-        :host[position="top"] > div > * {
-          animation-name: wup-popup-growOnTop;
-        }
-
-        :host[position="top"][hide] > div {
-          padding-bottom: 0;
-          margin-bottom: 1px;
-        }
-
-        :host[position="top"][hide] > div > * {
-          animation-name: wup-popup-growOffTop;
-        }
-      }
-    `;
-  }
-
   /** StyleContent related to component */
   static get style(): string {
     return `
@@ -199,14 +111,14 @@ export default class WUPPopupElement<
       @media not all and (prefers-reduced-motion) {
         :host,
         :host+:host-arrow {
-          animation: WUP-POPUP-a1 300ms ease-in-out forwards;
+          animation: WUP-POPUP-a1 var(--popup-anim) ease-in-out forwards;
         }
         @keyframes WUP-POPUP-a1 {
           from {opacity: 0;}
         }
         :host[hide],
         :host[hide]+:host-arrow {
-          animation: WUP-POPUP-a2 300ms ease-in-out forwards;
+          animation: WUP-POPUP-a2 var(--popup-anim) ease-in-out forwards;
         }
         @keyframes WUP-POPUP-a2 {
           to {opacity: 0;}
@@ -367,26 +279,6 @@ export default class WUPPopupElement<
     return this.#arrowElement || null;
   }
 
-  /** set animation and return container; drawer-animation requires 2 extra divs */
-  $appendAnimation(type: WUPPopup.Animations): HTMLElement {
-    if (!type) {
-      this.removeAttribute("anim");
-      return this;
-    }
-
-    if (type === WUPPopup.Animations.drawer) {
-      this.#ctr.appendStyle(`${this.tagName}[anim="drawer"]`, this.#ctr.styleDrawer);
-      this.setAttribute("anim", "drawer");
-      const d1 = document.createElement("div");
-      const d2 = d1.appendChild(document.createElement("div"));
-      d2.append(...this.childNodes);
-      this.appendChild(d1);
-      return d2;
-    }
-
-    throw new Error(`${this.tagName}. $appendAnimation for '${type}' is not defined`);
-  }
-
   protected override gotReady() {
     super.gotReady();
     this.init();
@@ -481,6 +373,7 @@ export default class WUPPopupElement<
     minH: number;
     minW: number;
     borderRadius: number;
+    /** When user defined custom animation via transform we must use heidht/widht for positioning */
     waitForAnimation: false | ReturnType<typeof setTimeout>;
     inherritY: HTMLElement | null;
     inherritX: HTMLElement | null;
@@ -567,14 +460,18 @@ export default class WUPPopupElement<
     };
 
     // checking if animation can affect on positioning
-    if (style.animationDuration && style.animationName !== "WUP-POPUP-a1") {
-      const animTime = Number.parseFloat(style.animationDuration.substring(0, style.animationDuration.length - 1));
+    let animTime = 0;
+    if (style.animationDuration && (style.animationName !== "WUP-POPUP-a1" || this._opts.animation)) {
+      animTime = Number.parseFloat(style.animationDuration.substring(0, style.animationDuration.length - 1));
       if (animTime) {
+        animTime *= 1000;
         // only for custom animation
         this.#userStyles.waitForAnimation = setTimeout(() => {
           this.#userStyles.waitForAnimation = false;
-        }, animTime * 1000);
+        }, animTime);
       }
+    } else if (!this._opts.animation) {
+      this.style.animationName = ""; // reset to default if previosly animation was added
     }
 
     this.#scrollParents = [];
@@ -638,8 +535,8 @@ export default class WUPPopupElement<
     ];
 
     const goUpdate = () => {
-      this.#prevRect = this.#updatePosition();
       if (this.#isOpen) {
+        this.#prevRect = this.#updatePosition();
         // possible if hidden by target-remove
         this.#frameId = window.requestAnimationFrame(goUpdate);
       }
@@ -647,6 +544,15 @@ export default class WUPPopupElement<
 
     this.#isOpen = true;
     goUpdate();
+    // animation for drawer
+    if (this._opts.animation === WUPPopup.Animations.drawer) {
+      if (!animTime) {
+        console.error(
+          `${this.tagName} style.animationDuration is missed but $options.animation is defined. Please point animation duration via styles`
+        );
+      }
+      this.#animateDrawer(animTime || 300);
+    }
 
     if (wasHidden) {
       // run async to dispose internal resources first: possible dev-side-issues
@@ -714,30 +620,35 @@ export default class WUPPopupElement<
       this.#onHideRef?.call(this);
 
       if (hideCase !== WUPPopup.HideCases.onShowAgain) {
-        let waitTimeout = 0;
-        let isFixTransformAnimation = false;
+        let hideTime = 0;
+        let isTransformAnimation = false;
 
         // waitFor only if was ordinary user-action
         if (hideCase >= WUPPopup.HideCases.onManuallCall && hideCase <= WUPPopup.HideCases.onTargetClick) {
           this.setAttribute("hide", "");
           const { animationDuration: aD, animationName: aN } = getComputedStyle(this);
-          waitTimeout = Number.parseFloat(aD.substring(0, aD.length - 1)) * 1000 || 0;
-          !waitTimeout && this.removeAttribute("hide");
-          isFixTransformAnimation = aN !== "WUP-POPUP-a2";
+          hideTime = Number.parseFloat(aD.substring(0, aD.length - 1)) * 1000 || 0;
+          !hideTime && this.removeAttribute("hide");
+          isTransformAnimation = aN !== "WUP-POPUP-a2";
         }
 
-        if (waitTimeout) {
+        if (hideTime) {
+          // recalc hideTime base on animationLeftTime
+          if (this._opts.animation) {
+            hideTime = this.#animateDrawer(hideTime, true);
+          }
           return new Promise((resolve) => {
-            const t = setTimeout(() => (this.#forceHide as () => void)(), waitTimeout);
-            // fix when user scrolls during the hide-animation
-            this.#forceHide = () => {
-              this.#forceHide = undefined;
-              clearTimeout(t);
+            const done = () => {
               finishHide();
-              this.removeAttribute("hide");
               resolve(true);
             };
-            this.#userStyles.waitForAnimation = isFixTransformAnimation ? t : false;
+            const t = setTimeout(done, hideTime);
+            // fix when user scrolls during the hide-animation
+            this.#forceHide = () => {
+              clearTimeout(t);
+              done();
+            };
+            this.#userStyles.waitForAnimation = isTransformAnimation ? t : false;
           });
         }
       }
@@ -746,6 +657,71 @@ export default class WUPPopupElement<
     finishHide();
     return true;
   }
+
+  #animCur?: number;
+  #frameAnimId?: number;
+  /** Run animation and return new animIime (possible when animation re-run and previous must be finished) */
+  #animateDrawer = (animTime: number, isRevert?: boolean): number => {
+    this.#frameAnimId && window.cancelAnimationFrame(this.#frameAnimId);
+    if (this.#animCur) {
+      animTime = this.#animCur;
+    }
+
+    let start = 0;
+    const prev = this.style.transform;
+    this.style.animationName = "none"; // disable default css-animation
+
+    const nested: Array<{ el: HTMLElement; prev: string }> = [];
+    const ch = this.children;
+    for (let i = 0; i < ch.length; ++i) {
+      const el = ch.item(i) as HTMLElement;
+      nested.push({ el, prev: el.style.transform });
+    }
+
+    // reset inline styles
+    const reset = () => {
+      this.#animCur = undefined;
+      this.#frameAnimId = undefined;
+      setTimeout(() => {
+        // timeout is required to prevent blink-effect when popup hasn't been hide yet
+        this.style.transform = prev;
+        this.style.transformOrigin = "";
+        nested.forEach((e) => (e.el.style.transform = e.prev));
+      }, 1); // 1ms is required because can be difference betwen Promise/setTimeout in different browsers
+    };
+
+    const animate = (time: DOMHighResTimeStamp) => {
+      if (!start) {
+        start = time;
+      }
+      const elapsed = time - start;
+      const cur = Math.min(elapsed, animTime); // to make sure the element stops at exactly pointed value
+      if (!this.isConnected) {
+        reset(); // possible when item is removed unexpectedly
+        return;
+      }
+
+      let s = cur / animTime;
+      this.#animCur = cur;
+      if (isRevert) {
+        s = 1 - s;
+      }
+      this.style.transformOrigin = this.getAttribute("position") === "top" ? "bottom" : "top";
+      this.style.transform = `${prev ? `${prev} ` : ""}scaleY(${s})`;
+      if (s !== 0) {
+        nested.forEach((e) => (e.el.style.transform = `${e.prev ? `${prev} ` : ""}scaleY(${1 / s})`));
+      }
+      if (cur === animTime) {
+        reset();
+        return;
+      }
+
+      this.#frameAnimId = window.requestAnimationFrame(animate);
+    };
+    this.#frameAnimId = window.requestAnimationFrame(animate);
+
+    return animTime;
+  };
 
   /** Update position of popup. Call this method in cases when you changed options */
   #updatePosition = (): DOMRect | undefined => {

@@ -32,7 +32,7 @@ export namespace WUPPopup {
   export const enum Animations {
     /** Via opacity */
     default = 0,
-    /** Dropdown/drawer animation. It creates 2-extra div inside */
+    /** Dropdown/drawer animation. It's implemented via JS */
     drawer,
   }
 
@@ -91,6 +91,9 @@ export namespace WUPPopup {
     /** Virtual margin for targetElement related to arrow
      *  [top, right, bottom, left] or [top/bottom, right/left] in px */
     arrowOffset: [number, number, number, number] | [number, number];
+    /** Animation that applied to popup
+     * @defaultValue Animations.default */
+    animation?: Animations;
   }
 
   export type AttachOptions = Partial<Omit<Options, "target">> & {

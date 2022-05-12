@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from "react";
 import movable from "src/helpers/movable";
 // eslint-disable-next-line import/named
-import WUPPopupElement, { WUPPopup, ShowCases } from "web-ui-pack/popup/popupElement";
+import WUPPopupElement, { ShowCases, WUPPopup } from "web-ui-pack/popup/popupElement";
 import styles from "./popupView.scss";
 
 // example of attach - use this to avoid overhelmed layout by closed popups
@@ -24,12 +24,12 @@ function attach(el: HTMLElement, opts: { text?: string; innerHTML?: string }) {
       ];
       popup.$options.toFitElement = document.querySelector("#fit") as HTMLElement;
       popup.$options.arrowEnable = false;
+      popup.$options.animation = WUPPopup.Animations.drawer;
       setTimeout(() => {
         if (popup.$arrowElement) {
           popup.$arrowElement.style.background = popup.style.background;
         }
       });
-      // todo how to use minHeight for dropdown when possible 1..2 items in list ?
       if (opts.innerHTML) {
         popup.innerHTML = opts.innerHTML;
       }
@@ -98,36 +98,17 @@ export default function Example2() {
         <button
           id="btnDropdownWithAttach"
           type="button"
-          ref={setTitle(`<div><div>I must feet div with border <br/>(changed option <b>toFitElement</b>)
+          ref={setTitle(`<div>I must feet div with border <br/>(changed option <b>toFitElement</b>)
                 <br/>I scrollable
                 <br/>(you can setup minHeight to avoid squizing)
                 <br/>I have a good animation
                 <br/>
-                </div></div>`)}
+                </div>`)}
         >
           Target
           <br />
           <small>drag and move me</small>
         </button>
-
-        <button type="button">
-          Target <br />
-          <small>click me</small>
-        </button>
-        <wup-popup
-          class={styles.animPopup}
-          ref={(el) => {
-            if (el) {
-              setTimeout(() => {
-                el.$options.arrowEnable = false;
-              }, 200);
-              el.$options.toFitElement = document.querySelector("#fit") as HTMLElement;
-              el.$appendAnimation(WUPPopup.Animations.drawer);
-            }
-          }}
-        >
-          I have $appendAnimation(WUPPopup.Animations.drawer)
-        </wup-popup>
       </div>
     </>
   );
