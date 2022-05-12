@@ -685,16 +685,19 @@ export default class WUPPopupElement<
     this.#userStyles.waitForAnimation && clearTimeout(this.#userStyles.waitForAnimation);
 
     const finishHide = () => {
+      this.#forceHide = undefined;
+      this.style.display = "";
+
       this.#isOpen = false;
+      this.removeAttribute("hide");
       this.#frameId && window.cancelAnimationFrame(this.#frameId);
       this.#frameId = undefined;
+      this.#userStyles.waitForAnimation = false;
 
       this.#showCase = undefined;
       this.#prevRect = undefined;
       this.#scrollParents = undefined;
       this.#userStyles = undefined as any;
-
-      this.style.display = "";
 
       if (this.#arrowElement) {
         this.#arrowElement.remove();
