@@ -945,6 +945,7 @@ export default class WUPPopupElement<
       if (this.#userStyles.waitForAnimation) {
         this.style.left = `${pos.left}px`;
         this.style.top = `${pos.top}px`;
+        // todo it affects on animation
         this.style.transform = ""; // it removes previous transform from previous opened state
       } else {
         this.style.left = "";

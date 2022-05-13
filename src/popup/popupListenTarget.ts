@@ -37,6 +37,7 @@ export default function popupListenTarget(
   }
 
   let openedEl: HTMLElement | null = null;
+  /** Events that must be added on show; Should return removeCallbacks/onHideCallbacks */
   const onShowCallbacks: Array<() => () => void> = [];
   const onHideCallbacks: Array<() => void> = [];
   const onRemoveCallbacks: Array<() => void> = [];
@@ -56,26 +57,21 @@ export default function popupListenTarget(
   }
 
   // required to prevent previous action (cancel hidding because need to show again etc.)
-  let isCancelShow = false;
-  let isCancelHide = false;
-
   async function show(showCase: WUPPopup.ShowCases): Promise<void> {
-    isCancelHide = true;
     openedEl = await onShow(showCase);
-    openedEl && !isCancelShow && onShowCallbacks.forEach((f) => onHideCallbacks.push(f()));
-    isCancelHide = false;
+    openedEl && onShowCallbacks.forEach((f) => onHideCallbacks.push(f()));
   }
 
   async function hide(hideCase: WUPPopup.HideCases): Promise<void> {
-    isCancelShow = true;
-    const was = openedEl; // requried when user clicks again during the hidding > we need to show in this case
+    const was = openedEl; // required when user clicks again during the hidding > we need to show in this case
     openedEl = null;
-    if ((await onHide(hideCase)) && !isCancelHide) {
-      onHideRef();
-    } else {
+    onHideRef();
+    const isDone = await onHide(hideCase);
+    if (!isDone && !openedEl) {
+      // rollback if onHide was prevented and onShow wasn't fired again during the hidding
       openedEl = was; // rollback if hidding wasn't successful
+      onShowCallbacks.forEach((f) => onHideCallbacks.push(f()));
     }
-    isCancelShow = false;
   }
 
   // try to detect if target removed

@@ -1,5 +1,6 @@
 /* eslint-disable prefer-rest-params */
 import { WUPPopupElement } from "web-ui-pack";
+import popupListenTarget from "web-ui-pack/popup/popupListenTarget";
 import * as all from "web-ui-pack/popup/popupElement.types";
 import { WUPPopup } from "web-ui-pack/popup/popupElement";
 import * as all2 from "web-ui-pack/popup/popupElement";
@@ -785,6 +786,7 @@ describe("popupElement", () => {
     el.remove();
     nextFrame();
     await wait(); // reset animation is async
+    // WARN styles haven't been removed because expected that item destroyed
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style=\\"animation-name: none; left: 140px; top: 150px; display: block; transform: translate(190px, 100px);\\" position=\\"bottom\\"><div style=\\"\\"></div><div style=\\"\\"></div></wup-popup>"`
     );
@@ -1616,7 +1618,7 @@ describe("popupElement", () => {
 
     // open
     trg.click(); // try open again when hide hasn't been finished yet
-    expect(el.$isOpen).toBeTruthy(); // todo issue here
+    expect(el.$isOpen).toBeTruthy();
     await wait(50); // wait for 50ms
     expect(el.$isOpen).toBeTruthy();
 
@@ -1635,5 +1637,48 @@ describe("popupElement", () => {
     trg.click(); // try ещ сдшсл again when previous hide hasn't been finished yet but opened again
     await wait();
     expect(el.$isOpen).toBeFalsy();
+  });
+
+  test("popupListenTarget: hidding by click twice", async () => {
+    /** @type WUPPopupElement */
+    const myel = document.createElement(el.tagName);
+    myel.$options.target = trg;
+    myel.$options.showCase = 0;
+
+    document.body.appendChild(myel);
+    popupListenTarget(
+      { target: trg, showCase: 1 << 2 }, // onClick
+      () => {
+        myel.$show();
+        return myel;
+      },
+      () => myel.$hide()
+    );
+
+    // simulate defaults
+    const orig = window.getComputedStyle;
+    jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
+      if (elem === myel) {
+        /** @type CSSStyleDeclaration */
+        return { animationDuration: "0.3s", animationName: "WUP-POPUP-a1" };
+      }
+      return orig(elem);
+    });
+
+    myel.$hide(); // showCase set true by default
+    await wait();
+    expect(myel.$isOpen).toBeFalsy();
+    // open
+    trg.click();
+    await wait(); // wait for changes
+    expect(myel.$isOpen).toBeTruthy();
+
+    // hide
+    document.body.click();
+    await wait(100); // wait for partially hidden
+    expect(myel.$isOpen).toBeTruthy();
+    expect(() => document.body.click()).not.toThrow(); // error here because openedEl is null in eventListener on 2nd call
+    await wait();
+    expect(myel.$isOpen).toBeFalsy();
   });
 });
