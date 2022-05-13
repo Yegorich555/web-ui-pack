@@ -402,14 +402,6 @@ export default class WUPPopupElement<
     }
   }
 
-  /** Override this method to prevent show; this method fires beofre willShow event;
-   * @param showCase as reason of show()
-   * @return true if successful */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected canShow(showCase: WUPPopup.ShowCases): boolean {
-    return true;
-  }
-
   /** Shows popup if target defined; returns true if successful */
   protected goShow(showCase: WUPPopup.ShowCases): boolean {
     const wasHidden = !this.#isOpen;
@@ -419,8 +411,6 @@ export default class WUPPopupElement<
     if (!(this._opts.target as HTMLElement).isConnected) {
       throw new Error(`${this.tagName}. Target is not appended to document`);
     }
-
-    if (!this.canShow(showCase)) return false;
 
     if (wasHidden) {
       const e = this.fireEvent("$willShow", { cancelable: true });
@@ -568,19 +558,8 @@ export default class WUPPopupElement<
     return true;
   }
 
-  /** Override this method to prevent hiding; method calls before $willHide event
-   * @param showCase as previous reason of show();
-   * @param hideCase as reason of hide()
-   * @return true if successful */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected canHide(showCase: WUPPopup.ShowCases | undefined, hideCase: WUPPopup.HideCases): boolean {
-    return true;
-  }
-
   /** Hide popup. @showCase as previous reason of show(); @hideCase as reason of hide() */
   protected goHide(hideCase: WUPPopup.HideCases): boolean | Promise<true> {
-    if (!this.canHide(this.#showCase, hideCase)) return false;
-
     if (this.#forceHide) {
       this.#forceHide();
       return true;

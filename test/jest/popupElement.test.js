@@ -615,30 +615,6 @@ describe("popupElement", () => {
     await Promise.resolve(); // wait for promise onShow is async
     expect(el.$isOpen).toBeTruthy(); // checking if events works again
 
-    // checking canShow/canHide with popupListenTarget
-    el.canHide = () => false;
-    trg.click();
-    jest.advanceTimersByTime(1000); // click has debounce filter
-    await Promise.resolve(); // wait for promise onShow is async
-    expect(el.$isOpen).toBeTruthy();
-
-    el.canHide = () => true;
-    trg.click();
-    jest.advanceTimersByTime(1000); // click has debounce filter
-    await Promise.resolve(); // wait for promise onShow is async
-    expect(el.$isOpen).toBeFalsy();
-    el.false = true;
-
-    el.canShow = () => false;
-    trg.click();
-    jest.advanceTimersByTime(100); // click has debounce filter
-    expect(el.$isOpen).toBeFalsy();
-    el.canShow = () => true;
-    trg.click();
-    jest.advanceTimersByTime(100); // click has debounce filter
-    await Promise.resolve(); // wait for promise onShow is async
-    expect(el.$isOpen).toBeTruthy();
-
     /** @type typeof el */
     const a = document.createElement(el.tagName);
     a.$options.showCase = 0;
@@ -656,20 +632,18 @@ describe("popupElement", () => {
     expect(() => jest.advanceTimersByTime(1)).not.toThrow(); // because isReady true
     expect(a.$isOpen).toBeTruthy();
 
-    // checking canHide method
-    a.canHide = () => false;
-    a.$hide();
-    expect(a.$isOpen).toBeTruthy();
-    a.canHide = () => true;
-    a.$hide();
-    expect(a.$isOpen).toBeFalsy();
-
-    a.canShow = () => false;
-    a.$show();
-    expect(a.$isOpen).toBeFalsy();
-    a.canShow = () => true;
-    a.$show();
-    expect(a.$isOpen).toBeTruthy();
+    /** @type typeof el */
+    const b = document.createElement(el.tagName);
+    jest.spyOn(b, "goShow").mockImplementationOnce(() => false);
+    b.$options.target = trg;
+    document.body.appendChild(b);
+    jest.advanceTimersByTime(1);
+    trg.click();
+    await wait();
+    expect(b.$isOpen).toBeFalsy();
+    trg.click(); // click again (goShow is once => it's restored to previous)
+    await wait();
+    expect(b.$isOpen).toBeTruthy();
 
     // other cases in test(`options.$target`) and test(`remove`)
   });
@@ -809,14 +783,9 @@ describe("popupElement", () => {
     window.matchMedia = orig2;
     expect(el.$isOpen).toBeTruthy();
     expect(spyErr).toBeCalled();
-    nextFrame();
+    nextFrame(); // no-animation expected
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"animation-name: none; transform: translate(190px, 100px) scaleY(0); display: block; transform-origin: top;\\" position=\\"bottom\\"><div style=\\"\\"></div><div style=\\"\\"></div></wup-popup>"`
-    );
-
-    nextFrame();
-    expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"animation-name: none; transform: translate(190px, 100px) scaleY(0.0033333333333333335); display: block; transform-origin: top;\\" position=\\"bottom\\"><div style=\\"transform: scaleY(300);\\"></div><div style=\\"transform: scaleY(300);\\"></div></wup-popup>"`
+      `"<wup-popup style=\\"animation-name: none; transform: translate(140px, 150px); display: block;\\" position=\\"bottom\\"><div style=\\"\\"></div><div style=\\"\\"></div></wup-popup>"`
     );
   });
 
@@ -1388,13 +1357,11 @@ describe("popupElement", () => {
 
     // checking when canShow = false > popup.removed
     jest.clearAllMocks();
-    const spyCanShow = jest.spyOn(WUPPopupElement.prototype, "canShow").mockImplementation(() => false);
+    jest.spyOn(WUPPopupElement.prototype, "goShow").mockImplementationOnce(() => false);
     detach = WUPPopupElement.$attach({ target: trg, showCase: 0b111111, text: "Me" }); // checking without callback
     trg.click();
     jest.advanceTimersByTime(100); // popup has click-timeouts
     expect(document.body.innerHTML).toMatchInlineSnapshot(`"<div id=\\"targetId\\">some text</div>"`);
-    spyCanShow.mockRestore();
-
     detach();
     spy.check(); // checking memory leak
 

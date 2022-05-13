@@ -132,11 +132,11 @@ How to extend/override
 
 class Popup extends WUPPopupElement {
   // take a look on definition of WUPPopupElement and you will find internals
-  protected override canShow(showCase: WUPPopup.ShowCases): boolean {
+  protected override goShow(showCase: WUPPopup.ShowCases): boolean {
     if (showCase === WUPPopup.ShowCases.onHover) {
       return false;
     }
-    return true;
+    return super.goShow(showCase);
   }
 }
 
