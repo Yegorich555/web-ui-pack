@@ -709,8 +709,9 @@ export default class WUPPopupElement<
       this.style.transformOrigin = this.getAttribute("position") === "top" ? "bottom" : "top";
       this.style.transform = `${prev ? `${prev} ` : ""}scaleY(${s})`;
       if (s !== 0) {
-        nested.forEach((e) => (e.el.style.transform = `${e.prev ? `${prev} ` : ""}scaleY(${1 / s})`));
+        nested.forEach((e) => (e.el.style.transform = `${e.prev ? `${e.prev} ` : ""}scaleY(${1 / s})`));
       }
+      console.warn("transform", { isRevert, parent: this.style.transform, child: nested[0].el.style.transform });
       if (cur === animTime) {
         reset();
         return;
