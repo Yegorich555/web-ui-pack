@@ -534,16 +534,8 @@ export default class WUPPopupElement<
       ...otherRules.map((v) => v.$resizeHeight),
     ];
 
-    const goUpdate = () => {
-      if (this.#isOpen) {
-        this.#prevRect = this.#updatePosition();
-        // possible if hidden by target-remove
-        this.#frameId = window.requestAnimationFrame(goUpdate);
-      }
-    };
-
     this.#isOpen = true;
-    goUpdate();
+
     // animation for drawer
     if (this._opts.animation === WUPPopup.Animations.drawer) {
       if (!animTime) {
@@ -553,6 +545,16 @@ export default class WUPPopupElement<
       }
       this.#animateDrawer(animTime || 300);
     }
+
+    const goUpdate = () => {
+      if (this.#isOpen) {
+        this.#prevRect = this.#updatePosition();
+        // possible if hidden by target-remove
+        this.#frameId = window.requestAnimationFrame(goUpdate);
+      }
+    };
+
+    goUpdate();
 
     if (wasHidden) {
       // run async to dispose internal resources first: possible dev-side-issues
@@ -658,60 +660,75 @@ export default class WUPPopupElement<
     return true;
   }
 
-  #animCur?: number;
   #frameAnimId?: number;
   /** Run animation and return new animIime (possible when animation re-run and previous must be finished) */
   #animateDrawer = (animTime: number, isRevert?: boolean): number => {
     this.#frameAnimId && window.cancelAnimationFrame(this.#frameAnimId);
-    if (this.#animCur) {
-      animTime = this.#animCur;
-    }
-
-    let start = 0;
-    const prev = this.style.transform;
     this.style.animationName = "none"; // disable default css-animation
+
+    // get previous scaleY and extract transform without scaleY
+    const reg = /scaleY\(([\d.]+)\)/;
+    const parseScale = (el: HTMLElement): { prev: string; from: number } => {
+      let prev = el.style.transform;
+      let from = isRevert ? 1 : 0;
+      const r = reg.exec(el.style.transform);
+      if (r) {
+        // remove scale from transform
+        prev = el.style.transform.replace(r[0], "");
+        from = Number.parseFloat(r[1]);
+      }
+      if (prev) {
+        prev = `${prev.trim().replace("  ", " ")} `; // extra-space to prepary add scaleY without extra logic
+      }
+
+      return { prev, from };
+    };
 
     const nested: Array<{ el: HTMLElement; prev: string }> = [];
     const ch = this.children;
     for (let i = 0; i < ch.length; ++i) {
       const el = ch.item(i) as HTMLElement;
-      nested.push({ el, prev: el.style.transform });
+      const parsed = parseScale(el);
+      nested.push({ el, prev: parsed.prev });
     }
 
     // reset inline styles
     const reset = () => {
-      this.#animCur = undefined;
       this.#frameAnimId = undefined;
       setTimeout(() => {
         // timeout is required to prevent blink-effect when popup hasn't been hide yet
-        this.style.transform = prev;
+        this.style.transform = prev.trimEnd();
         this.style.transformOrigin = "";
-        nested.forEach((e) => (e.el.style.transform = e.prev));
-      }, 1); // 1ms is required because can be difference betwen Promise/setTimeout in different browsers
+        nested.forEach((e) => (e.el.style.transform = e.prev.trimEnd()));
+      }, 1); // 1ms is required because can be difference betwen Promise & setTimeout in different browsers
     };
 
-    const animate = (time: DOMHighResTimeStamp) => {
-      if (!start) {
-        start = time;
-      }
-      const elapsed = time - start;
-      const cur = Math.min(elapsed, animTime); // to make sure the element stops at exactly pointed value
+    // define from-to ranges
+    const to = isRevert ? 0 : 1;
+    const { prev, from } = parseScale(this);
+
+    // recalc left-animTime based on current animation (if element is partially opened and need to hide it)
+    animTime *= Math.abs(to - from);
+
+    let start = 0;
+    const animate = (t: DOMHighResTimeStamp) => {
       if (!this.isConnected) {
         reset(); // possible when item is removed unexpectedly
         return;
       }
 
-      let s = cur / animTime;
-      this.#animCur = cur;
-      if (isRevert) {
-        s = 1 - s;
+      if (!start) {
+        start = t;
       }
+
+      const cur = Math.min(t - start, animTime); // to make sure the element stops at exactly pointed value
+      const v = cur / animTime;
+      const scale = from + (to - from) * v;
+
       this.style.transformOrigin = this.getAttribute("position") === "top" ? "bottom" : "top";
-      this.style.transform = `${prev ? `${prev} ` : ""}scaleY(${s})`;
-      if (s !== 0) {
-        nested.forEach((e) => (e.el.style.transform = `${e.prev ? `${e.prev} ` : ""}scaleY(${1 / s})`));
-      }
-      console.warn("transform", { isRevert, parent: this.style.transform, child: nested[0].el.style.transform });
+      this.style.transform = `${prev}scaleY(${scale})`;
+      scale !== 0 && nested.forEach((e) => (e.el.style.transform = `${e.prev}scaleY(${1 / scale})`));
+
       if (cur === animTime) {
         reset();
         return;
@@ -766,6 +783,7 @@ export default class WUPPopupElement<
     const _defMaxWidth = this._opts.maxWidthByTarget ? `${tdef.width}px` : "";
     this.setMaxWidth(_defMaxWidth); // resetting is required to get default size
     this.setMaxHeight(""); // resetting is required to get default size
+
     if (this.#arrowElement) {
       this.#arrowElement.style.display = "";
       this.#arrowElement.style.width = "";
