@@ -189,6 +189,22 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
 
   _cachedItems?: WUPSelectControlTypes.MenuItems<ValueType>;
 
+  protected async renderMenu(popup: WUPPopupElement, menuId: string) {
+    const ul = popup.appendChild(document.createElement("ul"));
+    ul.setAttribute("id", menuId);
+    ul.setAttribute("role", "listbox");
+    ul.setAttribute("aria-label", "Items");
+    // todo appendEvent maybe wrong
+    this.appendEvent(ul, "click", (e) => {
+      e.stopPropagation();
+      if (e.target instanceof HTMLLIElement) {
+        this.onMenuItemClick(e as MouseEvent & { target: HTMLLIElement });
+      }
+    });
+
+    await this.renderMenuItems(ul);
+  }
+
   protected async renderMenuItems(ul: HTMLUListElement) {
     const arr = await this.#ctr.getMenuItems<ValueType, this>(this);
 
@@ -215,25 +231,22 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     this.setValue(o.value);
   }
 
-  protected override onInput(e: Event & { currentTarget: HTMLInputElement }) {
-    // todo implement search
-  }
-
-  // todo error if popup is open and user goes to another UI-page (on React)
+  // todo error if menu is open and user goes to another UI-page (on React)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected async goShowMenu(showCase: WUPSelectControlTypes.ShowCases): Promise<WUPPopupElement | null> {
     if (this.#isOpen) {
       return this.$refPopup || null;
     }
 
     this.#isOpen = true;
-    this.$hideError(); // todo resolve conflict overflow popup and error
+    this.$hideError(); // it resolves overflow menu vs error
 
     const isCreate = !this.$refPopup;
     if (!this.$refPopup) {
       this.$refPopup = this.appendChild(document.createElement("wup-popup"));
       const p = this.$refPopup;
       p.$options.showCase = PopupShowCases.always;
-      // p.$options.target = this; // it's not required
+      p.$options.target = this;
       p.$options.minWidthByTarget = true;
       // todo set maxHeight via styles ?
       p.$options.placement = [
@@ -255,19 +268,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
       i.setAttribute("aria-owns", menuId);
       i.setAttribute("aria-controls", menuId);
 
-      const ul = p.appendChild(document.createElement("ul"));
-      ul.setAttribute("id", menuId);
-      ul.setAttribute("role", "listbox");
-      ul.setAttribute("aria-label", "Items");
-      // todo appendEvent maybe wrong
-      this.appendEvent(ul, "click", (e) => {
-        e.stopPropagation();
-        if (e.target instanceof HTMLLIElement) {
-          this.onMenuItemClick(e as MouseEvent & { target: HTMLLIElement });
-        }
-      });
-
-      await this.renderMenuItems(ul);
+      await this.renderMenu(p, menuId);
     }
 
     const selectedItemId = "itemId"; // todo implement
@@ -302,6 +303,10 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     this.$refInput.setAttribute("aria-expanded", "false");
 
     return true;
+  }
+
+  protected override onInput(e: Event & { currentTarget: HTMLInputElement }) {
+    // todo implement search
   }
 }
 
