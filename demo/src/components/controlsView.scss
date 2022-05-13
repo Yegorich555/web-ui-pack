@@ -26,7 +26,6 @@
 
   &:focus-within {
     outline: 1px solid var(--ctrl-focus);
-    z-index: 90002;
 
     > [menu] {
       outline: 1px solid var(--ctrl-focus);
@@ -618,5 +617,14 @@
   input:focus + *,
   input:not(:placeholder-shown) + * {
     top: 0.2em;
+  }
+}
+
+wup-popup[menu] {
+  overflow: hidden;
+
+  > ul {
+    max-height: 300px; // todo we need to improve this
+    overflow: auto;
   }
 }

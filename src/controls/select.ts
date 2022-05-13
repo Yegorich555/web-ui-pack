@@ -131,11 +131,11 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
   }
 
   $hide() {
-    this.goHide(WUPSelectControlTypes.HideCases.onManualCall);
+    this.goHideMenu(WUPSelectControlTypes.HideCases.onManualCall);
   }
 
   $show() {
-    this.goShow(WUPSelectControlTypes.ShowCases.onManualCall);
+    this.goShowMenu(WUPSelectControlTypes.ShowCases.onManualCall);
   }
 
   $refPopup?: WUPPopupElement;
@@ -149,7 +149,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
         showCase: PopupShowCases.onClick | PopupShowCases.onFocus,
       },
       (s) =>
-        this.goShow(
+        this.goShowMenu(
           s === PopupShowCases.onClick
             ? WUPSelectControlTypes.ShowCases.onClick
             : WUPSelectControlTypes.ShowCases.onFocus
@@ -158,13 +158,16 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
         (s === WUPPopup.HideCases.onFocusOut ||
           s === WUPPopup.HideCases.onOutsideClick ||
           s === WUPPopup.HideCases.onTargetClick) &&
-        this.goHide(
+        this.goHideMenu(
           s === WUPPopup.HideCases.onFocusOut
             ? WUPSelectControlTypes.HideCases.onFocusLost
             : WUPSelectControlTypes.HideCases.onClick
         )
     );
     this.#refPopupDispose = refs.onHideRef;
+
+    // todo remove after tests
+    // setTimeout(() => this.click(), 500);
   }
 
   protected override renderControl() {
@@ -216,7 +219,8 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     // todo implement search
   }
 
-  protected async goShow(showCase: WUPSelectControlTypes.ShowCases): Promise<WUPPopupElement | null> {
+  // todo error if popup is open and user goes to another UI-page (on React)
+  protected async goShowMenu(showCase: WUPSelectControlTypes.ShowCases): Promise<WUPPopupElement | null> {
     if (this.#isOpen) {
       return this.$refPopup || null;
     }
@@ -224,9 +228,12 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     this.#isOpen = true;
     this.$hideError(); // todo resolve conflict overflow popup and error
 
+    const isCreate = !this.$refPopup;
     if (!this.$refPopup) {
       this.$refPopup = this.appendChild(document.createElement("wup-popup"));
       const p = this.$refPopup;
+      p.$options.showCase = PopupShowCases.always;
+      // p.$options.target = this; // it's not required
       p.$options.minWidthByTarget = true;
       // todo set maxHeight via styles ?
       p.$options.placement = [
@@ -241,7 +248,8 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
       ];
 
       p.setAttribute("menu", "");
-      // todo don't forget dropdown animation from example
+      p.$options.animation = WUPPopup.Animations.drawer;
+
       const menuId = this.#ctr.uniqueId;
       const i = this.$refInput;
       i.setAttribute("aria-owns", menuId);
@@ -268,11 +276,11 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     this.setAttribute("opened", "");
     this.$refInput.setAttribute("aria-expanded", "true");
 
-    this.$refPopup.$show();
+    !isCreate && this.$refPopup.$show(); // otherwise popup is opened automatically by init (because PopupShowCases.always)
     return this.$refPopup;
   }
 
-  protected async goHide(hideCase: WUPSelectControlTypes.HideCases): Promise<boolean> {
+  protected async goHideMenu(hideCase: WUPSelectControlTypes.HideCases): Promise<boolean> {
     const wasOpen = this.#isOpen;
     this.#isOpen = false;
     if (!this.$refPopup) {
@@ -283,6 +291,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
       await this.$refPopup.$hide();
     }
 
+    // todo it's wrong if closing was prevented by openAgain
     // remove popup only by focusOut to optimize resources
     if (hideCase === WUPSelectControlTypes.HideCases.onFocusLost) {
       this.$refPopup.remove();
