@@ -55,18 +55,27 @@ export default function popupListenTarget(
     onShowCallbacks.length = 0;
   }
 
+  // required to prevent previous action (cancel hidding because need to show again etc.)
+  let isCancelShow = false;
+  let isCancelHide = false;
+
   async function show(showCase: WUPPopup.ShowCases): Promise<void> {
+    isCancelHide = true;
     openedEl = await onShow(showCase);
-    if (openedEl) {
-      onShowCallbacks.forEach((f) => onHideCallbacks.push(f()));
-    }
+    openedEl && !isCancelShow && onShowCallbacks.forEach((f) => onHideCallbacks.push(f()));
+    isCancelHide = false;
   }
 
   async function hide(hideCase: WUPPopup.HideCases): Promise<void> {
-    if (await onHide(hideCase)) {
-      openedEl = null;
+    isCancelShow = true;
+    const was = openedEl; // requried when user clicks again during the hidding > we need to show in this case
+    openedEl = null;
+    if ((await onHide(hideCase)) && !isCancelHide) {
       onHideRef();
+    } else {
+      openedEl = was; // rollback if hidding wasn't successful
     }
+    isCancelShow = false;
   }
 
   // try to detect if target removed

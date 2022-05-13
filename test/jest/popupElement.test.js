@@ -6,6 +6,11 @@ import * as all2 from "web-ui-pack/popup/popupElement";
 
 import * as h from "../testHelper";
 
+/** Wait for pointet time (includes times and async promise) */
+function wait(time = 1000) {
+  return new Promise((resolve) => setTimeout(resolve, time) && jest.advanceTimersByTime(time));
+}
+
 /** @type WUPPopupElement */
 let el;
 /** @type HTMLElement */
@@ -669,7 +674,6 @@ describe("popupElement", () => {
   });
 
   test("$options.animation", async () => {
-    el.test = true;
     el.$options.showCase = 0;
     await new Promise((resolve) => setTimeout(resolve, 1000) && jest.advanceTimersByTime(1000));
     expect(el.outerHTML).toMatchInlineSnapshot(
@@ -1572,5 +1576,64 @@ describe("popupElement", () => {
     );
 
     el.remove();
+  });
+
+  test("async show/hide on target click", async () => {
+    // issue by trg.click() open > hide > open  --- error
+    el.$hide();
+    el.$options.showCase = 1 << 2; // onlyClick
+    await wait();
+    expect(el.$isOpen).toBeFalsy();
+
+    // checking ordinary behavior without animation
+    trg.click();
+    await wait();
+    expect(el.$isOpen).toBeTruthy();
+
+    trg.click();
+    await wait();
+    expect(el.$isOpen).toBeFalsy();
+
+    // simulate defaults
+    const orig = window.getComputedStyle;
+    jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
+      if (elem === el) {
+        /** @type CSSStyleDeclaration */
+        return { animationDuration: "0.3s", animationName: "WUP-POPUP-a1" };
+      }
+      return orig(elem);
+    });
+
+    trg.click();
+    expect(el.$isOpen).toBeTruthy(); // because open is sync method
+
+    // hide
+    await wait(50); // wait for 50ms
+    trg.click();
+    expect(el.$isOpen).toBeTruthy(); // because hide is async method
+    await wait(50); // wait for 50ms
+    expect(el.$isOpen).toBeTruthy(); // because hide waits for animation in 300ms
+
+    // open
+    trg.click(); // try open again when hide hasn't been finished yet
+    expect(el.$isOpen).toBeTruthy(); // todo issue here
+    await wait(50); // wait for 50ms
+    expect(el.$isOpen).toBeTruthy();
+
+    // hide
+    trg.click(); // try again when previous hide hasn't been finished yet but opened again
+    expect(el.$isOpen).toBeTruthy();
+    await wait(50); // wait for 50ms
+    expect(el.$isOpen).toBeTruthy();
+    await wait(1000);
+    expect(el.$isOpen).toBeFalsy();
+
+    // checking if it works again
+    trg.click(); // try ещ сдшсл again when previous hide hasn't been finished yet but opened again
+    await wait();
+    expect(el.$isOpen).toBeTruthy();
+    trg.click(); // try ещ сдшсл again when previous hide hasn't been finished yet but opened again
+    await wait();
+    expect(el.$isOpen).toBeFalsy();
   });
 });
