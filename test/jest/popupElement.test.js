@@ -794,10 +794,19 @@ describe("popupElement", () => {
     // checking error when animTime is missed
     spyStyle.mockRestore();
     document.body.append(el);
+    el.$show();
+    await wait();
+    el.$hide();
+    await wait();
+    // checking with default: when browser prefers-reduced-motion = false
+    const orig2 = window.matchMedia;
+    window.matchMedia = () => ({ matches: true });
+    // jest.spyOn(window, "matchMedia").mockReturnValueOnce({ matches: true });
     const spyErr = h.mockConsoleError();
     el.$show();
     await wait();
     h.unMockConsoleError();
+    window.matchMedia = orig2;
     expect(el.$isOpen).toBeTruthy();
     expect(spyErr).toBeCalled();
     nextFrame();

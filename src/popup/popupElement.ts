@@ -539,11 +539,15 @@ export default class WUPPopupElement<
     // animation for drawer
     if (this._opts.animation === WUPPopup.Animations.drawer) {
       if (!animTime) {
-        console.error(
-          `${this.tagName} style.animationDuration is missed but $options.animation is defined. Please point animation duration via styles`
-        );
+        const isAnimEn = window.matchMedia("not all and (prefers-reduced-motion)").matches;
+        if (isAnimEn) {
+          console.error(
+            `${this.tagName} style.animationDuration is missed but $options.animation is defined. Please point animation duration via styles`
+          );
+        }
+      } else {
+        this.#animateDrawer(animTime);
       }
-      this.#animateDrawer(animTime || 300);
     }
 
     const goUpdate = () => {
@@ -945,7 +949,7 @@ export default class WUPPopupElement<
       if (this.#userStyles.waitForAnimation) {
         this.style.left = `${pos.left}px`;
         this.style.top = `${pos.top}px`;
-        // todo it affects on animation
+        // todo issue: it affects on animation
         this.style.transform = ""; // it removes previous transform from previous opened state
       } else {
         this.style.left = "";
