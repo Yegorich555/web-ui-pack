@@ -191,9 +191,8 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
   }
 
   /** Mapping items with li-ids */
-  _itemsMap: Map<string, WUPSelectControlTypes.MenuItem<ValueType> | WUPSelectControlTypes.MenuItemFn<ValueType>> =
-    new Map();
-
+  _menuItems?: HTMLLIElement[];
+  /** Items resolved from options */
   _cachedItems?: WUPSelectControlTypes.MenuItems<ValueType>;
 
   #disposeMenuEvent?: () => void;
@@ -215,19 +214,18 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
       this.disposeLst.splice(this.disposeLst.indexOf(r), 1);
     };
 
-    await this.renderMenuItems(ul);
+    this._menuItems = await this.renderMenuItems(ul);
   }
 
-  protected async renderMenuItems(ul: HTMLUListElement) {
+  protected async renderMenuItems(ul: HTMLUListElement): Promise<Array<HTMLLIElement>> {
     const arr = await this.#ctr.getMenuItems<ValueType, this>(this);
 
-    const arrLi = arr.map((o) => {
+    const arrLi = arr.map(() => {
       const li = ul.appendChild(document.createElement("li"));
       li.setAttribute("role", "option");
-      li.setAttribute("aria-selected", "false"); // todo implement it according to current value
+      li.setAttribute("aria-selected", "false");
       const id = this.#ctr.uniqueId;
-      li.id = id; // todo check it (maybe use more convenient id's)
-      this._itemsMap.set(id, o);
+      li.id = id;
       return li;
     });
 
@@ -236,10 +234,13 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     } else {
       arr.forEach((v, i) => (arrLi[i].textContent = (v as WUPSelectControlTypes.MenuItem<ValueType>).text));
     }
+
+    return arrLi;
   }
 
   protected onMenuItemClick(e: MouseEvent & { target: HTMLLIElement }) {
-    const o = this._itemsMap.get(e.target.id) as WUPSelectControlTypes.MenuItemAny<ValueType>;
+    const i = this._menuItems!.indexOf(e.target);
+    const o = this._cachedItems![i];
 
     this.setValue(o.value);
     this.goHideMenu(WUPSelectControlTypes.HideCases.onSelect);
@@ -287,17 +288,16 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
         async () => {
           this.disposeLst.splice(this.disposeLst.indexOf(r), 1);
           await this.#menuHidding; // wait for animation if exists
-          if (!this.#isOpen) {
-            this.$refPopup?.remove();
-            this.$refPopup = undefined;
-            this.#disposeMenuEvent?.call(this);
-          }
+          // check if closed (user can open again during the hidding)
+          !this.#isOpen && this.removePopup();
         },
         { debounceMs: this._opts.focusDebounceMs, once: true }
       );
       this.disposeLst.push(r);
 
       await this.renderMenu(p, menuId);
+    } else {
+      this.$refPopup.querySelector('[aria-selected="true"]')?.removeAttribute("aria-selected");
     }
 
     const selectedItemId = "itemId"; // todo implement
@@ -305,6 +305,13 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
 
     this.setAttribute("opened", "");
     this.$refInput.setAttribute("aria-expanded", "true");
+
+    // set aria-selected
+    const v = this.$value;
+    if (v !== undefined) {
+      const i = this._cachedItems!.findIndex((item) => this.#ctr.isEqual(item.value, v));
+      i !== -1 && this._menuItems![i].setAttribute("aria-selected", "true");
+    }
 
     !isCreate && this.$refPopup.$show(); // otherwise popup is opened automatically by init (because PopupShowCases.always)
 
@@ -358,15 +365,21 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     // todo implement search
   }
 
-  protected gotRemoved() {
-    super.gotRemoved();
-
-    // remove resources for case when control can be appended again
-    this.#isOpen = false;
+  protected removePopup() {
     this.$refPopup?.remove();
     this.$refPopup = undefined;
+    this.#disposeMenuEvent?.call(this);
     this.#disposeMenuEvent = undefined;
+    this._menuItems = undefined;
+  }
+
+  protected gotRemoved() {
+    this.removePopup();
+    // remove resources for case when control can be appended again
+    this.#isOpen = false;
     this.#popupRefs = undefined;
+
+    super.gotRemoved();
   }
 }
 
