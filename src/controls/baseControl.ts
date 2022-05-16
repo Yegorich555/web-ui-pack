@@ -176,7 +176,7 @@ export default abstract class WUPBaseControl<
   #value: ValueType | undefined;
   /** Current value of control */
   get $value(): ValueType | undefined {
-    return this.#value; // todo implement parse from rawValue
+    return this.#value;
   }
 
   set $value(v: ValueType | undefined) {
@@ -249,7 +249,7 @@ export default abstract class WUPBaseControl<
     this.$refTitle.textContent = this._opts.label || null;
     const r = this.$refInput;
     if (r) {
-      r.type = "text"; // todo configurable option
+      r.type = "text";
 
       if (this._opts.autoFillName === "") {
         r.autocomplete = "off";
@@ -381,6 +381,10 @@ export default abstract class WUPBaseControl<
   }
 
   protected goShowError(err: string) {
+    // possible when user goes to another page and focusout > validTimeout happened
+    if (!this.isConnected) {
+      return;
+    }
     this.$refInput.setCustomValidity(err);
     this.setAttribute("invalid", "");
 
