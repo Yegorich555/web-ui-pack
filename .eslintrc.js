@@ -26,6 +26,7 @@ module.exports = {
     "no-shadow": "off",
     "@typescript-eslint/no-shadow": "error",
     "@typescript-eslint/ban-ts-comment": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
     "import/no-extraneous-dependencies": "off",
     "lines-between-class-members": ["error", "always", { exceptAfterSingleLine: true }],
     "react/no-access-state-in-setstate": "off",

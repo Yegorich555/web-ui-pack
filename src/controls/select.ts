@@ -1,4 +1,6 @@
 /* eslint-disable no-use-before-define */
+import onEvent from "../helpers/onEvent";
+import onFocusLostEv from "../helpers/onFocusLost";
 // eslint-disable-next-line import/named
 import WUPPopupElement, { ShowCases as PopupShowCases, WUPPopup } from "../popup/popupElement";
 import popupListenTarget from "../popup/popupListenTarget";
@@ -18,8 +20,8 @@ export namespace WUPSelectControlTypes {
     onClick,
     onManualCall,
     onSelect,
-    onEscPress,
     onFocusLost,
+    // todo onPressEsc ???
   }
 
   export type MenuItem<T> = { text: string; value: T };
@@ -139,7 +141,11 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
   }
 
   $refPopup?: WUPPopupElement;
-  #refPopupDispose?: () => void; // todo use it
+  #popupRefs?: {
+    hide: (hideCase: WUPPopup.HideCases) => Promise<void>;
+    show: (showCase: WUPPopup.ShowCases) => Promise<void>;
+  };
+
   protected override connectedCallback() {
     super.connectedCallback();
 
@@ -149,25 +155,26 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
         showCase: PopupShowCases.onClick | PopupShowCases.onFocus,
       },
       (s) =>
-        this.goShowMenu(
-          s === PopupShowCases.onClick
-            ? WUPSelectControlTypes.ShowCases.onClick
-            : WUPSelectControlTypes.ShowCases.onFocus
-        ),
+        s === WUPPopup.ShowCases.always // manual show
+          ? (this.$refPopup as WUPPopupElement)
+          : this.goShowMenu(
+              s === PopupShowCases.onClick
+                ? WUPSelectControlTypes.ShowCases.onClick
+                : WUPSelectControlTypes.ShowCases.onFocus
+            ),
       (s) =>
-        (s === WUPPopup.HideCases.onFocusOut ||
-          s === WUPPopup.HideCases.onOutsideClick ||
-          s === WUPPopup.HideCases.onTargetClick) &&
-        this.goHideMenu(
-          s === WUPPopup.HideCases.onFocusOut
-            ? WUPSelectControlTypes.HideCases.onFocusLost
-            : WUPSelectControlTypes.HideCases.onClick
-        )
+        s === WUPPopup.HideCases.onFocusOut ||
+        s === WUPPopup.HideCases.onOutsideClick ||
+        s === WUPPopup.HideCases.onTargetClick ||
+        s === WUPPopup.HideCases.onPopupClick
+          ? this.goHideMenu(
+              s === WUPPopup.HideCases.onFocusOut || s === WUPPopup.HideCases.onOutsideClick
+                ? WUPSelectControlTypes.HideCases.onFocusLost
+                : WUPSelectControlTypes.HideCases.onClick
+            )
+          : true
     );
-    this.#refPopupDispose = refs.onHideRef;
-
-    // todo remove after tests
-    // setTimeout(() => this.click(), 500);
+    this.#popupRefs = { hide: refs.hide, show: refs.show };
   }
 
   protected override renderControl() {
@@ -189,18 +196,24 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
 
   _cachedItems?: WUPSelectControlTypes.MenuItems<ValueType>;
 
+  #disposeMenuEvent?: () => void;
   protected async renderMenu(popup: WUPPopupElement, menuId: string) {
     const ul = popup.appendChild(document.createElement("ul"));
     ul.setAttribute("id", menuId);
     ul.setAttribute("role", "listbox");
     ul.setAttribute("aria-label", "Items");
-    // todo appendEvent maybe wrong
-    this.appendEvent(ul, "click", (e) => {
+
+    const r = onEvent(ul, "click", async (e) => {
       e.stopPropagation();
       if (e.target instanceof HTMLLIElement) {
         this.onMenuItemClick(e as MouseEvent & { target: HTMLLIElement });
       }
     });
+    this.disposeLst.push(r);
+    this.#disposeMenuEvent = () => {
+      r(); // self-remove event listener by hidding
+      this.disposeLst.splice(this.disposeLst.indexOf(r), 1);
+    };
 
     await this.renderMenuItems(ul);
   }
@@ -229,9 +242,9 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     const o = this._itemsMap.get(e.target.id) as WUPSelectControlTypes.MenuItemAny<ValueType>;
 
     this.setValue(o.value);
+    this.goHideMenu(WUPSelectControlTypes.HideCases.onSelect);
   }
 
-  // todo error if menu is open and user goes to another UI-page (on React)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected async goShowMenu(showCase: WUPSelectControlTypes.ShowCases): Promise<WUPPopupElement | null> {
     if (this.#isOpen) {
@@ -268,6 +281,22 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
       i.setAttribute("aria-owns", menuId);
       i.setAttribute("aria-controls", menuId);
 
+      // remove popup only by focusOut to optimize resources
+      const r = onFocusLostEv(
+        this,
+        async () => {
+          this.disposeLst.splice(this.disposeLst.indexOf(r), 1);
+          await this.#menuHidding; // wait for animation if exists
+          if (!this.#isOpen) {
+            this.$refPopup?.remove();
+            this.$refPopup = undefined;
+            this.#disposeMenuEvent?.call(this);
+          }
+        },
+        { debounceMs: this._opts.focusDebounceMs, once: true }
+      );
+      this.disposeLst.push(r);
+
       await this.renderMenu(p, menuId);
     }
 
@@ -278,9 +307,17 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     this.$refInput.setAttribute("aria-expanded", "true");
 
     !isCreate && this.$refPopup.$show(); // otherwise popup is opened automatically by init (because PopupShowCases.always)
+
+    if (showCase === WUPSelectControlTypes.ShowCases.onManualCall) {
+      // call for ref-listener to apply events properly
+      this.#popupRefs!.show(WUPPopup.ShowCases.always);
+    }
+
     return this.$refPopup;
   }
 
+  #menuHidding?: Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected async goHideMenu(hideCase: WUPSelectControlTypes.HideCases): Promise<boolean> {
     const wasOpen = this.#isOpen;
     this.#isOpen = false;
@@ -289,14 +326,26 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     }
 
     if (wasOpen) {
-      await this.$refPopup.$hide();
+      if (
+        hideCase === WUPSelectControlTypes.HideCases.onManualCall ||
+        hideCase === WUPSelectControlTypes.HideCases.onSelect
+      ) {
+        // call for ref-listener to apply events properly
+        this.#popupRefs!.hide(WUPPopup.HideCases.onManuallCall);
+      }
+
+      let pback: () => void;
+      // eslint-disable-next-line no-promise-executor-return
+      this.#menuHidding = new Promise((resolve) => (pback = resolve));
+
+      wasOpen && (await this.$refPopup.$hide());
+      // @ts-expect-error
+      pback();
+      this.#menuHidding = undefined;
     }
 
-    // todo it's wrong if closing was prevented by openAgain
-    // remove popup only by focusOut to optimize resources
-    if (hideCase === WUPSelectControlTypes.HideCases.onFocusLost) {
-      this.$refPopup.remove();
-      this.$refPopup = undefined;
+    if (this.#isOpen) {
+      return false; // possible when popup opened again during the animation
     }
 
     this.removeAttribute("opened");
@@ -307,6 +356,17 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
 
   protected override onInput(e: Event & { currentTarget: HTMLInputElement }) {
     // todo implement search
+  }
+
+  protected gotRemoved() {
+    super.gotRemoved();
+
+    // remove resources for case when control can be appended again
+    this.#isOpen = false;
+    this.$refPopup?.remove();
+    this.$refPopup = undefined;
+    this.#disposeMenuEvent = undefined;
+    this.#popupRefs = undefined;
   }
 }
 

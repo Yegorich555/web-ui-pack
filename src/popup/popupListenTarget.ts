@@ -24,8 +24,10 @@ export default function popupListenTarget(
 ): {
   /** Fire it when element is removed manually (to remove all added related eventListeners) */
   onRemoveRef: () => void;
-  /** Fire it when element is hidden manually */
-  onHideRef: () => void;
+  /** Fire it when you need to hide manually; If hideCase== onManuallCall onHide isn't called */
+  hide: (hideCase: WUPPopup.HideCases) => Promise<void>;
+  /** Fire it when you need to show manually; If showCase == always onShow isn't called if onShow was called once before */
+  show: (showCase: WUPPopup.ShowCases) => Promise<void>;
 } {
   const opts = { ...popupListenTarget.$defaults, ...options };
   const t = opts.target;
@@ -58,7 +60,9 @@ export default function popupListenTarget(
 
   // required to prevent previous action (cancel hidding because need to show again etc.)
   async function show(showCase: WUPPopup.ShowCases): Promise<void> {
-    openedEl = await onShow(showCase);
+    if (showCase !== WUPPopup.ShowCases.always || !openedEl) {
+      openedEl = await onShow(showCase);
+    }
     openedEl && onShowCallbacks.forEach((f) => onHideCallbacks.push(f()));
   }
 
@@ -66,7 +70,7 @@ export default function popupListenTarget(
     const was = openedEl; // required when user clicks again during the hidding > we need to show in this case
     openedEl = null;
     onHideRef();
-    const isDone = await onHide(hideCase);
+    const isDone = hideCase === WUPPopup.HideCases.onManuallCall || (await onHide(hideCase));
     if (!isDone && !openedEl) {
       // rollback if onHide was prevented and onShow wasn't fired again during the hidding
       openedEl = was; // rollback if hidding wasn't successful
@@ -212,7 +216,7 @@ export default function popupListenTarget(
     }
   }
 
-  return { onRemoveRef, onHideRef };
+  return { onRemoveRef, hide, show };
 }
 
 popupListenTarget.$defaults = {

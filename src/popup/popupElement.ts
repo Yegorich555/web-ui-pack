@@ -192,7 +192,7 @@ export default class WUPPopupElement<
 
           if (!popup.goShow(v)) {
             if (isCreate) {
-              (popup as T).#onRemoveRef = undefined; // otherwise remove() destroys events
+              popup!.#onRemoveRef = undefined; // otherwise remove() destroys events
               popup.remove();
             }
             return null;
@@ -202,10 +202,10 @@ export default class WUPPopupElement<
         },
         async (v) => {
           isHidding = true;
-          const ok = await (popup as T).goHide(v);
+          const ok = await popup!.goHide(v);
           if (ok && isHidding) {
-            (popup as T).#onRemoveRef = undefined; // otherwise remove() destroys events
-            (popup as T).remove();
+            popup!.#onRemoveRef = undefined; // otherwise remove() destroys events
+            popup!.remove();
             popup = undefined;
           }
           return ok;
@@ -285,7 +285,6 @@ export default class WUPPopupElement<
   }
 
   #isOpen = false;
-  #onHideRef?: () => void; // func to remove eventListeners that added on onShow
   #onRemoveRef?: () => void; // func to remove eventListeners
   #attach?: () => ReturnType<typeof popupListenTarget>; // func to use alternative target
   /** Fired after gotReady() and $show() (to reinit according to options) */
@@ -310,7 +309,6 @@ export default class WUPPopupElement<
       );
     }
 
-    this.#onHideRef = refs.onHideRef;
     this.#onRemoveRef = refs.onRemoveRef;
   }
 
@@ -400,6 +398,7 @@ export default class WUPPopupElement<
     }
   }
 
+  // todo returns promise reflected to animation-timeout
   /** Shows popup if target defined; returns true if successful */
   protected goShow(showCase: WUPPopup.ShowCases): boolean {
     const wasHidden = !this.#isOpen;
@@ -423,9 +422,14 @@ export default class WUPPopupElement<
     const p = pAttr && WUPPopupElement.$placementAttrs[pAttr];
     this._opts.placement = p ? [p] : this._opts.placement;
 
+    // reset styles to default to avoid bugs and previous state
     // it works only when styles is defined before popup is opened
     this.setMaxWidth("");
     this.setMaxHeight("");
+    this.style.transform = "";
+    if (wasHidden) {
+      this.style.animationName = "";
+    }
     const style = getComputedStyle(this);
 
     let child = this.children.item(0);
@@ -591,8 +595,6 @@ export default class WUPPopupElement<
     };
 
     if (wasShow) {
-      this.#onHideRef?.call(this);
-
       if (hideCase !== WUPPopup.HideCases.onShowAgain) {
         let hideTime = 0;
 
@@ -607,21 +609,22 @@ export default class WUPPopupElement<
         if (hideTime) {
           // recalc hideTime base on animationLeftTime
           return new Promise((resolve) => {
+            if (this._opts.animation) {
+              this.#prevRect = undefined; // force to recalc position because transform translate must be cleared for animation
+              hideTime = this.#animateDrawer(hideTime, true);
+            }
+
             const done = () => {
               finishHide();
               resolve(true);
             };
             const t = setTimeout(done, hideTime);
+
             // fix when user scrolls during the hide-animation
             this.#forceHide = () => {
               clearTimeout(t);
               done();
             };
-
-            if (this._opts.animation) {
-              this.#prevRect = undefined; // force to recalc position because transform translate must be cleared for animation
-              hideTime = this.#animateDrawer(hideTime, true);
-            }
           });
         }
       }
@@ -672,7 +675,7 @@ export default class WUPPopupElement<
         this.style.transform = removeScaleY(this.style.transform);
         this.style.transformOrigin = "";
         nested.forEach((e) => (e.el.style.transform = e.prev.trimEnd()));
-      }, 1); // 1ms is required because can be difference betwen Promise & setTimeout in different browsers
+      });
     };
 
     // define from-to ranges
@@ -914,12 +917,9 @@ export default class WUPPopupElement<
         this.#arrowElement.style.transform = `translate(${pos.arrowLeft}px, ${pos.arrowTop}px) rotate(${pos.arrowAngle}deg)`;
       }
 
-      this.style.left = "";
-      this.style.top = "";
       // transform has performance benefits in comparison with positioning
       // prettier-ignore
       this.style.transform = `${this.style.transform.replace(/translate\(([\d., \w]+)\)/, "")}translate(${pos.left}px, ${pos.top}px)`;
-
       this.setAttribute("position", pos.attr);
     };
 

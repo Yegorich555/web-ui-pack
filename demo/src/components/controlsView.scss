@@ -57,7 +57,8 @@
     }
   }
 
-  &[invalid] {
+  &[invalid],
+  &[invalid] > [menu] {
     box-shadow: 0 0 3px 0 var(--ctrl-invalid-border);
     outline-color: var(--ctrl-invalid-border);
   }
