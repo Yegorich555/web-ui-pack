@@ -431,7 +431,11 @@ export default abstract class WUPBaseControl<
 
   protected setValue(v: ValueType | undefined) {
     this.$isDirty = true;
+    const isChanged = this.#ctr.isEqual(v, this.#value);
     this.#value = v;
+    if (!isChanged) {
+      return;
+    }
 
     const c = this._opts.validationCase;
     if (c & WUPBaseControlTypes.ValidationCases.onChange || c & WUPBaseControlTypes.ValidationCases.onChangeSmart) {
