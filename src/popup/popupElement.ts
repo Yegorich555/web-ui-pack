@@ -373,8 +373,6 @@ export default class WUPPopupElement<
     minH: number;
     minW: number;
     borderRadius: number;
-    /** When user defined custom animation via transform we must use heidht/widht for positioning */
-    waitForAnimation: false | ReturnType<typeof setTimeout>;
     inherritY: HTMLElement | null;
     inherritX: HTMLElement | null;
   } = undefined as any;
@@ -443,7 +441,6 @@ export default class WUPPopupElement<
       minH: Math.max(5, px2Number(style.paddingTop) + px2Number(style.paddingBottom), px2Number(style.minHeight)),
 
       borderRadius: 0,
-      waitForAnimation: false,
       // fix `maxSize inherritance doesn't work for customElements`
       inherritY: child && style.overflowY === "visible" ? child : null,
       inherritX: child && style.overflowX === "visible" ? child : null,
@@ -453,13 +450,7 @@ export default class WUPPopupElement<
     let animTime = 0;
     if (style.animationDuration && (style.animationName !== "WUP-POPUP-a1" || this._opts.animation)) {
       animTime = Number.parseFloat(style.animationDuration.substring(0, style.animationDuration.length - 1));
-      if (animTime) {
-        animTime *= 1000;
-        // only for custom animation
-        this.#userStyles.waitForAnimation = setTimeout(() => {
-          this.#userStyles.waitForAnimation = false;
-        }, animTime);
-      }
+      animTime *= 1000;
     } else if (!this._opts.animation) {
       this.style.animationName = ""; // reset to default if previosly animation was added
     }
@@ -525,7 +516,18 @@ export default class WUPPopupElement<
     ];
 
     this.#isOpen = true;
+    const goUpdate = () => {
+      if (this.#isOpen) {
+        this.#prevRect = this.#updatePosition();
+        // possible if hidden by target-remove
+        this.#frameId = window.requestAnimationFrame(goUpdate);
+      }
+    };
 
+    goUpdate();
+
+    // it requires because #updatePosition resets transform
+    // this.style.transform = prev;
     // animation for drawer
     if (this._opts.animation === WUPPopup.Animations.drawer) {
       if (!animTime) {
@@ -539,16 +541,6 @@ export default class WUPPopupElement<
         this.#animateDrawer(animTime);
       }
     }
-
-    const goUpdate = () => {
-      if (this.#isOpen) {
-        this.#prevRect = this.#updatePosition();
-        // possible if hidden by target-remove
-        this.#frameId = window.requestAnimationFrame(goUpdate);
-      }
-    };
-
-    goUpdate();
 
     if (wasHidden) {
       // run async to dispose internal resources first: possible dev-side-issues
@@ -573,8 +565,6 @@ export default class WUPPopupElement<
       }
     }
 
-    this.#userStyles.waitForAnimation && clearTimeout(this.#userStyles.waitForAnimation);
-
     const finishHide = () => {
       this.#forceHide = undefined;
       this.style.display = "";
@@ -583,7 +573,6 @@ export default class WUPPopupElement<
       this.removeAttribute("hide");
       this.#frameId && window.cancelAnimationFrame(this.#frameId);
       this.#frameId = undefined;
-      this.#userStyles.waitForAnimation = false;
 
       this.#showCase = undefined;
       this.#prevRect = undefined;
@@ -606,22 +595,17 @@ export default class WUPPopupElement<
 
       if (hideCase !== WUPPopup.HideCases.onShowAgain) {
         let hideTime = 0;
-        let isTransformAnimation = false;
 
         // waitFor only if was ordinary user-action
         if (hideCase >= WUPPopup.HideCases.onManuallCall && hideCase <= WUPPopup.HideCases.onTargetClick) {
           this.setAttribute("hide", "");
-          const { animationDuration: aD, animationName: aN } = getComputedStyle(this);
+          const { animationDuration: aD } = getComputedStyle(this);
           hideTime = Number.parseFloat(aD.substring(0, aD.length - 1)) * 1000 || 0;
           !hideTime && this.removeAttribute("hide");
-          isTransformAnimation = aN !== "WUP-POPUP-a2";
         }
 
         if (hideTime) {
           // recalc hideTime base on animationLeftTime
-          if (this._opts.animation) {
-            hideTime = this.#animateDrawer(hideTime, true);
-          }
           return new Promise((resolve) => {
             const done = () => {
               finishHide();
@@ -633,7 +617,11 @@ export default class WUPPopupElement<
               clearTimeout(t);
               done();
             };
-            this.#userStyles.waitForAnimation = isTransformAnimation ? t : false;
+
+            if (this._opts.animation) {
+              this.#prevRect = undefined; // force to recalc position because transform translate must be cleared for animation
+              hideTime = this.#animateDrawer(hideTime, true);
+            }
           });
         }
       }
@@ -651,6 +639,7 @@ export default class WUPPopupElement<
 
     // get previous scaleY and extract transform without scaleY
     const reg = /scaleY\(([\d.]+)\)/;
+    const removeScaleY = (styleTransform: string): string => styleTransform.replace(reg, "").trim().replace("  ", " ");
     const parseScale = (el: HTMLElement): { prev: string; from: number } => {
       let prev = el.style.transform;
       let from = isRevert ? 1 : 0;
@@ -680,7 +669,7 @@ export default class WUPPopupElement<
       this.#frameAnimId = undefined;
       setTimeout(() => {
         // timeout is required to prevent blink-effect when popup hasn't been hide yet
-        this.style.transform = prev.trimEnd();
+        this.style.transform = removeScaleY(this.style.transform);
         this.style.transformOrigin = "";
         nested.forEach((e) => (e.el.style.transform = e.prev.trimEnd()));
       }, 1); // 1ms is required because can be difference betwen Promise & setTimeout in different browsers
@@ -688,7 +677,7 @@ export default class WUPPopupElement<
 
     // define from-to ranges
     const to = isRevert ? 0 : 1;
-    const { prev, from } = parseScale(this);
+    const { from } = parseScale(this);
 
     // recalc left-animTime based on current animation (if element is partially opened and need to hide it)
     animTime *= Math.abs(to - from);
@@ -709,7 +698,7 @@ export default class WUPPopupElement<
       const scale = from + (to - from) * v;
 
       this.style.transformOrigin = this.getAttribute("position") === "top" ? "bottom" : "top";
-      this.style.transform = `${prev}scaleY(${scale})`;
+      this.style.transform = `${removeScaleY(this.style.transform)} scaleY(${scale})`;
       scale !== 0 && nested.forEach((e) => (e.el.style.transform = `${e.prev}scaleY(${1 / scale})`));
 
       if (cur === animTime) {
@@ -925,17 +914,11 @@ export default class WUPPopupElement<
         this.#arrowElement.style.transform = `translate(${pos.arrowLeft}px, ${pos.arrowTop}px) rotate(${pos.arrowAngle}deg)`;
       }
 
-      if (this.#userStyles.waitForAnimation) {
-        this.style.left = `${pos.left}px`;
-        this.style.top = `${pos.top}px`;
-        // todo issue: it affects on animation
-        this.style.transform = ""; // it removes previous transform from previous opened state
-      } else {
-        this.style.left = "";
-        this.style.top = "";
-        // transform has performance benefits in comparison with positioning
-        this.style.transform = `translate(${pos.left}px, ${pos.top}px)`;
-      }
+      this.style.left = "";
+      this.style.top = "";
+      // transform has performance benefits in comparison with positioning
+      // prettier-ignore
+      this.style.transform = `${this.style.transform.replace(/translate\(([\d., \w]+)\)/, "")}translate(${pos.left}px, ${pos.top}px)`;
 
       this.setAttribute("position", pos.attr);
     };
