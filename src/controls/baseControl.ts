@@ -466,3 +466,6 @@ export default abstract class WUPBaseControl<
     });
   }
 }
+// todo option.selectByFocus: boolean (select all in input)
+// todo option.pressESC: clear, reset to previous/default, none
+// todo option.clearBtn: boolean

@@ -74,8 +74,10 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     if (items instanceof Function) {
       const f = items();
       if (f instanceof Promise) {
-        // todo show isPending here; don't forget aria-busy
+        // todo show isPending here;
+        ctrl.$refInput.ariaBusy = "true"; // todo maybe some aria details need there
         arr = await f;
+        ctrl.$refInput.ariaBusy = "true";
       } else {
         arr = f;
       }
@@ -186,8 +188,6 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     i.setAttribute("aria-autocomplete", "list");
     i.setAttribute("aria-expanded", "false");
     // i.setAttribute("aria-multiselectable", "false");
-
-    // todo on input click need to select all every time
   }
 
   /** Mapping items with li-ids */
