@@ -5,9 +5,10 @@
 - [`FormControls`](README.md#controls)
 
 - [`PopupElement`](README.md#popupelement)
-  - Added method $appendAnimation() with animation-drawer
+  - Added option animation with animation-drawer
   - Added option maxWidthByTarget
-  - Added promise-result for $hide()
+  - Added promise-result for $hide() and $show() (resolve by animation time)
+  - Allow to use other inline transform options
 
 ## 0.0.5 (Apr 4, 2022)
 

@@ -200,7 +200,7 @@ describe("popupElement", () => {
     expect(onHide).toBeCalledTimes(1);
   });
 
-  test("$options.target", () => {
+  test("$options.target", async () => {
     /** @type typeof el */
     let a = document.createElement(el.tagName);
     a.$options.showCase = 0; // always
@@ -237,7 +237,10 @@ describe("popupElement", () => {
     onHide.mockClear();
     a.$options.target = null;
     const spyShow = jest.spyOn(a, "goShow").mockClear();
-    expect(a.$show).toThrow(); // to apply options - throw error because target is not defined
+    const onErr = jest.fn();
+    a.$show().catch(onErr);
+    await wait();
+    expect(onErr).toBeCalledTimes(1); // to apply options - throw error because target is not defined
     expect(spyShow).toBeCalledTimes(1);
     expect(a.$isOpen).toBeFalsy(); // because target is not defined
     jest.advanceTimersToNextTimer(); // onHide has timeout
@@ -625,11 +628,13 @@ describe("popupElement", () => {
 
     // test timeouts inside $show
     a.remove();
-    expect(a.$show).not.toThrow();
-    expect(() => jest.advanceTimersByTime(1)).toThrow(); // because isReady still false
+    const onErr = jest.fn();
+    a.$show().catch(onErr);
+    await wait();
+    expect(onErr).toBeCalledTimes(1); // to apply options - throw error because popup isn't ready
     a.$show();
     document.body.append(a);
-    expect(() => jest.advanceTimersByTime(1)).not.toThrow(); // because isReady true
+    await wait();
     expect(a.$isOpen).toBeTruthy();
 
     /** @type typeof el */
@@ -812,7 +817,7 @@ describe("popupElement", () => {
     expect(() => jest.advanceTimersByTime(1000)).toThrow(); // because of target is defined but not HTMLELement
   });
 
-  test("remove", () => {
+  test("remove", async () => {
     const dispose = jest.spyOn(el, "dispose");
     expect(el.$isOpen).toBeTruthy();
     el.remove();
@@ -821,9 +826,11 @@ describe("popupElement", () => {
     expect(el.$isReady).toBeFalsy();
 
     // try to open when element not appended
-    expect(el.$show).not.toThrow();
+    const onErr = jest.fn();
+    el.$show().catch(onErr);
     expect(el.$isOpen).toBeFalsy(); // because $show() is async method
-    expect(jest.advanceTimersToNextTimer).toThrow(); // wait for tryShow
+    await wait();
+    expect(onErr).toBeCalledTimes(1); // to apply options - throw error because popup isn't ready
     expect(el.$isReady).toBeFalsy();
     expect(el.$isOpen).toBeFalsy(); // because $show() is async method
 
@@ -1656,5 +1663,27 @@ describe("popupElement", () => {
     expect(() => document.body.click()).not.toThrow(); // error here because openedEl is null in eventListener on 2nd call
     await wait();
     expect(myel.$isOpen).toBeFalsy();
+  });
+
+  test("popupListenTarget: show 1st time", async () => {
+    /** @type WUPPopupElement */
+    const myel = document.createElement(el.tagName);
+    myel.$options.target = trg;
+    myel.$options.showCase = 0;
+
+    document.body.appendChild(myel);
+    const refs = popupListenTarget(
+      { target: trg, showCase: 1 << 2 }, // onClick
+      () => {
+        myel.$show();
+        return myel;
+      },
+      () => myel.$hide()
+    );
+
+    // cover case when openedEl hasn't been defined yet
+    refs.show(0);
+    await wait();
+    expect(myel.$isOpen).toBeTruthy();
   });
 });

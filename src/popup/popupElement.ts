@@ -240,7 +240,7 @@ export default class WUPPopupElement<
 
   protected override _opts = this.$options;
 
-  /** Hide popup; It takes time for hidding if hide-animation is defined (vis styles) */
+  /** Hide popup. Promise resolved by animation time */
   $hide() {
     return new Promise<void>((resolve) => {
       const f = async () => {
@@ -255,18 +255,25 @@ export default class WUPPopupElement<
     });
   }
 
-  /** Show popup; it disables option.showCase and enables by $hide() */
+  /** Show popup; it disables $options.showCase and rollbacks by $hide(). Promise resolved by animation time */
   $show() {
-    const f = () => {
-      if (!this.$isReady) {
-        throw new Error(`${this.tagName}. Impossible to show: not appended to document`);
-      } else {
-        this.dispose(); // remove events
-        this.goShow(WUPPopup.ShowCases.always);
-      }
-    };
+    return new Promise<void>((resolve, reject) => {
+      const f = async () => {
+        if (!this.$isReady) {
+          reject(new Error(`${this.tagName}. Impossible to show: not appended to document`));
+        } else {
+          this.dispose(); // remove events
+          try {
+            await this.goShow(WUPPopup.ShowCases.always);
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        }
+      };
 
-    this.$isReady ? f() : setTimeout(f, 1); // 1ms need to wait forReady
+      this.$isReady ? f() : setTimeout(f, 1); // 1ms need to wait forReady
+    });
   }
 
   /** Returns if popup is opened */
@@ -377,7 +384,6 @@ export default class WUPPopupElement<
 
   #placements: Array<WUPPopupPlace.PlaceFunc> = [];
   #prevRect?: DOMRect;
-  #showCase?: WUPPopup.ShowCases;
   #scrollParents?: HTMLElement[];
   // eslint-disable-next-line no-use-before-define
   #arrowElement?: WUPPopupArrowElement;
@@ -398,9 +404,9 @@ export default class WUPPopupElement<
     }
   }
 
-  // todo returns promise reflected to animation-timeout
   /** Shows popup if target defined; returns true if successful */
-  protected goShow(showCase: WUPPopup.ShowCases): boolean {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected goShow(showCase: WUPPopup.ShowCases): boolean | Promise<true> {
     const wasHidden = !this.#isOpen;
     this.#isOpen && this.goHide(WUPPopup.HideCases.onShowAgain);
 
@@ -415,8 +421,6 @@ export default class WUPPopupElement<
         return false;
       }
     }
-
-    this.#showCase = showCase;
 
     const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.$placementAttrs;
     const p = pAttr && WUPPopupElement.$placementAttrs[pAttr];
@@ -530,31 +534,36 @@ export default class WUPPopupElement<
 
     goUpdate();
 
-    // it requires because #updatePosition resets transform
-    // this.style.transform = prev;
-    // animation for drawer
-    if (this._opts.animation === WUPPopup.Animations.drawer) {
-      if (!animTime) {
-        const isAnimEn = window.matchMedia("not all and (prefers-reduced-motion)").matches;
-        if (isAnimEn) {
-          console.error(
-            `${this.tagName} style.animationDuration is missed but $options.animation is defined. Please point animation duration via styles`
-          );
-        }
-      } else {
-        this.#animateDrawer(animTime);
-      }
-    }
-
     if (wasHidden) {
+      // it requires because #updatePosition resets transform
+      // animation for drawer
+      if (this._opts.animation === WUPPopup.Animations.drawer) {
+        if (!animTime) {
+          const isAnimEn = window.matchMedia("not all and (prefers-reduced-motion)").matches;
+          if (isAnimEn) {
+            console.error(
+              `${this.tagName} style.animationDuration is missed but $options.animation is defined. Please point animation duration via styles`
+            );
+          }
+        } else {
+          animTime = this.#animateDrawer(animTime);
+        }
+      }
+
+      if (animTime) {
+        return new Promise((resolve) => {
+          setTimeout(() => resolve(true), animTime);
+        });
+      }
+
       // run async to dispose internal resources first: possible dev-side-issues
-      setTimeout(() => this.fireEvent("$show", { cancelable: false }));
+      setTimeout(() => this.fireEvent("$show", { cancelable: false }), animTime);
     }
 
     return true;
   }
 
-  /** Hide popup. @showCase as previous reason of show(); @hideCase as reason of hide() */
+  /** Hide popup. @hideCase as reason of hide() */
   protected goHide(hideCase: WUPPopup.HideCases): boolean | Promise<true> {
     if (this.#forceHide) {
       this.#forceHide();
@@ -578,7 +587,6 @@ export default class WUPPopupElement<
       this.#frameId && window.cancelAnimationFrame(this.#frameId);
       this.#frameId = undefined;
 
-      this.#showCase = undefined;
       this.#prevRect = undefined;
       this.#scrollParents = undefined;
       this.#userStyles = undefined as any;
@@ -596,29 +604,29 @@ export default class WUPPopupElement<
 
     if (wasShow) {
       if (hideCase !== WUPPopup.HideCases.onShowAgain) {
-        let hideTime = 0;
+        let animTime = 0;
 
         // waitFor only if was ordinary user-action
         if (hideCase >= WUPPopup.HideCases.onManuallCall && hideCase <= WUPPopup.HideCases.onTargetClick) {
           this.setAttribute("hide", "");
           const { animationDuration: aD } = getComputedStyle(this);
-          hideTime = Number.parseFloat(aD.substring(0, aD.length - 1)) * 1000 || 0;
-          !hideTime && this.removeAttribute("hide");
+          animTime = Number.parseFloat(aD.substring(0, aD.length - 1)) * 1000 || 0;
+          !animTime && this.removeAttribute("hide");
         }
 
-        if (hideTime) {
+        if (animTime) {
           // recalc hideTime base on animationLeftTime
-          return new Promise((resolve) => {
-            if (this._opts.animation) {
-              this.#prevRect = undefined; // force to recalc position because transform translate must be cleared for animation
-              hideTime = this.#animateDrawer(hideTime, true);
-            }
+          if (this._opts.animation) {
+            this.#prevRect = undefined; // force to recalc position because transform translate must be cleared for animation
+            animTime = this.#animateDrawer(animTime, true);
+          }
 
+          return new Promise((resolve) => {
             const done = () => {
               finishHide();
               resolve(true);
             };
-            const t = setTimeout(done, hideTime);
+            const t = setTimeout(done, animTime);
 
             // fix when user scrolls during the hide-animation
             this.#forceHide = () => {
