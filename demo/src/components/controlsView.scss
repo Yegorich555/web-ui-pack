@@ -533,6 +533,12 @@
     background: var(--ctrl-combo-selected-back);
   }
 
+  li[focused] {
+    // todo such style unclear when 1..2 items in list
+    box-shadow: inset 0 0 4px 0 var(--ctrl-focus);
+    border-radius: var(--ctrl-border-radius);
+  }
+
   > [menu] {
     padding: 0;
   }
