@@ -62,6 +62,15 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
      `;
   }
 
+  /** Text for listbox when no items are displayed */
+  static textNoItems: string | undefined = "No Items";
+
+  /** Function to filter menuItems based on inputValue; all values are in lowerCase */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static filterMenuItem(text: string, inputValue: string, inputRawValue: string): boolean {
+    return text.startsWith(inputValue) || text.includes(` ${inputValue}`);
+  }
+
   /** Parse/get items from $options.items */
   static async getMenuItems<T, C extends WUPSelectControl<T>>(ctrl: C): Promise<WUPSelectControlTypes.MenuItems<T>> {
     if (ctrl._cachedItems) {
@@ -157,6 +166,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
         showCase: PopupShowCases.onClick | PopupShowCases.onFocus,
       },
       (s) =>
+        // todo it's wrong if user tries select input-text via cursor
         s === WUPPopup.ShowCases.always // manual show
           ? (this.$refPopup as WUPPopupElement)
           : this.goShowMenu(
@@ -165,6 +175,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
                 : WUPSelectControlTypes.ShowCases.onFocus
             ),
       (s) =>
+        // todo it's wrong if user tries select input-text via cursor
         s === WUPPopup.HideCases.onFocusOut ||
         s === WUPPopup.HideCases.onOutsideClick ||
         s === WUPPopup.HideCases.onTargetClick ||
@@ -190,10 +201,35 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     // i.setAttribute("aria-multiselectable", "false");
   }
 
-  /** Mapping items with li-ids */
-  _menuItems?: HTMLLIElement[];
+  /** All items of current menu */
+  _menuItems?: Array<HTMLLIElement & { _text: string }>;
   /** Items resolved from options */
   _cachedItems?: WUPSelectControlTypes.MenuItems<ValueType>;
+
+  /** Called when NoItems need to show */
+  protected renderMenuNoItems(popup: WUPPopupElement, isReset: boolean) {
+    if (isReset) {
+      popup.hidden = false;
+      const liSaved = (this._menuItems as any).refNoItems as HTMLLIElement;
+      if (liSaved) {
+        liSaved.style.display = "none";
+      }
+    } else if (this.#ctr.textNoItems) {
+      const liSaved = (this._menuItems as any).refNoItems as HTMLLIElement;
+      if (liSaved) {
+        liSaved.style.display = "";
+      } else {
+        const ul = popup.children.item(0) as HTMLUListElement;
+        const li = ul.appendChild(document.createElement("li"));
+        li.textContent = this.#ctr.textNoItems;
+        li.setAttribute("aria-disabled", "true");
+        li.setAttribute("aria-selected", "false");
+        (this._menuItems as any).refNoItems = li;
+      }
+    } else {
+      popup.hidden = true;
+    }
+  }
 
   #disposeMenuEvent?: () => void;
   protected async renderMenu(popup: WUPPopupElement, menuId: string) {
@@ -215,9 +251,11 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     };
 
     this._menuItems = await this.renderMenuItems(ul);
+    !this._menuItems.length && this.renderMenuNoItems(popup, false);
   }
 
-  protected async renderMenuItems(ul: HTMLUListElement): Promise<Array<HTMLLIElement>> {
+  /** Create menuItems as array of HTMLLiElement with option _text required to filtering by input (otherwise content can be html-structure) */
+  protected async renderMenuItems(ul: HTMLUListElement): Promise<Array<HTMLLIElement & { _text: string }>> {
     const arr = await this.#ctr.getMenuItems<ValueType, this>(this);
 
     const arrLi = arr.map(() => {
@@ -227,19 +265,25 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
       const id = this.#ctr.uniqueId;
       li.id = id;
       return li;
-    });
+    }) as Array<HTMLLIElement & { _text: string }>;
 
     if (arr[0].text instanceof Function) {
-      arr.forEach((v, i) => (v as WUPSelectControlTypes.MenuItemFn<ValueType>).text(v.value, arrLi[i], i));
+      arr.forEach((v, i) => {
+        arrLi[i]._text = (v as WUPSelectControlTypes.MenuItemFn<ValueType>).text(v.value, arrLi[i], i).toLowerCase();
+      });
     } else {
-      arr.forEach((v, i) => (arrLi[i].textContent = (v as WUPSelectControlTypes.MenuItem<ValueType>).text));
+      arr.forEach((v, i) => {
+        const txt = (v as WUPSelectControlTypes.MenuItem<ValueType>).text;
+        arrLi[i].textContent = txt;
+        arrLi[i]._text = txt.toLowerCase();
+      });
     }
 
     return arrLi;
   }
 
   protected onMenuItemClick(e: MouseEvent & { target: HTMLLIElement }) {
-    const i = this._menuItems!.indexOf(e.target);
+    const i = this._menuItems!.indexOf(e.target as HTMLLIElement & { _text: string });
     const o = this._cachedItems![i];
 
     this.setValue(o.value);
@@ -285,11 +329,14 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
       // remove popup only by focusOut to optimize resources
       const r = onFocusLostEv(
         this,
-        async () => {
-          this.disposeLst.splice(this.disposeLst.indexOf(r), 1);
-          await this.#menuHidding; // wait for animation if exists
-          // check if closed (user can open again during the hidding)
-          !this.#isOpen && this.removePopup();
+        () => {
+          setTimeout(async () => {
+            this.setValue(this.$value); // to update imput according to result
+            this.disposeLst.splice(this.disposeLst.indexOf(r), 1);
+            await this.#menuHidding; // wait for animation if exists
+            // check if closed (user can open again during the hidding)
+            !this.#isOpen && this.removePopup();
+          });
         },
         { debounceMs: this._opts.focusDebounceMs, once: true }
       );
@@ -366,7 +413,21 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
   }
 
   protected override onInput(e: Event & { currentTarget: HTMLInputElement }) {
-    // todo implement search
+    !this.#isOpen && this.goShowMenu(WUPSelectControlTypes.ShowCases.onInput); // we don't need await of it
+    const rawV = e.currentTarget.value;
+    const v = rawV.trimStart().toLowerCase();
+
+    let hasVisible = false;
+    this._menuItems!.forEach((li) => {
+      const isOk = this.#ctr.filterMenuItem(li._text, v, rawV);
+      li.style.display = isOk ? "" : "none";
+      if (isOk) {
+        hasVisible = true;
+      }
+    });
+    this.renderMenuNoItems(this.$refPopup!, hasVisible);
+    // todo set selected menu-item here (active-descendant)
+    this.$refPopup!.$refresh();
   }
 
   protected removePopup() {

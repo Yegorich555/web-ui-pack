@@ -92,6 +92,7 @@ export default class WUPTextControl<ValueType = string> extends WUPBaseControl<
   }
 
   #inputTimer?: number;
+  /** Fired when user types text */
   protected onInput(e: Event & { currentTarget: HTMLInputElement }) {
     this._validTimer && clearTimeout(this._validTimer);
     const v = e.currentTarget.value;
