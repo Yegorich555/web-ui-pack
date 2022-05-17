@@ -650,6 +650,7 @@ describe("popupElement", () => {
     await wait();
     expect(b.$isOpen).toBeTruthy();
 
+    expect(() => b.$refresh()).not.toThrow();
     // other cases in test(`options.$target`) and test(`remove`)
   });
 

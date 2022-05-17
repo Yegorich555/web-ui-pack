@@ -276,6 +276,11 @@ export default class WUPPopupElement<
     });
   }
 
+  /** Force to update position when popup $isOpen. Call this if popup content is changed */
+  $refresh() {
+    this.#prevRect = undefined;
+  }
+
   /** Returns if popup is opened */
   get $isOpen(): boolean {
     return this.#isOpen;

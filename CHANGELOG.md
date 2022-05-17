@@ -5,6 +5,7 @@
 - [`FormControls`](README.md#controls)
 
 - [`PopupElement`](README.md#popupelement)
+  - Added $refresh() - to force update recalc position when nested content is changed
   - Added option animation with animation-drawer
   - Added option maxWidthByTarget
   - Added promise-result for $hide() and $show() (resolve by animation time)
