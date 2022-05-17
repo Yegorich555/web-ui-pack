@@ -313,7 +313,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
       if (i !== -1) {
         this._menuItems![i].setAttribute("aria-selected", "true");
         const ifneed = (this._menuItems![i] as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
-        ifneed ? ifneed(false) : this._menuItems![i].scrollIntoView();
+        ifneed ? ifneed.call(this._menuItems![i], false) : this._menuItems![i].scrollIntoView();
       }
     }
 
