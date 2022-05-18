@@ -455,6 +455,10 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
 
   /** Fired when use presses key */
   protected async onKeyDown(e: KeyboardEvent) {
+    if (e.altKey || e.shiftKey || e.ctrlKey) {
+      return;
+    }
+
     const { length } = this._menuItems!.filtered || this._menuItems!.all;
     let focusIndex: number | null = null;
 
