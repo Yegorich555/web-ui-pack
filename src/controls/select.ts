@@ -392,13 +392,8 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     }
 
     if (wasOpen) {
-      if (
-        hideCase === WUPSelectControlTypes.HideCases.onManualCall ||
-        hideCase === WUPSelectControlTypes.HideCases.onSelect
-      ) {
-        // call for ref-listener to apply events properly
-        this.#popupRefs!.hide(WUPPopup.HideCases.onManuallCall);
-      }
+      // call for ref-listener to apply events properly
+      this.#popupRefs!.hide(WUPPopup.HideCases.onManuallCall);
 
       let pback: () => void;
       // eslint-disable-next-line no-promise-executor-return
@@ -494,7 +489,6 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
       e.preventDefault();
       this.setValue(this.$value);
       await this.goHideMenu(WUPSelectControlTypes.HideCases.OnPressEsc);
-      // todo next open doesn't happend in this case
     } else if (e.key === "Enter") {
       e.preventDefault();
       let i = this._menuItems!.focused;
