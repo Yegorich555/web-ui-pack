@@ -202,9 +202,17 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     // i.setAttribute("aria-multiselectable", "false");
   }
 
-  // todo refactor menuItems to object because we need store filtered items here also
   /** All items of current menu */
-  _menuItems?: Array<HTMLLIElement & { _text: string }> & { _focused: number; _selected: number };
+  _menuItems?: {
+    all: Array<HTMLLIElement & { _text: string }>;
+    /** Index of items filtered by input */
+    filtered?: Array<number>;
+    /** Index (in 'filtered' otherwise in 'all' array) of item that has virtual-focus; */
+    focused: number;
+    /** Index of selected/current item */
+    selected: number;
+  };
+
   /** Items resolved from options */
   _cachedItems?: WUPSelectControlTypes.MenuItems<ValueType>;
 
@@ -249,14 +257,13 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     });
     this.#disposeMenuEvents!.push(r);
 
-    this._menuItems = await this.renderMenuItems(ul);
-    !this._menuItems.length && this.renderMenuNoItems(popup, false);
+    const all = await this.renderMenuItems(ul);
+    this._menuItems = { all, focused: -1, selected: -1 };
+    !all.length && this.renderMenuNoItems(popup, false);
   }
 
   /** Create menuItems as array of HTMLLiElement with option _text required to filtering by input (otherwise content can be html-structure) */
-  protected async renderMenuItems(
-    ul: HTMLUListElement
-  ): Promise<Array<HTMLLIElement & { _text: string }> & { _focused: number; _selected: number }> {
+  protected async renderMenuItems(ul: HTMLUListElement): Promise<Array<HTMLLIElement & { _text: string }>> {
     const arr = await this.#ctr.getMenuItems<ValueType, this>(this);
 
     const arrLi = arr.map(() => {
@@ -267,8 +274,6 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
       li.id = id;
       return li;
     }) as Array<HTMLLIElement & { _text: string }> & { _focused: number; _selected: number };
-    arrLi._focused = -1;
-    arrLi._selected = -1;
 
     if (arr.length) {
       if (arr[0].text instanceof Function) {
@@ -288,7 +293,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
   }
 
   protected onMenuItemClick(e: MouseEvent & { target: HTMLLIElement }) {
-    const i = this._menuItems!.indexOf(e.target as HTMLLIElement & { _text: string });
+    const i = this._menuItems!.all.indexOf(e.target as HTMLLIElement & { _text: string });
     const o = this._cachedItems![i];
 
     this.setValue(o.value);
@@ -352,10 +357,12 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
       await this.renderMenu(p, menuId);
     } else {
       this.$refPopup.querySelector('[aria-selected="true"]')?.setAttribute("aria-selected", "false");
-      if (showCase !== WUPSelectControlTypes.ShowCases.onInput) {
-        this._menuItems!.forEach((li) => (li.style.display = "")); // reset styles when after filtering
+      if (showCase !== WUPSelectControlTypes.ShowCases.onInput && this._menuItems!.filtered) {
+        this._menuItems!.all?.forEach((li) => (li.style.display = "")); // reset styles when after filtering
+        this._menuItems!.filtered = undefined;
       }
     }
+    !isCreate && this.$refPopup.$show(); // otherwise popup is opened automatically by init (because PopupShowCases.always)
 
     this.setAttribute("opened", "");
     this.$refInput.setAttribute("aria-expanded", "true");
@@ -364,10 +371,8 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     const v = this.$value;
     if (v !== undefined) {
       const i = this._cachedItems!.findIndex((item) => this.#ctr.isEqual(item.value, v));
-      this.selectMenuItem(i);
+      this.selectMenuItem(i); // todo scrollTo doesn't work on 2nd open if was closed by focusOut
     }
-
-    !isCreate && this.$refPopup.$show(); // otherwise popup is opened automatically by init (because PopupShowCases.always)
 
     if (showCase === WUPSelectControlTypes.ShowCases.onManualCall) {
       // call for ref-listener to apply events properly
@@ -415,59 +420,58 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     return true;
   }
 
-  /** Focus item by index or reset is index is null (via aria-activedescendant) */
+  /** Focus item by index or reset is index is null (via aria-activedescendant).
+   *  If menuItems is filtered by input-text than index must point on filtered array */
   protected focusMenuItem(index: number | null) {
-    const prev = this._menuItems![this._menuItems!._focused];
-    prev?.removeAttribute("focused");
+    const { filtered } = this._menuItems!;
+    // get the real index if items is filtered
+    const prevIndex = filtered ? filtered[this._menuItems!.focused] : this._menuItems!.focused;
+    this._menuItems!.all[prevIndex]?.removeAttribute("focused");
 
-    if (index !== null && index > -1) {
-      const next = this._menuItems![index];
+    if (index != null && index > -1) {
+      // get the real index if items is filtered
+      const trueIndex = filtered ? filtered[index] : index;
+      const next = this._menuItems!.all[trueIndex];
       next.setAttribute("focused", "");
       this.$refInput.setAttribute("aria-activedescendant", next.id);
-      this._menuItems!._focused = index;
-
       const ifneed = (next as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
       ifneed ? ifneed.call(next, false) : next.scrollIntoView();
+      this._menuItems!.focused = index;
     } else {
       this.$refInput.removeAttribute("aria-activedescendant");
-      this._menuItems!._focused = -1;
+      this._menuItems!.focused = -1;
     }
   }
 
   /** Select item by index (set aria-selected and scroll to) */
   protected selectMenuItem(index: number) {
-    const prev = this._menuItems![this._menuItems!._selected];
+    const prev = this._menuItems!.all[this._menuItems!.selected];
     prev?.setAttribute("aria-selected", "false");
 
     if (index !== -1) {
-      const li = this._menuItems![index];
+      const li = this._menuItems!.all[index];
       li.setAttribute("aria-selected", "true");
       const ifneed = (li as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
       ifneed ? ifneed.call(li, false) : li.scrollIntoView();
     }
 
-    this._menuItems!._selected = index;
+    this._menuItems!.selected = index;
   }
 
   /** Fired when use presses key */
   protected async onKeyDown(e: KeyboardEvent) {
-    // todo indexes are wrong when menu is filtered by input-text
+    const { length } = this._menuItems!.filtered || this._menuItems!.all;
+    let focusIndex: number | null = null;
+
     if (e.key === "ArrowDown") {
       !this.#isOpen && (await this.goShowMenu(WUPSelectControlTypes.ShowCases.onPressArrowKey));
-      let cur = this._menuItems!._focused;
-      if (++cur >= this._menuItems!.length) {
-        cur = 0;
-      }
-      this.focusMenuItem(cur);
+      let cur = this._menuItems!.focused;
+      focusIndex = ++cur >= length ? 0 : cur;
     } else if (e.key === "ArrowUp") {
       const wasOpen = this.#isOpen;
       !this.#isOpen && (await this.goShowMenu(WUPSelectControlTypes.ShowCases.onPressArrowKey));
-      let cur = wasOpen ? this._menuItems!._focused : this._menuItems!.length;
-      if (--cur < 0) {
-        cur = this._menuItems!.length - 1;
-      }
-      this.focusMenuItem(cur);
-      return;
+      let cur = wasOpen ? this._menuItems!.focused : length;
+      focusIndex = --cur < 0 ? length - 1 : cur;
     }
 
     if (!this.#isOpen) {
@@ -475,40 +479,49 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     }
 
     if (e.key === "Home") {
-      this.#isOpen && this.focusMenuItem(0);
+      focusIndex = 0;
     } else if (e.key === "End") {
-      this.#isOpen && this.focusMenuItem(this._menuItems!.length - 1);
-    } else if (e.key === "Escape") {
-      if (this.#isOpen) {
-        this.setValue(this.$value);
-        await this.goHideMenu(WUPSelectControlTypes.HideCases.OnPressEsc);
-      }
+      focusIndex = length - 1;
+    }
+
+    if (focusIndex != null) {
+      e.preventDefault();
+      this.focusMenuItem(focusIndex);
+      return;
+    }
+
+    if (e.key === "Escape") {
+      e.preventDefault();
+      this.setValue(this.$value);
+      await this.goHideMenu(WUPSelectControlTypes.HideCases.OnPressEsc);
+      // todo next open doesn't happend in this case
     } else if (e.key === "Enter") {
-      if (this.#isOpen) {
-        e.preventDefault();
-        const i = this._menuItems?._focused;
-        i != null && i > -1 && this.setValue(this._cachedItems![i].value);
-        await this.goHideMenu(WUPSelectControlTypes.HideCases.OnPressEnter);
-      }
+      e.preventDefault();
+      let i = this._menuItems!.focused;
+      i = this._menuItems!.filtered ? this._menuItems!.filtered[i] : i;
+      i > -1 && this.setValue(this._cachedItems![i].value);
+      await this.goHideMenu(WUPSelectControlTypes.HideCases.OnPressEnter);
     }
   }
 
   protected override async onInput(e: Event & { currentTarget: HTMLInputElement }) {
-    !this.#isOpen && (await this.goShowMenu(WUPSelectControlTypes.ShowCases.onInput)); // we don't need wait for it
+    this.#isOpen && this.focusMenuItem(null); // reset focus
+    !this.#isOpen && (await this.goShowMenu(WUPSelectControlTypes.ShowCases.onInput));
+
     const rawV = e.currentTarget.value;
     const v = rawV.trimStart().toLowerCase();
 
-    let firstVisible = -1;
-    this._menuItems!.forEach((li, i) => {
+    const filtered: number[] = [];
+    this._menuItems!.all.forEach((li, i) => {
       const isOk = this.#ctr.filterMenuItem(li._text, v, rawV);
+      isOk && filtered.push(i);
       li.style.display = isOk ? "" : "none";
-      if (isOk && firstVisible === -1) {
-        firstVisible = i;
-      }
     });
-    const hasVisible = firstVisible > -1;
+    this._menuItems!.filtered = filtered.length ? filtered : undefined;
+    const hasVisible = !!filtered.length;
     this.renderMenuNoItems(this.$refPopup!, hasVisible);
-    hasVisible && this.focusMenuItem(firstVisible);
+
+    hasVisible && rawV !== "" && this.focusMenuItem(0);
 
     this.$refPopup!.$refresh();
   }
