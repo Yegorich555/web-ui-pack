@@ -84,10 +84,12 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     if (items instanceof Function) {
       const f = items();
       if (f instanceof Promise) {
-        // todo show isPending here;
-        ctrl.$refInput.ariaBusy = "true"; // todo maybe some aria details need there
+        /* todo show isPending here;
+         what if user tries to input text - we need to prevent this while it's not ready
+         */
+        ctrl.$refInput.setAttribute("aria-busy", "true");
         arr = await f;
-        ctrl.$refInput.ariaBusy = "true";
+        ctrl.$refInput.removeAttribute("aria-busy");
       } else {
         arr = f;
       }
@@ -189,6 +191,8 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
           : true
     );
     this.#popupRefs = { hide: refs.hide, show: refs.show };
+
+    setTimeout(() => this.$refInput.click(), 300);
   }
 
   protected override renderControl() {
@@ -232,10 +236,10 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
         const ul = popup.children.item(0) as HTMLUListElement;
         const li = ul.appendChild(document.createElement("li"));
         li.textContent = this.#ctr.textNoItems;
+        li.setAttribute("role", "option");
         li.setAttribute("aria-disabled", "true");
         li.setAttribute("aria-selected", "false");
         (this._menuItems as any)._refNoItems = li;
-        // todo need to anounce for user 'No menu items'
       }
     } else {
       popup.hidden = true;
@@ -371,7 +375,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     const v = this.$value;
     if (v !== undefined) {
       const i = this._cachedItems!.findIndex((item) => this.#ctr.isEqual(item.value, v));
-      this.selectMenuItem(i); // todo scrollTo doesn't work on 2nd open if was closed by focusOut
+      this.selectMenuItem(i);
     }
 
     if (showCase === WUPSelectControlTypes.ShowCases.onManualCall) {
@@ -436,6 +440,8 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
       this.$refInput.removeAttribute("aria-activedescendant");
       this._menuItems!.focused = -1;
     }
+
+    console.warn("scroll by focus");
   }
 
   /** Select item by index (set aria-selected and scroll to) */
@@ -446,10 +452,11 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     if (index !== -1) {
       const li = this._menuItems!.all[index];
       li.setAttribute("aria-selected", "true");
-      const ifneed = (li as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
-      ifneed ? ifneed.call(li, false) : li.scrollIntoView();
+      setTimeout(() => {
+        const ifneed = (li as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
+        ifneed ? ifneed.call(li, false) : li.scrollIntoView();
+      }); // timeout to wait to popup to start opening otherwise scroll doesn't work
     }
-
     this._menuItems!.selected = index;
   }
 

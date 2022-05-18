@@ -132,6 +132,8 @@ export default function ControlsView() {
               el.$options.validations = {
                 required: true,
               };
+
+              el.$value = ir - 1;
             }
           }}
         />

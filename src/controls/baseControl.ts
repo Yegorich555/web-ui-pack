@@ -285,6 +285,7 @@ export default abstract class WUPBaseControl<
   protected override gotReady() {
     super.gotReady();
     this.gotReinit();
+    // todo usage of $options.initValue is missed
   }
 
   #isFirstConn = true;
