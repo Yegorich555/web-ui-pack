@@ -1,4 +1,5 @@
 /* eslint-disable no-use-before-define */
+import onFocusGot from "../helpers/onFocusGot";
 import WUPBaseControl, { WUPBaseControlTypes } from "./baseControl";
 
 export namespace WUPTextControlTypes {
@@ -6,6 +7,9 @@ export namespace WUPTextControlTypes {
     /** Debounce time to wait for user finishes typing to start validate and provide $change event
      * @defaultValue 0; */
     debounceMs?: number;
+    /** Select whole text when input got focus (when input is not readonly and not disabled);
+     * @defaultValue true */
+    selectOnFocus: boolean;
   };
 
   export type ValidationMap = WUPBaseControlTypes.ValidationMap & {
@@ -56,6 +60,7 @@ export default class WUPTextControl<ValueType = string> extends WUPBaseControl<
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUPTextControlTypes.Options = {
     ...WUPBaseControl.$defaults,
+    selectOnFocus: true,
     validationRules: {
       required: WUPBaseControl.$defaults.validationRules.required,
       min: (v, setV) => v.length < setV && `Min length is ${setV} characters`,
@@ -87,9 +92,19 @@ export default class WUPTextControl<ValueType = string> extends WUPBaseControl<
     this.appendChild(this.$refLabel);
   }
 
-  protected override connectedCallback() {
-    super.connectedCallback();
+  protected override gotReady() {
+    super.gotReady();
     this.appendEvent(this.$refInput, "input", this.onInput as any);
+  }
+
+  protected override gotReinit() {
+    super.gotReinit();
+
+    setTimeout(() => {
+      this._opts.selectOnFocus &&
+        !this.$refInput.readOnly &&
+        this.disposeLstInit.push(onFocusGot(this, () => this.$refInput.select()));
+    }); // timeout requires because selectControl can setup readOnly after super.gotReinit
   }
 
   #inputTimer?: number;
@@ -143,5 +158,4 @@ el.$options.validations = {
   min: (v) => v.length > 500 && "This is error",
   extra: (v) => "test Me",
 };
-
 // el.$validate();

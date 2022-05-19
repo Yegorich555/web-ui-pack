@@ -211,6 +211,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     return ev;
   }
 
+  /** Array of removeEventListener() that fired on remove */
   protected disposeLst: Array<() => void> = [];
   /** Add event listener and remove after component removed; @options.passive=true by default */
   appendEvent<

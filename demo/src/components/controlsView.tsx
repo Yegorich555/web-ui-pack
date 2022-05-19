@@ -6,13 +6,11 @@ export default function ControlsView() {
     <Page header="Controls" link="#textControl">
       <form autoComplete="off">
         <wup-text-ctrl
-          // disabled
           class={`${styles.common} ${styles.textControl}`}
           ref={(el) => {
             if (el) {
               el.$options.label =
                 "TextControl TextControl TextControlTextControl TextControl TextControl TextControl TextControl";
-              // el.$refs.input.required = true;
               el.$options.validations = {
                 required: true,
                 max: 10,
@@ -134,9 +132,10 @@ export default function ControlsView() {
               };
 
               el.$value = ir - 1;
-              el.$options.readOnlyInput = true;
+              // el.$options.readOnlyInput = true;
               // el.$options.readOnly = true;
               // el.$options.disabled = true;
+              el.$options.selectOnFocus = true;
             }
           }}
         />

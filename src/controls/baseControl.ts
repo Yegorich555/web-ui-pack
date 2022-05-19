@@ -237,9 +237,15 @@ export default abstract class WUPBaseControl<
   //   super();
   // }
 
+  /** Array of removeEventListener() that fired ReInit */
+  protected disposeLstInit: Array<() => void> = [];
+
   /** Fired on Init and every time as options/attributes changed */
   protected gotReinit() {
     console.warn("reinit");
+
+    this.disposeLstInit.forEach((f) => f()); // remove possible previous event listeners
+    this.disposeLstInit.length = 0;
 
     this._opts.label = this.getAttribute("label") ?? this._opts.label;
     this._opts.name = this.getAttribute("name") ?? this._opts.name;
@@ -284,21 +290,9 @@ export default abstract class WUPBaseControl<
 
   protected override gotReady() {
     super.gotReady();
-    this.gotReinit();
     // todo usage of $options.initValue is missed
-  }
 
-  #isFirstConn = true;
-  protected override connectedCallback() {
-    super.connectedCallback();
-
-    if (this.#isFirstConn) {
-      this.#isFirstConn = false;
-
-      this.renderControl();
-    }
-
-    // this.appendEvent be removed by dispose()
+    // this.appendEvent removed by dispose()
     this.appendEvent(
       this,
       "mousedown", // to prevent blur-focus effect for input by label click
@@ -314,6 +308,18 @@ export default abstract class WUPBaseControl<
           debounceMs: this._opts.focusDebounceMs,
         })
       );
+    }
+
+    this.gotReinit();
+  }
+
+  #isFirstConn = true;
+  protected override connectedCallback() {
+    super.connectedCallback();
+
+    if (this.#isFirstConn) {
+      this.#isFirstConn = false;
+      this.renderControl();
     }
   }
 
@@ -465,7 +471,12 @@ export default abstract class WUPBaseControl<
       this.gotReinit();
     });
   }
+
+  protected override dispose() {
+    super.dispose();
+    this.disposeLstInit.forEach((f) => f()); // remove possible previous event listeners
+    this.disposeLstInit.length = 0;
+  }
 }
-// todo option.selectByFocus: boolean (select all in input)
 // todo option.pressESC: clear, reset to previous/default, none
 // todo option.clearBtn: boolean
