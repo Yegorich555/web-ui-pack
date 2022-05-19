@@ -265,6 +265,7 @@ describe("popupElement", () => {
     jest.advanceTimersToNextTimer(); // $options.onChanged has timeout
     expect(a.$isOpen).toBeFalsy(); // because option changed
     trg.click(); // checking if new showCase works
+    await wait();
     expect(a.$isOpen).toBeTruthy();
   });
 
@@ -390,40 +391,59 @@ describe("popupElement", () => {
     expect(a.$isOpen).toBeFalsy();
 
     trg.dispatchEvent(new Event("click", { bubbles: true }));
+    await wait(1);
     expect(a.$isOpen).toBeTruthy();
     trg.dispatchEvent(new Event("click", { bubbles: true }));
-    await Promise.resolve(); // wait for promise onShow is async
     expect(a.$isOpen).toBeTruthy(); // because previous event is skipped (due to debounceTimeout)
     expect(spyShow).toHaveBeenCalledTimes(1);
     expect(spyShow).lastCalledWith(1 << 2);
-    jest.advanceTimersByTime(50); // onClick has debounce timeout
+    await wait(50); // onClick has debounce timeout
 
     trg.dispatchEvent(new Event("click", { bubbles: true }));
+    await wait(1);
     expect(a.$isOpen).toBeFalsy();
     expect(spyHide).toHaveBeenCalledTimes(1);
     expect(spyHide).lastCalledWith(6);
-    jest.advanceTimersByTime(50); // onClick has debounce timeout
-    await Promise.resolve(); // wait for promise onHide is async
+    await wait(50);
 
     trgInput.dispatchEvent(new Event("click", { bubbles: true }));
+    await wait();
     expect(a.$isOpen).toBeTruthy(); // click on input inside
-    jest.advanceTimersByTime(50); // onClick has debounce timeout
-    await Promise.resolve(); // wait for promise onShow is async
 
     a.dispatchEvent(new Event("click", { bubbles: true }));
-    await Promise.resolve(); // wait for promise onHide is async
+    await wait();
     expect(a.$isOpen).toBeFalsy(); // click onMe == close
     expect(spyHide).lastCalledWith(5);
 
     trgInput2.dispatchEvent(new Event("click", { bubbles: true }));
+    await wait();
     expect(a.$isOpen).toBeTruthy(); // click on input2 inside
-    jest.advanceTimersByTime(50); // onClick has debounce timeout
-    await Promise.resolve(); // wait for promise onShow is async
 
     document.body.dispatchEvent(new Event("click", { bubbles: true }));
-    await Promise.resolve(); // wait for promise onHide is async
+    await wait();
     expect(a.$isOpen).toBeFalsy(); // click outside == close
     expect(spyHide).lastCalledWith(4);
+
+    // simulate when user selected
+    jest.spyOn(window, "getSelection").mockReturnValueOnce({ type: "Range" });
+    trgInput.dispatchEvent(new Event("mouseenter", { bubbles: true }));
+    trgInput.dispatchEvent(new Event("mousedown", { bubbles: true }));
+    trgInput.dispatchEvent(new Event("mousemove", { bubbles: true }));
+    trgInput.dispatchEvent(new Event("mouseup", { bubbles: true }));
+    trgInput.dispatchEvent(new Event("click", { bubbles: true }));
+    await wait();
+    expect(a.$isOpen).toBeFalsy(); // because user selected something
+    trgInput.dispatchEvent(new Event("mouseenter", { bubbles: true }));
+    trgInput.dispatchEvent(new Event("mousedown", { bubbles: true }));
+    trgInput.dispatchEvent(new Event("mousemove", { bubbles: true }));
+    trgInput.dispatchEvent(new Event("mouseup", { bubbles: true }));
+    trgInput.dispatchEvent(new Event("click", { bubbles: true }));
+    await wait();
+    expect(a.$isOpen).toBeTruthy();
+    jest.spyOn(window, "getSelection").mockReturnValueOnce(null);
+    trgInput.click();
+    await wait();
+    expect(a.$isOpen).toBeFalsy();
 
     // check focus on target > on hide
     document.activeElement.blur();
@@ -434,13 +454,11 @@ describe("popupElement", () => {
     a2.$options.target = trgInput;
     jest.advanceTimersToNextTimer();
     trgInput.click();
-    jest.advanceTimersByTime(50); // onClick has debounce timeout
-    await Promise.resolve(); // wait for promise onShow is async
+    await wait();
     expect(a2.$isOpen).toBeTruthy();
     const onFocus = jest.spyOn(trgInput, "focus");
     a2.click();
-    jest.advanceTimersToNextTimer();
-    await Promise.resolve(); // wait for promise onHide is async
+    await wait();
 
     expect(a2.$isOpen).toBeFalsy();
     expect(onFocus).toBeCalled(); // because focus must me moved back
@@ -454,51 +472,48 @@ describe("popupElement", () => {
     document.activeElement?.blur();
     document.body.appendChild(a);
     a.$options.showCase = 0b111111111;
-    jest.advanceTimersToNextTimer(); // onReady has timeout
+    a.$options.target = trgInput; // only for testing
+    await wait();
     expect(a.$isOpen).toBeFalsy();
 
     // open by mouseenter-click-focus
     trgInput.dispatchEvent(new Event("mouseenter", { bubbles: true }));
-    jest.advanceTimersByTime(a.$options.hoverShowTimeout); // mouseenter has debounce timeout
+    await wait(a.$options.hoverShowTimeout); // mouseenter has debounce timeout
     expect(a.$isOpen).toBeTruthy();
     expect(spyShow).lastCalledWith(1);
     trgInput.dispatchEvent(new Event("mousedown", { bubbles: true }));
     trgInput.focus();
     trgInput.dispatchEvent(new Event("mouseup", { bubbles: true }));
-    await Promise.resolve(); // wait for promise onShow is async
+    await wait(1); // wait for promise onShow is async
     expect(a.$isOpen).toBeTruthy(); // no changes in state
     trgInput.dispatchEvent(new Event("click", { bubbles: true }));
     expect(a.$isOpen).toBeTruthy(); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
-    await Promise.resolve(); // wait for promise onShow is async
+    await wait(1); // wait for promise onShow is async
 
     // close by blur
     trgInput.blur();
-    await Promise.resolve(); // wait for promise onHide is async
+    await wait(1); // wait for promise onHide is async
     expect(a.$isOpen).toBeFalsy(); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
     expect(spyHide).lastCalledWith(3);
 
     // close by mouseleave
     trgInput.dispatchEvent(new Event("mouseenter", { bubbles: true }));
-    jest.advanceTimersByTime(a.$options.hoverShowTimeout); // mouseenter has debounce timeout
-    await Promise.resolve(); // wait for promise onShow is async
+    await wait(a.$options.hoverShowTimeout); // mouseenter has debounce timeout
     expect(a.$isOpen).toBeTruthy(); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
     trgInput.dispatchEvent(new Event("mouseleave", { bubbles: true }));
-    jest.advanceTimersByTime(a.$options.hoverHideTimeout); // mouseenter has debounce timeout
-    await Promise.resolve(); // wait for promise onHide is async
+    await wait(a.$options.hoverHideTimeout); // mouseenter has debounce timeout
     expect(a.$isOpen).toBeFalsy(); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
     expect(spyHide).lastCalledWith(2);
 
     // open again by click
     trgInput.dispatchEvent(new Event("click", { bubbles: true }));
-    jest.advanceTimersByTime(50); // click has debounce timeout
-    await Promise.resolve(); // wait for promise onShow is async
+    await wait();
     expect(a.$isOpen).toBeTruthy(); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
     expect(spyShow).lastCalledWith(1 << 2);
 
     // close by click again
     trgInput.dispatchEvent(new Event("click", { bubbles: true }));
-    jest.advanceTimersByTime(50);
-    await Promise.resolve(); // wait for promise onHide is async
+    await wait();
     expect(a.$isOpen).toBeFalsy();
     expect(spyHide).lastCalledWith(6);
     trgInput.blur();
@@ -511,20 +526,20 @@ describe("popupElement", () => {
     expect(a.$isOpen).toBeFalsy();
     trgInput.focus();
     expect(spyShow).lastCalledWith(1 << 1);
-    await Promise.resolve(); // wait for promise onShow is async
+    await wait(1);
     expect(a.$isOpen).toBeTruthy(); // show by focus
     trgInput.dispatchEvent(new Event("mouseup", { bubbles: true }));
     const ev = new MouseEvent("click", { bubbles: true });
     ev.pageX = 20; // required otherwise it's filtered from synthetic events
     trgInput.dispatchEvent(ev);
-    jest.advanceTimersByTime(50);
-    expect(a.$isOpen).toBeTruthy(); // stay opened because wasOpened by focus from click)
+    await wait(50);
+    expect(a.$isOpen).toBeTruthy(); // stay opened because wasOpened by focus from click
 
     // simulate mouse-click again
     trgInput.dispatchEvent(new Event("mousedown", { bubbles: true }));
     trgInput.dispatchEvent(new Event("mouseup", { bubbles: true }));
     trgInput.dispatchEvent(ev);
-    jest.advanceTimersByTime(50);
+    await wait(50);
     expect(a.$isOpen).toBeFalsy(); // 2nd click will close (but if click is fired without mousedown it doesn't work)
     expect(spyHide).lastCalledWith(6);
   });
@@ -863,7 +878,7 @@ describe("popupElement", () => {
     expect(called).not.toHaveLength(0); // test if event listeners were added
 
     trg.click(); // it will add extra events
-    await Promise.resolve(); // wait for promise onShow is async
+    await wait(1);
     expect(a.$isOpen).toBeTruthy();
     expect(spy[0].on).toBeCalled(); // expected that we have events for document
 
@@ -891,26 +906,27 @@ describe("popupElement", () => {
     document.body.appendChild(a);
     expect(() => jest.advanceTimersByTime(1000)).toThrow(); // error: Target must be appended to layout
     trg.click();
-    expect(a.$isOpen).toBeFalsy();
-    expect(a.goShow).toThrow(); // error expected
+    await wait();
+    expect(a.$isOpen).toBeFalsy(); // bercause target removed
+    expect(() => a.goShow(0)).toThrow(); // error expected
+    spy.check(); // checking if removed every listener that was added
 
     document.body.appendChild(trg);
     trg.click();
+    await wait();
     expect(a.$isOpen).toBeFalsy(); // because target isn't appened before initPopup
     a.$options.target = null;
     a.$options.target = trg; // reassignTarget
-    jest.advanceTimersByTime(1);
+    await wait();
     trg.click();
-    await Promise.resolve(); // wait for promise onShow is async
+    await wait();
     expect(a.$isOpen).toBeTruthy();
 
     spyFrameCancel.mockClear();
     trg.remove();
     expect(spyFrameCancel).toBeCalledTimes(1);
-    jest.advanceTimersByTime(1);
-    await Promise.resolve(); // wait for promise onHide is async
-    jest.advanceTimersByTime(1);
-    await Promise.resolve(); // wait for promise onHide is async
+    await wait();
+    await wait();
     expect(a.$isOpen).toBeFalsy();
     // if target removed - events should be removed
     spy.check(); // checking if removed every listener that was added
@@ -923,6 +939,7 @@ describe("popupElement", () => {
     const called2 = spy.map((v) => v.on.mock.calls[0]).filter((v) => v);
     expect(called2).not.toHaveLength(0); // test if event listeners were added
     trg.click();
+    await wait();
     expect(a.$isOpen).toBeTruthy();
   });
 
@@ -1384,7 +1401,7 @@ describe("popupElement", () => {
     );
     expect(warn).toBeCalledTimes(1);
     trg.click();
-    await Promise.resolve(); // wait for promise onShow is async
+    await wait();
     // checking if rendered once
     expect(document.body.innerHTML).toMatchInlineSnapshot(
       `"<div id=\\"targetId\\">some text</div><wup-popup style=\\"display: block; transform: translate(190px, 100px);\\" position=\\"top\\">Me2</wup-popup>"`
@@ -1400,7 +1417,7 @@ describe("popupElement", () => {
       popup = popupEl;
     });
     trg.click();
-
+    await wait();
     expect(popup.$isOpen).toBeTruthy();
     expect(popup.getAttribute("position")).not.toBe("bottom");
     jest.advanceTimersByTime(1000);
@@ -1408,7 +1425,7 @@ describe("popupElement", () => {
     jest.advanceTimersByTime(1000);
     expect(popup.$isOpen).toBeFalsy(); // changing options hides popup
     trg.click();
-    await Promise.resolve(); // wait for promise onShow is async
+    await wait();
     expect(popup.$isOpen).toBeTruthy();
     expect(popup.getAttribute("position")).toBe("bottom");
 
@@ -1419,8 +1436,10 @@ describe("popupElement", () => {
     jest.advanceTimersByTime(1000);
     expect(popup.$isOpen).toBeFalsy(); // changing options hides popup
     trg.click();
+    await wait();
     expect(popup.$isOpen).toBeFalsy(); // because target changed
     popup.$options.target.click();
+    await wait();
     expect(popup.$isOpen).toBeTruthy();
 
     // set target to null (for coverage)
@@ -1429,8 +1448,10 @@ describe("popupElement", () => {
     expect(popup.$isOpen).toBeFalsy(); // changing options hides popup
     expect(popup.$options.target).toBe(trg); // because it returns to previous
     trg2.click();
+    await wait();
     expect(popup.$isOpen).toBeFalsy(); // because target changed
     trg.click();
+    await wait();
     expect(popup.$isOpen).toBeTruthy();
 
     // checking self-removing opened popup when target turns into removed
@@ -1440,6 +1461,7 @@ describe("popupElement", () => {
     jest.advanceTimersByTime(1000);
     expect(popup.$isOpen).toBeFalsy(); // because target changed
     trg2.click();
+    await wait();
     expect(popup.$isOpen).toBeTruthy();
     divRemove.innerHTML = "";
     expect(trg2.isConnected).toBeFalsy(); // because removed by innerHTML
@@ -1497,32 +1519,28 @@ describe("popupElement", () => {
     });
     objStyle = { animationDuration: "0.3s", animationName: "WUP-POPUP-a1" };
     trg.click();
-    await Promise.resolve(); // wait for promise onShow is async
+    await wait();
     expect(popup.$isOpen).toBeTruthy();
     expect(popup.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style=\\"display: block; transform: translate(190px, 100px);\\" position=\\"top\\">Me</wup-popup>"`
     );
 
-    jest.advanceTimersByTime(100); // click has debounce-filter
     objStyle = { animationDuration: "0.3s", animationName: "WUP-POPUP-a2" };
     trg.click();
-    await Promise.resolve(); // wait for promise onShow is async
+    await wait(1);
     expect(popup.$isOpen).toBeTruthy(); // because we are waiting for animation
     expect(popup.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style=\\"display: block; transform: translate(190px, 100px);\\" position=\\"top\\" hide=\\"\\">Me</wup-popup>"`
     );
-    jest.advanceTimersByTime(301); // click has debounce-filter
-    await Promise.resolve(); // wait for promise onHide is async
+    await wait();
     expect(popup.$isOpen).toBeFalsy();
     expect(popup.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style=\\"transform: translate(190px, 100px);\\" position=\\"top\\">Me</wup-popup>"`
     );
 
-    jest.advanceTimersByTime(100); //  click has debounce-filter
-    await Promise.resolve(); // wait for promise onHide is async
     objStyle = { animationDuration: "0.3s", animationName: "WUP-POPUP-a1" };
     trg.click();
-    await Promise.resolve(); // wait for promise onShow is async
+    await wait();
     expect(popup.$isOpen).toBeTruthy();
     expect(popup.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style=\\"display: block; transform: translate(190px, 100px);\\" position=\\"top\\">Me</wup-popup>"`
@@ -1591,10 +1609,10 @@ describe("popupElement", () => {
     });
 
     trg.click();
+    await wait(50);
     expect(el.$isOpen).toBeTruthy(); // because open is sync method
 
     // hide
-    await wait(50); // wait for 50ms
     trg.click();
     expect(el.$isOpen).toBeTruthy(); // because hide is async method
     await wait(50); // wait for 50ms

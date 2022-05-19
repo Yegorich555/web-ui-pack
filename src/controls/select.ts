@@ -169,7 +169,6 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
         showCase: PopupShowCases.onClick | PopupShowCases.onFocus,
       },
       (s) =>
-        // todo it's wrong if user tries select input-text via cursor
         s === WUPPopup.ShowCases.always // manual show
           ? (this.$refPopup as WUPPopupElement)
           : this.goShowMenu(
@@ -178,7 +177,6 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
                 : WUPSelectControlTypes.ShowCases.onFocus
             ),
       (s) =>
-        // todo it's wrong if user tries select input-text via cursor
         s === WUPPopup.HideCases.onFocusOut ||
         s === WUPPopup.HideCases.onOutsideClick ||
         s === WUPPopup.HideCases.onTargetClick ||
@@ -359,12 +357,9 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
       this.#disposeMenuEvents!.push(r);
 
       await this.renderMenu(p, menuId);
-    } else {
-      this.$refPopup.querySelector('[aria-selected="true"]')?.setAttribute("aria-selected", "false");
-      if (showCase !== WUPSelectControlTypes.ShowCases.onInput && this._menuItems!.filtered) {
-        this._menuItems!.all?.forEach((li) => (li.style.display = "")); // reset styles when after filtering
-        this._menuItems!.filtered = undefined;
-      }
+    } else if (showCase !== WUPSelectControlTypes.ShowCases.onInput && this._menuItems!.filtered) {
+      this._menuItems!.all?.forEach((li) => (li.style.display = "")); // reset styles after filtering
+      this._menuItems!.filtered = undefined;
     }
     !isCreate && this.$refPopup.$show(); // otherwise popup is opened automatically by init (because PopupShowCases.always)
 
@@ -440,8 +435,6 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
       this.$refInput.removeAttribute("aria-activedescendant");
       this._menuItems!.focused = -1;
     }
-
-    console.warn("scroll by focus");
   }
 
   /** Select item by index (set aria-selected and scroll to) */
@@ -573,3 +566,5 @@ el.$options.validations = {
   min: (v) => v.length > 500 && "This is error",
   extra: (v) => "test Me",
 };
+
+// todo check behavior with Readonly

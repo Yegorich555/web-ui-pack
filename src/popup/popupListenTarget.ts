@@ -121,7 +121,8 @@ export default function popupListenTarget(
     onShowEvent(document, "click", ({ target }) => {
       preventClickAfterFocus = false; // mostly it doesn't make sense but maybe it's possible
       // filter click from target because we have target event for this
-      if (t !== target && !(target instanceof Node && t.contains(target))) {
+      const isTarget = t === target || (target instanceof Node && t.contains(target));
+      if (!isTarget) {
         const isMeClick = openedEl === target || includes(target);
         if (isMeClick) {
           focusFirst(lastActive || t);
@@ -144,13 +145,21 @@ export default function popupListenTarget(
       if (timeoutId || wasOutsideClick || openedByHover) {
         return;
       }
+      const isPrevented = preventClickAfterFocus; // otherwise it can be reset by document.click
 
-      if (!openedEl) {
-        lastActive = document.activeElement as HTMLElement;
-        show(WUPPopup.ShowCases.onClick);
-      } else if (!preventClickAfterFocus) {
-        hide(WUPPopup.HideCases.onTargetClick);
-      }
+      setTimeout(() => {
+        const isUserSelected = window.getSelection()?.type === "Range";
+        if (isUserSelected) {
+          return;
+        }
+        if (!openedEl) {
+          lastActive = document.activeElement as HTMLElement;
+          show(WUPPopup.ShowCases.onClick);
+        } else if (!isPrevented) {
+          hide(WUPPopup.HideCases.onTargetClick);
+        }
+      }); // timeout to wait for browser for applying selection on text if user selected something
+
       // fix when labelOnClick > inputOnClick
       timeoutId = setTimeout(() => (timeoutId = undefined), 50);
     });
