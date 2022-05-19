@@ -6,20 +6,31 @@ import onFocusLostEv from "../helpers/onFocusLost";
 // eslint-disable-next-line import/named
 import WUPPopupElement, { ShowCases } from "../popup/popupElement";
 
-export namespace WUPBaseControlTypes {
-  export const enum ValidationCases {
-    /** Wait for first user-change > wait for valid > wait for invalid >> show error;
-     *  When invalid: wait for valid > hide error > wait for invalid > show error
-     *  Also you can check $options.validityDebounceMs */
-    onChangeSmart = 1,
-    /** Validate when user changed value (via type,select etc.); Also you can check $options.validityDebounceMs */
-    onChange = 1 << 1,
-    /** Validate when control losts focus */
-    onFocusLost = 1 << 2,
-    /** Validate when not-empty initValue defined and doesn't fit validations  */
-    onInit = 1 << 3,
-  }
+/** Cases of validation for WUP Controls */
+export const enum ValidationCases {
+  /** Wait for first user-change > wait for valid > wait for invalid >> show error;
+   *  When invalid: wait for valid > hide error > wait for invalid > show error
+   *  Also you can check $options.validityDebounceMs */
+  onChangeSmart = 1,
+  /** Validate when user changed value (via type,select etc.); Also you can check $options.validityDebounceMs */
+  onChange = 1 << 1,
+  /** Validate when control losts focus */
+  onFocusLost = 1 << 2,
+  /** Validate when not-empty initValue defined and doesn't fit validations  */
+  onInit = 1 << 3,
+}
 
+/** Options for userKeyPress event */
+export const enum PressEscActions {
+  /** Disable action */
+  none = 0,
+  /** Make control is empty; pressing Esc again rollback action (it helps to avoid accidental action) */
+  clear = 1 << 1,
+  /** Return to init value; pressing Esc again rollback action (it helps to avoid accidental action) */
+  resetToInit = 1 << 2,
+}
+
+export namespace WUPBaseControlTypes {
   export const enum ValidateFromCases {
     /** When element appended to layout */
     onInit,
@@ -31,15 +42,6 @@ export namespace WUPBaseControlTypes {
     onSubmit,
     /** When $validate() is fired programmatically */
     onManualCall,
-  }
-
-  export const enum PressEscActions {
-    /** Disable action */
-    none = 0,
-    /** Make control is empty; pressing Esc again rollback action (it helps to avoid accidental action) */
-    clear = 1 << 1,
-    /** Return to init value; pressing Esc again rollback action (it helps to avoid accidental action) */
-    resetToInit = 1 << 2,
   }
 
   export type ValidationMap = {
@@ -170,9 +172,9 @@ export default abstract class WUPBaseControl<
 
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUPBaseControlTypes.Options = {
-    pressEsc: WUPBaseControlTypes.PressEscActions.clear | WUPBaseControlTypes.PressEscActions.resetToInit,
+    pressEsc: PressEscActions.clear | PressEscActions.resetToInit,
     validityDebounceMs: 500,
-    validationCase: WUPBaseControlTypes.ValidationCases.onChangeSmart | WUPBaseControlTypes.ValidationCases.onFocusLost,
+    validationCase: ValidationCases.onChangeSmart | ValidationCases.onFocusLost,
     validationRules: {
       required: (v, setV) => setV && this.isEmpty(v) && "This field is required",
     },
@@ -286,7 +288,7 @@ export default abstract class WUPBaseControl<
     this.disposeLstInit.forEach((f) => f()); // remove possible previous event listeners
     this.disposeLstInit.length = 0;
 
-    if (this._opts.validationCase & WUPBaseControlTypes.ValidationCases.onFocusLost) {
+    if (this._opts.validationCase & ValidationCases.onFocusLost) {
       this.disposeLstInit.push(
         onFocusLostEv(this, () => this.goValidate(WUPBaseControlTypes.ValidateFromCases.onFocusLost), {
           debounceMs: this._opts.focusDebounceMs,
@@ -304,8 +306,8 @@ export default abstract class WUPBaseControl<
 
           const was = this.#value;
 
-          const isEscClear = this._opts.pressEsc & WUPBaseControlTypes.PressEscActions.clear;
-          if (this._opts.pressEsc & WUPBaseControlTypes.PressEscActions.resetToInit) {
+          const isEscClear = this._opts.pressEsc & PressEscActions.clear;
+          if (this._opts.pressEsc & PressEscActions.resetToInit) {
             if (this.$isChanged) {
               this.#isDirty = false;
               this.setValue(this.$initValue);
@@ -373,7 +375,7 @@ export default abstract class WUPBaseControl<
       (e) => !(e.target instanceof HTMLInputElement) && e.preventDefault()
     );
 
-    if (this._opts.validationCase & WUPBaseControlTypes.ValidationCases.onInit) {
+    if (this._opts.validationCase & ValidationCases.onInit) {
       !this.$isEmpty && this.goValidate(WUPBaseControlTypes.ValidateFromCases.onInit);
     }
   }
@@ -429,7 +431,7 @@ export default abstract class WUPBaseControl<
 
     if (
       fromCase === WUPBaseControlTypes.ValidateFromCases.onInput &&
-      this._opts.validationCase & WUPBaseControlTypes.ValidationCases.onChangeSmart
+      this._opts.validationCase & ValidationCases.onChangeSmart
     ) {
       if (errMsg) {
         if (!this.#wasValid) {
@@ -512,7 +514,7 @@ export default abstract class WUPBaseControl<
     }
 
     const c = this._opts.validationCase;
-    if (c & WUPBaseControlTypes.ValidationCases.onChange || c & WUPBaseControlTypes.ValidationCases.onChangeSmart) {
+    if (c & ValidationCases.onChange || c & ValidationCases.onChangeSmart) {
       this.goValidate(WUPBaseControlTypes.ValidateFromCases.onInput);
     }
     this.fireEvent("$change", { cancelable: false });
