@@ -265,7 +265,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     const r = onEvent(ul, "click", async (e) => {
       e.stopPropagation();
       if (e.target instanceof HTMLLIElement) {
-        this.onMenuItemClick(e as MouseEvent & { target: HTMLLIElement });
+        this.gotMenuItemClick(e as MouseEvent & { target: HTMLLIElement });
       }
     });
     this.#disposeMenuEvents!.push(r);
@@ -305,7 +305,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     return arrLi;
   }
 
-  protected onMenuItemClick(e: MouseEvent & { target: HTMLLIElement }) {
+  protected gotMenuItemClick(e: MouseEvent & { target: HTMLLIElement }) {
     const i = this._menuItems!.all.indexOf(e.target as HTMLLIElement & { _text: string });
     const o = this._cachedItems![i];
 
@@ -349,7 +349,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
       i.setAttribute("aria-controls", menuId);
 
       this.#disposeMenuEvents = [];
-      const r2 = this.appendEvent(this, "keydown", this.onKeyDown);
+      const r2 = this.appendEvent(this, "keydown", this.gotKeyDown);
       this.#disposeMenuEvents!.push(r2);
 
       // remove popup only by focusOut to optimize resources
@@ -465,7 +465,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
   }
 
   /** Fired when use presses key */
-  protected async onKeyDown(e: KeyboardEvent) {
+  protected async gotKeyDown(e: KeyboardEvent) {
     if (e.altKey || e.shiftKey || e.ctrlKey) {
       return;
     }
@@ -513,7 +513,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     }
   }
 
-  protected override async onInput(e: Event & { currentTarget: HTMLInputElement }) {
+  protected override async gotInput(e: Event & { currentTarget: HTMLInputElement }) {
     this.#isOpen && this.focusMenuItem(null); // reset focus
     !this.#isOpen && (await this.goShowMenu(WUPSelectControlTypes.ShowCases.onInput));
 

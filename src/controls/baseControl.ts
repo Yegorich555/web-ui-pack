@@ -1,6 +1,7 @@
 /* eslint-disable no-use-before-define */
 import WUPBaseElement, { JSXCustomProps, WUP } from "../baseElement";
 import isEqual from "../helpers/isEqual";
+import onEvent from "../helpers/onEvent";
 import onFocusLostEv from "../helpers/onFocusLost";
 // eslint-disable-next-line import/named
 import WUPPopupElement, { ShowCases } from "../popup/popupElement";
@@ -129,6 +130,7 @@ export default abstract class WUPBaseControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseControl;
 
+  // todo check it & adjust
   /** Options that need to watch for changes; use gotOptionsChanged() */
   static observedOptions = new Set<keyof WUPBaseControlTypes.Options>([
     "label",
@@ -168,7 +170,6 @@ export default abstract class WUPBaseControl<
 
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUPBaseControlTypes.Options = {
-    // todo implement
     pressEsc: WUPBaseControlTypes.PressEscActions.clear | WUPBaseControlTypes.PressEscActions.resetToInit,
     validityDebounceMs: 500,
     validationCase: WUPBaseControlTypes.ValidationCases.onChangeSmart | WUPBaseControlTypes.ValidationCases.onFocusLost,
@@ -234,7 +235,7 @@ export default abstract class WUPBaseControl<
    *  By default values compared by valueOf if it's possible
    */
   get $isChanged(): boolean {
-    return this.#ctr.isEqual(this.$value, this.#initValue);
+    return !this.#ctr.isEqual(this.$value, this.#initValue);
   }
 
   #isValid?: boolean;
@@ -289,6 +290,33 @@ export default abstract class WUPBaseControl<
       this.disposeLstInit.push(
         onFocusLostEv(this, () => this.goValidate(WUPBaseControlTypes.ValidateFromCases.onFocusLost), {
           debounceMs: this._opts.focusDebounceMs,
+        })
+      );
+    }
+
+    if (this._opts.pressEsc) {
+      let prevValue = this.$value;
+      this.disposeLstInit.push(
+        onEvent(this, "keydown", (e) => {
+          if (e.key !== "Escape") {
+            return;
+          }
+
+          const was = this.#value;
+
+          const isEscClear = this._opts.pressEsc & WUPBaseControlTypes.PressEscActions.clear;
+          if (this._opts.pressEsc & WUPBaseControlTypes.PressEscActions.resetToInit) {
+            if (this.$isChanged) {
+              this.#isDirty = false;
+              this.setValue(this.$initValue);
+              prevValue = was;
+              return;
+            }
+          }
+          if (isEscClear) {
+            this.setValue(this.$isEmpty ? prevValue : undefined);
+          }
+          prevValue = was;
         })
       );
     }

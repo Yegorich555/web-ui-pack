@@ -94,7 +94,7 @@ export default class WUPTextControl<ValueType = string> extends WUPBaseControl<
 
   protected override gotReady() {
     super.gotReady();
-    this.appendEvent(this.$refInput, "input", this.onInput as any);
+    this.appendEvent(this.$refInput, "input", this.gotInput as any);
   }
 
   protected override gotReinit() {
@@ -109,7 +109,7 @@ export default class WUPTextControl<ValueType = string> extends WUPBaseControl<
 
   #inputTimer?: number;
   /** Fired when user types text */
-  protected onInput(e: Event & { currentTarget: HTMLInputElement }) {
+  protected gotInput(e: Event & { currentTarget: HTMLInputElement }) {
     this._validTimer && clearTimeout(this._validTimer);
     const v = e.currentTarget.value;
 
