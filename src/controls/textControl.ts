@@ -123,7 +123,10 @@ export default class WUPTextControl<ValueType = string> extends WUPBaseControl<
 
   protected override setValue(v: ValueType | undefined) {
     super.setValue(v);
+    this.setInputValue(v);
+  }
 
+  protected setInputValue(v: ValueType | undefined) {
     const p = this.#ctr.provideInputValue(v, this);
     if (p instanceof Promise) {
       p.then((s) => (this.$refInput.value = s));

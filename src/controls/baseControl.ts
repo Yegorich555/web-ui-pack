@@ -20,12 +20,25 @@ export namespace WUPBaseControlTypes {
   }
 
   export const enum ValidateFromCases {
+    /** When element appended to layout */
     onInit,
+    /** When control loses focus (including document.activeElement) */
     onFocusLost,
+    /** When user type text (or change value via input) in <input /> */
     onInput,
+    /** When form.submit is fired (via button submit or somehow else); It's impossible to disable */
     onSubmit,
     /** When $validate() is fired programmatically */
     onManualCall,
+  }
+
+  export const enum PressEscActions {
+    /** Disable action */
+    none = 0,
+    /** Make control is empty; pressing Esc again rollback action (it helps to avoid accidental action) */
+    clear = 1 << 1,
+    /** Return to init value; pressing Esc again rollback action (it helps to avoid accidental action) */
+    resetToInit = 1 << 2,
   }
 
   export type ValidationMap = {
@@ -47,8 +60,6 @@ export namespace WUPBaseControlTypes {
       disabled?: boolean;
       /** Disallow copy value; adds attr [readonly] for styling */
       readOnly?: boolean;
-      /** Default/init value */
-      initValue?: ValueType;
       /** When to validate control and show error. Validation by onSubmit impossible to disable
        *  @defaultValue onChangeSmart | onFocusLost | onSubmit
        */
@@ -70,6 +81,9 @@ export namespace WUPBaseControlTypes {
       /** Debounce option for onFocustLost event (for validationCases.onFocusLost); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost;
        * @defaultValue 100ms */
       focusDebounceMs?: number;
+      /** Behavior that expected on press key 'Escape'
+       * @defaultValue clear | resetToInit (both means: resetToInit if exists, 2nd time - clear etc.) */
+      pressEsc: PressEscActions;
     } & ExtraOptions;
   };
 
@@ -154,6 +168,8 @@ export default abstract class WUPBaseControl<
 
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUPBaseControlTypes.Options = {
+    // todo implement
+    pressEsc: WUPBaseControlTypes.PressEscActions.clear | WUPBaseControlTypes.PressEscActions.resetToInit,
     validityDebounceMs: 500,
     validationCase: WUPBaseControlTypes.ValidationCases.onChangeSmart | WUPBaseControlTypes.ValidationCases.onFocusLost,
     validationRules: {
@@ -169,12 +185,8 @@ export default abstract class WUPBaseControl<
 
   protected override _opts = this.$options;
 
-  get #initValue(): ValueType | undefined {
-    return this._opts.initValue as any;
-  }
-
-  #value: ValueType | undefined;
-  /** Current value of control */
+  #value?: ValueType;
+  /** Current value of control; You can change it without affecting on $isDirty state */
   get $value(): ValueType | undefined {
     return this.#value;
   }
@@ -185,14 +197,40 @@ export default abstract class WUPBaseControl<
     this.$isDirty = was;
   }
 
-  $isDirty = false;
+  #initValue?: ValueType;
+  /** Default/init value; used to define isChanged & to reset by Esc;
+   *  If control.$isDirty or not $isEmpty value isn't applied to */
+  get $initValue(): ValueType | undefined {
+    return this.#initValue;
+  }
+
+  set $initValue(v: ValueType | undefined) {
+    if (!this.#ctr.isEqual(v, this.#initValue) && !this.$isDirty && this.$isEmpty) {
+      // setValue if it's empty
+      this.$isReady ? (this.$value = v) : setTimeout(() => (this.$value = v));
+    }
+    this.#initValue = v;
+  }
+
+  #isDirty = false;
+  /** True if control is touched by user; Set 'false' if you want to reset state of control and assign initValue to value */
+  get $isDirty() {
+    return this.#isDirty;
+  }
+
+  set $isDirty(v: boolean) {
+    this.#isDirty = v;
+    if (!v) {
+      this.$initValue = this.$value;
+    }
+  }
 
   /** Returns true if value is empty string or undefined */
   get $isEmpty(): boolean {
     return this.#ctr.isEmpty(this.#value);
   }
 
-  /** Returns if value changed (by comparisson with initValue via static.isEqual option)
+  /** Returns if value changed (by comparisson with $initValue via static.isEqual option)
    *  By default values compared by valueOf if it's possible
    */
   get $isChanged(): boolean {
@@ -247,6 +285,14 @@ export default abstract class WUPBaseControl<
     this.disposeLstInit.forEach((f) => f()); // remove possible previous event listeners
     this.disposeLstInit.length = 0;
 
+    if (this._opts.validationCase & WUPBaseControlTypes.ValidationCases.onFocusLost) {
+      this.disposeLstInit.push(
+        onFocusLostEv(this, () => this.goValidate(WUPBaseControlTypes.ValidateFromCases.onFocusLost), {
+          debounceMs: this._opts.focusDebounceMs,
+        })
+      );
+    }
+
     this._opts.label = this.getAttribute("label") ?? this._opts.label;
     this._opts.name = this.getAttribute("name") ?? this._opts.name;
     this._opts.autoFillName = this.getAttribute("autoFillName") ?? this._opts.autoFillName;
@@ -290,7 +336,7 @@ export default abstract class WUPBaseControl<
 
   protected override gotReady() {
     super.gotReady();
-    // todo usage of $options.initValue is missed
+    this.gotReinit();
 
     // this.appendEvent removed by dispose()
     this.appendEvent(
@@ -302,15 +348,6 @@ export default abstract class WUPBaseControl<
     if (this._opts.validationCase & WUPBaseControlTypes.ValidationCases.onInit) {
       !this.$isEmpty && this.goValidate(WUPBaseControlTypes.ValidateFromCases.onInit);
     }
-    if (this._opts.validationCase & WUPBaseControlTypes.ValidationCases.onFocusLost) {
-      this.disposeLst.push(
-        onFocusLostEv(this, () => this.goValidate(WUPBaseControlTypes.ValidateFromCases.onFocusLost), {
-          debounceMs: this._opts.focusDebounceMs,
-        })
-      );
-    }
-
-    this.gotReinit();
   }
 
   #isFirstConn = true;
@@ -325,6 +362,7 @@ export default abstract class WUPBaseControl<
 
   #wasValid = false;
   protected _validTimer?: number;
+  /** Method called to check control based on validation rules and current value */
   protected goValidate(fromCase: WUPBaseControlTypes.ValidateFromCases, canShowError = true): string | false {
     const vls = this._opts.validations;
     if (!vls) {
@@ -387,6 +425,7 @@ export default abstract class WUPBaseControl<
     return false;
   }
 
+  /** Method called to show error */
   protected goShowError(err: string) {
     // possible when user goes to another page and focusout > validTimeout happened
     if (!this.isConnected) {
@@ -435,6 +474,7 @@ export default abstract class WUPBaseControl<
     }
   }
 
+  /** Fire this method to update value & validate */
   protected setValue(v: ValueType | undefined) {
     this.$isDirty = true;
     const isChanged = !this.#ctr.isEqual(v, this.#value);
@@ -478,5 +518,5 @@ export default abstract class WUPBaseControl<
     this.disposeLstInit.length = 0;
   }
 }
-// todo option.pressESC: clear, reset to previous/default, none
+
 // todo option.clearBtn: boolean

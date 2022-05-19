@@ -24,8 +24,9 @@ export default function ControlsView() {
           class={`${styles.common} ${styles.textControl}`}
           ref={(el) => {
             if (el) {
-              el.$options.label = "TextControl - disabled";
+              el.$options.label = "TextControl - readonly";
               el.$options.readOnly = true;
+              el.$initValue = "init value here";
             }
           }}
         />
@@ -131,11 +132,12 @@ export default function ControlsView() {
                 required: true,
               };
 
-              el.$value = ir - 1;
+              // el.$value = ir - 1;
               // el.$options.readOnlyInput = true;
               // el.$options.readOnly = true;
               // el.$options.disabled = true;
               el.$options.selectOnFocus = true;
+              el.$initValue = ir - 5;
             }
           }}
         />
