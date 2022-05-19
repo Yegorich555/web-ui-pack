@@ -37,6 +37,8 @@ export namespace WUPSelectControlTypes {
     /** Wait for pointed time before show error (it's sumarized with $options.debounce); WARN: hide error without debounce
      *  @defaultValue 0 */
     validityDebounceMs: number;
+    /** Set true to make input not editable but allow to user select items via popup-menu (ordinary dropdown mode) */
+    readOnlyInput?: boolean;
   };
 
   export type ValidationMap = WUPBaseControlTypes.ValidationMap;
@@ -141,6 +143,8 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     validationRules: undefined, // don't copy it from defaults to optimize memory
   };
 
+  protected override _opts = this.$options;
+
   #isOpen = false;
   get $isOpen(): boolean {
     return this.#isOpen;
@@ -158,40 +162,8 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
   #popupRefs?: {
     hide: (hideCase: WUPPopup.HideCases) => Promise<void>;
     show: (showCase: WUPPopup.ShowCases) => Promise<void>;
+    dispose: () => void;
   };
-
-  protected override connectedCallback() {
-    super.connectedCallback();
-
-    const refs = popupListenTarget(
-      {
-        target: this,
-        showCase: PopupShowCases.onClick | PopupShowCases.onFocus,
-      },
-      (s) =>
-        s === WUPPopup.ShowCases.always // manual show
-          ? (this.$refPopup as WUPPopupElement)
-          : this.goShowMenu(
-              s === PopupShowCases.onClick
-                ? WUPSelectControlTypes.ShowCases.onClick
-                : WUPSelectControlTypes.ShowCases.onFocus
-            ),
-      (s) =>
-        s === WUPPopup.HideCases.onFocusOut ||
-        s === WUPPopup.HideCases.onOutsideClick ||
-        s === WUPPopup.HideCases.onTargetClick ||
-        s === WUPPopup.HideCases.onPopupClick
-          ? this.goHideMenu(
-              s === WUPPopup.HideCases.onFocusOut || s === WUPPopup.HideCases.onOutsideClick
-                ? WUPSelectControlTypes.HideCases.onFocusLost
-                : WUPSelectControlTypes.HideCases.onClick
-            )
-          : true
-    );
-    this.#popupRefs = { hide: refs.hide, show: refs.show };
-
-    setTimeout(() => this.$refInput.click(), 300);
-  }
 
   protected override renderControl() {
     super.renderControl();
@@ -199,9 +171,50 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     const i = this.$refInput;
     i.setAttribute("role", "combobox");
     i.setAttribute("aria-haspopup", "listbox");
-    i.setAttribute("aria-autocomplete", "list");
     i.setAttribute("aria-expanded", "false");
     // i.setAttribute("aria-multiselectable", "false");
+  }
+
+  protected override gotReinit() {
+    super.gotReinit();
+
+    this._opts.readOnlyInput
+      ? this.$refInput.removeAttribute("aria-autocomplete")
+      : this.$refInput.setAttribute("aria-autocomplete", "list");
+    this.$refInput.readOnly = (this._opts.readOnly || this._opts.readOnlyInput) as boolean;
+
+    const isMenuEnabled = !this._opts.readOnly && !this._opts.disabled;
+    if (isMenuEnabled && !this.#popupRefs) {
+      const refs = popupListenTarget(
+        {
+          target: this,
+          showCase: PopupShowCases.onClick | PopupShowCases.onFocus,
+        },
+        (s) =>
+          s === WUPPopup.ShowCases.always // manual show
+            ? (this.$refPopup as WUPPopupElement)
+            : this.goShowMenu(
+                s === PopupShowCases.onClick
+                  ? WUPSelectControlTypes.ShowCases.onClick
+                  : WUPSelectControlTypes.ShowCases.onFocus
+              ),
+        (s) =>
+          s === WUPPopup.HideCases.onFocusOut ||
+          s === WUPPopup.HideCases.onOutsideClick ||
+          s === WUPPopup.HideCases.onTargetClick ||
+          s === WUPPopup.HideCases.onPopupClick
+            ? this.goHideMenu(
+                s === WUPPopup.HideCases.onFocusOut || s === WUPPopup.HideCases.onOutsideClick
+                  ? WUPSelectControlTypes.HideCases.onFocusLost
+                  : WUPSelectControlTypes.HideCases.onClick
+              )
+            : true
+      );
+      this.#popupRefs = { hide: refs.hide, show: refs.show, dispose: refs.onRemoveRef };
+    } else {
+      this.#popupRefs?.dispose.call(this.#popupRefs); // remove all possible prev-eventListeners
+      this.#popupRefs = undefined;
+    }
   }
 
   /** All items of current menu */
@@ -566,5 +579,3 @@ el.$options.validations = {
   min: (v) => v.length > 500 && "This is error",
   extra: (v) => "test Me",
 };
-
-// todo check behavior with Readonly

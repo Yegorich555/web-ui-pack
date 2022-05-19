@@ -134,6 +134,9 @@ export default function ControlsView() {
               };
 
               el.$value = ir - 1;
+              el.$options.readOnlyInput = true;
+              // el.$options.readOnly = true;
+              // el.$options.disabled = true;
             }
           }}
         />

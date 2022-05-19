@@ -237,7 +237,8 @@ export default abstract class WUPBaseControl<
   //   super();
   // }
 
-  gotReinit() {
+  /** Fired on Init and every time as options/attributes changed */
+  protected gotReinit() {
     console.warn("reinit");
 
     this._opts.label = this.getAttribute("label") ?? this._opts.label;
@@ -279,7 +280,7 @@ export default abstract class WUPBaseControl<
     this.#isStopAttrListen = false;
   }
 
-  /** Use this to append elements; can be fired ones */
+  /** Use this to append elements; fired single time when element isConnected but not ready yet */
   protected abstract renderControl(): void;
 
   protected override gotReady() {
