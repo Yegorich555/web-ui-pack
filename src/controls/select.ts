@@ -36,7 +36,7 @@ export namespace WUPSelectControlTypes {
     items: MenuItems<T> | (() => MenuItems<T> | Promise<MenuItems<T>>);
     /** Wait for pointed time before show error (it's sumarized with $options.debounce); WARN: hide error without debounce
      *  @defaultValue 0 */
-    validityDebounceMs: number;
+    validityDebounceMs?: number;
     /** Set true to make input not editable but allow to user select items via popup-menu (ordinary dropdown mode) */
     readOnlyInput?: boolean;
   };
@@ -102,7 +102,6 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     return arr;
   }
 
-  /** Get rawValue for input based on argument [value] */
   static provideInputValue<T, C extends WUPTextControl<T>>(v: T | undefined, control: C): string | Promise<string> {
     if (v === undefined) {
       return "";
@@ -131,9 +130,8 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
 
   static $defaults: WUPSelectControlTypes.Options = {
     ...WUPTextControl.$defaults,
-    debounceMs: 0,
-    validityDebounceMs: 0,
     items: [],
+    // ignore rules from textControl because it doesn't fit
     validationRules: WUPBaseControl.$defaults.validationRules,
   };
 

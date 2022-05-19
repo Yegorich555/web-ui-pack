@@ -5,7 +5,7 @@ export namespace WUPTextControlTypes {
   export type ExtraOptions = {
     /** Debounce time to wait for user finishes typing to start validate and provide $change event
      * @defaultValue 0; */
-    debounceMs: number;
+    debounceMs?: number;
   };
 
   export type ValidationMap = WUPBaseControlTypes.ValidationMap & {
@@ -47,6 +47,8 @@ export default class WUPTextControl<ValueType = string> extends WUPBaseControl<
      `;
   }
 
+  /** Get rawValue for input based on argument [value] */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   static provideInputValue<T, C extends WUPTextControl<T>>(v: T | undefined, ctrl: C): string | Promise<string> {
     return v != null ? (v as any).toString() : "";
   }
@@ -54,7 +56,6 @@ export default class WUPTextControl<ValueType = string> extends WUPBaseControl<
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUPTextControlTypes.Options = {
     ...WUPBaseControl.$defaults,
-    debounceMs: 0,
     validationRules: {
       required: WUPBaseControl.$defaults.validationRules.required,
       min: (v, setV) => v.length < setV && `Min length is ${setV} characters`,

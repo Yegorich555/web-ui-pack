@@ -267,7 +267,6 @@ export default abstract class WUPBaseControl<
 
       const required = this._opts.validations?.required;
       r.required = required ? (required as any) !== false : false;
-      // todo how to do it for fieldset[aria-required]
       r.disabled = this._opts.disabled as boolean;
       r.readOnly = this._opts.readOnly as boolean;
       // todo refactor this to manual autofocus ???
@@ -400,7 +399,6 @@ export default abstract class WUPBaseControl<
       ];
       p.$options.maxWidthByTarget = true;
       p.setAttribute("error", "");
-      // todo check if it works when err.msg is changed on the fly
       p.setAttribute("aria-live", "off"); // 'off' (not 'polite') because popup changes display block>none when it hidden after scrolling
       p.id = this.#ctr.uniqueId;
       this.$refInput.setAttribute("aria-describedby", p.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
@@ -433,7 +431,7 @@ export default abstract class WUPBaseControl<
 
   protected setValue(v: ValueType | undefined) {
     this.$isDirty = true;
-    const isChanged = this.#ctr.isEqual(v, this.#value);
+    const isChanged = !this.#ctr.isEqual(v, this.#value);
     this.#value = v;
     if (!isChanged) {
       return;
