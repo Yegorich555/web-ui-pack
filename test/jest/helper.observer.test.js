@@ -1,4 +1,4 @@
-import { observer } from "web-ui-pack";
+import observer from "web-ui-pack/helpers/observer";
 import * as h from "../testHelper";
 
 beforeEach(() => {

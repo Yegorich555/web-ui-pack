@@ -1,4 +1,4 @@
-import { findScrollParent } from "web-ui-pack";
+import findScrollParent from "web-ui-pack/helpers/findScrollParent";
 
 describe("helper.findScrollParent", () => {
   test("deault behavior", () => {

@@ -3,7 +3,7 @@ import "./styles/main.scss";
 import React, { useEffect } from "react";
 import ReactDom from "react-dom";
 import { BrowserRouter, Routes, Route, Navigate, NavLink, useNavigate } from "react-router-dom";
-import { stringPrettify } from "web-ui-pack";
+import { WUPHelpers } from "web-ui-pack";
 import PopupView from "./components/popup/popupView";
 
 import iconGit from "./assets/gitIcon.svg";
@@ -53,7 +53,7 @@ export default function AppContainer() {
             {routes.map((r) => (
               <li key={r.path}>
                 <NavLink to={r.url as string} className={({ isActive }) => (isActive ? styles.activeLink : "")}>
-                  {r.label || stringPrettify(r.path)}
+                  {r.label || WUPHelpers.stringPrettify(r.path)}
                 </NavLink>
               </li>
             ))}

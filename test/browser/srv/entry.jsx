@@ -10,3 +10,4 @@ window.renderIt = function renderIt(el) {
 };
 window.React = React;
 Object.assign(window, webUIpack);
+Object.assign(window, webUIpack.WUPHelpers);

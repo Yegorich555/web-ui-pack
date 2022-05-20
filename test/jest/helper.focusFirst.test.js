@@ -1,4 +1,4 @@
-import { focusFirst } from "web-ui-pack";
+import focusFirst from "web-ui-pack/helpers/focusFirst";
 
 afterEach(() => {
   document.body.innerHTML = "";

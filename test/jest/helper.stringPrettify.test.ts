@@ -1,4 +1,4 @@
-import { stringPrettify } from "web-ui-pack";
+import stringPrettify from "web-ui-pack/helpers/stringPrettify";
 
 describe("helper.stringPrettify", () => {
   test("camelCase", () => {

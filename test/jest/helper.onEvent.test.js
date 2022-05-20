@@ -1,4 +1,4 @@
-import { onEvent } from "web-ui-pack";
+import onEvent from "web-ui-pack/helpers/onEvent";
 
 beforeEach(() => {
   jest.clearAllMocks();

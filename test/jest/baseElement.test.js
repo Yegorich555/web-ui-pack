@@ -1,4 +1,4 @@
-import { WUPBaseElement } from "web-ui-pack";
+import WUPBaseElement from "web-ui-pack/baseElement";
 import * as h from "../testHelper";
 
 const testAttr = "testattr";
