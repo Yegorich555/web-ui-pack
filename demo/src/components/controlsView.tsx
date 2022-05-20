@@ -1,5 +1,9 @@
 import Page from "src/elements/page";
+import { WUPSelectControl, WUPTextControl } from "web-ui-pack";
 import styles from "./controlsView.scss";
+
+const sideEffect = WUPTextControl && WUPSelectControl;
+!sideEffect && console.error("Missed"); // It's required otherwise import is ignored by webpack
 
 export default function ControlsView() {
   return (

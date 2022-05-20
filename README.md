@@ -249,3 +249,19 @@ Be sure that you familiar with [common rules](#components)
 >       use: [ "babel-loader", ],
 >     },
 > ```
+
+#### UI doesn't recognize html tags like `<wup-popup />` etc
+
+> It's possible if you missed import or it was removed by optimizer of wepback etc. To fix this you need to force import at least once
+>
+> ```js
+> import { WUPSelectControl, WUPTextControl } from "web-ui-pack";
+>
+> // this force webpack don't ignore imports (if imported used only as html-tags without direct access)
+> const sideEffect = WUPTextControl && WUPSelectControl;
+> !sideEffect && console.error("Missed"); // It's required otherwise import is ignored by webpack
+> // or
+> WUPTextControl.$defaults.validityDebounceMs = 500;
+> WUPSelectControl.$defaults.validityDebounceMs = 500;
+> // etc.
+> ```
