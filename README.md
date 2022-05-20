@@ -66,7 +66,7 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
    - Every component has at least static `$defaults` (common options for current class) and personal `$options` (per each component). See details in [example](#popupelement)
    - `$options` are observed. So changing options affects on component immediately (every component has static `observedOptions` as set of watched options)
 2. **Usage**
-   - Since tree-shaking sometimes is not smart enough don't import from `web-ui-pack` directly. Instead use `web-ui-pack/path-to-element` or setup [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free) in package.json (for webpack)
+   - For webpack [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free) switched off (it's for optimization). But if you don't use webpack since tree-shaking sometimes is not smart enough don't import from `web-ui-pack` directly. Instead use `web-ui-pack/path-to-element`
    - Every component has a good JSDoc so go ahead and read details directly during the coding
    - Library compiled into ESNext. To avoid unexpected issues include this package into babel (use `exclude: /node_modules\/(?!(web-ui-pack)\/).*/` for babel-loader)
 3. **Limitations**
@@ -81,6 +81,8 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
      - [_HTMLElement_](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement)
        - [BaseElement](src/baseElement.ts)
          - [PopupElement](src/popupElement.ts)
+
+---
 
 ### PopupElement
 
@@ -160,6 +162,8 @@ declare global {
 }
 ```
 
+---
+
 ### Helpers
 
 use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
@@ -222,3 +226,26 @@ setTimeout(() => {
 - When you change array in most cases you get changing `length`; also `sort`/`reverse` triggers events
 - WeakMap, WeakSet, HTMLElement are not supported (not observed)
 - All objects compares by `valueOf()` so you maybe interested in custom valueOf to avoid unexpected issues
+
+---
+
+### Troubleshooting
+
+Be sure that you familiar with [common rules](#components)
+
+#### Library doesn't work in some browsers
+
+> web-ui-pack is compiled to ESNext. So some features maybe don't exist in browsers. To resolve it include the lib into babel-loader (for webpack check module.rules...exclude sections
+>
+> ```js
+> // webpack.config.js
+>   {
+>       test: /\.(js|jsx)$/,
+>       exclude: (() => {
+>         // these packages must be included to change according to browserslist
+>         const include = ["web-ui-pack"];
+>         return (v) => v.includes("node_modules") && !include.some((lib) => v.includes(lib));
+>       })(),
+>       use: [ "babel-loader", ],
+>     },
+> ```

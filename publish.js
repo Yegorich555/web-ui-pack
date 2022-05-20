@@ -31,9 +31,8 @@ async function go() {
   /* set date in changelog */
   const monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const dt = new Date();
-  const txt = fs
-    .readFileSync("./CHANGELOG.md", { encoding: "utf8" })
-    .replace("(___)", `(${monthsShort[dt.getUTCMonth()]} ${dt.getUTCDate()}, ${dt.getUTCFullYear()})`);
+  const gotDate = `(${monthsShort[dt.getUTCMonth()]} ${dt.getUTCDate()}, ${dt.getUTCFullYear()})`;
+  const txt = fs.readFileSync("./CHANGELOG.md", { encoding: "utf8" }).replace("(___)", gotDate);
   fs.writeFileSync("./CHANGELOG.md", txt, { encoding: "utf8" });
 
   /* update version in package.json */

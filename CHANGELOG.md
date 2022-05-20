@@ -1,15 +1,24 @@
 # Changelog
 
-## 0.0.6 (___)
+## 0.1.0 (\_\_\_)
 
+**BREAKING CHANGES**:
+
+- helpers reorganized to WUPHelpers (`WUPHelpers.isEqual`, `WUPHelpers.focusFirst` etc.)
+
+**Features**:
+
+- Optimized for webpack (via [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free))
 - [`FormControls`](README.md#controls)
+  - Added TextControl (desc. coming soon...)
+  - Added SelectControl (desc. coming soon...)
 
 - [`PopupElement`](README.md#popupelement)
-  - Added $refresh() - to force update recalc position when nested content is changed
-  - Added option animation with animation-drawer
-  - Added option maxWidthByTarget
-  - Added promise-result for $hide() and $show() (resolve by animation time)
-  - Allow to use other inline transform options
+  - Added $refresh() - to force update/recalc position when nested content is changed
+  - Added option **animation** with animation-drawer
+  - Added option **maxWidthByTarget**
+  - Added promise-result for \$hide() and \$show() (resolve by animation time)
+  - Allow to use other inline transform styles
 
 ## 0.0.5 (Apr 4, 2022)
 

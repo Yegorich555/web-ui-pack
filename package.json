@@ -4,6 +4,7 @@
   "description": "Web package with UI elements",
   "main": "index.js",
   "types": "index.d.ts",
+  "sideEffects": false,
   "scripts": {
     "pretest": "npm run build && webpack --config test\\browser\\srv\\webpack.config.js",
     "test": "jest --config test/jest.config.js --coverage",
