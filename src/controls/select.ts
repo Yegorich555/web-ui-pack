@@ -5,7 +5,7 @@ import onFocusLostEv from "../helpers/onFocusLost";
 import WUPPopupElement, { ShowCases as PopupShowCases, WUPPopup } from "../popup/popupElement";
 import popupListenTarget from "../popup/popupListenTarget";
 import WUPBaseControl, { WUPBaseControlTypes } from "./baseControl";
-import WUPTextControl, { WUPTextControlTypes } from "./textControl";
+import WUPTextControl, { WUPTextControlTypes } from "./text";
 
 export namespace WUPSelectControlTypes {
   export const enum ShowCases {
