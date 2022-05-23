@@ -36,17 +36,18 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     return "";
   }
 
+  /** StyleContent related to component & inherrited components */
+  static get styleRoot(): string {
+    return `:root {
+          --border-radius: 6px;
+          --anim-time: 200ms;
+          --anim: var(--anim-time, 200ms) cubic-bezier(0, 0, 0.2, 1) 0ms;
+        }`;
+  }
+
   /** Get unique id for html elements; Every getter returns new id */
   static get uniqueId(): string {
     return `wup${++lastUniqueNum}`;
-  }
-
-  /** Append style once (per tag) */
-  protected static appendStyle(tagName: string, styleContent: string) {
-    if (!appendedStyles.has(tagName)) {
-      styleContent && styleElement.append(styleContent.replace(/:host/g, `${tagName}`));
-      appendedStyles.add(tagName);
-    }
   }
 
   /** Options that applied to element */
@@ -55,10 +56,12 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   constructor() {
     super();
 
+    const protos: typeof WUPBaseElement[] = [];
     // autoBind functions (recursive until HMTLElement)
     const bindAll = (t: unknown) => {
       const p = Object.getPrototypeOf(t);
       if (p !== HTMLElement.prototype) {
+        protos.push(p.constructor);
         Object.getOwnPropertyNames(p).forEach((s) => {
           const k = s as keyof Omit<WUPBaseElement, keyof HTMLElement | "$isReady">;
           const desc = Object.getOwnPropertyDescriptor(p, s) as PropertyDescriptor;
@@ -98,7 +101,25 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     });
 
     // setup styles
-    this.#ctr.appendStyle(this.tagName, Object.getPrototypeOf(this).constructor.style as string);
+    if (!appendedStyles.has(this.tagName)) {
+      appendedStyles.add(this.tagName);
+
+      protos.reverse().forEach((p) => {
+        // append styleRoot
+        if (!appendedStyles.has(p.name)) {
+          appendedStyles.add(p.name);
+          if (Object.hasOwn(p, "styleRoot")) {
+            const s = p.styleRoot;
+            s && styleElement.append(s);
+          }
+        }
+        // append style by tagName
+        if (Object.hasOwn(p, "style")) {
+          const c = p.style;
+          c && styleElement.append(c.replace(/:host/g, `${this.tagName}`));
+        }
+      });
+    }
   }
 
   /* rawOptions ($options is observed) */

@@ -87,13 +87,16 @@ export default class WUPPopupElement<
     hoverHideTimeout: 500,
   };
 
-  /** StyleContent related to component */
-  static get style(): string {
+  static get styleRoot(): string {
     return `
       :root {
         --popup-shadow-size: 4px;
         --popup-anim: 300ms;
-      }
+      }`;
+  }
+
+  static get style(): string {
+    return `
       :host {
         z-index: 90000;
         display: none;

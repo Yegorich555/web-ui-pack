@@ -45,10 +45,56 @@ export default class WUPTextControl<ValueType = string> extends WUPBaseControl<
   /** StyleContent related to component */
   static get style(): string {
     return `
-      :host {
-
-      }
-     `;
+        :host {
+          cursor: text;
+        }
+        :host label > span {
+          width: 100%;
+          position: relative;
+        }
+        :host input {
+          width: 100%;
+          box-sizing: border-box;
+          font: inherit;
+          margin: 0;
+          padding: var(--ctrl-padding);
+          padding-left: 0;
+          padding-right: 0;
+          border: none;
+          background: none;
+          outline: none;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
+        }
+        :host input + * {
+          display: block;
+          position: absolute;
+          top: 50%;
+          left: 0;
+          padding: 0;
+          margin: 0;
+          box-sizing: border-box;
+          max-width: 100%;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
+          transform-origin: top left;
+          transform: translateY(-50%);
+          font-weight: normal;
+          text-decoration: none;
+        }
+        @media not all and (prefers-reduced-motion) {
+          :host input + * {
+            transition: top var(--anim), transform var(--anim), color var(--anim);
+          }
+        }
+        :host input:focus + *,
+        :host input:not(:placeholder-shown) + *,
+        :host legend {
+          top: 0.2em;
+          transform: scale(0.9);
+        }`;
   }
 
   /** Get rawValue for input based on argument [value] */

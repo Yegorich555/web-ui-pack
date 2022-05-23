@@ -10,7 +10,6 @@ export default function ControlsView() {
     <Page header="Controls" link="#textControl">
       <form autoComplete="off">
         <wup-text-ctrl
-          class={`${styles.common} ${styles.textControl}`}
           ref={(el) => {
             if (el) {
               el.$options.label =
@@ -20,12 +19,11 @@ export default function ControlsView() {
                 max: 10,
                 min: (v) => v.length < 2 && "This is custom error",
               };
-              // el.$showError("Very huge big message Very huge big message Very huge big message Very huge big message");
+              el.$showError("Very huge big message Very huge big message Very huge big message Very huge big message");
             }
           }}
         />
         <wup-text-ctrl
-          class={`${styles.common} ${styles.textControl}`}
           ref={(el) => {
             if (el) {
               el.$options.label = "TextControl - readonly";
@@ -35,7 +33,6 @@ export default function ControlsView() {
           }}
         />
         <wup-text-ctrl
-          class={`${styles.common} ${styles.textControl}`}
           ref={(el) => {
             if (el) {
               el.$options.label = "TextControl - disabled";
@@ -44,26 +41,6 @@ export default function ControlsView() {
             }
           }}
         />
-
-        <div className={`${styles.common} ${styles.textControl}`} invalid="true">
-          <label onMouseDown={(e) => !(e.target instanceof HTMLInputElement) && e.preventDefault()}>
-            <span>
-              <input
-                type="text"
-                placeholder=" "
-                // defaultValue="very long long very long long long long long value dsdsadasdsdas"
-                ref={(el) => {
-                  if (el) {
-                    el.setCustomValidity("Invalid value");
-                    el.required = true;
-                  }
-                }}
-              />
-              <strong>TextControl</strong>
-            </span>
-            {/* extra-span requires to properly use with after before */}
-          </label>
-        </div>
 
         <div className={`${styles.common} ${styles.slidebox}`}>
           <label onMouseDown={(e) => e.preventDefault()}>
@@ -114,7 +91,6 @@ export default function ControlsView() {
         </div>
 
         <wup-select
-          class={`${styles.common} ${styles.textControl} ${styles.combobox}`}
           ref={(el) => {
             if (el) {
               let ir = 10;
@@ -145,35 +121,6 @@ export default function ControlsView() {
             }
           }}
         />
-
-        <div className={`${styles.common} ${styles.textControl} ${styles.combobox}`} opened="true">
-          <label onMouseDown={(e) => !(e.target instanceof HTMLInputElement) && e.preventDefault()}>
-            <span>
-              <input
-                role="combobox"
-                aria-expanded={false}
-                aria-haspopup="listbox"
-                aria-owns="menuId"
-                aria-controls="menuId"
-                aria-autocomplete="list"
-                aria-activedescendant="itemId"
-                placeholder=" "
-                // aria-invalid="true"
-                aria-errormessage="err1"
-              />
-              <strong>
-                ComboControl ComboControl ComboControl ComboControl ComboControl ComboControl ComboControl ComboControl
-                ComboControl
-              </strong>
-            </span>
-          </label>
-          {/* <ul id="menuId" role="listbox">
-            <li role="option" aria-selected={false} id="itemId">
-              Puns
-            </li>
-          </ul> */}
-          {/* <div id="err1">This field is required</div> */}
-        </div>
 
         <div className={`${styles.common} ${styles.textControl} ${styles.combobox} ${styles.multiselect}`}>
           <label onMouseDown={(e) => !(e.target instanceof HTMLInputElement) && e.preventDefault()}>

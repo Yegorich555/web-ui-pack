@@ -147,13 +147,122 @@ export default abstract class WUPBaseControl<
     return ["label", "name", "autoFillName", "disabled", "readOnly"];
   }
 
-  /** StyleContent related to component */
+  static get styleRoot(): string {
+    return `:root {
+        --ctrl-padding: 1.4em 1em 0.6em 1em;
+        --ctrl-focus: #00778d;
+        --ctrl-focus-label: #00778d;
+        --ctrl-selected: var(--ctrl-focus-label);
+        --ctrl-label: #5e5e5e;
+        --cltr-icon: var(--ctrl-label);
+        --ctrl-back: #fff;
+        --ctrl-border-radius: var(--border-radius, 6px);
+        --ctrl-err: #ad0000;
+        --ctrl-err-back: #fff4fa;
+        --ctrl-invalid-border: red;
+        --wup-icon-remove: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M674.515 93.949a45.925 45.925 0 0 0-65.022 0L384.001 318.981 158.509 93.487a45.928 45.928 0 0 0-65.022 0c-17.984 17.984-17.984 47.034 0 65.018l225.492 225.494L93.487 609.491c-17.984 17.984-17.984 47.034 0 65.018s47.034 17.984 65.018 0l225.492-225.492 225.492 225.492c17.984 17.984 47.034 17.984 65.018 0s17.984-47.034 0-65.018L449.015 383.999l225.492-225.494c17.521-17.521 17.521-47.034 0-64.559z'/%3E%3C/svg%3E");
+      }
+      `;
+  }
+
   static get style(): string {
+    // WARN: 'contain:style' is tricky rule
     return `
       :host {
-
+        contain: style;
+        display: block;
+        margin-bottom: 20px;
+        position: relative;
+        border-radius: var(--ctrl-border-radius);
+        background: var(--ctrl-back);
+        cursor: pointer;
       }
-     `;
+      :host strong,
+      :host legend {
+        color: var(--ctrl-label);
+      }
+      :host:focus-within,
+      :host:focus-within > [menu] {
+        outline: 1px solid var(--ctrl-focus);
+      }
+      :host:focus-within strong,
+      :host:focus-within legend,
+      :host input:focus + * {
+        color: var(--ctrl-focus-label);
+      }
+      :host[disabled] {
+        opacity: 0.8;
+        cursor: not-allowed;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      :host[disabled] > * {
+        pointer-events: none;
+      }
+      :host[invalid],
+      :host[invalid] > [menu] {
+        box-shadow: 0 0 3px 0 var(--ctrl-invalid-border);
+        outline-color: var(--ctrl-invalid-border);
+      }
+      @media (hover: hover) {
+        :host:hover,
+        :host:hover > [menu] {
+          box-shadow: 0 0 3px 1px var(--ctrl-focus);
+        }
+        :host[invalid]:hover,
+        :host[invalid]:hover > [menu] {
+          box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+        }
+      }
+      :host label {
+        display: flex;
+        align-items: center;
+        box-sizing: border-box;
+        font: inherit;
+        cursor: inherit;
+        padding: var(--ctrl-padding);
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+      :host label::before,
+      :host label::after {
+        box-sizing: content-box;
+        cursor: pointer;
+        flex: 0 0 auto;
+        padding: var(--ctrl-padding);
+        padding-left: 0;
+        padding-right: 0;
+        align-self: stretch;
+      }
+      :host label::before {
+        margin-right: 0.5em;
+      }
+      :host label::after {
+        margin-left: 0.5em;
+      }
+      :host input {
+        padding: 0;
+        margin: 0;
+        cursor: inherit;
+      }
+      :host input + * {
+        cursor: inherit;
+      }
+      :host input:required + *::after,
+      :host fieldset[aria-required] > legend::after {
+        content: "*";
+        font-size: larger;
+        font-weight: bolder;
+        line-height: 0;
+      }
+      :host [error] {
+        cursor: pointer;
+        font-size: small;
+        color: var(--ctrl-err);
+        background: var(--ctrl-err-back);
+        margin: -4px 0;
+      }
+    `;
   }
 
   /** Default function to compare values/changes;
@@ -163,9 +272,7 @@ export default abstract class WUPBaseControl<
     return isEqual(v1, v2);
   }
 
-  /** Default function to compare values/changes;
-   *  Redefine it or define valueOf for values; By default values compared by valueOf if it's possible
-   */
+  /** Provide logic to check if control is empty (by comparison with value) */
   static isEmpty(v: unknown): boolean {
     return v === "" || v === undefined;
   }

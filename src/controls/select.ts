@@ -56,13 +56,80 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPSelectControl;
 
-  /** StyleContent related to component */
+  static get styleRoot(): string {
+    return `:root {
+              --ctrl-combo-icon: var(--cltr-icon);
+              --ctrl-combo-icon-size: 1em;
+              --ctrl-combo-icon-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m16.078 258.214 329.139 329.139c21.449 21.449 56.174 21.449 77.567 0l329.139-329.139c21.449-21.449 21.449-56.174 0-77.567s-56.174-21.449-77.567 0L384 471.003 93.644 180.647c-21.449-21.449-56.173-21.449-77.567 0s-21.449 56.173 0 77.567z'/%3E%3C/svg%3E");
+              --ctrl-combo-selected: inherit;
+              --ctrl-combo-selected-back: #d9f7fd;
+            }`;
+  }
+
   static get style(): string {
     return `
       :host {
-
+        cursor: pointer;
       }
-     `;
+      :host input:not(:placeholder-shown) {
+        cursor: text;
+      }
+      :host label::after {
+        content: "";
+        width: var(--ctrl-combo-icon-size);
+        min-height: var(--ctrl-combo-icon-size);
+
+        background-color: var(--ctrl-combo-icon);
+        -webkit-mask-image: var(--ctrl-combo-icon-img);
+        mask-image: var(--ctrl-combo-icon-img);
+        -webkit-mask-size: var(--ctrl-combo-icon-size);
+        mask-size: var(--ctrl-combo-icon-size);
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+      }
+      :host[opened] label::after {
+        transform: rotate(180deg);
+      }
+      @media not all and (prefers-reduced-motion) {
+        :host label::after {
+          transition: transform var(--anim);
+        }
+      }
+      @media (hover: hover) {
+        :host:hover {
+          label::after {
+            background-color: var(--ctrl-focus);
+          }
+        }
+      }
+      :host [menu] {
+        padding: 0;
+        overflow: hidden;
+      }
+      :host [menu] ul {
+        max-height: 300px;
+        overflow: auto;
+      }
+      :host [menu] ul {
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+        cursor: pointer;
+      }
+      :host [menu] li {
+        padding: 1em;
+      }
+      :host [menu] li:hover,
+      :host [menu] li[aria-selected="true"] {
+        color: var(--ctrl-combo-selected);
+        background: var(--ctrl-combo-selected-back);
+      }
+      :host [menu] li[focused] {
+        box-shadow: inset 0 0 4px 0 var(--ctrl-focus);
+        border-radius: var(--ctrl-border-radius);
+      }`;
   }
 
   /** Text for listbox when no items are displayed */
@@ -197,6 +264,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
                   : WUPSelectControlTypes.ShowCases.onFocus
               ),
         (s) =>
+          // todo click on label>strong doesn't work
           s === WUPPopup.HideCases.onFocusOut ||
           s === WUPPopup.HideCases.onOutsideClick ||
           s === WUPPopup.HideCases.onTargetClick ||
