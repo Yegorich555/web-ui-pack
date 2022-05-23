@@ -409,6 +409,7 @@ export default abstract class WUPBaseControl<
     if (this._opts.pressEsc) {
       let prevValue = this.$value;
       this.disposeLstInit.push(
+        // todo move to globals
         onEvent(this, "keydown", (e) => {
           if (e.key !== "Escape") {
             return;
@@ -438,6 +439,7 @@ export default abstract class WUPBaseControl<
     this._opts.autoFillName = this.getAttribute("autoFillName") ?? this._opts.autoFillName;
     this._opts.disabled = this.getAttribute("disabled") != null ? true : this._opts.disabled;
     this._opts.readOnly = this.getAttribute("readOnly") != null ? true : this._opts.readOnly;
+    this._opts.autoFocus = this.getAttribute("autoFocus") != null ? true : this._opts.autoFocus;
 
     this.$refTitle.textContent = this._opts.label || null;
     const r = this.$refInput;
@@ -461,9 +463,6 @@ export default abstract class WUPBaseControl<
       r.required = required ? (required as any) !== false : false;
       r.disabled = this._opts.disabled as boolean;
       r.readOnly = this._opts.readOnly as boolean;
-      // todo autofocus only when appended to layout ???
-      // todo refactor this to manual autofocus ???
-      r.autofocus = this.getAttribute("autoFocus") != null;
     }
 
     this.#isStopAttrListen = true;
@@ -498,6 +497,7 @@ export default abstract class WUPBaseControl<
     if (this.#isFirstConn) {
       this.#isFirstConn = false;
       this.renderControl();
+      (this.autofocus || this.$options.autoFocus) && setTimeout(this.focus); // timeout requires to wait for apply options
     }
   }
 
@@ -660,5 +660,3 @@ export default abstract class WUPBaseControl<
     this.disposeLstInit.length = 0;
   }
 }
-
-// todo option.clearBtn: boolean

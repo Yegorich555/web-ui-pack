@@ -214,3 +214,5 @@ el.$options.validations = {
   extra: (v) => "test Me",
 };
 // el.$validate();
+
+// todo option.clearBtn: boolean
