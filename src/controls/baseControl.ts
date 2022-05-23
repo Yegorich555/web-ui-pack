@@ -1,7 +1,6 @@
 /* eslint-disable no-use-before-define */
 import WUPBaseElement, { JSXCustomProps, WUP } from "../baseElement";
 import isEqual from "../helpers/isEqual";
-import onEvent from "../helpers/onEvent";
 import onFocusLostEv from "../helpers/onFocusLost";
 // eslint-disable-next-line import/named
 import WUPPopupElement, { ShowCases } from "../popup/popupElement";
@@ -406,34 +405,6 @@ export default abstract class WUPBaseControl<
       );
     }
 
-    if (this._opts.pressEsc) {
-      let prevValue = this.$value;
-      this.disposeLstInit.push(
-        // todo move to globals
-        onEvent(this, "keydown", (e) => {
-          if (e.key !== "Escape") {
-            return;
-          }
-
-          const was = this.#value;
-
-          const isEscClear = this._opts.pressEsc & PressEscActions.clear;
-          if (this._opts.pressEsc & PressEscActions.resetToInit) {
-            if (this.$isChanged) {
-              this.#isDirty = false;
-              this.setValue(this.$initValue);
-              prevValue = was;
-              return;
-            }
-          }
-          if (isEscClear) {
-            this.setValue(this.$isEmpty ? prevValue : undefined);
-          }
-          prevValue = was;
-        })
-      );
-    }
-
     this._opts.label = this.getAttribute("label") ?? this._opts.label;
     this._opts.name = this.getAttribute("name") ?? this._opts.name;
     this._opts.autoFillName = this.getAttribute("autoFillName") ?? this._opts.autoFillName;
@@ -484,6 +455,8 @@ export default abstract class WUPBaseControl<
       "mousedown", // to prevent blur-focus effect for input by label click
       (e) => !(e.target instanceof HTMLInputElement) && e.preventDefault()
     );
+
+    this.appendEvent(this, "keydown", this.gotKeyDown);
 
     if (this._opts.validationCase & ValidationCases.onInit) {
       !this.$isEmpty && this.goValidate(WUPBaseControlTypes.ValidateFromCases.onInit);
@@ -630,6 +603,26 @@ export default abstract class WUPBaseControl<
       this.goValidate(WUPBaseControlTypes.ValidateFromCases.onInput);
     }
     this.fireEvent("$change", { cancelable: false });
+  }
+
+  #prevValue = this.#value;
+  /** Fired when user pressed key */
+  protected gotKeyDown(e: KeyboardEvent) {
+    if (this._opts.pressEsc && e.key === "Escape") {
+      const was = this.#value;
+
+      const isEscClear = this._opts.pressEsc & PressEscActions.clear;
+      if (this._opts.pressEsc & PressEscActions.resetToInit) {
+        if (this.$isChanged) {
+          this.#isDirty = false;
+          this.setValue(this.$initValue);
+          this.#prevValue = was;
+          return;
+        }
+      }
+      isEscClear && this.setValue(this.$isEmpty ? this.#prevValue : undefined);
+      this.#prevValue = was;
+    }
   }
 
   protected override gotOptionsChanged(e: WUP.OptionEvent) {

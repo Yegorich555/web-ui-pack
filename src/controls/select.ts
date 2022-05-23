@@ -426,9 +426,6 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
       i.setAttribute("aria-controls", menuId);
 
       this.#disposeMenuEvents = [];
-      const r2 = this.appendEvent(this, "keydown", this.gotKeyDown);
-      this.#disposeMenuEvents!.push(r2);
-
       // remove popup only by focusOut to optimize resources
       const r = onFocusLostEv(
         this,
@@ -441,7 +438,6 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
           }),
         { debounceMs: this._opts.focusDebounceMs }
       );
-
       this.#disposeMenuEvents!.push(r);
 
       await this.renderMenu(p, menuId);
@@ -541,9 +537,10 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     this._menuItems!.selected = index;
   }
 
-  /** Fired when use presses key */
   protected async gotKeyDown(e: KeyboardEvent) {
-    if (e.altKey || e.shiftKey || e.ctrlKey) {
+    super.gotKeyDown(e);
+
+    if (!this.#isOpen || e.altKey || e.shiftKey || e.ctrlKey) {
       return;
     }
 
