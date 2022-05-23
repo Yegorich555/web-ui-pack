@@ -199,6 +199,7 @@ declare global {
   }
 }
 
+// todo remove after tests
 const el = document.createElement(tagName);
 el.$options.name = "testMe";
 el.$options.validations = {

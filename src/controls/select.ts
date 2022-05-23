@@ -1,4 +1,5 @@
 /* eslint-disable no-use-before-define */
+import { WUP } from "../baseElement";
 import onEvent from "../helpers/onEvent";
 import onFocusLostEv from "../helpers/onFocusLost";
 // eslint-disable-next-line import/named
@@ -23,6 +24,7 @@ export namespace WUPSelectControlTypes {
     onFocusLost,
     OnPressEsc,
     OnPressEnter,
+    OnOptionsChange,
   }
 
   export type MenuItem<T> = { text: string; value: T };
@@ -55,6 +57,8 @@ export namespace WUPSelectControlTypes {
 export default class WUPSelectControl<ValueType = any> extends WUPTextControl<ValueType> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPSelectControl;
+
+  static observedOptions = (super.observedOptions as Set<keyof WUPSelectControlTypes.Options>).add("items") as any;
 
   static get styleRoot(): string {
     return `:root {
@@ -603,6 +607,18 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     this.$refPopup!.$refresh();
   }
 
+  protected override async gotOptionsChanged(e: WUP.OptionEvent) {
+    const ev = e as unknown as WUP.OptionEvent<WUPSelectControlTypes.Options>;
+    if (ev.props.includes("items")) {
+      this.removePopup();
+      this._cachedItems = undefined;
+      if (ev.props.length === 1) {
+        return; // skip re-init if only $options.items is changed
+      }
+    }
+    super.gotOptionsChanged(e);
+  }
+
   protected removePopup() {
     this.$refPopup?.remove();
     this.$refPopup = undefined;
@@ -633,11 +649,15 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUPBaseControlTypes.JSXControlProps<WUPSelectControl>;
+      [tagName]: WUPBaseControlTypes.JSXControlProps<WUPSelectControl> & {
+        /** @readonly Use [opened] for styling */
+        readonly opened?: boolean;
+      };
     }
   }
 }
 
+// todo remove after tests
 const el = document.createElement(tagName);
 el.$options.name = "testMe";
 el.$options.validations = {

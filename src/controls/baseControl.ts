@@ -59,6 +59,8 @@ export namespace WUPBaseControlTypes {
       name?: string;
       /** Name to autocomplete by browser; by default it's equal to [name]; to disable autocomplete point empty string */
       autoFillName?: string;
+      /** Focus element when it's appended to layout */
+      autoFocus?: boolean;
       /** Disallow edit/copy value; adds attr [disabled] for styling */
       disabled?: boolean;
       /** Disallow copy value; adds attr [readonly] for styling */
@@ -100,11 +102,11 @@ export namespace WUPBaseControlTypes {
     /** @deprecated Name to autocomplete by browser; by default it's equal to [name]; to disable autocomplete point empty string */
     autoFillName?: string;
 
-    /** Disallow edit/copy value */
+    /** @deprecated Disallow edit/copy value. Use [disabled] for styling */
     disabled?: boolean;
-    /** Disallow edit value */
+    /** @deprecated Disallow edit value */
     readOnly?: boolean;
-    /** Focus on init */
+    /** @deprecated Focus on init */
     autoFocus?: boolean;
 
     /** @readonly Use [invalid] for styling */
@@ -132,7 +134,6 @@ export default abstract class WUPBaseControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseControl;
 
-  // todo check it & adjust
   /** Options that need to watch for changes; use gotOptionsChanged() */
   static observedOptions = new Set<keyof WUPBaseControlTypes.Options>([
     "label",
@@ -144,7 +145,7 @@ export default abstract class WUPBaseControl<
 
   /* Array of attribute names to listen for changes */
   static get observedAttributes(): Array<keyof WUPBaseControlTypes.Options> {
-    return ["label", "name", "autoFillName", "disabled", "readOnly"];
+    return ["label", "name", "autoFillName", "disabled", "readOnly", "autoFocus"];
   }
 
   static get styleRoot(): string {
@@ -458,6 +459,7 @@ export default abstract class WUPBaseControl<
       r.required = required ? (required as any) !== false : false;
       r.disabled = this._opts.disabled as boolean;
       r.readOnly = this._opts.readOnly as boolean;
+      // todo autofocus only when appended to layout ???
       // todo refactor this to manual autofocus ???
       r.autofocus = this.getAttribute("autoFocus") != null;
     }
