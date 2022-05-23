@@ -3,7 +3,7 @@ import onFocusGot from "../helpers/onFocusGot";
 import WUPBaseControl, { WUPBaseControlTypes } from "./baseControl";
 
 export namespace WUPTextControlTypes {
-  export type ExtraOptions = {
+  type Def = {
     /** Debounce time to wait for user finishes typing to start validate and provide $change event
      * @defaultValue 0; */
     debounceMs?: number;
@@ -11,6 +11,9 @@ export namespace WUPTextControlTypes {
      * @defaultValue true */
     selectOnFocus: boolean;
   };
+
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  type Opt = {};
 
   export type ValidationMap = WUPBaseControlTypes.ValidationMap & {
     min: number;
@@ -20,10 +23,12 @@ export namespace WUPTextControlTypes {
   export type Generics<
     ValueType = string,
     ValidationKeys extends WUPBaseControlTypes.ValidationMap = ValidationMap,
-    Extra = ExtraOptions
-  > = WUPBaseControlTypes.Generics<ValueType, ValidationKeys, Extra & ExtraOptions>;
+    Defaults = Def,
+    Options = Opt
+  > = WUPBaseControlTypes.Generics<ValueType, ValidationKeys, Defaults & Def, Options & Opt>;
 
   export type Validation<T = string> = Generics<T>["Validation"];
+  export type Defaults<T = string> = Generics<T>["Defaults"];
   export type Options<T = string> = Generics<T>["Options"];
 }
 /**
@@ -35,10 +40,10 @@ export namespace WUPTextControlTypes {
  *   </span>
  * </label>
  */
-export default class WUPTextControl<ValueType = string> extends WUPBaseControl<
-  ValueType,
-  WUPBaseControlTypes.EventMap
-> {
+export default class WUPTextControl<
+  ValueType = string,
+  EventMap extends WUPBaseControlTypes.EventMap = WUPBaseControlTypes.EventMap
+> extends WUPBaseControl<ValueType, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextControl;
 
@@ -104,7 +109,7 @@ export default class WUPTextControl<ValueType = string> extends WUPBaseControl<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUPTextControlTypes.Options = {
+  static $defaults: WUPTextControlTypes.Defaults = {
     ...WUPBaseControl.$defaults,
     selectOnFocus: true,
     validationRules: {
@@ -114,7 +119,7 @@ export default class WUPTextControl<ValueType = string> extends WUPBaseControl<
     },
   };
 
-  $options: Omit<WUPTextControlTypes.Options<ValueType>, "validationRules"> = {
+  $options: WUPTextControlTypes.Options<ValueType> = {
     ...this.#ctr.$defaults,
     // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory

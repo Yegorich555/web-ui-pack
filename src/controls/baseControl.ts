@@ -49,10 +49,30 @@ export namespace WUPBaseControlTypes {
   };
 
   // eslint-disable-next-line @typescript-eslint/ban-types
-  export type Generics<ValueType, ValidationKeys extends ValidationMap, ExtraOptions = {}> = {
+  export type Generics<ValueType, ValidationKeys extends ValidationMap, ExtraDefaults = {}, ExtraOptions = {}> = {
     Validation: (value: ValueType, setValue: ValidationKeys[keyof ValidationKeys]) => false | string;
     CustomValidation: (value: ValueType) => false | string;
-    Options: {
+    Defaults: {
+      /** Rules defined for control */
+      validationRules: {
+        [K in keyof ValidationKeys]?: (value: ValueType, setValue: ValidationKeys[K]) => false | string;
+      };
+      /** When to validate control and show error. Validation by onSubmit impossible to disable
+       *  @defaultValue onChangeSmart | onFocusLost | onSubmit
+       */
+      validationCase: ValidationCases;
+      /** Wait for pointed time before show error (it's sumarized with $options.debounce); WARN: hide error without debounce
+       *  @defaultValue 500
+       */
+      validityDebounceMs: number;
+      /** Debounce option for onFocustLost event (for validationCases.onFocusLost); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost;
+       * @defaultValue 100ms */
+      focusDebounceMs?: number;
+      /** Behavior that expected on press key 'Escape'
+       * @defaultValue clear | resetToInit (both means: resetToInit if exists, 2nd time - clear etc.) */
+      pressEsc: PressEscActions;
+    } & ExtraDefaults;
+    Options: Omit<Generics<ValueType, ValidationMap, ExtraDefaults>["Defaults"], "validationRules"> & {
       /** Title/label for control */
       label?: string;
       /** Property key of model; For name 'firstName' >> model['firstName'] */
@@ -65,33 +85,16 @@ export namespace WUPBaseControlTypes {
       disabled?: boolean;
       /** Disallow copy value; adds attr [readonly] for styling */
       readOnly?: boolean;
-      /** When to validate control and show error. Validation by onSubmit impossible to disable
-       *  @defaultValue onChangeSmart | onFocusLost | onSubmit
-       */
-      validationCase: ValidationCases;
-      /** Rules defined in control */
-      validationRules: {
-        [K in keyof ValidationKeys]?: (value: ValueType, setValue: ValidationKeys[K]) => false | string;
-      };
       /** Rules enabled for current control */
       validations?:
         | {
             [K in keyof ValidationKeys]?: ValidationKeys[K] | ((value: ValueType) => false | string);
           }
         | { [k: string]: (value: ValueType) => false | string };
-      /** Wait for pointed time before show error (it's sumarized with $options.debounce); WARN: hide error without debounce
-       *  @defaultValue 500
-       */
-      validityDebounceMs: number;
-      /** Debounce option for onFocustLost event (for validationCases.onFocusLost); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost;
-       * @defaultValue 100ms */
-      focusDebounceMs?: number;
-      /** Behavior that expected on press key 'Escape'
-       * @defaultValue clear | resetToInit (both means: resetToInit if exists, 2nd time - clear etc.) */
-      pressEsc: PressEscActions;
     } & ExtraOptions;
   };
 
+  export type Defaults<T = string> = Generics<T, ValidationMap>["Defaults"];
   export type Options<T = string> = Generics<T, ValidationMap>["Options"];
 
   export type JSXControlProps<T extends WUPBaseControl> = JSXCustomProps<T> & {
@@ -128,8 +131,7 @@ export namespace WUPBaseControlTypes {
 
 export default abstract class WUPBaseControl<
   ValueType = any,
-  Events extends WUPBaseControlTypes.EventMap = WUPBaseControlTypes.EventMap,
-  OptionsType extends WUPBaseControlTypes.Options<ValueType> = WUPBaseControlTypes.Options<ValueType>
+  Events extends WUPBaseControlTypes.EventMap = WUPBaseControlTypes.EventMap
 > extends WUPBaseElement<Events> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseControl;
@@ -279,7 +281,7 @@ export default abstract class WUPBaseControl<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUPBaseControlTypes.Options = {
+  static $defaults: WUPBaseControlTypes.Defaults = {
     pressEsc: PressEscActions.clear | PressEscActions.resetToInit,
     validityDebounceMs: 500,
     validationCase: ValidationCases.onChangeSmart | ValidationCases.onFocusLost,
@@ -288,7 +290,7 @@ export default abstract class WUPBaseControl<
     },
   };
 
-  $options: Omit<OptionsType, "validationRules"> = {
+  $options: WUPBaseControlTypes.Options<ValueType> = {
     ...this.#ctr.$defaults,
     // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory
@@ -522,7 +524,8 @@ export default abstract class WUPBaseControl<
         const rules = this.#ctr.$defaults.validationRules;
         const r = rules[k as "required"];
         if (!r) {
-          throw new Error(`${this.tagName} '${this.#ctr.$defaults.name}'. Validation rule [${vl}] is not found`);
+          const n = this._opts.name ? `.[${this._opts.name}]` : "";
+          throw new Error(`${this.tagName}${n}. Validation rule [${vl}] is not found`);
         }
         err = r(v, vl as boolean);
       }

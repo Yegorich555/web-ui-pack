@@ -33,12 +33,15 @@ export namespace WUPSelectControlTypes {
   export type MenuItemAny<T> = MenuItem<T> | MenuItemFn<T>;
   export type MenuItems<T> = MenuItem<T>[] | MenuItemFn<T>[];
 
-  export type ExtraOptions<T> = {
-    /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data! */
-    items: MenuItems<T> | (() => MenuItems<T> | Promise<MenuItems<T>>);
-    /** Wait for pointed time before show error (it's sumarized with $options.debounce); WARN: hide error without debounce
+  type Defs = {
+    /** Wait for pointed time before show-error (sumarized with $options.debounce); WARN: hide-error without debounce
      *  @defaultValue 0 */
     validityDebounceMs?: number;
+  };
+
+  type Opt<T> = {
+    /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data! */
+    items: MenuItems<T> | (() => MenuItems<T> | Promise<MenuItems<T>>);
     /** Set true to make input not editable but allow to user select items via popup-menu (ordinary dropdown mode) */
     readOnlyInput?: boolean;
   };
@@ -47,10 +50,12 @@ export namespace WUPSelectControlTypes {
   export type Generics<
     ValueType = any,
     ValidationKeys extends WUPBaseControlTypes.ValidationMap = ValidationMap,
-    Extra = ExtraOptions<ValueType>
-  > = WUPTextControlTypes.Generics<ValueType, ValidationKeys, Extra & ExtraOptions<ValueType>>;
+    Defaults = Defs,
+    Options = Opt<ValueType>
+  > = WUPTextControlTypes.Generics<ValueType, ValidationKeys, Defaults & Defs, Options & Opt<ValueType>>;
 
   export type Validation<T = any> = Generics<T>["Validation"];
+  export type Defaults<T = any> = Generics<T>["Defaults"];
   export type Options<T = any> = Generics<T>["Options"];
 }
 
@@ -183,7 +188,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     const r = ctr.getMenuItems<T, WUPSelectControl<T>>(ctrl).then((items) => {
       const i = (items as WUPSelectControlTypes.MenuItemAny<any>[]).findIndex((o) => ctr.isEqual(o.value, v));
       if (i === -1) {
-        console.error(`${ctrl.tagName} '${ctr.$defaults.name}'. Not found in items`, { items, value: v });
+        console.error(`${ctrl.tagName}.[${ctrl._opts.name}]. Not found in items`, { items, value: v });
         return `Error: not found for ${v}` != null ? (v as any).toString() : "";
       }
       const item = items[i];
@@ -199,15 +204,15 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     return r;
   }
 
-  static $defaults: WUPSelectControlTypes.Options = {
+  static $defaults: WUPSelectControlTypes.Defaults = {
     ...WUPTextControl.$defaults,
-    items: [],
     // ignore rules from textControl because it doesn't fit
     validationRules: WUPBaseControl.$defaults.validationRules,
   };
 
-  $options: Omit<WUPSelectControlTypes.Options<ValueType>, "validationRules"> = {
+  $options: WUPSelectControlTypes.Options<ValueType> = {
     ...this.#ctr.$defaults,
+    items: [],
     // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory
   };
