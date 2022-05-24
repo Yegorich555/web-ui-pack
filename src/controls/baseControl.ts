@@ -293,9 +293,9 @@ export default abstract class WUPBaseControl<
   }
 
   set $value(v: ValueType | undefined) {
-    const was = this.$isDirty;
+    const was = this.#isDirty;
     this.setValue(v);
-    this.$isDirty = was;
+    this.#isDirty = was;
   }
 
   #initValue?: ValueType;
