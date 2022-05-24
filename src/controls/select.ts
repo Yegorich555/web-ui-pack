@@ -275,7 +275,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
                   ? WUPSelectControlTypes.HideCases.onFocusLost
                   : WUPSelectControlTypes.HideCases.onClick
               )
-            : true
+            : false
       );
       this.#popupRefs = { hide: refs.hide, show: refs.show, dispose: refs.onRemoveRef };
     } else {
@@ -529,8 +529,10 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     this._menuItems!.selected = index;
   }
 
-  protected async gotKeyDown(e: KeyboardEvent) {
-    super.gotKeyDown(e);
+  protected override async gotKeyDown(e: KeyboardEvent) {
+    // don't allow to process Esc-key when menu is opened
+    const isEscPrevent = this.#isOpen && e.key === "Escape";
+    !isEscPrevent && super.gotKeyDown(e);
 
     if (!this.#isOpen || e.altKey || e.shiftKey || e.ctrlKey) {
       return;
@@ -665,3 +667,4 @@ el.$options.validations = {
 };
 
 // todo somehow impossible to close menu by outside click (sometimes)
+// to reproduce focus > pressEsc > typeText > try close by outside click
