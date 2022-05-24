@@ -616,7 +616,7 @@ export default abstract class WUPBaseControl<
         return;
       }
     }
-    isEscClear && this.setValue(this.$isEmpty ? this.#prevValue : undefined);
+    isEscClear && this.setValue(this.$isEmpty ? this.#prevValue : undefined, canValidate);
     this.#prevValue = was;
   }
 

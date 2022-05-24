@@ -252,6 +252,7 @@ export default class WUPTextControl<
       bc.setAttribute("aria-hidden", "true");
       bc.tabIndex = -1;
       const r = onEvent(bc, "click", (e) => {
+        e.stopPropagation(); // prevent from affect on parent
         e.preventDefault(); // prevent from submit
         this.clearValue();
       });

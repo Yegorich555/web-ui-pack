@@ -601,6 +601,10 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     this.$refPopup!.$refresh();
   }
 
+  protected override clearValue(canValidate = true) {
+    super.clearValue(!this.#isOpen && canValidate);
+  }
+
   protected override async gotOptionsChanged(e: WUP.OptionEvent) {
     const ev = e as unknown as WUP.OptionEvent<WUPSelectControlTypes.Options>;
     if (ev.props.includes("items")) {
@@ -660,4 +664,4 @@ el.$options.validations = {
   extra: (v) => "test Me",
 };
 
-// todo btn-clear.click deletes data, shows error & opens popup - is it correct ???
+// todo somehow impossible to close menu by outside click (sometimes)
