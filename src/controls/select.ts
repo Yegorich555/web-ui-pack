@@ -659,3 +659,5 @@ el.$options.validations = {
   min: (v) => v.length > 500 && "This is error",
   extra: (v) => "test Me",
 };
+
+// todo btn-clear.click deletes data, shows error & opens popup - is it correct ???

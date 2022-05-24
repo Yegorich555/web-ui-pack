@@ -245,7 +245,6 @@ export default class WUPTextControl<
         this.disposeLstInit.push(onFocusGot(this, () => this.$refInput.select()));
     }); // timeout requires because selectControl can setup readOnly after super.gotReinit
 
-    // todo should we show error after clearing ?
     if (this._opts.hasButtonClear && !this.$refBtnClear) {
       const bc = this.$refLabel.appendChild(document.createElement("button"));
       this.$refBtnClear = bc;
@@ -254,7 +253,7 @@ export default class WUPTextControl<
       bc.tabIndex = -1;
       const r = onEvent(bc, "click", (e) => {
         e.preventDefault(); // prevent from submit
-        this.setValue(undefined);
+        this.clearValue();
       });
 
       this.disposeLstInit.push(r);
@@ -281,8 +280,8 @@ export default class WUPTextControl<
     }
   }
 
-  protected override setValue(v: ValueType | undefined) {
-    super.setValue(v);
+  protected override setValue(v: ValueType | undefined, canValidate = true) {
+    super.setValue(v, canValidate);
     this.setInputValue(v);
   }
 
@@ -323,5 +322,3 @@ el.$options.validations = {
   extra: (v) => "test Me",
 };
 // el.$validate();
-
-// todo btn-clear.click deletes data, shows error & opens popup - is it correct ???

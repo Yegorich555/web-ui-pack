@@ -19,8 +19,8 @@ export const enum ValidationCases {
   onInit = 1 << 3,
 }
 
-/** Options for userKeyPress event */
-export const enum PressEscActions {
+/** Actions when user pressed ESC or button-clear */
+export const enum ClearActions {
   /** Disable action */
   none = 0,
   /** Make control is empty; pressing Esc again rollback action (it helps to avoid accidental action) */
@@ -69,7 +69,7 @@ export namespace WUPBaseControlTypes {
       focusDebounceMs?: number;
       /** Behavior that expected on press key 'Escape'
        * @defaultValue clear | resetToInit (both means: resetToInit if exists, 2nd time - clear etc.) */
-      pressEsc: PressEscActions;
+      pressEsc: ClearActions;
     } & ExtraDefaults;
     Options: Omit<Generics<ValueType, ValidationMap, ExtraDefaults>["Defaults"], "validationRules"> & {
       /** Title/label for control */
@@ -274,7 +274,7 @@ export default abstract class WUPBaseControl<
 
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUPBaseControlTypes.Defaults = {
-    pressEsc: PressEscActions.clear | PressEscActions.resetToInit,
+    pressEsc: ClearActions.clear | ClearActions.resetToInit,
     validityDebounceMs: 500,
     validationCase: ValidationCases.onChangeSmart | ValidationCases.onFocusLost,
     validationRules: {
@@ -303,7 +303,7 @@ export default abstract class WUPBaseControl<
   }
 
   #initValue?: ValueType;
-  /** Default/init value; used to define isChanged & to reset by Esc;
+  /** Default/init value; used to define isChanged & to reset by keyEsc/buttonClear;
    *  If control.$isDirty or not $isEmpty value isn't applied to */
   get $initValue(): ValueType | undefined {
     return this.#initValue;
@@ -311,7 +311,7 @@ export default abstract class WUPBaseControl<
 
   set $initValue(v: ValueType | undefined) {
     if (!this.#ctr.isEqual(v, this.#initValue) && !this.$isDirty && this.$isEmpty) {
-      // setValue if it's empty
+      // setValue if it's empty and not isDirty
       this.$isReady ? (this.$value = v) : setTimeout(() => (this.$value = v));
     }
     this.#initValue = v;
@@ -390,8 +390,6 @@ export default abstract class WUPBaseControl<
 
   /** Fired on Init and every time as options/attributes changed */
   protected gotReinit() {
-    console.warn("reinit");
-
     this.disposeLstInit.forEach((f) => f()); // remove possible previous event listeners
     this.disposeLstInit.length = 0;
 
@@ -591,7 +589,7 @@ export default abstract class WUPBaseControl<
   }
 
   /** Fire this method to update value & validate */
-  protected setValue(v: ValueType | undefined) {
+  protected setValue(v: ValueType | undefined, canValidate = true) {
     this.$isDirty = true;
     const isChanged = !this.#ctr.isEqual(v, this.#value);
     this.#value = v;
@@ -600,29 +598,33 @@ export default abstract class WUPBaseControl<
     }
 
     const c = this._opts.validationCase;
-    if (c & ValidationCases.onChange || c & ValidationCases.onChangeSmart) {
+    if (canValidate && (c & ValidationCases.onChange || c & ValidationCases.onChangeSmart)) {
       this.goValidate(WUPBaseControlTypes.ValidateFromCases.onInput);
     }
     this.fireEvent("$change", { cancelable: false });
+  }
+
+  /* Fired when user pressed Esc-key or button-clear */
+  protected clearValue(canValidate = true) {
+    const was = this.#value;
+
+    const isEscClear = this._opts.pressEsc & ClearActions.clear;
+    if (this._opts.pressEsc & ClearActions.resetToInit) {
+      if (this.$isChanged) {
+        this.setValue(this.$initValue, canValidate);
+        this.#prevValue = was;
+        return;
+      }
+    }
+    isEscClear && this.setValue(this.$isEmpty ? this.#prevValue : undefined);
+    this.#prevValue = was;
   }
 
   #prevValue = this.#value;
   /** Fired when user pressed key */
   protected gotKeyDown(e: KeyboardEvent) {
     if (this._opts.pressEsc && e.key === "Escape") {
-      const was = this.#value;
-
-      const isEscClear = this._opts.pressEsc & PressEscActions.clear;
-      if (this._opts.pressEsc & PressEscActions.resetToInit) {
-        if (this.$isChanged) {
-          this.#isDirty = false;
-          this.setValue(this.$initValue);
-          this.#prevValue = was;
-          return;
-        }
-      }
-      isEscClear && this.setValue(this.$isEmpty ? this.#prevValue : undefined);
-      this.#prevValue = was;
+      this.clearValue();
     }
   }
 

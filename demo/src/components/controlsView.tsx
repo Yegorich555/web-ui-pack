@@ -19,8 +19,8 @@ export default function ControlsView() {
                 max: 10,
                 min: (v) => v.length < 2 && "This is custom error",
               };
-              el.$showError("Very huge big message Very huge big message Very huge big message Very huge big message");
-              el.$options.hasButtonClear = true;
+              el.$initValue = "init value";
+              // el.$showError("Very huge big message Very huge big message Very huge big message Very huge big message");
             }
           }}
         />
@@ -30,6 +30,7 @@ export default function ControlsView() {
               el.$options.label = "TextControl - readonly";
               el.$options.readOnly = true;
               el.$initValue = "init value here";
+              el.$options.hasButtonClear = false;
             }
           }}
         />
