@@ -157,12 +157,13 @@ export default abstract class WUPBaseControl<
         --ctrl-selected: var(--ctrl-focus-label);
         --ctrl-label: #5e5e5e;
         --cltr-icon: var(--ctrl-label);
+        --ctrl-icon-size: 1em;
         --ctrl-back: #fff;
         --ctrl-border-radius: var(--border-radius, 6px);
         --ctrl-err: #ad0000;
         --ctrl-err-back: #fff4fa;
         --ctrl-invalid-border: red;
-        --wup-icon-remove: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M674.515 93.949a45.925 45.925 0 0 0-65.022 0L384.001 318.981 158.509 93.487a45.928 45.928 0 0 0-65.022 0c-17.984 17.984-17.984 47.034 0 65.018l225.492 225.494L93.487 609.491c-17.984 17.984-17.984 47.034 0 65.018s47.034 17.984 65.018 0l225.492-225.492 225.492 225.492c17.984 17.984 47.034 17.984 65.018 0s17.984-47.034 0-65.018L449.015 383.999l225.492-225.494c17.521-17.521 17.521-47.034 0-64.559z'/%3E%3C/svg%3E");
+        --wup-icon-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M674.515 93.949a45.925 45.925 0 0 0-65.022 0L384.001 318.981 158.509 93.487a45.928 45.928 0 0 0-65.022 0c-17.984 17.984-17.984 47.034 0 65.018l225.492 225.494L93.487 609.491c-17.984 17.984-17.984 47.034 0 65.018s47.034 17.984 65.018 0l225.492-225.492 225.492 225.492c17.984 17.984 47.034 17.984 65.018 0s17.984-47.034 0-65.018L449.015 383.999l225.492-225.494c17.521-17.521 17.521-47.034 0-64.559z'/%3E%3C/svg%3E");
       }
       `;
   }
@@ -215,6 +216,10 @@ export default abstract class WUPBaseControl<
         :host[invalid]:hover > [menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
         }
+        :host:hover label::before,
+        :host:hover label::after {
+          background-color: var(--ctrl-focus-label);
+        }
       }
       :host label {
         display: flex;
@@ -225,22 +230,6 @@ export default abstract class WUPBaseControl<
         padding: var(--ctrl-padding);
         padding-top: 0;
         padding-bottom: 0;
-      }
-      :host label::before,
-      :host label::after {
-        box-sizing: content-box;
-        cursor: pointer;
-        flex: 0 0 auto;
-        padding: var(--ctrl-padding);
-        padding-left: 0;
-        padding-right: 0;
-        align-self: stretch;
-      }
-      :host label::before {
-        margin-right: 0.5em;
-      }
-      :host label::after {
-        margin-left: 0.5em;
       }
       :host input {
         padding: 0;
@@ -653,3 +642,5 @@ export default abstract class WUPBaseControl<
     this.disposeLstInit.length = 0;
   }
 }
+
+// todo style-issue focus/hover doesn't change z-index to override error-msg

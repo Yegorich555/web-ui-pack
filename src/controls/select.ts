@@ -68,7 +68,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
   static get styleRoot(): string {
     return `:root {
               --ctrl-combo-icon: var(--cltr-icon);
-              --ctrl-combo-icon-size: 1em;
+              --ctrl-combo-icon-size: var(--ctrl-icon-size);
               --ctrl-combo-icon-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m16.078 258.214 329.139 329.139c21.449 21.449 56.174 21.449 77.567 0l329.139-329.139c21.449-21.449 21.449-56.174 0-77.567s-56.174-21.449-77.567 0L384 471.003 93.644 180.647c-21.449-21.449-56.173-21.449-77.567 0s-21.449 56.173 0 77.567z'/%3E%3C/svg%3E");
               --ctrl-combo-selected: inherit;
               --ctrl-combo-selected-back: #d9f7fd;
@@ -93,10 +93,6 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
         mask-image: var(--ctrl-combo-icon-img);
         -webkit-mask-size: var(--ctrl-combo-icon-size);
         mask-size: var(--ctrl-combo-icon-size);
-        -webkit-mask-repeat: no-repeat;
-        mask-repeat: no-repeat;
-        -webkit-mask-position: center;
-        mask-position: center;
       }
       :host[opened] label::after {
         transform: rotate(180deg);
@@ -106,12 +102,8 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
           transition: transform var(--anim);
         }
       }
-      @media (hover: hover) {
-        :host:hover {
-          label::after {
-            background-color: var(--ctrl-focus);
-          }
-        }
+      :host button[clear] {
+        margin: 0;
       }
       :host [menu] {
         padding: 0;

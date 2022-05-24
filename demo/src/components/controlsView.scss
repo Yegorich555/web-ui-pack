@@ -519,7 +519,7 @@
 .multiselect {
   --ctrl-multi-item-back: #f5f5f5;
   --ctrl-multi-remove: var(--cltr-icon);
-  --ctrl-multi-remove-img: var(--wup-icon-remove);
+  --ctrl-multi-remove-img: var(--wup-icon-cross);
   --ctrl-multi-remove-size: 1em;
   --ctrl-multi-selected: #00768b;
   --ctrl-multi-selected-back: #eff9fa;
@@ -557,8 +557,8 @@
         background-color: var(--ctrl-multi-remove);
 
         /* stylelint-disable plugin/no-unsupported-browser-features */
-        -webkit-mask-image: var(--wup-icon-remove);
-        mask-image: var(--wup-icon-remove);
+        -webkit-mask-image: var(--wup-icon-cross);
+        mask-image: var(--wup-icon-cross);
         -webkit-mask-size: contain;
         mask-size: contain;
         -webkit-mask-repeat: no-repeat;

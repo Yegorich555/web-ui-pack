@@ -1,5 +1,6 @@
 /* eslint-disable no-use-before-define */
 import onFocusGot from "../helpers/onFocusGot";
+import { onEvent } from "../indexHelpers";
 import WUPBaseControl, { WUPBaseControlTypes } from "./baseControl";
 
 export namespace WUPTextControlTypes {
@@ -10,6 +11,9 @@ export namespace WUPTextControlTypes {
     /** Select whole text when input got focus (when input is not readonly and not disabled);
      * @defaultValue true */
     selectOnFocus: boolean;
+    /** Show/hide clear button
+     * @defaultValue true */
+    hasClearButton: boolean;
   };
 
   // eslint-disable-next-line @typescript-eslint/ban-types
@@ -46,6 +50,13 @@ export default class WUPTextControl<
 > extends WUPBaseControl<ValueType, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextControl;
+
+  static get styleRoot(): string {
+    return `:root {
+      --ctrl-btn-clear-hover: rgba(255, 0, 0, 0.1);
+      --ctrl-icon-hover-size: 10px;
+     }`;
+  }
 
   /** StyleContent related to component */
   static get style(): string {
@@ -99,6 +110,78 @@ export default class WUPTextControl<
         :host legend {
           top: 0.2em;
           transform: scale(0.9);
+        }
+        /* style for icons */
+        :host label button,
+        :host label button::after,
+        :host label::after,
+        :host label::before {
+          display: inline-block;
+          width: var(--ctrl-icon-size);
+          min-height: var(--ctrl-icon-size);
+          box-sizing: content-box;
+          margin: 0;
+          padding: var(--ctrl-padding);
+          padding-left: calc(var(--ctrl-icon-size) / 2);
+          padding-right: calc(var(--ctrl-icon-size) / 2);
+          flex: 0 0 auto;
+          align-self: stretch;
+          cursor: pointer;
+          border: none;
+          box-shadow: none;
+          background: var(--ctrl-label);
+          -webkit-mask-size: var(--ctrl-icon-size);
+          mask-size: var(--ctrl-icon-size);
+          -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+          -webkit-mask-position: center;
+          mask-position: center;
+        }
+        :host label::after {
+          margin-right: calc(var(--ctrl-icon-size) / -2);
+        }
+        :host label::before {
+          margin-left: calc(var(--ctrl-icon-size) / -2);
+        }
+        :host label button {
+           z-index: 1;
+           contain: strict;
+           padding: calc(var(--ctrl-icon-hover-size) / 2);
+        }
+        :host label>span + button {
+          margin-right: -0.5em;
+        }
+        :host button[clear] {
+          position: relative;
+          background: none;
+        }
+        :host button[clear]::after {
+          content: "";
+          padding: 0;
+          background-color: var(--ctrl-label);
+          -webkit-mask-image: var(--wup-icon-cross);
+          mask-image: var(--wup-icon-cross);
+        }
+        :host button[clear]::after,
+        :host button[clear]::before {
+          position: absolute;
+          top: 50%; left: 50%;
+          transform: translate(-50%, -50%);
+          width: 100%;
+          padding-top: 100%;
+        }
+        @media (hover: hover) {
+          :host button[clear]:hover {
+            box-shadow: none;
+          }
+          :host button[clear]:hover::before {
+            content: "";
+            border-radius: 50%;
+            box-shadow: inset 0 0 0 99999px var(--ctrl-btn-clear-hover);
+          }
+          :host button[clear]:hover::after {
+            background-color: var(--ctrl-err);
+          }
         }`;
   }
 
@@ -112,6 +195,7 @@ export default class WUPTextControl<
   static $defaults: WUPTextControlTypes.Defaults = {
     ...WUPBaseControl.$defaults,
     selectOnFocus: true,
+    hasClearButton: true,
     validationRules: {
       required: WUPBaseControl.$defaults.validationRules.required,
       min: (v, setV) => v.length < setV && `Min length is ${setV} characters`,
@@ -138,9 +222,26 @@ export default class WUPTextControl<
     this.$refLabel.setAttribute("for", this.$refInput.id);
 
     const s = this.$refLabel.appendChild(document.createElement("span"));
-    s.appendChild(this.$refInput);
+    s.appendChild(this.$refInput); // input appended to span to allow user user :after,:before without padding adjust
     s.appendChild(this.$refTitle);
     this.appendChild(this.$refLabel);
+
+    // todo how to detect options.change for this case
+    if (this._opts.hasClearButton) {
+      const btnClear = this.$refLabel.appendChild(document.createElement("button"));
+      btnClear.setAttribute("clear", "");
+      btnClear.setAttribute("aria-hidden", "true");
+      btnClear.tabIndex = -1;
+      const r = onEvent(btnClear, "click", (e) => {
+        if (!this._opts?.hasClearButton) {
+          // possible when user changed options
+          r();
+          return;
+        }
+        e.preventDefault(); // prevent from submit
+        this.$value = undefined;
+      });
+    }
   }
 
   protected override gotReady() {
@@ -215,4 +316,4 @@ el.$options.validations = {
 };
 // el.$validate();
 
-// todo option.clearBtn: boolean
+// todo btn-clear.click deletes data, shows error & opens popup - is it correct ???
