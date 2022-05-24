@@ -67,6 +67,7 @@ export default function popupListenTarget(
   }
 
   async function hide(hideCase: WUPPopup.HideCases): Promise<void> {
+    console.warn("will hide", hideCase);
     const was = openedEl; // required when user clicks again during the hidding > we need to show in this case
     openedEl = null;
     onHideRef();
@@ -136,6 +137,11 @@ export default function popupListenTarget(
     });
 
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    const getSelection = () => {
+      const s = window.getSelection();
+      return s?.type === "Range" ? { text: s.toString(), node: s.anchorNode } : null;
+    };
+
     appendEvent(t, "click", (e) => {
       if (!(e as MouseEvent).pageX) {
         // pageX is null if it was fired programmatically
@@ -148,7 +154,11 @@ export default function popupListenTarget(
       const isPrevented = preventClickAfterFocus; // otherwise it can be reset by document.click
 
       setTimeout(() => {
-        const isUserSelected = window.getSelection()?.type === "Range";
+        // checking if user selected text during the click
+        const curSel = getSelection();
+        const prev = (popupListenTarget as any)._prevSel as typeof curSel;
+        const isUserSelected = curSel === null ? false : prev?.node !== curSel?.node || prev?.text !== curSel?.text;
+        (popupListenTarget as any)._prevSel = curSel;
         if (isUserSelected) {
           return;
         }

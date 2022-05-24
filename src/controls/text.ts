@@ -243,7 +243,7 @@ export default class WUPTextControl<
       this._opts.selectOnFocus &&
         !this.$refInput.readOnly &&
         this.disposeLstInit.push(onFocusGot(this, () => this.$refInput.select()));
-    }); // timeout requires because selectControl can setup readOnly after super.gotReinit
+    }); // timeout required because selectControl can setup readOnly after super.gotReinit
 
     if (this._opts.hasButtonClear && !this.$refBtnClear) {
       const bc = this.$refLabel.appendChild(document.createElement("button"));

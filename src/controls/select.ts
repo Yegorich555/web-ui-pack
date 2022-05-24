@@ -265,7 +265,6 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
                   : WUPSelectControlTypes.ShowCases.onFocus
               ),
         (s) =>
-          // todo click on label>strong doesn't work
           s === WUPPopup.HideCases.onFocusOut ||
           s === WUPPopup.HideCases.onOutsideClick ||
           s === WUPPopup.HideCases.onTargetClick ||
@@ -468,7 +467,9 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
 
     if (wasOpen) {
       // call for ref-listener to apply events properly
-      this.#popupRefs!.hide(WUPPopup.HideCases.onManuallCall);
+      hideCase !== WUPSelectControlTypes.HideCases.onFocusLost &&
+        hideCase !== WUPSelectControlTypes.HideCases.onClick &&
+        this.#popupRefs!.hide(WUPPopup.HideCases.onManuallCall);
 
       let pback: () => void;
       // eslint-disable-next-line no-promise-executor-return
@@ -668,3 +669,5 @@ el.$options.validations = {
 
 // todo somehow impossible to close menu by outside click (sometimes)
 // to reproduce focus > pressEsc > typeText > try close by outside click
+
+// todo maybe inputClick >>> prevent menuClose/toggle ??? otherwise user can't move carret via click without closing popup
