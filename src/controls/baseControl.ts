@@ -186,6 +186,7 @@ export default abstract class WUPBaseControl<
       }
       :host:focus-within,
       :host:focus-within > [menu] {
+        z-index: 90010;
         outline: 1px solid var(--ctrl-focus);
       }
       :host:focus-within strong,
@@ -208,6 +209,9 @@ export default abstract class WUPBaseControl<
         outline-color: var(--ctrl-invalid-border);
       }
       @media (hover: hover) {
+        :host:hover {
+           z-index: 90010;
+        }
         :host:hover,
         :host:hover > [menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
@@ -642,5 +646,3 @@ export default abstract class WUPBaseControl<
     this.disposeLstInit.length = 0;
   }
 }
-
-// todo style-issue focus/hover doesn't change z-index to override error-msg
