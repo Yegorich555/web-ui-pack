@@ -352,6 +352,11 @@ export default abstract class WUPBaseControl<
     return this.#isValid as boolean;
   }
 
+  /** Returs if current control is active/focused */
+  get $isFocused(): boolean {
+    return this === document.activeElement || this.includes(document.activeElement);
+  }
+
   /** Check validity and show error if not swtich off; canShowError is true by default
    * @returns errorMessage or false (if valid)
    */
@@ -446,7 +451,10 @@ export default abstract class WUPBaseControl<
     this.appendEvent(
       this,
       "mousedown", // to prevent blur-focus effect for input by label click
-      (e) => !(e.target instanceof HTMLInputElement) && e.preventDefault()
+      (e) => {
+        !(e.target instanceof HTMLInputElement) && e.preventDefault();
+        setTimeout(() => !this.$isFocused && this.focus());
+      }
     );
 
     this.appendEvent(this, "keydown", this.gotKeyDown);

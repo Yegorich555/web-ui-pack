@@ -1,7 +1,5 @@
 /* stylelint-disable no-descending-specificity */
 .common {
-  // todo button clear on controls
-
   //WARN: it's tricky rule
   contain: style; // otherwise it doesn't work for popup inside
   display: block;
