@@ -13,7 +13,7 @@ export namespace WUPTextControlTypes {
     selectOnFocus: boolean;
     /** Show/hide clear button
      * @defaultValue true */
-    hasClearButton: boolean;
+    hasButtonClear: boolean;
   };
 
   // eslint-disable-next-line @typescript-eslint/ban-types
@@ -50,6 +50,10 @@ export default class WUPTextControl<
 > extends WUPBaseControl<ValueType, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextControl;
+
+  static observedOptions = (super.observedOptions as Set<keyof WUPTextControlTypes.Options>).add(
+    "hasButtonClear"
+  ) as any;
 
   static get styleRoot(): string {
     return `:root {
@@ -193,7 +197,7 @@ export default class WUPTextControl<
   static $defaults: WUPTextControlTypes.Defaults = {
     ...WUPBaseControl.$defaults,
     selectOnFocus: true,
-    hasClearButton: true,
+    hasButtonClear: true,
     validationRules: {
       required: WUPBaseControl.$defaults.validationRules.required,
       min: (v, setV) => v.length < setV && `Min length is ${setV} characters`,
@@ -209,6 +213,8 @@ export default class WUPTextControl<
 
   protected override _opts = this.$options;
 
+  $refBtnClear?: HTMLButtonElement;
+
   constructor() {
     super();
 
@@ -223,23 +229,6 @@ export default class WUPTextControl<
     s.appendChild(this.$refInput); // input appended to span to allow user user :after,:before without padding adjust
     s.appendChild(this.$refTitle);
     this.appendChild(this.$refLabel);
-
-    // todo how to detect options.change for this case
-    if (this._opts.hasClearButton) {
-      const btnClear = this.$refLabel.appendChild(document.createElement("button"));
-      btnClear.setAttribute("clear", "");
-      btnClear.setAttribute("aria-hidden", "true");
-      btnClear.tabIndex = -1;
-      const r = onEvent(btnClear, "click", (e) => {
-        if (!this._opts?.hasClearButton) {
-          // possible when user changed options
-          r();
-          return;
-        }
-        e.preventDefault(); // prevent from submit
-        this.$value = undefined;
-      });
-    }
   }
 
   protected override gotReady() {
@@ -255,6 +244,27 @@ export default class WUPTextControl<
         !this.$refInput.readOnly &&
         this.disposeLstInit.push(onFocusGot(this, () => this.$refInput.select()));
     }); // timeout requires because selectControl can setup readOnly after super.gotReinit
+
+    // todo should we show error after clearing ?
+    if (this._opts.hasButtonClear && !this.$refBtnClear) {
+      const bc = this.$refLabel.appendChild(document.createElement("button"));
+      this.$refBtnClear = bc;
+      bc.setAttribute("clear", "");
+      bc.setAttribute("aria-hidden", "true");
+      bc.tabIndex = -1;
+      const r = onEvent(bc, "click", (e) => {
+        e.preventDefault(); // prevent from submit
+        this.setValue(undefined);
+      });
+
+      this.disposeLstInit.push(r);
+      this.disposeLstInit.push(() => {
+        if (!this._opts.hasButtonClear) {
+          bc.remove();
+          this.$refBtnClear = undefined;
+        }
+      });
+    }
   }
 
   #inputTimer?: number;

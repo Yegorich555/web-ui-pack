@@ -10,7 +10,6 @@ export default function ControlsView() {
     <Page header="Controls" link="#textControl">
       <form autoComplete="off">
         <wup-text-ctrl
-          class={styles.btnClear}
           ref={(el) => {
             if (el) {
               el.$options.label =
@@ -21,12 +20,11 @@ export default function ControlsView() {
                 min: (v) => v.length < 2 && "This is custom error",
               };
               el.$showError("Very huge big message Very huge big message Very huge big message Very huge big message");
-              el.$options.hasClearButton = true;
+              el.$options.hasButtonClear = true;
             }
           }}
         />
         <wup-text-ctrl
-          class={styles.btnClear}
           ref={(el) => {
             if (el) {
               el.$options.label = "TextControl - readonly";
@@ -36,7 +34,6 @@ export default function ControlsView() {
           }}
         />
         <wup-text-ctrl
-          class={styles.btnClear}
           ref={(el) => {
             if (el) {
               el.$options.label = "TextControl - disabled";
@@ -47,7 +44,6 @@ export default function ControlsView() {
         />
 
         <wup-select
-          class={styles.btnClear}
           ref={(el) => {
             if (el) {
               let ir = 10;
