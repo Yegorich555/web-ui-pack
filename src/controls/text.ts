@@ -121,9 +121,7 @@ export default class WUPTextControl<
           min-height: var(--ctrl-icon-size);
           box-sizing: content-box;
           margin: 0;
-          padding: var(--ctrl-padding);
-          padding-left: calc(var(--ctrl-icon-size) / 2);
-          padding-right: calc(var(--ctrl-icon-size) / 2);
+          padding: 0 calc(var(--ctrl-icon-size) / 2);
           flex: 0 0 auto;
           align-self: stretch;
           cursor: pointer;
