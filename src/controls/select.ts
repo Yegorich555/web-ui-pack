@@ -256,25 +256,33 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
           target: this,
           showCase: PopupShowCases.onClick | PopupShowCases.onFocus,
         },
-        (s) =>
-          s === WUPPopup.ShowCases.always // manual show
-            ? (this.$refPopup as WUPPopupElement)
-            : this.goShowMenu(
-                s === PopupShowCases.onClick
-                  ? WUPSelectControlTypes.ShowCases.onClick
-                  : WUPSelectControlTypes.ShowCases.onFocus
-              ),
-        (s) =>
-          s === WUPPopup.HideCases.onFocusOut ||
-          s === WUPPopup.HideCases.onOutsideClick ||
-          s === WUPPopup.HideCases.onTargetClick ||
-          s === WUPPopup.HideCases.onPopupClick
-            ? this.goHideMenu(
-                s === WUPPopup.HideCases.onFocusOut || s === WUPPopup.HideCases.onOutsideClick
-                  ? WUPSelectControlTypes.HideCases.onFocusLost
-                  : WUPSelectControlTypes.HideCases.onClick
-              )
-            : false
+        (s, e) => {
+          if (s === WUPPopup.ShowCases.always) {
+            return this.$refPopup!;
+          }
+          return this.goShowMenu(
+            s === PopupShowCases.onClick
+              ? WUPSelectControlTypes.ShowCases.onClick
+              : WUPSelectControlTypes.ShowCases.onFocus,
+            e
+          );
+        },
+        (s, e) => {
+          if (
+            s === WUPPopup.HideCases.onFocusOut ||
+            s === WUPPopup.HideCases.onOutsideClick ||
+            s === WUPPopup.HideCases.onTargetClick ||
+            s === WUPPopup.HideCases.onPopupClick
+          ) {
+            return this.goHideMenu(
+              s === WUPPopup.HideCases.onFocusOut || s === WUPPopup.HideCases.onOutsideClick
+                ? WUPSelectControlTypes.HideCases.onFocusLost
+                : WUPSelectControlTypes.HideCases.onClick,
+              e
+            );
+          }
+          return false;
+        }
       );
       this.#popupRefs = { hide: refs.hide, show: refs.show, dispose: refs.onRemoveRef };
     } else {
@@ -382,7 +390,19 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected async goShowMenu(showCase: WUPSelectControlTypes.ShowCases): Promise<WUPPopupElement> {
+  protected async goShowMenu(
+    showCase: WUPSelectControlTypes.ShowCases,
+    e?: MouseEvent | FocusEvent | null
+  ): Promise<WUPPopupElement | null> {
+    if (
+      showCase === WUPSelectControlTypes.ShowCases.onClick &&
+      e?.target instanceof HTMLInputElement &&
+      !e.target.readOnly &&
+      this.contains(e.target)
+    ) {
+      return null;
+    }
+
     if (this.#isOpen) {
       return this.$refPopup!;
     }
@@ -458,7 +478,19 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
 
   #menuHidding?: Promise<void>;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected async goHideMenu(hideCase: WUPSelectControlTypes.HideCases): Promise<boolean> {
+  protected async goHideMenu(
+    hideCase: WUPSelectControlTypes.HideCases,
+    e?: MouseEvent | FocusEvent | null
+  ): Promise<boolean> {
+    if (
+      hideCase === WUPSelectControlTypes.HideCases.onClick &&
+      e?.target instanceof HTMLInputElement &&
+      !e.target.readOnly &&
+      this.contains(e.target)
+    ) {
+      return false;
+    }
+
     const wasOpen = this.#isOpen;
     this.#isOpen = false;
     if (!this.$refPopup) {
@@ -668,5 +700,3 @@ el.$options.validations = {
 };
 
 // testcase (impossible to close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click
-
-// todo maybe inputClick >>> prevent menuClose/toggle ??? otherwise user can't move carret via click without closing popup
