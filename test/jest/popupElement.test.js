@@ -288,12 +288,12 @@ describe("popupElement", () => {
     await Promise.resolve(); // wait for promise onShow is async
     expect(spyShow).toBeCalledTimes(1);
     expect(a.$isOpen).toBeTruthy();
-    expect(spyShow).toHaveBeenLastCalledWith(1);
+    expect(spyShow).lastCalledWith(1);
 
     trg.dispatchEvent(new Event("mouseleave"));
     jest.advanceTimersByTime(a.$options.hoverHideTimeout); // event listener has timeout
     expect(a.$isOpen).toBeFalsy();
-    expect(spyHide).toHaveBeenLastCalledWith(2);
+    expect(spyHide.mock.calls[spyHide.mock.calls.length - 1][0]).toBe(2);
 
     jest.clearAllMocks();
     trg.dispatchEvent(new Event("mouseenter"));
@@ -345,7 +345,7 @@ describe("popupElement", () => {
     expect(a.$isOpen).toBeFalsy();
     expect(spyShow).toBeCalledTimes(1); // checking if throttling-filter works
     expect(spyShow).lastCalledWith(1 << 1); // checking if throttling-filter works
-    expect(spyHide).lastCalledWith(3); // because div haven't been lost focus
+    expect(spyHide.mock.calls[spyHide.mock.calls.length - 1][0]).toBe(3); // because div haven't been lost focus
 
     // checking case when document.activeElement is null/not-null (possible on Firefox/Safari)
     trgInput.focus();
@@ -395,55 +395,76 @@ describe("popupElement", () => {
     expect(a.$isOpen).toBeTruthy();
     trg.dispatchEvent(new Event("click", { bubbles: true }));
     expect(a.$isOpen).toBeTruthy(); // because previous event is skipped (due to debounceTimeout)
-    expect(spyShow).toHaveBeenCalledTimes(1);
+    expect(spyShow).toBeCalledTimes(1);
     expect(spyShow).lastCalledWith(1 << 2);
     await wait(50); // onClick has debounce timeout
 
-    trg.dispatchEvent(new Event("click", { bubbles: true }));
+    let e = new Event("click", { bubbles: true });
+    trg.dispatchEvent(e);
     await wait(1);
     expect(a.$isOpen).toBeFalsy();
-    expect(spyHide).toHaveBeenCalledTimes(1);
-    expect(spyHide).lastCalledWith(6);
+    expect(spyHide).toBeCalledTimes(1);
+    expect(spyHide).lastCalledWith(6, e);
     await wait(50);
 
     trgInput.dispatchEvent(new Event("click", { bubbles: true }));
     await wait();
     expect(a.$isOpen).toBeTruthy(); // click on input inside
 
-    a.dispatchEvent(new Event("click", { bubbles: true }));
+    e = new Event("click", { bubbles: true });
+    a.dispatchEvent(e);
     await wait();
     expect(a.$isOpen).toBeFalsy(); // click onMe == close
-    expect(spyHide).lastCalledWith(5);
+    expect(spyHide).lastCalledWith(5, e);
 
     trgInput2.dispatchEvent(new Event("click", { bubbles: true }));
     await wait();
     expect(a.$isOpen).toBeTruthy(); // click on input2 inside
 
-    document.body.dispatchEvent(new Event("click", { bubbles: true }));
+    e = new Event("click", { bubbles: true });
+    document.body.dispatchEvent(e);
     await wait();
     expect(a.$isOpen).toBeFalsy(); // click outside == close
-    expect(spyHide).lastCalledWith(4);
+    expect(spyHide).lastCalledWith(4, e);
 
     // simulate when user selected
-    jest.spyOn(window, "getSelection").mockReturnValueOnce({ type: "Range" });
-    trgInput.dispatchEvent(new Event("mouseenter", { bubbles: true }));
-    trgInput.dispatchEvent(new Event("mousedown", { bubbles: true }));
-    trgInput.dispatchEvent(new Event("mousemove", { bubbles: true }));
-    trgInput.dispatchEvent(new Event("mouseup", { bubbles: true }));
-    trgInput.dispatchEvent(new Event("click", { bubbles: true }));
-    await wait();
-    expect(a.$isOpen).toBeFalsy(); // because user selected something
-    trgInput.dispatchEvent(new Event("mouseenter", { bubbles: true }));
-    trgInput.dispatchEvent(new Event("mousedown", { bubbles: true }));
-    trgInput.dispatchEvent(new Event("mousemove", { bubbles: true }));
-    trgInput.dispatchEvent(new Event("mouseup", { bubbles: true }));
-    trgInput.dispatchEvent(new Event("click", { bubbles: true }));
-    await wait();
-    expect(a.$isOpen).toBeTruthy();
+    const simulateSelection = (sel) => {
+      jest.spyOn(window, "getSelection").mockReturnValueOnce(sel);
+      trgInput.dispatchEvent(new Event("mouseenter", { bubbles: true }));
+      trgInput.dispatchEvent(new Event("mousedown", { bubbles: true }));
+      trgInput.dispatchEvent(new Event("mousemove", { bubbles: true }));
+      trgInput.dispatchEvent(new Event("mouseup", { bubbles: true }));
+      trgInput.dispatchEvent(new Event("click", { bubbles: true }));
+      return wait();
+    };
+    expect(a.$isOpen).toBeFalsy();
+    await simulateSelection({ type: "Range", toString: () => "some", anchorNode: trgInput });
+    expect(a.$isOpen).toBeFalsy(); // because user selected
+    await simulateSelection({ type: "Range", toString: () => "some", anchorNode: trgInput });
+    expect(a.$isOpen).toBeTruthy(); // because user not changed selection
+
+    trgInput.value = "some_some";
+    trgInput.selectionStart = "5";
+    await simulateSelection({ type: "Range", toString: () => "some", anchorNode: trgInput });
+    expect(a.$isOpen).toBeTruthy(); // because user changed selection
+
+    await simulateSelection({ type: "Range", toString: () => "som", anchorNode: trgInput });
+    expect(a.$isOpen).toBeTruthy(); // because user changed selection
+    await simulateSelection({ type: "Range", toString: () => "some", anchorNode: trgInput2 }); // WARN: node is wrong but for tests it's ok
+    expect(a.$isOpen).toBeTruthy(); // because user selected same but on another element
+
+    await simulateSelection({ type: "Range", toString: () => "some", anchorNode: trgInput2 }); // WARN: node is wrong but for tests it's ok
+    expect(a.$isOpen).toBeFalsy(); // because selection not changed
+
     jest.spyOn(window, "getSelection").mockReturnValueOnce(null);
     trgInput.click();
     await wait();
-    expect(a.$isOpen).toBeFalsy();
+    expect(a.$isOpen).toBeTruthy();
+
+    // for coverage case when popupListener applied when something is already selected
+    jest.spyOn(window, "getSelection").mockReturnValueOnce({ type: "Range" });
+    const ref = popupListenTarget({ target: trgInput });
+    ref.onRemoveRef();
 
     // check focus on target > on hide
     document.activeElement.blur();
@@ -491,31 +512,35 @@ describe("popupElement", () => {
     await wait(1); // wait for promise onShow is async
 
     // close by blur
+    spyHide.mockClear();
     trgInput.blur();
     await wait(1); // wait for promise onHide is async
     expect(a.$isOpen).toBeFalsy(); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
-    expect(spyHide).lastCalledWith(3);
+    expect(spyHide.mock.calls[0][0]).toBe(3);
 
     // close by mouseleave
     trgInput.dispatchEvent(new Event("mouseenter", { bubbles: true }));
     await wait(a.$options.hoverShowTimeout); // mouseenter has debounce timeout
     expect(a.$isOpen).toBeTruthy(); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
-    trgInput.dispatchEvent(new Event("mouseleave", { bubbles: true }));
+    e = new Event("mouseleave", { bubbles: true });
+    trgInput.dispatchEvent(e);
     await wait(a.$options.hoverHideTimeout); // mouseenter has debounce timeout
     expect(a.$isOpen).toBeFalsy(); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
-    expect(spyHide).lastCalledWith(2);
+    expect(spyHide).lastCalledWith(2, e);
 
     // open again by click
-    trgInput.dispatchEvent(new Event("click", { bubbles: true }));
+    e = new Event("click", { bubbles: true });
+    trgInput.dispatchEvent(e);
     await wait();
     expect(a.$isOpen).toBeTruthy(); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
     expect(spyShow).lastCalledWith(1 << 2);
 
     // close by click again
-    trgInput.dispatchEvent(new Event("click", { bubbles: true }));
+    e = new Event("click", { bubbles: true });
+    trgInput.dispatchEvent(e);
     await wait();
     expect(a.$isOpen).toBeFalsy();
-    expect(spyHide).lastCalledWith(6);
+    expect(spyHide).lastCalledWith(6, e);
     trgInput.blur();
     spyShow.mockClear();
 
@@ -541,7 +566,7 @@ describe("popupElement", () => {
     trgInput.dispatchEvent(ev);
     await wait(50);
     expect(a.$isOpen).toBeFalsy(); // 2nd click will close (but if click is fired without mousedown it doesn't work)
-    expect(spyHide).lastCalledWith(6);
+    expect(spyHide).lastCalledWith(6, ev);
   });
 
   test("$options.minWidth/minHeight/maxWidth by target", async () => {

@@ -6,6 +6,14 @@ import onFocusLost from "../helpers/onFocusLost";
 import onSpy from "../helpers/onSpy";
 import { WUPPopup } from "./popupElement.types";
 
+function getSelection(e: MouseEvent | null) {
+  const s = window.getSelection();
+  if (!s || s.type !== "Range") {
+    return null;
+  }
+  return { text: s.toString(), node: s.anchorNode, start: e ? (e.target as HTMLInputElement).selectionStart : null };
+}
+
 /**
  * listen for target according to showCase and return onRemoveCallback (listeners that need to remove when popup removed)
  * If target removed then listeners removed
@@ -131,6 +139,7 @@ export default function popupListenTarget(
           focusFirst(lastActive || t);
           hide(WUPPopup.HideCases.onPopupClick, e);
         } else {
+          // todo it's wrong if user tries to select text and makes t.mousedown, mousemove, body.mouseup. maybe use mousedown instead ?
           hide(WUPPopup.HideCases.onOutsideClick, e);
           wasOutsideClick = true;
           setTimeout(() => (wasOutsideClick = false), 50);
@@ -138,12 +147,8 @@ export default function popupListenTarget(
       }
     });
 
+    (popupListenTarget as any)._prevSel = getSelection(null);
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    const getSelection = () => {
-      const s = window.getSelection();
-      return s?.type === "Range" ? { text: s.toString(), node: s.anchorNode } : null;
-    };
-
     appendEvent(t, "click", (e) => {
       if (!(e as MouseEvent).pageX) {
         // pageX is null if it was fired programmatically
@@ -156,10 +161,13 @@ export default function popupListenTarget(
       const isPrevented = preventClickAfterFocus; // otherwise it can be reset by document.click
 
       setTimeout(() => {
-        // checking if user selected text during the click
-        const curSel = getSelection();
+        // checking if user selected text during the click (filter user actions on input)
+        const curSel = getSelection(e);
         const prev = (popupListenTarget as any)._prevSel as typeof curSel;
-        const isUserSelected = curSel === null ? false : prev?.node !== curSel?.node || prev?.text !== curSel?.text;
+        const isUserSelected =
+          curSel === null
+            ? false
+            : prev === null || prev.node !== curSel.node || prev.text !== curSel.text || prev.start !== curSel.start;
         (popupListenTarget as any)._prevSel = curSel;
         if (isUserSelected) {
           return;
