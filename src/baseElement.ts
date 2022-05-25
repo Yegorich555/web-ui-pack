@@ -108,13 +108,13 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
         // append styleRoot
         if (!appendedStyles.has(p.name)) {
           appendedStyles.add(p.name);
-          if (Object.hasOwn(p, "styleRoot")) {
+          if (Object.prototype.hasOwnProperty.call(p, "styleRoot")) {
             const s = p.styleRoot;
             s && styleElement.append(s);
           }
         }
         // append style by tagName
-        if (Object.hasOwn(p, "style")) {
+        if (Object.prototype.hasOwnProperty.call(p, "style")) {
           const c = p.style;
           c && styleElement.append(c.replace(/:host/g, `${this.tagName}`));
         }
