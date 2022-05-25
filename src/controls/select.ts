@@ -448,10 +448,10 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
       this.selectMenuItem(i);
     }
 
-    if (showCase === WUPSelectControlTypes.ShowCases.onManualCall) {
-      // call for ref-listener to apply events properly
+    // call for ref-listener to apply events properly
+    showCase !== WUPSelectControlTypes.ShowCases.onClick &&
+      showCase !== WUPSelectControlTypes.ShowCases.onFocus &&
       this.#popupRefs!.show(WUPPopup.ShowCases.always);
-    }
 
     return this.$refPopup;
   }
@@ -667,7 +667,6 @@ el.$options.validations = {
   extra: (v) => "test Me",
 };
 
-// todo somehow impossible to close menu by outside click (sometimes)
-// to reproduce focus > pressEsc > typeText > try close by outside click
+// testcase (impossible to close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click
 
 // todo maybe inputClick >>> prevent menuClose/toggle ??? otherwise user can't move carret via click without closing popup

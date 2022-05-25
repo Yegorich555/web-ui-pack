@@ -67,7 +67,6 @@ export default function popupListenTarget(
   }
 
   async function hide(hideCase: WUPPopup.HideCases): Promise<void> {
-    console.warn("will hide", hideCase);
     const was = openedEl; // required when user clicks again during the hidding > we need to show in this case
     openedEl = null;
     onHideRef();
