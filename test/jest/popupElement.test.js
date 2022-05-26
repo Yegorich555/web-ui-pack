@@ -1730,4 +1730,25 @@ describe("popupElement", () => {
     await wait();
     expect(myel.$isOpen).toBeTruthy();
   });
+
+  test("double-click filter", async () => {
+    await el.$hide();
+    el.$options.showCase = 1 << 2; // click
+    await wait();
+    expect(el.$isOpen).toBeFalsy();
+    // double-click simulation
+    const doubleClick = async (htmlEl) => {
+      let e = new MouseEvent("click", { bubbles: true });
+      jest.spyOn(e, "detail", "get").mockReturnValue(1);
+      htmlEl.dispatchEvent(e);
+      await wait(100);
+      e = new MouseEvent("click", { bubbles: true });
+      jest.spyOn(e, "detail", "get").mockReturnValue(2);
+      htmlEl.dispatchEvent(e);
+      htmlEl.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+    };
+    await doubleClick(trg);
+    await wait(100);
+    expect(el.$isOpen).toBeTruthy(); // because 2nd click is filtered
+  });
 });

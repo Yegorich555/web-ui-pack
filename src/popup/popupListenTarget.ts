@@ -119,8 +119,7 @@ export default function popupListenTarget(
   let openedByHover = false;
   // onClick
   if (opts.showCase & WUPPopup.ShowCases.onClick) {
-    // fix when labelOnClick > inputOnClick
-    let wasOutsideClick = false;
+    let wasOutsideClick = false; // fix when labelOnClick > inputOnClick
     let lastActive: HTMLElement | null = null;
     onShowEvent(document, "focusin", ({ target }) => {
       const isMe = openedEl === target || includes(target);
@@ -155,7 +154,8 @@ export default function popupListenTarget(
         preventClickAfterFocus = false; // test-case: focus without click > show....click programatically on target > it should hide
       }
 
-      if (timeoutId || wasOutsideClick || openedByHover) {
+      if (timeoutId || wasOutsideClick || openedByHover || e.detail === 2) {
+        // detail === 2 for 2nd of double-click
         return;
       }
       const isPrevented = preventClickAfterFocus; // otherwise it can be reset by document.click
