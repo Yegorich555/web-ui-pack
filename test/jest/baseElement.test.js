@@ -208,11 +208,11 @@ describe("baseElement", () => {
     expect(fn.mock.calls[0][0].bubbles).toBeTruthy();
   });
 
-  test("static.uniqueId", () => {
-    expect(WUPBaseElement.uniqueId).toBeDefined();
-    expect(WUPBaseElement.uniqueId).not.toBe(WUPBaseElement.uniqueId);
-    expect(WUPBaseElement.uniqueId).not.toBe(WUPBaseElement.uniqueId);
-    expect(WUPBaseElement.uniqueId).not.toBe(WUPBaseElement.uniqueId);
+  test("static.$uniqueId", () => {
+    expect(WUPBaseElement.$uniqueId).toBeDefined();
+    expect(WUPBaseElement.$uniqueId).not.toBe(WUPBaseElement.$uniqueId);
+    expect(WUPBaseElement.$uniqueId).not.toBe(WUPBaseElement.$uniqueId);
+    expect(WUPBaseElement.$uniqueId).not.toBe(WUPBaseElement.$uniqueId);
   });
 
   test("focus", () => {
@@ -285,9 +285,9 @@ describe("baseElement", () => {
   });
 
   test("style inherritance", () => {
-    expect(WUPBaseElement.style).toBeDefined();
-    expect(WUPBaseElement.styleRoot).toBeTruthy();
-    jest.spyOn(WUPBaseElement, "style", "get").mockReturnValue(":host { display: block }");
+    expect(WUPBaseElement.$style).toBeDefined();
+    expect(WUPBaseElement.$styleRoot).toBeTruthy();
+    jest.spyOn(WUPBaseElement, "$style", "get").mockReturnValue(":host { display: block }");
 
     //  case when no new styles defined
     class TestA extends WUPBaseElement {}
@@ -297,7 +297,7 @@ describe("baseElement", () => {
     expect(TestA.$refStyle).toBeDefined();
 
     let style = TestA.$refStyle.textContent.toLowerCase();
-    expect(style).toContain(WUPBaseElement.styleRoot);
+    expect(style).toContain(WUPBaseElement.$styleRoot);
     expect(style).toContain("t-a { display: block }");
     expect(style.lastIndexOf("t-a")).toBe(style.indexOf("t-a")); // checking if style applied once
 
