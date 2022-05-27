@@ -87,7 +87,7 @@ export default class WUPPopupElement<
     hoverHideTimeout: 500,
   };
 
-  static get styleRoot(): string {
+  static get $styleRoot(): string {
     return `
       :root {
         --popup-shadow-size: 4px;
@@ -95,7 +95,7 @@ export default class WUPPopupElement<
       }`;
   }
 
-  static get style(): string {
+  static get $style(): string {
     return `
       :host {
         z-index: 90000;

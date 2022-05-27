@@ -21,12 +21,12 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   static observedOptions?: Set<keyof Record<string, any>>;
 
   /** StyleContent related to component */
-  static get style(): string {
+  static get $style(): string {
     return "";
   }
 
   /** StyleContent related to component & inherrited components */
-  static get styleRoot(): string {
+  static get $styleRoot(): string {
     return `:root {
           --border-radius: 6px;
           --anim-time: 200ms;
@@ -35,7 +35,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   }
 
   /** Get unique id for html elements; Every getter returns new id */
-  static get uniqueId(): string {
+  static get $uniqueId(): string {
     return `wup${++lastUniqueNum}`;
   }
 
@@ -108,17 +108,17 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
       appendedStyles.add(this.tagName);
 
       protos.reverse().forEach((p) => {
-        // append styleRoot
+        // append $styleRoot
         if (!appendedStyles.has(p.name)) {
           appendedStyles.add(p.name);
-          if (Object.prototype.hasOwnProperty.call(p, "styleRoot")) {
-            const s = p.styleRoot;
+          if (Object.prototype.hasOwnProperty.call(p, "$styleRoot")) {
+            const s = p.$styleRoot;
             s && refStyle.append(s);
           }
         }
         // append style by tagName
-        if (Object.prototype.hasOwnProperty.call(p, "style")) {
-          const c = p.style;
+        if (Object.prototype.hasOwnProperty.call(p, "$style")) {
+          const c = p.$style;
           c && refStyle.append(c.replace(/:host/g, `${this.tagName}`));
         }
       });

@@ -149,7 +149,7 @@ export default abstract class WUPBaseControl<
     return ["label", "name", "autoFillName", "disabled", "readOnly", "autoFocus"];
   }
 
-  static get styleRoot(): string {
+  static get $styleRoot(): string {
     return `:root {
         --ctrl-padding: 1.4em 1em 0.6em 1em;
         --ctrl-focus: #00778d;
@@ -168,7 +168,7 @@ export default abstract class WUPBaseControl<
       `;
   }
 
-  static get style(): string {
+  static get $style(): string {
     // WARN: 'contain:style' is tricky rule
     return `
       :host {
@@ -263,12 +263,12 @@ export default abstract class WUPBaseControl<
   /** Default function to compare values/changes;
    *  Redefine it or define valueOf for values; By default values compared by valueOf if it's possible
    */
-  static isEqual(v1: unknown, v2: unknown): boolean {
+  static $isEqual(v1: unknown, v2: unknown): boolean {
     return isEqual(v1, v2);
   }
 
   /** Provide logic to check if control is empty (by comparison with value) */
-  static isEmpty(v: unknown): boolean {
+  static $isEmpty(v: unknown): boolean {
     return v === "" || v === undefined;
   }
 
@@ -278,7 +278,7 @@ export default abstract class WUPBaseControl<
     validityDebounceMs: 500,
     validationCase: ValidationCases.onChangeSmart | ValidationCases.onFocusLost,
     validationRules: {
-      required: (v, setV) => setV && this.isEmpty(v) && "This field is required",
+      required: (v, setV) => setV && this.$isEmpty(v) && "This field is required",
     },
   };
 
@@ -310,7 +310,7 @@ export default abstract class WUPBaseControl<
   }
 
   set $initValue(v: ValueType | undefined) {
-    if (!this.#ctr.isEqual(v, this.#initValue) && !this.$isDirty && this.$isEmpty) {
+    if (!this.#ctr.$isEqual(v, this.#initValue) && !this.$isDirty && this.$isEmpty) {
       // setValue if it's empty and not isDirty
       this.$isReady ? (this.$value = v) : setTimeout(() => (this.$value = v));
     }
@@ -332,14 +332,14 @@ export default abstract class WUPBaseControl<
 
   /** Returns true if value is empty string or undefined */
   get $isEmpty(): boolean {
-    return this.#ctr.isEmpty(this.#value);
+    return this.#ctr.$isEmpty(this.#value);
   }
 
   /** Returns if value changed (by comparisson with $initValue via static.isEqual option)
    *  By default values compared by valueOf if it's possible
    */
   get $isChanged(): boolean {
-    return !this.#ctr.isEqual(this.$value, this.#initValue);
+    return !this.#ctr.$isEqual(this.$value, this.#initValue);
   }
 
   #isValid?: boolean;
@@ -559,7 +559,7 @@ export default abstract class WUPBaseControl<
       p.$options.maxWidthByTarget = true;
       p.setAttribute("error", "");
       p.setAttribute("aria-live", "off"); // 'off' (not 'polite') because popup changes display block>none when it hidden after scrolling
-      p.id = this.#ctr.uniqueId;
+      p.id = this.#ctr.$uniqueId;
       this.$refInput.setAttribute("aria-describedby", p.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
       this.$refError = this.appendChild(p);
       p.addEventListener("click", this.focus);
@@ -591,7 +591,7 @@ export default abstract class WUPBaseControl<
   /** Fire this method to update value & validate */
   protected setValue(v: ValueType | undefined, canValidate = true) {
     this.$isDirty = true;
-    const isChanged = !this.#ctr.isEqual(v, this.#value);
+    const isChanged = !this.#ctr.$isEqual(v, this.#value);
     this.#value = v;
     if (!isChanged) {
       return;

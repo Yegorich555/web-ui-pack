@@ -65,7 +65,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
 
   static observedOptions = (super.observedOptions as Set<keyof WUPSelectControlTypes.Options>).add("items") as any;
 
-  static get styleRoot(): string {
+  static get $styleRoot(): string {
     return `:root {
               --ctrl-combo-icon: var(--cltr-icon);
               --ctrl-combo-icon-size: var(--ctrl-icon-size);
@@ -75,7 +75,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
             }`;
   }
 
-  static get style(): string {
+  static get $style(): string {
     return `
       :host {
         cursor: pointer;
@@ -134,16 +134,16 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
   }
 
   /** Text for listbox when no items are displayed */
-  static textNoItems: string | undefined = "No Items";
+  static $textNoItems: string | undefined = "No Items";
 
   /** Function to filter menuItems based on inputValue; all values are in lowerCase */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  static filterMenuItem(text: string, inputValue: string, inputRawValue: string): boolean {
+  static $filterMenuItem(text: string, inputValue: string, inputRawValue: string): boolean {
     return text.startsWith(inputValue) || text.includes(` ${inputValue}`);
   }
 
   /** Parse/get items from $options.items */
-  static async getMenuItems<T, C extends WUPSelectControl<T>>(ctrl: C): Promise<WUPSelectControlTypes.MenuItems<T>> {
+  static async $getMenuItems<T, C extends WUPSelectControl<T>>(ctrl: C): Promise<WUPSelectControlTypes.MenuItems<T>> {
     if (ctrl._cachedItems) {
       return ctrl._cachedItems;
     }
@@ -170,15 +170,15 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     return arr;
   }
 
-  static provideInputValue<T, C extends WUPTextControl<T>>(v: T | undefined, control: C): string | Promise<string> {
+  static $provideInputValue<T, C extends WUPTextControl<T>>(v: T | undefined, control: C): string | Promise<string> {
     if (v === undefined) {
       return "";
     }
     const ctrl = control as unknown as WUPSelectControl<T>;
 
     const ctr = ctrl.constructor as typeof WUPSelectControl;
-    const r = ctr.getMenuItems<T, WUPSelectControl<T>>(ctrl).then((items) => {
-      const i = (items as WUPSelectControlTypes.MenuItemAny<any>[]).findIndex((o) => ctr.isEqual(o.value, v));
+    const r = ctr.$getMenuItems<T, WUPSelectControl<T>>(ctrl).then((items) => {
+      const i = (items as WUPSelectControlTypes.MenuItemAny<any>[]).findIndex((o) => ctr.$isEqual(o.value, v));
       if (i === -1) {
         console.error(`${ctrl.tagName}.[${ctrl._opts.name}]. Not found in items`, { items, value: v });
         return `Error: not found for ${v}` != null ? (v as any).toString() : "";
@@ -313,14 +313,14 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
       if (liSaved) {
         liSaved.style.display = "none";
       }
-    } else if (this.#ctr.textNoItems) {
+    } else if (this.#ctr.$textNoItems) {
       const liSaved = (this._menuItems as any)._refNoItems as HTMLLIElement;
       if (liSaved) {
         liSaved.style.display = "";
       } else {
         const ul = popup.children.item(0) as HTMLUListElement;
         const li = ul.appendChild(document.createElement("li"));
-        li.textContent = this.#ctr.textNoItems;
+        li.textContent = this.#ctr.$textNoItems;
         li.setAttribute("role", "option");
         li.setAttribute("aria-disabled", "true");
         li.setAttribute("aria-selected", "false");
@@ -353,13 +353,13 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
 
   /** Create menuItems as array of HTMLLiElement with option _text required to filtering by input (otherwise content can be html-structure) */
   protected async renderMenuItems(ul: HTMLUListElement): Promise<Array<HTMLLIElement & { _text: string }>> {
-    const arr = await this.#ctr.getMenuItems<ValueType, this>(this);
+    const arr = await this.#ctr.$getMenuItems<ValueType, this>(this);
 
     const arrLi = arr.map(() => {
       const li = ul.appendChild(document.createElement("li"));
       li.setAttribute("role", "option");
       li.setAttribute("aria-selected", "false");
-      const id = this.#ctr.uniqueId;
+      const id = this.#ctr.$uniqueId;
       li.id = id;
       return li;
     }) as Array<HTMLLIElement & { _text: string }> & { _focused: number; _selected: number };
@@ -431,7 +431,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
       p.setAttribute("menu", "");
       p.$options.animation = WUPPopup.Animations.drawer;
 
-      const menuId = this.#ctr.uniqueId;
+      const menuId = this.#ctr.$uniqueId;
       const i = this.$refInput;
       i.setAttribute("aria-owns", menuId);
       i.setAttribute("aria-controls", menuId);
@@ -464,7 +464,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     // set aria-selected
     const v = this.$value;
     if (v !== undefined) {
-      const i = this._cachedItems!.findIndex((item) => this.#ctr.isEqual(item.value, v));
+      const i = this._cachedItems!.findIndex((item) => this.#ctr.$isEqual(item.value, v));
       this.selectMenuItem(i);
     }
 
@@ -623,7 +623,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
 
     const filtered: number[] = [];
     this._menuItems!.all.forEach((li, i) => {
-      const isOk = this.#ctr.filterMenuItem(li._text, v, rawV);
+      const isOk = this.#ctr.$filterMenuItem(li._text, v, rawV);
       isOk && filtered.push(i);
       li.style.display = isOk ? "" : "none";
     });

@@ -55,7 +55,7 @@ export default class WUPTextControl<
     "hasButtonClear"
   ) as any;
 
-  static get styleRoot(): string {
+  static get $styleRoot(): string {
     return `:root {
       --ctrl-btn-clear-hover: rgba(255, 0, 0, 0.1);
       --ctrl-icon-hover-size: 10px;
@@ -63,7 +63,7 @@ export default class WUPTextControl<
   }
 
   /** StyleContent related to component */
-  static get style(): string {
+  static get $style(): string {
     return `
         :host {
           cursor: text;
@@ -189,7 +189,7 @@ export default class WUPTextControl<
 
   /** Get rawValue for input based on argument [value] */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  static provideInputValue<T, C extends WUPTextControl<T>>(v: T | undefined, ctrl: C): string | Promise<string> {
+  static $provideInputValue<T, C extends WUPTextControl<T>>(v: T | undefined, ctrl: C): string | Promise<string> {
     return v != null ? (v as any).toString() : "";
   }
 
@@ -222,7 +222,7 @@ export default class WUPTextControl<
   }
 
   protected override renderControl() {
-    this.$refInput.id = this.#ctr.uniqueId;
+    this.$refInput.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", this.$refInput.id);
 
     const s = this.$refLabel.appendChild(document.createElement("span"));
@@ -287,7 +287,7 @@ export default class WUPTextControl<
   }
 
   protected setInputValue(v: ValueType | undefined) {
-    const p = this.#ctr.provideInputValue(v, this);
+    const p = this.#ctr.$provideInputValue(v, this);
     if (p instanceof Promise) {
       p.then((s) => (this.$refInput.value = s));
     } else {

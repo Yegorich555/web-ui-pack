@@ -302,11 +302,11 @@ describe("baseElement", () => {
     expect(style.lastIndexOf("t-a")).toBe(style.indexOf("t-a")); // checking if style applied once
 
     class TestB extends TestA {
-      static get style() {
+      static get $style() {
         return ":host { position: my-absolute }";
       }
 
-      static get styleRoot() {
+      static get $styleRoot() {
         return ":root { main-color: my-red }";
       }
     }
@@ -317,11 +317,11 @@ describe("baseElement", () => {
     expect(style).toContain(":root { main-color: my-red }");
 
     class TestC extends TestB {
-      static get style() {
+      static get $style() {
         return ":host { z-index: me }";
       }
 
-      static get styleRoot() {
+      static get $styleRoot() {
         return ":root { vis: im here }";
       }
     }
