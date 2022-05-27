@@ -106,7 +106,9 @@ export default function popupListenTarget(
   }
 
   // add event by popup.onShow and remove by onHide
-  function onShowEvent<K extends keyof HTMLElementEventMap>(...args: Parameters<onEventType<K, Document>>) {
+  function onShowEvent<K extends keyof HTMLElementEventMap>(
+    ...args: Parameters<onEventType<K, Document | HTMLElement>>
+  ) {
     onShowCallbacks.push(() => onEvent(...args));
   }
 
@@ -128,6 +130,8 @@ export default function popupListenTarget(
       }
     });
 
+    let wasTargetMouseDown = false; // fix when user makes t.mousedown, mousemove, body.mouseup
+    onShowEvent(t, "mousedown", () => (wasTargetMouseDown = true));
     onShowEvent(document, "click", (e) => {
       preventClickAfterFocus = false; // mostly it doesn't make sense but maybe it's possible
       // filter click from target because we have target event for this
@@ -137,13 +141,15 @@ export default function popupListenTarget(
         if (isMeClick) {
           focusFirst(lastActive || t);
           hide(WUPPopup.HideCases.onPopupClick, e);
-        } else {
-          // todo it's wrong if user tries to select text and makes t.mousedown, mousemove, body.mouseup. maybe use mousedown instead ?
+        } else if (!wasTargetMouseDown) {
           hide(WUPPopup.HideCases.onOutsideClick, e);
           wasOutsideClick = true;
           setTimeout(() => (wasOutsideClick = false), 50);
+        } else {
+          (popupListenTarget as any)._prevSel = getSelection(e);
         }
       }
+      wasTargetMouseDown = false;
     });
 
     (popupListenTarget as any)._prevSel = getSelection(null);

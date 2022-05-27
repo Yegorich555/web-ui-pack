@@ -1751,4 +1751,37 @@ describe("popupElement", () => {
     await wait(100);
     expect(el.$isOpen).toBeTruthy(); // because 2nd click is filtered
   });
+
+  test("target.mousedown > mousemove > body.mouseup", async () => {
+    await el.$hide();
+    el.$options.showCase = 1 << 2; // click
+    await wait();
+    expect(el.$isOpen).toBeFalsy();
+
+    trg.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    await wait(30);
+    trg.dispatchEvent(new MouseEvent("mousemove", { bubbles: true }));
+    await wait(100);
+    document.body.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+    document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await wait(300);
+    expect(el.$isOpen).toBeFalsy(); // because click cancelled outside target
+
+    trg.click();
+    await wait(300);
+    expect(el.$isOpen).toBeTruthy(); // because click cancelled outside target
+
+    trg.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    await wait(30);
+    trg.dispatchEvent(new MouseEvent("mousemove", { bubbles: true }));
+    await wait(100);
+    document.body.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+    document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await wait(300);
+    expect(el.$isOpen).toBeTruthy(); // because click cancelled outside target
+
+    trg.click();
+    await wait(300);
+    expect(el.$isOpen).toBeFalsy(); // because click cancelled outside target
+  });
 });
