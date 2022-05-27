@@ -8,25 +8,14 @@ import onEvent, { onEventType } from "./helpers/onEvent";
 
 // theoritcally such single appending is faster than using :host inside shadowComponent
 const appendedStyles = new Set<string>();
-const styleElement = document.createElement("style");
-
-/* from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility  */
-// styleElement can be undefined during the tests
-styleElement?.append(`.wup-hidden {
-                        position: absolute;
-                        height: 1px;
-                        width: 1px;
-                        overflow: hidden;
-                        clip: rect(1px, 1px, 1px, 1px);
-                      }`);
-document.head.prepend(styleElement);
-
 let lastUniqueNum = 0;
 
 /** Basic abstract class for every component in web-ui-pack */
 export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.EventMap> extends HTMLElement {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseElement;
+
+  static $refStyle: HTMLStyleElement;
 
   /** Options that need to watch for changes; use gotOptionsChanged() */
   static observedOptions?: Set<keyof Record<string, any>>;
@@ -55,6 +44,20 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
 
   constructor() {
     super();
+
+    if (!this.#ctr.$refStyle) {
+      this.#ctr.$refStyle = document.createElement("style");
+      /* from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility  */
+      this.#ctr.$refStyle.append(`.wup-hidden {
+                        position: absolute;
+                        height: 1px;
+                        width: 1px;
+                        overflow: hidden;
+                        clip: rect(1px, 1px, 1px, 1px);
+                      }`);
+      document.head.prepend(this.#ctr.$refStyle);
+    }
+    const refStyle = this.#ctr.$refStyle;
 
     const protos: typeof WUPBaseElement[] = [];
     // autoBind functions (recursive until HMTLElement)
@@ -110,13 +113,13 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
           appendedStyles.add(p.name);
           if (Object.prototype.hasOwnProperty.call(p, "styleRoot")) {
             const s = p.styleRoot;
-            s && styleElement.append(s);
+            s && refStyle.append(s);
           }
         }
         // append style by tagName
         if (Object.prototype.hasOwnProperty.call(p, "style")) {
           const c = p.style;
-          c && styleElement.append(c.replace(/:host/g, `${this.tagName}`));
+          c && refStyle.append(c.replace(/:host/g, `${this.tagName}`));
         }
       });
     }

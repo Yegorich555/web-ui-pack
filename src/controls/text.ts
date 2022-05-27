@@ -314,12 +314,12 @@ declare global {
 }
 
 // todo remove after tests
-const el = document.createElement(tagName);
-el.$options.name = "testMe";
-el.$options.validations = {
-  required: true,
-  max: 2,
-  min: (v) => v.length > 500 && "This is error",
-  extra: (v) => "test Me",
-};
+// const el = document.createElement(tagName);
+// el.$options.name = "testMe";
+// el.$options.validations = {
+//   required: true,
+//   max: 2,
+//   min: (v) => v.length > 500 && "This is error",
+//   extra: (v) => "test Me",
+// };
 // el.$validate();

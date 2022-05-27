@@ -208,6 +208,23 @@ describe("baseElement", () => {
     expect(fn.mock.calls[0][0].bubbles).toBeTruthy();
   });
 
+  test("static.uniqueId", () => {
+    expect(WUPBaseElement.uniqueId).toBeDefined();
+    expect(WUPBaseElement.uniqueId).not.toBe(WUPBaseElement.uniqueId);
+    expect(WUPBaseElement.uniqueId).not.toBe(WUPBaseElement.uniqueId);
+    expect(WUPBaseElement.uniqueId).not.toBe(WUPBaseElement.uniqueId);
+  });
+
+  test("focus", () => {
+    class Test extends WUPBaseElement {}
+    customElements.define("test-el", Test);
+    const tst = document.body.appendChild(document.createElement("test-el"));
+    expect(document.activeElement).not.toBe(tst);
+    const btn = tst.appendChild(document.createElement("button"));
+    tst.focus();
+    expect(document.activeElement).toBe(btn);
+  });
+
   test("gotOptionsChanged", () => {
     class Test extends WUPBaseElement {
       $options = {};
@@ -265,5 +282,68 @@ describe("baseElement", () => {
     t2.$options.to = "str";
     jest.advanceTimersToNextTimer();
     expect(fnT2).toBeCalled(); // just for coverage when observedOptions is empty
+  });
+
+  test("style inherritance", () => {
+    expect(WUPBaseElement.style).toBeDefined();
+    expect(WUPBaseElement.styleRoot).toBeTruthy();
+    jest.spyOn(WUPBaseElement, "style", "get").mockReturnValue(":host { display: block }");
+
+    //  case when no new styles defined
+    class TestA extends WUPBaseElement {}
+    customElements.define("t-a", TestA);
+    document.body.appendChild(document.createElement("t-a"));
+    expect(WUPBaseElement.$refStyle).toBeDefined();
+    expect(TestA.$refStyle).toBeDefined();
+
+    let style = TestA.$refStyle.textContent.toLowerCase();
+    expect(style).toContain(WUPBaseElement.styleRoot);
+    expect(style).toContain("t-a { display: block }");
+    expect(style.lastIndexOf("t-a")).toBe(style.indexOf("t-a")); // checking if style applied once
+
+    class TestB extends TestA {
+      static get style() {
+        return ":host { position: my-absolute }";
+      }
+
+      static get styleRoot() {
+        return ":root { main-color: my-red }";
+      }
+    }
+    customElements.define("t-b", TestB);
+    document.body.appendChild(document.createElement("t-b"));
+    style = TestB.$refStyle.textContent.toLowerCase();
+    expect(style).toContain("t-b { position: my-absolute }");
+    expect(style).toContain(":root { main-color: my-red }");
+
+    class TestC extends TestB {
+      static get style() {
+        return ":host { z-index: me }";
+      }
+
+      static get styleRoot() {
+        return ":root { vis: im here }";
+      }
+    }
+    customElements.define("t-c", TestC);
+    document.body.appendChild(document.createElement("t-c"));
+    style = TestC.$refStyle.textContent.toLowerCase();
+    expect(style).toContain("t-c { position: my-absolute }");
+    expect(style).toContain(":root { main-color: my-red }");
+    expect(style).toContain("t-c { z-index: me }");
+    expect(style).toContain(":root { vis: im here }");
+
+    class TestD extends TestC {}
+    customElements.define("t-d", TestD);
+    document.body.appendChild(document.createElement("t-d"));
+    style = TestC.$refStyle.textContent.toLowerCase();
+    expect(style).toContain("t-d { position: my-absolute }");
+    expect(style).toContain(":root { main-color: my-red }");
+    expect(style).toContain("t-d { z-index: me }");
+    expect(style).toContain(":root { vis: im here }");
+
+    expect(style.lastIndexOf("t-a")).toBe(style.indexOf("t-a")); // checking if style applied once
+    expect(style.lastIndexOf("t-c { z-index: me }")).toBe(style.indexOf("t-c { z-index: me }")); // checking if style applied once
+    expect(style.lastIndexOf(":root { vis: im here }")).toBe(style.indexOf(":root { vis: im here }")); // checking if style applied once
   });
 });
