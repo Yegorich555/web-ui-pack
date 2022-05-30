@@ -296,7 +296,7 @@ export default class WUPTextControl<
   }
 }
 
-const tagName = "wup-text-ctrl";
+const tagName = "wup-text";
 customElements.define(tagName, WUPTextControl);
 
 declare global {

@@ -9,7 +9,7 @@ export default function ControlsView() {
   return (
     <Page header="Controls" link="#textControl">
       <form autoComplete="off">
-        <wup-text-ctrl
+        <wup-text
           ref={(el) => {
             if (el) {
               el.$options.label =
@@ -24,7 +24,7 @@ export default function ControlsView() {
             }
           }}
         />
-        <wup-text-ctrl
+        <wup-text
           ref={(el) => {
             if (el) {
               el.$options.label = "TextControl - readonly";
@@ -34,7 +34,7 @@ export default function ControlsView() {
             }
           }}
         />
-        <wup-text-ctrl
+        <wup-text
           ref={(el) => {
             if (el) {
               el.$options.label = "TextControl - disabled";
