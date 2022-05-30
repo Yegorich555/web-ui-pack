@@ -404,9 +404,9 @@ export default abstract class WUPBaseControl<
     this._opts.label = this.getAttribute("label") ?? this._opts.label;
     this._opts.name = this.getAttribute("name") ?? this._opts.name;
     this._opts.autoFillName = this.getAttribute("autoFillName") ?? this._opts.autoFillName;
-    this._opts.disabled = this.getAttribute("disabled") != null ? true : this._opts.disabled;
-    this._opts.readOnly = this.getAttribute("readOnly") != null ? true : this._opts.readOnly;
-    this._opts.autoFocus = this.getAttribute("autoFocus") != null ? true : this._opts.autoFocus;
+    this._opts.disabled = this.getBoolAttr("disabled", this._opts.disabled);
+    this._opts.readOnly = this.getBoolAttr("readOnly", this._opts.readOnly);
+    this._opts.autoFocus = this.getBoolAttr("autoFocus", this._opts.autoFocus);
 
     this.$refTitle.textContent = this._opts.label || null;
     const r = this.$refInput;
@@ -429,16 +429,16 @@ export default abstract class WUPBaseControl<
       const required = this._opts.validations?.required;
       r.required = required ? (required as any) !== false : false;
       r.disabled = this._opts.disabled as boolean;
-      r.readOnly = this._opts.readOnly as boolean;
+      r.readOnly = this._opts.readOnly ?? (this.$form?.$options.readOnly as boolean);
     }
 
     this.#isStopAttrListen = true;
-    this._opts.disabled ? this.setAttribute("disabled", "") : this.removeAttribute("disabled");
-    this._opts.readOnly ? this.setAttribute("readOnly", "") : this.removeAttribute("readOnly");
+    this.setBoolAttr("disabled", this._opts.disabled);
+    this.setBoolAttr("readOnly", this._opts.readOnly);
     this.#isStopAttrListen = false;
   }
 
-  /** Use this to append elements; fired single time when element isConnected but not ready yet */
+  /** Use this to append elements; fired single time when element isConnected/appended to layout but not ready yet */
   protected abstract renderControl(): void;
 
   protected override gotReady() {

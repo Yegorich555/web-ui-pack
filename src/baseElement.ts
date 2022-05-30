@@ -15,10 +15,10 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseElement;
 
-  static $refStyle: HTMLStyleElement;
-
   /** Options that need to watch for changes; use gotOptionsChanged() */
   static observedOptions?: Set<keyof Record<string, any>>;
+
+  static $refStyle: HTMLStyleElement;
 
   /** StyleContent related to component */
   static get $style(): string {
@@ -275,6 +275,19 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   /** Returns true if el is instance of Node and contains pointer element */
   includes(el: unknown): boolean {
     return el instanceof Node && this.contains(el);
+  }
+
+  /** Parse attribute and return result */
+  getBoolAttr(attr: string, alt: boolean): boolean;
+  getBoolAttr(attr: string, alt: boolean | undefined): boolean | undefined;
+  getBoolAttr(attr: string, alt: boolean | undefined): boolean | undefined {
+    const a = this.getAttribute(attr);
+    return a === null ? alt : a !== "false";
+  }
+
+  /* Remove or set empty attribute based on 2nd argument */
+  setBoolAttr(attr: string, isTrue: boolean | undefined): void {
+    isTrue ? this.setAttribute(attr, "") : this.removeAttribute(attr);
   }
 }
 
