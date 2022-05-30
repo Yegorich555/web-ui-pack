@@ -1,4 +1,5 @@
 /* eslint-disable no-use-before-define */
+import { JSXCustomProps } from "../baseElement";
 import onFocusGot from "../helpers/onFocusGot";
 import { onEvent } from "../indexHelpers";
 import WUPBaseControl, { WUPBaseControlTypes } from "./baseControl";
@@ -34,6 +35,7 @@ export namespace WUPTextControlTypes {
   export type Validation<T = string> = Generics<T>["Validation"];
   export type Defaults<T = string> = Generics<T>["Defaults"];
   export type Options<T = string> = Generics<T>["Options"];
+  export type JSXControlProps<T extends WUPTextControl> = JSXCustomProps<T>;
 }
 /**
  * @tutorial innerHTML @example
@@ -308,7 +310,7 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUPBaseControlTypes.JSXControlProps<WUPTextControl>;
+      [tagName]: WUPTextControlTypes.JSXControlProps<WUPTextControl>;
     }
   }
 }

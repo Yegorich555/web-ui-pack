@@ -57,6 +57,11 @@ export namespace WUPSelectControlTypes {
   export type Validation<T = any> = Generics<T>["Validation"];
   export type Defaults<T = any> = Generics<T>["Defaults"];
   export type Options<T = any> = Generics<T>["Options"];
+
+  export type JSXControlProps<T extends WUPSelectControl> = WUPTextControlTypes.JSXControlProps<T> & {
+    /** @readonly Use [opened] for styling */
+    readonly opened?: boolean;
+  };
 }
 
 export default class WUPSelectControl<ValueType = any> extends WUPTextControl<ValueType> {
@@ -682,10 +687,7 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUPBaseControlTypes.JSXControlProps<WUPSelectControl> & {
-        /** @readonly Use [opened] for styling */
-        readonly opened?: boolean;
-      };
+      [tagName]: WUPSelectControlTypes.JSXControlProps<WUPSelectControl>;
     }
   }
 }
@@ -699,4 +701,4 @@ declare global {
 //   extra: (v) => "test Me",
 // };
 
-// testcase (impossible to close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click
+// testcase (close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click
