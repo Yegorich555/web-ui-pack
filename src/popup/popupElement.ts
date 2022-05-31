@@ -2,7 +2,7 @@
 import WUPBaseElement, { JSXCustomProps, WUP } from "../baseElement";
 import { WUPPopup } from "./popupElement.types";
 import { getBoundingInternalRect, PopupPlacements, px2Number, WUPPopupPlace } from "./popupPlacements";
-import findScrollParent from "../helpers/findScrollParent";
+import { findScrollParentAll } from "../helpers/findScrollParent";
 import WUPPopupArrowElement from "./popupArrowElement";
 import popupListenTarget from "./popupListenTarget";
 
@@ -471,16 +471,7 @@ export default class WUPPopupElement<
       this.style.animationName = ""; // reset to default if previosly animation was added
     }
 
-    this.#scrollParents = [];
-    // eslint-disable-next-line no-constant-condition
-    let l = this._opts.target;
-    while (l && l !== document.body.parentElement) {
-      const s = findScrollParent(l);
-      s && this.#scrollParents.push(s);
-      l = l.parentElement as HTMLElement;
-    }
-    this.#scrollParents = this.#scrollParents.length ? this.#scrollParents : undefined;
-
+    this.#scrollParents = findScrollParentAll(this._opts.target) ?? undefined;
     // get arrowSize
     if (this._opts.arrowEnable) {
       const el = document.createElement(WUPPopupArrowElement.tagName);

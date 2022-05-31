@@ -20,3 +20,16 @@ export default function findScrollParent(el: HTMLElement): HTMLElement | null {
   }
   return findScrollParent(p);
 }
+
+/** Find all parents with active scroll X/Y */
+export function findScrollParentAll(el: HTMLElement): HTMLElement[] | null {
+  let l: HTMLElement | null = el;
+  const root = document.body.parentElement;
+  const arr = [];
+  while (l && l !== root) {
+    const s = findScrollParent(l);
+    s && arr.push(s);
+    l = l.parentElement;
+  }
+  return arr.length ? arr : null;
+}
