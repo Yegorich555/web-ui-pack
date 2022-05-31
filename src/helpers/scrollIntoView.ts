@@ -28,6 +28,9 @@ export default function scrollIntoView(el: HTMLElement, options?: WUPScrollOptio
   const elRect = el.getBoundingClientRect();
   const pRect = p.getBoundingClientRect();
 
+  const offsetTop = opts.offsetTop ?? 0;
+  const offsetLeft = opts.offsetTop ?? 0;
+
   const diffTop = elRect.top - pRect.top + (opts.offsetTop ?? 0);
   const diffLeft = elRect.left - pRect.left + (opts.offsetLeft ?? 0);
 
@@ -36,9 +39,13 @@ export default function scrollIntoView(el: HTMLElement, options?: WUPScrollOptio
     return Promise.resolve();
   }
 
-  if (opts.onlyIfNeeded && isIntoView(el, { scrollParents: [p] }).visible) {
+  const viewResult = isIntoView(el, { scrollParents: [p], offset: [-offsetTop, -offsetLeft] });
+  if (opts.onlyIfNeeded && viewResult.visible) {
     return Promise.resolve();
   }
+
+  const needY = viewResult.hiddenY || viewResult.partialHiddenY;
+  const needX = viewResult.hiddenX || viewResult.partialHiddenX;
 
   const scrollTopEnd = p.scrollHeight - p.offsetHeight;
   const toTop = Math.min(scrollTopEnd, Math.max(0, fromTop + diffTop));
