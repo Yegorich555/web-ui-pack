@@ -86,6 +86,7 @@ export function px2Number(styleValue: string): number {
 
 /* Returns bounding rectangular without borders and scroll (simulate box-sizing: border-box) */
 export function getBoundingInternalRect(el: HTMLElement): Omit<WUPPopupPlace.Rect, "el"> {
+  // todo cache for cases when it's called several time from different functions
   const { borderTopWidth, borderLeftWidth } = getComputedStyle(el);
   let { left, top } = el.getBoundingClientRect();
   top += px2Number(borderTopWidth);

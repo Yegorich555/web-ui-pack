@@ -36,7 +36,7 @@ export default function scrollIntoView(el: HTMLElement, options?: WUPScrollOptio
     return Promise.resolve();
   }
 
-  if (opts.onlyIfNeeded && isIntoView(el, [p])) {
+  if (opts.onlyIfNeeded && isIntoView(el, { scrollParents: [p] }).visible) {
     return Promise.resolve();
   }
 
