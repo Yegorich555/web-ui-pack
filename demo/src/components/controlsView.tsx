@@ -8,8 +8,19 @@ const sideEffect = WUPTextControl && WUPSelectControl;
 export default function ControlsView() {
   return (
     <Page header="Controls" link="#textControl">
-      <form autoComplete="off">
+      <wup-form
+        ref={(el) => {
+          if (el) {
+            el.$initModel = { in2: "val2" };
+          }
+        }}
+      >
+        <button type="submit" style={{ marginBottom: "1300px" }}>
+          Submit
+        </button>
+
         <wup-text
+          style={{ marginBottom: "1300px" }}
           ref={(el) => {
             if (el) {
               el.$options.label =
@@ -19,7 +30,9 @@ export default function ControlsView() {
                 max: 10,
                 min: (v) => v.length < 2 && "This is custom error",
               };
-              el.$initValue = "init value";
+              // todo initValue can't override initmodel upper
+              // el.$initValue = "init value";
+              el.$options.name = "in1";
               // el.$showError("Very huge big message Very huge big message Very huge big message Very huge big message");
             }
           }}
@@ -31,6 +44,7 @@ export default function ControlsView() {
               el.$options.readOnly = true;
               el.$initValue = "init value here";
               el.$options.hasButtonClear = false;
+              el.$options.name = "in2";
             }
           }}
         />
@@ -264,7 +278,8 @@ export default function ControlsView() {
             </label>
           </fieldset>
         </div>
-      </form>
+        <button type="submit">Submit</button>
+      </wup-form>
     </Page>
   );
 }

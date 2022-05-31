@@ -1,9 +1,11 @@
 /* eslint-disable no-use-before-define */
 import WUPBaseElement, { JSXCustomProps, WUP } from "../baseElement";
+import WUPFormElement from "../forms/form";
 import isEqual from "../helpers/isEqual";
 import onFocusLostEv from "../helpers/onFocusLost";
 // eslint-disable-next-line import/named
 import WUPPopupElement, { ShowCases } from "../popup/popupElement";
+import IBaseControl from "./baseControl.i";
 
 /** Cases of validation for WUP Controls */
 export const enum ValidationCases {
@@ -129,9 +131,12 @@ export namespace WUPBaseControlTypes {
 }
 
 export default abstract class WUPBaseControl<
-  ValueType = any,
-  Events extends WUPBaseControlTypes.EventMap = WUPBaseControlTypes.EventMap
-> extends WUPBaseElement<Events> {
+    ValueType = any,
+    Events extends WUPBaseControlTypes.EventMap = WUPBaseControlTypes.EventMap
+  >
+  extends WUPBaseElement<Events>
+  implements IBaseControl<ValueType>
+{
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseControl;
 
@@ -194,12 +199,14 @@ export default abstract class WUPBaseControl<
       :host input:focus + * {
         color: var(--ctrl-focus-label);
       }
+      [disabled]>:host,
       :host[disabled] {
         opacity: 0.8;
         cursor: not-allowed;
         -webkit-user-select: none;
         user-select: none;
       }
+      [disabled]>:host,
       :host[disabled] > * {
         pointer-events: none;
       }
@@ -310,9 +317,9 @@ export default abstract class WUPBaseControl<
   }
 
   set $initValue(v: ValueType | undefined) {
-    if (!this.#ctr.$isEqual(v, this.#initValue) && !this.$isDirty && this.$isEmpty) {
+    if (!this.$isReady || (!this.#ctr.$isEqual(v, this.#initValue) && !this.$isDirty && this.$isEmpty)) {
       // setValue if it's empty and not isDirty
-      this.$isReady ? (this.$value = v) : setTimeout(() => (this.$value = v));
+      this.$value = v;
     }
     this.#initValue = v;
   }
@@ -371,6 +378,8 @@ export default abstract class WUPBaseControl<
   $hideError(): void {
     return this.goHideError();
   }
+
+  $form?: WUPFormElement;
 
   /** Reference to nested HTMLElement */
   $refLabel = document.createElement("label");
@@ -465,12 +474,17 @@ export default abstract class WUPBaseControl<
   #isFirstConn = true;
   protected override connectedCallback() {
     super.connectedCallback();
-
     if (this.#isFirstConn) {
       this.#isFirstConn = false;
       this.renderControl();
-      (this.autofocus || this.$options.autoFocus) && setTimeout(this.focus); // timeout requires to wait for apply options
     }
+    this.$form = WUPFormElement.$tryConnect(this);
+    setTimeout(() => this._opts.autoFocus && this.focus()); // timeout requires to wait for apply options
+  }
+
+  protected disconnectedCallback() {
+    super.disconnectedCallback();
+    this.$form?.$controls.splice(this.$form.$controls.indexOf(this), 1);
   }
 
   #wasValid = false;
@@ -486,6 +500,7 @@ export default abstract class WUPBaseControl<
     let errMsg = "";
     const v = this.$value as unknown as string;
 
+    // todo validate required first ????
     Object.keys(vls).some((k) => {
       const vl = vls[k as "required"];
 
@@ -590,15 +605,21 @@ export default abstract class WUPBaseControl<
 
   /** Fire this method to update value & validate */
   protected setValue(v: ValueType | undefined, canValidate = true) {
-    this.$isDirty = true;
-    const isChanged = !this.#ctr.$isEqual(v, this.#value);
+    const was = this.#value;
     this.#value = v;
+    if (!this.$isReady) {
+      return;
+    }
+
+    this.$isDirty = true;
+    const isChanged = !this.#ctr.$isEqual(v, was);
+
     if (!isChanged) {
       return;
     }
 
     const c = this._opts.validationCase;
-    if (canValidate && (c & ValidationCases.onChange || c & ValidationCases.onChangeSmart)) {
+    if (this.$isReady && canValidate && (c & ValidationCases.onChange || c & ValidationCases.onChangeSmart)) {
       this.goValidate(WUPBaseControlTypes.ValidateFromCases.onInput);
     }
     this.fireEvent("$change", { cancelable: false });
