@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 import WUPBaseElement, { JSXCustomProps, WUP } from "../baseElement";
 import IBaseControl from "../controls/baseControl.i";
-import { scrollIntoView } from "../indexHelpers";
+import { nestedProperty, scrollIntoView } from "../indexHelpers";
 
 export namespace WUPFormTypes {
   export const enum SubmitActions {
@@ -95,7 +95,7 @@ export default class WUPFormElement<
 
       const k = control.$options.name;
       if (k && form._initModel) {
-        control.$initValue = form._initModel[k];
+        control.$initValue = nestedProperty.get(form._initModel, k);
       }
       if (form._opts.readOnly !== undefined) {
         control.$options.readOnly = form._opts.readOnly;
@@ -109,8 +109,9 @@ export default class WUPFormElement<
   static $modelToControls<T>(m: T, controls: IBaseControl[], prop: keyof Pick<IBaseControl, "$value" | "$initValue">) {
     controls.forEach((c) => {
       const key = c.$options.name;
-      if (key && key in m) {
-        c[prop] = (m as any)[key];
+      if (key) {
+        // todo we need to ignore case when model = { v1: "t1" }, but reset control with name 'v2'
+        c[prop] = nestedProperty.get(m, key);
       }
     });
   }
@@ -118,14 +119,15 @@ export default class WUPFormElement<
   /** Collect model from control-values */
   static $modelFromControls<T>(
     controls: IBaseControl[],
-    prop: keyof Pick<IBaseControl, "$value" | "$initValue">
+    prop: keyof Pick<IBaseControl, "$value" | "$initValue">,
+    isOnlyChanged?: boolean
   ): Partial<T> {
     const m: Partial<T> = {};
-    controls.forEach((c) => {
-      if (c.$options.name) {
-        (m as any)[c.$options.name] = c[prop];
-      }
-    });
+    if (isOnlyChanged) {
+      controls.forEach((c) => c.$options.name && c.$isChanged && nestedProperty.set(m, c.$options.name, c[prop]));
+    } else {
+      controls.forEach((c) => c.$options.name && nestedProperty.set(m, c.$options.name, c[prop]));
+    }
     return m;
   }
 
@@ -203,14 +205,8 @@ export default class WUPFormElement<
     }
 
     // collect values to model
-    const m = this.#ctr.$modelFromControls(this.$controls, "$value");
-    if (this._opts.submitActions & WUPFormTypes.SubmitActions.collectChanged) {
-      this.$controls.forEach((c) => {
-        if (c.$options.name && !c.$isChanged) {
-          delete (m as any)[c.$options.name];
-        }
-      });
-    }
+    const onlyChanged = this._opts.submitActions & WUPFormTypes.SubmitActions.collectChanged;
+    const m = this.#ctr.$modelFromControls(this.$controls, "$value", onlyChanged);
 
     // fire events
     const ev = new Event("$submit", { cancelable: false, bubbles: true }) as WUPFormTypes.SubmitEvent<Model>;
@@ -324,3 +320,5 @@ declare global {
     }
   }
 }
+
+// testcase: check if set model={v: 1} shouldn't reset control with other names

@@ -11,16 +11,13 @@ export default function ControlsView() {
       <wup-form
         ref={(el) => {
           if (el) {
-            el.$initModel = { in2: "val2" };
+            el.$initModel = { in1: "val1", in2: "val2" };
           }
         }}
       >
-        <button type="submit" style={{ marginBottom: "300px" }}>
-          Submit
-        </button>
+        <button type="submit">Submit</button>
 
         <wup-text
-          style={{ marginBottom: "1300px" }}
           ref={(el) => {
             if (el) {
               el.$options.label =
