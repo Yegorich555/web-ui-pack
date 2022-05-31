@@ -23,13 +23,17 @@ export default function scrollIntoView(el: HTMLElement, options?: WUPScrollOptio
   if (!p) {
     return Promise.resolve();
   }
-  const fromTop = p.scrollTop;
-  const fromLeft = p.scrollLeft;
-  const elRect = el.getBoundingClientRect();
-  const pRect = p.getBoundingClientRect();
 
   const offsetTop = opts.offsetTop ?? 0;
   const offsetLeft = opts.offsetTop ?? 0;
+
+  const viewResult = isIntoView(el, { scrollParents: [p], offset: [-offsetTop, -offsetLeft] });
+  if (opts.onlyIfNeeded && viewResult.visible) {
+    return Promise.resolve();
+  }
+
+  const elRect = el.getBoundingClientRect();
+  const pRect = p.getBoundingClientRect();
 
   const diffTop = elRect.top - pRect.top + (opts.offsetTop ?? 0);
   const diffLeft = elRect.left - pRect.left + (opts.offsetLeft ?? 0);
@@ -39,10 +43,8 @@ export default function scrollIntoView(el: HTMLElement, options?: WUPScrollOptio
     return Promise.resolve();
   }
 
-  const viewResult = isIntoView(el, { scrollParents: [p], offset: [-offsetTop, -offsetLeft] });
-  if (opts.onlyIfNeeded && viewResult.visible) {
-    return Promise.resolve();
-  }
+  const fromTop = p.scrollTop;
+  const fromLeft = p.scrollLeft;
 
   const needY = viewResult.hiddenY || viewResult.partialHiddenY;
   const needX = viewResult.hiddenX || viewResult.partialHiddenX;
