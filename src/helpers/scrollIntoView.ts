@@ -10,26 +10,29 @@ export interface WUPScrollOptions {
   offsetTop?: number;
   /** Offset that must be applied to scrollLeft;
    * @defaultValue -30 */
-  // todo offsetLeft?: number;
-
+  offsetLeft?: number;
   /** Scroll only if element out of view;
    * @defaultValue true */
   onlyIfNeeded?: boolean;
 }
 
-/** Scroll the HTMLElement element's parent container such that the element is visible to the user;
- * Returns promise that resolved when scroll-animation is finished */
+/** Scroll the HTMLElement's parent container such that the element is visible to the user and return promise by animation end */
 export default function scrollIntoView(el: HTMLElement, options?: WUPScrollOptions): Promise<void> {
-  const opts: WUPScrollOptions = { smoothMs: 400, offsetTop: 30, onlyIfNeeded: true, ...options };
+  const opts: WUPScrollOptions = { smoothMs: 400, offsetTop: -30, offsetLeft: -30, onlyIfNeeded: true, ...options };
   const p = findScrollParent(el);
   if (!p) {
     return Promise.resolve();
   }
-  const from = p.scrollTop;
-  const diff = el.getBoundingClientRect().top - p.getBoundingClientRect().top + (opts.offsetTop ?? 0);
+  const fromTop = p.scrollTop;
+  const fromLeft = p.scrollLeft;
+  const elRect = el.getBoundingClientRect();
+  const pRect = p.getBoundingClientRect();
+
+  const diffTop = elRect.top - pRect.top + (opts.offsetTop ?? 0);
+  const diffLeft = elRect.left - pRect.left + (opts.offsetLeft ?? 0);
 
   if (!opts.smoothMs) {
-    p.scrollBy({ top: diff, behavior: "auto" });
+    p.scrollBy({ top: diffTop, left: diffLeft, behavior: "auto" });
     return Promise.resolve();
   }
 
@@ -37,23 +40,26 @@ export default function scrollIntoView(el: HTMLElement, options?: WUPScrollOptio
     return Promise.resolve();
   }
 
-  const scrollEnd = p.scrollHeight - p.offsetHeight;
-  const to = Math.min(scrollEnd, Math.max(0, from + diff));
+  const scrollTopEnd = p.scrollHeight - p.offsetHeight;
+  const toTop = Math.min(scrollTopEnd, Math.max(0, fromTop + diffTop));
+
+  const scrollLeftEnd = p.scrollWidth - p.offsetWidth;
+  const toLeft = Math.min(scrollLeftEnd, Math.max(0, fromLeft + diffLeft));
+
   const animTime = opts.smoothMs;
   return new Promise((resolve) => {
-    let i = from;
     let start = 0;
     const animate = (t: DOMHighResTimeStamp) => {
-      from < to ? ++i : --i;
-
       if (!start) {
         start = t;
       }
 
       const cur = Math.min(t - start, animTime); // to make sure the element stops at exactly pointed value
       const v = cur / animTime;
-      const result = from + (to - from) * v;
-      p.scrollTo({ top: result });
+      const resTop = fromTop + (toTop - fromTop) * v;
+      const resLeft = fromLeft + (toLeft - fromLeft) * v;
+      // todo we don't need scrollLeft if onlyIfNeeded true and left scroll is ok
+      p.scrollTo({ top: resTop, left: resLeft });
 
       if (cur === animTime) {
         resolve();
