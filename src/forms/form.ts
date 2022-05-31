@@ -197,8 +197,7 @@ export default class WUPFormElement<
     if (errCtrl) {
       if (this._opts.submitActions & WUPFormTypes.SubmitActions.goToError) {
         const el = errCtrl;
-        // todo implement focus-smooth
-        scrollIntoView(el, { offsetTop: -30, smoothMs: 300, onlyIfNeeded: true }).then(() => el.focus());
+        scrollIntoView(el, { offsetTop: -30, onlyIfNeeded: true }).then(() => el.focus());
       }
       return;
     }
