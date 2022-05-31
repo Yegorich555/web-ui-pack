@@ -9,7 +9,7 @@ interface IntoViewOptions {
   /** Point el.getBoundingClientRect result if it's already defined outside function */
   childRect?: BasicRect;
   /** Virtual margin of target element [top, right, bottom, left] or [top/bottom, right/left] in px */
-  // todo offset: [number, number] | [number, number, number, number];
+  offset?: [number, number] | [number, number, number, number];
 }
 
 interface IntoViewResult {
@@ -35,6 +35,14 @@ export default function isIntoView(el: HTMLElement, options?: IntoViewOptions): 
   const scrollParents = options?.scrollParents || findScrollParentAll(el) || [document.body];
 
   let child: BasicRect = options?.childRect ?? el.getBoundingClientRect();
+  if (options?.offset) {
+    child = {
+      top: child.top - options.offset[0],
+      left: child.left - (options.offset[3] ?? options.offset[1]),
+      right: child.right + options.offset[1],
+      bottom: child.bottom + (options.offset[2] ?? options.offset[0]),
+    };
+  }
   const vH = Math.max(document.documentElement.clientHeight, window.innerHeight);
   const vW = Math.max(document.documentElement.clientWidth, window.innerWidth);
   const r: IntoViewResult = {
