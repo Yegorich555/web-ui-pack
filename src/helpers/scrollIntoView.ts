@@ -65,8 +65,7 @@ export default function scrollIntoView(el: HTMLElement, options?: WUPScrollOptio
       const v = cur / animTime;
       const resTop = fromTop + (toTop - fromTop) * v;
       const resLeft = fromLeft + (toLeft - fromLeft) * v;
-      // todo we don't need scrollLeft if onlyIfNeeded true and left scroll is ok
-      p.scrollTo({ top: resTop, left: resLeft });
+      p.scrollTo({ top: needY ? resTop : undefined, left: needX ? resLeft : undefined });
 
       if (cur === animTime) {
         resolve();
