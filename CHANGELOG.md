@@ -11,6 +11,7 @@
 - Optimized for webpack (via [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free))
 - Added [helpers](README.md#helpers)
   - `findScrollParentAll`
+  - `isIntoView`
 - [`FormControls`](README.md#controls)
   - Added TextControl (desc. coming soon...)
   - Added SelectControl (desc. coming soon...)

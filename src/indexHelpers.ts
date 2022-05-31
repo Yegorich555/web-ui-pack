@@ -1,6 +1,8 @@
 export { default as findScrollParent } from "./helpers/findScrollParent";
 export { findScrollParentAll } from "./helpers/findScrollParent";
 export { default as focusFirst } from "./helpers/focusFirst";
+export { default as isIntoView } from "./helpers/isIntoView";
+
 export { default as nestedProperty } from "./helpers/nestedProperty";
 export { default as observer } from "./helpers/observer";
 // export * from "./helpers/observer";

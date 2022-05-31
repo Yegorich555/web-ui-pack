@@ -7,6 +7,7 @@ import WUPPopupArrowElement from "./popupArrowElement";
 import popupListenTarget from "./popupListenTarget";
 
 export import ShowCases = WUPPopup.ShowCases;
+import { isIntoView } from "../indexHelpers";
 // code coverage doesn't work either: https://stackoverflow.com/questions/62493593/unable-to-ignore-block-within-react-class-components-with-istanbul-ignore-next-t
 /* c8 ignore next */
 export * from "./popupElement.types";
@@ -811,28 +812,7 @@ export default class WUPPopupElement<
 
     // check if target hidden by scrollParent
     if (this.#scrollParents) {
-      let isHiddenByScroll = false;
-
-      let child: DOMRect | WUPPopupPlace.Rect = t;
-      const vH = Math.max(document.documentElement.clientHeight, window.innerHeight);
-      const vW = Math.max(document.documentElement.clientWidth, window.innerWidth);
-      for (let i = 0; i < this.#scrollParents.length; ++i) {
-        const p = getBoundingInternalRect(this.#scrollParents[i]);
-        isHiddenByScroll =
-          p.top >= child.bottom || //
-          p.bottom <= child.top ||
-          p.left >= child.right ||
-          p.right <= child.left ||
-          // checking if visible in viewPort
-          child.top > vH ||
-          child.left > vW ||
-          child.bottom < 0 ||
-          child.right < 0;
-
-        if (isHiddenByScroll) break;
-        child = p as DOMRect;
-      }
-
+      const isHiddenByScroll = !isIntoView(t.el, this.#scrollParents, t);
       if (isHiddenByScroll) {
         this.style.display = ""; // hide popup if target hidden by scrollableParent
         if (this.#arrowElement) {
