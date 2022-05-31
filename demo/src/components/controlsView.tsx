@@ -15,7 +15,7 @@ export default function ControlsView() {
           }
         }}
       >
-        <button type="submit" style={{ marginBottom: "1300px" }}>
+        <button type="submit" style={{ marginBottom: "300px" }}>
           Submit
         </button>
 

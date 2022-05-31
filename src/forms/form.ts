@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 import WUPBaseElement, { JSXCustomProps, WUP } from "../baseElement";
 import IBaseControl from "../controls/baseControl.i";
-import { findScrollParent } from "../indexHelpers";
+import { scrollIntoView } from "../indexHelpers";
 
 export namespace WUPFormTypes {
   export const enum SubmitActions {
@@ -196,18 +196,9 @@ export default class WUPFormElement<
     // analyze - go to error
     if (errCtrl) {
       if (this._opts.submitActions & WUPFormTypes.SubmitActions.goToError) {
-        // todo implement scrollIntoView + smooth + offset that has promise after time
-        const p = findScrollParent(errCtrl);
-        if (p) {
-          const offset = -30;
-          p.scrollBy({
-            top: errCtrl.getBoundingClientRect().top - p.getBoundingClientRect().top + offset,
-            behavior: "smooth",
-          });
-          setTimeout(errCtrl.focus, 300);
-        } else {
-          errCtrl.focus(); // todo implement focus-smooth
-        }
+        const el = errCtrl;
+        // todo implement focus-smooth
+        scrollIntoView(el, { offsetTop: -30, smoothMs: 300, onlyIfNeeded: true }).then(() => el.focus());
       }
       return;
     }
@@ -259,7 +250,12 @@ export default class WUPFormElement<
     super.gotReady();
     this.gotReinit(null);
 
-    this.appendEvent(this, "keydown", (e) => !e.defaultPrevented && e.key === "Enter" && this.gotSubmit(e, e.target));
+    this.appendEvent(
+      this,
+      "keydown",
+      (e) =>
+        !e.defaultPrevented && e.key === "Enter" && this.gotSubmit(e, e.target instanceof HTMLElement ? e.target : this)
+    );
     this.appendEvent(this, "click", (e) => {
       if (!e.defaultPrevented) {
         let t = e.target as HTMLElement | null;

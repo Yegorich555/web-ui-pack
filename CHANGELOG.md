@@ -12,6 +12,7 @@
 - Added [helpers](README.md#helpers)
   - `findScrollParentAll`
   - `isIntoView`
+  - `scrollIntoView`
 - [`FormControls`](README.md#controls)
   - Added TextControl (desc. coming soon...)
   - Added SelectControl (desc. coming soon...)

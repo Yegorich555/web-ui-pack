@@ -11,4 +11,5 @@ export { default as onFocusGot } from "./helpers/onFocusGot";
 export { default as onFocusLost } from "./helpers/onFocusLost";
 // export * from "./helpers/onFocusLost";
 export { default as promiseWait } from "./helpers/promiseWait";
+export { default as scrollIntoView } from "./helpers/scrollIntoView";
 export { default as stringPrettify } from "./helpers/stringPrettify";

@@ -180,7 +180,8 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 - [**onFocusGot**(el: HTMLElement, listener: (ev) => void, {debounceMs: 100, once: false, ...})](#helpers) ⇒ `Fires when element/children takes focus once (fires again after onFocusLost on element)`
 - [**onFocusLost**(el: HTMLElement, listener: (ev) => void, {debounceMs: 100, once: false, ...})](#helpers) ⇒ `Fires when element/children completely lost focus`
 - [**onSpy**(object: {}, method: string, listener: (...args) => void](#helpers) ⇒ `Spy on method-call of object`
-- [**promiseWait**(promise: Promise, ms: number)](#helpers) ⇒ `Produce Promise during for "no less than pointed time"; it helps for avoding spinner blinking during the very fast api-request in case: pending > waitResponse > resetPending`
+- [**promiseWait**(promise: Promise, ms: number) => Promise](#helpers) ⇒ `Produce Promise during for "no less than pointed time"; it helps for avoding spinner blinking during the very fast api-request in case: pending > waitResponse > resetPending`
+- [**scrollIntoView**(el: HTMLElement, options: WUPScrollOptions) => Promise](#helpers) ⇒ `Scroll the HTMLElement's parent container such that the element is visible to the user and return promise by animation end`
 - [**stringPrettify**(text: string, changeKebabCase = false)](#helpers) ⇒ `Changes camelCase, snakeCase, kebaCase text to user-friendly`
 
 #### Helpers.Observer
