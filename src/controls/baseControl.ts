@@ -3,6 +3,7 @@ import WUPBaseElement, { JSXCustomProps, WUP } from "../baseElement";
 import WUPFormElement from "../forms/form";
 import isEqual from "../helpers/isEqual";
 import onFocusLostEv from "../helpers/onFocusLost";
+import { stringPrettify } from "../indexHelpers";
 // eslint-disable-next-line import/named
 import WUPPopupElement, { ShowCases } from "../popup/popupElement";
 import IBaseControl from "./baseControl.i";
@@ -74,9 +75,9 @@ export namespace WUPBaseControlTypes {
       pressEsc: ClearActions;
     } & ExtraDefaults;
     Options: Omit<Generics<ValueType, ValidationMap, ExtraDefaults>["Defaults"], "validationRules"> & {
-      /** Title/label for control */
+      /** Title/label of control; if label is missed it's parsed from option [name]. To skip point `label=''` (empty string) */
       label?: string;
-      /** Property key of model; For name 'firstName' >> model['firstName'] */
+      /** Property/key of model (collected by form); For name `firstName` >> `model.firstName`; for `nested.firstName` >> `model.nested.firstName` etc. */
       name?: string;
       /** Focus element when it's appended to layout */
       autoFocus?: boolean;
@@ -415,7 +416,6 @@ export default abstract class WUPBaseControl<
       );
     }
 
-    // todo get label from name
     this._opts.label = this.getAttribute("label") ?? this._opts.label;
     this._opts.name = this.getAttribute("name") ?? this._opts.name;
     this._opts.autoComplete = this.getAttribute("autoComplete") ?? this._opts.autoComplete;
@@ -423,11 +423,10 @@ export default abstract class WUPBaseControl<
     this._opts.readOnly = this.getBoolAttr("readOnly", this._opts.readOnly);
     this._opts.autoFocus = this.getBoolAttr("autoFocus", this._opts.autoFocus);
 
-    this.$refTitle.textContent = this._opts.label || null;
     const r = this.$refInput;
-    // todo move to options
     const isPwd = this._opts.name?.includes("password");
     r.type = isPwd ? "password" : "text";
+
     // set autocomplete
     const af = this._opts.autoComplete; // https://stackoverflow.com/questions/11708092/detecting-browser-autofill
     const n = af === true ? (this._opts.name as string) : af;
@@ -437,6 +436,15 @@ export default abstract class WUPBaseControl<
       // testcase: form with email+password ignores autocomplete: "off" if previously it was saved
       // it can be ignored by browsers: try to fix > https://stackoverflow.com/questions/2530/how-do-you-disable-browser-autocomplete-on-web-form-field-input-tags
     }
+
+    const label = (this._opts.label ?? (this._opts.name && stringPrettify(this._opts.name))) || null;
+    this.$refTitle.textContent = label;
+    if (!label && this._opts.name) {
+      r.setAttribute("aria-label", stringPrettify(this._opts.name));
+    } else {
+      r.removeAttribute("aria-label");
+    }
+
     // set other props
     const req = this._opts.validations?.required;
     req ? r.setAttribute("aria-required", "true") : r.removeAttribute("aria-required");
@@ -478,6 +486,7 @@ export default abstract class WUPBaseControl<
     super.connectedCallback();
     if (this.#isFirstConn) {
       this.#isFirstConn = false;
+      this.$refInput.type = "text";
       this.renderControl();
     }
     this.$form = WUPFormElement.$tryConnect(this);
@@ -679,3 +688,5 @@ export default abstract class WUPBaseControl<
     this.disposeLstInit.length = 0;
   }
 }
+
+// todo implement password input

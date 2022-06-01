@@ -22,9 +22,9 @@ export default function ControlsView() {
           <wup-text
             ref={(el) => {
               if (el) {
-                // todo if label is empty we must prettify it ???
                 // todo initValue can't override initmodel upper
                 el.$options.name = "email";
+                el.$options.label = "";
                 // el.$options.autoComplete = true;
               }
             }}
