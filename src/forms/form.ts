@@ -107,11 +107,14 @@ export default class WUPFormElement<
 
   /** Map model to control-values */
   static $modelToControls<T>(m: T, controls: IBaseControl[], prop: keyof Pick<IBaseControl, "$value" | "$initValue">) {
+    const out = { hasProp: undefined };
     controls.forEach((c) => {
       const key = c.$options.name;
       if (key) {
-        // todo we need to ignore case when model = { v1: "t1" }, but reset control with name 'v2'
-        c[prop] = nestedProperty.get(m, key);
+        const v = nestedProperty.get(m, key, out);
+        if (out.hasProp) {
+          c[prop] = v;
+        }
       }
     });
   }
@@ -206,7 +209,7 @@ export default class WUPFormElement<
 
     // collect values to model
     const onlyChanged = this._opts.submitActions & WUPFormTypes.SubmitActions.collectChanged;
-    const m = this.#ctr.$modelFromControls(this.$controls, "$value", onlyChanged);
+    const m = this.#ctr.$modelFromControls(this.$controls, "$value", !!onlyChanged);
 
     // fire events
     const ev = new Event("$submit", { cancelable: false, bubbles: true }) as WUPFormTypes.SubmitEvent<Model>;
