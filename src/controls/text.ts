@@ -78,6 +78,7 @@ export default class WUPTextControl<
           width: 100%;
           box-sizing: border-box;
           font: inherit;
+          color: inherit;
           margin: 0;
           padding: var(--ctrl-padding);
           padding-left: 0;
@@ -88,6 +89,14 @@ export default class WUPTextControl<
           text-overflow: ellipsis;
           overflow: hidden;
           white-space: nowrap;
+        }
+        :host input:-webkit-autofill {
+          font: inherit;
+          -webkit-background-clip: text;
+        }
+        :host input:autofill {
+          font: inherit;
+          background-clip: text;
         }
         :host input + * {
           display: block;
