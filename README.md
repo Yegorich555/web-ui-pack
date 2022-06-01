@@ -174,7 +174,7 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 - [**focusFirst**(el: HTMLElement)](#helpers) ⇒ `Set focus on parent itself or first possible element inside`
 - [**isIntoView**(el: HTMLElement)](#helpers) ⇒ `Check if element is visible in scrollable parents`
 - [**nestedProperty.set**](#helpers) ⇒ `nestedProperty.set(obj, "value.nestedValue", 1) sets obj.value.nestedValue = 1`
-- [**nestedProperty.get**](#helpers) ⇒ `nestedProperty.get(obj, "nestedValue1.nestVal2") returns value from obj.nestedValue1.nestVal2`
+- [**nestedProperty.get**](#helpers) ⇒ `nestedProperty.get(obj, "nested.val2", out?: {hasProp?: boolean} ) returns value from obj.nested.val2`
 - [**observer**](#observer) ⇒ `converts object to observable (via Proxy) to allow listen for changes`
 - **onEvent**([...args](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener)) ⇒ `More strict (for Typescript) wrapper of addEventListener() that returns callback with removeListener()`
 - [**onFocusGot**(el: HTMLElement, listener: (ev) => void, {debounceMs: 100, once: false, ...})](#helpers) ⇒ `Fires when element/children takes focus once (fires again after onFocusLost on element)`

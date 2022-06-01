@@ -16,6 +16,7 @@
 - [`FormControls`](README.md#controls)
   - Added TextControl (desc. coming soon...)
   - Added SelectControl (desc. coming soon...)
+- Helper [nestedProperty](README.md#helpers): added option `out.hasProp`
 
 - [`PopupElement`](README.md#popupelement)
   - Added $refresh() - to force update/recalc position when nested content is changed

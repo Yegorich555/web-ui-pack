@@ -22,18 +22,23 @@ const nestedProperty = {
    * nestedProperty.get(obj, "nestedValue1.nestVal2") returns value from obj.nestedValue1.nestVal2
    * @param object The object to query.
    * @param path The path of the property to get.
+   * @param out output object. Point empty {} if you want to get extrachecking hasProp (to define if prop undefined and exists)
    * @return Returns the resolved value.
    */
-  get<TObj extends Record<string, any>, TVal>(obj: TObj, path: string): TVal | undefined {
-    const propKeys = path.split(".");
-    let prop = obj[propKeys[0]];
-    for (let i = 1; i < propKeys.length; ++i) {
-      if (prop == null || !propKeys[i]) {
-        return undefined;
+  get<TObj extends Record<string, any>, TVal>(obj: TObj, path: string, out?: { hasProp?: boolean }): TVal | undefined {
+    const deepKeys = path.split(".");
+    let next = obj;
+    for (let i = 0; i < deepKeys.length; ++i) {
+      if (next == null) {
+        break;
       }
-      prop = prop[propKeys[i]];
+      if (out != null) {
+        out.hasProp = deepKeys[i] in next;
+      }
+      next = next[deepKeys[i]];
     }
-    return prop;
+
+    return next as TVal;
   },
 };
 
