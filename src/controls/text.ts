@@ -238,14 +238,14 @@ export default class WUPTextControl<
     this.appendEvent(this.$refInput, "input", this.gotInput as any);
   }
 
-  protected override gotReinit() {
-    super.gotReinit();
+  protected override gotChanges() {
+    super.gotChanges();
 
     setTimeout(() => {
       this._opts.selectOnFocus &&
         !this.$refInput.readOnly &&
         this.disposeLstInit.push(onFocusGot(this, () => this.$refInput.select()));
-    }); // timeout required because selectControl can setup readOnly after super.gotReinit
+    }); // timeout required because selectControl can setup readOnly after super.gotChanges
 
     if (this._opts.hasButtonClear && !this.$refBtnClear) {
       const bc = this.$refLabel.appendChild(document.createElement("button"));

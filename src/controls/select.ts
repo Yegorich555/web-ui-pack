@@ -246,8 +246,8 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     // i.setAttribute("aria-multiselectable", "false");
   }
 
-  protected override gotReinit() {
-    super.gotReinit();
+  protected override gotChanges() {
+    super.gotChanges();
 
     this._opts.readOnlyInput
       ? this.$refInput.removeAttribute("aria-autocomplete")

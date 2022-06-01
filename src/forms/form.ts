@@ -226,7 +226,7 @@ export default class WUPFormElement<
   }
 
   /** Fired on Init and every time as options/attributes changed */
-  protected gotReinit(propsChanged: Array<keyof WUPFormTypes.Options> | null) {
+  protected gotChanges(propsChanged: Array<keyof WUPFormTypes.Options> | null) {
     this._opts.disabled = this.getBoolAttr("disabled", this._opts.disabled);
     this._opts.readOnly = this.getBoolAttr("readOnly", this._opts.readOnly);
     this._opts.autoFocus = this.getBoolAttr("autoFocus", this._opts.autoFocus);
@@ -246,7 +246,7 @@ export default class WUPFormElement<
 
   protected override gotReady() {
     super.gotReady();
-    this.gotReinit(null);
+    this.gotChanges(null);
 
     this.appendEvent(
       this,
@@ -270,7 +270,7 @@ export default class WUPFormElement<
 
   protected override gotOptionsChanged(e: WUP.OptionEvent) {
     super.gotOptionsChanged(e);
-    this.gotReinit(e.props as Array<keyof WUPFormTypes.Options>);
+    this.gotChanges(e.props as Array<keyof WUPFormTypes.Options>);
   }
 
   #isStopAttrListen = false;
@@ -289,7 +289,7 @@ export default class WUPFormElement<
     this.#attrChanged = [name];
     this.#attrTimer = window.setTimeout(() => {
       this.#attrTimer = undefined;
-      this.gotReinit(this.#attrChanged as Array<keyof WUPFormTypes.Options>);
+      this.gotChanges(this.#attrChanged as Array<keyof WUPFormTypes.Options>);
       this.#attrChanged = undefined;
     });
   }

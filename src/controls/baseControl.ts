@@ -398,7 +398,7 @@ export default abstract class WUPBaseControl<
   protected disposeLstInit: Array<() => void> = [];
 
   /** Fired on Init and every time as options/attributes changed */
-  protected gotReinit() {
+  protected gotChanges() {
     this.disposeLstInit.forEach((f) => f()); // remove possible previous event listeners
     this.disposeLstInit.length = 0;
 
@@ -452,7 +452,7 @@ export default abstract class WUPBaseControl<
 
   protected override gotReady() {
     super.gotReady();
-    this.gotReinit();
+    this.gotChanges();
 
     // this.appendEvent removed by dispose()
     this.appendEvent(
@@ -651,7 +651,7 @@ export default abstract class WUPBaseControl<
 
   protected override gotOptionsChanged(e: WUP.OptionEvent) {
     super.gotOptionsChanged(e);
-    this.gotReinit();
+    this.gotChanges();
   }
 
   #isStopAttrListen = false;
@@ -667,7 +667,7 @@ export default abstract class WUPBaseControl<
     }
     this.#attrTimer = window.setTimeout(() => {
       this.#attrTimer = undefined;
-      this.gotReinit();
+      this.gotChanges();
     });
   }
 
