@@ -24,21 +24,16 @@ export default function ControlsView() {
               if (el) {
                 // todo if label is empty we must prettify it ???
                 // todo initValue can't override initmodel upper
-                // el.$initValue = "init value";
                 el.$options.name = "email";
-                el.$options.autoComplete = true;
-                // el.$showError("Very huge big message Very huge big message Very huge big message Very huge big message");
+                // el.$options.autoComplete = true;
               }
             }}
           />
           <wup-text
             ref={(el) => {
               if (el) {
-                // todo initValue can't override initmodel upper
-                // el.$initValue = "init value";
                 el.$options.name = "password";
-                el.$options.autoComplete = true;
-                // el.$showError("Very huge big message Very huge big message Very huge big message Very huge big message");
+                // el.$options.autoComplete = false;
               }
             }}
           />

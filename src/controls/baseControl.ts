@@ -78,10 +78,11 @@ export namespace WUPBaseControlTypes {
       label?: string;
       /** Property key of model; For name 'firstName' >> model['firstName'] */
       name?: string;
-      /** Name to autocomplete by browser; by default it's equal to [name]; to disable autocomplete point empty string */
-      autoFillName?: string;
       /** Focus element when it's appended to layout */
       autoFocus?: boolean;
+      /** Name to autocomplete by browser; Point `true` to inherit from $options.name or some string
+       * @defaultValue undefined/false (which means disabled) */
+      autoComplete?: string | boolean;
       /** Disallow edit/copy value; adds attr [disabled] for styling */
       disabled?: boolean;
       /** Disallow copy value; adds attr [readonly] for styling */
@@ -101,10 +102,10 @@ export namespace WUPBaseControlTypes {
   export type JSXControlProps<T extends WUPBaseControl> = JSXCustomProps<T> & {
     /** @deprecated Title/label for control; */
     label?: string;
-    /** @deprecated Property key of model; For name 'firstName' >> model['firstName'] */
+    /** @deprecated Property key of model */
     name?: string;
-    /** @deprecated Name to autocomplete by browser; by default it's equal to [name]; to disable autocomplete point empty string */
-    autoFillName?: string;
+    /** @deprecated Name to autocomplete by browser; */
+    autoComplete?: string;
 
     /** @deprecated Disallow edit/copy value. Use [disabled] for styling */
     disabled?: boolean;
@@ -144,14 +145,14 @@ export default abstract class WUPBaseControl<
   static observedOptions = new Set<keyof WUPBaseControlTypes.Options>([
     "label",
     "name",
-    "autoFillName",
+    "autoComplete",
     "disabled",
     "readOnly",
   ]);
 
   /* Array of attribute names to listen for changes */
   static get observedAttributes(): Array<keyof WUPBaseControlTypes.Options> {
-    return ["label", "name", "autoFillName", "disabled", "readOnly", "autoFocus"];
+    return ["label", "name", "autoComplete", "disabled", "readOnly", "autoFocus"];
   }
 
   static get $styleRoot(): string {
@@ -198,6 +199,9 @@ export default abstract class WUPBaseControl<
       :host:focus-within legend,
       :host input:focus + * {
         color: var(--ctrl-focus-label);
+      }
+      :host:not(:focus-within) strong {
+        pointer-events: none;
       }
       [disabled]>:host,
       :host[disabled] {
@@ -251,7 +255,8 @@ export default abstract class WUPBaseControl<
         cursor: inherit;
       }
       :host input:required + *::after,
-      :host fieldset[aria-required] > legend::after {
+      :host input[aria-required="true"] + *::after,
+      :host fieldset[aria-required="true"] > legend::after {
         content: "*";
         font-size: larger;
         font-weight: bolder;
@@ -410,36 +415,33 @@ export default abstract class WUPBaseControl<
       );
     }
 
+    // todo get label from name
     this._opts.label = this.getAttribute("label") ?? this._opts.label;
     this._opts.name = this.getAttribute("name") ?? this._opts.name;
-    this._opts.autoFillName = this.getAttribute("autoFillName") ?? this._opts.autoFillName;
+    this._opts.autoComplete = this.getAttribute("autoComplete") ?? this._opts.autoComplete;
     this._opts.disabled = this.getBoolAttr("disabled", this._opts.disabled);
     this._opts.readOnly = this.getBoolAttr("readOnly", this._opts.readOnly);
     this._opts.autoFocus = this.getBoolAttr("autoFocus", this._opts.autoFocus);
 
     this.$refTitle.textContent = this._opts.label || null;
     const r = this.$refInput;
-    if (r) {
-      r.type = "text";
-
-      if (this._opts.autoFillName === "") {
-        r.autocomplete = "off";
-      } else {
-        const n = this._opts.autoFillName || (this._opts.name as string);
-        if (!n) {
-          r.removeAttribute("name");
-          r.autocomplete = "off";
-        } else {
-          r.name = n;
-          r.autocomplete = n;
-        }
-      }
-
-      const required = this._opts.validations?.required;
-      r.required = required ? (required as any) !== false : false;
-      r.disabled = this._opts.disabled as boolean;
-      r.readOnly = this._opts.readOnly ?? (this.$form?.$options.readOnly as boolean);
+    // todo move to options
+    const isPwd = this._opts.name?.includes("password");
+    r.type = isPwd ? "password" : "text";
+    // set autocomplete
+    const af = this._opts.autoComplete; // https://stackoverflow.com/questions/11708092/detecting-browser-autofill
+    const n = af === true ? (this._opts.name as string) : af;
+    r.autocomplete = n || (isPwd ? "new-password" : "off"); // otherwise it doesn't disable autocomplete
+    // r.name = n || (undefined as any as string);
+    if (!r.autocomplete) {
+      // testcase: form with email+password ignores autocomplete: "off" if previously it was saved
+      // it can be ignored by browsers: try to fix > https://stackoverflow.com/questions/2530/how-do-you-disable-browser-autocomplete-on-web-form-field-input-tags
     }
+    // set other props
+    const req = this._opts.validations?.required;
+    req ? r.setAttribute("aria-required", "true") : r.removeAttribute("aria-required");
+    r.disabled = this._opts.disabled as boolean;
+    r.readOnly = this._opts.readOnly ?? (this.$form?.$options.readOnly as boolean);
 
     this.#isStopAttrListen = true;
     this.setBoolAttr("disabled", this._opts.disabled);
@@ -479,7 +481,7 @@ export default abstract class WUPBaseControl<
       this.renderControl();
     }
     this.$form = WUPFormElement.$tryConnect(this);
-    setTimeout(() => this._opts.autoFocus && this.focus()); // timeout requires to wait for apply options
+    setTimeout(() => this._opts.autoFocus && this.focus()); // timeout required to wait to apply options
   }
 
   protected disconnectedCallback() {

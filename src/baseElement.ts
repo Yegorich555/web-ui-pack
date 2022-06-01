@@ -286,8 +286,8 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   }
 
   /* Remove or set empty attribute based on 2nd argument */
-  setBoolAttr(attr: string, isTrue: boolean | undefined): void {
-    isTrue ? this.setAttribute(attr, "") : this.removeAttribute(attr);
+  setBoolAttr(attr: string, isTrue: boolean | undefined, isSetBool?: boolean): void {
+    isTrue ? this.setAttribute(attr, isSetBool ? "true" : "") : this.removeAttribute(attr);
   }
 }
 

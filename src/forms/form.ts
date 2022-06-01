@@ -42,9 +42,9 @@ export namespace WUPFormTypes {
     autoFocus?: boolean;
     /** Disallow edit/copy value; adds attr [disabled] for styling */
     disabled?: boolean;
-    /** Disallow copy value; adds attr [readonly] for styling */
+    /** Disallow copy value; adds attr [readonly] for styling (changes/replace option readOnly of controls) */
     readOnly?: boolean;
-    /** Enable/disable browser-autocomplete;
+    /** Enable/disable browser-autocomplete (changes/replace option autoComplete of controls)
      *  @defaultValue false */
     autoComplete?: boolean;
   };
@@ -173,9 +173,6 @@ export default class WUPFormElement<
     }
   }
 
-  $refForm = document.createElement("form");
-  /** Use this to append elements; fired single time when element isConnected/appended to layout but not ready yet */
-
   /** Fired on submit before validation */
   protected gotSubmit(e: KeyboardEvent | MouseEvent, submitter: HTMLElement) {
     (e as Events["$willSubmit"]).submitter = submitter;
@@ -232,13 +229,15 @@ export default class WUPFormElement<
     this._opts.autoFocus = this.getBoolAttr("autoFocus", this._opts.autoFocus);
     this._opts.autoComplete = this.getBoolAttr("autoComplete", this._opts.autoComplete);
 
-    const { readOnly } = this._opts;
+    const { readOnly, autoComplete } = this._opts;
     if (propsChanged ? propsChanged.includes("readOnly") : readOnly !== undefined) {
-      this.$controls.forEach((c) => (c.$options.readOnly = readOnly)); // apply on init or if only changed
+      this.$controls.forEach((c) => (c.$options.readOnly = readOnly)); // on init OR if changed
+    }
+    if (propsChanged ? propsChanged.includes("autoComplete") : autoComplete !== undefined) {
+      this.$controls.forEach((c) => (c.$options.autoComplete = autoComplete)); // on init OR if changed
     }
 
     this.#isStopAttrListen = true;
-    this.$refForm.setAttribute("autocomplete", this._opts.autoComplete ? "on" : "off");
     this.setBoolAttr("disabled", this._opts.disabled);
     this.setBoolAttr("readOnly", this._opts.readOnly);
     this.#isStopAttrListen = false;

@@ -10,7 +10,7 @@ export default interface IBaseControl<ValueType = any> extends HTMLElement {
   $options: {
     label?: string;
     name?: string;
-    autoFillName?: string;
+    autoComplete?: string | boolean;
     readOnly?: boolean;
     disabled?: boolean;
   };
