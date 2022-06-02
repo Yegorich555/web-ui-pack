@@ -4,7 +4,7 @@ const vH = Math.max(document.documentElement.clientHeight, window.innerHeight);
 const vW = Math.max(document.documentElement.clientWidth, window.innerWidth);
 
 const bodySize = {
-  width: vW,
+  width: 400,
   height: 600,
 };
 
@@ -19,6 +19,8 @@ const elRect = {
   right: 100,
 };
 
+jest.useFakeTimers();
+
 const moveTo = (x, y) => {
   elRect.x = x;
   elRect.y = y;
@@ -26,12 +28,18 @@ const moveTo = (x, y) => {
   elRect.top = y;
   elRect.right = elRect.left + elRect.width;
   elRect.bottom = elRect.top + elRect.height;
+  jest.advanceTimersByTime(1); // wait 1ms to clear cache
 };
 
 /** @type HTMLElement */
 let el;
 
 beforeEach(() => {
+  jest.spyOn(document.documentElement, "scrollTop", "set").mockImplementation(() => 0);
+  jest.spyOn(document.documentElement, "scrollLeft", "set").mockImplementation(() => 0);
+  jest.spyOn(document.body, "scrollTop", "set").mockImplementation(() => 0);
+  jest.spyOn(document.body, "scrollLeft", "set").mockImplementation(() => 0);
+
   jest.spyOn(document.body, "getBoundingClientRect").mockImplementation(() => ({
     x: 0,
     y: 0,
@@ -64,230 +72,238 @@ describe("helper.isIntoView", () => {
     expect(bodySize.width > 0).toBeTruthy();
     expect(bodySize.height > 0).toBeTruthy();
     moveTo(0, 0);
-    expect(isIntoView(el)).toMatchInlineSnapshot(`
-      Object {
-        "hidden": false,
-        "hiddenX": false,
-        "hiddenY": false,
-        "partialHiddenX": false,
-        "partialHiddenY": false,
-        "partialVisible": false,
-        "visible": true,
-      }
-    `);
+    expect(isIntoView(el)).toEqual({
+      hidden: false,
+      hiddenX: false,
+      hiddenY: false,
+      partialHiddenX: false,
+      partialHiddenY: false,
+      partialVisible: false,
+      visible: true,
+    });
 
     // move el to body > main > el
     const main = document.body.appendChild(document.createElement("main"));
     main.appendChild(el);
-    expect(isIntoView(el)).toMatchInlineSnapshot(`
-      Object {
-        "hidden": false,
-        "hiddenX": false,
-        "hiddenY": false,
-        "partialHiddenX": false,
-        "partialHiddenY": false,
-        "partialVisible": false,
-        "visible": true,
-      }
-    `);
+    jest.spyOn(main, "scrollTop", "set").mockImplementation(() => 0);
+    jest.spyOn(main, "scrollLeft", "set").mockImplementation(() => 0);
+    expect(isIntoView(el)).toEqual({
+      hidden: false,
+      hiddenX: false,
+      hiddenY: false,
+      partialHiddenX: false,
+      partialHiddenY: false,
+      partialVisible: false,
+      visible: true,
+    });
   });
 
   test("body as scrolled parent", () => {
     // simulate scrollHeight
-    jest.spyOn(document.body, "scrollHeight", "get").mockImplementation(() => bodySize.height + 74);
-    const orig = window.getComputedStyle;
-    jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
-      const o = orig(elem);
-      if (elem === document.body) {
-        o.overflowY = "auto";
-      }
-      return o;
+    jest.spyOn(document.body, "scrollTop", "set").mockRestore();
+
+    moveTo(10, 10); // full visible
+    expect(isIntoView(el)).toEqual({
+      hidden: false,
+      hiddenX: false,
+      hiddenY: false,
+      partialHiddenX: false,
+      partialHiddenY: false,
+      partialVisible: false,
+      visible: true,
     });
 
     moveTo(10, 10); // full visible
-    expect(isIntoView(el)).toMatchInlineSnapshot(`
-      Object {
-        "hidden": false,
-        "hiddenX": false,
-        "hiddenY": false,
-        "partialHiddenX": false,
-        "partialHiddenY": false,
-        "partialVisible": false,
-        "visible": true,
-      }
-    `);
-
-    moveTo(10, 10); // partial visible because of offset
-    expect(isIntoView(el, { offset: [20, 20] })).toMatchInlineSnapshot(`
-      Object {
-        "hidden": false,
-        "hiddenX": false,
-        "hiddenY": false,
-        "partialHiddenX": true,
-        "partialHiddenY": true,
-        "partialVisible": true,
-        "visible": false,
-      }
-    `);
+    expect(isIntoView(el, { offset: [20, 20] })).toEqual({
+      hidden: false,
+      hiddenX: false,
+      hiddenY: false,
+      partialHiddenX: document.documentElement,
+      partialHiddenY: document.documentElement,
+      partialVisible: document.documentElement,
+      visible: false,
+    });
 
     moveTo(0, -elRect.height / 2); // partialHiddenY
-    expect(isIntoView(el)).toMatchInlineSnapshot(`
-      Object {
-        "hidden": false,
-        "hiddenX": false,
-        "hiddenY": false,
-        "partialHiddenX": false,
-        "partialHiddenY": true,
-        "partialVisible": true,
-        "visible": false,
-      }
-    `);
+    expect(isIntoView(el)).toEqual({
+      hidden: false,
+      hiddenX: false,
+      hiddenY: false,
+      partialHiddenX: false,
+      partialHiddenY: document.documentElement,
+      partialVisible: document.documentElement,
+      visible: false,
+    });
 
     moveTo(-elRect.width / 2, 0); // partialHiddenX
-    expect(isIntoView(el)).toMatchInlineSnapshot(`
-      Object {
-        "hidden": false,
-        "hiddenX": false,
-        "hiddenY": false,
-        "partialHiddenX": true,
-        "partialHiddenY": false,
-        "partialVisible": true,
-        "visible": false,
-      }
-    `);
+    expect(isIntoView(el)).toEqual({
+      hidden: false,
+      hiddenX: false,
+      hiddenY: false,
+      partialHiddenX: document.documentElement,
+      partialHiddenY: false,
+      partialVisible: document.documentElement,
+      visible: false,
+    });
 
     moveTo(-elRect.width / 2, -elRect.height / 2); // partialHiddenX and Y
-    expect(isIntoView(el)).toMatchInlineSnapshot(`
-      Object {
-        "hidden": false,
-        "hiddenX": false,
-        "hiddenY": false,
-        "partialHiddenX": true,
-        "partialHiddenY": true,
-        "partialVisible": true,
-        "visible": false,
-      }
-    `);
+    expect(isIntoView(el)).toEqual({
+      hidden: false,
+      hiddenX: false,
+      hiddenY: false,
+      partialHiddenX: document.documentElement,
+      partialHiddenY: document.documentElement,
+      partialVisible: document.documentElement,
+      visible: false,
+    });
 
     moveTo(-elRect.width / 2, -elRect.height); // fullHiddenY and partialHiddenY
-    expect(isIntoView(el)).toMatchInlineSnapshot(`
-      Object {
-        "hidden": true,
-        "hiddenX": false,
-        "hiddenY": true,
-        "partialHiddenX": true,
-        "partialHiddenY": false,
-        "partialVisible": false,
-        "visible": false,
-      }
-    `);
+    expect(isIntoView(el)).toEqual({
+      hidden: document.body,
+      hiddenX: false,
+      hiddenY: document.body,
+      partialHiddenX: document.documentElement,
+      partialHiddenY: false,
+      partialVisible: false,
+      visible: false,
+    });
 
     moveTo(-elRect.width, -elRect.height / 2); // fullHiddenX and partialHiddenX
-    expect(isIntoView(el)).toMatchInlineSnapshot(`
-      Object {
-        "hidden": true,
-        "hiddenX": true,
-        "hiddenY": false,
-        "partialHiddenX": false,
-        "partialHiddenY": true,
-        "partialVisible": false,
-        "visible": false,
-      }
-    `);
+    expect(isIntoView(el)).toEqual({
+      hidden: document.body,
+      hiddenX: document.body,
+      hiddenY: false,
+      partialHiddenX: false,
+      partialHiddenY: document.documentElement,
+      partialVisible: false,
+      visible: false,
+    });
 
     moveTo(-elRect.width, -elRect.height); // fullHiddenX and fullHiddenY
-    expect(isIntoView(el)).toMatchInlineSnapshot(`
-      Object {
-        "hidden": true,
-        "hiddenX": true,
-        "hiddenY": true,
-        "partialHiddenX": false,
-        "partialHiddenY": false,
-        "partialVisible": false,
-        "visible": false,
-      }
-    `);
+    expect(isIntoView(el)).toEqual({
+      hidden: document.body,
+      hiddenX: document.body,
+      hiddenY: document.body,
+      partialHiddenX: false,
+      partialHiddenY: false,
+      partialVisible: false,
+      visible: false,
+    });
 
     moveTo(0, bodySize.height + elRect.height / 2); // partialHiddenY at bottom
-    expect(isIntoView(el)).toMatchInlineSnapshot(`
-      Object {
-        "hidden": true,
-        "hiddenX": false,
-        "hiddenY": true,
-        "partialHiddenX": false,
-        "partialHiddenY": false,
-        "partialVisible": false,
-        "visible": false,
-      }
-    `);
+    expect(isIntoView(el)).toEqual({
+      hidden: document.body,
+      hiddenX: false,
+      hiddenY: document.body,
+      partialHiddenX: false,
+      partialHiddenY: false,
+      partialVisible: false,
+      visible: false,
+    });
 
     moveTo(0, bodySize.height + elRect.height); // fullHiddenY at bottom
-    expect(isIntoView(el)).toMatchInlineSnapshot(`
-      Object {
-        "hidden": true,
-        "hiddenX": false,
-        "hiddenY": true,
-        "partialHiddenX": false,
-        "partialHiddenY": false,
-        "partialVisible": false,
-        "visible": false,
-      }
-    `);
+    expect(isIntoView(el)).toEqual({
+      hidden: document.body,
+      hiddenX: false,
+      hiddenY: document.body,
+      partialHiddenX: false,
+      partialHiddenY: false,
+      partialVisible: false,
+      visible: false,
+    });
 
     moveTo(bodySize.width + elRect.width / 2, 0); // partialHiddenX at right
-    expect(isIntoView(el)).toMatchInlineSnapshot(`
-      Object {
-        "hidden": true,
-        "hiddenX": true,
-        "hiddenY": false,
-        "partialHiddenX": false,
-        "partialHiddenY": false,
-        "partialVisible": false,
-        "visible": false,
-      }
-    `);
+    expect(isIntoView(el)).toEqual({
+      hidden: document.body,
+      hiddenX: document.body,
+      hiddenY: false,
+      partialHiddenX: false,
+      partialHiddenY: false,
+      partialVisible: false,
+      visible: false,
+    });
 
     moveTo(bodySize.width + elRect.width, 0); // fullHiddenX at right
-    expect(isIntoView(el)).toMatchInlineSnapshot(`
-      Object {
-        "hidden": true,
-        "hiddenX": true,
-        "hiddenY": false,
-        "partialHiddenX": false,
-        "partialHiddenY": false,
-        "partialVisible": false,
-        "visible": false,
-      }
-    `);
+    expect(isIntoView(el)).toEqual({
+      hidden: document.body,
+      hiddenX: document.body,
+      hiddenY: false,
+      partialHiddenX: false,
+      partialHiddenY: false,
+      partialVisible: false,
+      visible: false,
+    });
+
+    moveTo(0, vH + 1); // hiddenY in viewport
+    expect(isIntoView(el)).toEqual({
+      hidden: document.documentElement,
+      hiddenX: false,
+      hiddenY: document.documentElement,
+      partialHiddenX: false,
+      partialHiddenY: false,
+      partialVisible: false,
+      visible: false,
+    });
+
+    moveTo(vW + 1, 0); // hiddenX in viewport
+    expect(isIntoView(el)).toEqual({
+      hidden: document.documentElement,
+      hiddenX: document.documentElement,
+      hiddenY: false,
+      partialHiddenX: false,
+      partialHiddenY: false,
+      partialVisible: false,
+      visible: false,
+    });
+
+    expect(vH).toBeGreaterThan(bodySize.height);
+    moveTo(0, bodySize.height - 10); // partialHiddenY in body
+    expect(isIntoView(el)).toEqual({
+      hidden: false,
+      hiddenX: false,
+      hiddenY: false,
+      partialHiddenX: false,
+      partialHiddenY: document.body,
+      partialVisible: document.body,
+      visible: false,
+    });
+
+    expect(vW).toBeGreaterThan(bodySize.width);
+    moveTo(bodySize.width - 10, 0); // partialHiddenX in body
+    expect(isIntoView(el)).toEqual({
+      hidden: false,
+      hiddenX: false,
+      hiddenY: false,
+      partialHiddenX: document.body,
+      partialHiddenY: false,
+      partialVisible: document.body,
+      visible: false,
+    });
   });
 
-  test("option [childRect]", () => {
+  test("option [elRect]", () => {
     moveTo(0, 0);
-    expect(isIntoView(el, { childRect: el.getBoundingClientRect() })).toMatchInlineSnapshot(`
-      Object {
-        "hidden": false,
-        "hiddenX": false,
-        "hiddenY": false,
-        "partialHiddenX": false,
-        "partialHiddenY": false,
-        "partialVisible": false,
-        "visible": true,
-      }
-    `);
+    expect(isIntoView(el, { elRect: el.getBoundingClientRect() })).toEqual({
+      hidden: false,
+      hiddenX: false,
+      hiddenY: false,
+      partialHiddenX: false,
+      partialHiddenY: false,
+      partialVisible: false,
+      visible: true,
+    });
   });
 
   test("option [scrollParents]", () => {
     moveTo(0, 0);
-    expect(isIntoView(el, { scrollParents: [document.body] })).toMatchInlineSnapshot(`
-      Object {
-        "hidden": false,
-        "hiddenX": false,
-        "hiddenY": false,
-        "partialHiddenX": false,
-        "partialHiddenY": false,
-        "partialVisible": false,
-        "visible": true,
-      }
-    `);
+    expect(isIntoView(el, { scrollParents: [document.body] })).toEqual({
+      hidden: false,
+      hiddenX: false,
+      hiddenY: false,
+      partialHiddenX: false,
+      partialHiddenY: false,
+      partialVisible: false,
+      visible: true,
+    });
   });
 });

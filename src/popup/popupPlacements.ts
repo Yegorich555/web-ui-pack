@@ -87,14 +87,17 @@ export function px2Number(styleValue: string): number {
 /* Returns bounding rectangular without borders and scroll (simulate box-sizing: border-box) */
 export function getBoundingInternalRect(
   el: HTMLElement,
-  computedStyle?: CSSStyleDeclaration,
-  ignoreCache?: boolean
+  options?: {
+    computedStyle?: CSSStyleDeclaration;
+    ignoreCache?: boolean;
+    elRect?: DOMRect;
+  }
 ): Omit<WUPPopupPlace.Rect, "el"> {
-  if ((el as any)._savedBoundingRect && !ignoreCache) {
+  if ((el as any)._savedBoundingRect && !options?.ignoreCache) {
     return (el as any)._savedBoundingRect;
   }
-  const { borderTopWidth, borderLeftWidth } = computedStyle ?? getComputedStyle(el);
-  let { left, top } = el.getBoundingClientRect();
+  const { borderTopWidth, borderLeftWidth } = options?.computedStyle ?? getComputedStyle(el);
+  let { left, top } = options?.elRect ?? el.getBoundingClientRect();
   top += px2Number(borderTopWidth);
   left += px2Number(borderLeftWidth);
   // todo it's wrong for bottom/right need to include borderRight, borderBottom ??

@@ -812,7 +812,8 @@ export default class WUPPopupElement<
 
     // check if target hidden by scrollParent
     if (this.#scrollParents) {
-      const isHiddenByScroll = isIntoView(t.el, { scrollParents: this.#scrollParents, childRect: t }).hidden;
+      const viewResult = isIntoView(t.el, { scrollParents: this.#scrollParents, elRect: t });
+      const isHiddenByScroll = viewResult.hidden;
       if (isHiddenByScroll) {
         this.style.display = ""; // hide popup if target hidden by scrollableParent
         if (this.#arrowElement) {
@@ -823,11 +824,11 @@ export default class WUPPopupElement<
 
       // fix cases when target is partiallyHidden by scrollableParent
       // suggestion: if height/width is very small we can use another side
-      const scrollRect = getBoundingInternalRect(this.#scrollParents[0]);
+      const scrollRect = getBoundingInternalRect(this.#scrollParents[0]); // warn: it's important to fit only first parent
       t.top = Math.max(scrollRect.top, t.top);
-      t.right = Math.min(scrollRect.right, t.right);
       t.bottom = Math.min(scrollRect.bottom, t.bottom);
       t.left = Math.max(scrollRect.left, t.left);
+      t.right = Math.min(scrollRect.right, t.right);
     }
     t.height = t.bottom - t.top;
     t.width = t.right - t.left;

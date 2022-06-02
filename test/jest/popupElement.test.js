@@ -20,6 +20,11 @@ let trg; // target for popup
 // simulate layout
 beforeEach(() => {
   jest.useFakeTimers();
+  jest.spyOn(document.body, "scrollTop", "set").mockImplementation(() => 0);
+  jest.spyOn(document.body.parentElement, "scrollTop", "set").mockImplementation(() => 0);
+  jest.spyOn(document.body, "scrollLeft", "set").mockImplementation(() => 0);
+  jest.spyOn(document.body.parentElement, "scrollLeft", "set").mockImplementation(() => 0);
+
   jest.spyOn(document.body, "getBoundingClientRect").mockReturnValue({
     x: 0,
     y: 0,
@@ -910,7 +915,6 @@ describe("popupElement", () => {
     // checking if updatePosition was fired
     expect(spyFrame).toBeCalledTimes(1);
     expect(spyTrgRect).toBeCalled();
-    expect(spyBodyRect).toBeCalled();
     spyTrgRect.mockClear();
     spyBodyRect.mockClear();
     animateFrame();
@@ -1169,17 +1173,7 @@ describe("popupElement", () => {
 
   test("position with scroll", () => {
     // make body as scrollable
-    const dy = 10;
-    const dx = 5;
-    jest.spyOn(document.body, "scrollWidth", "get").mockReturnValue(document.body.clientWidth + dx);
-    const orig = window.getComputedStyle;
-    jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
-      const o = orig(elem);
-      if (elem === document.body) {
-        o.overflowX = "auto";
-      }
-      return o;
-    });
+    jest.spyOn(document.body, "scrollTop", "set").mockRestore();
 
     const bodyRect = { ...document.body.getBoundingClientRect() };
     const trgRect = { ...trg.getBoundingClientRect() };
@@ -1191,6 +1185,7 @@ describe("popupElement", () => {
       trgRect.top = y;
       trgRect.right = trgRect.left + trgRect.width;
       trgRect.bottom = trgRect.top + trgRect.height;
+      jest.advanceTimersByTime(1); // because getBoundingInternalRect is cached
     };
 
     const expectIt = (placement) => {
@@ -1204,16 +1199,6 @@ describe("popupElement", () => {
     expectIt(WUPPopupElement.$placements.$left.$middle).toMatchInlineSnapshot(
       `"<wup-popup style=\\"display: block; transform: translate(50px, 50px);\\" position=\\"bottom\\"></wup-popup>"`
     );
-
-    // check with overflowY
-    jest.spyOn(document.body, "scrollHeight", "get").mockReturnValue(document.body.clientHeight + dy);
-    jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
-      const o = orig(elem);
-      if (elem === document.body) {
-        o.overflowY = "auto";
-      }
-      return o;
-    });
 
     // cover case when target is partiallyHidden by scrollable parent
     // no place at the top

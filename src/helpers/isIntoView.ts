@@ -1,4 +1,4 @@
-import { getBoundingInternalRect } from "../popup/popupPlacements";
+import { getBoundingInternalRect, WUPPopupPlace } from "../popup/popupPlacements";
 import { findScrollParentAll } from "./findScrollParent";
 
 type BasicRect = Pick<DOMRect, "top" | "right" | "bottom" | "left">;
@@ -7,34 +7,34 @@ interface IntoViewOptions {
   /** Point parents if it's already defined outside function */
   scrollParents?: HTMLElement[] | null;
   /** Point el.getBoundingClientRect result if it's already defined outside function */
-  childRect?: BasicRect;
+  elRect?: BasicRect;
   /** Virtual margin of target element [top, right, bottom, left] or [top/bottom, right/left] in px */
   offset?: [number, number] | [number, number, number, number];
 }
 
 interface IntoViewResult {
   /** Completely hidden by parents x-scroll (hidden within horizontal scroll) */
-  hiddenX: boolean;
+  hiddenX: false | HTMLElement;
   /** Completely hidden by parents y-scroll (hidden within vertical scroll) */
-  hiddenY: boolean;
+  hiddenY: false | HTMLElement;
   /** Partially hidden/visible by parents x-scroll */
-  partialHiddenX: boolean;
+  partialHiddenX: false | HTMLElement;
   /** Partially hidden/visible by parents y-scroll */
-  partialHiddenY: boolean;
+  partialHiddenY: false | HTMLElement;
 
   /** Completely hidden (when hiddenX || hiddenY) */
-  hidden: boolean;
+  hidden: false | HTMLElement;
   /** Completely visible */
   visible: boolean;
   /** Partial hidden/visible (when partialHiddenX || partialHiddenY) */
-  partialVisible: boolean;
+  partialVisible: false | HTMLElement;
 }
 
 /** Check if element is visible in scrollable parents */
 export default function isIntoView(el: HTMLElement, options?: IntoViewOptions): IntoViewResult {
   const scrollParents = options?.scrollParents || findScrollParentAll(el) || [document.body];
 
-  let child: BasicRect = options?.childRect ?? el.getBoundingClientRect();
+  let child: BasicRect = options?.elRect ?? el.getBoundingClientRect();
   if (options?.offset) {
     child = {
       top: child.top - options.offset[0],
@@ -56,25 +56,48 @@ export default function isIntoView(el: HTMLElement, options?: IntoViewOptions): 
     partialVisible: false,
   };
 
-  // checking if visible in viewPort
-  // const isHiddenInViewport = (item: BasicRect) => item.top > vH || item.left > vW || item.bottom < 0 || item.right < 0;
+  interface ISaved {
+    (): Omit<WUPPopupPlace.Rect, "el">;
+    _saved: Omit<WUPPopupPlace.Rect, "el">;
+  }
 
   for (let i = 0; i < scrollParents.length; ++i) {
-    const p = getBoundingInternalRect(scrollParents[i]);
-    const isHiddenY = child.top > vH || child.bottom < 0 || p.top >= child.bottom || p.bottom <= child.top;
-    const isHiddenX = child.left > vW || child.right < 0 || p.left >= child.right || p.right <= child.left;
+    let isVisY = false;
+    let isVisX = false;
+    const elRect = scrollParents[i].getBoundingClientRect();
+    const p: ISaved = <ISaved>(() => {
+      if (!p._saved) {
+        const s = getComputedStyle(scrollParents[i]);
+        isVisY = s.overflowY === "visible";
+        isVisX = s.overflowX === "visible";
+        p._saved = getBoundingInternalRect(scrollParents[i], { computedStyle: s, elRect });
+      }
+      return p._saved; // implemented to cache huge getComputedStyle/getBoundingInternalRect
+    });
+
+    const isHiddenY = // checking if visible in viewPort also
+      ((child.top > vH || child.bottom < 0) && document.documentElement) ||
+      ((p().top >= child.bottom || p().bottom <= child.top) && !isVisY && scrollParents[i]);
+    const isHiddenX =
+      ((child.left > vW || child.right < 0) && document.documentElement) ||
+      ((p().left >= child.right || p().right <= child.left) && !isVisX && scrollParents[i]);
+
     if (isHiddenY) {
-      r.hiddenY = true;
+      r.hiddenY = isHiddenY;
     } else if (!r.hiddenY) {
-      r.partialHiddenY = child.top < 0 || child.bottom > vH || child.top < p.top || child.bottom > p.bottom;
+      r.partialHiddenY =
+        ((child.top < 0 || child.bottom > vH) && document.documentElement) ||
+        ((child.top < p().top || child.bottom > p().bottom) && !isVisY && scrollParents[i]);
     }
     if (isHiddenX) {
-      r.hiddenX = true;
+      r.hiddenX = isHiddenX;
     } else if (!r.hiddenX) {
-      r.partialHiddenX = child.left < 0 || child.right > vW || child.left < p.left || child.right > p.right;
+      r.partialHiddenX =
+        ((child.left < 0 || child.right > vW) && document.documentElement) ||
+        ((child.left < p().left || child.right > p().right) && !isVisX && scrollParents[i]);
     }
 
-    child = p as DOMRect;
+    child = elRect;
   }
 
   r.hidden = r.hiddenX || r.hiddenY;
