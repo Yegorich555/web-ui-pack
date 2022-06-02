@@ -8,8 +8,10 @@ afterEach(() => {
 
 beforeEach(() => {
   // default scenario when no items places
-  jest.spyOn(document.body, "scrollTop", "get").mockImplementation(() => 0);
-  jest.spyOn(document.body.parentElement, "scrollTop", "get").mockImplementation(() => 0);
+  jest.spyOn(document.body, "scrollTop", "set").mockImplementation(() => 0);
+  jest.spyOn(document.body.parentElement, "scrollTop", "set").mockImplementation(() => 0);
+  jest.spyOn(document.body, "scrollLeft", "set").mockImplementation(() => 0);
+  jest.spyOn(document.body.parentElement, "scrollLeft", "set").mockImplementation(() => 0);
 });
 
 describe("helper.findScrollParent", () => {
@@ -20,6 +22,13 @@ describe("helper.findScrollParent", () => {
 
     jest.restoreAllMocks(); // to allow change srollTop for body
     expect(findScrollParent(el) === document.body).toBeTruthy();
+
+    document.body.scrollLeft = 2; // cover case when item is scrolled
+    expect(findScrollParent(el) === document.body).toBeTruthy();
+    document.body.scrollLeft = 0;
+
+    jest.spyOn(document.body, "scrollTop", "set").mockImplementation(() => 0);
+    expect(findScrollParent(el) === document.body).toBeTruthy(); // because scrollLeft possible
   });
 
   test("helper.findScrollParentAll", () => {
@@ -28,7 +37,8 @@ describe("helper.findScrollParent", () => {
     expect(findScrollParentAll(document.body)).toBeNull();
 
     jest.restoreAllMocks(); // to allow change srollTop for body
-    jest.spyOn(document.body.parentElement, "scrollTop", "get").mockImplementation(() => 0);
+    jest.spyOn(document.body.parentElement, "scrollTop", "set").mockImplementation(() => 0);
+    jest.spyOn(document.body.parentElement, "scrollLeft", "set").mockImplementation(() => 0);
     expect(findScrollParentAll(el)).toEqual([document.body]);
 
     // move element to nested
@@ -37,10 +47,12 @@ describe("helper.findScrollParent", () => {
 
     expect(findScrollParentAll(el)).toEqual([main, document.body]); // because scrollTop possible now
     // check when main without scroll
-    jest.spyOn(main, "scrollTop", "get").mockImplementation(() => 0);
+    jest.spyOn(main, "scrollTop", "set").mockImplementation(() => 0);
+    jest.spyOn(main, "scrollLeft", "set").mockImplementation(() => 0);
     expect(findScrollParentAll(el)).toEqual([document.body]);
 
     jest.restoreAllMocks(); // to allow change srollTop for body
+    jest.spyOn(main, "scrollTop", "set").mockImplementation(() => 0); // for checking scrollLeft
     expect(findScrollParentAll(el)).toEqual([main, document.body, document.body.parentElement]); // in reality it's impossible but for simlation it's ok
   });
 });

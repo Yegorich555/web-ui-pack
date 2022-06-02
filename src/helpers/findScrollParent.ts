@@ -9,17 +9,23 @@ export default function findScrollParent(el: HTMLElement): HTMLElement | null {
   }
 
   // it means it's changed
-  if (p.scrollTop > 0) {
+  if (p.scrollTop > 0 || p.scrollLeft > 0) {
     return p;
   }
   // try to change and check if it's affected
-  const prev = p.scrollTop;
+  let prev = p.scrollTop;
   p.scrollTop += 10; // 10 to fix case when zoom applied
   if (prev !== p.scrollTop) {
     p.scrollTop = prev;
     return p;
   }
 
+  prev = p.scrollLeft;
+  p.scrollLeft += 10; // 10 to fix case when zoom applied
+  if (prev !== p.scrollLeft) {
+    p.scrollLeft = prev;
+    return p;
+  }
   return findScrollParent(p);
 }
 
