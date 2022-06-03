@@ -1,5 +1,12 @@
 const frames = new Map<HTMLElement, number>();
 
+interface PromiseCancel {
+  /** Call it when you need to stop animation immediately; it doesn't Promise.resolve() by stops animation and reset state
+   *  @param isReset reset state (inline styles) that was before animation @defaultValue true
+   */
+  stop: (isReset?: boolean) => void;
+}
+
 /** Animate (open/close) element as dropdown via scale and counter-scale for children
  * @param timeMs Animation time @defaultValue 300ms
  * @returns Promise that resolved by animation end
@@ -8,7 +15,7 @@ const frames = new Map<HTMLElement, number>();
  * * If call it again on the same element it wil continue/revert previous animation
  * * If call it again with reverted [isClose] previous promise (for open-end) is never resolved
  */
-export default function animateDropdown(el: HTMLElement, timeMs = 300, isClose = false): Promise<void> {
+export default function animateDropdown(el: HTMLElement, timeMs = 300, isClose = false): Promise<void> & PromiseCancel {
   const stored = frames.get(el);
   if (stored) {
     window.cancelAnimationFrame(stored);
@@ -44,14 +51,19 @@ export default function animateDropdown(el: HTMLElement, timeMs = 300, isClose =
     nested.push({ el: c, prev: parsed.prev });
   }
 
-  return new Promise((resolve) => {
+  const reset = () => {
+    frames.delete(el);
+    el.style.transform = removeScaleY(el.style.transform);
+    el.style.transformOrigin = "";
+    nested.forEach((e) => (e.el.style.transform = e.prev.trimEnd()));
+    return true;
+  };
+
+  const p = new Promise((resolve) => {
     // reset inline styles
-    const reset = () => {
-      frames.delete(el);
+    const finish = () => {
       resolve();
-      el.style.transform = removeScaleY(el.style.transform);
-      el.style.transformOrigin = "";
-      nested.forEach((e) => (e.el.style.transform = e.prev.trimEnd()));
+      reset();
     };
 
     // define from-to ranges
@@ -64,7 +76,7 @@ export default function animateDropdown(el: HTMLElement, timeMs = 300, isClose =
     let start = 0;
     const animate = (t: DOMHighResTimeStamp) => {
       if (!el.isConnected) {
-        reset(); // possible when item is removed unexpectedly
+        finish(); // possible when item is removed unexpectedly
         return;
       }
 
@@ -81,12 +93,22 @@ export default function animateDropdown(el: HTMLElement, timeMs = 300, isClose =
       scale !== 0 && nested.forEach((e) => (e.el.style.transform = `${e.prev}scaleY(${1 / scale})`));
 
       if (cur === timeMs) {
-        reset();
+        finish();
         return;
       }
 
       frames.set(el, window.requestAnimationFrame(animate));
     };
     frames.set(el, window.requestAnimationFrame(animate));
-  });
+  }) as Promise<void> & { stop: () => void };
+
+  p.stop = (isRst = true) => {
+    const frameId = frames.get(el);
+    if (frameId != null) {
+      window.cancelAnimationFrame(frameId);
+      isRst ? reset() : frames.delete(el);
+    }
+  };
+
+  return p;
 }

@@ -310,4 +310,38 @@ describe("helper.animateDropdown", () => {
       `"<ul style=\\"animation-name: none;\\"><ul style=\\"\\"><li>Some text here</li></ul></ul>"`
     );
   });
+
+  test("stop amimation", async () => {
+    let isResolved = false;
+    let p = animateDropdown(el, step * 2, false);
+    p.then(() => (isResolved = true));
+
+    await nextFrame();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<ul style=\\"animation-name: none; transform-origin: top; transform: scaleY(0);\\"><ul><li>Some text here</li></ul></ul>"`
+    );
+    p.stop();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<ul style=\\"animation-name: none;\\"><ul><li>Some text here</li></ul></ul>"`
+    );
+    await nextFrame();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<ul style=\\"animation-name: none;\\"><ul><li>Some text here</li></ul></ul>"`
+    );
+    expect(isResolved).toBeFalsy();
+
+    p = animateDropdown(el, step * 2, false);
+    p.then(() => (isResolved = true));
+    await nextFrame();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<ul style=\\"animation-name: none; transform-origin: top; transform: scaleY(0);\\"><ul><li>Some text here</li></ul></ul>"`
+    );
+    p.stop(false);
+    await nextFrame();
+    await nextFrame();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<ul style=\\"animation-name: none; transform-origin: top; transform: scaleY(0);\\"><ul><li>Some text here</li></ul></ul>"`
+    );
+    expect(isResolved).toBeFalsy();
+  });
 });
