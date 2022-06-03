@@ -265,6 +265,8 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
           if (s === WUPPopup.ShowCases.always) {
             return this.$refPopup!;
           }
+          // todo doesn't work immediate close when actions open>close>open
+          // todo open by db-click > try to close (it doesn't work)
           return this.goShowMenu(
             s === PopupShowCases.onClick
               ? WUPSelectControlTypes.ShowCases.onClick

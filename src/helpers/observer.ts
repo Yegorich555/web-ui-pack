@@ -310,7 +310,7 @@ function make<T extends object>(
   lstObserved.set(proxy, ref as Ref<object>);
   lstObjProxy.set(obj, proxy);
   if (isObject(obj) && obj.valueOf() === obj) {
-    // todo possible error if object isn't extensible
+    // warn: possible error if object isn't extensible
     Object.defineProperty(proxy, "valueOf", { value: () => obj.valueOf, enumerable: false });
   }
 

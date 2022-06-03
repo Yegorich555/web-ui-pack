@@ -96,11 +96,11 @@ export function getBoundingInternalRect(
   if ((el as any)._savedBoundingRect && !options?.ignoreCache) {
     return (el as any)._savedBoundingRect;
   }
+  // we don't need other borders (right/bottom) because of clientSize without borders
   const { borderTopWidth, borderLeftWidth } = options?.computedStyle ?? getComputedStyle(el);
   let { left, top } = options?.elRect ?? el.getBoundingClientRect();
   top += px2Number(borderTopWidth);
   left += px2Number(borderLeftWidth);
-  // todo it's wrong for bottom/right need to include borderRight, borderBottom ??
   const r: Omit<WUPPopupPlace.Rect, "el"> = {
     top,
     left,

@@ -154,6 +154,7 @@ export default function popupListenTarget(
 
     (popupListenTarget as any)._prevSel = getSelection(null);
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    // todo down-move-up should be ignored from click
     appendEvent(t, "click", (e) => {
       if (!(e as MouseEvent).pageX) {
         // pageX is null if it was fired programmatically
