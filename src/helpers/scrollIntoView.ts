@@ -25,7 +25,7 @@ export default function scrollIntoView(el: HTMLElement, options?: WUPScrollOptio
   }
 
   const oTop = opts.offsetTop ?? 0;
-  const oLeft = opts.offsetTop ?? 0;
+  const oLeft = opts.offsetLeft ?? 0;
 
   const viewResult = isIntoView(el, { scrollParents: [p], offset: [-oTop, -oLeft] });
   if (opts.onlyIfNeeded && viewResult.visible) {
