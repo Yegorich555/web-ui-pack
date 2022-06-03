@@ -42,6 +42,7 @@ module.exports = {
     "@typescript-eslint/no-explicit-any": "off", //["error", { ignoreRestArgs: true, }],
     "@typescript-eslint/no-namespace": "off",
     "prettier/prettier": ["error"],
+    "no-await-in-loop": 0,
     "no-bitwise": 0,
     "no-param-reassign": 0,
     "no-return-assign": ["error", "except-parens"],

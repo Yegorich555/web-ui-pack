@@ -24,10 +24,10 @@ export default function scrollIntoView(el: HTMLElement, options?: WUPScrollOptio
     return Promise.resolve();
   }
 
-  const offsetTop = opts.offsetTop ?? 0;
-  const offsetLeft = opts.offsetTop ?? 0;
+  const oTop = opts.offsetTop ?? 0;
+  const oLeft = opts.offsetTop ?? 0;
 
-  const viewResult = isIntoView(el, { scrollParents: [p], offset: [-offsetTop, -offsetLeft] });
+  const viewResult = isIntoView(el, { scrollParents: [p], offset: [-oTop, -oLeft] });
   if (opts.onlyIfNeeded && viewResult.visible) {
     return Promise.resolve();
   }
@@ -35,8 +35,8 @@ export default function scrollIntoView(el: HTMLElement, options?: WUPScrollOptio
   const elRect = el.getBoundingClientRect();
   const pRect = p.getBoundingClientRect();
 
-  const diffTop = elRect.top - pRect.top + (opts.offsetTop ?? 0);
-  const diffLeft = elRect.left - pRect.left + (opts.offsetLeft ?? 0);
+  const diffTop = elRect.top - pRect.top + oTop;
+  const diffLeft = elRect.left - pRect.left + oLeft;
 
   if (!opts.smoothMs) {
     p.scrollBy({ top: diffTop, left: diffLeft, behavior: "auto" });

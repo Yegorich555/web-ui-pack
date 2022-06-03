@@ -1,34 +1,16 @@
 import animateDropdown from "web-ui-pack/helpers/animateDropdown";
+import { useFakeAnimation } from "../testHelper";
 
+let step = 1;
 let nextFrame = async () => {};
 /** @type HTMLElement */
 let el;
-const step = 1000 / 60; // simulate 60Hz frequency
 
 beforeEach(() => {
   jest.useFakeTimers();
-
-  let i = 0;
-  const animateFrames = [];
-  nextFrame = async () => {
-    await Promise.resolve();
-    jest.advanceTimersByTime(step);
-    ++i;
-    const old = [...animateFrames];
-    animateFrames.length = 0;
-    old.forEach((f) => f(i * step));
-    await Promise.resolve();
-  };
-
-  jest.spyOn(window, "requestAnimationFrame").mockImplementation((fn) => {
-    animateFrames.push(fn);
-    return fn;
-  });
-
-  jest.spyOn(window, "cancelAnimationFrame").mockImplementation((fn) => {
-    const ind = animateFrames.indexOf(fn);
-    ind > -1 && animateFrames.splice(ind, 1);
-  });
+  const a = useFakeAnimation();
+  nextFrame = a.nextFrame;
+  step = a.step;
 
   el = document.body.appendChild(document.createElement("ul"));
   const ul = el.appendChild(document.createElement("ul"));

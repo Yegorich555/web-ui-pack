@@ -200,3 +200,31 @@ export function spyEventListeners(otherElements) {
 
   return spy;
 }
+
+export function useFakeAnimation() {
+  const step = 1000 / 60; // simulate 60Hz frequency
+  jest.useFakeTimers();
+  let i = 0;
+  const animateFrames = [];
+  const nextFrame = async () => {
+    await Promise.resolve();
+    jest.advanceTimersByTime(step);
+    ++i;
+    const old = [...animateFrames];
+    animateFrames.length = 0;
+    old.forEach((f) => f(i * step));
+    await Promise.resolve();
+  };
+
+  jest.spyOn(window, "requestAnimationFrame").mockImplementation((fn) => {
+    animateFrames.push(fn);
+    return fn;
+  });
+
+  jest.spyOn(window, "cancelAnimationFrame").mockImplementation((fn) => {
+    const ind = animateFrames.indexOf(fn);
+    ind > -1 && animateFrames.splice(ind, 1);
+  });
+
+  return { nextFrame, step };
+}
