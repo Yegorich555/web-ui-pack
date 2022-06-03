@@ -780,8 +780,9 @@ describe("popupElement", () => {
     );
 
     nextFrame();
+    await wait(0);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style=\\"display: block; transform: translate(190px, 100px) scaleY(0); animation-name: none; transform-origin: bottom;\\" position=\\"top\\" hide=\\"\\"><div style=\\"transform: scaleY(300);\\"></div><div style=\\"transform: scaleY(300);\\"></div></wup-popup>"`
+      `"<wup-popup style=\\"transform: translate(190px, 100px); animation-name: none;\\" position=\\"top\\"><div style=\\"\\"></div><div style=\\"\\"></div></wup-popup>"`
     );
 
     await wait();

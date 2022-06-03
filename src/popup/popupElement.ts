@@ -7,7 +7,7 @@ import WUPPopupArrowElement from "./popupArrowElement";
 import popupListenTarget from "./popupListenTarget";
 
 export import ShowCases = WUPPopup.ShowCases;
-import { isIntoView } from "../indexHelpers";
+import { animateDropdown, isIntoView } from "../indexHelpers";
 // code coverage doesn't work either: https://stackoverflow.com/questions/62493593/unable-to-ignore-block-within-react-class-components-with-istanbul-ignore-next-t
 /* c8 ignore next */
 export * from "./popupElement.types";
@@ -546,14 +546,8 @@ export default class WUPPopupElement<
             );
           }
         } else {
-          animTime = this.#animateDrawer(animTime);
+          return animateDropdown(this, animTime, false).then(() => true);
         }
-      }
-
-      if (animTime) {
-        return new Promise((resolve) => {
-          setTimeout(() => resolve(true), animTime);
-        });
       }
 
       // run async to dispose internal resources first: possible dev-side-issues
@@ -618,7 +612,11 @@ export default class WUPPopupElement<
           // recalc hideTime base on animationLeftTime
           if (this._opts.animation) {
             this.#prevRect = undefined; // force to recalc position because transform translate must be cleared for animation
-            animTime = this.#animateDrawer(animTime, true);
+            return animateDropdown(this, animTime, true).then(() => {
+              finishHide();
+              // todo how to stop immediate (with using #forceHide)
+              return true;
+            });
           }
 
           return new Promise((resolve) => {
@@ -641,88 +639,6 @@ export default class WUPPopupElement<
     finishHide();
     return true;
   }
-
-  #frameAnimId?: number;
-  /** Run animation and return new animIime (possible when animation re-run and previous must be finished) */
-  #animateDrawer = (animTime: number, isRevert?: boolean): number => {
-    this.#frameAnimId && window.cancelAnimationFrame(this.#frameAnimId);
-    this.style.animationName = "none"; // disable default css-animation
-
-    // get previous scaleY and extract transform without scaleY
-    const reg = /scaleY\(([\d.]+)\)/;
-    const removeScaleY = (styleTransform: string): string => styleTransform.replace(reg, "").trim().replace("  ", " ");
-    const parseScale = (el: HTMLElement): { prev: string; from: number } => {
-      let prev = el.style.transform;
-      let from = isRevert ? 1 : 0;
-      const r = reg.exec(el.style.transform);
-      if (r) {
-        // remove scale from transform
-        prev = el.style.transform.replace(r[0], "");
-        from = Number.parseFloat(r[1]);
-      }
-      if (prev) {
-        prev = `${prev.trim().replace("  ", " ")} `; // extra-space to prepary add scaleY without extra logic
-      }
-
-      return { prev, from };
-    };
-
-    const nested: Array<{ el: HTMLElement; prev: string }> = [];
-    const ch = this.children;
-    for (let i = 0; i < ch.length; ++i) {
-      const el = ch.item(i) as HTMLElement;
-      const parsed = parseScale(el);
-      nested.push({ el, prev: parsed.prev });
-    }
-
-    // reset inline styles
-    const reset = () => {
-      this.#frameAnimId = undefined;
-      setTimeout(() => {
-        // timeout is required to prevent blink-effect when popup hasn't been hide yet
-        this.style.transform = removeScaleY(this.style.transform);
-        this.style.transformOrigin = "";
-        nested.forEach((e) => (e.el.style.transform = e.prev.trimEnd()));
-      });
-    };
-
-    // define from-to ranges
-    const to = isRevert ? 0 : 1;
-    const { from } = parseScale(this);
-
-    // recalc left-animTime based on current animation (if element is partially opened and need to hide it)
-    animTime *= Math.abs(to - from);
-
-    let start = 0;
-    const animate = (t: DOMHighResTimeStamp) => {
-      if (!this.isConnected) {
-        reset(); // possible when item is removed unexpectedly
-        return;
-      }
-
-      if (!start) {
-        start = t;
-      }
-
-      const cur = Math.min(t - start, animTime); // to make sure the element stops at exactly pointed value
-      const v = cur / animTime;
-      const scale = from + (to - from) * v;
-
-      this.style.transformOrigin = this.getAttribute("position") === "top" ? "bottom" : "top";
-      this.style.transform = `${removeScaleY(this.style.transform)} scaleY(${scale})`;
-      scale !== 0 && nested.forEach((e) => (e.el.style.transform = `${e.prev}scaleY(${1 / scale})`));
-
-      if (cur === animTime) {
-        reset();
-        return;
-      }
-
-      this.#frameAnimId = window.requestAnimationFrame(animate);
-    };
-    this.#frameAnimId = window.requestAnimationFrame(animate);
-
-    return animTime;
-  };
 
   /** Update position of popup. Call this method in cases when you changed options */
   #updatePosition = (): DOMRect | undefined => {

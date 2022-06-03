@@ -35,11 +35,12 @@ npm install web-ui-pack
 - [x] [Basic helpers](#helpers)
 - [x] [Helper.Observer](#helpersobserver)
 - [x] [PopupElement](#popupelement)
+- [ ] SpinElement
 - [ ] FormElement, TextControl
 - [ ] PasswordControl
 - [ ] CheckControl
 - [ ] RadioControl
-- [ ] ComboControl, DropdownControl
+- [ ] ComboControl (DropdownControl)
 - [ ] Calendar
 - [ ] DateControl
 - [ ] TimeControl ?
@@ -50,6 +51,8 @@ npm install web-ui-pack
 - [ ] FileControl
 - [ ] ImageControl
 - [ ] SearchControl ?
+- [ ] InfiniteScroll
+- [ ] VirtualScroll
 - [ ] TableElement ?
 
 ## Demo
@@ -169,6 +172,7 @@ declare global {
 use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 **WARN**: don't use `import {focusFirst} from "web-ui-pack;` because in this case the whole web-ui-pack module traps in compilation of dev-bundle and increases time of compilation
 
+- [**animateDropdown**(el: HTMLElement, timeMs=300, isClose=false)](#helpers) ⇒ `Animate (open/close) element as dropdown via scale and counter-scale for children`
 - [**findScrollParent**(el: HTMLElement)](#helpers) ⇒ `Find first parent with active scroll X/Y`
 - [**findScrollParentAll**(e: HTMLElement)](#helpers) ⇒ `Find all parents with active scroll X/Y`
 - [**focusFirst**(el: HTMLElement)](#helpers) ⇒ `Set focus on parent itself or first possible element inside`

@@ -1,3 +1,4 @@
+export { default as animateDropdown } from "./helpers/animateDropdown";
 export { default as findScrollParent } from "./helpers/findScrollParent";
 export { findScrollParentAll } from "./helpers/findScrollParent";
 export { default as focusFirst } from "./helpers/focusFirst";

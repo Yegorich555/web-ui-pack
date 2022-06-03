@@ -10,6 +10,7 @@
 
 - Optimized for webpack (via [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free))
 - Added [helpers](README.md#helpers)
+  - `animateDropdown`
   - `findScrollParentAll`
   - `isIntoView`
   - `scrollIntoView`
