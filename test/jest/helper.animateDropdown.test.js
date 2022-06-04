@@ -311,7 +311,7 @@ describe("helper.animateDropdown", () => {
     );
   });
 
-  test("stop amimation", async () => {
+  test("stop animation", async () => {
     let isResolved = false;
     let p = animateDropdown(el, step * 2, false);
     p.then(() => (isResolved = true));
@@ -343,5 +343,15 @@ describe("helper.animateDropdown", () => {
       `"<ul style=\\"animation-name: none; transform-origin: top; transform: scaleY(0);\\"><ul><li>Some text here</li></ul></ul>"`
     );
     expect(isResolved).toBeFalsy();
+  });
+
+  test("options timeMs is 0", async () => {
+    const p = animateDropdown(el, 0, false);
+    let isResolved = false;
+    p.then(() => (isResolved = true));
+    await nextFrame();
+    expect(p.stop).toBeDefined();
+    expect(isResolved).toBeTruthy();
+    expect(el.outerHTML).toMatchInlineSnapshot(`"<ul><ul><li>Some text here</li></ul></ul>"`);
   });
 });

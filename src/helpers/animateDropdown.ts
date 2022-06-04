@@ -21,6 +21,10 @@ export default function animateDropdown(el: HTMLElement, timeMs = 300, isClose =
     window.cancelAnimationFrame(stored);
     frames.delete(el);
   }
+  if (!timeMs) {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    return Object.assign(Promise.resolve(), { stop: () => {} });
+  }
 
   el.style.animationName = "none"; // disable default css-animation
 
