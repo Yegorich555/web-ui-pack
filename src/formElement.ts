@@ -13,6 +13,8 @@ export namespace WUPForm {
     validateUntiFirst = 1 << 1,
     /** Collect to model only changed values */
     collectChanged = 1 << 2,
+    /** Reset isDirty and assign $value to $initValue for controls (on success only) */
+    reset = 1 << 3,
   }
 
   export type SubmitEvent<T> = Event & {
@@ -33,7 +35,7 @@ export namespace WUPForm {
 
   export type Defaults = {
     /** Actions that enabled on submit event; You can point several like: `goToError | collectChanged`
-     * @defaultValue goToError | validateUntiFirst */
+     * @defaultValue goToError | validateUntiFirst | reset */
     submitActions: SubmitActions;
   };
 
@@ -181,7 +183,8 @@ export default class WUPFormElement<
 
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUPForm.Defaults = {
-    submitActions: WUPForm.SubmitActions.goToError | WUPForm.SubmitActions.validateUntiFirst,
+    submitActions:
+      WUPForm.SubmitActions.goToError | WUPForm.SubmitActions.validateUntiFirst | WUPForm.SubmitActions.reset,
   };
 
   $options: WUPForm.Options = {
@@ -193,22 +196,24 @@ export default class WUPFormElement<
   /** All controls assigned to form */
   $controls: IBaseControl<any>[] = [];
 
+  _model?: Partial<Model>;
   /** Model related to every control inside (with $options.name); @see BaseControl...$value */
   get $model(): Partial<Model> {
-    return this.#ctr.$modelFromControls(this.$controls, "$value");
+    return Object.assign(this._model || {}, this.#ctr.$modelFromControls(this.$controls, "$value"));
   }
 
   set $model(m: Partial<Model>) {
-    this.#ctr.$modelToControls(m, this.$controls, "$value");
+    if (m !== this._model) {
+      this._model = m;
+      this.#ctr.$modelToControls(m, this.$controls, "$value");
+    }
   }
 
   _initModel?: Partial<Model>;
   /** Default/init model related to every control inside; @see BaseControl...$initValue */
   get $initModel(): Partial<Model> {
-    if (!this._initModel) {
-      this._initModel = this.#ctr.$modelFromControls(this.$controls, "$initValue");
-    }
-    return this._initModel;
+    // it's required to avoid case when model has more props than controls
+    return Object.assign(this._initModel || {}, this.#ctr.$modelFromControls(this.$controls, "$initValue"));
   }
 
   set $initModel(m: Partial<Model>) {
@@ -252,7 +257,6 @@ export default class WUPFormElement<
     // collect values to model
     const onlyChanged = this._opts.submitActions & WUPForm.SubmitActions.collectChanged;
     const m = this.#ctr.$modelFromControls(this.$controls, "$value", !!onlyChanged);
-
     // fire events
     const ev = new Event("$submit", { cancelable: false, bubbles: true }) as WUPForm.SubmitEvent<Model>;
     ev.$model = m;
@@ -261,11 +265,17 @@ export default class WUPFormElement<
     ev.$submitter = submitter;
 
     console.warn("got model", m, this.$controls);
+    const needReset = this._opts.submitActions & WUPForm.SubmitActions.reset;
     setTimeout(() => {
       // todo how to wait for response and show pending ?
       this.dispatchEvent("$submit", ev);
+      this.dispatchEvent("submit", new SubmitEvent("submit", { submitter, cancelable: false, bubbles: true }));
+
+      if (needReset) {
+        this.$controls.forEach((v) => (v.$isDirty = false));
+        this.$initModel = this.$model;
+      }
     });
-    // todo reset controls (replace initValues ?)
   }
 
   /** Fired on Init and every time as options/attributes changed */

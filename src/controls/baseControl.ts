@@ -322,17 +322,13 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   #isDirty = false;
-  /** True if control is touched by user; Set 'false' if you want to reset state of control and assign initValue to value */
+  /** True if control is touched by user */
   get $isDirty() {
     return this.#isDirty;
   }
 
   set $isDirty(v: boolean) {
     this.#isDirty = v;
-    if (!v) {
-      // todo it's unclear. Maybe implement reset() instead ?
-      this.$initValue = this.$value;
-    }
   }
 
   /** Returns true if value is empty string or undefined */
