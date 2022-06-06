@@ -6,14 +6,6 @@ import onFocusLost from "../helpers/onFocusLost";
 import onSpy from "../helpers/onSpy";
 import { WUPPopup } from "./popupElement.types";
 
-function getSelection(e: MouseEvent | null) {
-  const s = window.getSelection();
-  if (!s || s.type !== "Range") {
-    return null;
-  }
-  return { text: s.toString(), node: s.anchorNode, start: e ? (e.target as HTMLInputElement).selectionStart : null };
-}
-
 /**
  * listen for target according to showCase and return onRemoveCallback (listeners that need to remove when popup removed)
  * If target removed then listeners removed
@@ -130,10 +122,20 @@ export default function popupListenTarget(
       }
     });
 
-    let wasTargetMouseDown = false; // fix when user makes t.mousedown, mousemove, body.mouseup
-    onShowEvent(t, "mousedown", () => (wasTargetMouseDown = true));
+    let wasMouseMove = false; // fix when user makes t.mousedown, mousemove, body.mouseup
+    onShowEvent(t, "mousedown", () => {
+      wasMouseMove = false;
+      onEvent(t, "mousemove", () => (wasMouseMove = true), { once: true });
+    });
     onShowEvent(document, "click", (e) => {
       preventClickAfterFocus = false; // mostly it doesn't make sense but maybe it's possible
+      if (wasMouseMove) {
+        wasMouseMove = false;
+        return;
+      }
+      if (e.detail === 2) {
+        return;
+      }
       // filter click from target because we have target event for this
       const isTarget = t === e.target || (e.target instanceof Node && t.contains(e.target));
       if (!isTarget) {
@@ -141,20 +143,15 @@ export default function popupListenTarget(
         if (isMeClick) {
           focusFirst(lastActive || t);
           hide(WUPPopup.HideCases.onPopupClick, e);
-        } else if (!wasTargetMouseDown) {
+        } else {
           hide(WUPPopup.HideCases.onOutsideClick, e);
           wasOutsideClick = true;
           setTimeout(() => (wasOutsideClick = false), 50);
-        } else {
-          (popupListenTarget as any)._prevSel = getSelection(e);
         }
       }
-      wasTargetMouseDown = false;
     });
 
-    (popupListenTarget as any)._prevSel = getSelection(null);
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    // todo down-move-up should be ignored from click
     appendEvent(t, "click", (e) => {
       if (!(e as MouseEvent).pageX) {
         // pageX is null if it was fired programmatically
@@ -168,17 +165,6 @@ export default function popupListenTarget(
       const isPrevented = preventClickAfterFocus; // otherwise it can be reset by document.click
 
       setTimeout(() => {
-        // checking if user selected text during the click (filter user actions on input)
-        const curSel = getSelection(e);
-        const prev = (popupListenTarget as any)._prevSel as typeof curSel;
-        const isUserSelected =
-          curSel === null
-            ? false
-            : prev === null || prev.node !== curSel.node || prev.text !== curSel.text || prev.start !== curSel.start;
-        (popupListenTarget as any)._prevSel = curSel;
-        if (isUserSelected) {
-          return;
-        }
         if (!openedEl) {
           lastActive = document.activeElement as HTMLElement;
           show(WUPPopup.ShowCases.onClick, e);
@@ -220,7 +206,7 @@ export default function popupListenTarget(
       if (!openedEl && show(WUPPopup.ShowCases.onFocus, e)) {
         if (opts.showCase & WUPPopup.ShowCases.onClick) {
           preventClickAfterFocus = true;
-          const r1 = appendEvent(document, "touchstart", () => rst());
+          const r1 = appendEvent(document, "touchstart", () => rst()); // mousdown isn't not fired when user touch-move-end
           const r2 = appendEvent(document, "mousedown", () => rst());
           const rst = () => {
             preventClickAfterFocus = false;

@@ -431,45 +431,6 @@ describe("popupElement", () => {
     expect(a.$isOpen).toBeFalsy(); // click outside == close
     expect(spyHide).lastCalledWith(4, e);
 
-    // simulate when user selected
-    const simulateSelection = (sel) => {
-      jest.spyOn(window, "getSelection").mockReturnValueOnce(sel);
-      trgInput.dispatchEvent(new Event("mouseenter", { bubbles: true }));
-      trgInput.dispatchEvent(new Event("mousedown", { bubbles: true }));
-      trgInput.dispatchEvent(new Event("mousemove", { bubbles: true }));
-      trgInput.dispatchEvent(new Event("mouseup", { bubbles: true }));
-      trgInput.dispatchEvent(new Event("click", { bubbles: true }));
-      return wait();
-    };
-    expect(a.$isOpen).toBeFalsy();
-    await simulateSelection({ type: "Range", toString: () => "some", anchorNode: trgInput });
-    expect(a.$isOpen).toBeFalsy(); // because user selected
-    await simulateSelection({ type: "Range", toString: () => "some", anchorNode: trgInput });
-    expect(a.$isOpen).toBeTruthy(); // because user not changed selection
-
-    trgInput.value = "some_some";
-    trgInput.selectionStart = "5";
-    await simulateSelection({ type: "Range", toString: () => "some", anchorNode: trgInput });
-    expect(a.$isOpen).toBeTruthy(); // because user changed selection
-
-    await simulateSelection({ type: "Range", toString: () => "som", anchorNode: trgInput });
-    expect(a.$isOpen).toBeTruthy(); // because user changed selection
-    await simulateSelection({ type: "Range", toString: () => "some", anchorNode: trgInput2 }); // WARN: node is wrong but for tests it's ok
-    expect(a.$isOpen).toBeTruthy(); // because user selected same but on another element
-
-    await simulateSelection({ type: "Range", toString: () => "some", anchorNode: trgInput2 }); // WARN: node is wrong but for tests it's ok
-    expect(a.$isOpen).toBeFalsy(); // because selection not changed
-
-    jest.spyOn(window, "getSelection").mockReturnValueOnce(null);
-    trgInput.click();
-    await wait();
-    expect(a.$isOpen).toBeTruthy();
-
-    // for coverage case when popupListener applied when something is already selected
-    jest.spyOn(window, "getSelection").mockReturnValueOnce({ type: "Range" });
-    const ref = popupListenTarget({ target: trgInput });
-    ref.onRemoveRef();
-
     // check focus on target > on hide
     document.activeElement.blur();
     f = jest.spyOn(document, "activeElement", "get").mockReturnValue(null);
