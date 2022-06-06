@@ -362,4 +362,21 @@ describe("baseElement", () => {
     expect(el.getAttribute("disabled")).toBeNull();
     expect(el.getBoolAttr("disabled")).toBeFalsy();
   });
+
+  test("autofocus", async () => {
+    expect(document.activeElement).not.toBe(el);
+    const input = el.appendChild(document.createElement("input"));
+    expect(document.activeElement).not.toBe(input);
+    el.autofocus = true;
+    await h.wait();
+    expect(document.activeElement).toBe(input);
+
+    input.blur();
+    expect(document.activeElement).not.toBe(input);
+    el.remove();
+    el.$options.autofocs = true;
+    document.body.appendChild(el);
+    await h.wait();
+    expect(document.activeElement).toBe(input);
+  });
 });

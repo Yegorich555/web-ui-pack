@@ -490,7 +490,6 @@ export default abstract class WUPBaseControl<
       this.renderControl();
     }
     this.$form = WUPFormElement.$tryConnect(this);
-    setTimeout(() => this._opts.autoFocus && this.focus()); // timeout required to wait to apply options
   }
 
   protected disconnectedCallback() {

@@ -228,3 +228,9 @@ export function useFakeAnimation() {
 
   return { nextFrame, step };
 }
+
+export async function wait(t = 1000) {
+  await Promise.resolve();
+  jest.advanceTimersByTime(t);
+  await Promise.resolve();
+}

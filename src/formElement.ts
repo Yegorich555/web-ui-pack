@@ -297,7 +297,6 @@ export default class WUPFormElement<
     super.connectedCallback();
     this.setAttribute("role", "form");
     formStore.push(this);
-    setTimeout(() => this._opts.autoFocus && this.focus()); // timeout requires to wait for apply options
   }
 
   protected override disconnectedCallback() {

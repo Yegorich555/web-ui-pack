@@ -172,6 +172,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   /** Fired when element is added to document */
   protected gotReady() {
     this.#isReady = true;
+    setTimeout(() => (this.autofocus || this._opts.autoFocus) && this.focus()); // timeout to wait for options
   }
 
   /** Fired when element is removed from document */
