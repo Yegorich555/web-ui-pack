@@ -346,4 +346,20 @@ describe("baseElement", () => {
     expect(style.lastIndexOf("t-c { z-index: me }")).toBe(style.indexOf("t-c { z-index: me }")); // checking if style applied once
     expect(style.lastIndexOf(":root { vis: im here }")).toBe(style.indexOf(":root { vis: im here }")); // checking if style applied once
   });
+
+  test("get/set bool attr", () => {
+    expect(el.getBoolAttr("disabled")).toBeFalsy();
+
+    el.setBoolAttr("disabled", true);
+    expect(el.getAttribute("disabled")).toBe("");
+    expect(el.getBoolAttr("disabled")).toBeTruthy();
+
+    el.setBoolAttr("disabled", true, true);
+    expect(el.getAttribute("disabled")).toBe("true");
+    expect(el.getBoolAttr("disabled")).toBeTruthy();
+
+    el.setBoolAttr("disabled", false);
+    expect(el.getAttribute("disabled")).toBeNull();
+    expect(el.getBoolAttr("disabled")).toBeFalsy();
+  });
 });
