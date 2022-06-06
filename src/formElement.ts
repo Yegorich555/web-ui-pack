@@ -3,7 +3,7 @@ import WUPBaseElement, { JSXCustomProps, WUP } from "./baseElement";
 import IBaseControl from "./controls/baseControl.i";
 import { nestedProperty, scrollIntoView } from "./indexHelpers";
 
-export namespace WUPFormTypes {
+export namespace WUPForm {
   export const enum SubmitActions {
     /** Disable any action */
     none = 0,
@@ -118,16 +118,16 @@ const formStore: WUPFormElement[] = [];
  */
 export default class WUPFormElement<
   Model extends Record<string, any> = any,
-  Events extends WUPFormTypes.EventMap = WUPFormTypes.EventMap
+  Events extends WUPForm.EventMap = WUPForm.EventMap
 > extends WUPBaseElement<Events> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPFormElement;
 
   /** Options that need to watch for changes; use gotOptionsChanged() */
-  static observedOptions = new Set<keyof WUPFormTypes.Options>(["disabled", "readOnly", "autoComplete"]);
+  static observedOptions = new Set<keyof WUPForm.Options>(["disabled", "readOnly", "autoComplete"]);
 
   /* Array of attribute names to listen for changes */
-  static get observedAttributes(): Array<keyof WUPFormTypes.Options> {
+  static get observedAttributes(): Array<keyof WUPForm.Options> {
     return ["disabled", "readOnly", "autoComplete"];
   }
 
@@ -180,11 +180,11 @@ export default class WUPFormElement<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUPFormTypes.Defaults = {
-    submitActions: WUPFormTypes.SubmitActions.goToError | WUPFormTypes.SubmitActions.validateUntiFirst,
+  static $defaults: WUPForm.Defaults = {
+    submitActions: WUPForm.SubmitActions.goToError | WUPForm.SubmitActions.validateUntiFirst,
   };
 
-  $options: WUPFormTypes.Options = {
+  $options: WUPForm.Options = {
     ...this.#ctr.$defaults,
   };
 
@@ -229,7 +229,7 @@ export default class WUPFormElement<
 
     // validate
     let errCtrl: IBaseControl | undefined;
-    if (this._opts.submitActions & WUPFormTypes.SubmitActions.validateUntiFirst) {
+    if (this._opts.submitActions & WUPForm.SubmitActions.validateUntiFirst) {
       errCtrl = this.$controls.find((c) => c.$validate());
     } else {
       this.$controls.forEach((c) => {
@@ -242,7 +242,7 @@ export default class WUPFormElement<
 
     // analyze - go to error
     if (errCtrl) {
-      if (this._opts.submitActions & WUPFormTypes.SubmitActions.goToError) {
+      if (this._opts.submitActions & WUPForm.SubmitActions.goToError) {
         const el = errCtrl;
         scrollIntoView(el, { offsetTop: -30, onlyIfNeeded: true }).then(() => el.focus());
       }
@@ -250,11 +250,11 @@ export default class WUPFormElement<
     }
 
     // collect values to model
-    const onlyChanged = this._opts.submitActions & WUPFormTypes.SubmitActions.collectChanged;
+    const onlyChanged = this._opts.submitActions & WUPForm.SubmitActions.collectChanged;
     const m = this.#ctr.$modelFromControls(this.$controls, "$value", !!onlyChanged);
 
     // fire events
-    const ev = new Event("$submit", { cancelable: false, bubbles: true }) as WUPFormTypes.SubmitEvent<Model>;
+    const ev = new Event("$submit", { cancelable: false, bubbles: true }) as WUPForm.SubmitEvent<Model>;
     ev.$model = m;
     ev.$relatedForm = this;
     ev.$relatedEvent = e;
@@ -269,7 +269,7 @@ export default class WUPFormElement<
   }
 
   /** Fired on Init and every time as options/attributes changed */
-  protected gotChanges(propsChanged: Array<keyof WUPFormTypes.Options> | null) {
+  protected gotChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
     this._opts.disabled = this.getBoolAttr("disabled", this._opts.disabled);
     this._opts.readOnly = this.getBoolAttr("readOnly", this._opts.readOnly);
     this._opts.autoFocus = this.getBoolAttr("autoFocus", this._opts.autoFocus);
@@ -315,7 +315,7 @@ export default class WUPFormElement<
 
   protected override gotOptionsChanged(e: WUP.OptionEvent) {
     super.gotOptionsChanged(e);
-    this.gotChanges(e.props as Array<keyof WUPFormTypes.Options>);
+    this.gotChanges(e.props as Array<keyof WUPForm.Options>);
   }
 
   #isStopAttrListen = false;
@@ -334,7 +334,7 @@ export default class WUPFormElement<
     this.#attrChanged = [name];
     this.#attrTimer = window.setTimeout(() => {
       this.#attrTimer = undefined;
-      this.gotChanges(this.#attrChanged as Array<keyof WUPFormTypes.Options>);
+      this.gotChanges(this.#attrChanged as Array<keyof WUPForm.Options>);
       this.#attrChanged = undefined;
     });
   }
@@ -363,7 +363,7 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUPFormTypes.JSXControlProps<WUPFormElement>;
+      [tagName]: WUPForm.JSXControlProps<WUPFormElement>;
     }
   }
 }

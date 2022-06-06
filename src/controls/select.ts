@@ -5,8 +5,8 @@ import onFocusLostEv from "../helpers/onFocusLost";
 // eslint-disable-next-line import/named
 import WUPPopupElement, { ShowCases as PopupShowCases, WUPPopup } from "../popup/popupElement";
 import popupListenTarget from "../popup/popupListenTarget";
-import WUPBaseControl, { WUPBaseControlTypes } from "./baseControl";
-import WUPTextControl, { WUPTextControlTypes } from "./text";
+import WUPBaseControl, { WUPBase } from "./baseControl";
+import WUPTextControl, { WUPText } from "./text";
 
 export namespace WUPSelectControlTypes {
   export const enum ShowCases {
@@ -46,19 +46,19 @@ export namespace WUPSelectControlTypes {
     readOnlyInput?: boolean;
   };
 
-  export type ValidationMap = WUPBaseControlTypes.ValidationMap;
+  export type ValidationMap = WUPBase.ValidationMap;
   export type Generics<
     ValueType = any,
-    ValidationKeys extends WUPBaseControlTypes.ValidationMap = ValidationMap,
+    ValidationKeys extends WUPBase.ValidationMap = ValidationMap,
     Defaults = Defs,
     Options = Opt<ValueType>
-  > = WUPTextControlTypes.Generics<ValueType, ValidationKeys, Defaults & Defs, Options & Opt<ValueType>>;
+  > = WUPText.Generics<ValueType, ValidationKeys, Defaults & Defs, Options & Opt<ValueType>>;
 
   export type Validation<T = any> = Generics<T>["Validation"];
   export type Defaults<T = any> = Generics<T>["Defaults"];
   export type Options<T = any> = Generics<T>["Options"];
 
-  export type JSXControlProps<T extends WUPSelectControl> = WUPTextControlTypes.JSXControlProps<T> & {
+  export type JSXControlProps<T extends WUPSelectControl> = WUPText.JSXControlProps<T> & {
     /** @readonly Use [opened] for styling */
     readonly opened?: boolean;
   };

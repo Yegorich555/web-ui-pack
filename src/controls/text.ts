@@ -1,12 +1,12 @@
 /* eslint-disable no-use-before-define */
 import onFocusGot from "../helpers/onFocusGot";
 import { onEvent } from "../indexHelpers";
-import WUPBaseControl, { WUPBaseControlTypes } from "./baseControl";
+import WUPBaseControl, { WUPBase } from "./baseControl";
 
 const emailReg =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-export namespace WUPTextControlTypes {
+export namespace WUPText {
   type Def = {
     /** Debounce time to wait for user finishes typing to start validate and provide $change event
      * @defaultValue 0; */
@@ -22,7 +22,7 @@ export namespace WUPTextControlTypes {
   // eslint-disable-next-line @typescript-eslint/ban-types
   type Opt = {};
 
-  export type ValidationMap = WUPBaseControlTypes.ValidationMap & {
+  export type ValidationMap = WUPBase.ValidationMap & {
     min: number;
     max: number;
     email: boolean;
@@ -30,15 +30,15 @@ export namespace WUPTextControlTypes {
 
   export type Generics<
     ValueType = string,
-    ValidationKeys extends WUPBaseControlTypes.ValidationMap = ValidationMap,
+    ValidationKeys extends WUPBase.ValidationMap = ValidationMap,
     Defaults = Def,
     Options = Opt
-  > = WUPBaseControlTypes.Generics<ValueType, ValidationKeys, Defaults & Def, Options & Opt>;
+  > = WUPBase.Generics<ValueType, ValidationKeys, Defaults & Def, Options & Opt>;
 
   export type Validation<T = string> = Generics<T>["Validation"];
   export type Defaults<T = string> = Generics<T>["Defaults"];
   export type Options<T = string> = Generics<T>["Options"];
-  export type JSXControlProps<T extends WUPTextControl> = WUPBaseControlTypes.JSXControlProps<T>;
+  export type JSXControlProps<T extends WUPTextControl> = WUPBase.JSXControlProps<T>;
 }
 /**
  * @tutorial innerHTML @example
@@ -51,14 +51,12 @@ export namespace WUPTextControlTypes {
  */
 export default class WUPTextControl<
   ValueType = string,
-  EventMap extends WUPBaseControlTypes.EventMap = WUPBaseControlTypes.EventMap
+  EventMap extends WUPBase.EventMap = WUPBase.EventMap
 > extends WUPBaseControl<ValueType, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextControl;
 
-  static observedOptions = (super.observedOptions as Set<keyof WUPTextControlTypes.Options>).add(
-    "hasButtonClear"
-  ) as any;
+  static observedOptions = (super.observedOptions as Set<keyof WUPText.Options>).add("hasButtonClear") as any;
 
   static get $styleRoot(): string {
     return `:root {
@@ -208,7 +206,7 @@ export default class WUPTextControl<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUPTextControlTypes.Defaults = {
+  static $defaults: WUPText.Defaults = {
     ...WUPBaseControl.$defaults,
     selectOnFocus: true,
     hasButtonClear: true,
@@ -221,7 +219,7 @@ export default class WUPTextControl<
     },
   };
 
-  $options: WUPTextControlTypes.Options<ValueType> = {
+  $options: WUPText.Options<ValueType> = {
     ...this.#ctr.$defaults,
     // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory
@@ -324,7 +322,7 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUPTextControlTypes.JSXControlProps<WUPTextControl>;
+      [tagName]: WUPText.JSXControlProps<WUPTextControl>;
     }
   }
 }

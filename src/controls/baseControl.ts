@@ -32,7 +32,7 @@ export const enum ClearActions {
   resetToInit = 1 << 2,
 }
 
-export namespace WUPBaseControlTypes {
+export namespace WUPBase {
   export const enum ValidateFromCases {
     /** When element appended to layout */
     onInit,
@@ -132,10 +132,7 @@ export namespace WUPBaseControlTypes {
   }
 }
 
-export default abstract class WUPBaseControl<
-    ValueType = any,
-    Events extends WUPBaseControlTypes.EventMap = WUPBaseControlTypes.EventMap
-  >
+export default abstract class WUPBaseControl<ValueType = any, Events extends WUPBase.EventMap = WUPBase.EventMap>
   extends WUPBaseElement<Events>
   implements IBaseControl<ValueType>
 {
@@ -143,16 +140,10 @@ export default abstract class WUPBaseControl<
   #ctr = this.constructor as typeof WUPBaseControl;
 
   /** Options that need to watch for changes; use gotOptionsChanged() */
-  static observedOptions = new Set<keyof WUPBaseControlTypes.Options>([
-    "label",
-    "name",
-    "autoComplete",
-    "disabled",
-    "readOnly",
-  ]);
+  static observedOptions = new Set<keyof WUPBase.Options>(["label", "name", "autoComplete", "disabled", "readOnly"]);
 
   /* Array of attribute names to listen for changes */
-  static get observedAttributes(): Array<keyof WUPBaseControlTypes.Options> {
+  static get observedAttributes(): Array<keyof WUPBase.Options> {
     return ["label", "name", "autoComplete", "disabled", "readOnly", "autoFocus"];
   }
 
@@ -286,7 +277,7 @@ export default abstract class WUPBaseControl<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUPBaseControlTypes.Defaults = {
+  static $defaults: WUPBase.Defaults = {
     pressEsc: ClearActions.clear | ClearActions.resetToInit,
     validityDebounceMs: 500,
     validationCase: ValidationCases.onChangeSmart | ValidationCases.onFocusLost,
@@ -295,7 +286,7 @@ export default abstract class WUPBaseControl<
     },
   };
 
-  $options: WUPBaseControlTypes.Options<ValueType> = {
+  $options: WUPBase.Options<ValueType> = {
     ...this.#ctr.$defaults,
     // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory
@@ -360,7 +351,7 @@ export default abstract class WUPBaseControl<
   /** Returns true if control is valid; to fire validation use $validate() */
   get $isValid(): boolean {
     if (this.#isValid == null) {
-      this.goValidate(WUPBaseControlTypes.ValidateFromCases.onInit, false);
+      this.goValidate(WUPBase.ValidateFromCases.onInit, false);
     }
 
     return this.#isValid as boolean;
@@ -375,7 +366,7 @@ export default abstract class WUPBaseControl<
    * @returns errorMessage or false (if valid)
    */
   $validate(canShowError = true): string | false {
-    return this.goValidate(WUPBaseControlTypes.ValidateFromCases.onManualCall, canShowError);
+    return this.goValidate(WUPBase.ValidateFromCases.onManualCall, canShowError);
   }
 
   $showError(err: string): void {
@@ -411,7 +402,7 @@ export default abstract class WUPBaseControl<
 
     if (this._opts.validationCase & ValidationCases.onFocusLost) {
       this.disposeLstInit.push(
-        onFocusLostEv(this, () => this.goValidate(WUPBaseControlTypes.ValidateFromCases.onFocusLost), {
+        onFocusLostEv(this, () => this.goValidate(WUPBase.ValidateFromCases.onFocusLost), {
           debounceMs: this._opts.focusDebounceMs,
         })
       );
@@ -478,7 +469,7 @@ export default abstract class WUPBaseControl<
     this.appendEvent(this, "keydown", this.gotKeyDown);
 
     if (this._opts.validationCase & ValidationCases.onInit) {
-      !this.$isEmpty && this.goValidate(WUPBaseControlTypes.ValidateFromCases.onInit);
+      !this.$isEmpty && this.goValidate(WUPBase.ValidateFromCases.onInit);
     }
   }
 
@@ -501,7 +492,7 @@ export default abstract class WUPBaseControl<
   #wasValid = false;
   protected _validTimer?: number;
   /** Method called to check control based on validation rules and current value */
-  protected goValidate(fromCase: WUPBaseControlTypes.ValidateFromCases, canShowError = true): string | false {
+  protected goValidate(fromCase: WUPBase.ValidateFromCases, canShowError = true): string | false {
     const vls = this._opts.validations;
     if (!vls) {
       this.#isValid = true;
@@ -539,10 +530,7 @@ export default abstract class WUPBaseControl<
     this.#isValid = !errMsg;
     this._validTimer && clearTimeout(this._validTimer);
 
-    if (
-      fromCase === WUPBaseControlTypes.ValidateFromCases.onInput &&
-      this._opts.validationCase & ValidationCases.onChangeSmart
-    ) {
+    if (fromCase === WUPBase.ValidateFromCases.onInput && this._opts.validationCase & ValidationCases.onChangeSmart) {
       if (errMsg) {
         if (!this.#wasValid) {
           canShowError = false;
@@ -631,7 +619,7 @@ export default abstract class WUPBaseControl<
 
     const c = this._opts.validationCase;
     if (this.$isReady && canValidate && (c & ValidationCases.onChange || c & ValidationCases.onChangeSmart)) {
-      this.goValidate(WUPBaseControlTypes.ValidateFromCases.onInput);
+      this.goValidate(WUPBase.ValidateFromCases.onInput);
     }
     this.fireEvent("$change", { cancelable: false });
   }
