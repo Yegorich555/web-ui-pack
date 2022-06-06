@@ -339,6 +339,7 @@ export default abstract class WUPBaseControl<
   set $isDirty(v: boolean) {
     this.#isDirty = v;
     if (!v) {
+      // todo it's unclear. Maybe implement reset() instead ?
       this.$initValue = this.$value;
     }
   }
@@ -432,10 +433,10 @@ export default abstract class WUPBaseControl<
     const n = af === true ? (this._opts.name as string) : af;
     r.autocomplete = n || (isPwd ? "new-password" : "off"); // otherwise it doesn't disable autocomplete
     // r.name = n || (undefined as any as string);
-    if (!r.autocomplete) {
-      // testcase: form with email+password ignores autocomplete: "off" if previously it was saved
-      // it can be ignored by browsers: try to fix > https://stackoverflow.com/questions/2530/how-do-you-disable-browser-autocomplete-on-web-form-field-input-tags
-    }
+    // if (!r.autocomplete) {
+    // testcase: form with email+password ignores autocomplete: "off" if previously it was saved
+    // it can be ignored by browsers: try to fix > https://stackoverflow.com/questions/2530/how-do-you-disable-browser-autocomplete-on-web-form-field-input-tags
+    // }
 
     const label = (this._opts.label ?? (this._opts.name && stringPrettify(this._opts.name))) || null;
     this.$refTitle.textContent = label;

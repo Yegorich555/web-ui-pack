@@ -1,8 +1,10 @@
 /* eslint-disable no-use-before-define */
-import { JSXCustomProps } from "../baseElement";
 import onFocusGot from "../helpers/onFocusGot";
 import { onEvent } from "../indexHelpers";
 import WUPBaseControl, { WUPBaseControlTypes } from "./baseControl";
+
+const emailReg =
+  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 export namespace WUPTextControlTypes {
   type Def = {
@@ -23,6 +25,7 @@ export namespace WUPTextControlTypes {
   export type ValidationMap = WUPBaseControlTypes.ValidationMap & {
     min: number;
     max: number;
+    email: boolean;
   };
 
   export type Generics<
@@ -35,7 +38,7 @@ export namespace WUPTextControlTypes {
   export type Validation<T = string> = Generics<T>["Validation"];
   export type Defaults<T = string> = Generics<T>["Defaults"];
   export type Options<T = string> = Generics<T>["Options"];
-  export type JSXControlProps<T extends WUPTextControl> = JSXCustomProps<T>;
+  export type JSXControlProps<T extends WUPTextControl> = WUPBaseControlTypes.JSXControlProps<T>;
 }
 /**
  * @tutorial innerHTML @example
@@ -210,9 +213,11 @@ export default class WUPTextControl<
     selectOnFocus: true,
     hasButtonClear: true,
     validationRules: {
+      // todo inherritance in this case doesn't work (if user change baseElement.validationRules)
       required: WUPBaseControl.$defaults.validationRules.required,
       min: (v, setV) => v.length < setV && `Min length is ${setV} characters`,
       max: (v, setV) => v.length > setV && `Max length is ${setV} characters`,
+      email: (v, setV) => setV && !emailReg.test(v) && "Please enter a valid email address",
     },
   };
 
