@@ -29,8 +29,8 @@ export default function animateDropdown(el: HTMLElement, timeMs = 300, isClose =
   el.style.animationName = "none"; // disable default css-animation
 
   // get previous scaleY and extract transform without scaleY
-  const reg = /scaleY\(([\d.]+)\)/; // todo remove scaleY(1.7e-05) doesn't work
-  const removeScaleY = (styleTransform: string): string => styleTransform.replace(reg, "").trim().replace("  ", " ");
+  const reg = / *scaleY\(([%\d \w.-]+)\) */;
+  const removeScaleY = (styleTransform: string): string => styleTransform.replace(reg, "");
   const parseScale = (e: HTMLElement): { prev: string; from: number } => {
     let prev = e.style.transform;
     let from = isClose ? 1 : 0;
@@ -38,7 +38,7 @@ export default function animateDropdown(el: HTMLElement, timeMs = 300, isClose =
     if (r) {
       // remove scale from transform
       prev = e.style.transform.replace(r[0], "");
-      from = Number.parseFloat(r[1]);
+      from = Number.parseFloat(r[1]); // warn % isn't supported
     }
     if (prev) {
       prev = `${prev.trim().replace("  ", " ")} `; // extra-space to prepare add scaleY without extra logic
