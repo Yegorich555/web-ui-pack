@@ -85,7 +85,7 @@ describe("popupElement", () => {
     expect(t.gotHide).toBe(0);
 
     await page.click("label"); // click on label fires click on input also
-    await page.waitForTimeout(1); // timeout required because of debounceFilters
+    await page.waitForTimeout(301); // timeout required because of animation
     t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
     expect(t.isOpened).toBeTruthy();
     expect(t.gotShow).toBe(1);

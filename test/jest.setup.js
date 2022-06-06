@@ -47,3 +47,5 @@ Element.prototype.scrollBy =
       fixOverflow(this);
     }
   }; // scrollBy isn't implemented in jsdom
+
+window.matchMedia = window.matchMedia || (() => ({ matches: false }));
