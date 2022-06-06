@@ -1,6 +1,6 @@
 /* eslint-disable no-use-before-define */
 import WUPBaseElement, { JSXCustomProps, WUP } from "../baseElement";
-import WUPFormElement from "../forms/form";
+import WUPFormElement from "../formElement";
 import isEqual from "../helpers/isEqual";
 import onFocusLostEv from "../helpers/onFocusLost";
 import { stringPrettify } from "../indexHelpers";

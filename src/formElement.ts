@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
-import WUPBaseElement, { JSXCustomProps, WUP } from "../baseElement";
-import IBaseControl from "../controls/baseControl.i";
-import { nestedProperty, scrollIntoView } from "../indexHelpers";
+import WUPBaseElement, { JSXCustomProps, WUP } from "./baseElement";
+import IBaseControl from "./controls/baseControl.i";
+import { nestedProperty, scrollIntoView } from "./indexHelpers";
 
 export namespace WUPFormTypes {
   export const enum SubmitActions {
