@@ -16,10 +16,10 @@ export namespace WUPFormTypes {
   }
 
   export type SubmitEvent<T> = Event & {
-    model: Partial<T>;
-    relatedForm: WUPFormElement<T>;
-    relatedEvent: MouseEvent | KeyboardEvent;
-    submitter: HTMLElement | null;
+    $model: Partial<T>;
+    $relatedForm: WUPFormElement<T>;
+    $relatedEvent: MouseEvent | KeyboardEvent;
+    $submitter: HTMLElement | null;
   };
 
   export interface EventMap extends WUP.EventMap {
@@ -56,7 +56,7 @@ export namespace WUPFormTypes {
     readOnly?: boolean;
     /** @deprecated Focus on init */
     autoFocus?: boolean;
-    /** @deprecated Focus on init */
+    /** @deprecated Enable/disable browser-autocomplete */
     autoComplete?: boolean;
 
     /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willSubmit') instead */
@@ -71,6 +71,51 @@ export namespace WUPFormTypes {
 // eslint-disable-next-line no-use-before-define
 const formStore: WUPFormElement[] = [];
 
+/** Default Form-HTMLElement that collect values from controls
+ * @example
+ *  // init form
+ *  const form = document.createElement("wup-form");
+ *  form.$options.autoComplete = false;
+ *  form.$initModel = { email: "test-me@google.com" };
+ *  form.addEventListener("$submit", (e) => console.warn(e.$model));
+ *  // init control
+ *  const el = document.createElement("wup-text");
+ *  el.$options.name = "email";
+ *  el.$options.validations = { required: true, email: true };
+ *  form.appendChild(el);
+ *  const btn = form.appendChild(document.createElement("button"));
+ *  btn.textContent = "Submit";
+ *  btn.type = "Submit";
+ *  document.body.appendChild(form);
+ *  // or HTML
+ *  <wup-form autoComplete autoFocus>
+ *    <wup-text name="email" />
+ *    <button type="submit">Submit</submit>
+ *  </wup-form>;
+ * @tutorial Troubleshooting/rules:
+ * * options like $initModel, $model overrides $initValue, $value in each control that matches by $options.name
+ * * In react ref-parent fired after ref-children. So if you want to override $initValue use empty setTimeout on ref-control
+ * @example
+ * <wup-form
+      ref={(el) => {
+        if (el) {
+          el.$initModel = { email: "test-me@google.com" };
+        }
+      }}
+    >
+      <wup-text
+        ref={(el) => {
+          if (el) {
+            setTimeout(() => {
+              el.$options.name = "email";
+              el.$initValue = "";
+            });
+          }
+        }}
+        <button type="Submit">Submit</button>
+      />
+  </wup-form>
+ */
 export default class WUPFormElement<
   Model extends Record<string, any> = any,
   Events extends WUPFormTypes.EventMap = WUPFormTypes.EventMap
@@ -94,10 +139,10 @@ export default class WUPFormElement<
       form.$controls.push(control);
 
       const k = control.$options.name;
-      if (k && form._initModel) {
+      if (k && form._initModel && control.$initValue === undefined) {
         control.$initValue = nestedProperty.get(form._initModel, k);
       }
-      if (form._opts.readOnly !== undefined) {
+      if (form._opts.readOnly !== undefined && control.$options.readOnly === undefined) {
         control.$options.readOnly = form._opts.readOnly;
       }
     }
@@ -210,16 +255,17 @@ export default class WUPFormElement<
 
     // fire events
     const ev = new Event("$submit", { cancelable: false, bubbles: true }) as WUPFormTypes.SubmitEvent<Model>;
-    ev.model = m;
-    ev.relatedForm = this;
-    ev.relatedEvent = e;
-    ev.submitter = submitter;
+    ev.$model = m;
+    ev.$relatedForm = this;
+    ev.$relatedEvent = e;
+    ev.$submitter = submitter;
 
     console.warn("got model", m, this.$controls);
     setTimeout(() => {
       // todo how to wait for response and show pending ?
       this.dispatchEvent("$submit", ev);
     });
+    // todo reset controls (replace initValues ?)
   }
 
   /** Fired on Init and every time as options/attributes changed */
