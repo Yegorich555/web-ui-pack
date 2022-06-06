@@ -8,7 +8,7 @@ import popupListenTarget from "../popup/popupListenTarget";
 import WUPBaseControl, { WUPBase } from "./baseControl";
 import WUPTextControl, { WUPText } from "./text";
 
-export namespace WUPSelectControlTypes {
+export namespace WUPSelect {
   export const enum ShowCases {
     onManualCall,
     onInput,
@@ -68,7 +68,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPSelectControl;
 
-  static observedOptions = (super.observedOptions as Set<keyof WUPSelectControlTypes.Options>).add("items") as any;
+  static observedOptions = (super.observedOptions as Set<keyof WUPSelect.Options>).add("items") as any;
 
   static get $styleRoot(): string {
     return `:root {
@@ -148,14 +148,14 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
   }
 
   /** Parse/get items from $options.items */
-  static async $getMenuItems<T, C extends WUPSelectControl<T>>(ctrl: C): Promise<WUPSelectControlTypes.MenuItems<T>> {
+  static async $getMenuItems<T, C extends WUPSelectControl<T>>(ctrl: C): Promise<WUPSelect.MenuItems<T>> {
     if (ctrl._cachedItems) {
       return ctrl._cachedItems;
     }
 
     const { items } = ctrl.$options;
 
-    let arr: WUPSelectControlTypes.MenuItems<T>;
+    let arr: WUPSelect.MenuItems<T>;
     if (items instanceof Function) {
       const f = items();
       if (f instanceof Promise) {
@@ -183,7 +183,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
 
     const ctr = ctrl.constructor as typeof WUPSelectControl;
     const r = ctr.$getMenuItems<T, WUPSelectControl<T>>(ctrl).then((items) => {
-      const i = (items as WUPSelectControlTypes.MenuItemAny<any>[]).findIndex((o) => ctr.$isEqual(o.value, v));
+      const i = (items as WUPSelect.MenuItemAny<any>[]).findIndex((o) => ctr.$isEqual(o.value, v));
       if (i === -1) {
         console.error(`${ctrl.tagName}.[${ctrl._opts.name}]. Not found in items`, { items, value: v });
         return `Error: not found for ${v}` != null ? (v as any).toString() : "";
@@ -201,13 +201,13 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     return r;
   }
 
-  static $defaults: WUPSelectControlTypes.Defaults = {
+  static $defaults: WUPSelect.Defaults = {
     ...WUPTextControl.$defaults,
     // ignore rules from textControl because it doesn't fit
     validationRules: WUPBaseControl.$defaults.validationRules,
   };
 
-  $options: WUPSelectControlTypes.Options<ValueType> = {
+  $options: WUPSelect.Options<ValueType> = {
     ...this.#ctr.$defaults,
     items: [],
     // @ts-expect-error
@@ -222,11 +222,11 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
   }
 
   $hide() {
-    this.goHideMenu(WUPSelectControlTypes.HideCases.onManualCall);
+    this.goHideMenu(WUPSelect.HideCases.onManualCall);
   }
 
   $show() {
-    this.goShowMenu(WUPSelectControlTypes.ShowCases.onManualCall);
+    this.goShowMenu(WUPSelect.ShowCases.onManualCall);
   }
 
   $refPopup?: WUPPopupElement;
@@ -266,9 +266,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
             return this.$refPopup!;
           }
           return this.goShowMenu(
-            s === PopupShowCases.onClick
-              ? WUPSelectControlTypes.ShowCases.onClick
-              : WUPSelectControlTypes.ShowCases.onFocus,
+            s === PopupShowCases.onClick ? WUPSelect.ShowCases.onClick : WUPSelect.ShowCases.onFocus,
             e
           );
         },
@@ -281,8 +279,8 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
           ) {
             return this.goHideMenu(
               s === WUPPopup.HideCases.onFocusOut || s === WUPPopup.HideCases.onOutsideClick
-                ? WUPSelectControlTypes.HideCases.onFocusLost
-                : WUPSelectControlTypes.HideCases.onClick,
+                ? WUPSelect.HideCases.onFocusLost
+                : WUPSelect.HideCases.onClick,
               e
             );
           }
@@ -308,7 +306,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
   };
 
   /** Items resolved from options */
-  _cachedItems?: WUPSelectControlTypes.MenuItems<ValueType>;
+  _cachedItems?: WUPSelect.MenuItems<ValueType>;
 
   /** Called when NoItems need to show */
   protected renderMenuNoItems(popup: WUPPopupElement, isReset: boolean) {
@@ -372,11 +370,11 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     if (arr.length) {
       if (arr[0].text instanceof Function) {
         arr.forEach((v, i) => {
-          arrLi[i]._text = (v as WUPSelectControlTypes.MenuItemFn<ValueType>).text(v.value, arrLi[i], i).toLowerCase();
+          arrLi[i]._text = (v as WUPSelect.MenuItemFn<ValueType>).text(v.value, arrLi[i], i).toLowerCase();
         });
       } else {
         arr.forEach((v, i) => {
-          const txt = (v as WUPSelectControlTypes.MenuItem<ValueType>).text;
+          const txt = (v as WUPSelect.MenuItem<ValueType>).text;
           arrLi[i].textContent = txt;
           arrLi[i]._text = txt.toLowerCase();
         });
@@ -391,16 +389,16 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     const o = this._cachedItems![i];
 
     this.setValue(o.value);
-    this.goHideMenu(WUPSelectControlTypes.HideCases.onSelect);
+    this.goHideMenu(WUPSelect.HideCases.onSelect);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected async goShowMenu(
-    showCase: WUPSelectControlTypes.ShowCases,
+    showCase: WUPSelect.ShowCases,
     e?: MouseEvent | FocusEvent | null
   ): Promise<WUPPopupElement | null> {
     if (
-      showCase === WUPSelectControlTypes.ShowCases.onClick &&
+      showCase === WUPSelect.ShowCases.onClick &&
       e?.target instanceof HTMLInputElement &&
       !e.target.readOnly &&
       this.contains(e.target)
@@ -457,7 +455,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
       this.#disposeMenuEvents!.push(r);
 
       await this.renderMenu(p, menuId);
-    } else if (showCase !== WUPSelectControlTypes.ShowCases.onInput && this._menuItems!.filtered) {
+    } else if (showCase !== WUPSelect.ShowCases.onInput && this._menuItems!.filtered) {
       this._menuItems!.all?.forEach((li) => (li.style.display = "")); // reset styles after filtering
       this._menuItems!.filtered = undefined;
     }
@@ -474,8 +472,8 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     }
 
     // call for ref-listener to apply events properly
-    showCase !== WUPSelectControlTypes.ShowCases.onClick &&
-      showCase !== WUPSelectControlTypes.ShowCases.onFocus &&
+    showCase !== WUPSelect.ShowCases.onClick &&
+      showCase !== WUPSelect.ShowCases.onFocus &&
       this.#popupRefs!.show(WUPPopup.ShowCases.always);
 
     return this.$refPopup;
@@ -483,12 +481,9 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
 
   #menuHidding?: Promise<void>;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected async goHideMenu(
-    hideCase: WUPSelectControlTypes.HideCases,
-    e?: MouseEvent | FocusEvent | null
-  ): Promise<boolean> {
+  protected async goHideMenu(hideCase: WUPSelect.HideCases, e?: MouseEvent | FocusEvent | null): Promise<boolean> {
     if (
-      hideCase === WUPSelectControlTypes.HideCases.onClick &&
+      hideCase === WUPSelect.HideCases.onClick &&
       e?.target instanceof HTMLInputElement &&
       !e.target.readOnly &&
       this.contains(e.target)
@@ -504,8 +499,8 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
 
     if (wasOpen) {
       // call for ref-listener to apply events properly
-      hideCase !== WUPSelectControlTypes.HideCases.onFocusLost &&
-        hideCase !== WUPSelectControlTypes.HideCases.onClick &&
+      hideCase !== WUPSelect.HideCases.onFocusLost &&
+        hideCase !== WUPSelect.HideCases.onClick &&
         this.#popupRefs!.hide(WUPPopup.HideCases.onManuallCall);
 
       let pback: () => void;
@@ -580,12 +575,12 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     let focusIndex: number | null = null;
 
     if (e.key === "ArrowDown") {
-      !this.#isOpen && (await this.goShowMenu(WUPSelectControlTypes.ShowCases.onPressArrowKey));
+      !this.#isOpen && (await this.goShowMenu(WUPSelect.ShowCases.onPressArrowKey));
       let cur = this._menuItems!.focused;
       focusIndex = ++cur >= length ? 0 : cur;
     } else if (e.key === "ArrowUp") {
       const wasOpen = this.#isOpen;
-      !this.#isOpen && (await this.goShowMenu(WUPSelectControlTypes.ShowCases.onPressArrowKey));
+      !this.#isOpen && (await this.goShowMenu(WUPSelect.ShowCases.onPressArrowKey));
       let cur = wasOpen ? this._menuItems!.focused : length;
       focusIndex = --cur < 0 ? length - 1 : cur;
     }
@@ -609,19 +604,19 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
     if (e.key === "Escape") {
       e.preventDefault();
       this.setValue(this.$value);
-      await this.goHideMenu(WUPSelectControlTypes.HideCases.OnPressEsc);
+      await this.goHideMenu(WUPSelect.HideCases.OnPressEsc);
     } else if (e.key === "Enter") {
       e.preventDefault();
       let i = this._menuItems!.focused;
       i = this._menuItems!.filtered ? this._menuItems!.filtered[i] : i;
       i > -1 && this.setValue(this._cachedItems![i].value);
-      await this.goHideMenu(WUPSelectControlTypes.HideCases.OnPressEnter);
+      await this.goHideMenu(WUPSelect.HideCases.OnPressEnter);
     }
   }
 
   protected override async gotInput(e: Event & { currentTarget: HTMLInputElement }) {
     this.#isOpen && this.focusMenuItem(null); // reset focus
-    !this.#isOpen && (await this.goShowMenu(WUPSelectControlTypes.ShowCases.onInput));
+    !this.#isOpen && (await this.goShowMenu(WUPSelect.ShowCases.onInput));
 
     const rawV = e.currentTarget.value;
     const v = rawV.trimStart().toLowerCase();
@@ -646,7 +641,7 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
   }
 
   protected override async gotOptionsChanged(e: WUP.OptionEvent) {
-    const ev = e as unknown as WUP.OptionEvent<WUPSelectControlTypes.Options>;
+    const ev = e as unknown as WUP.OptionEvent<WUPSelect.Options>;
     if (ev.props.includes("items")) {
       this.removePopup();
       this._cachedItems = undefined;
@@ -687,7 +682,7 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUPSelectControlTypes.JSXControlProps<WUPSelectControl>;
+      [tagName]: WUPSelect.JSXControlProps<WUPSelectControl>;
     }
   }
 }
@@ -702,3 +697,8 @@ declare global {
 // };
 
 // testcase (close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click
+
+WUPTextControl.$defaults.validationRules.required = (v, setV) =>
+  setV && WUPTextControl.$isEmpty(v) && "Check it >>> is required";
+
+console.warn(WUPSelectControl.$defaults.validationRules.required);
