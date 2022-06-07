@@ -32,26 +32,26 @@ export const enum ClearActions {
   resetToInit = 1 << 2,
 }
 
-export namespace WUPBase {
-  export const enum ValidateFromCases {
-    /** When element appended to layout */
-    onInit,
-    /** When control loses focus (including document.activeElement) */
-    onFocusLost,
-    /** When user type text (or change value via input) in <input /> */
-    onInput,
-    /** When form.submit is fired (via button submit or somehow else); It's impossible to disable */
-    onSubmit,
-    /** When $validate() is fired programmatically */
-    onManualCall,
-  }
+export const enum ValidateFromCases {
+  /** When element appended to layout */
+  onInit,
+  /** When control loses focus (including document.activeElement) */
+  onFocusLost,
+  /** When user type text (or change value via input) in <input /> */
+  onInput,
+  /** When form.submit is fired (via button submit or somehow else); It's impossible to disable */
+  onSubmit,
+  /** When $validate() is fired programmatically */
+  onManualCall,
+}
 
-  export type ValidationMap = {
-    required: boolean;
-  };
-
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  export type Generics<ValueType, ValidationKeys extends ValidationMap, ExtraDefaults = {}, ExtraOptions = {}> = {
+export namespace WUPBaseIn {
+  export type Generics<
+    ValueType,
+    ValidationKeys extends WUPBase.ValidationMap,
+    ExtraDefaults = {},
+    ExtraOptions = {}
+  > = {
     Validation: (value: ValueType, setValue: ValidationKeys[keyof ValidationKeys]) => false | string;
     CustomValidation: (value: ValueType) => false | string;
     Defaults: {
@@ -74,7 +74,7 @@ export namespace WUPBase {
        * @defaultValue clear | resetToInit (both means: resetToInit if exists, 2nd time - clear etc.) */
       pressEsc: ClearActions;
     } & ExtraDefaults;
-    Options: Omit<Generics<ValueType, ValidationMap, ExtraDefaults>["Defaults"], "validationRules"> & {
+    Options: Omit<Generics<ValueType, WUPBase.ValidationMap, ExtraDefaults>["Defaults"], "validationRules"> & {
       /** Title/label of control; if label is missed it's parsed from option [name]. To skip point `label=''` (empty string) */
       label?: string;
       /** Property/key of model (collected by form); For name `firstName` >> `model.firstName`; for `nested.firstName` >> `model.nested.firstName` etc. */
@@ -97,38 +97,47 @@ export namespace WUPBase {
     } & ExtraOptions;
   };
 
-  export type Defaults<T = string> = Generics<T, ValidationMap>["Defaults"];
-  export type Options<T = string> = Generics<T, ValidationMap>["Options"];
+  export type GenDef<T = string> = Generics<T, WUPBase.ValidationMap>["Defaults"];
+  export type GenOpt<T = string> = Generics<T, WUPBase.ValidationMap>["Options"];
+}
 
-  export type JSXControlProps<T extends WUPBaseControl> = JSXCustomProps<T> & {
-    /** @deprecated Title/label for control; */
-    label?: string;
-    /** @deprecated Property key of model */
-    name?: string;
-    /** @deprecated Name to autocomplete by browser; */
-    autoComplete?: string;
+declare global {
+  namespace WUPBase {
+    interface ValidationMap {
+      required: boolean;
+    }
+    interface Defaults<T = string> extends WUPBaseIn.GenDef<T> {}
+    interface Options<T = string> extends WUPBaseIn.GenOpt<T> {}
+    interface JSXProps<T extends WUPBaseControl> extends JSXCustomProps<T> {
+      /** @deprecated Title/label for control; */
+      label?: string;
+      /** @deprecated Property key of model */
+      name?: string;
+      /** @deprecated Name to autocomplete by browser; */
+      autoComplete?: string;
 
-    /** @deprecated Disallow edit/copy value. Use [disabled] for styling */
-    disabled?: boolean;
-    /** @deprecated Disallow edit value */
-    readOnly?: boolean;
-    /** @deprecated Focus on init */
-    autoFocus?: boolean;
+      /** @deprecated Disallow edit/copy value. Use [disabled] for styling */
+      disabled?: boolean;
+      /** @deprecated Disallow edit value */
+      readOnly?: boolean;
+      /** @deprecated Focus on init */
+      autoFocus?: boolean;
 
-    /** @readonly Use [invalid] for styling */
-    readonly invalid?: boolean;
+      /** @readonly Use [invalid] for styling */
+      readonly invalid?: boolean;
 
-    /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$validate') instead */
-    onValidate?: never;
-    /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
-    onChange?: never;
-  };
+      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$validate') instead */
+      onValidate?: never;
+      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
+      onChange?: never;
+    }
 
-  export interface EventMap extends WUP.EventMap {
-    /** Fires after every UI-change (changes by user - not programmatically) */
-    $change: Event;
-    /** Fires after popup is hidden */
-    $validate: Event;
+    interface EventMap extends WUP.EventMap {
+      /** Fires after every UI-change (changes by user - not programmatically) */
+      $change: Event;
+      /** Fires after popup is hidden */
+      $validate: Event;
+    }
   }
 }
 
@@ -347,7 +356,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Returns true if control is valid; to fire validation use $validate() */
   get $isValid(): boolean {
     if (this.#isValid == null) {
-      this.goValidate(WUPBase.ValidateFromCases.onInit, false);
+      this.goValidate(ValidateFromCases.onInit, false);
     }
 
     return this.#isValid as boolean;
@@ -362,7 +371,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
    * @returns errorMessage or false (if valid)
    */
   $validate(canShowError = true): string | false {
-    return this.goValidate(WUPBase.ValidateFromCases.onManualCall, canShowError);
+    return this.goValidate(ValidateFromCases.onManualCall, canShowError);
   }
 
   $showError(err: string): void {
@@ -398,7 +407,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
     if (this._opts.validationCase & ValidationCases.onFocusLost) {
       this.disposeLstInit.push(
-        onFocusLostEv(this, () => this.goValidate(WUPBase.ValidateFromCases.onFocusLost), {
+        onFocusLostEv(this, () => this.goValidate(ValidateFromCases.onFocusLost), {
           debounceMs: this._opts.focusDebounceMs,
         })
       );
@@ -465,7 +474,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     this.appendEvent(this, "keydown", this.gotKeyDown);
 
     if (this._opts.validationCase & ValidationCases.onInit) {
-      !this.$isEmpty && this.goValidate(WUPBase.ValidateFromCases.onInit);
+      !this.$isEmpty && this.goValidate(ValidateFromCases.onInit);
     }
   }
 
@@ -488,7 +497,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   #wasValid = false;
   protected _validTimer?: number;
   /** Method called to check control based on validation rules and current value */
-  protected goValidate(fromCase: WUPBase.ValidateFromCases, canShowError = true): string | false {
+  protected goValidate(fromCase: ValidateFromCases, canShowError = true): string | false {
     const vls = this._opts.validations;
     if (!vls) {
       this.#isValid = true;
@@ -526,7 +535,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     this.#isValid = !errMsg;
     this._validTimer && clearTimeout(this._validTimer);
 
-    if (fromCase === WUPBase.ValidateFromCases.onInput && this._opts.validationCase & ValidationCases.onChangeSmart) {
+    if (fromCase === ValidateFromCases.onInput && this._opts.validationCase & ValidationCases.onChangeSmart) {
       if (errMsg) {
         if (!this.#wasValid) {
           canShowError = false;
@@ -615,7 +624,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
     const c = this._opts.validationCase;
     if (this.$isReady && canValidate && (c & ValidationCases.onChange || c & ValidationCases.onChangeSmart)) {
-      this.goValidate(WUPBase.ValidateFromCases.onInput);
+      this.goValidate(ValidateFromCases.onInput);
     }
     this.fireEvent("$change", { cancelable: false });
   }

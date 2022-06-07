@@ -5,66 +5,81 @@ import onFocusLostEv from "../helpers/onFocusLost";
 // eslint-disable-next-line import/named
 import WUPPopupElement, { ShowCases as PopupShowCases, WUPPopup } from "../popup/popupElement";
 import popupListenTarget from "../popup/popupListenTarget";
-import WUPBaseControl, { WUPBase } from "./baseControl";
-import WUPTextControl, { WUPText } from "./text";
+import WUPTextControl, { WUPTextIn } from "./text";
 
-export namespace WUPSelect {
-  export const enum ShowCases {
-    onManualCall,
-    onInput,
-    onPressArrowKey,
-    onClick,
-    onFocus,
-  }
-
-  export const enum HideCases {
-    onClick,
-    onManualCall,
-    onSelect,
-    onFocusLost,
-    OnPressEsc,
-    OnPressEnter,
-    OnOptionsChange,
-  }
-
-  export type MenuItem<T> = { text: string; value: T };
-  /** Use li.innerHTML to render value & return string required for input; */
-  export type MenuItemFn<T> = { text: (value: T, li: HTMLLIElement, i: number) => string; value: T };
-  export type MenuItemAny<T> = MenuItem<T> | MenuItemFn<T>;
-  export type MenuItems<T> = MenuItem<T>[] | MenuItemFn<T>[];
-
-  type Defs = {
+export namespace WUPSelectIn {
+  export interface Defs {
     /** Wait for pointed time before show-error (sumarized with $options.debounce); WARN: hide-error without debounce
      *  @defaultValue 0 */
     validityDebounceMs?: number;
-  };
+  }
 
-  type Opt<T> = {
+  export interface Opt<T> {
     /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data! */
-    items: MenuItems<T> | (() => MenuItems<T> | Promise<MenuItems<T>>);
+    items: WUPSelect.MenuItems<T> | (() => WUPSelect.MenuItems<T> | Promise<WUPSelect.MenuItems<T>>);
     /** Set true to make input not editable but allow to user select items via popup-menu (ordinary dropdown mode) */
     readOnlyInput?: boolean;
-  };
+  }
 
-  export type ValidationMap = WUPBase.ValidationMap;
   export type Generics<
     ValueType = any,
-    ValidationKeys extends WUPBase.ValidationMap = ValidationMap,
+    ValidationKeys extends WUPBase.ValidationMap = WUPSelect.ValidationMap,
     Defaults = Defs,
     Options = Opt<ValueType>
-  > = WUPText.Generics<ValueType, ValidationKeys, Defaults & Defs, Options & Opt<ValueType>>;
+  > = WUPTextIn.Generics<ValueType, ValidationKeys, Defaults & Defs, Options & Opt<ValueType>>;
 
   export type Validation<T = any> = Generics<T>["Validation"];
-  export type Defaults<T = any> = Generics<T>["Defaults"];
-  export type Options<T = any> = Generics<T>["Options"];
-
-  export type JSXControlProps<T extends WUPSelectControl> = WUPText.JSXControlProps<T> & {
-    /** @readonly Use [opened] for styling */
-    readonly opened?: boolean;
-  };
+  export type GenDef<T = any> = Generics<T>["Defaults"];
+  export type GenOpt<T = any> = Generics<T>["Options"];
 }
 
-export default class WUPSelectControl<ValueType = any> extends WUPTextControl<ValueType> {
+declare global {
+  namespace WUPSelect {
+    export const enum ShowCases {
+      onManualCall,
+      onInput,
+      onPressArrowKey,
+      onClick,
+      onFocus,
+    }
+
+    export const enum HideCases {
+      onClick,
+      onManualCall,
+      onSelect,
+      onFocusLost,
+      OnPressEsc,
+      OnPressEnter,
+      OnOptionsChange,
+    }
+
+    interface MenuItem<T> {
+      text: string;
+      value: T;
+    }
+    /** Use li.innerHTML to render value & return string required for input; */
+    interface MenuItemFn<T> {
+      text: (value: T, li: HTMLLIElement, i: number) => string;
+      value: T;
+    }
+    export type MenuItemAny<T> = MenuItem<T> | MenuItemFn<T>;
+    export type MenuItems<T> = MenuItem<T>[] | MenuItemFn<T>[];
+
+    interface ValidationMap extends Omit<WUPText.ValidationMap, "min" | "max" | "email"> {}
+    interface EventMap extends WUPText.EventMap {}
+    interface Defaults<T = string> extends WUPSelectIn.GenDef<T> {}
+    interface Options<T = string> extends WUPSelectIn.GenOpt<T> {}
+    interface JSXProps<T extends WUPSelectControl> extends WUPText.JSXProps<T> {
+      /** @readonly Use [opened] for styling */
+      readonly opened?: boolean;
+    }
+  }
+}
+
+export default class WUPSelectControl<
+  ValueType = any,
+  EventMap extends WUPSelect.EventMap = WUPSelect.EventMap
+> extends WUPTextControl<ValueType, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPSelectControl;
 
@@ -203,8 +218,6 @@ export default class WUPSelectControl<ValueType = any> extends WUPTextControl<Va
 
   static $defaults: WUPSelect.Defaults = {
     ...WUPTextControl.$defaults,
-    // ignore rules from textControl because it doesn't fit
-    validationRules: WUPBaseControl.$defaults.validationRules,
   };
 
   $options: WUPSelect.Options<ValueType> = {
@@ -682,7 +695,7 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUPSelect.JSXControlProps<WUPSelectControl>;
+      [tagName]: WUPSelect.JSXProps<WUPSelectControl>;
     }
   }
 }
@@ -697,8 +710,3 @@ declare global {
 // };
 
 // testcase (close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click
-
-WUPTextControl.$defaults.validationRules.required = (v, setV) =>
-  setV && WUPTextControl.$isEmpty(v) && "Check it >>> is required";
-
-console.warn(WUPSelectControl.$defaults.validationRules.required);

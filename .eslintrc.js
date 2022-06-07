@@ -37,6 +37,8 @@ module.exports = {
     "react/jsx-props-no-spreading": "off",
     // watch bug: https://github.com/airbnb/javascript/pull/2501
     "react/function-component-definition": [2, { namedComponents: "function-declaration" }],
+    "@typescript-eslint/ban-types": "off",
+    "@typescript-eslint/no-empty-interface": "off",
     "@typescript-eslint/ban-ts-ignore": "off",
     "@typescript-eslint/prefer-namespace-keyword": "off",
     "@typescript-eslint/no-explicit-any": "off", //["error", { ignoreRestArgs: true, }],

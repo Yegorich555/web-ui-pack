@@ -96,11 +96,11 @@ export namespace WUPPopup {
     animation?: Animations;
   }
 
-  export type AttachOptions = Partial<Omit<Options, "target">> & {
+  export interface AttachOptions extends Partial<Omit<Options, "target">> {
     target: HTMLElement;
     text: string | undefined | null;
     tagName?: string;
-  };
+  }
 
   export interface EventMap extends WUP.EventMap {
     /** Fires before show is happened; can be prevented via e.preventDefault() */

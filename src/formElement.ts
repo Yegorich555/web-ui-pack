@@ -3,71 +3,73 @@ import WUPBaseElement, { JSXCustomProps, WUP } from "./baseElement";
 import IBaseControl from "./controls/baseControl.i";
 import { nestedProperty, scrollIntoView } from "./indexHelpers";
 
-export namespace WUPForm {
-  export const enum SubmitActions {
-    /** Disable any action */
-    none = 0,
-    /** Scroll to first error (if exists) and focus control */
-    goToError = 1,
-    /** Validate until first error is found (otherwise validate all) */
-    validateUntiFirst = 1 << 1,
-    /** Collect to model only changed values */
-    collectChanged = 1 << 2,
-    /** Reset isDirty and assign $value to $initValue for controls (on success only) */
-    reset = 1 << 3,
+export const enum SubmitActions {
+  /** Disable any action */
+  none = 0,
+  /** Scroll to first error (if exists) and focus control */
+  goToError = 1,
+  /** Validate until first error is found (otherwise validate all) */
+  validateUntiFirst = 1 << 1,
+  /** Collect to model only changed values */
+  collectChanged = 1 << 2,
+  /** Reset isDirty and assign $value to $initValue for controls (on success only) */
+  reset = 1 << 3,
+}
+
+declare global {
+  namespace WUPForm {
+    export interface SubmitEvent<T> extends Event {
+      $model: Partial<T>;
+      $relatedForm: WUPFormElement<T>;
+      $relatedEvent: MouseEvent | KeyboardEvent;
+      $submitter: HTMLElement | null;
+    }
+
+    export interface EventMap extends WUP.EventMap {
+      /** Fires after value change on controls */
+      $change: Event; // todo implement
+      /** Fires before $submit is happened; can be prevented via e.preventDefault() */
+      $willSubmit: (MouseEvent | KeyboardEvent) & { submitter: HTMLElement };
+      /** Fires by user-submit when validation succesfull and model is collected */
+      $submit: SubmitEvent<any>;
+    }
+
+    export interface Defaults {
+      /** Actions that enabled on submit event; You can point several like: `goToError | collectChanged`
+       * @defaultValue goToError | validateUntiFirst | reset */
+      submitActions: SubmitActions;
+    }
+
+    export interface Options extends Defaults {
+      /** Focus first possible element when it's appended to layout */
+      autoFocus?: boolean;
+      /** Disallow edit/copy value; adds attr [disabled] for styling */
+      disabled?: boolean;
+      /** Disallow copy value; adds attr [readonly] for styling (changes/replace option readOnly of controls) */
+      readOnly?: boolean;
+      /** Enable/disable browser-autocomplete (changes/replace option autoComplete of controls)
+       *  @defaultValue false */
+      autoComplete?: boolean;
+    }
+
+    export interface JSXProps<T extends WUPBaseElement> extends JSXCustomProps<T> {
+      /** @deprecated Disallow edit/copy value. Use [disabled] for styling */
+      disabled?: boolean;
+      /** @deprecated Disallow edit value */
+      readOnly?: boolean;
+      /** @deprecated Focus on init */
+      autoFocus?: boolean;
+      /** @deprecated Enable/disable browser-autocomplete */
+      autoComplete?: boolean;
+
+      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willSubmit') instead */
+      onWillSubmit?: never;
+      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$submit') instead */
+      onSubmit?: never;
+      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
+      onChange?: never;
+    }
   }
-
-  export type SubmitEvent<T> = Event & {
-    $model: Partial<T>;
-    $relatedForm: WUPFormElement<T>;
-    $relatedEvent: MouseEvent | KeyboardEvent;
-    $submitter: HTMLElement | null;
-  };
-
-  export interface EventMap extends WUP.EventMap {
-    /** Fires after value change on controls */
-    $change: Event; // todo implement
-    /** Fires before $submit is happened; can be prevented via e.preventDefault() */
-    $willSubmit: (MouseEvent | KeyboardEvent) & { submitter: HTMLElement };
-    /** Fires by user-submit when validation succesfull and model is collected */
-    $submit: SubmitEvent<any>;
-  }
-
-  export type Defaults = {
-    /** Actions that enabled on submit event; You can point several like: `goToError | collectChanged`
-     * @defaultValue goToError | validateUntiFirst | reset */
-    submitActions: SubmitActions;
-  };
-
-  export type Options = Defaults & {
-    /** Focus first possible element when it's appended to layout */
-    autoFocus?: boolean;
-    /** Disallow edit/copy value; adds attr [disabled] for styling */
-    disabled?: boolean;
-    /** Disallow copy value; adds attr [readonly] for styling (changes/replace option readOnly of controls) */
-    readOnly?: boolean;
-    /** Enable/disable browser-autocomplete (changes/replace option autoComplete of controls)
-     *  @defaultValue false */
-    autoComplete?: boolean;
-  };
-
-  export type JSXControlProps<T extends WUPBaseElement> = JSXCustomProps<T> & {
-    /** @deprecated Disallow edit/copy value. Use [disabled] for styling */
-    disabled?: boolean;
-    /** @deprecated Disallow edit value */
-    readOnly?: boolean;
-    /** @deprecated Focus on init */
-    autoFocus?: boolean;
-    /** @deprecated Enable/disable browser-autocomplete */
-    autoComplete?: boolean;
-
-    /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willSubmit') instead */
-    onWillSubmit?: never;
-    /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$submit') instead */
-    onSubmit?: never;
-    /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
-    onChange?: never;
-  };
 }
 
 // eslint-disable-next-line no-use-before-define
@@ -183,8 +185,7 @@ export default class WUPFormElement<
 
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUPForm.Defaults = {
-    submitActions:
-      WUPForm.SubmitActions.goToError | WUPForm.SubmitActions.validateUntiFirst | WUPForm.SubmitActions.reset,
+    submitActions: SubmitActions.goToError | SubmitActions.validateUntiFirst | SubmitActions.reset,
   };
 
   $options: WUPForm.Options = {
@@ -234,7 +235,7 @@ export default class WUPFormElement<
 
     // validate
     let errCtrl: IBaseControl | undefined;
-    if (this._opts.submitActions & WUPForm.SubmitActions.validateUntiFirst) {
+    if (this._opts.submitActions & SubmitActions.validateUntiFirst) {
       errCtrl = this.$controls.find((c) => c.$validate());
     } else {
       this.$controls.forEach((c) => {
@@ -247,7 +248,7 @@ export default class WUPFormElement<
 
     // analyze - go to error
     if (errCtrl) {
-      if (this._opts.submitActions & WUPForm.SubmitActions.goToError) {
+      if (this._opts.submitActions & SubmitActions.goToError) {
         const el = errCtrl;
         scrollIntoView(el, { offsetTop: -30, onlyIfNeeded: true }).then(() => el.focus());
       }
@@ -255,7 +256,7 @@ export default class WUPFormElement<
     }
 
     // collect values to model
-    const onlyChanged = this._opts.submitActions & WUPForm.SubmitActions.collectChanged;
+    const onlyChanged = this._opts.submitActions & SubmitActions.collectChanged;
     const m = this.#ctr.$modelFromControls(this.$controls, "$value", !!onlyChanged);
     // fire events
     const ev = new Event("$submit", { cancelable: false, bubbles: true }) as WUPForm.SubmitEvent<Model>;
@@ -265,7 +266,7 @@ export default class WUPFormElement<
     ev.$submitter = submitter;
 
     console.warn("got model", m, this.$controls);
-    const needReset = this._opts.submitActions & WUPForm.SubmitActions.reset;
+    const needReset = this._opts.submitActions & SubmitActions.reset;
     setTimeout(() => {
       // todo how to wait for response and show pending ?
       this.dispatchEvent("$submit", ev);
@@ -373,7 +374,7 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUPForm.JSXControlProps<WUPFormElement>;
+      [tagName]: WUPForm.JSXProps<WUPFormElement>;
     }
   }
 }

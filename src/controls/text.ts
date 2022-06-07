@@ -1,13 +1,13 @@
 /* eslint-disable no-use-before-define */
 import onFocusGot from "../helpers/onFocusGot";
 import { onEvent } from "../indexHelpers";
-import WUPBaseControl, { WUPBase } from "./baseControl";
+import WUPBaseControl, { WUPBaseIn } from "./baseControl";
 
 const emailReg =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-export namespace WUPText {
-  type Def = {
+export namespace WUPTextIn {
+  export interface Def {
     /** Debounce time to wait for user finishes typing to start validate and provide $change event
      * @defaultValue 0; */
     debounceMs?: number;
@@ -17,28 +17,33 @@ export namespace WUPText {
     /** Show/hide clear button
      * @defaultValue true */
     hasButtonClear: boolean;
-  };
+  }
 
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  type Opt = {};
-
-  export type ValidationMap = WUPBase.ValidationMap & {
-    min: number;
-    max: number;
-    email: boolean;
-  };
+  export interface Opt {}
 
   export type Generics<
     ValueType = string,
-    ValidationKeys extends WUPBase.ValidationMap = ValidationMap,
+    ValidationKeys extends WUPBase.ValidationMap = WUPText.ValidationMap,
     Defaults = Def,
     Options = Opt
-  > = WUPBase.Generics<ValueType, ValidationKeys, Defaults & Def, Options & Opt>;
+  > = WUPBaseIn.Generics<ValueType, ValidationKeys, Defaults & Def, Options & Opt>;
+  // type Validation<T = string> = Generics<T>["Validation"];
+  export type GenDef<T = string> = Generics<T>["Defaults"];
+  export type GenOpt<T = string> = Generics<T>["Options"];
+}
 
-  export type Validation<T = string> = Generics<T>["Validation"];
-  export type Defaults<T = string> = Generics<T>["Defaults"];
-  export type Options<T = string> = Generics<T>["Options"];
-  export type JSXControlProps<T extends WUPTextControl> = WUPBase.JSXControlProps<T>;
+declare global {
+  namespace WUPText {
+    interface ValidationMap extends WUPBase.ValidationMap {
+      min: number;
+      max: number;
+      email: boolean;
+    }
+    interface EventMap extends WUPBase.EventMap {}
+    interface Defaults<T = string> extends WUPTextIn.GenDef<T> {}
+    interface Options<T = string> extends WUPTextIn.GenOpt<T> {}
+    interface JSXProps<T extends WUPTextControl> extends WUPBase.JSXProps<T> {}
+  }
 }
 /**
  * @tutorial innerHTML @example
@@ -51,7 +56,7 @@ export namespace WUPText {
  */
 export default class WUPTextControl<
   ValueType = string,
-  EventMap extends WUPBase.EventMap = WUPBase.EventMap
+  EventMap extends WUPText.EventMap = WUPText.EventMap
 > extends WUPBaseControl<ValueType, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextControl;
@@ -210,13 +215,11 @@ export default class WUPTextControl<
     ...WUPBaseControl.$defaults,
     selectOnFocus: true,
     hasButtonClear: true,
-    validationRules: {
-      // todo inherritance in this case doesn't work (if user change baseElement.validationRules)
-      required: WUPBaseControl.$defaults.validationRules.required,
+    validationRules: Object.assign(WUPBaseControl.$defaults.validationRules, {
       min: (v, setV) => v.length < setV && `Min length is ${setV} characters`,
       max: (v, setV) => v.length > setV && `Max length is ${setV} characters`,
       email: (v, setV) => setV && !emailReg.test(v) && "Please enter a valid email address",
-    },
+    } as WUPText.Defaults["validationRules"]),
   };
 
   $options: WUPText.Options<ValueType> = {
@@ -322,18 +325,9 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUPText.JSXControlProps<WUPTextControl>;
+      [tagName]: WUPText.JSXProps<WUPTextControl>;
     }
   }
 }
 
-// todo remove after tests
-// const el = document.createElement(tagName);
-// el.$options.name = "testMe";
-// el.$options.validations = {
-//   required: true,
-//   max: 2,
-//   min: (v) => v.length > 500 && "This is error",
-//   extra: (v) => "test Me",
-// };
-// el.$validate();
+// todo all $defaults.validationRules are inherrited and use common object. So every rule-name must be unique
