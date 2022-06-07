@@ -1,5 +1,5 @@
 /* eslint-disable no-use-before-define */
-import WUPBaseElement, { JSXCustomProps, WUP } from "./baseElement";
+import WUPBaseElement, { WUP } from "./baseElement";
 import IBaseControl from "./controls/baseControl.i";
 import { nestedProperty, scrollIntoView } from "./indexHelpers";
 
@@ -52,7 +52,7 @@ declare global {
       autoComplete?: boolean;
     }
 
-    export interface JSXProps<T extends WUPBaseElement> extends JSXCustomProps<T> {
+    export interface JSXProps<T extends WUPBaseElement> extends WUP.JSXProps<T> {
       /** @deprecated Disallow edit/copy value. Use [disabled] for styling */
       disabled?: boolean;
       /** @deprecated Disallow edit value */

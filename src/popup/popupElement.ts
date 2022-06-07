@@ -1,5 +1,5 @@
 /* eslint-disable no-use-before-define */
-import WUPBaseElement, { JSXCustomProps, WUP } from "../baseElement";
+import WUPBaseElement, { WUP } from "../baseElement";
 import { WUPPopup } from "./popupElement.types";
 import { getBoundingInternalRect, PopupPlacements, px2Number, WUPPopupPlace } from "./popupPlacements";
 import { findScrollParentAll } from "../helpers/findScrollParent";
@@ -869,7 +869,7 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: JSXCustomProps<WUPPopupElement> &
+      [tagName]: WUP.JSXProps<WUPPopupElement> &
         Partial<{
           /** QuerySelector to find target - anchor that popup uses for placement.
            * If attr.target and $options.target are empty previousSibling will be attached.

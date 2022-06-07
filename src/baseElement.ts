@@ -292,18 +292,17 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   }
 }
 
-export type JSXCustomProps<T> = React.DetailedHTMLProps<
-  // todo write babel-transform className > class
-  Omit<React.HTMLAttributes<T>, "className"> & { class?: string | undefined },
-  T
->;
-
 export namespace WUP {
   export type OptionEvent<T extends Record<string, any> = Record<string, any>> = {
     props: Array<Extract<keyof T, string>>;
     target: T;
   };
   export type EventMap<T = HTMLElementEventMap> = HTMLElementEventMap & Record<keyof T, Event>;
+  export type JSXProps<T> = React.DetailedHTMLProps<
+    // todo write babel-transform className > class
+    Omit<React.HTMLAttributes<T>, "className"> & { class?: string | undefined },
+    T
+  >;
 }
 
 // todo make all props not-enumerable (beside starts with $...): https://stackoverflow.com/questions/34517538/setting-an-es6-class-getter-to-enumerable

@@ -1,5 +1,5 @@
 /* eslint-disable no-use-before-define */
-import WUPBaseElement, { JSXCustomProps, WUP } from "../baseElement";
+import WUPBaseElement, { WUP } from "../baseElement";
 import WUPFormElement from "../formElement";
 import isEqual from "../helpers/isEqual";
 import onFocusLostEv from "../helpers/onFocusLost";
@@ -108,7 +108,7 @@ declare global {
     }
     interface Defaults<T = string> extends WUPBaseIn.GenDef<T> {}
     interface Options<T = string> extends WUPBaseIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPBaseControl> extends JSXCustomProps<T> {
+    interface JSXProps<T extends WUPBaseControl> extends WUP.JSXProps<T> {
       /** @deprecated Title/label for control; */
       label?: string;
       /** @deprecated Property key of model */

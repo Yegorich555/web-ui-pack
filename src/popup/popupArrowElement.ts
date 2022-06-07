@@ -1,4 +1,4 @@
-import { JSXCustomProps } from "../baseElement";
+import { WUP } from "../baseElement";
 
 const tag = "wup-popup-arrow";
 let isFirst = true;
@@ -45,7 +45,7 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tag]: JSXCustomProps<WUPPopupArrowElement>;
+      [tag]: WUP.JSXProps<WUPPopupArrowElement>;
     }
   }
 }
