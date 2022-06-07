@@ -32,19 +32,6 @@ export const enum ClearActions {
   resetToInit = 1 << 2,
 }
 
-export const enum ValidateFromCases {
-  /** When element appended to layout */
-  onInit,
-  /** When control loses focus (including document.activeElement) */
-  onFocusLost,
-  /** When user type text (or change value via input) in <input /> */
-  onInput,
-  /** When form.submit is fired (via button submit or somehow else); It's impossible to disable */
-  onSubmit,
-  /** When $validate() is fired programmatically */
-  onManualCall,
-}
-
 export namespace WUPBaseIn {
   export type Generics<
     ValueType,
@@ -103,6 +90,19 @@ export namespace WUPBaseIn {
 
 declare global {
   namespace WUPBase {
+    export const enum ValidateFromCases {
+      /** When element appended to layout */
+      onInit,
+      /** When control loses focus (including document.activeElement) */
+      onFocusLost,
+      /** When user type text (or change value via input) in <input /> */
+      onInput,
+      /** When form.submit is fired (via button submit or somehow else); It's impossible to disable */
+      onSubmit,
+      /** When $validate() is fired programmatically */
+      onManualCall,
+    }
+
     interface ValidationMap {
       required: boolean;
     }
@@ -356,7 +356,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Returns true if control is valid; to fire validation use $validate() */
   get $isValid(): boolean {
     if (this.#isValid == null) {
-      this.goValidate(ValidateFromCases.onInit, false);
+      this.goValidate(WUPBase.ValidateFromCases.onInit, false);
     }
 
     return this.#isValid as boolean;
@@ -371,7 +371,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
    * @returns errorMessage or false (if valid)
    */
   $validate(canShowError = true): string | false {
-    return this.goValidate(ValidateFromCases.onManualCall, canShowError);
+    return this.goValidate(WUPBase.ValidateFromCases.onManualCall, canShowError);
   }
 
   $showError(err: string): void {
@@ -407,7 +407,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
     if (this._opts.validationCase & ValidationCases.onFocusLost) {
       this.disposeLstInit.push(
-        onFocusLostEv(this, () => this.goValidate(ValidateFromCases.onFocusLost), {
+        onFocusLostEv(this, () => this.goValidate(WUPBase.ValidateFromCases.onFocusLost), {
           debounceMs: this._opts.focusDebounceMs,
         })
       );
@@ -474,7 +474,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     this.appendEvent(this, "keydown", this.gotKeyDown);
 
     if (this._opts.validationCase & ValidationCases.onInit) {
-      !this.$isEmpty && this.goValidate(ValidateFromCases.onInit);
+      !this.$isEmpty && this.goValidate(WUPBase.ValidateFromCases.onInit);
     }
   }
 
@@ -497,7 +497,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   #wasValid = false;
   protected _validTimer?: number;
   /** Method called to check control based on validation rules and current value */
-  protected goValidate(fromCase: ValidateFromCases, canShowError = true): string | false {
+  protected goValidate(fromCase: WUPBase.ValidateFromCases, canShowError = true): string | false {
     const vls = this._opts.validations;
     if (!vls) {
       this.#isValid = true;
@@ -535,7 +535,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     this.#isValid = !errMsg;
     this._validTimer && clearTimeout(this._validTimer);
 
-    if (fromCase === ValidateFromCases.onInput && this._opts.validationCase & ValidationCases.onChangeSmart) {
+    if (fromCase === WUPBase.ValidateFromCases.onInput && this._opts.validationCase & ValidationCases.onChangeSmart) {
       if (errMsg) {
         if (!this.#wasValid) {
           canShowError = false;
@@ -624,7 +624,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
     const c = this._opts.validationCase;
     if (this.$isReady && canValidate && (c & ValidationCases.onChange || c & ValidationCases.onChangeSmart)) {
-      this.goValidate(ValidateFromCases.onInput);
+      this.goValidate(WUPBase.ValidateFromCases.onInput);
     }
     this.fireEvent("$change", { cancelable: false });
   }
