@@ -66,7 +66,10 @@ declare global {
     export type MenuItems<T> = MenuItem<T>[] | MenuItemFn<T>[];
 
     interface ValidationMap extends Omit<WUPText.ValidationMap, "min" | "max" | "email"> {}
-    interface EventMap extends WUPText.EventMap {}
+    interface EventMap extends WUPText.EventMap {
+      $show: Event;
+      $hide: Event;
+    }
     interface Defaults<T = string> extends WUPSelectIn.GenDef<T> {}
     interface Options<T = string> extends WUPSelectIn.GenOpt<T> {}
     interface JSXProps<T extends WUPSelectControl> extends WUPText.JSXProps<T> {
@@ -489,6 +492,7 @@ export default class WUPSelectControl<
       showCase !== WUPSelect.ShowCases.onFocus &&
       this.#popupRefs!.show(WUPPopup.ShowCases.always);
 
+    setTimeout(() => this.fireEvent("$show", { cancelable: false }));
     return this.$refPopup;
   }
 
@@ -533,6 +537,7 @@ export default class WUPSelectControl<
     this.removeAttribute("opened");
     this.$refInput.setAttribute("aria-expanded", "false");
     this.focusMenuItem(null);
+    setTimeout(() => this.fireEvent("$hide", { cancelable: false }));
     return true;
   }
 

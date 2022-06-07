@@ -133,9 +133,9 @@ declare global {
     }
 
     interface EventMap extends WUP.EventMap {
-      /** Fires after every UI-change (changes by user - not programmatically) */
+      /** Fires on value change */
       $change: Event;
-      /** Fires after popup is hidden */
+      /** Fires on validation-call (depends on @see ValidationCases) */
       $validate: Event;
     }
   }
