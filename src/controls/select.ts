@@ -262,8 +262,8 @@ export default class WUPSelectControl<
     // i.setAttribute("aria-multiselectable", "false");
   }
 
-  protected override gotChanges() {
-    super.gotChanges();
+  protected override gotChanges(propsChanged: Array<keyof WUPSelect.Options> | null) {
+    super.gotChanges(propsChanged as any);
 
     this._opts.readOnlyInput
       ? this.$refInput.removeAttribute("aria-autocomplete")

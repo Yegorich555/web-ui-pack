@@ -148,9 +148,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseControl;
 
-  /** Options that need to watch for changes; use gotOptionsChanged() */
   static observedOptions = new Set<keyof WUPBase.Options>(["label", "name", "autoComplete", "disabled", "readOnly"]);
-
   /* Array of attribute names to listen for changes */
   static get observedAttributes(): Array<keyof WUPBase.Options> {
     return ["label", "name", "autoComplete", "disabled", "readOnly", "autoFocus"];
@@ -400,8 +398,9 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Array of removeEventListener() that fired ReInit */
   protected disposeLstInit: Array<() => void> = [];
 
-  /** Fired on Init and every time as options/attributes changed */
-  protected gotChanges() {
+  protected override gotChanges(propsChanged: Array<keyof WUPBase.Options> | null) {
+    super.gotChanges(propsChanged);
+
     this.disposeLstInit.forEach((f) => f()); // remove possible previous event listeners
     this.disposeLstInit.length = 0;
 
@@ -448,10 +447,8 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     r.disabled = this._opts.disabled as boolean;
     r.readOnly = this._opts.readOnly ?? (this.$form?.$options.readOnly as boolean);
 
-    this.#isStopAttrListen = true;
     this.setBoolAttr("disabled", this._opts.disabled);
     this.setBoolAttr("readOnly", this._opts.readOnly);
-    this.#isStopAttrListen = false;
   }
 
   /** Use this to append elements; fired single time when element isConnected/appended to layout but not ready yet */
@@ -459,7 +456,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   protected override gotReady() {
     super.gotReady();
-    this.gotChanges();
 
     // this.appendEvent removed by dispose()
     this.appendEvent(
@@ -652,28 +648,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     if (this._opts.pressEsc && e.key === "Escape") {
       this.clearValue();
     }
-  }
-
-  protected override gotOptionsChanged(e: WUP.OptionEvent) {
-    super.gotOptionsChanged(e);
-    this.gotChanges();
-  }
-
-  #isStopAttrListen = false;
-  #attrTimer?: number;
-  protected override gotAttributeChanged(name: string, oldValue: string, newValue: string): void {
-    if (this.#isStopAttrListen) {
-      return;
-    }
-    super.gotAttributeChanged(name, oldValue, newValue);
-    // debounce filter
-    if (this.#attrTimer) {
-      return;
-    }
-    this.#attrTimer = window.setTimeout(() => {
-      this.#attrTimer = undefined;
-      this.gotChanges();
-    });
   }
 
   protected override dispose() {

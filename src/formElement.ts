@@ -279,8 +279,9 @@ export default class WUPFormElement<
     });
   }
 
-  /** Fired on Init and every time as options/attributes changed */
-  protected gotChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
+  protected override gotChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
+    super.gotChanges(propsChanged);
+
     this._opts.disabled = this.getBoolAttr("disabled", this._opts.disabled);
     this._opts.readOnly = this.getBoolAttr("readOnly", this._opts.readOnly);
     this._opts.autoFocus = this.getBoolAttr("autoFocus", this._opts.autoFocus);
@@ -294,15 +295,12 @@ export default class WUPFormElement<
       this.$controls.forEach((c) => (c.$options.autoComplete = autoComplete)); // on init OR if changed
     }
 
-    this.#isStopAttrListen = true;
     this.setBoolAttr("disabled", this._opts.disabled);
     this.setBoolAttr("readOnly", this._opts.readOnly);
-    this.#isStopAttrListen = false;
   }
 
   protected override gotReady() {
     super.gotReady();
-    this.gotChanges(null);
 
     this.appendEvent(
       this,
@@ -321,32 +319,6 @@ export default class WUPFormElement<
           t = t.parentElement;
         }
       }
-    });
-  }
-
-  protected override gotOptionsChanged(e: WUP.OptionEvent) {
-    super.gotOptionsChanged(e);
-    this.gotChanges(e.props as Array<keyof WUPForm.Options>);
-  }
-
-  #isStopAttrListen = false;
-  #attrTimer?: number;
-  #attrChanged?: string[];
-  protected override gotAttributeChanged(name: string, oldValue: string, newValue: string): void {
-    if (this.#isStopAttrListen) {
-      return;
-    }
-    super.gotAttributeChanged(name, oldValue, newValue);
-    // debounce filter
-    if (this.#attrTimer) {
-      this.#attrChanged!.push(name);
-      return;
-    }
-    this.#attrChanged = [name];
-    this.#attrTimer = window.setTimeout(() => {
-      this.#attrTimer = undefined;
-      this.gotChanges(this.#attrChanged as Array<keyof WUPForm.Options>);
-      this.#attrChanged = undefined;
     });
   }
 
@@ -380,3 +352,4 @@ declare global {
 }
 
 // testcase: check if set model={v: 1} shouldn't reset control with other names
+// todo setup style for btn-submit

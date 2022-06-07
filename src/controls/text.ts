@@ -253,8 +253,8 @@ export default class WUPTextControl<
     this.appendEvent(this.$refInput, "input", this.gotInput as any);
   }
 
-  protected override gotChanges() {
-    super.gotChanges();
+  protected override gotChanges(propsChanged: Array<keyof WUPText.Options> | null) {
+    super.gotChanges(propsChanged as any);
 
     setTimeout(() => {
       this._opts.selectOnFocus &&

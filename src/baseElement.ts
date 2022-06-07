@@ -173,6 +173,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   protected gotReady() {
     this.#isReady = true;
     setTimeout(() => (this.autofocus || this._opts.autoFocus) && this.focus()); // timeout to wait for options
+    this.gotChanges(null);
   }
 
   /** Fired when element is removed from document */
@@ -181,8 +182,13 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     this.dispose();
   }
 
+  /** Fired on Init and every time as options/attributes changed */
+  protected gotChanges(propsChanged: Array<string> | null) {}
+
   /** Fired when element isReady and at least one of observedOptions is changed */
-  protected gotOptionsChanged(e: WUP.OptionEvent) {}
+  protected gotOptionsChanged(e: WUP.OptionEvent) {
+    !this.#isStopChanges && this.gotChanges(e.props);
+  }
 
   /** Browser calls this method when the element is added to the document */
   protected connectedCallback() {
@@ -196,8 +202,39 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     this.gotRemoved();
   }
 
+  /** Stop listening for options/attrs changes */
+  protected changesStop() {
+    this.#isStopChanges = true;
+  }
+
+  /** Resume listening for options/attrs changes */
+  protected changesResume() {
+    this.#isStopChanges = false;
+  }
+
+  #isStopChanges = false;
+  #attrTimer?: number;
+  #attrChanged?: string[];
   /** Fired when element isReady and one of observedAttributes is changed */
-  protected gotAttributeChanged(name: string, oldValue: string, newValue: string) {}
+  protected gotAttributeChanged(name: string, oldValue: string, newValue: string): void {
+    if (this.#isStopChanges) {
+      return;
+    }
+    // debounce filter
+    if (this.#attrTimer) {
+      this.#attrChanged!.push(name);
+      return;
+    }
+    this.#attrChanged = [name];
+    this.#attrTimer = setTimeout(() => {
+      this.#attrTimer = undefined;
+      this.changesStop();
+      this.gotChanges(this.#attrChanged as Array<keyof WUPForm.Options>);
+      this.changesResume();
+      this.#attrChanged = undefined;
+    });
+  }
+
   /** Browser calls this method when attrs pointed in observedAttributes is changed */
   protected attributeChangedCallback(name: string, oldValue: string, newValue: string) {
     this.#isReady && this.gotAttributeChanged(name, oldValue, newValue);
