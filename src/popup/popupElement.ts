@@ -1,13 +1,15 @@
 /* eslint-disable no-use-before-define */
 import WUPBaseElement, { WUP } from "../baseElement";
 import { WUPPopup } from "./popupElement.types";
-import { getBoundingInternalRect, PopupPlacements, px2Number, WUPPopupPlace } from "./popupPlacements";
+import { PopupPlacements, WUPPopupPlace } from "./popupPlacements";
 import { findScrollParentAll } from "../helpers/findScrollParent";
 import WUPPopupArrowElement from "./popupArrowElement";
 import popupListenTarget from "./popupListenTarget";
+import { animateDropdown, isIntoView } from "../indexHelpers";
+import { getBoundingInternalRect, px2Number, styleTransform } from "../helpers/styleHelpers";
 
 export import ShowCases = WUPPopup.ShowCases;
-import { animateDropdown, isIntoView } from "../indexHelpers";
+
 // code coverage doesn't work either: https://stackoverflow.com/questions/62493593/unable-to-ignore-block-within-react-class-components-with-istanbul-ignore-next-t
 /* c8 ignore next */
 export * from "./popupElement.types";
@@ -679,8 +681,7 @@ export default class WUPPopupElement<
     }
 
     const fitEl = this._opts.toFitElement || document.body;
-    const fit = getBoundingInternalRect(fitEl) as WUPPopupPlace.Rect;
-    fit.el = fitEl;
+    const fit = Object.assign(getBoundingInternalRect(fitEl), { el: fitEl });
 
     this.style.display = "block";
     const _defMaxWidth = this._opts.maxWidthByTarget ? `${tdef.width}px` : "";
@@ -826,8 +827,7 @@ export default class WUPPopupElement<
       }
 
       // transform has performance benefits in comparison with positioning
-      // prettier-ignore
-      this.style.transform = `${this.style.transform.replace(/translate\(([\d., \w]+)\)/, "")}translate(${pos.left}px, ${pos.top}px)`;
+      styleTransform(this, "translate", `${pos.left}px, ${pos.top}px`);
       this.setAttribute("position", pos.attr);
     };
 

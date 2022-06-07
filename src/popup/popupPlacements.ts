@@ -80,42 +80,6 @@ export namespace WUPPopupPlace {
   }
 }
 
-export function px2Number(styleValue: string): number {
-  return +(/([0-9]+)/.exec(styleValue)?.[0] || 0);
-}
-
-/* Returns bounding rectangular without borders and scroll (simulate box-sizing: border-box) */
-export function getBoundingInternalRect(
-  el: HTMLElement,
-  options?: {
-    computedStyle?: CSSStyleDeclaration;
-    ignoreCache?: boolean;
-    elRect?: DOMRect;
-  }
-): Omit<WUPPopupPlace.Rect, "el"> {
-  if ((el as any)._savedBoundingRect && !options?.ignoreCache) {
-    return (el as any)._savedBoundingRect;
-  }
-  // we don't need other borders (right/bottom) because of clientSize without borders
-  const { borderTopWidth, borderLeftWidth } = options?.computedStyle ?? getComputedStyle(el);
-  let { left, top } = options?.elRect ?? el.getBoundingClientRect();
-  top += px2Number(borderTopWidth);
-  left += px2Number(borderLeftWidth);
-  const r: Omit<WUPPopupPlace.Rect, "el"> = {
-    top,
-    left,
-    right: left + el.clientWidth,
-    bottom: top + el.clientHeight,
-    width: el.clientWidth,
-    height: el.clientHeight,
-  };
-
-  (el as any)._savedBoundingRect = r;
-  setTimeout(() => delete (el as any)._savedBoundingRect);
-
-  return r;
-}
-
 const yAdjust = <WUPPopupPlace.AdjustFunc>function yAdjust(this: WUPPopupPlace.Result, _t, me, fit) {
   const arrowFree = this.arrowAngle === 0 || this.arrowAngle === 180 ? me.arrow.h : 0;
   this.top = Math.max(fit.top - arrowFree, Math.min(this.top, fit.bottom - me.h + arrowFree));

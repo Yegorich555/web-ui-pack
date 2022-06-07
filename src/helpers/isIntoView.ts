@@ -1,5 +1,6 @@
-import { getBoundingInternalRect, WUPPopupPlace } from "../popup/popupPlacements";
+import { WUPPopupPlace } from "../popup/popupPlacements";
 import { findScrollParentAll } from "./findScrollParent";
+import { getBoundingInternalRect } from "./styleHelpers";
 
 type BasicRect = Pick<DOMRect, "top" | "right" | "bottom" | "left">;
 

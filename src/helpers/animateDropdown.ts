@@ -1,3 +1,5 @@
+import { styleTransform } from "./styleHelpers";
+
 const frames = new Map<HTMLElement, number>();
 
 interface PromiseCancel {
@@ -30,7 +32,6 @@ export default function animateDropdown(el: HTMLElement, timeMs = 300, isClose =
 
   // get previous scaleY and extract transform without scaleY
   const reg = / *scaleY\(([%\d \w.-]+)\) */;
-  const removeScaleY = (styleTransform: string): string => styleTransform.replace(reg, "");
   const parseScale = (e: HTMLElement): { prev: string; from: number } => {
     let prev = e.style.transform;
     let from = isClose ? 1 : 0;
@@ -57,7 +58,7 @@ export default function animateDropdown(el: HTMLElement, timeMs = 300, isClose =
 
   const reset = () => {
     frames.delete(el);
-    el.style.transform = removeScaleY(el.style.transform);
+    styleTransform(el, "scaleY", "");
     el.style.transformOrigin = "";
     nested.forEach((e) => (e.el.style.transform = e.prev.trimEnd()));
     return true;
@@ -93,7 +94,7 @@ export default function animateDropdown(el: HTMLElement, timeMs = 300, isClose =
       const scale = from + (to - from) * v;
 
       el.style.transformOrigin = el.getAttribute("position") === "top" ? "bottom" : "top";
-      el.style.transform = `${removeScaleY(el.style.transform)} scaleY(${scale})`.trimStart();
+      styleTransform(el, "scaleY", scale);
       scale !== 0 && nested.forEach((e) => (e.el.style.transform = `${e.prev}scaleY(${1 / scale})`));
 
       if (cur === timeMs) {
