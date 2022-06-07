@@ -507,8 +507,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     let errMsg = "";
     const v = this.$value as unknown as string;
 
-    // todo validate required first ????
-    Object.keys(vls).some((k) => {
+    const findErr = (k: string | number) => {
       const vl = vls[k as "required"];
 
       let err: false | string;
@@ -530,7 +529,9 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       }
 
       return false;
-    });
+    };
+    // validate [required] first
+    (vls.required && findErr("required")) || Object.keys(vls).some(findErr);
 
     this.#isValid = !errMsg;
     this._validTimer && clearTimeout(this._validTimer);

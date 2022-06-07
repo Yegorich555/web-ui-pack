@@ -1,3 +1,4 @@
+import { ValidationCases } from "./baseControl";
 import WUPTextControl from "./text";
 
 // it's required to extend default validationRules
@@ -10,6 +11,7 @@ declare global {
 }
 
 WUPTextControl.$defaults.validationRules.isNumber = (v) => !/^[0-9]*$/.test(v) && "Please enter a valid number";
+WUPTextControl.$defaults.validationCase = ValidationCases.onInit | ValidationCases.onChangeSmart;
 
 // create control for testing
 const el = document.createElement("wup-text");
