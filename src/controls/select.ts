@@ -33,26 +33,26 @@ export namespace WUPSelectIn {
   export type GenOpt<T = any> = Generics<T>["Options"];
 }
 
+export const enum ShowCases {
+  onManualCall,
+  onInput,
+  onPressArrowKey,
+  onClick,
+  onFocus,
+}
+
+export const enum HideCases {
+  onClick,
+  onManualCall,
+  onSelect,
+  onFocusLost,
+  OnPressEsc,
+  OnPressEnter,
+  OnOptionsChange,
+}
+
 declare global {
   namespace WUPSelect {
-    export const enum ShowCases {
-      onManualCall,
-      onInput,
-      onPressArrowKey,
-      onClick,
-      onFocus,
-    }
-
-    export const enum HideCases {
-      onClick,
-      onManualCall,
-      onSelect,
-      onFocusLost,
-      OnPressEsc,
-      OnPressEnter,
-      OnOptionsChange,
-    }
-
     interface MenuItem<T> {
       text: string;
       value: T;
@@ -238,11 +238,11 @@ export default class WUPSelectControl<
   }
 
   $hide() {
-    this.goHideMenu(WUPSelect.HideCases.onManualCall);
+    this.goHideMenu(HideCases.onManualCall);
   }
 
   $show() {
-    this.goShowMenu(WUPSelect.ShowCases.onManualCall);
+    this.goShowMenu(ShowCases.onManualCall);
   }
 
   $refPopup?: WUPPopupElement;
@@ -281,10 +281,7 @@ export default class WUPSelectControl<
           if (s === WUPPopup.ShowCases.always) {
             return this.$refPopup!;
           }
-          return this.goShowMenu(
-            s === PopupShowCases.onClick ? WUPSelect.ShowCases.onClick : WUPSelect.ShowCases.onFocus,
-            e
-          );
+          return this.goShowMenu(s === PopupShowCases.onClick ? ShowCases.onClick : ShowCases.onFocus, e);
         },
         (s, e) => {
           if (
@@ -295,8 +292,8 @@ export default class WUPSelectControl<
           ) {
             return this.goHideMenu(
               s === WUPPopup.HideCases.onFocusOut || s === WUPPopup.HideCases.onOutsideClick
-                ? WUPSelect.HideCases.onFocusLost
-                : WUPSelect.HideCases.onClick,
+                ? HideCases.onFocusLost
+                : HideCases.onClick,
               e
             );
           }
@@ -405,16 +402,13 @@ export default class WUPSelectControl<
     const o = this._cachedItems![i];
 
     this.setValue(o.value);
-    this.goHideMenu(WUPSelect.HideCases.onSelect);
+    this.goHideMenu(HideCases.onSelect);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected async goShowMenu(
-    showCase: WUPSelect.ShowCases,
-    e?: MouseEvent | FocusEvent | null
-  ): Promise<WUPPopupElement | null> {
+  protected async goShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | null): Promise<WUPPopupElement | null> {
     if (
-      showCase === WUPSelect.ShowCases.onClick &&
+      showCase === ShowCases.onClick &&
       e?.target instanceof HTMLInputElement &&
       !e.target.readOnly &&
       this.contains(e.target)
@@ -471,7 +465,7 @@ export default class WUPSelectControl<
       this.#disposeMenuEvents!.push(r);
 
       await this.renderMenu(p, menuId);
-    } else if (showCase !== WUPSelect.ShowCases.onInput && this._menuItems!.filtered) {
+    } else if (showCase !== ShowCases.onInput && this._menuItems!.filtered) {
       this._menuItems!.all?.forEach((li) => (li.style.display = "")); // reset styles after filtering
       this._menuItems!.filtered = undefined;
     }
@@ -488,8 +482,8 @@ export default class WUPSelectControl<
     }
 
     // call for ref-listener to apply events properly
-    showCase !== WUPSelect.ShowCases.onClick &&
-      showCase !== WUPSelect.ShowCases.onFocus &&
+    showCase !== ShowCases.onClick &&
+      showCase !== ShowCases.onFocus &&
       this.#popupRefs!.show(WUPPopup.ShowCases.always);
 
     setTimeout(() => this.fireEvent("$show", { cancelable: false }));
@@ -498,9 +492,9 @@ export default class WUPSelectControl<
 
   #menuHidding?: Promise<void>;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected async goHideMenu(hideCase: WUPSelect.HideCases, e?: MouseEvent | FocusEvent | null): Promise<boolean> {
+  protected async goHideMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): Promise<boolean> {
     if (
-      hideCase === WUPSelect.HideCases.onClick &&
+      hideCase === HideCases.onClick &&
       e?.target instanceof HTMLInputElement &&
       !e.target.readOnly &&
       this.contains(e.target)
@@ -516,8 +510,8 @@ export default class WUPSelectControl<
 
     if (wasOpen) {
       // call for ref-listener to apply events properly
-      hideCase !== WUPSelect.HideCases.onFocusLost &&
-        hideCase !== WUPSelect.HideCases.onClick &&
+      hideCase !== HideCases.onFocusLost &&
+        hideCase !== HideCases.onClick &&
         this.#popupRefs!.hide(WUPPopup.HideCases.onManuallCall);
 
       let pback: () => void;
@@ -593,12 +587,12 @@ export default class WUPSelectControl<
     let focusIndex: number | null = null;
 
     if (e.key === "ArrowDown") {
-      !this.#isOpen && (await this.goShowMenu(WUPSelect.ShowCases.onPressArrowKey));
+      !this.#isOpen && (await this.goShowMenu(ShowCases.onPressArrowKey));
       let cur = this._menuItems!.focused;
       focusIndex = ++cur >= length ? 0 : cur;
     } else if (e.key === "ArrowUp") {
       const wasOpen = this.#isOpen;
-      !this.#isOpen && (await this.goShowMenu(WUPSelect.ShowCases.onPressArrowKey));
+      !this.#isOpen && (await this.goShowMenu(ShowCases.onPressArrowKey));
       let cur = wasOpen ? this._menuItems!.focused : length;
       focusIndex = --cur < 0 ? length - 1 : cur;
     }
@@ -622,19 +616,19 @@ export default class WUPSelectControl<
     if (e.key === "Escape") {
       e.preventDefault();
       this.setValue(this.$value);
-      await this.goHideMenu(WUPSelect.HideCases.OnPressEsc);
+      await this.goHideMenu(HideCases.OnPressEsc);
     } else if (e.key === "Enter") {
       e.preventDefault();
       let i = this._menuItems!.focused;
       i = this._menuItems!.filtered ? this._menuItems!.filtered[i] : i;
       i > -1 && this.setValue(this._cachedItems![i].value);
-      await this.goHideMenu(WUPSelect.HideCases.OnPressEnter);
+      await this.goHideMenu(HideCases.OnPressEnter);
     }
   }
 
   protected override async gotInput(e: Event & { currentTarget: HTMLInputElement }) {
     this.#isOpen && this.focusMenuItem(null); // reset focus
-    !this.#isOpen && (await this.goShowMenu(WUPSelect.ShowCases.onInput));
+    !this.#isOpen && (await this.goShowMenu(ShowCases.onInput));
 
     const rawV = e.currentTarget.value;
     const v = rawV.trimStart().toLowerCase();
