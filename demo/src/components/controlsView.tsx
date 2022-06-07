@@ -1,8 +1,8 @@
 import Page from "src/elements/page";
-import { WUPSelectControl, WUPTextControl } from "web-ui-pack";
+import { WUPSelectControl, WUPTextControl, WUPSpinElement } from "web-ui-pack";
 import styles from "./controlsView.scss";
 
-const sideEffect = WUPTextControl && WUPSelectControl;
+const sideEffect = WUPTextControl && WUPSelectControl && WUPSpinElement;
 !sideEffect && console.error("Missed"); // It's required otherwise import is ignored by webpack
 
 export default function ControlsView() {
@@ -15,6 +15,11 @@ export default function ControlsView() {
           }
         }}
       >
+        <button type="submit" className={styles.checkSpin}>
+          Submit
+          <wup-spin class={styles.spin} />
+        </button>
+
         <wup-text
           ref={(el) => {
             if (el) {
@@ -270,6 +275,20 @@ export default function ControlsView() {
             <label>
               <input type="radio" name="w1" />
               <span>Va 7</span>
+            </label>
+          </fieldset>
+        </div>
+
+        <div className={`${styles.common} ${styles.radioGroup}`} onMouseDown={(e) => e.preventDefault()}>
+          <fieldset aria-required>
+            <legend>RadioGroup</legend>
+            <label>
+              <input type="radio" name="w2" />
+              <span>Value 1</span>
+            </label>
+            <label>
+              <input type="radio" name="w2" />
+              <span>Value 2</span>
             </label>
           </fieldset>
         </div>

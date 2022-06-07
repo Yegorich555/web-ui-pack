@@ -5,7 +5,11 @@ import onFocusLostEv from "../helpers/onFocusLost";
 // eslint-disable-next-line import/named
 import WUPPopupElement, { ShowCases as PopupShowCases, WUPPopup } from "../popup/popupElement";
 import popupListenTarget from "../popup/popupListenTarget";
+import WUPSpinElement from "../spinElement";
 import WUPTextControl, { WUPTextIn } from "./text";
+
+const sideEffect = WUPSpinElement;
+!sideEffect && console.error("Missed"); // It's required otherwise import is ignored by webpack
 
 export namespace WUPSelectIn {
   export interface Defs {
@@ -260,6 +264,9 @@ export default class WUPSelectControl<
     i.setAttribute("aria-haspopup", "listbox");
     i.setAttribute("aria-expanded", "false");
     // i.setAttribute("aria-multiselectable", "false");
+
+    // todo remove after tests
+    this.appendChild(document.createElement("wup-spin"));
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUPSelect.Options> | null) {

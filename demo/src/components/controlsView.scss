@@ -596,3 +596,14 @@
     top: 0.2em;
   }
 }
+
+.checkSpin {
+  position: relative;
+
+  wup-spin {
+    //   position: absolute;
+    //   transform: translate(-50%, -50%) scale(0.6);
+    // top: 50%;
+    // left: 50%;
+  }
+}
