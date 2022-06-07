@@ -190,10 +190,18 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     !this.#isStopChanges && this.gotChanges(e.props);
   }
 
+  /** Fired once on Init */
+  protected gotRender() {}
+
+  #isFirstConn = true;
   /** Browser calls this method when the element is added to the document */
   protected connectedCallback() {
     // async requires otherwise attributeChangedCallback doesn't set immediately
     setTimeout(this.gotReady);
+    if (this.#isFirstConn) {
+      this.#isFirstConn = false;
+      this.gotRender();
+    }
   }
 
   /** Browser calls this method when the element is removed from the document;

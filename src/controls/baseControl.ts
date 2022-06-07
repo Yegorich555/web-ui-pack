@@ -474,14 +474,14 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     }
   }
 
-  #isFirstConn = true;
+  protected override gotRender() {
+    super.gotRender();
+    this.$refInput.type = "text";
+    this.renderControl();
+  }
+
   protected override connectedCallback() {
     super.connectedCallback();
-    if (this.#isFirstConn) {
-      this.#isFirstConn = false;
-      this.$refInput.type = "text";
-      this.renderControl();
-    }
     this.$form = WUPFormElement.$tryConnect(this);
   }
 
