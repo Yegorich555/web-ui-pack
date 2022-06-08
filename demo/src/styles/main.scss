@@ -71,6 +71,10 @@ h3 {
   margin-bottom: 0.2em;
 }
 
+h3 + small {
+  font-size: 12px;
+}
+
 p {
   margin: 0;
   font-size: smaller;

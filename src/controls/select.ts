@@ -266,7 +266,7 @@ export default class WUPSelectControl<
     // i.setAttribute("aria-multiselectable", "false");
 
     // todo remove after tests
-    this.appendChild(document.createElement("wup-spin"));
+    // this.appendChild(document.createElement("wup-spin"));
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUPSelect.Options> | null) {

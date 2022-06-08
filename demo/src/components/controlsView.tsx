@@ -15,11 +15,7 @@ export default function ControlsView() {
           }
         }}
       >
-        <button type="submit" className={styles.checkSpin}>
-          Submit
-          <wup-spin class={styles.spin} />
-        </button>
-
+        <button type="submit">Submit</button>
         <wup-text
           ref={(el) => {
             if (el) {

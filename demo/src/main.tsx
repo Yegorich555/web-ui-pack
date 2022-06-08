@@ -10,6 +10,7 @@ import iconGit from "./assets/gitIcon.svg";
 import imgLogo from "./assets/logo.png";
 import styles from "./main.scss";
 import ControlsView from "./components/controlsView";
+import SpinView from "./components/spinView";
 
 interface IRoute {
   label?: string;
@@ -21,6 +22,7 @@ const baseURL = process.env.BASE_URL || "/";
 
 const routes: IRoute[] = [
   { path: "popup", el: PopupView },
+  { path: "spin", el: SpinView },
   { path: "controls", el: ControlsView },
 ];
 
