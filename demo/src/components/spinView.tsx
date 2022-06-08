@@ -67,7 +67,57 @@ export default function SpinView() {
           Pending...
         </button>
       </div>
+      <div>
+        <h3>Different types</h3>
+        <small>Todo description here</small>
+        <div className={styles.types}>
+          <div>
+            Default
+            <wup-spin inline />
+          </div>
+          <div>
+            Type 2
+            <wup-spin inline class={styles.spin2} />
+          </div>
+          <div>
+            Type 3
+            <wup-spin inline class={styles.spin3}>
+              <div />
+              <div />
+              <div />
+            </wup-spin>
+          </div>
+          <div>
+            Type 4
+            <wup-spin inline class={`${styles["lds-roller"]} lds-roller`}>
+              <div />
+              <div />
+              <div />
+              <div />
+              <div />
+              <div />
+              {/* <div /> */}
+            </wup-spin>
+          </div>
+        </div>
+      </div>
       <div className={styles.bottom} />
     </Page>
   );
 }
+
+const s = document.head.appendChild(document.createElement("style"));
+let txt = "";
+const cnt = 8;
+
+for (let i = 1; i <= cnt; ++i) {
+  txt += `
+     .lds-roller div:nth-child(${i}) {
+       animation-delay: -${0.036 * i}s;
+     }
+    .lds-roller div:nth-child(${i}):after {
+      transform: rotate(calc(45deg + var(--spin-step) * ${i - 1}));
+    }`;
+}
+
+s.textContent = txt;

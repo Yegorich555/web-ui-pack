@@ -41,26 +41,28 @@ export default class WUPSpinElement extends WUPBaseElement {
     return `:root {
           --spin-1: #ffa500;
           --spin-2: #fff;
-          --spin-speed: 1s;
-          --spin-size: 2em;
-          --spin-width: calc(var(--spin-size) / 6);
+          --spin-speed: 1.2s;
+          --spin-size: 3em;
+          --spin-width: calc(var(--spin-size) / 7);
         }`;
   }
 
   static get $style(): string {
     return `
-      :host,
-      :host > div {
+      :host {
         z-index: 100;
-        display: inline-block;
         width: var(--spin-size);
         height: var(--spin-size);
-        box-sizing: border-box;
-        border-radius: 50%;
         top:0; left:0;
         pointer-events: none;
       }
-      :host > div {
+      :host,
+      :host div {
+        display: inline-block;
+        box-sizing: border-box;
+        border-radius: 50%;
+      }
+      :host div {
         border: var(--spin-width) solid var(--spin-1);
         border-top-color: var(--spin-2);
         animation: WUP-SPIN-1 var(--spin-speed) linear infinite;
@@ -96,6 +98,9 @@ export default class WUPSpinElement extends WUPBaseElement {
 
   protected override gotRender() {
     this.appendChild(this.$refSpin);
+    // for (let i = 0; i < 3; ++i) {
+    //   this.appendChild(document.createElement("div"));
+    // }
   }
 
   protected override gotReady() {
@@ -206,6 +211,8 @@ declare global {
     }
   }
 }
+
+// todo attr-target as querySelector
 
 // setTimeout(() => {
 //   document.querySelector("main")?.scrollTo({ top: 60 });
