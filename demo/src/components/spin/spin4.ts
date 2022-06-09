@@ -1,9 +1,9 @@
 import { WUPSpinElement } from "web-ui-pack";
-import { spinUseType4 } from "web-ui-pack/spinElement";
+import { spinUseDotRoller } from "web-ui-pack/spinElement";
 
 // Create new class is required to use several spinners for the page
 export default class WUPSpin4Element extends WUPSpinElement {}
-spinUseType4(WUPSpin4Element);
+spinUseDotRoller(WUPSpin4Element);
 
 const tagName = "wup-spin4";
 customElements.define(tagName, WUPSpin4Element);

@@ -197,7 +197,7 @@ export default class WUPSpinElement extends WUPBaseElement {
   };
 }
 
-spinUseType1(WUPSpinElement);
+spinUseRing(WUPSpinElement);
 const tagName = "wup-spin";
 customElements.define(tagName, WUPSpinElement);
 
@@ -223,8 +223,8 @@ function setType(cls: typeof WUPSpinElement, itemsCount: number, getter: () => s
   });
 }
 
-/** Spinner type 1 - ring */
-export function spinUseType1(cls: typeof WUPSpinElement) {
+/** Default types */
+export function spinUseRing(cls: typeof WUPSpinElement) {
   setType(
     cls,
     1,
@@ -235,7 +235,7 @@ export function spinUseType1(cls: typeof WUPSpinElement) {
   );
 }
 
-export function spinUseType2(cls: typeof WUPSpinElement) {
+export function spinUseDualRing(cls: typeof WUPSpinElement) {
   setType(
     cls,
     1,
@@ -248,7 +248,7 @@ export function spinUseType2(cls: typeof WUPSpinElement) {
   );
 }
 
-export function spinUseType3(cls: typeof WUPSpinElement) {
+export function spinUseRoller(cls: typeof WUPSpinElement) {
   const cnt = 4;
   setType(cls, cnt, () => {
     let s = "";
@@ -268,7 +268,7 @@ export function spinUseType3(cls: typeof WUPSpinElement) {
   });
 }
 
-export function spinUseType4(cls: typeof WUPSpinElement) {
+export function spinUseDotRoller(cls: typeof WUPSpinElement) {
   const cnt = 7;
   setType(cls, cnt, () => {
     let s = "";
@@ -299,7 +299,7 @@ export function spinUseType4(cls: typeof WUPSpinElement) {
   });
 }
 
-export function spinUseType5(cls: typeof WUPSpinElement) {
+export function spinUseDotRing(cls: typeof WUPSpinElement) {
   const cnt = 10;
   setType(cls, cnt, () => {
     let s = "";
@@ -337,7 +337,7 @@ export function spinUseType5(cls: typeof WUPSpinElement) {
   });
 }
 
-export function spinUseType6(cls: typeof WUPSpinElement) {
+export function spinUseSpliceRing(cls: typeof WUPSpinElement) {
   const cnt = 12;
   setType(cls, cnt, () => {
     let s = "";
