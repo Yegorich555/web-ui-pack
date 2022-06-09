@@ -1,0 +1,49 @@
+/* stylelint-disable no-descending-specificity */
+.pageSpin {
+  > div {
+    margin-bottom: 30px;
+  }
+
+  button > wup-spin,
+  button + wup-spin {
+    --spin-2: white;
+  }
+
+  small {
+    display: block;
+    margin-bottom: 10px;
+
+    > strong {
+      color: #ad0000;
+    }
+
+    > ul {
+      margin-top: 0;
+    }
+  }
+
+  .bottom {
+    margin-top: 100vh;
+  }
+
+  .btnAlign {
+    display: flex;
+    align-items: center;
+
+    & > wup-spin {
+      margin-right: 4px;
+    }
+  }
+
+  .types {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+
+    > div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+}

@@ -27,7 +27,6 @@ declare global {
     }
   }
 }
-
 /** Flexible animated element with ability to place over target element without position relative */
 export default class WUPSpinElement extends WUPBaseElement {
   #ctr = this.constructor as typeof WUPSpinElement;
@@ -43,12 +42,19 @@ export default class WUPSpinElement extends WUPBaseElement {
           --spin-2: #fff;
           --spin-speed: 1.2s;
           --spin-size: 3em;
-          --spin-width: calc(var(--spin-size) / 7);
+          --spin-width: calc(var(--spin-size) / 8);
         }`;
+  }
+
+  static get $styleApplied(): string {
+    return "";
   }
 
   static get $style(): string {
     return `
+       @keyframes WUP-SPIN-1 {
+        100% { transform: rotate(360deg); }
+      }
       :host {
         z-index: 100;
         width: var(--spin-size);
@@ -63,14 +69,10 @@ export default class WUPSpinElement extends WUPBaseElement {
         border-radius: 50%;
       }
       :host div {
-        border: var(--spin-width) solid var(--spin-1);
-        border-top-color: var(--spin-2);
         animation: WUP-SPIN-1 var(--spin-speed) linear infinite;
         width: 100%; height: 100%;
       }
-      @keyframes WUP-SPIN-1 {
-        100% { transform: rotate(360deg); }
-      }`;
+      ${this.$styleApplied}`;
   }
 
   static $defaults: WUPSpin.Defaults = {
@@ -78,13 +80,13 @@ export default class WUPSpinElement extends WUPBaseElement {
     overflowOffset: [4, 4],
   };
 
+  static _childrenCount = 1;
+
   $options: WUPSpin.Options = {
     ...this.#ctr.$defaults,
   };
 
   protected override _opts = this.$options;
-
-  $refSpin = document.createElement("div");
 
   /** Force to update position (when $options.oveflow is true) */
   $refresh() {
@@ -97,10 +99,9 @@ export default class WUPSpinElement extends WUPBaseElement {
   }
 
   protected override gotRender() {
-    this.appendChild(this.$refSpin);
-    // for (let i = 0; i < 3; ++i) {
-    //   this.appendChild(document.createElement("div"));
-    // }
+    for (let i = 0; i < this.#ctr._childrenCount; ++i) {
+      this.appendChild(document.createElement("div"));
+    }
   }
 
   protected override gotReady() {
@@ -195,6 +196,7 @@ export default class WUPSpinElement extends WUPBaseElement {
   };
 }
 
+spinUseType1(WUPSpinElement);
 const tagName = "wup-spin";
 customElements.define(tagName, WUPSpinElement);
 
@@ -210,6 +212,135 @@ declare global {
       [tagName]: WUPSpin.JSXProps<WUPSpinElement>;
     }
   }
+}
+
+/** Spinner types */
+
+export function spinUseType1(cls: typeof WUPSpinElement) {
+  cls._childrenCount = 1;
+  Object.defineProperty(cls, "$styleApplied", {
+    configurable: true,
+    get: () => `:host div {
+        border: var(--spin-width) solid var(--spin-1);
+        border-top-color: var(--spin-2);
+      }`,
+  });
+}
+
+export function spinUseType2(cls: typeof WUPSpinElement) {
+  cls._childrenCount = 1;
+  Object.defineProperty(cls, "$styleApplied", {
+    configurable: true,
+    get: () => `:host div {
+         --spin-2: transparent;
+         border: var(--spin-width) solid var(--spin-1);
+         border-color: var(--spin-2) var(--spin-1) var(--spin-2) var(--spin-1);
+      }`,
+  });
+}
+
+export function spinUseType3(cls: typeof WUPSpinElement) {
+  const cnt = 4;
+  cls._childrenCount = cnt;
+  Object.defineProperty(cls, "$styleApplied", {
+    configurable: true,
+    get: () => {
+      let s = "";
+      for (let i = 1; i <= cnt - 1; ++i) {
+        s += `:host div:nth-child(${i}) { animation-delay: -0.${15 * (cnt - i)}s }
+        `;
+      }
+      return `
+        :host { position: relative; }
+        :host div {
+          animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
+          position: absolute;
+          border-color: transparent;
+          border-top-color: var(--spin-1);
+        }
+        ${s}`;
+    },
+  });
+}
+
+export function spinUseType4(cls: typeof WUPSpinElement) {
+  const cnt = 7;
+  cls._childrenCount = cnt;
+  Object.defineProperty(cls, "$styleApplied", {
+    configurable: true,
+    get: () => {
+      let s = "";
+      for (let i = 1; i <= cnt; ++i) {
+        s += `:host div:nth-child(${i}) { animation-delay: -${0.036 * i}s; }
+              :host div:nth-child(${i}):after { transform: rotate(calc(45deg + var(--spin-step) * ${i - 1})); }
+            `;
+      }
+      return `
+        :host { --spin-step: 24deg; position: relative; }
+        :host div {
+          animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
+          position: absolute;
+          border: none;
+        }
+        :host div:after {
+          content: " ";
+          display: block;
+          position: absolute;
+          left: 0;
+          top: calc(50% - var(--spin-width) / 2);
+          transform-origin: calc(var(--spin-size) / 2);
+          width: var(--spin-width);
+          height: var(--spin-width);
+          border-radius: 50%;
+          background: var(--spin-1);
+        }
+        ${s}`;
+    },
+  });
+}
+
+export function spinUseType5(cls: typeof WUPSpinElement) {
+  const cnt = 10;
+  cls._childrenCount = cnt;
+  Object.defineProperty(cls, "$styleApplied", {
+    configurable: true,
+    get: () => {
+      let s = "";
+      for (let i = 1; i <= cnt; ++i) {
+        s += `:host div:nth-child(${i}):after { animation-delay: ${0.1 * (i - 1)}s; }
+              :host div:nth-child(${i}) { transform: rotate(calc(360deg * ${(i - 1) / cnt})); }
+            `;
+      }
+      return `
+        @keyframes WUP-SPIN-2 {
+            0%,20%,80%,100% { transform: scale(1); }
+            50% { transform: scale(1.4); }
+        }
+        :host {
+          position: relative;
+          display: inline-flex;
+          justify-content: center;
+          align-items: center;
+         }
+        :host div {
+          animation: none;
+          position: absolute;
+          border: none;
+          width: calc(100% / 1.4142135623730951);
+          height: calc(100% / 1.4142135623730951);
+        }
+        :host div:after {
+          animation: WUP-SPIN-2 var(--spin-speed) linear infinite;
+          content: " ";
+          display: block;
+          width: var(--spin-width);
+          height: var(--spin-width);
+          border-radius: 50%;
+          background: var(--spin-1);
+        }
+        ${s}`;
+    },
+  });
 }
 
 // todo attr-target as querySelector

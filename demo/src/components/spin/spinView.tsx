@@ -1,9 +1,15 @@
 import Page from "src/elements/page";
 import { WUPSpinElement } from "web-ui-pack";
+import { spinUseType1 } from "web-ui-pack/spinElement";
+import WUPSpin2Element from "./spin2";
+import WUPSpin3Element from "./spin3";
+import WUPSpin4Element from "./spin4";
+import WUPSpin5Element from "./spin5";
 import styles from "./spinView.scss";
 
-const sideEffect = WUPSpinElement;
+const sideEffect = WUPSpinElement && WUPSpin2Element && WUPSpin3Element && WUPSpin4Element && WUPSpin5Element;
 !sideEffect && console.error("Missed"); // It's required otherwise import is ignored by webpack
+spinUseType1(WUPSpinElement); // setup default style
 
 export default function SpinView() {
   return (
@@ -72,32 +78,19 @@ export default function SpinView() {
         <small>Todo description here</small>
         <div className={styles.types}>
           <div>
-            Default
-            <wup-spin inline />
+            Default <wup-spin inline />
           </div>
           <div>
-            Type 2
-            <wup-spin inline class={styles.spin2} />
+            Type 2 <wup-spin2 inline />
           </div>
           <div>
-            Type 3
-            <wup-spin inline class={styles.spin3}>
-              <div />
-              <div />
-              <div />
-            </wup-spin>
+            Type 3 <wup-spin3 inline />
           </div>
           <div>
-            Type 4
-            <wup-spin inline class={`${styles["lds-roller"]} lds-roller`}>
-              <div />
-              <div />
-              <div />
-              <div />
-              <div />
-              <div />
-              {/* <div /> */}
-            </wup-spin>
+            Type 4<wup-spin4 inline />
+          </div>
+          <div>
+            Type 5<wup-spin5 inline class={styles.spin5} />
           </div>
         </div>
       </div>
@@ -105,19 +98,3 @@ export default function SpinView() {
     </Page>
   );
 }
-
-const s = document.head.appendChild(document.createElement("style"));
-let txt = "";
-const cnt = 8;
-
-for (let i = 1; i <= cnt; ++i) {
-  txt += `
-     .lds-roller div:nth-child(${i}) {
-       animation-delay: -${0.036 * i}s;
-     }
-    .lds-roller div:nth-child(${i}):after {
-      transform: rotate(calc(45deg + var(--spin-step) * ${i - 1}));
-    }`;
-}
-
-s.textContent = txt;

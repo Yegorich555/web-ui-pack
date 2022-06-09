@@ -10,7 +10,7 @@ import iconGit from "./assets/gitIcon.svg";
 import imgLogo from "./assets/logo.png";
 import styles from "./main.scss";
 import ControlsView from "./components/controlsView";
-import SpinView from "./components/spinView";
+import SpinView from "./components/spin/spinView";
 
 interface IRoute {
   label?: string;
