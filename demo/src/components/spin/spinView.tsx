@@ -19,7 +19,8 @@ export default function SpinView() {
       <div>
         <h3>With position: relative</h3>
         <small>
-          Spinner reduces size to fit target (option <b>overflowReduceByTarget</b>)
+          Spinner reduces size to fit target (option <b>overflowReduceByTarget</b>)<br />
+          By default parent is overlayed by shadowBox (option <b>overflowShadow</b>) <b />
         </small>
         <button type="button" style={{ position: "relative" }}>
           Button with relative position
@@ -59,6 +60,7 @@ export default function SpinView() {
           ref={(el) => {
             if (el) {
               el.$options.overflowTarget = el.previousElementSibling as HTMLElement;
+              el.$options.overflowShadow = false;
             }
           }}
         />

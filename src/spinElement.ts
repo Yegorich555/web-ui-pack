@@ -12,6 +12,8 @@ declare global {
        *  [top, right, bottom, left] or [top/bottom, right/left] in px
        * @defaultValue [4,4] */
       overflowOffset: [number, number, number, number] | [number, number];
+      /** Allow to create shadowBox to partially hide target */
+      overflowShadow: boolean;
       /** Allow to reduce size if it's bigger than parent (for max-size change css-var --spin-size)
        * @defaultValue true */
       overflowReduceByTarget: boolean;
@@ -43,6 +45,7 @@ export default class WUPSpinElement extends WUPBaseElement {
           --spin-speed: 1.2s;
           --spin-size: 3em;
           --spin-item-size: calc(var(--spin-size) / 8);
+          --spin-shadow: #ffffffa6;
         }`;
   }
 
@@ -73,12 +76,25 @@ export default class WUPSpinElement extends WUPBaseElement {
         width: 100%; height: 100%;
         left:0; top:0;
       }
+      :host div[fade] {
+         display: block;
+         position: absolute;
+         left:0; top:0;
+         animation: none;
+         border: none;
+         border-radius: var(--border-radius);
+         transform: none;
+         z-index: -1;
+         background: var(--spin-shadow);
+      }
+      :host div[fade]::after { content: none; }
       ${this.$styleApplied}`;
   }
 
   static $defaults: WUPSpin.Defaults = {
     overflowReduceByTarget: true,
     overflowOffset: [4, 4],
+    overflowShadow: true,
   };
 
   static _itemsCount = 1;
@@ -110,6 +126,7 @@ export default class WUPSpinElement extends WUPBaseElement {
     super.gotReady();
   }
 
+  $refShadow?: HTMLDivElement;
   protected override gotChanges(propsChanged: Array<keyof WUPSpin.Options> | null) {
     super.gotChanges(propsChanged);
 
@@ -121,6 +138,18 @@ export default class WUPSpinElement extends WUPBaseElement {
     this.#frameId = undefined;
 
     if (!this._opts.inline) {
+      if (this._opts.overflowShadow && !this.$refShadow) {
+        this.$refShadow = this.appendChild(document.createElement("div"));
+        this.$refShadow.setAttribute("fade", "");
+        const s = getComputedStyle(this.target);
+        this.$refShadow.style.borderTopLeftRadius = s.borderTopLeftRadius;
+        this.$refShadow.style.borderTopRightRadius = s.borderTopRightRadius;
+        this.$refShadow.style.borderBottomLeftRadius = s.borderBottomLeftRadius;
+        this.$refShadow.style.borderBottomRightRadius = s.borderBottomRightRadius;
+      } else if (!this._opts.overflowShadow && this.$refShadow) {
+        this.$refShadow.remove();
+        this.$refShadow = undefined;
+      }
       this.style.position = "absolute";
       const goUpdate = () => {
         this.#prevRect = this.#updatePosition();
@@ -130,6 +159,8 @@ export default class WUPSpinElement extends WUPBaseElement {
       goUpdate();
     } else {
       this.style.transform = "";
+      this.$refShadow?.remove();
+      this.$refShadow = undefined;
     }
   }
 
@@ -191,7 +222,16 @@ export default class WUPSpinElement extends WUPBaseElement {
     styleTransform(this, "translate", `${left}px,${top}px`);
     styleTransform(this, "scale", scale === 1 ? "" : `${scale}`);
 
-    // todo oveflow-shadow here ???
+    if (this.$refShadow) {
+      styleTransform(this.$refShadow, "translate", `${r.left - left}px,${r.top - top}px`);
+      styleTransform(this.$refShadow, "scale", scale === 1 ? "" : `${1 / scale}`);
+      if (this.$refShadow.clientWidth !== r.width) {
+        this.$refShadow.style.width = `${r.width}px`;
+      }
+      if (this.$refShadow.clientWidth !== r.height) {
+        this.$refShadow.style.height = `${r.height}px`;
+      }
+    }
 
     return r;
   };
@@ -215,7 +255,8 @@ declare global {
   }
 }
 
-function setType(cls: typeof WUPSpinElement, itemsCount: number, getter: () => string) {
+/** Basic function to change spinner-style */
+export function spinSetStyle(cls: typeof WUPSpinElement, itemsCount: number, getter: () => string) {
   cls._itemsCount = itemsCount;
   Object.defineProperty(cls, "$styleApplied", {
     configurable: true,
@@ -223,9 +264,9 @@ function setType(cls: typeof WUPSpinElement, itemsCount: number, getter: () => s
   });
 }
 
-/** Default types */
+/** Apply on class to change spinner-style */
 export function spinUseRing(cls: typeof WUPSpinElement) {
-  setType(
+  spinSetStyle(
     cls,
     1,
     () => `:host div {
@@ -235,8 +276,9 @@ export function spinUseRing(cls: typeof WUPSpinElement) {
   );
 }
 
+/** Apply on class to change spinner-style */
 export function spinUseDualRing(cls: typeof WUPSpinElement) {
-  setType(
+  spinSetStyle(
     cls,
     1,
     () =>
@@ -248,9 +290,10 @@ export function spinUseDualRing(cls: typeof WUPSpinElement) {
   );
 }
 
+/** Apply on class to change spinner-style */
 export function spinUseRoller(cls: typeof WUPSpinElement) {
   const cnt = 4;
-  setType(cls, cnt, () => {
+  spinSetStyle(cls, cnt, () => {
     let s = "";
     for (let i = 1; i <= cnt - 1; ++i) {
       s += `:host div:nth-child(${i}) { animation-delay: -0.${15 * (cnt - i)}s }
@@ -268,9 +311,10 @@ export function spinUseRoller(cls: typeof WUPSpinElement) {
   });
 }
 
+/** Apply on class to change spinner-style */
 export function spinUseDotRoller(cls: typeof WUPSpinElement) {
   const cnt = 7;
-  setType(cls, cnt, () => {
+  spinSetStyle(cls, cnt, () => {
     let s = "";
     for (let i = 1; i <= cnt; ++i) {
       s += `:host div:nth-child(${i}) { animation-delay: -${0.036 * i}s; }
@@ -299,9 +343,10 @@ export function spinUseDotRoller(cls: typeof WUPSpinElement) {
   });
 }
 
+/** Apply on class to change spinner-style */
 export function spinUseDotRing(cls: typeof WUPSpinElement) {
   const cnt = 10;
-  setType(cls, cnt, () => {
+  spinSetStyle(cls, cnt, () => {
     let s = "";
     for (let i = 1; i <= cnt; ++i) {
       s += `:host div:nth-child(${i}):after { animation-delay: ${0.1 * (i - 1)}s; }
@@ -337,9 +382,10 @@ export function spinUseDotRing(cls: typeof WUPSpinElement) {
   });
 }
 
+/** Apply on class to change spinner-style */
 export function spinUseSpliceRing(cls: typeof WUPSpinElement) {
   const cnt = 12;
-  setType(cls, cnt, () => {
+  spinSetStyle(cls, cnt, () => {
     let s = "";
     for (let i = 1; i <= cnt; ++i) {
       s += `:host div:nth-child(${i}) {
