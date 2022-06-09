@@ -103,7 +103,7 @@ export default class WUPSelectControl<
   }
 
   static get $style(): string {
-    return `
+    return `${super.$style}
       :host {
         cursor: pointer;
       }

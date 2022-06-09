@@ -99,7 +99,7 @@ export default class WUPPopupElement<
   }
 
   static get $style(): string {
-    return `
+    return `${super.$style}
       :host {
         z-index: 90000;
         display: none;

@@ -72,7 +72,7 @@ export default class WUPTextControl<
 
   /** StyleContent related to component */
   static get $style(): string {
-    return `
+    return `${super.$style}
         :host {
           cursor: text;
         }

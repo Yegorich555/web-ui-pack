@@ -175,7 +175,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   static get $style(): string {
     // WARN: 'contain:style' is tricky rule
-    return `
+    return `${super.$style}
       :host {
         contain: style;
         display: block;

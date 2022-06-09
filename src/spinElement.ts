@@ -51,7 +51,7 @@ export default class WUPSpinElement extends WUPBaseElement {
   }
 
   static get $style(): string {
-    return `
+    return `${super.$style}
       @keyframes WUP-SPIN-1 {
         100% { transform: rotate(360deg); }
       }
@@ -72,7 +72,7 @@ export default class WUPSpinElement extends WUPBaseElement {
         animation: WUP-SPIN-1 var(--spin-speed) linear infinite;
         width: 100%; height: 100%;
       }
-      ${this.$styleApplied}`; // todo it's wrong because styles will conflict due to inherritance
+      ${this.$styleApplied}`;
   }
 
   static $defaults: WUPSpin.Defaults = {
@@ -220,13 +220,6 @@ function setType(cls: typeof WUPSpinElement, itemsCount: number, getter: () => s
     configurable: true,
     get: getter,
   });
-  if (!Object.prototype.hasOwnProperty.call(cls, "$style")) {
-    Object.defineProperty(cls, "$style", {
-      get() {
-        return this.$styleApplied;
-      },
-    });
-  }
 }
 
 /** Spinner type 1 - ring */

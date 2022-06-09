@@ -116,12 +116,10 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
             s && refStyle.append(s);
           }
         }
-        // append style by tagName
-        if (Object.prototype.hasOwnProperty.call(p, "$style")) {
-          const c = p.$style;
-          c && refStyle.append(c.replace(/:host/g, `${this.tagName}`));
-        }
       });
+
+      const c = protos[protos.length - 1].$style;
+      refStyle.append(c.replace(/:host/g, `${this.tagName}`));
     }
   }
 

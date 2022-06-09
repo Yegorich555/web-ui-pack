@@ -5,8 +5,6 @@ import { spinUseType4 } from "web-ui-pack/spinElement";
 export default class WUPSpin4Element extends WUPSpinElement {}
 spinUseType4(WUPSpin4Element);
 
-console.warn(WUPSpin4Element.$style, WUPSpinElement.$style);
-
 const tagName = "wup-spin4";
 customElements.define(tagName, WUPSpin4Element);
 declare global {

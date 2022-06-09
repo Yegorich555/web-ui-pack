@@ -1,6 +1,6 @@
 import Page from "src/elements/page";
 import { WUPSpinElement } from "web-ui-pack";
-import { spinUseType1 } from "web-ui-pack/spinElement";
+import { spinUseType3 } from "web-ui-pack/spinElement";
 import WUPSpin2Element from "./spin2";
 import WUPSpin3Element from "./spin3";
 import WUPSpin4Element from "./spin4";
@@ -11,7 +11,7 @@ import styles from "./spinView.scss";
 const sideEffect =
   WUPSpinElement && WUPSpin2Element && WUPSpin3Element && WUPSpin4Element && WUPSpin5Element && WUPSpin6Element;
 !sideEffect && console.error("Missed"); // It's required otherwise import is ignored by webpack
-spinUseType1(WUPSpinElement); // setup default style
+spinUseType3(WUPSpinElement); // setup default style
 
 export default function SpinView() {
   return (
