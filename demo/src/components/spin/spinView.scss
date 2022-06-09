@@ -46,6 +46,10 @@
       align-items: center;
       gap: 5px;
     }
+
+    > .types > div {
+      flex-direction: row;
+    }
   }
 }
 
@@ -101,4 +105,9 @@
   border-radius: 50%;
   background: blue;
   opacity: 0.5;
+}
+
+.spin6-2 div {
+  border: var(--spin-width) solid var(--spin-1);
+  border-top-color: var(--spin-2);
 }

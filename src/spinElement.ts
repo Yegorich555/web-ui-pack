@@ -52,7 +52,7 @@ export default class WUPSpinElement extends WUPBaseElement {
 
   static get $style(): string {
     return `
-       @keyframes WUP-SPIN-1 {
+      @keyframes WUP-SPIN-1 {
         100% { transform: rotate(360deg); }
       }
       :host {
@@ -80,7 +80,7 @@ export default class WUPSpinElement extends WUPBaseElement {
     overflowOffset: [4, 4],
   };
 
-  static _childrenCount = 1;
+  static _itemsCount = 1;
 
   $options: WUPSpin.Options = {
     ...this.#ctr.$defaults,
@@ -99,7 +99,7 @@ export default class WUPSpinElement extends WUPBaseElement {
   }
 
   protected override gotRender() {
-    for (let i = 0; i < this.#ctr._childrenCount; ++i) {
+    for (let i = 0; i < this.#ctr._itemsCount; ++i) {
       this.appendChild(document.createElement("div"));
     }
   }
@@ -214,43 +214,55 @@ declare global {
   }
 }
 
-/** Spinner types */
-
-export function spinUseType1(cls: typeof WUPSpinElement) {
-  cls._childrenCount = 1;
+function setType(cls: typeof WUPSpinElement, itemsCount: number, getter: () => string) {
+  cls._itemsCount = itemsCount;
   Object.defineProperty(cls, "$styleApplied", {
     configurable: true,
-    get: () => `:host div {
+    get: getter,
+  });
+  if (!Object.prototype.hasOwnProperty.call(cls, "$style")) {
+    Object.defineProperty(cls, "$style", {
+      get() {
+        return this.$styleApplied;
+      },
+    });
+  }
+}
+
+/** Spinner type 1 - ring */
+export function spinUseType1(cls: typeof WUPSpinElement) {
+  setType(
+    cls,
+    1,
+    () => `:host div {
         border: var(--spin-width) solid var(--spin-1);
         border-top-color: var(--spin-2);
-      }`,
-  });
+      }`
+  );
 }
 
 export function spinUseType2(cls: typeof WUPSpinElement) {
-  cls._childrenCount = 1;
-  Object.defineProperty(cls, "$styleApplied", {
-    configurable: true,
-    get: () => `:host div {
+  setType(
+    cls,
+    1,
+    () =>
+      `:host div {
          --spin-2: transparent;
          border: var(--spin-width) solid;
          border-color: var(--spin-2) var(--spin-1) var(--spin-2) var(--spin-1);
-      }`,
-  });
+      }`
+  );
 }
 
 export function spinUseType3(cls: typeof WUPSpinElement) {
   const cnt = 4;
-  cls._childrenCount = cnt;
-  Object.defineProperty(cls, "$styleApplied", {
-    configurable: true,
-    get: () => {
-      let s = "";
-      for (let i = 1; i <= cnt - 1; ++i) {
-        s += `:host div:nth-child(${i}) { animation-delay: -0.${15 * (cnt - i)}s }
+  setType(cls, cnt, () => {
+    let s = "";
+    for (let i = 1; i <= cnt - 1; ++i) {
+      s += `:host div:nth-child(${i}) { animation-delay: -0.${15 * (cnt - i)}s }
         `;
-      }
-      return `
+    }
+    return `
         :host { position: relative; }
         :host div {
           animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
@@ -259,28 +271,23 @@ export function spinUseType3(cls: typeof WUPSpinElement) {
           border-color: var(--spin-1) transparent transparent transparent;
         }
         ${s}`;
-    },
   });
 }
 
 export function spinUseType4(cls: typeof WUPSpinElement) {
   const cnt = 7;
-  cls._childrenCount = cnt;
-  Object.defineProperty(cls, "$styleApplied", {
-    configurable: true,
-    get: () => {
-      let s = "";
-      for (let i = 1; i <= cnt; ++i) {
-        s += `:host div:nth-child(${i}) { animation-delay: -${0.036 * i}s; }
-              :host div:nth-child(${i}):after { transform: rotate(calc(45deg + var(--spin-step) * ${i - 1})); }
+  setType(cls, cnt, () => {
+    let s = "";
+    for (let i = 1; i <= cnt; ++i) {
+      s += `:host div:nth-child(${i}) { animation-delay: -${0.036 * i}s; }
+            :host div:nth-child(${i}):after { transform: rotate(calc(45deg + var(--spin-step) * ${i - 1})); }
             `;
-      }
-      return `
+    }
+    return `
         :host { --spin-step: 24deg; position: relative; }
         :host div {
           animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
           position: absolute;
-          border: none;
         }
         :host div:after {
           content: " ";
@@ -295,23 +302,19 @@ export function spinUseType4(cls: typeof WUPSpinElement) {
           background: var(--spin-1);
         }
         ${s}`;
-    },
   });
 }
 
 export function spinUseType5(cls: typeof WUPSpinElement) {
   const cnt = 10;
-  cls._childrenCount = cnt;
-  Object.defineProperty(cls, "$styleApplied", {
-    configurable: true,
-    get: () => {
-      let s = "";
-      for (let i = 1; i <= cnt; ++i) {
-        s += `:host div:nth-child(${i}):after { animation-delay: ${0.1 * (i - 1)}s; }
+  setType(cls, cnt, () => {
+    let s = "";
+    for (let i = 1; i <= cnt; ++i) {
+      s += `:host div:nth-child(${i}):after { animation-delay: ${0.1 * (i - 1)}s; }
               :host div:nth-child(${i}) { transform: rotate(${(360 / cnt) * (i - 1)}deg); }
             `;
-      }
-      return `
+    }
+    return `
         @keyframes WUP-SPIN-2 {
             0%,20%,80%,100% { transform: scale(1); }
             50% { transform: scale(1.4); }
@@ -323,11 +326,10 @@ export function spinUseType5(cls: typeof WUPSpinElement) {
           align-items: center;
          }
         :host div {
-          animation: none;
           position: absolute;
-          border: none;
           width: calc(100% / 1.4142135623730951);
           height: calc(100% / 1.4142135623730951);
+          animation: none
         }
         :host div:after {
           animation: WUP-SPIN-2 var(--spin-speed) linear infinite;
@@ -339,26 +341,21 @@ export function spinUseType5(cls: typeof WUPSpinElement) {
           background: var(--spin-1);
         }
         ${s}`;
-    },
   });
 }
 
 export function spinUseType6(cls: typeof WUPSpinElement) {
   const cnt = 12;
-  cls._childrenCount = cnt;
-  console.warn(cnt);
-  Object.defineProperty(cls, "$styleApplied", {
-    configurable: true,
-    get: () => {
-      let s = "";
-      for (let i = 1; i <= cnt; ++i) {
-        s += `:host div:nth-child(${i}) {
+  setType(cls, cnt, () => {
+    let s = "";
+    for (let i = 1; i <= cnt; ++i) {
+      s += `:host div:nth-child(${i}) {
                 animation-delay: -${0.1 * (cnt - i)}s;
                 transform: rotate(${(360 / cnt) * (i - 1)}deg);
               }
             `;
-      }
-      return `
+    }
+    return `
         @keyframes WUP-SPIN-3 {
           100% { opacity: 0; }
         }
@@ -375,11 +372,9 @@ export function spinUseType6(cls: typeof WUPSpinElement) {
           top: calc(50% - var(--spin-width) / 2);
           transform-origin: calc(var(--spin-size) / 2);
           background: var(--spin-1);
-          border: none;
           border-radius: calc(var(--spin-width) / 2);
         }
         ${s}`;
-    },
   });
 }
 

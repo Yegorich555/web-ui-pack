@@ -2,11 +2,7 @@ import { WUPSpinElement } from "web-ui-pack";
 import { spinUseType5 } from "web-ui-pack/spinElement";
 
 // Create new class is required to use several spinners for the page
-export default class WUPSpin5Element extends WUPSpinElement {
-  static get $style(): string {
-    return super.$style; // it's important part otherwise spinUseType4  isrewritten by default WUPSpinElement
-  }
-}
+export default class WUPSpin5Element extends WUPSpinElement {}
 spinUseType5(WUPSpin5Element);
 
 const tagName = "wup-spin5";

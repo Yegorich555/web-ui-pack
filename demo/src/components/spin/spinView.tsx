@@ -18,7 +18,9 @@ export default function SpinView() {
     <Page header="Spin" link="#spinelement" className={styles.pageSpin}>
       <div>
         <h3>With position: relative</h3>
-        <small>Attention: spinner reduces size to fit target (option overflowReduceByTarget)</small>
+        <small>
+          Spinner reduces size to fit target (option <b>overflowReduceByTarget</b>)
+        </small>
         <button type="button" style={{ position: "relative" }}>
           Button with relative position
           <wup-spin />
@@ -66,7 +68,7 @@ export default function SpinView() {
         <small>
           Use attr <b>inline</b> or <b>$options.inline=true</b>
           <br />
-          <strong>Attention</strong>: spinner does not reduce size to fit target
+          <strong>Attention</strong>: spinner does not reduce size to fit target in this case
           <br />
           (use css to fix this: <b>{`button>wup-spin{ --spin-size: 14px}`}</b>)
         </small>
@@ -96,13 +98,24 @@ export default function SpinView() {
             Type 5<wup-spin5 inline />
             <wup-spin5 inline class={styles.spin51} />
           </div>
-          <div>
-            Type 6<wup-spin6 inline />
-            <wup-spin6 inline class={styles.spin61} />
-            <wup-spin6 inline class={styles.spin62} />
-            <wup-spin6 inline class={styles.spin63} />
-            <wup-spin6 inline class={styles.spin64} />
-            <wup-spin6 inline class={styles.spin65} />
+          <div className={styles.types}>
+            Type 6
+            <div>
+              <wup-spin6 inline />
+              <wup-spin6 inline class={styles.spin61} />
+              <wup-spin6 inline class={styles.spin62} />
+              <wup-spin6 inline class={styles.spin63} />
+              <wup-spin6 inline class={styles.spin64} />
+              <wup-spin6 inline class={styles.spin65} />
+            </div>
+            <div>
+              <wup-spin6 inline />
+              <wup-spin6 inline class={`${styles.spin61} ${styles["spin6-2"]}`} />
+              <wup-spin6 inline class={`${styles.spin62} ${styles["spin6-2"]}`} />
+              <wup-spin6 inline class={`${styles.spin63} ${styles["spin6-2"]}`} />
+              <wup-spin6 inline class={`${styles.spin64} ${styles["spin6-2"]}`} />
+              <wup-spin6 inline class={`${styles.spin65} ${styles["spin6-2"]}`} />
+            </div>
           </div>
         </div>
       </div>
