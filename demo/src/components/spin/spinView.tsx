@@ -5,9 +5,11 @@ import WUPSpin2Element from "./spin2";
 import WUPSpin3Element from "./spin3";
 import WUPSpin4Element from "./spin4";
 import WUPSpin5Element from "./spin5";
+import WUPSpin6Element from "./spin6";
 import styles from "./spinView.scss";
 
-const sideEffect = WUPSpinElement && WUPSpin2Element && WUPSpin3Element && WUPSpin4Element && WUPSpin5Element;
+const sideEffect =
+  WUPSpinElement && WUPSpin2Element && WUPSpin3Element && WUPSpin4Element && WUPSpin5Element && WUPSpin6Element;
 !sideEffect && console.error("Missed"); // It's required otherwise import is ignored by webpack
 spinUseType1(WUPSpinElement); // setup default style
 
@@ -79,6 +81,7 @@ export default function SpinView() {
         <div className={styles.types}>
           <div>
             Default <wup-spin inline />
+            <wup-spin inline class={styles.spin11} />
           </div>
           <div>
             Type 2 <wup-spin2 inline />
@@ -90,7 +93,16 @@ export default function SpinView() {
             Type 4<wup-spin4 inline />
           </div>
           <div>
-            Type 5<wup-spin5 inline class={styles.spin5} />
+            Type 5<wup-spin5 inline />
+            <wup-spin5 inline class={styles.spin51} />
+          </div>
+          <div>
+            Type 6<wup-spin6 inline />
+            <wup-spin6 inline class={styles.spin61} />
+            <wup-spin6 inline class={styles.spin62} />
+            <wup-spin6 inline class={styles.spin63} />
+            <wup-spin6 inline class={styles.spin64} />
+            <wup-spin6 inline class={styles.spin65} />
           </div>
         </div>
       </div>

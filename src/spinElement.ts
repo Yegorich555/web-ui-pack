@@ -72,7 +72,7 @@ export default class WUPSpinElement extends WUPBaseElement {
         animation: WUP-SPIN-1 var(--spin-speed) linear infinite;
         width: 100%; height: 100%;
       }
-      ${this.$styleApplied}`;
+      ${this.$styleApplied}`; // todo it's wrong because styles will conflict due to inherritance
   }
 
   static $defaults: WUPSpin.Defaults = {
@@ -233,7 +233,7 @@ export function spinUseType2(cls: typeof WUPSpinElement) {
     configurable: true,
     get: () => `:host div {
          --spin-2: transparent;
-         border: var(--spin-width) solid var(--spin-1);
+         border: var(--spin-width) solid;
          border-color: var(--spin-2) var(--spin-1) var(--spin-2) var(--spin-1);
       }`,
   });
@@ -255,8 +255,8 @@ export function spinUseType3(cls: typeof WUPSpinElement) {
         :host div {
           animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
           position: absolute;
-          border-color: transparent;
-          border-top-color: var(--spin-1);
+          border: var(--spin-width) solid;
+          border-color: var(--spin-1) transparent transparent transparent;
         }
         ${s}`;
     },
@@ -308,7 +308,7 @@ export function spinUseType5(cls: typeof WUPSpinElement) {
       let s = "";
       for (let i = 1; i <= cnt; ++i) {
         s += `:host div:nth-child(${i}):after { animation-delay: ${0.1 * (i - 1)}s; }
-              :host div:nth-child(${i}) { transform: rotate(calc(360deg * ${(i - 1) / cnt})); }
+              :host div:nth-child(${i}) { transform: rotate(${(360 / cnt) * (i - 1)}deg); }
             `;
       }
       return `
@@ -337,6 +337,46 @@ export function spinUseType5(cls: typeof WUPSpinElement) {
           height: var(--spin-width);
           border-radius: 50%;
           background: var(--spin-1);
+        }
+        ${s}`;
+    },
+  });
+}
+
+export function spinUseType6(cls: typeof WUPSpinElement) {
+  const cnt = 12;
+  cls._childrenCount = cnt;
+  console.warn(cnt);
+  Object.defineProperty(cls, "$styleApplied", {
+    configurable: true,
+    get: () => {
+      let s = "";
+      for (let i = 1; i <= cnt; ++i) {
+        s += `:host div:nth-child(${i}) {
+                animation-delay: -${0.1 * (cnt - i)}s;
+                transform: rotate(${(360 / cnt) * (i - 1)}deg);
+              }
+            `;
+      }
+      return `
+        @keyframes WUP-SPIN-3 {
+          100% { opacity: 0; }
+        }
+        :host {
+          --spin-width: calc(var(--spin-size) / 10);
+          position: relative;
+         }
+        :host div {
+          animation: WUP-SPIN-3 var(--spin-speed) linear infinite;
+          position: absolute;
+          width: calc(var(--spin-size) / 4);
+          height: var(--spin-width);
+          left: 0;
+          top: calc(50% - var(--spin-width) / 2);
+          transform-origin: calc(var(--spin-size) / 2);
+          background: var(--spin-1);
+          border: none;
+          border-radius: calc(var(--spin-width) / 2);
         }
         ${s}`;
     },
