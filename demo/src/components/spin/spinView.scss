@@ -6,7 +6,7 @@
 
   button > wup-spin,
   button + wup-spin {
-    --spin-2: white;
+    // --spin-2: white;
   }
 
   small {
@@ -57,43 +57,34 @@
   --spin-2: transparent;
 }
 
-@keyframes SPIN-51 {
-  0%,
-  20%,
-  80%,
-  100% {
-    transform: scale(1);
-    background: var(--spin-1);
-  }
-
-  50% {
-    transform: scale(1.5);
-    background: var(--spin-2);
-  }
+.spin21 {
+  // --spin-2: #ff7600;
+  --spin-item-size: calc(var(--spin-size) / 2);
 }
 
-.spin51 div:after {
-  --spin-2: red;
-  animation: SPIN-51 var(--spin-speed) linear infinite;
+.spin51 {
+  --spin-2: orange;
 }
 
 .spin61 div {
+  --spin-1: red;
+  --spin-2: blue;
   border-radius: 50%;
-  background: red;
 }
 
 .spin62 div {
+  --spin-1: green;
+  --spin-2: yellow;
   --spin-item-size: calc(var(--spin-size) / 15);
   width: calc(var(--spin-item-size) * 2);
   height: calc(var(--spin-item-size) * 2);
   border-radius: 50%;
-  background: green;
 }
 
 .spin63 div {
+  --spin-1: blue;
   width: calc(var(--spin-size) / 1);
   border-radius: 50%;
-  background: blue;
 }
 
 .spin64 div {
@@ -101,13 +92,17 @@
 }
 
 .spin65 div {
+  --spin-1: blue;
   width: calc(var(--spin-size) / 2);
   border-radius: 50%;
-  background: blue;
   opacity: 0.5;
 }
 
 .spin6-2 div {
   border: var(--spin-item-size) solid var(--spin-1);
   border-top-color: var(--spin-2);
+}
+
+.spin6-2.spin61 div {
+  --spin-2: #fff;
 }

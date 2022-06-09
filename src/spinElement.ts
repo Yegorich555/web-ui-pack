@@ -71,6 +71,7 @@ export default class WUPSpinElement extends WUPBaseElement {
       :host div {
         animation: WUP-SPIN-1 var(--spin-speed) linear infinite;
         width: 100%; height: 100%;
+        left:0; top:0;
       }
       ${this.$styleApplied}`;
   }
@@ -239,8 +240,8 @@ export function spinUseType2(cls: typeof WUPSpinElement) {
     cls,
     1,
     () =>
-      `:host div {
-         --spin-2: transparent;
+      `:host { --spin-2: transparent; }
+       :host div {
          border: var(--spin-item-size) solid;
          border-color: var(--spin-2) var(--spin-1) var(--spin-2) var(--spin-1);
       }`
@@ -304,25 +305,24 @@ export function spinUseType5(cls: typeof WUPSpinElement) {
     let s = "";
     for (let i = 1; i <= cnt; ++i) {
       s += `:host div:nth-child(${i}):after { animation-delay: ${0.1 * (i - 1)}s; }
-              :host div:nth-child(${i}) { transform: rotate(${(360 / cnt) * (i - 1)}deg); }
+            :host div:nth-child(${i}) { transform: translate(-50%,-50%) rotate(${(360 / cnt) * (i - 1)}deg) }
             `;
     }
     return `
         @keyframes WUP-SPIN-2 {
-            0%,20%,80%,100% { transform: scale(1); }
-            50% { transform: scale(1.4); }
+            0%,20%,80%,100% { transform: scale(1); background: var(--spin-1) }
+            50% { transform: scale(1.4); background: var(--spin-2) }
         }
         :host {
+          --spin-2: #ff5200;
           position: relative;
-          display: inline-flex;
-          justify-content: center;
-          align-items: center;
          }
         :host div {
           position: absolute;
           width: calc(100% / 1.4142135623730951);
           height: calc(100% / 1.4142135623730951);
-          animation: none
+          animation: none;
+          top:50%; left:50%;
         }
         :host div:after {
           animation: WUP-SPIN-2 var(--spin-speed) linear infinite;
@@ -350,7 +350,7 @@ export function spinUseType6(cls: typeof WUPSpinElement) {
     }
     return `
         @keyframes WUP-SPIN-3 {
-          100% { opacity: 0; }
+          100% { opacity: 0; background: var(--spin-2); }
         }
         :host {
           --spin-item-size: calc(var(--spin-size) / 10);
