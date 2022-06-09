@@ -81,7 +81,9 @@ export default function SpinView() {
       </div>
       <div>
         <h3>Different types</h3>
-        <small>Todo description here</small>
+        <small>
+          To setup style use special functions <b>spinUseDotRoller, spinUseDualRing</b> etc.
+        </small>
         <div className={styles.types}>
           <div>
             Ring <wup-spin inline />
