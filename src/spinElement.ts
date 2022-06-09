@@ -42,7 +42,7 @@ export default class WUPSpinElement extends WUPBaseElement {
           --spin-2: #fff;
           --spin-speed: 1.2s;
           --spin-size: 3em;
-          --spin-width: calc(var(--spin-size) / 8);
+          --spin-item-size: calc(var(--spin-size) / 8);
         }`;
   }
 
@@ -235,7 +235,7 @@ export function spinUseType1(cls: typeof WUPSpinElement) {
     cls,
     1,
     () => `:host div {
-        border: var(--spin-width) solid var(--spin-1);
+        border: var(--spin-item-size) solid var(--spin-1);
         border-top-color: var(--spin-2);
       }`
   );
@@ -248,7 +248,7 @@ export function spinUseType2(cls: typeof WUPSpinElement) {
     () =>
       `:host div {
          --spin-2: transparent;
-         border: var(--spin-width) solid;
+         border: var(--spin-item-size) solid;
          border-color: var(--spin-2) var(--spin-1) var(--spin-2) var(--spin-1);
       }`
   );
@@ -267,7 +267,7 @@ export function spinUseType3(cls: typeof WUPSpinElement) {
         :host div {
           animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
           position: absolute;
-          border: var(--spin-width) solid;
+          border: var(--spin-item-size) solid;
           border-color: var(--spin-1) transparent transparent transparent;
         }
         ${s}`;
@@ -294,10 +294,10 @@ export function spinUseType4(cls: typeof WUPSpinElement) {
           display: block;
           position: absolute;
           left: 0;
-          top: calc(50% - var(--spin-width) / 2);
+          top: calc(50% - var(--spin-item-size) / 2);
           transform-origin: calc(var(--spin-size) / 2);
-          width: var(--spin-width);
-          height: var(--spin-width);
+          width: var(--spin-item-size);
+          height: var(--spin-item-size);
           border-radius: 50%;
           background: var(--spin-1);
         }
@@ -335,8 +335,8 @@ export function spinUseType5(cls: typeof WUPSpinElement) {
           animation: WUP-SPIN-2 var(--spin-speed) linear infinite;
           content: " ";
           display: block;
-          width: var(--spin-width);
-          height: var(--spin-width);
+          width: var(--spin-item-size);
+          height: var(--spin-item-size);
           border-radius: 50%;
           background: var(--spin-1);
         }
@@ -360,19 +360,19 @@ export function spinUseType6(cls: typeof WUPSpinElement) {
           100% { opacity: 0; }
         }
         :host {
-          --spin-width: calc(var(--spin-size) / 10);
+          --spin-item-size: calc(var(--spin-size) / 10);
           position: relative;
          }
         :host div {
           animation: WUP-SPIN-3 var(--spin-speed) linear infinite;
           position: absolute;
           width: calc(var(--spin-size) / 4);
-          height: var(--spin-width);
+          height: var(--spin-item-size);
           left: 0;
-          top: calc(50% - var(--spin-width) / 2);
+          top: calc(50% - var(--spin-item-size) / 2);
           transform-origin: calc(var(--spin-size) / 2);
           background: var(--spin-1);
-          border-radius: calc(var(--spin-width) / 2);
+          border-radius: calc(var(--spin-item-size) / 2);
         }
         ${s}`;
   });
