@@ -1,31 +1,37 @@
 /* eslint-disable no-use-before-define */
 import WUPBaseElement, { WUP } from "./baseElement";
-import { styleTransform } from "./helpers/styleHelpers";
+import { px2Number, styleTransform } from "./helpers/styleHelpers";
 
 declare global {
   namespace WUPSpin {
     interface Defaults {
-      /** Place inside parent as inline-block or overflow target in the center (`position: relative` not required);
+      /** Place inside parent as inline-block otherwise overflow target in the center (`position: relative` isnot  required);
        * @defaultValue false */
       inline?: boolean;
-      /** Virtual padding of parentElement
-       *  [top, right, bottom, left] or [top/bottom, right/left] in px
+      /** Virtual padding of parentElement [top, right, bottom, left] or [top/bottom, right/left] in px
        * @defaultValue [4,4] */
       overflowOffset: [number, number, number, number] | [number, number];
-      /** Allow to create shadowBox to partially hide target */
-      overflowShadow: boolean;
-      /** Allow to reduce size if it's bigger than parent (for max-size change css-var --spin-size)
+      /** Allow to create shadowBox to partially hide target (only for `inline: false`)
        * @defaultValue true */
-      overflowReduceByTarget: boolean;
+      overflowFade: boolean;
+      /** Allow to reduce size to fit parent (for max-size change css-var --spin-size)
+       * @defaultValue false for inline:true, true for inline:false */
+      fit?: boolean;
     }
     interface Options extends Defaults {
       /** Anchor element that need to oveflow by spinner, by default it's parentElement  */
       overflowTarget?: HTMLElement | null;
     }
     interface JSXProps<T extends WUPSpinElement> extends WUP.JSXProps<T> {
-      /** Place inside parent as inline-block or overflow target in the center (`position: relative` not required);
+      /** Place inside parent as inline-block or overflow target in the center (`position: relative` isnot  required);
        * @defaultValue false */
-      inline?: boolean;
+      inline?: boolean | "";
+      /** Allow to create shadowBox to partially hide target (only for `inline: false`)
+       * @defaultValue true */
+      overflowFade?: boolean | "";
+      /** Allow to reduce size to fit parent (for max-size change css-var --spin-size)
+       * @defaultValue false for inline:true, true for inline:false */
+      fit?: boolean | "";
     }
   }
 }
@@ -35,7 +41,7 @@ export default class WUPSpinElement extends WUPBaseElement {
 
   static observedOptions = new Set<keyof WUPSpin.Options>(["inline", "overflowTarget", "overflowOffset"]);
   static get observedAttributes(): Array<keyof WUPSpin.Options> {
-    return ["inline"];
+    return ["inline", "overflowFade", "fit"];
   }
 
   static get $styleRoot(): string {
@@ -92,9 +98,8 @@ export default class WUPSpinElement extends WUPBaseElement {
   }
 
   static $defaults: WUPSpin.Defaults = {
-    overflowReduceByTarget: true,
     overflowOffset: [4, 4],
-    overflowShadow: true,
+    overflowFade: true,
   };
 
   static _itemsCount = 1;
@@ -131,14 +136,14 @@ export default class WUPSpinElement extends WUPBaseElement {
     super.gotChanges(propsChanged);
 
     this._opts.inline = this.getBoolAttr("inline", this._opts.inline);
-
-    this.style.display = "";
+    this._opts.fit = this.getBoolAttr("inline", this._opts.fit ?? !this._opts.inline);
+    this.style.cssText = "";
     this.#prevRect = undefined;
     this.#frameId && window.cancelAnimationFrame(this.#frameId);
     this.#frameId = undefined;
 
     if (!this._opts.inline) {
-      if (this._opts.overflowShadow && !this.$refShadow) {
+      if (this._opts.overflowFade && !this.$refShadow) {
         this.$refShadow = this.appendChild(document.createElement("div"));
         this.$refShadow.setAttribute("fade", "");
         const s = getComputedStyle(this.target);
@@ -146,7 +151,7 @@ export default class WUPSpinElement extends WUPBaseElement {
         this.$refShadow.style.borderTopRightRadius = s.borderTopRightRadius;
         this.$refShadow.style.borderBottomLeftRadius = s.borderBottomLeftRadius;
         this.$refShadow.style.borderBottomRightRadius = s.borderBottomRightRadius;
-      } else if (!this._opts.overflowShadow && this.$refShadow) {
+      } else if (!this._opts.overflowFade && this.$refShadow) {
         this.$refShadow.remove();
         this.$refShadow = undefined;
       }
@@ -159,8 +164,37 @@ export default class WUPSpinElement extends WUPBaseElement {
       goUpdate();
     } else {
       this.style.transform = "";
+      this.style.position = "";
       this.$refShadow?.remove();
       this.$refShadow = undefined;
+
+      if (this.getBoolAttr("fit", false)) {
+        const goUpdate = () => {
+          this.style.position = "absolute";
+          const p = this.parentElement as HTMLElement;
+          const r = { width: p.clientWidth, height: p.clientHeight, left: 0, top: 0 };
+          this.style.position = "";
+          if (this.#prevRect && this.#prevRect.width === r.width && this.#prevRect.height === r.height) {
+            return;
+          }
+          const ps = getComputedStyle(p);
+          const { paddingTop, paddingLeft, paddingBottom, paddingRight } = ps;
+          const innW = r.width - px2Number(paddingLeft) - px2Number(paddingRight);
+          const innH = r.height - px2Number(paddingTop) - px2Number(paddingBottom);
+          const sz = Math.min(innH, innW);
+          const varItemSize = ps.getPropertyValue("--spin-item-size");
+          const scale = Math.min(Math.min(innW, innH) / this.clientWidth, 1);
+          // styleTransform(this, "scale", scale === 1 ? "" : `${scale}`); // work wrong because it doesn't affect on the layout size
+          // this.style.zoom = scale; // zoom isn't supported by FireFox
+          this.style.cssText = `--spin-size:${sz}px; --spin-item-size: calc(${varItemSize} * ${scale})`;
+          // this.style.width = `${sz}px`;
+          // this.style.height = `${sz}px`;
+
+          this.#prevRect = r;
+          this.#frameId = window.requestAnimationFrame(goUpdate);
+        };
+        goUpdate();
+      }
     }
   }
 
@@ -214,8 +248,7 @@ export default class WUPSpinElement extends WUPBaseElement {
 
     const w = r.width - offset.left - offset.right;
     const h = r.height - offset.top - offset.bottom;
-    const size = Math.min(h, w);
-    const scale = this._opts.overflowReduceByTarget ? Math.min(size / this.clientWidth, 1) : 1;
+    const scale = this._opts.fit ? Math.min(Math.min(h, w) / this.clientWidth, 1) : 1;
 
     const left = r.left + offset.left + (w - this.clientWidth) / 2;
     const top = r.top + offset.top + (h - this.clientHeight) / 2;

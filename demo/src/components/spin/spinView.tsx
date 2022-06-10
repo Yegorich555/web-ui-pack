@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import Page from "src/elements/page";
 import { WUPSpinElement } from "web-ui-pack";
 import { spinUseRing } from "web-ui-pack/spinElement";
@@ -19,7 +20,8 @@ export default function SpinView() {
       <div>
         <h3>With position: relative</h3>
         <small>
-          Spinner reduces size to fit target (option <b>overflowReduceByTarget</b>)<br />
+          Spinner reduces size to fit target via option <b>fit</b>(true when <b>inline: false </b>- by default)
+          <br />
           By default parent is overlayed by shadowBox (option <b>overflowShadow</b>) <b />
         </small>
         <button type="button" style={{ position: "relative" }}>
@@ -60,7 +62,7 @@ export default function SpinView() {
           ref={(el) => {
             if (el) {
               el.$options.overflowTarget = el.previousElementSibling as HTMLElement;
-              el.$options.overflowShadow = false;
+              el.$options.overflowFade = false;
             }
           }}
         />
@@ -70,13 +72,19 @@ export default function SpinView() {
         <small>
           Use attr <b>inline</b> or <b>$options.inline=true</b>
           <br />
-          <strong>Attention</strong>: spinner does not reduce size to fit target in this case
+          <strong>Attention</strong>: spinner does not reduce size to fit target in this case (by default)
           <br />
-          (use css to fix this: <b>{`button>wup-spin{ --spin-size: 14px}`}</b>)
+          (use option <b>fit</b> OR css to fix this:{" "}
+          <b>{`button>wup-spin{ --spin-size: 14px; -spin-item-size: 6px}`}</b>)
         </small>
         <button type="submit" className={styles.btnAlign}>
           <wup-spin inline />
           Pending...
+        </button>
+        <br />
+        <button type="submit" className={styles.btnAlign}>
+          <wup-spin inline="" fit="" />
+          With option 'fit'
         </button>
       </div>
       <div>
