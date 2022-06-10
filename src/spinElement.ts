@@ -184,7 +184,7 @@ export default class WUPSpinElement extends WUPBaseElement {
           const sz = Math.min(innH, innW);
           const varItemSize = ps.getPropertyValue("--spin-item-size");
           const scale = Math.min(Math.min(innW, innH) / this.clientWidth, 1);
-          // styleTransform(this, "scale", scale === 1 ? "" : `${scale}`); // work wrong because it doesn't affect on the layout size
+          // styleTransform(this, "scale", scale === 1 ? "" : `${scale}`); // wrong because it doesn't affect on the layout size
           // this.style.zoom = scale; // zoom isn't supported by FireFox
           this.style.cssText = `--spin-size:${sz}px; --spin-item-size: calc(${varItemSize} * ${scale})`;
           // this.style.width = `${sz}px`;
@@ -449,12 +449,6 @@ export function spinUseSpliceRing(cls: typeof WUPSpinElement) {
         ${s}`;
   });
 }
-
-// todo attr-target as querySelector
-
-// setTimeout(() => {
-//   document.querySelector("main")?.scrollTo({ top: 60 });
-// }, 300);
 
 // test case when target has position:relative
 // test case when target.parent has position:relative
