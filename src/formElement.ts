@@ -2,6 +2,9 @@
 import WUPBaseElement, { WUP } from "./baseElement";
 import IBaseControl from "./controls/baseControl.i";
 import { nestedProperty, scrollIntoView } from "./indexHelpers";
+import WUPSpinElement from "./spinElement";
+
+!WUPSpinElement && console.error("!"); // It's required otherwise import is ignored by webpack
 
 export const enum SubmitActions {
   /** Disable any action */
@@ -144,6 +147,7 @@ export default class WUPFormElement<
 
   static get $style() {
     return `${super.$style}
+        :host { position: relative; }
         :host [type='submit'] {
           box-shadow: none;
           border: 1px solid var(--btn-submit-back);
@@ -266,6 +270,30 @@ export default class WUPFormElement<
     }
   }
 
+  /** ShowPending and return cancel-pending function */
+  protected showPending(): () => void {
+    // todo option: disable whole form
+    // todo option: allow to prevent previous
+    // todo set aria-busy
+    const btns: Array<HTMLButtonElement & { _wupDisabled: boolean }> = [];
+    const spins: Array<WUPSpinElement> = [];
+    this.querySelectorAll("[type='submit']").forEach((b) => {
+      const spin = document.createElement("wup-spin");
+      spin.$options.fit = true;
+      spin.$options.overflowFade = false;
+      spin.$options.overflowTarget = b as HTMLButtonElement;
+      spins.push(this.appendChild(spin));
+      (b as HTMLButtonElement & { _wupDisabled: boolean })._wupDisabled = (b as HTMLButtonElement).disabled;
+      (b as HTMLButtonElement).disabled = true;
+      btns.push(b as HTMLButtonElement & { _wupDisabled: boolean });
+    });
+
+    return () => {
+      btns.forEach((b) => (b.disabled = b._wupDisabled));
+      spins.forEach((s) => s.remove());
+    };
+  }
+
   /** Fired on submit before validation */
   protected gotSubmit(e: KeyboardEvent | MouseEvent, submitter: HTMLElement) {
     (e as Events["$willSubmit"]).submitter = submitter;
@@ -323,6 +351,15 @@ export default class WUPFormElement<
 
   protected override gotChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
     super.gotChanges(propsChanged);
+
+    // setTimeout(() => {
+    //   let hidePending: (() => void) | undefined;
+    //   promiseWait(
+    //     new Promise((resolve) => setTimeout(resolve, 5000)),
+    //     300,
+    //     () => (hidePending = this.showPending())
+    //   ).finally(hidePending);
+    // }, 200);
 
     this._opts.disabled = this.getBoolAttr("disabled", this._opts.disabled);
     this._opts.readOnly = this.getBoolAttr("readOnly", this._opts.readOnly);
