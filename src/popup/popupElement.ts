@@ -657,6 +657,11 @@ export default class WUPPopupElement<
     }
 
     const tdef = trg.getBoundingClientRect();
+    if (!tdef.width || !tdef.height) {
+      this.style.display = "none"; // hide if target is not displayed
+      return this.#prevRect;
+    }
+
     if (
       // issue: it's wrong if minWidth, minHeight etc. is changed and doesn't affect on layout sizes directly
       this.#prevRect &&

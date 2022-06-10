@@ -542,6 +542,7 @@ describe("popupElement", () => {
     a.$options.minWidthByTarget = true;
     a.$options.minHeightByTarget = true;
     document.body.append(a);
+    jest.spyOn(a.previousElementSibling, "getBoundingClientRect").mockReturnValue(trg.getBoundingClientRect());
     jest.advanceTimersToNextTimer(); // wait for ready/init
     // WARN: layout impossible to test with unit; all layout tests see in e2e
     expect(a.style.minWidth).toBeDefined();
@@ -554,9 +555,10 @@ describe("popupElement", () => {
     a2.style.minHeight = `${2}px`;
     a2.$options.toFitElement = null;
     document.body.append(a2);
+    jest.spyOn(a2.previousElementSibling, "getBoundingClientRect").mockReturnValue(trg.getBoundingClientRect());
     jest.advanceTimersToNextTimer(); // wait for ready/init
-    expect(a.style.minWidth).toBeDefined();
-    expect(a.style.minHeight).toBeDefined();
+    expect(a2.style.minWidth).toBeDefined();
+    expect(a2.style.minHeight).toBeDefined();
     jest.clearAllTimers();
 
     /** @type typeof el */
@@ -564,6 +566,7 @@ describe("popupElement", () => {
     a3.$options.showCase = 0; // always
     a3.$options.maxWidthByTarget = false;
     document.body.append(a3);
+    jest.spyOn(a3.previousElementSibling, "getBoundingClientRect").mockReturnValue(trg.getBoundingClientRect());
     jest.advanceTimersByTime(1000); // wait for ready/init
     await Promise.resolve(); // onShow/onHide is async
     expect(a3.$isOpen).toBeTruthy();
