@@ -211,10 +211,11 @@ export default class WUPSpinElement extends WUPBaseElement {
   /** Update position. Call this method in cases when you changed options */
   #updatePosition = (): Pick<DOMRect, "width" | "height" | "top" | "left"> | undefined => {
     const trg = this.target;
-    // possible when target removed via set innerHTML (in this case remove-hook doesn't work)
-    if (!trg.isConnected) {
+    if (!trg.clientWidth || !trg.clientHeight) {
+      this.style.display = "none"; // hide if target is not displayed
       return undefined;
     }
+    this.style.display = "";
 
     const r = { width: trg.offsetWidth, height: trg.offsetHeight, left: trg.offsetLeft, top: trg.offsetTop };
     // when target has position:relative
