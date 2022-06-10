@@ -129,10 +129,52 @@ export default class WUPFormElement<
 
   /** Options that need to watch for changes; use gotOptionsChanged() */
   static observedOptions = new Set<keyof WUPForm.Options>(["disabled", "readOnly", "autoComplete"]);
-
   /* Array of attribute names to listen for changes */
   static get observedAttributes(): Array<keyof WUPForm.Options> {
     return ["disabled", "readOnly", "autoComplete"];
+  }
+
+  static get $styleRoot() {
+    return `:root {
+      --btn-submit-back: var(--base-btn-back);
+      --btn-submit-text: var(--base-btn-text);
+      --btn-submit-focus: var(--base-btn-focus);
+    }`;
+  }
+
+  static get $style() {
+    return `${super.$style}
+        :host [type='submit'] {
+          box-shadow: none;
+          border: 1px solid var(--btn-submit-back);
+          border-radius: var(--border-radius);
+          box-sizing: border-box;
+          padding: 0.6em;
+          margin: 1em 0;
+          min-width: 10em;
+          cursor: pointer;
+          font: inherit;
+          font-weight: bold;
+          background: var(--btn-submit-back);
+          color: var(--btn-submit-text);
+        }
+        :host [type='submit']:focus {
+          outline: 1px solid var(--btn-submit-focus);
+        }
+        @media (hover: hover) {
+          :host [type='submit']:hover {
+             box-shadow: inset 0 0 0 99999px rgba(0, 0, 0, 0.2);
+          }
+        }
+        :host [type='submit'][disabled] {
+          opacity: 0.3;
+          cursor: not-allowed;
+          -webkit-user-select: none;
+          user-select: none;
+        }
+        :host [type='submit'][aria-busy] {
+          cursor: wait;
+        }`;
   }
 
   /** Find form related to control,register and apply initModel if initValue undefined */
@@ -352,4 +394,3 @@ declare global {
 }
 
 // testcase: check if set model={v: 1} shouldn't reset control with other names
-// todo setup style for btn-submit

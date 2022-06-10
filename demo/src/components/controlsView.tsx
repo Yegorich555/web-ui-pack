@@ -15,7 +15,9 @@ export default function ControlsView() {
           }
         }}
       >
-        <button type="submit">Submit</button>
+        <button type="submit" disabled>
+          Submit
+        </button>
         <wup-text
           ref={(el) => {
             if (el) {

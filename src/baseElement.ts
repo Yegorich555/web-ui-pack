@@ -28,6 +28,13 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   /** StyleContent related to component & inherrited components */
   static get $styleRoot(): string {
     return `:root {
+          --base-back: #fff;
+          --base-text: #232323;
+          --base-focus: #00778d;
+          --base-btn-back: #009fbc;
+          --base-btn-text: #fff;
+          --base-btn2-back: var(--base-btn-text);
+          --base-btn2-text: var(--base-btn-back);
           --border-radius: 6px;
           --anim-time: 200ms;
           --anim: var(--anim-time, 200ms) cubic-bezier(0, 0, 0.2, 1) 0ms;
