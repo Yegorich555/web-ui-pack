@@ -32,15 +32,17 @@ npm install web-ui-pack
 
 ## TODO
 
-- [x] [Basic helpers](#helpers)
+- [x] [Helpers](#helpers)
 - [x] [Helper.Observer](#helpersobserver)
 - [x] [PopupElement](#popupelement)
-- [ ] SpinElement
-- [ ] FormElement, TextControl
-- [ ] PasswordControl
-- [ ] CheckControl
+- [x] SpinElement
+- [x] FormElement
+- [x] TextControl
+- [x] PasswordControl
+- [x] CheckControl
+- [x] SlideControl
 - [ ] RadioControl
-- [ ] ComboControl (DropdownControl)
+- [x] SelectControl (ComboBox, Dropdown)
 - [ ] Calendar
 - [ ] DateControl
 - [ ] TimeControl ?
@@ -64,26 +66,39 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
 **Common rules**:
 
 1. **Naming**
-   - All components named as `WUP....Element` and `<wup-...>` (for html-tags)
+   - All components named as `WUP..Element`, `WUP..Control` and `<wup-...>` (for html-tags)
    - Public properties/options/events/methods startsWith `$...` (events `$onShow`, `$onHide`, methods `$show`, `$hide`, props like `$isOpen` etc.)
    - Every component has at least static `$defaults` (common options for current class) and personal `$options` (per each component). See details in [example](#popupelement)
-   - `$options` are observed. So changing options affects on component immediately (every component has static `observedOptions` as set of watched options)
+   - `$options` are observed. So changing options affects on component immediately after empty timeout (every component has static `observedOptions` as set of watched options)
 2. **Usage**
-   - For webpack [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free) switched off (it's for optimization). But if you don't use webpack since tree-shaking sometimes is not smart enough don't import from `web-ui-pack` directly. Instead use `web-ui-pack/path-to-element`
+   - For webpack [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free) switched off (it's for optimization). But **if you don't use webpack** don't import from `web-ui-pack` directly (due to tree-shaking can be not smart enough). Instead use `web-ui-pack/path-to-element`
    - Every component has a good JSDoc so go ahead and read details directly during the coding
    - Library compiled into ESNext. To avoid unexpected issues include this package into babel (use `exclude: /node_modules\/(?!(web-ui-pack)\/).*/` for babel-loader)
 3. **Limitations**
    - In `jsx/tsx` instead of `className` use `class` attribute (React issue)
-   - If you change custom attributes it will update $options, but if you change some option it doesn't update related attribute (for performance reasons). Better to avoid customAttributes at all
+   - If you change custom html-attributes it will update `$options`, but if you change some option it doesn't update related attribute (for performance reasons). Better to avoid customAttributes at all
 4. **Inheritance**
+
    - Components are developed to be easy customized and inherrited. Every rule/option/method is developed to be customized if defaultOptions are not enough. You can rewrite everything that you can imagine without digging a lot in a code. To be sure don't hesitate to take a look on \*.d.ts or source code (there are enough comments to clarify even weird/difficult cases)
    - All Components inherrited from [WUPBaseElement](src/baseElement.ts) that extends default HTMLElement
    - All internal event-callbacks startsWith `got...` (gotReady, gotRemoved)
    - To redefine component just extend it and register with new html tag. See details in [example](#popupelement)
    - **Inherritance Tree**
+
      - [_HTMLElement_](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement)
-       - [BaseElement](src/baseElement.ts)
+       - [_BaseElement_](src/baseElement.ts)
          - [PopupElement](src/popupElement.ts)
+         - [SpinElement](src/spinElement.ts)
+         - [FormElement](src/formElement.ts)
+         - [_BaseControl_](src/controls/baseControl.ts)
+           - [CheckControl](src/controls/checkControl.ts)
+             - [SlideControl](src/controls/slideControl.ts)
+           - [RadioGroupControl](src/controls/checkControl.ts)
+           - [TextControl](src/controls/textControl.ts)
+             - [PasswordControl](src/controls/passwordControl.ts)
+             - [SelectControl](src/controls/selectControl.ts)
+               - [SelectManyControl](src/controls/selectManyControl.ts)
+               - [DateControl](src/controls/dateControl.ts)
 
 ---
 
