@@ -43,7 +43,7 @@ describe("helper.promiseWait", () => {
   test("rejects value", async () => {
     // jest.useFakeTimers();
     const fn = jest.fn();
-    promiseWait(Promise.reject("error"), 1).catch(fn);
+    promiseWait(Promise.reject("error"), 1, false).catch(fn);
 
     // expect(setTimeout).toBeCalled();
     await Promise.resolve();
@@ -54,11 +54,23 @@ describe("helper.promiseWait", () => {
     expect(fn).toBeCalledWith("error");
   });
 
-  test("wait if resolved before", async () => {
+  test("wait if resolved before (enable smart-option)", async () => {
+    let isPending;
+    promiseWait(Promise.resolve(), 2, true).then(() => (isPending = true));
+    await new Promise((resolve) => setTimeout(resolve, 1));
+    expect(isPending).toBeTruthy(); // because Promise is already resolved
+
+    isPending = undefined;
+    promiseWait(Promise.resolve(), 2, () => (isPending = true)).then(() => (isPending = false));
+    await new Promise((resolve) => setTimeout(resolve, 1));
+    expect(isPending).toBeFalsy();
+  });
+
+  test("wait if resolved before (disable smart-option)", async () => {
     const fn = jest.fn();
     const fnNested = jest.fn();
     const mainPromise = new Promise((resolve) => setTimeout(resolve, 1)).then(fnNested);
-    promiseWait(mainPromise, 5).then(fn);
+    promiseWait(mainPromise, 5, false).then(fn);
 
     await new Promise((resolve) => setTimeout(resolve, 1));
     expect(fnNested).toBeCalled();
