@@ -324,6 +324,36 @@ export function spinUseDualRing(cls: typeof WUPSpinElement) {
   );
 }
 
+export function spinUseTwinDualRing(cls: typeof WUPSpinElement) {
+  spinSetStyle(
+    cls,
+    2,
+    () =>
+      `@keyframes WUP-SPIN-2-2 {
+          0% { transform: translate(-50%, -50%) rotate(360deg); }
+       }
+       :host {
+          --spin-2: #b35e03;
+          --spin-item-size: max(1px, calc(var(--spin-size) / 12));
+          position: relative;
+       }
+       :host div:nth-child(1) {
+          border: var(--spin-item-size) solid;
+          border-color: transparent var(--spin-1) transparent var(--spin-1);
+       }
+       :host div:nth-child(2) {
+          border: var(--spin-item-size) solid;
+          border-color: var(--spin-2) transparent var(--spin-2) transparent;
+          position: absolute;
+          width: calc(100% - var(--spin-item-size) * 3);
+          height: calc(100% - var(--spin-item-size) * 3);
+          left: 50%; top: 50%;
+          transform: translate(-50%,-50%);
+          animation: WUP-SPIN-2-2 var(--spin-speed) linear infinite;
+       }`
+  );
+}
+
 /** Apply on class to change spinner-style */
 export function spinUseRoller(cls: typeof WUPSpinElement) {
   const cnt = 4;

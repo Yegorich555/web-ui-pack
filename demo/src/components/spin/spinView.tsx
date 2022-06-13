@@ -7,10 +7,17 @@ import WUPSpin3Element from "./spin3";
 import WUPSpin4Element from "./spin4";
 import WUPSpin5Element from "./spin5";
 import WUPSpin6Element from "./spin6";
+import WUPSpin7Element from "./spin7";
 import styles from "./spinView.scss";
 
 const sideEffect =
-  WUPSpinElement && WUPSpin2Element && WUPSpin3Element && WUPSpin4Element && WUPSpin5Element && WUPSpin6Element;
+  WUPSpinElement &&
+  WUPSpin2Element &&
+  WUPSpin3Element &&
+  WUPSpin4Element &&
+  WUPSpin5Element &&
+  WUPSpin6Element &&
+  WUPSpin7Element;
 !sideEffect && console.error("Missed"); // It's required otherwise import is ignored by webpack
 spinUseRing(WUPSpinElement); // setup default style
 
@@ -100,6 +107,11 @@ export default function SpinView() {
           <div>
             DualRing <wup-spin2 inline />
             <wup-spin2 inline class={styles.spin21} />
+            <wup-spin2 inline class={styles.spin22} />
+          </div>
+          <div>
+            TwinDualRing
+            <wup-spin7 inline />
           </div>
           <div>
             Roller <wup-spin3 inline />

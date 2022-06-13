@@ -57,6 +57,22 @@
   --spin-item-size: calc(var(--spin-size) / 2);
 }
 
+.spin22 {
+  --spin-2: #ff7600;
+  --spin-item-size: 3px;
+
+  border: var(--spin-2) var(--spin-item-size) solid;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  > div {
+    border-color: transparent var(--spin-1) transparent var(--spin-1);
+    width: calc(100% - var(--spin-item-size));
+    height: calc(100% - var(--spin-item-size));
+  }
+}
+
 .spin51 {
   --spin-2: orange;
 }
