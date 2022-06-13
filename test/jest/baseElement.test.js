@@ -303,7 +303,7 @@ describe("baseElement", () => {
 
     class TestB extends TestA {
       static get $style() {
-        return ":host { position: my-absolute }";
+        return `${super.$style} :host { position: my-absolute }`;
       }
 
       static get $styleRoot() {
@@ -318,7 +318,7 @@ describe("baseElement", () => {
 
     class TestC extends TestB {
       static get $style() {
-        return ":host { z-index: me }";
+        return `${super.$style} :host { z-index: me }`;
       }
 
       static get $styleRoot() {
@@ -378,5 +378,60 @@ describe("baseElement", () => {
     document.body.appendChild(el);
     await h.wait();
     expect(document.activeElement).toBe(input);
+  });
+
+  test("gotChanges method", async () => {
+    class TestEl extends WUPBaseElement {
+      $options = {};
+      static observedOptions = new Set(["disabled", "disabledReflect"]);
+      static get observedAttributes() {
+        return ["disabled", "disabledReflect", "readonly"];
+      }
+
+      gotChanges(...args) {
+        super.gotChanges(...args);
+        this.$options.disabledReflect = !this.$options.disabledReflect;
+        this.setAttribute("disabled", this.$options.disabled);
+      }
+    }
+    customElements.define("test-ch", TestEl);
+
+    const spyAttr = jest.spyOn(TestEl.prototype, "gotAttributeChanged");
+    const spyOpts = jest.spyOn(TestEl.prototype, "gotOptionsChanged");
+    const spyAll = jest.spyOn(TestEl.prototype, "gotChanges");
+
+    const testEl = document.body.appendChild(document.createElement("test-ch"));
+    await h.wait();
+
+    expect(spyAll).toBeCalledTimes(1); // it's called on init
+    expect(spyAll).toBeCalledWith(null);
+    expect(spyAttr).toBeCalledTimes(1); // inside gotChanges()
+    expect(spyOpts).toBeCalledTimes(1); // inside gotChanges()
+
+    await h.wait();
+    jest.clearAllMocks();
+    testEl.$options.disabled = !testEl.$options.disabled;
+    await h.wait();
+    expect(spyAll).toBeCalledTimes(1);
+    expect(spyAll).toBeCalledWith(["disabled"]);
+    expect(spyAttr).toBeCalledTimes(1);
+    expect(spyOpts).toBeCalledTimes(2);
+
+    jest.clearAllMocks();
+    testEl.setAttribute("disabled", "true");
+    await h.wait();
+    expect(spyAll).toBeCalledTimes(1);
+    expect(spyAll).toBeCalledWith(["disabled"]);
+    expect(spyAttr).toBeCalledTimes(2);
+    expect(spyOpts).toBeCalledTimes(1);
+
+    jest.clearAllMocks();
+    testEl.setAttribute("disabled", "false");
+    testEl.setAttribute("readonly", "false");
+    await h.wait();
+    expect(spyAll).toBeCalledTimes(1);
+    expect(spyAll).toBeCalledWith(["disabled", "readonly"]);
+    expect(spyAttr).toBeCalledTimes(3);
+    expect(spyOpts).toBeCalledTimes(1);
   });
 });

@@ -177,8 +177,11 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   /** Fired when element is added to document */
   protected gotReady() {
     this.#isReady = true;
-    setTimeout(() => (this.autofocus || this._opts.autoFocus) && this.focus()); // timeout to wait for options
     this.gotChanges(null);
+    setTimeout(() => {
+      (this.autofocus || this._opts.autoFocus) && this.focus();
+      this.changesResume();
+    }); // timeout to wait for options
   }
 
   /** Fired when element is removed from document */
@@ -192,7 +195,12 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
 
   /** Fired when element isReady and at least one of observedOptions is changed */
   protected gotOptionsChanged(e: WUP.OptionEvent) {
-    !this.#isStopChanges && this.gotChanges(e.props);
+    if (this.#isStopChanges) {
+      return;
+    }
+    this.changesStop();
+    this.gotChanges(e.props);
+    setTimeout(this.changesResume);
   }
 
   /** Fired once on Init */
@@ -225,7 +233,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     this.#isStopChanges = false;
   }
 
-  #isStopChanges = false;
+  #isStopChanges = true;
   #attrTimer?: number;
   #attrChanged?: string[];
   /** Fired when element isReady and one of observedAttributes is changed */
@@ -243,7 +251,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
       this.#attrTimer = undefined;
       this.changesStop();
       this.gotChanges(this.#attrChanged as Array<keyof WUPForm.Options>);
-      this.changesResume();
+      setTimeout(this.changesResume);
       this.#attrChanged = undefined;
     });
   }
