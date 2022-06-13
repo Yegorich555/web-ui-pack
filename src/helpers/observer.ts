@@ -235,9 +235,9 @@ function make<T extends object>(
           props: changedProps as any,
           target: proxy,
         };
-        ref.onChanged(ev);
 
         changedProps = [];
+        ref.onChanged(ev);
       });
     }
   };
