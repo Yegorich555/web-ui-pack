@@ -12,12 +12,11 @@ export default function ControlsView() {
         ref={(el) => {
           if (el) {
             el.$initModel = { email: "test-me@google.com" };
+            el.$isPending = true;
           }
         }}
       >
-        <button type="submit" disabled>
-          Submit
-        </button>
+        <button type="submit">Submit</button>
         <wup-text
           ref={(el) => {
             if (el) {

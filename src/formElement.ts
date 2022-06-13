@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 import WUPBaseElement, { WUP } from "./baseElement";
 import IBaseControl from "./controls/baseControl.i";
-import { nestedProperty, scrollIntoView } from "./indexHelpers";
+import { nestedProperty, promiseWait, scrollIntoView } from "./indexHelpers";
 import WUPSpinElement from "./spinElement";
 
 !WUPSpinElement && console.error("!"); // It's required otherwise import is ignored by webpack
@@ -17,15 +17,25 @@ export const enum SubmitActions {
   collectChanged = 1 << 2,
   /** Reset isDirty and assign $value to $initValue for controls (on success only) */
   reset = 1 << 3,
+  /** Lock the whole form during the pending state (set $isPending = true or provide `promise` to submitEvent.waitFor);
+   * Otherwise user can submit several times in a short time;
+   * If promise resolves during the short-time pending state won't be set, otherwise it takes at least 300ms via helper {@link promiseWait} */
+  lockOnPending = 1 << 4,
 }
 
 declare global {
   namespace WUPForm {
     export interface SubmitEvent<T> extends Event {
+      /** Model collected from controls */
       $model: Partial<T>;
+      /** Form related to submit event */
       $relatedForm: WUPFormElement<T>;
+      /** Event that produced submit event */
       $relatedEvent: MouseEvent | KeyboardEvent;
+      /** Element that that produced submit event */
       $submitter: HTMLElement | null;
+      /** Point a promise as callback to allow form show pending state during the promise */
+      $waitFor?: Promise<unknown>;
     }
 
     export interface EventMap extends WUP.EventMap {
@@ -39,7 +49,7 @@ declare global {
 
     export interface Defaults {
       /** Actions that enabled on submit event; You can point several like: `goToError | collectChanged`
-       * @defaultValue goToError | validateUntiFirst | reset */
+       * @defaultValue goToError | validateUntiFirst | reset | lockOnPending */
       submitActions: SubmitActions;
     }
 
@@ -84,7 +94,8 @@ const formStore: WUPFormElement[] = [];
  *  const form = document.createElement("wup-form");
  *  form.$options.autoComplete = false;
  *  form.$initModel = { email: "test-me@google.com" };
- *  form.addEventListener("$submit", (e) => console.warn(e.$model));
+ *  form.addEventListener("$submit", (e) => console.warn(e.$model) );
+ *  form.$onSubmit = async (e)=>{ await postHere(e.$model); }
  *  // init control
  *  const el = document.createElement("wup-text");
  *  el.$options.name = "email";
@@ -107,6 +118,9 @@ const formStore: WUPFormElement[] = [];
       ref={(el) => {
         if (el) {
           el.$initModel = { email: "test-me@google.com" };
+          el.$onSubmit = async (ev)=>{
+             await postHere();
+          }
         }
       }}
     >
@@ -119,7 +133,7 @@ const formStore: WUPFormElement[] = [];
             });
           }
         }}
-        <button type="Submit">Submit</button>
+        <button type="submit">Submit</button>
       />
   </wup-form>
  */
@@ -231,7 +245,8 @@ export default class WUPFormElement<
 
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUPForm.Defaults = {
-    submitActions: SubmitActions.goToError | SubmitActions.validateUntiFirst | SubmitActions.reset,
+    submitActions:
+      SubmitActions.goToError | SubmitActions.validateUntiFirst | SubmitActions.reset | SubmitActions.lockOnPending,
   };
 
   $options: WUPForm.Options = {
@@ -270,28 +285,62 @@ export default class WUPFormElement<
     }
   }
 
-  /** ShowPending and return cancel-pending function */
-  protected showPending(): () => void {
-    // todo option: disable whole form
-    // todo option: allow to prevent previous
-    // todo set aria-busy
-    const btns: Array<HTMLButtonElement & { _wupDisabled: boolean }> = [];
-    const spins: Array<WUPSpinElement> = [];
-    this.querySelectorAll("[type='submit']").forEach((b) => {
-      const spin = document.createElement("wup-spin");
-      spin.$options.fit = true;
-      spin.$options.overflowFade = false;
-      spin.$options.overflowTarget = b as HTMLButtonElement;
-      spins.push(this.appendChild(spin));
-      (b as HTMLButtonElement & { _wupDisabled: boolean })._wupDisabled = (b as HTMLButtonElement).disabled;
-      (b as HTMLButtonElement).disabled = true;
-      btns.push(b as HTMLButtonElement & { _wupDisabled: boolean });
-    });
+  // todo maybe place pending into $options ?
+  /** Pending state (spinner + lock form if SubmitActions.lockOnPending enabled) */
+  get $isPending() {
+    return this.#stopPending !== undefined;
+  }
 
-    return () => {
-      btns.forEach((b) => (b.disabled = b._wupDisabled));
-      spins.forEach((s) => s.remove());
-    };
+  set $isPending(v: boolean) {
+    if (v !== this.$isPending) {
+      this.changePending(v);
+    }
+  }
+
+  /** Dispatched on submit. Return promise to lock form and show spinner */
+  $onSubmit?: (ev: WUPForm.SubmitEvent<Model>) => void | Promise<unknown>;
+
+  /** Called on every spin-render */
+  renderSpin(target: HTMLElement): WUPSpinElement {
+    const spin = document.createElement("wup-spin");
+    spin.$options.fit = true;
+    spin.$options.overflowFade = false;
+    spin.$options.overflowTarget = target as HTMLButtonElement;
+    return spin;
+  }
+
+  #stopPending?: () => void;
+  /** Change pending state function */
+  protected changePending(v: boolean) {
+    if (v === !!this.#stopPending) {
+      return;
+    }
+
+    if (v) {
+      const wasDisabled = this._opts.disabled;
+      if (this._opts.submitActions & SubmitActions.lockOnPending) {
+        this._opts.disabled = true;
+      }
+      this.setAttribute("aria-busy", "true");
+      const btns: Array<HTMLButtonElement & { _wupDisabled: boolean }> = [];
+      const spins: Array<WUPSpinElement> = [];
+      this.querySelectorAll("[type='submit']").forEach((b) => {
+        spins.push(this.appendChild(this.renderSpin(b as HTMLButtonElement)));
+        (b as HTMLButtonElement & { _wupDisabled: boolean })._wupDisabled = (b as HTMLButtonElement).disabled;
+        (b as HTMLButtonElement).disabled = true;
+        btns.push(b as HTMLButtonElement & { _wupDisabled: boolean });
+      });
+
+      this.#stopPending = () => {
+        this.#stopPending = undefined;
+        this.$options.disabled = wasDisabled;
+        this.removeAttribute("aria-busy");
+        btns.forEach((b) => (b.disabled = b._wupDisabled));
+        spins.forEach((s) => s.remove());
+      };
+    } else {
+      this.#stopPending!();
+    }
   }
 
   /** Fired on submit before validation */
@@ -335,31 +384,30 @@ export default class WUPFormElement<
     ev.$relatedEvent = e;
     ev.$submitter = submitter;
 
-    console.warn("got model", m, this.$controls);
+    console.warn("got model", m, this.$controls); // todo remove after tests
     const needReset = this._opts.submitActions & SubmitActions.reset;
     setTimeout(() => {
-      // todo how to wait for response and show pending ?
+      const ev2 = new SubmitEvent("submit", { submitter, cancelable: false, bubbles: true });
       this.dispatchEvent("$submit", ev);
-      this.dispatchEvent("submit", new SubmitEvent("submit", { submitter, cancelable: false, bubbles: true }));
+      this.dispatchEvent("submit", ev2);
+      const p1 = this.$onSubmit?.call(this, ev);
+      const p2 = this.onsubmit?.call(this, ev2);
 
-      if (needReset) {
-        this.$controls.forEach((v) => (v.$isDirty = false));
-        this.$initModel = this.$model;
-      }
+      promiseWait(Promise.all([p1, p2, ev.$waitFor]), 300, () => this.changePending(true))
+        .then(() => {
+          if (needReset) {
+            this.$controls.forEach((v) => (v.$isDirty = false));
+            this.$initModel = this.$model;
+          }
+        })
+        .finally(() => {
+          this.changePending(false);
+        });
     });
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
     super.gotChanges(propsChanged);
-
-    // setTimeout(() => {
-    //   let hidePending: (() => void) | undefined;
-    //   promiseWait(
-    //     new Promise((resolve) => setTimeout(resolve, 5000)),
-    //     300,
-    //     () => (hidePending = this.showPending())
-    //   ).finally(hidePending);
-    // }, 200);
 
     this._opts.disabled = this.getBoolAttr("disabled", this._opts.disabled);
     this._opts.readOnly = this.getBoolAttr("readOnly", this._opts.readOnly);
