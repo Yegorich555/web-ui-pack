@@ -66,7 +66,7 @@ export default function AppContainer() {
             {routes.map((r) => (
               <Route key={r.path} path={r.url} element={React.createElement(r.el)} />
             ))}
-            <Route path="*" element={<Navigate to={routes[1].url as string} />} />
+            <Route path="*" element={<Navigate to={routes[DEV ? routes.length - 1 : 0].url as string} />} />
           </Routes>
         </main>
       </div>

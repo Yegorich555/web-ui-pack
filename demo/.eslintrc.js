@@ -1,4 +1,7 @@
 module.exports = {
+  globals: {
+    DEV: true,
+  },
   settings: {
     "import/resolver": {
       typescript: {

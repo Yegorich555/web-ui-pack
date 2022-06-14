@@ -306,7 +306,7 @@ export default class WUPFormElement<
   }
 
   #stopPending?: () => void;
-  /** Change pending state function */
+  /** Change pending state */
   protected changePending(v: boolean) {
     if (v === !!this.#stopPending) {
       return;

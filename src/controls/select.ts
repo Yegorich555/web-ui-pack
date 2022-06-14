@@ -2,6 +2,7 @@
 import { WUP } from "../baseElement";
 import onEvent from "../helpers/onEvent";
 import onFocusLostEv from "../helpers/onFocusLost";
+import { promiseWait } from "../indexHelpers";
 // eslint-disable-next-line import/named
 import WUPPopupElement, { ShowCases as PopupShowCases, WUPPopup } from "../popup/popupElement";
 import popupListenTarget from "../popup/popupListenTarget";
@@ -181,12 +182,8 @@ export default class WUPSelectControl<
     if (items instanceof Function) {
       const f = items();
       if (f instanceof Promise) {
-        /* todo show isPending here;
-         what if user tries to input text - we need to prevent this while it's not ready
-         */
-        ctrl.$refInput.setAttribute("aria-busy", "true");
-        arr = await f;
-        ctrl.$refInput.removeAttribute("aria-busy");
+        /* todo what if user tries to input text - we need to prevent this while it's not ready */
+        arr = await promiseWait(f, 300, () => ctrl.changePending(true)).finally(() => ctrl.changePending(false));
       } else {
         arr = f;
       }
@@ -207,7 +204,10 @@ export default class WUPSelectControl<
     const r = ctr.$getMenuItems<T, WUPSelectControl<T>>(ctrl).then((items) => {
       const i = (items as WUPSelect.MenuItemAny<any>[]).findIndex((o) => ctr.$isEqual(o.value, v));
       if (i === -1) {
-        console.error(`${ctrl.tagName}.[${ctrl._opts.name}]. Not found in items`, { items, value: v });
+        console.error(`${ctrl.tagName}${ctrl._opts.name ? `[${ctrl._opts.name}]` : ""}. Not found in items`, {
+          items,
+          value: v,
+        });
         return `Error: not found for ${v}` != null ? (v as any).toString() : "";
       }
       const item = items[i];
@@ -264,9 +264,38 @@ export default class WUPSelectControl<
     i.setAttribute("aria-haspopup", "listbox");
     i.setAttribute("aria-expanded", "false");
     // i.setAttribute("aria-multiselectable", "false");
+  }
 
-    // todo remove after tests
-    this.appendChild(document.createElement("wup-spin"));
+  /** Called on every spin-render */
+  renderSpin(): WUPSpinElement {
+    const spin = document.createElement("wup-spin");
+    spin.$options.fit = true;
+    spin.$options.overflowFade = true;
+    spin.$options.overflowTarget = this;
+    this.appendChild(spin);
+    return spin;
+  }
+
+  #stopPending?: () => void;
+  /** Change pending state */
+  protected changePending(v: boolean) {
+    if (v === !!this.#stopPending) {
+      return;
+    }
+
+    if (v) {
+      this.$refInput.setAttribute("aria-busy", "true");
+      const wasDisabled = this._opts.disabled;
+      const refSpin = this.renderSpin();
+      this.#stopPending = () => {
+        this.#stopPending = undefined;
+        this.$options.disabled = wasDisabled;
+        this.$refInput.removeAttribute("aria-busy");
+        refSpin.remove();
+      };
+    } else {
+      this.#stopPending!();
+    }
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUPSelect.Options> | null) {
@@ -432,8 +461,7 @@ export default class WUPSelectControl<
 
     const isCreate = !this.$refPopup;
     if (!this.$refPopup) {
-      this.$refPopup = this.appendChild(document.createElement("wup-popup"));
-      const p = this.$refPopup;
+      const p = document.createElement("wup-popup");
       p.$options.showCase = PopupShowCases.always;
       p.$options.target = this;
       p.$options.minWidthByTarget = true;
@@ -462,7 +490,7 @@ export default class WUPSelectControl<
         this,
         () =>
           setTimeout(async () => {
-            this.setValue(this.$value); // to update imput according to result
+            this.setValue(this.$value); // to update input according to result
             await this.#menuHidding; // wait for animation if exists
             // check if closed (user can open again during the hidding)
             !this.#isOpen && this.removePopup();
@@ -470,8 +498,9 @@ export default class WUPSelectControl<
         { debounceMs: this._opts.focusDebounceMs }
       );
       this.#disposeMenuEvents!.push(r);
-
+      this.$refPopup = p;
       await this.renderMenu(p, menuId);
+      this.appendChild(p);
     } else if (showCase !== ShowCases.onInput && this._menuItems!.filtered) {
       this._menuItems!.all?.forEach((li) => (li.style.display = "")); // reset styles after filtering
       this._menuItems!.filtered = undefined;

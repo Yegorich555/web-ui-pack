@@ -74,19 +74,24 @@ export default function ControlsView() {
             if (el) {
               let ir = 10;
               el.$options.label = "Select Control / Combobox";
-              el.$options.items = [
-                { text: "Item N 1", value: ++ir },
-                { text: "Item N 2", value: ++ir },
-                { text: "Item N 3", value: ++ir },
-                { text: "Item N 4", value: ++ir },
-                { text: "Item N 5", value: ++ir },
-                { text: "Donny 1", value: ++ir },
-                { text: "Item N 7", value: ++ir },
-                { text: "Donny 2", value: ++ir },
-                { text: "Item N 9", value: ++ir },
-                { text: "Item N 10", value: ++ir },
-                // { text: (v, li, i) => li.append(v.toString()), value: 124 },
-              ];
+              el.$options.items = () =>
+                new Promise((resolve) => {
+                  setTimeout(() => {
+                    resolve([
+                      { text: "Item N 1", value: ++ir },
+                      { text: "Item N 2", value: ++ir },
+                      { text: "Item N 3", value: ++ir },
+                      { text: "Item N 4", value: ++ir },
+                      { text: "Item N 5", value: ++ir },
+                      { text: "Donny 1", value: ++ir },
+                      { text: "Item N 7", value: ++ir },
+                      { text: "Donny 2", value: ++ir },
+                      { text: "Item N 9", value: ++ir },
+                      { text: "Item N 10", value: ++ir },
+                      // { text: (v, li, i) => li.append(v.toString()), value: 124 },
+                    ]);
+                  }, 5000);
+                });
               el.$options.validations = {
                 required: true,
               };
@@ -96,7 +101,7 @@ export default function ControlsView() {
               // el.$options.readOnly = true;
               // el.$options.disabled = true;
               el.$options.selectOnFocus = true;
-              el.$initValue = ir - 5;
+              // el.$initValue = 15;
             }
           }}
         />
