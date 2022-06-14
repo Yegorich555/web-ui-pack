@@ -56,9 +56,9 @@ declare global {
     export interface Options extends Defaults {
       /** Focus first possible element when it's appended to layout */
       autoFocus?: boolean;
-      /** Disallow edit/copy value; adds attr [disabled] for styling */
+      /** Disallow edit/copy value; adds attr [disabled] for styling; has higher priority above control.$options */
       disabled?: boolean;
-      /** Disallow copy value; adds attr [readonly] for styling (changes/replace option readOnly of controls) */
+      /** Disallow copy value; adds attr [readonly] for styling; has higher priority above control.$options */
       readOnly?: boolean;
       /** Enable/disable browser-autocomplete (changes/replace option autoComplete of controls)
        *  @defaultValue false */
@@ -206,8 +206,9 @@ export default class WUPFormElement<
       if (k && form._initModel && control.$initValue === undefined) {
         control.$initValue = nestedProperty.get(form._initModel, k);
       }
-      if (form._opts.readOnly !== undefined && control.$options.readOnly === undefined) {
-        control.$options.readOnly = form._opts.readOnly;
+      // assign options to control only if control doesn't have own
+      if (form._opts.autoComplete !== undefined) {
+        control.$options.autoComplete = form._opts.autoComplete;
       }
     }
 
@@ -319,7 +320,7 @@ export default class WUPFormElement<
     if (v) {
       const wasDisabled = this._opts.disabled;
       if (this._opts.submitActions & SubmitActions.lockOnPending) {
-        this._opts.disabled = true;
+        this.$options.disabled = true;
       }
       this.setAttribute("aria-busy", "true");
       const btns: Array<HTMLButtonElement & { _wupDisabled: boolean }> = [];
@@ -414,16 +415,19 @@ export default class WUPFormElement<
     this._opts.autoFocus = this.getBoolAttr("autoFocus", this._opts.autoFocus);
     this._opts.autoComplete = this.getBoolAttr("autoComplete", this._opts.autoComplete);
 
-    const { readOnly, autoComplete } = this._opts;
-    if (propsChanged ? propsChanged.includes("readOnly") : readOnly !== undefined) {
-      this.$controls.forEach((c) => (c.$options.readOnly = readOnly)); // on init OR if changed
-    }
+    this.setBoolAttr("readOnly", this._opts.readOnly);
+    this.setBoolAttr("disabled", this._opts.disabled);
+
+    const { autoComplete } = this._opts;
+
+    // todo autocomplete lower priority (every personal control value has higher priority)
     if (propsChanged ? propsChanged.includes("autoComplete") : autoComplete !== undefined) {
       this.$controls.forEach((c) => (c.$options.autoComplete = autoComplete)); // on init OR if changed
     }
 
-    this.setBoolAttr("disabled", this._opts.disabled);
-    this.setBoolAttr("readOnly", this._opts.readOnly);
+    if (propsChanged && (propsChanged.includes("readOnly") || propsChanged.includes("disabled"))) {
+      this.$controls.forEach((c) => c.gotFormChanges(propsChanged));
+    }
   }
 
   protected override gotReady() {

@@ -5,6 +5,8 @@ export default interface IBaseControl<ValueType = any> extends HTMLElement {
   readonly $isChanged: boolean;
   readonly $isValid: boolean;
   readonly $isFocused: boolean;
+  readonly $isDisabled: boolean;
+  readonly $isReadOnly: boolean;
   $validate: () => string | false;
 
   $options: {
@@ -14,4 +16,5 @@ export default interface IBaseControl<ValueType = any> extends HTMLElement {
     readOnly?: boolean;
     disabled?: boolean;
   };
+  gotFormChanges: (propsChanged: Array<any> | null) => void;
 }

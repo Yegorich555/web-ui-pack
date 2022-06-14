@@ -209,7 +209,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         -webkit-user-select: none;
         user-select: none;
       }
-      [disabled]>:host,
+      [disabled]>:host > *,
       :host[disabled] > * {
         pointer-events: none;
       }
@@ -360,14 +360,23 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return this.#isValid as boolean;
   }
 
-  /** Returs if current control is active/focused */
+  /** Returns if current control is active/focused */
   get $isFocused(): boolean {
     return this === document.activeElement || this.includes(document.activeElement);
   }
 
+  /** Returns if related form or control disabled */
+  get $isDisabled(): boolean {
+    return this.$form?.$options.disabled || this._opts.disabled || false;
+  }
+
+  /** Returns if related form or control readonly */
+  get $isReadOnly(): boolean {
+    return this.$form?.$options.readOnly || this._opts.readOnly || false;
+  }
+
   /** Check validity and show error if not swtich off; canShowError is true by default
-   * @returns errorMessage or false (if valid)
-   */
+   * @returns errorMessage or false (if valid) */
   $validate(canShowError = true): string | false {
     return this.goValidate(ValidateFromCases.onManualCall, canShowError);
   }
@@ -419,36 +428,41 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     this._opts.readOnly = this.getBoolAttr("readOnly", this._opts.readOnly);
     this._opts.autoFocus = this.getBoolAttr("autoFocus", this._opts.autoFocus);
 
-    const r = this.$refInput;
+    // set type
+    const i = this.$refInput;
     const isPwd = this._opts.name?.includes("password");
-    r.type = isPwd ? "password" : "text";
+    i.type = isPwd ? "password" : "text";
 
     // set autocomplete
     const af = this._opts.autoComplete; // https://stackoverflow.com/questions/11708092/detecting-browser-autofill
     const n = af === true ? (this._opts.name as string) : af;
-    r.autocomplete = n || (isPwd ? "new-password" : "off"); // otherwise it doesn't disable autocomplete
-    // r.name = n || (undefined as any as string);
-    // if (!r.autocomplete) {
-    // testcase: form with email+password ignores autocomplete: "off" if previously it was saved
+    i.autocomplete = n || (isPwd ? "new-password" : "off"); // otherwise form with email+password ignores autocomplete: "off" if previously it was saved
     // it can be ignored by browsers: try to fix > https://stackoverflow.com/questions/2530/how-do-you-disable-browser-autocomplete-on-web-form-field-input-tags
-    // }
 
+    // set label
     const label = (this._opts.label ?? (this._opts.name && stringPrettify(this._opts.name))) || null;
     this.$refTitle.textContent = label;
     if (!label && this._opts.name) {
-      r.setAttribute("aria-label", stringPrettify(this._opts.name));
+      i.setAttribute("aria-label", stringPrettify(this._opts.name));
     } else {
-      r.removeAttribute("aria-label");
+      i.removeAttribute("aria-label");
     }
 
     // set other props
     const req = this._opts.validations?.required;
-    req ? r.setAttribute("aria-required", "true") : r.removeAttribute("aria-required");
-    r.disabled = this._opts.disabled as boolean;
-    r.readOnly = this._opts.readOnly ?? (this.$form?.$options.readOnly as boolean);
-
+    req ? i.setAttribute("aria-required", "true") : i.removeAttribute("aria-required");
     this.setBoolAttr("disabled", this._opts.disabled);
     this.setBoolAttr("readOnly", this._opts.readOnly);
+
+    propsChanged == null && this.gotFormChanges(null);
+  }
+
+  /** Fired on control/form Init and every time as control/form options changed. Method contains changes related to form `disabled`,`readonly` etc. */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
+    const i = this.$refInput;
+    i.disabled = this.$isDisabled as boolean;
+    i.readOnly = this.$isReadOnly;
   }
 
   /** Use this to append elements; fired single time when element isConnected/appended to layout but not ready yet */
@@ -462,12 +476,15 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       this,
       "mousedown", // to prevent blur-focus effect for input by label click
       (e) => {
+        if (this.$isDisabled) {
+          return;
+        }
         !(e.target instanceof HTMLInputElement) && e.preventDefault();
         setTimeout(() => !this.$isFocused && this.focus());
       }
     );
 
-    this.appendEvent(this, "keydown", this.gotKeyDown);
+    this.appendEvent(this, "keydown", () => !this.$isDisabled && this.gotKeyDown);
 
     if (this._opts.validationCase & ValidationCases.onInit) {
       !this.$isEmpty && this.goValidate(ValidateFromCases.onInit);
@@ -658,3 +675,4 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 }
 
 // todo implement password input
+// testcase: form with email+password ignores autocomplete: "off" if previously it was saved

@@ -350,3 +350,5 @@ export namespace WUP {
 }
 
 // todo make all props not-enumerable (beside starts with $...): https://stackoverflow.com/questions/34517538/setting-an-es6-class-getter-to-enumerable
+
+// testcase: check if gotChanges sensitive to attr-case

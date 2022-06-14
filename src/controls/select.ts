@@ -266,7 +266,7 @@ export default class WUPSelectControl<
     // i.setAttribute("aria-multiselectable", "false");
 
     // todo remove after tests
-    // this.appendChild(document.createElement("wup-spin"));
+    this.appendChild(document.createElement("wup-spin"));
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUPSelect.Options> | null) {
@@ -275,9 +275,9 @@ export default class WUPSelectControl<
     this._opts.readOnlyInput
       ? this.$refInput.removeAttribute("aria-autocomplete")
       : this.$refInput.setAttribute("aria-autocomplete", "list");
-    this.$refInput.readOnly = (this._opts.readOnly || this._opts.readOnlyInput) as boolean;
+    this.$refInput.readOnly = (this.$isReadOnly || this._opts.readOnlyInput) as boolean;
 
-    const isMenuEnabled = !this._opts.readOnly && !this._opts.disabled;
+    const isMenuEnabled = !this.$isDisabled && !this.$isReadOnly;
     if (isMenuEnabled && !this.#popupRefs) {
       const refs = popupListenTarget(
         {
