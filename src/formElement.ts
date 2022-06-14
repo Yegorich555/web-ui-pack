@@ -60,7 +60,7 @@ declare global {
       disabled?: boolean;
       /** Disallow copy value; adds attr [readonly] for styling; has higher priority above control.$options */
       readOnly?: boolean;
-      /** Enable/disable browser-autocomplete (changes/replace option autoComplete of controls)
+      /** Enable/disable browser-autocomplete; if control has no autocomplete option then it's inherrited from form
        *  @defaultValue false */
       autoComplete?: boolean;
     }
@@ -206,10 +206,6 @@ export default class WUPFormElement<
       if (k && form._initModel && control.$initValue === undefined) {
         control.$initValue = nestedProperty.get(form._initModel, k);
       }
-      // assign options to control only if control doesn't have own
-      if (form._opts.autoComplete !== undefined) {
-        control.$options.autoComplete = form._opts.autoComplete;
-      }
     }
 
     return form;
@@ -286,7 +282,6 @@ export default class WUPFormElement<
     }
   }
 
-  // todo maybe place pending into $options ?
   /** Pending state (spinner + lock form if SubmitActions.lockOnPending enabled) */
   get $isPending() {
     return this.#stopPending !== undefined;
@@ -385,7 +380,6 @@ export default class WUPFormElement<
     ev.$relatedEvent = e;
     ev.$submitter = submitter;
 
-    console.warn("got model", m, this.$controls); // todo remove after tests
     const needReset = this._opts.submitActions & SubmitActions.reset;
     setTimeout(() => {
       const ev2 = new SubmitEvent("submit", { submitter, cancelable: false, bubbles: true });
@@ -418,14 +412,8 @@ export default class WUPFormElement<
     this.setBoolAttr("readOnly", this._opts.readOnly);
     this.setBoolAttr("disabled", this._opts.disabled);
 
-    const { autoComplete } = this._opts;
-
-    // todo autocomplete lower priority (every personal control value has higher priority)
-    if (propsChanged ? propsChanged.includes("autoComplete") : autoComplete !== undefined) {
-      this.$controls.forEach((c) => (c.$options.autoComplete = autoComplete)); // on init OR if changed
-    }
-
-    if (propsChanged && (propsChanged.includes("readOnly") || propsChanged.includes("disabled"))) {
+    const p = propsChanged;
+    if (p && (p.includes("readOnly") || p.includes("disabled") || p.includes("autoComplete"))) {
       this.$controls.forEach((c) => c.gotFormChanges(propsChanged));
     }
   }

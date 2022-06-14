@@ -82,7 +82,8 @@ export namespace WUPBaseIn {
       /** Focus element when it's appended to layout */
       autoFocus?: boolean;
       /** Name to autocomplete by browser; Point `true` to inherit from $options.name or some string
-       * @defaultValue undefined/false (which means disabled) */
+       *  if control has no autocomplete option then it's inherrited from form
+       * @defaultValue false */
       autoComplete?: string | boolean;
       /** Disallow edit/copy value; adds attr [disabled] for styling */
       disabled?: boolean;
@@ -373,6 +374,10 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Returns if related form or control readonly */
   get $isReadOnly(): boolean {
     return this.$form?.$options.readOnly || this._opts.readOnly || false;
+  }
+
+  get $autoComplete(): string | boolean {
+    return this._opts.autoComplete ?? (this.$form?.$options.autoComplete || false);
   }
 
   /** Check validity and show error if not swtich off; canShowError is true by default
