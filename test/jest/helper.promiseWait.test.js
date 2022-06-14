@@ -54,16 +54,23 @@ describe("helper.promiseWait", () => {
     expect(fn).toBeCalledWith("error");
   });
 
-  test("wait if resolved before (enable smart-option)", async () => {
-    let isPending;
-    promiseWait(Promise.resolve(), 2, true).then(() => (isPending = true));
+  test("no-wait if resolved before (enable smart-option)", async () => {
+    let fn = jest.fn();
+    promiseWait(Promise.resolve(), 2, true).then(fn);
     await new Promise((resolve) => setTimeout(resolve, 1));
-    expect(isPending).toBeTruthy(); // because Promise is already resolved
+    expect(fn).toBeCalledTimes(1); // because Promise is already resolved
 
-    isPending = undefined;
-    promiseWait(Promise.resolve(), 2, () => (isPending = true)).then(() => (isPending = false));
+    fn.mockClear();
+    promiseWait(Promise.resolve(), 2, fn).then(fn);
     await new Promise((resolve) => setTimeout(resolve, 1));
-    expect(isPending).toBeFalsy();
+    expect(fn).toBeCalledTimes(1); // because Promise is already resolved
+
+    let i = 0;
+    fn = () => ++i;
+    const mainPromise = new Promise((resolve) => setTimeout(resolve, 2));
+    promiseWait(mainPromise, 2, fn).then(fn);
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    expect(i).toBe(2);
   });
 
   test("wait if resolved before (disable smart-option)", async () => {

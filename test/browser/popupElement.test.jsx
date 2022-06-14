@@ -43,7 +43,7 @@ beforeEach(async () => {
 describe("popupElement", () => {
   test("clickOnLabel with input - single event", async () => {
     await page.click("label");
-    await page.waitForTimeout(300); // timeout required because of debounceFilters
+    await page.waitForTimeout(320); // timeout required because of debounceFilters
     let t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
     expect(t.isOpened).toBeTruthy();
     expect(t.gotShow).toBe(1);

@@ -36,6 +36,7 @@ export default function promiseWait<T>(
         if (isResolved) {
           clearTimeout(a);
           end();
+        } else {
           smartOrCallback instanceof Function && smartOrCallback();
         }
       });
