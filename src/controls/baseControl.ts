@@ -645,7 +645,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     if (this.$isReady && canValidate && (c & ValidationCases.onChange || c & ValidationCases.onChangeSmart)) {
       this.goValidate(ValidateFromCases.onInput);
     }
-    this.fireEvent("$change", { cancelable: false });
+    this.fireEvent("$change", { cancelable: false, bubbles: true });
   }
 
   /* Fired when user pressed Esc-key or button-clear */

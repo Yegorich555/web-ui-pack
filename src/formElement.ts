@@ -40,7 +40,7 @@ declare global {
 
     export interface EventMap extends WUP.EventMap {
       /** Fires after value change on controls */
-      $change: Event; // todo implement
+      $change: Event;
       /** Fires before $submit is happened; can be prevented via e.preventDefault() */
       $willSubmit: (MouseEvent | KeyboardEvent) & { submitter: HTMLElement };
       /** Fires by user-submit when validation succesfull and model is collected */

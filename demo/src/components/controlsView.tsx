@@ -12,7 +12,7 @@ export default function ControlsView() {
         ref={(el) => {
           if (el) {
             el.$initModel = { email: "test-me@google.com" };
-            el.$isPending = true;
+            el.$isPending = false;
           }
         }}
       >
