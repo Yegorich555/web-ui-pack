@@ -177,11 +177,10 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   /** Fired when element is added to document */
   protected gotReady() {
     this.#isReady = true;
+    this.#isStopChanges = true;
     this.gotChanges(null);
-    setTimeout(() => {
-      (this.autofocus || this._opts.autoFocus) && this.focus();
-      this.changesResume();
-    }); // timeout to wait for options
+    this.#isStopChanges = false;
+    setTimeout(() => (this.autofocus || this._opts.autoFocus) && this.focus()); // timeout to wait for options
   }
 
   /** Fired when element is removed from document */
@@ -195,12 +194,9 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
 
   /** Fired when element isReady and at least one of observedOptions is changed */
   protected gotOptionsChanged(e: WUP.OptionEvent) {
-    if (this.#isStopChanges) {
-      return;
-    }
-    this.changesStop();
+    this.#isStopChanges = true;
     this.gotChanges(e.props);
-    setTimeout(this.changesResume);
+    this.#isStopChanges = false;
   }
 
   /** Fired once on Init */
@@ -223,16 +219,6 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     this.gotRemoved();
   }
 
-  /** Stop listening for options/attrs changes */
-  protected changesStop() {
-    this.#isStopChanges = true;
-  }
-
-  /** Resume listening for options/attrs changes */
-  protected changesResume() {
-    this.#isStopChanges = false;
-  }
-
   #isStopChanges = true;
   #attrTimer?: number;
   #attrChanged?: string[];
@@ -249,9 +235,9 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     this.#attrChanged = [name];
     this.#attrTimer = setTimeout(() => {
       this.#attrTimer = undefined;
-      this.changesStop();
+      this.#isStopChanges = true;
       this.gotChanges(this.#attrChanged as Array<keyof WUPForm.Options>);
-      setTimeout(this.changesResume);
+      this.#isStopChanges = false;
       this.#attrChanged = undefined;
     });
   }

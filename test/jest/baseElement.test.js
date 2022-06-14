@@ -390,8 +390,8 @@ describe("baseElement", () => {
 
       gotChanges(...args) {
         super.gotChanges(...args);
-        this.$options.disabledReflect = !this.$options.disabledReflect;
-        this.setAttribute("disabled", this.$options.disabled);
+        this._opts.disabledReflect = !this._opts.disabledReflect;
+        this.setAttribute("disabled", this._opts.disabled);
       }
     }
     customElements.define("test-ch", TestEl);
@@ -406,7 +406,7 @@ describe("baseElement", () => {
     expect(spyAll).toBeCalledTimes(1); // it's called on init
     expect(spyAll).toBeCalledWith(null);
     expect(spyAttr).toBeCalledTimes(1); // inside gotChanges()
-    expect(spyOpts).toBeCalledTimes(1); // inside gotChanges()
+    expect(spyOpts).toBeCalledTimes(0);
 
     await h.wait();
     jest.clearAllMocks();
@@ -415,7 +415,7 @@ describe("baseElement", () => {
     expect(spyAll).toBeCalledTimes(1);
     expect(spyAll).toBeCalledWith(["disabled"]);
     expect(spyAttr).toBeCalledTimes(1);
-    expect(spyOpts).toBeCalledTimes(2);
+    expect(spyOpts).toBeCalledTimes(1);
 
     jest.clearAllMocks();
     testEl.setAttribute("disabled", "true");
@@ -423,7 +423,7 @@ describe("baseElement", () => {
     expect(spyAll).toBeCalledTimes(1);
     expect(spyAll).toBeCalledWith(["disabled"]);
     expect(spyAttr).toBeCalledTimes(2);
-    expect(spyOpts).toBeCalledTimes(1);
+    expect(spyOpts).toBeCalledTimes(0);
 
     jest.clearAllMocks();
     testEl.setAttribute("disabled", "false");
@@ -432,6 +432,13 @@ describe("baseElement", () => {
     expect(spyAll).toBeCalledTimes(1);
     expect(spyAll).toBeCalledWith(["disabled", "readonly"]);
     expect(spyAttr).toBeCalledTimes(3);
-    expect(spyOpts).toBeCalledTimes(1);
+    expect(spyOpts).toBeCalledTimes(0);
+
+    jest.clearAllMocks();
+    testEl.$options.disabled = !testEl.$options.disabled;
+    setTimeout(() => (testEl.$options.disabled = !testEl.$options.disabled));
+    setTimeout(() => (testEl.$options.disabled = !testEl.$options.disabled), 10);
+    await h.wait();
+    expect(spyOpts).toBeCalledTimes(3);
   });
 });
