@@ -488,7 +488,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       }
     );
 
-    this.appendEvent(this, "keydown", () => !this.$isDisabled && this.gotKeyDown);
+    this.appendEvent(this, "keydown", (e) => !this.$isDisabled && this.gotKeyDown(e));
 
     if (this._opts.validationCase & ValidationCases.onInit) {
       !this.$isEmpty && this.goValidate(ValidateFromCases.onInit);
