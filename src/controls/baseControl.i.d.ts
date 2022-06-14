@@ -7,7 +7,7 @@ export default interface IBaseControl<ValueType = any> extends HTMLElement {
   readonly $isFocused: boolean;
   readonly $isDisabled: boolean;
   readonly $isReadOnly: boolean;
-  readonly $autoComplete: boolean | string;
+  readonly $autoComplete: string | false;
 
   $validate: () => string | false;
 

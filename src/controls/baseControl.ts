@@ -376,8 +376,9 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return this.$form?.$options.readOnly || this._opts.readOnly || false;
   }
 
-  get $autoComplete(): string | boolean {
-    return this._opts.autoComplete ?? (this.$form?.$options.autoComplete || false);
+  get $autoComplete(): string | false {
+    const af = this._opts.autoComplete ?? (this.$form?.$options.autoComplete || false);
+    return (af === true ? this._opts.name : af) || false;
   }
 
   /** Check validity and show error if not swtich off; canShowError is true by default
@@ -438,11 +439,9 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     const isPwd = this._opts.name?.includes("password");
     i.type = isPwd ? "password" : "text";
 
-    // set autocomplete
-    const af = this._opts.autoComplete; // https://stackoverflow.com/questions/11708092/detecting-browser-autofill
-    const n = af === true ? (this._opts.name as string) : af;
-    i.autocomplete = n || (isPwd ? "new-password" : "off"); // otherwise form with email+password ignores autocomplete: "off" if previously it was saved
-    // it can be ignored by browsers: try to fix > https://stackoverflow.com/questions/2530/how-do-you-disable-browser-autocomplete-on-web-form-field-input-tags
+    i.autocomplete = this.$autoComplete || (isPwd ? "new-password" : "off"); // otherwise form with email+password ignores autocomplete: "off" if previously it was saved
+    // it can be ignored by browsers. To fix > https://stackoverflow.com/questions/2530/how-do-you-disable-browser-autocomplete-on-web-form-field-input-tags
+    // https://stackoverflow.com/questions/11708092/detecting-browser-autofill
 
     // set label
     const label = (this._opts.label ?? (this._opts.name && stringPrettify(this._opts.name))) || null;

@@ -706,13 +706,4 @@ declare global {
   }
 }
 
-// todo remove after tests
-// const el = document.createElement(tagName);
-// el.$options.name = "testMe";
-// el.$options.validations = {
-//   required: true,
-//   min: (v) => v.length > 500 && "This is error",
-//   extra: (v) => "test Me",
-// };
-
 // testcase (close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click
