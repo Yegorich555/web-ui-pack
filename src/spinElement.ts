@@ -115,9 +115,19 @@ export default class WUPSpinElement extends WUPBaseElement {
     this.gotChanges([]);
   }
 
-  protected connectedCallback() {
+  protected override connectedCallback() {
     this.style.display = "none"; // required to prevent unexpected wrong-render (tied with empty timeout)
     super.connectedCallback();
+  }
+
+  protected override disconnectedCallback() {
+    super.disconnectedCallback();
+
+    if (this.#prevTarget?.isConnected) {
+      // otherwise removing attribute doesn't make sense
+      this.#prevTarget.removeAttribute("aria-busy");
+      this.#prevTarget = undefined;
+    }
   }
 
   protected override gotRender() {
@@ -131,6 +141,7 @@ export default class WUPSpinElement extends WUPBaseElement {
     super.gotReady();
   }
 
+  #prevTarget?: HTMLElement;
   $refShadow?: HTMLDivElement;
   protected override gotChanges(propsChanged: Array<keyof WUPSpin.Options> | null) {
     super.gotChanges(propsChanged);
@@ -141,6 +152,13 @@ export default class WUPSpinElement extends WUPBaseElement {
     this.#prevRect = undefined;
     this.#frameId && window.cancelAnimationFrame(this.#frameId);
     this.#frameId = undefined;
+
+    const nextTarget = this.target;
+    if (this.#prevTarget !== nextTarget) {
+      this.#prevTarget?.removeAttribute("aria-busy");
+      nextTarget.setAttribute("aria-busy", "true");
+      this.#prevTarget = nextTarget;
+    }
 
     if (!this._opts.inline) {
       if (this._opts.overflowFade && !this.$refShadow) {
@@ -199,7 +217,7 @@ export default class WUPSpinElement extends WUPBaseElement {
   }
 
   get target(): HTMLElement {
-    return this._opts.overflowTarget || (this.parentElement as HTMLElement);
+    return (this._opts.inline ? this.parentElement : this._opts.overflowTarget || this.parentElement) as HTMLElement;
   }
 
   get hasRelativeParent(): boolean {

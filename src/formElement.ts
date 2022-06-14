@@ -317,7 +317,6 @@ export default class WUPFormElement<
       if (this._opts.submitActions & SubmitActions.lockOnPending) {
         this.$options.disabled = true;
       }
-      this.setAttribute("aria-busy", "true");
       const btns: Array<HTMLButtonElement & { _wupDisabled: boolean }> = [];
       const spins: Array<WUPSpinElement> = [];
       this.querySelectorAll("[type='submit']").forEach((b) => {
@@ -330,7 +329,6 @@ export default class WUPFormElement<
       this.#stopPending = () => {
         this.#stopPending = undefined;
         this.$options.disabled = wasDisabled;
-        this.removeAttribute("aria-busy");
         btns.forEach((b) => (b.disabled = b._wupDisabled));
         spins.forEach((s) => s.remove());
       };
