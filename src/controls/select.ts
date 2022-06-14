@@ -182,7 +182,6 @@ export default class WUPSelectControl<
     if (items instanceof Function) {
       const f = items();
       if (f instanceof Promise) {
-        /* todo what if user tries to input text - we need to prevent this while it's not ready */
         arr = await promiseWait(f, 300, () => ctrl.changePending(true)).finally(() => ctrl.changePending(false));
       } else {
         arr = f;
@@ -241,6 +240,10 @@ export default class WUPSelectControl<
     return this.#isOpen;
   }
 
+  get $isPending(): boolean {
+    return !!this.#stopPending;
+  }
+
   $hide() {
     this.goHideMenu(HideCases.onManualCall);
   }
@@ -287,7 +290,9 @@ export default class WUPSelectControl<
       this.$refInput.setAttribute("aria-busy", "true");
       const wasDisabled = this._opts.disabled;
       const refSpin = this.renderSpin();
+      this.$refInput.readOnly = true;
       this.#stopPending = () => {
+        this.$refInput.readOnly = this.$isReadOnly;
         this.#stopPending = undefined;
         this.$options.disabled = wasDisabled;
         this.$refInput.removeAttribute("aria-busy");
@@ -304,7 +309,7 @@ export default class WUPSelectControl<
     this._opts.readOnlyInput
       ? this.$refInput.removeAttribute("aria-autocomplete")
       : this.$refInput.setAttribute("aria-autocomplete", "list");
-    this.$refInput.readOnly = (this.$isReadOnly || this._opts.readOnlyInput) as boolean;
+    this.$refInput.readOnly = (this.$isReadOnly || this._opts.readOnlyInput || this.$isPending) as boolean;
 
     const isMenuEnabled = !this.$isDisabled && !this.$isReadOnly;
     if (isMenuEnabled && !this.#popupRefs) {
@@ -611,6 +616,7 @@ export default class WUPSelectControl<
   }
 
   protected override async gotKeyDown(e: KeyboardEvent) {
+    console.warn("down");
     // don't allow to process Esc-key when menu is opened
     const isEscPrevent = this.#isOpen && e.key === "Escape";
     !isEscPrevent && super.gotKeyDown(e);
