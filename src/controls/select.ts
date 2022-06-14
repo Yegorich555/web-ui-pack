@@ -448,6 +448,9 @@ export default class WUPSelectControl<
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected async goShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | null): Promise<WUPPopupElement | null> {
+    if (this.$isPending) {
+      return null;
+    }
     if (
       showCase === ShowCases.onClick &&
       e?.target instanceof HTMLInputElement &&
@@ -505,6 +508,12 @@ export default class WUPSelectControl<
       this.#disposeMenuEvents!.push(r);
       this.$refPopup = p;
       await this.renderMenu(p, menuId);
+      // fix case when user wait for loading and moved focus to another
+      if (!this.$isFocused) {
+        this.#isOpen = false;
+        this.removePopup();
+        return null;
+      }
       this.appendChild(p);
     } else if (showCase !== ShowCases.onInput && this._menuItems!.filtered) {
       this._menuItems!.all?.forEach((li) => (li.style.display = "")); // reset styles after filtering
@@ -616,7 +625,9 @@ export default class WUPSelectControl<
   }
 
   protected override async gotKeyDown(e: KeyboardEvent) {
-    console.warn("down");
+    if (this.$isPending) {
+      return;
+    }
     // don't allow to process Esc-key when menu is opened
     const isEscPrevent = this.#isOpen && e.key === "Escape";
     !isEscPrevent && super.gotKeyDown(e);

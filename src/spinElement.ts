@@ -120,8 +120,8 @@ export default class WUPSpinElement extends WUPBaseElement {
     super.connectedCallback();
   }
 
-  protected override disconnectedCallback() {
-    super.disconnectedCallback();
+  protected override gotRemoved() {
+    super.gotRemoved();
 
     if (this.#prevTarget?.isConnected) {
       // otherwise removing attribute doesn't make sense

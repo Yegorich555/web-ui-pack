@@ -268,6 +268,7 @@ export default class WUPFormElement<
     }
   }
 
+  // todo getter can be Promise<Model> to show pending ???
   _initModel?: Partial<Model>;
   /** Default/init model related to every control inside; @see BaseControl...$initValue */
   get $initModel(): Partial<Model> {

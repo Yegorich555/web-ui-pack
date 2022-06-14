@@ -90,7 +90,7 @@ export default function ControlsView() {
                       { text: "Item N 10", value: ++ir },
                       // { text: (v, li, i) => li.append(v.toString()), value: 124 },
                     ]);
-                  }, 5000);
+                  }, 3000);
                 });
               el.$options.validations = {
                 required: true,
