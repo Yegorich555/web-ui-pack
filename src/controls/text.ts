@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 import onFocusGot from "../helpers/onFocusGot";
 import { onEvent } from "../indexHelpers";
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";

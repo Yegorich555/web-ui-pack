@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 import focusFirst from "../helpers/focusFirst";
 import onEvent, { onEventType } from "../helpers/onEvent";
 import onFocusGot from "../helpers/onFocusGot";

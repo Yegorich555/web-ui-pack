@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 export namespace WUPPopupPlace {
   export interface XResult {
     attr: "left" | "right" | "top" | "bottom";

@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 import WUPBaseElement, { WUP } from "./baseElement";
 import { px2Number, styleTransform } from "./helpers/styleHelpers";
 

@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 import WUPBaseElement, { WUP } from "./baseElement";
 import IBaseControl from "./controls/baseControl.i";
 import { nestedProperty, promiseWait, scrollIntoView } from "./indexHelpers";
@@ -85,7 +84,6 @@ declare global {
   }
 }
 
-// eslint-disable-next-line no-use-before-define
 const formStore: WUPFormElement[] = [];
 
 /** Default Form-HTMLElement that collect values from controls
@@ -268,7 +266,6 @@ export default class WUPFormElement<
     }
   }
 
-  // todo getter can be Promise<Model> to show pending ???
   _initModel?: Partial<Model>;
   /** Default/init model related to every control inside; @see BaseControl...$initValue */
   get $initModel(): Partial<Model> {

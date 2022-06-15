@@ -1,4 +1,4 @@
-/* eslint-disable no-use-before-define, prefer-rest-params */
+/* eslint-disable prefer-rest-params */
 // discussions here https://stackoverflow.com/questions/5100376/how-to-watch-for-array-changes
 import isEqual, { isBothNaN } from "./isEqual";
 
@@ -274,7 +274,6 @@ function make<T extends object>(
 
       // remove parent from this object
       if (isObject(prev)) {
-        // eslint-disable-next-line no-use-before-define
         const v = proxy[prop as keyof T] as unknown as Observer.Observed;
         (lstObserved.get(v) as Ref<object>).parentRefs.delete(ref);
       }

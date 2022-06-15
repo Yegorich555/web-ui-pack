@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 import WUPBaseElement, { WUP } from "../baseElement";
 import { WUPPopup } from "./popupElement.types";
 import { PopupPlacements, WUPPopupPlace } from "./popupPlacements";
@@ -181,7 +180,6 @@ export default class WUPPopupElement<
           isHidding = false;
           const isCreate = !popup;
           if (!popup) {
-            // eslint-disable-next-line no-use-before-define
             const p = document.body.appendChild(document.createElement(opts.tagName ?? tagName) as T);
             popup = p;
             Object.assign(p._opts, opts);
@@ -396,7 +394,6 @@ export default class WUPPopupElement<
   #placements: Array<WUPPopupPlace.PlaceFunc> = [];
   #prevRect?: DOMRect;
   #scrollParents?: HTMLElement[];
-  // eslint-disable-next-line no-use-before-define
   #arrowElement?: WUPPopupArrowElement;
 
   protected setMaxHeight(v: string) {

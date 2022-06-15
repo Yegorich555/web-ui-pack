@@ -1,5 +1,3 @@
-/* eslint-disable no-use-before-define */
-
 /** Apply el.addEventListener and return el.removeEventListener function; use passive:true by default; */
 export default function onEvent<
   T extends keyof E,

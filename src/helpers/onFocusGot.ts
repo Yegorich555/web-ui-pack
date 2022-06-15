@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 import onFocusLost from "./onFocusLost";
 
 /** Fires when element or children gotFocus (happens once)

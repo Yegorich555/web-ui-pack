@@ -59,7 +59,6 @@ export default function onFocusLost(
 ): () => void {
   setEvent();
   const remove = () => {
-    // eslint-disable-next-line no-use-before-define
     element.removeEventListener("focusout", focusout);
     rstEvent?.call(element);
   };

@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 import WUPBaseElement, { WUP } from "../baseElement";
 import WUPFormElement from "../formElement";
 import isEqual from "../helpers/isEqual";

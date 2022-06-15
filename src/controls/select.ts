@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 import { WUP } from "../baseElement";
 import onEvent from "../helpers/onEvent";
 import onFocusLostEv from "../helpers/onFocusLost";
@@ -508,7 +507,7 @@ export default class WUPSelectControl<
       this.#disposeMenuEvents!.push(r);
       this.$refPopup = p;
       await this.renderMenu(p, menuId);
-      // fix case when user wait for loading and moved focus to another
+      // fix case when user waited for loading and moved focus to another
       if (!this.$isFocused) {
         this.#isOpen = false;
         this.removePopup();
