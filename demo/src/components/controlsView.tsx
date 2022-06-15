@@ -106,31 +106,10 @@ export default function ControlsView() {
           }}
         />
 
-        <wup-switch
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "switch";
-            }
-          }}
-        />
-        <wup-switch
-          disabled
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "switchDisabled";
-              el.$initValue = true;
-            }
-          }}
-        />
-        <wup-switch
-          reverse
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "switchReversed";
-              el.$initValue = true;
-            }
-          }}
-        />
+        <wup-switch name="switch" />
+        <wup-switch name="switchChecked - todo" defaultChecked />
+        <wup-switch name="switchDisabled" disabled />
+        <wup-switch name="switchReversed" reverse="" />
 
         <div className={`${styles.common} ${styles.textControl} ${styles.combobox} ${styles.multiselect}`}>
           <label onMouseDown={(e) => !(e.target instanceof HTMLInputElement) && e.preventDefault()}>

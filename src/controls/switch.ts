@@ -86,6 +86,7 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
         margin-left: 0.5em;
         position: relative;
         width: var(--ctrl-switch-size-w);
+        min-width: var(--ctrl-switch-size-w);
         height: var(--ctrl-switch-size-h);
         border-radius: 999px;
         background: var(--ctrl-switch-off-back);
@@ -187,3 +188,5 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
 }
 
 customElements.define(tagName, WUPSwitchControl);
+
+// todo add defaultChecked
