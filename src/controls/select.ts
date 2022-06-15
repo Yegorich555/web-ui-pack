@@ -8,9 +8,9 @@ import popupListenTarget from "../popup/popupListenTarget";
 import WUPSpinElement from "../spinElement";
 import WUPTextControl, { WUPTextIn } from "./text";
 
-const sideEffect = WUPSpinElement;
-!sideEffect && console.error("Missed"); // It's required otherwise import is ignored by webpack
+!WUPSpinElement && console.error("!"); // It's required otherwise import is ignored by webpack
 
+const tagName = "wup-select";
 export namespace WUPSelectIn {
   export interface Defs {
     /** Wait for pointed time before show-error (sumarized with $options.debounce); WARN: hide-error without debounce
@@ -66,8 +66,8 @@ declare global {
       text: (value: T, li: HTMLLIElement, i: number) => string;
       value: T;
     }
-    export type MenuItemAny<T> = MenuItem<T> | MenuItemFn<T>;
-    export type MenuItems<T> = MenuItem<T>[] | MenuItemFn<T>[];
+    type MenuItemAny<T> = MenuItem<T> | MenuItemFn<T>;
+    type MenuItems<T> = MenuItem<T>[] | MenuItemFn<T>[];
 
     interface ValidationMap extends Omit<WUPText.ValidationMap, "min" | "max" | "email"> {}
     interface EventMap extends WUPText.EventMap {
@@ -79,6 +79,18 @@ declare global {
     interface JSXProps<T extends WUPSelectControl> extends WUPText.JSXProps<T> {
       /** @readonly Use [opened] for styling */
       readonly opened?: boolean;
+    }
+  }
+
+  // add element to document.createElement
+  interface HTMLElementTagNameMap {
+    [tagName]: WUPSelectControl;
+  }
+
+  // add element to tsx/jsx intellisense
+  namespace JSX {
+    interface IntrinsicElements {
+      [tagName]: WUPSelect.JSXProps<WUPSelectControl>;
     }
   }
 }
@@ -734,21 +746,6 @@ export default class WUPSelectControl<
   }
 }
 
-const tagName = "wup-select";
 customElements.define(tagName, WUPSelectControl);
-
-declare global {
-  // add element to document.createElement
-  interface HTMLElementTagNameMap {
-    [tagName]: WUPSelectControl;
-  }
-
-  // add element to tsx/jsx intellisense
-  namespace JSX {
-    interface IntrinsicElements {
-      [tagName]: WUPSelect.JSXProps<WUPSelectControl>;
-    }
-  }
-}
 
 // testcase (close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click

@@ -54,7 +54,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     if (!this.#ctr.$refStyle) {
       this.#ctr.$refStyle = document.createElement("style");
       /* from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility  */
-      this.#ctr.$refStyle.append(`.wup-hidden {
+      this.#ctr.$refStyle.append(`.wup-hidden, [wup-hidden] {
                         position: absolute;
                         height: 1px;
                         width: 1px;

@@ -5,6 +5,7 @@ import WUPBaseControl, { WUPBaseIn } from "./baseControl";
 const emailReg =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
+const tagName = "wup-text";
 export namespace WUPTextIn {
   export interface Def {
     /** Debounce time to wait for user finishes typing to start validate and provide $change event
@@ -43,6 +44,18 @@ declare global {
     interface Options<T = string> extends WUPTextIn.GenOpt<T> {}
     interface JSXProps<T extends WUPTextControl> extends WUPBase.JSXProps<T> {}
   }
+
+  // add element to document.createElement
+  interface HTMLElementTagNameMap {
+    [tagName]: WUPTextControl;
+  }
+
+  // add element to tsx/jsx intellisense
+  namespace JSX {
+    interface IntrinsicElements {
+      [tagName]: WUPText.JSXProps<WUPTextControl>;
+    }
+  }
 }
 /**
  * @tutorial innerHTML @example
@@ -69,7 +82,6 @@ export default class WUPTextControl<
      }`;
   }
 
-  /** StyleContent related to component */
   static get $style(): string {
     return `${super.$style}
         :host {
@@ -241,6 +253,7 @@ export default class WUPTextControl<
     this.$refInput.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", this.$refInput.id);
 
+    this.$refInput.type = "text";
     const s = this.$refLabel.appendChild(document.createElement("span"));
     s.appendChild(this.$refInput); // input appended to span to allow user user :after,:before without padding adjust
     s.appendChild(this.$refTitle);
@@ -254,6 +267,13 @@ export default class WUPTextControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUPText.Options> | null) {
     super.gotChanges(propsChanged as any);
+
+    // todo implement password input
+    const isPwd = this._opts.name?.includes("password");
+    this.$refInput.type = isPwd ? "password" : "text";
+    this.$refInput.autocomplete = this.$autoComplete || (isPwd ? "new-password" : "off"); // otherwise form with email+password ignores autocomplete: "off" if previously it was saved
+    // it can be ignored by browsers. To fix > https://stackoverflow.com/questions/2530/how-do-you-disable-browser-autocomplete-on-web-form-field-input-tags
+    // https://stackoverflow.com/questions/11708092/detecting-browser-autofill
 
     setTimeout(() => {
       this._opts.selectOnFocus &&
@@ -312,21 +332,8 @@ export default class WUPTextControl<
   }
 }
 
-const tagName = "wup-text";
 customElements.define(tagName, WUPTextControl);
 
-declare global {
-  // add element to document.createElement
-  interface HTMLElementTagNameMap {
-    [tagName]: WUPTextControl;
-  }
-
-  // add element to tsx/jsx intellisense
-  namespace JSX {
-    interface IntrinsicElements {
-      [tagName]: WUPText.JSXProps<WUPTextControl>;
-    }
-  }
-}
-
 // todo all $defaults.validationRules are inherrited and use common object. So every rule-name must be unique
+
+// testcase: form with email+password ignores autocomplete: "off" if previously it was saved

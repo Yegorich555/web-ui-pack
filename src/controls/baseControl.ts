@@ -45,12 +45,7 @@ export const enum ValidateFromCases {
 }
 
 export namespace WUPBaseIn {
-  export type Generics<
-    ValueType,
-    ValidationKeys extends WUPBase.ValidationMap,
-    ExtraDefaults = {},
-    ExtraOptions = {}
-  > = {
+  export type Generics<ValueType, ValidationKeys, ExtraDefaults = {}, ExtraOptions = {}> = {
     Validation: (value: ValueType, setValue: ValidationKeys[keyof ValidationKeys]) => false | string;
     CustomValidation: (value: ValueType) => false | string;
     Defaults: {
@@ -149,11 +144,13 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   #ctr = this.constructor as typeof WUPBaseControl;
 
   static observedOptions = new Set<keyof WUPBase.Options>(["label", "name", "autoComplete", "disabled", "readOnly"]);
+
   /* Array of attribute names to listen for changes */
-  static get observedAttributes(): Array<keyof WUPBase.Options> {
-    return ["label", "name", "autoComplete", "disabled", "readOnly", "autoFocus"];
+  static get observedAttributes(): Array<keyof WUPBase.Options | any> {
+    return ["label", "name", "autoComplete", "disabled", "readOnly"];
   }
 
+  /** Css-variables related to component */
   static get $styleRoot(): string {
     return `:root {
         --ctrl-padding: 1.4em 1em 0.6em 1em;
@@ -173,6 +170,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       `;
   }
 
+  /** StyleContent related to component */
   static get $style(): string {
     // WARN: 'contain:style' is tricky rule
     return `${super.$style}
@@ -433,14 +431,8 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     this._opts.readOnly = this.getBoolAttr("readOnly", this._opts.readOnly);
     this._opts.autoFocus = this.getBoolAttr("autoFocus", this._opts.autoFocus);
 
-    // set type
     const i = this.$refInput;
-    const isPwd = this._opts.name?.includes("password");
-    i.type = isPwd ? "password" : "text";
-
-    i.autocomplete = this.$autoComplete || (isPwd ? "new-password" : "off"); // otherwise form with email+password ignores autocomplete: "off" if previously it was saved
-    // it can be ignored by browsers. To fix > https://stackoverflow.com/questions/2530/how-do-you-disable-browser-autocomplete-on-web-form-field-input-tags
-    // https://stackoverflow.com/questions/11708092/detecting-browser-autofill
+    i.autocomplete = this.$autoComplete || "off";
 
     // set label
     const label = (this._opts.label ?? (this._opts.name && stringPrettify(this._opts.name))) || null;
@@ -468,7 +460,8 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     i.readOnly = this.$isReadOnly;
   }
 
-  /** Use this to append elements; fired single time when element isConnected/appended to layout but not ready yet */
+  /** Use this to append elements; fired single time when element isConnected/appended to layout but not ready yet
+   * Attention: this.$refInput is already defined */
   protected abstract renderControl(): void;
 
   protected override gotReady() {
@@ -676,6 +669,3 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     this.disposeLstInit.length = 0;
   }
 }
-
-// todo implement password input
-// testcase: form with email+password ignores autocomplete: "off" if previously it was saved
