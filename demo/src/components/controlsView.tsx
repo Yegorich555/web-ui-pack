@@ -13,33 +13,19 @@ export default function ControlsView() {
           if (el) {
             el.$initModel = { email: "test-me@google.com" };
             el.$isPending = false;
+            el.$options.disabled = false;
+            el.$options.readOnly = false;
           }
         }}
       >
         <button type="submit">Submit</button>
-        <wup-text
-          ref={(el) => {
-            if (el) {
-              setTimeout(() => {
-                el.$options.name = "email";
-                el.$initValue = "";
-              });
-            }
-          }}
-        />
-        <wup-text
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "password";
-              // el.$options.autoComplete = false;
-            }
-          }}
-        />
+        <wup-text name="text" />
+        <wup-text name="password" />
         <wup-text
           ref={(el) => {
             if (el) {
               el.$options.label =
-                "TextControl TextControl TextControlTextControl TextControl TextControl TextControl TextControl";
+                "Very very very incredible long label to check if it has ellipsis rule and it works as expected";
               el.$options.validations = {
                 required: true,
                 max: 10,
@@ -68,7 +54,6 @@ export default function ControlsView() {
             }
           }}
         />
-
         <wup-select
           ref={(el) => {
             if (el) {
@@ -105,9 +90,9 @@ export default function ControlsView() {
             }
           }}
         />
-
         <wup-switch name="switch" />
-        <wup-switch name="switchChecked - todo" defaultChecked />
+        {/* otherwise in React inline [defaultChecked] doesn't work */}
+        <wup-switch name="switchChecked" ref={(el) => el?.setAttribute("defaultChecked", "")} />
         <wup-switch name="switchDisabled" disabled />
         <wup-switch name="switchReversed" reverse="" />
 
@@ -144,7 +129,6 @@ export default function ControlsView() {
             </li>
           </ul> */}
         </div>
-
         <div className={`${styles.common} ${styles.textControl} ${styles.combobox} ${styles.multiselect}`}>
           <label onMouseDown={(e) => !(e.target instanceof HTMLInputElement) && e.preventDefault()}>
             <span>
@@ -175,7 +159,6 @@ export default function ControlsView() {
             </li>
           </ul> */}
         </div>
-
         <div className={`${styles.common} ${styles.textControl} ${styles.combobox} ${styles.multiselect}`}>
           {/* todo onMouseDown > prevent only when input is already focused */}
           <label onMouseDown={(e) => !(e.target instanceof HTMLInputElement) && e.preventDefault()}>
@@ -203,7 +186,6 @@ export default function ControlsView() {
             </li>
           </ul> */}
         </div>
-
         <div className={`${styles.common} ${styles.slidebox} ${styles.checkbox}`}>
           <label onMouseDown={(e) => e.preventDefault()}>
             <input type="checkbox" defaultChecked />
@@ -211,7 +193,6 @@ export default function ControlsView() {
             <span />
           </label>
         </div>
-
         <div className={`${styles.common} ${styles.slidebox} ${styles.checkbox}  ${styles.checkboxReverse}`}>
           <label onMouseDown={(e) => e.preventDefault()}>
             <input type="checkbox" defaultChecked />
@@ -219,7 +200,6 @@ export default function ControlsView() {
             <span />
           </label>
         </div>
-
         <div className={`${styles.common} ${styles.slidebox} ${styles.checkbox}`} disabled>
           <label onMouseDown={(e) => e.preventDefault()}>
             <input type="checkbox" defaultChecked disabled />
@@ -227,7 +207,6 @@ export default function ControlsView() {
             <span />
           </label>
         </div>
-
         <div className={`${styles.common} ${styles.radioGroup}`} onMouseDown={(e) => e.preventDefault()}>
           <fieldset>
             <legend>RadioGroup</legend>
@@ -261,7 +240,6 @@ export default function ControlsView() {
             </label>
           </fieldset>
         </div>
-
         <div className={`${styles.common} ${styles.radioGroup}`} onMouseDown={(e) => e.preventDefault()}>
           <fieldset aria-required>
             <legend>RadioGroup</legend>
@@ -275,7 +253,6 @@ export default function ControlsView() {
             </label>
           </fieldset>
         </div>
-
         <div className={`${styles.common} ${styles.radioGroup}`} onMouseDown={(e) => e.preventDefault()}>
           <fieldset aria-required>
             <legend>RadioGroup</legend>

@@ -3,7 +3,7 @@ import WUPBaseControl, { WUPBaseIn } from "./baseControl";
 const tagName = "wup-switch";
 export namespace WUPSwitchIn {
   export interface Def {
-    /** Should it be reversed-style
+    /** Reversed-style (switch+label for true vs label+swich)
      * @defaultValue false */
     reverse?: boolean;
   }
@@ -27,7 +27,10 @@ declare global {
     interface Defaults<T = boolean> extends WUPSwitchIn.GenDef<T> {}
     interface Options<T = boolean> extends WUPSwitchIn.GenOpt<T> {}
     interface JSXProps<T extends WUPSwitchControl> extends WUPBase.JSXProps<T> {
-      reverse?: true | "";
+      /** Reversed-style (switch+label vs label+swich) */
+      reverse?: boolean | "";
+      /** @deprecated This attr doesn't work with React (react-issue) */
+      defaultChecked?: boolean;
     }
   }
 
@@ -124,8 +127,8 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
 
   static observedOptions = (super.observedOptions as Set<keyof WUPSwitch.Options>).add("reverse") as any;
   static get observedAttributes() {
-    const arr = super.observedAttributes as Array<keyof WUPSwitch.Options>;
-    arr.push("reverse");
+    const arr = super.observedAttributes as Array<keyof WUPSwitch.Options | "defaultChecked">;
+    arr.push("reverse", "defaultChecked");
     return arr;
   }
 
@@ -182,8 +185,16 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
 
   protected override gotChanges(propsChanged: Array<keyof WUPSwitch.Options> | null) {
     super.gotChanges(propsChanged as any);
+
     this._opts.reverse = this.getBoolAttr("reverse", this._opts.reverse);
     this.setBoolAttr("reverse", this._opts.reverse);
+
+    if (this.getBoolAttr("defaultChecked", false)) {
+      this.$initValue = true;
+      if (!propsChanged) {
+        this.$value = this.$initValue;
+      }
+    }
   }
 }
 

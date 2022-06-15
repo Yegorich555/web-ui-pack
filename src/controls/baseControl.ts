@@ -111,9 +111,9 @@ declare global {
       /** @deprecated Name to autocomplete by browser; */
       autoComplete?: string;
 
-      /** @deprecated Disallow edit/copy value. Use [disabled] for styling */
+      /** Disallow edit/copy value. Use [disabled] for styling */
       disabled?: boolean;
-      /** @deprecated Disallow edit value */
+      /** Disallow edit value */
       readOnly?: boolean;
       /** @deprecated Focus on init */
       autoFocus?: boolean;
@@ -669,3 +669,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     this.disposeLstInit.length = 0;
   }
 }
+
+// todo improve support for attrs 'name', 'label', 'initValue' as initValue
+// todo how to add validations to attrs maybe vld-min, vld-max or json: vld="{'min':2,'max':4}"; required ?
