@@ -1,8 +1,8 @@
 import Page from "src/elements/page";
-import { WUPSelectControl, WUPTextControl, WUPSpinElement, WUPSwitchControl } from "web-ui-pack";
+import { WUPSelectControl, WUPTextControl, WUPSpinElement, WUPSwitchControl, WUPCheckControl } from "web-ui-pack";
 import styles from "./controlsView.scss";
 
-const sideEffect = WUPTextControl && WUPSelectControl && WUPSpinElement && WUPSwitchControl;
+const sideEffect = WUPTextControl && WUPSelectControl && WUPSpinElement && WUPSwitchControl && WUPCheckControl;
 !sideEffect && console.error("!"); // It's required otherwise import is ignored by webpack
 
 export default function ControlsView() {
@@ -15,6 +15,12 @@ export default function ControlsView() {
             el.$isPending = false;
             el.$options.disabled = false;
             el.$options.readOnly = false;
+            el.$onSubmit = (e) => {
+              console.warn("sumbitted model", e.$model);
+              // eslint-disable-next-line no-promise-executor-return
+              return new Promise((resolve) => setTimeout(resolve, 1000));
+              // todo rollback disabled doesn't work after promise
+            };
           }
         }}
       >
@@ -95,6 +101,12 @@ export default function ControlsView() {
         <wup-switch name="switchChecked" ref={(el) => el?.setAttribute("defaultChecked", "")} />
         <wup-switch name="switchDisabled" disabled />
         <wup-switch name="switchReversed" reverse="" />
+
+        <wup-check name="checkbox" />
+        {/* otherwise in React inline [defaultChecked] doesn't work */}
+        <wup-check name="checkboxChecked" ref={(el) => el?.setAttribute("defaultChecked", "")} />
+        <wup-check name="checkboxDisabled" disabled />
+        <wup-check name="checkboxReversed" reverse="" />
 
         <div className={`${styles.common} ${styles.textControl} ${styles.combobox} ${styles.multiselect}`}>
           <label onMouseDown={(e) => !(e.target instanceof HTMLInputElement) && e.preventDefault()}>
@@ -186,27 +198,6 @@ export default function ControlsView() {
             </li>
           </ul> */}
         </div>
-        <div className={`${styles.common} ${styles.slidebox} ${styles.checkbox}`}>
-          <label onMouseDown={(e) => e.preventDefault()}>
-            <input type="checkbox" defaultChecked />
-            <strong>CheckControl</strong>
-            <span />
-          </label>
-        </div>
-        <div className={`${styles.common} ${styles.slidebox} ${styles.checkbox}  ${styles.checkboxReverse}`}>
-          <label onMouseDown={(e) => e.preventDefault()}>
-            <input type="checkbox" defaultChecked />
-            <strong>CheckControl - reverse</strong>
-            <span />
-          </label>
-        </div>
-        <div className={`${styles.common} ${styles.slidebox} ${styles.checkbox}`} disabled>
-          <label onMouseDown={(e) => e.preventDefault()}>
-            <input type="checkbox" defaultChecked disabled />
-            <strong>CheckControl - disabled</strong>
-            <span />
-          </label>
-        </div>
         <div className={`${styles.common} ${styles.radioGroup}`} onMouseDown={(e) => e.preventDefault()}>
           <fieldset>
             <legend>RadioGroup</legend>
@@ -244,24 +235,11 @@ export default function ControlsView() {
           <fieldset aria-required>
             <legend>RadioGroup</legend>
             <label>
-              <input type="radio" name="w2" />
+              <input type="radio" name="w1" />
               <span>Value 1</span>
             </label>
             <label>
-              <input type="radio" name="w2" />
-              <span>Value 2</span>
-            </label>
-          </fieldset>
-        </div>
-        <div className={`${styles.common} ${styles.radioGroup}`} onMouseDown={(e) => e.preventDefault()}>
-          <fieldset aria-required>
-            <legend>RadioGroup</legend>
-            <label>
-              <input type="radio" name="w2" />
-              <span>Value 1</span>
-            </label>
-            <label>
-              <input type="radio" name="w2" />
+              <input type="radio" name="w1" />
               <span>Value 2</span>
             </label>
           </fieldset>

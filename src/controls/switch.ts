@@ -11,7 +11,7 @@ export namespace WUPSwitchIn {
 
   export type Generics<
     ValueType = boolean,
-    ValidationKeys extends Omit<WUPBase.ValidationMap, "required"> = WUPSwitch.ValidationMap,
+    ValidationKeys extends WUPSwitch.ValidationMap = WUPSwitch.ValidationMap,
     Defaults = Def,
     Options = Opt
   > = WUPBaseIn.Generics<ValueType, ValidationKeys, Defaults & Def, Options & Opt>;
@@ -199,5 +199,3 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
 }
 
 customElements.define(tagName, WUPSwitchControl);
-
-// todo add defaultChecked

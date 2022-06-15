@@ -39,7 +39,7 @@ npm install web-ui-pack
 - [x] FormElement
 - [x] TextControl
 - [ ] PasswordControl
-- [ ] CheckControl
+- [x] CheckControl
 - [x] SwitchControl
 - [ ] RadioControl
 - [x] SelectControl (ComboBox, Dropdown)
