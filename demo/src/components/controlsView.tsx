@@ -1,9 +1,9 @@
 import Page from "src/elements/page";
-import { WUPSelectControl, WUPTextControl, WUPSpinElement } from "web-ui-pack";
+import { WUPSelectControl, WUPTextControl, WUPSpinElement, WUPSwitchControl } from "web-ui-pack";
 import styles from "./controlsView.scss";
 
-const sideEffect = WUPTextControl && WUPSelectControl && WUPSpinElement;
-!sideEffect && console.error("Missed"); // It's required otherwise import is ignored by webpack
+const sideEffect = WUPTextControl && WUPSelectControl && WUPSpinElement && WUPSwitchControl;
+!sideEffect && console.error("!"); // It's required otherwise import is ignored by webpack
 
 export default function ControlsView() {
   return (
@@ -106,6 +106,32 @@ export default function ControlsView() {
           }}
         />
 
+        <wup-switch
+          ref={(el) => {
+            if (el) {
+              el.$options.name = "switch";
+            }
+          }}
+        />
+        <wup-switch
+          disabled
+          ref={(el) => {
+            if (el) {
+              el.$options.name = "switchDisabled";
+              el.$initValue = true;
+            }
+          }}
+        />
+        <wup-switch
+          reverse
+          ref={(el) => {
+            if (el) {
+              el.$options.name = "switchReversed";
+              el.$initValue = true;
+            }
+          }}
+        />
+
         <div className={`${styles.common} ${styles.textControl} ${styles.combobox} ${styles.multiselect}`}>
           <label onMouseDown={(e) => !(e.target instanceof HTMLInputElement) && e.preventDefault()}>
             <span>
@@ -197,30 +223,6 @@ export default function ControlsView() {
               Puns
             </li>
           </ul> */}
-        </div>
-
-        <div className={`${styles.common} ${styles.slidebox}`}>
-          <label onMouseDown={(e) => e.preventDefault()}>
-            <input type="checkbox" defaultChecked autoFocus />
-            <strong>SlideControl</strong>
-            <span />
-          </label>
-        </div>
-
-        <div className={`${styles.common} ${styles.slidebox}`} disabled>
-          <label onMouseDown={(e) => e.preventDefault()}>
-            <input type="checkbox" defaultChecked disabled />
-            <strong>SlideControl - disabled</strong>
-            <span />
-          </label>
-        </div>
-
-        <div className={`${styles.common} ${styles.slidebox} ${styles.slideboxReverse}`}>
-          <label onMouseDown={(e) => e.preventDefault()}>
-            <input type="checkbox" />
-            <strong>SlideControl-reverse</strong>
-            <span />
-          </label>
         </div>
 
         <div className={`${styles.common} ${styles.slidebox} ${styles.checkbox}`}>

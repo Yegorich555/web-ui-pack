@@ -38,11 +38,12 @@ npm install web-ui-pack
 - [x] SpinElement
 - [x] FormElement
 - [x] TextControl
-- [x] PasswordControl
-- [x] CheckControl
-- [x] SlideControl
+- [ ] PasswordControl
+- [ ] CheckControl
+- [x] SwitchControl
 - [ ] RadioControl
 - [x] SelectControl (ComboBox, Dropdown)
+- [ ] SelectManyControl (ComboBox, Dropdown)
 - [ ] Calendar
 - [ ] DateControl
 - [ ] TimeControl ?
@@ -51,7 +52,7 @@ npm install web-ui-pack
 - [ ] ConfirmModalElement
 - [ ] FormModalElement
 - [ ] FileControl
-- [ ] ImageControl
+- [ ] ImageControl (AvatarEditor)
 - [ ] SearchControl ?
 - [ ] InfiniteScroll
 - [ ] VirtualScroll
@@ -91,14 +92,14 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
          - [SpinElement](src/spinElement.ts)
          - [FormElement](src/formElement.ts)
          - [_BaseControl_](src/controls/baseControl.ts)
-           - [CheckControl](src/controls/checkControl.ts)
-             - [SlideControl](src/controls/slideControl.ts)
-           - [RadioGroupControl](src/controls/checkControl.ts)
-           - [TextControl](src/controls/textControl.ts)
-             - [PasswordControl](src/controls/passwordControl.ts)
-             - [SelectControl](src/controls/selectControl.ts)
-               - [SelectManyControl](src/controls/selectManyControl.ts)
-               - [DateControl](src/controls/dateControl.ts)
+           - [SwitchControl](src/controls/switch.ts)
+             - [CheckControl](src/controls/check.ts)
+           - [RadioGroupControl](src/controls/radio.ts)
+           - [TextControl](src/controls/text.ts)
+             - [PasswordControl](src/controls/password.ts)
+             - [SelectControl](src/controls/select.ts)
+               - [SelectManyControl](src/controls/selectMany.ts)
+               - [DateControl](src/controls/date.ts)
 
 ---
 

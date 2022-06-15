@@ -14,9 +14,12 @@
   - `findScrollParentAll`
   - `isIntoView`
   - `scrollIntoView`
-- [`FormControls`](README.md#controls)
-  - Added TextControl (desc. coming soon...)
-  - Added SelectControl (desc. coming soon...)
+- Added elements // todo description comming soon
+  - SpinElement
+  - FormElement
+  - TextControl
+  - SelectControl
+  - SwitchControl
 - Helper [nestedProperty](README.md#helpers): added option `out.hasProp`
 - Helper [promiseWait](README.md#helpers): added option `smartOrCallback` to prevent useless pending on already resolved promises
 
