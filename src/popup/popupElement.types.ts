@@ -75,14 +75,14 @@ export namespace WUPPopup {
      *  Arrow is placed after popup so it's easy to access (via style @see arrowClass or popupElement.$arrowElement)
      */
     arrowEnable: boolean;
-    /** Setup arrow class and use :before to add background-image or content;
-     * Limitation: arrow developed with ratio 2:1(w:h). You can't change it directly. Use only :before, :after to reach you goal
+    /** Setup arrow class and use ::before to add background-image or content;
+     * Limitation: arrow developed with ratio 2:1(w:h). You can't change it directly. Use only ::before, ::after to reach you goal
      *
      * To customize arrow style you can use also the following scss logic
      * @example
      * wup-popup + wup-popup-arrow {
      *   opacity: 0.5
-     *   &:before {
+     *   &::before {
      *      background: no-repeat url("someImageHere.png");
      *   }
      * }

@@ -37,6 +37,7 @@ export default function promiseWait<T>(
           clearTimeout(a);
           end();
         } else {
+          // todo better if call it twice with bool
           smartOrCallback instanceof Function && smartOrCallback();
         }
       });

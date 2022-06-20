@@ -3,7 +3,7 @@ import WUPBaseControl, { WUPBaseIn } from "./baseControl";
 const tagName = "wup-switch";
 export namespace WUPSwitchIn {
   export interface Def {
-    /** Reversed-style (switch+label for true vs label+swich)
+    /** Reversed-style (switch+label for true vs label+switch)
      * @defaultValue false */
     reverse?: boolean;
   }
@@ -27,7 +27,7 @@ declare global {
     interface Defaults<T = boolean> extends WUPSwitchIn.GenDef<T> {}
     interface Options<T = boolean> extends WUPSwitchIn.GenOpt<T> {}
     interface JSXProps<T extends WUPSwitchControl> extends WUPBase.JSXProps<T> {
-      /** Reversed-style (switch+label vs label+swich) */
+      /** Reversed-style (switch+label vs label+switch) */
       reverse?: boolean | "";
       /** @deprecated This attr doesn't work with React (react-issue) */
       defaultChecked?: boolean;

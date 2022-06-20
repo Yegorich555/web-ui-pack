@@ -145,9 +145,9 @@ export default class WUPTextControl<
         }
         /* style for icons */
         :host label button,
-        :host label button::after,
-        :host label::after,
-        :host label::before {
+        :host label button:after,
+        :host label:after,
+        :host label:before {
           display: inline-block;
           width: var(--ctrl-icon-size);
           min-height: var(--ctrl-icon-size);
@@ -167,10 +167,10 @@ export default class WUPTextControl<
           -webkit-mask-position: center;
           mask-position: center;
         }
-        :host label::after {
+        :host label:after {
           margin-right: calc(var(--ctrl-icon-size) / -2);
         }
-        :host label::before {
+        :host label:before {
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
         :host label button {
@@ -185,15 +185,15 @@ export default class WUPTextControl<
           position: relative;
           background: none;
         }
-        :host button[clear]::after {
+        :host button[clear]:after {
           content: "";
           padding: 0;
           background-color: var(--ctrl-label);
           -webkit-mask-image: var(--wup-icon-cross);
           mask-image: var(--wup-icon-cross);
         }
-        :host button[clear]::after,
-        :host button[clear]::before {
+        :host button[clear]:after,
+        :host button[clear]:before {
           position: absolute;
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
@@ -204,12 +204,12 @@ export default class WUPTextControl<
           :host button[clear]:hover {
             box-shadow: none;
           }
-          :host button[clear]:hover::before {
+          :host button[clear]:hover:before {
             content: "";
             border-radius: 50%;
             box-shadow: inset 0 0 0 99999px var(--ctrl-btn-clear-hover);
           }
-          :host button[clear]:hover::after {
+          :host button[clear]:hover:after {
             background-color: var(--ctrl-err-text);
           }
         }`;
