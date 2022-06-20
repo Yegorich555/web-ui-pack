@@ -66,8 +66,8 @@
   padding-bottom: 0;
 }
 
-.common label::before,
-.common label::after {
+.common label:before,
+.common label:after {
   box-sizing: content-box;
   cursor: pointer;
   flex: 0 0 auto;
@@ -77,11 +77,11 @@
   align-self: stretch;
 }
 
-.common label::before {
+.common label:before {
   margin-right: 0.5em;
 }
 
-.common label::after {
+.common label:after {
   margin-left: 0.5em;
 }
 
@@ -95,8 +95,8 @@
   cursor: inherit;
 }
 
-.common input:required + *::after,
-.common fieldset[aria-required] > legend::after {
+.common input:required + *:after,
+.common fieldset[aria-required] > legend:after {
   content: "*";
   font-size: larger;
   font-weight: bolder;
@@ -170,107 +170,6 @@
   }
 }
 
-.radioGroup {
-  --ctrl-radio-size: 14px;
-  --ctrl-radio-spot-size: 8px;
-  --ctrl-radio-back: #fff;
-  --ctrl-radio-off: #fff;
-  --ctrl-radio-on: var(--ctrl-focus);
-  --ctrl-radio-border: #0002;
-  --ctrl-radio-border-size: 2px;
-  --ctrl-radio-gap: 0.7em;
-
-  padding: var(--ctrl-padding);
-
-  fieldset {
-    border: none;
-    padding: 0;
-    margin: calc(var(--ctrl-radio-gap) / -1);
-
-    display: flex;
-    flex-wrap: wrap;
-  }
-
-  legend,
-  strong {
-    display: block;
-    position: absolute;
-    transform-origin: top left;
-    top: 0.2em;
-    transform: scale(0.9);
-
-    margin: 0 var(--ctrl-radio-gap);
-    padding: 0;
-    box-sizing: border-box;
-
-    max-width: 100%;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-
-    font-weight: normal;
-    text-decoration: none;
-  }
-
-  label {
-    padding: 0;
-  }
-
-  input {
-    position: absolute;
-    height: 1px;
-    width: 1px;
-    overflow: hidden;
-    clip: rect(1px, 1px, 1px, 1px); /* from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility */
-    outline: none;
-  }
-
-  input + * {
-    padding: var(--ctrl-radio-gap);
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-
-    &::after {
-      content: "";
-      // it's not relative because 1.2em of 14px provides round-pixel-issue and not always rounded items
-      width: var(--ctrl-radio-size);
-      height: var(--ctrl-radio-size);
-      border: calc((var(--ctrl-radio-size) - var(--ctrl-radio-spot-size)) / 2) solid var(--ctrl-radio-back);
-      box-sizing: border-box;
-      background: var(--ctrl-radio-off);
-      box-shadow: 0 0 1px var(--ctrl-radio-border-size) var(--ctrl-radio-border);
-      border-radius: 50%;
-      margin-left: 0.5em;
-
-      @media not all and (prefers-reduced-motion) {
-        transition: background-color var(--anim);
-      }
-    }
-  }
-
-  input:checked + *::after {
-    background-color: var(--ctrl-radio-on);
-  }
-
-  input:focus + * {
-    color: var(--ctrl-selected);
-
-    &::after {
-      box-shadow: 0 0 1px var(--ctrl-radio-border-size) var(--ctrl-selected);
-    }
-  }
-  @media (hover: hover) {
-    input + *:hover {
-      color: var(--ctrl-selected);
-
-      &::after {
-        box-shadow: 0 0 1px var(--ctrl-radio-border-size) var(--ctrl-selected);
-      }
-    }
-  }
-}
-
 .combobox {
   cursor: pointer;
 }
@@ -279,7 +178,7 @@
   cursor: text;
 }
 
-.combobox label::after {
+.combobox label:after {
   content: "";
   width: var(--ctrl-combo-icon-size);
   min-height: var(--ctrl-combo-icon-size);
@@ -296,20 +195,20 @@
 }
 
 @media not all and (prefers-reduced-motion) {
-  .combobox label::after {
+  .combobox label:after {
     transition: transform var(--anim);
   }
 }
 
 @media (hover: hover) {
   .combobox:hover {
-    label::after {
+    label:after {
       background-color: var(--ctrl-focus);
     }
   }
 }
 
-.combobox[opened] label::after {
+.combobox[opened] label:after {
   transform: rotate(180deg);
 }
 
@@ -376,7 +275,7 @@
       border-radius: var(--ctrl-border-radius);
       cursor: pointer;
 
-      &::after {
+      &:after {
         content: "";
         display: inline-block;
         width: var(--ctrl-multi-remove-size);
@@ -403,7 +302,7 @@
         color: var(--ctrl-selected);
         background-color: var(--ctrl-multi-selected-back);
 
-        &::after {
+        &:after {
           background-color: var(--ctrl-multi-selected-remove);
         }
       }

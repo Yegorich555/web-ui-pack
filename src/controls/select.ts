@@ -63,7 +63,7 @@ declare global {
     }
     /** Use li.innerHTML to render value & return string required for input; */
     interface MenuItemFn<T> {
-      text: (value: T, li: HTMLLIElement, i: number) => string;
+      text: (value: T, el: HTMLElement, i: number) => string;
       value: T;
     }
     type MenuItemAny<T> = MenuItem<T> | MenuItemFn<T>;

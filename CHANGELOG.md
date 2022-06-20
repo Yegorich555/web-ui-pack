@@ -21,6 +21,7 @@
   - SelectControl
   - SwitchControl
   - CheckControl
+  - RadioControl
 - Helper [nestedProperty](README.md#helpers): added option `out.hasProp`
 - Helper [promiseWait](README.md#helpers): added option `smartOrCallback` to prevent useless pending on already resolved promises
 

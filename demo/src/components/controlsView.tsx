@@ -1,8 +1,16 @@
 import Page from "src/elements/page";
-import { WUPSelectControl, WUPTextControl, WUPSpinElement, WUPSwitchControl, WUPCheckControl } from "web-ui-pack";
+import {
+  WUPSelectControl,
+  WUPTextControl,
+  WUPSpinElement,
+  WUPSwitchControl,
+  WUPCheckControl,
+  WUPRadioControl,
+} from "web-ui-pack";
 import styles from "./controlsView.scss";
 
-const sideEffect = WUPTextControl && WUPSelectControl && WUPSpinElement && WUPSwitchControl && WUPCheckControl;
+const sideEffect =
+  WUPTextControl && WUPSelectControl && WUPSpinElement && WUPSwitchControl && WUPCheckControl && WUPRadioControl;
 !sideEffect && console.error("!"); // It's required otherwise import is ignored by webpack
 
 export default function ControlsView() {
@@ -27,7 +35,7 @@ export default function ControlsView() {
         <button type="submit">Submit</button>
         <wup-text name="text" />
         <wup-text name="password" />
-        <wup-text
+        {/* <wup-text
           ref={(el) => {
             if (el) {
               el.$options.label =
@@ -59,7 +67,7 @@ export default function ControlsView() {
               el.$value = "some value";
             }
           }}
-        />
+        /> */}
         <wup-select
           ref={(el) => {
             if (el) {
@@ -96,17 +104,42 @@ export default function ControlsView() {
             }
           }}
         />
+
         <wup-switch name="switch" />
         {/* otherwise in React inline [defaultChecked] doesn't work */}
-        <wup-switch name="switchChecked" ref={(el) => el?.setAttribute("defaultChecked", "")} />
+        {/* <wup-switch name="switchChecked" ref={(el) => el?.setAttribute("defaultChecked", "")} />
         <wup-switch name="switchDisabled" disabled />
-        <wup-switch name="switchReversed" reverse="" />
+        <wup-switch name="switchReversed" reverse="" /> */}
 
         <wup-check name="checkbox" />
         {/* otherwise in React inline [defaultChecked] doesn't work */}
-        <wup-check name="checkboxChecked" ref={(el) => el?.setAttribute("defaultChecked", "")} />
+        {/* <wup-check name="checkboxChecked" ref={(el) => el?.setAttribute("defaultChecked", "")} />
         <wup-check name="checkboxDisabled" disabled />
-        <wup-check name="checkboxReversed" reverse="" />
+        <wup-check name="checkboxReversed" reverse="" /> */}
+
+        <wup-radio
+          ref={(el) => {
+            if (el) {
+              el.$options.name = "radioGroup";
+              let ir = 10;
+              el.$options.items = [
+                { text: "Item N 1", value: ++ir },
+                { text: "Item N 2", value: ++ir },
+                { text: "Item N 3", value: ++ir },
+                { text: "Item N 4", value: ++ir },
+                { text: "Item N 5", value: ++ir },
+                { text: "Donny 1", value: ++ir },
+                { text: "Item N 7", value: ++ir },
+                { text: "Donny 2", value: ++ir },
+                { text: "Item N 9", value: ++ir },
+                { text: "Item N 10", value: ++ir },
+                // { text: (v, li, i) => li.append(v.toString()), value: 124 },
+              ];
+              el.$initValue = 12;
+              el.$options.reverse = true;
+            }
+          }}
+        />
 
         <div className={`${styles.common} ${styles.textControl} ${styles.combobox} ${styles.multiselect}`}>
           <label onMouseDown={(e) => !(e.target instanceof HTMLInputElement) && e.preventDefault()}>
@@ -197,52 +230,6 @@ export default function ControlsView() {
               Puns
             </li>
           </ul> */}
-        </div>
-        <div className={`${styles.common} ${styles.radioGroup}`} onMouseDown={(e) => e.preventDefault()}>
-          <fieldset>
-            <legend>RadioGroup</legend>
-            <label>
-              <input type="radio" name="w1" />
-              <span>Value 1</span>
-            </label>
-            <label>
-              <input type="radio" name="w1" />
-              <span>Value 2</span>
-            </label>
-            <label>
-              <input type="radio" name="w1" />
-              <span>Value 3</span>
-            </label>
-            <label>
-              <input type="radio" name="w1" />
-              <span>g4</span>
-            </label>
-            <label>
-              <input type="radio" name="w1" />
-              <span>Value 5</span>
-            </label>
-            <label>
-              <input type="radio" name="w1" />
-              <span>Value 6</span>
-            </label>
-            <label>
-              <input type="radio" name="w1" />
-              <span>Va 7</span>
-            </label>
-          </fieldset>
-        </div>
-        <div className={`${styles.common} ${styles.radioGroup}`} onMouseDown={(e) => e.preventDefault()}>
-          <fieldset aria-required>
-            <legend>RadioGroup</legend>
-            <label>
-              <input type="radio" name="w1" />
-              <span>Value 1</span>
-            </label>
-            <label>
-              <input type="radio" name="w1" />
-              <span>Value 2</span>
-            </label>
-          </fieldset>
         </div>
         <button type="submit">Submit</button>
       </wup-form>
