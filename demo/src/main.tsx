@@ -9,14 +9,20 @@ import PopupView from "./components/popup/popupView";
 import iconGit from "./assets/gitIcon.svg";
 import imgLogo from "./assets/logo.png";
 import styles from "./main.scss";
-import ControlsView from "./components/controlsView";
+import ControlsView from "./components/controls/controlsView";
 import SpinView from "./components/spin/spinView";
+import TextControlView from "./components/controls/text";
+import SelectControlView from "./components/controls/select";
+import SwitchControlView from "./components/controls/switch";
+import CheckControlView from "./components/controls/check";
+import RadioControlView from "./components/controls/radio";
 
 interface IRoute {
   label?: string;
   path: string;
   url?: string;
   el: React.FunctionComponent;
+  isNested?: boolean;
 }
 const baseURL = process.env.BASE_URL || "/";
 
@@ -24,6 +30,11 @@ const routes: IRoute[] = [
   { path: "popup", el: PopupView },
   { path: "spin", el: SpinView },
   { path: "controls", el: ControlsView },
+  { path: "text", el: TextControlView, isNested: true },
+  { path: "select", el: SelectControlView, isNested: true },
+  { path: "radio", el: RadioControlView, isNested: true },
+  { path: "switch", el: SwitchControlView, isNested: true },
+  { path: "check", el: CheckControlView, isNested: true },
 ];
 
 routes.forEach((v) => (v.url = baseURL + v.path));
@@ -54,7 +65,12 @@ export default function AppContainer() {
           <ul>
             {routes.map((r) => (
               <li key={r.path}>
-                <NavLink to={r.url as string} className={({ isActive }) => (isActive ? styles.activeLink : "")}>
+                <NavLink
+                  to={r.url as string}
+                  className={({ isActive }) =>
+                    [isActive ? styles.activeLink : "", r.isNested ? styles.nested : ""].join(" ")
+                  }
+                >
                   {r.label || WUPHelpers.stringPrettify(r.path)}
                 </NavLink>
               </li>

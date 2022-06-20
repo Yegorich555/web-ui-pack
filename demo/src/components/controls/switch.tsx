@@ -1,0 +1,42 @@
+import Page from "src/elements/page";
+import { WUPSwitchControl } from "web-ui-pack";
+
+const sideEffect = WUPSwitchControl;
+!sideEffect && console.error("!"); // required otherwise import is ignored by webpack
+
+export default function SwitchControlView() {
+  return (
+    <Page header="SwitchControl" link="switchcontrol">
+      <wup-form
+        ref={(el) => {
+          if (el) {
+            el.$onSubmit = (e) => console.warn("sumbitted model", e.$model);
+          }
+        }}
+      >
+        <wup-switch label="Switch" />
+        <wup-switch
+          ref={(el) => {
+            if (el) {
+              el.$options.name = "required";
+              el.$options.validations = { required: true };
+            }
+          }}
+        />
+        <wup-switch label="Very very very incredible long label to check if it has ellipsis rule and it works as expected" />
+        <wup-switch name="reversed" reverse="" />
+        <wup-switch
+          name="reversed2"
+          reverse=""
+          label="Very very very incredible long label to check if it has ellipsis rule and it works as expected"
+        />
+        {/* otherwise in React inline [defaultChecked] doesn't work */}
+        <wup-switch name="checked" ref={(el) => el?.setAttribute("defaultChecked", "")} />
+        <wup-switch name="disabled" disabled />
+        {/* todo readonly doesn't disable logic */}
+        <wup-switch name="readonly" readOnly />
+        <button type="submit">Submit</button>
+      </wup-form>
+    </Page>
+  );
+}

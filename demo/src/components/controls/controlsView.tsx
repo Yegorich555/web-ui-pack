@@ -1,3 +1,4 @@
+/* eslint-disable no-promise-executor-return */
 import Page from "src/elements/page";
 import {
   WUPSelectControl,
@@ -12,6 +13,21 @@ import styles from "./controlsView.scss";
 const sideEffect =
   WUPTextControl && WUPSelectControl && WUPSpinElement && WUPSwitchControl && WUPCheckControl && WUPRadioControl;
 !sideEffect && console.error("!"); // It's required otherwise import is ignored by webpack
+
+let ir = 10;
+const items = [
+  { text: "Item N 1", value: ++ir },
+  { text: "Item N 2", value: ++ir },
+  { text: "Wizard", value: ++ir },
+  { text: "Item N 4", value: ++ir },
+  { text: "Item N 5", value: ++ir },
+  { text: "Don", value: ++ir },
+  { text: "Item N 7", value: ++ir },
+  { text: "Angel", value: ++ir },
+  { text: "Item N 9", value: ++ir },
+  { text: "Item N 10", value: ++ir },
+  // { text: (v, li, i) => li.append(v.toString()), value: 124 },
+];
 
 export default function ControlsView() {
   return (
@@ -32,111 +48,27 @@ export default function ControlsView() {
           }
         }}
       >
-        <button type="submit">Submit</button>
         <wup-text name="text" />
-        <wup-text name="password" />
-        {/* <wup-text
-          ref={(el) => {
-            if (el) {
-              el.$options.label =
-                "Very very very incredible long label to check if it has ellipsis rule and it works as expected";
-              el.$options.validations = {
-                required: true,
-                max: 10,
-                min: (v) => v.length < 2 && "This is custom error",
-              };
-            }
-          }}
-        />
-        <wup-text
-          ref={(el) => {
-            if (el) {
-              el.$options.label = "TextControl - readonly";
-              el.$options.readOnly = true;
-              el.$initValue = "init value here";
-              el.$options.hasButtonClear = false;
-              el.$options.name = "in2";
-            }
-          }}
-        />
-        <wup-text
-          ref={(el) => {
-            if (el) {
-              el.$options.label = "TextControl - disabled";
-              el.$options.disabled = true;
-              el.$value = "some value";
-            }
-          }}
-        /> */}
         <wup-select
           ref={(el) => {
             if (el) {
-              let ir = 10;
-              el.$options.label = "Select Control / Combobox";
-              el.$options.items = () =>
-                new Promise((resolve) => {
-                  setTimeout(() => {
-                    resolve([
-                      { text: "Item N 1", value: ++ir },
-                      { text: "Item N 2", value: ++ir },
-                      { text: "Item N 3", value: ++ir },
-                      { text: "Item N 4", value: ++ir },
-                      { text: "Item N 5", value: ++ir },
-                      { text: "Donny 1", value: ++ir },
-                      { text: "Item N 7", value: ++ir },
-                      { text: "Donny 2", value: ++ir },
-                      { text: "Item N 9", value: ++ir },
-                      { text: "Item N 10", value: ++ir },
-                      // { text: (v, li, i) => li.append(v.toString()), value: 124 },
-                    ]);
-                  }, 3000);
-                });
+              el.$options.label = "Select (combobox/dropdown)";
+              el.$options.items = () => new Promise((resolve) => setTimeout(() => resolve(items), 3000));
               el.$options.validations = {
                 required: true,
               };
-
-              // el.$value = ir - 1;
-              // el.$options.readOnlyInput = true;
-              // el.$options.readOnly = true;
-              // el.$options.disabled = true;
-              el.$options.selectOnFocus = true;
-              // el.$initValue = 15;
+              el.$options.name = "select";
             }
           }}
         />
 
         <wup-switch name="switch" />
-        {/* otherwise in React inline [defaultChecked] doesn't work */}
-        {/* <wup-switch name="switchChecked" ref={(el) => el?.setAttribute("defaultChecked", "")} />
-        <wup-switch name="switchDisabled" disabled />
-        <wup-switch name="switchReversed" reverse="" /> */}
-
         <wup-check name="checkbox" />
-        {/* otherwise in React inline [defaultChecked] doesn't work */}
-        {/* <wup-check name="checkboxChecked" ref={(el) => el?.setAttribute("defaultChecked", "")} />
-        <wup-check name="checkboxDisabled" disabled />
-        <wup-check name="checkboxReversed" reverse="" /> */}
-
         <wup-radio
           ref={(el) => {
             if (el) {
               el.$options.name = "radioGroup";
-              let ir = 10;
-              el.$options.items = [
-                { text: "Item N 1", value: ++ir },
-                { text: "Item N 2", value: ++ir },
-                { text: "Item N 3", value: ++ir },
-                { text: "Item N 4", value: ++ir },
-                { text: "Item N 5", value: ++ir },
-                { text: "Donny 1", value: ++ir },
-                { text: "Item N 7", value: ++ir },
-                { text: "Donny 2", value: ++ir },
-                { text: "Item N 9", value: ++ir },
-                { text: "Item N 10", value: ++ir },
-                // { text: (v, li, i) => li.append(v.toString()), value: 124 },
-              ];
-              el.$initValue = 12;
-              el.$options.reverse = true;
+              el.$options.items = items;
             }
           }}
         />

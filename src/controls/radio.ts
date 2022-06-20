@@ -191,7 +191,6 @@ export default class WUPRadioControl<
   $refItems: ExtInputElement[] = [];
 
   protected override renderControl(): void {
-    console.warn(this.$refTitle);
     this.$refFieldset.appendChild(document.createElement("legend")).appendChild(this.$refTitle);
     this.appendChild(this.$refFieldset);
   }
