@@ -476,7 +476,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
           return;
         }
         !(e.target instanceof HTMLInputElement) && e.preventDefault();
-        setTimeout(() => !this.$isFocused && this.focus());
+        this.appendEvent(this, "mouseup", () => !this.$isFocused && this.focus(), { once: true });
       }
     );
 
