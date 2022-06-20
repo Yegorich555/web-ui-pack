@@ -105,6 +105,7 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
         box-shadow: 0 1px 4px 0 var(--ctrl-switch-shadow);
         border-radius: 50%;
       }
+      :host input { ${this.$styleHidden} }
       :host input:checked + * + * {
         background-color: var(--ctrl-switch-on-back);
       }
@@ -171,7 +172,6 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
     this.$refLabel.setAttribute("for", this.$refInput.id);
 
     this.$refInput.type = "checkbox";
-    this.$refInput.setAttribute("wup-hidden", "");
     this.$refLabel.appendChild(this.$refInput);
     this.$refLabel.appendChild(this.$refTitle);
     this.$refLabel.appendChild(document.createElement("span")); // for icon
