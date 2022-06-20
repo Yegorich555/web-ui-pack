@@ -2,7 +2,7 @@ import WUPBaseElement, { WUP } from "../baseElement";
 import WUPFormElement from "../formElement";
 import isEqual from "../helpers/isEqual";
 import onFocusLostEv from "../helpers/onFocusLost";
-import { stringPrettify } from "../indexHelpers";
+import { nestedProperty, stringPrettify } from "../indexHelpers";
 // eslint-disable-next-line import/named
 import WUPPopupElement, { ShowCases } from "../popup/popupElement";
 import IBaseControl from "./baseControl.i";
@@ -450,6 +450,13 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     this.setBoolAttr("readOnly", this._opts.readOnly);
 
     propsChanged == null && this.gotFormChanges(null);
+
+    // retrieve $initValue from $initModel
+    if (this.$initValue === undefined && this.$form && this._opts.name) {
+      if (propsChanged === null || propsChanged.includes("name")) {
+        this.$initValue = nestedProperty.get(this.$form._initModel as any, this._opts.name);
+      }
+    }
   }
 
   /** Fired on control/form Init and every time as control/form options changed. Method contains changes related to form `disabled`,`readonly` etc. */
@@ -467,7 +474,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   protected override gotReady() {
     super.gotReady();
 
-    // this.appendEvent removed by dispose()
+    // appendEvent removed by dispose()
     this.appendEvent(
       this,
       "mousedown", // to prevent blur-focus effect for input by label click
@@ -485,6 +492,8 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     if (this._opts.validationCase & ValidationCases.onInit) {
       !this.$isEmpty && this.goValidate(ValidateFromCases.onInit);
     }
+
+    // this.$form = WUPFormElement.$tryConnect(this);
   }
 
   protected override gotRender() {
@@ -498,8 +507,8 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     this.$form = WUPFormElement.$tryConnect(this);
   }
 
-  protected disconnectedCallback() {
-    super.disconnectedCallback();
+  protected override gotRemoved() {
+    super.gotRemoved();
     this.$form?.$controls.splice(this.$form.$controls.indexOf(this), 1);
   }
 
@@ -672,3 +681,4 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
 // todo improve support for attrs 'name', 'label', 'initValue' as initValue
 // todo how to add validations to attrs maybe vld-min, vld-max or json: vld="{'min':2,'max':4}"; required ?
+// testcase: $initModel & attr [name] (possible it doesn't work)

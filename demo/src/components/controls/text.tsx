@@ -10,12 +10,11 @@ export default function TextControlView() {
       <wup-form
         ref={(el) => {
           if (el) {
-            el.$initModel = { email: "test-me@google.com" };
+            el.$initModel = { email: "test-me@google.com", required: "yes" };
             el.$onSubmit = (e) => console.warn("sumbitted model", e.$model);
           }
         }}
       >
-        {/* todo $initModel doesn't work */}
         <wup-text name="email" label="Text" />
         <wup-text
           ref={(el) => {
@@ -28,8 +27,9 @@ export default function TextControlView() {
         <wup-text
           ref={(el) => {
             if (el) {
+              el.$options.name = "longName";
               el.$options.label =
-                "Very very very incredible long label to check if it has ellipsis rule and it works as expected";
+                "With long label and custom validations (very very very incredible long label to check if it has ellipsis rule)";
               el.$options.validations = {
                 required: true,
                 max: 10,

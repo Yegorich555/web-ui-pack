@@ -196,16 +196,7 @@ export default class WUPFormElement<
   /** Find form related to control,register and apply initModel if initValue undefined */
   static $tryConnect(control: IBaseControl & HTMLElement): WUPFormElement | undefined {
     const form = formStore.find((f) => f.contains(control));
-
-    if (form) {
-      form.$controls.push(control);
-
-      const k = control.$options.name;
-      if (k && form._initModel && control.$initValue === undefined) {
-        control.$initValue = nestedProperty.get(form._initModel, k);
-      }
-    }
-
+    form?.$controls.push(control);
     return form;
   }
 
