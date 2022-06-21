@@ -30,12 +30,12 @@ export default function RadioControlView() {
           }
         }}
       >
-        {/* todo tab-key works wrong for fieldsets */}
         <wup-radio
           ref={(el) => {
             if (el) {
               el.$options.name = "radio";
               el.$options.items = items;
+              el.$options.validations = { required: true };
             }
           }}
         />

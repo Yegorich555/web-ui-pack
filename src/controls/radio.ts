@@ -76,7 +76,7 @@ export default class WUPRadioControl<
     return `${super.$style}
       :host {
         padding: var(--ctrl-padding);
-        cursor: initial;
+        cursor: pointer;
        }
       :host fieldset {
         border: none;
@@ -107,13 +107,18 @@ export default class WUPRadioControl<
       }
       :host label {
         padding: 0;
+        cursor: pointer;
       }
       :host input {${this.$styleHidden}}
       :host input + * {
         padding: var(--ctrl-radio-gap);
-        cursor: pointer;
         display: inline-flex;
         align-items: center;
+      }
+      :host[readonly],
+      :host[readonly] legend,
+      :host[readonly] label {
+        cursor: default;
       }
       :host input + *:after {
         content: "";
@@ -125,6 +130,9 @@ export default class WUPRadioControl<
         box-shadow: 0 0 1px var(--ctrl-radio-border-size) var(--ctrl-radio-border);
         border-radius: 50%;
         margin-left: 0.5em;
+      }
+      :host fieldset[aria-required="true"] input + *:after {
+        content: "";
       }
       :host[reverse] input + * {
         flex-direction: row-reverse;
@@ -270,13 +278,21 @@ export default class WUPRadioControl<
     // required
     const req = this._opts.validations?.required;
     req ? this.$refFieldset.setAttribute("aria-required", "true") : this.$refFieldset.removeAttribute("aria-required");
+    // todo tab-key works wrong for fieldsets
+
+    super.gotChanges(propsChanged as any);
+  }
+
+  override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
+    super.gotFormChanges(propsChanged);
+    this.$refInput.disabled = false;
+    this.$refInput.readOnly = false;
     // disabled
     this.$refFieldset.disabled = this.$isDisabled as boolean;
     // readonly
-    const readonly = this.$isReadOnly as boolean;
-    this.$refItems.forEach((i) => (i.readOnly = readonly));
-
-    super.gotChanges(propsChanged as any);
+    this.$isReadOnly
+      ? this.$refFieldset.setAttribute("aria-description", "readonly")
+      : this.$refFieldset.removeAttribute("aria-description");
   }
 }
 
