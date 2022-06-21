@@ -61,7 +61,7 @@ export default class WUPCheckControl<
         position: initial;
         height: var(--ctrl-check-size);
         width: var(--ctrl-check-size);
-        min-width: auto;
+        min-width: var(--ctrl-check-size);
         border-radius: var(--ctrl-check-radius);
         background: var(--ctrl-check-off-back);
         box-shadow: 0 0 2px 0 var(--ctrl-check-shadow);

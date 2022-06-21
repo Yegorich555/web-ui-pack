@@ -23,10 +23,8 @@ export default function CheckControlView() {
             }
           }}
         />
-        {/* todo checkbox is squized */}
         <wup-check label="Very very very incredible long label to check if it has ellipsis rule and it works as expected" />
         <wup-check name="reversed" reverse="" />
-        {/* todo checkbox is squized */}
         <wup-check
           name="reversed2"
           reverse=""
