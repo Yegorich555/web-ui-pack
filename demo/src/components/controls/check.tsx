@@ -35,7 +35,6 @@ export default function CheckControlView() {
         {/* otherwise in React inline [defaultChecked] doesn't work */}
         <wup-check name="checked" ref={(el) => el?.setAttribute("defaultChecked", "")} />
         <wup-check name="disabled" disabled />
-        {/* todo readonly doesn't disable logic */}
         <wup-check name="readonly" readOnly />
         <button type="submit">Submit</button>
       </wup-form>

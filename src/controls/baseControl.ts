@@ -461,7 +461,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   /** Fired on control/form Init and every time as control/form options changed. Method contains changes related to form `disabled`,`readonly` etc. */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
+  protected gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
     const i = this.$refInput;
     i.disabled = this.$isDisabled as boolean;
     i.readOnly = this.$isReadOnly;

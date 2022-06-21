@@ -33,7 +33,6 @@ export default function SwitchControlView() {
         {/* otherwise in React inline [defaultChecked] doesn't work */}
         <wup-switch name="checked" ref={(el) => el?.setAttribute("defaultChecked", "")} />
         <wup-switch name="disabled" disabled />
-        {/* todo readonly doesn't disable logic */}
         <wup-switch name="readonly" readOnly />
         <button type="submit">Submit</button>
       </wup-form>

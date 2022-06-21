@@ -196,6 +196,12 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
       }
     }
   }
+
+  protected override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
+    super.gotFormChanges(propsChanged);
+    // fix for checkboxes
+    this.$refInput.disabled = this.$refInput.disabled || this.$refInput.readOnly;
+  }
 }
 
 customElements.define(tagName, WUPSwitchControl);
