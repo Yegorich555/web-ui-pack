@@ -185,7 +185,11 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
 
   /** Fired when user types text */
   protected gotInput(e: Event & { currentTarget: HTMLInputElement }) {
-    this.setValue(e.currentTarget.checked);
+    if (this.$isReadOnly) {
+      e.currentTarget.checked = !e.currentTarget.checked;
+    } else {
+      this.setValue(e.currentTarget.checked);
+    }
   }
 
   protected override setValue(v: boolean, canValidate = true) {
@@ -205,12 +209,6 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
         this.$value = this.$initValue;
       }
     }
-  }
-
-  protected override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
-    super.gotFormChanges(propsChanged);
-    // fix for checkboxes
-    this.$refInput.disabled = this.$refInput.disabled || this.$refInput.readOnly;
   }
 }
 
