@@ -30,6 +30,7 @@ export default function RadioControlView() {
           }
         }}
       >
+        {/* todo tab-key works wrong for fieldsets */}
         <wup-radio
           ref={(el) => {
             if (el) {
@@ -52,7 +53,7 @@ export default function RadioControlView() {
             if (el) {
               el.$options.name = "readonly";
               el.$options.items = items;
-              el.$options.readOnly = true; // todo readonly doesn't disable logic
+              el.$options.readOnly = true;
             }
           }}
         />

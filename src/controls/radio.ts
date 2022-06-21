@@ -80,7 +80,7 @@ export default class WUPRadioControl<
        }
       :host fieldset {
         border: none;
-        padding: 0; marging: 0;
+        padding: 0;
         margin: calc(var(--ctrl-radio-gap) * -1);
         display: flex;
         flex-wrap: wrap;
@@ -100,6 +100,7 @@ export default class WUPRadioControl<
         white-space: nowrap;
         font-weight: normal;
         text-decoration: none;
+        cursor: pointer;
       }
       :host strong {
         font: inherit;
@@ -184,7 +185,11 @@ export default class WUPRadioControl<
 
   /** Fired when user touches inputs */
   protected gotInput(e: Event & { target: ExtInputElement }) {
-    this.setValue(e.target._value);
+    if (this.$isReadOnly) {
+      e.target.checked = !e.target.checked;
+    } else {
+      this.setValue(e.target._value);
+    }
   }
 
   $refFieldset = document.createElement("fieldset");
