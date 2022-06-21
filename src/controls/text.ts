@@ -290,18 +290,15 @@ export default class WUPTextControl<
       bc.setAttribute("clear", "");
       bc.setAttribute("aria-hidden", "true");
       bc.tabIndex = -1;
-      const r = onEvent(bc, "click", (e) => {
+      onEvent(bc, "click", (e) => {
         e.stopPropagation(); // prevent from affect on parent
         e.preventDefault(); // prevent from submit
+        this.clearValue();
       });
-
-      this.disposeLstInit.push(r);
-      this.disposeLstInit.push(() => {
-        if (!this._opts.hasButtonClear) {
-          bc.remove();
-          this.$refBtnClear = undefined;
-        }
-      });
+    }
+    if (!this._opts.hasButtonClear && this.$refBtnClear) {
+      this.$refBtnClear.remove();
+      this.$refBtnClear = undefined;
     }
   }
 

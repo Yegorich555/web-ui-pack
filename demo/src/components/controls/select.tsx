@@ -72,7 +72,7 @@ export default function SelectControlView() {
             if (el) {
               el.$options.name = "readonly";
               el.$options.items = items;
-              el.$options.readOnly = true; // todo btnClear click doesn't open menu in this case
+              el.$options.readOnly = true;
             }
           }}
         />
