@@ -44,7 +44,6 @@ export default function SelectControlView() {
               el.$options.name = "withPending";
               el.$options.label = "With pending (set promise to $options.items)";
               el.$options.items = () => new Promise((resolve) => setTimeout(() => resolve(items), 3000));
-              el.$options.selectOnFocus = true;
             }
           }}
         />
@@ -54,7 +53,8 @@ export default function SelectControlView() {
               el.$options.name = "asDropdown";
               el.$options.label = "As dropdown ($options.readOnlyInput)";
               el.$options.items = items;
-              el.$options.readOnlyInput = true; // todo disable ability to select text-value ???
+              el.$initValue = ir - 3;
+              el.$options.readOnlyInput = true;
             }
           }}
         />

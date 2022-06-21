@@ -122,6 +122,9 @@ export default class WUPSelectControl<
       :host input:not(:placeholder-shown) {
         cursor: text;
       }
+      :host input:read-only {
+        cursor: pointer;
+      }
       :host label::after {
         content: "";
         width: var(--ctrl-combo-icon-size);
@@ -320,7 +323,6 @@ export default class WUPSelectControl<
     this._opts.readOnlyInput
       ? this.$refInput.removeAttribute("aria-autocomplete")
       : this.$refInput.setAttribute("aria-autocomplete", "list");
-    this.$refInput.readOnly = (this.$isReadOnly || this._opts.readOnlyInput || this.$isPending) as boolean;
 
     const isMenuEnabled = !this.$isDisabled && !this.$isReadOnly;
     if (isMenuEnabled && !this.#popupRefs) {
@@ -357,6 +359,11 @@ export default class WUPSelectControl<
       this.#popupRefs?.dispose.call(this.#popupRefs); // remove all possible prev-eventListeners
       this.#popupRefs = undefined;
     }
+  }
+
+  gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
+    super.gotFormChanges(propsChanged);
+    this.$refInput.readOnly = (this.$isReadOnly || this._opts.readOnlyInput || this.$isPending) as boolean;
   }
 
   /** All items of current menu */
@@ -407,7 +414,7 @@ export default class WUPSelectControl<
     ul.setAttribute("aria-label", "Items");
 
     const r = onEvent(ul, "click", async (e) => {
-      e.stopPropagation();
+      e.stopPropagation(); // to prevent popup-hide-show
       if (e.target instanceof HTMLLIElement) {
         this.gotMenuItemClick(e as MouseEvent & { target: HTMLLIElement });
       }
@@ -459,16 +466,17 @@ export default class WUPSelectControl<
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected async goShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | null): Promise<WUPPopupElement | null> {
-    if (this.$isPending) {
+    if (this.$isPending || this.$isReadOnly) {
       return null;
     }
+
     if (
       showCase === ShowCases.onClick &&
       e?.target instanceof HTMLInputElement &&
       !e.target.readOnly &&
       this.contains(e.target)
     ) {
-      return null;
+      return null; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
     }
 
     if (this.#isOpen) {
@@ -560,7 +568,7 @@ export default class WUPSelectControl<
       !e.target.readOnly &&
       this.contains(e.target)
     ) {
-      return false;
+      return false; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
     }
 
     const wasOpen = this.#isOpen;

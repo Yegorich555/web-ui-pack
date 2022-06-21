@@ -122,17 +122,13 @@ export default function popupListenTarget(
     });
 
     let wasMouseMove = false; // fix when user makes t.mousedown, mousemove, body.mouseup
-    onShowEvent(t, "mousedown", () => {
+    appendEvent(t, "mousedown", () => {
       wasMouseMove = false;
       onEvent(t, "mousemove", () => (wasMouseMove = true), { once: true });
     });
     onShowEvent(document, "click", (e) => {
       preventClickAfterFocus = false; // mostly it doesn't make sense but maybe it's possible
-      if (wasMouseMove) {
-        wasMouseMove = false;
-        return;
-      }
-      if (e.detail === 2) {
+      if (wasMouseMove || e.detail === 2) {
         return;
       }
       // filter click from target because we have target event for this
@@ -157,8 +153,8 @@ export default function popupListenTarget(
         preventClickAfterFocus = false; // test-case: focus without click > show....click programatically on target > it should hide
       }
 
-      if (timeoutId || wasOutsideClick || openedByHover || e.detail === 2) {
-        // detail === 2 for 2nd of double-click
+      // detail === 2 for 2nd of double-click
+      if (timeoutId || wasOutsideClick || openedByHover || e.detail === 2 || wasMouseMove) {
         return;
       }
       const isPrevented = preventClickAfterFocus; // otherwise it can be reset by document.click
