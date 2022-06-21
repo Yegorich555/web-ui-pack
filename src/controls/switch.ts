@@ -73,6 +73,9 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
         background: none;
         cursor: pointer;
       }
+      :host[readonly] {
+        cursor: initial;
+      }
       :host label {
         padding: var(--ctrl-switch-padding);
       }
@@ -209,6 +212,14 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
         this.$value = this.$initValue;
       }
     }
+  }
+
+  override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
+    super.gotFormChanges(propsChanged);
+    // readonly
+    this.$isReadOnly
+      ? this.$refInput.setAttribute("aria-description", "readonly")
+      : this.$refInput.removeAttribute("aria-description");
   }
 }
 
