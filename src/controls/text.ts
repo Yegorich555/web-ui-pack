@@ -212,6 +212,9 @@ export default class WUPTextControl<
           :host button[clear]:hover:after {
             background-color: var(--ctrl-err-text);
           }
+          :host[readonly] button[clear] {
+            pointer-events: none;
+          }
         }`;
   }
 
@@ -290,7 +293,6 @@ export default class WUPTextControl<
       const r = onEvent(bc, "click", (e) => {
         e.stopPropagation(); // prevent from affect on parent
         e.preventDefault(); // prevent from submit
-        this.clearValue();
       });
 
       this.disposeLstInit.push(r);

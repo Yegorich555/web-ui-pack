@@ -50,7 +50,7 @@ export default function TextControlView() {
           ref={(el) => {
             if (el) {
               el.$options.name = "readonly";
-              el.$options.readOnly = true; // todo need set pointer/select-all by click
+              el.$options.readOnly = true;
               el.$options.selectOnFocus = false;
               el.$initValue = "init value here";
             }
