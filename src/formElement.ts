@@ -175,7 +175,7 @@ export default class WUPFormElement<
           color: var(--btn-submit-text);
         }
         :host [type='submit']:focus {
-          outline: 1px solid var(--btn-submit-focus);
+          outline: 2px solid var(--btn-submit-focus);
         }
         @media (hover: hover) {
           :host [type='submit']:hover {
