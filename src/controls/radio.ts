@@ -216,7 +216,7 @@ export default class WUPRadioControl<
     if (!arr?.length) {
       return;
     }
-
+    const nm = this.#ctr.$uniqueId + (Date.now() % 1000);
     const arrLi = arr.map((item) => {
       const lbl = document.createElement("label");
       const inp = lbl.appendChild(document.createElement("input")) as ExtInputElement;
@@ -227,6 +227,7 @@ export default class WUPRadioControl<
 
       lbl.setAttribute("for", inp.id);
       inp.type = "radio";
+      inp.name = nm; // required otherwise tabbing, arrow-keys doesn't work inside single fieldset
       parent.appendChild(lbl);
       return tit;
     }) as Array<HTMLElement & { _text: string }>;
@@ -236,6 +237,8 @@ export default class WUPRadioControl<
     } else {
       arr.forEach((v, i) => (arrLi[i].textContent = (v as WUPSelect.MenuItem<ValueType>).text));
     }
+
+    this.$refItems[0].tabIndex = 0;
 
     this.checkInput(this.$value); // required for case when user changed items
   }
@@ -278,7 +281,6 @@ export default class WUPRadioControl<
     // required
     const req = this._opts.validations?.required;
     req ? this.$refFieldset.setAttribute("aria-required", "true") : this.$refFieldset.removeAttribute("aria-required");
-    // todo tab-key works wrong for fieldsets
 
     super.gotChanges(propsChanged as any);
   }

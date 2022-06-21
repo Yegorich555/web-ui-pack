@@ -432,8 +432,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     this._opts.autoFocus = this.getBoolAttr("autoFocus", this._opts.autoFocus);
 
     const i = this.$refInput;
-    i.autocomplete = this.$autoComplete || "off";
-
     // set label
     const label = (this._opts.label ?? (this._opts.name && stringPrettify(this._opts.name))) || null;
     this.$refTitle.textContent = label;
@@ -465,6 +463,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     const i = this.$refInput;
     i.disabled = this.$isDisabled as boolean;
     i.readOnly = this.$isReadOnly;
+    i.autocomplete = this.$autoComplete || "off";
   }
 
   /** Use this to append elements; fired single time when element isConnected/appended to layout but not ready yet
