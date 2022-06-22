@@ -14,9 +14,9 @@ export namespace WUPTextIn {
     /** Select whole text when input got focus (when input is not readonly and not disabled);
      * @defaultValue true */
     selectOnFocus: boolean;
-    /** Show/hide clear button
+    /** Show/hide clear button. @see ClearActions
      * @defaultValue true */
-    hasButtonClear: boolean;
+    clearButton: boolean;
   }
 
   export interface Opt {}
@@ -73,7 +73,7 @@ export default class WUPTextControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextControl;
 
-  static observedOptions = (super.observedOptions as Set<keyof WUPText.Options>).add("hasButtonClear") as any;
+  static observedOptions = (super.observedOptions as Set<keyof WUPText.Options>).add("clearButton") as any;
 
   static get $styleRoot(): string {
     return `:root {
@@ -228,7 +228,7 @@ export default class WUPTextControl<
   static $defaults: WUPText.Defaults = {
     ...WUPBaseControl.$defaults,
     selectOnFocus: true,
-    hasButtonClear: true,
+    clearButton: true,
     validationRules: Object.assign(WUPBaseControl.$defaults.validationRules, {
       min: (v, setV) => v.length < setV && `Min length is ${setV} characters`,
       max: (v, setV) => v.length > setV && `Max length is ${setV} characters`,
@@ -284,7 +284,7 @@ export default class WUPTextControl<
         this.disposeLstInit.push(onFocusGot(this, () => this.$refInput.select()));
     }); // timeout required because selectControl can setup readOnly after super.gotChanges
 
-    if (this._opts.hasButtonClear && !this.$refBtnClear) {
+    if (this._opts.clearButton && !this.$refBtnClear) {
       const bc = this.$refLabel.appendChild(document.createElement("button"));
       this.$refBtnClear = bc;
       bc.setAttribute("clear", "");
@@ -296,7 +296,7 @@ export default class WUPTextControl<
         this.clearValue();
       });
     }
-    if (!this._opts.hasButtonClear && this.$refBtnClear) {
+    if (!this._opts.clearButton && this.$refBtnClear) {
       this.$refBtnClear.remove();
       this.$refBtnClear = undefined;
     }

@@ -91,7 +91,7 @@ export default function SelectControlView() {
               el.$options.name = "withoutButtonClear";
               el.$options.items = items;
               el.$initValue = ir - 2;
-              el.$options.hasButtonClear = false;
+              el.$options.clearButton = false;
             }
           }}
         />

@@ -64,9 +64,9 @@ export namespace WUPBaseIn {
       /** Debounce option for onFocustLost event (for validationCases.onFocusLost); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost;
        * @defaultValue 100ms */
       focusDebounceMs?: number;
-      /** Behavior that expected on press key 'Escape'
+      /** Behavior that expected for clearing value inside control (via pressEsc or btnClear)
        * @defaultValue clear | resetToInit (both means: resetToInit if exists, 2nd time - clear etc.) */
-      pressEsc: ClearActions;
+      clearActions: ClearActions;
     } & ExtraDefaults;
     Options: Omit<Generics<ValueType, WUPBase.ValidationMap, ExtraDefaults>["Defaults"], "validationRules"> & {
       /** Title/label of control; if label is missed it's parsed from option [name]. To skip point `label=''` (empty string) */
@@ -283,7 +283,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUPBase.Defaults = {
-    pressEsc: ClearActions.clear | ClearActions.resetToInit,
+    clearActions: ClearActions.clear | ClearActions.resetToInit,
     validityDebounceMs: 500,
     validationCase: ValidationCases.onChangeSmart | ValidationCases.onFocusLost,
     validationRules: {
@@ -652,22 +652,20 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   protected clearValue(canValidate = true) {
     const was = this.#value;
 
-    const isEscClear = this._opts.pressEsc & ClearActions.clear;
-    if (this._opts.pressEsc & ClearActions.resetToInit) {
-      if (this.$isChanged) {
-        this.setValue(this.$initValue, canValidate);
-        this.#prevValue = was;
-        return;
-      }
+    let v: ValueType | undefined;
+    if (this._opts.clearActions & ClearActions.resetToInit && this.$isChanged) {
+      v = this.$initValue;
+    } else if (this._opts.clearActions & ClearActions.clear) {
+      v = this.$isEmpty ? this.#prevValue : undefined;
     }
-    isEscClear && this.setValue(this.$isEmpty ? this.#prevValue : undefined, canValidate);
+    this.setValue(v, canValidate);
     this.#prevValue = was;
   }
 
   #prevValue = this.#value;
   /** Fired when user pressed key */
   protected gotKeyDown(e: KeyboardEvent) {
-    if (this._opts.pressEsc && e.key === "Escape") {
+    if (e.key === "Escape") {
       this.clearValue();
     }
   }

@@ -42,7 +42,7 @@ export default function TextControlView() {
           name="withoutButtonClear"
           ref={(el) => {
             if (el) {
-              el.$options.hasButtonClear = false;
+              el.$options.clearButton = false;
             }
           }}
         />
