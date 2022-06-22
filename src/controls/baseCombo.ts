@@ -197,14 +197,15 @@ export default abstract class WUPBaseComboControl<
     }
   }
 
-  gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
+  override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
     super.gotFormChanges(propsChanged);
     this.$refInput.readOnly = this.$refInput.readOnly || (this._opts.readOnlyInput as boolean);
   }
 
-  /** Fired when need to create menu in opened popup */
+  /** Called when need to create menu in opened popup */
   protected abstract renderMenu(popup: WUPPopupElement, menuId: string): Promise<void> | void;
-  // todo required abstract valueToInput, valueFromInput
+  /** Called when need to transfer current value to input */
+  protected abstract valueToInput(v: ValueType | undefined): string | Promise<string>;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected async goShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | null): Promise<WUPPopupElement | null> {
@@ -323,8 +324,7 @@ export default abstract class WUPBaseComboControl<
 
   #focusedMenuItem?: HTMLElement | null;
   #focusedMenuValue?: ValueType | undefined;
-  /** Focus item by index or reset is index is null (via aria-activedescendant).
-   *  If menuItems is filtered by input-text than index must point on filtered array */
+  /** Focus/resetFocus for item (via aria-activedescendant) */
   protected focusMenuItem(next: HTMLElement | null, nextValue: ValueType | undefined) {
     this.#focusedMenuItem?.removeAttribute("focused");
 
@@ -388,6 +388,15 @@ export default abstract class WUPBaseComboControl<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override async gotInput(e: Event & { currentTarget: HTMLInputElement }) {
     !this.$isOpen && this._opts.showCase & ShowCases.onInput && (await this.goShowMenu(ShowCases.onInput));
+  }
+
+  protected override setInputValue(v: ValueType | undefined) {
+    const p = this.valueToInput(v);
+    if (p instanceof Promise) {
+      p.then((s) => (this.$refInput.value = s));
+    } else {
+      this.$refInput.value = p;
+    }
   }
 
   protected override clearValue(canValidate = true) {

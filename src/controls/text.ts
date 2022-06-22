@@ -218,12 +218,6 @@ export default class WUPTextControl<
         }`;
   }
 
-  /** Get rawValue for input based on argument [value] */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  static $provideInputValue<T, C extends WUPTextControl<T>>(v: T | undefined, ctrl: C): string | Promise<string> {
-    return v != null ? (v as any).toString() : "";
-  }
-
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUPText.Defaults = {
     ...WUPBaseControl.$defaults,
@@ -322,12 +316,7 @@ export default class WUPTextControl<
   }
 
   protected setInputValue(v: ValueType | undefined) {
-    const p = this.#ctr.$provideInputValue(v, this);
-    if (p instanceof Promise) {
-      p.then((s) => (this.$refInput.value = s));
-    } else {
-      this.$refInput.value = p;
-    }
+    this.$refInput.value = v != null ? (v as any).toString() : "";
   }
 }
 

@@ -4,7 +4,6 @@ import { onEvent, promiseWait } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
 import WUPSpinElement from "../spinElement";
 import WUPBaseComboControl, { HideCases, ShowCases, WUPBaseComboIn } from "./baseCombo";
-import WUPTextControl from "./text";
 
 !WUPSpinElement && console.error("!"); // It's required otherwise import is ignored by webpack
 
@@ -127,62 +126,8 @@ export default class WUPSelectControl<
 
   /** Function to filter menuItems based on inputValue; all values are in lowerCase */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  static $filterMenuItem(text: string, inputValue: string, inputRawValue: string): boolean {
-    return text.startsWith(inputValue) || text.includes(` ${inputValue}`);
-  }
-
-  // todo remove from static
-  /** Parse/get items from $options.items */
-  static async $getMenuItems<T, C extends WUPSelectControl<T>>(ctrl: C): Promise<WUPSelect.MenuItems<T>> {
-    if (ctrl._cachedItems) {
-      return ctrl._cachedItems;
-    }
-
-    const { items } = ctrl.$options;
-
-    let arr: WUPSelect.MenuItems<T>;
-    if (items instanceof Function) {
-      const f = items();
-      if (f instanceof Promise) {
-        arr = await promiseWait(f, 300, () => ctrl.changePending(true)).finally(() => ctrl.changePending(false));
-      } else {
-        arr = f;
-      }
-    } else {
-      arr = items;
-    }
-    ctrl._cachedItems = arr;
-    return arr;
-  }
-
-  // todo remove from static
-  static $provideInputValue<T, C extends WUPTextControl<T>>(v: T | undefined, control: C): string | Promise<string> {
-    if (v === undefined) {
-      return "";
-    }
-    const ctrl = control as unknown as WUPSelectControl<T>;
-
-    const ctr = ctrl.constructor as typeof WUPSelectControl;
-    const r = ctr.$getMenuItems<T, WUPSelectControl<T>>(ctrl).then((items) => {
-      const i = (items as WUPSelect.MenuItemAny<any>[]).findIndex((o) => ctr.$isEqual(o.value, v));
-      if (i === -1) {
-        console.error(`${ctrl.tagName}${ctrl._opts.name ? `[${ctrl._opts.name}]` : ""}. Not found in items`, {
-          items,
-          value: v,
-        });
-        return `Error: not found for ${v}` != null ? (v as any).toString() : "";
-      }
-      const item = items[i];
-      if (item.text instanceof Function) {
-        const li = document.createElement("li");
-        const s = item.text(item.value, li, i);
-        li.remove();
-        return s;
-      }
-      return item.text;
-    });
-
-    return r;
+  static $filterMenuItem(menuItemText: string, inputValue: string, inputRawValue: string): boolean {
+    return menuItemText.startsWith(inputValue) || menuItemText.includes(` ${inputValue}`);
   }
 
   static $defaults: WUPSelect.Defaults = {
@@ -199,6 +144,7 @@ export default class WUPSelectControl<
 
   protected override _opts = this.$options;
 
+  /** Returns is control in pending state (show spinner) */
   get $isPending(): boolean {
     return !!this.#stopPending;
   }
@@ -216,6 +162,23 @@ export default class WUPSelectControl<
     spin.$options.overflowTarget = this;
     this.appendChild(spin);
     return spin;
+  }
+
+  protected override async gotOptionsChanged(e: WUP.OptionEvent) {
+    const ev = e as unknown as WUP.OptionEvent<WUPSelect.Options>;
+    if (ev.props.includes("items")) {
+      this.removePopup();
+      this._cachedItems = undefined;
+      if (ev.props.length === 1) {
+        return; // skip re-init if only $options.items is changed
+      }
+    }
+    super.gotOptionsChanged(e);
+  }
+
+  override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
+    super.gotFormChanges(propsChanged);
+    this.$refInput.readOnly = this.$refInput.readOnly || (this.$isPending as boolean);
   }
 
   #stopPending?: () => void;
@@ -240,11 +203,6 @@ export default class WUPSelectControl<
     } else {
       this.#stopPending!();
     }
-  }
-
-  gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
-    super.gotFormChanges(propsChanged);
-    this.$refInput.readOnly = this.$refInput.readOnly || (this.$isPending as boolean);
   }
 
   /** All items of current menu */
@@ -286,6 +244,7 @@ export default class WUPSelectControl<
   }
 
   protected override async renderMenu(popup: WUPPopupElement, menuId: string) {
+    console.warn("start render menu");
     const ul = popup.appendChild(document.createElement("ul"));
     ul.setAttribute("id", menuId);
     ul.setAttribute("role", "listbox");
@@ -302,11 +261,61 @@ export default class WUPSelectControl<
         this.gotMenuItemClick(e as MouseEvent & { target: HTMLLIElement });
       }
     });
+    console.warn("end render menu");
+  }
+
+  /** Method retrieves items from options and shows spinner if required */
+  protected async getMenuItems(): Promise<WUPSelect.MenuItems<ValueType>> {
+    if (this._cachedItems) {
+      return this._cachedItems;
+    }
+
+    const { items } = this._opts;
+
+    let arr: WUPSelect.MenuItems<ValueType>;
+    if (items instanceof Function) {
+      const f = items();
+      if (f instanceof Promise) {
+        arr = await promiseWait(f, 300, () => this.changePending(true)).finally(() => this.changePending(false));
+      } else {
+        arr = f;
+      }
+    } else {
+      arr = items;
+    }
+    this._cachedItems = arr;
+    return arr;
+  }
+
+  protected override valueToInput(v: ValueType | undefined): Promise<string> | string {
+    if (v === undefined) {
+      return "";
+    }
+    const r = this.getMenuItems().then((items) => {
+      const i = (items as WUPSelect.MenuItemAny<any>[]).findIndex((o) => this.#ctr.$isEqual(o.value, v));
+      if (i === -1) {
+        console.error(`${this.tagName}${this._opts.name ? `[${this._opts.name}]` : ""}. Not found in items`, {
+          items,
+          value: v,
+        });
+        return `Error: not found for ${v}` != null ? (v as any).toString() : "";
+      }
+      const item = items[i];
+      if (item.text instanceof Function) {
+        const li = document.createElement("li");
+        const s = item.text(item.value, li, i);
+        li.remove();
+        return s;
+      }
+      return item.text;
+    });
+
+    return r;
   }
 
   /** Create menuItems as array of HTMLLiElement with option _text required to filtering by input (otherwise content can be html-structure) */
   protected async renderMenuItems(ul: HTMLUListElement): Promise<Array<HTMLLIElement & { _text: string }>> {
-    const arr = await this.#ctr.$getMenuItems<ValueType, this>(this);
+    const arr = await this.getMenuItems();
 
     const arrLi = arr.map(() => {
       const li = ul.appendChild(document.createElement("li"));
@@ -334,6 +343,7 @@ export default class WUPSelectControl<
     return arrLi;
   }
 
+  /** Called when need to setValue & close base on clicked item */
   protected gotMenuItemClick(e: MouseEvent & { target: HTMLLIElement }) {
     const i = this._menuItems!.all.indexOf(e.target as HTMLLIElement & { _text: string });
     const o = this._cachedItems![i];
@@ -343,6 +353,7 @@ export default class WUPSelectControl<
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  /** Called on show menu-popup */
   protected async goShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | null): Promise<WUPPopupElement | null> {
     if (this.$isPending) {
       return null;
@@ -355,9 +366,11 @@ export default class WUPSelectControl<
       this._menuItems!.filtered = undefined;
     }
     // set aria-selected
+    console.warn("goShowMenu");
     const v = this.$value;
     if (v !== undefined) {
       const i = this._cachedItems!.findIndex((item) => this.#ctr.$isEqual(item.value, v));
+      // todo some issue here: this._menuItems is undefined if we have $initValue value (not readonly)
       this.selectMenuItem(this._menuItems!.all[i] || null);
     }
 
@@ -366,11 +379,13 @@ export default class WUPSelectControl<
 
   protected override focusMenuItem(next: HTMLElement | null, nextValue: ValueType | undefined) {
     super.focusMenuItem(next, nextValue);
-    if (next === null) {
-      this._menuItems!.focused = -1;
+    if (next === null && this._menuItems) {
+      this._menuItems.focused = -1;
     }
   }
 
+  /** Focus item by index or reset is index is null (via aria-activedescendant).
+   *  If menuItems is filtered by input-text than index must point on filtered array */
   protected focusMenuItemByIndex(index: number | null) {
     if (index != null && index > -1) {
       const { filtered } = this._menuItems!;
@@ -435,18 +450,6 @@ export default class WUPSelectControl<
     hasVisible && rawV !== "" && this.focusMenuItemByIndex(0);
 
     this.$refPopup!.$refresh();
-  }
-
-  protected override async gotOptionsChanged(e: WUP.OptionEvent) {
-    const ev = e as unknown as WUP.OptionEvent<WUPSelect.Options>;
-    if (ev.props.includes("items")) {
-      this.removePopup();
-      this._cachedItems = undefined;
-      if (ev.props.length === 1) {
-        return; // skip re-init if only $options.items is changed
-      }
-    }
-    super.gotOptionsChanged(e);
   }
 
   protected override removePopup() {
