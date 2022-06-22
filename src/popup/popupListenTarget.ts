@@ -110,6 +110,7 @@ export default function popupListenTarget(
   // apply showCase
   let preventClickAfterFocus = false;
   let openedByHover = false;
+  let debounceTimeout: ReturnType<typeof setTimeout> | undefined;
   // onClick
   if (opts.showCase & WUPPopup.ShowCases.onClick) {
     let wasOutsideClick = false; // fix when labelOnClick > inputOnClick
@@ -146,7 +147,6 @@ export default function popupListenTarget(
       }
     });
 
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     appendEvent(t, "click", (e) => {
       if (!(e as MouseEvent).pageX) {
         // pageX is null if it was fired programmatically
@@ -154,7 +154,7 @@ export default function popupListenTarget(
       }
 
       // detail === 2 for 2nd of double-click
-      if (timeoutId || wasOutsideClick || openedByHover || e.detail === 2 || wasMouseMove) {
+      if (debounceTimeout || wasOutsideClick || openedByHover || e.detail === 2 || wasMouseMove) {
         return;
       }
       const isPrevented = preventClickAfterFocus; // otherwise it can be reset by document.click
@@ -168,8 +168,8 @@ export default function popupListenTarget(
         }
       }); // timeout to wait for browser for applying selection on text if user selected something
 
-      // fix when labelOnClick > inputOnClick
-      timeoutId = setTimeout(() => (timeoutId = undefined), 50);
+      // fix when labelOnClick > inputOnClick > inputOnFocus
+      debounceTimeout = setTimeout(() => (debounceTimeout = undefined), 1);
     });
   }
 
@@ -197,9 +197,10 @@ export default function popupListenTarget(
 
   // onFocus
   if (opts.showCase & WUPPopup.ShowCases.onFocus) {
-    const onFocused = (e: FocusEvent) => {
-      if (!openedEl && show(WUPPopup.ShowCases.onFocus, e)) {
-        if (opts.showCase & WUPPopup.ShowCases.onClick) {
+    const onFocused = async (e: FocusEvent) => {
+      if (!openedEl || debounceTimeout) {
+        await show(WUPPopup.ShowCases.onFocus, e);
+        if (openedEl && opts.showCase & WUPPopup.ShowCases.onClick) {
           preventClickAfterFocus = true;
           const r1 = appendEvent(document, "touchstart", () => rst()); // mousdown isn't not fired when user touch-move-end
           const r2 = appendEvent(document, "mousedown", () => rst());

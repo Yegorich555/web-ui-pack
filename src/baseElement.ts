@@ -300,7 +300,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
         return v;
       };
     }
-    // @ts-ignore
+    // @ts-expect-error
     const r = onEvent(...args);
     this.disposeLst.push(r);
     const remove = () => {

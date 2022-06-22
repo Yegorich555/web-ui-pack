@@ -57,9 +57,9 @@ export namespace WUPPopup {
     /** Sets minHeight 100% of targetWidth */
     minHeightByTarget: boolean;
     /** Case when popup need to show;
-     * @defaultValue onClick
+     * @defaultValue ShowCases.onClick
      * @example
-     * showCase=WUPPopup.ShowCases.onFocus | WUPPopup.ShowCases.onClick // to join cases
+     * showCase=ShowCases.onFocus | ShowCases.onClick // to join cases
      * */
     showCase: ShowCases;
     /** Timeout in ms before popup shows on hover of target (for ShowCases.onHover);

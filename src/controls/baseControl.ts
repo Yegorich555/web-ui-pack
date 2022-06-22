@@ -158,7 +158,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         --ctrl-focus-label: #00778d;
         --ctrl-selected: var(--ctrl-focus-label);
         --ctrl-label: #5e5e5e;
-        --cltr-icon: var(--ctrl-label);
+        --ctrl-icon: var(--ctrl-label);
         --ctrl-icon-size: 1em;
         --ctrl-back: var(--base-back);
         --ctrl-border-radius: var(--border-radius, 6px);
@@ -482,6 +482,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
           return;
         }
         !(e.target instanceof HTMLInputElement) && e.preventDefault();
+        // this required because default focus-effect was prevented
         this.appendEvent(this, "mouseup", () => !this.$isFocused && this.focus(), { once: true });
       }
     );

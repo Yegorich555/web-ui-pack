@@ -1,12 +1,10 @@
 import { WUP } from "../baseElement";
-import onEvent from "../helpers/onEvent";
-import onFocusLostEv from "../helpers/onFocusLost";
-import { promiseWait } from "../indexHelpers";
+import { onEvent, promiseWait } from "../indexHelpers";
 // eslint-disable-next-line import/named
-import WUPPopupElement, { ShowCases as PopupShowCases, WUPPopup } from "../popup/popupElement";
-import popupListenTarget from "../popup/popupListenTarget";
+import WUPPopupElement from "../popup/popupElement";
 import WUPSpinElement from "../spinElement";
-import WUPTextControl, { WUPTextIn } from "./text";
+import WUPBaseComboControl, { HideCases, ShowCases, WUPBaseComboIn } from "./baseCombo";
+import WUPTextControl from "./text";
 
 !WUPSpinElement && console.error("!"); // It's required otherwise import is ignored by webpack
 
@@ -16,6 +14,9 @@ export namespace WUPSelectIn {
     /** Wait for pointed time before show-error (sumarized with $options.debounce); WARN: hide-error without debounce
      *  @defaultValue 0 */
     validityDebounceMs?: number;
+    /** Case when menu-popup need to show
+     * @defaultValue onPressArrowKey | onClick | onFocus | onInput */
+    showCase: ShowCases;
   }
 
   export interface Opt<T> {
@@ -27,34 +28,15 @@ export namespace WUPSelectIn {
 
   export type Generics<
     ValueType = any,
-    ValidationKeys extends WUPBase.ValidationMap = WUPSelect.ValidationMap,
+    ValidationKeys extends WUPSelect.ValidationMap = WUPSelect.ValidationMap,
     Defaults = Defs,
     Options = Opt<ValueType>
-  > = WUPTextIn.Generics<ValueType, ValidationKeys, Defaults & Defs, Options & Opt<ValueType>>;
+  > = WUPBaseComboIn.Generics<ValueType, ValidationKeys, Defaults & Defs, Options & Opt<ValueType>>;
 
   export type Validation<T = any> = Generics<T>["Validation"];
   export type GenDef<T = any> = Generics<T>["Defaults"];
   export type GenOpt<T = any> = Generics<T>["Options"];
 }
-
-export const enum ShowCases {
-  onManualCall,
-  onInput,
-  onPressArrowKey,
-  onClick,
-  onFocus,
-}
-
-export const enum HideCases {
-  onClick,
-  onManualCall,
-  onSelect,
-  onFocusLost,
-  OnPressEsc,
-  OnPressEnter,
-  OnOptionsChange,
-}
-
 declare global {
   namespace WUPSelect {
     interface MenuItem<T> {
@@ -69,17 +51,11 @@ declare global {
     type MenuItemAny<T> = MenuItem<T> | MenuItemFn<T>;
     type MenuItems<T> = MenuItem<T>[] | MenuItemFn<T>[];
 
-    interface ValidationMap extends Omit<WUPText.ValidationMap, "min" | "max" | "email"> {}
-    interface EventMap extends WUPText.EventMap {
-      $show: Event;
-      $hide: Event;
-    }
+    interface ValidationMap extends WUPBaseCombo.ValidationMap {}
+    interface EventMap extends WUPBaseCombo.EventMap {}
     interface Defaults<T = string> extends WUPSelectIn.GenDef<T> {}
     interface Options<T = string> extends WUPSelectIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPSelectControl> extends WUPText.JSXProps<T> {
-      /** @readonly Use [opened] for styling */
-      readonly opened?: boolean;
-    }
+    interface JSXProps<T extends WUPSelectControl> extends WUPBaseCombo.JSXProps<T> {}
   }
 
   // add element to document.createElement
@@ -98,7 +74,7 @@ declare global {
 export default class WUPSelectControl<
   ValueType = any,
   EventMap extends WUPSelect.EventMap = WUPSelect.EventMap
-> extends WUPTextControl<ValueType, EventMap> {
+> extends WUPBaseComboControl<ValueType, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPSelectControl;
 
@@ -106,46 +82,17 @@ export default class WUPSelectControl<
 
   static get $styleRoot(): string {
     return `:root {
-              --ctrl-combo-icon: var(--cltr-icon);
-              --ctrl-combo-icon-size: var(--ctrl-icon-size);
-              --ctrl-combo-icon-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m16.078 258.214 329.139 329.139c21.449 21.449 56.174 21.449 77.567 0l329.139-329.139c21.449-21.449 21.449-56.174 0-77.567s-56.174-21.449-77.567 0L384 471.003 93.644 180.647c-21.449-21.449-56.173-21.449-77.567 0s-21.449 56.173 0 77.567z'/%3E%3C/svg%3E");
-              --ctrl-combo-selected: inherit;
-              --ctrl-combo-selected-back: #d9f7fd;
-            }`;
+        --ctrl-select-icon-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m16.078 258.214 329.139 329.139c21.449 21.449 56.174 21.449 77.567 0l329.139-329.139c21.449-21.449 21.449-56.174 0-77.567s-56.174-21.449-77.567 0L384 471.003 93.644 180.647c-21.449-21.449-56.173-21.449-77.567 0s-21.449 56.173 0 77.567z'/%3E%3C/svg%3E");
+        --ctrl-select-current: inherit;
+        --ctrl-select-current-back: #d9f7fd;
+      }`;
   }
 
   static get $style(): string {
     return `${super.$style}
       :host {
         cursor: pointer;
-      }
-      :host input:not(:placeholder-shown) {
-        cursor: text;
-      }
-      :host input:read-only {
-        cursor: pointer;
-      }
-      :host label::after {
-        content: "";
-        width: var(--ctrl-combo-icon-size);
-        min-height: var(--ctrl-combo-icon-size);
-
-        background-color: var(--ctrl-combo-icon);
-        -webkit-mask-image: var(--ctrl-combo-icon-img);
-        mask-image: var(--ctrl-combo-icon-img);
-        -webkit-mask-size: var(--ctrl-combo-icon-size);
-        mask-size: var(--ctrl-combo-icon-size);
-      }
-      :host[opened] label::after {
-        transform: rotate(180deg);
-      }
-      @media not all and (prefers-reduced-motion) {
-        :host label::after {
-          transition: transform var(--anim);
-        }
-      }
-      :host button[clear] {
-        margin: 0;
+        --ctrl-icon-img: var(--ctrl-select-icon-img);
       }
       :host [menu] {
         padding: 0;
@@ -166,8 +113,8 @@ export default class WUPSelectControl<
       }
       :host [menu] li:hover,
       :host [menu] li[aria-selected="true"] {
-        color: var(--ctrl-combo-selected);
-        background: var(--ctrl-combo-selected-back);
+        color: var(--ctrl-select-current);
+        background: var(--ctrl-select-current-back);
       }
       :host [menu] li[focused] {
         box-shadow: inset 0 0 4px 0 var(--ctrl-focus);
@@ -184,6 +131,7 @@ export default class WUPSelectControl<
     return text.startsWith(inputValue) || text.includes(` ${inputValue}`);
   }
 
+  // todo remove from static
   /** Parse/get items from $options.items */
   static async $getMenuItems<T, C extends WUPSelectControl<T>>(ctrl: C): Promise<WUPSelect.MenuItems<T>> {
     if (ctrl._cachedItems) {
@@ -207,6 +155,7 @@ export default class WUPSelectControl<
     return arr;
   }
 
+  // todo remove from static
   static $provideInputValue<T, C extends WUPTextControl<T>>(v: T | undefined, control: C): string | Promise<string> {
     if (v === undefined) {
       return "";
@@ -237,7 +186,8 @@ export default class WUPSelectControl<
   }
 
   static $defaults: WUPSelect.Defaults = {
-    ...WUPTextControl.$defaults,
+    ...WUPBaseComboControl.$defaults,
+    showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey | ShowCases.onInput,
   };
 
   $options: WUPSelect.Options<ValueType> = {
@@ -249,38 +199,13 @@ export default class WUPSelectControl<
 
   protected override _opts = this.$options;
 
-  #isOpen = false;
-  get $isOpen(): boolean {
-    return this.#isOpen;
-  }
-
   get $isPending(): boolean {
     return !!this.#stopPending;
   }
 
-  $hide() {
-    this.goHideMenu(HideCases.onManualCall);
-  }
-
-  $show() {
-    this.goShowMenu(ShowCases.onManualCall);
-  }
-
-  $refPopup?: WUPPopupElement;
-  #popupRefs?: {
-    hide: (hideCase: WUPPopup.HideCases) => Promise<void>;
-    show: (showCase: WUPPopup.ShowCases) => Promise<void>;
-    dispose: () => void;
-  };
-
   protected override renderControl() {
     super.renderControl();
-
-    const i = this.$refInput;
-    i.setAttribute("role", "combobox");
-    i.setAttribute("aria-haspopup", "listbox");
-    i.setAttribute("aria-expanded", "false");
-    // i.setAttribute("aria-multiselectable", "false");
+    // this.$refInput.setAttribute("aria-multiselectable", "false");
   }
 
   /** Called on every spin-render */
@@ -317,53 +242,9 @@ export default class WUPSelectControl<
     }
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUPSelect.Options> | null) {
-    super.gotChanges(propsChanged as any);
-
-    this._opts.readOnlyInput
-      ? this.$refInput.removeAttribute("aria-autocomplete")
-      : this.$refInput.setAttribute("aria-autocomplete", "list");
-
-    const isMenuEnabled = !this.$isDisabled && !this.$isReadOnly;
-    if (isMenuEnabled && !this.#popupRefs) {
-      const refs = popupListenTarget(
-        {
-          target: this,
-          showCase: PopupShowCases.onClick | PopupShowCases.onFocus,
-        },
-        (s, e) => {
-          if (s === WUPPopup.ShowCases.always) {
-            return this.$refPopup!;
-          }
-          return this.goShowMenu(s === PopupShowCases.onClick ? ShowCases.onClick : ShowCases.onFocus, e);
-        },
-        (s, e) => {
-          if (
-            s === WUPPopup.HideCases.onFocusOut ||
-            s === WUPPopup.HideCases.onOutsideClick ||
-            s === WUPPopup.HideCases.onTargetClick ||
-            s === WUPPopup.HideCases.onPopupClick
-          ) {
-            return this.goHideMenu(
-              s === WUPPopup.HideCases.onFocusOut || s === WUPPopup.HideCases.onOutsideClick
-                ? HideCases.onFocusLost
-                : HideCases.onClick,
-              e
-            );
-          }
-          return false;
-        }
-      );
-      this.#popupRefs = { hide: refs.hide, show: refs.show, dispose: refs.onRemoveRef };
-    } else {
-      this.#popupRefs?.dispose.call(this.#popupRefs); // remove all possible prev-eventListeners
-      this.#popupRefs = undefined;
-    }
-  }
-
   gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
     super.gotFormChanges(propsChanged);
-    this.$refInput.readOnly = (this.$isReadOnly || this._opts.readOnlyInput || this.$isPending) as boolean;
+    this.$refInput.readOnly = this.$refInput.readOnly || (this.$isPending as boolean);
   }
 
   /** All items of current menu */
@@ -373,8 +254,6 @@ export default class WUPSelectControl<
     filtered?: Array<number>;
     /** Index (in 'filtered' otherwise in 'all' array) of item that has virtual-focus; */
     focused: number;
-    /** Index of selected/current item */
-    selected: number;
   };
 
   /** Items resolved from options */
@@ -406,24 +285,23 @@ export default class WUPSelectControl<
     }
   }
 
-  #disposeMenuEvents?: Array<() => void>;
-  protected async renderMenu(popup: WUPPopupElement, menuId: string) {
+  protected override async renderMenu(popup: WUPPopupElement, menuId: string) {
     const ul = popup.appendChild(document.createElement("ul"));
     ul.setAttribute("id", menuId);
     ul.setAttribute("role", "listbox");
     ul.setAttribute("aria-label", "Items");
 
-    const r = onEvent(ul, "click", async (e) => {
+    const all = await this.renderMenuItems(ul);
+    this._menuItems = { all, focused: -1 };
+    !all.length && this.renderMenuNoItems(popup, false);
+
+    // it happens on every show because by hide it dispose events
+    onEvent(ul, "click", (e) => {
       e.stopPropagation(); // to prevent popup-hide-show
       if (e.target instanceof HTMLLIElement) {
         this.gotMenuItemClick(e as MouseEvent & { target: HTMLLIElement });
       }
     });
-    this.#disposeMenuEvents!.push(r);
-
-    const all = await this.renderMenuItems(ul);
-    this._menuItems = { all, focused: -1, selected: -1 };
-    !all.length && this.renderMenuNoItems(popup, false);
   }
 
   /** Create menuItems as array of HTMLLiElement with option _text required to filtering by input (otherwise content can be html-structure) */
@@ -466,192 +344,53 @@ export default class WUPSelectControl<
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected async goShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | null): Promise<WUPPopupElement | null> {
-    if (this.$isPending || this.$isReadOnly) {
+    if (this.$isPending) {
       return null;
     }
-
-    if (
-      showCase === ShowCases.onClick &&
-      e?.target instanceof HTMLInputElement &&
-      !e.target.readOnly &&
-      this.contains(e.target)
-    ) {
-      return null; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
-    }
-
-    if (this.#isOpen) {
-      return this.$refPopup!;
-    }
-
-    this.#isOpen = true;
-    this.$hideError(); // it resolves overflow menu vs error
-
     const isCreate = !this.$refPopup;
-    if (!this.$refPopup) {
-      const p = document.createElement("wup-popup");
-      p.$options.showCase = PopupShowCases.always;
-      p.$options.target = this;
-      p.$options.minWidthByTarget = true;
-      p.$options.placement = [
-        WUPPopupElement.$placements.$bottom.$start,
-        WUPPopupElement.$placements.$bottom.$end,
-        WUPPopupElement.$placements.$top.$start,
-        WUPPopupElement.$placements.$top.$end,
-        WUPPopupElement.$placements.$bottom.$start.$resizeHeight,
-        WUPPopupElement.$placements.$bottom.$end.$resizeHeight,
-        WUPPopupElement.$placements.$top.$start.$resizeHeight,
-        WUPPopupElement.$placements.$top.$end.$resizeHeight,
-      ];
+    const popup = await super.goShowMenu(showCase, e);
 
-      p.setAttribute("menu", "");
-      p.$options.animation = WUPPopup.Animations.drawer;
-
-      const menuId = this.#ctr.$uniqueId;
-      const i = this.$refInput;
-      i.setAttribute("aria-owns", menuId);
-      i.setAttribute("aria-controls", menuId);
-
-      this.#disposeMenuEvents = [];
-      // remove popup only by focusOut to optimize resources
-      const r = onFocusLostEv(
-        this,
-        () =>
-          setTimeout(async () => {
-            this.setValue(this.$value); // to update input according to result
-            await this.#menuHidding; // wait for animation if exists
-            // check if closed (user can open again during the hidding)
-            !this.#isOpen && this.removePopup();
-          }),
-        { debounceMs: this._opts.focusDebounceMs }
-      );
-      this.#disposeMenuEvents!.push(r);
-      this.$refPopup = p;
-      await this.renderMenu(p, menuId);
-      // fix case when user waited for loading and moved focus to another
-      if (!this.$isFocused) {
-        this.#isOpen = false;
-        this.removePopup();
-        return null;
-      }
-      this.appendChild(p);
-    } else if (showCase !== ShowCases.onInput && this._menuItems!.filtered) {
+    if (!isCreate && showCase !== ShowCases.onInput && this._menuItems!.filtered) {
       this._menuItems!.all?.forEach((li) => (li.style.display = "")); // reset styles after filtering
       this._menuItems!.filtered = undefined;
     }
-    !isCreate && this.$refPopup.$show(); // otherwise popup is opened automatically by init (because PopupShowCases.always)
-
-    this.setAttribute("opened", "");
-    this.$refInput.setAttribute("aria-expanded", "true");
-
     // set aria-selected
     const v = this.$value;
     if (v !== undefined) {
       const i = this._cachedItems!.findIndex((item) => this.#ctr.$isEqual(item.value, v));
-      this.selectMenuItem(i);
+      this.selectMenuItem(this._menuItems!.all[i] || null);
     }
 
-    // call for ref-listener to apply events properly
-    showCase !== ShowCases.onClick &&
-      showCase !== ShowCases.onFocus &&
-      this.#popupRefs!.show(WUPPopup.ShowCases.always);
-
-    setTimeout(() => this.fireEvent("$show", { cancelable: false }));
-    return this.$refPopup;
+    return popup;
   }
 
-  #menuHidding?: Promise<void>;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected async goHideMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): Promise<boolean> {
-    if (
-      hideCase === HideCases.onClick &&
-      e?.target instanceof HTMLInputElement &&
-      !e.target.readOnly &&
-      this.contains(e.target)
-    ) {
-      return false; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
-    }
-
-    const wasOpen = this.#isOpen;
-    this.#isOpen = false;
-    if (!this.$refPopup) {
-      return false;
-    }
-
-    if (wasOpen) {
-      // call for ref-listener to apply events properly
-      hideCase !== HideCases.onFocusLost &&
-        hideCase !== HideCases.onClick &&
-        this.#popupRefs!.hide(WUPPopup.HideCases.onManuallCall);
-
-      let pback: () => void;
-      // eslint-disable-next-line no-promise-executor-return
-      this.#menuHidding = new Promise((resolve) => (pback = resolve));
-
-      wasOpen && (await this.$refPopup.$hide());
-      // @ts-expect-error
-      pback();
-      this.#menuHidding = undefined;
-    }
-
-    if (this.#isOpen) {
-      return false; // possible when popup opened again during the animation
-    }
-
-    this.removeAttribute("opened");
-    this.$refInput.setAttribute("aria-expanded", "false");
-    this.focusMenuItem(null);
-    setTimeout(() => this.fireEvent("$hide", { cancelable: false }));
-    return true;
-  }
-
-  /** Focus item by index or reset is index is null (via aria-activedescendant).
-   *  If menuItems is filtered by input-text than index must point on filtered array */
-  protected focusMenuItem(index: number | null) {
-    const { filtered } = this._menuItems!;
-    // get the real index if items is filtered
-    const prevIndex = filtered ? filtered[this._menuItems!.focused] : this._menuItems!.focused;
-    this._menuItems!.all[prevIndex]?.removeAttribute("focused");
-
-    if (index != null && index > -1) {
-      // get the real index if items is filtered
-      const trueIndex = filtered ? filtered[index] : index;
-      const next = this._menuItems!.all[trueIndex];
-      next.setAttribute("focused", "");
-      this.$refInput.setAttribute("aria-activedescendant", next.id);
-      const ifneed = (next as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
-      ifneed ? ifneed.call(next, false) : next.scrollIntoView();
-      this._menuItems!.focused = index;
-    } else {
-      this.$refInput.removeAttribute("aria-activedescendant");
+  protected override focusMenuItem(next: HTMLElement | null, nextValue: ValueType | undefined) {
+    super.focusMenuItem(next, nextValue);
+    if (next === null) {
       this._menuItems!.focused = -1;
     }
   }
 
-  /** Select item by index (set aria-selected and scroll to) */
-  protected selectMenuItem(index: number) {
-    const prev = this._menuItems!.all[this._menuItems!.selected];
-    prev?.setAttribute("aria-selected", "false");
-
-    if (index !== -1) {
-      const li = this._menuItems!.all[index];
-      li.setAttribute("aria-selected", "true");
-      setTimeout(() => {
-        const ifneed = (li as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
-        ifneed ? ifneed.call(li, false) : li.scrollIntoView();
-      }); // timeout to wait to popup to start opening otherwise scroll doesn't work
+  protected focusMenuItemByIndex(index: number | null) {
+    if (index != null && index > -1) {
+      const { filtered } = this._menuItems!;
+      const trueIndex = filtered ? filtered[index] : index;
+      const next = this._menuItems!.all[trueIndex];
+      this.focusMenuItem(next, this._cachedItems![trueIndex].value);
+      this._menuItems!.focused = index;
+    } else {
+      this.focusMenuItem(null, undefined);
     }
-    this._menuItems!.selected = index;
   }
 
   protected override async gotKeyDown(e: KeyboardEvent) {
     if (this.$isPending) {
       return;
     }
-    // don't allow to process Esc-key when menu is opened
-    const isEscPrevent = this.#isOpen && e.key === "Escape";
-    !isEscPrevent && super.gotKeyDown(e);
+    const wasOpen = this.$isOpen;
+    super.gotKeyDown(e);
 
-    if (!this.#isOpen || e.altKey || e.shiftKey || e.ctrlKey) {
+    if (!this.$isOpen || e.altKey || e.shiftKey || e.ctrlKey) {
       return;
     }
 
@@ -659,21 +398,12 @@ export default class WUPSelectControl<
     let focusIndex: number | null = null;
 
     if (e.key === "ArrowDown") {
-      !this.#isOpen && (await this.goShowMenu(ShowCases.onPressArrowKey));
       let cur = this._menuItems!.focused;
       focusIndex = ++cur >= length ? 0 : cur;
     } else if (e.key === "ArrowUp") {
-      const wasOpen = this.#isOpen;
-      !this.#isOpen && (await this.goShowMenu(ShowCases.onPressArrowKey));
       let cur = wasOpen ? this._menuItems!.focused : length;
       focusIndex = --cur < 0 ? length - 1 : cur;
-    }
-
-    if (!this.#isOpen) {
-      return;
-    }
-
-    if (e.key === "Home") {
+    } else if (e.key === "Home") {
       focusIndex = 0;
     } else if (e.key === "End") {
       focusIndex = length - 1;
@@ -681,26 +411,13 @@ export default class WUPSelectControl<
 
     if (focusIndex != null) {
       e.preventDefault();
-      this.focusMenuItem(focusIndex);
-      return;
-    }
-
-    if (e.key === "Escape") {
-      e.preventDefault();
-      this.setValue(this.$value);
-      await this.goHideMenu(HideCases.OnPressEsc);
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      let i = this._menuItems!.focused;
-      i = this._menuItems!.filtered ? this._menuItems!.filtered[i] : i;
-      i > -1 && this.setValue(this._cachedItems![i].value);
-      await this.goHideMenu(HideCases.OnPressEnter);
+      this.focusMenuItemByIndex(focusIndex);
     }
   }
 
   protected override async gotInput(e: Event & { currentTarget: HTMLInputElement }) {
-    this.#isOpen && this.focusMenuItem(null); // reset focus
-    !this.#isOpen && (await this.goShowMenu(ShowCases.onInput));
+    this.$isOpen && this.focusMenuItem(null, undefined); // reset virtual focus
+    super.gotInput(e);
 
     const rawV = e.currentTarget.value;
     const v = rawV.trimStart().toLowerCase();
@@ -715,13 +432,9 @@ export default class WUPSelectControl<
     const hasVisible = !!filtered.length;
     this.renderMenuNoItems(this.$refPopup!, hasVisible);
 
-    hasVisible && rawV !== "" && this.focusMenuItem(0);
+    hasVisible && rawV !== "" && this.focusMenuItemByIndex(0);
 
     this.$refPopup!.$refresh();
-  }
-
-  protected override clearValue(canValidate = true) {
-    super.clearValue(!this.#isOpen && canValidate);
   }
 
   protected override async gotOptionsChanged(e: WUP.OptionEvent) {
@@ -736,21 +449,9 @@ export default class WUPSelectControl<
     super.gotOptionsChanged(e);
   }
 
-  protected removePopup() {
-    this.$refPopup?.remove();
-    this.$refPopup = undefined;
-    this.#disposeMenuEvents?.forEach((f) => f()); // remove possible previous event listeners
-    this.#disposeMenuEvents = undefined;
+  protected override removePopup() {
+    super.removePopup();
     this._menuItems = undefined;
-  }
-
-  protected gotRemoved() {
-    this.removePopup();
-    // remove resources for case when control can be appended again
-    this.#isOpen = false;
-    this.#popupRefs = undefined;
-
-    super.gotRemoved();
   }
 }
 
