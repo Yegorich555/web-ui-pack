@@ -55,22 +55,27 @@ describe("helper.promiseWait", () => {
   });
 
   test("no-wait if resolved before (enable smart-option)", async () => {
-    let fn = jest.fn();
+    const fn = jest.fn();
     promiseWait(Promise.resolve(), 2, true).then(fn);
     await new Promise((resolve) => setTimeout(resolve, 1));
     expect(fn).toBeCalledTimes(1); // because Promise is already resolved
 
     fn.mockClear();
-    promiseWait(Promise.resolve(), 2, fn).then(fn);
+    promiseWait(Promise.resolve(), 2, fn);
     await new Promise((resolve) => setTimeout(resolve, 1));
-    expect(fn).toBeCalledTimes(1); // because Promise is already resolved
+    expect(fn).not.toBeCalled(); // because Promise is already resolved
+  });
 
-    let i = 0;
-    fn = () => ++i;
+  test("wait if resolved before (enable smart-option)", async () => {
+    const fn = jest.fn();
+    const fnResolved = jest.fn();
     const mainPromise = new Promise((resolve) => setTimeout(resolve, 2));
-    promiseWait(mainPromise, 2, fn).then(fn);
-    await new Promise((resolve) => setTimeout(resolve, 30));
-    expect(i).toBe(2);
+    promiseWait(mainPromise, 5, (wait) => fn(wait)).finally(fnResolved);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(fnResolved).toBeCalled();
+    expect(fn).toBeCalledTimes(2);
+    expect(fn.mock.calls[0][0]).toBe(true);
+    expect(fn).lastCalledWith(false);
   });
 
   test("wait if resolved before (disable smart-option)", async () => {

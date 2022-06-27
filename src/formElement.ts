@@ -375,16 +375,12 @@ export default class WUPFormElement<
       const p1 = this.$onSubmit?.call(this, ev);
       const p2 = this.onsubmit?.call(this, ev2);
 
-      promiseWait(Promise.all([p1, p2, ev.$waitFor]), 300, () => this.changePending(true))
-        .then(() => {
-          if (needReset) {
-            this.$controls.forEach((v) => (v.$isDirty = false));
-            this.$initModel = this.$model;
-          }
-        })
-        .finally(() => {
-          this.changePending(false);
-        });
+      promiseWait(Promise.all([p1, p2, ev.$waitFor]), 300, this.changePending).then(() => {
+        if (needReset) {
+          this.$controls.forEach((v) => (v.$isDirty = false));
+          this.$initModel = this.$model;
+        }
+      });
     });
   }
 
