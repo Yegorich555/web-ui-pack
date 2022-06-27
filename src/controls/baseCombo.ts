@@ -40,7 +40,7 @@ export const enum ShowCases {
   /** When user clicks on control (beside editable not-empty input) */
   onClick = 1 << 3,
   /** When control got focus */
-  onFocus = 1 << 3,
+  onFocus = 1 << 4,
 }
 
 export const enum HideCases {
@@ -220,7 +220,7 @@ export default abstract class WUPBaseComboControl<
       this.contains(e.target) &&
       e.target.value !== ""
     ) {
-      return null; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
+      return this.$refPopup || null; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
     }
 
     if (this.#isOpen) {

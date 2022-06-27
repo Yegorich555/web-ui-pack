@@ -244,7 +244,6 @@ export default class WUPSelectControl<
   }
 
   protected override async renderMenu(popup: WUPPopupElement, menuId: string) {
-    console.warn("start render menu");
     const ul = popup.appendChild(document.createElement("ul"));
     ul.setAttribute("id", menuId);
     ul.setAttribute("role", "listbox");
@@ -261,7 +260,6 @@ export default class WUPSelectControl<
         this.gotMenuItemClick(e as MouseEvent & { target: HTMLLIElement });
       }
     });
-    console.warn("end render menu");
   }
 
   /** Method retrieves items from options and shows spinner if required */
@@ -366,11 +364,9 @@ export default class WUPSelectControl<
       this._menuItems!.filtered = undefined;
     }
     // set aria-selected
-    console.warn("goShowMenu");
     const v = this.$value;
     if (v !== undefined) {
       const i = this._cachedItems!.findIndex((item) => this.#ctr.$isEqual(item.value, v));
-      // todo some issue here: this._menuItems is undefined if we have $initValue value (not readonly)
       this.selectMenuItem(this._menuItems!.all[i] || null);
     }
 
