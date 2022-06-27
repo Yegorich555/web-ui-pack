@@ -419,18 +419,16 @@ export default class WUPPopupElement<
     this._stopShowing?.call(this);
     this._stopShowing = undefined;
 
-    const wasHidden = !this.#isOpen || this.goHide(WUPPopup.HideCases.onShowAgain);
+    !this.#isOpen || this.goHide(WUPPopup.HideCases.onShowAgain);
 
     this._opts.target = this._opts.target || this.#defineTarget();
     if (!(this._opts.target as HTMLElement).isConnected) {
       throw new Error(`${this.tagName}. Target is not appended to document`);
     }
 
-    if (wasHidden) {
-      const e = this.fireEvent("$willShow", { cancelable: true });
-      if (e.defaultPrevented) {
-        return false;
-      }
+    const e = this.fireEvent("$willShow", { cancelable: true });
+    if (e.defaultPrevented) {
+      return false;
     }
 
     const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.$placementAttrs;
@@ -527,36 +525,31 @@ export default class WUPPopupElement<
 
     goUpdate();
 
-    if (wasHidden) {
-      const animTime =
-        Number.parseFloat(style.animationDuration.substring(0, style.animationDuration.length - 1)) * 1000;
+    const animTime = Number.parseFloat(style.animationDuration.substring(0, style.animationDuration.length - 1)) * 1000;
 
-      if (!animTime && window.matchMedia("not all and (prefers-reduced-motion)").matches && this._opts.animation) {
-        if (this._opts.animation === WUPPopup.Animations.drawer) {
-          console.warn(
-            `${this.tagName} style.animationDuration is missed but $options.animation is defined. Please point animation duration via styles`
-          );
-        }
-      }
-
-      let pr: Promise<void>;
+    if (!animTime && window.matchMedia("not all and (prefers-reduced-motion)").matches && this._opts.animation) {
       if (this._opts.animation === WUPPopup.Animations.drawer) {
-        const pa = animateDropdown(this, animTime, false);
-        this._stopShowing = () => pa.stop(this._opts.animation !== WUPPopup.Animations.drawer); // rst animation state only if animation changed
-        pr = pa;
-      } else {
-        pr = new Promise((resolve) => {
-          const t = setTimeout(resolve, animTime);
-          this._stopShowing = () => clearTimeout(t);
-        });
+        console.warn(
+          `${this.tagName} style.animationDuration is missed but $options.animation is defined. Please point animation duration via styles`
+        );
       }
-      return pr.then(() => {
-        this.fireEvent("$show", { cancelable: false });
-        return true;
-      });
     }
 
-    return true;
+    let pr: Promise<void>;
+    if (this._opts.animation === WUPPopup.Animations.drawer) {
+      const pa = animateDropdown(this, animTime, false);
+      this._stopShowing = () => pa.stop(this._opts.animation !== WUPPopup.Animations.drawer); // rst animation state only if animation changed
+      pr = pa;
+    } else {
+      pr = new Promise((resolve) => {
+        const t = setTimeout(resolve, animTime);
+        this._stopShowing = () => clearTimeout(t);
+      });
+    }
+    return pr.then(() => {
+      this.fireEvent("$show", { cancelable: false });
+      return true;
+    });
   }
 
   /** Required to stop previous animations/timeouts */

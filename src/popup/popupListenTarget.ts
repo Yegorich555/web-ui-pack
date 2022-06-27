@@ -63,7 +63,12 @@ export default function popupListenTarget(
   // required to prevent previous action (cancel hidding because need to show again etc.)
   async function show(showCase: WUPPopup.ShowCases, e?: MouseEvent | FocusEvent): Promise<void> {
     if (showCase !== WUPPopup.ShowCases.always || !openedEl) {
-      openedEl = await onShow(showCase, e || null);
+      try {
+        openedEl = await onShow(showCase, e || null);
+      } catch (error) {
+        // handle error from onShow
+        Promise.reject(error);
+      }
     }
     openedEl && onShowCallbacks.forEach((f) => onHideCallbacks.push(f()));
   }
@@ -72,7 +77,13 @@ export default function popupListenTarget(
     const was = openedEl; // required when user clicks again during the hidding > we need to show in this case
     openedEl = null;
     onHideRef();
-    const isDone = hideCase === WUPPopup.HideCases.onManuallCall || (await onHide(hideCase, e || null));
+    let isDone = false;
+    try {
+      isDone = hideCase === WUPPopup.HideCases.onManuallCall || (await onHide(hideCase, e || null));
+    } catch (error) {
+      // handle error from onHide
+      Promise.reject(error);
+    }
     if (!isDone && !openedEl) {
       // rollback if onHide was prevented and onShow wasn't fired again during the hidding
       openedEl = was; // rollback if hidding wasn't successful
@@ -125,7 +136,7 @@ export default function popupListenTarget(
     let wasMouseMove = false; // fix when user makes t.mousedown, mousemove, body.mouseup
     appendEvent(t, "mousedown", () => {
       wasMouseMove = false;
-      onEvent(t, "mousemove", () => (wasMouseMove = true), { once: true });
+      t.addEventListener("mousemove", () => (wasMouseMove = true), { once: true });
     });
     onShowEvent(document, "click", (e) => {
       preventClickAfterFocus = false; // mostly it doesn't make sense but maybe it's possible
@@ -154,16 +165,22 @@ export default function popupListenTarget(
       }
 
       // detail === 2 for 2nd of double-click
-      if (debounceTimeout || wasOutsideClick || openedByHover || e.detail === 2 || wasMouseMove) {
+      if (
+        preventClickAfterFocus ||
+        debounceTimeout ||
+        wasOutsideClick ||
+        openedByHover ||
+        e.detail === 2 ||
+        wasMouseMove
+      ) {
         return;
       }
-      const isPrevented = preventClickAfterFocus; // otherwise it can be reset by document.click
 
       setTimeout(() => {
         if (!openedEl) {
           lastActive = document.activeElement as HTMLElement;
           show(WUPPopup.ShowCases.onClick, e);
-        } else if (!isPrevented) {
+        } else {
           hide(WUPPopup.HideCases.onTargetClick, e);
         }
       }); // timeout to wait for browser for applying selection on text if user selected something
@@ -199,16 +216,16 @@ export default function popupListenTarget(
   if (opts.showCase & WUPPopup.ShowCases.onFocus) {
     const onFocused = async (e: FocusEvent) => {
       if (!openedEl || debounceTimeout) {
+        preventClickAfterFocus = !!(opts.showCase & WUPPopup.ShowCases.onClick);
         await show(WUPPopup.ShowCases.onFocus, e);
-        if (openedEl && opts.showCase & WUPPopup.ShowCases.onClick) {
-          preventClickAfterFocus = true;
-          const r1 = appendEvent(document, "touchstart", () => rst()); // mousdown isn't not fired when user touch-move-end
-          const r2 = appendEvent(document, "mousedown", () => rst());
+        if (preventClickAfterFocus) {
           const rst = () => {
             preventClickAfterFocus = false;
             r1();
             r2();
           };
+          const r1 = appendEvent(document, "touchstart", rst); // mousdown isn't not fired when user touch-move-end
+          const r2 = appendEvent(document, "mousedown", rst);
         }
       }
     };

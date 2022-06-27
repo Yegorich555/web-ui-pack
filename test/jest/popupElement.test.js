@@ -392,20 +392,23 @@ describe("popupElement", () => {
     document.body.appendChild(a);
     a.$options.showCase = 1 << 2; // onClick
     jest.advanceTimersToNextTimer(); // onReady has timeout
+    await wait();
     expect(a.$isOpen).toBeFalsy();
 
     trg.dispatchEvent(new Event("click", { bubbles: true }));
-    await wait(1);
+    await wait(0);
     expect(a.$isOpen).toBeTruthy();
     trg.dispatchEvent(new Event("click", { bubbles: true }));
     expect(a.$isOpen).toBeTruthy(); // because previous event is skipped (due to debounceTimeout)
     expect(spyShow).toBeCalledTimes(1);
     expect(spyShow).lastCalledWith(1 << 2);
     await wait(50); // onClick has debounce timeout
+    expect(a.$isOpen).toBeTruthy(); // because previous event is skipped (due to debounceTimeout)
 
     let e = new Event("click", { bubbles: true });
     trg.dispatchEvent(e);
-    await wait(1);
+    await wait();
+    window.testMe = false;
     expect(a.$isOpen).toBeFalsy();
     expect(spyHide).toBeCalledTimes(1);
     expect(spyHide).lastCalledWith(6, e);
@@ -519,7 +522,7 @@ describe("popupElement", () => {
     await wait(1);
     expect(a.$isOpen).toBeTruthy(); // show by focus
     trgInput.dispatchEvent(new Event("mouseup", { bubbles: true }));
-    const ev = new MouseEvent("click", { bubbles: true });
+    let ev = new MouseEvent("click", { bubbles: true });
     ev.pageX = 20; // required otherwise it's filtered from synthetic events
     trgInput.dispatchEvent(ev);
     await wait(50);
@@ -532,6 +535,25 @@ describe("popupElement", () => {
     await wait(50);
     expect(a.$isOpen).toBeFalsy(); // 2nd click will close (but if click is fired without mousedown it doesn't work)
     expect(spyHide).lastCalledWith(6, ev);
+
+    // checking again when events doesn't propagate to body
+    trgInput.blur();
+    ev = new MouseEvent("click", { bubbles: false });
+    ev.pageX = 20; // required otherwise it's filtered from synthetic events
+    await wait();
+    trgInput.dispatchEvent(new Event("mousedown", { bubbles: false }));
+    trgInput.focus();
+    await wait(1);
+    expect(a.$isOpen).toBeTruthy(); // show by focus
+    trgInput.dispatchEvent(new Event("mouseup", { bubbles: false }));
+    trgInput.dispatchEvent(ev);
+    await wait();
+    expect(a.$isOpen).toBeTruthy(); // stay opened because wasOpened by focus from click
+    trgInput.dispatchEvent(new Event("mousedown", { bubbles: true }));
+    trgInput.dispatchEvent(new Event("mouseup", { bubbles: true }));
+    trgInput.dispatchEvent(ev);
+    await wait();
+    expect(a.$isOpen).toBeFalsy(); // 2nd click will close (but if click is fired without mousedown it doesn't work)
   });
 
   test("$options.minWidth/minHeight/maxWidth by target", async () => {
@@ -1743,9 +1765,10 @@ describe("popupElement", () => {
     await wait(300);
     expect(el.$isOpen).toBeFalsy(); // because click cancelled outside target
 
+    trg.dispatchEvent(new MouseEvent("mousedown", { bubbles: true })); // otherwise wasMouseMove isn't cleared
     trg.click();
     await wait(300);
-    expect(el.$isOpen).toBeTruthy(); // because click cancelled outside target
+    expect(el.$isOpen).toBeTruthy();
 
     trg.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
     await wait(30);
@@ -1756,8 +1779,36 @@ describe("popupElement", () => {
     await wait(300);
     expect(el.$isOpen).toBeTruthy(); // because click cancelled outside target
 
+    trg.dispatchEvent(new MouseEvent("mousedown", { bubbles: true })); // otherwise wasMouseMove isn't cleared
     trg.click();
     await wait(300);
     expect(el.$isOpen).toBeFalsy(); // because click cancelled outside target
+  });
+
+  test("popupListenTarget: handle error on show", async () => {
+    /** @type WUPPopupElement */
+    const myel = document.createElement(el.tagName);
+    myel.$options.target = trg;
+    myel.$options.showCase = 0;
+
+    document.body.appendChild(myel);
+    let cnt = 0;
+    popupListenTarget(
+      { target: trg, showCase: 1 << 2 }, // onClick
+      () => {
+        ++cnt;
+        throw new Error("TestCaseL Impossible to show");
+      },
+      () => myel.$hide()
+    );
+
+    h.handleRejection();
+    trg.click();
+    await wait();
+    expect(cnt).toBe(1);
+
+    trg.click();
+    await wait();
+    expect(cnt).toBe(2); // checking if possible again
   });
 });
