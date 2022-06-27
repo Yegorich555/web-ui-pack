@@ -86,11 +86,11 @@ export default function SelectControlView() {
           }}
         />
         <wup-select
+          initValue="13"
           ref={(el) => {
             if (el) {
-              el.$options.name = "withoutButtonClear";
+              el.$options.name = "withoutClearButton";
               el.$options.items = items;
-              el.$initValue = ir - 2;
               el.$options.clearButton = false;
             }
           }}

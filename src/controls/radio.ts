@@ -166,6 +166,15 @@ export default class WUPRadioControl<
      `;
   }
 
+  static $isEqual(v1: unknown, v2: unknown): boolean {
+    return (
+      super.$isEqual(v1, v2) ||
+      // eslint-disable-next-line eqeqeq
+      v1 == v2 ||
+      String.prototype.localeCompare.call(v1, v2 as string, undefined, { sensitivity: "accent" }) === 0
+    );
+  }
+
   static observedOptions = (super.observedOptions as Set<keyof WUPRadio.Options>).add("reverse") as any;
   static get observedAttributes() {
     const arr = super.observedAttributes as Array<keyof WUPRadio.Options>;
@@ -185,6 +194,14 @@ export default class WUPRadioControl<
   };
 
   protected override _opts = this.$options;
+
+  protected override parseValue(text: string): ValueType | undefined {
+    if (!this.$refItems?.length) {
+      return undefined;
+    }
+    const r = this.$refItems.find((o) => this.#ctr.$isEqual(o._value, text));
+    return r?._value;
+  }
 
   protected override gotReady() {
     super.gotReady();
@@ -299,3 +316,5 @@ export default class WUPRadioControl<
 }
 
 customElements.define(tagName, WUPRadioControl);
+
+// todo add support for attr [items]

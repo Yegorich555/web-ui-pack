@@ -170,6 +170,10 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
     this.$initValue = !!this.$initValue;
   }
 
+  protected override parseValue(text: string): boolean | undefined {
+    return text === "" || text.toLowerCase() === "true";
+  }
+
   protected override renderControl(): void {
     this.$refInput.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", this.$refInput.id);
@@ -208,9 +212,6 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
 
     if (this.getBoolAttr("defaultChecked", false)) {
       this.$initValue = true;
-      if (!propsChanged) {
-        this.$value = this.$initValue;
-      }
     }
   }
 

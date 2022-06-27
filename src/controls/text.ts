@@ -246,6 +246,10 @@ export default class WUPTextControl<
     this.$refInput.placeholder = " ";
   }
 
+  protected override parseValue(text: string): ValueType | undefined {
+    return (text || undefined) as unknown as ValueType;
+  }
+
   protected override renderControl() {
     this.$refInput.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", this.$refInput.id);
@@ -306,7 +310,7 @@ export default class WUPTextControl<
       this.#inputTimer && clearTimeout(this.#inputTimer);
       this.#inputTimer = window.setTimeout(() => this.setValue(v as any), this._opts.debounceMs);
     } else {
-      this.setValue(v as any);
+      this.setValue(this.parseValue(v as any));
     }
   }
 

@@ -130,6 +130,15 @@ export default class WUPSelectControl<
     return menuItemText.startsWith(inputValue) || menuItemText.includes(` ${inputValue}`);
   }
 
+  static $isEqual(v1: unknown, v2: unknown): boolean {
+    return (
+      super.$isEqual(v1, v2) ||
+      // eslint-disable-next-line eqeqeq
+      v1 == v2 ||
+      String.prototype.localeCompare.call(v1, v2 as string, undefined, { sensitivity: "accent" }) === 0
+    );
+  }
+
   static $defaults: WUPSelect.Defaults = {
     ...WUPBaseComboControl.$defaults,
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey | ShowCases.onInput,
@@ -147,6 +156,16 @@ export default class WUPSelectControl<
   /** Returns is control in pending state (show spinner) */
   get $isPending(): boolean {
     return !!this.#stopPending;
+  }
+
+  protected override parseValue(text: string): ValueType | undefined {
+    this.getMenuItems().then((arr) => {
+      if (arr?.length) {
+        const r = (arr as WUPSelect.MenuItemAny<any>[]).find((o) => this.#ctr.$isEqual(o.value, text));
+        this.$initValue = r?.value;
+      }
+    });
+    return this.$initValue;
   }
 
   protected override renderControl() {
@@ -457,3 +476,5 @@ export default class WUPSelectControl<
 customElements.define(tagName, WUPSelectControl);
 
 // testcase (close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click
+
+// todo add support for attr [items]

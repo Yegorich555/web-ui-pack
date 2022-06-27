@@ -67,6 +67,7 @@ export default function RadioControlView() {
           }}
         />
         <wup-radio
+          initValue="13"
           ref={(el) => {
             if (el) {
               el.$options.name = "reverse";

@@ -31,9 +31,17 @@ export default function SwitchControlView() {
           label="Very very very incredible long label to check if it has ellipsis rule and it works as expected"
         />
         {/* otherwise in React inline [defaultChecked] doesn't work */}
-        <wup-switch name="checked" ref={(el) => el?.setAttribute("defaultChecked", "")} />
-        <wup-switch name="disabled" disabled />
-        <wup-switch name="readonly" readOnly />
+        <wup-switch name="defaultChecked" ref={(el) => el?.setAttribute("defaultChecked", "")} />
+        <wup-switch name="disabled" initValue="" disabled />
+        <wup-switch
+          name="readonly"
+          readOnly
+          ref={(el) => {
+            if (el) {
+              el.$initValue = true;
+            }
+          }}
+        />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

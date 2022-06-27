@@ -39,7 +39,7 @@ export default function TextControlView() {
           }}
         />
         <wup-text
-          name="withoutButtonClear"
+          name="withoutClearButton"
           ref={(el) => {
             if (el) {
               el.$options.clearButton = false;
@@ -47,16 +47,17 @@ export default function TextControlView() {
           }}
         />
         <wup-text
+          initValue="init value here"
           ref={(el) => {
             if (el) {
               el.$options.name = "readonly";
               el.$options.readOnly = true;
               el.$options.selectOnFocus = false;
-              el.$initValue = "init value here";
             }
           }}
         />
         <wup-text
+          name="disabled"
           ref={(el) => {
             if (el) {
               el.$options.name = "disabled";

@@ -35,7 +35,7 @@ export default function ControlsView() {
       <wup-form
         ref={(el) => {
           if (el) {
-            el.$initModel = { email: "test-me@google.com" };
+            el.$initModel = { text: "test-me@google.com" };
             el.$isPending = false;
             el.$options.disabled = false;
             el.$options.readOnly = false;

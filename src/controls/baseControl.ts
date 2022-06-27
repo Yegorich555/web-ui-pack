@@ -118,6 +118,9 @@ declare global {
       /** @deprecated Focus on init */
       autoFocus?: boolean;
 
+      /** @deprecated default value (expected formatted for input) */
+      initValue?: string | boolean | number;
+
       /** @readonly Use [invalid] for styling */
       readonly invalid?: boolean;
 
@@ -147,7 +150,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   /* Array of attribute names to listen for changes */
   static get observedAttributes(): Array<keyof WUPBase.Options | any> {
-    return ["label", "name", "autoComplete", "disabled", "readOnly"];
+    return ["label", "name", "autoComplete", "disabled", "readOnly", "initValue"];
   }
 
   /** Css-variables related to component */
@@ -270,8 +273,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   /** Default function to compare values/changes;
-   *  Redefine it or define valueOf for values; By default values compared by valueOf if it's possible
-   */
+   *  Redefine it or define valueOf for values; By default values compared by valueOf if it's possible */
   static $isEqual(v1: unknown, v2: unknown): boolean {
     return isEqual(v1, v2);
   }
@@ -319,7 +321,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   set $initValue(v: ValueType | undefined) {
-    if (!this.$isReady || (!this.#ctr.$isEqual(v, this.#initValue) && !this.$isDirty && this.$isEmpty)) {
+    if (!this.$isReady || (!this.#ctr.$isEqual(v, this.#initValue) && !this.$isDirty)) {
       // setValue if it's empty and not isDirty
       this.$value = v;
     }
@@ -410,7 +412,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Array of removeEventListener() that fired ReInit */
   protected disposeLstInit: Array<() => void> = [];
 
-  protected override gotChanges(propsChanged: Array<keyof WUPBase.Options> | null) {
+  protected override gotChanges(propsChanged: Array<keyof WUPBase.Options | any> | null) {
     super.gotChanges(propsChanged);
 
     this.disposeLstInit.forEach((f) => f()); // remove possible previous event listeners
@@ -447,14 +449,19 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     this.setBoolAttr("disabled", this._opts.disabled);
     this.setBoolAttr("readOnly", this._opts.readOnly);
 
-    propsChanged == null && this.gotFormChanges(null);
+    if (!propsChanged || propsChanged.includes("initValue")) {
+      const attr = this.getAttribute("initValue");
+      this.$initValue = attr !== null ? this.parseValue(attr || "") : this.$initValue;
+    }
 
     // retrieve $initValue from $initModel
     if (this.$initValue === undefined && this.$form && this._opts.name) {
-      if (propsChanged === null || propsChanged.includes("name")) {
+      if (!propsChanged || propsChanged.includes("name")) {
         this.$initValue = nestedProperty.get(this.$form._initModel as any, this._opts.name);
       }
     }
+
+    !propsChanged && this.gotFormChanges(null);
   }
 
   /** Fired on control/form Init and every time as control/form options changed. Method contains changes related to form `disabled`,`readonly` etc. */
@@ -469,6 +476,8 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Use this to append elements; fired single time when element isConnected/appended to layout but not ready yet
    * Attention: this.$refInput is already defined */
   protected abstract renderControl(): void;
+  /** Called when need to parse inputValue or attr [initValue] */
+  protected abstract parseValue(text: string): ValueType | undefined;
 
   protected override gotReady() {
     super.gotReady();
@@ -677,6 +686,5 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 }
 
-// todo improve support for attrs 'name', 'label', 'initValue' as initValue
 // todo how to add validations to attrs maybe vld-min, vld-max or json: vld="{'min':2,'max':4}"; required ?
 // testcase: $initModel & attr [name] (possible it doesn't work)
