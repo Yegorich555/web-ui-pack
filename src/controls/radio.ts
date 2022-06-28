@@ -325,8 +325,11 @@ export default class WUPRadioControl<
     super.gotOptionsChanged(e);
     this._isStopChanges = false;
   }
+
+  override focus(): boolean {
+    this.$refInput.focus();
+    return document.activeElement === this.$refInput || super.focus();
+  }
 }
 
 customElements.define(tagName, WUPRadioControl);
-
-// todo focus by click doesn't select current (instead selected 1st)
