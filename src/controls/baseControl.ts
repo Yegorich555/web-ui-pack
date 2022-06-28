@@ -476,6 +476,14 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     i.autocomplete = this.$autoComplete || "off";
   }
 
+  protected override gotOptionsChanged(e: WUP.OptionEvent) {
+    this._isStopChanges = true;
+    e.props.includes("disabled") && this.setBoolAttr("disabled", this._opts.disabled);
+    e.props.includes("readOnly") && this.setBoolAttr("readOnly", this._opts.readOnly);
+    super.gotOptionsChanged(e);
+    this._isStopChanges = false;
+  }
+
   /** Use this to append elements; fired single time when element isConnected/appended to layout but not ready yet
    * Attention: this.$refInput is already defined */
   protected abstract renderControl(): void;
