@@ -1,3 +1,4 @@
+import { WUP } from "../baseElement";
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
 
 const tagName = "wup-switch";
@@ -221,6 +222,13 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
     this.$isReadOnly
       ? this.$refInput.setAttribute("aria-description", "readonly")
       : this.$refInput.removeAttribute("aria-description");
+  }
+
+  protected override gotOptionsChanged(e: WUP.OptionEvent) {
+    this._isStopChanges = true;
+    e.props.includes("reverse") && this.setBoolAttr("reverse", this._opts.reverse);
+    super.gotOptionsChanged(e);
+    this._isStopChanges = false;
   }
 }
 
