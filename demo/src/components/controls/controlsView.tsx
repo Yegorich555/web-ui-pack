@@ -43,8 +43,11 @@ export default function ControlsView() {
               console.warn("sumbitted model", e.$model);
               // eslint-disable-next-line no-promise-executor-return
               return new Promise((resolve) => setTimeout(resolve, 1000));
-              // todo rollback disabled doesn't work after promise
             };
+            window.test = el;
+
+            el.$options.disabled = true;
+            setTimeout(() => (el.$options.disabled = false), 1000);
           }
         }}
       >
@@ -53,7 +56,8 @@ export default function ControlsView() {
           ref={(el) => {
             if (el) {
               el.$options.label = "Select (combobox/dropdown)";
-              el.$options.items = () => new Promise((resolve) => setTimeout(() => resolve(items), 3000));
+              // todo after disabled $options.items doesn't work
+              el.$options.items = items;
               el.$options.validations = {
                 required: true,
               };

@@ -401,6 +401,14 @@ export default class WUPFormElement<
     }
   }
 
+  protected gotOptionsChanged(e: WUP.OptionEvent) {
+    this._isStopChanges = true;
+    e.props.includes("disabled") && this.setBoolAttr("disabled", this._opts.disabled);
+    e.props.includes("readOnly") && this.setBoolAttr("readOnly", this._opts.readOnly);
+    super.gotOptionsChanged(e);
+    this._isStopChanges = false;
+  }
+
   protected override gotReady() {
     super.gotReady();
 
@@ -454,3 +462,4 @@ declare global {
 }
 
 // testcase: check if set model={v: 1} shouldn't reset control with other names
+// testcase: set options.disabled=true, options.disabled=false - check if it works
