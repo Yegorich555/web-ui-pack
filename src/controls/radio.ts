@@ -85,7 +85,7 @@ export default class WUPRadioControl<
       :host fieldset {
         border: none;
         padding: 0;
-        margin: calc(var(--ctrl-radio-gap) * -1);
+        margin: calc(var(--ctrl-radio-gap) * -0.5) calc(var(--ctrl-radio-gap) * -1);
         display: flex;
         flex-wrap: wrap;
       }
