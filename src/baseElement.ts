@@ -79,7 +79,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
           const k = s as keyof Omit<WUPBaseElement, keyof HTMLElement | "$isReady">;
           const desc = Object.getOwnPropertyDescriptor(p, s) as PropertyDescriptor;
           if (desc.value instanceof Function && s !== "constructor") {
-            this[k] = this[k].bind(this);
+            this[k] = (this[k] as Function).bind(this);
           }
         });
         bindAll(p);
@@ -346,12 +346,10 @@ export namespace WUP {
   };
   export type EventMap<T = HTMLElementEventMap> = HTMLElementEventMap & Record<keyof T, Event>;
   export type JSXProps<T> = React.DetailedHTMLProps<
-    // todo write babel-transform className > class
+    // react doesn't support [className] attr for WebComponents; use [class] instead: https://github.com/facebook/react/issues/4933
     Omit<React.HTMLAttributes<T>, "className"> & { class?: string | undefined },
     T
   >;
 }
-
-// todo make all props not-enumerable (beside starts with $...): https://stackoverflow.com/questions/34517538/setting-an-es6-class-getter-to-enumerable
 
 // testcase: check if gotChanges sensitive to attr-case

@@ -1,3 +1,4 @@
+/* stylelint-disable no-descending-specificity */
 .popupEx1 {
   display: flex;
   flex-direction: column;
@@ -77,4 +78,59 @@ $dropdownAnimation: 300ms;
   > div {
     overflow: auto;
   }
+}
+
+.inputs {
+  border: none;
+  display: flex;
+  flex-wrap: wrap;
+  background: #fff;
+  border-radius: var(--border-radius);
+  margin: 0;
+  padding: 1.8em 1em 0.6em 1em;
+  position: relative;
+  gap: 8px;
+
+  > legend {
+    color: #5e5e5e;
+    display: block;
+    position: absolute;
+    left: 0.3em;
+    top: 0.2em;
+    transform-origin: top left;
+    transform: scale(0.9);
+    margin: 0 var(--ctrl-radio-gap);
+    padding: 0;
+  }
+
+  > label {
+    flex: 1 1 calc(50% - 8px);
+    position: relative;
+
+    > span {
+      color: #5e5e5e;
+      display: block;
+      position: absolute;
+      padding: 0 0.2em;
+      background: white;
+      left: 0.3em;
+      top: -0.5em;
+      transform-origin: top left;
+      transform: scale(0.9);
+    }
+
+    > input {
+      padding: 0.5em;
+      border-radius: 4px;
+      box-shadow: none;
+      border: 1px solid #5e5e5e;
+    }
+  }
+}
+
+.inputs + .inputs,
+.inputs + wup-radio,
+wup-radio + .inputs {
+  margin-top: 10px;
+  margin-bottom: 0;
 }

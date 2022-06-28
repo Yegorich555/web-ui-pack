@@ -328,3 +328,5 @@ export default class WUPRadioControl<
 }
 
 customElements.define(tagName, WUPRadioControl);
+
+// todo focus by click doesn't select current (instead selected 1st)
