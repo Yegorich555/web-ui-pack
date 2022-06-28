@@ -33,8 +33,7 @@ declare global {
     interface JSXProps<T extends WUPRadioControl> extends WUPBase.JSXProps<T> {
       /** Reversed-style (radio+label vs label+radio) */
       reverse?: boolean | "";
-      /** @deprecated Items showed as radio-buttons.
-       * Point global obj-key with items (set `window.inputRadio.items` for `window.inputRadio.items = [{value: 1, text: 'Item 1'}]` ) */
+      /** @deprecated Items showed as radio-buttons. Point global obj-key with items (set `window.inputRadio.items` for `window.inputRadio.items = [{value: 1, text: 'Item 1'}]` ) */
       items?: string;
     }
   }

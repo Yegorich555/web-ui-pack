@@ -20,8 +20,7 @@ const items = [
   // { text: (v, li, i) => li.append(v.toString()), value: 124 },
 ];
 
-// @ts-ignore
-window.inputRadio = {
+(window as any).inputRadio = {
   items,
 };
 

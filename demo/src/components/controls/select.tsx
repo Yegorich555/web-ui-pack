@@ -20,6 +20,10 @@ const items = [
   // { text: (v, li, i) => li.append(v.toString()), value: 124 },
 ];
 
+(window as any).inputSelect = {
+  items,
+};
+
 export default function SelectControlView() {
   return (
     <Page header="TextControl" link="#selectcontrol">
@@ -31,10 +35,10 @@ export default function SelectControlView() {
         }}
       >
         <wup-select
+          items="inputSelect.items"
           ref={(el) => {
             if (el) {
               el.$options.name = "selectControl";
-              el.$options.items = items;
             }
           }}
         />

@@ -1,5 +1,7 @@
 import { WUP } from "../baseElement";
-import { onEvent, promiseWait } from "../indexHelpers";
+import nestedProperty from "../helpers/nestedProperty";
+import onEvent from "../helpers/onEvent";
+import promiseWait from "../helpers/promiseWait";
 // eslint-disable-next-line import/named
 import WUPPopupElement from "../popup/popupElement";
 import WUPSpinElement from "../spinElement";
@@ -54,7 +56,10 @@ declare global {
     interface EventMap extends WUPBaseCombo.EventMap {}
     interface Defaults<T = string> extends WUPSelectIn.GenDef<T> {}
     interface Options<T = string> extends WUPSelectIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPSelectControl> extends WUPBaseCombo.JSXProps<T> {}
+    interface JSXProps<T extends WUPSelectControl> extends WUPBaseCombo.JSXProps<T> {
+      /** @deprecated Items showed in dropdown-menu. Point global obj-key with items (set `window.inputRadio.items` for `window.inputRadio.items = [{value: 1, text: 'Item 1'}]` ) */
+      items?: string;
+    }
   }
 
   // add element to document.createElement
@@ -287,7 +292,8 @@ export default class WUPSelectControl<
       return this._cachedItems;
     }
 
-    const { items } = this._opts;
+    const items =
+      (nestedProperty.get(window, this.getAttribute("items") || "") as WUPRadio.Options["items"]) || this._opts.items;
 
     let arr: WUPSelect.MenuItems<ValueType>;
     if (items instanceof Function) {
@@ -476,5 +482,3 @@ export default class WUPSelectControl<
 customElements.define(tagName, WUPSelectControl);
 
 // testcase (close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click
-
-// todo add support for attr [items]

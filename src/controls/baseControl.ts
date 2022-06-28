@@ -121,8 +121,7 @@ declare global {
 
       /** @deprecated default value (expected formatted for input) */
       initValue?: string | boolean | number;
-      /** @deprecated Rules enabled for current control.
-       * Point global obj-key with validations (set `window.validations.input1` for `window.validations.input1 = {required: true}` ) */
+      /** @deprecated Rules enabled for current control. Point global obj-key with validations (set `window.validations.input1` for `window.validations.input1 = {required: true}` ) */
       validations?: string;
 
       /** @readonly Use [invalid] for styling */
@@ -532,7 +531,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     const vls =
       (nestedProperty.get(window, this.getAttribute("validations") || "") as WUPBase.Options["validations"]) ||
       this._opts.validations;
-    console.warn(vls);
+
     if (!vls) {
       this.#isValid = true;
       return false;

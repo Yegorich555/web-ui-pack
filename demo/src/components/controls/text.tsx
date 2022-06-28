@@ -4,8 +4,7 @@ import { WUPTextControl } from "web-ui-pack";
 const sideEffect = WUPTextControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
 
-// @ts-ignore
-window.globalkey = {
+(window as any).globalkey = {
   pointHere: { required: true } as WUPText.Options["validations"],
 };
 
