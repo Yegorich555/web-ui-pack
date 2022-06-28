@@ -20,6 +20,11 @@ const items = [
   // { text: (v, li, i) => li.append(v.toString()), value: 124 },
 ];
 
+// @ts-ignore
+window.inputRadio = {
+  items,
+};
+
 export default function RadioControlView() {
   return (
     <Page header="RadioControl" link="#radiocontrol">
@@ -40,10 +45,10 @@ export default function RadioControlView() {
           }}
         />
         <wup-radio
+          items="inputRadio.items"
           ref={(el) => {
             if (el) {
               el.$options.name = "disabled";
-              el.$options.items = items;
               el.$options.disabled = true;
             }
           }}

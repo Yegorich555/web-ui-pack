@@ -1,3 +1,4 @@
+import nestedProperty from "../helpers/nestedProperty";
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
 
 const tagName = "wup-radio";
@@ -32,6 +33,9 @@ declare global {
     interface JSXProps<T extends WUPRadioControl> extends WUPBase.JSXProps<T> {
       /** Reversed-style (radio+label vs label+radio) */
       reverse?: boolean | "";
+      /** @deprecated Items showed as radio-buttons.
+       * Point global obj-key with items (set `window.inputRadio.items` for `window.inputRadio.items = [{value: 1, text: 'Item 1'}]` ) */
+      items?: string;
     }
   }
 
@@ -228,7 +232,8 @@ export default class WUPRadioControl<
   protected renderItems(parent: HTMLFieldSetElement): void {
     this.$refItems.forEach((r) => r.remove());
     this.$refItems.length = 0;
-    const tmp = this._opts.items;
+    const tmp =
+      (nestedProperty.get(window, this.getAttribute("items") || "") as WUPRadio.Options["items"]) || this._opts.items;
     const arr = tmp instanceof Function ? tmp() : tmp;
     if (!arr?.length) {
       return;
@@ -316,5 +321,3 @@ export default class WUPRadioControl<
 }
 
 customElements.define(tagName, WUPRadioControl);
-
-// todo add support for attr [items]

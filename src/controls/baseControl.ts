@@ -1,8 +1,9 @@
 import WUPBaseElement, { WUP } from "../baseElement";
 import WUPFormElement from "../formElement";
 import isEqual from "../helpers/isEqual";
+import nestedProperty from "../helpers/nestedProperty";
 import onFocusLostEv from "../helpers/onFocusLost";
-import { nestedProperty, stringPrettify } from "../indexHelpers";
+import stringPrettify from "../helpers/stringPrettify";
 // eslint-disable-next-line import/named
 import WUPPopupElement, { ShowCases } from "../popup/popupElement";
 import IBaseControl from "./baseControl.i";
@@ -120,7 +121,8 @@ declare global {
 
       /** @deprecated default value (expected formatted for input) */
       initValue?: string | boolean | number;
-      /** @deprecated point global obj-key with validations (set `window.validations.input1` for `window.validations.input1 = {required: true}` ) */
+      /** @deprecated Rules enabled for current control.
+       * Point global obj-key with validations (set `window.validations.input1` for `window.validations.input1 = {required: true}` ) */
       validations?: string;
 
       /** @readonly Use [invalid] for styling */
