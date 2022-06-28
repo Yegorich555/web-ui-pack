@@ -120,6 +120,8 @@ declare global {
 
       /** @deprecated default value (expected formatted for input) */
       initValue?: string | boolean | number;
+      /** @deprecated point global obj-key with validations (set `window.validations.input1` for `window.validations.input1 = {required: true}` ) */
+      validations?: string;
 
       /** @readonly Use [invalid] for styling */
       readonly invalid?: boolean;
@@ -309,7 +311,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   set $value(v: ValueType | undefined) {
     const was = this.#isDirty;
-    this.setValue(v);
+    this.setValue(v, false);
     this.#isDirty = was;
   }
 
@@ -525,7 +527,10 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   protected _validTimer?: number;
   /** Method called to check control based on validation rules and current value */
   protected goValidate(fromCase: ValidateFromCases, canShowError = true): string | false {
-    const vls = this._opts.validations;
+    const vls =
+      (nestedProperty.get(window, this.getAttribute("validations") || "") as WUPBase.Options["validations"]) ||
+      this._opts.validations;
+    console.warn(vls);
     if (!vls) {
       this.#isValid = true;
       return false;
@@ -686,5 +691,4 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 }
 
-// todo how to add validations to attrs maybe vld-min, vld-max or json: vld="{'min':2,'max':4}"; required ?
 // testcase: $initModel & attr [name] (possible it doesn't work)

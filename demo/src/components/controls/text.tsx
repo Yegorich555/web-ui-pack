@@ -4,6 +4,11 @@ import { WUPTextControl } from "web-ui-pack";
 const sideEffect = WUPTextControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
 
+// @ts-ignore
+window.globalkey = {
+  pointHere: { required: true } as WUPText.Options["validations"],
+};
+
 export default function TextControlView() {
   return (
     <Page header="TextControl" link="#textcontrol">
@@ -17,6 +22,7 @@ export default function TextControlView() {
       >
         <wup-text name="email" label="Text" />
         <wup-text
+          validations="globalkey.pointHere"
           ref={(el) => {
             if (el) {
               el.$options.name = "required";
