@@ -1,3 +1,4 @@
+import { WUP } from "../baseElement";
 import nestedProperty from "../helpers/nestedProperty";
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
 
@@ -316,6 +317,13 @@ export default class WUPRadioControl<
     this.$isReadOnly
       ? this.$refFieldset.setAttribute("aria-description", "readonly")
       : this.$refFieldset.removeAttribute("aria-description");
+  }
+
+  protected override gotOptionsChanged(e: WUP.OptionEvent) {
+    this._isStopChanges = true;
+    e.props.includes("reverse") && this.setBoolAttr("reverse", this._opts.reverse);
+    super.gotOptionsChanged(e);
+    this._isStopChanges = false;
   }
 }
 
