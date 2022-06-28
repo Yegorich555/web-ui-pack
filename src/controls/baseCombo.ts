@@ -160,6 +160,11 @@ export default abstract class WUPBaseComboControl<
     this._opts.readOnlyInput
       ? this.$refInput.removeAttribute("aria-autocomplete")
       : this.$refInput.setAttribute("aria-autocomplete", "list");
+  }
+
+  override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
+    super.gotFormChanges(propsChanged);
+    this.$refInput.readOnly = this.$refInput.readOnly || (this._opts.readOnlyInput as boolean);
 
     const isMenuEnabled = !this.$isDisabled && !this.$isReadOnly;
     if (isMenuEnabled && !this.#popupRefs) {
@@ -195,11 +200,6 @@ export default abstract class WUPBaseComboControl<
       this.#popupRefs?.dispose.call(this.#popupRefs); // remove all possible prev-eventListeners
       this.#popupRefs = undefined;
     }
-  }
-
-  override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
-    super.gotFormChanges(propsChanged);
-    this.$refInput.readOnly = this.$refInput.readOnly || (this._opts.readOnlyInput as boolean);
   }
 
   /** Called when need to create menu in opened popup */

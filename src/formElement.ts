@@ -401,7 +401,7 @@ export default class WUPFormElement<
     }
   }
 
-  protected gotOptionsChanged(e: WUP.OptionEvent) {
+  protected override gotOptionsChanged(e: WUP.OptionEvent) {
     this._isStopChanges = true;
     e.props.includes("disabled") && this.setBoolAttr("disabled", this._opts.disabled);
     e.props.includes("readOnly") && this.setBoolAttr("readOnly", this._opts.readOnly);

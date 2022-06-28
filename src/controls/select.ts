@@ -424,7 +424,7 @@ export default class WUPSelectControl<
       return;
     }
     const wasOpen = this.$isOpen;
-    super.gotKeyDown(e);
+    await super.gotKeyDown(e);
 
     if (!this.$isOpen || e.altKey || e.shiftKey || e.ctrlKey) {
       return;

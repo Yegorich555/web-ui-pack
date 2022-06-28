@@ -44,10 +44,6 @@ export default function ControlsView() {
               // eslint-disable-next-line no-promise-executor-return
               return new Promise((resolve) => setTimeout(resolve, 1000));
             };
-            window.test = el;
-
-            el.$options.disabled = true;
-            setTimeout(() => (el.$options.disabled = false), 1000);
           }
         }}
       >
@@ -56,7 +52,6 @@ export default function ControlsView() {
           ref={(el) => {
             if (el) {
               el.$options.label = "Select (combobox/dropdown)";
-              // todo after disabled $options.items doesn't work
               el.$options.items = items;
               el.$options.validations = {
                 required: true,
