@@ -1,3 +1,4 @@
+import WUPSpinElement, { spinUseDualRing } from "../spinElement";
 import WUPSelectControl from "./select";
 
 // it's required to extend default validationRules
@@ -23,4 +24,22 @@ el.$options.validations = {
 };
 console.warn("try custom validation", { validateResult: el.$validate() });
 
-// const t: WUPSelect.
+/* change spinner */
+class WUPSpin2Element extends WUPSpinElement {}
+spinUseDualRing(WUPSpin2Element);
+const tagName = "wup-spin2";
+customElements.define(tagName, WUPSpin2Element);
+declare global {
+  interface HTMLElementTagNameMap {
+    [tagName]: WUPSpin2Element;
+  }
+}
+
+WUPSelectControl.prototype.renderSpin = function renderSpinCustom(): WUPSpinElement {
+  const spin = document.createElement("wup-spin2");
+  spin.$options.fit = true;
+  spin.$options.overflowFade = true;
+  spin.$options.overflowTarget = this;
+  this.appendChild(spin);
+  return spin;
+};

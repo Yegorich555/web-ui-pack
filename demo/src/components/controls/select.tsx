@@ -1,6 +1,7 @@
 /* eslint-disable no-promise-executor-return */
 import Page from "src/elements/page";
-import { WUPSelectControl } from "web-ui-pack";
+import { WUPSelectControl, WUPSpinElement } from "web-ui-pack";
+import { spinUseDualRing } from "web-ui-pack/spinElement";
 
 const sideEffect = WUPSelectControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
@@ -23,6 +24,16 @@ const items = [
 (window as any).inputSelect = {
   items,
 };
+
+class WUPSpinSelElement extends WUPSpinElement {}
+spinUseDualRing(WUPSpinSelElement);
+const tagName = "wup-spin-sel";
+customElements.define(tagName, WUPSpinSelElement);
+declare global {
+  interface HTMLElementTagNameMap {
+    [tagName]: WUPSpinSelElement;
+  }
+}
 
 export default function SelectControlView() {
   return (
@@ -48,6 +59,24 @@ export default function SelectControlView() {
               el.$options.name = "withPending";
               el.$options.label = "With pending (set promise to $options.items)";
               el.$options.items = () => new Promise((resolve) => setTimeout(() => resolve(items), 3000));
+            }
+          }}
+        />
+        <wup-select
+          ref={(el) => {
+            if (el) {
+              el.$options.name = "customSpin";
+              el.$options.label = "CustomSpin: see WUPSpinElement types or override renderSpin() method";
+              el.$options.items = () => new Promise((resolve) => setTimeout(() => resolve(items), 3000));
+              el.renderSpin = function renderCustomSpin(this: WUPSelectControl) {
+                const spin = document.createElement("wup-spin-sel");
+                spin.$options.fit = true;
+                spin.$options.overflowFade = true;
+                spin.$options.overflowTarget = this;
+                // eslint-disable-next-line react/no-this-in-sfc
+                this.appendChild(spin);
+                return spin;
+              };
             }
           }}
         />
@@ -104,5 +133,3 @@ export default function SelectControlView() {
     </Page>
   );
 }
-
-// todo way to change spinner
