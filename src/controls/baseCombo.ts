@@ -1,6 +1,7 @@
 // eslint-disable-next-line import/named
 import WUPPopupElement, { ShowCases as PopupShowCases, WUPPopup } from "../popup/popupElement";
 import popupListenTarget from "../popup/popupListenTarget";
+import WUPBaseControl from "./baseControl";
 import WUPTextControl, { WUPTextIn } from "./text";
 
 export namespace WUPBaseComboIn {
@@ -113,6 +114,7 @@ export default abstract class WUPBaseComboControl<
 
   static $defaults: WUPBaseCombo.Defaults = {
     ...WUPTextControl.$defaults,
+    validationRules: { ...WUPBaseControl.$defaults.validationRules },
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey,
   };
 

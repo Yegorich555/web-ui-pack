@@ -43,7 +43,7 @@ npm install web-ui-pack
 - [x] SwitchControl
 - [x] RadioControl (RadioGroup)
 - [x] SelectControl (ComboBox, Dropdown)
-- [ ] SelectManyControl (ComboBox, Dropdown)
+- [ ] SelectManyControl
 - [ ] Calendar
 - [ ] DateControl
 - [ ] TimeControl ?
@@ -54,6 +54,7 @@ npm install web-ui-pack
 - [ ] FileControl
 - [ ] ImageControl (AvatarEditor)
 - [ ] SearchControl ?
+- [ ] NumberControl
 - [ ] InfiniteScroll
 - [ ] VirtualScroll
 - [ ] TableElement ?

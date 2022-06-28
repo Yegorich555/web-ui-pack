@@ -139,7 +139,7 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
 
   static $defaults: WUPSwitch.Defaults = {
     ...WUPBaseControl.$defaults,
-    validationRules: WUPBaseControl.$defaults.validationRules as WUPSwitch.Defaults["validationRules"],
+    validationRules: { ...WUPBaseControl.$defaults.validationRules },
   };
 
   $options: WUPSwitch.Options = {

@@ -97,7 +97,7 @@ export default class WUPCheckControl<
 
   static $defaults: WUPCheck.Defaults = {
     ...WUPSwitchControl.$defaults,
-    validationRules: WUPSwitchControl.$defaults.validationRules as WUPCheck.Defaults["validationRules"],
+    validationRules: { ...WUPSwitchControl.$defaults.validationRules },
   };
 
   $options: WUPCheck.Options = {

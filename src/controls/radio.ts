@@ -188,7 +188,7 @@ export default class WUPRadioControl<
 
   static $defaults: WUPRadio.Defaults = {
     ...WUPBaseControl.$defaults,
-    validationRules: WUPBaseControl.$defaults.validationRules as WUPRadio.Defaults["validationRules"],
+    validationRules: { ...WUPBaseControl.$defaults.validationRules },
   };
 
   $options: WUPRadio.Options<ValueType> = {

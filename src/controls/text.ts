@@ -223,11 +223,12 @@ export default class WUPTextControl<
     ...WUPBaseControl.$defaults,
     selectOnFocus: true,
     clearButton: true,
-    validationRules: Object.assign(WUPBaseControl.$defaults.validationRules, {
+    validationRules: {
+      ...WUPBaseControl.$defaults.validationRules,
       min: (v, setV) => v.length < setV && `Min length is ${setV} characters`,
       max: (v, setV) => v.length > setV && `Max length is ${setV} characters`,
       email: (v, setV) => setV && !emailReg.test(v) && "Please enter a valid email address",
-    } as WUPText.Defaults["validationRules"]),
+    } as WUPText.Defaults["validationRules"],
   };
 
   $options: WUPText.Options<ValueType> = {
@@ -325,7 +326,5 @@ export default class WUPTextControl<
 }
 
 customElements.define(tagName, WUPTextControl);
-
-// todo all $defaults.validationRules are inherrited and use common object. So every rule-name must be unique
 
 // testcase: form with email+password ignores autocomplete: "off" if previously it was saved

@@ -146,6 +146,7 @@ export default class WUPSelectControl<
 
   static $defaults: WUPSelect.Defaults = {
     ...WUPBaseComboControl.$defaults,
+    validationRules: { ...WUPBaseComboControl.$defaults.validationRules },
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey | ShowCases.onInput,
   };
 
