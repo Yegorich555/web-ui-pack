@@ -48,6 +48,8 @@
     "checkbox",
     "radiobox",
     "switchbox",
+    "dropdown",
+    "select",
     "multiselect"
   ],
   "author": "Yegor.Golubchik",
