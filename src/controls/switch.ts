@@ -67,6 +67,7 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
       --ctrl-switch-size-spot: calc(var(--ctrl-switch-size-h) * 1.4);
      }`;
   }
+  // todo add hover effect for slider
 
   static get $style(): string {
     return `${super.$style}

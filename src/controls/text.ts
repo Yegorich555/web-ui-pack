@@ -291,13 +291,7 @@ export default class WUPTextControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUPText.Options> | null) {
     super.gotChanges(propsChanged as any);
-
-    // todo implement password input
-    const isPwd = this._opts.name?.includes("password");
-    this.$refInput.type = isPwd ? "password" : "text";
-    this.$refInput.autocomplete = this.$autoComplete || (isPwd ? "new-password" : "off"); // otherwise form with email+password ignores autocomplete: "off" if previously it was saved
-    // it can be ignored by browsers. To fix > https://stackoverflow.com/questions/2530/how-do-you-disable-browser-autocomplete-on-web-form-field-input-tags
-    // https://stackoverflow.com/questions/11708092/detecting-browser-autofill
+    this.$refInput.autocomplete = this.$autoComplete || "off";
 
     setTimeout(() => {
       this._opts.selectOnFocus &&

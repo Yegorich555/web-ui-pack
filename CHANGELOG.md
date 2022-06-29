@@ -18,6 +18,7 @@
   - SpinElement
   - FormElement
   - TextControl
+  - PasswordControl
   - SelectControl
   - SwitchControl
   - CheckControl

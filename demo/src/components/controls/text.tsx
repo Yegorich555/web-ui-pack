@@ -20,15 +20,7 @@ export default function TextControlView() {
         }}
       >
         <wup-text name="email" label="Text" />
-        <wup-text
-          validations="globalkey.pointHere"
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "required";
-              el.$options.validations = { required: true };
-            }
-          }}
-        />
+        <wup-text name="required" validations="globalkey.pointHere" />
         <wup-text
           ref={(el) => {
             if (el) {

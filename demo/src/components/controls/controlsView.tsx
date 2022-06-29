@@ -7,11 +7,18 @@ import {
   WUPSwitchControl,
   WUPCheckControl,
   WUPRadioControl,
+  WUPPasswordControl,
 } from "web-ui-pack";
 import styles from "./controlsView.scss";
 
 const sideEffect =
-  WUPTextControl && WUPSelectControl && WUPSpinElement && WUPSwitchControl && WUPCheckControl && WUPRadioControl;
+  WUPTextControl &&
+  WUPPasswordControl &&
+  WUPSelectControl &&
+  WUPSpinElement &&
+  WUPSwitchControl &&
+  WUPCheckControl &&
+  WUPRadioControl;
 !sideEffect && console.error("!"); // It's required otherwise import is ignored by webpack
 
 let ir = 10;
@@ -48,6 +55,7 @@ export default function ControlsView() {
         }}
       >
         <wup-text name="text" />
+        <wup-pwd name="password" />
         <wup-select
           ref={(el) => {
             if (el) {

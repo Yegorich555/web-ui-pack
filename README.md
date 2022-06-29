@@ -38,8 +38,9 @@ npm install web-ui-pack
 - [x] SpinElement
 - [x] FormElement
 - [x] TextControl
-- [ ] PasswordControl
+- [x] PasswordControl
 - [x] CheckControl
+- [ ] CheckTreeControl
 - [x] SwitchControl
 - [x] RadioControl (RadioGroup)
 - [x] SelectControl (ComboBox, Dropdown)
@@ -48,13 +49,13 @@ npm install web-ui-pack
 - [ ] DateControl
 - [ ] TimeControl ?
 - [ ] DateTimeControl ?
-- [ ] ModalElement
-- [ ] ConfirmModalElement
-- [ ] FormModalElement
 - [ ] FileControl
 - [ ] ImageControl (AvatarEditor)
 - [ ] SearchControl ?
 - [ ] NumberControl
+- [ ] ModalElement
+- [ ] ConfirmModalElement
+- [ ] FormModalElement
 - [ ] InfiniteScroll
 - [ ] VirtualScroll
 - [ ] TableElement ?

@@ -12,6 +12,7 @@ import styles from "./main.scss";
 import ControlsView from "./components/controls/controlsView";
 import SpinView from "./components/spin/spinView";
 import TextControlView from "./components/controls/text";
+import PasswordControlView from "./components/controls/password";
 import SelectControlView from "./components/controls/select";
 import SwitchControlView from "./components/controls/switch";
 import CheckControlView from "./components/controls/check";
@@ -31,6 +32,7 @@ const routes: IRoute[] = [
   { path: "spin", el: SpinView },
   { path: "controls", el: ControlsView },
   { path: "text", el: TextControlView, isNested: true },
+  { path: "password", el: PasswordControlView, isNested: true },
   { path: "select", el: SelectControlView, isNested: true },
   { path: "radio", el: RadioControlView, isNested: true },
   { path: "switch", el: SwitchControlView, isNested: true },
