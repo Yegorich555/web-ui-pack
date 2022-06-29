@@ -82,22 +82,17 @@ export default abstract class WUPBaseComboControl<
       :host {
         cursor: pointer;
       }
-      :host input:not(:placeholder-shown) {
+      :host input {
         cursor: text;
       }
+      :host input:placeholder-shown,
       :host input:read-only {
         cursor: pointer;
       }
       :host label::after {
         content: "";
-        width: var(--ctrl-icon-size);
-        min-height: var(--ctrl-icon-size);
-
-        background-color: var(--ctrl-icon);
         -webkit-mask-image: var(--ctrl-icon-img);
         mask-image: var(--ctrl-icon-img);
-        -webkit-mask-size: var(--ctrl-icon-size);
-        mask-size: var(--ctrl-icon-size);
       }
       :host[opened] label::after {
         transform: rotate(180deg);

@@ -78,7 +78,7 @@ export default class WUPTextControl<
   static get $styleRoot(): string {
     return `:root {
       --ctrl-btn-clear-hover: rgba(255, 0, 0, 0.1);
-      --ctrl-icon-hover-size: 10px;
+      --ctrl-icon-hover-size: 22px;
      }`;
   }
 
@@ -153,13 +153,13 @@ export default class WUPTextControl<
           min-height: var(--ctrl-icon-size);
           box-sizing: content-box;
           margin: 0;
-          padding: 0 calc(var(--ctrl-icon-size) / 2);
+          padding: 0 5px;
           flex: 0 0 auto;
           align-self: stretch;
           cursor: pointer;
           border: none;
           box-shadow: none;
-          background: var(--ctrl-label);
+          background: var(--ctrl-icon);
           -webkit-mask-size: var(--ctrl-icon-size);
           mask-size: var(--ctrl-icon-size);
           -webkit-mask-repeat: no-repeat;
@@ -176,7 +176,6 @@ export default class WUPTextControl<
         :host label button {
            z-index: 1;
            contain: strict;
-           padding: calc(var(--ctrl-icon-hover-size) / 2);
         }
         :host label>span + button {
           margin-right: -0.5em;
@@ -188,7 +187,6 @@ export default class WUPTextControl<
         :host button[clear]:after {
           content: "";
           padding: 0;
-          background-color: var(--ctrl-label);
           -webkit-mask-image: var(--wup-icon-cross);
           mask-image: var(--wup-icon-cross);
         }
@@ -199,6 +197,10 @@ export default class WUPTextControl<
           transform: translate(-50%, -50%);
           width: 100%;
           padding-top: 100%;
+        }
+        :host button[clear]:before {
+          width: var(--ctrl-icon-hover-size);
+          padding-top: var(--ctrl-icon-hover-size);
         }
         @media (hover: hover) {
           :host button[clear]:hover {
@@ -228,7 +230,7 @@ export default class WUPTextControl<
       min: (v, setV) => v.length < setV && `Min length is ${setV} characters`,
       max: (v, setV) => v.length > setV && `Max length is ${setV} characters`,
       email: (v, setV) => setV && !emailReg.test(v) && "Please enter a valid email address",
-    } as WUPText.Defaults["validationRules"],
+    },
   };
 
   $options: WUPText.Options<ValueType> = {
@@ -262,6 +264,26 @@ export default class WUPTextControl<
     this.appendChild(this.$refLabel);
   }
 
+  /** Create & append element to control */
+  protected renderBtnClear(): HTMLButtonElement {
+    const bc = document.createElement("button");
+    const span = this.$refLabel.querySelector("span");
+    if (span!.nextElementSibling) {
+      this.$refLabel.insertBefore(bc, span!.nextElementSibling);
+    } else {
+      this.$refLabel.appendChild(bc);
+    }
+    bc.setAttribute("clear", "");
+    bc.setAttribute("aria-hidden", "true");
+    bc.tabIndex = -1;
+    onEvent(bc, "click", (e) => {
+      e.stopPropagation(); // prevent from affect on parent
+      e.preventDefault(); // prevent from submit
+      this.clearValue();
+    });
+    return bc;
+  }
+
   protected override gotReady() {
     super.gotReady();
     this.appendEvent(this.$refInput, "input", this.gotInput as any);
@@ -284,16 +306,7 @@ export default class WUPTextControl<
     }); // timeout required because selectControl can setup readOnly after super.gotChanges
 
     if (this._opts.clearButton && !this.$refBtnClear) {
-      const bc = this.$refLabel.appendChild(document.createElement("button"));
-      this.$refBtnClear = bc;
-      bc.setAttribute("clear", "");
-      bc.setAttribute("aria-hidden", "true");
-      bc.tabIndex = -1;
-      onEvent(bc, "click", (e) => {
-        e.stopPropagation(); // prevent from affect on parent
-        e.preventDefault(); // prevent from submit
-        this.clearValue();
-      });
+      this.$refBtnClear = this.renderBtnClear();
     }
     if (!this._opts.clearButton && this.$refBtnClear) {
       this.$refBtnClear.remove();
