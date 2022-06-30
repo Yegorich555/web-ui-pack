@@ -1,4 +1,6 @@
 import onEvent from "../helpers/onEvent";
+import { stringLowerCount, stringUpperCount } from "../helpers/stringCaseCount";
+// eslint-disable-next-line import/named
 import WUPTextControl, { WUPTextIn } from "./text";
 
 const tagName = "wup-pwd";
@@ -18,7 +20,12 @@ export namespace WUPPasswordIn {
 
 declare global {
   namespace WUPPassword {
-    interface ValidationMap extends WUPText.ValidationMap {}
+    interface ValidationMap extends WUPText.ValidationMap {
+      minNumber: number;
+      minUpper: number;
+      minLower: number;
+      special: { min: number; chars: string };
+    }
     interface EventMap extends WUPText.EventMap {}
     interface Defaults<T = string> extends WUPPasswordIn.GenDef<T> {}
     interface Options<T = string> extends WUPPasswordIn.GenOpt<T> {}
@@ -96,7 +103,17 @@ export default class WUPPasswordControl<
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUPPassword.Defaults = {
     ...WUPTextControl.$defaults,
-    validationRules: { ...WUPTextControl.$defaults.validationRules },
+    validationRules: {
+      ...WUPTextControl.$defaults.validationRules,
+      minNumber: (v, setV) =>
+        (!v || (v.match(/[0-9]/g)?.length ?? 0) < setV) &&
+        `Must contain at least ${setV} number${setV === 1 ? "" : "s"}`,
+      minUpper: (v, setV) => (!v || stringUpperCount(v, setV) < setV) && `Must contain at least ${setV} upper case`,
+      minLower: (v, setV) => (!v || stringLowerCount(v, setV) < setV) && `Must contain at least ${setV} lower case`,
+      special: (v, setV) =>
+        (!v || ![...setV.chars].reduce((prev, c) => (v.includes(c) ? ++prev : prev), 0)) &&
+        `Must contain at least ${setV.min} special character${setV.min === 1 ? "" : "s"}: ${setV.chars}`,
+    },
   };
 
   $options: WUPPassword.Options<ValueType> = {

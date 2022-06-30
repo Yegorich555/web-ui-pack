@@ -19,7 +19,22 @@ export default function PasswordControlView() {
           }
         }}
       >
-        <wup-pwd name="pwd" label="Password" />
+        <wup-pwd
+          name="pwd"
+          label="Password"
+          ref={(el) => {
+            if (el) {
+              el.$options.validations = {
+                required: true,
+                min: 8,
+                minNumber: 1,
+                minUpper: 1,
+                minLower: 1,
+                special: { min: 1, chars: "#!-_?,." },
+              };
+            }
+          }}
+        />
         <wup-pwd name="required" validations="globalkey.pointHere" />
         <wup-pwd
           name="withoutClearButton"
