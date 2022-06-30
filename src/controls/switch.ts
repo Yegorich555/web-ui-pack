@@ -67,7 +67,6 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
       --ctrl-switch-size-spot: calc(var(--ctrl-switch-size-h) * 1.4);
      }`;
   }
-  // todo add hover effect for slider
 
   static get $style(): string {
     return `${super.$style}
@@ -128,6 +127,11 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
       @media not all and (prefers-reduced-motion) {
         :host label>span { transition: background-color var(--anim); }
         :host label>span:before { transition: left var(--anim); }
+      }
+      @media (hover: hover) {
+        :host:hover label>span:before {
+           box-shadow: 0 0 4px 0 var(--ctrl-focus);
+        }
       }`;
   }
 
