@@ -148,24 +148,9 @@ export default class WUPTextControl<
         :host label button:after,
         :host label:after,
         :host label:before {
-          display: inline-block;
-          width: var(--ctrl-icon-size);
-          min-height: var(--ctrl-icon-size);
-          box-sizing: content-box;
-          margin: 0;
-          padding: 0 5px;
-          flex: 0 0 auto;
-          align-self: stretch;
-          cursor: pointer;
-          border: none;
-          box-shadow: none;
-          background: var(--ctrl-icon);
-          -webkit-mask-size: var(--ctrl-icon-size);
-          mask-size: var(--ctrl-icon-size);
-          -webkit-mask-repeat: no-repeat;
-          mask-repeat: no-repeat;
-          -webkit-mask-position: center;
-          mask-position: center;
+          ${this.$styleIcon}
+          -webkit-mask-image: none;
+          mask-image: none;
         }
         :host label:after {
           margin-right: calc(var(--ctrl-icon-size) / -2);
@@ -227,9 +212,9 @@ export default class WUPTextControl<
     clearButton: true,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
-      min: (v, setV) => v.length < setV && `Min length is ${setV} characters`,
-      max: (v, setV) => v.length > setV && `Max length is ${setV} characters`,
-      email: (v, setV) => setV && !emailReg.test(v) && "Please enter a valid email address",
+      min: (v, setV) => (v || "").length < setV && `Min length is ${setV} character${setV === 1 ? "" : "s"}`,
+      max: (v, setV) => (v || "").length > setV && `Max length is ${setV} character${setV === 1 ? "" : "s"}`,
+      email: (v, setV) => setV && !emailReg.test(v || "") && "Invalid email address",
     },
   };
 

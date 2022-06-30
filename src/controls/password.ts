@@ -175,4 +175,3 @@ export default class WUPPasswordControl<
 customElements.define(tagName, WUPPasswordControl);
 
 // testcase: form with email+password ignores autocomplete: "off" if previously it was saved
-// todo add custom-complex-validation

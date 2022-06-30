@@ -47,8 +47,8 @@ export const enum ValidateFromCases {
 
 export namespace WUPBaseIn {
   export type Generics<ValueType, ValidationKeys, ExtraDefaults = {}, ExtraOptions = {}> = {
-    Validation: (value: ValueType, setValue: ValidationKeys[keyof ValidationKeys]) => false | string;
-    CustomValidation: (value: ValueType) => false | string;
+    Validation: (value: ValueType | undefined, setValue: ValidationKeys[keyof ValidationKeys]) => false | string;
+    CustomValidation: (value: ValueType | undefined) => false | string;
     Defaults: {
       /** Rules defined for control */
       validationRules: {
@@ -87,9 +87,9 @@ export namespace WUPBaseIn {
       /** Rules enabled for current control */
       validations?:
         | {
-            [K in keyof ValidationKeys]?: ValidationKeys[K] | ((value: ValueType) => false | string);
+            [K in keyof ValidationKeys]?: ValidationKeys[K] | ((value: ValueType | undefined) => false | string);
           }
-        | { [k: string]: (value: ValueType) => false | string };
+        | { [k: string]: (value: ValueType | undefined) => false | string };
     } & ExtraOptions;
   };
 
@@ -166,14 +166,16 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         --ctrl-label: #5e5e5e;
         --ctrl-icon: var(--ctrl-label);
         --ctrl-icon-size: 1em;
+        --ctrl-icon-check-valid: green;
         --ctrl-back: var(--base-back);
         --ctrl-border-radius: var(--border-radius, 6px);
         --ctrl-err-text: #ad0000;
         --ctrl-err-back: #fff4fa;
         --ctrl-invalid-border: red;
         --wup-icon-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M674.515 93.949a45.925 45.925 0 0 0-65.022 0L384.001 318.981 158.509 93.487a45.928 45.928 0 0 0-65.022 0c-17.984 17.984-17.984 47.034 0 65.018l225.492 225.494L93.487 609.491c-17.984 17.984-17.984 47.034 0 65.018s47.034 17.984 65.018 0l225.492-225.492 225.492 225.492c17.984 17.984 47.034 17.984 65.018 0s17.984-47.034 0-65.018L449.015 383.999l225.492-225.494c17.521-17.521 17.521-47.034 0-64.559z'/%3E%3C/svg%3E");
-      }
-      `;
+        --wup-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath stroke='black' stroke-width='40' d='M37.691 450.599 224.76 635.864c21.528 21.32 56.11 21.425 77.478 0l428.035-426.23c21.47-21.38 21.425-56.11 0-77.478s-56.11-21.425-77.478 0L263.5 519.647 115.168 373.12c-21.555-21.293-56.108-21.425-77.478 0s-21.425 56.108 0 77.478z'/%3E%3C/svg%3E");
+        --wup-icon-dot: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='20'/%3E%3C/svg%3E");
+      }`;
   }
 
   /** StyleContent related to component */
@@ -272,6 +274,28 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         background: var(--ctrl-err-back);
         margin: -4px 0;
       }
+      :host [error] ul {
+        margin:0; padding:2px;
+      }
+      :host [error] li {
+        display: flex;
+        align-items: center;
+        margin-left: -5px;
+      }
+      :host [error] li:before {
+        content: '';
+        --ctrl-icon-img: var(--wup-icon-dot);
+        --ctrl-icon: var(--ctrl-err-text);
+        ${this.$styleIcon}
+      }
+      :host [error] li[valid] {
+        color: var(--ctrl-icon-check-valid);
+      }
+      :host [error] li[valid]:before {
+        content: '';
+        --ctrl-icon-img: var(--wup-icon-check);
+        --ctrl-icon: var(--ctrl-icon-check-valid);
+      }
     `;
   }
 
@@ -292,7 +316,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     validityDebounceMs: 500,
     validationCase: ValidationCases.onChangeSmart | ValidationCases.onFocusLost,
     validationRules: {
-      required: (v, setV) => setV && this.$isEmpty(v) && "This field is required",
+      required: (v, setV) => setV === true && this.$isEmpty(v) && "This field is required",
     },
   };
 
@@ -532,23 +556,15 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     this.$form?.$controls.splice(this.$form.$controls.indexOf(this), 1);
   }
 
-  #wasValid = false;
-  protected _validTimer?: number;
-  /** Method called to check control based on validation rules and current value */
-  protected goValidate(fromCase: ValidateFromCases, canShowError = true): string | false {
-    const vls =
-      (nestedProperty.get(window, this.getAttribute("validations") || "") as WUPBase.Options["validations"]) ||
-      this._opts.validations;
+  protected get validations(): Array<(v: ValueType | undefined) => string | false> {
+    const vls = (nestedProperty.get(window, this.getAttribute("validations") || "") ||
+      this._opts.validations) as WUPBase.Options["validations"];
 
     if (!vls) {
-      this.#isValid = true;
-      return false;
+      return [];
     }
 
-    let errMsg = "";
-    const v = this.$value as unknown as string;
-
-    const findErr = (k: string | number) => {
+    const check = (v: ValueType | undefined, k: string | number): string | false => {
       const vl = vls[k as "required"];
 
       let err: false | string;
@@ -561,20 +577,49 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
           const n = this._opts.name ? `.[${this._opts.name}]` : "";
           throw new Error(`${this.tagName}${n}. Validation rule [${vl}] is not found`);
         }
-        err = r(v, vl as boolean);
+        err = r(v as unknown as string, vl as boolean);
       }
 
       if (err !== false) {
-        errMsg = err;
-        return true;
+        return err;
       }
 
       return false;
     };
-    // validate [required] first
-    (vls.required && findErr("required")) || Object.keys(vls).some(findErr);
 
-    this.#isValid = !errMsg;
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
+    const arr = Object.keys(vls)
+      .sort((k1, k2) => {
+        if (k1 === "required") return -1;
+        if (k2 === "required") return 1;
+        return 0;
+      })
+      .map((key) => ({ [key]: (v: ValueType | undefined) => check.call(self, v, key) }[key])); // make object to create named function
+
+    return arr;
+  }
+
+  #wasValid = false;
+  protected _validTimer?: number;
+  /** Method called to check control based on validation rules and current value */
+  protected goValidate(fromCase: ValidateFromCases, canShowError = true): string | false {
+    const vls = this.validations;
+    if (!vls.length) {
+      this.#isValid = true;
+      return false;
+    }
+
+    const v = this.$value;
+    let errMsg = "";
+    this.#isValid = !this.validations.some((fn) => {
+      const err = fn(v);
+      if (err) {
+        errMsg = err;
+        return true;
+      }
+      return false;
+    });
     this._validTimer && clearTimeout(this._validTimer);
 
     if (fromCase === ValidateFromCases.onInput && this._opts.validationCase & ValidationCases.onChangeSmart) {
@@ -600,6 +645,31 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return false;
   }
 
+  protected renderError(): WUPPopupElement {
+    const p = document.createElement("wup-popup");
+    p.$options.showCase = ShowCases.always;
+    p.$options.target = this;
+    p.$options.placement = [
+      WUPPopupElement.$placements.$bottom.$start.$resizeWidth,
+      WUPPopupElement.$placements.$top.$start.$resizeWidth,
+    ];
+    p.$options.maxWidthByTarget = true;
+    p.setAttribute("error", "");
+    p.setAttribute("aria-live", "off"); // 'off' (not 'polite') because popup changes display block>none when it hidden after scrolling
+    p.id = this.#ctr.$uniqueId;
+    this.$refInput.setAttribute("aria-describedby", p.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
+    this.appendChild(p);
+    p.addEventListener("click", this.focus);
+
+    const hiddenLbl = p.appendChild(document.createElement("span"));
+    hiddenLbl.textContent = `Error${this._opts.name ? ` for ${this._opts.name}` : ""}: `;
+    hiddenLbl.className = "wup-hidden";
+
+    p.appendChild(document.createElement("span"));
+
+    return p;
+  }
+
   /** Method called to show error */
   protected goShowError(err: string) {
     // possible when user goes to another page and focusout > validTimeout happened
@@ -610,27 +680,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     this.setAttribute("invalid", "");
 
     if (!this.$refError) {
-      const p = document.createElement("wup-popup");
-      p.$options.showCase = ShowCases.always;
-      p.$options.target = this;
-      p.$options.placement = [
-        WUPPopupElement.$placements.$bottom.$start.$resizeWidth,
-        WUPPopupElement.$placements.$top.$start.$resizeWidth,
-      ];
-      p.$options.maxWidthByTarget = true;
-      p.setAttribute("error", "");
-      p.setAttribute("aria-live", "off"); // 'off' (not 'polite') because popup changes display block>none when it hidden after scrolling
-      p.id = this.#ctr.$uniqueId;
-      this.$refInput.setAttribute("aria-describedby", p.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
-      this.$refError = this.appendChild(p);
-      p.addEventListener("click", this.focus);
-
-      const hiddenLbl = p.appendChild(document.createElement("span"));
-      hiddenLbl.textContent = `Error${this._opts.name ? ` for ${this._opts.name}` : ""}: `;
-      hiddenLbl.className = "wup-hidden";
-
-      p.appendChild(document.createElement("span"));
-      p.$show();
+      this.$refError = this.renderError();
     }
 
     this.$refError.childNodes.item(1).textContent = err;
@@ -649,6 +699,51 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     }
   }
 
+  /** Show all validation-rules (beside required) with checkpoints of valid ones; to hide > goHideError() */
+  protected goShowValidations() {
+    const vls = this.validations;
+    if (!vls.length || (vls.length === 1 && vls[0].name === "required")) {
+      return;
+    }
+    type StoredItem = HTMLLIElement & { _wupValidation: (v: any) => string | false };
+    type StoredRefError = WUPPopupElement & { _wupItems: StoredItem[] };
+
+    let p: StoredRefError = this.$refError as StoredRefError;
+    if (!this.$refError) {
+      this.$refError = this.renderError();
+      // todo check interaction with showError
+      // todo don't forget about required)
+      // todo check NVDA reading - read only first error if showError happened - maybe show textContent but visually hide ?
+
+      p = this.$refError as StoredRefError;
+      p._wupItems = [];
+      const ul = this.$refError.appendChild(document.createElement("ul"));
+      for (let i = 0; i < vls.length; ++i) {
+        if (vls[i].name !== "required") {
+          // 'required' is excluded because it's clear enough
+          const li = ul.appendChild(document.createElement("li"));
+          const err = vls[i](undefined);
+          if (err) {
+            li.textContent = err;
+            (li as StoredItem)._wupValidation = vls[i];
+            p._wupItems.push(li as StoredItem);
+          } else {
+            // eslint-disable-next-line no-loop-func
+            setTimeout(() => {
+              const n = this._opts.name ? `.[${this._opts.name}]` : "";
+              throw new Error(
+                `${this.tagName}${n}. Can't get error message for validationRule [${vls[i].name}]. Calling rule with value [undefined] must return error message`
+              );
+            });
+          }
+        }
+      }
+    }
+
+    const v = this.$value;
+    p._wupItems.forEach((li) => (li._wupValidation(v) ? li.removeAttribute("valid") : li.setAttribute("valid", "")));
+  }
+
   /** Fire this method to update value & validate */
   protected setValue(v: ValueType | undefined, canValidate = true) {
     const was = this.#value;
@@ -662,6 +757,11 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
     if (!isChanged) {
       return;
+    }
+
+    // todo only if focused
+    if (this._opts.validationsShow) {
+      this.goShowValidations();
     }
 
     const c = this._opts.validationCase;

@@ -51,7 +51,6 @@ export default class WUPCheckControl<
         --ctrl-check-radius: 3px;
         --ctrl-check-shadow: #0003;
         --ctrl-check-size: calc(var(--ctrl-icon-size) * 1.2);
-        --ctrl-check-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath stroke='black' stroke-width='40' d='M37.691 450.599 224.76 635.864c21.528 21.32 56.11 21.425 77.478 0l428.035-426.23c21.47-21.38 21.425-56.11 0-77.478s-56.11-21.425-77.478 0L263.5 519.647 115.168 373.12c-21.555-21.293-56.108-21.425-77.478 0s-21.425 56.108 0 77.478z'/%3E%3C/svg%3E");
       }`;
   }
 
@@ -83,8 +82,8 @@ export default class WUPCheckControl<
         transform: scale(0.8);
 
         background-color: var(--ctrl-check-on);
-        -webkit-mask-image: var(--ctrl-check-img);
-        mask-image: var(--ctrl-check-img);
+        -webkit-mask-image: var(--wup-icon-check);
+        mask-image: var(--wup-icon-check);
         -webkit-mask-size: contain;
         mask-size: contain;
         -webkit-mask-repeat: no-repeat;

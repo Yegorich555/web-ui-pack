@@ -32,6 +32,7 @@ export default function PasswordControlView() {
                 minLower: 1,
                 special: { min: 1, chars: "#!-_?,." },
               };
+              el.$options.validationsShow = true;
             }
           }}
         />
