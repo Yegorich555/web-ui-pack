@@ -1,6 +1,5 @@
 import Page from "src/elements/page";
 import { WUPPasswordControl } from "web-ui-pack";
-import { ValidationCases } from "web-ui-pack/controls/baseControl";
 
 const sideEffect = WUPPasswordControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
@@ -35,7 +34,6 @@ export default function PasswordControlView() {
               };
               el.$options.validationShowAll = true;
               el.$options.autoFocus = true;
-              el.$options.validationCase = ValidationCases.onInit;
             }
           }}
         />

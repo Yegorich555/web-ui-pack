@@ -4,6 +4,7 @@ import isEqual from "../helpers/isEqual";
 import nestedProperty from "../helpers/nestedProperty";
 import onFocusLostEv from "../helpers/onFocusLost";
 import stringPrettify from "../helpers/stringPrettify";
+import { onFocusGot } from "../indexHelpers";
 // eslint-disable-next-line import/named
 import WUPPopupElement, { ShowCases } from "../popup/popupElement";
 import IBaseControl from "./baseControl.i";
@@ -19,7 +20,7 @@ export const enum ValidationCases {
   /** Validate when control losts focus */
   onFocusLost = 1 << 2,
   /** Validate if control has value and gets focus (recommended option for password with $options.validationShowAll) */
-  onFocusWithValue = 1 << 3, // todo implement
+  onFocusWithValue = 1 << 3,
   /** Validate when not-empty initValue defined and doesn't fit validations  */
   onInit = 1 << 4,
 }
@@ -38,6 +39,8 @@ export const enum ClearActions {
 export const enum ValidateFromCases {
   /** When element appended to layout */
   onInit,
+  /** When control gets focus */
+  onFocus,
   /** When control loses focus (including document.activeElement) */
   onFocusLost,
   /** When user type text (or change value via input) in <input /> */
@@ -58,9 +61,9 @@ export namespace WUPBaseIn {
         [K in keyof ValidationKeys]?: (value: ValueType, setValue: ValidationKeys[K]) => false | string;
       };
       /** When to validate control and show error. Validation by onSubmit impossible to disable
-       *  @defaultValue onChangeSmart | onFocusLost | onSubmit
+       *  @defaultValue onChangeSmart | onFocusLost | onFocusWithValue | onSubmit
        */
-      validationCase: ValidationCases; // todo add onFocusNotEmpty
+      validationCase: ValidationCases;
       /** Wait for pointed time before show error (it's sumarized with $options.debounce); WARN: hide error without debounce
        *  @defaultValue 500
        */
@@ -322,7 +325,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   static $defaults: WUPBase.Defaults = {
     clearActions: ClearActions.clear | ClearActions.resetToInit,
     validityDebounceMs: 500,
-    validationCase: ValidationCases.onChangeSmart | ValidationCases.onFocusLost,
+    validationCase: ValidationCases.onChangeSmart | ValidationCases.onFocusLost | ValidationCases.onFocusWithValue,
     validationRules: {
       required: (v, setV) => setV === true && this.$isEmpty(v) && "This field is required",
     },
@@ -456,6 +459,14 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     if (this._opts.validationCase & ValidationCases.onFocusLost) {
       this.disposeLstInit.push(
         onFocusLostEv(this, () => this.goValidate(ValidateFromCases.onFocusLost), {
+          debounceMs: this._opts.focusDebounceMs,
+        })
+      );
+    }
+
+    if (this._opts.validationCase & ValidationCases.onFocusWithValue) {
+      this.disposeLstInit.push(
+        onFocusGot(this, () => !this.$isEmpty && this.goValidate(ValidateFromCases.onFocus), {
           debounceMs: this._opts.focusDebounceMs,
         })
       );
