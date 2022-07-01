@@ -490,7 +490,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     }
 
     // set other props
-    const req = this._opts.validations?.required;
+    const req = this.validations?.required;
     req ? i.setAttribute("aria-required", "true") : i.removeAttribute("aria-required");
     this.setBoolAttr("disabled", this._opts.disabled);
     this.setBoolAttr("readOnly", this._opts.readOnly);
@@ -575,9 +575,16 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     this.$form?.$controls.splice(this.$form.$controls.indexOf(this), 1);
   }
 
-  protected get validations(): Array<(v: ValueType | undefined) => string | false> {
+  /** Returns validations enabled by user */
+  protected get validations(): WUPBase.Options["validations"] | undefined {
     const vls = (nestedProperty.get(window, this.getAttribute("validations") || "") ||
       this._opts.validations) as WUPBase.Options["validations"];
+    return vls;
+  }
+
+  /** Returns validations functions ready for checking */
+  protected get validationsRules(): Array<(v: ValueType | undefined) => string | false> {
+    const vls = this.validations;
 
     if (!vls) {
       return [];
@@ -623,7 +630,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   protected _validTimer?: number;
   /** Method called to check control based on validation rules and current value */
   protected goValidate(fromCase: ValidateFromCases, canShowError = true): string | false {
-    const vls = this.validations;
+    const vls = this.validationsRules;
     if (!vls.length) {
       this.#isValid = true;
       return false;
@@ -631,7 +638,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
     const v = this.$value;
     let errMsg = "";
-    this.#isValid = !this.validations.some((fn) => {
+    this.#isValid = !this.validationsRules.some((fn) => {
       const err = fn(v);
       if (err) {
         errMsg = err;
@@ -666,7 +673,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   /** Show (append/update) all validation-rules with checkpoints to existed error-element */
   protected renderValidations(parent: WUPPopupElement | HTMLElement, skipRules = ["required"]) {
-    const vls = this.validations.filter((vl) => !skipRules.includes(vl.name));
+    const vls = this.validationsRules.filter((vl) => !skipRules.includes(vl.name));
     if (!vls.length) {
       return;
     }
