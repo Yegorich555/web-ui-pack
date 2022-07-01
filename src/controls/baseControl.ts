@@ -4,6 +4,7 @@ import isEqual from "../helpers/isEqual";
 import nestedProperty from "../helpers/nestedProperty";
 import onFocusLostEv from "../helpers/onFocusLost";
 import stringPrettify from "../helpers/stringPrettify";
+import { onFocusGot } from "../indexHelpers";
 // eslint-disable-next-line import/named
 import WUPPopupElement, { ShowCases } from "../popup/popupElement";
 import IBaseControl from "./baseControl.i";
@@ -32,6 +33,7 @@ export const enum ClearActions {
   resetToInit = 1 << 2,
 }
 
+/** Points on what fired validation */
 export const enum ValidateFromCases {
   /** When element appended to layout */
   onInit,
@@ -43,6 +45,18 @@ export const enum ValidateFromCases {
   onSubmit,
   /** When $validate() is fired programmatically */
   onManualCall,
+}
+
+/** Cases to show list of validations for WUP Controls */
+export const enum ValidationListCases {
+  /** Don't show */
+  none,
+  /** Show forever when control invalid; hide when valid */
+  onInvalid = 1,
+  /** Show when user changed value; hide on blur */
+  onChange = 1 << 1,
+  /** Show when control got focus; hide on blur if valid */
+  onFocus = 1 << 2,
 }
 
 export namespace WUPBaseIn {
@@ -57,7 +71,7 @@ export namespace WUPBaseIn {
       /** When to validate control and show error. Validation by onSubmit impossible to disable
        *  @defaultValue onChangeSmart | onFocusLost | onSubmit
        */
-      validationCase: ValidationCases;
+      validationCase: ValidationCases; // todo add onFocusNotEmpty
       /** Wait for pointed time before show error (it's sumarized with $options.debounce); WARN: hide error without debounce
        *  @defaultValue 500
        */
@@ -90,12 +104,17 @@ export namespace WUPBaseIn {
             [K in keyof ValidationKeys]?: ValidationKeys[K] | ((value: ValueType | undefined) => false | string);
           }
         | { [k: string]: (value: ValueType | undefined) => false | string };
+      /** Show all validations rules with checkpoints at once in list */
+      validationListShow?: boolean | ValidationListCases;
     } & ExtraOptions;
   };
 
   export type GenDef<T = string> = Generics<T, WUPBase.ValidationMap>["Defaults"];
   export type GenOpt<T = string> = Generics<T, WUPBase.ValidationMap>["Options"];
 }
+
+type StoredItem = HTMLLIElement & { _wupVld: (v: any) => string | false };
+type StoredRefError = HTMLElement & { _wupVldItems?: StoredItem[] };
 
 declare global {
   namespace WUPBase {
@@ -134,9 +153,9 @@ declare global {
     }
 
     interface EventMap extends WUP.EventMap {
-      /** Fires on value change */
+      /** Called on value change */
       $change: Event;
-      /** Fires on validation-call (depends on @see ValidationCases) */
+      /** Called on validation-call (depends on @see ValidationCases) */
       $validate: Event;
     }
   }
@@ -453,6 +472,12 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       );
     }
 
+    if ((this._opts.validationListShow as number) & ValidationListCases.onFocus) {
+      this.disposeLstInit.push(
+        onFocusGot(this, () => this.goShowError(null), { debounceMs: this._opts.focusDebounceMs })
+      );
+    }
+
     this._opts.label = this.getAttribute("label") ?? this._opts.label;
     this._opts.name = this.getAttribute("name") ?? this._opts.name;
     this._opts.autoComplete = this.getAttribute("autoComplete") ?? this._opts.autoComplete;
@@ -645,6 +670,42 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return false;
   }
 
+  /** Show (append/update) all validation-rules with checkpoints to existed error-element */
+  protected renderValidations(parent: WUPPopupElement | HTMLElement, skipRules = ["required"]) {
+    const vls = this.validations.filter((vl) => !skipRules.includes(vl.name));
+    if (!vls.length) {
+      return;
+    }
+
+    let p: StoredRefError = parent as StoredRefError;
+    if (!p._wupVldItems) {
+      p = parent as StoredRefError;
+      p._wupVldItems = [];
+      const ul = p.appendChild(document.createElement("ul"));
+      ul.setAttribute("aria-hidden", "true");
+      for (let i = 0; i < vls.length; ++i) {
+        const li = ul.appendChild(document.createElement("li")) as StoredItem;
+        li._wupVld = vls[i];
+        p._wupVldItems.push(li);
+        const err = vls[i](undefined);
+        if (err) {
+          li.textContent = err;
+        } else {
+          // eslint-disable-next-line no-loop-func
+          setTimeout(() => {
+            const n = this._opts.name ? `.[${this._opts.name}]` : "";
+            throw new Error(
+              `${this.tagName}${n}. Can't get error message for validationRule [${vls[i].name}]. Calling rule with value [undefined] must return error message`
+            );
+          });
+        }
+      }
+    }
+
+    const v = this.$value;
+    p._wupVldItems.forEach((li) => (li._wupVld(v) ? li.removeAttribute("valid") : li.setAttribute("valid", "")));
+  }
+
   protected renderError(): WUPPopupElement {
     const p = document.createElement("wup-popup");
     p.$options.showCase = ShowCases.always;
@@ -658,90 +719,76 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     p.setAttribute("aria-live", "off"); // 'off' (not 'polite') because popup changes display block>none when it hidden after scrolling
     p.id = this.#ctr.$uniqueId;
     this.$refInput.setAttribute("aria-describedby", p.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
-    this.appendChild(p);
     p.addEventListener("click", this.focus);
 
     const hiddenLbl = p.appendChild(document.createElement("span"));
-    hiddenLbl.textContent = `Error${this._opts.name ? ` for ${this._opts.name}` : ""}: `;
     hiddenLbl.className = "wup-hidden";
-
     p.appendChild(document.createElement("span"));
+    this.$refError = this.appendChild(p);
 
     return p;
   }
 
-  /** Method called to show error */
-  protected goShowError(err: string) {
+  /** Method called to show error and set invalid state on input; point null to show all validation rules with checkpoints */
+  protected goShowError(err: string | null) {
     // possible when user goes to another page and focusout > validTimeout happened
     if (!this.isConnected) {
       return;
     }
-    this.$refInput.setCustomValidity(err);
-    this.setAttribute("invalid", "");
 
+    const isCreate = !this.$refError;
     if (!this.$refError) {
       this.$refError = this.renderError();
     }
 
-    this.$refError.childNodes.item(1).textContent = err;
+    if (this._opts.validationListShow) {
+      if (isCreate && (this._opts.validationListShow as number) & ValidationListCases.onFocus) {
+        const r = onFocusLostEv(this, () => this.$isValid && this.goHideError(ValidationListCases.onFocus), {
+          debounceMs: this._opts.focusDebounceMs,
+        });
+        const remove = () => {
+          r();
+          const i = this.disposeLst.indexOf(r);
+          i !== -1 && this.disposeLst.splice(i, 1);
+        };
+        this.disposeLst.push(r);
+        (this.$refError as any)._wupDispose = remove;
+      }
+
+      this.renderValidations(this.$refError);
+    }
+
+    if (err !== null) {
+      this.$refInput.setCustomValidity(err);
+      this.setAttribute("invalid", "");
+      this.$refError.firstElementChild!.textContent = `Error${this._opts.name ? ` for ${this._opts.name}` : ""}: `;
+      const el = this.$refError.children.item(1)!;
+      el.textContent = err;
+
+      const item = (this.$refError as StoredRefError)._wupVldItems?.find((li) => li.textContent === err);
+      el.className = item ? "wup-hidden" : "";
+
+      this.$refInput.setAttribute("aria-describedby", this.$refError.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
+    }
   }
 
-  protected goHideError() {
+  /** Method called to hide error and set valid state on input; point null to show all validation rules with checkpoints */
+  protected goHideError(validationListCase?: ValidationListCases) {
     this.$refInput.setCustomValidity("");
     this.$refInput.removeAttribute("aria-describedby");
     this.removeAttribute("invalid");
 
     if (this.$refError) {
-      const p = this.$refError;
-      p.addEventListener("$hide", p.remove);
-      p.$hide();
-      this.$refError = undefined;
-    }
-  }
-
-  /** Show all validation-rules (beside required) with checkpoints of valid ones; to hide > goHideError() */
-  protected goShowValidations() {
-    const vls = this.validations;
-    if (!vls.length || (vls.length === 1 && vls[0].name === "required")) {
-      return;
-    }
-    type StoredItem = HTMLLIElement & { _wupValidation: (v: any) => string | false };
-    type StoredRefError = WUPPopupElement & { _wupItems: StoredItem[] };
-
-    let p: StoredRefError = this.$refError as StoredRefError;
-    if (!this.$refError) {
-      this.$refError = this.renderError();
-      // todo check interaction with showError
-      // todo don't forget about required)
-      // todo check NVDA reading - read only first error if showError happened - maybe show textContent but visually hide ?
-
-      p = this.$refError as StoredRefError;
-      p._wupItems = [];
-      const ul = this.$refError.appendChild(document.createElement("ul"));
-      for (let i = 0; i < vls.length; ++i) {
-        if (vls[i].name !== "required") {
-          // 'required' is excluded because it's clear enough
-          const li = ul.appendChild(document.createElement("li"));
-          const err = vls[i](undefined);
-          if (err) {
-            li.textContent = err;
-            (li as StoredItem)._wupValidation = vls[i];
-            p._wupItems.push(li as StoredItem);
-          } else {
-            // eslint-disable-next-line no-loop-func
-            setTimeout(() => {
-              const n = this._opts.name ? `.[${this._opts.name}]` : "";
-              throw new Error(
-                `${this.tagName}${n}. Can't get error message for validationRule [${vls[i].name}]. Calling rule with value [undefined] must return error message`
-              );
-            });
-          }
-        }
+      if (!this._opts.validationCase || validationListCase) {
+        const p = this.$refError;
+        (this.$refError as any)._wupDispose?.call(this);
+        p.addEventListener("$hide", p.remove);
+        p.$hide(); // hide with animation
+        this.$refError = undefined;
+      } else {
+        this.$refError.children.item(1)!.textContent = "";
       }
     }
-
-    const v = this.$value;
-    p._wupItems.forEach((li) => (li._wupValidation(v) ? li.removeAttribute("valid") : li.setAttribute("valid", "")));
   }
 
   /** Fire this method to update value & validate */
@@ -759,9 +806,11 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       return;
     }
 
-    // todo only if focused
-    if (this._opts.validationsShow) {
-      this.goShowValidations();
+    const vs = this._opts.validationListShow;
+    if (vs && this.$isReady) {
+      if (this.$refError || ((vs as number) & ValidationListCases.onChange && canValidate)) {
+        this.goShowError(null); // update existed or show on change
+      }
     }
 
     const c = this._opts.validationCase;
@@ -801,3 +850,5 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 }
 
 // testcase: $initModel & attr [name] (possible it doesn't work)
+// todo improve hover effect on other controls when popup-error is shown
+// todo when click on not-empty-control > selectAll + cursorToEnd - need to prevent cursorToEnd
