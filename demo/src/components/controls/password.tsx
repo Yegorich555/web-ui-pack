@@ -1,6 +1,6 @@
 import Page from "src/elements/page";
 import { WUPPasswordControl } from "web-ui-pack";
-import { ValidationListCases } from "web-ui-pack/controls/baseControl";
+import { ValidationCases } from "web-ui-pack/controls/baseControl";
 
 const sideEffect = WUPPasswordControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
@@ -33,9 +33,9 @@ export default function PasswordControlView() {
                 minLower: 1,
                 special: { min: 1, chars: "#!-_?,.@:;'" },
               };
-              el.$options.validationListShow = ValidationListCases.onFocus;
+              el.$options.validationShowAll = true;
               el.$options.autoFocus = true;
-              // el.$showError("This field is required");
+              el.$options.validationCase = ValidationCases.onInit;
             }
           }}
         />

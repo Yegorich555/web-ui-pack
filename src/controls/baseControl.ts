@@ -4,7 +4,6 @@ import isEqual from "../helpers/isEqual";
 import nestedProperty from "../helpers/nestedProperty";
 import onFocusLostEv from "../helpers/onFocusLost";
 import stringPrettify from "../helpers/stringPrettify";
-import { onFocusGot } from "../indexHelpers";
 // eslint-disable-next-line import/named
 import WUPPopupElement, { ShowCases } from "../popup/popupElement";
 import IBaseControl from "./baseControl.i";
@@ -19,8 +18,10 @@ export const enum ValidationCases {
   onChange = 1 << 1,
   /** Validate when control losts focus */
   onFocusLost = 1 << 2,
+  /** Validate if control has value and gets focus (recommended option for password with $options.validationShowAll) */
+  onFocusWithValue = 1 << 3, // todo implement
   /** Validate when not-empty initValue defined and doesn't fit validations  */
-  onInit = 1 << 3,
+  onInit = 1 << 4,
 }
 
 /** Actions when user pressed ESC or button-clear */
@@ -45,18 +46,6 @@ export const enum ValidateFromCases {
   onSubmit,
   /** When $validate() is fired programmatically */
   onManualCall,
-}
-
-/** Cases to show list of validations for WUP Controls */
-export const enum ValidationListCases {
-  /** Don't show */
-  none,
-  /** Show forever when control invalid; hide when valid */
-  onInvalid = 1,
-  /** Show when user changed value; hide on blur */
-  onChange = 1 << 1,
-  /** Show when control got focus; hide on blur if valid */
-  onFocus = 1 << 2,
 }
 
 export namespace WUPBaseIn {
@@ -104,8 +93,8 @@ export namespace WUPBaseIn {
             [K in keyof ValidationKeys]?: ValidationKeys[K] | ((value: ValueType | undefined) => false | string);
           }
         | { [k: string]: (value: ValueType | undefined) => false | string };
-      /** Show all validations rules with checkpoints at once in list */
-      validationListShow?: boolean | ValidationListCases;
+      /** Show all validation-rules with checkpoints as list instead of single error */
+      validationShowAll?: boolean;
     } & ExtraOptions;
   };
 
@@ -472,12 +461,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       );
     }
 
-    if ((this._opts.validationListShow as number) & ValidationListCases.onFocus) {
-      this.disposeLstInit.push(
-        onFocusGot(this, () => this.goShowError(null), { debounceMs: this._opts.focusDebounceMs })
-      );
-    }
-
     this._opts.label = this.getAttribute("label") ?? this._opts.label;
     this._opts.name = this.getAttribute("name") ?? this._opts.name;
     this._opts.autoComplete = this.getAttribute("autoComplete") ?? this._opts.autoComplete;
@@ -736,27 +719,11 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       return;
     }
 
-    const isCreate = !this.$refError;
     if (!this.$refError) {
       this.$refError = this.renderError();
     }
 
-    if (this._opts.validationListShow) {
-      if (isCreate && (this._opts.validationListShow as number) & ValidationListCases.onFocus) {
-        const r = onFocusLostEv(this, () => this.$isValid && this.goHideError(ValidationListCases.onFocus), {
-          debounceMs: this._opts.focusDebounceMs,
-        });
-        const remove = () => {
-          r();
-          const i = this.disposeLst.indexOf(r);
-          i !== -1 && this.disposeLst.splice(i, 1);
-        };
-        this.disposeLst.push(r);
-        (this.$refError as any)._wupDispose = remove;
-      }
-
-      this.renderValidations(this.$refError);
-    }
+    this._opts.validationShowAll && this.renderValidations(this.$refError);
 
     if (err !== null) {
       this.$refInput.setCustomValidity(err);
@@ -765,29 +732,24 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       const el = this.$refError.children.item(1)!;
       el.textContent = err;
 
-      const item = (this.$refError as StoredRefError)._wupVldItems?.find((li) => li.textContent === err);
-      el.className = item ? "wup-hidden" : "";
+      const renderedError = (this.$refError as StoredRefError)._wupVldItems?.find((li) => li.textContent === err);
+      el.className = renderedError ? "wup-hidden" : "";
 
       this.$refInput.setAttribute("aria-describedby", this.$refError.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
     }
   }
 
-  /** Method called to hide error and set valid state on input; point null to show all validation rules with checkpoints */
-  protected goHideError(validationListCase?: ValidationListCases) {
+  /** Method called to hide error and set valid state on input */
+  protected goHideError() {
     this.$refInput.setCustomValidity("");
     this.$refInput.removeAttribute("aria-describedby");
     this.removeAttribute("invalid");
 
     if (this.$refError) {
-      if (!this._opts.validationCase || validationListCase) {
-        const p = this.$refError;
-        (this.$refError as any)._wupDispose?.call(this);
-        p.addEventListener("$hide", p.remove);
-        p.$hide(); // hide with animation
-        this.$refError = undefined;
-      } else {
-        this.$refError.children.item(1)!.textContent = "";
-      }
+      const p = this.$refError;
+      p.addEventListener("$hide", p.remove);
+      p.$hide(); // hide with animation
+      this.$refError = undefined;
     }
   }
 
@@ -804,13 +766,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
     if (!isChanged) {
       return;
-    }
-
-    const vs = this._opts.validationListShow;
-    if (vs && this.$isReady) {
-      if (this.$refError || ((vs as number) & ValidationListCases.onChange && canValidate)) {
-        this.goShowError(null); // update existed or show on change
-      }
     }
 
     const c = this._opts.validationCase;

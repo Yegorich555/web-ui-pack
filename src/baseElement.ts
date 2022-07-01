@@ -94,6 +94,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
 
     const protos: typeof WUPBaseElement[] = [];
     // autoBind functions (recursive until HMTLElement)
+    // todo check how bindAll affects on memory-consumption and performance
     const bindAll = (t: unknown) => {
       const p = Object.getPrototypeOf(t);
       if (p !== HTMLElement.prototype) {
