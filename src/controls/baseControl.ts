@@ -237,7 +237,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       }
       @media (hover: hover) {
         :host:hover {
-           z-index: 90010;
+          z-index: 90010;
         }
         :host:hover,
         :host:hover > [menu] {
@@ -284,6 +284,11 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         color: var(--ctrl-err-text);
         background: var(--ctrl-err-back);
         margin: -4px 0;
+        max-height: 3em;
+        scrollbar-width: none;
+      }
+      :host [error]::-webkit-scrollbar {
+        display: none;
       }
       :host [error] ul {
         margin:0; padding:2px;
@@ -306,6 +311,9 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         content: '';
         --ctrl-icon-img: var(--wup-icon-check);
         --ctrl-icon: var(--ctrl-icon-check-valid);
+      }
+      :host:focus-within [error] {
+        max-height: none;
       }
     `;
   }
@@ -823,5 +831,4 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 }
 
 // testcase: $initModel & attr [name] (possible it doesn't work)
-// todo improve hover effect on other controls when popup-error is shown
 // todo when click on not-empty-control > selectAll + cursorToEnd - need to prevent cursorToEnd

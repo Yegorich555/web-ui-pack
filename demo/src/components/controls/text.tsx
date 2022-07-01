@@ -30,7 +30,7 @@ export default function TextControlView() {
               el.$options.validations = {
                 required: true,
                 max: 10,
-                min: (v) => v.length < 2 && "This is custom error",
+                min: (v) => (!v || v.length < 2) && "This is custom error",
               };
             }
           }}
