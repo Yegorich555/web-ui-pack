@@ -71,7 +71,7 @@ export default class WUPRadioControl<
       --ctrl-radio-on: var(--ctrl-focus);
       --ctrl-radio-border: #0003;
       --ctrl-radio-border-size: 2px;
-      --ctrl-radio-gap: 0.7em;
+      --ctrl-radio-gap: 8px;
      }`;
   }
 

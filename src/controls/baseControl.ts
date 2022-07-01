@@ -170,7 +170,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Css-variables related to component */
   static get $styleRoot(): string {
     return `:root {
-        --ctrl-padding: 1.4em 1em 0.6em 1em;
+        --ctrl-padding: 1.5em 1em 0.5em 1em;
         --ctrl-focus: var(--base-focus);
         --ctrl-focus-label: #00778d;
         --ctrl-selected: var(--ctrl-focus-label);
