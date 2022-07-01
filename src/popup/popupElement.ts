@@ -646,8 +646,8 @@ export default class WUPPopupElement<
       return undefined;
     }
 
-    const tdef = trg.getBoundingClientRect();
-    if (!tdef.width || !tdef.height) {
+    const tRect = trg.getBoundingClientRect();
+    if (!tRect.width || !tRect.height) {
       this.style.display = "none"; // hide if target is not displayed
       return this.#prevRect;
     }
@@ -655,13 +655,22 @@ export default class WUPPopupElement<
     if (
       // issue: it's wrong if minWidth, minHeight etc. is changed and doesn't affect on layout sizes directly
       this.#prevRect &&
-      this.#prevRect.top === tdef.top &&
-      this.#prevRect.left === tdef.left &&
-      this.#prevRect.width === tdef.width &&
-      this.#prevRect.height === tdef.height
+      this.#prevRect.top === tRect.top &&
+      this.#prevRect.left === tRect.left &&
+      this.#prevRect.width === tRect.width &&
+      this.#prevRect.height === tRect.height
     ) {
       return this.#prevRect;
     }
+
+    const tdef: Omit<DOMRect, "toJSON" | "x" | "y"> = {
+      height: Math.round(tRect.height),
+      width: Math.round(tRect.width),
+      top: Math.round(tRect.top),
+      left: Math.round(tRect.left),
+      bottom: Math.round(tRect.bottom),
+      right: Math.round(tRect.right),
+    };
 
     if (this._opts.minWidthByTarget) {
       this.style.minWidth = `${tdef.width}px`;
@@ -735,7 +744,7 @@ export default class WUPPopupElement<
         if (this.#arrowElement) {
           this.#arrowElement.style.display = "none";
         }
-        return tdef;
+        return tRect;
       }
 
       // fix cases when target is partiallyHidden by scrollableParent
@@ -893,3 +902,4 @@ declare global {
 }
 
 // issue: popup overflows scrollbar of fitElement does it correct ?
+// todo develop custom scroll
