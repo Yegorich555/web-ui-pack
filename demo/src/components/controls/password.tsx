@@ -5,7 +5,7 @@ const sideEffect = WUPPasswordControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
 
 (window as any).globalkey = {
-  pointHere: { required: true } as WUPPassword.Options["validations"],
+  pointHere: { required: true, min: 4 } as WUPPassword.Options["validations"],
 };
 
 export default function PasswordControlView() {

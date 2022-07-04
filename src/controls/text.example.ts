@@ -20,8 +20,8 @@ el.$initValue = "Some value";
 el.$options.validations = {
   required: true,
   max: 2,
-  min: (v) => v.length > 500 && "This is error",
-  extra: (v) => v.includes(" ") && "Extra rule: spaces are not allowed",
+  min: (v) => (!v || v.length > 500) && "This is error",
+  extra: (v) => (!v || v.includes(" ")) && "Extra rule: spaces are not allowed",
   isNumber: true,
 };
 console.warn("try custom validation", { validateResult: el.$validate() });

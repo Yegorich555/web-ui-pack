@@ -69,25 +69,6 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     }
     const refStyle = this.#ctr.$refStyle;
 
-    const protos: typeof WUPBaseElement[] = [];
-    // autoBind functions (recursive until HMTLElement)
-    // todo check how bindAll affects on memory-consumption and performance
-    const bindAll = (t: unknown) => {
-      const p = Object.getPrototypeOf(t);
-      if (p !== HTMLElement.prototype) {
-        protos.push(p.constructor);
-        Object.getOwnPropertyNames(p).forEach((s) => {
-          const k = s as keyof Omit<WUPBaseElement, keyof HTMLElement | "$isReady">;
-          const desc = Object.getOwnPropertyDescriptor(p, s) as PropertyDescriptor;
-          if (desc.value instanceof Function && s !== "constructor") {
-            this[k] = (this[k] as Function).bind(this);
-          }
-        });
-        bindAll(p);
-      }
-    };
-    bindAll(this);
-
     // setup options to be observable
     setTimeout(() => {
       // cast options to observed
@@ -117,6 +98,24 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     // setup styles
     if (!appendedStyles.has(this.tagName)) {
       appendedStyles.add(this.tagName);
+
+      // autoBind functions (recursive until HMTLElement)
+      const findAllProtos = (t: unknown, protos: typeof WUPBaseElement[]) => {
+        const p = Object.getPrototypeOf(t);
+        if (p !== HTMLElement.prototype) {
+          protos.push(p.constructor);
+          // Object.getOwnPropertyNames(p).forEach((s) => {
+          //   const k = s as keyof Omit<WUPBaseElement, keyof HTMLElement | "$isReady">;
+          //   const desc = Object.getOwnPropertyDescriptor(p, s) as PropertyDescriptor;
+          //   if (desc.value instanceof Function && s !== "constructor") {
+          //     this[k] = (this[k] as Function).bind(this);
+          //   }
+          // });
+          findAllProtos(p, protos);
+        }
+        return protos;
+      };
+      const protos = findAllProtos(this, []);
 
       protos.reverse().forEach((p) => {
         // append $styleRoot
@@ -210,7 +209,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   /** Browser calls this method when the element is added to the document */
   protected connectedCallback() {
     // async requires otherwise attributeChangedCallback doesn't set immediately
-    setTimeout(this.gotReady);
+    setTimeout(this.gotReady.bind(this));
     if (this.#isFirstConn) {
       this.#isFirstConn = false;
       this.gotRender();
