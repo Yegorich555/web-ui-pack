@@ -28,29 +28,6 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
             clip: rect(1px, 1px, 1px, 1px);`;
   }
 
-  static get $styleIcon(): string {
-    return `display: inline-block;
-            width: var(--ctrl-icon-size);
-            min-height: var(--ctrl-icon-size);
-            box-sizing: content-box;
-            margin: 0;
-            padding: 0 5px;
-            flex: 0 0 auto;
-            align-self: stretch;
-            cursor: pointer;
-            border: none;
-            box-shadow: none;
-            background: var(--ctrl-icon);
-            -webkit-mask-size: var(--ctrl-icon-size);
-            mask-size: var(--ctrl-icon-size);
-            -webkit-mask-repeat: no-repeat;
-            mask-repeat: no-repeat;
-            -webkit-mask-position: center;
-            mask-position: center;
-            -webkit-mask-image: var(--ctrl-icon-img);
-            mask-image: var(--ctrl-icon-img);`;
-  }
-
   /** StyleContent related to component */
   static get $style(): string {
     return "";

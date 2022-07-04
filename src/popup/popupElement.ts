@@ -8,6 +8,7 @@ import { animateDropdown, isIntoView } from "../indexHelpers";
 import { getBoundingInternalRect, px2Number, styleTransform } from "../helpers/styleHelpers";
 
 export import ShowCases = WUPPopup.ShowCases;
+import { WUPcssScrollSmall } from "../styles";
 
 // code coverage doesn't work either: https://stackoverflow.com/questions/62493593/unable-to-ignore-block-within-react-class-components-with-istanbul-ignore-next-t
 /* c8 ignore next */
@@ -129,6 +130,7 @@ export default class WUPPopupElement<
           to {opacity: 0;}
         }
        }
+      ${WUPcssScrollSmall(":host")}
      `;
   }
 
@@ -902,4 +904,3 @@ declare global {
 }
 
 // issue: popup overflows scrollbar of fitElement does it correct ?
-// todo develop custom scroll

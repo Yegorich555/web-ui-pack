@@ -7,6 +7,7 @@ import stringPrettify from "../helpers/stringPrettify";
 import { onFocusGot } from "../indexHelpers";
 // eslint-disable-next-line import/named
 import WUPPopupElement, { ShowCases } from "../popup/popupElement";
+import { WUPcssIcon } from "../styles";
 import IBaseControl from "./baseControl.i";
 
 /** Cases of validation for WUP Controls */
@@ -285,13 +286,11 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         background: var(--ctrl-err-back);
         margin: -4px 0;
         max-height: 3em;
-        scrollbar-width: none;
-      }
-      :host [error]::-webkit-scrollbar {
-        display: none;
+        overflow: auto;
+        overflow: overlay;
       }
       :host [error] ul {
-        margin:0; padding:2px;
+        margin:0; padding:2px 4px 2px;
       }
       :host [error] li {
         display: flex;
@@ -302,7 +301,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         content: '';
         --ctrl-icon-img: var(--wup-icon-dot);
         --ctrl-icon: var(--ctrl-err-text);
-        ${this.$styleIcon}
+        ${WUPcssIcon}
       }
       :host [error] li[valid] {
         color: var(--ctrl-icon-check-valid);

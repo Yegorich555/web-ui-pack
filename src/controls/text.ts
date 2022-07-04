@@ -1,5 +1,6 @@
 import onFocusGot from "../helpers/onFocusGot";
 import { onEvent } from "../indexHelpers";
+import { WUPcssIcon } from "../styles";
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
 
 const emailReg =
@@ -148,7 +149,7 @@ export default class WUPTextControl<
         :host label button:after,
         :host label:after,
         :host label:before {
-          ${this.$styleIcon}
+          ${WUPcssIcon}
           -webkit-mask-image: none;
           mask-image: none;
         }
