@@ -114,9 +114,10 @@ export function testComponentFuncBind(obj) {
       expect(fns.arrow).toHaveLength(0);
     });
 
-    it("each function are bound", () => {
-      expect(fns.notBound).toHaveLength(0);
-    });
+    // it doesn't required anymore because bind costs memory
+    // it("each function are bound", () => {
+    //   expect(fns.notBound).toHaveLength(0);
+    // });
   });
 }
 
