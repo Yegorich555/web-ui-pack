@@ -411,7 +411,7 @@ describe("popupElement", () => {
     window.testMe = false;
     expect(a.$isOpen).toBeFalsy();
     expect(spyHide).toBeCalledTimes(1);
-    expect(spyHide).lastCalledWith(6, e);
+    expect(spyHide).lastCalledWith(6);
     await wait(50);
 
     trgInput.dispatchEvent(new Event("click", { bubbles: true }));
@@ -422,7 +422,7 @@ describe("popupElement", () => {
     a.dispatchEvent(e);
     await wait();
     expect(a.$isOpen).toBeFalsy(); // click onMe == close
-    expect(spyHide).lastCalledWith(5, e);
+    expect(spyHide).lastCalledWith(5);
 
     trgInput2.dispatchEvent(new Event("click", { bubbles: true }));
     await wait();
@@ -432,7 +432,7 @@ describe("popupElement", () => {
     document.body.dispatchEvent(e);
     await wait();
     expect(a.$isOpen).toBeFalsy(); // click outside == close
-    expect(spyHide).lastCalledWith(4, e);
+    expect(spyHide).lastCalledWith(4);
 
     // check focus on target > on hide
     document.activeElement.blur();
@@ -494,7 +494,7 @@ describe("popupElement", () => {
     trgInput.dispatchEvent(e);
     await wait(a.$options.hoverHideTimeout); // mouseenter has debounce timeout
     expect(a.$isOpen).toBeFalsy(); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
-    expect(spyHide).lastCalledWith(2, e);
+    expect(spyHide).lastCalledWith(2);
 
     // open again by click
     e = new Event("click", { bubbles: true });
@@ -508,7 +508,7 @@ describe("popupElement", () => {
     trgInput.dispatchEvent(e);
     await wait();
     expect(a.$isOpen).toBeFalsy();
-    expect(spyHide).lastCalledWith(6, e);
+    expect(spyHide).lastCalledWith(6);
     trgInput.blur();
     spyShow.mockClear();
 
@@ -534,7 +534,7 @@ describe("popupElement", () => {
     trgInput.dispatchEvent(ev);
     await wait(50);
     expect(a.$isOpen).toBeFalsy(); // 2nd click will close (but if click is fired without mousedown it doesn't work)
-    expect(spyHide).lastCalledWith(6, ev);
+    expect(spyHide).lastCalledWith(6);
 
     // checking again when events doesn't propagate to body
     trgInput.blur();

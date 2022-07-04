@@ -196,10 +196,10 @@ export default class WUPPopupElement<
             callback?.call(this, p);
           }
 
-          if (!popup.goShow(v)) {
+          if (!popup.goShow.call(popup, v)) {
             if (isCreate) {
               popup!.#onRemoveRef = undefined; // otherwise remove() destroys events
-              popup.remove();
+              popup.remove.call(popup);
             }
             return null;
           }
@@ -208,10 +208,10 @@ export default class WUPPopupElement<
         },
         async (v) => {
           isHidding = true;
-          const ok = await popup!.goHide(v);
+          const ok = await popup!.goHide.call(popup, v);
           if (ok && isHidding) {
             popup!.#onRemoveRef = undefined; // otherwise remove() destroys events
-            popup!.remove();
+            popup!.remove.call(popup);
             popup = undefined;
           }
           return ok;
@@ -224,8 +224,8 @@ export default class WUPPopupElement<
 
     function detach() {
       if (popup) {
-        popup.$isOpen && popup.goHide(WUPPopup.HideCases.onManuallCall);
-        (popup as T).remove();
+        popup.$isOpen && popup.goHide.call(popup, WUPPopup.HideCases.onManuallCall);
+        (popup as T).remove.call(popup);
       }
       r.onRemoveRef();
       popup = undefined;
@@ -323,7 +323,7 @@ export default class WUPPopupElement<
       refs = popupListenTarget(
         this._opts as typeof this._opts & { target: HTMLElement },
         (v) => (this.goShow(v) ? this : null),
-        this.goHide
+        (v) => this.goHide(v)
       );
     }
 

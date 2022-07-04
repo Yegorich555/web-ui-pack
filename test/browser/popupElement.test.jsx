@@ -56,7 +56,7 @@ describe("popupElement", () => {
     await page.click("label"); // click again should hide
     t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
     expect(t.isOpened).toBeTruthy(); // because animation-open works
-    await page.waitForTimeout(300); // wait for animation
+    await page.waitForTimeout(301); // wait for animation
     t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
     expect(t.isOpened).toBeFalsy();
     expect(t.gotShow).toBe(1);

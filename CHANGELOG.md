@@ -9,6 +9,7 @@
 **Features**:
 
 - Optimized for webpack (via [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free))
+- Optimized memory consumption (remove auto-bind functions)
 - Added [helpers](README.md#helpers)
   - `animateDropdown`
   - `findScrollParentAll`
