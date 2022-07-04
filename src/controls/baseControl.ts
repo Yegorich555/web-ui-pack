@@ -234,23 +234,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         box-shadow: 0 0 3px 0 var(--ctrl-invalid-border);
         outline-color: var(--ctrl-invalid-border);
       }
-      @media (hover: hover) {
-        :host:hover {
-          z-index: 90010;
-        }
-        :host:hover,
-        :host:hover > [menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
-        }
-        :host[invalid]:hover,
-        :host[invalid]:hover > [menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
-        }
-        :host:hover label:before,
-        :host:hover label:after {
-          background-color: var(--ctrl-focus-label);
-        }
-      }
       :host label {
         display: flex;
         align-items: center;
@@ -312,7 +295,26 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       :host:focus-within [error] {
         max-height: none;
       }
-    `;
+      @media (hover: hover) {
+        :host:hover {
+          z-index: 90011;
+        }
+        :host:hover [error] {
+          max-height: none;
+        }
+        :host:hover,
+        :host:hover > [menu] {
+          box-shadow: 0 0 3px 1px var(--ctrl-focus);
+        }
+        :host[invalid]:hover,
+        :host[invalid]:hover > [menu] {
+          box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+        }
+        :host:hover label:before,
+        :host:hover label:after {
+          background-color: var(--ctrl-focus-label);
+        }
+      }`;
   }
 
   /** Default function to compare values/changes;
@@ -832,4 +834,3 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 // testcase: $initModel & attr [name] (possible it doesn't work)
 // testcase: required & hasInitValue. Removing value must provide error
 // testcase: has invalid initValue. Changing must provide error (event smartOption)
-// todo when click on not-empty-control > selectAll + cursorToEnd - need to prevent cursorToEnd
