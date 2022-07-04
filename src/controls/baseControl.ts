@@ -148,8 +148,6 @@ declare global {
     interface EventMap extends WUP.EventMap {
       /** Called on value change */
       $change: Event;
-      /** Called on validation-call (depends on @see ValidationCases) */
-      $validate: Event;
     }
   }
 }
@@ -662,9 +660,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         this.#wasValid = true;
       }
     }
-
-    // todo remove useless event
-    setTimeout(() => this.fireEvent("$validate", { cancelable: false }));
 
     if (errMsg) {
       if (canShowError || this.$refError) {
