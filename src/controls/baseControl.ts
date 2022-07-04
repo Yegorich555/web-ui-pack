@@ -22,7 +22,7 @@ export const enum ValidationCases {
   onFocusLost = 1 << 2,
   /** Validate if control has value and gets focus (recommended option for password with $options.validationShowAll) */
   onFocusWithValue = 1 << 3,
-  /** Validate when not-empty initValue defined and doesn't fit validations  */
+  /** Validate when got state 'isReady' and initValue is not empty */
   onInit = 1 << 4,
 }
 
@@ -562,8 +562,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     if (this._opts.validationCase & ValidationCases.onInit) {
       !this.$isEmpty && this.goValidate(ValidateFromCases.onInit);
     }
-
-    // this.$form = WUPFormElement.$tryConnect(this);
   }
 
   protected override gotRender() {
@@ -633,7 +631,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return arr;
   }
 
-  #wasValid = false;
+  #wasValid?: boolean;
   protected _validTimer?: number;
   /** Method called to check control based on validation rules and current value */
   protected goValidate(fromCase: ValidateFromCases, canShowError = true): string | false {
@@ -665,10 +663,11 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       }
     }
 
+    // todo remove useless event
     setTimeout(() => this.fireEvent("$validate", { cancelable: false }));
 
     if (errMsg) {
-      if (canShowError) {
+      if (canShowError || this.$refError) {
         this._validTimer = window.setTimeout(() => this.goShowError(errMsg), this._opts.validityDebounceMs);
       }
       return errMsg;
@@ -753,7 +752,8 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     if (err !== null) {
       this.$refInput.setCustomValidity(err);
       this.setAttribute("invalid", "");
-      this.$refError.firstElementChild!.textContent = `Error${this._opts.name ? ` for ${this._opts.name}` : ""}: `;
+      const lbl = this.$refTitle.textContent;
+      this.$refError.firstElementChild!.textContent = `Error${lbl ? ` for ${lbl}` : ""}: `;
       const el = this.$refError.children.item(1)!;
       el.textContent = err;
 
@@ -795,6 +795,11 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
     const c = this._opts.validationCase;
     if (this.$isReady && canValidate && (c & ValidationCases.onChange || c & ValidationCases.onChangeSmart)) {
+      if (this.#wasValid == null && c & ValidationCases.onChangeSmart) {
+        this.#value = was;
+        this.goValidate(ValidateFromCases.onInput); // to define if previous value was valid or not
+        this.#value = v;
+      }
       this.goValidate(ValidateFromCases.onInput);
     }
     this.fireEvent("$change", { cancelable: false, bubbles: true });
@@ -830,4 +835,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 }
 
 // testcase: $initModel & attr [name] (possible it doesn't work)
+// testcase: required & hasInitValue. Removing value must provide error
+// testcase: has invalid initValue. Changing must provide error (event smartOption)
 // todo when click on not-empty-control > selectAll + cursorToEnd - need to prevent cursorToEnd
