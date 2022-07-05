@@ -29,14 +29,15 @@ export namespace WUPSelectIn {
 
   export type Generics<
     ValueType = any,
+    ItemType = ValueType,
     ValidationKeys extends WUPSelect.ValidationMap = WUPSelect.ValidationMap,
     Defaults = Defs,
     Options = Opt<ValueType>
-  > = WUPBaseComboIn.Generics<ValueType, ValidationKeys, Defaults & Defs, Options & Opt<ValueType>>;
+  > = WUPBaseComboIn.Generics<ValueType, ValidationKeys, Defaults & Defs, Options & Opt<ItemType>>;
 
   export type Validation<T = any> = Generics<T>["Validation"];
   export type GenDef<T = any> = Generics<T>["Defaults"];
-  export type GenOpt<T = any> = Generics<T>["Options"];
+  export type GenOpt<T = any, ItemT = T> = Generics<T, ItemT>["Options"];
 }
 declare global {
   namespace WUPSelect {
@@ -54,8 +55,8 @@ declare global {
 
     interface ValidationMap extends WUPBaseCombo.ValidationMap {}
     interface EventMap extends WUPBaseCombo.EventMap {}
-    interface Defaults<T = string> extends WUPSelectIn.GenDef<T> {}
-    interface Options<T = string> extends WUPSelectIn.GenOpt<T> {}
+    interface Defaults<T = any> extends WUPSelectIn.GenDef<T> {}
+    interface Options<T = any, ItemT = T> extends WUPSelectIn.GenOpt<T, ItemT> {}
     interface JSXProps<T extends WUPSelectControl> extends WUPBaseCombo.JSXProps<T> {
       /** @deprecated Items showed in dropdown-menu. Point global obj-key with items (set `window.inputRadio.items` for `window.inputRadio.items = [{value: 1, text: 'Item 1'}]` ) */
       items?: string;
@@ -75,6 +76,7 @@ declare global {
 
 export default class WUPSelectControl<
   ValueType = any,
+  ItemType = ValueType,
   EventMap extends WUPSelect.EventMap = WUPSelect.EventMap
 > extends WUPBaseComboControl<ValueType, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
@@ -148,7 +150,7 @@ export default class WUPSelectControl<
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey | ShowCases.onInput,
   };
 
-  $options: WUPSelect.Options<ValueType> = {
+  $options: WUPSelect.Options<ValueType, ItemType> = {
     ...this.#ctr.$defaults,
     items: [],
     // @ts-expect-error
@@ -309,24 +311,20 @@ export default class WUPSelectControl<
     return arr;
   }
 
-  protected override valueToInput(v: ValueType | undefined): Promise<string> | string {
-    if (v === undefined) {
-      return "";
+  protected valueToText(v: ItemType | undefined, items: WUPSelect.MenuItems<ItemType>): string {
+    const i = items.findIndex((o) => this.#ctr.$isEqual(o.value, v));
+    if (i === -1) {
+      console.error(`${this.tagName}${this._opts.name ? `[${this._opts.name}]` : ""}. Not found in items`, {
+        items,
+        value: v,
+      });
+      return `Error: not found for ${v}` != null ? (v as any).toString() : "";
     }
-    const r = this.getMenuItems().then((items) => {
-      const i = (items as WUPSelect.MenuItemAny<any>[]).findIndex((o) => this.#ctr.$isEqual(o.value, v));
-      if (i === -1) {
-        console.error(`${this.tagName}${this._opts.name ? `[${this._opts.name}]` : ""}. Not found in items`, {
-          items,
-          value: v,
-        });
-        return `Error: not found for ${v}` != null ? (v as any).toString() : "";
-      }
-      const item = items[i];
-      if (item.text instanceof Function) {
-        const li = document.createElement("li");
-        const s = item.text(item.value, li, i);
-        li.remove();
+    const item = items[i];
+    if (item.text instanceof Function) {
+      const li = document.createElement("li");
+      const s = item.text(item.value, li, i);
+      li.remove();
       return s;
     }
     return item.text;
@@ -487,3 +485,6 @@ export default class WUPSelectControl<
 customElements.define(tagName, WUPSelectControl);
 
 // testcase (close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click
+// todo bug: add $initValue, click on input > select the same, click at end of input, click on dropdown-icon - menu still closed !!!
+// todo bug: clear doesn't work at all
+// todo show-current with checkmark

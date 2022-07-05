@@ -44,7 +44,7 @@ npm install web-ui-pack
 - [x] SwitchControl
 - [x] RadioControl (RadioGroup)
 - [x] SelectControl (ComboBox, Dropdown)
-- [ ] SelectManyControl (MultiSelect)
+- [x] SelectManyControl (MultiSelect)
 - [ ] Calendar
 - [ ] DateControl
 - [ ] TimeControl ?
@@ -98,10 +98,10 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
              - [CheckControl](src/controls/check.ts)
            - [RadioControl](src/controls/radio.ts)
            - [TextControl](src/controls/text.ts)
-             ~~- [PasswordControl](src/controls/password.ts)~~
+             - [PasswordControl](src/controls/password.ts)
              - [BaseComboControl](src/controls/baseCombo.ts)
                - [SelectControl](src/controls/select.ts)
-                 ~~- [SelectManyControl](src/controls/selectMany.ts)~~
+                 - [SelectManyControl](src/controls/selectMany.ts)
                - ~~[DateControl](src/controls/date.ts)~~
 
 ---

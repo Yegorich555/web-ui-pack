@@ -17,6 +17,7 @@ import SelectControlView from "./components/controls/select";
 import SwitchControlView from "./components/controls/switch";
 import CheckControlView from "./components/controls/check";
 import RadioControlView from "./components/controls/radio";
+import SelectManyControlView from "./components/controls/selectMany";
 
 interface IRoute {
   label?: string;
@@ -34,6 +35,7 @@ const routes: IRoute[] = [
   { path: "text", el: TextControlView, isNested: true },
   { path: "password", el: PasswordControlView, isNested: true },
   { path: "select", el: SelectControlView, isNested: true },
+  { path: "selectMany", el: SelectManyControlView, isNested: true },
   { path: "radio", el: RadioControlView, isNested: true },
   { path: "switch", el: SwitchControlView, isNested: true },
   { path: "check", el: CheckControlView, isNested: true },
