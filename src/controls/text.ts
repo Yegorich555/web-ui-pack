@@ -272,7 +272,7 @@ export default class WUPTextControl<
 
   protected override gotReady() {
     super.gotReady();
-    this.appendEvent(this.$refInput, "input", this.gotInput as any);
+    this.appendEvent(this.$refInput, "input", (e) => this.gotInput(e as any));
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUPText.Options> | null) {
