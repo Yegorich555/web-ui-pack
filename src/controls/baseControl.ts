@@ -775,19 +775,19 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     }
   }
 
-  /** Fire this method to update value & validate */
-  protected setValue(v: ValueType | undefined, canValidate = true) {
+  /** Fire this method to update value & validate; returns null when not $isReady, true if changed */
+  protected setValue(v: ValueType | undefined, canValidate = true): boolean | null {
     const was = this.#value;
     this.#value = v;
     if (!this.$isReady) {
-      return;
+      return null;
     }
 
     this.$isDirty = true;
     const isChanged = !this.#ctr.$isEqual(v, was);
 
     if (!isChanged) {
-      return;
+      return false;
     }
 
     const c = this._opts.validationCase;
@@ -800,6 +800,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       this.goValidate(ValidateFromCases.onInput);
     }
     this.fireEvent("$change", { cancelable: false, bubbles: true });
+    return true;
   }
 
   /* Fired when user pressed Esc-key or button-clear */
@@ -834,3 +835,4 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 // testcase: $initModel & attr [name] (possible it doesn't work)
 // testcase: required & hasInitValue. Removing value must provide error
 // testcase: has invalid initValue. Changing must provide error (event smartOption)
+// testcase: all empty controls (or with single value) must be have the same height - 44px (check, switch can be different height)

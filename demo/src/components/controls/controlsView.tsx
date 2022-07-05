@@ -75,7 +75,7 @@ export default function ControlsView() {
           ref={(el) => {
             if (el) {
               el.$options.name = "radioGroup";
-              el.$options.items = items;
+              el.$options.items = items.slice(0, 4);
             }
           }}
         />

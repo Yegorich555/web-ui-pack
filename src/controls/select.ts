@@ -61,12 +61,10 @@ declare global {
       items?: string;
     }
   }
-
   // add element to document.createElement
   interface HTMLElementTagNameMap {
     [tagName]: WUPSelectControl;
   }
-
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
@@ -329,10 +327,16 @@ export default class WUPSelectControl<
         const li = document.createElement("li");
         const s = item.text(item.value, li, i);
         li.remove();
-        return s;
-      }
-      return item.text;
-    });
+      return s;
+    }
+    return item.text;
+  }
+
+  protected override valueToInput(v: ValueType | undefined): Promise<string> | string {
+    if (v === undefined) {
+      return "";
+    }
+    const r = this.getMenuItems().then((items) => this.valueToText(v as any, items as WUPSelect.MenuItems<any>));
 
     return r;
   }
@@ -372,7 +376,7 @@ export default class WUPSelectControl<
     const i = this._menuItems!.all.indexOf(e.target as HTMLLIElement & { _text: string });
     const o = this._cachedItems![i];
 
-    this.setValue(o.value);
+    this.selectValue(o.value);
     this.goHideMenu(HideCases.onSelect);
   }
 

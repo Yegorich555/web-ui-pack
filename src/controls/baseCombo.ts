@@ -377,7 +377,9 @@ export default abstract class WUPBaseComboControl<
       await this.goHideMenu(HideCases.OnPressEsc);
     } else if (e.key === "Enter") {
       e.preventDefault();
-      this.setValue(this.#focusedMenuValue);
+      if (this.#focusedMenuValue !== undefined) {
+        this.selectValue(this.#focusedMenuValue);
+      }
       await this.goHideMenu(HideCases.OnPressEnter);
     }
   }
@@ -385,6 +387,11 @@ export default abstract class WUPBaseComboControl<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override async gotInput(e: Event & { currentTarget: HTMLInputElement }) {
     !this.$isOpen && this._opts.showCase & ShowCases.onInput && (await this.goShowMenu(ShowCases.onInput));
+  }
+
+  /** Called when user selected new value from menu */
+  protected selectValue(v: ValueType) {
+    this.setValue(v);
   }
 
   protected override setInputValue(v: ValueType | undefined) {

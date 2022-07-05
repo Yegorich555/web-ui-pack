@@ -309,8 +309,9 @@ export default class WUPTextControl<
   }
 
   protected override setValue(v: ValueType | undefined, canValidate = true) {
-    super.setValue(v, canValidate);
+    const r = super.setValue(v, canValidate);
     this.setInputValue(v);
+    return r;
   }
 
   protected setInputValue(v: ValueType | undefined) {

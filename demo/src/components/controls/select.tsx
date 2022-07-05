@@ -37,7 +37,7 @@ declare global {
 
 export default function SelectControlView() {
   return (
-    <Page header="TextControl" link="#selectcontrol">
+    <Page header="SelectControl" link="#selectcontrol">
       <wup-form
         ref={(el) => {
           if (el) {
