@@ -488,3 +488,4 @@ customElements.define(tagName, WUPSelectControl);
 // todo bug: add $initValue, click on input > select the same, click at end of input, click on dropdown-icon - menu still closed !!!
 // todo bug: clear doesn't work at all
 // todo show-current with checkmark
+// todo when user select item with mouse-click - NVDA doesn't anounce result

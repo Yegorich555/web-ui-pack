@@ -62,6 +62,11 @@ export default class WUPRadioControl<
 > extends WUPBaseControl<ValueType, EventMap> {
   #ctr = this.constructor as typeof WUPRadioControl;
 
+  /** Custom text that announced by screen-readers. Change it to use with another language */
+  static get $ariaReadonly(): string {
+    return "readonly";
+  }
+
   static get $styleRoot(): string {
     return `:root {
       --ctrl-radio-size: 1em;
@@ -302,14 +307,14 @@ export default class WUPRadioControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUPRadio.Options> | null): void {
     this._opts.reverse = this.getBoolAttr("reverse", this._opts.reverse);
-    this.setBoolAttr("reverse", this._opts.reverse);
+    this.setAttr("reverse", this._opts.reverse, true);
 
     if (!propsChanged || propsChanged.includes("items")) {
       this.renderItems(this.$refFieldset);
     }
     // required
     const req = this._opts.validations?.required;
-    req ? this.$refFieldset.setAttribute("aria-required", true) : this.$refFieldset.removeAttribute("aria-required");
+    this.setAttr.call(this.$refFieldset, "aria-required", !!req);
 
     super.gotChanges(propsChanged as any);
   }
@@ -318,15 +323,13 @@ export default class WUPRadioControl<
     super.gotFormChanges(propsChanged);
     this.$refInput.disabled = false;
     this.$refInput.readOnly = false;
-    // disabled
     this.$refFieldset.disabled = this.$isDisabled as boolean;
-    // readonly
-    this.$setDetails(this.$isReadOnly ? "readonly" : null);
+    this.$setDetails(this.$isReadOnly ? this.#ctr.$ariaReadonly : null);
   }
 
   protected override gotOptionsChanged(e: WUP.OptionEvent): void {
     this._isStopChanges = true;
-    e.props.includes("reverse") && this.setBoolAttr("reverse", this._opts.reverse);
+    e.props.includes("reverse") && this.setAttr("reverse", this._opts.reverse, true);
     super.gotOptionsChanged(e);
     this._isStopChanges = false;
   }

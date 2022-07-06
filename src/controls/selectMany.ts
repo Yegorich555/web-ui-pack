@@ -1,3 +1,4 @@
+import WUPPopupElement from "../popup/popupElement";
 import { WUPcssIcon } from "../styles";
 import WUPSelectControl, { WUPSelectIn } from "./select";
 
@@ -128,9 +129,11 @@ export default class WUPSelectManyControl<
 
   $refItems?: Array<HTMLElement & { _wupValue: ValueType }>;
 
-  protected override renderControl(): void {
-    super.renderControl();
-    this.$setDetails("multiselectable"); // aria-multiselectable doesn't work on [menu]>ul
+  protected override async renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> {
+    const r = await super.renderMenu(popup, menuId);
+    r.setAttribute("aria-multiselectable", "true");
+    this.$refInput.setAttribute("aria-multiselectable", "true");
+    return r;
   }
 
   protected renderItems(v: ValueType[], items: WUPSelect.MenuItems<any>): void {

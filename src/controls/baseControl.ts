@@ -441,10 +441,9 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   /** Add (replace) description to control to be anounced by screen-readers */
   $setDetails(text: string | null): void {
-    // todo such description is different for languages
     // todo Safari VoiceOver doesn't support aria-description: https://a11ysupport.io/tests/tech__aria__aria-description
     // todo develop way to append details instead of replace
-    text ? this.$refInput.setAttribute("aria-description", text) : this.$refInput.removeAttribute("aria-description");
+    this.setAttr.call(this.$refInput, "aria-description", text);
   }
 
   $form?: WUPFormElement;
@@ -498,17 +497,14 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     // set label
     const label = (this._opts.label ?? (this._opts.name && stringPrettify(this._opts.name))) || null;
     this.$refTitle.textContent = label;
-    if (!label && this._opts.name) {
-      i.setAttribute("aria-label", stringPrettify(this._opts.name));
-    } else {
-      i.removeAttribute("aria-label");
-    }
+    const n = !label && this._opts.name ? stringPrettify(this._opts.name) : null;
+    this.setAttr.call(i, "aria-label", n);
 
     // set other props
     const req = this.validations?.required;
-    req ? i.setAttribute("aria-required", true) : i.removeAttribute("aria-required");
-    this.setBoolAttr("disabled", this._opts.disabled);
-    this.setBoolAttr("readOnly", this._opts.readOnly);
+    this.setAttr.call(i, "aria-required", !!req);
+    this.setAttr("disabled", this._opts.disabled, true);
+    this.setAttr("readOnly", this._opts.readOnly, true);
 
     if (!propsChanged || propsChanged.includes("initValue")) {
       const attr = this.getAttribute("initValue");
@@ -536,8 +532,8 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   protected override gotOptionsChanged(e: WUP.OptionEvent): void {
     this._isStopChanges = true;
-    e.props.includes("disabled") && this.setBoolAttr("disabled", this._opts.disabled);
-    e.props.includes("readOnly") && this.setBoolAttr("readOnly", this._opts.readOnly);
+    e.props.includes("disabled") && this.setAttr("disabled", this._opts.disabled, true);
+    e.props.includes("readOnly") && this.setAttr("readOnly", this._opts.readOnly, true);
     super.gotOptionsChanged(e);
     this._isStopChanges = false;
   }
@@ -694,7 +690,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       p = parent as StoredRefError;
       p._wupVldItems = [];
       const ul = p.appendChild(document.createElement("ul"));
-      ul.setAttribute(aria - hidden, true);
+      ul.setAttribute("aria-hidden", true);
       for (let i = 0; i < vls.length; ++i) {
         const li = ul.appendChild(document.createElement("li")) as StoredItem;
         li._wupVld = vls[i];
@@ -715,7 +711,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     }
 
     const v = this.$value;
-    p._wupVldItems.forEach((li) => (li._wupVld(v) ? li.removeAttribute("valid") : li.setAttribute("valid", "")));
+    p._wupVldItems.forEach((li) => this.setAttr.call(li, "valid", li._wupVld(v), true));
   }
 
   protected renderError(): WUPPopupElement {

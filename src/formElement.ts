@@ -396,8 +396,8 @@ export default class WUPFormElement<
     this._opts.autoFocus = this.getBoolAttr("autoFocus", this._opts.autoFocus);
     this._opts.autoComplete = this.getBoolAttr("autoComplete", this._opts.autoComplete);
 
-    this.setBoolAttr("readOnly", this._opts.readOnly);
-    this.setBoolAttr("disabled", this._opts.disabled);
+    this.setAttr("readOnly", this._opts.readOnly, true);
+    this.setAttr("disabled", this._opts.disabled, true);
 
     const p = propsChanged;
     if (p && (p.includes("readOnly") || p.includes("disabled") || p.includes("autoComplete"))) {
@@ -407,8 +407,8 @@ export default class WUPFormElement<
 
   protected override gotOptionsChanged(e: WUP.OptionEvent): void {
     this._isStopChanges = true;
-    e.props.includes("disabled") && this.setBoolAttr("disabled", this._opts.disabled);
-    e.props.includes("readOnly") && this.setBoolAttr("readOnly", this._opts.readOnly);
+    e.props.includes("disabled") && this.setAttr("disabled", this._opts.disabled, true);
+    e.props.includes("readOnly") && this.setAttr("readOnly", this._opts.readOnly, true);
     super.gotOptionsChanged(e);
     this._isStopChanges = false;
   }

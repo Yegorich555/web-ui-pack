@@ -215,7 +215,7 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
     super.gotChanges(propsChanged as any);
 
     this._opts.reverse = this.getBoolAttr("reverse", this._opts.reverse);
-    this.setBoolAttr("reverse", this._opts.reverse);
+    this.setAttr("reverse", this._opts.reverse, true);
 
     if (this.getBoolAttr("defaultChecked", false)) {
       this.$initValue = true;
@@ -224,14 +224,12 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
 
   override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null): void {
     super.gotFormChanges(propsChanged);
-    this.$isReadOnly
-      ? this.$refInput.setAttribute("aria-readonly", true)
-      : this.$refInput.removeAttribute("aria-readonly");
+    this.setAttr.call(this.$refInput, "aria-readonly", this.$isReadOnly);
   }
 
   protected override gotOptionsChanged(e: WUP.OptionEvent): void {
     this._isStopChanges = true;
-    e.props.includes("reverse") && this.setBoolAttr("reverse", this._opts.reverse);
+    e.props.includes("reverse") && this.setAttr("reverse", this._opts.reverse, true);
     super.gotOptionsChanged(e);
     this._isStopChanges = false;
   }

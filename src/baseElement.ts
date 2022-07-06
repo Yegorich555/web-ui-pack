@@ -333,9 +333,12 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     return a === null ? alt : a !== "false";
   }
 
-  /* Remove or set empty attribute based on 2nd argument */
-  setBoolAttr(attr: string, isTrue: boolean | undefined, isSetBool?: boolean): void {
-    isTrue ? this.setAttribute(attr, isSetBool ? true : "") : this.removeAttribute(attr);
+  /**
+   * Remove attr if value falseOrEmpty; set '' or 'true' if true for HTMLELement
+   * @param isSetEmpty set if need to '' instead of 'value'
+   */
+  setAttr(attr: string, v: boolean | string | undefined | null, isSetEmpty?: boolean): void {
+    v ? this.setAttribute(attr, isSetEmpty ? "" : v) : this.removeAttribute(attr);
   }
 }
 
