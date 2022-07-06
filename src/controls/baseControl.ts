@@ -375,7 +375,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   #isDirty = false;
   /** True if control is touched by user */
-  get $isDirty() {
+  get $isDirty(): boolean {
     return this.#isDirty;
   }
 
@@ -457,7 +457,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Array of removeEventListener() that fired ReInit */
   protected disposeLstInit: Array<() => void> = [];
 
-  protected override gotChanges(propsChanged: Array<keyof WUPBase.Options | any> | null) {
+  protected override gotChanges(propsChanged: Array<keyof WUPBase.Options | any> | null): void {
     super.gotChanges(propsChanged);
 
     this.disposeLstInit.forEach((f) => f()); // remove possible previous event listeners
@@ -519,14 +519,14 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   /** Fired on control/form Init and every time as control/form options changed. Method contains changes related to form `disabled`,`readonly` etc. */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
+  gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null): void {
     const i = this.$refInput;
     i.disabled = this.$isDisabled as boolean;
     i.readOnly = this.$isReadOnly;
     i.autocomplete = this.$autoComplete || "off";
   }
 
-  protected override gotOptionsChanged(e: WUP.OptionEvent) {
+  protected override gotOptionsChanged(e: WUP.OptionEvent): void {
     this._isStopChanges = true;
     e.props.includes("disabled") && this.setBoolAttr("disabled", this._opts.disabled);
     e.props.includes("readOnly") && this.setBoolAttr("readOnly", this._opts.readOnly);
@@ -540,7 +540,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Called when need to parse inputValue or attr [initValue] */
   protected abstract parseValue(text: string): ValueType | undefined;
 
-  protected override gotReady() {
+  protected override gotReady(): void {
     super.gotReady();
 
     // appendEvent removed by dispose()
@@ -564,18 +564,18 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     }
   }
 
-  protected override gotRender() {
+  protected override gotRender(): void {
     super.gotRender();
     this.$refInput.type = "text";
     this.renderControl();
   }
 
-  protected override connectedCallback() {
+  protected override connectedCallback(): void {
     super.connectedCallback();
     this.$form = WUPFormElement.$tryConnect(this);
   }
 
-  protected override gotRemoved() {
+  protected override gotRemoved(): void {
     super.gotRemoved();
     this.$form?.$controls.splice(this.$form.$controls.indexOf(this), 1);
   }
@@ -675,7 +675,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   /** Show (append/update) all validation-rules with checkpoints to existed error-element */
-  protected renderValidations(parent: WUPPopupElement | HTMLElement, skipRules = ["required"]) {
+  protected renderValidations(parent: WUPPopupElement | HTMLElement, skipRules = ["required"]): void {
     const vls = this.validationsRules.filter((vl) => !skipRules.includes(vl.name));
     if (!vls.length) {
       return;
@@ -734,7 +734,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   /** Method called to show error and set invalid state on input; point null to show all validation rules with checkpoints */
-  protected goShowError(err: string | null) {
+  protected goShowError(err: string | null): void {
     // possible when user goes to another page and focusout > validTimeout happened
     if (!this.isConnected) {
       return;
@@ -762,7 +762,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   /** Method called to hide error and set valid state on input */
-  protected goHideError() {
+  protected goHideError(): void {
     this.$refInput.setCustomValidity("");
     this.$refInput.removeAttribute("aria-describedby");
     this.removeAttribute("invalid");
@@ -804,7 +804,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   /* Fired when user pressed Esc-key or button-clear */
-  protected clearValue(canValidate = true) {
+  protected clearValue(canValidate = true): void {
     const was = this.#value;
 
     let v: ValueType | undefined;
@@ -819,13 +819,13 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   #prevValue = this.#value;
   /** Fired when user pressed key */
-  protected gotKeyDown(e: KeyboardEvent) {
+  protected gotKeyDown(e: KeyboardEvent): void {
     if (e.key === "Escape") {
       this.clearValue();
     }
   }
 
-  protected override dispose() {
+  protected override dispose(): void {
     super.dispose();
     this.disposeLstInit.forEach((f) => f()); // remove possible previous event listeners
     this.disposeLstInit.length = 0;

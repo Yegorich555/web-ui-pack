@@ -14,10 +14,10 @@ export default function onEvent<
     }
   ) => any,
   options?: boolean | AddEventListenerOptions
-) {
-  const remove = () => element.removeEventListener(type as string, wrapper);
+): () => void {
+  const remove = (): void => element.removeEventListener(type as string, wrapper);
 
-  function wrapper(this: K, e: Event) {
+  function wrapper(this: K, e: Event): void {
     listener.call(
       element,
       e as E[T] & {

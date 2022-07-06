@@ -58,7 +58,7 @@ export default function scrollIntoView(el: HTMLElement, options?: WUPScrollOptio
   const animTime = opts.smoothMs;
   return new Promise((resolve) => {
     let start = 0;
-    const animate = (t: DOMHighResTimeStamp) => {
+    const animate = (t: DOMHighResTimeStamp): void => {
       if (!start) {
         start = t;
       }

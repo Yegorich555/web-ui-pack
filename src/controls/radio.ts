@@ -180,7 +180,7 @@ export default class WUPRadioControl<
   }
 
   static observedOptions = (super.observedOptions as Set<keyof WUPRadio.Options>).add("reverse") as any;
-  static get observedAttributes() {
+  static get observedAttributes(): Array<keyof WUPRadio.Options> {
     const arr = super.observedAttributes as Array<keyof WUPRadio.Options>;
     arr.push("reverse");
     return arr;
@@ -207,13 +207,13 @@ export default class WUPRadioControl<
     return r?._value;
   }
 
-  protected override gotReady() {
+  protected override gotReady(): void {
     super.gotReady();
     this.appendEvent(this, "input", this.gotInput as any);
   }
 
   /** Fired when user touches inputs */
-  protected gotInput(e: Event & { target: ExtInputElement }) {
+  protected gotInput(e: Event & { target: ExtInputElement }): void {
     if (this.$isReadOnly) {
       e.target.checked = !e.target.checked;
     } else {
@@ -266,7 +266,7 @@ export default class WUPRadioControl<
   }
 
   /** Fired when need to update check-state of inputs */
-  protected checkInput(v: ValueType | undefined) {
+  protected checkInput(v: ValueType | undefined): void {
     this.$refInput.checked = false;
 
     if (v === undefined) {
@@ -288,12 +288,12 @@ export default class WUPRadioControl<
     this.$refLabel = this.$refInput.parentElement as HTMLLabelElement;
   }
 
-  protected override setValue(v: ValueType, canValidate = true) {
+  protected override setValue(v: ValueType, canValidate = true): boolean | null {
     this.$isReady && this.checkInput(v); // otherwise it will be checked from renderItems
-    super.setValue(v, canValidate);
+    return super.setValue(v, canValidate);
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUPRadio.Options> | null) {
+  protected override gotChanges(propsChanged: Array<keyof WUPRadio.Options> | null): void {
     this._opts.reverse = this.getBoolAttr("reverse", this._opts.reverse);
     this.setBoolAttr("reverse", this._opts.reverse);
 
@@ -307,7 +307,7 @@ export default class WUPRadioControl<
     super.gotChanges(propsChanged as any);
   }
 
-  override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
+  override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null): void {
     super.gotFormChanges(propsChanged);
     this.$refInput.disabled = false;
     this.$refInput.readOnly = false;
@@ -319,7 +319,7 @@ export default class WUPRadioControl<
       : this.$refFieldset.removeAttribute("aria-description");
   }
 
-  protected override gotOptionsChanged(e: WUP.OptionEvent) {
+  protected override gotOptionsChanged(e: WUP.OptionEvent): void {
     this._isStopChanges = true;
     e.props.includes("reverse") && this.setBoolAttr("reverse", this._opts.reverse);
     super.gotOptionsChanged(e);

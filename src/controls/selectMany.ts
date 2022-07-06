@@ -127,7 +127,7 @@ export default class WUPSelectManyControl<
   protected override _opts = this.$options;
 
   $refItems?: Array<HTMLElement & { _wupValue: ValueType }>;
-  protected renderItems(v: ValueType[], items: WUPSelect.MenuItems<any>) {
+  protected renderItems(v: ValueType[], items: WUPSelect.MenuItems<any>): void {
     const refs = this.$refItems ?? [];
     v.forEach((vi, i) => {
       let r = refs[i];
@@ -158,7 +158,7 @@ export default class WUPSelectManyControl<
   }
 
   // @ts-expect-error
-  protected override selectValue(v: ValueType) {
+  protected override selectValue(v: ValueType): void {
     const arr = this.$value || [];
     arr.push(v);
     super.selectValue(arr);

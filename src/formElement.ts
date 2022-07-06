@@ -149,7 +149,7 @@ export default class WUPFormElement<
     return ["disabled", "readOnly", "autoComplete"];
   }
 
-  static get $styleRoot() {
+  static get $styleRoot(): string {
     return `:root {
       --btn-submit-back: var(--base-btn-back);
       --btn-submit-text: var(--base-btn-text);
@@ -157,7 +157,7 @@ export default class WUPFormElement<
     }`;
   }
 
-  static get $style() {
+  static get $style(): string {
     return `${super.$style}
         :host { position: relative; }
         :host [type='submit'] {
@@ -201,7 +201,11 @@ export default class WUPFormElement<
   }
 
   /** Map model to control-values */
-  static $modelToControls<T>(m: T, controls: IBaseControl[], prop: keyof Pick<IBaseControl, "$value" | "$initValue">) {
+  static $modelToControls<T>(
+    m: T,
+    controls: IBaseControl[],
+    prop: keyof Pick<IBaseControl, "$value" | "$initValue">
+  ): void {
     const out = { hasProp: undefined };
     controls.forEach((c) => {
       const key = c.$options.name;
@@ -272,7 +276,7 @@ export default class WUPFormElement<
   }
 
   /** Pending state (spinner + lock form if SubmitActions.lockOnPending enabled) */
-  get $isPending() {
+  get $isPending(): boolean {
     return this.#stopPending !== undefined;
   }
 
@@ -296,7 +300,7 @@ export default class WUPFormElement<
 
   #stopPending?: () => void;
   /** Change pending state */
-  protected changePending(v: boolean) {
+  protected changePending(v: boolean): void {
     if (v === !!this.#stopPending) {
       return;
     }
@@ -327,7 +331,7 @@ export default class WUPFormElement<
   }
 
   /** Fired on submit before validation */
-  protected gotSubmit(e: KeyboardEvent | MouseEvent, submitter: HTMLElement) {
+  protected gotSubmit(e: KeyboardEvent | MouseEvent, submitter: HTMLElement): void {
     (e as Events["$willSubmit"]).submitter = submitter;
     this.dispatchEvent("$willSubmit", e);
     if (e.defaultPrevented) {
@@ -384,7 +388,7 @@ export default class WUPFormElement<
     });
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
+  protected override gotChanges(propsChanged: Array<keyof WUPForm.Options> | null): void {
     super.gotChanges(propsChanged);
 
     this._opts.disabled = this.getBoolAttr("disabled", this._opts.disabled);
@@ -401,7 +405,7 @@ export default class WUPFormElement<
     }
   }
 
-  protected override gotOptionsChanged(e: WUP.OptionEvent) {
+  protected override gotOptionsChanged(e: WUP.OptionEvent): void {
     this._isStopChanges = true;
     e.props.includes("disabled") && this.setBoolAttr("disabled", this._opts.disabled);
     e.props.includes("readOnly") && this.setBoolAttr("readOnly", this._opts.readOnly);
@@ -409,7 +413,7 @@ export default class WUPFormElement<
     this._isStopChanges = false;
   }
 
-  protected override gotReady() {
+  protected override gotReady(): void {
     super.gotReady();
 
     this.appendEvent(
@@ -432,13 +436,13 @@ export default class WUPFormElement<
     });
   }
 
-  protected override connectedCallback() {
+  protected override connectedCallback(): void {
     super.connectedCallback();
     this.setAttribute("role", "form");
     formStore.push(this);
   }
 
-  protected override disconnectedCallback() {
+  protected override disconnectedCallback(): void {
     super.disconnectedCallback();
     formStore.splice(formStore.indexOf(this), 1);
   }

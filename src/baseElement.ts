@@ -100,7 +100,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
       appendedStyles.add(this.tagName);
 
       // autoBind functions (recursive until HMTLElement)
-      const findAllProtos = (t: unknown, protos: typeof WUPBaseElement[]) => {
+      const findAllProtos = (t: unknown, protos: typeof WUPBaseElement[]): typeof WUPBaseElement[] => {
         const p = Object.getPrototypeOf(t);
         if (p !== HTMLElement.prototype) {
           protos.push(p.constructor);
@@ -137,7 +137,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   protected _opts: Record<string, any> = {};
   #optsObserved?: Observer.Observed<Record<string, any>>;
   #removeObserved?: Func;
-  #setOptions(v: Record<string, any>) {
+  #setOptions(v: Record<string, any>): void {
     if (!v) {
       throw new Error("$options can't be empty");
     }
@@ -167,7 +167,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   }
 
   /** Returns true if element is appended (result of setTimeout on connectedCallback) */
-  get $isReady() {
+  get $isReady(): boolean {
     return this.#isReady;
   }
 
@@ -178,7 +178,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
 
   #isReady = false;
   /** Fired when element is added to document */
-  protected gotReady() {
+  protected gotReady(): void {
     this.#isReady = true;
     this._isStopChanges = true;
     this.gotChanges(null);
@@ -187,27 +187,27 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   }
 
   /** Fired when element is removed from document */
-  protected gotRemoved() {
+  protected gotRemoved(): void {
     this.#isReady = false;
     this.dispose();
   }
 
   /** Fired on Init and every time as options/attributes changed */
-  protected gotChanges(propsChanged: Array<string> | null) {}
+  protected gotChanges(propsChanged: Array<string> | null): void {}
 
   /** Fired when element isReady and at least one of observedOptions is changed */
-  protected gotOptionsChanged(e: WUP.OptionEvent) {
+  protected gotOptionsChanged(e: WUP.OptionEvent): void {
     this._isStopChanges = true;
     this.gotChanges(e.props);
     this._isStopChanges = false;
   }
 
   /** Fired once on Init */
-  protected gotRender() {}
+  protected gotRender(): void {}
 
   #isFirstConn = true;
   /** Browser calls this method when the element is added to the document */
-  protected connectedCallback() {
+  protected connectedCallback(): void {
     // async requires otherwise attributeChangedCallback doesn't set immediately
     setTimeout(this.gotReady.bind(this));
     if (this.#isFirstConn) {
@@ -218,7 +218,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
 
   /** Browser calls this method when the element is removed from the document;
    * (can be called many times if an element is repeatedly added/removed) */
-  protected disconnectedCallback() {
+  protected disconnectedCallback(): void {
     this.gotRemoved();
   }
 
@@ -246,7 +246,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   }
 
   /** Browser calls this method when attrs pointed in observedAttributes is changed */
-  protected attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+  protected attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
     this.#isReady && this.gotAttributeChanged(name, oldValue, newValue);
   }
 
@@ -294,7 +294,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     // self-removing when option.once
     if ((args[3] as AddEventListenerOptions)?.once) {
       const listener = args[2];
-      args[2] = function wrapper(...args2) {
+      args[2] = function wrapper(...args2): any {
         const v = listener.call(this, ...args2);
         remove();
         return v;
@@ -303,7 +303,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     // @ts-expect-error
     const r = onEvent(...args);
     this.disposeLst.push(r);
-    const remove = () => {
+    const remove = (): void => {
       const i = this.disposeLst.indexOf(r);
       if (i !== -1) {
         r();
@@ -315,7 +315,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   }
 
   /** Remove events/functions that was appended */
-  protected dispose() {
+  protected dispose(): void {
     this.disposeLst.forEach((f) => f()); // remove possible previous event listeners
     this.disposeLst.length = 0;
   }

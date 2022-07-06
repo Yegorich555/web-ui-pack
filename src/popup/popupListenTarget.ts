@@ -46,11 +46,11 @@ export default function popupListenTarget(
   const onHideCallbacks: Array<() => void> = [];
   const onRemoveCallbacks: Array<() => void> = [];
 
-  function onHideRef() {
+  function onHideRef(): void {
     onHideCallbacks.forEach((f) => f());
     onHideCallbacks.length = 0;
   }
-  function onRemoveRef() {
+  function onRemoveRef(): void {
     rstSpy();
     rstSpy2();
 
@@ -92,7 +92,7 @@ export default function popupListenTarget(
   }
 
   // try to detect if target removed
-  async function hideByRemove() {
+  async function hideByRemove(): Promise<void> {
     openedEl && (await hide(WUPPopup.HideCases.onTargetRemove, null));
     onRemoveRef();
   }
@@ -101,7 +101,7 @@ export default function popupListenTarget(
 
   function appendEvent<K extends keyof HTMLElementEventMap>(
     ...args: Parameters<onEventType<K, HTMLElement | Document>>
-  ) {
+  ): () => void {
     const r = onEvent(...args);
     onRemoveCallbacks.push(r);
     return r;
@@ -110,7 +110,7 @@ export default function popupListenTarget(
   // add event by popup.onShow and remove by onHide
   function onShowEvent<K extends keyof HTMLElementEventMap>(
     ...args: Parameters<onEventType<K, Document | HTMLElement>>
-  ) {
+  ): void {
     onShowCallbacks.push(() => onEvent(...args));
   }
 
@@ -193,7 +193,7 @@ export default function popupListenTarget(
   // onHover
   if (opts.showCase & WUPPopup.ShowCases.onHover) {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    const ev = (ms: number, isMouseIn: boolean, e: MouseEvent) => {
+    const ev = (ms: number, isMouseIn: boolean, e: MouseEvent): void => {
       timeoutId && clearTimeout(timeoutId);
       openedByHover = isMouseIn;
       if ((isMouseIn && !openedEl) || (!isMouseIn && openedEl))
@@ -214,12 +214,12 @@ export default function popupListenTarget(
 
   // onFocus
   if (opts.showCase & WUPPopup.ShowCases.onFocus) {
-    const onFocused = async (e: FocusEvent) => {
+    const onFocused = async (e: FocusEvent): Promise<void> => {
       if (!openedEl || debounceTimeout) {
         preventClickAfterFocus = !!(opts.showCase & WUPPopup.ShowCases.onClick);
         await show(WUPPopup.ShowCases.onFocus, e);
         if (preventClickAfterFocus) {
-          const rst = () => {
+          const rst = (): void => {
             preventClickAfterFocus = false;
             r1();
             r2();
@@ -231,7 +231,7 @@ export default function popupListenTarget(
     };
     onRemoveCallbacks.push(onFocusGot(t, onFocused, { debounceMs: opts.focusDebounceMs }));
 
-    const blur = async (e: FocusEvent) => {
+    const blur = async (e: FocusEvent): Promise<void> => {
       if (openedEl) {
         const isToMe = openedEl === document.activeElement || openedEl === e.relatedTarget;
         const isToMeInside = !isToMe && includes(document.activeElement || e.relatedTarget);

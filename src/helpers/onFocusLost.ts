@@ -14,7 +14,7 @@ function setEvent(): void {
     passive: true,
   });
 
-  const mouseup = () => {
+  const mouseup = (): void => {
     onMouseUp.forEach((f) => f());
     onMouseUp.length = 0;
     isMouseDown = false;
@@ -58,11 +58,11 @@ export default function onFocusLost(
   options?: onFocusLostOptions
 ): () => void {
   setEvent();
-  const remove = () => {
+  const remove = (): void => {
     element.removeEventListener("focusout", focusout);
     rstEvent?.call(element);
   };
-  const focusout = (e: FocusEvent, isNext?: true) => {
+  const focusout = (e: FocusEvent, isNext?: true): void => {
     if (!isNext && isMouseDown) {
       // mouseDown Label > mouseUp Label (without mouseMove) >>> click Label > focusin Input > click Input
       // if mouseDown.target === mouseUp.target >>> click target; if clickTarget tied with input >>> clickInput
@@ -70,7 +70,7 @@ export default function onFocusLost(
       onMouseUp.push(() => setTimeout(() => focusout(e, true), options?.debounceMs || 100));
       return;
     }
-    const isFocused = (a: Node | null) => a && (element === a || element.contains(a));
+    const isFocused = (a: Node | null): boolean | null => a && (element === a || element.contains(a));
     const isStillFocused = e.relatedTarget instanceof Node && isFocused(e.relatedTarget);
     if (!isStillFocused && !isFocused(document.activeElement)) {
       listener.call(element, e);

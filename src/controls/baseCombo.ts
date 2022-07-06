@@ -126,11 +126,11 @@ export default abstract class WUPBaseComboControl<
     return this.#isOpen;
   }
 
-  $hide() {
+  $hide(): void {
     this.goHideMenu(HideCases.onManualCall);
   }
 
-  $show() {
+  $show(): void {
     this.goShowMenu(ShowCases.onManualCall);
   }
 
@@ -141,7 +141,7 @@ export default abstract class WUPBaseComboControl<
     dispose: () => void;
   };
 
-  protected override renderControl() {
+  protected override renderControl(): void {
     super.renderControl();
 
     const i = this.$refInput;
@@ -151,7 +151,7 @@ export default abstract class WUPBaseComboControl<
     // i.setAttribute("aria-multiselectable", "false");
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUPBaseCombo.Options> | null) {
+  protected override gotChanges(propsChanged: Array<keyof WUPBaseCombo.Options> | null): void {
     super.gotChanges(propsChanged as any);
 
     this._opts.readOnlyInput
@@ -159,7 +159,7 @@ export default abstract class WUPBaseComboControl<
       : this.$refInput.setAttribute("aria-autocomplete", "list");
   }
 
-  override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
+  override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null): void {
     super.gotFormChanges(propsChanged);
     this.$refInput.readOnly = this.$refInput.readOnly || (this._opts.readOnlyInput as boolean);
 
@@ -322,7 +322,7 @@ export default abstract class WUPBaseComboControl<
   #focusedMenuItem?: HTMLElement | null;
   #focusedMenuValue?: ValueType | undefined;
   /** Focus/resetFocus for item (via aria-activedescendant) */
-  protected focusMenuItem(next: HTMLElement | null, nextValue: ValueType | undefined) {
+  protected focusMenuItem(next: HTMLElement | null, nextValue: ValueType | undefined): void {
     this.#focusedMenuItem?.removeAttribute("focused");
 
     if (next) {
@@ -339,7 +339,7 @@ export default abstract class WUPBaseComboControl<
 
   #selectedMenuItem?: HTMLElement | null;
   /** Select item (set aria-selected and scroll to) */
-  protected selectMenuItem(next: HTMLElement | null) {
+  protected selectMenuItem(next: HTMLElement | null): void {
     this.#selectedMenuItem?.setAttribute("aria-selected", "false");
 
     if (next) {
@@ -352,7 +352,7 @@ export default abstract class WUPBaseComboControl<
     this.#selectedMenuItem = next;
   }
 
-  protected override async gotKeyDown(e: KeyboardEvent) {
+  protected override async gotKeyDown(e: KeyboardEvent): Promise<void> {
     // don't allow to process Esc-key when menu is opened
     const isEscPrevent = this.#isOpen && e.key === "Escape";
     !isEscPrevent && super.gotKeyDown(e);
@@ -385,16 +385,16 @@ export default abstract class WUPBaseComboControl<
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected override async gotInput(e: Event & { currentTarget: HTMLInputElement }) {
+  protected override async gotInput(e: Event & { currentTarget: HTMLInputElement }): Promise<void> {
     !this.$isOpen && this._opts.showCase & ShowCases.onInput && (await this.goShowMenu(ShowCases.onInput));
   }
 
   /** Called when user selected new value from menu */
-  protected selectValue(v: ValueType) {
+  protected selectValue(v: ValueType): void {
     this.setValue(v);
   }
 
-  protected override setInputValue(v: ValueType | undefined) {
+  protected override setInputValue(v: ValueType | undefined): void {
     const p = this.valueToInput(v);
     if (p instanceof Promise) {
       p.then((s) => (this.$refInput.value = s));
@@ -403,18 +403,18 @@ export default abstract class WUPBaseComboControl<
     }
   }
 
-  protected override clearValue(canValidate = true) {
+  protected override clearValue(canValidate = true): void {
     super.clearValue(!this.#isOpen && canValidate);
   }
 
-  protected removePopup() {
+  protected removePopup(): void {
     this.$refPopup?.remove();
     this.$refPopup = undefined;
     this.#focusedMenuItem = undefined;
     this.#focusedMenuValue = undefined;
   }
 
-  protected gotRemoved() {
+  protected gotRemoved(): void {
     this.removePopup();
     // remove resources for case when control can be appended again
     this.#isOpen = false;

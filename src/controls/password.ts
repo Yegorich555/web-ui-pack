@@ -125,7 +125,7 @@ export default class WUPPasswordControl<
   protected override _opts = this.$options;
 
   $refBtnEye = document.createElement("button");
-  protected override renderControl() {
+  protected override renderControl(): void {
     super.renderControl();
     this.$refInput.type = "password";
     this.$refInput.setAttribute("aria-description", "press Alt + V to show/hide password");
@@ -133,7 +133,7 @@ export default class WUPPasswordControl<
   }
 
   /** Create & append element to control */
-  protected renderBtnEye() {
+  protected renderBtnEye(): void {
     const b = this.$refBtnEye;
     b.setAttribute("eye", "");
     b.setAttribute("aria-hidden", "true");
@@ -146,7 +146,7 @@ export default class WUPPasswordControl<
     this.$refLabel.appendChild(b);
   }
 
-  protected toggleVisibility() {
+  protected toggleVisibility(): void {
     const start = this.$refInput.selectionStart;
     const end = this.$refInput.selectionEnd;
     const isOff = this.$refBtnEye.getAttribute("eye") !== "off";
@@ -158,14 +158,14 @@ export default class WUPPasswordControl<
     }); // otherwise selection is reset
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUPPassword.Options> | null) {
+  protected override gotChanges(propsChanged: Array<keyof WUPPassword.Options> | null): void {
     super.gotChanges(propsChanged);
     this.$refInput.autocomplete = this.$autoComplete || "new-password"; // otherwise form with email+password ignores autocomplete: "off" if previously it was saved
     // it can be ignored by browsers. To fix > https://stackoverflow.com/questions/2530/how-do-you-disable-browser-autocomplete-on-web-form-field-input-tags
     // https://stackoverflow.com/questions/11708092/detecting-browser-autofill
   }
 
-  protected override gotKeyDown(e: KeyboardEvent) {
+  protected override gotKeyDown(e: KeyboardEvent): void {
     if (e.altKey && e.key === "v") {
       this.toggleVisibility();
     }

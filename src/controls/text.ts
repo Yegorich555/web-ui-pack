@@ -239,7 +239,7 @@ export default class WUPTextControl<
     return (text || undefined) as unknown as ValueType;
   }
 
-  protected override renderControl() {
+  protected override renderControl(): void {
     this.$refInput.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", this.$refInput.id);
 
@@ -270,12 +270,12 @@ export default class WUPTextControl<
     return bc;
   }
 
-  protected override gotReady() {
+  protected override gotReady(): void {
     super.gotReady();
-    this.appendEvent(this.$refInput, "input", (e) => this.gotInput(e as any));
+    this.appendEvent(this.$refInput, "input", (e) => this.gotInput(e, this.$refInput));
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUPText.Options> | null) {
+  protected override gotChanges(propsChanged: Array<keyof WUPText.Options> | null): void {
     super.gotChanges(propsChanged as any);
     this.$refInput.autocomplete = this.$autoComplete || "off";
 
@@ -296,9 +296,9 @@ export default class WUPTextControl<
 
   #inputTimer?: number;
   /** Fired when user types text */
-  protected gotInput(e: Event & { currentTarget: HTMLInputElement }) {
+  protected gotInput(e: Event, inputEl: HTMLInputElement): void {
     this._validTimer && clearTimeout(this._validTimer);
-    const v = e.currentTarget.value;
+    const v = inputEl.value;
 
     if (this._opts.debounceMs) {
       this.#inputTimer && clearTimeout(this.#inputTimer);
@@ -308,13 +308,13 @@ export default class WUPTextControl<
     }
   }
 
-  protected override setValue(v: ValueType | undefined, canValidate = true) {
+  protected override setValue(v: ValueType | undefined, canValidate = true): boolean | null {
     const r = super.setValue(v, canValidate);
     this.setInputValue(v);
     return r;
   }
 
-  protected setInputValue(v: ValueType | undefined) {
+  protected setInputValue(v: ValueType | undefined): void {
     this.$refInput.value = v != null ? (v as any).toString() : "";
   }
 }

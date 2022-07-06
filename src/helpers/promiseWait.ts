@@ -32,7 +32,7 @@ export default function promiseWait<T>(
     });
 
   return new Promise((resolve, reject) => {
-    const end = () => (catchErr ? reject(catchErr) : resolve(promise));
+    const end = (): void => (catchErr ? reject(catchErr) : resolve(promise));
     const a = setTimeout(end, ms);
     smartOrCallback &&
       setTimeout(() => {

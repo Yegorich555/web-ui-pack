@@ -24,7 +24,7 @@ export const WUPcssIcon = `
   mask-image: var(--ctrl-icon-img);`;
 
 /** Style for popup-scroll; vars --scroll, --scroll-hover to customize styling */
-export const WUPcssScrollSmall = (tag: string) => `
+export const WUPcssScrollSmall = (tag: string): string => `
   ${tag}::-webkit-scrollbar {
     width: 10px; height: 10px;
   }

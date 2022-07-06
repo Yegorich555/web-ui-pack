@@ -3,12 +3,13 @@
 import isEqual, { isBothNaN } from "./isEqual";
 
 // #region Helpers
-const arrRemove = <T>(arr: Array<T>, item: T) => {
+const arrRemove = <T>(arr: Array<T>, item: T): void => {
   const i = arr.indexOf(item);
   if (i > -1) {
     arr.splice(i, 1);
   }
 };
+
 const some = <K, V>(m: Map<K, V>, predicate: (key: K, val: V) => boolean): boolean => {
   // eslint-disable-next-line no-restricted-syntax
   for (const [key, value] of m.entries()) {
@@ -24,7 +25,8 @@ const pathThrough = <R>(fn: () => R): Promise<R> =>
     resolve(fn());
   });
 
-const isObject = (obj: any) => obj instanceof Object && !(obj instanceof Function) && !(obj instanceof HTMLElement);
+const isObject = (obj: any): boolean =>
+  obj instanceof Object && !(obj instanceof Function) && !(obj instanceof HTMLElement);
 
 // #endregion
 
@@ -157,7 +159,7 @@ function appenCallback<T extends Observer.Observed<object>, K extends "listeners
   proxy: T,
   callback: K extends "propListeners" ? Observer.PropCallback<T> : Observer.Callback<T>,
   setKey: K
-) {
+): () => void {
   const o = lstObserved.get(proxy);
   if (!o) {
     throw new Error("Observer. Only observed objects expected. Use make() before");
@@ -219,7 +221,7 @@ function make<T extends object>(
   let changedProps: Array<keyof T> = [];
   let timeoutId: ReturnType<typeof setTimeout> | undefined | number;
 
-  const propChanged = <K extends keyof T>(e: Omit<Observer.BasicPropEvent<any, any>, "target">) => {
+  const propChanged = <K extends keyof T>(e: Omit<Observer.BasicPropEvent<any, any>, "target">): void => {
     (e as Observer.PropEvent<T, K>).target = proxy;
     ref.onPropChanged(e as Observer.PropEvent<T, K>);
     if (ref.hasObjListeners()) {

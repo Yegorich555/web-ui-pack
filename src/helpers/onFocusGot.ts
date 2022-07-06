@@ -14,16 +14,16 @@ export default function onFocusGot(
 ): () => void {
   let isLost = true;
   let removeLost: undefined | (() => void);
-  const remove = () => {
+  const remove = (): void => {
     removeLost?.call(element);
     element.removeEventListener("focusin", focusin);
   };
 
-  const focusin = (e: FocusEvent) => {
+  const focusin = (e: FocusEvent): void => {
     if (!isLost) {
       return;
     }
-    const isFocused = (a: Node) => element === a || element.contains(a);
+    const isFocused = (a: Node): boolean => element === a || element.contains(a);
     const isPrevFocused = e.relatedTarget instanceof Node && isFocused(e.relatedTarget);
     // requires to detect focusLost properly (when console opens)
     removeLost = removeLost || onFocusLost(element, () => (isLost = true), options);

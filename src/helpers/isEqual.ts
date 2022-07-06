@@ -1,6 +1,6 @@
 /** const a = NaN; a !== a; // true */
 // eslint-disable-next-line no-self-compare
-export const isBothNaN = (a: unknown, b: unknown) => a !== a && b !== b;
+export const isBothNaN = (a: unknown, b: unknown): boolean => a !== a && b !== b;
 
 /** Returns if v1 equal to v2 (compares by valueOf);
  * @tutorial Features:

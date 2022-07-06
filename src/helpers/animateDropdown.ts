@@ -56,17 +56,16 @@ export default function animateDropdown(el: HTMLElement, timeMs = 300, isClose =
     nested.push({ el: c, prev: parsed.prev });
   }
 
-  const reset = () => {
+  const reset = (): void => {
     frames.delete(el);
     styleTransform(el, "scaleY", "");
     el.style.transformOrigin = "";
     nested.forEach((e) => (e.el.style.transform = e.prev.trimEnd()));
-    return true;
   };
 
   const p = new Promise((resolve) => {
     // reset inline styles
-    const finish = () => {
+    const finish = (): void => {
       resolve();
       reset();
     };
@@ -79,7 +78,7 @@ export default function animateDropdown(el: HTMLElement, timeMs = 300, isClose =
     timeMs *= Math.abs(to - from);
 
     let start = 0;
-    const animate = (t: DOMHighResTimeStamp) => {
+    const animate = (t: DOMHighResTimeStamp): void => {
       if (!el.isConnected) {
         finish(); // possible when item is removed unexpectedly
         return;

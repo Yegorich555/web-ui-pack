@@ -110,16 +110,16 @@ export default class WUPSpinElement extends WUPBaseElement {
   protected override _opts = this.$options;
 
   /** Force to update position (when $options.oveflow is true) */
-  $refresh() {
+  $refresh(): void {
     this.gotChanges([]);
   }
 
-  protected override connectedCallback() {
+  protected override connectedCallback(): void {
     this.style.display = "none"; // required to prevent unexpected wrong-render (tied with empty timeout)
     super.connectedCallback();
   }
 
-  protected override gotRemoved() {
+  protected override gotRemoved(): void {
     super.gotRemoved();
 
     if (this.#prevTarget?.isConnected) {
@@ -129,20 +129,20 @@ export default class WUPSpinElement extends WUPBaseElement {
     }
   }
 
-  protected override gotRender() {
+  protected override gotRender(): void {
     for (let i = 0; i < this.#ctr._itemsCount; ++i) {
       this.appendChild(document.createElement("div"));
     }
   }
 
-  protected override gotReady() {
+  protected override gotReady(): void {
     this.setAttribute("aria-label", "Loading. Please wait");
     super.gotReady();
   }
 
   #prevTarget?: HTMLElement;
   $refShadow?: HTMLDivElement;
-  protected override gotChanges(propsChanged: Array<keyof WUPSpin.Options> | null) {
+  protected override gotChanges(propsChanged: Array<keyof WUPSpin.Options> | null): void {
     super.gotChanges(propsChanged);
 
     this._opts.inline = this.getBoolAttr("inline", this._opts.inline);
@@ -173,7 +173,7 @@ export default class WUPSpinElement extends WUPBaseElement {
         this.$refShadow = undefined;
       }
       this.style.position = "absolute";
-      const goUpdate = () => {
+      const goUpdate = (): void => {
         this.#prevRect = this.#updatePosition();
         // possible if hidden by target-remove
         this.#frameId = window.requestAnimationFrame(goUpdate);
@@ -186,7 +186,7 @@ export default class WUPSpinElement extends WUPBaseElement {
       this.$refShadow = undefined;
 
       if (this.getBoolAttr("fit", false)) {
-        const goUpdate = () => {
+        const goUpdate = (): void => {
           this.style.position = "absolute";
           const p = this.parentElement as HTMLElement;
           const r = { width: p.clientWidth, height: p.clientHeight, left: 0, top: 0 };
@@ -307,7 +307,7 @@ declare global {
 }
 
 /** Basic function to change spinner-style */
-export function spinSetStyle(cls: typeof WUPSpinElement, itemsCount: number, getter: () => string) {
+export function spinSetStyle(cls: typeof WUPSpinElement, itemsCount: number, getter: () => string): void {
   cls._itemsCount = itemsCount;
   Object.defineProperty(cls, "$styleApplied", {
     configurable: true,
@@ -316,7 +316,7 @@ export function spinSetStyle(cls: typeof WUPSpinElement, itemsCount: number, get
 }
 
 /** Apply on class to change spinner-style */
-export function spinUseRing(cls: typeof WUPSpinElement) {
+export function spinUseRing(cls: typeof WUPSpinElement): void {
   spinSetStyle(
     cls,
     1,
@@ -328,7 +328,7 @@ export function spinUseRing(cls: typeof WUPSpinElement) {
 }
 
 /** Apply on class to change spinner-style */
-export function spinUseDualRing(cls: typeof WUPSpinElement) {
+export function spinUseDualRing(cls: typeof WUPSpinElement): void {
   spinSetStyle(
     cls,
     1,
@@ -341,7 +341,7 @@ export function spinUseDualRing(cls: typeof WUPSpinElement) {
   );
 }
 
-export function spinUseTwinDualRing(cls: typeof WUPSpinElement) {
+export function spinUseTwinDualRing(cls: typeof WUPSpinElement): void {
   spinSetStyle(
     cls,
     2,
@@ -372,7 +372,7 @@ export function spinUseTwinDualRing(cls: typeof WUPSpinElement) {
 }
 
 /** Apply on class to change spinner-style */
-export function spinUseRoller(cls: typeof WUPSpinElement) {
+export function spinUseRoller(cls: typeof WUPSpinElement): void {
   const cnt = 4;
   spinSetStyle(cls, cnt, () => {
     let s = "";
@@ -393,7 +393,7 @@ export function spinUseRoller(cls: typeof WUPSpinElement) {
 }
 
 /** Apply on class to change spinner-style */
-export function spinUseDotRoller(cls: typeof WUPSpinElement) {
+export function spinUseDotRoller(cls: typeof WUPSpinElement): void {
   const cnt = 7;
   spinSetStyle(cls, cnt, () => {
     let s = "";
@@ -425,7 +425,7 @@ export function spinUseDotRoller(cls: typeof WUPSpinElement) {
 }
 
 /** Apply on class to change spinner-style */
-export function spinUseDotRing(cls: typeof WUPSpinElement) {
+export function spinUseDotRing(cls: typeof WUPSpinElement): void {
   const cnt = 10;
   spinSetStyle(cls, cnt, () => {
     let s = "";
@@ -464,7 +464,7 @@ export function spinUseDotRing(cls: typeof WUPSpinElement) {
 }
 
 /** Apply on class to change spinner-style */
-export function spinUseSpliceRing(cls: typeof WUPSpinElement) {
+export function spinUseSpliceRing(cls: typeof WUPSpinElement): void {
   const cnt = 12;
   spinSetStyle(cls, cnt, () => {
     let s = "";

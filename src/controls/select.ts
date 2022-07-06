@@ -174,7 +174,7 @@ export default class WUPSelectControl<
     return this.$initValue;
   }
 
-  protected override renderControl() {
+  protected override renderControl(): void {
     super.renderControl();
     // this.$refInput.setAttribute("aria-multiselectable", "false");
   }
@@ -189,7 +189,7 @@ export default class WUPSelectControl<
     return spin;
   }
 
-  protected override async gotOptionsChanged(e: WUP.OptionEvent) {
+  protected override async gotOptionsChanged(e: WUP.OptionEvent): Promise<void> {
     const ev = e as unknown as WUP.OptionEvent<WUPSelect.Options>;
     if (ev.props.includes("items")) {
       this.removePopup();
@@ -201,14 +201,14 @@ export default class WUPSelectControl<
     super.gotOptionsChanged(e);
   }
 
-  override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null) {
+  override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null): void {
     super.gotFormChanges(propsChanged);
     this.$refInput.readOnly = this.$refInput.readOnly || (this.$isPending as boolean);
   }
 
   #stopPending?: () => void;
   /** Change pending state */
-  protected changePending(v: boolean) {
+  protected changePending(v: boolean): void {
     if (v === !!this.#stopPending) {
       return;
     }
@@ -243,7 +243,7 @@ export default class WUPSelectControl<
   _cachedItems?: WUPSelect.MenuItems<ValueType>;
 
   /** Called when NoItems need to show */
-  protected renderMenuNoItems(popup: WUPPopupElement, isReset: boolean) {
+  protected renderMenuNoItems(popup: WUPPopupElement, isReset: boolean): void {
     if (isReset) {
       popup.hidden = false;
       const liSaved = (this._menuItems as any)._refNoItems as HTMLLIElement;
@@ -268,7 +268,7 @@ export default class WUPSelectControl<
     }
   }
 
-  protected override async renderMenu(popup: WUPPopupElement, menuId: string) {
+  protected override async renderMenu(popup: WUPPopupElement, menuId: string): Promise<void> {
     const ul = popup.appendChild(document.createElement("ul"));
     ul.setAttribute("id", menuId);
     ul.setAttribute("role", "listbox");
@@ -370,7 +370,7 @@ export default class WUPSelectControl<
   }
 
   /** Called when need to setValue & close base on clicked item */
-  protected gotMenuItemClick(e: MouseEvent & { target: HTMLLIElement }) {
+  protected gotMenuItemClick(e: MouseEvent & { target: HTMLLIElement }): void {
     const i = this._menuItems!.all.indexOf(e.target as HTMLLIElement & { _text: string });
     const o = this._cachedItems![i];
 
@@ -401,7 +401,7 @@ export default class WUPSelectControl<
     return popup;
   }
 
-  protected override focusMenuItem(next: HTMLElement | null, nextValue: ValueType | undefined) {
+  protected override focusMenuItem(next: HTMLElement | null, nextValue: ValueType | undefined): void {
     super.focusMenuItem(next, nextValue);
     if (next === null && this._menuItems) {
       this._menuItems.focused = -1;
@@ -410,7 +410,7 @@ export default class WUPSelectControl<
 
   /** Focus item by index or reset is index is null (via aria-activedescendant).
    *  If menuItems is filtered by input-text than index must point on filtered array */
-  protected focusMenuItemByIndex(index: number | null) {
+  protected focusMenuItemByIndex(index: number | null): void {
     if (index != null && index > -1) {
       const { filtered } = this._menuItems!;
       const trueIndex = filtered ? filtered[index] : index;
@@ -422,7 +422,7 @@ export default class WUPSelectControl<
     }
   }
 
-  protected override async gotKeyDown(e: KeyboardEvent) {
+  protected override async gotKeyDown(e: KeyboardEvent): Promise<void> {
     if (this.$isPending) {
       return;
     }
@@ -454,7 +454,7 @@ export default class WUPSelectControl<
     }
   }
 
-  protected override async gotInput(e: Event & { currentTarget: HTMLInputElement }) {
+  protected override async gotInput(e: Event & { currentTarget: HTMLInputElement }): Promise<void> {
     this.$isOpen && this.focusMenuItem(null, undefined); // reset virtual focus
     super.gotInput(e);
 
@@ -476,7 +476,7 @@ export default class WUPSelectControl<
     this.$refPopup!.$refresh();
   }
 
-  protected override removePopup() {
+  protected override removePopup(): void {
     super.removePopup();
     this._menuItems = undefined;
   }

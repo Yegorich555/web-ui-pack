@@ -27,6 +27,7 @@ module.exports = {
     "@typescript-eslint/no-shadow": "error",
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/explicit-function-return-type": "off",
     "import/no-extraneous-dependencies": "off",
     "lines-between-class-members": ["error", "always", { exceptAfterSingleLine: true }],
     "react/no-access-state-in-setstate": "off",
@@ -81,6 +82,23 @@ module.exports = {
       },
     ],
   },
+  overrides: [
+    {
+      files: ["*.ts"],
+      parser: "@typescript-eslint/parser",
+      rules: {
+        "@typescript-eslint/explicit-function-return-type": [
+          "error",
+          {
+            allowExpressions: true,
+            allowDirectConstAssertionInArrowFunctions: true,
+            allowConciseArrowFunctionExpressionsStartingWithVoid: true,
+          },
+        ],
+      },
+    },
+  ],
+
   settings: {
     "import/parsers": {
       "@typescript-eslint/parser": [".ts", ".tsx"],
