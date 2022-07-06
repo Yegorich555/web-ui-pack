@@ -199,6 +199,13 @@ export default class WUPRadioControl<
 
   protected override _opts = this.$options;
 
+  $setDetails(text: string | null): void {
+    const i = this.$refInput;
+    this.$refInput = this.$refFieldset as any; // set details to fieldset instead of input
+    super.$setDetails(text);
+    this.$refInput = i;
+  }
+
   protected override parseValue(text: string): ValueType | undefined {
     if (!this.$refItems?.length) {
       return undefined;
@@ -314,9 +321,7 @@ export default class WUPRadioControl<
     // disabled
     this.$refFieldset.disabled = this.$isDisabled as boolean;
     // readonly
-    this.$isReadOnly
-      ? this.$refFieldset.setAttribute("aria-description", "readonly")
-      : this.$refFieldset.removeAttribute("aria-description");
+    this.$setDetails(this.$isReadOnly ? "readonly" : null);
   }
 
   protected override gotOptionsChanged(e: WUP.OptionEvent): void {

@@ -128,7 +128,7 @@ export default class WUPPasswordControl<
   protected override renderControl(): void {
     super.renderControl();
     this.$refInput.type = "password";
-    this.$refInput.setAttribute("aria-description", "press Alt + V to show/hide password");
+    this.$setDetails("press Alt + V to show/hide password");
     this.renderBtnEye();
   }
 

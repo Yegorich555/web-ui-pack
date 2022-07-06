@@ -439,6 +439,13 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return this.goHideError();
   }
 
+  /** Add (replace) description to control to be anounced by screen-readers */
+  $setDetails(text: string | null): void {
+    // todo Safari VoiceOver doesn't support aria-description: https://a11ysupport.io/tests/tech__aria__aria-description
+    // todo develop way to append details instead of replace
+    text ? this.$refInput.setAttribute("aria-description", text) : this.$refInput.removeAttribute("aria-description");
+  }
+
   $form?: WUPFormElement;
 
   /** Reference to nested HTMLElement */
@@ -720,7 +727,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     ];
     p.$options.maxWidthByTarget = true;
     p.setAttribute("error", "");
-    p.setAttribute("aria-live", "off"); // 'off' (not 'polite') because popup changes display block>none when it hidden after scrolling
+    p.setAttribute("aria-live", "off"); // 'off' (not 'polite') because popup changes display (block to none) when it hidden after scrolling
     p.id = this.#ctr.$uniqueId;
     this.$refInput.setAttribute("aria-describedby", p.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
     p.addEventListener("click", this.focus);
