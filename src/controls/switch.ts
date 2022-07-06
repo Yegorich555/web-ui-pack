@@ -224,7 +224,9 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
 
   override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null): void {
     super.gotFormChanges(propsChanged);
-    this.$setDetails(this.$isReadOnly ? "readonly" : null);
+    this.$isReadOnly
+      ? this.$refInput.setAttribute("aria-readonly", true)
+      : this.$refInput.removeAttribute("aria-readonly");
   }
 
   protected override gotOptionsChanged(e: WUP.OptionEvent): void {
