@@ -36,7 +36,7 @@ function setEvent(): void {
 
 export interface onFocusLostOptions extends AddEventListenerOptions {
   /** Required to prevent debounce when user clicks on label tied with input;
-   * In this case events labelClick > inputFocusout > inputClick > inputFocusin is fired
+   * In this case events labelClick > inputFocusout > inputClick > inputFocusin is called
    *
    * Troubleshooting: if click/focusout is handled somewhere during for a long time `debounceMs` must be adjusted
    * or you can prevent labelOnClick behavior via adding label.addEventListener('mousedown', (e) => e.preventDefault());
@@ -46,7 +46,7 @@ export interface onFocusLostOptions extends AddEventListenerOptions {
 }
 
 /** Fires when element/children completely lost focus.
- * This event checks next focused/active element and isn't fired several times when focus goes between children.
+ * This event checks next focused/active element and isn't called several times when focus goes between children.
  * @param element HTMLElement to apply `.addEventListener`
  * @param listener Callback invoked on event
  * @param options OnFocusLostOptions

@@ -176,7 +176,6 @@ export default class WUPSelectControl<
 
   protected override renderControl(): void {
     super.renderControl();
-    // this.$refInput.setAttribute("aria-multiselectable", "false");
   }
 
   /** Called on every spin-render */

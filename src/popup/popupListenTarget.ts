@@ -85,7 +85,7 @@ export default function popupListenTarget(
       Promise.reject(error);
     }
     if (!isDone && !openedEl) {
-      // rollback if onHide was prevented and onShow wasn't fired again during the hidding
+      // rollback if onHide was prevented and onShow wasn't called again during the hidding
       openedEl = was; // rollback if hidding wasn't successful
       onShowCallbacks.forEach((f) => onHideCallbacks.push(f()));
     }
@@ -160,7 +160,7 @@ export default function popupListenTarget(
 
     appendEvent(t, "click", (e) => {
       if (!(e as MouseEvent).pageX) {
-        // pageX is null if it was fired programmatically
+        // pageX is null if it was called programmatically
         preventClickAfterFocus = false; // test-case: focus without click > show....click programatically on target > it should hide
       }
 
@@ -224,7 +224,7 @@ export default function popupListenTarget(
             r1();
             r2();
           };
-          const r1 = appendEvent(document, "touchstart", rst); // mousdown isn't not fired when user touch-move-end
+          const r1 = appendEvent(document, "touchstart", rst); // mousdown isn't not called when user touch-move-end
           const r2 = appendEvent(document, "mousedown", rst);
         }
       }

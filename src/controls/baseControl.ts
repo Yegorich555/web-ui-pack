@@ -36,7 +36,7 @@ export const enum ClearActions {
   resetToInit = 1 << 2,
 }
 
-/** Points on what fired validation */
+/** Points on what called validation */
 export const enum ValidateFromCases {
   /** When element appended to layout */
   onInit,
@@ -46,9 +46,9 @@ export const enum ValidateFromCases {
   onFocusLost,
   /** When user type text (or change value via input) in <input /> */
   onInput,
-  /** When form.submit is fired (via button submit or somehow else); It's impossible to disable */
+  /** When form.submit is called (via button submit or somehow else); It's impossible to disable */
   onSubmit,
-  /** When $validate() is fired programmatically */
+  /** When $validate() is called programmatically */
   onManualCall,
 }
 
@@ -441,6 +441,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   /** Add (replace) description to control to be anounced by screen-readers */
   $setDetails(text: string | null): void {
+    // todo such description is different for languages
     // todo Safari VoiceOver doesn't support aria-description: https://a11ysupport.io/tests/tech__aria__aria-description
     // todo develop way to append details instead of replace
     text ? this.$refInput.setAttribute("aria-description", text) : this.$refInput.removeAttribute("aria-description");
@@ -461,7 +462,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   //   super();
   // }
 
-  /** Array of removeEventListener() that fired ReInit */
+  /** Array of removeEventListener() that called ReInit */
   protected disposeLstInit: Array<() => void> = [];
 
   protected override gotChanges(propsChanged: Array<keyof WUPBase.Options | any> | null): void {
@@ -524,7 +525,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     !propsChanged && this.gotFormChanges(null);
   }
 
-  /** Fired on control/form Init and every time as control/form options changed. Method contains changes related to form `disabled`,`readonly` etc. */
+  /** Called on control/form Init and every time as control/form options changed. Method contains changes related to form `disabled`,`readonly` etc. */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null): void {
     const i = this.$refInput;
@@ -541,7 +542,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     this._isStopChanges = false;
   }
 
-  /** Use this to append elements; fired single time when element isConnected/appended to layout but not ready yet
+  /** Use this to append elements; called single time when element isConnected/appended to layout but not ready yet
    * Attention: this.$refInput is already defined */
   protected abstract renderControl(): void;
   /** Called when need to parse inputValue or attr [initValue] */
@@ -810,7 +811,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return true;
   }
 
-  /* Fired when user pressed Esc-key or button-clear */
+  /* Called when user pressed Esc-key or button-clear */
   protected clearValue(canValidate = true): void {
     const was = this.#value;
 
@@ -825,7 +826,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   #prevValue = this.#value;
-  /** Fired when user pressed key */
+  /** Called when user pressed key */
   protected gotKeyDown(e: KeyboardEvent): void {
     if (e.key === "Escape") {
       this.clearValue();

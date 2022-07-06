@@ -32,7 +32,7 @@ export namespace WUPBaseComboIn {
 }
 
 export const enum ShowCases {
-  /** When $show() fired programmatically; Don't use it for $options */
+  /** When $show() called programmatically; Don't use it for $options */
   onManualCall = 1,
   /** When user types text */
   onInput = 1 << 1,

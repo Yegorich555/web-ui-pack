@@ -164,7 +164,7 @@ export default class WUPPopupElement<
     const savedDetach = attachLst.get(options.target);
     if (savedDetach) {
       console.warn(
-        `${tagName.toUpperCase()}. $attach is fired again on the same target. Possible memory leak. Use detach() before new attach`
+        `${tagName.toUpperCase()}. $attach is called again on the same target. Possible memory leak. Use detach() before new attach`
       );
       savedDetach();
     }
@@ -307,7 +307,7 @@ export default class WUPPopupElement<
   #isOpen = false;
   #onRemoveRef?: () => void; // func to remove eventListeners
   #attach?: () => ReturnType<typeof popupListenTarget>; // func to use alternative target
-  /** Fired after gotReady() and $show() (to reinit according to options) */
+  /** Called after gotReady() and $show() (to reinit according to options) */
   protected init(): void {
     this.dispose(); // remove previously added events
 

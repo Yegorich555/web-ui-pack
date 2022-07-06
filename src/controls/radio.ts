@@ -219,7 +219,7 @@ export default class WUPRadioControl<
     this.appendEvent(this, "input", this.gotInput as any);
   }
 
-  /** Fired when user touches inputs */
+  /** Called when user touches inputs */
   protected gotInput(e: Event & { target: ExtInputElement }): void {
     if (this.$isReadOnly) {
       e.target.checked = !e.target.checked;
@@ -272,7 +272,7 @@ export default class WUPRadioControl<
     this.checkInput(this.$value); // required for case when user changed items
   }
 
-  /** Fired when need to update check-state of inputs */
+  /** Called when need to update check-state of inputs */
   protected checkInput(v: ValueType | undefined): void {
     this.$refInput.checked = false;
 

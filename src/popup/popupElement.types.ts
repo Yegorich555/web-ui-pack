@@ -14,9 +14,9 @@ export namespace WUPPopup {
   }
 
   export const enum HideCases {
-    /** When $show() is fired again; possible by firing $show() or changing attr `placement` */
+    /** When $show() is called again; possible by firing $show() or changing attr `placement` */
     onShowAgain = 0,
-    /** When $hide() is fired programmatically */
+    /** When $hide() is called programmatically */
     onManuallCall,
     onMouseLeave,
     onFocusOut,

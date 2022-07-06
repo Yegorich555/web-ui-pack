@@ -295,7 +295,7 @@ export default class WUPTextControl<
   }
 
   #inputTimer?: number;
-  /** Fired when user types text */
+  /** Called when user types text */
   protected gotInput(e: Event, inputEl: HTMLInputElement): void {
     this._validTimer && clearTimeout(this._validTimer);
     const v = inputEl.value;

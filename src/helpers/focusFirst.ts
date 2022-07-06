@@ -2,7 +2,7 @@ let last: HTMLElement | Pick<HTMLElement, "focus"> | null = null;
 /**
  * Set focus on parent itself or first possible element inside
  * @param element
- * @return {Boolean} true if focus is fired
+ * @return {Boolean} true if focus is called
  */
 export default function focusFirst(element: HTMLElement | Pick<HTMLElement, "focus">): boolean {
   if (last === element) {

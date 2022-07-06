@@ -110,7 +110,7 @@ const formStore: WUPFormElement[] = [];
  *  </wup-form>;
  * @tutorial Troubleshooting/rules:
  * * options like $initModel, $model overrides $initValue, $value in each control that matches by $options.name
- * * In react ref-parent fired after ref-children. So if you want to override $initValue use empty setTimeout on ref-control
+ * * In react ref-parent called after ref-children. So if you want to override $initValue use empty setTimeout on ref-control
  * @example
  * <wup-form
       ref={(el) => {
@@ -330,7 +330,7 @@ export default class WUPFormElement<
     }
   }
 
-  /** Fired on submit before validation */
+  /** Called on submit before validation */
   protected gotSubmit(e: KeyboardEvent | MouseEvent, submitter: HTMLElement): void {
     (e as Events["$willSubmit"]).submitter = submitter;
     this.dispatchEvent("$willSubmit", e);

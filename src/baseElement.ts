@@ -177,7 +177,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   }
 
   #isReady = false;
-  /** Fired when element is added to document */
+  /** Called when element is added to document */
   protected gotReady(): void {
     this.#isReady = true;
     this._isStopChanges = true;
@@ -186,23 +186,23 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     setTimeout(() => (this.autofocus || this._opts.autoFocus) && this.focus()); // timeout to wait for options
   }
 
-  /** Fired when element is removed from document */
+  /** Called when element is removed from document */
   protected gotRemoved(): void {
     this.#isReady = false;
     this.dispose();
   }
 
-  /** Fired on Init and every time as options/attributes changed */
+  /** Called on Init and every time as options/attributes changed */
   protected gotChanges(propsChanged: Array<string> | null): void {}
 
-  /** Fired when element isReady and at least one of observedOptions is changed */
+  /** Called when element isReady and at least one of observedOptions is changed */
   protected gotOptionsChanged(e: WUP.OptionEvent): void {
     this._isStopChanges = true;
     this.gotChanges(e.props);
     this._isStopChanges = false;
   }
 
-  /** Fired once on Init */
+  /** Called once on Init */
   protected gotRender(): void {}
 
   #isFirstConn = true;
@@ -225,7 +225,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   _isStopChanges = true;
   #attrTimer?: number;
   #attrChanged?: string[];
-  /** Fired when element isReady and one of observedAttributes is changed */
+  /** Called when element isReady and one of observedAttributes is changed */
   protected gotAttributeChanged(name: string, oldValue: string, newValue: string): void {
     if (this._isStopChanges) {
       return;
@@ -283,7 +283,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     return ev;
   }
 
-  /** Array of removeEventListener() that fired on remove */
+  /** Array of removeEventListener() that called on remove */
   protected disposeLst: Array<() => void> = [];
   /** Add event listener and remove after component removed; @options.passive=true by default */
   appendEvent<
