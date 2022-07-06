@@ -11,3 +11,7 @@ interface ObjectConstructor {
 }
 
 type Func = (...args: any[]) => any;
+
+interface Element {
+  setAttribute(qualifiedName: string, value: boolean | string): void;
+}

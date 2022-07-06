@@ -505,7 +505,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
     // set other props
     const req = this.validations?.required;
-    req ? i.setAttribute("aria-required", "true") : i.removeAttribute("aria-required");
+    req ? i.setAttribute("aria-required", true) : i.removeAttribute("aria-required");
     this.setBoolAttr("disabled", this._opts.disabled);
     this.setBoolAttr("readOnly", this._opts.readOnly);
 
@@ -693,7 +693,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       p = parent as StoredRefError;
       p._wupVldItems = [];
       const ul = p.appendChild(document.createElement("ul"));
-      ul.setAttribute("aria-hidden", "true");
+      ul.setAttribute(aria - hidden, true);
       for (let i = 0; i < vls.length; ++i) {
         const li = ul.appendChild(document.createElement("li")) as StoredItem;
         li._wupVld = vls[i];

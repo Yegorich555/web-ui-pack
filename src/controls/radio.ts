@@ -309,7 +309,7 @@ export default class WUPRadioControl<
     }
     // required
     const req = this._opts.validations?.required;
-    req ? this.$refFieldset.setAttribute("aria-required", "true") : this.$refFieldset.removeAttribute("aria-required");
+    req ? this.$refFieldset.setAttribute("aria-required", true) : this.$refFieldset.removeAttribute("aria-required");
 
     super.gotChanges(propsChanged as any);
   }

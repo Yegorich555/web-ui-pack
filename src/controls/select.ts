@@ -214,7 +214,7 @@ export default class WUPSelectControl<
     }
 
     if (v) {
-      this.$refInput.setAttribute("aria-busy", "true");
+      this.$refInput.setAttribute("aria-busy", true);
       const wasDisabled = this._opts.disabled;
       const refSpin = this.renderSpin();
       this.$refInput.readOnly = true;
@@ -259,8 +259,8 @@ export default class WUPSelectControl<
         const li = ul.appendChild(document.createElement("li"));
         li.textContent = this.#ctr.$textNoItems;
         li.setAttribute("role", "option");
-        li.setAttribute("aria-disabled", "true");
-        li.setAttribute("aria-selected", "false");
+        li.setAttribute("aria-disabled", true);
+        li.setAttribute("aria-selected", false);
         (this._menuItems as any)._refNoItems = li;
       }
     } else {
@@ -268,7 +268,7 @@ export default class WUPSelectControl<
     }
   }
 
-  protected override async renderMenu(popup: WUPPopupElement, menuId: string): Promise<void> {
+  protected override async renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> {
     const ul = popup.appendChild(document.createElement("ul"));
     ul.setAttribute("id", menuId);
     ul.setAttribute("role", "listbox");
@@ -285,6 +285,7 @@ export default class WUPSelectControl<
         this.gotMenuItemClick(e as MouseEvent & { target: HTMLLIElement });
       }
     });
+    return ul;
   }
 
   /** Method retrieves items from options and shows spinner if required */

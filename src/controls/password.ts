@@ -136,7 +136,7 @@ export default class WUPPasswordControl<
   protected renderBtnEye(): void {
     const b = this.$refBtnEye;
     b.setAttribute("eye", "");
-    b.setAttribute("aria-hidden", "true");
+    b.setAttribute("aria-hidden", true);
     b.tabIndex = -1;
     onEvent(b, "click", (e) => {
       e.preventDefault(); // prevent from submit

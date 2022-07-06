@@ -200,7 +200,7 @@ export default abstract class WUPBaseComboControl<
   }
 
   /** Called when need to create menu in opened popup */
-  protected abstract renderMenu(popup: WUPPopupElement, menuId: string): Promise<void> | void;
+  protected abstract renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> | HTMLElement;
   /** Called when need to transfer current value to input */
   protected abstract valueToInput(v: ValueType | undefined): string | Promise<string>;
 
@@ -264,7 +264,7 @@ export default abstract class WUPBaseComboControl<
     await this.$refPopup.$show();
 
     this.setAttribute("opened", "");
-    this.$refInput.setAttribute("aria-expanded", "true");
+    this.$refInput.setAttribute("aria-expanded", true);
 
     // call for ref-listener to apply events properly
     showCase !== ShowCases.onClick &&
@@ -343,7 +343,7 @@ export default abstract class WUPBaseComboControl<
     this.#selectedMenuItem?.setAttribute("aria-selected", "false");
 
     if (next) {
-      next.setAttribute("aria-selected", "true");
+      next.setAttribute("aria-selected", true);
       setTimeout(() => {
         const ifneed = (next as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
         ifneed ? ifneed.call(next, false) : next.scrollIntoView();

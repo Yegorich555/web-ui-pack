@@ -155,7 +155,7 @@ export default class WUPSpinElement extends WUPBaseElement {
     const nextTarget = this.target;
     if (this.#prevTarget !== nextTarget) {
       this.#prevTarget?.removeAttribute("aria-busy");
-      nextTarget.setAttribute("aria-busy", "true");
+      nextTarget.setAttribute("aria-busy", true);
       this.#prevTarget = nextTarget;
     }
 

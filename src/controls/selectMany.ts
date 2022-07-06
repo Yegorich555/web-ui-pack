@@ -127,6 +127,12 @@ export default class WUPSelectManyControl<
   protected override _opts = this.$options;
 
   $refItems?: Array<HTMLElement & { _wupValue: ValueType }>;
+
+  protected override renderControl(): void {
+    super.renderControl();
+    this.$setDetails("multiselectable"); // aria-multiselectable doesn't work on [menu]>ul
+  }
+
   protected renderItems(v: ValueType[], items: WUPSelect.MenuItems<any>): void {
     const refs = this.$refItems ?? [];
     v.forEach((vi, i) => {
@@ -135,7 +141,7 @@ export default class WUPSelectManyControl<
         r = this.$refInput.parentNode!.insertBefore(document.createElement("span"), this.$refInput) as HTMLElement & {
           _wupValue: ValueType;
         };
-        r.setAttribute("aria-hidden", "true"); // todo how to improve it to set on single parent ?
+        r.setAttribute("aria-hidden", true);
         refs.push(r);
       }
 
