@@ -161,6 +161,11 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   static observedOptions = new Set<keyof WUPBase.Options>(["label", "name", "autoComplete", "disabled", "readOnly"]);
 
+  /** Custom text that announced by screen-readers. Redefine it to use with another language */
+  static get $ariaError(): string {
+    return "Error for";
+  }
+
   /* Array of attribute names to listen for changes */
   static get observedAttributes(): Array<keyof WUPBase.Options | any> {
     return ["label", "name", "autoComplete", "disabled", "readOnly", "initValue"];
@@ -724,6 +729,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     ];
     p.$options.maxWidthByTarget = true;
     p.setAttribute("error", "");
+    // todo anounce doesn't work when user leaves control and validation called on focusLost
     p.setAttribute("aria-live", "off"); // 'off' (not 'polite') because popup changes display (block to none) when it hidden after scrolling
     p.id = this.#ctr.$uniqueId;
     this.$refInput.setAttribute("aria-describedby", p.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
@@ -754,7 +760,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       this.$refInput.setCustomValidity(err);
       this.setAttribute("invalid", "");
       const lbl = this.$refTitle.textContent;
-      this.$refError.firstElementChild!.textContent = `Error${lbl ? ` for ${lbl}` : ""}: `;
+      this.$refError.firstElementChild!.textContent = `${this.#ctr.$ariaError} ${lbl}:`;
       const el = this.$refError.children.item(1)!;
       el.textContent = err;
 

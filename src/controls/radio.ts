@@ -62,7 +62,7 @@ export default class WUPRadioControl<
 > extends WUPBaseControl<ValueType, EventMap> {
   #ctr = this.constructor as typeof WUPRadioControl;
 
-  /** Custom text that announced by screen-readers. Change it to use with another language */
+  /** Custom text that announced by screen-readers. Redefine it to use with another language */
   static get $ariaReadonly(): string {
     return "readonly";
   }
