@@ -140,7 +140,9 @@ export default class WUPSelectControl<
       super.$isEqual(v1, v2) ||
       // eslint-disable-next-line eqeqeq
       v1 == v2 ||
-      String.prototype.localeCompare.call(v1, v2 as string, undefined, { sensitivity: "accent" }) === 0
+      (v1 == null || v2 == null
+        ? false
+        : String.prototype.localeCompare.call(v1, v2 as string, undefined, { sensitivity: "accent" }) === 0)
     );
   }
 
@@ -486,6 +488,5 @@ customElements.define(tagName, WUPSelectControl);
 
 // testcase (close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click
 // todo bug: add $initValue, click on input > select the same, click at end of input, click on dropdown-icon - menu still closed !!!
-// todo bug: clear doesn't work at all
 // todo show-current with checkmark
 // todo when user select item with mouse-click - NVDA doesn't anounce result
