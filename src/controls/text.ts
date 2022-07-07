@@ -74,6 +74,11 @@ export default class WUPTextControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextControl;
 
+  /** Text announced by screen-readers when input cleared; @defaultValue `input cleared` */
+  static get $ariaCleared(): string {
+    return "input cleared";
+  }
+
   static observedOptions = (super.observedOptions as Set<keyof WUPText.Options>).add("clearButton") as any;
 
   static get $styleRoot(): string {
@@ -316,6 +321,12 @@ export default class WUPTextControl<
 
   protected setInputValue(v: ValueType | undefined): void {
     this.$refInput.value = v != null ? (v as any).toString() : "";
+  }
+
+  protected override clearValue(canValidate = true): void {
+    super.clearValue(canValidate);
+    this.$refInput.select();
+    !this.$refInput.value && this.$ariaSpeak(this.#ctr.$ariaCleared);
   }
 }
 
