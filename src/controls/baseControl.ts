@@ -161,7 +161,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   static observedOptions = new Set<keyof WUPBase.Options>(["label", "name", "autoComplete", "disabled", "readOnly"]);
 
-  /** Custom text that announced by screen-readers. Redefine it to use with another language */
+  /** Text that announced by screen-readers; @defaultValue `Error for` */
   static get $ariaError(): string {
     return "Error for";
   }
@@ -449,6 +449,21 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     // todo Safari VoiceOver doesn't support aria-description: https://a11ysupport.io/tests/tech__aria__aria-description
     // todo develop way to append details instead of replace
     this.setAttr.call(this.$refInput, "aria-description", text);
+  }
+
+  /** Announce text by screenReaders if element is focused */
+  $ariaSpeak(text: string): void {
+    // don't use speechSynthesis because it's announce despite on screen-reader settings - can be disabled
+    // text && speechSynthesis && speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+    if (text) {
+      const el = document.createElement("section");
+      el.setAttribute("aria-live", "polite");
+      el.setAttribute("aria-atomic", true);
+      el.className = this.#ctr.classNameHidden;
+      this.appendChild(el);
+      setTimeout(() => (el.textContent = text), 100); // otherwise reader doesn't announce section
+      setTimeout(() => el.remove(), 200);
+    }
   }
 
   $form?: WUPFormElement;
@@ -846,3 +861,5 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 // testcase: required & hasInitValue. Removing value must provide error
 // testcase: has invalid initValue. Changing must provide error (event smartOption)
 // testcase: all empty controls (or with single value) must be have the same height - 44px (check, switch can be different height)
+
+// todo NumberInput - set role 'spinbutton'
