@@ -744,8 +744,8 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     ];
     p.$options.maxWidthByTarget = true;
     p.setAttribute("error", "");
-    // todo anounce doesn't work when user leaves control and validation called on focusLost
-    p.setAttribute("aria-live", "off"); // 'off' (not 'polite') because popup changes display (block to none) when it hidden after scrolling
+    p.setAttribute("aria-live", "polite");
+    p.setAttribute("aria-atomic", true); // necessary to make Voiceover on iOS read the error messages after more than one invalid submission
     p.id = this.#ctr.$uniqueId;
     this.$refInput.setAttribute("aria-describedby", p.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
     p.addEventListener("click", this.focus);
@@ -783,6 +783,8 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       el.className = renderedError ? this.#ctr.classNameHidden : "";
 
       this.$refInput.setAttribute("aria-describedby", this.$refError.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
+      this.$refInput.setAttribute("aria-live", "polite");
+      setTimeout(() => this.$refInput.setAttribute("aria-live", "off"), 100); // 'off' (not 'polite') because popup changes display (block to none) when it hidden after scrolling
     }
   }
 
@@ -863,3 +865,4 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 // testcase: all empty controls (or with single value) must be have the same height - 44px (check, switch can be different height)
 
 // todo NumberInput - set role 'spinbutton'
+// todo option to hide error on focusLost ?
