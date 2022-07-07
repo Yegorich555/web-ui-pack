@@ -736,7 +736,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     p.addEventListener("click", this.focus);
 
     const hiddenLbl = p.appendChild(document.createElement("span"));
-    hiddenLbl.className = "wup-hidden";
+    hiddenLbl.className = this.#ctr.classNameHidden;
     p.appendChild(document.createElement("span"));
     this.$refError = this.appendChild(p);
 
@@ -765,7 +765,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       el.textContent = err;
 
       const renderedError = (this.$refError as StoredRefError)._wupVldItems?.find((li) => li.textContent === err);
-      el.className = renderedError ? "wup-hidden" : "";
+      el.className = renderedError ? this.#ctr.classNameHidden : "";
 
       this.$refInput.setAttribute("aria-describedby", this.$refError.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
     }

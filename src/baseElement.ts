@@ -19,11 +19,11 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
 
   static $refStyle: HTMLStyleElement;
 
-  /** Visually hidden but accessible */
+  /** Visually hidden but accessible for screenReaders */
   static get $styleHidden(): string {
     return `position: absolute;
-            height: 1px;
-            width: 1px;
+            height: 1px; width: 1px;
+            top:0;left:0;
             overflow: hidden;
             clip: rect(1px, 1px, 1px, 1px);`;
   }
@@ -55,6 +55,10 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     return `wup${++lastUniqueNum}`;
   }
 
+  static get classNameHidden(): string {
+    return "wup-hidden";
+  }
+
   /** Options that applied to element */
   abstract $options: Record<string, any>;
 
@@ -64,7 +68,9 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     if (!this.#ctr.$refStyle) {
       this.#ctr.$refStyle = document.createElement("style");
       /* from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility  */
-      this.#ctr.$refStyle.append(`.wup-hidden, [wup-hidden] {${this.#ctr.$styleHidden}}`);
+      this.#ctr.$refStyle.append(
+        `.${this.#ctr.classNameHidden}, [${this.#ctr.classNameHidden}] {${this.#ctr.$styleHidden}}`
+      );
       document.head.prepend(this.#ctr.$refStyle);
     }
     const refStyle = this.#ctr.$refStyle;
