@@ -331,7 +331,11 @@ export default class WUPRadioControl<
     this.$refInput.focus();
     return document.activeElement === this.$refInput || super.focus();
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected override goShowError(err: string | null, target: HTMLElement): void {
+    super.goShowError(err, this.$refFieldset);
+  }
 }
 
 customElements.define(tagName, WUPRadioControl);
-// todo error announce doesn't work properly. Need try to set aria-describedby for fieldset

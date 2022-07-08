@@ -437,7 +437,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   $showError(err: string): void {
-    return this.goShowError(err);
+    return this.goShowError(err, this.$refInput);
   }
 
   $hideError(): void {
@@ -702,7 +702,10 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
     if (errMsg) {
       if (canShowError || this.$refError) {
-        this._validTimer = window.setTimeout(() => this.goShowError(errMsg), this._opts.validityDebounceMs);
+        this._validTimer = window.setTimeout(
+          () => this.goShowError(errMsg, this.$refInput),
+          this._opts.validityDebounceMs
+        );
       }
       return errMsg;
     }
@@ -771,8 +774,9 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return p;
   }
 
+  #refErrTarget?: HTMLElement;
   /** Method called to show error and set invalid state on input; point null to show all validation rules with checkpoints */
-  protected goShowError(err: string | null): void {
+  protected goShowError(err: string | null, target: HTMLElement): void {
     // possible when user goes to another page and focusout > validTimeout happened
     if (!this.isConnected) {
       return;
@@ -784,7 +788,8 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     this._opts.validationShowAll && this.renderValidations(this.$refError);
 
     if (err !== null) {
-      this.$refInput.setCustomValidity(err);
+      this.#refErrTarget = target;
+      (target as HTMLInputElement).setCustomValidity?.call(target, err);
       this.setAttribute("invalid", "");
       const lbl = this.$refTitle.textContent;
       this.$refError.firstElementChild!.textContent = `${this.#ctr.$ariaError} ${lbl}:`;
@@ -794,23 +799,24 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       const renderedError = (this.$refError as StoredRefError)._wupVldItems?.find((li) => li.textContent === err);
       el.className = renderedError ? this.#ctr.classNameHidden : "";
 
-      this.$refInput.setAttribute("aria-describedby", this.$refError.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
-      setTimeout(() => this.$refInput.setAttribute("aria-live", "polite"), 50); // timeout fixes announce twice on focus
-      setTimeout(() => this.$refInput.setAttribute("aria-live", "off"), 100); // 'off' (not 'polite') because popup changes display (block to none) when it hidden after scrolling
+      target.setAttribute("aria-describedby", this.$refError.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
+      setTimeout(() => target.setAttribute("aria-live", "polite"), 50); // timeout fixes announce twice on focus
+      setTimeout(() => target.setAttribute("aria-live", "off"), 100); // 'off' (not 'polite') because popup changes display (block to none) when it hidden after scrolling
     }
   }
 
   /** Method called to hide error and set valid state on input */
   protected goHideError(): void {
-    this.$refInput.setCustomValidity("");
-    this.$refInput.removeAttribute("aria-describedby");
-    this.removeAttribute("invalid");
-
     if (this.$refError) {
       const p = this.$refError;
       p.addEventListener("$hide", p.remove);
       p.$hide(); // hide with animation
       this.$refError = undefined;
+
+      (this.#refErrTarget as HTMLInputElement).setCustomValidity?.call(this.#refErrTarget, "");
+      this.#refErrTarget!.removeAttribute("aria-describedby");
+      this.removeAttribute("invalid");
+      this.#refErrTarget = undefined;
     }
   }
 
@@ -878,3 +884,4 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
 // todo NumberInput - set role 'spinbutton'
 // todo option to hide error on focusLost ?
+// todo need to move scroll to existed error if validationsAll
