@@ -760,6 +760,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     ];
     p.$options.maxWidthByTarget = true;
     p.setAttribute("error", "");
+    // p.setAttribute("role", "alert");
     p.setAttribute("aria-live", "off");
     p.setAttribute("aria-atomic", true); // necessary to make Voiceover on iOS read the error messages after more than one invalid submission
     p.id = this.#ctr.$uniqueId;
@@ -769,7 +770,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     hiddenLbl.className = this.#ctr.classNameHidden;
     p.appendChild(document.createElement("span"));
     this.$refError = this.appendChild(p);
-    this.$refInput.setAttribute("aria-describedby", this.$refError.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
 
     return p;
   }
@@ -800,8 +800,9 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       el.className = renderedError ? this.#ctr.classNameHidden : "";
 
       target.setAttribute("aria-describedby", this.$refError.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
-      setTimeout(() => target.setAttribute("aria-live", "polite"), 50); // timeout fixes announce twice on focus
-      setTimeout(() => target.setAttribute("aria-live", "off"), 100); // 'off' (not 'polite') because popup changes display (block to none) when it hidden after scrolling
+      // todo check this with VoiceOver
+      !this.$isFocused && this.$refError!.setAttribute("role", "alert"); // force to announce error when focus is already missed
+      // todo need to move scroll to existed error if validationsAll and focus missed ?
     }
   }
 
@@ -883,5 +884,3 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 // testcase: all empty controls (or with single value) must be have the same height - 44px (check, switch can be different height)
 
 // todo NumberInput - set role 'spinbutton'
-// todo option to hide error on focusLost ?
-// todo need to move scroll to existed error if validationsAll

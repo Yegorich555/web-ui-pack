@@ -40,6 +40,9 @@ export default function TextControlView() {
           ref={(el) => {
             if (el) {
               el.$options.clearButton = false;
+              el.$options.validations = {
+                required: true,
+              };
             }
           }}
         />
