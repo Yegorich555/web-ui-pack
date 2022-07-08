@@ -776,13 +776,13 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       const lbl = this.$refTitle.textContent;
       this.$refError.firstElementChild!.textContent = `${this.#ctr.$ariaError} ${lbl}:`;
       const el = this.$refError.children.item(1)!;
-      el.textContent = err;
+      el.textContent = err; // todo wrong message for password input on example
 
       const renderedError = (this.$refError as StoredRefError)._wupVldItems?.find((li) => li.textContent === err);
       el.className = renderedError ? this.#ctr.classNameHidden : "";
 
       this.$refInput.setAttribute("aria-describedby", this.$refError.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
-      setTimeout(() => this.$refInput.setAttribute("aria-live", "polite")); // timeout fixes announce twice on focus
+      setTimeout(() => this.$refInput.setAttribute("aria-live", "polite"), 50); // timeout fixes announce twice on focus
       setTimeout(() => this.$refInput.setAttribute("aria-live", "off"), 100); // 'off' (not 'polite') because popup changes display (block to none) when it hidden after scrolling
     }
   }
