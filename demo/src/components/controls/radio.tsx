@@ -38,7 +38,7 @@ export default function RadioControlView() {
           ref={(el) => {
             if (el) {
               el.$options.name = "radio";
-              el.$options.items = items;
+              el.$options.items = items.slice(0, 4);
               el.$options.validations = { required: true };
             }
           }}
@@ -74,7 +74,7 @@ export default function RadioControlView() {
           initValue="13"
           ref={(el) => {
             if (el) {
-              el.$options.name = "reverse";
+              el.$options.name = "reversed";
               el.$options.items = items;
               el.$options.reverse = true;
             }
