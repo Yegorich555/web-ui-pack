@@ -447,7 +447,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   #refDetails?: HTMLElement;
   /** Add (replace) description of control to be anounced by screen-readers */
   $ariaDetails(text: string | null): void {
-    // this.setAttr.call(this.$refInput, "aria-description", text); //watchfix: Safari VoiceOver doesn't support aria-description: https://a11ysupport.io/tests/tech__aria__aria-description
+    // this.setAttr.call(this.$refInput, "aria-description", text); // watchfix: Safari VoiceOver doesn't support aria-description: https://a11ysupport.io/tests/tech__aria__aria-description
     let el = this.#refDetails;
     if (!text) {
       if (el) {
@@ -467,7 +467,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Announce text by screenReaders if element is focused */
   $ariaSpeak(text: string): void {
     // don't use speechSynthesis because it's announce despite on screen-reader settings - can be disabled
-    // text && speechSynthesis && speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+    // text && speechSynthesis && speechSynthesis.speak(new SpeechSynthesisUtterance(text)); // watchfix: https://stackoverflow.com/questions/72907960/web-accessibility-window-speechsynthesis-vs-role-alert
     if (text) {
       const el = document.createElement("section");
       el.setAttribute("aria-live", "polite");
@@ -744,7 +744,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     }
 
     const v = this.$value;
-    p._wupVldItems.forEach((li) => this.setAttr.call(li, "valid", li._wupVld(v), true));
+    p._wupVldItems.forEach((li) => this.setAttr.call(li, "valid", li._wupVld(v) === false, true));
   }
 
   protected renderError(): WUPPopupElement {
@@ -789,7 +789,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       const lbl = this.$refTitle.textContent;
       this.$refError.firstElementChild!.textContent = `${this.#ctr.$ariaError} ${lbl}:`;
       const el = this.$refError.children.item(1)!;
-      el.textContent = err; // todo wrong message for password input on example
+      el.textContent = err;
 
       const renderedError = (this.$refError as StoredRefError)._wupVldItems?.find((li) => li.textContent === err);
       el.className = renderedError ? this.#ctr.classNameHidden : "";
