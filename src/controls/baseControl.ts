@@ -444,11 +444,24 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return this.goHideError();
   }
 
-  /** Add (replace) description to control to be anounced by screen-readers */
-  $setDetails(text: string | null): void {
-    // todo Safari VoiceOver doesn't support aria-description: https://a11ysupport.io/tests/tech__aria__aria-description
-    // todo develop way to append details instead of replace
-    this.setAttr.call(this.$refInput, "aria-description", text);
+  #refDetails?: HTMLElement;
+  /** Add (replace) description of control to be anounced by screen-readers */
+  $ariaDetails(text: string | null): void {
+    // this.setAttr.call(this.$refInput, "aria-description", text); //watchfix: Safari VoiceOver doesn't support aria-description: https://a11ysupport.io/tests/tech__aria__aria-description
+    let el = this.#refDetails;
+    if (!text) {
+      if (el) {
+        el.remove();
+        this.#refDetails = undefined;
+      }
+    } else {
+      if (!el) {
+        el = document.createElement("span");
+        el.className = this.#ctr.classNameHidden;
+        this.#refDetails = this.$refTitle.parentElement!.appendChild(el);
+      }
+      el.textContent = text;
+    }
   }
 
   /** Announce text by screenReaders if element is focused */

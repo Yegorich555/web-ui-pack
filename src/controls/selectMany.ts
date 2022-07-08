@@ -132,7 +132,6 @@ export default class WUPSelectManyControl<
   protected override async renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> {
     const r = await super.renderMenu(popup, menuId);
     r.setAttribute("aria-multiselectable", "true");
-    this.$refInput.setAttribute("aria-multiselectable", "true");
     return r;
   }
 

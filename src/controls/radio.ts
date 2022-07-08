@@ -204,13 +204,6 @@ export default class WUPRadioControl<
 
   protected override _opts = this.$options;
 
-  $setDetails(text: string | null): void {
-    const i = this.$refInput;
-    this.$refInput = this.$refFieldset as any; // set details to fieldset instead of input
-    super.$setDetails(text);
-    this.$refInput = i;
-  }
-
   protected override parseValue(text: string): ValueType | undefined {
     if (!this.$refItems?.length) {
       return undefined;
@@ -324,7 +317,7 @@ export default class WUPRadioControl<
     this.$refInput.disabled = false;
     this.$refInput.readOnly = false;
     this.$refFieldset.disabled = this.$isDisabled as boolean;
-    this.$setDetails(this.$isReadOnly ? this.#ctr.$ariaReadonly : null);
+    this.$ariaDetails(this.$isReadOnly ? this.#ctr.$ariaReadonly : null);
   }
 
   protected override gotOptionsChanged(e: WUP.OptionEvent): void {
@@ -341,3 +334,4 @@ export default class WUPRadioControl<
 }
 
 customElements.define(tagName, WUPRadioControl);
+// todo error announce doesn't work properly. Need try to set aria-describedby for fieldset
