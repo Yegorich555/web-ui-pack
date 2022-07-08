@@ -744,16 +744,16 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     ];
     p.$options.maxWidthByTarget = true;
     p.setAttribute("error", "");
-    p.setAttribute("aria-live", "polite");
+    p.setAttribute("aria-live", "off");
     p.setAttribute("aria-atomic", true); // necessary to make Voiceover on iOS read the error messages after more than one invalid submission
     p.id = this.#ctr.$uniqueId;
-    this.$refInput.setAttribute("aria-describedby", p.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
     p.addEventListener("click", this.focus);
 
     const hiddenLbl = p.appendChild(document.createElement("span"));
     hiddenLbl.className = this.#ctr.classNameHidden;
     p.appendChild(document.createElement("span"));
     this.$refError = this.appendChild(p);
+    this.$refInput.setAttribute("aria-describedby", this.$refError.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
 
     return p;
   }
@@ -764,7 +764,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     if (!this.isConnected) {
       return;
     }
-
     if (!this.$refError) {
       this.$refError = this.renderError();
     }
@@ -783,7 +782,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       el.className = renderedError ? this.#ctr.classNameHidden : "";
 
       this.$refInput.setAttribute("aria-describedby", this.$refError.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
-      this.$refInput.setAttribute("aria-live", "polite");
+      setTimeout(() => this.$refInput.setAttribute("aria-live", "polite")); // timeout fixes announce twice on focus
       setTimeout(() => this.$refInput.setAttribute("aria-live", "off"), 100); // 'off' (not 'polite') because popup changes display (block to none) when it hidden after scrolling
     }
   }
