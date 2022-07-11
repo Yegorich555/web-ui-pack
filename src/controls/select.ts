@@ -5,6 +5,7 @@ import promiseWait from "../helpers/promiseWait";
 // eslint-disable-next-line import/named
 import WUPPopupElement from "../popup/popupElement";
 import WUPSpinElement from "../spinElement";
+import { WUPcssIcon } from "../styles";
 import WUPBaseComboControl, { HideCases, ShowCases, WUPBaseComboIn } from "./baseCombo";
 
 !WUPSpinElement && console.error("!"); // It's required otherwise import is ignored by webpack
@@ -119,6 +120,15 @@ export default class WUPSelectControl<
       :host [menu] li[aria-selected="true"] {
         color: var(--ctrl-select-current);
         background: var(--ctrl-select-current-back);
+      }
+      :host [menu] li[aria-selected="true"] {
+        display: flex;
+      }
+      :host [menu] li[aria-selected="true"]:after {
+        content: "";
+        --ctrl-icon-img: var(--wup-icon-check);
+        ${WUPcssIcon}
+        margin-left: auto;
       }
       :host [menu] li[focused] {
         box-shadow: inset 0 0 4px 0 var(--ctrl-focus);
@@ -489,4 +499,3 @@ customElements.define(tagName, WUPSelectControl);
 
 // testcase (close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click
 // testcase: click on input > select > click at end of input, click on dropdown-icon - menu still closed !!!
-// todo show-current with checkmark
