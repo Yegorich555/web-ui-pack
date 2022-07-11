@@ -101,11 +101,7 @@ export default class WUPSelectControl<
       }
       :host [menu] {
         padding: 0;
-        overflow: hidden;
-      }
-      :host [menu] ul {
         max-height: 300px;
-        overflow: auto;
       }
       :host [menu] ul {
         margin: 0;

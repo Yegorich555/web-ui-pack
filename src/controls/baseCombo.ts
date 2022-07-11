@@ -231,6 +231,7 @@ export default abstract class WUPBaseComboControl<
       this.$refPopup = p;
       p.$options.showCase = PopupShowCases.always;
       p.$options.target = this;
+      // p.$options.offsetFit = [1, 1]; // todo implement offsetFit as virtualMargin of fitElement
       p.$options.minWidthByTarget = true;
       p.$options.placement = [
         WUPPopupElement.$placements.$bottom.$start,
@@ -422,5 +423,3 @@ export default abstract class WUPBaseComboControl<
     super.gotRemoved();
   }
 }
-
-// todo menu offset required to show box-shadow
