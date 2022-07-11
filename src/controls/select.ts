@@ -487,6 +487,6 @@ export default class WUPSelectControl<
 customElements.define(tagName, WUPSelectControl);
 
 // testcase (close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click
-// todo bug: add $initValue, click on input > select the same, click at end of input, click on dropdown-icon - menu still closed !!!
+// testcase: click on input > select > click at end of input, click on dropdown-icon - menu still closed !!!
 // todo show-current with checkmark
 // todo when user select item with mouse-click - NVDA doesn't anounce result

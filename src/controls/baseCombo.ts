@@ -217,7 +217,7 @@ export default abstract class WUPBaseComboControl<
       this.contains(e.target) &&
       e.target.value !== ""
     ) {
-      return this.$refPopup || null; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
+      return this.#isOpen ? this.$refPopup! : null; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
     }
 
     if (this.#isOpen) {
