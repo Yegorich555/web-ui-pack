@@ -148,7 +148,6 @@ export default abstract class WUPBaseComboControl<
     i.setAttribute("role", "combobox");
     i.setAttribute("aria-haspopup", "listbox");
     i.setAttribute("aria-expanded", "false");
-    // i.setAttribute("aria-multiselectable", "false");
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUPBaseCombo.Options> | null): void {

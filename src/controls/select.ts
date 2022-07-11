@@ -377,6 +377,7 @@ export default class WUPSelectControl<
     const o = this._cachedItems![i];
 
     this.selectValue(o.value);
+    this.focusMenuItem(e.target, o.value); // to announce selected by screenReaders
     this.goHideMenu(HideCases.onSelect);
   }
 
@@ -489,4 +490,3 @@ customElements.define(tagName, WUPSelectControl);
 // testcase (close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click
 // testcase: click on input > select > click at end of input, click on dropdown-icon - menu still closed !!!
 // todo show-current with checkmark
-// todo when user select item with mouse-click - NVDA doesn't anounce result
