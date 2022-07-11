@@ -796,13 +796,14 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       const el = this.$refError.children.item(1)!;
       el.textContent = err;
 
-      const renderedError = (this.$refError as StoredRefError)._wupVldItems?.find((li) => li.textContent === err);
-      el.className = renderedError ? this.#ctr.classNameHidden : "";
+      const renderedErr = (this.$refError as StoredRefError)._wupVldItems?.find((li) => li.textContent === err);
+      el.className = renderedErr ? this.#ctr.classNameHidden : "";
 
       target.setAttribute("aria-describedby", this.$refError.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
-      // todo check this with VoiceOver
-      !this.$isFocused && this.$refError!.setAttribute("role", "alert"); // force to announce error when focus is already missed
-      // todo need to move scroll to existed error if validationsAll and focus missed ?
+      if (!this.$isFocused) {
+        this.$refError!.setAttribute("role", "alert"); // force to announce error when focus is already missed
+        renderedErr?.scrollIntoView();
+      }
     }
   }
 
