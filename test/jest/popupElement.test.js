@@ -62,6 +62,8 @@ beforeEach(() => {
 
   el = document.createElement("wup-popup");
   el.$options.showCase = 0; // always
+  el.$options.offset = [0, 0];
+  el.$options.arrowOffset = [0, 0];
   document.body.appendChild(el);
   jest.advanceTimersToNextTimer(); // gotReady has timeout
 });
@@ -642,7 +644,17 @@ describe("popupElement", () => {
       `"<wup-popup style=\\"display: block; transform: translate(190px, 100px);\\" position=\\"top\\"></wup-popup>"`
     );
 
+    WUPPopupElement.$defaults.offset = [1, 1];
+    el = document.body.appendChild(document.createElement("wup-popup"));
+    el.$options.target = trg;
+    el.$show();
+    await h.wait();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(190px, 99px);\\" position=\\"top\\"></wup-popup>"`
+    );
+
     WUPPopupElement.$defaults.offsetFitElement = undefined;
+    WUPPopupElement.$defaults.offset = undefined;
   });
 
   test("$hide()/$show()", async () => {
@@ -1375,6 +1387,20 @@ describe("popupElement", () => {
     expectIt(WUPPopupElement.$placements.$right.$end.$adjust).toMatchInlineSnapshot(
       `"<body><div id=\\"targetId\\">some text</div><wup-popup style=\\"display: block; transform: translate(244px, 130px);\\" position=\\"right\\"></wup-popup><wup-popup-arrow class=\\"my-arrow\\" style=\\"width: 8px; height: 4px; transform: translate(238px, 138px) rotate(90deg);\\"></wup-popup-arrow><a></a></body>"`
     );
+
+    el.$options.arrowOffset = [2, 3];
+    expectIt(WUPPopupElement.$placements.$right.$end.$adjust).toMatchInlineSnapshot(
+      `"<body><div id=\\"targetId\\">some text</div><wup-popup style=\\"display: block; transform: translate(244px, 130px);\\" position=\\"right\\"></wup-popup><wup-popup-arrow class=\\"my-arrow\\" style=\\"width: 8px; height: 4px; transform: translate(241px, 138px) rotate(90deg);\\"></wup-popup-arrow><a></a></body>"`
+    );
+
+    WUPPopupElement.$defaults.arrowOffset = [4, 8];
+    el = document.body.appendChild(document.createElement("wup-popup"));
+    el.$options.arrowEnable = true;
+    expectIt(WUPPopupElement.$placements.$right.$end.$adjust).toMatchInlineSnapshot(
+      `"<body><div id=\\"targetId\\">some text</div><wup-popup style=\\"display: block; transform: translate(244px, 130px);\\" position=\\"right\\"></wup-popup><wup-popup-arrow class=\\"my-arrow\\" style=\\"width: 8px; height: 4px; transform: translate(241px, 138px) rotate(90deg);\\"></wup-popup-arrow><a></a><wup-popup></wup-popup></body>"`
+    );
+
+    WUPPopupElement.$defaults.arrowOffset = undefined;
   });
 
   test("static.$attach", async () => {

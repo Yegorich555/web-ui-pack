@@ -259,7 +259,12 @@ Object.keys(PopupPlacements).forEach((kp) => {
 });
 
 /** Returns normalized offset */
-export function getOffset(offset: [number, number, number, number] | [number, number]): WUPPopupPlace.PositionRect {
+export function getOffset(
+  offset: [number, number, number, number] | [number, number] | undefined
+): WUPPopupPlace.PositionRect {
+  if (!offset) {
+    return { top: 0, left: 0, bottom: 0, right: 0 };
+  }
   return {
     top: offset[0],
     right: offset[1],

@@ -78,13 +78,7 @@ export default class WUPPopupElement<
       WUPPopupElement.$placements.$top.$middle.$adjust, //
       WUPPopupElement.$placements.$bottom.$middle.$adjust,
     ],
-    offset: [0, 0],
-    arrowEnable: false,
-    arrowOffset: [0, 0],
     toFitElement: document.body,
-    minWidthByTarget: false,
-    maxWidthByTarget: false,
-    minHeightByTarget: false,
     showCase: ShowCases.onClick,
     hoverShowTimeout: 200,
     hoverHideTimeout: 500,
@@ -243,7 +237,8 @@ export default class WUPPopupElement<
   $options: WUPPopup.Options = {
     ...this.#ctr.$defaults,
     placement: [...this.#ctr.$defaults.placement],
-    offset: [...this.#ctr.$defaults.offset],
+    offset: this.#ctr.$defaults.offset ? [...this.#ctr.$defaults.offset] : undefined,
+    arrowOffset: this.#ctr.$defaults.arrowOffset ? [...this.#ctr.$defaults.arrowOffset] : undefined,
     offsetFitElement: this.#ctr.$defaults.offsetFitElement ? [...this.#ctr.$defaults.offsetFitElement] : undefined,
   };
 

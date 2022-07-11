@@ -47,18 +47,18 @@ export namespace WUPPopup {
     placement: Array<WUPPopupPlace.PlaceFunc>;
     /** Virtual margin of targetElement (relative to popup)
      *  [top, right, bottom, left] or [top/bottom, right/left] in px */
-    offset: [number, number, number, number] | [number, number];
+    offset?: [number, number, number, number] | [number, number];
     /** Virtual padding of fitElement
      *  [top, right, bottom, left] or [top/bottom, right/left] in px */
     offsetFitElement?: [number, number, number, number] | [number, number];
     /** Inside edges of fitElement popup is positioned and can't overflow fitElement; {body} by default */
     toFitElement?: HTMLElement | null;
     /** Sets minWidth 100% of targetWidth */
-    minWidthByTarget: boolean;
+    minWidthByTarget?: boolean;
     /** Sets maxWidth 100% of targetWidth */
-    maxWidthByTarget: boolean;
+    maxWidthByTarget?: boolean;
     /** Sets minHeight 100% of targetWidth */
-    minHeightByTarget: boolean;
+    minHeightByTarget?: boolean;
     /** Case when popup need to show;
      * @defaultValue ShowCases.onClick
      * @example
@@ -75,9 +75,8 @@ export namespace WUPPopup {
      * @defaultValue 100ms */
     focusDebounceMs?: number;
     /** Set true to show arrow with popup; @false by default;
-     *  Arrow is placed after popup so it's easy to access (via style @see arrowClass or popupElement.$arrowElement)
-     */
-    arrowEnable: boolean;
+     *  Arrow is placed after popup so it's easy to access (via style @see arrowClass or popupElement.$arrowElement) */
+    arrowEnable?: boolean;
     /** Setup arrow class and use ::before to add background-image or content;
      * Limitation: arrow developed with ratio 2:1(w:h). You can't change it directly. Use only ::before, ::after to reach you goal
      *
@@ -93,7 +92,7 @@ export namespace WUPPopup {
     arrowClass?: string;
     /** Virtual margin for targetElement related to arrow
      *  [top, right, bottom, left] or [top/bottom, right/left] in px */
-    arrowOffset: [number, number, number, number] | [number, number];
+    arrowOffset?: [number, number, number, number] | [number, number];
     /** Animation that applied to popup
      * @defaultValue Animations.default */
     animation?: Animations;
