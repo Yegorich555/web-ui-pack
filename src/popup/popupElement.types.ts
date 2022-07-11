@@ -48,6 +48,9 @@ export namespace WUPPopup {
     /** Virtual margin of targetElement (relative to popup)
      *  [top, right, bottom, left] or [top/bottom, right/left] in px */
     offset: [number, number, number, number] | [number, number];
+    /** Virtual padding of fitElement
+     *  [top, right, bottom, left] or [top/bottom, right/left] in px */
+    offsetFitElement?: [number, number, number, number] | [number, number];
     /** Inside edges of fitElement popup is positioned and can't overflow fitElement; {body} by default */
     toFitElement?: HTMLElement | null;
     /** Sets minWidth 100% of targetWidth */

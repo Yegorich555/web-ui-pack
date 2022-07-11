@@ -95,6 +95,7 @@ describe("popupElement", () => {
       expect(Object.keys(WUPPopup).length > 0).toBe(true);
     });
   });
+
   describe("inheritance", () => {
     class TestPopupElement extends WUPPopupElement {}
     customElements.define("test-el", TestPopupElement);
@@ -123,7 +124,8 @@ describe("popupElement", () => {
     /** @type typeof el */
     const a = document.createElement(el.tagName);
     const skipped = Object.keys(a.$options) //
-      .filter((k) => a.$options[k] !== defVal && !(a.$options[k]?.length === 1 && a.$options[k][0] === 3456));
+      .filter((k) => a.$options[k] !== defVal && !(a.$options[k]?.length === 1 && a.$options[k][0] === 3456))
+      .filter((k) => a.$options[k] !== undefined);
     expect(skipped).toHaveLength(0);
 
     // it rollback to previous
@@ -607,6 +609,40 @@ describe("popupElement", () => {
     await Promise.resolve(); // onShow/onHide is async
     // WARN: layout impossible to test with unit; all layout tests see in e2e
     expect(a3.style.maxWidth).not.toBe("");
+  });
+
+  test("$options.offsetFitElement", async () => {
+    el.$options.offsetFitElement = [1, 1];
+    el.$show();
+    await h.wait();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(190px, 100px);\\" position=\\"top\\"></wup-popup>"`
+    );
+
+    el.$options.offsetFitElement = [2, 3, 4, 8];
+    el.$show();
+    await h.wait();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(190px, 100px);\\" position=\\"top\\"></wup-popup>"`
+    );
+
+    el.$options.offsetFitElement = undefined;
+    el.$show();
+    await h.wait();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(190px, 100px);\\" position=\\"top\\"></wup-popup>"`
+    );
+
+    WUPPopupElement.$defaults.offsetFitElement = [2, 2];
+    el = document.body.appendChild(document.createElement("wup-popup"));
+    el.$options.target = trg;
+    el.$show();
+    await h.wait();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(190px, 100px);\\" position=\\"top\\"></wup-popup>"`
+    );
+
+    WUPPopupElement.$defaults.offsetFitElement = undefined;
   });
 
   test("$hide()/$show()", async () => {
@@ -1182,6 +1218,11 @@ describe("popupElement", () => {
     );
     expect(fn).toBeCalledTimes(1);
     h.unMockConsoleError();
+
+    el.$options.offsetFitElement = [2, 3, 4, 8];
+    expectIt([WUPPopupElement.$placements.$left.$start]).toMatchInlineSnapshot(
+      `"<wup-popup style=\\"display: block; transform: translate(112px, 2px);\\" position=\\"right\\"></wup-popup>"`
+    );
   });
 
   test("position with scroll", () => {

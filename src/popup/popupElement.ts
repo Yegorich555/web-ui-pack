@@ -1,6 +1,6 @@
 import WUPBaseElement, { WUP } from "../baseElement";
 import { WUPPopup } from "./popupElement.types";
-import { PopupPlacements, WUPPopupPlace } from "./popupPlacements";
+import { getOffset, PopupPlacements, WUPPopupPlace } from "./popupPlacements";
 import { findScrollParentAll } from "../helpers/findScrollParent";
 import WUPPopupArrowElement from "./popupArrowElement";
 import popupListenTarget from "./popupListenTarget";
@@ -244,6 +244,7 @@ export default class WUPPopupElement<
     ...this.#ctr.$defaults,
     placement: [...this.#ctr.$defaults.placement],
     offset: [...this.#ctr.$defaults.offset],
+    offsetFitElement: this.#ctr.$defaults.offsetFitElement ? [...this.#ctr.$defaults.offsetFitElement] : undefined,
   };
 
   protected override _opts = this.$options;
@@ -689,7 +690,17 @@ export default class WUPPopupElement<
     }
 
     const fitEl = this._opts.toFitElement || document.body;
-    const fit = Object.assign(getBoundingInternalRect(fitEl), { el: fitEl });
+    const fit = getBoundingInternalRect(fitEl) as WUPPopupPlace.Rect;
+    fit.el = fitEl;
+    const a = this._opts.offsetFitElement;
+    if (a) {
+      fit.top += a[0];
+      fit.right -= a[1];
+      fit.bottom -= a[2] ?? a[0];
+      fit.left += a[3] ?? a[1];
+      fit.width = fit.right - fit.left;
+      fit.height = fit.bottom - fit.top;
+    }
 
     this.style.display = "block";
     const _defMaxWidth = this._opts.maxWidthByTarget ? `${tdef.width}px` : "";
@@ -707,24 +718,14 @@ export default class WUPPopupElement<
       w: this.offsetWidth, // clientWidth doesn't include border-size
       h: this.offsetHeight,
       el: this,
-      offset: {
-        top: this._opts.offset[0],
-        right: this._opts.offset[1],
-        bottom: this._opts.offset[2] ?? this._opts.offset[0],
-        left: this._opts.offset[3] ?? this._opts.offset[1],
-      },
+      offset: getOffset(this._opts.offset),
       minH: this.#userStyles.minH,
       minW: this.#userStyles.minW,
       arrow: this.#arrowElement
         ? {
             h: this.#arrowElement.offsetHeight,
             w: this.#arrowElement.offsetWidth,
-            offset: {
-              top: this._opts.arrowOffset[0],
-              right: this._opts.arrowOffset[1],
-              bottom: this._opts.arrowOffset[2] ?? this._opts.arrowOffset[0],
-              left: this._opts.arrowOffset[3] ?? this._opts.arrowOffset[1],
-            },
+            offset: getOffset(this._opts.arrowOffset),
           }
         : { h: 0, w: 0, offset: { bottom: 0, left: 0, right: 0, top: 0 } },
     };

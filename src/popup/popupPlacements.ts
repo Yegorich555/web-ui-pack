@@ -21,12 +21,14 @@ export namespace WUPPopupPlace {
   }
   export interface Result extends XResult, YResult {}
 
-  export interface Rect {
-    el: HTMLElement;
+  export interface PositionRect {
     top: number;
     right: number;
     bottom: number;
     left: number;
+  }
+  export interface Rect extends PositionRect {
+    el: HTMLElement;
     width: number;
     height: number;
   }
@@ -36,13 +38,13 @@ export namespace WUPPopupPlace {
     h: number;
     el: HTMLElement;
     /** target offset; attention: it's already applied before call of placements */
-    offset: { top: number; right: number; bottom: number; left: number };
+    offset: PositionRect;
     minW: number;
     minH: number;
     arrow: {
       h: number;
       w: number;
-      offset: { top: number; right: number; bottom: number; left: number };
+      offset: PositionRect;
     };
   }
 
@@ -255,3 +257,13 @@ Object.keys(PopupPlacements).forEach((kp) => {
     };
   });
 });
+
+/** Returns normalized offset */
+export function getOffset(offset: [number, number, number, number] | [number, number]): WUPPopupPlace.PositionRect {
+  return {
+    top: offset[0],
+    right: offset[1],
+    bottom: offset[2] ?? offset[0],
+    left: offset[3] ?? offset[1],
+  };
+}

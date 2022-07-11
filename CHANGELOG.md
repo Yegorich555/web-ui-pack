@@ -31,8 +31,10 @@
   - Added $refresh() - to force update/recalc position when nested content is changed
   - Added option **animation** with animation-drawer
   - Added option **maxWidthByTarget**
+  - Added option **offsetFitElement**
   - Added promise-result for \$hide() and \$show() (resolve by animation time)
   - Allow to use other inline transform styles
+  - Improved listener (filter mouse-move, double-click etc.)
 
 ## 0.0.5 (Apr 4, 2022)
 
