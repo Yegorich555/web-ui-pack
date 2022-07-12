@@ -1,10 +1,12 @@
 import WUPBaseElement, { WUP } from "./baseElement";
 import { px2Number, styleTransform } from "./helpers/styleHelpers";
+import { objectClone } from "./indexHelpers";
+import { getOffset } from "./popup/popupPlacements";
 
 declare global {
   namespace WUPSpin {
     interface Defaults {
-      /** Place inside parent as inline-block otherwise overflow target in the center (`position: relative` isnot  required);
+      /** Place inside parent as inline-block otherwise overflow target in the center (`position: relative` is not required);
        * @defaultValue false */
       inline?: boolean;
       /** Virtual padding of parentElement [top, right, bottom, left] or [top/bottom, right/left] in px
@@ -38,7 +40,7 @@ declare global {
 export default class WUPSpinElement extends WUPBaseElement {
   #ctr = this.constructor as typeof WUPSpinElement;
 
-  static observedOptions = new Set<keyof WUPSpin.Options>(["inline", "overflowTarget", "overflowOffset"]);
+  static observedOptions = new Set<keyof WUPSpin.Options>(["inline", "overflowTarget", "overflowOffset", "fit"]);
   static get observedAttributes(): Array<keyof WUPSpin.Options> {
     return ["inline", "overflowFade", "fit"];
   }
@@ -50,7 +52,7 @@ export default class WUPSpinElement extends WUPBaseElement {
           --spin-speed: 1.2s;
           --spin-size: 3em;
           --spin-item-size: calc(var(--spin-size) / 8);
-          --spin-shadow: #ffffff6e;
+          --spin-fade: #ffffff6e;
         }`;
   }
 
@@ -90,7 +92,7 @@ export default class WUPSpinElement extends WUPBaseElement {
          border-radius: var(--border-radius);
          transform: none;
          z-index: -1;
-         background: var(--spin-shadow);
+         background: var(--spin-fade);
       }
       :host div[fade]::after { content: none; }
       ${this.$styleApplied}`;
@@ -103,10 +105,7 @@ export default class WUPSpinElement extends WUPBaseElement {
 
   static _itemsCount = 1;
 
-  $options: WUPSpin.Options = {
-    ...this.#ctr.$defaults,
-  };
-
+  $options: WUPSpin.Options = objectClone(this.#ctr.$defaults);
   protected override _opts = this.$options;
 
   /** Force to update position (when $options.oveflow is true) */
@@ -141,7 +140,7 @@ export default class WUPSpinElement extends WUPBaseElement {
   }
 
   #prevTarget?: HTMLElement;
-  $refShadow?: HTMLDivElement;
+  $refFade?: HTMLDivElement;
   protected override gotChanges(propsChanged: Array<keyof WUPSpin.Options> | null): void {
     super.gotChanges(propsChanged);
 
@@ -160,17 +159,17 @@ export default class WUPSpinElement extends WUPBaseElement {
     }
 
     if (!this._opts.inline) {
-      if (this._opts.overflowFade && !this.$refShadow) {
-        this.$refShadow = this.appendChild(document.createElement("div"));
-        this.$refShadow.setAttribute("fade", "");
+      if (this._opts.overflowFade && !this.$refFade) {
+        this.$refFade = this.appendChild(document.createElement("div"));
+        this.$refFade.setAttribute("fade", "");
         const s = getComputedStyle(this.target);
-        this.$refShadow.style.borderTopLeftRadius = s.borderTopLeftRadius;
-        this.$refShadow.style.borderTopRightRadius = s.borderTopRightRadius;
-        this.$refShadow.style.borderBottomLeftRadius = s.borderBottomLeftRadius;
-        this.$refShadow.style.borderBottomRightRadius = s.borderBottomRightRadius;
-      } else if (!this._opts.overflowFade && this.$refShadow) {
-        this.$refShadow.remove();
-        this.$refShadow = undefined;
+        this.$refFade.style.borderTopLeftRadius = s.borderTopLeftRadius;
+        this.$refFade.style.borderTopRightRadius = s.borderTopRightRadius;
+        this.$refFade.style.borderBottomLeftRadius = s.borderBottomLeftRadius;
+        this.$refFade.style.borderBottomRightRadius = s.borderBottomRightRadius;
+      } else if (!this._opts.overflowFade && this.$refFade) {
+        this.$refFade.remove();
+        this.$refFade = undefined;
       }
       this.style.position = "absolute";
       const goUpdate = (): void => {
@@ -182,10 +181,10 @@ export default class WUPSpinElement extends WUPBaseElement {
     } else {
       this.style.transform = "";
       this.style.position = "";
-      this.$refShadow?.remove();
-      this.$refShadow = undefined;
+      this.$refFade?.remove();
+      this.$refFade = undefined;
 
-      if (this.getBoolAttr("fit", false)) {
+      if (this.getBoolAttr("fit", this._opts.fit)) {
         const goUpdate = (): void => {
           this.style.position = "absolute";
           const p = this.parentElement as HTMLElement;
@@ -220,7 +219,8 @@ export default class WUPSpinElement extends WUPBaseElement {
   }
 
   get hasRelativeParent(): boolean {
-    return !(!this.offsetParent || getComputedStyle(this.offsetParent as HTMLElement).position !== "relative");
+    const p = this.offsetParent;
+    return !!p && getComputedStyle(p).position === "relative";
   }
 
   #prevRect?: Pick<DOMRect, "width" | "height" | "top" | "left">;
@@ -255,13 +255,7 @@ export default class WUPSpinElement extends WUPBaseElement {
       return this.#prevRect;
     }
 
-    const offset = {
-      top: this._opts.overflowOffset[0],
-      right: this._opts.overflowOffset[1],
-      bottom: this._opts.overflowOffset[2] ?? this._opts.overflowOffset[0],
-      left: this._opts.overflowOffset[3] ?? this._opts.overflowOffset[1],
-    };
-
+    const offset = getOffset(this._opts.overflowOffset);
     this.style.display = "";
 
     const w = r.width - offset.left - offset.right;
@@ -273,14 +267,14 @@ export default class WUPSpinElement extends WUPBaseElement {
     styleTransform(this, "translate", `${left}px,${top}px`);
     styleTransform(this, "scale", scale === 1 ? "" : `${scale}`);
 
-    if (this.$refShadow) {
-      styleTransform(this.$refShadow, "translate", `${r.left - left}px,${r.top - top}px`);
-      styleTransform(this.$refShadow, "scale", scale === 1 ? "" : `${1 / scale}`);
-      if (this.$refShadow.clientWidth !== r.width) {
-        this.$refShadow.style.width = `${r.width}px`;
+    if (this.$refFade) {
+      styleTransform(this.$refFade, "translate", `${r.left - left}px,${r.top - top}px`);
+      styleTransform(this.$refFade, "scale", scale === 1 || !scale ? "" : `${1 / scale}`);
+      if (this.$refFade.clientWidth !== r.width) {
+        this.$refFade.style.width = `${r.width}px`;
       }
-      if (this.$refShadow.clientWidth !== r.height) {
-        this.$refShadow.style.height = `${r.height}px`;
+      if (this.$refFade.clientWidth !== r.height) {
+        this.$refFade.style.height = `${r.height}px`;
       }
     }
 
