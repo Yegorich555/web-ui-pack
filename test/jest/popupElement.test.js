@@ -1229,12 +1229,13 @@ describe("popupElement", () => {
       `"<wup-popup style=\\"display: block; transform: translate(112px, 0px);\\" position=\\"right\\"></wup-popup>"`
     );
     expect(fn).toBeCalledTimes(1);
-    h.unMockConsoleError();
 
     el.$options.offsetFitElement = [2, 3, 4, 8];
     expectIt([WUPPopupElement.$placements.$left.$start]).toMatchInlineSnapshot(
       `"<wup-popup style=\\"display: block; transform: translate(112px, 2px);\\" position=\\"right\\"></wup-popup>"`
     );
+
+    h.unMockConsoleError();
   });
 
   test("position with scroll", () => {
