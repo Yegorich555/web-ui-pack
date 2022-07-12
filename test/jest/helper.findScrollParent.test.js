@@ -52,7 +52,7 @@ describe("helper.findScrollParent", () => {
     expect(findScrollParentAll(el)).toEqual([document.body]);
 
     jest.restoreAllMocks(); // to allow change srollTop for body
-    jest.spyOn(main, "scrollTop", "set").mockImplementation(() => 0); // for checking scrollLeft
+    jest.spyOn(main, "scrollLeft", "set").mockImplementation(() => 0); // for checking scrollLeft
     expect(findScrollParentAll(el)).toEqual([main, document.body, document.body.parentElement]); // in reality it's impossible but for simlation it's ok
   });
 });
