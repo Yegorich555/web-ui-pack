@@ -885,4 +885,3 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 // testcase: all empty controls (or with single value) must be have the same height - 44px (check, switch can be different height)
 
 // todo NumberInput - set role 'spinbutton'
-// todo refactor css-vars from --ctrl- to --wup-

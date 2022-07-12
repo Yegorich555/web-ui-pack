@@ -350,15 +350,15 @@ describe("baseElement", () => {
   test("get/set bool attr", () => {
     expect(el.getBoolAttr("disabled")).toBeFalsy();
 
-    el.setBoolAttr("disabled", true);
+    el.setAttr("disabled", true, true);
     expect(el.getAttribute("disabled")).toBe("");
     expect(el.getBoolAttr("disabled")).toBeTruthy();
 
-    el.setBoolAttr("disabled", true, true);
+    el.setAttr("disabled", true, false);
     expect(el.getAttribute("disabled")).toBe("true");
     expect(el.getBoolAttr("disabled")).toBeTruthy();
 
-    el.setBoolAttr("disabled", false);
+    el.setAttr("disabled", false);
     expect(el.getAttribute("disabled")).toBeNull();
     expect(el.getBoolAttr("disabled")).toBeFalsy();
   });

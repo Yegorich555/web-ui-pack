@@ -326,7 +326,7 @@ describe("helper.observer", () => {
   });
 
   test("for Date (valueof)", () => {
-    let obj = observer.make(new Date());
+    let obj = observer.make(new Date(Date.parse("2007-10-05")));
     const fn = jest.fn();
     const fn2 = jest.fn();
     observer.onPropChanged(obj, fn);
