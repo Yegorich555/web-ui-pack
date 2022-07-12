@@ -4,11 +4,13 @@ import { getOffset, PopupPlacements, WUPPopupPlace } from "./popupPlacements";
 import { findScrollParentAll } from "../helpers/findScrollParent";
 import WUPPopupArrowElement from "./popupArrowElement";
 import popupListenTarget from "./popupListenTarget";
-import { animateDropdown, isIntoView } from "../indexHelpers";
 import { getBoundingInternalRect, px2Number, styleTransform } from "../helpers/styleHelpers";
 
 export import ShowCases = WUPPopup.ShowCases;
 import { WUPcssScrollSmall } from "../styles";
+import animateDropdown from "../helpers/animateDropdown";
+import isIntoView from "../helpers/isIntoView";
+import objectClone from "../helpers/objectClone";
 
 // code coverage doesn't work either: https://stackoverflow.com/questions/62493593/unable-to-ignore-block-within-react-class-components-with-istanbul-ignore-next-t
 /* c8 ignore next */
@@ -234,14 +236,7 @@ export default class WUPPopupElement<
   }
 
   /** All options for this popup. If you want to change common options @see WUPPopupElement.$defaults */
-  $options: WUPPopup.Options = {
-    ...this.#ctr.$defaults,
-    placement: [...this.#ctr.$defaults.placement],
-    offset: this.#ctr.$defaults.offset ? [...this.#ctr.$defaults.offset] : undefined,
-    arrowOffset: this.#ctr.$defaults.arrowOffset ? [...this.#ctr.$defaults.arrowOffset] : undefined,
-    offsetFitElement: this.#ctr.$defaults.offsetFitElement ? [...this.#ctr.$defaults.offsetFitElement] : undefined,
-  };
-
+  $options: WUPPopup.Options = objectClone(this.#ctr.$defaults);
   protected override _opts = this.$options;
 
   /** Hide popup. Promise resolved by animation time */
