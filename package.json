@@ -28,14 +28,12 @@
   },
   "keywords": [
     "webuipack",
+    "web ui pack",
     "WUP",
-    "web",
-    "ui",
     "html",
     "input",
     "control",
     "form",
-    "element",
     "helper",
     "material",
     "angular",
@@ -49,6 +47,7 @@
     "radiobox",
     "switchbox",
     "dropdown",
+    "combobox",
     "select",
     "multiselect"
   ],

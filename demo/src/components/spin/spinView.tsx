@@ -21,9 +21,11 @@ const sideEffect =
 !sideEffect && console.error("Missed"); // It's required otherwise import is ignored by webpack
 spinUseRing(WUPSpinElement); // setup default style
 
+// todo add css-vars dropdowns ?
+
 export default function SpinView() {
   return (
-    <Page header="Spin" link="#spinelement" className={styles.pageSpin}>
+    <Page header="Spin" link="/tree/master/src/spinElement.ts" className={styles.pageSpin}>
       <div>
         <h3>With position: relative</h3>
         <small>

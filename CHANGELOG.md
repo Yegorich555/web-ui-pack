@@ -11,15 +11,15 @@
 - Optimized for webpack (via [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free))
 - Optimized memory consumption (remove auto-bind functions)
 - Added [helpers](README.md#helpers)
-  - [`animateDropdown`](/src/helpers/animateDropdown.ts)
-  - [`findScrollParentAll`](/src/helpers/findScrollParent.ts)
-  - [`objectClone`](/src/helpers/objectClone.ts)
-  - [`isIntoView`](/src/helpers/isIntoView.ts)
-  - [`scrollIntoView`](/src/helpers/scrollIntoView.ts)
-  - [`stringLowerCount`](/src/helpers/stringCaseCount.ts)
-  - [`stringUpperCount`](/src/helpers/stringCaseCount.ts)
-- Added elements // todo description comming soon
-  - SpinElement
+  - [`animateDropdown`](src/helpers/animateDropdown.ts)
+  - [`findScrollParentAll`](src/helpers/findScrollParent.ts)
+  - [`objectClone`](src/helpers/objectClone.ts)
+  - [`isIntoView`](src/helpers/isIntoView.ts)
+  - [`scrollIntoView`](src/helpers/scrollIntoView.ts)
+  - [`stringLowerCount`](src/helpers/stringCaseCount.ts)
+  - [`stringUpperCount`](src/helpers/stringCaseCount.ts)
+- Added elements
+  - [SpinElement](https://yegorich555.github.io/web-ui-pack/spin)
   - FormElement
   - TextControl
   - PasswordControl
@@ -27,8 +27,8 @@
   - SwitchControl
   - CheckControl
   - RadioControl
-- Helper [nestedProperty](/src/helpers/nestedProperty.ts): added option `out.hasProp`
-- Helper [promiseWait](/src/helpers/promiseWait.ts): added option `smartOrCallback` to prevent useless pending on already resolved promises
+- Helper [nestedProperty](src/helpers/nestedProperty.ts): added option `out.hasProp`
+- Helper [promiseWait](src/helpers/promiseWait.ts): added option `smartOrCallback` to prevent useless pending on already resolved promises
 
 - [`PopupElement`](README.md#popupelement)
   - Added $refresh() - to force update/recalc position when nested content is changed
@@ -41,7 +41,7 @@
 
 ## 0.0.5 (Apr 4, 2022)
 
-- Fixed helper [`onFocusLost`](/src/helpers/onFocusLost.ts): missed callback when user clicks several times fast
+- Fixed helper [`onFocusLost`](src/helpers/onFocusLost.ts): missed callback when user clicks several times fast
 - [`PopupElement`](README.md#popupelement)
   - Fixed behavior on target-remove
   - Deprecated shadow mode
@@ -52,24 +52,24 @@
 - [`PopupElement`](README.md#popupelement)
   - Fixed $options.offset
   - Fixed behavior on target-remove
-- Added helper [`onSpy`](/src/helpers/onSpy.ts) to spy on method-call
+- Added helper [`onSpy`](src/helpers/onSpy.ts) to spy on method-call
 
 ## 0.0.3 (Mar 29, 2022)
 
 - Added [`popupElement`](README.md#popupelement)
 - Added [helpers](README.md#helpers)
-  - [`stringPrettify`](/src/helpers/stringPrettify.ts)
-  - [`onEvent`](/src/helpers/onEvent.ts)
-  - [`onFocusGot`](/src/helpers/onFocusGot.ts)
-  - [`onFocusLost`](/src/helpers/onFocusLost.ts)
-  - [`observer`](/src/helpers/observer.ts)
-  - [`findScrollParent`](/src/helpers/findScrollParent.ts)
+  - [`stringPrettify`](src/helpers/stringPrettify.ts)
+  - [`onEvent`](src/helpers/onEvent.ts)
+  - [`onFocusGot`](src/helpers/onFocusGot.ts)
+  - [`onFocusLost`](src/helpers/onFocusLost.ts)
+  - [`observer`](src/helpers/observer.ts)
+  - [`findScrollParent`](src/helpers/findScrollParent.ts)
 - Removed helper `detectFocusLeft` in favor `onFocusLost`
 
 ## 0.0.2 (Nov 30, 2021)
 
 - Added [helpers](README.md#helpers)
   - `detectFocusLeft`
-  - [`focusFirst`](/src/helpers/focusFirst.ts)
-  - [`nestedProperty.set/get`](/src/helpers/nestedProperty.ts)
-  - [`promiseWait`](/src/helpers/promiseWait.ts)
+  - [`focusFirst`](src/helpers/focusFirst.ts)
+  - [`nestedProperty.set/get`](src/helpers/nestedProperty.ts)
+  - [`promiseWait`](src/helpers/promiseWait.ts)

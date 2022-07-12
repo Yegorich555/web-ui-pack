@@ -35,7 +35,7 @@ npm install web-ui-pack
 - [x] [Helpers](#helpers)
 - [x] [Helper.Observer](#helpersobserver)
 - [x] [PopupElement](#popupelement)
-- [x] SpinElement
+- [x] [SpinElement](https://yegorich555.github.io/web-ui-pack/spin)
 - [x] FormElement
 - [x] TextControl
 - [x] PasswordControl
@@ -44,7 +44,7 @@ npm install web-ui-pack
 - [x] SwitchControl
 - [x] RadioControl (RadioGroup)
 - [x] SelectControl (ComboBox, Dropdown)
-- [x] SelectManyControl (MultiSelect)
+- [ ] SelectManyControl (MultiSelect)
 - [ ] Calendar
 - [ ] DateControl
 - [ ] TimeControl ?
@@ -81,7 +81,6 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
    - In `jsx/tsx` instead of `className` use `class` attribute (React issue)
    - If you change custom html-attributes it will update `$options`, but if you change some option it doesn't update related attribute (for performance reasons). Better to avoid customAttributes at all
 4. **Inheritance**
-
    - Components are developed to be easy customized and inherrited. Every rule/option/method is developed to be customized if defaultOptions are not enough. You can rewrite everything that you can imagine without digging a lot in a code. To be sure don't hesitate to take a look on \*.d.ts or source code (there are enough comments to clarify even weird/difficult cases)
    - All Components inherrited from [WUPBaseElement](src/baseElement.ts) that extends default HTMLElement
    - All internal event-callbacks startsWith `got...` (gotReady, gotRemoved)
@@ -90,8 +89,8 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
 
      - [_HTMLElement_](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement)
        - [_BaseElement_](src/baseElement.ts)
-         - [PopupElement](src/popupElement.ts)
-         - [SpinElement](src/spinElement.ts)
+         - [PopupElement](src/popupElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
+         - [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
          - [FormElement](src/formElement.ts)
          - [_BaseControl_](src/controls/baseControl.ts)
            - [SwitchControl](src/controls/switch.ts)
@@ -101,11 +100,12 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
              - [PasswordControl](src/controls/password.ts)
              - [BaseComboControl](src/controls/baseCombo.ts)
                - [SelectControl](src/controls/select.ts)
-                 - [SelectManyControl](src/controls/selectMany.ts)
+                 -~~[SelectManyControl](src/controls/selectMany.ts)~~
                - ~~[DateControl](src/controls/date.ts)~~
 
 ---
 
+ <!-- todo reogranize Readme. Focus on Demo or split readme per component -->
 ### PopupElement
 
 [WUPPopupElement](src/popupElement.ts), `<wup-popup />`
@@ -191,24 +191,24 @@ declare global {
 use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 **WARN**: don't use `import {focusFirst} from "web-ui-pack;` because in this case the whole web-ui-pack module traps in compilation of dev-bundle and increases time of compilation
 
-- [**animateDropdown**(el: HTMLElement, timeMs=300, isClose=false)](/src/helpers/animateDropdown.ts) ⇒ `Animate (open/close) element as dropdown via scale and counter-scale for children`
-- [**findScrollParent**(el: HTMLElement)](/src/helpers/findScrollParent.ts) ⇒ `Find first parent with active scroll X/Y`
-- [**findScrollParentAll**(e: HTMLElement)](/src//helpers/findScrollParent.ts) ⇒ `Find all parents with active scroll X/Y`
-- [**focusFirst**(el: HTMLElement)](/src//helpers/focusFirst.ts) ⇒ `Set focus on parent itself or first possible element inside`
-- [**isIntoView**(el: HTMLElement)](/src//helpers/isIntoView.ts) ⇒ `Check if element is visible in scrollable parents`
-- [**nestedProperty.set**](/src/helpers/nestedProperty.ts) ⇒ `nestedProperty.set(obj, "value.nestedValue", 1) sets obj.value.nestedValue = 1`
-- [**nestedProperty.get**](/src/helpers/nestedProperty.ts) ⇒ `nestedProperty.get(obj, "nested.val2", out?: {hasProp?: boolean} ) returns value from obj.nested.val2`
-- [**objectClone**(obj, opts: CloneOptions)](/src/helpers/objectClone.ts) ⇒ `converts object to observable (via Proxy) to allow listen for changes`
+- [**animateDropdown**(el: HTMLElement, timeMs=300, isClose=false)](src/helpers/animateDropdown.ts) ⇒ `Animate (open/close) element as dropdown via scale and counter-scale for children`
+- [**findScrollParent**(el: HTMLElement)](src/helpers/findScrollParent.ts) ⇒ `Find first parent with active scroll X/Y`
+- [**findScrollParentAll**(e: HTMLElement)](src//helpers/findScrollParent.ts) ⇒ `Find all parents with active scroll X/Y`
+- [**focusFirst**(el: HTMLElement)](src//helpers/focusFirst.ts) ⇒ `Set focus on parent itself or first possible element inside`
+- [**isIntoView**(el: HTMLElement)](src//helpers/isIntoView.ts) ⇒ `Check if element is visible in scrollable parents`
+- [**nestedProperty.set**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.set(obj, "value.nestedValue", 1) sets obj.value.nestedValue = 1`
+- [**nestedProperty.get**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.get(obj, "nested.val2", out?: {hasProp?: boolean} ) returns value from obj.nested.val2`
+- [**objectClone**(obj, opts: CloneOptions)](src/helpers/objectClone.ts) ⇒ `converts object to observable (via Proxy) to allow listen for changes`
 - [**observer**](#observer) ⇒ `converts object to observable (via Proxy) to allow listen for changes`
-- [**onEvent**(...args)](/src/helpers/onEvent.ts) ⇒ `More strict (for Typescript) wrapper of addEventListener() that returns callback with removeListener()`
-- [**onFocusGot**(el: HTMLElement, listener: (ev) => void, {debounceMs: 100, once: false, ...})](/src/helpers/onFocusGot.ts) ⇒ `Fires when element/children takes focus once (fires again after onFocusLost on element)`
-- [**onFocusLost**(el: HTMLElement, listener: (ev) => void, {debounceMs: 100, once: false, ...})](/src/helpers/onFocusLost.ts) ⇒ `Fires when element/children completely lost focus`
-- [**onSpy**(object: {}, method: string, listener: (...args) => void](/src/helpers/onSpy.ts) ⇒ `Spy on method-call of object`
-- [**promiseWait**(promise: Promise, ms: number, smartOrCallback: boolean | Function) => Promise](/src/helpers/promiseWait.ts) ⇒ `Produce Promise during for "no less than pointed time"; it helps for avoding spinner blinking during the very fast api-request in case: pending > waitResponse > resetPending`
-- [**scrollIntoView**(el: HTMLElement, options: WUPScrollOptions) => Promise](/src/helpers/scrollIntoView.ts) ⇒ `Scroll the HTMLElement's parent container such that the element is visible to the user and return promise by animation end`
-- [**stringLowerCount**(text: string, stopWith?: number)](/src/helpers/stringCaseCount.ts) ⇒ `Returns count of chars in lower case (for any language with ignoring numbers, symbols)`
-- [**stringUpperCount**(text: string, stopWith?: number)](/src/helpers/stringCaseCount.ts) ⇒ `Returns count of chars in upper case (for any language with ignoring numbers, symbols)`
-- [**stringPrettify**(text: string, changeKebabCase = false)](/src/helpers/stringPrettify.ts) ⇒ `Changes camelCase, snakeCase, kebaCase text to user-friendly`
+- [**onEvent**(...args)](src/helpers/onEvent.ts) ⇒ `More strict (for Typescript) wrapper of addEventListener() that returns callback with removeListener()`
+- [**onFocusGot**(el: HTMLElement, listener: (ev) => void, {debounceMs: 100, once: false, ...})](src/helpers/onFocusGot.ts) ⇒ `Fires when element/children takes focus once (fires again after onFocusLost on element)`
+- [**onFocusLost**(el: HTMLElement, listener: (ev) => void, {debounceMs: 100, once: false, ...})](src/helpers/onFocusLost.ts) ⇒ `Fires when element/children completely lost focus`
+- [**onSpy**(object: {}, method: string, listener: (...args) => void](src/helpers/onSpy.ts) ⇒ `Spy on method-call of object`
+- [**promiseWait**(promise: Promise, ms: number, smartOrCallback: boolean | Function) => Promise](src/helpers/promiseWait.ts) ⇒ `Produce Promise during for "no less than pointed time"; it helps for avoding spinner blinking during the very fast api-request in case: pending > waitResponse > resetPending`
+- [**scrollIntoView**(el: HTMLElement, options: WUPScrollOptions) => Promise](src/helpers/scrollIntoView.ts) ⇒ `Scroll the HTMLElement's parent container such that the element is visible to the user and return promise by animation end`
+- [**stringLowerCount**(text: string, stopWith?: number)](src/helpers/stringCaseCount.ts) ⇒ `Returns count of chars in lower case (for any language with ignoring numbers, symbols)`
+- [**stringUpperCount**(text: string, stopWith?: number)](src/helpers/stringCaseCount.ts) ⇒ `Returns count of chars in upper case (for any language with ignoring numbers, symbols)`
+- [**stringPrettify**(text: string, changeKebabCase = false)](src/helpers/stringPrettify.ts) ⇒ `Changes camelCase, snakeCase, kebaCase text to user-friendly`
 
 #### Helpers.Observer
 
