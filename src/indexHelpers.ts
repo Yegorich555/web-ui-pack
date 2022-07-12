@@ -8,6 +8,8 @@ export { default as isIntoView } from "./helpers/isIntoView";
 
 export { default as nestedProperty } from "./helpers/nestedProperty";
 export { default as observer } from "./helpers/observer";
+export { default as objectClone } from "./helpers/objectClone";
+
 // export * from "./helpers/observer";
 export { default as onEvent } from "./helpers/onEvent";
 export { default as onFocusGot } from "./helpers/onFocusGot";

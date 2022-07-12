@@ -198,6 +198,7 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 - [**isIntoView**(el: HTMLElement)](/src//helpers/isIntoView.ts) ⇒ `Check if element is visible in scrollable parents`
 - [**nestedProperty.set**](/src/helpers/nestedProperty.ts) ⇒ `nestedProperty.set(obj, "value.nestedValue", 1) sets obj.value.nestedValue = 1`
 - [**nestedProperty.get**](/src/helpers/nestedProperty.ts) ⇒ `nestedProperty.get(obj, "nested.val2", out?: {hasProp?: boolean} ) returns value from obj.nested.val2`
+- [**objectClone**(obj, opts: CloneOptions)](/src/helpers/objectClone.ts) ⇒ `converts object to observable (via Proxy) to allow listen for changes`
 - [**observer**](#observer) ⇒ `converts object to observable (via Proxy) to allow listen for changes`
 - [**onEvent**(...args)](/src/helpers/onEvent.ts) ⇒ `More strict (for Typescript) wrapper of addEventListener() that returns callback with removeListener()`
 - [**onFocusGot**(el: HTMLElement, listener: (ev) => void, {debounceMs: 100, once: false, ...})](/src/helpers/onFocusGot.ts) ⇒ `Fires when element/children takes focus once (fires again after onFocusLost on element)`
@@ -283,7 +284,7 @@ Be sure that you familiar with [common rules](#components)
 > ```js
 > import { WUPSelectControl, WUPTextControl } from "web-ui-pack";
 >
-> // this force webpack don't ignore imports (if imported used only as html-tags without direct access)
+> // this force webpack not ignore imports (if imported used only as html-tags without direct access)
 > const sideEffect = WUPTextControl && WUPSelectControl;
 > !sideEffect && console.error("Missed"); // It's required otherwise import is ignored by webpack
 > // or
