@@ -18,3 +18,4 @@ export { default as onFocusLost } from "./helpers/onFocusLost";
 export { default as promiseWait } from "./helpers/promiseWait";
 export { default as scrollIntoView } from "./helpers/scrollIntoView";
 export { default as stringPrettify } from "./helpers/stringPrettify";
+export * from "./helpers/stringCaseCount";

@@ -206,6 +206,8 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 - [**onSpy**(object: {}, method: string, listener: (...args) => void](/src/helpers/onSpy.ts) ⇒ `Spy on method-call of object`
 - [**promiseWait**(promise: Promise, ms: number, smartOrCallback: boolean | Function) => Promise](/src/helpers/promiseWait.ts) ⇒ `Produce Promise during for "no less than pointed time"; it helps for avoding spinner blinking during the very fast api-request in case: pending > waitResponse > resetPending`
 - [**scrollIntoView**(el: HTMLElement, options: WUPScrollOptions) => Promise](/src/helpers/scrollIntoView.ts) ⇒ `Scroll the HTMLElement's parent container such that the element is visible to the user and return promise by animation end`
+- [**stringLowerCount**(text: string, stopWith?: number)](/src/helpers/stringCaseCount.ts) ⇒ `Returns count of chars in lower case (for any language with ignoring numbers, symbols)`
+- [**stringUpperCount**(text: string, stopWith?: number)](/src/helpers/stringCaseCount.ts) ⇒ `Returns count of chars in upper case (for any language with ignoring numbers, symbols)`
 - [**stringPrettify**(text: string, changeKebabCase = false)](/src/helpers/stringPrettify.ts) ⇒ `Changes camelCase, snakeCase, kebaCase text to user-friendly`
 
 #### Helpers.Observer

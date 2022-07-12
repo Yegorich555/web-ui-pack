@@ -16,6 +16,8 @@
   - [`objectClone`](/src/helpers/objectClone.ts)
   - [`isIntoView`](/src/helpers/isIntoView.ts)
   - [`scrollIntoView`](/src/helpers/scrollIntoView.ts)
+  - [`stringLowerCount`](/src/helpers/stringCaseCount.ts)
+  - [`stringUpperCount`](/src/helpers/stringCaseCount.ts)
 - Added elements // todo description comming soon
   - SpinElement
   - FormElement
