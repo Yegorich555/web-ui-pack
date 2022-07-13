@@ -4,6 +4,7 @@
 import focusFirst from "./helpers/focusFirst";
 import observer, { Observer } from "./helpers/observer";
 import onEvent, { onEventType } from "./helpers/onEvent";
+import { WUPcssHidden } from "./styles";
 
 // theoritcally such single appending is faster than using :host inside shadowComponent
 const appendedStyles = new Set<string>();
@@ -13,20 +14,10 @@ let lastUniqueNum = 0;
 export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.EventMap> extends HTMLElement {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseElement;
-
   /** Options that need to watch for changes; use gotOptionsChanged() */
   static observedOptions?: Set<keyof Record<string, any>>;
-
+  /** Reference to global style element used by web-ui-pack */
   static $refStyle: HTMLStyleElement;
-
-  /** Visually hidden but accessible for screenReaders */
-  static get $styleHidden(): string {
-    return `position: absolute;
-            height: 1px; width: 1px;
-            top:0;left:0;
-            overflow: hidden;
-            clip: rect(1px, 1px, 1px, 1px);`;
-  }
 
   /** StyleContent related to component */
   static get $style(): string {
@@ -68,9 +59,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     if (!this.#ctr.$refStyle) {
       this.#ctr.$refStyle = document.createElement("style");
       /* from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility  */
-      this.#ctr.$refStyle.append(
-        `.${this.#ctr.classNameHidden}, [${this.#ctr.classNameHidden}] {${this.#ctr.$styleHidden}}`
-      );
+      this.#ctr.$refStyle.append(`.${this.#ctr.classNameHidden}, [${this.#ctr.classNameHidden}] {${WUPcssHidden}}`);
       document.head.prepend(this.#ctr.$refStyle);
     }
     const refStyle = this.#ctr.$refStyle;

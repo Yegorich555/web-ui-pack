@@ -1,4 +1,5 @@
 import { WUP } from "../baseElement";
+import { WUPcssHidden } from "../styles";
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
 
 const tagName = "wup-switch";
@@ -109,7 +110,7 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
         box-shadow: 0 1px 4px 0 var(--ctrl-switch-shadow);
         border-radius: 50%;
       }
-      :host input { ${this.$styleHidden} }
+      :host input { ${WUPcssHidden} }
       :host input:checked + * + * {
         background-color: var(--ctrl-switch-on-back);
       }

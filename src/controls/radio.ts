@@ -1,5 +1,6 @@
 import { WUP } from "../baseElement";
 import nestedProperty from "../helpers/nestedProperty";
+import { WUPcssHidden } from "../styles";
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
 
 const tagName = "wup-radio";
@@ -118,7 +119,7 @@ export default class WUPRadioControl<
         padding: 0;
         cursor: pointer;
       }
-      :host input {${this.$styleHidden}}
+      :host input {${WUPcssHidden}}
       :host input + * {
         padding: var(--ctrl-radio-gap);
         display: inline-flex;
