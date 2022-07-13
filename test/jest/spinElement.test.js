@@ -179,9 +179,9 @@ describe("spinElement", () => {
     jest.advanceTimersToNextTimer();
     expect(el.$options.inline).toBeTruthy();
 
-    // el.removeAttribute("inline"); // todo cross attr-options changes impossible now - need to develop way to affect on each other
-    // jest.advanceTimersToNextTimer();
-    // expect(el.$options.inline).toBeFalsy();
+    el.removeAttribute("inline");
+    jest.advanceTimersToNextTimer();
+    expect(el.$options.inline).toBeFalsy();
   });
 
   test("$options.overflowFade", async () => {
@@ -218,7 +218,6 @@ describe("spinElement", () => {
 
   test("$options.fit", async () => {
     // todo test it on e2e
-    el.testMe = true;
     const trg = targetAppend();
     el.$options.overflowTarget = trg;
 
@@ -256,14 +255,10 @@ describe("spinElement", () => {
     el.setAttribute("fit", "");
     jest.advanceTimersToNextTimer();
     expect(el.$options.fit).toBeTruthy();
-    expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body><button aria-busy=\\"true\\">someText<wup-spin style=\\"--spin-size: 20px; --spin-item-size: calc(30px * 0.6666666666666666);\\" aria-label=\\"Loading. Please wait\\" fit=\\"\\"><div></div></wup-spin></button></body>"`
-    );
 
-    // el.removeAttribute("fit"); // todo cross attr-options changes impossible now - need to develop way to affect on each other
-    // jest.advanceTimersToNextTimer();
-    // expect(el.$options.fit).toBeFalsy();
-    // expect(document.body.outerHTML).toMatchInlineSnapshot();
+    el.removeAttribute("fit");
+    jest.advanceTimersToNextTimer();
+    expect(el.$options.fit).toBeFalsy();
   });
 
   test("$refresh()", () => {
@@ -488,10 +483,9 @@ describe("spinElement", () => {
                background: var(--spin-fade);
             }
             SPIN-C div[fade]::after { content: none; }
-            
-              SPIN-C { position: relative; }
-              SPIN-C div {
-                animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
+            SPIN-C { position: relative; }
+                  SPIN-C div {
+                    animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
                 position: absolute;
                 border: var(--spin-item-size) solid;
                 border-color: var(--spin-1) transparent transparent transparent;
@@ -550,10 +544,9 @@ describe("spinElement", () => {
                background: var(--spin-fade);
             }
             SPIN-D div[fade]::after { content: none; }
-            
-              SPIN-D { --spin-step: 24deg; position: relative; }
-              SPIN-D div {
-                animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
+            SPIN-D { --spin-step: 24deg; position: relative; }
+                  SPIN-D div {
+                    animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
                 position: absolute;
               }
               SPIN-D div::after {
@@ -633,10 +626,9 @@ describe("spinElement", () => {
                background: var(--spin-fade);
             }
             SPIN-E div[fade]::after { content: none; }
-            
-              @keyframes WUP-SPIN-2 {
-                  0%,20%,80%,100% { transform: scale(1); background: var(--spin-1) }
-                  50% { transform: scale(1.4); background: var(--spin-2) }
+            @keyframes WUP-SPIN-2 {
+                    0%,20%,80%,100% { transform: scale(1); background: var(--spin-1) }
+                    50% { transform: scale(1.4); background: var(--spin-2) }
               }
               SPIN-E {
                 --spin-2: #ff5200;
@@ -729,10 +721,9 @@ describe("spinElement", () => {
                background: var(--spin-fade);
             }
             SPIN-F div[fade]::after { content: none; }
-            
-              @keyframes WUP-SPIN-3 {
-                100% { opacity: 0; background: var(--spin-2); }
-              }
+            @keyframes WUP-SPIN-3 {
+                    100% { opacity: 0; background: var(--spin-2); }
+                  }
               SPIN-F {
                 --spin-item-size: calc(var(--spin-size) / 10);
                 position: relative;

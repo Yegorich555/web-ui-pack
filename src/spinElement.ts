@@ -40,7 +40,14 @@ declare global {
 export default class WUPSpinElement extends WUPBaseElement {
   #ctr = this.constructor as typeof WUPSpinElement;
 
-  static observedOptions = new Set<keyof WUPSpin.Options>(["inline", "overflowTarget", "overflowOffset", "fit"]);
+  static observedOptions = new Set<keyof WUPSpin.Options>([
+    "inline",
+    "overflowTarget",
+    "overflowOffset",
+    "overflowFade",
+    "fit",
+  ]);
+
   static get observedAttributes(): Array<keyof WUPSpin.Options> {
     return ["inline", "overflowFade", "fit"];
   }
@@ -108,7 +115,7 @@ export default class WUPSpinElement extends WUPBaseElement {
   $options: WUPSpin.Options = objectClone(this.#ctr.$defaults);
   protected override _opts = this.$options;
 
-  /** Force to update position (when $options.oveflow is true) */
+  /** Force to update position (when options changed) */
   $refresh(): void {
     this.gotChanges([]);
   }
@@ -145,7 +152,9 @@ export default class WUPSpinElement extends WUPBaseElement {
     super.gotChanges(propsChanged);
 
     this._opts.inline = this.getBoolAttr("inline", this._opts.inline);
-    this._opts.fit = this.getBoolAttr("inline", this._opts.fit ?? !this._opts.inline);
+    this._opts.fit = this.getBoolAttr("fit", this._opts.fit ?? !this._opts.inline);
+    this._opts.overflowFade = this.getBoolAttr("overflowFade", this._opts.overflowFade);
+
     this.style.cssText = "";
     this.#prevRect = undefined;
     this.#frameId && window.cancelAnimationFrame(this.#frameId);
@@ -374,15 +383,14 @@ export function spinUseRoller(cls: typeof WUPSpinElement): void {
       s += `:host div:nth-child(${i}) { animation-delay: -0.${15 * (cnt - i)}s }
         `;
     }
-    return `
-        :host { position: relative; }
-        :host div {
-          animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
-          position: absolute;
-          border: var(--spin-item-size) solid;
-          border-color: var(--spin-1) transparent transparent transparent;
-        }
-        ${s}`;
+    return `:host { position: relative; }
+            :host div {
+              animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
+              position: absolute;
+              border: var(--spin-item-size) solid;
+              border-color: var(--spin-1) transparent transparent transparent;
+            }
+            ${s}`;
   });
 }
 
@@ -396,25 +404,24 @@ export function spinUseDotRoller(cls: typeof WUPSpinElement): void {
             :host div:nth-child(${i})::after { transform: rotate(calc(45deg + var(--spin-step) * ${i - 1})); }
             `;
     }
-    return `
-        :host { --spin-step: 24deg; position: relative; }
-        :host div {
-          animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
-          position: absolute;
-        }
-        :host div::after {
-          content: " ";
-          display: block;
-          position: absolute;
-          left: 0;
-          top: calc(50% - var(--spin-item-size) / 2);
-          transform-origin: calc(var(--spin-size) / 2);
-          width: var(--spin-item-size);
-          height: var(--spin-item-size);
-          border-radius: 50%;
-          background: var(--spin-1);
-        }
-        ${s}`;
+    return `:host { --spin-step: 24deg; position: relative; }
+            :host div {
+              animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
+              position: absolute;
+            }
+            :host div::after {
+              content: " ";
+              display: block;
+              position: absolute;
+              left: 0;
+              top: calc(50% - var(--spin-item-size) / 2);
+              transform-origin: calc(var(--spin-size) / 2);
+              width: var(--spin-item-size);
+              height: var(--spin-item-size);
+              border-radius: 50%;
+              background: var(--spin-1);
+            }
+            ${s}`;
   });
 }
 
@@ -428,32 +435,31 @@ export function spinUseDotRing(cls: typeof WUPSpinElement): void {
             :host div:nth-child(${i}) { transform: translate(-50%,-50%) rotate(${(360 / cnt) * (i - 1)}deg) }
             `;
     }
-    return `
-        @keyframes WUP-SPIN-2 {
-            0%,20%,80%,100% { transform: scale(1); background: var(--spin-1) }
-            50% { transform: scale(1.4); background: var(--spin-2) }
-        }
-        :host {
-          --spin-2: #ff5200;
-          position: relative;
-         }
-        :host div {
-          position: absolute;
-          width: calc(100% / 1.4142135623730951);
-          height: calc(100% / 1.4142135623730951);
-          animation: none;
-          top:50%; left:50%;
-        }
-        :host div::after {
-          animation: WUP-SPIN-2 var(--spin-speed) linear infinite;
-          content: " ";
-          display: block;
-          width: var(--spin-item-size);
-          height: var(--spin-item-size);
-          border-radius: 50%;
-          background: var(--spin-1);
-        }
-        ${s}`;
+    return `@keyframes WUP-SPIN-2 {
+              0%,20%,80%,100% { transform: scale(1); background: var(--spin-1) }
+              50% { transform: scale(1.4); background: var(--spin-2) }
+            }
+            :host {
+              --spin-2: #ff5200;
+              position: relative;
+            }
+            :host div {
+              position: absolute;
+              width: calc(100% / 1.4142135623730951);
+              height: calc(100% / 1.4142135623730951);
+              animation: none;
+              top:50%; left:50%;
+            }
+            :host div::after {
+              animation: WUP-SPIN-2 var(--spin-speed) linear infinite;
+              content: " ";
+              display: block;
+              width: var(--spin-item-size);
+              height: var(--spin-item-size);
+              border-radius: 50%;
+              background: var(--spin-1);
+            }
+            ${s}`;
   });
 }
 
@@ -469,26 +475,25 @@ export function spinUseSpliceRing(cls: typeof WUPSpinElement): void {
               }
             `;
     }
-    return `
-        @keyframes WUP-SPIN-3 {
-          100% { opacity: 0; background: var(--spin-2); }
-        }
-        :host {
-          --spin-item-size: calc(var(--spin-size) / 10);
-          position: relative;
-         }
-        :host div {
-          animation: WUP-SPIN-3 var(--spin-speed) linear infinite;
-          position: absolute;
-          width: calc(var(--spin-size) / 4);
-          height: var(--spin-item-size);
-          left: 0;
-          top: calc(50% - var(--spin-item-size) / 2);
-          transform-origin: calc(var(--spin-size) / 2);
-          background: var(--spin-1);
-          border-radius: calc(var(--spin-item-size) / 2);
-        }
-        ${s}`;
+    return `@keyframes WUP-SPIN-3 {
+              100% { opacity: 0; background: var(--spin-2); }
+            }
+            :host {
+              --spin-item-size: calc(var(--spin-size) / 10);
+              position: relative;
+            }
+            :host div {
+              animation: WUP-SPIN-3 var(--spin-speed) linear infinite;
+              position: absolute;
+              width: calc(var(--spin-size) / 4);
+              height: var(--spin-item-size);
+              left: 0;
+              top: calc(50% - var(--spin-item-size) / 2);
+              transform-origin: calc(var(--spin-size) / 2);
+              background: var(--spin-1);
+              border-radius: calc(var(--spin-item-size) / 2);
+            }
+            ${s}`;
   });
 }
 

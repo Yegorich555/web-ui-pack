@@ -225,6 +225,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     if (this._isStopChanges) {
       return;
     }
+    delete this._opts[name]; // otherwise attr can't override option if attribute removed
     // debounce filter
     if (this.#attrTimer) {
       this.#attrChanged!.push(name);
