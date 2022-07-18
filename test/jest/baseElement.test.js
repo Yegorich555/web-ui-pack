@@ -30,12 +30,12 @@ afterEach(() => {
 
 describe("baseElement", () => {
   describe("inheritance", () => {
-    h.baseTestComponent(document.createElement("test-inher-el"));
+    h.baseTestComponent(() => document.createElement("test-inher-el"));
   });
 
   describe("me", () => {
     customElements.define("test-base-el", WUPBaseElement);
-    h.baseTestComponent(document.createElement("test-base-el"));
+    h.baseTestComponent(() => document.createElement("test-base-el"));
   });
 
   test("gotReady/gotRemoved/gotAttributeChanged", () => {
@@ -414,7 +414,7 @@ describe("baseElement", () => {
     await h.wait();
     expect(spyAll).toBeCalledTimes(1);
     expect(spyAll).toBeCalledWith(["disabled"]);
-    expect(spyAttr).toBeCalledTimes(1);
+    expect(spyAttr).toBeCalledTimes(2); // twice because 1st - removed by gotOptionsChanged, 2nd - added by gotChanges
     expect(spyOpts).toBeCalledTimes(1);
 
     jest.clearAllMocks();

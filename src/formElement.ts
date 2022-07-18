@@ -55,9 +55,9 @@ declare global {
     export interface Options extends Defaults {
       /** Focus first possible element when it's appended to layout */
       autoFocus?: boolean;
-      /** Disallow edit/copy value; adds attr [disabled] for styling; has higher priority above control.$options */
+      /** Disallow edit/copy value; adds attr [disabled] for styling */
       disabled?: boolean;
-      /** Disallow copy value; adds attr [readonly] for styling; has higher priority above control.$options */
+      /** Disallow copy value; adds attr [readonly] for styling */
       readOnly?: boolean;
       /** Enable/disable browser-autocomplete; if control has no autocomplete option then it's inherrited from form
        *  @defaultValue false */

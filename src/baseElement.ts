@@ -193,6 +193,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   /** Called when element isReady and at least one of observedOptions is changed */
   protected gotOptionsChanged(e: WUP.OptionEvent): void {
     this._isStopChanges = true;
+    e.props.forEach((p) => this.removeAttribute(p)); // remove related attributes otherwise impossible to override
     this.gotChanges(e.props);
     this._isStopChanges = false;
   }
