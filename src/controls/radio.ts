@@ -181,7 +181,7 @@ export default class WUPRadioControl<
       super.$isEqual(v1, v2) ||
       // eslint-disable-next-line eqeqeq
       v1 == v2 ||
-      String.prototype.localeCompare.call(v1, v2 as string, undefined, { sensitivity: "accent" }) === 0
+      (v1 == null || v2 == null ? false : (v1 as string).toLowerCase() === (v2 as string).toLowerCase())
     );
   }
 
