@@ -30,12 +30,12 @@ afterEach(() => {
 
 describe("baseElement", () => {
   describe("inheritance", () => {
-    h.testComponentFuncBind(document.createElement("test-inher-el"));
+    h.baseTestComponent(document.createElement("test-inher-el"));
   });
 
   describe("me", () => {
     customElements.define("test-base-el", WUPBaseElement);
-    h.testComponentFuncBind(document.createElement("test-base-el"));
+    h.baseTestComponent(document.createElement("test-base-el"));
   });
 
   test("gotReady/gotRemoved/gotAttributeChanged", () => {

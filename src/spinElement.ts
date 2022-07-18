@@ -48,8 +48,8 @@ export default class WUPSpinElement extends WUPBaseElement {
     "fit",
   ]);
 
-  static get observedAttributes(): Array<keyof WUPSpin.Options> {
-    return ["inline", "overflowFade", "fit"];
+  static get observedAttributes(): Array<LowerKeys<WUPSpin.Options>> {
+    return ["inline", "overflowfade", "fit"];
   }
 
   static get $styleRoot(): string {

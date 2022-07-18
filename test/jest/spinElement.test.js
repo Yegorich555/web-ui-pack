@@ -81,7 +81,7 @@ afterEach(() => {
 });
 
 describe("spinElement", () => {
-  h.testComponentFuncBind(document.createElement("wup-spin"));
+  h.baseTestComponent(document.createElement("wup-spin"), false, { fit: { onRemove: true } });
 
   test("applied styles", () => {
     expect(document.head.innerHTML).toMatchInlineSnapshot(`
@@ -174,14 +174,6 @@ describe("spinElement", () => {
     expect(document.body.outerHTML).toMatchInlineSnapshot(
       `"<body aria-busy=\\"true\\"><wup-spin style=\\"position: absolute; transform: translate(285px,185px);\\" aria-label=\\"Loading. Please wait\\"><div></div><div fade=\\"\\" style=\\"transform: translate(-285px,-185px); width: 600px; height: 400px;\\"></div></wup-spin></body>"`
     );
-
-    el.setAttribute("inline", "");
-    jest.advanceTimersToNextTimer();
-    expect(el.$options.inline).toBeTruthy();
-
-    el.removeAttribute("inline");
-    jest.advanceTimersToNextTimer();
-    expect(el.$options.inline).toBeFalsy();
   });
 
   test("$options.overflowFade", async () => {
@@ -195,14 +187,6 @@ describe("spinElement", () => {
     expect(document.body.outerHTML).toMatchInlineSnapshot(
       `"<body aria-busy=\\"true\\"><wup-spin style=\\"position: absolute; transform: translate(285px,185px);\\" aria-label=\\"Loading. Please wait\\"><div></div></wup-spin></body>"`
     );
-
-    // el.setAttribute("overflowFade", "");
-    // jest.advanceTimersToNextTimer();
-    // expect(el.$options.overflowFade).toBeTruthy();
-
-    // el.removeAttribute("overflowFade"); // todo cross attr-options changes impossible now - need to develop way to affect on each other
-    // jest.advanceTimersToNextTimer();
-    // expect(el.$options.overflowFade).toBeFalsy();
   });
 
   test("$options.overflowTarget", () => {
@@ -251,14 +235,6 @@ describe("spinElement", () => {
     expect(document.body.outerHTML).toMatchInlineSnapshot(
       `"<body><button aria-busy=\\"true\\">someText<wup-spin style=\\"--spin-size: 20px; --spin-item-size: calc(30px * 0.6666666666666666);\\" aria-label=\\"Loading. Please wait\\"><div></div></wup-spin></button></body>"`
     );
-
-    el.setAttribute("fit", "");
-    jest.advanceTimersToNextTimer();
-    expect(el.$options.fit).toBeTruthy();
-
-    el.removeAttribute("fit");
-    jest.advanceTimersToNextTimer();
-    expect(el.$options.fit).toBeFalsy();
   });
 
   test("$refresh()", () => {
@@ -486,11 +462,11 @@ describe("spinElement", () => {
             SPIN-C { position: relative; }
                   SPIN-C div {
                     animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
-                position: absolute;
-                border: var(--spin-item-size) solid;
-                border-color: var(--spin-1) transparent transparent transparent;
-              }
-              SPIN-C div:nth-child(1) { animation-delay: -0.45s }
+                    position: absolute;
+                    border: var(--spin-item-size) solid;
+                    border-color: var(--spin-1) transparent transparent transparent;
+                  }
+                  SPIN-C div:nth-child(1) { animation-delay: -0.45s }
               SPIN-C div:nth-child(2) { animation-delay: -0.30s }
               SPIN-C div:nth-child(3) { animation-delay: -0.15s }
               </style>"
@@ -547,21 +523,21 @@ describe("spinElement", () => {
             SPIN-D { --spin-step: 24deg; position: relative; }
                   SPIN-D div {
                     animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
-                position: absolute;
-              }
-              SPIN-D div::after {
-                content: \\" \\";
-                display: block;
-                position: absolute;
-                left: 0;
-                top: calc(50% - var(--spin-item-size) / 2);
-                transform-origin: calc(var(--spin-size) / 2);
-                width: var(--spin-item-size);
-                height: var(--spin-item-size);
-                border-radius: 50%;
-                background: var(--spin-1);
-              }
-              SPIN-D div:nth-child(1) { animation-delay: -0.036s; }
+                    position: absolute;
+                  }
+                  SPIN-D div::after {
+                    content: \\" \\";
+                    display: block;
+                    position: absolute;
+                    left: 0;
+                    top: calc(50% - var(--spin-item-size) / 2);
+                    transform-origin: calc(var(--spin-size) / 2);
+                    width: var(--spin-item-size);
+                    height: var(--spin-item-size);
+                    border-radius: 50%;
+                    background: var(--spin-1);
+                  }
+                  SPIN-D div:nth-child(1) { animation-delay: -0.036s; }
                   SPIN-D div:nth-child(1)::after { transform: rotate(calc(45deg + var(--spin-step) * 0)); }
                   SPIN-D div:nth-child(2) { animation-delay: -0.072s; }
                   SPIN-D div:nth-child(2)::after { transform: rotate(calc(45deg + var(--spin-step) * 1)); }
@@ -629,28 +605,28 @@ describe("spinElement", () => {
             @keyframes WUP-SPIN-2 {
                     0%,20%,80%,100% { transform: scale(1); background: var(--spin-1) }
                     50% { transform: scale(1.4); background: var(--spin-2) }
-              }
-              SPIN-E {
-                --spin-2: #ff5200;
-                position: relative;
-               }
-              SPIN-E div {
-                position: absolute;
-                width: calc(100% / 1.4142135623730951);
-                height: calc(100% / 1.4142135623730951);
-                animation: none;
-                top:50%; left:50%;
-              }
-              SPIN-E div::after {
-                animation: WUP-SPIN-2 var(--spin-speed) linear infinite;
-                content: \\" \\";
-                display: block;
-                width: var(--spin-item-size);
-                height: var(--spin-item-size);
-                border-radius: 50%;
-                background: var(--spin-1);
-              }
-              SPIN-E div:nth-child(1)::after { animation-delay: 0s; }
+                  }
+                  SPIN-E {
+                    --spin-2: #ff5200;
+                    position: relative;
+                  }
+                  SPIN-E div {
+                    position: absolute;
+                    width: calc(100% / 1.4142135623730951);
+                    height: calc(100% / 1.4142135623730951);
+                    animation: none;
+                    top:50%; left:50%;
+                  }
+                  SPIN-E div::after {
+                    animation: WUP-SPIN-2 var(--spin-speed) linear infinite;
+                    content: \\" \\";
+                    display: block;
+                    width: var(--spin-item-size);
+                    height: var(--spin-item-size);
+                    border-radius: 50%;
+                    background: var(--spin-1);
+                  }
+                  SPIN-E div:nth-child(1)::after { animation-delay: 0s; }
                   SPIN-E div:nth-child(1) { transform: translate(-50%,-50%) rotate(0deg) }
                   SPIN-E div:nth-child(2)::after { animation-delay: 0.1s; }
                   SPIN-E div:nth-child(2) { transform: translate(-50%,-50%) rotate(36deg) }
@@ -724,22 +700,22 @@ describe("spinElement", () => {
             @keyframes WUP-SPIN-3 {
                     100% { opacity: 0; background: var(--spin-2); }
                   }
-              SPIN-F {
-                --spin-item-size: calc(var(--spin-size) / 10);
-                position: relative;
-               }
-              SPIN-F div {
-                animation: WUP-SPIN-3 var(--spin-speed) linear infinite;
-                position: absolute;
-                width: calc(var(--spin-size) / 4);
-                height: var(--spin-item-size);
-                left: 0;
-                top: calc(50% - var(--spin-item-size) / 2);
-                transform-origin: calc(var(--spin-size) / 2);
-                background: var(--spin-1);
-                border-radius: calc(var(--spin-item-size) / 2);
-              }
-              SPIN-F div:nth-child(1) {
+                  SPIN-F {
+                    --spin-item-size: calc(var(--spin-size) / 10);
+                    position: relative;
+                  }
+                  SPIN-F div {
+                    animation: WUP-SPIN-3 var(--spin-speed) linear infinite;
+                    position: absolute;
+                    width: calc(var(--spin-size) / 4);
+                    height: var(--spin-item-size);
+                    left: 0;
+                    top: calc(50% - var(--spin-item-size) / 2);
+                    transform-origin: calc(var(--spin-size) / 2);
+                    background: var(--spin-1);
+                    border-radius: calc(var(--spin-item-size) / 2);
+                  }
+                  SPIN-F div:nth-child(1) {
                       animation-delay: -1.1s;
                       transform: rotate(0deg);
                     }

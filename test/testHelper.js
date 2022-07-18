@@ -1,6 +1,8 @@
 /* eslint-disable no-prototype-builtins */
 /* eslint-disable jest/no-export */
 
+import WUPBaseElement from "web-ui-pack/baseElement";
+
 export function mockSetState(el) {
   return jest.fn((state, callback) =>
     setTimeout(() => {
@@ -106,8 +108,8 @@ export function findAllFunctions(obj) {
   };
 }
 
-export function testComponentFuncBind(obj) {
-  describe("componentFuncBind", () => {
+export function baseTestComponent(obj, skipAttrs, attrOptions) {
+  describe("common tests", () => {
     const fns = findAllFunctions(obj);
     it("no arrow functions", () => {
       // doesn't for work for deep-inheritted: const arrowFunc = objNames.filter(a => !protoNames.includes(a));
@@ -118,6 +120,51 @@ export function testComponentFuncBind(obj) {
     // it("each function are bound", () => {
     //   expect(fns.notBound).toHaveLength(0);
     // });
+
+    if (!skipAttrs && obj instanceof WUPBaseElement) {
+      const c = Object.getPrototypeOf(obj).constructor;
+      /** @type string[] */
+      const attrs = c?.observedAttributes || [];
+      if (!attrs.length) {
+        return;
+      }
+
+      describe("observedAttributes affects on options", () => {
+        jest.useFakeTimers();
+        /* eslint-disable jest/no-standalone-expect */
+        obj.testMe = true;
+        attrs.forEach((a) => {
+          it(`attr [${a}]`, () => {
+            expect(a.toLowerCase()).toBe(a); // all observed attrs must be in lowercase otherwise it doesn't work
+
+            obj.removeAttribute(a);
+            if (!obj.isConnected) {
+              document.body.appendChild(obj);
+              jest.advanceTimersByTime(1); // wait for ready
+            }
+
+            obj.setAttribute(a, "");
+            jest.advanceTimersByTime(1);
+            const key = Object.keys(obj.$options).find((k) => k.toLowerCase() === a);
+            expect(key).toBeDefined();
+            expect(obj.$options[key]).toBeDefined();
+            expect(obj.$options[key]).not.toBeFalsy();
+
+            obj.removeAttribute(a);
+            jest.advanceTimersByTime(1);
+            if (attrOptions && attrOptions[a]?.onRemove) {
+              // eslint-disable-next-line jest/no-conditional-expect
+              expect(obj.$options[key]).toBeTruthy();
+            } else {
+              // eslint-disable-next-line jest/no-conditional-expect
+              expect(obj.$options[key]).toBeFalsy();
+            }
+          });
+        });
+        /* eslint-enable jest/no-standalone-expect */
+      });
+      obj.remove();
+    }
   });
 }
 
@@ -137,7 +184,7 @@ export function testStaticInheritence(Type) {
 }
 
 export function testControlCommon(Type) {
-  testComponentFuncBind(Type);
+  baseTestComponent(Type);
   testStaticInheritence(Type);
   test("returnEmptyValue & isEmpty", () => {
     expect(Type.isEmpty(Type.returnEmptyValue)).toBe(true);

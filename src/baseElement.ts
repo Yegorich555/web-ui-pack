@@ -15,7 +15,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseElement;
   /** Options that need to watch for changes; use gotOptionsChanged() */
-  static observedOptions?: Set<keyof Record<string, any>>;
+  static observedOptions?: Set<keyof Record<Lowercase<string>, any>>;
   /** Reference to global style element used by web-ui-pack */
   static $refStyle: HTMLStyleElement;
 
@@ -225,16 +225,34 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     if (this._isStopChanges) {
       return;
     }
-    delete this._opts[name]; // otherwise attr can't override option if attribute removed
     // debounce filter
     if (this.#attrTimer) {
       this.#attrChanged!.push(name);
       return;
     }
+
     this.#attrChanged = [name];
     this.#attrTimer = setTimeout(() => {
       this.#attrTimer = undefined;
       this._isStopChanges = true;
+      const keys = Object.keys(this._opts);
+      const keysNormalized: string[] = []; // cache to boost performance via exlcuding extra-lowerCase
+      this.#attrChanged!.forEach((a) => {
+        keys.some((k, i) => {
+          let kn = keysNormalized[i];
+          if (!kn) {
+            kn = k.toLowerCase();
+            keysNormalized.push(kn);
+          }
+          if (kn === a) {
+            delete this._opts[k];
+            return true;
+          }
+
+          return false;
+        });
+      }); // otherwise attr can't override option if attribute removed
+
       this.gotChanges(this.#attrChanged as Array<keyof WUPForm.Options>);
       this._isStopChanges = false;
       this.#attrChanged = undefined;

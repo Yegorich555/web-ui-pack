@@ -57,6 +57,12 @@ export default class WUPPopupElement<
 > extends WUPBaseElement<Events> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPPopupElement;
+  static observedOptions = new Set<keyof WUPPopup.Options>(["showCase", "target", "placement"]);
+
+  /* Array of attribute names to monitor for changes */
+  static get observedAttributes(): Array<keyof WUPPopup.Options> {
+    return ["target", "placement"];
+  }
 
   static $placements = PopupPlacements;
   static $placementAttrs = {
@@ -328,15 +334,9 @@ export default class WUPPopupElement<
     this.init(); // possible only if popup is hidden
   }
 
-  static observedOptions = new Set<keyof WUPPopup.Options>(["showCase", "target", "placement"]);
   protected override gotOptionsChanged(e: WUP.OptionEvent): void {
     super.gotOptionsChanged(e);
     this.#reinit();
-  }
-
-  /* Array of attribute names to monitor for changes */
-  static get observedAttributes(): Array<keyof WUPPopup.Options> {
-    return ["target", "placement"];
   }
 
   #attrTimer?: number;
