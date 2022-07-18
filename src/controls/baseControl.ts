@@ -161,14 +161,14 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   static observedOptions = new Set<keyof WUPBase.Options>(["label", "name", "autoComplete", "disabled", "readOnly"]);
 
-  /** Text that announced by screen-readers; @defaultValue `Error for` */
-  static get $ariaError(): string {
-    return "Error for";
-  }
-
   /* Array of attribute names to listen for changes */
   static get observedAttributes(): Array<keyof WUPBase.Options | any> {
     return ["label", "name", "autoComplete", "disabled", "readOnly", "initValue"];
+  }
+
+  /** Text that announced by screen-readers; @defaultValue `Error for` */
+  static get $ariaError(): string {
+    return "Error for";
   }
 
   /** Css-variables related to component */

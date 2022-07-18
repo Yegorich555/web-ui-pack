@@ -329,27 +329,13 @@ export default class WUPPopupElement<
     this.#onRemoveRef = refs.onRemoveRef;
   }
 
-  #reinit(): void {
-    this.$isOpen && this.goHide(WUPPopup.HideCases.onOptionChange);
-    this.init(); // possible only if popup is hidden
-  }
+  protected override gotChanges(propsChanged: Array<string> | null): void {
+    super.gotChanges(propsChanged);
 
-  protected override gotOptionsChanged(e: WUP.OptionEvent): void {
-    super.gotOptionsChanged(e);
-    this.#reinit();
-  }
-
-  #attrTimer?: number;
-  protected override gotAttributeChanged(name: string, oldValue: string, newValue: string): void {
-    super.gotAttributeChanged(name, oldValue, newValue);
-    // debounce filter
-    if (this.#attrTimer) {
-      return;
+    if (propsChanged) {
+      this.$isOpen && this.goHide(WUPPopup.HideCases.onOptionChange);
+      this.init(); // possible only if popup is hidden
     }
-    this.#attrTimer = window.setTimeout(() => {
-      this.#attrTimer = undefined;
-      this.#reinit();
-    });
   }
 
   /** Defines target on show; @returns HTMLElement | Error */

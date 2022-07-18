@@ -129,6 +129,7 @@ export function baseTestComponent(obj, skipAttrs, attrOptions) {
         return;
       }
 
+      // todo check if options can affect on attributes
       describe("observedAttributes affects on options", () => {
         jest.useFakeTimers();
         /* eslint-disable jest/no-standalone-expect */
