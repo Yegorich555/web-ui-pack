@@ -34,8 +34,8 @@ npm install web-ui-pack
 
 - [x] [Helpers](#helpers)
 - [x] [Helper.Observer](#helpersobserver)
-- [x] [PopupElement](#popupelement)
-- [x] [SpinElement](https://yegorich555.github.io/web-ui-pack/spin)
+- [x] [PopupElement](#popupelement) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
+- [x] [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
 - [x] FormElement
 - [x] TextControl
 - [x] PasswordControl

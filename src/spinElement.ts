@@ -1,6 +1,6 @@
 import WUPBaseElement, { WUP } from "./baseElement";
+import objectClone from "./helpers/objectClone";
 import { px2Number, styleTransform } from "./helpers/styleHelpers";
-import { objectClone } from "./indexHelpers";
 import { getOffset } from "./popup/popupPlacements";
 
 declare global {
@@ -36,7 +36,29 @@ declare global {
     }
   }
 }
-/** Flexible animated element with ability to place over target element without position relative */
+/** Flexible animated element with ability to place over target element without position relative
+ * @example
+ * JS/TS
+ * ```js
+ * import WUPSpinElement, { spinUseTwinDualRing } from "web-ui-pack/spinElement";
+ * spinUseTwinDualRing(WUPSpinElement); // to apply another style
+ *
+ * const el = document.body.appendChild(document.createElement('wup-spin'));
+ * el.$options.inline = false;
+ * el.$options.overflowTarget = document.body.appendChild(document.createElement('button'))
+ * ```
+ * HTML
+ * ```html
+ * <button> Loading...
+ *  <!-- Default; it's equal to <wup-spin></wup-spin>-->
+ *  <wup-spin inline="false" fit="true" overflowfade="true"></wup-spin>
+ *  <!-- Inline + fit to parent -->
+ *  <wup-spin inline fit></wup-spin>
+ *  <!-- OR; it's equal to <wup-spin inline="false" fit="true" overflowfade="false"></wup-spin> -->
+ *  <wup-spin overflowfade="false"></wup-spin>
+ * </button>
+ * ```
+ */
 export default class WUPSpinElement extends WUPBaseElement {
   #ctr = this.constructor as typeof WUPSpinElement;
 
@@ -63,6 +85,7 @@ export default class WUPSpinElement extends WUPBaseElement {
         }`;
   }
 
+  /* c8 ignore next 3 */
   static get $styleApplied(): string {
     return "";
   }
@@ -496,7 +519,3 @@ export function spinUseSpliceRing(cls: typeof WUPSpinElement): void {
             ${s}`;
   });
 }
-
-// test case when target has position:relative
-// test case when target.parent has position:relative
-// test case when no parent with position:relative

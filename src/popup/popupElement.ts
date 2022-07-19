@@ -20,6 +20,8 @@ const attachLst = new Map<HTMLElement, () => void>();
 
 /** PopupElement
  * @example
+ * JS/TS
+ * ```js
  * WUPPopupElement.$defaults.arrowEnable = true;
  *
  * const el = document.createElement('wup-popup');
@@ -40,10 +42,13 @@ const attachLst = new Map<HTMLElement, () => void>();
                     { target: btn, text: "Some text content here", showCase: ShowCases.onFocus | ShowCases.onClick },
                     (popup) => { popup.className = "popup-class-here"; }
                   )'
- * // or
+ *```
+ * HTML
+ * ```html
  * <button id="btn1">Target</button>
- * // You can skip pointing attribute 'target' if popup appended after target
+ * <!-- You can skip pointing attribute 'target' if popup appended after target -->
  * <wup-popup target="#btn1" placement="top-start">Some content here</wup-popup>
+ * ```
  * @tutorial Troubleshooting:
  * * You can set minWidth, minHeight to prevent squizing of popup or don't use rule '.$adjust'
  * * Don't override styles: transform (possible to override only for animation), display

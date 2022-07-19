@@ -19,7 +19,7 @@
   - [`stringLowerCount`](src/helpers/stringCaseCount.ts)
   - [`stringUpperCount`](src/helpers/stringCaseCount.ts)
 - Added elements
-  - [SpinElement](https://yegorich555.github.io/web-ui-pack/spin)
+  - [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
   - FormElement
   - TextControl
   - PasswordControl
@@ -56,7 +56,7 @@
 
 ## 0.0.3 (Mar 29, 2022)
 
-- Added [`popupElement`](README.md#popupelement)
+- Added [`popupElement`](README.md#popupelement) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
 - Added [helpers](README.md#helpers)
   - [`stringPrettify`](src/helpers/stringPrettify.ts)
   - [`onEvent`](src/helpers/onEvent.ts)

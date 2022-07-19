@@ -190,7 +190,6 @@ describe("spinElement", () => {
   });
 
   test("$options.overflowTarget", () => {
-    // todo test it on e2e
     const trg = targetAppend();
     el.$options.inline = false;
     el.$options.overflowTarget = trg;
@@ -201,7 +200,6 @@ describe("spinElement", () => {
   });
 
   test("$options.fit", async () => {
-    // todo test it on e2e
     const trg = targetAppend();
     el.$options.overflowTarget = trg;
 
