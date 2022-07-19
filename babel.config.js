@@ -3,7 +3,7 @@ module.exports = (api) => {
   return {
     presets: [
       "@babel/preset-react", // optional: react: this resolves react-files (jsx, tsx)
-      "@babel/preset-typescript", // allows  to use TypeScript
+      "@babel/preset-typescript", // allows to use TypeScript
       [
         "@babel/preset-env", // allows you to use the latest JavaScript
         isTest

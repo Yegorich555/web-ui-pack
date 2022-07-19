@@ -8,6 +8,9 @@ div.id = "app";
 window.renderIt = function renderIt(el) {
   ReactDom.render(el, div);
 };
+window.renderHtml = function renderHtml(str) {
+  div.innerHTML = str;
+};
 window.React = React;
 Object.assign(window, webUIpack);
 Object.assign(window, webUIpack.WUPHelpers);

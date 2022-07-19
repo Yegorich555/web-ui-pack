@@ -1,15 +1,10 @@
-jest.spyOn(document, "createElement").getMockImplementation(() => ({
-  append: () => {},
-}));
 // ES5 import is required otherwise jest-env conflicts with puppeeter-env
 const WUPPopupElement = require("web-ui-pack/popup/popupElement").default;
 
 /** @type WUPPopupElement */
 let testEl;
 beforeEach(async () => {
-  jest.spyOn(document, "createElement").getMockImplementation(() => ({
-    append: () => {},
-  }));
+  jest.spyOn(document, "createElement").getMockImplementation(() => ({ append: () => {} }));
   // https://github.com/puppeteer/puppeteer/blob/v5.2.1/docs/api.md#pageemulatemediafeaturesfeatures
   await page.emulateMediaFeatures([
     // { name: "prefers-color-scheme", value: "dark" },

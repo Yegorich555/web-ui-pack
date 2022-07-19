@@ -5,9 +5,11 @@ module.exports = {
     context: true,
     jestPuppeteer: true,
     renderIt: true,
+    renderHtml: true,
   },
   rules: {
     "jsx-a11y/label-has-associated-control": "off",
+    "react/button-has-type": "off",
   },
   settings: {
     "import/resolver": {
