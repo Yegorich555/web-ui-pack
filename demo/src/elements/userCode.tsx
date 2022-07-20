@@ -58,6 +58,14 @@ function getUsedCssVars(scanEl: WUPBaseElement<any>) {
   return usedVars;
 }
 
+function renderCssValue(v: string): string | JSX.Element {
+  // todo show image in popup by click
+  if (v.startsWith("url")) {
+    return <a href="commingsoon">url(...)</a>;
+  }
+  return v;
+}
+
 export default function UserCode(props: React.PropsWithChildren<Props>) {
   if (!props.scanEl) {
     return null;
@@ -66,7 +74,7 @@ export default function UserCode(props: React.PropsWithChildren<Props>) {
     throw new Error("Only WUPBaseElement expected");
   }
 
-  // todo for textControl: wup-icon... must be truncated
+  // todo come reused vars is missed but some exists (textControl: --base-back; vs --ctrl-icon-img: var(--wup-icon-dot);) - check it
   const usedVars = getUsedCssVars(props.scanEl);
 
   return (
@@ -76,7 +84,7 @@ export default function UserCode(props: React.PropsWithChildren<Props>) {
         <ul>
           {usedVars.map((v) => (
             <li key={v.name}>
-              <span>{v.name}</span>: <span>{v.value}</span>;
+              <span>{v.name}</span>: <span>{renderCssValue(v.value)}</span>;
             </li>
           ))}
         </ul>
