@@ -17,7 +17,13 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   /** Options that need to watch for changes; use gotOptionsChanged() */
   static observedOptions?: Set<keyof Record<Lowercase<string>, any>>;
   /** Reference to global style element used by web-ui-pack */
-  static $refStyle: HTMLStyleElement;
+  static get $refStyle(): HTMLStyleElement | null {
+    return window.WUPrefStyle || null;
+  }
+
+  static set $refStyle(v: HTMLStyleElement | null) {
+    window.WUPrefStyle = v || undefined;
+  }
 
   /** StyleContent related to component */
   static get $style(): string {

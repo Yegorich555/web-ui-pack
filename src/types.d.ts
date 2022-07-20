@@ -19,3 +19,8 @@ interface Element {
 type LowerKeys<T> = keyof {
   [P in keyof T as Lowercase<string & P>]: P;
 };
+
+interface Window {
+  /** Reference to HTMLStyleElement with WUP-styles */
+  WUPrefStyle?: HTMLStyleElement;
+}
