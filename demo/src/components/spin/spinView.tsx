@@ -23,7 +23,7 @@ spinUseRing(WUPSpinElement); // setup default style
 
 export default function SpinView() {
   return (
-    <Page header="Spin" link="/tree/master/src/spinElement.ts" className={styles.pageSpin} elType={WUPSpinElement}>
+    <Page header="Spin" link="/tree/master/src/spinElement.ts" className={styles.pageSpin} scanTag="wup-spin">
       <section>
         <h3>With position: relative</h3>
         <small>

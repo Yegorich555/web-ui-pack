@@ -1,12 +1,11 @@
 /* eslint-disable react/destructuring-assignment */
-import WUPBaseElement from "web-ui-pack/baseElement";
 import UserCode from "./userCode";
 
 interface Props {
   header: string;
   link: string;
   className?: string;
-  elType?: typeof WUPBaseElement<any>;
+  scanTag?: keyof HTMLElementTagNameMap;
 }
 
 export default function Page(props: React.PropsWithChildren<Props>) {
@@ -17,7 +16,7 @@ export default function Page(props: React.PropsWithChildren<Props>) {
           {props.header}
         </a>
       </h2>
-      <UserCode elType={props.elType} />
+      {props.scanTag ? <UserCode scanEl={document.createElement(props.scanTag)} /> : null}
       {props.children}
     </div>
   );

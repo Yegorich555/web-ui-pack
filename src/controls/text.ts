@@ -84,7 +84,7 @@ export default class WUPTextControl<
   static get $styleRoot(): string {
     return `:root {
       --ctrl-btn-clear-hover: rgba(255, 0, 0, 0.1);
-      --ctrl-icon-hover-size: 22px;
+      --ctrl-btn-clear-hover-size: 22px;
      }`;
   }
 
@@ -190,8 +190,8 @@ export default class WUPTextControl<
           padding-top: 100%;
         }
         :host button[clear]:before {
-          width: var(--ctrl-icon-hover-size);
-          padding-top: var(--ctrl-icon-hover-size);
+          width: var(--ctrl-btn-clear-hover-size);
+          padding-top: var(--ctrl-btn-clear-hover-size);
         }
         @media (hover: hover) {
           :host button[clear]:hover {

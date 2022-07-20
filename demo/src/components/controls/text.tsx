@@ -10,7 +10,7 @@ const sideEffect = WUPTextControl;
 
 export default function TextControlView() {
   return (
-    <Page header="TextControl" link="#textcontrol">
+    <Page header="TextControl" link="#textcontrol" scanTag="wup-text">
       <wup-form
         ref={(el) => {
           if (el) {
