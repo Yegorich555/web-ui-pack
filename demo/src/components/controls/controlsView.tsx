@@ -10,7 +10,6 @@ import {
   WUPPasswordControl,
   WUPSelectManyControl,
 } from "web-ui-pack";
-import styles from "./controlsView.scss";
 
 const sideEffect =
   WUPTextControl &&
@@ -70,7 +69,7 @@ export default function ControlsView() {
             }
           }}
         />
-        <wup-select-many
+        {/* <wup-select-many
           class={styles.multiCustom}
           ref={(el) => {
             if (el) {
@@ -80,7 +79,7 @@ export default function ControlsView() {
               el.$initValue = [items[0].value, items[2].value];
             }
           }}
-        />
+        /> */}
 
         <wup-switch name="switch" />
         <wup-check name="checkbox" />
