@@ -23,8 +23,8 @@ export default function UserCode(props: Pick<Props, "elType">) {
   }
 
   return (
-    <>
-      <h3>CSS - variables</h3>
+    <section>
+      <h3>CSS variables</h3>
       <code className={styles.cssVars}>
         <ul>
           {vars.map((v) => (
@@ -34,6 +34,6 @@ export default function UserCode(props: Pick<Props, "elType">) {
           ))}
         </ul>
       </code>
-    </>
+    </section>
   );
 }

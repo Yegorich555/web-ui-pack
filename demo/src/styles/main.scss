@@ -84,3 +84,14 @@ p {
 //   outline: 2px solid $focusFrameColor;
 //   outline-offset: -2px;
 // }
+
+section {
+  padding: 6px;
+  box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius, 6px);
+  margin-bottom: 14px;
+
+  > h3 {
+    margin: 0;
+  }
+}

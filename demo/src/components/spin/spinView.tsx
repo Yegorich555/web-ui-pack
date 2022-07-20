@@ -24,7 +24,7 @@ spinUseRing(WUPSpinElement); // setup default style
 export default function SpinView() {
   return (
     <Page header="Spin" link="/tree/master/src/spinElement.ts" className={styles.pageSpin} elType={WUPSpinElement}>
-      <div>
+      <section>
         <h3>With position: relative</h3>
         <small>
           Spinner reduces size to fit target via option <b>fit</b>(true when <b>inline: false </b>- by default)
@@ -35,8 +35,8 @@ export default function SpinView() {
           Button with relative position
           <wup-spin />
         </button>
-      </div>
-      <div>
+      </section>
+      <section>
         <h3>Without position: relative</h3>
         <small>
           <strong>Try to scroll</strong> - spinner overflows header because there is no any parent with{" "}
@@ -56,8 +56,8 @@ export default function SpinView() {
           Button without relative position
           <wup-spin />
         </button>
-      </div>
-      <div style={{ position: "relative" }}>
+      </section>
+      <section style={{ position: "relative" }}>
         <h3>Outside target</h3>
         <small>
           Spinner placed outside button (option <b>overflowTarget</b>) and parent has <b>position: relative</b>
@@ -73,16 +73,15 @@ export default function SpinView() {
             }
           }}
         />
-      </div>
-      <div>
+      </section>
+      <section>
         <h3>Inline</h3>
         <small>
           Use attr <b>inline</b> or <b>$options.inline=true</b>
           <br />
           <strong>Attention</strong>: spinner does not reduce size to fit target in this case (by default)
           <br />
-          (use option <b>fit</b> OR css to fix this:{" "}
-          <b>{`button>wup-spin{ --spin-size: 14px; -spin-item-size: 6px}`}</b>)
+          (use option <b>fit</b> OR css to fix: <b>{`button>wup-spin{ --spin-size: 14px; -spin-item-size: 6px}`}</b>)
         </small>
         <button type="submit" className={styles.btnAlign}>
           <wup-spin inline />
@@ -93,11 +92,11 @@ export default function SpinView() {
           <wup-spin inline="" fit="" />
           With option 'fit'
         </button>
-      </div>
-      <div>
+      </section>
+      <section>
         <h3>Different types</h3>
         <small>
-          To setup style use special functions <b>spinUseDotRoller, spinUseDualRing</b> etc.
+          To setup style use css-vars and special functions <b>spinUseDotRoller, spinUseDualRing</b> etc.
         </small>
         <div className={styles.types}>
           <div>
@@ -145,7 +144,7 @@ export default function SpinView() {
             </div>
           </div>
         </div>
-      </div>
+      </section>
       <div className={styles.bottom} />
     </Page>
   );
