@@ -1,0 +1,17 @@
+.cssVars {
+  ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+
+    > li {
+      span:first-child {
+        color: #1973b8;
+      }
+
+      span:last-child {
+        color: #a95b3d;
+      }
+    }
+  }
+}
