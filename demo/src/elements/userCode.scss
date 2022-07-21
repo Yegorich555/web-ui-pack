@@ -5,6 +5,10 @@
     padding: 0;
 
     > li {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+
       span:first-child {
         color: #1973b8;
       }

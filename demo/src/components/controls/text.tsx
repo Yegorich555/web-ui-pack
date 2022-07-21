@@ -10,7 +10,14 @@ const sideEffect = WUPTextControl;
 
 export default function TextControlView() {
   return (
-    <Page header="TextControl" link="#textcontrol" scanTag="wup-text">
+    <Page
+      header="TextControl"
+      link="#textcontrol"
+      details={{
+        tag: "wup-text",
+        cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear,error-list etc."]]),
+      }}
+    >
       <wup-form
         ref={(el) => {
           if (el) {

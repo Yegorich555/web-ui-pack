@@ -1,11 +1,11 @@
 /* eslint-disable react/destructuring-assignment */
-import UserCode from "./userCode";
+import UserCode, { UserCodeProps } from "./userCode";
 
 interface Props {
   header: string;
   link: string;
   className?: string;
-  scanTag?: keyof HTMLElementTagNameMap;
+  details?: UserCodeProps;
 }
 
 export default function Page(props: React.PropsWithChildren<Props>) {
@@ -16,7 +16,7 @@ export default function Page(props: React.PropsWithChildren<Props>) {
           {props.header}
         </a>
       </h2>
-      {props.scanTag ? <UserCode scanEl={document.createElement(props.scanTag)} /> : null}
+      {props.details ? <UserCode {...props.details} /> : null}
       {props.children}
     </div>
   );
