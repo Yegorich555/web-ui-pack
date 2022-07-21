@@ -81,7 +81,7 @@ afterEach(() => {
 });
 
 describe("spinElement", () => {
-  h.baseTestComponent(() => document.createElement("wup-spin"), false, { fit: { onRemove: true } });
+  h.baseTestComponent(() => document.createElement("wup-spin"), { attrs: { fit: { onRemove: true } } });
 
   test("applied styles", () => {
     expect(document.head.innerHTML).toMatchInlineSnapshot(`

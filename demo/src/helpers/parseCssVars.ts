@@ -83,7 +83,6 @@ export default function getUsedCssVars(scanEl: WUPBaseElement<any>, opts?: Optio
     allUsedVars = allUsedVars.filter((v) => !v.isDuplicate);
   }
 
-  console.warn(allVars);
   allUsedVars.sort((a, b) => a.name.localeCompare(b.name));
   return allUsedVars;
 }

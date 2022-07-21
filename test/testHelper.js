@@ -107,9 +107,19 @@ export function findAllFunctions(obj) {
   };
 }
 
-/** @typedef {(create: ()=>HTMLElement, skipAttrs?: boolean, attrOptions?: Record<string, {onRemove: boolean} > ) => void} BaseTestFunction */
-/** @type BaseTestFunction */
-export function baseTestComponent(createFunction, skipAttrs, attrOptions) {
+/**
+ * @template T
+ * @typedef {(create: ()=>T, opts:
+ * {
+ *    skipAttrs?: boolean,
+ *    attrs: Record<string, {
+ *            onRemove?: boolean,
+ *            skip?: boolean,
+ *          }>,
+ * })=>void} BaseTestFunction
+ * */
+/** @type BaseTestFunction<T> */
+export function baseTestComponent(createFunction, opts) {
   describe("common tests", () => {
     jest.useFakeTimers();
     /** @type WUPBaseElement; */
@@ -126,7 +136,7 @@ export function baseTestComponent(createFunction, skipAttrs, attrOptions) {
     //   expect(fns.notBound).toHaveLength(0);
     // });
 
-    if (!skipAttrs && obj instanceof WUPBaseElement) {
+    if (!opts?.skipAttrs && obj instanceof WUPBaseElement) {
       /** @type typeof WUPBaseElement; */
       const c = Object.getPrototypeOf(obj).constructor;
       /** @type string[] */
@@ -135,16 +145,20 @@ export function baseTestComponent(createFunction, skipAttrs, attrOptions) {
         describe("observedAttributes affects on options", () => {
           /* eslint-disable jest/no-standalone-expect */
           attrs.forEach((a) => {
-            it(`attr [${a}]`, () => {
+            const isSkip = opts.attrs && opts.attrs[a]?.skip;
+            it(`attr [${a}]${isSkip ? " - skipped" : ""}`, () => {
               expect(a.toLowerCase()).toBe(a); // all observed attrs must be in lowercase otherwise it doesn't work
 
+              if (isSkip) {
+                return;
+              }
               obj.removeAttribute(a);
               if (!obj.isConnected) {
                 document.body.appendChild(obj);
                 jest.advanceTimersByTime(1); // wait for ready
               }
 
-              obj.setAttribute(a, "");
+              obj.setAttribute(a, "true");
               jest.advanceTimersByTime(1);
               const key = Object.keys(obj.$options).find((k) => k.toLowerCase() === a);
               expect(key).toBeDefined();
@@ -153,7 +167,7 @@ export function baseTestComponent(createFunction, skipAttrs, attrOptions) {
 
               obj.removeAttribute(a);
               jest.advanceTimersByTime(1);
-              if (attrOptions && attrOptions[a]?.onRemove) {
+              if (opts?.attrs && opts.attrs[a]?.onRemove) {
                 // eslint-disable-next-line jest/no-conditional-expect
                 expect(obj.$options[key]).toBeTruthy();
               } else {
@@ -165,14 +179,14 @@ export function baseTestComponent(createFunction, skipAttrs, attrOptions) {
           /* eslint-enable jest/no-standalone-expect */
         });
 
-        const opts = c.observedOptions;
-        if (opts.size) {
+        const os = c.observedOptions;
+        if (os.size) {
           obj.testMe = true;
           describe("observerOptions affects on attributes", () => {
-            opts.forEach((opt) => {
-              const attr = attrs.find((a) => a === opt.toLowerCase());
+            os.forEach((o) => {
+              const attr = attrs.find((a) => a === o.toLowerCase());
               if (attr) {
-                it(`opt [${opt}]`, () => {
+                it(`opt [${o}]`, () => {
                   if (!obj.isConnected) {
                     document.body.appendChild(obj);
                     jest.advanceTimersByTime(1); // wait for ready
@@ -180,9 +194,9 @@ export function baseTestComponent(createFunction, skipAttrs, attrOptions) {
 
                   obj.setAttribute(attr, "true");
                   jest.advanceTimersByTime(1);
-                  expect(obj.$options[opt]).toBeDefined();
+                  expect(obj.$options[o]).toBeDefined();
 
-                  obj.$options[opt] = null;
+                  obj.$options[o] = null;
                   jest.advanceTimersByTime(1);
                   expect(obj.getAttribute(attr)).toBeNull();
                 });

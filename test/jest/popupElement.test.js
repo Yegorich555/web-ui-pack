@@ -83,7 +83,7 @@ afterEach(() => {
 
 describe("popupElement", () => {
   describe("me", () => {
-    h.baseTestComponent(() => document.createElement("wup-popup"), true);
+    h.baseTestComponent(() => document.createElement("wup-popup"), { skipAttrs: true });
     test("re-import", () => {
       // just for coverage
       expect(all).toBeTruthy();
@@ -101,7 +101,7 @@ describe("popupElement", () => {
   describe("inheritance", () => {
     class TestPopupElement extends WUPPopupElement {}
     customElements.define("test-el", TestPopupElement);
-    h.baseTestComponent(() => document.createElement("test-el"), true);
+    h.baseTestComponent(() => document.createElement("test-el"), { skipAttrs: true });
   });
 
   // WARN: after this method static $defaults can be changed

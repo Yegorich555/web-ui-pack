@@ -58,6 +58,7 @@ declare global {
     }
   }
 }
+
 /**
  * @tutorial innerHTML @example
  * <label>
@@ -79,7 +80,7 @@ export default class WUPTextControl<
     return "input cleared";
   }
 
-  static observedOptions = (super.observedOptions as Set<keyof WUPText.Options>).add("clearButton") as any;
+  static observedOptions = (super.observedOptions as Set<keyof WUPText.Options>).add("clearButton");
 
   static get $styleRoot(): string {
     return `:root {
@@ -333,3 +334,5 @@ export default class WUPTextControl<
 customElements.define(tagName, WUPTextControl);
 
 // testcase: form with email+password ignores autocomplete: "off" if previously it was saved
+
+// todo docs about usage with css-variables... Maybe FAQ ???

@@ -159,11 +159,12 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseControl;
 
-  static observedOptions = new Set<keyof WUPBase.Options>(["label", "name", "autoComplete", "disabled", "readOnly"]);
+  static observedOptions = new Set<string>(["label", "name", "autoComplete", "disabled", "readOnly"]);
 
+  // todo use const instead of getter
   /* Array of attribute names to listen for changes */
-  static get observedAttributes(): Array<keyof WUPBase.Options | any> {
-    return ["label", "name", "autoComplete", "disabled", "readOnly", "initValue"];
+  static get observedAttributes(): Array<string> {
+    return ["label", "name", "autocomplete", "disabled", "readonly", "initvalue"];
   }
 
   /** Text that announced by screen-readers; @defaultValue `Error for` */
@@ -376,6 +377,11 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       this.$value = v;
     }
     this.#initValue = v;
+    if (!(this as any)._noDelInitValueAttr) {
+      this._isStopChanges = true;
+      this.removeAttribute("initvalue");
+      this._isStopChanges = false;
+    }
   }
 
   #isDirty = false;
@@ -539,12 +545,18 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     this.setAttr("disabled", this._opts.disabled, true);
     this.setAttr("readOnly", this._opts.readOnly, true);
 
-    if (!propsChanged || propsChanged.includes("initValue")) {
-      const attr = this.getAttribute("initValue");
-      this.$initValue = attr !== null ? this.parseValue(attr || "") : this.$initValue;
+    // lowercase for attribute-changes otherwise it's wrong
+    if (!propsChanged || propsChanged.includes("initvalue")) {
+      const attr = this.getAttribute("initvalue");
+      if (attr) {
+        (this as any)._noDelInitValueAttr = true;
+        this.$initValue = this.parseValue(attr || "");
+        delete (this as any)._noDelInitValueAttr;
+      } else if (propsChanged) {
+        this.$initValue = undefined; // removed attr >> remove initValue
+      }
     }
-
-    // retrieve $initValue from $initModel
+    // retrieve value from model
     if (this.$initValue === undefined && this.$form && this._opts.name) {
       if (!propsChanged || propsChanged.includes("name")) {
         this.$initValue = nestedProperty.get(this.$form._initModel as any, this._opts.name);
@@ -561,6 +573,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     i.disabled = this.$isDisabled as boolean;
     i.readOnly = this.$isReadOnly;
     i.autocomplete = this.$autoComplete || "off";
+    // todo check if initModel can affect on $initValue by change
   }
 
   protected override gotOptionsChanged(e: WUP.OptionEvent): void {
@@ -885,3 +898,4 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 // testcase: all empty controls (or with single value) must be have the same height - 44px (check, switch can be different height)
 
 // todo NumberInput - set role 'spinbutton'
+// todo details about validations
