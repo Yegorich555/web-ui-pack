@@ -38,9 +38,9 @@ ${tag}::-webkit-scrollbar-corner {
   background: none;
 }
 ${tag}::-webkit-scrollbar-thumb {
-  border: 3px solid rgba(0, 0, 0, 0);
+  border: 3px solid rgba(0,0,0,0);
   background-clip: padding-box;
-  background-color: var(--scroll, rgba(0, 0, 0, 0.2));
+  background-color: var(--scroll, rgba(0,0,0,0.2));
   border-radius: 999px;
 }
 ${tag}::-webkit-scrollbar-track-piece:vertical:start,
@@ -51,6 +51,6 @@ ${tag}::-webkit-scrollbar-track-piece:horizontal:end {
 }
 @media (hover) {
   ${tag}::-webkit-scrollbar-thumb:hover {
-    background-color: var(--scroll-hover, rgba(0, 0, 0, 0.5));
+    background-color: var(--scroll-hover, rgba(0,0,0,0.5));
   }
 }`;

@@ -49,7 +49,7 @@ export default class WUPSelectManyControl<
   static get $styleRoot(): string {
     return `:root {
         --ctrl-select-item: inherit;
-        --ctrl-select-item-back: rgba(0, 0, 0, 0.04);
+        --ctrl-select-item-back: rgba(0,0,0,0.04);
         --ctrl-select-item-del-display: inline-block;
         --ctrl-select-item-del: var(--ctrl-icon);
         --ctrl-select-item-del-hover: var(--ctrl-selected);

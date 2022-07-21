@@ -15,7 +15,7 @@ export default function TextControlView() {
       link="#textcontrol"
       details={{
         tag: "wup-text",
-        cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear,error-list etc."]]),
+        cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
       }}
     >
       <wup-form

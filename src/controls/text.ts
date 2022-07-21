@@ -83,8 +83,8 @@ export default class WUPTextControl<
 
   static get $styleRoot(): string {
     return `:root {
-      --ctrl-btn-clear-hover: rgba(255, 0, 0, 0.1);
-      --ctrl-btn-clear-hover-size: 22px;
+      --ctrl-clear-hover: rgba(255,0,0,0.1);
+      --ctrl-clear-hover-size: 22px;
      }`;
   }
 
@@ -190,8 +190,8 @@ export default class WUPTextControl<
           padding-top: 100%;
         }
         :host button[clear]:before {
-          width: var(--ctrl-btn-clear-hover-size);
-          padding-top: var(--ctrl-btn-clear-hover-size);
+          width: var(--ctrl-clear-hover-size);
+          padding-top: var(--ctrl-clear-hover-size);
         }
         @media (hover: hover) {
           :host button[clear]:hover {
@@ -200,7 +200,7 @@ export default class WUPTextControl<
           :host button[clear]:hover:before {
             content: "";
             border-radius: 50%;
-            box-shadow: inset 0 0 0 99999px var(--ctrl-btn-clear-hover);
+            box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
           }
           :host button[clear]:hover:after {
             background-color: var(--ctrl-err-text);

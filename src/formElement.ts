@@ -179,7 +179,7 @@ export default class WUPFormElement<
         }
         @media (hover: hover) {
           :host [type='submit']:hover {
-             box-shadow: inset 0 0 0 99999px rgba(0, 0, 0, 0.2);
+             box-shadow: inset 0 0 0 99999px rgba(0,0,0,0.2);
           }
         }
         :host [type='submit'][disabled] {

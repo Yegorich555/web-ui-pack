@@ -176,16 +176,16 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return `:root {
         --ctrl-padding: 1.5em 1em 0.5em 1em;
         --ctrl-focus: var(--base-focus);
-        --ctrl-focus-label: #00778d;
+        --ctrl-focus-label: var(--base-focus);
         --ctrl-selected: var(--ctrl-focus-label);
         --ctrl-label: #5e5e5e;
         --ctrl-icon: var(--ctrl-label);
         --ctrl-icon-size: 1em;
-        --ctrl-icon-check-valid: green;
         --ctrl-back: var(--base-back);
-        --ctrl-border-radius: var(--border-radius, 6px);
+        --ctrl-border-radius: var(--border-radius);
         --ctrl-err-text: #ad0000;
         --ctrl-err-back: #fff4fa;
+        --ctrl-err-icon-valid: green;
         --ctrl-invalid-border: red;
         --wup-icon-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M674.515 93.949a45.925 45.925 0 0 0-65.022 0L384.001 318.981 158.509 93.487a45.928 45.928 0 0 0-65.022 0c-17.984 17.984-17.984 47.034 0 65.018l225.492 225.494L93.487 609.491c-17.984 17.984-17.984 47.034 0 65.018s47.034 17.984 65.018 0l225.492-225.492 225.492 225.492c17.984 17.984 47.034 17.984 65.018 0s17.984-47.034 0-65.018L449.015 383.999l225.492-225.494c17.521-17.521 17.521-47.034 0-64.559z'/%3E%3C/svg%3E");
         --wup-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath stroke='black' stroke-width='40' d='M37.691 450.599 224.76 635.864c21.528 21.32 56.11 21.425 77.478 0l428.035-426.23c21.47-21.38 21.425-56.11 0-77.478s-56.11-21.425-77.478 0L263.5 519.647 115.168 373.12c-21.555-21.293-56.108-21.425-77.478 0s-21.425 56.108 0 77.478z'/%3E%3C/svg%3E");
@@ -290,12 +290,12 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         ${WUPcssIcon}
       }
       :host [error] li[valid] {
-        color: var(--ctrl-icon-check-valid);
+        color: var(--ctrl-err-icon-valid);
       }
       :host [error] li[valid]:before {
         content: '';
         --ctrl-icon-img: var(--wup-icon-check);
-        --ctrl-icon: var(--ctrl-icon-check-valid);
+        --ctrl-icon: var(--ctrl-err-icon-valid);
       }
       :host:focus-within [error] {
         max-height: none;
