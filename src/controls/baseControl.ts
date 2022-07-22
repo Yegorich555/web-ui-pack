@@ -30,7 +30,7 @@ export const enum ValidationCases {
 export const enum ClearActions {
   /** Disable action */
   none = 0,
-  /** Make control is empty; pressing Esc again rollback action (it helps to avoid accidental action) */
+  /** Make control empty; pressing Esc again rollback action (it helps to avoid accidental action) */
   clear = 1 << 1,
   /** Return to init value; pressing Esc again rollback action (it helps to avoid accidental action) */
   resetToInit = 1 << 2,
@@ -366,13 +366,13 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   #initValue?: ValueType;
   /** Default/init value; used to define isChanged & to reset by keyEsc/buttonClear;
-   *  If control.$isDirty or not $isEmpty value isn't applied to */
+   *  If control not $isDirty and not changed $value is updated according to $initValue */
   get $initValue(): ValueType | undefined {
     return this.#initValue;
   }
 
   set $initValue(v: ValueType | undefined) {
-    if (!this.$isReady || (!this.#ctr.$isEqual(v, this.#initValue) && !this.$isDirty)) {
+    if (!this.$isReady || (!this.#ctr.$isEqual(v, this.#initValue) && !this.$isDirty && !this.$isChanged)) {
       // setValue if it's empty and not isDirty
       this.$value = v;
     }
@@ -863,21 +863,26 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return true;
   }
 
+  #prevValue = this.#value;
   /* Called when user pressed Esc-key or button-clear */
   protected clearValue(canValidate = true): void {
     const was = this.#value;
 
     let v: ValueType | undefined;
-    if (this._opts.clearActions & ClearActions.resetToInit && this.$isChanged) {
-      v = this.$initValue;
+    if (this._opts.clearActions & ClearActions.resetToInit) {
+      if (this.$isChanged) {
+        v = this.$initValue;
+      } else if (!(this._opts.clearActions & ClearActions.clear && !this.$isEmpty)) {
+        v = this.#prevValue;
+      }
     } else if (this._opts.clearActions & ClearActions.clear) {
       v = this.$isEmpty ? this.#prevValue : undefined;
     }
+
     this.setValue(v, canValidate);
     this.#prevValue = was;
   }
 
-  #prevValue = this.#value;
   /** Called when user pressed key */
   protected gotKeyDown(e: KeyboardEvent): void {
     if (e.key === "Escape") {
