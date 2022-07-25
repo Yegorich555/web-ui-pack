@@ -74,25 +74,45 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     });
 
     test("$initValue vs $value", () => {
+      const spyChange = jest.fn();
+      el.addEventListener("$change", spyChange);
+
       el.$initValue = cfg.initValues[0].value;
       expect(el.$value).toBe(cfg.initValues[0].value);
       expect(el.$isDirty).toBe(false);
       expect(el.$isChanged).toBe(false);
+      expect(spyChange).toBeCalledTimes(1); // change event happens even via $initValue
 
       el.$initValue = cfg.initValues[1].value;
       expect(el.$value).toBe(cfg.initValues[1].value);
       expect(el.$isDirty).toBe(false);
       expect(el.$isChanged).toBe(false);
+      expect(spyChange).toBeCalledTimes(2); // change event happens even via $initValue
 
       el.$value = cfg.initValues[2].value;
       expect(el.$initValue).toBe(cfg.initValues[1].value);
       expect(el.$value).toBe(cfg.initValues[2].value);
       expect(el.$isDirty).toBe(false);
       expect(el.$isChanged).toBe(true);
+      expect(spyChange).toBeCalledTimes(3); // change event happens even via $initValue
 
       el.$initValue = cfg.initValues[0].value;
       expect(el.$value).toBe(cfg.initValues[2].value);
       expect(el.$isChanged).toBe(true);
+      expect(spyChange).toBeCalledTimes(3);
+
+      // checking when el not isReady
+      spyChange.mockClear();
+      el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
+      el.addEventListener("$change", spyChange);
+
+      el.$value = cfg.initValues[0].value;
+      expect(spyChange).not.toBeCalled(); // because el is not ready yet
+      jest.advanceTimersByTime(1);
+      el.$value = cfg.initValues[0].value;
+      expect(spyChange).not.toBeCalled(); // because no changes
+      el.$value = cfg.initValues[1].value;
+      expect(spyChange).toBeCalledTimes(1);
     });
   });
 
@@ -116,8 +136,10 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el = document.createElement(el.tagName) as WUPBaseControl;
       el.$options.autoFocus = true;
       document.body.appendChild(el);
+      expect(el.$isFocused).toBe(false);
       jest.advanceTimersByTime(1);
       expect(document.activeElement).toBe(el.$refInput);
+      expect(el.$isFocused).toBe(true);
     });
 
     test("clearActions", () => {
@@ -235,13 +257,24 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     });
   });
 
-  // todo test static $isEmpty, static $isEqual, $onValueChange event, $isFocused, $showError(), $hideError()
+  test("$show/$hide error", async () => {
+    expect(el).toMatchSnapshot();
+    el.$showError("Some custom message here");
+    expect(el).toMatchSnapshot();
+    el.$hideError();
+    await h.wait();
+    expect(el).toMatchSnapshot();
+  });
+
+  test("validation cases", () => {
+    throw new Error("Need to implement");
+  });
 
   describe("validations", () => {
-    test("$isValid() when not ready", () => {
-      el = document.createElement(tagName) as WUPBaseControl;
-      el.$options.validations = {};
-      expect(el.$isValid).toBeTruthy();
+    test("get $isValid() when not ready", () => {
+      const el2 = document.createElement(tagName) as WUPBaseControl;
+      el2.$options.validations = {};
+      expect(el2.$isValid).toBeTruthy();
     });
 
     test("via attr [validations]", () => {
@@ -264,11 +297,18 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$isValid).toBe(true);
     });
 
+    test("rule not exists", () => {
+      el.$options.validations = { no: true } as any;
+      expect(() => el.$validate()).toThrowError();
+      el.$options.name = "Me"; // just for coverage
+      expect(() => el.$validate()).toThrowError();
+    });
+
     const ruleNames = Object.keys(elType.$defaults.validationRules);
     cfg.validations.required = { set: true, failValue: undefined, trueValue: cfg.initValues[0].value };
 
     ruleNames.forEach((ruleName) => {
-      test(`${ruleName}`, () => {
+      test(`.${ruleName}`, () => {
         const isRuleRequired = ruleName === "required";
         expect(cfg.validations).toHaveProperty(ruleName);
         const vld = cfg.validations[ruleName];
@@ -306,4 +346,8 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
   });
 }
 
+// todo test $showError(), $hideError()
+// todo test form-integration
+
 // todo e2e $options.validityDebounce
+// todo e2e check focused by click event (mouse-down/mouse-up)

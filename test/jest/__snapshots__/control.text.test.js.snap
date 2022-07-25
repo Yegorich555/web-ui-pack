@@ -1,0 +1,89 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`control.text $show/$hide error 1`] = `
+<wup-text>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+</wup-text>
+`;
+
+exports[`control.text $show/$hide error 2`] = `
+<wup-text
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-describedby="txt2"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    role="alert"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for :
+    </span>
+    <span>
+      Some custom message here
+    </span>
+  </wup-popup>
+</wup-text>
+`;
+
+exports[`control.text $show/$hide error 3`] = `
+<wup-text>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+</wup-text>
+`;

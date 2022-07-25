@@ -544,7 +544,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       const attr = this.getAttribute("initvalue");
       if (attr) {
         (this as any)._noDelInitValueAttr = true;
-        this.$initValue = this.parseValue(attr || "");
+        this.$initValue = this.parseValue(attr);
         delete (this as any)._noDelInitValueAttr;
       } else if (propsChanged) {
         this.$initValue = undefined; // removed attr >> remove initValue
@@ -795,7 +795,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       el.textContent = err;
 
       const renderedErr = (this.$refError as StoredRefError)._wupVldItems?.find((li) => li.textContent === err);
-      el.className = renderedErr ? this.#ctr.classNameHidden : "";
+      this.setAttr.call(el, "className", renderedErr ? this.#ctr.classNameHidden : null);
 
       target.setAttribute("aria-describedby", this.$refError.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
       if (!this.$isFocused) {
