@@ -167,7 +167,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return ["label", "name", "autocomplete", "disabled", "readonly", "initvalue"];
   }
 
-  /** Text that announced by screen-readers; @defaultValue `Error for` */
+  /** Text announced by screen-readers; @defaultValue `Error for` */
   static get $ariaError(): string {
     return "Error for";
   }
@@ -431,6 +431,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return this.$form?.$options.readOnly || this._opts.readOnly || false;
   }
 
+  /** Returns autoComplete name if related form or control option is enabled */
   get $autoComplete(): string | false {
     const af = this._opts.autoComplete ?? (this.$form?.$options.autoComplete || false);
     return (af === true ? this._opts.name : af) || false;
@@ -563,25 +564,17 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       }
     }
 
-    !propsChanged && this.gotFormChanges(null);
+    this.gotFormChanges(propsChanged);
   }
 
   /** Called on control/form Init and every time as control/form options changed. Method contains changes related to form `disabled`,`readonly` etc. */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null): void {
+  gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | Array<keyof WUPBase.Options | any> | null): void {
     const i = this.$refInput;
     i.disabled = this.$isDisabled as boolean;
     i.readOnly = this.$isReadOnly;
     i.autocomplete = this.$autoComplete || "off";
     // todo check if initModel can affect on $initValue by change
-  }
-
-  protected override gotOptionsChanged(e: WUP.OptionEvent): void {
-    this._isStopChanges = true;
-    e.props.includes("disabled") && this.setAttr("disabled", this._opts.disabled, true);
-    e.props.includes("readOnly") && this.setAttr("readOnly", this._opts.readOnly, true);
-    super.gotOptionsChanged(e);
-    this._isStopChanges = false;
   }
 
   /** Use this to append elements; called single time when element isConnected/appended to layout but not ready yet
@@ -903,4 +896,4 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 // testcase: all empty controls (or with single value) must be have the same height - 44px (check, switch can be different height)
 
 // todo NumberInput - set role 'spinbutton'
-// todo details about validations
+// todo details about validations/customMessages

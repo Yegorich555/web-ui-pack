@@ -6,6 +6,8 @@ let el;
 initTestBaseControl({ type: WUPTextControl, htmlTag: "wup-text", onInit: (e) => (el = e) });
 
 describe("control.text", () => {
+  const initV = "some init val";
+
   testBaseControl({
     initValues: [
       { attrValue: "123", value: "123" },
@@ -14,25 +16,42 @@ describe("control.text", () => {
     ],
   });
 
-  test("selectAll by clear/focus", () => {
-    // todo split test for $option.selectOnFocus
-    // todo test btnClear
-    const initV = "some text";
-    el.$initValue = initV;
-    expect(el.$refInput.value).toBe(initV);
-    el.focus();
-    expect(el.$refInput.selectionStart).toBe(0);
-    expect(el.$refInput.selectionEnd).toBe(initV.length);
+  describe("text options", () => {
+    test("selectOnFocus (selectAll by clear/focus)", () => {
+      el.$options.selectOnFocus = true;
+      jest.advanceTimersByTime(1);
 
-    el.$refInput.selectionEnd = 0;
-    expect(el.$refInput.selectionEnd).toBe(0);
+      el.$initValue = initV;
+      expect(el.$refInput.value).toBe(initV);
+      el.focus();
+      expect(el.$refInput.selectionStart).toBe(0);
+      expect(el.$refInput.selectionEnd).toBe(initV.length);
 
-    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-    expect(el.$value).toBe(undefined);
-    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-    expect(el.$value).toBe(initV);
+      el.$refInput.selectionEnd = 0;
+      expect(el.$refInput.selectionEnd).toBe(0);
 
-    expect(el.$refInput.selectionStart).toBe(0);
-    expect(el.$refInput.selectionEnd).toBe(initV.length);
+      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      expect(el.$value).toBe(undefined);
+      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      expect(el.$value).toBe(initV);
+
+      expect(el.$refInput.selectionStart).toBe(0);
+      expect(el.$refInput.selectionEnd).toBe(initV.length);
+
+      el.blur();
+      el.$refInput.selectionEnd = 0;
+      el.$options.selectOnFocus = false;
+      jest.advanceTimersByTime(1);
+
+      el.focus();
+      expect(el.$refInput.selectionEnd).toBe(0);
+
+      // checking if select by clear not depends on $options.selectOnFocus
+      expect(el.$value).toBe(initV);
+      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      expect(el.$value).toBe(initV);
+      expect(el.$refInput.selectionEnd).toBe(initV.length);
+    });
   });
 });

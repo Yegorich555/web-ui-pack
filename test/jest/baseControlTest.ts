@@ -1,5 +1,5 @@
 /* eslint-disable jest/no-export */
-import WUPBaseControl from "web-ui-pack/controls/baseControl";
+import WUPBaseControl, { ClearActions } from "web-ui-pack/controls/baseControl";
 import * as h from "../testHelper";
 
 interface InitOptions<T> {
@@ -120,7 +120,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       // only clear
       el.$value = cfg.initValues[0].value;
       el.$initValue = cfg.initValues[1].value;
-      el.$options.clearActions = 1 << 1; // clear
+      el.$options.clearActions = ClearActions.clear as any;
       jest.advanceTimersByTime(1);
       expect(el.$value).toBe(cfg.initValues[0].value);
 
@@ -142,7 +142,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       // only reset to init
       el.$value = cfg.initValues[0].value;
       el.$initValue = cfg.initValues[1].value;
-      el.$options.clearActions = 1 << 2; // resetToInit
+      el.$options.clearActions = ClearActions.resetToInit as any;
       jest.advanceTimersByTime(1);
 
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
@@ -157,7 +157,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       // clear + resetToInit
       el.$value = cfg.initValues[0].value;
       el.$initValue = cfg.initValues[1].value;
-      el.$options.clearActions = 0b1111111; // all
+      el.$options.clearActions = ClearActions.clear | ClearActions.resetToInit;
       jest.advanceTimersByTime(1);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       expect(el.$value).toBe(cfg.initValues[1].value);
@@ -169,5 +169,98 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       expect(el.$value).toBe(undefined);
     });
+
+    test("disabled", () => {
+      el.$options.disabled = true;
+      jest.advanceTimersByTime(1);
+      expect(el.$isDisabled).toBe(true);
+      expect(el.getAttribute("disabled")).toBe("");
+      expect(el.$refInput.disabled).toBe(true);
+
+      el.$options.disabled = false;
+      jest.advanceTimersByTime(1);
+      expect(el.$isDisabled).toBe(false);
+      expect(el.getAttribute("disabled")).toBe(null);
+      expect(el.$refInput.disabled).toBe(false);
+    });
+
+    test("label", () => {
+      el.$options.label = "Hello";
+      jest.advanceTimersByTime(1);
+      expect(el.$refTitle.textContent).toBe("Hello");
+
+      el.$options.label = "Some-new";
+      jest.advanceTimersByTime(1);
+      expect(el.$refTitle.textContent).toBe("Some-new");
+
+      el.$options.label = undefined;
+      jest.advanceTimersByTime(1);
+      expect(el.$refTitle.textContent).toBe("");
+    });
+
+    test("readonly", () => {
+      el.$options.readOnly = true;
+      jest.advanceTimersByTime(1);
+      expect(el.getAttribute("readonly")).toBe("");
+      expect(el.$isReadOnly).toBe(true);
+      expect(el.$refInput.readOnly).toBe(true);
+
+      el.$options.readOnly = false;
+      jest.advanceTimersByTime(1);
+      expect(el.$isReadOnly).toBe(false);
+      expect(el.getAttribute("readonly")).toBe(null);
+      expect(el.$refInput.readOnly).not.toBe(true);
+    });
+
+    test("name - without form", () => {
+      el.$options.name = "firstName";
+      el.$options.label = undefined;
+      jest.advanceTimersByTime(1);
+      expect(el.$refTitle.textContent).toBe("First Name");
+      expect(el.$refInput.getAttribute("aria-label")).toBe(null);
+
+      el.$options.label = "";
+      jest.advanceTimersByTime(1);
+      expect(el.$refTitle.textContent).toBe("");
+      expect(el.$refInput.getAttribute("aria-label")).toBe("First Name");
+
+      el.$options.name = undefined;
+      jest.advanceTimersByTime(1);
+      expect(el.$refTitle.textContent).toBe("");
+      expect(el.$refInput.getAttribute("aria-label")).toBe(null);
+    });
+  });
+
+  // todo test static $isEmpty, static $isEqual, $onValueChange event, $isFocused, $showError(), $hideError()
+
+  describe("validations", () => {
+    // todo test $isValid when el not ready yet
+    test("required", () => {
+      el.$value = undefined;
+      el.$options.validations = { required: true };
+      jest.advanceTimersByTime(1);
+      expect(el.$refInput.getAttribute("aria-required")).toBe("true"); // todo changing validations not observed but must affect on aria-required
+
+      const defMsg = WUPBaseControl.$defaults.validationRules.required!(undefined as any, true);
+      expect(defMsg).toBeTruthy();
+      expect(el.$validate()).toBe(defMsg);
+      expect(el.$isValid).toBe(false);
+
+      el.$value = cfg.initValues[0].value;
+      expect(el.$validate()).toBe(false);
+      expect(el.$isValid).toBe(true);
+
+      // with custom error
+      el.$options.validations = { required: (v) => v === undefined && "Custom error" };
+      el.$value = undefined;
+      expect(el.$validate()).toBe("Custom error");
+      expect(el.$isValid).toBe(false);
+
+      el.$options.validations = {};
+      jest.advanceTimersByTime(1);
+      expect(el.$refInput.getAttribute("aria-required")).toBe(null);
+    });
   });
 }
+
+// todo e2e $options.validityDebounce
