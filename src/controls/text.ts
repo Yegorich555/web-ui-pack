@@ -80,7 +80,9 @@ export default class WUPTextControl<
     return "input cleared";
   }
 
-  static observedOptions = (super.observedOptions as Set<keyof WUPText.Options>).add("clearButton");
+  static observedOptions = (super.observedOptions as Set<keyof WUPText.Options>)
+    .add("clearButton")
+    .add("selectOnFocus");
 
   static get $styleRoot(): string {
     return `:root {
@@ -336,3 +338,4 @@ customElements.define(tagName, WUPTextControl);
 // testcase: form with email+password ignores autocomplete: "off" if previously it was saved
 
 // todo docs about usage with css-variables... Maybe FAQ ???
+// todo docs about removing required-asterisk-label

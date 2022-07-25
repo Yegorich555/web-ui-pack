@@ -38,13 +38,16 @@ describe("control.text", () => {
       expect(el.$refInput.selectionStart).toBe(0);
       expect(el.$refInput.selectionEnd).toBe(initV.length);
 
-      el.blur();
       el.$refInput.selectionEnd = 0;
+      el.blur();
+      expect(document.activeElement).not.toBe(el.$refInput);
+      expect(el.$refInput.selectionEnd).toBe(0);
+      expect(el.$refInput.selectionStart).toBe(0);
       el.$options.selectOnFocus = false;
       jest.advanceTimersByTime(1);
 
       el.focus();
-      expect(el.$refInput.selectionEnd).toBe(0);
+      expect(el.$refInput.selectionEnd - el.$refInput.selectionStart).toBe(0);
 
       // checking if select by clear not depends on $options.selectOnFocus
       expect(el.$value).toBe(initV);
