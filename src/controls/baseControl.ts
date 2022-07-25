@@ -153,7 +153,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseControl;
 
-  static observedOptions = new Set<string>(["label", "name", "autoComplete", "disabled", "readOnly"]);
+  static observedOptions = new Set<string>(["label", "name", "autoComplete", "disabled", "readOnly", "validations"]);
 
   // todo use const instead of getter
   /* Array of attribute names to listen for changes */
@@ -401,7 +401,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   #isValid?: boolean;
-  /** Returns true if control is valid; to fire validation use $validate() */
+  /** Returns true if control is valid; it'c cache-value. To refresh - call $validate() */
   get $isValid(): boolean {
     if (this.#isValid == null) {
       this.goValidate(ValidateFromCases.onInit, false);
@@ -537,6 +537,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     // set other props
     this.setAttr("disabled", this._opts.disabled, true);
     this.setAttr("readOnly", this._opts.readOnly, true);
+    this.setAttr.call(this.$refInput, "aria-required", !!this.validations?.required);
 
     // lowercase for attribute-changes otherwise it's wrong
     if (!propsChanged || propsChanged.includes("initvalue")) {
@@ -593,10 +594,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     );
 
     this.appendEvent(this, "keydown", (e) => !this.$isDisabled && this.gotKeyDown(e));
-    this.appendEvent(this, "focusin", () =>
-      this.setAttr.call(this.$refInput, "aria-required", !!this.validations?.required)
-    );
-
     if (this._opts.validationCase & ValidationCases.onInit) {
       !this.$isEmpty && this.goValidate(ValidateFromCases.onInit);
     }

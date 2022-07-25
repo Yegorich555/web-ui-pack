@@ -14,6 +14,11 @@ describe("control.text", () => {
       { attrValue: "some txt", value: "some txt" },
       { attrValue: "34", value: "34" },
     ],
+    validations: {
+      min: { set: 2, failValue: "r", trueValue: "re" },
+      max: { set: 3, failValue: "rela", trueValue: "rel" },
+      email: { set: true, failValue: "relation", trueValue: "relation@google.com" },
+    },
   });
 
   describe("text options", () => {

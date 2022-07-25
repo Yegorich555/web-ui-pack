@@ -316,7 +316,7 @@ function make<T extends object>(
   }
 
   // scan recursive
-  // it doesn't required becayse object keys is null: if (!isDate && !(obj instanceof Map || obj instanceof Set)) {
+  // it doesn't required because object keys is null: if (!isDate && !(obj instanceof Map || obj instanceof Set)) {
   Object.keys(obj).forEach((k) => {
     const v = obj[k] as any;
     if (isObject(v)) {

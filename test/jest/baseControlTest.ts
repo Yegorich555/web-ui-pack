@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-conditional-expect */
 /* eslint-disable jest/no-export */
 import WUPBaseControl, { ClearActions } from "web-ui-pack/controls/baseControl";
 import * as h from "../testHelper";
@@ -10,11 +11,13 @@ interface InitOptions<T> {
 
 let tagName = "";
 let el: WUPBaseControl;
+let elType: typeof WUPBaseControl;
 
 /** Function with init-cylce beforeEach/afterEach */
 export function initTestBaseControl<T extends WUPBaseControl>(cfg: InitOptions<T>) {
   !cfg.type && console.error("missed");
   tagName = cfg.htmlTag;
+  elType = cfg.type;
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -40,6 +43,7 @@ interface ValueToAttr<T> {
 
 interface TestOptions<T> {
   initValues: [ValueToAttr<T>, ValueToAttr<T>, ValueToAttr<T>];
+  validations: Record<string, { set: any; failValue: T | undefined; trueValue: T }>;
 }
 
 export function testBaseControl<T>(cfg: TestOptions<T>) {
@@ -234,33 +238,70 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
   // todo test static $isEmpty, static $isEqual, $onValueChange event, $isFocused, $showError(), $hideError()
 
   describe("validations", () => {
-    // todo test $isValid when el not ready yet
-    // todo test attr validations
-    test("required", () => {
-      el.$value = undefined;
-      el.$options.validations = { required: true };
-      el.focus(); // to apply aria-required
-      expect(el.$refInput.getAttribute("aria-required")).toBe("true");
+    test("$isValid() when not ready", () => {
+      el = document.createElement(tagName) as WUPBaseControl;
+      el.$options.validations = {};
+      expect(el.$isValid).toBeTruthy();
+    });
 
-      const defMsg = WUPBaseControl.$defaults.validationRules.required!(undefined as any, true);
-      expect(defMsg).toBeTruthy();
-      expect(el.$validate()).toBe(defMsg);
+    test("via attr [validations]", () => {
+      const vld = { required: true };
+      (window as any)._testVld = vld;
+      el.setAttribute("validations", "_testVld");
+      jest.advanceTimersByTime(1);
+      expect((el as any).validations).toBe(vld);
+
+      el.$value = undefined;
+      expect(el.$validate()).not.toBe(false);
       expect(el.$isValid).toBe(false);
 
       el.$value = cfg.initValues[0].value;
       expect(el.$validate()).toBe(false);
       expect(el.$isValid).toBe(true);
 
-      // with custom error
-      el.$options.validations = { required: (v: any) => v === undefined && "Custom error" };
-      el.$value = undefined;
-      expect(el.$validate()).toBe("Custom error");
-      expect(el.$isValid).toBe(false);
+      delete (window as any)._testVld;
+      expect(el.$validate()).toBe(false);
+      expect(el.$isValid).toBe(true);
+    });
 
-      el.blur();
-      el.$options.validations = {};
-      el.focus(); // to apply aria-required
-      expect(el.$refInput.getAttribute("aria-required")).toBe(null);
+    const ruleNames = Object.keys(elType.$defaults.validationRules);
+    cfg.validations.required = { set: true, failValue: undefined, trueValue: cfg.initValues[0].value };
+
+    ruleNames.forEach((ruleName) => {
+      test(`${ruleName}`, () => {
+        const isRuleRequired = ruleName === "required";
+        expect(cfg.validations).toHaveProperty(ruleName);
+        const vld = cfg.validations[ruleName];
+
+        el.$value = vld.failValue;
+        el.$options.validations = { [ruleName]: vld.set };
+
+        if (isRuleRequired) {
+          jest.advanceTimersByTime(1);
+          expect(el.$refInput.getAttribute("aria-required")).toBe("true");
+        }
+
+        const defMsg = elType.$defaults.validationRules![ruleName]!(vld.failValue as any, vld.set);
+        expect(defMsg).toBeTruthy();
+        expect(el.$validate()).toBe(defMsg);
+        expect(el.$isValid).toBe(false);
+
+        el.$value = vld.trueValue;
+        expect(el.$validate()).toBe(false);
+        expect(el.$isValid).toBe(true);
+
+        // with custom error
+        el.$options.validations = { [ruleName]: (v: any) => v === undefined && "Custom error" };
+        el.$value = undefined;
+        expect(el.$validate()).toBe("Custom error");
+        expect(el.$isValid).toBe(false);
+
+        if (isRuleRequired) {
+          el.$options.validations = {};
+          jest.advanceTimersByTime(1);
+          expect(el.$refInput.getAttribute("aria-required")).toBe(null);
+        }
+      });
     });
   });
 }
