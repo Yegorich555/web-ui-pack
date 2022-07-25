@@ -177,6 +177,16 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     return focusFirst(this);
   }
 
+  /** Remove focus from element on any nested active element */
+  blur(): void {
+    const ae = document.activeElement;
+    if (ae === this) {
+      super.blur();
+    } else if (ae instanceof HTMLElement && this.includes(ae)) {
+      ae.blur();
+    }
+  }
+
   #isReady = false;
   /** Called when element is added to document */
   protected gotReady(): void {
