@@ -235,11 +235,12 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
   describe("validations", () => {
     // todo test $isValid when el not ready yet
+    // todo test attr validations
     test("required", () => {
       el.$value = undefined;
       el.$options.validations = { required: true };
-      jest.advanceTimersByTime(1);
-      expect(el.$refInput.getAttribute("aria-required")).toBe("true"); // todo changing validations not observed but must affect on aria-required
+      el.focus(); // to apply aria-required
+      expect(el.$refInput.getAttribute("aria-required")).toBe("true");
 
       const defMsg = WUPBaseControl.$defaults.validationRules.required!(undefined as any, true);
       expect(defMsg).toBeTruthy();
@@ -251,13 +252,14 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$isValid).toBe(true);
 
       // with custom error
-      el.$options.validations = { required: (v) => v === undefined && "Custom error" };
+      el.$options.validations = { required: (v: any) => v === undefined && "Custom error" };
       el.$value = undefined;
       expect(el.$validate()).toBe("Custom error");
       expect(el.$isValid).toBe(false);
 
+      el.blur();
       el.$options.validations = {};
-      jest.advanceTimersByTime(1);
+      el.focus(); // to apply aria-required
       expect(el.$refInput.getAttribute("aria-required")).toBe(null);
     });
   });

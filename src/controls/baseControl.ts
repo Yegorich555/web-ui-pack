@@ -123,24 +123,18 @@ declare global {
       name?: string;
       /** @deprecated Name to autocomplete by browser; */
       autoComplete?: string;
-
       /** Disallow edit/copy value. Use [disabled] for styling */
       disabled?: boolean;
       /** Disallow edit value */
       readOnly?: boolean;
       /** @deprecated Focus on init */
       autoFocus?: boolean;
-
       /** @deprecated default value (expected formatted for input) */
       initValue?: string | boolean | number;
       /** @deprecated Rules enabled for current control. Point global obj-key with validations (set `window.validations.input1` for `window.validations.input1 = {required: true}` ) */
       validations?: string;
-
       /** @readonly Use [invalid] for styling */
       readonly invalid?: boolean;
-
-      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$validate') instead */
-      onValidate?: never;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
       onChange?: never;
     }
@@ -541,8 +535,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     this.setAttr.call(i, "aria-label", n);
 
     // set other props
-    const req = this.validations?.required;
-    this.setAttr.call(i, "aria-required", !!req);
     this.setAttr("disabled", this._opts.disabled, true);
     this.setAttr("readOnly", this._opts.readOnly, true);
 
@@ -601,6 +593,9 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     );
 
     this.appendEvent(this, "keydown", (e) => !this.$isDisabled && this.gotKeyDown(e));
+    this.appendEvent(this, "focusin", () =>
+      this.setAttr.call(this.$refInput, "aria-required", !!this.validations?.required)
+    );
 
     if (this._opts.validationCase & ValidationCases.onInit) {
       !this.$isEmpty && this.goValidate(ValidateFromCases.onInit);
