@@ -221,9 +221,11 @@ export default class WUPTextControl<
     clearButton: true,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
-      min: (v, setV) => (v || "").length < setV && `Min length is ${setV} character${setV === 1 ? "" : "s"}`,
-      max: (v, setV) => (v || "").length > setV && `Max length is ${setV} character${setV === 1 ? "" : "s"}`,
-      email: (v, setV) => setV && !emailReg.test(v || "") && "Invalid email address",
+      min: (v, setV) =>
+        (v === undefined || v.length < setV) && `Min length is ${setV} character${setV === 1 ? "" : "s"}`,
+      max: (v, setV) =>
+        (v === undefined || v.length > setV) && `Max length is ${setV} character${setV === 1 ? "" : "s"}`,
+      email: (v, setV) => setV && (!v || !emailReg.test(v)) && "Invalid email address",
     },
   };
 

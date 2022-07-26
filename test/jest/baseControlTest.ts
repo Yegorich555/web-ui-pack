@@ -21,6 +21,7 @@ export function initTestBaseControl<T extends WUPBaseControl>(cfg: InitOptions<T
 
   beforeEach(() => {
     jest.useFakeTimers();
+    Element.prototype.scrollIntoView = jest.fn();
     let lastUniqueNum = 0;
     jest.spyOn(cfg.type, "$uniqueId", "get").mockImplementation(() => `txt${++lastUniqueNum}`);
     el = document.createElement(cfg.htmlTag) as WUPBaseControl;
@@ -410,6 +411,41 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
     const ruleNames = Object.keys(elType.$defaults.validationRules);
     cfg.validations.required = { set: true, failValue: undefined, trueValue: cfg.initValues[0].value };
+
+    test("$options.validationShowAll", async () => {
+      el.$options.validationShowAll = true;
+      const vld = {} as Record<string, any>;
+      Object.keys(cfg.validations).map((k) => (vld[k] = cfg.validations[k].set));
+      el.$options.validations = vld;
+      el.$validate();
+      await h.wait();
+      expect(el.$refError).toBeDefined();
+      expect(el).toMatchSnapshot();
+
+      el.$value = cfg.initValues[0].value;
+      el.$validate();
+      await h.wait();
+      expect(el).toMatchSnapshot();
+
+      (elType.$defaults.validationRules as any)._testInvalid = () => false;
+      (el.$options.validations as any)._testInvalid = true;
+      el.$hideError();
+      el.$validate();
+      expect(() => jest.advanceTimersByTime(1000)).toThrow(); // because impossible to get errorMessage
+
+      el.$options.name = "firstName"; // again just for coverage
+      el.$hideError();
+      el.$validate();
+      expect(() => jest.advanceTimersByTime(1000)).toThrow(); // because impossible to get errorMessage
+
+      el.$options.validations = { required: true };
+      el.$value = undefined;
+      el.$hideError();
+      el.$validate();
+      expect(el.$isValid).toBe(false);
+      await h.wait();
+      expect(el).toMatchSnapshot();
+    });
 
     ruleNames.forEach((ruleName) => {
       test(`.${ruleName}`, () => {

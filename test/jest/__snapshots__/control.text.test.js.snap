@@ -245,3 +245,165 @@ exports[`control.text validations validation cases 4`] = `
   </wup-popup>
 </wup-text>
 `;
+
+exports[`control.text validations validationShowAll 1`] = `
+<wup-text
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-describedby="txt2"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    role="alert"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      This field is required
+    </span>
+    <ul
+      aria-hidden="true"
+    >
+      <li>
+        Min length is 2 characters
+      </li>
+      <li>
+        Max length is 3 characters
+      </li>
+      <li>
+        Invalid email address
+      </li>
+    </ul>
+  </wup-popup>
+</wup-text>
+`;
+
+exports[`control.text validations validationShowAll 2`] = `
+<wup-text
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-describedby="txt2"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    role="alert"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span
+      classname="wup-hidden"
+    >
+      Invalid email address
+    </span>
+    <ul
+      aria-hidden="true"
+    >
+      <li
+        valid=""
+      >
+        Min length is 2 characters
+      </li>
+      <li
+        valid=""
+      >
+        Max length is 3 characters
+      </li>
+      <li>
+        Invalid email address
+      </li>
+    </ul>
+  </wup-popup>
+</wup-text>
+`;
+
+exports[`control.text validations validationShowAll 3`] = `
+<wup-text
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-describedby="txt5"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        type="text"
+      />
+      <strong>
+        First Name
+      </strong>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt5"
+    role="alert"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Name:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+</wup-text>
+`;
