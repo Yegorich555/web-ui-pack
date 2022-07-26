@@ -14,9 +14,9 @@ import IBaseControl from "./baseControl.i";
 export const enum ValidationCases {
   /** Wait for first user-change > wait for valid > wait for invalid >> show error;
    *  When invalid: wait for valid > hide error > wait for invalid > show error
-   *  Also you can check $options.validityDebounceMs */
+   *  Also you can check $options.validateDebounceMs */
   onChangeSmart = 1,
-  /** Validate when user changed value (via type,select etc.); Also you can check $options.validityDebounceMs */
+  /** Validate when user changed value (via type,select etc.); Also you can check $options.validateDebounceMs */
   onChange = 1 << 1,
   /** Validate when control losts focus */
   onFocusLost = 1 << 2,
@@ -68,7 +68,7 @@ export namespace WUPBaseIn {
       /** Wait for pointed time before show error (it's sumarized with $options.debounce); WARN: hide error without debounce
        *  @defaultValue 500
        */
-      validityDebounceMs: number;
+      validateDebounceMs: number;
       /** Debounce option for onFocustLost event (for validationCases.onFocusLost); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost;
        * @defaultValue 100ms */
       focusDebounceMs?: number;
@@ -331,7 +331,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUPBase.Defaults = {
     clearActions: ClearActions.clear | ClearActions.resetToInit,
-    validityDebounceMs: 500,
+    validateDebounceMs: 500,
     validationCase: ValidationCases.onChangeSmart | ValidationCases.onFocusLost | ValidationCases.onFocusWithValue,
     validationRules: {
       required: (v, setV) => setV === true && this.$isEmpty(v) && "This field is required",
@@ -702,7 +702,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       if (canShowError || this.$refError) {
         this._validTimer = window.setTimeout(
           () => this.goShowError(errMsg, this.$refInput),
-          this._opts.validityDebounceMs
+          this._opts.validateDebounceMs
         );
       }
       return errMsg;

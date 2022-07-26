@@ -290,7 +290,7 @@ Be sure that you familiar with [common rules](#components)
 > const sideEffect = WUPTextControl && WUPSelectControl;
 > !sideEffect && console.error("Missed"); // It's required otherwise import is ignored by webpack
 > // or
-> WUPTextControl.$defaults.validityDebounceMs = 500;
-> WUPSelectControl.$defaults.validityDebounceMs = 500;
+> WUPTextControl.$defaults.validateDebounceMs = 500;
+> WUPSelectControl.$defaults.validateDebounceMs = 500;
 > // etc.
 > ```

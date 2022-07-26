@@ -488,5 +488,5 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
 // todo test form-integration
 
-// todo e2e $options.validityDebounce
+// todo e2e $options.validateDebounce
 // todo e2e check focused by click event (mouse-down/mouse-up)

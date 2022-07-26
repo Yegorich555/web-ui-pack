@@ -15,7 +15,7 @@ export namespace WUPSelectIn {
   export interface Defs {
     /** Wait for pointed time before show-error (sumarized with $options.debounce); WARN: hide-error without debounce
      *  @defaultValue 0 */
-    validityDebounceMs?: number;
+    validateDebounceMs?: number;
     /** Case when menu-popup need to show
      * @defaultValue onPressArrowKey | onClick | onFocus | onInput */
     showCase: ShowCases;
