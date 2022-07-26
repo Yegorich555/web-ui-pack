@@ -55,9 +55,7 @@ exports[`control.text $show/$hide error 2`] = `
   >
     <span
       class="wup-hidden"
-    >
-      Error for :
-    </span>
+    />
     <span>
       Some custom message here
     </span>
@@ -85,5 +83,165 @@ exports[`control.text $show/$hide error 3`] = `
       tabindex="-1"
     />
   </label>
+</wup-text>
+`;
+
+exports[`control.text validations validation cases 1`] = `
+<wup-text>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+</wup-text>
+`;
+
+exports[`control.text validations validation cases 2`] = `
+<wup-text
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-describedby="txt2"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        type="text"
+      />
+      <strong>
+        First Input
+      </strong>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    role="alert"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+</wup-text>
+`;
+
+exports[`control.text validations validation cases 3`] = `
+<wup-text
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-describedby="txt3"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        type="text"
+      />
+      <strong>
+        First Input
+      </strong>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt3"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
+</wup-text>
+`;
+
+exports[`control.text validations validation cases 4`] = `
+<wup-text
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-describedby="txt4"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        type="text"
+      />
+      <strong>
+        First Input
+      </strong>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt4"
+    role="alert"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
 </wup-text>
 `;

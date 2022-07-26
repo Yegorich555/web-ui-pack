@@ -367,8 +367,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   set $initValue(v: ValueType | undefined) {
     if (!this.$isReady || (!this.#ctr.$isEqual(v, this.#initValue) && !this.$isDirty && !this.$isChanged)) {
-      // setValue if it's empty and not isDirty
-      this.$value = v;
+      this.$value = v; // setValue if it's empty and not isDirty
     }
     this.#initValue = v;
     if (!(this as any)._noDelInitValueAttr) {
@@ -431,9 +430,10 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return (af === true ? this._opts.name : af) || false;
   }
 
-  /** Check validity and show error if not swtich off; canShowError is true by default
+  /** Check validity and show error if canShowError is true (by default)
    * @returns errorMessage or false (if valid) */
   $validate(canShowError = true): string | false {
+    // todo $validate mustIgnore debounce
     return this.goValidate(ValidateFromCases.onManualCall, canShowError);
   }
 
@@ -790,7 +790,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       (target as HTMLInputElement).setCustomValidity?.call(target, err);
       this.setAttribute("invalid", "");
       const lbl = this.$refTitle.textContent;
-      this.$refError.firstElementChild!.textContent = `${this.#ctr.$ariaError} ${lbl}:`;
+      this.$refError.firstElementChild!.textContent = lbl ? `${this.#ctr.$ariaError} ${lbl}:` : "";
       const el = this.$refError.children.item(1)!;
       el.textContent = err;
 
@@ -839,7 +839,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     if (this.$isReady && canValidate && (c & ValidationCases.onChange || c & ValidationCases.onChangeSmart)) {
       if (this.#wasValid == null && c & ValidationCases.onChangeSmart) {
         this.#value = was;
-        this.goValidate(ValidateFromCases.onInput); // to define if previous value was valid or not
+        this.goValidate(ValidateFromCases.onInput, false); // to define if previous value was valid or not
         this.#value = v;
       }
       this.goValidate(ValidateFromCases.onInput);

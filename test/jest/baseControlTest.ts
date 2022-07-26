@@ -1,6 +1,6 @@
 /* eslint-disable jest/no-conditional-expect */
 /* eslint-disable jest/no-export */
-import WUPBaseControl, { ClearActions } from "web-ui-pack/controls/baseControl";
+import WUPBaseControl, { ClearActions, ValidationCases } from "web-ui-pack/controls/baseControl";
 import * as h from "../testHelper";
 
 interface InitOptions<T> {
@@ -264,10 +264,18 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     el.$hideError();
     await h.wait();
     expect(el).toMatchSnapshot();
-  });
+    const first = el;
 
-  test("validation cases", () => {
-    throw new Error("Need to implement");
+    // just for coverage
+    el = document.createElement(tagName) as WUPBaseControl;
+    expect(() => el.$showError("Test when not connected")).not.toThrowError();
+    // just for coverage
+    document.body.appendChild(el);
+    jest.advanceTimersByTime(1);
+    // @ts-ignore
+    expect(() => el.goShowError("Test with another target", first)).not.toThrowError();
+    expect(() => el.$hideError()).not.toThrow();
+    await h.wait();
   });
 
   describe("validations", () => {
@@ -302,6 +310,102 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(() => el.$validate()).toThrowError();
       el.$options.name = "Me"; // just for coverage
       expect(() => el.$validate()).toThrowError();
+    });
+
+    test("validation cases", async () => {
+      el.$options.name = "firstInput";
+      el.$options.clearActions = ClearActions.clear | 0;
+      el.$options.validations = { required: true };
+      el.$value = cfg.initValues[0].value;
+
+      // onChange only
+      el.$options.validationCase = ValidationCases.onChange | 0;
+      expect(el).toMatchSnapshot();
+      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
+      expect(el.$isEmpty).toBe(true);
+      await h.wait();
+      expect(el.$refError).toBeDefined();
+      expect(el).toMatchSnapshot();
+
+      // onFocusWithValue
+      el.$hideError();
+      await h.wait();
+      el.$options.validationCase = ValidationCases.onFocusWithValue | 0;
+      el.$options.validations = { required: true, custom: () => "custom err here" };
+      el.focus();
+      await h.wait();
+      expect(el.$refError).not.toBeDefined();
+      expect(el.$isValid).toBe(false);
+      expect(el.$refError).not.toBeDefined();
+      el.blur();
+
+      el.$value = cfg.initValues[0].value;
+      el.focus();
+      await h.wait();
+      expect(el.$refError).toBeDefined();
+      expect(el).toMatchSnapshot();
+
+      // onFocusLost
+      el.$hideError();
+      el.blur();
+      await h.wait();
+      el.$value = undefined;
+      el.$options.validationCase = ValidationCases.onFocusLost | 0;
+      el.$options.validations = { required: true };
+      await h.wait();
+      expect(el.$refError).not.toBeDefined();
+      el.focus();
+      el.blur();
+      await h.wait();
+      expect(el.$refError).toBeDefined();
+      expect(el).toMatchSnapshot();
+
+      // onInit
+      el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
+      el.$initValue = cfg.initValues[0].value;
+      el.$options.validationCase = ValidationCases.onInit | 0;
+      el.$options.validations = { custom: () => "custom err here", required: true, c2: () => false };
+      await h.wait();
+      expect(el.$refError).toBeDefined();
+
+      // onChangeSmart
+      el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
+      el.$options.validationCase = ValidationCases.onChangeSmart | 0;
+      el.$options.validations = { required: true };
+      el.$options.clearActions = ClearActions.clear | 0;
+      el.$value = cfg.initValues[0].value;
+      await h.wait();
+
+      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
+      expect(el.$isEmpty).toBe(true);
+      await h.wait();
+      expect(el.$refError).toBeDefined(); // because previously was valid and now need to show invalid state
+      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
+      expect(el.$isEmpty).toBe(false);
+      await h.wait();
+      expect(el.$refError).not.toBeDefined();
+
+      // cover case when el is invalid previously
+      el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
+      el.$options.validationCase = ValidationCases.onChangeSmart | 0;
+      el.$options.validations = { required: true, custom: () => "always err", c2: () => false };
+      el.$options.clearActions = ClearActions.clear | 0;
+      el.$value = undefined;
+      await h.wait();
+      // @ts-ignore
+      el.setValue(cfg.initValues[0]);
+      expect(el.$isValid).toBe(false);
+      await h.wait();
+      expect(el.$refError).not.toBeDefined();
+      el.$options.validations = { required: true };
+      // @ts-ignore
+      el.setValue(cfg.initValues[1]);
+      expect(el.$isValid).toBe(true); // was valid
+      // @ts-ignore
+      el.setValue(undefined);
+      expect(el.$isValid).toBe(false);
+      await h.wait();
+      expect(el.$refError).toBeDefined();
     });
 
     const ruleNames = Object.keys(elType.$defaults.validationRules);
@@ -346,7 +450,6 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
   });
 }
 
-// todo test $showError(), $hideError()
 // todo test form-integration
 
 // todo e2e $options.validityDebounce
