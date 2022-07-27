@@ -83,7 +83,11 @@ export default class WUPSelectControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPSelectControl;
 
-  static observedOptions = (super.observedOptions as Set<keyof WUPSelect.Options>).add("items") as any;
+  static get observedOptions(): Array<string> {
+    const arr = super.observedOptions as Array<keyof WUPSelect.Options>;
+    arr.push("items");
+    return arr;
+  }
 
   static get $styleRoot(): string {
     return `:root {

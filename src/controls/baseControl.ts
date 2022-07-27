@@ -153,7 +153,9 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseControl;
 
-  static observedOptions = new Set<string>(["label", "name", "autoComplete", "disabled", "readOnly", "validations"]);
+  static get observedOptions(): Array<string> {
+    return ["label", "name", "autoComplete", "disabled", "readOnly", "validations"];
+  }
 
   // todo use const instead of getter
   /* Array of attribute names to listen for changes */

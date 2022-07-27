@@ -62,13 +62,9 @@ declare global {
 export default class WUPSpinElement extends WUPBaseElement {
   #ctr = this.constructor as typeof WUPSpinElement;
 
-  static observedOptions = new Set<keyof WUPSpin.Options>([
-    "inline",
-    "overflowTarget",
-    "overflowOffset",
-    "overflowFade",
-    "fit",
-  ]);
+  static get observedOptions(): Array<keyof WUPSpin.Options> {
+    return ["inline", "overflowTarget", "overflowOffset", "overflowFade", "fit"];
+  }
 
   static get observedAttributes(): Array<LowerKeys<WUPSpin.Options>> {
     return ["inline", "overflowfade", "fit"];

@@ -228,7 +228,9 @@ describe("baseElement", () => {
   test("gotOptionsChanged", () => {
     class Test extends WUPBaseElement {
       $options = {};
-      static observedOptions = new Set(["t1", "t2"]);
+      static get observedOptions() {
+        return ["t1", "t2"];
+      }
 
       gotOptionsChanged() {}
     }
@@ -273,7 +275,9 @@ describe("baseElement", () => {
     expect(el.$options === el.$options).toBeTruthy(); // just for coverage when observedOptions is empty
     class T2 extends WUPBaseElement {
       $options = {};
-      static observedOptions = new Set(["to"]);
+      static get observedOptions() {
+        return ["to"];
+      }
     }
     const fnT2 = jest.spyOn(T2.prototype, "gotOptionsChanged");
     customElements.define("t2-test", T2);
@@ -383,7 +387,10 @@ describe("baseElement", () => {
   test("gotChanges method", async () => {
     class TestEl extends WUPBaseElement {
       $options = {};
-      static observedOptions = new Set(["disabled", "disabledReflect"]);
+      static get observedOptions() {
+        return ["disabled", "disabledReflect"];
+      }
+
       static get observedAttributes() {
         return ["disabled", "disabledReflect", "readonly"];
       }

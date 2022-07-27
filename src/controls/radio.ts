@@ -185,7 +185,12 @@ export default class WUPRadioControl<
     );
   }
 
-  static observedOptions = (super.observedOptions as Set<keyof WUPRadio.Options>).add("reverse") as any;
+  static get observedOptions(): Array<string> {
+    const arr = super.observedOptions as Array<keyof WUPRadio.Options>;
+    arr.push("reverse");
+    return arr;
+  }
+
   static get observedAttributes(): Array<keyof WUPRadio.Options> {
     const arr = super.observedAttributes as Array<keyof WUPRadio.Options>;
     arr.push("reverse");

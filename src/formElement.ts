@@ -143,7 +143,10 @@ export default class WUPFormElement<
   #ctr = this.constructor as typeof WUPFormElement;
 
   /** Options that need to watch for changes; use gotOptionsChanged() */
-  static observedOptions = new Set<keyof WUPForm.Options>(["disabled", "readOnly", "autoComplete"]);
+  static get observedOptions(): Array<keyof WUPForm.Options> {
+    return ["disabled", "readOnly", "autoComplete"];
+  }
+
   /* Array of attribute names to listen for changes */
   static get observedAttributes(): Array<keyof WUPForm.Options> {
     return ["disabled", "readOnly", "autoComplete"];

@@ -62,7 +62,10 @@ export default class WUPPopupElement<
 > extends WUPBaseElement<Events> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPPopupElement;
-  static observedOptions = new Set<keyof WUPPopup.Options>(["showCase", "target", "placement"]);
+
+  static get observedOptions(): Array<keyof WUPPopup.Options> {
+    return ["showCase", "target", "placement"];
+  }
 
   /* Array of attribute names to monitor for changes */
   static get observedAttributes(): Array<keyof WUPPopup.Options> {

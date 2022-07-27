@@ -60,8 +60,6 @@ export default class WUPPasswordControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPPasswordControl;
 
-  static observedOptions = (super.observedOptions as Set<keyof WUPPassword.Options>).add("clearButton") as any;
-
   /** Text announced by screen-readers when input cleared; @defaultValue `input cleared` */
   static get $ariaDescription(): string {
     return "press Alt + V to show/hide password";

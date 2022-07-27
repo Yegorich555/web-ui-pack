@@ -10,12 +10,17 @@ import { WUPcssHidden } from "./styles";
 const appendedStyles = new Set<string>();
 let lastUniqueNum = 0;
 
+const allObservedOptions = new WeakMap<typeof WUPBaseElement, Set<string> | null>();
+
 /** Basic abstract class for every component in web-ui-pack */
 export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.EventMap> extends HTMLElement {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseElement;
   /** Options that need to watch for changes; use gotOptionsChanged() */
-  static observedOptions?: Set<keyof Record<Lowercase<string>, any>>;
+  static get observedOptions(): Array<string> | undefined {
+    return undefined;
+  }
+
   /** Reference to global style element used by web-ui-pack */
   static get $refStyle(): HTMLStyleElement | null {
     return window.WUPrefStyle || null;
@@ -74,10 +79,18 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     setTimeout(() => {
       // cast options to observed
       const prev = this.$options;
+      // get from cache
+      let o = allObservedOptions.get(this.#ctr);
+      if (o === undefined) {
+        const arr = this.#ctr.observedOptions;
+        o = arr?.length ? new Set(arr) : null;
+        allObservedOptions.set(this.#ctr, o);
+      }
+
       Object.defineProperty(this, "$options", {
         set: this.#setOptions,
         get: () => {
-          const watched = this.#ctr.observedOptions;
+          const watched = o;
           if (!watched?.size) {
             return this._opts;
           }
@@ -150,14 +163,15 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     this.#optsObserved = undefined;
     this.#removeObserved = undefined;
 
-    if (!this.#ctr.observedOptions?.size) {
+    const observedOptions = allObservedOptions.get(this.#ctr);
+    if (!observedOptions?.size) {
       return;
     }
 
     if (this.#isReady && prev.valueOf() !== v.valueOf()) {
       const props: string[] = [];
       // eslint-disable-next-line no-restricted-syntax
-      for (const [k] of this.#ctr.observedOptions.entries()) {
+      for (const [k] of observedOptions.entries()) {
         if (this._opts[k] !== prev[k]) {
           props.push(k);
         }

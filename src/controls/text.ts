@@ -80,9 +80,11 @@ export default class WUPTextControl<
     return "input cleared";
   }
 
-  static observedOptions = (super.observedOptions as Set<keyof WUPText.Options>)
-    .add("clearButton")
-    .add("selectOnFocus");
+  static get observedOptions(): Array<string> {
+    const arr = super.observedOptions as Array<keyof WUPText.Options>;
+    arr.push("clearButton", "selectOnFocus");
+    return arr;
+  }
 
   static get $styleRoot(): string {
     return `:root {

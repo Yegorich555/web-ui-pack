@@ -136,7 +136,12 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
       }`;
   }
 
-  static observedOptions = (super.observedOptions as Set<keyof WUPSwitch.Options>).add("reverse");
+  static get observedOptions(): Array<string> {
+    const arr = super.observedOptions as Array<keyof WUPSwitch.Options>;
+    arr.push("reverse");
+    return arr;
+  }
+
   static get observedAttributes(): Array<LowerKeys<WUPSwitch.Options> | "defaultchecked"> {
     const arr = super.observedAttributes as Array<LowerKeys<WUPSwitch.Options> | "defaultchecked">;
     arr.push("reverse", "defaultchecked");
