@@ -287,7 +287,7 @@ export default class WUPTextControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUPText.Options> | null): void {
     super.gotChanges(propsChanged as any);
-    this.$refInput.autocomplete = this.$autoComplete || "off";
+    this.$refInput.autocomplete = this.$autoComplete || "off"; // todo useless logic
 
     setTimeout(() => {
       this._opts.selectOnFocus &&
