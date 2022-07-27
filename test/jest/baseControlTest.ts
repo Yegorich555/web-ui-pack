@@ -643,7 +643,3 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     expect(el.$initValue).toBe(cfg.initValues[1].value);
   });
 }
-
-// todo e2e $options.validateDebounce
-// todo e2e click on label doesn't reset focus-frame on input
-// todo e2e click on popup doesn't removes it
