@@ -1,5 +1,6 @@
 import { WUPTextControl } from "web-ui-pack";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
+import * as h from "../testHelper";
 
 /** @type WUPTextControl */
 let el;
@@ -21,7 +22,37 @@ describe("control.text", () => {
     },
   });
 
-  describe("text options", () => {
+  // todo move it to common tests
+  test("$initValue affects on input", () => {
+    el.$initValue = initV;
+    expect(el.$refInput.value).toBe(initV);
+    el.$initValue = undefined;
+    el.$value = undefined;
+    expect(el.$refInput.value).toBe("");
+    el.$value = initV;
+    expect(el.$refInput.value).toBe(initV);
+  });
+
+  describe("options", () => {
+    test("debounceMs", async () => {
+      el.$options.debounceMs = 400;
+      const spyChange = jest.fn();
+      el.addEventListener("$change", spyChange);
+
+      expect(el.$value).toBe(undefined);
+      await h.typeInputText(el.$refInput, initV);
+      expect(el.$value).toBe(undefined);
+      jest.advanceTimersByTime(401);
+      expect(el.$refInput.value).toBe(initV);
+      expect(el.$value).toBe(initV);
+      expect(spyChange).toBeCalledTimes(1);
+
+      el.$options.debounceMs = 0;
+      el.$value = undefined;
+      await h.typeInputText(el.$refInput, initV);
+      expect(el.$value).toBe(initV);
+    });
+
     test("selectOnFocus (selectAll by clear/focus)", () => {
       el.$options.selectOnFocus = true;
       jest.advanceTimersByTime(1);

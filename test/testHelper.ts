@@ -311,8 +311,32 @@ export function useFakeAnimation() {
   return { nextFrame, step };
 }
 
+/** Wait for pointed time via Promise + jest.advanceTimersByTime */
 export async function wait(t = 1000) {
   await Promise.resolve();
   jest.advanceTimersByTime(t);
   await Promise.resolve();
+}
+
+/** Simulate user type text */
+export async function typeInputText(el: HTMLInputElement, text: string, opts = { clearPrevious: true }) {
+  jest.useFakeTimers();
+  el.focus();
+  if (opts?.clearPrevious) {
+    el.value = "";
+  }
+
+  for (let i = 0; i < text.length; ++i) {
+    const key = text[i];
+    el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+    el.dispatchEvent(new KeyboardEvent("keyup", { key, bubbles: true }));
+    el.dispatchEvent(new KeyboardEvent("keypress", { key, bubbles: true }));
+    el.value += key;
+    el.dispatchEvent(new InputEvent("input"));
+
+    if (i !== text.length - 1) {
+      jest.advanceTimersByTime(20);
+      await Promise.resolve();
+    }
+  }
 }
