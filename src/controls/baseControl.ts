@@ -414,17 +414,17 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return this === document.activeElement || this.includes(document.activeElement);
   }
 
-  /** Returns if related form or control disabled */
+  /** Returns if related form or control disabled (true even if form.$options.disabled && !control.$options.disabled) */
   get $isDisabled(): boolean {
     return this.$form?.$options.disabled || this._opts.disabled || false;
   }
 
-  /** Returns if related form or control readonly */
+  /** Returns if related form or control readonly (true even if form.$options.readOnly && !control.$options.readOnly) */
   get $isReadOnly(): boolean {
     return this.$form?.$options.readOnly || this._opts.readOnly || false;
   }
 
-  /** Returns autoComplete name if related form or control option is enabled */
+  /** Returns autoComplete name if related form or control option is enabled (and control.$options.autoComplete !== false ) */
   get $autoComplete(): string | false {
     const af = this._opts.autoComplete ?? (this.$form?.$options.autoComplete || false);
     return (af === true ? this._opts.name : af) || false;
@@ -567,7 +567,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     i.disabled = this.$isDisabled as boolean;
     i.readOnly = this.$isReadOnly;
     i.autocomplete = this.$autoComplete || "off";
-    // todo check if initModel can affect on $initValue by change
   }
 
   /** Use this to append elements; called single time when element isConnected/appended to layout but not ready yet

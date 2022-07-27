@@ -50,6 +50,10 @@ interface TestOptions<T> {
 export function testBaseControl<T>(cfg: TestOptions<T>) {
   h.baseTestComponent(() => document.createElement(tagName), { attrs: { initvalue: { skip: true } } });
 
+  test("styles", () => {
+    expect(elType.$refStyle).toMatchSnapshot();
+  });
+
   describe("$initValue", () => {
     test("attr [initvalue] vs $initValue", () => {
       expect(el.$isReady).toBeTruthy();
@@ -279,6 +283,28 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     await h.wait();
   });
 
+  test("$ariaDetails", () => {
+    el.$ariaDetails("Some details for screen-readers");
+    expect(el).toMatchSnapshot();
+    el.$ariaDetails(null);
+    expect(el).toMatchSnapshot();
+  });
+
+  test("focus by click", () => {
+    expect(el.$isFocused).toBe(false);
+    el.dispatchEvent(new MouseEvent("mousedown"));
+    el.dispatchEvent(new MouseEvent("mouseup"));
+    expect(el.$isFocused).toBe(true);
+
+    el.blur();
+    expect(el.$isFocused).toBe(false);
+    el.$options.disabled = true;
+    jest.advanceTimersByTime(1);
+    el.dispatchEvent(new MouseEvent("mousedown"));
+    el.dispatchEvent(new MouseEvent("mouseup"));
+    expect(el.$isFocused).toBe(false);
+  });
+
   describe("validations", () => {
     test("get $isValid() when not ready", () => {
       const el2 = document.createElement(tagName) as WUPBaseControl;
@@ -484,9 +510,87 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       });
     });
   });
+
+  test("with form", () => {
+    const form = document.body.appendChild(document.createElement("wup-form"));
+    document.body.appendChild(document.createElement("wup-form"));
+    form.appendChild(el);
+    el.$options.name = "firstInput";
+    jest.advanceTimersByTime(1);
+    expect(el.$form).toBe(form);
+    expect(el.$form).toMatchSnapshot();
+
+    // form.disabled
+    expect(el.$isDisabled).toBe(false);
+    form.$options.disabled = true;
+    jest.advanceTimersByTime(1);
+    expect(el.$isDisabled).toBe(true);
+    expect(el.$refInput.disabled).toBe(true);
+
+    el.$options.disabled = false;
+    jest.advanceTimersByTime(1);
+    expect(el.$isDisabled).toBe(true);
+
+    form.$options.disabled = false;
+    jest.advanceTimersByTime(1);
+    expect(el.$isDisabled).toBe(false);
+    expect(el.$refInput.disabled).toBe(false);
+
+    el.$options.disabled = true;
+    jest.advanceTimersByTime(1);
+    expect(el.$isDisabled).toBe(true);
+
+    // form.readOnly
+    expect(el.$isReadOnly).toBe(false);
+    form.$options.readOnly = true;
+    jest.advanceTimersByTime(1);
+    expect(el.$isReadOnly).toBe(true);
+    expect(el.$refInput.readOnly).toBe(true);
+
+    el.$options.readOnly = false;
+    jest.advanceTimersByTime(1);
+    expect(el.$isReadOnly).toBe(true);
+
+    form.$options.readOnly = false;
+    jest.advanceTimersByTime(1);
+    expect(el.$isReadOnly).toBe(false);
+    expect(el.$refInput.readOnly).toBe(false);
+
+    el.$options.readOnly = true;
+    jest.advanceTimersByTime(1);
+    expect(el.$isReadOnly).toBe(true);
+
+    // form.autoComplete
+    expect(el.$autoComplete).toBe(false);
+    form.$options.autoComplete = true;
+    jest.advanceTimersByTime(1);
+    expect(el.$autoComplete).toBeTruthy();
+    expect(el.$refInput.autocomplete).toBeTruthy();
+
+    el.$options.autoComplete = false;
+    jest.advanceTimersByTime(1);
+    expect(el.$autoComplete).toBeFalsy();
+    expect(el.$refInput.autocomplete).toBe("off");
+
+    form.$options.autoComplete = undefined;
+    el.$options.autoComplete = undefined;
+    jest.advanceTimersByTime(1);
+    expect(el.$autoComplete).toBeFalsy();
+    expect(el.$refInput.autocomplete).toBe("off");
+
+    // form.$initModel vs control.$initValue
+    form.$initModel = { firstInput: cfg.initValues[0].value };
+    expect(el.$initValue).toBe(cfg.initValues[0].value);
+    form.$initModel = { firstInput: cfg.initValues[1].value };
+    expect(el.$initValue).toBe(cfg.initValues[1].value);
+
+    el.$initValue = cfg.initValues[0].value;
+    expect(el.$initValue).toBe(cfg.initValues[0].value);
+    expect(form.$initModel).toMatchObject({ firstInput: cfg.initValues[0].value });
+    form.$initModel = { firstInput: cfg.initValues[1].value };
+    expect(el.$initValue).toBe(cfg.initValues[1].value);
+  });
 }
 
-// todo test form-integration
-
+// todo check memory leak
 // todo e2e $options.validateDebounce
-// todo e2e check focused by click event (mouse-down/mouse-up)
