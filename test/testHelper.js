@@ -251,37 +251,49 @@ export function handleRejection() {
   return fn;
 }
 
-/** @type ReturnType typeof spyEventListeners & {check: ()=>void } */
 export function spyEventListeners(otherElements) {
   const spy = [document, document.body, HTMLElement.prototype, ...(otherElements ?? [])].map((s) => {
     const me = {
       on: jest.spyOn(s, "addEventListener"),
-      onCalls: ["array names"],
+      onCalls: [{ el: HTMLElement.prototype, name: "array names" }],
       off: jest.spyOn(s, "removeEventListener"),
-      offCalls: ["array names"],
+      offCalls: [{ el: HTMLElement.prototype, name: "array names" }],
       itemName: s.toString(),
     };
     Object.defineProperty(me, "onCalls", {
       get: () =>
         me.on.mock.calls
           .filter((c) => c[2]?.once !== true)
-          .map((c, i) => `${c[0]} ${me.on.mock.instances[i] || me.itemName}`)
-          .sort(),
+          .map((c, i) => ({ el: me.on.mock.instances[i], name: `${c[0]} ${me.on.mock.instances[i] || me.itemName}` })),
+      // .sort(),
     });
     Object.defineProperty(me, "offCalls", {
-      get: () => me.off.mock.calls.map((c, i) => `${c[0]} ${me.off.mock.instances[i] || me.itemName}`).sort(),
+      get: () =>
+        me.off.mock.calls.map((c, i) => ({
+          el: me.on.mock.instances[i],
+          name: `${c[0]} ${me.off.mock.instances[i] || me.itemName}`,
+        })), // .sort(),
     });
     return me;
   });
 
-  spy.check = () => {
+  const check = () => {
     spy.forEach((s) => {
       // checking if removed every listener that was added
-      expect(s.onCalls).toEqual(s.offCalls);
+      const onCalls = s.onCalls
+        .filter((c) => c.el.isConnected) // skip for elements that's removed itself
+        .map((c) => c.name)
+        .sort();
+      const offCalls = s.offCalls
+        .filter((c) => c.el.isConnected) // skip for elements that's removed itself
+        .map((c) => c.name)
+        .sort();
+
+      expect(onCalls).toEqual(offCalls);
     });
   };
 
-  return spy;
+  return Object.assign(spy, { check });
 }
 
 export function useFakeAnimation() {

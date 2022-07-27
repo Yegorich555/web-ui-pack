@@ -54,6 +54,14 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     expect(elType.$refStyle).toMatchSnapshot();
   });
 
+  test("memoryLeak", () => {
+    const spy = h.spyEventListeners(null);
+    el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
+    jest.advanceTimersByTime(1);
+    el.remove();
+    spy.check(); // checking memory leak
+  });
+
   describe("$initValue", () => {
     test("attr [initvalue] vs $initValue", () => {
       expect(el.$isReady).toBeTruthy();
@@ -592,5 +600,4 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
   });
 }
 
-// todo check memory leak
 // todo e2e $options.validateDebounce
