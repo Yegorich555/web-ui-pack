@@ -2,15 +2,6 @@
 /* eslint-disable jest/no-export */
 import WUPBaseElement from "web-ui-pack/baseElement";
 
-export function mockSetState(el) {
-  return jest.fn((state, callback) =>
-    setTimeout(() => {
-      Object.assign(el.state, state);
-      callback && callback();
-    })
-  );
-}
-
 const origConsoleWarn = console.warn;
 export function mockConsoleWarn() {
   console.warn = jest.fn();
@@ -31,7 +22,7 @@ export function unMockConsoleError() {
   console.error = origConsoleError;
 }
 
-export function wrapConsoleWarn(fn) {
+export function wrapConsoleWarn(fn: () => void) {
   const mockConsole = mockConsoleWarn();
   try {
     fn();
@@ -44,12 +35,12 @@ export function wrapConsoleWarn(fn) {
 }
 
 const skipNames = new Set(["apply", "bind", "call", "toString", "click", "focus", "blur"]);
-function setHTMLProps(t) {
+function setHTMLProps(t: HTMLElement) {
   const proto = Object.getPrototypeOf(t);
   if (proto && !Object.prototype.hasOwnProperty.call(proto, "__proto__")) {
     Object.getOwnPropertyNames(proto).forEach((a) => {
-      if (typeof Object.getOwnPropertyDescriptor(proto, a).value === "function") {
-        skipNames.add(a);
+      if (typeof Object.getOwnPropertyDescriptor(proto, a)!.value === "function") {
+        skipNames.add(a as string);
       }
     });
     setHTMLProps(proto);
@@ -57,24 +48,24 @@ function setHTMLProps(t) {
 }
 setHTMLProps(HTMLElement.prototype);
 
-function findOwnFunctions(obj, proto) {
+function findOwnFunctions(obj: any, proto: any) {
   const result = Object.getOwnPropertyNames(proto)
-    .filter((a) => !skipNames.has(a))
-    .filter((a) => typeof Object.getOwnPropertyDescriptor(proto, a).value === "function")
+    .filter((a) => !skipNames.has(a as any))
+    .filter((a) => typeof Object.getOwnPropertyDescriptor(proto, a)!.value === "function")
     .map((k) => ({
-      name: k,
+      name: k as string,
       isArrow: false,
       isBound: obj[k].name.startsWith("bound ") && !obj[k].hasOwnProperty("prototype"),
     }));
   return result;
 }
 
-export function findAllFunctions(obj) {
+export function findAllFunctions(obj: any) {
   // const proto = Object.getPrototypeOf(obj);
   // const result = findOwnFunctions(obj, proto);
   /** @type ReturnType<typeof findOwnFunctions(obj, proto)> */
-  const result = [];
-  const search = (v) => {
+  const result: Array<{ name: string; isArrow: boolean; isBound: boolean }> = [];
+  const search = (v: any) => {
     const proto = Object.getPrototypeOf(v);
     if (!!proto && !Object.prototype.hasOwnProperty.call(proto, "__proto__")) {
       result.push(...findOwnFunctions(obj, proto));
@@ -86,9 +77,9 @@ export function findAllFunctions(obj) {
 
   // find arrow functions
   const arrowRegex = /^[^{]+?=>/;
-  Object.getOwnPropertyNames(obj)
+  (Object.getOwnPropertyNames(obj) as Array<string>)
     .filter((a) => !skipNames.has(a))
-    .filter((a) => typeof Object.getOwnPropertyDescriptor(obj, a).value === "function")
+    .filter((a) => typeof Object.getOwnPropertyDescriptor(obj, a)!.value === "function")
     .filter((a) => arrowRegex.test(obj[a].toString()))
     .forEach((k) =>
       result.push({
@@ -107,19 +98,18 @@ export function findAllFunctions(obj) {
   };
 }
 
-/**
- * @template T
- * @typedef {(create: ()=>T, opts:
- * {
- *    skipAttrs?: boolean,
- *    attrs: Record<string, {
- *            onRemove?: boolean,
- *            skip?: boolean,
- *          }>,
- * })=>void} BaseTestFunction
- * */
-/** @type BaseTestFunction<T> */
-export function baseTestComponent(createFunction, opts) {
+interface BaseTestOptions {
+  skipAttrs?: boolean;
+  attrs: Record<
+    string,
+    {
+      onRemove?: boolean;
+      skip?: boolean;
+    }
+  >;
+}
+
+export function baseTestComponent(createFunction: () => any, opts: BaseTestOptions) {
   describe("common tests", () => {
     jest.useFakeTimers();
     /** @type WUPBaseElement; */
@@ -137,10 +127,9 @@ export function baseTestComponent(createFunction, opts) {
     // });
 
     if (!opts?.skipAttrs && obj instanceof WUPBaseElement) {
-      /** @type typeof WUPBaseElement; */
-      const c = Object.getPrototypeOf(obj).constructor;
+      const c = Object.getPrototypeOf(obj).constructor as typeof WUPBaseElement;
       /** @type string[] */
-      const attrs = c.observedAttributes || [];
+      const attrs = ((c as any).observedAttributes || []) as string[];
       if (attrs.length) {
         describe("observedAttributes affects on options", () => {
           /* eslint-disable jest/no-standalone-expect */
@@ -160,7 +149,7 @@ export function baseTestComponent(createFunction, opts) {
 
               obj.setAttribute(a, "true");
               jest.advanceTimersByTime(1);
-              const key = Object.keys(obj.$options).find((k) => k.toLowerCase() === a);
+              const key = Object.keys(obj.$options).find((k) => k.toLowerCase() === a) as string;
               expect(key).toBeDefined();
               expect(obj.$options[key]).toBeDefined();
               expect(obj.$options[key]).not.toBeFalsy();
@@ -180,8 +169,7 @@ export function baseTestComponent(createFunction, opts) {
         });
 
         const os = c.observedOptions;
-        if (os.size) {
-          obj.testMe = true;
+        if (os?.length) {
           describe("observerOptions affects on attributes", () => {
             os.forEach((o) => {
               const attr = attrs.find((a) => a === o.toLowerCase());
@@ -212,13 +200,12 @@ export function baseTestComponent(createFunction, opts) {
 }
 
 const skipNamesStatic = new Set(["length", "prototype", "name"]);
-export function testStaticInheritence(Type) {
+export function testStaticInheritence(Type: any) {
   describe("componentStatic", () => {
     const stat = Object.getOwnPropertyNames(Type) //
-      .filter((a) => !skipNamesStatic.includes(a));
+      .filter((a) => !skipNamesStatic.has(a as string));
     const statProto = Object.getOwnPropertyNames(Object.getPrototypeOf(Type)) //
-      .filter((a) => !skipNamesStatic.includes(a));
-
+      .filter((a) => !skipNamesStatic.has(a as string));
     it("overrides static", () => {
       const arrowNotOverrided = statProto.filter((a) => !stat.includes(a));
       expect(arrowNotOverrided).toHaveLength(0);
@@ -243,15 +230,15 @@ export const keys = {
 export function handleRejection() {
   const fn = jest.fn();
   const rst = fn.mockClear;
-  fn.mockClear = () => {
+  (fn.mockClear as any) = () => {
     rst();
-    global.setUnhandledReject(null);
+    global.setUnhandledReject(null as any);
   };
   global.setUnhandledReject(fn);
   return fn;
 }
 
-export function spyEventListeners(otherElements) {
+export function spyEventListeners(otherElements: Array<any>) {
   const spy = [document, document.body, HTMLElement.prototype, ...(otherElements ?? [])].map((s) => {
     const me = {
       on: jest.spyOn(s, "addEventListener"),
@@ -263,7 +250,7 @@ export function spyEventListeners(otherElements) {
     Object.defineProperty(me, "onCalls", {
       get: () =>
         me.on.mock.calls
-          .filter((c) => c[2]?.once !== true)
+          .filter((c) => (c as any)[2]?.once !== true)
           .map((c, i) => ({ el: me.on.mock.instances[i], name: `${c[0]} ${me.on.mock.instances[i] || me.itemName}` })),
       // .sort(),
     });
@@ -300,7 +287,7 @@ export function useFakeAnimation() {
   const step = 1000 / 60; // simulate 60Hz frequency
   jest.useFakeTimers();
   let i = 0;
-  const animateFrames = [];
+  const animateFrames: Array<Function> = [];
   const nextFrame = async () => {
     await Promise.resolve();
     jest.advanceTimersByTime(step);
@@ -313,7 +300,7 @@ export function useFakeAnimation() {
 
   jest.spyOn(window, "requestAnimationFrame").mockImplementation((fn) => {
     animateFrames.push(fn);
-    return fn;
+    return fn as any;
   });
 
   jest.spyOn(window, "cancelAnimationFrame").mockImplementation((fn) => {
