@@ -153,14 +153,15 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseControl;
 
+  /* Array of options names to listen for changes */
   static get observedOptions(): Array<string> {
-    return ["label", "name", "autoComplete", "disabled", "readOnly", "validations"];
+    return <Array<keyof WUPBase.Options>>["label", "name", "autoComplete", "disabled", "readOnly", "validations"];
   }
 
-  // todo use const instead of getter
   /* Array of attribute names to listen for changes */
   static get observedAttributes(): Array<string> {
-    return ["label", "name", "autocomplete", "disabled", "readonly", "initvalue"];
+    // todo how to cache observedAttrs per each type to reduce memoryConsumption
+    return <Array<LowerKeys<WUPBase.Options>>>["label", "name", "autocomplete", "disabled", "readonly", "initvalue"];
   }
 
   /** Text announced by screen-readers; @defaultValue `Error for` */
@@ -435,7 +436,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Check validity and show error if canShowError is true (by default)
    * @returns errorMessage or false (if valid) */
   $validate(canShowError = true): string | false {
-    // todo $validate mustIgnore debounce
     return this.goValidate(ValidateFromCases.onManualCall, canShowError);
   }
 
@@ -703,7 +703,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       if (canShowError || this.$refError) {
         this._validTimer = window.setTimeout(
           () => this.goShowError(errMsg, this.$refInput),
-          this._opts.validateDebounceMs
+          fromCase === ValidateFromCases.onManualCall ? 0 : this._opts.validateDebounceMs
         );
       }
       return errMsg;

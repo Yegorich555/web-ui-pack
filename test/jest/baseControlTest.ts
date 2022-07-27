@@ -3,6 +3,15 @@
 import WUPBaseControl, { ClearActions, ValidationCases } from "web-ui-pack/controls/baseControl";
 import * as h from "../testHelper";
 
+declare global {
+  namespace WUPBase {
+    interface ValidationMap {
+      _alwaysValid: boolean;
+      _alwaysInvalid: boolean;
+    }
+  }
+}
+
 interface InitOptions<T> {
   type: typeof WUPBaseControl;
   htmlTag: string;
@@ -24,6 +33,9 @@ export function initTestBaseControl<T extends WUPBaseControl>(cfg: InitOptions<T
     Element.prototype.scrollIntoView = jest.fn();
     let lastUniqueNum = 0;
     jest.spyOn(cfg.type, "$uniqueId", "get").mockImplementation(() => `txt${++lastUniqueNum}`);
+    (elType.$defaults.validationRules as any)._alwaysValid = () => false;
+    (elType.$defaults.validationRules as any)._alwaysInvalid = () => "Always error";
+
     el = document.createElement(cfg.htmlTag) as WUPBaseControl;
     cfg.onInit(el as T);
     document.body.appendChild(el);
@@ -32,6 +44,8 @@ export function initTestBaseControl<T extends WUPBaseControl>(cfg: InitOptions<T
 
   afterEach(() => {
     document.body.innerHTML = "";
+    delete (elType.$defaults.validationRules as any)._alwaysValid;
+    delete (elType.$defaults.validationRules as any)._alwaysInvalid;
     jest.restoreAllMocks();
     jest.clearAllMocks();
   });
@@ -347,7 +361,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(() => el.$validate()).toThrowError();
     });
 
-    test("validation cases", async () => {
+    test("options.validationCase", async () => {
       el.$options.name = "firstInput";
       el.$options.clearActions = ClearActions.clear | 0;
       el.$options.validations = { required: true };
@@ -443,6 +457,37 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$refError).toBeDefined();
     });
 
+    test("options.validateDebounceMs", async () => {
+      el.$options.validationCase = ValidationCases.onChange | 0;
+      el.$options.validateDebounceMs = 500;
+      el.$options.validations = { _alwaysInvalid: true };
+      // @ts-ignore
+      el.setValue(cfg.initValues[0].value);
+      expect(el.$isValid).toBe(false);
+      jest.advanceTimersByTime(499);
+      expect(el.$refError).toBe(undefined);
+
+      // @ts-ignore
+      el.setValue(cfg.initValues[1].value);
+      expect(el.$isValid).toBe(false);
+      jest.advanceTimersByTime(499);
+      expect(el.$refError).toBe(undefined);
+      jest.advanceTimersByTime(2);
+      expect(el.$refError).toBeDefined();
+
+      el.$options.validateDebounceMs = 10;
+      el.$hideError();
+      await h.wait();
+      expect(el.$refError).toBe(undefined);
+
+      // @ts-ignore
+      el.setValue(cfg.initValues[0].value);
+      jest.advanceTimersByTime(9);
+      expect(el.$refError).toBe(undefined);
+      jest.advanceTimersByTime(2);
+      expect(el.$refError).toBeDefined();
+    });
+
     const ruleNames = Object.keys(elType.$defaults.validationRules);
     cfg.validations.required = { set: true, failValue: undefined, trueValue: cfg.initValues[0].value };
 
@@ -461,8 +506,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       await h.wait();
       expect(el).toMatchSnapshot();
 
-      (elType.$defaults.validationRules as any)._testInvalid = () => false;
-      (el.$options.validations as any)._testInvalid = true;
+      (el.$options.validations as any)._alwaysValid = true;
       el.$hideError();
       el.$validate();
       expect(() => jest.advanceTimersByTime(1000)).toThrow(); // because impossible to get errorMessage
@@ -601,3 +645,5 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 }
 
 // todo e2e $options.validateDebounce
+// todo e2e click on label doesn't reset focus-frame on input
+// todo e2e click on popup doesn't removes it

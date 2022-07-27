@@ -16,10 +16,6 @@ const allObservedOptions = new WeakMap<typeof WUPBaseElement, Set<string> | null
 export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.EventMap> extends HTMLElement {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseElement;
-  /** Options that need to watch for changes; use gotOptionsChanged() */
-  static get observedOptions(): Array<string> | undefined {
-    return undefined;
-  }
 
   /** Reference to global style element used by web-ui-pack */
   static get $refStyle(): HTMLStyleElement | null {
@@ -82,6 +78,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
       // get from cache
       let o = allObservedOptions.get(this.#ctr);
       if (o === undefined) {
+        // @ts-ignore
         const arr = this.#ctr.observedOptions;
         o = arr?.length ? new Set(arr) : null;
         allObservedOptions.set(this.#ctr, o);

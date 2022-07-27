@@ -628,7 +628,7 @@ exports[`control.text validations $options.validationShowAll 3`] = `
 </wup-text>
 `;
 
-exports[`control.text validations validation cases 1`] = `
+exports[`control.text validations options.validationCase 1`] = `
 <wup-text>
   <label
     for="txt1"
@@ -651,7 +651,7 @@ exports[`control.text validations validation cases 1`] = `
 </wup-text>
 `;
 
-exports[`control.text validations validation cases 2`] = `
+exports[`control.text validations options.validationCase 2`] = `
 <wup-text
   invalid=""
 >
@@ -697,7 +697,7 @@ exports[`control.text validations validation cases 2`] = `
 </wup-text>
 `;
 
-exports[`control.text validations validation cases 3`] = `
+exports[`control.text validations options.validationCase 3`] = `
 <wup-text
   invalid=""
 >
@@ -742,7 +742,7 @@ exports[`control.text validations validation cases 3`] = `
 </wup-text>
 `;
 
-exports[`control.text validations validation cases 4`] = `
+exports[`control.text validations options.validationCase 4`] = `
 <wup-text
   invalid=""
 >
