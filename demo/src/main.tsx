@@ -30,7 +30,7 @@ const baseURL = process.env.BASE_URL || "/";
 const routes: IRoute[] = [
   { path: "popup", el: PopupView },
   { path: "spin", el: SpinView },
-  { path: "controls", el: ControlsView },
+  { path: "controls", label: "Form & Controls", el: ControlsView },
   { path: "control/text", el: TextControlView, isNested: true },
   { path: "control/password", el: PasswordControlView, isNested: true },
   { path: "control/select", el: SelectControlView, isNested: true },
@@ -78,7 +78,7 @@ export default function AppContainer() {
                     [isActive ? styles.activeLink : "", r.isNested ? styles.nested : ""].join(" ")
                   }
                 >
-                  {r.label || WUPHelpers.stringPrettify(last(r.path.split("/")))}
+                  {r.label || WUPHelpers.stringPrettify(r.label || last(r.path.split("/")))}
                 </NavLink>
               </li>
             ))}

@@ -7,7 +7,7 @@ interface Props {
   link: string;
   className?: string;
   details?: UserCodeProps;
-  features: Array<string | JSX.Element>;
+  features: Array<string | JSX.Element> | null;
 }
 
 export default function Page(props: React.PropsWithChildren<Props>) {

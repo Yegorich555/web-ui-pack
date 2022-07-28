@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import getUsedCssVars from "src/helpers/parseCssVars";
 import WUPBaseElement from "web-ui-pack/baseElement";
 import WUPBaseControl from "web-ui-pack/controls/baseControl";
+import { WUPFormElement } from "web-ui-pack";
 import styles from "./userCode.scss";
 import pageStyles from "./page.scss";
 
@@ -36,12 +37,12 @@ function renderHTMLCode(tag: string): string | JSX.Element {
   const attrs = el.attributes;
   for (let i = 0; i < attrs.length; ++i) {
     const name = attrs[i].nodeName;
-    if (name !== "style" && !name.startsWith("aria")) {
+    if (name !== "style" && !name.startsWith("aria") && !name.startsWith("role")) {
       parsedAttrs.push({ name, value: attrs[i].nodeValue });
     }
   }
 
-  if (el instanceof WUPBaseControl) {
+  if (el instanceof WUPBaseControl || el instanceof WUPFormElement) {
     parsedAttrs.push({ name: "disabled", value: "false" });
     parsedAttrs.push({ name: "readonly", value: "false" });
     parsedAttrs.push({ name: "autofocus", value: "false" });

@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 /* eslint-disable no-promise-executor-return */
 import Page from "src/elements/page";
 import {
@@ -39,8 +40,28 @@ const items = [
 
 export default function ControlsView() {
   return (
-    <Page header="Controls" link="#textControl">
+    <Page
+      header="FormElement & Controls"
+      link="src/formElement.ts"
+      features={[
+        <>
+          Custom <b>$submit</b> event with collected values into single model-object according to control-names
+        </>,
+        <>
+          Custom <b>$change</b> event with collected values into single model-object according to control-names
+        </>,
+        <>
+          Nested complex model (use dotted names for controls: <b>name="personal.firstName")</b>
+        </>,
+        "Validate by submit and scroll + focus into first invalid input if exists",
+        <>
+          Pending state with spinner if return promise for <b>$onSubmit()</b> method
+        </>,
+      ]}
+      details={{ tag: "wup-form" }}
+    >
       <wup-form
+        autoComplete={false}
         ref={(el) => {
           if (el) {
             el.$initModel = { text: "test-me@google.com" };

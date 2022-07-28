@@ -468,5 +468,4 @@ declare global {
   }
 }
 
-// testcase: check if set model={v: 1} shouldn't reset control with other names
-// testcase: set options.disabled=true, options.disabled=false - check if it works
+// todo details how to change spinner
