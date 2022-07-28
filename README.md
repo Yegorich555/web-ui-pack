@@ -37,7 +37,7 @@ npm install web-ui-pack
 - [x] [PopupElement](#popupelement) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
 - [x] [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
 - [x] FormElement
-- [x] TextControl
+- [x] [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
 - [x] PasswordControl
 - [x] CheckControl (Checkbox)
 - [ ] CheckTreeControl

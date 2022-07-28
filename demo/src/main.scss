@@ -71,6 +71,7 @@ h1 {
         display: block;
         padding: 10px;
         text-decoration: none;
+        color: inherit;
 
         &:hover {
           color: $hoverColor;

@@ -1,4 +1,13 @@
+/* stylelint-disable no-descending-specificity */
+.headerDetails {
+  font-weight: normal;
+  font-size: small;
+  opacity: 0.8;
+}
+
 .cssVars {
+  font-size: smaller;
+
   ul {
     list-style-type: none;
     margin: 0;
@@ -16,6 +25,24 @@
       span:last-child {
         color: #a95b3d;
       }
+    }
+  }
+}
+
+.htmlCode {
+  font-size: smaller;
+
+  .htmlTag {
+    color: #0d7310;
+  }
+
+  .htmlAttr {
+    color: #a95b3d;
+    display: block;
+
+    & > span {
+      color: #1973b8;
+      padding-left: 1em;
     }
   }
 }

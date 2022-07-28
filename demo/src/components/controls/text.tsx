@@ -11,8 +11,8 @@ const sideEffect = WUPTextControl;
 export default function TextControlView() {
   return (
     <Page
-      header="TextControl"
-      link="#textcontrol"
+      header="Text Control"
+      link="/blob/master/src/controls/text.ts"
       details={{
         tag: "wup-text",
         cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
@@ -21,12 +21,18 @@ export default function TextControlView() {
       <wup-form
         ref={(el) => {
           if (el) {
-            el.$initModel = { email: "test-me@google.com", required: "yes" };
+            el.$initModel = { email: "test@google.com", required: "yes" };
             el.$onSubmit = (e) => console.warn("sumbitted model", e.$model);
           }
         }}
       >
-        <wup-text name="email" label="Text" />
+        <wup-text
+          name="email"
+          label="Text control"
+          initValue="test@google.com"
+          autoComplete="off"
+          validations="window._someObject"
+        />
         <wup-text name="required" validations="globalkey.pointHere" />
         <wup-text
           ref={(el) => {
@@ -44,6 +50,7 @@ export default function TextControlView() {
         />
         <wup-text
           name="withoutClearButton"
+          label="Without clear button (options.clearButton)"
           ref={(el) => {
             if (el) {
               el.$options.clearButton = false;

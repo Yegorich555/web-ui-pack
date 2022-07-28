@@ -31,16 +31,20 @@ const routes: IRoute[] = [
   { path: "popup", el: PopupView },
   { path: "spin", el: SpinView },
   { path: "controls", el: ControlsView },
-  { path: "text", el: TextControlView, isNested: true },
-  { path: "password", el: PasswordControlView, isNested: true },
-  { path: "select", el: SelectControlView, isNested: true },
-  // { path: "selectMany", el: SelectManyControlView, isNested: true },
-  { path: "radio", el: RadioControlView, isNested: true },
-  { path: "switch", el: SwitchControlView, isNested: true },
-  { path: "check", el: CheckControlView, isNested: true },
+  { path: "control/text", el: TextControlView, isNested: true },
+  { path: "control/password", el: PasswordControlView, isNested: true },
+  { path: "control/select", el: SelectControlView, isNested: true },
+  // { path: "control/selectMany", el: SelectManyControlView, isNested: true },
+  { path: "control/radio", el: RadioControlView, isNested: true },
+  { path: "control/switch", el: SwitchControlView, isNested: true },
+  { path: "control/check", el: CheckControlView, isNested: true },
 ];
 
 routes.forEach((v) => (v.url = baseURL + v.path));
+
+function last(arr: string[]) {
+  return arr[arr.length - 1];
+}
 
 export default function AppContainer() {
   const navigate = useNavigate();
@@ -74,7 +78,7 @@ export default function AppContainer() {
                     [isActive ? styles.activeLink : "", r.isNested ? styles.nested : ""].join(" ")
                   }
                 >
-                  {r.label || WUPHelpers.stringPrettify(r.path)}
+                  {r.label || WUPHelpers.stringPrettify(last(r.path.split("/")))}
                 </NavLink>
               </li>
             ))}

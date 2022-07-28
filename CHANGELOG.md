@@ -18,10 +18,11 @@
   - [`scrollIntoView`](src/helpers/scrollIntoView.ts)
   - [`stringLowerCount`](src/helpers/stringCaseCount.ts)
   - [`stringUpperCount`](src/helpers/stringCaseCount.ts)
+  - [`onSpy`](src/helpers/onSpy.ts)
 - Added elements
   - [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
   - FormElement
-  - [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/text)
+  - [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
   - PasswordControl
   - SelectControl
   - SwitchControl
