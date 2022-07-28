@@ -154,7 +154,7 @@ export default class WUPFormElement<
 
   static get $styleRoot(): string {
     return `:root {
-      --btn-submit-back: var(--base-btn-back);
+      --btn-submit-bg: var(--base-btn-bg);
       --btn-submit-text: var(--base-btn-text);
       --btn-submit-focus: var(--base-btn-focus);
     }`;
@@ -165,7 +165,7 @@ export default class WUPFormElement<
         :host { position: relative; }
         :host [type='submit'] {
           box-shadow: none;
-          border: 1px solid var(--btn-submit-back);
+          border: 1px solid var(--btn-submit-bg);
           border-radius: var(--border-radius);
           box-sizing: border-box;
           padding: 0.5em;
@@ -174,7 +174,7 @@ export default class WUPFormElement<
           cursor: pointer;
           font: inherit;
           font-weight: bold;
-          background: var(--btn-submit-back);
+          background: var(--btn-submit-bg);
           color: var(--btn-submit-text);
         }
         :host [type='submit']:focus {

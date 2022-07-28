@@ -49,7 +49,7 @@ export default class WUPSelectManyControl<
   static get $styleRoot(): string {
     return `:root {
         --ctrl-select-item: inherit;
-        --ctrl-select-item-back: rgba(0,0,0,0.04);
+        --ctrl-select-item-bg: rgba(0,0,0,0.04);
         --ctrl-select-item-del-display: inline-block;
         --ctrl-select-item-del: var(--ctrl-icon);
         --ctrl-select-item-del-hover: var(--ctrl-selected);
@@ -86,7 +86,7 @@ export default class WUPSelectManyControl<
         display: flex;
         align-items: center;
         color: var(--ctrl-select-item);
-        background-color: var(--ctrl-select-item-back);
+        background-color: var(--ctrl-select-item-bg);
         border-radius: var(--ctrl-border-radius);
         cursor: pointer;
       }
@@ -104,7 +104,7 @@ export default class WUPSelectManyControl<
         :host label > span > span:hover {
           text-decoration: line-through;
           color: var(--ctrl-err-text);
-          background-color: var(--ctrl-err-back);
+          background-color: var(--ctrl-err-bg);
         }
         :host label > span > span:hover:after {
           --ctrl-icon: var(--ctrl-err-text);

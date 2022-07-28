@@ -72,7 +72,7 @@ export default class WUPRadioControl<
     return `:root {
       --ctrl-radio-size: 1em;
       --ctrl-radio-spot-size: calc(var(--ctrl-radio-size) * 0.5);
-      --ctrl-radio-back: #fff;
+      --ctrl-radio-bg: #fff;
       --ctrl-radio-off: #fff;
       --ctrl-radio-on: var(--ctrl-focus);
       --ctrl-radio-border: #0003;
@@ -134,7 +134,7 @@ export default class WUPRadioControl<
         content: "";
         width: var(--ctrl-radio-size);
         height: var(--ctrl-radio-size);
-        border: calc((var(--ctrl-radio-size) - var(--ctrl-radio-spot-size)) / 2) solid var(--ctrl-radio-back);
+        border: calc((var(--ctrl-radio-size) - var(--ctrl-radio-spot-size)) / 2) solid var(--ctrl-radio-bg);
         box-sizing: border-box;
         background: var(--ctrl-radio-off);
         box-shadow: 0 0 1px var(--ctrl-radio-border-size) var(--ctrl-radio-border);

@@ -45,8 +45,8 @@ export default class WUPCheckControl<
 
   static get $styleRoot(): string {
     return `:root {
-        --ctrl-check-off-back: #fff;
-        --ctrl-check-on-back: var(--ctrl-focus);
+        --ctrl-check-off-bg: #fff;
+        --ctrl-check-on-bg: var(--ctrl-focus);
         --ctrl-check-on: #fff;
         --ctrl-check-radius: 3px;
         --ctrl-check-shadow: #0003;
@@ -62,14 +62,14 @@ export default class WUPCheckControl<
         width: var(--ctrl-check-size);
         min-width: var(--ctrl-check-size);
         border-radius: var(--ctrl-check-radius);
-        background: var(--ctrl-check-off-back);
+        background: var(--ctrl-check-off-bg);
         box-shadow: 0 0 2px 0 var(--ctrl-check-shadow);
       }
       :host label>span:before {
         content: none;
       }
       :host input:checked + * + * {
-        background: var(--ctrl-check-on-back);
+        background: var(--ctrl-check-on-bg);
       }
       :host input:checked + * + *:before {
         content: "";

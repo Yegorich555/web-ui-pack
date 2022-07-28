@@ -179,10 +179,10 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         --ctrl-label: #5e5e5e;
         --ctrl-icon: var(--ctrl-label);
         --ctrl-icon-size: 1em;
-        --ctrl-back: var(--base-back);
+        --ctrl-bg: var(--base-bg);
         --ctrl-border-radius: var(--border-radius);
         --ctrl-err-text: #ad0000;
-        --ctrl-err-back: #fff4fa;
+        --ctrl-err-bg: #fff4fa;
         --ctrl-err-icon-valid: green;
         --ctrl-invalid-border: red;
         --wup-icon-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M674.515 93.949a45.925 45.925 0 0 0-65.022 0L384.001 318.981 158.509 93.487a45.928 45.928 0 0 0-65.022 0c-17.984 17.984-17.984 47.034 0 65.018l225.492 225.494L93.487 609.491c-17.984 17.984-17.984 47.034 0 65.018s47.034 17.984 65.018 0l225.492-225.492 225.492 225.492c17.984 17.984 47.034 17.984 65.018 0s17.984-47.034 0-65.018L449.015 383.999l225.492-225.494c17.521-17.521 17.521-47.034 0-64.559z'/%3E%3C/svg%3E");
@@ -201,7 +201,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         margin-bottom: 20px;
         position: relative;
         border-radius: var(--ctrl-border-radius);
-        background: var(--ctrl-back);
+        background: var(--ctrl-bg);
         cursor: pointer;
       }
       :host strong,
@@ -267,7 +267,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         cursor: pointer;
         font-size: small;
         color: var(--ctrl-err-text);
-        background: var(--ctrl-err-back);
+        background: var(--ctrl-err-bg);
         margin: -4px 0;
         max-height: 3em;
         overflow: auto;

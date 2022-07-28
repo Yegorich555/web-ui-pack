@@ -61,8 +61,8 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
       --ctrl-switch-on: #fff;
       --ctrl-switch-off: #fff;
       --ctrl-switch-shadow: #0003;
-      --ctrl-switch-off-back: #9f9f9f;
-      --ctrl-switch-on-back: var(--ctrl-focus);
+      --ctrl-switch-off-bg: #9f9f9f;
+      --ctrl-switch-on-bg: var(--ctrl-focus);
       --ctrl-switch-size-h: var(--ctrl-icon-size);
       --ctrl-switch-size-w: calc(var(--ctrl-switch-size-spot) * 2);
       --ctrl-switch-size-spot: calc(var(--ctrl-switch-size-h) * 1.4);
@@ -97,7 +97,7 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
         min-width: var(--ctrl-switch-size-w);
         height: var(--ctrl-switch-size-h);
         border-radius: 999px;
-        background: var(--ctrl-switch-off-back);
+        background: var(--ctrl-switch-off-bg);
       }
       :host label>span:before {
         content: "";
@@ -112,7 +112,7 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
       }
       :host input { ${WUPcssHidden} }
       :host input:checked + * + * {
-        background-color: var(--ctrl-switch-on-back);
+        background-color: var(--ctrl-switch-on-bg);
       }
       :host input:checked + * + *:before {
         background: var(--ctrl-switch-on);
