@@ -37,7 +37,21 @@ export default function PopupView() {
   setTimeout(() => setOpts(opts));
 
   return (
-    <Page header="PopupElement" link="#popupelement">
+    <Page
+      header="PopupElement"
+      link="src/popup/popupElement"
+      details={{ tag: "wup-popup" }}
+      features={[
+        "The main goal: place inside visible area without oveflow of target",
+        <>
+          Works without <b>position: relative</b>
+        </>,
+        "Optimized for render (via window.requestAnimationFrame)",
+        "Built-in animations",
+        "Built-in arrow",
+        "Flexible way to change position-priorities",
+      ]}
+    >
       <h3>Options</h3>
       <fieldset className={styles.inputs}>
         <legend>Offset</legend>

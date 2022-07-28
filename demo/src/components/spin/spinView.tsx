@@ -27,7 +27,14 @@ export default function SpinView() {
       header="SpinElement"
       link="src/spinElement.ts"
       className={styles.pageSpin}
-      details={{ tag: "wup-spin" }}
+      details={{
+        tag: "wup-spin",
+        cssVarAlt: new Map([["--spin-step", "Used for specific types"]]),
+      }}
+      features={[
+        "Highly configurable (via css-vars, presets, attrs)",
+        "Ability to fit parent without affecting on parent-height",
+      ]}
     >
       <section>
         <h3>With position: relative</h3>

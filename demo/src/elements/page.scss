@@ -1,0 +1,19 @@
+.features {
+  h3 {
+    margin: 0;
+  }
+
+  ul {
+    padding-left: 20px;
+    margin: 0;
+    list-style-type: disc;
+  }
+
+  & > li {
+    padding: 0;
+  }
+}
+
+.smallText {
+  font-size: small;
+}

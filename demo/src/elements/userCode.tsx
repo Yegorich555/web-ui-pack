@@ -6,6 +6,7 @@ import getUsedCssVars from "src/helpers/parseCssVars";
 import WUPBaseElement from "web-ui-pack/baseElement";
 import WUPBaseControl from "web-ui-pack/controls/baseControl";
 import styles from "./userCode.scss";
+import pageStyles from "./page.scss";
 
 export interface UserCodeProps {
   tag?: `wup-${string}`;
@@ -80,7 +81,7 @@ export default function UserCode(props: React.PropsWithChildren<UserCodeProps>) 
 
   return (
     <>
-      <section>
+      <section className={pageStyles.smallText}>
         <h3>
           HTML{" "}
           <small className={styles.headerDetails}>
@@ -89,7 +90,7 @@ export default function UserCode(props: React.PropsWithChildren<UserCodeProps>) 
         </h3>
         {renderHTMLCode(props.tag)}
       </section>
-      <section>
+      <section className={pageStyles.smallText}>
         <h3>CSS variables</h3>
         <code className={styles.cssVars}>
           <ul>

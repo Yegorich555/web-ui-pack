@@ -17,6 +17,7 @@ export default function TextControlView() {
         tag: "wup-text",
         cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
       }}
+      features={null}
     >
       <wup-form
         ref={(el) => {

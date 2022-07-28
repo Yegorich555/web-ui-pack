@@ -34,7 +34,7 @@ npm install web-ui-pack
 
 - [x] [Helpers](#helpers)
 - [x] [Helper.Observer](#helpersobserver)
-- [x] [PopupElement](#popupelement) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
+- [x] [PopupElement](#example) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
 - [x] [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
 - [x] FormElement
 - [x] [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
@@ -71,7 +71,7 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
 1. **Naming**
    - All components named as `WUP..Element`, `WUP..Control` and `<wup-...>` (for html-tags)
    - Public properties/options/events/methods startsWith `$...` (events `$onShow`, `$onHide`, methods `$show`, `$hide`, props like `$isOpen` etc.)
-   - Every component has at least static `$defaults` (common options for current class) and personal `$options` (per each component). See details in [example](#popupelement)
+   - Every component has static `$defaults` (common options for current class) and personal `$options` (per each component). See details in [example](#example)
    - `$options` are observed. So changing options affects on component immediately after empty timeout (every component has static `observedOptions` as set of watched options)
 2. **Usage**
    - For webpack [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free) switched off (it's for optimization). But **if you don't use webpack** don't import from `web-ui-pack` directly (due to tree-shaking can be not smart enough). Instead use `web-ui-pack/path-to-element`
@@ -84,7 +84,7 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
    - Components are developed to be easy customized and inherrited. Every rule/option/method is developed to be customized if defaultOptions are not enough. You can rewrite everything that you can imagine without digging a lot in a code. To be sure don't hesitate to take a look on \*.d.ts or source code (there are enough comments to clarify even weird/difficult cases)
    - All Components inherrited from [WUPBaseElement](src/baseElement.ts) that extends default HTMLElement
    - All internal event-callbacks startsWith `got...` (gotReady, gotRemoved)
-   - To redefine component just extend it and register with new html tag. See details in [example](#popupelement)
+   - To redefine component just extend it and register with new html tag. See details in [example](#example)
    - **Inherritance Tree**
 
      - [_HTMLElement_](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement)
@@ -105,12 +105,9 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
 
 ---
 
- <!-- todo reogranize Readme. Focus on Demo or split readme per component -->
-### PopupElement
+### Example
 
-[WUPPopupElement](src/popupElement.ts), `<wup-popup />`
-
-This is **the most smart & crazy element** you've ever seen (see [Demo](#demo))
+Check how you can use every element/control (popupElement for example)
 
 Typescript
 

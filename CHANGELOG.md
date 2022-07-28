@@ -31,7 +31,7 @@
 - Helper [nestedProperty](src/helpers/nestedProperty.ts): added option `out.hasProp`
 - Helper [promiseWait](src/helpers/promiseWait.ts): added option `smartOrCallback` to prevent useless pending on already resolved promises
 
-- [`PopupElement`](README.md#popupelement)
+- [`PopupElement`](src/popup/popupElement.ts)
   - Added $refresh() - to force update/recalc position when nested content is changed
   - Added option **animation** with animation-drawer
   - Added option **maxWidthByTarget**
@@ -43,21 +43,21 @@
 ## 0.0.5 (Apr 4, 2022)
 
 - Fixed helper [`onFocusLost`](src/helpers/onFocusLost.ts): missed callback when user clicks several times fast
-- [`PopupElement`](README.md#popupelement)
+- [`PopupElement`](src/popup/popupElement.ts)
   - Fixed behavior on target-remove
   - Deprecated shadow mode
   - Fixed half-pixel issue on arrow
 
 ## 0.0.4 (Apr 1, 2022)
 
-- [`PopupElement`](README.md#popupelement)
+- [`PopupElement`](src/popup/popupElement.ts)
   - Fixed $options.offset
   - Fixed behavior on target-remove
 - Added helper [`onSpy`](src/helpers/onSpy.ts) to spy on method-call
 
 ## 0.0.3 (Mar 29, 2022)
 
-- Added [`popupElement`](README.md#popupelement) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
+- Added [`PopupElement`](src/popup/popupElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
 - Added [helpers](README.md#helpers)
   - [`stringPrettify`](src/helpers/stringPrettify.ts)
   - [`onEvent`](src/helpers/onEvent.ts)
