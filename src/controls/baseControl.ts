@@ -796,7 +796,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       el.textContent = err;
 
       const renderedErr = (this.$refError as StoredRefError)._wupVldItems?.find((li) => li.textContent === err);
-      this.setAttr.call(el, "className", renderedErr ? this.#ctr.classNameHidden : null);
+      this.setAttr.call(el, "class", renderedErr ? this.#ctr.classNameHidden : null);
 
       target.setAttribute("aria-describedby", this.$refError.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
       if (!this.$isFocused) {

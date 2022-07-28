@@ -137,6 +137,57 @@ exports[`control.text $show/$hide error 3`] = `
 </wup-text>
 `;
 
+exports[`control.text options clearButton 1`] = `
+<wup-text>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+  <section
+    aria-atomic="true"
+    aria-live="polite"
+    class="wup-hidden"
+  />
+</wup-text>
+`;
+
+exports[`control.text options clearButton 2`] = `
+<wup-text>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        type="text"
+      />
+      <strong />
+    </span>
+  </label>
+  <section
+    aria-atomic="true"
+    aria-live="polite"
+    class="wup-hidden"
+  />
+</wup-text>
+`;
+
 exports[`control.text styles 1`] = `
 <style>
   .wup-hidden, [wup-hidden] {
@@ -639,7 +690,7 @@ exports[`control.text validations $options.validationShowAll 2`] = `
       class="wup-hidden"
     />
     <span
-      classname="wup-hidden"
+      class="wup-hidden"
     >
       Invalid email address
     </span>

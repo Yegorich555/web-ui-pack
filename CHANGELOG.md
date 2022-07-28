@@ -21,7 +21,7 @@
 - Added elements
   - [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
   - FormElement
-  - TextControl
+  - [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/text)
   - PasswordControl
   - SelectControl
   - SwitchControl

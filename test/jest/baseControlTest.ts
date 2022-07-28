@@ -69,7 +69,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
   });
 
   test("memoryLeak", () => {
-    const spy = h.spyEventListeners(null);
+    const spy = h.spyEventListeners([]);
     el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
     jest.advanceTimersByTime(1);
     el.remove();
