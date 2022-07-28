@@ -36,6 +36,7 @@ declare global {
     }
   }
 }
+
 /** Flexible animated element with ability to place over target element without position relative
  * @example
  * JS/TS

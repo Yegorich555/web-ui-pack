@@ -1,3 +1,4 @@
+/* eslint-disable react/require-default-props */
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable react/destructuring-assignment */
 import React, { useEffect, useState } from "react";
@@ -30,12 +31,6 @@ function renderHTMLCode(tag: string): string | JSX.Element {
     return "";
   }
 
-  const content: string = el.outerHTML.replace(el.innerHTML, "");
-  const parsed = /<([^/ ]+) ([^>]+)*><\/([^>]+)>/g.exec(content);
-  if (!parsed) {
-    return <code className={styles.htmlCode}>{content}</code>;
-  }
-
   const parsedAttrs: Array<{ name: string; value: string | null }> = [];
   const attrs = el.attributes;
   for (let i = 0; i < attrs.length; ++i) {
@@ -50,21 +45,23 @@ function renderHTMLCode(tag: string): string | JSX.Element {
     parsedAttrs.push({ name: "readonly", value: "false" });
     parsedAttrs.push({ name: "autofocus", value: "false" });
   }
+  const isSingleLine = parsedAttrs.length < 4;
 
   return (
     <code className={styles.htmlCode}>
       {"<"}
-      <span className={styles.htmlTag}>{parsed[1]}</span>
-      <span className={styles.htmlAttr}>
+      <span className={styles.htmlTag}>{tag}</span>
+      <ul className={[styles.htmlAttr, isSingleLine ? styles.htmlAttrSingle : ""].join(" ")}>
         {parsedAttrs.map((a) => (
-          <React.Fragment key={a.name}>
-            <span>{a.name}</span>="{a.value}"<br />
-          </React.Fragment>
+          <li key={a.name}>
+            <span>{a.name}</span>
+            {!a.value ? "" : `="${a.value}"`}
+          </li>
         ))}
-      </span>
+      </ul>
       {">"}
       {"</"}
-      <span className={styles.htmlTag}>{parsed[3]}</span>
+      <span className={styles.htmlTag}>{tag}</span>
       {">"}
     </code>
   );

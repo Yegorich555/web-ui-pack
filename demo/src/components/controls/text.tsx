@@ -11,8 +11,8 @@ const sideEffect = WUPTextControl;
 export default function TextControlView() {
   return (
     <Page
-      header="Text Control"
-      link="/blob/master/src/controls/text.ts"
+      header="TextControl"
+      link="src/controls/text.ts"
       details={{
         tag: "wup-text",
         cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),

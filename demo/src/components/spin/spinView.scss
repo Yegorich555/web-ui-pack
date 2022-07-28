@@ -4,16 +4,18 @@
     margin-bottom: 30px;
   }
 
-  small {
-    display: block;
-    margin-bottom: 10px;
+  section {
+    & > small {
+      display: block;
+      margin-bottom: 10px;
 
-    > strong {
-      color: #ad0000;
-    }
+      > strong {
+        color: #ad0000;
+      }
 
-    > ul {
-      margin-top: 0;
+      > ul {
+        margin-top: 0;
+      }
     }
   }
 

@@ -23,9 +23,9 @@ spinUseRing(WUPSpinElement); // setup default style
 
 export default function SpinView() {
   return (
-    <Page
-      header="Spin"
-      link="/tree/master/src/spinElement.ts"
+    <Page //
+      header="SpinElement"
+      link="src/spinElement.ts"
       className={styles.pageSpin}
       details={{ tag: "wup-spin" }}
     >
@@ -38,7 +38,7 @@ export default function SpinView() {
         </small>
         <button type="button" style={{ position: "relative" }}>
           Button with relative position
-          <wup-spin />
+          <wup-spin overflowFade="" fit="" inline={false} />
         </button>
       </section>
       <section>

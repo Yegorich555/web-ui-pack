@@ -39,10 +39,25 @@
   .htmlAttr {
     color: #a95b3d;
     display: block;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
 
-    & > span {
-      color: #1973b8;
+    & > li {
       padding-left: 1em;
+
+      > span {
+        color: #1973b8;
+      }
+    }
+  }
+
+  .htmlAttrSingle {
+    display: inline;
+
+    & > li {
+      display: inline;
+      padding-left: 0.5em;
     }
   }
 }
