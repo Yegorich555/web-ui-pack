@@ -1,4 +1,5 @@
 import { WUPTextControl } from "web-ui-pack";
+import { ValidationCases, ClearActions } from "web-ui-pack/controls/baseControl";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../testHelper";
 
@@ -22,7 +23,6 @@ describe("control.text", () => {
     },
   });
 
-  // todo move it to common tests
   test("$initValue affects on input", () => {
     el.$initValue = initV;
     expect(el.$refInput.value).toBe(initV);
@@ -33,9 +33,39 @@ describe("control.text", () => {
     expect(el.$refInput.value).toBe(initV);
   });
 
+  test("validation messages ends without '-s'", async () => {
+    el.$options.validations = { min: 1 };
+    el.$validate();
+    await h.wait();
+    expect(el).toMatchSnapshot();
+
+    el.$options.validations = { max: 1 };
+    el.$validate();
+    await h.wait();
+    expect(el).toMatchSnapshot();
+  });
+
   describe("options", () => {
+    test("clearButton", () => {
+      el.$value = initV;
+      el.$options.clearButton = true;
+      el.$options.clearActions = ClearActions.clear;
+      jest.advanceTimersByTime(1);
+      expect(el.$refBtnClear).toBeDefined();
+      el.$refBtnClear.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      expect(el.$value).toBe(undefined);
+      expect(el).toMatchSnapshot();
+
+      el.$options.clearButton = false;
+      jest.advanceTimersByTime(1);
+      expect(el.$refBtnClear).toBe(undefined);
+      expect(el).toMatchSnapshot();
+    });
+
     test("debounceMs", async () => {
       el.$options.debounceMs = 400;
+      el.$options.validations = { _alwaysInvalid: true }; // just for coverage
+      el.$options.validationCase = ValidationCases.onChange; // just for coverage
       const spyChange = jest.fn();
       el.addEventListener("$change", spyChange);
 
@@ -46,6 +76,7 @@ describe("control.text", () => {
       expect(el.$refInput.value).toBe(initV);
       expect(el.$value).toBe(initV);
       expect(spyChange).toBeCalledTimes(1);
+      await h.typeInputText(el.$refInput, ""); // just for coverage
 
       el.$options.debounceMs = 0;
       el.$value = undefined;

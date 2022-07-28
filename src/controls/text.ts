@@ -310,13 +310,13 @@ export default class WUPTextControl<
   /** Called when user types text */
   protected gotInput(e: Event, inputEl: HTMLInputElement): void {
     this._validTimer && clearTimeout(this._validTimer);
-    const v = inputEl.value;
+    const v = this.parseValue(inputEl.value);
 
     if (this._opts.debounceMs) {
       this.#inputTimer && clearTimeout(this.#inputTimer);
       this.#inputTimer = window.setTimeout(() => this.setValue(v as any), this._opts.debounceMs);
     } else {
-      this.setValue(this.parseValue(v as any));
+      this.setValue(v);
     }
   }
 

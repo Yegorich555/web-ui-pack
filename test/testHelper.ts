@@ -168,7 +168,7 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
           /* eslint-enable jest/no-standalone-expect */
         });
 
-        const os = c.observedOptions;
+        const os = (c as any).observedOptions as string[];
         if (os?.length) {
           describe("observerOptions affects on attributes", () => {
             os.forEach((o) => {
@@ -304,7 +304,7 @@ export function useFakeAnimation() {
   });
 
   jest.spyOn(window, "cancelAnimationFrame").mockImplementation((fn) => {
-    const ind = animateFrames.indexOf(fn);
+    const ind = animateFrames.indexOf(fn as any);
     ind > -1 && animateFrames.splice(ind, 1);
   });
 
@@ -332,11 +332,15 @@ export async function typeInputText(el: HTMLInputElement, text: string, opts = {
     el.dispatchEvent(new KeyboardEvent("keyup", { key, bubbles: true }));
     el.dispatchEvent(new KeyboardEvent("keypress", { key, bubbles: true }));
     el.value += key;
-    el.dispatchEvent(new InputEvent("input"));
+    el.dispatchEvent(new InputEvent("input", { bubbles: true }));
 
     if (i !== text.length - 1) {
       jest.advanceTimersByTime(20);
       await Promise.resolve();
     }
+  }
+
+  if (text === "") {
+    el.dispatchEvent(new InputEvent("input", { bubbles: true }));
   }
 }

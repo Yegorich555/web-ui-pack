@@ -466,6 +466,88 @@ mask-image: var(--ctrl-icon-img);
 </style>
 `;
 
+exports[`control.text validation messages ends without '-s' 1`] = `
+<wup-text
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-describedby="txt2"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    role="alert"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      Min length is 1 character
+    </span>
+  </wup-popup>
+</wup-text>
+`;
+
+exports[`control.text validation messages ends without '-s' 2`] = `
+<wup-text
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-describedby="txt2"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    role="alert"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      Max length is 1 character
+    </span>
+  </wup-popup>
+</wup-text>
+`;
+
 exports[`control.text validations $options.validationShowAll 1`] = `
 <wup-text
   invalid=""
