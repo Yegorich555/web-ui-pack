@@ -115,6 +115,7 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
   describe("common tests", () => {
     jest.useFakeTimers();
     const obj = createFunction() as WUPBaseElement | HTMLElement;
+    jest.advanceTimersByTime(1);
 
     test("no arrow functions", () => {
       const fns = findAllFunctions(obj);
