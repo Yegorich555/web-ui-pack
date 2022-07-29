@@ -1,4 +1,3 @@
-import onFocusGot from "../helpers/onFocusGot";
 import { onEvent } from "../indexHelpers";
 import { WUPcssIcon } from "../styles";
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
@@ -82,7 +81,7 @@ export default class WUPTextControl<
 
   static get observedOptions(): Array<string> {
     const arr = super.observedOptions as Array<keyof WUPText.Options>;
-    arr.push("clearButton", "selectOnFocus");
+    arr.push("clearButton");
     return arr;
   }
 
@@ -282,20 +281,17 @@ export default class WUPTextControl<
     return bc;
   }
 
-  protected override gotReady(): void {
-    super.gotReady();
-    this.appendEvent(this.$refInput, "input", (e) => this.gotInput(e, this.$refInput));
+  protected override gotFocus(): Array<() => void> {
+    const arr = super.gotFocus();
+    const r = this.appendEvent(this.$refInput, "input", (e) => this.gotInput(e, this.$refInput));
+    this._opts.selectOnFocus && !this.$refInput.readOnly && this.$refInput.select();
+
+    arr.push(r);
+    return arr;
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUPText.Options> | null): void {
     super.gotChanges(propsChanged as any);
-    this.$refInput.autocomplete = this.$autoComplete || "off"; // todo useless logic
-
-    setTimeout(() => {
-      this._opts.selectOnFocus &&
-        !this.$refInput.readOnly &&
-        this.disposeLstInit.push(onFocusGot(this, () => this.$refInput.select()));
-    }); // timeout required because selectControl can setup readOnly after super.gotChanges
 
     if (this._opts.clearButton && !this.$refBtnClear) {
       this.$refBtnClear = this.renderBtnClear();

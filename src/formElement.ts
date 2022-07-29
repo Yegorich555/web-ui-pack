@@ -93,7 +93,7 @@ const formStore: WUPFormElement[] = [];
  *  form.$options.autoComplete = false;
  *  form.$initModel = { email: "test-me@google.com" };
  *  form.addEventListener("$submit", (e) => console.warn(e.$model) );
- *  form.$onSubmit = async (e)=>{ await postHere(e.$model); }
+ *  form.$onSubmit = async (e)=>{ await postHere(e.$model); } // equal to form.addEventListener
  *  // init control
  *  const el = document.createElement("wup-text");
  *  el.$options.name = "email";
@@ -101,7 +101,7 @@ const formStore: WUPFormElement[] = [];
  *  form.appendChild(el);
  *  const btn = form.appendChild(document.createElement("button"));
  *  btn.textContent = "Submit";
- *  btn.type = "Submit";
+ *  btn.type = "submit";
  *  document.body.appendChild(form);
  *  // or HTML
  *  <wup-form autoComplete autoFocus>
@@ -109,8 +109,8 @@ const formStore: WUPFormElement[] = [];
  *    <button type="submit">Submit</submit>
  *  </wup-form>;
  * @tutorial Troubleshooting/rules:
- * * options like $initModel, $model overrides $initValue, $value in each control that matches by $options.name
- * * In react ref-parent called after ref-children. So if you want to override $initValue use empty setTimeout on ref-control
+ * * options like $initModel, $model overrides control.$initValue, control.$value (every control that matches by $options.name)
+ * * In React ref-parent called after ref-children. So if you want to set control.$initValue over form.$initModel use empty setTimeout on ref-control
  * @example
  * <wup-form
       ref={(el) => {

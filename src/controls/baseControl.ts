@@ -3,8 +3,8 @@ import WUPFormElement from "../formElement";
 import isEqual from "../helpers/isEqual";
 import nestedProperty from "../helpers/nestedProperty";
 import onFocusLostEv from "../helpers/onFocusLost";
+import onFocusGot from "../helpers/onFocusGot";
 import stringPrettify from "../helpers/stringPrettify";
-import { onFocusGot } from "../indexHelpers";
 // eslint-disable-next-line import/named
 import WUPPopupElement, { ShowCases } from "../popup/popupElement";
 import { WUPcssIcon } from "../styles";
@@ -497,30 +497,8 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   //   super();
   // }
 
-  /** Array of removeEventListener() that called ReInit */
-  protected disposeLstInit: Array<() => void> = [];
-
   protected override gotChanges(propsChanged: Array<keyof WUPBase.Options | any> | null): void {
     super.gotChanges(propsChanged);
-
-    this.disposeLstInit.forEach((f) => f()); // remove possible previous event listeners
-    this.disposeLstInit.length = 0;
-
-    if (this._opts.validationCase & ValidationCases.onFocusLost) {
-      this.disposeLstInit.push(
-        onFocusLostEv(this, () => this.goValidate(ValidateFromCases.onFocusLost), {
-          debounceMs: this._opts.focusDebounceMs,
-        })
-      );
-    }
-
-    if (this._opts.validationCase & ValidationCases.onFocusWithValue) {
-      this.disposeLstInit.push(
-        onFocusGot(this, () => !this.$isEmpty && this.goValidate(ValidateFromCases.onFocus), {
-          debounceMs: this._opts.focusDebounceMs,
-        })
-      );
-    }
 
     this._opts.label = this.getAttribute("label") ?? this._opts.label;
     this._opts.name = this.getAttribute("name") ?? this._opts.name;
@@ -580,6 +558,23 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   protected override gotReady(): void {
     super.gotReady();
 
+    const r = onFocusGot(
+      this,
+      () => {
+        const arr = this.gotFocus();
+        const r2 = onFocusLostEv(this, () => {
+          arr.forEach((f) => f());
+          this.gotFocusLost();
+          r2();
+          this.disposeLst.splice(this.disposeLst.indexOf(r2), 1);
+        });
+        this.disposeLst.push(r2);
+      },
+      { debounceMs: this._opts.focusDebounceMs }
+    );
+
+    this.disposeLst.push(r);
+
     // appendEvent removed by dispose()
     this.appendEvent(
       this,
@@ -594,7 +589,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       }
     );
 
-    this.appendEvent(this, "keydown", (e) => !this.$isDisabled && this.gotKeyDown(e));
     if (this._opts.validationCase & ValidationCases.onInit) {
       !this.$isEmpty && this.goValidate(ValidateFromCases.onInit);
     }
@@ -763,7 +757,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     p.setAttribute("aria-live", "off");
     p.setAttribute("aria-atomic", true); // necessary to make Voiceover on iOS read the error messages after more than one invalid submission
     p.id = this.#ctr.$uniqueId;
-    p.addEventListener("click", this.focus);
 
     const hiddenLbl = p.appendChild(document.createElement("span"));
     hiddenLbl.className = this.#ctr.classNameHidden;
@@ -810,7 +803,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   protected goHideError(): void {
     if (this.$refError) {
       const p = this.$refError;
-      p.addEventListener("$hide", p.remove);
+      p.addEventListener("$hide", p.remove, { passive: true, once: true });
       p.$hide(); // hide with animation
       this.$refError = undefined;
 
@@ -869,24 +862,29 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     this.#prevValue = was;
   }
 
+  /** Called when element got focus; must return array of RemoveFunctions called on FocusLost */
+  protected gotFocus(): Array<() => void> {
+    if (this._opts.validationCase & ValidationCases.onFocusWithValue) {
+      !this.$isEmpty && this.goValidate(ValidateFromCases.onFocus);
+    }
+    const r = this.appendEvent(this, "keydown", (e) => !this.$isDisabled && this.gotKeyDown(e));
+    return [r];
+  }
+
+  /** Called when element completely lost focus; despite on blur it has debounce filter */
+  protected gotFocusLost(): void {
+    if (this._opts.validationCase & ValidationCases.onFocusLost) {
+      this.goValidate(ValidateFromCases.onFocusLost);
+    }
+  }
+
   /** Called when user pressed key */
   protected gotKeyDown(e: KeyboardEvent): void {
     if (e.key === "Escape") {
       this.clearValue();
     }
   }
-
-  protected override dispose(): void {
-    super.dispose();
-    this.disposeLstInit.forEach((f) => f()); // remove possible previous event listeners
-    this.disposeLstInit.length = 0;
-  }
 }
-
-// testcase: $initModel & attr [name] (possible it doesn't work)
-// testcase: required & hasInitValue. Removing value must provide error
-// testcase: has invalid initValue. Changing must provide error (event smartOption)
-// testcase: all empty controls (or with single value) must be have the same height - 44px (check, switch can be different height)
 
 // todo NumberInput - set role 'spinbutton'
 // todo details about validations/customMessages

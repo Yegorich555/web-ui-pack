@@ -165,6 +165,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       jest.advanceTimersByTime(1);
       expect(el.$value).toBe(cfg.initValues[0].value);
 
+      el.focus();
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       expect(el.$value).toBe(undefined);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
@@ -358,6 +359,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       // onChange only
       el.$options.validationCase = ValidationCases.onChange | 0;
       expect(el).toMatchSnapshot();
+      el.focus();
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
       expect(el.$isEmpty).toBe(true);
       await h.wait();
@@ -392,6 +394,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       await h.wait();
       expect(el.$refError).not.toBeDefined();
       el.focus();
+      await h.wait();
       el.blur();
       await h.wait();
       expect(el.$refError).toBeDefined();
@@ -413,6 +416,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$value = cfg.initValues[0].value;
       await h.wait();
 
+      el.focus();
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
       expect(el.$isEmpty).toBe(true);
       await h.wait();
@@ -631,3 +635,9 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     expect(el.$initValue).toBe(cfg.initValues[1].value);
   });
 }
+
+// todo
+// testcase: $initModel & attr [name] (possible it doesn't work)
+// testcase: required & hasInitValue. Removing value must provide error
+// testcase: has invalid initValue. Changing must provide error (event smartOption)
+// testcase: all empty controls (or with single value) must be have the same height - 44px (check, switch can be different height)

@@ -88,3 +88,5 @@ describe("formElement", () => {
 });
 
 // todo e2e click on button without [submit] should fire submit call
+
+// test-case: submit by Enter keydown

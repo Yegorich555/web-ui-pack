@@ -817,7 +817,6 @@ exports[`control.text validations options.validationCase 2`] = `
     aria-live="off"
     error=""
     id="txt2"
-    role="alert"
     style="display: none;"
   >
     <span
