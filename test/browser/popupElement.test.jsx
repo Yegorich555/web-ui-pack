@@ -93,7 +93,7 @@ describe("popupElement", () => {
     await page.hover("input");
     let t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
     expect(t.isOpened).toBeFalsy(); // because of timeout
-    await page.waitForTimeout(202); // hoverShowTimeout is 200 by default
+    await page.waitForTimeout(212); // hoverShowTimeout is 200 by default
     t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
     expect(t.isOpened).toBeTruthy();
 

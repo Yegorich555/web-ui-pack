@@ -14,9 +14,9 @@ beforeEach(async () => {
         <wup-spin />
       </button>`
     );
-    window.testEl = document.querySelector("wup-spin");
   });
   await page.waitForTimeout(20); // timeout required because of debounceFilters
+  await page.evaluate(() => (window.testEl = document.querySelector("wup-spin")));
 });
 
 describe("spinElement", () => {
