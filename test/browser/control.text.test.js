@@ -57,6 +57,14 @@ describe("control.text", () => {
     await page.click("#fakeLabel");
     t = await page.getInfo();
     expect(t.gotBlurMineEl).toBe(1); // checking if click outside affects on blur
+
+    await page.click("[clear]"); // checking if click on btn-clear moves focus to input
+    t = await page.getInfo();
+    expect(t.id).toBe(t.trueId);
+
+    await page.click("[clear]"); // checking again
+    t = await page.getInfo();
+    expect(t.id).toBe(t.trueId);
   });
 
   test("click on err moves focus into input", async () => {
