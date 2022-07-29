@@ -26,6 +26,7 @@ beforeEach(() => {
 
   btnSubmit = el.appendChild(document.createElement("button"));
   btnSubmit.type = "submit";
+  jest.advanceTimersByTime(1);
 });
 
 afterEach(() => {
@@ -47,7 +48,7 @@ describe("formElement", () => {
     expect(inputs[0].$initValue).toBe("some@email.com");
     expect(inputs[0].$value).toBe("some@email.com");
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-form role=\\"form\\"><wup-text><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\"><strong></strong></span></label></wup-text><wup-text><label for=\\"txt2\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt2\\"><strong></strong></span></label></wup-text><wup-text><label for=\\"txt3\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt3\\"><strong></strong></span></label></wup-text><button type=\\"submit\\"></button></wup-form>"`
+      `"<wup-form role=\\"form\\"><wup-text><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" autocomplete=\\"off\\"><strong>Email</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt2\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt2\\" autocomplete=\\"off\\"><strong>First Name</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt3\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt3\\" autocomplete=\\"off\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><button type=\\"submit\\"></button></wup-form>"`
     );
 
     expect(inputs[1].$initValue).toBe("hello from 2");
@@ -84,6 +85,108 @@ describe("formElement", () => {
     expect(inputs[0].$value).toBe("");
     expect(inputs[1].$value).toBe(undefined);
     expect(inputs[2].$value).toBe("without name");
+
+    // name applied after setModel
+    inputs[0].$initValue = undefined;
+    el.$initModel = { DOB: "some date", Address: "Walk st." };
+    inputs[0].setAttribute("name", "DOB");
+    jest.advanceTimersByTime(1);
+    expect(inputs[0].$initValue).toBe("some date");
+
+    inputs[0].setAttribute("name", "Address");
+    jest.advanceTimersByTime(1);
+    expect(inputs[0].$initValue).toBe("some date"); // stay same because prev. $initValue is defined
+  });
+
+  describe("options applied to controls", () => {
+    test("readOnly", () => {
+      expect(inputs[0].$isReadOnly).toBe(false);
+      el.setAttribute("readonly", "");
+      jest.advanceTimersByTime(1);
+      expect(inputs[0].$isReadOnly).toBe(true);
+      expect(inputs[0].$refInput.readOnly).toBe(true);
+      expect(inputs[1].$refInput.readOnly).toBe(true);
+      expect(inputs[2].$refInput.readOnly).toBe(true);
+
+      el.removeAttribute("readonly");
+      jest.advanceTimersByTime(1);
+      expect(inputs[0].$isReadOnly).toBe(false);
+      expect(inputs[0].$refInput.readOnly).toBe(false);
+      expect(inputs[1].$refInput.readOnly).toBe(false);
+      expect(inputs[2].$refInput.readOnly).toBe(false);
+
+      el.$options.readOnly = true;
+      jest.advanceTimersByTime(1);
+      expect(inputs[0].$isReadOnly).toBe(true);
+      expect(inputs[0].$refInput.readOnly).toBe(true);
+      expect(inputs[1].$refInput.readOnly).toBe(true);
+
+      el.$options.readOnly = false;
+      jest.advanceTimersByTime(1);
+      expect(inputs[0].$isReadOnly).toBe(false);
+      expect(inputs[0].$refInput.readOnly).toBe(false);
+      expect(inputs[1].$refInput.readOnly).toBe(false);
+    });
+
+    test("disabled", () => {
+      expect(inputs[0].$isDisabled).toBe(false);
+      el.setAttribute("disabled", "");
+      jest.advanceTimersByTime(1);
+      expect(inputs[0].$isDisabled).toBe(true);
+      expect(inputs[0].$refInput.disabled).toBe(true);
+      expect(inputs[1].$refInput.disabled).toBe(true);
+      expect(inputs[2].$refInput.disabled).toBe(true);
+
+      el.removeAttribute("disabled");
+      jest.advanceTimersByTime(1);
+      expect(inputs[0].$isDisabled).toBe(false);
+      expect(inputs[0].$refInput.disabled).toBe(false);
+      expect(inputs[1].$refInput.disabled).toBe(false);
+      expect(inputs[2].$refInput.disabled).toBe(false);
+
+      el.$options.disabled = true;
+      jest.advanceTimersByTime(1);
+      expect(inputs[0].$isDisabled).toBe(true);
+      expect(inputs[0].$refInput.disabled).toBe(true);
+      expect(inputs[1].$refInput.disabled).toBe(true);
+
+      el.$options.disabled = false;
+      jest.advanceTimersByTime(1);
+      expect(inputs[0].$isDisabled).toBe(false);
+      expect(inputs[0].$refInput.disabled).toBe(false);
+      expect(inputs[1].$refInput.disabled).toBe(false);
+    });
+
+    test("autoComplete", () => {
+      expect(inputs[0].$autoComplete).toBe(false);
+      el.setAttribute("autocomplete", "");
+      jest.advanceTimersByTime(1);
+      expect(inputs[0].$autoComplete).toBe("email");
+      expect(inputs[0].$refInput.autocomplete).toBe("email");
+      expect(inputs[1].$refInput.autocomplete).toBe("firstName");
+      expect(inputs[2].$refInput.autocomplete).toBe("off");
+
+      el.removeAttribute("autocomplete");
+      jest.advanceTimersByTime(1);
+      expect(inputs[0].$autoComplete).toBe(false);
+      expect(inputs[0].$refInput.autocomplete).toBe("off");
+      expect(inputs[1].$refInput.autocomplete).toBe("off");
+      expect(inputs[2].$refInput.autocomplete).toBe("off");
+
+      el.$options.autoComplete = true;
+      jest.advanceTimersByTime(1);
+      expect(inputs[0].$autoComplete).toBe("email");
+      expect(inputs[0].$refInput.autocomplete).toBe("email");
+      expect(inputs[1].$refInput.autocomplete).toBe("firstName");
+      expect(inputs[2].$refInput.autocomplete).toBe("off");
+
+      el.$options.autoComplete = false;
+      jest.advanceTimersByTime(1);
+      expect(inputs[0].$autoComplete).toBe(false);
+      expect(inputs[0].$refInput.autocomplete).toBe("off");
+      expect(inputs[1].$refInput.autocomplete).toBe("off");
+      expect(inputs[2].$refInput.autocomplete).toBe("off");
+    });
   });
 });
 

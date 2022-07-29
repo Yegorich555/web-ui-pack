@@ -339,5 +339,3 @@ customElements.define(tagName, WUPTextControl);
 
 // todo docs about usage with css-variables... Maybe FAQ ???
 // todo docs about removing required-asterisk-label
-
-// todo Optimization: refactor events to be listen only by focusGot!!!

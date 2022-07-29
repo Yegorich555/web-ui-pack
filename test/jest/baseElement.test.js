@@ -34,7 +34,10 @@ describe("baseElement", () => {
   });
 
   describe("me", () => {
-    customElements.define("test-base-el", WUPBaseElement);
+    class TestMeElement extends WUPBaseElement {
+      $options = {};
+    }
+    customElements.define("test-base-el", TestMeElement);
     h.baseTestComponent(() => document.createElement("test-base-el"));
   });
 
@@ -392,7 +395,7 @@ describe("baseElement", () => {
       }
 
       static get observedAttributes() {
-        return ["disabled", "disabledReflect", "readonly"];
+        return ["disabled", "disabledreflect", "readonly"];
       }
 
       gotChanges(...args) {
@@ -412,7 +415,7 @@ describe("baseElement", () => {
 
     expect(spyAll).toBeCalledTimes(1); // it's called on init
     expect(spyAll).toBeCalledWith(null);
-    expect(spyAttr).toBeCalledTimes(1); // inside gotChanges()
+    expect(spyAttr).toBeCalledTimes(0); // because of inside gotChanges()
     expect(spyOpts).toBeCalledTimes(0);
 
     await h.wait();
@@ -421,7 +424,7 @@ describe("baseElement", () => {
     await h.wait();
     expect(spyAll).toBeCalledTimes(1);
     expect(spyAll).toBeCalledWith(["disabled"]);
-    expect(spyAttr).toBeCalledTimes(2); // twice because 1st - removed by gotOptionsChanged, 2nd - added by gotChanges
+    expect(spyAttr).toBeCalledTimes(0);
     expect(spyOpts).toBeCalledTimes(1);
 
     jest.clearAllMocks();
@@ -429,7 +432,7 @@ describe("baseElement", () => {
     await h.wait();
     expect(spyAll).toBeCalledTimes(1);
     expect(spyAll).toBeCalledWith(["disabled"]);
-    expect(spyAttr).toBeCalledTimes(2);
+    expect(spyAttr).toBeCalledTimes(1);
     expect(spyOpts).toBeCalledTimes(0);
 
     jest.clearAllMocks();
@@ -438,7 +441,7 @@ describe("baseElement", () => {
     await h.wait();
     expect(spyAll).toBeCalledTimes(1);
     expect(spyAll).toBeCalledWith(["disabled", "readonly"]);
-    expect(spyAttr).toBeCalledTimes(3);
+    expect(spyAttr).toBeCalledTimes(2);
     expect(spyOpts).toBeCalledTimes(0);
 
     jest.clearAllMocks();
@@ -449,3 +452,5 @@ describe("baseElement", () => {
     expect(spyOpts).toBeCalledTimes(3);
   });
 });
+
+// todo add tests for blur()

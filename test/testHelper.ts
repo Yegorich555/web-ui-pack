@@ -135,7 +135,9 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
 
       test("memoryLeak", () => {
         const spy = spyEventListeners([]);
-        const el = document.body.appendChild(obj);
+        spy.check(); // checking memory leak
+
+        const el = document.body.appendChild(createFunction());
         jest.advanceTimersByTime(1);
         el.remove();
         spy.check(); // checking memory leak

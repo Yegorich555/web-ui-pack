@@ -250,9 +250,6 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   #attrChanged?: string[];
   /** Called when element isReady and one of observedAttributes is changed */
   protected gotAttributeChanged(name: string, oldValue: string, newValue: string): void {
-    if (this._isStopChanges) {
-      return;
-    }
     // debounce filter
     if (this.#attrTimer) {
       this.#attrChanged!.push(name);
@@ -289,7 +286,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
 
   /** Browser calls this method when attrs pointed in observedAttributes is changed */
   protected attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
-    this.#isReady && this.gotAttributeChanged(name, oldValue, newValue);
+    this.#isReady && !this._isStopChanges && this.gotAttributeChanged(name, oldValue, newValue);
   }
 
   dispatchEvent<K extends keyof Events>(type: K, eventInit?: EventInit): boolean;

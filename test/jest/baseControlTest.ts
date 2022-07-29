@@ -635,9 +635,3 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     expect(el.$initValue).toBe(cfg.initValues[1].value);
   });
 }
-
-// todo
-// testcase: $initModel & attr [name] (possible it doesn't work)
-// testcase: required & hasInitValue. Removing value must provide error
-// testcase: has invalid initValue. Changing must provide error (event smartOption)
-// testcase: all empty controls (or with single value) must be have the same height - 44px (check, switch can be different height)

@@ -391,29 +391,40 @@ export default class WUPFormElement<
     });
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUPForm.Options> | null): void {
+  #hasControlChanges?: boolean;
+  protected override gotChanges(propsChanged: Array<keyof WUPForm.Options | LowerKeys<WUPForm.Options>> | null): void {
     super.gotChanges(propsChanged);
 
     this._opts.disabled = this.getBoolAttr("disabled", this._opts.disabled);
-    this._opts.readOnly = this.getBoolAttr("readOnly", this._opts.readOnly);
-    this._opts.autoFocus = this.getBoolAttr("autoFocus", this._opts.autoFocus);
+    this._opts.readOnly = this.getBoolAttr("readonly", this._opts.readOnly);
     this._opts.autoComplete = this.getBoolAttr("autoComplete", this._opts.autoComplete);
+    this._opts.autoFocus = this.getBoolAttr("autoFocus", this._opts.autoFocus);
 
-    this.setAttr("readOnly", this._opts.readOnly, true);
+    this.setAttr("readonly", this._opts.readOnly, true);
     this.setAttr("disabled", this._opts.disabled, true);
 
     const p = propsChanged;
-    if (p && (p.includes("readOnly") || p.includes("disabled") || p.includes("autoComplete"))) {
+    if (this.#hasControlChanges || p?.includes("disabled")) {
       this.$controls.forEach((c) => c.gotFormChanges(propsChanged));
+      this.#hasControlChanges = undefined;
     }
   }
 
-  protected override gotOptionsChanged(e: WUP.OptionEvent): void {
-    this._isStopChanges = true;
-    e.props.includes("disabled") && this.setAttr("disabled", this._opts.disabled, true);
-    e.props.includes("readOnly") && this.setAttr("readOnly", this._opts.readOnly, true);
+  protected override gotOptionsChanged(e: WUP.OptionEvent<Record<string, any>>): void {
+    const p = e.props as Array<keyof WUPForm.Options>;
+    if (p.includes("autoComplete") || p.includes("readOnly")) {
+      this.#hasControlChanges = true;
+    }
+
     super.gotOptionsChanged(e);
-    this._isStopChanges = false;
+  }
+
+  protected override gotAttributeChanged(name: string, oldValue: string, newValue: string): void {
+    if (name === "autocomplete" || name === "readonly") {
+      this.#hasControlChanges = true;
+    }
+
+    super.gotAttributeChanged(name, oldValue, newValue);
   }
 
   protected override gotReady(): void {

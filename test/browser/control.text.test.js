@@ -32,6 +32,12 @@ beforeEach(async () => {
 });
 
 describe("control.text", () => {
+  test("control height", async () => {
+    await page.addStyleTag({ content: "body { font-size: 14px}" });
+    const h = await page.evaluate(() => document.getElementById("trueEl").offsetHeight);
+    expect(h).toBe(44);
+  });
+
   test("click on control > focus", async () => {
     // checking default browser behavior
     await page.click("#fakeLabel");
