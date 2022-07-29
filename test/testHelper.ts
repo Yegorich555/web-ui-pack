@@ -134,7 +134,7 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
         describe("observedAttributes affects on options", () => {
           /* eslint-disable jest/no-standalone-expect */
           attrs.forEach((a) => {
-            const isSkip = opts.attrs && opts.attrs[a]?.skip;
+            const isSkip = opts?.attrs && opts.attrs[a]?.skip;
             it(`attr [${a}]${isSkip ? " - skipped" : ""}`, () => {
               expect(a.toLowerCase()).toBe(a); // all observed attrs must be in lowercase otherwise it doesn't work
 

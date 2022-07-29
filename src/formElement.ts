@@ -148,8 +148,8 @@ export default class WUPFormElement<
   }
 
   /* Array of attribute names to listen for changes */
-  static get observedAttributes(): Array<keyof WUPForm.Options> {
-    return ["disabled", "readOnly", "autoComplete"];
+  static get observedAttributes(): Array<LowerKeys<WUPForm.Options>> {
+    return ["disabled", "readonly", "autocomplete"];
   }
 
   static get $styleRoot(): string {
