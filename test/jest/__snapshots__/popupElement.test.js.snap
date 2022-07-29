@@ -1,0 +1,287 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`popupElement inheritance common tests render + styles 1`] = `<test-el />`;
+
+exports[`popupElement inheritance common tests render + styles 2`] = `
+<style>
+  .wup-hidden, [wup-hidden] {
+position: absolute;
+height: 1px; width: 1px;
+top:0;left:0;
+overflow: hidden;
+clip: rect(1px, 1px, 1px, 1px);}
+  :root {
+          --base-bg: #fff;
+          --base-text: #232323;
+          --base-focus: #00778d;
+          --base-btn-bg: #009fbc;
+          --base-btn-text: #fff;
+          --base-btn-focus: #005766;
+          --base-btn2-bg: var(--base-btn-text);
+          --base-btn2-text: var(--base-btn-bg);
+          --border-radius: 6px;
+          --anim-time: 200ms;
+          --anim: var(--anim-time, 200ms) cubic-bezier(0, 0, 0.2, 1) 0ms;
+        }
+  
+      :root {
+        --popup-shadow-size: 4px;
+        --popup-anim: 300ms;
+      }
+  
+      WUP-POPUP {
+        z-index: 90000;
+        display: none;
+        position: fixed!important;
+        top: 0; left: 0;
+        padding: 4px;
+        margin: 0;
+        box-sizing: border-box;
+        border-radius: var(--border-radius, 6px);
+        box-shadow: 0 1px var(--popup-shadow-size) 0 #00000033;
+        background: white;
+        text-overflow: ellipsis;
+        overflow: auto;
+      }
+      @media not all and (prefers-reduced-motion) {
+        WUP-POPUP,
+        WUP-POPUP+WUP-POPUP-arrow {
+          animation: WUP-POPUP-a1 var(--popup-anim) ease-in-out forwards;
+        }
+        @keyframes WUP-POPUP-a1 {
+          from {opacity: 0;}
+        }
+        WUP-POPUP[hide],
+        WUP-POPUP[hide]+WUP-POPUP-arrow {
+          animation: WUP-POPUP-a2 var(--popup-anim) ease-in-out forwards;
+        }
+        @keyframes WUP-POPUP-a2 {
+          to {opacity: 0;}
+        }
+       }
+      
+WUP-POPUP::-webkit-scrollbar {
+  width: 10px; height: 10px;
+}
+WUP-POPUP::-webkit-scrollbar-corner {
+  background: none;
+}
+WUP-POPUP::-webkit-scrollbar-thumb {
+  border: 3px solid rgba(0,0,0,0);
+  background-clip: padding-box;
+  background-color: var(--scroll, rgba(0,0,0,0.2));
+  border-radius: 999px;
+}
+WUP-POPUP::-webkit-scrollbar-track-piece:vertical:start,
+WUP-POPUP::-webkit-scrollbar-track-piece:vertical:end,
+WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:start,
+WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
+  margin: 0;
+}
+@media (hover) {
+  WUP-POPUP::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scroll-hover, rgba(0,0,0,0.5));
+  }
+}
+     
+  
+      TEST-EL {
+        z-index: 90000;
+        display: none;
+        position: fixed!important;
+        top: 0; left: 0;
+        padding: 4px;
+        margin: 0;
+        box-sizing: border-box;
+        border-radius: var(--border-radius, 6px);
+        box-shadow: 0 1px var(--popup-shadow-size) 0 #00000033;
+        background: white;
+        text-overflow: ellipsis;
+        overflow: auto;
+      }
+      @media not all and (prefers-reduced-motion) {
+        TEST-EL,
+        TEST-EL+TEST-EL-arrow {
+          animation: WUP-POPUP-a1 var(--popup-anim) ease-in-out forwards;
+        }
+        @keyframes WUP-POPUP-a1 {
+          from {opacity: 0;}
+        }
+        TEST-EL[hide],
+        TEST-EL[hide]+TEST-EL-arrow {
+          animation: WUP-POPUP-a2 var(--popup-anim) ease-in-out forwards;
+        }
+        @keyframes WUP-POPUP-a2 {
+          to {opacity: 0;}
+        }
+       }
+      
+TEST-EL::-webkit-scrollbar {
+  width: 10px; height: 10px;
+}
+TEST-EL::-webkit-scrollbar-corner {
+  background: none;
+}
+TEST-EL::-webkit-scrollbar-thumb {
+  border: 3px solid rgba(0,0,0,0);
+  background-clip: padding-box;
+  background-color: var(--scroll, rgba(0,0,0,0.2));
+  border-radius: 999px;
+}
+TEST-EL::-webkit-scrollbar-track-piece:vertical:start,
+TEST-EL::-webkit-scrollbar-track-piece:vertical:end,
+TEST-EL::-webkit-scrollbar-track-piece:horizontal:start,
+TEST-EL::-webkit-scrollbar-track-piece:horizontal:end {
+  margin: 0;
+}
+@media (hover) {
+  TEST-EL::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scroll-hover, rgba(0,0,0,0.5));
+  }
+}
+     
+</style>
+`;
+
+exports[`popupElement me common tests render + styles 1`] = `<wup-popup />`;
+
+exports[`popupElement me common tests render + styles 2`] = `
+<style>
+  .wup-hidden, [wup-hidden] {
+position: absolute;
+height: 1px; width: 1px;
+top:0;left:0;
+overflow: hidden;
+clip: rect(1px, 1px, 1px, 1px);}
+  :root {
+          --base-bg: #fff;
+          --base-text: #232323;
+          --base-focus: #00778d;
+          --base-btn-bg: #009fbc;
+          --base-btn-text: #fff;
+          --base-btn-focus: #005766;
+          --base-btn2-bg: var(--base-btn-text);
+          --base-btn2-text: var(--base-btn-bg);
+          --border-radius: 6px;
+          --anim-time: 200ms;
+          --anim: var(--anim-time, 200ms) cubic-bezier(0, 0, 0.2, 1) 0ms;
+        }
+  
+      :root {
+        --popup-shadow-size: 4px;
+        --popup-anim: 300ms;
+      }
+  
+      WUP-POPUP {
+        z-index: 90000;
+        display: none;
+        position: fixed!important;
+        top: 0; left: 0;
+        padding: 4px;
+        margin: 0;
+        box-sizing: border-box;
+        border-radius: var(--border-radius, 6px);
+        box-shadow: 0 1px var(--popup-shadow-size) 0 #00000033;
+        background: white;
+        text-overflow: ellipsis;
+        overflow: auto;
+      }
+      @media not all and (prefers-reduced-motion) {
+        WUP-POPUP,
+        WUP-POPUP+WUP-POPUP-arrow {
+          animation: WUP-POPUP-a1 var(--popup-anim) ease-in-out forwards;
+        }
+        @keyframes WUP-POPUP-a1 {
+          from {opacity: 0;}
+        }
+        WUP-POPUP[hide],
+        WUP-POPUP[hide]+WUP-POPUP-arrow {
+          animation: WUP-POPUP-a2 var(--popup-anim) ease-in-out forwards;
+        }
+        @keyframes WUP-POPUP-a2 {
+          to {opacity: 0;}
+        }
+       }
+      
+WUP-POPUP::-webkit-scrollbar {
+  width: 10px; height: 10px;
+}
+WUP-POPUP::-webkit-scrollbar-corner {
+  background: none;
+}
+WUP-POPUP::-webkit-scrollbar-thumb {
+  border: 3px solid rgba(0,0,0,0);
+  background-clip: padding-box;
+  background-color: var(--scroll, rgba(0,0,0,0.2));
+  border-radius: 999px;
+}
+WUP-POPUP::-webkit-scrollbar-track-piece:vertical:start,
+WUP-POPUP::-webkit-scrollbar-track-piece:vertical:end,
+WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:start,
+WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
+  margin: 0;
+}
+@media (hover) {
+  WUP-POPUP::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scroll-hover, rgba(0,0,0,0.5));
+  }
+}
+     
+  
+      TEST-EL {
+        z-index: 90000;
+        display: none;
+        position: fixed!important;
+        top: 0; left: 0;
+        padding: 4px;
+        margin: 0;
+        box-sizing: border-box;
+        border-radius: var(--border-radius, 6px);
+        box-shadow: 0 1px var(--popup-shadow-size) 0 #00000033;
+        background: white;
+        text-overflow: ellipsis;
+        overflow: auto;
+      }
+      @media not all and (prefers-reduced-motion) {
+        TEST-EL,
+        TEST-EL+TEST-EL-arrow {
+          animation: WUP-POPUP-a1 var(--popup-anim) ease-in-out forwards;
+        }
+        @keyframes WUP-POPUP-a1 {
+          from {opacity: 0;}
+        }
+        TEST-EL[hide],
+        TEST-EL[hide]+TEST-EL-arrow {
+          animation: WUP-POPUP-a2 var(--popup-anim) ease-in-out forwards;
+        }
+        @keyframes WUP-POPUP-a2 {
+          to {opacity: 0;}
+        }
+       }
+      
+TEST-EL::-webkit-scrollbar {
+  width: 10px; height: 10px;
+}
+TEST-EL::-webkit-scrollbar-corner {
+  background: none;
+}
+TEST-EL::-webkit-scrollbar-thumb {
+  border: 3px solid rgba(0,0,0,0);
+  background-clip: padding-box;
+  background-color: var(--scroll, rgba(0,0,0,0.2));
+  border-radius: 999px;
+}
+TEST-EL::-webkit-scrollbar-track-piece:vertical:start,
+TEST-EL::-webkit-scrollbar-track-piece:vertical:end,
+TEST-EL::-webkit-scrollbar-track-piece:horizontal:start,
+TEST-EL::-webkit-scrollbar-track-piece:horizontal:end {
+  margin: 0;
+}
+@media (hover) {
+  TEST-EL::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scroll-hover, rgba(0,0,0,0.5));
+  }
+}
+     
+</style>
+`;

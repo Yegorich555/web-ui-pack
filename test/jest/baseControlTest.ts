@@ -64,18 +64,6 @@ interface TestOptions<T> {
 export function testBaseControl<T>(cfg: TestOptions<T>) {
   h.baseTestComponent(() => document.createElement(tagName), { attrs: { initvalue: { skip: true } } });
 
-  test("styles", () => {
-    expect(elType.$refStyle).toMatchSnapshot();
-  });
-
-  test("memoryLeak", () => {
-    const spy = h.spyEventListeners([]);
-    el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
-    jest.advanceTimersByTime(1);
-    el.remove();
-    spy.check(); // checking memory leak
-  });
-
   describe("$initValue", () => {
     test("attr [initvalue] vs $initValue", () => {
       expect(el.$isReady).toBeTruthy();

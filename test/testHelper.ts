@@ -1,3 +1,5 @@
+/* eslint-disable jest/no-conditional-expect */
+/* eslint-disable jest/no-standalone-expect */
 /* eslint-disable no-prototype-builtins */
 /* eslint-disable jest/no-export */
 import WUPBaseElement from "web-ui-pack/baseElement";
@@ -112,8 +114,7 @@ interface BaseTestOptions {
 export function baseTestComponent(createFunction: () => any, opts: BaseTestOptions) {
   describe("common tests", () => {
     jest.useFakeTimers();
-    /** @type WUPBaseElement; */
-    const obj = createFunction();
+    const obj = createFunction() as WUPBaseElement | HTMLElement;
 
     test("no arrow functions", () => {
       const fns = findAllFunctions(obj);
@@ -125,14 +126,27 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
     // it("each function are bound", () => {
     //   expect(fns.notBound).toHaveLength(0);
     // });
+    if (obj instanceof WUPBaseElement) {
+      test("render + styles", () => {
+        expect(obj).toMatchSnapshot();
+        const c = Object.getPrototypeOf(obj).constructor as typeof WUPBaseElement;
+        expect(c.$refStyle).toMatchSnapshot();
+      });
+
+      test("memoryLeak", () => {
+        const spy = spyEventListeners([]);
+        const el = document.body.appendChild(obj);
+        jest.advanceTimersByTime(1);
+        el.remove();
+        spy.check(); // checking memory leak
+      });
+    }
 
     if (!opts?.skipAttrs && obj instanceof WUPBaseElement) {
       const c = Object.getPrototypeOf(obj).constructor as typeof WUPBaseElement;
-      /** @type string[] */
       const attrs = ((c as any).observedAttributes || []) as string[];
       if (attrs.length) {
         describe("observedAttributes affects on options", () => {
-          /* eslint-disable jest/no-standalone-expect */
           attrs.forEach((a) => {
             const isSkip = opts?.attrs && opts.attrs[a]?.skip;
             it(`attr [${a}]${isSkip ? " - skipped" : ""}`, () => {
@@ -157,15 +171,12 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
               obj.removeAttribute(a);
               jest.advanceTimersByTime(1);
               if (opts?.attrs && opts.attrs[a]?.onRemove) {
-                // eslint-disable-next-line jest/no-conditional-expect
                 expect(obj.$options[key]).toBeTruthy();
               } else {
-                // eslint-disable-next-line jest/no-conditional-expect
                 expect(obj.$options[key]).toBeFalsy();
               }
             });
           });
-          /* eslint-enable jest/no-standalone-expect */
         });
 
         const os = (c as any).observedOptions as string[];
@@ -225,8 +236,7 @@ export const keys = {
 };
 
 /** Handle process.on("unhandledRejection"); @type jest.MockedFunction;
- * WARN: it can't provide mock.calls because processFires after test-execution
- */
+ * WARN: it can't provide mock.calls because processFires after test-execution */
 export function handleRejection() {
   const fn = jest.fn();
   const rst = fn.mockClear;
