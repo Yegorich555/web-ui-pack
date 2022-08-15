@@ -176,15 +176,6 @@ export default class WUPRadioControl<
      `;
   }
 
-  static $isEqual(v1: unknown, v2: unknown): boolean {
-    return (
-      super.$isEqual(v1, v2) ||
-      // eslint-disable-next-line eqeqeq
-      v1 == v2 ||
-      (v1 == null || v2 == null ? false : (v1 as string).toLowerCase() === (v2 as string).toLowerCase())
-    );
-  }
-
   static get observedOptions(): Array<string> {
     const arr = super.observedOptions as Array<keyof WUPRadio.Options>;
     arr.push("reverse");
@@ -210,11 +201,16 @@ export default class WUPRadioControl<
 
   protected override _opts = this.$options;
 
-  protected override parseValue(text: string): ValueType | undefined {
+  /** Called when need to parse attr [initValue] */
+  protected override parseValue(attrValue: string): ValueType | undefined {
     if (!this.$refItems?.length) {
       return undefined;
     }
-    const r = this.$refItems.find((o) => this.#ctr.$isEqual(o._value, text));
+
+    const r =
+      attrValue === ""
+        ? this.$refItems.find((o) => o._value == null)
+        : this.$refItems.find((o) => o._value && `${o._value}` === attrValue);
     return r?._value;
   }
 
@@ -263,7 +259,7 @@ export default class WUPRadioControl<
       inp.name = nm; // required otherwise tabbing, arrow-keys doesn't work inside single fieldset
       parent.appendChild(lbl);
       return tit;
-    }) as Array<HTMLElement & { _text: string }>;
+    });
 
     if (arr[0].text instanceof Function) {
       arr.forEach((v, i) => (v as WUPSelect.MenuItemFn<ValueType>).text(v.value, arrLi[i], i));
