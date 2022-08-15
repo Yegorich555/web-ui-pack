@@ -42,7 +42,7 @@ declare global {
       /** Fires after value change on controls */
       $change: Event;
       /** Fires before $submit is happened; can be prevented via e.preventDefault() */
-      $willSubmit: (MouseEvent | KeyboardEvent) & { submitter: HTMLElement };
+      $willSubmit: SubmitEvent<null>;
       /** Fires by user-submit when validation succesfull and model is collected */
       $submit: SubmitEvent<any>;
     }
@@ -336,12 +336,18 @@ export default class WUPFormElement<
 
   /** Called on submit before validation */
   protected gotSubmit(e: KeyboardEvent | MouseEvent, submitter: HTMLElement): void {
-    (e as Events["$willSubmit"]).submitter = submitter;
-    this.dispatchEvent("$willSubmit", e);
-    if (e.defaultPrevented) {
+    e.preventDefault();
+
+    const willEv = new Event("$willSubmit", { bubbles: true, cancelable: true }) as Events["$willSubmit"];
+    willEv.$model = null;
+    willEv.$relatedEvent = e;
+    willEv.$relatedForm = this as WUPFormElement<any>;
+    willEv.$submitter = submitter;
+
+    this.dispatchEvent(willEv);
+    if (willEv.defaultPrevented) {
       return;
     }
-    e.preventDefault();
 
     // validate
     let errCtrl: IBaseControl | undefined;
@@ -377,14 +383,16 @@ export default class WUPFormElement<
 
     const needReset = this._opts.submitActions & SubmitActions.reset;
     setTimeout(() => {
+      this.dispatchEvent(ev);
+      const p1 = this.$onSubmit?.call(this, ev);
       // SubmitEvent constructor doesn't exist on some browsers: https://developer.mozilla.org/en-US/docs/Web/API/SubmitEvent/SubmitEvent
       const ev2 = new (window.SubmitEvent || Event)("submit", { submitter, cancelable: false, bubbles: true });
-      this.dispatchEvent("$submit", ev);
-      this.dispatchEvent("submit", ev2);
-      const p1 = this.$onSubmit?.call(this, ev);
-      const p2 = this.onsubmit?.call(this, ev2);
+      if (!window.SubmitEvent) {
+        (ev2 as any).submitter = submitter;
+      }
+      this.dispatchEvent(ev2);
 
-      promiseWait(Promise.all([p1, p2, ev.$waitFor]), 300, (v: boolean) => this.changePending(v)).then(() => {
+      promiseWait(Promise.all([p1, ev.$waitFor]), 300, (v: boolean) => this.changePending(v)).then(() => {
         if (needReset) {
           this.$controls.forEach((v) => (v.$isDirty = false));
           this.$initModel = this.$model;

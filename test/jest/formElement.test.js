@@ -188,8 +188,66 @@ describe("formElement", () => {
       expect(inputs[2].$refInput.autocomplete).toBe("off");
     });
   });
+
+  describe("submit", () => {
+    const $willSubmitEv = jest.fn();
+    const $submitEv = jest.fn();
+    const $onSubmit = jest.fn();
+    // native events
+    const submitEv = jest.fn();
+    const onsubmit = jest.fn();
+
+    test("firing events", async () => {
+      el.addEventListener("$willSubmit", $willSubmitEv);
+      el.addEventListener("$submit", $submitEv);
+      el.$onSubmit = $onSubmit;
+      // native events
+      el.addEventListener("submit", submitEv);
+      el.onsubmit = onsubmit;
+
+      btnSubmit.click();
+      await h.wait(1);
+      expect($willSubmitEv).toBeCalledTimes(1);
+      expect($willSubmitEv.mock.calls[0][0].$relatedForm).toBe(el);
+      expect($willSubmitEv.mock.calls[0][0].$relatedEvent.type).toBe("click");
+      expect($willSubmitEv.mock.calls[0][0].$submitter).toBe(btnSubmit);
+
+      expect($submitEv).toBeCalledTimes(1);
+      expect($submitEv.mock.calls[0][0].$model).toEqual({ email: undefined, firstName: undefined });
+      expect($submitEv.mock.calls[0][0].$relatedForm).toBe(el);
+      expect($submitEv.mock.calls[0][0].$relatedEvent.type).toBe("click");
+      expect($submitEv.mock.calls[0][0].$submitter).toBe(btnSubmit);
+
+      expect($onSubmit).toBeCalledTimes(1);
+      expect($onSubmit.mock.calls[0][0].$model).toEqual({ email: undefined, firstName: undefined });
+      expect($onSubmit.mock.calls[0][0].$relatedForm).toBe(el);
+      expect($onSubmit.mock.calls[0][0].$relatedEvent.type).toBe("click");
+      expect($onSubmit.mock.calls[0][0].$submitter).toBe(btnSubmit);
+
+      expect(onsubmit).toBeCalledTimes(1);
+      expect(onsubmit.mock.calls[0][0].submitter).toBe(btnSubmit);
+      expect(submitEv).toBeCalledTimes(1);
+      expect(submitEv.mock.calls[0][0].submitter).toBe(btnSubmit);
+    });
+
+    test("prevent on $wilSubmit", async () => {
+      el.addEventListener("$submit", $submitEv);
+      el.$onSubmit = $onSubmit;
+
+      // checking preventDefault
+      jest.clearAllMocks();
+      el.addEventListener("$willSubmit", (e) => e.preventDefault());
+
+      btnSubmit.click();
+      await h.wait(1);
+
+      expect($submitEv).toBeCalledTimes(0);
+      expect($onSubmit).toBeCalledTimes(0);
+    });
+  });
 });
 
 // todo e2e click on button without [submit] should fire submit call
 
 // test-case: submit by Enter keydown
+// test-case: onChange event
