@@ -145,15 +145,6 @@ export default class WUPSelectControl<
     return menuItemText.startsWith(inputValue) || menuItemText.includes(` ${inputValue}`);
   }
 
-  static $isEqual(v1: unknown, v2: unknown): boolean {
-    return (
-      super.$isEqual(v1, v2) ||
-      // eslint-disable-next-line eqeqeq
-      v1 == v2 ||
-      (v1 == null || v2 == null ? false : (v1 as string).toLowerCase() === (v2 as string).toLowerCase())
-    );
-  }
-
   static $defaults: WUPSelect.Defaults = {
     ...WUPBaseComboControl.$defaults,
     validationRules: { ...WUPBaseComboControl.$defaults.validationRules },
@@ -174,11 +165,18 @@ export default class WUPSelectControl<
     return !!this.#stopPending;
   }
 
-  protected override parseValue(text: string): ValueType | undefined {
+  /** Called when need to parse attr [initValue] */
+  protected override parseValue(attrValue: string): ValueType | undefined {
     this.getMenuItems().then((arr) => {
       if (arr?.length) {
-        const r = (arr as WUPSelect.MenuItemAny<any>[]).find((o) => this.#ctr.$isEqual(o.value, text));
+        const r =
+          attrValue === ""
+            ? (arr as WUPSelect.MenuItemAny<any>[]).find((o) => o.value == null)
+            : (arr as WUPSelect.MenuItemAny<any>[]).find((o) => o.value && `${o.value}` === attrValue);
+
+        (this as any)._noDelInitValueAttr = true;
         this.$initValue = r?.value;
+        delete (this as any)._noDelInitValueAttr;
       }
     });
     return this.$initValue;
