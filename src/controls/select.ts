@@ -308,7 +308,7 @@ export default class WUPSelectControl<
     if (items instanceof Function) {
       const f = items();
       if (f instanceof Promise) {
-        arr = await promiseWait(f, 300, this.changePending);
+        arr = await promiseWait(f, 300, (v: boolean) => this.changePending(v));
       } else {
         arr = f;
       }
