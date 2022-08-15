@@ -3,6 +3,7 @@ import IBaseControl from "./controls/baseControl.i";
 import { nestedProperty, promiseWait, scrollIntoView } from "./indexHelpers";
 import WUPSpinElement from "./spinElement";
 
+/* c8 ignore next */
 !WUPSpinElement && console.error("!"); // It's required otherwise import is ignored by webpack
 
 export const enum SubmitActions {
@@ -79,7 +80,7 @@ declare global {
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$submit') instead */
       onSubmit?: never;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
-      onChange?: never;
+      onChange?: never; // todo implement
     }
   }
 }
@@ -376,7 +377,8 @@ export default class WUPFormElement<
 
     const needReset = this._opts.submitActions & SubmitActions.reset;
     setTimeout(() => {
-      const ev2 = new SubmitEvent("submit", { submitter, cancelable: false, bubbles: true });
+      // SubmitEvent constructor doesn't exist on some browsers: https://developer.mozilla.org/en-US/docs/Web/API/SubmitEvent/SubmitEvent
+      const ev2 = new (window.SubmitEvent || Event)("submit", { submitter, cancelable: false, bubbles: true });
       this.dispatchEvent("$submit", ev);
       this.dispatchEvent("submit", ev2);
       const p1 = this.$onSubmit?.call(this, ev);
