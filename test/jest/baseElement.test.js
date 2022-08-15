@@ -308,6 +308,11 @@ describe("baseElement", () => {
     expect(style).toContain("t-a { display: block }");
     expect(style.lastIndexOf("t-a")).toBe(style.indexOf("t-a")); // checking if style applied once
 
+    const was = TestA.$refStyle;
+    TestA.$refStyle = ""; // just for coverage
+    expect(TestA.$refStyle).toBeFalsy();
+    TestA.$refStyle = was;
+
     class TestB extends TestA {
       static get $style() {
         return `${super.$style} :host { position: my-absolute }`;
@@ -387,6 +392,25 @@ describe("baseElement", () => {
     expect(document.activeElement).toBe(input);
   });
 
+  test("blur", async () => {
+    el.tabIndex = 0;
+    el.focus();
+    const mocked = jest.spyOn(document, "activeElement", "get").mockReturnValue(el); // jsdom works wrong with custom elements
+    expect(document.activeElement).toBe(el);
+    el.blur();
+    mocked.mockRestore();
+    expect(document.activeElement).not.toBe(el);
+
+    el.tabIndex = undefined;
+    const input = el.appendChild(document.createElement("input"));
+    input.focus();
+    expect(document.activeElement).toBe(input);
+
+    el.blur();
+    expect(document.activeElement).not.toBe(input);
+    expect(document.activeElement).not.toBe(el);
+  });
+
   test("gotChanges method", async () => {
     class TestEl extends WUPBaseElement {
       $options = {};
@@ -452,5 +476,3 @@ describe("baseElement", () => {
     expect(spyOpts).toBeCalledTimes(3);
   });
 });
-
-// todo add tests for blur()
