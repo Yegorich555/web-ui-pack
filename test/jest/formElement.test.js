@@ -1,4 +1,5 @@
 import { WUPFormElement, WUPTextControl } from "web-ui-pack";
+import { SubmitActions } from "web-ui-pack/formElement";
 import * as h from "../testHelper";
 
 /** @type WUPFormElement */
@@ -53,35 +54,35 @@ describe("formElement", () => {
 
     expect(inputs[1].$initValue).toBe("hello from 2");
     expect(inputs[2].$initValue).toBe("without name");
-    expect(el.$model).toMatchObject({ email: "some@email.com", firstName: "hello from 2" });
+    expect(el.$model).toEqual({ email: "some@email.com", firstName: "hello from 2" });
 
     el.$initModel = { firstName: "Nick" };
     expect(inputs[0].$initValue).toBe("some@email.com");
     expect(inputs[1].$initValue).toBe("Nick");
-    expect(el.$model).toMatchObject({ email: "some@email.com", firstName: "Nick" });
+    expect(el.$model).toEqual({ email: "some@email.com", firstName: "Nick" });
 
     el.$initModel = { email: "tas@google.com", firstName: "Tasy" };
     expect(inputs[0].$initValue).toBe("tas@google.com");
     expect(inputs[1].$initValue).toBe("Tasy");
-    expect(el.$model).toMatchObject({ email: "tas@google.com", firstName: "Tasy" });
+    expect(el.$model).toEqual({ email: "tas@google.com", firstName: "Tasy" });
 
     // checking $model
     inputs[0].$value = "v@email.en";
     inputs[1].$value = "Mike";
-    expect(el.$model).toMatchObject({ email: "v@email.en", firstName: "Mike" });
-    expect(el.$initModel).toMatchObject({ email: "tas@google.com", firstName: "Tasy" });
+    expect(el.$model).toEqual({ email: "v@email.en", firstName: "Mike" });
+    expect(el.$initModel).toEqual({ email: "tas@google.com", firstName: "Tasy" });
 
     el.$model = { email: "true@mail.com" };
-    expect(el.$model).toMatchObject({ email: "true@mail.com", firstName: "Mike" });
+    expect(el.$model).toEqual({ email: "true@mail.com", firstName: "Mike" });
 
     el.$model = { email: "next@em.com", firstName: "Tisha", lastName: "Turunen" };
-    expect(el.$model).toMatchObject({ email: "next@em.com", firstName: "Tisha", lastName: "Turunen" });
+    expect(el.$model).toEqual({ email: "next@em.com", firstName: "Tisha", lastName: "Turunen" });
     expect(inputs[0].$value).toBe("next@em.com");
     expect(inputs[1].$value).toBe("Tisha");
     expect(inputs[2].$value).toBe("without name");
 
     el.$model = { email: "", firstName: undefined };
-    expect(el.$model).toMatchObject({ email: "", firstName: undefined });
+    expect(el.$model).toEqual({ email: "", firstName: undefined });
     expect(inputs[0].$value).toBe("");
     expect(inputs[1].$value).toBe(undefined);
     expect(inputs[2].$value).toBe("without name");
@@ -96,6 +97,27 @@ describe("formElement", () => {
     inputs[0].setAttribute("name", "Address");
     jest.advanceTimersByTime(1);
     expect(inputs[0].$initValue).toBe("some date"); // stay same because prev. $initValue is defined
+  });
+
+  test("$initModel from controls", () => {
+    inputs[0].$options.name = "user.email";
+    inputs[0].$initValue = "some@text.com";
+    inputs[1].$options.name = "user.firstName";
+    inputs[1].$initValue = "Kate";
+    expect(el.$initModel).toEqual({ user: { email: "some@text.com", firstName: "Kate" } });
+
+    inputs[1].$initValue = "Vally";
+    expect(el.$initModel).toEqual({ user: { email: "some@text.com", firstName: "Vally" } });
+
+    el.$initModel = { user: { email: "me@google.com", firstName: "Greg", lastName: "Winter" }, isCustom: true };
+    expect(inputs[0].$initValue).toBe("me@google.com");
+    expect(inputs[1].$initValue).toBe("Greg");
+
+    inputs[1].$initValue = "Kate";
+    expect(el.$initModel).toEqual({
+      user: { email: "me@google.com", firstName: "Kate", lastName: "Winter" },
+      isCustom: true,
+    });
   });
 
   describe("options applied to controls", () => {
@@ -444,7 +466,123 @@ describe("formElement", () => {
       expect(el.$isValid).toBe(true);
     });
 
-    test("submitActions", () => {});
+    describe("submitActions", () => {
+      test("goToError", async () => {
+        inputs.forEach((inp) => (inp.$options.validations = { required: true }));
+        inputs[0].$value = "Kaly";
+
+        el.$options.submitActions = SubmitActions.goToError;
+        btnSubmit.click();
+        await h.wait();
+        expect(document.activeElement).toBe(inputs[1].$refInput);
+        document.activeElement.blur();
+
+        el.$options.submitActions = SubmitActions.none;
+        btnSubmit.click();
+        await h.wait();
+        expect(document.activeElement).not.toBe(inputs[1].$refInput);
+      });
+
+      test("validateUntiFirst", async () => {
+        inputs.forEach((inp) => (inp.$options.validations = { required: true }));
+        inputs[0].$value = "kaly@mail.com";
+
+        el.$options.submitActions = SubmitActions.validateUntiFirst;
+        btnSubmit.click();
+        await h.wait();
+        expect(inputs.map((c) => !!c.$refError)).toEqual([false, true, false]);
+
+        el.$options.submitActions = SubmitActions.none;
+        btnSubmit.click();
+        await h.wait();
+        expect(inputs.map((c) => !!c.$refError)).toEqual([false, true, true]);
+      });
+
+      test("collectChanged", async () => {
+        let m = null;
+        el.addEventListener("$submit", (e) => (m = e.$model));
+
+        el.$options.submitActions = SubmitActions.collectChanged;
+        btnSubmit.click();
+        await h.wait(1);
+        expect(m).toEqual({}); // empty object
+        await h.wait();
+
+        inputs[0].$value = "kaly@mail.com";
+        inputs[1].$value = "Kaly";
+        inputs[2].$options.name = "lastName";
+        btnSubmit.click();
+        await h.wait(1);
+        expect(m).toEqual({ email: "kaly@mail.com", firstName: "Kaly" });
+        await h.wait();
+
+        el.$options.submitActions = SubmitActions.none;
+        btnSubmit.click();
+        await h.wait(1);
+        expect(m).toEqual({ email: "kaly@mail.com", firstName: "Kaly", lastName: undefined });
+        await h.wait();
+      });
+
+      test("reset", async () => {
+        await h.typeInputText(inputs[0].$refInput, "kaly@");
+        await h.typeInputText(inputs[1].$refInput, "Ka");
+        expect(inputs[0].$initValue).not.toBe("kaly@");
+        expect(inputs[1].$initValue).not.toBe("Ka");
+        expect(inputs[0].$isDirty).toBe(true);
+        expect(inputs[1].$isDirty).toBe(true);
+
+        el.$options.submitActions = SubmitActions.reset;
+        btnSubmit.click();
+        await h.wait();
+        await h.wait(1);
+
+        expect(inputs[0].$initValue).toBe("kaly@");
+        expect(inputs[0].$isDirty).toBe(false);
+        expect(inputs[0].$isChanged).toBe(false);
+
+        expect(inputs[1].$initValue).toBe("Ka");
+        expect(inputs[1].$isDirty).toBe(false);
+        expect(inputs[1].$isChanged).toBe(false);
+
+        // again without reset
+        await h.typeInputText(inputs[0].$refInput, "kaly@mail");
+        await h.typeInputText(inputs[1].$refInput, "Kaly");
+        el.$options.submitActions = SubmitActions.none;
+        btnSubmit.click();
+        await h.wait();
+        await h.wait(1);
+
+        expect(inputs[0].$initValue).toBe("kaly@");
+        expect(inputs[0].$isDirty).toBe(true);
+        expect(inputs[0].$isChanged).toBe(true);
+
+        expect(inputs[1].$initValue).toBe("Ka");
+        expect(inputs[1].$isDirty).toBe(true);
+        expect(inputs[1].$isChanged).toBe(true);
+      });
+
+      test("lockOnPending", async () => {
+        el.$options.submitActions = SubmitActions.lockOnPending;
+        btnSubmit.click();
+        await h.wait(1);
+        expect(el.$isPending).toBe(true);
+        expect(el.$options.disabled).toBe(true);
+        expect(el.outerHTML).toMatchInlineSnapshot(
+          `"<wup-form role=\\"form\\"><wup-text><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" autocomplete=\\"off\\"><strong>Email</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt2\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt2\\" autocomplete=\\"off\\"><strong>First Name</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt3\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt3\\" autocomplete=\\"off\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><button type=\\"submit\\" disabled=\\"\\"></button><wup-spin style=\\"display: none;\\"><div></div></wup-spin></wup-form>"`
+        );
+        await h.wait();
+
+        el.$options.submitActions = SubmitActions.none;
+        btnSubmit.click();
+        await h.wait(1);
+        expect(el.$isPending).toBe(true);
+        expect(el.$options.disabled).toBeFalsy();
+        expect(el.outerHTML).toMatchInlineSnapshot(
+          `"<wup-form role=\\"form\\"><wup-text><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" autocomplete=\\"off\\"><strong>Email</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt2\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt2\\" autocomplete=\\"off\\"><strong>First Name</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt3\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt3\\" autocomplete=\\"off\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><button type=\\"submit\\" aria-busy=\\"true\\" disabled=\\"\\"></button><wup-spin style=\\"display: none;\\"><div></div></wup-spin></wup-form>"`
+        );
+        await h.wait();
+      });
+    });
   });
 });
 

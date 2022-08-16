@@ -222,17 +222,19 @@ export default class WUPFormElement<
 
   /** Collect model from control-values */
   static $modelFromControls<T>(
+    prevModel: Partial<T>,
     controls: IBaseControl[],
     prop: keyof Pick<IBaseControl, "$value" | "$initValue">,
     isOnlyChanged?: boolean
   ): Partial<T> {
-    const m: Partial<T> = {};
     if (isOnlyChanged) {
-      controls.forEach((c) => c.$options.name && c.$isChanged && nestedProperty.set(m, c.$options.name, c[prop]));
+      controls.forEach(
+        (c) => c.$options.name && c.$isChanged && nestedProperty.set(prevModel, c.$options.name, c[prop])
+      );
     } else {
-      controls.forEach((c) => c.$options.name && nestedProperty.set(m, c.$options.name, c[prop]));
+      controls.forEach((c) => c.$options.name && nestedProperty.set(prevModel, c.$options.name, c[prop]));
     }
-    return m;
+    return prevModel;
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
@@ -253,7 +255,7 @@ export default class WUPFormElement<
   _model?: Partial<Model>;
   /** Model related to every control inside (with $options.name); @see BaseControl...$value */
   get $model(): Partial<Model> {
-    return Object.assign(this._model || {}, this.#ctr.$modelFromControls(this.$controls, "$value"));
+    return Object.assign(this._model || {}, this.#ctr.$modelFromControls({}, this.$controls, "$value"));
   }
 
   set $model(m: Partial<Model>) {
@@ -267,7 +269,7 @@ export default class WUPFormElement<
   /** Default/init model related to every control inside; @see BaseControl...$initValue */
   get $initModel(): Partial<Model> {
     // it's required to avoid case when model has more props than controls
-    return Object.assign(this._initModel || {}, this.#ctr.$modelFromControls(this.$controls, "$initValue"));
+    return this.#ctr.$modelFromControls(this._initModel || {}, this.$controls, "$initValue");
   }
 
   set $initModel(m: Partial<Model>) {
@@ -381,7 +383,7 @@ export default class WUPFormElement<
 
     // collect values to model
     const onlyChanged = this._opts.submitActions & SubmitActions.collectChanged;
-    const m = this.#ctr.$modelFromControls(this.$controls, "$value", !!onlyChanged);
+    const m = this.#ctr.$modelFromControls({}, this.$controls, "$value", !!onlyChanged);
     // fire events
     const ev = new Event("$submit", { cancelable: false, bubbles: true }) as WUPForm.SubmitEvent<Model>;
     ev.$model = m;
