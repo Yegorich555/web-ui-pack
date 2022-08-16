@@ -443,8 +443,7 @@ export default class WUPFormElement<
     this.appendEvent(
       this,
       "keydown",
-      (e) =>
-        !e.defaultPrevented && e.key === "Enter" && this.gotSubmit(e, e.target instanceof HTMLElement ? e.target : this)
+      (e) => e.key === "Enter" && this.gotSubmit(e, e.target instanceof HTMLElement ? e.target : this)
     );
     this.appendEvent(this, "click", (e) => {
       if (!e.defaultPrevented) {
@@ -490,3 +489,5 @@ declare global {
 }
 
 // todo details how to change spinner
+// todo add $isValid
+// todo add $isChanged

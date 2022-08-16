@@ -189,6 +189,19 @@ describe("formElement", () => {
     });
   });
 
+  test("static $tryConnect()", () => {
+    const form2 = document.body.appendChild(document.createElement("wup-form"));
+    const input2 = form2.appendChild(document.createElement("input"));
+    const inputOutside = document.body.appendChild(document.createElement("input"));
+
+    expect(el.$controls.length).toBe(3);
+    expect(WUPFormElement.$tryConnect(inputs[0])).toBe(el);
+    expect(WUPFormElement.$tryConnect(inputs[1])).toBe(el);
+
+    expect(WUPFormElement.$tryConnect(input2)).toBe(form2);
+    expect(WUPFormElement.$tryConnect(inputOutside)).toBeFalsy();
+  });
+
   describe("submit", () => {
     const $willSubmitEv = jest.fn();
     const $submitEv = jest.fn();
@@ -228,26 +241,190 @@ describe("formElement", () => {
       expect(onsubmit.mock.calls[0][0].submitter).toBe(btnSubmit);
       expect(submitEv).toBeCalledTimes(1);
       expect(submitEv.mock.calls[0][0].submitter).toBe(btnSubmit);
+
+      // click on btn without type 'submit' - no action
+      const btnNoSubmit = el.appendChild(document.createElement("button"));
+      btnNoSubmit.type = "button";
+      jest.clearAllMocks();
+      expect($willSubmitEv).toBeCalledTimes(0);
+      btnNoSubmit.click();
+      await h.wait(1);
+      expect($willSubmitEv).toBeCalledTimes(0);
+
+      // try again on EnterKey
+      jest.clearAllMocks();
+      expect($willSubmitEv).toBeCalledTimes(0);
+      inputs[0].dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Enter" }));
+      await h.wait(1);
+      expect($willSubmitEv).toBeCalledTimes(1);
+      expect($willSubmitEv.mock.calls[0][0].$relatedForm).toBe(el);
+      expect($willSubmitEv.mock.calls[0][0].$relatedEvent.type).toBe("keydown");
+      expect($willSubmitEv.mock.calls[0][0].$submitter).toBe(inputs[0]);
+
+      expect($submitEv).toBeCalledTimes(1);
+      expect($submitEv.mock.calls[0][0].$model).toEqual({ email: undefined, firstName: undefined });
+      expect($submitEv.mock.calls[0][0].$relatedForm).toBe(el);
+      expect($submitEv.mock.calls[0][0].$relatedEvent.type).toBe("keydown");
+      expect($submitEv.mock.calls[0][0].$submitter).toBe(inputs[0]);
+
+      expect($onSubmit).toBeCalledTimes(1);
+      expect($onSubmit.mock.calls[0][0].$model).toEqual({ email: undefined, firstName: undefined });
+      expect($onSubmit.mock.calls[0][0].$relatedForm).toBe(el);
+      expect($onSubmit.mock.calls[0][0].$relatedEvent.type).toBe("keydown");
+      expect($onSubmit.mock.calls[0][0].$submitter).toBe(inputs[0]);
+
+      expect(onsubmit).toBeCalledTimes(1);
+      expect(onsubmit.mock.calls[0][0].submitter).toBe(inputs[0]);
+      expect(submitEv).toBeCalledTimes(1);
+      expect(submitEv.mock.calls[0][0].submitter).toBe(inputs[0]);
+
+      // try again when sumbitter is not HTMLElement
+      jest.clearAllMocks();
+      expect($willSubmitEv).toBeCalledTimes(0);
+      const svg = el.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "svg"));
+      svg.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Enter" }));
+      await h.wait(1);
+      expect($willSubmitEv).toBeCalledTimes(1);
+      expect($willSubmitEv.mock.calls[0][0].$submitter).toBe(el);
     });
 
-    test("prevent on $wilSubmit", async () => {
+    test("prevent submit", async () => {
       el.addEventListener("$submit", $submitEv);
-      el.$onSubmit = $onSubmit;
+      const prevFn = (e) => e.preventDefault();
 
-      // checking preventDefault
+      // checking preventDefault for $willSubmit
       jest.clearAllMocks();
-      el.addEventListener("$willSubmit", (e) => e.preventDefault());
-
+      el.addEventListener("$willSubmit", prevFn);
       btnSubmit.click();
       await h.wait(1);
-
       expect($submitEv).toBeCalledTimes(0);
-      expect($onSubmit).toBeCalledTimes(0);
+
+      jest.clearAllMocks();
+      el.removeEventListener("$willSubmit", prevFn);
+      btnSubmit.click();
+      await h.wait(1);
+      expect($submitEv).toBeCalledTimes(1);
+
+      // checking preventDefault on btnSubmit
+      jest.clearAllMocks();
+      btnSubmit.addEventListener("click", prevFn);
+      btnSubmit.click();
+      await h.wait(1);
+      expect($submitEv).toBeCalledTimes(0);
+      btnSubmit.removeEventListener("click", prevFn);
     });
+
+    test("collected model", async () => {
+      el.addEventListener("$submit", $submitEv);
+
+      async function expectModel(m) {
+        jest.clearAllMocks();
+        await h.wait(1);
+        btnSubmit.click();
+        await h.wait(1);
+        expect($submitEv.mock.calls[0][0].$model).toEqual(m);
+      }
+      await expectModel({ email: undefined, firstName: undefined });
+
+      inputs[0].$value = "some@mail.com";
+      await expectModel({ email: "some@mail.com", firstName: undefined });
+
+      inputs[1].$value = "Mike";
+      inputs[2].$value = "Vazovski";
+      await expectModel({ email: "some@mail.com", firstName: "Mike" });
+
+      inputs[2].$options.name = "lastName";
+      await expectModel({ email: "some@mail.com", firstName: "Mike", lastName: "Vazovski" });
+
+      inputs[1].$options.name = "user.profile.firstName";
+      inputs[2].$options.name = "user.profile.lastName";
+      await expectModel({ email: "some@mail.com", user: { profile: { firstName: "Mike", lastName: "Vazovski" } } });
+    });
+
+    test("pending on submit", async () => {
+      el.$isPending = true;
+      await h.wait();
+      expect(el.outerHTML).toMatchInlineSnapshot(
+        `"<wup-form role=\\"form\\" disabled=\\"\\"><wup-text><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" autocomplete=\\"off\\" disabled=\\"\\"><strong>Email</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt2\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt2\\" autocomplete=\\"off\\" disabled=\\"\\"><strong>First Name</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt3\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt3\\" autocomplete=\\"off\\" disabled=\\"\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><button type=\\"submit\\" disabled=\\"\\" aria-busy=\\"true\\"></button><wup-spin style=\\"position: absolute; display: none;\\" aria-label=\\"Loading. Please wait\\"><div></div></wup-spin></wup-form>"`
+      );
+      el.$isPending = false;
+      await h.wait();
+      expect(el.outerHTML).toMatchInlineSnapshot(
+        `"<wup-form role=\\"form\\"><wup-text><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" autocomplete=\\"off\\"><strong>Email</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt2\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt2\\" autocomplete=\\"off\\"><strong>First Name</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt3\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt3\\" autocomplete=\\"off\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><button type=\\"submit\\"></button></wup-form>"`
+      );
+
+      const submitFn = (e) => (e.$waitFor = new Promise((resolve) => setTimeout(() => resolve("true"), 500)));
+      el.addEventListener("$submit", submitFn);
+      btnSubmit.click();
+      await h.wait(1);
+      expect(el.$isPending).toBe(true);
+      expect(el.outerHTML).toMatchInlineSnapshot(
+        `"<wup-form role=\\"form\\"><wup-text><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" autocomplete=\\"off\\"><strong>Email</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt2\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt2\\" autocomplete=\\"off\\"><strong>First Name</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt3\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt3\\" autocomplete=\\"off\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><button type=\\"submit\\" disabled=\\"\\"></button><wup-spin style=\\"display: none;\\"><div></div></wup-spin></wup-form>"`
+      );
+      await h.wait();
+      await h.wait(1);
+      expect(el.$isPending).toBe(false);
+      expect(el.outerHTML).toMatchInlineSnapshot(
+        `"<wup-form role=\\"form\\"><wup-text><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" autocomplete=\\"off\\"><strong>Email</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt2\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt2\\" autocomplete=\\"off\\"><strong>First Name</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt3\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt3\\" autocomplete=\\"off\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><button type=\\"submit\\"></button></wup-form>"`
+      );
+      el.removeEventListener("$submit", submitFn);
+
+      // check again with $onSubmit
+      el.$onSubmit = () => new Promise((resolve) => setTimeout(() => resolve("true"), 500));
+      btnSubmit.click();
+      await h.wait(1);
+      expect(el.$isPending).toBe(true);
+      await h.wait();
+      await h.wait(1);
+      expect(el.$isPending).toBe(false);
+    });
+
+    test("validation on submit", async () => {
+      inputs[0].$options.validations = { required: true };
+      inputs[1].$options.validations = { required: true };
+      inputs[2].$options.validations = { required: true };
+      await h.wait(1);
+      el.addEventListener("$willSubmit", $willSubmitEv);
+      el.addEventListener("$submit", $submitEv);
+
+      btnSubmit.click();
+      await h.wait();
+      expect($willSubmitEv).toBeCalledTimes(1);
+      expect($submitEv).not.toBeCalled();
+      expect(document.activeElement).toBe(inputs[0].$refInput); // focus on firstInvalid
+      // todo rollback after implementation expect(el.$isValid).toBe(false)
+
+      jest.clearAllMocks();
+      inputs[0].$value = "test@google.com";
+      btnSubmit.click();
+      await h.wait();
+      expect($willSubmitEv).toBeCalledTimes(1);
+      expect($submitEv).not.toBeCalled();
+      expect(document.activeElement).toBe(inputs[1].$refInput); // focus on firstInvalid
+      // todo rollback after implementation expect(el.$isValid).toBe(false)
+
+      jest.clearAllMocks();
+      inputs[1].$value = "Mike";
+      btnSubmit.click();
+      await h.wait();
+      expect($willSubmitEv).toBeCalledTimes(1);
+      expect($submitEv).not.toBeCalled();
+      expect(document.activeElement).toBe(inputs[2].$refInput); // focus on firstInvalid
+      // todo rollback after implementation expect(el.$isValid).toBe(false)
+
+      await h.wait();
+      jest.clearAllMocks();
+      inputs[2].$value = "Newton";
+      btnSubmit.click();
+      await h.wait(1);
+      expect($willSubmitEv).toBeCalledTimes(1);
+      expect($submitEv).toBeCalledTimes(1);
+      // todo rollback after implementation expect(el.$isValid).toBe(true)
+    });
+
+    test("submitActions", () => {});
   });
 });
 
-// todo e2e click on button without [submit] should fire submit call
-
-// test-case: submit by Enter keydown
-// test-case: onChange event
+// todo test-case: onChange event
+// e2e test case: scrollIntoView to invalid input
