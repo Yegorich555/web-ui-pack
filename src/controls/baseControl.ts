@@ -403,7 +403,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   #isValid?: boolean;
-  /** Returns true if control is valid; it'c cache-value. To refresh - call $validate() */
+  /** Returns true if control is valid */
   get $isValid(): boolean {
     if (this.#isValid == null) {
       this.goValidate(ValidateFromCases.onInit, false);
@@ -828,6 +828,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     if (!isChanged) {
       return false;
     }
+    this.#isValid = undefined;
 
     const c = this._opts.validationCase;
     if (this.$isReady && canValidate && (c & ValidationCases.onChange || c & ValidationCases.onChangeSmart)) {
