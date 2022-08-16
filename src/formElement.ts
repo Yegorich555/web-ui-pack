@@ -38,9 +38,7 @@ declare global {
       $waitFor?: Promise<unknown>;
     }
 
-    export interface EventMap extends WUP.EventMap {
-      /** Fires after value change on controls */
-      $change: Event;
+    export interface EventMap extends WUPBase.EventMap {
       /** Fires before $submit is happened; can be prevented via e.preventDefault() */
       $willSubmit: SubmitEvent<null>;
       /** Fires by user-submit when validation succesfull and model is collected */
@@ -80,7 +78,7 @@ declare global {
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$submit') instead */
       onSubmit?: never;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
-      onChange?: never; // todo implement
+      onChange?: never;
     }
   }
 }
@@ -295,6 +293,11 @@ export default class WUPFormElement<
     return this.$controls.every((c) => c.$isValid);
   }
 
+  /** Returns true if some of controls value is changed by user */
+  get $isChanged(): boolean {
+    return this.$controls.some((c) => c.$isChanged);
+  }
+
   /** Dispatched on submit. Return promise to lock form and show spinner */
   $onSubmit?: (ev: WUPForm.SubmitEvent<Model>) => void | Promise<unknown>;
 
@@ -494,5 +497,4 @@ declare global {
 }
 
 // todo details how to change spinner
-// todo add $isChanged
 // todo ability to detach control

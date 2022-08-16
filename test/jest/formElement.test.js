@@ -202,6 +202,26 @@ describe("formElement", () => {
     expect(WUPFormElement.$tryConnect(inputOutside)).toBeFalsy();
   });
 
+  test("onChange event", async () => {
+    const changeEv = jest.fn();
+    el.addEventListener("$change", changeEv);
+    expect(el.$isChanged).toBe(false);
+
+    inputs[0].$value = "some@email.com";
+    await h.wait();
+    expect(changeEv).toBeCalledTimes(1);
+    expect(changeEv.mock.calls[0][0].target).toBe(inputs[0]); // because it bubbles from control
+    expect(el.$isChanged).toBe(true);
+
+    changeEv.mockClear();
+    inputs[1].$value = "Lacy";
+    inputs[0].$value = "LacyNewton@email.com";
+    await h.wait();
+    expect(changeEv).toBeCalledTimes(2);
+    expect(changeEv.mock.calls[0][0].target).toBe(inputs[1]); // because it bubbles from control
+    expect(el.$isChanged).toBe(true);
+  });
+
   describe("submit", () => {
     const $willSubmitEv = jest.fn();
     const $submitEv = jest.fn();
@@ -393,6 +413,7 @@ describe("formElement", () => {
       expect($submitEv).not.toBeCalled();
       expect(document.activeElement).toBe(inputs[0].$refInput); // focus on firstInvalid
       expect(el.$isValid).toBe(false);
+      expect(el.$isChanged).toBe(false);
 
       jest.clearAllMocks();
       inputs[0].$value = "test@google.com";
@@ -402,6 +423,7 @@ describe("formElement", () => {
       expect($submitEv).not.toBeCalled();
       expect(document.activeElement).toBe(inputs[1].$refInput); // focus on firstInvalid
       expect(el.$isValid).toBe(false);
+      expect(el.$isChanged).toBe(true);
 
       jest.clearAllMocks();
       inputs[1].$value = "Mike";
@@ -426,5 +448,4 @@ describe("formElement", () => {
   });
 });
 
-// todo test-case: onChange event
-// e2e test case: scrollIntoView to invalid input
+// todo e2e test case: scrollIntoView to invalid input
