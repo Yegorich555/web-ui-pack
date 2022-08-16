@@ -290,6 +290,11 @@ export default class WUPFormElement<
     }
   }
 
+  /** Returns true if all nested controls are valid */
+  get $isValid(): boolean {
+    return this.$controls.every((c) => c.$isValid);
+  }
+
   /** Dispatched on submit. Return promise to lock form and show spinner */
   $onSubmit?: (ev: WUPForm.SubmitEvent<Model>) => void | Promise<unknown>;
 
@@ -489,5 +494,5 @@ declare global {
 }
 
 // todo details how to change spinner
-// todo add $isValid
 // todo add $isChanged
+// todo ability to detach control

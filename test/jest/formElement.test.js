@@ -392,7 +392,7 @@ describe("formElement", () => {
       expect($willSubmitEv).toBeCalledTimes(1);
       expect($submitEv).not.toBeCalled();
       expect(document.activeElement).toBe(inputs[0].$refInput); // focus on firstInvalid
-      // todo rollback after implementation expect(el.$isValid).toBe(false)
+      expect(el.$isValid).toBe(false);
 
       jest.clearAllMocks();
       inputs[0].$value = "test@google.com";
@@ -401,7 +401,7 @@ describe("formElement", () => {
       expect($willSubmitEv).toBeCalledTimes(1);
       expect($submitEv).not.toBeCalled();
       expect(document.activeElement).toBe(inputs[1].$refInput); // focus on firstInvalid
-      // todo rollback after implementation expect(el.$isValid).toBe(false)
+      expect(el.$isValid).toBe(false);
 
       jest.clearAllMocks();
       inputs[1].$value = "Mike";
@@ -410,7 +410,7 @@ describe("formElement", () => {
       expect($willSubmitEv).toBeCalledTimes(1);
       expect($submitEv).not.toBeCalled();
       expect(document.activeElement).toBe(inputs[2].$refInput); // focus on firstInvalid
-      // todo rollback after implementation expect(el.$isValid).toBe(false)
+      expect(el.$isValid).toBe(false);
 
       await h.wait();
       jest.clearAllMocks();
@@ -419,7 +419,7 @@ describe("formElement", () => {
       await h.wait(1);
       expect($willSubmitEv).toBeCalledTimes(1);
       expect($submitEv).toBeCalledTimes(1);
-      // todo rollback after implementation expect(el.$isValid).toBe(true)
+      expect(el.$isValid).toBe(true);
     });
 
     test("submitActions", () => {});
