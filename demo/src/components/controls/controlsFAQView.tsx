@@ -21,7 +21,7 @@ export default function ControlsFAQView() {
           {
             link: "form-spinner",
             question: "How to change spinner for FormElement (appears on submit if return promise result)'",
-            answer: <>Comming soon</>,
+            answer: <Code code={codeChangeSpinner} />,
           },
           {
             link: "validation-rules",
@@ -55,6 +55,30 @@ body { /* Redefine css variables */
   --border-radius: 0;
   --ctrl-label: blue; /* etc. */
 }`;
+
+const codeChangeSpinner = `js
+/*
+const formEl = document.body.appendChild(document.createElement("wup-form"));
+formEl.$isPending = true; // use this to debug spinner-style
+*/
+// it's way to redefine global spinner style so every web-ui-pack element will use it (SpinElement, FormElement, SelectControl etc.)
+import WUPSpinElement, { spinUseDualRing } from "web-ui-pack/spinElement";
+spinUseDualRing(WUPSpinElement);
+
+// OR you can redefine spinner only for FormElement directly
+import WUPSpinElement, { spinUseDualRing } from "web-ui-pack/spinElement";
+class WUPSpin2Element extends WUPSpinElement {}
+spinUseDualRing(WUPSpin2Element);
+const tagName = "wup-spin-form";
+customElements.define(tagName, WUPSpin2Element);
+
+WUPFormElement.prototype.renderSpin = function renderSpin(target: HTMLElement): WUPSpinElement {
+  const spin = document.createElement("wup-spin-form");
+  spin.$options.fit = true;
+  spin.$options.overflowFade = false;
+  spin.$options.overflowTarget = target as HTMLButtonElement;
+  return spin;
+};`;
 
 const codeVldRules = `js
 // to define new rule add new property to validationRules

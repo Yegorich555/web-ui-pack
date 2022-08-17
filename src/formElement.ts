@@ -498,5 +498,4 @@ declare global {
   }
 }
 
-// todo details how to change spinner
 // todo ability to detach control

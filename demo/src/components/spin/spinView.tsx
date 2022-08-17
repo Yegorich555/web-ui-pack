@@ -2,7 +2,6 @@
 import Code from "src/elements/code";
 import Page from "src/elements/page";
 import { WUPSpinElement } from "web-ui-pack";
-import { spinUseRing } from "web-ui-pack/spinElement";
 import WUPSpin2Element from "./spin2";
 import WUPSpin3Element from "./spin3";
 import WUPSpin4Element from "./spin4";
@@ -20,7 +19,6 @@ const sideEffect =
   WUPSpin6Element &&
   WUPSpin7Element;
 !sideEffect && console.error("Missed"); // It's required otherwise import is ignored by webpack
-spinUseRing(WUPSpinElement); // setup default style
 
 export default function SpinView() {
   return (
@@ -169,7 +167,7 @@ import WUPSpinElement, {spinUseDualRing} from "web-ui-pack/spinElement";
 spinUseDualRing(WUPSpinElement); // you can redefine default style
 
 // OR define new class to use several diffrent styled spinners
-export default class WUPSpin2Element extends WUPSpinElement {}
+class WUPSpin2Element extends WUPSpinElement {}
 spinUseDualRing(WUPSpin2Element);
 const tagName = "wup-spin2";
 customElements.define(tagName, WUPSpin2Element);
