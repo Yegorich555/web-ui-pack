@@ -389,6 +389,13 @@ describe("formElement", () => {
       expect(el.outerHTML).toMatchInlineSnapshot(
         `"<wup-form role=\\"form\\" disabled=\\"\\"><wup-text><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" autocomplete=\\"off\\" disabled=\\"\\"><strong>Email</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt2\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt2\\" autocomplete=\\"off\\" disabled=\\"\\"><strong>First Name</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt3\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt3\\" autocomplete=\\"off\\" disabled=\\"\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><button type=\\"submit\\" disabled=\\"\\" aria-busy=\\"true\\"></button><wup-spin style=\\"position: absolute; display: none;\\" aria-label=\\"Loading. Please wait\\"><div></div></wup-spin></wup-form>"`
       );
+
+      el.changePending(true); // just for coverage
+      await h.wait();
+      expect(el.outerHTML).toMatchInlineSnapshot(
+        `"<wup-form role=\\"form\\" disabled=\\"\\"><wup-text><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" autocomplete=\\"off\\" disabled=\\"\\"><strong>Email</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt2\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt2\\" autocomplete=\\"off\\" disabled=\\"\\"><strong>First Name</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt3\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt3\\" autocomplete=\\"off\\" disabled=\\"\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><button type=\\"submit\\" disabled=\\"\\" aria-busy=\\"true\\"></button><wup-spin style=\\"position: absolute; display: none;\\" aria-label=\\"Loading. Please wait\\"><div></div></wup-spin></wup-form>"`
+      );
+
       el.$isPending = false;
       await h.wait();
       expect(el.outerHTML).toMatchInlineSnapshot(
