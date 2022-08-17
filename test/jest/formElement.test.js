@@ -592,5 +592,3 @@ describe("formElement", () => {
     });
   });
 });
-
-// todo e2e test case: scrollIntoView to invalid input

@@ -334,8 +334,3 @@ export default class WUPTextControl<
 }
 
 customElements.define(tagName, WUPTextControl);
-
-// manual testcase: form with email+password ignores autocomplete: "off" if previously it was saved
-
-// todo docs about usage with css-variables... Maybe FAQ ???
-// todo docs about removing required-asterisk-label

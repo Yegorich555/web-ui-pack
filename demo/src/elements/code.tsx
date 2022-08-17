@@ -3,10 +3,10 @@ import Prism from "prismjs";
 
 interface Props {
   code: string;
-  // language?: "css";
 }
 export default function Code({ code }: Props) {
-  const lng = "css";
+  const lng = /^([\w-]+)/.exec(code)![1];
+  code = code.substring(lng.length, code.length).trimStart();
   useEffect(() => Prism.highlightAll(), []);
   return (
     <div className="code">

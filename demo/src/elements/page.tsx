@@ -4,7 +4,7 @@ import styles from "./page.scss";
 
 interface Props {
   header: string;
-  link: string;
+  link: string | null;
   className?: string;
   details?: UserCodeProps;
   features: Array<string | JSX.Element> | null;
@@ -12,7 +12,7 @@ interface Props {
 
 export default function Page(props: React.PropsWithChildren<Props>) {
   let { link } = props;
-  if (link.startsWith("src")) {
+  if (link?.startsWith("src")) {
     link = `/blob/${DEV ? "develop" : "master"}/${link}`;
   }
 

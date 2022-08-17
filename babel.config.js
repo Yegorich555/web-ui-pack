@@ -22,7 +22,7 @@ module.exports = (api) => {
       [
         "prismjs",
         {
-          languages: ["css"], // example: https://hackernoon.com/using-prismjs-as-a-syntax-highlighter-in-react
+          languages: ["css", "javascript"], // example: https://hackernoon.com/using-prismjs-as-a-syntax-highlighter-in-react
           theme: "default",
           css: true,
         },

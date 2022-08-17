@@ -107,7 +107,7 @@ export default class WUPPasswordControl<
   static $defaults: WUPPassword.Defaults = {
     ...WUPTextControl.$defaults,
     validationRules: {
-      ...WUPTextControl.$defaults.validationRules,
+      ...WUPTextControl.$defaults.validationRules, // todo how to fix such inherritance when user need to redefine the whole bunch
       minNumber: (v, setV) =>
         (!v || (v.match(/[0-9]/g)?.length ?? 0) < setV) &&
         `Must contain at least ${setV} number${setV === 1 ? "" : "s"}`,
@@ -178,7 +178,7 @@ export default class WUPPasswordControl<
 
 customElements.define(tagName, WUPPasswordControl);
 
-// testcase: form with email+password ignores autocomplete: "off" if previously it was saved
+// manual testcase: form with email+password ignores autocomplete: "off" if previously it was saved
 // testcase: toggle eye-btn and check if height stay the same
 
 // todo option reverse btn-eye;

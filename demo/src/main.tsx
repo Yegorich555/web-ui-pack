@@ -17,6 +17,7 @@ import SelectControlView from "./components/controls/select";
 import SwitchControlView from "./components/controls/switch";
 import CheckControlView from "./components/controls/check";
 import RadioControlView from "./components/controls/radio";
+import ControlsFAQView from "./components/controls/controlsFAQView";
 
 interface IRoute {
   label?: string;
@@ -31,6 +32,7 @@ const routes: IRoute[] = [
   { path: "popup", el: PopupView },
   { path: "spin", el: SpinView },
   { path: "controls", label: "Form & Controls", el: ControlsView },
+  { path: "controls/faq", label: "FAQ", el: ControlsFAQView, isNested: true },
   { path: "control/text", el: TextControlView, isNested: true },
   { path: "control/password", el: PasswordControlView, isNested: true },
   { path: "control/select", el: SelectControlView, isNested: true },

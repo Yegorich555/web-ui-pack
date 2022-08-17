@@ -25,3 +25,20 @@ el.$options.validations = {
   isNumber: true,
 };
 console.warn("try custom validation", { validateResult: el.$validate() });
+
+// to define new rule add new property to validationRules
+WUPTextControl.$defaults.validationRules.isNumber = (v) => (!v || !/^[0-9]*$/.test(v)) && "Please enter a valid number";
+const el = document.createElement("wup-text");
+el.$options.validations = { isNumber: true };
+// or add function to validations of element directlty
+const el = document.createElement("wup-text");
+el.$options.validations = {
+  isNumber: (v) => (!v || !/^[0-9]*$/.test(v)) && "Please enter a valid number",
+};
+
+// to redefine default error message need to redefine the whole rule
+const minOrig = WUPTextControl.$defaults.validationRules.min!;
+WUPTextControl.$defaults.validationRules.min = (v, setV) => minOrig(v, setV) && `Your custom error message`;
+
+/* ATTENTION: all rules must return error-message when value is [undefined].
+It's required to show errorMessages as whole list via $options.validationShowAll (mostly used for PasswordControl) */

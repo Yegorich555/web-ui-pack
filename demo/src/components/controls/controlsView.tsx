@@ -1,5 +1,4 @@
 /* eslint-disable react/no-unescaped-entities */
-/* eslint-disable no-promise-executor-return */
 import Page from "src/elements/page";
 import {
   WUPSelectControl,
