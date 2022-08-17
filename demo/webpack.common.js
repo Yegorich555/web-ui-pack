@@ -152,7 +152,8 @@ module.exports = function (env, argv) {
                   auto: (function () {
                     class MyReg extends RegExp {
                       test(str) {
-                        return !str.includes("styles") && !str.includes("react-quill");
+                        console.warn(str);
+                        return !str.includes("styles") && !str.includes("prismjs");
                       }
                     }
                     return new MyReg();

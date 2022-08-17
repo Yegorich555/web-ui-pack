@@ -19,6 +19,14 @@ module.exports = (api) => {
       "@babel/plugin-proposal-class-properties", // transforms static class properties as well as properties declared with the property initializer syntax
       "@babel/plugin-proposal-private-methods",
       "jsx-classnames-advanced", // optional: react: this resolves className={object}
+      [
+        "prismjs",
+        {
+          languages: ["css"], // example: https://hackernoon.com/using-prismjs-as-a-syntax-highlighter-in-react
+          theme: "default",
+          css: true,
+        },
+      ],
     ],
   };
 };
