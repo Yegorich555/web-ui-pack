@@ -86,7 +86,7 @@ export default function UserCode(props: React.PropsWithChildren<UserCodeProps>) 
         <h3>
           HTML{" "}
           <small className={styles.headerDetails}>
-            (using <b>$options</b> is preferable)
+            (using <b>$options</b> instead of attributes is preferable)
           </small>
         </h3>
         {renderHTMLCode(props.tag)}

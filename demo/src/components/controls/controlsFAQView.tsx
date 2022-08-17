@@ -20,7 +20,7 @@ export default function ControlsFAQView() {
           },
           {
             link: "form-spinner",
-            question: "How to change spinner for FormElement (appears on submit if returned promise result)'",
+            question: "How to change spinner for FormElement (appears on submit if return promise result)'",
             answer: <>Comming soon</>,
           },
           {

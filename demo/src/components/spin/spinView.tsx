@@ -1,4 +1,5 @@
 /* eslint-disable react/no-unescaped-entities */
+import Code from "src/elements/code";
 import Page from "src/elements/page";
 import { WUPSpinElement } from "web-ui-pack";
 import { spinUseRing } from "web-ui-pack/spinElement";
@@ -110,6 +111,7 @@ export default function SpinView() {
         <small>
           To setup style use css-vars and special functions <b>spinUseDotRoller, spinUseDualRing</b> etc.
         </small>
+        <Code code={codeTypes} />
         <div className={styles.types}>
           <div>
             Ring <wup-spin inline />
@@ -161,3 +163,26 @@ export default function SpinView() {
     </Page>
   );
 }
+
+const codeTypes = `js
+import WUPSpinElement, {spinUseDualRing} from "web-ui-pack/spinElement";
+spinUseDualRing(WUPSpinElement); // you can redefine default style
+
+// OR define new class to use several diffrent styled spinners
+export default class WUPSpin2Element extends WUPSpinElement {}
+spinUseDualRing(WUPSpin2Element);
+const tagName = "wup-spin2";
+customElements.define(tagName, WUPSpin2Element);
+declare global { // for TS intellisense
+  // add element to document.createElement
+  interface HTMLElementTagNameMap {
+    [tagName]: WUPSpin2Element;
+  }
+
+  // add element to tsx/jsx intellisense
+  namespace JSX { // skip it if you don't use JSX/TSX (react/vue)
+    interface IntrinsicElements {
+      [tagName]: JSX.IntrinsicElements["wup-spin"];
+    }
+  }
+}`;
