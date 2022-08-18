@@ -1,11 +1,11 @@
 import Code from "src/elements/code";
 import FAQ from "src/elements/faq";
 import Page from "src/elements/page";
-import styles from "./controlsFAQView.scss";
+import styles from "./FAQView.scss";
 
-export default function ControlsFAQView() {
+export default function FAQView() {
   return (
-    <Page header="FormElement & Controls. FAQ" link="" features={null} className={styles.FAQPage}>
+    <Page header="FAQ" link="" features={null} className={styles.FAQPage}>
       <FAQ
         items={[
           {
@@ -34,12 +34,12 @@ export default function ControlsFAQView() {
           },
           {
             link: "form-spinner",
-            question: "How to change spinner for FormElement (appears on submit if return promise result)'",
+            question: "FormElement. How to change spinner (appears on submit if return promise result)'",
             answer: <Code code={codeChangeSpinner} />,
           },
           {
             link: "validation-rules",
-            question: "How to change default validation rules/messages and add new",
+            question: "Controls. How to change default validation rules/messages and add new",
             answer: (
               <>
                 Every control-type has own $defaults.validationRules
@@ -49,7 +49,8 @@ export default function ControlsFAQView() {
           },
           {
             link: "asterisk-for-required",
-            question: "How to remove asterisk at the end of label for controls with validationRule 'required'",
+            question:
+              "Controls. How to remove asterisk at the end of label for controls with validationRule 'required'",
             answer: (
               <>
                 Apply styles below
