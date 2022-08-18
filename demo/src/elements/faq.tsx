@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import styles from "./faq.scss";
 
 interface Props {
-  items: Array<{ link: string; question: string; answer: React.ReactElement }>;
+  items: Array<{ link: string; question: string; answer: React.ReactElement | string }>;
 }
 
 export default function FAQ({ items }: Props) {

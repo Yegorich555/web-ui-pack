@@ -8,6 +8,10 @@ Web package with high scalable [WebComponents](#components) and [helpers](#helpe
 [![npm downloads](https://img.shields.io/npm/dm/web-ui-pack.svg?style=flat-square)](http://npm-stat.com/charts.html?package=web-ui-pack)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+## Demo
+
+You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone repo and run `npm i & npm start`
+
 ## Features
 
 - Possible to use **with/without** any frameworks like Angular, React, Vue etc. (because it's js-native logic)
@@ -17,10 +21,14 @@ Web package with high scalable [WebComponents](#components) and [helpers](#helpe
 - Built-in Typescript (coverage types 100%)
 - Built-in `.jsx/.tsx` support
 - Well documented via JSDoc (use intellisense power of your editor to get details about each property/option/usage)
-- Optimized for webpack (in build included only in-use components and helpers)
-- Zero dependancy (don't need to wait for bug-fixing of another packages)
+- Optimized for webpack (build includes only used components and helpers via **side-effects** option)
+- Zero dependancy (don't need to wait for bug-fixing of other packages)
 - Always 100% test coverage via e2e and unit tests (it's must-have and always will be so)
-- Focus on performance (it's important to have low-memory consumption)
+- Focus on performance (it's important to have low-memory consumption and fastest initialization)
+
+## Why the package is so big
+
+It's developed with Typescript and has huge built-in documentation (JSDoc). Every method,property,event is documented well so you don't need extra resource to take an example to implement or configure elements. In build-result without comments you will see the it's small-enough
 
 ## Installing
 
@@ -60,16 +68,12 @@ npm install web-ui-pack
 - [ ] VirtualScroll
 - [ ] TableElement ?
 
-## Demo
-
-You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone repo and run `npm i & npm start`
-
 ## Components
 
 **Common rules**:
 
 1. **Naming**
-   - All components named as `WUP..Element`, `WUP..Control` and `<wup-...>` (for html-tags)
+   - All components named as `WUP..Element`, `WUP..Control` and has `<wup-...>` html-tags
    - Public properties/options/events/methods startsWith `$...` (events `$onShow`, `$onHide`, methods `$show`, `$hide`, props like `$isOpen` etc.)
    - Every component has static `$defaults` (common options for current class) and personal `$options` (per each component). See details in [example](#example)
    - `$options` are observed. So changing options affects on component immediately after empty timeout (every component has static `observedOptions` as set of watched options)
@@ -81,6 +85,7 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
    - In `jsx/tsx` instead of `className` use `class` attribute (React issue)
    - If you change custom html-attributes it will update `$options`, but if you change some option it doesn't update related attribute (for performance reasons). Better to avoid customAttributes at all
 4. **Inheritance**
+
    - Components are developed to be easy customized and inherrited. Every rule/option/method is developed to be customized if defaultOptions are not enough. You can rewrite everything that you can imagine without digging a lot in a code. To be sure don't hesitate to take a look on \*.d.ts or source code (there are enough comments to clarify even weird/difficult cases)
    - All Components inherrited from [WUPBaseElement](src/baseElement.ts) that extends default HTMLElement
    - All internal event-callbacks startsWith `got...` (gotReady, gotRemoved)
@@ -99,8 +104,7 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
            - [TextControl](src/controls/text.ts)
              - [PasswordControl](src/controls/password.ts)
              - [BaseComboControl](src/controls/baseCombo.ts)
-               - [SelectControl](src/controls/select.ts)
-                 -~~[SelectManyControl](src/controls/selectMany.ts)~~
+               - [SelectControl](src/controls/select.ts) -~~[SelectManyControl](src/controls/selectMany.ts)~~
                - ~~[DateControl](src/controls/date.ts)~~
 
 ---

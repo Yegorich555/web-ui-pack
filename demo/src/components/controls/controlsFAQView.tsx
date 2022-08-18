@@ -19,6 +19,20 @@ export default function ControlsFAQView() {
             ),
           },
           {
+            link: "support-attributes",
+            question: "What attributes possible to use instead of $options",
+            answer: (
+              <>
+                See details on demo for each element. Section <b>HTML</b> contains example with all supported
+                attributes.
+                <br />
+                Every attribute has reflected option. So changing attribute affects on $options (but changing $options
+                clears attribute to make HTML clearer)
+                <Code code={codeAttrs} />
+              </>
+            ),
+          },
+          {
             link: "form-spinner",
             question: "How to change spinner for FormElement (appears on submit if return promise result)'",
             answer: <Code code={codeChangeSpinner} />,
@@ -56,12 +70,19 @@ body { /* Redefine css variables */
   --ctrl-label: blue; /* etc. */
 }`;
 
+const codeAttrs = `js
+// HTML code
+<wup-text name="email"></wup-text>
+// equal to
+const el = document.querySelector("wup-text");
+el.$options.name = "email";`;
+
 const codeChangeSpinner = `js
-/*
-const formEl = document.body.appendChild(document.createElement("wup-form"));
-formEl.$isPending = true; // use this to debug spinner-style
-*/
-// it's way to redefine global spinner style so every web-ui-pack element will use it (SpinElement, FormElement, SelectControl etc.)
+// const formEl = document.body.appendChild(document.createElement("wup-form"));
+// formEl.$isPending = true; // use this to debug spinner-style
+
+// it's way to redefine global spinner style
+// so every web-ui-pack element will use it (SpinElement, FormElement, SelectControl etc.)
 import WUPSpinElement, { spinUseDualRing } from "web-ui-pack/spinElement";
 spinUseDualRing(WUPSpinElement);
 
