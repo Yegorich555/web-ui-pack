@@ -59,9 +59,11 @@ interface ValueToAttr<T> {
 interface TestOptions<T> {
   initValues: [ValueToAttr<T>, ValueToAttr<T>, ValueToAttr<T>];
   validations: Record<string, { set: any; failValue: T | undefined; trueValue: T }>;
+  autoCompleteOff?: "off" | "new-password";
 }
 
 export function testBaseControl<T>(cfg: TestOptions<T>) {
+  cfg.autoCompleteOff = cfg.autoCompleteOff || "off";
   h.baseTestComponent(() => document.createElement(tagName), { attrs: { initvalue: { skip: true } } });
 
   describe("$initValue", () => {
@@ -144,7 +146,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
       el.$options.autoComplete = false;
       jest.advanceTimersByTime(1);
-      expect(el.$refInput.autocomplete).toBe("off"); // todo it's wrong for password
+      expect(el.$refInput.autocomplete).toBe(cfg.autoCompleteOff);
     });
 
     test("autoFocus", () => {
@@ -614,13 +616,13 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     el.$options.autoComplete = false;
     jest.advanceTimersByTime(1);
     expect(el.$autoComplete).toBeFalsy();
-    expect(el.$refInput.autocomplete).toBe("off");
+    expect(el.$refInput.autocomplete).toBe(cfg.autoCompleteOff);
 
     form.$options.autoComplete = undefined;
     el.$options.autoComplete = undefined;
     jest.advanceTimersByTime(1);
     expect(el.$autoComplete).toBeFalsy();
-    expect(el.$refInput.autocomplete).toBe("off");
+    expect(el.$refInput.autocomplete).toBe(cfg.autoCompleteOff);
 
     // form.$initModel vs control.$initValue
     form.$initModel = { firstInput: cfg.initValues[0].value };
