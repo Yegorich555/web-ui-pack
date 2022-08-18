@@ -267,7 +267,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         font-size: small;
         color: var(--ctrl-err-text);
         background: var(--ctrl-err-bg);
-        margin: -4px 0;
         max-height: 3em;
         overflow: auto;
         overflow: overlay;
@@ -751,6 +750,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       WUPPopupElement.$placements.$top.$start.$resizeWidth,
     ];
     p.$options.maxWidthByTarget = true;
+    p.$options.offset = [-2, 0];
     p.setAttribute("error", "");
     // p.setAttribute("role", "alert");
     p.setAttribute("aria-live", "off");
@@ -761,7 +761,9 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     hiddenLbl.className = this.#ctr.classNameHidden;
     p.appendChild(document.createElement("span"));
     this.$refError = this.appendChild(p);
-
+    // timeout required because popup dispose events onInit
+    // popup need to refresh if content is placed at the top, minimized (we need to update position)
+    setTimeout(() => this.$refError?.appendEvent(this, "focusout", () => this.$refError?.$refresh()));
     return p;
   }
 
@@ -864,6 +866,8 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   /** Called when element got focus; must return array of RemoveFunctions called on FocusLost */
   protected gotFocus(): Array<() => void> {
+    this.$refError?.$refresh();
+
     if (this._opts.validationCase & ValidationCases.onFocusWithValue) {
       !this.$isEmpty && this.goValidate(ValidateFromCases.onFocus);
     }

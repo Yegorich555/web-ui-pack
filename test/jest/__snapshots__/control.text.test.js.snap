@@ -256,7 +256,6 @@ clip: rect(1px, 1px, 1px, 1px);}
         font-size: small;
         color: var(--ctrl-err-text);
         background: var(--ctrl-err-bg);
-        margin: -4px 0;
         max-height: 3em;
         overflow: auto;
         overflow: overlay;

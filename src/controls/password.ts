@@ -197,5 +197,4 @@ customElements.define(tagName, WUPPasswordControl);
 // manual testcase: form with email+password ignores autocomplete: "off" if previously it was saved
 // e2e testcase: toggle eye-btn and check if height stay the same
 
-// todo issue on focus-out error size is changed and need to recalc position
 // todo FAQ how to create ConfirmPassword field
