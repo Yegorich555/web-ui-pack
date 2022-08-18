@@ -44,8 +44,8 @@ export const enum ValidateFromCases {
   onFocus,
   /** When control loses focus (including document.activeElement) */
   onFocusLost,
-  /** When user type text (or change value via input) in <input /> */
-  onInput,
+  /** When value changed */
+  onChange,
   /** When form.submit is called (via button submit or somehow else); It's impossible to disable */
   onSubmit,
   /** When $validate() is called programmatically */
@@ -65,7 +65,7 @@ export namespace WUPBaseIn {
        *  @defaultValue onChangeSmart | onFocusLost | onFocusWithValue | onSubmit
        */
       validationCase: ValidationCases;
-      /** Wait for pointed time before show error (it's sumarized with $options.debounce); WARN: hide error without debounce
+      /** Wait for pointed time after valueChange before show error (it's sumarized with $options.debounce); WARN: hide error without debounce
        *  @defaultValue 500
        */
       validateDebounceMs: number;
@@ -682,7 +682,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     });
     this._validTimer && clearTimeout(this._validTimer);
 
-    if (fromCase === ValidateFromCases.onInput && this._opts.validationCase & ValidationCases.onChangeSmart) {
+    if (fromCase === ValidateFromCases.onChange && this._opts.validationCase & ValidationCases.onChangeSmart) {
       if (errMsg) {
         if (!this.#wasValid) {
           canShowError = false;
@@ -696,7 +696,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       if (canShowError || this.$refError) {
         this._validTimer = window.setTimeout(
           () => this.goShowError(errMsg, this.$refInput),
-          fromCase === ValidateFromCases.onManualCall ? 0 : this._opts.validateDebounceMs
+          fromCase === ValidateFromCases.onChange ? this._opts.validateDebounceMs : 0
         );
       }
       return errMsg;
@@ -833,10 +833,10 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     if (this.$isReady && canValidate && (c & ValidationCases.onChange || c & ValidationCases.onChangeSmart)) {
       if (this.#wasValid == null && c & ValidationCases.onChangeSmart) {
         this.#value = was;
-        this.goValidate(ValidateFromCases.onInput, false); // to define if previous value was valid or not
+        this.goValidate(ValidateFromCases.onChange, false); // to define if previous value was valid or not
         this.#value = v;
       }
-      this.goValidate(ValidateFromCases.onInput);
+      this.goValidate(ValidateFromCases.onChange);
     }
     this.fireEvent("$change", { cancelable: false, bubbles: true });
     return true;
