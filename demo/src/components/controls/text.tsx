@@ -17,7 +17,11 @@ export default function TextControlView() {
         tag: "wup-text",
         cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
       }}
-      features={null}
+      features={[
+        "Smart clear (reset/revert) by Esc key and button-clear (use $defaults.clearActions)",
+        "Built-in validations (required,min,max,email). To extend use $defaults.validations",
+        "Smart validations on the fly (use $defaults.validationCases)",
+      ]}
     >
       <wup-form
         ref={(el) => {

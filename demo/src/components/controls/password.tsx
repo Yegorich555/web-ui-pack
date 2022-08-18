@@ -4,13 +4,35 @@ import { WUPPasswordControl } from "web-ui-pack";
 const sideEffect = WUPPasswordControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
 
+(window as any)._somePasswordValidations = {
+  required: true,
+  min: 8,
+  minNumber: 1,
+  minUpper: 1,
+  minLower: 1,
+  special: { min: 1, chars: "#!-_?,.@:;'" },
+} as WUPPassword.Options["validations"];
+
 (window as any).globalkey = {
   pointHere: { required: true, min: 4 } as WUPPassword.Options["validations"],
 };
 
 export default function PasswordControlView() {
   return (
-    <Page header="PasswordControl" link="#passwordcontrol">
+    <Page
+      header="PasswordControl"
+      link="#passwordcontrol"
+      features={[
+        "Inheritted features from TextControl",
+        "Built-in validations (required,min,max,email, minNumber,minUpper,minLower,special)",
+        "Possible to show all validation rules in list (use $options.validationShowAll). Use css to style error-list/min-size on focusOut",
+        "Possible to reverse eye-button (use $options.reverse)",
+      ]}
+      details={{
+        tag: "wup-pwd",
+        cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
+      }}
+    >
       <wup-form
         ref={(el) => {
           if (el) {
@@ -22,16 +44,12 @@ export default function PasswordControlView() {
         <wup-pwd
           name="pwd"
           label="Password"
+          initValue="someValue"
+          autoComplete="off"
+          validations="window._somePasswordValidations"
+          reverse={false}
           ref={(el) => {
             if (el) {
-              el.$options.validations = {
-                required: true,
-                min: 8,
-                minNumber: 1,
-                minUpper: 1,
-                minLower: 1,
-                special: { min: 1, chars: "#!-_?,.@:;'" },
-              };
               el.$options.validationShowAll = true;
               el.$options.autoFocus = true;
             }
@@ -46,15 +64,8 @@ export default function PasswordControlView() {
             }
           }}
         />
-        <wup-pwd
-          name="disabled"
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "disabled";
-              el.$options.disabled = true;
-            }
-          }}
-        />
+        <wup-pwd name="disabled" disabled />
+        <wup-pwd label="Reversed button eye" name="reversed" reverse initValue="someValue-ForReversed" />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

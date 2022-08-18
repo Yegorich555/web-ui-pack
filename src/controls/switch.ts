@@ -1,4 +1,3 @@
-import { WUP } from "../baseElement";
 import { WUPcssHidden } from "../styles";
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
 
@@ -231,13 +230,6 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
   override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null): void {
     super.gotFormChanges(propsChanged);
     this.setAttr.call(this.$refInput, "aria-readonly", this.$isReadOnly);
-  }
-
-  protected override gotOptionsChanged(e: WUP.OptionEvent): void {
-    this._isStopChanges = true;
-    e.props.includes("reverse") && this.setAttr("reverse", this._opts.reverse, true);
-    super.gotOptionsChanged(e);
-    this._isStopChanges = false;
   }
 }
 

@@ -75,13 +75,7 @@ export default function ControlsView() {
           }
         }}
       >
-        <wup-text
-          name="text"
-          onKeyDown={(e) => {
-            e.preventDefault();
-            console.warn("text");
-          }}
-        />
+        <wup-text name="text" />
         <wup-pwd name="password" />
         <wup-select
           ref={(el) => {

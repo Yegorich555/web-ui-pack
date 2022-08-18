@@ -5,7 +5,11 @@ import WUPTextControl, { WUPTextIn } from "./text";
 
 const tagName = "wup-pwd";
 export namespace WUPPasswordIn {
-  export interface Def {}
+  export interface Def {
+    /** Reversed-style for button-eye
+     * @defaultValue false */
+    reverse?: boolean;
+  }
   export interface Opt {}
   export type Generics<
     ValueType = string,
@@ -29,7 +33,10 @@ declare global {
     interface EventMap extends WUPText.EventMap {}
     interface Defaults<T = string> extends WUPPasswordIn.GenDef<T> {}
     interface Options<T = string> extends WUPPasswordIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPPasswordControl> extends WUPText.JSXProps<T> {}
+    interface JSXProps<T extends WUPPasswordControl> extends WUPText.JSXProps<T> {
+      /** Reversed-style for button-eye */
+      reverse?: boolean | "";
+    }
   }
 
   // add element to document.createElement
@@ -77,6 +84,9 @@ export default class WUPPasswordControl<
         :host {
           --ctrl-icon-img: var(--wup-icon-eye);
         }
+        :host[reverse] {
+          --ctrl-icon-img: var(--wup-icon-eye-off);
+        }
         :host input[type='password'] {
           font-family: Verdana, sans-serif;
           letter-spacing: 0.125;
@@ -91,6 +101,9 @@ export default class WUPPasswordControl<
         }
         :host button[eye="off"] {
           --ctrl-icon-img: var(--wup-icon-eye-off);
+        }
+        :host[reverse] button[eye="off"] {
+          --ctrl-icon-img: var(--wup-icon-eye);
         }
         @media (hover: hover) {
           :host button[eye]:hover {
@@ -162,10 +175,13 @@ export default class WUPPasswordControl<
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUPPassword.Options> | null): void {
-    super.gotChanges(propsChanged);
+    super.gotChanges(propsChanged as any);
     this.$refInput.autocomplete = this.$autoComplete || "new-password"; // otherwise form with email+password ignores autocomplete: "off" if previously it was saved
     // it can be ignored by browsers. To fix > https://stackoverflow.com/questions/2530/how-do-you-disable-browser-autocomplete-on-web-form-field-input-tags
     // https://stackoverflow.com/questions/11708092/detecting-browser-autofill
+
+    this._opts.reverse = this.getBoolAttr("reverse", this._opts.reverse);
+    this.setAttr("reverse", this._opts.reverse, true);
   }
 
   protected override gotKeyDown(e: KeyboardEvent): void {
@@ -181,4 +197,5 @@ customElements.define(tagName, WUPPasswordControl);
 // manual testcase: form with email+password ignores autocomplete: "off" if previously it was saved
 // e2e testcase: toggle eye-btn and check if height stay the same
 
-// todo option reverse btn-eye;
+// todo issue on focus-out error size is changed and need to recalc position
+// todo FAQ how to create ConfirmPassword field
