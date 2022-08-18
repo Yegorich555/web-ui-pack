@@ -50,3 +50,4 @@ export default function objectClone<T>(obj: T, opts?: CloneOptions): T {
 }
 
 // todo check instanceOf vs typeof: https://stackoverflow.com/questions/899574/what-is-the-difference-between-typeof-and-instanceof-and-when-should-one-be-used#:~:text=typeof%3A%20Per%20the%20MDN%20docmentation,type%20of%20the%20unevaluated%20operand.&text=instanceof%3A%20is%20a%20binary%20operator,constructor%20in%20its%20prototype%20chain.
+// todo rewrite instanceOf to typeof since it's faster https://stackoverflow.com/questions/50157577/performance-typeof-vs-instanceof
