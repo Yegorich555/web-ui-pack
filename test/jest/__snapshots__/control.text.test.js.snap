@@ -307,12 +307,12 @@ mask-image: var(--ctrl-icon-img);
         max-height: none;
       }
       @media (hover: hover) {
-        WUP-TEXT:hover {
+        /*WUP-TEXT:hover {
           z-index: 90011;
         }
         WUP-TEXT:hover [error] {
           max-height: none;
-        }
+        }*/
         WUP-TEXT:hover,
         WUP-TEXT:hover &gt; [menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-focus);

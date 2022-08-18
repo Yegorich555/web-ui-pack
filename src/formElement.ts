@@ -497,5 +497,3 @@ declare global {
     }
   }
 }
-
-// todo ability to detach control

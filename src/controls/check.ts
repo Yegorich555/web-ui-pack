@@ -115,3 +115,4 @@ export default class WUPCheckControl<
 customElements.define(tagName, WUPCheckControl);
 
 // todo add logic for checkbox-tree
+// todo cache observedAttrs per each type to reduce memoryConsumption (when use checkbox-tree)

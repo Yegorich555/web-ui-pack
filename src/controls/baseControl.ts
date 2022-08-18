@@ -160,7 +160,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   /* Array of attribute names to listen for changes */
   static get observedAttributes(): Array<string> {
-    // todo how to cache observedAttrs per each type to reduce memoryConsumption
     return <Array<LowerKeys<WUPBase.Options>>>["label", "name", "autocomplete", "disabled", "readonly", "initvalue"];
   }
 
@@ -299,12 +298,12 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         max-height: none;
       }
       @media (hover: hover) {
-        :host:hover {
+        /*:host:hover {
           z-index: 90011;
         }
         :host:hover [error] {
           max-height: none;
-        }
+        }*/
         :host:hover,
         :host:hover > [menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
