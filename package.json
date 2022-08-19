@@ -43,10 +43,13 @@
     "accessibility",
     "popup",
     "spin",
+    "spinner",
     "checkbox",
     "radiobox",
     "switchbox",
+    "toggler",
     "dropdown",
+    "select",
     "combobox",
     "select",
     "multiselect"

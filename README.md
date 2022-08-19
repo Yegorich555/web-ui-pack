@@ -44,12 +44,12 @@ npm install web-ui-pack
 - [x] [Helper.Observer](#helpersobserver)
 - [x] [PopupElement](#example) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
 - [x] [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
-- [x] FormElement
+- [x] [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
 - [x] [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
-- [x] PasswordControl
+- [x] [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
+- [x] SwitchControl (Toggler)
 - [x] CheckControl (Checkbox)
 - [ ] CheckTreeControl
-- [x] SwitchControl
 - [x] RadioControl (RadioGroup)
 - [x] SelectControl (ComboBox, Dropdown)
 - [ ] SelectManyControl (MultiSelect)
@@ -96,15 +96,16 @@ npm install web-ui-pack
        - [_BaseElement_](src/baseElement.ts)
          - [PopupElement](src/popupElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
          - [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
-         - [FormElement](src/formElement.ts)
+         - [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
          - [_BaseControl_](src/controls/baseControl.ts)
            - [SwitchControl](src/controls/switch.ts)
              - [CheckControl](src/controls/check.ts)
            - [RadioControl](src/controls/radio.ts)
-           - [TextControl](src/controls/text.ts)
-             - [PasswordControl](src/controls/password.ts)
+           - [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
+             - [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
              - [BaseComboControl](src/controls/baseCombo.ts)
-               - [SelectControl](src/controls/select.ts) -~~[SelectManyControl](src/controls/selectMany.ts)~~
+               - [SelectControl](src/controls/select.ts)
+                 - ~~[SelectManyControl](src/controls/selectMany.ts)~~
                - ~~[DateControl](src/controls/date.ts)~~
 
 ---

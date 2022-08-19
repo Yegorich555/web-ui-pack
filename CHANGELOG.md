@@ -21,9 +21,9 @@
   - [`onSpy`](src/helpers/onSpy.ts)
 - Added elements
   - [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
-  - FormElement
+  - [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
   - [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
-  - PasswordControl
+  - [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
   - SelectControl
   - SwitchControl
   - CheckControl
