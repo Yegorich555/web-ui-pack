@@ -1,4 +1,4 @@
-import { stringLowerCount, stringUpperCount } from "web-ui-pack/helpers/stringCaseCount";
+import { stringLowerCount, stringUpperCount } from "web-ui-pack/indexHelpers";
 
 describe("helper.stringCaseCount", () => {
   test("stringLowerCount", () => {

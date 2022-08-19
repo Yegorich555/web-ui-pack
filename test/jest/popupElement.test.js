@@ -7,7 +7,7 @@ import * as all2 from "web-ui-pack/popup/popupElement";
 
 import * as h from "../testHelper";
 
-/** Wait for pointet time (includes times and async promise) */
+/** Wait for pointed time (includes times and async promise) */
 function wait(time = 1000) {
   return new Promise((resolve) => setTimeout(resolve, time) && jest.advanceTimersByTime(time));
 }
