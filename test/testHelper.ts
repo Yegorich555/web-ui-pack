@@ -100,7 +100,7 @@ export function findAllFunctions(obj: any) {
   };
 }
 
-interface BaseTestOptions {
+export interface BaseTestOptions {
   skipAttrs?: boolean;
   attrs: Record<
     string,

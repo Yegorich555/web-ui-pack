@@ -2,6 +2,7 @@
 /* eslint-disable jest/no-export */
 import WUPBaseControl, { ClearActions, ValidationCases } from "web-ui-pack/controls/baseControl";
 import * as h from "../testHelper";
+import { BaseTestOptions } from "../testHelper";
 
 declare global {
   namespace WUPBase {
@@ -56,16 +57,24 @@ interface ValueToAttr<T> {
   attrValue: string;
 }
 
-interface TestOptions<T> {
+interface TestOptions<T> extends BaseTestOptions {
+  emptyValue?: any;
   initValues: [ValueToAttr<T>, ValueToAttr<T>, ValueToAttr<T>];
   validations: Record<string, { set: any; failValue: T | undefined; trueValue: T }>;
   validationsSkip?: string[];
   autoCompleteOff?: "off" | "new-password";
+  /** Set true to ignore select in input text */
+  noInputSelection?: boolean;
 }
 
 export function testBaseControl<T>(cfg: TestOptions<T>) {
   cfg.autoCompleteOff = cfg.autoCompleteOff || "off";
-  h.baseTestComponent(() => document.createElement(tagName), { attrs: { initvalue: { skip: true } } });
+  cfg.emptyValue = "emptyValue" in cfg ? cfg.emptyValue : undefined;
+  const hasVldRequired = !cfg.validationsSkip?.includes("required");
+
+  h.baseTestComponent(() => document.createElement(tagName), {
+    attrs: { initvalue: { skip: true }, ...cfg.attrs },
+  });
 
   describe("$initValue", () => {
     test("attr [initvalue] vs $initValue", () => {
@@ -88,7 +97,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.removeAttribute("initvalue");
       jest.advanceTimersByTime(1);
       expect(el.getAttribute("initvalue")).toBe(null);
-      expect(el.$initValue).toBe(undefined);
+      expect(el.$initValue).toBe(cfg.emptyValue);
     });
 
     test("$initValue vs $value", () => {
@@ -114,7 +123,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$isChanged).toBe(true);
       expect(spyChange).toBeCalledTimes(3); // change event happens even via $initValue
 
-      el.$initValue = cfg.initValues[0].value;
+      el.$initValue = cfg.initValues[1].value;
       expect(el.$value).toBe(cfg.initValues[2].value);
       expect(el.$isChanged).toBe(true);
       expect(spyChange).toBeCalledTimes(3);
@@ -196,8 +205,10 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$value).toBe(cfg.initValues[0].value);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       expect(el.$value).toBe(cfg.initValues[1].value);
-      expect(el.$refInput.selectionStart).toBe(0);
-      expect(el.$refInput.selectionEnd).toBe(el.$refInput.value.length);
+      if (!cfg.noInputSelection) {
+        expect(el.$refInput.selectionStart).toBe(0);
+        expect(el.$refInput.selectionEnd).toBe(el.$refInput.value.length);
+      }
 
       // clear + resetToInit
       el.$value = cfg.initValues[0].value;
@@ -326,25 +337,27 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el2.$isValid).toBeTruthy();
     });
 
-    test("via attr [validations]", () => {
-      const vld = { required: true };
-      (window as any)._testVld = vld;
-      el.setAttribute("validations", "_testVld");
-      jest.advanceTimersByTime(1);
-      expect((el as any).validations).toBe(vld);
+    if (hasVldRequired) {
+      test("via attr [validations]", () => {
+        const vld = { required: true };
+        (window as any)._testVld = vld;
+        el.setAttribute("validations", "_testVld");
+        jest.advanceTimersByTime(1);
+        expect((el as any).validations).toBe(vld);
 
-      el.$value = undefined;
-      expect(el.$validate()).not.toBe(false);
-      expect(el.$isValid).toBe(false);
+        el.$value = undefined;
+        expect(el.$validate()).not.toBe(false);
+        expect(el.$isValid).toBe(false);
 
-      el.$value = cfg.initValues[0].value;
-      expect(el.$validate()).toBe(false);
-      expect(el.$isValid).toBe(true);
+        el.$value = cfg.initValues[0].value;
+        expect(el.$validate()).toBe(false);
+        expect(el.$isValid).toBe(true);
 
-      delete (window as any)._testVld;
-      expect(el.$validate()).toBe(false);
-      expect(el.$isValid).toBe(true);
-    });
+        delete (window as any)._testVld;
+        expect(el.$validate()).toBe(false);
+        expect(el.$isValid).toBe(true);
+      });
+    }
 
     test("rule not exists", () => {
       el.$options.validations = { no: true } as any;
@@ -393,7 +406,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       await h.wait();
       el.$value = undefined;
       el.$options.validationCase = ValidationCases.onFocusLost | 0;
-      el.$options.validations = { required: true };
+      el.$options.validations = hasVldRequired ? { required: true } : { _alwaysInvalid: true };
       await h.wait();
       expect(el.$refError).not.toBeDefined();
       el.focus();
@@ -484,41 +497,45 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     });
 
     const ruleNames = Object.keys(elType.$defaults.validationRules);
-    cfg.validations.required = { set: true, failValue: undefined, trueValue: cfg.initValues[0].value };
+    if (!cfg.validationsSkip?.includes("required")) {
+      cfg.validations.required = { set: true, failValue: undefined, trueValue: cfg.initValues[0].value };
+    }
+    const hasValidations = !!Object.keys(cfg.validations).length;
 
-    test("$options.validationShowAll", async () => {
-      el.$options.validationShowAll = true;
-      const vld = {} as Record<string, any>;
-      Object.keys(cfg.validations).map((k) => (vld[k] = cfg.validations[k].set));
-      el.$options.validations = vld;
-      el.$validate();
-      await h.wait();
-      expect(el.$refError).toBeDefined();
-      expect(el).toMatchSnapshot();
+    hasValidations &&
+      test("$options.validationShowAll", async () => {
+        el.$options.validationShowAll = true;
+        const vld = {} as Record<string, any>;
+        Object.keys(cfg.validations).forEach((k) => (vld[k] = cfg.validations[k].set));
+        el.$options.validations = vld;
+        el.$validate();
+        await h.wait();
+        expect(el.$refError).toBeDefined();
+        expect(el).toMatchSnapshot();
 
-      el.$value = cfg.initValues[0].value;
-      el.$validate();
-      await h.wait();
-      expect(el).toMatchSnapshot();
+        el.$value = cfg.initValues[0].value;
+        el.$validate();
+        await h.wait();
+        expect(el).toMatchSnapshot();
 
-      (el.$options.validations as any)._alwaysValid = true;
-      el.$hideError();
-      el.$validate();
-      expect(() => jest.advanceTimersByTime(1000)).toThrow(); // because impossible to get errorMessage
+        (el.$options.validations as any)._alwaysValid = true;
+        el.$hideError();
+        el.$validate();
+        expect(() => jest.advanceTimersByTime(1000)).toThrow(); // because impossible to get errorMessage
 
-      el.$options.name = "firstName"; // again just for coverage
-      el.$hideError();
-      el.$validate();
-      expect(() => jest.advanceTimersByTime(1000)).toThrow(); // because impossible to get errorMessage
+        el.$options.name = "firstName"; // again just for coverage
+        el.$hideError();
+        el.$validate();
+        expect(() => jest.advanceTimersByTime(1000)).toThrow(); // because impossible to get errorMessage
 
-      el.$options.validations = { required: true };
-      el.$value = undefined;
-      el.$hideError();
-      el.$validate();
-      expect(el.$isValid).toBe(false);
-      await h.wait();
-      expect(el).toMatchSnapshot();
-    });
+        el.$options.validations = { required: true };
+        el.$value = undefined;
+        el.$hideError();
+        el.$validate();
+        expect(el.$isValid).toBe(false);
+        await h.wait();
+        expect(el).toMatchSnapshot();
+      });
 
     ruleNames.forEach((ruleName) => {
       if ((cfg.validationsSkip as any)?.includes(ruleName)) {

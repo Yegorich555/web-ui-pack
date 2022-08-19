@@ -51,10 +51,10 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       const el = getEl();
       el.$value = initV;
       el.$options.clearButton = true;
-      el.$options.clearActions = ClearActions.clear;
+      el.$options.clearActions = ClearActions.clear | 0;
       jest.advanceTimersByTime(1);
       expect(el.$refBtnClear).toBeDefined();
-      el.$refBtnClear.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      el.$refBtnClear!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       expect(el.$value).toBe(undefined);
       expect(el).toMatchSnapshot();
 
@@ -68,7 +68,7 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       const el = getEl();
       el.$options.debounceMs = 400;
       el.$options.validations = { _alwaysInvalid: true }; // just for coverage
-      el.$options.validationCase = ValidationCases.onChange; // just for coverage
+      el.$options.validationCase = ValidationCases.onChange | 0; // just for coverage
       const spyChange = jest.fn();
       el.addEventListener("$change", spyChange);
 
