@@ -34,11 +34,11 @@ const routes: IRoute[] = [
   { path: "controls", label: "Form & Controls", el: ControlsView },
   { path: "control/text", el: TextControlView, isNested: true },
   { path: "control/password", el: PasswordControlView, isNested: true },
-  { path: "control/select", el: SelectControlView, isNested: true },
-  // { path: "control/selectMany", el: SelectManyControlView, isNested: true },
-  { path: "control/radio", el: RadioControlView, isNested: true },
   { path: "control/switch", el: SwitchControlView, isNested: true },
   { path: "control/check", el: CheckControlView, isNested: true },
+  { path: "control/radio", el: RadioControlView, isNested: true },
+  { path: "control/select", el: SelectControlView, isNested: true },
+  // { path: "control/selectMany", el: SelectManyControlView, isNested: true },
 
   { path: "faq", label: "FAQ", el: FAQView },
 ];

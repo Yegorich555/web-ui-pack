@@ -124,6 +124,9 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
         margin-left: 0;
         margin-right: 0.5em;
       }
+      :host[reverse] label>strong {
+        margin-right: auto;
+      }
       @media not all and (prefers-reduced-motion) {
         :host label>span { transition: background-color var(--anim); }
         :host label>span:before { transition: left var(--anim); }

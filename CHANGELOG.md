@@ -9,7 +9,7 @@
 **Features**:
 
 - Optimized for webpack (via [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free))
-- Optimized memory consumption (remove auto-bind functions)
+- Optimized memory consumption (removed auto-bind functions)
 - Added [helpers](README.md#helpers)
   - [`animateDropdown`](src/helpers/animateDropdown.ts)
   - [`findScrollParentAll`](src/helpers/findScrollParent.ts)
@@ -24,10 +24,10 @@
   - [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
   - [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
   - [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
-  - SelectControl
-  - SwitchControl
+  - [SwitchControl](src/controls/switch.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/switch)
   - CheckControl
   - RadioControl
+  - SelectControl
 - Helper [nestedProperty](src/helpers/nestedProperty.ts): added option `out.hasProp`
 - Helper [promiseWait](src/helpers/promiseWait.ts): added option `smartOrCallback` to prevent useless pending on already resolved promises
 
@@ -36,8 +36,8 @@
   - Added option **animation** with animation-drawer
   - Added option **maxWidthByTarget**
   - Added option **offsetFitElement**
-  - Added promise-result for \$hide() and \$show() (resolve by animation time)
-  - Allow to use other inline transform styles
+  - Added promise-result for \$hide() and \$show() (resolved by animation time)
+  - Allowed to use other inline transform styles
   - Improved listener (filter mouse-move, double-click etc.)
 
 ## 0.0.5 (Apr 4, 2022)

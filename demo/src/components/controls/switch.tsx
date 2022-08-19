@@ -6,7 +6,19 @@ const sideEffect = WUPSwitchControl;
 
 export default function SwitchControlView() {
   return (
-    <Page header="SwitchControl" link="switchcontrol">
+    <Page
+      header="SwitchControl"
+      link="switchcontrol"
+      features={[
+        "Easy to change size of items via css-variables (ctrl-switch-size...)", //
+        "Possible to reverse label",
+        "Powerful accessibility support",
+      ]}
+      details={{
+        tag: "wup-switch",
+        cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
+      }}
+    >
       <wup-form
         ref={(el) => {
           if (el) {

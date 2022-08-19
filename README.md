@@ -47,7 +47,7 @@ npm install web-ui-pack
 - [x] [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
 - [x] [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
 - [x] [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
-- [x] SwitchControl (Toggler)
+- [x] [SwitchControl (Toggler)](src/controls/switch.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/switch)
 - [x] CheckControl (Checkbox)
 - [ ] CheckTreeControl
 - [x] RadioControl (RadioGroup)
@@ -98,7 +98,7 @@ npm install web-ui-pack
          - [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
          - [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
          - [_BaseControl_](src/controls/baseControl.ts)
-           - [SwitchControl](src/controls/switch.ts)
+           - [SwitchControl](src/controls/switch.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/switch)
              - [CheckControl](src/controls/check.ts)
            - [RadioControl](src/controls/radio.ts)
            - [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
