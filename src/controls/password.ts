@@ -67,6 +67,12 @@ export default class WUPPasswordControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPPasswordControl;
 
+  static get observedOptions(): Array<string> {
+    const arr = super.observedOptions as Array<keyof WUPPassword.Options>;
+    arr.push("reverse");
+    return arr;
+  }
+
   /** Text announced by screen-readers when input cleared; @defaultValue `input cleared` */
   static get $ariaDescription(): string {
     return "press Alt + V to show/hide password";
@@ -195,6 +201,4 @@ export default class WUPPasswordControl<
 customElements.define(tagName, WUPPasswordControl);
 
 // manual testcase: form with email+password ignores autocomplete: "off" if previously it was saved
-// e2e testcase: toggle eye-btn and check if height stay the same
-
 // todo FAQ how to create ConfirmPassword field
