@@ -24,7 +24,7 @@ export default function PasswordControlView() {
       link="#passwordcontrol"
       features={[
         "Inheritted features from TextControl",
-        "Built-in validations (required,min,max,email, minNumber,minUpper,minLower,special)",
+        "Built-in validations (required,min,max,email, minNumber,minUpper,minLower,special,confirm)",
         "Possible to show all validation rules in list (use $options.validationShowAll). Use css to style error-list/min-size on focusOut",
         "Possible to reverse eye-button (use $options.reverse)",
       ]}
@@ -66,6 +66,15 @@ export default function PasswordControlView() {
         />
         <wup-pwd name="disabled" disabled />
         <wup-pwd label="Reversed button eye" name="reversed" reverse initValue="someValue-ForReversed" />
+        <wup-pwd
+          label="Confirm password"
+          name="confirm"
+          ref={(el) => {
+            if (el) {
+              el.$options.validations = { confirm: true };
+            }
+          }}
+        />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

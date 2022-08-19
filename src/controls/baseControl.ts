@@ -59,7 +59,11 @@ export namespace WUPBaseIn {
     Defaults: {
       /** Rules defined for control */
       validationRules: {
-        [K in keyof ValidationKeys]?: (value: ValueType, setValue: ValidationKeys[K]) => false | string;
+        [K in keyof ValidationKeys]?: (
+          value: ValueType,
+          setValue: ValidationKeys[K],
+          control: IBaseControl
+        ) => false | string;
       };
       /** When to validate control and show error. Validation by onSubmit impossible to disable
        *  @defaultValue onChangeSmart | onFocusLost | onFocusWithValue | onSubmit
@@ -636,7 +640,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
           const n = this._opts.name ? `.[${this._opts.name}]` : "";
           throw new Error(`${this.tagName}${n}. Validation rule [${vl}] is not found`);
         }
-        err = r(v as unknown as string, vl as boolean);
+        err = r(v as unknown as string, vl as boolean, this);
       }
 
       if (err !== false) {

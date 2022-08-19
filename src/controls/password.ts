@@ -29,6 +29,8 @@ declare global {
       minUpper: number;
       minLower: number;
       special: { min: number; chars: string };
+      /** Match password fields with confirm password */
+      confirm: boolean;
     }
     interface EventMap extends WUPText.EventMap {}
     interface Defaults<T = string> extends WUPPasswordIn.GenDef<T> {}
@@ -135,6 +137,29 @@ export default class WUPPasswordControl<
       special: (v, setV) =>
         (!v || ![...setV.chars].reduce((prev, c) => (v.includes(c) ? ++prev : prev), 0)) &&
         `Must contain at least ${setV.min} special character${setV.min === 1 ? "" : "s"}: ${setV.chars}`,
+      confirm: (v, setV, control) => {
+        if (v && setV) {
+          const selector = control.tagName.toLowerCase();
+          const all = document.querySelectorAll(selector);
+          let i = -1;
+          // eslint-disable-next-line no-restricted-syntax
+          for (const el of all.values()) {
+            if (control === el) {
+              const found = all[i] as WUPPasswordControl;
+              if (found && found.$value === control.$value) {
+                return false;
+              }
+              i = -2;
+              break;
+            }
+            ++i;
+          }
+          if (i === -2) {
+            return `Previous "${selector}" not found`;
+          }
+        }
+        return "Passwords must be equal";
+      },
     },
   };
 
@@ -201,4 +226,3 @@ export default class WUPPasswordControl<
 customElements.define(tagName, WUPPasswordControl);
 
 // manual testcase: form with email+password ignores autocomplete: "off" if previously it was saved
-// todo FAQ how to create ConfirmPassword field

@@ -16,6 +16,30 @@ describe("control.pwd", () => {
       minLower: { set: 1, failValue: "RELAX", trueValue: "RELAx" },
       special: { set: { min: 1, chars: "#!-_?,.@:;'" }, failValue: "relax", trueValue: "re-l-ax" },
     },
+    validationsSkip: ["confirm"],
+  });
+
+  test("validation confirm", async () => {
+    const main = document.body.appendChild(document.createElement("wup-pwd"));
+    main.$value = "Ab1";
+    const second = document.body.appendChild(document.createElement("wup-pwd"));
+    second.$options.validations = { confirm: true };
+
+    await h.wait();
+    expect(second.$isValid).toBe(false);
+    expect(second.$validate()).toMatchInlineSnapshot(`"Passwords must be equal"`);
+
+    second.$value = "Ab1";
+    expect(second.$isValid).toBe(true);
+
+    document.body.innerHTML = "";
+    const secondWithout = document.body.appendChild(document.createElement("wup-pwd"));
+    secondWithout.$options.validations = { confirm: true };
+    secondWithout.$value = "B2";
+    document.body.appendChild(document.createElement("wup-pwd")); // append after confirmPassword
+    await h.wait();
+    expect(secondWithout.$isValid).toBe(false);
+    expect(secondWithout.$validate()).toMatchInlineSnapshot(`"Previous \\"wup-pwd\\" not found"`);
   });
 
   test("validation messages ends with -s", () => {

@@ -59,6 +59,7 @@ interface ValueToAttr<T> {
 interface TestOptions<T> {
   initValues: [ValueToAttr<T>, ValueToAttr<T>, ValueToAttr<T>];
   validations: Record<string, { set: any; failValue: T | undefined; trueValue: T }>;
+  validationsSkip?: string[];
   autoCompleteOff?: "off" | "new-password";
 }
 
@@ -520,6 +521,10 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     });
 
     ruleNames.forEach((ruleName) => {
+      if ((cfg.validationsSkip as any)?.includes(ruleName)) {
+        return;
+      }
+
       test(`.${ruleName}`, () => {
         const isRuleRequired = ruleName === "required";
         expect(cfg.validations).toHaveProperty(ruleName);
@@ -533,7 +538,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
           expect(el.$refInput.getAttribute("aria-required")).toBe("true");
         }
 
-        const defMsg = elType.$defaults.validationRules![ruleName]!(vld.failValue as any, vld.set);
+        const defMsg = elType.$defaults.validationRules![ruleName]!(vld.failValue as any, vld.set, el);
         expect(defMsg).toBeTruthy();
         expect(el.$validate()).toBe(defMsg);
         expect(el.$isValid).toBe(false);
