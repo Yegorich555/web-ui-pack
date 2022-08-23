@@ -524,7 +524,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     // lowercase for attribute-changes otherwise it's wrong
     if (!propsChanged || propsChanged.includes("initvalue")) {
       const attr = this.getAttribute("initvalue");
-      if (attr) {
+      if (attr !== null) {
         (this as any)._noDelInitValueAttr = true;
         this.$initValue = this.parseValue(attr);
         delete (this as any)._noDelInitValueAttr;

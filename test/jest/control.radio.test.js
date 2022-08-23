@@ -1,5 +1,6 @@
 import { WUPRadioControl } from "web-ui-pack";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
+import * as h from "../testHelper";
 
 const getItems = () => [
   { value: 10, text: "Donny" },
@@ -64,26 +65,35 @@ describe("control.radio", () => {
     );
   });
 
-  // test("parsing $initValue", () => {
-  //   const el = testEl;
-  //   el.testMe = true;
-  //   el.$initValue = 20;
+  test("parsing $initValue", () => {
+    const el = testEl;
+    el.$initValue = 20;
+    el.setAttribute("initvalue", "");
+    jest.advanceTimersByTime(1);
+    expect(el.$initValue).toBe(undefined);
 
-  //   el.setAttribute("initvalue", "333");
-  //   jest.advanceTimersByTime(1);
-  //   expect(el.$initValue).toBe(undefined); // because not found
+    el.setAttribute("initvalue", "10");
+    jest.advanceTimersByTime(1);
+    expect(el.$initValue).toBe(10);
 
-  //   el.$options.items = [{ value: null, text: "Me" }];
-  //   jest.advanceTimersByTime(1);
-  //   el.setAttribute("initvalue", "");
-  //   jest.advanceTimersByTime(1);
-  //   expect(el.$initValue).toBe(null);
+    el.setAttribute("initvalue", "333");
+    jest.advanceTimersByTime(1);
+    expect(el.$initValue).toBe(undefined);
 
-  //   el.$options.items = [{ value: 10, text: "Me" }];
-  //   el.setAttribute("initvalue", "");
-  //   jest.advanceTimersByTime(1);
-  //   expect(el.$initValue).toBe(null);
-  // });
+    el.setAttribute("initvalue", "20");
+    jest.advanceTimersByTime(1);
+    expect(el.$initValue).toBe(20);
+
+    h.mockConsoleError(); // because of items changed but initValue doesn't matches
+    el.$options.items = [{ value: null, text: "Empty" }];
+    jest.advanceTimersByTime(1);
+    h.unMockConsoleError();
+
+    el.setAttribute("initvalue", "");
+    jest.advanceTimersByTime(1);
+    expect(el.getAttribute("initvalue")).toBe("");
+    expect(el.$initValue).toBe(null);
+  });
 
   test("user clicks on radio", () => {
     const el = testEl;
