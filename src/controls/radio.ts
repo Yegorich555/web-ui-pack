@@ -237,7 +237,7 @@ export default class WUPRadioControl<
   }
 
   protected renderItems(parent: HTMLFieldSetElement): void {
-    this.$refItems.forEach((r) => r.remove());
+    this.$refItems.forEach((r) => r.parentElement!.remove());
     this.$refItems.length = 0;
     const tmp = this._opts.items;
     const arr = typeof tmp === "function" ? tmp() : tmp;

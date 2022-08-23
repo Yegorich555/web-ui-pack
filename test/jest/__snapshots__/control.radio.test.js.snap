@@ -1290,34 +1290,6 @@ exports[`control.radio with form 1`] = `
         </strong>
       </legend>
       <label
-        for="txt2"
-      >
-        <span>
-          Donny
-        </span>
-      </label>
-      <label
-        for="txt3"
-      >
-        <span>
-          Mikky
-        </span>
-      </label>
-      <label
-        for="txt4"
-      >
-        <span>
-          Leo
-        </span>
-      </label>
-      <label
-        for="txt5"
-      >
-        <span>
-          Splinter
-        </span>
-      </label>
-      <label
         for="txt7"
       >
         <input
@@ -1390,34 +1362,6 @@ exports[`control.radio with form 2`] = `
       </span>
     </legend>
     <label
-      for="txt2"
-    >
-      <span>
-        Donny
-      </span>
-    </label>
-    <label
-      for="txt3"
-    >
-      <span>
-        Mikky
-      </span>
-    </label>
-    <label
-      for="txt4"
-    >
-      <span>
-        Leo
-      </span>
-    </label>
-    <label
-      for="txt5"
-    >
-      <span>
-        Splinter
-      </span>
-    </label>
-    <label
       for="txt7"
     >
       <input
@@ -1483,34 +1427,6 @@ exports[`control.radio with form 3`] = `
         First Input
       </strong>
     </legend>
-    <label
-      for="txt2"
-    >
-      <span>
-        Donny
-      </span>
-    </label>
-    <label
-      for="txt3"
-    >
-      <span>
-        Mikky
-      </span>
-    </label>
-    <label
-      for="txt4"
-    >
-      <span>
-        Leo
-      </span>
-    </label>
-    <label
-      for="txt5"
-    >
-      <span>
-        Splinter
-      </span>
-    </label>
     <label
       for="txt7"
     >

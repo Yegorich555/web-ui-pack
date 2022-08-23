@@ -60,7 +60,7 @@ describe("control.radio", () => {
     expect(el.$refItems.length).toBe(1);
     expect(el.querySelectorAll("input").length).toBe(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<fieldset><legend><strong></strong></legend><label for=\\"txt2\\"><span>Donny</span></label><label for=\\"txt3\\"><span>Mikky</span></label><label for=\\"txt4\\"><span>Leo</span></label><label for=\\"txt5\\"><span>Splinter</span></label><label for=\\"txt7\\"><span>Ms</span></label><label for=\\"txt9\\"><span>Number 1</span></label><label for=\\"txt11\\"><span>#33</span></label><label for=\\"txt13\\"><input id=\\"txt13\\" type=\\"radio\\" name=\\"txt12473\\" tabindex=\\"0\\"><span>Don</span></label></fieldset>"`
+      `"<fieldset><legend><strong></strong></legend><label for=\\"txt13\\"><input id=\\"txt13\\" type=\\"radio\\" name=\\"txt12473\\" tabindex=\\"0\\"><span>Don</span></label></fieldset>"`
     );
   });
 
