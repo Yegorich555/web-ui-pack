@@ -1,3 +1,4 @@
+import { WUP } from "../baseElement";
 import { WUPcssHidden } from "../styles";
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
 
@@ -222,9 +223,6 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
   protected override gotChanges(propsChanged: Array<keyof WUPSwitch.Options | any> | null): void {
     super.gotChanges(propsChanged as any);
 
-    this._opts.reverse = this.getBoolAttr("reverse", this._opts.reverse);
-    this.setAttr("reverse", this._opts.reverse, true);
-
     if (!propsChanged || propsChanged.includes("defaultchecked")) {
       const attr = this.getAttribute("defaultchecked");
       if (attr) {
@@ -233,6 +231,12 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
         this.$initValue = false; // removed attr >> remove initValue
       }
     }
+  }
+
+  protected override gotOptionsChanged(e: WUP.OptionEvent): void {
+    this._isStopChanges = true;
+    e.props.includes("reverse") && this.setAttr("reverse", this._opts.reverse, true);
+    super.gotOptionsChanged(e);
   }
 
   override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null): void {

@@ -326,7 +326,6 @@ export default class WUPRadioControl<
     this._isStopChanges = true;
     e.props.includes("reverse") && this.setAttr("reverse", this._opts.reverse, true);
     super.gotOptionsChanged(e);
-    this._isStopChanges = false;
   }
 
   override focus(): boolean {
@@ -341,3 +340,5 @@ export default class WUPRadioControl<
 }
 
 customElements.define(tagName, WUPRadioControl);
+
+// todo fix styles for [required]

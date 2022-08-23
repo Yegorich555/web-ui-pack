@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import getUsedCssVars from "src/helpers/parseCssVars";
 import WUPBaseElement from "web-ui-pack/baseElement";
 import WUPBaseControl from "web-ui-pack/controls/baseControl";
-import { WUPFormElement, WUPSwitchControl } from "web-ui-pack";
+import { WUPFormElement, WUPPasswordControl, WUPRadioControl, WUPSwitchControl } from "web-ui-pack";
 import styles from "./userCode.scss";
 import pageStyles from "./page.scss";
 
@@ -47,7 +47,7 @@ function renderHTMLCode(tag: string): string | JSX.Element {
     parsedAttrs.push({ name: "readonly", value: "false" });
     parsedAttrs.push({ name: "autofocus", value: "false" });
   }
-  if (el instanceof WUPSwitchControl) {
+  if (el instanceof WUPSwitchControl || el instanceof WUPPasswordControl || el instanceof WUPRadioControl) {
     parsedAttrs.push({ name: "reverse", value: "false" });
   }
   const isSingleLine = parsedAttrs.length < 4;

@@ -20,13 +20,28 @@ const items = [
   // { text: (v, li, i) => li.append(v.toString()), value: 124 },
 ];
 
-(window as any).inputRadio = {
-  items,
+(window as any)._someRadioValidations = {
+  required: true,
+} as WUPRadio.Options["validations"];
+
+(window as any).storedRadioItems = {
+  items: items.slice(0, 4),
 };
 
 export default function RadioControlView() {
   return (
-    <Page header="RadioControl" link="#radiocontrol">
+    <Page
+      header="RadioControl"
+      link="src/controls/radio.ts"
+      features={[
+        "Easy to change size of items and style via css-variables (ctrl-radio-size...)", //
+        "Possible to reverse labels",
+      ]}
+      details={{
+        tag: "wup-radio",
+        cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
+      }}
+    >
       <wup-form
         ref={(el) => {
           if (el) {
@@ -35,20 +50,20 @@ export default function RadioControlView() {
         }}
       >
         <wup-radio
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "radio";
-              el.$options.items = items.slice(0, 4);
-              el.$options.validations = { required: true };
-            }
-          }}
+          name="switch"
+          label="Switch"
+          initValue={items[1].value.toString()}
+          items="storedRadioItems.items"
+          validations="window._someRadioValidations"
+          reverse={false}
+          autoComplete="off"
         />
         <wup-radio
-          items="inputRadio.items"
           ref={(el) => {
             if (el) {
               el.$options.name = "disabled";
               el.$options.disabled = true;
+              el.$options.items = items;
             }
           }}
         />
