@@ -356,6 +356,9 @@ clip: rect(1px, 1px, 1px, 1px); }
         margin-left: 0;
         margin-right: 0.5em;
       }
+      WUP-SWITCH[reverse] label&gt;strong {
+        margin-right: auto;
+      }
       @media not all and (prefers-reduced-motion) {
         WUP-SWITCH label&gt;span { transition: background-color var(--anim); }
         WUP-SWITCH label&gt;span:before { transition: left var(--anim); }

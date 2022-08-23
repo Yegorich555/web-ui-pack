@@ -219,14 +219,19 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
     return r;
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUPSwitch.Options> | null): void {
+  protected override gotChanges(propsChanged: Array<keyof WUPSwitch.Options | any> | null): void {
     super.gotChanges(propsChanged as any);
 
     this._opts.reverse = this.getBoolAttr("reverse", this._opts.reverse);
     this.setAttr("reverse", this._opts.reverse, true);
 
-    if (this.getBoolAttr("defaultChecked", false)) {
-      this.$initValue = true;
+    if (!propsChanged || propsChanged.includes("defaultchecked")) {
+      const attr = this.getAttribute("defaultchecked");
+      if (attr) {
+        this.$initValue = attr !== "false";
+      } else if (propsChanged) {
+        this.$initValue = false; // removed attr >> remove initValue
+      }
     }
   }
 

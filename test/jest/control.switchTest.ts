@@ -19,5 +19,29 @@ export default function testSwitchControl(getEl: () => WUPSwitchControl, opts: P
     validationsSkip: ["required"], // because it doesn't make sense for checkbox
   });
 
-  // todo test defaultChecked
+  test("defaultChecked", () => {
+    const el = getEl();
+    expect(el.$refInput.type).toBe("checkbox");
+    expect(el.$initValue).toBe(false);
+
+    el.setAttribute("defaultchecked", "true");
+    jest.advanceTimersByTime(1);
+    expect(el.$initValue).toBe(true);
+    expect(el.$value).toBe(true);
+    expect(el.$refInput.checked).toBe(true);
+
+    el.setAttribute("defaultchecked", "false");
+    jest.advanceTimersByTime(1);
+    expect(el.$initValue).toBe(false);
+    expect(el.$value).toBe(false);
+    expect(el.$refInput.checked).toBe(false);
+
+    el.setAttribute("defaultchecked", "true");
+    jest.advanceTimersByTime(1);
+    expect(el.$initValue).toBe(true);
+    el.removeAttribute("defaultchecked");
+    el.$options.readOnly = true;
+    jest.advanceTimersByTime(1);
+    expect(el.$initValue).toBe(false);
+  });
 }
