@@ -44,4 +44,33 @@ export default function testSwitchControl(getEl: () => WUPSwitchControl, opts: P
     jest.advanceTimersByTime(1);
     expect(el.$initValue).toBe(false);
   });
+
+  test("user clicks on checkbox", () => {
+    const el = getEl();
+    expect(el.$value).toBe(false);
+    expect(el.$isChanged).toBe(false);
+
+    el.$refInput.click();
+    expect(el.$value).toBe(true);
+    expect(el.$isChanged).toBe(true);
+
+    el.$refInput.click();
+    expect(el.$value).toBe(false);
+  });
+
+  test("[readOnly] prevents changing", () => {
+    const el = getEl();
+    el.$options.readOnly = true;
+    jest.advanceTimersByTime(1);
+    expect(el.$value).toBe(false);
+
+    el.$refInput.click();
+    expect(el.$value).toBe(false);
+
+    el.$value = true;
+    el.$refInput.click();
+    expect(el.$value).toBe(true);
+    el.$refInput.click();
+    expect(el.$value).toBe(true);
+  });
 }
