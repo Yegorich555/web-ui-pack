@@ -26,7 +26,7 @@ export default function SwitchControlView() {
           }
         }}
       >
-        <wup-switch label="Switch" />
+        <wup-switch name="switch" label="Switch" initValue={false} reverse={false} />
         <wup-switch
           ref={(el) => {
             if (el) {

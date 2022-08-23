@@ -204,7 +204,7 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
     this.appendEvent(this.$refInput, "input", (e) => this.gotInput(e, this.$refInput));
   }
 
-  /** Called when user types text */
+  /** Called when user changes value via click or keyboard */
   protected gotInput(e: Event, inputEl: HTMLInputElement): void {
     if (this.$isReadOnly) {
       inputEl.checked = !inputEl.checked;
