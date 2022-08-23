@@ -109,6 +109,12 @@ export interface BaseTestOptions {
       skip?: boolean;
     }
   >;
+  $options: Record<
+    string,
+    {
+      skip?: boolean;
+    }
+  >;
 }
 
 export function baseTestComponent(createFunction: () => any, opts: BaseTestOptions) {
@@ -152,7 +158,7 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
         describe("observedAttributes affects on options", () => {
           attrs.forEach((a) => {
             const isSkip = opts?.attrs && opts.attrs[a]?.skip;
-            it(`attr [${a}]${isSkip ? " - skipped" : ""}`, () => {
+            test(`attr [${a}]${isSkip ? " - skipped" : ""}`, () => {
               expect(a.toLowerCase()).toBe(a); // all observed attrs must be in lowercase otherwise it doesn't work
 
               if (isSkip) {
@@ -188,7 +194,11 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
             os.forEach((o) => {
               const attr = attrs.find((a) => a === o.toLowerCase());
               if (attr) {
-                it(`opt [${o}]`, () => {
+                const isSkip = opts?.$options && opts?.$options[attr]?.skip;
+                if (isSkip) {
+                  return;
+                }
+                test(`opt [${o}]`, () => {
                   if (!obj.isConnected) {
                     document.body.appendChild(obj);
                     jest.advanceTimersByTime(1); // wait for ready

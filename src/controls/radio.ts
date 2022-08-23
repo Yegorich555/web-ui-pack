@@ -178,13 +178,13 @@ export default class WUPRadioControl<
 
   static get observedOptions(): Array<string> {
     const arr = super.observedOptions as Array<keyof WUPRadio.Options>;
-    arr.push("reverse");
+    arr.push("reverse", "items");
     return arr;
   }
 
-  static get observedAttributes(): Array<keyof WUPRadio.Options> {
-    const arr = super.observedAttributes as Array<keyof WUPRadio.Options>;
-    arr.push("reverse");
+  static get observedAttributes(): Array<LowerKeys<WUPRadio.Options>> {
+    const arr = super.observedAttributes as Array<LowerKeys<WUPRadio.Options>>;
+    arr.push("reverse", "items");
     return arr;
   }
 
@@ -239,9 +239,8 @@ export default class WUPRadioControl<
   protected renderItems(parent: HTMLFieldSetElement): void {
     this.$refItems.forEach((r) => r.remove());
     this.$refItems.length = 0;
-    const tmp =
-      (nestedProperty.get(window, this.getAttribute("items") || "") as WUPRadio.Options["items"]) || this._opts.items;
-    const arr = tmp instanceof Function ? tmp() : tmp;
+    const tmp = this._opts.items;
+    const arr = typeof tmp === "function" ? tmp() : tmp;
     if (!arr?.length) {
       return;
     }
@@ -261,7 +260,7 @@ export default class WUPRadioControl<
       return tit;
     });
 
-    if (arr[0].text instanceof Function) {
+    if (arr[0].text && typeof arr[0].text === "function") {
       arr.forEach((v, i) => (v as WUPSelect.MenuItemFn<ValueType>).text(v.value, arrLi[i], i));
     } else {
       arr.forEach((v, i) => (arrLi[i].textContent = (v as WUPSelect.MenuItem<ValueType>).text));
@@ -307,6 +306,8 @@ export default class WUPRadioControl<
     this.setAttr("reverse", this._opts.reverse, true);
 
     if (!propsChanged || propsChanged.includes("items")) {
+      const attr = this.getAttribute("items");
+      this._opts.items = attr ? (nestedProperty.get(window, attr) as WUPRadio.Options["items"]) : this._opts.items;
       this.renderItems(this.$refFieldset);
     }
     // required

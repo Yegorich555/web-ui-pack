@@ -76,6 +76,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
   h.baseTestComponent(() => document.createElement(tagName), {
     attrs: { initvalue: { skip: true }, ...cfg.attrs },
+    $options: cfg.$options,
   });
 
   describe("$initValue", () => {
