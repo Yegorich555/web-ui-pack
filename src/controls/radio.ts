@@ -201,6 +201,8 @@ export default class WUPRadioControl<
 
   protected override _opts = this.$options;
 
+  // todo FAQ how to change parsing InitValue
+
   /** Called when need to parse attr [initValue] */
   protected override parseValue(attrValue: string): ValueType | undefined {
     if (!this.$refItems?.length) {
@@ -301,6 +303,8 @@ export default class WUPRadioControl<
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUPRadio.Options> | null): void {
+    super.gotChanges(propsChanged as any);
+
     this._opts.reverse = this.getBoolAttr("reverse", this._opts.reverse);
     this.setAttr("reverse", this._opts.reverse, true);
 
@@ -308,10 +312,8 @@ export default class WUPRadioControl<
       this.renderItems(this.$refFieldset);
     }
     // required
-    const req = this._opts.validations?.required;
+    const req = this.validations?.required;
     this.setAttr.call(this.$refFieldset, "aria-required", !!req);
-
-    super.gotChanges(propsChanged as any);
   }
 
   override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null): void {
@@ -340,5 +342,3 @@ export default class WUPRadioControl<
 }
 
 customElements.define(tagName, WUPRadioControl);
-
-// todo fix styles for [required]
