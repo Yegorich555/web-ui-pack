@@ -65,6 +65,8 @@ interface TestOptions<T> extends BaseTestOptions {
   autoCompleteOff?: "off" | "new-password";
   /** Set true to ignore select in input text */
   noInputSelection?: boolean;
+  onCreateNew: (el: WUPBaseControl) => void;
+  testReadonly: { true: (el: WUPBaseControl) => void; false: (el: WUPBaseControl) => void };
 }
 
 export function testBaseControl<T>(cfg: TestOptions<T>) {
@@ -131,6 +133,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       // checking when el not isReady
       spyChange.mockClear();
       el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
+      cfg.onCreateNew?.call(cfg, el);
       el.addEventListener("$change", spyChange);
 
       el.$value = cfg.initValues[0].value;
@@ -161,6 +164,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
     test("autoFocus", () => {
       el = document.createElement(el.tagName) as WUPBaseControl;
+      cfg.onCreateNew?.call(cfg, el);
       el.$options.autoFocus = true;
       document.body.appendChild(el);
       expect(el.$isFocused).toBe(false);
@@ -231,13 +235,13 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       jest.advanceTimersByTime(1);
       expect(el.$isDisabled).toBe(true);
       expect(el.getAttribute("disabled")).toBe("");
-      expect(el.$refInput.disabled).toBe(true);
+      expect(((el as any).$refFieldset || el.$refInput).disabled).toBe(true);
 
       el.$options.disabled = false;
       jest.advanceTimersByTime(1);
       expect(el.$isDisabled).toBe(false);
       expect(el.getAttribute("disabled")).toBe(null);
-      expect(el.$refInput.disabled).toBe(false);
+      expect(((el as any).$refFieldset || el.$refInput).disabled).toBe(false);
     });
 
     test("label", () => {
@@ -259,13 +263,16 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       jest.advanceTimersByTime(1);
       expect(el.getAttribute("readonly")).toBe("");
       expect(el.$isReadOnly).toBe(true);
-      expect(el.$refInput.readOnly).toBe(true);
+      if (cfg.testReadonly) cfg.testReadonly.true(el);
+      else expect(el.$refInput.readOnly).toBe(true);
 
       el.$options.readOnly = false;
       jest.advanceTimersByTime(1);
       expect(el.$isReadOnly).toBe(false);
       expect(el.getAttribute("readonly")).toBe(null);
       expect(el.$refInput.readOnly).not.toBe(true);
+      if (cfg.testReadonly) cfg.testReadonly.false(el);
+      else expect(el.$refInput.readOnly).not.toBe(true);
     });
 
     test("name - without form", () => {
@@ -298,6 +305,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
     // just for coverage
     el = document.createElement(tagName) as WUPBaseControl;
+    cfg.onCreateNew?.call(cfg, el);
     expect(() => el.$showError("Test when not connected")).not.toThrowError();
     // just for coverage
     document.body.appendChild(el);
@@ -418,6 +426,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
       // onInit
       el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
+      cfg.onCreateNew?.call(cfg, el);
       el.$initValue = cfg.initValues[0].value;
       el.$options.validationCase = ValidationCases.onInit | 0;
       el.$options.validations = { custom: () => "custom err here", required: true, c2: () => false };
@@ -426,6 +435,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
       // onChangeSmart
       el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
+      cfg.onCreateNew?.call(cfg, el);
       el.$options.validationCase = ValidationCases.onChangeSmart | 0;
       el.$options.validations = { required: true };
       el.$options.clearActions = ClearActions.clear | 0;
@@ -444,19 +454,20 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
       // cover case when el is invalid previously
       el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
+      cfg.onCreateNew?.call(cfg, el);
       el.$options.validationCase = ValidationCases.onChangeSmart | 0;
       el.$options.validations = { required: true, custom: () => "always err", c2: () => false };
       el.$options.clearActions = ClearActions.clear | 0;
       el.$value = undefined;
       await h.wait();
       // @ts-ignore
-      el.setValue(cfg.initValues[0]);
+      el.setValue(cfg.initValues[0].value);
       expect(el.$isValid).toBe(false);
       await h.wait();
       expect(el.$refError).not.toBeDefined();
       el.$options.validations = { required: true };
       // @ts-ignore
-      el.setValue(cfg.initValues[1]);
+      el.setValue(cfg.initValues[1].value);
       expect(el.$isValid).toBe(true); // was valid
       // @ts-ignore
       el.setValue(undefined);
@@ -519,6 +530,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
         expect(el).toMatchSnapshot();
 
         (el.$options.validations as any)._alwaysValid = true;
+        (el.$options.validations as any)._alwaysInvalid = true;
         el.$hideError();
         el.$validate();
         expect(() => jest.advanceTimersByTime(1000)).toThrow(); // because impossible to get errorMessage
@@ -593,7 +605,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     form.$options.disabled = true;
     jest.advanceTimersByTime(1);
     expect(el.$isDisabled).toBe(true);
-    expect(el.$refInput.disabled).toBe(true);
+    expect(((el as any).$refFieldset || el.$refInput).disabled).toBe(true);
 
     el.$options.disabled = false;
     jest.advanceTimersByTime(1);
@@ -602,7 +614,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     form.$options.disabled = false;
     jest.advanceTimersByTime(1);
     expect(el.$isDisabled).toBe(false);
-    expect(el.$refInput.disabled).toBe(false);
+    expect(((el as any).$refFieldset || el.$refInput).disabled).toBe(false);
 
     el.$options.disabled = true;
     jest.advanceTimersByTime(1);
@@ -613,7 +625,8 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     form.$options.readOnly = true;
     jest.advanceTimersByTime(1);
     expect(el.$isReadOnly).toBe(true);
-    expect(el.$refInput.readOnly).toBe(true);
+    if (cfg.testReadonly) cfg.testReadonly.true(el);
+    else expect(el.$refInput.readOnly).toBe(true);
 
     el.$options.readOnly = false;
     jest.advanceTimersByTime(1);
@@ -622,7 +635,8 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     form.$options.readOnly = false;
     jest.advanceTimersByTime(1);
     expect(el.$isReadOnly).toBe(false);
-    expect(el.$refInput.readOnly).toBe(false);
+    if (cfg.testReadonly) cfg.testReadonly.true(el);
+    else expect(el.$refInput.readOnly).toBe(false);
 
     el.$options.readOnly = true;
     jest.advanceTimersByTime(1);

@@ -201,8 +201,6 @@ export default class WUPRadioControl<
 
   protected override _opts = this.$options;
 
-  // todo FAQ how to change parsing InitValue
-
   /** Called when need to parse attr [initValue] */
   protected override parseValue(attrValue: string): ValueType | undefined {
     if (!this.$refItems?.length) {
@@ -342,3 +340,5 @@ export default class WUPRadioControl<
 }
 
 customElements.define(tagName, WUPRadioControl);
+
+// todo FAQ how to change parsing InitValue
