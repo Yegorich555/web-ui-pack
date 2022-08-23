@@ -116,3 +116,4 @@ customElements.define(tagName, WUPCheckControl);
 
 // todo add logic for checkbox-tree
 // todo cache observedAttrs per each type to reduce memoryConsumption (when use checkbox-tree)
+// todo animation for checkbox possible if show image partially during the time

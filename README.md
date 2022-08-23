@@ -48,7 +48,7 @@ npm install web-ui-pack
 - [x] [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
 - [x] [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
 - [x] [SwitchControl (Toggler)](src/controls/switch.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/switch)
-- [x] CheckControl (Checkbox)
+- [x] [CheckControl (Checkbox)](src/controls/check.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/check)
 - [ ] CheckTreeControl
 - [x] RadioControl (RadioGroup)
 - [x] SelectControl (ComboBox, Dropdown)
@@ -99,7 +99,7 @@ npm install web-ui-pack
          - [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
          - [_BaseControl_](src/controls/baseControl.ts)
            - [SwitchControl](src/controls/switch.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/switch)
-             - [CheckControl](src/controls/check.ts)
+             - [CheckControl](src/controls/check.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/check)
            - [RadioControl](src/controls/radio.ts)
            - [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
              - [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)

@@ -6,7 +6,15 @@ const sideEffect = WUPCheckControl;
 
 export default function CheckControlView() {
   return (
-    <Page header="Check Control" link="#checkcontrol">
+    <Page
+      header="CheckControl"
+      link="src/controls/check.ts"
+      features={["Inheritted features from SwitchControl"]}
+      details={{
+        tag: "wup-check",
+        cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
+      }}
+    >
       <wup-form
         ref={(el) => {
           if (el) {
@@ -14,7 +22,7 @@ export default function CheckControlView() {
           }
         }}
       >
-        <wup-check label="Check" />
+        <wup-check name="check" label="Check" initValue={false} reverse={false} />
         <wup-check
           ref={(el) => {
             if (el) {

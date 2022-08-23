@@ -8,7 +8,7 @@ export default function SwitchControlView() {
   return (
     <Page
       header="SwitchControl"
-      link="switchcontrol"
+      link="src/controls/switch.ts"
       features={[
         "Easy to change size of items via css-variables (ctrl-switch-size...)", //
         "Possible to reverse label",

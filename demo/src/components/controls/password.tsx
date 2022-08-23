@@ -21,7 +21,7 @@ export default function PasswordControlView() {
   return (
     <Page
       header="PasswordControl"
-      link="#passwordcontrol"
+      link="src/controls/password.ts"
       features={[
         "Inheritted features from TextControl",
         "Built-in validations (required,min,max,email, minNumber,minUpper,minLower,special,confirm)",

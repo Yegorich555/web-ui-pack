@@ -25,7 +25,7 @@
   - [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
   - [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
   - [SwitchControl](src/controls/switch.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/switch)
-  - CheckControl
+  - [CheckControl](src/controls/check.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/check)
   - RadioControl
   - SelectControl
 - Helper [nestedProperty](src/helpers/nestedProperty.ts): added option `out.hasProp`
