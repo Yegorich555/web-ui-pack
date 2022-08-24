@@ -588,7 +588,8 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         !(e.target instanceof HTMLInputElement) && e.preventDefault();
         // this required because default focus-effect was prevented
         this.appendEvent(this, "mouseup", () => !this.$isFocused && this.focus(), { once: true });
-      }
+      },
+      { passive: false } // otherwise preventDefault doesn't work
     );
 
     if (this._opts.validationCase & ValidationCases.onInit) {
@@ -631,7 +632,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       const vl = vls[k as "required"];
 
       let err: false | string;
-      if (vl instanceof Function) {
+      if (typeof vl === "function") {
         err = vl(v as any);
       } else {
         const rules = this.#ctr.$defaults.validationRules;

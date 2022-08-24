@@ -30,7 +30,7 @@ export default function onEvent<
   element.addEventListener(
     type as string,
     wrapper,
-    options instanceof Object ? { passive: true, ...options } : options
+    typeof options !== "boolean" ? { passive: true, ...options } : options
   );
   return remove;
 }

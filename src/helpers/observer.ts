@@ -25,8 +25,8 @@ const pathThrough = <R>(fn: () => R): Promise<R> =>
     resolve(fn());
   });
 
-const isObject = (obj: any): boolean =>
-  obj instanceof Object && !(obj instanceof Function) && !(obj instanceof HTMLElement);
+const isObject = (obj: any): boolean => typeof obj === "object" && obj !== null && !(obj instanceof HTMLElement);
+const isDate = (obj: any): boolean => Object.prototype.toString.call(obj) === "[object Date]";
 
 // #endregion
 
@@ -110,7 +110,7 @@ type WatchItem<T> = {
 // #region Functions
 const watchSet: Array<WatchItem<any>> = [
   <WatchItem<Date>>{
-    is: (obj) => obj instanceof Date,
+    is: isDate,
     keys: new Set([
       "setDate",
       "setFullYear",
@@ -133,13 +133,13 @@ const watchSet: Array<WatchItem<any>> = [
     propKey: "valueOf",
   },
   <WatchItem<Set<unknown>>>{
-    is: (obj) => obj instanceof Set,
+    is: (obj) => Object.prototype.toString.call(obj) === "[object Set]",
     keys: new Set(["add", "delete", "clear"]),
     getVal: (obj) => obj.size,
     propKey: "size",
   },
   <WatchItem<Map<unknown, unknown>>>{
-    is: (obj) => obj instanceof Map,
+    is: (obj) => Object.prototype.toString.call(obj) === "[object Map]",
     keys: new Set(["set", "delete", "clear"]),
     getVal: (obj) => obj.size,
     propKey: "size",
@@ -190,7 +190,7 @@ function make<T extends object>(
     return (prevProxy as Observer.Observed<T>) || obj;
   }
 
-  const isDate = obj instanceof Date;
+  const isDateObj = isDate(obj);
   const ref: Ref<Observer.Observed<T>> = {
     propListeners: [],
     listeners: [],
@@ -270,7 +270,7 @@ function make<T extends object>(
     deleteProperty(t, prop) {
       const prev = t[prop as keyof T];
       debugger;
-      if (!isDate && ref.hasListeners()) {
+      if (!isDateObj && ref.hasListeners()) {
         propChanged({ prev, next: undefined, prop });
       }
 
@@ -288,7 +288,7 @@ function make<T extends object>(
     proxyHandler.get = function get(t, prop, receiver) {
       const v = Reflect.get(t, prop, receiver) as Func;
       // wrap if listeners exists
-      if (v instanceof Function) {
+      if (typeof v === "function") {
         if (watchObj.keys.has(prop) && ref.hasListeners()) {
           return (...args: any[]) => {
             const prev = watchObj.getVal(t);
