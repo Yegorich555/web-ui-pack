@@ -277,7 +277,7 @@ export default class WUPRadioControl<
 
     if (v === undefined) {
       // eslint-disable-next-line prefer-destructuring
-      this.$refInput = this.$refItems[0];
+      this.$refInput = this.$refItems[0] || this.$refInput;
     } else {
       const item = this.$refItems.find((inp) => inp._value === v);
       if (!item) {
@@ -343,3 +343,5 @@ export default class WUPRadioControl<
 customElements.define(tagName, WUPRadioControl);
 
 // todo FAQ how to change parsing InitValue
+// todo details about custom renderItems
+// todo $refLabel, $refInput can be null if items are empty. Need override default to be nullable

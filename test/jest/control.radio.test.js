@@ -63,6 +63,19 @@ describe("control.radio", () => {
     expect(el.innerHTML).toMatchInlineSnapshot(
       `"<fieldset><legend><strong></strong></legend><label for=\\"txt13\\"><input id=\\"txt13\\" type=\\"radio\\" name=\\"txt12473\\" tabindex=\\"0\\"><span>Don</span></label></fieldset>"`
     );
+
+    el.$options.items = [
+      {
+        value: 123,
+        text: (val, li, i) => {
+          li.textContent = `testVal${val}_${i}`;
+        },
+      },
+    ];
+    jest.advanceTimersByTime(1);
+    expect(el.innerHTML).toMatchInlineSnapshot(
+      `"<fieldset><legend><strong></strong></legend><label for=\\"txt15\\"><input id=\\"txt15\\" type=\\"radio\\" name=\\"txt14473\\" tabindex=\\"0\\"><span>testVal123_0</span></label></fieldset>"`
+    );
   });
 
   test("parsing $initValue", () => {
@@ -87,12 +100,25 @@ describe("control.radio", () => {
     h.mockConsoleError(); // because of items changed but initValue doesn't matches
     el.$options.items = [{ value: null, text: "Empty" }];
     jest.advanceTimersByTime(1);
+
+    el.$options.name = "TestMe"; // again with name - for coverage
+    el.$options.items = [{ value: null, text: "Empty" }];
+    jest.advanceTimersByTime(1);
     h.unMockConsoleError();
 
     el.setAttribute("initvalue", "");
     jest.advanceTimersByTime(1);
     expect(el.getAttribute("initvalue")).toBe("");
     expect(el.$initValue).toBe(null);
+
+    // just for coverage
+    el.$options.items = [];
+    jest.advanceTimersByTime(1);
+    el.$initValue = undefined;
+    // todo check empty space in label of snapshot
+    expect(el.innerHTML).toMatchInlineSnapshot(`"<fieldset><legend><strong> Test Me</strong></legend></fieldset>"`);
+    el.setAttribute("initvalue", "10");
+    jest.advanceTimersByTime(1);
   });
 
   test("user clicks on radio", () => {
@@ -128,5 +154,18 @@ describe("control.radio", () => {
     expect(el.$value).toBe(20);
     el.$refInput.click();
     expect(el.$value).toBe(20);
+  });
+
+  test("focus on current input", () => {
+    const el = testEl;
+    el.$value = 20;
+    expect(el.$refInput).toBe(el.$refItems[1]);
+    el.focus();
+    expect(document.activeElement).toBe(el.$refItems[1]);
+
+    document.activeElement.blur();
+    el.$refItems[1].disabled = true;
+    el.focus();
+    expect(document.activeElement).toBe(el.$refItems[0]);
   });
 });
