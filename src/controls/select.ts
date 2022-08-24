@@ -166,7 +166,7 @@ export default class WUPSelectControl<
   }
 
   /** Called when need to parse attr [initValue] */
-  protected override parseValue(attrValue: string): ValueType | undefined {
+  override parseValue(attrValue: string): ValueType | undefined {
     this.getMenuItems().then((arr) => {
       if (arr?.length) {
         const r =

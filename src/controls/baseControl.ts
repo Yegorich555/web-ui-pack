@@ -555,7 +555,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
    * Attention: this.$refInput is already defined */
   protected abstract renderControl(): void;
   /** Called when need to parse inputValue or attr [initValue] */
-  protected abstract parseValue(text: string): ValueType | undefined;
+  abstract parseValue(text: string): ValueType | undefined;
 
   protected override gotReady(): void {
     super.gotReady();

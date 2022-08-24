@@ -246,7 +246,7 @@ export default class WUPTextControl<
     this.$refInput.placeholder = " ";
   }
 
-  protected override parseValue(text: string): ValueType | undefined {
+  override parseValue(text: string): ValueType | undefined {
     return (text || undefined) as unknown as ValueType;
   }
 

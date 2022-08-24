@@ -15,7 +15,7 @@ beforeEach(() => {
 });
 
 describe("helper.findScrollParent", () => {
-  test("deault behavior", () => {
+  test("default behavior", () => {
     const el = document.body.appendChild(document.createElement("div"));
     expect(findScrollParent(el)).toBeNull();
     expect(findScrollParent(document.body)).toBeNull();

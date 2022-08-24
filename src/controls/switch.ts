@@ -185,7 +185,7 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
     this.$initValue = !!this.$initValue;
   }
 
-  protected override parseValue(text: string): boolean | undefined {
+  override parseValue(text: string): boolean | undefined {
     return text === "" || text.toLowerCase() === "true";
   }
 

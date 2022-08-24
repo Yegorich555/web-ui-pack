@@ -58,6 +58,17 @@ export default function FAQView() {
               </>
             ),
           },
+          {
+            link: "parse-init-value",
+            question: "Controls. How to change parsing attribute [initvalue]",
+            answer: (
+              <>
+                When applied attribute [initvalue] controls use method parseValue() to try to find the real. By default
+                it&apos;s search by string-type. But you can override behavior
+                <Code code={codeParseInitValue} />
+              </>
+            ),
+          },
         ]}
       />
     </Page>
@@ -134,3 +145,9 @@ body input[aria-required="true"] + *:after,
 body fieldset[aria-required="true"] > legend:after {
   content: none;
 }`;
+
+const codeParseInitValue = `js
+WUPRadioControl.prototype.parseValue = function parseValue(attrValue: string) {
+  // let's imagine that attrValue is pointer to global key
+  return (window as any)[attrValue];
+};`;
