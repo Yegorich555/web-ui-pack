@@ -31,9 +31,14 @@ describe("helper.focusFirst", () => {
     document.body.appendChild(container);
     expect(focusFirst(container)).toBe(true);
     expect(document.activeElement).toBe(el2);
+
+    document.body.innerHTML = "<div><input disabled/></div>";
+    const was = document.activeElement;
+    expect(focusFirst(document.querySelector("div"))).toBe(false);
+    expect(document.activeElement).toBe(was);
   });
 
-  test("focus object with propery focus", () => {
+  test("focus object with property focus", () => {
     expect(focusFirst({})).toBe(false);
     const focus = jest.fn();
     expect(focusFirst({ focus })).toBe(true);
