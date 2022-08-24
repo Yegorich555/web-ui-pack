@@ -13,6 +13,7 @@
 export default function stringPrettify(text: string, changeKebabCase = false): string {
   const r = text
     .replace(/([A-ZА-Я])/g, " $1")
+    .trimStart()
     .replace(new RegExp(`[_${(changeKebabCase && "-") || ""}]`, "g"), " ")
     .replace(/[ ]{2,}/, " ");
   return r.charAt(0).toUpperCase() + r.slice(1);

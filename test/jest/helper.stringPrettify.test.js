@@ -3,6 +3,7 @@ import stringPrettify from "web-ui-pack/helpers/stringPrettify";
 describe("helper.stringPrettify", () => {
   test("camelCase", () => {
     expect(stringPrettify("somePropValue")).toEqual("Some Prop Value");
+    expect(stringPrettify("TestMe")).toEqual("Test Me");
   });
   test("russian-camelCase", () => {
     expect(stringPrettify("хорошоСделано")).toEqual("Хорошо Сделано");

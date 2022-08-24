@@ -115,8 +115,7 @@ describe("control.radio", () => {
     el.$options.items = [];
     jest.advanceTimersByTime(1);
     el.$initValue = undefined;
-    // todo check empty space in label of snapshot
-    expect(el.innerHTML).toMatchInlineSnapshot(`"<fieldset><legend><strong> Test Me</strong></legend></fieldset>"`);
+    expect(el.innerHTML).toMatchInlineSnapshot(`"<fieldset><legend><strong>Test Me</strong></legend></fieldset>"`);
     el.setAttribute("initvalue", "10");
     jest.advanceTimersByTime(1);
 
