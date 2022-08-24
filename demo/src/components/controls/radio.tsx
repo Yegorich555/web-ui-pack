@@ -52,9 +52,8 @@ export default function RadioControlView() {
         }}
       >
         <wup-radio
-          name="switch"
-          label="Switch"
-          // todo initValue missed for UserCode
+          name="radio"
+          label="Radio"
           initValue={items[1].value.toString()}
           items="storedRadioItems.items"
           validations="window._someRadioValidations"
@@ -135,7 +134,7 @@ el.$options.items = () => {
   const renderText: WUPSelect.MenuItemFn<number>["text"] =
   (value, li, i) => {
     li.innerHTML = \`<b>Value</b>: \${value},
-    <span style="color: red">index</span>: \${i}\`;
+       <span style="color: red">index</span>: \${i}\`;
     return value.toString();
   };
   return [

@@ -533,7 +533,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       }
     }
     // retrieve value from model
-    if (this.$initValue === undefined && this.$form && this._opts.name) {
+    if (this.$initValue === undefined && this.$form && this._opts.name && !this.hasAttribute("initvalue")) {
       if (!propsChanged || propsChanged.includes("name")) {
         this.$initValue = nestedProperty.get(this.$form._initModel as any, this._opts.name);
       }

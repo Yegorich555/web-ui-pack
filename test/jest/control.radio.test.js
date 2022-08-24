@@ -61,7 +61,7 @@ describe("control.radio", () => {
     expect(el.$refItems.length).toBe(1);
     expect(el.querySelectorAll("input").length).toBe(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<fieldset><legend><strong></strong></legend><label for=\\"txt13\\"><input id=\\"txt13\\" type=\\"radio\\" name=\\"txt12473\\" tabindex=\\"0\\"><span>Don</span></label></fieldset>"`
+      `"<fieldset><legend><strong></strong></legend><label for=\\"txt13\\"><input id=\\"txt13\\" type=\\"radio\\" name=\\"txt12473\\" tabindex=\\"0\\" autocomplete=\\"off\\"><span>Don</span></label></fieldset>"`
     );
 
     el.$options.items = [
@@ -74,7 +74,7 @@ describe("control.radio", () => {
     ];
     jest.advanceTimersByTime(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<fieldset><legend><strong></strong></legend><label for=\\"txt15\\"><input id=\\"txt15\\" type=\\"radio\\" name=\\"txt14473\\" tabindex=\\"0\\"><span>testVal123_0</span></label></fieldset>"`
+      `"<fieldset><legend><strong></strong></legend><label for=\\"txt15\\"><input id=\\"txt15\\" type=\\"radio\\" name=\\"txt14473\\" tabindex=\\"0\\" autocomplete=\\"off\\"><span>testVal123_0</span></label></fieldset>"`
     );
   });
 
@@ -119,6 +119,24 @@ describe("control.radio", () => {
     expect(el.innerHTML).toMatchInlineSnapshot(`"<fieldset><legend><strong> Test Me</strong></legend></fieldset>"`);
     el.setAttribute("initvalue", "10");
     jest.advanceTimersByTime(1);
+
+    const f = h.mockConsoleError();
+    el.$initValue = 13;
+    jest.advanceTimersByTime(1);
+    expect(el.hasAttribute("initvalue")).toBe(false);
+    expect(f).toBeCalled();
+    h.unMockConsoleError();
+
+    // checking if initValue assigned correctly
+    const me = document.body.appendChild(document.createElement("wup-radio"));
+    me.$options.items = [
+      { value: 1, text: "Its one" },
+      { value: 12, text: "Its number" },
+    ];
+    me.$initValue = 12;
+    jest.advanceTimersByTime(1);
+    expect(me.$value).toBe(12);
+    expect(me.$refInput).toBe(me.$refItems[1]);
   });
 
   test("user clicks on radio", () => {

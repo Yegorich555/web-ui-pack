@@ -203,15 +203,13 @@ export default class WUPRadioControl<
 
   /** Called when need to parse attr [initValue] */
   protected override parseValue(attrValue: string): ValueType | undefined {
-    if (!this.$refItems?.length) {
+    const a = this.getItems() as WUPSelect.MenuItem<ValueType>[];
+    if (!a?.length) {
       return undefined;
     }
 
-    const r =
-      attrValue === ""
-        ? this.$refItems.find((o) => o._value == null)
-        : this.$refItems.find((o) => o._value && `${o._value}` === attrValue);
-    return r?._value;
+    const r = attrValue === "" ? a.find((o) => o.value == null) : a.find((o) => o.value && `${o.value}` === attrValue);
+    return r?.value;
   }
 
   protected override gotReady(): void {
@@ -228,6 +226,16 @@ export default class WUPRadioControl<
     }
   }
 
+  /** Items resolved from options */
+  #cachedItems?: WUPSelect.MenuItems<ValueType>;
+  protected getItems(): WUPSelect.MenuItems<ValueType> {
+    if (!this.#cachedItems) {
+      const { items } = this._opts;
+      this.#cachedItems = typeof items === "function" ? items() : items;
+    }
+    return this.#cachedItems;
+  }
+
   $refFieldset = document.createElement("fieldset");
   $refItems: ExtInputElement[] = [];
 
@@ -239,8 +247,7 @@ export default class WUPRadioControl<
   protected renderItems(parent: HTMLFieldSetElement): void {
     this.$refItems.forEach((r) => r.parentElement!.remove());
     this.$refItems.length = 0;
-    const tmp = this._opts.items;
-    const arr = typeof tmp === "function" ? tmp() : tmp;
+    const arr = this.getItems();
     if (!arr?.length) {
       return;
     }
@@ -267,7 +274,6 @@ export default class WUPRadioControl<
     }
 
     this.$refItems[0].tabIndex = 0;
-
     this.checkInput(this.$value); // required for case when user changed items
   }
 
@@ -300,17 +306,20 @@ export default class WUPRadioControl<
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUPRadio.Options> | null): void {
+    const isNeedRenderItems = !propsChanged || propsChanged.includes("items");
+    if (isNeedRenderItems) {
+      this.#cachedItems = undefined;
+      // it's important to be before super otherwise initValue won't work
+      const attr = this.getAttribute("items");
+      this._opts.items = attr ? (nestedProperty.get(window, attr) as WUPRadio.Options["items"]) : this._opts.items;
+      this.renderItems(this.$refFieldset);
+    }
+
     super.gotChanges(propsChanged as any);
 
     this._opts.reverse = this.getBoolAttr("reverse", this._opts.reverse);
     this.setAttr("reverse", this._opts.reverse, true);
 
-    if (!propsChanged || propsChanged.includes("items")) {
-      const attr = this.getAttribute("items");
-      this._opts.items = attr ? (nestedProperty.get(window, attr) as WUPRadio.Options["items"]) : this._opts.items;
-      this.renderItems(this.$refFieldset);
-    }
-    // required
     const req = this.validations?.required;
     this.setAttr.call(this.$refFieldset, "aria-required", !!req);
   }
@@ -343,4 +352,4 @@ export default class WUPRadioControl<
 customElements.define(tagName, WUPRadioControl);
 
 // todo FAQ how to change parsing InitValue
-// todo $refLabel, $refInput can be null if items are empty. Need override default to be nullable
+// todo $refLabel, $refInput can be null if items are empty. Need override default to be nullable???

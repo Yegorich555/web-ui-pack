@@ -15,6 +15,7 @@ exports[`control.radio $ariaDetails 1`] = `
       for="txt2"
     >
       <input
+        autocomplete="off"
         id="txt2"
         name="txt1473"
         tabindex="0"
@@ -74,6 +75,7 @@ exports[`control.radio $ariaDetails 2`] = `
       for="txt2"
     >
       <input
+        autocomplete="off"
         id="txt2"
         name="txt1473"
         tabindex="0"
@@ -133,6 +135,7 @@ exports[`control.radio $show/$hide error 1`] = `
       for="txt2"
     >
       <input
+        autocomplete="off"
         id="txt2"
         name="txt1473"
         tabindex="0"
@@ -196,6 +199,7 @@ exports[`control.radio $show/$hide error 2`] = `
       for="txt2"
     >
       <input
+        autocomplete="off"
         id="txt2"
         name="txt1473"
         tabindex="0"
@@ -269,6 +273,7 @@ exports[`control.radio $show/$hide error 3`] = `
       for="txt2"
     >
       <input
+        autocomplete="off"
         id="txt2"
         name="txt1473"
         tabindex="0"
@@ -976,6 +981,7 @@ exports[`control.radio validations options.validationCase 1`] = `
       for="txt2"
     >
       <input
+        autocomplete="off"
         id="txt2"
         name="txt1473"
         tabindex="0"
