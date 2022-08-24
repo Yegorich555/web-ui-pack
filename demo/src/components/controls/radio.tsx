@@ -1,4 +1,5 @@
 /* eslint-disable no-promise-executor-return */
+import Code from "src/elements/code";
 import Page from "src/elements/page";
 import { WUPRadioControl } from "web-ui-pack";
 
@@ -36,6 +37,7 @@ export default function RadioControlView() {
       features={[
         "Easy to change size of items and style via css-variables (ctrl-radio-size...)", //
         "Possible to reverse labels",
+        "Possible to customize render of items (via $options.items; see below...)",
       ]}
       details={{
         tag: "wup-radio",
@@ -52,6 +54,7 @@ export default function RadioControlView() {
         <wup-radio
           name="switch"
           label="Switch"
+          // todo initValue missed for UserCode
           initValue={items[1].value.toString()}
           items="storedRadioItems.items"
           validations="window._someRadioValidations"
@@ -95,8 +98,49 @@ export default function RadioControlView() {
             }
           }}
         />
+        <section>
+          <wup-radio
+            ref={(el) => {
+              if (el) {
+                el.$options.name = "customized";
+                el.$options.items = () => {
+                  const renderText: WUPSelect.MenuItemFn<number>["text"] = (value, li, i) => {
+                    li.innerHTML = `<b>Value</b>: ${value}, <span style="color: red">index</span>: ${i}`;
+                    return li.textContent as string;
+                  };
+                  return [
+                    { value: 1, text: renderText },
+                    { value: 2, text: renderText },
+                  ];
+                };
+              }
+            }}
+          />
+          <Code code={codeTypes} />
+        </section>
         <button type="submit">Submit</button>
       </wup-form>
     </Page>
   );
 }
+
+const codeTypes = `js
+import WUPRadioControl from "web-ui-pack";
+// otherwise import is ignored by webpack
+!WUPRadioControl && console.error("!");
+
+const el = document.createElement("wup-radio");
+el.$options.name = "customized";
+el.$options.items = () => {
+  const renderText: WUPSelect.MenuItemFn<number>["text"] =
+  (value, li, i) => {
+    li.innerHTML = \`<b>Value</b>: \${value},
+    <span style="color: red">index</span>: \${i}\`;
+    return value.toString();
+  };
+  return [
+    { value: 1, text: renderText },
+    { value: 2, text: renderText },
+  ];
+};
+document.body.appendChild(el);`;

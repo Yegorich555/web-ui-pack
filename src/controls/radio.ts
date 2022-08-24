@@ -343,5 +343,4 @@ export default class WUPRadioControl<
 customElements.define(tagName, WUPRadioControl);
 
 // todo FAQ how to change parsing InitValue
-// todo details about custom renderItems
 // todo $refLabel, $refInput can be null if items are empty. Need override default to be nullable
