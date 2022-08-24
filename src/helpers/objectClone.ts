@@ -3,7 +3,7 @@ interface CloneOptions {
   skipEmptyObjects?: boolean;
 }
 
-/** Recursive clone object (doesn't work for cloning between iframes) */
+/** Recursive clone object */
 export default function objectClone<T>(obj: T, opts?: CloneOptions): T {
   const skipUndefined = opts?.skipUndefined;
   const skipEmptyObjects = opts?.skipEmptyObjects;
@@ -22,13 +22,14 @@ export default function objectClone<T>(obj: T, opts?: CloneOptions): T {
       }
       return arr;
     }
-    if (vobj instanceof Function || vobj instanceof HTMLElement) {
+    const type = typeof vobj;
+    if (type === "function" || vobj instanceof HTMLElement) {
       return vobj;
     }
-    if (vobj instanceof Date) {
+    if (Object.prototype.toString.call(vobj) === "[object Date]") {
       return new Date(vobj.valueOf());
     }
-    if (vobj instanceof Object) {
+    if (type === "object") {
       const keys = Object.keys(vobj);
       const r: any = {};
       let hasKey = false;
@@ -49,5 +50,4 @@ export default function objectClone<T>(obj: T, opts?: CloneOptions): T {
   return map(obj) as T;
 }
 
-// todo check instanceOf vs typeof: https://stackoverflow.com/questions/899574/what-is-the-difference-between-typeof-and-instanceof-and-when-should-one-be-used#:~:text=typeof%3A%20Per%20the%20MDN%20docmentation,type%20of%20the%20unevaluated%20operand.&text=instanceof%3A%20is%20a%20binary%20operator,constructor%20in%20its%20prototype%20chain.
-// todo rewrite instanceOf to typeof since it's faster https://stackoverflow.com/questions/50157577/performance-typeof-vs-instanceof
+// check instanceOf vs typeof: https://stackoverflow.com/questions/899574/what-is-the-difference-between-typeof-and-instanceof-and-when-should-one-be-used#:~:text=typeof%3A%20Per%20the%20MDN%20docmentation,type%20of%20the%20unevaluated%20operand.&text=instanceof%3A%20is%20a%20binary%20operator,constructor%20in%20its%20prototype%20chain.
