@@ -22,7 +22,7 @@ export default function CheckControlView() {
           }
         }}
       >
-        <wup-check name="check" label="Check" initValue={false} reverse={false} autoComplete="off" />
+        <wup-check name="check" label="Check" initValue={false} reverse={false} autoComplete="off" autoFocus={false} />
         <wup-check
           ref={(el) => {
             if (el) {

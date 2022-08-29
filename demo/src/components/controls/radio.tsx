@@ -59,6 +59,7 @@ export default function RadioControlView() {
           validations="window._someRadioValidations"
           reverse={false}
           autoComplete="off"
+          autoFocus={false}
         />
         <wup-radio
           ref={(el) => {

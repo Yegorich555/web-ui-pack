@@ -46,6 +46,7 @@ export default function PasswordControlView() {
           label="Password"
           initValue="someValue"
           autoComplete="off"
+          autoFocus={false}
           validations="window._somePasswordValidations"
           reverse={false}
           ref={(el) => {

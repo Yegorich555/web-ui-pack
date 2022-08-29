@@ -50,7 +50,7 @@ export default function SelectControlView() {
       }}
       features={[
         "Inheritted features from TextControl",
-        "Pending state with spinner if $options.items is Promise function",
+        "Pending state with spinner if $options.items is a function with promise-result",
         "Possible to customize render of items (via $options.items; see below...)",
       ]}
     >
@@ -69,6 +69,7 @@ export default function SelectControlView() {
           initValue={items[1].value.toString()}
           validations="window._someSelectValidations"
           autoComplete="off"
+          autoFocus={false}
         />
         <wup-select
           ref={(el) => {
@@ -141,5 +142,3 @@ export default function SelectControlView() {
     </Page>
   );
 }
-
-// todo sometimes several popups are visible and not closed (if change focus by Tab)

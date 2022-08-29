@@ -37,6 +37,7 @@ export default function TextControlView() {
           label="Text control"
           initValue="test@google.com"
           autoComplete="off"
+          autoFocus={false}
           validations="window._someObject"
         />
         <wup-text name="required" validations="globalkey.pointHere" />

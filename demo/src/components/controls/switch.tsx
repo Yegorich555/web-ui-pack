@@ -26,7 +26,14 @@ export default function SwitchControlView() {
           }
         }}
       >
-        <wup-switch name="switch" label="Switch" initValue={false} reverse={false} autoComplete="off" />
+        <wup-switch
+          name="switch"
+          label="Switch"
+          initValue={false}
+          reverse={false}
+          autoComplete="off"
+          autoFocus={false}
+        />
         <wup-switch
           ref={(el) => {
             if (el) {
