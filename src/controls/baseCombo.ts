@@ -58,8 +58,8 @@ declare global {
   namespace WUPBaseCombo {
     interface ValidationMap extends Omit<WUPText.ValidationMap, "min" | "max" | "email"> {}
     interface EventMap extends WUPText.EventMap {
-      $show: Event;
-      $hide: Event;
+      $showMenu: Event;
+      $hideMenu: Event;
     }
     interface Defaults<T = string> extends WUPBaseComboIn.GenDef<T> {}
     interface Options<T = string> extends WUPBaseComboIn.GenOpt<T> {}
@@ -122,18 +122,22 @@ export default abstract class WUPBaseComboControl<
   protected override _opts = this.$options;
 
   #isOpen = false;
+  /** Returns if popup-menu is opened */
   get $isOpen(): boolean {
     return this.#isOpen;
   }
 
-  $hide(): void {
+  /** Hide popup-menu */
+  $hideMenu(): void {
     this.goHideMenu(HideCases.onManualCall);
   }
 
-  $show(): void {
+  /** Show popup-menu */
+  $showMenu(): void {
     this.goShowMenu(ShowCases.onManualCall);
   }
 
+  /** Reference to popupMenu */
   $refPopup?: WUPPopupElement;
   #popupRefs?: {
     hide: (hideCase: WUPPopup.HideCases) => Promise<void>;
@@ -271,7 +275,7 @@ export default abstract class WUPBaseComboControl<
       showCase !== ShowCases.onFocus &&
       this.#popupRefs!.show(WUPPopup.ShowCases.always);
 
-    setTimeout(() => this.fireEvent("$show", { cancelable: false }));
+    setTimeout(() => this.fireEvent("$showMenu", { cancelable: false }));
     return this.$refPopup;
   }
 
@@ -315,7 +319,7 @@ export default abstract class WUPBaseComboControl<
     this.removeAttribute("opened");
     this.$refInput.setAttribute("aria-expanded", "false");
     this.focusMenuItem(null, undefined);
-    setTimeout(() => this.fireEvent("$hide", { cancelable: false }));
+    setTimeout(() => this.fireEvent("$hideMenu", { cancelable: false }));
     return true;
   }
 
@@ -407,6 +411,7 @@ export default abstract class WUPBaseComboControl<
     super.clearValue(!this.#isOpen && canValidate);
   }
 
+  /** Called when popup must be removed (by focus out OR if control removed) */
   protected removePopup(): void {
     this.$refPopup?.remove();
     this.$refPopup = undefined;
@@ -414,7 +419,7 @@ export default abstract class WUPBaseComboControl<
     this.#focusedMenuValue = undefined;
   }
 
-  protected gotRemoved(): void {
+  protected override gotRemoved(): void {
     this.removePopup();
     // remove resources for case when control can be appended again
     this.#isOpen = false;
