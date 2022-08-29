@@ -876,7 +876,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     if (this._opts.validationCase & ValidationCases.onFocusWithValue) {
       !this.$isEmpty && this.goValidate(ValidateFromCases.onFocus);
     }
-    const r = this.appendEvent(this, "keydown", (e) => !this.$isDisabled && this.gotKeyDown(e));
+    const r = this.appendEvent(this, "keydown", (e) => !this.$isDisabled && this.gotKeyDown(e), { passive: false });
     return [r];
   }
 
