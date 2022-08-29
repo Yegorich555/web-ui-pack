@@ -453,7 +453,8 @@ export default class WUPFormElement<
     this.appendEvent(
       this,
       "keydown",
-      (e) => e.key === "Enter" && this.gotSubmit(e, e.target instanceof HTMLElement ? e.target : this)
+      (e) => e.key === "Enter" && this.gotSubmit(e, e.target instanceof HTMLElement ? e.target : this),
+      { passive: false }
     );
     this.appendEvent(this, "click", (e) => {
       if (!e.defaultPrevented) {
