@@ -156,7 +156,7 @@ export default class WUPSelectManyControl<
   }
 
   protected override valueToInput(v: ValueType[] | undefined): Promise<string> | string {
-    const r = this.getMenuItems().then((items) => {
+    const r = this.getItems().then((items) => {
       v = v ?? [];
       this.renderItems(v, items);
       return `Selected ${v.length} of ${items.length}`; // required to suppress reading blank need to set opacity 0 ???

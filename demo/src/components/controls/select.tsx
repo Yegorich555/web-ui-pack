@@ -42,7 +42,7 @@ declare global {
 export default function SelectControlView() {
   return (
     <Page
-      header="SelectControl"
+      header="SelectControl (Dropdown)"
       link="src/controls/select.ts"
       details={{
         tag: "wup-select",
@@ -58,6 +58,7 @@ export default function SelectControlView() {
         ref={(el) => {
           if (el) {
             el.$onSubmit = (e) => console.warn("sumbitted model", e.$model);
+            el.$initModel = { radio: items[3].value };
           }
         }}
       >
@@ -141,5 +142,4 @@ export default function SelectControlView() {
   );
 }
 
-// todo focus on another control changes z-index and popup-hiding looks bad maybe try to change opacity
-// todo sometimes several popups are visible and not closed if click fast
+// todo sometimes several popups are visible and not closed (if change focus by Tab)

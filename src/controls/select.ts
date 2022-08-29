@@ -167,17 +167,18 @@ export default class WUPSelectControl<
 
   /** Called when need to parse attr [initValue] */
   override parseValue(attrValue: string): ValueType | undefined {
-    this.getMenuItems().then((arr) => {
+    this.getItems().then((arr) => {
+      let r;
       if (arr?.length) {
-        const r =
+        r =
           attrValue === ""
             ? (arr as WUPSelect.MenuItemAny<any>[]).find((o) => o.value == null)
             : (arr as WUPSelect.MenuItemAny<any>[]).find((o) => o.value && `${o.value}` === attrValue);
-
-        (this as any)._noDelInitValueAttr = true;
-        this.$initValue = r?.value;
-        delete (this as any)._noDelInitValueAttr;
       }
+
+      (this as any)._noDelInitValueAttr = true;
+      this.$initValue = r?.value;
+      delete (this as any)._noDelInitValueAttr;
     });
     return this.$initValue;
   }
@@ -296,7 +297,7 @@ export default class WUPSelectControl<
   }
 
   /** Method retrieves items from options and shows spinner if required */
-  protected async getMenuItems(): Promise<WUPSelect.MenuItems<ValueType>> {
+  protected async getItems(): Promise<WUPSelect.MenuItems<ValueType>> {
     if (this._cachedItems) {
       return this._cachedItems;
     }
@@ -319,6 +320,7 @@ export default class WUPSelectControl<
     return arr;
   }
 
+  // Called when need to show text related to value
   protected valueToText(v: ItemType | undefined, items: WUPSelect.MenuItems<ItemType>): string {
     const i = items.findIndex((o) => this.#ctr.$isEqual(o.value, v));
     if (i === -1) {
@@ -342,14 +344,13 @@ export default class WUPSelectControl<
     if (v === undefined) {
       return "";
     }
-    const r = this.getMenuItems().then((items) => this.valueToText(v as any, items as WUPSelect.MenuItems<any>));
-
+    const r = this.getItems().then((items) => this.valueToText(v as any, items as WUPSelect.MenuItems<any>));
     return r;
   }
 
   /** Create menuItems as array of HTMLLiElement with option _text required to filtering by input (otherwise content can be html-structure) */
   protected async renderMenuItems(ul: HTMLUListElement): Promise<Array<HTMLLIElement & { _text: string }>> {
-    const arr = await this.getMenuItems();
+    const arr = await this.getItems();
 
     const arrLi = arr.map(() => {
       const li = ul.appendChild(document.createElement("li"));

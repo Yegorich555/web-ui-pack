@@ -118,7 +118,7 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       jest.advanceTimersByTime(1);
 
       el.focus();
-      expect(el.$refInput.selectionEnd - el.$refInput.selectionStart).toBe(0);
+      expect(el.$refInput.selectionEnd - el.$refInput.selectionStart!).toBe(0);
 
       // checking if select by clear not depends on $options.selectOnFocus
       expect(el.$value).toBe(initV);

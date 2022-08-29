@@ -1,5 +1,6 @@
 /* eslint-disable jest/no-conditional-expect */
 /* eslint-disable jest/no-export */
+import WUPBaseComboControl from "web-ui-pack/controls/baseCombo";
 import WUPBaseControl, { ClearActions, ValidationCases } from "web-ui-pack/controls/baseControl";
 import * as h from "../testHelper";
 import { BaseTestOptions } from "../testHelper";
@@ -29,7 +30,7 @@ export function initTestBaseControl<T extends WUPBaseControl>(cfg: InitOptions<T
   tagName = cfg.htmlTag;
   elType = cfg.type;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.useFakeTimers();
     Element.prototype.scrollIntoView = jest.fn();
     let lastUniqueNum = 0;
@@ -40,7 +41,7 @@ export function initTestBaseControl<T extends WUPBaseControl>(cfg: InitOptions<T
     el = document.createElement(cfg.htmlTag) as WUPBaseControl;
     cfg.onInit(el as T);
     document.body.appendChild(el);
-    jest.advanceTimersByTime(1); // wait for ready
+    await h.wait(1); // wait for ready
   });
 
   afterEach(() => {
@@ -80,25 +81,25 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
   });
 
   describe("$initValue", () => {
-    test("attr [initvalue] vs $initValue", () => {
+    test("attr [initvalue] vs $initValue", async () => {
       expect(el.$isReady).toBeTruthy();
       el.setAttribute("initvalue", cfg.initValues[0].attrValue);
       expect(el.getAttribute("initValue")).toBe(cfg.initValues[0].attrValue);
-      jest.advanceTimersByTime(1);
+      await h.wait(1);
       expect(el.$initValue).toBe(cfg.initValues[0].value);
 
       el.$initValue = cfg.initValues[1].value;
-      jest.advanceTimersByTime(1);
+      await h.wait(1);
       expect(el.$initValue).toBe(cfg.initValues[1].value);
       expect(el.getAttribute("initvalue")).toBe(null);
 
       el.setAttribute("initvalue", cfg.initValues[2].attrValue);
-      jest.advanceTimersByTime(1);
+      await h.wait(1);
       expect(el.$initValue).toBe(cfg.initValues[2].value);
       expect(el.getAttribute("initvalue")).toBe(cfg.initValues[2].attrValue);
 
       el.removeAttribute("initvalue");
-      jest.advanceTimersByTime(1);
+      await h.wait(1);
       expect(el.getAttribute("initvalue")).toBe(null);
       expect(el.$initValue).toBe(cfg.emptyValue);
     });
@@ -174,16 +175,17 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$isFocused).toBe(true);
     });
 
-    test("clearActions", () => {
+    test("clearActions", async () => {
       // only clear
       el.$value = cfg.initValues[0].value;
       el.$initValue = cfg.initValues[1].value;
       el.$options.clearActions = ClearActions.clear as any;
-      jest.advanceTimersByTime(1);
+      await h.wait(1);
       expect(el.$value).toBe(cfg.initValues[0].value);
 
       el.focus();
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
       expect(el.$value).toBe(undefined);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       expect(el.$value).toBe(cfg.initValues[0].value); // rollback to previous value
@@ -202,7 +204,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$value = cfg.initValues[0].value;
       el.$initValue = cfg.initValues[1].value;
       el.$options.clearActions = ClearActions.resetToInit as any;
-      jest.advanceTimersByTime(1);
+      await h.wait(1);
 
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       expect(el.$value).toBe(cfg.initValues[1].value);
@@ -219,7 +221,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$value = cfg.initValues[0].value;
       el.$initValue = cfg.initValues[1].value;
       el.$options.clearActions = ClearActions.clear | ClearActions.resetToInit;
-      jest.advanceTimersByTime(1);
+      await h.wait(1);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       expect(el.$value).toBe(cfg.initValues[1].value);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
@@ -386,6 +388,8 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el).toMatchSnapshot();
       el.focus();
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
+      el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
+
       expect(el.$isEmpty).toBe(true);
       await h.wait();
       expect(el.$refError).toBeDefined();
@@ -445,6 +449,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
       el.focus();
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
+      el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
       expect(el.$isEmpty).toBe(true);
       await h.wait();
       expect(el.$refError).toBeDefined(); // because previously was valid and now need to show invalid state
@@ -502,9 +507,9 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
       // @ts-ignore
       el.setValue(cfg.initValues[0].value);
-      jest.advanceTimersByTime(9);
+      await h.wait(9);
       expect(el.$refError).toBe(undefined);
-      jest.advanceTimersByTime(2);
+      await h.wait(2);
       expect(el.$refError).toBeDefined();
     });
 
@@ -555,7 +560,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
         return;
       }
 
-      test(`.${ruleName}`, () => {
+      test(`.${ruleName}`, async () => {
         const isRuleRequired = ruleName === "required";
         expect(cfg.validations).toHaveProperty(ruleName);
         const vld = cfg.validations[ruleName];
@@ -564,7 +569,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
         el.$options.validations = { [ruleName]: vld.set };
 
         if (isRuleRequired) {
-          jest.advanceTimersByTime(1);
+          await h.wait(1);
           expect(el.$refInput.getAttribute("aria-required")).toBe("true");
         }
 
