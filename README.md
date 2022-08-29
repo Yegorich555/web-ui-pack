@@ -49,10 +49,12 @@ npm install web-ui-pack
 - [x] [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
 - [x] [SwitchControl (Toggler)](src/controls/switch.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/switch)
 - [x] [CheckControl (Checkbox)](src/controls/check.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/check)
-- [ ] CheckTreeControl
 - [x] [RadioControl (RadioGroup)](src/controls/radio.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/radio)
-- [x] SelectControl (ComboBox, Dropdown)
+- [x] [SelectControl (ComboBox, Dropdown)](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
 - [ ] SelectManyControl (MultiSelect)
+- [ ] CheckTreeControl
+- [ ] NumberControl
+- [ ] Mask/pattern for controls
 - [ ] Calendar
 - [ ] DateControl
 - [ ] TimeControl ?
@@ -60,7 +62,6 @@ npm install web-ui-pack
 - [ ] FileControl
 - [ ] ImageControl (AvatarEditor)
 - [ ] SearchControl ?
-- [ ] NumberControl
 - [ ] ModalElement
 - [ ] ConfirmModalElement
 - [ ] FormModalElement
@@ -104,7 +105,7 @@ npm install web-ui-pack
            - [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
              - [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
              - [BaseComboControl](src/controls/baseCombo.ts)
-               - [SelectControl](src/controls/select.ts)
+               - [SelectControl](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
                  - ~~[SelectManyControl](src/controls/selectMany.ts)~~
                - ~~[DateControl](src/controls/date.ts)~~
 

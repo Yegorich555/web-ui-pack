@@ -334,3 +334,4 @@ export default class WUPTextControl<
 }
 
 customElements.define(tagName, WUPTextControl);
+// todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)

@@ -33,8 +33,8 @@ export default function FAQView() {
             ),
           },
           {
-            link: "form-spinner",
-            question: "FormElement. How to change spinner (appears on submit if return promise result)'",
+            link: "control-spinner",
+            question: "FormElement. SelectControl. How to change spinner (appears on submit if return promise result)'",
             answer: <Code code={codeChangeSpinner} />,
           },
           {

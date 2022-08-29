@@ -25,6 +25,10 @@ const items = [
   items,
 };
 
+(window as any)._someSelectValidations = {
+  required: true,
+} as WUPSelect.Options["validations"];
+
 class WUPSpinSelElement extends WUPSpinElement {}
 spinUseDualRing(WUPSpinSelElement);
 const tagName = "wup-spin-sel";
@@ -37,7 +41,19 @@ declare global {
 
 export default function SelectControlView() {
   return (
-    <Page header="SelectControl" link="#selectcontrol">
+    <Page
+      header="SelectControl"
+      link="src/controls/select.ts"
+      details={{
+        tag: "wup-select",
+        cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
+      }}
+      features={[
+        "Inheritted features from TextControl",
+        "Pending state with spinner if $options.items is Promise function",
+        "Possible to customize render of items (via $options.items; see below...)",
+      ]}
+    >
       <wup-form
         ref={(el) => {
           if (el) {
@@ -47,11 +63,11 @@ export default function SelectControlView() {
       >
         <wup-select
           items="inputSelect.items"
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "selectControl";
-            }
-          }}
+          name="radio"
+          label="Radio"
+          initValue={items[1].value.toString()}
+          validations="window._someSelectValidations"
+          autoComplete="off"
         />
         <wup-select
           ref={(el) => {
@@ -110,15 +126,6 @@ export default function SelectControlView() {
           }}
         />
         <wup-select
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "withInitValue";
-              el.$options.items = items;
-              el.$initValue = ir - 2;
-            }
-          }}
-        />
-        <wup-select
           initValue="13"
           ref={(el) => {
             if (el) {
@@ -135,3 +142,4 @@ export default function SelectControlView() {
 }
 
 // todo focus on another control changes z-index and popup-hiding looks bad maybe try to change opacity
+// todo sometimes several popups are visible and not closed if click fast
