@@ -423,6 +423,7 @@ export default abstract class WUPBaseComboControl<
     this.removePopup();
     // remove resources for case when control can be appended again
     this.#isOpen = false;
+    this.#popupRefs?.dispose.call(this);
     this.#popupRefs = undefined;
 
     super.gotRemoved();

@@ -337,7 +337,9 @@ export function useFakeAnimation() {
 /** Wait for pointed time via Promise + jest.advanceTimersByTime */
 export async function wait(t = 1000) {
   await Promise.resolve();
-  jest.advanceTimersByTime(t);
+  jest.advanceTimersByTime(t / 2);
+  await Promise.resolve();
+  jest.advanceTimersByTime(t / 2);
   await Promise.resolve();
 }
 
