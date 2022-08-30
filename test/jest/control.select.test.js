@@ -1,5 +1,6 @@
 import { WUPSelectControl } from "web-ui-pack";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
+import * as h from "../testHelper";
 
 const getItems = () => [
   { value: 10, text: "Donny" },
@@ -9,13 +10,13 @@ const getItems = () => [
 ];
 
 /** @type WUPSelectControl */
-let testEl;
+let el;
 initTestBaseControl({
   type: WUPSelectControl,
   htmlTag: "wup-select",
   onInit: (e) => {
-    testEl = e;
-    testEl.$options.items = getItems();
+    el = e;
+    el.$options.items = getItems();
   },
 });
 
@@ -30,8 +31,117 @@ describe("control.select", () => {
     validations: {},
     attrs: { items: { skip: true } },
     $options: { items: { skip: true } },
-    // attrs: { defaultchecked: { skip: true } },
     onCreateNew: (e) => (e.$options.items = getItems()),
-    // testReadonly: { true: (el) => expect(el).toMatchSnapshot(), false: (el) => expect(el).toMatchSnapshot() },
+  });
+
+  test("$show/$hide menu", async () => {
+    el.$initValue = 20;
+    expect(el.$isOpen).toBe(false);
+    const onShow = jest.fn();
+    const onHide = jest.fn();
+    el.addEventListener("$showMenu", onShow);
+    el.addEventListener("$hideMenu", onHide);
+
+    // opening by focus
+    el.focus();
+    expect(document.activeElement).toBe(el.$refInput);
+    expect(el.$isOpen).toBe(true);
+    expect(el.$refPopup).toBeDefined();
+    await h.wait();
+    await h.wait(1);
+    await h.wait(1);
+    expect(onHide).toBeCalledTimes(0);
+    expect(onShow).toBeCalledTimes(1);
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id=\\"txt2\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt3\\">Donny</li><li role=\\"option\\" aria-selected=\\"true\\" id=\\"txt4\\">Mikky</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt5\\">Leo</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt6\\">Splinter</li></ul>"`
+    );
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-select opened=\\"\\"><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" role=\\"combobox\\" aria-haspopup=\\"listbox\\" aria-expanded=\\"true\\" autocomplete=\\"off\\" aria-autocomplete=\\"list\\" aria-owns=\\"txt2\\" aria-controls=\\"txt2\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label><wup-popup menu=\\"\\" style=\\"display: none;\\"><ul id=\\"txt2\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt3\\">Donny</li><li role=\\"option\\" aria-selected=\\"true\\" id=\\"txt4\\">Mikky</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt5\\">Leo</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt6\\">Splinter</li></ul></wup-popup></wup-select>"`
+    );
+
+    // closing by Esc
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    await h.wait();
+    await h.wait(1);
+    expect(el.$isOpen).toBe(false);
+    expect(el.$refPopup).toBeDefined(); // disposed only by focus out
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-select><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" role=\\"combobox\\" aria-haspopup=\\"listbox\\" aria-expanded=\\"false\\" autocomplete=\\"off\\" aria-autocomplete=\\"list\\" aria-owns=\\"txt2\\" aria-controls=\\"txt2\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label><wup-popup menu=\\"\\" style=\\"\\"><ul id=\\"txt2\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt3\\">Donny</li><li role=\\"option\\" aria-selected=\\"true\\" id=\\"txt4\\">Mikky</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt5\\">Leo</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt6\\">Splinter</li></ul></wup-popup></wup-select>"`
+    );
+    expect(onHide).toBeCalledTimes(1);
+    expect(onShow).toBeCalledTimes(1);
+
+    // opening by call $show()
+    jest.clearAllMocks();
+    el.$showMenu();
+    await h.wait();
+    await h.wait(1);
+    expect(el.$isOpen).toBe(true);
+    expect(onHide).toBeCalledTimes(0);
+    expect(onShow).toBeCalledTimes(1);
+
+    // closing by call $hide()
+    el.$hideMenu();
+    await h.wait();
+    await h.wait(1);
+    expect(el.$isOpen).toBe(false);
+    expect(onHide).toBeCalledTimes(1);
+    expect(onShow).toBeCalledTimes(1);
+
+    // opening by keyboard
+    jest.clearAllMocks();
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+    await h.wait();
+    await h.wait(1);
+    expect(el.$isOpen).toBe(true);
+    // again
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+    await h.wait();
+    await h.wait(1);
+    expect(el.$isOpen).toBe(true);
+    expect(onShow).toBeCalledTimes(1);
+
+    // closing by select (by enter)
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait();
+    await h.wait(1);
+    expect(el.$isOpen).toBe(false);
+    expect(el.$refPopup).toBeDefined();
+
+    // opening by keyboard
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
+    await h.wait();
+    await h.wait(1);
+    expect(el.$isOpen).toBe(true);
+
+    document.activeElement.blur();
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    expect(el.$refPopup).not.toBeDefined();
+  });
+
+  test("submit by Enter key", async () => {
+    el.testMe = true;
+    const form = document.body.appendChild(document.createElement("wup-form"));
+    form.testMe = true;
+    form.appendChild(el);
+    const onSubmit = jest.fn();
+    form.$onSubmit = onSubmit;
+    await h.wait();
+
+    el.focus();
+    expect(el.$isOpen).toBe(true);
+
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait();
+    await h.wait(1);
+    expect(onSubmit).not.toBeCalled();
+    expect(el.$isOpen).toBe(false);
+
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(onSubmit).toBeCalledTimes(1);
   });
 });
+
+// todo e2e: click on title again or on input doesn't close popup
