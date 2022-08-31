@@ -16,6 +16,8 @@ export default function popupListenTarget(
     hoverShowTimeout?: number;
     hoverHideTimeout?: number;
     focusDebounceMs?: number;
+    /** By default when listener is applied on focused element it provides immediate onShow event. You can disable this */
+    skipAlreadyFocused?: boolean;
   },
   /** If succesfull callback must return HTMLElement */
   onShow: (
@@ -244,7 +246,7 @@ export default function popupListenTarget(
 
     onShowCallbacks.push(() => onFocusLost(t, blur, { debounceMs: opts.focusDebounceMs }));
     const a = document.activeElement;
-    if (a === t || (a instanceof HTMLElement && t.contains(a))) {
+    if (!opts.skipAlreadyFocused && (a === t || (a instanceof HTMLElement && t.contains(a)))) {
       // isAlreadyFocused
       onFocused(new FocusEvent("focus"));
       preventClickAfterFocus = false;

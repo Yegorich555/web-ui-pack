@@ -172,6 +172,7 @@ export default abstract class WUPBaseComboControl<
         {
           target: this,
           showCase: PopupShowCases.onClick | PopupShowCases.onFocus,
+          skipAlreadyFocused: true,
         },
         (s, e) => {
           if (s === WUPPopup.ShowCases.always) {

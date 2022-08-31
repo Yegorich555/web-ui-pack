@@ -139,13 +139,27 @@ describe("control.select", () => {
     el.$hideMenu();
     await h.wait();
 
-    // no closing when readonly
+    // no opening when readonly
     el.$options.readOnly = true;
     el.$showMenu();
     await h.wait();
+    await h.wait();
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+
+    // not opening when click on input without readonly (to allow user edit input value without menu)
+    el.$options.readOnly = false;
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    expect(el.$isFocused).toBe(true);
+    expect(el.$refInput.value).toBeTruthy();
+    el.testMe = true;
+    el.$refInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     expect(el.$isOpen).toBe(false);
 
     // removing by blur
+    el.$hideMenu(); // close before to check if it works when need remove when closed
+    await h.wait();
     expect(document.activeElement).toBe(el.$refInput);
     document.activeElement.blur();
     await h.wait();

@@ -824,11 +824,101 @@ exports[`control.select validations options.validationCase 3`] = `
     <span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt2"
-        aria-describedby="txt8"
+        aria-controls="txt8"
+        aria-describedby="txt13"
         aria-expanded="true"
         aria-haspopup="listbox"
-        aria-owns="txt2"
+        aria-owns="txt8"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong>
+        First Input
+      </strong>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt13"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
+  <wup-popup
+    menu=""
+  >
+    <ul
+      aria-label="Items"
+      id="txt8"
+      role="listbox"
+    >
+      <li
+        aria-selected="false"
+        id="txt9"
+        role="option"
+      >
+        Donny
+      </li>
+      <li
+        aria-selected="false"
+        id="txt10"
+        role="option"
+      >
+        Mikky
+      </li>
+      <li
+        aria-selected="false"
+        id="txt11"
+        role="option"
+      >
+        Leo
+      </li>
+      <li
+        aria-selected="false"
+        id="txt12"
+        role="option"
+      >
+        Splinter
+      </li>
+    </ul>
+  </wup-popup>
+</wup-select>
+`;
+
+exports[`control.select validations options.validationCase 4`] = `
+<wup-select
+  invalid=""
+  opened=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-controls="txt8"
+        aria-describedby="txt14"
+        aria-expanded="true"
+        aria-haspopup="listbox"
+        aria-owns="txt8"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -852,33 +942,33 @@ exports[`control.select validations options.validationCase 3`] = `
   >
     <ul
       aria-label="Items"
-      id="txt2"
+      id="txt8"
       role="listbox"
     >
       <li
-        aria-selected="true"
-        id="txt3"
+        aria-selected="false"
+        id="txt9"
         role="option"
       >
         Donny
       </li>
       <li
         aria-selected="false"
-        id="txt4"
+        id="txt10"
         role="option"
       >
         Mikky
       </li>
       <li
         aria-selected="false"
-        id="txt5"
+        id="txt11"
         role="option"
       >
         Leo
       </li>
       <li
         aria-selected="false"
-        id="txt6"
+        id="txt12"
         role="option"
       >
         Splinter
@@ -889,58 +979,7 @@ exports[`control.select validations options.validationCase 3`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt8"
-    style="display: none;"
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      custom err here
-    </span>
-  </wup-popup>
-</wup-select>
-`;
-
-exports[`control.select validations options.validationCase 4`] = `
-<wup-select
-  invalid=""
->
-  <label
-    for="txt1"
-  >
-    <span>
-      <input
-        aria-autocomplete="list"
-        aria-controls="txt2"
-        aria-describedby="txt9"
-        aria-expanded="false"
-        aria-haspopup="listbox"
-        aria-owns="txt2"
-        aria-required="true"
-        autocomplete="off"
-        id="txt1"
-        placeholder=" "
-        role="combobox"
-        type="text"
-      />
-      <strong>
-        First Input
-      </strong>
-    </span>
-    <button
-      aria-hidden="true"
-      clear=""
-      tabindex="-1"
-    />
-  </label>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt9"
+    id="txt14"
     role="alert"
     style="display: none;"
   >
