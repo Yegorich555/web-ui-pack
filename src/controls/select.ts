@@ -497,8 +497,3 @@ export default class WUPSelectControl<
 }
 
 customElements.define(tagName, WUPSelectControl);
-
-// testcase (close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click
-// testcase: click on input > select > click at end of input, click on dropdown-icon - menu still closed !!!
-
-// todo several popups are visible and not closed (if change focus by Tab)

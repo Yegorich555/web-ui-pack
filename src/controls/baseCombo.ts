@@ -173,7 +173,11 @@ export default abstract class WUPBaseComboControl<
     this.$refInput.readOnly = this.$refInput.readOnly || (this._opts.readOnlyInput as boolean);
 
     const isMenuEnabled = !this.$isDisabled && !this.$isReadOnly;
-    if (isMenuEnabled && !this.#popupRefs) {
+    if (!isMenuEnabled) {
+      this.#popupRefs?.dispose.call(this.#popupRefs); // remove all possible prev-eventListeners
+      this.#popupRefs = undefined;
+      this.removePopup();
+    } else if (!this.#popupRefs) {
       const refs = popupListenTarget(
         {
           target: this,
@@ -199,10 +203,6 @@ export default abstract class WUPBaseComboControl<
         }
       );
       this.#popupRefs = { hide: refs.hide, show: refs.show, dispose: refs.onRemoveRef };
-    } else {
-      this.#popupRefs?.dispose.call(this.#popupRefs); // remove all possible prev-eventListeners
-      this.#popupRefs = undefined;
-      this.removePopup();
     }
   }
 
@@ -442,3 +442,5 @@ export default abstract class WUPBaseComboControl<
     super.gotRemoved();
   }
 }
+
+// todo several popups are visible and not closed (if change focus by Tab)

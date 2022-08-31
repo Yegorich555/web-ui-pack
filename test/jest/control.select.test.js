@@ -157,6 +157,7 @@ describe("control.select", () => {
     expect(el.$isOpen).toBe(false);
     expect(el.$refPopup).not.toBeDefined();
 
+    // not opening when click on input without readonly (to allow user edit input value without menu)
     el.$options.readOnly = false;
     await h.wait();
     expect(el.$isOpen).toBe(false);
@@ -166,9 +167,26 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isOpen).toBe(false);
 
+    // opening when click on input with readonly (to allow user edit input value without menu)
+    el.$options.readOnlyInput = true;
+    await h.wait();
+    expect(el.$refInput.readOnly).toBe(true);
+    expect(el.$refInput.value).toBeTruthy();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-select><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" role=\\"combobox\\" aria-haspopup=\\"listbox\\" aria-expanded=\\"false\\" autocomplete=\\"off\\" aria-owns=\\"txt7\\" aria-controls=\\"txt7\\" readonly=\\"\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-select>"`
+    );
+    el.$refInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+    el.$options.readOnlyInput = false;
+    await h.wait();
+
     // checking with disabled
+    el.$showMenu();
+    expect(el.$isOpen).toBe(true);
     el.$options.disabled = true;
     await h.wait();
+    expect(el.$isOpen).toBe(false);
     expect(el.$refPopup).not.toBeDefined();
 
     el.$options.disabled = false;
@@ -176,6 +194,7 @@ describe("control.select", () => {
 
     // not closing when click on input without readonly (to allow user edit input value without menu)
     el.$showMenu();
+    await h.wait();
     await h.wait();
     expect(el.$isOpen).toBe(true);
     expect(el.$isFocused).toBe(true);
@@ -205,6 +224,10 @@ describe("control.select", () => {
     await h.wait();
   });
 
+  test("menu", async () => {
+    // todo test items selection for selectControl
+  });
+
   test("submit by Enter key", async () => {
     const form = document.body.appendChild(document.createElement("wup-form"));
     form.appendChild(el);
@@ -227,3 +250,5 @@ describe("control.select", () => {
 });
 
 // todo e2e: click on title again or on input doesn't close popup
+// todo test option showCase
+// testcase (close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click
