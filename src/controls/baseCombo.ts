@@ -393,6 +393,11 @@ export default abstract class WUPBaseComboControl<
     !this.$isOpen && this._opts.showCase & ShowCases.onInput && (await this.goShowMenu(ShowCases.onInput));
   }
 
+  protected override gotFocusLost(): void {
+    super.gotFocusLost();
+    !this.#isOpen && this.removePopup(); // otherwise it's removed by hidingMenu
+  }
+
   /** Called when user selected new value from menu */
   protected selectValue(v: ValueType): void {
     this.setValue(v);

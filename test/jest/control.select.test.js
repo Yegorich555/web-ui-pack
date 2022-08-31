@@ -83,7 +83,6 @@ describe("control.select", () => {
     // closing by call $hide()
     el.$hideMenu();
     await h.wait();
-    await h.wait(1);
     expect(el.$isOpen).toBe(false);
     expect(onHide).toBeCalledTimes(1);
     expect(onShow).toBeCalledTimes(1);
@@ -92,38 +91,73 @@ describe("control.select", () => {
     jest.clearAllMocks();
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
     await h.wait();
-    await h.wait(1);
     expect(el.$isOpen).toBe(true);
     // again
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
     await h.wait();
-    await h.wait(1);
     expect(el.$isOpen).toBe(true);
     expect(onShow).toBeCalledTimes(1);
 
     // closing by select (by enter)
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
-    await h.wait(1);
     expect(el.$isOpen).toBe(false);
     expect(el.$refPopup).toBeDefined();
 
     // opening by keyboard
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
     await h.wait();
-    await h.wait(1);
     expect(el.$isOpen).toBe(true);
 
-    document.activeElement.blur();
+    // hide by outside click
+    document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     expect(el.$isOpen).toBe(false);
+
+    // open by click control
+    el.testMe = true;
+    el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.wait();
+    await h.wait();
+    await h.wait();
+    expect(document.activeElement).toBe(el.$refInput);
+    expect(el.$isOpen).toBe(true);
+
+    // hide by click control again
+    el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.wait();
+    await h.wait();
+    await h.wait();
+    expect(document.activeElement).toBe(el.$refInput);
+    expect(el.$isOpen).toBe(false);
+
+    // opening by text in input
+    await h.typeInputText(el.$refInput, "S");
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+
+    el.$hideMenu();
+    await h.wait();
+
+    // no closing when readonly
+    el.$options.readOnly = true;
+    el.$showMenu();
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+
+    // removing by blur
+    expect(document.activeElement).toBe(el.$refInput);
+    document.activeElement.blur();
+    await h.wait();
+    await h.wait(1);
+    expect(el.$isOpen).toBe(false);
     expect(el.$refPopup).not.toBeDefined();
+
+    // todo test other cases
   });
 
   test("submit by Enter key", async () => {
-    el.testMe = true;
     const form = document.body.appendChild(document.createElement("wup-form"));
-    form.testMe = true;
     form.appendChild(el);
     const onSubmit = jest.fn();
     form.$onSubmit = onSubmit;
@@ -134,7 +168,6 @@ describe("control.select", () => {
 
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
-    await h.wait(1);
     expect(onSubmit).not.toBeCalled();
     expect(el.$isOpen).toBe(false);
 
