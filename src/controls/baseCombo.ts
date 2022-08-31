@@ -181,11 +181,7 @@ export default abstract class WUPBaseComboControl<
           return this.goShowMenu(s === PopupShowCases.onClick ? ShowCases.onClick : ShowCases.onFocus, e);
         },
         (s, e) => {
-          if (
-            s === WUPPopup.HideCases.onFocusOut ||
-            s === WUPPopup.HideCases.onOutsideClick ||
-            s === WUPPopup.HideCases.onTargetClick
-          ) {
+          if (s !== WUPPopup.HideCases.onPopupClick) {
             return this.goHideMenu(
               s === WUPPopup.HideCases.onFocusOut || s === WUPPopup.HideCases.onOutsideClick
                 ? HideCases.onFocusLost
@@ -214,18 +210,17 @@ export default abstract class WUPBaseComboControl<
       return null;
     }
 
-    if (
-      showCase === ShowCases.onClick &&
-      e?.target instanceof HTMLInputElement &&
-      !e.target.readOnly &&
-      this.contains(e.target) &&
-      e.target.value !== ""
-    ) {
-      return this.#isOpen ? this.$refPopup! : null; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
-    }
-
     if (this.#isOpen) {
       return this.$refPopup!;
+    }
+
+    if (
+      showCase === ShowCases.onClick &&
+      e!.target instanceof HTMLInputElement &&
+      !e!.target.readOnly &&
+      e!.target.value !== ""
+    ) {
+      return null; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
     }
 
     this.#isOpen = true;
@@ -284,10 +279,9 @@ export default abstract class WUPBaseComboControl<
   protected async goHideMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): Promise<boolean> {
     if (
       hideCase === HideCases.onClick &&
-      e?.target instanceof HTMLInputElement &&
-      !e.target.readOnly &&
-      this.contains(e.target) &&
-      e.target.value !== ""
+      e!.target instanceof HTMLInputElement &&
+      !e!.target.readOnly &&
+      e!.target.value !== ""
     ) {
       return false; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
     }

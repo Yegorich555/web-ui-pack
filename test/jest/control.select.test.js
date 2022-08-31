@@ -115,7 +115,6 @@ describe("control.select", () => {
     expect(el.$isOpen).toBe(false);
 
     // open by click control
-    el.testMe = true;
     el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     await h.wait();
@@ -136,6 +135,16 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isOpen).toBe(true);
 
+    // try to show again - for coverage
+    await el.$showMenu();
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+
+    // stay open even by popupClick
+    el.$refPopup.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+
     el.$hideMenu();
     await h.wait();
 
@@ -147,15 +156,33 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isOpen).toBe(false);
 
+    // todo test with disabled
+
     // not opening when click on input without readonly (to allow user edit input value without menu)
     el.$options.readOnly = false;
     await h.wait();
     expect(el.$isOpen).toBe(false);
     expect(el.$isFocused).toBe(true);
     expect(el.$refInput.value).toBeTruthy();
-    el.testMe = true;
     el.$refInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.wait();
     expect(el.$isOpen).toBe(false);
+
+    // not closing when click on input without readonly (to allow user edit input value without menu)
+    el.$showMenu();
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+    expect(el.$isFocused).toBe(true);
+    expect(el.$refInput.value).toBeTruthy();
+    el.$refInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+
+    // checking when hiding is not finished and opened again
+    el.$hideMenu();
+    el.$showMenu();
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
 
     // removing by blur
     el.$hideMenu(); // close before to check if it works when need remove when closed
@@ -167,7 +194,9 @@ describe("control.select", () => {
     expect(el.$isOpen).toBe(false);
     expect(el.$refPopup).not.toBeDefined();
 
-    // todo test other cases
+    // checking when refPopup is removed
+    el.$hideMenu();
+    await h.wait();
   });
 
   test("submit by Enter key", async () => {

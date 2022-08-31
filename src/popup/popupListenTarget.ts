@@ -175,6 +175,7 @@ export default function popupListenTarget(
         e.detail === 2 ||
         wasMouseMove
       ) {
+        console.warn({ preventClickAfterFocus, debounceTimeout, wasOutsideClick, openedByHover, wasMouseMove });
         return;
       }
 
@@ -183,7 +184,8 @@ export default function popupListenTarget(
           lastActive = document.activeElement as HTMLElement;
           show(WUPPopup.ShowCases.onClick, e);
         } else {
-          hide(WUPPopup.HideCases.onTargetClick, e);
+          const isMeClick = openedEl === e.target || includes(e.target);
+          hide(isMeClick ? WUPPopup.HideCases.onPopupClick : WUPPopup.HideCases.onTargetClick, e);
         }
       }); // timeout to wait for browser for applying selection on text if user selected something
 
