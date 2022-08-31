@@ -816,7 +816,6 @@ exports[`control.select validations options.validationCase 2`] = `
 exports[`control.select validations options.validationCase 3`] = `
 <wup-select
   invalid=""
-  opened=""
 >
   <label
     for="txt1"
@@ -826,7 +825,7 @@ exports[`control.select validations options.validationCase 3`] = `
         aria-autocomplete="list"
         aria-controls="txt8"
         aria-describedby="txt13"
-        aria-expanded="true"
+        aria-expanded="false"
         aria-haspopup="listbox"
         aria-owns="txt8"
         aria-required="true"
@@ -846,6 +845,45 @@ exports[`control.select validations options.validationCase 3`] = `
       tabindex="-1"
     />
   </label>
+  <wup-popup
+    menu=""
+    style="display: none;"
+  >
+    <ul
+      aria-label="Items"
+      id="txt2"
+      role="listbox"
+    >
+      <li
+        aria-selected="false"
+        id="txt3"
+        role="option"
+      >
+        Donny
+      </li>
+      <li
+        aria-selected="false"
+        id="txt4"
+        role="option"
+      >
+        Mikky
+      </li>
+      <li
+        aria-selected="false"
+        id="txt5"
+        role="option"
+      >
+        Leo
+      </li>
+      <li
+        aria-selected="false"
+        id="txt6"
+        role="option"
+      >
+        Splinter
+      </li>
+    </ul>
+  </wup-popup>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
@@ -906,7 +944,6 @@ exports[`control.select validations options.validationCase 3`] = `
 exports[`control.select validations options.validationCase 4`] = `
 <wup-select
   invalid=""
-  opened=""
 >
   <label
     for="txt1"
@@ -916,7 +953,7 @@ exports[`control.select validations options.validationCase 4`] = `
         aria-autocomplete="list"
         aria-controls="txt8"
         aria-describedby="txt14"
-        aria-expanded="true"
+        aria-expanded="false"
         aria-haspopup="listbox"
         aria-owns="txt8"
         aria-required="true"
@@ -942,33 +979,33 @@ exports[`control.select validations options.validationCase 4`] = `
   >
     <ul
       aria-label="Items"
-      id="txt8"
+      id="txt2"
       role="listbox"
     >
       <li
         aria-selected="false"
-        id="txt9"
+        id="txt3"
         role="option"
       >
         Donny
       </li>
       <li
         aria-selected="false"
-        id="txt10"
+        id="txt4"
         role="option"
       >
         Mikky
       </li>
       <li
         aria-selected="false"
-        id="txt11"
+        id="txt5"
         role="option"
       >
         Leo
       </li>
       <li
         aria-selected="false"
-        id="txt12"
+        id="txt6"
         role="option"
       >
         Splinter

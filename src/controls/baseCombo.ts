@@ -151,7 +151,7 @@ export default abstract class WUPBaseComboControl<
     const i = this.$refInput;
     i.setAttribute("role", "combobox");
     i.setAttribute("aria-haspopup", "listbox");
-    i.setAttribute("aria-expanded", "false");
+    i.setAttribute("aria-expanded", false);
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUPBaseCombo.Options> | null): void {
@@ -196,6 +196,7 @@ export default abstract class WUPBaseComboControl<
     } else {
       this.#popupRefs?.dispose.call(this.#popupRefs); // remove all possible prev-eventListeners
       this.#popupRefs = undefined;
+      this.removePopup();
     }
   }
 
@@ -261,8 +262,10 @@ export default abstract class WUPBaseComboControl<
       }
       this.appendChild(p);
     }
+    if (!this.$refPopup) {
+      return null; // possible when options.readOnly is changed and popup is destroyed immediately
+    }
     await this.$refPopup.$show();
-
     this.setAttribute("opened", "");
     this.$refInput.setAttribute("aria-expanded", true);
 
@@ -312,7 +315,7 @@ export default abstract class WUPBaseComboControl<
     }
 
     this.removeAttribute("opened");
-    this.$refInput.setAttribute("aria-expanded", "false");
+    this.$refInput.setAttribute("aria-expanded", false);
     this.focusMenuItem(null, undefined);
     setTimeout(() => this.fireEvent("$hideMenu", { cancelable: false }));
     return true;
@@ -417,15 +420,19 @@ export default abstract class WUPBaseComboControl<
     this.$refPopup = undefined;
     this.#focusedMenuItem = undefined;
     this.#focusedMenuValue = undefined;
+    if (this.#isOpen) {
+      this.#isOpen = false;
+      this.removeAttribute("opened");
+      this.$refInput.setAttribute("aria-expanded", false);
+      this.$refInput.removeAttribute("aria-activedescendant");
+    }
   }
 
   protected override gotRemoved(): void {
     this.removePopup();
     // remove resources for case when control can be appended again
-    this.#isOpen = false;
     this.#popupRefs?.dispose.call(this);
     this.#popupRefs = undefined;
-
     super.gotRemoved();
   }
 }

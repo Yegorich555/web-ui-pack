@@ -155,10 +155,8 @@ describe("control.select", () => {
     await h.wait();
     await h.wait();
     expect(el.$isOpen).toBe(false);
+    expect(el.$refPopup).not.toBeDefined();
 
-    // todo test with disabled
-
-    // not opening when click on input without readonly (to allow user edit input value without menu)
     el.$options.readOnly = false;
     await h.wait();
     expect(el.$isOpen).toBe(false);
@@ -167,6 +165,14 @@ describe("control.select", () => {
     el.$refInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     expect(el.$isOpen).toBe(false);
+
+    // checking with disabled
+    el.$options.disabled = true;
+    await h.wait();
+    expect(el.$refPopup).not.toBeDefined();
+
+    el.$options.disabled = false;
+    await h.wait();
 
     // not closing when click on input without readonly (to allow user edit input value without menu)
     el.$showMenu();

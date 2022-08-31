@@ -398,7 +398,9 @@ export default class WUPSelectControl<
     }
     const isCreate = !this.$refPopup;
     const popup = await super.goShowMenu(showCase, e);
-
+    if (!popup) {
+      return null;
+    }
     if (!isCreate && showCase !== ShowCases.onInput && this._menuItems!.filtered) {
       this._menuItems!.all?.forEach((li) => (li.style.display = "")); // reset styles after filtering
       this._menuItems!.filtered = undefined;
