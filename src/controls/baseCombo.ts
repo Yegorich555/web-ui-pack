@@ -77,6 +77,12 @@ export default abstract class WUPBaseComboControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseComboControl;
 
+  static get observedOptions(): Array<string> {
+    const arr = super.observedOptions as Array<keyof WUPBaseCombo.Options>;
+    arr.push("readOnlyInput");
+    return arr;
+  }
+
   static get $style(): string {
     return `${super.$style}
       :host {

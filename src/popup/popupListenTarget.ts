@@ -175,7 +175,6 @@ export default function popupListenTarget(
         e.detail === 2 ||
         wasMouseMove
       ) {
-        console.warn({ preventClickAfterFocus, debounceTimeout, wasOutsideClick, openedByHover, wasMouseMove });
         return;
       }
 
