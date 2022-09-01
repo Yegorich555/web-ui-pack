@@ -209,6 +209,15 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isOpen).toBe(true);
 
+    // checking showMenu takes time and popup is removed because of $options.readOnly applied
+    el.$hideMenu();
+    await h.wait();
+    el.$showMenu();
+    el.$options.readOnly = true;
+    await h.wait();
+    expect(el.$refPopup).not.toBeDefined();
+    expect(el.$isOpen).toBe(false);
+
     // removing by blur
     el.$hideMenu(); // close before to check if it works when need remove when closed
     await h.wait();
@@ -224,8 +233,112 @@ describe("control.select", () => {
     await h.wait();
   });
 
-  test("menu", async () => {
-    // todo test items selection for selectControl
+  test("menu navigation", async () => {
+    const was = HTMLElement.prototype.scrollIntoViewIfNeeded;
+    HTMLElement.prototype.scrollIntoViewIfNeeded = () => undefined; // just for coverage
+    el.focus();
+    await h.wait();
+    expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup menu=\\"\\"><ul id=\\"txt2\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt3\\">Donny</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt4\\">Mikky</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt5\\">Leo</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt6\\">Splinter</li></ul></wup-popup>"`
+    );
+
+    const setItems = async (items) => {
+      el.$hideMenu();
+      await h.wait();
+      el.$options.items = items;
+      await h.wait();
+      el.$showMenu();
+      await h.wait();
+    };
+
+    await setItems([]);
+    expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup menu=\\"\\"><ul id=\\"txt7\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-disabled=\\"true\\" aria-selected=\\"false\\">No Items</li></ul></wup-popup>"`
+    );
+
+    await setItems(() => Promise.resolve(getItems()));
+    expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup menu=\\"\\"><ul id=\\"txt8\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt9\\">Donny</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt10\\">Mikky</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt11\\">Leo</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt12\\">Splinter</li></ul></wup-popup>"`
+    );
+
+    // menu navigation by arrowKeys
+    expect(el.$isOpen).toBe(true);
+    const menuIds = ["txt9", "txt10", "txt11", "txt12"];
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[0]);
+    expect(el.querySelectorAll("[aria-selected='true']").length).toBe(0);
+
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[1]);
+
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[2]);
+
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[1]);
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[2]);
+
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[3]);
+
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[0]);
+
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[3]);
+
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[2]);
+
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(el.$value).toBe(getItems()[2].value);
+    expect(el.$isOpen).toBe(false);
+
+    // open again and pressEsc to close menu
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
+    await h.wait();
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+    expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[3]);
+    expect(el.querySelector("[aria-selected='true']")?.id).toBe(menuIds[2]);
+    expect(el.querySelectorAll("[aria-selected='true']").length).toBe(1);
+
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(el.$value).toBe(getItems()[2].value); // no changes
+    expect(el.$isOpen).toBe(false);
+
+    // checking if resetValue still works
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(el.$value).not.toBe(getItems()[2].value);
+
+    // open again and check if selectedValue is correct
+    el.$value = getItems()[3].value;
+    await h.wait();
+    el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.wait();
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+    expect(el.querySelector("[aria-selected='true']")?.id).toBe(menuIds[3]);
+    expect(el.querySelectorAll("[aria-selected='true']").length).toBe(1);
+
+    HTMLElement.prototype.scrollIntoViewIfNeeded = was;
+  });
+
+  test("menu filtering by input", async () => {
+    // todo implement
   });
 
   test("submit by Enter key", async () => {
@@ -246,6 +359,23 @@ describe("control.select", () => {
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
     expect(onSubmit).toBeCalledTimes(1);
+
+    onSubmit.mockClear();
+    el.$showMenu();
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", altKey: true, bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(onSubmit).toBeCalledTimes(1);
+    expect(el.$isOpen).toBe(true);
+
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", shiftKey: true, bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(onSubmit).toBeCalledTimes(2);
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(onSubmit).toBeCalledTimes(3);
+    expect(el.$isOpen).toBe(true);
   });
 });
 

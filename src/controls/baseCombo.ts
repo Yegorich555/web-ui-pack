@@ -268,10 +268,10 @@ export default abstract class WUPBaseComboControl<
       }
       this.appendChild(p);
     }
+    this.$refPopup && (await this.$refPopup.$show()); // popup==null >> possible when options.readOnly is changed and popup is destroyed immediately
     if (!this.$refPopup) {
       return null; // possible when options.readOnly is changed and popup is destroyed immediately
     }
-    await this.$refPopup.$show();
     this.setAttribute("opened", "");
     this.$refInput.setAttribute("aria-expanded", true);
 
