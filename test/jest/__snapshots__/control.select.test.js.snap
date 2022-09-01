@@ -727,6 +727,7 @@ exports[`control.select validations options.validationCase 1`] = `
 exports[`control.select validations options.validationCase 2`] = `
 <wup-select
   invalid=""
+  opened=""
 >
   <label
     for="txt1"
@@ -736,7 +737,7 @@ exports[`control.select validations options.validationCase 2`] = `
         aria-autocomplete="list"
         aria-controls="txt2"
         aria-describedby="txt7"
-        aria-expanded="false"
+        aria-expanded="true"
         aria-haspopup="listbox"
         aria-owns="txt2"
         aria-required="true"
@@ -871,7 +872,7 @@ exports[`control.select validations options.validationCase 3`] = `
       role="listbox"
     >
       <li
-        aria-selected="false"
+        aria-selected="true"
         id="txt9"
         role="option"
       >
@@ -906,7 +907,6 @@ exports[`control.select validations options.validationCase 3`] = `
 exports[`control.select validations options.validationCase 4`] = `
 <wup-select
   invalid=""
-  opened=""
 >
   <label
     for="txt1"
@@ -914,11 +914,11 @@ exports[`control.select validations options.validationCase 4`] = `
     <span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt14"
-        aria-describedby="txt19"
-        aria-expanded="true"
+        aria-controls="txt8"
+        aria-describedby="txt14"
+        aria-expanded="false"
         aria-haspopup="listbox"
-        aria-owns="txt14"
+        aria-owns="txt8"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -937,49 +937,10 @@ exports[`control.select validations options.validationCase 4`] = `
     />
   </label>
   <wup-popup
-    menu=""
-    style="display: none;"
-  >
-    <ul
-      aria-label="Items"
-      id="txt14"
-      role="listbox"
-    >
-      <li
-        aria-selected="false"
-        id="txt15"
-        role="option"
-      >
-        Donny
-      </li>
-      <li
-        aria-selected="false"
-        id="txt16"
-        role="option"
-      >
-        Mikky
-      </li>
-      <li
-        aria-selected="false"
-        id="txt17"
-        role="option"
-      >
-        Leo
-      </li>
-      <li
-        aria-selected="false"
-        id="txt18"
-        role="option"
-      >
-        Splinter
-      </li>
-    </ul>
-  </wup-popup>
-  <wup-popup
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt19"
+    id="txt14"
     role="alert"
     style="display: none;"
   >

@@ -64,8 +64,8 @@ export default function SelectControlView() {
       >
         <wup-select
           items="inputSelect.items"
-          name="radio"
-          label="Radio"
+          name="select"
+          label="Select"
           initValue={items[1].value.toString()}
           validations="window._someSelectValidations"
           autoComplete="off"

@@ -231,6 +231,45 @@ describe("control.select", () => {
     // checking when refPopup is removed
     el.$hideMenu();
     await h.wait();
+
+    // case: popups are visible and not closed (if change focus by Tab)
+    const orig = window.getComputedStyle;
+    jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
+      if (elem.tagName === "WUP-POPUP") {
+        /** @type CSSStyleDeclaration */
+        return { animationDuration: "0.3s", animationName: "WUP-POPUP-a1" };
+      }
+      return orig(elem);
+    });
+
+    /** @type WUPSelectControl */
+    const el2 = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.readOnly = false;
+    await h.wait();
+    const goShowMenu = jest.spyOn(el, "goShowMenu");
+    expect(el.$isFocused).toBe(false);
+    el.focus();
+    await h.wait(1); // start animation
+    await h.wait(1);
+    expect(goShowMenu).toBeCalled();
+    expect(el.$isOpen).toBe(true);
+
+    el2.focus();
+    await h.wait();
+    expect(el2.$isOpen).toBe(true);
+    expect(el.$isOpen).toBe(false);
+
+    // el2.testMe = true;
+    // el2.$hideMenu();
+    // await h.wait();
+    // expect(el2.$isOpen).toBe(false);
+    // expect(el2.$isFocused).toBe(true);
+    // expect(el2.$refPopup).toBeDefined();
+    // el2.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    // await h.wait();
+    // await h.wait();
+    // expect(el2.$isOpen).toBe(true);
+    // expect(el.$isOpen).toBe(false);
   });
 
   test("menu navigation", async () => {

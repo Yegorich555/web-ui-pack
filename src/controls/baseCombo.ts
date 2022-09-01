@@ -266,11 +266,9 @@ export default abstract class WUPBaseComboControl<
         this.removePopup();
         return null;
       }
-      this.appendChild(p);
-    }
-    this.$refPopup && (await this.$refPopup.$show()); // popup==null >> possible when options.readOnly is changed and popup is destroyed immediately
-    if (!this.$refPopup) {
-      return null; // possible when options.readOnly is changed and popup is destroyed immediately
+      this.appendChild(p); // WARN: it will show onInit
+    } else {
+      this.$refPopup.$show(); // WARN: it's important don't wait for animation to assign onShow events fast
     }
     this.setAttribute("opened", "");
     this.$refInput.setAttribute("aria-expanded", true);
@@ -307,7 +305,7 @@ export default abstract class WUPBaseComboControl<
         hideCase !== HideCases.onClick &&
         this.#popupRefs!.hide(WUPPopup.HideCases.onManuallCall);
 
-      wasOpen && (await this.$refPopup.$hide());
+      await this.$refPopup.$hide();
 
       // remove popup only by focusOut to optimize resources
       if (hideCase === HideCases.onFocusLost) {
@@ -393,8 +391,8 @@ export default abstract class WUPBaseComboControl<
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected override async gotInput(e: Event & { currentTarget: HTMLInputElement }): Promise<void> {
-    !this.$isOpen && this._opts.showCase & ShowCases.onInput && (await this.goShowMenu(ShowCases.onInput));
+  protected override gotInput(e: Event & { currentTarget: HTMLInputElement }): void {
+    !this.$isOpen && this._opts.showCase & ShowCases.onInput && this.goShowMenu(ShowCases.onInput);
   }
 
   protected override gotFocusLost(): void {
@@ -443,4 +441,4 @@ export default abstract class WUPBaseComboControl<
   }
 }
 
-// todo several popups are visible and not closed (if change focus by Tab)
+// todo $showMenu doesn't work if notFocused

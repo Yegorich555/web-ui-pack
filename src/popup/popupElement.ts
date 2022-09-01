@@ -408,7 +408,7 @@ export default class WUPPopupElement<
     this._stopShowing?.call(this);
     this._stopShowing = undefined;
 
-    !this.#isOpen || this.goHide(WUPPopup.HideCases.onShowAgain);
+    this.#isOpen && this.goHide(WUPPopup.HideCases.onShowAgain);
 
     this._opts.target = this._opts.target || this.#defineTarget();
     if (!(this._opts.target as HTMLElement).isConnected) {

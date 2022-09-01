@@ -72,7 +72,8 @@ export default function popupListenTarget(
         Promise.reject(error);
       }
     }
-    openedEl && onShowCallbacks.forEach((f) => onHideCallbacks.push(f()));
+    // timeout required to avoid immediate hide by bubbling events to root
+    openedEl && setTimeout(() => onShowCallbacks.forEach((f) => onHideCallbacks.push(f())));
   }
 
   async function hide(hideCase: WUPPopup.HideCases, e?: MouseEvent | FocusEvent | null): Promise<void> {
@@ -178,15 +179,13 @@ export default function popupListenTarget(
         return;
       }
 
-      setTimeout(() => {
-        if (!openedEl) {
-          lastActive = document.activeElement as HTMLElement;
-          show(WUPPopup.ShowCases.onClick, e);
-        } else {
-          const isMeClick = openedEl === e.target || includes(e.target);
-          hide(isMeClick ? WUPPopup.HideCases.onPopupClick : WUPPopup.HideCases.onTargetClick, e);
-        }
-      }); // timeout to wait for browser for applying selection on text if user selected something
+      if (!openedEl) {
+        lastActive = document.activeElement as HTMLElement;
+        show(WUPPopup.ShowCases.onClick, e);
+      } else {
+        const isMeClick = openedEl === e.target || includes(e.target);
+        hide(isMeClick ? WUPPopup.HideCases.onPopupClick : WUPPopup.HideCases.onTargetClick, e);
+      }
 
       // fix when labelOnClick > inputOnClick > inputOnFocus
       debounceTimeout = setTimeout(() => (debounceTimeout = undefined), 1);
