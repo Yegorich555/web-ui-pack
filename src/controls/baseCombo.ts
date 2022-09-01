@@ -133,12 +133,14 @@ export default abstract class WUPBaseComboControl<
     return this.#isOpen;
   }
 
-  /** Hide popup-menu */
+  /** Hide popup-menu
+   * @returns Promise resolved by animation time */
   async $hideMenu(): Promise<void> {
     await this.goHideMenu(HideCases.onManualCall);
   }
 
-  /** Show popup-menu */
+  /** Show popup-menu
+   * @returns Promise resolved when popup starts opening */
   async $showMenu(): Promise<void> {
     await this.goShowMenu(ShowCases.onManualCall);
   }
@@ -442,3 +444,5 @@ export default abstract class WUPBaseComboControl<
 }
 
 // todo $showMenu doesn't work if notFocused
+
+// todo normalize show/hide. Popup returns finished process but $showMenu returns started-process (before animation end)

@@ -253,7 +253,8 @@ export default class WUPPopupElement<
   $options: WUPPopup.Options = objectClone(this.#ctr.$defaults);
   protected override _opts = this.$options;
 
-  /** Hide popup. Promise resolved by animation time */
+  /** Hide popup
+   * @returns Promise resolved by animation time */
   $hide(): Promise<void> {
     return new Promise<void>((resolve) => {
       const f = async (): Promise<void> => {
@@ -268,7 +269,8 @@ export default class WUPPopupElement<
     });
   }
 
-  /** Show popup; it disables $options.showCase and rollbacks by $hide(). Promise resolved by animation time */
+  /** Show popup; it disables $options.showCase and rollbacks by $hide().
+   * @returns Promise resolved by animation time */
   $show(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       const f = async (): Promise<void> => {
@@ -300,8 +302,8 @@ export default class WUPPopupElement<
   }
 
   /** Returns arrowElement if $options.arrowEnable=true and after popup $isOpen */
-  get $arrowElement(): WUPPopupArrowElement | null {
-    return this.#arrowElement || null;
+  get $refArrow(): WUPPopupArrowElement | null {
+    return this.#refArrow || null;
   }
 
   protected override gotReady(): void {
@@ -383,7 +385,7 @@ export default class WUPPopupElement<
   #placements: Array<WUPPopupPlace.PlaceFunc> = [];
   #prevRect?: DOMRect;
   #scrollParents?: HTMLElement[];
-  #arrowElement?: WUPPopupArrowElement;
+  #refArrow?: WUPPopupArrowElement;
 
   protected setMaxHeight(v: string): void {
     this.style.maxHeight = v;
@@ -472,7 +474,7 @@ export default class WUPPopupElement<
         this,
         style.borderRadius.split(" ").map((s) => px2Number(s))
       );
-      this.#arrowElement = el;
+      this.#refArrow = el;
     }
 
     if (!this._opts.placement.length) {
@@ -571,9 +573,9 @@ export default class WUPPopupElement<
       this.#scrollParents = undefined;
       this.#userStyles = undefined as any;
 
-      if (this.#arrowElement) {
-        this.#arrowElement.remove();
-        this.#arrowElement = undefined;
+      if (this.#refArrow) {
+        this.#refArrow.remove();
+        this.#refArrow = undefined;
       }
 
       wasShow &&
@@ -691,10 +693,10 @@ export default class WUPPopupElement<
     this.setMaxWidth(_defMaxWidth); // resetting is required to get default size
     this.setMaxHeight(""); // resetting is required to get default size
 
-    if (this.#arrowElement) {
-      this.#arrowElement.style.display = "";
-      this.#arrowElement.style.width = "";
-      this.#arrowElement.style.height = "";
+    if (this.#refArrow) {
+      this.#refArrow.style.display = "";
+      this.#refArrow.style.width = "";
+      this.#refArrow.style.height = "";
     }
 
     const me: WUPPopupPlace.MeRect = {
@@ -705,10 +707,10 @@ export default class WUPPopupElement<
       offset: getOffset(this._opts.offset),
       minH: this.#userStyles.minH,
       minW: this.#userStyles.minW,
-      arrow: this.#arrowElement
+      arrow: this.#refArrow
         ? {
-            h: this.#arrowElement.offsetHeight,
-            w: this.#arrowElement.offsetWidth,
+            h: this.#refArrow.offsetHeight,
+            w: this.#refArrow.offsetWidth,
             offset: getOffset(this._opts.arrowOffset),
           }
         : { h: 0, w: 0, offset: { bottom: 0, left: 0, right: 0, top: 0 } },
@@ -730,8 +732,8 @@ export default class WUPPopupElement<
       const isHiddenByScroll = viewResult.hidden;
       if (isHiddenByScroll) {
         this.style.display = ""; // hide popup if target hidden by scrollableParent
-        if (this.#arrowElement) {
-          this.#arrowElement.style.display = "none";
+        if (this.#refArrow) {
+          this.#refArrow.style.display = "none";
         }
         return tRect;
       }
@@ -787,7 +789,7 @@ export default class WUPPopupElement<
       });
       !isOk && console.error(`${this.tagName}. Impossible to place without overflow`, this);
 
-      if (this.#arrowElement) {
+      if (this.#refArrow) {
         // change arrowSize if it's bigger than popup
         const checkSize = (relatedSize: number): void => {
           // if we have border-radius of popup we need to include in offset to prevent overflow between arrow and popup
@@ -795,8 +797,8 @@ export default class WUPPopupElement<
           if (me.arrow.w > maxArrowSize) {
             me.arrow.w = maxArrowSize;
             me.arrow.h = maxArrowSize / 2;
-            (this.#arrowElement as WUPPopupArrowElement).style.width = `${me.arrow.w}px`;
-            (this.#arrowElement as WUPPopupArrowElement).style.height = `${me.arrow.h}px`;
+            (this.#refArrow as WUPPopupArrowElement).style.width = `${me.arrow.w}px`;
+            (this.#refArrow as WUPPopupArrowElement).style.height = `${me.arrow.h}px`;
             pos = lastRule(t, me, fit); // recalc position because size of arrow is changed
           }
         };
@@ -816,7 +818,7 @@ export default class WUPPopupElement<
             pos.top + this.offsetHeight - this.#userStyles.borderRadius - me.arrow.w / 2 - me.arrow.h / 2 // align to popup
           );
         }
-        this.#arrowElement.style.transform = `translate(${pos.arrowLeft}px, ${pos.arrowTop}px) rotate(${pos.arrowAngle}deg)`;
+        this.#refArrow.style.transform = `translate(${pos.arrowLeft}px, ${pos.arrowTop}px) rotate(${pos.arrowAngle}deg)`;
       }
 
       // transform has performance benefits in comparison with positioning
@@ -838,8 +840,8 @@ export default class WUPPopupElement<
     this.#frameId = undefined;
     super.gotRemoved();
     this.#isOpen = false;
-    this.#arrowElement?.remove();
-    this.#arrowElement = undefined;
+    this.#refArrow?.remove();
+    this.#refArrow = undefined;
   }
 
   protected override dispose(): void {

@@ -5,6 +5,7 @@
 **BREAKING CHANGES**:
 
 - helpers reorganized to WUPHelpers (`WUPHelpers.isEqual`, `WUPHelpers.focusFirst` etc.)
+- PopupElement. Renamed $arrowElement to $refArrow
 
 **Features**:
 
@@ -32,6 +33,7 @@
 - Helper [promiseWait](src/helpers/promiseWait.ts): added option `smartOrCallback` to prevent useless pending on already resolved promises
 
 - [`PopupElement`](src/popup/popupElement.ts)
+  - Renamed $arrowElement to $refArrow
   - Added $refresh() - to force update/recalc position when nested content is changed
   - Added option **animation** with animation-drawer
   - Added option **maxWidthByTarget**

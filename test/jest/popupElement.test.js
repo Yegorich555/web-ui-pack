@@ -1309,7 +1309,7 @@ describe("popupElement", () => {
 
   test("arrow", () => {
     expect(el.$isOpen).toBeTruthy(); // checking prev-state
-    expect(el.$arrowElement).toBeNull();
+    expect(el.$refArrow).toBeNull();
     el.$options.arrowEnable = true;
 
     const orig = document.createElement;
@@ -1333,7 +1333,7 @@ describe("popupElement", () => {
     expectIt(WUPPopupElement.$placements.$top.$start.$adjust).toMatchInlineSnapshot(
       `"<body><div id=\\"targetId\\">some text</div><wup-popup style=\\"display: block; transform: translate(140px, 70px);\\" position=\\"top\\"></wup-popup><wup-popup-arrow style=\\"transform: translate(154px, 90px) rotate(0deg);\\"></wup-popup-arrow></body>"`
     );
-    expect(el.$arrowElement).toBeDefined();
+    expect(el.$refArrow).toBeDefined();
 
     expectIt(WUPPopupElement.$placements.$top.$middle.$adjust).toMatchInlineSnapshot(
       `"<body><div id=\\"targetId\\">some text</div><wup-popup style=\\"display: block; transform: translate(170px, 70px);\\" position=\\"top\\"></wup-popup><wup-popup-arrow style=\\"transform: translate(180px, 90px) rotate(0deg);\\"></wup-popup-arrow></body>"`

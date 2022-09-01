@@ -26,8 +26,8 @@ function attach(el: HTMLElement, opts: { text?: string; innerHTML?: string }) {
       popup.$options.arrowEnable = false;
       popup.$options.animation = WUPPopup.Animations.drawer;
       setTimeout(() => {
-        if (popup.$arrowElement) {
-          popup.$arrowElement.style.background = popup.style.background;
+        if (popup.$refArrow) {
+          popup.$refArrow.style.background = popup.style.background;
         }
       });
       if (opts.innerHTML) {

@@ -62,7 +62,6 @@ export default function popupListenTarget(
     onShowCallbacks.length = 0;
   }
 
-  // required to prevent previous action (cancel hidding because need to show again etc.)
   async function show(showCase: WUPPopup.ShowCases, e?: MouseEvent | FocusEvent): Promise<void> {
     if (showCase !== WUPPopup.ShowCases.always || !openedEl) {
       try {

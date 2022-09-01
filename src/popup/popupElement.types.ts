@@ -75,7 +75,7 @@ export namespace WUPPopup {
      * @defaultValue 100ms */
     focusDebounceMs?: number;
     /** Set true to show arrow with popup; @false by default;
-     *  Arrow is placed after popup so it's easy to access (via style @see arrowClass or popupElement.$arrowElement) */
+     *  Arrow is placed after popup so it's easy to access (via style @see arrowClass or popupElement.$refArrow) */
     arrowEnable?: boolean;
     /** Setup arrow class and use ::before to add background-image or content;
      * Limitation: arrow developed with ratio 2:1(w:h). You can't change it directly. Use only ::before, ::after to reach you goal
