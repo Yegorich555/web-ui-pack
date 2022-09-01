@@ -569,23 +569,24 @@ describe("formElement", () => {
       });
 
       test("lockOnPending", async () => {
+        el.$onSubmit = () => new Promise((resolve) => setTimeout(resolve, 300));
         el.$options.submitActions = SubmitActions.lockOnPending;
         btnSubmit.click();
-        await h.wait(1);
+        await h.wait(50);
         expect(el.$isPending).toBe(true);
         expect(el.$options.disabled).toBe(true);
         expect(el.outerHTML).toMatchInlineSnapshot(
-          `"<wup-form role=\\"form\\"><wup-text><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" autocomplete=\\"off\\"><strong>Email</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt2\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt2\\" autocomplete=\\"off\\"><strong>First Name</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt3\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt3\\" autocomplete=\\"off\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><button type=\\"submit\\" disabled=\\"\\"></button><wup-spin style=\\"display: none;\\"><div></div></wup-spin></wup-form>"`
+          `"<wup-form role=\\"form\\" disabled=\\"\\"><wup-text><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" autocomplete=\\"off\\" disabled=\\"\\"><strong>Email</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt2\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt2\\" autocomplete=\\"off\\" disabled=\\"\\"><strong>First Name</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt3\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt3\\" autocomplete=\\"off\\" disabled=\\"\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><button type=\\"submit\\" disabled=\\"\\" aria-busy=\\"true\\"></button><wup-spin style=\\"position: absolute; display: none;\\" aria-label=\\"Loading. Please wait\\"><div></div></wup-spin></wup-form>"`
         );
         await h.wait();
 
         el.$options.submitActions = SubmitActions.none;
         btnSubmit.click();
-        await h.wait(1);
+        await h.wait(50);
         expect(el.$isPending).toBe(true);
         expect(el.$options.disabled).toBeFalsy();
         expect(el.outerHTML).toMatchInlineSnapshot(
-          `"<wup-form role=\\"form\\"><wup-text><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" autocomplete=\\"off\\"><strong>Email</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt2\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt2\\" autocomplete=\\"off\\"><strong>First Name</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt3\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt3\\" autocomplete=\\"off\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><button type=\\"submit\\" aria-busy=\\"true\\" disabled=\\"\\"></button><wup-spin style=\\"display: none;\\"><div></div></wup-spin></wup-form>"`
+          `"<wup-form role=\\"form\\"><wup-text><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" autocomplete=\\"off\\"><strong>Email</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt2\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt2\\" autocomplete=\\"off\\"><strong>First Name</strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><wup-text><label for=\\"txt3\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt3\\" autocomplete=\\"off\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-text><button type=\\"submit\\" disabled=\\"\\" aria-busy=\\"true\\"></button><wup-spin style=\\"position: absolute; display: none;\\" aria-label=\\"Loading. Please wait\\"><div></div></wup-spin></wup-form>"`
         );
         await h.wait();
       });

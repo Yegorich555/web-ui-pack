@@ -256,20 +256,21 @@ describe("control.select", () => {
 
     el2.focus();
     await h.wait();
+    await h.wait();
     expect(el2.$isOpen).toBe(true);
     expect(el.$isOpen).toBe(false);
 
-    // el2.testMe = true;
-    // el2.$hideMenu();
-    // await h.wait();
-    // expect(el2.$isOpen).toBe(false);
-    // expect(el2.$isFocused).toBe(true);
-    // expect(el2.$refPopup).toBeDefined();
-    // el2.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    // await h.wait();
-    // await h.wait();
-    // expect(el2.$isOpen).toBe(true);
-    // expect(el.$isOpen).toBe(false);
+    el2.$hideMenu();
+    await h.wait();
+    expect(el2.$isOpen).toBe(false);
+    expect(el2.$isFocused).toBe(true);
+    expect(el2.$refPopup).toBeDefined();
+    el2.testMe = true;
+    el2.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.wait();
+    await h.wait();
+    expect(el2.$isOpen).toBe(true);
+    expect(el.$isOpen).toBe(false);
   });
 
   test("menu navigation", async () => {

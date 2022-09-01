@@ -459,18 +459,23 @@ export default class WUPFormElement<
         this.gotSubmit(e, e.target instanceof HTMLElement ? e.target : this),
       { passive: false }
     );
-    this.appendEvent(this, "click", (e) => {
-      if (!e.defaultPrevented) {
-        let t = e.target as HTMLElement | null;
-        while (t instanceof HTMLElement && t !== this) {
-          if ((t as HTMLButtonElement).type === "submit") {
-            this.gotSubmit(e, t);
-            return;
+    this.appendEvent(
+      this,
+      "click",
+      (e) => {
+        if (!e.defaultPrevented) {
+          let t = e.target as HTMLElement | null;
+          while (t instanceof HTMLElement && t !== this) {
+            if ((t as HTMLButtonElement).type === "submit") {
+              this.gotSubmit(e, t);
+              return;
+            }
+            t = t.parentElement;
           }
-          t = t.parentElement;
         }
-      }
-    });
+      },
+      { passive: false }
+    );
   }
 
   protected override connectedCallback(): void {
