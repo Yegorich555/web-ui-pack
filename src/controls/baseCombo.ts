@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/named
 import WUPPopupElement, { ShowCases as PopupShowCases, WUPPopup } from "../popup/popupElement";
-import popupListenTarget from "../popup/popupListenTarget";
+import popupListen from "../popup/popupListen";
 import WUPBaseControl from "./baseControl";
 import WUPTextControl, { WUPTextIn } from "./text";
 
@@ -180,7 +180,7 @@ export default abstract class WUPBaseComboControl<
       this.#popupRefs = undefined;
       this.removePopup();
     } else if (!this.#popupRefs) {
-      const refs = popupListenTarget(
+      const refs = popupListen(
         {
           target: this,
           showCase: PopupShowCases.onClick | PopupShowCases.onFocus,
@@ -303,7 +303,7 @@ export default abstract class WUPBaseComboControl<
 
     if (wasOpen) {
       // call for ref-listener to apply events properly
-      hideCase !== HideCases.onFocusLost &&
+      hideCase !== HideCases.onFocusLost && // todo simplify it
         hideCase !== HideCases.onClick &&
         this.#popupRefs!.hide(WUPPopup.HideCases.onManuallCall);
 

@@ -9,7 +9,7 @@ import { WUPPopup } from "./popupElement.types";
  * listen for target according to showCase and return onRemoveCallback (listeners that need to remove when popup removed)
  * If target removed then listeners removed
  * */
-export default function popupListenTarget(
+export default function popupListen(
   options: {
     target: HTMLElement;
     showCase?: WUPPopup.ShowCases;
@@ -33,7 +33,7 @@ export default function popupListenTarget(
   /** Fire it when you need to show manually; If showCase == always onShow isn't called if onShow was called once before */
   show: (showCase: WUPPopup.ShowCases) => Promise<void>;
 } {
-  const opts = { ...popupListenTarget.$defaults, ...options };
+  const opts = { ...popupListen.$defaults, ...options };
   const t = opts.target;
   if (!(t instanceof HTMLElement)) {
     throw new Error("WUP-Popup. Target is required");
@@ -63,6 +63,9 @@ export default function popupListenTarget(
   }
 
   async function show(showCase: WUPPopup.ShowCases, e?: MouseEvent | FocusEvent): Promise<void> {
+    if (openedEl) {
+      return;
+    }
     if (showCase !== WUPPopup.ShowCases.always || !openedEl) {
       try {
         openedEl = await onShow(showCase, e || null);
@@ -76,6 +79,9 @@ export default function popupListenTarget(
   }
 
   async function hide(hideCase: WUPPopup.HideCases, e?: MouseEvent | FocusEvent | null): Promise<void> {
+    if (!openedEl) {
+      return;
+    }
     const was = openedEl; // required when user clicks again during the hidding > we need to show in this case
     openedEl = null;
     onHideRef();
@@ -255,7 +261,7 @@ export default function popupListenTarget(
   return { onRemoveRef, hide, show };
 }
 
-popupListenTarget.$defaults = {
+popupListen.$defaults = {
   showCase: WUPPopup.ShowCases.onClick,
   hoverShowTimeout: 200,
   hoverHideTimeout: 500,

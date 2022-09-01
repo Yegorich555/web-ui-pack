@@ -3,7 +3,7 @@ import { WUPPopup } from "./popupElement.types";
 import { getOffset, PopupPlacements, WUPPopupPlace } from "./popupPlacements";
 import { findScrollParentAll } from "../helpers/findScrollParent";
 import WUPPopupArrowElement from "./popupArrowElement";
-import popupListenTarget from "./popupListenTarget";
+import popupListen from "./popupListen";
 import { getBoundingInternalRect, px2Number, styleTransform } from "../helpers/styleHelpers";
 
 export import ShowCases = WUPPopup.ShowCases;
@@ -187,7 +187,7 @@ export default class WUPPopupElement<
       const opts = popup ? { ...options, ...popup.$options, target: popup.$options.target as HTMLElement } : options;
       let isHidding = false;
 
-      const refs = popupListenTarget(
+      const refs = popupListen(
         opts,
         (v) => {
           isHidding = false;
@@ -313,12 +313,12 @@ export default class WUPPopupElement<
 
   #isOpen = false;
   #onRemoveRef?: () => void; // func to remove eventListeners
-  #attach?: () => ReturnType<typeof popupListenTarget>; // func to use alternative target
+  #attach?: () => ReturnType<typeof popupListen>; // func to use alternative target
   /** Called after gotReady() and $show() (to reinit according to options) */
   protected init(): void {
     this.dispose(); // remove previously added events
 
-    let refs: ReturnType<typeof popupListenTarget>;
+    let refs: ReturnType<typeof popupListen>;
     if (this.#attach) {
       refs = this.#attach();
     } else {
@@ -329,7 +329,7 @@ export default class WUPPopupElement<
         return;
       }
 
-      refs = popupListenTarget(
+      refs = popupListen(
         this._opts as typeof this._opts & { target: HTMLElement },
         (v) => (this.goShow(v) ? this : null),
         (v) => this.goHide(v)

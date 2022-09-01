@@ -1,6 +1,6 @@
 /* eslint-disable prefer-rest-params */
 import { WUPPopupElement } from "web-ui-pack";
-import popupListenTarget from "web-ui-pack/popup/popupListenTarget";
+import popupListen from "web-ui-pack/popup/popupListen";
 import * as all from "web-ui-pack/popup/popupElement.types";
 import { WUPPopup } from "web-ui-pack/popup/popupElement";
 import * as all2 from "web-ui-pack/popup/popupElement";
@@ -1725,14 +1725,14 @@ describe("popupElement", () => {
     expect(el.$isOpen).toBeFalsy();
   });
 
-  test("popupListenTarget: hidding by click twice", async () => {
+  test("popupListen: hidding by click twice", async () => {
     /** @type WUPPopupElement */
     const myel = document.createElement(el.tagName);
     myel.$options.target = trg;
     myel.$options.showCase = 0;
 
     document.body.appendChild(myel);
-    popupListenTarget(
+    popupListen(
       { target: trg, showCase: 1 << 2 }, // onClick
       () => {
         myel.$show();
@@ -1768,14 +1768,14 @@ describe("popupElement", () => {
     expect(myel.$isOpen).toBeFalsy();
   });
 
-  test("popupListenTarget: show 1st time", async () => {
+  test("popupListen: show 1st time", async () => {
     /** @type WUPPopupElement */
     const myel = document.createElement(el.tagName);
     myel.$options.target = trg;
     myel.$options.showCase = 0;
 
     document.body.appendChild(myel);
-    const refs = popupListenTarget(
+    const refs = popupListen(
       { target: trg, showCase: 1 << 2 }, // onClick
       () => {
         myel.$show();
@@ -1846,7 +1846,7 @@ describe("popupElement", () => {
     expect(el.$isOpen).toBeFalsy(); // because click cancelled outside target
   });
 
-  test("popupListenTarget: handle error on show", async () => {
+  test("popupListen: handle error on show", async () => {
     /** @type WUPPopupElement */
     const myel = document.createElement(el.tagName);
     myel.$options.target = trg;
@@ -1854,7 +1854,7 @@ describe("popupElement", () => {
 
     document.body.appendChild(myel);
     let cnt = 0;
-    popupListenTarget(
+    popupListen(
       { target: trg, showCase: 1 << 2 }, // onClick
       () => {
         ++cnt;
