@@ -43,6 +43,8 @@ export default function ControlsView() {
       header="FormElement & Controls"
       link="src/formElement.ts"
       features={[
+        "Powerful accessibility and keyboard support",
+        "Built-in highly customizable validations rules",
         <>
           Custom <b>$submit</b> event with collected values into single model-object according to control-names
         </>,
@@ -116,3 +118,6 @@ export default function ControlsView() {
     </Page>
   );
 }
+
+// todo detailed example about usage with controls, validations, initModel, model etc.
+// todo CSS-vars detection is wrong:after Password open Select. It will provide --wup-icon-eye

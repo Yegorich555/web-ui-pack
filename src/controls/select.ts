@@ -497,3 +497,5 @@ export default class WUPSelectControl<
 }
 
 customElements.define(tagName, WUPSelectControl);
+
+// todo need option to allowUser create new value
