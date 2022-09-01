@@ -52,6 +52,7 @@ npm install web-ui-pack
 - [x] [RadioControl (RadioGroup)](src/controls/radio.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/radio)
 - [x] [SelectControl (ComboBox, Dropdown)](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
 - [ ] SelectManyControl (MultiSelect)
+- [ ] TextareaControl
 - [ ] CheckTreeControl
 - [ ] NumberControl
 - [ ] Mask/pattern for controls
