@@ -134,13 +134,13 @@ export default abstract class WUPBaseComboControl<
   }
 
   /** Hide popup-menu */
-  $hideMenu(): void {
-    this.goHideMenu(HideCases.onManualCall);
+  async $hideMenu(): Promise<void> {
+    await this.goHideMenu(HideCases.onManualCall);
   }
 
   /** Show popup-menu */
-  $showMenu(): void {
-    this.goShowMenu(ShowCases.onManualCall);
+  async $showMenu(): Promise<void> {
+    await this.goShowMenu(ShowCases.onManualCall);
   }
 
   /** Reference to popupMenu */
