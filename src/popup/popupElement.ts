@@ -611,6 +611,7 @@ export default class WUPPopupElement<
       if (animTime) {
         return this.goAnimate(animTime, true).then((isOk) => {
           delete this._isClosing;
+          this.removeAttribute("hide");
           if (!isOk) {
             return false;
           }
