@@ -1717,10 +1717,10 @@ describe("popupElement", () => {
     expect(el.$isOpen).toBeFalsy();
 
     // checking if it works again
-    trg.click(); // try ещ сдшсл again when previous hide hasn't been finished yet but opened again
+    trg.click(); // try to open again when previous hide hasn't been finished yet but opened again
     await h.wait();
     expect(el.$isOpen).toBeTruthy();
-    trg.click(); // try ещ сдшсл again when previous hide hasn't been finished yet but opened again
+    trg.click();
     await h.wait();
     expect(el.$isOpen).toBeFalsy();
   });

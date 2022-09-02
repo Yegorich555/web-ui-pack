@@ -19,6 +19,8 @@ import CheckControlView from "./components/controls/check";
 import RadioControlView from "./components/controls/radio";
 import FAQView from "./components/FAQView";
 
+(window as any).WUPHelpers = WUPHelpers;
+
 interface IRoute {
   label?: string;
   path: string;

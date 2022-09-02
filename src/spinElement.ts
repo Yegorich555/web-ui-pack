@@ -516,3 +516,5 @@ export function spinUseSpliceRing(cls: typeof WUPSpinElement): void {
             ${s}`;
   });
 }
+
+// todo issue when spinElement is removed during the animation

@@ -147,11 +147,7 @@ export default abstract class WUPBaseComboControl<
 
   /** Reference to popupMenu */
   $refPopup?: WUPPopupElement;
-  #popupRefs?: {
-    hide: (hideCase: WUPPopup.HideCases) => Promise<void>;
-    show: (showCase: WUPPopup.ShowCases) => Promise<void>;
-    dispose: () => void;
-  };
+  #popupRefs?: ReturnType<typeof popupListen>;
 
   protected override renderControl(): void {
     super.renderControl();
@@ -176,7 +172,7 @@ export default abstract class WUPBaseComboControl<
 
     const isMenuEnabled = !this.$isDisabled && !this.$isReadOnly;
     if (!isMenuEnabled) {
-      this.#popupRefs?.dispose.call(this.#popupRefs); // remove all possible prev-eventListeners
+      this.#popupRefs?.stopListen.call(this.#popupRefs); // remove all possible prev-eventListeners
       this.#popupRefs = undefined;
       this.removePopup();
     } else if (!this.#popupRefs) {
@@ -204,7 +200,7 @@ export default abstract class WUPBaseComboControl<
           return false;
         }
       );
-      this.#popupRefs = { hide: refs.hide, show: refs.show, dispose: refs.onRemoveRef };
+      this.#popupRefs = refs;
     }
   }
 
@@ -272,13 +268,10 @@ export default abstract class WUPBaseComboControl<
     } else {
       this.$refPopup.$show(); // WARN: it's important don't wait for animation to assign onShow events fast
     }
+    this.#popupRefs!.show(WUPPopup.ShowCases.always); // call for ref-listener to apply events properly
+
     this.setAttribute("opened", "");
     this.$refInput.setAttribute("aria-expanded", true);
-
-    // call for ref-listener to apply events properly
-    showCase !== ShowCases.onClick &&
-      showCase !== ShowCases.onFocus &&
-      this.#popupRefs!.show(WUPPopup.ShowCases.always);
 
     setTimeout(() => this.fireEvent("$showMenu", { cancelable: false }));
     return this.$refPopup;
@@ -302,11 +295,7 @@ export default abstract class WUPBaseComboControl<
     }
 
     if (wasOpen) {
-      // call for ref-listener to apply events properly
-      hideCase !== HideCases.onFocusLost && // todo simplify it
-        hideCase !== HideCases.onClick &&
-        this.#popupRefs!.hide(WUPPopup.HideCases.onManuallCall);
-
+      this.#popupRefs!.hide(WUPPopup.HideCases.onManuallCall); // call for ref-listener to apply events properly
       await this.$refPopup.$hide();
 
       // remove popup only by focusOut to optimize resources
@@ -437,7 +426,7 @@ export default abstract class WUPBaseComboControl<
   protected override gotRemoved(): void {
     this.removePopup();
     // remove resources for case when control can be appended again
-    this.#popupRefs?.dispose.call(this);
+    this.#popupRefs?.stopListen.call(this);
     this.#popupRefs = undefined;
     super.gotRemoved();
   }
@@ -446,3 +435,4 @@ export default abstract class WUPBaseComboControl<
 // todo $showMenu doesn't work if notFocused
 
 // todo normalize show/hide. Popup returns finished process but $showMenu returns started-process (before animation end)
+// todo need showStart/hideStart events

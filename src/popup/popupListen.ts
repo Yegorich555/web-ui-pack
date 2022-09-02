@@ -2,13 +2,12 @@ import focusFirst from "../helpers/focusFirst";
 import onEvent, { onEventType } from "../helpers/onEvent";
 import onFocusGot from "../helpers/onFocusGot";
 import onFocusLost from "../helpers/onFocusLost";
-import onSpy from "../helpers/onSpy";
 import { WUPPopup } from "./popupElement.types";
 
-/**
- * listen for target according to showCase and return onRemoveCallback (listeners that need to remove when popup removed)
- * If target removed then listeners removed
- * */
+/** Listen for target according to showCase. If target removed call stopListen + don't forget to remove popup yourself;
+ * @tutorial Troubleshooting/rules:
+ * * To allow user hide/show popup before previous action is ended provide for onShow and onHide-
+ *   callbacks results as fast as it's possible without waiting for animation */
 export default function popupListen(
   options: {
     target: HTMLElement;
@@ -26,11 +25,11 @@ export default function popupListen(
   ) => HTMLElement | null | Promise<HTMLElement | null>,
   onHide: (hideCase: WUPPopup.HideCases, ev: MouseEvent | FocusEvent | null) => boolean | Promise<boolean>
 ): {
-  /** Fire it when element is removed manually (to remove all added related eventListeners) */
-  onRemoveRef: () => void;
-  /** Fire it when you need to hide manually; If hideCase== onManuallCall onHide isn't called */
+  /** Fire it when target is removed manually (to remove all added related eventListeners) */
+  stopListen: () => void;
+  /** Fire it before hiding (to ability to show in the feature by listened events) when you need to hide outside listener (manually) */
   hide: (hideCase: WUPPopup.HideCases) => Promise<void>;
-  /** Fire it when you need to show manually; If showCase == always onShow isn't called if onShow was called once before */
+  /** Fire it before showing (to ability to hide in the feature by listened events) when you need to show outside listener (manually) */
   show: (showCase: WUPPopup.ShowCases) => Promise<void>;
 } {
   const opts = { ...popupListen.$defaults, ...options };
@@ -52,10 +51,8 @@ export default function popupListen(
     onHideCallbacks.forEach((f) => f());
     onHideCallbacks.length = 0;
   }
-  function onRemoveRef(): void {
-    rstSpy();
-    rstSpy2();
-
+  function stopListen(): void {
+    openedEl = null;
     onRemoveCallbacks.forEach((f) => f());
     onRemoveCallbacks.length = 0;
     onHideRef();
@@ -63,49 +60,41 @@ export default function popupListen(
   }
 
   async function show(showCase: WUPPopup.ShowCases, e?: MouseEvent | FocusEvent): Promise<void> {
-    if (openedEl) {
+    if (openedEl || show._isDoing) {
       return;
     }
-    if (showCase !== WUPPopup.ShowCases.always || !openedEl) {
-      try {
-        openedEl = await onShow(showCase, e || null);
-      } catch (error) {
-        // handle error from onShow
-        Promise.reject(error);
-      }
+    try {
+      show._isDoing = true;
+      openedEl = await onShow(showCase, e || null);
+    } catch (error) {
+      Promise.reject(error); // handle error from onShow
     }
+    show._isDoing = false;
     // timeout required to avoid immediate hide by bubbling events to root
     openedEl && setTimeout(() => onShowCallbacks.forEach((f) => onHideCallbacks.push(f())));
   }
+  show._isDoing = false; // required to prevent infinite-calling from parent
 
   async function hide(hideCase: WUPPopup.HideCases, e?: MouseEvent | FocusEvent | null): Promise<void> {
-    if (!openedEl) {
+    if (!openedEl || hide._isDoing) {
       return;
     }
     const was = openedEl; // required when user clicks again during the hidding > we need to show in this case
     openedEl = null;
     onHideRef();
-    let isDone = false;
     try {
-      isDone = hideCase === WUPPopup.HideCases.onManuallCall || (await onHide(hideCase, e || null));
+      hide._isDoing = true;
+      const isOk = await onHide(hideCase, e || null);
+      if (!isOk && !openedEl) {
+        openedEl = was; // rollback if onHide was prevented and onShow wasn't called again during the hidding
+        onShowCallbacks.forEach((f) => onHideCallbacks.push(f()));
+      }
     } catch (error) {
-      // handle error from onHide
-      Promise.reject(error);
+      Promise.reject(error); // handle error from onHide
     }
-    if (!isDone && !openedEl) {
-      // rollback if onHide was prevented and onShow wasn't called again during the hidding
-      openedEl = was; // rollback if hidding wasn't successful
-      onShowCallbacks.forEach((f) => onHideCallbacks.push(f()));
-    }
+    hide._isDoing = false;
   }
-
-  // try to detect if target removed
-  async function hideByRemove(): Promise<void> {
-    openedEl && (await hide(WUPPopup.HideCases.onTargetRemove, null));
-    onRemoveRef();
-  }
-  const rstSpy = onSpy(t, "remove", hideByRemove);
-  const rstSpy2 = onSpy(t.parentElement as HTMLElement, "removeChild", (child) => child === t && hideByRemove());
+  hide._isDoing = false; // required to prevent infinite-calling from parent
 
   function appendEvent<K extends keyof HTMLElementEventMap>(
     ...args: Parameters<onEventType<K, HTMLElement | Document>>
@@ -258,7 +247,7 @@ export default function popupListen(
     }
   }
 
-  return { onRemoveRef, hide, show };
+  return { stopListen, hide, show };
 }
 
 popupListen.$defaults = {
