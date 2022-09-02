@@ -403,10 +403,8 @@ export default class WUPPopupElement<
 
   /** Collect/calc all required values into #state (when menu shows) */
   protected buildState(): void {
-    if (!this.#state) {
-      this.#state = {} as any;
-    }
-
+    this.#state = {} as any;
+    this.#state!.prevRect = undefined;
     this.setMaxWidth(""); // reset styles to default to avoid bugs and previous state
     this.setMaxHeight(""); // it works only when styles is defined before popup is opened
 
@@ -447,7 +445,7 @@ export default class WUPPopupElement<
     this.#state!.scrollParents = findScrollParentAll(this._opts.target) ?? undefined;
     // get arrowSize
     if (this._opts.arrowEnable) {
-      const el = document.createElement(WUPPopupArrowElement.tagName);
+      const el = this.#refArrow || document.createElement(WUPPopupArrowElement.tagName);
       this.#refArrow = el;
       // insert arrow after popup
       const nextEl = this.nextSibling;
@@ -498,32 +496,60 @@ export default class WUPPopupElement<
 
   /** Required to stop previous animations/timeouts (for case when option animation is changed) */
   _stopAnimation?: () => void;
+  protected goAnimate(animTime: number, isClose: boolean): Promise<boolean> {
+    let pr: Promise<boolean>;
+    if (this._opts.animation === WUPPopup.Animations.drawer) {
+      const pa = animateDropdown(this, animTime, isClose);
+      pr = new Promise((resolve) => {
+        this._stopAnimation = () => {
+          delete this._stopAnimation;
+          pa.stop(this._opts.animation !== WUPPopup.Animations.drawer); // rst animation state only if animation changed
+          resolve(false);
+        };
+        pa.then(() => resolve(true));
+      });
+    } else {
+      pr = new Promise((resolve) => {
+        const t = setTimeout(() => resolve(true), animTime);
+        this._stopAnimation = () => {
+          delete this._stopAnimation;
+          clearTimeout(t);
+          resolve(false);
+        };
+      });
+    }
+
+    return pr;
+  }
+
   /** Shows popup if target defined; returns true if successful */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected goShow(showCase: WUPPopup.ShowCases): boolean | Promise<true> {
-    console.warn("goShow");
+  protected goShow(showCase: WUPPopup.ShowCases): boolean | Promise<boolean> {
     this._stopAnimation?.call(this);
-    delete this._stopAnimation;
 
     const e = this.fireEvent("$willShow", { cancelable: true });
     if (e.defaultPrevented) {
       return false;
     }
 
+    this.#state?.frameId && window.cancelAnimationFrame(this.#state?.frameId);
     this.buildState();
     const wasClosed = !this.#isOpen;
     this.#isOpen = true;
 
     // possible when show fired againg with new values
-    if (!this.#state!.frameId) {
-      const goUpdate = (): void => {
+    const goUpdate = (): void => {
+      // possible if hidden by target-remove
+      if (this.#isOpen) {
         this.#state!.prevRect = this.#updatePosition();
-        // possible if hidden by target-remove
-        this.#state!.frameId = window.requestAnimationFrame(goUpdate);
-      };
+        const id = window.requestAnimationFrame(goUpdate);
+        if (this.#state) {
+          this.#state.frameId = id;
+        }
+      }
+    };
 
-      goUpdate();
-    }
+    goUpdate();
 
     const { animTime } = this.#state!.userStyles;
     if (!animTime && window.matchMedia("not all and (prefers-reduced-motion)").matches && this._opts.animation) {
@@ -533,34 +559,27 @@ export default class WUPPopupElement<
         );
       }
     }
-
-    let pr: Promise<void>;
-    if (this._opts.animation === WUPPopup.Animations.drawer) {
-      const pa = animateDropdown(this, animTime, false);
-      this._stopAnimation = () => pa.stop(this._opts.animation !== WUPPopup.Animations.drawer); // rst animation state only if animation changed
-      pr = pa;
-    } else {
-      pr = new Promise((resolve) => {
-        const t = setTimeout(resolve, animTime);
-        this._stopAnimation = () => clearTimeout(t);
-      });
+    if (!animTime) {
+      wasClosed && setTimeout(() => this.fireEvent("$show", { cancelable: false }));
+      return true;
     }
-    return pr.then(() => {
+
+    return this.goAnimate(animTime, false).then((isOk) => {
+      if (!isOk) {
+        return false;
+      }
       wasClosed && this.fireEvent("$show", { cancelable: false });
-      delete this._stopAnimation;
       return true;
     });
   }
 
-  _isClosing?: boolean;
+  _isClosing?: true;
   /** Hide popup. @hideCase as reason of hide(). Calling 2nd time at once will stop previous hide-animation */
-  protected goHide(hideCase: WUPPopup.HideCases): boolean | Promise<true> {
+  protected goHide(hideCase: WUPPopup.HideCases): boolean | Promise<boolean> {
     if (!this.#isOpen || this._isClosing) {
       return true;
     }
-    console.warn("goHide");
     this._stopAnimation?.call(this);
-    delete this._stopAnimation;
 
     const e = this.fireEvent("$willHide", { cancelable: true });
     if (e.defaultPrevented) {
@@ -572,8 +591,8 @@ export default class WUPPopupElement<
       delete this._isClosing;
       delete this._stopAnimation;
       this.style.display = "";
-      this.#isOpen = false;
       this.removeAttribute("hide");
+      this.#isOpen = false;
       this.#state?.frameId && window.cancelAnimationFrame(this.#state.frameId);
       this.#state = undefined;
 
@@ -590,19 +609,11 @@ export default class WUPPopupElement<
       const { animationDuration: aD } = getComputedStyle(this);
       const animTime = Number.parseFloat(aD.substring(0, aD.length - 1)) * 1000 || 0;
       if (animTime) {
-        let p: Promise<void>;
-        if (this._opts.animation === WUPPopup.Animations.drawer) {
-          const pa = animateDropdown(this, animTime, true);
-          this._stopAnimation = () => pa.stop(false);
-          p = pa;
-        } else {
-          p = new Promise((resolve) => {
-            const t = setTimeout(resolve, animTime);
-            this._stopAnimation = () => clearTimeout(t);
-          });
-        }
-
-        return p.then(() => {
+        return this.goAnimate(animTime, true).then((isOk) => {
+          delete this._isClosing;
+          if (!isOk) {
+            return false;
+          }
           finishHide();
           return true;
         });
@@ -753,10 +764,10 @@ export default class WUPPopupElement<
         let ok = !hasOveflow(pos, me);
         if (ok) {
           // maxW/H can be null if resize is not required
-          if (pos.maxW != null && this.#state.userStyles.maxW > pos.maxW) {
+          if (pos.maxW != null && this.#state!.userStyles.maxW > pos.maxW) {
             this.setMaxWidth(`${pos.maxW}px`);
           }
-          if (pos.maxH != null && this.#state.userStyles.maxH > pos.maxH) {
+          if (pos.maxH != null && this.#state!.userStyles.maxH > pos.maxH) {
             this.setMaxHeight(`${pos.maxH}px`);
           }
           // re-check because maxWidth can affect on height
@@ -779,7 +790,7 @@ export default class WUPPopupElement<
         // change arrowSize if it's bigger than popup
         const checkSize = (relatedSize: number): void => {
           // if we have border-radius of popup we need to include in offset to prevent overflow between arrow and popup
-          const maxArrowSize = Math.max(relatedSize - this.#state.userStyles.borderRadius * 2, 0);
+          const maxArrowSize = Math.max(relatedSize - this.#state!.userStyles.borderRadius * 2, 0);
           if (me.arrow.w > maxArrowSize) {
             me.arrow.w = maxArrowSize;
             me.arrow.h = maxArrowSize / 2;
@@ -793,15 +804,15 @@ export default class WUPPopupElement<
           checkSize(this.offsetWidth);
           pos.arrowLeft = t.left + t.width / 2 - me.arrow.w / 2; // attach to middle of target
           pos.arrowLeft = Math.min(
-            Math.max(pos.arrowLeft, pos.left + this.#state.userStyles.borderRadius), // align to popup
-            pos.left + this.offsetWidth - me.arrow.w - this.#state.userStyles.borderRadius // align to popup
+            Math.max(pos.arrowLeft, pos.left + this.#state!.userStyles.borderRadius), // align to popup
+            pos.left + this.offsetWidth - me.arrow.w - this.#state!.userStyles.borderRadius // align to popup
           );
         } else if (pos.arrowTop == null) {
           checkSize(this.offsetHeight);
           pos.arrowTop = t.top + t.height / 2 - me.arrow.h / 2; // attach to middle of target
           pos.arrowTop = Math.min(
-            Math.max(pos.arrowTop, pos.top + this.#state.userStyles.borderRadius + me.arrow.h / 2), // align to popup
-            pos.top + this.offsetHeight - this.#state.userStyles.borderRadius - me.arrow.w / 2 - me.arrow.h / 2 // align to popup
+            Math.max(pos.arrowTop, pos.top + this.#state!.userStyles.borderRadius + me.arrow.h / 2), // align to popup
+            pos.top + this.offsetHeight - this.#state!.userStyles.borderRadius - me.arrow.w / 2 - me.arrow.h / 2 // align to popup
           );
         }
         this.#refArrow.style.transform = `translate(${pos.arrowLeft}px, ${pos.arrowTop}px) rotate(${pos.arrowAngle}deg)`;
@@ -822,12 +833,12 @@ export default class WUPPopupElement<
   };
 
   protected override gotRemoved(): void {
-    this.#state.frameId && window.cancelAnimationFrame(this.#state.frameId);
-    this.#state.frameId = undefined;
-    super.gotRemoved();
     this.#isOpen = false;
+    this.#state?.frameId && window.cancelAnimationFrame(this.#state.frameId);
+    this.#state = undefined;
     this.#refArrow?.remove();
     this.#refArrow = undefined;
+    super.gotRemoved();
   }
 
   protected override dispose(): void {
