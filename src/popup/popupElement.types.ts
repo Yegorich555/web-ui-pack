@@ -105,11 +105,11 @@ export namespace WUPPopup {
   export interface EventMap extends WUP.EventMap {
     /** Fires before show is happened; can be prevented via e.preventDefault() */
     $willShow: Event;
-    /** Fires after popup is shown */
+    /** Fires after popup is shown (after animation finishes) */
     $show: Event;
     /** Fires before hide is happened; can be prevented via e.preventDefault() */
     $willHide: Event;
-    /** Fires after popup is hidden */
+    /** Fires after popup is hidden (after animation finishes) */
     $hide: Event;
   }
 }

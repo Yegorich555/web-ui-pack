@@ -277,7 +277,7 @@ export default class WUPPopupElement<
         if (!this.$isReady) {
           reject(new Error(`${this.tagName}. Impossible to show: not appended to document`));
         } else {
-          this.dispose(); // remove events
+          this.disposeListener(); // remove events
           try {
             await this.goShow(WUPPopup.ShowCases.always);
             resolve();
@@ -316,7 +316,7 @@ export default class WUPPopupElement<
   #attach?: () => ReturnType<typeof popupListen>; // func to use alternative target
   /** Called after gotReady() and $show() (to reinit according to options) */
   protected init(): void {
-    this.dispose(); // remove previously added events
+    this.disposeListener(); // remove previously added events
 
     if (this.#attach) {
       this.#listenRefs = this.#attach();
@@ -324,7 +324,7 @@ export default class WUPPopupElement<
       this._opts.target = this.#defineTarget();
 
       if (!this._opts.showCase /* always */) {
-        this.goShow(WUPPopup.ShowCases.always);
+        this.goShow(WUPPopup.ShowCases.always); // todo case when we don't need to fire goShow
         return;
       }
 
@@ -842,11 +842,16 @@ export default class WUPPopupElement<
     super.gotRemoved();
   }
 
-  protected override dispose(): void {
-    super.dispose();
+  /** Call when need to reinit */
+  protected disposeListener(): void {
     // possible on reinit when need to rebound events
     this.#listenRefs?.stopListen();
     this.#listenRefs = undefined;
+  }
+
+  protected override dispose(): void {
+    super.dispose();
+    this.disposeListener();
   }
 }
 
