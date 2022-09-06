@@ -58,7 +58,9 @@ declare global {
   namespace WUPBaseCombo {
     interface ValidationMap extends Omit<WUPText.ValidationMap, "min" | "max" | "email"> {}
     interface EventMap extends WUPText.EventMap {
+      /** Fires after popup-menu is shown (after animation finishes) */
       $showMenu: Event;
+      /** Fires after popup is hidden (after animation finishes) */
       $hideMenu: Event;
     }
     interface Defaults<T = string> extends WUPBaseComboIn.GenDef<T> {}
@@ -140,9 +142,9 @@ export default abstract class WUPBaseComboControl<
   }
 
   /** Show popup-menu
-   * @returns Promise resolved when popup starts opening */
+   * @returns Promise resolved resolved by animation time */
   async $showMenu(): Promise<void> {
-    await this.goShowMenu(ShowCases.onManualCall);
+    await this.goShowMenu(ShowCases.onManualCall, null, true);
   }
 
   /** Reference to popupMenu */
@@ -189,6 +191,9 @@ export default abstract class WUPBaseComboControl<
           return this.goShowMenu(s === PopupShowCases.onClick ? ShowCases.onClick : ShowCases.onFocus, e);
         },
         (s, e) => {
+          if (s === WUPPopup.HideCases.onManuallCall) {
+            return true;
+          }
           if (s !== WUPPopup.HideCases.onPopupClick) {
             return this.goHideMenu(
               s === WUPPopup.HideCases.onFocusOut || s === WUPPopup.HideCases.onOutsideClick
@@ -210,7 +215,11 @@ export default abstract class WUPBaseComboControl<
   protected abstract valueToInput(v: ValueType | undefined): string | Promise<string>;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected async goShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | null): Promise<WUPPopupElement | null> {
+  protected async goShowMenu(
+    showCase: ShowCases,
+    e?: MouseEvent | FocusEvent | null,
+    isNeedWait?: boolean
+  ): Promise<WUPPopupElement | null> {
     if (this.$isReadOnly) {
       return null;
     }
@@ -265,10 +274,11 @@ export default abstract class WUPBaseComboControl<
         return null;
       }
       this.appendChild(p); // WARN: it will show onInit
-    } else {
-      this.$refPopup.$show(); // WARN: it's important don't wait for animation to assign onShow events fast
+      this.$refPopup.addEventListener("$willShow", (ev) => ev.preventDefault(), { once: true }); // otherwise popup shows by init and impossible to wait for result (only via event)
     }
+    const r = this.$refPopup.$show();
     this.#popupRefs!.show(WUPPopup.ShowCases.always); // call for ref-listener to apply events properly
+    isNeedWait && (await r); // WARN: it's important don't wait for animation to assign onShow events fast
 
     this.setAttribute("opened", "");
     this.$refInput.setAttribute("aria-expanded", true);
@@ -433,6 +443,3 @@ export default abstract class WUPBaseComboControl<
 }
 
 // todo $showMenu doesn't work if notFocused
-
-// todo normalize show/hide. Popup returns finished process but $showMenu returns started-process (before animation end)
-// todo need showStart/hideStart events
