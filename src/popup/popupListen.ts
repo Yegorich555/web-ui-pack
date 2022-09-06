@@ -63,19 +63,24 @@ export default function popupListen(
     if (openedEl || show._isDoing) {
       return;
     }
-    try {
-      show._isDoing = true;
-      openedEl = await onShow(showCase, e || null);
-    } catch (error) {
-      Promise.reject(error); // handle error from onShow
-    }
-    show._isDoing = false;
+    show._isDoing = true;
+    // eslint-disable-next-line no-async-promise-executor
+    show._isDoing = new Promise<void>(async (res, rej) => {
+      try {
+        openedEl = await onShow(showCase, e || null);
+        res();
+      } catch (err) {
+        rej(err);
+      }
+    }).finally(() => (show._isDoing = false));
+    await show._isDoing;
     // timeout required to avoid immediate hide by bubbling events to root
     openedEl && setTimeout(() => openedEl && onShowCallbacks.forEach((f) => onHideCallbacks.push(f())));
   }
-  show._isDoing = false; // required to prevent infinite-calling from parent
+  show._isDoing = false as Promise<void> | boolean; // required to prevent infinite-calling from parent
 
   async function hide(hideCase: WUPPopup.HideCases, e?: MouseEvent | FocusEvent | null): Promise<void> {
+    show._isDoing && (await show._isDoing);
     if (!openedEl || hide._isDoing) {
       return;
     }

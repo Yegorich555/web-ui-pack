@@ -17,6 +17,22 @@ initTestBaseControl({
   onInit: (e) => {
     el = e;
     el.$options.items = getItems();
+
+    const height = 50;
+    const width = 100;
+    const x = 140;
+    const y = 100;
+    jest.spyOn(el, "getBoundingClientRect").mockReturnValue({
+      x,
+      left: x,
+      y,
+      top: y,
+      bottom: y + height,
+      right: x + width,
+      height,
+      width,
+      toJSON: () => "",
+    });
   },
 });
 
@@ -48,25 +64,22 @@ describe("control.select", () => {
     expect(el.$isOpen).toBe(true);
     expect(el.$refPopup).toBeDefined();
     await h.wait();
-    await h.wait(1);
-    await h.wait(1);
     expect(onHide).toBeCalledTimes(0);
     expect(onShow).toBeCalledTimes(1);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
       `"<ul id=\\"txt2\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt3\\">Donny</li><li role=\\"option\\" aria-selected=\\"true\\" id=\\"txt4\\">Mikky</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt5\\">Leo</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt6\\">Splinter</li></ul>"`
     );
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-select opened=\\"\\"><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" role=\\"combobox\\" aria-haspopup=\\"listbox\\" aria-expanded=\\"true\\" autocomplete=\\"off\\" aria-autocomplete=\\"list\\" aria-owns=\\"txt2\\" aria-controls=\\"txt2\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label><wup-popup menu=\\"\\" style=\\"display: none;\\"><ul id=\\"txt2\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt3\\">Donny</li><li role=\\"option\\" aria-selected=\\"true\\" id=\\"txt4\\">Mikky</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt5\\">Leo</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt6\\">Splinter</li></ul></wup-popup></wup-select>"`
+      `"<wup-select opened=\\"\\"><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" role=\\"combobox\\" aria-haspopup=\\"listbox\\" aria-expanded=\\"true\\" autocomplete=\\"off\\" aria-autocomplete=\\"list\\" aria-owns=\\"txt2\\" aria-controls=\\"txt2\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label><wup-popup menu=\\"\\" style=\\"min-width: 100px;\\"><ul id=\\"txt2\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt3\\">Donny</li><li role=\\"option\\" aria-selected=\\"true\\" id=\\"txt4\\">Mikky</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt5\\">Leo</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt6\\">Splinter</li></ul></wup-popup></wup-select>"`
     );
 
     // closing by Esc
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
     await h.wait();
-    await h.wait(1);
     expect(el.$isOpen).toBe(false);
     expect(el.$refPopup).toBeDefined(); // disposed only by focus out
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-select><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" role=\\"combobox\\" aria-haspopup=\\"listbox\\" aria-expanded=\\"false\\" autocomplete=\\"off\\" aria-autocomplete=\\"list\\" aria-owns=\\"txt2\\" aria-controls=\\"txt2\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label><wup-popup menu=\\"\\" style=\\"\\"><ul id=\\"txt2\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt3\\">Donny</li><li role=\\"option\\" aria-selected=\\"true\\" id=\\"txt4\\">Mikky</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt5\\">Leo</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt6\\">Splinter</li></ul></wup-popup></wup-select>"`
+      `"<wup-select><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" role=\\"combobox\\" aria-haspopup=\\"listbox\\" aria-expanded=\\"false\\" autocomplete=\\"off\\" aria-autocomplete=\\"list\\" aria-owns=\\"txt2\\" aria-controls=\\"txt2\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label><wup-popup menu=\\"\\" style=\\"min-width: 100px;\\"><ul id=\\"txt2\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt3\\">Donny</li><li role=\\"option\\" aria-selected=\\"true\\" id=\\"txt4\\">Mikky</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt5\\">Leo</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt6\\">Splinter</li></ul></wup-popup></wup-select>"`
     );
     expect(onHide).toBeCalledTimes(1);
     expect(onShow).toBeCalledTimes(1);
@@ -75,7 +88,6 @@ describe("control.select", () => {
     jest.clearAllMocks();
     el.$showMenu();
     await h.wait();
-    await h.wait(1);
     expect(el.$isOpen).toBe(true);
     expect(onHide).toBeCalledTimes(0);
     expect(onShow).toBeCalledTimes(1);
@@ -117,15 +129,11 @@ describe("control.select", () => {
     // open by click control
     el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
-    await h.wait();
-    await h.wait();
     expect(document.activeElement).toBe(el.$refInput);
     expect(el.$isOpen).toBe(true);
 
     // hide by click control again
     el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    await h.wait();
-    await h.wait();
     await h.wait();
     expect(document.activeElement).toBe(el.$refInput);
     expect(el.$isOpen).toBe(false);
@@ -151,8 +159,6 @@ describe("control.select", () => {
     // no opening when readonly
     el.$options.readOnly = true;
     el.$showMenu();
-    await h.wait();
-    await h.wait();
     await h.wait();
     expect(el.$isOpen).toBe(false);
     expect(el.$refPopup).not.toBeDefined();
@@ -195,7 +201,6 @@ describe("control.select", () => {
     // not closing when click on input without readonly (to allow user edit input value without menu)
     el.$showMenu();
     await h.wait();
-    await h.wait();
     expect(el.$isOpen).toBe(true);
     expect(el.$isFocused).toBe(true);
     expect(el.$refInput.value).toBeTruthy();
@@ -224,7 +229,6 @@ describe("control.select", () => {
     expect(document.activeElement).toBe(el.$refInput);
     document.activeElement.blur();
     await h.wait();
-    await h.wait(1);
     expect(el.$isOpen).toBe(false);
     expect(el.$refPopup).not.toBeDefined();
 
@@ -239,24 +243,24 @@ describe("control.select", () => {
     expect(el.$isOpen).toBe(false);
     el.$showMenu();
     await h.wait();
-    // await h.wait(1);
     expect(el.$isOpen).toBe(true);
 
     el.$hideMenu();
     await h.wait();
 
     // checking if sync-call works as expected
-    el.testMe = true;
     el.$showMenu();
     el.$hideMenu();
-    await h.wait(500);
-    await h.wait(500);
+    await h.wait();
     expect(el.$isOpen).toBe(false);
     expect(el.getAttribute("opened")).toBeFalsy();
     el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     expect(el.$isOpen).toBe(true);
+    el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     el.blur();
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
 
     // case: popups are visible and not closed (if change focus by Tab)
     const orig = window.getComputedStyle;
@@ -275,12 +279,10 @@ describe("control.select", () => {
     expect(el.$isFocused).toBe(false);
     el.focus();
     await h.wait(1); // start animation
-    await h.wait(1);
     expect(el.$isOpen).toBe(true);
     expect(goShowMenu).toBeCalled();
 
     el2.focus();
-    await h.wait();
     await h.wait();
     expect(el2.$isOpen).toBe(true);
     expect(el.$isOpen).toBe(false);
@@ -292,7 +294,6 @@ describe("control.select", () => {
     expect(el2.$refPopup).toBeDefined();
     el2.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
-    await h.wait();
     expect(el2.$isOpen).toBe(true);
     expect(el.$isOpen).toBe(false);
   });
@@ -303,7 +304,7 @@ describe("control.select", () => {
     el.focus();
     await h.wait();
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup menu=\\"\\"><ul id=\\"txt2\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt3\\">Donny</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt4\\">Mikky</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt5\\">Leo</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt6\\">Splinter</li></ul></wup-popup>"`
+      `"<wup-popup menu=\\"\\" style=\\"min-width: 100px;\\"><ul id=\\"txt2\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt3\\">Donny</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt4\\">Mikky</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt5\\">Leo</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt6\\">Splinter</li></ul></wup-popup>"`
     );
 
     const setItems = async (items) => {
@@ -317,12 +318,12 @@ describe("control.select", () => {
 
     await setItems([]);
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup menu=\\"\\"><ul id=\\"txt7\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-disabled=\\"true\\" aria-selected=\\"false\\">No Items</li></ul></wup-popup>"`
+      `"<wup-popup menu=\\"\\" style=\\"min-width: 100px;\\"><ul id=\\"txt7\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-disabled=\\"true\\" aria-selected=\\"false\\">No Items</li></ul></wup-popup>"`
     );
 
     await setItems(() => Promise.resolve(getItems()));
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup menu=\\"\\"><ul id=\\"txt8\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt9\\">Donny</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt10\\">Mikky</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt11\\">Leo</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt12\\">Splinter</li></ul></wup-popup>"`
+      `"<wup-popup menu=\\"\\" style=\\"min-width: 100px;\\"><ul id=\\"txt8\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt9\\">Donny</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt10\\">Mikky</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt11\\">Leo</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt12\\">Splinter</li></ul></wup-popup>"`
     );
 
     // menu navigation by arrowKeys
@@ -372,7 +373,6 @@ describe("control.select", () => {
     // open again and pressEsc to close menu
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
     await h.wait();
-    await h.wait();
     expect(el.$isOpen).toBe(true);
     expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[3]);
     expect(el.querySelector("[aria-selected='true']")?.id).toBe(menuIds[2]);
@@ -392,7 +392,6 @@ describe("control.select", () => {
     el.$value = getItems()[3].value;
     await h.wait();
     el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    await h.wait();
     await h.wait();
     expect(el.$isOpen).toBe(true);
     expect(el.querySelector("[aria-selected='true']")?.id).toBe(menuIds[3]);

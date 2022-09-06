@@ -607,7 +607,7 @@ exports[`control.select validations $options.validationShowAll 1`] = `
     error=""
     id="txt2"
     role="alert"
-    style="display: none;"
+    style="max-width: 100px;"
   >
     <span
       class="wup-hidden"
@@ -683,7 +683,7 @@ exports[`control.select validations $options.validationShowAll 3`] = `
     error=""
     id="txt5"
     role="alert"
-    style="display: none;"
+    style="max-width: 100px;"
   >
     <span
       class="wup-hidden"
@@ -757,22 +757,6 @@ exports[`control.select validations options.validationCase 2`] = `
     />
   </label>
   <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt7"
-    style="display: none;"
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      This field is required
-    </span>
-  </wup-popup>
-  <wup-popup
     menu=""
   >
     <ul
@@ -809,6 +793,22 @@ exports[`control.select validations options.validationCase 2`] = `
         Splinter
       </li>
     </ul>
+  </wup-popup>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt7"
+    style="max-width: 100px;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      This field is required
+    </span>
   </wup-popup>
 </wup-select>
 `;
@@ -851,7 +851,7 @@ exports[`control.select validations options.validationCase 3`] = `
     aria-live="off"
     error=""
     id="txt13"
-    style="display: none;"
+    style="max-width: 100px;"
   >
     <span
       class="wup-hidden"
@@ -864,6 +864,7 @@ exports[`control.select validations options.validationCase 3`] = `
   </wup-popup>
   <wup-popup
     menu=""
+    style="min-width: 100px;"
   >
     <ul
       aria-label="Items"
@@ -913,11 +914,11 @@ exports[`control.select validations options.validationCase 4`] = `
     <span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt8"
-        aria-describedby="txt14"
+        aria-controls="txt14"
+        aria-describedby="txt19"
         aria-expanded="false"
         aria-haspopup="listbox"
-        aria-owns="txt8"
+        aria-owns="txt14"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -939,9 +940,9 @@ exports[`control.select validations options.validationCase 4`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt14"
+    id="txt19"
     role="alert"
-    style="display: none;"
+    style="max-width: 100px;"
   >
     <span
       class="wup-hidden"

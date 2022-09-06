@@ -336,11 +336,12 @@ export function useFakeAnimation() {
 
 /** Wait for pointed time via Promise + jest.advanceTimersByTime */
 export async function wait(t = 1000) {
-  await Promise.resolve();
-  jest.advanceTimersByTime(t / 2);
-  await Promise.resolve();
-  jest.advanceTimersByTime(t / 2);
-  await Promise.resolve();
+  const cnt = 5;
+  for (let i = 0; i < cnt; ++i) {
+    await Promise.resolve();
+    jest.advanceTimersByTime(t / cnt);
+    await Promise.resolve();
+  }
 }
 
 /** Simulate user type text */

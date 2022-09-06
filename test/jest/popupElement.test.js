@@ -286,14 +286,13 @@ describe("popupElement", () => {
     expect(a.$isOpen).toBeFalsy();
 
     trg.dispatchEvent(new Event("mouseenter"));
-    jest.advanceTimersByTime(a.$options.hoverShowTimeout); // event listener has timeout
-    await Promise.resolve(); // wait for promise onShow is async
+    await h.wait(a.$options.hoverShowTimeout); // event listener has timeout
     expect(spyShow).toBeCalledTimes(1);
     expect(a.$isOpen).toBeTruthy();
     expect(spyShow).lastCalledWith(1);
 
     trg.dispatchEvent(new Event("mouseleave"));
-    jest.advanceTimersByTime(a.$options.hoverHideTimeout); // event listener has timeout
+    await h.wait(a.$options.hoverHideTimeout); // event listener has timeout
     expect(a.$isOpen).toBeFalsy();
     expect(spyHide.mock.calls[spyHide.mock.calls.length - 1][0]).toBe(1);
 
@@ -415,6 +414,7 @@ describe("popupElement", () => {
     await h.wait();
     expect(a.$isOpen).toBeTruthy(); // click on input inside
 
+    await h.wait();
     e = new Event("click", { bubbles: true });
     a.dispatchEvent(e);
     await h.wait();
@@ -425,6 +425,7 @@ describe("popupElement", () => {
     await h.wait();
     expect(a.$isOpen).toBeTruthy(); // click on input2 inside
 
+    await h.wait();
     e = new Event("click", { bubbles: true });
     document.body.dispatchEvent(e);
     await h.wait();
@@ -1423,8 +1424,7 @@ describe("popupElement", () => {
 
     expect(popup).toBeNull();
     trg.click(); // to show
-    jest.advanceTimersByTime(100); // popup has click-timeouts
-    await Promise.resolve(); // wait for promise onShow is async
+    await h.wait(100);
     expect(popup).toBeDefined();
     expect(popup.$options.showCase).toBe(0b111111);
     expect(popup.$options.target).toBe(trg);
@@ -1438,8 +1438,7 @@ describe("popupElement", () => {
     expect(spyHide).toBeCalledTimes(0);
 
     trg.click(); // to hide
-    jest.advanceTimersByTime(1000); // popup has click-timeouts and animation timeouts
-    await Promise.resolve(); // wait for promise onHide is async
+    await h.wait();
     expect(cnt).toBe(1);
     expect(popup.$isOpen).toBeFalsy();
     expect(popup.isConnected).toBeFalsy();
@@ -1447,11 +1446,9 @@ describe("popupElement", () => {
     expect(spyShow).toBeCalledTimes(1);
     expect(spyHide).toBeCalledTimes(1);
 
-    jest.advanceTimersByTime(1000); // popup has click-timeouts
-    await Promise.resolve(); // wait for promise onShow is async
+    await h.wait();
     trg.click(); // to show again
-    jest.advanceTimersByTime(1000); // popup has click-timeouts
-    await Promise.resolve(); // wait for promise onShow is async
+    await h.wait();
     expect(popup.$isOpen).toBeTruthy();
     expect(popup.isConnected).toBeTruthy();
     expect(cnt).toBe(2);
@@ -1872,7 +1869,7 @@ describe("popupElement", () => {
       { target: trg, showCase: 1 << 2 }, // onClick
       () => {
         ++cnt;
-        throw new Error("TestCaseL Impossible to show");
+        throw new Error("TestCase Impossible to show");
       },
       () => myel.$hide()
     );
