@@ -266,11 +266,13 @@ export default abstract class WUPBaseComboControl<
       i.setAttribute("aria-owns", menuId);
       i.setAttribute("aria-controls", menuId);
 
+      const wasFcs = this.$isFocused;
       await this.renderMenu(p, menuId);
-      // fix case when user waited for loading and moved focus to another
-      if (!this.$isFocused) {
+
+      const fcs = this.$isFocused;
+      if (!fcs && wasFcs) {
         this.#isOpen = false;
-        this.removePopup();
+        this.removePopup(); // fix case when user waited for loading and moved focus to another
         return null;
       }
       this.appendChild(p); // WARN: it will show onInit
@@ -441,5 +443,3 @@ export default abstract class WUPBaseComboControl<
     super.gotRemoved();
   }
 }
-
-// todo $showMenu doesn't work if notFocused

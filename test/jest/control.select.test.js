@@ -232,6 +232,25 @@ describe("control.select", () => {
     el.$hideMenu();
     await h.wait();
 
+    // checking when not-focused
+    el.$options.readOnly = false;
+    document.activeElement.blur();
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    el.$showMenu();
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+
+    el.$hideMenu();
+    await h.wait();
+
+    // checking if sync-call works as expected
+    el.$showMenu();
+    el.$hideMenu();
+    await h.wait(500);
+    await h.wait(500);
+    expect(el.$isOpen).toBe(false);
+
     // case: popups are visible and not closed (if change focus by Tab)
     const orig = window.getComputedStyle;
     jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
@@ -244,7 +263,6 @@ describe("control.select", () => {
 
     /** @type WUPSelectControl */
     const el2 = document.body.appendChild(document.createElement(el.tagName));
-    el.$options.readOnly = false;
     await h.wait();
     const goShowMenu = jest.spyOn(el, "goShowMenu");
     expect(el.$isFocused).toBe(false);
