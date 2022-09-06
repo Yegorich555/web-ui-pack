@@ -71,7 +71,7 @@ export default function popupListen(
     }
     show._isDoing = false;
     // timeout required to avoid immediate hide by bubbling events to root
-    openedEl && setTimeout(() => onShowCallbacks.forEach((f) => onHideCallbacks.push(f())));
+    openedEl && setTimeout(() => openedEl && onShowCallbacks.forEach((f) => onHideCallbacks.push(f())));
   }
   show._isDoing = false; // required to prevent infinite-calling from parent
 

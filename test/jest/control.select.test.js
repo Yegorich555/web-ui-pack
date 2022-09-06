@@ -239,6 +239,7 @@ describe("control.select", () => {
     expect(el.$isOpen).toBe(false);
     el.$showMenu();
     await h.wait();
+    // await h.wait(1);
     expect(el.$isOpen).toBe(true);
 
     el.$hideMenu();
@@ -249,7 +250,15 @@ describe("control.select", () => {
     el.$hideMenu();
     await h.wait(500);
     await h.wait(500);
-    expect(el.$isOpen).toBe(false);
+    expect(el.$isOpen).toBe(false); // todo somehow it doesn't work in reality
+    el.$showMenu();
+    el.$hideMenu();
+    el.$showMenu();
+    await h.wait(500);
+    await h.wait(500);
+    expect(el.$isOpen).toBe(true);
+    el.$hideMenu();
+    await h.wait();
 
     // case: popups are visible and not closed (if change focus by Tab)
     const orig = window.getComputedStyle;
