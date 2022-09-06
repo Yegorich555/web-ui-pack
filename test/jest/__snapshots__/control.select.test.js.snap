@@ -727,7 +727,6 @@ exports[`control.select validations options.validationCase 1`] = `
 exports[`control.select validations options.validationCase 2`] = `
 <wup-select
   invalid=""
-  opened=""
 >
   <label
     for="txt1"
@@ -737,7 +736,7 @@ exports[`control.select validations options.validationCase 2`] = `
         aria-autocomplete="list"
         aria-controls="txt2"
         aria-describedby="txt7"
-        aria-expanded="true"
+        aria-expanded="false"
         aria-haspopup="listbox"
         aria-owns="txt2"
         aria-required="true"

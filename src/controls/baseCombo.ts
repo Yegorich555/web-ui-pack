@@ -278,14 +278,15 @@ export default abstract class WUPBaseComboControl<
       this.appendChild(p); // WARN: it will show onInit
       this.$refPopup.addEventListener("$willShow", (ev) => ev.preventDefault(), { once: true }); // otherwise popup shows by init and impossible to wait for result (only via event)
     }
-    const r = this.$refPopup.$show();
+    if (!this.#isOpen) {
+      return null; // possible when user calls show & hide sync
+    }
+    const r = this.$refPopup.$show().finally(() => this.fireEvent("$showMenu", { cancelable: false }));
+    this.setAttribute("opened", ""); // possible when user calls show & hide sync
+    this.$refInput.setAttribute("aria-expanded", true);
     this.#popupRefs!.show(WUPPopup.ShowCases.always); // call for ref-listener to apply events properly
     isNeedWait && (await r); // WARN: it's important don't wait for animation to assign onShow events fast
 
-    this.setAttribute("opened", "");
-    this.$refInput.setAttribute("aria-expanded", true);
-
-    setTimeout(() => this.fireEvent("$showMenu", { cancelable: false }));
     return this.$refPopup;
   }
 

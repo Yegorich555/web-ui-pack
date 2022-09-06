@@ -246,19 +246,17 @@ describe("control.select", () => {
     await h.wait();
 
     // checking if sync-call works as expected
+    el.testMe = true;
     el.$showMenu();
     el.$hideMenu();
     await h.wait(500);
     await h.wait(500);
-    expect(el.$isOpen).toBe(false); // todo somehow it doesn't work in reality
-    el.$showMenu();
-    el.$hideMenu();
-    el.$showMenu();
-    await h.wait(500);
-    await h.wait(500);
-    expect(el.$isOpen).toBe(true);
-    el.$hideMenu();
+    expect(el.$isOpen).toBe(false);
+    expect(el.getAttribute("opened")).toBeFalsy();
+    el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
+    expect(el.$isOpen).toBe(true);
+    el.blur();
 
     // case: popups are visible and not closed (if change focus by Tab)
     const orig = window.getComputedStyle;
@@ -278,8 +276,8 @@ describe("control.select", () => {
     el.focus();
     await h.wait(1); // start animation
     await h.wait(1);
-    expect(goShowMenu).toBeCalled();
     expect(el.$isOpen).toBe(true);
+    expect(goShowMenu).toBeCalled();
 
     el2.focus();
     await h.wait();
