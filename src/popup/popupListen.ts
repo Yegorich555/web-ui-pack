@@ -136,7 +136,7 @@ export default function popupListen(
       const r = onEvent(
         t,
         "mousemove",
-        (e) => (wasMouseMove = Math.max(Math.abs(e.movementX), Math.abs(e.movementY)) > 3), // it's required otherwise browser can provide move with 0 0 changes
+        (e) => (wasMouseMove = e.movementX !== 0 || e.movementY !== 0), // it's required otherwise browser can provide move with 0 0 changes
         { once: true, passive: true }
       );
       document.addEventListener("mouseup", () => r(), { once: true, passive: true });

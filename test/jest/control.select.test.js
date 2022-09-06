@@ -265,7 +265,6 @@ describe("control.select", () => {
     expect(el2.$isOpen).toBe(false);
     expect(el2.$isFocused).toBe(true);
     expect(el2.$refPopup).toBeDefined();
-    el2.testMe = true;
     el2.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     await h.wait();
