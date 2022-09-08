@@ -2,12 +2,12 @@ import { WUP } from "../baseElement";
 import nestedProperty from "../helpers/nestedProperty";
 import onEvent from "../helpers/onEvent";
 import promiseWait from "../helpers/promiseWait";
-// eslint-disable-next-line import/named
 import WUPPopupElement from "../popup/popupElement";
 import WUPSpinElement from "../spinElement";
 import { WUPcssIcon } from "../styles";
 import WUPBaseComboControl, { HideCases, ShowCases, WUPBaseComboIn } from "./baseCombo";
 
+/* c8 ignore next */
 !WUPSpinElement && console.error("!"); // It's required otherwise import is ignored by webpack
 
 const tagName = "wup-select";
