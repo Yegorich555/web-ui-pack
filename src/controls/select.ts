@@ -183,10 +183,6 @@ export default class WUPSelectControl<
     return this.$initValue;
   }
 
-  protected override renderControl(): void {
-    super.renderControl();
-  }
-
   /** Called on every spin-render */
   renderSpin(): WUPSpinElement {
     const spin = document.createElement("wup-spin");

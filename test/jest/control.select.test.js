@@ -203,7 +203,7 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isOpen).toBe(true);
     expect(el.$isFocused).toBe(true);
-    expect(el.$refInput.value).toBe(true);
+    expect(el.$refInput.value).toBeTruthy();
     el.$refInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     expect(el.$isOpen).toBe(true);
@@ -253,7 +253,7 @@ describe("control.select", () => {
     el.$hideMenu();
     await h.wait();
     expect(el.$isOpen).toBe(false);
-    expect(el.getAttribute("opened")).toBe(false);
+    expect(el.getAttribute("opened")).toBeFalsy();
     el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     expect(el.$isOpen).toBe(true);
@@ -450,7 +450,7 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isOpen).toBe(false);
     expect(el.$value).toBe(was); // previous value because no selected according to filter
-    expect(el.$refInput.value).toBe("Dona Rose"); // todo fix this case
+    expect(el.$refInput.value).toBe("Dona Rose");
 
     // filter by other words
     el.$value = 10;

@@ -383,12 +383,14 @@ export default abstract class WUPBaseComboControl<
 
     if (e.key === "Escape") {
       e.preventDefault();
-      this.setValue(this.$value);
+      this.setInputValue(this.$value); // reset input to currentValue
       await this.goHideMenu(HideCases.OnPressEsc);
     } else if (e.key === "Enter") {
       e.preventDefault();
       if (this.#focusedMenuValue !== undefined) {
         this.selectValue(this.#focusedMenuValue);
+      } else {
+        this.setInputValue(this.$value); // reset input to currentValue
       }
       await this.goHideMenu(HideCases.OnPressEnter);
     }
