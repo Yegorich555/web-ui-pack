@@ -532,7 +532,7 @@ export default class WUPPopupElement<
       return false;
     }
 
-    this.#state?.frameId && window.cancelAnimationFrame(this.#state?.frameId);
+    this.#state && window.cancelAnimationFrame(this.#state.frameId);
     this.buildState();
     const wasClosed = !this.#isOpen;
     this.#isOpen = true;
@@ -593,7 +593,7 @@ export default class WUPPopupElement<
       this.style.display = "";
       this.removeAttribute("hide");
       this.#isOpen = false;
-      this.#state?.frameId && window.cancelAnimationFrame(this.#state.frameId);
+      this.#state && window.cancelAnimationFrame(this.#state.frameId);
       this.#state = undefined;
 
       if (this.#refArrow) {

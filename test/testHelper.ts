@@ -306,6 +306,7 @@ export function spyEventListeners(otherElements: Array<any>) {
   return Object.assign(spy, { check });
 }
 
+/** Mock window.requestAnimationFrame */
 export function useFakeAnimation() {
   const step = 1000 / 60; // simulate 60Hz frequency
   jest.useFakeTimers();

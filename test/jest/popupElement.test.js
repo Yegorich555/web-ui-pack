@@ -695,7 +695,7 @@ describe("popupElement", () => {
     const a = document.createElement(el.tagName);
     a.$options.showCase = 0;
     document.body.append(a);
-    expect(a.$isReady).toBeFalsy();
+    expect(a.$isReady).toBe(false);
     expect(a.$hide).not.toThrow();
     jest.advanceTimersByTime(1);
 
@@ -708,7 +708,7 @@ describe("popupElement", () => {
     a.$show();
     document.body.append(a);
     await h.wait();
-    expect(a.$isOpen).toBeTruthy();
+    expect(a.$isOpen).toBe(true);
 
     /** @type typeof el */
     const b = document.createElement(el.tagName);
@@ -718,13 +718,18 @@ describe("popupElement", () => {
     jest.advanceTimersByTime(1);
     trg.click();
     await h.wait();
-    expect(b.$isOpen).toBeFalsy();
+    expect(b.$isOpen).toBe(false);
     trg.click(); // click again (goShow is once => it's restored to previous)
     await h.wait();
-    expect(b.$isOpen).toBeTruthy();
+    expect(b.$isOpen).toBe(true);
 
     expect(() => b.$refresh()).not.toThrow();
     // other cases in test(`options.$target`) and test(`remove`)
+
+    b.$hide();
+    await h.wait();
+    b.goHide(); // just for coverage
+    expect(b.$isOpen).toBe(false);
   });
 
   test("$options.animation", async () => {
@@ -736,7 +741,6 @@ describe("popupElement", () => {
 
     el.appendChild(document.createElement("div"));
     el.appendChild(document.createElement("div"));
-    // todo reuse logic with frames to helper
     let i = 0;
     const animateFrames = [];
     const nextFrame = () => {
