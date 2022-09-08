@@ -499,13 +499,3 @@ export default class WUPSelectControl<
 customElements.define(tagName, WUPSelectControl);
 
 // todo need option to allowUser create new value
-
-// todo in the following example somehow popup opens almost completely but timer 1 sec
-// (() => {
-//   setTimeout(() => {
-//     const el = document.querySelector("wup-select");
-//     el.focus();
-//     setTimeout(() => el.nextElementSibling.focus(), 1);
-//     setTimeout(() => console.warn(el?.$isOpen), 500);
-//   }, 1000);
-// })();

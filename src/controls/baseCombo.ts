@@ -444,3 +444,5 @@ export default abstract class WUPBaseComboControl<
     super.gotRemoved();
   }
 }
+
+// todo mouseClick filter only by LeftButton

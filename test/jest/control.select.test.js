@@ -401,7 +401,83 @@ describe("control.select", () => {
   });
 
   test("menu filtering by input", async () => {
-    // todo implement
+    el.$options.items = [
+      { value: 10, text: "Donny" },
+      { value: 20, text: "Dona Rose" },
+      { value: 30, text: "Leo" },
+    ];
+    await h.wait();
+    expect(el.$value).toBeFalsy();
+    el.focus();
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id=\\"txt2\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt3\\">Donny</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt4\\">Dona Rose</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt5\\">Leo</li></ul>"`
+    );
+
+    await h.typeInputText(el.$refInput, "d");
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id=\\"txt2\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt3\\" focused=\\"\\">Donny</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt4\\">Dona Rose</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt5\\" style=\\"display: none;\\">Leo</li></ul>"`
+    );
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    expect(el.$value).toBe(10); // because selected Donny
+    expect(el.$refInput.value).toBe("Donny");
+
+    // ordinary filter: 2 items starts with 'do' ignoring case
+    await h.typeInputText(el.$refInput, "do");
+    expect(el.$refInput.value).toBe("do");
+    expect(el.$isOpen).toBe(true); // open when user opens filter
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
+    await h.wait();
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    expect(el.$value).toBe(20); // because selected DoneRose
+    expect(el.$refInput.value).toBe("Dona Rose");
+
+    // when 'No items' are shown
+    const was = el.$value;
+    await h.typeInputText(el.$refInput, "123");
+    expect(el.$isOpen).toBe(true);
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id=\\"txt2\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt3\\" style=\\"display: none;\\">Donny</li><li role=\\"option\\" aria-selected=\\"true\\" id=\\"txt4\\" style=\\"display: none;\\">Dona Rose</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt5\\" style=\\"display: none;\\">Leo</li><li role=\\"option\\" aria-disabled=\\"true\\" aria-selected=\\"false\\">No Items</li></ul>"`
+    );
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    expect(el.$value).toBe(was); // previous value because no selected according to filter
+    expect(el.$refInput.value).toBe("Dona Rose"); // todo fix this case
+
+    // filter by other words
+    el.$value = 10;
+    await h.wait();
+    expect(el.$refInput.value).toBe("Donny");
+    await h.typeInputText(el.$refInput, "rose"); // filter by second word
+    expect(el.$isOpen).toBe(true);
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
+    await h.wait();
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    expect(el.$value).toBe(was); // previous value because no selected according to filter
+    expect(el.$refInput.value).toBe("Dona Rose");
+
+    // when items are empty
+    el.$options.items = [];
+    await h.wait();
+    el.$refInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.wait();
+    expect(el.$isOpen).toBe(true); // todo issue here: need to show NoItems
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot();
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
   });
 
   test("submit by Enter key", async () => {
