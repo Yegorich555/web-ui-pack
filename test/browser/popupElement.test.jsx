@@ -40,7 +40,7 @@ describe("popupElement", () => {
     await page.click("label");
     await page.waitForTimeout(320); // timeout required because of debounceFilters
     let t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
-    expect(t.isOpened).toBeTruthy();
+    expect(t.isOpened).toBe(true);
     expect(t.gotShow).toBe(1);
     expect(t.gotHide).toBe(0);
     // bug: toMatchInlineSnapshot doesn't work
@@ -50,10 +50,10 @@ describe("popupElement", () => {
     );
     await page.click("label"); // click again should hide
     t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
-    expect(t.isOpened).toBeTruthy(); // because animation-open works
+    expect(t.isOpened).toBe(true); // because animation-open works
     await page.waitForTimeout(310); // wait for animation
     t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
-    expect(t.isOpened).toBeFalsy();
+    expect(t.isOpened).toBe(false);
     expect(t.gotShow).toBe(1);
     expect(t.gotHide).toBe(1);
     expect(t.html).toBe(
@@ -65,11 +65,11 @@ describe("popupElement", () => {
     await page.click("label");
     await page.waitForTimeout(1); // timeout required because of debounceFilters
     t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
-    expect(t.isOpened).toBeTruthy();
+    expect(t.isOpened).toBe(true);
     await page.click("label"); // click again should hide
     t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
     await page.waitForTimeout(1); // timeout required because of debounceFilters
-    expect(t.isOpened).toBeFalsy();
+    expect(t.isOpened).toBe(false);
   });
 
   test("showCase: click & focus", async () => {
@@ -82,7 +82,7 @@ describe("popupElement", () => {
     await page.click("label"); // click on label fires click on input also
     await page.waitForTimeout(301); // timeout required because of animation
     t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
-    expect(t.isOpened).toBeTruthy();
+    expect(t.isOpened).toBe(true);
     expect(t.gotShow).toBe(1);
     expect(t.gotHide).toBe(0);
   });
@@ -92,21 +92,21 @@ describe("popupElement", () => {
     await page.waitForTimeout(1); // timeout required because of debounceFilters
     await page.hover("input");
     let t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
-    expect(t.isOpened).toBeFalsy(); // because of timeout
-    await page.waitForTimeout(212); // hoverShowTimeout is 200 by default
+    expect(t.isOpened).toBe(false); // because of timeout
+    await page.waitForTimeout(220); // hoverShowTimeout is 200 by default
     t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
-    expect(t.isOpened).toBeTruthy();
+    expect(t.isOpened).toBe(true);
 
     await page.hover("span");
     t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
-    expect(t.isOpened).toBeTruthy(); // because of timeout
+    expect(t.isOpened).toBe(true); // because of timeout
     await page.waitForTimeout(500 + 300 + 10); // hoverShowTimeout is 500 by default and hide-animation is 300
     t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
-    expect(t.isOpened).toBeFalsy();
+    expect(t.isOpened).toBe(false);
 
     await page.click("label");
     t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
-    expect(t.isOpened).toBeTruthy();
+    expect(t.isOpened).toBe(true);
   });
 
   test("options.minWidthByTarget/minHeightByTarget", async () => {

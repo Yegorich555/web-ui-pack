@@ -203,7 +203,7 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isOpen).toBe(true);
     expect(el.$isFocused).toBe(true);
-    expect(el.$refInput.value).toBeTruthy();
+    expect(el.$refInput.value).toBe(true);
     el.$refInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     expect(el.$isOpen).toBe(true);
@@ -253,7 +253,7 @@ describe("control.select", () => {
     el.$hideMenu();
     await h.wait();
     expect(el.$isOpen).toBe(false);
-    expect(el.getAttribute("opened")).toBeFalsy();
+    expect(el.getAttribute("opened")).toBe(false);
     el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     expect(el.$isOpen).toBe(true);

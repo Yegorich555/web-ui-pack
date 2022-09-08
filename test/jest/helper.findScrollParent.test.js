@@ -21,14 +21,14 @@ describe("helper.findScrollParent", () => {
     expect(findScrollParent(document.body)).toBeNull();
 
     jest.restoreAllMocks(); // to allow change srollTop for body
-    expect(findScrollParent(el) === document.body).toBeTruthy();
+    expect(findScrollParent(el) === document.body).toBe(true);
 
     document.body.scrollLeft = 2; // cover case when item is scrolled
-    expect(findScrollParent(el) === document.body).toBeTruthy();
+    expect(findScrollParent(el) === document.body).toBe(true);
     document.body.scrollLeft = 0;
 
     jest.spyOn(document.body, "scrollTop", "set").mockImplementation(() => 0);
-    expect(findScrollParent(el) === document.body).toBeTruthy(); // because scrollLeft possible
+    expect(findScrollParent(el) === document.body).toBe(true); // because scrollLeft possible
   });
 
   test("helper.findScrollParentAll", () => {

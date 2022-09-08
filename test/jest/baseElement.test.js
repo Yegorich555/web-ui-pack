@@ -97,7 +97,7 @@ describe("baseElement", () => {
 
     const ev = el.fireEvent("click", { bubbles: true });
     expect(ev).toBeInstanceOf(Event);
-    expect(ev.bubbles).toBeTruthy();
+    expect(ev.bubbles).toBe(true);
     expect(fn).toHaveBeenCalledTimes(1);
     expect(fn.mock.calls[0][0]).toBe(ev);
   });
@@ -144,16 +144,16 @@ describe("baseElement", () => {
     };
     el.appendEvent(el, "click", setPassive, { passive: true, once: true });
     el.dispatchEvent(new Event("click", { cancelable: true }));
-    expect(isPassive).toBeTruthy();
+    expect(isPassive).toBe(true);
 
     el.appendEvent(el, "click", setPassive, { passive: false, once: true });
     el.dispatchEvent(new Event("click", { cancelable: true }));
-    expect(isPassive).toBeFalsy();
+    expect(isPassive).toBe(false);
 
     // passive is true by default
     el.appendEvent(el, "click", setPassive, { once: true });
     el.dispatchEvent(new Event("click", { cancelable: true }));
-    expect(isPassive).toBeTruthy();
+    expect(isPassive).toBe(true);
   });
 
   test("dispose", () => {
@@ -190,10 +190,10 @@ describe("baseElement", () => {
 
   test("includes", () => {
     const span = el.appendChild(document.createElement("span"));
-    expect(el.includes(document)).toBeFalsy();
+    expect(el.includes(document)).toBe(false);
     expect(() => el.includes(null)).not.toThrow();
-    expect(el.includes(null)).toBeFalsy();
-    expect(el.includes(span)).toBeTruthy();
+    expect(el.includes(null)).toBe(false);
+    expect(el.includes(span)).toBe(true);
   });
 
   test("overriden dispatchEvent", () => {
@@ -208,7 +208,7 @@ describe("baseElement", () => {
 
     fn.mockClear();
     expect(() => el.dispatchEvent("click", { bubbles: true })).not.toThrow();
-    expect(fn.mock.calls[0][0].bubbles).toBeTruthy();
+    expect(fn.mock.calls[0][0].bubbles).toBe(true);
   });
 
   test("static.$uniqueId", () => {
@@ -241,7 +241,7 @@ describe("baseElement", () => {
     const tst = document.body.appendChild(document.createElement("test-opt-el"));
     const fn = jest.spyOn(tst, "gotOptionsChanged");
     jest.advanceTimersToNextTimer();
-    expect(tst.$isReady).toBeTruthy();
+    expect(tst.$isReady).toBe(true);
 
     tst.$options = {};
     const old = tst.$options;
@@ -271,11 +271,11 @@ describe("baseElement", () => {
     expect(() => (tst.$options = null)).toThrow();
 
     // test when no observedOptions
-    expect(el.$isReady).toBeTruthy();
+    expect(el.$isReady).toBe(true);
     el.$options = { v: 1 };
 
     // eslint-disable-next-line no-self-compare
-    expect(el.$options === el.$options).toBeTruthy(); // just for coverage when observedOptions is empty
+    expect(el.$options === el.$options).toBe(true); // just for coverage when observedOptions is empty
     class T2 extends WUPBaseElement {
       $options = {};
       static get observedOptions() {
@@ -364,11 +364,11 @@ describe("baseElement", () => {
 
     el.setAttr("disabled", true, true);
     expect(el.getAttribute("disabled")).toBe("");
-    expect(el.getBoolAttr("disabled")).toBeTruthy();
+    expect(el.getBoolAttr("disabled")).toBe(true);
 
     el.setAttr("disabled", true, false);
     expect(el.getAttribute("disabled")).toBe("true");
-    expect(el.getBoolAttr("disabled")).toBeTruthy();
+    expect(el.getBoolAttr("disabled")).toBe(true);
 
     el.setAttr("disabled", false);
     expect(el.getAttribute("disabled")).toBeNull();

@@ -69,8 +69,8 @@ afterEach(() => {
 
 describe("helper.isIntoView", () => {
   test("no scroll parents", () => {
-    expect(bodySize.width > 0).toBeTruthy();
-    expect(bodySize.height > 0).toBeTruthy();
+    expect(bodySize.width > 0).toBe(true);
+    expect(bodySize.height > 0).toBe(true);
     moveTo(0, 0);
     expect(isIntoView(el)).toEqual({
       hidden: false,

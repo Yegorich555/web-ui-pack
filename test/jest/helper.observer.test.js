@@ -358,7 +358,7 @@ describe("helper.observer", () => {
     // date (valueof and ref) is changed
     const nextDateVal = new Date(dtVal);
     obj.dateVal = nextDateVal;
-    expect(obj.dateVal !== nextDateVal).toBeTruthy(); // because Date converts into observed
+    expect(obj.dateVal !== nextDateVal).toBe(true); // because Date converts into observed
     expect(obj.dateVal.valueOf()).toBe(dtVal);
     expect(fn).toBeCalledTimes(1);
     expect(fn).lastCalledWith({ prev: prevDateVal, next: obj.dateVal, target: obj, prop: "dateVal" });
@@ -391,7 +391,7 @@ describe("helper.observer", () => {
     observer.onPropChanged(set, fn);
 
     expect(() => set.add("s1")).not.toThrow();
-    expect(set.has("s1")).toBeTruthy();
+    expect(set.has("s1")).toBe(true);
     expect(fn).toBeCalledTimes(1);
     // watch jest issue with Set/Map equality: https://github.com/facebook/jest/issues/7975
     expect(fn).toBeCalledWith(expect.objectContaining({ prev: 0, next: 1, prop: "size" }));
@@ -404,7 +404,7 @@ describe("helper.observer", () => {
 
     fn.mockClear();
     expect(set.clear).not.toThrow();
-    expect(set.has("s1")).toBeFalsy();
+    expect(set.has("s1")).toBe(false);
     expect(fn).toBeCalledTimes(1);
     expect(fn).toBeCalledWith(expect.objectContaining({ prev: 1, next: 0, prop: "size" }));
     expect(fn.mock.calls[0][0].target).toBe(set);
@@ -415,14 +415,14 @@ describe("helper.observer", () => {
     observer.onPropChanged(map, fn);
 
     expect(() => map.set("k1", 111)).not.toThrow();
-    expect(map.has("k1", 111)).toBeTruthy();
+    expect(map.has("k1", 111)).toBe(true);
     expect(fn).toBeCalledTimes(1);
     expect(fn).toBeCalledWith(expect.objectContaining({ prev: 0, next: 1, prop: "size" }));
     expect(fn.mock.calls[0][0].target).toBe(map);
 
     fn.mockClear();
     expect(() => map.clear()).not.toThrow();
-    expect(set.has("k1")).toBeFalsy();
+    expect(set.has("k1")).toBe(false);
     expect(fn).toBeCalledTimes(1);
     expect(fn).toBeCalledWith(expect.objectContaining({ prev: 1, next: 0, prop: "size" }));
     expect(fn.mock.calls[0][0].target).toBe(map);
@@ -433,7 +433,7 @@ describe("helper.observer", () => {
     observer.onPropChanged(obj, fn);
     const ref = {};
     expect(() => weakSet.add(ref)).not.toThrow();
-    expect(weakSet.has(ref)).toBeTruthy();
+    expect(weakSet.has(ref)).toBe(true);
     expect(fn).not.toBeCalled(); // because WeakSet & WeakMap not supported
   });
 
@@ -462,16 +462,16 @@ describe("helper.observer", () => {
   });
 
   test("method isObserver(), exceptions etc.", () => {
-    expect(observer.isObserved({ v: 1 })).toBeFalsy(); // on notObserved object
+    expect(observer.isObserved({ v: 1 })).toBe(false); // on notObserved object
     const prev = { v: 1 };
     const obj = observer.make(prev);
-    expect(observer.isObserved(obj)).toBeTruthy();
+    expect(observer.isObserved(obj)).toBe(true);
     expect(prev).not.toBe(obj); // IMPORTANT: because after assigning it's converted to proxy object
-    expect(observer.isObserved(prev)).toBeFalsy();
+    expect(observer.isObserved(prev)).toBe(false);
 
     const next = {};
     obj.next = next;
-    expect(observer.isObserved(obj.next)).toBeTruthy();
+    expect(observer.isObserved(obj.next)).toBe(true);
 
     // on empty callback
     expect(() => observer.onPropChanged(obj)).toThrow();
@@ -493,11 +493,11 @@ describe("helper.observer", () => {
     jest.advanceTimersToNextTimer();
     expect(fn).toBeCalledTimes(1);
     jest.clearAllMocks();
-    expect(raw !== obj.ref).toBeTruthy(); // IMPORTANT: because after assigning it's converted to proxy object
+    expect(raw !== obj.ref).toBe(true); // IMPORTANT: because after assigning it's converted to proxy object
 
     // try to assign again
     expect(() => (obj.ref = raw)).not.toThrow();
-    expect(raw !== obj.ref).toBeTruthy(); // IMPORTANT: because after assigning it's converted to proxy object
+    expect(raw !== obj.ref).toBe(true); // IMPORTANT: because after assigning it's converted to proxy object
     jest.advanceTimersToNextTimer();
     expect(fn).not.toBeCalled(); // IMPORTANT: because stored proxy-object but assigned raw that has proxy
     jest.clearAllMocks();
@@ -506,11 +506,11 @@ describe("helper.observer", () => {
     expect(() => (obj.ref = obj.ref)).not.toThrow();
     jest.advanceTimersToNextTimer();
     expect(fn).not.toBeCalled(); // stay the same because no changes
-    expect(observer.isObserved(raw)).toBeFalsy();
-    expect(raw !== obj.ref).toBeTruthy(); // IMPORTANT: because after assigning it's converted to proxy object
+    expect(observer.isObserved(raw)).toBe(false);
+    expect(raw !== obj.ref).toBe(true); // IMPORTANT: because after assigning it's converted to proxy object
 
     // try basic logic
-    expect(observer.isObserved(obj.ref)).toBeTruthy();
+    expect(observer.isObserved(obj.ref)).toBe(true);
     obj.ref.val += 1;
     jest.advanceTimersToNextTimer();
     expect(fn).toBeCalledTimes(1);
@@ -518,11 +518,11 @@ describe("helper.observer", () => {
     // checking observer make on the same object returns previous observedItem
     const a = observer.make(raw);
     const b = observer.make(raw);
-    expect(a === b).toBeTruthy();
-    expect(a.valueOf() === raw.valueOf()).toBeTruthy();
+    expect(a === b).toBe(true);
+    expect(a.valueOf() === raw.valueOf()).toBe(true);
     const dt = new Date();
     const d = observer.make(dt);
-    expect(d.valueOf() === dt.valueOf()).toBeTruthy();
+    expect(d.valueOf() === dt.valueOf()).toBe(true);
   });
 
   test("exception in event > callback doesn't affect on another", () => {
@@ -614,7 +614,7 @@ describe("helper.observer", () => {
 
     // checking how it works for newProp
     obj.inObj2 = {};
-    expect(observer.isObserved(obj.inObj2)).toBeTruthy();
+    expect(observer.isObserved(obj.inObj2)).toBe(true);
     jest.clearAllMocks();
     jest.clearAllTimers();
     obj.inObj2.v2 = 123;
@@ -629,7 +629,7 @@ describe("helper.observer", () => {
     delete obj.inObj; // it will fire events
     jest.clearAllMocks();
     jest.clearAllTimers();
-    expect(observer.isObserved(inObj)).toBeTruthy();
+    expect(observer.isObserved(inObj)).toBe(true);
     observer.onPropChanged(obj.inObj, fnIn);
     observer.onChanged(obj.inObj, fnIn2);
     inObj.txt = "345"; // expected that previousParent not tied anymore
@@ -653,7 +653,7 @@ describe("helper.observer", () => {
     expect(fn2).toBeCalled();
 
     obj1.ref = {};
-    expect(observer.isObserved(ref)).toBeTruthy();
+    expect(observer.isObserved(ref)).toBe(true);
     jest.clearAllMocks();
     jest.clearAllTimers();
     const fnRef = jest.fn();
@@ -674,7 +674,7 @@ describe("helper.observer", () => {
     jest.clearAllMocks();
     const obj2 = observer.make({});
     obj2.ref = ref;
-    expect(observer.isObserved(obj2.ref)).toBeTruthy();
+    expect(observer.isObserved(obj2.ref)).toBe(true);
     const fnObj2 = jest.fn();
     observer.onChanged(obj2, fnObj2);
     ref.val += 3;
@@ -692,7 +692,7 @@ describe("helper.observer", () => {
     const { ref } = obj1;
     const obj2 = observer.make({ ref });
 
-    expect(observer.isObserved(ref)).toBeTruthy();
+    expect(observer.isObserved(ref)).toBe(true);
     jest.clearAllMocks();
     jest.clearAllTimers();
     const fn = jest.fn();
@@ -720,12 +720,12 @@ describe("helper.observer", () => {
   test("valueOf is equal; Object keys are same", () => {
     let raw = { v: 1 };
     let obj = observer.make(raw);
-    expect(obj.valueOf() === raw.valueOf()).toBeTruthy();
+    expect(obj.valueOf() === raw.valueOf()).toBe(true);
     expect(Object.keys(raw)).toEqual(Object.keys(obj));
 
     raw = { s: "str", valueOf: () => 5 };
     obj = observer.make(raw);
-    expect(obj.valueOf() === raw.valueOf()).toBeTruthy();
+    expect(obj.valueOf() === raw.valueOf()).toBe(true);
     expect(Object.keys(raw)).toHaveLength(2);
     expect(Object.keys(obj)).toHaveLength(2);
   });

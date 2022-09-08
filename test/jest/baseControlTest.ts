@@ -82,7 +82,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
   describe("$initValue", () => {
     test("attr [initvalue] vs $initValue", async () => {
-      expect(el.$isReady).toBeTruthy();
+      expect(el.$isReady).toBe(true);
       el.setAttribute("initvalue", cfg.initValues[0].attrValue);
       expect(el.getAttribute("initValue")).toBe(cfg.initValues[0].attrValue);
       await h.wait(1);
@@ -345,7 +345,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     test("get $isValid() when not ready", () => {
       const el2 = document.createElement(tagName) as WUPBaseControl;
       el2.$options.validations = {};
-      expect(el2.$isValid).toBeTruthy();
+      expect(el2.$isValid).toBe(true);
     });
 
     if (hasVldRequired) {
@@ -649,7 +649,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     expect(el.$isReadOnly).toBe(true);
 
     // form.autoComplete
-    expect(el.$autoComplete).toBe(false);
+    expect(el.$autoComplete).toBeFalsy();
     form.$options.autoComplete = true;
     jest.advanceTimersByTime(1);
     expect(el.$autoComplete).toBeTruthy();

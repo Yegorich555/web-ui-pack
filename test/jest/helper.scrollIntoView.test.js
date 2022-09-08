@@ -90,12 +90,12 @@ afterEach(() => {
 
 describe("helper.scrollIntoView", () => {
   test("no scroll parents", async () => {
-    expect(bodySize.width > 0).toBeTruthy();
-    expect(bodySize.height > 0).toBeTruthy();
+    expect(bodySize.width > 0).toBe(true);
+    expect(bodySize.height > 0).toBe(true);
 
     scroll({ smoothMs: 0, offsetTop: 0, offsetLeft: 0, onlyIfNeeded: false });
     await Promise.resolve();
-    expect(isResolved).toBeTruthy();
+    expect(isResolved).toBe(true);
   });
 
   test("without animation", async () => {
@@ -137,9 +137,9 @@ describe("helper.scrollIntoView", () => {
     moveTo(0, -4);
     scroll({ smoothMs: step * 2, offsetTop: 0, offsetLeft: 0, onlyIfNeeded: false });
     await nextFrames();
-    expect(isResolved).toBeFalsy();
+    expect(isResolved).toBe(false);
     await nextFrames(3);
-    expect(isResolved).toBeTruthy();
+    expect(isResolved).toBe(true);
     expect(document.body.scrollTop).toBe(0);
     expect(document.body.scrollLeft).toBe(0);
 

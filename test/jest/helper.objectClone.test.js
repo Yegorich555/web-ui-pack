@@ -45,14 +45,14 @@ describe("helper.objectClone", () => {
 
     expect(cloned).toEqual(v);
     expect(cloned.dt).toBeInstanceOf(Date);
-    expect(v.dt !== cloned.dt).toBeTruthy();
-    expect(v.arr !== cloned.arr).toBeTruthy();
-    expect(v.nested !== cloned.nested).toBeTruthy();
-    expect(v.nested.dtn !== cloned.nested.dtn).toBeTruthy();
-    expect(v.nested.arr !== cloned.nested.arr).toBeTruthy();
-    expect(v.nested.next !== cloned.nested.next).toBeTruthy();
-    expect(v.nested.next.dtn !== cloned.nested.next.dtn).toBeTruthy();
-    expect(v.nested.next.arr !== cloned.nested.next.arr).toBeTruthy();
+    expect(v.dt !== cloned.dt).toBe(true);
+    expect(v.arr !== cloned.arr).toBe(true);
+    expect(v.nested !== cloned.nested).toBe(true);
+    expect(v.nested.dtn !== cloned.nested.dtn).toBe(true);
+    expect(v.nested.arr !== cloned.nested.arr).toBe(true);
+    expect(v.nested.next !== cloned.nested.next).toBe(true);
+    expect(v.nested.next.dtn !== cloned.nested.next.dtn).toBe(true);
+    expect(v.nested.next.arr !== cloned.nested.next.arr).toBe(true);
 
     expect(cloned.empty4).toBeUndefined();
     expect(cloned.nested.nempty4).toBeUndefined();
@@ -62,13 +62,13 @@ describe("helper.objectClone", () => {
   test("with option skipUndefined", () => {
     const cloned = objectClone(v, { skipUndefined: true });
 
-    expect(Object.prototype.hasOwnProperty.call(v, "empty4")).toBeTruthy();
-    expect(Object.prototype.hasOwnProperty.call(v.nested, "nempty4")).toBeTruthy();
-    expect(Object.prototype.hasOwnProperty.call(v.nested.next, "nnempty4")).toBeTruthy();
+    expect(Object.prototype.hasOwnProperty.call(v, "empty4")).toBe(true);
+    expect(Object.prototype.hasOwnProperty.call(v.nested, "nempty4")).toBe(true);
+    expect(Object.prototype.hasOwnProperty.call(v.nested.next, "nnempty4")).toBe(true);
 
-    expect(Object.prototype.hasOwnProperty.call(cloned, "empty4")).toBeFalsy();
-    expect(Object.prototype.hasOwnProperty.call(cloned.nested, "nempty4")).toBeFalsy();
-    expect(Object.prototype.hasOwnProperty.call(cloned.nested.next, "nnempty4")).toBeFalsy();
+    expect(Object.prototype.hasOwnProperty.call(cloned, "empty4")).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(cloned.nested, "nempty4")).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(cloned.nested.next, "nnempty4")).toBe(false);
     expect(cloned).toEqual(v);
   });
 
@@ -79,8 +79,8 @@ describe("helper.objectClone", () => {
     };
     const cloned = objectClone(v, { skipEmptyObjects: true, skipUndefined: true });
 
-    expect(Object.prototype.hasOwnProperty.call(cloned, "emptyObj")).toBeFalsy();
-    expect(Object.prototype.hasOwnProperty.call(cloned, "emptyObj2")).toBeFalsy();
+    expect(Object.prototype.hasOwnProperty.call(cloned, "emptyObj")).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(cloned, "emptyObj2")).toBe(false);
     expect(cloned).not.toEqual(v);
     delete v.emptyObj;
     delete v.nested.emptyObj2;
@@ -91,7 +91,7 @@ describe("helper.objectClone", () => {
     v.el = document.createElement("span");
 
     const cloned = objectClone(v);
-    expect(v.el === cloned.el).toBeTruthy();
+    expect(v.el === cloned.el).toBe(true);
     expect(cloned).toEqual(v);
   });
 });

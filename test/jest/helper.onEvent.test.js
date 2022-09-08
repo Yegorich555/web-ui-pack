@@ -11,7 +11,7 @@ describe("helper.onEvent", () => {
     const e = new Event("click");
     document.dispatchEvent(e);
     expect(fn).toBeCalledTimes(1);
-    expect(fn.mock.calls[0][0] === e).toBeTruthy();
+    expect(fn.mock.calls[0][0] === e).toBe(true);
   });
 
   test("add/removeListener", () => {
