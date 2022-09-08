@@ -296,6 +296,21 @@ describe("control.select", () => {
     await h.wait();
     expect(el2.$isOpen).toBe(true);
     expect(el.$isOpen).toBe(false);
+
+    // test if $showMenu() resolve only when popup is show-end
+    document.body.innerHTML = "";
+    /** @type WUPSelectControl */
+    el = document.body.appendChild(document.createElement(el.tagName));
+    await h.wait();
+    expect(el.$refPopup).toBeFalsy();
+    onShow.mockClear();
+    el.$showMenu().then(onShow);
+    await h.wait(100);
+    expect(el.$isOpen).toBe(true);
+    expect(onShow).not.toBeCalled(); // because of animation
+    await h.wait();
+    await h.wait();
+    expect(onShow).toBeCalledTimes(1);
   });
 
   test("menu navigation", async () => {
@@ -471,10 +486,12 @@ describe("control.select", () => {
     // when items are empty
     el.$options.items = [];
     await h.wait();
-    el.$refInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
-    expect(el.$isOpen).toBe(true); // todo issue here: need to show NoItems
-    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot();
+    expect(el.$isOpen).toBe(true);
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id=\\"txt6\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-disabled=\\"true\\" aria-selected=\\"false\\">No Items</li></ul>"`
+    );
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
     expect(el.$isOpen).toBe(false);

@@ -387,13 +387,14 @@ export default class WUPSelectControl<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override async goShowMenu(
     showCase: ShowCases,
-    e?: MouseEvent | FocusEvent | null
+    e?: MouseEvent | FocusEvent | null,
+    isNeedWait?: boolean
   ): Promise<WUPPopupElement | null> {
     if (this.$isPending) {
       return null;
     }
     const isCreate = !this.$refPopup;
-    const popup = await super.goShowMenu(showCase, e);
+    const popup = await super.goShowMenu(showCase, e, isNeedWait);
     if (!popup) {
       return null;
     }
