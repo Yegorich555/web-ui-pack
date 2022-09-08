@@ -40,7 +40,7 @@
   - Added option **offsetFitElement**
   - Added promise-result for \$hide() and \$show() (resolved by animation time)
   - Allowed to use other inline transform styles
-  - Improved listener (filter mouse-move, double-click etc.)
+  - Improved listener (filter mouse-move, double-click, mouse-right-click etc.)
 
 ## 0.0.5 (Apr 4, 2022)
 

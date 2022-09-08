@@ -203,4 +203,29 @@ describe("popupListen", () => {
     expect(onHide).toBeCalledTimes(2);
     expect(isOpen).toBe(false);
   });
+
+  test("hide waits for show end", async () => {
+    ref = popupListen({ target, showCase: WUPPopup.ShowCases.onClick }, onShow, onHide);
+    const origShow = onShow.getMockImplementation();
+    onShow.mockImplementation(() => {
+      const r = origShow();
+      return new Promise((resolve) => setTimeout(() => resolve(r), 100));
+    });
+
+    const origHide = onHide.getMockImplementation();
+    onHide.mockImplementation(() => {
+      const r = origHide();
+      return new Promise((resolve) => setTimeout(() => resolve(r), 100));
+    });
+
+    ref.show();
+    await h.wait(20);
+    ref.hide();
+    await h.wait(20);
+    expect(onShow).toBeCalledTimes(1);
+    expect(onHide).not.toBeCalled();
+
+    await h.wait(100);
+    expect(onHide).toBeCalledTimes(1);
+  });
 });

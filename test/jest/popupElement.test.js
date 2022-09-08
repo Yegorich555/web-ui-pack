@@ -5,6 +5,7 @@ import * as all from "web-ui-pack/popup/popupElement.types";
 import { WUPPopup } from "web-ui-pack/popup/popupElement";
 import * as all2 from "web-ui-pack/popup/popupElement";
 import * as h from "../testHelper";
+import { TestMouseMoveEvent } from "../testHelper";
 
 /** @type WUPPopupElement */
 let el;
@@ -285,27 +286,27 @@ describe("popupElement", () => {
     jest.advanceTimersToNextTimer(); // onReady has timeout
     expect(a.$isOpen).toBeFalsy();
 
-    trg.dispatchEvent(new Event("mouseenter"));
+    trg.dispatchEvent(new MouseEvent("mouseenter"));
     await h.wait(a.$options.hoverShowTimeout); // event listener has timeout
     expect(spyShow).toBeCalledTimes(1);
     expect(a.$isOpen).toBeTruthy();
     expect(spyShow).lastCalledWith(1);
 
-    trg.dispatchEvent(new Event("mouseleave"));
+    trg.dispatchEvent(new MouseEvent("mouseleave"));
     await h.wait(a.$options.hoverHideTimeout); // event listener has timeout
     expect(a.$isOpen).toBeFalsy();
     expect(spyHide.mock.calls[spyHide.mock.calls.length - 1][0]).toBe(1);
 
     jest.clearAllMocks();
-    trg.dispatchEvent(new Event("mouseenter"));
-    trg.dispatchEvent(new Event("mouseleave"));
-    trg.dispatchEvent(new Event("mouseenter"));
-    trg.dispatchEvent(new Event("mouseleave"));
+    trg.dispatchEvent(new MouseEvent("mouseenter"));
+    trg.dispatchEvent(new MouseEvent("mouseleave"));
+    trg.dispatchEvent(new MouseEvent("mouseenter"));
+    trg.dispatchEvent(new MouseEvent("mouseleave"));
     jest.advanceTimersByTime(a.$options.hoverShowTimeout + a.$options.hoverHideTimeout); // event listener has timeout
     expect(a.$isOpen).toBeFalsy();
     expect(spyShow).not.toBeCalled();
 
-    trg.dispatchEvent(new Event("mouseenter"));
+    trg.dispatchEvent(new MouseEvent("mouseenter"));
     trg.remove();
     jest.advanceTimersByTime(a.$options.hoverShowTimeout + a.$options.hoverHideTimeout); // event listener has timeout
     expect(a.$isOpen).toBeFalsy(); // because removed
@@ -392,17 +393,17 @@ describe("popupElement", () => {
     await h.wait();
     expect(a.$isOpen).toBeFalsy();
 
-    trg.dispatchEvent(new Event("click", { bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait(0);
     expect(a.$isOpen).toBeTruthy();
-    trg.dispatchEvent(new Event("click", { bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     expect(a.$isOpen).toBeTruthy(); // because previous event is skipped (due to debounceTimeout)
     expect(spyShow).toBeCalledTimes(1);
     expect(spyShow).lastCalledWith(1 << 2);
     await h.wait(50); // onClick has debounce timeout
     expect(a.$isOpen).toBeTruthy(); // because previous event is skipped (due to debounceTimeout)
 
-    let e = new Event("click", { bubbles: true });
+    let e = new MouseEvent("click", { bubbles: true });
     trg.dispatchEvent(e);
     await h.wait();
     expect(a.$isOpen).toBeFalsy();
@@ -410,23 +411,23 @@ describe("popupElement", () => {
     expect(spyHide).lastCalledWith(5);
     await h.wait(50);
 
-    trgInput.dispatchEvent(new Event("click", { bubbles: true }));
+    trgInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     expect(a.$isOpen).toBeTruthy(); // click on input inside
 
     await h.wait();
-    e = new Event("click", { bubbles: true });
+    e = new MouseEvent("click", { bubbles: true });
     a.dispatchEvent(e);
     await h.wait();
     expect(a.$isOpen).toBeFalsy(); // click onMe == close
     expect(spyHide).lastCalledWith(4);
 
-    trgInput2.dispatchEvent(new Event("click", { bubbles: true }));
+    trgInput2.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     expect(a.$isOpen).toBeTruthy(); // click on input2 inside
 
     await h.wait();
-    e = new Event("click", { bubbles: true });
+    e = new MouseEvent("click", { bubbles: true });
     document.body.dispatchEvent(e);
     await h.wait();
     expect(a.$isOpen).toBeFalsy(); // click outside == close
@@ -464,16 +465,16 @@ describe("popupElement", () => {
     expect(a.$isOpen).toBeFalsy();
 
     // open by mouseenter-click-focus
-    trgInput.dispatchEvent(new Event("mouseenter", { bubbles: true }));
+    trgInput.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
     await h.wait(a.$options.hoverShowTimeout); // mouseenter has debounce timeout
     expect(a.$isOpen).toBeTruthy();
     expect(spyShow).lastCalledWith(1);
-    trgInput.dispatchEvent(new Event("mousedown", { bubbles: true }));
+    trgInput.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
     trgInput.focus();
-    trgInput.dispatchEvent(new Event("mouseup", { bubbles: true }));
+    trgInput.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
     await h.wait(1); // wait for promise onShow is async
     expect(a.$isOpen).toBeTruthy(); // no changes in state
-    trgInput.dispatchEvent(new Event("click", { bubbles: true }));
+    trgInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     expect(a.$isOpen).toBeTruthy(); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
     await h.wait(1); // wait for promise onShow is async
 
@@ -488,21 +489,21 @@ describe("popupElement", () => {
     trgInput.dispatchEvent(new Event("mouseenter", { bubbles: true }));
     await h.wait(a.$options.hoverShowTimeout); // mouseenter has debounce timeout
     expect(a.$isOpen).toBeTruthy(); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
-    e = new Event("mouseleave", { bubbles: true });
+    e = new MouseEvent("mouseleave", { bubbles: true });
     trgInput.dispatchEvent(e);
     await h.wait(a.$options.hoverHideTimeout); // mouseenter has debounce timeout
     expect(a.$isOpen).toBeFalsy(); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
     expect(spyHide).lastCalledWith(1);
 
     // open again by click
-    e = new Event("click", { bubbles: true });
+    e = new MouseEvent("click", { bubbles: true });
     trgInput.dispatchEvent(e);
     await h.wait();
     expect(a.$isOpen).toBeTruthy(); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
     expect(spyShow).lastCalledWith(1 << 2);
 
     // close by click again
-    e = new Event("click", { bubbles: true });
+    e = new MouseEvent("click", { bubbles: true });
     trgInput.dispatchEvent(e);
     await h.wait();
     expect(a.$isOpen).toBeFalsy();
@@ -513,13 +514,13 @@ describe("popupElement", () => {
     // simulate click-focus without mouseenter
     // jest.advanceTimersByTime(el.$options.focusDebounceMs);
     trgInput.dispatchEvent(new Event("touchstart", { bubbles: true })); // just for coverage 100%
-    trgInput.dispatchEvent(new Event("mousedown", { bubbles: true }));
+    trgInput.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
     expect(a.$isOpen).toBeFalsy();
     trgInput.focus();
     expect(spyShow).lastCalledWith(1 << 1);
     await h.wait(1);
     expect(a.$isOpen).toBeTruthy(); // show by focus
-    trgInput.dispatchEvent(new Event("mouseup", { bubbles: true }));
+    trgInput.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
     let ev = new MouseEvent("click", { bubbles: true });
     ev.pageX = 20; // required otherwise it's filtered from synthetic events
     trgInput.dispatchEvent(ev);
@@ -527,8 +528,8 @@ describe("popupElement", () => {
     expect(a.$isOpen).toBeTruthy(); // stay opened because wasOpened by focus from click
 
     // simulate mouse-click again
-    trgInput.dispatchEvent(new Event("mousedown", { bubbles: true }));
-    trgInput.dispatchEvent(new Event("mouseup", { bubbles: true }));
+    trgInput.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    trgInput.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
     trgInput.dispatchEvent(ev);
     await h.wait(50);
     expect(a.$isOpen).toBeFalsy(); // 2nd click will close (but if click is fired without mousedown it doesn't work)
@@ -539,16 +540,16 @@ describe("popupElement", () => {
     ev = new MouseEvent("click", { bubbles: false });
     ev.pageX = 20; // required otherwise it's filtered from synthetic events
     await h.wait();
-    trgInput.dispatchEvent(new Event("mousedown", { bubbles: false }));
+    trgInput.dispatchEvent(new MouseEvent("mousedown", { bubbles: false }));
     trgInput.focus();
     await h.wait(1);
     expect(a.$isOpen).toBeTruthy(); // show by focus
-    trgInput.dispatchEvent(new Event("mouseup", { bubbles: false }));
+    trgInput.dispatchEvent(new MouseEvent("mouseup", { bubbles: false }));
     trgInput.dispatchEvent(ev);
     await h.wait();
     expect(a.$isOpen).toBeTruthy(); // stay opened because wasOpened by focus from click
-    trgInput.dispatchEvent(new Event("mousedown", { bubbles: true }));
-    trgInput.dispatchEvent(new Event("mouseup", { bubbles: true }));
+    trgInput.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    trgInput.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
     trgInput.dispatchEvent(ev);
     await h.wait();
     expect(a.$isOpen).toBeFalsy(); // 2nd click will close (but if click is fired without mousedown it doesn't work)
@@ -1819,6 +1820,24 @@ describe("popupElement", () => {
     expect(el.$isOpen).toBeTruthy(); // because 2nd click is filtered
   });
 
+  test("right-click filter", async () => {
+    await el.$hide();
+    el.$options.showCase = WUPPopup.ShowCases.onClick;
+    await h.wait();
+
+    await h.userClick(trg);
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+
+    await h.userClick(trg, { button: 1 });
+    await h.wait();
+    expect(el.$isOpen).toBe(true); // because right-button
+
+    await h.userClick(trg, { button: 0 });
+    await h.wait();
+    expect(el.$isOpen).toBe(false); // because left-button
+  });
+
   test("target.mousedown > mousemove > body.mouseup", async () => {
     await el.$hide();
     el.$options.showCase = 1 << 2; // click
@@ -1827,34 +1846,40 @@ describe("popupElement", () => {
 
     trg.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
     await h.wait(30);
-    trg.dispatchEvent(new MouseEvent("mousemove", { bubbles: true, movementX: 2 }));
+    trg.dispatchEvent(new TestMouseMoveEvent("mousemove", { bubbles: true, movementX: 2, movementY: 0 }));
     await h.wait(100);
     document.body.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
     document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait(300);
     expect(el.$isOpen).toBeFalsy(); // because click cancelled outside target
 
-    trg.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
-    trg.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
-    trg.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.userClick(trg);
     await h.wait();
-    expect(el.$isOpen).toBeTruthy();
+    expect(el.$isOpen).toBe(true);
 
     // again when popup is open
     trg.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
     await h.wait(30);
-    trg.dispatchEvent(new MouseEvent("mousemove", { bubbles: true, movementY: 2 }));
+    trg.dispatchEvent(new TestMouseMoveEvent("mousemove", { bubbles: true, movementX: 0, movementY: 2 }));
     await h.wait(100);
     document.body.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
     document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait(300);
-    expect(el.$isOpen).toBeTruthy(); // because click cancelled outside target
+    expect(el.$isOpen).toBe(true); // because click cancelled outside target
 
-    trg.dispatchEvent(new MouseEvent("mousedown", { bubbles: true })); // otherwise wasMouseMove isn't cleared
-    trg.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
-    trg.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.userClick(trg); // otherwise wasMouseMove isn't cleared
     await h.wait(300);
     expect(el.$isOpen).toBeFalsy(); // because click cancelled outside target
+
+    await h.wait();
+    trg.testMe = true;
+    // cover case when browser somehow sends mousemove 0
+    trg.dispatchEvent(new TestMouseMoveEvent("mousedown", { bubbles: true }));
+    trg.dispatchEvent(new TestMouseMoveEvent("mousemove", { bubbles: true, movementX: 0, movementY: 0 }));
+    trg.dispatchEvent(new TestMouseMoveEvent("mouseup", { bubbles: true }));
+    trg.dispatchEvent(new TestMouseMoveEvent("click", { bubbles: true }));
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
   });
 
   test("popupListen: handle error on show", async () => {
@@ -1882,5 +1907,19 @@ describe("popupElement", () => {
     trg.click();
     await h.wait();
     expect(cnt).toBe(2); // checking if possible again
+  });
+
+  test("popup inside target", async () => {
+    el.$options.showCase = 1 << 2;
+    trg.appendChild(el);
+    await h.wait();
+
+    // click on popup > close popup
+    await h.userClick(trg);
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+    await h.userClick(el);
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
   });
 });

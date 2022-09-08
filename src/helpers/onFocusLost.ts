@@ -10,17 +10,24 @@ function setEvent(): void {
     return;
   }
 
-  const r1 = onEvent(document, "mousedown", ({ defaultPrevented }) => (isMouseDown = !defaultPrevented), {
-    passive: true,
-  });
+  const r1 = onEvent(
+    document,
+    "mousedown",
+    ({ button, defaultPrevented }) => (isMouseDown = !button && !defaultPrevented), // filter only for LeftClick
+    { passive: true }
+  );
 
-  const mouseup = (): void => {
-    onMouseUp.forEach((f) => f());
-    onMouseUp.length = 0;
-    isMouseDown = false;
-  };
   // click fires after mouseup but provides better mechanism
-  const r2 = onEvent(document, "click", mouseup, { passive: true });
+  const r2 = onEvent(
+    document,
+    "click",
+    () => {
+      onMouseUp.forEach((f) => f());
+      onMouseUp.length = 0;
+      isMouseDown = false;
+    },
+    { passive: true }
+  );
 
   if (!rstEvent) {
     rstEvent = () => {

@@ -136,8 +136,12 @@ export default function popupListen(
     });
 
     let wasMouseMove = false; // fix when user makes t.mousedown, mousemove, body.mouseup
-    appendEvent(t, "mousedown", () => {
+    appendEvent(t, "mousedown", (ev) => {
       wasMouseMove = false;
+      if (ev.button) {
+        // only for leftButton === 0
+        return;
+      }
       const r = onEvent(
         t,
         "mousemove",
@@ -149,7 +153,7 @@ export default function popupListen(
 
     onShowEvent(document, "click", (e) => {
       preventClickAfterFocus = false; // mostly it doesn't make sense but maybe it's possible
-      if (wasMouseMove || e.detail === 2) {
+      if (wasMouseMove || e.detail === 2 || e.button) {
         wasMouseMove = false;
         return;
       }
@@ -180,6 +184,7 @@ export default function popupListen(
         wasOutsideClick ||
         openedByHover ||
         e.detail === 2 || // it's double-click
+        e.button || // it's not left-click
         wasMouseMove
       ) {
         return;
@@ -267,3 +272,5 @@ popupListen.$defaults = {
   hoverShowTimeout: 200,
   hoverHideTimeout: 500,
 };
+
+// todo click on popup with closing must return focus back
