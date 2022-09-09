@@ -1,7 +1,9 @@
 import { stringLowerCount, stringUpperCount } from "web-ui-pack/indexHelpers";
+import { WUPHelpers } from "web-ui-pack";
 
 describe("helper.stringCaseCount", () => {
   test("stringLowerCount", () => {
+    expect(WUPHelpers.stringLowerCount).toBe(stringLowerCount);
     expect(stringLowerCount("WeLLDoNE")).toBe(2);
     expect(stringLowerCount("ХоРОшО СДЕЛАнО")).toBe(3);
 
@@ -15,6 +17,7 @@ describe("helper.stringCaseCount", () => {
   });
 
   test("stringUpperCount", () => {
+    expect(WUPHelpers.stringUpperCount).toBe(stringUpperCount);
     expect(stringUpperCount("wEllDone")).toBe(2);
     expect(stringUpperCount("Хорошо Сделано")).toBe(2);
 
