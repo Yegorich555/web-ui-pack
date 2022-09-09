@@ -95,6 +95,7 @@ export default function SelectControlView() {
                 this.appendChild(spin);
                 return spin;
               };
+              el.$initValue = 13;
             }
           }}
         />

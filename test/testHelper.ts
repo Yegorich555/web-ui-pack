@@ -16,8 +16,9 @@ export function unMockConsoleWarn() {
 
 const origConsoleError = console.error;
 export function mockConsoleError() {
-  console.error = jest.fn();
-  return console.error;
+  const f = jest.fn();
+  console.error = f;
+  return f;
 }
 
 export function unMockConsoleError() {

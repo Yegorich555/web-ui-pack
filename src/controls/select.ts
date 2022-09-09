@@ -13,9 +13,6 @@ import WUPBaseComboControl, { HideCases, ShowCases, WUPBaseComboIn } from "./bas
 const tagName = "wup-select";
 export namespace WUPSelectIn {
   export interface Defs {
-    /** Wait for pointed time before show-error (sumarized with $options.debounce); WARN: hide-error without debounce
-     *  @defaultValue 0 */
-    validateDebounceMs?: number;
     /** Case when menu-popup need to show
      * @defaultValue onPressArrowKey | onClick | onFocus | onInput */
     showCase: ShowCases;
@@ -324,7 +321,7 @@ export default class WUPSelectControl<
         items,
         value: v,
       });
-      return `Error: not found for ${v}` != null ? (v as any).toString() : "";
+      return `Error: not found for ${v != null ? (v as any).toString() : ""}`;
     }
     const item = items[i];
     if (item.text instanceof Function) {
@@ -399,7 +396,7 @@ export default class WUPSelectControl<
       return null;
     }
     if (!isCreate && showCase !== ShowCases.onInput && this._menuItems!.filtered) {
-      this._menuItems!.all?.forEach((li) => (li.style.display = "")); // reset styles after filtering
+      this._menuItems!.all.forEach((li) => (li.style.display = "")); // reset styles after filtering
       this._menuItems!.filtered = undefined;
     }
     // set aria-selected
@@ -421,25 +418,21 @@ export default class WUPSelectControl<
 
   /** Focus item by index or reset is index is null (via aria-activedescendant).
    *  If menuItems is filtered by input-text than index must point on filtered array */
-  protected focusMenuItemByIndex(index: number | null): void {
-    if (index != null && index > -1) {
-      const { filtered } = this._menuItems!;
-      const trueIndex = filtered ? filtered[index] : index;
-      const next = this._menuItems!.all[trueIndex];
-      this.focusMenuItem(next, this._cachedItems![trueIndex].value);
-      this._menuItems!.focused = index;
-    } else {
-      this.focusMenuItem(null, undefined);
-    }
+  protected focusMenuItemByIndex(index: number): void {
+    const { filtered } = this._menuItems!;
+    const trueIndex = filtered ? filtered[index] : index;
+    const next = this._menuItems!.all[trueIndex];
+    this.focusMenuItem(next, this._cachedItems![trueIndex].value);
+    this._menuItems!.focused = index;
   }
 
   protected override async gotKeyDown(e: KeyboardEvent): Promise<void> {
-    if (this.$isPending) {
-      return;
-    }
+    // pending event disables gotKeyDown so it's case impossible
+    // if (this.$isPending) {
+    //   return;
+    // }
     const wasOpen = this.$isOpen;
     await super.gotKeyDown(e);
-
     if (!this.$isOpen || e.altKey || e.shiftKey || e.ctrlKey) {
       return;
     }

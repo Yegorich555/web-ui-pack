@@ -50,6 +50,72 @@ describe("control.select", () => {
     onCreateNew: (e) => (e.$options.items = getItems()),
   });
 
+  test("attr [initValue] (extra tests)", async () => {
+    el.$options.items = [
+      { value: 2, text: "Dark" },
+      { value: null, text: "Default" },
+      { value: 3, text: "Green" },
+    ];
+    el.setAttribute("initvalue", "");
+    await h.wait();
+    expect(el.$value).toBe(null);
+    expect(el.$refInput.value).toBe("Default");
+
+    // checking when items empty
+    el.$options.items = [];
+    el.setAttribute("initvalue", "");
+    await h.wait();
+    expect(el.$value).toBe(undefined);
+    expect(el.$refInput.value).toBeFalsy();
+  });
+
+  test("pending state", async () => {
+    el.changePending(true);
+    expect(el.$isPending).toBe(true);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-select><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" role=\\"combobox\\" aria-haspopup=\\"listbox\\" aria-expanded=\\"false\\" autocomplete=\\"off\\" aria-autocomplete=\\"list\\" aria-busy=\\"true\\" readonly=\\"\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label><wup-spin style=\\"display: none;\\"><div></div></wup-spin></wup-select>"`
+    );
+
+    el.changePending(true);
+    expect(el.$isPending).toBe(true);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-select><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" role=\\"combobox\\" aria-haspopup=\\"listbox\\" aria-expanded=\\"false\\" autocomplete=\\"off\\" aria-autocomplete=\\"list\\" aria-busy=\\"true\\" readonly=\\"\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label><wup-spin style=\\"display: none;\\"><div></div></wup-spin></wup-select>"`
+    );
+
+    el.changePending(false);
+    expect(el.$isPending).toBe(false);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-select><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" role=\\"combobox\\" aria-haspopup=\\"listbox\\" aria-expanded=\\"false\\" autocomplete=\\"off\\" aria-autocomplete=\\"list\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-select>"`
+    );
+
+    // checking if value applied properly when items is promise
+    await h.wait();
+    document.activeElement.blur();
+    await h.wait();
+    const mockRequest = jest.fn();
+    el.$options.items = () => {
+      mockRequest();
+      return new Promise((resolve) => setTimeout(() => resolve(getItems()), 100));
+    };
+    el.$value = 10;
+    await h.wait(10);
+    expect(el.$refInput.value).toBe("");
+    expect(el.$isPending).toBe(true);
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true })); // keydown events must be skipped because of pending
+    el.$showMenu(); // showMenu must be skipped because of pending
+    // await h.userClick(el) // todo why it's reset value ?
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    expect(el.$refInput.value).toBe("Donny");
+    expect(mockRequest).toBeCalledTimes(1);
+    // checking cached items
+    el.$value = 20;
+    await h.wait(10);
+    expect(mockRequest).toBeCalledTimes(1);
+    expect(el.$isPending).toBe(false); // no pending because items were cached
+    expect(el.$refInput.value).toBe("Mikky");
+  });
+
   test("$show/$hide menu", async () => {
     el.$initValue = 20;
     expect(el.$isOpen).toBe(false);
@@ -385,6 +451,26 @@ describe("control.select", () => {
     expect(el.$value).toBe(getItems()[2].value);
     expect(el.$isOpen).toBe(false);
 
+    // Home/End keys works ordinary when menu is closed
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Home", bubbles: true, cancelable: true }));
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+
+    // Home/End keys works ordinary when menu is opened
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+    expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[3]);
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Home", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[0]);
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[3]);
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+    await h.wait();
+
     // open again and pressEsc to close menu
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
     await h.wait();
@@ -413,6 +499,41 @@ describe("control.select", () => {
     expect(el.querySelectorAll("[aria-selected='true']").length).toBe(1);
 
     HTMLElement.prototype.scrollIntoViewIfNeeded = was;
+
+    // checking when user changed text No Items
+    const wasText = WUPSelectControl.$textNoItems;
+    WUPSelectControl.$textNoItems = "";
+    await setItems([]);
+    expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup menu=\\"\\" hidden=\\"\\" style=\\"min-width: 100px;\\"><ul id=\\"txt13\\" role=\\"listbox\\" aria-label=\\"Items\\"></ul></wup-popup>"`
+    );
+    WUPSelectControl.$textNoItems = wasText;
+
+    // checking when items is function with promise
+    await setItems(() => Promise.resolve(getItems()));
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id=\\"txt14\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt15\\">Donny</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt16\\">Mikky</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt17\\">Leo</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt18\\">Splinter</li></ul>"`
+    );
+
+    // checking when items is function without promise
+    await setItems(() => getItems().slice(0, 2));
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id=\\"txt19\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt20\\">Donny</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt21\\">Mikky</li></ul>"`
+    );
+
+    // checking when items has custom render
+    await setItems([
+      {
+        value: 123,
+        text: (val, li, i) => {
+          li.textContent = `testVal-${val}_${i}`;
+          return li.textContent;
+        },
+      },
+    ]);
+    el.$value = 123;
+    await h.wait();
+    expect(el.$refInput.value).toBe("testVal-123_0");
   });
 
   test("menu filtering by input", async () => {
@@ -484,6 +605,7 @@ describe("control.select", () => {
     expect(el.$refInput.value).toBe("Dona Rose");
 
     // when items are empty
+    const err = h.mockConsoleError();
     el.$options.items = [];
     await h.wait();
     el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
@@ -495,6 +617,16 @@ describe("control.select", () => {
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
     expect(el.$isOpen).toBe(false);
+    expect(err).toBeCalledTimes(1); // because value not found in items
+    expect(el.$refInput.value).toMatchInlineSnapshot(`"Error: not found for 20"`);
+
+    err.mockClear();
+    el.$options.name = "names";
+    el.$value = null;
+    await h.wait();
+    expect(err).toBeCalledTimes(1); // because value not found in items
+    expect(el.$refInput.value).toMatchInlineSnapshot(`"Error: not found for "`);
+    h.unMockConsoleError();
   });
 
   test("submit by Enter key", async () => {
@@ -533,8 +665,31 @@ describe("control.select", () => {
     expect(onSubmit).toBeCalledTimes(3);
     expect(el.$isOpen).toBe(true);
   });
+
+  test("select by menu item click", async () => {
+    el.focus();
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+    expect(el.$value).toBe(undefined);
+
+    const arrLi = el.$refPopup.querySelectorAll("li");
+    expect(arrLi.length).toBe(4);
+    await h.userClick(arrLi[1]);
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    expect(el.$value).toBe(20);
+
+    await h.userClick(el);
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+    await h.userClick(arrLi[2]);
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    expect(el.$value).toBe(30);
+  });
 });
 
+// todo e2e: open by ArrowUp must scroll to last item at the end of animation - issue here because selectMenuItem fires after focusMenuItem
 // todo e2e: click on title again or on input doesn't close popup
 // todo test option showCase
-// testcase (close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click
+// manual testcase (close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click

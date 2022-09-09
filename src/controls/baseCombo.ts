@@ -6,7 +6,7 @@ import WUPTextControl, { WUPTextIn } from "./text";
 
 export namespace WUPBaseComboIn {
   export interface Defs {
-    /** Wait for pointed time before show-error (sumarized with $options.debounce);
+    /** Wait for pointed time before show-error (sumarized with $options.debounce); WARN: hide-error without debounce
      *  @defaultValue 0 */
     validateDebounceMs?: number;
     /** Case when menu-popup need to show
@@ -372,9 +372,9 @@ export default abstract class WUPBaseComboControl<
     }
 
     if (e.key === "ArrowDown") {
-      !this.#isOpen && (await this.goShowMenu(ShowCases.onPressArrowKey));
+      !this.#isOpen && (await this.goShowMenu(ShowCases.onPressArrowKey, null, true));
     } else if (e.key === "ArrowUp") {
-      !this.#isOpen && (await this.goShowMenu(ShowCases.onPressArrowKey));
+      !this.#isOpen && (await this.goShowMenu(ShowCases.onPressArrowKey, null, true));
     }
 
     if (!this.#isOpen) {
