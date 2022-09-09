@@ -58,15 +58,15 @@ describe("helper.styleHelpers", () => {
   test("getBoundingInternalRect", () => {
     // just for coverage
     expect(getBoundingInternalRect(el)).toMatchInlineSnapshot(`
-        Object {
-          "bottom": 0,
-          "height": 0,
-          "left": 0,
-          "right": 0,
-          "top": 0,
-          "width": 0,
-        }
-      `);
+      {
+        "bottom": 0,
+        "height": 0,
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "width": 0,
+      }
+    `);
     expect(getBoundingInternalRect(el, { ignoreCache: true })).toBeDefined();
     expect(getBoundingInternalRect(el)).toBeDefined();
   });

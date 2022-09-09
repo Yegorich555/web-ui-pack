@@ -31,17 +31,17 @@ describe("spinElement", () => {
       fadeRect: testEl.querySelector("[fade]").getBoundingClientRect().toJSON(),
     }));
     expect(t.html).toMatchInlineSnapshot(`
-      "<button aria-busy=\\"true\\">
+      "<button aria-busy="true">
               <span>Some text</span>
-              <wup-spin aria-label=\\"Loading. Please wait\\" style=\\"position: absolute; transform: translate(26px, -1.5px) scale(0.425);\\">
-            <div></div><div fade=\\"\\" style=\\"border-radius: 0px; transform: translate(-18px, 9.5px) scale(2.35294); width: 76px; height: 21px;\\"></div></wup-spin></button>"
+              <wup-spin aria-label="Loading. Please wait" style="position: absolute; transform: translate(26px, -1.5px) scale(0.425);">
+            <div></div><div fade="" style="border-radius: 0px; transform: translate(-18px, 9.5px) scale(2.35294); width: 76px; height: 21px;"></div></wup-spin></button>"
     `);
     expect(t.rect.width).toBe(t.rect.height);
     expect(t.rect.height).toBeLessThan(t.parentRect.height);
     expect(t.fadeRect.height).toBe(t.parentRect.height);
     expect(t.fadeRect.width).toBe(Math.round(t.parentRect.width));
     expect(t.rect).toMatchInlineSnapshot(`
-      Object {
+      {
         "bottom": 27,
         "height": 17,
         "left": 37.5,
@@ -63,13 +63,13 @@ describe("spinElement", () => {
       rect: testEl.getBoundingClientRect().toJSON(),
     }));
     expect(t.html).toMatchInlineSnapshot(`
-      "<button aria-busy=\\"true\\" style=\\"position: relative;\\">
+      "<button aria-busy="true" style="position: relative;">
               <span>Some text</span>
-              <wup-spin aria-label=\\"Loading. Please wait\\" style=\\"position: absolute; transform: translate(18px, -9.5px) scale(0.425);\\">
-            <div></div><div fade=\\"\\" style=\\"border-radius: 0px; transform: translate(-18px, 9.5px) scale(2.35294); width: 76px; height: 21px;\\"></div></wup-spin></button>"
+              <wup-spin aria-label="Loading. Please wait" style="position: absolute; transform: translate(18px, -9.5px) scale(0.425);">
+            <div></div><div fade="" style="border-radius: 0px; transform: translate(-18px, 9.5px) scale(2.35294); width: 76px; height: 21px;"></div></wup-spin></button>"
     `);
     expect(t.rect).toMatchInlineSnapshot(`
-      Object {
+      {
         "bottom": 29,
         "height": 17,
         "left": 39.5,
@@ -91,13 +91,13 @@ describe("spinElement", () => {
       rect: testEl.getBoundingClientRect().toJSON(),
     }));
     expect(t.html).toMatchInlineSnapshot(`
-      "<button aria-busy=\\"true\\">
+      "<button aria-busy="true">
               <span>Some text</span>
-              <wup-spin aria-label=\\"Loading. Please wait\\" style=\\"position: absolute; transform: translate(18px, -9.5px) scale(0.425);\\">
-            <div></div><div fade=\\"\\" style=\\"border-radius: 0px; transform: translate(-18px, 9.5px) scale(2.35294); width: 76px; height: 21px;\\"></div></wup-spin></button>"
+              <wup-spin aria-label="Loading. Please wait" style="position: absolute; transform: translate(18px, -9.5px) scale(0.425);">
+            <div></div><div fade="" style="border-radius: 0px; transform: translate(-18px, 9.5px) scale(2.35294); width: 76px; height: 21px;"></div></wup-spin></button>"
     `);
     expect(t.rect).toMatchInlineSnapshot(`
-      Object {
+      {
         "bottom": 27,
         "height": 17,
         "left": 37.5,
@@ -115,10 +115,10 @@ describe("spinElement", () => {
     await page.waitForTimeout(20);
     const t = await page.evaluate(() => ({ html: testEl.parentElement.outerHTML }));
     expect(t.html).toMatchInlineSnapshot(`
-      "<button aria-busy=\\"true\\" style=\\"display: none;\\">
+      "<button aria-busy="true" style="display: none;">
               <span>Some text</span>
-              <wup-spin aria-label=\\"Loading. Please wait\\" style=\\"position: absolute; transform: translate(18px, -9.5px) scale(0.425); display: none;\\">
-            <div></div><div fade=\\"\\" style=\\"border-radius: 0px; transform: translate(-18px, 9.5px) scale(2.35294); width: 76px; height: 21px;\\"></div></wup-spin></button>"
+              <wup-spin aria-label="Loading. Please wait" style="position: absolute; transform: translate(18px, -9.5px) scale(0.425); display: none;">
+            <div></div><div fade="" style="border-radius: 0px; transform: translate(-18px, 9.5px) scale(2.35294); width: 76px; height: 21px;"></div></wup-spin></button>"
     `);
   });
 
@@ -130,9 +130,9 @@ describe("spinElement", () => {
     await page.waitForTimeout(20);
     let t = await page.evaluate(() => ({ html: testEl.parentElement.outerHTML }));
     expect(t.html).toMatchInlineSnapshot(`
-      "<button aria-busy=\\"true\\">
+      "<button aria-busy="true">
               <span>Some text</span>
-              <wup-spin aria-label=\\"Loading. Please wait\\" style=\\"\\">
+              <wup-spin aria-label="Loading. Please wait" style="">
             <div></div></wup-spin></button>"
     `);
 
@@ -140,9 +140,9 @@ describe("spinElement", () => {
     await page.waitForTimeout(20);
     t = await page.evaluate(() => ({ html: testEl.parentElement.outerHTML }));
     expect(t.html).toMatchInlineSnapshot(`
-      "<button aria-busy=\\"true\\">
+      "<button aria-busy="true">
               <span>Some text</span>
-              <wup-spin aria-label=\\"Loading. Please wait\\" style=\\"--spin-size:15px; --spin-item-size: calc( calc( 3em / 8) * 0.375);\\">
+              <wup-spin aria-label="Loading. Please wait" style="--spin-size:15px; --spin-item-size: calc( calc( 3em / 8) * 0.375);">
             <div></div></wup-spin></button>"
     `);
   });

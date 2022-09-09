@@ -25,7 +25,7 @@ export const enum SubmitActions {
 
 declare global {
   namespace WUPForm {
-    export interface SubmitEvent<T> extends Event {
+    export interface SubmitEvent<T extends Record<string, any>> extends Event {
       /** Model collected from controls */
       $model: Partial<T>;
       /** Form related to submit event */
@@ -40,7 +40,7 @@ declare global {
 
     export interface EventMap extends WUPBase.EventMap {
       /** Fires before $submit is happened; can be prevented via e.preventDefault() */
-      $willSubmit: SubmitEvent<null>;
+      $willSubmit: Omit<SubmitEvent<any>, "$model">;
       /** Fires by user-submit when validation succesfull and model is collected */
       $submit: SubmitEvent<any>;
     }
@@ -203,7 +203,7 @@ export default class WUPFormElement<
   }
 
   /** Map model to control-values */
-  static $modelToControls<T>(
+  static $modelToControls<T extends Record<string, any>>(
     m: T,
     controls: IBaseControl[],
     prop: keyof Pick<IBaseControl, "$value" | "$initValue">
@@ -349,7 +349,7 @@ export default class WUPFormElement<
     e.preventDefault();
 
     const willEv = new Event("$willSubmit", { bubbles: true, cancelable: true }) as Events["$willSubmit"];
-    willEv.$model = null;
+    // willEv.$model = null;
     willEv.$relatedEvent = e;
     willEv.$relatedForm = this as WUPFormElement<any>;
     willEv.$submitter = submitter;

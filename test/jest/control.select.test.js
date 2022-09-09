@@ -73,19 +73,19 @@ describe("control.select", () => {
     el.changePending(true);
     expect(el.$isPending).toBe(true);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-select><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" role=\\"combobox\\" aria-haspopup=\\"listbox\\" aria-expanded=\\"false\\" autocomplete=\\"off\\" aria-autocomplete=\\"list\\" aria-busy=\\"true\\" readonly=\\"\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label><wup-spin style=\\"display: none;\\"><div></div></wup-spin></wup-select>"`
+      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-busy="true" readonly=""><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label><wup-spin style="display: none;"><div></div></wup-spin></wup-select>"`
     );
 
     el.changePending(true);
     expect(el.$isPending).toBe(true);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-select><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" role=\\"combobox\\" aria-haspopup=\\"listbox\\" aria-expanded=\\"false\\" autocomplete=\\"off\\" aria-autocomplete=\\"list\\" aria-busy=\\"true\\" readonly=\\"\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label><wup-spin style=\\"display: none;\\"><div></div></wup-spin></wup-select>"`
+      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-busy="true" readonly=""><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label><wup-spin style="display: none;"><div></div></wup-spin></wup-select>"`
     );
 
     el.changePending(false);
     expect(el.$isPending).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-select><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" role=\\"combobox\\" aria-haspopup=\\"listbox\\" aria-expanded=\\"false\\" autocomplete=\\"off\\" aria-autocomplete=\\"list\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-select>"`
+      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label></wup-select>"`
     );
 
     // checking if value applied properly when items is promise
@@ -133,10 +133,10 @@ describe("control.select", () => {
     expect(onHide).toBeCalledTimes(0);
     expect(onShow).toBeCalledTimes(1);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id=\\"txt2\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt3\\">Donny</li><li role=\\"option\\" aria-selected=\\"true\\" id=\\"txt4\\">Mikky</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt5\\">Leo</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt6\\">Splinter</li></ul>"`
+      `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3">Donny</li><li role="option" aria-selected="true" id="txt4">Mikky</li><li role="option" aria-selected="false" id="txt5">Leo</li><li role="option" aria-selected="false" id="txt6">Splinter</li></ul>"`
     );
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-select opened=\\"\\"><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" role=\\"combobox\\" aria-haspopup=\\"listbox\\" aria-expanded=\\"true\\" autocomplete=\\"off\\" aria-autocomplete=\\"list\\" aria-owns=\\"txt2\\" aria-controls=\\"txt2\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label><wup-popup menu=\\"\\" style=\\"min-width: 100px;\\"><ul id=\\"txt2\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt3\\">Donny</li><li role=\\"option\\" aria-selected=\\"true\\" id=\\"txt4\\">Mikky</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt5\\">Leo</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt6\\">Splinter</li></ul></wup-popup></wup-select>"`
+      `"<wup-select opened=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-owns="txt2" aria-controls="txt2"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label><wup-popup menu="" style="min-width: 100px;"><ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3">Donny</li><li role="option" aria-selected="true" id="txt4">Mikky</li><li role="option" aria-selected="false" id="txt5">Leo</li><li role="option" aria-selected="false" id="txt6">Splinter</li></ul></wup-popup></wup-select>"`
     );
 
     // closing by Esc
@@ -145,7 +145,7 @@ describe("control.select", () => {
     expect(el.$isOpen).toBe(false);
     expect(el.$refPopup).toBeDefined(); // disposed only by focus out
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-select><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" role=\\"combobox\\" aria-haspopup=\\"listbox\\" aria-expanded=\\"false\\" autocomplete=\\"off\\" aria-autocomplete=\\"list\\" aria-owns=\\"txt2\\" aria-controls=\\"txt2\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label><wup-popup menu=\\"\\" style=\\"min-width: 100px;\\"><ul id=\\"txt2\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt3\\">Donny</li><li role=\\"option\\" aria-selected=\\"true\\" id=\\"txt4\\">Mikky</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt5\\">Leo</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt6\\">Splinter</li></ul></wup-popup></wup-select>"`
+      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-owns="txt2" aria-controls="txt2"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label><wup-popup menu="" style="min-width: 100px;"><ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3">Donny</li><li role="option" aria-selected="true" id="txt4">Mikky</li><li role="option" aria-selected="false" id="txt5">Leo</li><li role="option" aria-selected="false" id="txt6">Splinter</li></ul></wup-popup></wup-select>"`
     );
     expect(onHide).toBeCalledTimes(1);
     expect(onShow).toBeCalledTimes(1);
@@ -245,7 +245,7 @@ describe("control.select", () => {
     expect(el.$refInput.readOnly).toBe(true);
     expect(el.$refInput.value).toBeTruthy();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-select><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" role=\\"combobox\\" aria-haspopup=\\"listbox\\" aria-expanded=\\"false\\" autocomplete=\\"off\\" aria-owns=\\"txt7\\" aria-controls=\\"txt7\\" readonly=\\"\\"><strong></strong></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-select>"`
+      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-owns="txt7" aria-controls="txt7" readonly=""><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label></wup-select>"`
     );
     el.$refInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
@@ -385,7 +385,7 @@ describe("control.select", () => {
     el.focus();
     await h.wait();
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup menu=\\"\\" style=\\"min-width: 100px;\\"><ul id=\\"txt2\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt3\\">Donny</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt4\\">Mikky</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt5\\">Leo</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt6\\">Splinter</li></ul></wup-popup>"`
+      `"<wup-popup menu="" style="min-width: 100px;"><ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3">Donny</li><li role="option" aria-selected="false" id="txt4">Mikky</li><li role="option" aria-selected="false" id="txt5">Leo</li><li role="option" aria-selected="false" id="txt6">Splinter</li></ul></wup-popup>"`
     );
 
     const setItems = async (items) => {
@@ -399,12 +399,12 @@ describe("control.select", () => {
 
     await setItems([]);
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup menu=\\"\\" style=\\"min-width: 100px;\\"><ul id=\\"txt7\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-disabled=\\"true\\" aria-selected=\\"false\\">No Items</li></ul></wup-popup>"`
+      `"<wup-popup menu="" style="min-width: 100px;"><ul id="txt7" role="listbox" aria-label="Items"><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul></wup-popup>"`
     );
 
     await setItems(() => Promise.resolve(getItems()));
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup menu=\\"\\" style=\\"min-width: 100px;\\"><ul id=\\"txt8\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt9\\">Donny</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt10\\">Mikky</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt11\\">Leo</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt12\\">Splinter</li></ul></wup-popup>"`
+      `"<wup-popup menu="" style="min-width: 100px;"><ul id="txt8" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt9">Donny</li><li role="option" aria-selected="false" id="txt10">Mikky</li><li role="option" aria-selected="false" id="txt11">Leo</li><li role="option" aria-selected="false" id="txt12">Splinter</li></ul></wup-popup>"`
     );
 
     // menu navigation by arrowKeys
@@ -505,20 +505,20 @@ describe("control.select", () => {
     WUPSelectControl.$textNoItems = "";
     await setItems([]);
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup menu=\\"\\" hidden=\\"\\" style=\\"min-width: 100px;\\"><ul id=\\"txt13\\" role=\\"listbox\\" aria-label=\\"Items\\"></ul></wup-popup>"`
+      `"<wup-popup menu="" hidden="" style="min-width: 100px;"><ul id="txt13" role="listbox" aria-label="Items"></ul></wup-popup>"`
     );
     WUPSelectControl.$textNoItems = wasText;
 
     // checking when items is function with promise
     await setItems(() => Promise.resolve(getItems()));
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id=\\"txt14\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt15\\">Donny</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt16\\">Mikky</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt17\\">Leo</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt18\\">Splinter</li></ul>"`
+      `"<ul id="txt14" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt15">Donny</li><li role="option" aria-selected="false" id="txt16">Mikky</li><li role="option" aria-selected="false" id="txt17">Leo</li><li role="option" aria-selected="false" id="txt18">Splinter</li></ul>"`
     );
 
     // checking when items is function without promise
     await setItems(() => getItems().slice(0, 2));
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id=\\"txt19\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt20\\">Donny</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt21\\">Mikky</li></ul>"`
+      `"<ul id="txt19" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt20">Donny</li><li role="option" aria-selected="false" id="txt21">Mikky</li></ul>"`
     );
 
     // checking when items has custom render
@@ -548,12 +548,12 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isOpen).toBe(true);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id=\\"txt2\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt3\\">Donny</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt4\\">Dona Rose</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt5\\">Leo</li></ul>"`
+      `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3">Donny</li><li role="option" aria-selected="false" id="txt4">Dona Rose</li><li role="option" aria-selected="false" id="txt5">Leo</li></ul>"`
     );
 
     await h.typeInputText(el.$refInput, "d");
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id=\\"txt2\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt3\\" focused=\\"\\">Donny</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt4\\">Dona Rose</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt5\\" style=\\"display: none;\\">Leo</li></ul>"`
+      `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3" focused="">Donny</li><li role="option" aria-selected="false" id="txt4">Dona Rose</li><li role="option" aria-selected="false" id="txt5" style="display: none;">Leo</li></ul>"`
     );
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
@@ -580,7 +580,7 @@ describe("control.select", () => {
     await h.typeInputText(el.$refInput, "123");
     expect(el.$isOpen).toBe(true);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id=\\"txt2\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt3\\" style=\\"display: none;\\">Donny</li><li role=\\"option\\" aria-selected=\\"true\\" id=\\"txt4\\" style=\\"display: none;\\">Dona Rose</li><li role=\\"option\\" aria-selected=\\"false\\" id=\\"txt5\\" style=\\"display: none;\\">Leo</li><li role=\\"option\\" aria-disabled=\\"true\\" aria-selected=\\"false\\">No Items</li></ul>"`
+      `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3" style="display: none;">Donny</li><li role="option" aria-selected="true" id="txt4" style="display: none;">Dona Rose</li><li role="option" aria-selected="false" id="txt5" style="display: none;">Leo</li><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
     );
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
@@ -612,7 +612,7 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isOpen).toBe(true);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id=\\"txt6\\" role=\\"listbox\\" aria-label=\\"Items\\"><li role=\\"option\\" aria-disabled=\\"true\\" aria-selected=\\"false\\">No Items</li></ul>"`
+      `"<ul id="txt6" role="listbox" aria-label="Items"><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
     );
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();

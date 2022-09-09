@@ -61,7 +61,7 @@ describe("control.radio", () => {
     expect(el.$refItems.length).toBe(1);
     expect(el.querySelectorAll("input").length).toBe(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<fieldset><legend><strong></strong></legend><label for=\\"txt13\\"><input id=\\"txt13\\" type=\\"radio\\" name=\\"txt12473\\" tabindex=\\"0\\" autocomplete=\\"off\\"><span>Don</span></label></fieldset>"`
+      `"<fieldset><legend><strong></strong></legend><label for="txt13"><input id="txt13" type="radio" name="txt12473" tabindex="0" autocomplete="off"><span>Don</span></label></fieldset>"`
     );
 
     el.$options.items = [
@@ -74,7 +74,7 @@ describe("control.radio", () => {
     ];
     jest.advanceTimersByTime(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<fieldset><legend><strong></strong></legend><label for=\\"txt15\\"><input id=\\"txt15\\" type=\\"radio\\" name=\\"txt14473\\" tabindex=\\"0\\" autocomplete=\\"off\\"><span>testVal123_0</span></label></fieldset>"`
+      `"<fieldset><legend><strong></strong></legend><label for="txt15"><input id="txt15" type="radio" name="txt14473" tabindex="0" autocomplete="off"><span>testVal123_0</span></label></fieldset>"`
     );
   });
 

@@ -38,7 +38,7 @@ const nestedProperty = {
       next = next[deepKeys[i]];
     }
 
-    return next as TVal;
+    return next as unknown as TVal;
   },
 };
 

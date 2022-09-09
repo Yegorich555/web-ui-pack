@@ -39,7 +39,7 @@ describe("control.pwd", () => {
     document.body.appendChild(document.createElement("wup-pwd")); // append after confirmPassword
     await h.wait();
     expect(secondWithout.$isValid).toBe(false);
-    expect(secondWithout.$validate()).toMatchInlineSnapshot(`"Previous \\"wup-pwd\\" not found"`);
+    expect(secondWithout.$validate()).toMatchInlineSnapshot(`"Previous "wup-pwd" not found"`);
   });
 
   test("validation messages ends with -s", () => {
@@ -59,14 +59,14 @@ describe("control.pwd", () => {
     testEl.$value = defValue;
     expect(testEl.$refInput.type).toBe("password");
     expect(testEl.outerHTML).toMatchInlineSnapshot(
-      `"<wup-pwd><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"password\\" id=\\"txt1\\" autocomplete=\\"new-password\\"><strong></strong><span class=\\"wup-hidden\\">press Alt + V to show/hide password</span></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button><button eye=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-pwd>"`
+      `"<wup-pwd><label for="txt1"><span><input placeholder=" " type="password" id="txt1" autocomplete="new-password"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button clear="" aria-hidden="true" tabindex="-1"></button><button eye="" aria-hidden="true" tabindex="-1"></button></label></wup-pwd>"`
     );
 
     testEl.$refBtnEye.click();
     await h.wait();
     expect(testEl.$refInput.type).toBe("text");
     expect(testEl.outerHTML).toMatchInlineSnapshot(
-      `"<wup-pwd><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"text\\" id=\\"txt1\\" autocomplete=\\"new-password\\"><strong></strong><span class=\\"wup-hidden\\">press Alt + V to show/hide password</span></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button><button eye=\\"off\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-pwd>"`
+      `"<wup-pwd><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="new-password"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button clear="" aria-hidden="true" tabindex="-1"></button><button eye="off" aria-hidden="true" tabindex="-1"></button></label></wup-pwd>"`
     );
     let was = getSelection();
     await anim.nextFrame();
@@ -76,7 +76,7 @@ describe("control.pwd", () => {
     testEl.$refBtnEye.click();
     expect(testEl.$refInput.type).toBe("password");
     expect(testEl.outerHTML).toMatchInlineSnapshot(
-      `"<wup-pwd><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"password\\" id=\\"txt1\\" autocomplete=\\"new-password\\"><strong></strong><span class=\\"wup-hidden\\">press Alt + V to show/hide password</span></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button><button eye=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-pwd>"`
+      `"<wup-pwd><label for="txt1"><span><input placeholder=" " type="password" id="txt1" autocomplete="new-password"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button clear="" aria-hidden="true" tabindex="-1"></button><button eye="" aria-hidden="true" tabindex="-1"></button></label></wup-pwd>"`
     );
     await anim.nextFrame();
     expect(getSelection()).toEqual(was);
@@ -107,13 +107,13 @@ describe("control.pwd", () => {
     testEl.$options.reverse = true;
     jest.advanceTimersByTime(1);
     expect(testEl.outerHTML).toMatchInlineSnapshot(
-      `"<wup-pwd reverse=\\"\\"><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"password\\" id=\\"txt1\\" autocomplete=\\"new-password\\"><strong></strong><span class=\\"wup-hidden\\">press Alt + V to show/hide password</span></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button><button eye=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-pwd>"`
+      `"<wup-pwd reverse=""><label for="txt1"><span><input placeholder=" " type="password" id="txt1" autocomplete="new-password"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button clear="" aria-hidden="true" tabindex="-1"></button><button eye="" aria-hidden="true" tabindex="-1"></button></label></wup-pwd>"`
     );
 
     testEl.$options.reverse = false;
     jest.advanceTimersByTime(1);
     expect(testEl.outerHTML).toMatchInlineSnapshot(
-      `"<wup-pwd><label for=\\"txt1\\"><span><input placeholder=\\" \\" type=\\"password\\" id=\\"txt1\\" autocomplete=\\"new-password\\"><strong></strong><span class=\\"wup-hidden\\">press Alt + V to show/hide password</span></span><button clear=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button><button eye=\\"\\" aria-hidden=\\"true\\" tabindex=\\"-1\\"></button></label></wup-pwd>"`
+      `"<wup-pwd><label for="txt1"><span><input placeholder=" " type="password" id="txt1" autocomplete="new-password"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button clear="" aria-hidden="true" tabindex="-1"></button><button eye="" aria-hidden="true" tabindex="-1"></button></label></wup-pwd>"`
     );
   });
 });

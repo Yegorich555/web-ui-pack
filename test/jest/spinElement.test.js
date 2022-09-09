@@ -152,11 +152,11 @@ describe("spinElement", () => {
 
   test("ordinary render", async () => {
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body aria-busy=\\"true\\"><wup-spin style=\\"position: absolute; transform: translate(285px,185px);\\" aria-label=\\"Loading. Please wait\\"><div></div><div fade=\\"\\" style=\\"transform: translate(-285px,-185px); width: 600px; height: 400px;\\"></div></wup-spin></body>"`
+      `"<body aria-busy="true"><wup-spin style="position: absolute; transform: translate(285px,185px);" aria-label="Loading. Please wait"><div></div><div fade="" style="transform: translate(-285px,-185px); width: 600px; height: 400px;"></div></wup-spin></body>"`
     );
     await nextFrame();
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body aria-busy=\\"true\\"><wup-spin style=\\"position: absolute; transform: translate(285px,185px);\\" aria-label=\\"Loading. Please wait\\"><div></div><div fade=\\"\\" style=\\"transform: translate(-285px,-185px); width: 600px; height: 400px;\\"></div></wup-spin></body>"`
+      `"<body aria-busy="true"><wup-spin style="position: absolute; transform: translate(285px,185px);" aria-label="Loading. Please wait"><div></div><div fade="" style="transform: translate(-285px,-185px); width: 600px; height: 400px;"></div></wup-spin></body>"`
     );
     el.remove();
     expect(document.body.outerHTML).toMatchInlineSnapshot(`"<body></body>"`);
@@ -166,13 +166,13 @@ describe("spinElement", () => {
     el.$options.inline = true;
     jest.advanceTimersToNextTimer();
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body aria-busy=\\"true\\"><wup-spin style=\\"--spin-size: 400px; --spin-item-size: calc(30px * 1);\\" aria-label=\\"Loading. Please wait\\"><div></div></wup-spin></body>"`
+      `"<body aria-busy="true"><wup-spin style="--spin-size: 400px; --spin-item-size: calc(30px * 1);" aria-label="Loading. Please wait"><div></div></wup-spin></body>"`
     );
 
     el.$options.inline = false;
     jest.advanceTimersToNextTimer();
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body aria-busy=\\"true\\"><wup-spin style=\\"position: absolute; transform: translate(285px,185px);\\" aria-label=\\"Loading. Please wait\\"><div></div><div fade=\\"\\" style=\\"transform: translate(-285px,-185px); width: 600px; height: 400px;\\"></div></wup-spin></body>"`
+      `"<body aria-busy="true"><wup-spin style="position: absolute; transform: translate(285px,185px);" aria-label="Loading. Please wait"><div></div><div fade="" style="transform: translate(-285px,-185px); width: 600px; height: 400px;"></div></wup-spin></body>"`
     );
   });
 
@@ -181,11 +181,11 @@ describe("spinElement", () => {
     el.$options.overflowFade = false;
     jest.advanceTimersToNextTimer();
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body aria-busy=\\"true\\"><wup-spin style=\\"position: absolute; transform: translate(285px,185px);\\" aria-label=\\"Loading. Please wait\\"><div></div></wup-spin></body>"`
+      `"<body aria-busy="true"><wup-spin style="position: absolute; transform: translate(285px,185px);" aria-label="Loading. Please wait"><div></div></wup-spin></body>"`
     );
     await nextFrame();
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body aria-busy=\\"true\\"><wup-spin style=\\"position: absolute; transform: translate(285px,185px);\\" aria-label=\\"Loading. Please wait\\"><div></div></wup-spin></body>"`
+      `"<body aria-busy="true"><wup-spin style="position: absolute; transform: translate(285px,185px);" aria-label="Loading. Please wait"><div></div></wup-spin></body>"`
     );
   });
 
@@ -195,7 +195,7 @@ describe("spinElement", () => {
     el.$options.overflowTarget = trg;
     jest.advanceTimersToNextTimer();
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body><wup-spin style=\\"position: absolute; transform: translate(35px,-5px) scale(0.4);\\" aria-label=\\"Loading. Please wait\\"><div></div><div fade=\\"\\" style=\\"transform: translate(-35px,5px) scale(2.5); width: 100px; height: 20px;\\"></div></wup-spin><button aria-busy=\\"true\\">someText</button></body>"`
+      `"<body><wup-spin style="position: absolute; transform: translate(35px,-5px) scale(0.4);" aria-label="Loading. Please wait"><div></div><div fade="" style="transform: translate(-35px,5px) scale(2.5); width: 100px; height: 20px;"></div></wup-spin><button aria-busy="true">someText</button></body>"`
     );
   });
 
@@ -207,13 +207,13 @@ describe("spinElement", () => {
     el.$options.fit = true;
     jest.advanceTimersToNextTimer();
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body><wup-spin style=\\"position: absolute; transform: translate(35px,-5px) scale(0.4);\\" aria-label=\\"Loading. Please wait\\"><div></div><div fade=\\"\\" style=\\"transform: translate(-35px,5px) scale(2.5); width: 100px; height: 20px;\\"></div></wup-spin><button aria-busy=\\"true\\">someText</button></body>"`
+      `"<body><wup-spin style="position: absolute; transform: translate(35px,-5px) scale(0.4);" aria-label="Loading. Please wait"><div></div><div fade="" style="transform: translate(-35px,5px) scale(2.5); width: 100px; height: 20px;"></div></wup-spin><button aria-busy="true">someText</button></body>"`
     );
 
     el.$options.fit = false;
     jest.advanceTimersToNextTimer();
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body><wup-spin style=\\"position: absolute; transform: translate(35px,-5px);\\" aria-label=\\"Loading. Please wait\\"><div></div><div fade=\\"\\" style=\\"transform: translate(-35px,5px); width: 100px; height: 20px;\\"></div></wup-spin><button aria-busy=\\"true\\">someText</button></body>"`
+      `"<body><wup-spin style="position: absolute; transform: translate(35px,-5px);" aria-label="Loading. Please wait"><div></div><div fade="" style="transform: translate(-35px,5px); width: 100px; height: 20px;"></div></wup-spin><button aria-busy="true">someText</button></body>"`
     );
 
     trg.appendChild(el);
@@ -221,27 +221,27 @@ describe("spinElement", () => {
     el.$options.fit = false;
     jest.advanceTimersToNextTimer();
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body><button aria-busy=\\"true\\">someText<wup-spin style=\\"\\" aria-label=\\"Loading. Please wait\\"><div></div></wup-spin></button></body>"`
+      `"<body><button aria-busy="true">someText<wup-spin style="" aria-label="Loading. Please wait"><div></div></wup-spin></button></body>"`
     );
 
     el.$options.fit = true;
     jest.advanceTimersToNextTimer();
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body><button aria-busy=\\"true\\">someText<wup-spin style=\\"--spin-size: 20px; --spin-item-size: calc(30px * 0.6666666666666666);\\" aria-label=\\"Loading. Please wait\\"><div></div></wup-spin></button></body>"`
+      `"<body><button aria-busy="true">someText<wup-spin style="--spin-size: 20px; --spin-item-size: calc(30px * 0.6666666666666666);" aria-label="Loading. Please wait"><div></div></wup-spin></button></body>"`
     );
     await nextFrame();
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body><button aria-busy=\\"true\\">someText<wup-spin style=\\"--spin-size: 20px; --spin-item-size: calc(30px * 0.6666666666666666);\\" aria-label=\\"Loading. Please wait\\"><div></div></wup-spin></button></body>"`
+      `"<body><button aria-busy="true">someText<wup-spin style="--spin-size: 20px; --spin-item-size: calc(30px * 0.6666666666666666);" aria-label="Loading. Please wait"><div></div></wup-spin></button></body>"`
     );
   });
 
   test("$refresh()", () => {
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body aria-busy=\\"true\\"><wup-spin style=\\"position: absolute; transform: translate(285px,185px);\\" aria-label=\\"Loading. Please wait\\"><div></div><div fade=\\"\\" style=\\"transform: translate(-285px,-185px); width: 600px; height: 400px;\\"></div></wup-spin></body>"`
+      `"<body aria-busy="true"><wup-spin style="position: absolute; transform: translate(285px,185px);" aria-label="Loading. Please wait"><div></div><div fade="" style="transform: translate(-285px,-185px); width: 600px; height: 400px;"></div></wup-spin></body>"`
     );
     el.$refresh();
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body aria-busy=\\"true\\"><wup-spin style=\\"position: absolute; transform: translate(285px,185px);\\" aria-label=\\"Loading. Please wait\\"><div></div><div fade=\\"\\" style=\\"transform: translate(-285px,-185px); width: 600px; height: 400px;\\"></div></wup-spin></body>"`
+      `"<body aria-busy="true"><wup-spin style="position: absolute; transform: translate(285px,185px);" aria-label="Loading. Please wait"><div></div><div fade="" style="transform: translate(-285px,-185px); width: 600px; height: 400px;"></div></wup-spin></body>"`
     );
   });
 
@@ -251,7 +251,7 @@ describe("spinElement", () => {
     el.$options.inline = false;
     jest.advanceTimersToNextTimer();
     expect(document.body.innerHTML).toMatchInlineSnapshot(
-      `"<wup-spin style=\\"position: absolute; display: none;\\" aria-label=\\"Loading. Please wait\\"><div></div><div fade=\\"\\" style=\\"transform: translate(-285px,-185px); width: 600px; height: 400px;\\"></div></wup-spin><button aria-busy=\\"true\\"></button>"`
+      `"<wup-spin style="position: absolute; display: none;" aria-label="Loading. Please wait"><div></div><div fade="" style="transform: translate(-285px,-185px); width: 600px; height: 400px;"></div></wup-spin><button aria-busy="true"></button>"`
     );
   });
 
@@ -263,7 +263,7 @@ describe("spinElement", () => {
     el.$options.inline = false;
     jest.advanceTimersToNextTimer();
     expect(document.body.innerHTML).toMatchInlineSnapshot(
-      `"<wup-spin style=\\"position: absolute; transform: translate(35px,-5px) scale(0.4);\\" aria-label=\\"Loading. Please wait\\"><div></div><div fade=\\"\\" style=\\"transform: translate(-35px,5px) scale(2.5); width: 100px; height: 20px;\\"></div></wup-spin><button aria-busy=\\"true\\">someText</button>"`
+      `"<wup-spin style="position: absolute; transform: translate(35px,-5px) scale(0.4);" aria-label="Loading. Please wait"><div></div><div fade="" style="transform: translate(-35px,5px) scale(2.5); width: 100px; height: 20px;"></div></wup-spin><button aria-busy="true">someText</button>"`
     );
 
     // simulate hasRelativeParent case
@@ -279,7 +279,7 @@ describe("spinElement", () => {
     el.$options.inline = false;
     jest.advanceTimersToNextTimer();
     expect(document.body.innerHTML).toMatchInlineSnapshot(
-      `"<wup-spin style=\\"position: absolute; transform: translate(35px,-5px) scale(0.4);\\" aria-label=\\"Loading. Please wait\\"><div></div><div fade=\\"\\" style=\\"transform: translate(-35px,5px) scale(2.5); width: 100px; height: 20px;\\"></div></wup-spin><button aria-busy=\\"true\\">someText</button>"`
+      `"<wup-spin style="position: absolute; transform: translate(35px,-5px) scale(0.4);" aria-label="Loading. Please wait"><div></div><div fade="" style="transform: translate(-35px,5px) scale(2.5); width: 100px; height: 20px;"></div></wup-spin><button aria-busy="true">someText</button>"`
     );
   });
 
@@ -293,7 +293,7 @@ describe("spinElement", () => {
     jest.advanceTimersToNextTimer();
 
     expect(document.body.innerHTML).toMatchInlineSnapshot(
-      `"<spin-a style=\\"position: absolute; transform: translate(300px,200px);\\" aria-label=\\"Loading. Please wait\\"><div></div><div fade=\\"\\" style=\\"transform: translate(-300px,-200px); width: 600px; height: 400px;\\"></div></spin-a>"`
+      `"<spin-a style="position: absolute; transform: translate(300px,200px);" aria-label="Loading. Please wait"><div></div><div fade="" style="transform: translate(-300px,-200px); width: 600px; height: 400px;"></div></spin-a>"`
     );
     expect(document.head.innerHTML).toMatchInlineSnapshot(`
       "<style>
@@ -348,7 +348,7 @@ describe("spinElement", () => {
     jest.advanceTimersToNextTimer();
 
     expect(document.body.innerHTML).toMatchInlineSnapshot(
-      `"<spin-b style=\\"position: absolute; transform: translate(300px,200px);\\" aria-label=\\"Loading. Please wait\\"><div></div><div></div><div fade=\\"\\" style=\\"transform: translate(-300px,-200px); width: 600px; height: 400px;\\"></div></spin-b>"`
+      `"<spin-b style="position: absolute; transform: translate(300px,200px);" aria-label="Loading. Please wait"><div></div><div></div><div fade="" style="transform: translate(-300px,-200px); width: 600px; height: 400px;"></div></spin-b>"`
     );
     expect(document.head.innerHTML).toMatchInlineSnapshot(`
       "<style>
@@ -420,7 +420,7 @@ describe("spinElement", () => {
     jest.advanceTimersToNextTimer();
 
     expect(document.body.innerHTML).toMatchInlineSnapshot(
-      `"<spin-c style=\\"position: absolute; transform: translate(300px,200px);\\" aria-label=\\"Loading. Please wait\\"><div></div><div></div><div></div><div></div><div fade=\\"\\" style=\\"transform: translate(-300px,-200px); width: 600px; height: 400px;\\"></div></spin-c>"`
+      `"<spin-c style="position: absolute; transform: translate(300px,200px);" aria-label="Loading. Please wait"><div></div><div></div><div></div><div></div><div fade="" style="transform: translate(-300px,-200px); width: 600px; height: 400px;"></div></spin-c>"`
     );
     expect(document.head.innerHTML).toMatchInlineSnapshot(`
       "<style>
@@ -481,7 +481,7 @@ describe("spinElement", () => {
     jest.advanceTimersToNextTimer();
 
     expect(document.body.innerHTML).toMatchInlineSnapshot(
-      `"<spin-d style=\\"position: absolute; transform: translate(300px,200px);\\" aria-label=\\"Loading. Please wait\\"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div fade=\\"\\" style=\\"transform: translate(-300px,-200px); width: 600px; height: 400px;\\"></div></spin-d>"`
+      `"<spin-d style="position: absolute; transform: translate(300px,200px);" aria-label="Loading. Please wait"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div fade="" style="transform: translate(-300px,-200px); width: 600px; height: 400px;"></div></spin-d>"`
     );
     expect(document.head.innerHTML).toMatchInlineSnapshot(`
       "<style>
@@ -524,7 +524,7 @@ describe("spinElement", () => {
                     position: absolute;
                   }
                   SPIN-D div::after {
-                    content: \\" \\";
+                    content: " ";
                     display: block;
                     position: absolute;
                     left: 0;
@@ -563,7 +563,7 @@ describe("spinElement", () => {
     jest.advanceTimersToNextTimer();
 
     expect(document.body.innerHTML).toMatchInlineSnapshot(
-      `"<spin-e style=\\"position: absolute; transform: translate(300px,200px);\\" aria-label=\\"Loading. Please wait\\"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div fade=\\"\\" style=\\"transform: translate(-300px,-200px); width: 600px; height: 400px;\\"></div></spin-e>"`
+      `"<spin-e style="position: absolute; transform: translate(300px,200px);" aria-label="Loading. Please wait"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div fade="" style="transform: translate(-300px,-200px); width: 600px; height: 400px;"></div></spin-e>"`
     );
     expect(document.head.innerHTML).toMatchInlineSnapshot(`
       "<style>
@@ -617,7 +617,7 @@ describe("spinElement", () => {
                   }
                   SPIN-E div::after {
                     animation: WUP-SPIN-2 var(--spin-speed) linear infinite;
-                    content: \\" \\";
+                    content: " ";
                     display: block;
                     width: var(--spin-item-size);
                     height: var(--spin-item-size);
@@ -658,7 +658,7 @@ describe("spinElement", () => {
     jest.advanceTimersToNextTimer();
 
     expect(document.body.innerHTML).toMatchInlineSnapshot(
-      `"<spin-f style=\\"position: absolute; transform: translate(300px,200px);\\" aria-label=\\"Loading. Please wait\\"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div fade=\\"\\" style=\\"transform: translate(-300px,-200px); width: 600px; height: 400px;\\"></div></spin-f>"`
+      `"<spin-f style="position: absolute; transform: translate(300px,200px);" aria-label="Loading. Please wait"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div fade="" style="transform: translate(-300px,-200px); width: 600px; height: 400px;"></div></spin-f>"`
     );
     expect(document.head.innerHTML).toMatchInlineSnapshot(`
       "<style>
