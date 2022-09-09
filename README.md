@@ -107,8 +107,6 @@ npm install web-ui-pack
              - [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
              - [BaseComboControl](src/controls/baseCombo.ts)
                - [SelectControl](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
-                 - ~~[SelectManyControl](src/controls/selectMany.ts)~~
-               - ~~[DateControl](src/controls/date.ts)~~
 
 ---
 
