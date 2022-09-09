@@ -27,9 +27,16 @@ type TransformFunctions =
  * styleTransform(el, 'translate', '0,0' )
  */
 export function styleTransform(el: HTMLElement, prop: TransformFunctions, value: string | number): void {
-  const reg = new RegExp(` *${prop}\\(([%d \\w.,-]+)\\) *`);
-  const cleared = el.style.transform.replace(reg, "");
-  el.style.transform = value !== "" ? `${cleared}${cleared ? " " : ""}${prop}(${value})` : cleared;
+  const reg = new RegExp(`( )*${prop}\\(([%d \\w.,-]+)\\)( )*`);
+  const setValue = value || value === 0;
+  let isDone = !setValue;
+  const s = setValue
+    ? el.style.transform.replace(reg, (_t, p1, _p2, p3) => {
+        isDone = true;
+        return `${p1 || ""}${prop}(${value})${p3 || ""}`;
+      })
+    : el.style.transform.replace(reg, " ").trim();
+  el.style.transform = isDone ? s : `${el.style.transform} ${prop}(${value})`.trimStart();
 }
 
 /** Converts '23px' to number 23 */
