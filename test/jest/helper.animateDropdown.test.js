@@ -351,6 +351,7 @@ describe("helper.animateDropdown", () => {
     p.then(() => (isResolved = true));
     await nextFrame();
     expect(p.stop).toBeDefined();
+    expect(p.stop).not.toThrow();
     expect(isResolved).toBe(true);
     expect(el.outerHTML).toMatchInlineSnapshot(`"<ul><ul><li>Some text here</li></ul></ul>"`);
   });
