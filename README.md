@@ -15,11 +15,12 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
 ## Features
 
 - Possible to use **with/without** any frameworks like Angular, React, Vue etc. (because it's js-native logic)
-- Focus on accessibility (best practices)
+- Form/controls are ready to use and has built-in completed validation logic for any case that you can imagine (see [demo/controls](https://yegorich555.github.io/web-ui-pack/controls))
+- Focus on accessibility (best practices), other packages has low-accessibility support
 - High scalable and easy customizable (every component is developed to easy inherit and redefine/extend default logic)
-- Built-in css-variables to use custom color-themes
+- Built-in css-variables to use custom color-themes with native ordinary styling (css, scss etc.)
 - Built-in Typescript (coverage types 100%)
-- Built-in `.jsx/.tsx` support
+- Built-in `.jsx/.tsx` support (for React/Vue)
 - Well documented via JSDoc (use intellisense power of your editor to get details about each property/option/usage)
 - Optimized for webpack (build includes only used components and helpers via **side-effects** option)
 - Zero dependancy (don't need to wait for bug-fixing of other packages)
@@ -28,7 +29,7 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
 
 ## Why the package is so big
 
-It's developed with Typescript and has huge built-in documentation (JSDoc). Every method,property,event is documented well so you don't need extra resource to take an example to implement or configure elements. In build-result without comments you will see the it's small-enough
+It's developed with [Typescript](https://www.typescriptlang.org/) and has huge built-in documentation (JSDoc). Every method,property,event is documented well so you don't need extra resource to take an example to implement or configure elements. In build-result without comments you will see that it's small-enough
 
 ## Installing
 
@@ -77,21 +78,21 @@ npm install web-ui-pack
 1. **Naming**
    - All components named as `WUP..Element`, `WUP..Control` and has `<wup-...>` html-tags
    - Public properties/options/events/methods startsWith `$...` (events `$onShow`, `$onHide`, methods `$show`, `$hide`, props like `$isOpen` etc.)
-   - Every component has static `$defaults` (common options for current class) and personal `$options` (per each component). See details in [example](#example)
+   - Every component/class has static `$defaults` (common options for current class) and personal `$options` (per each component). See details in [example](#example)
    - `$options` are observed. So changing options affects on component immediately after empty timeout (every component has static `observedOptions` as set of watched options)
 2. **Usage**
-   - For webpack [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free) switched off (it's for optimization). But **if you don't use webpack** don't import from `web-ui-pack` directly (due to tree-shaking can be not smart enough). Instead use `web-ui-pack/path-to-element`
+   - For webpack [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free) switched on (it's for optimization). But **if you don't use webpack** don't import from `web-ui-pack` directly (due to tree-shaking can be not smart enough). Instead use `web-ui-pack/path-to-element`
    - Every component has a good JSDoc so go ahead and read details directly during the coding
    - Library compiled into ESNext. To avoid unexpected issues include this package into babel (use `exclude: /node_modules\/(?!(web-ui-pack)\/).*/` for babel-loader)
 3. **Limitations**
    - In `jsx/tsx` instead of `className` use `class` attribute (React issue)
-   - If you change custom html-attributes it will update `$options`, but if you change some option it doesn't update related attribute (for performance reasons). Better to avoid customAttributes at all
+   - If you change custom html-attributes it will update `$options`, but if you change some option it removes related attribute (for performance reasons). Better to avoid usage attributes at all
 4. **Inheritance**
 
-   - Components are developed to be easy customized and inherrited. Every rule/option/method is developed to be customized if defaultOptions are not enough. You can rewrite everything that you can imagine without digging a lot in a code. To be sure don't hesitate to take a look on \*.d.ts or source code (there are enough comments to clarify even weird/difficult cases)
+   - Components are developed to be easy customized and inherrited. Use ...$defaults of every class to configure behavior You can rewrite everything that you can imagine without digging a lot in a code. To be sure don't hesitate to take a look on \*.d.ts or source code (there are enough comments to clarify even weird/difficult cases)
    - All Components inherrited from [WUPBaseElement](src/baseElement.ts) that extends default HTMLElement
    - All internal event-callbacks startsWith `got...` (gotReady, gotRemoved)
-   - To redefine component just extend it and register with new html tag. See details in [example](#example)
+   - To redefine component just extend it and register with new html tag OR redefine default behavior via prototype functions (if $defaults are not included something). See details in [example](#example)
    - **Inherritance Tree**
 
      - [_HTMLElement_](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement)
@@ -156,6 +157,17 @@ How to extend/override
 ```typescript
 /// popup.ts
 
+// you can override via prototypes
+const original = WUPPopupElement.prototype.goShow;
+WUPPopupElement.prototype.goShow = function customGoShow() {
+  if (window.isBusy) {
+    return null;
+  }
+  return original(...arguments);
+};
+
+/*** OR create extended class ***/
+
 class Popup extends WUPPopupElement {
   // take a look on definition of WUPPopupElement and you will find internals
   protected override goShow(showCase: WUPPopup.ShowCases): boolean {
@@ -201,7 +213,7 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 - [**nestedProperty.set**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.set(obj, "value.nestedValue", 1) sets obj.value.nestedValue = 1`
 - [**nestedProperty.get**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.get(obj, "nested.val2", out?: {hasProp?: boolean} ) returns value from obj.nested.val2`
 - [**objectClone**(obj, opts: CloneOptions)](src/helpers/objectClone.ts) ⇒ `converts object to observable (via Proxy) to allow listen for changes`
-- [**observer**](#observer) ⇒ `converts object to observable (via Proxy) to allow listen for changes`
+- [**observer**](#helpersobserver) ⇒ `converts object to observable (via Proxy) to allow listen for changes`
 - [**onEvent**(...args)](src/helpers/onEvent.ts) ⇒ `More strict (for Typescript) wrapper of addEventListener() that returns callback with removeListener()`
 - [**onFocusGot**(el: HTMLElement, listener: (ev) => void, {debounceMs: 100, once: false, ...})](src/helpers/onFocusGot.ts) ⇒ `Fires when element/children takes focus once (fires again after onFocusLost on element)`
 - [**onFocusLost**(el: HTMLElement, listener: (ev) => void, {debounceMs: 100, once: false, ...})](src/helpers/onFocusLost.ts) ⇒ `Fires when element/children completely lost focus`
