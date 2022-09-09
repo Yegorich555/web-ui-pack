@@ -480,6 +480,20 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$isValid).toBe(false);
       await h.wait();
       expect(el.$refError).toBeDefined();
+
+      // cover case when errorLeft but focusOut
+      el.$options.validations = { _alwaysInvalid: true };
+      (document.activeElement as HTMLElement)!.blur();
+      await h.wait();
+      el.$refInput.focus();
+      el.$validate(true);
+      await h.wait();
+      expect(el.$isValid).toBe(false);
+      expect(el.$refError).toBeDefined();
+      (document.activeElement as HTMLElement)!.blur();
+      await h.wait();
+      expect(el.$isValid).toBe(false);
+      expect(el.$refError).toBeDefined(); // popup must left even focusout
     });
 
     test("options.validateDebounceMs", async () => {

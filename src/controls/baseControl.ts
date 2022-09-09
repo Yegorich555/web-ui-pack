@@ -766,9 +766,8 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     hiddenLbl.className = this.#ctr.classNameHidden;
     p.appendChild(document.createElement("span"));
     this.$refError = this.appendChild(p);
-    // timeout required because popup dispose events onInit
     // popup need to refresh if content is placed at the top, minimized (we need to update position)
-    setTimeout(() => this.$refError?.appendEvent(this, "focusout", () => this.$refError?.$refresh()));
+    this.$refError.appendEvent(this, "focusout", () => this.$refError?.$refresh());
     return p;
   }
 
