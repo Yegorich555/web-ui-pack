@@ -56,9 +56,16 @@ describe("helper.onEvent", () => {
   test("other options", () => {
     const fn = jest.fn();
     const spyOn = jest.spyOn(document, "addEventListener");
-    const remove = onEvent(document, "click", fn, { passive: true });
+    let remove = onEvent(document, "click", fn, { passive: true });
 
-    document.dispatchEvent(new Event("click"));
+    document.dispatchEvent(new MouseEvent("click"));
+    expect(spyOn).toBeCalledTimes(1);
+    expect(fn).toBeCalledTimes(1);
+    remove();
+
+    jest.clearAllMocks();
+    remove = onEvent(document, "click", fn, true);
+    document.dispatchEvent(new MouseEvent("click"));
     expect(spyOn).toBeCalledTimes(1);
     expect(fn).toBeCalledTimes(1);
     remove();
