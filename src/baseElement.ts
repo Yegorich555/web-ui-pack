@@ -118,7 +118,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
           // Object.getOwnPropertyNames(p).forEach((s) => {
           //   const k = s as keyof Omit<WUPBaseElement, keyof HTMLElement | "$isReady">;
           //   const desc = Object.getOwnPropertyDescriptor(p, s) as PropertyDescriptor;
-          //   if (desc.value instanceof Function && s !== "constructor") {
+          //   if (typeof desc.value === "function" && s !== "constructor") {
           //     this[k] = (this[k] as Function).bind(this);
           //   }
           // });

@@ -299,7 +299,7 @@ export default class WUPSelectControl<
       (nestedProperty.get(window, this.getAttribute("items") || "") as WUPRadio.Options["items"]) || this._opts.items;
 
     let arr: WUPSelect.MenuItems<ValueType>;
-    if (items instanceof Function) {
+    if (typeof items === "function") {
       const f = items();
       if (f instanceof Promise) {
         arr = await promiseWait(f, 300, (v: boolean) => this.changePending(v));
@@ -324,7 +324,7 @@ export default class WUPSelectControl<
       return `Error: not found for ${v != null ? (v as any).toString() : ""}`;
     }
     const item = items[i];
-    if (item.text instanceof Function) {
+    if (typeof item.text === "function") {
       const li = document.createElement("li");
       const s = item.text(item.value, li, i);
       li.remove();
@@ -355,7 +355,7 @@ export default class WUPSelectControl<
     }) as Array<HTMLLIElement & { _text: string }> & { _focused: number; _selected: number };
 
     if (arr.length) {
-      if (arr[0].text instanceof Function) {
+      if (typeof arr[0].text === "function") {
         arr.forEach((v, i) => {
           arrLi[i]._text = (v as WUPSelect.MenuItemFn<ValueType>).text(v.value, arrLi[i], i).toLowerCase();
         });
