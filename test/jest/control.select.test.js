@@ -1,4 +1,5 @@
 import { WUPSelectControl } from "web-ui-pack";
+import { ShowCases } from "web-ui-pack/controls/baseCombo";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../testHelper";
 
@@ -687,7 +688,69 @@ describe("control.select", () => {
     expect(el.$isOpen).toBe(false);
     expect(el.$value).toBe(30);
   });
+
+  test("option showCase", async () => {
+    // showCase: focus
+    el.focus();
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+
+    document.activeElement.blur();
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+
+    el.$options.showCase &= ~ShowCases.onFocus; // remove option
+    el.focus();
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+
+    // showCase: onInput
+    await h.typeInputText(el.$refInput, "d");
+    expect(el.$isOpen).toBe(true);
+
+    el.$hideMenu();
+    el.$options.showCase &= ~ShowCases.onInput; // remove option
+    await h.typeInputText(el.$refInput, "a");
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+
+    // showCase: Click
+    el.click();
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+    el.click();
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    el.$options.showCase &= ~ShowCases.onClick; // remove option
+    el.click();
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+
+    // showCase: inputClick
+    el.$options.showCase |= ShowCases.onClick; // enable click again
+    await h.userClick(el.$refInput);
+    await h.wait();
+    expect(el.$isOpen).toBe(false); // because click by input is disabled
+    el.$options.showCase |= ShowCases.onClickInput;
+    await h.userClick(el.$refInput);
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+    await h.userClick(el.$refInput);
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+
+    // showCase: ArrowKeys
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    el.$options.showCase &= ~ShowCases.onPressArrowKey; // remove option
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+  });
 });
 
-// todo test option showCase
 // manual testcase (close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click

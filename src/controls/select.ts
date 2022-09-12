@@ -14,7 +14,7 @@ import WUPBaseComboControl, { HideCases, ShowCases, WUPBaseComboIn } from "./bas
 const tagName = "wup-select";
 export namespace WUPSelectIn {
   export interface Defs {
-    /** Case when menu-popup need to show
+    /** Case when menu-popup to show
      * @defaultValue onPressArrowKey | onClick | onFocus | onInput */
     showCase: ShowCases;
   }
@@ -289,6 +289,11 @@ export default class WUPSelectControl<
         this.gotMenuItemClick(e as MouseEvent & { target: HTMLLIElement });
       }
     });
+
+    if (this._needFilter) {
+      this._needFilter();
+      delete this._needFilter;
+    }
     return ul;
   }
 
@@ -436,7 +441,7 @@ export default class WUPSelectControl<
     // }
     const wasOpen = this.$isOpen;
     await super.gotKeyDown(e);
-    if (!this.$isOpen || e.altKey || e.shiftKey || e.ctrlKey) {
+    if (!this.$isOpen || e.altKey || e.shiftKey || e.ctrlKey || !this._menuItems) {
       return;
     }
 
@@ -461,6 +466,8 @@ export default class WUPSelectControl<
     }
   }
 
+  /** For case when need to menu is opened but items are not rendered yet */
+  protected _needFilter?: () => void;
   protected override gotInput(e: Event & { currentTarget: HTMLInputElement }): void {
     this.$isOpen && this.focusMenuItem(null, undefined); // reset virtual focus
     super.gotInput(e);
@@ -468,17 +475,27 @@ export default class WUPSelectControl<
     const rawV = e.currentTarget.value;
     const v = rawV.trimStart().toLowerCase();
 
-    const filtered: number[] = [];
-    this._menuItems!.all.forEach((li, i) => {
-      const isOk = this.#ctr.$filterMenuItem(li._text, v, rawV);
-      isOk && filtered.push(i);
-      li.style.display = isOk ? "" : "none";
-    });
-    this._menuItems!.filtered = filtered.length ? filtered : undefined;
-    const hasVisible = !!filtered.length;
-    this.renderMenuNoItems(this.$refPopup!, hasVisible);
+    delete this._needFilter;
+    // todo check how items are filtered when input is empty
+    const filter = (): void => {
+      const filtered: number[] = [];
+      this._menuItems!.all.forEach((li, i) => {
+        const isOk = this.#ctr.$filterMenuItem(li._text, v, rawV);
+        isOk && filtered.push(i);
+        li.style.display = isOk ? "" : "none";
+      });
+      this._menuItems!.filtered = filtered.length ? filtered : undefined;
+      const hasVisible = !!filtered.length;
+      this.renderMenuNoItems(this.$refPopup!, hasVisible);
 
-    hasVisible && rawV !== "" && this.focusMenuItemByIndex(0);
+      hasVisible && rawV !== "" && this.focusMenuItemByIndex(0);
+    };
+
+    if (!this._menuItems) {
+      this._needFilter = filter;
+    } else {
+      filter();
+    }
 
     this.$refPopup!.$refresh();
   }

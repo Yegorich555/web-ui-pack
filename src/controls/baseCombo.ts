@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/named
-import WUPPopupElement, { ShowCases as PopupShowCases, WUPPopup } from "../popup/popupElement";
+import WUPPopupElement, { WUPPopup } from "../popup/popupElement";
 import popupListen from "../popup/popupListen";
 import WUPBaseControl from "./baseControl";
 import WUPTextControl, { WUPTextIn } from "./text";
@@ -9,7 +9,7 @@ export namespace WUPBaseComboIn {
     /** Wait for pointed time before show-error (sumarized with $options.debounce); WARN: hide-error without debounce
      *  @defaultValue 0 */
     validateDebounceMs?: number;
-    /** Case when menu-popup need to show
+    /** Case when menu-popup to show; WARN ShowCases.inputClick doesn't work without ShowCases.click
      * @defaultValue onPressArrowKey | onClick | onFocus */
     showCase: ShowCases;
   }
@@ -32,21 +32,23 @@ export namespace WUPBaseComboIn {
 }
 
 export const enum ShowCases {
-  /** When $show() called programmatically; Don't use it for $options */
+  /** When $show() called programmatically; Don't use it for $options (it's for nested cycle) */
   onManualCall = 1,
-  /** When user types text */
-  onInput = 1 << 1,
-  /** When user presses arrowUp/arrowDown */
-  onPressArrowKey = 1 << 2,
-  /** When user clicks on control (beside editable not-empty input) */
-  onClick = 1 << 3,
   /** When control got focus */
-  onFocus = 1 << 4,
+  onFocus = 1 << 1,
+  /** When user clicks on control (beside editable not-empty input) */
+  onClick = 1 << 2,
+  /** When user clicks on input (by default it's disabled rule to allow user to work with input without popup hide/show blinks) */
+  onClickInput = 1 << 4,
+  /** When user types text */
+  onInput = 1 << 5,
+  /** When user presses arrowUp/arrowDown */
+  onPressArrowKey = 1 << 6,
 }
 
 export const enum HideCases {
-  onClick,
   onManualCall,
+  onClick,
   onSelect,
   onFocusLost,
   OnPressEsc,
@@ -168,7 +170,7 @@ export default abstract class WUPBaseComboControl<
       : this.$refInput.setAttribute("aria-autocomplete", "list");
   }
 
-  override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null): void {
+  override gotFormChanges(propsChanged: Array<keyof WUPForm.Options | keyof WUPBaseCombo.Options> | null): void {
     super.gotFormChanges(propsChanged);
     this.$refInput.readOnly = this.$refInput.readOnly || (this._opts.readOnlyInput as boolean);
 
@@ -181,14 +183,18 @@ export default abstract class WUPBaseComboControl<
       const refs = popupListen(
         {
           target: this,
-          showCase: PopupShowCases.onClick | PopupShowCases.onFocus,
+          showCase: WUPPopup.ShowCases.onClick | WUPPopup.ShowCases.onFocus,
           skipAlreadyFocused: true,
         },
         (s, e) => {
+          const sc = s === WUPPopup.ShowCases.onClick ? ShowCases.onClick : ShowCases.onFocus;
           if (s === WUPPopup.ShowCases.always) {
             return this.$refPopup!;
           }
-          return this.goShowMenu(s === PopupShowCases.onClick ? ShowCases.onClick : ShowCases.onFocus, e);
+          if (!(sc & this._opts.showCase)) {
+            return null;
+          }
+          return this.goShowMenu(sc, e);
         },
         (s, e) => {
           if (s === WUPPopup.HideCases.onManuallCall) {
@@ -214,18 +220,14 @@ export default abstract class WUPBaseComboControl<
   /** Called when need to transfer current value to input */
   protected abstract valueToInput(v: ValueType | undefined): string | Promise<string>;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected async goShowMenu(
-    showCase: ShowCases,
-    e?: MouseEvent | FocusEvent | null,
-    isNeedWait?: boolean
-  ): Promise<WUPPopupElement | null> {
+  /** Override to change show-behavior */
+  canShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | null): boolean {
     if (this.$isReadOnly) {
-      return null;
+      return false;
     }
 
-    if (this.#isOpen) {
-      return this.$refPopup!;
+    if (this._opts.showCase & ShowCases.onClickInput) {
+      return true;
     }
 
     if (
@@ -234,7 +236,21 @@ export default abstract class WUPBaseComboControl<
       !e!.target.readOnly &&
       e!.target.value !== ""
     ) {
-      return null; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
+      return false; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
+    }
+    return true;
+  }
+
+  protected async goShowMenu(
+    showCase: ShowCases,
+    e?: MouseEvent | FocusEvent | null,
+    isNeedWait?: boolean
+  ): Promise<WUPPopupElement | null> {
+    if (this.#isOpen) {
+      return this.$refPopup!;
+    }
+    if (!this.canShowMenu(showCase, e)) {
+      return null;
     }
 
     this.#isOpen = true;
@@ -243,7 +259,7 @@ export default abstract class WUPBaseComboControl<
     if (!this.$refPopup) {
       const p = document.createElement("wup-popup");
       this.$refPopup = p;
-      p.$options.showCase = PopupShowCases.always;
+      p.$options.showCase = WUPPopup.ShowCases.always;
       p.$options.target = this;
       p.$options.offsetFitElement = [1, 1];
       p.$options.minWidthByTarget = true;
@@ -290,8 +306,12 @@ export default abstract class WUPBaseComboControl<
     return this.$refPopup;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected async goHideMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): Promise<boolean> {
+  /** Override to change hide-behavior */
+  canHideMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): boolean {
+    if (this._opts.showCase & ShowCases.onClickInput) {
+      return true;
+    }
+
     if (
       hideCase === HideCases.onClick &&
       e!.target instanceof HTMLInputElement &&
@@ -300,12 +320,19 @@ export default abstract class WUPBaseComboControl<
     ) {
       return false; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
     }
+    return true;
+  }
 
-    const wasOpen = this.#isOpen;
-    this.#isOpen = false;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected async goHideMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): Promise<boolean> {
     if (!this.$refPopup) {
       return false;
     }
+    const wasOpen = this.#isOpen;
+    if (!this.canHideMenu(hideCase, e)) {
+      return false;
+    }
+    this.#isOpen = false;
     /* istanbul ignore else */
     if (wasOpen) {
       this.#popupRefs!.hide(WUPPopup.HideCases.onManuallCall); // call for ref-listener to apply events properly
@@ -369,10 +396,12 @@ export default abstract class WUPBaseComboControl<
       return;
     }
 
-    if (e.key === "ArrowDown") {
-      !this.#isOpen && (await this.goShowMenu(ShowCases.onPressArrowKey, null, true));
-    } else if (e.key === "ArrowUp") {
-      !this.#isOpen && (await this.goShowMenu(ShowCases.onPressArrowKey, null, true));
+    if (this._opts.showCase & ShowCases.onPressArrowKey) {
+      if (e.key === "ArrowDown") {
+        !this.#isOpen && (await this.goShowMenu(ShowCases.onPressArrowKey, null, true));
+      } else if (e.key === "ArrowUp") {
+        !this.#isOpen && (await this.goShowMenu(ShowCases.onPressArrowKey, null, true));
+      }
     }
 
     if (!this.#isOpen) {
@@ -444,3 +473,4 @@ export default abstract class WUPBaseComboControl<
     super.gotRemoved();
   }
 }
+// todo hide animation is broken by focusout
