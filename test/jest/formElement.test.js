@@ -531,8 +531,8 @@ describe("formElement", () => {
       });
 
       test("reset", async () => {
-        await h.typeInputText(inputs[0].$refInput, "kaly@");
-        await h.typeInputText(inputs[1].$refInput, "Ka");
+        await h.userTypeText(inputs[0].$refInput, "kaly@");
+        await h.userTypeText(inputs[1].$refInput, "Ka");
         expect(inputs[0].$initValue).not.toBe("kaly@");
         expect(inputs[1].$initValue).not.toBe("Ka");
         expect(inputs[0].$isDirty).toBe(true);
@@ -552,8 +552,8 @@ describe("formElement", () => {
         expect(inputs[1].$isChanged).toBe(false);
 
         // again without reset
-        await h.typeInputText(inputs[0].$refInput, "kaly@mail");
-        await h.typeInputText(inputs[1].$refInput, "Kaly");
+        await h.userTypeText(inputs[0].$refInput, "kaly@mail");
+        await h.userTypeText(inputs[1].$refInput, "Kaly");
         el.$options.submitActions = SubmitActions.none;
         btnSubmit.click();
         await h.wait();

@@ -347,7 +347,7 @@ export async function wait(t = 1000) {
 }
 
 /** Simulate user type text */
-export async function typeInputText(el: HTMLInputElement, text: string, opts = { clearPrevious: true }) {
+export async function userTypeText(el: HTMLInputElement, text: string, opts = { clearPrevious: true }) {
   jest.useFakeTimers();
   el.focus();
   if (opts?.clearPrevious) {

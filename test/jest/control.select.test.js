@@ -206,7 +206,7 @@ describe("control.select", () => {
     expect(el.$isOpen).toBe(false);
 
     // opening by text in input
-    await h.typeInputText(el.$refInput, "S");
+    await h.userTypeText(el.$refInput, "S");
     await h.wait();
     expect(el.$isOpen).toBe(true);
 
@@ -552,7 +552,7 @@ describe("control.select", () => {
       `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3">Donny</li><li role="option" aria-selected="false" id="txt4">Dona Rose</li><li role="option" aria-selected="false" id="txt5">Leo</li></ul>"`
     );
 
-    await h.typeInputText(el.$refInput, "d");
+    await h.userTypeText(el.$refInput, "d");
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
       `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3" focused="">Donny</li><li role="option" aria-selected="false" id="txt4">Dona Rose</li><li role="option" aria-selected="false" id="txt5" style="display: none;">Leo</li></ul>"`
     );
@@ -563,7 +563,7 @@ describe("control.select", () => {
     expect(el.$refInput.value).toBe("Donny");
 
     // ordinary filter: 2 items starts with 'do' ignoring case
-    await h.typeInputText(el.$refInput, "do");
+    await h.userTypeText(el.$refInput, "do");
     expect(el.$refInput.value).toBe("do");
     expect(el.$isOpen).toBe(true); // open when user opens filter
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
@@ -578,7 +578,7 @@ describe("control.select", () => {
 
     // when 'No items' are shown
     const was = el.$value;
-    await h.typeInputText(el.$refInput, "123");
+    await h.userTypeText(el.$refInput, "123");
     expect(el.$isOpen).toBe(true);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
       `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3" style="display: none;">Donny</li><li role="option" aria-selected="true" id="txt4" style="display: none;">Dona Rose</li><li role="option" aria-selected="false" id="txt5" style="display: none;">Leo</li><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
@@ -593,7 +593,7 @@ describe("control.select", () => {
     el.$value = 10;
     await h.wait();
     expect(el.$refInput.value).toBe("Donny");
-    await h.typeInputText(el.$refInput, "rose"); // filter by second word
+    await h.userTypeText(el.$refInput, "rose"); // filter by second word
     expect(el.$isOpen).toBe(true);
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
@@ -705,12 +705,12 @@ describe("control.select", () => {
     expect(el.$isOpen).toBe(false);
 
     // showCase: onInput
-    await h.typeInputText(el.$refInput, "d");
+    await h.userTypeText(el.$refInput, "d");
     expect(el.$isOpen).toBe(true);
 
     el.$hideMenu();
     el.$options.showCase &= ~ShowCases.onInput; // remove option
-    await h.typeInputText(el.$refInput, "a");
+    await h.userTypeText(el.$refInput, "a");
     await h.wait();
     expect(el.$isOpen).toBe(false);
 

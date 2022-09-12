@@ -73,17 +73,17 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       el.addEventListener("$change", spyChange);
 
       expect(el.$value).toBe(undefined);
-      await h.typeInputText(el.$refInput, initV);
+      await h.userTypeText(el.$refInput, initV);
       expect(el.$value).toBe(undefined);
       jest.advanceTimersByTime(401);
       expect(el.$refInput.value).toBe(initV);
       expect(el.$value).toBe(initV);
       expect(spyChange).toBeCalledTimes(1);
-      await h.typeInputText(el.$refInput, ""); // just for coverage
+      await h.userTypeText(el.$refInput, ""); // just for coverage
 
       el.$options.debounceMs = 0;
       el.$value = undefined;
-      await h.typeInputText(el.$refInput, initV);
+      await h.userTypeText(el.$refInput, initV);
       expect(el.$value).toBe(initV);
     });
 
