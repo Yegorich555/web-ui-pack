@@ -367,9 +367,8 @@ Object.seal(observer);
 export default observer;
 
 /*
-  todo case:
+  troubleshooting:
   const obj = observer.make({v: 1})
   obj.v = 2; // propsChanged
-  obj.v = 1 // props not Changed (because we use async)
-
+  obj.v = 1 // props not changed but event is called (because we use async)
 */

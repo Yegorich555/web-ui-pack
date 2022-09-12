@@ -376,7 +376,7 @@ export async function typeInputText(el: HTMLInputElement, text: string, opts = {
 /** Simulate user mouse click with 100ms between mouseDown and mouseUp */
 export async function userClick(el: HTMLElement, opts?: MouseEventInit) {
   jest.useFakeTimers();
-  const o = () => ({ bubbles: true, cancelable: true, pageX: 10, pageY: 5, ...opts });
+  const o = () => ({ bubbles: true, cancelable: true, pageX: 1, pageY: 1, ...opts });
   el.dispatchEvent(new MouseEvent("mousedown", o()));
   await wait(100);
   el.dispatchEvent(new MouseEvent("mouseup", o()));

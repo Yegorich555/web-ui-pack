@@ -103,7 +103,7 @@ describe("control.select", () => {
     expect(el.$isPending).toBe(true);
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true })); // keydown events must be skipped because of pending
     el.$showMenu(); // showMenu must be skipped because of pending
-    // await h.userClick(el) // todo why it's reset value ?
+    // await h.userClick(el); // WARN; somehow it blocks Promise.resolve - it's test-issue
     await h.wait();
     expect(el.$isOpen).toBe(false);
     expect(el.$refInput.value).toBe("Donny");
