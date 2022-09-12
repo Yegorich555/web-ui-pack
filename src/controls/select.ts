@@ -8,6 +8,7 @@ import { WUPcssIcon } from "../styles";
 import WUPBaseComboControl, { HideCases, ShowCases, WUPBaseComboIn } from "./baseCombo";
 
 /* c8 ignore next */
+/* istanbul ignore next */
 !WUPSpinElement && console.error("!"); // It's required otherwise import is ignored by webpack
 
 const tagName = "wup-select";
@@ -195,6 +196,7 @@ export default class WUPSelectControl<
     if (ev.props.includes("items")) {
       this.removePopup();
       this._cachedItems = undefined;
+      /* istanbul ignore else */
       if (ev.props.length === 1) {
         return; // skip re-init if only $options.items is changed
       }
@@ -282,6 +284,7 @@ export default class WUPSelectControl<
     // it happens on every show because by hide it dispose events
     onEvent(ul, "click", (e) => {
       e.stopPropagation(); // to prevent popup-hide-show
+      /* istanbul ignore else */
       if (e.target instanceof HTMLLIElement) {
         this.gotMenuItemClick(e as MouseEvent & { target: HTMLLIElement });
       }

@@ -5,6 +5,7 @@ import isEqual, { isBothNaN } from "./isEqual";
 // #region Helpers
 const arrRemove = <T>(arr: Array<T>, item: T): void => {
   const i = arr.indexOf(item);
+  /* istanbul ignore else */
   if (i > -1) {
     arr.splice(i, 1);
   }
@@ -13,6 +14,7 @@ const arrRemove = <T>(arr: Array<T>, item: T): void => {
 const some = <K, V>(m: Map<K, V>, predicate: (key: K, val: V) => boolean): boolean => {
   // eslint-disable-next-line no-restricted-syntax
   for (const [key, value] of m.entries()) {
+    /* istanbul ignore else */
     if (predicate(key, value)) {
       return true;
     }

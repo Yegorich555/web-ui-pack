@@ -209,6 +209,7 @@ export default class WUPPopupElement<
           }
 
           if (!popup.goShow.call(popup, v)) {
+            /* istanbul ignore else */
             if (isCreate) {
               popup!.#listenRefs = undefined; // otherwise remove() destroys events
               popup.remove.call(popup);
@@ -221,6 +222,7 @@ export default class WUPPopupElement<
         async (v) => {
           isHidding = true;
           const ok = await popup!.goHide.call(popup, v);
+          /* istanbul ignore else */
           if (ok && isHidding) {
             popup!.#listenRefs = undefined; // otherwise remove() destroys events
             popup!.remove.call(popup);
@@ -293,6 +295,7 @@ export default class WUPPopupElement<
 
   /** Force to update position when popup $isOpen. Call this if popup content is changed */
   $refresh(): void {
+    /* istanbul ignore else */
     if (this.#state) this.#state.prevRect = undefined;
   }
 
@@ -553,6 +556,7 @@ export default class WUPPopupElement<
 
     const { animTime } = this.#state!.userStyles;
     if (!animTime && window.matchMedia("not all and (prefers-reduced-motion)").matches && this._opts.animation) {
+      /* istanbul ignore else */
       if (this._opts.animation === WUPPopup.Animations.drawer) {
         console.warn(
           `${this.tagName} style.animationDuration is missed but $options.animation is defined. Please point animation duration via styles`
@@ -776,6 +780,7 @@ export default class WUPPopupElement<
             const meUpdated = { ...me, w: this.offsetWidth, h: this.offsetHeight };
             pos = pfn(t, meUpdated, fit);
             ok = !hasOveflow(pos, meUpdated);
+            /* istanbul ignore else */
             if (!ok) {
               // reset styles if need to look for another position
               this.setMaxWidth(_defMaxWidth); // resetting is required to get default size
@@ -801,6 +806,7 @@ export default class WUPPopupElement<
           }
         };
 
+        /* istanbul ignore else */
         if (pos.arrowLeft == null) {
           checkSize(this.offsetWidth);
           pos.arrowLeft = t.left + t.width / 2 - me.arrow.w / 2; // attach to middle of target

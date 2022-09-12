@@ -473,6 +473,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   $ariaSpeak(text: string): void {
     // don't use speechSynthesis because it's announce despite on screen-reader settings - can be disabled
     // text && speechSynthesis && speechSynthesis.speak(new SpeechSynthesisUtterance(text)); // watchfix: https://stackoverflow.com/questions/72907960/web-accessibility-window-speechsynthesis-vs-role-alert
+    /* istanbul ignore else */
     if (text) {
       const el = document.createElement("section");
       el.setAttribute("aria-live", "polite");
@@ -784,6 +785,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
     this._opts.validationShowAll && this.renderValidations(this.$refError);
 
+    /* istanbul ignore else */
     if (err !== null) {
       this.#refErrTarget = target;
       (target as HTMLInputElement).setCustomValidity?.call(target, err);
@@ -820,7 +822,11 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   /** Fire this method to update value & validate; returns null when not $isReady, true if changed */
-  protected setValue(v: ValueType | undefined, canValidate = true): boolean | null {
+  protected setValue(
+    v: ValueType | undefined,
+    /* istanbul ignore next */
+    canValidate = true
+  ): boolean | null {
     const was = this.#value;
     this.#value = v;
     if (!this.$isReady) {
@@ -854,6 +860,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     const was = this.#value;
 
     let v: ValueType | undefined;
+    /* istanbul ignore else */
     if (this._opts.clearActions & ClearActions.resetToInit) {
       if (this.$isChanged) {
         v = this.$initValue;

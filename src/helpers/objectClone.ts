@@ -16,6 +16,7 @@ export default function objectClone<T>(obj: T, opts?: CloneOptions): T {
       const arr = [];
       for (let k = 0; k < vobj.length; ++k) {
         const v = map(vobj[k]);
+        /* istanbul ignore else */
         if (!skipUndefined || v !== undefined) {
           arr.push(v);
         }

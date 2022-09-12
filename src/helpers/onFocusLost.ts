@@ -29,6 +29,7 @@ function setEvent(): void {
     { passive: true }
   );
 
+  /* istanbul ignore else */
   if (!rstEvent) {
     rstEvent = () => {
       if (--rstCnt === 0) {

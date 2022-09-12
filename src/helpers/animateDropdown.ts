@@ -17,7 +17,12 @@ interface PromiseCancel {
  * * If call it again on the same element it wil continue/revert previous animation
  * * If call it again with reverted [isClose] previous promise (for open-end) is never resolved
  */
-export default function animateDropdown(el: HTMLElement, timeMs = 300, isClose = false): Promise<void> & PromiseCancel {
+export default function animateDropdown(
+  el: HTMLElement,
+  /* istanbul ignore next */
+  timeMs = 300,
+  isClose = false
+): Promise<void> & PromiseCancel {
   const stored = frames.get(el);
   if (stored) {
     window.cancelAnimationFrame(stored);

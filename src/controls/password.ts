@@ -153,6 +153,7 @@ export default class WUPPasswordControl<
             }
             ++i;
           }
+          /* istanbul ignore else */
           if (i === -2) {
             return `Previous "${selector}" not found`;
           }

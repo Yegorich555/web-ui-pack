@@ -4,6 +4,7 @@ import { nestedProperty, promiseWait, scrollIntoView } from "./indexHelpers";
 import WUPSpinElement from "./spinElement";
 
 /* c8 ignore next */
+/* istanbul ignore next */
 !WUPSpinElement && console.error("!"); // It's required otherwise import is ignored by webpack
 
 export const enum SubmitActions {
@@ -259,6 +260,7 @@ export default class WUPFormElement<
   }
 
   set $model(m: Partial<Model>) {
+    /* istanbul ignore else */
     if (m !== this._model) {
       this._model = m;
       this.#ctr.$modelToControls(m, this.$controls, "$value");
@@ -273,6 +275,7 @@ export default class WUPFormElement<
   }
 
   set $initModel(m: Partial<Model>) {
+    /* istanbul ignore else */
     if (m !== this._initModel) {
       this._initModel = m;
       this.#ctr.$modelToControls(m, this.$controls, "$initValue");
@@ -285,6 +288,7 @@ export default class WUPFormElement<
   }
 
   set $isPending(v: boolean) {
+    /* istanbul ignore else */
     if (v !== this.$isPending) {
       this.changePending(v);
     }
@@ -397,6 +401,7 @@ export default class WUPFormElement<
       const p1 = this.$onSubmit?.call(this, ev);
       // SubmitEvent constructor doesn't exist on some browsers: https://developer.mozilla.org/en-US/docs/Web/API/SubmitEvent/SubmitEvent
       const ev2 = new (window.SubmitEvent || Event)("submit", { submitter, cancelable: false, bubbles: true });
+      /* istanbul ignore else */
       if (!window.SubmitEvent) {
         (ev2 as any).submitter = submitter;
       }

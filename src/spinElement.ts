@@ -83,6 +83,7 @@ export default class WUPSpinElement extends WUPBaseElement {
   }
 
   /* c8 ignore next 3 */
+  /* istanbul ignore next 3 */
   static get $styleApplied(): string {
     return "";
   }
@@ -299,9 +300,11 @@ export default class WUPSpinElement extends WUPBaseElement {
     if (this.$refFade) {
       styleTransform(this.$refFade, "translate", `${r.left - left}px,${r.top - top}px`);
       styleTransform(this.$refFade, "scale", scale === 1 || !scale ? "" : `${1 / scale}`);
+      /* istanbul ignore else */
       if (this.$refFade.clientWidth !== r.width) {
         this.$refFade.style.width = `${r.width}px`;
       }
+      /* istanbul ignore else */
       if (this.$refFade.clientWidth !== r.height) {
         this.$refFade.style.height = `${r.height}px`;
       }

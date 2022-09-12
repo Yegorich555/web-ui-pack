@@ -306,7 +306,7 @@ export default abstract class WUPBaseComboControl<
     if (!this.$refPopup) {
       return false;
     }
-
+    /* istanbul ignore else */
     if (wasOpen) {
       this.#popupRefs!.hide(WUPPopup.HideCases.onManuallCall); // call for ref-listener to apply events properly
       await this.$refPopup.$hide();
