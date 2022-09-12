@@ -476,18 +476,16 @@ export default class WUPSelectControl<
     const v = rawV.trimStart().toLowerCase();
 
     delete this._needFilter;
-    // todo check how items are filtered when input is empty
     const filter = (): void => {
       const filtered: number[] = [];
       this._menuItems!.all.forEach((li, i) => {
-        const isOk = this.#ctr.$filterMenuItem(li._text, v, rawV);
-        isOk && filtered.push(i);
+        const isOk = !v || this.#ctr.$filterMenuItem(li._text, v, rawV);
+        isOk && filtered!.push(i);
         li.style.display = isOk ? "" : "none";
       });
       this._menuItems!.filtered = filtered.length ? filtered : undefined;
-      const hasVisible = !!filtered.length;
+      const hasVisible = filtered.length !== 0;
       this.renderMenuNoItems(this.$refPopup!, hasVisible);
-
       hasVisible && rawV !== "" && this.focusMenuItemByIndex(0);
     };
 
