@@ -354,10 +354,8 @@ export default abstract class WUPBaseComboControl<
 
     if (next) {
       next.setAttribute("aria-selected", true);
-      setTimeout(() => {
-        const ifneed = (next as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
-        ifneed ? ifneed.call(next, false) : next.scrollIntoView();
-      }); // timeout to wait to popup to start opening otherwise scroll doesn't work
+      const ifneed = (next as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
+      ifneed ? ifneed.call(next, false) : next.scrollIntoView();
     }
     this.#selectedMenuItem = next;
   }

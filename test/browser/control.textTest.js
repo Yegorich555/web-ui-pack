@@ -2,8 +2,9 @@
 
 /** @type WUPTextControl */
 let el;
-export function initTestTextControl({ htmlTag, type }) {
+export function initTestTextControl({ htmlTag, type, onBeforeEach }) {
   beforeEach(async () => {
+    await onBeforeEach?.call();
     await page.evaluate(
       (opts) => {
         const tagName = opts.htmlTag;

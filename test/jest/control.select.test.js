@@ -689,7 +689,5 @@ describe("control.select", () => {
   });
 });
 
-// todo e2e: open by ArrowUp must scroll to last item at the end of animation - issue here because selectMenuItem fires after focusMenuItem
-// todo e2e: click on title again or on input doesn't close popup
 // todo test option showCase
 // manual testcase (close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click
