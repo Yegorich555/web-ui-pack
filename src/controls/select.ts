@@ -24,6 +24,8 @@ export namespace WUPSelectIn {
     items: WUPSelect.MenuItems<T> | (() => WUPSelect.MenuItems<T> | Promise<WUPSelect.MenuItems<T>>);
     /** Set true to make input not editable but allow to user select items via popup-menu (ordinary dropdown mode) */
     readOnlyInput?: boolean;
+    /** Allow user to create new value (if value not found in items) */
+    allowNewValue?: boolean;
   }
 
   export type Generics<
@@ -322,9 +324,12 @@ export default class WUPSelectControl<
   }
 
   // Called when need to show text related to value
-  protected valueToText(v: ItemType | undefined, items: WUPSelect.MenuItems<ItemType>): string {
+  protected valueToText(v: ItemType, items: WUPSelect.MenuItems<ItemType>): string {
     const i = items.findIndex((o) => this.#ctr.$isEqual(o.value, v));
     if (i === -1) {
+      if (this._opts.allowNewValue) {
+        return v != null ? (v as any).toString() : "";
+      }
       console.error(`${this.tagName}${this._opts.name ? `[${this._opts.name}]` : ""}. Not found in items`, {
         items,
         value: v,
@@ -346,6 +351,14 @@ export default class WUPSelectControl<
       return "";
     }
     const r = this.getItems().then((items) => this.valueToText(v as any, items as WUPSelect.MenuItems<any>));
+    return r;
+  }
+
+  /** It's called with option allowNewValue to find value related to text */
+  protected findValueByText(txt: string): ValueType | undefined {
+    const s = txt.toLowerCase();
+    const i = this._menuItems?.all.findIndex((o) => o._text === s) as number;
+    const r = i > -1 ? this._cachedItems![i].value : undefined;
     return r;
   }
 
@@ -434,12 +447,18 @@ export default class WUPSelectControl<
     this._menuItems!.focused = index;
   }
 
-  protected override async gotKeyDown(e: KeyboardEvent): Promise<void> {
+  protected override async gotKeyDown(e: KeyboardEvent & { _handleSetValue?: boolean }): Promise<void> {
     // pending event disables gotKeyDown so it's case impossible
     // if (this.$isPending) {
     //   return;
     // }
     const wasOpen = this.$isOpen;
+    if (e.key === "Enter" && wasOpen && this._opts.allowNewValue && !this._focusedMenuValue) {
+      const txt = this.$refInput.value.trim();
+      const v = txt ? this.findValueByText(txt) ?? (txt as any) : undefined;
+      this.setValue(v);
+      e._handleSetValue = true; // prevent set value by enter
+    }
     await super.gotKeyDown(e);
     if (!this.$isOpen || e.altKey || e.shiftKey || e.ctrlKey || !this._menuItems) {
       return;
@@ -486,7 +505,7 @@ export default class WUPSelectControl<
       this._menuItems!.filtered = filtered.length ? filtered : undefined;
       const hasVisible = filtered.length !== 0;
       this.renderMenuNoItems(this.$refPopup!, hasVisible);
-      hasVisible && rawV !== "" && this.focusMenuItemByIndex(0);
+      hasVisible && rawV !== "" && !this._opts.allowNewValue && this.focusMenuItemByIndex(0);
     };
 
     if (!this._menuItems) {
@@ -498,6 +517,16 @@ export default class WUPSelectControl<
     this.$refPopup!.$refresh();
   }
 
+  protected override gotFocusLost(): void {
+    if (this._opts.allowNewValue) {
+      // to allow user left value without press Enter
+      const txt = this.$refInput.value.trim();
+      const v = txt ? this.findValueByText(txt) ?? (txt as any) : undefined;
+      this.setValue(v);
+    }
+    super.gotFocusLost();
+  }
+
   protected override removePopup(): void {
     super.removePopup();
     this._menuItems = undefined;
@@ -506,4 +535,4 @@ export default class WUPSelectControl<
 
 customElements.define(tagName, WUPSelectControl);
 
-// todo need option to allowUser create new value
+// maybe event onCreateNew?

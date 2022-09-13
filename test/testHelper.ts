@@ -346,7 +346,7 @@ export async function wait(t = 1000) {
   }
 }
 
-/** Simulate user type text */
+/** Simulate user type text: focus + keydown+ keyup + keypress + input events */
 export async function userTypeText(el: HTMLInputElement, text: string, opts = { clearPrevious: true }) {
   jest.useFakeTimers();
   el.focus();

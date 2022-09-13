@@ -52,6 +52,7 @@ export default function SelectControlView() {
         "Inheritted features from TextControl",
         "Pending state with spinner if $options.items is a function with promise-result",
         "Possible to customize render of items (via $options.items; see below...)",
+        "Possible to create any value not pointed in items (via $options.allowNewValue)",
       ]}
     >
       <wup-form
@@ -135,6 +136,17 @@ export default function SelectControlView() {
               el.$options.name = "withoutClearButton";
               el.$options.items = items;
               el.$options.clearButton = false;
+            }
+          }}
+        />
+        <wup-select
+          initValue="14"
+          ref={(el) => {
+            if (el) {
+              el.$options.name = "allowsNewValue";
+              el.$options.label = "Allows New Value ($options.allowNewValue)";
+              el.$options.items = items;
+              el.$options.allowNewValue = true;
             }
           }}
         />

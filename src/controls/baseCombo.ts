@@ -341,7 +341,6 @@ export default abstract class WUPBaseComboControl<
       // remove popup only by focusOut to optimize resources
       if (hideCase === HideCases.onFocusLost) {
         this.removePopup();
-        this.setValue(this.$value); // to update/rollback input according to result
       }
     }
 
@@ -357,7 +356,7 @@ export default abstract class WUPBaseComboControl<
   }
 
   #focusedMenuItem?: HTMLElement | null;
-  #focusedMenuValue?: ValueType | undefined;
+  _focusedMenuValue?: ValueType | undefined;
   /** Focus/resetFocus for item (via aria-activedescendant) */
   protected focusMenuItem(next: HTMLElement | null, nextValue: ValueType | undefined): void {
     this.#focusedMenuItem?.removeAttribute("focused");
@@ -371,7 +370,7 @@ export default abstract class WUPBaseComboControl<
       this.$refInput.removeAttribute("aria-activedescendant");
     }
     this.#focusedMenuItem = next;
-    this.#focusedMenuValue = nextValue;
+    this._focusedMenuValue = nextValue;
   }
 
   #selectedMenuItem?: HTMLElement | null;
@@ -387,7 +386,7 @@ export default abstract class WUPBaseComboControl<
     this.#selectedMenuItem = next;
   }
 
-  protected override async gotKeyDown(e: KeyboardEvent): Promise<void> {
+  protected override async gotKeyDown(e: KeyboardEvent & { _handleSetValue?: boolean }): Promise<void> {
     // don't allow to process Esc-key when menu is opened
     const isEscPrevent = this.#isOpen && e.key === "Escape";
     !isEscPrevent && super.gotKeyDown(e);
@@ -414,10 +413,14 @@ export default abstract class WUPBaseComboControl<
       await this.goHideMenu(HideCases.OnPressEsc);
     } else if (e.key === "Enter") {
       e.preventDefault();
-      if (this.#focusedMenuValue !== undefined) {
-        this.selectValue(this.#focusedMenuValue);
+      if (!e._handleSetValue) {
+        if (this._focusedMenuValue !== undefined) {
+          this.selectValue(this._focusedMenuValue);
+        } else {
+          this.setInputValue(this.$value); // reset input to currentValue
+        }
       } else {
-        this.setInputValue(this.$value); // reset input to currentValue
+        delete e._handleSetValue;
       }
       await this.goHideMenu(HideCases.OnPressEnter);
     }
@@ -431,6 +434,7 @@ export default abstract class WUPBaseComboControl<
   protected override gotFocusLost(): void {
     super.gotFocusLost();
     !this.#isOpen && this.removePopup(); // otherwise it's removed by hidingMenu
+    this.setInputValue(this.$value); // to update/rollback input according to result
   }
 
   /** Called when user selected new value from menu */
@@ -456,7 +460,7 @@ export default abstract class WUPBaseComboControl<
     this.$refPopup?.remove();
     this.$refPopup = undefined;
     this.#focusedMenuItem = undefined;
-    this.#focusedMenuValue = undefined;
+    delete this._focusedMenuValue;
     if (this.#isOpen) {
       this.#isOpen = false;
       this.removeAttribute("opened");

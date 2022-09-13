@@ -842,7 +842,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     this.#isValid = undefined;
 
     const c = this._opts.validationCase;
-    if (this.$isReady && canValidate && (c & ValidationCases.onChange || c & ValidationCases.onChangeSmart)) {
+    if (canValidate && (c & ValidationCases.onChange || c & ValidationCases.onChangeSmart)) {
       if (this.#wasValid == null && c & ValidationCases.onChangeSmart) {
         this.#value = was;
         this.goValidate(ValidateFromCases.onChange, false); // to define if previous value was valid or not

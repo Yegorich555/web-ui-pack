@@ -689,67 +689,120 @@ describe("control.select", () => {
     expect(el.$value).toBe(30);
   });
 
-  test("option showCase", async () => {
-    // showCase: focus
-    el.focus();
-    await h.wait();
-    expect(el.$isOpen).toBe(true);
+  describe("options", () => {
+    test("showCase", async () => {
+      // showCase: focus
+      el.focus();
+      await h.wait();
+      expect(el.$isOpen).toBe(true);
 
-    document.activeElement.blur();
-    await h.wait();
-    expect(el.$isOpen).toBe(false);
+      document.activeElement.blur();
+      await h.wait();
+      expect(el.$isOpen).toBe(false);
 
-    el.$options.showCase &= ~ShowCases.onFocus; // remove option
-    el.focus();
-    await h.wait();
-    expect(el.$isOpen).toBe(false);
+      el.$options.showCase &= ~ShowCases.onFocus; // remove option
+      el.focus();
+      await h.wait();
+      expect(el.$isOpen).toBe(false);
 
-    // showCase: onInput
-    await h.userTypeText(el.$refInput, "d");
-    expect(el.$isOpen).toBe(true);
+      // showCase: onInput
+      await h.userTypeText(el.$refInput, "d");
+      expect(el.$isOpen).toBe(true);
 
-    el.$hideMenu();
-    el.$options.showCase &= ~ShowCases.onInput; // remove option
-    await h.userTypeText(el.$refInput, "a");
-    await h.wait();
-    expect(el.$isOpen).toBe(false);
+      el.$hideMenu();
+      el.$options.showCase &= ~ShowCases.onInput; // remove option
+      await h.userTypeText(el.$refInput, "a");
+      await h.wait();
+      expect(el.$isOpen).toBe(false);
 
-    // showCase: Click
-    el.click();
-    await h.wait();
-    expect(el.$isOpen).toBe(true);
-    el.click();
-    await h.wait();
-    expect(el.$isOpen).toBe(false);
-    el.$options.showCase &= ~ShowCases.onClick; // remove option
-    el.click();
-    await h.wait();
-    expect(el.$isOpen).toBe(false);
+      // showCase: Click
+      el.click();
+      await h.wait();
+      expect(el.$isOpen).toBe(true);
+      el.click();
+      await h.wait();
+      expect(el.$isOpen).toBe(false);
+      el.$options.showCase &= ~ShowCases.onClick; // remove option
+      el.click();
+      await h.wait();
+      expect(el.$isOpen).toBe(false);
 
-    // showCase: inputClick
-    el.$options.showCase |= ShowCases.onClick; // enable click again
-    await h.userClick(el.$refInput);
-    await h.wait();
-    expect(el.$isOpen).toBe(false); // because click by input is disabled
-    el.$options.showCase |= ShowCases.onClickInput;
-    await h.userClick(el.$refInput);
-    await h.wait();
-    expect(el.$isOpen).toBe(true);
-    await h.userClick(el.$refInput);
-    await h.wait();
-    expect(el.$isOpen).toBe(false);
+      // showCase: inputClick
+      el.$options.showCase |= ShowCases.onClick; // enable click again
+      await h.userClick(el.$refInput);
+      await h.wait();
+      expect(el.$isOpen).toBe(false); // because click by input is disabled
+      el.$options.showCase |= ShowCases.onClickInput;
+      await h.userClick(el.$refInput);
+      await h.wait();
+      expect(el.$isOpen).toBe(true);
+      await h.userClick(el.$refInput);
+      await h.wait();
+      expect(el.$isOpen).toBe(false);
 
-    // showCase: ArrowKeys
-    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
-    await h.wait();
-    expect(el.$isOpen).toBe(true);
-    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
-    await h.wait();
-    expect(el.$isOpen).toBe(false);
-    el.$options.showCase &= ~ShowCases.onPressArrowKey; // remove option
-    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
-    await h.wait();
-    expect(el.$isOpen).toBe(false);
+      // showCase: ArrowKeys
+      el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+      await h.wait();
+      expect(el.$isOpen).toBe(true);
+      el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+      await h.wait();
+      expect(el.$isOpen).toBe(false);
+      el.$options.showCase &= ~ShowCases.onPressArrowKey; // remove option
+      el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+      await h.wait();
+      expect(el.$isOpen).toBe(false);
+    });
+
+    test("allowNewValue", async () => {
+      el.$options.allowNewValue = true;
+      const onChange = jest.fn();
+      el.addEventListener("$change", onChange);
+
+      const check = async (arr, event) => {
+        for (let i = 0; i < arr.length; ++i) {
+          onChange.mockClear();
+          await h.userTypeText(el.$refInput, arr[i].userText);
+          await h.wait();
+          event();
+          await h.wait();
+          expect(el.$value).toBe(arr[i].expectedValue);
+          expect(onChange).toBeCalledTimes(1);
+          expect(el.$isOpen).toBe(false); // closed by enter or focusOut
+        }
+      };
+
+      // user can select value by pressing enter (by focus left)
+      await check(
+        [
+          { userText: "Someone new", expectedValue: "Someone new" }, // user can create another value
+          { userText: "Don", expectedValue: "Don" }, // user can create a new value that mathes by filters
+          { userText: "Donny", expectedValue: 10 }, // user can select exact value without ArrowKeys
+          { userText: "Leo", expectedValue: 30 }, // check it again
+          { userText: "", expectedValue: undefined },
+        ],
+        () =>
+          el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }))
+      );
+
+      // user can select value without pressing enter (by focus left)
+      await check(
+        [
+          { userText: "Someone new", expectedValue: "Someone new" }, // user can create another value
+          { userText: "Don", expectedValue: "Don" }, // user can create a new value that mathes by filters
+          { userText: "Donny", expectedValue: 10 }, // user can select exact value without ArrowKeys
+          { userText: "Leo", expectedValue: 30 }, // check it again
+          { userText: "", expectedValue: undefined },
+        ],
+        () => document.activeElement.blur()
+      );
+
+      el.$value = 10;
+      await h.wait(1);
+      expect(el.$refInput.value).toBe("Donny");
+      el.$value = null;
+      await h.wait(1);
+      expect(el.$refInput.value).toBe("");
+    });
   });
 });
 
