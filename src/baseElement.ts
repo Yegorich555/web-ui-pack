@@ -1,28 +1,60 @@
-/* eslint-disable no-use-before-define */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // eslint-disable-next-line max-classes-per-file
+import focusFirst from "./helpers/focusFirst";
 import observer, { Observer } from "./helpers/observer";
 import onEvent, { onEventType } from "./helpers/onEvent";
+import { WUPcssHidden } from "./styles";
 
 // theoritcally such single appending is faster than using :host inside shadowComponent
 const appendedStyles = new Set<string>();
-const styleElement = document.createElement("style");
-document.head.prepend(styleElement);
+let lastUniqueNum = 0;
+
+const allObservedOptions = new WeakMap<typeof WUPBaseElement, Set<string> | null>();
 
 /** Basic abstract class for every component in web-ui-pack */
 export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.EventMap> extends HTMLElement {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
-  protected get ctr(): typeof WUPBaseElement {
-    return this.constructor as typeof WUPBaseElement;
+  #ctr = this.constructor as typeof WUPBaseElement;
+
+  /** Reference to global style element used by web-ui-pack */
+  static get $refStyle(): HTMLStyleElement | null {
+    return window.WUPrefStyle || null;
   }
 
-  /** Options that need to watch for changes; use gotOptionsChanged() */
-  static observedOptions?: Set<keyof Record<string, any>>;
+  static set $refStyle(v: HTMLStyleElement | null) {
+    window.WUPrefStyle = v || undefined;
+  }
 
   /** StyleContent related to component */
-  static get style(): string {
+  static get $style(): string {
     return "";
+  }
+
+  /** StyleContent related to component & inherrited components */
+  static get $styleRoot(): string {
+    return `:root {
+          --base-bg: #fff;
+          --base-text: #232323;
+          --base-focus: #00778d;
+          --base-btn-bg: #009fbc;
+          --base-btn-text: #fff;
+          --base-btn-focus: #005766;
+          --base-btn2-bg: var(--base-btn-text);
+          --base-btn2-text: var(--base-btn-bg);
+          --border-radius: 6px;
+          --anim-time: 200ms;
+          --anim: var(--anim-time, 200ms) cubic-bezier(0, 0, 0.2, 1) 0ms;
+        }`;
+  }
+
+  /** Get unique id for html elements; Every getter returns new id */
+  static get $uniqueId(): string {
+    return `wup${++lastUniqueNum}`;
+  }
+
+  static get classNameHidden(): string {
+    return "wup-hidden";
   }
 
   /** Options that applied to element */
@@ -31,30 +63,31 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   constructor() {
     super();
 
-    // autoBind functions (recursive until HMTLElement)
-    const bindAll = (t: unknown) => {
-      const p = Object.getPrototypeOf(t);
-      if (p !== HTMLElement.prototype) {
-        Object.getOwnPropertyNames(p).forEach((s) => {
-          const k = s as keyof Omit<WUPBaseElement, keyof HTMLElement | "$isReady">;
-          const desc = Object.getOwnPropertyDescriptor(p, s) as PropertyDescriptor;
-          if (desc.value instanceof Function && s !== "constructor") {
-            this[k] = this[k].bind(this);
-          }
-        });
-        bindAll(p);
-      }
-    };
-    bindAll(this);
+    if (!this.#ctr.$refStyle) {
+      this.#ctr.$refStyle = document.createElement("style");
+      /* from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility  */
+      this.#ctr.$refStyle.append(`.${this.#ctr.classNameHidden}, [${this.#ctr.classNameHidden}] {${WUPcssHidden}}`);
+      document.head.prepend(this.#ctr.$refStyle);
+    }
+    const refStyle = this.#ctr.$refStyle;
 
     // setup options to be observable
     setTimeout(() => {
       // cast options to observed
       const prev = this.$options;
+      // get from cache
+      let o = allObservedOptions.get(this.#ctr);
+      if (o === undefined) {
+        // @ts-ignore
+        const arr = this.#ctr.observedOptions;
+        o = arr?.length ? new Set(arr) : null;
+        allObservedOptions.set(this.#ctr, o);
+      }
+
       Object.defineProperty(this, "$options", {
         set: this.#setOptions,
         get: () => {
-          const watched = this.ctr.observedOptions;
+          const watched = o;
           if (!watched?.size) {
             return this._opts;
           }
@@ -75,11 +108,39 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
 
     // setup styles
     if (!appendedStyles.has(this.tagName)) {
-      const s = Object.getPrototypeOf(this).constructor.style as string;
-      if (s) {
-        styleElement.append(s.replace(/:host/g, `${this.tagName}`));
-      }
       appendedStyles.add(this.tagName);
+
+      // autoBind functions (recursive until HMTLElement)
+      const findAllProtos = (t: unknown, protos: typeof WUPBaseElement[]): typeof WUPBaseElement[] => {
+        const p = Object.getPrototypeOf(t);
+        if (p !== HTMLElement.prototype) {
+          protos.push(p.constructor);
+          // Object.getOwnPropertyNames(p).forEach((s) => {
+          //   const k = s as keyof Omit<WUPBaseElement, keyof HTMLElement | "$isReady">;
+          //   const desc = Object.getOwnPropertyDescriptor(p, s) as PropertyDescriptor;
+          //   if (typeof desc.value === "function" && s !== "constructor") {
+          //     this[k] = (this[k] as Function).bind(this);
+          //   }
+          // });
+          findAllProtos(p, protos);
+        }
+        return protos;
+      };
+      const protos = findAllProtos(this, []);
+
+      protos.reverse().forEach((p) => {
+        // append $styleRoot
+        if (!appendedStyles.has(p.name)) {
+          appendedStyles.add(p.name);
+          if (Object.prototype.hasOwnProperty.call(p, "$styleRoot")) {
+            const s = p.$styleRoot;
+            s && refStyle.append(s);
+          }
+        }
+      });
+
+      const c = protos[protos.length - 1].$style;
+      refStyle.append(c.replace(/:host/g, `${this.tagName}`));
     }
   }
 
@@ -87,7 +148,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   protected _opts: Record<string, any> = {};
   #optsObserved?: Observer.Observed<Record<string, any>>;
   #removeObserved?: Func;
-  #setOptions(v: Record<string, any>) {
+  #setOptions(v: Record<string, any>): void {
     if (!v) {
       throw new Error("$options can't be empty");
     }
@@ -99,14 +160,15 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     this.#optsObserved = undefined;
     this.#removeObserved = undefined;
 
-    if (!this.ctr.observedOptions?.size) {
+    const observedOptions = allObservedOptions.get(this.#ctr);
+    if (!observedOptions?.size) {
       return;
     }
 
     if (this.#isReady && prev.valueOf() !== v.valueOf()) {
       const props: string[] = [];
       // eslint-disable-next-line no-restricted-syntax
-      for (const [k] of this.ctr.observedOptions.entries()) {
+      for (const [k] of observedOptions.entries()) {
         if (this._opts[k] !== prev[k]) {
           props.push(k);
         }
@@ -117,42 +179,114 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   }
 
   /** Returns true if element is appended (result of setTimeout on connectedCallback) */
-  get $isReady() {
+  get $isReady(): boolean {
     return this.#isReady;
   }
 
-  #isReady = false;
-  /** Fired when element is added to document */
-  protected gotReady() {
-    this.#isReady = true;
+  /** Try to focus self or first possible children; returns true if succesful */
+  focus(): boolean {
+    return focusFirst(this);
   }
 
-  /** Fired when element is removed from document */
-  protected gotRemoved() {
+  /** Remove focus from element on any nested active element */
+  blur(): void {
+    const ae = document.activeElement;
+    if (ae === this) {
+      super.blur();
+    } else if (ae instanceof HTMLElement && this.includes(ae)) {
+      ae.blur();
+    }
+  }
+
+  #isReady = false;
+  /** Called when element is added to document */
+  protected gotReady(): void {
+    this.#isReady = true;
+    this._isStopChanges = true;
+    this.gotChanges(null);
+    this._isStopChanges = false;
+    setTimeout(() => (this.autofocus || this._opts.autoFocus) && this.focus()); // timeout to wait for options
+  }
+
+  /** Called when element is removed from document */
+  protected gotRemoved(): void {
     this.#isReady = false;
     this.dispose();
   }
 
-  /** Fired when element isReady and at least one of observedOptions is changed */
-  protected gotOptionsChanged(e: WUP.OptionEvent) {}
+  /** Called on Init and every time as options/attributes changed */
+  protected gotChanges(propsChanged: Array<string> | null): void {}
 
+  /** Called when element isReady and at least one of observedOptions is changed */
+  protected gotOptionsChanged(e: WUP.OptionEvent): void {
+    this._isStopChanges = true;
+    e.props.forEach((p) => this.removeAttribute(p)); // remove related attributes otherwise impossible to override
+    this.gotChanges(e.props);
+    this._isStopChanges = false;
+  }
+
+  /** Called once on Init */
+  protected gotRender(): void {}
+
+  #isFirstConn = true;
   /** Browser calls this method when the element is added to the document */
-  protected connectedCallback() {
+  protected connectedCallback(): void {
     // async requires otherwise attributeChangedCallback doesn't set immediately
-    setTimeout(this.gotReady);
+    setTimeout(this.gotReady.bind(this));
+    if (this.#isFirstConn) {
+      this.#isFirstConn = false;
+      this.gotRender();
+    }
   }
 
   /** Browser calls this method when the element is removed from the document;
    * (can be called many times if an element is repeatedly added/removed) */
-  protected disconnectedCallback() {
+  protected disconnectedCallback(): void {
     this.gotRemoved();
   }
 
-  /** Fired when element isReady and one of observedAttributes is changed */
-  protected gotAttributeChanged(name: string, oldValue: string, newValue: string) {}
+  _isStopChanges = true;
+  #attrTimer?: number;
+  #attrChanged?: string[];
+  /** Called when element isReady and one of observedAttributes is changed */
+  protected gotAttributeChanged(name: string, oldValue: string, newValue: string): void {
+    // debounce filter
+    if (this.#attrTimer) {
+      this.#attrChanged!.push(name);
+      return;
+    }
+
+    this.#attrChanged = [name];
+    this.#attrTimer = setTimeout(() => {
+      this.#attrTimer = undefined;
+      this._isStopChanges = true;
+      const keys = Object.keys(this._opts);
+      const keysNormalized: string[] = []; // cache to boost performance via exlcuding extra-lowerCase
+      this.#attrChanged!.forEach((a) => {
+        keys.some((k, i) => {
+          let kn = keysNormalized[i];
+          if (!kn) {
+            kn = k.toLowerCase();
+            keysNormalized.push(kn);
+          }
+          if (kn === a) {
+            delete this._opts[k];
+            return true;
+          }
+
+          return false;
+        });
+      }); // otherwise attr can't override option if attribute removed
+
+      this.gotChanges(this.#attrChanged as Array<keyof WUPForm.Options>);
+      this._isStopChanges = false;
+      this.#attrChanged = undefined;
+    });
+  }
+
   /** Browser calls this method when attrs pointed in observedAttributes is changed */
-  protected attributeChangedCallback(name: string, oldValue: string, newValue: string) {
-    this.#isReady && this.gotAttributeChanged(name, oldValue, newValue);
+  protected attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
+    this.#isReady && !this._isStopChanges && this.gotAttributeChanged(name, oldValue, newValue);
   }
 
   dispatchEvent<K extends keyof Events>(type: K, eventInit?: EventInit): boolean;
@@ -188,6 +322,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     return ev;
   }
 
+  /** Array of removeEventListener() that called on remove */
   protected disposeLst: Array<() => void> = [];
   /** Add event listener and remove after component removed; @options.passive=true by default */
   appendEvent<
@@ -198,16 +333,16 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     // self-removing when option.once
     if ((args[3] as AddEventListenerOptions)?.once) {
       const listener = args[2];
-      args[2] = function wrapper(...args2) {
+      args[2] = function wrapper(...args2): any {
         const v = listener.call(this, ...args2);
         remove();
         return v;
       };
     }
-    // @ts-ignore
+    // @ts-expect-error
     const r = onEvent(...args);
     this.disposeLst.push(r);
-    const remove = () => {
+    const remove = (): void => {
       const i = this.disposeLst.indexOf(r);
       if (i !== -1) {
         r();
@@ -219,7 +354,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   }
 
   /** Remove events/functions that was appended */
-  protected dispose() {
+  protected dispose(): void {
     this.disposeLst.forEach((f) => f()); // remove possible previous event listeners
     this.disposeLst.length = 0;
   }
@@ -228,13 +363,23 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   includes(el: unknown): boolean {
     return el instanceof Node && this.contains(el);
   }
-}
 
-export type JSXCustomProps<T> = React.DetailedHTMLProps<
-  // todo write babel-transform className > class
-  Omit<React.HTMLAttributes<T>, "className"> & { class?: string | undefined },
-  T
->;
+  /** Parse attribute and return result */
+  getBoolAttr(attr: string, alt: boolean): boolean;
+  getBoolAttr(attr: string, alt: boolean | undefined): boolean | undefined;
+  getBoolAttr(attr: string, alt: boolean | undefined): boolean | undefined {
+    const a = this.getAttribute(attr);
+    return a === null ? alt : a !== "false";
+  }
+
+  /**
+   * Remove attr if value falseOrEmpty; set '' or 'true' if true for HTMLELement
+   * @param isSetEmpty set if need to '' instead of 'value'
+   */
+  setAttr(attr: string, v: boolean | string | undefined | null, isSetEmpty?: boolean): void {
+    v ? this.setAttribute(attr, isSetEmpty ? "" : v) : this.removeAttribute(attr);
+  }
+}
 
 export namespace WUP {
   export type OptionEvent<T extends Record<string, any> = Record<string, any>> = {
@@ -242,6 +387,11 @@ export namespace WUP {
     target: T;
   };
   export type EventMap<T = HTMLElementEventMap> = HTMLElementEventMap & Record<keyof T, Event>;
+  export type JSXProps<T> = React.DetailedHTMLProps<
+    // react doesn't support [className] attr for WebComponents; use [class] instead: https://github.com/facebook/react/issues/4933
+    Omit<React.HTMLAttributes<T>, "className"> & { class?: string | undefined },
+    T
+  >;
 }
 
-// todo make all props not-enumerable (beside starts with $...): https://stackoverflow.com/questions/34517538/setting-an-es6-class-getter-to-enumerable
+// testcase: check if gotChanges sensitive to attr-case

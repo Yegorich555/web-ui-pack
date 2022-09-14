@@ -1,4 +1,4 @@
-import { WUPBaseElement } from "web-ui-pack";
+import WUPBaseElement from "web-ui-pack/baseElement";
 import * as h from "../testHelper";
 
 const testAttr = "testattr";
@@ -30,12 +30,15 @@ afterEach(() => {
 
 describe("baseElement", () => {
   describe("inheritance", () => {
-    h.testComponentFuncBind(document.createElement("test-inher-el"));
+    h.baseTestComponent(() => document.createElement("test-inher-el"));
   });
 
   describe("me", () => {
-    customElements.define("test-base-el", WUPBaseElement);
-    h.testComponentFuncBind(document.createElement("test-base-el"));
+    class TestMeElement extends WUPBaseElement {
+      $options = {};
+    }
+    customElements.define("test-base-el", TestMeElement);
+    h.baseTestComponent(() => document.createElement("test-base-el"));
   });
 
   test("gotReady/gotRemoved/gotAttributeChanged", () => {
@@ -94,7 +97,7 @@ describe("baseElement", () => {
 
     const ev = el.fireEvent("click", { bubbles: true });
     expect(ev).toBeInstanceOf(Event);
-    expect(ev.bubbles).toBeTruthy();
+    expect(ev.bubbles).toBe(true);
     expect(fn).toHaveBeenCalledTimes(1);
     expect(fn.mock.calls[0][0]).toBe(ev);
   });
@@ -141,16 +144,16 @@ describe("baseElement", () => {
     };
     el.appendEvent(el, "click", setPassive, { passive: true, once: true });
     el.dispatchEvent(new Event("click", { cancelable: true }));
-    expect(isPassive).toBeTruthy();
+    expect(isPassive).toBe(true);
 
     el.appendEvent(el, "click", setPassive, { passive: false, once: true });
     el.dispatchEvent(new Event("click", { cancelable: true }));
-    expect(isPassive).toBeFalsy();
+    expect(isPassive).toBe(false);
 
     // passive is true by default
     el.appendEvent(el, "click", setPassive, { once: true });
     el.dispatchEvent(new Event("click", { cancelable: true }));
-    expect(isPassive).toBeTruthy();
+    expect(isPassive).toBe(true);
   });
 
   test("dispose", () => {
@@ -187,10 +190,10 @@ describe("baseElement", () => {
 
   test("includes", () => {
     const span = el.appendChild(document.createElement("span"));
-    expect(el.includes(document)).toBeFalsy();
+    expect(el.includes(document)).toBe(false);
     expect(() => el.includes(null)).not.toThrow();
-    expect(el.includes(null)).toBeFalsy();
-    expect(el.includes(span)).toBeTruthy();
+    expect(el.includes(null)).toBe(false);
+    expect(el.includes(span)).toBe(true);
   });
 
   test("overriden dispatchEvent", () => {
@@ -205,13 +208,32 @@ describe("baseElement", () => {
 
     fn.mockClear();
     expect(() => el.dispatchEvent("click", { bubbles: true })).not.toThrow();
-    expect(fn.mock.calls[0][0].bubbles).toBeTruthy();
+    expect(fn.mock.calls[0][0].bubbles).toBe(true);
+  });
+
+  test("static.$uniqueId", () => {
+    expect(WUPBaseElement.$uniqueId).toBeDefined();
+    expect(WUPBaseElement.$uniqueId).not.toBe(WUPBaseElement.$uniqueId);
+    expect(WUPBaseElement.$uniqueId).not.toBe(WUPBaseElement.$uniqueId);
+    expect(WUPBaseElement.$uniqueId).not.toBe(WUPBaseElement.$uniqueId);
+  });
+
+  test("focus", () => {
+    class Test extends WUPBaseElement {}
+    customElements.define("test-el", Test);
+    const tst = document.body.appendChild(document.createElement("test-el"));
+    expect(document.activeElement).not.toBe(tst);
+    const btn = tst.appendChild(document.createElement("button"));
+    tst.focus();
+    expect(document.activeElement).toBe(btn);
   });
 
   test("gotOptionsChanged", () => {
     class Test extends WUPBaseElement {
       $options = {};
-      static observedOptions = new Set(["t1", "t2"]);
+      static get observedOptions() {
+        return ["t1", "t2"];
+      }
 
       gotOptionsChanged() {}
     }
@@ -219,7 +241,7 @@ describe("baseElement", () => {
     const tst = document.body.appendChild(document.createElement("test-opt-el"));
     const fn = jest.spyOn(tst, "gotOptionsChanged");
     jest.advanceTimersToNextTimer();
-    expect(tst.$isReady).toBeTruthy();
+    expect(tst.$isReady).toBe(true);
 
     tst.$options = {};
     const old = tst.$options;
@@ -249,14 +271,16 @@ describe("baseElement", () => {
     expect(() => (tst.$options = null)).toThrow();
 
     // test when no observedOptions
-    expect(el.$isReady).toBeTruthy();
+    expect(el.$isReady).toBe(true);
     el.$options = { v: 1 };
 
     // eslint-disable-next-line no-self-compare
-    expect(el.$options === el.$options).toBeTruthy(); // just for coverage when observedOptions is empty
+    expect(el.$options === el.$options).toBe(true); // just for coverage when observedOptions is empty
     class T2 extends WUPBaseElement {
       $options = {};
-      static observedOptions = new Set(["to"]);
+      static get observedOptions() {
+        return ["to"];
+      }
     }
     const fnT2 = jest.spyOn(T2.prototype, "gotOptionsChanged");
     customElements.define("t2-test", T2);
@@ -265,5 +289,190 @@ describe("baseElement", () => {
     t2.$options.to = "str";
     jest.advanceTimersToNextTimer();
     expect(fnT2).toBeCalled(); // just for coverage when observedOptions is empty
+  });
+
+  test("style inherritance", () => {
+    expect(WUPBaseElement.$style).toBeDefined();
+    expect(WUPBaseElement.$styleRoot).toBeTruthy();
+    jest.spyOn(WUPBaseElement, "$style", "get").mockReturnValue(":host { display: block }");
+
+    //  case when no new styles defined
+    class TestA extends WUPBaseElement {}
+    customElements.define("t-a", TestA);
+    document.body.appendChild(document.createElement("t-a"));
+    expect(WUPBaseElement.$refStyle).toBeDefined();
+    expect(TestA.$refStyle).toBeDefined();
+
+    let style = TestA.$refStyle.textContent.toLowerCase();
+    expect(style).toContain(WUPBaseElement.$styleRoot);
+    expect(style).toContain("t-a { display: block }");
+    expect(style.lastIndexOf("t-a")).toBe(style.indexOf("t-a")); // checking if style applied once
+
+    const was = TestA.$refStyle;
+    TestA.$refStyle = ""; // just for coverage
+    expect(TestA.$refStyle).toBeFalsy();
+    TestA.$refStyle = was;
+
+    class TestB extends TestA {
+      static get $style() {
+        return `${super.$style} :host { position: my-absolute }`;
+      }
+
+      static get $styleRoot() {
+        return ":root { main-color: my-red }";
+      }
+    }
+    customElements.define("t-b", TestB);
+    document.body.appendChild(document.createElement("t-b"));
+    style = TestB.$refStyle.textContent.toLowerCase();
+    expect(style).toContain("t-b { position: my-absolute }");
+    expect(style).toContain(":root { main-color: my-red }");
+
+    class TestC extends TestB {
+      static get $style() {
+        return `${super.$style} :host { z-index: me }`;
+      }
+
+      static get $styleRoot() {
+        return ":root { vis: im here }";
+      }
+    }
+    customElements.define("t-c", TestC);
+    document.body.appendChild(document.createElement("t-c"));
+    style = TestC.$refStyle.textContent.toLowerCase();
+    expect(style).toContain("t-c { position: my-absolute }");
+    expect(style).toContain(":root { main-color: my-red }");
+    expect(style).toContain("t-c { z-index: me }");
+    expect(style).toContain(":root { vis: im here }");
+
+    class TestD extends TestC {}
+    customElements.define("t-d", TestD);
+    document.body.appendChild(document.createElement("t-d"));
+    style = TestC.$refStyle.textContent.toLowerCase();
+    expect(style).toContain("t-d { position: my-absolute }");
+    expect(style).toContain(":root { main-color: my-red }");
+    expect(style).toContain("t-d { z-index: me }");
+    expect(style).toContain(":root { vis: im here }");
+
+    expect(style.lastIndexOf("t-a")).toBe(style.indexOf("t-a")); // checking if style applied once
+    expect(style.lastIndexOf("t-c { z-index: me }")).toBe(style.indexOf("t-c { z-index: me }")); // checking if style applied once
+    expect(style.lastIndexOf(":root { vis: im here }")).toBe(style.indexOf(":root { vis: im here }")); // checking if style applied once
+  });
+
+  test("get/set bool attr", () => {
+    expect(el.getBoolAttr("disabled")).toBeFalsy();
+
+    el.setAttr("disabled", true, true);
+    expect(el.getAttribute("disabled")).toBe("");
+    expect(el.getBoolAttr("disabled")).toBe(true);
+
+    el.setAttr("disabled", true, false);
+    expect(el.getAttribute("disabled")).toBe("true");
+    expect(el.getBoolAttr("disabled")).toBe(true);
+
+    el.setAttr("disabled", false);
+    expect(el.getAttribute("disabled")).toBeNull();
+    expect(el.getBoolAttr("disabled")).toBeFalsy();
+  });
+
+  test("autofocus", async () => {
+    expect(document.activeElement).not.toBe(el);
+    const input = el.appendChild(document.createElement("input"));
+    expect(document.activeElement).not.toBe(input);
+    el.autofocus = true;
+    await h.wait();
+    expect(document.activeElement).toBe(input);
+
+    input.blur();
+    expect(document.activeElement).not.toBe(input);
+    el.remove();
+    el.$options.autofocs = true;
+    document.body.appendChild(el);
+    await h.wait();
+    expect(document.activeElement).toBe(input);
+  });
+
+  test("blur", async () => {
+    el.tabIndex = 0;
+    el.focus();
+    const mocked = jest.spyOn(document, "activeElement", "get").mockReturnValue(el); // jsdom works wrong with custom elements
+    expect(document.activeElement).toBe(el);
+    el.blur();
+    mocked.mockRestore();
+    expect(document.activeElement).not.toBe(el);
+
+    el.tabIndex = undefined;
+    const input = el.appendChild(document.createElement("input"));
+    input.focus();
+    expect(document.activeElement).toBe(input);
+
+    el.blur();
+    expect(document.activeElement).not.toBe(input);
+    expect(document.activeElement).not.toBe(el);
+  });
+
+  test("gotChanges method", async () => {
+    class TestEl extends WUPBaseElement {
+      $options = {};
+      static get observedOptions() {
+        return ["disabled", "disabledReflect"];
+      }
+
+      static get observedAttributes() {
+        return ["disabled", "disabledreflect", "readonly"];
+      }
+
+      gotChanges(...args) {
+        super.gotChanges(...args);
+        this._opts.disabledReflect = !this._opts.disabledReflect;
+        this.setAttribute("disabled", this._opts.disabled);
+      }
+    }
+    customElements.define("test-ch", TestEl);
+
+    const spyAttr = jest.spyOn(TestEl.prototype, "gotAttributeChanged");
+    const spyOpts = jest.spyOn(TestEl.prototype, "gotOptionsChanged");
+    const spyAll = jest.spyOn(TestEl.prototype, "gotChanges");
+
+    const testEl = document.body.appendChild(document.createElement("test-ch"));
+    await h.wait();
+
+    expect(spyAll).toBeCalledTimes(1); // it's called on init
+    expect(spyAll).toBeCalledWith(null);
+    expect(spyAttr).toBeCalledTimes(0); // because of inside gotChanges()
+    expect(spyOpts).toBeCalledTimes(0);
+
+    await h.wait();
+    jest.clearAllMocks();
+    testEl.$options.disabled = !testEl.$options.disabled;
+    await h.wait();
+    expect(spyAll).toBeCalledTimes(1);
+    expect(spyAll).toBeCalledWith(["disabled"]);
+    expect(spyAttr).toBeCalledTimes(0);
+    expect(spyOpts).toBeCalledTimes(1);
+
+    jest.clearAllMocks();
+    testEl.setAttribute("disabled", "true");
+    await h.wait();
+    expect(spyAll).toBeCalledTimes(1);
+    expect(spyAll).toBeCalledWith(["disabled"]);
+    expect(spyAttr).toBeCalledTimes(1);
+    expect(spyOpts).toBeCalledTimes(0);
+
+    jest.clearAllMocks();
+    testEl.setAttribute("disabled", "false");
+    testEl.setAttribute("readonly", "false");
+    await h.wait();
+    expect(spyAll).toBeCalledTimes(1);
+    expect(spyAll).toBeCalledWith(["disabled", "readonly"]);
+    expect(spyAttr).toBeCalledTimes(2);
+    expect(spyOpts).toBeCalledTimes(0);
+
+    jest.clearAllMocks();
+    testEl.$options.disabled = !testEl.$options.disabled;
+    setTimeout(() => (testEl.$options.disabled = !testEl.$options.disabled));
+    setTimeout(() => (testEl.$options.disabled = !testEl.$options.disabled), 10);
+    await h.wait();
+    expect(spyOpts).toBeCalledTimes(3);
   });
 });

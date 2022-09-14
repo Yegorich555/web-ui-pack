@@ -1,15 +1,15 @@
-export { default as WUPBaseElement } from "./baseElement";
-// export * from "./baseElement"; it doesn't work with coverage
-export { default as WUPPopupElement } from "./popup/popupElement";
+import * as WUPHelpers from "./indexHelpers";
 
-export { default as findScrollParent } from "./helpers/findScrollParent";
-export { default as focusFirst } from "./helpers/focusFirst";
-export { default as nestedProperty } from "./helpers/nestedProperty";
-export { default as observer } from "./helpers/observer";
-// export * from "./helpers/observer";
-export { default as onEvent } from "./helpers/onEvent";
-export { default as onFocusGot } from "./helpers/onFocusGot";
-export { default as onFocusLost } from "./helpers/onFocusLost";
-// export * from "./helpers/onFocusLost";
-export { default as promiseWait } from "./helpers/promiseWait";
-export { default as stringPrettify } from "./helpers/stringPrettify";
+export { WUPHelpers };
+
+// export { default as WUPBaseElement } from "./baseElement";
+export { default as WUPPopupElement } from "./popup/popupElement";
+export { default as WUPSpinElement } from "./spinElement";
+
+export { default as WUPFormElement } from "./formElement";
+export { default as WUPTextControl } from "./controls/text";
+export { default as WUPPasswordControl } from "./controls/password";
+export { default as WUPSelectControl } from "./controls/select";
+export { default as WUPSwitchControl } from "./controls/switch";
+export { default as WUPCheckControl } from "./controls/check";
+export { default as WUPRadioControl } from "./controls/radio";

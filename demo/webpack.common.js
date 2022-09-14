@@ -67,7 +67,11 @@ module.exports = function (env, argv) {
         // rule for ts, tsx files
         {
           test: /\.(js|jsx)$/,
-          exclude: /node_modules/,
+          exclude: (() => {
+            // these packages must be included to change according to browserslist
+            const include = ["web-ui-pack"];
+            return (v) => v.includes("node_modules") && !include.some((lib) => v.includes(lib));
+          })(),
           use: [
             "babel-loader", // transpile *.js, *.jsx, *.ts, *.tsx to result according to .browserlistrc and babel.config.js files
             // optional: "ifdef-loader" // prodives conditinal compilation: https://github.com/nippur72/ifdef-loader
@@ -148,7 +152,8 @@ module.exports = function (env, argv) {
                   auto: (function () {
                     class MyReg extends RegExp {
                       test(str) {
-                        return !str.includes("styles") && !str.includes("react-quill");
+                        console.warn(str);
+                        return !str.includes("styles") && !str.includes("prismjs");
                       }
                     }
                     return new MyReg();

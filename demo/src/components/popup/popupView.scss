@@ -1,3 +1,4 @@
+/* stylelint-disable no-descending-specificity */
 .popupEx1 {
   display: flex;
   flex-direction: column;
@@ -71,116 +72,65 @@ $dropdownAnimation: 300ms;
   }
 }
 
-// difficult dropdown animation
 .dropdownPopup {
-  // reset popup defaults
-  animation: none;
-  background: none;
-  border: none;
-  padding: 0;
-  overflow: visible;
-  box-shadow: none;
-
-  $boxShadowSize: 4px;
+  overflow: hidden;
 
   > div {
-    // max-height: inherit; // css inherit doesn't work. Instead popup sets it itself
-    overflow: hidden;
-    background: inherit;
+    overflow: auto;
+  }
+}
 
-    // make box-shadow visible despite on overflow: hidden
-    padding: $boxShadowSize;
-    margin: -$boxShadowSize;
-    @media not all and (prefers-reduced-motion) {
-      animation: shadowFix $dropdownAnimation ease-in-out forwards;
-      @keyframes shadowFix {
-        from,
-        to {
-          padding-top: 0;
-          margin-top: 1px;
-        }
-      }
-    }
+.inputs {
+  border: none;
+  display: flex;
+  flex-wrap: wrap;
+  background: #fff;
+  border-radius: var(--border-radius);
+  margin: 0;
+  padding: 2em 1em 0.5em 1em;
+  position: relative;
+  gap: 8px;
 
-    // animated div: drawer-effect
-    > div {
-      max-height: inherit;
-      max-width: inherit;
+  > legend {
+    color: #5e5e5e;
+    display: block;
+    position: absolute;
+    left: 0.3em;
+    top: 0.2em;
+    transform-origin: top left;
+    transform: scale(0.9);
+    margin: 0 var(--ctrl-radio-gap);
+    padding: 0;
+  }
+
+  > label {
+    flex: 1 1 calc(50% - 8px);
+    position: relative;
+
+    > span {
+      color: #5e5e5e;
+      display: block;
+      position: absolute;
+      padding: 0 0.2em;
       background: white;
-      border-radius: var(--border-radius, 6px);
-      padding: 4px;
-      box-shadow: 0 1px $boxShadowSize 0 #00000033;
-      box-sizing: border-box;
-      overflow: auto;
+      left: 0.3em;
+      top: -0.5em;
+      transform-origin: top left;
+      transform: scale(0.9);
+    }
 
-      @media not all and (prefers-reduced-motion) {
-        animation: growOn $dropdownAnimation ease-in-out forwards;
-        @keyframes growOn {
-          from {
-            transform: translateY(calc(-100% - #{$boxShadowSize}));
-          }
-        }
-      }
+    > input {
+      padding: 0.5em;
+      border-radius: 4px;
+      box-shadow: none;
+      border: 1px solid #5e5e5e;
     }
   }
+}
 
-  &[hide] {
-    @media not all and (prefers-reduced-motion) {
-      animation: none; // removing default animation
-      animation-duration: $dropdownAnimation; // required to notify popup to wait before close
-      > div {
-        padding-top: 0;
-        margin-top: 1px;
-
-        > div {
-          animation: growOff $dropdownAnimation ease-in-out forwards;
-          @keyframes growOff {
-            to {
-              transform: translateY(calc(-100% - #{$boxShadowSize}));
-            }
-          }
-        }
-      }
-    }
-  }
-
-  @media not all and (prefers-reduced-motion) {
-    &[position="top"] {
-      > div {
-        animation-name: shadowFixTop;
-
-        > div {
-          animation-name: growOnTop;
-        }
-      }
-
-      &[hide] > div {
-        padding-bottom: 0;
-        margin-bottom: 1px;
-
-        > div {
-          animation-name: growOffTop;
-        }
-      }
-
-      @keyframes growOnTop {
-        from {
-          transform: translateY(calc(100% - #{$boxShadowSize}));
-        }
-      }
-      @keyframes growOffTop {
-        to {
-          transform: translateY(calc(100% - #{$boxShadowSize}));
-        }
-      }
-      @keyframes shadowFixTop {
-        from,
-        to {
-          padding-bottom: 0;
-          margin-bottom: 1px;
-        }
-      }
-    }
-  }
-  // end
+.inputs + .inputs,
+.inputs + wup-radio,
+wup-radio + .inputs {
+  margin-top: 10px;
+  margin-bottom: 0;
 }

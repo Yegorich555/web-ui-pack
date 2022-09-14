@@ -1,5 +1,3 @@
-/* eslint-disable no-use-before-define */
-
 /** Apply el.addEventListener and return el.removeEventListener function; use passive:true by default; */
 export default function onEvent<
   T extends keyof E,
@@ -16,10 +14,10 @@ export default function onEvent<
     }
   ) => any,
   options?: boolean | AddEventListenerOptions
-) {
-  const remove = () => element.removeEventListener(type as string, wrapper);
+): () => void {
+  const remove = (): void => element.removeEventListener(type as string, wrapper);
 
-  function wrapper(this: K, e: Event) {
+  function wrapper(this: K, e: Event): void {
     listener.call(
       element,
       e as E[T] & {
@@ -32,7 +30,7 @@ export default function onEvent<
   element.addEventListener(
     type as string,
     wrapper,
-    options instanceof Object ? { passive: true, ...options } : options
+    typeof options !== "boolean" ? { passive: true, ...options } : options
   );
   return remove;
 }

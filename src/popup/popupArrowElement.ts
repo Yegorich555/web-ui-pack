@@ -1,4 +1,4 @@
-import { JSXCustomProps } from "../baseElement";
+import { WUP } from "../baseElement";
 
 const tag = "wup-popup-arrow";
 let isFirst = true;
@@ -13,14 +13,14 @@ export default class WUPPopupArrowElement extends HTMLElement {
       const s = document.createElement("style");
       s.textContent = `
           wup-popup-arrow {
-            z-index: 99999;
+            z-index: 90001;
             position: fixed;
             top: 0; left: 0;
             width:1.2rem; height:0.6rem;
             overflow: visible;
             filter: drop-shadow(0 3px 2px #00000033);
           }
-          wup-popup-arrow:before {
+          wup-popup-arrow::before {
             content: "";
             display: block;
             width: 100%; height: 100%;
@@ -45,7 +45,7 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tag]: JSXCustomProps<WUPPopupArrowElement>;
+      [tag]: WUP.JSXProps<WUPPopupArrowElement>;
     }
   }
 }

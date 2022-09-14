@@ -1,19 +1,20 @@
-/* eslint-disable no-use-before-define, prefer-rest-params */
+/* eslint-disable prefer-rest-params */
 // discussions here https://stackoverflow.com/questions/5100376/how-to-watch-for-array-changes
+import isEqual, { isBothNaN } from "./isEqual";
 
 // #region Helpers
-/** const a = NaN; a !== a; // true */
-// eslint-disable-next-line no-self-compare
-const isBothNaN = (a: unknown, b: unknown) => a !== a && b !== b;
-const arrRemove = <T>(arr: Array<T>, item: T) => {
+const arrRemove = <T>(arr: Array<T>, item: T): void => {
   const i = arr.indexOf(item);
+  /* istanbul ignore else */
   if (i > -1) {
     arr.splice(i, 1);
   }
 };
+
 const some = <K, V>(m: Map<K, V>, predicate: (key: K, val: V) => boolean): boolean => {
   // eslint-disable-next-line no-restricted-syntax
   for (const [key, value] of m.entries()) {
+    /* istanbul ignore else */
     if (predicate(key, value)) {
       return true;
     }
@@ -26,7 +27,8 @@ const pathThrough = <R>(fn: () => R): Promise<R> =>
     resolve(fn());
   });
 
-const isObject = (obj: any) => obj instanceof Object && !(obj instanceof Function) && !(obj instanceof HTMLElement);
+const isObject = (obj: any): boolean => typeof obj === "object" && obj !== null && !(obj instanceof HTMLElement);
+const isDate = (obj: any): boolean => Object.prototype.toString.call(obj) === "[object Date]";
 
 // #endregion
 
@@ -110,7 +112,7 @@ type WatchItem<T> = {
 // #region Functions
 const watchSet: Array<WatchItem<any>> = [
   <WatchItem<Date>>{
-    is: (obj) => obj instanceof Date,
+    is: isDate,
     keys: new Set([
       "setDate",
       "setFullYear",
@@ -133,13 +135,13 @@ const watchSet: Array<WatchItem<any>> = [
     propKey: "valueOf",
   },
   <WatchItem<Set<unknown>>>{
-    is: (obj) => obj instanceof Set,
+    is: (obj) => Object.prototype.toString.call(obj) === "[object Set]",
     keys: new Set(["add", "delete", "clear"]),
     getVal: (obj) => obj.size,
     propKey: "size",
   },
   <WatchItem<Map<unknown, unknown>>>{
-    is: (obj) => obj instanceof Map,
+    is: (obj) => Object.prototype.toString.call(obj) === "[object Map]",
     keys: new Set(["set", "delete", "clear"]),
     getVal: (obj) => obj.size,
     propKey: "size",
@@ -159,7 +161,7 @@ function appenCallback<T extends Observer.Observed<object>, K extends "listeners
   proxy: T,
   callback: K extends "propListeners" ? Observer.PropCallback<T> : Observer.Callback<T>,
   setKey: K
-) {
+): () => void {
   const o = lstObserved.get(proxy);
   if (!o) {
     throw new Error("Observer. Only observed objects expected. Use make() before");
@@ -190,7 +192,7 @@ function make<T extends object>(
     return (prevProxy as Observer.Observed<T>) || obj;
   }
 
-  const isDate = obj instanceof Date;
+  const isDateObj = isDate(obj);
   const ref: Ref<Observer.Observed<T>> = {
     propListeners: [],
     listeners: [],
@@ -221,7 +223,7 @@ function make<T extends object>(
   let changedProps: Array<keyof T> = [];
   let timeoutId: ReturnType<typeof setTimeout> | undefined | number;
 
-  const propChanged = <K extends keyof T>(e: Omit<Observer.BasicPropEvent<any, any>, "target">) => {
+  const propChanged = <K extends keyof T>(e: Omit<Observer.BasicPropEvent<any, any>, "target">): void => {
     (e as Observer.PropEvent<T, K>).target = proxy;
     ref.onPropChanged(e as Observer.PropEvent<T, K>);
     if (ref.hasObjListeners()) {
@@ -237,9 +239,9 @@ function make<T extends object>(
           props: changedProps as any,
           target: proxy,
         };
-        ref.onChanged(ev);
 
         changedProps = [];
+        ref.onChanged(ev);
       });
     }
   };
@@ -262,16 +264,7 @@ function make<T extends object>(
 
       const isOk = Reflect.set(t, prop, next, receiver);
       if (isOk && ref.hasListeners()) {
-        let isChanged = false;
-        if (prev == null || next == null) {
-          isChanged = prev !== next;
-        } else {
-          const a = prev.valueOf();
-          const b = next.valueOf();
-          isChanged = a !== b && !isBothNaN(a, b);
-        }
-
-        isChanged && propChanged({ prev, next, prop });
+        !isEqual(prev, next) && propChanged({ prev, next, prop });
       }
 
       return isOk;
@@ -279,13 +272,12 @@ function make<T extends object>(
     deleteProperty(t, prop) {
       const prev = t[prop as keyof T];
       debugger;
-      if (!isDate && ref.hasListeners()) {
+      if (!isDateObj && ref.hasListeners()) {
         propChanged({ prev, next: undefined, prop });
       }
 
       // remove parent from this object
       if (isObject(prev)) {
-        // eslint-disable-next-line no-use-before-define
         const v = proxy[prop as keyof T] as unknown as Observer.Observed;
         (lstObserved.get(v) as Ref<object>).parentRefs.delete(ref);
       }
@@ -298,7 +290,7 @@ function make<T extends object>(
     proxyHandler.get = function get(t, prop, receiver) {
       const v = Reflect.get(t, prop, receiver) as Func;
       // wrap if listeners exists
-      if (v instanceof Function) {
+      if (typeof v === "function") {
         if (watchObj.keys.has(prop) && ref.hasListeners()) {
           return (...args: any[]) => {
             const prev = watchObj.getVal(t);
@@ -321,12 +313,12 @@ function make<T extends object>(
   lstObserved.set(proxy, ref as Ref<object>);
   lstObjProxy.set(obj, proxy);
   if (isObject(obj) && obj.valueOf() === obj) {
-    // todo possible error if object isn't extensible
+    // warn: possible error if object isn't extensible
     Object.defineProperty(proxy, "valueOf", { value: () => obj.valueOf, enumerable: false });
   }
 
   // scan recursive
-  // it doesn't required becayse object keys is null: if (!isDate && !(obj instanceof Map || obj instanceof Set)) {
+  // it doesn't required because object keys is null: if (!isDate && !(obj instanceof Map || obj instanceof Set)) {
   Object.keys(obj).forEach((k) => {
     const v = obj[k] as any;
     if (isObject(v)) {
@@ -375,9 +367,8 @@ Object.seal(observer);
 export default observer;
 
 /*
-  todo case:
+  troubleshooting:
   const obj = observer.make({v: 1})
   obj.v = 2; // propsChanged
-  obj.v = 1 // props not Changed (because we use async)
-
+  obj.v = 1 // props not changed but event is called (because we use async)
 */

@@ -1,9 +1,15 @@
+let last: HTMLElement | Pick<HTMLElement, "focus"> | null = null;
 /**
- * Set focus on parent itself or first possible element inside
+ * Set focus on element or first possible nested element
  * @param element
- * @return {Boolean} true if focus is fired
+ * @return {Boolean} true if focus is called
  */
 export default function focusFirst(element: HTMLElement | Pick<HTMLElement, "focus">): boolean {
+  if (last === element) {
+    return false;
+  }
+  last = element; //
+
   if (element instanceof HTMLElement) {
     const prev = document.activeElement;
     const tryFocus = (el: HTMLElement): boolean => {
@@ -16,8 +22,10 @@ export default function focusFirst(element: HTMLElement | Pick<HTMLElement, "foc
     };
 
     if (tryFocus(element)) {
+      last = null;
       return true;
     }
+    last = null;
     // const isVisible = (e: HTMLElement): boolean => {
     //   return e.offsetWidth > 0 || e.offsetHeight > 0 || !!(e.style?.display && e.style.display !== "none");
     // };

@@ -1,11 +1,11 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import InputRadio from "src/elements/inputRadio";
 import Page from "src/elements/page";
 import { WUPPopup } from "web-ui-pack/popup/popupElement.types";
 import Example1 from "./example1";
 import Example2 from "./example2";
 import Example3 from "./example3";
 import Example4 from "./example4";
+import styles from "./popupView.scss";
 
 const opts: Partial<WUPPopup.Options> = {
   arrowEnable: true,
@@ -37,13 +37,27 @@ export default function PopupView() {
   setTimeout(() => setOpts(opts));
 
   return (
-    <Page header="PopupElement" link="#features">
+    <Page
+      header="PopupElement"
+      link="src/popup/popupElement"
+      details={{ tag: "wup-popup" }}
+      features={[
+        "The main goal: place inside visible area without oveflow of target",
+        <>
+          Works without <b>position: relative</b>
+        </>,
+        "Optimized for render (via window.requestAnimationFrame)",
+        "Built-in animations",
+        "Built-in arrow",
+        "Flexible way to change position-priorities",
+      ]}
+    >
       <h3>Options</h3>
-      <fieldset>
+      <fieldset className={styles.inputs}>
         <legend>Offset</legend>
         {["Top", "Right", "Bottom", "Left"].map((l, i) => (
           <label key={l}>
-            {l}
+            <span>{l}</span>
             <input
               type="number"
               onChange={(e) => changeOffset(+e.target.value, i)}
@@ -52,22 +66,24 @@ export default function PopupView() {
           </label>
         ))}
       </fieldset>
-      {/* todo replace with wup-ctrl-radio after implementation */}
-      <InputRadio
-        label="Arrow"
-        items={[
-          { value: true, label: "Show" },
-          { value: false, label: " Hide" },
-        ]}
-        defaultValue={opts.arrowEnable}
-        onChange={(v) => setOpts({ arrowEnable: v })}
+      <wup-radio
+        ref={(el) => {
+          if (el && !el.$options.label) {
+            el.$options.label = "Arrow";
+            el.$options.items = [
+              { value: true, text: "Show" },
+              { value: false, text: " Hide" },
+            ];
+            el.$value = opts.arrowEnable;
+            el.addEventListener("$change", () => setOpts({ arrowEnable: el.$value }));
+          }
+        }}
       />
-
-      <fieldset>
+      <fieldset className={styles.inputs}>
         <legend>ArrowOffset (only if arrow enabled)</legend>
         {["Top", "Right", "Bottom", "Left"].map((l, i) => (
           <label key={l}>
-            {l}
+            <span>{l}</span>
             <input
               type="number"
               onChange={(e) => changeArrowOffset(+e.target.value, i)}
@@ -76,7 +92,6 @@ export default function PopupView() {
           </label>
         ))}
       </fieldset>
-      <br />
       <Example1 />
       <Example2 />
       <Example3 />

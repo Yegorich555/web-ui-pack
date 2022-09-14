@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`spinElement common tests render + styles 1`] = `<wup-spin />`;
+
+exports[`spinElement common tests render + styles 2`] = `
+<style>
+  .wup-hidden, [wup-hidden] {
+position: absolute;
+height: 1px; width: 1px;
+top:0;left:0;
+overflow: hidden;
+clip: rect(1px, 1px, 1px, 1px);}
+  :root {
+          --base-bg: #fff;
+          --base-text: #232323;
+          --base-focus: #00778d;
+          --base-btn-bg: #009fbc;
+          --base-btn-text: #fff;
+          --base-btn-focus: #005766;
+          --base-btn2-bg: var(--base-btn-text);
+          --base-btn2-text: var(--base-btn-bg);
+          --border-radius: 6px;
+          --anim-time: 200ms;
+          --anim: var(--anim-time, 200ms) cubic-bezier(0, 0, 0.2, 1) 0ms;
+        }
+  :root {
+          --spin-1: #ffa500;
+          --spin-2: #fff;
+          --spin-speed: 1.2s;
+          --spin-size: 3em;
+          --spin-item-size: calc(var(--spin-size) / 8);
+          --spin-fade: #ffffff6e;
+        }
+  
+      @keyframes WUP-SPIN-1 {
+        100% { transform: rotate(360deg); }
+      }
+      WUP-SPIN {
+        z-index: 100;
+        width: var(--spin-size);
+        height: var(--spin-size);
+        top:0; left:0;
+        pointer-events: none;
+      }
+      WUP-SPIN,
+      WUP-SPIN div {
+        display: inline-block;
+        box-sizing: border-box;
+        border-radius: 50%;
+      }
+      WUP-SPIN div {
+        animation: WUP-SPIN-1 var(--spin-speed) linear infinite;
+        width: 100%; height: 100%;
+        left:0; top:0;
+      }
+      WUP-SPIN div[fade] {
+         display: block;
+         position: absolute;
+         left:0; top:0;
+         animation: none;
+         border: none;
+         border-radius: var(--border-radius);
+         transform: none;
+         z-index: -1;
+         background: var(--spin-fade);
+      }
+      WUP-SPIN div[fade]::after { content: none; }
+      WUP-SPIN div {
+        border: var(--spin-item-size) solid var(--spin-1);
+        border-top-color: var(--spin-2);
+      }
+</style>
+`;

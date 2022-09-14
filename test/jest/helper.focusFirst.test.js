@@ -1,4 +1,4 @@
-import { focusFirst } from "web-ui-pack";
+import focusFirst from "web-ui-pack/helpers/focusFirst";
 
 afterEach(() => {
   document.body.innerHTML = "";
@@ -31,9 +31,14 @@ describe("helper.focusFirst", () => {
     document.body.appendChild(container);
     expect(focusFirst(container)).toBe(true);
     expect(document.activeElement).toBe(el2);
+
+    document.body.innerHTML = "<div><input disabled/></div>";
+    const was = document.activeElement;
+    expect(focusFirst(document.querySelector("div"))).toBe(false);
+    expect(document.activeElement).toBe(was);
   });
 
-  test("focus object with propery focus", () => {
+  test("focus object with property focus", () => {
     expect(focusFirst({})).toBe(false);
     const focus = jest.fn();
     expect(focusFirst({ focus })).toBe(true);
@@ -51,6 +56,32 @@ describe("helper.focusFirst", () => {
     expect(document.activeElement).toBe(el);
     expect(focusFirst(container)).toBe(true);
     expect(document.activeElement).toBe(el);
+  });
+
+  test("focus on self - infinite loop", () => {
+    let i = 0;
+    class TestElement extends HTMLElement {
+      constructor() {
+        super();
+        this.focus = this.focus.bind(this);
+      }
+
+      focus() {
+        if (++i > 2) {
+          throw new Error("Infinite loop");
+        }
+        return focusFirst(this);
+      }
+    }
+    customElements.define("test-inher-el", TestElement);
+    const el = document.body.appendChild(document.createElement("test-inher-el"));
+    const inp = el.appendChild(document.createElement("input"));
+    expect(() => el.focus()).not.toThrow();
+    expect(document.activeElement).toBe(inp);
+    inp.blur();
+    i = 0;
+    expect(() => el.focus()).not.toThrow(); // checking again
+    expect(document.activeElement).toBe(inp);
   });
 
   // testing child with invisible element see in test/browser/..

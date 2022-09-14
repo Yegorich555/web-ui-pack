@@ -1,4 +1,4 @@
-import { onFocusLost } from "web-ui-pack";
+import onFocusLost from "web-ui-pack/helpers/onFocusLost";
 
 jest.useFakeTimers();
 
@@ -22,7 +22,7 @@ afterEach(() => {
 });
 
 describe("helper.onFocusLost", () => {
-  test("memory leaking", () => {
+  test("memory leak", () => {
     const fn = jest.fn();
     const spyOn = jest.spyOn(document, "addEventListener");
     const spyOff = jest.spyOn(document, "removeEventListener");
@@ -162,14 +162,23 @@ describe("helper.onFocusLost", () => {
     const remove = onFocusLost(el, fn, { debounceMs: 50 });
 
     el.focus();
-    other.dispatchEvent(new Event("mousedown", { bubbles: true }));
+    other.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
     el.blur();
     expect(document.activeElement).not.toBe(el);
     expect(fn).not.toBeCalled();
-    other.dispatchEvent(new Event("mouseup", { bubbles: true }));
-    other.dispatchEvent(new Event("click", { bubbles: true }));
-    other.focus();
+    other.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+    other.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    other.focus(); // only for simulation
     jest.advanceTimersToNextTimer();
+    expect(fn).toBeCalled();
+
+    // also should work on right click
+    el.focus();
+    jest.clearAllMocks();
+    other.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, button: 1 })); // Right click
+    other.focus(); // only for simulation
+    // WARN rightClick doesn't required for waiting for jest.advanceTimersToNextTimer();
+    expect(document.activeElement).toBe(other);
     expect(fn).toBeCalled();
 
     remove();

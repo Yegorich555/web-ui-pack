@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable prefer-rest-params */
 type FuncProps<T> = { [P in keyof T]: T[P] extends CallableFunction ? P : never }[keyof T];
 

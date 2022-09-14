@@ -1,4 +1,4 @@
-import { promiseWait } from "web-ui-pack";
+import promiseWait from "web-ui-pack/helpers/promiseWait";
 
 describe("helper.promiseWait", () => {
   // watchfix: jest.fakeTimers bug: https://github.com/facebook/jest/issues/9719
@@ -43,7 +43,7 @@ describe("helper.promiseWait", () => {
   test("rejects value", async () => {
     // jest.useFakeTimers();
     const fn = jest.fn();
-    promiseWait(Promise.reject("error"), 1).catch(fn);
+    promiseWait(Promise.reject("error"), 1, false).catch(fn);
 
     // expect(setTimeout).toBeCalled();
     await Promise.resolve();
@@ -54,11 +54,35 @@ describe("helper.promiseWait", () => {
     expect(fn).toBeCalledWith("error");
   });
 
-  test("wait if resolved before", async () => {
+  test("no-wait if resolved before (enable smart-option)", async () => {
+    const fn = jest.fn();
+    promiseWait(Promise.resolve(), 2, true).then(fn);
+    await new Promise((resolve) => setTimeout(resolve, 1));
+    expect(fn).toBeCalledTimes(1); // because Promise is already resolved
+
+    fn.mockClear();
+    promiseWait(Promise.resolve(), 2, fn);
+    await new Promise((resolve) => setTimeout(resolve, 1));
+    expect(fn).not.toBeCalled(); // because Promise is already resolved
+  });
+
+  test("wait if resolved before (enable smart-option)", async () => {
+    const fn = jest.fn();
+    const fnResolved = jest.fn();
+    const mainPromise = new Promise((resolve) => setTimeout(resolve, 2));
+    promiseWait(mainPromise, 5, (wait) => fn(wait)).finally(fnResolved);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(fnResolved).toBeCalled();
+    expect(fn).toBeCalledTimes(2);
+    expect(fn.mock.calls[0][0]).toBe(true);
+    expect(fn).lastCalledWith(false);
+  });
+
+  test("wait if resolved before (disable smart-option)", async () => {
     const fn = jest.fn();
     const fnNested = jest.fn();
     const mainPromise = new Promise((resolve) => setTimeout(resolve, 1)).then(fnNested);
-    promiseWait(mainPromise, 5).then(fn);
+    promiseWait(mainPromise, 5, false).then(fn);
 
     await new Promise((resolve) => setTimeout(resolve, 1));
     expect(fnNested).toBeCalled();

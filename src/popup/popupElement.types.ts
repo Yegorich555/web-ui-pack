@@ -3,7 +3,7 @@ import { WUPPopupPlace } from "./popupPlacements";
 
 export namespace WUPPopup {
   export const enum ShowCases {
-    /** Show when it's added to document; to hide just remove popup from document (outsideClick event can be helpful) */
+    /** Show when it's added to document; to hide call $hide() (outsideClick event can be helpful) */
     always = 0,
     /** On mouseEnter event of target; hide by mouseLeave; if popup shown by mouseEnter it can'be closed by click (onHover partially suppress onClick case)  */
     onHover = 1,
@@ -14,10 +14,8 @@ export namespace WUPPopup {
   }
 
   export const enum HideCases {
-    /** When $show() is fired again; possible by firing $show() or changing attr `placement` */
-    onShowAgain = 0,
-    /** When $hide() is fired programmatically */
-    onFireHide,
+    /** When $hide() is called programmatically */
+    onManuallCall,
     onMouseLeave,
     onFocusOut,
     onOutsideClick,
@@ -27,6 +25,13 @@ export namespace WUPPopup {
     onTargetRemove,
     /** When options or attributes changes */
     onOptionChange,
+  }
+
+  export const enum Animations {
+    /** Via opacity */
+    default = 0,
+    /** Dropdown/drawer animation. It's implemented via JS */
+    drawer,
   }
 
   export interface Options {
@@ -40,36 +45,44 @@ export namespace WUPPopup {
     placement: Array<WUPPopupPlace.PlaceFunc>;
     /** Virtual margin of targetElement (relative to popup)
      *  [top, right, bottom, left] or [top/bottom, right/left] in px */
-    offset: [number, number, number, number] | [number, number];
+    offset?: [number, number, number, number] | [number, number];
+    /** Virtual padding of fitElement
+     *  [top, right, bottom, left] or [top/bottom, right/left] in px */
+    offsetFitElement?: [number, number, number, number] | [number, number];
     /** Inside edges of fitElement popup is positioned and can't overflow fitElement; {body} by default */
     toFitElement?: HTMLElement | null;
     /** Sets minWidth 100% of targetWidth */
-    minWidthByTarget: boolean;
+    minWidthByTarget?: boolean;
+    /** Sets maxWidth 100% of targetWidth */
+    maxWidthByTarget?: boolean;
     /** Sets minHeight 100% of targetWidth */
-    minHeightByTarget: boolean;
-    /** Case when popup need to show; default is `onClick`
+    minHeightByTarget?: boolean;
+    /** Case when popup need to show;
+     * @defaultValue ShowCases.onClick
      * @example
-     * showCase=WUPPopup.ShowCases.onFocus | WUPPopup.ShowCases.onClick // to join cases
+     * showCase=ShowCases.onFocus | ShowCases.onClick // to join cases
      * */
     showCase: ShowCases;
-    /** Timeout in ms before popup shows on hover of target (for ShowCases.onHover); Default is 200ms */
+    /** Timeout in ms before popup shows on hover of target (for ShowCases.onHover);
+     * @defaultValue 200ms */
     hoverShowTimeout: number;
-    /** Timeout in ms before popup hides on mouse-leave of target (for ShowCases.onHover); Default is 500ms  */
+    /** Timeout in ms before popup hides on mouse-leave of target (for ShowCases.onHover);
+     * @defaultValue 500ms  */
     hoverHideTimeout: number;
-    /** Debounce option for onFocustLost event (for ShowCases.onFocus); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost; Default is 100ms */
+    /** Debounce option for onFocustLost event (for ShowCases.onFocus); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost;
+     * @defaultValue 100ms */
     focusDebounceMs?: number;
     /** Set true to show arrow with popup; @false by default;
-     *  Arrow is placed after popup so it's easy to access (via style @see arrowClass or popupElement.$arrowElement)
-     */
-    arrowEnable: boolean;
-    /** Setup arrow class and use :before to add background-image or content;
-     * Limitation: arrow developed with ratio 2:1(w:h). You can't change it directly. Use only :before, :after to reach you goal
+     *  Arrow is placed after popup so it's easy to access (via style @see arrowClass or popupElement.$refArrow) */
+    arrowEnable?: boolean;
+    /** Setup arrow class and use ::before to add background-image or content;
+     * Limitation: arrow developed with ratio 2:1(w:h). You can't change it directly. Use only ::before, ::after to reach you goal
      *
      * To customize arrow style you can use also the following scss logic
      * @example
      * wup-popup + wup-popup-arrow {
      *   opacity: 0.5
-     *   &:before {
+     *   &::before {
      *      background: no-repeat url("someImageHere.png");
      *   }
      * }
@@ -77,33 +90,26 @@ export namespace WUPPopup {
     arrowClass?: string;
     /** Virtual margin for targetElement related to arrow
      *  [top, right, bottom, left] or [top/bottom, right/left] in px */
-    arrowOffset: [number, number, number, number] | [number, number];
+    arrowOffset?: [number, number, number, number] | [number, number];
+    /** Animation that applied to popup
+     * @defaultValue Animations.default */
+    animation?: Animations;
   }
 
-  export type AttachOptions = Partial<Omit<Options, "target">> & {
+  export interface AttachOptions extends Partial<Omit<Options, "target">> {
     target: HTMLElement;
     text: string | undefined | null;
     tagName?: string;
-  };
+  }
 
   export interface EventMap extends WUP.EventMap {
     /** Fires before show is happened; can be prevented via e.preventDefault() */
     $willShow: Event;
-    /** Fires after popup is shown */
+    /** Fires after popup is shown (after animation finishes) */
     $show: Event;
     /** Fires before hide is happened; can be prevented via e.preventDefault() */
     $willHide: Event;
-    /** Fires after popup is hidden */
+    /** Fires after popup is hidden (after animation finishes) */
     $hide: Event;
-  }
-
-  export interface Element {
-    $options: Options;
-    /** Show popup; it disables option.showCase and enables by $hide() */
-    $show: () => void;
-    /** Hide popup */
-    $hide: () => void;
-    /** Current state */
-    readonly $isOpen: boolean;
   }
 }

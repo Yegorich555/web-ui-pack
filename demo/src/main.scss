@@ -71,6 +71,7 @@ h1 {
         display: block;
         padding: 10px;
         text-decoration: none;
+        color: inherit;
 
         &:hover {
           color: $hoverColor;
@@ -86,6 +87,10 @@ h1 {
           background-color: $activeLinkHoverBgColor;
         }
       }
+
+      .nested {
+        margin-left: 1em;
+      }
     }
   }
 
@@ -97,7 +102,7 @@ h1 {
     /* stylelint-disable-next-line no-descending-specificity */
     > div {
       min-width: 450px;
-      max-width: 450px;
+      max-width: 500px;
       margin: 0 auto;
     }
   }

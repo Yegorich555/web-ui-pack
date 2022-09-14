@@ -71,12 +71,33 @@ h3 {
   margin-bottom: 0.2em;
 }
 
+h3 + small {
+  font-size: 12px;
+}
+
 p {
   margin: 0;
   font-size: smaller;
 }
 
-*:focus {
-  outline: 2px solid $focusFrameColor;
-  outline-offset: -2px;
+// *:focus {
+//   outline: 2px solid $focusFrameColor;
+//   outline-offset: -2px;
+// }
+
+section {
+  padding: 6px;
+  box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius, 6px);
+  margin-bottom: 14px;
+
+  > h3 {
+    margin: 0;
+  }
+}
+
+code {
+  .token.operator {
+    background: none;
+  }
 }

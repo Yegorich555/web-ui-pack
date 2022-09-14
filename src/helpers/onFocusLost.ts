@@ -10,18 +10,26 @@ function setEvent(): void {
     return;
   }
 
-  const r1 = onEvent(document, "mousedown", ({ defaultPrevented }) => (isMouseDown = !defaultPrevented), {
-    passive: true,
-  });
+  const r1 = onEvent(
+    document,
+    "mousedown",
+    ({ button, defaultPrevented }) => (isMouseDown = !button && !defaultPrevented), // filter only for LeftClick
+    { passive: true }
+  );
 
-  const mouseup = () => {
-    onMouseUp.forEach((f) => f());
-    onMouseUp.length = 0;
-    isMouseDown = false;
-  };
   // click fires after mouseup but provides better mechanism
-  const r2 = onEvent(document, "click", mouseup, { passive: true });
+  const r2 = onEvent(
+    document,
+    "click",
+    () => {
+      onMouseUp.forEach((f) => f());
+      onMouseUp.length = 0;
+      isMouseDown = false;
+    },
+    { passive: true }
+  );
 
+  /* istanbul ignore else */
   if (!rstEvent) {
     rstEvent = () => {
       if (--rstCnt === 0) {
@@ -36,18 +44,17 @@ function setEvent(): void {
 
 export interface onFocusLostOptions extends AddEventListenerOptions {
   /** Required to prevent debounce when user clicks on label tied with input;
-   * In this case events labelClick > inputFocusout > inputClick > inputFocusin is fired
+   * In this case events labelClick > inputFocusout > inputClick > inputFocusin is called
    *
    * Troubleshooting: if click/focusout is handled somewhere during for a long time `debounceMs` must be adjusted
    * or you can prevent labelOnClick behavior via adding label.addEventListener('mousedown', (e) => e.preventDefault());
    * and implement labelClick > inputFocus yourself
-   *
-   * Default is `100ms` */
+   * @defaultValue 100ms */
   debounceMs?: number;
 }
 
 /** Fires when element/children completely lost focus.
- * This event checks next focused/active element and isn't fired several times when focus goes between children.
+ * This event checks next focused/active element and isn't called several times when focus goes between children.
  * @param element HTMLElement to apply `.addEventListener`
  * @param listener Callback invoked on event
  * @param options OnFocusLostOptions
@@ -59,12 +66,11 @@ export default function onFocusLost(
   options?: onFocusLostOptions
 ): () => void {
   setEvent();
-  const remove = () => {
-    // eslint-disable-next-line no-use-before-define
+  const remove = (): void => {
     element.removeEventListener("focusout", focusout);
     rstEvent?.call(element);
   };
-  const focusout = (e: FocusEvent, isNext?: true) => {
+  const focusout = (e: FocusEvent, isNext?: true): void => {
     if (!isNext && isMouseDown) {
       // mouseDown Label > mouseUp Label (without mouseMove) >>> click Label > focusin Input > click Input
       // if mouseDown.target === mouseUp.target >>> click target; if clickTarget tied with input >>> clickInput
@@ -72,7 +78,7 @@ export default function onFocusLost(
       onMouseUp.push(() => setTimeout(() => focusout(e, true), options?.debounceMs || 100));
       return;
     }
-    const isFocused = (a: Node | null) => a && (element === a || element.contains(a));
+    const isFocused = (a: Node | null): boolean | null => a && (element === a || element.contains(a));
     const isStillFocused = e.relatedTarget instanceof Node && isFocused(e.relatedTarget);
     if (!isStillFocused && !isFocused(document.activeElement)) {
       listener.call(element, e);

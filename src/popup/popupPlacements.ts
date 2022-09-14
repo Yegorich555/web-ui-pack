@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 export namespace WUPPopupPlace {
   export interface XResult {
     attr: "left" | "right" | "top" | "bottom";
@@ -22,12 +21,14 @@ export namespace WUPPopupPlace {
   }
   export interface Result extends XResult, YResult {}
 
-  export interface Rect {
-    el: HTMLElement;
+  export interface PositionRect {
     top: number;
     right: number;
     bottom: number;
     left: number;
+  }
+  export interface Rect extends PositionRect {
+    el: HTMLElement;
     width: number;
     height: number;
   }
@@ -37,13 +38,13 @@ export namespace WUPPopupPlace {
     h: number;
     el: HTMLElement;
     /** target offset; attention: it's already applied before call of placements */
-    offset: { top: number; right: number; bottom: number; left: number };
+    offset: PositionRect;
     minW: number;
     minH: number;
     arrow: {
       h: number;
       w: number;
-      offset: { top: number; right: number; bottom: number; left: number };
+      offset: PositionRect;
     };
   }
 
@@ -78,27 +79,6 @@ export namespace WUPPopupPlace {
     /** align by end of edge of target */
     $end: AlignFunc;
   }
-}
-
-export function px2Number(styleValue: string): number {
-  return +(/([0-9]+)/.exec(styleValue)?.[0] || 0);
-}
-
-/* Returns bounding rectangular without borders and scroll (simulate box-sizing: border-box) */
-export function getBoundingInternalRect(el: HTMLElement): Omit<WUPPopupPlace.Rect, "el"> {
-  const { borderTopWidth, borderLeftWidth } = getComputedStyle(el);
-  let { left, top } = el.getBoundingClientRect();
-  top += px2Number(borderTopWidth);
-  left += px2Number(borderLeftWidth);
-  const r: Omit<WUPPopupPlace.Rect, "el"> = {
-    top,
-    left,
-    right: left + el.clientWidth,
-    bottom: top + el.clientHeight,
-    width: el.clientWidth,
-    height: el.clientHeight,
-  };
-  return r;
 }
 
 const yAdjust = <WUPPopupPlace.AdjustFunc>function yAdjust(this: WUPPopupPlace.Result, _t, me, fit) {
@@ -277,3 +257,18 @@ Object.keys(PopupPlacements).forEach((kp) => {
     };
   });
 });
+
+/** Returns normalized offset */
+export function getOffset(
+  offset: [number, number, number, number] | [number, number] | undefined
+): WUPPopupPlace.PositionRect {
+  if (!offset) {
+    return { top: 0, left: 0, bottom: 0, right: 0 };
+  }
+  return {
+    top: offset[0],
+    right: offset[1],
+    bottom: offset[2] ?? offset[0],
+    left: offset[3] ?? offset[1],
+  };
+}

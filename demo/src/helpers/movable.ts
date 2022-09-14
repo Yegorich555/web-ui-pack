@@ -22,7 +22,7 @@ function canMove(
   return { dx: x - el.posX, dy: y - el.posY };
 }
 
-export default function movable(refEl: HTMLElement) {
+export default function movable(refEl: HTMLElement): (x: number, y: number) => void {
   let isDown = false;
   const el = refEl as unknown as HTMLElement & { posX: number; posY: number };
   el.posX = 0;
@@ -41,7 +41,7 @@ export default function movable(refEl: HTMLElement) {
     document.body.style.cursor = "";
   });
   // eslint-disable-next-line no-inner-declarations
-  function move(x: number, y: number) {
+  function move(x: number, y: number): void {
     const can = canMove(el, x, y);
     if (can) {
       el.posX += can.dx;

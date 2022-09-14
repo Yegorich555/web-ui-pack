@@ -1,4 +1,4 @@
-import { onEvent } from "web-ui-pack";
+import onEvent from "web-ui-pack/helpers/onEvent";
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -11,7 +11,7 @@ describe("helper.onEvent", () => {
     const e = new Event("click");
     document.dispatchEvent(e);
     expect(fn).toBeCalledTimes(1);
-    expect(fn.mock.calls[0][0] === e).toBeTruthy();
+    expect(fn.mock.calls[0][0] === e).toBe(true);
   });
 
   test("add/removeListener", () => {
@@ -56,9 +56,16 @@ describe("helper.onEvent", () => {
   test("other options", () => {
     const fn = jest.fn();
     const spyOn = jest.spyOn(document, "addEventListener");
-    const remove = onEvent(document, "click", fn, { passive: true });
+    let remove = onEvent(document, "click", fn, { passive: true });
 
-    document.dispatchEvent(new Event("click"));
+    document.dispatchEvent(new MouseEvent("click"));
+    expect(spyOn).toBeCalledTimes(1);
+    expect(fn).toBeCalledTimes(1);
+    remove();
+
+    jest.clearAllMocks();
+    remove = onEvent(document, "click", fn, true);
+    document.dispatchEvent(new MouseEvent("click"));
     expect(spyOn).toBeCalledTimes(1);
     expect(fn).toBeCalledTimes(1);
     remove();
