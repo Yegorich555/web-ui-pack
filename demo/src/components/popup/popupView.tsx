@@ -39,7 +39,7 @@ export default function PopupView() {
   return (
     <Page
       header="PopupElement"
-      link="src/popup/popupElement"
+      link="src/popup/popupElement.ts"
       details={{ tag: "wup-popup" }}
       features={[
         "The main goal: place inside visible area without oveflow of target",
