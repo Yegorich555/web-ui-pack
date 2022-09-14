@@ -32,7 +32,7 @@ export namespace WUPBaseComboIn {
 }
 
 export const enum ShowCases {
-  /** When $show() called programmatically; Don't use it for $options (it's for nested cycle) */
+  /** When $showMenu() called programmatically; Don't use it for $options (it's for nested cycle) */
   onManualCall = 1,
   /** When control got focus */
   onFocus = 1 << 1,
@@ -323,6 +323,7 @@ export default abstract class WUPBaseComboControl<
     return true;
   }
 
+  protected _isHidding?: true;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected async goHideMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): Promise<boolean> {
     if (!this.$refPopup) {
@@ -335,17 +336,17 @@ export default abstract class WUPBaseComboControl<
     this.#isOpen = false;
     /* istanbul ignore else */
     if (wasOpen) {
+      this._isHidding = true;
       this.#popupRefs!.hide(WUPPopup.HideCases.onManuallCall); // call for ref-listener to apply events properly
       await this.$refPopup.$hide();
-
+      delete this._isHidding;
+      if (this.#isOpen) {
+        return false; // possible when popup opened again during the animation
+      }
       // remove popup only by focusOut to optimize resources
       if (hideCase === HideCases.onFocusLost) {
         this.removePopup();
       }
-    }
-
-    if (this.#isOpen) {
-      return false; // possible when popup opened again during the animation
     }
 
     this.removeAttribute("opened");
@@ -433,7 +434,7 @@ export default abstract class WUPBaseComboControl<
 
   protected override gotFocusLost(): void {
     super.gotFocusLost();
-    !this.#isOpen && this.removePopup(); // otherwise it's removed by hidingMenu
+    !this.#isOpen && !this._isHidding && this.removePopup(); // otherwise it's removed by hidingMenu
     this.setInputValue(this.$value); // to update/rollback input according to result
   }
 
@@ -477,4 +478,25 @@ export default abstract class WUPBaseComboControl<
     super.gotRemoved();
   }
 }
-// todo hide animation is broken by focusout
+
+// WARN about chaining
+/*
+ $showMenu().then(()=> console.warn('done'))
+ isOpen: true >>> create popup,
+ isOpening: true
+ ...fetch menu-items (takes time)... >>> render popup with items
+ ...animation (takes time)...
+ isOpening: false
+ >>> console.warn('done')
+ show-event
+ */
+
+/*
+ $hideMenu().then(()=> console.warn('done'))
+ isOpen: false
+ isHidding: true
+ ...animation...
+ isHidding: false >>> remove popup if focus out
+ >>> console.warn('done')
+ hide-event
+ */

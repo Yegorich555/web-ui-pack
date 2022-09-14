@@ -18,6 +18,7 @@ describe("control.select", () => {
         trueId: el.$refInput.id,
         html: el.outerHTML,
         isOpen: el.$isOpen,
+        isMenuExists: !!el.$refPopup,
       };
     });
 
@@ -75,5 +76,38 @@ describe("control.select", () => {
         return el.scrollHeight - el.scrollTop - el.clientHeight;
       })
     ).toBe(0); // check if scroll at the end
+  });
+
+  test("show/hide animation works", async () => {
+    await page.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: "no-preference" }]); // allow animations
+    // show
+    await page.evaluate(() => document.getElementById("trueEl").focus());
+    await page.waitForTimeout(310); // animation takes 300ms by default
+    let r = await getInfo();
+    expect(r.isOpen).toBe(true);
+    expect(r.isMenuExists).toBe(true);
+
+    // hide
+    await page.evaluate(() => document.activeElement.blur());
+    await page.waitForTimeout(250); // animation takes 300ms by default but we wait partially
+    r = await getInfo();
+    expect(r.isOpen).toBe(false);
+    expect(r.isMenuExists).toBe(true); // because still closing
+
+    await page.waitForTimeout(100); // animation takes 300ms by default
+    r = await getInfo();
+    expect(r.isOpen).toBe(false);
+    expect(r.isMenuExists).toBe(false); // because removed after animation end
+
+    // case: focus again during the closing by focusout must open
+    await page.evaluate(() => document.getElementById("trueEl").focus());
+    await page.waitForTimeout(200);
+    await page.evaluate(() => document.activeElement.blur());
+    await page.waitForTimeout(100);
+    await page.evaluate(() => document.getElementById("trueEl").focus());
+    await page.waitForTimeout(300);
+    r = await getInfo();
+    expect(r.isMenuExists).toBe(true);
+    expect(r.isOpen).toBe(true);
   });
 });
