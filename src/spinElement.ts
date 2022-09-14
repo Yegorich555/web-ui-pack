@@ -148,7 +148,8 @@ export default class WUPSpinElement extends WUPBaseElement {
 
   protected override gotRemoved(): void {
     super.gotRemoved();
-
+    this.#frameId && window.cancelAnimationFrame(this.#frameId);
+    this.#frameId = undefined;
     if (this.#prevTarget?.isConnected) {
       // otherwise removing attribute doesn't make sense
       this.#prevTarget.removeAttribute("aria-busy");
@@ -519,5 +520,3 @@ export function spinUseSpliceRing(cls: typeof WUPSpinElement): void {
             ${s}`;
   });
 }
-
-// todo issue when spinElement is removed during the animation
