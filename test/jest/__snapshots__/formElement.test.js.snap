@@ -29,7 +29,12 @@ clip: rect(1px, 1px, 1px, 1px);}
       --btn-submit-focus: var(--base-btn-focus);
     }
   
-        WUP-FORM { position: relative; }
+        WUP-FORM {
+          position: relative;
+          display: block;
+          max-width: 500px;
+          margin: auto;
+        }
         WUP-FORM [type='submit'] {
           box-shadow: none;
           border: 1px solid var(--btn-submit-bg);

@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0 (\_\_\_)
+## 0.1.0 (Sep 14, 2022)
 
 **BREAKING CHANGES**:
 

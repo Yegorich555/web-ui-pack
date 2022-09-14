@@ -162,7 +162,12 @@ export default class WUPFormElement<
 
   static get $style(): string {
     return `${super.$style}
-        :host { position: relative; }
+        :host {
+          position: relative;
+          display: block;
+          max-width: 500px;
+          margin: auto;
+        }
         :host [type='submit'] {
           box-shadow: none;
           border: 1px solid var(--btn-submit-bg);
