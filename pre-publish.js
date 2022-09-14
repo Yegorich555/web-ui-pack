@@ -37,6 +37,7 @@ async function go() {
 
   /* update version in package.json */
   await exec("npm version patch --commit-hooks false --git-tag-version false", []);
+  await exec("npm run build"); // run build again because version is changed
 
   /* commit files */
   const { version } = require("./package.json");
