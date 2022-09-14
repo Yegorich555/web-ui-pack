@@ -250,8 +250,13 @@ export default class WUPFormElement<
 
   protected override _opts = this.$options;
 
-  /** All controls assigned to form */
+  /** All controls related to form */
   $controls: IBaseControl<any>[] = [];
+
+  /** Returns related to form controls with $options.name != null */
+  get $controlsAttached(): IBaseControl<any>[] {
+    return this.$controls.filter((c) => c.$options.name != null);
+  }
 
   _model?: Partial<Model>;
   /** Model related to every control inside (with $options.name); @see BaseControl...$value */
@@ -296,12 +301,12 @@ export default class WUPFormElement<
 
   /** Returns true if all nested controls are valid */
   get $isValid(): boolean {
-    return this.$controls.every((c) => c.$isValid);
+    return this.$controlsAttached.every((c) => c.$isValid);
   }
 
   /** Returns true if some of controls value is changed by user */
   get $isChanged(): boolean {
-    return this.$controls.some((c) => c.$isChanged);
+    return this.$controls.some((c) => c.$options.name && c.$isChanged);
   }
 
   /** Dispatched on submit. Return promise to lock form and show spinner */
@@ -365,10 +370,11 @@ export default class WUPFormElement<
 
     // validate
     let errCtrl: IBaseControl | undefined;
+    const arrCtrl = this.$controlsAttached;
     if (this._opts.submitActions & SubmitActions.validateUntiFirst) {
-      errCtrl = this.$controls.find((c) => c.$validate());
+      errCtrl = arrCtrl.find((c) => c.$validate());
     } else {
-      this.$controls.forEach((c) => {
+      arrCtrl.forEach((c) => {
         const err = c.$validate();
         if (err && !errCtrl) {
           errCtrl = c;
@@ -409,7 +415,7 @@ export default class WUPFormElement<
 
       promiseWait(Promise.all([p1, ev.$waitFor]), 300, (v: boolean) => this.changePending(v)).then(() => {
         if (needReset) {
-          this.$controls.forEach((v) => (v.$isDirty = false));
+          arrCtrl.forEach((v) => (v.$isDirty = false));
           this.$initModel = this.$model;
         }
       });
@@ -511,4 +517,3 @@ declare global {
     }
   }
 }
-// todo isChanged is wrong if assigned control without name >>> such control doesn't affect on Model so it's must be excluded from....

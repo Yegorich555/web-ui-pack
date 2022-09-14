@@ -21,7 +21,7 @@ beforeEach(() => {
   const inp2 = el.appendChild(document.createElement("wup-text"));
   inp2.$options.name = "firstName";
   const inp3 = el.appendChild(document.createElement("wup-text"));
-  inp3.$options.name = undefined;
+  inp3.$options.name = "";
 
   inputs.push(inp1, inp2, inp3);
 
@@ -209,6 +209,36 @@ describe("formElement", () => {
       expect(inputs[1].$refInput.autocomplete).toBe("off");
       expect(inputs[2].$refInput.autocomplete).toBe("off");
     });
+  });
+
+  test("detached control", async () => {
+    inputs[2].$value = "Something new";
+    inputs[2].$options.name = "Third";
+    inputs[2].$options.validations = { _alwaysInvalid: () => "Always invalid message" };
+    expect(el.$isChanged).toBe(true);
+    expect(el.$isValid).toBe(false);
+
+    inputs[2].$options.name = undefined;
+    expect(el.$isChanged).toBe(false);
+    expect(el.$isValid).toBe(true);
+
+    const $onSubmit = jest.fn();
+    el.$onSubmit = $onSubmit;
+    btnSubmit.click();
+    await h.wait(1);
+    expect($onSubmit).toBeCalledTimes(1);
+
+    el.$options.readOnly = true;
+    jest.advanceTimersByTime(1);
+    expect(inputs[2].$refInput.readOnly).toBe(true);
+
+    el.$options.disabled = true;
+    jest.advanceTimersByTime(1);
+    expect(inputs[2].$refInput.disabled).toBe(true);
+
+    el.$options.autoComplete = true;
+    jest.advanceTimersByTime(1);
+    expect(inputs[2].$refInput.autocomplete).toBe("off");
   });
 
   test("static $tryConnect()", () => {

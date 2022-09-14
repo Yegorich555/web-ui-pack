@@ -38,6 +38,17 @@ export default function FAQView() {
             answer: <Code code={codeChangeSpinner} />,
           },
           {
+            link: "detach-controls",
+            question: "Controls. How to detach from FormElement (exclude from model, validation, changes etc.)",
+            answer: (
+              <>
+                Use $options.<b>name</b> per each control (<b>readonly</b>, <b>disabled</b> applies even to detached
+                controls inside form)
+                <Code code={codeControlDetach} />
+              </>
+            ),
+          },
+          {
             link: "validation-rules",
             question: "Controls. How to change default validation rules/messages and add new",
             answer: (
@@ -112,6 +123,20 @@ WUPFormElement.prototype.renderSpin = function renderSpin(target: HTMLElement): 
   spin.$options.overflowTarget = target as HTMLButtonElement;
   return spin;
 };`;
+
+const codeControlDetach = `js
+const form = document.body.appendChild(document.createElement("wup-form"));
+const el = form.appendChild(document.createElement("wup-text"));
+el.$options.name = undefined; // To completely detach from FormElement skip option name
+// OR
+el.$options.name = ""; // To partially detach (exlcude from model, isChanged, but included in validations, sumbit)
+/* WARNING: event $change bubbles from control.
+ * To subscribe for only attached controls changes you need filter it yourself */
+form.addEventListener("$change", (e) => {
+  if ((e.target as IBaseControl).$options.name) {
+    console.warn("this control is attached and changed", e);
+  }
+});`;
 
 const codeVldRules = `js
 // to define new rule add new property to validationRules
