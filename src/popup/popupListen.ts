@@ -275,5 +275,3 @@ popupListen.$defaults = {
   hoverShowTimeout: 200,
   hoverHideTimeout: 500,
 };
-
-// todo click on popup with closing must return focus back

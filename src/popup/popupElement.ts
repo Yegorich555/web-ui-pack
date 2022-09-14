@@ -327,7 +327,7 @@ export default class WUPPopupElement<
       this._opts.target = this.#defineTarget();
 
       if (!this._opts.showCase /* always */) {
-        this.goShow(WUPPopup.ShowCases.always); // todo case when we don't need to fire goShow
+        this.goShow(WUPPopup.ShowCases.always);
         return;
       }
 

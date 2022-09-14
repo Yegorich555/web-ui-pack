@@ -52,13 +52,13 @@ npm install web-ui-pack
 - [x] [CheckControl (Checkbox)](src/controls/check.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/check)
 - [x] [RadioControl (RadioGroup)](src/controls/radio.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/radio)
 - [x] [SelectControl (ComboBox, Dropdown)](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
-- [ ] SelectManyControl (MultiSelect)
-- [ ] TextareaControl
-- [ ] CheckTreeControl
-- [ ] NumberControl
-- [ ] Mask/pattern for controls
 - [ ] Calendar
 - [ ] DateControl
+- [ ] SelectManyControl (MultiSelect)
+- [ ] TextareaControl
+- [ ] NumberControl
+- [ ] Mask/pattern for controls
+- [ ] CheckTreeControl
 - [ ] TimeControl ?
 - [ ] DateTimeControl ?
 - [ ] FileControl
@@ -208,7 +208,7 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 - [**animateDropdown**(el: HTMLElement, timeMs=300, isClose=false)](src/helpers/animateDropdown.ts) ⇒ `Animate (open/close) element as dropdown via scale and counter-scale for children`
 - [**findScrollParent**(el: HTMLElement)](src/helpers/findScrollParent.ts) ⇒ `Find first parent with active scroll X/Y`
 - [**findScrollParentAll**(e: HTMLElement)](src//helpers/findScrollParent.ts) ⇒ `Find all parents with active scroll X/Y`
-- [**focusFirst**(el: HTMLElement)](src//helpers/focusFirst.ts) ⇒ `Set focus on parent itself or first possible element inside`
+- [**focusFirst**(el: HTMLElement)](src//helpers/focusFirst.ts) ⇒ `Set focus on element or first possible nested element`
 - [**isIntoView**(el: HTMLElement)](src//helpers/isIntoView.ts) ⇒ `Check if element is visible in scrollable parents`
 - [**nestedProperty.set**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.set(obj, "value.nestedValue", 1) sets obj.value.nestedValue = 1`
 - [**nestedProperty.get**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.get(obj, "nested.val2", out?: {hasProp?: boolean} ) returns value from obj.nested.val2`

@@ -81,7 +81,7 @@ export default class WUPCheckControl<
         height: 100%; width: 100%;
         transform: scale(0.8);
 
-        background-color: var(--ctrl-check-on);
+        background: var(--ctrl-check-on);
         -webkit-mask-image: var(--wup-icon-check);
         mask-image: var(--wup-icon-check);
         -webkit-mask-size: contain;
@@ -114,6 +114,4 @@ export default class WUPCheckControl<
 
 customElements.define(tagName, WUPCheckControl);
 
-// todo add logic for checkbox-tree
-// todo cache observedAttrs per each type to reduce memoryConsumption (when use checkbox-tree)
-// todo animation for checkbox possible if show image partially during the time
+// todo add logic for checkbox-tree: also cache observedAttrs per each type to reduce memoryConsumption

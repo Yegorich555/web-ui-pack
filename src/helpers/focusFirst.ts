@@ -1,6 +1,6 @@
 let last: HTMLElement | Pick<HTMLElement, "focus"> | null = null;
 /**
- * Set focus on parent itself or first possible element inside
+ * Set focus on element or first possible nested element
  * @param element
  * @return {Boolean} true if focus is called
  */
