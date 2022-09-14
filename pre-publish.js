@@ -44,7 +44,7 @@ async function go() {
   await exec(`git tag v${version}`, []);
 
   // publish to npm
-  await exec("cd ./dist && npm publish");
+  // await exec("cd ./dist && npm publish");
 
   // push files
   await exec("git push && git push --tags", []);
