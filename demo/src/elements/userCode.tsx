@@ -8,9 +8,11 @@ import WUPBaseControl from "web-ui-pack/controls/baseControl";
 import { WUPFormElement, WUPPasswordControl, WUPRadioControl, WUPSwitchControl } from "web-ui-pack";
 import styles from "./userCode.scss";
 import pageStyles from "./page.scss";
+import Code from "./code";
 
 export interface UserCodeProps {
   tag?: `wup-${string}`;
+  customHTML?: string[];
   /** Set of alternative values for css-vars. Possible whe css-var used several times and need to skip the real-value */
   cssVarAlt?: Map<string, string>;
 }
@@ -22,7 +24,11 @@ function renderCssValue(v: string, alt: string | undefined): string | JSX.Elemen
   return v;
 }
 
-function renderHTMLCode(tag: string): string | JSX.Element {
+function renderHTMLCode(tag: string, customHTML: string[] | undefined): string | JSX.Element | JSX.Element[] {
+  if (customHTML) {
+    // eslint-disable-next-line react/no-array-index-key
+    return customHTML.map((c, i) => <Code code={c} key={i.toString()} />);
+  }
   const [, updateState] = useState<number>();
   useEffect(() => {
     setTimeout(() => updateState(1));
@@ -92,7 +98,7 @@ export default function UserCode(props: React.PropsWithChildren<UserCodeProps>) 
             (using <b>$options</b> instead of attributes is preferable)
           </small>
         </h3>
-        {renderHTMLCode(props.tag)}
+        {renderHTMLCode(props.tag, props.customHTML)}
       </section>
       <section className={pageStyles.smallText}>
         <h3>CSS variables</h3>

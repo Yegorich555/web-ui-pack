@@ -57,7 +57,7 @@ export default function ControlsView() {
           Pending state with spinner if return promise for <b>$onSubmit()</b> method
         </>,
       ]}
-      details={{ tag: "wup-form" }}
+      details={{ tag: "wup-form", customHTML }}
     >
       <wup-form
         autoComplete={false}
@@ -117,4 +117,47 @@ export default function ControlsView() {
   );
 }
 
-// todo detailed example about usage with controls, validations, initModel, model etc.
+const customHTML = [
+  `html
+<wup-form
+  autoComplete={false}
+  readOnly={false}
+  disabled={false}
+  autoFocus={false}
+>
+  <wup-text name="firstName"/>
+  <wup-text name="lastName" />
+  <wup-text name="email"/>
+  <wup-pwd name="password"/>
+  <button type="submit">Submit</button>
+</wup-form>;`,
+  `js
+const form = document.querySelector("wup-form")!;
+form.$onSubmit = (e) => {
+  // post request here
+  console.warn("sumbitted model", e.$model);
+  // return promise to block form and show spinner
+  return new Promise<boolean>((resolve) => setTimeout(resolve, 1000));
+};
+
+const iFirstName = form.$controls[0] as WUPTextControl;
+iFirstName.$options.validations = { required: true };
+iFirstName.$initValue = "Dan";
+
+const iLastName = form.$controls[1] as WUPTextControl;
+iLastName.$options.validations = { required: true };
+
+const iEmail = form.$controls[2] as WUPTextControl;
+iEmail.$options.validations = { required: true, email: true };
+
+const pwd = form.$controls[3] as WUPPasswordControl;
+pwd.$options.validations = {
+  required: true,
+  min: 8,
+  minNumber: 1,
+  minUpper: 1,
+  minLower: 1,
+  special: { min: 1, chars: "#!-_?,.@:;'" },
+};
+pwd.$options.validationShowAll = true;`,
+];
