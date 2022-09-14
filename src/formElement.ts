@@ -517,3 +517,5 @@ declare global {
     }
   }
 }
+
+// todo show success result in modal window

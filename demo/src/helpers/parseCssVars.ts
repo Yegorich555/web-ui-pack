@@ -4,23 +4,35 @@ interface CssVar {
   name: string;
   value: string;
   isDuplicate?: boolean;
+  tagName: string;
 }
 
 /** Returns all css-vars definitions */
 export function parseCssVars(str: string): CssVar[] {
+  const regByTags = /\s*(:*[A-Za-z0-9-]+)\[*\s*[^{ ]*\s*\{\s*([^}]*)\s*}/g;
   const reg = /(--[\w-]+): *([^;]+);/g;
   const vars: CssVar[] = [];
   const uniqueList = new Set<string>();
+
   while (1) {
-    const exec = reg.exec(str);
-    if (exec === null) {
+    const execTags = regByTags.exec(str);
+    if (execTags === null) {
       break;
     }
-    const name = exec[1];
-    const duplicate = uniqueList.has(name);
-    vars.push({ name, value: exec[2], isDuplicate: duplicate });
-    !duplicate && uniqueList.add(name);
+    const tagName = execTags[1].trim();
+    const s = execTags[2];
+    while (1) {
+      const exec = reg.exec(s);
+      if (exec === null) {
+        break;
+      }
+      const name = exec[1];
+      const duplicate = uniqueList.has(name);
+      vars.push({ tagName, name, value: exec[2], isDuplicate: duplicate });
+      !duplicate && uniqueList.add(name);
+    }
   }
+
   return vars;
 }
 
@@ -71,11 +83,14 @@ interface Options {
 
 /** Returns all css-vars thar used by pointed element */
 export default function getUsedCssVars(scanEl: WUPBaseElement<any>, opts?: Options): CssVar[] {
-  const str = (scanEl.constructor as typeof WUPBaseElement).$refStyle!.textContent!;
+  const styleEl = (scanEl.constructor as typeof WUPBaseElement).$refStyle!;
+  const str = styleEl.textContent!;
   const usedSet = parseUsedCssVars(str, scanEl.tagName);
   const allVars = parseCssVars(str);
+  const usedVars = allVars.filter(
+    (v) => usedSet.has(v.name) && (v.tagName === scanEl.tagName || v.tagName === ":root" || v.tagName === "body")
+  );
 
-  const usedVars = allVars.filter((v) => usedSet.has(v.name));
   const reusedVars = parseReusedVars(usedVars);
 
   let allUsedVars = allVars.filter((v) => usedSet.has(v.name) || reusedVars.has(v.name));

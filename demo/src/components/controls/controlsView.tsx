@@ -118,4 +118,3 @@ export default function ControlsView() {
 }
 
 // todo detailed example about usage with controls, validations, initModel, model etc.
-// todo CSS-vars detection is wrong:after Password open Select. It will provide --wup-icon-eye
