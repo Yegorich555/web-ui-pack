@@ -75,6 +75,39 @@ declare global {
   }
 }
 
+/** Form-control with dropdown/combobox behavior
+ * @example
+  const el = document.createElement("wup-select");
+  el.$options.name = "gender";
+  el.$options.items = [
+    { value: 1, text: "Male" },
+    { value: 2, text: "Female" },
+    { value: 3, text: "Other/Skip" },
+  ];
+  el.$initValue = 3;
+  el.$options.validations = { required: true };
+  const form = document.body.appendChild(document.createElement("wup-form"));
+  form.appendChild(el);
+  // or HTML
+  <wup-form>
+    <wup-select name="gender" initvalue="3" validations="myValidations" items="myDropdownItems" />
+  </wup-form>;
+ * @tutorial innerHTML @example
+ * <label>
+ *   <span> // extra span requires to use with icons via label:before, label:after without adjustments
+ *      <input/>
+ *      <strong>{$options.label}</strong>
+ *   </span>
+ *   <button clear/>
+ *   <wup-popup menu>
+ *      <ul>
+ *          <li>Item 1</li>
+ *          <li>Item 2</li>
+ *          // etc/
+ *      </ul>
+ *   </wup-popup>
+ * </label>
+ */
 export default class WUPSelectControl<
   ValueType = any,
   ItemType = ValueType,

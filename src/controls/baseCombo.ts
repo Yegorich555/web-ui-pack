@@ -74,6 +74,7 @@ declare global {
   }
 }
 
+/** Base abstract form-control for any control with popup-menu (Dropdown, Datepicker etc.) */
 export default abstract class WUPBaseComboControl<
   ValueType = any,
   EventMap extends WUPBaseCombo.EventMap = WUPBaseCombo.EventMap

@@ -150,6 +150,7 @@ declare global {
   }
 }
 
+/** Base abstract form-control */
 export default abstract class WUPBaseControl<ValueType = any, Events extends WUPBase.EventMap = WUPBase.EventMap>
   extends WUPBaseElement<Events>
   implements IBaseControl<ValueType>

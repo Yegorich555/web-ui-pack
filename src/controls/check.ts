@@ -38,6 +38,27 @@ declare global {
   }
 }
 
+/** Form-control with checkbox
+ * @example
+  const el = document.createElement("wup-check");
+  el.$options.name = "accepted";
+  el.$options.label = "Accept";
+  el.$initValue = false;
+  const form = document.body.appendChild(document.createElement("wup-form"));
+  form.appendChild(el);
+  // or HTML
+  <wup-form>
+    <wup-check name="accepted" label="Accept" initvalue="false"/>
+  </wup-form>;
+ * @tutorial innerHTML @example
+ * <label>
+ *   <span> // extra span requires to use with icons via label:before, label:after without adjustments
+ *      <input/>
+ *      <strong>{$options.label}</strong>
+ *      <span></span> // this icon
+ *   </span>
+ * </label>
+ */
 export default class WUPCheckControl<
   EventMap extends WUPCheck.EventMap = WUPCheck.EventMap
 > extends WUPSwitchControl<EventMap> {

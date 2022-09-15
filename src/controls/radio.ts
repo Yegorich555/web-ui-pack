@@ -57,6 +57,31 @@ interface ExtInputElement extends HTMLInputElement {
   _value: any;
 }
 
+/** Form-control with radio buttons
+ * @example
+  const el = document.createElement("wup-radio");
+  el.$options.name = "gender";
+  el.$options.items = [
+    { value: 1, text: "Male" },
+    { value: 2, text: "Female" },
+    { value: 3, text: "Other/Skip" },
+  ];
+  el.$initValue = 3;
+  el.$options.validations = { required: true };
+  const form = document.body.appendChild(document.createElement("wup-form"));
+  form.appendChild(el);
+  // or HTML
+  <wup-form>
+    <wup-radio name="gender" initvalue="3" validations="myValidations" items="myRadioItems"/>
+  </wup-form>;
+ * @tutorial innerHTML @example
+ * <fieldset>
+ *   <legend><strong>{$options.label}</strong></legend>
+ *   <label> <input/> <span/> </label>
+ *   <label> <input/> <span/> </label>
+ *   // etc.
+ * </fieldset>
+ */
 export default class WUPRadioControl<
   ValueType = any,
   EventMap extends WUPRadio.EventMap = WUPRadio.EventMap

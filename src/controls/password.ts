@@ -52,13 +52,39 @@ declare global {
     }
   }
 }
-/**
+
+/** Form-control with text-input
+ * @example
+  const el = document.createElement("wup-pwd");
+  el.$options.name = "password";
+  el.$options.validations = {
+    required: true,
+    min: 8,
+    minNumber: 1,
+    minUpper: 1,
+    minLower: 1,
+    special: { min: 1, chars: "#!-_?,.@:;'" }
+  };
+  el.$options.validationShowAll = true;
+
+  const elConfirm = document.createElement("wup-pwd");
+  elConfirm.$options.name = "passwordConfirm";
+  elConfirm.$options.validations = { confirm: true };
+
+  const form = document.body.appendChild(document.createElement("wup-form"));
+  form.appendChild(el);
+  // or HTML
+  <wup-form>
+    <wup-pwd name="password" validations="myValidations"/>
+    <wup-pwd name="passwordConfirm" validations="myValidations2"/>
+  </wup-form>;
  * @tutorial innerHTML @example
  * <label>
  *   <span> // extra span requires to use with icons via label:before, label:after without adjustments
- *      <input />
+ *      <input/>
  *      <strong>{$options.label}</strong>
  *   </span>
+ *   <button clear/>
  * </label>
  */
 export default class WUPPasswordControl<

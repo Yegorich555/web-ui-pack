@@ -58,13 +58,24 @@ declare global {
   }
 }
 
-/**
+/** Form-control with text-input
+ * @example
+  const el = document.createElement("wup-text");
+  el.$options.name = "email";
+  el.$options.validations = { required: true, max: 100, email: true };
+  const form = document.body.appendChild(document.createElement("wup-form"));
+  form.appendChild(el);
+  // or HTML
+  <wup-form>
+    <wup-text name="firstName" initvalue="Donny" validations="myValidations"/>
+  </wup-form>;
  * @tutorial innerHTML @example
  * <label>
  *   <span> // extra span requires to use with icons via label:before, label:after without adjustments
- *      <input />
+ *      <input/>
  *      <strong>{$options.label}</strong>
  *   </span>
+ *   <button clear/>
  * </label>
  */
 export default class WUPTextControl<

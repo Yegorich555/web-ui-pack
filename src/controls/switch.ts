@@ -49,6 +49,27 @@ declare global {
   }
 }
 
+/** Form-control with toggle button
+ * @example
+  const el = document.createElement("wup-switch");
+  el.$options.name = "isDarkMode";
+  el.$options.label = "Dark Mode";
+  el.$initValue = false;
+  const form = document.body.appendChild(document.createElement("wup-form"));
+  form.appendChild(el);
+  // or HTML
+  <wup-form>
+    <wup-switch name="isDarkMode" label="Dark Mode" initvalue="false"/>
+  </wup-form>;
+ * @tutorial innerHTML @example
+ * <label>
+ *   <span> // extra span requires to use with icons via label:before, label:after without adjustments
+ *      <input/>
+ *      <strong>{$options.label}</strong>
+ *      <span></span> // this icon
+ *   </span>
+ * </label>
+ */
 export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPSwitch.EventMap> extends WUPBaseControl<
   boolean,
   EventMap
