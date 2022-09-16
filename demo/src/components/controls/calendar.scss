@@ -1,0 +1,98 @@
+.cln [calendar="day"] {
+  --ctrl-clr-width: 17em;
+  --ctrl-clr-cell-size: 2em;
+  --ctrl-clr-cell-gap: calc((var(--ctrl-clr-width) / 7 - var(--ctrl-clr-cell-size)) / 2);
+  // --ctrl-clr-cell-gap: 0px;
+  // --ctrl-clr-cell-size: calc(var(--ctrl-clr-width) / 7 - 2 * var(--ctrl-clr-cell-gap));
+  --ctrl-selected: #fff; //#d9f7fd;
+  --ctrl-selected-bg: #009fbc; //#d9f7fd;
+  --ctrl-current-bg: var(--ctrl-selected);
+
+  width: var(--ctrl-clr-width);
+  padding: calc(4px + var(--ctrl-clr-cell-gap));
+  border-radius: var(--ctrl-border-radius);
+  box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.1);
+
+  ol,
+  ul,
+  header {
+    display: flex;
+    list-style: none;
+    flex-wrap: wrap;
+    padding: 0;
+    margin: 0;
+  }
+
+  ol > li,
+  ul > li {
+    height: var(--ctrl-clr-cell-size);
+    width: var(--ctrl-clr-cell-size);
+    font: inherit;
+    line-height: var(--ctrl-clr-cell-size);
+    text-align: center;
+    background: none;
+    padding: 0;
+    margin: var(--ctrl-clr-cell-gap);
+    cursor: pointer;
+    border: none;
+    border-radius: 50%;
+  }
+
+  header > button {
+    margin: auto;
+    padding: 0.25em 1em;
+    font-size: larger;
+    font-weight: initial;
+    border-radius: 2em;
+    color: inherit;
+    background-color: white;
+    box-shadow: none;
+    @media (hover: hover) {
+      &:hover {
+        // box-shadow: inset 0 0 0 99999px rgba(0, 0, 0, 0.2);
+        background-color: var(--ctrl-selected-bg);
+        color: var(--ctrl-selected);
+      }
+    }
+  }
+
+  ul {
+    color: var(--ctrl-label);
+  }
+
+  ul > li {
+    height: initial;
+    line-height: initial;
+    padding: 2px 0;
+  }
+
+  ol > li[prev],
+  ol > li[next] {
+    opacity: 0.6;
+  }
+
+  ol {
+    @media (hover: hover) {
+      > li:hover {
+        background-color: var(--ctrl-selected-bg);
+        color: var(--ctrl-selected);
+        opacity: 1;
+      }
+    }
+  }
+
+  ol > li[aria-current] {
+    background-color: var(--ctrl-selected-bg);
+    color: var(--ctrl-selected);
+    opacity: 1;
+  }
+
+  header > button,
+  ol > li {
+    // box-shadow: inset 0 0 0 99999px rgba(0, 0, 0, 0.2);
+    // background: var(--ctrl-focus);
+    // color: white;
+    // background: var(--ctrl-select-current-bg);
+    // background: #009fbc;
+  }
+}
