@@ -31,6 +31,7 @@ export namespace WUPCalendarIn {
   // type Validation<T = string> = Generics<T>["Validation"];
   export type GenDef<T = string> = Generics<T>["Defaults"];
   export type GenOpt<T = string> = Generics<T>["Options"];
+  export type DayItems = HTMLElement[] & { _firstValue: number };
 }
 
 declare global {
@@ -69,7 +70,7 @@ declare global {
  todo leave details
  */
 export default class WUPCalendarControl<
-  ValueType = Date,
+  ValueType extends Date = Date,
   EventMap extends WUPCalendar.EventMap = WUPCalendar.EventMap
 > extends WUPBaseControl<ValueType, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
@@ -181,10 +182,29 @@ export default class WUPCalendarControl<
     this.appendChild(this.$refLabel);
 
     this.renderDayPicker();
+    this.addEventListener("click", this.gotClick, { passive: true });
   }
 
+  /** Called when user clicks on calendar */
+  protected gotClick(e: MouseEvent): void {
+    if (!(e.target instanceof HTMLElement)) {
+      return;
+    }
+    const i = this._items!.findIndex((li) => li === e.target || li.contains(e.target as HTMLElement));
+    if (i > -1) {
+      this.querySelector("[aria-selected]")?.removeAttribute("aria-selected");
+      const el = this._items![i];
+      el.setAttribute("aria-selected", "true");
+      const v = new Date(this._items!._firstValue + i * 86400000);
+      this.setValue(v as ValueType);
+      console.warn("new value", v);
+    }
+  }
+
+  _items?: WUPCalendarIn.DayItems;
+
   /** Appends DayPicker on layout */
-  renderDayPicker(): void {
+  protected renderDayPicker(): void {
     const now = new Date();
     const v = (this.$value || now) as Date;
     const $1 = this._opts.firstDayOfWeek;
@@ -212,16 +232,15 @@ export default class WUPCalendarControl<
       d.textContent = names[n];
     }
 
-    type DayItems = HTMLElement[] & { _firstValue: number };
-    const items: DayItems = [] as unknown as DayItems;
-    items._firstValue = r.first;
+    this._items = [] as unknown as WUPCalendarIn.DayItems;
+    this._items._firstValue = r.first;
 
     const ol = add(box, "ol");
     const addItem = (i: number, attr: string): void => {
       const d = add(ol, "li");
       d.textContent = i.toString();
       attr && d.setAttribute(attr, "");
-      items.push(d);
+      this._items!.push(d);
     };
     if (r.prev) {
       for (let i = r.prev.from; i <= r.prev.to; ++i) {
@@ -235,8 +254,10 @@ export default class WUPCalendarControl<
       addItem(i, "next");
     }
 
-    const i = Math.floor((now.valueOf() - r.first) / 86400000);
-    items[i]?.setAttribute("aria-current", "date");
+    let i = Math.floor((now.valueOf() - r.first) / 86400000);
+    this._items[i]?.setAttribute("aria-current", "date");
+    i = Math.floor((v.valueOf() - r.first) / 86400000);
+    this._items[i]?.setAttribute("aria-selected", "true");
     // todo disabled attr
   }
 }
