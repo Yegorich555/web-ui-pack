@@ -31,7 +31,6 @@ export namespace WUPCalendarIn {
   // type Validation<T = string> = Generics<T>["Validation"];
   export type GenDef<T = string> = Generics<T>["Defaults"];
   export type GenOpt<T = string> = Generics<T>["Options"];
-  export type DayItems = HTMLElement[] & { _firstValue: number };
 }
 
 declare global {
@@ -175,7 +174,7 @@ export default class WUPCalendarControl<
     this.$refInput.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", this.$refInput.id);
 
-    this.$refInput.type = "date";
+    // this.$refInput.type = "date";
     const s = this.$refLabel.appendChild(document.createElement("span"));
     s.appendChild(this.$refInput); // input appended to span to allow user user :after,:before without padding adjust
     s.appendChild(this.$refTitle);
@@ -190,18 +189,10 @@ export default class WUPCalendarControl<
     if (!(e.target instanceof HTMLElement)) {
       return;
     }
-    const i = this._items!.findIndex((li) => li === e.target || li.contains(e.target as HTMLElement));
-    if (i > -1) {
-      this.querySelector("[aria-selected]")?.removeAttribute("aria-selected");
-      const el = this._items![i];
-      el.setAttribute("aria-selected", "true");
-      const v = new Date(this._items!._firstValue + i * 86400000);
-      this.setValue(v as ValueType);
-      console.warn("new value", v);
-    }
+    this.#handleClick!.call(this, e);
   }
 
-  _items?: WUPCalendarIn.DayItems;
+  #handleClick?: (e: MouseEvent) => void;
 
   /** Appends DayPicker on layout */
   protected renderDayPicker(): void {
@@ -216,7 +207,13 @@ export default class WUPCalendarControl<
       tag
     ) => el.appendChild(document.createElement(tag));
 
+    // const ri = this.$refInput;
+    // ri.setAttribute("role", "combobox");
+    // ri.setAttribute("aria-owns", "test123");
+    // ri.setAttribute("aria-controls", "test123");
+
     const box = add(this, "div");
+    box.id = "test123";
     box.setAttribute("calendar", "day");
     const header = add(box, "header");
     /**/ const title = add(header, "button");
@@ -232,15 +229,15 @@ export default class WUPCalendarControl<
       d.textContent = names[n];
     }
 
-    this._items = [] as unknown as WUPCalendarIn.DayItems;
-    this._items._firstValue = r.first;
-
+    const items: HTMLElement[] = [];
     const ol = add(box, "ol");
+    ol.setAttribute("role", "grid");
     const addItem = (i: number, attr: string): void => {
       const d = add(ol, "li");
       d.textContent = i.toString();
+      d.setAttribute("role", "gridcell");
       attr && d.setAttribute(attr, "");
-      this._items!.push(d);
+      items!.push(d);
     };
     if (r.prev) {
       for (let i = r.prev.from; i <= r.prev.to; ++i) {
@@ -255,10 +252,35 @@ export default class WUPCalendarControl<
     }
 
     let i = Math.floor((now.valueOf() - r.first) / 86400000);
-    this._items[i]?.setAttribute("aria-current", "date");
-    i = Math.floor((v.valueOf() - r.first) / 86400000);
-    this._items[i]?.setAttribute("aria-selected", "true");
-    // todo disabled attr
+    items[i]?.setAttribute("aria-current", "date");
+    if (this.$value) {
+      i = Math.floor((this.$value.valueOf() - r.first) / 86400000);
+      items[i]?.setAttribute("aria-selected", "true");
+    }
+    // todo attr [disabled]
+
+    const firstValue = r.first;
+    this.#handleClick = (e) => {
+      // eslint-disable-next-line @typescript-eslint/no-shadow
+      const i = items!.findIndex((li) => li === e.target || li.contains(e.target as HTMLElement));
+      if (i > -1) {
+        this.querySelector("[aria-selected]")?.removeAttribute("aria-selected");
+        const el = items![i];
+        el.setAttribute("aria-selected", "true");
+        const d = new Date(firstValue + i * 86400000);
+        this.setValue(d as ValueType);
+        console.warn("new value", d);
+
+        const id = this.#ctr.$uniqueId;
+        el.setAttribute("aria-label", `${el.textContent} ${title.textContent}`);
+        this.$refInput.setAttribute("aria-activedescendant", id);
+        items[i].id = id;
+      }
+    };
+  }
+
+  protected override gotFocusLost(): void {
+    this.$refInput.removeAttribute("aria-activedescendant");
   }
 }
 
