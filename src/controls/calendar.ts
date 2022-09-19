@@ -1,22 +1,13 @@
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
 import { WUPcssHidden } from "../styles";
-
-export const enum FirstDayOfWeek {
-  Monday = 1,
-  Tuesday,
-  Wednesday,
-  Thursday,
-  Friday,
-  Saturday,
-  Sunday,
-}
+import scrollable from "../helpers/scrollable";
 
 const tagName = "wup-calendar";
 export namespace WUPCalendarIn {
   export interface Def {
     /** First day of week in calendar where 1-Monday, 7-Sunday;
-     * @default Monday === 1 */
-    firstDayOfWeek: FirstDayOfWeek;
+     * @default 1 (Monday) */
+    firstDayOfWeek: 1 | 2 | 3 | 4 | 5 | 6 | 7;
   }
   export interface Opt {
     min?: Date;
@@ -123,7 +114,7 @@ export default class WUPCalendarControl<
    * @param month index of month (0-11)
    * @param firstDayOfWeek where 1-Monday, 7-Sunday
    */
-  static $daysOfMonth(year: number, month: number, firstDayOfWeek = FirstDayOfWeek.Monday): WUPCalendar.MonthInfo {
+  static $daysOfMonth(year: number, month: number, firstDayOfWeek = 1): WUPCalendar.MonthInfo {
     let dt = new Date(year, month + 1, 0); // month in JS is 0-11 index based but here is a hack: returns last day of month
     const r: WUPCalendar.MonthInfo = { total: dt.getDate(), nextTo: 0, first: 0 };
     dt.setDate(2 - firstDayOfWeek); // reset to first day of week
@@ -145,7 +136,7 @@ export default class WUPCalendarControl<
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUPCalendar.Defaults = {
     ...WUPBaseControl.$defaults,
-    firstDayOfWeek: FirstDayOfWeek.Monday,
+    firstDayOfWeek: 1,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
     },
@@ -170,20 +161,48 @@ export default class WUPCalendarControl<
     return new Date(dt) as any;
   }
 
+  $refCalenar = document.createElement("div");
+  $refCalenarTitle = document.createElement("button");
+
   protected renderControl(): void {
     this.$refInput.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", this.$refInput.id);
 
+    const add: <K extends keyof HTMLElementTagNameMap>(el: HTMLElement, tagName: K) => HTMLElementTagNameMap[K] = (
+      el,
+      tag
+    ) => el.appendChild(document.createElement(tag));
+
     // this.$refInput.type = "date";
-    const s = this.$refLabel.appendChild(document.createElement("span"));
-    s.appendChild(this.$refInput); // input appended to span to allow user user :after,:before without padding adjust
+    const s = add(this.$refLabel, "span");
+    s.appendChild(this.$refInput); // input appended to span to allow user use :after,:before without padding adjust
     s.appendChild(this.$refTitle);
     this.appendChild(this.$refLabel);
 
-    this.renderDayPicker();
-    this.addEventListener("click", this.gotClick, { passive: true });
+    // render calendar
+    const h = add(this.$refCalenar, "header");
+    h.appendChild(this.$refCalenarTitle);
+    const r = this.renderDayPicker();
+    this.#handleClick = r.onClick;
+
+    const ol = add(this.$refCalenar, "ol");
+    let v = this.$value ? new Date(this.$value.valueOf()) : new Date();
+    r.renderItems(ol, [], v, v);
+    this.appendChild(this.$refCalenar);
+
+    let lock = true;
+    scrollable(ol, (n, els) => {
+      v = lock ? v : r.next(v, n);
+      const nextVal = r.next(new Date(v.valueOf()), n);
+      const items = r.renderItems(ol, els, nextVal, v);
+      return items;
+    });
+    lock = false;
+
+    this.addEventListener("click", (e) => this.gotClick(e), { passive: true });
   }
 
+  #handleClick?: (e: MouseEvent) => void;
   /** Called when user clicks on calendar */
   protected gotClick(e: MouseEvent): void {
     if (!(e.target instanceof HTMLElement)) {
@@ -192,91 +211,122 @@ export default class WUPCalendarControl<
     this.#handleClick!.call(this, e);
   }
 
-  #handleClick?: (e: MouseEvent) => void;
+  /** Returns render function of DayPicker */
+  #isDayWeeksAdded = false;
+  protected renderDayPicker(): {
+    renderItems: (el: HTMLElement, replaceItems: HTMLElement[], v: Date, cur: Date) => HTMLElement[];
+    next: (v: Date, n: -1 | 1) => Date;
+    onClick: (e: MouseEvent) => void;
+  } {
+    this.$refCalenar.setAttribute("calendar", "day");
 
-  /** Appends DayPicker on layout */
-  protected renderDayPicker(): void {
-    const now = new Date();
-    const v = (this.$value || now) as Date;
-    const $1 = this._opts.firstDayOfWeek;
-    const valMonth = v.getMonth();
-    const valYear = v.getFullYear();
-    const r = this.#ctr.$daysOfMonth(valYear, valMonth, $1);
     const add: <K extends keyof HTMLElementTagNameMap>(el: HTMLElement, tagName: K) => HTMLElementTagNameMap[K] = (
       el,
       tag
     ) => el.appendChild(document.createElement(tag));
 
-    // const ri = this.$refInput;
-    // ri.setAttribute("role", "combobox");
-    // ri.setAttribute("aria-owns", "test123");
-    // ri.setAttribute("aria-controls", "test123");
-
-    const box = add(this, "div");
-    box.id = "test123";
-    box.setAttribute("calendar", "day");
-    const header = add(box, "header");
-    /**/ const title = add(header, "button");
-    /**/ title.textContent = `${this.#ctr.$namesMonth[valMonth]} ${valYear}`;
-
-    const days = add(box, "ul");
-    const names = this.#ctr.$namesDayShort;
-    for (let i = 0, n = $1 - 1; i < 7; ++i, ++n) {
-      const d = add(days, "li");
-      if (n >= names.length) {
-        n = 0;
+    // render daysOfWeek - need to hide for other month and year calendar
+    if (!this.#isDayWeeksAdded) {
+      const days = add(this.$refCalenar, "ul");
+      const names = this.#ctr.$namesDayShort;
+      for (let i = 0, n = this._opts.firstDayOfWeek - 1; i < 7; ++i, ++n) {
+        const d = add(days, "li");
+        if (n >= names.length) {
+          n = 0;
+        }
+        d.textContent = names[n];
       }
-      d.textContent = names[n];
+      this.#isDayWeeksAdded = true;
     }
 
-    const items: HTMLElement[] = [];
-    const ol = add(box, "ol");
-    ol.setAttribute("role", "grid");
-    const addItem = (i: number, attr: string): void => {
-      const d = add(ol, "li");
-      d.textContent = i.toString();
-      d.setAttribute("role", "gridcell");
-      attr && d.setAttribute(attr, "");
-      items!.push(d);
+    const renderItems = (ol: HTMLElement, replaceItems: HTMLElement[], v: Date, cur: Date): HTMLElement[] => {
+      this.$refCalenarTitle.textContent = `${this.#ctr.$namesMonth[cur.getMonth()]} ${cur.getFullYear()}`;
+      const valMonth = v.getMonth();
+      const valYear = v.getFullYear();
+
+      const items: HTMLElement[] = [];
+      const r = this.#ctr.$daysOfMonth(valYear, valMonth, this._opts.firstDayOfWeek);
+
+      let i = 0;
+      const addItem = (n: number, attr: string): void => {
+        const d = replaceItems[i] || add(ol, "li");
+        if (i === 0) {
+          // todo remove after tests
+          d.setAttribute("check", `${this.#ctr.$namesMonth[valMonth]} ${valYear}`);
+        }
+
+        d.textContent = n.toString();
+        if (attr) {
+          d.setAttribute(attr, "");
+        } else {
+          while (d.attributes.length > 0) {
+            d.removeAttributeNode(d.attributes[0]);
+          }
+        }
+        (d as any)._value = r.first + i * 86400000;
+        items.push(d);
+        ++i;
+      };
+
+      if (r.prev) {
+        for (let n = r.prev.from; n <= r.prev.to; ++n) {
+          addItem(n, "prev");
+        }
+      }
+      for (let n = 1; n <= r.total; ++n) {
+        addItem(n, "");
+      }
+      for (let n = 1; n <= r.nextTo; ++n) {
+        addItem(n, "next");
+      }
+
+      i = Math.floor((Date.now() - r.first) / 86400000);
+      items[i]?.setAttribute("aria-current", "date");
+      if (this.$value) {
+        i = Math.floor((this.$value.valueOf() - r.first) / 86400000);
+        items[i] && this.selectItem(items[i]);
+      }
+
+      return items;
     };
-    if (r.prev) {
-      for (let i = r.prev.from; i <= r.prev.to; ++i) {
-        addItem(i, "prev");
-      }
-    }
-    for (let i = 1; i <= r.total; ++i) {
-      addItem(i, "");
-    }
-    for (let i = 1; i <= r.nextTo; ++i) {
-      addItem(i, "next");
-    }
 
-    let i = Math.floor((now.valueOf() - r.first) / 86400000);
-    items[i]?.setAttribute("aria-current", "date");
-    if (this.$value) {
-      i = Math.floor((this.$value.valueOf() - r.first) / 86400000);
-      items[i]?.setAttribute("aria-selected", "true");
-    }
     // todo attr [disabled]
 
-    const firstValue = r.first;
-    this.#handleClick = (e) => {
-      // eslint-disable-next-line @typescript-eslint/no-shadow
-      const i = items!.findIndex((li) => li === e.target || li.contains(e.target as HTMLElement));
-      if (i > -1) {
-        this.querySelector("[aria-selected]")?.removeAttribute("aria-selected");
-        const el = items![i];
-        el.setAttribute("aria-selected", "true");
-        const d = new Date(firstValue + i * 86400000);
+    const onClick = (e: MouseEvent): void => {
+      if ((e.target as any)._value !== undefined) {
+        this.selectItem(e.target as HTMLElement);
+
+        const d = new Date((e.target as any)._value);
         this.setValue(d as ValueType);
         console.warn("new value", d);
-
-        const id = this.#ctr.$uniqueId;
-        el.setAttribute("aria-label", `${el.textContent} ${title.textContent}`);
-        this.$refInput.setAttribute("aria-activedescendant", id);
-        items[i].id = id;
       }
     };
+
+    return {
+      renderItems,
+      next: (v, n) => {
+        v.setMonth(v.getMonth() + n);
+        return v;
+      },
+      onClick,
+    };
+  }
+
+  /** Focus for item (via aria-activedescendant) */
+  protected focusItem(el: HTMLElement): void {
+    const id = el.id || this.#ctr.$uniqueId;
+    el.setAttribute("aria-label", `${el.textContent} ${this.$refCalenarTitle.textContent}`);
+    this.$refInput.setAttribute("aria-activedescendant", id);
+    el.id = id;
+  }
+
+  /** Select item (set aria-selected and focus) */
+  protected selectItem(el: HTMLElement | undefined): void {
+    this.querySelector("[aria-selected]")?.removeAttribute("aria-selected");
+    if (el) {
+      el.setAttribute("aria-selected", "true");
+      this.focusItem(el);
+    }
   }
 
   protected override gotFocusLost(): void {
