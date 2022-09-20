@@ -375,3 +375,4 @@ export default class WUPRadioControl<
 }
 
 customElements.define(tagName, WUPRadioControl);
+// todo mobile: weird blink on touch by radio-button

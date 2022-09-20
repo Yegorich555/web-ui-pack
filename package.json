@@ -14,6 +14,7 @@
     "coverage": "npm test -- --coverageReporters=lcov && coveralls < coverage\\lcov.info && shx rm -rf .\\coverage && echo \nCoverage: published\n",
     "start": ".\\node_modules\\.bin\\webpack serve --open --config demo/webpack.devServer.js",
     "build-demo": ".\\node_modules\\.bin\\webpack --mode production --config demo/webpack.prod.js",
+    "build-demo-dev": ".\\node_modules\\.bin\\webpack --mode development --config demo/webpack.dev.js --watch",
     "lint-code": ".\\node_modules\\.bin\\eslint --fix --cache ./**/*.{js,jsx,ts,tsx,json}",
     "lint-styles": ".\\node_modules\\.bin\\stylelint --fix --cache ./**/*.{css,scss,less}",
     "lint-md": ".\\node_modules\\.bin\\markdownlint --fix **/*.md --ignore node_modules --ignore dist",

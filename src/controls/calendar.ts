@@ -165,6 +165,10 @@ export default class WUPCalendarControl<
   $refCalenarTitle = document.createElement("button");
 
   protected renderControl(): void {
+    // todo mobile: focus on input opens keyboard;
+    // todo mobile: click on item makes focus-frame blink
+    setTimeout(() => (this.$refInput.readOnly = true));
+
     this.$refInput.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", this.$refInput.id);
 
