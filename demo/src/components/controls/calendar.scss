@@ -118,13 +118,7 @@
   // --ctrl-clr-cell-gap: 0px;
   // --ctrl-clr-cell-size: calc(var(--ctrl-clr-width) / 7 - 2 * var(--ctrl-clr-cell-gap));
   > ol {
-    overflow-y: auto;
     // max-height: calc(6 * (var(--ctrl-clr-cell-size) + var(--ctrl-clr-cell-gap) * 2));
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
   }
 }
 

@@ -1,55 +1,39 @@
 /* eslint-disable prefer-destructuring */
-interface Scrollable {
+interface ScrollResult {
   /** Call this to remove listener */
   remove: () => void;
 }
 
-const enum ScrollModes {
-  /** When user scrolls it's alligned scroll so current element is rendered at the center of screen;
-   *  Expected only 1 visible block at once */
-  carousel = 0,
-}
-interface ScrollableOptions {
+interface ScrollOptions {
   /** Point 'true' when you need to skip built-in render-functions (for React app, Vue etc.) */
   disableRender?: boolean;
-  /** Scroll mode of current function
-   *  @default ScrollModes.carousel */
-  mode?: ScrollModes;
 }
 
 /**
- * Function makes pointed element scrollable and implements unordinary scroll-behavior according to pointed mode: Carousel/VirtualScroll etc.
+ * Function makes pointed element scrollable and implements carousel scroll behavior when during the scroll need to append new items
  *
  * @param el HTMLElement that need to make scrollable
  * @param next Callback when need to append new items on layout
  */
-export default function scrollable(
+export default function scrollCarousel(
   el: HTMLElement,
   next: (direction: -1 | 1, prevItems: HTMLElement[]) => HTMLElement[],
-  options?: ScrollableOptions
-): Scrollable {
-  let lock = false;
+  options?: ScrollOptions
+): ScrollResult {
   const c = Array.prototype.slice.call(el.children) as HTMLElement[];
   el.style.maxHeight = `${el.offsetHeight}px`;
+  el.style.overflow = "hidden";
   const range = [next(-1, []), c, next(1, [])];
   if (!options?.disableRender) {
     el.prepend(...range[0]);
     el.append(...range[2]);
   }
-  window.requestAnimationFrame(() => {
-    range[1][0]?.scrollIntoView();
-    window.requestAnimationFrame(() => el.addEventListener("scroll", onScroll));
-  });
-  let prevScrollTop = -1;
 
-  const onScroll = (): void => {
-    if (lock) {
-      return;
-    }
-    const sv = el.scrollTop;
-    const isNext = sv > prevScrollTop;
-    lock = true;
+  window.requestAnimationFrame(() => range[1][0]?.scrollIntoView());
 
+  const onWheel = (e: WheelEvent): void => {
+    e.preventDefault();
+    const isNext = e.deltaY > 0;
     if (isNext) {
       const toUpdate = range[0];
       range[0] = range[1];
@@ -74,16 +58,12 @@ export default function scrollable(
       }
     }
 
-    // todo if user scroll fast it doesn't work
-    range[1][0]?.scrollIntoView(); // { behavior: "smooth" });
-
-    setTimeout(() => {
-      lock = false;
-      prevScrollTop = el.scrollTop;
-    }, 100); // todo does it enough when behavior 'smooth' ???
+    range[1][0]?.scrollIntoView({ behavior: "smooth" });
   };
 
+  el.addEventListener("wheel", onWheel);
+  // todo add swipe-scroll
   return {
-    remove: () => el.removeEventListener("scroll", onScroll),
+    remove: () => el.removeEventListener("wheel", onWheel),
   };
 }

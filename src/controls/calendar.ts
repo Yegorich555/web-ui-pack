@@ -1,6 +1,6 @@
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
 import { WUPcssHidden } from "../styles";
-import scrollable from "../helpers/scrollable";
+import scrollCarousel from "../helpers/scrollCarousel";
 
 const tagName = "wup-calendar";
 export namespace WUPCalendarIn {
@@ -191,7 +191,7 @@ export default class WUPCalendarControl<
     this.appendChild(this.$refCalenar);
 
     let lock = true;
-    scrollable(ol, (n, els) => {
+    scrollCarousel(ol, (n, els) => {
       v = lock ? v : r.next(v, n);
       const nextVal = r.next(new Date(v.valueOf()), n);
       const items = r.renderItems(ol, els, nextVal, v);
