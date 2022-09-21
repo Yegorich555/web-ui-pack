@@ -118,7 +118,8 @@ export default class WUPCalendarControl<
     let dt = new Date(year, month + 1, 0); // month in JS is 0-11 index based but here is a hack: returns last day of month
     const r: WUPCalendar.MonthInfo = { total: dt.getDate(), nextTo: 0, first: 0 };
     dt.setDate(2 - firstDayOfWeek); // reset to first day of week
-    const $1 = dt.getDay() - 1; // get index of first day of current month
+    let $1 = dt.getDay() - 1; // get index of first day of current month
+    if ($1 === -1) $1 = 6; // getDay returns Sun...Sat (0...6) and need to normalize to Mon-0 Sun-6
     if ($1 !== 0) {
       dt = new Date(year, month, 0);
       const to = dt.getDate();
