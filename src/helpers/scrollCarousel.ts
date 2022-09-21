@@ -34,12 +34,7 @@ export default function scrollCarousel(
 
   window.requestAnimationFrame(() => range[1][0]?.scrollIntoView());
 
-  let dt = 0;
   const scroll = (isNext: boolean): void => {
-    const now = Date.now();
-    console.warn("will scroll", now - dt);
-    dt = now;
-
     if (isNext) {
       const toUpdate = range[0];
       range[0] = range[1];
@@ -67,67 +62,48 @@ export default function scrollCarousel(
     range[1][0]?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const r1 = onEvent(
+  const rOnWheel = onEvent(
     el,
     "wheel",
     (e) => {
-      e.preventDefault();
-      const isNext = e.deltaY > 0;
-      scroll(isNext);
+      e.preventDefault(); // prevent body scroll
+      scroll(e.deltaY > 0);
     },
     { passive: false, capture: true }
   );
 
-  let y = 0;
-  let stamp = 0;
-
-  let wasStart = false;
-  const r2 = onEvent(
+  const rOnTouch = onEvent(
     el,
     "touchstart",
-    (e) => {
-      y = e.touches[0].clientY;
-      wasStart = true;
-      el.addEventListener(
-        "touchend",
-        () => {
-          wasStart = false;
+    (ev) => {
+      let y = ev.touches[0].clientY;
+      let stamp = 0;
+      const rOnTouchMove = onEvent(
+        el,
+        "touchmove",
+        (e) => {
+          // todo also detect scrollX
+          const dy = e.touches[0].clientY - y;
+          if (Math.abs(dy) > 10) {
+            y = e.touches[0].clientY;
+            if (e.timeStamp - stamp > 300) {
+              stamp = e.timeStamp;
+              scroll(dy < 0);
+            }
+          }
         },
-        { once: true, passive: true, capture: true }
+        { passive: false, capture: true }
       );
+
+      el.addEventListener("touchend", rOnTouchMove, { once: true, passive: true, capture: true });
     },
     { capture: true }
   );
 
-  const dbg = document.querySelector("wup-calendar")!.appendChild(document.createElement("div"));
-  dbg.textContent = "Debug";
-  const r3 = onEvent(
-    el,
-    "touchmove",
-    (e) => {
-      if (!wasStart) {
-        return;
-      }
-      dbg.textContent = `dt: ${Math.round(e.timeStamp - stamp)};  dy: ${
-        Math.round((e.touches[0].clientY - y) * 100) / 100
-      }`;
-      const dy = e.touches[0].clientY - y;
-      if (Math.abs(dy) > 10) {
-        y = e.touches[0].clientY;
-        if (e.timeStamp - stamp > 300) {
-          stamp = e.timeStamp;
-          scroll(dy < 0);
-        }
-      }
-    },
-    { passive: false, capture: true }
-  );
-
   return {
     remove: () => {
-      r1();
-      r2();
-      r3();
+      rOnWheel();
+      rOnTouch();
     },
   };
 }
