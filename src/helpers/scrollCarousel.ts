@@ -4,15 +4,23 @@ import onEvent from "./onEvent";
 interface ScrollResult {
   /** Call this to remove listener */
   remove: () => void;
+  /** Call this to fire scrolling manually */
+  scroll: (isNext: boolean) => void;
 }
 
 interface ScrollOptions {
   /** Point 'true' when you need to skip built-in render-functions (for React app, Vue etc.) */
   disableRender?: boolean;
+  /** Time between scrolls during the user-swipe on touchpads
+   * @defaultValue 300 */
+  swipeDebounceMs?: number;
+  /** Min swipe-movement in pixels when need to scroll
+   * @defaultValue 10 */
+  swipeDebounceDelta?: number;
 }
 
 /**
- * Function makes pointed element scrollable and implements carousel scroll behavior when during the scroll need to append new items
+ * Function makes pointed element scrollable and implements carousel-scroll behavior (during the scroll appends new items)
  *
  * @param el HTMLElement that need to make scrollable
  * @param next Callback when need to append new items on layout
@@ -84,9 +92,9 @@ export default function scrollCarousel(
         (e) => {
           // todo also detect scrollX
           const dy = e.touches[0].clientY - y;
-          if (Math.abs(dy) > 10) {
+          if (Math.abs(dy) > (options?.swipeDebounceDelta ?? 10)) {
             y = e.touches[0].clientY;
-            if (e.timeStamp - stamp > 300) {
+            if (e.timeStamp - stamp > (options?.swipeDebounceMs ?? 300)) {
               stamp = e.timeStamp;
               scroll(dy < 0);
             }
@@ -105,5 +113,6 @@ export default function scrollCarousel(
       rOnWheel();
       rOnTouch();
     },
+    scroll,
   };
 }
