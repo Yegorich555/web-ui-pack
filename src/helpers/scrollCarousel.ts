@@ -100,7 +100,7 @@ export default function scrollCarousel(
             }
           }
         },
-        { passive: false, capture: true }
+        { passive: false } // WARN don't set capture: true; otherwise it's not removed
       );
 
       el.addEventListener("touchend", rOnTouchMove, { once: true, passive: true, capture: true });
