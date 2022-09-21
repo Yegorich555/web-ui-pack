@@ -30,17 +30,30 @@ export default function scrollCarousel(
   next: (direction: -1 | 1, prevItems: HTMLElement[]) => HTMLElement[],
   options?: ScrollOptions
 ): ScrollResult {
-  const c = Array.prototype.slice.call(el.children) as HTMLElement[];
-  el.style.maxHeight = `${el.offsetHeight}px`;
+  if (el.offsetHeight) el.style.maxHeight = `${el.offsetHeight}px`;
   el.style.overflow = "hidden";
   el.style.touchAction = "none";
+
+  const c = Array.prototype.slice.call(el.children) as HTMLElement[];
   const range = [next(-1, []), c, next(1, [])];
   if (!options?.disableRender) {
     el.prepend(...range[0]);
     el.append(...range[2]);
   }
 
-  window.requestAnimationFrame(() => range[1][0]?.scrollIntoView());
+  /** Scroll to center of range */
+  const scrollToRange = (isSmooth: boolean): void => {
+    const y1 = range[1][0].offsetTop - el.offsetTop;
+    const x1 = range[1][0].offsetLeft - el.offsetLeft;
+    const $2 = range[1][range[1].length - 1];
+    const y2 = $2.offsetTop + $2.offsetHeight - el.offsetTop;
+    const x2 = $2.offsetLeft + $2.offsetWidth - el.offsetLeft;
+    const top = y1 + (y2 - y1 - el.offsetHeight) / 2;
+    const left = x1 + (x2 - x1 - el.offsetWidth) / 2;
+    el.scroll({ top, left, behavior: isSmooth ? "smooth" : "auto" });
+  };
+
+  window.requestAnimationFrame(() => scrollToRange(false));
 
   const scroll = (isNext: boolean): void => {
     if (isNext) {
@@ -67,7 +80,7 @@ export default function scrollCarousel(
       }
     }
 
-    range[1][0]?.scrollIntoView({ behavior: "smooth" });
+    scrollToRange(true);
   };
 
   const rOnWheel = onEvent(
