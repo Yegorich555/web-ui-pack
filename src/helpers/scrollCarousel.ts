@@ -84,19 +84,20 @@ export default function scrollCarousel(
     el,
     "touchstart",
     (ev) => {
-      let y = ev.touches[0].clientY;
+      const isYScroll = el.scrollHeight - el.offsetHeight > el.scrollWidth - el.offsetWidth;
+      let xy = isYScroll ? ev.touches[0].clientY : ev.touches[0].clientX;
       let stamp = 0;
       const rOnTouchMove = onEvent(
         el,
         "touchmove",
         (e) => {
-          // todo also detect scrollX
-          const dy = e.touches[0].clientY - y;
-          if (Math.abs(dy) > (options?.swipeDebounceDelta ?? 10)) {
-            y = e.touches[0].clientY;
+          const xyNew = isYScroll ? e.touches[0].clientY : e.touches[0].clientX;
+          const diff = xyNew - xy;
+          if (Math.abs(diff) > (options?.swipeDebounceDelta ?? 10)) {
+            xy = xyNew;
             if (e.timeStamp - stamp > (options?.swipeDebounceMs ?? 300)) {
               stamp = e.timeStamp;
-              scroll(dy < 0);
+              scroll(diff < 0);
             }
           }
         },
