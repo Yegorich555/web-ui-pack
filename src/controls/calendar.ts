@@ -9,6 +9,12 @@ const add: <K extends keyof HTMLElementTagNameMap>(el: HTMLElement, tagName: K) 
   tag
 ) => el.appendChild(document.createElement(tag));
 
+export const enum PickersEnum {
+  Day = 0,
+  Month,
+  Year,
+}
+
 export namespace WUPCalendarIn {
   export interface Def {
     /** First day of week in calendar where 1-Monday, 7-Sunday;
@@ -16,8 +22,13 @@ export namespace WUPCalendarIn {
     firstDayOfWeek: 1 | 2 | 3 | 4 | 5 | 6 | 7;
   }
   export interface Opt {
+    /** User can't select date less than min */
     min?: Date;
+    /** User can't select date more than max */
     max?: Date;
+    /** Picker that must be rendered at first
+     * @defaultValue Day */
+    startWith?: PickersEnum;
   }
   export type Generics<
     ValueType = string,
@@ -28,12 +39,6 @@ export namespace WUPCalendarIn {
   // type Validation<T = string> = Generics<T>["Validation"];
   export type GenDef<T = string> = Generics<T>["Defaults"];
   export type GenOpt<T = string> = Generics<T>["Options"];
-
-  export const enum PickersEnum {
-    Day = 1,
-    Month,
-    Year,
-  }
 
   export interface PickerResult {
     renderItems: (ol: HTMLElement, replaceItems: HTMLElement[], v: Date, cur: Date) => HTMLElement[];
@@ -59,7 +64,10 @@ declare global {
     interface EventMap extends WUPBase.EventMap {}
     interface Defaults<T = string> extends WUPCalendarIn.GenDef<T> {}
     interface Options<T = string> extends WUPCalendarIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPCalendarControl> extends WUPBase.JSXProps<T> {}
+    interface JSXProps<T extends WUPCalendarControl> extends WUPBase.JSXProps<T> {
+      /** @deprecated Picker that must be rendered at first */
+      startWith?: "year" | "month" | "day";
+    }
   }
 
   // add element to document.createElement
@@ -203,28 +211,33 @@ export default class WUPCalendarControl<
     // render calendar
     const h = add(this.$refCalenar, "header");
     /* */ h.appendChild(this.$refCalenarTitle);
+    // const box = add(this.$refCalenar, "div");
+    // /* */ box.appendChild(this.$refCalenarItems);
     this.$refCalenar.appendChild(this.$refCalenarItems);
     this.appendChild(this.$refCalenar);
 
-    const v = this.$value ? new Date(this.$value.valueOf()) : new Date();
-    this.changePicker(v, WUPCalendarIn.PickersEnum.Day);
+    setTimeout(() => {
+      const v = this.$value ? new Date(this.$value.valueOf()) : new Date();
+      this.changePicker(v, this._opts.startWith);
+    }); // wait for options
 
     this.addEventListener("click", (e) => this.gotClick(e));
   }
 
   #clearPicker?: () => void;
-  protected changePicker(v: Date, picker: WUPCalendarIn.PickersEnum): void {
+  protected changePicker(v: Date, picker: PickersEnum | undefined): void {
     this.#clearPicker?.call(this);
 
     let r: WUPCalendarIn.PickerResult;
-    let type = "day";
-    if (picker === WUPCalendarIn.PickersEnum.Day) {
+    let type: string;
+    if (picker === PickersEnum.Year) {
+      type = "year";
       r = this.getDayPicker();
-    } else if (picker === WUPCalendarIn.PickersEnum.Month) {
+    } else if (picker === PickersEnum.Month) {
       type = "month";
       r = this.getMonthPicker();
     } else {
-      type = "year";
+      type = "day";
       r = this.getDayPicker();
     }
     this.$refCalenar.setAttribute("calendar", type);
@@ -326,7 +339,7 @@ export default class WUPCalendarControl<
         this.setValue(new Date(v) as ValueType);
         console.warn("new value", new Date(v).toJSON()); // todo remove after tests
       },
-      onTitleClick: () => this.changePicker(new Date(curValue), WUPCalendarIn.PickersEnum.Month),
+      onTitleClick: () => this.changePicker(new Date(curValue), PickersEnum.Month),
     };
   }
 
@@ -378,10 +391,10 @@ export default class WUPCalendarControl<
       onItemClick: (_e, v) => {
         const dt = new Date(curValue);
         dt.setMonth(v);
-        this.changePicker(dt, WUPCalendarIn.PickersEnum.Day);
+        this.changePicker(dt, PickersEnum.Day);
         console.warn("month change", dt.toJSON()); // todo remove after tests
       },
-      onTitleClick: () => this.changePicker(new Date(curValue), WUPCalendarIn.PickersEnum.Year),
+      onTitleClick: () => this.changePicker(new Date(curValue), PickersEnum.Year),
     };
   }
 
@@ -399,6 +412,22 @@ export default class WUPCalendarControl<
     if (el) {
       el.setAttribute("aria-selected", "true");
       this.focusItem(el);
+    }
+  }
+
+  protected override gotChanges(propsChanged: Array<keyof WUPCalendar.Options | any> | null): void {
+    super.gotChanges(propsChanged);
+
+    let attr = this.getAttribute("startwith");
+    if (attr != null) {
+      attr = attr.toLowerCase();
+      if (attr === "year") {
+        this._opts.startWith = PickersEnum.Year;
+      } else if (attr === "month") {
+        this._opts.startWith = PickersEnum.Month;
+      } else {
+        delete this._opts.startWith;
+      }
     }
   }
 

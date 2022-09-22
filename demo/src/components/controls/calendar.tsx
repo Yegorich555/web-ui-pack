@@ -52,6 +52,7 @@ export default function CalendarControlView() {
             autoFocus={false}
             validations="window._someObject"
             class={styles.cln}
+            startWith="month"
           />
         </div>
         {/* <wup-calendar name="required" validations="globalkey.pointHere" />
