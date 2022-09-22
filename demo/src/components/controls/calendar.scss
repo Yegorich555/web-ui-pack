@@ -199,7 +199,8 @@
     }
   }
 
-  > * + * {
+  ul,
+  ol {
     margin-top: var(--ctrl-clr-padding);
   }
 }

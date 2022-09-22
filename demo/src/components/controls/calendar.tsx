@@ -42,7 +42,7 @@ export default function CalendarControlView() {
             validations="window._someObject"
             class={styles.cln}
           />
-          {/* <wup-calendar
+          <wup-calendar
             name="calendar"
             // label="Calendar control"
             label=""
@@ -53,7 +53,7 @@ export default function CalendarControlView() {
             validations="window._someObject"
             class={styles.cln}
             startWith="month"
-          /> */}
+          />
         </div>
         {/* <wup-calendar name="required" validations="globalkey.pointHere" />
         <wup-calendar
