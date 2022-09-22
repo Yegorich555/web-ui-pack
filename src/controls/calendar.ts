@@ -280,7 +280,7 @@ export default class WUPCalendarControl<
       scrollObj.remove();
       this.$refCalenarItems.textContent = "";
 
-      animate(isOut ? "out2" : "in2").then(() => box.removeAttribute("zoom")); // WARN: it's important don't wait
+      animate(isOut ? "out2" : "in2").then(() => box.removeAttribute("zoom")); // WARN: it's important not to wait
     };
   }
 
@@ -396,12 +396,21 @@ export default class WUPCalendarControl<
         d.setAttribute("next", "");
       }
 
-      // i = Math.floor((Date.now() - r.first) / 86400000);
-      // items[i]?.setAttribute("aria-current", "date");
-      // if (this.$value) {
-      //   i = Math.floor((this.$value.valueOf() - r.first) / 86400000);
-      //   items[i] && this.selectItem(items[i]);
-      // }
+      const vyear = v.getFullYear();
+      const getIndex = (b: Date | undefined): number => {
+        if (!b) {
+          return -1;
+        }
+        const yearDiff = vyear - b.getFullYear();
+        return yearDiff * 12 + b.getMonth();
+      };
+
+      const now = new Date();
+      let i = getIndex(now);
+      items[i]?.setAttribute("aria-current", "date");
+
+      i = getIndex(this.$value);
+      items[i] && this.selectItem(items[i]);
 
       return items;
     };
@@ -481,3 +490,4 @@ customElements.define(tagName, WUPCalendarControl);
 
 // todo testcase: no change event if user selected the same date
 // todo testcase: dayPickerSize === monthPickerSize === yearPickerSize
+// todo testcase: find aria-current for different pickers
