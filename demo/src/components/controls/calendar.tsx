@@ -30,17 +30,30 @@ export default function CalendarControlView() {
           }
         }}
       >
-        <wup-calendar
-          name="calendar"
-          // label="Calendar control"
-          label=""
-          // label="With long label and custom validations (very very very incredible long label to check if it has ellipsis rule)"
-          initValue="1970-10-15"
-          autoComplete="off"
-          autoFocus={false}
-          validations="window._someObject"
-          class={styles.cln}
-        />
+        <div className={styles.flex}>
+          <wup-calendar
+            name="calendar"
+            // label="Calendar control"
+            label=""
+            // label="With long label and custom validations (very very very incredible long label to check if it has ellipsis rule)"
+            initValue="1970-10-15"
+            autoComplete="off"
+            autoFocus={false}
+            validations="window._someObject"
+            class={styles.cln}
+          />
+          <wup-calendar
+            name="calendar"
+            // label="Calendar control"
+            label=""
+            // label="With long label and custom validations (very very very incredible long label to check if it has ellipsis rule)"
+            initValue="1970-10-15"
+            autoComplete="off"
+            autoFocus={false}
+            validations="window._someObject"
+            class={styles.cln}
+          />
+        </div>
         {/* <wup-calendar name="required" validations="globalkey.pointHere" />
         <wup-calendar
           ref={(el) => {

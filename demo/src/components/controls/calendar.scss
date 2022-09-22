@@ -1,5 +1,10 @@
+.flex {
+  display: flex;
+}
+
 .cln {
   --ctrl-clr-width: 17em;
+  --ctrl-clr-cell-gap: 4px;
   --ctrl-selected: #fff; //#d9f7fd;
   --ctrl-selected-bg: #009fbc; //#d9f7fd;
   --ctrl-current-bg: var(--ctrl-selected);
@@ -9,6 +14,7 @@
   background: none;
   margin: auto;
   max-width: fit-content;
+  contain: initial;
 
   label {
     max-width: var(--ctrl-clr-width);
@@ -37,13 +43,17 @@
 
   ol > li,
   ul > li {
-    height: var(--ctrl-clr-cell-size);
-    width: var(--ctrl-clr-cell-size);
-    margin: var(--ctrl-clr-cell-gap);
+    height: var(--ctrl-clr-cell-h);
+    width: var(--ctrl-clr-cell-w);
+    margin: calc(var(--ctrl-clr-cell-gap) / 2);
     padding: 0;
     font: inherit;
-    line-height: var(--ctrl-clr-cell-size);
+    line-height: var(--ctrl-clr-cell-h);
     text-align: center;
+  }
+
+  ul > li {
+    margin: 0 calc(var(--ctrl-clr-cell-gap) / 2);
   }
 
   header > button {
@@ -63,9 +73,8 @@
   }
 
   ul > li {
-    height: initial;
-    line-height: initial;
-    padding: 2px 0;
+    height: 1em;
+    line-height: 1em;
   }
 
   ol > li {
@@ -101,30 +110,58 @@
   header > button,
   ol > li {
     cursor: pointer;
+    box-sizing: border-box;
   }
 }
 
 .cln [calendar] {
+  --ctrl-clr-cell-day-w: calc(var(--ctrl-clr-width) / 7 - var(--ctrl-clr-cell-gap));
+  --ctrl-clr-h: calc((var(--ctrl-clr-cell-day-w) + var(--ctrl-clr-cell-gap)) * 6);
+  --ctrl-clr-padding: calc(4px + var(--ctrl-clr-cell-gap) / 2);
   width: var(--ctrl-clr-width);
-  padding: calc(4px + var(--ctrl-clr-cell-gap));
+  padding: var(--ctrl-clr-padding);
   border-radius: var(--ctrl-border-radius);
   background: var(--ctrl-bg);
   box-sizing: content-box;
+
+  > * + * {
+    margin-top: var(--ctrl-clr-padding);
+  }
 }
 
 .cln [calendar="day"] {
-  --ctrl-clr-cell-size: 2em;
-  --ctrl-clr-cell-gap: calc((var(--ctrl-clr-width) / 7 - var(--ctrl-clr-cell-size)) / 2);
-  // --ctrl-clr-cell-gap: 0px;
-  // --ctrl-clr-cell-size: calc(var(--ctrl-clr-width) / 7 - 2 * var(--ctrl-clr-cell-gap));
-  > ol {
-    // max-height: calc(6 * (var(--ctrl-clr-cell-size) + var(--ctrl-clr-cell-gap) * 2));
-  }
+  --ctrl-clr-cell-w: var(--ctrl-clr-cell-day-w);
+  --ctrl-clr-cell-h: var(--ctrl-clr-cell-day-w);
 }
 
 .cln [calendar="month"],
 .cln [calendar="year"] {
+  --ctrl-clr-cell-w: calc(var(--ctrl-clr-width) / 4 - var(--ctrl-clr-cell-gap));
+  --ctrl-clr-cell-h: calc((var(--ctrl-clr-h) + 1em + var(--ctrl-clr-padding)) / 4 - var(--ctrl-clr-cell-gap));
+
+  // todo need cell.h == cell.w
+  // ol {
+  //   --ctrl-clr-cell-gap: 17px;
+  // }
+
+  // ol > li {
+  //   width: var(--ctrl-clr-cell-size);
+  //   height: var(--ctrl-clr-cell-size);
+  //   line-height: var(--ctrl-clr-cell-size);
+  // }
+
   ul {
     display: none;
+  }
+}
+
+/* stylelint-disable no-duplicate-selectors */
+.cln {
+  ol {
+    background: red;
+
+    > li {
+      background: beige;
+    }
   }
 }

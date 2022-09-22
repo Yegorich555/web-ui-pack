@@ -3,6 +3,12 @@ import { WUPcssHidden } from "../styles";
 import scrollCarousel from "../helpers/scrollCarousel";
 
 const tagName = "wup-calendar";
+
+const add: <K extends keyof HTMLElementTagNameMap>(el: HTMLElement, tagName: K) => HTMLElementTagNameMap[K] = (
+  el,
+  tag
+) => el.appendChild(document.createElement(tag));
+
 export namespace WUPCalendarIn {
   export interface Def {
     /** First day of week in calendar where 1-Monday, 7-Sunday;
@@ -22,6 +28,19 @@ export namespace WUPCalendarIn {
   // type Validation<T = string> = Generics<T>["Validation"];
   export type GenDef<T = string> = Generics<T>["Defaults"];
   export type GenOpt<T = string> = Generics<T>["Options"];
+
+  export const enum PickersEnum {
+    Day = 1,
+    Month,
+    Year,
+  }
+
+  export interface PickerResult {
+    renderItems: (ol: HTMLElement, replaceItems: HTMLElement[], v: Date, cur: Date) => HTMLElement[];
+    next: (v: Date, n: -1 | 1) => Date;
+    onItemClick: (e: MouseEvent & { target: HTMLElement }, targetValue: number) => void;
+    onTitleClick: (e: MouseEvent) => void;
+  }
 }
 
 declare global {
@@ -164,6 +183,7 @@ export default class WUPCalendarControl<
 
   $refCalenar = document.createElement("div");
   $refCalenarTitle = document.createElement("button");
+  $refCalenarItems = document.createElement("ol");
 
   protected renderControl(): void {
     // todo mobile: focus on input opens keyboard;
@@ -173,11 +193,7 @@ export default class WUPCalendarControl<
     this.$refInput.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", this.$refInput.id);
 
-    const add: <K extends keyof HTMLElementTagNameMap>(el: HTMLElement, tagName: K) => HTMLElementTagNameMap[K] = (
-      el,
-      tag
-    ) => el.appendChild(document.createElement(tag));
-
+    // todo resolve it
     // this.$refInput.type = "date";
     const s = add(this.$refLabel, "span");
     s.appendChild(this.$refInput); // input appended to span to allow user use :after,:before without padding adjust
@@ -186,53 +202,59 @@ export default class WUPCalendarControl<
 
     // render calendar
     const h = add(this.$refCalenar, "header");
-    h.appendChild(this.$refCalenarTitle);
-    const r = this.renderDayPicker();
-    this.#handleClick = r.onClick;
-
-    const ol = add(this.$refCalenar, "ol");
-    let v = this.$value ? new Date(this.$value.valueOf()) : new Date();
-    r.renderItems(ol, [], v, v);
+    /* */ h.appendChild(this.$refCalenarTitle);
+    this.$refCalenar.appendChild(this.$refCalenarItems);
     this.appendChild(this.$refCalenar);
 
-    let lock = true;
-    scrollCarousel(ol, (n, els) => {
-      v = lock ? v : r.next(v, n);
-      const nextVal = r.next(new Date(v.valueOf()), n);
-      const items = r.renderItems(ol, els, nextVal, v);
-      return items;
-    });
-    lock = false;
+    const v = this.$value ? new Date(this.$value.valueOf()) : new Date();
+    this.changePicker(v, WUPCalendarIn.PickersEnum.Day);
 
-    this.addEventListener("click", (e) => this.gotClick(e), { passive: true });
+    this.addEventListener("click", (e) => this.gotClick(e));
   }
 
-  #handleClick?: (e: MouseEvent) => void;
-  /** Called when user clicks on calendar */
-  protected gotClick(e: MouseEvent): void {
-    if (!(e.target instanceof HTMLElement)) {
-      return;
+  #clearPicker?: () => void;
+  protected changePicker(v: Date, picker: WUPCalendarIn.PickersEnum): void {
+    this.#clearPicker?.call(this);
+
+    let r: WUPCalendarIn.PickerResult;
+    let type = "day";
+    if (picker === WUPCalendarIn.PickersEnum.Day) {
+      r = this.getDayPicker();
+    } else if (picker === WUPCalendarIn.PickersEnum.Month) {
+      type = "month";
+      r = this.getMonthPicker();
+    } else {
+      type = "year";
+      r = this.getDayPicker();
     }
-    this.#handleClick!.call(this, e);
+    this.$refCalenar.setAttribute("calendar", type);
+
+    this.#handleClickItem = r.onItemClick;
+    this.#handleClickTitle = r.onTitleClick;
+    r.renderItems(this.$refCalenarItems, [], v, v);
+
+    let lock = true;
+    const scrollObj = scrollCarousel(this.$refCalenarItems, (n, els) => {
+      v = lock ? v : r.next(v, n);
+      const nextVal = r.next(new Date(v.valueOf()), n);
+      const items = r.renderItems(this.$refCalenarItems, els, nextVal, v);
+      return items;
+    });
+
+    this.#clearPicker = () => {
+      // todo animation when picker is changed
+      scrollObj.remove();
+      this.$refCalenarItems.textContent = "";
+    };
+    lock = false;
   }
 
   /** Returns render function of DayPicker */
   #isDayWeeksAdded = false;
-  protected renderDayPicker(): {
-    renderItems: (el: HTMLElement, replaceItems: HTMLElement[], v: Date, cur: Date) => HTMLElement[];
-    next: (v: Date, n: -1 | 1) => Date;
-    onClick: (e: MouseEvent) => void;
-  } {
-    this.$refCalenar.setAttribute("calendar", "day");
-
-    const add: <K extends keyof HTMLElementTagNameMap>(el: HTMLElement, tagName: K) => HTMLElementTagNameMap[K] = (
-      el,
-      tag
-    ) => el.appendChild(document.createElement(tag));
-
+  protected getDayPicker(): WUPCalendarIn.PickerResult {
     // render daysOfWeek - need to hide for other month and year calendar
     if (!this.#isDayWeeksAdded) {
-      const days = add(this.$refCalenar, "ul");
+      const days = this.$refCalenar.insertBefore(document.createElement("ul"), this.$refCalenarItems);
       const names = this.#ctr.$namesDayShort;
       for (let i = 0, n = this._opts.firstDayOfWeek - 1; i < 7; ++i, ++n) {
         const d = add(days, "li");
@@ -244,22 +266,18 @@ export default class WUPCalendarControl<
       this.#isDayWeeksAdded = true;
     }
 
+    let curValue = 0;
     const renderItems = (ol: HTMLElement, replaceItems: HTMLElement[], v: Date, cur: Date): HTMLElement[] => {
       this.$refCalenarTitle.textContent = `${this.#ctr.$namesMonth[cur.getMonth()]} ${cur.getFullYear()}`;
+      curValue = cur.valueOf();
       const valMonth = v.getMonth();
       const valYear = v.getFullYear();
 
       const items: HTMLElement[] = [];
       const r = this.#ctr.$daysOfMonth(valYear, valMonth, this._opts.firstDayOfWeek);
-
       let i = 0;
       const addItem = (n: number, attr: string): void => {
         const d = replaceItems[i] || add(ol, "li");
-        if (i === 0) {
-          // todo remove after tests
-          d.setAttribute("check", `${this.#ctr.$namesMonth[valMonth]} ${valYear}`);
-        }
-
         d.textContent = n.toString();
         if (attr) {
           d.setAttribute(attr, "");
@@ -297,23 +315,73 @@ export default class WUPCalendarControl<
 
     // todo attr [disabled]
 
-    const onClick = (e: MouseEvent): void => {
-      if ((e.target as any)._value !== undefined) {
-        this.selectItem(e.target as HTMLElement);
-
-        const d = new Date((e.target as any)._value);
-        this.setValue(d as ValueType);
-        console.warn("new value", d);
-      }
-    };
-
     return {
       renderItems,
       next: (v, n) => {
         v.setMonth(v.getMonth() + n);
         return v;
       },
-      onClick,
+      onItemClick: ({ target }, v) => {
+        this.selectItem(target);
+        this.setValue(new Date(v) as ValueType);
+        console.warn("new value", new Date(v).toJSON()); // todo remove after tests
+      },
+      onTitleClick: () => this.changePicker(new Date(curValue), WUPCalendarIn.PickersEnum.Month),
+    };
+  }
+
+  protected getMonthPicker(): WUPCalendarIn.PickerResult {
+    let curYear = 0;
+    let curValue = 0;
+
+    const renderItems = (ol: HTMLElement, replaceItems: HTMLElement[], v: Date, cur: Date): HTMLElement[] => {
+      curYear = cur.getFullYear();
+      curValue = cur.valueOf();
+      this.$refCalenarTitle.textContent = `${curYear}`;
+
+      const namesShort = this.#ctr.$namesMonthShort;
+      //  const names = this.#ctr.$namesMonth;
+      // todo don't forget about aria-label
+
+      const items: HTMLElement[] = [];
+      const addItem = (n: string, i: number): HTMLElement => {
+        const d = replaceItems[i] || add(ol, "li");
+        d.textContent = n;
+        (d as any)._value = i;
+        items.push(d);
+        return d;
+      };
+
+      namesShort.forEach(addItem);
+      const n = items.length - 1;
+      for (let i = 0; i < 4; ++i) {
+        const d = addItem(namesShort[i], i + n);
+        d.setAttribute("next", "");
+      }
+
+      // i = Math.floor((Date.now() - r.first) / 86400000);
+      // items[i]?.setAttribute("aria-current", "date");
+      // if (this.$value) {
+      //   i = Math.floor((this.$value.valueOf() - r.first) / 86400000);
+      //   items[i] && this.selectItem(items[i]);
+      // }
+
+      return items;
+    };
+
+    return {
+      renderItems,
+      next: (v, n) => {
+        v.setFullYear(v.getFullYear() + n);
+        return v;
+      },
+      onItemClick: (_e, v) => {
+        const dt = new Date(curValue);
+        dt.setMonth(v);
+        this.changePicker(dt, WUPCalendarIn.PickersEnum.Day);
+        console.warn("month change", dt.toJSON()); // todo remove after tests
+      },
+      onTitleClick: () => this.changePicker(new Date(curValue), WUPCalendarIn.PickersEnum.Year),
     };
   }
 
@@ -337,6 +405,26 @@ export default class WUPCalendarControl<
   protected override gotFocusLost(): void {
     this.$refInput.removeAttribute("aria-activedescendant");
   }
+
+  #handleClickTitle?: (e: MouseEvent) => void;
+  #handleClickItem?: WUPCalendarIn.PickerResult["onItemClick"];
+  /** Called when user clicks on calendar */
+  protected gotClick(e: MouseEvent): void {
+    if (!(e.target instanceof HTMLElement)) {
+      return;
+    }
+    e.preventDefault();
+    if (this.$refCalenarTitle === e.target || this.$refCalenarTitle.contains(e.target)) {
+      this.#handleClickTitle!.call(this, e);
+    } else {
+      // WARN: if li element will include span or something else it won't work
+      const v = (e.target as any)._value;
+      v !== undefined && this.#handleClickItem!.call(this, e as MouseEvent & { target: HTMLElement }, v);
+    }
+  }
 }
 
 customElements.define(tagName, WUPCalendarControl);
+
+// todo testcase: no change event if user selected the same date
+// todo testcase: dayPickerSize === monthPickerSize === yearPickerSize

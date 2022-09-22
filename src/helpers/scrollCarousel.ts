@@ -30,6 +30,8 @@ export default function scrollCarousel(
   next: (direction: -1 | 1, prevItems: HTMLElement[]) => HTMLElement[],
   options?: ScrollOptions
 ): ScrollResult {
+  // todo scroll somehow works wrong for monthPicker
+  el.style.maxHeight = "";
   if (el.offsetHeight) el.style.maxHeight = `${el.offsetHeight}px`;
   el.style.overflow = "hidden";
   el.style.touchAction = "none";
