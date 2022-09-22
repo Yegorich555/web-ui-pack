@@ -114,6 +114,54 @@
   }
 }
 
+@keyframes WUP-ZOOM-OUT-1 {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes WUP-ZOOM-OUT-2 {
+  0% {
+    transform: scale(5);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes WUP-ZOOM-IN-1 {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(5);
+    opacity: 0;
+  }
+}
+
+@keyframes WUP-ZOOM-IN-2 {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 .cln [calendar] {
   --ctrl-clr-cell-day-w: calc(var(--ctrl-clr-width) / 7 - var(--ctrl-clr-cell-gap));
   --ctrl-clr-h: calc((var(--ctrl-clr-cell-day-w) + var(--ctrl-clr-cell-gap)) * 6);
@@ -123,6 +171,33 @@
   border-radius: var(--ctrl-border-radius);
   background: var(--ctrl-bg);
   box-sizing: content-box;
+
+  @media not all and (prefers-reduced-motion) {
+    > div {
+      overflow: hidden;
+      --anim: 300ms;
+
+      > div {
+        animation: none var(--anim) linear forwards;
+
+        &[zoom="out"] {
+          animation-name: WUP-ZOOM-OUT-1;
+        }
+
+        &[zoom="out2"] {
+          animation-name: WUP-ZOOM-OUT-2;
+        }
+
+        &[zoom="in"] {
+          animation-name: WUP-ZOOM-IN-1;
+        }
+
+        &[zoom="in2"] {
+          animation-name: WUP-ZOOM-IN-2;
+        }
+      }
+    }
+  }
 
   > * + * {
     margin-top: var(--ctrl-clr-padding);
@@ -156,12 +231,12 @@
 }
 
 /* stylelint-disable no-duplicate-selectors */
-.cln {
-  ol {
-    background: red;
+// .cln {
+//   ol {
+//     background: red;
 
-    > li {
-      background: beige;
-    }
-  }
-}
+//     > li {
+//       background: beige;
+//     }
+//   }
+// }

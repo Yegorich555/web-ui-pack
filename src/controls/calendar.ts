@@ -211,28 +211,29 @@ export default class WUPCalendarControl<
     // render calendar
     const h = add(this.$refCalenar, "header");
     /* */ h.appendChild(this.$refCalenarTitle);
-    // const box = add(this.$refCalenar, "div");
-    // /* */ box.appendChild(this.$refCalenarItems);
-    this.$refCalenar.appendChild(this.$refCalenarItems);
+    const box = add(this.$refCalenar, "div");
+    const animBox = add(box, "div");
+    /* */ animBox.appendChild(this.$refCalenarItems);
     this.appendChild(this.$refCalenar);
 
     setTimeout(() => {
       const v = this.$value ? new Date(this.$value.valueOf()) : new Date();
-      this.changePicker(v, this._opts.startWith);
+      this.changePicker(v, this._opts.startWith || PickersEnum.Day);
     }); // wait for options
 
     this.addEventListener("click", (e) => this.gotClick(e));
   }
 
-  #clearPicker?: () => void;
-  protected changePicker(v: Date, picker: PickersEnum | undefined): void {
-    this.#clearPicker?.call(this);
+  #wasPicker: PickersEnum = PickersEnum.Day;
+  #clearPicker?: (isIn: boolean) => Promise<void>;
+  protected async changePicker(v: Date, picker: PickersEnum): Promise<void> {
+    await this.#clearPicker?.call(this, !!(picker - this.#wasPicker));
 
     let r: WUPCalendarIn.PickerResult;
     let type: string;
     if (picker === PickersEnum.Year) {
       type = "year";
-      r = this.getDayPicker();
+      r = this.getDayPicker(); // todo yearPicker
     } else if (picker === PickersEnum.Month) {
       type = "month";
       r = this.getMonthPicker();
@@ -253,13 +254,34 @@ export default class WUPCalendarControl<
       const items = r.renderItems(this.$refCalenarItems, els, nextVal, v);
       return items;
     });
+    lock = false;
 
-    this.#clearPicker = () => {
-      // todo animation when picker is changed
+    this.#clearPicker = async (isOut: boolean) => {
+      const box = this.$refCalenar.children[1].children[0] as HTMLElement;
+
+      const animate = (attrVal: string): Promise<any> =>
+        new Promise<any | void>((resolve) => {
+          let id = 0;
+          id = window.requestAnimationFrame(() => {
+            id = window.requestAnimationFrame(resolve);
+          });
+          box.addEventListener(
+            "animationstart",
+            () => {
+              window.cancelAnimationFrame(id);
+              box.addEventListener("animationend", resolve, { once: true });
+            },
+            { once: true }
+          );
+          box.setAttribute("zoom", attrVal);
+        });
+
+      await animate(isOut ? "out" : "in");
       scrollObj.remove();
       this.$refCalenarItems.textContent = "";
+
+      animate(isOut ? "out2" : "in2").then(() => box.removeAttribute("zoom")); // WARN: it's important don't wait
     };
-    lock = false;
   }
 
   /** Returns render function of DayPicker */
@@ -267,7 +289,9 @@ export default class WUPCalendarControl<
   protected getDayPicker(): WUPCalendarIn.PickerResult {
     // render daysOfWeek - need to hide for other month and year calendar
     if (!this.#isDayWeeksAdded) {
-      const days = this.$refCalenar.insertBefore(document.createElement("ul"), this.$refCalenarItems);
+      const box = this.$refCalenarItems.parentElement!;
+      const days = document.createElement("ul");
+      box.prepend(days);
       const names = this.#ctr.$namesDayShort;
       for (let i = 0, n = this._opts.firstDayOfWeek - 1; i < 7; ++i, ++n) {
         const d = add(days, "li");
