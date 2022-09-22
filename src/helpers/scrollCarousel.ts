@@ -30,7 +30,6 @@ export default function scrollCarousel(
   next: (direction: -1 | 1, prevItems: HTMLElement[]) => HTMLElement[],
   options?: ScrollOptions
 ): ScrollResult {
-  // todo scroll somehow works wrong for monthPicker
   el.style.maxHeight = "";
   if (el.offsetHeight) el.style.maxHeight = `${el.offsetHeight}px`;
   el.style.overflow = "hidden";
@@ -92,37 +91,32 @@ export default function scrollCarousel(
       e.preventDefault(); // prevent body scroll
       scroll(e.deltaY > 0);
     },
-    { passive: false, capture: true }
+    { passive: false }
   );
 
-  const rOnTouch = onEvent(
-    el,
-    "touchstart",
-    (ev) => {
-      const isYScroll = el.scrollHeight - el.offsetHeight > el.scrollWidth - el.offsetWidth;
-      let xy = isYScroll ? ev.touches[0].clientY : ev.touches[0].clientX;
-      let stamp = 0;
-      const rOnTouchMove = onEvent(
-        el,
-        "touchmove",
-        (e) => {
-          const xyNew = isYScroll ? e.touches[0].clientY : e.touches[0].clientX;
-          const diff = xyNew - xy;
-          if (Math.abs(diff) > (options?.swipeDebounceDelta ?? 10)) {
-            xy = xyNew;
-            if (e.timeStamp - stamp > (options?.swipeDebounceMs ?? 300)) {
-              stamp = e.timeStamp;
-              scroll(diff < 0);
-            }
+  const rOnTouch = onEvent(el, "touchstart", (ev) => {
+    const isYScroll = el.scrollHeight - el.offsetHeight > el.scrollWidth - el.offsetWidth;
+    let xy = isYScroll ? ev.touches[0].clientY : ev.touches[0].clientX;
+    let stamp = 0;
+    const rOnTouchMove = onEvent(
+      el,
+      "touchmove",
+      (e) => {
+        const xyNew = isYScroll ? e.touches[0].clientY : e.touches[0].clientX;
+        const diff = xyNew - xy;
+        if (Math.abs(diff) > (options?.swipeDebounceDelta ?? 10)) {
+          xy = xyNew;
+          if (e.timeStamp - stamp > (options?.swipeDebounceMs ?? 300)) {
+            stamp = e.timeStamp;
+            scroll(diff < 0);
           }
-        },
-        { passive: false } // WARN don't set capture: true; otherwise it's not removed
-      );
+        }
+      },
+      { passive: false } // WARN don't set capture: true; otherwise it's not removed
+    );
 
-      el.addEventListener("touchend", rOnTouchMove, { once: true, passive: true, capture: true });
-    },
-    { capture: true }
-  );
+    el.addEventListener("touchend", rOnTouchMove, { once: true, passive: true });
+  });
 
   return {
     remove: () => {

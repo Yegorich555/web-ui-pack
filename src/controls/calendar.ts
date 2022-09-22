@@ -353,7 +353,7 @@ export default class WUPCalendarControl<
       };
 
       namesShort.forEach(addItem);
-      const n = items.length - 1;
+      const n = items.length;
       for (let i = 0; i < 4; ++i) {
         const d = addItem(namesShort[i], i + n);
         d.setAttribute("next", "");
