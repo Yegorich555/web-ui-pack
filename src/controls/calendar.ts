@@ -196,7 +196,6 @@ export default class WUPCalendarControl<
   protected renderControl(): void {
     // todo mobile: focus on input opens keyboard;
     // todo mobile: click on item makes focus-frame blink
-    setTimeout(() => (this.$refInput.readOnly = true));
 
     this.$refInput.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", this.$refInput.id);
@@ -211,17 +210,34 @@ export default class WUPCalendarControl<
     // render calendar
     const h = add(this.$refCalenar, "header");
     /* */ h.appendChild(this.$refCalenarTitle);
+    this.$refCalenarTitle.setAttribute("tabindex", "-1");
     const box = add(this.$refCalenar, "div");
     const animBox = add(box, "div");
     /* */ animBox.appendChild(this.$refCalenarItems);
+    this.$refCalenarItems.setAttribute("role", "grid");
     this.appendChild(this.$refCalenar);
 
     setTimeout(() => {
       const v = this.$value ? new Date(this.$value.valueOf()) : new Date();
       this.changePicker(v, this._opts.startWith || PickersEnum.Day);
     }); // wait for options
+  }
 
-    this.addEventListener("click", (e) => this.gotClick(e));
+  /** Append calendar item to parent or replace previous */
+  protected appendItem(prevEl: HTMLElement | undefined, text: string, v: number): HTMLElement {
+    let el: HTMLElement;
+    if (prevEl) {
+      el = prevEl;
+      while (el.attributes.length > 0) {
+        el.removeAttributeNode(el.attributes[0]);
+      }
+    } else {
+      el = add(this.$refCalenarItems, "li");
+    }
+    el.setAttribute("role", "gridcell");
+    el.textContent = text;
+    (el as any)._value = v;
+    return el;
   }
 
   #wasPicker: PickersEnum = PickersEnum.Day;
@@ -314,16 +330,8 @@ export default class WUPCalendarControl<
       const r = this.#ctr.$daysOfMonth(valYear, valMonth, this._opts.firstDayOfWeek);
       let i = 0;
       const addItem = (n: number, attr: string): void => {
-        const d = replaceItems[i] || add(ol, "li");
-        d.textContent = n.toString();
-        if (attr) {
-          d.setAttribute(attr, "");
-        } else {
-          while (d.attributes.length > 0) {
-            d.removeAttributeNode(d.attributes[0]);
-          }
-        }
-        (d as any)._value = r.first + i * 86400000;
+        const d = this.appendItem(replaceItems[i], n.toString(), r.first + i * 86400000);
+        attr && d.setAttribute(attr, "");
         items.push(d);
         ++i;
       };
@@ -382,9 +390,7 @@ export default class WUPCalendarControl<
 
       const items: HTMLElement[] = [];
       const addItem = (n: string, i: number): HTMLElement => {
-        const d = replaceItems[i] || add(ol, "li");
-        d.textContent = n;
-        (d as any)._value = i;
+        const d = this.appendItem(replaceItems[i], n, i);
         items.push(d);
         return d;
       };
@@ -444,8 +450,18 @@ export default class WUPCalendarControl<
     this.querySelector("[aria-selected]")?.removeAttribute("aria-selected");
     if (el) {
       el.setAttribute("aria-selected", "true");
-      this.focusItem(el);
+      this.$isFocused && this.focusItem(el);
     }
+  }
+
+  protected override setValue(
+    v: ValueType | undefined,
+    /* istanbul ignore next */
+    canValidate = true
+  ): boolean | null {
+    const r = super.setValue(v, canValidate);
+    this.$refInput.value = v != null ? `${v.getDate()} ${this.#ctr.$namesMonth[v.getMonth()]} ${v.getFullYear()}` : "";
+    return r;
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUPCalendar.Options | any> | null): void {
@@ -466,6 +482,13 @@ export default class WUPCalendarControl<
 
   protected override gotFocusLost(): void {
     this.$refInput.removeAttribute("aria-activedescendant");
+    super.gotFocusLost();
+  }
+
+  protected override gotFocus(): Array<() => void> {
+    const r = super.gotFocus();
+    r.push(this.appendEvent(this, "click", (e) => this.gotClick(e), { passive: false }));
+    return r;
   }
 
   #handleClickTitle?: (e: MouseEvent) => void;
