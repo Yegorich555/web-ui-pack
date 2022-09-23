@@ -288,23 +288,21 @@ export default class WUPCalendarControl<
 
     this.#clearPicker = async (isOut: boolean) => {
       const box = this.$refCalenar.children[1].children[0] as HTMLElement;
-
       const animate = (attrVal: string): Promise<any> =>
-        new Promise<any | void>((resolve) => {
-          // todo sometime animation starts with delay
-          let id = 0;
-          id = window.requestAnimationFrame(() => {
-            id = window.requestAnimationFrame(resolve);
-          });
-          box.addEventListener(
-            "animationstart",
-            () => {
-              window.cancelAnimationFrame(id);
-              box.addEventListener("animationend", resolve, { once: true });
-            },
-            { once: true }
-          );
+        new Promise<any>((resolve) => {
           box.setAttribute("zoom", attrVal);
+          const { animationDuration: ad } = window.getComputedStyle(box);
+          if (!ad) {
+            resolve(null);
+          } else {
+            // for cases when animation somehow not fired
+            setTimeout(resolve, Number.parseFloat(ad.substring(0, ad.length - 1)) * 1000);
+            box.addEventListener(
+              "animationstart",
+              () => box.addEventListener("animationend", resolve, { once: true }),
+              { once: true }
+            );
+          }
         });
 
       await animate(isOut ? "out" : "in");
