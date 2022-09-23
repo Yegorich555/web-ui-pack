@@ -26,8 +26,7 @@ export namespace WUPCalendarIn {
     min?: Date;
     /** User can't select date more than max */
     max?: Date;
-    /** Picker that must be rendered at first
-     * @defaultValue Day */
+    /** Picker that must be rendered at first; if undefined then when isEmpty - year, otherwise - day */
     startWith?: PickersEnum;
   }
   export type Generics<
@@ -229,7 +228,7 @@ export default class WUPCalendarControl<
 
     setTimeout(() => {
       const v = this.$value ? new Date(this.$value.valueOf()) : new Date();
-      this.changePicker(v, this._opts.startWith || PickersEnum.Day);
+      this.changePicker(v, this._opts.startWith ?? this.$isEmpty ? PickersEnum.Year : PickersEnum.Day);
     }); // wait for options
   }
 
@@ -416,9 +415,7 @@ export default class WUPCalendarControl<
 
       const vyear = v.getFullYear();
       const getIndex = (b: Date | undefined): number => {
-        if (!b) {
-          return -1;
-        }
+        if (!b) return -1;
         return (vyear - b.getFullYear()) * 12 + b.getMonth();
       };
 
@@ -473,9 +470,7 @@ export default class WUPCalendarControl<
       }
 
       const getIndex = (b: Date | undefined): number => {
-        if (!b) {
-          return -1;
-        }
+        if (!b) return -1;
         return pageSize - (year - b.getFullYear());
       };
 
@@ -539,7 +534,7 @@ export default class WUPCalendarControl<
   protected override gotChanges(propsChanged: Array<keyof WUPCalendar.Options | any> | null): void {
     super.gotChanges(propsChanged);
 
-    // todo when user skips label need not to parse from name
+    // todo when developer skips label need not to parse from name
     let attr = this.getAttribute("startwith");
     if (attr != null) {
       attr = attr.toLowerCase();
@@ -547,8 +542,10 @@ export default class WUPCalendarControl<
         this._opts.startWith = PickersEnum.Year;
       } else if (attr === "month") {
         this._opts.startWith = PickersEnum.Month;
+      } else if (attr === "day") {
+        this._opts.startWith = PickersEnum.Day;
       } else {
-        delete this._opts.startWith; // todo if startWith isn't pointed than we need to open yearPicker first, otherwise dayPicker
+        delete this._opts.startWith;
       }
     }
   }
@@ -587,3 +584,5 @@ customElements.define(tagName, WUPCalendarControl);
 // todo testcase: no change event if user selected the same date again
 // todo testcase: dayPickerSize === monthPickerSize === yearPickerSize
 // todo testcase: find aria-current for different pickers
+
+// todo animation from year to month is reverted
