@@ -259,13 +259,16 @@ export default class WUPCalendarControl<
     let type: string;
     if (picker === PickersEnum.Year) {
       type = "year";
-      r = this.getDayPicker(); // todo yearPicker
+      r = this.getYearPicker();
+      this.$refCalenarTitle.disabled = true;
     } else if (picker === PickersEnum.Month) {
       type = "month";
       r = this.getMonthPicker();
+      this.$refCalenarTitle.disabled = false;
     } else {
       type = "day";
       r = this.getDayPicker();
+      this.$refCalenarTitle.disabled = false;
     }
     this.$refCalenar.setAttribute("calendar", type);
 
@@ -310,7 +313,7 @@ export default class WUPCalendarControl<
     };
   }
 
-  /** Returns render function of DayPicker */
+  /** Returns result to render day picker */
   #isDayWeeksAdded = false;
   protected getDayPicker(): WUPCalendarIn.PickerResult {
     // render daysOfWeek - need to hide for other month and year calendar
@@ -331,7 +334,7 @@ export default class WUPCalendarControl<
     }
 
     let curValue = 0;
-    const renderItems = (ol: HTMLElement, replaceItems: HTMLElement[], v: Date, cur: Date): HTMLElement[] => {
+    const renderItems = (_ol: HTMLElement, replaceItems: HTMLElement[], v: Date, cur: Date): HTMLElement[] => {
       this.$refCalenarTitle.textContent = `${this.#ctr.$namesMonth[cur.getMonth()]} ${cur.getFullYear()}`;
       curValue = cur.valueOf();
       const valMonth = v.getMonth();
@@ -386,11 +389,12 @@ export default class WUPCalendarControl<
     };
   }
 
+  /** Returns result to render month picker */
   protected getMonthPicker(): WUPCalendarIn.PickerResult {
     let curYear = 0;
     let curValue = 0;
 
-    const renderItems = (ol: HTMLElement, replaceItems: HTMLElement[], v: Date, cur: Date): HTMLElement[] => {
+    const renderItems = (_ol: HTMLElement, replaceItems: HTMLElement[], v: Date, cur: Date): HTMLElement[] => {
       curYear = cur.getFullYear();
       curValue = cur.valueOf();
       this.$refCalenarTitle.textContent = `${curYear}`;
@@ -415,8 +419,7 @@ export default class WUPCalendarControl<
         if (!b) {
           return -1;
         }
-        const yearDiff = vyear - b.getFullYear();
-        return yearDiff * 12 + b.getMonth();
+        return (vyear - b.getFullYear()) * 12 + b.getMonth();
       };
 
       const now = new Date();
@@ -425,6 +428,9 @@ export default class WUPCalendarControl<
 
       i = getIndex(this.$value);
       items[i] && this.selectItem(items[i]);
+
+      i = getIndex(cur);
+      items[i] && this.focusItem(items[i]); // todo or focus to first
 
       return items;
     };
@@ -441,6 +447,63 @@ export default class WUPCalendarControl<
         this.changePicker(dt, PickersEnum.Day);
       },
       onTitleClick: () => this.changePicker(new Date(curValue), PickersEnum.Year),
+    };
+  }
+
+  /** Returns result to render year picker */
+  protected getYearPicker(): WUPCalendarIn.PickerResult {
+    let curValue = 0;
+    const pageSize = 16;
+
+    const renderItems = (_ol: HTMLElement, replaceItems: HTMLElement[], v: Date, cur: Date): HTMLElement[] => {
+      curValue = cur.valueOf();
+      let page = Math.floor((cur.getFullYear() - 1970) / pageSize);
+      let year = page * pageSize + 1970;
+
+      this.$refCalenarTitle.textContent = `${year} ... ${year + pageSize - 1}`;
+
+      page = Math.floor((v.getFullYear() - 1970) / pageSize);
+      year = page * pageSize + 1970;
+      const items: HTMLElement[] = [];
+      let i = 0;
+      for (i = 0; i < pageSize; ++i) {
+        const d = this.appendItem(replaceItems[i], year.toString(), year);
+        items.push(d);
+        ++year;
+      }
+
+      const getIndex = (b: Date | undefined): number => {
+        if (!b) {
+          return -1;
+        }
+        return pageSize - (year - b.getFullYear());
+      };
+
+      const now = new Date();
+      i = getIndex(now);
+      items[i]?.setAttribute("aria-current", "date");
+
+      i = getIndex(this.$value);
+      items[i] && this.selectItem(items[i]);
+
+      i = getIndex(cur);
+      items[i] && this.focusItem(items[i]); // todo or focus to first
+
+      return items;
+    };
+
+    return {
+      renderItems,
+      next: (v, n) => {
+        v.setFullYear(v.getFullYear() + n * pageSize);
+        return v;
+      },
+      onItemClick: (_e, v) => {
+        const dt = new Date(curValue); // todo when user changes year we must reset month and date to 0
+        dt.setFullYear(v);
+        this.changePicker(dt, PickersEnum.Month);
+      },
+      onTitleClick: () => null,
     };
   }
 

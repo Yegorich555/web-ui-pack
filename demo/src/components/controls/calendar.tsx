@@ -41,7 +41,7 @@ export default function CalendarControlView() {
             autoFocus={false}
             validations="window._someObject"
             class={styles.cln}
-            startWith="day"
+            startWith="year"
           />
           {/* <wup-calendar name="calendar2" label="" class={styles.cln} /> */}
         </div>
