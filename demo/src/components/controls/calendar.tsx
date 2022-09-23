@@ -36,40 +36,15 @@ export default function CalendarControlView() {
             // label="Calendar control"
             label=""
             // label="With long label and custom validations (very very very incredible long label to check if it has ellipsis rule)"
-            initValue="2022-09-20"
+            initValue="2022-09-20 10:05"
             autoComplete="off"
             autoFocus={false}
             validations="window._someObject"
             class={styles.cln}
+            startWith="day"
           />
-          <wup-calendar
-            name="calendar"
-            // label="Calendar control"
-            label=""
-            // label="With long label and custom validations (very very very incredible long label to check if it has ellipsis rule)"
-            initValue="2022-09-20"
-            autoComplete="off"
-            autoFocus={false}
-            validations="window._someObject"
-            class={styles.cln}
-            startWith="month"
-          />
+          {/* <wup-calendar name="calendar2" label="" class={styles.cln} /> */}
         </div>
-        {/* <wup-calendar name="required" validations="globalkey.pointHere" />
-        <wup-calendar
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "longName";
-              el.$options.label =
-                "With long label and custom validations (very very very incredible long label to check if it has ellipsis rule)";
-              el.$options.validations = {
-                required: true,
-              };
-            }
-          }}
-        />
-        <wup-calendar name="readonly" initValue="1990-02-10" readOnly />
-        <wup-calendar name="disabled" disabled /> */}
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

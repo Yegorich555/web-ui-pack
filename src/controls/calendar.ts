@@ -193,24 +193,34 @@ export default class WUPCalendarControl<
   $refCalenarTitle = document.createElement("button");
   $refCalenarItems = document.createElement("ol");
 
-  protected renderControl(): void {
+  protected override renderControl(): void {
     // todo mobile: focus on input opens keyboard;
     // todo mobile: click on item makes focus-frame blink
 
-    this.$refInput.id = this.#ctr.$uniqueId;
-    this.$refLabel.setAttribute("for", this.$refInput.id);
+    const i = this.$refInput;
+    i.id = this.#ctr.$uniqueId;
+    this.$refLabel.setAttribute("for", i.id);
+    i.type = "text";
+    i.setAttribute("role", "combobox");
+    // i.setAttribute("aria-haspopup", "grid");
+    // i.setAttribute("aria-expanded", true);
+    const menuId = this.#ctr.$uniqueId;
+    i.setAttribute("aria-owns", menuId);
+    i.setAttribute("aria-controls", menuId);
 
-    // todo resolve it
-    // this.$refInput.type = "date";
     const s = add(this.$refLabel, "span");
     s.appendChild(this.$refInput); // input appended to span to allow user use :after,:before without padding adjust
     s.appendChild(this.$refTitle);
     this.appendChild(this.$refLabel);
 
     // render calendar
+    this.$refCalenar.id = menuId;
     const h = add(this.$refCalenar, "header");
     /* */ h.appendChild(this.$refCalenarTitle);
+    // this.$refCalenarTitle.setAttribute("aria-live", "polite");
+    // this.$refCalenarTitle.setAttribute("aria-atomic", true);
     this.$refCalenarTitle.setAttribute("tabindex", "-1");
+    this.$refCalenarTitle.setAttribute("aria-hidden", true);
     const box = add(this.$refCalenar, "div");
     const animBox = add(box, "div");
     /* */ animBox.appendChild(this.$refCalenarItems);
@@ -307,6 +317,7 @@ export default class WUPCalendarControl<
     if (!this.#isDayWeeksAdded) {
       const box = this.$refCalenarItems.parentElement!;
       const days = document.createElement("ul");
+      days.setAttribute("aria-hidden", true);
       box.prepend(days);
       const names = this.#ctr.$namesDayShort;
       for (let i = 0, n = this._opts.firstDayOfWeek - 1; i < 7; ++i, ++n) {
@@ -385,9 +396,6 @@ export default class WUPCalendarControl<
       this.$refCalenarTitle.textContent = `${curYear}`;
 
       const namesShort = this.#ctr.$namesMonthShort;
-      //  const names = this.#ctr.$namesMonth;
-      // todo don't forget about aria-label
-
       const items: HTMLElement[] = [];
       const addItem = (n: string, i: number): HTMLElement => {
         const d = this.appendItem(replaceItems[i], n, i);
@@ -431,18 +439,23 @@ export default class WUPCalendarControl<
         const dt = new Date(curValue);
         dt.setMonth(v);
         this.changePicker(dt, PickersEnum.Day);
-        console.warn("month change", dt.toJSON()); // todo remove after tests
       },
       onTitleClick: () => this.changePicker(new Date(curValue), PickersEnum.Year),
     };
   }
 
-  /** Focus for item (via aria-activedescendant) */
+  #focusedItem?: HTMLElement | null;
+  /** Focus item (via aria-activedescendant) */
   protected focusItem(el: HTMLElement): void {
-    const id = el.id || this.#ctr.$uniqueId;
-    el.setAttribute("aria-label", `${el.textContent} ${this.$refCalenarTitle.textContent}`);
-    this.$refInput.setAttribute("aria-activedescendant", id);
-    el.id = id;
+    this.#focusedItem?.removeAttribute("focused");
+
+    this.#focusedItem = el;
+    el.id = el.id || this.#ctr.$uniqueId;
+    el.setAttribute("focused", "");
+    this.$refInput.setAttribute("aria-activedescendant", el.id);
+    setTimeout(() => {
+      el.setAttribute("aria-label", `${el.textContent} ${this.$refCalenarTitle.textContent}`);
+    }, 100); // without timeout text isn't announced when switch pickers
   }
 
   /** Select item (set aria-selected and focus) */
@@ -454,11 +467,7 @@ export default class WUPCalendarControl<
     }
   }
 
-  protected override setValue(
-    v: ValueType | undefined,
-    /* istanbul ignore next */
-    canValidate = true
-  ): boolean | null {
+  protected override setValue(v: ValueType | undefined, canValidate = true): boolean | null {
     const r = super.setValue(v, canValidate);
     this.$refInput.value = v != null ? `${v.getDate()} ${this.#ctr.$namesMonth[v.getMonth()]} ${v.getFullYear()}` : "";
     return r;
@@ -467,6 +476,7 @@ export default class WUPCalendarControl<
   protected override gotChanges(propsChanged: Array<keyof WUPCalendar.Options | any> | null): void {
     super.gotChanges(propsChanged);
 
+    // todo when user skips label need not to parse from name
     let attr = this.getAttribute("startwith");
     if (attr != null) {
       attr = attr.toLowerCase();
@@ -475,7 +485,7 @@ export default class WUPCalendarControl<
       } else if (attr === "month") {
         this._opts.startWith = PickersEnum.Month;
       } else {
-        delete this._opts.startWith;
+        delete this._opts.startWith; // todo if startWith isn't pointed than we need to open yearPicker first, otherwise dayPicker
       }
     }
   }
@@ -511,6 +521,6 @@ export default class WUPCalendarControl<
 
 customElements.define(tagName, WUPCalendarControl);
 
-// todo testcase: no change event if user selected the same date
+// todo testcase: no change event if user selected the same date again
 // todo testcase: dayPickerSize === monthPickerSize === yearPickerSize
 // todo testcase: find aria-current for different pickers

@@ -112,6 +112,10 @@
     cursor: pointer;
     box-sizing: border-box;
   }
+
+  li[focused] {
+    box-shadow: 0 0 4px 0 red; //var(--ctrl-focus);
+  }
 }
 
 @keyframes WUP-ZOOM-OUT-1 {
