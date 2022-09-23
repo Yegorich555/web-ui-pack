@@ -33,9 +33,6 @@ export default function CalendarControlView() {
         <div className={styles.flex}>
           <wup-calendar
             name="calendar"
-            // label="Calendar control"
-            label=""
-            // label="With long label and custom validations (very very very incredible long label to check if it has ellipsis rule)"
             initValue="2022-09-20 10:05"
             autoComplete="off"
             autoFocus={false}
@@ -50,6 +47,3 @@ export default function CalendarControlView() {
     </Page>
   );
 }
-
-// todo details about icons before/after
-// todo details about ariaAttributes to change messages

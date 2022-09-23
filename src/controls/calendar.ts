@@ -534,7 +534,12 @@ export default class WUPCalendarControl<
   protected override gotChanges(propsChanged: Array<keyof WUPCalendar.Options | any> | null): void {
     super.gotChanges(propsChanged);
 
-    // todo when developer skips label need not to parse from name
+    if (!this._opts.label) {
+      this.$refTitle.classList.add(this.#ctr.classNameHidden);
+    } else {
+      this.$refTitle.classList.remove(this.#ctr.classNameHidden);
+    }
+
     let attr = this.getAttribute("startwith");
     if (attr != null) {
       attr = attr.toLowerCase();
