@@ -249,10 +249,12 @@ export default class WUPCalendarControl<
     return el;
   }
 
-  #wasPicker: PickersEnum = PickersEnum.Day;
+  #wasPicker: PickersEnum = 0;
   #clearPicker?: (isIn: boolean) => Promise<void>;
+  /** Called when need set/change day/month/year picker */
   protected async changePicker(v: Date, picker: PickersEnum): Promise<void> {
-    await this.#clearPicker?.call(this, !!(picker - this.#wasPicker));
+    await this.#clearPicker?.call(this, picker - this.#wasPicker > 0);
+    this.#wasPicker = picker;
 
     let r: WUPCalendarIn.PickerResult;
     let type: string;
@@ -289,6 +291,7 @@ export default class WUPCalendarControl<
 
       const animate = (attrVal: string): Promise<any> =>
         new Promise<any | void>((resolve) => {
+          // todo sometime animation starts with delay
           let id = 0;
           id = window.requestAnimationFrame(() => {
             id = window.requestAnimationFrame(resolve);
@@ -589,5 +592,3 @@ customElements.define(tagName, WUPCalendarControl);
 // todo testcase: no change event if user selected the same date again
 // todo testcase: dayPickerSize === monthPickerSize === yearPickerSize
 // todo testcase: find aria-current for different pickers
-
-// todo animation from year to month is reverted
