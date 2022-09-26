@@ -33,12 +33,12 @@ export default function CalendarControlView() {
         <div className={styles.flex}>
           <wup-calendar
             name="calendar"
-            initValue="2022-09-20 10:05"
+            initValue="2022-03-20 10:05"
             autoComplete="off"
             autoFocus={false}
             validations="window._someObject"
             class={styles.cln}
-            startWith="year"
+            // startWith="year"
           />
           {/* <wup-calendar name="calendar2" label="" class={styles.cln} /> */}
         </div>
