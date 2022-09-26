@@ -33,7 +33,7 @@ export default function CalendarControlView() {
         <div className={styles.flex}>
           <wup-calendar
             name="calendar"
-            initValue="2022-03-20 10:05"
+            initValue="2022-03-06 10:05"
             autoComplete="off"
             autoFocus={false}
             validations="window._someObject"

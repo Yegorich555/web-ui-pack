@@ -1,4 +1,5 @@
 import onEvent from "./onEvent";
+import onScrollStop from "./onScrollStop";
 
 /* eslint-disable prefer-destructuring */
 interface ScrollResult {
@@ -27,7 +28,7 @@ interface ScrollOptions {
  */
 export default function scrollCarousel(
   el: HTMLElement,
-  next: (direction: -1 | 1, prevItems: HTMLElement[]) => HTMLElement[],
+  next: (direction: -1 | 1) => HTMLElement[] | null,
   options?: ScrollOptions
 ): ScrollResult {
   el.style.maxHeight = "";
@@ -35,18 +36,13 @@ export default function scrollCarousel(
   el.style.overflow = "hidden";
   el.style.touchAction = "none";
 
-  const c = Array.prototype.slice.call(el.children) as HTMLElement[];
-  const range = [next(-1, []), c, next(1, [])];
-  if (!options?.disableRender) {
-    el.prepend(...range[0]);
-    el.append(...range[2]);
-  }
+  // todo carousel now works without pre-rendered items; if need render images it will produce not-loaded images during the scrolling
 
   /** Scroll to center of range */
-  const scrollToRange = (isSmooth: boolean): void => {
-    const y1 = range[1][0].offsetTop - el.offsetTop;
-    const x1 = range[1][0].offsetLeft - el.offsetLeft;
-    const $2 = range[1][range[1].length - 1];
+  const scrollToRange = (isSmooth: boolean, items: HTMLElement[]): void => {
+    const y1 = items[0].offsetTop - el.offsetTop;
+    const x1 = items[0].offsetLeft - el.offsetLeft;
+    const $2 = items[items.length - 1];
     const y2 = $2.offsetTop + $2.offsetHeight - el.offsetTop;
     const x2 = $2.offsetLeft + $2.offsetWidth - el.offsetLeft;
     const top = y1 + (y2 - y1 - el.offsetHeight) / 2;
@@ -54,34 +50,34 @@ export default function scrollCarousel(
     el.scroll({ top, left, behavior: isSmooth ? "smooth" : "auto" });
   };
 
-  window.requestAnimationFrame(() => scrollToRange(false));
+  let prevItems = Array.prototype.slice.call(el.children) as HTMLElement[];
+  window.requestAnimationFrame(() => scrollToRange(false, prevItems));
 
   const scroll = (isNext: boolean): void => {
-    if (isNext) {
-      const toUpdate = range[0];
-      range[0] = range[1];
-      range[1] = range[2];
-      range[2] = next(1, toUpdate);
-      if (!options?.disableRender) {
-        for (let i = toUpdate.length - 1; i >= range[2].length; --i) {
-          toUpdate[i].remove(); // remove other if added less than was before
-        }
-        el.append(...range[2]); // move previous to the end
-      }
-    } else {
-      const toUpdate = range[2];
-      range[2] = range[1];
-      range[1] = range[0];
-      range[0] = next(-1, toUpdate);
-      if (!options?.disableRender) {
-        for (let i = toUpdate.length - 1; i >= range[0].length; --i) {
-          toUpdate[i].remove(); // remove other if added less than was before
-        }
-        el.prepend(...range[0]); // move previous to the end
-      }
+    const prev = {
+      y: el.scrollHeight - el.offsetHeight - el.scrollTop,
+      x: el.scrollWidth - el.offsetWidth - el.scrollLeft,
+    };
+
+    const items = next(isNext ? 1 : -1);
+    if (!items) {
+      return; // if no new items
+    }
+    const now = {
+      y: el.scrollHeight - el.offsetHeight - el.scrollTop,
+      x: el.scrollWidth - el.offsetWidth - el.scrollLeft,
+    };
+    if (!options?.disableRender) {
+      isNext ? el.append(...items) : el.prepend(...items);
     }
 
-    scrollToRange(true);
+    !isNext && el.scroll({ top: now.y - prev.y, left: now.x - prev.x });
+    scrollToRange(true, items);
+
+    onScrollStop(el, () => {
+      prevItems.forEach((a) => a.remove());
+      prevItems = items;
+    });
   };
 
   const rOnWheel = onEvent(

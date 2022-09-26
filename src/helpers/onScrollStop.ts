@@ -1,4 +1,4 @@
-/** Returns callback on scroll end (via checking scroll position on every frame)
+/** Returns callback on scrolling is stopped (via checking scroll position on every frame)
  * @param {HTMLElement} el HTMLElement to listen for`
  * @param {Function} listener Callback invoked on event
  * @returns removeListener callback

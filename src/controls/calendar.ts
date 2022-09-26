@@ -40,8 +40,8 @@ export namespace WUPCalendarIn {
   export type GenOpt<T = string> = Generics<T>["Options"];
 
   export interface PickerResult {
-    renderItems: (ol: HTMLElement, replaceItems: HTMLElement[], next: Date, cur: Date) => HTMLElement[];
-    getIndex: (d: Date, firstValue: number) => number;
+    renderItems: (ol: HTMLElement, prevItems: [], v: Date) => HTMLElement[];
+    getIndex: (v: Date, firstValue: number) => number;
     next: (v: Date, n: -1 | 1) => Date;
     onItemClick: (e: MouseEvent & { target: HTMLElement }, targetValue: number) => void;
     onTitleClick: (e: MouseEvent) => void;
@@ -278,9 +278,8 @@ export default class WUPCalendarControl<
     this.#handleClickItem = r.onItemClick;
     this.#handleClickTitle = r.onTitleClick;
 
-    let lock = false; // required because scrollCarousel calls render twice
-    const renderPicker = (oldItems: HTMLElement[], next: Date, cur: Date): HTMLElement[] => {
-      const items = r.renderItems(this.$refCalenarItems, oldItems, next, cur);
+    const renderPicker = (next: Date): HTMLElement[] => {
+      const items = r.renderItems(this.$refCalenarItems, [], next); // todo remove prevItems
 
       const first = (items[0] as any)._value as any;
       let i = r.getIndex(new Date(), first);
@@ -288,26 +287,19 @@ export default class WUPCalendarControl<
 
       if (this.$value) {
         i = r.getIndex(this.$value, first);
-        items[i] && this.selectItem(items[i], false);
+        items[i] && this.selectItem(items[i]);
       }
 
-      if (!lock && this.$isFocused) {
-        i = r.getIndex(cur, first);
+      if (this.$isFocused) {
+        i = r.getIndex(next, first);
         items[i] && this.focusItem(items[i]);
       }
 
       return items;
     };
 
-    renderPicker([], v, v);
-    lock = true;
-    const scrollObj = scrollCarousel(this.$refCalenarItems, (n, oldItems) => {
-      v = lock ? v : r.next(v, n);
-      const nextVal = r.next(new Date(v.valueOf()), n);
-      const items = renderPicker(oldItems, nextVal, v);
-      return items;
-    });
-    lock = false;
+    renderPicker(v);
+    const scrollObj = scrollCarousel(this.$refCalenarItems, (n) => renderPicker(r.next(v, n)));
 
     this.#clearPicker = async (isOut: boolean) => {
       const box = this.$refCalenar.children[1].children[0] as HTMLElement;
@@ -339,7 +331,7 @@ export default class WUPCalendarControl<
   /** Returns result to render day picker */
   #isDayWeeksAdded = false;
   protected getDayPicker(): WUPCalendarIn.PickerResult {
-    // render daysOfWeek - need to hide for other month and year calendar
+    // render daysOfWeek
     if (!this.#isDayWeeksAdded) {
       const box = this.$refCalenarItems.parentElement!;
       const days = document.createElement("ul");
@@ -356,12 +348,12 @@ export default class WUPCalendarControl<
       this.#isDayWeeksAdded = true;
     }
 
-    let curValue = 0;
-    const renderItems = (_ol: HTMLElement, replaceItems: HTMLElement[], v: Date, cur: Date): HTMLElement[] => {
-      this.$refCalenarTitle.textContent = `${this.#ctr.$namesMonth[cur.getMonth()]} ${cur.getFullYear()}`;
-      curValue = cur.valueOf();
+    let curValue: Date;
+    const renderItems = (_ol: HTMLElement, replaceItems: HTMLElement[], v: Date): HTMLElement[] => {
+      curValue = v;
       const valMonth = v.getMonth();
       const valYear = v.getFullYear();
+      this.$refCalenarTitle.textContent = `${this.#ctr.$namesMonth[valMonth]} ${valYear}`;
 
       const items: HTMLElement[] = [];
       const r = this.#ctr.$daysOfMonth(valYear, valMonth, this._opts.firstDayOfWeek);
@@ -408,25 +400,24 @@ export default class WUPCalendarControl<
             this.$value.getMilliseconds()
           );
         }
-        curValue = dt.valueOf();
+        curValue = dt;
         this.setValue(dt as ValueType);
-        console.warn("new value", dt.toDateString()); // todo remove after tests
       },
-      onTitleClick: () => this.changePicker(new Date(curValue), PickersEnum.Month),
+      onTitleClick: () => this.changePicker(curValue, PickersEnum.Month),
     };
   }
 
   /** Returns result to render month picker */
   protected getMonthPicker(): WUPCalendarIn.PickerResult {
-    let curValue = 0;
-
-    const renderItems = (_ol: HTMLElement, replaceItems: HTMLElement[], v: Date, cur: Date): HTMLElement[] => {
-      curValue = cur.valueOf();
-      this.$refCalenarTitle.textContent = `${cur.getFullYear()}`;
+    let curValue: Date;
+    const renderItems = (_ol: HTMLElement, replaceItems: HTMLElement[], v: Date): HTMLElement[] => {
+      curValue = v;
+      const year = v.getFullYear();
+      this.$refCalenarTitle.textContent = `${year}`;
 
       const namesShort = this.#ctr.$namesMonthShort;
       const items: HTMLElement[] = [];
-      const total = v.getFullYear() * 12;
+      const total = year * 12;
       const addItem = (n: string, i: number): HTMLElement => {
         const d = this.appendItem(replaceItems[i], n, total + i);
         items.push(d);
@@ -450,32 +441,20 @@ export default class WUPCalendarControl<
         v.setFullYear(v.getFullYear() + n);
         return v;
       },
-      onItemClick: (_e, v) => {
-        const dt = new Date(curValue);
-        const year = Math.floor(v / 12);
-        dt.setFullYear(year);
-        dt.setMonth(v - 12 * year);
-        dt.setDate(1);
-        this.changePicker(dt, PickersEnum.Day);
-      },
-      onTitleClick: () => this.changePicker(new Date(curValue), PickersEnum.Year),
+      onItemClick: (_e, v) => this.changePicker(new Date(Math.floor(v / 12), Math.ceil(v / 12), 1), PickersEnum.Day),
+      onTitleClick: () => this.changePicker(curValue, PickersEnum.Year),
     };
   }
 
   /** Returns result to render year picker */
   protected getYearPicker(): WUPCalendarIn.PickerResult {
-    let curValue = 0;
     const pageSize = 16;
 
-    const renderItems = (_ol: HTMLElement, replaceItems: HTMLElement[], v: Date, cur: Date): HTMLElement[] => {
-      curValue = cur.valueOf();
-      let page = Math.floor((cur.getFullYear() - 1970) / pageSize);
+    const renderItems = (_ol: HTMLElement, replaceItems: HTMLElement[], v: Date): HTMLElement[] => {
+      const page = Math.floor((v.getFullYear() - 1970) / pageSize);
       let year = page * pageSize + 1970;
 
       this.$refCalenarTitle.textContent = `${year} ... ${year + pageSize - 1}`;
-
-      page = Math.floor((v.getFullYear() - 1970) / pageSize);
-      year = page * pageSize + 1970;
       const items: HTMLElement[] = [];
       let i = 0;
       for (i = 0; i < pageSize; ++i) {
@@ -494,12 +473,7 @@ export default class WUPCalendarControl<
         v.setFullYear(v.getFullYear() + n * pageSize);
         return v;
       },
-      onItemClick: (_e, v) => {
-        const dt = new Date(curValue);
-        dt.setFullYear(v);
-        dt.setMonth(0);
-        this.changePicker(dt, PickersEnum.Month);
-      },
+      onItemClick: (_e, v) => this.changePicker(new Date(v, 0), PickersEnum.Month),
       onTitleClick: () => null,
     };
   }
@@ -519,11 +493,8 @@ export default class WUPCalendarControl<
   }
 
   /** Select item (set aria-selected and focus) */
-  protected selectItem(el: HTMLElement | undefined, rstPrev = true): void {
-    if (rstPrev) {
-      // todo it makes carousel ugly with several pickers
-      this.querySelector("[aria-selected]")?.removeAttribute("aria-selected");
-    }
+  protected selectItem(el: HTMLElement | undefined): void {
+    this.querySelector("[aria-selected]")?.removeAttribute("aria-selected");
     if (el) {
       el.setAttribute("aria-selected", "true");
       this.$isFocused && this.focusItem(el);
