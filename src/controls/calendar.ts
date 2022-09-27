@@ -426,6 +426,7 @@ export default class WUPCalendarControl<
     const getIndex: WUPCalendarIn.PickerResult["getIndex"] = //
       (b, first) => b.getFullYear() * 12 + b.getMonth() - first;
 
+    const pageSize = 12;
     const renderItems = (ol: HTMLElement, v: Date): HTMLElement[] => {
       curValue = v;
       const year = v.getFullYear();
@@ -433,7 +434,7 @@ export default class WUPCalendarControl<
 
       const namesShort = this.#ctr.$namesMonthShort;
       const items: HTMLElement[] = [];
-      const total = year * 12;
+      const total = year * pageSize;
 
       let iPrev = -999;
       if (ol.children.length) {
@@ -464,7 +465,7 @@ export default class WUPCalendarControl<
         v.setFullYear(v.getFullYear() + n);
         return v;
       },
-      onItemClick: (_e, v) => this.changePicker(new Date(Math.floor(v / 12), Math.ceil(v / 12), 1), PickersEnum.Day),
+      onItemClick: (_e, v) => this.changePicker(new Date(Math.floor(v / pageSize), v % pageSize, 1), PickersEnum.Day),
       onTitleClick: () => this.changePicker(curValue, PickersEnum.Year),
     };
   }
@@ -592,6 +593,6 @@ customElements.define(tagName, WUPCalendarControl);
 // todo testcase: dayPickerSize === monthPickerSize === yearPickerSize
 // todo testcase: find aria-current for different pickers
 // todo testCase: 31 Mar 2022  + 1 month > return April (but returns May)
-
 // todo testcase: initValue: 2022-03-20 10:05; Month picker must show focused in visible area
+
 // todo when user scrolls pickers title changing must be announced
