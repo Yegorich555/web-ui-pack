@@ -477,12 +477,23 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     /* istanbul ignore else */
     if (text) {
       const el = document.createElement("section");
-      el.setAttribute("aria-live", "polite");
+      el.setAttribute("aria-live", "off");
       el.setAttribute("aria-atomic", true);
       el.className = this.#ctr.classNameHidden;
+      el.id = this.#ctr.$uniqueId;
+      const i = this.$refInput;
+      const an = "aria-describedby";
+      i.setAttribute(an, `${this.$refInput.getAttribute(an) || ""} ${el.id}`.trimStart());
       this.appendChild(el);
       setTimeout(() => (el.textContent = text), 100); // otherwise reader doesn't announce section
-      setTimeout(() => el.remove(), 200);
+      setTimeout(() => {
+        el.remove();
+        const a = i.getAttribute(an);
+        if (a != null) {
+          const aNext = a.replace(el.id, "").trim();
+          aNext ? i.setAttribute(an, aNext) : i.removeAttribute(an);
+        }
+      }, 200);
     }
   }
 

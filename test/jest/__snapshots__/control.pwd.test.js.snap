@@ -551,6 +551,7 @@ exports[`control.pwd options clearButton 1`] = `
   >
     <span>
       <input
+        aria-describedby="txt2"
         autocomplete="new-password"
         id="txt1"
         placeholder=" "
@@ -576,8 +577,9 @@ exports[`control.pwd options clearButton 1`] = `
   </label>
   <section
     aria-atomic="true"
-    aria-live="polite"
+    aria-live="off"
     class="wup-hidden"
+    id="txt2"
   />
 </wup-pwd>
 `;
@@ -589,6 +591,7 @@ exports[`control.pwd options clearButton 2`] = `
   >
     <span>
       <input
+        aria-describedby="txt2"
         autocomplete="new-password"
         id="txt1"
         placeholder=" "
@@ -609,8 +612,9 @@ exports[`control.pwd options clearButton 2`] = `
   </label>
   <section
     aria-atomic="true"
-    aria-live="polite"
+    aria-live="off"
     class="wup-hidden"
+    id="txt2"
   />
 </wup-pwd>
 `;
@@ -977,61 +981,6 @@ exports[`control.pwd validations options.validationCase 2`] = `
   >
     <span>
       <input
-        aria-describedby="txt2"
-        aria-required="true"
-        autocomplete="new-password"
-        id="txt1"
-        placeholder=" "
-        type="password"
-      />
-      <strong>
-        First Input
-      </strong>
-      <span
-        class="wup-hidden"
-      >
-        press Alt + V to show/hide password
-      </span>
-    </span>
-    <button
-      aria-hidden="true"
-      clear=""
-      tabindex="-1"
-    />
-    <button
-      aria-hidden="true"
-      eye=""
-      tabindex="-1"
-    />
-  </label>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt2"
-    style="display: none;"
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      This field is required
-    </span>
-  </wup-popup>
-</wup-pwd>
-`;
-
-exports[`control.pwd validations options.validationCase 3`] = `
-<wup-pwd
-  invalid=""
->
-  <label
-    for="txt1"
-  >
-    <span>
-      <input
         aria-describedby="txt3"
         aria-required="true"
         autocomplete="new-password"
@@ -1072,13 +1021,13 @@ exports[`control.pwd validations options.validationCase 3`] = `
       Error for First Input:
     </span>
     <span>
-      custom err here
+      This field is required
     </span>
   </wup-popup>
 </wup-pwd>
 `;
 
-exports[`control.pwd validations options.validationCase 4`] = `
+exports[`control.pwd validations options.validationCase 3`] = `
 <wup-pwd
   invalid=""
 >
@@ -1119,6 +1068,61 @@ exports[`control.pwd validations options.validationCase 4`] = `
     aria-live="off"
     error=""
     id="txt4"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
+</wup-pwd>
+`;
+
+exports[`control.pwd validations options.validationCase 4`] = `
+<wup-pwd
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-describedby="txt5"
+        aria-required="true"
+        autocomplete="new-password"
+        id="txt1"
+        placeholder=" "
+        type="password"
+      />
+      <strong>
+        First Input
+      </strong>
+      <span
+        class="wup-hidden"
+      >
+        press Alt + V to show/hide password
+      </span>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+    <button
+      aria-hidden="true"
+      eye=""
+      tabindex="-1"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt5"
     role="alert"
     style="display: none;"
   >

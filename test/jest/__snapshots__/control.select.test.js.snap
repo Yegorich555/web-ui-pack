@@ -735,7 +735,7 @@ exports[`control.select validations options.validationCase 2`] = `
       <input
         aria-autocomplete="list"
         aria-controls="txt2"
-        aria-describedby="txt7"
+        aria-describedby="txt8"
         aria-expanded="false"
         aria-haspopup="listbox"
         aria-owns="txt2"
@@ -766,28 +766,28 @@ exports[`control.select validations options.validationCase 2`] = `
     >
       <li
         aria-selected="false"
-        id="txt3"
+        id="txt4"
         role="option"
       >
         Donny
       </li>
       <li
         aria-selected="false"
-        id="txt4"
+        id="txt5"
         role="option"
       >
         Mikky
       </li>
       <li
         aria-selected="false"
-        id="txt5"
+        id="txt6"
         role="option"
       >
         Leo
       </li>
       <li
         aria-selected="false"
-        id="txt6"
+        id="txt7"
         role="option"
       >
         Splinter
@@ -798,7 +798,7 @@ exports[`control.select validations options.validationCase 2`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt7"
+    id="txt8"
     style="max-width: 100px;"
   >
     <span
@@ -824,11 +824,11 @@ exports[`control.select validations options.validationCase 3`] = `
     <span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt8"
-        aria-describedby="txt13"
+        aria-controls="txt9"
+        aria-describedby="txt14"
         aria-expanded="true"
         aria-haspopup="listbox"
-        aria-owns="txt8"
+        aria-owns="txt9"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -850,7 +850,7 @@ exports[`control.select validations options.validationCase 3`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt13"
+    id="txt14"
     style="max-width: 100px;"
   >
     <span
@@ -868,33 +868,33 @@ exports[`control.select validations options.validationCase 3`] = `
   >
     <ul
       aria-label="Items"
-      id="txt8"
+      id="txt9"
       role="listbox"
     >
       <li
         aria-selected="true"
-        id="txt9"
+        id="txt10"
         role="option"
       >
         Donny
       </li>
       <li
         aria-selected="false"
-        id="txt10"
+        id="txt11"
         role="option"
       >
         Mikky
       </li>
       <li
         aria-selected="false"
-        id="txt11"
+        id="txt12"
         role="option"
       >
         Leo
       </li>
       <li
         aria-selected="false"
-        id="txt12"
+        id="txt13"
         role="option"
       >
         Splinter
@@ -914,11 +914,11 @@ exports[`control.select validations options.validationCase 4`] = `
     <span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt14"
-        aria-describedby="txt19"
+        aria-controls="txt15"
+        aria-describedby="txt20"
         aria-expanded="false"
         aria-haspopup="listbox"
-        aria-owns="txt14"
+        aria-owns="txt15"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -940,7 +940,7 @@ exports[`control.select validations options.validationCase 4`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt19"
+    id="txt20"
     role="alert"
     style="max-width: 100px;"
   >

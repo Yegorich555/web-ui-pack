@@ -474,6 +474,7 @@ exports[`control.text options clearButton 1`] = `
   >
     <span>
       <input
+        aria-describedby="txt2"
         autocomplete="off"
         id="txt1"
         placeholder=" "
@@ -489,8 +490,9 @@ exports[`control.text options clearButton 1`] = `
   </label>
   <section
     aria-atomic="true"
-    aria-live="polite"
+    aria-live="off"
     class="wup-hidden"
+    id="txt2"
   />
 </wup-text>
 `;
@@ -502,6 +504,7 @@ exports[`control.text options clearButton 2`] = `
   >
     <span>
       <input
+        aria-describedby="txt2"
         autocomplete="off"
         id="txt1"
         placeholder=" "
@@ -512,8 +515,9 @@ exports[`control.text options clearButton 2`] = `
   </label>
   <section
     aria-atomic="true"
-    aria-live="polite"
+    aria-live="off"
     class="wup-hidden"
+    id="txt2"
   />
 </wup-text>
 `;
@@ -794,51 +798,6 @@ exports[`control.text validations options.validationCase 2`] = `
   >
     <span>
       <input
-        aria-describedby="txt2"
-        aria-required="true"
-        autocomplete="off"
-        id="txt1"
-        placeholder=" "
-        type="text"
-      />
-      <strong>
-        First Input
-      </strong>
-    </span>
-    <button
-      aria-hidden="true"
-      clear=""
-      tabindex="-1"
-    />
-  </label>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt2"
-    style="display: none;"
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      This field is required
-    </span>
-  </wup-popup>
-</wup-text>
-`;
-
-exports[`control.text validations options.validationCase 3`] = `
-<wup-text
-  invalid=""
->
-  <label
-    for="txt1"
-  >
-    <span>
-      <input
         aria-describedby="txt3"
         aria-required="true"
         autocomplete="off"
@@ -869,13 +828,13 @@ exports[`control.text validations options.validationCase 3`] = `
       Error for First Input:
     </span>
     <span>
-      custom err here
+      This field is required
     </span>
   </wup-popup>
 </wup-text>
 `;
 
-exports[`control.text validations options.validationCase 4`] = `
+exports[`control.text validations options.validationCase 3`] = `
 <wup-text
   invalid=""
 >
@@ -906,6 +865,51 @@ exports[`control.text validations options.validationCase 4`] = `
     aria-live="off"
     error=""
     id="txt4"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
+</wup-text>
+`;
+
+exports[`control.text validations options.validationCase 4`] = `
+<wup-text
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-describedby="txt5"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        type="text"
+      />
+      <strong>
+        First Input
+      </strong>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt5"
     role="alert"
     style="display: none;"
   >

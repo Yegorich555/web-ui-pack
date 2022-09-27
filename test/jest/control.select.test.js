@@ -506,20 +506,20 @@ describe("control.select", () => {
     WUPSelectControl.$textNoItems = "";
     await setItems([]);
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup menu="" hidden="" style="min-width: 100px;"><ul id="txt13" role="listbox" aria-label="Items"></ul></wup-popup>"`
+      `"<wup-popup menu="" hidden="" style="min-width: 100px;"><ul id="txt14" role="listbox" aria-label="Items"></ul></wup-popup>"`
     );
     WUPSelectControl.$textNoItems = wasText;
 
     // checking when items is function with promise
     await setItems(() => Promise.resolve(getItems()));
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt14" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt15">Donny</li><li role="option" aria-selected="false" id="txt16">Mikky</li><li role="option" aria-selected="false" id="txt17">Leo</li><li role="option" aria-selected="false" id="txt18">Splinter</li></ul>"`
+      `"<ul id="txt15" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt16">Donny</li><li role="option" aria-selected="false" id="txt17">Mikky</li><li role="option" aria-selected="false" id="txt18">Leo</li><li role="option" aria-selected="false" id="txt19">Splinter</li></ul>"`
     );
 
     // checking when items is function without promise
     await setItems(() => getItems().slice(0, 2));
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt19" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt20">Donny</li><li role="option" aria-selected="false" id="txt21">Mikky</li></ul>"`
+      `"<ul id="txt20" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt21">Donny</li><li role="option" aria-selected="false" id="txt22">Mikky</li></ul>"`
     );
 
     // checking when items has custom render
