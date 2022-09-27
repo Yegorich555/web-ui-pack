@@ -216,8 +216,6 @@ export default class WUPCalendarControl<
     this.$refCalenar.id = menuId;
     const h = add(this.$refCalenar, "header");
     /* */ h.appendChild(this.$refCalenarTitle);
-    // this.$refCalenarTitle.setAttribute("aria-live", "polite");
-    // this.$refCalenarTitle.setAttribute("aria-atomic", true);
     this.$refCalenarTitle.setAttribute("tabindex", "-1");
     this.$refCalenarTitle.setAttribute("aria-hidden", true);
     const box = add(this.$refCalenar, "div");
@@ -253,7 +251,7 @@ export default class WUPCalendarControl<
 
   #pickerValue?: Date;
   #picker: PickersEnum = 0;
-  #updateSelectedValue?: () => void;
+  #refreshSelected?: () => void;
   #clearPicker?: (isIn: boolean) => Promise<void>;
   /** Called when need set/change day/month/year picker */
   protected async changePicker(v: Date, pickerNext: PickersEnum): Promise<void> {
@@ -288,17 +286,18 @@ export default class WUPCalendarControl<
       let i = r.getIndex(new Date(), first);
       a[i]?.setAttribute("aria-current", "date");
 
-      this.#updateSelectedValue = () => {
+      this.#refreshSelected = () => {
         if (this.$value) {
           i = r.getIndex(this.$value, first);
           a[i] && this.selectItem(a[i]);
         }
       };
-      this.#updateSelectedValue();
+      this.#refreshSelected();
 
       if (this.$isFocused) {
-        i = r.getIndex(next, first);
-        a[i] && this.focusItem(a[i]);
+        // i = r.getIndex(next, first);
+        // this.focusItem(a[i]); // todo focus only when user works with keyboard
+        this.$ariaSpeak(this.$refCalenarTitle.textContent!);
       }
 
       return a;
@@ -329,7 +328,7 @@ export default class WUPCalendarControl<
       await animate(isOut ? "out" : "in");
       scrollObj.remove();
       this.$refCalenarItems.textContent = "";
-      this.#updateSelectedValue = undefined;
+      this.#refreshSelected = undefined;
 
       animate(isOut ? "out2" : "in2").then(() => box.removeAttribute("zoom")); // WARN: it's important not to wait
     };
@@ -416,6 +415,7 @@ export default class WUPCalendarControl<
           );
         }
         this.setValue(dt as ValueType);
+        // todo need announce selection here
       },
     };
   }
@@ -518,15 +518,13 @@ export default class WUPCalendarControl<
     this.querySelector("[aria-selected]")?.removeAttribute("aria-selected");
     if (el) {
       el.setAttribute("aria-selected", "true");
-      // todo focus item in select - not good idea, because selection can be outside focused item
-      // this.$isFocused && this.focusItem(el);
     }
   }
 
   protected override setValue(v: ValueType | undefined, canValidate = true): boolean | null {
     const r = super.setValue(v, canValidate);
     this.$refInput.value = v != null ? `${v.getDate()} ${this.#ctr.$namesMonth[v.getMonth()]} ${v.getFullYear()}` : "";
-    this.#updateSelectedValue?.call(this);
+    this.#refreshSelected?.call(this);
     return r;
   }
 
@@ -562,8 +560,6 @@ export default class WUPCalendarControl<
   protected override gotFocus(): Array<() => void> {
     const r = super.gotFocus();
     r.push(this.appendEvent(this, "click", (e) => this.gotClick(e), { passive: false }));
-    const el = this.$refCalenarItems.querySelector("[aria-selected=true]") as HTMLElement;
-    el && this.focusItem(el); // todo check with NVDA: it can announce twice
     return r;
   }
 
@@ -591,5 +587,3 @@ customElements.define(tagName, WUPCalendarControl);
 // todo testcase: find aria-current for different pickers
 // todo testCase: 31 Mar 2022  + 1 month > return April (but returns May)
 // todo testcase: initValue: 2022-03-20 10:05; Month picker must show focused in visible area
-
-// todo when user scrolls pickers title changing must be announced
