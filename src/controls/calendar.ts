@@ -44,7 +44,6 @@ export namespace WUPCalendarIn {
     getIndex: (v: Date, firstValue: number) => number;
     next: (v: Date, n: -1 | 1) => Date;
     onItemClick: (e: MouseEvent & { target: HTMLElement }, targetValue: number) => void;
-    onTitleClick: (e: MouseEvent) => void;
   }
 }
 
@@ -252,21 +251,23 @@ export default class WUPCalendarControl<
     return el;
   }
 
-  #wasPicker: PickersEnum = 0;
+  #pickerValue?: Date;
+  #picker: PickersEnum = 0;
+  #updateSelectedValue?: () => void;
   #clearPicker?: (isIn: boolean) => Promise<void>;
   /** Called when need set/change day/month/year picker */
-  protected async changePicker(v: Date, picker: PickersEnum): Promise<void> {
+  protected async changePicker(v: Date, pickerNext: PickersEnum): Promise<void> {
     console.warn("change picker to", v.toDateString());
-    await this.#clearPicker?.call(this, picker - this.#wasPicker > 0);
-    this.#wasPicker = picker;
+    await this.#clearPicker?.call(this, pickerNext - this.#picker > 0);
+    this.#picker = pickerNext;
 
     let r: WUPCalendarIn.PickerResult;
     let type: string;
-    if (picker === PickersEnum.Year) {
+    if (pickerNext === PickersEnum.Year) {
       type = "year";
       r = this.getYearPicker();
       this.$refCalenarTitle.disabled = true;
-    } else if (picker === PickersEnum.Month) {
+    } else if (pickerNext === PickersEnum.Month) {
       type = "month";
       r = this.getMonthPicker();
       this.$refCalenarTitle.disabled = false;
@@ -275,22 +276,25 @@ export default class WUPCalendarControl<
       r = this.getDayPicker();
       this.$refCalenarTitle.disabled = false;
     }
-    this.$refCalenar.setAttribute("calendar", type);
 
+    this.$refCalenar.setAttribute("calendar", type);
     this.#handleClickItem = r.onItemClick;
-    this.#handleClickTitle = r.onTitleClick;
 
     const renderPicker = (next: Date): HTMLElement[] => {
+      this.#pickerValue = next;
       const a = r.renderItems(this.$refCalenarItems, next);
 
       const first = (a[0] as any)._value as any;
       let i = r.getIndex(new Date(), first);
       a[i]?.setAttribute("aria-current", "date");
 
-      if (this.$value) {
-        i = r.getIndex(this.$value, first);
-        a[i] && this.selectItem(a[i]);
-      }
+      this.#updateSelectedValue = () => {
+        if (this.$value) {
+          i = r.getIndex(this.$value, first);
+          a[i] && this.selectItem(a[i]);
+        }
+      };
+      this.#updateSelectedValue();
 
       if (this.$isFocused) {
         i = r.getIndex(next, first);
@@ -325,6 +329,7 @@ export default class WUPCalendarControl<
       await animate(isOut ? "out" : "in");
       scrollObj.remove();
       this.$refCalenarItems.textContent = "";
+      this.#updateSelectedValue = undefined;
 
       animate(isOut ? "out2" : "in2").then(() => box.removeAttribute("zoom")); // WARN: it's important not to wait
     };
@@ -350,12 +355,10 @@ export default class WUPCalendarControl<
       this.#isDayWeeksAdded = true;
     }
 
-    let curValue: Date;
     const getIndex: WUPCalendarIn.PickerResult["getIndex"] = (b, first) =>
       Math.floor((b.valueOf() - (first as number)) / 86400000);
 
     const renderItems = (ol: HTMLElement, v: Date): HTMLElement[] => {
-      curValue = v;
       const valMonth = v.getMonth();
       const valYear = v.getFullYear();
       this.$refCalenarTitle.textContent = `${this.#ctr.$namesMonth[valMonth]} ${valYear}`;
@@ -412,23 +415,19 @@ export default class WUPCalendarControl<
             this.$value.getMilliseconds()
           );
         }
-        curValue = dt;
         this.setValue(dt as ValueType);
       },
-      onTitleClick: () => this.changePicker(curValue, PickersEnum.Month),
     };
   }
 
   /** Returns result to render month picker */
   protected getMonthPicker(): WUPCalendarIn.PickerResult {
-    let curValue: Date;
+    const pageSize = 12;
 
     const getIndex: WUPCalendarIn.PickerResult["getIndex"] = //
-      (b, first) => b.getFullYear() * 12 + b.getMonth() - first;
+      (b, first) => b.getFullYear() * pageSize + b.getMonth() - first;
 
-    const pageSize = 12;
     const renderItems = (ol: HTMLElement, v: Date): HTMLElement[] => {
-      curValue = v;
       const year = v.getFullYear();
       this.$refCalenarTitle.textContent = `${year}`;
 
@@ -466,7 +465,6 @@ export default class WUPCalendarControl<
         return v;
       },
       onItemClick: (_e, v) => this.changePicker(new Date(Math.floor(v / pageSize), v % pageSize, 1), PickersEnum.Day),
-      onTitleClick: () => this.changePicker(curValue, PickersEnum.Year),
     };
   }
 
@@ -498,7 +496,6 @@ export default class WUPCalendarControl<
         return v;
       },
       onItemClick: (_e, v) => this.changePicker(new Date(v, 0), PickersEnum.Month),
-      onTitleClick: () => null,
     };
   }
 
@@ -521,14 +518,15 @@ export default class WUPCalendarControl<
     this.querySelector("[aria-selected]")?.removeAttribute("aria-selected");
     if (el) {
       el.setAttribute("aria-selected", "true");
-      this.$isFocused && this.focusItem(el);
+      // todo focus item in select - not good idea, because selection can be outside focused item
+      // this.$isFocused && this.focusItem(el);
     }
   }
 
   protected override setValue(v: ValueType | undefined, canValidate = true): boolean | null {
     const r = super.setValue(v, canValidate);
-    // todo fire selectItem on picker here
     this.$refInput.value = v != null ? `${v.getDate()} ${this.#ctr.$namesMonth[v.getMonth()]} ${v.getFullYear()}` : "";
+    this.#updateSelectedValue?.call(this);
     return r;
   }
 
@@ -569,7 +567,6 @@ export default class WUPCalendarControl<
     return r;
   }
 
-  #handleClickTitle?: (e: MouseEvent) => void;
   #handleClickItem?: WUPCalendarIn.PickerResult["onItemClick"];
   /** Called when user clicks on calendar */
   protected gotClick(e: MouseEvent): void {
@@ -578,7 +575,7 @@ export default class WUPCalendarControl<
     }
     e.preventDefault();
     if (this.$refCalenarTitle === e.target || this.$refCalenarTitle.contains(e.target)) {
-      this.#handleClickTitle!.call(this, e);
+      this.#picker !== PickersEnum.Year && this.changePicker(this.#pickerValue!, this.#picker + 1);
     } else {
       // WARN: if li element will include span or something else it won't work
       const v = (e.target as any)._value;
