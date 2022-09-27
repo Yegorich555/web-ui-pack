@@ -40,7 +40,7 @@ export namespace WUPCalendarIn {
   export type GenOpt<T = string> = Generics<T>["Options"];
 
   export interface PickerResult {
-    renderItems: (ol: HTMLElement, prevItems: [], v: Date) => HTMLElement[];
+    renderItems: (ol: HTMLElement, v: Date) => HTMLElement[];
     getIndex: (v: Date, firstValue: number) => number;
     next: (v: Date, n: -1 | 1) => Date;
     onItemClick: (e: MouseEvent & { target: HTMLElement }, targetValue: number) => void;
@@ -229,12 +229,14 @@ export default class WUPCalendarControl<
 
     setTimeout(() => {
       const v = this.$value ? new Date(this.$value.valueOf()) : new Date();
+      v.setDate(1);
+      v.setHours(0, 0, 0, 0); // otherwise month increment works wrong for the last days of the month
       this.changePicker(v, this._opts.startWith ?? this.$isEmpty ? PickersEnum.Year : PickersEnum.Day);
     }); // wait for options
   }
 
   /** Append calendar item to parent or replace previous */
-  protected appendItem(prevEl: HTMLElement | undefined, text: string, v: number): HTMLElement {
+  protected appendItem(prevEl: HTMLElement | undefined | null, text: string, v: number): HTMLElement {
     let el: HTMLElement;
     if (prevEl) {
       el = prevEl;
@@ -279,23 +281,23 @@ export default class WUPCalendarControl<
     this.#handleClickTitle = r.onTitleClick;
 
     const renderPicker = (next: Date): HTMLElement[] => {
-      const items = r.renderItems(this.$refCalenarItems, [], next); // todo remove prevItems
+      const a = r.renderItems(this.$refCalenarItems, next);
 
-      const first = (items[0] as any)._value as any;
+      const first = (a[0] as any)._value as any;
       let i = r.getIndex(new Date(), first);
-      items[i]?.setAttribute("aria-current", "date");
+      a[i]?.setAttribute("aria-current", "date");
 
       if (this.$value) {
         i = r.getIndex(this.$value, first);
-        items[i] && this.selectItem(items[i]);
+        a[i] && this.selectItem(a[i]);
       }
 
       if (this.$isFocused) {
         i = r.getIndex(next, first);
-        items[i] && this.focusItem(items[i]);
+        a[i] && this.focusItem(a[i]);
       }
 
-      return items;
+      return a;
     };
 
     renderPicker(v);
@@ -349,7 +351,10 @@ export default class WUPCalendarControl<
     }
 
     let curValue: Date;
-    const renderItems = (_ol: HTMLElement, replaceItems: HTMLElement[], v: Date): HTMLElement[] => {
+    const getIndex: WUPCalendarIn.PickerResult["getIndex"] = (b, first) =>
+      Math.floor((b.valueOf() - (first as number)) / 86400000);
+
+    const renderItems = (ol: HTMLElement, v: Date): HTMLElement[] => {
       curValue = v;
       const valMonth = v.getMonth();
       const valYear = v.getFullYear();
@@ -357,12 +362,19 @@ export default class WUPCalendarControl<
 
       const items: HTMLElement[] = [];
       const r = this.#ctr.$daysOfMonth(valYear, valMonth, this._opts.firstDayOfWeek);
+
+      let iPrev = -999;
+      if (ol.children.length) {
+        iPrev = getIndex(new Date(r.first), (ol.children.item(0) as any)._value);
+      }
+
       let i = 0;
       const addItem = (n: number, attr: string): void => {
-        const d = this.appendItem(replaceItems[i], n.toString(), r.first + i * 86400000);
+        const d = this.appendItem(ol.children.item(iPrev) as HTMLElement, n.toString(), r.first + i * 86400000);
         attr && d.setAttribute(attr, "");
         items.push(d);
         ++i;
+        ++iPrev;
       };
 
       if (r.prev) {
@@ -383,7 +395,7 @@ export default class WUPCalendarControl<
     // todo attr [disabled]
 
     return {
-      getIndex: (b, first) => Math.floor((b.valueOf() - (first as number)) / 86400000),
+      getIndex,
       renderItems,
       next: (v, n) => {
         v.setMonth(v.getMonth() + n);
@@ -410,7 +422,11 @@ export default class WUPCalendarControl<
   /** Returns result to render month picker */
   protected getMonthPicker(): WUPCalendarIn.PickerResult {
     let curValue: Date;
-    const renderItems = (_ol: HTMLElement, replaceItems: HTMLElement[], v: Date): HTMLElement[] => {
+
+    const getIndex: WUPCalendarIn.PickerResult["getIndex"] = //
+      (b, first) => b.getFullYear() * 12 + b.getMonth() - first;
+
+    const renderItems = (ol: HTMLElement, v: Date): HTMLElement[] => {
       curValue = v;
       const year = v.getFullYear();
       this.$refCalenarTitle.textContent = `${year}`;
@@ -418,9 +434,16 @@ export default class WUPCalendarControl<
       const namesShort = this.#ctr.$namesMonthShort;
       const items: HTMLElement[] = [];
       const total = year * 12;
+
+      let iPrev = -999;
+      if (ol.children.length) {
+        iPrev = getIndex(new Date(year, 0), (ol.children.item(0) as any)._value);
+      }
+
       const addItem = (n: string, i: number): HTMLElement => {
-        const d = this.appendItem(replaceItems[i], n, total + i);
+        const d = this.appendItem(ol.children.item(iPrev) as HTMLElement, n, total + i);
         items.push(d);
+        ++iPrev;
         return d;
       };
 
@@ -436,7 +459,7 @@ export default class WUPCalendarControl<
 
     return {
       renderItems,
-      getIndex: (b, first) => b.getFullYear() * 12 + b.getMonth() - first,
+      getIndex,
       next: (v, n) => {
         v.setFullYear(v.getFullYear() + n);
         return v;
@@ -450,7 +473,7 @@ export default class WUPCalendarControl<
   protected getYearPicker(): WUPCalendarIn.PickerResult {
     const pageSize = 16;
 
-    const renderItems = (_ol: HTMLElement, replaceItems: HTMLElement[], v: Date): HTMLElement[] => {
+    const renderItems = (_ol: HTMLElement, v: Date): HTMLElement[] => {
       const page = Math.floor((v.getFullYear() - 1970) / pageSize);
       let year = page * pageSize + 1970;
 
@@ -458,7 +481,7 @@ export default class WUPCalendarControl<
       const items: HTMLElement[] = [];
       let i = 0;
       for (i = 0; i < pageSize; ++i) {
-        const d = this.appendItem(replaceItems[i], year.toString(), year);
+        const d = this.appendItem(undefined, year.toString(), year);
         items.push(d);
         ++year;
       }
@@ -568,6 +591,7 @@ customElements.define(tagName, WUPCalendarControl);
 // todo testcase: no change event if user selected the same date again
 // todo testcase: dayPickerSize === monthPickerSize === yearPickerSize
 // todo testcase: find aria-current for different pickers
+// todo testCase: 31 Mar 2022  + 1 month > return April (but returns May)
 
 // todo testcase: initValue: 2022-03-20 10:05; Month picker must show focused in visible area
 // todo when user scrolls pickers title changing must be announced

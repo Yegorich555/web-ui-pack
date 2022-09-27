@@ -36,7 +36,7 @@ export default function scrollCarousel(
   el.style.overflow = "hidden";
   el.style.touchAction = "none";
 
-  // todo carousel now works without pre-rendered items; if need render images it will produce not-loaded images during the scrolling
+  // todo leave details: if need render images it will produce not-loaded images during the scrolling
 
   /** Scroll to center of range */
   const scrollToRange = (isSmooth: boolean, items: HTMLElement[]): void => {
@@ -50,34 +50,38 @@ export default function scrollCarousel(
     el.scroll({ top, left, behavior: isSmooth ? "smooth" : "auto" });
   };
 
-  let prevItems = Array.prototype.slice.call(el.children) as HTMLElement[];
-  window.requestAnimationFrame(() => scrollToRange(false, prevItems));
+  let items = Array.prototype.slice.call(el.children) as HTMLElement[];
+  window.requestAnimationFrame(() => scrollToRange(false, items));
+
+  const saveScroll = (): (() => void) => {
+    const savedItems = [items[0], items[items.length - 1]];
+    return () => scrollToRange(false, savedItems);
+  };
 
   const scroll = (isNext: boolean): void => {
-    const prev = {
-      y: el.scrollHeight - el.offsetHeight - el.scrollTop,
-      x: el.scrollWidth - el.offsetWidth - el.scrollLeft,
-    };
-
-    const items = next(isNext ? 1 : -1);
-    if (!items) {
+    const s = saveScroll();
+    items.forEach((a) => ((a as any).__scrollRemove = true));
+    const itemsNext = next(isNext ? 1 : -1);
+    if (!itemsNext) {
       return; // if no new items
     }
-    const now = {
-      y: el.scrollHeight - el.offsetHeight - el.scrollTop,
-      x: el.scrollWidth - el.offsetWidth - el.scrollLeft,
-    };
     if (!options?.disableRender) {
-      isNext ? el.append(...items) : el.prepend(...items);
+      isNext ? el.append(...itemsNext) : el.prepend(...itemsNext);
     }
-
-    !isNext && el.scroll({ top: now.y - prev.y, left: now.x - prev.x });
-    scrollToRange(true, items);
-
-    onScrollStop(el, () => {
-      prevItems.forEach((a) => a.remove());
-      prevItems = items;
+    s();
+    scrollToRange(true, itemsNext);
+    const prevItems = items;
+    items = itemsNext.map((a) => {
+      delete (a as any).__scrollRemove;
+      return a;
     });
+
+    !options?.disableRender &&
+      onScrollStop(el, () => {
+        // const s2 = saveScroll(); // lookse like save scroll not required
+        prevItems.forEach((a) => (a as any).__scrollRemove && a.remove());
+        // s2();
+      });
   };
 
   const rOnWheel = onEvent(
