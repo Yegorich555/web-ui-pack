@@ -86,6 +86,13 @@
     opacity: 0.6;
   }
 
+  ol > li[disabled] {
+    // text-decoration: line-through;
+    cursor: not-allowed;
+    color: var(--ctrl-err-text);
+    background-color: var(--ctrl-err-bg);
+  }
+
   ol > li[aria-current] {
     color: var(--ctrl-selected-bg);
     font-weight: bold;
@@ -108,7 +115,7 @@
       color: var(--ctrl-selected);
     }
 
-    ol > li:hover {
+    ol > li:hover:not([disabled]) {
       box-shadow: 0 0 4px 0 var(--ctrl-focus);
       opacity: 1;
     }
@@ -225,17 +232,6 @@
 .cln [calendar="year"] {
   --ctrl-clr-cell-w: calc(var(--ctrl-clr-width) / 4 - var(--ctrl-clr-cell-gap));
   --ctrl-clr-cell-h: calc((var(--ctrl-clr-h) + 1em + var(--ctrl-clr-padding)) / 4 - var(--ctrl-clr-cell-gap));
-
-  // todo need cell.h == cell.w
-  // ol {
-  //   --ctrl-clr-cell-gap: 17px;
-  // }
-
-  // ol > li {
-  //   width: var(--ctrl-clr-cell-size);
-  //   height: var(--ctrl-clr-cell-size);
-  //   line-height: var(--ctrl-clr-cell-size);
-  // }
 
   ul {
     display: none;

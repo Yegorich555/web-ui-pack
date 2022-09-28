@@ -78,7 +78,7 @@ export default function scrollCarousel(
 
     !options?.disableRender &&
       onScrollStop(el, () => {
-        // const s2 = saveScroll(); // lookse like save scroll not required
+        // const s2 = saveScroll(); // looks like save scroll not required
         prevItems.forEach((a) => (a as any).__scrollRemove && a.remove());
         // s2();
       });

@@ -34,7 +34,9 @@ export default function CalendarControlView() {
           <wup-calendar
             name="calendar"
             initValue="2022-03-06 10:05"
-            autoComplete="off"
+            // min="2022-02-27"
+            // max="2022-04-01"
+            autoComplete="off" // todo remove support for autoComplete
             autoFocus={false}
             validations="window._someObject"
             class={styles.cln}

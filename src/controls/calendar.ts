@@ -66,6 +66,10 @@ declare global {
     interface JSXProps<T extends WUPCalendarControl> extends WUPBase.JSXProps<T> {
       /** @deprecated Picker that must be rendered at first */
       startWith?: "year" | "month" | "day";
+      /** @deprecated User can't select date less than min */
+      min?: string;
+      /** @deprecated User can't select date more than max */
+      max?: string;
     }
   }
 
@@ -92,12 +96,6 @@ export default class WUPCalendarControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPCalendarControl;
 
-  // static get observedOptions(): Array<string> {
-  //   const arr = super.observedOptions as Array<keyof WUPCalendar.Options>;
-  //   // arr.push("clearButton");
-  //   return arr;
-  // }
-
   // static get $styleRoot(): string {
   //   return `:root { }`;
   // }
@@ -105,6 +103,18 @@ export default class WUPCalendarControl<
   static get $style(): string {
     return `${super.$style}
       :host input {${WUPcssHidden}}`;
+  }
+
+  static get observedOptions(): Array<string> {
+    const arr = super.observedOptions as Array<keyof WUPCalendar.Options>;
+    arr.push("min", "max");
+    return arr;
+  }
+
+  static get observedAttributes(): Array<LowerKeys<WUPCalendar.Options>> {
+    const arr = super.observedAttributes as Array<LowerKeys<WUPCalendar.Options>>;
+    arr.push("min", "max");
+    return arr;
   }
 
   /** Short names of days: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"] */
@@ -176,6 +186,13 @@ export default class WUPCalendarControl<
   };
 
   protected override _opts = this.$options;
+
+  /** Call when need to re-rended picker (min/max changed etc.) */
+  $refreshPicker(): void {
+    if (this.#pickerValue != null) {
+      this.changePicker(this.#pickerValue, this.#picker);
+    }
+  }
 
   parseValue(text: string): ValueType | undefined {
     if (!text) {
@@ -253,6 +270,7 @@ export default class WUPCalendarControl<
   #picker: PickersEnum = 0;
   #refreshSelected?: () => void;
   #clearPicker?: (isIn: boolean) => Promise<void>;
+
   /** Called when need set/change day/month/year picker */
   protected async changePicker(v: Date, pickerNext: PickersEnum): Promise<void> {
     console.warn("change picker to", v.toDateString());
@@ -300,11 +318,47 @@ export default class WUPCalendarControl<
         this.$ariaSpeak(this.$refCalenarTitle.textContent!);
       }
 
+      if (this._opts.min) {
+        const last = r.getIndex(this._opts.min, first);
+        a.some((item, k) => {
+          if (k >= last) {
+            return true;
+          }
+          item.setAttribute("disabled", "");
+          return false;
+        });
+      }
+
+      if (this._opts.max) {
+        i = r.getIndex(this._opts.max, first);
+        for (++i; i < a.length; ++i) {
+          a[i].setAttribute("disabled", "");
+        }
+      }
+
       return a;
     };
 
     renderPicker(v);
-    const scrollObj = scrollCarousel(this.$refCalenarItems, (n) => renderPicker(r.next(v, n)));
+
+    let min: undefined | Date;
+    if (this._opts.min) {
+      min = new Date(this._opts.min.getFullYear(), this._opts.min.getMonth()); // start of pointed month
+    }
+    let max: undefined | Date;
+    if (this._opts.max) {
+      max = new Date(this._opts.max.getFullYear(), this._opts.max.getMonth() + 1);
+      max.setMilliseconds(-1); // end of pointed month
+    }
+    const scrollObj = scrollCarousel(this.$refCalenarItems, (n) => {
+      const nextDate = r.next(v, n);
+      if (nextDate > max! || nextDate < min!) {
+        r.next(v, (-1 * n) as 1);
+        return null;
+      }
+      const arr = renderPicker(nextDate);
+      return arr;
+    });
 
     this.#clearPicker = async (isOut: boolean) => {
       const box = this.$refCalenar.children[1].children[0] as HTMLElement;
@@ -393,8 +447,6 @@ export default class WUPCalendarControl<
 
       return items;
     };
-
-    // todo attr [disabled]
 
     return {
       getIndex,
@@ -550,6 +602,15 @@ export default class WUPCalendarControl<
         delete this._opts.startWith;
       }
     }
+
+    this._opts.min = this.parseValue(this.getAttribute("min") || "") ?? this._opts.min;
+    this._opts.max = this.parseValue(this.getAttribute("max") || "") ?? this._opts.max;
+
+    if (propsChanged) {
+      if (propsChanged.includes("min") || propsChanged.includes("max")) {
+        this.$refreshPicker();
+      }
+    }
   }
 
   protected override gotFocusLost(): void {
@@ -570,6 +631,9 @@ export default class WUPCalendarControl<
       return;
     }
     e.preventDefault();
+    if (e.target.hasAttribute("disabled")) {
+      return;
+    }
     if (this.$refCalenarTitle === e.target || this.$refCalenarTitle.contains(e.target)) {
       this.#picker !== PickersEnum.Year && this.changePicker(this.#pickerValue!, this.#picker + 1);
     } else {
