@@ -914,3 +914,9 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 }
 
 // todo NumberInput - set role 'spinbutton'
+/* todo when control disabled/readonly
+  - need to hide errorMesssage;
+  - form > submit must be successfull despite on invalid state of control
+  - form > collectOnlyChanges - must skip disabled control (because user can't affect on this)
+  - form > model must inlcude $initValue for disabled control instead of last changed. After submit need to reset $value to $initValue in this case
+*/
