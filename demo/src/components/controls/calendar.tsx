@@ -16,10 +16,12 @@ export default function CalendarControlView() {
       details={{
         tag: "wup-calendar",
         cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
+        excludeCssVars: ["--ctrl-clr-cell-day-w", "--ctrl-clr-cell-h", "--ctrl-clr-cell-w", "--ctrl-clr-h"],
       }}
       features={[
-        "Smart clear (reset/revert) by Esc key and button-clear (use $defaults.clearActions)",
+        "Inheritted features from TextControl",
         "Powerful accessibility support (keyboard, announcenement)",
+        "Scrollable & well animated pickers (with mobile-swipe support)",
       ]}
     >
       <wup-form
@@ -34,8 +36,8 @@ export default function CalendarControlView() {
           <wup-calendar
             name="calendar"
             initValue="2022-03-06 10:05"
-            // min="2022-02-27"
-            // max="2022-04-01"
+            min="2022-02-27"
+            max="2022-04-01"
             autoComplete="off" // todo remove support for autoComplete
             autoFocus={false}
             validations="window._someObject"

@@ -96,13 +96,166 @@ export default class WUPCalendarControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPCalendarControl;
 
-  // static get $styleRoot(): string {
-  //   return `:root { }`;
-  // }
+  static get $styleRoot(): string {
+    return `:root {
+      --ctrl-clr-selected: #fff;
+      --ctrl-clr-selected-bg: #009fbc;
+      --ctrl-clr-width: 17em;
+      --ctrl-clr-cell-gap: 4px;
+      --ctrl-clr-padding: calc(4px + var(--ctrl-clr-cell-gap) / 2);
+    }`;
+  }
 
   static get $style(): string {
     return `${super.$style}
-      :host input {${WUPcssHidden}}`;
+      :host {
+        max-width: fit-content;
+        margin: auto;
+        border-radius: var(--ctrl-border-radius);
+        box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.1);
+        background: none;
+      }
+      :host label {
+        max-width: var(--ctrl-clr-width);
+        display: block;
+        padding-right: 0;
+      }
+      :host strong {
+        display: block;
+        box-sizing: border-box;
+        max-width: 100%;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+      :host input {${WUPcssHidden}}
+      :host [calendar] {
+        --ctrl-clr-cell-day-w: calc(var(--ctrl-clr-width) / 7 - var(--ctrl-clr-cell-gap));
+        --ctrl-clr-h: calc((var(--ctrl-clr-cell-day-w) + var(--ctrl-clr-cell-gap)) * 6);
+        width: var(--ctrl-clr-width);
+        padding: var(--ctrl-clr-padding);
+        border-radius: var(--ctrl-border-radius);
+        background: var(--ctrl-bg);
+        box-sizing: content-box;
+      }
+      :host [calendar="day"] {
+        --ctrl-clr-cell-w: var(--ctrl-clr-cell-day-w);
+        --ctrl-clr-cell-h: var(--ctrl-clr-cell-day-w);
+      }
+      :host [calendar="month"],
+      :host [calendar="year"] {
+        --ctrl-clr-cell-w: calc(var(--ctrl-clr-width) / 4 - var(--ctrl-clr-cell-gap));
+        --ctrl-clr-cell-h: calc((var(--ctrl-clr-h) + 1em + var(--ctrl-clr-padding)) / 4 - var(--ctrl-clr-cell-gap));
+      }
+      :host [calendar="month"] ul,
+      :host [calendar="year"] ul {
+        display: none;
+      }
+      :host header,
+      :host ol,
+      :host ul {
+        display: flex;
+        flex-wrap: wrap;
+        margin:0; padding:0;
+      }
+      :host header > button {
+        box-sizing: border-box;
+        cursor: pointer;
+        margin: auto;
+        padding: 0.25em 1em;
+        font-size: larger;
+        font-weight: initial;
+        border: none;
+        border-radius: 2em;
+        color: inherit;
+        background-color: white;
+        box-shadow: none;
+      }
+      :host header > button[disabled] {
+        pointer-events: none;
+      }
+      :host ol,
+      :host ul {
+        margin-top: var(--ctrl-clr-padding);
+        list-style: none;
+      }
+      :host ul {
+        color: var(--ctrl-label);
+      }
+      :host li {
+        height: var(--ctrl-clr-cell-h);
+        width: var(--ctrl-clr-cell-w);
+        padding: 0;
+        margin: calc(var(--ctrl-clr-cell-gap) / 2);
+        font: inherit;
+        line-height: var(--ctrl-clr-cell-h);
+        text-align: center;
+        border-radius: 50%;
+      }
+      :host ul>li {
+        margin: 0 calc(var(--ctrl-clr-cell-gap) / 2);
+        height: 1em;
+        line-height: 1em;
+      }
+      :host li[prev],
+      :host li[next] {
+        opacity: 0.6;
+      }
+      :host li[aria-current] {
+        color: var(--ctrl-clr-selected-bg);
+        font-weight: bold;
+        opacity: 1;
+      }
+      :host li[aria-selected] {
+        background-color: var(--ctrl-clr-selected-bg);
+        color: var(--ctrl-clr-selected);
+        opacity: 1;
+      }
+      :host li[focused] {
+        box-shadow: 0 0 4px 0 var(--ctrl-focus);
+      }
+      @media (hover: hover) {
+        :host header>button:hover {
+          background-color: var(--ctrl-clr-selected-bg);
+          color: var(--ctrl-clr-selected);
+        }
+        ol>li:hover:not([disabled]) {
+          box-shadow: 0 0 4px 0 var(--ctrl-focus);
+          opacity: 1;
+        }
+      }
+      :host li[disabled] {
+        color: var(--ctrl-err-text);
+        background-color: var(--ctrl-err-bg);
+      }
+      @media not all and (prefers-reduced-motion) {
+        @keyframes WUP-ZOOM-OUT-1 {
+          0% { transform: scale(1); opacity: 1; }
+          100% { transform: scale(0); opacity: 0; }
+        }
+        @keyframes WUP-ZOOM-OUT-2 {
+          0% { transform: scale(5); opacity: 0; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes WUP-ZOOM-IN-1 {
+          0% { transform: scale(1); opacity: 1; }
+          100% { transform: scale(5); opacity: 0; }
+        }
+        @keyframes WUP-ZOOM-IN-2 {
+          0% { transform: scale(0); opacity: 0; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        :host [calendar]>div {
+          overflow: hidden;
+          --anim-time: 300ms;
+        }
+        :host [zoom] { animation: none var(--anim-time) linear forwards; }
+        :host [zoom="out"] { animation-name: WUP-ZOOM-OUT-1; }
+        :host [zoom="out2"] { animation-name: WUP-ZOOM-OUT-2; }
+        :host [zoom="in"] { animation-name: WUP-ZOOM-IN-1; }
+        :host [zoom="in2"] { animation-name: WUP-ZOOM-IN-2; }
+      }
+      `;
   }
 
   static get observedOptions(): Array<string> {
