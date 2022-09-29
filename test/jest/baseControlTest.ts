@@ -364,9 +364,12 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
         expect(el.$validate()).toBe(false);
         expect(el.$isValid).toBe(true);
 
-        delete (window as any)._testVld;
+        (window as any)._testVld = null;
         expect(el.$validate()).toBe(false);
         expect(el.$isValid).toBe(true);
+
+        (window as any)._testVld = undefined;
+        expect(() => el.$validate()).toThrowError(); // because key is pointed but value undefined
       });
     }
 

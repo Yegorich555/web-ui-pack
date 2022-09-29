@@ -13,9 +13,7 @@ const sideEffect = WUPPasswordControl;
   special: { min: 1, chars: "#!-_?,.@:;'" },
 } as WUPPassword.Options["validations"];
 
-(window as any).globalkey = {
-  pointHere: { required: true, min: 4 } as WUPPassword.Options["validations"],
-};
+(window as any).myPasswordValidations = { required: true, min: 4 } as WUPPassword.Options["validations"];
 
 export default function PasswordControlView() {
   return (
@@ -56,7 +54,7 @@ export default function PasswordControlView() {
             }
           }}
         />
-        <wup-pwd name="required" validations="globalkey.pointHere" />
+        <wup-pwd name="required" validations="myPasswordValidations" />
         <wup-pwd
           name="withoutClearButton"
           ref={(el) => {

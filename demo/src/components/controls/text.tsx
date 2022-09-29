@@ -4,9 +4,7 @@ import { WUPTextControl } from "web-ui-pack";
 const sideEffect = WUPTextControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
 
-(window as any).globalkey = {
-  pointHere: { required: true } as WUPText.Options["validations"],
-};
+(window as any).myTextValidations = { required: true, min: 4 } as WUPText.Options["validations"];
 
 export default function TextControlView() {
   return (
@@ -38,9 +36,9 @@ export default function TextControlView() {
           initValue="test@google.com"
           autoComplete="off"
           autoFocus={false}
-          validations="window._someObject"
+          validations="window.myTextValidations"
         />
-        <wup-text name="required" validations="globalkey.pointHere" />
+        <wup-text name="required" validations="myTextValidations" />
         <wup-text
           ref={(el) => {
             if (el) {

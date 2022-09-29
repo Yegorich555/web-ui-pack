@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0 (___)
+
+**Features**:
+
+- Controls throws error if attr [validations] has object-key to undefined value
+- Added elements
+  - CalendarControl (...coming soon)
+
 ## 0.1.0 (Sep 14, 2022)
 
 **BREAKING CHANGES**:

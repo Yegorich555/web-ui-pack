@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // eslint-disable-next-line max-classes-per-file
 import focusFirst from "./helpers/focusFirst";
+import nestedProperty from "./helpers/nestedProperty";
 import observer, { Observer } from "./helpers/observer";
 import onEvent, { onEventType } from "./helpers/onEvent";
 import { WUPcssHidden } from "./styles";
@@ -370,6 +371,23 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   getBoolAttr(attr: string, alt: boolean | undefined): boolean | undefined {
     const a = this.getAttribute(attr);
     return a === null ? alt : a !== "false";
+  }
+
+  /** Returns value from window[key] according to [attr]="key" or $options[key] if attr is missed */
+  getRefAttr<T>(attr: string): T | undefined {
+    const a = this.getAttribute(attr);
+    if (a === null) {
+      return this._opts[attr];
+    }
+    const v = nestedProperty.get(window, a);
+    if (v === undefined) {
+      throw new Error(
+        `${this.tagName}. Value not found according to attribute [${attr}] in '${
+          a.startsWith("window.") ? a : `window.${a}`
+        }'`
+      );
+    }
+    return v as T;
   }
 
   /**

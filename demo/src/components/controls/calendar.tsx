@@ -4,9 +4,7 @@ import styles from "./calendar.scss";
 
 const sideEffect = WUPCalendarControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
-(window as any).globalkey = {
-  pointHere: { required: true } as WUPCalendar.Options["validations"],
-};
+(window as any).myCalendarValidations = { required: true } as WUPCalendar.Options["validations"];
 
 export default function CalendarControlView() {
   return (
@@ -40,7 +38,7 @@ export default function CalendarControlView() {
             max="2022-04-01"
             autoComplete="off" // todo remove support for autoComplete
             autoFocus={false}
-            validations="window._someObject"
+            validations="window.myCalendarValidations"
             class={styles.cln}
             // startWith="year"
           />

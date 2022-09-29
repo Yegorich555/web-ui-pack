@@ -628,9 +628,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   /** Returns validations enabled by user */
   protected get validations(): WUPBase.Options["validations"] | undefined {
-    const vls = (nestedProperty.get(window, this.getAttribute("validations") || "") ||
-      this._opts.validations) as WUPBase.Options["validations"];
-    return vls;
+    return this.getRefAttr<WUPBase.Options["validations"]>("validations");
   }
 
   /** Returns validations functions ready for checking */
