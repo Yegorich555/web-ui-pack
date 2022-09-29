@@ -395,9 +395,9 @@ export default class WUPCalendarControl<
 
     setTimeout(() => {
       const v = this.$value ? new Date(this.$value.valueOf()) : new Date();
-      v.setDate(1);
       v.setHours(0, 0, 0, 0); // otherwise month increment works wrong for the last days of the month
-      this.changePicker(v, this._opts.startWith ?? this.$isEmpty ? PickersEnum.Year : PickersEnum.Day);
+      v.setDate(1);
+      this.changePicker(v, this._opts.startWith ?? (this.$isEmpty ? PickersEnum.Year : PickersEnum.Day));
     }); // wait for options
   }
 
