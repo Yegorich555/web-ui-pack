@@ -254,8 +254,7 @@ export default class WUPCalendarControl<
         :host [zoom="out2"] { animation-name: WUP-ZOOM-OUT-2; }
         :host [zoom="in"] { animation-name: WUP-ZOOM-IN-1; }
         :host [zoom="in2"] { animation-name: WUP-ZOOM-IN-2; }
-      }
-      `;
+      }`;
   }
 
   static get observedOptions(): Array<string> {
@@ -620,7 +619,7 @@ export default class WUPCalendarControl<
           );
         }
         this.setValue(dt as ValueType);
-        // todo need announce selection here
+        this.focusItem(target);
       },
     };
   }
