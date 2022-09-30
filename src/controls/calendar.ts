@@ -378,14 +378,12 @@ export default class WUPCalendarControl<
     this.$refLabel.setAttribute("for", i.id);
     i.type = "text";
     i.setAttribute("role", "combobox");
-    // i.setAttribute("aria-haspopup", "grid");
-    // i.setAttribute("aria-expanded", true);
     const menuId = this.#ctr.$uniqueId;
     i.setAttribute("aria-owns", menuId);
     i.setAttribute("aria-controls", menuId);
 
     const s = add(this.$refLabel, "span");
-    s.appendChild(this.$refInput); // input appended to span to allow user use :after,:before without padding adjust
+    s.appendChild(this.$refInput);
     s.appendChild(this.$refTitle);
     this.appendChild(this.$refLabel);
 
@@ -856,18 +854,13 @@ export default class WUPCalendarControl<
     this._opts.min = this.parseValue(this.getAttribute("min") || "") ?? this._opts.min;
     this._opts.max = this.parseValue(this.getAttribute("max") || "") ?? this._opts.max;
     this._opts.exclude = this.getRefAttr<Date[]>("exclude")?.sort((a, b) => a.valueOf() - b.valueOf());
-    const isDisableChange =
+    const isChangedDisabled =
       propsChanged &&
       (propsChanged.includes("min") || propsChanged.includes("max") || propsChanged.includes("exclude"));
-    if (!propsChanged || isDisableChange) {
+    if (!propsChanged || isChangedDisabled) {
       this.#disabled = this._opts.exclude?.length ? this.calcDisabled() : undefined;
     }
-
-    if (propsChanged) {
-      if (propsChanged.includes("min") || propsChanged.includes("max") || propsChanged.includes("exclude")) {
-        this.$refreshPicker();
-      }
-    }
+    isChangedDisabled && this.$refreshPicker();
   }
 
   protected override gotFocusLost(): void {
@@ -878,6 +871,8 @@ export default class WUPCalendarControl<
   protected override gotFocus(): Array<() => void> {
     const r = super.gotFocus();
     r.push(this.appendEvent(this, "click", (e) => this.gotClick(e), { passive: false }));
+    r.push(this.appendEvent(this.$refInput, "input", (e) => this.gotInput(e, this.$refInput)));
+    r.push(this.appendEvent(this.$refInput, "keypress", (e) => e.preventDefault(), { passive: false }));
     return r;
   }
 
@@ -899,6 +894,16 @@ export default class WUPCalendarControl<
       v !== undefined && this.#handleClickItem!.call(this, e as MouseEvent & { target: HTMLElement }, v);
     }
   }
+
+  /** Called when browsers fills the field via autocomplete */
+  protected gotInput(e: Event, inputEl: HTMLInputElement): void {
+    const v = this.parseValue(inputEl.value);
+    this.setValue(v);
+  }
+
+  protected override gotKeyDown(e: KeyboardEvent): void {
+    super.gotKeyDown(e);
+  }
 }
 
 customElements.define(tagName, WUPCalendarControl);
@@ -912,6 +917,6 @@ customElements.define(tagName, WUPCalendarControl);
 // todo testCase: min="2022-02-28" max="2022-04-01" exclude=[min, max] - Feb and Apr must be excluded
 // todo testCase: min="2022-02-27" max="2022-04-02" exclude=["2022-02-27", "2022-02-28", "2022-04-01", "2022-04-02"] - Feb and Apr must be excluded
 
-/* todo isUTC required when user select date > on backend we must throw UTC time
+/* todo isUTC required when user select date > to a backend we must throw UTC time
 in this case min/max must be pointed in UTC ???
 */

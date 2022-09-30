@@ -48,7 +48,7 @@ export default function CalendarControlView() {
             startWith="month"
             validations="window.myCalendarValidations"
             autoFocus={false}
-            autoComplete="off" // todo remove support for autoComplete
+            autoComplete="off"
             class={styles.cln}
           />
         </div>
