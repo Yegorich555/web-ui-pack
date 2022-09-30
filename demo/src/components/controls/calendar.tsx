@@ -5,6 +5,12 @@ import styles from "./calendar.scss";
 const sideEffect = WUPCalendarControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
 (window as any).myCalendarValidations = { required: true } as WUPCalendar.Options["validations"];
+(window as any).myCalendarExclude = [
+  new Date("2022-02-28"),
+  new Date("2022-03-16"),
+  new Date("2022-03-18"),
+  new Date("2022-04-01"),
+];
 
 export default function CalendarControlView() {
   return (
@@ -19,7 +25,9 @@ export default function CalendarControlView() {
       features={[
         "Inheritted features from TextControl",
         "Powerful accessibility support (keyboard, announcenement)",
-        "Scrollable & well animated pickers (with mobile-swipe support)",
+        "Scrollable & well animated pickers (with swipe for touchscreens)",
+        "Wide ability to disable particular dates (options min/max/exclude)",
+        "No dependancy for working with dates (usage momentjs doesn't make sense)",
       ]}
     >
       <wup-form
@@ -34,15 +42,15 @@ export default function CalendarControlView() {
           <wup-calendar
             name="calendar"
             initValue="2022-03-06 10:05"
-            min="2022-02-27"
+            min="2022-02-28"
             max="2022-04-01"
-            autoComplete="off" // todo remove support for autoComplete
-            autoFocus={false}
+            exclude="window.myCalendarExclude"
+            startWith="month"
             validations="window.myCalendarValidations"
+            autoFocus={false}
+            autoComplete="off" // todo remove support for autoComplete
             class={styles.cln}
-            // startWith="year"
           />
-          {/* <wup-calendar name="calendar2" label="" class={styles.cln} /> */}
         </div>
         <button type="submit">Submit</button>
       </wup-form>
