@@ -85,11 +85,6 @@ export default class WUPTextControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextControl;
 
-  /** Text announced by screen-readers when input cleared; @defaultValue `input cleared` */
-  static get $ariaCleared(): string {
-    return "input cleared";
-  }
-
   static get observedOptions(): Array<string> {
     const arr = super.observedOptions as Array<keyof WUPText.Options>;
     arr.push("clearButton");
@@ -320,7 +315,7 @@ export default class WUPTextControl<
 
   #inputTimer?: number;
   /** Called when user types text */
-  protected gotInput(e: Event, inputEl: HTMLInputElement): void {
+  protected gotInput(_e: Event, inputEl: HTMLInputElement): void {
     this._validTimer && clearTimeout(this._validTimer);
     const v = this.parseValue(inputEl.value);
 
@@ -340,12 +335,6 @@ export default class WUPTextControl<
 
   protected setInputValue(v: ValueType | undefined): void {
     this.$refInput.value = v != null ? (v as any).toString() : "";
-  }
-
-  protected override clearValue(canValidate = true): void {
-    super.clearValue(canValidate);
-    this.$refInput.select();
-    !this.$refInput.value && this.$ariaSpeak(this.#ctr.$ariaCleared);
   }
 }
 

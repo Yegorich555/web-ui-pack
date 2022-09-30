@@ -158,6 +158,11 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseControl;
 
+  /** Text announced by screen-readers when control cleared; @defaultValue `cleared` */
+  static get $ariaCleared(): string {
+    return "cleared";
+  }
+
   /* Array of options names to listen for changes */
   static get observedOptions(): Array<string> {
     return <Array<keyof WUPBase.Options>>["label", "name", "autoComplete", "disabled", "readOnly", "validations"];
@@ -883,6 +888,8 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
     this.setValue(v, canValidate);
     this.#prevValue = was;
+
+    this.$isEmpty ? this.$ariaSpeak(this.#ctr.$ariaCleared) : this.$refInput.select();
   }
 
   /** Called when element got focus; must return array of RemoveFunctions called on FocusLost */
@@ -905,9 +912,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   /** Called when user pressed key */
   protected gotKeyDown(e: KeyboardEvent): void {
-    if (e.key === "Escape") {
-      this.clearValue();
-    }
+    e.key === "Escape" && !e.shiftKey && !e.altKey && !e.ctrlKey && this.clearValue(); // WARN: Escape works wrong with NVDA because it's enables NVDA-focus-mode
   }
 }
 
