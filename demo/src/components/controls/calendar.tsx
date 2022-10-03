@@ -45,7 +45,7 @@ export default function CalendarControlView() {
             min="2022-02-28"
             max="2022-04-01"
             exclude="window.myCalendarExclude"
-            startWith="month"
+            // startWith="month"
             validations="window.myCalendarValidations"
             autoFocus={false}
             autoComplete="off"

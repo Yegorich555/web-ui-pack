@@ -23,13 +23,15 @@ export namespace WUPCalendarIn {
   }
   export interface Opt {
     /** User can't select date less than min */
-    min?: Date;
+    min?: Date; // todo allow string
     /** User can't select date more than max */
-    max?: Date;
+    max?: Date; // todo allow string
     /** Picker that must be rendered at first; if undefined then when isEmpty - year, otherwise - day */
     startWith?: PickersEnum;
     /** Dates that user can't choose (disabled dates) */
     exclude?: Date[];
+    /** Provide local or UTC date; @default true (UTC); min/max/exclude $initValue/$value must be provided according to pointed attr */
+    UTC: boolean; // todo implement
   }
   export type Generics<
     ValueType = string,
@@ -62,7 +64,7 @@ declare global {
       prev?: { from: number; to: number };
       /** Count of next days */
       nextTo: number;
-      /** ValueOf first Date of result */
+      /** ValueOf first Date of result in UTC */
       first: number;
     }
     interface ValidationMap extends WUPBase.ValidationMap {}
@@ -323,9 +325,8 @@ export default class WUPCalendarControl<
       r.prev = { from, to };
       dt.setDate(from);
     }
-    r.first = dt.valueOf();
-    // const weeksDays = Math.ceil((r.total + $1) / 7) * 7; // Generate days for 35 or 42 cells with previous month dates for placeholders
-    const weeksDays = 42;
+    r.first = dt.valueOf() - dt.getTimezoneOffset() * 60000; // store in UTC
+    const weeksDays = 42; // const weeksDays = Math.ceil((r.total + $1) / 7) * 7; // Generate days for 35 or 42 cells with previous month dates for placeholders
     r.nextTo = weeksDays - $1 - r.total;
     return r;
   }
@@ -341,6 +342,7 @@ export default class WUPCalendarControl<
 
   $options: WUPCalendar.Options<ValueType> = {
     ...this.#ctr.$defaults,
+    UTC: true,
     // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory
   };
@@ -921,3 +923,18 @@ customElements.define(tagName, WUPCalendarControl);
 /* todo isUTC required when user select date > to a backend we must throw UTC time
 in this case min/max must be pointed in UTC ???
 */
+
+// const dt = new Date(2022, 0, 1);
+// while (dt.getFullYear() < 2023) {
+//   const was = dt.valueOf();
+//   const next = dt.setDate(dt.getDate() + 1);
+//   if (next - was !== 86400000) {
+//     console.warn(dt, next - was);
+//   }
+// }
+
+/**
+ *  UTC -5 EST >>> DST
+ *  Mar 13...14 >>>  + 1h
+ *  Nov 6...7 >>> -1h
+ */
