@@ -16,7 +16,6 @@ interface Element {
   setAttribute(qualifiedName: string, value: boolean | string): void;
 }
 
-// todo this type must be included into dist
 type LowerKeys<T> = keyof {
   [P in keyof T as Lowercase<string & P>]: P;
 };

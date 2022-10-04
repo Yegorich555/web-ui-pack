@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.2.0 (___)
+## 0.2.0 (\_\_\_)
+
+**Fixes**:
+
+- Controls. Click on button `Clear` throws console.error
 
 **Features**:
 
