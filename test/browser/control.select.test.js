@@ -7,7 +7,7 @@ const WUPSelectControl = require("web-ui-pack/controls/select").default;
 initTestTextControl({ htmlTag: "wup-select", type: "WUPSelectControl" });
 
 describe("control.select", () => {
-  testTextControl();
+  testTextControl({ isComboCtrl: true });
 
   const getInfo = () =>
     page.evaluate(() => {
