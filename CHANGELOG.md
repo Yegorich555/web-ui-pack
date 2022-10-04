@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 (Oct 4, 2022)
+
+- Hotfix: gotReady() calls gotChanges() when element disconnected (possible in React)
+
 ## 0.1.0 (Sep 14, 2022)
 
 **BREAKING CHANGES**:
