@@ -12,7 +12,7 @@
 - Added elements
   - CalendarControl (...coming soon)
 
-## 0.1.1 (Oct 4, 2022)
+## 0.1.2 (Oct 4, 2022)
 
 - Hotfix: gotReady() calls gotChanges() when element disconnected (possible in React)
 
