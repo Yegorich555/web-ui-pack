@@ -202,11 +202,15 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   #isReady = false;
   /** Called when element is added to document */
   protected gotReady(): void {
+    this.#readyTimeout = undefined;
     this.#isReady = true;
     this._isStopChanges = true;
     this.gotChanges(null);
     this._isStopChanges = false;
-    setTimeout(() => (this.autofocus || this._opts.autoFocus) && this.focus()); // timeout to wait for options
+    this.#readyTimeout = setTimeout(() => {
+      (this.autofocus || this._opts.autoFocus) && this.focus();
+      this.#readyTimeout = undefined;
+    }); // timeout to wait for options
   }
 
   /** Called when element is removed from document */
@@ -230,10 +234,11 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   protected gotRender(): void {}
 
   #isFirstConn = true;
+  #readyTimeout?: number;
   /** Browser calls this method when the element is added to the document */
   protected connectedCallback(): void {
     // async requires otherwise attributeChangedCallback doesn't set immediately
-    setTimeout(this.gotReady.bind(this));
+    this.#readyTimeout = setTimeout(() => this.gotReady.call(this));
     if (this.#isFirstConn) {
       this.#isFirstConn = false;
       this.gotRender();
@@ -243,6 +248,8 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   /** Browser calls this method when the element is removed from the document;
    * (can be called many times if an element is repeatedly added/removed) */
   protected disconnectedCallback(): void {
+    this.#readyTimeout && clearTimeout(this.#readyTimeout);
+    this.#readyTimeout = undefined;
     this.gotRemoved();
   }
 

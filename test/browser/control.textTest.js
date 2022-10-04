@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-conditional-expect */
 /* eslint-disable jest/no-export */
 
 /** @type WUPTextControl */
@@ -37,7 +38,7 @@ export function initTestTextControl({ htmlTag, type, onBeforeEach }) {
   });
 }
 
-export function testTextControl() {
+export function testTextControl({ isComboCtrl } = {}) {
   test("control height", async () => {
     await page.addStyleTag({ content: "body { font-size: 14px}" });
     const h = await page.evaluate(() => document.getElementById("trueEl").offsetHeight);
@@ -87,9 +88,12 @@ export function testTextControl() {
     let t = await page.getInfo();
     expect(t.id).toBe(t.trueId);
 
-    await page.click("[error]");
-    t = await page.getInfo();
-    expect(t.id).toBe(t.trueId);
-    expect(t.gotBlurMineEl).toBe(0);
+    // click on error of 2nd control hides error and opens popup
+    if (!isComboCtrl) {
+      await page.click("[error]");
+      t = await page.getInfo();
+      expect(t.id).toBe(t.trueId);
+      expect(t.gotBlurMineEl).toBe(0);
+    }
   });
 }
