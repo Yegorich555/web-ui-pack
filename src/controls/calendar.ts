@@ -470,7 +470,9 @@ export default class WUPCalendarControl<
       const a = r.renderItems(this.$refCalenarItems, next);
 
       const first = a[0]._value;
-      let i = r.getIndex(new Date(), first);
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      let i = r.getIndex(now, first);
       a[i]?.setAttribute("aria-current", "date");
 
       this.#refreshSelected = () => {
