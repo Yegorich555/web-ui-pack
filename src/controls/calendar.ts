@@ -888,7 +888,8 @@ export default class WUPCalendarControl<
   #handleClickItem?: WUPCalendarIn.PickerResult["onItemClick"];
   /** Called when user clicks on calendar */
   protected gotClick(e: MouseEvent): void {
-    if (!(e.target instanceof HTMLElement)) {
+    // only left button
+    if (!(e.target instanceof HTMLElement) || e.button) {
       return;
     }
     e.preventDefault();
