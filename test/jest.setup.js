@@ -16,6 +16,22 @@ const fixOverflow = (el) => {
   el.scrollLeft = Math.max(el.scrollLeft, 0);
 };
 
+Element.prototype.scroll =
+  Element.prototype.scroll ||
+  function scrollMock(opts) {
+    if (opts.behavior === "smooth") {
+      setTimeout(() => {
+        this.scrollTop = opts.top ?? this.scrollTop;
+        this.scrollLeft = opts.left ?? this.scrollLeft;
+        fixOverflow(this);
+      }, 500);
+    } else {
+      this.scrollTop = opts.top ?? this.scrollTop;
+      this.scrollLeft = opts.left ?? this.scrollLeft;
+      fixOverflow(this);
+    }
+  }; // it's not implemented in jsdom
+
 Element.prototype.scrollTo =
   Element.prototype.scrollTo ||
   function scrollToMock(opts) {
@@ -30,7 +46,7 @@ Element.prototype.scrollTo =
       this.scrollLeft = opts.left ?? this.scrollLeft;
       fixOverflow(this);
     }
-  }; // scrollTo isn't implemented in jsdom
+  }; // it's not implemented in jsdom
 
 Element.prototype.scrollBy =
   Element.prototype.scrollBy ||
@@ -46,6 +62,6 @@ Element.prototype.scrollBy =
       this.scrollLeft += opts.left || 0;
       fixOverflow(this);
     }
-  }; // scrollBy isn't implemented in jsdom
+  }; // it's not implemented in jsdom
 
 window.matchMedia = window.matchMedia || (() => ({ matches: false }));

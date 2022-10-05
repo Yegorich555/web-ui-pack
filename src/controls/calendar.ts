@@ -26,7 +26,8 @@ export namespace WUPCalendarIn {
     min?: Date; // todo allow string
     /** User can't select date more than max */
     max?: Date; // todo allow string
-    /** Picker that must be rendered at first; if undefined then when isEmpty - year, otherwise - day */
+    /** Picker that must be rendered at first; if undefined then when isEmpty - year, otherwise - day;
+     * @not observed (affects only on init) */
     startWith?: PickersEnum;
     /** Dates that user can't choose (disabled dates) */
     exclude?: Date[];
@@ -380,7 +381,6 @@ export default class WUPCalendarControl<
     const i = this.$refInput;
     i.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", i.id);
-    i.type = "text";
     i.setAttribute("role", "combobox");
     const menuId = this.#ctr.$uniqueId;
     i.setAttribute("aria-owns", menuId);
@@ -403,12 +403,7 @@ export default class WUPCalendarControl<
     this.$refCalenarItems.setAttribute("role", "grid");
     this.appendChild(this.$refCalenar);
 
-    setTimeout(() => {
-      const v = this.$value ? new Date(this.$value.valueOf()) : new Date();
-      v.setHours(0, 0, 0, 0); // otherwise month increment works wrong for the last days of the month
-      v.setDate(1);
-      this.changePicker(v, this._opts.startWith ?? (this.$isEmpty ? PickersEnum.Year : PickersEnum.Day));
-    }); // wait for options
+    // WARN: for render picker see gotReady
   }
 
   /** Append calendar item to parent or replace previous */
@@ -827,9 +822,19 @@ export default class WUPCalendarControl<
 
   protected override setValue(v: ValueType | undefined, canValidate = true): boolean | null {
     const r = super.setValue(v, canValidate);
+    // todo UTC
     this.$refInput.value = v != null ? `${v.getDate()} ${this.#ctr.$namesMonth[v.getMonth()]} ${v.getFullYear()}` : "";
     this.#refreshSelected?.call(this);
     return r;
+  }
+
+  protected override gotReady(): void {
+    super.gotReady();
+
+    const v = this.$value ? new Date(this.$value.valueOf()) : new Date();
+    v.setUTCHours(0, 0, 0, 0); // otherwise month increment works wrong for the last days of the month
+    v.setUTCDate(1);
+    this.changePicker(v, this._opts.startWith ?? (this.$isEmpty ? PickersEnum.Year : PickersEnum.Day));
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUPCalendar.Options> | null): void {
