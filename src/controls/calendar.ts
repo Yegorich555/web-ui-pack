@@ -315,19 +315,21 @@ export default class WUPCalendarControl<
   static $daysOfMonth(year: number, month: number, firstDayOfWeek = 1): WUPCalendar.MonthInfo {
     let dt = new Date(year, month + 1, 0); // month in JS is 0-11 index based but here is a hack: returns last day of month
     const r: WUPCalendar.MonthInfo = { total: dt.getDate(), nextTo: 0, first: 0 };
-    dt.setDate(2 - firstDayOfWeek); // reset to first day of week
-    let $1 = dt.getDay() - 1; // get index of first day of current month
-    if ($1 === -1) $1 = 6; // getDay returns Sun...Sat (0...6) and need to normalize to Mon-0 Sun-6
-    if ($1 !== 0) {
+    dt.setDate(1); // reset to first day
+    let shift = (dt.getDay() || 7) - firstDayOfWeek; // days-shift to firstOfWeek // get dayOfWeek  returns Sun...Sat (0...6) and need to normalize to Mon-1 Sun-7
+    if (shift < 0) {
+      shift += 7;
+    }
+    if (shift) {
       dt = new Date(year, month, 0);
       const to = dt.getDate();
-      const from = to - $1 + 1;
+      const from = to - shift + 1;
       r.prev = { from, to };
       dt.setDate(from);
     }
     r.first = dt.valueOf() - dt.getTimezoneOffset() * 60000; // store in UTC
     const weeksDays = 42; // const weeksDays = Math.ceil((r.total + $1) / 7) * 7; // Generate days for 35 or 42 cells with previous month dates for placeholders
-    r.nextTo = weeksDays - $1 - r.total;
+    r.nextTo = weeksDays - shift - r.total;
     return r;
   }
 
@@ -554,7 +556,7 @@ export default class WUPCalendarControl<
     }
 
     const getIndex: WUPCalendarIn.PickerResult["getIndex"] = (b, first) =>
-      Math.floor((b.valueOf() - (first as number)) / 86400000); // todo maybe it's wrong for the daylightSavingTime ???
+      Math.floor((b.valueOf() - (first as number)) / 86400000); // todo it's wrong for the daylightSavingTime ???
 
     const renderItems = (ol: HTMLElement, v: Date): WUPCalendarIn.ItemElement[] => {
       const valMonth = v.getMonth();

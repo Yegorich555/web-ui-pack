@@ -5,12 +5,12 @@ import styles from "./calendar.scss";
 const sideEffect = WUPCalendarControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
 (window as any).myCalendarValidations = { required: true } as WUPCalendar.Options["validations"];
-(window as any).myCalendarExclude = [
-  new Date("2022-02-28"),
-  new Date("2022-03-16"),
-  new Date("2022-03-18"),
-  new Date("2022-04-01"),
-];
+// (window as any).myCalendarExclude = [
+//   new Date("2022-02-28"),
+//   new Date("2022-03-16"),
+//   new Date("2022-03-18"),
+//   new Date("2022-04-01"),
+// ];
 
 export default function CalendarControlView() {
   return (
@@ -41,10 +41,10 @@ export default function CalendarControlView() {
         <div className={styles.flex}>
           <wup-calendar
             name="calendar"
-            initValue="2022-03-06 10:05"
-            min="2022-02-28"
-            max="2022-04-01"
-            exclude="window.myCalendarExclude"
+            initValue="2022-10-04 10:05"
+            // min="2022-02-28"
+            // max="2022-04-01"
+            // exclude="window.myCalendarExclude"
             // startWith="month"
             validations="window.myCalendarValidations"
             autoFocus={false}
