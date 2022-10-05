@@ -32,7 +32,7 @@ export namespace WUPCalendarIn {
     /** Dates that user can't choose (disabled dates) */
     exclude?: Date[];
     /** Provide local or UTC date; @default true (UTC); min/max/exclude $initValue/$value must be provided according to pointed attr */
-    UTC: boolean; // todo implement
+    utc?: boolean; // todo check if possible observed
   }
   export type Generics<
     ValueType = string,
@@ -81,6 +81,8 @@ declare global {
       max?: string;
       /** @deprecated Dates that user can't choose. Point global obj-key (window.myExclude = [] ) */
       exclude?: string;
+      /** @deprecated Provide local or UTC date; @default true (UTC); min/max/exclude $initValue/$value must be provided according to pointed attr */
+      utc?: boolean;
     }
   }
 
@@ -345,7 +347,7 @@ export default class WUPCalendarControl<
 
   $options: WUPCalendar.Options<ValueType> = {
     ...this.#ctr.$defaults,
-    UTC: true,
+    utc: true,
     // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory
   };
@@ -359,6 +361,7 @@ export default class WUPCalendarControl<
     }
   }
 
+  /** Converts date-string into Date according (to this._opt.UTC) */
   parseValue(text: string): ValueType | undefined {
     if (!text) {
       return undefined;
@@ -367,7 +370,13 @@ export default class WUPCalendarControl<
     if (Number.isNaN(dt)) {
       throw new Error(`Impossible to parse date from '${text}'`);
     }
-    return new Date(dt) as any;
+    const v = new Date(dt);
+    const isUTC = text.length === 10;
+    if (isUTC !== this._opts.utc || !"timeZonePointer") {
+      // todo need to detect if timezone is pointed
+      v.setMinutes(v.getMinutes() - v.getTimezoneOffset());
+    }
+    return v as any;
   }
 
   $refCalenar = document.createElement("div");
@@ -465,9 +474,13 @@ export default class WUPCalendarControl<
       a[i]?.setAttribute("aria-current", "date");
 
       this.#refreshSelected = () => {
-        if (this.$value) {
-          i = r.getIndex(this.$value, first);
-          a[i] && this.selectItem(a[i]);
+        let uv = this.$value as Date;
+        if (uv) {
+          if (!this._opts.utc) {
+            uv = new Date(uv.valueOf() - uv.getTimezoneOffset() * 60000);
+          }
+          i = r.getIndex(uv, first);
+          this.selectItem(a[i]);
         }
       };
       this.#refreshSelected();
@@ -485,12 +498,14 @@ export default class WUPCalendarControl<
 
     let min: undefined | Date;
     if (this._opts.min) {
-      min = new Date(this._opts.min.getFullYear(), this._opts.min.getMonth()); // start of pointed month
+      // todo UTC
+      min = new Date(this._opts.min.getUTCFullYear(), this._opts.min.getUTCMonth()); // start of pointed month
     }
     let max: undefined | Date;
     if (this._opts.max) {
-      max = new Date(this._opts.max.getFullYear(), this._opts.max.getMonth() + 1);
-      max.setMilliseconds(-1); // end of pointed month
+      // todo UTC
+      max = new Date(this._opts.max.getUTCFullYear(), this._opts.max.getUTCMonth() + 1);
+      max.setUTCMilliseconds(-1); // end of pointed month
     }
     const scrollObj = scrollCarousel(this.$refCalenarItems, (n) => {
       const nextDate = r.next(v, n);
@@ -550,12 +565,13 @@ export default class WUPCalendarControl<
       this.#isDayWeeksAdded = true;
     }
 
+    // WARN: the whole calendar must be in UTC, otherwise getIndex is wrong for locales with DST (daylightSavingTime)
     const getIndex: WUPCalendarIn.PickerResult["getIndex"] = (b, first) =>
-      Math.floor((b.valueOf() - (first as number)) / 86400000); // todo it's wrong for the daylightSavingTime ???
+      Math.floor((b.valueOf() - (first as number)) / 86400000);
 
     const renderItems = (ol: HTMLElement, v: Date): WUPCalendarIn.ItemElement[] => {
-      const valMonth = v.getMonth();
-      const valYear = v.getFullYear();
+      const valMonth = v.getUTCMonth();
+      const valYear = v.getUTCFullYear();
       this.$refCalenarTitle.textContent = `${this.#ctr.$namesMonth[valMonth]} ${valYear}`;
 
       const items: WUPCalendarIn.ItemElement[] = [];
@@ -563,7 +579,7 @@ export default class WUPCalendarControl<
 
       let iPrev = -999;
       if (ol.children.length) {
-        iPrev = getIndex(new Date(r.first), (ol.children.item(0) as any)._value);
+        iPrev = getIndex(r.first as unknown as Date, (ol.children.item(0) as any)._value);
       }
 
       let i = 0;
@@ -598,19 +614,22 @@ export default class WUPCalendarControl<
       getIndex,
       renderItems,
       next: (v, n) => {
-        v.setMonth(v.getMonth() + n);
+        v.setUTCMonth(v.getUTCMonth() + n);
         return v;
       },
       onItemClick: ({ target }, v) => {
         this.selectItem(target);
         const dt = new Date(v);
-        if (this.$value) {
-          dt.setHours(
-            this.$value.getHours(),
-            this.$value.getMinutes(),
-            this.$value.getSeconds(),
-            this.$value.getMilliseconds()
-          );
+        const a = this.$value;
+        if (a) {
+          this._opts.utc
+            ? dt.setUTCHours(a.getUTCHours(), a.getUTCMinutes(), a.getUTCSeconds(), a.getUTCMilliseconds())
+            : dt.setUTCHours(
+                a.getHours(),
+                a.getMinutes() + dt.getTimezoneOffset(),
+                a.getMilliseconds(),
+                a.getSeconds()
+              );
         }
         this.setValue(dt as ValueType);
         this.focusItem(target);
@@ -623,10 +642,10 @@ export default class WUPCalendarControl<
     const pageSize = 12;
 
     const getIndex: WUPCalendarIn.PickerResult["getIndex"] = //
-      (b, first) => b.getFullYear() * pageSize + b.getMonth() - first;
+      (b, first) => b.getUTCFullYear() * pageSize + b.getUTCMonth() - first;
 
     const renderItems = (ol: HTMLElement, v: Date): WUPCalendarIn.ItemElement[] => {
-      const year = v.getFullYear();
+      const year = v.getUTCFullYear();
       this.$refCalenarTitle.textContent = `${year}`;
 
       const namesShort = this.#ctr.$namesMonthShort;
@@ -659,7 +678,7 @@ export default class WUPCalendarControl<
       renderItems,
       getIndex,
       next: (v, n) => {
-        v.setFullYear(v.getFullYear() + n);
+        v.setUTCFullYear(v.getUTCFullYear() + n);
         return v;
       },
       onItemClick: (_e, v) => this.changePicker(new Date(Math.floor(v / pageSize), v % pageSize, 1), PickersEnum.Day),
@@ -671,7 +690,7 @@ export default class WUPCalendarControl<
     const pageSize = 16;
 
     const renderItems = (_ol: HTMLElement, v: Date): WUPCalendarIn.ItemElement[] => {
-      const page = Math.floor((v.getFullYear() - 1970) / pageSize);
+      const page = Math.floor((v.getUTCFullYear() - 1970) / pageSize);
       let year = page * pageSize + 1970;
 
       this.$refCalenarTitle.textContent = `${year} ... ${year + pageSize - 1}`;
@@ -688,9 +707,9 @@ export default class WUPCalendarControl<
 
     return {
       renderItems,
-      getIndex: (b, first) => b.getFullYear() - (first as number),
+      getIndex: (b, first) => b.getUTCFullYear() - (first as number),
       next: (v, n) => {
-        v.setFullYear(v.getFullYear() + n * pageSize);
+        v.setUTCFullYear(v.getUTCFullYear() + n * pageSize);
         return v;
       },
       onItemClick: (_e, v) => this.changePicker(new Date(v, 0), PickersEnum.Month),
@@ -767,6 +786,7 @@ export default class WUPCalendarControl<
     const ex = this._opts.exclude!;
     let prevY: number | null = null;
     let mCnt = 0;
+    // todo UTC
     const min = this._opts.min ? new Date(this._opts.min).setHours(23, 59, 59, 999) : Number.MIN_SAFE_INTEGER; // shift min at the end of day
     const max = this._opts.max ? new Date(this._opts.max).setHours(0, 0, 0, 0) : Number.MAX_SAFE_INTEGER; // shift min at the end of day
 
@@ -838,6 +858,7 @@ export default class WUPCalendarControl<
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUPCalendar.Options> | null): void {
+    this._opts.utc = this.getBoolAttr("utc", this._opts.utc);
     super.gotChanges(propsChanged);
 
     if (!this._opts.label) {
@@ -919,18 +940,12 @@ export default class WUPCalendarControl<
 
 customElements.define(tagName, WUPCalendarControl);
 
-// todo testcase: no change event if user selected the same date again
 // todo testcase: dayPickerSize === monthPickerSize === yearPickerSize
-// todo testcase: find aria-current for different pickers
 // todo testCase: 31 Mar 2022  + 1 month > return April (but returns May)
 // todo testcase: initValue: 2022-03-20 10:05; Month picker must show focused in visible area
 
 // todo testCase: min="2022-02-28" max="2022-04-01" exclude=[min, max] - Feb and Apr must be excluded
 // todo testCase: min="2022-02-27" max="2022-04-02" exclude=["2022-02-27", "2022-02-28", "2022-04-01", "2022-04-02"] - Feb and Apr must be excluded
-
-/* todo isUTC required when user select date > to a backend we must throw UTC time
-in this case min/max must be pointed in UTC ???
-*/
 
 // const dt = new Date(2022, 0, 1);
 // while (dt.getFullYear() < 2023) {

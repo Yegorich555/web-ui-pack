@@ -41,11 +41,12 @@ export default function CalendarControlView() {
         <div className={styles.flex}>
           <wup-calendar
             name="calendar"
-            initValue="2022-10-04 10:05"
+            initValue="2022-11-01 23:50"
             // min="2022-02-28"
             // max="2022-04-01"
             // exclude="window.myCalendarExclude"
             // startWith="month"
+            utc={false}
             validations="window.myCalendarValidations"
             autoFocus={false}
             autoComplete="off"

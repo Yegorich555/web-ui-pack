@@ -21,8 +21,8 @@ beforeAll(() => {
 });
 
 /** @type WUPCalendarControl */
-let testEl;
-initTestBaseControl({ type: WUPCalendarControl, htmlTag: "wup-calendar", onInit: (e) => (testEl = e) });
+let el;
+initTestBaseControl({ type: WUPCalendarControl, htmlTag: "wup-calendar", onInit: (e) => (el = e) });
 
 describe("control.calendar", () => {
   // todo implement basic tests
@@ -37,5 +37,13 @@ describe("control.calendar", () => {
   //   // attrs: { items: { skip: true } },
   //   // $options: { items: { skip: true } },
   // });
+  test("isChanged on the same date", () => {
+    el.$initValue = new Date(2022, 10, 1);
+    el.$value = new Date(2022, 10, 1);
+    expect(el.$value !== el.$initValue).toBe(true);
+    expect(el.$isChanged).toBe(false);
+    el.$value = new Date(2022, 10, 2);
+    expect(el.$isChanged).toBe(true);
+  });
   calendarTZtest();
 });
