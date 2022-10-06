@@ -82,7 +82,6 @@ export default function calendarTZtest() {
 
     describe(`utc=${opt.utc}`, () => {
       jest.useFakeTimers();
-      jest.setSystemTime(new Date(2022, 11, 31, 23, 59)); // end of 2022 year
       describe("day picker", () => {
         daysSet.forEach((ds) => {
           test(`firstOfWeek: ${ds.label}`, async () => {
@@ -97,6 +96,7 @@ export default function calendarTZtest() {
             await h.wait();
 
             expect(el.querySelector("[calendar='day']")).toBeTruthy();
+            expect(el.$refCalenarTitle.textContent).toBe("December 2022");
             expect(el.$refCalenarItems.children.length).toBe(42);
             expect(el.$refCalenarItems.firstElementChild!.textContent).toBe(`${ds.days[curMonth].prev?.from ?? 1}`);
             expect(el.$refCalenarItems.lastElementChild!.textContent).toBe(`${ds.days[curMonth].nextTo}`);
@@ -112,7 +112,7 @@ export default function calendarTZtest() {
             expect(el.querySelector("[aria-selected]")).toBeFalsy();
             expect(el.$refInput.value).toBe("5 October 2022");
 
-            // testing click
+            // test click
             const onChange = jest.fn();
             el.addEventListener("$change", onChange);
 
@@ -180,7 +180,7 @@ export default function calendarTZtest() {
         });
       });
       test("month picker", async () => {
-        return;
+        jest.setSystemTime(new Date(2022, 11, 31, 23, 0));
         el.remove();
         el.$options.utc = opt.utc;
         el.$initValue = initDate(2022, 11, 31, 23, 10);
@@ -190,14 +190,63 @@ export default function calendarTZtest() {
 
         expect(el.querySelector("[calendar='month']")).toBeTruthy();
         expect(el.$refCalenarItems.children.length).toBe(12 + 4);
+        expect(el.$refCalenarTitle?.textContent).toBe("2022");
         expect(el.querySelector("[aria-current]")?.textContent).toBe("Dec");
         expect(el.querySelector("[aria-selected]")?.textContent).toBe("Dec");
-        // todo expect(el.$refCalenar).toMatchSnapshot();
+        expect(el.$refCalenar).toMatchSnapshot();
+
+        el.remove();
+        el.$initValue = undefined;
+        document.body.appendChild(el);
+        await h.wait();
+        expect(el.querySelector("[calendar='month']")).toBeTruthy();
+        expect(el.$refCalenarTitle?.textContent).toBe("2022");
+        expect(el.querySelector("[aria-selected]")).toBeFalsy();
+
+        await h.userClick(el.$refCalenarItems.firstElementChild);
+        await h.wait();
+        expect(el.querySelector("[calendar='day']")).toBeTruthy();
+        expect(el.$refCalenarTitle.textContent).toBe("January 2022");
+        // other click tests see in 'navigation between pickers'
+
+        // todo test scroll here
+        // todo test keyboard here
       });
-      describe("year picker", () => {
-        // todo implement
+
+      test("year picker", async () => {
+        jest.setSystemTime(new Date(2018, 1, 1));
+        el.remove();
+        el.$options.utc = opt.utc;
+        el.$initValue = initDate(2018, 1, 1, 0, 46);
+        el.$options.startWith = PickersEnum.Year | 0;
+        document.body.appendChild(el);
+        await h.wait();
+
+        expect(el.querySelector("[calendar='year']")).toBeTruthy();
+        expect(el.$refCalenarItems.children.length).toBe(16);
+        expect(el.$refCalenarTitle?.textContent).toBe("2018 ... 2033");
+        expect(el.querySelector("[aria-current]")?.textContent).toBe("2018");
+        expect(el.querySelector("[aria-selected]")?.textContent).toBe("2018");
+        expect(el.$refCalenar).toMatchSnapshot();
+
+        el.remove();
+        el.$initValue = undefined;
+        document.body.appendChild(el);
+        await h.wait();
+        expect(el.querySelector("[calendar='year']")).toBeTruthy();
+        expect(el.$refCalenarTitle?.textContent).toBe("2018 ... 2033");
+        expect(el.querySelector("[aria-selected]")).toBeFalsy();
+
+        await h.userClick(el.$refCalenarItems.firstElementChild);
+        await h.wait();
+        expect(el.querySelector("[calendar='month']")).toBeTruthy();
+        expect(el.$refCalenarTitle.textContent).toBe("2018");
+        // other click tests see in 'navigation between pickers'
+
+        // todo test scroll here
+        // todo test keyboard here
       });
-      // describe("naigation between pickers", () => {
+      // describe("navigation between pickers", () => {
       //   jest.setSystemTime(new Date(2022, 10, 16, 23, 49));
       //   el.remove(); // otherwise option startWith doesn't work
       //   el.$options.startWith = PickersEnum.Day | 0;

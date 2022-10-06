@@ -656,7 +656,7 @@ export default class WUPCalendarControl<
 
       let iPrev = -999;
       if (ol.children.length) {
-        iPrev = getIndex(new Date(year, 0), (ol.children.item(0) as any)._value);
+        iPrev = getIndex(new Date(Date.UTC(year, 0)), (ol.children.item(0) as any)._value);
       }
 
       const addItem = (n: string, i: number): WUPCalendarIn.ItemElement => {
@@ -683,7 +683,8 @@ export default class WUPCalendarControl<
         v.setUTCFullYear(v.getUTCFullYear() + n);
         return v;
       },
-      onItemClick: (_e, v) => this.changePicker(new Date(Math.floor(v / pageSize), v % pageSize, 1), PickersEnum.Day),
+      onItemClick: (_e, v) =>
+        this.changePicker(new Date(Date.UTC(Math.floor(v / pageSize), v % pageSize, 1)), PickersEnum.Day),
     };
   }
 
@@ -714,7 +715,7 @@ export default class WUPCalendarControl<
         v.setUTCFullYear(v.getUTCFullYear() + n * pageSize);
         return v;
       },
-      onItemClick: (_e, v) => this.changePicker(new Date(v, 0), PickersEnum.Month),
+      onItemClick: (_e, v) => this.changePicker(new Date(Date.UTC(v, 0)), PickersEnum.Month),
     };
   }
 
@@ -859,6 +860,7 @@ export default class WUPCalendarControl<
     super.gotReady();
 
     const v = this.$value ? new Date(this.$value.valueOf()) : new Date();
+    (!this.$value || !this._opts.utc) && v.setMinutes(v.getMinutes() - v.getTimezoneOffset());
     v.setUTCHours(0, 0, 0, 0); // otherwise month increment works wrong for the last days of the month
     v.setUTCDate(1);
     this.changePicker(v, this._opts.startWith ?? (this.$isEmpty ? PickersEnum.Year : PickersEnum.Day));
