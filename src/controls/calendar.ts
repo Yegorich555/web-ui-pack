@@ -911,6 +911,7 @@ export default class WUPCalendarControl<
   #handleClickItem?: WUPCalendarIn.PickerResult["onItemClick"];
   /** Called when user clicks on calendar */
   protected gotClick(e: MouseEvent): void {
+    // todo analys is wrong for span&svg inside li/title
     // only left button
     if (!(e.target instanceof HTMLElement) || e.button) {
       return;

@@ -4,7 +4,6 @@
  */
 import { WUPCalendarControl } from "web-ui-pack";
 import { initTestBaseControl } from "./baseControlTest";
-// import * as h from "../testHelper";
 import calendarTZtest from "./control.calendar.TZ";
 
 beforeAll(() => {
@@ -37,7 +36,7 @@ describe("control.calendar", () => {
   //   // attrs: { items: { skip: true } },
   //   // $options: { items: { skip: true } },
   // });
-  test("isChanged on the same date", () => {
+  test("no isChanged on the same date", () => {
     el.$initValue = new Date(2022, 10, 1);
     el.$value = new Date(2022, 10, 1);
     expect(el.$value !== el.$initValue).toBe(true);
@@ -45,5 +44,6 @@ describe("control.calendar", () => {
     el.$value = new Date(2022, 10, 2);
     expect(el.$isChanged).toBe(true);
   });
+
   calendarTZtest();
 });

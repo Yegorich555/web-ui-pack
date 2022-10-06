@@ -86,7 +86,7 @@ export default function calendarTZtest() {
           el.$options.utc = opt.utc;
 
           const curMonth = 11; // December WARN: it's important to test with December to check DST
-          jest.setSystemTime(initDate(2022, curMonth, 16));
+          jest.setSystemTime(new Date(2022, curMonth, 16, 23, 49));
           el.remove(); // otherwise option startWith doesn't work
           el.$options.firstDayOfWeek = ds.startOfWeek as any;
           el.$options.startWith = PickersEnum.Day | 0;
@@ -168,6 +168,8 @@ export default function calendarTZtest() {
           expect(item.getAttribute("aria-selected")).toBe("true");
           expect(el.$value).toEqual(initDate(2022, 5, item.textContent!, 23, 50));
 
+          // todo check inputValue here
+
           // todo test scroll here
           // todo test keyboard here
         });
@@ -177,4 +179,35 @@ export default function calendarTZtest() {
       goTest({ utc: false });
     });
   });
+
+  describe("month picker", () => {
+    // todo implement
+  });
+
+  describe("year picker", () => {
+    // todo implement
+  });
+
+  // describe("naigation between pickers", () => {
+  //   jest.setSystemTime(new Date(2022, 10, 16, 23, 49));
+  //   el.remove(); // otherwise option startWith doesn't work
+  //   el.$options.startWith = PickersEnum.Day | 0;
+  //   document.body.appendChild(el);
+  //   await h.wait();
+  //   expect(el.querySelector("[calendar='day']")).toBeTruthy();
+  //   expect(el.$refCalenarTitle.textContent).toBe("November 2022");
+  //   await h.userClick(el.$refCalenarItems.lastElementChild);
+
+  //   const was = el.outerHTML;
+  //   await h.userClick(el.$refCalenarTitle, { button: 1 }); // right button must be ignored
+  //   await h.wait();
+  //   expect(el.outerHTML).toBe(was);
+
+  //   await h.userClick(el.$refCalenarTitle); // go to monthPicker
+  //   await h.wait();
+  //   expect(el.querySelector("[calendar='month']")).toBeTruthy();
+  //   expect(el.$refCalenarTitle.textContent).toBe("2022");
+  //   expect(el.querySelector("[aria-selected]").textContent).toBe("Dec"); // because user selected december
+  //   expect(el.$refCalenar.outerHTML).toMatchInlineSnapshot();
+  // });
 }
