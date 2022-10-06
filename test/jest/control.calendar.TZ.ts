@@ -76,138 +76,152 @@ export default function calendarTZtest() {
     });
   });
 
-  describe("day picker", () => {
-    daysSet.forEach((ds) => {
-      const goTest = async (opt: { utc: boolean }) => {
-        const initDate = (y: number, m: number, d: number | string, hh = 0, mm = 0) =>
-          opt.utc ? new Date(Date.UTC(y, m, +d, hh, mm)) : new Date(y, m, +d, hh, mm);
+  const goTest = async (opt: { utc: boolean }) => {
+    const initDate = (y: number, m: number, d: number | string, hh = 0, mm = 0) =>
+      opt.utc ? new Date(Date.UTC(y, m, +d, hh, mm)) : new Date(y, m, +d, hh, mm);
 
-        test(`firstOfWeek: ${ds.label}, utc=${opt.utc}`, async () => {
-          el.$options.utc = opt.utc;
+    describe(`utc=${opt.utc}`, () => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date(2022, 11, 31, 23, 59)); // end of 2022 year
+      describe("day picker", () => {
+        daysSet.forEach((ds) => {
+          test(`firstOfWeek: ${ds.label}`, async () => {
+            const curMonth = 11; // December WARN: it's important to test with December to check DST
+            jest.setSystemTime(new Date(2022, curMonth, 16, 23, 49));
+            el.remove(); // otherwise option startWith doesn't work
+            el.$options.utc = opt.utc;
+            el.$options.firstDayOfWeek = ds.startOfWeek as any;
+            el.$options.startWith = PickersEnum.Day | 0;
+            el.$initValue = initDate(2022, curMonth, 5);
+            document.body.appendChild(el);
+            await h.wait();
 
-          const curMonth = 11; // December WARN: it's important to test with December to check DST
-          jest.setSystemTime(new Date(2022, curMonth, 16, 23, 49));
-          el.remove(); // otherwise option startWith doesn't work
-          el.$options.firstDayOfWeek = ds.startOfWeek as any;
-          el.$options.startWith = PickersEnum.Day | 0;
-          el.$initValue = initDate(2022, curMonth, 5);
-          document.body.appendChild(el);
-          await h.wait();
+            expect(el.querySelector("[calendar='day']")).toBeTruthy();
+            expect(el.$refCalenarItems.children.length).toBe(42);
+            expect(el.$refCalenarItems.firstElementChild!.textContent).toBe(`${ds.days[curMonth].prev?.from ?? 1}`);
+            expect(el.$refCalenarItems.lastElementChild!.textContent).toBe(`${ds.days[curMonth].nextTo}`);
+            expect(el.querySelector("[aria-current]")?.textContent).toBe("16");
+            expect(el.querySelector("[aria-selected]")?.textContent).toBe("5");
+            expect(el.$refInput.value).toBe("5 December 2022");
+            expect(el).toMatchSnapshot();
 
-          expect(el.$refCalenarItems.children.length).toBe(42);
-          expect(el.$refCalenarItems.firstElementChild!.textContent).toBe(`${ds.days[curMonth].prev?.from ?? 1}`);
-          expect(el.$refCalenarItems.lastElementChild!.textContent).toBe(`${ds.days[curMonth].nextTo}`);
-          expect(el.querySelector("[aria-current]")?.textContent).toBe("16");
-          expect(el.querySelector("[aria-selected]")?.textContent).toBe("5");
-          expect(el.$refCalenarItems).toMatchSnapshot();
+            el.$initValue = initDate(2022, curMonth, 10);
+            expect(el.querySelector("[aria-selected]")?.textContent).toBe("10");
+            expect(el.$refInput.value).toBe("10 December 2022");
+            el.$initValue = initDate(2022, curMonth - 2, 5);
+            expect(el.querySelector("[aria-selected]")).toBeFalsy();
+            expect(el.$refInput.value).toBe("5 October 2022");
 
-          el.$initValue = initDate(2022, curMonth, 10);
-          expect(el.querySelector("[aria-selected]")?.textContent).toBe("10");
-          el.$initValue = initDate(2022, curMonth - 2, 5);
-          expect(el.querySelector("[aria-selected]")).toBeFalsy();
+            // testing click
+            const onChange = jest.fn();
+            el.addEventListener("$change", onChange);
 
-          // testing click
-          const onChange = jest.fn();
-          el.addEventListener("$change", onChange);
+            let item = el.$refCalenarItems.children.item(15) as HTMLElement;
+            await h.userClick(item);
+            expect(item.getAttribute("aria-selected")).toBe("true");
+            expect(el.querySelectorAll("[aria-selected]").length).toBe(1);
+            expect(onChange).toBeCalledTimes(1);
+            expect(el.$value).toEqual(initDate(2022, curMonth, item.textContent!));
+            expect(el.$isChanged).toBe(true);
 
-          let item = el.$refCalenarItems.children.item(15) as HTMLElement;
-          await h.userClick(item);
-          expect(item.getAttribute("aria-selected")).toBe("true");
-          expect(el.querySelectorAll("[aria-selected]").length).toBe(1);
-          expect(onChange).toBeCalledTimes(1);
-          expect(el.$value).toEqual(initDate(2022, curMonth, item.textContent!));
-          expect(el.$isChanged).toBe(true);
+            // click again on the same shouldn't change anything
+            await h.userClick(item);
+            expect(onChange).toBeCalledTimes(1);
+            expect(item.getAttribute("aria-selected")).toBe("true");
+            expect(el.querySelectorAll("[aria-selected]").length).toBe(1);
 
-          // click again on the same shouldn't change anything
-          await h.userClick(item);
-          expect(onChange).toBeCalledTimes(1);
-          expect(item.getAttribute("aria-selected")).toBe("true");
-          expect(el.querySelectorAll("[aria-selected]").length).toBe(1);
+            // click on the first
+            onChange.mockClear();
+            item = el.$refCalenarItems.firstElementChild as HTMLElement;
+            await h.userClick(item);
+            expect(item.getAttribute("aria-selected")).toBe("true");
+            expect(el.querySelectorAll("[aria-selected]").length).toBe(1);
+            expect(onChange).toBeCalledTimes(1);
+            const selectedM = ds.days[curMonth].prev?.from ? curMonth - 1 : curMonth;
+            expect(el.$value).toEqual(initDate(2022, selectedM, item.textContent!));
+            expect(el.$isChanged).toBe(true);
 
-          // click on the first
-          onChange.mockClear();
-          item = el.$refCalenarItems.firstElementChild as HTMLElement;
-          await h.userClick(item);
-          expect(item.getAttribute("aria-selected")).toBe("true");
-          expect(el.querySelectorAll("[aria-selected]").length).toBe(1);
-          expect(onChange).toBeCalledTimes(1);
-          const selectedM = ds.days[curMonth].prev?.from ? curMonth - 1 : curMonth;
-          expect(el.$value).toEqual(initDate(2022, selectedM, item.textContent!));
-          expect(el.$isChanged).toBe(true);
+            // click on the last
+            onChange.mockClear();
+            item = el.$refCalenarItems.lastElementChild as HTMLElement;
+            await h.userClick(item);
+            expect(item.getAttribute("aria-selected")).toBe("true");
+            expect(el.querySelectorAll("[aria-selected]").length).toBe(1);
+            expect(onChange).toBeCalledTimes(1);
+            expect(el.$value).toEqual(initDate(2022, curMonth + 1, item.textContent!));
+            expect(el.$isChanged).toBe(true);
 
-          // click on the last
-          onChange.mockClear();
-          item = el.$refCalenarItems.lastElementChild as HTMLElement;
-          await h.userClick(item);
-          expect(item.getAttribute("aria-selected")).toBe("true");
-          expect(el.querySelectorAll("[aria-selected]").length).toBe(1);
-          expect(onChange).toBeCalledTimes(1);
-          expect(el.$value).toEqual(initDate(2022, curMonth + 1, item.textContent!));
-          expect(el.$isChanged).toBe(true);
+            // test when initValue with time
+            // for US: DST Nov 6..7, Mar 13..14
+            el.$value = initDate(2022, 10, 1, 23, 50); // 2022-Nov-01
+            el.remove();
+            document.body.appendChild(el);
+            await h.wait();
+            expect(el.$refCalenarItems.children.length).toBe(42);
+            expect(el.querySelector("[aria-selected]")?.textContent).toBe("1");
+            item = el.$refCalenarItems.lastElementChild as HTMLElement;
+            await h.userClick(item);
+            expect(item.getAttribute("aria-selected")).toBe("true");
+            expect(el.$value).toEqual(initDate(2022, 11, item.textContent!, 23, 50));
 
-          // test when initValue with time
-          // for US: DST Nov 6..7, Mar 13..14
-          el.$value = initDate(2022, 10, 1, 23, 50); // 2022-Nov-01
-          el.remove();
-          document.body.appendChild(el);
-          await h.wait();
-          expect(el.$refCalenarItems.children.length).toBe(42);
-          expect(el.querySelector("[aria-selected]")?.textContent).toBe("1");
-          item = el.$refCalenarItems.lastElementChild as HTMLElement;
-          await h.userClick(item);
-          expect(item.getAttribute("aria-selected")).toBe("true");
-          expect(el.$value).toEqual(initDate(2022, 11, item.textContent!, 23, 50));
+            el.$value = initDate(2022, 4, 2, 23, 50); // 2022-Mar-02
+            el.remove();
+            document.body.appendChild(el);
+            await h.wait();
+            expect(el.querySelector("[aria-selected]")?.textContent).toBe("2");
+            item = el.$refCalenarItems.lastElementChild as HTMLElement;
+            await h.userClick(item);
+            expect(item.getAttribute("aria-selected")).toBe("true");
+            expect(el.$value).toEqual(initDate(2022, 5, item.textContent!, 23, 50));
 
-          el.$value = initDate(2022, 4, 2, 23, 50); // 2022-Mar-02
-          el.remove();
-          document.body.appendChild(el);
-          await h.wait();
-          expect(el.querySelector("[aria-selected]")?.textContent).toBe("2");
-          item = el.$refCalenarItems.lastElementChild as HTMLElement;
-          await h.userClick(item);
-          expect(item.getAttribute("aria-selected")).toBe("true");
-          expect(el.$value).toEqual(initDate(2022, 5, item.textContent!, 23, 50));
-
-          // todo check inputValue here
-
-          // todo test scroll here
-          // todo test keyboard here
+            // todo test scroll here
+            // todo test keyboard here
+          });
         });
-      };
+      });
+      test("month picker", async () => {
+        return;
+        el.remove();
+        el.$options.utc = opt.utc;
+        el.$initValue = initDate(2022, 11, 31, 23, 10);
+        el.$options.startWith = PickersEnum.Month | 0;
+        document.body.appendChild(el);
+        await h.wait();
 
-      goTest({ utc: true });
-      goTest({ utc: false });
+        expect(el.querySelector("[calendar='month']")).toBeTruthy();
+        expect(el.$refCalenarItems.children.length).toBe(12 + 4);
+        expect(el.querySelector("[aria-current]")?.textContent).toBe("Dec");
+        expect(el.querySelector("[aria-selected]")?.textContent).toBe("Dec");
+        // todo expect(el.$refCalenar).toMatchSnapshot();
+      });
+      describe("year picker", () => {
+        // todo implement
+      });
+      // describe("naigation between pickers", () => {
+      //   jest.setSystemTime(new Date(2022, 10, 16, 23, 49));
+      //   el.remove(); // otherwise option startWith doesn't work
+      //   el.$options.startWith = PickersEnum.Day | 0;
+      //   document.body.appendChild(el);
+      //   await h.wait();
+      //   expect(el.querySelector("[calendar='day']")).toBeTruthy();
+      //   expect(el.$refCalenarTitle.textContent).toBe("November 2022");
+      //   await h.userClick(el.$refCalenarItems.lastElementChild);
+
+      //   const was = el.outerHTML;
+      //   await h.userClick(el.$refCalenarTitle, { button: 1 }); // right button must be ignored
+      //   await h.wait();
+      //   expect(el.outerHTML).toBe(was);
+
+      //   await h.userClick(el.$refCalenarTitle); // go to monthPicker
+      //   await h.wait();
+      //   expect(el.querySelector("[calendar='month']")).toBeTruthy();
+      //   expect(el.$refCalenarTitle.textContent).toBe("2022");
+      //   expect(el.querySelector("[aria-selected]").textContent).toBe("Dec"); // because user selected december
+      //   expect(el.$refCalenar.outerHTML).toMatchInlineSnapshot();
+      // });
     });
-  });
+  };
 
-  describe("month picker", () => {
-    // todo implement
-  });
-
-  describe("year picker", () => {
-    // todo implement
-  });
-
-  // describe("naigation between pickers", () => {
-  //   jest.setSystemTime(new Date(2022, 10, 16, 23, 49));
-  //   el.remove(); // otherwise option startWith doesn't work
-  //   el.$options.startWith = PickersEnum.Day | 0;
-  //   document.body.appendChild(el);
-  //   await h.wait();
-  //   expect(el.querySelector("[calendar='day']")).toBeTruthy();
-  //   expect(el.$refCalenarTitle.textContent).toBe("November 2022");
-  //   await h.userClick(el.$refCalenarItems.lastElementChild);
-
-  //   const was = el.outerHTML;
-  //   await h.userClick(el.$refCalenarTitle, { button: 1 }); // right button must be ignored
-  //   await h.wait();
-  //   expect(el.outerHTML).toBe(was);
-
-  //   await h.userClick(el.$refCalenarTitle); // go to monthPicker
-  //   await h.wait();
-  //   expect(el.querySelector("[calendar='month']")).toBeTruthy();
-  //   expect(el.$refCalenarTitle.textContent).toBe("2022");
-  //   expect(el.querySelector("[aria-selected]").textContent).toBe("Dec"); // because user selected december
-  //   expect(el.$refCalenar.outerHTML).toMatchInlineSnapshot();
-  // });
+  goTest({ utc: true });
+  goTest({ utc: false });
 }

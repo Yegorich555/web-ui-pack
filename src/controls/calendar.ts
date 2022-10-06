@@ -844,8 +844,13 @@ export default class WUPCalendarControl<
 
   protected override setValue(v: ValueType | undefined, canValidate = true): boolean | null {
     const r = super.setValue(v, canValidate);
-    // todo UTC
-    this.$refInput.value = v != null ? `${v.getDate()} ${this.#ctr.$namesMonth[v.getMonth()]} ${v.getFullYear()}` : "";
+    if (v != null) {
+      this.$refInput.value = this._opts.utc
+        ? `${v.getUTCDate()} ${this.#ctr.$namesMonth[v.getUTCMonth()]} ${v.getUTCFullYear()}`
+        : `${v.getDate()} ${this.#ctr.$namesMonth[v.getMonth()]} ${v.getFullYear()}`;
+    } else {
+      this.$refInput.value = "";
+    }
     this.#refreshSelected?.call(this);
     return r;
   }
