@@ -624,6 +624,7 @@ export default class WUPCalendarControl<
         const dt = new Date(v);
         const a = this.$value;
         if (a) {
+          // todo saving hours can be wrong for DST day (DST dayOn has 23h, DST dayOff: 25h)
           this._opts.utc
             ? dt.setUTCHours(a.getUTCHours(), a.getUTCMinutes(), a.getUTCSeconds(), a.getUTCMilliseconds())
             : dt.setUTCHours(
@@ -952,19 +953,9 @@ customElements.define(tagName, WUPCalendarControl);
 
 // todo testcase: dayPickerSize === monthPickerSize === yearPickerSize
 // todo testCase: 31 Mar 2022  + 1 month > return April (but returns May)
-// todo testcase: initValue: 2022-03-20 10:05; Month picker must show focused in visible area
 
 // todo testCase: min="2022-02-28" max="2022-04-01" exclude=[min, max] - Feb and Apr must be excluded
 // todo testCase: min="2022-02-27" max="2022-04-02" exclude=["2022-02-27", "2022-02-28", "2022-04-01", "2022-04-02"] - Feb and Apr must be excluded
-
-// const dt = new Date(2022, 0, 1);
-// while (dt.getFullYear() < 2023) {
-//   const was = dt.valueOf();
-//   const next = dt.setDate(dt.getDate() + 1);
-//   if (next - was !== 86400000) {
-//     console.warn(dt, next - was);
-//   }
-// }
 
 /**
  *  UTC -5 EST >>> DST
