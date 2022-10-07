@@ -319,10 +319,16 @@ export default class WUPSelectControl<
     // it happens on every show because by hide it dispose events
     onEvent(ul, "click", (e) => {
       e.stopPropagation(); // to prevent popup-hide-show
-      /* istanbul ignore else */
-      // todo instanceof is wrong if was click on span inside li-element
-      if (e.target instanceof HTMLLIElement) {
-        this.gotMenuItemClick(e as MouseEvent & { target: HTMLLIElement });
+
+      let t = e.target as Node | HTMLElement;
+      while (1) {
+        const parent = t.parentElement as HTMLElement;
+        /* istanbul ignore else */
+        if (parent === ul) {
+          this.gotMenuItemClick(e, t as HTMLLIElement & { _text: string });
+          break;
+        }
+        t = parent;
       }
     });
 
@@ -427,12 +433,12 @@ export default class WUPSelectControl<
   }
 
   /** Called when need to setValue & close base on clicked item */
-  protected gotMenuItemClick(e: MouseEvent & { target: HTMLLIElement }): void {
-    const i = this._menuItems!.all.indexOf(e.target as HTMLLIElement & { _text: string });
+  protected gotMenuItemClick(e: MouseEvent, item: HTMLLIElement & { _text: string }): void {
+    const i = this._menuItems!.all.indexOf(item);
     const o = this._cachedItems![i];
 
     this.selectValue(o.value);
-    this.focusMenuItem(e.target, o.value); // to announce selected by screenReaders
+    this.focusMenuItem(item, o.value); // to announce selected by screenReaders
     this.goHideMenu(HideCases.onSelect);
   }
 

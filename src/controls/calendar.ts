@@ -932,6 +932,7 @@ export default class WUPCalendarControl<
     } else if (this.$refCalenarItems.contains(t)) {
       while (t !== this.$refCalenarItems) {
         const v = (t as any)._value;
+        /* istanbul ignore else */
         if (v !== undefined) {
           e.preventDefault();
           !(t as HTMLElement).hasAttribute("disabled") &&

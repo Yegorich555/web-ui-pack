@@ -5,6 +5,7 @@
 **Fixes**:
 
 - Controls. Click on button `Clear` throws console.error
+- SelectControl. Click on custom list-item with nested span doesn't call click-event
 
 **Features**:
 

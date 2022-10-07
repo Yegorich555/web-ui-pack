@@ -687,6 +687,15 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isOpen).toBe(false);
     expect(el.$value).toBe(30);
+
+    // click on item inside li
+    const span = arrLi[1].appendChild(document.createElement("span"));
+    await h.userClick(el);
+    await h.wait();
+    await h.userClick(span);
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    expect(el.$value).toBe(20);
   });
 
   describe("options", () => {
