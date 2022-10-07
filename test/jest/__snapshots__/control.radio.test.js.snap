@@ -125,6 +125,136 @@ exports[`control.radio $ariaDetails 2`] = `
 </wup-radio>
 `;
 
+exports[`control.radio $ariaSpeak 1`] = `
+<wup-radio>
+  <fieldset>
+    <legend>
+      <strong />
+    </legend>
+    <label
+      for="txt2"
+    >
+      <input
+        aria-describedby="my-test-id txt6 my-test-id2"
+        autocomplete="off"
+        id="txt2"
+        name="txt1473"
+        tabindex="0"
+        type="radio"
+      />
+      <span>
+        Donny
+      </span>
+    </label>
+    <label
+      for="txt3"
+    >
+      <input
+        id="txt3"
+        name="txt1473"
+        type="radio"
+      />
+      <span>
+        Mikky
+      </span>
+    </label>
+    <label
+      for="txt4"
+    >
+      <input
+        id="txt4"
+        name="txt1473"
+        type="radio"
+      />
+      <span>
+        Leo
+      </span>
+    </label>
+    <label
+      for="txt5"
+    >
+      <input
+        id="txt5"
+        name="txt1473"
+        type="radio"
+      />
+      <span>
+        Splinter
+      </span>
+    </label>
+  </fieldset>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt6"
+  >
+    Hello
+  </section>
+</wup-radio>
+`;
+
+exports[`control.radio $ariaSpeak 2`] = `
+<wup-radio>
+  <fieldset>
+    <legend>
+      <strong />
+    </legend>
+    <label
+      for="txt2"
+    >
+      <input
+        aria-describedby="my-test-id my-test-id2"
+        autocomplete="off"
+        id="txt2"
+        name="txt1473"
+        tabindex="0"
+        type="radio"
+      />
+      <span>
+        Donny
+      </span>
+    </label>
+    <label
+      for="txt3"
+    >
+      <input
+        id="txt3"
+        name="txt1473"
+        type="radio"
+      />
+      <span>
+        Mikky
+      </span>
+    </label>
+    <label
+      for="txt4"
+    >
+      <input
+        id="txt4"
+        name="txt1473"
+        type="radio"
+      />
+      <span>
+        Leo
+      </span>
+    </label>
+    <label
+      for="txt5"
+    >
+      <input
+        id="txt5"
+        name="txt1473"
+        type="radio"
+      />
+      <span>
+        Splinter
+      </span>
+    </label>
+  </fieldset>
+</wup-radio>
+`;
+
 exports[`control.radio $show/$hide error 1`] = `
 <wup-radio>
   <fieldset>

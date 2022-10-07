@@ -37,6 +37,48 @@ exports[`control.check $ariaDetails 2`] = `
 </wup-check>
 `;
 
+exports[`control.check $ariaSpeak 1`] = `
+<wup-check>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-describedby="my-test-id txt2 my-test-id2"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong />
+    <span />
+  </label>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt2"
+  >
+    Hello
+  </section>
+</wup-check>
+`;
+
+exports[`control.check $ariaSpeak 2`] = `
+<wup-check>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-describedby="my-test-id my-test-id2"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong />
+    <span />
+  </label>
+</wup-check>
+`;
+
 exports[`control.check $show/$hide error 1`] = `
 <wup-check>
   <label

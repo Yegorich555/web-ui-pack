@@ -494,8 +494,9 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       setTimeout(() => {
         el.remove();
         const a = i.getAttribute(an);
+        /* istanbul ignore else */
         if (a != null) {
-          const aNext = a.replace(el.id, "").trim();
+          const aNext = a.replace(el.id, "").replace("  ", " ").trim();
           aNext ? i.setAttribute(an, aNext) : i.removeAttribute(an);
         }
       }, 200);

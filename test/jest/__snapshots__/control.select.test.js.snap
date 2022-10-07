@@ -59,6 +59,70 @@ exports[`control.select $ariaDetails 2`] = `
 </wup-select>
 `;
 
+exports[`control.select $ariaSpeak 1`] = `
+<wup-select>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-describedby="my-test-id txt2 my-test-id2"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt2"
+  >
+    Hello
+  </section>
+</wup-select>
+`;
+
+exports[`control.select $ariaSpeak 2`] = `
+<wup-select>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-describedby="my-test-id my-test-id2"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+</wup-select>
+`;
+
 exports[`control.select $show/$hide error 1`] = `
 <wup-select>
   <label

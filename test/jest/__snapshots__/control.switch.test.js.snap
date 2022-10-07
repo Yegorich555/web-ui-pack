@@ -37,6 +37,48 @@ exports[`control.text $ariaDetails 2`] = `
 </wup-switch>
 `;
 
+exports[`control.text $ariaSpeak 1`] = `
+<wup-switch>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-describedby="my-test-id txt2 my-test-id2"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong />
+    <span />
+  </label>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt2"
+  >
+    Hello
+  </section>
+</wup-switch>
+`;
+
+exports[`control.text $ariaSpeak 2`] = `
+<wup-switch>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-describedby="my-test-id my-test-id2"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong />
+    <span />
+  </label>
+</wup-switch>
+`;
+
 exports[`control.text $show/$hide error 1`] = `
 <wup-switch>
   <label

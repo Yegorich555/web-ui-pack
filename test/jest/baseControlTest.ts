@@ -326,6 +326,19 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     expect(el).toMatchSnapshot();
   });
 
+  test("$ariaSpeak", async () => {
+    el.$refInput.setAttribute("aria-describedby", "my-test-id");
+    el.$ariaSpeak("Hello");
+    await h.wait(110);
+    const a = el.$refInput.getAttribute("aria-describedby");
+    expect(a?.includes("my-test-id")).toBe(true);
+    el.$refInput.setAttribute("aria-describedby", `${a} my-test-id2`.trim());
+    expect(el).toMatchSnapshot();
+    await h.wait(210);
+    expect(el.$refInput.getAttribute("aria-describedby")).toBe("my-test-id my-test-id2");
+    expect(el).toMatchSnapshot();
+  });
+
   test("focus by click", () => {
     expect(el.$isFocused).toBe(false);
     el.dispatchEvent(new MouseEvent("mousedown"));

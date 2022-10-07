@@ -61,6 +61,82 @@ exports[`control.pwd $ariaDetails 2`] = `
 </wup-pwd>
 `;
 
+exports[`control.pwd $ariaSpeak 1`] = `
+<wup-pwd>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-describedby="my-test-id txt2 my-test-id2"
+        autocomplete="new-password"
+        id="txt1"
+        placeholder=" "
+        type="password"
+      />
+      <strong />
+      <span
+        class="wup-hidden"
+      >
+        press Alt + V to show/hide password
+      </span>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+    <button
+      aria-hidden="true"
+      eye=""
+      tabindex="-1"
+    />
+  </label>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt2"
+  >
+    Hello
+  </section>
+</wup-pwd>
+`;
+
+exports[`control.pwd $ariaSpeak 2`] = `
+<wup-pwd>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-describedby="my-test-id my-test-id2"
+        autocomplete="new-password"
+        id="txt1"
+        placeholder=" "
+        type="password"
+      />
+      <strong />
+      <span
+        class="wup-hidden"
+      >
+        press Alt + V to show/hide password
+      </span>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+    <button
+      aria-hidden="true"
+      eye=""
+      tabindex="-1"
+    />
+  </label>
+</wup-pwd>
+`;
+
 exports[`control.pwd $show/$hide error 1`] = `
 <wup-pwd>
   <label
