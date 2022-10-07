@@ -379,8 +379,11 @@ export default class WUPCalendarControl<
     return v as any;
   }
 
+  /** Reference to calendar-container */
   $refCalenar = document.createElement("div");
+  /** Reference to header-button */
   $refCalenarTitle = document.createElement("button");
+  /** Reference to container with items */
   $refCalenarItems = document.createElement("ol");
 
   protected override renderControl(): void {
@@ -919,26 +922,29 @@ export default class WUPCalendarControl<
   #handleClickItem?: WUPCalendarIn.PickerResult["onItemClick"];
   /** Called when user clicks on calendar */
   protected gotClick(e: MouseEvent): void {
-    // todo analys is wrong for span&svg inside li/title
-    // only left button
-    if (!(e.target instanceof HTMLElement) || e.button) {
-      return;
+    if (e.button) {
+      return; // only left button
     }
-    e.preventDefault();
-    if (e.target.hasAttribute("disabled")) {
-      return;
-    }
-    if (this.$refCalenarTitle === e.target || this.$refCalenarTitle.contains(e.target)) {
+    let t = e.target as Node | HTMLElement;
+    if (this.$refCalenarTitle === t || this.$refCalenarTitle.contains(t)) {
+      e.preventDefault();
       this._picker !== PickersEnum.Year && this.changePicker(this._pickerValue!, this._picker + 1);
-    } else {
-      // WARN: if li element will include span or something else it won't work
-      const v = (e.target as any)._value;
-      v !== undefined && this.#handleClickItem!.call(this, e as MouseEvent & { target: HTMLElement }, v);
+    } else if (this.$refCalenarItems.contains(t)) {
+      while (t !== this.$refCalenarItems) {
+        const v = (t as any)._value;
+        if (v !== undefined) {
+          e.preventDefault();
+          !(t as HTMLElement).hasAttribute("disabled") &&
+            this.#handleClickItem!.call(this, e as MouseEvent & { target: HTMLElement }, v);
+          break;
+        }
+        t = t.parentElement!;
+      }
     }
   }
 
   /** Called when browsers fills the field via autocomplete */
-  protected gotInput(e: Event, inputEl: HTMLInputElement): void {
+  protected gotInput(_e: Event, inputEl: HTMLInputElement): void {
     const v = this.parseValue(inputEl.value);
     this.setValue(v);
   }

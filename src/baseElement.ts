@@ -195,6 +195,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     if (ae === this) {
       super.blur();
     } else if (ae instanceof HTMLElement && this.includes(ae)) {
+      // todo instanceof is useless
       ae.blur();
     }
   }

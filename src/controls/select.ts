@@ -320,6 +320,7 @@ export default class WUPSelectControl<
     onEvent(ul, "click", (e) => {
       e.stopPropagation(); // to prevent popup-hide-show
       /* istanbul ignore else */
+      // todo instanceof is wrong if was click on span inside li-element
       if (e.target instanceof HTMLLIElement) {
         this.gotMenuItemClick(e as MouseEvent & { target: HTMLLIElement });
       }

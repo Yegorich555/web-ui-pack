@@ -5,7 +5,7 @@ import { initTestBaseControl } from "./baseControlTest";
 import * as h from "../testHelper";
 
 let el: WUPCalendarControl;
-initTestBaseControl({ type: WUPCalendarControl, htmlTag: "wup-calendar", onInit: (e) => (el = e) });
+initTestBaseControl({ type: WUPCalendarControl as any, htmlTag: "wup-calendar", onInit: (e) => (el = e) });
 
 /** Test function for different timezones */
 export default function calendarTZtest() {
@@ -267,11 +267,6 @@ export default function calendarTZtest() {
         expect(el.$refCalenarTitle.textContent).toBe("April 2022");
         onChange.mockClear();
 
-        const was = el.outerHTML;
-        await h.userClick(el.$refCalenarTitle, { button: 1 }); // right button must be ignored
-        await h.wait();
-        expect(el.outerHTML).toBe(was);
-
         await h.userClick(el.$refCalenarTitle);
         await h.wait();
         expect(el.querySelector("[calendar='month']")).toBeTruthy();
@@ -350,6 +345,4 @@ export default function calendarTZtest() {
 
   goTest({ utc: true });
   goTest({ utc: false });
-
-  // todo cover all possible clicks outside expected items
 }
