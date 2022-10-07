@@ -1036,90 +1036,6 @@ exports[`control.radio validations options.validationCase 2`] = `
   invalid=""
 >
   <fieldset
-    aria-describedby="txt6"
-    aria-required="true"
-  >
-    <legend>
-      <strong>
-        First Input
-      </strong>
-    </legend>
-    <label
-      for="txt2"
-    >
-      <input
-        aria-required="true"
-        autocomplete="off"
-        id="txt2"
-        name="txt1473"
-        tabindex="0"
-        type="radio"
-      />
-      <span>
-        Donny
-      </span>
-    </label>
-    <label
-      for="txt3"
-    >
-      <input
-        id="txt3"
-        name="txt1473"
-        type="radio"
-      />
-      <span>
-        Mikky
-      </span>
-    </label>
-    <label
-      for="txt4"
-    >
-      <input
-        id="txt4"
-        name="txt1473"
-        type="radio"
-      />
-      <span>
-        Leo
-      </span>
-    </label>
-    <label
-      for="txt5"
-    >
-      <input
-        id="txt5"
-        name="txt1473"
-        type="radio"
-      />
-      <span>
-        Splinter
-      </span>
-    </label>
-  </fieldset>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt6"
-    style="display: none;"
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      This field is required
-    </span>
-  </wup-popup>
-</wup-radio>
-`;
-
-exports[`control.radio validations options.validationCase 3`] = `
-<wup-radio
-  invalid=""
->
-  <fieldset
     aria-describedby="txt7"
     aria-required="true"
   >
@@ -1193,13 +1109,13 @@ exports[`control.radio validations options.validationCase 3`] = `
       Error for First Input:
     </span>
     <span>
-      custom err here
+      This field is required
     </span>
   </wup-popup>
 </wup-radio>
 `;
 
-exports[`control.radio validations options.validationCase 4`] = `
+exports[`control.radio validations options.validationCase 3`] = `
 <wup-radio
   invalid=""
 >
@@ -1269,6 +1185,90 @@ exports[`control.radio validations options.validationCase 4`] = `
     aria-live="off"
     error=""
     id="txt8"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
+</wup-radio>
+`;
+
+exports[`control.radio validations options.validationCase 4`] = `
+<wup-radio
+  invalid=""
+>
+  <fieldset
+    aria-describedby="txt9"
+    aria-required="true"
+  >
+    <legend>
+      <strong>
+        First Input
+      </strong>
+    </legend>
+    <label
+      for="txt2"
+    >
+      <input
+        aria-required="true"
+        autocomplete="off"
+        id="txt2"
+        name="txt1473"
+        tabindex="0"
+        type="radio"
+      />
+      <span>
+        Donny
+      </span>
+    </label>
+    <label
+      for="txt3"
+    >
+      <input
+        id="txt3"
+        name="txt1473"
+        type="radio"
+      />
+      <span>
+        Mikky
+      </span>
+    </label>
+    <label
+      for="txt4"
+    >
+      <input
+        id="txt4"
+        name="txt1473"
+        type="radio"
+      />
+      <span>
+        Leo
+      </span>
+    </label>
+    <label
+      for="txt5"
+    >
+      <input
+        id="txt5"
+        name="txt1473"
+        type="radio"
+      />
+      <span>
+        Splinter
+      </span>
+    </label>
+  </fieldset>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt9"
     role="alert"
     style="display: none;"
   >
