@@ -91,6 +91,21 @@ describe("baseElement", () => {
     expect(spyAttrChanged).toBeCalledTimes(1);
   });
 
+  test("getRefAttr", () => {
+    el.setAttribute("testRef", "window._model.firstName");
+    expect(() => el.getRefAttr("testRef")).toThrow();
+    el.setAttribute("testRef", "_model.firstName");
+    expect(() => el.getRefAttr("testRef")).toThrow();
+
+    window._model = { firstName: "Den" };
+    el.setAttribute("testRef", "_model.firstName");
+    expect(el.getRefAttr("testRef")).toBe("Den");
+
+    window._model = { firstName: "Wiki" };
+    el.setAttribute("testRef", "window._model.firstName");
+    expect(el.getRefAttr("testRef")).toBe("Wiki");
+  });
+
   test("fireEvent", () => {
     const fn = jest.fn();
     el.addEventListener("click", fn);
