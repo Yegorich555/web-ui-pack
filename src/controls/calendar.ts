@@ -388,7 +388,6 @@ export default class WUPCalendarControl<
 
   protected override renderControl(): void {
     // todo mobile: focus on input opens keyboard;
-    // todo mobile: click on item makes focus-frame blink
 
     const i = this.$refInput;
     i.id = this.#ctr.$uniqueId;

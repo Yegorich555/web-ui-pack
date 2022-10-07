@@ -640,6 +640,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
         cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
       }
       WUP-RADIO strong,
       WUP-RADIO legend {
@@ -776,8 +777,7 @@ mask-image: var(--ctrl-icon-img);
       }
       WUP-RADIO {
         padding: var(--ctrl-padding);
-        cursor: pointer;
-       }
+      }
       WUP-RADIO fieldset {
         border: none;
         padding: 0;
@@ -800,14 +800,12 @@ mask-image: var(--ctrl-icon-img);
         white-space: nowrap;
         font-weight: normal;
         text-decoration: none;
-        cursor: pointer;
       }
       WUP-RADIO strong {
         font: inherit;
       }
       WUP-RADIO label {
         padding: 0;
-        cursor: pointer;
       }
       WUP-RADIO input {
 position: absolute;
@@ -823,7 +821,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-RADIO[readonly],
       WUP-RADIO[readonly] legend,
       WUP-RADIO[readonly] label {
-        cursor: default;
+         cursor: default;
       }
       WUP-RADIO input + *:after {
         content: "";

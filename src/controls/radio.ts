@@ -111,8 +111,7 @@ export default class WUPRadioControl<
     return `${super.$style}
       :host {
         padding: var(--ctrl-padding);
-        cursor: pointer;
-       }
+      }
       :host fieldset {
         border: none;
         padding: 0;
@@ -135,14 +134,12 @@ export default class WUPRadioControl<
         white-space: nowrap;
         font-weight: normal;
         text-decoration: none;
-        cursor: pointer;
       }
       :host strong {
         font: inherit;
       }
       :host label {
         padding: 0;
-        cursor: pointer;
       }
       :host input {${WUPcssHidden}}
       :host input + * {
@@ -153,7 +150,7 @@ export default class WUPRadioControl<
       :host[readonly],
       :host[readonly] legend,
       :host[readonly] label {
-        cursor: default;
+         cursor: default;
       }
       :host input + *:after {
         content: "";
@@ -375,4 +372,3 @@ export default class WUPRadioControl<
 }
 
 customElements.define(tagName, WUPRadioControl);
-// todo mobile: weird blink on touch by radio-button

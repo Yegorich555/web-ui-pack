@@ -212,6 +212,9 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
         cursor: pointer;
+        -webkit-tap-highlight-color: transparent;${
+          /* issue: https://stackoverflow.com/questions/25704650/disable-blue-highlight-when-touch-press-object-with-cursorpointer */ ""
+        }
       }
       :host strong,
       :host legend {

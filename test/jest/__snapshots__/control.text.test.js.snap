@@ -247,6 +247,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
         cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
       }
       WUP-TEXT strong,
       WUP-TEXT legend {

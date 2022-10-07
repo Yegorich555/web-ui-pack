@@ -4,6 +4,7 @@
 
 **Fixes**:
 
+- Controls. [Blue highlight blink on tap action](https://stackoverflow.com/questions/25704650/disable-blue-highlight-when-touch-press-object-with-cursorpointer)
 - Controls. Click on button `Clear` throws console.error
 - SelectControl. Click on custom list-item with nested span doesn't call click-event
 
