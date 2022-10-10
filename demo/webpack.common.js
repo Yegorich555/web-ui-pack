@@ -12,7 +12,7 @@ const path = require("path");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 
 const srcPath = path.resolve(__dirname, "./src/");
-const destPath = path.resolve(__dirname, "../docs/");
+let destPath = path.resolve(__dirname, "../docs/");
 const assetsPath = path.resolve(__dirname, "./public/");
 const filesThreshold = 8196; // (bytes) threshold for compression, url-loader plugins
 
@@ -21,6 +21,9 @@ module.exports = function (env, argv) {
   const isDevServer = env.WEBPACK_SERVE;
   const mode = argv.mode || (isDevServer ? "development" : "production");
   const isDevMode = mode !== "production";
+  if (isDevMode) {
+    destPath = "d:/Projects/_publish/web-ui-pack/wwwroot/";
+  }
 
   process.env.NODE_ENV = mode; // it resolves issues in postcss.config.js (since Define plugin is loaded only after reading config-files)
 

@@ -9,8 +9,10 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=false d
       <input
         aria-controls="txt2"
         aria-owns="txt2"
+        aria-readonly="false"
         autocomplete="off"
         id="txt1"
+        readonly=""
         role="combobox"
         type="text"
       />
@@ -301,8 +303,10 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=false d
       <input
         aria-controls="txt2"
         aria-owns="txt2"
+        aria-readonly="false"
         autocomplete="off"
         id="txt1"
+        readonly=""
         role="combobox"
         type="text"
       />
@@ -593,8 +597,10 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=false d
       <input
         aria-controls="txt2"
         aria-owns="txt2"
+        aria-readonly="false"
         autocomplete="off"
         id="txt1"
+        readonly=""
         role="combobox"
         type="text"
       />
@@ -1104,8 +1110,10 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=true da
       <input
         aria-controls="txt2"
         aria-owns="txt2"
+        aria-readonly="false"
         autocomplete="off"
         id="txt1"
+        readonly=""
         role="combobox"
         type="text"
       />
@@ -1396,8 +1404,10 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=true da
       <input
         aria-controls="txt2"
         aria-owns="txt2"
+        aria-readonly="false"
         autocomplete="off"
         id="txt1"
+        readonly=""
         role="combobox"
         type="text"
       />
@@ -1688,8 +1698,10 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=true da
       <input
         aria-controls="txt2"
         aria-owns="txt2"
+        aria-readonly="false"
         autocomplete="off"
         id="txt1"
+        readonly=""
         role="combobox"
         type="text"
       />

@@ -387,8 +387,6 @@ export default class WUPCalendarControl<
   $refCalenarItems = document.createElement("ol");
 
   protected override renderControl(): void {
-    // todo mobile: focus on input opens keyboard;
-
     const i = this.$refInput;
     i.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", i.id);
@@ -905,6 +903,14 @@ export default class WUPCalendarControl<
     isChangedDisabled && this.$refreshPicker();
   }
 
+  override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null): void {
+    super.gotFormChanges(propsChanged);
+
+    const i = this.$refInput;
+    i.readOnly = true;
+    this.$isReadOnly ? i.removeAttribute("aria-readonly") : i.setAttribute("aria-readonly", false); // input must be readonly to hide mobile-keyboard on focus
+  }
+
   protected override gotFocusLost(): void {
     this.$refInput.removeAttribute("aria-activedescendant");
     super.gotFocusLost();
@@ -912,9 +918,10 @@ export default class WUPCalendarControl<
 
   protected override gotFocus(): Array<() => void> {
     const r = super.gotFocus();
+    const i = this.$refInput;
     r.push(this.appendEvent(this, "click", (e) => this.gotClick(e), { passive: false }));
-    r.push(this.appendEvent(this.$refInput, "input", (e) => this.gotInput(e, this.$refInput)));
-    r.push(this.appendEvent(this.$refInput, "keypress", (e) => e.preventDefault(), { passive: false }));
+    r.push(this.appendEvent(i, "input", (e) => this.gotInput(e, i)));
+    r.push(this.appendEvent(i, "keypress", (e) => e.preventDefault(), { passive: false }));
     return r;
   }
 
