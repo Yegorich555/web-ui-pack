@@ -28,6 +28,7 @@ export default function CalendarControlView() {
         "Scrollable & well animated pickers (with swipe for touchscreens)",
         "Wide ability to disable particular dates (options min/max/exclude)",
         "No dependancy for working with dates (usage momentjs doesn't make sense)",
+        "Static parser > WUPCalendarControl.$parse('2022-10-25', false) returns Date",
       ]}
     >
       <wup-form

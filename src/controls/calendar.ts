@@ -22,10 +22,10 @@ export namespace WUPCalendarIn {
     firstDayOfWeek: 1 | 2 | 3 | 4 | 5 | 6 | 7;
   }
   export interface Opt {
-    /** User can't select date less than min */
-    min?: Date; // todo allow string
-    /** User can't select date more than max */
-    max?: Date; // todo allow string
+    /** User can't select date less than min; point new Date(Date.UTC(2022,1,25)) for `utc:true`, or new Date(2022,1,25) */
+    min?: Date;
+    /** User can't select date more than max; point new Date(Date.UTC(2022,1,25)) for `utc:true`, or new Date(2022,1,25) */
+    max?: Date;
     /** Picker that must be rendered at first; if undefined then when isEmpty - year, otherwise - day;
      * @not observed (affects only on init) */
     startWith?: PickersEnum;
@@ -336,6 +336,33 @@ export default class WUPCalendarControl<
     return r;
   }
 
+  /** Parse string to Date
+   * @example
+   * "2022-10-25" asUTC >> returns new Date(Date.UTC(yyyy, MM, dd))
+   * "2022-10-25 02:40" asUTC >> returns new Date(Date.UTC(yyyy, MM, dd, hh, mm))
+   * "2022-10-25" >> returns new Date(yyyy, MM, dd)
+   * "2022-10-25 02:40" >> returns new Date(yyyy, MM, dd, hh, mm)
+   * "2022-10-25T02:40:00.000Z" >> returns UTC Date (argument `asUTC:false` is ignored)
+   */
+  static $parse(yyyyMMdd: string, asUTC: boolean): Date {
+    const dt = Date.parse(yyyyMMdd);
+    if (Number.isNaN(dt)) {
+      throw new Error(`Impossible to parse date from '${yyyyMMdd}'`);
+    }
+    /* by default
+       2022-10-25 >> utc
+       2022-10-25 00:00 >> local
+       2022-10-25T00:00 >> local
+    */
+    const v = new Date(dt);
+    const isUTC = yyyyMMdd.length === 10;
+    if (!yyyyMMdd.endsWith("Z") && isUTC !== asUTC) {
+      v.setMinutes(v.getMinutes() + (isUTC ? 1 : -1) * v.getTimezoneOffset());
+    }
+
+    return v as any;
+  }
+
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUPCalendar.Defaults = {
     ...WUPBaseControl.$defaults,
@@ -361,22 +388,12 @@ export default class WUPCalendarControl<
     }
   }
 
-  /** Converts date-string into Date according (to this._opt.UTC) */
-  parseValue(text: string): ValueType | undefined {
+  /** Converts date-string into Date according (to $options.utc), @see WUPCalendarControl.$parse */
+  override parseValue(text: string): ValueType | undefined {
     if (!text) {
       return undefined;
     }
-    const dt = Date.parse(text);
-    if (Number.isNaN(dt)) {
-      throw new Error(`Impossible to parse date from '${text}'`);
-    }
-    const v = new Date(dt);
-    const isUTC = text.length === 10;
-    if (isUTC !== this._opts.utc || !"timeZonePointer") {
-      // todo need to detect if timezone is pointed
-      v.setMinutes(v.getMinutes() - v.getTimezoneOffset());
-    }
-    return v as any;
+    return this.#ctr.$parse(text, !!this._opts.utc) as ValueType;
   }
 
   /** Reference to calendar-container */

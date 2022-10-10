@@ -66,6 +66,22 @@ export default function calendarTZtest() {
     },
   ];
 
+  test("static $parse()", () => {
+    expect(WUPCalendarControl.$parse("2022-10-25T02:40:00.000Z", false).toISOString()).toBe("2022-10-25T02:40:00.000Z");
+    expect(WUPCalendarControl.$parse("2022-10-25T02:40:00.000Z", true).toISOString()).toBe("2022-10-25T02:40:00.000Z");
+
+    let ds = new Date(2022, 9, 25).toLocaleString();
+    expect(WUPCalendarControl.$parse("2022-10-25", true).toISOString()).toBe("2022-10-25T00:00:00.000Z");
+    expect(WUPCalendarControl.$parse("2022-10-25", false).toLocaleString()).toBe(ds);
+
+    ds = new Date(2022, 9, 25, 20, 40).toLocaleString();
+    expect(WUPCalendarControl.$parse("2022-10-25T20:40", true).toISOString()).toBe("2022-10-25T20:40:00.000Z");
+    expect(WUPCalendarControl.$parse("2022-10-25T20:40", false).toLocaleString()).toBe(ds);
+
+    expect(WUPCalendarControl.$parse("2022-10-25 20:40", true).toISOString()).toBe("2022-10-25T20:40:00.000Z");
+    expect(WUPCalendarControl.$parse("2022-10-25 20:40", false).toLocaleString()).toBe(ds);
+  });
+
   describe("$daysOfMonth", () => {
     daysSet.forEach((ds) => {
       test(`2022..2023 firstOfWeek: ${ds.label}`, () => {
