@@ -1,6 +1,5 @@
 import Page from "src/elements/page";
 import { WUPCalendarControl } from "web-ui-pack";
-import styles from "./calendar.scss";
 
 const sideEffect = WUPCalendarControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
@@ -29,6 +28,7 @@ export default function CalendarControlView() {
         "Wide ability to disable particular dates (options min/max/exclude)",
         "No dependancy for working with dates (usage momentjs doesn't make sense)",
         "Static parser > WUPCalendarControl.$parse('2022-10-25', false) returns Date",
+        "Saves hours. So $value='2022-11-06 23:50' & click on '20 Dec' => '2022-12-20 23:50'",
       ]}
     >
       <wup-form
@@ -39,21 +39,18 @@ export default function CalendarControlView() {
           }
         }}
       >
-        <div className={styles.flex}>
-          <wup-calendar
-            name="calendar"
-            initValue="2022-12-01 23:50"
-            // min="2022-02-28"
-            // max="2022-04-01"
-            // exclude="window.myCalendarExclude"
-            startWith="day"
-            utc={false}
-            validations="window.myCalendarValidations"
-            autoFocus={false}
-            autoComplete="off"
-            class={styles.cln}
-          />
-        </div>
+        <wup-calendar
+          name="calendar"
+          initValue="2022-12-01 23:50"
+          // min="2022-02-28"
+          // max="2022-04-01"
+          // exclude="window.myCalendarExclude"
+          startWith="day"
+          utc={false}
+          validations="window.myCalendarValidations"
+          autoFocus={false}
+          autoComplete="off"
+        />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

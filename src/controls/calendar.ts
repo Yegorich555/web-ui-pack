@@ -31,8 +31,9 @@ export namespace WUPCalendarIn {
     startWith?: PickersEnum;
     /** Dates that user can't choose (disabled dates) */
     exclude?: Date[];
-    /** Provide local or UTC date; @default true (UTC); min/max/exclude $initValue/$value must be provided according to pointed attr */
-    utc?: boolean; // todo check if possible observed
+    /** Provide local or UTC date; @default true (UTC); min/max/exclude $initValue/$value must be provided according to pointed attr
+     * @not observed (affects only on init) */
+    utc?: boolean;
   }
   export type Generics<
     ValueType = string,
@@ -638,18 +639,22 @@ export default class WUPCalendarControl<
       },
       onItemClick: ({ target }, v) => {
         this.selectItem(target);
-        const dt = new Date(v);
+        let dt = new Date(v);
         const a = this.$value;
         if (a) {
-          // todo saving hours can be wrong for DST day (DST dayOn has 23h, DST dayOff: 25h)
-          this._opts.utc
-            ? dt.setUTCHours(a.getUTCHours(), a.getUTCMinutes(), a.getUTCSeconds(), a.getUTCMilliseconds())
-            : dt.setUTCHours(
-                a.getHours(),
-                a.getMinutes() + dt.getTimezoneOffset(),
-                a.getMilliseconds(),
-                a.getSeconds()
-              );
+          if (this._opts.utc) {
+            dt.setUTCHours(a.getUTCHours(), a.getUTCMinutes(), a.getUTCSeconds(), a.getUTCMilliseconds());
+          } else {
+            dt = new Date(
+              dt.getUTCFullYear(),
+              dt.getUTCMonth(),
+              dt.getUTCDate(),
+              a.getHours(),
+              a.getMinutes(),
+              a.getSeconds(),
+              a.getMilliseconds()
+            );
+          }
         }
         this.setValue(dt as ValueType);
         this.focusItem(target);
