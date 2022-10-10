@@ -31,8 +31,7 @@ export namespace WUPCalendarIn {
     startWith?: PickersEnum;
     /** Dates that user can't choose (disabled dates) */
     exclude?: Date[];
-    /** Provide local or UTC date; @default true (UTC); min/max/exclude $initValue/$value must be provided according to pointed attr
-     * @not observed (affects only on init) */
+    /** Provide local or UTC date; @default true (UTC); min/max/exclude $initValue/$value must be provided according to pointed attr */
     utc?: boolean;
   }
   export type Generics<
@@ -273,13 +272,13 @@ export default class WUPCalendarControl<
 
   static get observedOptions(): Array<string> {
     const arr = super.observedOptions as Array<keyof WUPCalendar.Options>;
-    arr.push("min", "max", "exclude");
+    arr.push("utc", "min", "max", "exclude");
     return arr;
   }
 
   static get observedAttributes(): Array<LowerKeys<WUPCalendar.Options>> {
     const arr = super.observedAttributes as Array<LowerKeys<WUPCalendar.Options>>;
-    arr.push("min", "max", "exclude");
+    arr.push("utc", "min", "max", "exclude");
     return arr;
   }
 
@@ -918,7 +917,10 @@ export default class WUPCalendarControl<
     this._opts.exclude = this.getRefAttr<Date[]>("exclude")?.sort((a, b) => a.valueOf() - b.valueOf());
     const isChangedDisabled =
       propsChanged &&
-      (propsChanged.includes("min") || propsChanged.includes("max") || propsChanged.includes("exclude"));
+      (propsChanged.includes("min") ||
+        propsChanged.includes("max") ||
+        propsChanged.includes("exclude") ||
+        propsChanged.includes("utc"));
     if (!propsChanged || isChangedDisabled) {
       this.#disabled = this._opts.exclude?.length ? this.calcDisabled() : undefined;
     }
