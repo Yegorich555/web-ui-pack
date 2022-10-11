@@ -353,6 +353,52 @@ export default function calendarTZtest() {
         el.$value = initDate(2018, 1, 26); // 26 Feb 2018
         expect(el.querySelector("[aria-selected]")?.textContent).toBe("26");
       });
+
+      test("options min/max", async () => {
+        const { nextFrame } = h.useFakeAnimation();
+        const showNext = async (isNext: boolean) => {
+          el.showNext(isNext);
+          await nextFrame();
+          await nextFrame();
+          await nextFrame();
+        };
+        const mapContent = () => {
+          const arr = new Array(el.$refCalenarItems.children.length);
+          for (let i = 0; i < arr.length; ++i) {
+            const item = el.$refCalenarItems.children.item(i)!;
+            arr[i] = `${item.textContent}${item.hasAttribute("disabled") ? " disabled" : ""}`;
+          }
+          return arr;
+        };
+        jest.setSystemTime(new Date(2022, 9, 15));
+        el.remove();
+        el.$options.utc = opt.utc;
+        el.$options.min = initDate(2022, 8, 30); // 30 Sep
+        el.$initValue = initDate(2022, 9, 11); // 11 Oct
+        el.$options.max = initDate(2022, 10, 1); // 1 Nov
+        document.body.appendChild(el);
+        await h.wait();
+
+        expect(el.$refCalenarTitle.textContent).toBe("October 2022");
+        expect(mapContent()).toMatchSnapshot();
+        await showNext(true);
+        expect(el.$refCalenarTitle.textContent).toBe("November 2022");
+        expect(el.$refCalenarItems.children.length).toBe(42);
+        expect(mapContent()).toMatchSnapshot();
+        await showNext(true);
+        expect(el.$refCalenarTitle.textContent).toBe("November 2022");
+        expect(el.$refCalenarItems.children.length).toBe(42);
+
+        await showNext(false);
+        expect(el.$refCalenarTitle.textContent).toBe("October 2022");
+        await showNext(false);
+        expect(el.$refCalenarTitle.textContent).toBe("September 2022");
+        expect(el.$refCalenarItems.children.length).toBe(42);
+        expect(mapContent()).toMatchSnapshot();
+        await showNext(false);
+        expect(el.$refCalenarTitle.textContent).toBe("September 2022");
+        expect(el.$refCalenarItems.children.length).toBe(42);
+      });
     });
   };
 

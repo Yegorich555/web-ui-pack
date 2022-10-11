@@ -522,22 +522,13 @@ export default class WUPCalendarControl<
 
     renderPicker(v);
 
-    // todo here options are not observed at all: need to move calc into calcDisabled() and update gotChanges logic
-    let min: undefined | Date;
-    if (this._opts.min) {
-      // todo UTC
-      min = new Date(this._opts.min.getUTCFullYear(), this._opts.min.getUTCMonth()); // start of pointed month
-    }
-    let max: undefined | Date;
-    if (this._opts.max) {
-      // todo UTC
-      max = new Date(this._opts.max.getUTCFullYear(), this._opts.max.getUTCMonth() + 1);
-      max.setUTCMilliseconds(-1); // end of pointed month
-    }
-
     const scrollObj = scrollCarousel(this.$refCalenarItems, (n) => {
       const nextDate = r.next(v, n);
-      if (nextDate > max! || nextDate < min!) {
+
+      const { scrollFrom: from, scrollTo: to } = this.#disabled!;
+
+      // todo when user fast scrolls somehow some items are removed
+      if ((nextDate as unknown as number) > to! || (nextDate as unknown as number) < from!) {
         r.next(v, (-1 * n) as 1);
         return null;
       }
@@ -756,8 +747,10 @@ export default class WUPCalendarControl<
   protected disableItems(items: WUPCalendarIn.ItemElement[], getIndex: WUPCalendarIn.PickerResult["getIndex"]): void {
     const first = items[0]._value;
     let i = 0;
-    if (this._opts.min) {
-      const last = getIndex(this._opts.min, first);
+
+    const { min, max } = this.#disabled!;
+    if (min) {
+      const last = getIndex(min, first);
       items.some((item, k) => {
         if (k >= last) {
           return true;
@@ -766,10 +759,10 @@ export default class WUPCalendarControl<
       });
     }
 
-    if (this._opts.max) {
-      i = getIndex(this._opts.max, first);
+    if (max) {
+      i = getIndex(max, first);
       for (++i; i < items.length; ++i) {
-        items[i].setAttribute("disabled", "");
+        items[i]?.setAttribute("disabled", "");
       }
     }
 
@@ -814,44 +807,69 @@ export default class WUPCalendarControl<
 
   /** Returns disabled years & months based on options; Called only when options.exclude is pointed;
    *  where month value: y*12 + m, year value: y */
-  #disabled?: { months: number[]; years: number[] };
-  calcDisabled(): { months: number[]; years: number[] } {
+  #disabled?: { months: number[]; years: number[]; scrollFrom?: number; scrollTo?: number; min?: Date; max?: Date };
+  calcDisabled(): {
+    months: number[];
+    years: number[];
+    scrollFrom?: number;
+    scrollTo?: number;
+    min?: Date;
+    max?: Date;
+  } {
     const months: number[] = [];
     const years: number[] = [];
 
-    const ex = this._opts.exclude!;
-    let prevY: number | null = null;
-    let mCnt = 0;
-    // todo UTC
-    const min = this._opts.min ? new Date(this._opts.min).setHours(23, 59, 59, 999) : Number.MIN_SAFE_INTEGER; // shift min at the end of day
-    const max = this._opts.max ? new Date(this._opts.max).setHours(0, 0, 0, 0) : Number.MAX_SAFE_INTEGER; // shift min at the end of day
+    // eslint-disable-next-line prefer-const
+    let { min, max, utc } = this._opts;
+    if (!utc) {
+      min = min ? new Date(min.valueOf() - min.getTimezoneOffset() * 60000) : min;
+      max = max ? new Date(max.valueOf() - max.getTimezoneOffset() * 60000) : max;
+    }
 
-    const last = ex.length - 1;
-    for (let i = 0; i < ex.length; ++i) {
-      const iStart = i;
-      const y = ex[i].getFullYear();
-      const m = ex[i].getMonth();
-      const nextM = new Date(y, m + 1);
-      if (prevY !== y) {
-        prevY = y;
-        mCnt = 0;
-      }
-      for (; i < ex.length; ++i) {
-        if (ex[i + 1] >= nextM || i === last) {
-          const cnt = i - iStart;
-          const total = new Date(y, m + 1, 0).getDate();
-          const hasEnabled = ex[i].valueOf() > min && cnt !== total && ex[i].valueOf() < max;
-          if (!hasEnabled) {
-            months.push(y * 12 + m);
-            ++mCnt === 12 && years.push(y);
-          }
-          if (i !== last) {
-            break;
+    const ex = this._opts.exclude;
+    if (ex?.length) {
+      const from = min ? new Date(min).setUTCHours(23, 59, 59, 999) : Number.MIN_SAFE_INTEGER; // shift min at the end of day
+      const to = max ? new Date(max).setUTCHours(0, 0, 0, 0) : Number.MAX_SAFE_INTEGER; // shift min at the start of day
+      // todo UTC
+      let prevY: number | null = null;
+      let mCnt = 0;
+      const last = ex.length - 1;
+      for (let i = 0; i < ex.length; ++i) {
+        const iStart = i;
+        const y = ex[i].getFullYear();
+        const m = ex[i].getMonth();
+        const nextM = new Date(y, m + 1);
+        if (prevY !== y) {
+          prevY = y;
+          mCnt = 0;
+        }
+        for (; i < ex.length; ++i) {
+          if (ex[i + 1] >= nextM || i === last) {
+            const cnt = i - iStart;
+            const total = new Date(y, m + 1, 0).getDate();
+            const hasEnabled = ex[i].valueOf() > from && cnt !== total && ex[i].valueOf() < to;
+            if (!hasEnabled) {
+              months.push(y * 12 + m);
+              ++mCnt === 12 && years.push(y);
+            }
+            if (i !== last) {
+              break;
+            }
           }
         }
       }
     }
-    return { months, years };
+
+    return {
+      months,
+      years,
+      scrollFrom: min ? Date.UTC(min.getUTCFullYear(), min.getUTCMonth()) : undefined, // start of pointed month
+      scrollTo: max
+        ? new Date(Date.UTC(max.getUTCFullYear(), max.getUTCMonth() + 1)).setUTCMilliseconds(-1)
+        : undefined, // end of pointed month
+      min,
+      max,
+    };
   }
 
   #focusedItem?: HTMLElement | null;
@@ -926,16 +944,16 @@ export default class WUPCalendarControl<
     this._opts.min = this.parseValue(this.getAttribute("min") || "") ?? this._opts.min;
     this._opts.max = this.parseValue(this.getAttribute("max") || "") ?? this._opts.max;
     this._opts.exclude = this.getRefAttr<Date[]>("exclude")?.sort((a, b) => a.valueOf() - b.valueOf()); // todo need to sort only by changes
-    const isChangedDisabled =
+    const isNeedRecalc =
       propsChanged &&
       (propsChanged.includes("min") ||
         propsChanged.includes("max") ||
         propsChanged.includes("exclude") ||
         propsChanged.includes("utc"));
-    if (!propsChanged || isChangedDisabled) {
-      this.#disabled = this._opts.exclude?.length ? this.calcDisabled() : undefined;
+    if (!propsChanged || isNeedRecalc) {
+      this.#disabled = this.calcDisabled();
     }
-    isChangedDisabled && this.$refreshPicker();
+    isNeedRecalc && this.$refreshPicker();
   }
 
   override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null): void {
