@@ -457,6 +457,13 @@ export default class WUPCalendarControl<
   _picker: PickersEnum = 0;
   #refreshSelected?: () => void;
   #clearPicker?: (isIn: boolean) => Promise<void>;
+  #showNext?: (isNext: boolean) => Promise<void>;
+
+  /** Call it to manually show next/prev picker-section;
+   * @returns promise resolved by scroll-animation-end */
+  showNext(isNext: boolean): Promise<void> {
+    return !this.#showNext ? Promise.resolve() : this.#showNext?.call(this, isNext);
+  }
 
   /** Called when need set/change day/month/year picker */
   protected async changePicker(v: Date, pickerNext: PickersEnum): Promise<void> {
@@ -515,6 +522,7 @@ export default class WUPCalendarControl<
 
     renderPicker(v);
 
+    // todo here options are not observed at all: need to move calc into calcDisabled() and update gotChanges logic
     let min: undefined | Date;
     if (this._opts.min) {
       // todo UTC
@@ -526,6 +534,7 @@ export default class WUPCalendarControl<
       max = new Date(this._opts.max.getUTCFullYear(), this._opts.max.getUTCMonth() + 1);
       max.setUTCMilliseconds(-1); // end of pointed month
     }
+
     const scrollObj = scrollCarousel(this.$refCalenarItems, (n) => {
       const nextDate = r.next(v, n);
       if (nextDate > max! || nextDate < min!) {
@@ -535,6 +544,8 @@ export default class WUPCalendarControl<
       const arr = renderPicker(nextDate);
       return arr;
     });
+
+    this.#showNext = scrollObj.scroll;
 
     this.#clearPicker = async (isOut: boolean) => {
       const box = this.$refCalenar.children[1].children[0] as HTMLElement;
@@ -914,7 +925,7 @@ export default class WUPCalendarControl<
 
     this._opts.min = this.parseValue(this.getAttribute("min") || "") ?? this._opts.min;
     this._opts.max = this.parseValue(this.getAttribute("max") || "") ?? this._opts.max;
-    this._opts.exclude = this.getRefAttr<Date[]>("exclude")?.sort((a, b) => a.valueOf() - b.valueOf());
+    this._opts.exclude = this.getRefAttr<Date[]>("exclude")?.sort((a, b) => a.valueOf() - b.valueOf()); // todo need to sort only by changes
     const isChangedDisabled =
       propsChanged &&
       (propsChanged.includes("min") ||
@@ -989,8 +1000,6 @@ export default class WUPCalendarControl<
 customElements.define(tagName, WUPCalendarControl);
 
 // todo testcase: dayPickerSize === monthPickerSize === yearPickerSize
-// todo testCase: 31 Mar 2022  + 1 month > return April (but returns May)
-
 // todo testCase: min="2022-02-28" max="2022-04-01" exclude=[min, max] - Feb and Apr must be excluded
 // todo testCase: min="2022-02-27" max="2022-04-02" exclude=["2022-02-27", "2022-02-28", "2022-04-01", "2022-04-02"] - Feb and Apr must be excluded
 

@@ -24,6 +24,12 @@ beforeAll(() => {
 let el;
 initTestBaseControl({ type: WUPCalendarControl, htmlTag: "wup-calendar", onInit: (e) => (el = e) });
 
+/** @type () => Promise<void> */
+let nextFrame;
+beforeEach(() => {
+  nextFrame = h.useFakeAnimation().nextFrame;
+});
+
 describe("control.calendar", () => {
   // todo implement basic tests
   // testBaseControl({
@@ -37,7 +43,7 @@ describe("control.calendar", () => {
   //   // attrs: { items: { skip: true } },
   //   // $options: { items: { skip: true } },
   // });
-  calendarTZtest();
+  const daysSet = calendarTZtest();
 
   test("no isChanged on the same date", () => {
     el.$initValue = new Date(2022, 10, 1);
@@ -112,5 +118,118 @@ describe("control.calendar", () => {
     await h.wait();
     expect(ev.defaultPrevented).toBe(false);
     expect(el.outerHTML).toBe(was);
+  });
+
+  test("scrolling", async () => {
+    const mapContent = () => {
+      const arr = new Array(el.$refCalenarItems.children.length);
+      for (let i = 0; i < arr.length; ++i) {
+        arr[i] = el.$refCalenarItems.children.item(i).textContent;
+      }
+      return arr;
+    };
+
+    const scrollNext = async (isNext) => {
+      await nextFrame();
+      el.$refCalenarItems.dispatchEvent(
+        new WheelEvent("wheel", { cancelable: true, bubbles: true, deltaY: isNext ? 100 : -100 })
+      );
+      await nextFrame();
+      await nextFrame();
+      await nextFrame();
+    };
+
+    el.remove();
+    el.$options.utc = true;
+    el.$initValue = new Date("2022-01-31");
+    document.body.appendChild(el);
+    await h.wait();
+
+    const arr = daysSet[0].days;
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    // day picker
+    for (let i = 0; i < arr.length; ++i) {
+      expect(el.$refCalenarTitle.textContent).toBe(`${months[i]} 2022`);
+      expect(el.$refCalenarItems.children.length).toBe(42);
+      expect(`${el.$refCalenarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
+      await scrollNext(true);
+    }
+    for (let i = arr.length - 1; i !== 0; --i) {
+      await scrollNext(false);
+      expect(el.$refCalenarTitle.textContent).toBe(`${months[i]} 2022`);
+      expect(el.$refCalenarItems.children.length).toBe(42);
+      expect(`${el.$refCalenarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
+    }
+
+    // check if selectBy clicks works after scrolling
+    let item = el.$refCalenarItems.children.item(2);
+    expect(item?.textContent).toBe("2");
+    await h.userClick(item);
+    expect(el.$value).toEqual(new Date("2022-02-02"));
+
+    // month picker
+    await h.userClick(el.$refCalenarTitle);
+    await h.wait();
+    for (let i = 0; i < 4; ++i) {
+      expect(`${el.$refCalenarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
+      await scrollNext(true);
+    }
+    for (let i = 4; i !== 0; --i) {
+      await scrollNext(false);
+      expect(`${el.$refCalenarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
+    }
+
+    // year picker
+    await h.userClick(el.$refCalenarTitle);
+    await h.wait();
+    for (let i = 0; i < 4; ++i) {
+      expect(`${el.$refCalenarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
+      await scrollNext(true);
+    }
+    for (let i = 4; i !== 0; --i) {
+      await scrollNext(false);
+      expect(`${el.$refCalenarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
+    }
+
+    // test if after scrolling selection works fine
+    item = el.$refCalenarItems.children.item(2);
+    expect(item.textContent).toBe("2020");
+    await h.userClick(item);
+    await h.wait();
+    item = el.$refCalenarItems.children.item(2);
+    expect(item.textContent).toBe("Mar");
+    await h.userClick(item);
+    await h.wait();
+    item = el.$refCalenarItems.children.item(7);
+    expect(item.textContent).toBe("2");
+    await h.userClick(item);
+    await h.wait();
+    expect(el.$value.toISOString()).toBe("2020-03-02T00:00:00.000Z");
+
+    // test manual showNext
+    el.showNext(true);
+    await h.wait();
+    expect(`${el.$refCalenarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
+    el.showNext(false);
+    await h.wait();
+    expect(`${el.$refCalenarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
+    // cover case when #showNext not ready
+    el = document.createElement("wup-calendar");
+    expect(() => el.showNext()).not.toThrow();
+
+    // todo detailed scroll-tests in helper.scroll...test.js
   });
 });

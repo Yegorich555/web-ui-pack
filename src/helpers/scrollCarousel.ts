@@ -6,7 +6,7 @@ interface ScrollResult {
   /** Call this to remove listener */
   remove: () => void;
   /** Call this to fire scrolling manually */
-  scroll: (isNext: boolean) => void;
+  scroll: (isNext: boolean) => Promise<void>;
 }
 
 interface ScrollOptions {
@@ -58,12 +58,12 @@ export default function scrollCarousel(
     return () => scrollToRange(false, savedItems);
   };
 
-  const scroll = (isNext: boolean): void => {
+  const scroll = (isNext: boolean): Promise<void> => {
     const s = saveScroll();
     items.forEach((a) => ((a as any).__scrollRemove = true));
     const itemsNext = next(isNext ? 1 : -1);
     if (!itemsNext) {
-      return; // if no new items
+      return Promise.resolve(); // if no new items
     }
     if (!options?.disableRender) {
       isNext ? el.append(...itemsNext) : el.prepend(...itemsNext);
@@ -76,12 +76,14 @@ export default function scrollCarousel(
       return a;
     });
 
-    !options?.disableRender &&
+    return new Promise<void>((resolve) => {
       onScrollStop(el, () => {
         // const s2 = saveScroll(); // looks like save scroll not required
-        prevItems.forEach((a) => (a as any).__scrollRemove && a.remove());
+        !options?.disableRender && prevItems.forEach((a) => (a as any).__scrollRemove && a.remove());
+        resolve();
         // s2();
       });
+    });
   };
 
   const rOnWheel = onEvent(
