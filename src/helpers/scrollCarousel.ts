@@ -63,6 +63,7 @@ export default function scrollCarousel(
     items.forEach((a) => ((a as any).__scrollRemove = true));
     const itemsNext = next(isNext ? 1 : -1);
     if (!itemsNext) {
+      items.forEach((a) => delete (a as any).__scrollRemove);
       return Promise.resolve(); // if no new items
     }
     if (!options?.disableRender) {

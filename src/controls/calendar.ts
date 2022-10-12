@@ -524,10 +524,7 @@ export default class WUPCalendarControl<
 
     const scrollObj = scrollCarousel(this.$refCalenarItems, (n) => {
       const nextDate = r.next(v, n);
-
       const { scrollFrom: from, scrollTo: to } = this.#disabled!;
-
-      // todo when user fast scrolls somehow some items are removed
       if ((nextDate as unknown as number) > to! || (nextDate as unknown as number) < from!) {
         r.next(v, (-1 * n) as 1);
         return null;
@@ -889,9 +886,7 @@ export default class WUPCalendarControl<
   /** Select item (set aria-selected and focus) */
   protected selectItem(el: HTMLElement | undefined): void {
     this.querySelector("[aria-selected]")?.removeAttribute("aria-selected");
-    if (el) {
-      el.setAttribute("aria-selected", "true");
-    }
+    el?.setAttribute("aria-selected", "true");
   }
 
   protected override setValue(v: ValueType | undefined, canValidate = true): boolean | null {

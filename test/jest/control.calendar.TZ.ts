@@ -373,10 +373,11 @@ export default function calendarTZtest() {
         jest.setSystemTime(new Date(2022, 9, 15));
         el.remove();
         el.$options.utc = opt.utc;
-        el.$options.min = initDate(2022, 8, 30); // 30 Sep
         el.$initValue = initDate(2022, 9, 11); // 11 Oct
-        el.$options.max = initDate(2022, 10, 1); // 1 Nov
         document.body.appendChild(el);
+        await h.wait();
+        el.$options.min = initDate(2022, 8, 30); // 30 Sep
+        el.$options.max = initDate(2022, 10, 1); // 1 Nov
         await h.wait();
 
         expect(el.$refCalenarTitle.textContent).toBe("October 2022");
@@ -398,6 +399,10 @@ export default function calendarTZtest() {
         await showNext(false);
         expect(el.$refCalenarTitle.textContent).toBe("September 2022");
         expect(el.$refCalenarItems.children.length).toBe(42);
+      });
+
+      test("option [disabled]", () => {
+        throw new Error("Not implemented"); // todo implement tests
       });
     });
   };
