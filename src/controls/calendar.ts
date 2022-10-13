@@ -947,7 +947,10 @@ export default class WUPCalendarControl<
 
     this._opts.min = this.parseValue(this.getAttribute("min") || "") ?? this._opts.min;
     this._opts.max = this.parseValue(this.getAttribute("max") || "") ?? this._opts.max;
-    this._opts.exclude = this.getRefAttr<Date[]>("exclude")?.sort((a, b) => a.valueOf() - b.valueOf()); // todo need to sort only by changes
+    this._opts.exclude = this.getRefAttr<Date[]>("exclude");
+    if (!propsChanged || propsChanged.includes("exclude")) {
+      this._opts.exclude?.sort((a, b) => a.valueOf() - b.valueOf());
+    }
     const isNeedRecalc =
       propsChanged &&
       (propsChanged.includes("min") ||

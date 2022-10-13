@@ -42,8 +42,8 @@ export default function CalendarControlView() {
         <wup-calendar
           name="calendar"
           initValue="2022-03-01 23:50"
-          min="2022-02-28"
-          max="2022-04-01"
+          min="2022-01-28"
+          max="2022-05-01"
           exclude="window.myCalendarExcludeDays"
           startWith="day"
           utc
