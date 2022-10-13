@@ -4,12 +4,12 @@ import { WUPCalendarControl } from "web-ui-pack";
 const sideEffect = WUPCalendarControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
 (window as any).myCalendarValidations = { required: true } as WUPCalendar.Options["validations"];
-// (window as any).myCalendarExclude = [
-//   new Date("2022-02-28"),
-//   new Date("2022-03-16"),
-//   new Date("2022-03-18"),
-//   new Date("2022-04-01"),
-// ];
+(window as any).myCalendarExcludeDays = [
+  new Date("2022-02-28"),
+  new Date("2022-03-16"),
+  new Date("2022-03-18"),
+  new Date("2022-04-01"),
+];
 
 export default function CalendarControlView() {
   return (
@@ -44,9 +44,9 @@ export default function CalendarControlView() {
           initValue="2022-03-01 23:50"
           min="2022-02-28"
           max="2022-04-01"
-          // exclude="window.myCalendarExclude"
+          exclude="window.myCalendarExcludeDays"
           startWith="day"
-          utc={false}
+          utc
           validations="window.myCalendarValidations"
           autoFocus={false}
           autoComplete="off"

@@ -54,6 +54,17 @@ export namespace WUPCalendarIn {
   export interface ItemElement extends HTMLElement {
     _value: number;
   }
+
+  /** UTC-normalized params */
+  export interface INormalized {
+    months: number[];
+    years: number[];
+    scrollFrom?: number;
+    scrollTo?: number;
+    min: Date | undefined;
+    max: Date | undefined;
+    exclude: Date[] | undefined;
+  }
 }
 
 declare global {
@@ -768,7 +779,7 @@ export default class WUPCalendarControl<
     }
 
     if (this._picker === PickersEnum.Day) {
-      const { exclude } = this._opts;
+      const { exclude } = this.#disabled;
       if (!exclude) {
         return;
       }
@@ -802,17 +813,10 @@ export default class WUPCalendarControl<
     }
   }
 
-  /** Returns disabled years & months based on options; Called only when options.exclude is pointed;
+  /** Returns utc-normalized object based on options;
    *  where month value: y*12 + m, year value: y */
-  #disabled?: { months: number[]; years: number[]; scrollFrom?: number; scrollTo?: number; min?: Date; max?: Date };
-  calcDisabled(): {
-    months: number[];
-    years: number[];
-    scrollFrom?: number;
-    scrollTo?: number;
-    min?: Date;
-    max?: Date;
-  } {
+  #disabled?: WUPCalendarIn.INormalized;
+  calcDisabled(): WUPCalendarIn.INormalized {
     const months: number[] = [];
     const years: number[] = [];
 
@@ -823,19 +827,22 @@ export default class WUPCalendarControl<
       max = max ? new Date(max.valueOf() - max.getTimezoneOffset() * 60000) : max;
     }
 
-    const ex = this._opts.exclude;
+    let ex = this._opts.exclude;
     if (ex?.length) {
       const from = min ? new Date(min).setUTCHours(23, 59, 59, 999) : Number.MIN_SAFE_INTEGER; // shift min at the end of day
-      const to = max ? new Date(max).setUTCHours(0, 0, 0, 0) : Number.MAX_SAFE_INTEGER; // shift min at the start of day
-      // todo UTC
+      const to = max ? new Date(max).setUTCHours(0, 0, 0, 0) : Number.MAX_SAFE_INTEGER; // shift max at the start of day
+
       let prevY: number | null = null;
       let mCnt = 0;
       const last = ex.length - 1;
+      if (!this._opts.utc) {
+        ex = ex.map((v) => new Date(v.valueOf() - v.getTimezoneOffset() * 60000));
+      }
       for (let i = 0; i < ex.length; ++i) {
         const iStart = i;
-        const y = ex[i].getFullYear();
-        const m = ex[i].getMonth();
-        const nextM = new Date(y, m + 1);
+        const y = ex[i].getUTCFullYear();
+        const m = ex[i].getUTCMonth();
+        const nextM = new Date(Date.UTC(y, m + 1));
         if (prevY !== y) {
           prevY = y;
           mCnt = 0;
@@ -843,8 +850,9 @@ export default class WUPCalendarControl<
         for (; i < ex.length; ++i) {
           if (ex[i + 1] >= nextM || i === last) {
             const cnt = i - iStart;
-            const total = new Date(y, m + 1, 0).getDate();
-            const hasEnabled = ex[i].valueOf() > from && cnt !== total && ex[i].valueOf() < to;
+            const total = new Date(y, m + 1, 0).getDate(); // WARN: convert to UTC is useless
+            const hasEnabled =
+              (ex[i] as unknown as number) > from && cnt !== total && (ex[i] as unknown as number) < to;
             if (!hasEnabled) {
               months.push(y * 12 + m);
               ++mCnt === 12 && years.push(y);
@@ -866,6 +874,7 @@ export default class WUPCalendarControl<
         : undefined, // end of pointed month
       min,
       max,
+      exclude: ex,
     };
   }
 
@@ -1013,8 +1022,6 @@ export default class WUPCalendarControl<
 customElements.define(tagName, WUPCalendarControl);
 
 // todo testcase: dayPickerSize === monthPickerSize === yearPickerSize
-// todo testCase: min="2022-02-28" max="2022-04-01" exclude=[min, max] - Feb and Apr must be excluded
-// todo testCase: min="2022-02-27" max="2022-04-02" exclude=["2022-02-27", "2022-02-28", "2022-04-01", "2022-04-02"] - Feb and Apr must be excluded
 
 /**
  *  UTC -5 EST >>> DST

@@ -401,8 +401,58 @@ export default function calendarTZtest() {
         expect(el.$refCalenarItems.children.length).toBe(42);
       });
 
-      test("option [disabled]", () => {
-        throw new Error("Not implemented"); // todo implement tests
+      test("option [disabled]", async () => {
+        const { nextFrame } = h.useFakeAnimation();
+        const showNext = async (isNext: boolean) => {
+          el.showNext(isNext);
+          await nextFrame();
+          await nextFrame();
+          await nextFrame();
+        };
+        const mapContent = () => {
+          const arr = new Array(el.$refCalenarItems.children.length);
+          for (let i = 0; i < arr.length; ++i) {
+            const item = el.$refCalenarItems.children.item(i)!;
+            arr[i] = `${item.textContent}${item.hasAttribute("disabled") ? " disabled" : ""}`;
+          }
+          return arr;
+        };
+        jest.setSystemTime(new Date(2022, 9, 15));
+        el.remove();
+        el.$options.utc = opt.utc;
+        el.$initValue = initDate(2022, 9, 11); // 11 Oct
+        document.body.appendChild(el);
+        await h.wait();
+
+        const min = initDate(2022, 8, 30); // 30 Sep
+        const max = initDate(2022, 10, 1); // 1 Nov
+        el.$options.exclude = [new Date(min), new Date(max)];
+        await h.wait();
+        expect(el.$refCalenarTitle.textContent).toBe("October 2022");
+        expect(mapContent()).toMatchSnapshot();
+        el.$options.min = min;
+        el.$options.max = max;
+        el.$options.exclude = [
+          new Date(el.$options.min),
+          initDate(2022, 9, 10),
+          initDate(2022, 9, 11),
+          new Date(el.$options.max),
+        ];
+        await h.wait();
+        expect(el.$refCalenarTitle.textContent).toBe("October 2022");
+        expect(mapContent()).toMatchSnapshot();
+        await showNext(true);
+        expect(el.$refCalenarTitle.textContent).toBe("November 2022");
+        expect(el.$refCalenarItems.children.length).toBe(42);
+        expect(mapContent()).toMatchSnapshot();
+
+        await h.userClick(el.$refCalenarTitle);
+        await h.wait();
+        expect(mapContent()).toMatchSnapshot();
+
+        await h.userClick(el.$refCalenarTitle);
+        await h.wait();
+        expect(mapContent()).toMatchSnapshot();
       });
     });
   };
