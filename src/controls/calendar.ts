@@ -236,7 +236,8 @@ export default class WUPCalendarControl<
         opacity: 1;
       }
       :host li[focused] {
-        box-shadow: 0 0 4px 0 var(--ctrl-focus);
+        box-shadow: 0 0 3px 1px var(--ctrl-focus);
+        opacity: 1;
       }
       @media (hover: hover) {
         :host header>button:hover {
@@ -244,7 +245,7 @@ export default class WUPCalendarControl<
           color: var(--ctrl-clr-selected);
         }
         ol>li:hover:not([disabled]) {
-          box-shadow: 0 0 4px 0 var(--ctrl-focus);
+          box-shadow: 0 0 3px 1px var(--ctrl-focus);
           opacity: 1;
         }
       }
@@ -412,7 +413,7 @@ export default class WUPCalendarControl<
   /** Reference to header-button */
   $refCalenarTitle = document.createElement("button");
   /** Reference to container with items */
-  $refCalenarItems = document.createElement("ol");
+  $refCalenarItems: HTMLOListElement & { _items?: WUPCalendarIn.ItemElement[] } = document.createElement("ol");
 
   protected override renderControl(): void {
     const i = this.$refInput;
@@ -483,18 +484,21 @@ export default class WUPCalendarControl<
 
     let r: WUPCalendarIn.PickerResult;
     let type: string;
-    if (pickerNext === PickersEnum.Year) {
-      type = "year";
-      r = this.getYearPicker();
-      this.$refCalenarTitle.disabled = true;
-    } else if (pickerNext === PickersEnum.Month) {
-      type = "month";
-      r = this.getMonthPicker();
-      this.$refCalenarTitle.disabled = false;
-    } else {
-      type = "day";
-      r = this.getDayPicker();
-      this.$refCalenarTitle.disabled = false;
+    switch (pickerNext) {
+      case PickersEnum.Year:
+        type = "year";
+        r = this.getYearPicker();
+        this.$refCalenarTitle.disabled = true;
+        break;
+      case PickersEnum.Month:
+        type = "month";
+        r = this.getMonthPicker();
+        this.$refCalenarTitle.disabled = false;
+        break;
+      default:
+        type = "day";
+        r = this.getDayPicker();
+        this.$refCalenarTitle.disabled = false;
     }
 
     this.$refCalenar.setAttribute("calendar", type);
@@ -503,6 +507,7 @@ export default class WUPCalendarControl<
     const renderPicker = (next: Date): WUPCalendarIn.ItemElement[] => {
       this._pickerValue = next;
       const a = r.renderItems(this.$refCalenarItems, next);
+      this.$refCalenarItems._items = a;
 
       const first = a[0]._value;
       const now = new Date();
@@ -522,12 +527,8 @@ export default class WUPCalendarControl<
       };
       this.#refreshSelected();
 
-      if (this.$isFocused) {
-        // i = r.getIndex(next, first);
-        // this.focusItem(a[i]); // todo focus only when user works with keyboard
-        this.$ariaSpeak(this.$refCalenarTitle.textContent!);
-      }
       this.disableItems(a, r.getIndex);
+      this.$isFocused && this.$ariaSpeak(this.$refCalenarTitle.textContent!);
       return a;
     };
 
@@ -541,9 +542,10 @@ export default class WUPCalendarControl<
         return null;
       }
       const arr = renderPicker(nextDate);
+      this.#focused && this.focusItem(arr.find((a) => !a.hasAttribute("prev"))!);
+
       return arr;
     });
-
     this.#showNext = scrollObj.scroll;
 
     this.#clearPicker = async (isOut: boolean) => {
@@ -666,7 +668,8 @@ export default class WUPCalendarControl<
           }
         }
         this.setValue(dt as ValueType);
-        this.focusItem(target);
+        this.$ariaSpeak(this.$refInput.value);
+        // this.focusItem(target);
       },
     };
   }
@@ -878,18 +881,66 @@ export default class WUPCalendarControl<
     };
   }
 
-  #focusedItem?: HTMLElement | null;
-  /** Focus item (via aria-activedescendant) */
-  protected focusItem(el: HTMLElement): void {
-    this.#focusedItem?.removeAttribute("focused");
+  /** Virtually focused element */
+  #focused?: HTMLElement | null;
+  /** Focus/clear of item (via aria-activedescendant) */
+  protected focusItem(el: HTMLElement | null): void {
+    if (el === this.#focused) {
+      return;
+    }
+    const was = this.#focused;
+    if (was) {
+      was.removeAttribute("focused");
+      was.removeAttribute("aria-label"); // without removing label NVDA doesn't announce it again
+      was.removeAttribute("aria-disabled"); // without removing label NVDA doesn't announce it again
+    }
 
-    this.#focusedItem = el;
-    el.id = el.id || this.#ctr.$uniqueId;
-    el.setAttribute("focused", ""); // focus only if user uses keyboard otherwise only announce by clicks
-    this.$refInput.setAttribute("aria-activedescendant", el.id);
-    setTimeout(() => {
-      el.setAttribute("aria-label", `${el.textContent} ${this.$refCalenarTitle.textContent}`);
-    }, 100); // without timeout text isn't announced when switch pickers
+    this.#focused = el;
+    if (el) {
+      el.id = el.id || this.#ctr.$uniqueId;
+      el.setAttribute("focused", ""); // focus only if user uses keyboard otherwise only announce by clicks
+      this.$refInput.setAttribute("aria-activedescendant", el.id);
+      setTimeout(() => {
+        el.setAttribute("aria-label", `${el.textContent} ${this.$refCalenarTitle.textContent}`);
+        el.hasAttribute("disabled") && el.setAttribute("aria-disabled", true);
+      }, 100); // without timeout text isn't announced when switch pickers
+    } else {
+      !this.$isFocused && this.$refInput.removeAttribute("aria-activedescendant");
+    }
+  }
+
+  /** Focus sibling item OR show next/prev and focus (via focusItem) */
+  protected focusSibling(n: number): HTMLElement | null {
+    const was = this.#focused;
+    let will: Element | null = null;
+
+    const isSkip = (el: Element): boolean => el.hasAttribute("prev") || el.hasAttribute("next");
+    if (!was) {
+      will =
+        this.$refCalenarItems.querySelector("[aria-selected]:not([prev]):not([next])") ||
+        this.$refCalenarItems.querySelector("[aria-current]:not([prev]):not([next])") ||
+        this.$refCalenarItems._items!.find((el) => !el.hasAttribute("prev"))!;
+    } else {
+      const getSibling = (nn: number): Element | null => {
+        let el: Element | null = was;
+        for (let i = 0; i < Math.abs(nn); ++i) {
+          el = nn > 0 ? el.nextElementSibling : el.previousElementSibling;
+          if (!el) break;
+        }
+        if (el && isSkip(el)) {
+          return null;
+        }
+        return el;
+      };
+
+      will = getSibling(n);
+      if (!will) {
+        this.showNext(n > 0);
+        will = getSibling(n);
+      }
+    }
+    will && this.focusItem(will as HTMLElement);
+    return will as HTMLElement;
   }
 
   /** Select item (set aria-selected and focus) */
@@ -934,14 +985,12 @@ export default class WUPCalendarControl<
     let attr = this.getAttribute("startwith");
     if (attr != null) {
       attr = attr.toLowerCase();
-      if (attr === "year") {
-        this._opts.startWith = PickersEnum.Year;
-      } else if (attr === "month") {
-        this._opts.startWith = PickersEnum.Month;
-      } else if (attr === "day") {
-        this._opts.startWith = PickersEnum.Day;
-      } else {
-        delete this._opts.startWith;
+      // prettier-ignore
+      switch (attr) {
+        case "year": this._opts.startWith = PickersEnum.Year; break;
+        case "month": this._opts.startWith = PickersEnum.Month; break;
+        case "day": this._opts.startWith = PickersEnum.Day; break;
+        default: delete this._opts.startWith;
       }
     }
 
@@ -972,7 +1021,7 @@ export default class WUPCalendarControl<
   }
 
   protected override gotFocusLost(): void {
-    this.$refInput.removeAttribute("aria-activedescendant");
+    this.focusItem(null);
     super.gotFocusLost();
   }
 
@@ -1018,7 +1067,50 @@ export default class WUPCalendarControl<
 
   protected override gotKeyDown(e: KeyboardEvent): void {
     super.gotKeyDown(e);
-    // todo handle keyboard here
+    if (e.altKey || e.ctrlKey) {
+      return;
+    }
+    console.warn(e.key);
+
+    let isHandled = true;
+    const isDayPicker = this._picker === PickersEnum.Day;
+    const items = this.$refCalenarItems._items!;
+    // prettier-ignore
+    switch (e.key) {
+      case "Enter":
+      case " ":
+        if (!isDayPicker) {
+          this.changePicker(this._pickerValue!, this._picker - 1);
+        } else {
+          const el = this.#focused;
+          el && !el.hasAttribute("aria-selected") && !el.hasAttribute("disabled") && this.selectItem(el);
+        }
+        break;
+      case "ArrowLeft": this.focusSibling(-1); break;
+      case "ArrowRight": this.focusSibling(1); break;
+      case "ArrowUp": this.focusSibling(isDayPicker ? -7 : -4); break;
+      case "ArrowDown": this.focusSibling(isDayPicker ? 7 : 4); break;
+      case "Home": this.focusItem(items.find(el=>!el.hasAttribute('prev'))!); break;
+      case "End":
+        for (let i = items.length - 1;;--i) {
+          if (!items[i].hasAttribute('next')) {
+            this.focusItem(items[i])
+            break;
+          }
+        }
+       break;
+      case "PageDown":
+        this.showNext(true); // todo handle shiftKey
+        this.focusItem(this.$refCalenarItems._items!.find((el) => !el.hasAttribute("prev"))!);
+        break;
+      case "PageUp":
+        this.showNext(false); // todo handle shiftKey
+        this.focusItem(this.$refCalenarItems._items!.find((el) => !el.hasAttribute("prev"))!);
+        break;
+      default: isHandled = false;
+    }
+
+    isHandled && e.preventDefault();
   }
 }
 
@@ -1031,3 +1123,4 @@ customElements.define(tagName, WUPCalendarControl);
  *  Mar 13...14 >>>  + 1h
  *  Nov 6...7 >>> -1h
  */
+// todo reduce item focus frame or add padding for picker (extra pixel issue)

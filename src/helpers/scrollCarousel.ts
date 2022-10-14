@@ -97,6 +97,18 @@ export default function scrollCarousel(
     { passive: false }
   );
 
+  const rOnKeydown = onEvent(
+    el,
+    "keydown",
+    (e) => {
+      if (!e.altKey && !e.shiftKey && !e.ctrlKey && !e.defaultPrevented && e.key.startsWith("Page")) {
+        e.preventDefault();
+        scroll(!e.key.endsWith("Up"));
+      }
+    },
+    { passive: false }
+  );
+
   const rOnTouch = onEvent(el, "touchstart", (ev) => {
     const isYScroll = el.scrollHeight - el.offsetHeight > el.scrollWidth - el.offsetWidth;
     let xy = isYScroll ? ev.touches[0].clientY : ev.touches[0].clientX;
@@ -124,6 +136,7 @@ export default function scrollCarousel(
   return {
     remove: () => {
       rOnWheel();
+      rOnKeydown();
       rOnTouch();
     },
     scroll,

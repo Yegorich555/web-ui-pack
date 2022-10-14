@@ -5,7 +5,11 @@ import { initTestBaseControl } from "./baseControlTest";
 import * as h from "../testHelper";
 
 let el: WUPCalendarControl;
-initTestBaseControl({ type: WUPCalendarControl as any, htmlTag: "wup-calendar", onInit: (e) => (el = e) });
+initTestBaseControl({
+  type: WUPCalendarControl as any,
+  htmlTag: "wup-calendar",
+  onInit: (e) => (el = e as WUPCalendarControl),
+});
 
 /** Test function for different timezones */
 export default function calendarTZtest() {
