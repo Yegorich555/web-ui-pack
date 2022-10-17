@@ -236,6 +236,7 @@ export default class WUPCalendarControl<
         opacity: 1;
       }
       :host li[focused] {
+        //box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
         box-shadow: 0 0 3px 1px var(--ctrl-focus);
         opacity: 1;
       }
@@ -245,6 +246,7 @@ export default class WUPCalendarControl<
           color: var(--ctrl-clr-selected);
         }
         ol>li:hover:not([disabled]) {
+          //box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
           opacity: 1;
         }
@@ -1133,4 +1135,3 @@ customElements.define(tagName, WUPCalendarControl);
  *  Mar 13...14 >>>  + 1h
  *  Nov 6...7 >>> -1h
  */
-// todo reduce item focus frame or add padding for picker (extra pixel issue)
