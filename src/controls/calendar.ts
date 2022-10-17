@@ -1100,11 +1100,21 @@ export default class WUPCalendarControl<
         }
        break;
       case "PageDown":
-        this.showNext(true); // todo handle shiftKey
+        this.showNext(true);
+        if (e.shiftKey) {
+          for (let i=0; i<11;++i) {
+            this.showNext(true); // shift the whole year
+          }
+        }
         this.focusItem(this.$refCalenarItems._items!.find((el) => !el.hasAttribute("prev"))!);
         break;
       case "PageUp":
-        this.showNext(false); // todo handle shiftKey
+        this.showNext(false);
+          if (e.shiftKey) {
+            for (let i = 0; i < 11; ++i) {
+              this.showNext(false); // shift the whole year
+            }
+          }
         this.focusItem(this.$refCalenarItems._items!.find((el) => !el.hasAttribute("prev"))!);
         break;
       default: isHandled = false;
