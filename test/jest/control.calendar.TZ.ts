@@ -193,8 +193,6 @@ export default function calendarTZtest() {
             await h.userClick(item);
             expect(item.getAttribute("aria-selected")).toBe("true");
             expect(el.$value).toEqual(initDate(2022, 5, item.textContent!, 23, 50));
-
-            // todo test keyboard here
           });
         });
       });
@@ -227,8 +225,6 @@ export default function calendarTZtest() {
         expect(el.querySelector("[calendar='day']")).toBeTruthy();
         expect(el.$refCalenarTitle.textContent).toBe("January 2022");
         // other click tests see in 'navigation between pickers'
-
-        // todo test keyboard here
       });
 
       test("year picker", async () => {
@@ -260,8 +256,6 @@ export default function calendarTZtest() {
         expect(el.querySelector("[calendar='month']")).toBeTruthy();
         expect(el.$refCalenarTitle.textContent).toBe("2018");
         // other click tests see in 'navigation between pickers'
-
-        // todo test keyboard here
       });
 
       test("navigation between pickers", async () => {

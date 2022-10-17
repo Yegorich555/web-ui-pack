@@ -1,5 +1,105 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`control.calendar keyboard 1`] = `
+<input
+  aria-activedescendant="txt4"
+  aria-controls="txt2"
+  aria-owns="txt2"
+  aria-readonly="false"
+  autocomplete="off"
+  id="txt1"
+  readonly=""
+  role="combobox"
+  type="text"
+/>
+`;
+
+exports[`control.calendar keyboard 2`] = `
+<li
+  disabled=""
+  focused=""
+  id="txt4"
+  prev=""
+  role="gridcell"
+>
+  28
+</li>
+`;
+
+exports[`control.calendar keyboard 3`] = `
+<li
+  aria-disabled="true"
+  aria-label="28 March 2022"
+  disabled=""
+  focused=""
+  id="txt4"
+  prev=""
+  role="gridcell"
+>
+  28
+</li>
+`;
+
+exports[`control.calendar keyboard 4`] = `
+<input
+  aria-activedescendant="txt5"
+  aria-controls="txt2"
+  aria-owns="txt2"
+  aria-readonly="false"
+  autocomplete="off"
+  id="txt1"
+  readonly=""
+  role="combobox"
+  type="text"
+/>
+`;
+
+exports[`control.calendar keyboard 5`] = `
+<li
+  aria-label="10 March 2022"
+  focused=""
+  id="txt5"
+  next=""
+  role="gridcell"
+>
+  10
+</li>
+`;
+
+exports[`control.calendar keyboard 6`] = `
+<li
+  disabled=""
+  id="txt4"
+  prev=""
+  role="gridcell"
+>
+  28
+</li>
+`;
+
+exports[`control.calendar keyboard 7`] = `
+<input
+  aria-controls="txt2"
+  aria-owns="txt2"
+  aria-readonly="false"
+  autocomplete="off"
+  id="txt1"
+  readonly=""
+  role="combobox"
+  type="text"
+/>
+`;
+
+exports[`control.calendar keyboard 8`] = `
+<li
+  id="txt5"
+  next=""
+  role="gridcell"
+>
+  10
+</li>
+`;
+
 exports[`control.calendar scrolling 1`] = `"January 2022: 27,28,29,30,31,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,1,2,3,4,5,6"`;
 
 exports[`control.calendar scrolling 2`] = `"February 2022: 31,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,1,2,3,4,5,6,7,8,9,10,11,12,13"`;

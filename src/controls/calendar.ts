@@ -887,7 +887,7 @@ export default class WUPCalendarControl<
   #focused?: HTMLElement | null;
   /** Focus/clear of item (via aria-activedescendant) */
   protected focusItem(el: HTMLElement | null): void {
-    if (el === this.#focused) {
+    if (el?.hasAttribute("focused")) {
       return;
     }
     const was = this.#focused;
@@ -918,10 +918,11 @@ export default class WUPCalendarControl<
 
     const isSkip = (el: Element): boolean => el.hasAttribute("prev") || el.hasAttribute("next");
     if (!was) {
+      const items = this.$refCalenarItems._items!;
       will =
-        this.$refCalenarItems.querySelector("[aria-selected]:not([prev]):not([next])") ||
-        this.$refCalenarItems.querySelector("[aria-current]:not([prev]):not([next])") ||
-        this.$refCalenarItems._items!.find((el) => !el.hasAttribute("prev"))!;
+        items.find((el) => el.hasAttribute("aria-selected") && !el.hasAttribute("prev") && !el.hasAttribute("next")) ||
+        items.find((el) => el.hasAttribute("aria-current") && !el.hasAttribute("prev") && !el.hasAttribute("next")) ||
+        items.find((el) => !el.hasAttribute("prev"))!;
     } else {
       const getSibling = (nn: number): Element | null => {
         let el: Element | null = was;
@@ -1068,11 +1069,10 @@ export default class WUPCalendarControl<
   }
 
   protected override gotKeyDown(e: KeyboardEvent): void {
-    super.gotKeyDown(e);
+    super.gotKeyDown(e); // todo check when input readonly/disabled
     if (e.altKey || e.ctrlKey) {
       return;
     }
-    console.warn(e.key);
 
     let isHandled = true;
     const isDayPicker = this._picker === PickersEnum.Day;
@@ -1080,31 +1080,42 @@ export default class WUPCalendarControl<
     // prettier-ignore
     switch (e.key) {
       case "Enter":
-      case " ":
-        if (!isDayPicker) {
-          this.changePicker(this._pickerValue!, this._picker - 1);
-        } else {
-          const el = this.#focused;
-          el && !el.hasAttribute("aria-selected") && !el.hasAttribute("disabled") && this.selectItem(el);
+        isHandled = this.#focused != null; // WARN: submit by enter impossible if user focused item
+      // eslint-disable-next-line no-fallthrough
+      case " ": {
+        const el = this.#focused;
+        if (el && !el.hasAttribute("disabled")) {
+          el.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }));
         }
         break;
-      case "ArrowLeft": this.focusSibling(-1); break;
-      case "ArrowRight": this.focusSibling(1); break;
-      case "ArrowUp": this.focusSibling(isDayPicker ? -7 : -4); break;
-      case "ArrowDown": this.focusSibling(isDayPicker ? 7 : 4); break;
-      case "Home": this.focusItem(items.find(el=>!el.hasAttribute('prev'))!); break;
+      }
+      case "ArrowLeft":
+        this.focusSibling(-1);
+        break;
+      case "ArrowRight":
+        this.focusSibling(1);
+        break;
+      case "ArrowUp":
+        this.focusSibling(isDayPicker ? -7 : -4);
+        break;
+      case "ArrowDown":
+        this.focusSibling(isDayPicker ? 7 : 4);
+        break;
+      case "Home":
+        this.focusItem(items.find((el) => !el.hasAttribute("prev"))!);
+        break;
       case "End":
-        for (let i = items.length - 1;;--i) {
-          if (!items[i].hasAttribute('next')) {
-            this.focusItem(items[i])
+        for (let i = items.length - 1; ; --i) {
+          if (!items[i].hasAttribute("next")) {
+            this.focusItem(items[i]);
             break;
           }
         }
-       break;
+        break;
       case "PageDown":
         this.showNext(true);
         if (e.shiftKey) {
-          for (let i=0; i<11;++i) {
+          for (let i = 0; i < 11; ++i) {
             this.showNext(true); // shift the whole year
           }
         }
@@ -1112,14 +1123,15 @@ export default class WUPCalendarControl<
         break;
       case "PageUp":
         this.showNext(false);
-          if (e.shiftKey) {
-            for (let i = 0; i < 11; ++i) {
-              this.showNext(false); // shift the whole year
-            }
+        if (e.shiftKey) {
+          for (let i = 0; i < 11; ++i) {
+            this.showNext(false); // shift the whole year
           }
+        }
         this.focusItem(this.$refCalenarItems._items!.find((el) => !el.hasAttribute("prev"))!);
         break;
-      default: isHandled = false;
+      default:
+        isHandled = false;
     }
 
     isHandled && e.preventDefault();
@@ -1129,7 +1141,7 @@ export default class WUPCalendarControl<
 customElements.define(tagName, WUPCalendarControl);
 
 // todo testcase: dayPickerSize === monthPickerSize === yearPickerSize
-
+// todo clearByEsc works wrong. aria-selected not removed
 /**
  *  UTC -5 EST >>> DST
  *  Mar 13...14 >>>  + 1h
