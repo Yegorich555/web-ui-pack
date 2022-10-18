@@ -51,8 +51,8 @@ export default function CalendarControlView() {
           autoFocus={false}
           autoComplete="off"
         />
-        {/* <wup-calendar name="disabled" disabled initValue />
-        <wup-calendar name="readonly" readOnly initValue /> */}
+        <wup-calendar name="disabled" label="Disabled" disabled utc />
+        <wup-calendar name="disabled" label="Readonly" readOnly utc />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

@@ -108,12 +108,16 @@ export interface BaseTestOptions {
     {
       onRemove?: boolean;
       skip?: boolean;
+      value?: string;
+      /** test when attr has key of window */
+      refGlobal: any;
     }
   >;
   $options: Record<
     string,
     {
       skip?: boolean;
+      ignoreInput?: boolean;
     }
   >;
 }
@@ -171,7 +175,12 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
                 jest.advanceTimersByTime(1); // wait for ready
               }
 
-              obj.setAttribute(a, "true");
+              delete (window as any)._myTestKey;
+              const oa = opts.attrs[a];
+              if (oa?.refGlobal) {
+                (window as any)._myTestKey = oa?.refGlobal;
+              }
+              obj.setAttribute(a, oa?.value ?? (oa?.refGlobal ? "window._myTestKey" : "true"));
               jest.advanceTimersByTime(1);
               const key = Object.keys(obj.$options).find((k) => k.toLowerCase() === a) as string;
               expect(key).toBeDefined();
@@ -185,6 +194,7 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
               } else {
                 expect(obj.$options[key]).toBeFalsy();
               }
+              delete (window as any)._myTestKey;
             });
           });
         });
@@ -205,7 +215,12 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
                     jest.advanceTimersByTime(1); // wait for ready
                   }
 
-                  obj.setAttribute(attr, "true");
+                  delete (window as any)._myTestKey;
+                  const oa = opts.attrs[attr];
+                  if (oa?.refGlobal) {
+                    (window as any)._myTestKey = oa?.refGlobal;
+                  }
+                  obj.setAttribute(attr, oa?.value ?? (oa?.refGlobal ? "window._myTestKey" : "true"));
                   jest.advanceTimersByTime(1);
                   expect(obj.$options[o]).toBeDefined();
 

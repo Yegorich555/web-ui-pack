@@ -134,7 +134,7 @@ export default class WUPCalendarControl<
     return `${super.$style}
       :host {
         max-width: fit-content;
-        margin: auto;
+        margin: auto auto 20px;
         border-radius: var(--ctrl-border-radius);
         box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.1);
         background: none;
@@ -374,7 +374,7 @@ export default class WUPCalendarControl<
       v.setMinutes(v.getMinutes() + (isUTC ? 1 : -1) * v.getTimezoneOffset());
     }
 
-    return v as any;
+    return v;
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
@@ -406,7 +406,6 @@ export default class WUPCalendarControl<
   /** Converts date-string into Date according (to $options.utc), @see WUPCalendarControl.$parse */
   override parseValue(text: string): ValueType | undefined {
     /* istanbul ignore else */
-
     if (!text) {
       return undefined;
     }
@@ -983,6 +982,8 @@ export default class WUPCalendarControl<
     this._opts.utc = this.getBoolAttr("utc", this._opts.utc);
     super.gotChanges(propsChanged);
 
+    (this.$isReadOnly || this.$isDisabled) && this.focusItem(null);
+
     if (!this._opts.label) {
       this.$refTitle.classList.add(this.#ctr.classNameHidden);
     } else {
@@ -1050,7 +1051,7 @@ export default class WUPCalendarControl<
   #handleClickItem?: WUPCalendarIn.PickerResult["onItemClick"];
   /** Called when user clicks on calendar */
   protected gotClick(e: MouseEvent): void {
-    if (e.button) {
+    if (e.button || this.$isReadOnly || this.$isDisabled) {
       return; // only left button
     }
     let t = e.target as Node | HTMLElement;
@@ -1080,8 +1081,8 @@ export default class WUPCalendarControl<
   }
 
   protected override gotKeyDown(e: KeyboardEvent): void {
-    super.gotKeyDown(e); // todo check when input readonly/disabled
-    if (e.altKey) {
+    super.gotKeyDown(e);
+    if (e.altKey || this.$isReadOnly) {
       return;
     }
 

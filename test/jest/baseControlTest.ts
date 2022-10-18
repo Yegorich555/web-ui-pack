@@ -84,24 +84,24 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     test("attr [initvalue] vs $initValue", async () => {
       expect(el.$isReady).toBe(true);
       el.setAttribute("initvalue", cfg.initValues[0].attrValue);
-      expect(el.getAttribute("initValue")).toBe(cfg.initValues[0].attrValue);
+      expect(el.getAttribute("initValue")).toStrictEqual(cfg.initValues[0].attrValue);
       await h.wait(1);
-      expect(el.$initValue).toBe(cfg.initValues[0].value);
+      expect(el.$initValue).toStrictEqual(cfg.initValues[0].value);
 
       el.$initValue = cfg.initValues[1].value;
       await h.wait(1);
-      expect(el.$initValue).toBe(cfg.initValues[1].value);
+      expect(el.$initValue).toStrictEqual(cfg.initValues[1].value);
       expect(el.getAttribute("initvalue")).toBe(null);
 
       el.setAttribute("initvalue", cfg.initValues[2].attrValue);
       await h.wait(1);
-      expect(el.$initValue).toBe(cfg.initValues[2].value);
-      expect(el.getAttribute("initvalue")).toBe(cfg.initValues[2].attrValue);
+      expect(el.$initValue).toStrictEqual(cfg.initValues[2].value);
+      expect(el.getAttribute("initvalue")).toStrictEqual(cfg.initValues[2].attrValue);
 
       el.removeAttribute("initvalue");
       await h.wait(1);
       expect(el.getAttribute("initvalue")).toBe(null);
-      expect(el.$initValue).toBe(cfg.emptyValue);
+      expect(el.$initValue).toStrictEqual(cfg.emptyValue);
     });
 
     test("$initValue vs $value", () => {
@@ -267,15 +267,15 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.getAttribute("readonly")).toBe("");
       expect(el.$isReadOnly).toBe(true);
       if (cfg.testReadonly) cfg.testReadonly.true(el);
-      else expect(el.$refInput.readOnly).toBe(true);
+      else if (!cfg.$options.readOnly?.ignoreInput) expect(el.$refInput.readOnly).toBe(true);
 
       el.$options.readOnly = false;
       jest.advanceTimersByTime(1);
       expect(el.$isReadOnly).toBe(false);
       expect(el.getAttribute("readonly")).toBe(null);
-      expect(el.$refInput.readOnly).not.toBe(true);
+      if (!cfg.$options.readOnly?.ignoreInput) expect(el.$refInput.readOnly).not.toBe(true);
       if (cfg.testReadonly) cfg.testReadonly.false(el);
-      else expect(el.$refInput.readOnly).not.toBe(true);
+      else if (!cfg.$options.readOnly?.ignoreInput) expect(el.$refInput.readOnly).not.toBe(true);
     });
 
     test("name - without form", () => {
@@ -662,7 +662,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     jest.advanceTimersByTime(1);
     expect(el.$isReadOnly).toBe(true);
     if (cfg.testReadonly) cfg.testReadonly.true(el);
-    else expect(el.$refInput.readOnly).toBe(true);
+    else if (!cfg.$options.readOnly?.ignoreInput) expect(el.$refInput.readOnly).toBe(true);
 
     el.$options.readOnly = false;
     jest.advanceTimersByTime(1);
@@ -672,7 +672,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     jest.advanceTimersByTime(1);
     expect(el.$isReadOnly).toBe(false);
     if (cfg.testReadonly) cfg.testReadonly.true(el);
-    else expect(el.$refInput.readOnly).toBe(false);
+    else if (!cfg.$options.readOnly?.ignoreInput) expect(el.$refInput.readOnly).toBe(false);
 
     el.$options.readOnly = true;
     jest.advanceTimersByTime(1);

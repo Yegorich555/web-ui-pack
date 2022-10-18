@@ -1,5 +1,1283 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`control.calendar $ariaDetails 1`] = `
+<wup-calendar>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-owns="txt2"
+        aria-readonly="false"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      />
+      <span
+        class="wup-hidden"
+      >
+        Some details for screen-readers
+      </span>
+    </span>
+  </label>
+  <div
+    calendar="year"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        disabled=""
+        tabindex="-1"
+      >
+        2018 ... 2033
+      </button>
+    </header>
+    <div>
+      <div>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            role="gridcell"
+          >
+            2018
+          </li>
+          <li
+            role="gridcell"
+          >
+            2019
+          </li>
+          <li
+            role="gridcell"
+          >
+            2020
+          </li>
+          <li
+            role="gridcell"
+          >
+            2021
+          </li>
+          <li
+            aria-current="date"
+            role="gridcell"
+          >
+            2022
+          </li>
+          <li
+            role="gridcell"
+          >
+            2023
+          </li>
+          <li
+            role="gridcell"
+          >
+            2024
+          </li>
+          <li
+            role="gridcell"
+          >
+            2025
+          </li>
+          <li
+            role="gridcell"
+          >
+            2026
+          </li>
+          <li
+            role="gridcell"
+          >
+            2027
+          </li>
+          <li
+            role="gridcell"
+          >
+            2028
+          </li>
+          <li
+            role="gridcell"
+          >
+            2029
+          </li>
+          <li
+            role="gridcell"
+          >
+            2030
+          </li>
+          <li
+            role="gridcell"
+          >
+            2031
+          </li>
+          <li
+            role="gridcell"
+          >
+            2032
+          </li>
+          <li
+            role="gridcell"
+          >
+            2033
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</wup-calendar>
+`;
+
+exports[`control.calendar $ariaDetails 2`] = `
+<wup-calendar>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-owns="txt2"
+        aria-readonly="false"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      />
+    </span>
+  </label>
+  <div
+    calendar="year"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        disabled=""
+        tabindex="-1"
+      >
+        2018 ... 2033
+      </button>
+    </header>
+    <div>
+      <div>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            role="gridcell"
+          >
+            2018
+          </li>
+          <li
+            role="gridcell"
+          >
+            2019
+          </li>
+          <li
+            role="gridcell"
+          >
+            2020
+          </li>
+          <li
+            role="gridcell"
+          >
+            2021
+          </li>
+          <li
+            aria-current="date"
+            role="gridcell"
+          >
+            2022
+          </li>
+          <li
+            role="gridcell"
+          >
+            2023
+          </li>
+          <li
+            role="gridcell"
+          >
+            2024
+          </li>
+          <li
+            role="gridcell"
+          >
+            2025
+          </li>
+          <li
+            role="gridcell"
+          >
+            2026
+          </li>
+          <li
+            role="gridcell"
+          >
+            2027
+          </li>
+          <li
+            role="gridcell"
+          >
+            2028
+          </li>
+          <li
+            role="gridcell"
+          >
+            2029
+          </li>
+          <li
+            role="gridcell"
+          >
+            2030
+          </li>
+          <li
+            role="gridcell"
+          >
+            2031
+          </li>
+          <li
+            role="gridcell"
+          >
+            2032
+          </li>
+          <li
+            role="gridcell"
+          >
+            2033
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</wup-calendar>
+`;
+
+exports[`control.calendar $ariaSpeak 1`] = `
+<wup-calendar>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-describedby="my-test-id txt3 my-test-id2"
+        aria-owns="txt2"
+        aria-readonly="false"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      />
+    </span>
+  </label>
+  <div
+    calendar="year"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        disabled=""
+        tabindex="-1"
+      >
+        2018 ... 2033
+      </button>
+    </header>
+    <div>
+      <div>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            role="gridcell"
+          >
+            2018
+          </li>
+          <li
+            role="gridcell"
+          >
+            2019
+          </li>
+          <li
+            role="gridcell"
+          >
+            2020
+          </li>
+          <li
+            role="gridcell"
+          >
+            2021
+          </li>
+          <li
+            aria-current="date"
+            role="gridcell"
+          >
+            2022
+          </li>
+          <li
+            role="gridcell"
+          >
+            2023
+          </li>
+          <li
+            role="gridcell"
+          >
+            2024
+          </li>
+          <li
+            role="gridcell"
+          >
+            2025
+          </li>
+          <li
+            role="gridcell"
+          >
+            2026
+          </li>
+          <li
+            role="gridcell"
+          >
+            2027
+          </li>
+          <li
+            role="gridcell"
+          >
+            2028
+          </li>
+          <li
+            role="gridcell"
+          >
+            2029
+          </li>
+          <li
+            role="gridcell"
+          >
+            2030
+          </li>
+          <li
+            role="gridcell"
+          >
+            2031
+          </li>
+          <li
+            role="gridcell"
+          >
+            2032
+          </li>
+          <li
+            role="gridcell"
+          >
+            2033
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt3"
+  >
+    Hello
+  </section>
+</wup-calendar>
+`;
+
+exports[`control.calendar $ariaSpeak 2`] = `
+<wup-calendar>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-describedby="my-test-id my-test-id2"
+        aria-owns="txt2"
+        aria-readonly="false"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      />
+    </span>
+  </label>
+  <div
+    calendar="year"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        disabled=""
+        tabindex="-1"
+      >
+        2018 ... 2033
+      </button>
+    </header>
+    <div>
+      <div>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            role="gridcell"
+          >
+            2018
+          </li>
+          <li
+            role="gridcell"
+          >
+            2019
+          </li>
+          <li
+            role="gridcell"
+          >
+            2020
+          </li>
+          <li
+            role="gridcell"
+          >
+            2021
+          </li>
+          <li
+            aria-current="date"
+            role="gridcell"
+          >
+            2022
+          </li>
+          <li
+            role="gridcell"
+          >
+            2023
+          </li>
+          <li
+            role="gridcell"
+          >
+            2024
+          </li>
+          <li
+            role="gridcell"
+          >
+            2025
+          </li>
+          <li
+            role="gridcell"
+          >
+            2026
+          </li>
+          <li
+            role="gridcell"
+          >
+            2027
+          </li>
+          <li
+            role="gridcell"
+          >
+            2028
+          </li>
+          <li
+            role="gridcell"
+          >
+            2029
+          </li>
+          <li
+            role="gridcell"
+          >
+            2030
+          </li>
+          <li
+            role="gridcell"
+          >
+            2031
+          </li>
+          <li
+            role="gridcell"
+          >
+            2032
+          </li>
+          <li
+            role="gridcell"
+          >
+            2033
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</wup-calendar>
+`;
+
+exports[`control.calendar $show/$hide error 1`] = `
+<wup-calendar>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-owns="txt2"
+        aria-readonly="false"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      />
+    </span>
+  </label>
+  <div
+    calendar="year"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        disabled=""
+        tabindex="-1"
+      >
+        2018 ... 2033
+      </button>
+    </header>
+    <div>
+      <div>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            role="gridcell"
+          >
+            2018
+          </li>
+          <li
+            role="gridcell"
+          >
+            2019
+          </li>
+          <li
+            role="gridcell"
+          >
+            2020
+          </li>
+          <li
+            role="gridcell"
+          >
+            2021
+          </li>
+          <li
+            aria-current="date"
+            role="gridcell"
+          >
+            2022
+          </li>
+          <li
+            role="gridcell"
+          >
+            2023
+          </li>
+          <li
+            role="gridcell"
+          >
+            2024
+          </li>
+          <li
+            role="gridcell"
+          >
+            2025
+          </li>
+          <li
+            role="gridcell"
+          >
+            2026
+          </li>
+          <li
+            role="gridcell"
+          >
+            2027
+          </li>
+          <li
+            role="gridcell"
+          >
+            2028
+          </li>
+          <li
+            role="gridcell"
+          >
+            2029
+          </li>
+          <li
+            role="gridcell"
+          >
+            2030
+          </li>
+          <li
+            role="gridcell"
+          >
+            2031
+          </li>
+          <li
+            role="gridcell"
+          >
+            2032
+          </li>
+          <li
+            role="gridcell"
+          >
+            2033
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</wup-calendar>
+`;
+
+exports[`control.calendar $show/$hide error 2`] = `
+<wup-calendar
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-describedby="txt3"
+        aria-owns="txt2"
+        aria-readonly="false"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      />
+    </span>
+  </label>
+  <div
+    calendar="year"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        disabled=""
+        tabindex="-1"
+      >
+        2018 ... 2033
+      </button>
+    </header>
+    <div>
+      <div>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            role="gridcell"
+          >
+            2018
+          </li>
+          <li
+            role="gridcell"
+          >
+            2019
+          </li>
+          <li
+            role="gridcell"
+          >
+            2020
+          </li>
+          <li
+            role="gridcell"
+          >
+            2021
+          </li>
+          <li
+            aria-current="date"
+            role="gridcell"
+          >
+            2022
+          </li>
+          <li
+            role="gridcell"
+          >
+            2023
+          </li>
+          <li
+            role="gridcell"
+          >
+            2024
+          </li>
+          <li
+            role="gridcell"
+          >
+            2025
+          </li>
+          <li
+            role="gridcell"
+          >
+            2026
+          </li>
+          <li
+            role="gridcell"
+          >
+            2027
+          </li>
+          <li
+            role="gridcell"
+          >
+            2028
+          </li>
+          <li
+            role="gridcell"
+          >
+            2029
+          </li>
+          <li
+            role="gridcell"
+          >
+            2030
+          </li>
+          <li
+            role="gridcell"
+          >
+            2031
+          </li>
+          <li
+            role="gridcell"
+          >
+            2032
+          </li>
+          <li
+            role="gridcell"
+          >
+            2033
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt3"
+    role="alert"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      Some custom message here
+    </span>
+  </wup-popup>
+</wup-calendar>
+`;
+
+exports[`control.calendar $show/$hide error 3`] = `
+<wup-calendar>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-owns="txt2"
+        aria-readonly="false"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      />
+    </span>
+  </label>
+  <div
+    calendar="year"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        disabled=""
+        tabindex="-1"
+      >
+        2018 ... 2033
+      </button>
+    </header>
+    <div>
+      <div>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            role="gridcell"
+          >
+            2018
+          </li>
+          <li
+            role="gridcell"
+          >
+            2019
+          </li>
+          <li
+            role="gridcell"
+          >
+            2020
+          </li>
+          <li
+            role="gridcell"
+          >
+            2021
+          </li>
+          <li
+            aria-current="date"
+            role="gridcell"
+          >
+            2022
+          </li>
+          <li
+            role="gridcell"
+          >
+            2023
+          </li>
+          <li
+            role="gridcell"
+          >
+            2024
+          </li>
+          <li
+            role="gridcell"
+          >
+            2025
+          </li>
+          <li
+            role="gridcell"
+          >
+            2026
+          </li>
+          <li
+            role="gridcell"
+          >
+            2027
+          </li>
+          <li
+            role="gridcell"
+          >
+            2028
+          </li>
+          <li
+            role="gridcell"
+          >
+            2029
+          </li>
+          <li
+            role="gridcell"
+          >
+            2030
+          </li>
+          <li
+            role="gridcell"
+          >
+            2031
+          </li>
+          <li
+            role="gridcell"
+          >
+            2032
+          </li>
+          <li
+            role="gridcell"
+          >
+            2033
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</wup-calendar>
+`;
+
+exports[`control.calendar common tests render + styles 1`] = `<wup-calendar />`;
+
+exports[`control.calendar common tests render + styles 2`] = `
+<style>
+  .wup-hidden, [wup-hidden] {
+position: absolute;
+height: 1px; width: 1px;
+top:0;left:0;
+overflow: hidden;
+clip: rect(1px, 1px, 1px, 1px);}
+  :root {
+          --base-bg: #fff;
+          --base-text: #232323;
+          --base-focus: #00778d;
+          --base-btn-bg: #009fbc;
+          --base-btn-text: #fff;
+          --base-btn-focus: #005766;
+          --base-btn2-bg: var(--base-btn-text);
+          --base-btn2-text: var(--base-btn-bg);
+          --border-radius: 6px;
+          --anim-time: 200ms;
+          --anim: var(--anim-time, 200ms) cubic-bezier(0, 0, 0.2, 1) 0ms;
+        }
+  :root {
+        --ctrl-padding: 1.5em 1em 0.5em 1em;
+        --ctrl-focus: var(--base-focus);
+        --ctrl-focus-label: var(--base-focus);
+        --ctrl-selected: var(--ctrl-focus-label);
+        --ctrl-label: #5e5e5e;
+        --ctrl-icon: var(--ctrl-label);
+        --ctrl-icon-size: 1em;
+        --ctrl-bg: var(--base-bg);
+        --ctrl-border-radius: var(--border-radius);
+        --ctrl-err-text: #ad0000;
+        --ctrl-err-bg: #fff4fa;
+        --ctrl-err-icon-valid: green;
+        --ctrl-invalid-border: red;
+        --wup-icon-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M674.515 93.949a45.925 45.925 0 0 0-65.022 0L384.001 318.981 158.509 93.487a45.928 45.928 0 0 0-65.022 0c-17.984 17.984-17.984 47.034 0 65.018l225.492 225.494L93.487 609.491c-17.984 17.984-17.984 47.034 0 65.018s47.034 17.984 65.018 0l225.492-225.492 225.492 225.492c17.984 17.984 47.034 17.984 65.018 0s17.984-47.034 0-65.018L449.015 383.999l225.492-225.494c17.521-17.521 17.521-47.034 0-64.559z'/%3E%3C/svg%3E");
+        --wup-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath stroke='black' stroke-width='40' d='M37.691 450.599 224.76 635.864c21.528 21.32 56.11 21.425 77.478 0l428.035-426.23c21.47-21.38 21.425-56.11 0-77.478s-56.11-21.425-77.478 0L263.5 519.647 115.168 373.12c-21.555-21.293-56.108-21.425-77.478 0s-21.425 56.108 0 77.478z'/%3E%3C/svg%3E");
+        --wup-icon-dot: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='20'/%3E%3C/svg%3E");
+      }
+  :root {
+      --ctrl-clr-selected: #fff;
+      --ctrl-clr-selected-bg: #009fbc;
+      --ctrl-clr-width: 17em;
+      --ctrl-clr-cell-gap: 4px;
+      --ctrl-clr-padding: calc(4px + var(--ctrl-clr-cell-gap) / 2);
+    }
+  
+      WUP-CALENDAR {
+        contain: style;
+        display: block;
+        margin-bottom: 20px;
+        position: relative;
+        border-radius: var(--ctrl-border-radius);
+        background: var(--ctrl-bg);
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+      WUP-CALENDAR strong,
+      WUP-CALENDAR legend {
+        color: var(--ctrl-label);
+      }
+      WUP-CALENDAR:focus-within,
+      WUP-CALENDAR:focus-within &gt; [menu] {
+        z-index: 90010;
+        outline: 1px solid var(--ctrl-focus);
+      }
+      WUP-CALENDAR:focus-within strong,
+      WUP-CALENDAR:focus-within legend,
+      WUP-CALENDAR input:focus + * {
+        color: var(--ctrl-focus-label);
+      }
+      WUP-CALENDAR:not(:focus-within) strong {
+        pointer-events: none;
+      }
+      [disabled]&gt;WUP-CALENDAR,
+      WUP-CALENDAR[disabled] {
+        opacity: 0.6;
+        cursor: not-allowed;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      [disabled]&gt;WUP-CALENDAR &gt; *,
+      WUP-CALENDAR[disabled] &gt; * {
+        pointer-events: none;
+      }
+      WUP-CALENDAR[invalid],
+      WUP-CALENDAR[invalid] &gt; [menu] {
+        box-shadow: 0 0 3px 0 var(--ctrl-invalid-border);
+        outline-color: var(--ctrl-invalid-border);
+      }
+      WUP-CALENDAR label {
+        display: flex;
+        align-items: center;
+        box-sizing: border-box;
+        font: inherit;
+        cursor: inherit;
+        padding: var(--ctrl-padding);
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+      WUP-CALENDAR input {
+        padding: 0;
+        margin: 0;
+        cursor: inherit;
+      }
+      WUP-CALENDAR input + * {
+        cursor: inherit;
+      }
+      WUP-CALENDAR input:required + *:after,
+      WUP-CALENDAR input[aria-required="true"] + *:after,
+      WUP-CALENDAR fieldset[aria-required="true"] &gt; legend:after {
+        content: "*";
+        font-size: larger;
+        font-weight: bolder;
+        line-height: 0;
+      }
+      WUP-CALENDAR [error] {
+        cursor: pointer;
+        font-size: small;
+        color: var(--ctrl-err-text);
+        background: var(--ctrl-err-bg);
+        max-height: 3em;
+        overflow: auto;
+        overflow: overlay;
+      }
+      WUP-CALENDAR [error] ul {
+        margin:0; padding:2px 4px 2px;
+      }
+      WUP-CALENDAR [error] li {
+        display: flex;
+        align-items: center;
+        margin-left: -5px;
+      }
+      WUP-CALENDAR [error] li:before {
+        content: '';
+        --ctrl-icon-img: var(--wup-icon-dot);
+        --ctrl-icon: var(--ctrl-err-text);
+        
+display: inline-block;
+width: var(--ctrl-icon-size);
+min-height: var(--ctrl-icon-size);
+box-sizing: content-box;
+margin: 0;
+padding: 0 5px;
+flex: 0 0 auto;
+align-self: stretch;
+cursor: pointer;
+border: none;
+box-shadow: none;
+background: var(--ctrl-icon);
+-webkit-mask-size: var(--ctrl-icon-size);
+mask-size: var(--ctrl-icon-size);
+-webkit-mask-repeat: no-repeat;
+mask-repeat: no-repeat;
+-webkit-mask-position: center;
+mask-position: center;
+-webkit-mask-image: var(--ctrl-icon-img);
+mask-image: var(--ctrl-icon-img);
+      }
+      WUP-CALENDAR [error] li[valid] {
+        color: var(--ctrl-err-icon-valid);
+      }
+      WUP-CALENDAR [error] li[valid]:before {
+        content: '';
+        --ctrl-icon-img: var(--wup-icon-check);
+        --ctrl-icon: var(--ctrl-err-icon-valid);
+      }
+      WUP-CALENDAR:focus-within [error] {
+        max-height: none;
+      }
+      @media (hover: hover) {
+        /*WUP-CALENDAR:hover {
+          z-index: 90011;
+        }
+        WUP-CALENDAR:hover [error] {
+          max-height: none;
+        }*/
+        WUP-CALENDAR:hover,
+        WUP-CALENDAR:hover &gt; [menu] {
+          box-shadow: 0 0 3px 1px var(--ctrl-focus);
+        }
+        WUP-CALENDAR[invalid]:hover,
+        WUP-CALENDAR[invalid]:hover &gt; [menu] {
+          box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+        }
+        WUP-CALENDAR:hover label:before,
+        WUP-CALENDAR:hover label:after {
+          background-color: var(--ctrl-focus-label);
+        }
+      }
+      WUP-CALENDAR {
+        max-width: fit-content;
+        margin: auto auto 20px;
+        border-radius: var(--ctrl-border-radius);
+        box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.1);
+        background: none;
+      }
+      WUP-CALENDAR label {
+        max-width: var(--ctrl-clr-width);
+        display: block;
+        padding-right: 0;
+      }
+      WUP-CALENDAR strong {
+        display: block;
+        box-sizing: border-box;
+        max-width: 100%;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+      WUP-CALENDAR input {
+position: absolute;
+height: 1px; width: 1px;
+top:0;left:0;
+overflow: hidden;
+clip: rect(1px, 1px, 1px, 1px);}
+      WUP-CALENDAR [calendar] {
+        --ctrl-clr-cell-day-w: calc(var(--ctrl-clr-width) / 7 - var(--ctrl-clr-cell-gap));
+        --ctrl-clr-h: calc((var(--ctrl-clr-cell-day-w) + var(--ctrl-clr-cell-gap)) * 6);
+        width: var(--ctrl-clr-width);
+        padding: var(--ctrl-clr-padding);
+        border-radius: var(--ctrl-border-radius);
+        background: var(--ctrl-bg);
+        box-sizing: content-box;
+      }
+      WUP-CALENDAR [calendar="day"] {
+        --ctrl-clr-cell-w: var(--ctrl-clr-cell-day-w);
+        --ctrl-clr-cell-h: var(--ctrl-clr-cell-day-w);
+      }
+      WUP-CALENDAR [calendar="month"],
+      WUP-CALENDAR [calendar="year"] {
+        --ctrl-clr-cell-w: calc(var(--ctrl-clr-width) / 4 - var(--ctrl-clr-cell-gap));
+        --ctrl-clr-cell-h: calc((var(--ctrl-clr-h) + 1em + var(--ctrl-clr-padding)) / 4 - var(--ctrl-clr-cell-gap));
+      }
+      WUP-CALENDAR [calendar="month"] ul,
+      WUP-CALENDAR [calendar="year"] ul {
+        display: none;
+      }
+      WUP-CALENDAR header,
+      WUP-CALENDAR ol,
+      WUP-CALENDAR ul {
+        display: flex;
+        flex-wrap: wrap;
+        margin:0; padding:0;
+      }
+      WUP-CALENDAR header &gt; button {
+        box-sizing: border-box;
+        cursor: pointer;
+        margin: auto;
+        padding: 0.25em 1em;
+        font-size: larger;
+        font-weight: initial;
+        border: none;
+        border-radius: 2em;
+        color: inherit;
+        background-color: white;
+        box-shadow: none;
+      }
+      WUP-CALENDAR header &gt; button[disabled] {
+        pointer-events: none;
+      }
+      WUP-CALENDAR ol,
+      WUP-CALENDAR ul {
+        margin-top: var(--ctrl-clr-padding);
+        list-style: none;
+      }
+      WUP-CALENDAR ul {
+        color: var(--ctrl-label);
+      }
+      WUP-CALENDAR li {
+        height: var(--ctrl-clr-cell-h);
+        width: var(--ctrl-clr-cell-w);
+        padding: 0;
+        margin: calc(var(--ctrl-clr-cell-gap) / 2);
+        font: inherit;
+        line-height: var(--ctrl-clr-cell-h);
+        text-align: center;
+        border-radius: 50%;
+      }
+      WUP-CALENDAR ul&gt;li {
+        margin: 0 calc(var(--ctrl-clr-cell-gap) / 2);
+        height: 1em;
+        line-height: 1em;
+      }
+      WUP-CALENDAR li[prev],
+      WUP-CALENDAR li[next] {
+        opacity: 0.6;
+      }
+      WUP-CALENDAR li[aria-current] {
+        color: var(--ctrl-clr-selected-bg);
+        font-weight: bold;
+        opacity: 1;
+      }
+      WUP-CALENDAR li[aria-selected] {
+        background-color: var(--ctrl-clr-selected-bg);
+        color: var(--ctrl-clr-selected);
+        opacity: 1;
+      }
+      WUP-CALENDAR li[focused] {
+        //box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
+        box-shadow: 0 0 3px 1px var(--ctrl-focus);
+        opacity: 1;
+      }
+      @media (hover: hover) {
+        WUP-CALENDAR header&gt;button:hover {
+          background-color: var(--ctrl-clr-selected-bg);
+          color: var(--ctrl-clr-selected);
+        }
+        ol&gt;li:hover:not([disabled]) {
+          //box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
+          box-shadow: 0 0 3px 1px var(--ctrl-focus);
+          opacity: 1;
+        }
+      }
+      WUP-CALENDAR li[disabled] {
+        color: var(--ctrl-err-text);
+        background-color: var(--ctrl-err-bg);
+      }
+      @media not all and (prefers-reduced-motion) {
+        @keyframes WUP-ZOOM-OUT-1 {
+          0% { transform: scale(1); opacity: 1; }
+          100% { transform: scale(0); opacity: 0; }
+        }
+        @keyframes WUP-ZOOM-OUT-2 {
+          0% { transform: scale(5); opacity: 0; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes WUP-ZOOM-IN-1 {
+          0% { transform: scale(1); opacity: 1; }
+          100% { transform: scale(5); opacity: 0; }
+        }
+        @keyframes WUP-ZOOM-IN-2 {
+          0% { transform: scale(0); opacity: 0; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        WUP-CALENDAR [calendar]&gt;div {
+          overflow: hidden;
+          --anim-time: 300ms;
+        }
+        WUP-CALENDAR [zoom] { animation: none var(--anim-time) linear forwards; }
+        WUP-CALENDAR [zoom="out"] { animation-name: WUP-ZOOM-OUT-1; }
+        WUP-CALENDAR [zoom="out2"] { animation-name: WUP-ZOOM-OUT-2; }
+        WUP-CALENDAR [zoom="in"] { animation-name: WUP-ZOOM-IN-1; }
+        WUP-CALENDAR [zoom="in2"] { animation-name: WUP-ZOOM-IN-2; }
+      }
+</style>
+`;
+
 exports[`control.calendar keyboard 1`] = `
 <input
   aria-activedescendant="txt4"
@@ -3030,4 +4308,1152 @@ exports[`control.calendar utc=true year picker 1`] = `
     </div>
   </div>
 </div>
+`;
+
+exports[`control.calendar validations $options.validationShowAll 1`] = `
+<wup-calendar
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-describedby="txt3"
+        aria-owns="txt2"
+        aria-readonly="false"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      />
+    </span>
+  </label>
+  <div
+    calendar="year"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        disabled=""
+        tabindex="-1"
+      >
+        2018 ... 2033
+      </button>
+    </header>
+    <div>
+      <div>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            role="gridcell"
+          >
+            2018
+          </li>
+          <li
+            role="gridcell"
+          >
+            2019
+          </li>
+          <li
+            role="gridcell"
+          >
+            2020
+          </li>
+          <li
+            role="gridcell"
+          >
+            2021
+          </li>
+          <li
+            aria-current="date"
+            role="gridcell"
+          >
+            2022
+          </li>
+          <li
+            role="gridcell"
+          >
+            2023
+          </li>
+          <li
+            role="gridcell"
+          >
+            2024
+          </li>
+          <li
+            role="gridcell"
+          >
+            2025
+          </li>
+          <li
+            role="gridcell"
+          >
+            2026
+          </li>
+          <li
+            role="gridcell"
+          >
+            2027
+          </li>
+          <li
+            role="gridcell"
+          >
+            2028
+          </li>
+          <li
+            role="gridcell"
+          >
+            2029
+          </li>
+          <li
+            role="gridcell"
+          >
+            2030
+          </li>
+          <li
+            role="gridcell"
+          >
+            2031
+          </li>
+          <li
+            role="gridcell"
+          >
+            2032
+          </li>
+          <li
+            role="gridcell"
+          >
+            2033
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt3"
+    role="alert"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+</wup-calendar>
+`;
+
+exports[`control.calendar validations $options.validationShowAll 2`] = `
+<wup-calendar>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-owns="txt2"
+        aria-readonly="false"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      />
+    </span>
+  </label>
+  <div
+    calendar="year"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        disabled=""
+        tabindex="-1"
+      >
+        2018 ... 2033
+      </button>
+    </header>
+    <div>
+      <div>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            role="gridcell"
+          >
+            2018
+          </li>
+          <li
+            role="gridcell"
+          >
+            2019
+          </li>
+          <li
+            role="gridcell"
+          >
+            2020
+          </li>
+          <li
+            role="gridcell"
+          >
+            2021
+          </li>
+          <li
+            aria-current="date"
+            aria-selected="true"
+            role="gridcell"
+          >
+            2022
+          </li>
+          <li
+            role="gridcell"
+          >
+            2023
+          </li>
+          <li
+            role="gridcell"
+          >
+            2024
+          </li>
+          <li
+            role="gridcell"
+          >
+            2025
+          </li>
+          <li
+            role="gridcell"
+          >
+            2026
+          </li>
+          <li
+            role="gridcell"
+          >
+            2027
+          </li>
+          <li
+            role="gridcell"
+          >
+            2028
+          </li>
+          <li
+            role="gridcell"
+          >
+            2029
+          </li>
+          <li
+            role="gridcell"
+          >
+            2030
+          </li>
+          <li
+            role="gridcell"
+          >
+            2031
+          </li>
+          <li
+            role="gridcell"
+          >
+            2032
+          </li>
+          <li
+            role="gridcell"
+          >
+            2033
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</wup-calendar>
+`;
+
+exports[`control.calendar validations $options.validationShowAll 3`] = `
+<wup-calendar
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-describedby="txt6"
+        aria-owns="txt2"
+        aria-readonly="false"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      >
+        First Name
+      </strong>
+    </span>
+  </label>
+  <div
+    calendar="year"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        disabled=""
+        tabindex="-1"
+      >
+        2018 ... 2033
+      </button>
+    </header>
+    <div>
+      <div>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            role="gridcell"
+          >
+            2018
+          </li>
+          <li
+            role="gridcell"
+          >
+            2019
+          </li>
+          <li
+            role="gridcell"
+          >
+            2020
+          </li>
+          <li
+            role="gridcell"
+          >
+            2021
+          </li>
+          <li
+            aria-current="date"
+            aria-selected="true"
+            role="gridcell"
+          >
+            2022
+          </li>
+          <li
+            role="gridcell"
+          >
+            2023
+          </li>
+          <li
+            role="gridcell"
+          >
+            2024
+          </li>
+          <li
+            role="gridcell"
+          >
+            2025
+          </li>
+          <li
+            role="gridcell"
+          >
+            2026
+          </li>
+          <li
+            role="gridcell"
+          >
+            2027
+          </li>
+          <li
+            role="gridcell"
+          >
+            2028
+          </li>
+          <li
+            role="gridcell"
+          >
+            2029
+          </li>
+          <li
+            role="gridcell"
+          >
+            2030
+          </li>
+          <li
+            role="gridcell"
+          >
+            2031
+          </li>
+          <li
+            role="gridcell"
+          >
+            2032
+          </li>
+          <li
+            role="gridcell"
+          >
+            2033
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt6"
+    role="alert"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Name:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+</wup-calendar>
+`;
+
+exports[`control.calendar validations options.validationCase 1`] = `
+<wup-calendar>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-owns="txt2"
+        aria-readonly="false"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      />
+    </span>
+  </label>
+  <div
+    calendar="year"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        disabled=""
+        tabindex="-1"
+      >
+        2018 ... 2033
+      </button>
+    </header>
+    <div>
+      <div>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            role="gridcell"
+          >
+            2018
+          </li>
+          <li
+            role="gridcell"
+          >
+            2019
+          </li>
+          <li
+            role="gridcell"
+          >
+            2020
+          </li>
+          <li
+            role="gridcell"
+          >
+            2021
+          </li>
+          <li
+            aria-current="date"
+            aria-selected="true"
+            role="gridcell"
+          >
+            2022
+          </li>
+          <li
+            role="gridcell"
+          >
+            2023
+          </li>
+          <li
+            role="gridcell"
+          >
+            2024
+          </li>
+          <li
+            role="gridcell"
+          >
+            2025
+          </li>
+          <li
+            role="gridcell"
+          >
+            2026
+          </li>
+          <li
+            role="gridcell"
+          >
+            2027
+          </li>
+          <li
+            role="gridcell"
+          >
+            2028
+          </li>
+          <li
+            role="gridcell"
+          >
+            2029
+          </li>
+          <li
+            role="gridcell"
+          >
+            2030
+          </li>
+          <li
+            role="gridcell"
+          >
+            2031
+          </li>
+          <li
+            role="gridcell"
+          >
+            2032
+          </li>
+          <li
+            role="gridcell"
+          >
+            2033
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</wup-calendar>
+`;
+
+exports[`control.calendar validations options.validationCase 2`] = `
+<wup-calendar
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-describedby="txt4"
+        aria-owns="txt2"
+        aria-readonly="false"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      >
+        First Input
+      </strong>
+    </span>
+  </label>
+  <div
+    calendar="year"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        disabled=""
+        tabindex="-1"
+      >
+        2018 ... 2033
+      </button>
+    </header>
+    <div>
+      <div>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            role="gridcell"
+          >
+            2018
+          </li>
+          <li
+            role="gridcell"
+          >
+            2019
+          </li>
+          <li
+            role="gridcell"
+          >
+            2020
+          </li>
+          <li
+            role="gridcell"
+          >
+            2021
+          </li>
+          <li
+            aria-current="date"
+            aria-selected="true"
+            role="gridcell"
+          >
+            2022
+          </li>
+          <li
+            role="gridcell"
+          >
+            2023
+          </li>
+          <li
+            role="gridcell"
+          >
+            2024
+          </li>
+          <li
+            role="gridcell"
+          >
+            2025
+          </li>
+          <li
+            role="gridcell"
+          >
+            2026
+          </li>
+          <li
+            role="gridcell"
+          >
+            2027
+          </li>
+          <li
+            role="gridcell"
+          >
+            2028
+          </li>
+          <li
+            role="gridcell"
+          >
+            2029
+          </li>
+          <li
+            role="gridcell"
+          >
+            2030
+          </li>
+          <li
+            role="gridcell"
+          >
+            2031
+          </li>
+          <li
+            role="gridcell"
+          >
+            2032
+          </li>
+          <li
+            role="gridcell"
+          >
+            2033
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt4"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+</wup-calendar>
+`;
+
+exports[`control.calendar validations options.validationCase 3`] = `
+<wup-calendar
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-describedby="txt5"
+        aria-owns="txt2"
+        aria-readonly="false"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      >
+        First Input
+      </strong>
+    </span>
+  </label>
+  <div
+    calendar="year"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        disabled=""
+        tabindex="-1"
+      >
+        2018 ... 2033
+      </button>
+    </header>
+    <div>
+      <div>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            role="gridcell"
+          >
+            2018
+          </li>
+          <li
+            role="gridcell"
+          >
+            2019
+          </li>
+          <li
+            role="gridcell"
+          >
+            2020
+          </li>
+          <li
+            role="gridcell"
+          >
+            2021
+          </li>
+          <li
+            aria-current="date"
+            aria-selected="true"
+            role="gridcell"
+          >
+            2022
+          </li>
+          <li
+            role="gridcell"
+          >
+            2023
+          </li>
+          <li
+            role="gridcell"
+          >
+            2024
+          </li>
+          <li
+            role="gridcell"
+          >
+            2025
+          </li>
+          <li
+            role="gridcell"
+          >
+            2026
+          </li>
+          <li
+            role="gridcell"
+          >
+            2027
+          </li>
+          <li
+            role="gridcell"
+          >
+            2028
+          </li>
+          <li
+            role="gridcell"
+          >
+            2029
+          </li>
+          <li
+            role="gridcell"
+          >
+            2030
+          </li>
+          <li
+            role="gridcell"
+          >
+            2031
+          </li>
+          <li
+            role="gridcell"
+          >
+            2032
+          </li>
+          <li
+            role="gridcell"
+          >
+            2033
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt5"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
+</wup-calendar>
+`;
+
+exports[`control.calendar validations options.validationCase 4`] = `
+<wup-calendar
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-describedby="txt6"
+        aria-owns="txt2"
+        aria-readonly="false"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      >
+        First Input
+      </strong>
+    </span>
+  </label>
+  <div
+    calendar="year"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        disabled=""
+        tabindex="-1"
+      >
+        2018 ... 2033
+      </button>
+    </header>
+    <div>
+      <div>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            role="gridcell"
+          >
+            2018
+          </li>
+          <li
+            role="gridcell"
+          >
+            2019
+          </li>
+          <li
+            role="gridcell"
+          >
+            2020
+          </li>
+          <li
+            role="gridcell"
+          >
+            2021
+          </li>
+          <li
+            aria-current="date"
+            aria-selected="true"
+            role="gridcell"
+          >
+            2022
+          </li>
+          <li
+            role="gridcell"
+          >
+            2023
+          </li>
+          <li
+            role="gridcell"
+          >
+            2024
+          </li>
+          <li
+            role="gridcell"
+          >
+            2025
+          </li>
+          <li
+            role="gridcell"
+          >
+            2026
+          </li>
+          <li
+            role="gridcell"
+          >
+            2027
+          </li>
+          <li
+            role="gridcell"
+          >
+            2028
+          </li>
+          <li
+            role="gridcell"
+          >
+            2029
+          </li>
+          <li
+            role="gridcell"
+          >
+            2030
+          </li>
+          <li
+            role="gridcell"
+          >
+            2031
+          </li>
+          <li
+            role="gridcell"
+          >
+            2032
+          </li>
+          <li
+            role="gridcell"
+          >
+            2033
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt6"
+    role="alert"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+</wup-calendar>
+`;
+
+exports[`control.calendar with form 1`] = `
+<wup-form
+  role="form"
+>
+  <wup-calendar>
+    <label
+      for="txt1"
+    >
+      <span>
+        <input
+          aria-controls="txt2"
+          aria-owns="txt2"
+          aria-readonly="false"
+          autocomplete="off"
+          id="txt1"
+          readonly=""
+          role="combobox"
+          type="text"
+        />
+        <strong
+          class="wup-hidden"
+        >
+          First Input
+        </strong>
+      </span>
+    </label>
+    <div
+      calendar="year"
+      id="txt2"
+    >
+      <header>
+        <button
+          aria-hidden="true"
+          disabled=""
+          tabindex="-1"
+        >
+          2018 ... 2033
+        </button>
+      </header>
+      <div>
+        <div
+          zoom="in"
+        >
+          <ol
+            role="grid"
+            style="overflow: hidden;"
+          >
+            <li
+              role="gridcell"
+            >
+              2018
+            </li>
+            <li
+              role="gridcell"
+            >
+              2019
+            </li>
+            <li
+              role="gridcell"
+            >
+              2020
+            </li>
+            <li
+              role="gridcell"
+            >
+              2021
+            </li>
+            <li
+              aria-current="date"
+              role="gridcell"
+            >
+              2022
+            </li>
+            <li
+              role="gridcell"
+            >
+              2023
+            </li>
+            <li
+              role="gridcell"
+            >
+              2024
+            </li>
+            <li
+              role="gridcell"
+            >
+              2025
+            </li>
+            <li
+              role="gridcell"
+            >
+              2026
+            </li>
+            <li
+              role="gridcell"
+            >
+              2027
+            </li>
+            <li
+              role="gridcell"
+            >
+              2028
+            </li>
+            <li
+              role="gridcell"
+            >
+              2029
+            </li>
+            <li
+              role="gridcell"
+            >
+              2030
+            </li>
+            <li
+              role="gridcell"
+            >
+              2031
+            </li>
+            <li
+              role="gridcell"
+            >
+              2032
+            </li>
+            <li
+              role="gridcell"
+            >
+              2033
+            </li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </wup-calendar>
+</wup-form>
 `;

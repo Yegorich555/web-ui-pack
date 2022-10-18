@@ -4,7 +4,7 @@
  */
 import { WUPCalendarControl } from "web-ui-pack";
 import { PickersEnum } from "web-ui-pack/controls/calendar";
-import { initTestBaseControl } from "./baseControlTest";
+import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import calendarTZtest from "./control.calendar.TZ";
 import * as h from "../testHelper";
 
@@ -12,8 +12,7 @@ beforeAll(() => {
   jest.useFakeTimers();
   if (new Date().getTimezoneOffset() !== 0) {
     throw new Error(
-      `
-      Missed timezone 'UTC'.
+      `\nMissed timezone 'UTC'.
       new Date().getTimezoneOffset() is ${new Date().getTimezoneOffset()}.
       Expected NodeJS >= v16.2.0 or 17.2.0 & process.env.TZ='UTC'`
       // related issue: https://github.com/nodejs/node/issues/4230#issuecomment-163688700
@@ -29,21 +28,24 @@ initTestBaseControl({ type: WUPCalendarControl, htmlTag: "wup-calendar", onInit:
 let nextFrame;
 beforeEach(() => {
   nextFrame = h.useFakeAnimation().nextFrame;
+  jest.setSystemTime(new Date("2022-10-18T12:00:00.000Z")); // 18 Oct 2022 12:00 UTC
 });
 
 describe("control.calendar", () => {
-  // todo implement basic tests
-  // testBaseControl({
-  //   // noInputSelection: true,
-  //   initValues: [
-  //     { attrValue: "2022-02-28", value: new Date("2022-02-28") },
-  //     { attrValue: "2022-03-16", value: new Date("2022-02-28") },
-  //     { attrValue: "2022-03-18", value: new Date("2022-03-18") },
-  //   ],
-  //   validations: {},
-  //   // attrs: { items: { skip: true } },
-  //   // $options: { items: { skip: true } },
-  // });
+  testBaseControl({
+    initValues: [
+      { attrValue: "2022-02-28", value: new Date("2022-02-28") },
+      { attrValue: "2022-03-16", value: new Date("2022-03-16") },
+      { attrValue: "2022-05-20", value: new Date("2022-05-20") },
+    ],
+    validations: {},
+    attrs: {
+      min: { value: "2022-05-20" },
+      max: { value: "2022-05-21" },
+      exclude: { refGlobal: [new Date("2009-02-06")] },
+    },
+    $options: { readOnly: { ignoreInput: true } },
+  });
   const daysSet = calendarTZtest();
 
   test("no isChanged on the same date", () => {
@@ -495,5 +497,24 @@ describe("control.calendar", () => {
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", cancelable: true, bubbles: true }));
     expect(el.$refCalenarTitle.textContent).toBe("July 2022");
     expect(el.querySelector("[focused]")?.textContent).toBe("31");
+
+    el.$options.disabled = true;
+    await h.wait();
+    expect(el.querySelector("[focused]")).toBeFalsy();
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", cancelable: true, bubbles: true }));
+    expect(el.querySelector("[focused]")).toBeFalsy();
+    await h.userClick(el.$refCalenarTitle);
+    await h.wait();
+    expect(el.$refCalenarTitle.textContent).toBe("July 2022");
+
+    el.$options.disabled = false;
+    el.$options.readOnly = true;
+    await h.wait();
+    expect(el.querySelector("[focused]")).toBeFalsy();
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", cancelable: true, bubbles: true }));
+    expect(el.querySelector("[focused]")).toBeFalsy();
+    await h.userClick(el.$refCalenarTitle);
+    await h.wait();
+    expect(el.$refCalenarTitle.textContent).toBe("July 2022");
   });
 });
