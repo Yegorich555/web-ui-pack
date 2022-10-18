@@ -561,7 +561,7 @@ describe("control.calendar", () => {
 
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", cancelable: true, bubbles: true }));
     expect(el.$value).toBe(undefined);
-    expect(el.querySelector("[aria-selected]")).toBeFalsy(); // todo clearByEsc works wrong. aria-selected not removed
+    expect(el.querySelector("[aria-selected]")).toBeFalsy();
 
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", cancelable: true, bubbles: true }));
     expect(el.querySelector("[aria-selected]")).toBeTruthy();
@@ -570,4 +570,3 @@ describe("control.calendar", () => {
 });
 
 // todo e2e testcase: dayPickerSize === monthPickerSize === yearPickerSize
-// todo scroll year-picker scroll doesn't work when min: 2016-01-02 & max:2034-05-01

@@ -108,6 +108,8 @@ export default function calendarTZtest() {
     const initDate = (y: number, m: number, d: number | string, hh = 0, mm = 0) =>
       opt.utc ? new Date(Date.UTC(y, m, +d, hh, mm)) : new Date(y, m, +d, hh, mm);
 
+    const initDateStr = (utcString: string) => (opt.utc ? new Date(utcString) : new Date(`${utcString} 00:00`));
+
     describe(`utc=${opt.utc}`, () => {
       jest.useFakeTimers();
       describe("day picker", () => {
@@ -361,11 +363,6 @@ export default function calendarTZtest() {
       });
 
       test("options min/max", async () => {
-        /** todo issue:
-         *     min="2016-01-02" - impossible to scroll yearPicker to 2002...2017
-         *     min="2034-05-01" - impossible to scroll yearPicker to 2034...2049
-         */
-
         const { nextFrame } = h.useFakeAnimation();
         const showNext = async (isNext: boolean) => {
           el.showNext(isNext);
@@ -410,6 +407,40 @@ export default function calendarTZtest() {
         await showNext(false);
         expect(el.$refCalenarTitle.textContent).toBe("September 2022");
         expect(el.$refCalenarItems.children.length).toBe(42);
+
+        // with monthPicker
+        el.$options.min = initDateStr("2021-08-02");
+        el.$options.max = initDateStr("2023-01-31");
+        await h.wait();
+        await h.userClick(el.$refCalenarTitle);
+        await h.wait();
+        expect(el.$refCalenarTitle.textContent).toBe("2022");
+        await showNext(false);
+        await showNext(false);
+        expect(el.$refCalenarTitle.textContent).toBe("2021");
+        expect(el).toMatchSnapshot();
+        await showNext(true);
+        await showNext(true);
+        await showNext(true);
+        expect(el.$refCalenarTitle.textContent).toBe("2023");
+        expect(el).toMatchSnapshot();
+
+        // checking with yearPicker
+        el.$options.min = initDateStr("2016-01-02");
+        el.$options.max = initDateStr("2034-05-01");
+        await h.wait();
+        await h.userClick(el.$refCalenarTitle);
+        await h.wait();
+        expect(el.$refCalenarTitle.textContent).toBe("2018 ... 2033");
+        await showNext(false);
+        await showNext(false);
+        expect(el.$refCalenarTitle.textContent).toBe("2002 ... 2017");
+        expect(el.$refCalenarItems).toMatchSnapshot();
+        await showNext(true);
+        await showNext(true);
+        await showNext(true);
+        expect(el.$refCalenarTitle.textContent).toBe("2034 ... 2049");
+        expect(el.$refCalenarItems).toMatchSnapshot();
       });
 
       test("option [disabled]", async () => {

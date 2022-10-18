@@ -47,7 +47,7 @@ export namespace WUPCalendarIn {
   export interface PickerResult {
     renderItems: (ol: HTMLElement, v: Date) => ItemElement[];
     getIndex: (v: Date, firstValue: number) => number;
-    next: (v: Date, n: -1 | 1) => Date;
+    next: (v: Date, n: number) => Date;
     onItemClick: (e: MouseEvent & { target: HTMLElement }, targetValue: number) => void;
   }
 
@@ -491,12 +491,12 @@ export default class WUPCalendarControl<
     switch (pickerNext) {
       case PickersEnum.Year:
         type = "year";
-        r = this.getYearPicker();
+        r = this.getYearPicker(v);
         this.$refCalenarTitle.disabled = true;
         break;
       case PickersEnum.Month:
         type = "month";
-        r = this.getMonthPicker();
+        r = this.getMonthPicker(v);
         this.$refCalenarTitle.disabled = false;
         break;
       default:
@@ -542,9 +542,12 @@ export default class WUPCalendarControl<
     const scrollObj = scrollCarousel(this.$refCalenarItems, (n) => {
       const nextDate = r.next(v, n);
       const { scrollFrom: from, scrollTo: to } = this.#disabled!;
-      if ((nextDate as unknown as number) > to! || (nextDate as unknown as number) < from!) {
-        r.next(v, (-1 * n) as 1);
-        return null;
+      if (from != null || to !== null) {
+        const nextDateEnd = r.next(new Date(v), 1).setUTCMilliseconds(-1);
+        if ((from as unknown as Number) > nextDateEnd || (to as unknown as Date) < nextDate) {
+          r.next(v, (-1 * n) as 1);
+          return null;
+        }
       }
       const arr = renderPicker(nextDate);
       return arr;
@@ -679,8 +682,9 @@ export default class WUPCalendarControl<
   }
 
   /** Returns result to render month picker */
-  protected getMonthPicker(): WUPCalendarIn.PickerResult {
+  protected getMonthPicker(dateToRound: Date): WUPCalendarIn.PickerResult {
     const pageSize = 12;
+    dateToRound.setUTCMonth(0, 1); // required to define rendered range for min/max
 
     const getIndex: WUPCalendarIn.PickerResult["getIndex"] = //
       (b, first) => b.getUTCFullYear() * pageSize + b.getUTCMonth() - first;
@@ -728,12 +732,19 @@ export default class WUPCalendarControl<
   }
 
   /** Returns result to render year picker */
-  protected getYearPicker(): WUPCalendarIn.PickerResult {
+  protected getYearPicker(dateToRound: Date): WUPCalendarIn.PickerResult {
     const pageSize = 16;
 
-    const renderItems = (_ol: HTMLElement, v: Date): WUPCalendarIn.ItemElement[] => {
+    const getFirst = (v: Date): number => {
       const page = Math.floor((v.getUTCFullYear() - 1970) / pageSize);
-      let year = page * pageSize + 1970;
+      return page * pageSize + 1970;
+    };
+
+    dateToRound.setUTCMonth(0, 1);
+    dateToRound.setUTCFullYear(getFirst(dateToRound)); // required to define rendered range for min/max
+
+    const renderItems = (_ol: HTMLElement, v: Date): WUPCalendarIn.ItemElement[] => {
+      let year = getFirst(v);
 
       this.$refCalenarTitle.textContent = `${year} ... ${year + pageSize - 1}`;
       const items: WUPCalendarIn.ItemElement[] = [];
