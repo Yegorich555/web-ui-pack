@@ -968,6 +968,11 @@ export default class WUPCalendarControl<
     return r;
   }
 
+  protected override clearValue(canValidate = true): void {
+    super.clearValue(canValidate);
+    this.$isEmpty && this.selectItem(undefined);
+  }
+
   protected override gotReady(): void {
     super.gotReady();
 
@@ -1044,7 +1049,7 @@ export default class WUPCalendarControl<
     const i = this.$refInput;
     r.push(this.appendEvent(this, "click", (e) => this.gotClick(e), { passive: false }));
     r.push(this.appendEvent(i, "input", (e) => this.gotInput(e, i)));
-    r.push(this.appendEvent(i, "keypress", (e) => e.preventDefault(), { passive: false }));
+    // r.push(this.appendEvent(i, "keypress", (e) => e.preventDefault(), { passive: false })); // input is readonly so default keyPress doesn't required
     return r;
   }
 
@@ -1152,8 +1157,6 @@ export default class WUPCalendarControl<
 
 customElements.define(tagName, WUPCalendarControl);
 
-// todo testcase: dayPickerSize === monthPickerSize === yearPickerSize
-// todo clearByEsc works wrong. aria-selected not removed
 /**
  *  UTC -5 EST >>> DST
  *  Mar 13...14 >>>  + 1h

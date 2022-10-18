@@ -48,13 +48,28 @@ describe("control.calendar", () => {
   });
   const daysSet = calendarTZtest();
 
-  test("no isChanged on the same date", () => {
-    el.$initValue = new Date(2022, 10, 1);
-    el.$value = new Date(2022, 10, 1);
-    expect(el.$value !== el.$initValue).toBe(true);
-    expect(el.$isChanged).toBe(false);
-    el.$value = new Date(2022, 10, 2);
-    expect(el.$isChanged).toBe(true);
+  test("attr [startWith]", async () => {
+    const set = async (s) => {
+      el.remove();
+      el.setAttribute("startwith", s);
+      document.body.appendChild(el);
+      await h.wait();
+    };
+
+    await set("day");
+    expect(el.$options.startWith).toBe(PickersEnum.Day);
+    expect(el.$refCalenarTitle.textContent).toBe("October 2022");
+
+    await set("month");
+    expect(el.$options.startWith).toBe(PickersEnum.Month);
+    expect(el.$refCalenarTitle.textContent).toBe("2022");
+
+    await set("year");
+    expect(el.$options.startWith).toBe(PickersEnum.Year);
+    expect(el.$refCalenarTitle.textContent).toBe("2018 ... 2033");
+
+    await set("");
+    expect(el.$options.startWith).toBeFalsy();
   });
 
   test("option starWith based on value", async () => {
@@ -67,6 +82,23 @@ describe("control.calendar", () => {
     document.body.appendChild(el);
     await h.wait();
     expect(el.querySelector("[calendar='day']")).toBeTruthy();
+  });
+
+  test("no isChanged on the same date", () => {
+    el.$initValue = new Date(2022, 10, 1);
+    el.$value = new Date(2022, 10, 1);
+    expect(el.$value !== el.$initValue).toBe(true);
+    expect(el.$isChanged).toBe(false);
+    el.$value = new Date(2022, 10, 2);
+    expect(el.$isChanged).toBe(true);
+  });
+
+  test("browser autofill", async () => {
+    el.focus();
+    await h.wait();
+    el.$refInput.value = "2022-10-30";
+    el.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    expect(el.$value).toStrictEqual(new Date("2022-10-30"));
   });
 
   test("clicks handled properly", async () => {
@@ -517,4 +549,25 @@ describe("control.calendar", () => {
     await h.wait();
     expect(el.$refCalenarTitle.textContent).toBe("July 2022");
   });
+
+  test("clear by Esc", async () => {
+    el.remove();
+    el.$initValue = new Date();
+    document.body.appendChild(el);
+    await h.wait();
+    expect(el.$value).toBeTruthy();
+    expect(el.querySelector("[aria-selected]")).toBeTruthy();
+    el.focus();
+
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", cancelable: true, bubbles: true }));
+    expect(el.$value).toBe(undefined);
+    expect(el.querySelector("[aria-selected]")).toBeFalsy(); // todo clearByEsc works wrong. aria-selected not removed
+
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", cancelable: true, bubbles: true }));
+    expect(el.querySelector("[aria-selected]")).toBeTruthy();
+    expect(el.$value).toStrictEqual(el.$initValue);
+  });
 });
+
+// todo e2e testcase: dayPickerSize === monthPickerSize === yearPickerSize
+// todo scroll year-picker scroll doesn't work when min: 2016-01-02 & max:2034-05-01

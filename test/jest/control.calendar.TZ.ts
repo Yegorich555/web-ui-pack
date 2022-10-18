@@ -84,13 +84,21 @@ export default function calendarTZtest() {
 
     expect(WUPCalendarControl.$parse("2022-10-25 20:40", true).toISOString()).toBe("2022-10-25T20:40:00.000Z");
     expect(WUPCalendarControl.$parse("2022-10-25 20:40", false).toLocaleString()).toBe(ds);
+
+    expect(() => WUPCalendarControl.$parse("hello")).toThrow();
   });
 
   describe("$daysOfMonth", () => {
     daysSet.forEach((ds) => {
       test(`2022..2023 firstOfWeek: ${ds.label}`, () => {
         ds.days.forEach((d, i) => {
-          expect(WUPCalendarControl.$daysOfMonth(2022, i, ds.startOfWeek)).toEqual(d);
+          if (ds.startOfWeek === 1) {
+            // eslint-disable-next-line jest/no-conditional-expect
+            expect(WUPCalendarControl.$daysOfMonth(2022, i)).toEqual(d); // just for coverage default
+          } else {
+            // eslint-disable-next-line jest/no-conditional-expect
+            expect(WUPCalendarControl.$daysOfMonth(2022, i, ds.startOfWeek)).toEqual(d);
+          }
         });
       });
     });

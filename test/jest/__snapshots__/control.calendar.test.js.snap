@@ -4936,7 +4936,6 @@ exports[`control.calendar validations options.validationCase 2`] = `
           </li>
           <li
             aria-current="date"
-            aria-selected="true"
             role="gridcell"
           >
             2022
