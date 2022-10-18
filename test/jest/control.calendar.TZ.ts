@@ -353,6 +353,11 @@ export default function calendarTZtest() {
       });
 
       test("options min/max", async () => {
+        /** todo issue:
+         *     min="2016-01-02" - impossible to scroll yearPicker to 2002...2017
+         *     min="2034-05-01" - impossible to scroll yearPicker to 2034...2049
+         */
+
         const { nextFrame } = h.useFakeAnimation();
         const showNext = async (isNext: boolean) => {
           el.showNext(isNext);

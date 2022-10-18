@@ -3,6 +3,7 @@
  * @jest-environment-options {"timezone": "UTC"}
  */
 import { WUPCalendarControl } from "web-ui-pack";
+import { PickersEnum } from "web-ui-pack/controls/calendar";
 import { initTestBaseControl } from "./baseControlTest";
 import calendarTZtest from "./control.calendar.TZ";
 import * as h from "../testHelper";
@@ -247,7 +248,7 @@ describe("control.calendar", () => {
     expect(el.querySelector("[calendar='day']")).toBeTruthy();
     expect(el.$refCalenarTitle.textContent).toBe("March 2022");
 
-    // check logic of focusItem() before
+    // checking logic of focusItem() before
     el.$options.min = new Date("2022-03-01");
     await h.wait();
     let item = el.$refCalenarItems.children[0];
@@ -270,6 +271,7 @@ describe("control.calendar", () => {
     expect(el.$refInput).toMatchSnapshot();
     expect(item).toMatchSnapshot();
 
+    // checking dayPicker
     el.$options.min = new Date("2022-01-01");
     el.$options.max = new Date("2023-03-29");
     el.focus();
@@ -395,6 +397,103 @@ describe("control.calendar", () => {
     expect(el.$value.toISOString()).toBe("2022-03-01T00:00:00.000Z");
     expect(isPrevented).toBe(true);
 
-    // todo check with month/year pickers
+    // monthPicker
+    el.$options.min = new Date("2021-02-15");
+    await h.wait();
+    await h.userClick(el.$refCalenarTitle);
+    await h.wait();
+    expect(el.$refCalenarTitle.textContent).toBe("2022");
+    expect(el.querySelector("[focused]")?.textContent).toBe("Jan");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", cancelable: true, bubbles: true }));
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", cancelable: true, bubbles: true }));
+    expect(el.querySelector("[focused]")?.textContent).toBe("Mar");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", cancelable: true, bubbles: true }));
+    expect(el.querySelector("[focused]")?.textContent).toBe("Feb");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", cancelable: true, bubbles: true }));
+    expect(el.querySelector("[focused]")?.textContent).toBe("Jun");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", cancelable: true, bubbles: true }));
+    expect(el.querySelector("[focused]")?.textContent).toBe("Feb");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "PageUp", cancelable: true, bubbles: true }));
+    expect(el.$refCalenarTitle.textContent).toBe("2021");
+    expect(el.querySelector("[focused]")?.textContent).toBe("Jan");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "PageDown", cancelable: true, bubbles: true }));
+    expect(el.$refCalenarTitle.textContent).toBe("2022");
+    expect(el.querySelector("[focused]")?.textContent).toBe("Jan");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "End", cancelable: true, bubbles: true }));
+    expect(el.querySelector("[focused]")?.textContent).toBe("Dec");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Home", cancelable: true, bubbles: true }));
+    expect(el.querySelector("[focused]")?.textContent).toBe("Jan");
+
+    // yearPicker
+    el.$options.min = new Date("2002-02-15");
+    await h.wait();
+    await h.userClick(el.$refCalenarTitle);
+    await h.wait();
+    expect(el.$refCalenarTitle.textContent).toBe("2018 ... 2033");
+    expect(el.querySelector("[focused]")?.textContent).toBe("2018");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", cancelable: true, bubbles: true }));
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", cancelable: true, bubbles: true }));
+    expect(el.querySelector("[focused]")?.textContent).toBe("2020");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", cancelable: true, bubbles: true }));
+    expect(el.querySelector("[focused]")?.textContent).toBe("2019");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", cancelable: true, bubbles: true }));
+    expect(el.querySelector("[focused]")?.textContent).toBe("2023");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", cancelable: true, bubbles: true }));
+    expect(el.querySelector("[focused]")?.textContent).toBe("2019");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "PageUp", cancelable: true, bubbles: true }));
+    expect(el.$refCalenarTitle.textContent).toBe("2002 ... 2017");
+    expect(el.querySelector("[focused]")?.textContent).toBe("2002");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "PageDown", cancelable: true, bubbles: true }));
+    expect(el.$refCalenarTitle.textContent).toBe("2018 ... 2033");
+    expect(el.querySelector("[focused]")?.textContent).toBe("2018");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "End", cancelable: true, bubbles: true }));
+    expect(el.querySelector("[focused]")?.textContent).toBe("2033");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Home", cancelable: true, bubbles: true }));
+    expect(el.querySelector("[focused]")?.textContent).toBe("2018");
+
+    // skip when user clicks alt
+    expect(el.querySelector("[focused]")?.textContent).toBe("2018");
+    isPrevented = null;
+    el.$refInput.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "ArrowRight", altKey: true, cancelable: true, bubbles: true })
+    );
+    expect(isPrevented).toBe(false);
+    expect(el.querySelector("[focused]")?.textContent).toBe("2018");
+
+    // just for coverage => any other key
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "S", cancelable: true, bubbles: true }));
+    expect(el.querySelector("[focused]")?.textContent).toBe("2018");
+
+    // checking focusFirst
+    jest.setSystemTime(new Date("2022-03-20"));
+    el.remove();
+    el.$options.startWith = PickersEnum.Day;
+    el.$initValue = undefined;
+    el.$value = undefined;
+    document.body.appendChild(el);
+    await h.wait();
+    el.focus();
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", cancelable: true, bubbles: true }));
+    expect(el.querySelector("[focused]")?.textContent).toBe("20"); // it takes aria-current if aria-selected not defined
+
+    el.focusItem(null);
+    el.showNext(false);
+    await h.wait();
+    expect(el.$refCalenarTitle.textContent).toBe("February 2022");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", cancelable: true, bubbles: true }));
+    expect(el.querySelector("[focused]")?.textContent).toBe("1"); // it takes first of month if no aria-selected and aria-current
+
+    // checking when no prevSibling
+    el.remove();
+    el.$initValue = new Date("2022-08-01");
+    document.body.appendChild(el);
+    await h.wait();
+    expect(el.$refCalenarItems.firstElementChild.textContent).toBe("1");
+    el.focus();
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", cancelable: true, bubbles: true }));
+    expect(el.querySelector("[focused]")?.textContent).toBe("1");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", cancelable: true, bubbles: true }));
+    expect(el.$refCalenarTitle.textContent).toBe("July 2022");
+    expect(el.querySelector("[focused]")?.textContent).toBe("31");
   });
 });

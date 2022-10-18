@@ -397,6 +397,7 @@ export default class WUPCalendarControl<
 
   /** Call when need to re-rended picker (min/max changed etc.) */
   $refreshPicker(): void {
+    /* istanbul ignore else */
     if (this._pickerValue != null) {
       this.changePicker(this._pickerValue, this._picker);
     }
@@ -404,6 +405,8 @@ export default class WUPCalendarControl<
 
   /** Converts date-string into Date according (to $options.utc), @see WUPCalendarControl.$parse */
   override parseValue(text: string): ValueType | undefined {
+    /* istanbul ignore else */
+
     if (!text) {
       return undefined;
     }
@@ -531,6 +534,7 @@ export default class WUPCalendarControl<
 
       this.disableItems(a, r.getIndex);
       this.$isFocused && this.$ariaSpeak(this.$refCalenarTitle.textContent!);
+      this.#focused && this.focusItem(a.find((e) => !e.hasAttribute("prev"))!);
       return a;
     };
 
@@ -544,8 +548,6 @@ export default class WUPCalendarControl<
         return null;
       }
       const arr = renderPicker(nextDate);
-      this.#focused && this.focusItem(arr.find((a) => !a.hasAttribute("prev"))!);
-
       return arr;
     });
     this.#showNext = scrollObj.scroll;
@@ -654,6 +656,7 @@ export default class WUPCalendarControl<
         this.selectItem(target);
         let dt = new Date(v);
         const a = this.$value;
+        /* istanbul ignore else */
         if (a) {
           if (this._opts.utc) {
             dt.setUTCHours(a.getUTCHours(), a.getUTCMinutes(), a.getUTCSeconds(), a.getUTCMilliseconds());
@@ -806,6 +809,7 @@ export default class WUPCalendarControl<
       for (i = 0; i < items.length && k < arr.length; ++i) {
         const el = items[i];
         for (; k < arr.length; ++k) {
+          /* istanbul ignore else */
           if (arr[k] > el._value) {
             break;
           } else if (arr[k] === el._value) {
@@ -920,8 +924,8 @@ export default class WUPCalendarControl<
     if (!was) {
       const items = this.$refCalenarItems._items!;
       will =
-        items.find((el) => el.hasAttribute("aria-selected") && !el.hasAttribute("prev") && !el.hasAttribute("next")) ||
-        items.find((el) => el.hasAttribute("aria-current") && !el.hasAttribute("prev") && !el.hasAttribute("next")) ||
+        items.find((el) => el.hasAttribute("aria-selected") && !isSkip(el)) ||
+        items.find((el) => el.hasAttribute("aria-current") && !isSkip(el)) ||
         items.find((el) => !el.hasAttribute("prev"))!;
     } else {
       const getSibling = (nn: number): Element | null => {
@@ -1009,6 +1013,7 @@ export default class WUPCalendarControl<
         propsChanged.includes("max") ||
         propsChanged.includes("exclude") ||
         propsChanged.includes("utc"));
+    /* istanbul ignore else */
     if (!propsChanged || isNeedRecalc) {
       this.#disabled = this.calcDisabled();
     }
@@ -1021,6 +1026,11 @@ export default class WUPCalendarControl<
     const i = this.$refInput;
     i.readOnly = true;
     this.$isReadOnly ? i.removeAttribute("aria-readonly") : i.setAttribute("aria-readonly", false); // input must be readonly to hide mobile-keyboard on focus
+  }
+
+  protected override gotRemoved(): void {
+    this.focusItem(null); // possible re-init control
+    super.gotRemoved();
   }
 
   protected override gotFocusLost(): void {
@@ -1044,6 +1054,7 @@ export default class WUPCalendarControl<
       return; // only left button
     }
     let t = e.target as Node | HTMLElement;
+    /* istanbul ignore else */
     if (this.$refCalenarTitle === t || this.$refCalenarTitle.contains(t)) {
       e.preventDefault();
       this._picker !== PickersEnum.Year && this.changePicker(this._pickerValue!, this._picker + 1);
@@ -1070,7 +1081,7 @@ export default class WUPCalendarControl<
 
   protected override gotKeyDown(e: KeyboardEvent): void {
     super.gotKeyDown(e); // todo check when input readonly/disabled
-    if (e.altKey || e.ctrlKey) {
+    if (e.altKey) {
       return;
     }
 

@@ -42,8 +42,8 @@ export default function CalendarControlView() {
         <wup-calendar
           name="calendar"
           initValue="2022-03-01 23:50"
-          min="2022-01-28"
-          max="2022-05-01"
+          min="2016-01-02"
+          max="2034-05-01"
           exclude="window.myCalendarExcludeDays"
           startWith="day"
           utc
@@ -51,6 +51,8 @@ export default function CalendarControlView() {
           autoFocus={false}
           autoComplete="off"
         />
+        {/* <wup-calendar name="disabled" disabled initValue />
+        <wup-calendar name="readonly" readOnly initValue /> */}
         <button type="submit">Submit</button>
       </wup-form>
     </Page>
