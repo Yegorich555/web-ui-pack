@@ -68,7 +68,7 @@ export default function ControlsView() {
             el.$options.disabled = false;
             el.$options.readOnly = false;
             el.$onSubmit = (e) => {
-              console.warn("sumbitted model", e.$model);
+              console.warn("submitted model", e.$model);
               // eslint-disable-next-line no-promise-executor-return
               return new Promise((resolve) => setTimeout(resolve, 1000));
             };
@@ -135,7 +135,7 @@ const customHTML = [
 const form = document.querySelector("wup-form")!;
 form.$onSubmit = (e) => {
   // post request here
-  console.warn("sumbitted model", e.$model);
+  console.warn("submitted model", e.$model);
   // return promise to block form and show spinner
   return new Promise<boolean>((resolve) => setTimeout(resolve, 1000));
 };

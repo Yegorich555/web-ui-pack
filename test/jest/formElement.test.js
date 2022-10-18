@@ -350,7 +350,7 @@ describe("formElement", () => {
       expect(submitEv).toBeCalledTimes(1);
       expect(submitEv.mock.calls[0][0].submitter).toBe(inputs[0]);
 
-      // try again when sumbitter is not HTMLElement
+      // try again when submitter is not HTMLElement
       jest.clearAllMocks();
       expect($willSubmitEv).toBeCalledTimes(0);
       const svg = el.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "svg"));

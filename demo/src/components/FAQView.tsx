@@ -34,7 +34,7 @@ export default function FAQView() {
           },
           {
             link: "control-spinner",
-            question: "FormElement. SelectControl. How to change spinner (appears on submit if return promise result)'",
+            question: "FormElement, SelectControl. How to change spinner (appears on submit if return promise result)",
             answer: <Code code={codeChangeSpinner} />,
           },
           {
@@ -61,7 +61,7 @@ export default function FAQView() {
           {
             link: "asterisk-for-required",
             question:
-              "Controls. How to remove asterisk at the end of label for controls with validationRule 'required'",
+              "Controls. How to remove asterisk at the end of label for controls with validationRule [required]",
             answer: (
               <>
                 Apply styles below
@@ -74,8 +74,8 @@ export default function FAQView() {
             question: "Controls. How to change parsing attribute [initvalue]",
             answer: (
               <>
-                When applied attribute [initvalue] controls use method parseValue() to try to find the real. By default
-                it&apos;s search by string-type. But you can override behavior
+                When applied attribute [initvalue] controls use method parseValue(). By default it&apos;s search by
+                string-type. But you can override behavior
                 <Code code={codeParseInitValue} />
               </>
             ),
@@ -129,7 +129,7 @@ const form = document.body.appendChild(document.createElement("wup-form"));
 const el = form.appendChild(document.createElement("wup-text"));
 el.$options.name = undefined; // To completely detach from FormElement skip option name
 // OR
-el.$options.name = ""; // To partially detach (exlcude from model, isChanged, but included in validations, sumbit)
+el.$options.name = ""; // To partially detach (exlcude from model, isChanged, but included in validations, submit)
 /* WARNING: event $change bubbles from control.
  * To subscribe for only attached controls changes you need filter it yourself */
 form.addEventListener("$change", (e) => {

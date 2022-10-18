@@ -35,7 +35,7 @@ export default function PasswordControlView() {
         ref={(el) => {
           if (el) {
             el.$initModel = { pwd: "somePwdHere", required: "yes" };
-            el.$onSubmit = (e) => console.warn("sumbitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
       >

@@ -26,7 +26,7 @@ export default function TextControlView() {
         ref={(el) => {
           if (el) {
             el.$initModel = { email: "test@google.com", required: "yes" };
-            el.$onSubmit = (e) => console.warn("sumbitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
       >
