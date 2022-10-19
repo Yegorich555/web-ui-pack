@@ -85,7 +85,7 @@ export default function calendarTZtest() {
     expect(WUPCalendarControl.$parse("2022-10-25 20:40", true).toISOString()).toBe("2022-10-25T20:40:00.000Z");
     expect(WUPCalendarControl.$parse("2022-10-25 20:40", false).toLocaleString()).toBe(ds);
 
-    expect(() => WUPCalendarControl.$parse("hello")).toThrow();
+    expect(() => WUPCalendarControl.$parse("hello", false)).toThrow();
   });
 
   describe("$daysOfMonth", () => {
@@ -362,7 +362,7 @@ export default function calendarTZtest() {
         expect(el.querySelector("[aria-selected]")?.textContent).toBe("26");
       });
 
-      test("options min/max", async () => {
+      test("$options.min & .max", async () => {
         const { nextFrame } = h.useFakeAnimation();
         const showNext = async (isNext: boolean) => {
           el.showNext(isNext);
@@ -443,7 +443,7 @@ export default function calendarTZtest() {
         expect(el.$refCalenarItems).toMatchSnapshot();
       });
 
-      test("option [disabled]", async () => {
+      test("$options.exclude (attr [disabled])", async () => {
         const { nextFrame } = h.useFakeAnimation();
         const showNext = async (isNext: boolean) => {
           el.showNext(isNext);
