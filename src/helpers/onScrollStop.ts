@@ -32,7 +32,7 @@ export default function onScrollStop(
         i = 0;
       } else if (i === 3) {
         if (wasScrolled || options?.onceNotStarted) {
-          listener.call(el); // todo isolate via setTimeout
+          setTimeout(() => listener.call(el));
           if (options?.once || options?.onceNotStarted) {
             return;
           }

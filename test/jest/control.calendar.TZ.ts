@@ -5,6 +5,17 @@ import { initTestBaseControl } from "./baseControlTest";
 import * as h from "../testHelper";
 
 let el: WUPCalendarControl;
+const mockShowNext = () => {
+  const { nextFrame } = h.useFakeAnimation();
+  const showNext = async (isNext: boolean) => {
+    el.showNext(isNext);
+    await nextFrame();
+    await nextFrame();
+    await nextFrame();
+    jest.advanceTimersByTime(1);
+  };
+  return showNext;
+};
 initTestBaseControl({
   type: WUPCalendarControl as any,
   htmlTag: "wup-calendar",
@@ -363,13 +374,7 @@ export default function calendarTZtest() {
       });
 
       test("$options.min & .max", async () => {
-        const { nextFrame } = h.useFakeAnimation();
-        const showNext = async (isNext: boolean) => {
-          el.showNext(isNext);
-          await nextFrame();
-          await nextFrame();
-          await nextFrame();
-        };
+        const showNext = mockShowNext();
         const mapContent = () => {
           const arr = new Array(el.$refCalenarItems.children.length);
           for (let i = 0; i < arr.length; ++i) {
@@ -444,13 +449,7 @@ export default function calendarTZtest() {
       });
 
       test("$options.exclude (attr [disabled])", async () => {
-        const { nextFrame } = h.useFakeAnimation();
-        const showNext = async (isNext: boolean) => {
-          el.showNext(isNext);
-          await nextFrame();
-          await nextFrame();
-          await nextFrame();
-        };
+        const showNext = mockShowNext();
         const mapContent = () => {
           const arr = new Array(el.$refCalenarItems.children.length);
           for (let i = 0; i < arr.length; ++i) {

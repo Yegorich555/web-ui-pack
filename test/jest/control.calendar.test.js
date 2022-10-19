@@ -172,6 +172,7 @@ describe("control.calendar", () => {
       await nextFrame();
       await nextFrame();
       await nextFrame();
+      jest.advanceTimersByTime(1);
     };
 
     el.remove();

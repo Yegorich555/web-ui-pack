@@ -2085,7 +2085,9 @@ exports[`control.calendar utc=false $options.min & .max 4`] = `
     aria-live="off"
     class="wup-hidden"
     id="txt4"
-  />
+  >
+    2021
+  </section>
 </wup-calendar>
 `;
 
@@ -4207,7 +4209,9 @@ exports[`control.calendar utc=true $options.min & .max 4`] = `
     aria-live="off"
     class="wup-hidden"
     id="txt4"
-  />
+  >
+    2021
+  </section>
 </wup-calendar>
 `;
 
