@@ -55,7 +55,7 @@ export namespace WUPCalendarIn {
     _value: number;
   }
 
-  /** UTC-normalized params */
+  /** UTC-normalized params for disabled dates */
   export interface INormalized {
     months: number[];
     years: number[];
@@ -833,9 +833,9 @@ export default class WUPCalendarControl<
     }
   }
 
-  /** Returns utc-normalized object based on options;
-   *  where month value: y*12 + m, year value: y */
   #disabled?: WUPCalendarIn.INormalized;
+  /** Returns utc-normalized object based on options;
+   *  where monthValue: y*12 + m, yearValue: y */
   calcDisabled(): WUPCalendarIn.INormalized {
     const months: number[] = [];
     const years: number[] = [];
@@ -869,7 +869,7 @@ export default class WUPCalendarControl<
         }
         for (; i < ex.length; ++i) {
           if (ex[i + 1] >= nextM || i === last) {
-            const cnt = i - iStart;
+            const cnt = i - iStart + 1;
             const total = new Date(y, m + 1, 0).getDate(); // WARN: convert to UTC is useless
             const hasEnabled =
               (ex[i] as unknown as number) > from && cnt !== total && (ex[i] as unknown as number) < to;

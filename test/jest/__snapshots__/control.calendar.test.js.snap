@@ -1643,6 +1643,48 @@ exports[`control.calendar utc=false $options.exclude (attr [disabled]) 5`] = `
 ]
 `;
 
+exports[`control.calendar utc=false $options.exclude (attr [disabled]) 6`] = `
+[
+  "2018",
+  "2019",
+  "2020",
+  "2021",
+  "2022 disabled",
+  "2023",
+  "2024",
+  "2025",
+  "2026",
+  "2027",
+  "2028",
+  "2029",
+  "2030",
+  "2031",
+  "2032",
+  "2033",
+]
+`;
+
+exports[`control.calendar utc=false $options.exclude (attr [disabled]) 7`] = `
+[
+  "Jan",
+  "Feb disabled",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+]
+`;
+
 exports[`control.calendar utc=false $options.min & .max 1`] = `
 [
   "26 disabled",
@@ -3626,6 +3668,48 @@ exports[`control.calendar utc=true $options.exclude (attr [disabled]) 5`] = `
   "2031 disabled",
   "2032 disabled",
   "2033 disabled",
+]
+`;
+
+exports[`control.calendar utc=true $options.exclude (attr [disabled]) 6`] = `
+[
+  "2018",
+  "2019",
+  "2020",
+  "2021",
+  "2022 disabled",
+  "2023",
+  "2024",
+  "2025",
+  "2026",
+  "2027",
+  "2028",
+  "2029",
+  "2030",
+  "2031",
+  "2032",
+  "2033",
+]
+`;
+
+exports[`control.calendar utc=true $options.exclude (attr [disabled]) 7`] = `
+[
+  "Jan",
+  "Feb disabled",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
 ]
 `;
 

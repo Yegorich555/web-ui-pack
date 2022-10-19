@@ -495,6 +495,40 @@ export default function calendarTZtest() {
         await h.userClick(el.$refCalenarTitle);
         await h.wait();
         expect(mapContent()).toMatchSnapshot();
+
+        // checking when the whole year is disabled
+        el.remove();
+        el.$options.startWith = PickersEnum.Year | 0;
+        el.$options.min = undefined;
+        el.$options.max = undefined;
+        let arr = [];
+        for (
+          let dt = initDate(2022, 0, 1);
+          dt < initDate(2023, 0, 1);
+          opt.utc ? dt.setUTCDate(dt.getUTCDate() + 1) : dt.setDate(dt.getDate() + 1)
+        ) {
+          arr.push(new Date(dt));
+        }
+        el.$options.exclude = arr;
+        document.body.appendChild(el);
+        await h.wait();
+        expect(mapContent()).toMatchSnapshot(); // only 2022 year must be disabled
+
+        // checking when the whole month is disabled
+        el.remove();
+        el.$options.startWith = PickersEnum.Month | 0;
+        arr = [];
+        for (
+          let dt = initDate(2022, 1, 1);
+          dt < initDate(2022, 2, 1);
+          opt.utc ? dt.setUTCDate(dt.getUTCDate() + 1) : dt.setDate(dt.getDate() + 1)
+        ) {
+          arr.push(new Date(dt));
+        }
+        el.$options.exclude = arr;
+        document.body.appendChild(el);
+        await h.wait();
+        expect(mapContent()).toMatchSnapshot(); // only Feb 2022 must be disabled
       });
     });
   };
