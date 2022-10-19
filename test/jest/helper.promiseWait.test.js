@@ -71,7 +71,7 @@ describe("helper.promiseWait", () => {
     const fnResolved = jest.fn();
     const mainPromise = new Promise((resolve) => setTimeout(resolve, 2));
     promiseWait(mainPromise, 5, (wait) => fn(wait)).finally(fnResolved);
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     expect(fnResolved).toBeCalled();
     expect(fn).toBeCalledTimes(2);
     expect(fn.mock.calls[0][0]).toBe(true);

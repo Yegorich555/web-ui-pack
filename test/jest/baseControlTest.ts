@@ -267,15 +267,15 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.getAttribute("readonly")).toBe("");
       expect(el.$isReadOnly).toBe(true);
       if (cfg.testReadonly) cfg.testReadonly.true(el);
-      else if (!cfg.$options.readOnly?.ignoreInput) expect(el.$refInput.readOnly).toBe(true);
+      else if (!cfg.$options?.readOnly?.ignoreInput) expect(el.$refInput.readOnly).toBe(true);
 
       el.$options.readOnly = false;
       jest.advanceTimersByTime(1);
       expect(el.$isReadOnly).toBe(false);
       expect(el.getAttribute("readonly")).toBe(null);
-      if (!cfg.$options.readOnly?.ignoreInput) expect(el.$refInput.readOnly).not.toBe(true);
+      if (!cfg.$options?.readOnly?.ignoreInput) expect(el.$refInput.readOnly).not.toBe(true);
       if (cfg.testReadonly) cfg.testReadonly.false(el);
-      else if (!cfg.$options.readOnly?.ignoreInput) expect(el.$refInput.readOnly).not.toBe(true);
+      else if (!cfg.$options?.readOnly?.ignoreInput) expect(el.$refInput.readOnly).not.toBe(true);
     });
 
     test("name - without form", () => {
@@ -662,7 +662,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     jest.advanceTimersByTime(1);
     expect(el.$isReadOnly).toBe(true);
     if (cfg.testReadonly) cfg.testReadonly.true(el);
-    else if (!cfg.$options.readOnly?.ignoreInput) expect(el.$refInput.readOnly).toBe(true);
+    else if (!cfg.$options?.readOnly?.ignoreInput) expect(el.$refInput.readOnly).toBe(true);
 
     el.$options.readOnly = false;
     jest.advanceTimersByTime(1);
@@ -672,7 +672,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     jest.advanceTimersByTime(1);
     expect(el.$isReadOnly).toBe(false);
     if (cfg.testReadonly) cfg.testReadonly.true(el);
-    else if (!cfg.$options.readOnly?.ignoreInput) expect(el.$refInput.readOnly).toBe(false);
+    else if (!cfg.$options?.readOnly?.ignoreInput) expect(el.$refInput.readOnly).toBe(false);
 
     el.$options.readOnly = true;
     jest.advanceTimersByTime(1);

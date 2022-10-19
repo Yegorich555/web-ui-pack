@@ -176,7 +176,7 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
               }
 
               delete (window as any)._myTestKey;
-              const oa = opts.attrs[a];
+              const oa = opts?.attrs[a];
               if (oa?.refGlobal) {
                 (window as any)._myTestKey = oa?.refGlobal;
               }
@@ -216,7 +216,7 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
                   }
 
                   delete (window as any)._myTestKey;
-                  const oa = opts.attrs[attr];
+                  const oa = opts?.attrs[attr];
                   if (oa?.refGlobal) {
                     (window as any)._myTestKey = oa?.refGlobal;
                   }
