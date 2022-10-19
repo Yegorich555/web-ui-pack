@@ -793,12 +793,8 @@ export default class WUPCalendarControl<
       }
     }
 
-    if (!this.#disabled) {
-      return;
-    }
-
     if (this._picker === PickersEnum.Day) {
-      const { exclude } = this.#disabled;
+      const { exclude } = this.#disabled!;
       if (!exclude) {
         return;
       }
@@ -815,7 +811,7 @@ export default class WUPCalendarControl<
         }
       }
     } else {
-      const arr = this._picker === PickersEnum.Month ? this.#disabled.months : this.#disabled.years;
+      const arr = this._picker === PickersEnum.Month ? this.#disabled!.months : this.#disabled!.years;
       let k = 0;
       for (i = 0; i < items.length && k < arr.length; ++i) {
         const el = items[i];

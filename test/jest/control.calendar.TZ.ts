@@ -514,6 +514,14 @@ export default function calendarTZtest() {
         await h.wait();
         expect(mapContent()).toMatchSnapshot(); // only 2022 year must be disabled
 
+        // checking daypicker when the whole year is disabled
+        el.remove();
+        el.$initValue = initDate(2022, 1, 1);
+        el.$options.startWith = PickersEnum.Day | 0;
+        document.body.appendChild(el);
+        await h.wait();
+        expect(mapContent()).toMatchSnapshot(); // expected all days are disabled
+
         // checking when the whole month is disabled
         el.remove();
         el.$options.startWith = PickersEnum.Month | 0;
@@ -529,6 +537,22 @@ export default function calendarTZtest() {
         document.body.appendChild(el);
         await h.wait();
         expect(mapContent()).toMatchSnapshot(); // only Feb 2022 must be disabled
+
+        // checking daypicker when the whole month is disabled
+        el.remove();
+        el.$initValue = initDate(2022, 1, 1);
+        el.$options.startWith = PickersEnum.Day | 0;
+        document.body.appendChild(el);
+        await h.wait();
+        expect(mapContent()).toMatchSnapshot(); // expected all days beside prev/ntext are disabled
+
+        // checking dayPicker when no excluded for current month
+        el.remove();
+        el.$options.startWith = PickersEnum.Day | 0;
+        el.$options.exclude = [initDate(2021, 0, 1)];
+        document.body.appendChild(el);
+        await h.wait();
+        expect(el.querySelector("[disabled]")).toBeFalsy(); // expected no disabled
       });
     });
   };
