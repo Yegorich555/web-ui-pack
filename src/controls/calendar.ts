@@ -186,7 +186,7 @@ export default class WUPCalendarControl<
         box-sizing: border-box;
         cursor: pointer;
         margin: auto;
-        padding: 0.25em 1em;
+        padding: 4px 1em;
         font-size: larger;
         font-weight: initial;
         border: none;

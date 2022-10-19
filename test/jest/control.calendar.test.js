@@ -625,5 +625,3 @@ describe("control.calendar", () => {
     expect(el.$refCalenarTitle.textContent).toBe("January 2018");
   });
 });
-
-// todo e2e testcase: dayPickerSize === monthPickerSize === yearPickerSize
