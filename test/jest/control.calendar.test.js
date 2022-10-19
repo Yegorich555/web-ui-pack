@@ -567,6 +567,63 @@ describe("control.calendar", () => {
     expect(el.querySelector("[aria-selected]")).toBeTruthy();
     expect(el.$value).toStrictEqual(el.$initValue);
   });
+
+  test("animation", async () => {
+    el.remove();
+    el.$options.startWith = PickersEnum.Day;
+    document.body.appendChild(el);
+    await h.wait();
+
+    const animEl = el.$refCalenar.children[1].children[0];
+    const orig = window.getComputedStyle;
+    jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
+      if (animEl === elem) {
+        return { animationDuration: "0.3s" };
+      }
+      return orig(elem);
+    });
+
+    expect(el.$refCalenarTitle.textContent).toBe("October 2022");
+    await h.userClick(el.$refCalenarTitle);
+    expect(animEl.getAttribute("zoom")).toBe("out");
+    await h.wait(300); // cases when events not fired
+    expect(animEl.getAttribute("zoom")).toBe("out2");
+    animEl.dispatchEvent(new Event("animationstart"));
+    animEl.dispatchEvent(new Event("animationend"));
+    await Promise.resolve();
+    expect(animEl.getAttribute("zoom")).toBe(null);
+    await h.wait();
+
+    expect(el.$refCalenarTitle.textContent).toBe("2022");
+    await h.userClick(el.$refCalenarTitle);
+    expect(animEl.getAttribute("zoom")).toBe("out");
+    await h.wait(300); // cases when events not fired
+    expect(animEl.getAttribute("zoom")).toBe("out2");
+    animEl.dispatchEvent(new Event("animationstart"));
+    await h.wait(300); // cases when animationend event somehow destroyed
+    await Promise.resolve();
+    expect(animEl.getAttribute("zoom")).toBe(null);
+    await h.wait();
+
+    expect(el.$refCalenarTitle.textContent).toBe("2018 ... 2033");
+    await h.userClick(el.$refCalenarItems.firstElementChild);
+    expect(animEl.getAttribute("zoom")).toBe("in");
+    await h.wait(300);
+    expect(animEl.getAttribute("zoom")).toBe("in2");
+    await h.wait(300);
+    expect(animEl.getAttribute("zoom")).toBe(null);
+    await h.wait();
+
+    expect(el.$refCalenarTitle.textContent).toBe("2018");
+    await h.userClick(el.$refCalenarItems.firstElementChild);
+    expect(animEl.getAttribute("zoom")).toBe("in");
+    await h.wait(300);
+    expect(animEl.getAttribute("zoom")).toBe("in2");
+    await h.wait(300);
+    expect(animEl.getAttribute("zoom")).toBe(null);
+    await h.wait();
+    expect(el.$refCalenarTitle.textContent).toBe("January 2018");
+  });
 });
 
 // todo e2e testcase: dayPickerSize === monthPickerSize === yearPickerSize

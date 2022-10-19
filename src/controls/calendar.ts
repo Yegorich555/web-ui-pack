@@ -542,6 +542,7 @@ export default class WUPCalendarControl<
     const scrollObj = scrollCarousel(this.$refCalenarItems, (n) => {
       const nextDate = r.next(v, n);
       const { scrollFrom: from, scrollTo: to } = this.#disabled!;
+      /* istanbul ignore else */
       if (from != null || to !== null) {
         const nextDateEnd = r.next(new Date(v), 1).setUTCMilliseconds(-1);
         if ((from as unknown as Number) > nextDateEnd || (to as unknown as Date) < nextDate) {
