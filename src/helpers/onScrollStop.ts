@@ -1,38 +1,50 @@
-/** Returns callback on scrolling is stopped (via checking scroll position on every frame)
- * @param {HTMLElement} el HTMLElement to listen for`
+/** Returns callback when scrolling is stopped (via checking scroll position every frame-render)
+ * @param {HTMLElement} el HTMLElement to listen for
  * @param {Function} listener Callback invoked on event
  * @returns removeListener callback
  */
-export default function onScrollStop(el: HTMLElement, listener: (this: HTMLElement) => void): () => void {
+export default function onScrollStop(
+  el: HTMLElement,
+  listener: (this: HTMLElement) => void,
+  options?: {
+    once?: boolean;
+    /** Call once even if scrolling isn't started */
+    onceNotStarted?: boolean;
+  }
+): () => void {
   let { scrollTop: y, scrollLeft: x } = el;
-
   let id: number | null;
+  let wasScrolled = false;
   const check = async (): Promise<void> => {
+    let i = 0;
     while (1) {
-      for (let i = 0; i < 3; ++i) {
-        // eslint-disable-next-line no-loop-func, no-promise-executor-return
-        await new Promise<any>((resolve) => (id = requestAnimationFrame(resolve)));
-        if (id === null) {
-          break;
-        }
+      ++i;
+      // eslint-disable-next-line no-loop-func, no-promise-executor-return
+      await new Promise<any>((resolve) => (id = requestAnimationFrame(resolve)));
+      if (id === null) {
+        return; // skip other actions if it's cancelled
       }
-
-      if (el.scrollTop === y && el.scrollLeft === x) {
-        id = null;
-        listener.call(el);
-        break;
-      } else {
+      const isScrolled = el.scrollTop !== y || el.scrollLeft !== x;
+      if (isScrolled) {
+        wasScrolled = true;
         y = el.scrollTop;
         x = el.scrollLeft;
+        i = 0;
+      } else if (i === 3) {
+        if (wasScrolled || options?.onceNotStarted) {
+          listener.call(el); // todo isolate via setTimeout
+          if (options?.once || options?.onceNotStarted) {
+            return;
+          }
+        }
+        wasScrolled = false;
+        i = 0;
       }
     }
   };
 
   check();
-  return () => {
-    id != null && window.cancelAnimationFrame(id);
-    id = null;
-  };
+  return () => (id = null);
 }
 
 // function to check intervals

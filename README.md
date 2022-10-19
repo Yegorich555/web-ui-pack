@@ -52,7 +52,7 @@ npm install web-ui-pack
 - [x] [CheckControl (Checkbox)](src/controls/check.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/check)
 - [x] [RadioControl (RadioGroup)](src/controls/radio.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/radio)
 - [x] [SelectControl (ComboBox, Dropdown)](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
-- [ ] Calendar
+- [x] [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
 - [ ] DateControl
 - [ ] SelectManyControl (MultiSelect)
 - [ ] TextareaControl
@@ -108,6 +108,7 @@ npm install web-ui-pack
              - [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
              - [BaseComboControl](src/controls/baseCombo.ts)
                - [SelectControl](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
+           - [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
 
 ---
 
@@ -216,6 +217,7 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 - [**observer**](#helpersobserver) ⇒ `converts object to observable (via Proxy) to allow listen for changes`
 - [**onEvent**(...args)](src/helpers/onEvent.ts) ⇒ `More strict (for Typescript) wrapper of addEventListener() that returns callback with removeListener()`
 - [**onFocusGot**(el: HTMLElement, listener: (ev) => void, {debounceMs: 100, once: false, ...})](src/helpers/onFocusGot.ts) ⇒ `Fires when element/children takes focus once (fires again after onFocusLost on element)`
+- [**onScrollStop**(el: HTMLElement, listener: (this: HTMLElement) => void), {once: false, ...}](src/helpers/onScrollStop.ts) ⇒ `Returns callback when scrolling is stopped (via checking scroll position every frame-render)`
 - [**onFocusLost**(el: HTMLElement, listener: (ev) => void, {debounceMs: 100, once: false, ...})](src/helpers/onFocusLost.ts) ⇒ `Fires when element/children completely lost focus`
 - [**onSpy**(object: {}, method: string, listener: (...args) => void](src/helpers/onSpy.ts) ⇒ `Spy on method-call of object`
 - [**promiseWait**(promise: Promise, ms: number, smartOrCallback: boolean | Function) => Promise](src/helpers/promiseWait.ts) ⇒ `Produce Promise during for "no less than pointed time"; it helps for avoding spinner blinking during the very fast api-request in case: pending > waitResponse > resetPending`

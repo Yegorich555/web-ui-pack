@@ -12,7 +12,10 @@
 
 - Controls throws error if attr [validations] has object-key to undefined value
 - Added elements
-  - CalendarControl (...coming soon)
+  - [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
+- Added [helpers](README.md#helpers)
+  - [`onScrollStop`](src/helpers/onScrollStop.ts)
+  - scrollCarousel (...coming soon)
 
 ## 0.1.2 (Oct 4, 2022)
 

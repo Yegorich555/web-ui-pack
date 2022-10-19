@@ -78,12 +78,16 @@ export default function scrollCarousel(
     });
 
     return new Promise<void>((resolve) => {
-      onScrollStop(el, () => {
-        // const s2 = saveScroll(); // looks like save scroll not required
-        !options?.disableRender && prevItems.forEach((a) => (a as any).__scrollRemove && a.remove());
-        resolve();
-        // s2();
-      });
+      onScrollStop(
+        el,
+        () => {
+          // const s2 = saveScroll(); // looks like save scroll not required
+          !options?.disableRender && prevItems.forEach((a) => (a as any).__scrollRemove && a.remove());
+          resolve();
+          // s2();
+        },
+        { onceNotStarted: true }
+      );
     });
   };
 
