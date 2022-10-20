@@ -625,7 +625,9 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=false $
     aria-live="off"
     class="wup-hidden"
     id="txt4"
-  />
+  >
+    2021
+  </section>
 </wup-calendar>
 `;
 
@@ -2747,7 +2749,9 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=true $o
     aria-live="off"
     class="wup-hidden"
     id="txt4"
-  />
+  >
+    2021
+  </section>
 </wup-calendar>
 `;
 

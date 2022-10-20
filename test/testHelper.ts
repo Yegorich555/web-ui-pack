@@ -398,6 +398,29 @@ export async function userClick(el: HTMLElement, opts?: MouseEventInit) {
   el.dispatchEvent(new MouseEvent("click", o()));
 }
 
+/** Simulate user swipe with 10ms between events */
+export async function userSwipe(
+  el: HTMLElement,
+  opts: { movements: Array<{ dx: number; dy: number; delayMs?: number }> }
+) {
+  let clientX = el.offsetWidth / 2;
+  let clientY = el.offsetHeight / 2;
+  el.dispatchEvent(new TouchEvent("touchstart", { bubbles: true, touches: [{ clientX, clientY }] as any }));
+  const t = { now: Date.now() };
+  for (let i = 0; i < opts.movements.length; ++i) {
+    const m = opts.movements[i];
+    await wait(m?.delayMs ?? 10);
+    t.now += m?.delayMs ?? 10;
+    clientX += m.dx;
+    clientY += m.dy;
+    const ev = new TouchEvent("touchmove", { bubbles: true, touches: [{ clientX, clientY }] as any });
+    jest.spyOn(ev, "timeStamp", "get").mockImplementation(() => t.now);
+    el.dispatchEvent(ev);
+  }
+  await wait(10);
+  el.dispatchEvent(new TouchEvent("touchend", { bubbles: true, touches: [{ clientX, clientY }] as any }));
+}
+
 /* watchfix: https://github.com/jsdom/jsdom/issues/3209 */
 export class TestMouseMoveEvent extends MouseEvent {
   movementX = 0;

@@ -10,6 +10,8 @@ interface ScrollResult {
 }
 
 interface ScrollOptions {
+  /** Point true if need to implement scroll by X instead of scroll by Y */
+  isXScroll?: boolean;
   /** Point 'true' when you need to skip built-in render-functions (for React app, Vue etc.) */
   disableRender?: boolean;
   /** Time between scrolls during the user-swipe on touchpads
@@ -20,9 +22,11 @@ interface ScrollOptions {
   swipeDebounceDelta?: number;
 }
 
+// WARN: this helper isn't appended to Readme.md because it's very specific and mostly works only for calendar
+
 /**
- * Function makes pointed element scrollable and implements carousel-scroll behavior (during the scroll appends new items)
- *
+ * Function makes pointed element scrollable and implements carousel-scroll behavior (appends new items during the scrolling)
+ * usage-details you can find in CalendarControl
  * @param el HTMLElement that need to make scrollable
  * @param next Callback when need to append new items on layout
  */
@@ -32,11 +36,17 @@ export default function scrollCarousel(
   options?: ScrollOptions
 ): ScrollResult {
   el.style.maxHeight = "";
-  if (el.offsetHeight) el.style.maxHeight = `${el.offsetHeight}px`;
+  el.style.maxWidth = "";
+  const { maxHeight, maxWidth } = getComputedStyle(el);
+  const isYScroll = !options?.isXScroll;
+
+  // WARN: it affects on flexible container when user rotates mobile and size must be changed ?
+  /* istanbul ignore else */
+  if (isYScroll && !maxHeight?.endsWith("px") && el.offsetHeight) el.style.maxHeight = `${el.offsetHeight}px`;
+  /* istanbul ignore else */
+  if (!isYScroll && !maxWidth?.endsWith("px") && el.offsetWidth) el.style.maxWidth = `${el.offsetWidth}px`;
   el.style.overflow = "hidden";
   el.style.touchAction = "none";
-
-  // todo leave details: if need render images it will produce not-loaded images during the scrolling
 
   /** Scroll to center of range */
   const scrollToRange = (isSmooth: boolean, items: HTMLElement[]): void => {
@@ -61,11 +71,13 @@ export default function scrollCarousel(
   const scroll = (isNext: boolean): Promise<void> => {
     const s = saveScroll();
     items.forEach((a) => ((a as any).__scrollRemove = true));
+
     const itemsNext = next(isNext ? 1 : -1);
-    if (!itemsNext) {
+    if (!itemsNext?.length) {
       items.forEach((a) => delete (a as any).__scrollRemove);
       return Promise.resolve(); // if no new items
     }
+    /* istanbul ignore else */
     if (!options?.disableRender) {
       isNext ? el.append(...itemsNext) : el.prepend(...itemsNext);
     }
@@ -114,9 +126,9 @@ export default function scrollCarousel(
   );
 
   const rOnTouch = onEvent(el, "touchstart", (ev) => {
-    const isYScroll = el.scrollHeight - el.offsetHeight > el.scrollWidth - el.offsetWidth;
     let xy = isYScroll ? ev.touches[0].clientY : ev.touches[0].clientX;
     let stamp = 0;
+
     const rOnTouchMove = onEvent(
       ev.target as HTMLElement, // WARN: it's important to attach to target otherwise event not fired when element is removed: https://developer.mozilla.org/en-US/docs/Web/API/Touch/target
       "touchmove",

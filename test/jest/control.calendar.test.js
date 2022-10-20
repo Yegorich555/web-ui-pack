@@ -266,7 +266,7 @@ describe("control.calendar", () => {
     el = document.createElement("wup-calendar");
     expect(() => el.showNext()).not.toThrow();
 
-    // todo detailed scroll-tests in helper.scroll...test.js
+    // detailed scroll-tests in helper.scrollCarousel.test.js
   });
 
   test("keyboard", async () => {

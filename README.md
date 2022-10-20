@@ -69,6 +69,7 @@ npm install web-ui-pack
 - [ ] FormModalElement
 - [ ] InfiniteScroll
 - [ ] VirtualScroll
+- [ ] CarouselElement (Slide)
 - [ ] TableElement ?
 
 ## Components
