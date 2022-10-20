@@ -15,7 +15,7 @@
   - [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
 - Added [helpers](README.md#helpers)
   - [`onScrollStop`](src/helpers/onScrollStop.ts)
-  - scrollCarousel (...coming soon)
+  - [`scrollCarousel`](src/helpers/scrollCarousel.ts)
 
 ## 0.1.2 (Oct 4, 2022)
 

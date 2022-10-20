@@ -22,11 +22,12 @@ interface ScrollOptions {
   swipeDebounceDelta?: number;
 }
 
-// WARN: this helper isn't appended to Readme.md because it's very specific and mostly works only for calendar
+// WARN: this helper is very specific and works only for calendar
 
 /**
- * Function makes pointed element scrollable and implements carousel-scroll behavior (appends new items during the scrolling)
- * usage-details you can find in CalendarControl
+ * Function makes pointed element scrollable and implements carousel-scroll behavior (appends new items during the scrolling).
+ * Supports swipe/pageUp/pageDown/mouseWheel events.
+ * usage-details you can find in CalendarControl implementation
  * @param el HTMLElement that need to make scrollable
  * @param next Callback when need to append new items on layout
  */
