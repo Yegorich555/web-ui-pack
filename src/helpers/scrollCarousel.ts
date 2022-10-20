@@ -118,7 +118,7 @@ export default function scrollCarousel(
     let xy = isYScroll ? ev.touches[0].clientY : ev.touches[0].clientX;
     let stamp = 0;
     const rOnTouchMove = onEvent(
-      el,
+      ev.target as HTMLElement, // WARN: it's important to attach to target otherwise event not fired when element is removed: https://developer.mozilla.org/en-US/docs/Web/API/Touch/target
       "touchmove",
       (e) => {
         const xyNew = isYScroll ? e.touches[0].clientY : e.touches[0].clientX;
