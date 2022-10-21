@@ -206,6 +206,7 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 **WARN**: don't use `import {focusFirst} from "web-ui-pack;` because in this case the whole web-ui-pack module traps in compilation of dev-bundle and increases time of compilation
 
 - [**animateDropdown**(el: HTMLElement, timeMs=300, isClose=false)](src/helpers/animateDropdown.ts) ⇒ `Animate (open/close) element as dropdown via scale and counter-scale for children`
+- [**dateToString**(v:Date, format="yyyy-MM-dd hh:mm:ss AZ")](src/helpers/dateToString.ts) ⇒ `Returns a string representation of a date-time according to pointed format`
 - [**findScrollParent**(el: HTMLElement)](src/helpers/findScrollParent.ts) ⇒ `Find first parent with active scroll X/Y`
 - [**findScrollParentAll**(e: HTMLElement)](src//helpers/findScrollParent.ts) ⇒ `Find all parents with active scroll X/Y`
 - [**focusFirst**(el: HTMLElement)](src//helpers/focusFirst.ts) ⇒ `Set focus on element or first possible nested element`
