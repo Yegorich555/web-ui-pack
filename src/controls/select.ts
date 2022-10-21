@@ -133,8 +133,10 @@ export default class WUPSelectControl<
   static get $style(): string {
     return `${super.$style}
       :host {
-        cursor: pointer;
         --ctrl-icon-img: var(--ctrl-select-icon-img);
+      }
+      :host[opened] label::after {
+        transform: rotate(180deg);
       }
       :host [menu] {
         padding: 0;

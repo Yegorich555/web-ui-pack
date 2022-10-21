@@ -569,9 +569,6 @@ mask-image: var(--ctrl-icon-img);
         -webkit-mask-image: var(--ctrl-icon-img);
         mask-image: var(--ctrl-icon-img);
       }
-      WUP-SELECT[opened] label::after {
-        transform: rotate(180deg);
-      }
       @media not all and (prefers-reduced-motion) {
         WUP-SELECT label::after {
           transition: transform var(--anim);
@@ -581,8 +578,10 @@ mask-image: var(--ctrl-icon-img);
         margin: 0;
       }
       WUP-SELECT {
-        cursor: pointer;
         --ctrl-icon-img: var(--ctrl-select-icon-img);
+      }
+      WUP-SELECT[opened] label::after {
+        transform: rotate(180deg);
       }
       WUP-SELECT [menu] {
         padding: 0;

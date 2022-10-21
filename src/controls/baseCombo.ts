@@ -105,9 +105,6 @@ export default abstract class WUPBaseComboControl<
         -webkit-mask-image: var(--ctrl-icon-img);
         mask-image: var(--ctrl-icon-img);
       }
-      :host[opened] label::after {
-        transform: rotate(180deg);
-      }
       @media not all and (prefers-reduced-motion) {
         :host label::after {
           transition: transform var(--anim);
@@ -118,7 +115,7 @@ export default abstract class WUPBaseComboControl<
       }`;
   }
 
-  static $defaults: WUPBaseCombo.Defaults = {
+  static $defaults: WUPBaseCombo.Defaults<any> = {
     ...WUPTextControl.$defaults,
     validationRules: { ...WUPBaseControl.$defaults.validationRules },
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey,

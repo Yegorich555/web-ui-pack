@@ -343,7 +343,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUPBase.Defaults = {
+  static $defaults: WUPBase.Defaults<any> = {
     clearActions: ClearActions.clear | ClearActions.resetToInit,
     validateDebounceMs: 500,
     validationCase: ValidationCases.onChangeSmart | ValidationCases.onFocusLost | ValidationCases.onFocusWithValue,

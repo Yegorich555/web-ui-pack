@@ -31,9 +31,25 @@ export namespace WUPCalendarIn {
     startWith?: PickersEnum;
     /** Dates that user can't choose (disabled dates) */
     exclude?: Date[];
-    /** Provide local or UTC date; @default true (UTC); min/max/exclude $initValue/$value must be provided according to pointed attr */
+    /** Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this
+     *  @default true */
     utc?: boolean;
   }
+
+  export interface JSXProps {
+    /** @deprecated Picker that must be rendered at first */
+    startWith?: "year" | "month" | "day";
+    /** @deprecated User can't select date less than min */
+    min?: string;
+    /** @deprecated User can't select date more than max */
+    max?: string;
+    /** @deprecated Dates that user can't choose. Point global obj-key (window.myExclude = [] ) */
+    exclude?: string;
+    /** Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this
+     *  @deprecated true */
+    utc?: boolean;
+  }
+
   export type Generics<
     ValueType = string,
     ValidationKeys extends WUPBase.ValidationMap = WUPCalendar.ValidationMap,
@@ -83,18 +99,7 @@ declare global {
     interface EventMap extends WUPBase.EventMap {}
     interface Defaults<T = string> extends WUPCalendarIn.GenDef<T> {}
     interface Options<T = string> extends WUPCalendarIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPCalendarControl> extends WUPBase.JSXProps<T> {
-      /** @deprecated Picker that must be rendered at first */
-      startWith?: "year" | "month" | "day";
-      /** @deprecated User can't select date less than min */
-      min?: string;
-      /** @deprecated User can't select date more than max */
-      max?: string;
-      /** @deprecated Dates that user can't choose. Point global obj-key (window.myExclude = [] ) */
-      exclude?: string;
-      /** @deprecated Provide local or UTC date; @default true (UTC); min/max/exclude $initValue/$value must be provided according to pointed attr */
-      utc?: boolean;
-    }
+    interface JSXProps<T extends WUPCalendarControl> extends WUPBase.JSXProps<T>, WUPCalendarIn.JSXProps {}
   }
 
   // add element to document.createElement

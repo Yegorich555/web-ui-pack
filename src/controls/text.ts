@@ -222,7 +222,7 @@ export default class WUPTextControl<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUPText.Defaults = {
+  static $defaults: WUPText.Defaults<string> = {
     ...WUPBaseControl.$defaults,
     selectOnFocus: true,
     clearButton: true,
