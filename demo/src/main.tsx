@@ -17,8 +17,9 @@ import SelectControlView from "./components/controls/select";
 import SwitchControlView from "./components/controls/switch";
 import CheckControlView from "./components/controls/check";
 import RadioControlView from "./components/controls/radio";
-import FAQView from "./components/FAQView";
 import CalendarControlView from "./components/controls/calendar";
+import DateControlView from "./components/controls/date";
+import FAQView from "./components/FAQView";
 
 (window as any).WUPHelpers = WUPHelpers;
 
@@ -43,6 +44,7 @@ const routes: IRoute[] = [
   { path: "control/select", el: SelectControlView, isNested: true },
   // { path: "control/selectMany", el: SelectManyControlView, isNested: true },
   { path: "control/calendar", el: CalendarControlView, isNested: true },
+  { path: "control/date", el: DateControlView, isNested: true },
   { path: "faq", label: "FAQ", el: FAQView },
 ];
 
