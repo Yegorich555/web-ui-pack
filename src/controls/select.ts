@@ -308,7 +308,7 @@ export default class WUPSelectControl<
     const ul = popup.appendChild(document.createElement("ul"));
     ul.setAttribute("id", menuId);
     ul.setAttribute("role", "listbox");
-    ul.setAttribute("aria-label", "Items");
+    ul.setAttribute("aria-label", "Items"); // todo support multilang
 
     const all = await this.renderMenuItems(ul);
     this._menuItems = { all, focused: -1 };
@@ -436,7 +436,6 @@ export default class WUPSelectControl<
     const o = this._cachedItems![i];
 
     this.selectValue(o.value);
-    this.focusMenuItem(item, o.value); // to announce selected by screenReaders
     this.goHideMenu(HideCases.onSelect);
   }
 
@@ -468,8 +467,8 @@ export default class WUPSelectControl<
     return popup;
   }
 
-  protected override focusMenuItem(next: HTMLElement | null, nextValue: ValueType | undefined): void {
-    super.focusMenuItem(next, nextValue);
+  protected override focusMenuItem(next: HTMLElement | null): void {
+    super.focusMenuItem(next);
     if (next === null && this._menuItems) {
       this._menuItems.focused = -1;
     }
@@ -481,21 +480,21 @@ export default class WUPSelectControl<
     const { filtered } = this._menuItems!;
     const trueIndex = filtered ? filtered[index] : index;
     const next = this._menuItems!.all[trueIndex];
-    this.focusMenuItem(next, this._cachedItems![trueIndex].value);
+    this.focusMenuItem(next);
     this._menuItems!.focused = index;
   }
 
-  protected override async gotKeyDown(e: KeyboardEvent & { _handleSetValue?: boolean }): Promise<void> {
+  protected override async gotKeyDown(e: KeyboardEvent): Promise<void> {
     // pending event disables gotKeyDown so it's case impossible
     // if (this.$isPending) {
     //   return;
     // }
     const wasOpen = this.$isOpen;
-    if (e.key === "Enter" && wasOpen && this._opts.allowNewValue && !this._focusedMenuValue) {
+    if (e.key === "Enter" && wasOpen && this._opts.allowNewValue && !this._focusedMenuItem) {
+      // todo in this case when try to open again "No Items" shows but focus possible
       const txt = this.$refInput.value.trim();
       const v = txt ? this.findValueByText(txt) ?? (txt as any) : undefined;
       this.setValue(v);
-      e._handleSetValue = true; // prevent set value by enter
     }
     await super.gotKeyDown(e);
     if (!this.$isOpen || e.altKey || e.shiftKey || e.ctrlKey || !this._menuItems) {
@@ -505,16 +504,27 @@ export default class WUPSelectControl<
     const { length } = this._menuItems!.filtered || this._menuItems!.all;
     let focusIndex: number | null = null;
 
-    if (e.key === "ArrowDown") {
-      let cur = this._menuItems!.focused;
-      focusIndex = ++cur >= length ? 0 : cur;
-    } else if (e.key === "ArrowUp") {
-      let cur = wasOpen ? this._menuItems!.focused : length;
-      focusIndex = --cur < 0 ? length - 1 : cur;
-    } else if (e.key === "Home") {
-      focusIndex = 0;
-    } else if (e.key === "End") {
-      focusIndex = length - 1;
+    switch (e.key) {
+      case "ArrowDown":
+        {
+          let cur = this._menuItems!.focused;
+          focusIndex = ++cur >= length ? 0 : cur;
+        }
+        break;
+      case "ArrowUp":
+        {
+          let cur = wasOpen ? this._menuItems!.focused : length;
+          focusIndex = --cur < 0 ? length - 1 : cur;
+        }
+        break;
+      case "Home":
+        focusIndex = 0;
+        break;
+      case "End":
+        focusIndex = length - 1;
+        break;
+      default:
+        break;
     }
 
     if (focusIndex != null) {
@@ -526,7 +536,7 @@ export default class WUPSelectControl<
   /** For case when need to menu is opened but items are not rendered yet */
   protected _needFilter?: () => void;
   protected override gotInput(e: Event & { currentTarget: HTMLInputElement }): void {
-    this.$isOpen && this.focusMenuItem(null, undefined); // reset virtual focus
+    this.$isOpen && this.focusMenuItem(null); // reset virtual focus
     super.gotInput(e);
 
     const rawV = e.currentTarget.value;

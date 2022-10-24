@@ -353,16 +353,15 @@ export default abstract class WUPBaseComboControl<
 
     this.removeAttribute("opened");
     this.$refInput.setAttribute("aria-expanded", false);
-    this.focusMenuItem(null, undefined);
+    this.focusMenuItem(null);
     setTimeout(() => this.fireEvent("$hideMenu", { cancelable: false }));
     return true;
   }
 
-  #focusedMenuItem?: HTMLElement | null;
-  _focusedMenuValue?: ValueType | undefined;
+  _focusedMenuItem?: HTMLElement | null;
   /** Focus/resetFocus for item (via aria-activedescendant) */
-  protected focusMenuItem(next: HTMLElement | null, nextValue: ValueType | undefined): void {
-    this.#focusedMenuItem?.removeAttribute("focused");
+  protected focusMenuItem(next: HTMLElement | null): void {
+    this._focusedMenuItem?.removeAttribute("focused");
 
     if (next) {
       next.setAttribute("focused", "");
@@ -372,8 +371,7 @@ export default abstract class WUPBaseComboControl<
     } else {
       this.$refInput.removeAttribute("aria-activedescendant");
     }
-    this.#focusedMenuItem = next;
-    this._focusedMenuValue = nextValue;
+    this._focusedMenuItem = next;
   }
 
   #selectedMenuItem?: HTMLElement | null;
@@ -389,7 +387,7 @@ export default abstract class WUPBaseComboControl<
     this.#selectedMenuItem = next;
   }
 
-  protected override async gotKeyDown(e: KeyboardEvent & { _handleSetValue?: boolean }): Promise<void> {
+  protected override async gotKeyDown(e: KeyboardEvent): Promise<void> {
     // don't allow to process Esc-key when menu is opened
     const isEscPrevent = this.#isOpen && e.key === "Escape";
     !isEscPrevent && super.gotKeyDown(e);
@@ -401,7 +399,10 @@ export default abstract class WUPBaseComboControl<
     if (this._opts.showCase & ShowCases.onPressArrowKey) {
       if (e.key === "ArrowDown" || e.key === "ArrowUp") {
         e.preventDefault(); // to prevent parent-scroll
-        !this.#isOpen && (await this.goShowMenu(ShowCases.onPressArrowKey, null, true));
+        if (!this.#isOpen) {
+          await this.goShowMenu(ShowCases.onPressArrowKey, null, true);
+          return;
+        }
       }
     }
 
@@ -409,22 +410,21 @@ export default abstract class WUPBaseComboControl<
       return;
     }
 
-    if (e.key === "Escape") {
-      e.preventDefault();
-      this.setInputValue(this.$value); // reset input to currentValue
-      await this.goHideMenu(HideCases.OnPressEsc);
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (!e._handleSetValue) {
-        if (this._focusedMenuValue !== undefined) {
-          this.selectValue(this._focusedMenuValue);
-        } else {
-          this.setInputValue(this.$value); // reset input to currentValue
-        }
-      } else {
-        delete e._handleSetValue;
-      }
-      await this.goHideMenu(HideCases.OnPressEnter);
+    switch (e.key) {
+      case "Escape":
+        e.preventDefault();
+        this.setInputValue(this.$value); // reset input to currentValue
+        await this.goHideMenu(HideCases.OnPressEsc);
+        break;
+      case "Enter":
+      case " ":
+        e.preventDefault();
+        this._focusedMenuItem?.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }));
+        this.setInputValue(this.$value); // reset input to currentValue
+        await this.goHideMenu(HideCases.OnPressEnter);
+        break;
+      default:
+        break;
     }
   }
 
@@ -461,8 +461,7 @@ export default abstract class WUPBaseComboControl<
   protected removePopup(): void {
     this.$refPopup?.remove();
     this.$refPopup = undefined;
-    this.#focusedMenuItem = undefined;
-    delete this._focusedMenuValue;
+    delete this._focusedMenuItem;
     if (this.#isOpen) {
       this.#isOpen = false;
       this.removeAttribute("opened");
