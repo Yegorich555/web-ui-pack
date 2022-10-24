@@ -577,15 +577,15 @@ mask-image: var(--ctrl-icon-img);
       WUP-SELECT button[clear] {
         margin: 0;
       }
+      WUP-SELECT [menu] {
+        padding: 0;
+        max-height: 300px;
+      }
       WUP-SELECT {
         --ctrl-icon-img: var(--ctrl-select-icon-img);
       }
       WUP-SELECT[opened] label::after {
         transform: rotate(180deg);
-      }
-      WUP-SELECT [menu] {
-        padding: 0;
-        max-height: 300px;
       }
       WUP-SELECT [menu] ul {
         margin: 0;

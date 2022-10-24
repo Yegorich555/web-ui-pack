@@ -3,6 +3,10 @@ import WUPPopupElement from "../popup/popupElement";
 import WUPBaseComboControl, { WUPBaseComboIn } from "./baseCombo";
 import WUPCalendarControl, { WUPCalendarIn } from "./calendar";
 
+/* c8 ignore next */
+/* istanbul ignore next */
+!WUPCalendarControl && console.error("!"); // It's required otherwise import is ignored by webpack
+
 const tagName = "wup-date";
 export namespace WUPDateIn {
   export interface Defs extends WUPCalendarIn.Def {
@@ -57,7 +61,7 @@ declare global {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-date name="dateOfBirhday" utc initvalue="1990-10-24"/>
+    <wup-date name="dateOfBirhday" utc initvalue="1990-10-24" min="1930-01-01" max="2010-01-01"/>
   </wup-form>;
  */
 export default class WUPDateControl<
@@ -77,6 +81,12 @@ export default class WUPDateControl<
     return `${super.$style}
       :host {
         --ctrl-icon-img: var(--ctrl-date-icon-img);
+      }
+      :host wup-calendar {
+        margin: 0;
+      }
+      :host [menu] {
+        overflow: hidden;
       }`;
   }
 
@@ -106,9 +116,36 @@ export default class WUPDateControl<
   }
 
   protected override async renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> {
-    // todo render menu here
-    // todo handle change event from calendar
-    return Promise.resolve(document.createElement("div"));
+    popup.$options.minWidthByTarget = false;
+
+    const el = document.createElement("wup-calendar");
+    // todo blink when scroll calendar - maxHeight are not applied at first time!!!
+    // todo popup closes when try to go to yearPicker
+    // todo handle keyboard
+    el.renderInput = () => {
+      el.$refLabel.remove();
+      return { menuId }; // todo check aria-owns when id applied to role-element directly
+    };
+    el.$options.startWith = this._opts.startWith;
+    el.$options.exclude = this._opts.exclude;
+    el.$options.max = this._opts.max;
+    el.$options.min = this._opts.min;
+    el.$options.utc = this._opts.utc;
+    el.$initValue = this.$value as unknown as Date;
+    el.$options.name = undefined;
+    el.addEventListener("$change", () => this.setValue(el.$value as unknown as ValueType));
+
+    popup.appendChild(el);
+    return Promise.resolve(el);
+  }
+
+  protected override setValue(v: ValueType | undefined, canValidate = true): boolean | null {
+    const r = super.setValue(v, canValidate);
+    const clnd = this.$refPopup?.firstElementChild as WUPCalendarControl;
+    if (clnd) {
+      clnd.$value = v as unknown as Date;
+    }
+    return r;
   }
 
   protected override valueToInput(v: ValueType | undefined): Promise<string> | string {

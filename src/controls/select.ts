@@ -138,10 +138,6 @@ export default class WUPSelectControl<
       :host[opened] label::after {
         transform: rotate(180deg);
       }
-      :host [menu] {
-        padding: 0;
-        max-height: 300px;
-      }
       :host [menu] ul {
         margin: 0;
         padding: 0;

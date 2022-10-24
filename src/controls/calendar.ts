@@ -424,7 +424,8 @@ export default class WUPCalendarControl<
   /** Reference to container with items */
   $refCalenarItems: HTMLOListElement & { _items?: WUPCalendarIn.ItemElement[] } = document.createElement("ol");
 
-  protected override renderControl(): void {
+  /** Called once when need to render label + input */
+  renderInput(): { menuId: string } {
     const i = this.$refInput;
     i.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", i.id);
@@ -437,6 +438,11 @@ export default class WUPCalendarControl<
     s.appendChild(this.$refInput);
     s.appendChild(this.$refTitle);
     this.appendChild(this.$refLabel);
+    return { menuId };
+  }
+
+  protected override renderControl(): void {
+    const { menuId } = this.renderInput();
 
     // render calendar
     this.$refCalenar.id = menuId;
@@ -449,11 +455,10 @@ export default class WUPCalendarControl<
     /* */ animBox.appendChild(this.$refCalenarItems);
     this.$refCalenarItems.setAttribute("role", "grid");
     this.appendChild(this.$refCalenar);
-
     // WARN: for render picker see gotReady
   }
 
-  /** Append calendar item to parent or replace previous */
+  /** Appends calendar item to parent or replace previous */
   protected appendItem(
     prevEl: WUPCalendarIn.ItemElement | undefined | null,
     text: string,
