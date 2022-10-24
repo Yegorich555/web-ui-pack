@@ -923,9 +923,11 @@ export default class WUPCalendarControl<
       el.id = el.id || this.#ctr.$uniqueId;
       el.setAttribute("focused", ""); // focus only if user uses keyboard otherwise only announce by clicks
       this.$refInput.setAttribute("aria-activedescendant", el.id);
+      el.hasAttribute("aria-selected") && el.setAttribute("aria-selected", "false");
       setTimeout(() => {
         el.setAttribute("aria-label", `${el.textContent} ${this.$refCalenarTitle.textContent}`);
         el.hasAttribute("disabled") && el.setAttribute("aria-disabled", true);
+        el.hasAttribute("aria-selected") && el.setAttribute("aria-selected", "true"); // otherwise NVDA doesn't announce it again
       }, 100); // without timeout text isn't announced when switch pickers
     } else {
       !this.$isFocused && this.$refInput.removeAttribute("aria-activedescendant");
