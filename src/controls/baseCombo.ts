@@ -399,9 +399,8 @@ export default abstract class WUPBaseComboControl<
     }
 
     if (this._opts.showCase & ShowCases.onPressArrowKey) {
-      if (e.key === "ArrowDown") {
-        !this.#isOpen && (await this.goShowMenu(ShowCases.onPressArrowKey, null, true));
-      } else if (e.key === "ArrowUp") {
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault(); // to prevent parent-scroll
         !this.#isOpen && (await this.goShowMenu(ShowCases.onPressArrowKey, null, true));
       }
     }
