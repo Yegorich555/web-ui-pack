@@ -264,6 +264,15 @@ describe("helper.onScrollStop", () => {
     expect(renderNext).toHaveBeenLastCalledWith(-1);
   });
 
+  test("element size not defined", () => {
+    jest.spyOn(ul, "offsetHeight", "get").mockImplementation(() => 0);
+    const renderNext = jest.fn().mockImplementation(() => [createItem()]);
+    scrollCarousel(ul, renderNext);
+    jest.spyOn(ul, "offsetHeight", "get").mockImplementation(() => 12);
+    jest.advanceTimersByTime(1);
+    expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden; max-height: 12px;"></ul>"`);
+  });
+
   test("removing listener", async () => {
     const spy = h.spyEventListeners();
     const renderNext = jest.fn().mockImplementation(() => [createItem()]);
@@ -273,5 +282,3 @@ describe("helper.onScrollStop", () => {
     spy.check();
   });
 });
-
-// todo e2e tests for checking scroll

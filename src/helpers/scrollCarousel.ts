@@ -42,10 +42,14 @@ export default function scrollCarousel(
   const isYScroll = !options?.isXScroll;
 
   // WARN: it affects on flexible container when user rotates mobile and size must be changed ?
-  /* istanbul ignore else */
-  if (isYScroll && !maxHeight?.endsWith("px") && el.offsetHeight) el.style.maxHeight = `${el.offsetHeight}px`;
-  /* istanbul ignore else */
-  if (!isYScroll && !maxWidth?.endsWith("px") && el.offsetWidth) el.style.maxWidth = `${el.offsetWidth}px`;
+  const restrict = (): void => {
+    /* istanbul ignore else */
+    if (isYScroll && !maxHeight?.endsWith("px") && el.offsetHeight) el.style.maxHeight = `${el.offsetHeight}px`;
+    /* istanbul ignore else */
+    if (!isYScroll && !maxWidth?.endsWith("px") && el.offsetWidth) el.style.maxWidth = `${el.offsetWidth}px`;
+  };
+  !el.offsetHeight || !el.offsetWidth ? setTimeout(restrict) : restrict();
+
   el.style.overflow = "hidden";
   el.style.touchAction = "none";
 

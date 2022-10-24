@@ -119,7 +119,6 @@ export default class WUPDateControl<
     popup.$options.minWidthByTarget = false;
 
     const el = document.createElement("wup-calendar");
-    // todo blink when scroll calendar - maxHeight are not applied at first time!!!
     // todo popup closes when try to go to yearPicker
     // todo handle keyboard
     el.renderInput = () => {
