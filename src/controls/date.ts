@@ -119,19 +119,21 @@ export default class WUPDateControl<
     popup.$options.minWidthByTarget = false;
 
     const el = document.createElement("wup-calendar");
-    // todo popup closes when try to go to yearPicker
     // todo handle keyboard
     el.renderInput = () => {
       el.$refLabel.remove();
       return { menuId }; // todo check aria-owns when id applied to role-element directly
     };
+    el.focus = () => true; // don't allow to focus calendar itselft
+    el.gotFocus.call(el);
     el.$options.startWith = this._opts.startWith;
     el.$options.exclude = this._opts.exclude;
     el.$options.max = this._opts.max;
     el.$options.min = this._opts.min;
     el.$options.utc = this._opts.utc;
+    el.$options.name = undefined; // to detach from formElement
+    el.$options.validationCase = 0; // disable any validations for control
     el.$initValue = this.$value as unknown as Date;
-    el.$options.name = undefined;
     el.addEventListener("$change", () => this.setValue(el.$value as unknown as ValueType));
 
     popup.appendChild(el);

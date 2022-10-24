@@ -1062,7 +1062,7 @@ export default class WUPCalendarControl<
     super.gotFocusLost();
   }
 
-  protected override gotFocus(): Array<() => void> {
+  override gotFocus(): Array<() => void> {
     const r = super.gotFocus();
     const i = this.$refInput;
     r.push(this.appendEvent(this, "click", (e) => this.gotClick(e), { passive: false }));
