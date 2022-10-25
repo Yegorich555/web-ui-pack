@@ -188,7 +188,16 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isOpen).toBe(true);
 
+    // checking when default Enter behavior is prevented
+    el._focusedMenuItem.addEventListener("click", (e) => e.preventDefault(), { once: true });
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+
     // hide by outside click
+    el.$showMenu();
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
     document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     expect(el.$isOpen).toBe(false);
@@ -720,6 +729,7 @@ describe("control.select", () => {
 
       el.$hideMenu();
       el.$options.showCase &= ~ShowCases.onInput; // remove option
+      await h.wait();
       await h.userTypeText(el.$refInput, "a");
       await h.wait();
       expect(el.$isOpen).toBe(false);
@@ -766,21 +776,24 @@ describe("control.select", () => {
       el.$options.allowNewValue = true;
       const onChange = jest.fn();
       el.addEventListener("$change", onChange);
+      await h.wait();
 
       const check = async (arr, event) => {
         for (let i = 0; i < arr.length; ++i) {
           onChange.mockClear();
           await h.userTypeText(el.$refInput, arr[i].userText);
           await h.wait();
+          expect(el.$refInput.value).toBe(arr[i].userText);
           event();
           await h.wait();
           expect(el.$value).toBe(arr[i].expectedValue);
+          expect(el.$refInput.value).toBe(arr[i].userText);
           expect(onChange).toBeCalledTimes(1);
           expect(el.$isOpen).toBe(false); // closed by enter or focusOut
         }
       };
 
-      // user can select value by pressing enter (by focus left)
+      // user can select value by pressing enter
       await check(
         [
           { userText: "Someone new", expectedValue: "Someone new" }, // user can create another value
@@ -793,7 +806,7 @@ describe("control.select", () => {
           el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }))
       );
 
-      // user can select value without pressing enter (by focus left)
+      // user can select value by focus left
       await check(
         [
           { userText: "Someone new", expectedValue: "Someone new" }, // user can create another value

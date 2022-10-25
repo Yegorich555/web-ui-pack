@@ -328,7 +328,7 @@ export default abstract class WUPBaseComboControl<
   protected _isHidding?: true;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected async goHideMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): Promise<boolean> {
-    if (!this.$refPopup) {
+    if (!this.$refPopup || this._isHidding) {
       return false;
     }
     const wasOpen = this.#isOpen;
@@ -417,11 +417,20 @@ export default abstract class WUPBaseComboControl<
         await this.goHideMenu(HideCases.OnPressEsc);
         break;
       case "Enter":
-      case " ":
+        // case " ": user can type space; we should not  use this as click
         e.preventDefault();
-        this._focusedMenuItem?.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }));
-        this.setInputValue(this.$value); // reset input to currentValue
-        await this.goHideMenu(HideCases.OnPressEnter);
+        {
+          const el = this._focusedMenuItem;
+          if (el && !el.hasAttribute("disabled")) {
+            const ev = new MouseEvent("click", { cancelable: true, bubbles: true });
+            el.dispatchEvent(ev);
+            if (ev.defaultPrevented) {
+              return; // skip hidding menu if itemClick isHandled
+            }
+          }
+          await this.goHideMenu(HideCases.OnPressEnter);
+          this.setInputValue(this.$value); // reset input to currentValue
+        }
         break;
       default:
         break;
