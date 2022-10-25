@@ -671,19 +671,16 @@ export default class WUPCalendarControl<
         const a = this.$value;
         /* istanbul ignore else */
         if (a) {
-          if (this._opts.utc) {
-            dt.setUTCHours(a.getUTCHours(), a.getUTCMinutes(), a.getUTCSeconds(), a.getUTCMilliseconds());
-          } else {
-            dt = new Date(
-              dt.getUTCFullYear(),
-              dt.getUTCMonth(),
-              dt.getUTCDate(),
-              a.getHours(),
-              a.getMinutes(),
-              a.getSeconds(),
-              a.getMilliseconds()
-            );
-          }
+          const key = this._opts.utc ? "UTC" : "";
+          dt = new Date(
+            dt.getUTCFullYear(),
+            dt.getUTCMonth(),
+            dt.getUTCDate(),
+            a[`get${key}Hours`](),
+            a[`get${key}Minutes`](),
+            a[`get${key}Seconds`](),
+            a[`get${key}Milliseconds`]()
+          );
         }
         this.setValue(dt as ValueType);
         this.$ariaSpeak(this.$refInput.value);
@@ -985,9 +982,9 @@ export default class WUPCalendarControl<
   /** Called when need to update/announce value for input */
   setInputValue(v: ValueType | undefined | null): void {
     if (v != null) {
-      this.$refInput.value = this._opts.utc
-        ? `${v.getUTCDate()} ${this.#ctr.$namesMonth[v.getUTCMonth()]} ${v.getUTCFullYear()}`
-        : `${v.getDate()} ${this.#ctr.$namesMonth[v.getMonth()]} ${v.getFullYear()}`;
+      const key = this._opts.utc ? "UTC" : "";
+      // prettier-ignore
+      this.$refInput.value = `${v[`get${key}Date`]()} ${this.#ctr.$namesMonth[v[`get${key}Month`]()]} ${v[`get${key}FullYear`]()}`
     } else {
       this.$refInput.value = "";
     }
@@ -1020,11 +1017,10 @@ export default class WUPCalendarControl<
       this.$refTitle.classList.remove(this.#ctr.classNameHidden);
     }
 
-    let attr = this.getAttribute("startwith");
+    const attr = this.getAttribute("startwith");
     if (attr != null) {
-      attr = attr.toLowerCase();
       // prettier-ignore
-      switch (attr) {
+      switch (attr.toLowerCase()) {
         case "year": this._opts.startWith = PickersEnum.Year; break;
         case "month": this._opts.startWith = PickersEnum.Month; break;
         case "day": this._opts.startWith = PickersEnum.Day; break;

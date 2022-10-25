@@ -5,7 +5,7 @@ import promiseWait from "../helpers/promiseWait";
 import WUPPopupElement from "../popup/popupElement";
 import WUPSpinElement from "../spinElement";
 import { WUPcssIcon } from "../styles";
-import WUPBaseComboControl, { HideCases, ShowCases, WUPBaseComboIn } from "./baseCombo";
+import WUPBaseComboControl, { ShowCases, WUPBaseComboIn } from "./baseCombo";
 
 /* c8 ignore next */
 /* istanbul ignore next */
@@ -431,12 +431,10 @@ export default class WUPSelectControl<
   }
 
   /** Called when need to setValue & close base on clicked item */
-  protected gotMenuItemClick(e: MouseEvent, item: HTMLLIElement & { _text: string }): void {
+  protected gotMenuItemClick(_e: MouseEvent, item: HTMLLIElement & { _text: string }): void {
     const i = this._menuItems!.all.indexOf(item);
     const o = this._cachedItems![i];
-
     this.selectValue(o.value);
-    this.goHideMenu(HideCases.onSelect);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -503,7 +501,7 @@ export default class WUPSelectControl<
 
     const { length } = this._menuItems!.filtered || this._menuItems!.all;
     let focusIndex: number | null = null;
-
+    // todo firstFocused can be selected/current
     switch (e.key) {
       case "ArrowDown":
         {

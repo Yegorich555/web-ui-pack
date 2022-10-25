@@ -439,7 +439,8 @@ export default abstract class WUPBaseComboControl<
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override gotInput(e: Event & { currentTarget: HTMLInputElement }): void {
-    !this.$isOpen && this._opts.showCase & ShowCases.onInput && this.goShowMenu(ShowCases.onInput);
+    // gotInput possible on browser-autofill
+    !this.$isOpen && this._opts.showCase & ShowCases.onInput && this.$isFocused && this.goShowMenu(ShowCases.onInput);
   }
 
   protected override gotFocusLost(): void {
@@ -448,9 +449,10 @@ export default abstract class WUPBaseComboControl<
     this.setInputValue(this.$value); // to update/rollback input according to result
   }
 
-  /** Called when user selected new value from menu */
+  /** Called when user selected new value from menu and need to hide menu */
   protected selectValue(v: ValueType): void {
     this.setValue(v);
+    setTimeout(() => this.goHideMenu(HideCases.onSelect)); // without timeout it handles click by listener and opens again
   }
 
   protected override setInputValue(v: ValueType | undefined): void {

@@ -1,7 +1,8 @@
 import dateToString from "../helpers/dateToString";
 import WUPPopupElement from "../popup/popupElement";
-import WUPBaseComboControl, { HideCases, WUPBaseComboIn } from "./baseCombo";
-import WUPCalendarControl, { WUPCalendarIn } from "./calendar";
+import WUPBaseComboControl, { WUPBaseComboIn } from "./baseCombo";
+import { ValidateFromCases } from "./baseControl";
+import WUPCalendarControl, { PickersEnum, WUPCalendarIn } from "./calendar";
 
 /* c8 ignore next */
 /* istanbul ignore next */
@@ -31,6 +32,9 @@ declare global {
   namespace WUPDate {
     interface ValidationMap {
       required: boolean;
+      min: Date;
+      max: Date;
+      exclude: Date[];
     }
     interface EventMap extends WUPBaseCombo.EventMap {}
     interface Defaults<T = Date> extends WUPDateIn.GenDef<T> {}
@@ -65,7 +69,7 @@ declare global {
   </wup-form>;
  */
 export default class WUPDateControl<
-  ValueType = Date,
+  ValueType extends Date = Date,
   EventMap extends WUPDate.EventMap = WUPDate.EventMap
 > extends WUPBaseComboControl<ValueType, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
@@ -92,7 +96,15 @@ export default class WUPDateControl<
 
   static $defaults: WUPDate.Defaults<Date> = {
     ...WUPBaseComboControl.$defaults,
-    validationRules: { ...WUPBaseComboControl.$defaults.validationRules },
+    validationRules: {
+      ...WUPBaseComboControl.$defaults.validationRules,
+      min: (v, setV, c) =>
+        (v === undefined || v < setV) && `Min date is ${dateToString(setV, (c as WUPDateControl)._opts.format)}`,
+      max: (v, setV, c) =>
+        (v === undefined || v > setV) && `Max date is ${dateToString(setV, (c as WUPDateControl)._opts.format)}`,
+      exclude: (v, setV) =>
+        (v === undefined || setV.some((d) => d.valueOf() === v.valueOf())) && `This date is disabled`,
+    },
     firstDayOfWeek: 1,
     format: "YYYY-MM-DD",
   };
@@ -112,7 +124,53 @@ export default class WUPDateControl<
     if (!text) {
       return undefined;
     }
+    // todo parseValue according to format
     return WUPCalendarControl.$parse(text, !!this._opts.utc) as unknown as ValueType;
+  }
+
+  protected override gotChanges(propsChanged: Array<keyof WUPDate.Options> | null): void {
+    this._opts.utc = this.getBoolAttr("utc", this._opts.utc);
+    super.gotChanges(propsChanged as any);
+
+    const attr = this.getAttribute("startwith");
+    if (attr != null) {
+      // prettier-ignore
+      switch (attr.toLowerCase()) {
+        case "year": this._opts.startWith = PickersEnum.Year; break;
+        case "month": this._opts.startWith = PickersEnum.Month; break;
+        case "day": this._opts.startWith = PickersEnum.Day; break;
+        default: delete this._opts.startWith;
+      }
+    }
+
+    this._opts.min = this.parseValue(this.getAttribute("min") || "") ?? this._opts.min;
+    this._opts.max = this.parseValue(this.getAttribute("max") || "") ?? this._opts.max;
+    this._opts.exclude = this.getRefAttr<Date[]>("exclude");
+  }
+
+  protected get validations(): WUPBase.Options["validations"] | undefined {
+    const vls = (super.validations as WUPDate.Options["validations"]) || {};
+    // user can type not valid value according to options min,max,exclude. So we need enable validations rules in this case
+    if (this._opts.min) vls.min = this._opts.min;
+    if (this._opts.max) vls.max = this._opts.max;
+    if (this._opts.exclude) vls.exclude = this._opts.exclude;
+    return vls as WUPBase.Options["validations"];
+  }
+
+  protected goValidate(fromCase: ValidateFromCases, canShowError = true): string | false {
+    // reset hours for validations
+    const v = this.$value as Date | undefined;
+    const key = this._opts.utc ? "UTC" : "";
+    const hh = v && [
+      v[`get${key}Hours`](),
+      v[`get${key}Minutes`](),
+      v[`get${key}Seconds`](),
+      v[`get${key}Milliseconds`](),
+    ];
+    v && v[`set${key}Hours`](0, 0, 0, 0);
+    const r = super.goValidate(fromCase, canShowError);
+    hh && v[`set${key}Hours`](hh[0], hh[1], hh[2], hh[3]);
+    return r;
   }
 
   protected override async renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> {
@@ -138,11 +196,8 @@ export default class WUPDateControl<
     el.$options.utc = this._opts.utc;
     el.$options.name = undefined; // to detach from formElement
     el.$options.validationCase = 0; // disable any validations for control
-    el.$initValue = this.$value as unknown as Date;
-    el.addEventListener("$change", () => {
-      this.setValue(el.$value as unknown as ValueType);
-      !this._isHidding && setTimeout(() => this.goHideMenu(HideCases.onSelect)); // todo without timeout it handles click by listener and opens again
-    });
+    el.$initValue = this.$value;
+    el.addEventListener("$change", () => this.selectValue(el.$value as any));
 
     popup.appendChild(el);
     return Promise.resolve(el);
@@ -152,8 +207,9 @@ export default class WUPDateControl<
     const r = super.setValue(v, canValidate);
     const clnd = this.$refPopup?.firstElementChild as WUPCalendarControl;
     if (clnd) {
-      clnd.$value = v as unknown as Date;
+      clnd.$value = v;
     }
+    console.warn("setValue", v!.toISOString());
     return r;
   }
 
@@ -161,22 +217,28 @@ export default class WUPDateControl<
     if (v === undefined) {
       return "";
     }
-    return dateToString(v as unknown as Date, this._opts.format.toUpperCase() + (this._opts.utc ? "Z" : ""));
+    return dateToString(v, this._opts.format.toUpperCase() + (this._opts.utc ? "Z" : ""));
   }
 
   protected override gotInput(e: Event & { currentTarget: HTMLInputElement }): void {
     super.gotInput(e);
-    console.error("Not implemented yet");
-    // todo since user can input value outside min/max/exclude need to validate according to this
-    // todo implement mask ?
-    this.$refPopup!.$refresh();
+    try {
+      const txt = this.$refInput.value.trim();
+      this.setValue(txt ? this.parseValue(txt) : undefined);
+      // eslint-disable-next-line no-empty
+    } catch {}
+    /* todo mask/parsing
+       during the parsing need to detect:
+       1. isValid => allow change
+       2. completed => setValue
+    */
   }
 
   protected override gotKeyDown(e: KeyboardEvent): Promise<void> {
     const isOpen = this.$isOpen;
     const el = this.$refPopup!.firstElementChild as WUPCalendarControl;
     isOpen && e.key !== "Escape" && el.gotKeyDown.call(el, e); // skip actions for Escape key
-    // todo what if user want to type text with space between ??? maybe mask resolves this case ?
+    // todo allow user to type Space and prevent handling of ' ' ???
     const r = !e.defaultPrevented && super.gotKeyDown(e);
     !isOpen && this.$isOpen && e.key !== "Escape" && el.gotKeyDown.call(el, e); // case when user press ArrowKey for opening menu
     return r || Promise.resolve();

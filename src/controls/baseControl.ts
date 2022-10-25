@@ -696,7 +696,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
     const v = this.$value;
     let errMsg = "";
-    this.#isValid = !this.validationsRules.some((fn) => {
+    this.#isValid = !vls.some((fn) => {
       const err = fn(v);
       if (err) {
         errMsg = err;
