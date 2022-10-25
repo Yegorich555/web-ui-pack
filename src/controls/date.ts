@@ -1,6 +1,6 @@
 import dateToString from "../helpers/dateToString";
 import WUPPopupElement from "../popup/popupElement";
-import WUPBaseComboControl, { WUPBaseComboIn } from "./baseCombo";
+import WUPBaseComboControl, { HideCases, WUPBaseComboIn } from "./baseCombo";
 import WUPCalendarControl, { WUPCalendarIn } from "./calendar";
 
 /* c8 ignore next */
@@ -119,13 +119,18 @@ export default class WUPDateControl<
     popup.$options.minWidthByTarget = false;
 
     const el = document.createElement("wup-calendar");
-    // todo handle keyboard
     el.renderInput = () => {
       el.$refLabel.remove();
-      return { menuId }; // todo check aria-owns when id applied to role-element directly
+      return { menuId };
     };
-    el.focus = () => true; // don't allow to focus calendar itselft
+    el.focusItem = (a) => this.focusMenuItem(a);
+    el.focus = () => true; // to not allow to focus calendar itselft
     el.gotFocus.call(el);
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    el.setInputValue = () => {};
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    el.gotFormChanges = () => {}; // it's must be completely detached from formElement
+    el.$refInput = this.$refInput;
     el.$options.startWith = this._opts.startWith;
     el.$options.exclude = this._opts.exclude;
     el.$options.max = this._opts.max;
@@ -134,7 +139,10 @@ export default class WUPDateControl<
     el.$options.name = undefined; // to detach from formElement
     el.$options.validationCase = 0; // disable any validations for control
     el.$initValue = this.$value as unknown as Date;
-    el.addEventListener("$change", () => this.setValue(el.$value as unknown as ValueType));
+    el.addEventListener("$change", () => {
+      this.setValue(el.$value as unknown as ValueType);
+      !this._isHidding && setTimeout(() => this.goHideMenu(HideCases.onSelect)); // todo without timeout it handles click by listener and opens again
+    });
 
     popup.appendChild(el);
     return Promise.resolve(el);
@@ -163,8 +171,32 @@ export default class WUPDateControl<
     // todo implement mask ?
     this.$refPopup!.$refresh();
   }
+
+  protected override gotKeyDown(e: KeyboardEvent): Promise<void> {
+    const isOpen = this.$isOpen;
+    const el = this.$refPopup!.firstElementChild as WUPCalendarControl;
+    isOpen && e.key !== "Escape" && el.gotKeyDown.call(el, e); // skip actions for Escape key
+    // todo what if user want to type text with space between ??? maybe mask resolves this case ?
+    const r = !e.defaultPrevented && super.gotKeyDown(e);
+    !isOpen && this.$isOpen && e.key !== "Escape" && el.gotKeyDown.call(el, e); // case when user press ArrowKey for opening menu
+    return r || Promise.resolve();
+  }
+
+  protected override focusMenuItem(next: HTMLElement | null): void {
+    // WARN: it's important don't use call super... because the main logic is implemented inside calendar
+    // can be fired from baseCombo when need to clear selection
+    const el = this.$refPopup?.firstElementChild as WUPCalendarControl;
+    if (el) {
+      (Object.getPrototypeOf(el) as WUPCalendarControl).focusItem.call(el, next);
+    } else if (!next) {
+      this.$refInput.removeAttribute("aria-activedescendant");
+    }
+    this._focusedMenuItem = next;
+  }
 }
 
 customElements.define(tagName, WUPDateControl);
 
 // todo what about role spinner ? with ability to change input values by scroll
+
+// todo testcase: startWith: year. User must be able goto dayPicker with pressing Enter

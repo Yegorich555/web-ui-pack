@@ -907,7 +907,7 @@ export default class WUPCalendarControl<
   /** Virtually focused element */
   #focused?: HTMLElement | null;
   /** Focus/clear of item (via aria-activedescendant) */
-  protected focusItem(el: HTMLElement | null): void {
+  focusItem(el: HTMLElement | null): void {
     if (el?.hasAttribute("focused")) {
       return;
     }
@@ -977,6 +977,13 @@ export default class WUPCalendarControl<
 
   protected override setValue(v: ValueType | undefined, canValidate = true): boolean | null {
     const r = super.setValue(v, canValidate);
+    this.setInputValue(v);
+    this.#refreshSelected?.call(this);
+    return r;
+  }
+
+  /** Called when need to update/announce value for input */
+  setInputValue(v: ValueType | undefined | null): void {
     if (v != null) {
       this.$refInput.value = this._opts.utc
         ? `${v.getUTCDate()} ${this.#ctr.$namesMonth[v.getUTCMonth()]} ${v.getUTCFullYear()}`
@@ -984,8 +991,6 @@ export default class WUPCalendarControl<
     } else {
       this.$refInput.value = "";
     }
-    this.#refreshSelected?.call(this);
-    return r;
   }
 
   protected override clearValue(canValidate = true): void {
@@ -1105,7 +1110,7 @@ export default class WUPCalendarControl<
     this.setValue(v);
   }
 
-  protected override gotKeyDown(e: KeyboardEvent): void {
+  override gotKeyDown(e: KeyboardEvent): void {
     super.gotKeyDown(e);
     if (e.altKey || this.$isReadOnly) {
       return;
