@@ -14,6 +14,7 @@
 - Added elements
   - [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
 - Added [helpers](README.md#helpers)
+  - [`dateFromString`](src/helpers/dateFromString.ts)
   - [`dateToString`](src/helpers/dateToString.ts)
   - [`onScrollStop`](src/helpers/onScrollStop.ts)
   - [`scrollCarousel`](src/helpers/scrollCarousel.ts)

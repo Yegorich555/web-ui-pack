@@ -1,4 +1,5 @@
 export { default as animateDropdown } from "./helpers/animateDropdown";
+export { default as dateFromString } from "./helpers/dateFromString";
 export { default as dateToString } from "./helpers/dateToString";
 export { default as findScrollParent } from "./helpers/findScrollParent";
 export { findScrollParentAll } from "./helpers/findScrollParent";

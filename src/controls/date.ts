@@ -1,3 +1,4 @@
+import dateFromString from "../helpers/dateFromString";
 import dateToString from "../helpers/dateToString";
 import WUPPopupElement from "../popup/popupElement";
 import WUPBaseComboControl, { WUPBaseComboIn } from "./baseCombo";
@@ -124,8 +125,11 @@ export default class WUPDateControl<
     if (!text) {
       return undefined;
     }
-    // todo parseValue according to format
-    return WUPCalendarControl.$parse(text, !!this._opts.utc) as unknown as ValueType;
+    let f = this._opts.format;
+    if (this._opts.utc) {
+      f += "Z";
+    }
+    return dateFromString(text, f) as unknown as ValueType;
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUPDate.Options> | null): void {
@@ -224,7 +228,7 @@ export default class WUPDateControl<
     super.gotInput(e);
     try {
       const txt = this.$refInput.value.trim();
-      this.setValue(txt ? this.parseValue(txt) : undefined);
+      this.setValue(this.parseValue(txt));
       // eslint-disable-next-line no-empty
     } catch {}
     /* todo mask/parsing
@@ -258,7 +262,5 @@ export default class WUPDateControl<
 }
 
 customElements.define(tagName, WUPDateControl);
-
-// todo what about role spinner ? with ability to change input values by scroll
 
 // todo testcase: startWith: year. User must be able goto dayPicker with pressing Enter
