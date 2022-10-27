@@ -18,7 +18,7 @@ export const enum PickersEnum {
 export namespace WUPCalendarIn {
   export interface Def {
     /** First day of week in calendar where 1-Monday, 7-Sunday;
-     * @default 1 (Monday) */
+     * @defaultValue 1 (Monday) */
     firstDayOfWeek: 1 | 2 | 3 | 4 | 5 | 6 | 7;
   }
   export interface Opt {
@@ -32,7 +32,7 @@ export namespace WUPCalendarIn {
     /** Dates that user can't choose (disabled dates) */
     exclude?: Date[];
     /** Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this
-     *  @default true */
+     *  @defaultValue true */
     utc?: boolean;
   }
 

@@ -8,9 +8,20 @@
  * "yyyy-M-d h:m:s" => "2022-4-23 13:9:12"
  * "dd/MM/yyyy" => "23/04/2022"
  * "yyyy-MM-ddThh:mm:ss.fffZ" // ISOstring
- * "YYYYMMDD hhmmss"
+ * "YYYYMMDD hhmmss" etc.
  */
-export default function dateFromString(v: string, format = "YYYY-MM-DD"): Date | null {
+export default function dateFromString(
+  v: string,
+  format = "YYYY-MM-DD",
+  options: {
+    /** Disable partially matching format
+     * so strict: false => "yyy-MM-dd" and "2022-05" returns date (but "2022-05-6" returns null)
+     *    strict: true => "yyy-MM-dd" and "2022-05" returns null
+     * @defaultValue true
+     */
+    strict?: boolean;
+  } = { strict: true }
+): Date | null {
   if (!v) {
     return null;
   }
@@ -23,8 +34,12 @@ export default function dateFromString(v: string, format = "YYYY-MM-DD"): Date |
   let char = format[0];
   let cnt = 1;
   const r = { y: 0, M: 1, d: 1, h: 0, m: 0, s: 0, f: 0 };
+
   let iShift = 0;
-  for (let i = 1; i <= format.length; ++i) {
+  let i = 1;
+  const ln = options?.strict ? format.length : Math.min(v.length, format.length);
+  // const ln = format.length;
+  for (; i <= ln; ++i) {
     const ch = format[i];
     if (char !== ch) {
       // prettier-ignore
@@ -45,6 +60,10 @@ export default function dateFromString(v: string, format = "YYYY-MM-DD"): Date |
           }
         }
         const k = i + iShift;
+        const s = v.substring(k - cnt, k);
+        if (s.length !== cnt) {
+          return null;
+        }
         r[char as keyof typeof r] = Number.parseInt(v.substring(k - cnt, k), 10);
       }
       char = ch;
@@ -54,23 +73,37 @@ export default function dateFromString(v: string, format = "YYYY-MM-DD"): Date |
     }
   }
 
-  --r.M; // month started from 0
+  if (r.M < 1 || r.M > 12 || r.d < 1 || r.d > 31 || r.h > 23 || r.m > 59 || r.s > 59 || r.f > 999) {
+    return null;
+  }
+
+  if (options.strict) {
+    const usedLn = i + iShift - 1;
+    const expectedLn = v.length - (h12 ? 2 : 0) - (isUTC && (v.endsWith("z") || v.endsWith("Z")) ? 1 : 0);
+    if (usedLn !== expectedLn) {
+      return null;
+    }
+  }
+
   if (h12) {
     char = v[v.length - 2];
     if (char === "P" || char === "p") {
       r.h += 12;
+    } else if (char !== "A" && char !== "a") {
+      return null;
     } else if (r.h === 12) {
       r.h = 0; // 12:00 AM means 00:00
     }
   }
 
+  --r.M;
   let dt: Date;
   if (isUTC) {
     dt = new Date(Date.UTC(r.y, r.M, r.d, r.h, r.m, r.s, r.f));
   } else {
     dt = new Date(r.y, r.M, r.d, r.h, r.m, r.s, r.f);
   }
-  if (Number.isNaN(dt.valueOf())) {
+  if (Number.isNaN(dt.valueOf()) || r.M !== dt[`get${isUTC ? "UTC" : ""}Month`]()) {
     return null;
   }
   return dt;

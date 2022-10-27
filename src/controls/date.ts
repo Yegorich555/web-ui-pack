@@ -13,7 +13,7 @@ const tagName = "wup-date";
 export namespace WUPDateIn {
   export interface Defs extends WUPCalendarIn.Def {
     /** String representation of a date;
-     * @default "DD-MM-YYYY" */
+     * @defaultValue "YYYY-MM-DD" */
     format: string;
   }
   export interface Opt extends Pick<WUPCalendarIn.Opt, "min" | "max" | "exclude" | "utc" | "startWith"> {}
@@ -119,17 +119,14 @@ export default class WUPDateControl<
 
   protected override _opts = this.$options;
 
-  /** Converts date-string into Date according (to $options.utc), @see WUPCalendarControl.$parse */
-  override parseValue(text: string): ValueType | undefined {
+  /** Converts date-string into Date according (to $options.utc/.format), @see WUPCalendarControl.$parse */
+  override parseValue(text: string, strict = false): ValueType | undefined {
     /* istanbul ignore else */
     if (!text) {
       return undefined;
     }
-    let f = this._opts.format;
-    if (this._opts.utc) {
-      f += "Z";
-    }
-    return dateFromString(text, f) as unknown as ValueType;
+    const f = `${this._opts.format} hh:mm:ss.fff`;
+    return (dateFromString(text, this._opts.utc ? `${f}Z` : f, { strict }) ?? undefined) as unknown as ValueType;
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUPDate.Options> | null): void {
@@ -201,20 +198,24 @@ export default class WUPDateControl<
     el.$options.name = undefined; // to detach from formElement
     el.$options.validationCase = 0; // disable any validations for control
     el.$initValue = this.$value;
-    el.addEventListener("$change", () => this.selectValue(el.$value as any));
+    el.addEventListener("$change", () => !el._isStopChanges && this.selectValue(el.$value as any));
 
     popup.appendChild(el);
     return Promise.resolve(el);
   }
 
   protected override setValue(v: ValueType | undefined, canValidate = true): boolean | null {
-    const r = super.setValue(v, canValidate);
-    const clnd = this.$refPopup?.firstElementChild as WUPCalendarControl;
-    if (clnd) {
-      clnd.$value = v;
+    const isChanged = super.setValue(v, canValidate);
+    if (isChanged) {
+      const clnd = this.$refPopup?.firstElementChild as WUPCalendarControl;
+      if (clnd) {
+        clnd._isStopChanges = true;
+        clnd.$value = v;
+        clnd._isStopChanges = false;
+      }
+      console.warn("setValue", v?.toISOString());
     }
-    console.warn("setValue", v!.toISOString());
-    return r;
+    return isChanged;
   }
 
   protected override valueToInput(v: ValueType | undefined): Promise<string> | string {
@@ -227,8 +228,13 @@ export default class WUPDateControl<
   protected override gotInput(e: Event & { currentTarget: HTMLInputElement }): void {
     super.gotInput(e);
     try {
-      const txt = this.$refInput.value.trim();
-      this.setValue(this.parseValue(txt));
+      const txt = this.$refInput.value;
+      if (!txt) {
+        this.setValue(undefined);
+      } else {
+        const v = this.parseValue(txt, true);
+        v && this.setValue(v); // todo need to save previous hours
+      }
       // eslint-disable-next-line no-empty
     } catch {}
     /* todo mask/parsing
@@ -262,5 +268,19 @@ export default class WUPDateControl<
 }
 
 customElements.define(tagName, WUPDateControl);
+// NiceToHave: role 'spinbutton" + changing input value via scrolling: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/spinbutton_role
+// NiceToHave: allowYear, allowMonth, allowDays based on format: "YYYY-MM" - only for selection year & month
 
 // todo testcase: startWith: year. User must be able goto dayPicker with pressing Enter
+
+// interface IMaskResult {
+//   isCompleted?: true;
+//   isValid?: true;
+//   value: string;
+// }
+
+// function maskDate(v: string, format = "YYYY-DD-MM"): IMaskResult {
+//   if (!v) {
+//     return { value: format };
+//   }
+// }
