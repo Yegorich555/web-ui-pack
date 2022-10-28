@@ -869,7 +869,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       }
       this.goValidate(ValidateFromCases.onChange);
     }
-    this.fireEvent("$change", { cancelable: false, bubbles: true });
+    this.fireEvent("$change", { cancelable: false, bubbles: true }); // todo isolate event
     return true;
   }
 

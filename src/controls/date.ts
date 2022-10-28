@@ -233,7 +233,18 @@ export default class WUPDateControl<
         this.setValue(undefined);
       } else {
         const v = this.parseValue(txt, true);
-        v && this.setValue(v); // todo need to save previous hours
+        if (v) {
+          const key = this._opts.utc ? "UTC" : "";
+          const a = this.$value || this.$initValue;
+          a &&
+            v[`set${key}Hours`](
+              a[`get${key}Hours`](),
+              a[`get${key}Minutes`](),
+              a[`get${key}Seconds`](),
+              a[`get${key}Milliseconds`]()
+            );
+          this.setValue(v, true);
+        }
       }
       // eslint-disable-next-line no-empty
     } catch {}

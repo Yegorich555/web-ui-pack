@@ -130,4 +130,3 @@ describe("helper.dateToString", () => {
     );
   });
 });
-// todo cover all cases
