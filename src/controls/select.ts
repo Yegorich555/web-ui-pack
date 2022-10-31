@@ -533,11 +533,11 @@ export default class WUPSelectControl<
 
   /** For case when need to menu is opened but items are not rendered yet */
   protected _needFilter?: () => void;
-  protected override gotInput(e: Event & { currentTarget: HTMLInputElement }): void {
+  protected override gotInput(e: Event, inputEl: HTMLInputElement): void {
     this.$isOpen && this.focusMenuItem(null); // reset virtual focus
-    super.gotInput(e);
+    super.gotInput(e, inputEl);
 
-    const rawV = e.currentTarget.value;
+    const rawV = inputEl.value;
     const v = rawV.trimStart().toLowerCase();
 
     delete this._needFilter;

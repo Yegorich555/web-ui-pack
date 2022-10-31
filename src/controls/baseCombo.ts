@@ -417,7 +417,7 @@ export default abstract class WUPBaseComboControl<
         await this.goHideMenu(HideCases.OnPressEsc);
         break;
       case "Enter":
-        // case " ": user can type space; we should not  use this as click
+        // case " ": user can type space; we should not use this as click
         e.preventDefault();
         {
           const el = this._focusedMenuItem;
@@ -438,9 +438,10 @@ export default abstract class WUPBaseComboControl<
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected override gotInput(e: Event & { currentTarget: HTMLInputElement }): void {
-    // gotInput possible on browser-autofill
+  protected override gotInput(e: Event, inputEl: HTMLInputElement, allowSuper = false): void {
+    // gotInput possible on browser-autofill so we need filter check if isFocused
     !this.$isOpen && this._opts.showCase & ShowCases.onInput && this.$isFocused && this.goShowMenu(ShowCases.onInput);
+    allowSuper && super.gotInput(e, inputEl);
   }
 
   protected override gotFocusLost(): void {
