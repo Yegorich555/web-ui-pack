@@ -43,6 +43,12 @@ declare global {
     interface Defaults<T = string> extends WUPTextIn.GenDef<T> {}
     interface Options<T = string> extends WUPTextIn.GenOpt<T> {}
     interface JSXProps<T extends WUPTextControl> extends WUPBase.JSXProps<T> {}
+    interface InputEvent extends Event {
+      currentTarget: HTMLInputElement;
+      /** Call it to prevent calling setValue by input event */
+      preventSetValue: () => void;
+      setValuePrevented: boolean;
+  }
   }
 
   // add element to document.createElement
@@ -294,7 +300,11 @@ export default class WUPTextControl<
 
   protected override gotFocus(): Array<() => void> {
     const arr = super.gotFocus();
-    const r = this.appendEvent(this.$refInput, "input", (e) => this.gotInput(e, this.$refInput));
+    const r = this.appendEvent(this.$refInput, "input", (e) => {
+      (e as WUPText.InputEvent).setValuePrevented = false;
+      (e as WUPText.InputEvent).preventSetValue = () => ((e as WUPText.InputEvent).setValuePrevented = true);
+      this.gotInput(e as WUPText.InputEvent);
+    });
     this._opts.selectOnFocus && !this.$refInput.readOnly && this.$refInput.select();
 
     arr.push(r);
@@ -315,15 +325,17 @@ export default class WUPTextControl<
 
   #inputTimer?: number;
   /** Called when user types text */
-  protected gotInput(_e: Event, inputEl: HTMLInputElement): void {
+  protected gotInput(e: WUPText.InputEvent): void {
     this._validTimer && clearTimeout(this._validTimer);
-    const v = this.parseValue(inputEl.value);
+    const v = this.parseValue(e.currentTarget.value);
 
+    if (!e.setValuePrevented) {
     if (this._opts.debounceMs) {
       this.#inputTimer && clearTimeout(this.#inputTimer);
       this.#inputTimer = window.setTimeout(() => this.setValue(v as any), this._opts.debounceMs);
     } else {
       this.setValue(v);
+      }
     }
   }
 

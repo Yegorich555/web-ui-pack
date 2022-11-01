@@ -225,7 +225,7 @@ export default class WUPDateControl<
     return dateToString(v, this._opts.format.toUpperCase() + (this._opts.utc ? "Z" : ""));
   }
 
-  protected override gotInput(e: Event & { currentTarget: HTMLInputElement }): void {
+  protected override gotInput(e: WUPText.InputEvent): void {
     super.gotInput(e);
     try {
       const txt = this.$refInput.value;
