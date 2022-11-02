@@ -97,6 +97,7 @@ export default class WUPDateControl<
 
   static $defaults: WUPDate.Defaults<Date> = {
     ...WUPBaseComboControl.$defaults,
+    debounceMs: 500,
     validationRules: {
       ...WUPBaseComboControl.$defaults.validationRules,
       min: (v, setV, c) =>
@@ -167,9 +168,7 @@ export default class WUPDateControl<
       }
     }
 
-    this._opts.min = this.parseValue(this.getAttribute("min") || "") ?? this._opts.min;
-    this._opts.max = this.parseValue(this.getAttribute("max") || "") ?? this._opts.max;
-    this._opts.exclude = this.getRefAttr<Date[]>("exclude");
+    super.gotChanges(propsChanged as any);
   }
 
   protected get validations(): WUPBase.Options["validations"] | undefined {
@@ -220,7 +219,8 @@ export default class WUPDateControl<
     el.$options.utc = this._opts.utc;
     el.$options.name = undefined; // to detach from formElement
     el.$options.validationCase = 0; // disable any validations for control
-    el.$initValue = this.$value;
+    const v = this.$value;
+    el.$initValue = v && !Number.isNaN(v.valueOf()) ? v : undefined;
     el.addEventListener("$change", () => !el._isStopChanges && this.selectValue(el.$value as any));
 
     popup.appendChild(el);
@@ -230,13 +230,12 @@ export default class WUPDateControl<
   protected override setValue(v: ValueType | undefined, canValidate = true): boolean | null {
     const isChanged = super.setValue(v, canValidate);
     if (isChanged) {
-      const clnd = this.$refPopup?.firstElementChild as WUPCalendarControl;
-      if (clnd) {
-        clnd._isStopChanges = true;
-        clnd.$value = v;
-        clnd._isStopChanges = false;
+      const c = this.$refPopup?.firstElementChild as WUPCalendarControl;
+      if (c) {
+        c._isStopChanges = true;
+        c.$value = v && !Number.isNaN(v.valueOf()) ? v : undefined;
+        c._isStopChanges = false;
       }
-      console.warn("setValue", v?.toISOString());
     }
     return isChanged;
   }

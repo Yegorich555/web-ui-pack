@@ -16,11 +16,12 @@ export default function DateControlView() {
     <Page
       header="DateControl"
       link="src/controls/date.ts"
-      details={{
-        tag: "wup-date",
-        cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
-        excludeCssVars: ["--ctrl-clr-cell-day-w", "--ctrl-clr-cell-h", "--ctrl-clr-cell-w", "--ctrl-clr-h"],
-      }}
+      // todo uncomment after tests
+      // details={{
+      //   tag: "wup-date",
+      //   cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
+      //   excludeCssVars: ["--ctrl-clr-cell-day-w", "--ctrl-clr-cell-h", "--ctrl-clr-cell-w", "--ctrl-clr-h"],
+      // }}
       features={[
         "Inheritted features from TextControl & CalendarControl",
         "Powerful accessibility support (keyboard, announcenement)",
@@ -50,8 +51,9 @@ export default function DateControlView() {
           autoFocus={false}
           autoComplete="off"
         />
-        {/* <wup-date name="disabled" label="Disabled" disabled utc />
-        <wup-date name="disabled" label="Readonly" readOnly utc /> */}
+        <wup-date name="empty" />
+        {/* <wup-date name="disabled" disabled /> */}
+        {/* <wup-date name="readonly" readOnly /> */}
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

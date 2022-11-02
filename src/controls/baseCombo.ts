@@ -6,9 +6,6 @@ import WUPTextControl, { WUPTextIn } from "./text";
 
 export namespace WUPBaseComboIn {
   export interface Defs {
-    /** Wait for pointed time before show-error (sumarized with $options.debounce); WARN: hide-error without debounce
-     *  @defaultValue 0 */
-    validateDebounceMs?: number;
     /** Case when menu-popup to show; WARN ShowCases.inputClick doesn't work without ShowCases.click
      * @defaultValue onPressArrowKey | onClick | onFocus */
     showCase: ShowCases;
@@ -462,9 +459,14 @@ export default abstract class WUPBaseComboControl<
   protected override setInputValue(v: ValueType | undefined): void {
     const p = this.valueToInput(v);
     if (p instanceof Promise) {
-      p.then((s) => (this.$refInput.value = s));
+      // todo try to avoid promise here and use super.setInputValue instead
+      p.then((s) => {
+        this.$refInput.value = s;
+        this._opts.mask && this.maskInput(this._opts.mask, this._opts.maskholder);
+      });
     } else {
       this.$refInput.value = p;
+      this._opts.mask && this.maskInput(this._opts.mask, this._opts.maskholder);
     }
   }
 
