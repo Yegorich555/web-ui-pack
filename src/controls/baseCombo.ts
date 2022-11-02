@@ -121,7 +121,10 @@ export default abstract class WUPBaseComboControl<
 
   static $defaults: WUPBaseCombo.Defaults<any> = {
     ...WUPTextControl.$defaults,
-    validationRules: { ...WUPBaseControl.$defaults.validationRules },
+    validationRules: {
+      ...WUPBaseControl.$defaults.validationRules,
+      invalidParse: WUPTextControl.$defaults.validationRules.invalidParse,
+    },
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey,
   };
 

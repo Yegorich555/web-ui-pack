@@ -366,7 +366,7 @@ export default class WUPRadioControl<
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected override goShowError(err: string | null, target: HTMLElement): void {
+  protected override goShowError(err: string, target: HTMLElement): void {
     super.goShowError(err, this.$refFieldset);
   }
 }

@@ -13,7 +13,7 @@ const tagName = "wup-date";
 export namespace WUPDateIn {
   export interface Defs extends WUPCalendarIn.Def {
     /** String representation of a date;
-     * @defaultValue "YYYY-MM-DD" */
+     * @defaultValue "yyyy-mm-dd" */
     format: string;
   }
   export interface Opt extends Pick<WUPCalendarIn.Opt, "min" | "max" | "exclude" | "utc" | "startWith"> {}
@@ -107,7 +107,7 @@ export default class WUPDateControl<
         (v === undefined || setV.some((d) => d.valueOf() === v.valueOf())) && `This date is disabled`,
     },
     firstDayOfWeek: 1,
-    format: "YYYY-MM-DD",
+    format: "yyyy-mm-dd",
   };
 
   $options: WUPDate.Options<ValueType> = {
@@ -119,19 +119,42 @@ export default class WUPDateControl<
 
   protected override _opts = this.$options;
 
-  /** Converts date-string into Date according (to $options.utc/.format), @see WUPCalendarControl.$parse */
-  override parseValue(text: string, strict = false): ValueType | undefined {
-    /* istanbul ignore else */
+  /** Converts date-string into Date according (to $options.utc/.format)
+   * @Troubleshooting
+   * despite on $options.format is "yyyy-mm-dd" the correct format "yyyy-MM-dd" */
+  override parseValue(
+    text: string,
+    opts?: { format?: string | null; strict?: boolean; showError?: boolean }
+  ): ValueType | undefined {
     if (!text) {
       return undefined;
     }
-    const f = `${this._opts.format} hh:mm:ss.fff`;
-    return (dateFromString(text, this._opts.utc ? `${f}Z` : f, { strict }) ?? undefined) as unknown as ValueType;
+    let format = opts?.format ?? `${this._opts.format.toUpperCase()} hh:mm:ss.fff`;
+    format = this._opts.utc ? `${format}Z` : format;
+    const ref = { strict: opts?.strict, isOutOfRange: false };
+
+    const v = dateFromString(text, format, ref) ?? undefined;
+    if (opts) {
+      opts.showError = ref.isOutOfRange;
+    }
+    return v as unknown as ValueType;
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUPDate.Options> | null): void {
     this._opts.utc = this.getBoolAttr("utc", this._opts.utc);
-    super.gotChanges(propsChanged as any);
+    // this._opts.format = this.getAttribute("format") ?? this._opts.format; //WANR: format defined only in defaults
+    this._opts.mask =
+      this._opts.mask ??
+      this._opts.format
+        .replace(/[yY]/g, "0")
+        .replace(/dd|DD/g, "00")
+        .replace(/[dD]/g, "#0")
+        .replace(/mm|MM/g, "00")
+        .replace(/[mM]/g, "#0"); // convert yyyy-mm-dd > 0000-00-00; d/m/yyyy > #0/#0/0000
+    this._opts.maskholder = this._opts.maskholder ?? this._opts.format;
+    this._opts.min = this.parseValue(this.getAttribute("min") || "") ?? this._opts.min;
+    this._opts.max = this.parseValue(this.getAttribute("max") || "") ?? this._opts.max;
+    this._opts.exclude = this.getRefAttr<Date[]>("exclude");
 
     const attr = this.getAttribute("startwith");
     if (attr != null) {
@@ -226,33 +249,37 @@ export default class WUPDateControl<
   }
 
   protected override gotInput(e: WUPText.InputEvent): void {
-    super.gotInput(e);
-    try {
-      const txt = this.$refInput.value;
+    this.parseValue = (txt, out) => {
       if (!txt) {
-        this.setValue(undefined);
-      } else {
-        const v = this.parseValue(txt, true);
-        if (v) {
-          const key = this._opts.utc ? "UTC" : "";
-          const a = this.$value || this.$initValue;
-          a &&
-            v[`set${key}Hours`](
-              a[`get${key}Hours`](),
-              a[`get${key}Minutes`](),
-              a[`get${key}Seconds`](),
-              a[`get${key}Milliseconds`]()
-            );
-          this.setValue(v, true);
-        }
+        return undefined;
       }
-      // eslint-disable-next-line no-empty
-    } catch {}
-    /* todo mask/parsing
-       during the parsing need to detect:
-       1. isValid => allow change
-       2. completed => setValue
-    */
+      const v: Date = this.#ctr.prototype.parseValue.call(
+        this,
+        txt,
+        Object.assign(out!, {
+          format: this._opts.format.toUpperCase(),
+          strict: true,
+        })
+      );
+      if (v) {
+        const key = this._opts.utc ? "UTC" : "";
+        const a = this.$value || this.$initValue;
+        a &&
+          !Number.isNaN(a.valueOf()) &&
+          v[`set${key}Hours`](
+            a[`get${key}Hours`](),
+            a[`get${key}Minutes`](),
+            a[`get${key}Seconds`](),
+            a[`get${key}Milliseconds`]()
+          );
+      } else {
+        e.preventSetValue(); // to allow user to continue input
+      }
+      delete (this as any).parseValue;
+      return v as any;
+    };
+
+    super.gotInput(e, true);
   }
 
   protected override gotKeyDown(e: KeyboardEvent): Promise<void> {

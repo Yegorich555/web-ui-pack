@@ -413,14 +413,14 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return !this.#ctr.$isEqual(this.$value, this.#initValue);
   }
 
-  #isValid?: boolean;
+  _isValid?: boolean;
   /** Returns true if control is valid */
   get $isValid(): boolean {
-    if (this.#isValid == null) {
+    if (this._isValid == null) {
       this.goValidate(ValidateFromCases.onInit, false);
     }
 
-    return this.#isValid as boolean;
+    return this._isValid as boolean;
   }
 
   /** Returns if current control is active/focused */
@@ -659,7 +659,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         const r = rules[k as "required"];
         if (!r) {
           const n = this._opts.name ? `.[${this._opts.name}]` : "";
-          throw new Error(`${this.tagName}${n}. Validation rule [${vl}] is not found`);
+          throw new Error(`${this.tagName}${n}. Validation rule [${k}] is not found`);
         }
         err = r(v as unknown as string, vl as boolean, this);
       }
@@ -680,7 +680,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         return 0;
       })
       .map((key) => ({ [key]: (v: ValueType | undefined) => check.call(self, v, key) }[key])); // make object to create named function
-
     return arr;
   }
 
@@ -690,13 +689,13 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   protected goValidate(fromCase: ValidateFromCases, canShowError = true): string | false {
     const vls = this.validationsRules;
     if (!vls.length) {
-      this.#isValid = true;
+      this._isValid = true;
       return false;
     }
 
     const v = this.$value;
     let errMsg = "";
-    this.#isValid = !vls.some((fn) => {
+    this._isValid = !vls.some((fn) => {
       const err = fn(v);
       if (err) {
         errMsg = err;
@@ -705,6 +704,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       return false;
     });
     this._validTimer && clearTimeout(this._validTimer);
+    console.warn("goValidate", this._isValid);
 
     if (fromCase === ValidateFromCases.onChange && this._opts.validationCase & ValidationCases.onChangeSmart) {
       if (errMsg) {
@@ -731,7 +731,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   /** Show (append/update) all validation-rules with checkpoints to existed error-element */
-  protected renderValidations(parent: WUPPopupElement | HTMLElement, skipRules = ["required"]): void {
+  protected renderValidations(parent: WUPPopupElement | HTMLElement, skipRules = ["required", "invalidParse"]): void {
     const vls = this.validationsRules.filter((vl) => !skipRules.includes(vl.name));
     if (!vls.length) {
       return;
@@ -791,13 +791,20 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return p;
   }
 
+  #prevErr?: string;
   #refErrTarget?: HTMLElement;
   /** Method called to show error and set invalid state on input; point null to show all validation rules with checkpoints */
-  protected goShowError(err: string | null, target: HTMLElement): void {
+  protected goShowError(err: string, target: HTMLElement): void {
+    if (this.#prevErr === err) {
+      return;
+    }
     // possible when user goes to another page and focusout > validTimeout happened
     if (!this.isConnected) {
       return;
     }
+
+    this.#prevErr = err;
+
     if (!this.$refError) {
       this.$refError = this.renderError();
     }
@@ -827,6 +834,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   /** Method called to hide error and set valid state on input */
   protected goHideError(): void {
+    this.#prevErr = undefined;
     if (this.$refError) {
       const p = this.$refError;
       p.addEventListener("$hide", p.remove, { passive: true, once: true });
@@ -858,7 +866,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     if (!isChanged) {
       return false;
     }
-    this.#isValid = undefined;
+    this._isValid = undefined;
 
     const c = this._opts.validationCase;
     if (canValidate && (c & ValidationCases.onChange || c & ValidationCases.onChangeSmart)) {

@@ -19,7 +19,13 @@ export namespace WUPTextIn {
     clearButton: boolean;
   }
 
-  export interface Opt {}
+  export interface Opt {
+    // todo more details here
+    /** Make input masked 0000-00-00 - for date, $ 0 000 - for currency */
+    mask?: string;
+    /** Replace missed masked values with placeholder; for date it's equal to format 'yyyy-mm-dd' */
+    maskholder?: string;
+  }
 
   export type Generics<
     ValueType = string,
@@ -38,6 +44,8 @@ declare global {
       min: number;
       max: number;
       email: boolean;
+      /** Called when value parsing from input is invalid */
+      invalidParse: true;
     }
     interface EventMap extends WUPBase.EventMap {}
     interface Defaults<T = string> extends WUPTextIn.GenDef<T> {}
@@ -48,7 +56,7 @@ declare global {
       /** Call it to prevent calling setValue by input event */
       preventSetValue: () => void;
       setValuePrevented: boolean;
-  }
+    }
   }
 
   // add element to document.createElement
@@ -93,7 +101,13 @@ export default class WUPTextControl<
 
   static get observedOptions(): Array<string> {
     const arr = super.observedOptions as Array<keyof WUPText.Options>;
-    arr.push("clearButton");
+    arr.push("clearButton", "maskholder");
+    return arr;
+  }
+
+  static get observedAttributes(): Array<LowerKeys<WUPText.Options>> {
+    const arr = super.observedAttributes as Array<LowerKeys<WUPText.Options>>;
+    arr.push("maskholder");
     return arr;
   }
 
@@ -113,7 +127,8 @@ export default class WUPTextControl<
           width: 100%;
           position: relative;
         }
-        :host input {
+        :host input,
+        :host [maskholder] {
           width: 100%;
           box-sizing: border-box;
           font: inherit;
@@ -128,6 +143,15 @@ export default class WUPTextControl<
           text-overflow: ellipsis;
           overflow: hidden;
           white-space: nowrap;
+        }
+        :host [maskholder] {
+          position: absolute;
+          opacity: 0.65;
+          display: none;
+          pointer-events: none;
+        }
+        :host [maskholder]>i {
+          visibility: hidden
         }
         :host input:-webkit-autofill {
           font: inherit;
@@ -159,11 +183,17 @@ export default class WUPTextControl<
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
+        :host input:not(:focus)::placeholder {
+          color: transparent;
+        }
         :host input:focus + *,
         :host input:not(:placeholder-shown) + *,
         :host legend {
           top: 0.2em;
           transform: scale(0.9);
+        }
+        :host:focus-within [maskholder] {
+          display: initial;
         }
         /* style for icons */
         :host label button,
@@ -239,6 +269,7 @@ export default class WUPTextControl<
       max: (v, setV) =>
         (v === undefined || v.length > setV) && `Max length is ${setV} character${setV === 1 ? "" : "s"}`,
       email: (v, setV) => setV && (!v || !emailReg.test(v)) && "Invalid email address",
+      invalidParse: (v) => v === undefined && "Invalid value",
     },
   };
 
@@ -251,6 +282,7 @@ export default class WUPTextControl<
   protected override _opts = this.$options;
 
   $refBtnClear?: HTMLButtonElement;
+  $refMaskholder?: HTMLSpanElement;
 
   constructor() {
     super();
@@ -258,7 +290,15 @@ export default class WUPTextControl<
     this.$refInput.placeholder = " ";
   }
 
-  override parseValue(text: string): ValueType | undefined {
+  /** Returns validations enabled by user + invalidParse (impossible to disable) */
+  protected get validations(): WUPBase.Options["validations"] | undefined {
+    const vls = (super.validations as WUPText.Options["validations"]) || {};
+    vls.invalidParse = vls.invalidParse ?? true;
+    return vls as WUPBase.Options["validations"];
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  override parseValue(text: string, _out?: { showError?: boolean }): ValueType | undefined {
     return (text || undefined) as unknown as ValueType;
   }
 
@@ -312,43 +352,161 @@ export default class WUPTextControl<
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUPText.Options> | null): void {
+    // apply mask options
+    this._opts.mask = this.getAttribute("mask") ?? this._opts.mask;
+    this._opts.maskholder = this.getAttribute("maskholder") ?? this._opts.maskholder;
+    if (this._opts.maskholder) {
+      if (!this.$refMaskholder) {
+        const m = document.createElement("span");
+        m.setAttribute("aria-hidden", "true");
+        m.setAttribute("maskholder", "");
+        m.appendChild(document.createElement("i"));
+        m.append("");
+        this.$refInput.parentElement!.prepend(m);
+        this.$refMaskholder = m;
+      }
+    } else if (this.$refMaskholder) {
+      this.$refMaskholder.remove();
+      this.$refMaskholder = undefined;
+    }
+
     super.gotChanges(propsChanged as any);
 
-    if (this._opts.clearButton && !this.$refBtnClear) {
-      this.$refBtnClear = this.renderBtnClear();
-    }
-    if (!this._opts.clearButton && this.$refBtnClear) {
+    if (this._opts.clearButton) {
+      this.$refBtnClear = this.$refBtnClear || this.renderBtnClear();
+    } else if (this.$refBtnClear) {
       this.$refBtnClear.remove();
       this.$refBtnClear = undefined;
     }
+
+    setTimeout(() => !this.$value && this.setInputValue(undefined)); // wait for timeout (wait for applying of inherrited) to set maskholder
   }
 
   #inputTimer?: number;
   /** Called when user types text */
   protected gotInput(e: WUPText.InputEvent): void {
-    this._validTimer && clearTimeout(this._validTimer);
-    const v = this.parseValue(e.currentTarget.value);
+    let txt = e.currentTarget.value;
+    txt = this._opts.mask ? this.maskInput(this._opts.mask, this._opts.maskholder) : txt;
 
-    if (!e.setValuePrevented) {
-    if (this._opts.debounceMs) {
-      this.#inputTimer && clearTimeout(this.#inputTimer);
-      this.#inputTimer = window.setTimeout(() => this.setValue(v as any), this._opts.debounceMs);
+    const outRef: { showError?: boolean } = {};
+    const v = this.parseValue(txt, outRef);
+    if (outRef.showError) {
+      // parseValue must return valid/not-valid result
+      const msg = this.validationsRules.find((rule) => rule.name === "invalidParse"); // todo the rule must be disabled for default validation
+      this.$showError(msg!.call(this, undefined) as string);
     } else {
-      this.setValue(v);
+      this._isValid !== false && this.$hideError();
+      if (!e.setValuePrevented) {
+        this._validTimer && clearTimeout(this._validTimer);
+        if (this._opts.debounceMs) {
+          this.#inputTimer && clearTimeout(this.#inputTimer);
+          this.#inputTimer = window.setTimeout(() => this.setValue(v), this._opts.debounceMs);
+        } else {
+          this.setValue(v);
+        }
       }
     }
   }
 
+  // pattern ###0.## where # - optional, 0 - required
+  /** Called to apply mask-behavior (on "input" event) */
+  protected maskInput(mask: string, maskholder?: string): string {
+    const el = this.$refInput as HTMLInputElement & { _prev?: string };
+    const v = el.value;
+
+    const next = maskProcess(v, mask);
+    const isCharNotAllowed = v.length > next.length;
+
+    const setMaskHolder = (str: string): void => {
+      if (maskholder) {
+        this.$refMaskholder!.lastChild!.textContent = maskholder.substring(str.length); // todo it's wrong for optional numbers
+        this.$refMaskholder!.firstElementChild!.textContent = str;
+      }
+    };
+
+    // todo add removing separators ???
+    const ds = (el.selectionEnd || v.length) - v.length;
+
+    const setV = (): void => {
+      el.value = next;
+      el._prev = next;
+      el.selectionEnd = next.length - ds;
+      el.selectionStart = el.selectionEnd;
+      setMaskHolder(next);
+    };
+    if (isCharNotAllowed) {
+      setMaskHolder(v);
+      setTimeout(setV, 100); // set value after 50ms to show user typed value before mask applied
+    } else {
+      setV();
+    }
+    return next;
+  }
+
   protected override setValue(v: ValueType | undefined, canValidate = true): boolean | null {
-    const r = super.setValue(v, canValidate);
+    const isChanged = super.setValue(v, canValidate);
     this.setInputValue(v);
-    return r;
+    isChanged && this._isValid !== false && this.$hideError();
+    return isChanged;
   }
 
   protected setInputValue(v: ValueType | undefined): void {
-    this.$refInput.value = v != null ? (v as any).toString() : "";
+    const str = v != null ? (v as any).toString() : "";
+    this.$refInput.value = str;
+    this._opts.mask && this.maskInput(this._opts.mask, this._opts.maskholder);
   }
 }
 
 customElements.define(tagName, WUPTextControl);
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
+
+function maskProcess(v: string, pattern: string): string {
+  // yyyy-mm-dd => 0000-00-00
+  /**
+   * 3333 + 3 => 3333-3
+   * 3333-3 - removeLast => 3333
+   */
+  let i = 0;
+  let s = "";
+  for (; i < v.length; ++i) {
+    const pi = pattern[i];
+    // const char = v[i];
+    if (pi === undefined) {
+      break;
+    }
+    const ascii = v.charCodeAt(i);
+    const isNumber = ascii > 47 && ascii < 58;
+    if (pi === "0") {
+      if (!isNumber) {
+        return s;
+      }
+    } else if (v[i] !== pi) {
+      s += pi;
+      if (!isNumber) {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+    }
+
+    s += v[i];
+  }
+
+  return s;
+}
+
+function testMask(v: string, pattern = "0000-00-00"): void {
+  console.warn("testMask", { v, will: maskProcess(v, pattern) });
+}
+// todo mask for currency $ # ##0
+// todo mask for letters prefix_valueWithLetters_suffix
+
+// testMask("1234"); // 1234
+// testMask("12345"); // 1234-5
+// testMask("1234-5"); // 1234-5
+// testMask("1234-");
+// testMask("1234-52-32");
+// testMask("1234-52-324");
+// testMask("1234 ");
+// testMask("12345", "0000--0"); // todo issue here
+
+// gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
