@@ -15,11 +15,13 @@ export default function dateFromString(
   format = "YYYY-MM-DD",
   options: {
     /** Disable partially matching format
-     * so strict: false => "yyy-MM-dd" and "2022-05" returns date (but "2022-05-6" returns null)
+     *    strict: false => "yyy-MM-dd" and "2022-05" returns date (but "2022-05-6" returns null)
      *    strict: true => "yyy-MM-dd" and "2022-05" returns null
      * @defaultValue true
      */
     strict?: boolean;
+    /** Output value returns true if detected out of range value: day > 31 etc. */
+    isOutOfRange?: boolean;
   } = { strict: true }
 ): Date | null {
   if (!v) {
@@ -37,7 +39,7 @@ export default function dateFromString(
 
   let iShift = 0;
   let i = 1;
-  const ln = options?.strict ? format.length : Math.min(v.length, format.length);
+  const ln = options.strict ? format.length : Math.min(v.length, format.length);
   // const ln = format.length;
   for (; i <= ln; ++i) {
     const ch = format[i];
@@ -61,27 +63,17 @@ export default function dateFromString(
         }
         const k = i + iShift;
         const s = v.substring(k - cnt, k);
+        r[char as keyof typeof r] = Number.parseInt(s, 10);
         if (s.length !== cnt) {
+          // --r.M;
+          // options.isOutOfRange = isOutOfRange(r, isUTC, null);
           return null;
         }
-        r[char as keyof typeof r] = Number.parseInt(v.substring(k - cnt, k), 10);
       }
       char = ch;
       cnt = 1;
     } else {
       ++cnt;
-    }
-  }
-
-  if (r.M < 1 || r.M > 12 || r.d < 1 || r.d > 31 || r.h > 23 || r.m > 59 || r.s > 59 || r.f > 999) {
-    return null;
-  }
-
-  if (options.strict) {
-    const usedLn = i + iShift - 1;
-    const expectedLn = v.length - (h12 ? 2 : 0) - (isUTC && (v.endsWith("z") || v.endsWith("Z")) ? 1 : 0);
-    if (usedLn !== expectedLn) {
-      return null;
     }
   }
 
@@ -103,8 +95,42 @@ export default function dateFromString(
   } else {
     dt = new Date(r.y, r.M, r.d, r.h, r.m, r.s, r.f);
   }
-  if (Number.isNaN(dt.valueOf()) || r.M !== dt[`get${isUTC ? "UTC" : ""}Month`]()) {
+  if (Number.isNaN(dt.valueOf())) {
     return null;
   }
+
+  options.isOutOfRange = isOutOfRange(r, isUTC, dt);
+  if (options.isOutOfRange) {
+    return null;
+  }
+
+  if (options.strict) {
+    const usedLn = i + iShift - 1;
+    const expectedLn = v.length - (h12 ? 2 : 0) - (isUTC && (v.endsWith("z") || v.endsWith("Z")) ? 1 : 0);
+    if (usedLn !== expectedLn) {
+      return null;
+    }
+  }
+
   return dt;
+}
+
+function isOutOfRange(
+  r: { y: number; M: number; d: number; h: number; m: number; s: number; f: number },
+  isUTC: boolean,
+  v: Date | null
+): boolean {
+  // NiceToHave: expect(getOutOfRange("2022-2", "yyyy-MM-dd")).toBe(true)
+  return (
+    r.M < 0 ||
+    r.M > 11 ||
+    r.d < 1 ||
+    r.d > 31 ||
+    r.h > 23 ||
+    r.m > 59 ||
+    r.s > 59 ||
+    r.f > 999 ||
+    (v && r.M !== v[`get${isUTC ? "UTC" : ""}Month`]()) ||
+    false
+  );
 }

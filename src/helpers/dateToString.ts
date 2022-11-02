@@ -37,7 +37,7 @@ export default function dateToString(v: Date, format: string): string {
       switch (char) {
         case "y":
         case "Y":
-          s += zeroBefore(v[`get${ukey}FullYear`].call(v), cnt);
+          s += zeroBefore(v[`get${ukey}FullYear`].call(v), cnt); // todo allow y yy yyy
           break;
         case "M": // todo allow yyyy-mm-dd
           s += zeroBefore(v[`get${ukey}Month`].call(v) + 1, cnt);

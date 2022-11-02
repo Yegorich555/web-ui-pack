@@ -2,6 +2,7 @@
  * @jest-environment ./test/jest.timeZoneEnv.js
  * @jest-environment-options {"timezone": "America/New_York"}
  */
+// import dateFromString from "../../src/helpers/dateFromString";
 import dateFromString from "web-ui-pack/helpers/dateFromString";
 
 describe("helper.dateToString", () => {
@@ -128,5 +129,32 @@ describe("helper.dateToString", () => {
     expect(dateFromString("2022-03-10 23:40", "yyyy-MM-dd hh:mm:ss.fffZ", { strict: false })).toStrictEqual(
       new Date(Date.UTC(2022, 3 - 1, 10, 23, 40))
     );
+  });
+
+  test("isOutOfRange", () => {
+    const getOutOfRange = (v = "2022", format = "yyyy") => {
+      const out = { strict: true, isOutOfRange: null };
+      dateFromString(v, format, out);
+      return out.isOutOfRange;
+    };
+
+    expect(getOutOfRange("2022-12-20", "yyyy-MM-dd")).toBe(false);
+    expect(getOutOfRange("2022-00-20", "yyyy-MM-dd")).toBe(true);
+    expect(getOutOfRange("2022-05-00", "yyyy-MM-dd")).toBe(true);
+    expect(getOutOfRange("2022-12-50", "yyyy-MM-dd")).toBe(true);
+    expect(getOutOfRange("2022-13-20", "yyyy-MM-dd")).toBe(true);
+    expect(getOutOfRange("2022-11-31", "yyyy-MM-dd")).toBe(true); // 31 Nov 2022 doesn't exist
+    expect(getOutOfRange("2022-11-30 23:59:59.999", "yyyy-MM-dd hh:mm:ss.fff")).toBe(false);
+    expect(getOutOfRange("2022-11-30 24:59:59.999", "yyyy-MM-dd hh:mm:ss.fff")).toBe(true);
+    expect(getOutOfRange("2022-11-30 23:60:59.999", "yyyy-MM-dd hh:mm:ss.fff")).toBe(true);
+    expect(getOutOfRange("2022-11-30 23:59:60.999", "yyyy-MM-dd hh:mm:ss.fff")).toBe(true);
+    expect(getOutOfRange("2022-11-30 23:59:59.000", "yyyy-MM-dd hh:mm:ss.fff")).toBe(false);
+
+    // NiceToHave:
+    // expect(getOutOfRange("20", "yyyy-MM-dd")).toBe(false);
+    // expect(getOutOfRange("2022", "yyyy-MM-dd")).toBe(false);
+    // expect(getOutOfRange("2022-0", "yyyy-MM-dd")).toBe(false);
+    // expect(getOutOfRange("2022-09", "yyyy-MM-dd")).toBe(false);
+    // expect(getOutOfRange("2022-2", "yyyy-MM-dd")).toBe(false);
   });
 });

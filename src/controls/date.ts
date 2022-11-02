@@ -259,7 +259,7 @@ export default class WUPDateControl<
     const isOpen = this.$isOpen;
     const el = this.$refPopup!.firstElementChild as WUPCalendarControl;
     isOpen && e.key !== "Escape" && el.gotKeyDown.call(el, e); // skip actions for Escape key
-    // todo allow user to type Space and prevent handling of ' ' ???
+    // WARN: user can't type Space " " symbol because it's handled by calendar
     const r = !e.defaultPrevented && super.gotKeyDown(e);
     !isOpen && this.$isOpen && e.key !== "Escape" && el.gotKeyDown.call(el, e); // case when user press ArrowKey for opening menu
     return r || Promise.resolve();
@@ -267,7 +267,7 @@ export default class WUPDateControl<
 
   protected override focusMenuItem(next: HTMLElement | null): void {
     // WARN: it's important don't use call super... because the main logic is implemented inside calendar
-    // can be fired from baseCombo when need to clear selection
+    // can be fired from baseCombo => when need to clear selection
     const el = this.$refPopup?.firstElementChild as WUPCalendarControl;
     if (el) {
       (Object.getPrototypeOf(el) as WUPCalendarControl).focusItem.call(el, next);
@@ -281,10 +281,11 @@ export default class WUPDateControl<
 customElements.define(tagName, WUPDateControl);
 // NiceToHave: role 'spinbutton" + changing input value via scrolling: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/spinbutton_role
 // NiceToHave: allowYear, allowMonth, allowDays based on format: "YYYY-MM" - only for selection year & month
+// NiceToHave: alt-behavior; when user press Alt allow to use arrowKeys to navigate in input - use logic for all comboboxes
 
 // todo testcase: startWith: year. User must be able goto dayPicker with pressing Enter
-
-// interface IMaskResult {
+// todo focus, type some text, press Esc. Value must be not cleared if popup was opened and now is closnig
+// todo impossible to use shiftHome, shiftEnd with calendar
 //   isCompleted?: true;
 //   isValid?: true;
 //   value: string;
