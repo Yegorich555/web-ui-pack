@@ -414,7 +414,8 @@ export default class WUPTextControl<
     const el = this.$refInput as HTMLInputElement & { _prev?: string };
     const v = el.value;
 
-    const next = this.maskProcess(v, mask);
+    // todo prediction (1234 >>> 1234-) several scenarios how user can remove previous number and we need manipulate by selectionStart/End
+    const next = this.maskProcess(v, mask, { prediction: true, lazy: true });
     const isCharNotAllowed = v.length > next.length;
 
     const setMaskHolder = (str: string): void => {
@@ -424,7 +425,6 @@ export default class WUPTextControl<
       }
     };
 
-    // todo add removing separators ???
     const ds = (el.selectionEnd || v.length) - v.length;
 
     const setV = (): void => {
@@ -450,12 +450,19 @@ export default class WUPTextControl<
    * #### where # - optional, 0 - required numbers
    * @returns corrected result
    */
-  maskProcess(v: string, pattern: string): string {
-    // yyyy-mm-dd => 0000-00-00
-    /**
-     * 3333 + 3 => 3333-3
-     * 3333-3 - removeLast => 3333
-     */
+  maskProcess(
+    v: string,
+    pattern: string,
+    options = {
+      /** Add next constant-symbol to allow user don't worry about non-digit values */
+      prediction: true,
+      /** Add missed zero: for pattern '0000-00' and string '1 ' result will be "0001-"  */
+      lazy: true,
+    }
+  ): string {
+    if (!v) {
+      return "";
+    }
 
     const charIsNumber = (str: string, i: number): boolean => {
       const ascii = str.charCodeAt(i);
@@ -466,17 +473,15 @@ export default class WUPTextControl<
     let pi = 0;
     const s: string[] = [""];
     const regSep = /[., _+-/\\]/;
-    /* todo for prediction (1234 >>> 1234-) need to resolve on input side because there is several scenarios how user can remove previous number
-      and we need manipulate by selectionStart/End */
     const ln = Math.max(v.length, pattern.length);
     let cntOptional = 0; // count of optionalNumbers
     for (; vi < ln; ++vi, ++pi) {
       let p = pattern[pi];
       const c = v[vi];
-      if (p === undefined || c === undefined) {
+      if (p === undefined) {
+        // || c === undefined) {
         return s.join("");
       }
-      const lazy = true; // when for 0000-00 & "1-" >> "0001-"
       switch (p) {
         case "0":
           if (!charIsNumber(v, vi)) {
@@ -485,7 +490,7 @@ export default class WUPTextControl<
               --vi;
               continue;
             }
-            if (lazy && regSep.test(c)) {
+            if (options.lazy && regSep.test(c)) {
               const last = s[s.length - 1];
               if (charIsNumber(last, 0)) {
                 s[s.length - 1] = `0${last}`; // prepend '0' only if user typed number before '1234--' >>> '1234-', '1234-1-' >>> '1234-01-'
@@ -525,8 +530,12 @@ export default class WUPTextControl<
             s.push(""); // for lazy mode
             isNum && --vi;
             continue;
+          } else if (options.prediction && c === undefined) {
+            s.push(p); // past suffix at the end
+            s.push(""); // for lazy mode
+            continue;
           } else {
-            return s.join();
+            return s.join("");
           }
         }
         // break;
@@ -561,5 +570,5 @@ function testMask(v: string, pattern = "0000-00-00"): void {
   console.warn("testMask", { p: pattern, v, will: WUPTextControl.prototype.maskProcess(v, pattern) });
 }
 
-// testMask("12345", "0000--5");
+testMask("$ 5", "$ #####0 USD");
 // testMask("1.2.3.4", "##0.##0.##0.##0");
