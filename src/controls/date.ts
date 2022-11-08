@@ -312,13 +312,3 @@ customElements.define(tagName, WUPDateControl);
 // todo testcase: startWith: year. User must be able goto dayPicker with pressing Enter
 // todo focus, type some text, press Esc. Value must be not cleared if popup was opened and now is closnig
 // todo impossible to use shiftHome, shiftEnd with calendar
-//   isCompleted?: true;
-//   isValid?: true;
-//   value: string;
-// }
-
-// function maskDate(v: string, format = "YYYY-DD-MM"): IMaskResult {
-//   if (!v) {
-//     return { value: format };
-//   }
-// }

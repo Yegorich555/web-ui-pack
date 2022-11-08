@@ -43,6 +43,7 @@ module.exports = {
     "@typescript-eslint/no-namespace": "off",
     "prettier/prettier": ["error"],
     "lines-between-class-members": ["error", "always", { exceptAfterSingleLine: true }],
+    "no-continue": "off",
     "no-shadow": "off",
     "no-constant-condition": "off",
     "no-await-in-loop": 0,

@@ -414,7 +414,7 @@ export default class WUPTextControl<
     const el = this.$refInput as HTMLInputElement & { _prev?: string };
     const v = el.value;
 
-    const next = maskProcess(v, mask);
+    const next = this.maskProcess(v, mask);
     const isCharNotAllowed = v.length > next.length;
 
     const setMaskHolder = (str: string): void => {
@@ -443,6 +443,101 @@ export default class WUPTextControl<
     return next;
   }
 
+  /**
+   * Format string accoring to pattern
+   * @param v string that must be processed
+   * @param pattern 0000-00-00 (for date yyyy-MM-dd), ##0.##0.##0.##0 (for IPaddress), $ ### ### ### ### ### ##0 (for currency)
+   * #### where # - optional, 0 - required numbers
+   * @returns corrected result
+   */
+  maskProcess(v: string, pattern: string): string {
+    // yyyy-mm-dd => 0000-00-00
+    /**
+     * 3333 + 3 => 3333-3
+     * 3333-3 - removeLast => 3333
+     */
+
+    const charIsNumber = (str: string, i: number): boolean => {
+      const ascii = str.charCodeAt(i);
+      return ascii > 47 && ascii < 58;
+    };
+
+    let vi = 0;
+    let pi = 0;
+    const s: string[] = [""];
+    const regSep = /[., _+-/\\]/;
+    /* todo for prediction (1234 >>> 1234-) need to resolve on input side because there is several scenarios how user can remove previous number
+      and we need manipulate by selectionStart/End */
+    const ln = Math.max(v.length, pattern.length);
+    let cntOptional = 0; // count of optionalNumbers
+    for (; vi < ln; ++vi, ++pi) {
+      let p = pattern[pi];
+      const c = v[vi];
+      if (p === undefined || c === undefined) {
+        return s.join("");
+      }
+      const lazy = true; // when for 0000-00 & "1-" >> "0001-"
+      switch (p) {
+        case "0":
+          if (!charIsNumber(v, vi)) {
+            if (cntOptional) {
+              --cntOptional;
+              --vi;
+              continue;
+            }
+            if (lazy && regSep.test(c)) {
+              const last = s[s.length - 1];
+              if (charIsNumber(last, 0)) {
+                s[s.length - 1] = `0${last}`; // prepend '0' only if user typed number before '1234--' >>> '1234-', '1234-1-' >>> '1234-01-'
+                --vi;
+              }
+              continue;
+            } else {
+              return s.join("");
+            }
+          }
+          break;
+        case "#":
+          if (!charIsNumber(v, vi)) {
+            --vi;
+            continue;
+          }
+          ++cntOptional;
+          break;
+        case c:
+          cntOptional = 0;
+          s.push(c);
+          s.push(""); // for lazy mode
+          continue;
+        case "\0":
+          // todo allow user to use char '#'
+          cntOptional = 0;
+          if (v.charCodeAt(vi) === 0) {
+            // todo check it >> s.push("");
+            break;
+          } else p = "0";
+        // eslint-disable-next-line no-fallthrough
+        default: {
+          cntOptional = 0;
+          const isNum = charIsNumber(v, vi);
+          if (isNum || regSep.test(c)) {
+            s.push(p);
+            s.push(""); // for lazy mode
+            isNum && --vi;
+            continue;
+          } else {
+            return s.join();
+          }
+        }
+        // break;
+      }
+
+      s[s.length - 1] += c;
+    }
+
+    return s.join("");
+  }
+
   protected override setValue(v: ValueType | undefined, canValidate = true): boolean | null {
     const isChanged = super.setValue(v, canValidate);
     this.setInputValue(v);
@@ -450,6 +545,7 @@ export default class WUPTextControl<
     return isChanged;
   }
 
+  /** Called to update value for <input/> */
   protected setInputValue(v: ValueType | undefined): void {
     const str = v != null ? (v as any).toString() : "";
     this.$refInput.value = str;
@@ -459,54 +555,11 @@ export default class WUPTextControl<
 
 customElements.define(tagName, WUPTextControl);
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
-
-function maskProcess(v: string, pattern: string): string {
-  // yyyy-mm-dd => 0000-00-00
-  /**
-   * 3333 + 3 => 3333-3
-   * 3333-3 - removeLast => 3333
-   */
-  let i = 0;
-  let s = "";
-  for (; i < v.length; ++i) {
-    const pi = pattern[i];
-    // const char = v[i];
-    if (pi === undefined) {
-      break;
-    }
-    const ascii = v.charCodeAt(i);
-    const isNumber = ascii > 47 && ascii < 58;
-    if (pi === "0") {
-      if (!isNumber) {
-        return s;
-      }
-    } else if (v[i] !== pi) {
-      s += pi;
-      if (!isNumber) {
-        // eslint-disable-next-line no-continue
-        continue;
-      }
-    }
-
-    s += v[i];
-  }
-
-  return s;
-}
+// gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
 
 function testMask(v: string, pattern = "0000-00-00"): void {
-  console.warn("testMask", { v, will: maskProcess(v, pattern) });
+  console.warn("testMask", { p: pattern, v, will: WUPTextControl.prototype.maskProcess(v, pattern) });
 }
-// todo mask for currency $ # ##0
-// todo mask for letters prefix_valueWithLetters_suffix
 
-// testMask("1234"); // 1234
-// testMask("12345"); // 1234-5
-// testMask("1234-5"); // 1234-5
-// testMask("1234-");
-// testMask("1234-52-32");
-// testMask("1234-52-324");
-// testMask("1234 ");
-// testMask("12345", "0000--0"); // todo issue here
-
-// gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
+// testMask("12345", "0000--5");
+// testMask("1.2.3.4", "##0.##0.##0.##0");

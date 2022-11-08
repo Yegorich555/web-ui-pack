@@ -704,7 +704,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       return false;
     });
     this._validTimer && clearTimeout(this._validTimer);
-    console.warn("goValidate", this._isValid);
 
     if (fromCase === ValidateFromCases.onChange && this._opts.validationCase & ValidationCases.onChangeSmart) {
       if (errMsg) {
