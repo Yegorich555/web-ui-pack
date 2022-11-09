@@ -495,8 +495,10 @@ export default class WUPTextControl<
               if (charIsNumber(last, 0)) {
                 s[s.length - 1] = `0${last}`; // prepend '0' only if user typed number before '1234--' >>> '1234-', '1234-1-' >>> '1234-01-'
                 --vi;
+                continue;
+              } else {
+                return s.join("");
               }
-              continue;
             } else {
               return s.join("");
             }
@@ -570,5 +572,6 @@ function testMask(v: string, pattern = "0000-00-00"): void {
   console.warn("testMask", { p: pattern, v, will: WUPTextControl.prototype.maskProcess(v, pattern) });
 }
 
-testMask("$ 5", "$ #####0 USD");
+// testMask("192.16. ", "##0.##0.##0.##0");
+// testMask("$ 5", "$ #####0 USD");
 // testMask("1.2.3.4", "##0.##0.##0.##0");

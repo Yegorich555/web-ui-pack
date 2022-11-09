@@ -56,7 +56,7 @@ describe("control.text: mask", () => {
 
     // lazy mode
     expect(proc("192.16 ")).toBe("192.16.");
-    expect(proc("192.16. ")).toBe("192.16."); // todo prediction is wrong here
+    expect(proc("192.16. ")).toBe("192.16.");
     expect(proc("192.16.0 ")).toBe("192.16.0.");
     expect(proc("192.16.0  ")).toBe("192.16.0.");
     expect(proc("192 168 255 254")).toBe("192.168.255.254");
