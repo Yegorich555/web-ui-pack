@@ -120,7 +120,7 @@ export default abstract class WUPBaseComboControl<
     ...WUPTextControl.$defaults,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
-      invalidParse: WUPTextControl.$defaults.validationRules.invalidParse,
+      _invalidParse: WUPTextControl.$defaults.validationRules._invalidParse,
     },
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey,
   };

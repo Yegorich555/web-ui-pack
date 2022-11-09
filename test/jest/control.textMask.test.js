@@ -82,14 +82,13 @@ describe("control.text: mask", () => {
     expect(proc("$ 123456789")).toBe("$ 123456 USD");
     expect(proc("")).toBe("");
 
-    // todo suffix must be without prediction ???
+    // WARN: suffix works only with option prediction, but possible without it
     expect(proc("$ 5")).toBe("$ 5 USD");
     expect(proc("5")).toBe("$ 5 USD");
     expect(proc("$ 5 US")).toBe("$ 5 USD"); // WARN: in this case input must control caret position and don't allow to remove prefix/suffix
   });
 
-  // todo need to define maskForCurrency with local-decimal-delimiter
   // todo test("### ### ### ### ##0.## - currency with delimiters", () => {
-
+  // need to define maskForCurrency with local-decimal-delimiter
   // })
 });

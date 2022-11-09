@@ -20,10 +20,17 @@ export namespace WUPTextIn {
   }
 
   export interface Opt {
-    // todo more details here
-    /** Make input masked 0000-00-00 - for date, $ 0 000 - for currency */
+    /** Make input masked
+     * @example
+     * "0000-00-00" // date in format yyyy-mm-dd
+     * "##0.##0.##0.##0" // IPaddress
+     * "+1(000) 000-0000" // phoneNumber
+     * `0` // required digit
+     * '#' // optional digit
+     * //todo details about currency
+     */
     mask?: string;
-    /** Replace missed masked values with placeholder; for date it's equal to format 'yyyy-mm-dd' */
+    /** Replace missed masked values with placeholder; for date maskholder the same as format 'yyyy-mm-dd' */
     maskholder?: string;
   }
 
@@ -44,8 +51,8 @@ declare global {
       min: number;
       max: number;
       email: boolean;
-      /** Called when value parsing from input is invalid */
-      invalidParse: true;
+      /** Called when value parsing from input is invalid (skipped on default validation logic) */
+      _invalidParse: true;
     }
     interface EventMap extends WUPBase.EventMap {}
     interface Defaults<T = string> extends WUPTextIn.GenDef<T> {}
@@ -269,7 +276,7 @@ export default class WUPTextControl<
       max: (v, setV) =>
         (v === undefined || v.length > setV) && `Max length is ${setV} character${setV === 1 ? "" : "s"}`,
       email: (v, setV) => setV && (!v || !emailReg.test(v)) && "Invalid email address",
-      invalidParse: (v) => v === undefined && "Invalid value",
+      _invalidParse: (v) => v === undefined && "Invalid value",
     },
   };
 
@@ -288,13 +295,6 @@ export default class WUPTextControl<
     super();
 
     this.$refInput.placeholder = " ";
-  }
-
-  /** Returns validations enabled by user + invalidParse (impossible to disable) */
-  protected get validations(): WUPBase.Options["validations"] | undefined {
-    const vls = (super.validations as WUPText.Options["validations"]) || {};
-    vls.invalidParse = vls.invalidParse ?? true;
-    return vls as WUPBase.Options["validations"];
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -392,8 +392,9 @@ export default class WUPTextControl<
     const v = this.parseValue(txt, outRef);
     if (outRef.showError) {
       // parseValue must return valid/not-valid result
-      const msg = this.validationsRules.find((rule) => rule.name === "invalidParse"); // todo the rule must be disabled for default validation
-      this.$showError(msg!.call(this, undefined) as string);
+      const vl = (this.validations as WUPText.Options["validations"])?._invalidParse;
+      const msg = typeof vl === "function" ? vl : this.#ctr.$defaults.validationRules._invalidParse;
+      this.$showError(msg!.call(this, undefined as any, true, this) as string);
     } else {
       this._isValid !== false && this.$hideError();
       if (!e.setValuePrevented) {
@@ -414,7 +415,7 @@ export default class WUPTextControl<
     const el = this.$refInput as HTMLInputElement & { _prev?: string };
     const v = el.value;
 
-    // todo prediction (1234 >>> 1234-) several scenarios how user can remove previous number and we need manipulate by selectionStart/End
+    // todo impossible to delete with prediction (1234 >>> 1234-) several scenarios how user can remove previous number and we need manipulate by selectionStart/End
     const next = this.maskProcess(v, mask, { prediction: true, lazy: true });
     const isCharNotAllowed = v.length > next.length;
 
@@ -568,9 +569,9 @@ customElements.define(tagName, WUPTextControl);
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
 
-function testMask(v: string, pattern = "0000-00-00"): void {
-  console.warn("testMask", { p: pattern, v, will: WUPTextControl.prototype.maskProcess(v, pattern) });
-}
+// function testMask(v: string, pattern = "0000-00-00"): void {
+//   console.warn("testMask", { p: pattern, v, will: WUPTextControl.prototype.maskProcess(v, pattern) });
+// }
 
 // testMask("192.16. ", "##0.##0.##0.##0");
 // testMask("$ 5", "$ #####0 USD");
