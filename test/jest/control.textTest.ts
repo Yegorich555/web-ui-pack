@@ -20,6 +20,7 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       email: { set: true, failValue: "relation", trueValue: "relation@google.com" },
       ...opts?.validations,
     },
+    validationsSkip: ["_invalidParse", ...(opts?.validationsSkip || [])],
   });
 
   test("$initValue affects on input", () => {

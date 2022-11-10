@@ -477,7 +477,8 @@ mask-image: var(--ctrl-icon-img);
           pointer-events: none;
         }
         WUP-PWD [maskholder]&gt;i {
-          visibility: hidden
+          visibility: hidden;
+          font-style: inherit;
         }
         WUP-PWD input:-webkit-autofill {
           font: inherit;

@@ -413,7 +413,8 @@ mask-image: var(--ctrl-icon-img);
           pointer-events: none;
         }
         WUP-TEXT [maskholder]&gt;i {
-          visibility: hidden
+          visibility: hidden;
+          font-style: inherit;
         }
         WUP-TEXT input:-webkit-autofill {
           font: inherit;

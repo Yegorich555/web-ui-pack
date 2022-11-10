@@ -446,7 +446,8 @@ mask-image: var(--ctrl-icon-img);
           pointer-events: none;
         }
         WUP-SELECT [maskholder]&gt;i {
-          visibility: hidden
+          visibility: hidden;
+          font-style: inherit;
         }
         WUP-SELECT input:-webkit-autofill {
           font: inherit;

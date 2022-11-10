@@ -170,7 +170,8 @@ export default class WUPTextControl<
           pointer-events: none;
         }
         :host [maskholder]>i {
-          visibility: hidden
+          visibility: hidden;
+          font-style: inherit;
         }
         :host input:-webkit-autofill {
           font: inherit;
