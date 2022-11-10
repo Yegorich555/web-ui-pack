@@ -205,8 +205,8 @@ export default class WUPTextControl<
         :host input:not(:focus)::placeholder {
           color: transparent;
         }
-        :host input:focus + *,
-        :host input:not(:placeholder-shown) + *,
+        :host:focus-within input + strong,
+        :host input:not(:placeholder-shown) + strong,
         :host legend {
           top: 0.2em;
           transform: scale(0.9);

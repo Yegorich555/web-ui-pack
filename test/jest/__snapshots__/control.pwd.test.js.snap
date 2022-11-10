@@ -453,7 +453,8 @@ mask-image: var(--ctrl-icon-img);
           width: 100%;
           position: relative;
         }
-        WUP-PWD input {
+        WUP-PWD input,
+        WUP-PWD [maskholder] {
           width: 100%;
           box-sizing: border-box;
           font: inherit;
@@ -468,6 +469,15 @@ mask-image: var(--ctrl-icon-img);
           text-overflow: ellipsis;
           overflow: hidden;
           white-space: nowrap;
+        }
+        WUP-PWD [maskholder] {
+          position: absolute;
+          opacity: 0.65;
+          display: none;
+          pointer-events: none;
+        }
+        WUP-PWD [maskholder]&gt;i {
+          visibility: hidden
         }
         WUP-PWD input:-webkit-autofill {
           font: inherit;
@@ -499,11 +509,17 @@ mask-image: var(--ctrl-icon-img);
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
-        WUP-PWD input:focus + *,
-        WUP-PWD input:not(:placeholder-shown) + *,
+        WUP-PWD input:not(:focus)::placeholder {
+          color: transparent;
+        }
+        WUP-PWD:focus-within input + strong,
+        WUP-PWD input:not(:placeholder-shown) + strong,
         WUP-PWD legend {
           top: 0.2em;
           transform: scale(0.9);
+        }
+        WUP-PWD:focus-within [maskholder] {
+          display: initial;
         }
         /* style for icons */
         WUP-PWD label button,
@@ -884,7 +900,7 @@ exports[`control.pwd validations $options.validationShowAll 2`] = `
   >
     <span>
       <input
-        aria-describedby="txt2"
+        aria-describedby="txt3"
         aria-required="true"
         autocomplete="new-password"
         id="txt1"
@@ -913,7 +929,7 @@ exports[`control.pwd validations $options.validationShowAll 2`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt2"
+    id="txt3"
     role="alert"
     style="display: none;"
   >
