@@ -361,7 +361,7 @@ export async function wait(t = 1000) {
   }
 }
 
-/** Simulate user type text: focus + keydown+ keyup + keypress + input events */
+/** Simulate user type text (send values to the end of input): focus + keydown+ keyup + keypress + input events */
 export async function userTypeText(el: HTMLInputElement, text: string, opts = { clearPrevious: true }) {
   jest.useFakeTimers();
   el.focus();
@@ -375,6 +375,8 @@ export async function userTypeText(el: HTMLInputElement, text: string, opts = { 
     el.dispatchEvent(new KeyboardEvent("keyup", { key, bubbles: true }));
     el.dispatchEvent(new KeyboardEvent("keypress", { key, bubbles: true }));
     el.value += key;
+    el.selectionEnd = el.value.length;
+    el.selectionStart = el.value.length;
     el.dispatchEvent(new InputEvent("input", { bubbles: true }));
 
     if (i !== text.length - 1) {

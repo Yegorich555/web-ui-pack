@@ -97,7 +97,7 @@ export default class WUPDateControl<
 
   static $defaults: WUPDate.Defaults<Date> = {
     ...WUPBaseComboControl.$defaults,
-    debounceMs: 500,
+    // debounceMs: 500,
     validationRules: {
       ...WUPBaseComboControl.$defaults.validationRules,
       min: (v, setV, c) =>
@@ -248,6 +248,7 @@ export default class WUPDateControl<
   }
 
   protected override gotInput(e: WUPText.InputEvent): void {
+    // todo: when user types 2022-06-3 and leaves the control we can allow to setValue (lazy mode)
     this.parseValue = (txt, out) => {
       if (!txt) {
         return undefined;
@@ -283,11 +284,11 @@ export default class WUPDateControl<
 
   protected override gotKeyDown(e: KeyboardEvent): Promise<void> {
     const isOpen = this.$isOpen;
-    const el = this.$refPopup!.firstElementChild as WUPCalendarControl;
-    isOpen && e.key !== "Escape" && el.gotKeyDown.call(el, e); // skip actions for Escape key
-    // WARN: user can't type Space " " symbol because it's handled by calendar
+    const clnd = this.$refPopup!.firstElementChild as WUPCalendarControl;
+    isOpen && e.key !== "Escape" && clnd.gotKeyDown.call(clnd, e); // skip actions for Escape key
+    // todo user can't type Space " " symbol because it's handled by calendar
     const r = !e.defaultPrevented && super.gotKeyDown(e);
-    !isOpen && this.$isOpen && e.key !== "Escape" && el.gotKeyDown.call(el, e); // case when user press ArrowKey for opening menu
+    !isOpen && this.$isOpen && e.key !== "Escape" && clnd.gotKeyDown.call(clnd, e); // case when user press ArrowKey for opening menu
     return r || Promise.resolve();
   }
 
@@ -307,8 +308,9 @@ export default class WUPDateControl<
 customElements.define(tagName, WUPDateControl);
 // NiceToHave: role 'spinbutton" + changing input value via scrolling: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/spinbutton_role
 // NiceToHave: allowYear, allowMonth, allowDays based on format: "YYYY-MM" - only for selection year & month
-// NiceToHave: alt-behavior; when user press Alt allow to use arrowKeys to navigate in input - use logic for all comboboxes
+// todo: alt-behavior; when user press Alt allow to use arrowKeys to navigate in input - use logic for all comboboxes
 
 // todo testcase: startWith: year. User must be able goto dayPicker with pressing Enter
 // todo focus, type some text, press Esc. Value must be not cleared if popup was opened and now is closnig
 // todo impossible to use shiftHome, shiftEnd with calendar
+// todo show error over datePickerPopup

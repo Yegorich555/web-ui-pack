@@ -20,6 +20,7 @@ export default function TextControlView() {
         "Built-in validations (required,min,max,email). To extend use $defaults.validations",
         "Smart validations on the fly (use $defaults.validationCases)",
         "Powerful accessibility support (keyboard, announcenement)",
+        "Mask/maskholder support",
       ]}
     >
       <wup-form
@@ -37,6 +38,8 @@ export default function TextControlView() {
           autoComplete="off"
           autoFocus={false}
           validations="window.myTextValidations"
+          mask=""
+          maskholder=""
         />
         <wup-text name="required" validations="myTextValidations" />
         <wup-text
@@ -84,6 +87,19 @@ export default function TextControlView() {
             }
           }}
         />
+        <wup-text
+          name="ipaddr"
+          label="Phone number (with mask)"
+          mask="+1(000) 000-0000"
+          maskholder="+1(000) 000-0000"
+          ref={(el) => {
+            if (el) {
+              el.$options.autoFocus = true;
+            }
+          }}
+        />
+        {/* todo correct maskHolder spaces */}
+        <wup-text name="ipaddr" label="IPaddress (with mask)" mask="##0.##0.##0.##0" maskholder="   .   .   .   ." />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

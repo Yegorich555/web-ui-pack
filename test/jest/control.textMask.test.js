@@ -1,7 +1,16 @@
 import WUPTextControl from "../../src/controls/text";
+import * as h from "../testHelper";
+
+beforeEach(() => {
+  jest.useFakeTimers();
+});
+
+afterEach(() => {
+  document.body.innerHTML = "";
+});
 
 describe("control.text: mask", () => {
-  test("0000-00-00 (dateMask yyyy-MM-dd)", () => {
+  test("0000-00-00 (dateMask yyyy-MM-dd)", async () => {
     const proc = (v, opts) => WUPTextControl.prototype.maskProcess(v, "0000-00-00", opts);
     expect(proc("12")).toBe("12");
     expect(proc("12345")).toBe("1234-5");
@@ -34,6 +43,47 @@ describe("control.text: mask", () => {
     expect(proc("12-")).toBe("0012-");
     expect(proc("12 ")).toBe("0012-");
     expect(proc("1 2 3 ")).toBe("0001-02-03"); // lazy + any not char
+
+    // tests with input
+    const el = document.createElement("wup-text");
+    el.$options.mask = "0000-00-00";
+    el.$options.maskholder = "yyyy-mm-dd";
+    document.body.appendChild(el);
+    await h.wait();
+    el.focus();
+    await h.wait(1);
+    expect(el.innerHTML).toMatchInlineSnapshot(
+      `"<label for="wup1"><span><span aria-hidden="true" maskholder=""><i></i>yyyy-mm-dd</span><input placeholder=" " type="text" id="wup1" autocomplete="off"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
+    );
+
+    el.testMe = true;
+    const typeText = [
+      // todo check also carret position
+      { $in: "1", $out: "1", $outN: "1", h: "<i>1</i>yyy-mm-dd", hN: "<i>1</i>yyy-mm-dd" },
+      { $in: "a", $out: "1a", $outN: "1", h: "<i>1a</i>yy-mm-dd", hN: "<i>1</i>yyy-mm-dd" },
+      { $in: "2", $out: "12", $outN: "12", h: "<i>12</i>yy-mm-dd", hN: "<i>12</i>yy-mm-dd" },
+      { $in: "3", $out: "123", $outN: "123", h: "<i>123</i>y-mm-dd", hN: "<i>123</i>y-mm-dd" },
+      { $in: "b", $out: "123b", $outN: "123", h: "<i>123b</i>-mm-dd", hN: "<i>123</i>y-mm-dd" },
+      { $in: "4", $out: "1234-", $outN: "1234-", h: "<i>1234-</i>mm-dd", hN: "<i>1234-</i>mm-dd" }, // prediction mode
+      { $in: "5", $out: "1234-5", $outN: "1234-5", h: "<i>1234-5</i>m-dd", hN: "<i>1234-5</i>m-dd" },
+      { $in: " ", $out: "1234-05-", $outN: "1234-05-", h: "<i>1234-05-</i>dd", hN: "<i>1234-05-</i>dd" }, // lazy mode + prediction
+      { $in: "6", $out: "1234-05-6", $outN: "1234-05-6", h: "<i>1234-05-6</i>d", hN: "<i>1234-05-6</i>d" }, // lazy mode + prediction
+      { $in: "abcd", $out: "1234-05-6abcd", $outN: "1234-05-6", h: "<i>1234-05-6abcd</i>", hN: "<i>1234-05-6</i>d" },
+      { $in: " ", $out: "1234-05-06", $outN: "1234-05-06", h: "<i>1234-05-06</i>", hN: "<i>1234-05-06</i>" }, // lazy mode + prediction
+    ];
+    for (let i = 0; i < typeText.length; ++i) {
+      const s = typeText[i];
+      await h.userTypeText(el.$refInput, s.$in, { clearPrevious: false });
+      expect(el.$refInput.value).toBe(s.$out);
+      expect(`${s.$in}: ${el.$refMaskholder.innerHTML}`).toBe(`${s.$in}: ${s.h}`);
+      await h.wait(150); // when user types invalid char it shows and hides after a time
+      expect(el.$refInput.value).toBe(s.$outN);
+      expect(`${s.$in}: ${el.$refMaskholder.innerHTML}`).toBe(`${s.$in}: ${s.hN}`);
+    }
+
+    // todo test ability to remove previous
+    // todo check with optional number
+    // todo check when user tries to remove or type in the middle of text
   });
 
   test("0000--0", () => {

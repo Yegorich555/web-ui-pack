@@ -582,6 +582,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   protected override gotReady(): void {
     super.gotReady();
 
+    // todo check it: gotFocus not fired if append element and focus immediately without timeout
     const r = onFocusGot(
       this,
       () => {

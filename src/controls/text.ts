@@ -57,7 +57,19 @@ declare global {
     interface EventMap extends WUPBase.EventMap {}
     interface Defaults<T = string> extends WUPTextIn.GenDef<T> {}
     interface Options<T = string> extends WUPTextIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPTextControl> extends WUPBase.JSXProps<T> {}
+    interface JSXProps<T extends WUPTextControl> extends WUPBase.JSXProps<T> {
+      /** @deprecated Make input masked
+       * @example
+       * "0000-00-00" // date in format yyyy-mm-dd
+       * "##0.##0.##0.##0" // IPaddress
+       * "+1(000) 000-0000" // phoneNumber
+       * `0` // required digit
+       * '#' // optional digit
+       */
+      mask?: string;
+      /** @deprecated Replace missed masked values with placeholder; for date maskholder the same as format 'yyyy-mm-dd' */
+      maskholder?: string;
+    }
     interface InputEvent extends Event {
       currentTarget: HTMLInputElement;
       /** Call it to prevent calling setValue by input event */
@@ -415,9 +427,14 @@ export default class WUPTextControl<
     const el = this.$refInput as HTMLInputElement & { _prev?: string };
     const v = el.value;
 
-    // todo impossible to delete with prediction (1234 >>> 1234-) several scenarios how user can remove previous number and we need manipulate by selectionStart/End
     const next = this.maskProcess(v, mask, { prediction: true, lazy: true });
     const isCharNotAllowed = v.length > next.length;
+    const isNeedRemove = el.selectionStart === v.length && el._prev?.startsWith(v) && next === el._prev;
+    if (isNeedRemove) {
+      // console.warn("need remove", { next, prev: el._prev, v, isNeedRemove });
+      // case when 1234- for pattern 0000-0 and user tries to remove last number; prediction adds removed separator again
+      // next = next.substring(0, next.length - 2); // todo it doesn't work if user removes from the middle
+    }
 
     const setMaskHolder = (str: string): void => {
       if (maskholder) {
@@ -431,13 +448,13 @@ export default class WUPTextControl<
     const setV = (): void => {
       el.value = next;
       el._prev = next;
-      el.selectionEnd = next.length - ds;
+      el.selectionEnd = next.length - ds; // todo it's wrong if user types in the middle
       el.selectionStart = el.selectionEnd;
       setMaskHolder(next);
     };
     if (isCharNotAllowed) {
       setMaskHolder(v);
-      setTimeout(setV, 100); // set value after 50ms to show user typed value before mask applied
+      setTimeout(setV, 100); // set value after time to show user typed value before mask applied
     } else {
       setV();
     }
@@ -552,7 +569,7 @@ export default class WUPTextControl<
 
   protected override setValue(v: ValueType | undefined, canValidate = true): boolean | null {
     const isChanged = super.setValue(v, canValidate);
-    this.setInputValue(v);
+    isChanged && this.setInputValue(v); // todo it can be wrong for previous tests ?
     isChanged && this._isValid !== false && this.$hideError();
     return isChanged;
   }
