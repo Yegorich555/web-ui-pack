@@ -123,6 +123,9 @@ describe("control.text: mask", () => {
     expect(proc("192.16.0  ")).toBe("192.16.0.");
     expect(proc("192 168 255 254")).toBe("192.168.255.254");
     expect(proc("1 2 3 4")).toBe("1.2.3.4");
+    expect(proc("1")).toBe("1");
+    expect(proc("123")).toBe("123.");
+    expect(proc("1 ")).toBe("1.");
 
     // todo check input with optional number
   });

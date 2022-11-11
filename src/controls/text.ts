@@ -522,7 +522,10 @@ export default class WUPTextControl<
       outIsFull?: boolean;
     }
   ): string {
-    options = Object.assign(options || {}, { prediction: true, lazy: true, ...options });
+    options = options || {};
+    options.prediction = options.prediction ?? true;
+    options.lazy = options.lazy ?? true;
+
     if (!v) {
       const i = pattern.search(/[#0]/);
       return i > 0 ? pattern.substring(0, i) : ""; // return prefix if possible //todo need also for suffix when prefix not defined ???
@@ -533,13 +536,21 @@ export default class WUPTextControl<
       return ascii > 47 && ascii < 58;
     };
 
-    let vi = 0;
-    let pi = 0;
-    const s: string[] = [""];
+    const s = [""];
     const regSep = /[., _+-/\\]/;
-    const ln = Math.max(v.length, pattern.length);
     let cntOptional = 0; // count of optionalNumbers
-    for (; vi < ln; ++vi, ++pi) {
+    let cntDig = 0; // count of digits in one chunk
+
+    const addChunk = (char: string): void => {
+      // eslint-disable-next-line no-multi-assign
+      cntOptional = cntDig = 0;
+      s.push(char, ""); // for lazy mode
+    };
+
+    const append = (char: string): string => (s[s.length - 1] += char);
+
+    const ln = Math.max(v.length, pattern.length);
+    for (let vi = 0, pi = 0; vi < ln; ++vi, ++pi) {
       let p = pattern[pi];
       const c = v[vi];
       if (p === undefined) {
@@ -548,66 +559,60 @@ export default class WUPTextControl<
       }
       switch (p) {
         case "0":
-          if (!charIsNumber(v, vi)) {
-            if (cntOptional) {
-              --cntOptional;
+          ++cntDig;
+          if (charIsNumber(v, vi)) {
+            append(c);
+          } else if (cntOptional) {
+            --cntOptional;
+            --vi;
+          } else if (options.lazy && regSep.test(c)) {
+            const last = s[s.length - 1];
+            if (charIsNumber(last, 0)) {
+              s[s.length - 1] = `0${last}`; // prepend '0' only if user typed number before '1234--' >>> '1234-', '1234-1-' >>> '1234-01-'
               --vi;
-              continue;
-            }
-            if (options.lazy && regSep.test(c)) {
-              const last = s[s.length - 1];
-              if (charIsNumber(last, 0)) {
-                s[s.length - 1] = `0${last}`; // prepend '0' only if user typed number before '1234--' >>> '1234-', '1234-1-' >>> '1234-01-'
-                --vi;
-                continue;
-              } else {
-                return s.join("");
-              }
             } else {
               return s.join("");
             }
-          }
-          break;
-        case "#":
-          if (!charIsNumber(v, vi)) {
-            --vi;
-            continue;
-          }
-          ++cntOptional;
-          break;
-        case c:
-          cntOptional = 0;
-          s.push(c);
-          s.push(""); // for lazy mode
-          continue;
-        case "\0":
-          // todo allow user to use char '#'
-          cntOptional = 0;
-          if (v.charCodeAt(vi) === 0) {
-            // todo check it >> s.push("");
-            break;
-          } else p = "0";
-        // eslint-disable-next-line no-fallthrough
-        default: {
-          cntOptional = 0;
-          const isNum = charIsNumber(v, vi);
-          if (isNum || regSep.test(c)) {
-            s.push(p);
-            s.push(""); // for lazy mode
-            isNum && --vi;
-            continue;
-          } else if (options.prediction && c === undefined) {
-            s.push(p); // past suffix at the end
-            s.push(""); // for lazy mode
-            continue;
           } else {
             return s.join("");
           }
+          break;
+        case "#":
+          ++cntDig;
+          if (charIsNumber(v, vi)) {
+            append(c);
+            ++cntOptional;
+          } else {
+            --vi;
+          }
+          break;
+        case c:
+          addChunk(c);
+          break;
+        case "\0": // for char '0'
+          p = "0";
+        // eslint-disable-next-line no-fallthrough
+        case "\x01": // '\1' for char '#'
+          p = "#";
+          if (p === c) {
+            addChunk(p);
+            break;
+          }
+        // eslint-disable-next-line no-fallthrough
+        default: {
+          const isNum = charIsNumber(v, vi);
+          if (isNum || regSep.test(c)) {
+            addChunk(p);
+            isNum && --vi; // allow 1234 convert to 123-4 for '000-0'
+          } else if (options.prediction && c === undefined) {
+            // && cntDig <= s[s.length - 1].length) {
+            addChunk(p);
+          } else {
+            return s.join("");
+          }
+          break;
         }
-        // break;
       }
-
-      s[s.length - 1] += c;
     }
     options.outIsFull = true;
     return s.join("");
@@ -639,11 +644,13 @@ customElements.define(tagName, WUPTextControl);
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
 
-// function testMask(v: string, pattern = "0000-00-00"): void {
-//   console.warn("testMask", { p: pattern, v, will: WUPTextControl.prototype.maskProcess(v, pattern) });
-// }
-// testMask("192.16. ", "##0.##0.##0.##0");
-// testMask("1.2.3.4", "##0.##0.##0.##0");
+function testMask(v: string, pattern = "0000-00-00"): void {
+  console.warn("testMask", { p: pattern, v, will: WUPTextControl.prototype.maskProcess(v, pattern) });
+}
+// testMask("1", "##0.##0.##0.##0"); // expected 1
+// testMask("$ 5", "$ #####0 USD"); // expected $ 5 USD
+// testMask("1- ", "0000-");
+// testMask("123", "##0.##0.##0.##0");
 // testMask("$ 123456 USD", "$ #####0 USD");
 // const isOk = WUPTextControl.prototype.maskIsFull("$ 123456 USD", "$ #####0 USD");
 // console.warn({ success: isOk });
