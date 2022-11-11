@@ -31,10 +31,12 @@ export namespace WUPDateIn {
 }
 declare global {
   namespace WUPDate {
-    interface ValidationMap {
-      required: boolean;
+    interface ValidationMap extends WUPBase.ValidationMap {
+      /** Enabled if option [min] is pointed; If $value < pointed shows message 'Min date is {x}` */
       min: Date;
+      /** Enabled if option [min] is pointed; if $value > pointed shows message 'Max date is {x}` */
       max: Date;
+      /** Enabled if option [exclude] is pointed; If invalid shows "This date is disabled" */
       exclude: Date[];
     }
     interface EventMap extends WUPBaseCombo.EventMap {}

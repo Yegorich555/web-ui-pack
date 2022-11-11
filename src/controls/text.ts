@@ -48,11 +48,14 @@ export namespace WUPTextIn {
 declare global {
   namespace WUPText {
     interface ValidationMap extends WUPBase.ValidationMap {
+      /** If textLength < pointed shows message 'Min length is {x} characters` */
       min: number;
+      /** If textLength > pointed shows message 'Max length is {x} characters` */
       max: number;
+      /** If $value doesn't match email-pattern shows message 'Invalid email address` */
       email: boolean;
-      /** Called when value parsing from input is invalid (skipped on default validation logic) */
-      _invalidParse: true;
+      /** Called when parseValue() is invalid (skipped on default validation logic) */
+      _invalidParse: true; // todo maybe throw error message in this case ?
     }
     interface EventMap extends WUPBase.EventMap {}
     interface Defaults<T = string> extends WUPTextIn.GenDef<T> {}
@@ -74,6 +77,7 @@ declare global {
       currentTarget: HTMLInputElement;
       /** Call it to prevent calling setValue by input event */
       preventSetValue: () => void;
+      /** Returns a boolean value indicating whether or not the call to InputEvent.preventSetValue() */
       setValuePrevented: boolean;
     }
   }

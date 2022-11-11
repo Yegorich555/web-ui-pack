@@ -24,11 +24,15 @@ export namespace WUPPasswordIn {
 declare global {
   namespace WUPPassword {
     interface ValidationMap extends WUPText.ValidationMap {
+      /** If count of numbers < pointed shows message 'Must contain at least {x} numbers' */
       minNumber: number;
+      /** If count of uppercase letters < pointed shows message 'Must contain at least {x} upper case' */
       minUpper: number;
+      /** If count of lowercase letters < pointed shows message 'Must contain at least {x} lower case' */
       minLower: number;
+      /** If count of pointed chars < pointed shows message 'Must contain at least {x} special characters' */
       special: { min: number; chars: string };
-      /** Match password fields with confirm password */
+      /** If $value != with previous siblint wup-pwd.$value shows message 'Passwords must be equal' */
       confirm: boolean;
     }
     interface EventMap extends WUPText.EventMap {}

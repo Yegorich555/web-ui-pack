@@ -116,6 +116,7 @@ type StoredRefError = HTMLElement & { _wupVldItems?: StoredItem[] };
 declare global {
   namespace WUPBase {
     interface ValidationMap {
+      /** If $value is empty shows message 'This field is required` */
       required: boolean;
     }
     interface Defaults<T = string> extends WUPBaseIn.GenDef<T> {}
