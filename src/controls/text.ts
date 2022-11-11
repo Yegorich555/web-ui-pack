@@ -56,6 +56,8 @@ declare global {
       email: boolean;
       /** Called when parseValue() is invalid (skipped on default validation logic) */
       _invalidParse: true; // todo maybe throw error message in this case ?
+      /** Enabled if option [mask] is pointed; if input value doesn't comletely fit mask shows "Incomplete value" */
+      mask: boolean;
     }
     interface EventMap extends WUPBase.EventMap {}
     interface Defaults<T = string> extends WUPTextIn.GenDef<T> {}
@@ -294,6 +296,12 @@ export default class WUPTextControl<
         (v === undefined || v.length > setV) && `Max length is ${setV} character${setV === 1 ? "" : "s"}`,
       email: (v, setV) => setV && (!v || !emailReg.test(v)) && "Invalid email address",
       _invalidParse: (v) => v === undefined && "Invalid value",
+      mask: (v, setV, c) =>
+        setV &&
+        v !== undefined &&
+        !!(c as WUPTextControl)._opts.mask &&
+        !(c as WUPTextControl).maskIsFull(v, (c as WUPTextControl)._opts.mask!) &&
+        "Incomplete value",
     },
   };
 
@@ -317,6 +325,12 @@ export default class WUPTextControl<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override parseValue(text: string, _out?: { showError?: boolean }): ValueType | undefined {
     return (text || undefined) as unknown as ValueType;
+  }
+
+  protected get validations(): WUPText.Options["validations"] | undefined {
+    const vls = (super.validations as WUPText.Options["validations"]) || {};
+    if (this._opts.mask && vls.mask == null) vls.mask = true; // enable validation mask based on option mask
+    return vls;
   }
 
   protected override renderControl(): void {
@@ -362,27 +376,37 @@ export default class WUPTextControl<
       (e as WUPText.InputEvent).preventSetValue = () => ((e as WUPText.InputEvent).setValuePrevented = true);
       this.gotInput(e as WUPText.InputEvent);
     });
-    this._opts.selectOnFocus && !this.$refInput.readOnly && this.$refInput.select();
 
-    arr.push(r);
+    if (!this.$refInput.readOnly) {
+      if (!this.$refInput.value) {
+        if (this._opts.mask) {
+          this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true, data: "To apply mask before start" })); // apply prefix/suffix from mask
+        }
+      } else {
+        this._opts.selectOnFocus && this.$refInput.select();
+      }
+    }
+
+    arr.push(() => setTimeout(r));
     return arr;
+  }
+
+  protected override gotFocusLost(): void {
+    if (this._opts.mask) {
+      const prefAndSuf = this.maskProcess("", this._opts.mask);
+      if (this.$refInput.value === prefAndSuf) {
+        this.$refInput.value = ""; // rollback prefix/suffix if user types nothing
+        this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true, data: "To rollback prefix-sufix" }));
+      }
+    }
+    super.gotFocusLost();
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUPText.Options> | null): void {
     // apply mask options
     this._opts.mask = this.getAttribute("mask") ?? this._opts.mask;
     this._opts.maskholder = this.getAttribute("maskholder") ?? this._opts.maskholder;
-    if (this._opts.maskholder) {
-      if (!this.$refMaskholder) {
-        const m = document.createElement("span");
-        m.setAttribute("aria-hidden", "true");
-        m.setAttribute("maskholder", "");
-        m.appendChild(document.createElement("i"));
-        m.append("");
-        this.$refInput.parentElement!.prepend(m);
-        this.$refMaskholder = m;
-      }
-    } else if (this.$refMaskholder) {
+    if (!this._opts.maskholder && this.$refMaskholder) {
       this.$refMaskholder.remove();
       this.$refMaskholder = undefined;
     }
@@ -400,7 +424,7 @@ export default class WUPTextControl<
   }
 
   #inputTimer?: number;
-  /** Called when user types text */
+  /** Called when user types text OR when need to apply/reset mask (on focusGot, focusLost) */
   protected gotInput(e: WUPText.InputEvent): void {
     let txt = e.currentTarget.value;
     txt = this._opts.mask ? this.maskInput(this._opts.mask, this._opts.maskholder) : txt;
@@ -432,7 +456,11 @@ export default class WUPTextControl<
     const el = this.$refInput as HTMLInputElement & { _prev?: string };
     const v = el.value;
 
-    const next = this.maskProcess(v, mask, { prediction: true, lazy: true });
+    if (!v && !this.$isFocused) {
+      el.value = v;
+      return v; // ignore mask prefix+suffix if user isn't touched input
+    }
+    const next = this.maskProcess(v, mask, { prediction: true, lazy: true, outIsFull: false });
     const isCharNotAllowed = v.length > next.length;
     const isNeedRemove = el.selectionStart === v.length && el._prev?.startsWith(v) && next === el._prev;
     if (isNeedRemove) {
@@ -443,6 +471,15 @@ export default class WUPTextControl<
 
     const setMaskHolder = (str: string): void => {
       if (maskholder) {
+        if (!this.$refMaskholder) {
+          const m = document.createElement("span");
+          m.setAttribute("aria-hidden", "true");
+          m.setAttribute("maskholder", "");
+          m.appendChild(document.createElement("i"));
+          m.append("");
+          this.$refInput.parentElement!.prepend(m);
+          this.$refMaskholder = m;
+        }
         this.$refMaskholder!.lastChild!.textContent = maskholder.substring(str.length); // todo it's wrong for optional numbers
         this.$refMaskholder!.firstElementChild!.textContent = str;
       }
@@ -476,15 +513,19 @@ export default class WUPTextControl<
   maskProcess(
     v: string,
     pattern: string,
-    options = {
-      /** Add next constant-symbol to allow user don't worry about non-digit values */
-      prediction: true,
-      /** Add missed zero: for pattern '0000-00' and string '1 ' result will be "0001-"  */
-      lazy: true,
+    options?: {
+      /** Add next constant-symbol to allow user don't worry about non-digit values @default true */
+      prediction?: boolean;
+      /** Add missed zero: for pattern '0000-00' and string '1 ' result will be "0001-" @default true   */
+      lazy?: boolean;
+      /** Returns whether value completely fits pattern */
+      outIsFull?: boolean;
     }
   ): string {
+    options = Object.assign(options || {}, { prediction: true, lazy: true, ...options });
     if (!v) {
-      return "";
+      const i = pattern.search(/[#0]/);
+      return i > 0 ? pattern.substring(0, i) : ""; // return prefix if possible //todo need also for suffix when prefix not defined ???
     }
 
     const charIsNumber = (str: string, i: number): boolean => {
@@ -503,7 +544,7 @@ export default class WUPTextControl<
       const c = v[vi];
       if (p === undefined) {
         // || c === undefined) {
-        return s.join("");
+        break;
       }
       switch (p) {
         case "0":
@@ -568,8 +609,15 @@ export default class WUPTextControl<
 
       s[s.length - 1] += c;
     }
-
+    options.outIsFull = true;
     return s.join("");
+  }
+
+  /** Returns whether value completely fits pattern/mask */
+  maskIsFull(v: string, pattern: string): boolean {
+    const o = { outIsFull: false };
+    this.maskProcess(v, pattern, o);
+    return o.outIsFull;
   }
 
   protected override setValue(v: ValueType | undefined, canValidate = true): boolean | null {
@@ -594,7 +642,8 @@ customElements.define(tagName, WUPTextControl);
 // function testMask(v: string, pattern = "0000-00-00"): void {
 //   console.warn("testMask", { p: pattern, v, will: WUPTextControl.prototype.maskProcess(v, pattern) });
 // }
-
 // testMask("192.16. ", "##0.##0.##0.##0");
-// testMask("$ 5", "$ #####0 USD");
 // testMask("1.2.3.4", "##0.##0.##0.##0");
+// testMask("$ 123456 USD", "$ #####0 USD");
+// const isOk = WUPTextControl.prototype.maskIsFull("$ 123456 USD", "$ #####0 USD");
+// console.warn({ success: isOk });

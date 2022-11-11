@@ -1,8 +1,13 @@
 import WUPTextControl from "../../src/controls/text";
 import * as h from "../testHelper";
 
-beforeEach(() => {
+/** @type WUPTextControl */
+let el;
+beforeEach(async () => {
   jest.useFakeTimers();
+  Element.prototype.scrollIntoView = jest.fn();
+  el = document.body.appendChild(document.createElement("wup-text"));
+  await h.wait(1); // wait for ready
 });
 
 afterEach(() => {
@@ -11,7 +16,8 @@ afterEach(() => {
 
 describe("control.text: mask", () => {
   test("0000-00-00 (dateMask yyyy-MM-dd)", async () => {
-    const proc = (v, opts) => WUPTextControl.prototype.maskProcess(v, "0000-00-00", opts);
+    const mask = "0000-00-00";
+    const proc = (v, opts) => WUPTextControl.prototype.maskProcess(v, mask, opts);
     expect(proc("12")).toBe("12");
     expect(proc("12345")).toBe("1234-5");
     expect(proc("12345678")).toBe("1234-56-78");
@@ -45,20 +51,15 @@ describe("control.text: mask", () => {
     expect(proc("1 2 3 ")).toBe("0001-02-03"); // lazy + any not char
 
     // tests with input
-    const el = document.createElement("wup-text");
-    el.$options.mask = "0000-00-00";
+    el.$options.mask = mask;
     el.$options.maskholder = "yyyy-mm-dd";
-    document.body.appendChild(el);
-    await h.wait();
     el.focus();
     await h.wait(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
       `"<label for="wup1"><span><span aria-hidden="true" maskholder=""><i></i>yyyy-mm-dd</span><input placeholder=" " type="text" id="wup1" autocomplete="off"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
     );
 
-    el.testMe = true;
     const typeText = [
-      // todo check also carret position
       { $in: "1", $out: "1", $outN: "1", h: "<i>1</i>yyy-mm-dd", hN: "<i>1</i>yyy-mm-dd" },
       { $in: "a", $out: "1a", $outN: "1", h: "<i>1a</i>yy-mm-dd", hN: "<i>1</i>yyy-mm-dd" },
       { $in: "2", $out: "12", $outN: "12", h: "<i>12</i>yy-mm-dd", hN: "<i>12</i>yy-mm-dd" },
@@ -81,13 +82,24 @@ describe("control.text: mask", () => {
       expect(`${s.$in}: ${el.$refMaskholder.innerHTML}`).toBe(`${s.$in}: ${s.hN}`);
     }
 
-    // todo test ability to remove previous
-    // todo check with optional number
-    // todo check when user tries to remove or type in the middle of text
+    expect(el.maskIsFull("1234-05-06", mask)).toBe(true);
+    expect(el.maskIsFull("1234-05-0", mask)).toBe(false); // todo what about lazy mode ???
+    expect(el.maskIsFull("1234-05-", mask)).toBe(false);
+    expect(el.maskIsFull("1234-05", mask)).toBe(false);
+    expect(el.maskIsFull("1234-0", mask)).toBe(false);
+    expect(el.maskIsFull("1234-", mask)).toBe(false);
+    expect(el.maskIsFull("1234", mask)).toBe(false);
+    expect(el.maskIsFull("1", mask)).toBe(false);
+    expect(el.maskIsFull("", mask)).toBe(false);
+
+    // await h.userRemove(el.$refInput, 1, { fromEnd: true });
+    // todo test ability to remove chars (including in the middle)
+    // todo test ability to type chars in the middle
   });
 
   test("0000--0", () => {
-    const proc = (v) => WUPTextControl.prototype.maskProcess(v, "0000--0");
+    const mask = "0000--0";
+    const proc = (v) => WUPTextControl.prototype.maskProcess(v, mask);
     expect(proc("1234--5")).toBe("1234--5");
     expect(proc("1234--5b")).toBe("1234--5");
     expect(proc("12345")).toBe("1234--5");
@@ -111,10 +123,13 @@ describe("control.text: mask", () => {
     expect(proc("192.16.0  ")).toBe("192.16.0.");
     expect(proc("192 168 255 254")).toBe("192.168.255.254");
     expect(proc("1 2 3 4")).toBe("1.2.3.4");
+
+    // todo check input with optional number
   });
 
-  test("+1(000) 000-0000", () => {
-    const proc = (v, opts) => WUPTextControl.prototype.maskProcess(v, "+1(000) 000-0000", opts);
+  test("+1(000) 000-0000", async () => {
+    const mask = "+1(000) 000-0000";
+    const proc = (v, opts) => WUPTextControl.prototype.maskProcess(v, mask, opts);
     expect(proc("+1(234) 975-1234")).toBe("+1(234) 975-1234");
     expect(proc("2")).toBe("+1(2");
     expect(proc("23")).toBe("+1(23");
@@ -122,20 +137,36 @@ describe("control.text: mask", () => {
     expect(proc("234", { prediction: false })).toBe("+1(234");
     expect(proc("+1(234)9")).toBe("+1(234) 9");
     expect(proc("12349751234")).toBe("+1(234) 975-1234");
+    expect(proc("")).toBe("+1("); // autoprefix
+
+    expect(el.maskIsFull("+1(234) 975-1234", mask)).toBe(true);
+    expect(el.maskIsFull("+1(234) 975-123", mask)).toBe(false);
+    expect(el.maskIsFull("+1(234) 975-", mask)).toBe(false);
+    expect(el.maskIsFull("+1(234) 975", mask)).toBe(false);
+    expect(el.maskIsFull("+1(234) ", mask)).toBe(false);
+    expect(el.maskIsFull("+1(234)", mask)).toBe(false);
+    expect(el.maskIsFull("+1(234", mask)).toBe(false);
+    expect(el.maskIsFull("+1(", mask)).toBe(false);
+    expect(el.maskIsFull("", mask)).toBe(false);
   });
 
   test("$ #####0 USD", () => {
+    const mask = "$ #####0 USD";
     const proc = (v) => WUPTextControl.prototype.maskProcess(v, "$ #####0 USD");
     expect(proc("$ 123456 USD")).toBe("$ 123456 USD");
     expect(proc("$ 123450 USD")).toBe("$ 123450 USD");
     expect(proc("$ 50 USD")).toBe("$ 50 USD");
     expect(proc("$ 123456789")).toBe("$ 123456 USD");
-    expect(proc("")).toBe("");
+    expect(proc("")).toBe("$ ");
 
-    // WARN: suffix works only with option prediction, but possible without it
+    // WARN: suffix works only with option prediction, but possible without it (extra implementation required)
     expect(proc("$ 5")).toBe("$ 5 USD");
     expect(proc("5")).toBe("$ 5 USD");
     expect(proc("$ 5 US")).toBe("$ 5 USD"); // WARN: in this case input must control caret position and don't allow to remove prefix/suffix
+
+    expect(el.maskIsFull("$ 123456 USD", mask)).toBe(true);
+    expect(el.maskIsFull("$ 5 USD", mask)).toBe(true);
+    expect(el.maskIsFull("$ 5", mask)).toBe(true); // because suffix appends in lazy mode
   });
 
   // todo test("### ### ### ### ##0.## - currency with delimiters", () => {

@@ -94,11 +94,11 @@ export default function TextControlView() {
           maskholder="+1(000) 000-0000"
           ref={(el) => {
             if (el) {
-              el.$options.autoFocus = true;
+              // el.$options.autoFocus = true;
             }
           }}
         />
-        {/* todo correct maskHolder spaces */}
+        {/* todo fix maskHolder spaces */}
         <wup-text name="ipaddr" label="IPaddress (with mask)" mask="##0.##0.##0.##0" maskholder="   .   .   .   ." />
         <button type="submit">Submit</button>
       </wup-form>
