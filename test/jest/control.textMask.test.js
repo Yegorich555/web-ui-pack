@@ -1,4 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-imports
 import WUPTextControl from "../../src/controls/text";
+import maskInput from "../../src/helpers/maskInput";
 import * as h from "../testHelper";
 
 /** @type WUPTextControl */
@@ -17,7 +19,7 @@ afterEach(() => {
 describe("control.text: mask", () => {
   test("0000-00-00 (dateMask yyyy-MM-dd)", async () => {
     const mask = "0000-00-00";
-    const proc = (v, opts) => WUPTextControl.prototype.maskProcess(v, mask, opts).text;
+    const proc = (v, opts) => maskInput(v, mask, opts).text;
     expect(proc("12")).toBe("12");
     expect(proc("12345")).toBe("1234-5");
     expect(proc("12345678")).toBe("1234-56-78");
@@ -82,15 +84,15 @@ describe("control.text: mask", () => {
       expect(`${s.$in}: ${el.$refMaskholder.innerHTML}`).toBe(`${s.$in}: ${s.hN}`);
     }
 
-    expect(el.maskIsFull("1234-05-06", mask)).toBe(true);
-    expect(el.maskIsFull("1234-05-0", mask)).toBe(false); // todo what about lazy mode ???
-    expect(el.maskIsFull("1234-05-", mask)).toBe(false);
-    expect(el.maskIsFull("1234-05", mask)).toBe(false);
-    expect(el.maskIsFull("1234-0", mask)).toBe(false);
-    expect(el.maskIsFull("1234-", mask)).toBe(false);
-    expect(el.maskIsFull("1234", mask)).toBe(false);
-    expect(el.maskIsFull("1", mask)).toBe(false);
-    expect(el.maskIsFull("", mask)).toBe(false);
+    expect(maskInput("1234-05-06", mask).isComplete).toBe(true);
+    expect(maskInput("1234-05-0", mask).isComplete).toBe(false); // todo what about lazy mode ???
+    expect(maskInput("1234-05-", mask).isComplete).toBe(false);
+    expect(maskInput("1234-05", mask).isComplete).toBe(false);
+    expect(maskInput("1234-0", mask).isComplete).toBe(false);
+    expect(maskInput("1234-", mask).isComplete).toBe(false);
+    expect(maskInput("1234", mask).isComplete).toBe(false);
+    expect(maskInput("1", mask).isComplete).toBe(false);
+    expect(maskInput("", mask).isComplete).toBe(false);
 
     // await h.userRemove(el.$refInput, 1, { fromEnd: true });
     // todo test ability to remove chars (including in the middle)
@@ -99,7 +101,7 @@ describe("control.text: mask", () => {
 
   test("0000--0", () => {
     const mask = "0000--0";
-    const proc = (v) => WUPTextControl.prototype.maskProcess(v, mask).text;
+    const proc = (v) => maskInput(v, mask).text;
     expect(proc("1234--5")).toBe("1234--5");
     expect(proc("1234--5b")).toBe("1234--5");
     expect(proc("12345")).toBe("1234--5");
@@ -108,7 +110,7 @@ describe("control.text: mask", () => {
 
   test("##0.##0.##0.##0 (IP addess)", async () => {
     const mask = "##0.##0.##0.##0";
-    const proc = (v, opts) => WUPTextControl.prototype.maskProcess(v, mask, opts).text;
+    const proc = (v, opts) => maskInput(v, mask, opts).text;
     expect(proc("192.168.255.254")).toBe("192.168.255.254");
     expect(proc("1.2.3.4")).toBe("1.2.3.4");
     expect(proc("1.")).toBe("1.");
@@ -128,10 +130,10 @@ describe("control.text: mask", () => {
     expect(proc("123")).toBe("123.");
     expect(proc("1 ")).toBe("1.");
 
-    expect(el.maskIsFull("255.255.123.233", mask)).toBe(true);
-    expect(el.maskIsFull("1.2.3.4", mask)).toBe(true);
-    expect(el.maskIsFull("255.255.123.2", mask)).toBe(true);
-    expect(el.maskIsFull("255.255.123.", mask)).toBe(false);
+    expect(maskInput("255.255.123.233", mask).isComplete).toBe(true);
+    expect(maskInput("1.2.3.4", mask).isComplete).toBe(true);
+    expect(maskInput("255.255.123.2", mask).isComplete).toBe(true);
+    expect(maskInput("255.255.123.", mask).isComplete).toBe(false);
 
     // tests with input
     el.$options.mask = mask;
@@ -168,7 +170,7 @@ describe("control.text: mask", () => {
 
   test("+1(000) 000-0000", async () => {
     const mask = "+1(000) 000-0000";
-    const proc = (v, opts) => WUPTextControl.prototype.maskProcess(v, mask, opts).text;
+    const proc = (v, opts) => maskInput(v, mask, opts).text;
     expect(proc("+1(234) 975-1234")).toBe("+1(234) 975-1234");
     expect(proc("2")).toBe("+1(2");
     expect(proc("23")).toBe("+1(23");
@@ -178,20 +180,20 @@ describe("control.text: mask", () => {
     expect(proc("12349751234")).toBe("+1(234) 975-1234");
     expect(proc("")).toBe("+1("); // autoprefix
 
-    expect(el.maskIsFull("+1(234) 975-1234", mask)).toBe(true);
-    expect(el.maskIsFull("+1(234) 975-123", mask)).toBe(false);
-    expect(el.maskIsFull("+1(234) 975-", mask)).toBe(false);
-    expect(el.maskIsFull("+1(234) 975", mask)).toBe(false);
-    expect(el.maskIsFull("+1(234) ", mask)).toBe(false);
-    expect(el.maskIsFull("+1(234)", mask)).toBe(false);
-    expect(el.maskIsFull("+1(234", mask)).toBe(false);
-    expect(el.maskIsFull("+1(", mask)).toBe(false);
-    expect(el.maskIsFull("", mask)).toBe(false);
+    expect(maskInput("+1(234) 975-1234", mask).isComplete).toBe(true);
+    expect(maskInput("+1(234) 975-123", mask).isComplete).toBe(false);
+    expect(maskInput("+1(234) 975-", mask).isComplete).toBe(false);
+    expect(maskInput("+1(234) 975", mask).isComplete).toBe(false);
+    expect(maskInput("+1(234) ", mask).isComplete).toBe(false);
+    expect(maskInput("+1(234)", mask).isComplete).toBe(false);
+    expect(maskInput("+1(234", mask).isComplete).toBe(false);
+    expect(maskInput("+1(", mask).isComplete).toBe(false);
+    expect(maskInput("", mask).isComplete).toBe(false);
   });
 
   test("$ #####0 USD", () => {
     const mask = "$ #####0 USD";
-    const proc = (v) => WUPTextControl.prototype.maskProcess(v, "$ #####0 USD").text;
+    const proc = (v) => maskInput(v, "$ #####0 USD").text;
     expect(proc("$ 123456 USD")).toBe("$ 123456 USD");
     expect(proc("$ 123450 USD")).toBe("$ 123450 USD");
     expect(proc("$ 50 USD")).toBe("$ 50 USD");
@@ -203,9 +205,9 @@ describe("control.text: mask", () => {
     expect(proc("5")).toBe("$ 5 USD");
     expect(proc("$ 5 US")).toBe("$ 5 USD"); // WARN: in this case input must control caret position and don't allow to remove prefix/suffix
 
-    expect(el.maskIsFull("$ 123456 USD", mask)).toBe(true);
-    expect(el.maskIsFull("$ 5 USD", mask)).toBe(true);
-    expect(el.maskIsFull("$ 5", mask)).toBe(true); // because suffix appends in lazy mode
+    expect(maskInput("$ 123456 USD", mask).isComplete).toBe(true);
+    expect(maskInput("$ 5 USD", mask).isComplete).toBe(true);
+    expect(maskInput("$ 5", mask).isComplete).toBe(true); // because suffix appends in lazy mode
   });
 
   // todo test("### ### ### ### ##0.## - currency with delimiters", () => {

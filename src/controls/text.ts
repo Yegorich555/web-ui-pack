@@ -1,3 +1,4 @@
+import maskInput from "../helpers/maskInput";
 import { onEvent } from "../indexHelpers";
 import { WUPcssIcon } from "../styles";
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
@@ -300,7 +301,7 @@ export default class WUPTextControl<
         setV &&
         v !== undefined &&
         !!(c as WUPTextControl)._opts.mask &&
-        !(c as WUPTextControl).maskIsFull(v, (c as WUPTextControl)._opts.mask!) &&
+        !maskInput(v, (c as WUPTextControl)._opts.mask!).isComplete &&
         "Incomplete value",
     },
   };
@@ -393,7 +394,7 @@ export default class WUPTextControl<
 
   protected override gotFocusLost(): void {
     if (this._opts.mask) {
-      const prefAndSuf = this.maskProcess("", this._opts.mask).text;
+      const prefAndSuf = maskInput("", this._opts.mask).text;
       if (this.$refInput.value === prefAndSuf) {
         this.$refInput.value = ""; // rollback prefix/suffix if user types nothing
         this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true, data: "To rollback prefix-sufix" }));
@@ -427,7 +428,7 @@ export default class WUPTextControl<
   /** Called when user types text OR when need to apply/reset mask (on focusGot, focusLost) */
   protected gotInput(e: WUPText.InputEvent): void {
     let txt = e.currentTarget.value;
-    txt = this._opts.mask ? this.maskInput(this._opts.mask, this._opts.maskholder) : txt;
+    txt = this._opts.mask ? this.maskInputProcess(this._opts.mask, this._opts.maskholder) : txt;
 
     const outRef: { showError?: boolean } = {};
     const v = this.parseValue(txt, outRef);
@@ -452,7 +453,7 @@ export default class WUPTextControl<
 
   // pattern ###0.## where # - optional, 0 - required
   /** Called to apply mask-behavior (on "input" event) */
-  protected maskInput(mask: string, maskholder?: string): string {
+  protected maskInputProcess(mask: string, maskholder?: string): string {
     const el = this.$refInput as HTMLInputElement & { _prev?: string };
     const v = el.value;
 
@@ -460,7 +461,7 @@ export default class WUPTextControl<
       el.value = v;
       return v; // ignore mask prefix+suffix if user isn't touched input
     }
-    const maskResult = this.maskProcess(v, mask, { prediction: true, lazy: true });
+    const maskResult = maskInput(v, mask, { prediction: true, lazy: true });
     const isCharNotAllowed = v.length > maskResult.text.length;
     const isNeedRemove = el.selectionStart === v.length && el._prev?.startsWith(v) && maskResult.text === el._prev;
     if (isNeedRemove) {
@@ -480,8 +481,8 @@ export default class WUPTextControl<
           this.$refInput.parentElement!.prepend(m);
           this.$refMaskholder = m;
         }
-        this.$refMaskholder!.lastChild!.textContent = maskholder.substring(str.length); // todo it's wrong for optional numbers so for ##0.##0.##0.##0 and 1.2.3.4 it returns '<i>1.2.3.4</i>.xxx.xxx'
-        this.$refMaskholder!.firstElementChild!.textContent = str;
+        this.$refMaskholder.firstChild!.textContent = str;
+        this.$refMaskholder.lastChild!.textContent = maskholder.substring(str.length); // todo it's wrong for optional numbers so for ##0.##0.##0.##0 and 1.2.3.4 it returns '<i>1.2.3.4</i>.xxx.xxx'
       }
     };
 
@@ -503,152 +504,6 @@ export default class WUPTextControl<
     return maskResult.text;
   }
 
-  /**
-   * Format string accoring to pattern
-   * @param v string that must be processed
-   * @param pattern 0000-00-00 (for date yyyy-MM-dd), ##0.##0.##0.##0 (for IPaddress), $ ### ### ### ### ### ##0 (for currency)
-   * #### where # - optional, 0 - required numbers
-   */
-  maskProcess(
-    v: string,
-    pattern: string,
-    options?: {
-      /** Add next constant-symbol to allow user don't worry about non-digit values @default true */
-      prediction?: boolean;
-      /** Add missed zero: for pattern '0000-00' and string '1 ' result will be "0001-" @default true   */
-      lazy?: boolean;
-    }
-  ): {
-    /** Corrected result */
-    text: string;
-    /** Returns whether value completely fits pattern */
-    isFull: boolean;
-  } {
-    options = options || {};
-    options.prediction = options.prediction ?? true;
-    options.lazy = options.lazy ?? true;
-
-    const r = {
-      text: v,
-      isFull: false,
-    };
-
-    if (!v) {
-      const i = pattern.search(/[#0]/);
-      r.text = i > 0 ? pattern.substring(0, i) : ""; // return prefix if possible //todo need also for suffix when prefix not defined ???
-      return r;
-    }
-
-    const charIsNumber = (str: string, i: number): boolean => {
-      const ascii = str.charCodeAt(i);
-      return ascii > 47 && ascii < 58;
-    };
-
-    /** Returns last index of digital value; required to extract suffix */
-    const lastDigIndex = (): number => {
-      for (let i = pattern.length - 1; i >= 0; --i) {
-        const p = pattern[i];
-        if (p === "#" || p === "0") {
-          return i;
-        }
-      }
-      return -1; // case possible only if missed '#' and '0' in pattern
-    };
-
-    const s = [""];
-    const regSep = /[., _+-/\\]/;
-    let cntOptional = 0; // count of optionalNumbers
-    let cntDig = 0; // count of required digits in one chunk
-
-    const addChunk = (char: string): void => {
-      // eslint-disable-next-line no-multi-assign
-      cntOptional = cntDig = 0;
-      s.push(char, ""); // for lazy mode
-    };
-
-    const append = (char: string): string => (s[s.length - 1] += char);
-
-    const ln = Math.max(v.length, pattern.length);
-    for (let vi = 0, pi = 0; vi < ln; ++vi, ++pi) {
-      let p = pattern[pi];
-      const c = v[vi];
-      if (p === undefined) {
-        // || c === undefined) {
-        break;
-      }
-      switch (p) {
-        case "0":
-          ++cntDig;
-          if (charIsNumber(v, vi)) {
-            append(c);
-          } else if (cntOptional) {
-            --cntOptional;
-            --vi;
-          } else if (options.lazy && regSep.test(c)) {
-            const last = s[s.length - 1];
-            if (charIsNumber(last, 0)) {
-              s[s.length - 1] = `0${last}`; // prepend '0' only if user typed number before '1234--' >>> '1234-', '1234-1-' >>> '1234-01-'
-              --vi;
-            } else {
-              r.text = s.join("");
-              return r;
-            }
-          } else {
-            r.text = s.join("");
-            return r;
-          }
-          break;
-        case "#":
-          ++cntDig;
-          if (charIsNumber(v, vi)) {
-            append(c);
-            ++cntOptional;
-          } else {
-            --vi;
-          }
-          break;
-        case c:
-          addChunk(c);
-          break;
-        case "\0": // for char '0'
-          p = "0";
-        // eslint-disable-next-line no-fallthrough
-        case "\x01": // '\1' for char '#'
-          p = "#";
-          if (p === c) {
-            addChunk(p);
-            break;
-          }
-        // any not digit char
-        // eslint-disable-next-line no-fallthrough
-        default: {
-          const isNum = charIsNumber(v, vi);
-          if (isNum || regSep.test(c)) {
-            addChunk(p);
-            isNum && --vi; // allow 1234 convert to 123-4 for '000-0'
-          } else if (options.prediction && !c && (cntDig <= s[s.length - 1].length || pi > lastDigIndex())) {
-            // for '##0.#0' >>> '1' to '1' (without .)
-            // for '$ ###0 USD' >>> '$ 5' to '$ 5 USD'
-            addChunk(p);
-          } else {
-            r.text = s.join("");
-            return r;
-          }
-          break;
-        }
-      }
-    }
-
-    r.isFull = true;
-    r.text = s.join("");
-    return r;
-  }
-
-  /** Returns whether value completely fits pattern/mask */
-  maskIsFull(v: string, pattern: string): boolean {
-    return this.maskProcess(v, pattern).isFull;
-  }
-
   protected override setValue(v: ValueType | undefined, canValidate = true): boolean | null {
     const isChanged = super.setValue(v, canValidate);
     isChanged && this.setInputValue(v); // todo it can be wrong for previous tests ?
@@ -660,7 +515,7 @@ export default class WUPTextControl<
   protected setInputValue(v: ValueType | undefined): void {
     const str = v != null ? (v as any).toString() : "";
     this.$refInput.value = str;
-    this._opts.mask && this.maskInput(this._opts.mask, this._opts.maskholder);
+    this._opts.mask && this.maskInputProcess(this._opts.mask, this._opts.maskholder);
   }
 }
 
@@ -669,7 +524,7 @@ customElements.define(tagName, WUPTextControl);
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
 
 function testMask(v: string, pattern = "0000-00-00"): void {
-  console.warn("testMask", { p: pattern, v, will: WUPTextControl.prototype.maskProcess(v, pattern) });
+  console.warn("testMask", { p: pattern, v, will: maskInput(v, pattern) });
 }
 // testMask("1", "##0.##0.##0.##0"); // expected 1
 // testMask("123", "##0.##0.##0.##0"); // expected 123.
