@@ -30,7 +30,7 @@ export default function maskInput(value: string, pattern: string, options?: IMas
 
   if (!value) {
     const i = pattern.search(/[#0]/);
-    r.text = i > 0 ? pattern.substring(0, i) : ""; // return prefix if possible //todo need also for suffix when prefix not defined ???
+    r.text = i > 0 ? pattern.substring(0, i) : ""; // returns prefix if possible //todo need also for suffix when prefix not defined ???
     return r;
   }
 
@@ -59,7 +59,7 @@ export default function maskInput(value: string, pattern: string, options?: IMas
     // eslint-disable-next-line no-multi-assign
     cntOptional = cntDig = 0;
     s.push(char, ""); // for lazy mode
-    console.warn("add chunk", s);
+    // console.warn("add chunk", s);
   };
 
   const append = (char: string): string => (s[s.length - 1] += char);

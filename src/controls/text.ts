@@ -443,9 +443,9 @@ export default class WUPTextControl<
         this._validTimer && clearTimeout(this._validTimer);
         if (this._opts.debounceMs) {
           this.#inputTimer && clearTimeout(this.#inputTimer);
-          this.#inputTimer = window.setTimeout(() => this.setValue(v), this._opts.debounceMs);
+          this.#inputTimer = window.setTimeout(() => this.setValue(v, true, true), this._opts.debounceMs);
         } else {
-          this.setValue(v);
+          this.setValue(v, true, true);
         }
       }
     }
@@ -504,10 +504,12 @@ export default class WUPTextControl<
     return maskResult.text;
   }
 
-  protected override setValue(v: ValueType | undefined, canValidate = true): boolean | null {
+  protected override setValue(v: ValueType | undefined, canValidate = true, skipInput = false): boolean | null {
     const isChanged = super.setValue(v, canValidate);
-    isChanged && this.setInputValue(v); // todo it can be wrong for previous tests ?
-    isChanged && this._isValid !== false && this.$hideError();
+    if (isChanged) {
+      !skipInput && this.setInputValue(v);
+      this._isValid !== false && this.$hideError();
+    }
     return isChanged;
   }
 
