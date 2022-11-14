@@ -17,7 +17,7 @@ afterEach(() => {
 describe("control.text: mask", () => {
   test("0000-00-00 (dateMask yyyy-MM-dd)", async () => {
     const mask = "0000-00-00";
-    const proc = (v, opts) => WUPTextControl.prototype.maskProcess(v, mask, opts);
+    const proc = (v, opts) => WUPTextControl.prototype.maskProcess(v, mask, opts).text;
     expect(proc("12")).toBe("12");
     expect(proc("12345")).toBe("1234-5");
     expect(proc("12345678")).toBe("1234-56-78");
@@ -99,15 +99,16 @@ describe("control.text: mask", () => {
 
   test("0000--0", () => {
     const mask = "0000--0";
-    const proc = (v) => WUPTextControl.prototype.maskProcess(v, mask);
+    const proc = (v) => WUPTextControl.prototype.maskProcess(v, mask).text;
     expect(proc("1234--5")).toBe("1234--5");
     expect(proc("1234--5b")).toBe("1234--5");
     expect(proc("12345")).toBe("1234--5");
     expect(proc("1 5")).toBe("0001--5");
   });
 
-  test("##0.##0.##0.##0 (IP addess)", () => {
-    const proc = (v, opts) => WUPTextControl.prototype.maskProcess(v, "##0.##0.##0.##0", opts);
+  test("##0.##0.##0.##0 (IP addess)", async () => {
+    const mask = "##0.##0.##0.##0";
+    const proc = (v, opts) => WUPTextControl.prototype.maskProcess(v, mask, opts).text;
     expect(proc("192.168.255.254")).toBe("192.168.255.254");
     expect(proc("1.2.3.4")).toBe("1.2.3.4");
     expect(proc("1.")).toBe("1.");
@@ -127,12 +128,47 @@ describe("control.text: mask", () => {
     expect(proc("123")).toBe("123.");
     expect(proc("1 ")).toBe("1.");
 
-    // todo check input with optional number
+    expect(el.maskIsFull("255.255.123.233", mask)).toBe(true);
+    expect(el.maskIsFull("1.2.3.4", mask)).toBe(true);
+    expect(el.maskIsFull("255.255.123.2", mask)).toBe(true);
+    expect(el.maskIsFull("255.255.123.", mask)).toBe(false);
+
+    // tests with input
+    el.$options.mask = mask;
+    el.$options.maskholder = "xxx.xxx.xxx.xxx";
+    el.focus();
+    await h.wait(1);
+    expect(el.innerHTML).toMatchInlineSnapshot(
+      `"<label for="wup3"><span><span aria-hidden="true" maskholder=""><i></i>xxx.xxx.xxx.xxx</span><input placeholder=" " type="text" id="wup3" autocomplete="off"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
+    );
+
+    const typeText = [
+      { $in: "1", $out: "1", $outN: "1", h: "<i>1</i>xx.xxx.xxx.xxx", hN: "<i>1</i>xx.xxx.xxx.xxx" },
+      { $in: "a", $out: "1a", $outN: "1", h: "<i>1a</i>x.xxx.xxx.xxx", hN: "<i>1</i>xx.xxx.xxx.xxx" },
+      { $in: "2", $out: "12", $outN: "12", h: "<i>12</i>x.xxx.xxx.xxx", hN: "<i>12</i>x.xxx.xxx.xxx" },
+      { $in: "3", $out: "123.", $outN: "123.", h: "<i>123.</i>xxx.xxx.xxx", hN: "<i>123.</i>xxx.xxx.xxx" }, // prediction mode
+      { $in: "4", $out: "123.4", $outN: "123.4", h: "<i>123.4</i>xx.xxx.xxx", hN: "<i>123.4</i>xx.xxx.xxx" },
+      /// todo it doesn't work
+      { $in: " ", $out: "123.4.", $outN: "123.4.", h: "<i>123.4.</i>xxx.xxx", hN: "<i>123.4</i>xxx.xxx" }, // lazy mode + prediction
+      { $in: "5", $out: "123.4.5", $outN: "123.4.5", h: "<i>123.4.5</i>xx.xxx", hN: "<i>123.4.5</i>xx.xxx" },
+      { $in: ".", $out: "123.4.5.", $outN: "123.4.5.", h: "<i>123.4.5.</i>xxx", hN: "<i>123.4.5.</i>xxx" },
+      { $in: "abcd", $out: "123.4.5.abcd", $outN: "123.4.5.", h: "<i>123.4.5.</i>abcd", hN: "<i>123.4.5.</i>xxx" },
+      { $in: "6 ", $out: "123.4.5.6", $outN: "123.4.5.6", h: "<i>123.4.5.6</i>", hN: "<i>123.4.5.</i>" },
+    ];
+    for (let i = 0; i < typeText.length; ++i) {
+      const s = typeText[i];
+      await h.userTypeText(el.$refInput, s.$in, { clearPrevious: false });
+      expect(el.$refInput.value).toBe(s.$out);
+      expect(`${s.$in}: ${el.$refMaskholder.innerHTML}`).toBe(`${s.$in}: ${s.h}`);
+      await h.wait(150); // when user types invalid char it shows and hides after a time
+      expect(el.$refInput.value).toBe(s.$outN);
+      expect(`${s.$in}: ${el.$refMaskholder.innerHTML}`).toBe(`${s.$in}: ${s.hN}`);
+    }
   });
 
   test("+1(000) 000-0000", async () => {
     const mask = "+1(000) 000-0000";
-    const proc = (v, opts) => WUPTextControl.prototype.maskProcess(v, mask, opts);
+    const proc = (v, opts) => WUPTextControl.prototype.maskProcess(v, mask, opts).text;
     expect(proc("+1(234) 975-1234")).toBe("+1(234) 975-1234");
     expect(proc("2")).toBe("+1(2");
     expect(proc("23")).toBe("+1(23");
@@ -155,7 +191,7 @@ describe("control.text: mask", () => {
 
   test("$ #####0 USD", () => {
     const mask = "$ #####0 USD";
-    const proc = (v) => WUPTextControl.prototype.maskProcess(v, "$ #####0 USD");
+    const proc = (v) => WUPTextControl.prototype.maskProcess(v, "$ #####0 USD").text;
     expect(proc("$ 123456 USD")).toBe("$ 123456 USD");
     expect(proc("$ 123450 USD")).toBe("$ 123450 USD");
     expect(proc("$ 50 USD")).toBe("$ 50 USD");

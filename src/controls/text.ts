@@ -219,7 +219,7 @@ export default class WUPTextControl<
           transform: scale(0.9);
         }
         :host:focus-within [maskholder] {
-          display: initial;
+          display: inline-block;
         }
         /* style for icons */
         :host label button,
@@ -393,7 +393,7 @@ export default class WUPTextControl<
 
   protected override gotFocusLost(): void {
     if (this._opts.mask) {
-      const prefAndSuf = this.maskProcess("", this._opts.mask);
+      const prefAndSuf = this.maskProcess("", this._opts.mask).text;
       if (this.$refInput.value === prefAndSuf) {
         this.$refInput.value = ""; // rollback prefix/suffix if user types nothing
         this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true, data: "To rollback prefix-sufix" }));
@@ -460,9 +460,9 @@ export default class WUPTextControl<
       el.value = v;
       return v; // ignore mask prefix+suffix if user isn't touched input
     }
-    const next = this.maskProcess(v, mask, { prediction: true, lazy: true, outIsFull: false });
-    const isCharNotAllowed = v.length > next.length;
-    const isNeedRemove = el.selectionStart === v.length && el._prev?.startsWith(v) && next === el._prev;
+    const maskResult = this.maskProcess(v, mask, { prediction: true, lazy: true });
+    const isCharNotAllowed = v.length > maskResult.text.length;
+    const isNeedRemove = el.selectionStart === v.length && el._prev?.startsWith(v) && maskResult.text === el._prev;
     if (isNeedRemove) {
       // console.warn("need remove", { next, prev: el._prev, v, isNeedRemove });
       // case when 1234- for pattern 0000-0 and user tries to remove last number; prediction adds removed separator again
@@ -480,7 +480,7 @@ export default class WUPTextControl<
           this.$refInput.parentElement!.prepend(m);
           this.$refMaskholder = m;
         }
-        this.$refMaskholder!.lastChild!.textContent = maskholder.substring(str.length); // todo it's wrong for optional numbers
+        this.$refMaskholder!.lastChild!.textContent = maskholder.substring(str.length); // todo it's wrong for optional numbers so for ##0.##0.##0.##0 and 1.2.3.4 it returns '<i>1.2.3.4</i>.xxx.xxx'
         this.$refMaskholder!.firstElementChild!.textContent = str;
       }
     };
@@ -488,11 +488,11 @@ export default class WUPTextControl<
     const ds = (el.selectionEnd || v.length) - v.length;
 
     const setV = (): void => {
-      el.value = next;
-      el._prev = next;
-      el.selectionEnd = next.length - ds; // todo it's wrong if user types in the middle
+      el.value = maskResult.text;
+      el._prev = el.value;
+      el.selectionEnd = maskResult.text.length - ds; // todo it's wrong if user types in the middle
       el.selectionStart = el.selectionEnd;
-      setMaskHolder(next);
+      setMaskHolder(maskResult.text);
     };
     if (isCharNotAllowed) {
       setMaskHolder(v);
@@ -500,7 +500,7 @@ export default class WUPTextControl<
     } else {
       setV();
     }
-    return next;
+    return maskResult.text;
   }
 
   /**
@@ -508,7 +508,6 @@ export default class WUPTextControl<
    * @param v string that must be processed
    * @param pattern 0000-00-00 (for date yyyy-MM-dd), ##0.##0.##0.##0 (for IPaddress), $ ### ### ### ### ### ##0 (for currency)
    * #### where # - optional, 0 - required numbers
-   * @returns corrected result
    */
   maskProcess(
     v: string,
@@ -518,17 +517,26 @@ export default class WUPTextControl<
       prediction?: boolean;
       /** Add missed zero: for pattern '0000-00' and string '1 ' result will be "0001-" @default true   */
       lazy?: boolean;
-      /** Returns whether value completely fits pattern */
-      outIsFull?: boolean;
     }
-  ): string {
+  ): {
+    /** Corrected result */
+    text: string;
+    /** Returns whether value completely fits pattern */
+    isFull: boolean;
+  } {
     options = options || {};
     options.prediction = options.prediction ?? true;
     options.lazy = options.lazy ?? true;
 
+    const r = {
+      text: v,
+      isFull: false,
+    };
+
     if (!v) {
       const i = pattern.search(/[#0]/);
-      return i > 0 ? pattern.substring(0, i) : ""; // return prefix if possible //todo need also for suffix when prefix not defined ???
+      r.text = i > 0 ? pattern.substring(0, i) : ""; // return prefix if possible //todo need also for suffix when prefix not defined ???
+      return r;
     }
 
     const charIsNumber = (str: string, i: number): boolean => {
@@ -536,10 +544,21 @@ export default class WUPTextControl<
       return ascii > 47 && ascii < 58;
     };
 
+    /** Returns last index of digital value; required to extract suffix */
+    const lastDigIndex = (): number => {
+      for (let i = pattern.length - 1; i >= 0; --i) {
+        const p = pattern[i];
+        if (p === "#" || p === "0") {
+          return i;
+        }
+      }
+      return -1; // case possible only if missed '#' and '0' in pattern
+    };
+
     const s = [""];
     const regSep = /[., _+-/\\]/;
     let cntOptional = 0; // count of optionalNumbers
-    let cntDig = 0; // count of digits in one chunk
+    let cntDig = 0; // count of required digits in one chunk
 
     const addChunk = (char: string): void => {
       // eslint-disable-next-line no-multi-assign
@@ -571,10 +590,12 @@ export default class WUPTextControl<
               s[s.length - 1] = `0${last}`; // prepend '0' only if user typed number before '1234--' >>> '1234-', '1234-1-' >>> '1234-01-'
               --vi;
             } else {
-              return s.join("");
+              r.text = s.join("");
+              return r;
             }
           } else {
-            return s.join("");
+            r.text = s.join("");
+            return r;
           }
           break;
         case "#":
@@ -598,31 +619,34 @@ export default class WUPTextControl<
             addChunk(p);
             break;
           }
+        // any not digit char
         // eslint-disable-next-line no-fallthrough
         default: {
           const isNum = charIsNumber(v, vi);
           if (isNum || regSep.test(c)) {
             addChunk(p);
             isNum && --vi; // allow 1234 convert to 123-4 for '000-0'
-          } else if (options.prediction && c === undefined) {
-            // && cntDig <= s[s.length - 1].length) {
+          } else if (options.prediction && !c && (cntDig <= s[s.length - 1].length || pi > lastDigIndex())) {
+            // for '##0.#0' >>> '1' to '1' (without .)
+            // for '$ ###0 USD' >>> '$ 5' to '$ 5 USD'
             addChunk(p);
           } else {
-            return s.join("");
+            r.text = s.join("");
+            return r;
           }
           break;
         }
       }
     }
-    options.outIsFull = true;
-    return s.join("");
+
+    r.isFull = true;
+    r.text = s.join("");
+    return r;
   }
 
   /** Returns whether value completely fits pattern/mask */
   maskIsFull(v: string, pattern: string): boolean {
-    const o = { outIsFull: false };
-    this.maskProcess(v, pattern, o);
-    return o.outIsFull;
+    return this.maskProcess(v, pattern).isFull;
   }
 
   protected override setValue(v: ValueType | undefined, canValidate = true): boolean | null {
@@ -648,9 +672,7 @@ function testMask(v: string, pattern = "0000-00-00"): void {
   console.warn("testMask", { p: pattern, v, will: WUPTextControl.prototype.maskProcess(v, pattern) });
 }
 // testMask("1", "##0.##0.##0.##0"); // expected 1
+// testMask("123", "##0.##0.##0.##0"); // expected 123.
 // testMask("$ 5", "$ #####0 USD"); // expected $ 5 USD
 // testMask("1- ", "0000-");
 // testMask("123", "##0.##0.##0.##0");
-// testMask("$ 123456 USD", "$ #####0 USD");
-// const isOk = WUPTextControl.prototype.maskIsFull("$ 123456 USD", "$ #####0 USD");
-// console.warn({ success: isOk });

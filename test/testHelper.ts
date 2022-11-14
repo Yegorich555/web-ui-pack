@@ -390,6 +390,32 @@ export async function userTypeText(el: HTMLInputElement, text: string, opts = { 
   }
 }
 
+/** Simulate user removes text via backspace: focus + keydown+ keyup + keypress + input events */
+export async function userRemove(el: HTMLInputElement, removeCount: number, opts = { fromEnd: false }) {
+  jest.useFakeTimers();
+  el.focus();
+
+  const key = "Backspace";
+  if (opts.fromEnd) {
+    el.selectionStart = el.value.length;
+    el.selectionEnd = el.value.length;
+  }
+  let carretPos = (el.selectionStart || 0) - 1; // position of carret
+  for (let i = 0; i < removeCount && carretPos >= 0; ++i, --carretPos) {
+    el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+    el.dispatchEvent(new KeyboardEvent("keyup", { key, bubbles: true }));
+    el.dispatchEvent(new KeyboardEvent("keypress", { key, bubbles: true }));
+    const v = el.value;
+    el.value = v.substring(0, carretPos) + v.substring(carretPos + 1);
+    el.selectionEnd = carretPos;
+    el.selectionStart = carretPos;
+    el.dispatchEvent(new InputEvent("input", { bubbles: true }));
+
+    jest.advanceTimersByTime(20);
+    await Promise.resolve();
+  }
+}
+
 /** Simulate user mouse click with 100ms between mouseDown and mouseUp */
 export async function userClick(el: HTMLElement, opts?: MouseEventInit) {
   jest.useFakeTimers();
