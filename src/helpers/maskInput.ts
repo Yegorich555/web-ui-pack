@@ -1,15 +1,17 @@
-interface IMaskInputResult {
-  /** Corrected result */
-  text: string;
-  /** Returns whether value completely fits pattern (isComplete) */
-  isComplete: boolean;
-}
-
 interface IMaskInputOptions {
   /** Add next constant-symbol to allow user don't worry about non-digit values @default true */
   prediction?: boolean;
   /** Add missed zero: for pattern '0000-00' and string '1 ' result will be "0001-" @default true   */
   lazy?: boolean;
+}
+
+interface IMaskInputResult {
+  /** Corrected result */
+  text: string;
+  /** Returns whether value completely fits pattern (isComplete) */
+  isCompleted: boolean;
+  /** Returns count chars of pattern that missed in value (used to maskHolder) */
+  leftLength: number;
 }
 
 /**
@@ -25,12 +27,14 @@ export default function maskInput(value: string, pattern: string, options?: IMas
 
   const r: IMaskInputResult = {
     text: value,
-    isComplete: false,
+    isCompleted: false,
+    leftLength: pattern.length,
   };
 
   if (!value) {
     const i = pattern.search(/[#0]/);
     r.text = i > 0 ? pattern.substring(0, i) : ""; // returns prefix if possible //todo need also for suffix when prefix not defined ???
+    r.leftLength = pattern.length - r.text.length;
     return r;
   }
 
@@ -50,31 +54,47 @@ export default function maskInput(value: string, pattern: string, options?: IMas
     return -1; // case possible only if missed '#' and '0' in pattern
   };
 
-  const s = [""];
+  const s: string[] = [];
   const regSep = /[., _+-/\\]/;
   let cntOptional = 0; // count of optionalNumbers
   let cntDig = 0; // count of required digits in one chunk
+  let isNewChunk = true;
 
   const addChunk = (char: string): void => {
     // eslint-disable-next-line no-multi-assign
     cntOptional = cntDig = 0;
-    s.push(char, ""); // for lazy mode
-    // console.warn("add chunk", s);
+    s.push(char); // for lazy mode
+    isNewChunk = true;
   };
 
-  const append = (char: string): string => (s[s.length - 1] += char);
+  // appendToLastChunk
+  const append = (char: string): void => {
+    if (isNewChunk) {
+      s.push(char);
+      isNewChunk = false;
+    } else {
+      s[s.length - 1] += char;
+    }
+  };
+
+  const joinToResult = (): IMaskInputResult => {
+    if (cntDig) {
+      const fillDig = isNewChunk ? 0 : s[s.length - 1].length;
+      r.leftLength += cntDig - fillDig; // if latest chunk contains nums >>> adjust according to optional nums
+    }
+    r.text = s.join("");
+    return r;
+  };
 
   const ln = Math.max(value.length, pattern.length);
   for (let vi = 0, pi = 0; vi < ln; ++vi, ++pi) {
     let p = pattern[pi];
-    const c = value[vi];
     if (p === undefined) {
-      // || c === undefined) {
       break;
     }
+    const c = value[vi];
     switch (p) {
       case "0":
-        ++cntDig;
         if (charIsNumber(value, vi)) {
           append(c);
         } else if (cntOptional) {
@@ -86,13 +106,12 @@ export default function maskInput(value: string, pattern: string, options?: IMas
             s[s.length - 1] = `0${last}`; // prepend '0' only if user typed number before '1234--' >>> '1234-', '1234-1-' >>> '1234-01-'
             --vi;
           } else {
-            r.text = s.join("");
-            return r;
+            return joinToResult();
           }
         } else {
-          r.text = s.join("");
-          return r;
+          return joinToResult();
         }
+        ++cntDig;
         break;
       case "#":
         ++cntDig;
@@ -127,15 +146,14 @@ export default function maskInput(value: string, pattern: string, options?: IMas
           // for '$ ###0 USD' >>> '$ 5' to '$ 5 USD'
           addChunk(p);
         } else {
-          r.text = s.join("");
-          return r;
+          // last chars are removed because doesn't fit pattern
+          return joinToResult();
         }
-        break;
       }
     }
+    --r.leftLength;
   }
 
-  r.isComplete = true;
-  r.text = s.join("");
-  return r;
+  r.isCompleted = true;
+  return joinToResult();
 }

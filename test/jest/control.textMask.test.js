@@ -84,19 +84,97 @@ describe("control.text: mask", () => {
       expect(`${s.$in}: ${el.$refMaskholder.innerHTML}`).toBe(`${s.$in}: ${s.hN}`);
     }
 
-    expect(maskInput("1234-05-06", mask).isComplete).toBe(true);
-    expect(maskInput("1234-05-0", mask).isComplete).toBe(false); // todo what about lazy mode ???
-    expect(maskInput("1234-05-", mask).isComplete).toBe(false);
-    expect(maskInput("1234-05", mask).isComplete).toBe(false);
-    expect(maskInput("1234-0", mask).isComplete).toBe(false);
-    expect(maskInput("1234-", mask).isComplete).toBe(false);
-    expect(maskInput("1234", mask).isComplete).toBe(false);
-    expect(maskInput("1", mask).isComplete).toBe(false);
-    expect(maskInput("", mask).isComplete).toBe(false);
+    expect(maskInput("1234-05-06", mask).isCompleted).toBe(true);
+    expect(maskInput("1234-05-0", mask).isCompleted).toBe(false);
+    expect(maskInput("1234-05-", mask).isCompleted).toBe(false);
+    expect(maskInput("1234-05", mask).isCompleted).toBe(false);
+    expect(maskInput("1234-0", mask).isCompleted).toBe(false);
+    expect(maskInput("1234-", mask).isCompleted).toBe(false);
+    expect(maskInput("1234", mask).isCompleted).toBe(false);
+    expect(maskInput("1", mask).isCompleted).toBe(false);
+    expect(maskInput("", mask).isCompleted).toBe(false);
 
     // await h.userRemove(el.$refInput, 1, { fromEnd: true });
     // todo test ability to remove chars (including in the middle)
     // todo test ability to type chars in the middle
+  });
+
+  test("0000/#0/#0 (dateMask yyyy-M-d)", async () => {
+    const mask = "0000/#0/#0";
+    const proc = (v, opts) => maskInput(v, mask, opts).text;
+    expect(proc("12")).toBe("12");
+    expect(proc("12345")).toBe("1234/5");
+    expect(proc("12345678")).toBe("1234/56/78");
+    expect(proc("123456789")).toBe("1234/56/78");
+    expect(proc("1234/")).toBe("1234/");
+    expect(proc("1234/5")).toBe("1234/5");
+    expect(proc("1234/56/7")).toBe("1234/56/7");
+    expect(proc("1234-56-78")).toBe("1234/56/78");
+    expect(proc("1234 56 78")).toBe("1234/56/78");
+    expect(proc("1234/56/789")).toBe("1234/56/78");
+    expect(proc("2000/1/2")).toBe("2000/1/2");
+
+    expect(proc("1234/W")).toBe("1234/");
+    expect(proc("1absd234/56/78")).toBe("1");
+
+    expect(proc("1234")).toBe("1234/");
+    expect(proc("1234", { prediction: false })).toBe("1234");
+    expect(proc("1234w")).toBe("1234");
+    expect(proc("1234 ")).toBe("1234/");
+    expect(proc("1234/")).toBe("1234/");
+    expect(proc("1234//")).toBe("1234/");
+
+    // lazy mode
+    expect(proc("1/")).toBe("0001/");
+    expect(proc("1 ")).toBe("0001/");
+    expect(proc("1234/4/")).toBe("1234/4/");
+    expect(proc("1234/04/ ")).toBe("1234/04/");
+    expect(proc("12/")).toBe("0012/");
+    expect(proc("12 ")).toBe("0012/");
+    expect(proc("1 2 3 ")).toBe("0001/2/3"); // lazy + any not char
+
+    // tests with input
+    el.$options.mask = mask;
+    el.$options.maskholder = "yyyy/mm/dd";
+    el.focus();
+    await h.wait(1);
+    expect(el.innerHTML).toMatchInlineSnapshot(
+      `"<label for="wup2"><span><span aria-hidden="true" maskholder=""><i></i>yyyy/mm/dd</span><input placeholder=" " type="text" id="wup2" autocomplete="off"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
+    );
+
+    const typeText = [
+      { $in: "1", $out: "1", $outN: "1", h: "<i>1</i>yyy/mm/dd", hN: "<i>1</i>yyy/mm/dd" },
+      { $in: "a", $out: "1a", $outN: "1", h: "<i>1a</i>yy/mm/dd", hN: "<i>1</i>yyy/mm/dd" },
+      { $in: "2", $out: "12", $outN: "12", h: "<i>12</i>yy/mm/dd", hN: "<i>12</i>yy/mm/dd" },
+      { $in: "3", $out: "123", $outN: "123", h: "<i>123</i>y/mm/dd", hN: "<i>123</i>y/mm/dd" },
+      { $in: "b", $out: "123b", $outN: "123", h: "<i>123b</i>/mm/dd", hN: "<i>123</i>y/mm/dd" },
+      { $in: "4", $out: "1234/", $outN: "1234/", h: "<i>1234/</i>mm/dd", hN: "<i>1234/</i>mm/dd" }, // prediction mode
+      { $in: "5", $out: "1234/5", $outN: "1234/5", h: "<i>1234/5</i>m/dd", hN: "<i>1234/5</i>m/dd" },
+      { $in: " ", $out: "1234/5/", $outN: "1234/5/", h: "<i>1234/5/</i>dd", hN: "<i>1234/5/</i>dd" }, // lazy mode + prediction
+      { $in: "6", $out: "1234/5/6", $outN: "1234/5/6", h: "<i>1234/5/6</i>d", hN: "<i>1234/5/6</i>d" }, // lazy mode + prediction
+      { $in: "abcd", $out: "1234/5/6abcd", $outN: "1234/5/6", h: "<i>1234/5/6abcd</i>", hN: "<i>1234/5/6</i>d" },
+      { $in: " ", $out: "1234/5/6 ", $outN: "1234/5/6", h: "<i>1234/5/6 </i>", hN: "<i>1234/5/6</i>d" }, // lazy mode + prediction
+    ];
+    for (let i = 0; i < typeText.length; ++i) {
+      const s = typeText[i];
+      await h.userTypeText(el.$refInput, s.$in, { clearPrevious: false });
+      expect(el.$refInput.value).toBe(s.$out);
+      expect(`${s.$in}: ${el.$refMaskholder.innerHTML}`).toBe(`${s.$in}: ${s.h}`);
+      await h.wait(150); // when user types invalid char it shows and hides after a time
+      expect(el.$refInput.value).toBe(s.$outN);
+      expect(`${s.$in}: ${el.$refMaskholder.innerHTML}`).toBe(`${s.$in}: ${s.hN}`);
+    }
+
+    expect(maskInput("1234/05/06", mask).isCompleted).toBe(true);
+    expect(maskInput("1234/5/6", mask).isCompleted).toBe(true);
+    expect(maskInput("1234/5/0", mask).isCompleted).toBe(true);
+    expect(maskInput("1234/05/", mask).isCompleted).toBe(false);
+    expect(maskInput("1234/5", mask).isCompleted).toBe(false);
+    expect(maskInput("1234/0", mask).isCompleted).toBe(false);
+    expect(maskInput("1234/", mask).isCompleted).toBe(false);
+    expect(maskInput("1234", mask).isCompleted).toBe(false);
+    expect(maskInput("1", mask).isCompleted).toBe(false);
+    expect(maskInput("", mask).isCompleted).toBe(false);
   });
 
   test("0000--0", () => {
@@ -130,10 +208,22 @@ describe("control.text: mask", () => {
     expect(proc("123")).toBe("123.");
     expect(proc("1 ")).toBe("1.");
 
-    expect(maskInput("255.255.123.233", mask).isComplete).toBe(true);
-    expect(maskInput("1.2.3.4", mask).isComplete).toBe(true);
-    expect(maskInput("255.255.123.2", mask).isComplete).toBe(true);
-    expect(maskInput("255.255.123.", mask).isComplete).toBe(false);
+    expect(maskInput("255.255.123.233", mask).isCompleted).toBe(true);
+    expect(maskInput("1.2.3.4", mask).isCompleted).toBe(true);
+    expect(maskInput("255.255.123.2", mask).isCompleted).toBe(true);
+    expect(maskInput("255.255.123.", mask).isCompleted).toBe(false);
+
+    expect(maskInput("255.255.123.233", mask).leftLength).toBe(0);
+    expect(maskInput("255.255.123.", mask).leftLength).toBe(3);
+    expect(maskInput("255.255.1.", mask).leftLength).toBe(3);
+    expect(maskInput("255.2.1.", mask).leftLength).toBe(3);
+    expect(maskInput("3.2.1.", mask).leftLength).toBe(3);
+    expect(maskInput("3.2.1.2", mask).leftLength).toBe(2);
+    expect(maskInput("3.2.1.21", mask).leftLength).toBe(1);
+    expect(maskInput("3.2.1.210", mask).leftLength).toBe(0);
+    expect(maskInput("1", mask).leftLength).toBe(mask.length - 1);
+    expect(maskInput("12", mask).leftLength).toBe(mask.length - 2);
+    expect(maskInput("123", mask).leftLength).toBe(mask.length - 4); // because . appended
 
     // tests with input
     el.$options.mask = mask;
@@ -141,7 +231,7 @@ describe("control.text: mask", () => {
     el.focus();
     await h.wait(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<label for="wup3"><span><span aria-hidden="true" maskholder=""><i></i>xxx.xxx.xxx.xxx</span><input placeholder=" " type="text" id="wup3" autocomplete="off"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
+      `"<label for="wup4"><span><span aria-hidden="true" maskholder=""><i></i>xxx.xxx.xxx.xxx</span><input placeholder=" " type="text" id="wup4" autocomplete="off"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
     );
 
     const typeText = [
@@ -150,12 +240,11 @@ describe("control.text: mask", () => {
       { $in: "2", $out: "12", $outN: "12", h: "<i>12</i>x.xxx.xxx.xxx", hN: "<i>12</i>x.xxx.xxx.xxx" },
       { $in: "3", $out: "123.", $outN: "123.", h: "<i>123.</i>xxx.xxx.xxx", hN: "<i>123.</i>xxx.xxx.xxx" }, // prediction mode
       { $in: "4", $out: "123.4", $outN: "123.4", h: "<i>123.4</i>xx.xxx.xxx", hN: "<i>123.4</i>xx.xxx.xxx" },
-      /// todo it doesn't work
-      { $in: " ", $out: "123.4.", $outN: "123.4.", h: "<i>123.4.</i>xxx.xxx", hN: "<i>123.4</i>xxx.xxx" }, // lazy mode + prediction
+      { $in: " ", $out: "123.4.", $outN: "123.4.", h: "<i>123.4.</i>xxx.xxx", hN: "<i>123.4.</i>xxx.xxx" }, // lazy mode + prediction
       { $in: "5", $out: "123.4.5", $outN: "123.4.5", h: "<i>123.4.5</i>xx.xxx", hN: "<i>123.4.5</i>xx.xxx" },
       { $in: ".", $out: "123.4.5.", $outN: "123.4.5.", h: "<i>123.4.5.</i>xxx", hN: "<i>123.4.5.</i>xxx" },
-      { $in: "abcd", $out: "123.4.5.abcd", $outN: "123.4.5.", h: "<i>123.4.5.</i>abcd", hN: "<i>123.4.5.</i>xxx" },
-      { $in: "6 ", $out: "123.4.5.6", $outN: "123.4.5.6", h: "<i>123.4.5.6</i>", hN: "<i>123.4.5.</i>" },
+      { $in: "abcd", $out: "123.4.5.abcd", $outN: "123.4.5.", h: "<i>123.4.5.abcd</i>", hN: "<i>123.4.5.</i>xxx" },
+      { $in: "6 ", $out: "123.4.5.6 ", $outN: "123.4.5.6", h: "<i>123.4.5.6 </i>x", hN: "<i>123.4.5.6</i>xx" },
     ];
     for (let i = 0; i < typeText.length; ++i) {
       const s = typeText[i];
@@ -180,15 +269,18 @@ describe("control.text: mask", () => {
     expect(proc("12349751234")).toBe("+1(234) 975-1234");
     expect(proc("")).toBe("+1("); // autoprefix
 
-    expect(maskInput("+1(234) 975-1234", mask).isComplete).toBe(true);
-    expect(maskInput("+1(234) 975-123", mask).isComplete).toBe(false);
-    expect(maskInput("+1(234) 975-", mask).isComplete).toBe(false);
-    expect(maskInput("+1(234) 975", mask).isComplete).toBe(false);
-    expect(maskInput("+1(234) ", mask).isComplete).toBe(false);
-    expect(maskInput("+1(234)", mask).isComplete).toBe(false);
-    expect(maskInput("+1(234", mask).isComplete).toBe(false);
-    expect(maskInput("+1(", mask).isComplete).toBe(false);
-    expect(maskInput("", mask).isComplete).toBe(false);
+    expect(maskInput("+1(234) 975-1234", mask).isCompleted).toBe(true);
+    expect(maskInput("+1(234) 975-123", mask).isCompleted).toBe(false);
+    expect(maskInput("+1(234) 975-", mask).isCompleted).toBe(false);
+    expect(maskInput("+1(234) 975", mask).isCompleted).toBe(false);
+    expect(maskInput("+1(234) ", mask).isCompleted).toBe(false);
+    expect(maskInput("+1(234)", mask).isCompleted).toBe(false);
+    expect(maskInput("+1(234", mask).isCompleted).toBe(false);
+    expect(maskInput("+1(", mask).isCompleted).toBe(false);
+    expect(maskInput("", mask).isCompleted).toBe(false);
+
+    expect(maskInput("+1(", mask).leftLength).toBe(mask.length - 3);
+    expect(maskInput("", mask).leftLength).toBe(mask.length - 3);
   });
 
   test("$ #####0 USD", () => {
@@ -205,9 +297,12 @@ describe("control.text: mask", () => {
     expect(proc("5")).toBe("$ 5 USD");
     expect(proc("$ 5 US")).toBe("$ 5 USD"); // WARN: in this case input must control caret position and don't allow to remove prefix/suffix
 
-    expect(maskInput("$ 123456 USD", mask).isComplete).toBe(true);
-    expect(maskInput("$ 5 USD", mask).isComplete).toBe(true);
-    expect(maskInput("$ 5", mask).isComplete).toBe(true); // because suffix appends in lazy mode
+    expect(maskInput("$ 123456 USD", mask).isCompleted).toBe(true);
+    expect(maskInput("$ 5 USD", mask).isCompleted).toBe(true);
+    expect(maskInput("$ 5", mask).isCompleted).toBe(true); // because suffix appends in lazy mode
+
+    expect(maskInput("$ 123456 USD", mask).leftLength).toBe(0);
+    expect(maskInput("$ 5 USD", mask).leftLength).toBe(0);
   });
 
   // todo test("### ### ### ### ##0.## - currency with delimiters", () => {

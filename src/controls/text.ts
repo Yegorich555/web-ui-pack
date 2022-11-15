@@ -301,7 +301,7 @@ export default class WUPTextControl<
         setV &&
         v !== undefined &&
         !!(c as WUPTextControl)._opts.mask &&
-        !maskInput(v, (c as WUPTextControl)._opts.mask!).isComplete &&
+        !maskInput(v, (c as WUPTextControl)._opts.mask!).isCompleted &&
         "Incomplete value",
     },
   };
@@ -381,6 +381,7 @@ export default class WUPTextControl<
     if (!this.$refInput.readOnly) {
       if (!this.$refInput.value) {
         if (this._opts.mask) {
+          // todo for phoneNumber +1... it's produces IncompleteValue message on focus when no value yet
           this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true, data: "To apply mask before start" })); // apply prefix/suffix from mask
         }
       } else {
@@ -451,7 +452,6 @@ export default class WUPTextControl<
     }
   }
 
-  // pattern ###0.## where # - optional, 0 - required
   /** Called to apply mask-behavior (on "input" event) */
   protected maskInputProcess(mask: string, maskholder?: string): string {
     const el = this.$refInput as HTMLInputElement & { _prev?: string };
@@ -461,16 +461,16 @@ export default class WUPTextControl<
       el.value = v;
       return v; // ignore mask prefix+suffix if user isn't touched input
     }
-    const maskResult = maskInput(v, mask, { prediction: true, lazy: true });
-    const isCharNotAllowed = v.length > maskResult.text.length;
-    const isNeedRemove = el.selectionStart === v.length && el._prev?.startsWith(v) && maskResult.text === el._prev;
+    const mr = maskInput(v, mask);
+    const removeChars = v.length - mr.text.length;
+    const isNeedRemove = el.selectionStart === v.length && el._prev?.startsWith(v) && mr.text === el._prev;
     if (isNeedRemove) {
       // console.warn("need remove", { next, prev: el._prev, v, isNeedRemove });
       // case when 1234- for pattern 0000-0 and user tries to remove last number; prediction adds removed separator again
       // next = next.substring(0, next.length - 2); // todo it doesn't work if user removes from the middle
     }
 
-    const setMaskHolder = (str: string): void => {
+    const setMaskHolder = (str: string, leftLength: number): void => {
       if (maskholder) {
         if (!this.$refMaskholder) {
           const m = document.createElement("span");
@@ -482,26 +482,26 @@ export default class WUPTextControl<
           this.$refMaskholder = m;
         }
         this.$refMaskholder.firstChild!.textContent = str;
-        this.$refMaskholder.lastChild!.textContent = maskholder.substring(str.length); // todo it's wrong for optional numbers so for ##0.##0.##0.##0 and 1.2.3.4 it returns '<i>1.2.3.4</i>.xxx.xxx'
+        this.$refMaskholder.lastChild!.textContent = maskholder.substring(maskholder.length - leftLength);
       }
     };
 
     const ds = (el.selectionEnd || v.length) - v.length;
 
     const setV = (): void => {
-      el.value = maskResult.text;
+      el.value = mr.text;
       el._prev = el.value;
-      el.selectionEnd = maskResult.text.length - ds; // todo it's wrong if user types in the middle
+      el.selectionEnd = mr.text.length - ds; // todo it's wrong if user types in the middle
       el.selectionStart = el.selectionEnd;
-      setMaskHolder(maskResult.text);
+      setMaskHolder(mr.text, mr.leftLength);
     };
-    if (isCharNotAllowed) {
-      setMaskHolder(v);
+    if (removeChars > 0) {
+      setMaskHolder(v, mr.leftLength - removeChars);
       setTimeout(setV, 100); // set value after time to show user typed value before mask applied
     } else {
       setV();
     }
-    return maskResult.text;
+    return mr.text;
   }
 
   protected override setValue(v: ValueType | undefined, canValidate = true, skipInput = false): boolean | null {
@@ -524,12 +524,3 @@ export default class WUPTextControl<
 customElements.define(tagName, WUPTextControl);
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
-
-function testMask(v: string, pattern = "0000-00-00"): void {
-  console.warn("testMask", { p: pattern, v, will: maskInput(v, pattern) });
-}
-// testMask("1", "##0.##0.##0.##0"); // expected 1
-// testMask("123", "##0.##0.##0.##0"); // expected 123.
-// testMask("$ 5", "$ #####0 USD"); // expected $ 5 USD
-// testMask("1- ", "0000-");
-// testMask("123", "##0.##0.##0.##0");
