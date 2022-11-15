@@ -96,7 +96,6 @@ describe("control.text: mask", () => {
 
     // await h.userRemove(el.$refInput, 1, { fromEnd: true });
     // todo test ability to remove chars (including in the middle)
-    // todo test ability to type chars in the middle
   });
 
   test("0000/#0/#0 (dateMask yyyy-M-d)", async () => {
@@ -163,6 +162,9 @@ describe("control.text: mask", () => {
       await h.wait(150); // when user types invalid char it shows and hides after a time
       expect(el.$refInput.value).toBe(s.$outN);
       expect(`${s.$in}: ${el.$refMaskholder.innerHTML}`).toBe(`${s.$in}: ${s.hN}`);
+
+      expect(el.$refInput.selectionStart).toBe(el.$refInput.value.length);
+      expect(el.$refInput.selectionEnd).toBe(el.$refInput.selectionStart);
     }
 
     expect(maskInput("1234/05/06", mask).isCompleted).toBe(true);
@@ -196,6 +198,7 @@ describe("control.text: mask", () => {
     expect(proc("192")).toBe("192.");
     expect(proc("192", { prediction: false })).toBe("192");
     expect(proc("192 ")).toBe("192.");
+    expect(proc(".")).toBe("");
 
     // lazy mode
     expect(proc("192.16 ")).toBe("192.16.");
@@ -254,6 +257,9 @@ describe("control.text: mask", () => {
       await h.wait(150); // when user types invalid char it shows and hides after a time
       expect(el.$refInput.value).toBe(s.$outN);
       expect(`${s.$in}: ${el.$refMaskholder.innerHTML}`).toBe(`${s.$in}: ${s.hN}`);
+
+      expect(el.$refInput.selectionStart).toBe(el.$refInput.value.length);
+      expect(el.$refInput.selectionEnd).toBe(el.$refInput.selectionStart);
     }
   });
 
@@ -304,6 +310,8 @@ describe("control.text: mask", () => {
     expect(maskInput("$ 123456 USD", mask).leftLength).toBe(0);
     expect(maskInput("$ 5 USD", mask).leftLength).toBe(0);
   });
+
+  // todo test with \1 \0
 
   // todo test("### ### ### ### ##0.## - currency with delimiters", () => {
   // need to define maskForCurrency with local-decimal-delimiter

@@ -462,41 +462,43 @@ export default class WUPTextControl<
       return v; // ignore mask prefix+suffix if user isn't touched input
     }
     const mr = maskInput(v, mask);
-    const removeChars = v.length - mr.text.length;
-    const isNeedRemove = el.selectionStart === v.length && el._prev?.startsWith(v) && mr.text === el._prev;
-    if (isNeedRemove) {
-      // console.warn("need remove", { next, prev: el._prev, v, isNeedRemove });
-      // case when 1234- for pattern 0000-0 and user tries to remove last number; prediction adds removed separator again
-      // next = next.substring(0, next.length - 2); // todo it doesn't work if user removes from the middle
-    }
+    const removedChars = v.length - mr.text.length;
+    // const isNeedRemove = el.selectionStart === v.length && el._prev?.startsWith(v) && mr.text === el._prev;
+    // if (isNeedRemove) {
+    // console.warn("need remove", { next, prev: el._prev, v, isNeedRemove });
+    // case when 1234- for pattern 0000-0 and user tries to remove last number; prediction adds removed separator again
+    // next = next.substring(0, next.length - 2); // todo it doesn't work if user removes from the middle
+    // }
 
     const setMaskHolder = (str: string, leftLength: number): void => {
-      if (maskholder) {
-        if (!this.$refMaskholder) {
-          const m = document.createElement("span");
-          m.setAttribute("aria-hidden", "true");
-          m.setAttribute("maskholder", "");
-          m.appendChild(document.createElement("i"));
-          m.append("");
-          this.$refInput.parentElement!.prepend(m);
-          this.$refMaskholder = m;
-        }
-        this.$refMaskholder.firstChild!.textContent = str;
-        this.$refMaskholder.lastChild!.textContent = maskholder.substring(maskholder.length - leftLength);
+      if (!maskholder) {
+        return;
       }
+      if (!this.$refMaskholder) {
+        const m = document.createElement("span");
+        m.setAttribute("aria-hidden", "true");
+        m.setAttribute("maskholder", "");
+        m.appendChild(document.createElement("i"));
+        m.append("");
+        this.$refInput.parentElement!.prepend(m);
+        this.$refMaskholder = m;
+      }
+      this.$refMaskholder.firstChild!.textContent = str;
+      this.$refMaskholder.lastChild!.textContent = maskholder.substring(maskholder.length - leftLength);
     };
-
-    const ds = (el.selectionEnd || v.length) - v.length;
 
     const setV = (): void => {
+      const cursorShift = (el.selectionStart ?? 0) !== v.length ? el.selectionStart : 0;
       el.value = mr.text;
-      el._prev = el.value;
-      el.selectionEnd = mr.text.length - ds; // todo it's wrong if user types in the middle
-      el.selectionStart = el.selectionEnd;
+      if (cursorShift) {
+        el.selectionStart = cursorShift;
+        el.selectionEnd = cursorShift;
+      }
       setMaskHolder(mr.text, mr.leftLength);
+      el._prev = el.value;
     };
-    if (removeChars > 0) {
-      setMaskHolder(v, mr.leftLength - removeChars);
+    if (removedChars > 0) {
+      setMaskHolder(v, mr.leftLength - removedChars);
       setTimeout(setV, 100); // set value after time to show user typed value before mask applied
     } else {
       setV();
@@ -524,3 +526,12 @@ export default class WUPTextControl<
 customElements.define(tagName, WUPTextControl);
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
+
+setTimeout(() => {
+  console.warn(maskInput(".", "##0.##0.##0.##0")); // todo exception here
+});
+
+// todo it's converted into 123.4. so user can not append chars stupidly. It's can be fixed if remove separators previously ???
+console.warn("from 1234.", maskInput("1234.", "##0.##0.##0.##0"));
+console.warn("from 214.2.3.4.", maskInput("214.2.3.4", "##0.##0.##0.##0"));
+console.warn("from 5214.2.3.4.", maskInput("5214.2.3.4".replaceAll(".", ""), "##0.##0.##0.##0"));
