@@ -527,11 +527,7 @@ customElements.define(tagName, WUPTextControl);
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
 
-setTimeout(() => {
-  console.warn(maskInput(".", "##0.##0.##0.##0")); // todo exception here
-});
-
 // todo it's converted into 123.4. so user can not append chars stupidly. It's can be fixed if remove separators previously ???
-console.warn("from 1234.", maskInput("1234.", "##0.##0.##0.##0"));
-console.warn("from 214.2.3.4.", maskInput("214.2.3.4", "##0.##0.##0.##0"));
-console.warn("from 5214.2.3.4.", maskInput("5214.2.3.4".replaceAll(".", ""), "##0.##0.##0.##0"));
+// console.warn("from 1234.", maskInput("1234.", "##0.##0.##0.##0"));
+// console.warn("from 214.2.3.4.", maskInput("214.2.3.4", "##0.##0.##0.##0"));
+// console.warn("from 5214.2.3.4.", maskInput("5214.2.3.4".replaceAll(".", ""), "##0.##0.##0.##0"));

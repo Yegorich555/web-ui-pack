@@ -39,6 +39,9 @@ export default function maskInput(value: string, pattern: string, options?: IMas
   }
 
   const charIsNumber = (str: string, i: number): boolean => {
+    if (!str) {
+      return false;
+    }
     const ascii = str.charCodeAt(i);
     return ascii > 47 && ascii < 58;
   };
