@@ -461,14 +461,20 @@ export default class WUPTextControl<
       el.value = v;
       return v; // ignore mask prefix+suffix if user isn't touched input
     }
-    const mr = maskInput(v, mask);
-    const removedChars = v.length - mr.text.length;
-    // const isNeedRemove = el.selectionStart === v.length && el._prev?.startsWith(v) && mr.text === el._prev;
-    // if (isNeedRemove) {
-    // console.warn("need remove", { next, prev: el._prev, v, isNeedRemove });
-    // case when 1234- for pattern 0000-0 and user tries to remove last number; prediction adds removed separator again
-    // next = next.substring(0, next.length - 2); // todo it doesn't work if user removes from the middle
-    // }
+    let mr = maskInput(v, mask);
+
+    const isRemovedSep = mr.text === el._prev && el._prev.length > v.length;
+    if (isRemovedSep) {
+      // case when 1234- for pattern 0000-0 and user tries to remove last number; prediction adds removed separator again
+      mr = maskInput(mr.text.substring(0, mr.text.length - 2), mask); // allow user to remove digit with separator
+      // todo it doesn't work with several seps at once
+      // todo it doesn't work with optional digs
+      // it's case when need to allow user remove separator
+      // mr.text = mr.text.substring(0, mr.text.length - 1);
+      // ++mr.leftLength;
+      // mr.isCompleted = false; // WARN: user can not remove > 1 sep
+    }
+    console.warn({ isRemovedSep, prev: el._prev, v, mrText: mr.text });
 
     const setMaskHolder = (str: string, leftLength: number): void => {
       if (!maskholder) {
@@ -497,6 +503,8 @@ export default class WUPTextControl<
       setMaskHolder(mr.text, mr.leftLength);
       el._prev = el.value;
     };
+
+    const removedChars = v.length - mr.text.length;
     if (removedChars > 0) {
       setMaskHolder(v, mr.leftLength - removedChars);
       setTimeout(setV, 100); // set value after time to show user typed value before mask applied
@@ -527,7 +535,11 @@ customElements.define(tagName, WUPTextControl);
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
 
-// todo it's converted into 123.4. so user can not append chars stupidly. It's can be fixed if remove separators previously ???
-// console.warn("from 1234.", maskInput("1234.", "##0.##0.##0.##0"));
-// console.warn("from 214.2.3.4.", maskInput("214.2.3.4", "##0.##0.##0.##0"));
-// console.warn("from 5214.2.3.4.", maskInput("5214.2.3.4".replaceAll(".", ""), "##0.##0.##0.##0"));
+/** todo complex cases
+ *  For prediction mode need to implement prediction delete: if user removed separator need to remove 1 dig
+ *
+ * '+1(000) 000' | '+1(234) ' + Backspace: '+1(234) ' vs '+1(23' // also similar case with Delete button
+ * '##0.##0' | '1.' + Backspace: '1' vs '' // removed separator but need to remove
+ *  if user past values in the middle we need shift it between chunks
+ *  if user past wrong symb in the middle we heed shift and hide
+ */

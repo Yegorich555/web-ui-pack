@@ -1,6 +1,8 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-imports
 import WUPTextControl from "../../src/controls/text";
 import maskInput from "../../src/helpers/maskInput";
+// todo change ref to web-ui-pack to coverage
+
 import * as h from "../testHelper";
 
 /** @type WUPTextControl */
@@ -84,6 +86,24 @@ describe("control.text: mask", () => {
       expect(`${s.$in}: ${el.$refMaskholder.innerHTML}`).toBe(`${s.$in}: ${s.hN}`);
     }
 
+    // test ability to remove chars
+    expect(el.$refInput.value).toBe("1234-05-06");
+    const removeResult = [
+      "1234-05-0",
+      "1234-05-",
+      "1234-0", // removing separator and number
+      "1234-",
+      "123", // removing separator and number
+      "12",
+      "1",
+      "",
+    ];
+    for (let i = 0; i < removeResult.length; ++i) {
+      await h.userRemove(el.$refInput, 1);
+      await h.wait(150);
+      expect(el.$refInput.value).toBe(removeResult[i]);
+    }
+
     expect(maskInput("1234-05-06", mask).isCompleted).toBe(true);
     expect(maskInput("1234-05-0", mask).isCompleted).toBe(false);
     expect(maskInput("1234-05-", mask).isCompleted).toBe(false);
@@ -93,9 +113,6 @@ describe("control.text: mask", () => {
     expect(maskInput("1234", mask).isCompleted).toBe(false);
     expect(maskInput("1", mask).isCompleted).toBe(false);
     expect(maskInput("", mask).isCompleted).toBe(false);
-
-    // await h.userRemove(el.$refInput, 1, { fromEnd: true });
-    // todo test ability to remove chars (including in the middle)
   });
 
   test("0000/#0/#0 (dateMask yyyy-M-d)", async () => {
@@ -260,6 +277,22 @@ describe("control.text: mask", () => {
 
       expect(el.$refInput.selectionStart).toBe(el.$refInput.value.length);
       expect(el.$refInput.selectionEnd).toBe(el.$refInput.selectionStart);
+    }
+
+    // test ability to remove chars
+    expect(el.$refInput.value).toBe("123.4.5.6");
+    const removeResult = [
+      "123.4.5.", //
+      "123.4.",
+      "123.",
+      "12",
+      "1",
+      "",
+    ];
+    for (let i = 0; i < removeResult.length; ++i) {
+      await h.userRemove(el.$refInput, 1);
+      await h.wait(150);
+      expect(el.$refInput.value).toBe(removeResult[i]);
     }
   });
 
