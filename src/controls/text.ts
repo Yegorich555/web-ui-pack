@@ -474,7 +474,6 @@ export default class WUPTextControl<
       // ++mr.leftLength;
       // mr.isCompleted = false; // WARN: user can not remove > 1 sep
     }
-    console.warn({ isRemovedSep, prev: el._prev, v, mrText: mr.text });
 
     const setMaskHolder = (str: string, leftLength: number): void => {
       if (!maskholder) {

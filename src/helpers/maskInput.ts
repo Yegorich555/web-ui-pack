@@ -14,6 +14,61 @@ interface IMaskInputResult {
   leftLength: number;
 }
 
+interface IDigChunk {
+  text: string;
+  isDigit: true;
+  min: number;
+  max: number;
+  isCompleted?: boolean;
+}
+
+interface ISymChunk {
+  text: string;
+  isDigit?: false;
+}
+
+type IInputChunk = IDigChunk | ISymChunk;
+
+function parsePattern(pattern: string): IInputChunk[] {
+  const chunks: IInputChunk[] = [];
+  let lastChunk: IInputChunk | null = null;
+  const setToChunk = (char: string, isDigit: boolean | undefined): IInputChunk => {
+    if (!lastChunk || lastChunk.isDigit !== isDigit) {
+      lastChunk = { text: char } as IDigChunk;
+      if (isDigit) {
+        lastChunk.isDigit = true;
+        lastChunk.max = 0;
+        lastChunk.min = 0;
+      }
+      chunks.push(lastChunk);
+    } else {
+      lastChunk.text += char;
+    }
+    return lastChunk;
+  };
+
+  // 1st step: define pattern chunks
+  for (let i = 0; i < pattern.length; ++i) {
+    const p = pattern[i];
+    switch (p) {
+      case "0":
+        ++(setToChunk(p, true) as IDigChunk).max;
+        ++(lastChunk! as IDigChunk).min;
+        break;
+      case "#":
+        ++(setToChunk(p, true) as IDigChunk).max;
+        break;
+      default:
+        setToChunk(p, undefined);
+        break;
+    }
+  }
+
+  return chunks;
+}
+
+// let memo: Record<string, IMaskInputChunk[]> = {};
+
 /**
  * Format string accoring to pattern
  * @param value string that must be processed
@@ -25,138 +80,85 @@ export default function maskInput(value: string, pattern: string, options?: IMas
   options.prediction = options.prediction ?? true;
   options.lazy = options.lazy ?? true;
 
-  const r: IMaskInputResult = {
-    text: value,
-    isCompleted: false,
-    leftLength: pattern.length,
-  };
+  // let pchunks = memo[pattern];
+  // if (pchunks === undefined) {
+  //   pchunks = parsePattern(pattern);
+  //   memo = { pattern: pchunks }; // store only last pattern
+  // }
+  const chunks = parsePattern(pattern);
 
   if (!value) {
-    const i = pattern.search(/[#0]/);
-    r.text = i > 0 ? pattern.substring(0, i) : ""; // returns prefix if possible //todo need also for suffix when prefix not defined ???
-    r.leftLength = pattern.length - r.text.length;
-    return r;
+    const $1 = chunks[0];
+    const text = $1.isDigit ? "" : $1.text; // returns prefix if possible //WARN: what about suffix when prefix not defined ???
+    return {
+      isCompleted: false,
+      text,
+      leftLength: pattern.length - text.length,
+    };
   }
 
-  const charIsNumber = (str: string, i: number): boolean => {
-    if (!str) {
-      return false;
-    }
-    const ascii = str.charCodeAt(i);
-    return ascii > 47 && ascii < 58;
-  };
-
-  /** Returns last index of digital value; required to extract suffix */
-  const lastDigIndex = (): number => {
-    for (let i = pattern.length - 1; i >= 0; --i) {
-      const p = pattern[i];
-      if (p === "#" || p === "0") {
-        return i;
-      }
-    }
-    return -1; // case possible only if missed '#' and '0' in pattern
-  };
-
-  const s: string[] = [];
-  const regSep = /[., _+-/\\]/;
-  let cntOptional = 0; // count of optionalNumbers
-  let cntDig = 0; // count of required digits in one chunk
-  let isNewChunk = true;
-
-  const addChunk = (char: string): void => {
-    // eslint-disable-next-line no-multi-assign
-    cntOptional = cntDig = 0;
-    s.push(char); // for lazy mode
-    isNewChunk = true;
-  };
-
-  // appendToLastChunk
-  const append = (char: string): void => {
-    if (isNewChunk) {
-      s.push(char);
-      isNewChunk = false;
-    } else {
-      s[s.length - 1] += char;
-    }
-  };
-
-  const joinToResult = (): IMaskInputResult => {
-    if (cntDig) {
-      const fillDig = isNewChunk ? 0 : s[s.length - 1].length;
-      r.leftLength += cntDig - fillDig; // if latest chunk contains nums >>> adjust according to optional nums
-    }
-    r.text = s.join("");
-    return r;
-  };
-
-  const ln = Math.max(value.length, pattern.length);
-  for (let vi = 0, pi = 0; vi < ln; ++vi, ++pi) {
-    let p = pattern[pi];
-    if (p === undefined) {
-      break;
-    }
-    const c = value[vi];
-    switch (p) {
-      case "0":
-        if (charIsNumber(value, vi)) {
-          append(c);
-        } else if (cntOptional) {
-          --cntOptional;
-          --vi;
-        } else if (options.lazy && regSep.test(c)) {
-          const last = s[s.length - 1];
-          if (charIsNumber(last, 0)) {
-            s[s.length - 1] = `0${last}`; // prepend '0' only if user typed number before '1234--' >>> '1234-', '1234-1-' >>> '1234-01-'
-            --vi;
-          } else {
-            return joinToResult();
+  let pi = 0;
+  for (let i = 0; pi < chunks.length && i < value.length; ++pi) {
+    const chunk = chunks[pi];
+    if (chunk.isDigit) {
+      chunk.text = "";
+      for (let ci = 0; ci < chunk.max && i < value.length; ++ci, ++i) {
+        const ascii = value.charCodeAt(i);
+        const isNum = ascii > 47 && ascii < 58;
+        if (isNum) {
+          chunk.text += String.fromCharCode(ascii);
+          chunk.isCompleted = chunk.text.length >= chunk.min;
+        } else if (chunk.isCompleted && chunks[pi + 1]?.text.charCodeAt(0) === ascii) {
+          break; // skip chunk if length fits min
+        } else if (options.lazy && /[., _+-/\\]/.test(String.fromCharCode(ascii)) && ci) {
+          const cnt = chunk.min - ci;
+          if (cnt > 0) {
+            chunk.text = "0".repeat(chunk.min - ci) + chunk.text; // add zero before in lazy mode
           }
-        } else {
-          return joinToResult();
-        }
-        ++cntDig;
-        break;
-      case "#":
-        ++cntDig;
-        if (charIsNumber(value, vi)) {
-          append(c);
-          ++cntOptional;
-        } else {
-          --vi;
-        }
-        break;
-      case c:
-        addChunk(c);
-        break;
-      case "\0": // for char '0'
-        p = "0";
-      // eslint-disable-next-line no-fallthrough
-      case "\x01": // '\1' for char '#'
-        p = "#";
-        if (p === c) {
-          addChunk(p);
+          chunk.isCompleted = true;
+          // ++i;
           break;
-        }
-      // any not digit char
-      // eslint-disable-next-line no-fallthrough
-      default: {
-        const isNum = charIsNumber(value, vi);
-        if (isNum || regSep.test(c)) {
-          addChunk(p);
-          isNum && --vi; // allow 1234 convert to 123-4 for '000-0'
-        } else if (options.prediction && !c && (cntDig <= s[s.length - 1].length || pi > lastDigIndex())) {
-          // for '##0.#0' >>> '1' to '1' (without .)
-          // for '$ ###0 USD' >>> '$ 5' to '$ 5 USD'
-          addChunk(p);
         } else {
-          // last chars are removed because doesn't fit pattern
-          return joinToResult();
+          --ci; // : otherwise skip this char
         }
       }
+    } else {
+      for (let ci = 0; ci < chunk.text.length && i < value.length; ++ci) {
+        if (chunk.text[ci] === value[i] || /[., _+-/\\]/.test(value[i])) {
+          ++i;
+        }
+      }
+      // i += chunk.text.length; // analyze of chars doesn't required since it's not changable
     }
-    --r.leftLength;
   }
 
-  r.isCompleted = true;
-  return joinToResult();
+  if (options.prediction && pi !== chunks.length) {
+    const last = chunks[pi - 1];
+    if (last.isDigit && last.max === last.text.length) {
+      ++pi; // append suffix if prev digitChunk is filled completely
+    }
+  }
+
+  // append suffix at the end if all chunks are completed & only lacks suffix
+  if (pi === chunks.length - 1 && (chunks[pi - 1] as IDigChunk).isCompleted) {
+    ++pi;
+  }
+
+  // find leftLength for maskholder
+  const last = chunks[pi - 1];
+  let leftLength = last.isDigit ? last.max - last.text.length : 0; // if last proccess chunk is digit than need to call diff actual and max
+  for (let i = pi; i < chunks.length; ++i) {
+    leftLength += chunks[i].text.length;
+  }
+
+  const r: IMaskInputResult = {
+    text: chunks.reduce((str, c, i) => (i < pi ? str + c.text : str), ""),
+    isCompleted: pi >= chunks.length && chunks.every((c) => !c.isDigit || c.text.length >= c.min),
+    leftLength,
+  };
+
+  return r;
 }
+
+console.warn(maskInput("123.4.5.", "##0.##0.##0.##0"));
+console.warn(maskInput("123.4.5", "##0.##0.##0.##0"));

@@ -9,6 +9,9 @@ import * as h from "../testHelper";
 let el;
 beforeEach(async () => {
   jest.useFakeTimers();
+  let lastUniqueNum = 0;
+  jest.spyOn(WUPTextControl, "$uniqueId", "get").mockImplementation(() => `txt${++lastUniqueNum}`);
+
   Element.prototype.scrollIntoView = jest.fn();
   el = document.body.appendChild(document.createElement("wup-text"));
   await h.wait(1); // wait for ready
@@ -16,6 +19,7 @@ beforeEach(async () => {
 
 afterEach(() => {
   document.body.innerHTML = "";
+  jest.restoreAllMocks();
 });
 
 describe("control.text: mask", () => {
@@ -34,13 +38,12 @@ describe("control.text: mask", () => {
     expect(proc("1234-56-789")).toBe("1234-56-78");
     expect(proc("2000-01-01")).toBe("2000-01-01");
     expect(proc("0000-00-00")).toBe("0000-00-00");
-
     expect(proc("1234-W")).toBe("1234-");
-    expect(proc("1absd234-56-78")).toBe("1");
+    expect(proc("1absd234-56-78")).toBe("1234-56-78");
 
     expect(proc("1234")).toBe("1234-");
     expect(proc("1234", { prediction: false })).toBe("1234");
-    expect(proc("1234w")).toBe("1234");
+    expect(proc("1234w")).toBe("1234-");
     expect(proc("1234 ")).toBe("1234-");
     expect(proc("1234-")).toBe("1234-");
     expect(proc("1234--")).toBe("1234-");
@@ -60,7 +63,7 @@ describe("control.text: mask", () => {
     el.focus();
     await h.wait(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<label for="wup1"><span><span aria-hidden="true" maskholder=""><i></i>yyyy-mm-dd</span><input placeholder=" " type="text" id="wup1" autocomplete="off"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
+      `"<label for="txt1"><span><span aria-hidden="true" maskholder=""><i></i>yyyy-mm-dd</span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
     );
 
     const typeText = [
@@ -131,11 +134,11 @@ describe("control.text: mask", () => {
     expect(proc("2000/1/2")).toBe("2000/1/2");
 
     expect(proc("1234/W")).toBe("1234/");
-    expect(proc("1absd234/56/78")).toBe("1");
+    expect(proc("1absd234/56/78")).toBe("1234/56/78"); // todo in such case input sets wrong cursorPos
 
     expect(proc("1234")).toBe("1234/");
     expect(proc("1234", { prediction: false })).toBe("1234");
-    expect(proc("1234w")).toBe("1234");
+    expect(proc("1234w")).toBe("1234/");
     expect(proc("1234 ")).toBe("1234/");
     expect(proc("1234/")).toBe("1234/");
     expect(proc("1234//")).toBe("1234/");
@@ -155,7 +158,7 @@ describe("control.text: mask", () => {
     el.focus();
     await h.wait(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<label for="wup2"><span><span aria-hidden="true" maskholder=""><i></i>yyyy/mm/dd</span><input placeholder=" " type="text" id="wup2" autocomplete="off"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
+      `"<label for="txt1"><span><span aria-hidden="true" maskholder=""><i></i>yyyy/mm/dd</span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
     );
 
     const typeText = [
@@ -251,7 +254,7 @@ describe("control.text: mask", () => {
     el.focus();
     await h.wait(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<label for="wup4"><span><span aria-hidden="true" maskholder=""><i></i>xxx.xxx.xxx.xxx</span><input placeholder=" " type="text" id="wup4" autocomplete="off"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
+      `"<label for="txt1"><span><span aria-hidden="true" maskholder=""><i></i>xxx.xxx.xxx.xxx</span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
     );
 
     const typeText = [
@@ -283,7 +286,7 @@ describe("control.text: mask", () => {
     expect(el.$refInput.value).toBe("123.4.5.6");
     const removeResult = [
       "123.4.5.", //
-      "123.4.",
+      "123.4.", // todo it's wrong on the input side
       "123.",
       "12",
       "1",
