@@ -286,7 +286,7 @@ describe("control.text: mask", () => {
     expect(el.$refInput.value).toBe("123.4.5.6");
     const removeResult = [
       "123.4.5.", //
-      "123.4.", // todo it's wrong on the input side
+      "123.4.",
       "123.",
       "12",
       "1",
@@ -349,7 +349,5 @@ describe("control.text: mask", () => {
 
   // todo test with \1 \0
 
-  // todo test("### ### ### ### ##0.## - currency with delimiters", () => {
-  // need to define maskForCurrency with local-decimal-delimiter
-  // })
+  // WARN. for currency need to use completely another behavior: see NumberControl
 });

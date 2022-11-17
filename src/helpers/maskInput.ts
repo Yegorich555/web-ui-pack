@@ -160,8 +160,8 @@ export default function maskInput(value: string, pattern: string, options?: IMas
   const r: IMaskInputResult = {
     text: chunks.reduce((str, c, i) => (i < pi ? str + c.text : str), ""),
     isCompleted:
-      (pi >= chunks.length && !chunks[pi - 1].isDigit) ||
-      chunks[pi - 1].text.length >= (chunks[pi - 1] as IDigChunk).min,
+      pi >= chunks.length &&
+      (!chunks[pi - 1].isDigit || chunks[pi - 1].text.length >= (chunks[pi - 1] as IDigChunk).min),
     leftLength,
     chunks,
     lastChunkIndex: pi - 1,
@@ -170,5 +170,5 @@ export default function maskInput(value: string, pattern: string, options?: IMas
   return r;
 }
 
-// console.warn(maskInput("123.4.5.", "##0.##0.##0.##0"));
+// console.warn(maskInput("1234/5", "0000/#0/#0"));
 // console.warn(maskInput("123.4.5", "##0.##0.##0.##0"));
