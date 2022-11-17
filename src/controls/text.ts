@@ -297,12 +297,14 @@ export default class WUPTextControl<
         (v === undefined || v.length > setV) && `Max length is ${setV} character${setV === 1 ? "" : "s"}`,
       email: (v, setV) => setV && (!v || !emailReg.test(v)) && "Invalid email address",
       _invalidParse: (v) => v === undefined && "Invalid value",
-      mask: (v, setV, c) =>
-        setV &&
-        v !== undefined &&
-        !!(c as WUPTextControl)._opts.mask &&
-        !maskInput(v, (c as WUPTextControl)._opts.mask!).isCompleted &&
-        "Incomplete value",
+      mask: (v, setV, c) => {
+        if (setV && v !== undefined && !!(c as WUPTextControl)._opts.mask) {
+          const m = maskInput(v, (c as WUPTextControl)._opts.mask!);
+          const pref = !m.chunks[0].isDigit ? m.chunks[0].text : "";
+          return !m.isCompleted && v !== pref && "Incomplete value";
+        }
+        return false;
+      },
     },
   };
 
@@ -381,7 +383,6 @@ export default class WUPTextControl<
     if (!this.$refInput.readOnly) {
       if (!this.$refInput.value) {
         if (this._opts.mask) {
-          // todo for phoneNumber +1... it's produces IncompleteValue message on focus when no value yet
           this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true, data: "To apply mask before start" })); // apply prefix/suffix from mask
         }
       } else {

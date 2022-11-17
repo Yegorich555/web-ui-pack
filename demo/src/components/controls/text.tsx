@@ -98,7 +98,6 @@ export default function TextControlView() {
             }
           }}
         />
-        {/* todo fix maskHolder spaces */}
         <wup-text name="ipaddr" label="IPaddress (with mask)" mask="##0.##0.##0.##0" maskholder="xxx.xxx.xxx.xxx" />
         <button type="submit">Submit</button>
       </wup-form>
