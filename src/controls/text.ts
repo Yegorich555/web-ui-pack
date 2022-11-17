@@ -1,4 +1,4 @@
-import maskInput from "../helpers/maskInput";
+import maskInput, { IMaskInputOptions } from "../helpers/maskInput";
 import { onEvent } from "../indexHelpers";
 import { WUPcssIcon } from "../styles";
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
@@ -453,26 +453,37 @@ export default class WUPTextControl<
   }
 
   /** Called to apply mask-behavior (on "input" event) */
-  protected maskInputProcess(mask: string, maskholder?: string): string {
-    const el = this.$refInput as HTMLInputElement & { _prev?: string };
-    const v = el.value;
+  protected maskInputProcess(
+    mask: string,
+    maskholder?: string,
+    options: IMaskInputOptions = { lazy: true, prediction: true }
+  ): string {
+    const el = this.$refInput as HTMLInputElement & { _prev: string };
+    let v = el.value;
 
     if (!v && !this.$isFocused) {
       el.value = v;
       return v; // ignore mask prefix+suffix if user isn't touched input
     }
-    let mr = maskInput(v, mask);
+    let mr = maskInput(v, mask, options);
 
-    const isRemovedSep = mr.text === el._prev && el._prev.length > v.length;
+    // todo when user appends values in the middle need some shift logic according with chunks
+    // todo need handle it on keyDown otherwise impossible to detect whether it was Delete or Backspace
+    const isRemovedSep = mr.text === el._prev && v.length < el._prev.length;
     if (isRemovedSep) {
-      // case when 1234- for pattern 0000-0 and user tries to remove last number; prediction adds removed separator again
-      mr = maskInput(mr.text.substring(0, mr.text.length - 2), mask); // allow user to remove digit with separator
-      // todo it doesn't work with several seps at once
-      // todo it doesn't work with optional digs
-      // it's case when need to allow user remove separator
-      // mr.text = mr.text.substring(0, mr.text.length - 1);
-      // ++mr.leftLength;
-      // mr.isCompleted = false; // WARN: user can not remove > 1 sep
+      // case when 1234-- for pattern 0000-- and user tries to remove last number; prediction adds removed separator again
+      let i = el.selectionStart!;
+      const removeChunk = mr.chunks.find((c) => {
+        i -= c.text.length;
+        return i < 0;
+      })!;
+
+      i = el.selectionStart! - removeChunk.text.length;
+      const next = v.substring(0, i) + v.substring(el.selectionStart!);
+      v = next;
+      el.selectionStart = i;
+      el.selectionEnd = i;
+      mr = maskInput(v, mask, options);
     }
 
     const setMaskHolder = (str: string, leftLength: number): void => {
@@ -525,6 +536,7 @@ export default class WUPTextControl<
   /** Called to update value for <input/> */
   protected setInputValue(v: ValueType | undefined): void {
     const str = v != null ? (v as any).toString() : "";
+    (this.$refInput as any)._prev = str;
     this.$refInput.value = str;
     this._opts.mask && this.maskInputProcess(this._opts.mask, this._opts.maskholder);
   }

@@ -1,4 +1,4 @@
-interface IMaskInputOptions {
+export interface IMaskInputOptions {
   /** Add next constant-symbol to allow user don't worry about non-digit values @default true */
   prediction?: boolean;
   /** Add missed zero: for pattern '0000-00' and string '1 ' result will be "0001-" @default true   */
@@ -12,6 +12,10 @@ interface IMaskInputResult {
   isCompleted: boolean;
   /** Returns count chars of pattern that missed in value (used to maskHolder) */
   leftLength: number;
+  /** Pattern splits into chunks. With detailed info about process */
+  chunks: IInputChunk[];
+  /** Returns index of lastChunk that processed */
+  lastChunkIndex: number;
 }
 
 interface IDigChunk {
@@ -94,6 +98,8 @@ export default function maskInput(value: string, pattern: string, options?: IMas
       isCompleted: false,
       text,
       leftLength: pattern.length - text.length,
+      chunks,
+      lastChunkIndex: 0,
     };
   }
 
@@ -153,12 +159,16 @@ export default function maskInput(value: string, pattern: string, options?: IMas
 
   const r: IMaskInputResult = {
     text: chunks.reduce((str, c, i) => (i < pi ? str + c.text : str), ""),
-    isCompleted: pi >= chunks.length && chunks.every((c) => !c.isDigit || c.text.length >= c.min),
+    isCompleted:
+      (pi >= chunks.length && !chunks[pi - 1].isDigit) ||
+      chunks[pi - 1].text.length >= (chunks[pi - 1] as IDigChunk).min,
     leftLength,
+    chunks,
+    lastChunkIndex: pi - 1,
   };
 
   return r;
 }
 
-console.warn(maskInput("123.4.5.", "##0.##0.##0.##0"));
-console.warn(maskInput("123.4.5", "##0.##0.##0.##0"));
+// console.warn(maskInput("123.4.5.", "##0.##0.##0.##0"));
+// console.warn(maskInput("123.4.5", "##0.##0.##0.##0"));
