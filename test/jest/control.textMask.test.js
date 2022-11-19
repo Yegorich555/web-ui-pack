@@ -15,6 +15,7 @@ beforeEach(async () => {
   Element.prototype.scrollIntoView = jest.fn();
   el = document.body.appendChild(document.createElement("wup-text"));
   await h.wait(1); // wait for ready
+  el.$refInput.focus();
 });
 
 afterEach(() => {

@@ -392,30 +392,60 @@ export async function userTypeText(el: HTMLInputElement, text: string, opts = { 
   }
 }
 
-/** Simulate user removes text via backspace: focus + keydown+ keyup + keypress + input events */
-export async function userRemove(el: HTMLInputElement, removeCount: number, opts = { fromEnd: false }) {
+/** Get cursor of input according in pattern "abc|def" where '|' - cursor position */
+export function getInputCursor(el: HTMLInputElement) {
+  const v = el.value;
+  if (el.selectionStart == null || el.selectionEnd == null) {
+    return v;
+  }
+  const p1 = v.substring(0, el.selectionStart);
+  const p2 = v.substring(el.selectionStart, el.selectionEnd);
+  const p3 = v.substring(el.selectionEnd);
+  return `${p1}|${p2 ? `${p2}|` : ""}${p3}`;
+}
+
+/** Set cursor & check value to input according to pattern "abc|def" where '|' - cursor position */
+export function setInputCursor(el: HTMLInputElement, cursorPattern: string) {
+  const gotValue = cursorPattern.replace(/[|]/g, "");
+  expect(el.value).toBe(gotValue);
+  el.selectionStart = cursorPattern.indexOf("|");
+  el.selectionEnd = cursorPattern.lastIndexOf("|");
+}
+
+/** Simulates user removes text via backspace: focus + keydown+ keyup + keypress + input events;
+ * Returns cursor snapshot (getInputCursor) */
+export async function userRemove(
+  el: HTMLInputElement,
+  opts?: { removeCount: number; key: "Backspace" | "Delete" }
+): Promise<string> {
   jest.useFakeTimers();
   el.focus();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  opts = { removeCount: 1, key: "Backspace", ...opts };
+  const { key } = opts;
 
-  const key = "Backspace";
-  if (opts.fromEnd) {
-    el.selectionStart = el.value.length;
-    el.selectionEnd = el.value.length;
-  }
-  let carretPos = (el.selectionStart || 0) - 1; // position of carret
-  for (let i = 0; i < removeCount && carretPos >= 0; ++i, --carretPos) {
+  for (let i = 0; i < opts.removeCount; ++i) {
     el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
-    el.dispatchEvent(new KeyboardEvent("keyup", { key, bubbles: true }));
-    el.dispatchEvent(new KeyboardEvent("keypress", { key, bubbles: true }));
-    const v = el.value;
-    el.value = v.substring(0, carretPos) + v.substring(carretPos + 1);
-    el.selectionEnd = carretPos;
-    el.selectionStart = carretPos;
-    el.dispatchEvent(new InputEvent("input", { bubbles: true }));
-
+    // keypress not fired on not-char keys
+    // el.dispatchEvent(new KeyboardEvent("keypress", { key, bubbles: true }));
+    let v = el.value;
+    let carretPos = el.selectionStart ?? v.length;
+    if (key === "Backspace" && carretPos > 0) {
+      --carretPos;
+    }
+    v = v.substring(0, carretPos) + v.substring(carretPos + 1);
+    if (el.value !== v) {
+      el.value = v;
+      el.selectionEnd = carretPos;
+      el.selectionStart = carretPos;
+      el.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    }
     jest.advanceTimersByTime(20);
     await Promise.resolve();
   }
+  el.dispatchEvent(new KeyboardEvent("keyup", { key, bubbles: true }));
+
+  return getInputCursor(el);
 }
 
 /** Simulate user mouse click with 100ms between mouseDown and mouseUp */
