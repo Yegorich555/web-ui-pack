@@ -426,12 +426,60 @@ export default class WUPTextControl<
     setTimeout(() => !this.$value && this.setInputValue(undefined)); // wait for timeout (wait for applying of inherrited) to set maskholder
   }
 
+  protected override gotKeyDown(e: KeyboardEvent): void {
+    super.gotKeyDown(e);
+    if (!this._opts.mask) {
+      return;
+    }
+
+    // todo it's required only if 'prediction: true'
+    // when user press Delete and user removed not digit chunk need to remove the whole chunk + 1 num
+    const isBackDel = e.key === "Backspace";
+    if (!isBackDel && e.key !== "Delete") {
+      return;
+    }
+    const el = this.$refInput;
+    if (el.selectionEnd !== el.selectionStart) {
+      return; // skip action if several chars are selected
+    }
+    const v = el.value;
+    const removeIndex = (isBackDel ? 0 : 1) + el.selectionStart! - 1; // char that will be removed
+    if (removeIndex >= v.length || removeIndex < 0) {
+      return; // nothing to remove
+    }
+
+    // case when 1234-- for pattern 0000-- and user tries to remove last number; prediction adds removed separator again
+    let i = removeIndex;
+    const mr = maskInput(v, this._opts.mask); // todo how to reuse options from maskInputProcess
+    console.warn(mr);
+    const removeChunkInd = mr.chunks.findIndex((c) => {
+      i -= c.text.length;
+      return i < 0;
+    })!;
+    const removeChunk = mr.chunks[removeChunkInd];
+    if (removeChunk.isDigit) {
+      // todo when user removes required digits it's replaced by zeros but need to shift other digits from chunks
+      return; // digits are removed by default
+    }
+    // todo need to prevent removing prefix !!!
+    // todo if remove first chars than selection goes to the end: '.323.232.323'
+    // todo if add digits in the middle need to shift other digits if chunk is overflow
+    // todo when user press wrong sym in the middle cursor goes to next
+    i = isBackDel ? removeIndex - removeChunk.text.length + 1 : removeIndex;
+    // todo user can't delete in case "##0|.##" with key Delete
+    const next = v.substring(0, i) + v.substring(el.selectionStart!);
+    el.selectionStart = i;
+    el.selectionEnd = i;
+    el.value = next;
+    console.warn(next, i);
+  }
+
   #inputTimer?: number;
   /** Called when user types text OR when need to apply/reset mask (on focusGot, focusLost) */
   protected gotInput(e: WUPText.InputEvent): void {
     let txt = e.currentTarget.value;
+    console.warn("got input", txt);
     txt = this._opts.mask ? this.maskInputProcess(this._opts.mask, this._opts.maskholder) : txt;
-
     const outRef: { showError?: boolean } = {};
     const v = this.parseValue(txt, outRef);
     if (outRef.showError) {
@@ -460,32 +508,13 @@ export default class WUPTextControl<
     options: IMaskInputOptions = { lazy: true, prediction: true }
   ): string {
     const el = this.$refInput as HTMLInputElement & { _prev: string };
-    let v = el.value;
+    const v = el.value;
 
     if (!v && !this.$isFocused) {
       el.value = v;
-      return v; // ignore mask prefix+suffix if user isn't touched input
+      return v; // ignore mask prefix+suffix if user isn't touched input - possible on autofill
     }
-    let mr = maskInput(v, mask, options);
-
-    // todo when user appends values in the middle need some shift logic according with chunks
-    // todo need handle it on keyDown otherwise impossible to detect whether it was Delete or Backspace
-    const isRemovedSep = mr.text === el._prev && v.length < el._prev.length;
-    if (isRemovedSep) {
-      // case when 1234-- for pattern 0000-- and user tries to remove last number; prediction adds removed separator again
-      let i = el.selectionStart!;
-      const removeChunk = mr.chunks.find((c) => {
-        i -= c.text.length;
-        return i < 0;
-      })!;
-
-      i = el.selectionStart! - removeChunk.text.length;
-      const next = v.substring(0, i) + v.substring(el.selectionStart!);
-      v = next;
-      el.selectionStart = i;
-      el.selectionEnd = i;
-      mr = maskInput(v, mask, options);
-    }
+    const mr = maskInput(v, mask, options);
 
     const setMaskHolder = (str: string, leftLength: number): void => {
       if (!maskholder) {
@@ -547,11 +576,17 @@ customElements.define(tagName, WUPTextControl);
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
 
-/** todo complex cases
- *  For prediction mode need to implement prediction delete: if user removed separator need to remove 1 dig
- *
- * '+1(000) 000' | '+1(234) ' + Backspace: '+1(234) ' vs '+1(23' // also similar case with Delete button
- * '##0.##0' | '1.' + Backspace: '1' vs '' // removed separator but need to remove
- *  if user past values in the middle we need shift it between chunks
- *  if user past wrong symb in the middle we heed shift and hide
- */
+// (() => {
+//   const div = document.body.appendChild(document.createElement("div"));
+//   div.style.position = "fixed";
+//   div.style.fontSize = "120px";
+//   div.style.width = "100vw";
+//   div.style.top = "50vh";
+//   div.style.left = "0";
+//   div.style.textAlign = "center";
+//   div.style.background = "white";
+//   div.textContent = "-3";
+//   setInterval(() => {
+//     div.textContent = ++div.textContent;
+//   }, 1000);
+// })();
