@@ -1,4 +1,4 @@
-import maskInput, { IMaskInputOptions } from "../helpers/maskInput";
+import maskInput from "../helpers/maskInput";
 import { onEvent } from "../indexHelpers";
 import { WUPcssIcon } from "../styles";
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
@@ -18,6 +18,10 @@ export namespace WUPTextIn {
     /** Show/hide clear button. @see ClearActions
      * @defaultValue true */
     clearButton: boolean;
+    /** Prediction mode means: when user types '1234' it returns '1234-' for mask '0000-00-00' (separators are added automatically);
+     * When user tries to remove separator then related digit are removed with ones;
+     * @defaultValue true */
+    maskPrediction: boolean; // todo test when it false
   }
 
   export interface Opt {
@@ -288,6 +292,7 @@ export default class WUPTextControl<
     ...WUPBaseControl.$defaults,
     selectOnFocus: true,
     clearButton: true,
+    maskPrediction: true,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
       min: (v, setV) =>
@@ -427,11 +432,10 @@ export default class WUPTextControl<
 
   protected override gotKeyDown(e: KeyboardEvent): void {
     super.gotKeyDown(e);
-    if (!this._opts.mask) {
+    if (!this._opts.mask || !this._opts.maskPrediction) {
       return;
     }
 
-    // todo it's required only if 'prediction: true'
     // when user press Delete and user removed not digit chunk need to remove the whole chunk + 1 num
     const isBackDel = e.key === "Backspace";
     if (!isBackDel && e.key !== "Delete") {
@@ -449,7 +453,7 @@ export default class WUPTextControl<
 
     // case when 1234-- for pattern 0000-- and user tries to remove last number; prediction adds removed separator again
     let i = removeIndex;
-    const mr = maskInput(v, this._opts.mask); // todo how to reuse options from maskInputProcess
+    const mr = maskInput(v, this._opts.mask);
     // console.warn(mr);
     const removeChunkInd = mr.chunks.findIndex((c) => {
       i -= c.text.length;
@@ -499,11 +503,7 @@ export default class WUPTextControl<
   }
 
   /** Called to apply mask-behavior (on "input" event) */
-  protected maskInputProcess(
-    mask: string,
-    maskholder?: string,
-    options: IMaskInputOptions = { lazy: true, prediction: true }
-  ): string {
+  protected maskInputProcess(mask: string, maskholder?: string): string {
     const el = this.$refInput;
     const v = el.value;
 
@@ -511,7 +511,7 @@ export default class WUPTextControl<
       el.value = v;
       return v; // ignore mask prefix+suffix if user isn't touched input - possible on autofill
     }
-    const mr = maskInput(v, mask, options);
+    const mr = maskInput(v, mask, { prediction: true });
 
     const setMaskHolder = (str: string, leftLength: number): void => {
       if (!maskholder) {
