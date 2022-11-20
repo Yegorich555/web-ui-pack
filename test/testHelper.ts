@@ -369,14 +369,14 @@ export async function userTypeText(el: HTMLInputElement, text: string, opts = { 
     el.value = "";
   }
 
-  let carretPos = el.selectionStart || el.value.length;
+  let carretPos = el.selectionStart ?? el.value.length;
   for (let i = 0; i < text.length; ++i) {
     const key = text[i];
     el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
     el.dispatchEvent(new KeyboardEvent("keyup", { key, bubbles: true }));
     el.dispatchEvent(new KeyboardEvent("keypress", { key, bubbles: true }));
     const v = el.value;
-    el.value = v.substring(0, carretPos) + key + v.substring(carretPos + 1);
+    el.value = v.substring(0, carretPos) + key + v.substring(carretPos);
     el.selectionStart = ++carretPos;
     el.selectionEnd = el.selectionStart;
     el.dispatchEvent(new InputEvent("input", { bubbles: true }));

@@ -135,7 +135,7 @@ describe("control.text: mask", () => {
     expect(proc("2000/1/2")).toBe("2000/1/2");
 
     expect(proc("1234/W")).toBe("1234/");
-    expect(proc("1absd234/56/78")).toBe("1234/56/78"); // todo in such case input sets wrong cursorPos
+    expect(proc("1absd234/56/78")).toBe("1234/56/78");
 
     expect(proc("1234")).toBe("1234/");
     expect(proc("1234", { prediction: false })).toBe("1234");
@@ -187,6 +187,21 @@ describe("control.text: mask", () => {
       expect(el.$refInput.selectionStart).toBe(el.$refInput.value.length);
       expect(el.$refInput.selectionEnd).toBe(el.$refInput.selectionStart);
     }
+
+    // append wrong chars when cursor in the middle
+    el.$refInput.value = "1234/56/78";
+    h.setInputCursor(el.$refInput, "1|234/56/78");
+    await h.userTypeText(el.$refInput, "ab", { clearPrevious: false });
+    expect(h.getInputCursor(el.$refInput)).toBe("1ab|234/56/78");
+    await h.wait(150); // when user types invalid char it shows and hides after a time
+    expect(h.getInputCursor(el.$refInput)).toBe("1|234/56/78");
+
+    el.$refInput.value = "123";
+    h.setInputCursor(el.$refInput, "|123");
+    await h.userTypeText(el.$refInput, "ab", { clearPrevious: false });
+    expect(h.getInputCursor(el.$refInput)).toBe("ab|123");
+    await h.wait(150); // when user types invalid char it shows and hides after a time
+    expect(h.getInputCursor(el.$refInput)).toBe("|123");
 
     expect(maskInput("1234/05/06", mask).isCompleted).toBe(true);
     expect(maskInput("1234/5/6", mask).isCompleted).toBe(true);

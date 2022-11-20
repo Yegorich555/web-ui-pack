@@ -28,7 +28,6 @@ export namespace WUPTextIn {
      * "+1(000) 000-0000" // phoneNumber
      * `0` // required digit
      * '#' // optional digit
-     * //todo details about currency
      */
     mask?: string;
     /** Replace missed masked values with placeholder; for date maskholder the same as format 'yyyy-mm-dd' */
@@ -451,7 +450,7 @@ export default class WUPTextControl<
     // case when 1234-- for pattern 0000-- and user tries to remove last number; prediction adds removed separator again
     let i = removeIndex;
     const mr = maskInput(v, this._opts.mask); // todo how to reuse options from maskInputProcess
-    console.warn(mr);
+    // console.warn(mr);
     const removeChunkInd = mr.chunks.findIndex((c) => {
       i -= c.text.length;
       return i < 0;
@@ -464,21 +463,19 @@ export default class WUPTextControl<
     // todo need to prevent removing prefix !!!
     // todo if remove first chars than selection goes to the end: '.323.232.323'
     // todo if add digits in the middle need to shift other digits if chunk is overflow
-    // todo when user press wrong sym in the middle cursor goes to next
     i = isBackDel ? removeIndex - removeChunk.text.length + 1 : removeIndex;
     // todo user can't delete in case "##0|.##" with key Delete
     const next = v.substring(0, i) + v.substring(el.selectionStart!);
     el.selectionStart = i;
     el.selectionEnd = i;
     el.value = next;
-    console.warn(next, i);
+    // console.warn(next, i);
   }
 
   #inputTimer?: number;
   /** Called when user types text OR when need to apply/reset mask (on focusGot, focusLost) */
   protected gotInput(e: WUPText.InputEvent): void {
     let txt = e.currentTarget.value;
-    console.warn("got input", txt);
     txt = this._opts.mask ? this.maskInputProcess(this._opts.mask, this._opts.maskholder) : txt;
     const outRef: { showError?: boolean } = {};
     const v = this.parseValue(txt, outRef);
@@ -507,7 +504,7 @@ export default class WUPTextControl<
     maskholder?: string,
     options: IMaskInputOptions = { lazy: true, prediction: true }
   ): string {
-    const el = this.$refInput as HTMLInputElement & { _prev: string };
+    const el = this.$refInput;
     const v = el.value;
 
     if (!v && !this.$isFocused) {
@@ -533,19 +530,19 @@ export default class WUPTextControl<
       this.$refMaskholder.lastChild!.textContent = maskholder.substring(maskholder.length - leftLength);
     };
 
+    const removedChars = Math.max(v.length - mr.text.length, 0); // chars removed after mask
+    const cursorShift = (el.selectionStart !== v.length ? el.selectionStart! : 0) - removedChars;
+
     const setV = (): void => {
-      const cursorShift = (el.selectionStart ?? 0) !== v.length ? el.selectionStart : 0;
       el.value = mr.text;
-      if (cursorShift) {
+      if (cursorShift || removedChars) {
         el.selectionStart = cursorShift;
         el.selectionEnd = cursorShift;
       }
       setMaskHolder(mr.text, mr.leftLength);
-      el._prev = el.value;
     };
 
-    const removedChars = v.length - mr.text.length;
-    if (removedChars > 0) {
+    if (removedChars) {
       setMaskHolder(v, mr.leftLength - removedChars);
       setTimeout(setV, 100); // set value after time to show user typed value before mask applied
     } else {
@@ -566,7 +563,6 @@ export default class WUPTextControl<
   /** Called to update value for <input/> */
   protected setInputValue(v: ValueType | undefined): void {
     const str = v != null ? (v as any).toString() : "";
-    (this.$refInput as any)._prev = str;
     this.$refInput.value = str;
     this._opts.mask && this.maskInputProcess(this._opts.mask, this._opts.maskholder);
   }
