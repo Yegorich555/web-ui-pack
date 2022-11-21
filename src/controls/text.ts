@@ -435,20 +435,34 @@ export default class WUPTextControl<
 
   protected override gotKeyDown(e: KeyboardEvent): void {
     super.gotKeyDown(e);
-    if (!this._opts.mask || !this._opts.maskPrediction) {
+    if (!this._opts.mask) {
       return;
     }
 
+    // todo reuse 'beforeinput' event instead
+
+    const el = this.$refInput;
+    const v = el.value;
+    const mr = maskInput(el.value, this._opts.mask);
+    const onlyPrefix = mr.lastChunkIndex === 0 && !mr.chunks[mr.lastChunkIndex].isDigit;
+    if (onlyPrefix && v.length !== el.selectionStart) {
+      // move cursor to the end if it was inside prefix-chunk: '|+1('+ symbol => '+1(|'+symbol
+      el.selectionStart = v.length;
+      el.selectionEnd = el.selectionStart;
+    }
+
+    if (!this._opts.maskPrediction) {
+      return;
+    }
     // when user press Delete and user removed not digit chunk need to remove the whole chunk + 1 num
     const isBackDel = e.key === "Backspace";
     if (!isBackDel && e.key !== "Delete") {
       return;
     }
-    const el = this.$refInput;
+
     if (el.selectionEnd !== el.selectionStart) {
       return; // skip action if several chars are selected
     }
-    const v = el.value;
     const removeIndex = (isBackDel ? 0 : 1) + el.selectionStart! - 1; // char that will be removed
     if (removeIndex >= v.length || removeIndex < 0) {
       return; // nothing to remove
@@ -456,7 +470,7 @@ export default class WUPTextControl<
 
     // case when 1234-- for pattern 0000-- and user tries to remove last number; prediction adds removed separator again
     let i = removeIndex;
-    const mr = maskInput(v, this._opts.mask);
+    // const mr = maskInput(v, this._opts.mask);
     // console.warn(mr);
     const removeChunkInd = mr.chunks.findIndex((c) => {
       i -= c.text.length;
@@ -473,7 +487,7 @@ export default class WUPTextControl<
       // todo when user removes required digits it's replaced by zeros but need to shift other digits from chunks
       return; // digits are removed by default
     }
-    // todo when 12.| + Backspace need to remove only separator ???
+    // todo when 12.| + Backspace need to remove only separator since optional number are possibble ???
 
     // todo if add digits in the middle need to shift other digits if chunk is overflow
     const nextChunk = mr.chunks[isBackDel ? removeChunkInd - 1 : removeChunkInd + 1];
@@ -485,10 +499,13 @@ export default class WUPTextControl<
       next = v.substring(0, i) + v.substring(el.selectionStart!);
     }
 
-    // console.warn({ next, i, v, mr, nextChunk }); // todo when "|+1(" and press Delete cursor goes to the end without any visible actions
+    // console.warn({ next, i, v, mr, nextChunk });
     if (!next) {
       (el as any)._showRemovedChunk = true; // to show to user removed symbol and rollback after timeout
       return; // fix case when for "+1(..." user removes prefix and there is nothing to remove by the real logic
+    }
+    if (onlyPrefix && !isBackDel) {
+      i = next.length; // when "|+1(" + press Delete - no actions, only change cursor position
     }
     el.value = next;
     el.selectionStart = i;

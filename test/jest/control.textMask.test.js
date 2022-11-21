@@ -7,6 +7,14 @@ import * as h from "../testHelper";
 
 /** @type WUPTextControl */
 let el;
+
+/** Remove char on the control and remove cursorSnapshot */
+const remove = async (opts = { key: "Backspace" }) => {
+  await h.userRemove(el.$refInput, opts);
+  await h.wait(150);
+  return h.getInputCursor(el.$refInput);
+};
+
 beforeEach(async () => {
   jest.useFakeTimers();
   let lastUniqueNum = 0;
@@ -312,11 +320,6 @@ describe("control.text: mask", () => {
       "1|",
       "|",
     ];
-    const remove = async () => {
-      await h.userRemove(el.$refInput);
-      await h.wait(150);
-      return h.getInputCursor(el.$refInput);
-    };
 
     for (let i = 0; i < removeResult.length; ++i) {
       expect(await remove()).toBe(removeResult[i]);
@@ -374,6 +377,14 @@ describe("control.text: mask", () => {
     expect(el.$refInput.value).toBe("+1(");
     expect(el.$refMaskholder.innerHTML).toBe("<i>+1(</i>000) 000-0000");
 
+    h.setInputCursor(el.$refInput, "|+1(");
+    expect(await remove({ key: "Delete" })).toBe("+1(|");
+
+    el.testMe = true;
+    h.setInputCursor(el.$refInput, "|+1(");
+    await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
+    expect(h.getInputCursor(el.$refInput)).toBe("+1(2|");
+
     // type in the middle
     h.setInputCursor(el.$refInput, "+1(234) 9|75-123");
     // type 'ab'
@@ -384,8 +395,9 @@ describe("control.text: mask", () => {
     expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 9|75-123");
     expect(el.$refMaskholder.innerHTML).toBe("<i>+1(234) 975-123</i>0");
     // type digits
+    h.setInputCursor(el.$refInput, "+1(234) 9|75-123");
     await h.userTypeText(el.$refInput, "4", { clearPrevious: false });
-    // expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 94|7-5123"); // todo implement it
+    expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 94|7-5123"); // todo implement it
   });
 
   test("$ #####0 USD", () => {
