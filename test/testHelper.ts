@@ -404,10 +404,12 @@ export function getInputCursor(el: HTMLInputElement) {
   return `${p1}|${p2 ? `${p2}|` : ""}${p3}`;
 }
 
-/** Set cursor & check value to input according to pattern "abc|def" where '|' - cursor position */
+/** Set cursor & value to input according to pattern "abc|def" where '|' - cursor position */
 export function setInputCursor(el: HTMLInputElement, cursorPattern: string) {
   const gotValue = cursorPattern.replace(/[|]/g, "");
-  expect(el.value).toBe(gotValue);
+  // expect(el.value).toBe(gotValue);
+  el.focus();
+  el.value = gotValue;
   el.selectionStart = cursorPattern.indexOf("|");
   el.selectionEnd = cursorPattern.lastIndexOf("|");
 }

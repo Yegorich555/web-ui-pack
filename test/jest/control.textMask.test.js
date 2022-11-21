@@ -189,14 +189,12 @@ describe("control.text: mask", () => {
     }
 
     // append wrong chars when cursor in the middle
-    el.$refInput.value = "1234/56/78";
     h.setInputCursor(el.$refInput, "1|234/56/78");
     await h.userTypeText(el.$refInput, "ab", { clearPrevious: false });
     expect(h.getInputCursor(el.$refInput)).toBe("1ab|234/56/78");
     await h.wait(150); // when user types invalid char it shows and hides after a time
     expect(h.getInputCursor(el.$refInput)).toBe("1|234/56/78");
 
-    el.$refInput.value = "123";
     h.setInputCursor(el.$refInput, "|123");
     await h.userTypeText(el.$refInput, "ab", { clearPrevious: false });
     expect(h.getInputCursor(el.$refInput)).toBe("ab|123");
@@ -298,21 +296,43 @@ describe("control.text: mask", () => {
       expect(el.$refInput.selectionEnd).toBe(el.$refInput.selectionStart);
     }
 
+    h.setInputCursor(el.$refInput, "1|45.789.387.");
+    await h.userTypeText(el.$refInput, ".", { clearPrevious: false });
+    await h.wait(150);
+    expect(h.getInputCursor(el.$refInput)).toBe("1.|45.789.387");
+
     // test ability to remove chars
+    h.setInputCursor(el.$refInput, "123.4.5.6|");
     expect(el.$refInput.value).toBe("123.4.5.6");
     const removeResult = [
-      "123.4.5.", //
-      "123.4.",
-      "123.",
-      "12",
-      "1",
-      "",
+      "123.4.5.|", //
+      "123.4.|",
+      "123.|",
+      "12|",
+      "1|",
+      "|",
     ];
-    for (let i = 0; i < removeResult.length; ++i) {
-      await h.userRemove(el.$refInput, 1);
+    const remove = async () => {
+      await h.userRemove(el.$refInput);
       await h.wait(150);
-      expect(el.$refInput.value).toBe(removeResult[i]);
+      return h.getInputCursor(el.$refInput);
+    };
+
+    for (let i = 0; i < removeResult.length; ++i) {
+      expect(await remove()).toBe(removeResult[i]);
     }
+    // removing digits in the middle
+    h.setInputCursor(el.$refInput, "123.|45.789.387");
+    expect(await remove()).toBe("12|.45.789.387"); // 1245.789.387 >>> 12|4.5.789.387
+    expect(await remove()).toBe("1|.45.789.387");
+    expect(await remove()).toBe("|45.789.387.");
+
+    h.setInputCursor(el.$refInput, "123.45|.789.387");
+    expect(await remove()).toBe("123.4|.789.387");
+    expect(await remove()).toBe("123.|789.387.");
+    expect(await remove()).toBe("12|.789.387.");
+    expect(await remove()).toBe("1|.789.387.");
+    expect(await remove()).toBe("|789.387.");
   });
 
   test("+1(000) 000-0000", async () => {
@@ -353,6 +373,19 @@ describe("control.text: mask", () => {
     await h.wait(150); // when user types invalid char it shows and hides after a time
     expect(el.$refInput.value).toBe("+1(");
     expect(el.$refMaskholder.innerHTML).toBe("<i>+1(</i>000) 000-0000");
+
+    // type in the middle
+    h.setInputCursor(el.$refInput, "+1(234) 9|75-123");
+    // type 'ab'
+    await h.userTypeText(el.$refInput, "ab", { clearPrevious: false });
+    expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 9ab|75-123");
+    expect(el.$refMaskholder.innerHTML).toBe("<i>+1(234) 9ab75-123</i>");
+    await h.wait(150);
+    expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 9|75-123");
+    expect(el.$refMaskholder.innerHTML).toBe("<i>+1(234) 975-123</i>0");
+    // type digits
+    await h.userTypeText(el.$refInput, "4", { clearPrevious: false });
+    // expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 94|7-5123"); // todo implement it
   });
 
   test("$ #####0 USD", () => {

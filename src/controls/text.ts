@@ -20,6 +20,8 @@ export namespace WUPTextIn {
     clearButton: boolean;
     /** Prediction mode means: when user types '1234' it returns '1234-' for mask '0000-00-00' (separators are added automatically);
      * When user tries to remove separator then related digit are removed with ones;
+     * @Troubleshooting
+     * Impossible to use with Ctrl+Z
      * @defaultValue true */
     maskPrediction: boolean; // todo test when it false
   }
@@ -36,6 +38,7 @@ export namespace WUPTextIn {
     mask?: string;
     /** Replace missed masked values with placeholder; for date maskholder the same as format 'yyyy-mm-dd' */
     maskholder?: string;
+    // todo when use mask need to change mobile-keyboard to numeric
   }
 
   export type Generics<
@@ -460,23 +463,36 @@ export default class WUPTextControl<
       return i < 0;
     })!;
     const removeChunk = mr.chunks[removeChunkInd];
+    i = isBackDel ? removeIndex - removeChunk.text.length + 1 : removeIndex;
     if (removeChunk.isDigit) {
+      // console.warn({ i });
+      // if (removeChunk.text.length === 1 && i === 0) {
+      //   el.selectionStart = i;
+      //   el.selectionEnd = i;
+      // }
       // todo when user removes required digits it's replaced by zeros but need to shift other digits from chunks
       return; // digits are removed by default
     }
-    // todo if remove first chunk: selection goes to the end: '.323.232.323'
+    // todo when 12.| + Backspace need to remove only separator ???
+
     // todo if add digits in the middle need to shift other digits if chunk is overflow
-    i = isBackDel ? removeIndex - removeChunk.text.length + 1 : removeIndex;
-    // todo user can't delete in case "##0|.##" with key Delete
-    const next = v.substring(0, i) + v.substring(el.selectionStart!);
-    console.warn({ next, i, v });
+    const nextChunk = mr.chunks[isBackDel ? removeChunkInd - 1 : removeChunkInd + 1];
+    let next: string = v;
+    if (nextChunk?.isDigit && nextChunk.text.length > nextChunk.min && removeChunk !== mr.chunks[mr.lastChunkIndex]) {
+      next = v; // remove rule: "123.|45.789.387" + Backspace >>> 12|.45.789.387 for ##0.##0.##0.##0
+    } else {
+      // todo user can't delete when "##0|.##" with Delete key
+      next = v.substring(0, i) + v.substring(el.selectionStart!);
+    }
+
+    // console.warn({ next, i, v, mr, nextChunk }); // todo when "|+1(" and press Delete cursor goes to the end without any visible actions
     if (!next) {
       (el as any)._showRemovedChunk = true; // to show to user removed symbol and rollback after timeout
       return; // fix case when for "+1(..." user removes prefix and there is nothing to remove by the real logic
     }
+    el.value = next;
     el.selectionStart = i;
     el.selectionEnd = i;
-    el.value = next;
   }
 
   #inputTimer?: number;
@@ -515,7 +531,7 @@ export default class WUPTextControl<
       return v; // ignore mask prefix/suffix if user isn't touched input; it appends only by focusGot
     }
     const mr = maskInput(v, mask, { prediction: true });
-
+    // console.warn("mask", { v, mr });
     const setMaskHolder = (str: string, leftLength: number): void => {
       if (!maskholder) {
         return;
@@ -534,15 +550,26 @@ export default class WUPTextControl<
     };
 
     const removedChars = Math.max(v.length - mr.text.length, 0); // chars removed after mask
-    const cursorShift = (el.selectionStart !== v.length ? el.selectionStart! : 0) - removedChars;
+    const cursor = el.selectionStart !== v.length ? el.selectionStart : null;
 
+    // console.warn({ cursorShift: cursor, v, removedChars, start: el.selectionStart });
     const setV = (): void => {
       el.value = mr.text;
-      if (cursorShift || removedChars) {
-        el.selectionStart = cursorShift;
-        el.selectionEnd = cursorShift;
-      }
       setMaskHolder(mr.text, mr.leftLength);
+      if (cursor != null) {
+        // rollback cursor when '+1(234) 9|75-123' + "ab" => '+1(234) 9|75-123' (exclude case: '1|45.789.387.' + "." => "1.|45.789.387")
+        let isKeepCursor = false;
+        if (removedChars) {
+          let i;
+          for (i = 0; i < v.length; ++i) if (mr.text[i] !== v[i]) break;
+          const from = i;
+          const to = from + removedChars;
+          isKeepCursor = cursor !== to;
+        }
+
+        el.selectionStart = isKeepCursor ? cursor : cursor - removedChars;
+        el.selectionEnd = el.selectionStart;
+      }
     };
 
     if (removedChars || (el as any)._showRemovedChunk) {
@@ -573,6 +600,7 @@ export default class WUPTextControl<
 }
 
 customElements.define(tagName, WUPTextControl);
+// NiceToHave: handle Ctrl+Z for mask, wup-select etc. cases
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
 
