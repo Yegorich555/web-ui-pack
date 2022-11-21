@@ -464,16 +464,19 @@ export default class WUPTextControl<
       // todo when user removes required digits it's replaced by zeros but need to shift other digits from chunks
       return; // digits are removed by default
     }
-    // todo need to prevent removing prefix !!!
-    // todo if remove first chars than selection goes to the end: '.323.232.323'
+    // todo if remove first chunk: selection goes to the end: '.323.232.323'
     // todo if add digits in the middle need to shift other digits if chunk is overflow
     i = isBackDel ? removeIndex - removeChunk.text.length + 1 : removeIndex;
     // todo user can't delete in case "##0|.##" with key Delete
     const next = v.substring(0, i) + v.substring(el.selectionStart!);
+    console.warn({ next, i, v });
+    if (!next) {
+      (el as any)._showRemovedChunk = true; // to show to user removed symbol and rollback after timeout
+      return; // fix case when for "+1(..." user removes prefix and there is nothing to remove by the real logic
+    }
     el.selectionStart = i;
     el.selectionEnd = i;
     el.value = next;
-    // console.warn(next, i);
   }
 
   #inputTimer?: number;
@@ -509,7 +512,7 @@ export default class WUPTextControl<
 
     if (!v && !this.$isFocused) {
       el.value = v;
-      return v; // ignore mask prefix+suffix if user isn't touched input - possible on autofill
+      return v; // ignore mask prefix/suffix if user isn't touched input; it appends only by focusGot
     }
     const mr = maskInput(v, mask, { prediction: true });
 
@@ -542,12 +545,13 @@ export default class WUPTextControl<
       setMaskHolder(mr.text, mr.leftLength);
     };
 
-    if (removedChars) {
-      setMaskHolder(v, mr.leftLength - removedChars);
+    if (removedChars || (el as any)._showRemovedChunk) {
+      setMaskHolder(v, mr.leftLength - removedChars + ((el as any)._showRemovedChunk ? 1 : 0));
       setTimeout(setV, 100); // set value after time to show user typed value before mask applied
     } else {
       setV();
     }
+    delete (el as any)._showRemovedChunk;
     return mr.text;
   }
 

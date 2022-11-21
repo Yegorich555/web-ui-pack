@@ -339,6 +339,20 @@ describe("control.text: mask", () => {
 
     expect(maskInput("+1(", mask).leftLength).toBe(mask.length - 3);
     expect(maskInput("", mask).leftLength).toBe(mask.length - 3);
+
+    // removing prefix: show user remove and after 100ms rollback
+    el.$options.mask = mask;
+    el.$options.maskholder = mask;
+    el.$refInput.value = "+1(";
+    el.focus();
+    await h.wait(1);
+    h.setInputCursor(el.$refInput, "+1(|");
+    await h.userRemove(el.$refInput);
+    expect(el.$refInput.value).toBe("+1");
+    expect(el.$refMaskholder.innerHTML).toBe("<i>+1</i>(000) 000-0000");
+    await h.wait(150); // when user types invalid char it shows and hides after a time
+    expect(el.$refInput.value).toBe("+1(");
+    expect(el.$refMaskholder.innerHTML).toBe("<i>+1(</i>000) 000-0000");
   });
 
   test("$ #####0 USD", () => {
