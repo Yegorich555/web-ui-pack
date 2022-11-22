@@ -82,7 +82,7 @@ declare global {
       /** @deprecated Replace missed masked values with placeholder; for date maskholder the same as format 'yyyy-mm-dd' */
       maskholder?: string;
     }
-    interface InputEvent extends Event {
+    interface GotInputEvent extends InputEvent {
       currentTarget: HTMLInputElement;
       /** Call it to prevent calling setValue by input event */
       preventSetValue: () => void;
@@ -382,9 +382,9 @@ export default class WUPTextControl<
   protected override gotFocus(): Array<() => void> {
     const arr = super.gotFocus();
     const r = this.appendEvent(this.$refInput, "input", (e) => {
-      (e as WUPText.InputEvent).setValuePrevented = false;
-      (e as WUPText.InputEvent).preventSetValue = () => ((e as WUPText.InputEvent).setValuePrevented = true);
-      this.gotInput(e as WUPText.InputEvent);
+      (e as WUPText.GotInputEvent).setValuePrevented = false;
+      (e as WUPText.GotInputEvent).preventSetValue = () => ((e as WUPText.GotInputEvent).setValuePrevented = true);
+      this.gotInput(e as WUPText.GotInputEvent);
     });
 
     if (!this.$refInput.readOnly) {
@@ -397,7 +397,7 @@ export default class WUPTextControl<
       }
     }
 
-    arr.push(() => setTimeout(r));
+    arr.push(() => setTimeout(r)); // timeout required to handle Event on gotFocusLost
     return arr;
   }
 
@@ -514,7 +514,7 @@ export default class WUPTextControl<
 
   #inputTimer?: number;
   /** Called when user types text OR when need to apply/reset mask (on focusGot, focusLost) */
-  protected gotInput(e: WUPText.InputEvent): void {
+  protected gotInput(e: WUPText.GotInputEvent): void {
     let txt = e.currentTarget.value;
     txt = this._opts.mask ? this.maskInputProcess(this._opts.mask, this._opts.maskholder) : txt;
     const outRef: { showError?: boolean } = {};

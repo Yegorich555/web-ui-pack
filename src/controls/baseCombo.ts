@@ -438,7 +438,7 @@ export default abstract class WUPBaseComboControl<
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected override gotInput(e: WUPText.InputEvent, allowSuper = false): void {
+  protected override gotInput(e: WUPText.GotInputEvent, allowSuper = false): void {
     // gotInput possible on browser-autofill so we need filter check if isFocused
     !this.$isOpen && this._opts.showCase & ShowCases.onInput && this.$isFocused && this.goShowMenu(ShowCases.onInput);
     allowSuper && super.gotInput(e);

@@ -249,7 +249,7 @@ export default class WUPDateControl<
     return dateToString(v, this._opts.format.toUpperCase() + (this._opts.utc ? "Z" : ""));
   }
 
-  protected override gotInput(e: WUPText.InputEvent): void {
+  protected override gotInput(e: WUPText.GotInputEvent): void {
     // todo: when user types 2022-06-3 and leaves the control we can allow to setValue (lazy mode)
     this.parseValue = (txt, out) => {
       if (!txt) {

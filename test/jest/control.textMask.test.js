@@ -380,7 +380,6 @@ describe("control.text: mask", () => {
     h.setInputCursor(el.$refInput, "|+1(");
     expect(await remove({ key: "Delete" })).toBe("+1(|");
 
-    el.testMe = true;
     h.setInputCursor(el.$refInput, "|+1(");
     await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
     expect(h.getInputCursor(el.$refInput)).toBe("+1(2|");
