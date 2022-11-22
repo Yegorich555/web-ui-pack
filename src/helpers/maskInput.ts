@@ -222,7 +222,6 @@ export function maskBeforeInput(
     // todo: case1 when user removes required digits it's replaced by zeros but need to shift other digits from chunks
     return; // digits are removed by default
   }
-  // todo when 12.| + Backspace need to remove only separator since optional number are possible ???
 
   const nextChunk = mr.chunks[isBackDel ? removeChunkInd - 1 : removeChunkInd + 1];
   let next: string;
@@ -230,12 +229,16 @@ export function maskBeforeInput(
     isBackDel &&
     nextChunk?.isDigit &&
     nextChunk.text.length > nextChunk.min &&
-    removeChunkInd !== mr.lastChunkIndex
+    (removeChunkInd !== mr.lastChunkIndex || nextChunk.text.length < nextChunk.max)
   ) {
+    if (removeChunkInd === mr.lastChunkIndex && nextChunk.text.length < nextChunk.max) {
+      return; // rule: "12.|"" + Backspace >>> remove only separator since optional number are possible
+    }
     next = v; // rule: "123.|45.789.387" + Backspace >>> 12|.45.789.387 for ##0.##0.##0.##0
   } else {
     next = v.substring(0, i) + v.substring(from); // remove chunk otherwise it's impossible
-    if (isDel && next === maskInput(next.substring(0, i) + next.substring(i + 1), pattern, options).text) {
+    const willVal = next.substring(0, i) + next.substring(i + 1);
+    if (isDel && next === maskInput(willVal, pattern, options).text) {
       // todo: case1 when user removes required digits it's replaced by zeros but need to shift other digits from chunks
       i = iNextChunk; // rule: '+|1(23' + Del >>> '+1(|3'; "123|.456.789.387" + Del '123|.456.789.387'
     }
@@ -243,7 +246,7 @@ export function maskBeforeInput(
 
   // console.warn({ next, i, iNextChunk, v, mr, nextChunk, from, removeChunk });
   if (!next) {
-    return { showRemovedChunk: true }; // when for "+1(|..." + Backspace >>> there is nothing to remove and need to hide&show symbol
+    return { showRemovedChunk: true }; // rule: "+1(|..." + Backspace >>> nothing to remove and need to hide&show symbol
   }
 
   el.value = next;
