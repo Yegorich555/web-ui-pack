@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 export interface IMaskInputOptions {
   /** Add next constant-symbol to allow user don't worry about non-digit values @default true */
   prediction?: boolean;
@@ -71,8 +72,6 @@ function parsePattern(pattern: string): IInputChunk[] {
   return chunks;
 }
 
-// let memo: Record<string, IMaskInputChunk[]> = {};
-
 /**
  * Format string accoring to pattern
  * @param value string that must be processed
@@ -80,15 +79,8 @@ function parsePattern(pattern: string): IInputChunk[] {
  * #### where # - optional, 0 - required numbers
  */
 export default function maskInput(value: string, pattern: string, options?: IMaskInputOptions): IMaskInputResult {
-  options = options || {};
-  options.prediction = options.prediction ?? true;
-  options.lazy = options.lazy ?? true;
+  options = { prediction: true, lazy: true, ...options };
 
-  // let pchunks = memo[pattern];
-  // if (pchunks === undefined) {
-  //   pchunks = parsePattern(pattern);
-  //   memo = { pattern: pchunks }; // store only last pattern
-  // }
   const chunks = parsePattern(pattern);
 
   if (!value) {
@@ -170,5 +162,83 @@ export default function maskInput(value: string, pattern: string, options?: IMas
   return r;
 }
 
-// console.warn(maskInput("1234/5", "0000/#0/#0"));
-// console.warn(maskInput("123.4.5", "##0.##0.##0.##0"));
+// Call it on 'beforeinput' event to improve logic
+export function maskBeforeInput(
+  e: InputEvent,
+  pattern: string,
+  options?: IMaskInputOptions
+): { showRemovedChunk?: boolean } | undefined {
+  options = { prediction: true, lazy: true, ...options };
+
+  const isAdd = e.inputType === "insertText";
+  const isDel = !isAdd && e.inputType === "deleteContentForward";
+  const isBackDel = !isAdd && !isDel && e.inputType === "deleteContentBackward";
+  if (!isAdd && !isDel && !isBackDel) {
+    return;
+  }
+
+  const el = e.target as HTMLInputElement;
+  const v = el.value;
+  const from = el.selectionStart!;
+  const to = el.selectionEnd!;
+
+  if (isAdd) {
+    // todo if add digits in the middle need to shift other digits if chunk is overflow
+    const mr = maskInput(el.value, pattern, options);
+    const onlyPrefix = mr.lastChunkIndex === 0 && !mr.chunks[mr.lastChunkIndex].isDigit;
+    if (onlyPrefix) {
+      // move cursor to the end if it was inside prefix-chunk: '|+1('+ symbol => '+1(|'+symbol
+      el.selectionStart = v.length;
+      el.selectionEnd = el.selectionStart;
+    }
+    return;
+  }
+
+  // Process delete: when user tries to remove not digit chunk need to remove the whole chunk + 1 num
+  if (!options?.prediction || from !== to) {
+    return; // skip action if several chars are selected
+  }
+
+  const removeIndex = (isBackDel ? 0 : 1) + from - 1; // char that will be removed
+  if (removeIndex >= v.length || removeIndex < 0) {
+    return; // nothing to remove
+  }
+
+  // case when 1234-- for pattern 0000-- and user tries to remove last number; prediction adds removed separator again
+  let i = removeIndex;
+  const mr = maskInput(el.value, pattern, options);
+  const removeChunkInd = mr.chunks.findIndex((c) => {
+    i -= c.text.length;
+    return i < 0;
+  })!;
+  const removeChunk = mr.chunks[removeChunkInd];
+  i = isBackDel ? removeIndex - removeChunk.text.length + 1 : removeIndex;
+  if (removeChunk.isDigit) {
+    // console.warn({ i });
+    // if (removeChunk.text.length === 1 && i === 0) {
+    //   el.selectionStart = i;
+    //   el.selectionEnd = i;
+    // }
+    // todo when user removes required digits it's replaced by zeros but need to shift other digits from chunks
+    return; // digits are removed by default
+  }
+  // todo when 12.| + Backspace need to remove only separator since optional number are possibble ???
+
+  const nextChunk = mr.chunks[isBackDel ? removeChunkInd - 1 : removeChunkInd + 1];
+  let next: string = v;
+  if (nextChunk?.isDigit && nextChunk.text.length > nextChunk.min && removeChunk !== mr.chunks[mr.lastChunkIndex]) {
+    next = v; // remove rule: "123.|45.789.387" + Backspace >>> 12|.45.789.387 for ##0.##0.##0.##0
+  } else {
+    // todo user can't delete when "##0|.##" with Delete key
+    next = v.substring(0, i) + v.substring(el.selectionStart!);
+  }
+
+  // console.warn({ next, i, v, mr, nextChunk });
+  if (!next) {
+    return { showRemovedChunk: true }; // fix case when for "+1(..." user removes prefix and there is nothing to remove by the real logic
+  }
+
+  el.value = next;
+  el.selectionStart = i;
+  el.selectionEnd = i;
+}

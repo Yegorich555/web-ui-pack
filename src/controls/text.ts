@@ -1,4 +1,4 @@
-import maskInput from "../helpers/maskInput";
+import maskInput, { maskBeforeInput } from "../helpers/maskInput";
 import { onEvent } from "../indexHelpers";
 import { WUPcssIcon } from "../styles";
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
@@ -386,18 +386,18 @@ export default class WUPTextControl<
       (e as WUPText.GotInputEvent).preventSetValue = () => ((e as WUPText.GotInputEvent).setValuePrevented = true);
       this.gotInput(e as WUPText.GotInputEvent);
     });
+    const r2 = this.appendEvent(this.$refInput, "beforeinput", (e) => this.gotBeforeInput(e), { passive: false });
 
     if (!this.$refInput.readOnly) {
       if (!this.$refInput.value) {
-        if (this._opts.mask) {
-          this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true, data: "To apply mask before start" })); // apply prefix/suffix from mask
-        }
+        this._opts.mask && this.maskInputProcess(this._opts.mask, this._opts.maskholder);
       } else {
         this._opts.selectOnFocus && this.$refInput.select();
       }
     }
 
     arr.push(() => setTimeout(r)); // timeout required to handle Event on gotFocusLost
+    arr.push(r2);
     return arr;
   }
 
@@ -433,83 +433,12 @@ export default class WUPTextControl<
     setTimeout(() => !this.$value && this.setInputValue(undefined)); // wait for timeout (wait for applying of inherrited) to set maskholder
   }
 
-  protected override gotKeyDown(e: KeyboardEvent): void {
-    super.gotKeyDown(e);
-    if (!this._opts.mask) {
-      return;
+  /** Handler of 'beforeinput' event */
+  protected gotBeforeInput(e: InputEvent): void {
+    if (this._opts.mask) {
+      const r = maskBeforeInput(e, this._opts.mask);
+      (this.$refInput as any)._showRemovedChunk = r?.showRemovedChunk;
     }
-
-    // todo reuse 'beforeinput' event instead
-
-    const el = this.$refInput;
-    const v = el.value;
-    const mr = maskInput(el.value, this._opts.mask);
-    const onlyPrefix = mr.lastChunkIndex === 0 && !mr.chunks[mr.lastChunkIndex].isDigit;
-    if (onlyPrefix && v.length !== el.selectionStart) {
-      // move cursor to the end if it was inside prefix-chunk: '|+1('+ symbol => '+1(|'+symbol
-      el.selectionStart = v.length;
-      el.selectionEnd = el.selectionStart;
-    }
-
-    if (!this._opts.maskPrediction) {
-      return;
-    }
-    // when user press Delete and user removed not digit chunk need to remove the whole chunk + 1 num
-    const isBackDel = e.key === "Backspace";
-    if (!isBackDel && e.key !== "Delete") {
-      return;
-    }
-
-    if (el.selectionEnd !== el.selectionStart) {
-      return; // skip action if several chars are selected
-    }
-    const removeIndex = (isBackDel ? 0 : 1) + el.selectionStart! - 1; // char that will be removed
-    if (removeIndex >= v.length || removeIndex < 0) {
-      return; // nothing to remove
-    }
-
-    // case when 1234-- for pattern 0000-- and user tries to remove last number; prediction adds removed separator again
-    let i = removeIndex;
-    // const mr = maskInput(v, this._opts.mask);
-    // console.warn(mr);
-    const removeChunkInd = mr.chunks.findIndex((c) => {
-      i -= c.text.length;
-      return i < 0;
-    })!;
-    const removeChunk = mr.chunks[removeChunkInd];
-    i = isBackDel ? removeIndex - removeChunk.text.length + 1 : removeIndex;
-    if (removeChunk.isDigit) {
-      // console.warn({ i });
-      // if (removeChunk.text.length === 1 && i === 0) {
-      //   el.selectionStart = i;
-      //   el.selectionEnd = i;
-      // }
-      // todo when user removes required digits it's replaced by zeros but need to shift other digits from chunks
-      return; // digits are removed by default
-    }
-    // todo when 12.| + Backspace need to remove only separator since optional number are possibble ???
-
-    // todo if add digits in the middle need to shift other digits if chunk is overflow
-    const nextChunk = mr.chunks[isBackDel ? removeChunkInd - 1 : removeChunkInd + 1];
-    let next: string = v;
-    if (nextChunk?.isDigit && nextChunk.text.length > nextChunk.min && removeChunk !== mr.chunks[mr.lastChunkIndex]) {
-      next = v; // remove rule: "123.|45.789.387" + Backspace >>> 12|.45.789.387 for ##0.##0.##0.##0
-    } else {
-      // todo user can't delete when "##0|.##" with Delete key
-      next = v.substring(0, i) + v.substring(el.selectionStart!);
-    }
-
-    // console.warn({ next, i, v, mr, nextChunk });
-    if (!next) {
-      (el as any)._showRemovedChunk = true; // to show to user removed symbol and rollback after timeout
-      return; // fix case when for "+1(..." user removes prefix and there is nothing to remove by the real logic
-    }
-    if (onlyPrefix && !isBackDel) {
-      i = next.length; // when "|+1(" + press Delete - no actions, only change cursor position
-    }
-    el.value = next;
-    el.selectionStart = i;
-    el.selectionEnd = i;
   }
 
   #inputTimer?: number;
@@ -547,7 +476,7 @@ export default class WUPTextControl<
       el.value = v;
       return v; // ignore mask prefix/suffix if user isn't touched input; it appends only by focusGot
     }
-    const mr = maskInput(v, mask, { prediction: true });
+    const mr = maskInput(v, mask, { prediction: this._opts.maskPrediction ?? true });
     // console.warn("mask", { v, mr });
     const setMaskHolder = (str: string, leftLength: number): void => {
       if (!maskholder) {

@@ -369,17 +369,18 @@ export async function userTypeText(el: HTMLInputElement, text: string, opts = { 
     el.value = "";
   }
 
+  const inputType = "insertText";
   for (let i = 0; i < text.length; ++i) {
     const key = text[i];
     el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
     el.dispatchEvent(new KeyboardEvent("keypress", { key, bubbles: true }));
+    el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, cancelable: true, data: key, inputType }));
     const v = el.value;
     let carretPos = el.selectionStart ?? el.value.length;
     el.value = v.substring(0, carretPos) + key + v.substring(carretPos);
     el.selectionStart = ++carretPos;
     el.selectionEnd = el.selectionStart;
-    el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, cancelable: true }));
-    el.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    el.dispatchEvent(new InputEvent("input", { bubbles: true, data: key, inputType }));
     el.dispatchEvent(new KeyboardEvent("keyup", { key, bubbles: true }));
 
     if (i !== text.length - 1) {
@@ -430,7 +431,9 @@ export async function userRemove(
   for (let i = 0; i < opts.removeCount; ++i) {
     el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
     // keypress not fired on not-char keys
-    // el.dispatchEvent(new KeyboardEvent("keypress", { key, bubbles: true }));
+    const inputType = `deleteContent${key === "Backspace" ? "Back" : "For"}ward`;
+    el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, data: null, inputType }));
+
     let v = el.value;
     let carretPos = el.selectionStart ?? v.length;
     if (key === "Backspace" && carretPos > 0) {
@@ -441,7 +444,7 @@ export async function userRemove(
       el.value = v;
       el.selectionEnd = carretPos;
       el.selectionStart = carretPos;
-      el.dispatchEvent(new InputEvent("input", { bubbles: true }));
+      el.dispatchEvent(new InputEvent("input", { bubbles: true, data: null, inputType }));
     }
     jest.advanceTimersByTime(20);
     await Promise.resolve();
