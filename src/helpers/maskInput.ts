@@ -180,7 +180,6 @@ export function maskBeforeInput(
   const el = e.target as HTMLInputElement;
   const v = el.value;
   const from = el.selectionStart!;
-  const to = el.selectionEnd!;
 
   if (isAdd) {
     // todo if add digits in the middle need to shift other digits if chunk is overflow
@@ -195,7 +194,7 @@ export function maskBeforeInput(
   }
 
   // Process delete: when user tries to remove not digit chunk need to remove the whole chunk + 1 num
-  if (!options?.prediction || from !== to) {
+  if (!options?.prediction || from !== el.selectionEnd) {
     return; // skip action if several chars are selected
   }
 
@@ -212,6 +211,7 @@ export function maskBeforeInput(
     return i < 0;
   })!;
   const removeChunk = mr.chunks[removeChunkInd];
+  const iNextChunk = removeIndex - i; // startIndex char of next chunk
   i = isBackDel ? removeIndex - removeChunk.text.length + 1 : removeIndex;
   if (removeChunk.isDigit) {
     // console.warn({ i });
@@ -219,23 +219,31 @@ export function maskBeforeInput(
     //   el.selectionStart = i;
     //   el.selectionEnd = i;
     // }
-    // todo when user removes required digits it's replaced by zeros but need to shift other digits from chunks
+    // todo: case1 when user removes required digits it's replaced by zeros but need to shift other digits from chunks
     return; // digits are removed by default
   }
-  // todo when 12.| + Backspace need to remove only separator since optional number are possibble ???
+  // todo when 12.| + Backspace need to remove only separator since optional number are possible ???
 
   const nextChunk = mr.chunks[isBackDel ? removeChunkInd - 1 : removeChunkInd + 1];
-  let next: string = v;
-  if (nextChunk?.isDigit && nextChunk.text.length > nextChunk.min && removeChunk !== mr.chunks[mr.lastChunkIndex]) {
-    next = v; // remove rule: "123.|45.789.387" + Backspace >>> 12|.45.789.387 for ##0.##0.##0.##0
+  let next: string;
+  if (
+    isBackDel &&
+    nextChunk?.isDigit &&
+    nextChunk.text.length > nextChunk.min &&
+    removeChunkInd !== mr.lastChunkIndex
+  ) {
+    next = v; // rule: "123.|45.789.387" + Backspace >>> 12|.45.789.387 for ##0.##0.##0.##0
   } else {
-    // todo user can't delete when "##0|.##" with Delete key
-    next = v.substring(0, i) + v.substring(el.selectionStart!);
+    next = v.substring(0, i) + v.substring(from); // remove chunk otherwise it's impossible
+    if (isDel && next === maskInput(next.substring(0, i) + next.substring(i + 1), pattern, options).text) {
+      // todo: case1 when user removes required digits it's replaced by zeros but need to shift other digits from chunks
+      i = iNextChunk; // rule: '+|1(23' + Del >>> '+1(|3'; "123|.456.789.387" + Del '123|.456.789.387'
+    }
   }
 
-  // console.warn({ next, i, v, mr, nextChunk });
+  // console.warn({ next, i, iNextChunk, v, mr, nextChunk, from, removeChunk });
   if (!next) {
-    return { showRemovedChunk: true }; // fix case when for "+1(..." user removes prefix and there is nothing to remove by the real logic
+    return { showRemovedChunk: true }; // when for "+1(|..." + Backspace >>> there is nothing to remove and need to hide&show symbol
   }
 
   el.value = next;
