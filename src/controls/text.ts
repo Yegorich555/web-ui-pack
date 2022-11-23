@@ -307,7 +307,7 @@ export default class WUPTextControl<
       mask: (v, setV, c) => {
         if (setV && v !== undefined && !!(c as WUPTextControl)._opts.mask) {
           const m = maskInput(v, (c as WUPTextControl)._opts.mask!);
-          const pref = !m.chunks[0].isDigit ? m.chunks[0].text : "";
+          const pref = !m.chunks[0].isDig ? m.chunks[0].text : "";
           return !m.isCompleted && v !== pref && "Incomplete value";
         }
         return false;

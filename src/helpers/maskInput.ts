@@ -22,7 +22,7 @@ interface IMaskInputResult {
 interface IDigChunk {
   index: number;
   text: string;
-  isDigit: true;
+  isDig: true;
   min: number;
   max: number;
   isCompleted?: boolean;
@@ -31,7 +31,7 @@ interface IDigChunk {
 interface ISymChunk {
   index: number;
   text: string;
-  isDigit?: false;
+  isDig?: false;
 }
 
 type IInputChunk = IDigChunk | ISymChunk;
@@ -40,10 +40,10 @@ function parsePattern(pattern: string): IInputChunk[] {
   const chunks: IInputChunk[] = [];
   let lastChunk: IInputChunk | null = null;
   const setToChunk = (char: string, isDigit: boolean | undefined): IInputChunk => {
-    if (!lastChunk || lastChunk.isDigit !== isDigit) {
+    if (!lastChunk || lastChunk.isDig !== isDigit) {
       lastChunk = { text: char } as IDigChunk;
       if (isDigit) {
-        lastChunk.isDigit = true;
+        lastChunk.isDig = true;
         lastChunk.max = 0;
         lastChunk.min = 0;
       }
@@ -87,7 +87,7 @@ export default function maskInput(value: string, pattern: string, options?: IMas
 
   if (!value) {
     const $1 = chunks[0];
-    const text = $1.isDigit ? "" : $1.text; // returns prefix if possible //WARN: what about suffix when prefix not defined ???
+    const text = $1.isDig ? "" : $1.text; // returns prefix if possible //WARN: what about suffix when prefix not defined ???
     return {
       isCompleted: false,
       text,
@@ -98,9 +98,10 @@ export default function maskInput(value: string, pattern: string, options?: IMas
   }
 
   let pi = 0;
+  let canShift: number | null = null;
   for (let i = 0; pi < chunks.length && i < value.length; ++pi) {
     const chunk = chunks[pi];
-    if (chunk.isDigit) {
+    if (chunk.isDig) {
       chunk.text = "";
       for (let ci = 0; ci < chunk.max && i < value.length; ++ci, ++i) {
         const ascii = value.charCodeAt(i);
@@ -108,12 +109,20 @@ export default function maskInput(value: string, pattern: string, options?: IMas
         if (isNum) {
           chunk.text += String.fromCharCode(ascii);
           chunk.isCompleted = chunk.text.length >= chunk.min;
+        } else if (canShift != null && chunks[pi - 1].text[0] === String.fromCharCode(ascii)) {
+          // console.warn("shift", { chunks, chunk, value, char: value[i], ci, i });
+          const prev = chunks[pi - 1];
+          while (prev.text.length > ++canShift && prev.text[canShift] === value[i + 1]) {
+            ++i; // if chunk.legnth > 1 need to shift more: "4+1(23" >>> "+1(423"
+          }
+          --ci;
+          continue; // shift behavior: "+1(234) 9675-123" >>> "+1(234) 967-5123"
         } else if (chunk.isCompleted && chunks[pi + 1]?.text.charCodeAt(0) === ascii) {
           break; // skip chunk if length fits min
         } else if (options.lazy && /[., _+-/\\]/.test(String.fromCharCode(ascii)) && ci) {
           const cnt = chunk.min - ci;
           if (cnt > 0) {
-            chunk.text = "0".repeat(chunk.min - ci) + chunk.text; // add zero before in lazy mode
+            chunk.text = "0".repeat(chunk.min - ci) + chunk.text; // add zero before (lazy mode)
           }
           chunk.isCompleted = true;
           // ++i;
@@ -123,30 +132,34 @@ export default function maskInput(value: string, pattern: string, options?: IMas
         }
       }
     } else {
+      // console.warn("before", { chunk, pi, i, v: value[i] });
+      canShift = 0;
       for (let ci = 0; ci < chunk.text.length && i < value.length; ++ci) {
         if (chunk.text[ci] === value[i] || /[., _+-/\\]/.test(value[i])) {
           ++i;
+          canShift = null;
         }
       }
+      // !matches && --i;
+      // console.log("after", { chunk, pi, i, v: value[i] });
       // i += chunk.text.length; // analyze of chars doesn't required since it's not changable
     }
   }
 
   if (options.prediction && pi !== chunks.length) {
     const last = chunks[pi - 1];
-    if (last.isDigit && last.max === last.text.length) {
+    if (last.isDig && last.max === last.text.length) {
       ++pi; // append suffix if prev digitChunk is filled completely
     }
   }
 
-  // append suffix at the end if all chunks are completed & only lacks suffix
   if (pi === chunks.length - 1 && (chunks[pi - 1] as IDigChunk).isCompleted) {
-    ++pi;
+    ++pi; // append suffix at the end if all chunks are completed & only lacks suffix
   }
 
   // find leftLength for maskholder
   const last = chunks[pi - 1];
-  let leftLength = last.isDigit ? last.max - last.text.length : 0; // if last proccess chunk is digit than need to call diff actual and max
+  let leftLength = last.isDig ? last.max - last.text.length : 0; // if last proccess chunk is digit than need to call diff actual and max
   for (let i = pi; i < chunks.length; ++i) {
     leftLength += chunks[i].text.length;
   }
@@ -154,8 +167,7 @@ export default function maskInput(value: string, pattern: string, options?: IMas
   const r: IMaskInputResult = {
     text: chunks.reduce((str, c, i) => (i < pi ? str + c.text : str), ""),
     isCompleted:
-      pi >= chunks.length &&
-      (!chunks[pi - 1].isDigit || chunks[pi - 1].text.length >= (chunks[pi - 1] as IDigChunk).min),
+      pi >= chunks.length && (!chunks[pi - 1].isDig || chunks[pi - 1].text.length >= (chunks[pi - 1] as IDigChunk).min),
     leftLength,
     chunks,
     lastChunk: chunks[pi - 1],
@@ -194,15 +206,15 @@ export function maskBeforeInput(
 
   if (isAdd) {
     const mr = maskInput(el.value, pattern, options);
-    const onlyPrefix = mr.lastChunk.index === 0 && !mr.lastChunk.isDigit;
+    const onlyPrefix = mr.lastChunk.index === 0 && !mr.lastChunk.isDig;
     if (onlyPrefix) {
-      // move cursor to the end if it was inside prefix-chunk: '|+1('+ symbol => '+1(|'+symbol
-      el.selectionStart = v.length;
+      el.selectionStart = v.length; // move cursor to the end if it was inside prefix-chunk: '|+1('+ symbol => '+1(|'+symbol
       el.selectionEnd = el.selectionStart;
     } else {
       // todo findChunk.call and shift digits to right
       // todo if add digits in the middle need to shift other digits if chunk is overflow
-      // console.warn({ v, from });
+      const nextVal = v.substring(0, from) + (e.data ?? "") + v.substring(el.selectionEnd!);
+      // console.warn({ v, from, data: e.data, nextVal });
     }
     return;
   }
@@ -222,7 +234,7 @@ export function maskBeforeInput(
   const mr = maskInput(el.value, pattern, options);
   const { chunk: removeChunk, cursor } = findChunkByCursor.call(mr, removeIndex);
   let i = isBackDel ? removeIndex - removeChunk.text.length + 1 : removeIndex;
-  if (removeChunk.isDigit) {
+  if (removeChunk.isDig) {
     // console.warn({ i });
     // if (removeChunk.text.length === 1 && i === 0) {
     //   el.selectionStart = i;
@@ -236,7 +248,7 @@ export function maskBeforeInput(
   let next: string;
   if (
     isBackDel &&
-    nextChunk?.isDigit &&
+    nextChunk?.isDig &&
     nextChunk.text.length > nextChunk.min &&
     (removeChunk !== mr.lastChunk || nextChunk.text.length < nextChunk.max)
   ) {
@@ -263,3 +275,7 @@ export function maskBeforeInput(
   el.selectionStart = i;
   el.selectionEnd = i;
 }
+
+// console.warn(maskInput("+1(234) 9675-123", "+1(000) 000-0000"));
+// console.warn(maskInput("1234-4-", "0000-00-00"));
+// console.warn(maskInput("4+1(23", "+1(000) 000-0000"));

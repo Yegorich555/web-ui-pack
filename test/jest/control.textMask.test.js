@@ -339,14 +339,13 @@ describe("control.text: mask", () => {
 
     h.setInputCursor(el.$refInput, "123.4|5.789.387");
     expect(await remove({ key: "Delete" })).toBe("123.4|.789.387");
-    expect(await remove({ key: "Delete" })).toBe("123.4|78.9.387");
-    expect(await remove({ key: "Delete" })).toBe("123.4|8.9.387");
-    expect(await remove({ key: "Delete" })).toBe("123.4|.9.387");
-    expect(await remove({ key: "Delete" })).toBe("123.4|9.387.");
-    expect(await remove({ key: "Delete" })).toBe("123.4|.387.");
-    expect(await remove({ key: "Delete" })).toBe("123.4|38.7.");
-    expect(await remove({ key: "Delete" })).toBe("123.4|8.7.");
-    expect(await remove({ key: "Delete" })).toBe("123.4|.7.");
+    expect(await remove({ key: "Delete" })).toBe("123.4|78.938.7");
+    expect(await remove({ key: "Delete" })).toBe("123.4|8.938.7");
+    expect(await remove({ key: "Delete" })).toBe("123.4|.938.7");
+    expect(await remove({ key: "Delete" })).toBe("123.4|93.87");
+    expect(await remove({ key: "Delete" })).toBe("123.4|3.87");
+    expect(await remove({ key: "Delete" })).toBe("123.4|.87");
+    expect(await remove({ key: "Delete" })).toBe("123.4|87.");
     expect(await remove({ key: "Delete" })).toBe("123.4|7.");
     expect(await remove({ key: "Delete" })).toBe("123.4|.");
     expect(await remove({ key: "Delete" })).toBe("123.4|");
@@ -366,6 +365,7 @@ describe("control.text: mask", () => {
     expect(proc("+1(234)9")).toBe("+1(234) 9");
     expect(proc("12349751234")).toBe("+1(234) 975-1234");
     expect(proc("")).toBe("+1("); // autoprefix
+    expect(proc("+1(234) 9675-123")).toBe("+1(234) 967-5123"); // shift behavior
 
     expect(maskInput("+1(234) 975-1234", mask).isCompleted).toBe(true);
     expect(maskInput("+1(234) 975-123", mask).isCompleted).toBe(false);
@@ -417,7 +417,21 @@ describe("control.text: mask", () => {
     // type digits
     h.setInputCursor(el.$refInput, "+1(234) 9|75-123");
     await h.userTypeText(el.$refInput, "4", { clearPrevious: false });
-    // expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 94|7-5123"); todo implement it
+    expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 94|7-5123"); // digits must be shifted
+
+    const arr = [
+      { from: "|+1(", add: "2", to: "+1(2|" },
+      { from: "|+1(2", add: "3", to: "+1(3|2" }, // todo in this case need to change input cursor according to shift
+      { from: "|+1(32", add: "4", to: "+1(4|32) " },
+      { from: "|+1(432) ", add: "5", to: "+1(5|43) 2" },
+      { from: "|+1(543) 2 ", add: "6", to: "+1(6|54) 32" },
+    ];
+    for (let i = 0; i < arr.length; ++i) {
+      const a = arr[i];
+      h.setInputCursor(el.$refInput, a.from);
+      await h.userTypeText(el.$refInput, a.add, { clearPrevious: false });
+      expect(h.getInputCursor(el.$refInput)).toBe(a.to); // cursor must be shifted with digits
+    }
   });
 
   test("$ #####0 USD", () => {
