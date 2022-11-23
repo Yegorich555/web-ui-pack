@@ -15,11 +15,12 @@ interface IMaskInputResult {
   leftLength: number;
   /** Pattern splits into chunks. With detailed info about process */
   chunks: IInputChunk[];
-  /** Returns index of lastChunk that processed */
-  lastChunkIndex: number;
+  /** Returns lastChunk that processed */
+  lastChunk: IInputChunk;
 }
 
 interface IDigChunk {
+  index: number;
   text: string;
   isDigit: true;
   min: number;
@@ -28,6 +29,7 @@ interface IDigChunk {
 }
 
 interface ISymChunk {
+  index: number;
   text: string;
   isDigit?: false;
 }
@@ -45,7 +47,7 @@ function parsePattern(pattern: string): IInputChunk[] {
         lastChunk.max = 0;
         lastChunk.min = 0;
       }
-      chunks.push(lastChunk);
+      lastChunk.index = chunks.push(lastChunk) - 1;
     } else {
       lastChunk.text += char;
     }
@@ -91,7 +93,7 @@ export default function maskInput(value: string, pattern: string, options?: IMas
       text,
       leftLength: pattern.length - text.length,
       chunks,
-      lastChunkIndex: 0,
+      lastChunk: $1,
     };
   }
 
@@ -156,13 +158,22 @@ export default function maskInput(value: string, pattern: string, options?: IMas
       (!chunks[pi - 1].isDigit || chunks[pi - 1].text.length >= (chunks[pi - 1] as IDigChunk).min),
     leftLength,
     chunks,
-    lastChunkIndex: pi - 1,
+    lastChunk: chunks[pi - 1],
   };
 
   return r;
 }
 
-// Call it on 'beforeinput' event to improve logic
+/** Returns chunk related to input.selectionStart */
+function findChunkByCursor(this: IMaskInputResult, inputCursor: number): { chunk: IInputChunk; cursor: number } {
+  const chunk = this.chunks.find((c) => {
+    inputCursor -= c.text.length;
+    return inputCursor < 0;
+  })!;
+  return { chunk, cursor: chunk.text.length + inputCursor };
+}
+
+/* Call it on 'beforeinput' event to improve logic */
 export function maskBeforeInput(
   e: InputEvent,
   pattern: string,
@@ -182,13 +193,16 @@ export function maskBeforeInput(
   const from = el.selectionStart!;
 
   if (isAdd) {
-    // todo if add digits in the middle need to shift other digits if chunk is overflow
     const mr = maskInput(el.value, pattern, options);
-    const onlyPrefix = mr.lastChunkIndex === 0 && !mr.chunks[mr.lastChunkIndex].isDigit;
+    const onlyPrefix = mr.lastChunk.index === 0 && !mr.lastChunk.isDigit;
     if (onlyPrefix) {
       // move cursor to the end if it was inside prefix-chunk: '|+1('+ symbol => '+1(|'+symbol
       el.selectionStart = v.length;
       el.selectionEnd = el.selectionStart;
+    } else {
+      // todo findChunk.call and shift digits to right
+      // todo if add digits in the middle need to shift other digits if chunk is overflow
+      // console.warn({ v, from });
     }
     return;
   }
@@ -204,15 +218,10 @@ export function maskBeforeInput(
   }
 
   // case when 1234-- for pattern 0000-- and user tries to remove last number; prediction adds removed separator again
-  let i = removeIndex;
+  // let i = removeIndex;
   const mr = maskInput(el.value, pattern, options);
-  const removeChunkInd = mr.chunks.findIndex((c) => {
-    i -= c.text.length;
-    return i < 0;
-  })!;
-  const removeChunk = mr.chunks[removeChunkInd];
-  const iNextChunk = removeIndex - i; // startIndex char of next chunk
-  i = isBackDel ? removeIndex - removeChunk.text.length + 1 : removeIndex;
+  const { chunk: removeChunk, cursor } = findChunkByCursor.call(mr, removeIndex);
+  let i = isBackDel ? removeIndex - removeChunk.text.length + 1 : removeIndex;
   if (removeChunk.isDigit) {
     // console.warn({ i });
     // if (removeChunk.text.length === 1 && i === 0) {
@@ -223,15 +232,15 @@ export function maskBeforeInput(
     return; // digits are removed by default
   }
 
-  const nextChunk = mr.chunks[isBackDel ? removeChunkInd - 1 : removeChunkInd + 1];
+  const nextChunk = mr.chunks[isBackDel ? removeChunk.index - 1 : removeChunk.index + 1];
   let next: string;
   if (
     isBackDel &&
     nextChunk?.isDigit &&
     nextChunk.text.length > nextChunk.min &&
-    (removeChunkInd !== mr.lastChunkIndex || nextChunk.text.length < nextChunk.max)
+    (removeChunk !== mr.lastChunk || nextChunk.text.length < nextChunk.max)
   ) {
-    if (removeChunkInd === mr.lastChunkIndex && nextChunk.text.length < nextChunk.max) {
+    if (removeChunk === mr.lastChunk && nextChunk.text.length < nextChunk.max) {
       return; // rule: "12.|"" + Backspace >>> remove only separator since optional number are possible
     }
     next = v; // rule: "123.|45.789.387" + Backspace >>> 12|.45.789.387 for ##0.##0.##0.##0
@@ -240,6 +249,7 @@ export function maskBeforeInput(
     const willVal = next.substring(0, i) + next.substring(i + 1);
     if (isDel && next === maskInput(willVal, pattern, options).text) {
       // todo: case1 when user removes required digits it's replaced by zeros but need to shift other digits from chunks
+      const iNextChunk = removeIndex - (cursor - removeChunk.text.length); // startIndex char of next chunk
       i = iNextChunk; // rule: '+|1(23' + Del >>> '+1(|3'; "123|.456.789.387" + Del '123|.456.789.387'
     }
   }

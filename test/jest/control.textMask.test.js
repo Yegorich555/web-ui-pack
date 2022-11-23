@@ -417,7 +417,7 @@ describe("control.text: mask", () => {
     // type digits
     h.setInputCursor(el.$refInput, "+1(234) 9|75-123");
     await h.userTypeText(el.$refInput, "4", { clearPrevious: false });
-    // expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 94|7-5123"); // todo implement it
+    // expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 94|7-5123"); todo implement it
   });
 
   test("$ #####0 USD", () => {
