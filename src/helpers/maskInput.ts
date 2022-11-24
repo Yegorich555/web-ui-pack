@@ -82,6 +82,7 @@ function parsePattern(pattern: string): IInputChunk[] {
  */
 export default function maskInput(value: string, pattern: string, options?: IMaskInputOptions): IMaskInputResult {
   options = { prediction: true, lazy: true, ...options };
+  // todo need to define new cursor position if it was pointed in options
 
   const chunks = parsePattern(pattern);
 
@@ -110,10 +111,9 @@ export default function maskInput(value: string, pattern: string, options?: IMas
           chunk.text += String.fromCharCode(ascii);
           chunk.isCompleted = chunk.text.length >= chunk.min;
         } else if (canShift != null && chunks[pi - 1].text[0] === String.fromCharCode(ascii)) {
-          // console.warn("shift", { chunks, chunk, value, char: value[i], ci, i });
           const prev = chunks[pi - 1];
           while (prev.text.length > ++canShift && prev.text[canShift] === value[i + 1]) {
-            ++i; // if chunk.legnth > 1 need to shift more: "4+1(23" >>> "+1(423"
+            ++i; // if chunk.length > 1 need to shift more: "4+1(23" >>> "+1(423"
           }
           --ci;
           continue; // shift behavior: "+1(234) 9675-123" >>> "+1(234) 967-5123"
@@ -193,7 +193,7 @@ export function maskBeforeInput(
 ): { showRemovedChunk?: boolean } | undefined {
   options = { prediction: true, lazy: true, ...options };
 
-  const isAdd = e.inputType === "insertText";
+  const isAdd = e.inputType === "insertText" || "insertFromPaste";
   const isDel = !isAdd && e.inputType === "deleteContentForward";
   const isBackDel = !isAdd && !isDel && e.inputType === "deleteContentBackward";
   if (!isAdd && !isDel && !isBackDel) {
@@ -201,23 +201,21 @@ export function maskBeforeInput(
   }
 
   const el = e.target as HTMLInputElement;
-  const v = el.value;
-  const from = el.selectionStart!;
-
-  if (isAdd) {
-    const mr = maskInput(el.value, pattern, options);
-    const onlyPrefix = mr.lastChunk.index === 0 && !mr.lastChunk.isDig;
-    if (onlyPrefix) {
-      el.selectionStart = v.length; // move cursor to the end if it was inside prefix-chunk: '|+1('+ symbol => '+1(|'+symbol
-      el.selectionEnd = el.selectionStart;
-    } else {
-      // todo findChunk.call and shift digits to right
-      // todo if add digits in the middle need to shift other digits if chunk is overflow
-      const nextVal = v.substring(0, from) + (e.data ?? "") + v.substring(el.selectionEnd!);
-      // console.warn({ v, from, data: e.data, nextVal });
-    }
+  if (el.selectionStart !== el.selectionEnd) {
     return;
   }
+  (e.target as any)._prev = {
+    position: el.selectionStart,
+    value: el.value,
+    text: e.data,
+  };
+
+  if (isAdd) {
+    return;
+  }
+
+  const v = el.value;
+  const from = el.selectionStart!;
 
   // Process delete: when user tries to remove not digit chunk need to remove the whole chunk + 1 num
   if (!options?.prediction || from !== el.selectionEnd) {
@@ -279,3 +277,73 @@ export function maskBeforeInput(
 // console.warn(maskInput("+1(234) 9675-123", "+1(000) 000-0000"));
 // console.warn(maskInput("1234-4-", "0000-00-00"));
 // console.warn(maskInput("4+1(23", "+1(000) 000-0000"));
+// console.warn(maskInput("+41(23", "+1(000) 000-0000"));
+
+export class MaskInput {
+  #lastChunk: IInputChunk = { index: -1, text: "" };
+  chunks: IInputChunk[] = [];
+  value = "";
+  isCompleted = false;
+  leftLength = 0;
+
+  constructor(public pattern: string, private options?: IMaskInputOptions) {
+    this.options = { prediction: true, lazy: true, ...options };
+    this.parse("");
+  }
+
+  /** Converts pointed value to masked-value and update internal state */
+  parse(value: string): string {
+    const mr = maskInput(value, this.pattern, this.options);
+    this.value = mr.text;
+    this.chunks = mr.chunks;
+    this.#lastChunk = this.chunks[this.chunks.length - 1];
+    this.isCompleted = mr.isCompleted;
+    this.leftLength = mr.leftLength;
+    return this.value;
+  }
+
+  /** Returns chunk according to pointed cursor position + position inside chunk */
+  findChunkByCursor(pos: number): { chunk: IInputChunk; posChunk: number } {
+    const chunk = this.chunks.find((c) => {
+      pos -= c.text.length;
+      return pos < 0;
+    })!;
+    return { chunk, posChunk: chunk.text.length + pos };
+  }
+
+  /** Add char at pointed position; returns next cursor position */
+  insert(char: string, pos: number): number {
+    const prevPos = pos;
+    const atTheEnd = pos >= this.value.length;
+    if (!atTheEnd) {
+      const { chunk, posChunk } = this.findChunkByCursor(pos);
+      if (!chunk.isDig) {
+        // || chunk.text.length === chunk.max) {
+        // shift to the next chunk if insert into separator or digitChunk reached max
+        const shiftRight = chunk.text.length - posChunk;
+        pos += shiftRight;
+      }
+    }
+
+    const prev = this.value;
+    const next = prev.substring(0, pos) + char + prev.substring(pos);
+    this.parse(next);
+    if (this.value === prev) {
+      return prevPos; // return prevPosition if char isn't appended
+    }
+    pos += 1;
+
+    if (atTheEnd) {
+      pos = this.value.length;
+      if (this.isCompleted && !this.#lastChunk.isDig) {
+        return pos - this.#lastChunk.text.length; // if last is suffix we need to set cursor before
+      }
+    }
+    return pos;
+  }
+}
+
+// const m = new MaskInput("+1(000) 000-0000");
+// console.warn(m.parse);
+// 12a|345678
+// 123.456.78

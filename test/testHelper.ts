@@ -414,6 +414,7 @@ export function setInputCursor(el: HTMLInputElement, cursorPattern: string) {
   el.value = gotValue;
   el.selectionStart = cursorPattern.indexOf("|");
   el.selectionEnd = cursorPattern.lastIndexOf("|");
+  el.dispatchEvent(new InputEvent("input", { bubbles: true }));
 }
 
 /** Simulates user removes text via backspace: focus + keydown+ keyup + keypress + input events;

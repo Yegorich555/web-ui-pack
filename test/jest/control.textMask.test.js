@@ -85,7 +85,7 @@ describe("control.text: mask", () => {
       { $in: "5", $out: "1234-5", $outN: "1234-5", h: "<i>1234-5</i>m-dd", hN: "<i>1234-5</i>m-dd" },
       { $in: " ", $out: "1234-05-", $outN: "1234-05-", h: "<i>1234-05-</i>dd", hN: "<i>1234-05-</i>dd" }, // lazy mode + prediction
       { $in: "6", $out: "1234-05-6", $outN: "1234-05-6", h: "<i>1234-05-6</i>d", hN: "<i>1234-05-6</i>d" }, // lazy mode + prediction
-      { $in: "abcd", $out: "1234-05-6abcd", $outN: "1234-05-6", h: "<i>1234-05-6abcd</i>", hN: "<i>1234-05-6</i>d" },
+      { $in: "abcd", $out: "1234-05-6d", $outN: "1234-05-6", h: "<i>1234-05-6d</i>", hN: "<i>1234-05-6</i>d" },
       { $in: " ", $out: "1234-05-06", $outN: "1234-05-06", h: "<i>1234-05-06</i>", hN: "<i>1234-05-06</i>" }, // lazy mode + prediction
     ];
     for (let i = 0; i < typeText.length; ++i) {
@@ -180,7 +180,7 @@ describe("control.text: mask", () => {
       { $in: "5", $out: "1234/5", $outN: "1234/5", h: "<i>1234/5</i>m/dd", hN: "<i>1234/5</i>m/dd" },
       { $in: " ", $out: "1234/5/", $outN: "1234/5/", h: "<i>1234/5/</i>dd", hN: "<i>1234/5/</i>dd" }, // lazy mode + prediction
       { $in: "6", $out: "1234/5/6", $outN: "1234/5/6", h: "<i>1234/5/6</i>d", hN: "<i>1234/5/6</i>d" }, // lazy mode + prediction
-      { $in: "abcd", $out: "1234/5/6abcd", $outN: "1234/5/6", h: "<i>1234/5/6abcd</i>", hN: "<i>1234/5/6</i>d" },
+      { $in: "abcd", $out: "1234/5/6d", $outN: "1234/5/6", h: "<i>1234/5/6d</i>", hN: "<i>1234/5/6</i>d" },
       { $in: " ", $out: "1234/5/6 ", $outN: "1234/5/6", h: "<i>1234/5/6 </i>", hN: "<i>1234/5/6</i>d" }, // lazy mode + prediction
     ];
     for (let i = 0; i < typeText.length; ++i) {
@@ -199,13 +199,13 @@ describe("control.text: mask", () => {
     // append wrong chars when cursor in the middle
     h.setInputCursor(el.$refInput, "1|234/56/78");
     await h.userTypeText(el.$refInput, "ab", { clearPrevious: false });
-    expect(h.getInputCursor(el.$refInput)).toBe("1ab|234/56/78");
+    expect(h.getInputCursor(el.$refInput)).toBe("1b|234/56/78");
     await h.wait(150); // when user types invalid char it shows and hides after a time
     expect(h.getInputCursor(el.$refInput)).toBe("1|234/56/78");
 
     h.setInputCursor(el.$refInput, "|123");
     await h.userTypeText(el.$refInput, "ab", { clearPrevious: false });
-    expect(h.getInputCursor(el.$refInput)).toBe("ab|123");
+    expect(h.getInputCursor(el.$refInput)).toBe("b|123");
     await h.wait(150); // when user types invalid char it shows and hides after a time
     expect(h.getInputCursor(el.$refInput)).toBe("|123");
 
@@ -288,7 +288,7 @@ describe("control.text: mask", () => {
       { $in: " ", $out: "123.4.", $outN: "123.4.", h: "<i>123.4.</i>xxx.xxx", hN: "<i>123.4.</i>xxx.xxx" }, // lazy mode + prediction
       { $in: "5", $out: "123.4.5", $outN: "123.4.5", h: "<i>123.4.5</i>xx.xxx", hN: "<i>123.4.5</i>xx.xxx" },
       { $in: ".", $out: "123.4.5.", $outN: "123.4.5.", h: "<i>123.4.5.</i>xxx", hN: "<i>123.4.5.</i>xxx" },
-      { $in: "abcd", $out: "123.4.5.abcd", $outN: "123.4.5.", h: "<i>123.4.5.abcd</i>", hN: "<i>123.4.5.</i>xxx" },
+      { $in: "abcd", $out: "123.4.5.d", $outN: "123.4.5.", h: "<i>123.4.5.d</i>xx", hN: "<i>123.4.5.</i>xxx" },
       { $in: "6 ", $out: "123.4.5.6 ", $outN: "123.4.5.6", h: "<i>123.4.5.6 </i>x", hN: "<i>123.4.5.6</i>xx" },
     ];
     for (let i = 0; i < typeText.length; ++i) {
@@ -311,7 +311,6 @@ describe("control.text: mask", () => {
 
     // test ability to remove chars
     h.setInputCursor(el.$refInput, "123.4.5.6|");
-    expect(el.$refInput.value).toBe("123.4.5.6");
     const removeResult = [
       "123.4.5.|", //
       "123.4.|",
@@ -421,10 +420,11 @@ describe("control.text: mask", () => {
 
     const arr = [
       { from: "|+1(", add: "2", to: "+1(2|" },
-      { from: "|+1(2", add: "3", to: "+1(3|2" }, // todo in this case need to change input cursor according to shift
+      { from: "|+1(2", add: "3", to: "+1(3|2" },
       { from: "|+1(32", add: "4", to: "+1(4|32) " },
       { from: "|+1(432) ", add: "5", to: "+1(5|43) 2" },
       { from: "|+1(543) 2 ", add: "6", to: "+1(6|54) 32" },
+      { from: "+|1(2", add: "3", to: "+|1(32" },
     ];
     for (let i = 0; i < arr.length; ++i) {
       const a = arr[i];
