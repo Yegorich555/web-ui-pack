@@ -1,4 +1,4 @@
-import { maskBeforeInput, MaskInput } from "../helpers/maskInput";
+import MaskTextInput from "./text.mask";
 import { onEvent } from "../indexHelpers";
 import { WUPcssIcon } from "../styles";
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
@@ -64,7 +64,9 @@ declare global {
     interface Defaults<T = string> extends WUPTextIn.GenDef<T> {}
     interface Options<T = string> extends WUPTextIn.GenOpt<T> {}
     interface JSXProps<T extends WUPTextControl> extends WUPBase.JSXProps<T> {
-      /** @deprecated Make input masked
+      /**
+       * Make input masked
+       * @deprecated
        * @example
        * "0000-00-00" // date in format yyyy-mm-dd
        * "##0.##0.##0.##0" // IPaddress
@@ -425,8 +427,7 @@ export default class WUPTextControl<
   protected gotBeforeInput(e: InputEvent): void {
     if (this._opts.mask) {
       this.#maskTimerEnd?.call(this);
-      maskBeforeInput(e);
-      // (this.$refInput as any)._showRemovedChunk = r?.showRemovedChunk;
+      MaskTextInput.handleBeforInput(e);
     }
   }
 
@@ -457,7 +458,7 @@ export default class WUPTextControl<
     }
   }
 
-  maskInput?: MaskInput;
+  maskInput?: MaskTextInput;
   #maskTimerEnd?: () => void; // required to rollback value immediately if user types next (otherwise cursor can shift wrong if type several 'ab' at once)
   /** Called to apply mask-behavior (on "input" event) */
   protected maskInputProcess(e: WUPText.GotInputEvent | null): string {
@@ -469,36 +470,18 @@ export default class WUPTextControl<
       return v; // ignore mask prefix/suffix if user isn't touched input; it appends only by focusGot
     }
     const { maskholder, mask } = this._opts;
-    this.maskInput = this.maskInput ?? new MaskInput(mask!);
+    this.maskInput = this.maskInput ?? new MaskTextInput(mask!);
     const mi = this.maskInput;
+
+    let declinedChars = 0;
     let position = el.selectionStart ?? el.value.length;
 
-    const prev = (e?.target as any)?._prev;
-    let canShowRemoved = false;
-    if (prev) {
-      switch (e!.inputType) {
-        case "insertText":
-        case "insertFromPaste":
-          canShowRemoved = true;
-          position = mi.insert(prev.text, prev.position);
-          break;
-        case "deleteContentForward":
-          position = mi.deleteAfter(prev.position);
-          break;
-        case "deleteContentBackward":
-          position = mi.deleteBefore(prev.position);
-          break;
-        case "historyUndo":
-          break; // todo implement
-        case "historyRedo":
-          break;
-        default:
-          console.warn(e!.inputType);
-          mi.parse(el.value);
-          break;
-      }
+    if (!e) {
+      mi.parse(v);
     } else {
-      mi.parse(el.value);
+      const r = mi.handleInput(e);
+      declinedChars = r.declinedChars;
+      position = r.position;
     }
 
     const setMaskHolder = (str: string, leftLength: number): void => {
@@ -521,15 +504,14 @@ export default class WUPTextControl<
     const setV = (): void => {
       el.value = mi.value;
       setMaskHolder(el.value, mi.leftLength);
-      el.selectionStart = position - removedChars;
+      el.selectionStart = position - declinedChars;
       el.selectionEnd = el.selectionStart;
       this.#maskTimerEnd = undefined;
     };
 
-    const removedChars = canShowRemoved ? Math.max(v.length - mi.value.length, 0) : 0; // chars removed by mask
-    if (removedChars || (el as any)._showRemovedChunk) {
-      setMaskHolder(v, mi.leftLength - removedChars + ((el as any)._showRemovedChunk ? 1 : 0));
-      position += removedChars;
+    if (declinedChars || (el as any)._showRemovedChunk) {
+      setMaskHolder(v, mi.leftLength - declinedChars + ((el as any)._showRemovedChunk ? 1 : 0));
+      position += declinedChars;
       const t = setTimeout(setV, 100); // set value after time to show user typed value before mask applied
       this.#maskTimerEnd = () => {
         clearTimeout(t);
@@ -538,7 +520,7 @@ export default class WUPTextControl<
     } else {
       setV();
     }
-    delete (el as any)._showRemovedChunk;
+    delete (el as any)._showRemovedChunk; // todo do we need this ???
     return mi.value;
   }
 
