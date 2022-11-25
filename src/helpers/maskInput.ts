@@ -22,6 +22,8 @@ interface IMaskInputResult {
 interface IDigChunk {
   index: number;
   text: string;
+  isTouched?: true;
+
   isDig: true;
   min: number;
   max: number;
@@ -31,6 +33,7 @@ interface IDigChunk {
 interface ISymChunk {
   index: number;
   text: string;
+  isTouched?: true;
   isDig?: false;
 }
 
@@ -82,13 +85,15 @@ function parsePattern(pattern: string): IInputChunk[] {
  */
 export default function maskInput(value: string, pattern: string, options?: IMaskInputOptions): IMaskInputResult {
   options = { prediction: true, lazy: true, ...options };
-  // todo need to define new cursor position if it was pointed in options
-
   const chunks = parsePattern(pattern);
 
   if (!value) {
     const $1 = chunks[0];
-    const text = $1.isDig ? "" : $1.text; // returns prefix if possible //WARN: what about suffix when prefix not defined ???
+    $1.isTouched = true;
+    if ($1.isDig) {
+      $1.text = "";
+    }
+    const { text } = $1; // returns prefix if possible //WARN: what about suffix when prefix not defined ???
     return {
       isCompleted: false,
       text,
@@ -102,6 +107,7 @@ export default function maskInput(value: string, pattern: string, options?: IMas
   let canShift: number | null = null;
   for (let i = 0; pi < chunks.length && i < value.length; ++pi) {
     const chunk = chunks[pi];
+    chunk.isTouched = true;
     if (chunk.isDig) {
       chunk.text = "";
       for (let ci = 0; ci < chunk.max && i < value.length; ++ci, ++i) {
@@ -128,11 +134,10 @@ export default function maskInput(value: string, pattern: string, options?: IMas
           // ++i;
           break;
         } else {
-          --ci; // : otherwise skip this char
+          --ci; // otherwise skip this char
         }
       }
     } else {
-      // console.warn("before", { chunk, pi, i, v: value[i] });
       canShift = 0;
       for (let ci = 0; ci < chunk.text.length && i < value.length; ++ci) {
         if (chunk.text[ci] === value[i] || /[., _+-/\\]/.test(value[i])) {
@@ -140,9 +145,6 @@ export default function maskInput(value: string, pattern: string, options?: IMas
           canShift = null;
         }
       }
-      // !matches && --i;
-      // console.log("after", { chunk, pi, i, v: value[i] });
-      // i += chunk.text.length; // analyze of chars doesn't required since it's not changable
     }
   }
 
@@ -166,11 +168,11 @@ export default function maskInput(value: string, pattern: string, options?: IMas
 
   const r: IMaskInputResult = {
     text: chunks.reduce((str, c, i) => (i < pi ? str + c.text : str), ""),
-    isCompleted:
-      pi >= chunks.length && (!chunks[pi - 1].isDig || chunks[pi - 1].text.length >= (chunks[pi - 1] as IDigChunk).min),
+    // isCompleted: pi >= chunks.length && (!last.isDig || last.text.length >= last.min),
+    isCompleted: pi >= chunks.length && (!last.isDig || !!last.isCompleted),
     leftLength,
     chunks,
-    lastChunk: chunks[pi - 1],
+    lastChunk: last,
   };
 
   return r;
@@ -186,95 +188,21 @@ function findChunkByCursor(this: IMaskInputResult, inputCursor: number): { chunk
 }
 
 /* Call it on 'beforeinput' event to improve logic */
-export function maskBeforeInput(
-  e: InputEvent,
-  pattern: string,
-  options?: IMaskInputOptions
-): { showRemovedChunk?: boolean } | undefined {
-  options = { prediction: true, lazy: true, ...options };
-
-  const isAdd = e.inputType === "insertText" || "insertFromPaste";
-  const isDel = !isAdd && e.inputType === "deleteContentForward";
-  const isBackDel = !isAdd && !isDel && e.inputType === "deleteContentBackward";
-  if (!isAdd && !isDel && !isBackDel) {
-    return;
-  }
-
+export function maskBeforeInput(e: InputEvent): void {
   const el = e.target as HTMLInputElement;
   if (el.selectionStart !== el.selectionEnd) {
+    delete (el as any)._prev;
     return;
   }
-  (e.target as any)._prev = {
+
+  (el as any)._prev = {
     position: el.selectionStart,
     value: el.value,
     text: e.data,
   };
-
-  if (isAdd) {
-    return;
-  }
-
-  const v = el.value;
-  const from = el.selectionStart!;
-
-  // Process delete: when user tries to remove not digit chunk need to remove the whole chunk + 1 num
-  if (!options?.prediction || from !== el.selectionEnd) {
-    return; // skip action if several chars are selected
-  }
-
-  const removeIndex = (isBackDel ? 0 : 1) + from - 1; // char that will be removed
-  if (removeIndex >= v.length || removeIndex < 0) {
-    return; // nothing to remove
-  }
-
-  // case when 1234-- for pattern 0000-- and user tries to remove last number; prediction adds removed separator again
-  // let i = removeIndex;
-  const mr = maskInput(el.value, pattern, options);
-  const { chunk: removeChunk, cursor } = findChunkByCursor.call(mr, removeIndex);
-  let i = isBackDel ? removeIndex - removeChunk.text.length + 1 : removeIndex;
-  if (removeChunk.isDig) {
-    // console.warn({ i });
-    // if (removeChunk.text.length === 1 && i === 0) {
-    //   el.selectionStart = i;
-    //   el.selectionEnd = i;
-    // }
-    // todo: case1 when user removes required digits it's replaced by zeros but need to shift other digits from chunks
-    return; // digits are removed by default
-  }
-
-  const nextChunk = mr.chunks[isBackDel ? removeChunk.index - 1 : removeChunk.index + 1];
-  let next: string;
-  if (
-    isBackDel &&
-    nextChunk?.isDig &&
-    nextChunk.text.length > nextChunk.min &&
-    (removeChunk !== mr.lastChunk || nextChunk.text.length < nextChunk.max)
-  ) {
-    if (removeChunk === mr.lastChunk && nextChunk.text.length < nextChunk.max) {
-      return; // rule: "12.|"" + Backspace >>> remove only separator since optional number are possible
-    }
-    next = v; // rule: "123.|45.789.387" + Backspace >>> 12|.45.789.387 for ##0.##0.##0.##0
-  } else {
-    next = v.substring(0, i) + v.substring(from); // remove chunk otherwise it's impossible
-    const willVal = next.substring(0, i) + next.substring(i + 1);
-    if (isDel && next === maskInput(willVal, pattern, options).text) {
-      // todo: case1 when user removes required digits it's replaced by zeros but need to shift other digits from chunks
-      const iNextChunk = removeIndex - (cursor - removeChunk.text.length); // startIndex char of next chunk
-      i = iNextChunk; // rule: '+|1(23' + Del >>> '+1(|3'; "123|.456.789.387" + Del '123|.456.789.387'
-    }
-  }
-
-  // console.warn({ next, i, iNextChunk, v, mr, nextChunk, from, removeChunk });
-  if (!next) {
-    return { showRemovedChunk: true }; // rule: "+1(|..." + Backspace >>> nothing to remove and need to hide&show symbol
-  }
-
-  el.value = next;
-  el.selectionStart = i;
-  el.selectionEnd = i;
 }
 
-// console.warn(maskInput("+1(234) 9675-123", "+1(000) 000-0000"));
+console.warn(maskInput("+1(234) 96-123", "+1(000) 000-0000", { lazy: false }));
 // console.warn(maskInput("1234-4-", "0000-00-00"));
 // console.warn(maskInput("4+1(23", "+1(000) 000-0000"));
 // console.warn(maskInput("+41(23", "+1(000) 000-0000"));
@@ -294,11 +222,9 @@ export class MaskInput {
   /** Converts pointed value to masked-value and update internal state */
   parse(value: string): string {
     const mr = maskInput(value, this.pattern, this.options);
-    this.value = mr.text;
+    // todo remove calculation from maskInput
     this.chunks = mr.chunks;
-    this.#lastChunk = this.chunks[this.chunks.length - 1];
-    this.isCompleted = mr.isCompleted;
-    this.leftLength = mr.leftLength;
+    this.updateState();
     return this.value;
   }
 
@@ -311,7 +237,8 @@ export class MaskInput {
     return { chunk, posChunk: chunk.text.length + pos };
   }
 
-  /** Add char at pointed position; returns next cursor position */
+  /** Add char at pointed position;
+   *  @returns next cursor position */
   insert(char: string, pos: number): number {
     const prevPos = pos;
     const atTheEnd = pos >= this.value.length;
@@ -341,9 +268,141 @@ export class MaskInput {
     }
     return pos;
   }
+
+  /** Delete a char after pointed position: when user presses 'Delete';
+   *  @returns next cursor position */
+  deleteAfter(position: number): number {
+    throw new Error("Method not implemented.");
+  }
+
+  /** Delete a char before pointed position: when user presses 'Backspace'
+   *  @returns next cursor position */
+  deleteBefore(position: number): number {
+    /**
+     * +1(234) 343|-4: remove char, shiftDigits. If lastDigit isEmpty: remove isTouched
+     * +1(234) 343|-: remove char, shiftDigits. if lastDigit incompleted: remove separator chunk
+     * +1(234) 343-4|: remove char, shiftDigits. if lastDigit incompleted: remove next separator chunk
+     */
+
+    const resetChunk = (c: IInputChunk): void => {
+      delete c.isTouched;
+      if (c.isDig) {
+        c.text = "#".repeat(c.max - c.min) + "0".repeat(c.min);
+      }
+    };
+
+    --position;
+    let { chunk, posChunk } = this.findChunkByCursor(position);
+    if (!chunk.isDig) {
+      if (chunk.index === 0) {
+        position = chunk.text.length; // impossible to remove prefix: so set cursor to the end
+      } else {
+        const next = this.chunks[chunk.index + 1] as IDigChunk;
+        !next?.text && resetChunk(chunk);
+        next && !next.text && resetChunk(next); // clear state next chunk after separator
+
+        position -= posChunk + 1;
+        chunk = this.chunks[chunk.index - 1]; // go to prevChunk
+        posChunk = chunk.text.length - 1;
+      }
+    }
+
+    if (chunk.isDig) {
+      const was = chunk.isDig;
+      chunk.text = chunk.text.substring(0, posChunk) + chunk.text.substring(posChunk + 1);
+      chunk.isCompleted = chunk.text.length >= chunk.min;
+      if (was && !chunk.isCompleted) {
+        // shift/recalc chunks
+        let prev = chunk;
+        for (let i = chunk.index + 2; i < this.chunks.length; i += 2) {
+          const next = this.chunks[i] as IDigChunk;
+          if (!next.text.length || !next.isTouched) {
+            resetChunk(next);
+            break;
+          }
+          prev.text += next.text[0];
+          next.text = next.text.substring(1);
+          prev = next;
+        }
+        if (prev !== chunk) {
+          chunk.isCompleted = true;
+          prev.isCompleted = prev.text.length >= prev.min; // recalc last chunk
+        } else {
+          // if no digit chunks at the right need to remove separator
+          const next = this.chunks[chunk.index + 1];
+          if (next) {
+            delete next.isTouched;
+          }
+        }
+      }
+
+      this.updateState();
+    }
+
+    return position;
+  }
+
+  /** Update state based on chunks; call it when chunks are changed to recalc value etc. */
+  private updateState(): void {
+    // find last processed chunk
+    let l = this.chunks.findIndex((c) => !c.isTouched) - 1;
+    const endIndex = this.chunks.length - 1;
+    if (l === -2) {
+      l = endIndex;
+    } else if (l === endIndex && (this.chunks[l] as IDigChunk).isCompleted) {
+      ++l; // append suffix at the end if all chunks are completed & only lacks suffix
+    } else if (this.options!.prediction && l !== endIndex) {
+      const last = this.chunks[l];
+      if (last.isDig && last.max === last.text.length) {
+        ++l; // append suffix if prev digitChunk is filled completely
+      }
+    }
+    this.#lastChunk = this.chunks[l];
+
+    // find leftLength for maskholder
+    const last = this.#lastChunk;
+    this.leftLength = last.isDig ? last.max - last.text.length : 0; // if last proccess chunk is digit than need to call diff actual and max
+    for (let i = last.index + 1; i <= endIndex; ++i) {
+      this.leftLength += this.chunks[i].text.length;
+    }
+
+    // get text from chunks
+    this.value = "";
+    for (let i = 0; i <= last.index; ++i) {
+      this.value += this.chunks[i].text;
+    }
+
+    // define whether all chunks processed
+    this.isCompleted = last.index === endIndex && (!last.isDig || !!last.isCompleted);
+
+    // console.warn("update state", this, this.#lastChunk);
+  }
 }
 
-// const m = new MaskInput("+1(000) 000-0000");
-// console.warn(m.parse);
-// 12a|345678
-// 123.456.78
+/**
+ * +1(234) 343|-4: remove char, shiftDigits. If lastDigit isEmpty: remove isTouched
+ * +1(234) 343|-: remove char, shiftDigits. if lastDigit incompleted: remove separator chunk
+ * +1(234) 343-4|: remove char, shiftDigits. if lastDigit incompleted: remove next separator chunk
+ * ##0|.##0
+ */
+
+// const testChunks = [
+//   { text: "+1(", index: 0, isTouched: true },
+//   { text: "123", isDig: true, max: 3, min: 3, index: 1, isTouched: true, isCompleted: true },
+//   { text: ") ", index: 2, isTouched: true },
+//   /** removed chunks */
+//   { text: "21", isDig: true, max: 3, min: 3, index: 3, isTouched: true, isCompleted: false },
+//   { text: "-", index: 4, isTouched: true },
+
+//   { text: "", isDig: true, max: 4, min: 4, index: 5, isTouched: true, isCompleted: false },
+// ];
+
+// const testChunks2 = [
+//   { text: "+1(", index: 0, isTouched: true },
+//   { text: "123", isDig: true, max: 3, min: 3, index: 1, isTouched: true, isCompleted: true },
+//   { text: ") ", index: 2, isTouched: true },
+//   /** removed chunks */
+//   { text: "213", isDig: true, max: 3, min: 3, index: 3, isTouched: true, isCompleted: false },
+//   { text: "-", index: 4, isTouched: true },
+//   { text: "4", isDig: true, max: 4, min: 4, index: 5, isTouched: true, isCompleted: false },
+// ];

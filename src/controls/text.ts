@@ -430,8 +430,8 @@ export default class WUPTextControl<
   protected gotBeforeInput(e: InputEvent): void {
     if (this._opts.mask) {
       this.#maskTimerEnd?.call(this);
-      const r = maskBeforeInput(e, this._opts.mask);
-      (this.$refInput as any)._showRemovedChunk = r?.showRemovedChunk;
+      maskBeforeInput(e);
+      // (this.$refInput as any)._showRemovedChunk = r?.showRemovedChunk;
     }
   }
 
@@ -479,14 +479,21 @@ export default class WUPTextControl<
     const mi = this.#maskInput;
     let position = el.selectionStart ?? el.value.length;
 
-    const prev = (e?.target as any)._prev;
+    const prev = (e?.target as any)?._prev;
+    let canShowRemoved = false;
     if (prev) {
       switch (e!.inputType) {
         case "insertText":
         case "insertFromPaste":
+          canShowRemoved = true;
           position = mi.insert(prev.text, prev.position);
           break;
-        // todo case delete here
+        case "deleteContentForward":
+          position = mi.deleteAfter(prev.position);
+          break;
+        case "deleteContentBackward":
+          position = mi.deleteBefore(prev.position);
+          break;
         default:
           // todo handle Ctrl+Z, +Y properly
           console.warn(e!.inputType);
@@ -522,7 +529,7 @@ export default class WUPTextControl<
       this.#maskTimerEnd = undefined;
     };
 
-    const removedChars = Math.max(v.length - mi.value.length, 0); // chars removed by mask
+    const removedChars = canShowRemoved ? Math.max(v.length - mi.value.length, 0) : 0; // chars removed by mask
     if (removedChars || (el as any)._showRemovedChunk) {
       setMaskHolder(v, mi.leftLength - removedChars + ((el as any)._showRemovedChunk ? 1 : 0));
       position += removedChars;

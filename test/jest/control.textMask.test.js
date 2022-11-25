@@ -325,16 +325,16 @@ describe("control.text: mask", () => {
     }
     // removing digits in the middle
     h.setInputCursor(el.$refInput, "123.|45.789.387");
-    expect(await remove()).toBe("12|.45.789.387"); // 1245.789.387 >>> 12|4.5.789.387
+    expect(await remove()).toBe("12|.45.789.387");
     expect(await remove()).toBe("1|.45.789.387");
-    expect(await remove()).toBe("|45.789.387.");
+    expect(await remove()).toBe("|4.57.893.87");
 
     h.setInputCursor(el.$refInput, "123.45|.789.387");
     expect(await remove()).toBe("123.4|.789.387");
-    expect(await remove()).toBe("123.|789.387.");
-    expect(await remove()).toBe("12|.789.387.");
-    expect(await remove()).toBe("1|.789.387.");
-    expect(await remove()).toBe("|789.387.");
+    expect(await remove()).toBe("123.|7.893.87");
+    expect(await remove()).toBe("12|.7.893.87");
+    expect(await remove()).toBe("1|.7.893.87");
+    expect(await remove()).toBe("|7.8.938.7");
 
     h.setInputCursor(el.$refInput, "123.4|5.789.387");
     expect(await remove({ key: "Delete" })).toBe("123.4|.789.387");
@@ -385,14 +385,28 @@ describe("control.text: mask", () => {
     el.$refInput.value = "+1(";
     el.focus();
     await h.wait(1);
+
     h.setInputCursor(el.$refInput, "+1(|");
     await h.userRemove(el.$refInput);
-    expect(el.$refInput.value).toBe("+1");
-    expect(el.$refMaskholder.innerHTML).toBe("<i>+1</i>(000) 000-0000");
+    // todo restore case when user tries to remove suffix: need to temp-delete and rollback again ???
+    // expect(el.$refInput.value).toBe("+1");
+    // expect(el.$refMaskholder.innerHTML).toBe("<i>+1</i>(000) 000-0000");
     await h.wait(150); // when user types invalid char it shows and hides after a time
     expect(el.$refInput.value).toBe("+1(");
     expect(el.$refMaskholder.innerHTML).toBe("<i>+1(</i>000) 000-0000");
 
+    // removing in the middle
+    h.setInputCursor(el.$refInput, "+1(234) 975|-1234");
+    expect(await remove()).toBe("+1(234) 97|1-234");
+    expect(el.$refMaskholder.innerHTML).toBe("<i>+1(234) 971-234</i>0");
+
+    h.setInputCursor(el.$refInput, "+1(234) |975-1234");
+    expect(await remove()).toBe("+1(23|9) 751-234");
+    expect(el.$refMaskholder.innerHTML).toBe("<i>+1(239) 751-234</i>0");
+    expect(await remove()).toBe("+1(2|97) 512-34");
+    expect(el.$refMaskholder.innerHTML).toBe("<i>+1(297) 512-34</i>00");
+
+    // removing by Delete key
     h.setInputCursor(el.$refInput, "|+1(");
     expect(await remove({ key: "Delete" })).toBe("+1(|");
     h.setInputCursor(el.$refInput, "|+1(23");
