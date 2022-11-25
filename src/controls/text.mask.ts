@@ -174,7 +174,7 @@ export default class MaskTextInput {
     const endIndex = this.chunks.length - 1;
     if (l === -2) {
       l = endIndex;
-    } else if (l === endIndex && (this.chunks[l] as IDigChunk).isCompleted) {
+    } else if (l === endIndex - 1 && (this.chunks[l] as IDigChunk).isCompleted) {
       ++l; // append suffix at the end if all chunks are completed & only lacks suffix
     } else if (this.options!.prediction && l !== endIndex) {
       const last = this.chunks[l];
