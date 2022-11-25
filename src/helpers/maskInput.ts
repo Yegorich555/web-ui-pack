@@ -202,21 +202,18 @@ export function maskBeforeInput(e: InputEvent): void {
   };
 }
 
-console.warn(maskInput("+1(234) 96-123", "+1(000) 000-0000", { lazy: false }));
-// console.warn(maskInput("1234-4-", "0000-00-00"));
-// console.warn(maskInput("4+1(23", "+1(000) 000-0000"));
-// console.warn(maskInput("+41(23", "+1(000) 000-0000"));
-
 export class MaskInput {
   #lastChunk: IInputChunk = { index: -1, text: "" };
   chunks: IInputChunk[] = [];
   value = "";
   isCompleted = false;
   leftLength = 0;
+  prefix = "";
 
   constructor(public pattern: string, private options?: IMaskInputOptions) {
     this.options = { prediction: true, lazy: true, ...options };
     this.parse("");
+    this.prefix = this.chunks[0].isDig ? this.chunks[0].text : "";
   }
 
   /** Converts pointed value to masked-value and update internal state */

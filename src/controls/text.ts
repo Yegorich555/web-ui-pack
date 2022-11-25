@@ -1,4 +1,4 @@
-import maskInput, { maskBeforeInput, MaskInput } from "../helpers/maskInput";
+import { maskBeforeInput, MaskInput } from "../helpers/maskInput";
 import { onEvent } from "../indexHelpers";
 import { WUPcssIcon } from "../styles";
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
@@ -298,12 +298,8 @@ export default class WUPTextControl<
       email: (v, setV) => setV && (!v || !emailReg.test(v)) && "Invalid email address",
       _invalidParse: (v) => v === undefined && "Invalid value",
       mask: (v, setV, c) => {
-        if (setV && v !== undefined && !!(c as WUPTextControl)._opts.mask) {
-          const m = maskInput(v, (c as WUPTextControl)._opts.mask!);
-          const pref = !m.chunks[0].isDig ? m.chunks[0].text : "";
-          return !m.isCompleted && v !== pref && "Incomplete value";
-        }
-        return false;
+        const refMask = (c as WUPTextControl).maskInput;
+        return (v === undefined || (setV && !!refMask && v !== refMask.prefix)) && "Incomplete value";
       },
     },
   };
@@ -395,9 +391,8 @@ export default class WUPTextControl<
   }
 
   protected override gotFocusLost(): void {
-    if (this._opts.mask) {
-      const prefAndSuf = maskInput("", this._opts.mask).text;
-      if (this.$refInput.value === prefAndSuf) {
+    if (this.maskInput && this.$refInput.value) {
+      if (this.$refInput.value === this.maskInput.prefix) {
         this.$refInput.value = ""; // rollback prefix/suffix if user types nothing
         this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
       }
@@ -439,7 +434,6 @@ export default class WUPTextControl<
   /** Called when user types text OR when need to apply/reset mask (on focusGot, focusLost) */
   protected gotInput(e: WUPText.GotInputEvent): void {
     let txt = e.currentTarget.value;
-    // txt = this._opts.mask ? this.maskInputProcess(this._opts.mask, this._opts.maskholder) : txt;
     txt = this._opts.mask ? this.maskInputProcess(e) : txt;
 
     const outRef: { showError?: boolean } = {};
@@ -463,7 +457,7 @@ export default class WUPTextControl<
     }
   }
 
-  #maskInput?: MaskInput;
+  maskInput?: MaskInput;
   #maskTimerEnd?: () => void; // required to rollback value immediately if user types next (otherwise cursor can shift wrong if type several 'ab' at once)
   /** Called to apply mask-behavior (on "input" event) */
   protected maskInputProcess(e: WUPText.GotInputEvent | null): string {
@@ -475,8 +469,8 @@ export default class WUPTextControl<
       return v; // ignore mask prefix/suffix if user isn't touched input; it appends only by focusGot
     }
     const { maskholder, mask } = this._opts;
-    this.#maskInput = this.#maskInput ?? new MaskInput(mask!);
-    const mi = this.#maskInput;
+    this.maskInput = this.maskInput ?? new MaskInput(mask!);
+    const mi = this.maskInput;
     let position = el.selectionStart ?? el.value.length;
 
     const prev = (e?.target as any)?._prev;
@@ -494,8 +488,11 @@ export default class WUPTextControl<
         case "deleteContentBackward":
           position = mi.deleteBefore(prev.position);
           break;
+        case "historyUndo":
+          break; // todo implement
+        case "historyRedo":
+          break;
         default:
-          // todo handle Ctrl+Z, +Y properly
           console.warn(e!.inputType);
           mi.parse(el.value);
           break;

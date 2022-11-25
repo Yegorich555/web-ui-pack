@@ -88,12 +88,13 @@ export default function TextControlView() {
           }}
         />
         <wup-text
-          name="ipaddr"
+          name="phone"
           label="Phone number (with mask)"
           mask="+1(000) 000-0000"
           maskholder="+1(000) 000-0000"
           ref={(el) => {
             if (el) {
+              el.$options.validations = { min: 3 };
               // el.$options.autoFocus = true;
             }
           }}
