@@ -224,11 +224,13 @@ export default class MaskTextInput {
           position = this.deleteBefore(prev.position);
           break;
         case "historyUndo":
+          this.parse(el.value);
           break; // todo implement
         case "historyRedo":
+          this.parse(el.value);
           break;
         default:
-          console.warn(e!.inputType);
+          // console.warn(e!.inputType);
           this.parse(el.value);
           break;
       }
@@ -277,15 +279,7 @@ export default class MaskTextInput {
     return pos;
   }
 
-  /** Delete a char after pointed position: when user presses 'Delete';
-   *  @returns next cursor position */
-  deleteAfter(position: number): number {
-    throw new Error("Method not implemented.");
-  }
-
-  /** Delete a char before pointed position: when user presses 'Backspace'
-   *  @returns next cursor position */
-  deleteBefore(position: number): number {
+  private deleteChar(position: number, isBefore: boolean): number {
     /**
      * +1(234) 343|-4: remove char, shiftDigits. If lastDigit isEmpty: remove isTouched
      * +1(234) 343|-: remove char, shiftDigits. if lastDigit incompleted: remove separator chunk
@@ -299,19 +293,35 @@ export default class MaskTextInput {
       }
     };
 
-    --position;
+    isBefore && --position;
     let { chunk, posChunk } = this.findChunkByCursor(position);
     if (!chunk.isDig) {
-      if (chunk.index === 0) {
+      if (chunk.index === 0 && isBefore) {
+        // todo need hide/show remove char here
         position = chunk.text.length; // impossible to remove prefix: so set cursor to the end
       } else {
         const next = this.chunks[chunk.index + 1] as IDigChunk;
-        !next?.text && resetChunk(chunk);
+        const prev = this.chunks[chunk.index - 1] as IDigChunk;
+        !next?.text && resetChunk(chunk); // clear current chunk if next isEmpty or not exists
         next && !next.text && resetChunk(next); // clear state next chunk after separator
-
-        position -= posChunk + 1;
-        chunk = this.chunks[chunk.index - 1]; // go to prevChunk
-        posChunk = chunk.text.length - 1;
+        const canRemove = prev && !next.isTouched && prev.text.length !== prev.max; // whether possible to remove separator
+        canRemove && resetChunk(chunk); // clear current chunk if possible
+        // 1|-- + delete
+        // 1--| + backspace
+        if (isBefore) {
+          position -= posChunk + (canRemove ? 0 : 1); // go to prevChunk
+          posChunk = prev.text.length - 1;
+          if (!canRemove) {
+            chunk = prev; // "123.|456" + Backspace => "12|.456" or "12|4.56" (depends on min of prev)
+          }
+        } else if (!canRemove) {
+          // "123|.456" + Delete
+          position += chunk.text.length - posChunk; // move cursor to the end
+          if (next?.isTouched) {
+            chunk = next; // if next not empty go to next:  "123|.456" + Delete => "123.|56"
+            posChunk = 0;
+          }
+        }
       }
     }
 
@@ -343,11 +353,22 @@ export default class MaskTextInput {
           }
         }
       }
-
-      this.updateState();
     }
 
+    this.updateState();
     return position;
+  }
+
+  /** Delete a char after pointed position: when user presses 'Delete';
+   *  @returns next cursor position */
+  deleteAfter(position: number): number {
+    return this.deleteChar(position, false);
+  }
+
+  /** Delete a char before pointed position: when user presses 'Backspace'
+   *  @returns next cursor position */
+  deleteBefore(position: number): number {
+    return this.deleteChar(position, true);
   }
 }
 

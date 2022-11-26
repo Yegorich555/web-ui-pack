@@ -335,7 +335,9 @@ describe("control.text: mask", () => {
     h.setInputCursor(el.$refInput, "123.4.5.6|");
     const removeResult = [
       "123.4.5.|", //
+      "123.4.5|",
       "123.4.|",
+      "123.4|",
       "123.|",
       "12|",
       "1|",
@@ -358,22 +360,26 @@ describe("control.text: mask", () => {
     expect(await remove()).toBe("1|.7.893.87");
     expect(await remove()).toBe("|7.8.938.7");
 
-    return; // todo implement
+    h.setInputCursor(el.$refInput, "1.|");
+    expect(await remove()).toBe("1|");
+
     h.setInputCursor(el.$refInput, "123.4|5.789.387");
     expect(await remove({ key: "Delete" })).toBe("123.4|.789.387");
-    expect(await remove({ key: "Delete" })).toBe("123.4|78.938.7");
-    expect(await remove({ key: "Delete" })).toBe("123.4|8.938.7");
-    expect(await remove({ key: "Delete" })).toBe("123.4|.938.7");
-    expect(await remove({ key: "Delete" })).toBe("123.4|93.87");
-    expect(await remove({ key: "Delete" })).toBe("123.4|3.87");
-    expect(await remove({ key: "Delete" })).toBe("123.4|.87");
-    expect(await remove({ key: "Delete" })).toBe("123.4|87.");
-    expect(await remove({ key: "Delete" })).toBe("123.4|7.");
-    expect(await remove({ key: "Delete" })).toBe("123.4|.");
-    expect(await remove({ key: "Delete" })).toBe("123.4|");
+    expect(await remove({ key: "Delete" })).toBe("123.4.|89.387");
+    expect(await remove({ key: "Delete" })).toBe("123.4.|9.387");
+    expect(await remove({ key: "Delete" })).toBe("123.4.|3.87");
+    expect(await remove({ key: "Delete" })).toBe("123.4.|8.7");
+    expect(await remove({ key: "Delete" })).toBe("123.4.|7.");
+    expect(await remove({ key: "Delete" })).toBe("123.4.|");
 
     h.setInputCursor(el.$refInput, "123|.456.789.387");
     expect(await remove({ key: "Delete" })).toBe("123.|56.789.387");
+
+    h.setInputCursor(el.$refInput, "1|.");
+    expect(await remove({ key: "Delete" })).toBe("1|");
+
+    h.setInputCursor(el.$refInput, "123|.");
+    expect(await remove({ key: "Delete" })).toBe("123.|");
   });
 
   test("+1(000) 000-0000", async () => {
@@ -415,6 +421,36 @@ describe("control.text: mask", () => {
     el.focus();
     await h.wait(1);
 
+    // type in the middle
+    h.setInputCursor(el.$refInput, "+1(234) 9|75-123");
+    // type 'ab'
+    await h.userTypeText(el.$refInput, "ab", { clearPrevious: false });
+    expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 9b|75-123");
+    expect(el.$refMaskholder.innerHTML).toBe("<i>+1(234) 9b75-123</i>");
+    await h.wait(150);
+    expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 9|75-123");
+    expect(el.$refMaskholder.innerHTML).toBe("<i>+1(234) 975-123</i>0");
+    // type digits
+    h.setInputCursor(el.$refInput, "+1(234) 9|75-123");
+    await h.userTypeText(el.$refInput, "4", { clearPrevious: false });
+    expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 94|7-5123"); // digits must be shifted
+
+    const arr = [
+      { from: "|+1(", add: "2", to: "+1(2|" },
+      { from: "|+1(2", add: "3", to: "+1(3|2" },
+      { from: "|+1(32", add: "4", to: "+1(4|32) " },
+      { from: "|+1(432) ", add: "5", to: "+1(5|43) 2" },
+      { from: "|+1(543) 2", add: "6", to: "+1(6|54) 32" },
+      { from: "+|1(2", add: "3", to: "+1(3|2" },
+    ];
+    for (let i = 0; i < arr.length; ++i) {
+      const a = arr[i];
+      h.setInputCursor(el.$refInput, a.from);
+      await h.userTypeText(el.$refInput, a.add, { clearPrevious: false });
+      expect(h.getInputCursor(el.$refInput)).toBe(a.to); // cursor must be shifted with digits
+    }
+
+    // removing
     h.setInputCursor(el.$refInput, "+1(|");
     await h.userRemove(el.$refInput);
     // todo restore case when user tries to remove suffix: need to temp-delete and rollback again ???
@@ -435,7 +471,6 @@ describe("control.text: mask", () => {
     expect(await remove()).toBe("+1(2|97) 512-34");
     expect(el.$refMaskholder.innerHTML).toBe("<i>+1(297) 512-34</i>00");
 
-    return; // todo implement
     // removing by Delete key
     h.setInputCursor(el.$refInput, "|+1(");
     expect(await remove({ key: "Delete" })).toBe("+1(|");
@@ -447,35 +482,6 @@ describe("control.text: mask", () => {
     h.setInputCursor(el.$refInput, "|+1(");
     await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
     expect(h.getInputCursor(el.$refInput)).toBe("+1(2|");
-
-    // type in the middle
-    h.setInputCursor(el.$refInput, "+1(234) 9|75-123");
-    // type 'ab'
-    await h.userTypeText(el.$refInput, "ab", { clearPrevious: false });
-    expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 9ab|75-123");
-    expect(el.$refMaskholder.innerHTML).toBe("<i>+1(234) 9ab75-123</i>");
-    await h.wait(150);
-    expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 9|75-123");
-    expect(el.$refMaskholder.innerHTML).toBe("<i>+1(234) 975-123</i>0");
-    // type digits
-    h.setInputCursor(el.$refInput, "+1(234) 9|75-123");
-    await h.userTypeText(el.$refInput, "4", { clearPrevious: false });
-    expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 94|7-5123"); // digits must be shifted
-
-    const arr = [
-      { from: "|+1(", add: "2", to: "+1(2|" },
-      { from: "|+1(2", add: "3", to: "+1(3|2" },
-      { from: "|+1(32", add: "4", to: "+1(4|32) " },
-      { from: "|+1(432) ", add: "5", to: "+1(5|43) 2" },
-      { from: "|+1(543) 2 ", add: "6", to: "+1(6|54) 32" },
-      { from: "+|1(2", add: "3", to: "+|1(32" },
-    ];
-    for (let i = 0; i < arr.length; ++i) {
-      const a = arr[i];
-      h.setInputCursor(el.$refInput, a.from);
-      await h.userTypeText(el.$refInput, a.add, { clearPrevious: false });
-      expect(h.getInputCursor(el.$refInput)).toBe(a.to); // cursor must be shifted with digits
-    }
   });
 
   test("$ #####0 USD", () => {

@@ -300,8 +300,9 @@ export default class WUPTextControl<
       email: (v, setV) => setV && (!v || !emailReg.test(v)) && "Invalid email address",
       _invalidParse: (v) => v === undefined && "Invalid value",
       mask: (v, setV, c) => {
+        // todo error appeared even by focusout
         const refMask = (c as WUPTextControl).maskInput;
-        return (v === undefined || (setV && !!refMask && v !== refMask.prefix)) && "Incomplete value";
+        return (v === undefined || (setV && !!refMask && refMask.value !== refMask.prefix)) && "Incomplete value";
       },
     },
   };
