@@ -474,14 +474,14 @@ export default class WUPTextControl<
     this.maskInput = this.maskInput ?? new MaskTextInput(mask!);
     const mi = this.maskInput;
 
-    let declinedChars = 0;
+    let declinedAdd = 0;
     let position = el.selectionStart ?? el.value.length;
 
     if (!e) {
       mi.parse(v);
     } else {
       const r = mi.handleInput(e);
-      declinedChars = r.declinedChars;
+      declinedAdd = r.declinedAdd;
       position = r.position;
     }
 
@@ -505,14 +505,14 @@ export default class WUPTextControl<
     const setV = (): void => {
       el.value = mi.value;
       setMaskHolder(el.value, mi.leftLength);
-      el.selectionStart = position - declinedChars;
+      el.selectionStart = position - declinedAdd;
       el.selectionEnd = el.selectionStart;
       this.#maskTimerEnd = undefined;
     };
 
-    if (declinedChars || (el as any)._showRemovedChunk) {
-      setMaskHolder(v, mi.leftLength - declinedChars + ((el as any)._showRemovedChunk ? 1 : 0));
-      position += declinedChars;
+    if (declinedAdd) {
+      setMaskHolder(v, mi.leftLength - declinedAdd);
+      position += declinedAdd;
       const t = setTimeout(setV, 100); // set value after time to show user typed value before mask applied
       this.#maskTimerEnd = () => {
         clearTimeout(t);
@@ -521,7 +521,6 @@ export default class WUPTextControl<
     } else {
       setV();
     }
-    delete (el as any)._showRemovedChunk; // todo do we need this ???
     return mi.value;
   }
 

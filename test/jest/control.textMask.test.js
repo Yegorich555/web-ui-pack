@@ -453,9 +453,8 @@ describe("control.text: mask", () => {
     // removing
     h.setInputCursor(el.$refInput, "+1(|");
     await h.userRemove(el.$refInput);
-    // todo restore case when user tries to remove suffix: need to temp-delete and rollback again ???
-    // expect(el.$refInput.value).toBe("+1");
-    // expect(el.$refMaskholder.innerHTML).toBe("<i>+1</i>(000) 000-0000");
+    expect(el.$refInput.value).toBe("+1");
+    expect(el.$refMaskholder.innerHTML).toBe("<i>+1</i>(000) 000-0000");
     await h.wait(150); // when user types invalid char it shows and hides after a time
     expect(el.$refInput.value).toBe("+1(");
     expect(el.$refMaskholder.innerHTML).toBe("<i>+1(</i>000) 000-0000");
