@@ -38,8 +38,8 @@ export default function TextControlView() {
           autoComplete="off"
           autoFocus={false}
           validations="window.myTextValidations"
-          mask=""
-          maskholder=""
+          mask={false}
+          maskholder={false}
         />
         <wup-text name="required" validations="myTextValidations" />
         <wup-text
@@ -91,7 +91,6 @@ export default function TextControlView() {
           name="phone"
           label="Phone number (with mask)"
           mask="+1(000) 000-0000"
-          maskholder="+1(000) 000-0000"
           ref={(el) => {
             if (el) {
               el.$options.validations = { min: 3 };

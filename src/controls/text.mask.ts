@@ -68,6 +68,11 @@ export default class MaskTextInput {
     };
   }
 
+  // /** Returns maskholder according to pattern for '##0.##0' returns '000.000' */
+  // static parseHolder(pattern: string): string {
+  //   return pattern.replace(/[#]g/, "0").replace(/[\0]g/, "0").replace(/[\1]g/, "#");
+  // }
+
   /** Splits pointed pattern to chunks */
   static parsePattern(pattern: string): IInputChunk[] {
     const chunks: IInputChunk[] = [];
@@ -226,7 +231,7 @@ export default class MaskTextInput {
           break;
         case "historyUndo":
           this.parse(el.value);
-          break; // todo implement
+          break; // todo implement: https://stackoverflow.com/questions/16195644/in-chrome-undo-does-not-work-properly-for-input-element-after-contents-changed-p
         case "historyRedo":
           this.parse(el.value);
           break;

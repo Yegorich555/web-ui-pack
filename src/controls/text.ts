@@ -30,8 +30,9 @@ export namespace WUPTextIn {
      * '#' // optional digit
      */
     mask?: string;
-    /** Replace missed masked values with placeholder; for date maskholder the same as format 'yyyy-mm-dd' */
-    maskholder?: string;
+    /** Placeholder for mask. By default it inherits from mask. To disabled it set 'false' or '' - empty string
+     *  for date maskholder can be 'yyyy-mm-dd' */
+    maskholder?: string | false;
     // todo when use mask need to change mobile-keyboard to numeric
   }
 
@@ -74,9 +75,11 @@ declare global {
        * `0` // required digit
        * '#' // optional digit
        */
-      mask?: string;
-      /** @deprecated Replace missed masked values with placeholder; for date maskholder the same as format 'yyyy-mm-dd' */
-      maskholder?: string;
+      mask?: string | false;
+      /** Placeholder for mask. By default it inherits from mask. To disabled it set 'false' or '' - empty string
+       *  for date maskholder can be 'yyyy-mm-dd'
+       *  @deprecated  */
+      maskholder?: string | false;
     }
     interface GotInputEvent extends InputEvent {
       currentTarget: HTMLInputElement;
@@ -407,6 +410,11 @@ export default class WUPTextControl<
     // apply mask options
     this._opts.mask = this.getAttribute("mask") ?? this._opts.mask;
     this._opts.maskholder = this.getAttribute("maskholder") ?? this._opts.maskholder;
+    const disabledHolder = this._opts.maskholder === "false" || this._opts.maskholder === "";
+    if (!this._opts.maskholder && !disabledHolder) {
+      this._opts.maskholder = this._opts.mask;
+    }
+
     if (!this._opts.maskholder && this.$refMaskholder) {
       this.$refMaskholder.remove();
       this.$refMaskholder = undefined;
