@@ -669,19 +669,22 @@ export default class WUPCalendarControl<
         this.selectItem(target);
         let dt = new Date(v);
         const a = this.$value;
-        /* istanbul ignore else */
         if (a) {
-          const key = this._opts.utc ? "UTC" : "";
-          dt = new Date(
-            dt.getUTCFullYear(),
-            dt.getUTCMonth(),
-            dt.getUTCDate(),
-            a[`get${key}Hours`](),
-            a[`get${key}Minutes`](),
-            a[`get${key}Seconds`](),
-            a[`get${key}Milliseconds`]()
-          );
+          if (this._opts.utc) {
+            dt.setUTCHours(a.getUTCHours(), a.getUTCMinutes(), a.getUTCSeconds(), a.getUTCMilliseconds());
+          } else {
+            dt = new Date(
+              dt.getUTCFullYear(),
+              dt.getUTCMonth(),
+              dt.getUTCDate(),
+              a.getHours(),
+              a.getMinutes(),
+              a.getSeconds(),
+              a.getMilliseconds()
+            );
+          }
         }
+
         this.setValue(dt as ValueType);
         this.$ariaSpeak(this.$refInput.value);
         // this.focusItem(target);

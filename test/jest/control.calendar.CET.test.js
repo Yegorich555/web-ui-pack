@@ -5,6 +5,6 @@
 import calendarTZtest from "./control.calendar.TZ";
 
 /** Test calendar with timezone Central European Time */
-describe(`control.calendar >> timezone: ${window.TZ}, offset: ${new Date().getTimezoneOffset()}`, () => {
+describe(`control.calendar >> timezone: ${window.TZ}, offset: ${new Date(2022, 9, 16).getTimezoneOffset()}`, () => {
   calendarTZtest();
 });

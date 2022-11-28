@@ -7,7 +7,7 @@ import calendarTZtest from "./control.calendar.TZ";
 import * as h from "../testHelper";
 
 /** Test calendar with timezone America/New_York */
-describe(`control.calendar >> timezone: ${window.TZ}, offset: ${new Date().getTimezoneOffset()}`, () => {
+describe(`control.calendar >> timezone: ${window.TZ}, offset: ${new Date(2022, 9, 16).getTimezoneOffset()}`, () => {
   calendarTZtest();
 
   test("dayPicker saves hours for DST", async () => {
