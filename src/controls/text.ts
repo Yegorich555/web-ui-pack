@@ -303,9 +303,11 @@ export default class WUPTextControl<
       email: (v, setV) => setV && (!v || !emailReg.test(v)) && "Invalid email address",
       _invalidParse: (v) => v === undefined && "Invalid value",
       mask: (v, setV, c) => {
-        // todo error appeared even by focusout
         const refMask = (c as WUPTextControl).maskInput;
-        return (v === undefined || (setV && !!refMask && refMask.value !== refMask.prefix)) && "Incomplete value";
+        return (
+          (v === undefined || (setV && !!refMask && refMask.value !== refMask.prefix && !refMask.isCompleted)) &&
+          "Incomplete value"
+        );
       },
     },
   };
@@ -397,11 +399,9 @@ export default class WUPTextControl<
   }
 
   protected override gotFocusLost(): void {
-    if (this.maskInput && this.$refInput.value) {
-      if (this.$refInput.value === this.maskInput.prefix) {
-        this.$refInput.value = ""; // rollback prefix/suffix if user types nothing
-        this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
-      }
+    if (this.maskInput?.prefix && this.$refInput.value === this.maskInput.prefix) {
+      this.$refInput.value = ""; // rollback prefix/suffix if user types nothing
+      this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
     }
     super.gotFocusLost();
   }
@@ -478,6 +478,7 @@ export default class WUPTextControl<
       el.value = v;
       return v; // ignore mask prefix/suffix if user isn't touched input; it appends only by focusGot
     }
+
     const { maskholder, mask } = this._opts;
     this.maskInput = this.maskInput ?? new MaskTextInput(mask!);
     const mi = this.maskInput;

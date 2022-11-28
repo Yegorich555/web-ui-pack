@@ -589,8 +589,8 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       () => {
         const arr = this.gotFocus();
         const r2 = onFocusLostEv(this, () => {
-          arr.forEach((f) => f());
           this.gotFocusLost();
+          arr.forEach((f) => f());
           r2();
           this.disposeLst.splice(this.disposeLst.indexOf(r2), 1);
         });
@@ -676,7 +676,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     const arr = Object.keys(vls)
-      .filter((key) => key.toString()[0] !== "_") // ignore rules started with _
+      // todo rollback for date ? .filter((key) => key.toString()[0] !== "_") // ignore rules started with _
       .sort((k1, k2) => {
         if (k1 === "required") return -1;
         if (k2 === "required") return 1;

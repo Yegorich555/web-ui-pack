@@ -50,7 +50,7 @@ export default class MaskTextInput {
   constructor(public pattern: string, private options?: IMaskInputOptions) {
     this.options = { prediction: true, lazy: true, ...options };
     this.parse("");
-    this.prefix = this.chunks[0].isDig ? this.chunks[0].text : "";
+    this.prefix = !this.chunks[0].isDig ? this.chunks[0].text : "";
   }
 
   /* Call it on 'beforeinput' event to improve logic */
@@ -376,3 +376,5 @@ export default class MaskTextInput {
     return this.deleteChar(position, true);
   }
 }
+
+// todo test with $ xx0 USD

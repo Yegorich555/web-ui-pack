@@ -10,15 +10,16 @@ initTestBaseControl({ type: WUPTextControl, htmlTag: "wup-text", onInit: (e) => 
 describe("control.text", () => {
   testTextControl(() => el);
 
+  // todo issue: set validations = { max:3 } and by focusout input must be valid despite value === undefined
+
   test("validation: mask", async () => {
-    // todo test it
     el.$options.mask = "$ 000";
-    el.$value = "";
     el.focus();
+    await h.wait(1);
     expect(el.$refInput.value).toBe("$ ");
-    expect(el.$value).toBe("$ ");
+    expect(el.$value).toBe(undefined); // mask prefix is applied but value not
     await h.wait();
-    expect(el.$refError).not.toBeDefined(); // todo issue here because it sees that value not empty but it's not correct
+    expect(el.$refError).not.toBeDefined();
 
     el.blur();
     await h.wait(1);
@@ -31,9 +32,12 @@ describe("control.text", () => {
     await h.wait();
     expect(el.$value).toBe("$ 2");
     expect(el.$isValid).toBe(false);
-    expect(el.$refError).toBeDefined();
-    expect(el.$refError).toMatchInlineSnapshot();
+    expect(el.$refError?.innerHTML).toMatchInlineSnapshot(
+      `"<span class="wup-hidden"></span><span>Incomplete value</span>"`
+    );
 
+    el.focus();
+    h.setInputCursor(el.$refInput, "$ 2|");
     await h.userTypeText(el.$refInput, "34", { clearPrevious: false });
     expect(el.$value).toBe("$ 234");
     el.blur();
@@ -46,7 +50,7 @@ describe("control.text", () => {
     el.blur();
     await h.wait();
     expect(el.$value).toBe("$ 2");
-    expect(el.$isValid).toBe(false); // because mask-validation is disabled via options
+    expect(el.$isValid).toBe(true); // because mask-validation is disabled via options
 
     // cover case when validation mask is enabled but mask is missed
     el.$value = "$ 2";

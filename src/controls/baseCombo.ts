@@ -462,11 +462,11 @@ export default abstract class WUPBaseComboControl<
       // todo try to avoid promise here and use super.setInputValue instead
       p.then((s) => {
         this.$refInput.value = s;
-        this._opts.mask && this.maskInputProcess(this._opts.mask, this._opts.maskholder);
+        this._opts.mask && this.maskInputProcess(null);
       });
     } else {
       this.$refInput.value = p;
-      this._opts.mask && this.maskInputProcess(this._opts.mask, this._opts.maskholder);
+      this._opts.mask && this.maskInputProcess(null);
     }
   }
 
