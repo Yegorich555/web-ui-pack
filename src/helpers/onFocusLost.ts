@@ -80,7 +80,6 @@ export default function onFocusLost(
     }
     const isFocused = (a: Node | null): boolean | null => a && (element === a || element.contains(a));
     const isStillFocused = e.relatedTarget instanceof Node && isFocused(e.relatedTarget);
-    // todo on controls it fires 2...4 times
     // console.warn("focusout", { rel: e.relatedTarget, act: document.activeElement });
     if (!isStillFocused && !isFocused(document.activeElement)) {
       listener.call(element, e);
@@ -91,5 +90,3 @@ export default function onFocusLost(
   element.addEventListener("focusout", focusout, { passive: true, ...options, once: false });
   return remove;
 }
-
-// todo remove all protected fields from all controls otherwise impossible to update prototype or event call in TS

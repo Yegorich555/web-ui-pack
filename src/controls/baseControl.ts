@@ -583,22 +583,20 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   protected override gotReady(): void {
     super.gotReady();
 
-    // todo check it: gotFocus not fired if append element and focus immediately without timeout
-    const r = onFocusGot(
-      this,
-      () => {
-        const arr = this.gotFocus();
-        const r2 = onFocusLostEv(this, () => {
-          this.gotFocusLost();
-          arr.forEach((f) => f());
-          r2();
-          this.disposeLst.splice(this.disposeLst.indexOf(r2), 1);
-        });
-        this.disposeLst.push(r2);
-      },
-      { debounceMs: this._opts.focusDebounceMs }
-    );
+    const onFocusGotHandler = (): void => {
+      const arr = this.gotFocus();
+      const r = onFocusLostEv(this, () => {
+        this.gotFocusLost();
+        arr.forEach((f) => f());
+        r();
+        this.disposeLst.splice(this.disposeLst.indexOf(r), 1);
+      });
+      this.disposeLst.push(r);
+    };
 
+    this.$isFocused && setTimeout(onFocusGotHandler); // case if append element and focus immediately
+
+    const r = onFocusGot(this, onFocusGotHandler, { debounceMs: this._opts.focusDebounceMs });
     this.disposeLst.push(r);
 
     // appendEvent removed by dispose()

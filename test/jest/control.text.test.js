@@ -12,6 +12,14 @@ describe("control.text", () => {
 
   // todo issue: set validations = { max:3 } and by focusout input must be valid despite value === undefined
 
+  test("onFocusGot with autofocus", async () => {
+    el = document.body.appendChild(document.createElement("wup-text"));
+    const spy = jest.spyOn(el, "gotFocus");
+    el.focus();
+    await h.wait(1);
+    expect(spy).toBeCalledTimes(1);
+  });
+
   test("validation: mask", async () => {
     el.$options.mask = "$ 000";
     el.focus();
