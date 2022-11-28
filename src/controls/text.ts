@@ -22,18 +22,18 @@ export namespace WUPTextIn {
 
   export interface Opt {
     /** Make input masked
+     * * inputmode='numeric' is applied if mask is pointed
      * @example
-     * "0000-00-00" // date in format yyyy-mm-dd
+     * "0000-00-00" // for date in format yyyy-mm-dd
      * "##0.##0.##0.##0" // IPaddress
      * "+1(000) 000-0000" // phoneNumber
-     * `0` // required digit
+     * '0' // required digit
      * '#' // optional digit
      */
     mask?: string;
-    /** Placeholder for mask. By default it inherits from mask. To disabled it set 'false' or '' - empty string
+    /** Placeholder for mask. By default it inherits from mask. To disabled it set 'false' or '' (empty string);
      *  for date maskholder can be 'yyyy-mm-dd' */
     maskholder?: string | false;
-    // todo when use mask need to change mobile-keyboard to numeric
   }
 
   export type Generics<
@@ -379,6 +379,8 @@ export default class WUPTextControl<
 
   protected override gotFocus(): Array<() => void> {
     const arr = super.gotFocus();
+    this.$refInput.inputMode = this._opts.mask ? "numeric" : "";
+
     const r = this.appendEvent(this.$refInput, "input", (e) => {
       (e as WUPText.GotInputEvent).setValuePrevented = false;
       (e as WUPText.GotInputEvent).preventSetValue = () => ((e as WUPText.GotInputEvent).setValuePrevented = true);

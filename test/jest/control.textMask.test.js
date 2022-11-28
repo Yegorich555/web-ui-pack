@@ -24,7 +24,7 @@ beforeEach(async () => {
   Element.prototype.scrollIntoView = jest.fn();
   el = document.body.appendChild(document.createElement("wup-text"));
   await h.wait(1); // wait for ready
-  el.$refInput.focus();
+  // el.$refInput.focus();
 });
 
 afterEach(() => {
@@ -75,7 +75,7 @@ describe("control.text: mask", () => {
     el.focus();
     await h.wait(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<label for="txt1"><span><span aria-hidden="true" maskholder=""><i></i>yyyy-mm-dd</span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
+      `"<label for="txt1"><span><span aria-hidden="true" maskholder=""><i></i>yyyy-mm-dd</span><input placeholder=" " type="text" id="txt1" autocomplete="off" inputmode="numeric"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
     );
 
     const typeText = [
@@ -177,7 +177,7 @@ describe("control.text: mask", () => {
     el.focus();
     await h.wait(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<label for="txt1"><span><span aria-hidden="true" maskholder=""><i></i>yyyy/mm/dd</span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
+      `"<label for="txt1"><span><span aria-hidden="true" maskholder=""><i></i>yyyy/mm/dd</span><input placeholder=" " type="text" id="txt1" autocomplete="off" inputmode="numeric"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
     );
 
     const typeText = [
@@ -298,7 +298,7 @@ describe("control.text: mask", () => {
     el.focus();
     await h.wait(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<label for="txt1"><span><span aria-hidden="true" maskholder=""><i></i>xxx.xxx.xxx.xxx</span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
+      `"<label for="txt1"><span><span aria-hidden="true" maskholder=""><i></i>xxx.xxx.xxx.xxx</span><input placeholder=" " type="text" id="txt1" autocomplete="off" inputmode="numeric"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
     );
 
     const typeText = [
@@ -380,6 +380,8 @@ describe("control.text: mask", () => {
 
     h.setInputCursor(el.$refInput, "123|.");
     expect(await remove({ key: "Delete" })).toBe("123.|");
+
+    // todo if remove "|123.456.789.012" result =>>>> "|9.012.."
   });
 
   test("+1(000) 000-0000", async () => {
@@ -512,6 +514,17 @@ describe("control.text: mask", () => {
     expect(parse("$ 5 USD", mask).leftLength).toBe(0);
   });
 
+  test("input: numeric if mask applied", async () => {
+    el.$options.mask = "0000";
+    el.focus();
+    await h.wait(1);
+    expect(el.$refInput.inputMode).toBe("numeric");
+
+    el.blur();
+    el.$options.mask = undefined;
+    el.focus();
+    expect(el.$refInput.inputMode).toBe("");
+  });
   // todo test with \1 \0
 
   // WARN. for currency need to use completely another behavior: see NumberControl
