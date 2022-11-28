@@ -239,7 +239,8 @@ mask-image: var(--ctrl-icon-img);
           width: 100%;
           position: relative;
         }
-        WUP-TEXT input {
+        WUP-TEXT input,
+        WUP-TEXT [maskholder] {
           width: 100%;
           box-sizing: border-box;
           font: inherit;
@@ -254,6 +255,16 @@ mask-image: var(--ctrl-icon-img);
           text-overflow: ellipsis;
           overflow: hidden;
           white-space: nowrap;
+        }
+        WUP-TEXT [maskholder] {
+          position: absolute;
+          opacity: 0.65;
+          display: none;
+          pointer-events: none;
+        }
+        WUP-TEXT [maskholder]&gt;i {
+          visibility: hidden;
+          font-style: inherit;
         }
         WUP-TEXT input:-webkit-autofill {
           font: inherit;
@@ -285,11 +296,17 @@ mask-image: var(--ctrl-icon-img);
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
-        WUP-TEXT input:focus + *,
-        WUP-TEXT input:not(:placeholder-shown) + *,
+        WUP-TEXT input:not(:focus)::placeholder {
+          color: transparent;
+        }
+        WUP-TEXT:focus-within input + strong,
+        WUP-TEXT input:not(:placeholder-shown) + strong,
         WUP-TEXT legend {
           top: 0.2em;
           transform: scale(0.9);
+        }
+        WUP-TEXT:focus-within [maskholder] {
+          display: inline-block;
         }
         /* style for icons */
         WUP-TEXT label button,
