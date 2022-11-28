@@ -164,12 +164,6 @@ export default class MaskTextInput {
       }
     }
 
-    const next = chunks[pi + 1];
-    if (next && next.isDig) {
-      next.isTouched = true;
-      next.text = "";
-    }
-
     this.chunks = chunks;
     this.updateState();
     return this.value;
@@ -191,6 +185,7 @@ export default class MaskTextInput {
       }
     }
     this.lastChunk = this.chunks[l];
+    this.lastChunk.isTouched = true;
 
     // find leftLength for maskholder
     const last = this.lastChunk;
@@ -334,12 +329,11 @@ export default class MaskTextInput {
     }
 
     if (chunk.isDig) {
-      // if (chunk.text.length === 1) {
-      //   const nextVal = this.value.substring(0, position) + this.value.substring(position + 1);
-      //   // this.parse(nextVal);
-      //   console.warn({ nextVal, me: this.chunks });
-      //   // return position;
-      // }
+      if (chunk.text.length === 1) {
+        const nextVal = this.value.substring(0, position) + this.value.substring(position + 1);
+        this.parse(nextVal); // '123.|4.567' + Delete = > 123.567
+        return position;
+      }
       chunk.text = chunk.text.substring(0, posChunk) + chunk.text.substring(posChunk + 1);
       chunk.isCompleted = chunk.text.length >= chunk.min;
       if (!chunk.isCompleted) {
@@ -349,6 +343,7 @@ export default class MaskTextInput {
           const next = this.chunks[i] as IDigChunk;
           if (!next.text.length || !next.isTouched) {
             resetChunk(next);
+
             break;
           }
           prev.text += next.text[0];

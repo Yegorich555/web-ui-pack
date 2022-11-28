@@ -352,14 +352,14 @@ describe("control.text: mask", () => {
     h.setInputCursor(el.$refInput, "123.|45.789.387");
     expect(await remove()).toBe("12|.45.789.387");
     expect(await remove()).toBe("1|.45.789.387");
-    expect(await remove()).toBe("|4.57.893.87");
+    expect(await remove()).toBe("|45.789.387.");
 
     h.setInputCursor(el.$refInput, "123.45|.789.387");
     expect(await remove()).toBe("123.4|.789.387");
-    expect(await remove()).toBe("123.|7.893.87");
-    expect(await remove()).toBe("12|.7.893.87");
-    expect(await remove()).toBe("1|.7.893.87");
-    expect(await remove()).toBe("|7.8.938.7");
+    expect(await remove()).toBe("123.|789.387.");
+    expect(await remove()).toBe("12|.789.387.");
+    expect(await remove()).toBe("1|.789.387.");
+    expect(await remove()).toBe("|789.387.");
 
     h.setInputCursor(el.$refInput, "1.|");
     expect(await remove()).toBe("1|");
@@ -368,11 +368,11 @@ describe("control.text: mask", () => {
     expect(await remove({ key: "Delete" })).toBe("123.4|.789.387");
     expect(await remove({ key: "Delete" })).toBe("123.4.|89.387");
     expect(await remove({ key: "Delete" })).toBe("123.4.|9.387");
-    expect(await remove({ key: "Delete" })).toBe("123.4.|3.87");
-    expect(await remove({ key: "Delete" })).toBe("123.4.|8.7");
+    expect(await remove({ key: "Delete" })).toBe("123.4.|387.");
+    expect(await remove({ key: "Delete" })).toBe("123.4.|87."); // todo issue here
     expect(await remove({ key: "Delete" })).toBe("123.4.|7.");
     expect(await remove({ key: "Delete" })).toBe("123.4.|");
-
+    // 123.387
     h.setInputCursor(el.$refInput, "123|.456.789.387");
     expect(await remove({ key: "Delete" })).toBe("123.|56.789.387");
 
@@ -383,10 +383,6 @@ describe("control.text: mask", () => {
     expect(await remove({ key: "Delete" })).toBe("123.|");
 
     // todo maskholder is wrong on empty space "xxx.xxx.xxx.xxx" + Space
-    // todo if Delete "|123.456.789.012" result =>>>> "|9.012.."
-    // todo if Delete "|3.456.789.012" >>> "4.567.890.12";
-    // "123.456.|9.012" - remove the whole chunk? - is it expected ???: rule if left 1char + other chunks a equal >>> remove the Dig and shift all next dig chunks together:
-    // ##0.##00; "|3.456" =>
   });
 
   test("+1(000) 000-0000", async () => {
