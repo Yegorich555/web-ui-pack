@@ -10,8 +10,6 @@ initTestBaseControl({ type: WUPTextControl, htmlTag: "wup-text", onInit: (e) => 
 describe("control.text", () => {
   testTextControl(() => el);
 
-  // todo issue: set validations = { max:3 } and by focusout input must be valid despite value === undefined
-
   test("onFocusGot with autofocus", async () => {
     el = document.body.appendChild(document.createElement("wup-text"));
     const spy = jest.spyOn(el, "gotFocus");

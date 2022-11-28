@@ -395,6 +395,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
     test("rule not exists", () => {
       el.$options.validations = { no: true } as any;
+      el.$value = "";
       expect(() => el.$validate()).toThrowError();
       el.$options.name = "Me"; // just for coverage
       expect(() => el.$validate()).toThrowError();
@@ -505,6 +506,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$refError).toBeDefined();
 
       // cover case when errorLeft but focusOut
+      el.$value = "";
       el.$options.validations = { _alwaysInvalid: true };
       (document.activeElement as HTMLElement)!.blur();
       await h.wait();
@@ -620,8 +622,8 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
         expect(el.$isValid).toBe(true);
 
         // with custom error
-        el.$options.validations = { [ruleName]: (v: any) => v === undefined && "Custom error" };
-        el.$value = undefined;
+        el.$options.validations = { [ruleName]: (v: any) => v === undefined || "Custom error" };
+        el.$value = "";
         expect(el.$validate()).toBe("Custom error");
         expect(el.$isValid).toBe(false);
 

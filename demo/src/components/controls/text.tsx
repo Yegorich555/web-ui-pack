@@ -88,16 +88,14 @@ export default function TextControlView() {
           }}
         />
         <wup-text
-          name="phone"
-          label="Phone number (with mask)"
-          mask="+1(000) 000-0000"
+          name="test"
           ref={(el) => {
             if (el) {
-              el.$options.validations = { min: 3 };
-              // el.$options.autoFocus = true;
+              el.$options.validations = { max: 3 };
             }
           }}
         />
+        <wup-text name="phone" label="Phone number (with mask)" mask="+1(000) 000-0000" />
         <wup-text name="ipaddr" label="IPaddress (with mask)" mask="##0.##0.##0.##0" maskholder="xxx.xxx.xxx.xxx" />
         <wup-text name="num" label="Test (with mask)" mask="$ 000 USD" />
         <button type="submit">Submit</button>

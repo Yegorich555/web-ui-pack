@@ -984,7 +984,7 @@ export default class WUPCalendarControl<
 
   /** Called when need to update/announce value for input */
   setInputValue(v: ValueType | undefined | null): void {
-    if (v != null) {
+    if (v) {
       const key = this._opts.utc ? "UTC" : "";
       // prettier-ignore
       this.$refInput.value = `${v[`get${key}Date`]()} ${this.#ctr.$namesMonth[v[`get${key}Month`]()]} ${v[`get${key}FullYear`]()}`

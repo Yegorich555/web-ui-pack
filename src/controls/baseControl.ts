@@ -57,7 +57,19 @@ export namespace WUPBaseIn {
     Validation: (value: ValueType | undefined, setValue: ValidationKeys[keyof ValidationKeys]) => false | string;
     CustomValidation: (value: ValueType | undefined) => false | string;
     Defaults: {
-      /** Rules defined for control */
+      /** Rules defined for control;
+       * * all functions must return error-message when value === undefined
+       * * all functions must return error-message if setValue is true/enabled and value doesn't fit some rule
+       * * value can be undefined only when a rule named as 'required' or need to collect error-messages @see $options.validationShowAll
+       * @example
+       * ```
+       * WUPTextControl.$defaults.validationRules.isNumber = (v === undefined || !/^[0-9]*$/.test(v)) && "Please enter a valid number";
+       *
+       * const el = document.body.appendChild(document.createElement("wup-text"));
+       * el.$options.validations = {
+          isNumber: true,
+        };
+       * ``` */
       validationRules: {
         [K in keyof ValidationKeys]?: (
           value: ValueType,
@@ -95,7 +107,15 @@ export namespace WUPBaseIn {
       disabled?: boolean;
       /** Disallow copy value; adds attr [readonly] for styling */
       readOnly?: boolean;
-      /** Rules enabled for current control */
+      /** Rules enabled for current control; you can enable defined in $defaults.validationRules or define own directly
+       * @example
+       * ```
+       * const el = document.body.appendChild(document.createElement("wup-text"));
+         el.$options.validations = {
+           min: 10, // set min 10symbols for $default.validationRules.min
+           custom: (value: string | undefined) => value === "test-me" && "This is custom error", // custom validation for single element
+         };
+       * ``` */
       validations?:
         | {
             [K in keyof ValidationKeys]?: ValidationKeys[K] | ((value: ValueType | undefined) => false | string);
@@ -696,8 +716,9 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
     const v = this.$value;
     let errMsg = "";
-    this._isValid = !vls.some((fn) => {
-      const err = fn(v);
+    this._isValid = !vls.some((fn, i) => {
+      const skipRule = v === undefined && (i !== 0 || fn.name !== "required"); // undefined only for 'required' rule; for others: skip if value = undefined
+      const err = !skipRule && fn(v);
       if (err) {
         errMsg = err;
         return true;

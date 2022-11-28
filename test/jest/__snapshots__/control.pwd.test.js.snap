@@ -773,7 +773,7 @@ exports[`control.pwd validation messages ends without '-s' 2`] = `
   >
     <span>
       <input
-        aria-describedby="txt2"
+        aria-describedby="txt3"
         autocomplete="new-password"
         id="txt1"
         placeholder=" "
@@ -801,7 +801,7 @@ exports[`control.pwd validation messages ends without '-s' 2`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt2"
+    id="txt3"
     role="alert"
     style="display: none;"
   >

@@ -36,15 +36,30 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
 
   test("validation messages ends without '-s'", async () => {
     const el = getEl();
+    el.$value = "";
     el.$options.validations = { min: 1 };
     el.$validate();
+    expect(el.$isValid).toBe(false);
     await h.wait();
     expect(el).toMatchSnapshot();
 
+    el.$value = "abc";
     el.$options.validations = { max: 1 };
     el.$validate();
+    expect(el.$isValid).toBe(false);
     await h.wait();
     expect(el).toMatchSnapshot();
+  });
+
+  test("validation: skip on undefined (beside: required)", () => {
+    const el = getEl();
+    el.$options.validations = { max: 3 };
+    expect(el.$validate()).toBe(false);
+    expect(el.$isValid).toBe(true);
+
+    el.$value = "abcd";
+    expect(el.$validate()).toBeTruthy();
+    expect(el.$isValid).toBe(false);
   });
 
   describe("options", () => {
