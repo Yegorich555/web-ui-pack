@@ -75,6 +75,8 @@ declare global {
        * "+1(000) 000-0000" // phoneNumber
        * `0` // required digit
        * '#' // optional digit
+       * '\0' // for '0' char
+       * '\1' // for '#' char
        */
       mask?: string | false;
       /** Placeholder for mask. By default it inherits from mask. To disabled it set 'false' or '' - empty string

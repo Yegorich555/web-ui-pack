@@ -347,6 +347,7 @@ describe("control.text: mask", () => {
     for (let i = 0; i < removeResult.length; ++i) {
       expect(await remove()).toBe(removeResult[i]);
     }
+
     // removing digits in the middle
     h.setInputCursor(el.$refInput, "123.|45.789.387");
     expect(await remove()).toBe("12|.45.789.387");
@@ -381,7 +382,11 @@ describe("control.text: mask", () => {
     h.setInputCursor(el.$refInput, "123|.");
     expect(await remove({ key: "Delete" })).toBe("123.|");
 
-    // todo if remove "|123.456.789.012" result =>>>> "|9.012.."
+    // todo maskholder is wrong on empty space "xxx.xxx.xxx.xxx" + Space
+    // todo if Delete "|123.456.789.012" result =>>>> "|9.012.."
+    // todo if Delete "|3.456.789.012" >>> "4.567.890.12";
+    // "123.456.|9.012" - remove the whole chunk? - is it expected ???: rule if left 1char + other chunks a equal >>> remove the Dig and shift all next dig chunks together:
+    // ##0.##00; "|3.456" =>
   });
 
   test("+1(000) 000-0000", async () => {
@@ -512,6 +517,8 @@ describe("control.text: mask", () => {
 
     expect(parse("$ 123456 USD", mask).leftLength).toBe(0);
     expect(parse("$ 5 USD", mask).leftLength).toBe(0);
+
+    // todo removing suffix doesn't work
   });
 
   test("input: numeric if mask applied", async () => {

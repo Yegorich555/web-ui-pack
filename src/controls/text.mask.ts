@@ -38,7 +38,7 @@ export default class MaskTextInput {
   /** Pattern splits into chunks. With detailed info about process */
   chunks: IInputChunk[] = [];
   /** Last processed chunk */
-  #lastChunk: IInputChunk = { index: -1, text: "" };
+  lastChunk: IInputChunk = { index: -1, text: "" };
   /** Returns whether value completely fits pattern (isComplete) */
   isCompleted = false;
   /** Returns count chars of pattern that missed in value (used to maskHolder) */
@@ -116,57 +116,60 @@ export default class MaskTextInput {
   parse(value: string): string {
     const chunks = MaskTextInput.parsePattern(this.pattern);
 
-    if (!value) {
-      const $1 = chunks[0];
-      $1.isTouched = true;
-      if ($1.isDig) {
-        $1.text = "";
-      }
-    } else {
-      let canShift: number | null = null;
-      for (let i = 0, pi = 0; pi < chunks.length && i < value.length; ++pi) {
-        const chunk = chunks[pi];
-        chunk.isTouched = true;
-        if (chunk.isDig) {
-          chunk.text = "";
-          for (let ci = 0; ci < chunk.max && i < value.length; ++ci, ++i) {
-            const ascii = value.charCodeAt(i);
-            const isNum = ascii > 47 && ascii < 58;
-            if (isNum) {
-              chunk.text += String.fromCharCode(ascii);
-              chunk.isCompleted = chunk.text.length >= chunk.min;
-            } else if (canShift != null && chunks[pi - 1].text[0] === String.fromCharCode(ascii)) {
-              const prev = chunks[pi - 1];
-              while (prev.text.length > ++canShift && prev.text[canShift] === value[i + 1]) {
-                ++i; // if chunk.length > 1 need to shift more: "4+1(23" >>> "+1(423"
-              }
-              --ci;
-              continue; // shift behavior: "+1(234) 9675-123" >>> "+1(234) 967-5123"
-            } else if (chunk.isCompleted && chunks[pi + 1]?.text.charCodeAt(0) === ascii) {
-              break; // skip chunk if length fits min
-            } else if (this.options!.lazy && /[., _+-/\\]/.test(String.fromCharCode(ascii)) && ci) {
-              const cnt = chunk.min - ci;
-              if (cnt > 0) {
-                chunk.text = "0".repeat(chunk.min - ci) + chunk.text; // add zero before (lazy mode)
-              }
-              chunk.isCompleted = true;
-              // ++i;
-              break;
-            } else {
-              --ci; // otherwise skip this char
+    let canShift: number | null = null;
+    let pi = 0;
+    for (let i = 0; pi < chunks.length; ++pi) {
+      const chunk = chunks[pi];
+      chunk.isTouched = true;
+      if (chunk.isDig) {
+        chunk.text = "";
+        for (let ci = 0; ci < chunk.max && i < value.length; ++ci, ++i) {
+          const ascii = value.charCodeAt(i);
+          const isNum = ascii > 47 && ascii < 58;
+          if (isNum) {
+            chunk.text += String.fromCharCode(ascii);
+            chunk.isCompleted = chunk.text.length >= chunk.min;
+          } else if (canShift != null && chunks[pi - 1].text[0] === String.fromCharCode(ascii)) {
+            const prev = chunks[pi - 1];
+            while (prev.text.length > ++canShift && prev.text[canShift] === value[i + 1]) {
+              ++i; // if chunk.length > 1 need to shift more: "4+1(23" >>> "+1(423"
             }
+            --ci;
+            continue; // shift behavior: "+1(234) 9675-123" >>> "+1(234) 967-5123"
+          } else if (chunk.isCompleted && chunks[pi + 1]?.text.charCodeAt(0) === ascii) {
+            break; // skip chunk if length fits min
+          } else if (this.options!.lazy && /[., _+-/\\]/.test(String.fromCharCode(ascii)) && ci) {
+            const cnt = chunk.min - ci;
+            if (cnt > 0) {
+              chunk.text = "0".repeat(chunk.min - ci) + chunk.text; // add zero before (lazy mode)
+            }
+            chunk.isCompleted = true;
+            // ++i;
+            break;
+          } else {
+            --ci; // otherwise skip this char
           }
-        } else {
-          canShift = 0;
-          for (let ci = 0; ci < chunk.text.length && i < value.length; ++ci) {
-            if (chunk.text[ci] === value[i] || /[., _+-/\\]/.test(value[i])) {
-              ++i;
-              canShift = null;
-            }
+        }
+      } else {
+        canShift = 0;
+        for (let ci = 0; ci < chunk.text.length && i < value.length; ++ci) {
+          if (chunk.text[ci] === value[i] || /[., _+-/\\]/.test(value[i])) {
+            ++i;
+            canShift = null;
           }
         }
       }
+      if (i === value.length) {
+        break;
+      }
     }
+
+    const next = chunks[pi + 1];
+    if (next && next.isDig) {
+      next.isTouched = true;
+      next.text = "";
+    }
+
     this.chunks = chunks;
     this.updateState();
     return this.value;
@@ -187,10 +190,10 @@ export default class MaskTextInput {
         ++l; // append suffix if prev digitChunk is filled completely
       }
     }
-    this.#lastChunk = this.chunks[l];
+    this.lastChunk = this.chunks[l];
 
     // find leftLength for maskholder
-    const last = this.#lastChunk;
+    const last = this.lastChunk;
     this.leftLength = last.isDig ? last.max - last.text.length : 0; // if last proccess chunk is digit than need to call diff actual and max
     for (let i = last.index + 1; i <= endIndex; ++i) {
       this.leftLength += this.chunks[i].text.length;
@@ -278,8 +281,8 @@ export default class MaskTextInput {
     pos += 1;
     if (atTheEnd) {
       pos = this.value.length;
-      if (this.isCompleted && !this.#lastChunk.isDig) {
-        return pos - this.#lastChunk.text.length; // if last is suffix we need to set cursor before
+      if (this.isCompleted && !this.lastChunk.isDig) {
+        return pos - this.lastChunk.text.length; // if last is suffix we need to set cursor before
       }
     }
     return pos;
@@ -307,7 +310,6 @@ export default class MaskTextInput {
       } else {
         const next = this.chunks[chunk.index + 1] as IDigChunk;
         const prev = this.chunks[chunk.index - 1] as IDigChunk;
-        !next?.text && resetChunk(chunk); // clear current chunk if next isEmpty or not exists
         next && !next.text && resetChunk(next); // clear state next chunk after separator
         const canRemove = prev && !next.isTouched && prev.text.length !== prev.max; // whether possible to remove separator
         canRemove && resetChunk(chunk); // clear current chunk if possible
@@ -316,7 +318,8 @@ export default class MaskTextInput {
         if (isBefore) {
           position -= posChunk + (canRemove ? 0 : 1); // go to prevChunk
           posChunk = prev.text.length - 1;
-          if (!canRemove) {
+          if (!canRemove && prev) {
+            !next.isTouched && resetChunk(chunk); // '123.|' + Backspace => 12
             chunk = prev; // "123.|456" + Backspace => "12|.456" or "12|4.56" (depends on min of prev)
           }
         } else if (!canRemove) {
@@ -331,10 +334,15 @@ export default class MaskTextInput {
     }
 
     if (chunk.isDig) {
-      const was = chunk.isDig;
+      // if (chunk.text.length === 1) {
+      //   const nextVal = this.value.substring(0, position) + this.value.substring(position + 1);
+      //   // this.parse(nextVal);
+      //   console.warn({ nextVal, me: this.chunks });
+      //   // return position;
+      // }
       chunk.text = chunk.text.substring(0, posChunk) + chunk.text.substring(posChunk + 1);
       chunk.isCompleted = chunk.text.length >= chunk.min;
-      if (was && !chunk.isCompleted) {
+      if (!chunk.isCompleted) {
         // shift/recalc chunks
         let prev = chunk;
         for (let i = chunk.index + 2; i < this.chunks.length; i += 2) {
@@ -353,13 +361,10 @@ export default class MaskTextInput {
         } else {
           // if no digit chunks at the right need to remove separator
           const next = this.chunks[chunk.index + 1];
-          if (next) {
-            delete next.isTouched;
-          }
+          next && delete next.isTouched;
         }
       }
     }
-
     this.updateState();
     return position;
   }
