@@ -112,12 +112,14 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$value).toBe(cfg.initValues[0].value);
       expect(el.$isDirty).toBe(false);
       expect(el.$isChanged).toBe(false);
+      jest.advanceTimersByTime(1);
       expect(spyChange).toBeCalledTimes(1); // change event happens even via $initValue
 
       el.$initValue = cfg.initValues[1].value;
       expect(el.$value).toBe(cfg.initValues[1].value);
       expect(el.$isDirty).toBe(false);
       expect(el.$isChanged).toBe(false);
+      jest.advanceTimersByTime(1);
       expect(spyChange).toBeCalledTimes(2); // change event happens even via $initValue
 
       el.$value = cfg.initValues[2].value;
@@ -125,11 +127,13 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$value).toBe(cfg.initValues[2].value);
       expect(el.$isDirty).toBe(false);
       expect(el.$isChanged).toBe(true);
+      jest.advanceTimersByTime(1);
       expect(spyChange).toBeCalledTimes(3); // change event happens even via $initValue
 
       el.$initValue = cfg.initValues[1].value;
       expect(el.$value).toBe(cfg.initValues[2].value);
       expect(el.$isChanged).toBe(true);
+      jest.advanceTimersByTime(1);
       expect(spyChange).toBeCalledTimes(3);
 
       // checking when el not isReady
@@ -139,11 +143,14 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.addEventListener("$change", spyChange);
 
       el.$value = cfg.initValues[0].value;
+      jest.advanceTimersByTime(1);
       expect(spyChange).not.toBeCalled(); // because el is not ready yet
       jest.advanceTimersByTime(1);
       el.$value = cfg.initValues[0].value;
+      jest.advanceTimersByTime(1);
       expect(spyChange).not.toBeCalled(); // because no changes
       el.$value = cfg.initValues[1].value;
+      jest.advanceTimersByTime(1);
       expect(spyChange).toBeCalledTimes(1);
     });
   });

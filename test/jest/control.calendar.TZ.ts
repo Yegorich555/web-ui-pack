@@ -161,12 +161,14 @@ export default function calendarTZtest() {
             await h.userClick(item);
             expect(item.getAttribute("aria-selected")).toBe("true");
             expect(el.querySelectorAll("[aria-selected]").length).toBe(1);
+            jest.advanceTimersByTime(1);
             expect(onChange).toBeCalledTimes(1);
             expect(el.$value).toEqual(initDate(2022, curMonth, item.textContent!));
             expect(el.$isChanged).toBe(true);
 
             // click again on the same shouldn't change anything
             await h.userClick(item);
+            jest.advanceTimersByTime(1);
             expect(onChange).toBeCalledTimes(1);
             expect(item.getAttribute("aria-selected")).toBe("true");
             expect(el.querySelectorAll("[aria-selected]").length).toBe(1);
@@ -177,6 +179,7 @@ export default function calendarTZtest() {
             await h.userClick(item);
             expect(item.getAttribute("aria-selected")).toBe("true");
             expect(el.querySelectorAll("[aria-selected]").length).toBe(1);
+            jest.advanceTimersByTime(1);
             expect(onChange).toBeCalledTimes(1);
             const selectedM = ds.days[curMonth].prev?.from ? curMonth - 1 : curMonth;
             expect(el.$value).toEqual(initDate(2022, selectedM, item.textContent!));
@@ -188,6 +191,7 @@ export default function calendarTZtest() {
             await h.userClick(item);
             expect(item.getAttribute("aria-selected")).toBe("true");
             expect(el.querySelectorAll("[aria-selected]").length).toBe(1);
+            jest.advanceTimersByTime(1);
             expect(onChange).toBeCalledTimes(1);
             expect(el.$value).toEqual(initDate(2022, curMonth + 1, item.textContent!));
             expect(el.$isChanged).toBe(true);
