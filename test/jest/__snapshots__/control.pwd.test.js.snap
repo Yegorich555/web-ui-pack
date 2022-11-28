@@ -520,7 +520,7 @@ mask-image: var(--ctrl-icon-img);
           transform: scale(0.9);
         }
         WUP-PWD:focus-within [maskholder] {
-          display: initial;
+          display: inline-block;
         }
         /* style for icons */
         WUP-PWD label button,
@@ -986,7 +986,7 @@ exports[`control.pwd validations $options.validationShowAll 3`] = `
   >
     <span>
       <input
-        aria-describedby="txt5"
+        aria-describedby="txt6"
         aria-required="true"
         autocomplete="new-password"
         id="txt1"
@@ -1017,7 +1017,7 @@ exports[`control.pwd validations $options.validationShowAll 3`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt5"
+    id="txt6"
     role="alert"
     style="display: none;"
   >

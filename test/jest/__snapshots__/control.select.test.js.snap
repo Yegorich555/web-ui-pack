@@ -489,7 +489,7 @@ mask-image: var(--ctrl-icon-img);
           transform: scale(0.9);
         }
         WUP-SELECT:focus-within [maskholder] {
-          display: initial;
+          display: inline-block;
         }
         /* style for icons */
         WUP-SELECT label button,

@@ -56,8 +56,9 @@ declare global {
       max: number;
       /** If $value doesn't match email-pattern shows message 'Invalid email address` */
       email: boolean;
-      /** Called when parseValue() is invalid (skipped on default validation logic) */
-      _invalidParse: true; // todo maybe throw error message in this case ?
+      // todo fix it
+      // /** Called when parseValue() is invalid (skipped on default validation logic) */
+      // _invalidParse: true; // todo maybe throw error message in this case ?
       /** Enabled if option [mask] is pointed; if input value doesn't comletely fit mask shows "Incomplete value" */
       mask: boolean;
     }
@@ -301,7 +302,7 @@ export default class WUPTextControl<
       max: (v, setV) =>
         (v === undefined || v.length > setV) && `Max length is ${setV} character${setV === 1 ? "" : "s"}`,
       email: (v, setV) => setV && (!v || !emailReg.test(v)) && "Invalid email address",
-      _invalidParse: (v) => v === undefined && "Invalid value",
+      // _invalidParse: (v) => v === undefined && "Invalid value",
       mask: (v, setV, c) => {
         const refMask = (c as WUPTextControl).maskInput;
         return (
@@ -450,9 +451,10 @@ export default class WUPTextControl<
     const v = this.parseValue(txt, outRef);
     if (outRef.showError) {
       // parseValue must return valid/not-valid result
-      const vl = (this.validations as WUPText.Options["validations"])?._invalidParse;
-      const msg = typeof vl === "function" ? vl : this.#ctr.$defaults.validationRules._invalidParse;
-      this.$showError(msg!.call(this, undefined as any, true, this) as string);
+      console.error("Validation must be here");
+      // const vl = (this.validations as WUPText.Options["validations"])?._invalidParse;
+      // const msg = typeof vl === "function" ? vl : this.#ctr.$defaults.validationRules._invalidParse;
+      // this.$showError(msg!.call(this, undefined as any, true, this) as string);
     } else {
       this._isValid !== false && this.$hideError();
       if (!e.setValuePrevented) {
