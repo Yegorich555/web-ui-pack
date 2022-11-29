@@ -61,8 +61,34 @@ export default class MaskTextInput {
   }
 
   /* Call it on 'beforeinput' event to improve logic */
-  static handleBeforInput(e: InputEvent): void {
+  handleBeforInput(e: InputEvent): void {
     const el = e.target as HandledInput;
+
+    const cur = { pos: el.selectionStart ?? this.value.length, v: this.value };
+    let hist;
+    switch (e!.inputType) {
+      case "historyUndo": // Ctrl+Z
+        if (this.#histUndo.length) {
+          hist = this.#histUndo.pop()!;
+          this.#histRedo.push(cur);
+        }
+        break;
+      case "historyRedo": // Ctrl+Y
+        if (this.#histRedo.length) {
+          hist = this.#histRedo.pop()!;
+          this.#histUndo.push(cur);
+        }
+        break;
+      default: // this.#histUndo.push(cur); see in handleInput
+        break;
+    }
+
+    if (hist) {
+      el.value = hist.v;
+      el.selectionStart = hist.pos;
+      el.selectionEnd = el.selectionStart;
+    }
+
     if (el.selectionStart == null || el.selectionStart !== el.selectionEnd) {
       delete el._maskPrev;
       return;
@@ -222,6 +248,14 @@ export default class MaskTextInput {
     this.isCompleted = last.index === endIndex && (!last.isDig || !!last.isCompleted);
   }
 
+  #histUndo: Array<{ v: string; pos: number }> = [];
+  #histRedo: Array<{ v: string; pos: number }> = [];
+  /** Clear redo/undo history */
+  clearHistory(): void {
+    this.#histUndo.length = 0;
+    this.#histRedo.length = 0;
+  }
+
   /* Call it on 'input' event */
   handleInput(e: InputEvent): { declinedAdd: number; position: number } {
     const el = e.target as HandledInput;
@@ -230,26 +264,29 @@ export default class MaskTextInput {
     let position = el.selectionStart ?? el.value.length;
     let declinedAdd = 0;
 
-    const prev = el._maskPrev;
-    if (prev) {
+    const saved = el._maskPrev;
+    let isUndoRedo = false;
+    if (saved) {
       switch (e!.inputType) {
         case "insertText":
         case "insertFromPaste":
-          position = this.insert(prev.insertText!, prev.position);
+          position = this.insert(saved.insertText!, saved.position);
           declinedAdd = Math.max(v.length - this.value.length, 0);
           break;
         case "deleteContentForward":
-          position = this.deleteAfter(prev.position);
+          position = this.deleteAfter(saved.position);
           declinedAdd = Math.min(v.length - this.value.length, 0);
           break;
         case "deleteContentBackward":
-          position = this.deleteBefore(prev.position);
+          position = this.deleteBefore(saved.position);
           declinedAdd = Math.min(v.length - this.value.length, 0);
           break;
         case "historyUndo":
+          isUndoRedo = true;
           this.parse(el.value);
-          break; // todo implement: https://stackoverflow.com/questions/16195644/in-chrome-undo-does-not-work-properly-for-input-element-after-contents-changed-p
+          break;
         case "historyRedo":
+          isUndoRedo = true;
           this.parse(el.value);
           break;
         default:
@@ -257,9 +294,13 @@ export default class MaskTextInput {
           this.parse(el.value);
           break;
       }
+      if (!isUndoRedo && saved.value !== this.value) {
+        this.#histUndo.push({ pos: saved.position, v: saved.value }); // WARN: it works only if selectionStart == End
+      }
     } else {
       this.parse(el.value);
     }
+    delete el._maskPrev;
 
     return { position, declinedAdd };
   }
@@ -426,3 +467,6 @@ export default class MaskTextInput {
 //   delBefore("$ 5 USD|");
 //   delAfter("123.4|.789.387");
 // })();
+
+// type/delete 1 2 3 => historyUndo[1,2]
+// Ctrl+Z get historyUndo.pop + push into Redo

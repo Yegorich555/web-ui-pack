@@ -570,5 +570,49 @@ describe("control.text: mask", () => {
     `);
   });
 
+  test("Ctrl+Z,Ctrl+Y (history redo/undo)", async () => {
+    el.$options.mask = "##0.##0.##0.##0";
+    el.focus();
+    await h.wait(1);
+
+    // make different actions before undo
+    await h.userTypeText(el.$refInput, "1234.5.67", { clearPrevious: false }); // #1 type long text
+    expect(h.getInputCursor(el.$refInput)).toBe("123.4.5.67|");
+    expect(await h.userRemove(el.$refInput)).toBe("123.4.5.6|"); // #2 remove last char
+    h.setInputCursor(el.$refInput, "1|23.4.5.6");
+    expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("1|3.4.5.6"); // #3 remove middle char
+    await h.userTypeText(el.$refInput, "a", { clearPrevious: false });
+    await h.wait(150);
+
+    // cover Ctrl+Z
+    expect(h.getInputCursor(el.$refInput)).toBe("1|3.4.5.6");
+    expect(await h.userUndo(el.$refInput)).toBe("1|23.4.5.6"); // rollback before #3
+    expect(await h.userUndo(el.$refInput)).toBe("123.4.5.67|"); // rollback before #2
+    expect(await h.userUndo(el.$refInput)).toBe("123.4.5.6|"); // rollback before #1
+    expect(await h.userUndo(el.$refInput)).toBe("123.4.5.|");
+    expect(await h.userUndo(el.$refInput)).toBe("123.4.5|");
+
+    // cover Ctrl+Y
+    expect(await h.userRedo(el.$refInput)).toBe("123.4.5.|");
+    expect(await h.userRedo(el.$refInput)).toBe("123.4.5.6|");
+    expect(await h.userRedo(el.$refInput)).toBe("123.4.5.67|");
+    expect(await h.userRedo(el.$refInput)).toBe("1|23.4.5.6");
+
+    // test again on simple case
+    el = document.body.appendChild(document.createElement("wup-text"));
+    el.$options.mask = "+1(000) 000";
+    await h.wait(1);
+    el.focus();
+    h.setInputCursor(el.$refInput, "+1(|");
+    await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
+    expect(await h.userUndo(el.$refInput)).toBe("+1(|");
+
+    expect(await h.userRedo(el.$refInput)).toBe("+1(2|");
+    expect(await h.userRedo(el.$refInput)).toBe("+1(2|"); // try again - no actions
+
+    expect(await h.userUndo(el.$refInput)).toBe("+1(|");
+    expect(await h.userUndo(el.$refInput)).toBe("+1(|"); // try again - no actions
+  });
+
   // WARN. for currency need to use completely another behavior: exctract digits and mask again >>> see NumberControl
 });

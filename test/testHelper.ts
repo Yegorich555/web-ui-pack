@@ -418,7 +418,7 @@ export function setInputCursor(el: HTMLInputElement, cursorPattern: string) {
 }
 
 /** Simulates user removes text via backspace: focus + keydown+ keyup + keypress + input events;
- * Returns cursor snapshot (getInputCursor) */
+ * @return cursor snapshot (getInputCursor) */
 export async function userRemove(
   el: HTMLInputElement,
   opts?: { removeCount: number; key: "Backspace" | "Delete" }
@@ -463,6 +463,34 @@ export async function userClick(el: HTMLElement, opts?: MouseEventInit) {
   await wait(100);
   el.dispatchEvent(new MouseEvent("mouseup", o()));
   el.dispatchEvent(new MouseEvent("click", o()));
+}
+
+/** Simulate user press Ctrl+Z on input;
+ * WARN: in reality onBeforeInput event calls only if history.legth >= 1
+ * @return cursor snapshot (getInputCursor) */
+export async function userUndo(el: HTMLInputElement): Promise<string> {
+  jest.useFakeTimers();
+  el.dispatchEvent(new KeyboardEvent("keydown", { key: "z", ctrlKey: true, bubbles: true }));
+  el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, inputType: "historyUndo" }));
+  el.dispatchEvent(new InputEvent("input", { bubbles: true, data: null, inputType: "historyUndo" }));
+  jest.advanceTimersByTime(20);
+  await Promise.resolve();
+  el.dispatchEvent(new KeyboardEvent("keyup", { key: "z", ctrlKey: false, bubbles: true }));
+  return getInputCursor(el);
+}
+
+/** Simulate user press Ctrl+Y on input;
+ * WARN: in reality onBeforeInput event calls only if history.legth >= 1
+ * @return cursor snapshot (getInputCursor) */
+export async function userRedo(el: HTMLInputElement): Promise<string> {
+  jest.useFakeTimers();
+  el.dispatchEvent(new KeyboardEvent("keydown", { key: "y", ctrlKey: true, bubbles: true }));
+  el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, inputType: "historyRedo" }));
+  el.dispatchEvent(new InputEvent("input", { bubbles: true, data: null, inputType: "historyRedo" }));
+  jest.advanceTimersByTime(20);
+  await Promise.resolve();
+  el.dispatchEvent(new KeyboardEvent("keyup", { key: "y", ctrlKey: false, bubbles: true }));
+  return getInputCursor(el);
 }
 
 /** Simulate user swipe with 10ms between events */

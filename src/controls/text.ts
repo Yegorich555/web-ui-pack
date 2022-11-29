@@ -408,9 +408,12 @@ export default class WUPTextControl<
   }
 
   protected override gotFocusLost(): void {
-    if (this.refMask?.prefix && this.$refInput.value === this.refMask.prefix) {
-      this.$refInput.value = ""; // rollback prefix/suffix if user types nothing
-      this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    if (this.refMask) {
+      if (this.refMask.prefix && this.$refInput.value === this.refMask.prefix) {
+        this.$refInput.value = ""; // rollback prefix/suffix if user types nothing
+        this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
+      }
+      this.refMask.clearHistory();
     }
     super.gotFocusLost();
   }
@@ -447,7 +450,8 @@ export default class WUPTextControl<
   protected gotBeforeInput(e: InputEvent): void {
     if (this._opts.mask) {
       this.#maskTimerEnd?.call(this);
-      MaskTextInput.handleBeforInput(e);
+      this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask);
+      this.refMask.handleBeforInput(e);
     }
   }
 
