@@ -97,7 +97,7 @@ export default function TextControlView() {
         />
         <wup-text name="phone" label="Phone number (with mask)" mask="+1(000) 000-0000" />
         <wup-text name="ipaddr" label="IPaddress (with mask)" mask="##0.##0.##0.##0" maskholder="xxx.xxx.xxx.xxx" />
-        <wup-text name="num" label="Test (with mask)" mask="$ ##0 USD" />
+        <wup-text name="num" label="Test (with mask)" mask="$0 ##0 USD" />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

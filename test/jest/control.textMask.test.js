@@ -549,7 +549,26 @@ describe("control.text: mask", () => {
     el.focus();
     expect(el.$refInput.inputMode).toBe("");
   });
-  // todo test with \1 \0
 
-  // WARN. for currency need to use completely another behavior: see NumberControl
+  test("escaped chars: 0, # etc.", () => {
+    expect(new MaskTextInput("a|0 ##0 b|#").chunks.map((v) => v.text)).toMatchInlineSnapshot(`
+      [
+        "a0 ",
+        "##0",
+        " b#",
+      ]
+    `);
+    expect(new MaskTextInput("a||0 ##0 b||#").chunks.map((v) => v.text)).toMatchInlineSnapshot(`
+      [
+        "a|",
+        "0",
+        " ",
+        "##0",
+        " b|",
+        "#",
+      ]
+    `);
+  });
+
+  // WARN. for currency need to use completely another behavior: exctract digits and mask again >>> see NumberControl
 });

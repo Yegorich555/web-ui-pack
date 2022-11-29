@@ -21,7 +21,7 @@ export namespace WUPTextIn {
   }
 
   export interface Opt {
-    /** Make input masked
+    /** Make input masked (supports only digit-mask. If you need aphabet please open an issue on Github)
      * * inputmode='numeric' is applied if mask is pointed
      * @example
      * "0000-00-00" // for date in format yyyy-mm-dd
@@ -29,7 +29,9 @@ export namespace WUPTextIn {
      * "+1(000) 000-0000" // phoneNumber
      * '0' // required digit
      * '#' // optional digit
-     */
+     * '|0' // or '\x00' - static char '0'
+     * '|#' // or '\x01' - static char '#'
+     * */
     mask?: string;
     /** Placeholder for mask. By default it inherits from mask. To disabled it set 'false' or '' (empty string);
      *  for date maskholder can be 'yyyy-mm-dd' */

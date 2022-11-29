@@ -46,8 +46,14 @@ export default class MaskTextInput {
   leftLength = 0;
 
   /** Format string accoring to pattern
-   * @param pattern 0000-00-00 (for date yyyy-MM-dd), ##0.##0.##0.##0 (for IPaddress), $ ### ### ### ### ### ##0 (for currency)
-   * #### where # - optional, 0 - required numbers */
+   * @param pattern
+   * * 0000-00-00 - for date yyyy-MM-dd
+   * * ##0.##0.##0.##0 - for IPaddress
+   * * \# - optional number
+   * * 0 - required number
+   * * '|0' or '\x00' - static char '0'
+   * * '|#' or '\x01' - static char '#'
+   *  */
   constructor(public pattern: string, private options?: IMaskInputOptions) {
     this.options = { prediction: true, lazy: true, ...options };
     this.parse("");
@@ -93,9 +99,14 @@ export default class MaskTextInput {
       return lastChunk;
     };
 
+    const pr = pattern
+      .replace(/([^|])\|0/g, "$1\x00")
+      .replace(/([^|])\|#/g, "$1\x01")
+      .replace(/\|\|/g, "|");
+
     // 1st step: define pattern chunks
-    for (let i = 0; i < pattern.length; ++i) {
-      const p = pattern[i];
+    for (let i = 0; i < pr.length; ++i) {
+      const p = pr[i];
       switch (p) {
         case "0":
           ++(setToChunk(p, true) as IDigChunk).max;
@@ -103,6 +114,12 @@ export default class MaskTextInput {
           break;
         case "#":
           ++(setToChunk(p, true) as IDigChunk).max;
+          break;
+        case "\x00":
+          setToChunk("0", undefined);
+          break;
+        case "\x01":
+          setToChunk("#", undefined);
           break;
         default:
           setToChunk(p, undefined);
