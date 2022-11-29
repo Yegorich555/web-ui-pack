@@ -381,8 +381,6 @@ describe("control.text: mask", () => {
 
     h.setInputCursor(el.$refInput, "123|.");
     expect(await remove({ key: "Delete" })).toBe("123.|");
-
-    // todo maskholder is wrong on empty space "xxx.xxx.xxx.xxx" + Space
   });
 
   test("+1(000) 000-0000", async () => {

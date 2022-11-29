@@ -444,10 +444,12 @@ mask-image: var(--ctrl-icon-img);
           opacity: 0.65;
           display: none;
           pointer-events: none;
+          text-overflow: initial;
         }
         WUP-SELECT [maskholder]&gt;i {
           visibility: hidden;
-          font-style: inherit;
+          font: inherit;
+          white-space: pre;
         }
         WUP-SELECT input:-webkit-autofill {
           font: inherit;

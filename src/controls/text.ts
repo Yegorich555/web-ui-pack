@@ -183,10 +183,12 @@ export default class WUPTextControl<
           opacity: 0.65;
           display: none;
           pointer-events: none;
+          text-overflow: initial;
         }
         :host [maskholder]>i {
           visibility: hidden;
-          font-style: inherit;
+          font: inherit;
+          white-space: pre;
         }
         :host input:-webkit-autofill {
           font: inherit;
@@ -575,3 +577,4 @@ customElements.define(tagName, WUPTextControl);
 //     div.textContent = ++div.textContent;
 //   }, 1000);
 // })();
+// todo maskholder shows if mask="false" etc.
