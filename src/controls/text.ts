@@ -135,13 +135,13 @@ export default class WUPTextControl<
 
   static get observedOptions(): Array<string> {
     const arr = super.observedOptions as Array<keyof WUPText.Options>;
-    arr.push("clearButton", "maskholder");
+    arr.push("clearButton", "maskholder", "mask");
     return arr;
   }
 
   static get observedAttributes(): Array<LowerKeys<WUPText.Options>> {
     const arr = super.observedAttributes as Array<LowerKeys<WUPText.Options>>;
-    arr.push("maskholder");
+    arr.push("maskholder", "mask");
     return arr;
   }
 

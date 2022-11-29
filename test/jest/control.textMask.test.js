@@ -523,23 +523,21 @@ describe("control.text: mask", () => {
     expect(el.$refInput.value).toBe("$ 5 USD");
     await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
     await h.wait(150);
-    expect(el.$refInput.value).toBe("$ 52 USD"); // todo it doesn't work
+    expect(el.$refInput.value).toBe("$ 52 USD");
 
-    // todo issue here
-    // h.setInputCursor(el.$refInput, "$ 5| USD");
-    // expect(await remove()).toBe("$ |");
+    h.setInputCursor(el.$refInput, "$ 5| USD");
+    expect(await remove()).toBe("$ |");
 
-    // h.setInputCursor(el.$refInput, "$ 5| USD");
-    // await h.userRemove(el.$refInput, { key: "Delete" });
-    // expect(el.$refInput.value).toBe("$ 5USD");
-    // expect(el.$refMaskholder.innerHTML).toBe("<i>$ 5USD</i>D");
-    // await h.wait(150); // when user types invalid char it shows and hides after a time
-    // expect(el.$refInput.value).toBe("$ 5 USD");
-    // expect(el.$refMaskholder.innerHTML).toBe("<i>$ 5 USD</i>");
+    h.setInputCursor(el.$refInput, "$ 5| USD");
+    await h.userRemove(el.$refInput, { key: "Delete" });
+    expect(el.$refInput.value).toBe("$ 5USD");
+    expect(el.$refMaskholder.innerHTML).toBe("<i>$ 5USD</i>D");
+    await h.wait(150); // when user types invalid char it shows and hides after a time
+    expect(el.$refInput.value).toBe("$ 5 USD");
+    expect(el.$refMaskholder.innerHTML).toBe("<i>$ 5 USD</i>");
 
-    // todo removing suffix doesn't work
-    // h.setInputCursor(el.$refInput, "$ 5 USD|");
-    // expect(await remove()).toBe("$ ");
+    h.setInputCursor(el.$refInput, "$ 5 USD|");
+    expect(await remove()).toBe("$ |"); // because of in prediction need to remove this
   });
 
   test("input: numeric if mask applied", async () => {

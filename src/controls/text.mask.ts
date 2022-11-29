@@ -1,5 +1,6 @@
 export interface IMaskInputOptions {
-  /** Add next constant-symbol to allow user don't worry about non-digit values @default true */
+  /** Add next constant-symbol to allow user don't worry about non-digit values @default true
+   * @WARN prediction:false is partially supported (delete behavior forces prediction logic) */
   prediction?: boolean;
   /** Add missed zero: for pattern '0000-00' and string '1 ' result will be "0001-" @default true   */
   lazy?: boolean;
@@ -222,6 +223,7 @@ export default class MaskTextInput {
           break;
         case "deleteContentForward":
           position = this.deleteAfter(prev.position);
+          declinedAdd = Math.min(v.length - this.value.length, 0);
           break;
         case "deleteContentBackward":
           position = this.deleteBefore(prev.position);
@@ -304,13 +306,15 @@ export default class MaskTextInput {
     }
 
     if (!chunk.isDig) {
+      const lastIndex = this.chunks.length - 1;
       if (chunk.index === 0 && isBefore) {
         position = chunk.text.length; // impossible to remove prefix: so set cursor to the end
       } else {
         const next = this.chunks[chunk.index + 1] as IDigChunk;
         const prev = this.chunks[chunk.index - 1] as IDigChunk;
         next && !next.text && resetChunk(next); // clear state next chunk after separator
-        const canRemove = prev && !next?.isTouched && prev.text.length !== prev.max; // whether possible to remove separator
+        const canRemove = prev && !next?.isTouched && prev.text.length !== prev.max && chunk.index !== lastIndex; // whether possible to remove separator
+
         canRemove && resetChunk(chunk); // clear current chunk if possible
         // 1|-- + delete
         // 1--| + backspace
@@ -318,12 +322,14 @@ export default class MaskTextInput {
           position -= posChunk; // go to prevChunk
           posChunk = prev.text.length;
           if (!canRemove && prev) {
-            !next.isTouched && resetChunk(chunk); // '123.|' + Backspace => 12
+            !next?.isTouched && resetChunk(chunk); // '123.|' + Backspace => 12
             chunk = prev; // "123.|456" + Backspace => "12|.456" or "12|4.56" (depends on min of prev)
           }
         } else if (!canRemove) {
           // "123|.456" + Delete
-          position += chunk.text.length - posChunk; // move cursor to the end
+          if (chunk.index !== lastIndex) {
+            position += chunk.text.length - posChunk; // move cursor to the end
+          }
           if (next?.isTouched) {
             chunk = next; // if next not empty go to next:  "123|.456" + Delete => "123.|56"
             posChunk = 0;
@@ -368,6 +374,7 @@ export default class MaskTextInput {
         }
       }
     }
+
     this.updateState();
     return position;
   }
@@ -386,7 +393,7 @@ export default class MaskTextInput {
 }
 
 // (() => {
-//   const t = new MaskTextInput("##0.##0.##0.##0");
+//   const t = new MaskTextInput("$ ##0 USD");
 //   const delAfter = (v: string): void => {
 //     t.parse(v);
 //     const pos = t.deleteAfter(v.indexOf("|"));
@@ -399,6 +406,6 @@ export default class MaskTextInput {
 //     console.warn(`${t.value.substring(0, pos)}|${t.value.substring(pos)}`, t.chunks);
 //   };
 
-//   delBefore("123.|");
+//   delBefore("$ 5 USD|");
 //   delAfter("123.4|.789.387");
 // })();
