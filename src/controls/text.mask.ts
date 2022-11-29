@@ -249,7 +249,7 @@ export default class MaskTextInput {
   findChunkByCursor(pos: number): { chunk: IInputChunk; posChunk: number } {
     const chunk = this.chunks.find((c) => {
       pos -= c.text.length;
-      return pos < 0;
+      return pos <= 0;
     })!;
     return { chunk, posChunk: chunk.text.length + pos };
   }
@@ -297,8 +297,12 @@ export default class MaskTextInput {
       }
     };
 
-    isBefore && --position;
     let { chunk, posChunk } = this.findChunkByCursor(position);
+    if (!isBefore && chunk.isDig && chunk.text.length === posChunk && this.chunks[chunk.index + 1]) {
+      chunk = this.chunks[chunk.index + 1]; // go to next chunk when '4|.789' + Delete
+      posChunk = 0;
+    }
+
     if (!chunk.isDig) {
       if (chunk.index === 0 && isBefore) {
         position = chunk.text.length; // impossible to remove prefix: so set cursor to the end
@@ -306,13 +310,13 @@ export default class MaskTextInput {
         const next = this.chunks[chunk.index + 1] as IDigChunk;
         const prev = this.chunks[chunk.index - 1] as IDigChunk;
         next && !next.text && resetChunk(next); // clear state next chunk after separator
-        const canRemove = prev && !next.isTouched && prev.text.length !== prev.max; // whether possible to remove separator
+        const canRemove = prev && !next?.isTouched && prev.text.length !== prev.max; // whether possible to remove separator
         canRemove && resetChunk(chunk); // clear current chunk if possible
         // 1|-- + delete
         // 1--| + backspace
         if (isBefore) {
-          position -= posChunk + (canRemove ? 0 : 1); // go to prevChunk
-          posChunk = prev.text.length - 1;
+          position -= posChunk; // go to prevChunk
+          posChunk = prev.text.length;
           if (!canRemove && prev) {
             !next.isTouched && resetChunk(chunk); // '123.|' + Backspace => 12
             chunk = prev; // "123.|456" + Backspace => "12|.456" or "12|4.56" (depends on min of prev)
@@ -329,6 +333,10 @@ export default class MaskTextInput {
     }
 
     if (chunk.isDig) {
+      if (isBefore) {
+        --position;
+        --posChunk;
+      }
       if (chunk.text.length === 1) {
         const nextVal = this.value.substring(0, position) + this.value.substring(position + 1);
         this.parse(nextVal); // '123.|4.567' + Delete = > 123.567
@@ -377,4 +385,20 @@ export default class MaskTextInput {
   }
 }
 
-// todo test with $ xx0 USD
+// (() => {
+//   const t = new MaskTextInput("##0.##0.##0.##0");
+//   const delAfter = (v: string): void => {
+//     t.parse(v);
+//     const pos = t.deleteAfter(v.indexOf("|"));
+//     console.warn(`${t.value.substring(0, pos)}|${t.value.substring(pos)}`, t.chunks);
+//   };
+
+//   const delBefore = (v: string): void => {
+//     t.parse(v);
+//     const pos = t.deleteBefore(v.indexOf("|"));
+//     console.warn(`${t.value.substring(0, pos)}|${t.value.substring(pos)}`, t.chunks);
+//   };
+
+//   delBefore("123.|");
+//   delAfter("123.4|.789.387");
+// })();

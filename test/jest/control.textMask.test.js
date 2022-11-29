@@ -369,7 +369,7 @@ describe("control.text: mask", () => {
     expect(await remove({ key: "Delete" })).toBe("123.4.|89.387");
     expect(await remove({ key: "Delete" })).toBe("123.4.|9.387");
     expect(await remove({ key: "Delete" })).toBe("123.4.|387.");
-    expect(await remove({ key: "Delete" })).toBe("123.4.|87."); // todo issue here
+    expect(await remove({ key: "Delete" })).toBe("123.4.|87.");
     expect(await remove({ key: "Delete" })).toBe("123.4.|7.");
     expect(await remove({ key: "Delete" })).toBe("123.4.|");
     // 123.387
@@ -486,7 +486,7 @@ describe("control.text: mask", () => {
     expect(h.getInputCursor(el.$refInput)).toBe("+1(2|");
   });
 
-  test("$ #####0 USD", () => {
+  test("$ #####0 USD", async () => {
     const mask = "$ #####0 USD";
     const mi = new MaskTextInput(mask);
     const proc = (v) => mi.parse(v);
@@ -514,7 +514,32 @@ describe("control.text: mask", () => {
     expect(parse("$ 123456 USD", mask).leftLength).toBe(0);
     expect(parse("$ 5 USD", mask).leftLength).toBe(0);
 
+    el.$options.mask = mask;
+    el.focus();
+    await h.wait(1);
+
+    await h.userTypeText(el.$refInput, "5", { clearPrevious: false });
+    await h.wait(150);
+    expect(el.$refInput.value).toBe("$ 5 USD");
+    await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
+    await h.wait(150);
+    expect(el.$refInput.value).toBe("$ 52 USD"); // todo it doesn't work
+
+    // todo issue here
+    // h.setInputCursor(el.$refInput, "$ 5| USD");
+    // expect(await remove()).toBe("$ |");
+
+    // h.setInputCursor(el.$refInput, "$ 5| USD");
+    // await h.userRemove(el.$refInput, { key: "Delete" });
+    // expect(el.$refInput.value).toBe("$ 5USD");
+    // expect(el.$refMaskholder.innerHTML).toBe("<i>$ 5USD</i>D");
+    // await h.wait(150); // when user types invalid char it shows and hides after a time
+    // expect(el.$refInput.value).toBe("$ 5 USD");
+    // expect(el.$refMaskholder.innerHTML).toBe("<i>$ 5 USD</i>");
+
     // todo removing suffix doesn't work
+    // h.setInputCursor(el.$refInput, "$ 5 USD|");
+    // expect(await remove()).toBe("$ ");
   });
 
   test("input: numeric if mask applied", async () => {
