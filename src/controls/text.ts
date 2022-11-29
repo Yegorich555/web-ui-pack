@@ -310,7 +310,7 @@ export default class WUPTextControl<
       email: (v, setV) => setV && (!v || !emailReg.test(v)) && "Invalid email address",
       // _invalidParse: (v) => v === undefined && "Invalid value",
       mask: (v, setV, c) => {
-        const refMask = (c as WUPTextControl).maskInput;
+        const { refMask } = c as WUPTextControl;
         return (
           (v === undefined || (setV && !!refMask && refMask.value !== refMask.prefix && !refMask.isCompleted)) &&
           "Incomplete value"
@@ -408,7 +408,7 @@ export default class WUPTextControl<
   }
 
   protected override gotFocusLost(): void {
-    if (this.maskInput?.prefix && this.$refInput.value === this.maskInput.prefix) {
+    if (this.refMask?.prefix && this.$refInput.value === this.refMask.prefix) {
       this.$refInput.value = ""; // rollback prefix/suffix if user types nothing
       this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
     }
@@ -426,6 +426,9 @@ export default class WUPTextControl<
     if (!this._opts.maskholder && this.$refMaskholder) {
       this.$refMaskholder.remove();
       this.$refMaskholder = undefined;
+    }
+    if (!this._opts.mask) {
+      this.refMask = undefined;
     }
 
     super.gotChanges(propsChanged as any);
@@ -476,7 +479,8 @@ export default class WUPTextControl<
     }
   }
 
-  maskInput?: MaskTextInput;
+  /** Mask object to proccess mask on input */
+  refMask?: MaskTextInput;
   #maskTimerEnd?: () => void; // required to rollback value immediately if user types next (otherwise cursor can shift wrong if type several 'ab' at once)
   /** Called to apply mask-behavior (on "input" event) */
   protected maskInputProcess(e: WUPText.GotInputEvent | null): string {
@@ -489,8 +493,8 @@ export default class WUPTextControl<
     }
 
     const { maskholder, mask } = this._opts;
-    this.maskInput = this.maskInput ?? new MaskTextInput(mask!);
-    const mi = this.maskInput;
+    this.refMask = this.refMask ?? new MaskTextInput(mask!);
+    const mi = this.refMask;
 
     let declinedAdd = 0;
     let position = el.selectionStart ?? el.value.length;
