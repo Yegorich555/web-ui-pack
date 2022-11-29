@@ -22,7 +22,9 @@ export namespace WUPTextIn {
 
   export interface Opt {
     /** Make input masked (supports only digit-mask. If you need aphabet please open an issue on Github)
-     * * inputmode='numeric' is applied if mask is pointed
+     * @rules when mask is pointed
+     * * inputmode='numeric' so mobile device show numeric-keyboard
+     * * enables validation 'mask' with error message 'Incomplete value'
      * @example
      * "0000-00-00" // for date in format yyyy-mm-dd
      * "##0.##0.##0.##0" // IPaddress

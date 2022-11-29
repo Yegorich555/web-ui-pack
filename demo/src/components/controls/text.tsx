@@ -20,7 +20,7 @@ export default function TextControlView() {
         "Built-in validations (required,min,max,email). To extend use $defaults.validations",
         "Smart validations on the fly (use $defaults.validationCases)",
         "Powerful accessibility support (keyboard, announcenement)",
-        "Mask/maskholder support",
+        "Mask/maskholder support (options mask & maskholder)",
       ]}
     >
       <wup-form
@@ -87,17 +87,9 @@ export default function TextControlView() {
             }
           }}
         />
-        <wup-text
-          name="test"
-          ref={(el) => {
-            if (el) {
-              el.$options.validations = { max: 3 };
-            }
-          }}
-        />
+        {/* todo wrap in the code-block to provide more details about mask and what rules are enabled */}
         <wup-text name="phone" label="Phone number (with mask)" mask="+1(000) 000-0000" />
         <wup-text name="ipaddr" label="IPaddress (with mask)" mask="##0.##0.##0.##0" maskholder="xxx.xxx.xxx.xxx" />
-        <wup-text name="num" label="Test (with mask)" mask="$0 ##0 USD" />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

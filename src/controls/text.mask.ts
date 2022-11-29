@@ -64,19 +64,18 @@ export default class MaskTextInput {
   handleBeforInput(e: InputEvent): void {
     const el = e.target as HandledInput;
 
-    const cur = { pos: el.selectionStart ?? this.value.length, v: this.value };
     let hist;
     switch (e!.inputType) {
       case "historyUndo": // Ctrl+Z
         if (this.#histUndo.length) {
           hist = this.#histUndo.pop()!;
-          this.#histRedo.push(cur);
+          this.#histRedo.push(this.historyToSnapshot(this.value, el.selectionStart || 0));
         }
         break;
       case "historyRedo": // Ctrl+Y
         if (this.#histRedo.length) {
           hist = this.#histRedo.pop()!;
-          this.#histUndo.push(cur);
+          this.#histUndo.push(this.historyToSnapshot(this.value, el.selectionStart || 0));
         }
         break;
       default: // this.#histUndo.push(cur); see in handleInput
@@ -84,8 +83,9 @@ export default class MaskTextInput {
     }
 
     if (hist) {
-      el.value = hist.v;
-      el.selectionStart = hist.pos;
+      const rh = this.historyFromSnapshot(hist);
+      el.value = rh.v;
+      el.selectionStart = rh.position;
       el.selectionEnd = el.selectionStart;
     }
 
@@ -248,12 +248,22 @@ export default class MaskTextInput {
     this.isCompleted = last.index === endIndex && (!last.isDig || !!last.isCompleted);
   }
 
-  #histUndo: Array<{ v: string; pos: number }> = [];
-  #histRedo: Array<{ v: string; pos: number }> = [];
+  #histUndo: Array<string> = [];
+  #histRedo: Array<string> = [];
   /** Clear redo/undo history */
   clearHistory(): void {
     this.#histUndo.length = 0;
     this.#histRedo.length = 0;
+  }
+
+  private historyToSnapshot(v: string, position: number): string {
+    return `${v.substring(0, position)}\0${v.substring(position)}`;
+  }
+
+  private historyFromSnapshot(h: string): { v: string; position: number } {
+    const position = h.indexOf("\0");
+    const v = h.substring(0, position) + h.substring(position + 1);
+    return { position, v };
   }
 
   /* Call it on 'input' event */
@@ -295,7 +305,7 @@ export default class MaskTextInput {
           break;
       }
       if (!isUndoRedo && saved.value !== this.value) {
-        this.#histUndo.push({ pos: saved.position, v: saved.value }); // WARN: it works only if selectionStart == End
+        this.#histUndo.push(this.historyToSnapshot(saved.value, saved.position)); // WARN: it works only if selectionStart == End
       }
     } else {
       this.parse(el.value);
