@@ -38,8 +38,8 @@ export default function TextControlView() {
           autoComplete="off"
           autoFocus={false}
           validations="window.myTextValidations"
-          mask={false}
-          maskholder={false}
+          mask=""
+          maskholder=""
         />
         <wup-text name="required" validations="myTextValidations" />
         <wup-text

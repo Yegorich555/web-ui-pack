@@ -78,11 +78,11 @@ declare global {
        * '\0' // for '0' char
        * '\1' // for '#' char
        */
-      mask?: string | false;
+      mask?: string;
       /** Placeholder for mask. By default it inherits from mask. To disabled it set 'false' or '' - empty string
        *  for date maskholder can be 'yyyy-mm-dd'
        *  @deprecated  */
-      maskholder?: string | false;
+      maskholder?: string;
     }
     interface GotInputEvent extends InputEvent {
       currentTarget: HTMLInputElement;
@@ -383,7 +383,7 @@ export default class WUPTextControl<
 
   protected override gotFocus(): Array<() => void> {
     const arr = super.gotFocus();
-    this.$refInput.inputMode = this._opts.mask ? "numeric" : "";
+    this.setAttr.call(this.$refInput, "inputMode", this._opts.mask ? "numeric" : "");
 
     const r = this.appendEvent(this.$refInput, "input", (e) => {
       (e as WUPText.GotInputEvent).setValuePrevented = false;
@@ -417,8 +417,7 @@ export default class WUPTextControl<
     // apply mask options
     this._opts.mask = this.getAttribute("mask") ?? this._opts.mask;
     this._opts.maskholder = this.getAttribute("maskholder") ?? this._opts.maskholder;
-    const disabledHolder = this._opts.maskholder === "false" || this._opts.maskholder === "";
-    if (!this._opts.maskholder && !disabledHolder) {
+    if (this._opts.maskholder == null) {
       this._opts.maskholder = this._opts.mask;
     }
 
@@ -577,4 +576,3 @@ customElements.define(tagName, WUPTextControl);
 //     div.textContent = ++div.textContent;
 //   }, 1000);
 // })();
-// todo maskholder shows if mask="false" etc.
