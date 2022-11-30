@@ -47,21 +47,21 @@ npm install web-ui-pack
 - [x] [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
 - [x] [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
 - [x] [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
+- [x] [Mask/pattern for controls](src/controls//text.mask.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
 - [x] [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
 - [x] [SwitchControl (Toggler)](src/controls/switch.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/switch)
 - [x] [CheckControl (Checkbox)](src/controls/check.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/check)
+- [ ] CheckTreeControl
 - [x] [RadioControl (RadioGroup)](src/controls/radio.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/radio)
 - [x] [SelectControl (ComboBox, Dropdown)](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
+- [ ] SelectManyControl (MultiSelect)
 - [x] [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
 - [ ] DateControl
-- [ ] SelectManyControl (MultiSelect)
 - [ ] TextareaControl
 - [ ] NumberControl
-- [ ] Mask/pattern for controls
-- [ ] CheckTreeControl
-- [ ] TimeControl ?
-- [ ] DateTimeControl ?
 - [ ] FileControl
+- [ ] TimeControl
+- [ ] DateTimeControl ?
 - [ ] ImageControl (AvatarEditor)
 - [ ] SearchControl ?
 - [ ] ModalElement

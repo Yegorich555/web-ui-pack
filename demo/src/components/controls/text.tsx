@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import Page from "src/elements/page";
 import { WUPTextControl } from "web-ui-pack";
 
@@ -87,9 +88,30 @@ export default function TextControlView() {
             }
           }}
         />
-        {/* todo wrap in the code-block to provide more details about mask and what rules are enabled */}
-        <wup-text name="phone" label="Phone number (with mask)" mask="+1(000) 000-0000" />
-        <wup-text name="ipaddr" label="IPaddress (with mask)" mask="##0.##0.##0.##0" maskholder="xxx.xxx.xxx.xxx" />
+        <section>
+          <h3>Masked inputs</h3>
+          <br />
+          <wup-text name="phone" label="Phone number (with mask)" mask="+1(000) 000-0000" />
+          <wup-text name="ipaddr" label="IPaddress (with mask)" mask="##0.##0.##0.##0" maskholder="xxx.xxx.xxx.xxx" />
+          Features:
+          <ul>
+            <li>
+              supports only numeric mask (to support alphabet-chars create an issue on Github), example:
+              <br /> $options.mask=<b>"+1(000) 000-0000"</b> - for phone number
+              <br /> $options.mask=<b>"##0.##0.##0.##0"</b> - for IP address
+              <br /> where <b>#</b> - optional, <b>0</b> - required number
+            </li>
+            <li>prediction: all static chars append automatically</li>
+            <li>lazy: type next separator on press Space to fill rest required digits with zeros</li>
+            <li>history redo/undo (use Ctrl+Z, Ctrl+Y)</li>
+            <li>shows typed declined chars (so user can see that keyboard works) and rollback after 100ms</li>
+            <li>possible to delete/append chars in the middle of text</li>
+            <li>
+              enables validations.mask by default with message <b>Incomplete value</b>
+            </li>
+            <li>usage details see in JSDoc: use intellisense to get info during the coding</li>
+          </ul>
+        </section>
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

@@ -6,11 +6,13 @@
 
 - Controls. [Blue highlight blink on tap action](https://stackoverflow.com/questions/25704650/disable-blue-highlight-when-touch-press-object-with-cursorpointer)
 - Controls. Click on button `Clear` throws console.error
+- Controls. Validation gets undefined value but must be skipped in this case (value is undefined only for messages or validations.required)
 - SelectControl. Click on custom list-item with nested span doesn't call click-event
 
 **Features**:
 
 - Controls throws error if attr [validations] has object-key to undefined value
+- Added [mask](http://localhost:8015/control/text) for text based controls
 - Added elements
   - [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
 - Added [helpers](README.md#helpers)
