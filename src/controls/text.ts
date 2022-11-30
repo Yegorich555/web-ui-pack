@@ -398,8 +398,10 @@ export default class WUPTextControl<
 
     /* istanbul ignore else */
     if (!this.$refInput.readOnly) {
-      if (!this.$refInput.value) {
-        this._opts.mask && this.maskInputProcess(null); // to apply prefix + maskholder
+      if (!this.$refInput.value && this._opts.mask) {
+        this.maskInputProcess(null); // to apply prefix + maskholder
+        this.$refInput.selectionStart = this.$refInput.value.length; // move cursor to the end
+        this.$refInput.selectionEnd = this.$refInput.selectionStart;
       } else {
         this._opts.selectOnFocus && this.$refInput.select();
       }
@@ -433,8 +435,8 @@ export default class WUPTextControl<
       this.$refMaskholder.remove();
       delete this.$refMaskholder;
     }
-    if (!this._opts.mask || propsChanged?.includes("mask")) {
-      delete this.refMask; // delete is mask is removed or changed (it's recovered again on event)
+    if (!this._opts.mask || this._opts.mask !== this.refMask?.pattern) {
+      delete this.refMask; // delete if mask is removed or changed (it's recovered again on event)
     }
 
     super.gotChanges(propsChanged as any);
@@ -446,7 +448,7 @@ export default class WUPTextControl<
       this.$refBtnClear = undefined;
     }
 
-    setTimeout(() => !this.$value && this.setInputValue(undefined)); // wait for timeout (wait for applying of inherrited) to set maskholder
+    // todo remove if this doesn't required for dateControl; it provide wrong cursor position: setTimeout(() => !this.$value && this.setInputValue(undefined)); // wait for timeout (wait for applying of inherrited) to set maskholder
   }
 
   /** Handler of 'beforeinput' event */

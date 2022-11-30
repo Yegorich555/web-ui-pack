@@ -34,7 +34,7 @@ interface HandledInput extends HTMLInputElement {
 export default class MaskTextInput {
   /** Corrected result */
   value = "";
-  /** Returns lastChunk that processed */
+  /** Returns text of first chunk if it's static or "" */
   prefix = "";
   /** Pattern splits into chunks. With detailed info about process */
   chunks: IInputChunk[] = [];
@@ -58,47 +58,6 @@ export default class MaskTextInput {
     this.options = { prediction: true, lazy: true, ...options };
     this.parse(rawValue);
     this.prefix = !this.chunks[0].isDig ? this.chunks[0].text : "";
-  }
-
-  /* Call it on 'beforeinput' event to improve logic */
-  handleBeforInput(e: InputEvent): void {
-    const el = e.target as HandledInput;
-
-    let hist;
-    switch (e!.inputType) {
-      case "historyUndo": // Ctrl+Z
-        if (this.#histUndo.length) {
-          hist = this.#histUndo.pop()!;
-          this.#histRedo.push(this.historyToSnapshot(this.value, el.selectionStart || 0));
-        }
-        break;
-      case "historyRedo": // Ctrl+Y
-        if (this.#histRedo.length) {
-          hist = this.#histRedo.pop()!;
-          this.#histUndo.push(this.historyToSnapshot(this.value, el.selectionStart || 0));
-        }
-        break;
-      default: // this.#histUndo.push(cur); see in handleInput
-        break;
-    }
-
-    if (hist) {
-      const rh = this.historyFromSnapshot(hist);
-      el.value = rh.v;
-      el.selectionStart = rh.position;
-      el.selectionEnd = el.selectionStart;
-    }
-
-    if (el.selectionStart !== el.selectionEnd) {
-      delete el._maskPrev;
-      return;
-    }
-
-    el._maskPrev = {
-      position: el.selectionStart || 0,
-      value: el.value,
-      insertText: e.data,
-    };
   }
 
   // /** Returns maskholder according to pattern for '##0.##0' returns '000.000' */
@@ -266,6 +225,61 @@ export default class MaskTextInput {
     return { position, v };
   }
 
+  /* Call it on 'beforeinput' event to improve logic */
+  handleBeforInput(e: InputEvent): void {
+    const el = e.target as HandledInput;
+
+    let hist;
+    switch (e!.inputType) {
+      case "historyUndo": // Ctrl+Z
+        if (this.#histUndo.length) {
+          hist = this.#histUndo.pop()!;
+          this.#histRedo.push(this.historyToSnapshot(this.value, el.selectionStart || 0));
+        }
+        break;
+      case "historyRedo": // Ctrl+Y
+        if (this.#histRedo.length) {
+          hist = this.#histRedo.pop()!;
+          this.#histUndo.push(this.historyToSnapshot(this.value, el.selectionStart || 0));
+        }
+        break;
+      default: // this.#histUndo.push(cur); see in handleInput
+        break;
+    }
+
+    if (hist) {
+      const rh = this.historyFromSnapshot(hist);
+      el.value = rh.v;
+      el.selectionStart = rh.position;
+      el.selectionEnd = el.selectionStart;
+    }
+
+    if (el.selectionStart !== el.selectionEnd) {
+      delete el._maskPrev;
+      return;
+    }
+
+    let pos = el.selectionStart || 0;
+    // eslint-disable-next-line default-case
+    switch (e!.inputType) {
+      case "insertText":
+      case "insertFromPaste": {
+        const { chunk, posChunk } = this.findChunkByCursor(pos);
+        if (!chunk.isDig && chunk.index === this.chunks.length - 1) {
+          pos -= posChunk; // move cursor before suffix
+          el.selectionStart = pos;
+          el.selectionEnd = pos;
+        }
+      }
+    }
+
+    el._maskPrev = {
+      position: pos,
+      value: el.value,
+      insertText: e.data,
+    };
+  }
+
   /* Call it on 'input' event */
   handleInput(e: InputEvent): { declinedAdd: number; position: number } {
     const el = e.target as HandledInput;
@@ -328,34 +342,30 @@ export default class MaskTextInput {
    *  @returns next cursor position */
   insert(char: string, pos: number): number {
     const prevPos = pos;
+
     const atTheEnd = pos >= this.value.length;
     if (!atTheEnd) {
       const { chunk, posChunk } = this.findChunkByCursor(pos);
       if (!chunk.isDig) {
         const shiftRight = chunk.text.length - posChunk;
-        pos += shiftRight;
+        pos += shiftRight; // leap through the static chunk
       }
     }
-
     const prev = this.value;
     const next = prev.substring(0, pos) + char + prev.substring(pos);
     this.parse(next);
 
-    pos += 1;
-    if (atTheEnd) {
-      pos = this.value.length;
-      if (this.isCompleted && !this.lastChunk.isDig) {
-        return pos - this.lastChunk.text.length; // if last is suffix we need to set cursor before
-      }
-    }
-
     if (this.value === prev) {
       return prevPos; // return prevPosition if char isn't appended
+    }
+    pos = atTheEnd ? this.value.length : pos + 1;
+    if (atTheEnd && this.isCompleted && !this.lastChunk.isDig) {
+      pos -= this.lastChunk.text.length;
     }
     return pos;
   }
 
-  private deleteChar(position: number, isBefore: boolean): number {
+  private deleteChar(pos: number, isBefore: boolean): number {
     /**
      * +1(234) 343|-4: remove char, shiftDigits. If lastDigit isEmpty: remove isTouched
      * +1(234) 343|-: remove char, shiftDigits. if lastDigit incompleted: remove separator chunk
@@ -369,7 +379,7 @@ export default class MaskTextInput {
       }
     };
 
-    let { chunk, posChunk } = this.findChunkByCursor(position);
+    let { chunk, posChunk } = this.findChunkByCursor(pos);
     if (!isBefore && chunk.isDig && chunk.text.length === posChunk && this.chunks[chunk.index + 1]) {
       chunk = this.chunks[chunk.index + 1]; // go to next chunk when '4|.789' + Delete
       posChunk = 0;
@@ -378,7 +388,7 @@ export default class MaskTextInput {
     if (!chunk.isDig) {
       const lastIndex = this.chunks.length - 1;
       if (chunk.index === 0 && isBefore) {
-        position = chunk.text.length; // impossible to remove prefix: so set cursor to the end
+        pos = chunk.text.length; // impossible to remove prefix: so set cursor to the end
       } else {
         const next = this.chunks[chunk.index + 1] as IDigChunk;
         const prev = this.chunks[chunk.index - 1] as IDigChunk;
@@ -389,7 +399,7 @@ export default class MaskTextInput {
         // 1|-- + delete
         // 1--| + backspace
         if (isBefore) {
-          position -= posChunk; // go to prevChunk
+          pos -= posChunk; // go to prevChunk
           posChunk = prev.text.length;
           if (!canRemove && prev) {
             !next?.isTouched && resetChunk(chunk); // '123.|' + Backspace => 12
@@ -398,7 +408,7 @@ export default class MaskTextInput {
         } else if (!canRemove) {
           // "123|.456" + Delete
           if (chunk.index !== lastIndex) {
-            position += chunk.text.length - posChunk; // move cursor to the end
+            pos += chunk.text.length - posChunk; // move cursor to the end
           }
           if (next?.isTouched) {
             chunk = next; // if next not empty go to next:  "123|.456" + Delete => "123.|56"
@@ -410,13 +420,13 @@ export default class MaskTextInput {
 
     if (chunk.isDig) {
       if (isBefore) {
-        --position;
+        --pos;
         --posChunk;
       }
       if (chunk.text.length === 1) {
-        const nextVal = this.value.substring(0, position) + this.value.substring(position + 1);
+        const nextVal = this.value.substring(0, pos) + this.value.substring(pos + 1);
         this.parse(nextVal); // '123.|4.567' + Delete = > 123.567
-        return position;
+        return pos;
       }
       chunk.text = chunk.text.substring(0, posChunk) + chunk.text.substring(posChunk + 1);
       chunk.isCompleted = chunk.text.length >= chunk.min;
@@ -446,7 +456,7 @@ export default class MaskTextInput {
     }
 
     this.updateState();
-    return position;
+    return pos;
   }
 
   /** Delete a char after pointed position: when user presses 'Delete';

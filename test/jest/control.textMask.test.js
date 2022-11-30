@@ -539,21 +539,31 @@ describe("control.text: mask", () => {
     expect(parse("$ 123456 USD", mask).leftLength).toBe(0);
     expect(parse("$ 5 USD", mask).leftLength).toBe(0);
 
+    el.testMe = true;
+    expect(h.getInputCursor(el.$refInput)).toBe("|");
     el.$options.mask = mask;
     el.focus();
+    expect(h.getInputCursor(el.$refInput)).toBe("$ |");
     await h.wait(1);
+    expect(h.getInputCursor(el.$refInput)).toBe("$ |");
 
     await h.userTypeText(el.$refInput, "5", { clearPrevious: false });
     await h.wait(150);
-    expect(el.$refInput.value).toBe("$ 5 USD");
+    expect(h.getInputCursor(el.$refInput)).toBe("$ 5| USD");
     await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
     await h.wait(150);
-    expect(el.$refInput.value).toBe("$ 52 USD");
+    expect(h.getInputCursor(el.$refInput)).toBe("$ 52| USD");
 
     h.setInputCursor(el.$refInput, "$ 5 USD|");
     await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
     await h.wait(150);
-    expect(h.getInputCursor(el.$refInput)).toBe("$ 5| USD");
+    expect(h.getInputCursor(el.$refInput)).toBe("$ 52| USD");
+
+    h.setInputCursor(el.$refInput, "$ 123456 USD|");
+    await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
+    expect(h.getInputCursor(el.$refInput)).toBe("$ 1234562| USD");
+    await h.wait(150);
+    expect(h.getInputCursor(el.$refInput)).toBe("$ 123456| USD");
 
     h.setInputCursor(el.$refInput, "$ 5| USD");
     expect(await remove()).toBe("$ |");
@@ -685,11 +695,11 @@ describe("control.text: mask", () => {
     expect(el.refMask).toBeUndefined();
 
     // possible to add mask after a time
-    expect(el.$refInput.value).toBe("2");
+    expect(h.getInputCursor(el.$refInput)).toBe("2|");
     el.$options.mask = "#0";
     await h.wait(1);
     await h.userTypeText(el.$refInput, "3", { clearPrevious: false });
-    expect(el.$refInput.value).toBe("23");
+    expect(h.getInputCursor(el.$refInput)).toBe("23|");
 
     expect(el.refMask?.pattern).toBe("#0"); // checking if new pattern is applied
   });
