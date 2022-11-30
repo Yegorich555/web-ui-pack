@@ -54,9 +54,9 @@ export default class MaskTextInput {
    * * '|0' or '\x00' - static char '0'
    * * '|#' or '\x01' - static char '#'
    *  */
-  constructor(public pattern: string, private options?: IMaskInputOptions) {
+  constructor(public pattern: string, rawValue: string, private options?: IMaskInputOptions) {
     this.options = { prediction: true, lazy: true, ...options };
-    this.parse("");
+    this.parse(rawValue);
     this.prefix = !this.chunks[0].isDig ? this.chunks[0].text : "";
   }
 
@@ -89,13 +89,13 @@ export default class MaskTextInput {
       el.selectionEnd = el.selectionStart;
     }
 
-    if (el.selectionStart == null || el.selectionStart !== el.selectionEnd) {
+    if (el.selectionStart !== el.selectionEnd) {
       delete el._maskPrev;
       return;
     }
 
     el._maskPrev = {
-      position: el.selectionStart!,
+      position: el.selectionStart || 0,
       value: el.value,
       insertText: e.data,
     };
@@ -271,7 +271,7 @@ export default class MaskTextInput {
     const el = e.target as HandledInput;
     const v = el.value;
 
-    let position = el.selectionStart ?? el.value.length;
+    let position = el.selectionStart || 0;
     let declinedAdd = 0;
 
     const saved = el._maskPrev;
@@ -340,15 +340,17 @@ export default class MaskTextInput {
     const prev = this.value;
     const next = prev.substring(0, pos) + char + prev.substring(pos);
     this.parse(next);
-    if (this.value === prev) {
-      return prevPos; // return prevPosition if char isn't appended
-    }
+
     pos += 1;
     if (atTheEnd) {
       pos = this.value.length;
       if (this.isCompleted && !this.lastChunk.isDig) {
         return pos - this.lastChunk.text.length; // if last is suffix we need to set cursor before
       }
+    }
+
+    if (this.value === prev) {
+      return prevPos; // return prevPosition if char isn't appended
     }
     return pos;
   }
@@ -380,7 +382,7 @@ export default class MaskTextInput {
       } else {
         const next = this.chunks[chunk.index + 1] as IDigChunk;
         const prev = this.chunks[chunk.index - 1] as IDigChunk;
-        next && !next.text && resetChunk(next); // clear state next chunk after separator
+        // case impossible anymore: next && !next.text && resetChunk(next); // clear state next chunk after separator
         const canRemove = prev && !next?.isTouched && prev.text.length !== prev.max && chunk.index !== lastIndex; // whether possible to remove separator
 
         canRemove && resetChunk(chunk); // clear current chunk if possible

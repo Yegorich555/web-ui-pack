@@ -372,9 +372,13 @@ export async function userTypeText(el: HTMLInputElement, text: string, opts = { 
   const inputType = "insertText";
   for (let i = 0; i < text.length; ++i) {
     const key = text[i];
-    el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
+    if (!el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }))) {
+      continue;
+    }
     el.dispatchEvent(new KeyboardEvent("keypress", { key, bubbles: true }));
-    el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, cancelable: true, data: key, inputType }));
+    if (!el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, cancelable: true, data: key, inputType }))) {
+      continue;
+    }
     const v = el.value;
     let carretPos = el.selectionStart ?? el.value.length;
     el.value = v.substring(0, carretPos) + key + v.substring(carretPos);
@@ -430,10 +434,14 @@ export async function userRemove(
   const { key } = opts;
 
   for (let i = 0; i < opts.removeCount; ++i) {
-    el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+    if (!el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }))) {
+      continue;
+    }
     // keypress not fired on not-char keys
     const inputType = `deleteContent${key === "Backspace" ? "Back" : "For"}ward`;
-    el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, data: null, inputType }));
+    if (!el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, data: null, inputType }))) {
+      continue;
+    }
 
     let v = el.value;
     let carretPos = el.selectionStart ?? v.length;

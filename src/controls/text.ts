@@ -396,9 +396,10 @@ export default class WUPTextControl<
     });
     const r2 = this.appendEvent(this.$refInput, "beforeinput", (e) => this.gotBeforeInput(e), { passive: false });
 
+    /* istanbul ignore else */
     if (!this.$refInput.readOnly) {
       if (!this.$refInput.value) {
-        this._opts.mask && this.maskInputProcess(null);
+        this._opts.mask && this.maskInputProcess(null); // to apply prefix + maskholder
       } else {
         this._opts.selectOnFocus && this.$refInput.select();
       }
@@ -430,10 +431,10 @@ export default class WUPTextControl<
 
     if (!this._opts.maskholder && this.$refMaskholder) {
       this.$refMaskholder.remove();
-      this.$refMaskholder = undefined;
+      delete this.$refMaskholder;
     }
-    if (!this._opts.mask) {
-      this.refMask = undefined;
+    if (!this._opts.mask || propsChanged?.includes("mask")) {
+      delete this.refMask; // delete is mask is removed or changed (it's recovered again on event)
     }
 
     super.gotChanges(propsChanged as any);
@@ -452,7 +453,7 @@ export default class WUPTextControl<
   protected gotBeforeInput(e: InputEvent): void {
     if (this._opts.mask) {
       this.#maskTimerEnd?.call(this);
-      this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask);
+      this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask, this.$refInput.value);
       this.refMask.handleBeforInput(e);
     }
   }
@@ -473,6 +474,7 @@ export default class WUPTextControl<
       // this.$showError(msg!.call(this, undefined as any, true, this) as string);
     } else {
       this._isValid !== false && this.$hideError();
+      /* istanbul ignore else */
       if (!e.setValuePrevented) {
         this._validTimer && clearTimeout(this._validTimer);
         if (this._opts.debounceMs) {
@@ -499,11 +501,11 @@ export default class WUPTextControl<
     }
 
     const { maskholder, mask } = this._opts;
-    this.refMask = this.refMask ?? new MaskTextInput(mask!);
+    this.refMask = this.refMask ?? new MaskTextInput(mask!, "");
     const mi = this.refMask;
 
     let declinedAdd = 0;
-    let position = el.selectionStart ?? el.value.length;
+    let position = el.selectionStart || 0;
 
     if (!e) {
       mi.parse(v);

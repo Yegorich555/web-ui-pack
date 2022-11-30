@@ -1,8 +1,7 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-imports
-import WUPTextControl from "../../src/controls/text";
-import MaskTextInput from "../../src/controls/text.mask";
-// todo change ref to web-ui-pack to coverage
-
+// import WUPTextControl from "../../src/controls/text";
+// import MaskTextInput from "../../src/controls/text.mask";
+import WUPTextControl from "web-ui-pack/controls/text";
+import MaskTextInput from "web-ui-pack/controls/text.mask";
 import * as h from "../testHelper";
 
 /** @type WUPTextControl */
@@ -35,7 +34,7 @@ afterEach(() => {
 describe("control.text: mask", () => {
   test("0000-00-00 (dateMask yyyy-MM-dd)", async () => {
     const mask = "0000-00-00";
-    const mi = new MaskTextInput(mask);
+    const mi = new MaskTextInput(mask, "");
     const proc = (v) => mi.parse(v);
 
     expect(proc("12")).toBe("12");
@@ -54,7 +53,7 @@ describe("control.text: mask", () => {
     expect(proc("1absd234-56-78")).toBe("1234-56-78");
 
     expect(proc("1234")).toBe("1234-");
-    expect(new MaskTextInput(mask, { prediction: false }).parse("1234")).toBe("1234");
+    expect(new MaskTextInput(mask, "1234", { prediction: false }).value).toBe("1234");
     expect(proc("1234w")).toBe("1234-");
     expect(proc("1234 ")).toBe("1234-");
     expect(proc("1234-")).toBe("1234-");
@@ -101,6 +100,34 @@ describe("control.text: mask", () => {
       expect(`${s.$in}: ${el.$refMaskholder.innerHTML}`).toBe(`${s.$in}: ${s.hN}`);
     }
 
+    // case when selectionEnd !== selectionStart
+    el.$refInput.select();
+    expect(
+      el.$refInput.dispatchEvent(
+        new InputEvent("beforeinput", { data: "1", inputType: "instertText", cancelable: true, bubbles: true })
+      )
+    ).toBe(true); // event must be not-prevented
+    el.$refInput.value = "6";
+    el.$refInput.selectionStart = 1;
+    el.$refInput.selectionEnd = 1;
+    el.$refInput.dispatchEvent(new InputEvent("input", { inputType: "instertText", bubbles: true }));
+    await h.wait(150);
+    expect(el.$refInput.value).toBe("6");
+
+    // case when user swipes 2 values
+    h.setInputCursor(el.$refInput, "6|7|");
+    expect(
+      el.$refInput.dispatchEvent(
+        new InputEvent("beforeinput", { inputType: "insertFromDrop", cancelable: true, bubbles: true })
+      )
+    ).toBe(true); // event must be not-prevented
+    el.$refInput.value = "76";
+    el.$refInput.selectionStart = 1;
+    el.$refInput.selectionEnd = 1;
+    el.$refInput.dispatchEvent(new InputEvent("input", { inputType: "instertText", bubbles: true }));
+    await h.wait(150);
+    expect(el.$refInput.value).toBe("76");
+
     // test ability to remove chars
     h.setInputCursor(el.$refInput, "1234-05-06|");
     const removeResult = [
@@ -137,7 +164,7 @@ describe("control.text: mask", () => {
 
   test("0000/#0/#0 (dateMask yyyy-M-d)", async () => {
     const mask = "0000/#0/#0";
-    const mi = new MaskTextInput(mask);
+    const mi = new MaskTextInput(mask, "");
     const proc = (v) => mi.parse(v);
 
     expect(proc("12")).toBe("12");
@@ -156,7 +183,7 @@ describe("control.text: mask", () => {
     expect(proc("1absd234/56/78")).toBe("1234/56/78");
 
     expect(proc("1234")).toBe("1234/");
-    expect(new MaskTextInput(mask, { prediction: false }).parse("1234")).toBe("1234");
+    expect(new MaskTextInput(mask, "1234", { prediction: false }).value).toBe("1234");
     expect(proc("1234w")).toBe("1234/");
     expect(proc("1234 ")).toBe("1234/");
     expect(proc("1234/")).toBe("1234/");
@@ -237,7 +264,7 @@ describe("control.text: mask", () => {
 
   test("0000--0", () => {
     const mask = "0000--0";
-    const mi = new MaskTextInput(mask);
+    const mi = new MaskTextInput(mask, "");
     const proc = (v) => mi.parse(v);
 
     expect(proc("1234--5")).toBe("1234--5");
@@ -248,7 +275,7 @@ describe("control.text: mask", () => {
 
   test("##0.##0.##0.##0 (IP addess)", async () => {
     const mask = "##0.##0.##0.##0";
-    const mi = new MaskTextInput(mask);
+    const mi = new MaskTextInput(mask, "");
     const proc = (v) => mi.parse(v);
 
     expect(proc("192.168.255.254")).toBe("192.168.255.254");
@@ -256,7 +283,7 @@ describe("control.text: mask", () => {
     expect(proc("1.")).toBe("1.");
     expect(proc("192.")).toBe("192.");
     expect(proc("192")).toBe("192.");
-    expect(new MaskTextInput(mask, { prediction: false }).parse("192")).toBe("192");
+    expect(new MaskTextInput(mask, "192", { prediction: false }).value).toBe("192");
     expect(proc("192 ")).toBe("192.");
     expect(proc(".")).toBe("");
 
@@ -385,14 +412,14 @@ describe("control.text: mask", () => {
 
   test("+1(000) 000-0000", async () => {
     const mask = "+1(000) 000-0000";
-    const mi = new MaskTextInput(mask);
+    const mi = new MaskTextInput(mask, "");
     const proc = (v) => mi.parse(v);
 
     expect(proc("+1(234) 975-1234")).toBe("+1(234) 975-1234");
     expect(proc("2")).toBe("+1(2");
     expect(proc("23")).toBe("+1(23");
     expect(proc("234")).toBe("+1(234) ");
-    expect(new MaskTextInput(mask, { prediction: false }).parse("234")).toBe("+1(234");
+    expect(new MaskTextInput(mask, "234", { prediction: false }).value).toBe("+1(234");
     expect(proc("+1(234)9")).toBe("+1(234) 9");
     expect(proc("12349751234")).toBe("+1(234) 975-1234");
     expect(proc("")).toBe("+1("); // autoprefix
@@ -486,7 +513,7 @@ describe("control.text: mask", () => {
 
   test("$ #####0 USD", async () => {
     const mask = "$ #####0 USD";
-    const mi = new MaskTextInput(mask);
+    const mi = new MaskTextInput(mask, "");
     const proc = (v) => mi.parse(v);
 
     expect(proc("$ 123456 USD")).toBe("$ 123456 USD");
@@ -523,6 +550,11 @@ describe("control.text: mask", () => {
     await h.wait(150);
     expect(el.$refInput.value).toBe("$ 52 USD");
 
+    h.setInputCursor(el.$refInput, "$ 5 USD|");
+    await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
+    await h.wait(150);
+    expect(h.getInputCursor(el.$refInput)).toBe("$ 5| USD");
+
     h.setInputCursor(el.$refInput, "$ 5| USD");
     expect(await remove()).toBe("$ |");
 
@@ -551,14 +583,14 @@ describe("control.text: mask", () => {
   });
 
   test("escaped chars: 0, # etc.", () => {
-    expect(new MaskTextInput("a|0 ##0 b|#").chunks.map((v) => v.text)).toMatchInlineSnapshot(`
+    expect(new MaskTextInput("a|0 ##0 b|#", "").chunks.map((v) => v.text)).toMatchInlineSnapshot(`
       [
         "a0 ",
         "##0",
         " b#",
       ]
     `);
-    expect(new MaskTextInput("a||0 ##0 b||#").chunks.map((v) => v.text)).toMatchInlineSnapshot(`
+    expect(new MaskTextInput("a||0 ##0 b||#", "").chunks.map((v) => v.text)).toMatchInlineSnapshot(`
       [
         "a|",
         "0",
@@ -612,7 +644,54 @@ describe("control.text: mask", () => {
 
     expect(await h.userUndo(el.$refInput)).toBe("+1(|");
     expect(await h.userUndo(el.$refInput)).toBe("+1(|"); // try again - no actions
+
+    // cover case when !selectionStart
+    el.blur();
+    el.$options.mask = "##0";
+    el.$value = "";
+    await h.wait(1);
+    await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
+    h.setInputCursor(el.$refInput, "|2");
+    expect(await h.userUndo(el.$refInput)).toBe("|");
+    expect(await h.userRedo(el.$refInput)).toBe("|2");
   });
 
+  test("$opions.mask works properly", async () => {
+    el.$options.mask = "##0";
+    await h.wait(1);
+    expect(el.$options.maskholder).toBe("##0");
+    el.$options.maskholder = "xxx";
+    await h.wait(1);
+    expect(el.$options.maskholder).toBe("xxx");
+
+    el.focus();
+    expect(el.$refMaskholder).toBeDefined();
+
+    el.$options.maskholder = "";
+    await h.wait(1);
+    expect(el.$options.maskholder).toBe("");
+    expect(el.$refMaskholder).toBeUndefined();
+
+    // mask works without maskholder
+    await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
+    expect(el.$refInput.value).toBe("2");
+    expect(el.$refMaskholder).toBeUndefined();
+
+    // possible to remove mask
+    expect(el.refMask).toBeDefined();
+    el.$options.mask = undefined;
+    await h.wait(1);
+    el.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    expect(el.refMask).toBeUndefined();
+
+    // possible to add mask after a time
+    expect(el.$refInput.value).toBe("2");
+    el.$options.mask = "#0";
+    await h.wait(1);
+    await h.userTypeText(el.$refInput, "3", { clearPrevious: false });
+    expect(el.$refInput.value).toBe("23");
+
+    expect(el.refMask?.pattern).toBe("#0"); // checking if new pattern is applied
+  });
   // WARN. for currency need to use completely another behavior: exctract digits and mask again >>> see NumberControl
 });

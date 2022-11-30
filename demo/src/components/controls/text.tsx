@@ -91,8 +91,9 @@ export default function TextControlView() {
         <section>
           <h3>Masked inputs</h3>
           <br />
-          <wup-text name="phone" label="Phone number (with mask)" mask="+1(000) 000-0000" />
-          <wup-text name="ipaddr" label="IPaddress (with mask)" mask="##0.##0.##0.##0" maskholder="xxx.xxx.xxx.xxx" />
+          <wup-text name="phone" label="Phone number" mask="+1(000) 000-0000" />
+          <wup-text name="ipaddr" label="IPaddress" mask="##0.##0.##0.##0" maskholder="xxx.xxx.xxx.xxx" />
+          {/* <wup-text name="num" label="Test suffix" mask="$ ##0 USD" maskholder="$ 000 USD" /> */}
           Features:
           <ul>
             <li>
