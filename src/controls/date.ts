@@ -12,7 +12,7 @@ import WUPCalendarControl, { PickersEnum, WUPCalendarIn } from "./calendar";
 const tagName = "wup-date";
 export namespace WUPDateIn {
   export interface Defs extends WUPCalendarIn.Def {
-    /** String representation of a date;
+    /** String representation of date (enables mask, - to disable mask set $options.mask="");
      * @defaultValue "yyyy-mm-dd" */
     format: string;
   }
@@ -287,8 +287,7 @@ export default class WUPDateControl<
   protected override gotKeyDown(e: KeyboardEvent): Promise<void> {
     const isOpen = this.$isOpen;
     const clnd = this.$refPopup!.firstElementChild as WUPCalendarControl;
-    isOpen && e.key !== "Escape" && clnd.gotKeyDown.call(clnd, e); // skip actions for Escape key
-    // todo user can't type Space " " symbol because it's handled by calendar
+    isOpen && e.key !== "Escape" && e.key !== " " && clnd.gotKeyDown.call(clnd, e); // skip actions for Escape & Space keys
     const r = !e.defaultPrevented && super.gotKeyDown(e);
     !isOpen && this.$isOpen && e.key !== "Escape" && clnd.gotKeyDown.call(clnd, e); // case when user press ArrowKey for opening menu
     return r || Promise.resolve();
