@@ -45,24 +45,38 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
     expect(el.$isValid).toBe(false);
     await h.wait();
     expect(el.$refError).toBeDefined();
-
-    // el.$value = "abc";
-    // el.$options.validations = { max: 1 };
-    // el.$validate();
-    // expect(el.$isValid).toBe(false);
-    // await h.wait();
-    // expect(el).toMatchSnapshot();
   });
 
-  test("validation: skip on undefined (beside: required)", () => {
+  test("validations debounce", async () => {
+    /* rules:
+      1. invalid > valid: hide without debounce
+      2. invalid > invalid show another message without debouce
+      3. valid > invalid: debounce
+    */
     const el = getEl();
-    el.$options.validations = { max: 3 };
-    expect(el.$validate()).toBe(false);
-    expect(el.$isValid).toBe(true);
+    const inp = el.$refInput;
+    el.$options.validations = {
+      min: () => inp.value.length < 2 && "Min 2",
+      max: () => inp.value.length > 3 && "Max 3",
+    };
+    el.$options.validateDebounceMs = 300;
+    el.$options.debounceMs = 0;
+    await h.wait(1);
+    await h.userTypeText(inp, "ab"); // type to Valid
+    expect(el._wasValidNotEmpty).toBe(true);
+    await h.userRemove(inp); // remove to Invalid
+    expect(inp.value).toBe("a");
+    await h.wait(100);
+    expect(el.$refError).toBeFalsy(); // waiting for debounce
+    await h.wait(300);
+    expect(el.$refError?.innerHTML).toMatchInlineSnapshot(`"<span class="wup-hidden"></span><span>Min 2</span>"`);
 
-    el.$value = "abcd";
-    expect(el.$validate()).toBeTruthy();
-    expect(el.$isValid).toBe(false);
+    inp.value += "bcd";
+    await h.userTypeText(inp, "2", { clearPrevious: false });
+    expect(el.$refInput.value).toBe("abcd2");
+    await h.wait(1);
+    // don't wait for debounce because error message is changed. Debounce only to show error at first time
+    expect(el.$refError?.innerHTML).toMatchInlineSnapshot(`"<span class="wup-hidden"></span><span>Max 3</span>"`);
   });
 
   describe("options", () => {

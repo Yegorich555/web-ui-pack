@@ -81,9 +81,8 @@ export namespace WUPBaseIn {
        *  @defaultValue onChangeSmart | onFocusLost | onFocusWithValue | onSubmit
        */
       validationCase: ValidationCases;
-      /** Wait for pointed time after valueChange before show error (it's sumarized with $options.debounce); WARN: hide error without debounce
-       *  @defaultValue 500
-       */
+      /** Wait for pointed time after valueChange before showError (it's sumarized with $options.debounce); WARN: hide error without debounce
+       *  @defaultValue 500 */
       validateDebounceMs: number;
       /** Debounce option for onFocustLost event (for validationCases.onFocusLost); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost;
        * @defaultValue 100ms */
@@ -646,6 +645,10 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   protected override connectedCallback(): void {
+    delete this._errName;
+    delete this._errMsg;
+    delete this._wasValidNotEmpty;
+
     super.connectedCallback();
     this.$form = WUPFormElement.$tryConnect(this);
   }
@@ -744,14 +747,13 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
     if (errMsg) {
       if (canShowError || this.$refError) {
-        this._validTimer = setTimeout(
-          () => {
-            const saved = this._errName;
-            this.goShowError(errMsg, this.$refInput);
-            this._errName = saved;
-          },
-          fromCase === ValidateFromCases.onChange ? this._opts.validateDebounceMs : 0
-        );
+        // don't wait for debounce if we need to update an error
+        const waitMs = this.$refError || fromCase !== ValidateFromCases.onChange ? 0 : this._opts.validateDebounceMs;
+        this._validTimer = setTimeout(() => {
+          const saved = this._errName;
+          this.goShowError(errMsg, this.$refInput);
+          this._errName = saved;
+        }, waitMs);
       }
       return errMsg;
     }
@@ -829,12 +831,11 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     if (this._errMsg === err) {
       return;
     }
-    this._errName = undefined;
     // possible when user goes to another page and focusout > validTimeout happened
     if (!this.isConnected) {
       return;
     }
-
+    this._errName = undefined;
     this._errMsg = err;
 
     if (!this.$refError) {
@@ -971,9 +972,4 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   - form > model must inlcude $initValue for disabled control instead of last changed. After submit need to reset $value to $initValue in this case
 */
 
-/* todo improve validationDebouce:
-  1. invalid > valid: show without debounce
-  2. invalid > invalid another message: without debouce
-  3. valid > invalid: debounce
-*/
-// todo when user leaves the control and vld-message appeared once - need to return back
+/** todo when user sees validation error at first time by focusout need to return focus back */

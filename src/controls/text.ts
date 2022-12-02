@@ -487,12 +487,6 @@ export default class WUPTextControl<
       return;
     }
 
-    // gotInput => mask > parse > ...setValue... > validate
-    // setInputValue => mask
-
-    // testcase: valid + remove required digit => show Incomplete
-    // testcase: empty + add 1 digit => show Incomplete; focusOut - remove message if inputCleared
-
     const canParse = this.canParse(txt);
     let v = this.$value;
     let errMsg: boolean | string = "";
@@ -510,7 +504,7 @@ export default class WUPTextControl<
       } else if (canParse) {
         this.setValue(v, true, true);
       } else if (this._opts.mask) {
-        // testcase: when user lefts control need to show error
+        // todo testcase: when user lefts control need to left error if input not cleared
         this.validateOnce({ _mask: this.validations?._mask || "" });
       }
     };
@@ -635,6 +629,6 @@ export default class WUPTextControl<
 }
 
 customElements.define(tagName, WUPTextControl);
-// NiceToHave: handle Ctrl+Z for mask, wup-select etc. cases
+// NiceToHave: handle Ctrl+Z wup-select etc. cases
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
