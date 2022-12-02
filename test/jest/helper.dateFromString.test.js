@@ -95,8 +95,9 @@ describe("helper.dateToString", () => {
     expect(dateFromString("2022-03-5", "yyyy-MM-dd")).toBe(null);
     expect(dateFromString("2022-03-512:36", "yyyy-MM-dd hh:mm")).toBe(null);
     expect(dateFromString("20-03-05", "yyyy-MM-dd")).toBe(null);
-    expect(dateFromString("2022-03-50", "yyyy-MM-dd")).toBe(null);
-    expect(dateFromString("2022-30-50", "yyyy-MM-dd")).toBe(null);
+    expect(() => dateFromString("2022-03-50", "yyyy-MM-dd")).toThrow();
+    expect(() => dateFromString("2022-30-50", "yyyy-MM-dd")).toThrow();
+    expect(dateFromString("2022-30-50", "yyyy-MM-dd", { throwOutOfRange: false })).toBe(null);
     expect(dateFromString("2022-03-103", "yyyy-MM-dd")).toBe(null);
     expect(dateFromString("2022-11-29 01:02:03.679", "YYYY-MM-DD hh:mm:ss.fff a", { strict: false })).toBe(null); // with out am/pm it's wrong
   });
@@ -132,11 +133,8 @@ describe("helper.dateToString", () => {
   });
 
   test("isOutOfRange", () => {
-    const getOutOfRange = (v = "2022", format = "yyyy") => {
-      const out = { strict: true, isOutOfRange: null };
-      dateFromString(v, format, out);
-      return out.isOutOfRange;
-    };
+    const getOutOfRange = (v = "2022", format = "yyyy") =>
+      dateFromString(v, format, { strict: true, throwOutOfRange: false }) == null;
 
     expect(getOutOfRange("2022-12-20", "yyyy-MM-dd")).toBe(false);
     expect(getOutOfRange("2022-00-20", "yyyy-MM-dd")).toBe(true);

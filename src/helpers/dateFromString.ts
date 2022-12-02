@@ -20,9 +20,11 @@ export default function dateFromString(
      * @defaultValue true
      */
     strict?: boolean;
-    /** Output value returns true if detected out of range value: day > 31 etc. */
-    isOutOfRange?: boolean;
-  } = { strict: true }
+    /** Enables rule: if detected out of range value: day > 31 etc. then throws exeption "Out of range";
+     *  Disable it to return null instead
+     * @defaultValue true */
+    throwOutOfRange?: boolean;
+  } = { strict: true, throwOutOfRange: true }
 ): Date | null {
   if (!v) {
     return null;
@@ -99,8 +101,13 @@ export default function dateFromString(
     return null;
   }
 
-  options.isOutOfRange = isOutOfRange(r, isUTC, dt);
-  if (options.isOutOfRange) {
+  const isOut = isOutOfRange(r, isUTC, dt);
+  if (isOut && options.throwOutOfRange) {
+    const err = RangeError(dateFromString.rangeErrorMessage) as RangeError & { details: any };
+    err.details = { format, raw: v, options, parsed: r };
+    console.warn(`${err.message}. Details:`, err.details);
+    throw err;
+  } else if (isOut) {
     return null;
   }
 
@@ -111,9 +118,13 @@ export default function dateFromString(
       return null;
     }
   }
+  // todo if options.strict === false then "2022-06-3", "yyyy-MM-dd" must be truthy
 
   return dt;
 }
+
+/** Returns "Out of range" text for error */
+dateFromString.rangeErrorMessage = "Out of range";
 
 function isOutOfRange(
   r: { y: number; M: number; d: number; h: number; m: number; s: number; f: number },
