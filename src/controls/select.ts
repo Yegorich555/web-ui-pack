@@ -197,7 +197,7 @@ export default class WUPSelectControl<
   }
 
   /** Called when need to parse attr [initValue] */
-  override parseValue(attrValue: string): ValueType | undefined {
+  override parse(attrValue: string): ValueType | undefined {
     this.getItems().then((arr) => {
       let r;
       if (arr?.length) {

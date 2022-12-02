@@ -569,7 +569,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       const attr = this.getAttribute("initvalue");
       if (attr !== null) {
         (this as any)._noDelInitValueAttr = true;
-        this.$initValue = this.parseValue(attr);
+        this.$initValue = this.parse(attr);
         delete (this as any)._noDelInitValueAttr;
       } else if (propsChanged) {
         this.$initValue = undefined; // removed attr >> remove initValue
@@ -598,7 +598,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
    * Attention: this.$refInput is already defined */
   protected abstract renderControl(): void;
   /** Called when need to parse inputValue or attr [initValue] */
-  abstract parseValue(text: string): ValueType | undefined;
+  abstract parse(text: string): ValueType | undefined;
 
   protected override gotReady(): void {
     super.gotReady();

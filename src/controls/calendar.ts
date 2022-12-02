@@ -409,7 +409,7 @@ export default class WUPCalendarControl<
   }
 
   /** Converts date-string into Date according (to $options.utc), @see WUPCalendarControl.$parse */
-  override parseValue(text: string): ValueType | undefined {
+  override parse(text: string): ValueType | undefined {
     /* istanbul ignore else */
     if (!text) {
       return undefined;
@@ -1031,8 +1031,8 @@ export default class WUPCalendarControl<
       }
     }
 
-    this._opts.min = this.parseValue(this.getAttribute("min") || "") ?? this._opts.min;
-    this._opts.max = this.parseValue(this.getAttribute("max") || "") ?? this._opts.max;
+    this._opts.min = this.parse(this.getAttribute("min") || "") ?? this._opts.min;
+    this._opts.max = this.parse(this.getAttribute("max") || "") ?? this._opts.max;
     this._opts.exclude = this.getRefAttr<Date[]>("exclude");
     if (!propsChanged || propsChanged.includes("exclude")) {
       this._opts.exclude?.sort((a, b) => a.valueOf() - b.valueOf());
@@ -1105,7 +1105,7 @@ export default class WUPCalendarControl<
 
   /** Called when browsers fills the field via autocomplete */
   protected gotInput(_e: Event, inputEl: HTMLInputElement): void {
-    const v = this.parseValue(inputEl.value);
+    const v = this.parse(inputEl.value);
     this.setValue(v);
   }
 

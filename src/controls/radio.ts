@@ -224,7 +224,7 @@ export default class WUPRadioControl<
   protected override _opts = this.$options;
 
   /** Called when need to parse attr [initValue] */
-  override parseValue(attrValue: string): ValueType | undefined {
+  override parse(attrValue: string): ValueType | undefined {
     const a = this.getItems() as WUPSelect.MenuItem<ValueType>[];
     if (!a?.length) {
       return undefined;

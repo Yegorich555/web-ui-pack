@@ -128,7 +128,7 @@ export default class WUPDateControl<
   /** Converts date-string into Date according (to $options.utc & .format)
    * @Troubleshooting
    * * despite on $options.format is "yyyy-mm-dd" the correct format "yyyy-MM-dd" */
-  override parseValue(text: string, opts?: { strict?: boolean }): ValueType | undefined {
+  override parse(text: string, opts?: { strict?: boolean }): ValueType | undefined {
     if (!text) {
       return undefined;
     }
@@ -157,8 +157,8 @@ export default class WUPDateControl<
     // todo allow last chunk to be optional: 2022-06-3 yyyy-mm-dd must be refMask.isCompleted
 
     this._opts.maskholder = this._opts.maskholder ?? this._opts.format;
-    this._opts.min = this.parseValue(this.getAttribute("min") || "") ?? this._opts.min;
-    this._opts.max = this.parseValue(this.getAttribute("max") || "") ?? this._opts.max;
+    this._opts.min = this.parse(this.getAttribute("min") || "") ?? this._opts.min;
+    this._opts.max = this.parse(this.getAttribute("max") || "") ?? this._opts.max;
     this._opts.exclude = this.getRefAttr<Date[]>("exclude");
 
     const attr = this.getAttribute("startwith");

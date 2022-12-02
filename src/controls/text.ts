@@ -345,9 +345,8 @@ export default class WUPTextControl<
     this.$refInput.placeholder = " ";
   }
 
-  // todo rename to 'parse'
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override parseValue(text: string): ValueType | undefined {
+  override parse(text: string): ValueType | undefined {
     return (text || undefined) as unknown as ValueType;
   }
 
@@ -499,7 +498,7 @@ export default class WUPTextControl<
     let errMsg: boolean | string = "";
     if (canParse) {
       try {
-        v = this.parseValue(txt);
+        v = this.parse(txt);
       } catch (err) {
         errMsg = (err as Error).message || true;
       }
