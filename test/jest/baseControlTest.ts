@@ -8,8 +8,8 @@ import { BaseTestOptions } from "../testHelper";
 declare global {
   namespace WUPBase {
     interface ValidationMap {
-      _alwaysValid: boolean;
-      _alwaysInvalid: boolean;
+      $alwaysValid: boolean;
+      $alwaysInvalid: boolean;
     }
   }
 }
@@ -35,8 +35,8 @@ export function initTestBaseControl<T extends WUPBaseControl>(cfg: InitOptions<T
     Element.prototype.scrollIntoView = jest.fn();
     let lastUniqueNum = 0;
     jest.spyOn(cfg.type, "$uniqueId", "get").mockImplementation(() => `txt${++lastUniqueNum}`);
-    (elType.$defaults.validationRules as any)._alwaysValid = () => false;
-    (elType.$defaults.validationRules as any)._alwaysInvalid = () => "Always error";
+    (elType.$defaults.validationRules as any).$alwaysValid = () => false;
+    (elType.$defaults.validationRules as any).$alwaysInvalid = () => "Always error";
 
     el = document.createElement(cfg.htmlTag) as WUPBaseControl;
     cfg.onInit(el as T);
@@ -46,8 +46,8 @@ export function initTestBaseControl<T extends WUPBaseControl>(cfg: InitOptions<T
 
   afterEach(() => {
     document.body.innerHTML = "";
-    delete (elType.$defaults.validationRules as any)._alwaysValid;
-    delete (elType.$defaults.validationRules as any)._alwaysInvalid;
+    delete (elType.$defaults.validationRules as any).$alwaysValid;
+    delete (elType.$defaults.validationRules as any).$alwaysInvalid;
     jest.restoreAllMocks();
     jest.clearAllMocks();
   });
@@ -395,7 +395,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
     test("rule not exists", () => {
       el.$options.validations = { no: true } as any;
-      el.$value = "";
+      el.$value = cfg.initValues[0].value;
       expect(() => el.$validate()).toThrowError();
       el.$options.name = "Me"; // just for coverage
       expect(() => el.$validate()).toThrowError();
@@ -443,7 +443,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       await h.wait();
       el.$value = undefined;
       el.$options.validationCase = ValidationCases.onFocusLost | 0;
-      el.$options.validations = hasVldRequired ? { required: true } : { _alwaysInvalid: true };
+      el.$options.validations = hasVldRequired ? { required: true } : { $alwaysInvalid: true };
       await h.wait();
       expect(el.$refError).not.toBeDefined();
       el.focus();
@@ -505,9 +505,9 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       await h.wait();
       expect(el.$refError).toBeDefined();
 
-      // cover case when errorLeft but focusOut
-      el.$value = "";
-      el.$options.validations = { _alwaysInvalid: true };
+      // cover case when focusOut but error left
+      el.$value = cfg.initValues[0].value;
+      el.$options.validations = { $alwaysInvalid: true };
       (document.activeElement as HTMLElement)!.blur();
       await h.wait();
       el.$refInput.focus();
@@ -524,7 +524,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     test("options.validateDebounceMs", async () => {
       el.$options.validationCase = ValidationCases.onChange | 0;
       el.$options.validateDebounceMs = 500;
-      el.$options.validations = { _alwaysInvalid: true };
+      el.$options.validations = { $alwaysInvalid: true };
       // @ts-ignore
       el.setValue(cfg.initValues[0].value);
       expect(el.$isValid).toBe(false);
@@ -574,8 +574,9 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
         await h.wait();
         expect(el).toMatchSnapshot();
 
-        (el.$options.validations as any)._alwaysValid = true;
-        (el.$options.validations as any)._alwaysInvalid = true;
+        (el.$options.validations as any).$alwaysValid = true;
+        (el.$options.validations as any).$alwaysInvalid = true;
+
         el.$hideError();
         el.$validate();
         expect(() => jest.advanceTimersByTime(1000)).toThrow(); // because impossible to get errorMessage
@@ -623,7 +624,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
         // with custom error
         el.$options.validations = { [ruleName]: (v: any) => v === undefined || "Custom error" };
-        el.$value = "";
+        el.$value = cfg.initValues[0].value;
         expect(el.$validate()).toBe("Custom error");
         expect(el.$isValid).toBe(false);
 

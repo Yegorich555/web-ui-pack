@@ -113,7 +113,7 @@ export namespace WUPBaseIn {
        * const el = document.body.appendChild(document.createElement("wup-text"));
          el.$options.validations = {
            min: 10, // set min 10symbols for $default.validationRules.min
-           custom: (value: string | undefined) => value === "test-me" && "This is custom error", // custom validation for single element
+           custom: (value: string | undefined) => (value === undefined || value === "test-me") && "This is custom error", // custom validation for single element
          };
        * ``` */
       validations?:
@@ -694,7 +694,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     const arr = Object.keys(vls)
-      // todo rollback for date ? .filter((key) => key.toString()[0] !== "_") // ignore rules started with _
       .sort((k1, k2) => {
         if (k1 === "required") return -1;
         if (k2 === "required") return 1;
@@ -704,22 +703,31 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return arr;
   }
 
-  #wasValid?: boolean;
-  protected _validTimer?: number;
+  /** Current name of failed validation */
+  _errName?: string;
+  _wasValidNotEmpty?: boolean;
+  protected _validTimer?: ReturnType<typeof setTimeout>;
   /** Method called to check control based on validation rules and current value */
   protected goValidate(fromCase: ValidateFromCases, canShowError = true): string | false {
+    this._errName = undefined;
     const vls = this.validationsRules;
     if (!vls.length) {
       this._isValid = true;
+      if (this.$isEmpty) {
+        this._wasValidNotEmpty = true;
+      }
       return false;
     }
 
     const v = this.$value;
     let errMsg = "";
-    this._isValid = !vls.some((fn, i) => {
-      const skipRule = v === undefined && (i !== 0 || fn.name !== "required"); // undefined only for 'required' rule; for others: skip if value = undefined
+    const isEmpty = this.$isEmpty;
+    this._isValid = !vls.some((fn) => {
+      // process empty value only on rule 'required'; for others skip if value is empty
+      const skipRule = isEmpty && fn.name[0] !== "_" && fn.name !== "required"; // undefined only for 'required' rule; for others: skip if value = undefined
       const err = !skipRule && fn(v);
       if (err) {
+        this._errName = fn.name;
         errMsg = err;
         return true;
       }
@@ -728,19 +736,20 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     this._validTimer && clearTimeout(this._validTimer);
 
     if (fromCase === ValidateFromCases.onChange && this._opts.validationCase & ValidationCases.onChangeSmart) {
-      if (errMsg) {
-        if (!this.#wasValid) {
-          canShowError = false;
-        }
-      } else {
-        this.#wasValid = true;
+      if (errMsg && !this._wasValidNotEmpty) {
+        canShowError = false;
       }
     }
+    this._wasValidNotEmpty = this._wasValidNotEmpty || (this._isValid && !this.$isEmpty);
 
     if (errMsg) {
       if (canShowError || this.$refError) {
-        this._validTimer = window.setTimeout(
-          () => this.goShowError(errMsg, this.$refInput),
+        this._validTimer = setTimeout(
+          () => {
+            const saved = this._errName;
+            this.goShowError(errMsg, this.$refInput);
+            this._errName = saved;
+          },
           fromCase === ValidateFromCases.onChange ? this._opts.validateDebounceMs : 0
         );
       }
@@ -753,7 +762,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   /** Show (append/update) all validation-rules with checkpoints to existed error-element */
   protected renderValidations(parent: WUPPopupElement | HTMLElement, skipRules = ["required"]): void {
-    const vls = this.validationsRules.filter((vl) => !skipRules.includes(vl.name));
+    const vls = this.validationsRules.filter((vl) => !skipRules.includes(vl.name) && vl.name[0] !== "_");
     if (!vls.length) {
       return;
     }
@@ -812,19 +821,21 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return p;
   }
 
-  #prevErr?: string;
+  /** Current error message */
+  _errMsg?: string;
   #refErrTarget?: HTMLElement;
   /** Method called to show error and set invalid state on input; point null to show all validation rules with checkpoints */
   protected goShowError(err: string, target: HTMLElement): void {
-    if (this.#prevErr === err) {
+    if (this._errMsg === err) {
       return;
     }
+    this._errName = undefined;
     // possible when user goes to another page and focusout > validTimeout happened
     if (!this.isConnected) {
       return;
     }
 
-    this.#prevErr = err;
+    this._errMsg = err;
 
     if (!this.$refError) {
       this.$refError = this.renderError();
@@ -855,7 +866,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   /** Method called to hide error and set valid state on input */
   protected goHideError(): void {
-    this.#prevErr = undefined;
+    this._errMsg = undefined;
     if (this.$refError) {
       const p = this.$refError;
       p.addEventListener("$hide", p.remove, { passive: true, once: true });
@@ -875,31 +886,30 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     /* istanbul ignore next */
     canValidate = true
   ): boolean | null {
-    const was = this.#value;
+    const prev = this.#value;
     this.#value = v;
     if (!this.$isReady) {
       return null;
     }
 
     this.$isDirty = true;
-    const isChanged = !this.#ctr.$isEqual(v, was);
-
+    const isChanged = !this.#ctr.$isEqual(v, prev);
     if (!isChanged) {
       return false;
     }
-    this._isValid = undefined;
 
-    const c = this._opts.validationCase;
-    if (canValidate && (c & ValidationCases.onChange || c & ValidationCases.onChangeSmart)) {
-      if (this.#wasValid == null && c & ValidationCases.onChangeSmart) {
-        this.#value = was;
-        this.goValidate(ValidateFromCases.onChange, false); // to define if previous value was valid or not
-        this.#value = v;
-      }
-      this.goValidate(ValidateFromCases.onChange);
-    }
+    this._isValid = undefined;
+    canValidate && this.validateAfterChange();
     setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true }));
     return true;
+  }
+
+  /** Called after value is changed */
+  protected validateAfterChange(): void {
+    const c = this._opts.validationCase;
+    if (c & ValidationCases.onChange || c & ValidationCases.onChangeSmart) {
+      this.goValidate(ValidateFromCases.onChange);
+    }
   }
 
   #prevValue = this.#value;
@@ -929,9 +939,13 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   protected gotFocus(): Array<() => void> {
     this.$refError?.$refresh();
 
-    if (this._opts.validationCase & ValidationCases.onFocusWithValue) {
-      !this.$isEmpty && this.goValidate(ValidateFromCases.onFocus);
+    const c = this._opts.validationCase;
+    if (c & ValidationCases.onFocusWithValue && !this.$isEmpty) {
+      this.goValidate(ValidateFromCases.onFocus);
+    } else if (this._wasValidNotEmpty == null && c & ValidationCases.onChangeSmart) {
+      this.goValidate(ValidateFromCases.onChange, false); // validate to define current state
     }
+
     const r = this.appendEvent(this, "keydown", (e) => !this.$isDisabled && this.gotKeyDown(e), { passive: false });
     return [r];
   }
@@ -956,3 +970,10 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   - form > collectOnlyChanges - must skip disabled control (because user can't affect on this)
   - form > model must inlcude $initValue for disabled control instead of last changed. After submit need to reset $value to $initValue in this case
 */
+
+/* todo improve validationDebouce:
+  1. invalid > valid: show without debounce
+  2. invalid > invalid another message: without debouce
+  3. valid > invalid: debounce
+*/
+// todo when user leaves the control and vld-message appeared once - need to return back

@@ -166,19 +166,20 @@ export default class WUPPasswordControl<
       special: (v, setV) =>
         (!v || ![...setV.chars].reduce((prev, c) => (v.includes(c) ? ++prev : prev), 0)) &&
         `Must contain at least ${setV.min} special character${setV.min === 1 ? "" : "s"}: ${setV.chars}`,
-      confirm: (v, setV, control) => {
+      confirm: (v, setV, c) => {
         if (v && setV) {
-          const selector = control.tagName.toLowerCase();
+          const selector = c.tagName.toLowerCase();
           const all = document.querySelectorAll(selector);
           let i = -1;
           // eslint-disable-next-line no-restricted-syntax
           for (const el of all.values()) {
-            if (control === el) {
+            if (c === el) {
               const found = all[i] as WUPPasswordControl;
-              if (found && found.$value === control.$value) {
+              if (!found) {
+                i = -2;
+              } else if (found.$value === c.$value) {
                 return false;
               }
-              i = -2;
               break;
             }
             ++i;
@@ -215,11 +216,16 @@ export default class WUPPasswordControl<
     b.setAttribute("eye", "");
     b.setAttribute("aria-hidden", true);
     b.tabIndex = -1;
-    onEvent(b, "click", (e) => {
-      e.preventDefault(); // prevent from submit
-      e.stopPropagation();
-      this.toggleVisibility();
-    });
+    onEvent(
+      b,
+      "click",
+      (e) => {
+        e.preventDefault(); // prevent from submit
+        e.stopPropagation();
+        this.toggleVisibility();
+      },
+      { passive: false }
+    );
     this.$refLabel.appendChild(b);
   }
 

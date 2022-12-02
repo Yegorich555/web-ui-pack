@@ -1,4 +1,4 @@
-import MaskTextInput from "./text.mask";
+import MaskTextInput, { MaskHandledInput } from "./text.mask";
 import { onEvent } from "../indexHelpers";
 import { WUPcssIcon } from "../styles";
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
@@ -60,11 +60,22 @@ declare global {
       max: number;
       /** If $value doesn't match email-pattern shows message 'Invalid email address` */
       email: boolean;
-      // todo fix it
-      // /** Called when parseValue() is invalid (skipped on default validation logic) */
-      // _invalidParse: true; // todo maybe throw error message in this case ?
-      /** Enabled if option [mask] is pointed; if input value doesn't comletely fit mask shows "Incomplete value" */
-      mask: boolean;
+      /** If input value doesn't completely fit pointed mask shows pointed message
+       * @default "Incomplete value"
+       * @Rules
+       * * enabled by default with $options.mask
+       * * excluded from listing (for $options.validationShowAll)
+       * * ignores control value, instead it uses `this.refMask` state based on `$refInput.value`
+       * * removed by focusout (because input rollback to previous valid value)
+       *  */
+      _mask: string;
+      /** If parse() throws exception during the input-change is wrong then pointed message shows
+       * @default "Invalid value"
+       * @Rules
+       * * processed only by input change (not value-change)
+       * * removed by focusout (because input rollback to previous valid value)
+       * * excluded from listing (for $options.validationShowAll) */
+      _parse: string;
     }
     interface EventMap extends WUPBase.EventMap {}
     interface Defaults<T = string> extends WUPTextIn.GenDef<T> {}
@@ -89,7 +100,7 @@ declare global {
       maskholder?: string;
     }
     interface GotInputEvent extends InputEvent {
-      currentTarget: HTMLInputElement;
+      target: HTMLInputElement;
       /** Call it to prevent calling setValue by input event */
       preventSetValue: () => void;
       /** Returns a boolean value indicating whether or not the call to InputEvent.preventSetValue() */
@@ -305,19 +316,15 @@ export default class WUPTextControl<
     clearButton: true,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
-      min: (v, setV) =>
-        (v === undefined || v.length < setV) && `Min length is ${setV} character${setV === 1 ? "" : "s"}`,
-      max: (v, setV) =>
-        (v === undefined || v.length > setV) && `Max length is ${setV} character${setV === 1 ? "" : "s"}`,
+      min: (v, setV) => (v === undefined || v.length < setV) && `Min length is ${setV} characters`,
+      max: (v, setV) => (v === undefined || v.length > setV) && `Max length is ${setV} characters`,
       email: (v, setV) => setV && (!v || !emailReg.test(v)) && "Invalid email address",
-      // _invalidParse: (v) => v === undefined && "Invalid value",
-      mask: (v, setV, c) => {
+      _mask: (_v, setV, c) => {
         const { refMask } = c as WUPTextControl;
-        return (
-          (v === undefined || (setV && !!refMask && refMask.value !== refMask.prefix && !refMask.isCompleted)) &&
-          "Incomplete value"
-        );
+        // WARN: mask ignores value === undefined otherwise it doesn't work with controls that $value !== input.value
+        return !!refMask && refMask.value !== refMask.prefix && !refMask.isCompleted && (setV || "Incomplete value");
       },
+      _parse: (_v, setV) => setV || "Invalid value",
     },
   };
 
@@ -338,14 +345,21 @@ export default class WUPTextControl<
     this.$refInput.placeholder = " ";
   }
 
+  // todo rename to 'parse'
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override parseValue(text: string, _out?: { showError?: boolean }): ValueType | undefined {
+  override parseValue(text: string): ValueType | undefined {
     return (text || undefined) as unknown as ValueType;
+  }
+
+  /** Called before parseValue on gotInput event */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected canParse(_text: string): boolean {
+    return true;
   }
 
   protected get validations(): WUPText.Options["validations"] | undefined {
     const vls = (super.validations as WUPText.Options["validations"]) || {};
-    if (this._opts.mask && vls.mask == null) vls.mask = true; // enable validation mask based on option mask
+    if (this._opts.mask && vls._mask === undefined) vls._mask = ""; // enable validation mask based on option mask
     return vls;
   }
 
@@ -416,6 +430,7 @@ export default class WUPTextControl<
     if (this.refMask) {
       if (this.refMask.prefix && this.$refInput.value === this.refMask.prefix) {
         this.$refInput.value = ""; // rollback prefix/suffix if user types nothing
+        delete (this.$refInput as MaskHandledInput)._maskPrev;
         this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
       }
       this.refMask.clearHistory();
@@ -447,8 +462,6 @@ export default class WUPTextControl<
       this.$refBtnClear.remove();
       this.$refBtnClear = undefined;
     }
-
-    // todo remove if this doesn't required for dateControl; it provide wrong cursor position: setTimeout(() => !this.$value && this.setInputValue(undefined)); // wait for timeout (wait for applying of inherrited) to set maskholder
   }
 
   /** Handler of 'beforeinput' event */
@@ -460,32 +473,56 @@ export default class WUPTextControl<
     }
   }
 
-  #inputTimer?: number;
+  #inputTimer?: ReturnType<typeof setTimeout>;
   /** Called when user types text OR when need to apply/reset mask (on focusGot, focusLost) */
   protected gotInput(e: WUPText.GotInputEvent): void {
-    let txt = e.currentTarget.value;
-    txt = this._opts.mask ? this.maskInputProcess(e) : txt;
-
-    const outRef: { showError?: boolean } = {};
-    const v = this.parseValue(txt, outRef);
-    if (outRef.showError) {
-      // parseValue must return valid/not-valid result
-      console.error("Validation must be here");
-      // const vl = (this.validations as WUPText.Options["validations"])?._invalidParse;
-      // const msg = typeof vl === "function" ? vl : this.#ctr.$defaults.validationRules._invalidParse;
-      // this.$showError(msg!.call(this, undefined as any, true, this) as string);
-    } else {
-      this._isValid !== false && this.$hideError();
-      /* istanbul ignore else */
-      if (!e.setValuePrevented) {
-        this._validTimer && clearTimeout(this._validTimer);
-        if (this._opts.debounceMs) {
-          this.#inputTimer && clearTimeout(this.#inputTimer);
-          this.#inputTimer = window.setTimeout(() => this.setValue(v, true, true), this._opts.debounceMs);
-        } else {
-          this.setValue(v, true, true);
-        }
+    const el = e.target as MaskHandledInput;
+    let txt = el.value;
+    if (this._opts.mask) {
+      const prev = el._maskPrev?.value;
+      txt = this.maskInputProcess(e);
+      if (txt === prev) {
+        return; // skip because no changes from previous action
       }
+    } else if (e.setValuePrevented) {
+      return;
+    }
+
+    // gotInput => mask > parse > ...setValue... > validate
+    // setInputValue => mask
+
+    // testcase: valid + remove required digit => show Incomplete
+    // testcase: empty + add 1 digit => show Incomplete; focusOut - remove message if inputCleared
+
+    const canParse = this.canParse(txt);
+    let v = this.$value;
+    let errMsg: boolean | string = "";
+    if (canParse) {
+      try {
+        v = this.parseValue(txt);
+      } catch (err) {
+        errMsg = (err as Error).message || true;
+      }
+    }
+
+    const act = (): void => {
+      if (errMsg) {
+        this.validateOnce({ _parse: this.validations?._parse || "" }, true);
+      } else if (canParse) {
+        this.setValue(v, true, true);
+      } else if (this._opts.mask) {
+        // testcase: when user lefts control need to show error
+        // todo message showed despite on ChangeSmart
+        this.validateOnce({ _mask: this.validations?._mask || "" });
+      }
+    };
+
+    this._validTimer && clearTimeout(this._validTimer);
+    this.#inputTimer && clearTimeout(this.#inputTimer);
+    if (this._opts.debounceMs) {
+      this.#inputTimer = setTimeout(act, this._opts.debounceMs);
+    } else {
+      act();
     }
   }
 
@@ -497,14 +534,15 @@ export default class WUPTextControl<
     const el = this.$refInput;
     const v = el.value;
 
-    if (!v && !this.$isFocused) {
-      el.value = v;
-      return v; // ignore mask prefix/suffix if user isn't touched input; it appends only by focusGot
-    }
-
     const { maskholder, mask } = this._opts;
     this.refMask = this.refMask ?? new MaskTextInput(mask!, "");
     const mi = this.refMask;
+
+    if (!v && !this.$isFocused) {
+      el.value = v;
+      mi.parse(v);
+      return v; // ignore mask prefix/suffix if user isn't touched input; it appends only by focusGot
+    }
 
     let declinedAdd = 0;
     let position = el.selectionStart || 0;
@@ -553,23 +591,48 @@ export default class WUPTextControl<
     } else {
       setV();
     }
+
     return mi.value;
   }
 
   protected override setValue(v: ValueType | undefined, canValidate = true, skipInput = false): boolean | null {
+    !skipInput && this.setInputValue(v);
     const isChanged = super.setValue(v, canValidate);
-    if (isChanged) {
-      !skipInput && this.setInputValue(v);
-      this._isValid !== false && this.$hideError();
-    }
+    this._isValid !== false && this.goHideError();
     return isChanged;
   }
 
-  /** Called to update value for <input/> */
-  protected setInputValue(v: ValueType | undefined): void {
+  /** Called to update/reset value for <input/> */
+  protected setInputValue(v: ValueType | undefined | string): void {
     const str = v != null ? (v as any).toString() : "";
     this.$refInput.value = str;
     this._opts.mask && this.maskInputProcess(null);
+    this._onceErrName === this._errName && this.goHideError(); // hide mask-message because value has higher priority than inputValue
+  }
+
+  _onceErrName?: string;
+  /** Called for controls when inputValue != $value and need to show error on the fly by input-change */
+  protected validateOnce(
+    rule: { [key: string]: boolean | string | ((v: any) => false | string) },
+    force = false
+  ): void {
+    this._wasValidNotEmpty = force ? true : this._wasValidNotEmpty;
+    const prev = this._wasValidNotEmpty;
+
+    // redefine prototype getter once & fire validation
+    Object.defineProperty(this, "validations", { configurable: true, value: rule });
+    this.validateAfterChange();
+    delete (this as any).validations; // rollback to previous
+
+    if (!this._wasValidNotEmpty) {
+      this._wasValidNotEmpty = prev; // rollback to previous
+    }
+    this._onceErrName = this._errName;
+  }
+
+  protected override goHideError(): void {
+    this._onceErrName = undefined;
+    super.goHideError();
   }
 }
 
@@ -577,18 +640,3 @@ customElements.define(tagName, WUPTextControl);
 // NiceToHave: handle Ctrl+Z for mask, wup-select etc. cases
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
-
-// (() => {
-//   const div = document.body.appendChild(document.createElement("div"));
-//   div.style.position = "fixed";
-//   div.style.fontSize = "120px";
-//   div.style.width = "100vw";
-//   div.style.top = "50vh";
-//   div.style.left = "0";
-//   div.style.textAlign = "center";
-//   div.style.background = "white";
-//   div.textContent = "-3";
-//   setInterval(() => {
-//     div.textContent = ++div.textContent;
-//   }, 1000);
-// })();

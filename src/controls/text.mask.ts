@@ -23,7 +23,7 @@ interface ISymChunk {
   isDig?: false;
 }
 type IInputChunk = IDigChunk | ISymChunk;
-interface HandledInput extends HTMLInputElement {
+export interface MaskHandledInput extends HTMLInputElement {
   _maskPrev?: {
     position: number;
     value: string;
@@ -227,7 +227,7 @@ export default class MaskTextInput {
 
   /* Call it on 'beforeinput' event to improve logic */
   handleBeforInput(e: InputEvent): void {
-    const el = e.target as HandledInput;
+    const el = e.target as MaskHandledInput;
 
     let hist;
     switch (e!.inputType) {
@@ -282,7 +282,7 @@ export default class MaskTextInput {
 
   /* Call it on 'input' event */
   handleInput(e: InputEvent): { declinedAdd: number; position: number } {
-    const el = e.target as HandledInput;
+    const el = e.target as MaskHandledInput;
     const v = el.value;
 
     let position = el.selectionStart || 0;

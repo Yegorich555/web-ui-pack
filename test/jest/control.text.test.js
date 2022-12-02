@@ -32,6 +32,7 @@ describe("control.text", () => {
     expect(el.$refInput.value).toBe("");
     expect(el.$value).toBe(undefined); // because only prefix user left and it means nothing
 
+    el.testMe = true;
     await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
     expect(el.$value).toBe("$ 2");
     el.blur();
@@ -50,19 +51,13 @@ describe("control.text", () => {
     await h.wait();
     expect(el.$isValid).toBe(true);
 
-    el.$options.validations = { mask: false }; // user can disable defaults
+    el.$options.validations = { _mask: "Hello" }; // user can change defaults
     el.$value = "";
     await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
     el.blur();
     await h.wait();
     expect(el.$value).toBe("$ 2");
-    expect(el.$isValid).toBe(true); // because mask-validation is disabled via options
-
-    // cover case when validation mask is enabled but mask is missed
-    el.$value = "$ 2";
-    el.$options.mask = undefined;
-    el.$options.validations = { mask: true };
-    await h.wait();
-    expect(el.$isValid).toBe(true);
+    expect(el.$isValid).toBe(false);
+    expect(el.$refError?.innerHTML).toMatchInlineSnapshot(`"<span class="wup-hidden"></span><span>Hello</span>"`);
   });
 });

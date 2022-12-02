@@ -1880,7 +1880,6 @@ describe("popupElement", () => {
     expect(el.$isOpen).toBe(false); // because click cancelled outside target
 
     await h.wait();
-    trg.testMe = true;
     // cover case when browser somehow sends mousemove 0
     trg.dispatchEvent(new TestMouseMoveEvent("mousedown", { bubbles: true }));
     trg.dispatchEvent(new TestMouseMoveEvent("mousemove", { bubbles: true, movementX: 0, movementY: 0 }));

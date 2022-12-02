@@ -26,7 +26,7 @@ describe("control.pwd", () => {
     second.$options.validations = { confirm: true };
 
     await h.wait();
-    second.$value = "";
+    second.$value = "A";
     expect(second.$isValid).toBe(false);
     expect(second.$validate()).toMatchInlineSnapshot(`"Passwords must be equal"`);
 
@@ -45,7 +45,7 @@ describe("control.pwd", () => {
 
   test("validation messages ends with -s", () => {
     // other tests in testTextControl
-    testEl.$value = "";
+    testEl.$value = "A";
     testEl.$options.validations = { minNumber: 1 };
     expect(testEl.$validate()).toMatchInlineSnapshot(`"Must contain at least 1 number"`);
 

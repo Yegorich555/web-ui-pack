@@ -110,7 +110,7 @@ export interface BaseTestOptions {
       skip?: boolean;
       value?: string;
       /** test when attr has key of window */
-      refGlobal: any;
+      refGlobal?: any;
     }
   >;
   $options: Record<

@@ -537,7 +537,7 @@ export default class WUPSelectControl<
     this.$isOpen && this.focusMenuItem(null); // reset virtual focus
     super.gotInput(e);
 
-    const rawV = e.currentTarget.value;
+    const rawV = e.target.value;
     const v = rawV.trimStart().toLowerCase();
 
     delete this._needFilter;

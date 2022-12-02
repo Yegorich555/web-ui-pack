@@ -20,7 +20,7 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       email: { set: true, failValue: "relation", trueValue: "relation@google.com" },
       ...opts?.validations,
     },
-    validationsSkip: ["_invalidParse", "mask", ...(opts?.validationsSkip || [])],
+    validationsSkip: ["_parse", "_mask", ...(opts?.validationsSkip || [])],
   });
 
   test("$initValue affects on input", () => {
@@ -34,21 +34,24 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
     expect(el.$refInput.value).toBe(initV);
   });
 
-  test("validation messages ends without '-s'", async () => {
+  test("validations without 'required'", async () => {
     const el = getEl();
     el.$value = "";
-    el.$options.validations = { min: 1 };
+    el.$options.validations = { min: 2 };
     el.$validate();
+    expect(el.$isValid).toBe(true); // because it's not required
+    el.$value = "a";
+    el.$validate(); // need to show error-msg
     expect(el.$isValid).toBe(false);
     await h.wait();
-    expect(el).toMatchSnapshot();
+    expect(el.$refError).toBeDefined();
 
-    el.$value = "abc";
-    el.$options.validations = { max: 1 };
-    el.$validate();
-    expect(el.$isValid).toBe(false);
-    await h.wait();
-    expect(el).toMatchSnapshot();
+    // el.$value = "abc";
+    // el.$options.validations = { max: 1 };
+    // el.$validate();
+    // expect(el.$isValid).toBe(false);
+    // await h.wait();
+    // expect(el).toMatchSnapshot();
   });
 
   test("validation: skip on undefined (beside: required)", () => {
@@ -83,7 +86,7 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
     test("debounceMs", async () => {
       const el = getEl();
       el.$options.debounceMs = 400;
-      el.$options.validations = { _alwaysInvalid: true }; // just for coverage
+      el.$options.validations = { $alwaysInvalid: true }; // just for coverage
       el.$options.validationCase = ValidationCases.onChange | 0; // just for coverage
       const spyChange = jest.fn();
       el.addEventListener("$change", spyChange);

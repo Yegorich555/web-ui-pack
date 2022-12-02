@@ -46,6 +46,7 @@ describe("control.select", () => {
       { attrValue: "30", value: 30 },
     ],
     validations: {},
+    validationsSkip: ["_parse", "_mask"],
     attrs: { items: { skip: true } },
     $options: { items: { skip: true } },
     onCreateNew: (e) => (e.$options.items = getItems()),

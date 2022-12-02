@@ -120,7 +120,8 @@ export default abstract class WUPBaseComboControl<
     ...WUPTextControl.$defaults,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
-      // _invalidParse: WUPTextControl.$defaults.validationRules._invalidParse,
+      _mask: WUPTextControl.$defaults.validationRules._mask,
+      _parse: WUPTextControl.$defaults.validationRules._parse,
     },
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey,
   };
@@ -445,9 +446,9 @@ export default abstract class WUPBaseComboControl<
   }
 
   protected override gotFocusLost(): void {
-    super.gotFocusLost();
     !this.#isOpen && !this._isHidding && this.removePopup(); // otherwise it's removed by hidingMenu
     this.setInputValue(this.$value); // to update/rollback input according to result
+    super.gotFocusLost();
   }
 
   /** Called when user selected new value from menu and need to hide menu */
@@ -460,13 +461,9 @@ export default abstract class WUPBaseComboControl<
     const p = this.valueToInput(v);
     if (p instanceof Promise) {
       // todo try to avoid promise here and use super.setInputValue instead
-      p.then((s) => {
-        this.$refInput.value = s;
-        this._opts.mask && this.maskInputProcess(null);
-      });
+      p.then((s) => super.setInputValue(s));
     } else {
-      this.$refInput.value = p;
-      this._opts.mask && this.maskInputProcess(null);
+      super.setInputValue(p);
     }
   }
 
@@ -495,6 +492,8 @@ export default abstract class WUPBaseComboControl<
     super.gotRemoved();
   }
 }
+
+// todo when Open + Escape-key => close without removing value
 
 // WARN about chaining
 /*

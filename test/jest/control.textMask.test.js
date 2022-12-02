@@ -539,7 +539,6 @@ describe("control.text: mask", () => {
     expect(parse("$ 123456 USD", mask).leftLength).toBe(0);
     expect(parse("$ 5 USD", mask).leftLength).toBe(0);
 
-    el.testMe = true;
     expect(h.getInputCursor(el.$refInput)).toBe("|");
     el.$options.mask = mask;
     el.focus();
