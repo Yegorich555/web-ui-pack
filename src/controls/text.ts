@@ -512,7 +512,6 @@ export default class WUPTextControl<
         this.setValue(v, true, true);
       } else if (this._opts.mask) {
         // testcase: when user lefts control need to show error
-        // todo message showed despite on ChangeSmart
         this.validateOnce({ _mask: this.validations?._mask || "" });
       }
     };

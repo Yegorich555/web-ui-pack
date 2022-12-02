@@ -35,6 +35,8 @@ describe("control.text", () => {
     el.testMe = true;
     await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
     expect(el.$value).toBe("$ 2");
+    await h.wait();
+    expect(el.$refError).toBeUndefined(); // despite on control is invalid ValidationCases.onChangeSmart is applied
     el.blur();
     await h.wait();
     expect(el.$value).toBe("$ 2");
