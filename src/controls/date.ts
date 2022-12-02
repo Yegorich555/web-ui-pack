@@ -31,7 +31,7 @@ export namespace WUPDateIn {
 }
 declare global {
   namespace WUPDate {
-    interface ValidationMap extends WUPBase.ValidationMap {
+    interface ValidationMap extends WUPBase.ValidationMap, Pick<WUPText.ValidationMap, "_mask" | "_parse"> {
       /** Enabled if option [min] is pointed; If $value < pointed shows message 'Min date is {x}` */
       min: Date;
       /** Enabled if option [min] is pointed; if $value > pointed shows message 'Max date is {x}` */
@@ -94,6 +94,9 @@ export default class WUPDateControl<
       }
       :host [menu] {
         overflow: hidden;
+      }
+      :host [error] {
+        z-index: 90020;
       }`;
   }
 
@@ -122,25 +125,22 @@ export default class WUPDateControl<
 
   protected override _opts = this.$options;
 
-  /** Converts date-string into Date according (to $options.utc/.format)
+  /** Converts date-string into Date according (to $options.utc & .format)
    * @Troubleshooting
-   * despite on $options.format is "yyyy-mm-dd" the correct format "yyyy-MM-dd" */
-  override parseValue(
-    text: string,
-    opts?: { format?: string | null; strict?: boolean; showError?: boolean }
-  ): ValueType | undefined {
+   * * despite on $options.format is "yyyy-mm-dd" the correct format "yyyy-MM-dd" */
+  override parseValue(text: string, opts?: { strict?: boolean }): ValueType | undefined {
     if (!text) {
       return undefined;
     }
-    let format = opts?.format ?? `${this._opts.format.toUpperCase()} hh:mm:ss.fff`;
+    let format = `${this._opts.format.toUpperCase()} hh:mm:ss.fff`;
     format = this._opts.utc ? `${format}Z` : format;
-    const ref = { strict: opts?.strict, isOutOfRange: false };
+    const v = dateFromString(text, format, { strict: opts?.strict, throwOutOfRange: true }) ?? undefined;
+    return v as any;
+  }
 
-    const v = dateFromString(text, format, ref) ?? undefined;
-    if (opts) {
-      opts.showError = ref.isOutOfRange;
-    }
-    return v as unknown as ValueType;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected override canParse(_text: string): boolean {
+    return !this.refMask || this.refMask.isCompleted;
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUPDate.Options> | null): void {
@@ -154,6 +154,8 @@ export default class WUPDateControl<
         .replace(/[dD]/g, "#0")
         .replace(/mm|MM/g, "00")
         .replace(/[mM]/g, "#0"); // convert yyyy-mm-dd > 0000-00-00; d/m/yyyy > #0/#0/0000
+    // todo allow last chunk to be optional: 2022-06-3 yyyy-mm-dd must be refMask.isCompleted
+
     this._opts.maskholder = this._opts.maskholder ?? this._opts.format;
     this._opts.min = this.parseValue(this.getAttribute("min") || "") ?? this._opts.min;
     this._opts.max = this.parseValue(this.getAttribute("max") || "") ?? this._opts.max;
@@ -250,37 +252,6 @@ export default class WUPDateControl<
   }
 
   protected override gotInput(e: WUPText.GotInputEvent): void {
-    // todo: when user types 2022-06-3 and leaves the control we can allow to setValue (lazy mode)
-    this.parseValue = (txt, out) => {
-      if (!txt) {
-        return undefined;
-      }
-      const v: Date = this.#ctr.prototype.parseValue.call(
-        this,
-        txt,
-        Object.assign(out!, {
-          format: this._opts.format.toUpperCase(),
-          strict: true,
-        })
-      );
-      if (v) {
-        const key = this._opts.utc ? "UTC" : "";
-        const a = this.$value || this.$initValue;
-        a &&
-          !Number.isNaN(a.valueOf()) &&
-          v[`set${key}Hours`](
-            a[`get${key}Hours`](),
-            a[`get${key}Minutes`](),
-            a[`get${key}Seconds`](),
-            a[`get${key}Milliseconds`]()
-          );
-      } else {
-        e.preventSetValue(); // to allow user to continue input
-      }
-      delete (this as any).parseValue;
-      return v as any;
-    };
-
     super.gotInput(e, true);
   }
 
@@ -312,6 +283,7 @@ customElements.define(tagName, WUPDateControl);
 // todo: alt-behavior; when user press Alt allow to use arrowKeys to navigate in input - use logic for all comboboxes
 
 // todo testcase: startWith: year. User must be able goto dayPicker with pressing Enter
-// todo focus, type some text, press Esc. Value must be not cleared if popup was opened and now is closnig
 // todo impossible to use shiftHome, shiftEnd with calendar
 // todo show error over datePickerPopup
+
+// todo when user left control don't clear input-value???
