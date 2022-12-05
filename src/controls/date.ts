@@ -43,7 +43,10 @@ declare global {
     interface Defaults<T = Date> extends WUPDateIn.GenDef<T> {}
     interface Options<T = Date> extends WUPDateIn.GenOpt<T> {}
     interface JSXProps<T extends WUPDateControl> extends WUPBaseCombo.JSXProps<T>, WUPDateIn.JSXProps {
-      // extra props here
+      /** String representation of date (enables mask, - to disable mask set $options.mask="");
+       * @defaultValue "yyyy-mm-dd"
+       * @deprecated */
+      format?: string;
     }
   }
   // add element to document.createElement
@@ -100,6 +103,18 @@ export default class WUPDateControl<
       }`;
   }
 
+  static get observedOptions(): Array<string> {
+    const arr = super.observedOptions as Array<keyof WUPDate.Options>;
+    arr.push("format");
+    return arr;
+  }
+
+  static get observedAttributes(): Array<LowerKeys<WUPDate.Options>> {
+    const arr = super.observedAttributes as Array<LowerKeys<WUPDate.Options>>;
+    arr.push("format");
+    return arr;
+  }
+
   static $defaults: WUPDate.Defaults<Date> = {
     ...WUPBaseComboControl.$defaults,
     // debounceMs: 500,
@@ -145,7 +160,7 @@ export default class WUPDateControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUPDate.Options> | null): void {
     this._opts.utc = this.getBoolAttr("utc", this._opts.utc);
-    // this._opts.format = this.getAttribute("format") ?? this._opts.format; //WANR: format defined only in defaults
+    this._opts.format = this.getAttribute("format") ?? this._opts.format;
     this._opts.mask =
       this._opts.mask ??
       this._opts.format
@@ -154,8 +169,7 @@ export default class WUPDateControl<
         .replace(/[dD]/g, "#0")
         .replace(/mm|MM/g, "00")
         .replace(/[mM]/g, "#0"); // convert yyyy-mm-dd > 0000-00-00; d/m/yyyy > #0/#0/0000
-
-    this._opts.maskholder = this._opts.maskholder ?? this._opts.format;
+    this._opts.maskholder = this._opts.maskholder ?? this._opts.format.replace(/([mMdD]){1,2}/g, "$1$1");
     this._opts.min = this.parse(this.getAttribute("min") || "") ?? this._opts.min;
     this._opts.max = this.parse(this.getAttribute("max") || "") ?? this._opts.max;
     this._opts.exclude = this.getRefAttr<Date[]>("exclude");

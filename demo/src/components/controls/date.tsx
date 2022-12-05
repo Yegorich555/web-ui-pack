@@ -52,6 +52,7 @@ export default function DateControlView() {
           autoComplete="off"
         />
         <wup-date name="empty" />
+        <wup-date name="another" label="Another format: yyyy-m-d" format="yyyy-m-d" />
         {/* <wup-date name="disabled" disabled /> */}
         {/* <wup-date name="readonly" readOnly /> */}
         <button type="submit">Submit</button>
