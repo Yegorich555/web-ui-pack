@@ -115,8 +115,18 @@ declare global {
   }
 }
 
-/**
- todo leave details
+/** Form-control as date picker
+ * @example
+  const el = document.createElement("wup-calendar");
+  el.$options.name = "dateOfBirthday";
+  el.$initValue = "1990-10-24";
+  el.$options.validations = { required: true };
+  const form = document.body.appendChild(document.createElement("wup-form"));
+  form.appendChild(el);
+  // or HTML
+  <wup-form>
+    <wup-calendar name="dateOfBirhday" utc initvalue="1990-10-24" min="1930-01-01" max="2010-01-01"/>
+  </wup-form>;
  */
 export default class WUPCalendarControl<
   ValueType extends Date = Date,
@@ -130,7 +140,7 @@ export default class WUPCalendarControl<
       --ctrl-clr-selected: #fff;
       --ctrl-clr-selected-bg: #009fbc;
       --ctrl-clr-width: 17em;
-      --ctrl-clr-cell-gap: 4px;
+      --ctrl-clr-cell-gap: 0px;
       --ctrl-clr-padding: calc(4px + var(--ctrl-clr-cell-gap) / 2);
     }`;
   }
@@ -241,8 +251,8 @@ export default class WUPCalendarControl<
         opacity: 1;
       }
       :host li[focused] {
-        //box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
-        box-shadow: 0 0 3px 1px var(--ctrl-focus);
+        box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
+        //box-shadow: 0 0 3px 1px var(--ctrl-focus);
         opacity: 1;
       }
       @media (hover: hover) {
@@ -251,8 +261,8 @@ export default class WUPCalendarControl<
           color: var(--ctrl-clr-selected);
         }
         ol>li:hover:not([disabled]) {
-          //box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
+          box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
+          //box-shadow: 0 0 3px 1px var(--ctrl-focus);
           opacity: 1;
         }
       }

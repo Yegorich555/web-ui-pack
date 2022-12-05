@@ -973,7 +973,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       --ctrl-clr-selected: #fff;
       --ctrl-clr-selected-bg: #009fbc;
       --ctrl-clr-width: 17em;
-      --ctrl-clr-cell-gap: 4px;
+      --ctrl-clr-cell-gap: 0px;
       --ctrl-clr-padding: calc(4px + var(--ctrl-clr-cell-gap) / 2);
     }
   
@@ -1229,8 +1229,8 @@ clip: rect(1px, 1px, 1px, 1px);}
         opacity: 1;
       }
       WUP-CALENDAR li[focused] {
-        //box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
-        box-shadow: 0 0 3px 1px var(--ctrl-focus);
+        box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
+        //box-shadow: 0 0 3px 1px var(--ctrl-focus);
         opacity: 1;
       }
       @media (hover: hover) {
@@ -1239,8 +1239,8 @@ clip: rect(1px, 1px, 1px, 1px);}
           color: var(--ctrl-clr-selected);
         }
         ol&gt;li:hover:not([disabled]) {
-          //box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
+          box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
+          //box-shadow: 0 0 3px 1px var(--ctrl-focus);
           opacity: 1;
         }
       }

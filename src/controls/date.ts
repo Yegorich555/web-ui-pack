@@ -279,9 +279,9 @@ export default class WUPDateControl<
 customElements.define(tagName, WUPDateControl);
 // NiceToHave: role 'spinbutton" + changing input value via scrolling: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/spinbutton_role
 // NiceToHave: allowYear, allowMonth, allowDays based on format: "YYYY-MM" - only for selection year & month
+
 // todo: alt-behavior; when user press Alt allow to use arrowKeys to navigate in input - use logic for all comboboxes
-
-// todo testcase: startWith: year. User must be able goto dayPicker with pressing Enter
 // todo impossible to use shiftHome, shiftEnd with calendar
-
 // todo when user lefts control don't clear input-value. Need to disable it from baseCombobox ???
+
+// testcase: startWith: year. User must be able goto dayPicker with pressing Enter
