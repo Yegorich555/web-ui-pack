@@ -2,6 +2,7 @@
  * @jest-environment ./test/jest.timeZoneEnv.js
  * @jest-environment-options {"timezone": "America/New_York"}
  */
+// import dateToString from "../../src/helpers/dateToString";
 import dateToString from "web-ui-pack/helpers/dateToString";
 
 describe("helper.dateToString", () => {
@@ -136,6 +137,10 @@ describe("helper.dateToString", () => {
     "YYYY-MM-DD hh:mm:ss.fff aZ": [
       { v: "2022-01-02T16:23:45.567Z", txt: "2022-01-02 04:23:45.567 pm" },
       { v: "2022-11-29T01:02:03.567Z", txt: "2022-11-29 01:02:03.567 am" },
+    ],
+    "YY-MM-DD": [
+      { v: "2022-01-02 16:23:45.567", txt: "22-01-02" },
+      { v: "2023-11-29 01:02:03.567", txt: "23-11-29" },
     ],
   };
 

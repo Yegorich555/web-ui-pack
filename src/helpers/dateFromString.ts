@@ -122,5 +122,3 @@ function isOutOfRange(
     false
   );
 }
-
-console.warn(dateFromString("202A-BB-DD", "YYYY-MM-DD")?.toLocaleDateString());

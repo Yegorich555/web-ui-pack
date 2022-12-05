@@ -7,6 +7,10 @@ export function zeroBefore(v: number, length: number): string {
   return s;
 }
 
+function cutEndString(s: string, length: number): string {
+  return s.substring(s.length - length);
+}
+
 /** Returns a string representation of a date-time according to pointed format
  * @param format 'yyyy-MM-dd hh:mm:ss.fff AZ'
  * @example
@@ -14,7 +18,7 @@ export function zeroBefore(v: number, length: number): string {
  * "yyyy-MM-dd hh:mm:ss a" => "2022-04-23 04:09:12 pm" // point 'a' or 'A' at the end for 12hour format
  * "yyyy-MM-dd hh:mm:ss.fff aZ" => "2022-04-23 04:09:12 pm" // point 'Z' at the end for UTCdate
  * "yyyy-MM-dd hh:mm:ss" => "2022-04-23 16:09:12"
- * "yyyy-M-d h:m:s" => "2022-4-23 13:9:12"
+ * "yy-M-d h:m:s" => "22-4-23 13:9:12"
  * "dd/MM/yyyy" => "23/04/2022"
  */
 export default function dateToString(v: Date, format: string): string {
@@ -37,9 +41,9 @@ export default function dateToString(v: Date, format: string): string {
       switch (char) {
         case "y":
         case "Y":
-          s += zeroBefore(v[`get${ukey}FullYear`].call(v), cnt); // todo allow y yy yyy
+          s += cutEndString(zeroBefore(v[`get${ukey}FullYear`].call(v), cnt), cnt);
           break;
-        case "M": // todo allow yyyy-mm-dd
+        case "M":
           s += zeroBefore(v[`get${ukey}Month`].call(v) + 1, cnt);
           break;
         case "d":
