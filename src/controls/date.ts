@@ -128,13 +128,13 @@ export default class WUPDateControl<
   /** Converts date-string into Date according (to $options.utc & .format)
    * @Troubleshooting
    * * despite on $options.format is "yyyy-mm-dd" the correct format "yyyy-MM-dd" */
-  override parse(text: string, opts?: { strict?: boolean }): ValueType | undefined {
+  override parse(text: string): ValueType | undefined {
     if (!text) {
       return undefined;
     }
     let format = `${this._opts.format.toUpperCase()} hh:mm:ss.fff`;
     format = this._opts.utc ? `${format}Z` : format;
-    const v = dateFromString(text, format, { strict: opts?.strict, throwOutOfRange: true }) ?? undefined;
+    const v = dateFromString(text, format, { throwOutOfRange: true }) ?? undefined;
     return v as any;
   }
 
@@ -284,6 +284,5 @@ customElements.define(tagName, WUPDateControl);
 
 // todo testcase: startWith: year. User must be able goto dayPicker with pressing Enter
 // todo impossible to use shiftHome, shiftEnd with calendar
-// todo show error over datePickerPopup
 
-// todo when user left control don't clear input-value???
+// todo when user lefts control don't clear input-value. Need to disable it from baseCombobox ???

@@ -14,40 +14,33 @@ export default function dateFromString(
   v: string,
   format = "YYYY-MM-DD",
   options: {
-    /** Disable partially matching format
-     *    strict: false => "yyy-MM-dd" and "2022-05" returns date (but "2022-05-6" returns null)
-     *    strict: true => "yyy-MM-dd" and "2022-05" returns null
-     * @defaultValue true
-     */
-    strict?: boolean;
     /** Enables rule: if detected out of range value: day > 31 etc. then throws exeption "Out of range";
-     *  Disable it to return null instead
+     *  Disable it to return `null` instead
      * @defaultValue true */
     throwOutOfRange?: boolean;
-  } = { strict: true, throwOutOfRange: true }
+  } = { throwOutOfRange: true }
 ): Date | null {
   if (!v) {
     return null;
   }
+  let fLast = format.length - 1;
   const isUTC = format.endsWith("Z") || format.endsWith("z");
-  format = isUTC ? format.substring(0, format.length - 1) : format;
+  fLast -= isUTC ? 1 : 0;
 
-  const h12 = format.endsWith("a") || format.endsWith("A") ? format[format.length - 1] : "";
-  format = h12 ? format.substring(0, format.length - 1) : format;
+  const h12 = format[fLast] === "a" || format[fLast] === "A";
+  let vLast = v.length - 1;
+  if (h12) {
+    fLast -= 1;
+    vLast -= 2;
+  }
 
-  let char = format[0];
-  let cnt = 1;
-  const r = { y: 0, M: 1, d: 1, h: 0, m: 0, s: 0, f: 0 };
+  const r = { y: 0, M: 0, d: 0, h: 0, m: 0, s: 0, f: 0 };
 
-  let iShift = 0;
-  let i = 1;
-  const ln = options.strict ? format.length : Math.min(v.length, format.length);
-  // const ln = format.length;
-  for (; i <= ln; ++i) {
-    const ch = format[i];
-    if (char !== ch) {
-      // prettier-ignore
-      switch (char) {
+  let vi = 0;
+  for (let fi = 0; vi <= vLast; ++vi, ++fi) {
+    let char = format[fi];
+    // prettier-ignore
+    switch (char) {
         case "Y": char = "y"; break;
         case "D": char = "d"; break;
         case "H": char = "h"; break;
@@ -55,32 +48,25 @@ export default function dateFromString(
         case "F": char = "f"; break;
         default: break;
       }
-      if (r[char as keyof typeof r] !== undefined) {
-        if (cnt === 1) {
-          const n = v.charCodeAt(i - cnt + 1) - 48; // checking next char
-          if (n >= 0 && n <= 9) {
-            ++cnt; // for case "YYYY-M-D" => "2022-11-24"
-            ++iShift;
-          }
-        }
-        const k = i + iShift;
-        const s = v.substring(k - cnt, k);
-        r[char as keyof typeof r] = Number.parseInt(s, 10);
-        if (s.length !== cnt) {
-          // --r.M;
-          // options.isOutOfRange = isOutOfRange(r, isUTC, null);
-          return null;
-        }
+    const num = v.charCodeAt(vi) - 48;
+    const isNum = num >= 0 && num <= 9;
+    const key = char as keyof typeof r;
+
+    if (isNum) {
+      if (r[key] !== undefined) {
+        r[key] = r[key] * 10 + num;
+      } else {
+        // rollback to prev
+        fi -= 2;
+        vi -= 1;
       }
-      char = ch;
-      cnt = 1;
-    } else {
-      ++cnt;
+    } else if (char !== v[vi]) {
+      return null; // if dateFromString("202A-BB-DD", "YYYY-MM-DD")
     }
   }
 
   if (h12) {
-    char = v[v.length - 2];
+    const char = v[v.length - 2];
     if (char === "P" || char === "p") {
       r.h += 12;
     } else if (char !== "A" && char !== "a") {
@@ -111,15 +97,6 @@ export default function dateFromString(
     return null;
   }
 
-  if (options.strict) {
-    const usedLn = i + iShift - 1;
-    const expectedLn = v.length - (h12 ? 2 : 0) - (isUTC && (v.endsWith("z") || v.endsWith("Z")) ? 1 : 0);
-    if (usedLn !== expectedLn) {
-      return null;
-    }
-  }
-  // todo if options.strict === false then "2022-06-3", "yyyy-MM-dd" must be truthy
-
   return dt;
 }
 
@@ -145,3 +122,5 @@ function isOutOfRange(
     false
   );
 }
+
+console.warn(dateFromString("202A-BB-DD", "YYYY-MM-DD")?.toLocaleDateString());

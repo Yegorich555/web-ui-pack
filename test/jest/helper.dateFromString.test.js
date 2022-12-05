@@ -71,74 +71,36 @@ describe("helper.dateToString", () => {
 
   Object.keys(obj).forEach((k) => {
     const tsts = obj[k];
-    test(`${k} (strict:true)`, () => {
+    test(`${k}`, () => {
       tsts.forEach((t) => {
-        expect(dateFromString(t.txt, `${k}`, { strict: true })).toStrictEqual(t.v);
+        expect(dateFromString(t.txt, `${k}`)).toStrictEqual(t.v);
       });
     });
-    test(`${k} (strict:false)`, () => {
-      tsts.forEach((t) => {
-        expect(dateFromString(t.txt, `${k}`, { strict: false })).toStrictEqual(t.v);
-      });
-    });
+  });
+
+  test("not full date", () => {
+    expect(dateFromString("2022-03-5", "yyyy-MM-dd")).toStrictEqual(new Date("2022-03-05 00:00"));
+    // expect(dateFromString("2022-03-0", "yyyy-MM-dd")).toBe(null);
+    // expect(dateFromString("22", "yyyy-MM-dd")).toBe(null);
+    // expect(dateFromString("2022", "yyyy-MM-dd")).toBe(null);
+    // expect(dateFromString("2022-3", "yyyy-MM-dd")).toBe(null);
   });
 
   test("invalid date", () => {
     expect(dateFromString(null)).toBe(null);
     expect(dateFromString("", "YYYY-MM-DD")).toBe(null);
     expect(dateFromString("202A-BB-DD", "YYYY-MM-DD")).toBe(null);
-
-    expect(dateFromString("22", "yyyy-MM-dd")).toBe(null);
-    expect(dateFromString("2022", "yyyy-MM-dd")).toBe(null);
-    expect(dateFromString("2022-3", "yyyy-MM-dd")).toBe(null);
-    expect(dateFromString("2022-03-0", "yyyy-MM-dd")).toBe(null);
-    expect(dateFromString("2022-03-5", "yyyy-MM-dd")).toBe(null);
-    expect(dateFromString("2022-03-512:36", "yyyy-MM-dd hh:mm")).toBe(null);
     expect(dateFromString("20-03-05", "yyyy-MM-dd")).toBe(null);
-    expect(() => dateFromString("2022-03-50", "yyyy-MM-dd")).toThrow();
-    expect(() => dateFromString("2022-30-50", "yyyy-MM-dd")).toThrow();
-    expect(dateFromString("2022-30-50", "yyyy-MM-dd", { throwOutOfRange: false })).toBe(null);
-    expect(dateFromString("2022-03-103", "yyyy-MM-dd")).toBe(null);
-    expect(dateFromString("2022-11-29 01:02:03.679", "YYYY-MM-DD hh:mm:ss.fff a", { strict: false })).toBe(null); // with out am/pm it's wrong
-  });
+    expect(dateFromString("2022-11-29 01:02:03.679", "YYYY-MM-DD hh:mm:ss.fff a")).toBe(null); // with out am/pm it's wrong
 
-  test("option [strict]", () => {
-    expect(dateFromString("2022", "yyyy-MM-dd")).toBe(null);
-    expect(dateFromString("2022", "yyyy-MM-dd", { strict: false })).toStrictEqual(new Date("2022-01-01 00:00"));
-
-    expect(dateFromString("2022-03", "yyyy-MM-dd")).toBe(null);
-    expect(dateFromString("2022-03", "yyyy-MM-dd", { strict: false })).toStrictEqual(new Date("2022-03-01 00:00"));
-
-    expect(dateFromString("2022-03-103", "yyyy-MM-dd")).toBe(null);
-    expect(dateFromString("2022-03-103", "yyyy-MM-dd", { strict: false })).toStrictEqual(new Date("2022-03-10 00:00"));
-
-    expect(dateFromString("2022-03-10 23:40", "yyyy-MM-dd")).toBe(null);
-    expect(dateFromString("2022-03-10 23:40", "yyyy-MM-dd", { strict: false })).toStrictEqual(
-      new Date("2022-03-10 00:00")
-    );
-
-    expect(dateFromString("2022-03-10", "yyyy-MM-dd hh:mm:ss.fff")).toBe(null);
-    expect(dateFromString("2022-03-10", "yyyy-MM-dd hh:mm:ss.fff", { strict: false })).toStrictEqual(
-      new Date("2022-03-10 00:00")
-    );
-
-    expect(dateFromString("2022-03-10 23:40", "yyyy-MM-dd hh:mm:ss.fff")).toBe(null);
-    expect(dateFromString("2022-03-10 23:40", "yyyy-MM-dd hh:mm:ss.fff", { strict: false })).toStrictEqual(
-      new Date("2022-03-10 23:40")
-    );
-
-    expect(dateFromString("2022-03-10 23:40", "yyyy-MM-dd hh:mm:ss.fffZ", { strict: false })).toStrictEqual(
-      new Date(Date.UTC(2022, 3 - 1, 10, 23, 40))
-    );
-  });
-
-  test("isOutOfRange", () => {
     const getOutOfRange = (v = "2022", format = "yyyy") =>
       dateFromString(v, format, { strict: true, throwOutOfRange: false }) == null;
 
     expect(getOutOfRange("2022-12-20", "yyyy-MM-dd")).toBe(false);
     expect(getOutOfRange("2022-00-20", "yyyy-MM-dd")).toBe(true);
     expect(getOutOfRange("2022-05-00", "yyyy-MM-dd")).toBe(true);
+    expect(() => dateFromString("2022-05-00", "yyyy-MM-dd", { strict: true, throwOutOfRange: true })).toThrow();
+    expect(getOutOfRange("2022-12-50", "yyyy-MM-dd")).toBe(true);
     expect(getOutOfRange("2022-12-50", "yyyy-MM-dd")).toBe(true);
     expect(getOutOfRange("2022-13-20", "yyyy-MM-dd")).toBe(true);
     expect(getOutOfRange("2022-11-31", "yyyy-MM-dd")).toBe(true); // 31 Nov 2022 doesn't exist
@@ -147,12 +109,7 @@ describe("helper.dateToString", () => {
     expect(getOutOfRange("2022-11-30 23:60:59.999", "yyyy-MM-dd hh:mm:ss.fff")).toBe(true);
     expect(getOutOfRange("2022-11-30 23:59:60.999", "yyyy-MM-dd hh:mm:ss.fff")).toBe(true);
     expect(getOutOfRange("2022-11-30 23:59:59.000", "yyyy-MM-dd hh:mm:ss.fff")).toBe(false);
-
-    // NiceToHave:
-    // expect(getOutOfRange("20", "yyyy-MM-dd")).toBe(false);
-    // expect(getOutOfRange("2022", "yyyy-MM-dd")).toBe(false);
-    // expect(getOutOfRange("2022-0", "yyyy-MM-dd")).toBe(false);
-    // expect(getOutOfRange("2022-09", "yyyy-MM-dd")).toBe(false);
-    // expect(getOutOfRange("2022-2", "yyyy-MM-dd")).toBe(false);
+    expect(getOutOfRange("2022-03-512:36", "yyyy-MM-dd hh:mm")).toBe(true);
+    expect(getOutOfRange("2022-03-103", "yyyy-MM-dd")).toBe(true);
   });
 });
