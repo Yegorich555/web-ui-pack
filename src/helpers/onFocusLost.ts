@@ -34,6 +34,7 @@ function setEvent(): void {
     rstEvent = () => {
       if (--rstCnt === 0) {
         onMouseUp.length = 0;
+        isMouseDown = false;
         r1();
         r2();
         rstEvent = undefined;
@@ -80,7 +81,6 @@ export default function onFocusLost(
     }
     const isFocused = (a: Node | null): boolean | null => a && (element === a || element.contains(a));
     const isStillFocused = e.relatedTarget instanceof Node && isFocused(e.relatedTarget);
-    // console.warn("focusout", { rel: e.relatedTarget, act: document.activeElement });
     if (!isStillFocused && !isFocused(document.activeElement)) {
       listener.call(element, e);
       options?.once && remove();
