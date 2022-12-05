@@ -147,7 +147,7 @@ describe("control.select", () => {
     expect(el.$isOpen).toBe(false);
     expect(el.$refPopup).toBeDefined(); // disposed only by focus out
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-owns="txt2" aria-controls="txt2"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label><wup-popup menu="" style="min-width: 100px;"><ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3">Donny</li><li role="option" aria-selected="true" id="txt4">Mikky</li><li role="option" aria-selected="false" id="txt5">Leo</li><li role="option" aria-selected="false" id="txt6">Splinter</li></ul></wup-popup></wup-select>"`
+      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-owns="txt2" aria-controls="txt2"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label><wup-popup menu="" style="min-width: 100px;"><ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3">Donny</li><li role="option" aria-selected="false" id="txt4">Mikky</li><li role="option" aria-selected="false" id="txt5">Leo</li><li role="option" aria-selected="false" id="txt6">Splinter</li></ul></wup-popup></wup-select>"`
     );
     expect(onHide).toBeCalledTimes(1);
     expect(onShow).toBeCalledTimes(1);
@@ -472,7 +472,7 @@ describe("control.select", () => {
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
     await h.wait();
     expect(el.$isOpen).toBe(true);
-    expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[3]);
+    expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[2]);
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Home", bubbles: true, cancelable: true }));
     await h.wait(1);
     expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[0]);
@@ -483,19 +483,23 @@ describe("control.select", () => {
     await h.wait();
 
     // open again and pressEsc to close menu
+    expect(el.$isOpen).toBe(false);
+    el.$value = undefined;
+    await h.wait(1);
+    expect(el._selectedMenuItem).toBe(null);
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
     await h.wait();
     expect(el.$isOpen).toBe(true);
     expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[3]);
-    expect(el.querySelector("[aria-selected='true']")?.id).toBe(menuIds[2]);
-    expect(el.querySelectorAll("[aria-selected='true']").length).toBe(1);
+    expect(el.querySelector("[aria-selected='true']")?.id).toBe(undefined);
+    expect(el.querySelectorAll("[aria-selected='true']").length).toBe(0);
 
-    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
-    expect(el.$value).toBe(getItems()[2].value); // no changes
+    expect(el.$value).toBe(getItems()[3].value);
     expect(el.$isOpen).toBe(false);
 
-    // checking if resetValue still works
+    // if resetValue still works
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
     await h.wait();
     expect(el.$value).not.toBe(getItems()[2].value);
@@ -511,7 +515,7 @@ describe("control.select", () => {
 
     HTMLElement.prototype.scrollIntoViewIfNeeded = was;
 
-    // checking when user changed text No Items
+    // when user changed text No Items
     const wasText = WUPSelectControl.$textNoItems;
     WUPSelectControl.$textNoItems = "";
     await setItems([]);
@@ -520,19 +524,19 @@ describe("control.select", () => {
     );
     WUPSelectControl.$textNoItems = wasText;
 
-    // checking when items is function with promise
+    // when items is function with promise
     await setItems(() => Promise.resolve(getItems()));
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
       `"<ul id="txt15" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt16">Donny</li><li role="option" aria-selected="false" id="txt17">Mikky</li><li role="option" aria-selected="false" id="txt18">Leo</li><li role="option" aria-selected="false" id="txt19">Splinter</li></ul>"`
     );
 
-    // checking when items is function without promise
+    // when items is function without promise
     await setItems(() => getItems().slice(0, 2));
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
       `"<ul id="txt20" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt21">Donny</li><li role="option" aria-selected="false" id="txt22">Mikky</li></ul>"`
     );
 
-    // checking when items has custom render
+    // when items has custom render
     await setItems([
       {
         value: 123,

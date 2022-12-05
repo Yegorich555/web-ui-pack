@@ -458,13 +458,16 @@ export default class WUPSelectControl<
       this._menuItems!.filtered = undefined;
     }
     // set aria-selected
-    const v = this.$value;
-    if (v !== undefined) {
+    this.selectMenuItemByValue(this.$value);
+    return popup;
+  }
+
+  /** Select menu item if value !== undefined and menu is opened */
+  protected selectMenuItemByValue(v: ValueType | undefined): void {
+    if (v !== undefined && this.$isOpen) {
       const i = this._cachedItems!.findIndex((item) => this.#ctr.$isEqual(item.value, v));
       this.selectMenuItem(this._menuItems!.all[i] || null);
     }
-
-    return popup;
   }
 
   protected override focusMenuItem(next: HTMLElement | null): void {
@@ -503,28 +506,44 @@ export default class WUPSelectControl<
 
     const { length } = this._menuItems!.filtered || this._menuItems!.all;
     let focusIndex: number | null = null;
-    // todo firstFocused can be selected/current
-    switch (e.key) {
-      case "ArrowDown":
-        {
-          let cur = this._menuItems!.focused;
-          focusIndex = ++cur >= length ? 0 : cur;
-        }
-        break;
-      case "ArrowUp":
-        {
-          let cur = wasOpen ? this._menuItems!.focused : length;
-          focusIndex = --cur < 0 ? length - 1 : cur;
-        }
-        break;
-      case "Home":
-        focusIndex = 0;
-        break;
-      case "End":
-        focusIndex = length - 1;
-        break;
-      default:
-        break;
+
+    // firstFocused can be selected/current
+    if (this._menuItems!.focused === -1 && this._selectedMenuItem) {
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        focusIndex = this._menuItems!.all.indexOf(this._selectedMenuItem as HTMLLIElement & { _text: string });
+        // case impossible because with filtered items we have this._menuItems!.focused !== -1
+        // if (this._menuItems.filtered) {
+        //   focusIndex = this._menuItems.filtered.indexOf(focusIndex);
+        // }
+        // if (focusIndex === -1) {
+        //   focusIndex = null;
+        // }
+      }
+    }
+
+    if (focusIndex === null) {
+      switch (e.key) {
+        case "ArrowDown":
+          {
+            let cur = this._menuItems!.focused;
+            focusIndex = ++cur >= length ? 0 : cur;
+          }
+          break;
+        case "ArrowUp":
+          {
+            let cur = wasOpen ? this._menuItems!.focused : length;
+            focusIndex = --cur < 0 ? length - 1 : cur;
+          }
+          break;
+        case "Home":
+          focusIndex = 0;
+          break;
+        case "End":
+          focusIndex = length - 1;
+          break;
+        default:
+          break;
+      }
     }
 
     if (focusIndex != null) {
@@ -573,6 +592,12 @@ export default class WUPSelectControl<
       this.setValue(v);
     }
     super.gotFocusLost();
+  }
+
+  protected override setValue(v: ValueType | undefined, canValidate = true, skipInput = false): boolean | null {
+    const r = super.setValue(v, canValidate, skipInput);
+    r && this.selectMenuItemByValue(v);
+    return r;
   }
 
   protected override removePopup(): void {

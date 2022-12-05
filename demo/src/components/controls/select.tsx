@@ -67,7 +67,7 @@ export default function SelectControlView() {
           items="inputSelect.items"
           name="select"
           label="Select"
-          initValue={items[1].value.toString()}
+          initValue={items[8].value.toString()}
           validations="window._someSelectValidations"
           autoComplete="off"
           autoFocus={false}

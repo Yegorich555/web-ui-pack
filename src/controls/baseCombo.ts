@@ -355,6 +355,7 @@ export default abstract class WUPBaseComboControl<
     this.removeAttribute("opened");
     this.$refInput.setAttribute("aria-expanded", false);
     this.focusMenuItem(null);
+    this.selectMenuItem(null);
     setTimeout(() => this.fireEvent("$hideMenu", { cancelable: false }));
     return true;
   }
@@ -375,17 +376,18 @@ export default abstract class WUPBaseComboControl<
     this._focusedMenuItem = next;
   }
 
-  #selectedMenuItem?: HTMLElement | null;
+  _selectedMenuItem?: HTMLElement | null;
   /** Select item (set aria-selected and scroll to) */
   protected selectMenuItem(next: HTMLElement | null): void {
-    this.#selectedMenuItem?.setAttribute("aria-selected", "false");
-
+    this._selectedMenuItem?.setAttribute("aria-selected", "false");
     if (next) {
+      // todo scroll doesn't work because of animation
       next.setAttribute("aria-selected", true);
       const ifneed = (next as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
       ifneed ? ifneed.call(next, false) : next.scrollIntoView();
     }
-    this.#selectedMenuItem = next;
+
+    this._selectedMenuItem = next;
   }
 
   protected override async gotKeyDown(e: KeyboardEvent): Promise<void> {
