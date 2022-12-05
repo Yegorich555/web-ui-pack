@@ -279,7 +279,6 @@ export default class WUPCalendarControl<
         }
         :host [calendar]>div {
           overflow: hidden;
-          --anim-time: 300ms;
         }
         :host [zoom] { animation: none var(--anim-time) linear forwards; }
         :host [zoom="out"] { animation-name: WUP-ZOOM-OUT-1; }

@@ -154,7 +154,6 @@ export default class WUPDateControl<
         .replace(/[dD]/g, "#0")
         .replace(/mm|MM/g, "00")
         .replace(/[mM]/g, "#0"); // convert yyyy-mm-dd > 0000-00-00; d/m/yyyy > #0/#0/0000
-    // todo allow last chunk to be optional: 2022-06-3 yyyy-mm-dd must be refMask.isCompleted
 
     this._opts.maskholder = this._opts.maskholder ?? this._opts.format;
     this._opts.min = this.parse(this.getAttribute("min") || "") ?? this._opts.min;

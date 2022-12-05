@@ -1267,7 +1267,6 @@ clip: rect(1px, 1px, 1px, 1px);}
         }
         WUP-CALENDAR [calendar]&gt;div {
           overflow: hidden;
-          --anim-time: 300ms;
         }
         WUP-CALENDAR [zoom] { animation: none var(--anim-time) linear forwards; }
         WUP-CALENDAR [zoom="out"] { animation-name: WUP-ZOOM-OUT-1; }
