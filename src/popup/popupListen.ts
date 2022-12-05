@@ -174,29 +174,28 @@ export default function popupListen(
     });
 
     appendEvent(t, "click", (e) => {
-      if (!(e as MouseEvent).pageX) {
+      if ((e as MouseEvent).pageX == null) {
         // pageX is null if it was called programmatically
         preventClickAfterFocus = false; // test-case: focus without click > show....click programatically on target > it should hide
       }
 
-      if (
+      const skip =
         preventClickAfterFocus ||
         debounceTimeout ||
         wasOutsideClick ||
         openedByHover ||
         e.detail === 2 || // it's double-click
         e.button || // it's not left-click
-        wasMouseMove
-      ) {
-        return;
-      }
+        wasMouseMove;
 
-      if (!openedEl) {
-        lastActive = document.activeElement as HTMLElement;
-        show(WUPPopup.ShowCases.onClick, e);
-      } else {
-        const isMeClick = openedEl === e.target || includes(e.target);
-        hide(isMeClick ? WUPPopup.HideCases.onPopupClick : WUPPopup.HideCases.onTargetClick, e);
+      if (!skip) {
+        if (!openedEl) {
+          lastActive = document.activeElement as HTMLElement;
+          show(WUPPopup.ShowCases.onClick, e);
+        } else {
+          const isMeClick = openedEl === e.target || includes(e.target);
+          hide(isMeClick ? WUPPopup.HideCases.onPopupClick : WUPPopup.HideCases.onTargetClick, e);
+        }
       }
 
       // fix when labelOnClick > inputOnClick > inputOnFocus

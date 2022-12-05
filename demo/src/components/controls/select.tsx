@@ -92,7 +92,6 @@ export default function SelectControlView() {
                 spin.$options.fit = true;
                 spin.$options.overflowFade = true;
                 spin.$options.overflowTarget = this;
-                // eslint-disable-next-line react/no-this-in-sfc
                 this.appendChild(spin);
                 return spin;
               };
@@ -106,7 +105,7 @@ export default function SelectControlView() {
               el.$options.name = "asDropdown";
               el.$options.label = "As dropdown ($options.readOnlyInput)";
               el.$options.items = items;
-              el.$initValue = ir - 3;
+              // el.$initValue = ir - 3;
               el.$options.readOnlyInput = true;
             }
           }}

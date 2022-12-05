@@ -493,8 +493,6 @@ export default abstract class WUPBaseComboControl<
   }
 }
 
-// todo when Open + Escape-key => close without removing value
-
 // WARN about chaining
 /*
  $showMenu().then(()=> console.warn('done'))
