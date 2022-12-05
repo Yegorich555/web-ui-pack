@@ -37,6 +37,7 @@ export default function dateFromString(
   const r = { y: 0, M: 0, d: 0, h: 0, m: 0, s: 0, f: 0 };
 
   let vi = 0;
+  let yCnt = 0;
   for (let fi = 0; vi <= vLast; ++vi, ++fi) {
     let char = format[fi];
     // prettier-ignore
@@ -55,6 +56,9 @@ export default function dateFromString(
     if (isNum) {
       if (r[key] !== undefined) {
         r[key] = r[key] * 10 + num;
+        if (key === "y") {
+          ++yCnt;
+        }
       } else {
         // rollback to prev
         fi -= 2;
@@ -74,6 +78,10 @@ export default function dateFromString(
     } else if (r.h === 12) {
       r.h = 0; // 12:00 AM means 00:00
     }
+  }
+
+  if (yCnt === 2) {
+    r.y += 2000; // to support "YY-MM-DD" => "22-01-02"
   }
 
   --r.M;
@@ -108,7 +116,6 @@ function isOutOfRange(
   isUTC: boolean,
   v: Date | null
 ): boolean {
-  // NiceToHave: expect(getOutOfRange("2022-2", "yyyy-MM-dd")).toBe(true)
   return (
     r.M < 0 ||
     r.M > 11 ||

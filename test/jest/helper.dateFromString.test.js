@@ -67,6 +67,11 @@ describe("helper.dateToString", () => {
       { v: new Date("2022-01-02T16:23:45.567Z"), txt: "2022-01-02T16:23:45.567Z" },
       { v: new Date("2022-11-29T01:02:03.567Z"), txt: "2022-11-29T01:02:03.567Z" },
     ],
+    "YY-MM-DD": [
+      { v: new Date("2022-01-02 00:00"), txt: "22-01-02" },
+      { v: new Date("2023-07-02 00:00"), txt: "23-07-02" },
+      { v: new Date("2025-11-24 00:00"), txt: "25-11-24" },
+    ],
   };
 
   Object.keys(obj).forEach((k) => {
