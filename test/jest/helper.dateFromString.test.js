@@ -85,7 +85,6 @@ describe("helper.dateToString", () => {
 
   test("not full date", () => {
     expect(dateFromString("2022-03-5", "yyyy-MM-dd")).toStrictEqual(new Date("2022-03-05 00:00"));
-    // expect(dateFromString("2022-03-0", "yyyy-MM-dd")).toBe(null);
     // expect(dateFromString("22", "yyyy-MM-dd")).toBe(null);
     // expect(dateFromString("2022", "yyyy-MM-dd")).toBe(null);
     // expect(dateFromString("2022-3", "yyyy-MM-dd")).toBe(null);
@@ -116,5 +115,7 @@ describe("helper.dateToString", () => {
     expect(getOutOfRange("2022-11-30 23:59:59.000", "yyyy-MM-dd hh:mm:ss.fff")).toBe(false);
     expect(getOutOfRange("2022-03-512:36", "yyyy-MM-dd hh:mm")).toBe(true);
     expect(getOutOfRange("2022-03-103", "yyyy-MM-dd")).toBe(true);
+    expect(getOutOfRange("2022-03-0", "yyyy-MM-dd")).toBe(true);
+    expect(getOutOfRange("2022-3", "yyyy-MM-dd")).toBe(true);
   });
 });
