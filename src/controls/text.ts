@@ -154,7 +154,7 @@ export default class WUPTextControl<
     return arr;
   }
 
-  static get observedAttributes(): Array<LowerKeys<WUPText.Options>> {
+  static get observedAttributes(): Array<string> {
     const arr = super.observedAttributes as Array<LowerKeys<WUPText.Options>>;
     arr.push("maskholder", "mask");
     return arr;
@@ -504,7 +504,6 @@ export default class WUPTextControl<
       } else if (canParse) {
         this.setValue(v, true, true);
       } else if (this._opts.mask) {
-        // todo testcase: when user lefts control need to left error if input not cleared
         this.validateOnce({ _mask: this.validations?._mask || "" });
       }
     };

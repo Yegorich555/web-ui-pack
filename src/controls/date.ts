@@ -109,7 +109,7 @@ export default class WUPDateControl<
     return arr;
   }
 
-  static get observedAttributes(): Array<LowerKeys<WUPDate.Options>> {
+  static get observedAttributes(): Array<string> {
     const arr = super.observedAttributes as Array<LowerKeys<WUPDate.Options>>;
     arr.push("format");
     return arr;

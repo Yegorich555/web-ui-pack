@@ -169,6 +169,8 @@ export default class WUPSelectControl<
 
   /** Text for listbox when no items are displayed */
   static $textNoItems: string | undefined = "No Items";
+  /** Text for aria-label of <ul> element */
+  static $ariaLabelItems = "Items";
 
   /** Function to filter menuItems based on inputValue; all values are in lowerCase */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -308,7 +310,7 @@ export default class WUPSelectControl<
     const ul = popup.appendChild(document.createElement("ul"));
     ul.setAttribute("id", menuId);
     ul.setAttribute("role", "listbox");
-    ul.setAttribute("aria-label", "Items"); // todo support multilang
+    ul.setAttribute("aria-label", this.#ctr.$ariaLabelItems);
 
     const all = await this.renderMenuItems(ul);
     this._menuItems = { all, focused: -1 };
