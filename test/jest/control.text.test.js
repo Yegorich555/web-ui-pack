@@ -18,7 +18,7 @@ describe("control.text", () => {
     expect(spy).toBeCalledTimes(1);
   });
 
-  test("validation: mask", async () => {
+  test("validation: _mask", async () => {
     el.$options.mask = "$ 000";
     el.focus();
     await h.wait(1);
@@ -32,7 +32,6 @@ describe("control.text", () => {
     expect(el.$refInput.value).toBe("");
     expect(el.$value).toBe(undefined); // because only prefix user left and it means nothing
 
-    el.testMe = true;
     await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
     expect(el.$value).toBe("$ 2");
     await h.wait();
@@ -61,5 +60,37 @@ describe("control.text", () => {
     expect(el.$value).toBe("$ 2");
     expect(el.$isValid).toBe(false);
     expect(el.$refError?.innerHTML).toMatchInlineSnapshot(`"<span class="wup-hidden"></span><span>Hello</span>"`);
+
+    // todo test when canParse = false + mask + value is valid
+  });
+
+  test("validation: _parse", async () => {
+    class TestTextElement extends WUPTextControl {
+      canParse() {
+        return true;
+      }
+
+      parse() {
+        throw new Error();
+      }
+    }
+    customElements.define("test-text-el", TestTextElement);
+    el = document.body.appendChild(document.createElement("test-text-el"));
+    // el.$value = "Im valid";
+    await h.wait(1);
+    await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
+    await h.wait();
+    expect(el.$isValid).toBe(false);
+    expect(el.$refError?.innerHTML).toMatchInlineSnapshot(
+      `"<span class="wup-hidden"></span><span>Invalid value</span>"`
+    );
+    expect(el.$value).toBe(undefined);
+    // when user lefts control need to show error anyway
+    el.blur();
+    await h.wait();
+    expect(el.$isValid).toBe(false);
+    expect(el.$refError?.innerHTML).toMatchInlineSnapshot(
+      `"<span class="wup-hidden"></span><span>Invalid value</span>"`
+    );
   });
 });

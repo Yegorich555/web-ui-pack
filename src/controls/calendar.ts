@@ -1197,3 +1197,4 @@ customElements.define(tagName, WUPCalendarControl);
  */
 
 // todo add ability to select range
+// todo improve aria-selected & aria-active styling

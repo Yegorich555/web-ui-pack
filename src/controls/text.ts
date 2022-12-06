@@ -359,6 +359,7 @@ export default class WUPTextControl<
   protected get validations(): WUPText.Options["validations"] | undefined {
     const vls = (super.validations as WUPText.Options["validations"]) || {};
     if (this._opts.mask && vls._mask === undefined) vls._mask = ""; // enable validation mask based on option mask
+    if (this._onceErrName === "_parse") vls._parse = "";
     return vls;
   }
 
@@ -457,6 +458,7 @@ export default class WUPTextControl<
 
     if (this._opts.clearButton) {
       this.$refBtnClear = this.$refBtnClear || this.renderBtnClear();
+      /* istanbul ignore else */
     } else if (this.$refBtnClear) {
       this.$refBtnClear.remove();
       this.$refBtnClear = undefined;
@@ -490,6 +492,7 @@ export default class WUPTextControl<
     const canParse = this.canParse(txt);
     let v = this.$value;
     let errMsg: boolean | string = "";
+    /* istanbul ignore else */
     if (canParse) {
       try {
         v = this.parse(txt);
@@ -631,3 +634,5 @@ customElements.define(tagName, WUPTextControl);
 // NiceToHave: handle Ctrl+Z wup-select etc. cases
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
+
+// testcase: user able to left a valid control despite on validation wrong

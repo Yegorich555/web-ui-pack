@@ -427,9 +427,8 @@ export default abstract class WUPBaseComboControl<
         {
           const el = this._focusedMenuItem;
           if (el && !el.hasAttribute("disabled")) {
-            const ev = new MouseEvent("click", { cancelable: true, bubbles: true });
-            el.dispatchEvent(ev);
-            if (ev.defaultPrevented) {
+            const isHandled = !el.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }));
+            if (isHandled) {
               return; // skip hidding menu if itemClick isHandled
             }
           }

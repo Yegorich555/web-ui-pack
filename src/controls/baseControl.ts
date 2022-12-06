@@ -971,5 +971,4 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   - form > collectOnlyChanges - must skip disabled control (because user can't affect on this)
   - form > model must inlcude $initValue for disabled control instead of last changed. After submit need to reset $value to $initValue in this case
 */
-
-/** todo when user sees validation error at first time by focusout need to return focus back */
+/* todo when user sees validation error at first time by focusout need to return focus back */
