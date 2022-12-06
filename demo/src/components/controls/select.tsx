@@ -21,6 +21,10 @@ const items = [
   // { text: (v, li, i) => li.append(v.toString()), value: 124 },
 ];
 
+// for (let i = 20; i < 1000; ++i) {
+//   items.push({ text: `Test ${i}`, value: i });
+// }
+
 (window as any).inputSelect = {
   items,
 };

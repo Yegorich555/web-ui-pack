@@ -4,7 +4,7 @@ import onEvent from "../helpers/onEvent";
 import promiseWait from "../helpers/promiseWait";
 import WUPPopupElement from "../popup/popupElement";
 import WUPSpinElement from "../spinElement";
-import { WUPcssIcon } from "../styles";
+import { WUPcssIcon, WUPcssScrollSmall } from "../styles";
 import WUPBaseComboControl, { ShowCases, WUPBaseComboIn } from "./baseCombo";
 
 /* c8 ignore next */
@@ -130,6 +130,7 @@ export default class WUPSelectControl<
       }`;
   }
 
+  // WARN: scroll sets for ul otherwise animation brokes scroll to selectItem because animation affects on scrollSize
   static get $style(): string {
     return `${super.$style}
       :host {
@@ -138,12 +139,18 @@ export default class WUPSelectControl<
       :host[opened] label::after {
         transform: rotate(180deg);
       }
+      :host [menu] {
+        overflow: hidden;
+      }
       :host [menu] ul {
         margin: 0;
         padding: 0;
         list-style-type: none;
         cursor: pointer;
+        overflow: auto;
+        max-height: 300px;
       }
+      ${WUPcssScrollSmall(":host [menu]>ul")}
       :host [menu] li {
         padding: 1em;
       }
@@ -315,7 +322,6 @@ export default class WUPSelectControl<
     const all = await this.renderMenuItems(ul);
     this._menuItems = { all, focused: -1 };
     !all.length && this.renderMenuNoItems(popup, false);
-
     // it happens on every show because by hide it dispose events
     onEvent(ul, "click", (e) => {
       e.stopPropagation(); // to prevent popup-hide-show
@@ -457,6 +463,7 @@ export default class WUPSelectControl<
       this._menuItems!.all.forEach((li) => (li.style.display = "")); // reset styles after filtering
       this._menuItems!.filtered = undefined;
     }
+
     // set aria-selected
     this.selectMenuItemByValue(this.$value);
     return popup;

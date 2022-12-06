@@ -606,12 +606,41 @@ mask-image: var(--ctrl-icon-img);
       WUP-SELECT[opened] label::after {
         transform: rotate(180deg);
       }
+      WUP-SELECT [menu] {
+        overflow: hidden;
+      }
       WUP-SELECT [menu] ul {
         margin: 0;
         padding: 0;
         list-style-type: none;
         cursor: pointer;
+        overflow: auto;
+        max-height: 300px;
       }
+      
+WUP-SELECT [menu]&gt;ul::-webkit-scrollbar {
+  width: 10px; height: 10px;
+}
+WUP-SELECT [menu]&gt;ul::-webkit-scrollbar-corner {
+  background: none;
+}
+WUP-SELECT [menu]&gt;ul::-webkit-scrollbar-thumb {
+  border: 3px solid rgba(0,0,0,0);
+  background-clip: padding-box;
+  background-color: var(--scroll, rgba(0,0,0,0.2));
+  border-radius: 999px;
+}
+WUP-SELECT [menu]&gt;ul::-webkit-scrollbar-track-piece:vertical:start,
+WUP-SELECT [menu]&gt;ul::-webkit-scrollbar-track-piece:vertical:end,
+WUP-SELECT [menu]&gt;ul::-webkit-scrollbar-track-piece:horizontal:start,
+WUP-SELECT [menu]&gt;ul::-webkit-scrollbar-track-piece:horizontal:end {
+  margin: 0;
+}
+@media (hover) {
+  WUP-SELECT [menu]&gt;ul::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scroll-hover, rgba(0,0,0,0.5));
+  }
+}
       WUP-SELECT [menu] li {
         padding: 1em;
       }
@@ -997,11 +1026,11 @@ exports[`control.select validations options.validationCase 4`] = `
     <span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt15"
-        aria-describedby="txt20"
+        aria-controls="txt9"
+        aria-describedby="txt15"
         aria-expanded="false"
         aria-haspopup="listbox"
-        aria-owns="txt15"
+        aria-owns="txt9"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -1023,7 +1052,7 @@ exports[`control.select validations options.validationCase 4`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt20"
+    id="txt15"
     role="alert"
     style="max-width: 100px;"
   >

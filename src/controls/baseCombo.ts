@@ -296,6 +296,8 @@ export default abstract class WUPBaseComboControl<
       }
       this.appendChild(p); // WARN: it will show onInit
       this.$refPopup.addEventListener("$willShow", (ev) => ev.preventDefault(), { once: true }); // otherwise popup shows by init and impossible to wait for result (only via event)
+      // eslint-disable-next-line no-promise-executor-return
+      await new Promise((res) => setTimeout(res)); // wait for appending to body so size is defined and possible to scroll
     }
     if (!this.#isOpen) {
       return null; // possible when user calls show & hide sync
@@ -379,9 +381,8 @@ export default abstract class WUPBaseComboControl<
   _selectedMenuItem?: HTMLElement | null;
   /** Select item (set aria-selected and scroll to) */
   protected selectMenuItem(next: HTMLElement | null): void {
-    this._selectedMenuItem?.setAttribute("aria-selected", "false");
+    this._selectedMenuItem?.setAttribute("aria-selected", false);
     if (next) {
-      // todo scroll doesn't work because of animation
       next.setAttribute("aria-selected", true);
       const ifneed = (next as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
       ifneed ? ifneed.call(next, false) : next.scrollIntoView();

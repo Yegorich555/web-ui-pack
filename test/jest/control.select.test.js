@@ -717,6 +717,7 @@ describe("control.select", () => {
       // showCase: focus
       el.focus();
       await h.wait();
+      await h.wait();
       expect(el.$isOpen).toBe(true);
 
       document.activeElement.blur();
@@ -787,6 +788,7 @@ describe("control.select", () => {
         for (let i = 0; i < arr.length; ++i) {
           onChange.mockClear();
           await h.userTypeText(el.$refInput, arr[i].userText);
+          await h.wait();
           await h.wait();
           expect(el.$refInput.value).toBe(arr[i].userText);
           event();

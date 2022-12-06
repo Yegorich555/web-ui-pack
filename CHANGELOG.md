@@ -8,6 +8,8 @@
 - Controls. Click on button `Clear` throws console.error
 - Controls. Validation gets undefined value but must be skipped in this case (value is undefined only for messages or validations.required)
 - SelectControl. Click on custom list-item with nested span doesn't call click-event
+- SelectControl. No scroll to selected element at first opening
+- SelectControl. Sometimes menu isn't opened
 
 **Features**:
 
