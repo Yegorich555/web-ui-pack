@@ -65,7 +65,10 @@ export default function animateDropdown(
     frames.delete(el);
     styleTransform(el, "scaleY", "");
     el.style.transformOrigin = "";
-    nested.forEach((e) => (e.el.style.transform = e.prev.trimEnd()));
+    nested.forEach((e) => {
+      e.el.style.transform = e.prev.trimEnd();
+      e.el.style.transformOrigin = "";
+    });
   };
 
   const p = new Promise((resolve) => {
@@ -99,7 +102,11 @@ export default function animateDropdown(
 
       el.style.transformOrigin = el.getAttribute("position") === "top" ? "bottom" : "top";
       styleTransform(el, "scaleY", scale);
-      scale !== 0 && nested.forEach((e) => (e.el.style.transform = `${e.prev}scaleY(${1 / scale})`));
+      scale !== 0 &&
+        nested.forEach((e) => {
+          e.el.style.transform = `${e.prev}scaleY(${1 / scale})`;
+          e.el.style.transformOrigin = "bottom";
+        });
 
       if (cur === timeMs) {
         finish();
