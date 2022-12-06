@@ -97,9 +97,6 @@ export default class WUPDateControl<
       }
       :host [menu] {
         overflow: hidden;
-      }
-      :host [error] {
-        z-index: 90020;
       }`;
   }
 
@@ -300,5 +297,5 @@ customElements.define(tagName, WUPDateControl);
 
 // todo: alt-behavior; when user press Alt allow to use arrowKeys to navigate in input - use logic for all comboboxes
 // todo impossible to use shiftHome, shiftEnd with calendar
-
+// todo: click on clearBtn hides popup
 // testcase: startWith: year. User must be able goto dayPicker with pressing Enter

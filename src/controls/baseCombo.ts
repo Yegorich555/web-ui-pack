@@ -113,6 +113,7 @@ export default abstract class WUPBaseComboControl<
       :host [menu] {
         padding: 0;
         max-height: 300px;
+        z-index: 90010;
       }`;
   }
 
@@ -257,7 +258,7 @@ export default abstract class WUPBaseComboControl<
     }
 
     this.#isOpen = true;
-    this.$hideError(); // it resolves overflow menu vs error
+    // this.$hideError(); // it resolves overflow menu vs error
 
     if (!this.$refPopup) {
       const p = document.createElement("wup-popup");
@@ -473,10 +474,6 @@ export default abstract class WUPBaseComboControl<
     } else {
       super.setInputValue(p);
     }
-  }
-
-  protected override clearValue(canValidate = true): void {
-    super.clearValue(!this.#isOpen && canValidate);
   }
 
   /** Called when popup must be removed (by focus out OR if control removed) */

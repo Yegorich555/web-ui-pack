@@ -599,6 +599,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-SELECT [menu] {
         padding: 0;
         max-height: 300px;
+        z-index: 90010;
       }
       WUP-SELECT {
         --ctrl-icon-img: var(--ctrl-select-icon-img);
