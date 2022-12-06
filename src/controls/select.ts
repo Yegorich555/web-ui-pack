@@ -454,14 +454,15 @@ export default class WUPSelectControl<
     if (this.$isPending) {
       return null;
     }
-    const isCreate = !this.$refPopup;
+
+    if (this.$refPopup && showCase !== ShowCases.onInput && this._menuItems!.filtered) {
+      this._menuItems!.all.forEach((li) => (li.style.display = "")); // reset styles after filtering
+      this._menuItems!.filtered = undefined;
+    }
+
     const popup = await super.goShowMenu(showCase, e, isNeedWait);
     if (!popup) {
       return null;
-    }
-    if (!isCreate && showCase !== ShowCases.onInput && this._menuItems!.filtered) {
-      this._menuItems!.all.forEach((li) => (li.style.display = "")); // reset styles after filtering
-      this._menuItems!.filtered = undefined;
     }
 
     // set aria-selected
@@ -501,9 +502,13 @@ export default class WUPSelectControl<
     // }
     const wasOpen = this.$isOpen;
     if (e.key === "Enter" && wasOpen && this._opts.allowNewValue && !this._focusedMenuItem) {
+      // todo testCase: after new value - close. remove last symbol and open again. Popup opens out of window
       // todo in this case when try to open again "No Items" shows but focus possible
       const txt = this.$refInput.value.trim();
       const v = txt ? this.findValueByText(txt) ?? (txt as any) : undefined;
+      // this.selectValue(v);
+      // e.preventDefault();
+      // return;
       this.setValue(v);
     }
     await super.gotKeyDown(e);

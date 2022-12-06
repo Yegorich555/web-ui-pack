@@ -404,7 +404,7 @@ export default abstract class WUPBaseComboControl<
       if (e.key === "ArrowDown" || e.key === "ArrowUp") {
         e.preventDefault(); // to prevent parent-scroll
         if (!this.#isOpen) {
-          await this.goShowMenu(ShowCases.onPressArrowKey, null, true);
+          await this.goShowMenu(ShowCases.onPressArrowKey, null); // , true);
           return;
         }
       }
