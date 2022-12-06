@@ -264,6 +264,10 @@ export default class WUPDateControl<
     return dateToString(v, this._opts.format.toUpperCase() + (this._opts.utc ? "Z" : ""));
   }
 
+  protected override resetInputValue(): void {
+    // don't call super because validation is appeared
+  }
+
   protected override gotInput(e: WUPText.GotInputEvent): void {
     super.gotInput(e, true);
   }
@@ -296,6 +300,5 @@ customElements.define(tagName, WUPDateControl);
 
 // todo: alt-behavior; when user press Alt allow to use arrowKeys to navigate in input - use logic for all comboboxes
 // todo impossible to use shiftHome, shiftEnd with calendar
-// todo when user lefts control don't clear input-value. Need to disable it from baseCombobox ???
 
 // testcase: startWith: year. User must be able goto dayPicker with pressing Enter

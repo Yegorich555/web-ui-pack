@@ -417,7 +417,7 @@ export default abstract class WUPBaseComboControl<
     switch (e.key) {
       case "Escape":
         e.preventDefault();
-        this.setInputValue(this.$value); // reset input to currentValue
+        this.resetInputValue();
         await this.goHideMenu(HideCases.OnPressEsc);
         break;
       case "Enter":
@@ -433,7 +433,7 @@ export default abstract class WUPBaseComboControl<
             }
           }
           await this.goHideMenu(HideCases.OnPressEnter);
-          this.setInputValue(this.$value); // reset input to currentValue
+          this.resetInputValue();
         }
         break;
       default:
@@ -450,7 +450,7 @@ export default abstract class WUPBaseComboControl<
 
   protected override gotFocusLost(): void {
     !this.#isOpen && !this._isHidding && this.removePopup(); // otherwise it's removed by hidingMenu
-    this.setInputValue(this.$value); // to update/rollback input according to result
+    this.resetInputValue(); // to update/rollback input according to result
     super.gotFocusLost();
   }
 
@@ -458,6 +458,11 @@ export default abstract class WUPBaseComboControl<
   protected selectValue(v: ValueType): void {
     this.setValue(v);
     setTimeout(() => this.goHideMenu(HideCases.onSelect)); // without timeout it handles click by listener and opens again
+  }
+
+  /* Reset input to currentValue; called on focusOut, press Escape, Enter */
+  protected resetInputValue(): void {
+    this.setInputValue(this.$value);
   }
 
   protected override setInputValue(v: ValueType | undefined): void {
