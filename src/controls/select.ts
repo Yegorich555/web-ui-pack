@@ -457,7 +457,8 @@ export default class WUPSelectControl<
 
     if (this.$refPopup && showCase !== ShowCases.onInput && this._menuItems!.filtered) {
       this._menuItems!.all.forEach((li) => (li.style.display = "")); // reset styles after filtering
-      this._menuItems!.filtered = undefined;
+      delete this._menuItems!.filtered;
+      this.renderMenuNoItems(this.$refPopup, true); // remove NoItems
     }
 
     const popup = await super.goShowMenu(showCase, e, isNeedWait);
@@ -501,9 +502,7 @@ export default class WUPSelectControl<
     //   return;
     // }
     const wasOpen = this.$isOpen;
-    if (e.key === "Enter" && wasOpen && this._opts.allowNewValue && !this._focusedMenuItem) {
-      // todo testCase: after new value - close. remove last symbol and open again. Popup opens out of window
-      // todo in this case when try to open again "No Items" shows but focus possible
+    if (wasOpen && this._opts.allowNewValue && !this._focusedMenuItem && e.key === "Enter") {
       const txt = this.$refInput.value.trim();
       const v = txt ? this.findValueByText(txt) ?? (txt as any) : undefined;
       // this.selectValue(v);
@@ -581,7 +580,7 @@ export default class WUPSelectControl<
         isOk && filtered!.push(i);
         li.style.display = isOk ? "" : "none";
       });
-      this._menuItems!.filtered = filtered.length ? filtered : undefined;
+      this._menuItems!.filtered = filtered;
       const hasVisible = filtered.length !== 0;
       this.renderMenuNoItems(this.$refPopup!, hasVisible);
       hasVisible && rawV !== "" && !this._opts.allowNewValue && this.focusMenuItemByIndex(0);

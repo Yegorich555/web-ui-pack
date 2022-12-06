@@ -808,9 +808,18 @@ describe("control.select", () => {
           { userText: "Donny", expectedValue: 10 }, // user can select exact value without ArrowKeys
           { userText: "Leo", expectedValue: 30 }, // check it again
           { userText: "", expectedValue: undefined },
+          { userText: "Smt new", expectedValue: "Smt new" },
         ],
         () =>
           el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }))
+      );
+
+      // when open again filtering must be cleared
+      el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+      await h.wait();
+      expect(el.$isOpen).toBe(true);
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3" style="" focused="">Donny</li><li role="option" aria-selected="false" id="txt4" style="">Mikky</li><li role="option" aria-selected="false" id="txt5" style="">Leo</li><li role="option" aria-selected="false" id="txt6" style="">Splinter</li><li role="option" aria-disabled="true" aria-selected="false" style="display: none;">No Items</li></ul>"`
       );
 
       // user can select value by focus left
