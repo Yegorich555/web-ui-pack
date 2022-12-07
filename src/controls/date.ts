@@ -246,9 +246,9 @@ export default class WUPDateControl<
     if (isChanged) {
       const c = this.$refPopup?.firstElementChild as WUPCalendarControl;
       if (c) {
-        c._isStopChanges = true;
+        c._isStopChanges = true; // to prevend hidding popup by calendar valueChange
         c.$value = v && !Number.isNaN(v.valueOf()) ? v : undefined;
-        c._isStopChanges = false;
+        setTimeout(() => (c._isStopChanges = false)); // without timeout calendar $changeEvent is fired
       }
     }
     return isChanged;
@@ -297,5 +297,5 @@ customElements.define(tagName, WUPDateControl);
 
 // todo: alt-behavior; when user press Alt allow to use arrowKeys to navigate in input - use logic for all comboboxes
 // todo impossible to use shiftHome, shiftEnd with calendar
-// todo: click on clearBtn hides popup
+// testcase: changing value outside calendar hides popup
 // testcase: startWith: year. User must be able goto dayPicker with pressing Enter
