@@ -101,10 +101,10 @@ declare global {
     }
     interface GotInputEvent extends InputEvent {
       target: HTMLInputElement;
-      /** Call it to prevent calling setValue by input event */
-      preventSetValue: () => void;
-      /** Returns a boolean value indicating whether or not the call to InputEvent.preventSetValue() */
-      setValuePrevented: boolean;
+      // /** Call it to prevent calling setValue by input event */
+      // preventSetValue: () => void;
+      // /** Returns a boolean value indicating whether or not the call to InputEvent.preventSetValue() */
+      // setValuePrevented: boolean;
     }
   }
 
@@ -404,8 +404,8 @@ export default class WUPTextControl<
     this.setAttr.call(this.$refInput, "inputMode", this._opts.mask ? "numeric" : "");
 
     const r = this.appendEvent(this.$refInput, "input", (e) => {
-      (e as WUPText.GotInputEvent).setValuePrevented = false;
-      (e as WUPText.GotInputEvent).preventSetValue = () => ((e as WUPText.GotInputEvent).setValuePrevented = true);
+      // (e as WUPText.GotInputEvent).setValuePrevented = false;
+      // (e as WUPText.GotInputEvent).preventSetValue = () => ((e as WUPText.GotInputEvent).setValuePrevented = true);
       this.gotInput(e as WUPText.GotInputEvent);
     });
     const r2 = this.appendEvent(this.$refInput, "beforeinput", (e) => this.gotBeforeInput(e), { passive: false });
@@ -456,9 +456,9 @@ export default class WUPTextControl<
 
     super.gotChanges(propsChanged as any);
 
+    /* istanbul ignore else */
     if (this._opts.clearButton) {
       this.$refBtnClear = this.$refBtnClear || this.renderBtnClear();
-      /* istanbul ignore else */
     } else if (this.$refBtnClear) {
       this.$refBtnClear.remove();
       this.$refBtnClear = undefined;
@@ -479,15 +479,20 @@ export default class WUPTextControl<
   protected gotInput(e: WUPText.GotInputEvent): void {
     const el = e.target as MaskHandledInput;
     let txt = el.value;
+
+    /* istanbul ignore else */
     if (this._opts.mask) {
       const prev = el._maskPrev?.value;
       txt = this.maskInputProcess(e);
       if (txt === prev) {
         return; // skip because no changes from previous action
       }
-    } else if (e.setValuePrevented) {
-      return;
     }
+
+    // /* istanbul ignore else */
+    // if (e.setValuePrevented) { // use canParse instead
+    //   return;
+    // }
 
     const canParse = this.canParse(txt);
     let v = this.$value;
@@ -502,6 +507,7 @@ export default class WUPTextControl<
     }
 
     const act = (): void => {
+      /* istanbul ignore else */
       if (errMsg) {
         this.validateOnce({ _parse: this.validations?._parse || "" }, true);
       } else if (canParse) {
@@ -605,20 +611,22 @@ export default class WUPTextControl<
   }
 
   _onceErrName?: string;
-  /** Called for controls when inputValue != $value and need to show error on the fly by input-change */
+  /** Called when inputValue != $value and need to show error on the fly by input-change */
   protected validateOnce(
     rule: { [key: string]: boolean | string | ((v: any) => false | string) },
     force = false
   ): void {
-    this._wasValidNotEmpty = force ? true : this._wasValidNotEmpty;
     const prev = this._wasValidNotEmpty;
+    if (force) {
+      this._wasValidNotEmpty = true; // to ignore onChangeSmart and show error anyway
+    }
 
     // redefine prototype getter once & fire validation
     Object.defineProperty(this, "validations", { configurable: true, value: rule });
     this.validateAfterChange();
     delete (this as any).validations; // rollback to previous
 
-    if (!this._wasValidNotEmpty) {
+    if (force) {
       this._wasValidNotEmpty = prev; // rollback to previous
     }
     this._onceErrName = this._errName;

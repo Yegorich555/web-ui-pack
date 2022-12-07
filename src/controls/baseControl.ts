@@ -716,7 +716,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     const vls = this.validationsRules;
     if (!vls.length) {
       this._isValid = true;
-      if (this.$isEmpty) {
+      if (!this.$isEmpty) {
         this._wasValidNotEmpty = true;
       }
       return false;
@@ -743,7 +743,10 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         canShowError = false;
       }
     }
-    this._wasValidNotEmpty = this._wasValidNotEmpty || (this._isValid && !this.$isEmpty);
+
+    if (this._isValid && !isEmpty) {
+      this._wasValidNotEmpty = true;
+    }
 
     if (errMsg) {
       if (canShowError || this.$refError) {
