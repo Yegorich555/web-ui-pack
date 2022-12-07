@@ -4,7 +4,7 @@
  */
 import { WUPDateControl } from "web-ui-pack";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
-// import * as h from "../testHelper";
+import * as h from "../testHelper";
 
 /** @type WUPDateControl */
 let el;
@@ -60,9 +60,36 @@ describe("control.date", () => {
     validationsSkip: ["_parse", "_mask"],
   });
 
-  // test("options.format", () => {
-  // todo check mask + maskHolder
-  // });
+  test("options.format", async () => {
+    await h.wait(1);
+    expect(el.$options.format).toBe("yyyy-mm-dd");
+    expect(el.$options.mask).toBe("0000-00-00");
+    expect(el.$options.maskholder).toBe("yyyy-mm-dd");
+
+    el.$options.format = "YYYY-MM-DD";
+    el.$options.mask = undefined;
+    el.$options.maskholder = undefined;
+    await h.wait(1);
+    expect(el.$options.mask).toBe("0000-00-00");
+    expect(el.$options.maskholder).toBe("YYYY-MM-DD");
+
+    el.$options.format = "M/D/YYYY";
+    el.$options.mask = undefined;
+    el.$options.maskholder = undefined;
+    await h.wait(1);
+    expect(el.$options.mask).toBe("#0/#0/0000");
+    expect(el.$options.maskholder).toBe("MM/DD/YYYY");
+
+    // user can override defaults
+    el.$options.mask = "00-00-0000";
+    await h.wait(1);
+    expect(el.$options.mask).toBe("00-00-0000");
+    expect(el.$options.maskholder).toBe("MM/DD/YYYY");
+
+    el.$options.maskholder = "mm/dd/yyyy";
+    await h.wait(1);
+    expect(el.$options.maskholder).toBe("mm/dd/yyyy");
+  });
 
   // test("attr [startWith]", async () => {
   //   const set = async (s) => {

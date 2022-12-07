@@ -13,7 +13,9 @@ const tagName = "wup-date";
 export namespace WUPDateIn {
   export interface Defs extends WUPCalendarIn.Def {
     /** String representation of date (enables mask, - to disable mask set $options.mask="");
-     * @defaultValue "yyyy-mm-dd" */
+     * @defaultValue "yyyy-mm-dd"
+     * @tutorial Troubleshooting
+     * * with changing $options.format need to change/reset mask/maskholder also */
     format: string;
   }
   export interface Opt extends Pick<WUPCalendarIn.Opt, "min" | "max" | "exclude" | "utc" | "startWith"> {}
@@ -140,8 +142,8 @@ export default class WUPDateControl<
   protected override _opts = this.$options;
 
   /** Converts date-string into Date according (to $options.utc & .format)
-   * @Troubleshooting
-   * * despite on $options.format is "yyyy-mm-dd" the correct format "yyyy-MM-dd" */
+   * @tutorial Troubleshooting
+   * * for "yyyy-mm-dd" the correct format is "yyyy-MM-dd" */
   override parse(text: string): ValueType | undefined {
     if (!text) {
       return undefined;
@@ -189,7 +191,7 @@ export default class WUPDateControl<
 
   protected get validations(): WUPBase.Options["validations"] | undefined {
     const vls = (super.validations as WUPDate.Options["validations"]) || {};
-    // user can type not valid value according to options min,max,exclude. So we need enable validations rules in this case
+    // user can type not valid value according to options min,max,exclude. So need to enable validations rules in this case
     if (this._opts.min) vls.min = this._opts.min;
     if (this._opts.max) vls.max = this._opts.max;
     if (this._opts.exclude) vls.exclude = this._opts.exclude;
