@@ -3,8 +3,14 @@
  * @jest-environment-options {"timezone": "UTC"}
  */
 import { WUPDateControl } from "web-ui-pack";
+import { PickersEnum } from "web-ui-pack/controls/calendar";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../testHelper";
+
+beforeEach(async () => {
+  jest.useFakeTimers();
+  jest.setSystemTime(new Date(2022, 10 + 1, 16, 23, 49));
+});
 
 /** @type WUPDateControl */
 let el;
@@ -60,60 +66,79 @@ describe("control.date", () => {
     validationsSkip: ["_parse", "_mask"],
   });
 
-  test("options.format", async () => {
-    await h.wait(1);
-    expect(el.$options.format).toBe("yyyy-mm-dd");
-    expect(el.$options.mask).toBe("0000-00-00");
-    expect(el.$options.maskholder).toBe("yyyy-mm-dd");
+  describe("extra options", () => {
+    test("format", async () => {
+      await h.wait(1);
+      expect(el.$options.format).toBe("yyyy-mm-dd");
+      expect(el.$options.mask).toBe("0000-00-00");
+      expect(el.$options.maskholder).toBe("yyyy-mm-dd");
 
-    el.$options.format = "YYYY-MM-DD";
-    el.$options.mask = undefined;
-    el.$options.maskholder = undefined;
-    await h.wait(1);
-    expect(el.$options.mask).toBe("0000-00-00");
-    expect(el.$options.maskholder).toBe("YYYY-MM-DD");
+      el.$options.format = "YYYY-MM-DD";
+      el.$options.mask = undefined;
+      el.$options.maskholder = undefined;
+      await h.wait(1);
+      expect(el.$options.mask).toBe("0000-00-00");
+      expect(el.$options.maskholder).toBe("YYYY-MM-DD");
 
-    el.$options.format = "M/D/YYYY";
-    el.$options.mask = undefined;
-    el.$options.maskholder = undefined;
-    await h.wait(1);
-    expect(el.$options.mask).toBe("#0/#0/0000");
-    expect(el.$options.maskholder).toBe("MM/DD/YYYY");
+      el.$options.format = "M/D/YYYY";
+      el.$options.mask = undefined;
+      el.$options.maskholder = undefined;
+      await h.wait(1);
+      expect(el.$options.mask).toBe("#0/#0/0000");
+      expect(el.$options.maskholder).toBe("MM/DD/YYYY");
 
-    // user can override defaults
-    el.$options.mask = "00-00-0000";
-    await h.wait(1);
-    expect(el.$options.mask).toBe("00-00-0000");
-    expect(el.$options.maskholder).toBe("MM/DD/YYYY");
+      // user can override defaults
+      el.$options.mask = "00-00-0000";
+      await h.wait(1);
+      expect(el.$options.mask).toBe("00-00-0000");
+      expect(el.$options.maskholder).toBe("MM/DD/YYYY");
 
-    el.$options.maskholder = "mm/dd/yyyy";
-    await h.wait(1);
-    expect(el.$options.maskholder).toBe("mm/dd/yyyy");
+      el.$options.maskholder = "mm/dd/yyyy";
+      await h.wait(1);
+      expect(el.$options.maskholder).toBe("mm/dd/yyyy");
+    });
+
+    test("attr [startWith]", async () => {
+      const set = async (s) => {
+        el.remove();
+        el.setAttribute("startwith", s);
+        document.body.appendChild(el);
+        await h.wait(1);
+        el.focus();
+        await h.wait();
+      };
+
+      await set("day");
+      expect(el.$options.startWith).toBe(PickersEnum.Day);
+      expect(el.$refPopup.firstChild.$options.startWith).toBe(PickersEnum.Day);
+
+      await set("month");
+      expect(el.$options.startWith).toBe(PickersEnum.Month);
+      expect(el.$refPopup.firstChild.$options.startWith).toBe(PickersEnum.Month);
+
+      await set("year");
+      expect(el.$options.startWith).toBe(PickersEnum.Year);
+      expect(el.$refPopup.firstChild.$options.startWith).toBe(PickersEnum.Year);
+
+      await set("");
+      expect(el.$options.startWith).toBeFalsy();
+
+      el.$options.startWith = PickersEnum.Month;
+      el.blur();
+      await h.wait(1);
+      el.focus();
+      await h.wait();
+      expect(el.$options.startWith).toBe(PickersEnum.Month);
+      expect(el.$refPopup.firstChild.$options.startWith).toBe(PickersEnum.Month);
+    });
+    // test("min/max/exclude affects on validations", async()=>{
+    // todo implement
+    // });
+
+    // test("options utc", async()=>{
+    // todo implement
+    // });
   });
-
-  // test("attr [startWith]", async () => {
-  //   const set = async (s) => {
-  //     el.remove();
-  //     el.setAttribute("startwith", s);
-  //     document.body.appendChild(el);
-  //     await h.wait();
-  //   };
-
-  //   await set("day");
-  //   expect(el.$options.startWith).toBe(PickersEnum.Day);
-  //   expect(el.$refCalenarTitle.textContent).toBe("October 2022");
-
-  //   await set("month");
-  //   expect(el.$options.startWith).toBe(PickersEnum.Month);
-  //   expect(el.$refCalenarTitle.textContent).toBe("2022");
-
-  //   await set("year");
-  //   expect(el.$options.startWith).toBe(PickersEnum.Year);
-  //   expect(el.$refCalenarTitle.textContent).toBe("2018 ... 2033");
-
-  //   await set("");
-  //   expect(el.$options.startWith).toBeFalsy();
-  // });
 
   // test("$show/$hide menu", async () => {
   //   el.$initValue = new Date("2022-02-28");
