@@ -255,6 +255,9 @@ export default class WUPCalendarControl<
         //box-shadow: 0 0 3px 1px var(--ctrl-focus);
         opacity: 1;
       }
+      :host li[focused][aria-selected] {
+        text-decoration: underline;
+      }
       @media (hover: hover) {
         :host header>button:hover {
           background-color: var(--ctrl-clr-selected-bg);
@@ -1197,4 +1200,3 @@ customElements.define(tagName, WUPCalendarControl);
  */
 
 // todo add ability to select range
-// todo improve aria-selected & aria-active styling

@@ -1233,6 +1233,9 @@ clip: rect(1px, 1px, 1px, 1px);}
         //box-shadow: 0 0 3px 1px var(--ctrl-focus);
         opacity: 1;
       }
+      WUP-CALENDAR li[focused][aria-selected] {
+        text-decoration: underline;
+      }
       @media (hover: hover) {
         WUP-CALENDAR header&gt;button:hover {
           background-color: var(--ctrl-clr-selected-bg);
