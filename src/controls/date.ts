@@ -118,9 +118,11 @@ export default class WUPDateControl<
     validationRules: {
       ...WUPBaseComboControl.$defaults.validationRules,
       min: (v, setV, c) =>
-        (v === undefined || v < setV) && `Min date is ${dateToString(setV, (c as WUPDateControl)._opts.format)}`,
+        (v === undefined || v < setV) &&
+        `Min date is ${dateToString(setV, (c as WUPDateControl)._opts.format.toUpperCase())}`,
       max: (v, setV, c) =>
-        (v === undefined || v > setV) && `Max date is ${dateToString(setV, (c as WUPDateControl)._opts.format)}`,
+        (v === undefined || v > setV) &&
+        `Max date is ${dateToString(setV, (c as WUPDateControl)._opts.format.toUpperCase())}`,
       exclude: (v, setV) =>
         (v === undefined || setV.some((d) => d.valueOf() === v.valueOf())) && `This date is disabled`,
     },
@@ -157,7 +159,7 @@ export default class WUPDateControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUPDate.Options> | null): void {
     this._opts.utc = this.getBoolAttr("utc", this._opts.utc);
-    this._opts.format = this.getAttribute("format") ?? this._opts.format;
+    this._opts.format = (this.getAttribute("format") ?? this._opts.format) || "YYYY-MM-DD";
     this._opts.mask =
       this._opts.mask ??
       this._opts.format
@@ -309,5 +311,3 @@ customElements.define(tagName, WUPDateControl);
 // NiceToHave: allowYear, allowMonth, allowDays based on format: "YYYY-MM" - only for selection year & month
 
 // todo: alt-behavior; when user press Alt allow to use arrowKeys to navigate in input - use logic for all comboboxes
-// testcase: changing value outside calendar hides popup
-// testcase: startWith: year. User must be able goto dayPicker with pressing Enter
