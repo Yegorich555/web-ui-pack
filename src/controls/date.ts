@@ -270,11 +270,24 @@ export default class WUPDateControl<
   }
 
   protected override gotKeyDown(e: KeyboardEvent): Promise<void> {
-    const isOpen = this.$isOpen;
+    const wasOpen = this.$isOpen;
     const clnd = this.$refPopup!.firstElementChild as WUPCalendarControl;
-    isOpen && e.key !== "Escape" && e.key !== " " && clnd.gotKeyDown.call(clnd, e); // skip actions for Escape & Space keys
+    let skipCalendar = false;
+    switch (e.key) {
+      case "Escape":
+      case " ":
+        skipCalendar = true;
+        break;
+      case "Home":
+      case "End":
+        skipCalendar = e.shiftKey || e.ctrlKey; // skip only if pressed shift + Home/End
+        break;
+      default:
+        break;
+    }
+    wasOpen && !skipCalendar && clnd.gotKeyDown.call(clnd, e); // skip actions for Escape & Space keys
     const r = !e.defaultPrevented && super.gotKeyDown(e);
-    !isOpen && this.$isOpen && e.key !== "Escape" && clnd.gotKeyDown.call(clnd, e); // case when user press ArrowKey for opening menu
+    !wasOpen && this.$isOpen && !skipCalendar && clnd.gotKeyDown.call(clnd, e); // case when user press ArrowKey for opening menu
     return r || Promise.resolve();
   }
 
@@ -296,6 +309,5 @@ customElements.define(tagName, WUPDateControl);
 // NiceToHave: allowYear, allowMonth, allowDays based on format: "YYYY-MM" - only for selection year & month
 
 // todo: alt-behavior; when user press Alt allow to use arrowKeys to navigate in input - use logic for all comboboxes
-// todo impossible to use shiftHome, shiftEnd with calendar
 // testcase: changing value outside calendar hides popup
 // testcase: startWith: year. User must be able goto dayPicker with pressing Enter
