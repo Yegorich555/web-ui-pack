@@ -41,7 +41,6 @@ export default function DateControlView() {
         <wup-date
           name="date"
           initValue="2022-03-01 23:50"
-          // todo onChange event fired here by init
           min="2016-01-02"
           max="2034-05-01"
           exclude="window.myDateExcludeDays"
@@ -51,17 +50,10 @@ export default function DateControlView() {
           autoFocus={false}
           autoComplete="off"
         />
-        <wup-date
-          name="empty"
-          ref={(el) => {
-            if (el) {
-              el.addEventListener("$change", () => console.warn("changed", el.$value));
-            }
-          }}
-        />
+        <wup-date name="empty" />
         <wup-date name="another" label="Another format: yyyy-m-d" format="yyyy-m-d" />
-        {/* <wup-date name="disabled" disabled /> */}
-        {/* <wup-date name="readonly" readOnly /> */}
+        <wup-date name="disabled" disabled />
+        <wup-date name="readonly" readOnly />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>
