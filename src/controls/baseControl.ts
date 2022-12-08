@@ -400,10 +400,13 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   set $initValue(v: ValueType | undefined) {
-    if (!this.$isReady || (!this.#ctr.$isEqual(v, this.#initValue) && !this.$isDirty && !this.$isChanged)) {
-      this.$value = v; // setValue if it's empty and not isDirty
-    }
+    const was = this.#initValue;
+    const canUpdate = !this.$isReady || (!this.$isDirty && !this.$isChanged);
     this.#initValue = v;
+    if (canUpdate && !this.#ctr.$isEqual(v, was)) {
+      // WARN: comparing required for SelectControl when during the parse it waits for promise
+      this.$value = v; // WARN: it's fire $change event despite on value set from $initValue
+    }
     if (!(this as any)._noDelInitValueAttr) {
       this._isStopChanges = true;
       this.removeAttribute("initvalue");

@@ -257,9 +257,9 @@ describe("control.date", () => {
     expect(onSubmit).toBeCalledTimes(0);
 
     // check if changing saves hours
-    onChange.mockClear();
     el.$value = new Date("2022-10-16T13:45:56.000Z");
     await h.wait(1);
+    onChange.mockClear();
     expect(el.$refInput.value).toBe("2022-10-16");
     h.setInputCursor(el.$refInput, "2022-10-16|");
     await h.userRemove(el.$refInput);

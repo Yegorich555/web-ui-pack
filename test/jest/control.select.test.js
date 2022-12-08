@@ -60,14 +60,18 @@ describe("control.select", () => {
     ];
     el.setAttribute("initvalue", "");
     await h.wait();
+    expect(el.$initValue).toBe(null);
     expect(el.$value).toBe(null);
     expect(el.$refInput.value).toBe("Default");
+    expect(el.getAttribute("initvalue")).toBe("");
 
     // checking when items empty
     el.$options.items = [];
-    el.setAttribute("initvalue", "");
+    el.removeAttribute("initvalue");
+    el.setAttribute("initvalue", ""); // to trigger set value again
     await h.wait();
     expect(el.$value).toBe(undefined);
+    expect(el.$initValue).toBe(undefined);
     expect(el.$refInput.value).toBeFalsy();
   });
 
