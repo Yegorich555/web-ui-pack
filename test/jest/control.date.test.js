@@ -175,6 +175,9 @@ describe("control.date", () => {
       await h.wait(1);
       expect(el.$options.min.valueOf()).toBe(new Date("2022-10-15T00:00").valueOf()); // parse must be in local time
 
+      el.$value = new Date("2022-10-15"); // utc
+      expect(el.$refInput.value).toBe("2022-10-15"); // just for coverage
+
       el.setAttribute("min", "abc");
       await h.wait(1);
       expect(el.$options.min).toBe(undefined);
@@ -196,231 +199,42 @@ describe("control.date", () => {
     const onParse = jest.spyOn(el, "parse");
     const onChange = jest.fn();
     el.addEventListener("$change", onChange);
-    await h.userTypeText(el.$refInput, "20221015");
+    await h.userTypeText(el.$refInput, "20221030");
     await h.wait(150);
-    expect(el.$refInput.value).toBe("2022-10-15"); // becahuse mask is applied
+    expect(el.$isOpen).toBe(true);
+    expect(el.$refInput.value).toBe("2022-10-30"); // becahuse mask is applied
     expect(el.$isValid).toBe(true);
     expect(el.$refError).toBe(undefined);
-    expect(onChange).toBeCalledTimes(1);
-
     // el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    expect(onChange).toBeCalledTimes(1);
     expect(onParse).toBeCalled();
-    expect(el.$value?.toISOString()).toBe("2022-10-15T00:00:00.000Z");
+    expect(el.$value?.toISOString()).toBe("2022-10-30T00:00:00.000Z");
+
+    expect(await h.userRemove(el.$refInput)).toBe("2022-10-3|");
+    await h.wait(); // wait for validation.debounce
+    expect(el.$refError.innerHTML).toMatchInlineSnapshot(
+      `"<span class="wup-hidden"></span><span>Incomplete value</span>"`
+    );
+
+    h.mockConsoleWarn();
+    await h.userTypeText(el.$refInput, "9", { clearPrevious: false });
+    h.unMockConsoleWarn();
+    expect(el.$refInput.value).toBe("2022-10-39");
+    await h.wait(1);
+    expect(el.$refError.innerHTML).toMatchInlineSnapshot(
+      `"<span class="wup-hidden"></span><span>Invalid value</span>"`
+    );
+    expect(el.$value?.toISOString()).toBe("2022-10-30T00:00:00.000Z"); // value the same
+    expect(el.$isOpen).toBe(true);
+
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    expect(el.$refError.innerHTML).toMatchInlineSnapshot(
+      `"<span class="wup-hidden"></span><span>Invalid value</span>"`
+    ); // value lefts the same
+    expect(el.$isValid).toBe(false);
   });
-
-  // test("$show/$hide menu", async () => {
-  //   el.$initValue = new Date("2022-02-28");
-  //   expect(el.$isOpen).toBe(false);
-  //   const onShow = jest.fn();
-  //   const onHide = jest.fn();
-  //   el.addEventListener("$showMenu", onShow);
-  //   el.addEventListener("$hideMenu", onHide);
-
-  //   // opening by focus
-  //   el.focus();
-  //   expect(document.activeElement).toBe(el.$refInput);
-  //   expect(el.$isOpen).toBe(true);
-  //   expect(el.$refPopup).toBeDefined();
-  //   await h.wait();
-  //   expect(onHide).toBeCalledTimes(0);
-  //   expect(onShow).toBeCalledTimes(1);
-  //   expect(el.$refPopup.innerHTML).toMatchInlineSnapshot();
-  //   expect(el.outerHTML).toMatchInlineSnapshot();
-
-  //   // closing by Esc
-  //   el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(false);
-  //   expect(el.$refPopup).toBeDefined(); // disposed only by focus out
-  //   expect(el.outerHTML).toMatchInlineSnapshot();
-  //   expect(onHide).toBeCalledTimes(1);
-  //   expect(onShow).toBeCalledTimes(1);
-
-  //   // opening by call $show()
-  //   jest.clearAllMocks();
-  //   el.$showMenu();
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(true);
-  //   expect(onHide).toBeCalledTimes(0);
-  //   expect(onShow).toBeCalledTimes(1);
-
-  //   // closing by call $hide()
-  //   el.$hideMenu();
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(false);
-  //   expect(onHide).toBeCalledTimes(1);
-  //   expect(onShow).toBeCalledTimes(1);
-
-  //   // opening by keyboard
-  //   jest.clearAllMocks();
-  //   el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(true);
-  //   // again
-  //   el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(true);
-  //   expect(onShow).toBeCalledTimes(1);
-
-  //   // closing by select (by enter)
-  //   el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(false);
-  //   expect(el.$refPopup).toBeDefined();
-
-  //   // opening by keyboard
-  //   el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(true);
-
-  //   // checking when default Enter behavior is prevented
-  //   el._focusedMenuItem.addEventListener("click", (e) => e.preventDefault(), { once: true });
-  //   el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(false);
-
-  //   // hide by outside click
-  //   el.$showMenu();
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(true);
-  //   document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(false);
-
-  //   // open by click control
-  //   el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-  //   await h.wait();
-  //   expect(document.activeElement).toBe(el.$refInput);
-  //   expect(el.$isOpen).toBe(true);
-
-  //   // hide by click control again
-  //   el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-  //   await h.wait();
-  //   expect(document.activeElement).toBe(el.$refInput);
-  //   expect(el.$isOpen).toBe(false);
-
-  //   // opening by text in input
-  //   await h.userTypeText(el.$refInput, "2");
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(true);
-
-  //   // try to show again - for coverage
-  //   await el.$showMenu();
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(true);
-
-  //   // stay open even by popupClick
-  //   el.$refPopup.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(true);
-
-  //   el.$hideMenu();
-  //   await h.wait();
-
-  //   // no opening when readonly
-  //   el.$options.readOnly = true;
-  //   el.$showMenu();
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(false);
-  //   expect(el.$refPopup).not.toBeDefined();
-
-  //   // not opening when click on input without readonly (to allow user edit input value without menu)
-  //   el.$options.readOnly = false;
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(false);
-  //   expect(el.$isFocused).toBe(true);
-  //   expect(el.$refInput.value).toBeTruthy();
-  //   el.$refInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(false);
-
-  //   // opening when click on input with readonly (to allow user edit input value without menu)
-  //   el.$options.readOnlyInput = true;
-  //   await h.wait();
-  //   expect(el.$refInput.readOnly).toBe(true);
-  //   expect(el.$refInput.value).toBeTruthy();
-  //   expect(el.outerHTML).toMatchInlineSnapshot();
-  //   el.$refInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(true);
-  //   el.$options.readOnlyInput = false;
-  //   await h.wait();
-
-  //   // checking with disabled
-  //   el.$showMenu();
-  //   expect(el.$isOpen).toBe(true);
-  //   el.$options.disabled = true;
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(false);
-  //   expect(el.$refPopup).not.toBeDefined();
-
-  //   el.$options.disabled = false;
-  //   await h.wait();
-
-  //   // not closing when click on input without readonly (to allow user edit input value without menu)
-  //   el.$showMenu();
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(true);
-  //   expect(el.$isFocused).toBe(true);
-  //   expect(el.$refInput.value).toBeTruthy();
-  //   el.$refInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(true);
-
-  //   // checking when hiding is not finished and opened again
-  //   el.$hideMenu();
-  //   el.$showMenu();
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(true);
-
-  //   // checking showMenu takes time and popup is removed because of $options.readOnly applied
-  //   el.$hideMenu();
-  //   await h.wait();
-  //   el.$showMenu();
-  //   el.$options.readOnly = true;
-  //   await h.wait();
-  //   expect(el.$refPopup).not.toBeDefined();
-  //   expect(el.$isOpen).toBe(false);
-
-  //   // removing by blur
-  //   el.$hideMenu(); // close before to check if it works when need remove when closed
-  //   await h.wait();
-  //   expect(document.activeElement).toBe(el.$refInput);
-  //   document.activeElement.blur();
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(false);
-  //   expect(el.$refPopup).not.toBeDefined();
-
-  //   // checking when refPopup is removed
-  //   el.$hideMenu();
-  //   await h.wait();
-
-  //   // checking when not-focused
-  //   el.$options.readOnly = false;
-  //   document.activeElement.blur();
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(false);
-  //   el.$showMenu();
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(true);
-
-  //   el.$hideMenu();
-  //   await h.wait();
-
-  //   // checking if sync-call works as expected
-  //   el.$showMenu();
-  //   el.$hideMenu();
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(false);
-  //   expect(el.getAttribute("opened")).toBeFalsy();
-  //   el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(true);
-  //   el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-  //   el.blur();
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(false);
-  // });
 
   // test("menu navigation", async () => {
   //   // todo inherit from calendar
