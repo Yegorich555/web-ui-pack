@@ -1,6 +1,7 @@
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
 import { WUPcssHidden } from "../styles";
 import scrollCarousel from "../helpers/scrollCarousel";
+import { dateCopyTime } from "../indexHelpers";
 
 const tagName = "wup-calendar";
 
@@ -680,21 +681,12 @@ export default class WUPCalendarControl<
       onItemClick: ({ target }, v) => {
         this.selectItem(target);
         let dt = new Date(v);
-        const a = this.$value;
-        if (a) {
-          if (this._opts.utc) {
-            dt.setUTCHours(a.getUTCHours(), a.getUTCMinutes(), a.getUTCSeconds(), a.getUTCMilliseconds());
-          } else {
-            dt = new Date(
-              dt.getUTCFullYear(),
-              dt.getUTCMonth(),
-              dt.getUTCDate(),
-              a.getHours(),
-              a.getMinutes(),
-              a.getSeconds(),
-              a.getMilliseconds()
-            );
-          }
+        if (!this._opts.utc) {
+          dt = new Date(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate());
+        }
+        const prev = this.$value || this.$initValue;
+        if (prev) {
+          dateCopyTime(dt, prev, !!this._opts.utc);
         }
 
         this.setValue(dt as ValueType);

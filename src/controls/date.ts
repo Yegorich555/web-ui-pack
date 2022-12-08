@@ -1,5 +1,6 @@
 import dateFromString from "../helpers/dateFromString";
 import dateToString from "../helpers/dateToString";
+import { dateCopyTime } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
 import WUPBaseComboControl, { WUPBaseComboIn } from "./baseCombo";
 import { ValidateFromCases } from "./baseControl";
@@ -248,8 +249,12 @@ export default class WUPDateControl<
     return Promise.resolve(el);
   }
 
-  protected override setValue(v: ValueType | undefined, canValidate = true): boolean | null {
-    const isChanged = super.setValue(v, canValidate);
+  protected override setValue(v: ValueType | undefined, canValidate = true, skipInput = false): boolean | null {
+    if (v && skipInput) {
+      const prev = this.$value || this.$initValue;
+      prev && dateCopyTime(v, prev, !!this._opts.utc); // copy time if was changing from input (calendar do it itself)
+    }
+    const isChanged = super.setValue(v, canValidate, skipInput);
     if (isChanged) {
       const c = this.$refPopup?.firstElementChild as WUPCalendarControl;
       if (c) {

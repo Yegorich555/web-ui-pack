@@ -175,7 +175,7 @@ describe("control.date", () => {
       await h.wait(1);
       expect(el.$options.min.valueOf()).toBe(new Date("2022-10-15T00:00").valueOf()); // parse must be in local time
 
-      el.$value = new Date("2022-10-15"); // utc
+      el.$value = new Date("2022-10-15T12:40:59.000Z"); // utc
       expect(el.$refInput.value).toBe("2022-10-15"); // just for coverage
 
       el.setAttribute("min", "abc");
@@ -254,8 +254,25 @@ describe("control.date", () => {
       `"<span class="wup-hidden">Error for Test Date:</span><span>Invalid value</span>"`
     ); // value lefts the same
     expect(el.$isValid).toBe(false);
-
     expect(onSubmit).toBeCalledTimes(0);
+
+    // check if changing saves hours
+    onChange.mockClear();
+    el.$value = new Date("2022-10-16T13:45:56.000Z");
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("2022-10-16");
+    h.setInputCursor(el.$refInput, "2022-10-16|");
+    await h.userRemove(el.$refInput);
+    await h.userTypeText(el.$refInput, "6", { clearPrevious: false });
+    await h.wait();
+    expect(el.$value?.toISOString()).toBe("2022-10-16T13:45:56.000Z");
+    expect(onChange).toBeCalledTimes(0); // no change because value the same
+
+    await h.userRemove(el.$refInput);
+    await h.userTypeText(el.$refInput, "5", { clearPrevious: false });
+    await h.wait();
+    expect(el.$value?.toISOString()).toBe("2022-10-15T13:45:56.000Z");
+    expect(onChange).toBeCalledTimes(0); // no change because value the same
   });
 
   test("menu navigation", async () => {
@@ -264,7 +281,7 @@ describe("control.date", () => {
     const onSubmit = jest.fn();
     form.$onSubmit = onSubmit;
     el.$options.name = "testDate";
-    el.$initValue = new Date("2022-10-12");
+    el.$initValue = new Date("2022-10-12T13:45:59.000Z");
     el.$options.startWith = PickersEnum.Year;
     await h.wait(1);
 
@@ -319,7 +336,7 @@ describe("control.date", () => {
 
     expect(isPressKeyPrevented("Enter")).toBe(true);
     await h.wait();
-    expect(el.$value?.toISOString()).toBe("2033-01-01T00:00:00.000Z");
+    expect(el.$value?.toISOString()).toBe("2033-01-01T13:45:59.000Z"); // it's must store hours
     expect(onChanged).toBeCalledTimes(1);
     expect(onSubmit).toBeCalledTimes(0);
     expect(el.$isValid).toBe(true);
@@ -353,7 +370,7 @@ describe("control.date", () => {
     await h.userClick(el.$refPopup.firstChild.$refCalenarItems.children[6]); // click on 4 February 2018
     await h.wait();
     expect(el.$isOpen).toBe(false);
-    expect(el.$value?.toISOString()).toBe("2018-02-04T00:00:00.000Z");
+    expect(el.$value?.toISOString()).toBe("2018-02-04T13:45:59.000Z"); // it's must store hours
     expect(onChanged).toBeCalledTimes(1);
   });
 
