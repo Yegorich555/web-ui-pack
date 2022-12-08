@@ -239,7 +239,10 @@ export default class WUPDateControl<
     el.$options.validationCase = 0; // disable any validations for control
     const v = this.$value;
     el.$initValue = v && !Number.isNaN(v.valueOf()) ? v : undefined;
-    el.addEventListener("$change", () => !el._isStopChanges && this.selectValue(el.$value as any));
+    el.addEventListener("$change", (e) => {
+      e.stopPropagation(); // otherwise date change event fired twice
+      !el._isStopChanges && this.selectValue(el.$value as any);
+    });
 
     popup.appendChild(el);
     return Promise.resolve(el);

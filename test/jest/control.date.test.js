@@ -191,6 +191,23 @@ describe("control.date", () => {
     });
   });
 
+  test("user inputs value", async () => {
+    el.focus();
+    const onParse = jest.spyOn(el, "parse");
+    const onChange = jest.fn();
+    el.addEventListener("$change", onChange);
+    await h.userTypeText(el.$refInput, "20221015");
+    await h.wait(150);
+    expect(el.$refInput.value).toBe("2022-10-15"); // becahuse mask is applied
+    expect(el.$isValid).toBe(true);
+    expect(el.$refError).toBe(undefined);
+    expect(onChange).toBeCalledTimes(1);
+
+    // el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    expect(onParse).toBeCalled();
+    expect(el.$value?.toISOString()).toBe("2022-10-15T00:00:00.000Z");
+  });
+
   // test("$show/$hide menu", async () => {
   //   el.$initValue = new Date("2022-02-28");
   //   expect(el.$isOpen).toBe(false);

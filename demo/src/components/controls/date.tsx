@@ -51,7 +51,14 @@ export default function DateControlView() {
           autoFocus={false}
           autoComplete="off"
         />
-        <wup-date name="empty" />
+        <wup-date
+          name="empty"
+          ref={(el) => {
+            if (el) {
+              el.addEventListener("$change", () => console.warn("changed", el.$value));
+            }
+          }}
+        />
         <wup-date name="another" label="Another format: yyyy-m-d" format="yyyy-m-d" />
         {/* <wup-date name="disabled" disabled /> */}
         {/* <wup-date name="readonly" readOnly /> */}
