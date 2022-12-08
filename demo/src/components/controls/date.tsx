@@ -16,12 +16,11 @@ export default function DateControlView() {
     <Page
       header="DateControl"
       link="src/controls/date.ts"
-      // todo uncomment after tests
-      // details={{
-      //   tag: "wup-date",
-      //   cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
-      //   excludeCssVars: ["--ctrl-clr-cell-day-w", "--ctrl-clr-cell-h", "--ctrl-clr-cell-w", "--ctrl-clr-h"],
-      // }}
+      details={{
+        tag: "wup-date",
+        cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
+        excludeCssVars: ["--ctrl-clr-cell-day-w", "--ctrl-clr-cell-h", "--ctrl-clr-cell-w", "--ctrl-clr-h"],
+      }}
       features={[
         "Inheritted features from TextControl & CalendarControl",
         "Powerful accessibility support (keyboard, announcenement)",
@@ -42,6 +41,7 @@ export default function DateControlView() {
         <wup-date
           name="date"
           initValue="2022-03-01 23:50"
+          // todo onChange event fired here by init
           min="2016-01-02"
           max="2034-05-01"
           exclude="window.myDateExcludeDays"

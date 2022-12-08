@@ -18,6 +18,7 @@
 - Added [mask](http://localhost:8015/control/text) for text based controls
 - Added elements
   - [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
+  - [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
 - Added [helpers](README.md#helpers)
   - [`dateCopyTime`](src/helpers/dateCopyTime.ts)
   - [`dateFromString`](src/helpers/dateFromString.ts)

@@ -272,7 +272,7 @@ describe("control.date", () => {
     await h.userTypeText(el.$refInput, "5", { clearPrevious: false });
     await h.wait();
     expect(el.$value?.toISOString()).toBe("2022-10-15T13:45:56.000Z");
-    expect(onChange).toBeCalledTimes(0); // no change because value the same
+    expect(onChange).toBeCalledTimes(1);
   });
 
   test("menu navigation", async () => {
