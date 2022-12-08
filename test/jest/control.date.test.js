@@ -195,6 +195,13 @@ describe("control.date", () => {
   });
 
   test("user inputs value", async () => {
+    const form = document.body.appendChild(document.createElement("wup-form"));
+    form.appendChild(el);
+    const onSubmit = jest.fn();
+    form.$onSubmit = onSubmit;
+    el.$options.name = "testDate";
+    await h.wait();
+
     el.focus();
     const onParse = jest.spyOn(el, "parse");
     const onChange = jest.fn();
@@ -208,13 +215,24 @@ describe("control.date", () => {
     // el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     expect(onChange).toBeCalledTimes(1);
     expect(onParse).toBeCalled();
-    expect(el.$value?.toISOString()).toBe("2022-10-30T00:00:00.000Z");
+    expect(el.$value?.toISOString()).toBe("2022-10-30T00:00:00.000Z"); // value changed without key "Enter" because user completed input
+    expect(el.$isOpen).toBe(true);
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    expect(onSubmit).toBeCalledTimes(0); // 1st Enter only hides popup
+
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(onSubmit).toBeCalledTimes(1); // 2st Enter sumbits
+    onSubmit.mockClear();
 
     expect(await h.userRemove(el.$refInput)).toBe("2022-10-3|");
     await h.wait(); // wait for validation.debounce
     expect(el.$refError.innerHTML).toMatchInlineSnapshot(
-      `"<span class="wup-hidden"></span><span>Incomplete value</span>"`
+      `"<span class="wup-hidden">Error for Test Date:</span><span>Incomplete value</span>"`
     );
+    expect(el.$isOpen).toBe(false); // menu must stay closed
 
     h.mockConsoleWarn();
     await h.userTypeText(el.$refInput, "9", { clearPrevious: false });
@@ -222,85 +240,28 @@ describe("control.date", () => {
     expect(el.$refInput.value).toBe("2022-10-39");
     await h.wait(1);
     expect(el.$refError.innerHTML).toMatchInlineSnapshot(
-      `"<span class="wup-hidden"></span><span>Invalid value</span>"`
+      `"<span class="wup-hidden">Error for Test Date:</span><span>Invalid value</span>"`
     );
     expect(el.$value?.toISOString()).toBe("2022-10-30T00:00:00.000Z"); // value the same
-    expect(el.$isOpen).toBe(true);
+    expect(el.$isOpen).toBe(false);
+    expect(onSubmit).toBeCalledTimes(0);
 
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
+    expect(el.$value?.toISOString()).toBe("2022-10-30T00:00:00.000Z"); // value the same
     expect(el.$isOpen).toBe(false);
     expect(el.$refError.innerHTML).toMatchInlineSnapshot(
-      `"<span class="wup-hidden"></span><span>Invalid value</span>"`
+      `"<span class="wup-hidden">Error for Test Date:</span><span>Invalid value</span>"`
     ); // value lefts the same
     expect(el.$isValid).toBe(false);
+
+    expect(onSubmit).toBeCalledTimes(0);
   });
 
   // test("menu navigation", async () => {
   //   // todo inherit from calendar
-  // });
-
-  // test("submit by Enter key", async () => {
-  //   const form = document.body.appendChild(document.createElement("wup-form"));
-  //   form.appendChild(el);
-  //   const onSubmit = jest.fn();
-  //   form.$onSubmit = onSubmit;
-  //   await h.wait();
-
-  //   el.focus();
-  //   expect(el.$isOpen).toBe(true);
-
-  //   el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
-  //   await h.wait();
-  //   expect(onSubmit).not.toBeCalled();
-  //   expect(el.$isOpen).toBe(false);
-
-  //   el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
-  //   await h.wait();
-  //   expect(onSubmit).toBeCalledTimes(1);
-
-  //   onSubmit.mockClear();
-  //   el.$showMenu();
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(true);
-  //   el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", altKey: true, bubbles: true, cancelable: true }));
-  //   await h.wait(1);
-  //   expect(onSubmit).toBeCalledTimes(1);
-  //   expect(el.$isOpen).toBe(true);
-
-  //   el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", shiftKey: true, bubbles: true, cancelable: true }));
-  //   await h.wait(1);
-  //   expect(onSubmit).toBeCalledTimes(2);
-  //   el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, bubbles: true, cancelable: true }));
-  //   await h.wait(1);
-  //   expect(onSubmit).toBeCalledTimes(3);
-  //   expect(el.$isOpen).toBe(true);
-  // });
-
-  // test("select by menu item click", async () => {
-  //   el.focus();
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(true);
-  //   expect(el.$value).toBe(undefined);
-
-  //   // todo implement
-
-  //   // const arrLi = el.$refPopup.querySelectorAll("li");
-  //   // expect(arrLi.length).toBe(4);
-  //   // await h.userClick(arrLi[1]);
-  //   // await h.wait();
-  //   // expect(el.$isOpen).toBe(false);
-  //   // expect(el.$value).toBe(20);
-
-  //   // await h.userClick(el);
-  //   // await h.wait();
-  //   // expect(el.$isOpen).toBe(true);
-  //   // await h.userClick(arrLi[2]);
-  //   // await h.wait();
-  //   // expect(el.$isOpen).toBe(false);
-  //   // expect(el.$value).toBe(30);
+  // testcase: startWith: year. User must be able goto dayPicker with pressing Enter
   // });
 });
 
 // testcase: changing value outside calendar hides popup
-// testcase: startWith: year. User must be able goto dayPicker with pressing Enter
