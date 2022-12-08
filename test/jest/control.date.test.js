@@ -200,7 +200,7 @@ describe("control.date", () => {
     const onSubmit = jest.fn();
     form.$onSubmit = onSubmit;
     el.$options.name = "testDate";
-    await h.wait();
+    await h.wait(1);
 
     el.focus();
     const onParse = jest.spyOn(el, "parse");
@@ -258,10 +258,112 @@ describe("control.date", () => {
     expect(onSubmit).toBeCalledTimes(0);
   });
 
-  // test("menu navigation", async () => {
-  //   // todo inherit from calendar
-  // testcase: startWith: year. User must be able goto dayPicker with pressing Enter
-  // });
-});
+  test("menu navigation", async () => {
+    const form = document.body.appendChild(document.createElement("wup-form"));
+    form.appendChild(el);
+    const onSubmit = jest.fn();
+    form.$onSubmit = onSubmit;
+    el.$options.name = "testDate";
+    el.$initValue = new Date("2022-10-12");
+    el.$options.startWith = PickersEnum.Year;
+    await h.wait(1);
 
-// testcase: changing value outside calendar hides popup
+    const onChanged = jest.fn();
+    el.addEventListener("$change", onChanged);
+    el.focus();
+    await h.wait();
+    expect(h.getInputCursor(el.$refInput)).toBe("|2022-10-12|");
+    expect(el.querySelector("[calendar='year']")).toBeTruthy();
+    expect(el.$refPopup.firstChild.$refCalenarTitle.textContent).toBe("2018 ... 2033");
+
+    const isPressKeyPrevented = (key = "Arrow", opts = { shiftKey: false, ctrlKey: false }) => {
+      const isPrevented = !el.$refInput.dispatchEvent(
+        new KeyboardEvent("keydown", { key, cancelable: true, bubbles: true, ...opts })
+      );
+      return isPrevented;
+    };
+
+    expect(isPressKeyPrevented("ArrowRight")).toBe(true);
+    expect(el.querySelector("[focused]")?.textContent).toBe("2022"); // start with current year
+    expect(isPressKeyPrevented("ArrowRight")).toBe(true);
+    expect(el.querySelector("[focused]")?.textContent).toBe("2023");
+    expect(isPressKeyPrevented("ArrowDown")).toBe(true);
+    expect(el.querySelector("[focused]")?.textContent).toBe("2027");
+    expect(isPressKeyPrevented("ArrowLeft")).toBe(true);
+    expect(el.querySelector("[focused]")?.textContent).toBe("2026");
+    expect(isPressKeyPrevented("Home")).toBe(true);
+    expect(el.querySelector("[focused]")?.textContent).toBe("2018");
+    expect(isPressKeyPrevented("End")).toBe(true);
+    expect(el.querySelector("[focused]")?.textContent).toBe("2033");
+    // expect(h.getInputCursor(el.$refInput)).toBe("|2022-10-12|"); // WARN: in jsdom it doesn't work use e2e insted
+
+    // these keys don't affects on calendar but works for input
+    expect(isPressKeyPrevented("Home", { shiftKey: true })).toBe(false);
+    expect(isPressKeyPrevented("End", { shiftKey: true })).toBe(false);
+    expect(isPressKeyPrevented("Home", { ctrlKey: true })).toBe(false);
+    expect(isPressKeyPrevented("End", { ctrlKey: true })).toBe(false);
+    expect(isPressKeyPrevented(" ")).toBe(false);
+
+    expect(el.querySelector("[focused]")?.textContent).toBe("2033");
+    expect(isPressKeyPrevented("Enter")).toBe(true);
+    await h.wait();
+    expect(el.querySelector("[calendar='month']")).toBeTruthy();
+    expect(el.$refPopup.firstChild.$refCalenarTitle.textContent).toBe("2033");
+    expect(el.querySelector("[focused]")?.textContent).toBe("Jan");
+
+    expect(isPressKeyPrevented("Enter")).toBe(true);
+    await h.wait();
+    expect(el.querySelector("[calendar='day']")).toBeTruthy();
+    expect(el.$refPopup.firstChild.$refCalenarTitle.textContent).toBe("January 2033");
+    expect(el.querySelector("[focused]")?.textContent).toBe("1");
+
+    expect(isPressKeyPrevented("Enter")).toBe(true);
+    await h.wait();
+    expect(el.$value?.toISOString()).toBe("2033-01-01T00:00:00.000Z");
+    expect(onChanged).toBeCalledTimes(1);
+    expect(onSubmit).toBeCalledTimes(0);
+    expect(el.$isValid).toBe(true);
+
+    expect(isPressKeyPrevented("Enter")).toBe(true);
+    await h.wait(1);
+    expect(onSubmit).toBeCalledTimes(1);
+
+    // checking if user can use mouse properly
+    onChanged.mockClear();
+    expect(el.$isOpen).toBe(false);
+    expect(isPressKeyPrevented("ArrowDown")).toBe(true); // open menu by arrow key
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+    expect(el.querySelector("[calendar='day']")).toBeTruthy(); // dayPicker because it was stored previously by calendar
+
+    // force to remove calendar (to startWith year again)
+    el.blur();
+    await h.wait(1);
+    el.focus();
+    await h.wait();
+
+    expect(el.querySelector("[calendar='year']")).toBeTruthy();
+    await h.userClick(el.$refPopup.firstChild.$refCalenarItems.firstElementChild); // click on 2018
+    await h.wait();
+    expect(el.querySelector("[calendar='month']")).toBeTruthy();
+    await h.userClick(el.$refPopup.firstChild.$refCalenarItems.children[1]); // click on Feb
+    await h.wait();
+    expect(el.querySelector("[calendar='day']")).toBeTruthy();
+    expect(el.$refPopup.firstChild.$refCalenarTitle.textContent).toBe("February 2018");
+    await h.userClick(el.$refPopup.firstChild.$refCalenarItems.children[6]); // click on 4 February 2018
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    expect(el.$value?.toISOString()).toBe("2018-02-04T00:00:00.000Z");
+    expect(onChanged).toBeCalledTimes(1);
+  });
+
+  test("value change not affects on popup", async () => {
+    el.focus();
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+
+    el.$value = new Date("2015-09-26");
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+  });
+});
