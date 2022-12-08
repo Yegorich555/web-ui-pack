@@ -494,3 +494,4 @@ export default class MaskTextInput {
 // Ctrl+Z get historyUndo.pop + push into Redo
 
 // todo press Escape to clear several times: cursor position is wrong
+// todo maybe when placeholder ###0 and user typed value hide placeholder?

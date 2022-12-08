@@ -7,9 +7,21 @@ import { PickersEnum } from "web-ui-pack/controls/calendar";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../testHelper";
 
+beforeAll(() => {
+  jest.useFakeTimers();
+  if (new Date().getTimezoneOffset() !== 0) {
+    throw new Error(
+      `\nMissed timezone 'UTC'.
+      new Date().getTimezoneOffset() is ${new Date().getTimezoneOffset()}.
+      Expected NodeJS >= v16.2.0 or 17.2.0 & process.env.TZ='UTC'`
+      // related issue: https://github.com/nodejs/node/issues/4230#issuecomment-163688700
+    );
+  }
+});
+
 beforeEach(async () => {
   jest.useFakeTimers();
-  jest.setSystemTime(new Date(2022, 10 + 1, 16, 23, 49));
+  jest.setSystemTime(new Date("2022-10-18T12:00:00.000Z")); // 18 Oct 2022 12:00 UTC
 });
 
 /** @type WUPDateControl */
@@ -131,13 +143,52 @@ describe("control.date", () => {
       expect(el.$options.startWith).toBe(PickersEnum.Month);
       expect(el.$refPopup.firstChild.$options.startWith).toBe(PickersEnum.Month);
     });
-    // test("min/max/exclude affects on validations", async()=>{
-    // todo implement
-    // });
 
-    // test("options utc", async()=>{
-    // todo implement
-    // });
+    test("min/max/exclude affects on validations", async () => {
+      expect(el.validations).toBeTruthy(); // for coverage when el.$options.validations = undefined;
+
+      el.$options.min = new Date("2022-01-01");
+      expect(el.validations.min.valueOf()).toBe(new Date("2022-01-01").valueOf());
+
+      el.$options.max = new Date("2023-10-15");
+      expect(el.validations.max.valueOf()).toBe(new Date("2023-10-15").valueOf());
+
+      el.$options.exclude = [new Date("2022-07-12")];
+      expect(el.validations.exclude).toMatchInlineSnapshot(`
+        [
+          "2022-07-12T00:00:00.000Z",
+        ]
+      `);
+      await h.wait(1);
+      el.focus();
+      await h.wait();
+      const clnd = el.$refPopup.firstChild;
+      expect(clnd.$options.min).toBe(el.$options.min);
+      expect(clnd.$options.max).toBe(el.$options.max);
+      expect(clnd.$options.exclude).toBe(el.$options.exclude);
+    });
+
+    test("utc", async () => {
+      expect(el.$options.utc).toBe(true);
+      el.setAttribute("min", "2022-10-15");
+      el.$options.utc = false;
+      await h.wait(1);
+      expect(el.$options.min.valueOf()).toBe(new Date("2022-10-15T00:00").valueOf()); // parse must be in local time
+
+      el.setAttribute("min", "abc");
+      await h.wait(1);
+      expect(el.$options.min).toBe(undefined);
+
+      el.focus();
+      await h.wait();
+      expect(el.$refPopup.firstChild.$options.utc).toBe(false);
+      el.blur();
+      await h.wait();
+
+      el.$options.utc = true;
+      el.focus();
+      expect(el.$refPopup.firstChild.$options.utc).toBe(true);
+    });
   });
 
   // test("$show/$hide menu", async () => {

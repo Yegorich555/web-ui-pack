@@ -356,7 +356,7 @@ export default class WUPTextControl<
     return true;
   }
 
-  protected get validations(): WUPText.Options["validations"] | undefined {
+  protected get validations(): WUPText.Options["validations"] {
     const vls = (super.validations as WUPText.Options["validations"]) || {};
     if (this._opts.mask && vls._mask === undefined) vls._mask = ""; // enable validation mask based on option mask
     if (this._onceErrName === "_parse") vls._parse = "";

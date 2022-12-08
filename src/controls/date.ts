@@ -110,7 +110,7 @@ export default class WUPDateControl<
 
   static get observedAttributes(): Array<string> {
     const arr = super.observedAttributes as Array<LowerKeys<WUPDate.Options>>;
-    arr.push("format");
+    arr.push("format", "min", "max", "utc", "exclude");
     return arr;
   }
 
@@ -189,8 +189,8 @@ export default class WUPDateControl<
     super.gotChanges(propsChanged as any);
   }
 
-  protected get validations(): WUPBase.Options["validations"] | undefined {
-    const vls = (super.validations as WUPDate.Options["validations"]) || {};
+  protected get validations(): WUPText.Options["validations"] {
+    const vls = (super.validations as WUPDate.Options["validations"])!; // undefined impossible because of textControl || {};
     // user can type not valid value according to options min,max,exclude. So need to enable validations rules in this case
     if (this._opts.min) vls.min = this._opts.min;
     if (this._opts.max) vls.max = this._opts.max;
