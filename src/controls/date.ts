@@ -199,7 +199,7 @@ export default class WUPDateControl<
     return vls as WUPBase.Options["validations"];
   }
 
-  protected goValidate(fromCase: ValidateFromCases, canShowError = true): string | false {
+  protected goValidate(fromCase: ValidateFromCases, silent = false): string | false {
     // reset hours for validations
     const v = this.$value as Date | undefined;
     const key = this._opts.utc ? "UTC" : "";
@@ -210,7 +210,7 @@ export default class WUPDateControl<
       v[`get${key}Milliseconds`](),
     ];
     v && v[`set${key}Hours`](0, 0, 0, 0);
-    const r = super.goValidate(fromCase, canShowError);
+    const r = super.goValidate(fromCase, silent);
     hh && v[`set${key}Hours`](hh[0], hh[1], hh[2], hh[3]);
     return r;
   }

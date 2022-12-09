@@ -440,7 +440,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Returns true if control is valid */
   get $isValid(): boolean {
     if (this._isValid == null) {
-      this.goValidate(ValidateFromCases.onInit, false);
+      this.goValidate(ValidateFromCases.onInit, true);
     }
 
     return this._isValid as boolean;
@@ -467,10 +467,10 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return (af === true ? this._opts.name : af) || false;
   }
 
-  /** Check validity and show error if canShowError is true (by default)
+  /** Check validity and show error if silent is false (by default)
    * @returns errorMessage or false (if valid) */
-  $validate(canShowError = true): string | false {
-    return this.goValidate(ValidateFromCases.onManualCall, canShowError);
+  $validate(silent = false): string | false {
+    return this.goValidate(ValidateFromCases.onManualCall, silent);
   }
 
   /** Check validity and show error
@@ -597,9 +597,15 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gotFormChanges(propsChanged: Array<string> | null): void {
     const i = this.$refInput;
-    i.disabled = this.$isDisabled as boolean;
+    i.disabled = this.$isDisabled;
     i.readOnly = this.$isReadOnly;
     i.autocomplete = this.$autoComplete || "off";
+    this.$refError && !this.canShowError && this.goHideError(); // hide error if user can't touch the control
+  }
+
+  /** Returns true on !$isDisabled */
+  get canShowError(): boolean {
+    return !this.$isDisabled; // && !this.$isReadOnly;
   }
 
   /** Use this to append elements; called single time when element isConnected/appended to layout but not ready yet
@@ -720,7 +726,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   _wasValidNotEmpty?: boolean;
   protected _validTimer?: ReturnType<typeof setTimeout>;
   /** Method called to check control based on validation rules and current value */
-  protected goValidate(fromCase: ValidateFromCases, canShowError = true): string | false {
+  protected goValidate(fromCase: ValidateFromCases, silent = false): string | false {
     this._errName = undefined;
     const vls = this.validationsRules;
     if (!vls.length) {
@@ -747,6 +753,8 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     });
     this._validTimer && clearTimeout(this._validTimer);
 
+    let canShowError = (!silent || this.$refError) && this.canShowError;
+
     if (fromCase === ValidateFromCases.onChange && this._opts.validationCase & ValidationCases.onChangeSmart) {
       if (errMsg && !this._wasValidNotEmpty) {
         canShowError = false;
@@ -757,7 +765,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       this._wasValidNotEmpty = true;
     }
     if (errMsg) {
-      if (canShowError || this.$refError) {
+      if (canShowError) {
         // don't wait for debounce if we need to update an error
         const waitMs = this.$refError || fromCase !== ValidateFromCases.onChange ? 0 : this._opts.validateDebounceMs;
         const saved = this._errName;
@@ -957,7 +965,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     if (c & ValidationCases.onFocusWithValue && !this.$isEmpty) {
       this.goValidate(ValidateFromCases.onFocus);
     } else if (this._wasValidNotEmpty == null && c & ValidationCases.onChangeSmart) {
-      this.goValidate(ValidateFromCases.onChange, false); // validate to define current state
+      this.goValidate(ValidateFromCases.onChange, true); // validate to define current state
     }
 
     const r = this.appendEvent(this, "keydown", (e) => !this.$isDisabled && this.gotKeyDown(e), { passive: false });
@@ -967,7 +975,10 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Called when element completely lost focus; despite on blur it has debounce filter */
   protected gotFocusLost(): void {
     if (this._opts.validationCase & ValidationCases.onFocusLost) {
+      // const wasErr = !!this._errMsg;
       this.goValidate(ValidateFromCases.onFocusLost);
+      // todo test & rollback it when error will be visible over popup: for selectControl the color is changed but error not visible and menu stays opened
+      // this._errMsg && !wasErr && this.focus(); // user sees validation error at first time: return focus back once
     }
   }
 
@@ -978,11 +989,3 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 }
 
 // todo NumberInput - set role 'spinbutton'
-/* todo when control disabled
-  - need to hide errorMesssage;
-  - form > submit must be successfull despite on invalid state of control
-  - form > collectOnlyChanges - must skip disabled control (because user can't affect on this)
-  - form > collecModel for all control (excluding disable)
-*/
-/* todo when control readonly : need to hide
-/* todo when user sees validation error at first time by focusout need to return focus back */

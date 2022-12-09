@@ -53,9 +53,37 @@ export default function FAQView() {
             question: "Controls. How to change default validation rules/messages and add new",
             answer: (
               <>
-                Every control-type has own $defaults.validationRules
+                Every control-type has $defaults.validationRules
                 <Code code={codeVldRules} />
               </>
+            ),
+          },
+          {
+            link: "validations",
+            question: "Controls & Form. How validations works and form collects model",
+            answer: (
+              <section>
+                <ol>
+                  <li>Controls have $defaults.validationCase where you can change default behavior</li>
+                  <li>
+                    When user clicks on submit button OR press Enter key then form
+                    <br />- validates all attached & enabled controls (controls with name!=null and $isDisabled==false)
+                    <br />- if above is valid: gathers value into submit-model (according to control names)
+                    <br />- dispatches onSubmit, $submit, submit events
+                    <br />- if dispatched returns promise: blocks form and show spinner until promise resolved
+                  </li>
+                  <li>
+                    If some control was invalid but switched to disabled then
+                    <br /> - error message hidden but control.$isValid still returns false
+                    <br /> - such control is completely ignored from submit-model and validation (but re-validation
+                    triggered anyway)
+                    <br /> - form.$isValid returns true despite on invalid & disabled controls
+                    <br /> - form.$model returns gathered model including invalid & disabled controls
+                    <br /> - submit-model returns gathered model without disabled controls
+                    <br /> - rules aboves works only for disabled control; for readonly control it works usually
+                  </li>
+                </ol>
+              </section>
             ),
           },
           {
@@ -172,7 +200,7 @@ body fieldset[aria-required="true"] > legend:after {
 }`;
 
 const codeParseInitValue = `js
-WUPRadioControl.prototype.parseValue = function parseValue(attrValue: string) {
+WUPRadioControl.prototype.parse = function parse(stringValue: string) {
   // let's imagine that attrValue is pointer to global key
-  return (window as any)[attrValue];
+  return (window as any)[stringValue];
 };`;

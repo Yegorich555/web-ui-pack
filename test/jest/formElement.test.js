@@ -411,6 +411,19 @@ describe("formElement", () => {
       inputs[1].$options.name = "user.profile.firstName";
       inputs[2].$options.name = "user.profile.lastName";
       await expectModel({ email: "some@mail.com", user: { profile: { firstName: "Mike", lastName: "Vazovski" } } });
+
+      // test when input invalid & disabled
+      inputs[0].$options.disabled = true;
+      expect(inputs[0].$isValid).toBe(true);
+      await expectModel({ user: { profile: { firstName: "Mike", lastName: "Vazovski" } } }); // model gathered without "email" control because it's disabled
+
+      jest.clearAllMocks();
+      inputs[0].$options.validations = { $alwaysInvalid: () => "Always error" };
+      inputs[0].$validate();
+      await h.wait(10);
+      expect(inputs[0].$isValid).toBe(false);
+      expect(inputs[0].canShowError).toBe(false);
+      await expectModel({ user: { profile: { firstName: "Mike", lastName: "Vazovski" } } }); // model gathered without "email" even if disabled control is invalid
     });
 
     test("pending on submit", async () => {

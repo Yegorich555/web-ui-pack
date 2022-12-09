@@ -511,7 +511,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       (document.activeElement as HTMLElement)!.blur();
       await h.wait();
       el.$refInput.focus();
-      el.$validate(true);
+      el.$validate(false);
       await h.wait();
       expect(el.$isValid).toBe(false);
       expect(el.$refError).toBeDefined();
@@ -635,6 +635,21 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
         }
       });
     });
+  });
+
+  test("validation when disabled", () => {
+    el.$value = cfg.initValues[0].value;
+    el.$options.validations = { $alwaysInvalid: true };
+    jest.advanceTimersByTime(1);
+    el.$validate();
+    expect(el.$isValid).toBe(false);
+    expect(el.$refError).toBeTruthy();
+
+    el.$options.disabled = true;
+    jest.advanceTimersByTime(1);
+    expect(el.$isValid).toBe(false); // still invalid
+    expect(el.$refError).toBeFalsy(); // message hidden because control disabled
+    expect(el.$value).toBeTruthy(); // value still here even invalid
   });
 
   test("with form", () => {
