@@ -56,7 +56,7 @@ npm install web-ui-pack
 - [x] [SelectControl (ComboBox, Dropdown)](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
 - [ ] SelectManyControl (MultiSelect)
 - [x] [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
-- [x] DateControl
+- [x] [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
 - [ ] TextareaControl
 - [ ] NumberControl
 - [ ] FileControl
