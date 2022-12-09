@@ -91,9 +91,11 @@ export default function dateFromString(
   } else {
     dt = new Date(r.y, r.M, r.d, r.h, r.m, r.s, r.f);
   }
-  if (Number.isNaN(dt.valueOf())) {
-    return null;
-  }
+
+  // case impossible
+  // if (Number.isNaN(dt.valueOf())) {
+  //   return null;
+  // }
 
   const isOut = isOutOfRange(r, isUTC, dt);
   if (isOut && options.throwOutOfRange) {

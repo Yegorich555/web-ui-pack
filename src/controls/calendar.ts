@@ -685,10 +685,7 @@ export default class WUPCalendarControl<
           dt = new Date(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate());
         }
         const prev = this.$value || this.$initValue;
-        if (prev) {
-          dateCopyTime(dt, prev, !!this._opts.utc);
-        }
-
+        prev && dateCopyTime(dt, prev, !!this._opts.utc);
         this.setValue(dt as ValueType);
         this.$ariaSpeak(this.$refInput.value);
         // this.focusItem(target);

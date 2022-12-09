@@ -167,6 +167,7 @@ export default class WUPPasswordControl<
         (!v || ![...setV.chars].reduce((prev, c) => (v.includes(c) ? ++prev : prev), 0)) &&
         `Must contain at least ${setV.min} special character${setV.min === 1 ? "" : "s"}: ${setV.chars}`,
       confirm: (v, setV, c) => {
+        /* istanbul ignore else */
         if (v && setV) {
           const selector = c.tagName.toLowerCase();
           const all = document.querySelectorAll(selector);

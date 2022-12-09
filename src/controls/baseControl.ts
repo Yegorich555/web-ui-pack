@@ -782,6 +782,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     }
 
     let p: StoredRefError = parent as StoredRefError;
+    /* istanbul ignore else */
     if (!p._wupVldItems) {
       p = parent as StoredRefError;
       p._wupVldItems = [];
