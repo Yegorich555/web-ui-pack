@@ -23,16 +23,17 @@ describe("control.calendar", () => {
         return { headerText: el.querySelector("header>button").textContent, h: el.offsetHeight, w: el.offsetWidth };
       });
     let info = await getInfo();
-    expect(info).toEqual({ headerText: "September 2022", h: 270, w: 250 });
+    const sz = { h: 262, w: 246 };
+    expect(info).toEqual({ headerText: "September 2022", ...sz });
 
     await page.click("wup-calendar header>button");
     await page.waitForTimeout(310);
     info = await getInfo();
-    expect(info).toEqual({ headerText: "2022", h: 270, w: 250 });
+    expect(info).toEqual({ headerText: "2022", ...sz });
 
     await page.click("wup-calendar header>button");
     await page.waitForTimeout(310);
     info = await getInfo();
-    expect(info).toEqual({ headerText: "2018 ... 2033", h: 270, w: 250 });
+    expect(info).toEqual({ headerText: "2018 ... 2033", ...sz });
   });
 });

@@ -174,8 +174,8 @@ export default function popupListen(
     });
 
     appendEvent(t, "click", (e) => {
-      if ((e as MouseEvent).pageX == null) {
-        // pageX is null if it was called programmatically
+      if (!e.pageX) {
+        // pageX is null or 0 if it was called programmatically
         preventClickAfterFocus = false; // test-case: focus without click > show....click programatically on target > it should hide
       }
 
