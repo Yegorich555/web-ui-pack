@@ -294,7 +294,10 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
 
   /** Browser calls this method when attrs pointed in observedAttributes is changed */
   protected attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
-    this.#isReady && !this._isStopChanges && this.gotAttributeChanged(name, oldValue, newValue);
+    this.#isReady &&
+      !this._isStopChanges &&
+      oldValue !== newValue &&
+      this.gotAttributeChanged(name, oldValue, newValue);
   }
 
   dispatchEvent<K extends keyof Events>(type: K, eventInit?: EventInit): boolean;

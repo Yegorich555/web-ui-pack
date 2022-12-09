@@ -469,13 +469,17 @@ describe("baseElement", () => {
     jest.clearAllMocks();
     testEl.setAttribute("disabled", "true");
     await h.wait();
+    expect(spyAll).toBeCalledTimes(0); // because no changes (attr is set before)
+
+    testEl.setAttribute("disabled", "false");
+    await h.wait();
     expect(spyAll).toBeCalledTimes(1);
     expect(spyAll).toBeCalledWith(["disabled"]);
     expect(spyAttr).toBeCalledTimes(1);
     expect(spyOpts).toBeCalledTimes(0);
 
     jest.clearAllMocks();
-    testEl.setAttribute("disabled", "false");
+    testEl.setAttribute("disabled", "true");
     testEl.setAttribute("readonly", "false");
     await h.wait();
     expect(spyAll).toBeCalledTimes(1);
