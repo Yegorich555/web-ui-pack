@@ -533,7 +533,6 @@ export default class WUPTextControl<
   protected maskInputProcess(e: WUPText.GotInputEvent | null): string {
     const el = this.$refInput;
     const v = el.value;
-
     const { maskholder, mask } = this._opts;
     this.refMask = this.refMask ?? new MaskTextInput(mask!, "");
     const mi = this.refMask;
@@ -546,9 +545,9 @@ export default class WUPTextControl<
 
     let declinedAdd = 0;
     let position = el.selectionStart || 0;
-
     if (!e) {
       mi.parse(v);
+      position = mi.value.length; // fix case: mask with prefix + call .clearValue()
     } else {
       const r = mi.handleInput(e);
       declinedAdd = r.declinedAdd;
