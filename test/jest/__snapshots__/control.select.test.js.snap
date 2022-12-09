@@ -938,7 +938,7 @@ exports[`control.select validations options.validationCase 3`] = `
       <input
         aria-autocomplete="list"
         aria-controls="txt9"
-        aria-describedby="txt14"
+        aria-describedby="txt10"
         aria-expanded="true"
         aria-haspopup="listbox"
         aria-owns="txt9"
@@ -963,7 +963,7 @@ exports[`control.select validations options.validationCase 3`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt14"
+    id="txt10"
     style="max-width: 100px;"
   >
     <span
@@ -986,28 +986,28 @@ exports[`control.select validations options.validationCase 3`] = `
     >
       <li
         aria-selected="true"
-        id="txt10"
+        id="txt11"
         role="option"
       >
         Donny
       </li>
       <li
         aria-selected="false"
-        id="txt11"
+        id="txt12"
         role="option"
       >
         Mikky
       </li>
       <li
         aria-selected="false"
-        id="txt12"
+        id="txt13"
         role="option"
       >
         Leo
       </li>
       <li
         aria-selected="false"
-        id="txt13"
+        id="txt14"
         role="option"
       >
         Splinter

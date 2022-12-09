@@ -473,6 +473,12 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return this.goValidate(ValidateFromCases.onManualCall, canShowError);
   }
 
+  /** Check validity and show error
+   * @returns errorMessage or false (if valid) */
+  validateBySubmit(): string | false {
+    return this.goValidate(ValidateFromCases.onSubmit);
+  }
+
   $showError(err: string): void {
     return this.goShowError(err, this.$refInput);
   }
@@ -750,16 +756,16 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     if (this._isValid && !isEmpty) {
       this._wasValidNotEmpty = true;
     }
-
     if (errMsg) {
       if (canShowError || this.$refError) {
         // don't wait for debounce if we need to update an error
         const waitMs = this.$refError || fromCase !== ValidateFromCases.onChange ? 0 : this._opts.validateDebounceMs;
-        this._validTimer = setTimeout(() => {
-          const saved = this._errName;
+        const saved = this._errName;
+        const act = (): void => {
           this.goShowError(errMsg, this.$refInput);
           this._errName = saved;
-        }, waitMs);
+        };
+        this._validTimer = waitMs ? setTimeout(act, waitMs) : (act(), undefined);
       }
       return errMsg;
     }

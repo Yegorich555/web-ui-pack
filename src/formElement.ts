@@ -377,10 +377,10 @@ export default class WUPFormElement<
     let errCtrl: IBaseControl | undefined;
     const arrCtrl = this.$controlsAttached;
     if (this._opts.submitActions & SubmitActions.validateUntiFirst) {
-      errCtrl = arrCtrl.find((c) => c.$validate());
+      errCtrl = arrCtrl.find((c) => c.validateBySubmit());
     } else {
       arrCtrl.forEach((c) => {
-        const err = c.$validate();
+        const err = c.validateBySubmit();
         if (err && !errCtrl) {
           errCtrl = c;
         }
