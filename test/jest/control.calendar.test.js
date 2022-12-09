@@ -625,4 +625,17 @@ describe("control.calendar", () => {
     await h.wait();
     expect(el.$refCalenarTitle.textContent).toBe("January 2018");
   });
+
+  test("save hh even when no $value but has $initValue", async () => {
+    el.remove();
+    el.$options.startWith = PickersEnum.Day;
+    el.$initValue = new Date("2022-12-13T23:46:57.987Z");
+    document.body.appendChild(el);
+    await h.wait();
+    expect(el.$refCalenarTitle.textContent).toBe("December 2022");
+    el.$value = undefined;
+    await h.userClick(el.$refCalenarItems.children[6]);
+    await h.wait();
+    expect(el.$value?.toISOString()).toBe("2022-12-04T23:46:57.987Z");
+  });
 });
