@@ -51,6 +51,62 @@ exports[`control.text $ariaDetails 2`] = `
 </wup-text>
 `;
 
+exports[`control.text $ariaSpeak 1`] = `
+<wup-text>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-describedby="my-test-id txt2 my-test-id2"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt2"
+  >
+    Hello
+  </section>
+</wup-text>
+`;
+
+exports[`control.text $ariaSpeak 2`] = `
+<wup-text>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-describedby="my-test-id my-test-id2"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+</wup-text>
+`;
+
 exports[`control.text $show/$hide error 1`] = `
 <wup-text>
   <label
@@ -191,6 +247,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
         cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
       }
       WUP-TEXT strong,
       WUP-TEXT legend {
@@ -332,7 +389,8 @@ mask-image: var(--ctrl-icon-img);
           width: 100%;
           position: relative;
         }
-        WUP-TEXT input {
+        WUP-TEXT input,
+        WUP-TEXT [maskholder] {
           width: 100%;
           box-sizing: border-box;
           font: inherit;
@@ -347,6 +405,18 @@ mask-image: var(--ctrl-icon-img);
           text-overflow: ellipsis;
           overflow: hidden;
           white-space: nowrap;
+        }
+        WUP-TEXT [maskholder] {
+          position: absolute;
+          opacity: 0.65;
+          display: none;
+          pointer-events: none;
+          text-overflow: initial;
+        }
+        WUP-TEXT [maskholder]&gt;i {
+          visibility: hidden;
+          font: inherit;
+          white-space: pre;
         }
         WUP-TEXT input:-webkit-autofill {
           font: inherit;
@@ -378,11 +448,17 @@ mask-image: var(--ctrl-icon-img);
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
-        WUP-TEXT input:focus + *,
-        WUP-TEXT input:not(:placeholder-shown) + *,
+        WUP-TEXT input:not(:focus)::placeholder {
+          color: transparent;
+        }
+        WUP-TEXT:focus-within input + strong,
+        WUP-TEXT input:not(:placeholder-shown) + strong,
         WUP-TEXT legend {
           top: 0.2em;
           transform: scale(0.9);
+        }
+        WUP-TEXT:focus-within [maskholder] {
+          display: inline-block;
         }
         /* style for icons */
         WUP-TEXT label button,
@@ -474,6 +550,7 @@ exports[`control.text options clearButton 1`] = `
   >
     <span>
       <input
+        aria-describedby="txt2"
         autocomplete="off"
         id="txt1"
         placeholder=" "
@@ -489,8 +566,9 @@ exports[`control.text options clearButton 1`] = `
   </label>
   <section
     aria-atomic="true"
-    aria-live="polite"
+    aria-live="off"
     class="wup-hidden"
+    id="txt2"
   />
 </wup-text>
 `;
@@ -502,6 +580,7 @@ exports[`control.text options clearButton 2`] = `
   >
     <span>
       <input
+        aria-describedby="txt2"
         autocomplete="off"
         id="txt1"
         placeholder=" "
@@ -512,91 +591,10 @@ exports[`control.text options clearButton 2`] = `
   </label>
   <section
     aria-atomic="true"
-    aria-live="polite"
+    aria-live="off"
     class="wup-hidden"
+    id="txt2"
   />
-</wup-text>
-`;
-
-exports[`control.text validation messages ends without '-s' 1`] = `
-<wup-text
-  invalid=""
->
-  <label
-    for="txt1"
-  >
-    <span>
-      <input
-        aria-describedby="txt2"
-        autocomplete="off"
-        id="txt1"
-        placeholder=" "
-        type="text"
-      />
-      <strong />
-    </span>
-    <button
-      aria-hidden="true"
-      clear=""
-      tabindex="-1"
-    />
-  </label>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt2"
-    role="alert"
-    style="display: none;"
-  >
-    <span
-      class="wup-hidden"
-    />
-    <span>
-      Min length is 1 character
-    </span>
-  </wup-popup>
-</wup-text>
-`;
-
-exports[`control.text validation messages ends without '-s' 2`] = `
-<wup-text
-  invalid=""
->
-  <label
-    for="txt1"
-  >
-    <span>
-      <input
-        aria-describedby="txt2"
-        autocomplete="off"
-        id="txt1"
-        placeholder=" "
-        type="text"
-      />
-      <strong />
-    </span>
-    <button
-      aria-hidden="true"
-      clear=""
-      tabindex="-1"
-    />
-  </label>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt2"
-    role="alert"
-    style="display: none;"
-  >
-    <span
-      class="wup-hidden"
-    />
-    <span>
-      Max length is 1 character
-    </span>
-  </wup-popup>
 </wup-text>
 `;
 
@@ -664,7 +662,7 @@ exports[`control.text validations $options.validationShowAll 2`] = `
   >
     <span>
       <input
-        aria-describedby="txt2"
+        aria-describedby="txt3"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -683,7 +681,7 @@ exports[`control.text validations $options.validationShowAll 2`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt2"
+    id="txt3"
     role="alert"
     style="display: none;"
   >
@@ -725,7 +723,7 @@ exports[`control.text validations $options.validationShowAll 3`] = `
   >
     <span>
       <input
-        aria-describedby="txt5"
+        aria-describedby="txt6"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -746,7 +744,7 @@ exports[`control.text validations $options.validationShowAll 3`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt5"
+    id="txt6"
     role="alert"
     style="display: none;"
   >
@@ -794,51 +792,6 @@ exports[`control.text validations options.validationCase 2`] = `
   >
     <span>
       <input
-        aria-describedby="txt2"
-        aria-required="true"
-        autocomplete="off"
-        id="txt1"
-        placeholder=" "
-        type="text"
-      />
-      <strong>
-        First Input
-      </strong>
-    </span>
-    <button
-      aria-hidden="true"
-      clear=""
-      tabindex="-1"
-    />
-  </label>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt2"
-    style="display: none;"
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      This field is required
-    </span>
-  </wup-popup>
-</wup-text>
-`;
-
-exports[`control.text validations options.validationCase 3`] = `
-<wup-text
-  invalid=""
->
-  <label
-    for="txt1"
-  >
-    <span>
-      <input
         aria-describedby="txt3"
         aria-required="true"
         autocomplete="off"
@@ -869,13 +822,13 @@ exports[`control.text validations options.validationCase 3`] = `
       Error for First Input:
     </span>
     <span>
-      custom err here
+      This field is required
     </span>
   </wup-popup>
 </wup-text>
 `;
 
-exports[`control.text validations options.validationCase 4`] = `
+exports[`control.text validations options.validationCase 3`] = `
 <wup-text
   invalid=""
 >
@@ -906,6 +859,51 @@ exports[`control.text validations options.validationCase 4`] = `
     aria-live="off"
     error=""
     id="txt4"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
+</wup-text>
+`;
+
+exports[`control.text validations options.validationCase 4`] = `
+<wup-text
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-describedby="txt5"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        type="text"
+      />
+      <strong>
+        First Input
+      </strong>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt5"
     role="alert"
     style="display: none;"
   >

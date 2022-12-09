@@ -4,8 +4,8 @@ import onEvent from "../helpers/onEvent";
 import promiseWait from "../helpers/promiseWait";
 import WUPPopupElement from "../popup/popupElement";
 import WUPSpinElement from "../spinElement";
-import { WUPcssIcon } from "../styles";
-import WUPBaseComboControl, { HideCases, ShowCases, WUPBaseComboIn } from "./baseCombo";
+import { WUPcssIcon, WUPcssScrollSmall } from "../styles";
+import WUPBaseComboControl, { ShowCases, WUPBaseComboIn } from "./baseCombo";
 
 /* c8 ignore next */
 /* istanbul ignore next */
@@ -75,6 +75,39 @@ declare global {
   }
 }
 
+/** Form-control with dropdown/combobox behavior
+ * @example
+  const el = document.createElement("wup-select");
+  el.$options.name = "gender";
+  el.$options.items = [
+    { value: 1, text: "Male" },
+    { value: 2, text: "Female" },
+    { value: 3, text: "Other/Skip" },
+  ];
+  el.$initValue = 3;
+  el.$options.validations = { required: true };
+  const form = document.body.appendChild(document.createElement("wup-form"));
+  form.appendChild(el);
+  // or HTML
+  <wup-form>
+    <wup-select name="gender" initvalue="3" validations="myValidations" items="myDropdownItems" />
+  </wup-form>;
+ * @tutorial innerHTML @example
+ * <label>
+ *   <span> // extra span requires to use with icons via label:before, label:after without adjustments
+ *      <input/>
+ *      <strong>{$options.label}</strong>
+ *   </span>
+ *   <button clear/>
+ *   <wup-popup menu>
+ *      <ul>
+ *          <li>Item 1</li>
+ *          <li>Item 2</li>
+ *          // etc/
+ *      </ul>
+ *   </wup-popup>
+ * </label>
+ */
 export default class WUPSelectControl<
   ValueType = any,
   ItemType = ValueType,
@@ -97,22 +130,27 @@ export default class WUPSelectControl<
       }`;
   }
 
+  // WARN: scroll sets for ul otherwise animation brokes scroll to selectItem because animation affects on scrollSize
   static get $style(): string {
     return `${super.$style}
       :host {
-        cursor: pointer;
         --ctrl-icon-img: var(--ctrl-select-icon-img);
       }
+      :host[opened] label::after {
+        transform: rotate(180deg);
+      }
       :host [menu] {
-        padding: 0;
-        max-height: 300px;
+        overflow: hidden;
       }
       :host [menu] ul {
         margin: 0;
         padding: 0;
         list-style-type: none;
         cursor: pointer;
+        overflow: auto;
+        max-height: 300px;
       }
+      ${WUPcssScrollSmall(":host [menu]>ul")}
       :host [menu] li {
         padding: 1em;
       }
@@ -138,6 +176,8 @@ export default class WUPSelectControl<
 
   /** Text for listbox when no items are displayed */
   static $textNoItems: string | undefined = "No Items";
+  /** Text for aria-label of <ul> element */
+  static $ariaLabelItems = "Items";
 
   /** Function to filter menuItems based on inputValue; all values are in lowerCase */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -166,7 +206,7 @@ export default class WUPSelectControl<
   }
 
   /** Called when need to parse attr [initValue] */
-  override parseValue(attrValue: string): ValueType | undefined {
+  override parse(attrValue: string): ValueType | undefined {
     this.getItems().then((arr) => {
       let r;
       if (arr?.length) {
@@ -277,18 +317,24 @@ export default class WUPSelectControl<
     const ul = popup.appendChild(document.createElement("ul"));
     ul.setAttribute("id", menuId);
     ul.setAttribute("role", "listbox");
-    ul.setAttribute("aria-label", "Items");
+    ul.setAttribute("aria-label", this.#ctr.$ariaLabelItems);
 
     const all = await this.renderMenuItems(ul);
     this._menuItems = { all, focused: -1 };
     !all.length && this.renderMenuNoItems(popup, false);
-
     // it happens on every show because by hide it dispose events
     onEvent(ul, "click", (e) => {
       e.stopPropagation(); // to prevent popup-hide-show
-      /* istanbul ignore else */
-      if (e.target instanceof HTMLLIElement) {
-        this.gotMenuItemClick(e as MouseEvent & { target: HTMLLIElement });
+
+      let t = e.target as Node | HTMLElement;
+      while (1) {
+        const parent = t.parentElement as HTMLElement;
+        /* istanbul ignore else */
+        if (parent === ul) {
+          this.gotMenuItemClick(e, t as HTMLLIElement & { _text: string });
+          break;
+        }
+        t = parent;
       }
     });
 
@@ -393,13 +439,10 @@ export default class WUPSelectControl<
   }
 
   /** Called when need to setValue & close base on clicked item */
-  protected gotMenuItemClick(e: MouseEvent & { target: HTMLLIElement }): void {
-    const i = this._menuItems!.all.indexOf(e.target as HTMLLIElement & { _text: string });
+  protected gotMenuItemClick(_e: MouseEvent, item: HTMLLIElement & { _text: string }): void {
+    const i = this._menuItems!.all.indexOf(item);
     const o = this._cachedItems![i];
-
     this.selectValue(o.value);
-    this.focusMenuItem(e.target, o.value); // to announce selected by screenReaders
-    this.goHideMenu(HideCases.onSelect);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -411,27 +454,33 @@ export default class WUPSelectControl<
     if (this.$isPending) {
       return null;
     }
-    const isCreate = !this.$refPopup;
+
+    if (this.$refPopup && showCase !== ShowCases.onInput && this._menuItems!.filtered) {
+      this._menuItems!.all.forEach((li) => (li.style.display = "")); // reset styles after filtering
+      delete this._menuItems!.filtered;
+      this.renderMenuNoItems(this.$refPopup, true); // remove NoItems
+    }
+
     const popup = await super.goShowMenu(showCase, e, isNeedWait);
     if (!popup) {
       return null;
     }
-    if (!isCreate && showCase !== ShowCases.onInput && this._menuItems!.filtered) {
-      this._menuItems!.all.forEach((li) => (li.style.display = "")); // reset styles after filtering
-      this._menuItems!.filtered = undefined;
-    }
-    // set aria-selected
-    const v = this.$value;
-    if (v !== undefined) {
-      const i = this._cachedItems!.findIndex((item) => this.#ctr.$isEqual(item.value, v));
-      this.selectMenuItem(this._menuItems!.all[i] || null);
-    }
 
+    // set aria-selected
+    this.selectMenuItemByValue(this.$value);
     return popup;
   }
 
-  protected override focusMenuItem(next: HTMLElement | null, nextValue: ValueType | undefined): void {
-    super.focusMenuItem(next, nextValue);
+  /** Select menu item if value !== undefined and menu is opened */
+  protected selectMenuItemByValue(v: ValueType | undefined): void {
+    if (v !== undefined && this.$isOpen) {
+      const i = this._cachedItems!.findIndex((item) => this.#ctr.$isEqual(item.value, v));
+      this.selectMenuItem(this._menuItems!.all[i] || null);
+    }
+  }
+
+  protected override focusMenuItem(next: HTMLElement | null): void {
+    super.focusMenuItem(next);
     if (next === null && this._menuItems) {
       this._menuItems.focused = -1;
     }
@@ -443,21 +492,23 @@ export default class WUPSelectControl<
     const { filtered } = this._menuItems!;
     const trueIndex = filtered ? filtered[index] : index;
     const next = this._menuItems!.all[trueIndex];
-    this.focusMenuItem(next, this._cachedItems![trueIndex].value);
+    this.focusMenuItem(next);
     this._menuItems!.focused = index;
   }
 
-  protected override async gotKeyDown(e: KeyboardEvent & { _handleSetValue?: boolean }): Promise<void> {
+  protected override async gotKeyDown(e: KeyboardEvent): Promise<void> {
     // pending event disables gotKeyDown so it's case impossible
     // if (this.$isPending) {
     //   return;
     // }
     const wasOpen = this.$isOpen;
-    if (e.key === "Enter" && wasOpen && this._opts.allowNewValue && !this._focusedMenuValue) {
+    if (wasOpen && this._opts.allowNewValue && !this._focusedMenuItem && e.key === "Enter") {
       const txt = this.$refInput.value.trim();
       const v = txt ? this.findValueByText(txt) ?? (txt as any) : undefined;
+      // this.selectValue(v);
+      // e.preventDefault();
+      // return;
       this.setValue(v);
-      e._handleSetValue = true; // prevent set value by enter
     }
     await super.gotKeyDown(e);
     if (!this.$isOpen || e.altKey || e.shiftKey || e.ctrlKey || !this._menuItems) {
@@ -467,16 +518,43 @@ export default class WUPSelectControl<
     const { length } = this._menuItems!.filtered || this._menuItems!.all;
     let focusIndex: number | null = null;
 
-    if (e.key === "ArrowDown") {
-      let cur = this._menuItems!.focused;
-      focusIndex = ++cur >= length ? 0 : cur;
-    } else if (e.key === "ArrowUp") {
-      let cur = wasOpen ? this._menuItems!.focused : length;
-      focusIndex = --cur < 0 ? length - 1 : cur;
-    } else if (e.key === "Home") {
-      focusIndex = 0;
-    } else if (e.key === "End") {
-      focusIndex = length - 1;
+    // firstFocused can be selected/current
+    if (this._menuItems!.focused === -1 && this._selectedMenuItem) {
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        focusIndex = this._menuItems!.all.indexOf(this._selectedMenuItem as HTMLLIElement & { _text: string });
+        // case impossible because with filtered items we have this._menuItems!.focused !== -1
+        // if (this._menuItems.filtered) {
+        //   focusIndex = this._menuItems.filtered.indexOf(focusIndex);
+        // }
+        // if (focusIndex === -1) {
+        //   focusIndex = null;
+        // }
+      }
+    }
+
+    if (focusIndex === null) {
+      switch (e.key) {
+        case "ArrowDown":
+          {
+            let cur = this._menuItems!.focused;
+            focusIndex = ++cur >= length ? 0 : cur;
+          }
+          break;
+        case "ArrowUp":
+          {
+            let cur = wasOpen ? this._menuItems!.focused : length;
+            focusIndex = --cur < 0 ? length - 1 : cur;
+          }
+          break;
+        case "Home":
+          focusIndex = 0;
+          break;
+        case "End":
+          focusIndex = length - 1;
+          break;
+        default:
+          break;
+      }
     }
 
     if (focusIndex != null) {
@@ -487,11 +565,11 @@ export default class WUPSelectControl<
 
   /** For case when need to menu is opened but items are not rendered yet */
   protected _needFilter?: () => void;
-  protected override gotInput(e: Event & { currentTarget: HTMLInputElement }): void {
-    this.$isOpen && this.focusMenuItem(null, undefined); // reset virtual focus
+  protected override gotInput(e: WUPText.GotInputEvent): void {
+    this.$isOpen && this.focusMenuItem(null); // reset virtual focus
     super.gotInput(e);
 
-    const rawV = e.currentTarget.value;
+    const rawV = e.target.value;
     const v = rawV.trimStart().toLowerCase();
 
     delete this._needFilter;
@@ -502,7 +580,7 @@ export default class WUPSelectControl<
         isOk && filtered!.push(i);
         li.style.display = isOk ? "" : "none";
       });
-      this._menuItems!.filtered = filtered.length ? filtered : undefined;
+      this._menuItems!.filtered = filtered;
       const hasVisible = filtered.length !== 0;
       this.renderMenuNoItems(this.$refPopup!, hasVisible);
       hasVisible && rawV !== "" && !this._opts.allowNewValue && this.focusMenuItemByIndex(0);
@@ -525,6 +603,12 @@ export default class WUPSelectControl<
       this.setValue(v);
     }
     super.gotFocusLost();
+  }
+
+  protected override setValue(v: ValueType | undefined, canValidate = true, skipInput = false): boolean | null {
+    const r = super.setValue(v, canValidate, skipInput);
+    r && this.selectMenuItemByValue(v);
+    return r;
   }
 
   protected override removePopup(): void {

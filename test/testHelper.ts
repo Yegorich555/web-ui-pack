@@ -108,12 +108,16 @@ export interface BaseTestOptions {
     {
       onRemove?: boolean;
       skip?: boolean;
+      value?: string;
+      /** test when attr has key of window */
+      refGlobal?: any;
     }
   >;
   $options: Record<
     string,
     {
       skip?: boolean;
+      ignoreInput?: boolean;
     }
   >;
 }
@@ -171,7 +175,12 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
                 jest.advanceTimersByTime(1); // wait for ready
               }
 
-              obj.setAttribute(a, "true");
+              delete (window as any)._myTestKey;
+              const oa = opts?.attrs[a];
+              if (oa?.refGlobal) {
+                (window as any)._myTestKey = oa?.refGlobal;
+              }
+              obj.setAttribute(a, oa?.value ?? (oa?.refGlobal ? "window._myTestKey" : "true"));
               jest.advanceTimersByTime(1);
               const key = Object.keys(obj.$options).find((k) => k.toLowerCase() === a) as string;
               expect(key).toBeDefined();
@@ -185,6 +194,7 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
               } else {
                 expect(obj.$options[key]).toBeFalsy();
               }
+              delete (window as any)._myTestKey;
             });
           });
         });
@@ -205,7 +215,12 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
                     jest.advanceTimersByTime(1); // wait for ready
                   }
 
-                  obj.setAttribute(attr, "true");
+                  delete (window as any)._myTestKey;
+                  const oa = opts?.attrs[attr];
+                  if (oa?.refGlobal) {
+                    (window as any)._myTestKey = oa?.refGlobal;
+                  }
+                  obj.setAttribute(attr, oa?.value ?? (oa?.refGlobal ? "window._myTestKey" : "true"));
                   jest.advanceTimersByTime(1);
                   expect(obj.$options[o]).toBeDefined();
 
@@ -346,7 +361,7 @@ export async function wait(t = 1000) {
   }
 }
 
-/** Simulate user type text: focus + keydown+ keyup + keypress + input events */
+/** Simulate user type text (send values to the end of input): focus + keydown+ keyup + keypress + input events */
 export async function userTypeText(el: HTMLInputElement, text: string, opts = { clearPrevious: true }) {
   jest.useFakeTimers();
   el.focus();
@@ -354,13 +369,23 @@ export async function userTypeText(el: HTMLInputElement, text: string, opts = { 
     el.value = "";
   }
 
+  const inputType = "insertText";
   for (let i = 0; i < text.length; ++i) {
     const key = text[i];
-    el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
-    el.dispatchEvent(new KeyboardEvent("keyup", { key, bubbles: true }));
+    if (!el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }))) {
+      continue;
+    }
     el.dispatchEvent(new KeyboardEvent("keypress", { key, bubbles: true }));
-    el.value += key;
-    el.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    if (!el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, cancelable: true, data: key, inputType }))) {
+      continue;
+    }
+    const v = el.value;
+    let carretPos = el.selectionStart ?? el.value.length;
+    el.value = v.substring(0, carretPos) + key + v.substring(carretPos);
+    el.selectionStart = ++carretPos;
+    el.selectionEnd = el.selectionStart;
+    el.dispatchEvent(new InputEvent("input", { bubbles: true, data: key, inputType }));
+    el.dispatchEvent(new KeyboardEvent("keyup", { key, bubbles: true }));
 
     if (i !== text.length - 1) {
       jest.advanceTimersByTime(20);
@@ -373,14 +398,131 @@ export async function userTypeText(el: HTMLInputElement, text: string, opts = { 
   }
 }
 
+/** Get cursor of input according in pattern "abc|def" where '|' - cursor position */
+export function getInputCursor(el: HTMLInputElement) {
+  const v = el.value;
+  if (el.selectionStart == null || el.selectionEnd == null) {
+    return v;
+  }
+  const p1 = v.substring(0, el.selectionStart);
+  const p2 = v.substring(el.selectionStart, el.selectionEnd);
+  const p3 = v.substring(el.selectionEnd);
+  return `${p1}|${p2 ? `${p2}|` : ""}${p3}`;
+}
+
+/** Set cursor & value to input according to pattern "abc|def" where '|' - cursor position */
+export function setInputCursor(el: HTMLInputElement, cursorPattern: string) {
+  const gotValue = cursorPattern.replace(/[|]/g, "");
+  // expect(el.value).toBe(gotValue);
+  el.focus();
+  el.value = gotValue;
+  el.selectionStart = cursorPattern.indexOf("|");
+  el.selectionEnd = cursorPattern.lastIndexOf("|");
+  el.dispatchEvent(new InputEvent("input", { bubbles: true }));
+}
+
+/** Simulates user removes text via backspace: focus + keydown+ keyup + keypress + input events;
+ * @return cursor snapshot (getInputCursor) */
+export async function userRemove(
+  el: HTMLInputElement,
+  opts?: { removeCount: number; key: "Backspace" | "Delete" }
+): Promise<string> {
+  jest.useFakeTimers();
+  el.focus();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  opts = { removeCount: 1, key: "Backspace", ...opts };
+  const { key } = opts;
+
+  for (let i = 0; i < opts.removeCount; ++i) {
+    if (!el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }))) {
+      continue;
+    }
+    // keypress not fired on not-char keys
+    const inputType = `deleteContent${key === "Backspace" ? "Back" : "For"}ward`;
+    if (!el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, data: null, inputType }))) {
+      continue;
+    }
+
+    let v = el.value;
+    let carretPos = el.selectionStart ?? v.length;
+    if (key === "Backspace" && carretPos > 0) {
+      --carretPos;
+    }
+    v = v.substring(0, carretPos) + v.substring(carretPos + 1);
+    if (el.value !== v) {
+      el.value = v;
+      el.selectionEnd = carretPos;
+      el.selectionStart = carretPos;
+      el.dispatchEvent(new InputEvent("input", { bubbles: true, data: null, inputType }));
+    }
+    jest.advanceTimersByTime(20);
+    await Promise.resolve();
+  }
+  el.dispatchEvent(new KeyboardEvent("keyup", { key, bubbles: true }));
+
+  return getInputCursor(el);
+}
+
 /** Simulate user mouse click with 100ms between mouseDown and mouseUp */
-export async function userClick(el: HTMLElement, opts?: MouseEventInit) {
+export async function userClick(el: HTMLElement, opts?: MouseEventInit, timeoutMouseUp = 100) {
   jest.useFakeTimers();
   const o = () => ({ bubbles: true, cancelable: true, pageX: 1, pageY: 1, ...opts });
-  el.dispatchEvent(new MouseEvent("mousedown", o()));
-  await wait(100);
+  const isOk = el.dispatchEvent(new MouseEvent("mousedown", o()));
+  isOk && el.focus();
+  timeoutMouseUp && (await wait(timeoutMouseUp));
   el.dispatchEvent(new MouseEvent("mouseup", o()));
   el.dispatchEvent(new MouseEvent("click", o()));
+}
+
+/** Simulate user press Ctrl+Z on input;
+ * WARN: in reality onBeforeInput event calls only if history.legth >= 1
+ * @return cursor snapshot (getInputCursor) */
+export async function userUndo(el: HTMLInputElement): Promise<string> {
+  jest.useFakeTimers();
+  el.dispatchEvent(new KeyboardEvent("keydown", { key: "z", ctrlKey: true, bubbles: true }));
+  el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, inputType: "historyUndo" }));
+  el.dispatchEvent(new InputEvent("input", { bubbles: true, data: null, inputType: "historyUndo" }));
+  jest.advanceTimersByTime(20);
+  await Promise.resolve();
+  el.dispatchEvent(new KeyboardEvent("keyup", { key: "z", ctrlKey: false, bubbles: true }));
+  return getInputCursor(el);
+}
+
+/** Simulate user press Ctrl+Y on input;
+ * WARN: in reality onBeforeInput event calls only if history.legth >= 1
+ * @return cursor snapshot (getInputCursor) */
+export async function userRedo(el: HTMLInputElement): Promise<string> {
+  jest.useFakeTimers();
+  el.dispatchEvent(new KeyboardEvent("keydown", { key: "y", ctrlKey: true, bubbles: true }));
+  el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, inputType: "historyRedo" }));
+  el.dispatchEvent(new InputEvent("input", { bubbles: true, data: null, inputType: "historyRedo" }));
+  jest.advanceTimersByTime(20);
+  await Promise.resolve();
+  el.dispatchEvent(new KeyboardEvent("keyup", { key: "y", ctrlKey: false, bubbles: true }));
+  return getInputCursor(el);
+}
+
+/** Simulate user swipe with 10ms between events */
+export async function userSwipe(
+  el: HTMLElement,
+  opts: { movements: Array<{ dx: number; dy: number; delayMs?: number }> }
+) {
+  let clientX = el.offsetWidth / 2;
+  let clientY = el.offsetHeight / 2;
+  el.dispatchEvent(new TouchEvent("touchstart", { bubbles: true, touches: [{ clientX, clientY }] as any }));
+  const t = { now: Date.now() };
+  for (let i = 0; i < opts.movements.length; ++i) {
+    const m = opts.movements[i];
+    await wait(m?.delayMs ?? 10);
+    t.now += m?.delayMs ?? 10;
+    clientX += m.dx;
+    clientY += m.dy;
+    const ev = new TouchEvent("touchmove", { bubbles: true, touches: [{ clientX, clientY }] as any });
+    jest.spyOn(ev, "timeStamp", "get").mockImplementation(() => t.now);
+    el.dispatchEvent(ev);
+  }
+  await wait(10);
+  el.dispatchEvent(new TouchEvent("touchend", { bubbles: true, touches: [{ clientX, clientY }] as any }));
 }
 
 /* watchfix: https://github.com/jsdom/jsdom/issues/3209 */

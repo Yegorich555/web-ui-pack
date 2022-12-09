@@ -6,9 +6,6 @@ import WUPTextControl, { WUPTextIn } from "./text";
 
 export namespace WUPBaseComboIn {
   export interface Defs {
-    /** Wait for pointed time before show-error (sumarized with $options.debounce); WARN: hide-error without debounce
-     *  @defaultValue 0 */
-    validateDebounceMs?: number;
     /** Case when menu-popup to show; WARN ShowCases.inputClick doesn't work without ShowCases.click
      * @defaultValue onPressArrowKey | onClick | onFocus */
     showCase: ShowCases;
@@ -74,6 +71,7 @@ declare global {
   }
 }
 
+/** Base abstract form-control for any control with popup-menu (Dropdown, Datepicker etc.) */
 export default abstract class WUPBaseComboControl<
   ValueType = any,
   EventMap extends WUPBaseCombo.EventMap = WUPBaseCombo.EventMap
@@ -104,9 +102,6 @@ export default abstract class WUPBaseComboControl<
         -webkit-mask-image: var(--ctrl-icon-img);
         mask-image: var(--ctrl-icon-img);
       }
-      :host[opened] label::after {
-        transform: rotate(180deg);
-      }
       @media not all and (prefers-reduced-motion) {
         :host label::after {
           transition: transform var(--anim);
@@ -114,12 +109,21 @@ export default abstract class WUPBaseComboControl<
       }
       :host button[clear] {
         margin: 0;
+      }
+      :host [menu] {
+        padding: 0;
+        max-height: 300px;
+        z-index: 90010;
       }`;
   }
 
-  static $defaults: WUPBaseCombo.Defaults = {
+  static $defaults: WUPBaseCombo.Defaults<any> = {
     ...WUPTextControl.$defaults,
-    validationRules: { ...WUPBaseControl.$defaults.validationRules },
+    validationRules: {
+      ...WUPBaseControl.$defaults.validationRules,
+      _mask: WUPTextControl.$defaults.validationRules._mask,
+      _parse: WUPTextControl.$defaults.validationRules._parse,
+    },
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey,
   };
 
@@ -254,7 +258,7 @@ export default abstract class WUPBaseComboControl<
     }
 
     this.#isOpen = true;
-    this.$hideError(); // it resolves overflow menu vs error
+    // this.$hideError(); // it resolves overflow menu vs error
 
     if (!this.$refPopup) {
       const p = document.createElement("wup-popup");
@@ -293,6 +297,8 @@ export default abstract class WUPBaseComboControl<
       }
       this.appendChild(p); // WARN: it will show onInit
       this.$refPopup.addEventListener("$willShow", (ev) => ev.preventDefault(), { once: true }); // otherwise popup shows by init and impossible to wait for result (only via event)
+      // eslint-disable-next-line no-promise-executor-return
+      await new Promise((res) => setTimeout(res)); // wait for appending to body so size is defined and possible to scroll
     }
     if (!this.#isOpen) {
       return null; // possible when user calls show & hide sync
@@ -326,7 +332,7 @@ export default abstract class WUPBaseComboControl<
   protected _isHidding?: true;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected async goHideMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): Promise<boolean> {
-    if (!this.$refPopup) {
+    if (!this.$refPopup || this._isHidding) {
       return false;
     }
     const wasOpen = this.#isOpen;
@@ -351,16 +357,16 @@ export default abstract class WUPBaseComboControl<
 
     this.removeAttribute("opened");
     this.$refInput.setAttribute("aria-expanded", false);
-    this.focusMenuItem(null, undefined);
+    this.focusMenuItem(null);
+    this.selectMenuItem(null);
     setTimeout(() => this.fireEvent("$hideMenu", { cancelable: false }));
     return true;
   }
 
-  #focusedMenuItem?: HTMLElement | null;
-  _focusedMenuValue?: ValueType | undefined;
+  _focusedMenuItem?: HTMLElement | null;
   /** Focus/resetFocus for item (via aria-activedescendant) */
-  protected focusMenuItem(next: HTMLElement | null, nextValue: ValueType | undefined): void {
-    this.#focusedMenuItem?.removeAttribute("focused");
+  protected focusMenuItem(next: HTMLElement | null): void {
+    this._focusedMenuItem?.removeAttribute("focused");
 
     if (next) {
       next.setAttribute("focused", "");
@@ -370,24 +376,23 @@ export default abstract class WUPBaseComboControl<
     } else {
       this.$refInput.removeAttribute("aria-activedescendant");
     }
-    this.#focusedMenuItem = next;
-    this._focusedMenuValue = nextValue;
+    this._focusedMenuItem = next;
   }
 
-  #selectedMenuItem?: HTMLElement | null;
+  _selectedMenuItem?: HTMLElement | null;
   /** Select item (set aria-selected and scroll to) */
   protected selectMenuItem(next: HTMLElement | null): void {
-    this.#selectedMenuItem?.setAttribute("aria-selected", "false");
-
+    this._selectedMenuItem?.setAttribute("aria-selected", false);
     if (next) {
       next.setAttribute("aria-selected", true);
       const ifneed = (next as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
       ifneed ? ifneed.call(next, false) : next.scrollIntoView();
     }
-    this.#selectedMenuItem = next;
+
+    this._selectedMenuItem = next;
   }
 
-  protected override async gotKeyDown(e: KeyboardEvent & { _handleSetValue?: boolean }): Promise<void> {
+  protected override async gotKeyDown(e: KeyboardEvent): Promise<void> {
     // don't allow to process Esc-key when menu is opened
     const isEscPrevent = this.#isOpen && e.key === "Escape";
     !isEscPrevent && super.gotKeyDown(e);
@@ -397,10 +402,12 @@ export default abstract class WUPBaseComboControl<
     }
 
     if (this._opts.showCase & ShowCases.onPressArrowKey) {
-      if (e.key === "ArrowDown") {
-        !this.#isOpen && (await this.goShowMenu(ShowCases.onPressArrowKey, null, true));
-      } else if (e.key === "ArrowUp") {
-        !this.#isOpen && (await this.goShowMenu(ShowCases.onPressArrowKey, null, true));
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault(); // to prevent parent-scroll
+        if (!this.#isOpen) {
+          await this.goShowMenu(ShowCases.onPressArrowKey, null); // , true);
+          return;
+        }
       }
     }
 
@@ -408,60 +415,71 @@ export default abstract class WUPBaseComboControl<
       return;
     }
 
-    if (e.key === "Escape") {
-      e.preventDefault();
-      this.setInputValue(this.$value); // reset input to currentValue
-      await this.goHideMenu(HideCases.OnPressEsc);
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (!e._handleSetValue) {
-        if (this._focusedMenuValue !== undefined) {
-          this.selectValue(this._focusedMenuValue);
-        } else {
-          this.setInputValue(this.$value); // reset input to currentValue
+    switch (e.key) {
+      case "Escape":
+        e.preventDefault();
+        this.resetInputValue();
+        await this.goHideMenu(HideCases.OnPressEsc);
+        break;
+      case "Enter":
+        // case " ": user can type space; we should not use this as click
+        e.preventDefault();
+        {
+          const el = this._focusedMenuItem;
+          if (el && !el.hasAttribute("disabled")) {
+            const isHandled = !el.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }));
+            if (isHandled) {
+              return; // skip hidding menu if itemClick isHandled
+            }
+          }
+          await this.goHideMenu(HideCases.OnPressEnter);
+          this.resetInputValue();
         }
-      } else {
-        delete e._handleSetValue;
-      }
-      await this.goHideMenu(HideCases.OnPressEnter);
+        break;
+      default:
+        break;
     }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected override gotInput(e: Event & { currentTarget: HTMLInputElement }): void {
-    !this.$isOpen && this._opts.showCase & ShowCases.onInput && this.goShowMenu(ShowCases.onInput);
+  protected override gotInput(e: WUPText.GotInputEvent, allowSuper = false): void {
+    // gotInput possible on browser-autofill so we need filter check if isFocused
+    !this.$isOpen && this._opts.showCase & ShowCases.onInput && this.$isFocused && this.goShowMenu(ShowCases.onInput);
+    allowSuper && super.gotInput(e);
   }
 
   protected override gotFocusLost(): void {
-    super.gotFocusLost();
     !this.#isOpen && !this._isHidding && this.removePopup(); // otherwise it's removed by hidingMenu
-    this.setInputValue(this.$value); // to update/rollback input according to result
+    this.resetInputValue(); // to update/rollback input according to result
+    super.gotFocusLost();
   }
 
-  /** Called when user selected new value from menu */
+  /** Called when user selected new value from menu and need to hide menu */
   protected selectValue(v: ValueType): void {
     this.setValue(v);
+    setTimeout(() => this.goHideMenu(HideCases.onSelect)); // without timeout it handles click by listener and opens again
+  }
+
+  /* Reset input to currentValue; called on focusOut, press Escape, Enter */
+  protected resetInputValue(): void {
+    this.setInputValue(this.$value);
   }
 
   protected override setInputValue(v: ValueType | undefined): void {
     const p = this.valueToInput(v);
     if (p instanceof Promise) {
-      p.then((s) => (this.$refInput.value = s));
+      // todo try to avoid promise here and use super.setInputValue instead
+      p.then((s) => super.setInputValue(s));
     } else {
-      this.$refInput.value = p;
+      super.setInputValue(p);
     }
-  }
-
-  protected override clearValue(canValidate = true): void {
-    super.clearValue(!this.#isOpen && canValidate);
   }
 
   /** Called when popup must be removed (by focus out OR if control removed) */
   protected removePopup(): void {
     this.$refPopup?.remove();
     this.$refPopup = undefined;
-    this.#focusedMenuItem = undefined;
-    delete this._focusedMenuValue;
+    delete this._focusedMenuItem;
     if (this.#isOpen) {
       this.#isOpen = false;
       this.removeAttribute("opened");

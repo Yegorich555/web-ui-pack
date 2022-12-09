@@ -8,8 +8,8 @@ import { BaseTestOptions } from "../testHelper";
 declare global {
   namespace WUPBase {
     interface ValidationMap {
-      _alwaysValid: boolean;
-      _alwaysInvalid: boolean;
+      $alwaysValid: boolean;
+      $alwaysInvalid: boolean;
     }
   }
 }
@@ -35,8 +35,8 @@ export function initTestBaseControl<T extends WUPBaseControl>(cfg: InitOptions<T
     Element.prototype.scrollIntoView = jest.fn();
     let lastUniqueNum = 0;
     jest.spyOn(cfg.type, "$uniqueId", "get").mockImplementation(() => `txt${++lastUniqueNum}`);
-    (elType.$defaults.validationRules as any)._alwaysValid = () => false;
-    (elType.$defaults.validationRules as any)._alwaysInvalid = () => "Always error";
+    (elType.$defaults.validationRules as any).$alwaysValid = () => false;
+    (elType.$defaults.validationRules as any).$alwaysInvalid = () => "Always error";
 
     el = document.createElement(cfg.htmlTag) as WUPBaseControl;
     cfg.onInit(el as T);
@@ -46,8 +46,8 @@ export function initTestBaseControl<T extends WUPBaseControl>(cfg: InitOptions<T
 
   afterEach(() => {
     document.body.innerHTML = "";
-    delete (elType.$defaults.validationRules as any)._alwaysValid;
-    delete (elType.$defaults.validationRules as any)._alwaysInvalid;
+    delete (elType.$defaults.validationRules as any).$alwaysValid;
+    delete (elType.$defaults.validationRules as any).$alwaysInvalid;
     jest.restoreAllMocks();
     jest.clearAllMocks();
   });
@@ -84,24 +84,24 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     test("attr [initvalue] vs $initValue", async () => {
       expect(el.$isReady).toBe(true);
       el.setAttribute("initvalue", cfg.initValues[0].attrValue);
-      expect(el.getAttribute("initValue")).toBe(cfg.initValues[0].attrValue);
+      expect(el.getAttribute("initValue")).toStrictEqual(cfg.initValues[0].attrValue);
       await h.wait(1);
-      expect(el.$initValue).toBe(cfg.initValues[0].value);
+      expect(el.$initValue).toStrictEqual(cfg.initValues[0].value);
 
       el.$initValue = cfg.initValues[1].value;
       await h.wait(1);
-      expect(el.$initValue).toBe(cfg.initValues[1].value);
+      expect(el.$initValue).toStrictEqual(cfg.initValues[1].value);
       expect(el.getAttribute("initvalue")).toBe(null);
 
       el.setAttribute("initvalue", cfg.initValues[2].attrValue);
       await h.wait(1);
-      expect(el.$initValue).toBe(cfg.initValues[2].value);
-      expect(el.getAttribute("initvalue")).toBe(cfg.initValues[2].attrValue);
+      expect(el.$initValue).toStrictEqual(cfg.initValues[2].value);
+      expect(el.getAttribute("initvalue")).toStrictEqual(cfg.initValues[2].attrValue);
 
       el.removeAttribute("initvalue");
       await h.wait(1);
       expect(el.getAttribute("initvalue")).toBe(null);
-      expect(el.$initValue).toBe(cfg.emptyValue);
+      expect(el.$initValue).toStrictEqual(cfg.emptyValue);
     });
 
     test("$initValue vs $value", () => {
@@ -112,12 +112,14 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$value).toBe(cfg.initValues[0].value);
       expect(el.$isDirty).toBe(false);
       expect(el.$isChanged).toBe(false);
+      jest.advanceTimersByTime(1);
       expect(spyChange).toBeCalledTimes(1); // change event happens even via $initValue
 
       el.$initValue = cfg.initValues[1].value;
       expect(el.$value).toBe(cfg.initValues[1].value);
       expect(el.$isDirty).toBe(false);
       expect(el.$isChanged).toBe(false);
+      jest.advanceTimersByTime(1);
       expect(spyChange).toBeCalledTimes(2); // change event happens even via $initValue
 
       el.$value = cfg.initValues[2].value;
@@ -125,11 +127,13 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$value).toBe(cfg.initValues[2].value);
       expect(el.$isDirty).toBe(false);
       expect(el.$isChanged).toBe(true);
+      jest.advanceTimersByTime(1);
       expect(spyChange).toBeCalledTimes(3); // change event happens even via $initValue
 
       el.$initValue = cfg.initValues[1].value;
       expect(el.$value).toBe(cfg.initValues[2].value);
       expect(el.$isChanged).toBe(true);
+      jest.advanceTimersByTime(1);
       expect(spyChange).toBeCalledTimes(3);
 
       // checking when el not isReady
@@ -139,11 +143,14 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.addEventListener("$change", spyChange);
 
       el.$value = cfg.initValues[0].value;
+      jest.advanceTimersByTime(1);
       expect(spyChange).not.toBeCalled(); // because el is not ready yet
       jest.advanceTimersByTime(1);
       el.$value = cfg.initValues[0].value;
+      jest.advanceTimersByTime(1);
       expect(spyChange).not.toBeCalled(); // because no changes
       el.$value = cfg.initValues[1].value;
+      jest.advanceTimersByTime(1);
       expect(spyChange).toBeCalledTimes(1);
     });
   });
@@ -267,15 +274,15 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.getAttribute("readonly")).toBe("");
       expect(el.$isReadOnly).toBe(true);
       if (cfg.testReadonly) cfg.testReadonly.true(el);
-      else expect(el.$refInput.readOnly).toBe(true);
+      else if (!cfg.$options?.readOnly?.ignoreInput) expect(el.$refInput.readOnly).toBe(true);
 
       el.$options.readOnly = false;
       jest.advanceTimersByTime(1);
       expect(el.$isReadOnly).toBe(false);
       expect(el.getAttribute("readonly")).toBe(null);
-      expect(el.$refInput.readOnly).not.toBe(true);
+      if (!cfg.$options?.readOnly?.ignoreInput) expect(el.$refInput.readOnly).not.toBe(true);
       if (cfg.testReadonly) cfg.testReadonly.false(el);
-      else expect(el.$refInput.readOnly).not.toBe(true);
+      else if (!cfg.$options?.readOnly?.ignoreInput) expect(el.$refInput.readOnly).not.toBe(true);
     });
 
     test("name - without form", () => {
@@ -326,6 +333,19 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     expect(el).toMatchSnapshot();
   });
 
+  test("$ariaSpeak", async () => {
+    el.$refInput.setAttribute("aria-describedby", "my-test-id");
+    el.$ariaSpeak("Hello");
+    await h.wait(110);
+    const a = el.$refInput.getAttribute("aria-describedby");
+    expect(a?.includes("my-test-id")).toBe(true);
+    el.$refInput.setAttribute("aria-describedby", `${a} my-test-id2`.trim());
+    expect(el).toMatchSnapshot();
+    await h.wait(210);
+    expect(el.$refInput.getAttribute("aria-describedby")).toBe("my-test-id my-test-id2");
+    expect(el).toMatchSnapshot();
+  });
+
   test("focus by click", () => {
     expect(el.$isFocused).toBe(false);
     el.dispatchEvent(new MouseEvent("mousedown"));
@@ -364,14 +384,18 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
         expect(el.$validate()).toBe(false);
         expect(el.$isValid).toBe(true);
 
-        delete (window as any)._testVld;
+        (window as any)._testVld = null;
         expect(el.$validate()).toBe(false);
         expect(el.$isValid).toBe(true);
+
+        (window as any)._testVld = undefined;
+        expect(() => el.$validate()).toThrowError(); // because key is pointed but value undefined
       });
     }
 
     test("rule not exists", () => {
       el.$options.validations = { no: true } as any;
+      el.$value = cfg.initValues[0].value;
       expect(() => el.$validate()).toThrowError();
       el.$options.name = "Me"; // just for coverage
       expect(() => el.$validate()).toThrowError();
@@ -419,7 +443,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       await h.wait();
       el.$value = undefined;
       el.$options.validationCase = ValidationCases.onFocusLost | 0;
-      el.$options.validations = hasVldRequired ? { required: true } : { _alwaysInvalid: true };
+      el.$options.validations = hasVldRequired ? { required: true } : { $alwaysInvalid: true };
       await h.wait();
       expect(el.$refError).not.toBeDefined();
       el.focus();
@@ -481,12 +505,13 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       await h.wait();
       expect(el.$refError).toBeDefined();
 
-      // cover case when errorLeft but focusOut
-      el.$options.validations = { _alwaysInvalid: true };
+      // cover case when focusOut but error left
+      el.$value = cfg.initValues[0].value;
+      el.$options.validations = { $alwaysInvalid: true };
       (document.activeElement as HTMLElement)!.blur();
       await h.wait();
       el.$refInput.focus();
-      el.$validate(true);
+      el.$validate(false);
       await h.wait();
       expect(el.$isValid).toBe(false);
       expect(el.$refError).toBeDefined();
@@ -499,7 +524,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     test("options.validateDebounceMs", async () => {
       el.$options.validationCase = ValidationCases.onChange | 0;
       el.$options.validateDebounceMs = 500;
-      el.$options.validations = { _alwaysInvalid: true };
+      el.$options.validations = { $alwaysInvalid: true };
       // @ts-ignore
       el.setValue(cfg.initValues[0].value);
       expect(el.$isValid).toBe(false);
@@ -549,8 +574,9 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
         await h.wait();
         expect(el).toMatchSnapshot();
 
-        (el.$options.validations as any)._alwaysValid = true;
-        (el.$options.validations as any)._alwaysInvalid = true;
+        (el.$options.validations as any).$alwaysValid = true;
+        (el.$options.validations as any).$alwaysInvalid = true;
+
         el.$hideError();
         el.$validate();
         expect(() => jest.advanceTimersByTime(1000)).toThrow(); // because impossible to get errorMessage
@@ -597,8 +623,8 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
         expect(el.$isValid).toBe(true);
 
         // with custom error
-        el.$options.validations = { [ruleName]: (v: any) => v === undefined && "Custom error" };
-        el.$value = undefined;
+        el.$options.validations = { [ruleName]: (v: any) => v === undefined || "Custom error" };
+        el.$value = cfg.initValues[0].value;
         expect(el.$validate()).toBe("Custom error");
         expect(el.$isValid).toBe(false);
 
@@ -609,6 +635,21 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
         }
       });
     });
+  });
+
+  test("validation when disabled", () => {
+    el.$value = cfg.initValues[0].value;
+    el.$options.validations = { $alwaysInvalid: true };
+    jest.advanceTimersByTime(1);
+    el.$validate();
+    expect(el.$isValid).toBe(false);
+    expect(el.$refError).toBeTruthy();
+
+    el.$options.disabled = true;
+    jest.advanceTimersByTime(1);
+    expect(el.$isValid).toBe(false); // still invalid
+    expect(el.$refError).toBeFalsy(); // message hidden because control disabled
+    expect(el.$value).toBeTruthy(); // value still here even invalid
   });
 
   test("with form", () => {
@@ -646,7 +687,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     jest.advanceTimersByTime(1);
     expect(el.$isReadOnly).toBe(true);
     if (cfg.testReadonly) cfg.testReadonly.true(el);
-    else expect(el.$refInput.readOnly).toBe(true);
+    else if (!cfg.$options?.readOnly?.ignoreInput) expect(el.$refInput.readOnly).toBe(true);
 
     el.$options.readOnly = false;
     jest.advanceTimersByTime(1);
@@ -656,7 +697,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     jest.advanceTimersByTime(1);
     expect(el.$isReadOnly).toBe(false);
     if (cfg.testReadonly) cfg.testReadonly.true(el);
-    else expect(el.$refInput.readOnly).toBe(false);
+    else if (!cfg.$options?.readOnly?.ignoreInput) expect(el.$refInput.readOnly).toBe(false);
 
     el.$options.readOnly = true;
     jest.advanceTimersByTime(1);

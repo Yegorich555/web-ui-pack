@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.2.0 (\_\_\_)
+
+**Fixes**:
+
+- Controls. [Blue highlight blink on tap action](https://stackoverflow.com/questions/25704650/disable-blue-highlight-when-touch-press-object-with-cursorpointer)
+- Controls. Click on button `Clear` throws console.error
+- Controls. Validation gets undefined value but must be skipped in this case (value is undefined only for messages or validations.required)
+- SelectControl. Click on custom list-item with nested span doesn't call click-event
+- SelectControl. No scroll to selected element at first opening
+- SelectControl. Sometimes menu isn't opened
+- SelectControl. Fix `noItems` appeared on 2nd menu opening when user created a new value
+- Helper. observer. Fix onChange fired even date.setHours didn't change value
+
+**Features**:
+
+- Controls throws error if attr [validations] has object-key to undefined value
+- Added [mask](http://localhost:8015/control/text) for text based controls
+- Added elements
+  - [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
+  - [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
+- Added [helpers](README.md#helpers)
+  - [`dateCopyTime`](src/helpers/dateCopyTime.ts)
+  - [`dateFromString`](src/helpers/dateFromString.ts)
+  - [`dateToString`](src/helpers/dateToString.ts)
+  - [`onScrollStop`](src/helpers/onScrollStop.ts)
+  - [`scrollCarousel`](src/helpers/scrollCarousel.ts)
+
 ## 0.1.2 (Oct 4, 2022)
 
 - Hotfix: gotReady() calls gotChanges() when element disconnected (possible in React)

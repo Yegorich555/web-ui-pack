@@ -91,6 +91,21 @@ describe("baseElement", () => {
     expect(spyAttrChanged).toBeCalledTimes(1);
   });
 
+  test("getRefAttr", () => {
+    el.setAttribute("testRef", "window._model.firstName");
+    expect(() => el.getRefAttr("testRef")).toThrow();
+    el.setAttribute("testRef", "_model.firstName");
+    expect(() => el.getRefAttr("testRef")).toThrow();
+
+    window._model = { firstName: "Den" };
+    el.setAttribute("testRef", "_model.firstName");
+    expect(el.getRefAttr("testRef")).toBe("Den");
+
+    window._model = { firstName: "Wiki" };
+    el.setAttribute("testRef", "window._model.firstName");
+    expect(el.getRefAttr("testRef")).toBe("Wiki");
+  });
+
   test("fireEvent", () => {
     const fn = jest.fn();
     el.addEventListener("click", fn);
@@ -454,13 +469,17 @@ describe("baseElement", () => {
     jest.clearAllMocks();
     testEl.setAttribute("disabled", "true");
     await h.wait();
+    expect(spyAll).toBeCalledTimes(0); // because no changes (attr is set before)
+
+    testEl.setAttribute("disabled", "false");
+    await h.wait();
     expect(spyAll).toBeCalledTimes(1);
     expect(spyAll).toBeCalledWith(["disabled"]);
     expect(spyAttr).toBeCalledTimes(1);
     expect(spyOpts).toBeCalledTimes(0);
 
     jest.clearAllMocks();
-    testEl.setAttribute("disabled", "false");
+    testEl.setAttribute("disabled", "true");
     testEl.setAttribute("readonly", "false");
     await h.wait();
     expect(spyAll).toBeCalledTimes(1);

@@ -21,6 +21,10 @@ const items = [
   // { text: (v, li, i) => li.append(v.toString()), value: 124 },
 ];
 
+// for (let i = 20; i < 1000; ++i) {
+//   items.push({ text: `Test ${i}`, value: i });
+// }
+
 (window as any).inputSelect = {
   items,
 };
@@ -58,7 +62,7 @@ export default function SelectControlView() {
       <wup-form
         ref={(el) => {
           if (el) {
-            el.$onSubmit = (e) => console.warn("sumbitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("submitted model", e.$model);
             el.$initModel = { radio: items[3].value };
           }
         }}
@@ -67,7 +71,7 @@ export default function SelectControlView() {
           items="inputSelect.items"
           name="select"
           label="Select"
-          initValue={items[1].value.toString()}
+          initValue={items[8].value.toString()}
           validations="window._someSelectValidations"
           autoComplete="off"
           autoFocus={false}
@@ -92,7 +96,6 @@ export default function SelectControlView() {
                 spin.$options.fit = true;
                 spin.$options.overflowFade = true;
                 spin.$options.overflowTarget = this;
-                // eslint-disable-next-line react/no-this-in-sfc
                 this.appendChild(spin);
                 return spin;
               };
@@ -106,7 +109,7 @@ export default function SelectControlView() {
               el.$options.name = "asDropdown";
               el.$options.label = "As dropdown ($options.readOnlyInput)";
               el.$options.items = items;
-              el.$initValue = ir - 3;
+              // el.$initValue = ir - 3;
               el.$options.readOnlyInput = true;
             }
           }}

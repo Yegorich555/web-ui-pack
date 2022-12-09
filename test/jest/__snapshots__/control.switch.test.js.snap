@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`control.text $ariaDetails 1`] = `
+exports[`control.switch $ariaDetails 1`] = `
 <wup-switch>
   <label
     for="txt1"
@@ -21,7 +21,7 @@ exports[`control.text $ariaDetails 1`] = `
 </wup-switch>
 `;
 
-exports[`control.text $ariaDetails 2`] = `
+exports[`control.switch $ariaDetails 2`] = `
 <wup-switch>
   <label
     for="txt1"
@@ -37,7 +37,49 @@ exports[`control.text $ariaDetails 2`] = `
 </wup-switch>
 `;
 
-exports[`control.text $show/$hide error 1`] = `
+exports[`control.switch $ariaSpeak 1`] = `
+<wup-switch>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-describedby="my-test-id txt2 my-test-id2"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong />
+    <span />
+  </label>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt2"
+  >
+    Hello
+  </section>
+</wup-switch>
+`;
+
+exports[`control.switch $ariaSpeak 2`] = `
+<wup-switch>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-describedby="my-test-id my-test-id2"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong />
+    <span />
+  </label>
+</wup-switch>
+`;
+
+exports[`control.switch $show/$hide error 1`] = `
 <wup-switch>
   <label
     for="txt1"
@@ -53,7 +95,7 @@ exports[`control.text $show/$hide error 1`] = `
 </wup-switch>
 `;
 
-exports[`control.text $show/$hide error 2`] = `
+exports[`control.switch $show/$hide error 2`] = `
 <wup-switch
   invalid=""
 >
@@ -86,7 +128,7 @@ exports[`control.text $show/$hide error 2`] = `
 </wup-switch>
 `;
 
-exports[`control.text $show/$hide error 3`] = `
+exports[`control.switch $show/$hide error 3`] = `
 <wup-switch>
   <label
     for="txt1"
@@ -102,9 +144,9 @@ exports[`control.text $show/$hide error 3`] = `
 </wup-switch>
 `;
 
-exports[`control.text common tests render + styles 1`] = `<wup-switch />`;
+exports[`control.switch common tests render + styles 1`] = `<wup-switch />`;
 
-exports[`control.text common tests render + styles 2`] = `
+exports[`control.switch common tests render + styles 2`] = `
 <style>
   .wup-hidden, [wup-hidden] {
 position: absolute;
@@ -163,6 +205,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
         cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
       }
       WUP-SWITCH strong,
       WUP-SWITCH legend {
@@ -371,7 +414,7 @@ clip: rect(1px, 1px, 1px, 1px); }
 </style>
 `;
 
-exports[`control.text validations options.validationCase 1`] = `
+exports[`control.switch validations options.validationCase 1`] = `
 <wup-switch>
   <label
     for="txt1"
@@ -387,45 +430,7 @@ exports[`control.text validations options.validationCase 1`] = `
 </wup-switch>
 `;
 
-exports[`control.text validations options.validationCase 2`] = `
-<wup-switch
-  invalid=""
->
-  <label
-    for="txt1"
-  >
-    <input
-      aria-describedby="txt2"
-      aria-required="true"
-      autocomplete="off"
-      id="txt1"
-      type="checkbox"
-    />
-    <strong>
-      First Input
-    </strong>
-    <span />
-  </label>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt2"
-    style="display: none;"
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      This field is required
-    </span>
-  </wup-popup>
-</wup-switch>
-`;
-
-exports[`control.text validations options.validationCase 3`] = `
+exports[`control.switch validations options.validationCase 2`] = `
 <wup-switch
   invalid=""
 >
@@ -457,13 +462,13 @@ exports[`control.text validations options.validationCase 3`] = `
       Error for First Input:
     </span>
     <span>
-      custom err here
+      This field is required
     </span>
   </wup-popup>
 </wup-switch>
 `;
 
-exports[`control.text validations options.validationCase 4`] = `
+exports[`control.switch validations options.validationCase 3`] = `
 <wup-switch
   invalid=""
 >
@@ -472,6 +477,7 @@ exports[`control.text validations options.validationCase 4`] = `
   >
     <input
       aria-describedby="txt4"
+      aria-required="true"
       autocomplete="off"
       id="txt1"
       type="checkbox"
@@ -486,6 +492,43 @@ exports[`control.text validations options.validationCase 4`] = `
     aria-live="off"
     error=""
     id="txt4"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
+</wup-switch>
+`;
+
+exports[`control.switch validations options.validationCase 4`] = `
+<wup-switch
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-describedby="txt5"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong>
+      First Input
+    </strong>
+    <span />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt5"
     role="alert"
     style="display: none;"
   >
@@ -501,7 +544,7 @@ exports[`control.text validations options.validationCase 4`] = `
 </wup-switch>
 `;
 
-exports[`control.text with form 1`] = `
+exports[`control.switch with form 1`] = `
 <wup-form
   role="form"
 >

@@ -20,6 +20,7 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       email: { set: true, failValue: "relation", trueValue: "relation@google.com" },
       ...opts?.validations,
     },
+    validationsSkip: ["_parse", "_mask", ...(opts?.validationsSkip || [])],
   });
 
   test("$initValue affects on input", () => {
@@ -33,17 +34,49 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
     expect(el.$refInput.value).toBe(initV);
   });
 
-  test("validation messages ends without '-s'", async () => {
+  test("validations without 'required'", async () => {
     const el = getEl();
-    el.$options.validations = { min: 1 };
+    el.$value = "";
+    el.$options.validations = { min: 2 };
     el.$validate();
+    expect(el.$isValid).toBe(true); // because it's not required
+    el.$value = "a";
+    el.$validate(); // need to show error-msg
+    expect(el.$isValid).toBe(false);
     await h.wait();
-    expect(el).toMatchSnapshot();
+    expect(el.$refError).toBeDefined();
+  });
 
-    el.$options.validations = { max: 1 };
-    el.$validate();
-    await h.wait();
-    expect(el).toMatchSnapshot();
+  test("validations debounce", async () => {
+    /* rules:
+      1. invalid > valid: hide without debounce
+      2. invalid > invalid show another message without debouce
+      3. valid > invalid: debounce
+    */
+    const el = getEl();
+    const inp = el.$refInput;
+    el.$options.validations = {
+      min: () => inp.value.length < 2 && "Min 2",
+      max: () => inp.value.length > 3 && "Max 3",
+    };
+    el.$options.validateDebounceMs = 300;
+    el.$options.debounceMs = 0;
+    await h.wait(1);
+    await h.userTypeText(inp, "ab"); // type to Valid
+    expect(el._wasValidNotEmpty).toBe(true);
+    await h.userRemove(inp); // remove to Invalid
+    expect(inp.value).toBe("a");
+    await h.wait(100);
+    expect(el.$refError).toBeFalsy(); // waiting for debounce
+    await h.wait(300);
+    expect(el.$refError?.innerHTML).toMatchInlineSnapshot(`"<span class="wup-hidden"></span><span>Min 2</span>"`);
+
+    inp.value += "bcd";
+    await h.userTypeText(inp, "2", { clearPrevious: false });
+    expect(el.$refInput.value).toBe("abcd2");
+    await h.wait(1);
+    // don't wait for debounce because error message is changed. Debounce only to show error at first time
+    expect(el.$refError?.innerHTML).toMatchInlineSnapshot(`"<span class="wup-hidden"></span><span>Max 3</span>"`);
   });
 
   describe("options", () => {
@@ -67,7 +100,7 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
     test("debounceMs", async () => {
       const el = getEl();
       el.$options.debounceMs = 400;
-      el.$options.validations = { _alwaysInvalid: true }; // just for coverage
+      el.$options.validations = { $alwaysInvalid: true }; // just for coverage
       el.$options.validationCase = ValidationCases.onChange | 0; // just for coverage
       const spyChange = jest.fn();
       el.addEventListener("$change", spyChange);

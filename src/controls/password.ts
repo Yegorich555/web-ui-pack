@@ -24,11 +24,15 @@ export namespace WUPPasswordIn {
 declare global {
   namespace WUPPassword {
     interface ValidationMap extends WUPText.ValidationMap {
+      /** If count of numbers < pointed shows message 'Must contain at least {x} numbers' */
       minNumber: number;
+      /** If count of uppercase letters < pointed shows message 'Must contain at least {x} upper case' */
       minUpper: number;
+      /** If count of lowercase letters < pointed shows message 'Must contain at least {x} lower case' */
       minLower: number;
+      /** If count of pointed chars < pointed shows message 'Must contain at least {x} special characters' */
       special: { min: number; chars: string };
-      /** Match password fields with confirm password */
+      /** If $value != with previous siblint wup-pwd.$value shows message 'Passwords must be equal' */
       confirm: boolean;
     }
     interface EventMap extends WUPText.EventMap {}
@@ -52,13 +56,39 @@ declare global {
     }
   }
 }
-/**
+
+/** Form-control with text-input
+ * @example
+  const el = document.createElement("wup-pwd");
+  el.$options.name = "password";
+  el.$options.validations = {
+    required: true,
+    min: 8,
+    minNumber: 1,
+    minUpper: 1,
+    minLower: 1,
+    special: { min: 1, chars: "#!-_?,.@:;'" }
+  };
+  el.$options.validationShowAll = true;
+
+  const elConfirm = document.createElement("wup-pwd");
+  elConfirm.$options.name = "passwordConfirm";
+  elConfirm.$options.validations = { confirm: true };
+
+  const form = document.body.appendChild(document.createElement("wup-form"));
+  form.appendChild(el);
+  // or HTML
+  <wup-form>
+    <wup-pwd name="password" validations="myValidations"/>
+    <wup-pwd name="passwordConfirm" validations="myValidations2"/>
+  </wup-form>;
  * @tutorial innerHTML @example
  * <label>
  *   <span> // extra span requires to use with icons via label:before, label:after without adjustments
- *      <input />
+ *      <input/>
  *      <strong>{$options.label}</strong>
  *   </span>
+ *   <button clear/>
  * </label>
  */
 export default class WUPPasswordControl<
@@ -136,19 +166,21 @@ export default class WUPPasswordControl<
       special: (v, setV) =>
         (!v || ![...setV.chars].reduce((prev, c) => (v.includes(c) ? ++prev : prev), 0)) &&
         `Must contain at least ${setV.min} special character${setV.min === 1 ? "" : "s"}: ${setV.chars}`,
-      confirm: (v, setV, control) => {
+      confirm: (v, setV, c) => {
+        /* istanbul ignore else */
         if (v && setV) {
-          const selector = control.tagName.toLowerCase();
+          const selector = c.tagName.toLowerCase();
           const all = document.querySelectorAll(selector);
           let i = -1;
           // eslint-disable-next-line no-restricted-syntax
           for (const el of all.values()) {
-            if (control === el) {
+            if (c === el) {
               const found = all[i] as WUPPasswordControl;
-              if (found && found.$value === control.$value) {
+              if (!found) {
+                i = -2;
+              } else if (found.$value === c.$value) {
                 return false;
               }
-              i = -2;
               break;
             }
             ++i;
@@ -185,11 +217,16 @@ export default class WUPPasswordControl<
     b.setAttribute("eye", "");
     b.setAttribute("aria-hidden", true);
     b.tabIndex = -1;
-    onEvent(b, "click", (e) => {
-      e.preventDefault(); // prevent from submit
-      e.stopPropagation();
-      this.toggleVisibility();
-    });
+    onEvent(
+      b,
+      "click",
+      (e) => {
+        e.preventDefault(); // prevent from submit
+        e.stopPropagation();
+        this.toggleVisibility();
+      },
+      { passive: false }
+    );
     this.$refLabel.appendChild(b);
   }
 

@@ -1,0 +1,4249 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=false $options.exclude (attr [disabled]) 1`] = `
+[
+  "26",
+  "27",
+  "28",
+  "29",
+  "30 disabled",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
+  "13",
+  "14",
+  "15",
+  "16",
+  "17",
+  "18",
+  "19",
+  "20",
+  "21",
+  "22",
+  "23",
+  "24",
+  "25",
+  "26",
+  "27",
+  "28",
+  "29",
+  "30",
+  "31",
+  "1 disabled",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=false $options.exclude (attr [disabled]) 2`] = `
+[
+  "26 disabled",
+  "27 disabled",
+  "28 disabled",
+  "29 disabled",
+  "30 disabled",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10 disabled",
+  "11 disabled",
+  "12",
+  "13",
+  "14",
+  "15",
+  "16",
+  "17",
+  "18",
+  "19",
+  "20",
+  "21",
+  "22",
+  "23",
+  "24",
+  "25",
+  "26",
+  "27",
+  "28",
+  "29",
+  "30",
+  "31",
+  "1 disabled",
+  "2 disabled",
+  "3 disabled",
+  "4 disabled",
+  "5 disabled",
+  "6 disabled",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=false $options.exclude (attr [disabled]) 3`] = `
+[
+  "31",
+  "1 disabled",
+  "2 disabled",
+  "3 disabled",
+  "4 disabled",
+  "5 disabled",
+  "6 disabled",
+  "7 disabled",
+  "8 disabled",
+  "9 disabled",
+  "10 disabled",
+  "11 disabled",
+  "12 disabled",
+  "13 disabled",
+  "14 disabled",
+  "15 disabled",
+  "16 disabled",
+  "17 disabled",
+  "18 disabled",
+  "19 disabled",
+  "20 disabled",
+  "21 disabled",
+  "22 disabled",
+  "23 disabled",
+  "24 disabled",
+  "25 disabled",
+  "26 disabled",
+  "27 disabled",
+  "28 disabled",
+  "29 disabled",
+  "30 disabled",
+  "1 disabled",
+  "2 disabled",
+  "3 disabled",
+  "4 disabled",
+  "5 disabled",
+  "6 disabled",
+  "7 disabled",
+  "8 disabled",
+  "9 disabled",
+  "10 disabled",
+  "11 disabled",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=false $options.exclude (attr [disabled]) 4`] = `
+[
+  "Jan disabled",
+  "Feb disabled",
+  "Mar disabled",
+  "Apr disabled",
+  "May disabled",
+  "Jun disabled",
+  "Jul disabled",
+  "Aug disabled",
+  "Sep disabled",
+  "Oct",
+  "Nov disabled",
+  "Dec disabled",
+  "Jan disabled",
+  "Feb disabled",
+  "Mar disabled",
+  "Apr disabled",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=false $options.exclude (attr [disabled]) 5`] = `
+[
+  "2018 disabled",
+  "2019 disabled",
+  "2020 disabled",
+  "2021 disabled",
+  "2022",
+  "2023 disabled",
+  "2024 disabled",
+  "2025 disabled",
+  "2026 disabled",
+  "2027 disabled",
+  "2028 disabled",
+  "2029 disabled",
+  "2030 disabled",
+  "2031 disabled",
+  "2032 disabled",
+  "2033 disabled",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=false $options.exclude (attr [disabled]) 6`] = `
+[
+  "2018",
+  "2019",
+  "2020",
+  "2021",
+  "2022 disabled",
+  "2023",
+  "2024",
+  "2025",
+  "2026",
+  "2027",
+  "2028",
+  "2029",
+  "2030",
+  "2031",
+  "2032",
+  "2033",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=false $options.exclude (attr [disabled]) 7`] = `
+[
+  "31 disabled",
+  "1 disabled",
+  "2 disabled",
+  "3 disabled",
+  "4 disabled",
+  "5 disabled",
+  "6 disabled",
+  "7 disabled",
+  "8 disabled",
+  "9 disabled",
+  "10 disabled",
+  "11 disabled",
+  "12 disabled",
+  "13 disabled",
+  "14 disabled",
+  "15 disabled",
+  "16 disabled",
+  "17 disabled",
+  "18 disabled",
+  "19 disabled",
+  "20 disabled",
+  "21 disabled",
+  "22 disabled",
+  "23 disabled",
+  "24 disabled",
+  "25 disabled",
+  "26 disabled",
+  "27 disabled",
+  "28 disabled",
+  "1 disabled",
+  "2 disabled",
+  "3 disabled",
+  "4 disabled",
+  "5 disabled",
+  "6 disabled",
+  "7 disabled",
+  "8 disabled",
+  "9 disabled",
+  "10 disabled",
+  "11 disabled",
+  "12 disabled",
+  "13 disabled",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=false $options.exclude (attr [disabled]) 8`] = `
+[
+  "Jan",
+  "Feb disabled",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=false $options.exclude (attr [disabled]) 9`] = `
+[
+  "31",
+  "1 disabled",
+  "2 disabled",
+  "3 disabled",
+  "4 disabled",
+  "5 disabled",
+  "6 disabled",
+  "7 disabled",
+  "8 disabled",
+  "9 disabled",
+  "10 disabled",
+  "11 disabled",
+  "12 disabled",
+  "13 disabled",
+  "14 disabled",
+  "15 disabled",
+  "16 disabled",
+  "17 disabled",
+  "18 disabled",
+  "19 disabled",
+  "20 disabled",
+  "21 disabled",
+  "22 disabled",
+  "23 disabled",
+  "24 disabled",
+  "25 disabled",
+  "26 disabled",
+  "27 disabled",
+  "28 disabled",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
+  "13",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=false $options.min & .max 1`] = `
+[
+  "26 disabled",
+  "27 disabled",
+  "28 disabled",
+  "29 disabled",
+  "30",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
+  "13",
+  "14",
+  "15",
+  "16",
+  "17",
+  "18",
+  "19",
+  "20",
+  "21",
+  "22",
+  "23",
+  "24",
+  "25",
+  "26",
+  "27",
+  "28",
+  "29",
+  "30",
+  "31",
+  "1",
+  "2 disabled",
+  "3 disabled",
+  "4 disabled",
+  "5 disabled",
+  "6 disabled",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=false $options.min & .max 2`] = `
+[
+  "31",
+  "1",
+  "2 disabled",
+  "3 disabled",
+  "4 disabled",
+  "5 disabled",
+  "6 disabled",
+  "7 disabled",
+  "8 disabled",
+  "9 disabled",
+  "10 disabled",
+  "11 disabled",
+  "12 disabled",
+  "13 disabled",
+  "14 disabled",
+  "15 disabled",
+  "16 disabled",
+  "17 disabled",
+  "18 disabled",
+  "19 disabled",
+  "20 disabled",
+  "21 disabled",
+  "22 disabled",
+  "23 disabled",
+  "24 disabled",
+  "25 disabled",
+  "26 disabled",
+  "27 disabled",
+  "28 disabled",
+  "29 disabled",
+  "30 disabled",
+  "1 disabled",
+  "2 disabled",
+  "3 disabled",
+  "4 disabled",
+  "5 disabled",
+  "6 disabled",
+  "7 disabled",
+  "8 disabled",
+  "9 disabled",
+  "10 disabled",
+  "11 disabled",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=false $options.min & .max 3`] = `
+[
+  "29 disabled",
+  "30 disabled",
+  "31 disabled",
+  "1 disabled",
+  "2 disabled",
+  "3 disabled",
+  "4 disabled",
+  "5 disabled",
+  "6 disabled",
+  "7 disabled",
+  "8 disabled",
+  "9 disabled",
+  "10 disabled",
+  "11 disabled",
+  "12 disabled",
+  "13 disabled",
+  "14 disabled",
+  "15 disabled",
+  "16 disabled",
+  "17 disabled",
+  "18 disabled",
+  "19 disabled",
+  "20 disabled",
+  "21 disabled",
+  "22 disabled",
+  "23 disabled",
+  "24 disabled",
+  "25 disabled",
+  "26 disabled",
+  "27 disabled",
+  "28 disabled",
+  "29 disabled",
+  "30",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=false $options.min & .max 4`] = `
+<wup-calendar>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-describedby="txt4"
+        aria-owns="txt2"
+        aria-readonly="false"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      />
+    </span>
+  </label>
+  <div
+    calendar="month"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        tabindex="-1"
+      >
+        2021
+      </button>
+    </header>
+    <div>
+      <div>
+        <ul
+          aria-hidden="true"
+        >
+          <li>
+            Mo
+          </li>
+          <li>
+            Tu
+          </li>
+          <li>
+            We
+          </li>
+          <li>
+            Th
+          </li>
+          <li>
+            Fr
+          </li>
+          <li>
+            Sa
+          </li>
+          <li>
+            Su
+          </li>
+        </ul>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Jan
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Feb
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Mar
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Apr
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            May
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Jun
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Jul
+          </li>
+          <li
+            role="gridcell"
+          >
+            Aug
+          </li>
+          <li
+            role="gridcell"
+          >
+            Sep
+          </li>
+          <li
+            role="gridcell"
+          >
+            Oct
+          </li>
+          <li
+            role="gridcell"
+          >
+            Nov
+          </li>
+          <li
+            role="gridcell"
+          >
+            Dec
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            Jan
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            Feb
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            Mar
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            Apr
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt4"
+  >
+    2021
+  </section>
+</wup-calendar>
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=false $options.min & .max 5`] = `
+<wup-calendar>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-describedby="txt5 txt6"
+        aria-owns="txt2"
+        aria-readonly="false"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      />
+    </span>
+  </label>
+  <div
+    calendar="month"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        tabindex="-1"
+      >
+        2023
+      </button>
+    </header>
+    <div>
+      <div>
+        <ul
+          aria-hidden="true"
+        >
+          <li>
+            Mo
+          </li>
+          <li>
+            Tu
+          </li>
+          <li>
+            We
+          </li>
+          <li>
+            Th
+          </li>
+          <li>
+            Fr
+          </li>
+          <li>
+            Sa
+          </li>
+          <li>
+            Su
+          </li>
+        </ul>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            role="gridcell"
+          >
+            Jan
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Feb
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Mar
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Apr
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            May
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Jun
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Jul
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Aug
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Sep
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Oct
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Nov
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Dec
+          </li>
+          <li
+            disabled=""
+            next=""
+            role="gridcell"
+          >
+            Jan
+          </li>
+          <li
+            disabled=""
+            next=""
+            role="gridcell"
+          >
+            Feb
+          </li>
+          <li
+            disabled=""
+            next=""
+            role="gridcell"
+          >
+            Mar
+          </li>
+          <li
+            disabled=""
+            next=""
+            role="gridcell"
+          >
+            Apr
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt5"
+  >
+    2022
+  </section>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt6"
+  >
+    2023
+  </section>
+</wup-calendar>
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=false $options.min & .max 6`] = `
+<ol
+  role="grid"
+  style="overflow: hidden;"
+>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2002
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2003
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2004
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2005
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2006
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2007
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2008
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2009
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2010
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2011
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2012
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2013
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2014
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2015
+  </li>
+  <li
+    role="gridcell"
+  >
+    2016
+  </li>
+  <li
+    role="gridcell"
+  >
+    2017
+  </li>
+</ol>
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=false $options.min & .max 7`] = `
+<ol
+  role="grid"
+  style="overflow: hidden;"
+>
+  <li
+    role="gridcell"
+  >
+    2034
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2035
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2036
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2037
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2038
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2039
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2040
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2041
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2042
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2043
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2044
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2045
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2046
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2047
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2048
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2049
+  </li>
+</ol>
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=false day picker firstOfWeek: Monday 1`] = `
+<wup-calendar>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-owns="txt2"
+        aria-readonly="false"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      />
+    </span>
+  </label>
+  <div
+    calendar="day"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        tabindex="-1"
+      >
+        December 2022
+      </button>
+    </header>
+    <div>
+      <div>
+        <ul
+          aria-hidden="true"
+        >
+          <li>
+            Mo
+          </li>
+          <li>
+            Tu
+          </li>
+          <li>
+            We
+          </li>
+          <li>
+            Th
+          </li>
+          <li>
+            Fr
+          </li>
+          <li>
+            Sa
+          </li>
+          <li>
+            Su
+          </li>
+        </ul>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            prev=""
+            role="gridcell"
+          >
+            28
+          </li>
+          <li
+            prev=""
+            role="gridcell"
+          >
+            29
+          </li>
+          <li
+            prev=""
+            role="gridcell"
+          >
+            30
+          </li>
+          <li
+            role="gridcell"
+          >
+            1
+          </li>
+          <li
+            role="gridcell"
+          >
+            2
+          </li>
+          <li
+            role="gridcell"
+          >
+            3
+          </li>
+          <li
+            role="gridcell"
+          >
+            4
+          </li>
+          <li
+            aria-selected="true"
+            role="gridcell"
+          >
+            5
+          </li>
+          <li
+            role="gridcell"
+          >
+            6
+          </li>
+          <li
+            role="gridcell"
+          >
+            7
+          </li>
+          <li
+            role="gridcell"
+          >
+            8
+          </li>
+          <li
+            role="gridcell"
+          >
+            9
+          </li>
+          <li
+            role="gridcell"
+          >
+            10
+          </li>
+          <li
+            role="gridcell"
+          >
+            11
+          </li>
+          <li
+            role="gridcell"
+          >
+            12
+          </li>
+          <li
+            role="gridcell"
+          >
+            13
+          </li>
+          <li
+            role="gridcell"
+          >
+            14
+          </li>
+          <li
+            role="gridcell"
+          >
+            15
+          </li>
+          <li
+            aria-current="date"
+            role="gridcell"
+          >
+            16
+          </li>
+          <li
+            role="gridcell"
+          >
+            17
+          </li>
+          <li
+            role="gridcell"
+          >
+            18
+          </li>
+          <li
+            role="gridcell"
+          >
+            19
+          </li>
+          <li
+            role="gridcell"
+          >
+            20
+          </li>
+          <li
+            role="gridcell"
+          >
+            21
+          </li>
+          <li
+            role="gridcell"
+          >
+            22
+          </li>
+          <li
+            role="gridcell"
+          >
+            23
+          </li>
+          <li
+            role="gridcell"
+          >
+            24
+          </li>
+          <li
+            role="gridcell"
+          >
+            25
+          </li>
+          <li
+            role="gridcell"
+          >
+            26
+          </li>
+          <li
+            role="gridcell"
+          >
+            27
+          </li>
+          <li
+            role="gridcell"
+          >
+            28
+          </li>
+          <li
+            role="gridcell"
+          >
+            29
+          </li>
+          <li
+            role="gridcell"
+          >
+            30
+          </li>
+          <li
+            role="gridcell"
+          >
+            31
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            1
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            2
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            3
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            4
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            5
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            6
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            7
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            8
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</wup-calendar>
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=false day picker firstOfWeek: Sunday 1`] = `
+<wup-calendar>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-owns="txt2"
+        aria-readonly="false"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      />
+    </span>
+  </label>
+  <div
+    calendar="day"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        tabindex="-1"
+      >
+        December 2022
+      </button>
+    </header>
+    <div>
+      <div>
+        <ul
+          aria-hidden="true"
+        >
+          <li>
+            Su
+          </li>
+          <li>
+            Mo
+          </li>
+          <li>
+            Tu
+          </li>
+          <li>
+            We
+          </li>
+          <li>
+            Th
+          </li>
+          <li>
+            Fr
+          </li>
+          <li>
+            Sa
+          </li>
+        </ul>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            prev=""
+            role="gridcell"
+          >
+            27
+          </li>
+          <li
+            prev=""
+            role="gridcell"
+          >
+            28
+          </li>
+          <li
+            prev=""
+            role="gridcell"
+          >
+            29
+          </li>
+          <li
+            prev=""
+            role="gridcell"
+          >
+            30
+          </li>
+          <li
+            role="gridcell"
+          >
+            1
+          </li>
+          <li
+            role="gridcell"
+          >
+            2
+          </li>
+          <li
+            role="gridcell"
+          >
+            3
+          </li>
+          <li
+            role="gridcell"
+          >
+            4
+          </li>
+          <li
+            aria-selected="true"
+            role="gridcell"
+          >
+            5
+          </li>
+          <li
+            role="gridcell"
+          >
+            6
+          </li>
+          <li
+            role="gridcell"
+          >
+            7
+          </li>
+          <li
+            role="gridcell"
+          >
+            8
+          </li>
+          <li
+            role="gridcell"
+          >
+            9
+          </li>
+          <li
+            role="gridcell"
+          >
+            10
+          </li>
+          <li
+            role="gridcell"
+          >
+            11
+          </li>
+          <li
+            role="gridcell"
+          >
+            12
+          </li>
+          <li
+            role="gridcell"
+          >
+            13
+          </li>
+          <li
+            role="gridcell"
+          >
+            14
+          </li>
+          <li
+            role="gridcell"
+          >
+            15
+          </li>
+          <li
+            aria-current="date"
+            role="gridcell"
+          >
+            16
+          </li>
+          <li
+            role="gridcell"
+          >
+            17
+          </li>
+          <li
+            role="gridcell"
+          >
+            18
+          </li>
+          <li
+            role="gridcell"
+          >
+            19
+          </li>
+          <li
+            role="gridcell"
+          >
+            20
+          </li>
+          <li
+            role="gridcell"
+          >
+            21
+          </li>
+          <li
+            role="gridcell"
+          >
+            22
+          </li>
+          <li
+            role="gridcell"
+          >
+            23
+          </li>
+          <li
+            role="gridcell"
+          >
+            24
+          </li>
+          <li
+            role="gridcell"
+          >
+            25
+          </li>
+          <li
+            role="gridcell"
+          >
+            26
+          </li>
+          <li
+            role="gridcell"
+          >
+            27
+          </li>
+          <li
+            role="gridcell"
+          >
+            28
+          </li>
+          <li
+            role="gridcell"
+          >
+            29
+          </li>
+          <li
+            role="gridcell"
+          >
+            30
+          </li>
+          <li
+            role="gridcell"
+          >
+            31
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            1
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            2
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            3
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            4
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            5
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            6
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            7
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</wup-calendar>
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=false day picker firstOfWeek: Tuesday 1`] = `
+<wup-calendar>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-owns="txt2"
+        aria-readonly="false"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      />
+    </span>
+  </label>
+  <div
+    calendar="day"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        tabindex="-1"
+      >
+        December 2022
+      </button>
+    </header>
+    <div>
+      <div>
+        <ul
+          aria-hidden="true"
+        >
+          <li>
+            Tu
+          </li>
+          <li>
+            We
+          </li>
+          <li>
+            Th
+          </li>
+          <li>
+            Fr
+          </li>
+          <li>
+            Sa
+          </li>
+          <li>
+            Su
+          </li>
+          <li>
+            Mo
+          </li>
+        </ul>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            prev=""
+            role="gridcell"
+          >
+            29
+          </li>
+          <li
+            prev=""
+            role="gridcell"
+          >
+            30
+          </li>
+          <li
+            role="gridcell"
+          >
+            1
+          </li>
+          <li
+            role="gridcell"
+          >
+            2
+          </li>
+          <li
+            role="gridcell"
+          >
+            3
+          </li>
+          <li
+            role="gridcell"
+          >
+            4
+          </li>
+          <li
+            aria-selected="true"
+            role="gridcell"
+          >
+            5
+          </li>
+          <li
+            role="gridcell"
+          >
+            6
+          </li>
+          <li
+            role="gridcell"
+          >
+            7
+          </li>
+          <li
+            role="gridcell"
+          >
+            8
+          </li>
+          <li
+            role="gridcell"
+          >
+            9
+          </li>
+          <li
+            role="gridcell"
+          >
+            10
+          </li>
+          <li
+            role="gridcell"
+          >
+            11
+          </li>
+          <li
+            role="gridcell"
+          >
+            12
+          </li>
+          <li
+            role="gridcell"
+          >
+            13
+          </li>
+          <li
+            role="gridcell"
+          >
+            14
+          </li>
+          <li
+            role="gridcell"
+          >
+            15
+          </li>
+          <li
+            aria-current="date"
+            role="gridcell"
+          >
+            16
+          </li>
+          <li
+            role="gridcell"
+          >
+            17
+          </li>
+          <li
+            role="gridcell"
+          >
+            18
+          </li>
+          <li
+            role="gridcell"
+          >
+            19
+          </li>
+          <li
+            role="gridcell"
+          >
+            20
+          </li>
+          <li
+            role="gridcell"
+          >
+            21
+          </li>
+          <li
+            role="gridcell"
+          >
+            22
+          </li>
+          <li
+            role="gridcell"
+          >
+            23
+          </li>
+          <li
+            role="gridcell"
+          >
+            24
+          </li>
+          <li
+            role="gridcell"
+          >
+            25
+          </li>
+          <li
+            role="gridcell"
+          >
+            26
+          </li>
+          <li
+            role="gridcell"
+          >
+            27
+          </li>
+          <li
+            role="gridcell"
+          >
+            28
+          </li>
+          <li
+            role="gridcell"
+          >
+            29
+          </li>
+          <li
+            role="gridcell"
+          >
+            30
+          </li>
+          <li
+            role="gridcell"
+          >
+            31
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            1
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            2
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            3
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            4
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            5
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            6
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            7
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            8
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            9
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</wup-calendar>
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=false month picker 1`] = `
+<div
+  calendar="month"
+  id="txt2"
+>
+  <header>
+    <button
+      aria-hidden="true"
+      tabindex="-1"
+    >
+      2022
+    </button>
+  </header>
+  <div>
+    <div>
+      <ol
+        role="grid"
+        style="overflow: hidden;"
+      >
+        <li
+          role="gridcell"
+        >
+          Jan
+        </li>
+        <li
+          role="gridcell"
+        >
+          Feb
+        </li>
+        <li
+          role="gridcell"
+        >
+          Mar
+        </li>
+        <li
+          role="gridcell"
+        >
+          Apr
+        </li>
+        <li
+          role="gridcell"
+        >
+          May
+        </li>
+        <li
+          role="gridcell"
+        >
+          Jun
+        </li>
+        <li
+          role="gridcell"
+        >
+          Jul
+        </li>
+        <li
+          role="gridcell"
+        >
+          Aug
+        </li>
+        <li
+          role="gridcell"
+        >
+          Sep
+        </li>
+        <li
+          role="gridcell"
+        >
+          Oct
+        </li>
+        <li
+          role="gridcell"
+        >
+          Nov
+        </li>
+        <li
+          aria-current="date"
+          aria-selected="true"
+          role="gridcell"
+        >
+          Dec
+        </li>
+        <li
+          next=""
+          role="gridcell"
+        >
+          Jan
+        </li>
+        <li
+          next=""
+          role="gridcell"
+        >
+          Feb
+        </li>
+        <li
+          next=""
+          role="gridcell"
+        >
+          Mar
+        </li>
+        <li
+          next=""
+          role="gridcell"
+        >
+          Apr
+        </li>
+      </ol>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=false year picker 1`] = `
+<div
+  calendar="year"
+  id="txt2"
+>
+  <header>
+    <button
+      aria-hidden="true"
+      disabled=""
+      tabindex="-1"
+    >
+      2018 ... 2033
+    </button>
+  </header>
+  <div>
+    <div>
+      <ol
+        role="grid"
+        style="overflow: hidden;"
+      >
+        <li
+          aria-current="date"
+          aria-selected="true"
+          role="gridcell"
+        >
+          2018
+        </li>
+        <li
+          role="gridcell"
+        >
+          2019
+        </li>
+        <li
+          role="gridcell"
+        >
+          2020
+        </li>
+        <li
+          role="gridcell"
+        >
+          2021
+        </li>
+        <li
+          role="gridcell"
+        >
+          2022
+        </li>
+        <li
+          role="gridcell"
+        >
+          2023
+        </li>
+        <li
+          role="gridcell"
+        >
+          2024
+        </li>
+        <li
+          role="gridcell"
+        >
+          2025
+        </li>
+        <li
+          role="gridcell"
+        >
+          2026
+        </li>
+        <li
+          role="gridcell"
+        >
+          2027
+        </li>
+        <li
+          role="gridcell"
+        >
+          2028
+        </li>
+        <li
+          role="gridcell"
+        >
+          2029
+        </li>
+        <li
+          role="gridcell"
+        >
+          2030
+        </li>
+        <li
+          role="gridcell"
+        >
+          2031
+        </li>
+        <li
+          role="gridcell"
+        >
+          2032
+        </li>
+        <li
+          role="gridcell"
+        >
+          2033
+        </li>
+      </ol>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=true $options.exclude (attr [disabled]) 1`] = `
+[
+  "26",
+  "27",
+  "28",
+  "29",
+  "30 disabled",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
+  "13",
+  "14",
+  "15",
+  "16",
+  "17",
+  "18",
+  "19",
+  "20",
+  "21",
+  "22",
+  "23",
+  "24",
+  "25",
+  "26",
+  "27",
+  "28",
+  "29",
+  "30",
+  "31",
+  "1 disabled",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=true $options.exclude (attr [disabled]) 2`] = `
+[
+  "26 disabled",
+  "27 disabled",
+  "28 disabled",
+  "29 disabled",
+  "30 disabled",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10 disabled",
+  "11 disabled",
+  "12",
+  "13",
+  "14",
+  "15",
+  "16",
+  "17",
+  "18",
+  "19",
+  "20",
+  "21",
+  "22",
+  "23",
+  "24",
+  "25",
+  "26",
+  "27",
+  "28",
+  "29",
+  "30",
+  "31",
+  "1 disabled",
+  "2 disabled",
+  "3 disabled",
+  "4 disabled",
+  "5 disabled",
+  "6 disabled",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=true $options.exclude (attr [disabled]) 3`] = `
+[
+  "31",
+  "1 disabled",
+  "2 disabled",
+  "3 disabled",
+  "4 disabled",
+  "5 disabled",
+  "6 disabled",
+  "7 disabled",
+  "8 disabled",
+  "9 disabled",
+  "10 disabled",
+  "11 disabled",
+  "12 disabled",
+  "13 disabled",
+  "14 disabled",
+  "15 disabled",
+  "16 disabled",
+  "17 disabled",
+  "18 disabled",
+  "19 disabled",
+  "20 disabled",
+  "21 disabled",
+  "22 disabled",
+  "23 disabled",
+  "24 disabled",
+  "25 disabled",
+  "26 disabled",
+  "27 disabled",
+  "28 disabled",
+  "29 disabled",
+  "30 disabled",
+  "1 disabled",
+  "2 disabled",
+  "3 disabled",
+  "4 disabled",
+  "5 disabled",
+  "6 disabled",
+  "7 disabled",
+  "8 disabled",
+  "9 disabled",
+  "10 disabled",
+  "11 disabled",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=true $options.exclude (attr [disabled]) 4`] = `
+[
+  "Jan disabled",
+  "Feb disabled",
+  "Mar disabled",
+  "Apr disabled",
+  "May disabled",
+  "Jun disabled",
+  "Jul disabled",
+  "Aug disabled",
+  "Sep disabled",
+  "Oct",
+  "Nov disabled",
+  "Dec disabled",
+  "Jan disabled",
+  "Feb disabled",
+  "Mar disabled",
+  "Apr disabled",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=true $options.exclude (attr [disabled]) 5`] = `
+[
+  "2018 disabled",
+  "2019 disabled",
+  "2020 disabled",
+  "2021 disabled",
+  "2022",
+  "2023 disabled",
+  "2024 disabled",
+  "2025 disabled",
+  "2026 disabled",
+  "2027 disabled",
+  "2028 disabled",
+  "2029 disabled",
+  "2030 disabled",
+  "2031 disabled",
+  "2032 disabled",
+  "2033 disabled",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=true $options.exclude (attr [disabled]) 6`] = `
+[
+  "2018",
+  "2019",
+  "2020",
+  "2021",
+  "2022 disabled",
+  "2023",
+  "2024",
+  "2025",
+  "2026",
+  "2027",
+  "2028",
+  "2029",
+  "2030",
+  "2031",
+  "2032",
+  "2033",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=true $options.exclude (attr [disabled]) 7`] = `
+[
+  "31 disabled",
+  "1 disabled",
+  "2 disabled",
+  "3 disabled",
+  "4 disabled",
+  "5 disabled",
+  "6 disabled",
+  "7 disabled",
+  "8 disabled",
+  "9 disabled",
+  "10 disabled",
+  "11 disabled",
+  "12 disabled",
+  "13 disabled",
+  "14 disabled",
+  "15 disabled",
+  "16 disabled",
+  "17 disabled",
+  "18 disabled",
+  "19 disabled",
+  "20 disabled",
+  "21 disabled",
+  "22 disabled",
+  "23 disabled",
+  "24 disabled",
+  "25 disabled",
+  "26 disabled",
+  "27 disabled",
+  "28 disabled",
+  "1 disabled",
+  "2 disabled",
+  "3 disabled",
+  "4 disabled",
+  "5 disabled",
+  "6 disabled",
+  "7 disabled",
+  "8 disabled",
+  "9 disabled",
+  "10 disabled",
+  "11 disabled",
+  "12 disabled",
+  "13 disabled",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=true $options.exclude (attr [disabled]) 8`] = `
+[
+  "Jan",
+  "Feb disabled",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=true $options.exclude (attr [disabled]) 9`] = `
+[
+  "31",
+  "1 disabled",
+  "2 disabled",
+  "3 disabled",
+  "4 disabled",
+  "5 disabled",
+  "6 disabled",
+  "7 disabled",
+  "8 disabled",
+  "9 disabled",
+  "10 disabled",
+  "11 disabled",
+  "12 disabled",
+  "13 disabled",
+  "14 disabled",
+  "15 disabled",
+  "16 disabled",
+  "17 disabled",
+  "18 disabled",
+  "19 disabled",
+  "20 disabled",
+  "21 disabled",
+  "22 disabled",
+  "23 disabled",
+  "24 disabled",
+  "25 disabled",
+  "26 disabled",
+  "27 disabled",
+  "28 disabled",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
+  "13",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=true $options.min & .max 1`] = `
+[
+  "26 disabled",
+  "27 disabled",
+  "28 disabled",
+  "29 disabled",
+  "30",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
+  "13",
+  "14",
+  "15",
+  "16",
+  "17",
+  "18",
+  "19",
+  "20",
+  "21",
+  "22",
+  "23",
+  "24",
+  "25",
+  "26",
+  "27",
+  "28",
+  "29",
+  "30",
+  "31",
+  "1",
+  "2 disabled",
+  "3 disabled",
+  "4 disabled",
+  "5 disabled",
+  "6 disabled",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=true $options.min & .max 2`] = `
+[
+  "31",
+  "1",
+  "2 disabled",
+  "3 disabled",
+  "4 disabled",
+  "5 disabled",
+  "6 disabled",
+  "7 disabled",
+  "8 disabled",
+  "9 disabled",
+  "10 disabled",
+  "11 disabled",
+  "12 disabled",
+  "13 disabled",
+  "14 disabled",
+  "15 disabled",
+  "16 disabled",
+  "17 disabled",
+  "18 disabled",
+  "19 disabled",
+  "20 disabled",
+  "21 disabled",
+  "22 disabled",
+  "23 disabled",
+  "24 disabled",
+  "25 disabled",
+  "26 disabled",
+  "27 disabled",
+  "28 disabled",
+  "29 disabled",
+  "30 disabled",
+  "1 disabled",
+  "2 disabled",
+  "3 disabled",
+  "4 disabled",
+  "5 disabled",
+  "6 disabled",
+  "7 disabled",
+  "8 disabled",
+  "9 disabled",
+  "10 disabled",
+  "11 disabled",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=true $options.min & .max 3`] = `
+[
+  "29 disabled",
+  "30 disabled",
+  "31 disabled",
+  "1 disabled",
+  "2 disabled",
+  "3 disabled",
+  "4 disabled",
+  "5 disabled",
+  "6 disabled",
+  "7 disabled",
+  "8 disabled",
+  "9 disabled",
+  "10 disabled",
+  "11 disabled",
+  "12 disabled",
+  "13 disabled",
+  "14 disabled",
+  "15 disabled",
+  "16 disabled",
+  "17 disabled",
+  "18 disabled",
+  "19 disabled",
+  "20 disabled",
+  "21 disabled",
+  "22 disabled",
+  "23 disabled",
+  "24 disabled",
+  "25 disabled",
+  "26 disabled",
+  "27 disabled",
+  "28 disabled",
+  "29 disabled",
+  "30",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+]
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=true $options.min & .max 4`] = `
+<wup-calendar>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-describedby="txt4"
+        aria-owns="txt2"
+        aria-readonly="false"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      />
+    </span>
+  </label>
+  <div
+    calendar="month"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        tabindex="-1"
+      >
+        2021
+      </button>
+    </header>
+    <div>
+      <div>
+        <ul
+          aria-hidden="true"
+        >
+          <li>
+            Mo
+          </li>
+          <li>
+            Tu
+          </li>
+          <li>
+            We
+          </li>
+          <li>
+            Th
+          </li>
+          <li>
+            Fr
+          </li>
+          <li>
+            Sa
+          </li>
+          <li>
+            Su
+          </li>
+        </ul>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Jan
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Feb
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Mar
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Apr
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            May
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Jun
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Jul
+          </li>
+          <li
+            role="gridcell"
+          >
+            Aug
+          </li>
+          <li
+            role="gridcell"
+          >
+            Sep
+          </li>
+          <li
+            role="gridcell"
+          >
+            Oct
+          </li>
+          <li
+            role="gridcell"
+          >
+            Nov
+          </li>
+          <li
+            role="gridcell"
+          >
+            Dec
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            Jan
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            Feb
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            Mar
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            Apr
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt4"
+  >
+    2021
+  </section>
+</wup-calendar>
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=true $options.min & .max 5`] = `
+<wup-calendar>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-describedby="txt5 txt6"
+        aria-owns="txt2"
+        aria-readonly="false"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      />
+    </span>
+  </label>
+  <div
+    calendar="month"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        tabindex="-1"
+      >
+        2023
+      </button>
+    </header>
+    <div>
+      <div>
+        <ul
+          aria-hidden="true"
+        >
+          <li>
+            Mo
+          </li>
+          <li>
+            Tu
+          </li>
+          <li>
+            We
+          </li>
+          <li>
+            Th
+          </li>
+          <li>
+            Fr
+          </li>
+          <li>
+            Sa
+          </li>
+          <li>
+            Su
+          </li>
+        </ul>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            role="gridcell"
+          >
+            Jan
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Feb
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Mar
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Apr
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            May
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Jun
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Jul
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Aug
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Sep
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Oct
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Nov
+          </li>
+          <li
+            disabled=""
+            role="gridcell"
+          >
+            Dec
+          </li>
+          <li
+            disabled=""
+            next=""
+            role="gridcell"
+          >
+            Jan
+          </li>
+          <li
+            disabled=""
+            next=""
+            role="gridcell"
+          >
+            Feb
+          </li>
+          <li
+            disabled=""
+            next=""
+            role="gridcell"
+          >
+            Mar
+          </li>
+          <li
+            disabled=""
+            next=""
+            role="gridcell"
+          >
+            Apr
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt5"
+  >
+    2022
+  </section>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt6"
+  >
+    2023
+  </section>
+</wup-calendar>
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=true $options.min & .max 6`] = `
+<ol
+  role="grid"
+  style="overflow: hidden;"
+>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2002
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2003
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2004
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2005
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2006
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2007
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2008
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2009
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2010
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2011
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2012
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2013
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2014
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2015
+  </li>
+  <li
+    role="gridcell"
+  >
+    2016
+  </li>
+  <li
+    role="gridcell"
+  >
+    2017
+  </li>
+</ol>
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=true $options.min & .max 7`] = `
+<ol
+  role="grid"
+  style="overflow: hidden;"
+>
+  <li
+    role="gridcell"
+  >
+    2034
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2035
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2036
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2037
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2038
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2039
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2040
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2041
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2042
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2043
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2044
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2045
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2046
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2047
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2048
+  </li>
+  <li
+    disabled=""
+    role="gridcell"
+  >
+    2049
+  </li>
+</ol>
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=true day picker firstOfWeek: Monday 1`] = `
+<wup-calendar>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-owns="txt2"
+        aria-readonly="false"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      />
+    </span>
+  </label>
+  <div
+    calendar="day"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        tabindex="-1"
+      >
+        December 2022
+      </button>
+    </header>
+    <div>
+      <div>
+        <ul
+          aria-hidden="true"
+        >
+          <li>
+            Mo
+          </li>
+          <li>
+            Tu
+          </li>
+          <li>
+            We
+          </li>
+          <li>
+            Th
+          </li>
+          <li>
+            Fr
+          </li>
+          <li>
+            Sa
+          </li>
+          <li>
+            Su
+          </li>
+        </ul>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            prev=""
+            role="gridcell"
+          >
+            28
+          </li>
+          <li
+            prev=""
+            role="gridcell"
+          >
+            29
+          </li>
+          <li
+            prev=""
+            role="gridcell"
+          >
+            30
+          </li>
+          <li
+            role="gridcell"
+          >
+            1
+          </li>
+          <li
+            role="gridcell"
+          >
+            2
+          </li>
+          <li
+            role="gridcell"
+          >
+            3
+          </li>
+          <li
+            role="gridcell"
+          >
+            4
+          </li>
+          <li
+            aria-selected="true"
+            role="gridcell"
+          >
+            5
+          </li>
+          <li
+            role="gridcell"
+          >
+            6
+          </li>
+          <li
+            role="gridcell"
+          >
+            7
+          </li>
+          <li
+            role="gridcell"
+          >
+            8
+          </li>
+          <li
+            role="gridcell"
+          >
+            9
+          </li>
+          <li
+            role="gridcell"
+          >
+            10
+          </li>
+          <li
+            role="gridcell"
+          >
+            11
+          </li>
+          <li
+            role="gridcell"
+          >
+            12
+          </li>
+          <li
+            role="gridcell"
+          >
+            13
+          </li>
+          <li
+            role="gridcell"
+          >
+            14
+          </li>
+          <li
+            role="gridcell"
+          >
+            15
+          </li>
+          <li
+            aria-current="date"
+            role="gridcell"
+          >
+            16
+          </li>
+          <li
+            role="gridcell"
+          >
+            17
+          </li>
+          <li
+            role="gridcell"
+          >
+            18
+          </li>
+          <li
+            role="gridcell"
+          >
+            19
+          </li>
+          <li
+            role="gridcell"
+          >
+            20
+          </li>
+          <li
+            role="gridcell"
+          >
+            21
+          </li>
+          <li
+            role="gridcell"
+          >
+            22
+          </li>
+          <li
+            role="gridcell"
+          >
+            23
+          </li>
+          <li
+            role="gridcell"
+          >
+            24
+          </li>
+          <li
+            role="gridcell"
+          >
+            25
+          </li>
+          <li
+            role="gridcell"
+          >
+            26
+          </li>
+          <li
+            role="gridcell"
+          >
+            27
+          </li>
+          <li
+            role="gridcell"
+          >
+            28
+          </li>
+          <li
+            role="gridcell"
+          >
+            29
+          </li>
+          <li
+            role="gridcell"
+          >
+            30
+          </li>
+          <li
+            role="gridcell"
+          >
+            31
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            1
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            2
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            3
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            4
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            5
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            6
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            7
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            8
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</wup-calendar>
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=true day picker firstOfWeek: Sunday 1`] = `
+<wup-calendar>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-owns="txt2"
+        aria-readonly="false"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      />
+    </span>
+  </label>
+  <div
+    calendar="day"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        tabindex="-1"
+      >
+        December 2022
+      </button>
+    </header>
+    <div>
+      <div>
+        <ul
+          aria-hidden="true"
+        >
+          <li>
+            Su
+          </li>
+          <li>
+            Mo
+          </li>
+          <li>
+            Tu
+          </li>
+          <li>
+            We
+          </li>
+          <li>
+            Th
+          </li>
+          <li>
+            Fr
+          </li>
+          <li>
+            Sa
+          </li>
+        </ul>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            prev=""
+            role="gridcell"
+          >
+            27
+          </li>
+          <li
+            prev=""
+            role="gridcell"
+          >
+            28
+          </li>
+          <li
+            prev=""
+            role="gridcell"
+          >
+            29
+          </li>
+          <li
+            prev=""
+            role="gridcell"
+          >
+            30
+          </li>
+          <li
+            role="gridcell"
+          >
+            1
+          </li>
+          <li
+            role="gridcell"
+          >
+            2
+          </li>
+          <li
+            role="gridcell"
+          >
+            3
+          </li>
+          <li
+            role="gridcell"
+          >
+            4
+          </li>
+          <li
+            aria-selected="true"
+            role="gridcell"
+          >
+            5
+          </li>
+          <li
+            role="gridcell"
+          >
+            6
+          </li>
+          <li
+            role="gridcell"
+          >
+            7
+          </li>
+          <li
+            role="gridcell"
+          >
+            8
+          </li>
+          <li
+            role="gridcell"
+          >
+            9
+          </li>
+          <li
+            role="gridcell"
+          >
+            10
+          </li>
+          <li
+            role="gridcell"
+          >
+            11
+          </li>
+          <li
+            role="gridcell"
+          >
+            12
+          </li>
+          <li
+            role="gridcell"
+          >
+            13
+          </li>
+          <li
+            role="gridcell"
+          >
+            14
+          </li>
+          <li
+            role="gridcell"
+          >
+            15
+          </li>
+          <li
+            aria-current="date"
+            role="gridcell"
+          >
+            16
+          </li>
+          <li
+            role="gridcell"
+          >
+            17
+          </li>
+          <li
+            role="gridcell"
+          >
+            18
+          </li>
+          <li
+            role="gridcell"
+          >
+            19
+          </li>
+          <li
+            role="gridcell"
+          >
+            20
+          </li>
+          <li
+            role="gridcell"
+          >
+            21
+          </li>
+          <li
+            role="gridcell"
+          >
+            22
+          </li>
+          <li
+            role="gridcell"
+          >
+            23
+          </li>
+          <li
+            role="gridcell"
+          >
+            24
+          </li>
+          <li
+            role="gridcell"
+          >
+            25
+          </li>
+          <li
+            role="gridcell"
+          >
+            26
+          </li>
+          <li
+            role="gridcell"
+          >
+            27
+          </li>
+          <li
+            role="gridcell"
+          >
+            28
+          </li>
+          <li
+            role="gridcell"
+          >
+            29
+          </li>
+          <li
+            role="gridcell"
+          >
+            30
+          </li>
+          <li
+            role="gridcell"
+          >
+            31
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            1
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            2
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            3
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            4
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            5
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            6
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            7
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</wup-calendar>
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=true day picker firstOfWeek: Tuesday 1`] = `
+<wup-calendar>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-controls="txt2"
+        aria-owns="txt2"
+        aria-readonly="false"
+        autocomplete="off"
+        id="txt1"
+        readonly=""
+        role="combobox"
+        type="text"
+      />
+      <strong
+        class="wup-hidden"
+      />
+    </span>
+  </label>
+  <div
+    calendar="day"
+    id="txt2"
+  >
+    <header>
+      <button
+        aria-hidden="true"
+        tabindex="-1"
+      >
+        December 2022
+      </button>
+    </header>
+    <div>
+      <div>
+        <ul
+          aria-hidden="true"
+        >
+          <li>
+            Tu
+          </li>
+          <li>
+            We
+          </li>
+          <li>
+            Th
+          </li>
+          <li>
+            Fr
+          </li>
+          <li>
+            Sa
+          </li>
+          <li>
+            Su
+          </li>
+          <li>
+            Mo
+          </li>
+        </ul>
+        <ol
+          role="grid"
+          style="overflow: hidden;"
+        >
+          <li
+            prev=""
+            role="gridcell"
+          >
+            29
+          </li>
+          <li
+            prev=""
+            role="gridcell"
+          >
+            30
+          </li>
+          <li
+            role="gridcell"
+          >
+            1
+          </li>
+          <li
+            role="gridcell"
+          >
+            2
+          </li>
+          <li
+            role="gridcell"
+          >
+            3
+          </li>
+          <li
+            role="gridcell"
+          >
+            4
+          </li>
+          <li
+            aria-selected="true"
+            role="gridcell"
+          >
+            5
+          </li>
+          <li
+            role="gridcell"
+          >
+            6
+          </li>
+          <li
+            role="gridcell"
+          >
+            7
+          </li>
+          <li
+            role="gridcell"
+          >
+            8
+          </li>
+          <li
+            role="gridcell"
+          >
+            9
+          </li>
+          <li
+            role="gridcell"
+          >
+            10
+          </li>
+          <li
+            role="gridcell"
+          >
+            11
+          </li>
+          <li
+            role="gridcell"
+          >
+            12
+          </li>
+          <li
+            role="gridcell"
+          >
+            13
+          </li>
+          <li
+            role="gridcell"
+          >
+            14
+          </li>
+          <li
+            role="gridcell"
+          >
+            15
+          </li>
+          <li
+            aria-current="date"
+            role="gridcell"
+          >
+            16
+          </li>
+          <li
+            role="gridcell"
+          >
+            17
+          </li>
+          <li
+            role="gridcell"
+          >
+            18
+          </li>
+          <li
+            role="gridcell"
+          >
+            19
+          </li>
+          <li
+            role="gridcell"
+          >
+            20
+          </li>
+          <li
+            role="gridcell"
+          >
+            21
+          </li>
+          <li
+            role="gridcell"
+          >
+            22
+          </li>
+          <li
+            role="gridcell"
+          >
+            23
+          </li>
+          <li
+            role="gridcell"
+          >
+            24
+          </li>
+          <li
+            role="gridcell"
+          >
+            25
+          </li>
+          <li
+            role="gridcell"
+          >
+            26
+          </li>
+          <li
+            role="gridcell"
+          >
+            27
+          </li>
+          <li
+            role="gridcell"
+          >
+            28
+          </li>
+          <li
+            role="gridcell"
+          >
+            29
+          </li>
+          <li
+            role="gridcell"
+          >
+            30
+          </li>
+          <li
+            role="gridcell"
+          >
+            31
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            1
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            2
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            3
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            4
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            5
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            6
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            7
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            8
+          </li>
+          <li
+            next=""
+            role="gridcell"
+          >
+            9
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</wup-calendar>
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=true month picker 1`] = `
+<div
+  calendar="month"
+  id="txt2"
+>
+  <header>
+    <button
+      aria-hidden="true"
+      tabindex="-1"
+    >
+      2022
+    </button>
+  </header>
+  <div>
+    <div>
+      <ol
+        role="grid"
+        style="overflow: hidden;"
+      >
+        <li
+          role="gridcell"
+        >
+          Jan
+        </li>
+        <li
+          role="gridcell"
+        >
+          Feb
+        </li>
+        <li
+          role="gridcell"
+        >
+          Mar
+        </li>
+        <li
+          role="gridcell"
+        >
+          Apr
+        </li>
+        <li
+          role="gridcell"
+        >
+          May
+        </li>
+        <li
+          role="gridcell"
+        >
+          Jun
+        </li>
+        <li
+          role="gridcell"
+        >
+          Jul
+        </li>
+        <li
+          role="gridcell"
+        >
+          Aug
+        </li>
+        <li
+          role="gridcell"
+        >
+          Sep
+        </li>
+        <li
+          role="gridcell"
+        >
+          Oct
+        </li>
+        <li
+          role="gridcell"
+        >
+          Nov
+        </li>
+        <li
+          aria-current="date"
+          aria-selected="true"
+          role="gridcell"
+        >
+          Dec
+        </li>
+        <li
+          next=""
+          role="gridcell"
+        >
+          Jan
+        </li>
+        <li
+          next=""
+          role="gridcell"
+        >
+          Feb
+        </li>
+        <li
+          next=""
+          role="gridcell"
+        >
+          Mar
+        </li>
+        <li
+          next=""
+          role="gridcell"
+        >
+          Apr
+        </li>
+      </ol>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`control.calendar >> timezone: CET, offset: -120 utc=true year picker 1`] = `
+<div
+  calendar="year"
+  id="txt2"
+>
+  <header>
+    <button
+      aria-hidden="true"
+      disabled=""
+      tabindex="-1"
+    >
+      2018 ... 2033
+    </button>
+  </header>
+  <div>
+    <div>
+      <ol
+        role="grid"
+        style="overflow: hidden;"
+      >
+        <li
+          aria-current="date"
+          aria-selected="true"
+          role="gridcell"
+        >
+          2018
+        </li>
+        <li
+          role="gridcell"
+        >
+          2019
+        </li>
+        <li
+          role="gridcell"
+        >
+          2020
+        </li>
+        <li
+          role="gridcell"
+        >
+          2021
+        </li>
+        <li
+          role="gridcell"
+        >
+          2022
+        </li>
+        <li
+          role="gridcell"
+        >
+          2023
+        </li>
+        <li
+          role="gridcell"
+        >
+          2024
+        </li>
+        <li
+          role="gridcell"
+        >
+          2025
+        </li>
+        <li
+          role="gridcell"
+        >
+          2026
+        </li>
+        <li
+          role="gridcell"
+        >
+          2027
+        </li>
+        <li
+          role="gridcell"
+        >
+          2028
+        </li>
+        <li
+          role="gridcell"
+        >
+          2029
+        </li>
+        <li
+          role="gridcell"
+        >
+          2030
+        </li>
+        <li
+          role="gridcell"
+        >
+          2031
+        </li>
+        <li
+          role="gridcell"
+        >
+          2032
+        </li>
+        <li
+          role="gridcell"
+        >
+          2033
+        </li>
+      </ol>
+    </div>
+  </div>
+</div>
+`;

@@ -1,12 +1,11 @@
+/* eslint-disable react/no-unescaped-entities */
 import Page from "src/elements/page";
 import { WUPTextControl } from "web-ui-pack";
 
 const sideEffect = WUPTextControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
 
-(window as any).globalkey = {
-  pointHere: { required: true } as WUPText.Options["validations"],
-};
+(window as any).myTextValidations = { required: true, min: 4 } as WUPText.Options["validations"];
 
 export default function TextControlView() {
   return (
@@ -21,14 +20,15 @@ export default function TextControlView() {
         "Smart clear (reset/revert) by Esc key and button-clear (use $defaults.clearActions)",
         "Built-in validations (required,min,max,email). To extend use $defaults.validations",
         "Smart validations on the fly (use $defaults.validationCases)",
-        "Powerful accessibility support",
+        "Powerful accessibility support (keyboard, announcenement)",
+        "Mask/maskholder support (options mask & maskholder)",
       ]}
     >
       <wup-form
         ref={(el) => {
           if (el) {
             el.$initModel = { email: "test@google.com", required: "yes" };
-            el.$onSubmit = (e) => console.warn("sumbitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
       >
@@ -38,9 +38,11 @@ export default function TextControlView() {
           initValue="test@google.com"
           autoComplete="off"
           autoFocus={false}
-          validations="window._someObject"
+          validations="window.myTextValidations"
+          mask=""
+          maskholder=""
         />
-        <wup-text name="required" validations="globalkey.pointHere" />
+        <wup-text name="required" validations="myTextValidations" />
         <wup-text
           ref={(el) => {
             if (el) {
@@ -86,8 +88,45 @@ export default function TextControlView() {
             }
           }}
         />
+        <section>
+          <h3>Masked inputs</h3>
+          <br />
+          <wup-text
+            name="phone"
+            label="Phone number"
+            mask="+1(000) 000-0000"
+            ref={(el) => {
+              if (el) {
+                el.$options.validations = { required: true };
+              }
+            }}
+          />
+          <wup-text name="ipaddr" label="IPaddress" mask="##0.##0.##0.##0" maskholder="xxx.xxx.xxx.xxx" />
+          <wup-text name="num" label="Test suffix" mask="$ ##0 USD" maskholder="$ 000 USD" />
+          Features:
+          <ul>
+            <li>
+              supports only numeric mask (to support alphabet-chars create an issue on Github), example:
+              <br /> $options.mask=<b>"+1(000) 000-0000"</b> - for phone number
+              <br /> $options.mask=<b>"##0.##0.##0.##0"</b> - for IP address
+              <br /> where <b>#</b> - optional, <b>0</b> - required number
+            </li>
+            <li>prediction: all static chars append automatically</li>
+            <li>lazy: type next separator on press Space to fill rest required digits with zeros</li>
+            <li>history redo/undo (use Ctrl+Z, Ctrl+Y)</li>
+            <li>shows typed declined chars (so user can see that keyboard works) and rollback after 100ms</li>
+            <li>possible to delete/append chars in the middle of text</li>
+            <li>
+              enables validations.mask by default with message <b>Incomplete value</b>
+            </li>
+            <li>usage details see in JSDoc: use intellisense to get info during the coding</li>
+          </ul>
+        </section>
         <button type="submit">Submit</button>
       </wup-form>
     </Page>
   );
 }
+
+// todo details about icons before/after
+// todo details about ariaAttributes to change messages

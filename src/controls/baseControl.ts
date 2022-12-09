@@ -57,7 +57,19 @@ export namespace WUPBaseIn {
     Validation: (value: ValueType | undefined, setValue: ValidationKeys[keyof ValidationKeys]) => false | string;
     CustomValidation: (value: ValueType | undefined) => false | string;
     Defaults: {
-      /** Rules defined for control */
+      /** Rules defined for control;
+       * * all functions must return error-message when value === undefined
+       * * all functions must return error-message if setValue is true/enabled and value doesn't fit some rule
+       * * value can be undefined only when a rule named as 'required' or need to collect error-messages @see $options.validationShowAll
+       * @example
+       * ```
+       * WUPTextControl.$defaults.validationRules.isNumber = (v === undefined || !/^[0-9]*$/.test(v)) && "Please enter a valid number";
+       *
+       * const el = document.body.appendChild(document.createElement("wup-text"));
+       * el.$options.validations = {
+          isNumber: true,
+        };
+       * ``` */
       validationRules: {
         [K in keyof ValidationKeys]?: (
           value: ValueType,
@@ -69,9 +81,8 @@ export namespace WUPBaseIn {
        *  @defaultValue onChangeSmart | onFocusLost | onFocusWithValue | onSubmit
        */
       validationCase: ValidationCases;
-      /** Wait for pointed time after valueChange before show error (it's sumarized with $options.debounce); WARN: hide error without debounce
-       *  @defaultValue 500
-       */
+      /** Wait for pointed time after valueChange before showError (it's sumarized with $options.debounce); WARN: hide error without debounce
+       *  @defaultValue 500 */
       validateDebounceMs: number;
       /** Debounce option for onFocustLost event (for validationCases.onFocusLost); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost;
        * @defaultValue 100ms */
@@ -95,7 +106,15 @@ export namespace WUPBaseIn {
       disabled?: boolean;
       /** Disallow copy value; adds attr [readonly] for styling */
       readOnly?: boolean;
-      /** Rules enabled for current control */
+      /** Rules enabled for current control; you can enable defined in $defaults.validationRules or define own directly
+       * @example
+       * ```
+       * const el = document.body.appendChild(document.createElement("wup-text"));
+         el.$options.validations = {
+           min: 10, // set min 10symbols for $default.validationRules.min
+           custom: (value: string | undefined) => (value === undefined || value === "test-me") && "This is custom error", // custom validation for single element
+         };
+       * ``` */
       validations?:
         | {
             [K in keyof ValidationKeys]?: ValidationKeys[K] | ((value: ValueType | undefined) => false | string);
@@ -116,6 +135,7 @@ type StoredRefError = HTMLElement & { _wupVldItems?: StoredItem[] };
 declare global {
   namespace WUPBase {
     interface ValidationMap {
+      /** If $value is empty shows message 'This field is required` */
       required: boolean;
     }
     interface Defaults<T = string> extends WUPBaseIn.GenDef<T> {}
@@ -150,12 +170,18 @@ declare global {
   }
 }
 
+/** Base abstract form-control */
 export default abstract class WUPBaseControl<ValueType = any, Events extends WUPBase.EventMap = WUPBase.EventMap>
   extends WUPBaseElement<Events>
   implements IBaseControl<ValueType>
 {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseControl;
+
+  /** Text announced by screen-readers when control cleared; @defaultValue `cleared` */
+  static get $ariaCleared(): string {
+    return "cleared";
+  }
 
   /* Array of options names to listen for changes */
   static get observedOptions(): Array<string> {
@@ -206,6 +232,9 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
         cursor: pointer;
+        -webkit-tap-highlight-color: transparent;${
+          /* issue: https://stackoverflow.com/questions/25704650/disable-blue-highlight-when-touch-press-object-with-cursorpointer */ ""
+        }
       }
       :host strong,
       :host legend {
@@ -334,7 +363,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUPBase.Defaults = {
+  static $defaults: WUPBase.Defaults<any> = {
     clearActions: ClearActions.clear | ClearActions.resetToInit,
     validateDebounceMs: 500,
     validationCase: ValidationCases.onChangeSmart | ValidationCases.onFocusLost | ValidationCases.onFocusWithValue,
@@ -371,10 +400,13 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   set $initValue(v: ValueType | undefined) {
-    if (!this.$isReady || (!this.#ctr.$isEqual(v, this.#initValue) && !this.$isDirty && !this.$isChanged)) {
-      this.$value = v; // setValue if it's empty and not isDirty
-    }
+    const was = this.#initValue;
+    const canUpdate = !this.$isReady || (!this.$isDirty && !this.$isChanged);
     this.#initValue = v;
+    if (canUpdate && !this.#ctr.$isEqual(v, was)) {
+      // WARN: comparing required for SelectControl when during the parse it waits for promise
+      this.$value = v; // WARN: it's fire $change event despite on value set from $initValue
+    }
     if (!(this as any)._noDelInitValueAttr) {
       this._isStopChanges = true;
       this.removeAttribute("initvalue");
@@ -404,14 +436,14 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return !this.#ctr.$isEqual(this.$value, this.#initValue);
   }
 
-  #isValid?: boolean;
+  _isValid?: boolean;
   /** Returns true if control is valid */
   get $isValid(): boolean {
-    if (this.#isValid == null) {
-      this.goValidate(ValidateFromCases.onInit, false);
+    if (this._isValid == null) {
+      this.goValidate(ValidateFromCases.onInit, true);
     }
 
-    return this.#isValid as boolean;
+    return this._isValid as boolean;
   }
 
   /** Returns if current control is active/focused */
@@ -435,10 +467,16 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return (af === true ? this._opts.name : af) || false;
   }
 
-  /** Check validity and show error if canShowError is true (by default)
+  /** Check validity and show error if silent is false (by default)
    * @returns errorMessage or false (if valid) */
-  $validate(canShowError = true): string | false {
-    return this.goValidate(ValidateFromCases.onManualCall, canShowError);
+  $validate(silent = false): string | false {
+    return this.goValidate(ValidateFromCases.onManualCall, silent);
+  }
+
+  /** Check validity and show error
+   * @returns errorMessage or false (if valid) */
+  validateBySubmit(): string | false {
+    return this.goValidate(ValidateFromCases.onSubmit);
   }
 
   $showError(err: string): void {
@@ -476,12 +514,24 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     /* istanbul ignore else */
     if (text) {
       const el = document.createElement("section");
-      el.setAttribute("aria-live", "polite");
+      el.setAttribute("aria-live", "off");
       el.setAttribute("aria-atomic", true);
       el.className = this.#ctr.classNameHidden;
+      el.id = this.#ctr.$uniqueId;
+      const i = this.$refInput;
+      const an = "aria-describedby";
+      i.setAttribute(an, `${this.$refInput.getAttribute(an) || ""} ${el.id}`.trimStart());
       this.appendChild(el);
       setTimeout(() => (el.textContent = text), 100); // otherwise reader doesn't announce section
-      setTimeout(() => el.remove(), 200);
+      setTimeout(() => {
+        el.remove();
+        const a = i.getAttribute(an);
+        /* istanbul ignore else */
+        if (a != null) {
+          const aNext = a.replace(el.id, "").replace("  ", " ").trim();
+          aNext ? i.setAttribute(an, aNext) : i.removeAttribute(an);
+        }
+      }, 200);
     }
   }
 
@@ -527,7 +577,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       const attr = this.getAttribute("initvalue");
       if (attr !== null) {
         (this as any)._noDelInitValueAttr = true;
-        this.$initValue = this.parseValue(attr);
+        this.$initValue = this.parse(attr);
         delete (this as any)._noDelInitValueAttr;
       } else if (propsChanged) {
         this.$initValue = undefined; // removed attr >> remove initValue
@@ -547,35 +597,40 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gotFormChanges(propsChanged: Array<string> | null): void {
     const i = this.$refInput;
-    i.disabled = this.$isDisabled as boolean;
+    i.disabled = this.$isDisabled;
     i.readOnly = this.$isReadOnly;
     i.autocomplete = this.$autoComplete || "off";
+    this.$refError && !this.canShowError && this.goHideError(); // hide error if user can't touch the control
+  }
+
+  /** Returns true on !$isDisabled */
+  get canShowError(): boolean {
+    return !this.$isDisabled; // && !this.$isReadOnly;
   }
 
   /** Use this to append elements; called single time when element isConnected/appended to layout but not ready yet
    * Attention: this.$refInput is already defined */
   protected abstract renderControl(): void;
   /** Called when need to parse inputValue or attr [initValue] */
-  abstract parseValue(text: string): ValueType | undefined;
+  abstract parse(text: string): ValueType | undefined;
 
   protected override gotReady(): void {
     super.gotReady();
 
-    const r = onFocusGot(
-      this,
-      () => {
-        const arr = this.gotFocus();
-        const r2 = onFocusLostEv(this, () => {
-          arr.forEach((f) => f());
-          this.gotFocusLost();
-          r2();
-          this.disposeLst.splice(this.disposeLst.indexOf(r2), 1);
-        });
-        this.disposeLst.push(r2);
-      },
-      { debounceMs: this._opts.focusDebounceMs }
-    );
+    const onFocusGotHandler = (): void => {
+      const arr = this.gotFocus();
+      const r = onFocusLostEv(this, () => {
+        this.gotFocusLost();
+        arr.forEach((f) => f());
+        r();
+        this.disposeLst.splice(this.disposeLst.indexOf(r), 1);
+      });
+      this.disposeLst.push(r);
+    };
 
+    this.$isFocused && setTimeout(onFocusGotHandler); // case if append element and focus immediately
+
+    const r = onFocusGot(this, onFocusGotHandler, { debounceMs: this._opts.focusDebounceMs });
     this.disposeLst.push(r);
 
     // appendEvent removed by dispose()
@@ -605,6 +660,10 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   protected override connectedCallback(): void {
+    delete this._errName;
+    delete this._errMsg;
+    delete this._wasValidNotEmpty;
+
     super.connectedCallback();
     this.$form = WUPFormElement.$tryConnect(this);
   }
@@ -616,9 +675,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   /** Returns validations enabled by user */
   protected get validations(): WUPBase.Options["validations"] | undefined {
-    const vls = (nestedProperty.get(window, this.getAttribute("validations") || "") ||
-      this._opts.validations) as WUPBase.Options["validations"];
-    return vls;
+    return this.getRefAttr<WUPBase.Options["validations"]>("validations");
   }
 
   /** Returns validations functions ready for checking */
@@ -640,7 +697,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         const r = rules[k as "required"];
         if (!r) {
           const n = this._opts.name ? `.[${this._opts.name}]` : "";
-          throw new Error(`${this.tagName}${n}. Validation rule [${vl}] is not found`);
+          throw new Error(`${this.tagName}${n}. Validation rule [${k}] is not found`);
         }
         err = r(v as unknown as string, vl as boolean, this);
       }
@@ -661,25 +718,34 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         return 0;
       })
       .map((key) => ({ [key]: (v: ValueType | undefined) => check.call(self, v, key) }[key])); // make object to create named function
-
     return arr;
   }
 
-  #wasValid?: boolean;
-  protected _validTimer?: number;
+  /** Current name of failed validation */
+  _errName?: string;
+  _wasValidNotEmpty?: boolean;
+  protected _validTimer?: ReturnType<typeof setTimeout>;
   /** Method called to check control based on validation rules and current value */
-  protected goValidate(fromCase: ValidateFromCases, canShowError = true): string | false {
+  protected goValidate(fromCase: ValidateFromCases, silent = false): string | false {
+    this._errName = undefined;
     const vls = this.validationsRules;
     if (!vls.length) {
-      this.#isValid = true;
+      this._isValid = true;
+      if (!this.$isEmpty) {
+        this._wasValidNotEmpty = true;
+      }
       return false;
     }
 
     const v = this.$value;
     let errMsg = "";
-    this.#isValid = !this.validationsRules.some((fn) => {
-      const err = fn(v);
+    const isEmpty = this.$isEmpty;
+    this._isValid = !vls.some((fn) => {
+      // process empty value only on rule 'required'; for others skip if value is empty
+      const skipRule = isEmpty && fn.name[0] !== "_" && fn.name !== "required"; // undefined only for 'required' rule; for others: skip if value = undefined
+      const err = !skipRule && fn(v);
       if (err) {
+        this._errName = fn.name;
         errMsg = err;
         return true;
       }
@@ -687,22 +753,27 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     });
     this._validTimer && clearTimeout(this._validTimer);
 
+    let canShowError = (!silent || this.$refError) && this.canShowError;
+
     if (fromCase === ValidateFromCases.onChange && this._opts.validationCase & ValidationCases.onChangeSmart) {
-      if (errMsg) {
-        if (!this.#wasValid) {
-          canShowError = false;
-        }
-      } else {
-        this.#wasValid = true;
+      if (errMsg && !this._wasValidNotEmpty) {
+        canShowError = false;
       }
     }
 
+    if (this._isValid && !isEmpty) {
+      this._wasValidNotEmpty = true;
+    }
     if (errMsg) {
-      if (canShowError || this.$refError) {
-        this._validTimer = window.setTimeout(
-          () => this.goShowError(errMsg, this.$refInput),
-          fromCase === ValidateFromCases.onChange ? this._opts.validateDebounceMs : 0
-        );
+      if (canShowError) {
+        // don't wait for debounce if we need to update an error
+        const waitMs = this.$refError || fromCase !== ValidateFromCases.onChange ? 0 : this._opts.validateDebounceMs;
+        const saved = this._errName;
+        const act = (): void => {
+          this.goShowError(errMsg, this.$refInput);
+          this._errName = saved;
+        };
+        this._validTimer = waitMs ? setTimeout(act, waitMs) : (act(), undefined);
       }
       return errMsg;
     }
@@ -713,12 +784,13 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   /** Show (append/update) all validation-rules with checkpoints to existed error-element */
   protected renderValidations(parent: WUPPopupElement | HTMLElement, skipRules = ["required"]): void {
-    const vls = this.validationsRules.filter((vl) => !skipRules.includes(vl.name));
+    const vls = this.validationsRules.filter((vl) => !skipRules.includes(vl.name) && vl.name[0] !== "_");
     if (!vls.length) {
       return;
     }
 
     let p: StoredRefError = parent as StoredRefError;
+    /* istanbul ignore else */
     if (!p._wupVldItems) {
       p = parent as StoredRefError;
       p._wupVldItems = [];
@@ -772,13 +844,21 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     return p;
   }
 
+  /** Current error message */
+  _errMsg?: string;
   #refErrTarget?: HTMLElement;
   /** Method called to show error and set invalid state on input; point null to show all validation rules with checkpoints */
-  protected goShowError(err: string | null, target: HTMLElement): void {
+  protected goShowError(err: string, target: HTMLElement): void {
+    if (this._errMsg === err) {
+      return;
+    }
     // possible when user goes to another page and focusout > validTimeout happened
     if (!this.isConnected) {
       return;
     }
+    this._errName = undefined;
+    this._errMsg = err;
+
     if (!this.$refError) {
       this.$refError = this.renderError();
     }
@@ -808,6 +888,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   /** Method called to hide error and set valid state on input */
   protected goHideError(): void {
+    this._errMsg = undefined;
     if (this.$refError) {
       const p = this.$refError;
       p.addEventListener("$hide", p.remove, { passive: true, once: true });
@@ -827,31 +908,30 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     /* istanbul ignore next */
     canValidate = true
   ): boolean | null {
-    const was = this.#value;
+    const prev = this.#value;
     this.#value = v;
     if (!this.$isReady) {
       return null;
     }
 
     this.$isDirty = true;
-    const isChanged = !this.#ctr.$isEqual(v, was);
-
+    const isChanged = !this.#ctr.$isEqual(v, prev);
     if (!isChanged) {
       return false;
     }
-    this.#isValid = undefined;
 
+    this._isValid = undefined;
+    canValidate && this.validateAfterChange();
+    setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true }));
+    return true;
+  }
+
+  /** Called after value is changed */
+  protected validateAfterChange(): void {
     const c = this._opts.validationCase;
-    if (canValidate && (c & ValidationCases.onChange || c & ValidationCases.onChangeSmart)) {
-      if (this.#wasValid == null && c & ValidationCases.onChangeSmart) {
-        this.#value = was;
-        this.goValidate(ValidateFromCases.onChange, false); // to define if previous value was valid or not
-        this.#value = v;
-      }
+    if (c & ValidationCases.onChange || c & ValidationCases.onChangeSmart) {
       this.goValidate(ValidateFromCases.onChange);
     }
-    this.fireEvent("$change", { cancelable: false, bubbles: true });
-    return true;
   }
 
   #prevValue = this.#value;
@@ -873,15 +953,21 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
     this.setValue(v, canValidate);
     this.#prevValue = was;
+
+    this.$isEmpty ? this.$ariaSpeak(this.#ctr.$ariaCleared) : this.$refInput.select();
   }
 
   /** Called when element got focus; must return array of RemoveFunctions called on FocusLost */
   protected gotFocus(): Array<() => void> {
     this.$refError?.$refresh();
 
-    if (this._opts.validationCase & ValidationCases.onFocusWithValue) {
-      !this.$isEmpty && this.goValidate(ValidateFromCases.onFocus);
+    const c = this._opts.validationCase;
+    if (c & ValidationCases.onFocusWithValue && !this.$isEmpty) {
+      this.goValidate(ValidateFromCases.onFocus);
+    } else if (this._wasValidNotEmpty == null && c & ValidationCases.onChangeSmart) {
+      this.goValidate(ValidateFromCases.onChange, true); // validate to define current state
     }
+
     const r = this.appendEvent(this, "keydown", (e) => !this.$isDisabled && this.gotKeyDown(e), { passive: false });
     return [r];
   }
@@ -889,15 +975,16 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Called when element completely lost focus; despite on blur it has debounce filter */
   protected gotFocusLost(): void {
     if (this._opts.validationCase & ValidationCases.onFocusLost) {
+      // const wasErr = !!this._errMsg;
       this.goValidate(ValidateFromCases.onFocusLost);
+      // todo test & rollback it when error will be visible over popup: for selectControl the color is changed but error not visible and menu stays opened
+      // this._errMsg && !wasErr && this.focus(); // user sees validation error at first time: return focus back once
     }
   }
 
   /** Called when user pressed key */
   protected gotKeyDown(e: KeyboardEvent): void {
-    if (e.key === "Escape") {
-      this.clearValue();
-    }
+    e.key === "Escape" && !e.shiftKey && !e.altKey && !e.ctrlKey && this.clearValue(); // WARN: Escape works wrong with NVDA because it's enables NVDA-focus-mode
   }
 }
 

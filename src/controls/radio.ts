@@ -57,6 +57,31 @@ interface ExtInputElement extends HTMLInputElement {
   _value: any;
 }
 
+/** Form-control with radio buttons
+ * @example
+  const el = document.createElement("wup-radio");
+  el.$options.name = "gender";
+  el.$options.items = [
+    { value: 1, text: "Male" },
+    { value: 2, text: "Female" },
+    { value: 3, text: "Other/Skip" },
+  ];
+  el.$initValue = 3;
+  el.$options.validations = { required: true };
+  const form = document.body.appendChild(document.createElement("wup-form"));
+  form.appendChild(el);
+  // or HTML
+  <wup-form>
+    <wup-radio name="gender" initvalue="3" validations="myValidations" items="myRadioItems"/>
+  </wup-form>;
+ * @tutorial innerHTML @example
+ * <fieldset>
+ *   <legend><strong>{$options.label}</strong></legend>
+ *   <label> <input/> <span/> </label>
+ *   <label> <input/> <span/> </label>
+ *   // etc.
+ * </fieldset>
+ */
 export default class WUPRadioControl<
   ValueType = any,
   EventMap extends WUPRadio.EventMap = WUPRadio.EventMap
@@ -86,8 +111,7 @@ export default class WUPRadioControl<
     return `${super.$style}
       :host {
         padding: var(--ctrl-padding);
-        cursor: pointer;
-       }
+      }
       :host fieldset {
         border: none;
         padding: 0;
@@ -110,14 +134,12 @@ export default class WUPRadioControl<
         white-space: nowrap;
         font-weight: normal;
         text-decoration: none;
-        cursor: pointer;
       }
       :host strong {
         font: inherit;
       }
       :host label {
         padding: 0;
-        cursor: pointer;
       }
       :host input {${WUPcssHidden}}
       :host input + * {
@@ -128,7 +150,7 @@ export default class WUPRadioControl<
       :host[readonly],
       :host[readonly] legend,
       :host[readonly] label {
-        cursor: default;
+         cursor: default;
       }
       :host input + *:after {
         content: "";
@@ -202,7 +224,7 @@ export default class WUPRadioControl<
   protected override _opts = this.$options;
 
   /** Called when need to parse attr [initValue] */
-  override parseValue(attrValue: string): ValueType | undefined {
+  override parse(attrValue: string): ValueType | undefined {
     const a = this.getItems() as WUPSelect.MenuItem<ValueType>[];
     if (!a?.length) {
       return undefined;
@@ -344,7 +366,7 @@ export default class WUPRadioControl<
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected override goShowError(err: string | null, target: HTMLElement): void {
+  protected override goShowError(err: string, target: HTMLElement): void {
     super.goShowError(err, this.$refFieldset);
   }
 }

@@ -61,6 +61,82 @@ exports[`control.pwd $ariaDetails 2`] = `
 </wup-pwd>
 `;
 
+exports[`control.pwd $ariaSpeak 1`] = `
+<wup-pwd>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-describedby="my-test-id txt2 my-test-id2"
+        autocomplete="new-password"
+        id="txt1"
+        placeholder=" "
+        type="password"
+      />
+      <strong />
+      <span
+        class="wup-hidden"
+      >
+        press Alt + V to show/hide password
+      </span>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+    <button
+      aria-hidden="true"
+      eye=""
+      tabindex="-1"
+    />
+  </label>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt2"
+  >
+    Hello
+  </section>
+</wup-pwd>
+`;
+
+exports[`control.pwd $ariaSpeak 2`] = `
+<wup-pwd>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-describedby="my-test-id my-test-id2"
+        autocomplete="new-password"
+        id="txt1"
+        placeholder=" "
+        type="password"
+      />
+      <strong />
+      <span
+        class="wup-hidden"
+      >
+        press Alt + V to show/hide password
+      </span>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+    <button
+      aria-hidden="true"
+      eye=""
+      tabindex="-1"
+    />
+  </label>
+</wup-pwd>
+`;
+
 exports[`control.pwd $show/$hide error 1`] = `
 <wup-pwd>
   <label
@@ -235,6 +311,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
         cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
       }
       WUP-PWD strong,
       WUP-PWD legend {
@@ -376,7 +453,8 @@ mask-image: var(--ctrl-icon-img);
           width: 100%;
           position: relative;
         }
-        WUP-PWD input {
+        WUP-PWD input,
+        WUP-PWD [maskholder] {
           width: 100%;
           box-sizing: border-box;
           font: inherit;
@@ -391,6 +469,18 @@ mask-image: var(--ctrl-icon-img);
           text-overflow: ellipsis;
           overflow: hidden;
           white-space: nowrap;
+        }
+        WUP-PWD [maskholder] {
+          position: absolute;
+          opacity: 0.65;
+          display: none;
+          pointer-events: none;
+          text-overflow: initial;
+        }
+        WUP-PWD [maskholder]&gt;i {
+          visibility: hidden;
+          font: inherit;
+          white-space: pre;
         }
         WUP-PWD input:-webkit-autofill {
           font: inherit;
@@ -422,11 +512,17 @@ mask-image: var(--ctrl-icon-img);
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
-        WUP-PWD input:focus + *,
-        WUP-PWD input:not(:placeholder-shown) + *,
+        WUP-PWD input:not(:focus)::placeholder {
+          color: transparent;
+        }
+        WUP-PWD:focus-within input + strong,
+        WUP-PWD input:not(:placeholder-shown) + strong,
         WUP-PWD legend {
           top: 0.2em;
           transform: scale(0.9);
+        }
+        WUP-PWD:focus-within [maskholder] {
+          display: inline-block;
         }
         /* style for icons */
         WUP-PWD label button,
@@ -551,6 +647,7 @@ exports[`control.pwd options clearButton 1`] = `
   >
     <span>
       <input
+        aria-describedby="txt2"
         autocomplete="new-password"
         id="txt1"
         placeholder=" "
@@ -576,8 +673,9 @@ exports[`control.pwd options clearButton 1`] = `
   </label>
   <section
     aria-atomic="true"
-    aria-live="polite"
+    aria-live="off"
     class="wup-hidden"
+    id="txt2"
   />
 </wup-pwd>
 `;
@@ -589,6 +687,7 @@ exports[`control.pwd options clearButton 2`] = `
   >
     <span>
       <input
+        aria-describedby="txt2"
         autocomplete="new-password"
         id="txt1"
         placeholder=" "
@@ -609,111 +708,10 @@ exports[`control.pwd options clearButton 2`] = `
   </label>
   <section
     aria-atomic="true"
-    aria-live="polite"
+    aria-live="off"
     class="wup-hidden"
+    id="txt2"
   />
-</wup-pwd>
-`;
-
-exports[`control.pwd validation messages ends without '-s' 1`] = `
-<wup-pwd
-  invalid=""
->
-  <label
-    for="txt1"
-  >
-    <span>
-      <input
-        aria-describedby="txt2"
-        autocomplete="new-password"
-        id="txt1"
-        placeholder=" "
-        type="password"
-      />
-      <strong />
-      <span
-        class="wup-hidden"
-      >
-        press Alt + V to show/hide password
-      </span>
-    </span>
-    <button
-      aria-hidden="true"
-      clear=""
-      tabindex="-1"
-    />
-    <button
-      aria-hidden="true"
-      eye=""
-      tabindex="-1"
-    />
-  </label>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt2"
-    role="alert"
-    style="display: none;"
-  >
-    <span
-      class="wup-hidden"
-    />
-    <span>
-      Min length is 1 character
-    </span>
-  </wup-popup>
-</wup-pwd>
-`;
-
-exports[`control.pwd validation messages ends without '-s' 2`] = `
-<wup-pwd
-  invalid=""
->
-  <label
-    for="txt1"
-  >
-    <span>
-      <input
-        aria-describedby="txt2"
-        autocomplete="new-password"
-        id="txt1"
-        placeholder=" "
-        type="password"
-      />
-      <strong />
-      <span
-        class="wup-hidden"
-      >
-        press Alt + V to show/hide password
-      </span>
-    </span>
-    <button
-      aria-hidden="true"
-      clear=""
-      tabindex="-1"
-    />
-    <button
-      aria-hidden="true"
-      eye=""
-      tabindex="-1"
-    />
-  </label>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt2"
-    role="alert"
-    style="display: none;"
-  >
-    <span
-      class="wup-hidden"
-    />
-    <span>
-      Max length is 1 character
-    </span>
-  </wup-popup>
 </wup-pwd>
 `;
 
@@ -803,7 +801,7 @@ exports[`control.pwd validations $options.validationShowAll 2`] = `
   >
     <span>
       <input
-        aria-describedby="txt2"
+        aria-describedby="txt3"
         aria-required="true"
         autocomplete="new-password"
         id="txt1"
@@ -832,7 +830,7 @@ exports[`control.pwd validations $options.validationShowAll 2`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt2"
+    id="txt3"
     role="alert"
     style="display: none;"
   >
@@ -888,7 +886,7 @@ exports[`control.pwd validations $options.validationShowAll 3`] = `
   >
     <span>
       <input
-        aria-describedby="txt5"
+        aria-describedby="txt6"
         aria-required="true"
         autocomplete="new-password"
         id="txt1"
@@ -919,7 +917,7 @@ exports[`control.pwd validations $options.validationShowAll 3`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt5"
+    id="txt6"
     role="alert"
     style="display: none;"
   >
@@ -977,61 +975,6 @@ exports[`control.pwd validations options.validationCase 2`] = `
   >
     <span>
       <input
-        aria-describedby="txt2"
-        aria-required="true"
-        autocomplete="new-password"
-        id="txt1"
-        placeholder=" "
-        type="password"
-      />
-      <strong>
-        First Input
-      </strong>
-      <span
-        class="wup-hidden"
-      >
-        press Alt + V to show/hide password
-      </span>
-    </span>
-    <button
-      aria-hidden="true"
-      clear=""
-      tabindex="-1"
-    />
-    <button
-      aria-hidden="true"
-      eye=""
-      tabindex="-1"
-    />
-  </label>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt2"
-    style="display: none;"
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      This field is required
-    </span>
-  </wup-popup>
-</wup-pwd>
-`;
-
-exports[`control.pwd validations options.validationCase 3`] = `
-<wup-pwd
-  invalid=""
->
-  <label
-    for="txt1"
-  >
-    <span>
-      <input
         aria-describedby="txt3"
         aria-required="true"
         autocomplete="new-password"
@@ -1072,13 +1015,13 @@ exports[`control.pwd validations options.validationCase 3`] = `
       Error for First Input:
     </span>
     <span>
-      custom err here
+      This field is required
     </span>
   </wup-popup>
 </wup-pwd>
 `;
 
-exports[`control.pwd validations options.validationCase 4`] = `
+exports[`control.pwd validations options.validationCase 3`] = `
 <wup-pwd
   invalid=""
 >
@@ -1119,6 +1062,61 @@ exports[`control.pwd validations options.validationCase 4`] = `
     aria-live="off"
     error=""
     id="txt4"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
+</wup-pwd>
+`;
+
+exports[`control.pwd validations options.validationCase 4`] = `
+<wup-pwd
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-describedby="txt5"
+        aria-required="true"
+        autocomplete="new-password"
+        id="txt1"
+        placeholder=" "
+        type="password"
+      />
+      <strong>
+        First Input
+      </strong>
+      <span
+        class="wup-hidden"
+      >
+        press Alt + V to show/hide password
+      </span>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+    <button
+      aria-hidden="true"
+      eye=""
+      tabindex="-1"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt5"
     role="alert"
     style="display: none;"
   >

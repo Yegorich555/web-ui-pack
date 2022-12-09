@@ -100,7 +100,7 @@ describe("popupElement", () => {
     await page.hover("span");
     t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
     expect(t.isOpened).toBe(true); // because of timeout
-    await page.waitForTimeout(500 + 300 + 10); // hoverShowTimeout is 500 by default and hide-animation is 300
+    await page.waitForTimeout(500 + 300 + 100); // hoverShowTimeout is 500 by default and hide-animation is 300
     t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpen }));
     expect(t.isOpened).toBe(false);
 

@@ -46,6 +46,7 @@ describe("control.select", () => {
       { attrValue: "30", value: 30 },
     ],
     validations: {},
+    validationsSkip: ["_parse", "_mask"],
     attrs: { items: { skip: true } },
     $options: { items: { skip: true } },
     onCreateNew: (e) => (e.$options.items = getItems()),
@@ -59,14 +60,18 @@ describe("control.select", () => {
     ];
     el.setAttribute("initvalue", "");
     await h.wait();
+    expect(el.$initValue).toBe(null);
     expect(el.$value).toBe(null);
     expect(el.$refInput.value).toBe("Default");
+    expect(el.getAttribute("initvalue")).toBe("");
 
     // checking when items empty
     el.$options.items = [];
-    el.setAttribute("initvalue", "");
+    el.removeAttribute("initvalue");
+    el.setAttribute("initvalue", ""); // to trigger set value again
     await h.wait();
     expect(el.$value).toBe(undefined);
+    expect(el.$initValue).toBe(undefined);
     expect(el.$refInput.value).toBeFalsy();
   });
 
@@ -146,7 +151,7 @@ describe("control.select", () => {
     expect(el.$isOpen).toBe(false);
     expect(el.$refPopup).toBeDefined(); // disposed only by focus out
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-owns="txt2" aria-controls="txt2"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label><wup-popup menu="" style="min-width: 100px;"><ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3">Donny</li><li role="option" aria-selected="true" id="txt4">Mikky</li><li role="option" aria-selected="false" id="txt5">Leo</li><li role="option" aria-selected="false" id="txt6">Splinter</li></ul></wup-popup></wup-select>"`
+      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-owns="txt2" aria-controls="txt2"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label><wup-popup menu="" style="min-width: 100px;"><ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3">Donny</li><li role="option" aria-selected="false" id="txt4">Mikky</li><li role="option" aria-selected="false" id="txt5">Leo</li><li role="option" aria-selected="false" id="txt6">Splinter</li></ul></wup-popup></wup-select>"`
     );
     expect(onHide).toBeCalledTimes(1);
     expect(onShow).toBeCalledTimes(1);
@@ -188,7 +193,16 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isOpen).toBe(true);
 
+    // checking when default Enter behavior is prevented
+    el._focusedMenuItem.addEventListener("click", (e) => e.preventDefault(), { once: true });
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+
     // hide by outside click
+    el.$showMenu();
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
     document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     expect(el.$isOpen).toBe(false);
@@ -462,7 +476,7 @@ describe("control.select", () => {
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
     await h.wait();
     expect(el.$isOpen).toBe(true);
-    expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[3]);
+    expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[2]);
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Home", bubbles: true, cancelable: true }));
     await h.wait(1);
     expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[0]);
@@ -473,19 +487,23 @@ describe("control.select", () => {
     await h.wait();
 
     // open again and pressEsc to close menu
+    expect(el.$isOpen).toBe(false);
+    el.$value = undefined;
+    await h.wait(1);
+    expect(el._selectedMenuItem).toBe(null);
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
     await h.wait();
     expect(el.$isOpen).toBe(true);
     expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[3]);
-    expect(el.querySelector("[aria-selected='true']")?.id).toBe(menuIds[2]);
-    expect(el.querySelectorAll("[aria-selected='true']").length).toBe(1);
+    expect(el.querySelector("[aria-selected='true']")?.id).toBe(undefined);
+    expect(el.querySelectorAll("[aria-selected='true']").length).toBe(0);
 
-    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
-    expect(el.$value).toBe(getItems()[2].value); // no changes
+    expect(el.$value).toBe(getItems()[3].value);
     expect(el.$isOpen).toBe(false);
 
-    // checking if resetValue still works
+    // if resetValue still works
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
     await h.wait();
     expect(el.$value).not.toBe(getItems()[2].value);
@@ -501,28 +519,28 @@ describe("control.select", () => {
 
     HTMLElement.prototype.scrollIntoViewIfNeeded = was;
 
-    // checking when user changed text No Items
+    // when user changed text No Items
     const wasText = WUPSelectControl.$textNoItems;
     WUPSelectControl.$textNoItems = "";
     await setItems([]);
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup menu="" hidden="" style="min-width: 100px;"><ul id="txt13" role="listbox" aria-label="Items"></ul></wup-popup>"`
+      `"<wup-popup menu="" hidden="" style="min-width: 100px;"><ul id="txt14" role="listbox" aria-label="Items"></ul></wup-popup>"`
     );
     WUPSelectControl.$textNoItems = wasText;
 
-    // checking when items is function with promise
+    // when items is function with promise
     await setItems(() => Promise.resolve(getItems()));
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt14" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt15">Donny</li><li role="option" aria-selected="false" id="txt16">Mikky</li><li role="option" aria-selected="false" id="txt17">Leo</li><li role="option" aria-selected="false" id="txt18">Splinter</li></ul>"`
+      `"<ul id="txt15" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt16">Donny</li><li role="option" aria-selected="false" id="txt17">Mikky</li><li role="option" aria-selected="false" id="txt18">Leo</li><li role="option" aria-selected="false" id="txt19">Splinter</li></ul>"`
     );
 
-    // checking when items is function without promise
+    // when items is function without promise
     await setItems(() => getItems().slice(0, 2));
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt19" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt20">Donny</li><li role="option" aria-selected="false" id="txt21">Mikky</li></ul>"`
+      `"<ul id="txt20" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt21">Donny</li><li role="option" aria-selected="false" id="txt22">Mikky</li></ul>"`
     );
 
-    // checking when items has custom render
+    // when items has custom render
     await setItems([
       {
         value: 123,
@@ -687,12 +705,22 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isOpen).toBe(false);
     expect(el.$value).toBe(30);
+
+    // click on item inside li
+    const span = arrLi[1].appendChild(document.createElement("span"));
+    await h.userClick(el);
+    await h.wait();
+    await h.userClick(span);
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    expect(el.$value).toBe(20);
   });
 
   describe("options", () => {
     test("showCase", async () => {
       // showCase: focus
       el.focus();
+      await h.wait();
       await h.wait();
       expect(el.$isOpen).toBe(true);
 
@@ -711,6 +739,7 @@ describe("control.select", () => {
 
       el.$hideMenu();
       el.$options.showCase &= ~ShowCases.onInput; // remove option
+      await h.wait();
       await h.userTypeText(el.$refInput, "a");
       await h.wait();
       expect(el.$isOpen).toBe(false);
@@ -757,21 +786,25 @@ describe("control.select", () => {
       el.$options.allowNewValue = true;
       const onChange = jest.fn();
       el.addEventListener("$change", onChange);
+      await h.wait();
 
       const check = async (arr, event) => {
         for (let i = 0; i < arr.length; ++i) {
           onChange.mockClear();
           await h.userTypeText(el.$refInput, arr[i].userText);
           await h.wait();
+          await h.wait();
+          expect(el.$refInput.value).toBe(arr[i].userText);
           event();
           await h.wait();
           expect(el.$value).toBe(arr[i].expectedValue);
+          expect(el.$refInput.value).toBe(arr[i].userText);
           expect(onChange).toBeCalledTimes(1);
           expect(el.$isOpen).toBe(false); // closed by enter or focusOut
         }
       };
 
-      // user can select value by pressing enter (by focus left)
+      // user can select value by pressing enter
       await check(
         [
           { userText: "Someone new", expectedValue: "Someone new" }, // user can create another value
@@ -779,12 +812,21 @@ describe("control.select", () => {
           { userText: "Donny", expectedValue: 10 }, // user can select exact value without ArrowKeys
           { userText: "Leo", expectedValue: 30 }, // check it again
           { userText: "", expectedValue: undefined },
+          { userText: "Smt new", expectedValue: "Smt new" },
         ],
         () =>
           el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }))
       );
 
-      // user can select value without pressing enter (by focus left)
+      // when open again filtering must be cleared
+      el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+      await h.wait();
+      expect(el.$isOpen).toBe(true);
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3" style="" focused="">Donny</li><li role="option" aria-selected="false" id="txt4" style="">Mikky</li><li role="option" aria-selected="false" id="txt5" style="">Leo</li><li role="option" aria-selected="false" id="txt6" style="">Splinter</li><li role="option" aria-disabled="true" aria-selected="false" style="display: none;">No Items</li></ul>"`
+      );
+
+      // user can select value by focus left
       await check(
         [
           { userText: "Someone new", expectedValue: "Someone new" }, // user can create another value

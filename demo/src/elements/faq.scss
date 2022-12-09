@@ -27,4 +27,12 @@
     padding: 0 14px;
     font-size: small;
   }
+
+  section li + li {
+    margin-top: 1em;
+  }
+
+  section ol {
+    padding-left: 1em;
+  }
 }

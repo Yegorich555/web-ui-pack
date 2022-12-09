@@ -125,6 +125,136 @@ exports[`control.radio $ariaDetails 2`] = `
 </wup-radio>
 `;
 
+exports[`control.radio $ariaSpeak 1`] = `
+<wup-radio>
+  <fieldset>
+    <legend>
+      <strong />
+    </legend>
+    <label
+      for="txt2"
+    >
+      <input
+        aria-describedby="my-test-id txt6 my-test-id2"
+        autocomplete="off"
+        id="txt2"
+        name="txt1473"
+        tabindex="0"
+        type="radio"
+      />
+      <span>
+        Donny
+      </span>
+    </label>
+    <label
+      for="txt3"
+    >
+      <input
+        id="txt3"
+        name="txt1473"
+        type="radio"
+      />
+      <span>
+        Mikky
+      </span>
+    </label>
+    <label
+      for="txt4"
+    >
+      <input
+        id="txt4"
+        name="txt1473"
+        type="radio"
+      />
+      <span>
+        Leo
+      </span>
+    </label>
+    <label
+      for="txt5"
+    >
+      <input
+        id="txt5"
+        name="txt1473"
+        type="radio"
+      />
+      <span>
+        Splinter
+      </span>
+    </label>
+  </fieldset>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt6"
+  >
+    Hello
+  </section>
+</wup-radio>
+`;
+
+exports[`control.radio $ariaSpeak 2`] = `
+<wup-radio>
+  <fieldset>
+    <legend>
+      <strong />
+    </legend>
+    <label
+      for="txt2"
+    >
+      <input
+        aria-describedby="my-test-id my-test-id2"
+        autocomplete="off"
+        id="txt2"
+        name="txt1473"
+        tabindex="0"
+        type="radio"
+      />
+      <span>
+        Donny
+      </span>
+    </label>
+    <label
+      for="txt3"
+    >
+      <input
+        id="txt3"
+        name="txt1473"
+        type="radio"
+      />
+      <span>
+        Mikky
+      </span>
+    </label>
+    <label
+      for="txt4"
+    >
+      <input
+        id="txt4"
+        name="txt1473"
+        type="radio"
+      />
+      <span>
+        Leo
+      </span>
+    </label>
+    <label
+      for="txt5"
+    >
+      <input
+        id="txt5"
+        name="txt1473"
+        type="radio"
+      />
+      <span>
+        Splinter
+      </span>
+    </label>
+  </fieldset>
+</wup-radio>
+`;
+
 exports[`control.radio $show/$hide error 1`] = `
 <wup-radio>
   <fieldset>
@@ -510,6 +640,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
         cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
       }
       WUP-RADIO strong,
       WUP-RADIO legend {
@@ -646,8 +777,7 @@ mask-image: var(--ctrl-icon-img);
       }
       WUP-RADIO {
         padding: var(--ctrl-padding);
-        cursor: pointer;
-       }
+      }
       WUP-RADIO fieldset {
         border: none;
         padding: 0;
@@ -670,14 +800,12 @@ mask-image: var(--ctrl-icon-img);
         white-space: nowrap;
         font-weight: normal;
         text-decoration: none;
-        cursor: pointer;
       }
       WUP-RADIO strong {
         font: inherit;
       }
       WUP-RADIO label {
         padding: 0;
-        cursor: pointer;
       }
       WUP-RADIO input {
 position: absolute;
@@ -693,7 +821,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-RADIO[readonly],
       WUP-RADIO[readonly] legend,
       WUP-RADIO[readonly] label {
-        cursor: default;
+         cursor: default;
       }
       WUP-RADIO input + *:after {
         content: "";
@@ -1036,90 +1164,6 @@ exports[`control.radio validations options.validationCase 2`] = `
   invalid=""
 >
   <fieldset
-    aria-describedby="txt6"
-    aria-required="true"
-  >
-    <legend>
-      <strong>
-        First Input
-      </strong>
-    </legend>
-    <label
-      for="txt2"
-    >
-      <input
-        aria-required="true"
-        autocomplete="off"
-        id="txt2"
-        name="txt1473"
-        tabindex="0"
-        type="radio"
-      />
-      <span>
-        Donny
-      </span>
-    </label>
-    <label
-      for="txt3"
-    >
-      <input
-        id="txt3"
-        name="txt1473"
-        type="radio"
-      />
-      <span>
-        Mikky
-      </span>
-    </label>
-    <label
-      for="txt4"
-    >
-      <input
-        id="txt4"
-        name="txt1473"
-        type="radio"
-      />
-      <span>
-        Leo
-      </span>
-    </label>
-    <label
-      for="txt5"
-    >
-      <input
-        id="txt5"
-        name="txt1473"
-        type="radio"
-      />
-      <span>
-        Splinter
-      </span>
-    </label>
-  </fieldset>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt6"
-    style="display: none;"
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      This field is required
-    </span>
-  </wup-popup>
-</wup-radio>
-`;
-
-exports[`control.radio validations options.validationCase 3`] = `
-<wup-radio
-  invalid=""
->
-  <fieldset
     aria-describedby="txt7"
     aria-required="true"
   >
@@ -1193,13 +1237,13 @@ exports[`control.radio validations options.validationCase 3`] = `
       Error for First Input:
     </span>
     <span>
-      custom err here
+      This field is required
     </span>
   </wup-popup>
 </wup-radio>
 `;
 
-exports[`control.radio validations options.validationCase 4`] = `
+exports[`control.radio validations options.validationCase 3`] = `
 <wup-radio
   invalid=""
 >
@@ -1269,6 +1313,90 @@ exports[`control.radio validations options.validationCase 4`] = `
     aria-live="off"
     error=""
     id="txt8"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
+</wup-radio>
+`;
+
+exports[`control.radio validations options.validationCase 4`] = `
+<wup-radio
+  invalid=""
+>
+  <fieldset
+    aria-describedby="txt9"
+    aria-required="true"
+  >
+    <legend>
+      <strong>
+        First Input
+      </strong>
+    </legend>
+    <label
+      for="txt2"
+    >
+      <input
+        aria-required="true"
+        autocomplete="off"
+        id="txt2"
+        name="txt1473"
+        tabindex="0"
+        type="radio"
+      />
+      <span>
+        Donny
+      </span>
+    </label>
+    <label
+      for="txt3"
+    >
+      <input
+        id="txt3"
+        name="txt1473"
+        type="radio"
+      />
+      <span>
+        Mikky
+      </span>
+    </label>
+    <label
+      for="txt4"
+    >
+      <input
+        id="txt4"
+        name="txt1473"
+        type="radio"
+      />
+      <span>
+        Leo
+      </span>
+    </label>
+    <label
+      for="txt5"
+    >
+      <input
+        id="txt5"
+        name="txt1473"
+        type="radio"
+      />
+      <span>
+        Splinter
+      </span>
+    </label>
+  </fieldset>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt9"
     role="alert"
     style="display: none;"
   >

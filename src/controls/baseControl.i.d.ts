@@ -18,5 +18,8 @@ export default interface IBaseControl<ValueType = any> extends HTMLElement {
     readOnly?: boolean;
     disabled?: boolean;
   };
+
   gotFormChanges: (propsChanged: Array<string> | null) => void;
+  validateBySubmit: () => string | false;
+  readonly canShowError: boolean;
 }

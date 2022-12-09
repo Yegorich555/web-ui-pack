@@ -34,6 +34,7 @@ function setEvent(): void {
     rstEvent = () => {
       if (--rstCnt === 0) {
         onMouseUp.length = 0;
+        isMouseDown = false;
         r1();
         r2();
         rstEvent = undefined;

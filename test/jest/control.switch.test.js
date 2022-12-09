@@ -6,6 +6,6 @@ import testSwitchControl from "./control.switchTest";
 let testEl;
 initTestBaseControl({ type: WUPSwitchControl, htmlTag: "wup-switch", onInit: (e) => (testEl = e) });
 
-describe("control.text", () => {
+describe("control.switch", () => {
   testSwitchControl(() => testEl);
 });

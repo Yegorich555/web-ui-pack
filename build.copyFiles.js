@@ -18,3 +18,6 @@ fs.mkdirSync(out);
 ].forEach((f) => {
   fs.copyFileSync(f, path.resolve(out, f));
 });
+
+fs.copyFileSync("./tsconfig.dist.json", path.resolve(out, "./tsconfig.json"));
+fs.copyFileSync("./src/types.d.ts", path.resolve(out, "./types.d.ts"));

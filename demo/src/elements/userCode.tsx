@@ -15,6 +15,7 @@ export interface UserCodeProps {
   customHTML?: string[];
   /** Set of alternative values for css-vars. Possible whe css-var used several times and need to skip the real-value */
   cssVarAlt?: Map<string, string>;
+  excludeCssVars?: string[];
 }
 
 function renderCssValue(v: string, alt: string | undefined): string | JSX.Element {
@@ -104,11 +105,13 @@ export default function UserCode(props: React.PropsWithChildren<UserCodeProps>) 
         <h3>CSS variables</h3>
         <code className={styles.cssVars}>
           <ul>
-            {usedVars.map((v) => (
-              <li key={v.name + v.value}>
-                <span>{v.name}</span>: <span>{renderCssValue(v.value, props.cssVarAlt?.get(v.name))}</span>;
-              </li>
-            ))}
+            {(props.excludeCssVars ? usedVars.filter((v) => !props.excludeCssVars!.includes(v.name)) : usedVars).map(
+              (v) => (
+                <li key={v.name + v.value}>
+                  <span>{v.name}</span>: <span>{renderCssValue(v.value, props.cssVarAlt?.get(v.name))}</span>;
+                </li>
+              )
+            )}
           </ul>
         </code>
       </section>

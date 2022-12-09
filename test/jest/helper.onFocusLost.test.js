@@ -1,11 +1,10 @@
 import onFocusLost from "web-ui-pack/helpers/onFocusLost";
 
-jest.useFakeTimers();
-
 let el = document.createElement("input");
 let other = document.createElement("input");
 
 beforeEach(() => {
+  jest.useFakeTimers();
   el = document.body.appendChild(document.createElement("input"));
   other = document.body.appendChild(document.createElement("input"));
 });

@@ -12,7 +12,7 @@ export default function SwitchControlView() {
       features={[
         "Easy to change size of items via css-variables (ctrl-switch-size...)", //
         "Possible to reverse label",
-        "Powerful accessibility support",
+        "Powerful accessibility support (keyboard, announcenement)",
       ]}
       details={{
         tag: "wup-switch",
@@ -22,7 +22,7 @@ export default function SwitchControlView() {
       <wup-form
         ref={(el) => {
           if (el) {
-            el.$onSubmit = (e) => console.warn("sumbitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
       >

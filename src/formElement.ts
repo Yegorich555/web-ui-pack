@@ -304,7 +304,7 @@ export default class WUPFormElement<
     }
   }
 
-  /** Returns true if all nested controls are valid */
+  /** Returns true if all nested controls (with name) are valid */
   get $isValid(): boolean {
     return this.$controlsAttached.every((c) => c.$isValid);
   }
@@ -375,13 +375,13 @@ export default class WUPFormElement<
 
     // validate
     let errCtrl: IBaseControl | undefined;
-    const arrCtrl = this.$controlsAttached;
+    let arrCtrl = this.$controlsAttached;
     if (this._opts.submitActions & SubmitActions.validateUntiFirst) {
-      errCtrl = arrCtrl.find((c) => c.$validate());
+      errCtrl = arrCtrl.find((c) => c.validateBySubmit() && c.canShowError);
     } else {
       arrCtrl.forEach((c) => {
-        const err = c.$validate();
-        if (err && !errCtrl) {
+        const err = c.validateBySubmit();
+        if (err && !errCtrl && c.canShowError) {
           errCtrl = c;
         }
       });
@@ -396,9 +396,12 @@ export default class WUPFormElement<
       return;
     }
 
+    // collect changes only from valid controls: because some controls has canShowError: false
+    arrCtrl = arrCtrl.filter((c) => c.canShowError);
+
     // collect values to model
     const onlyChanged = this._opts.submitActions & SubmitActions.collectChanged;
-    const m = this.#ctr.$modelFromControls({}, this.$controls, "$value", !!onlyChanged);
+    const m = this.#ctr.$modelFromControls({}, arrCtrl, "$value", !!onlyChanged);
     // fire events
     const ev = new Event("$submit", { cancelable: false, bubbles: true }) as WUPForm.SubmitEvent<Model>;
     ev.$model = m;

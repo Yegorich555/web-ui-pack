@@ -34,7 +34,7 @@ export default function FAQView() {
           },
           {
             link: "control-spinner",
-            question: "FormElement. SelectControl. How to change spinner (appears on submit if return promise result)'",
+            question: "FormElement, SelectControl. How to change spinner (appears on submit if return promise result)",
             answer: <Code code={codeChangeSpinner} />,
           },
           {
@@ -53,15 +53,43 @@ export default function FAQView() {
             question: "Controls. How to change default validation rules/messages and add new",
             answer: (
               <>
-                Every control-type has own $defaults.validationRules
+                Every control-type has $defaults.validationRules
                 <Code code={codeVldRules} />
               </>
             ),
           },
           {
+            link: "validations",
+            question: "Controls & Form. How validations works and form collects model",
+            answer: (
+              <section>
+                <ol>
+                  <li>Controls have $defaults.validationCase where you can change default behavior</li>
+                  <li>
+                    When user clicks on submit button OR press Enter key then form
+                    <br />- validates all attached & enabled controls (controls with name!=null and $isDisabled==false)
+                    <br />- if above is valid: gathers value into submit-model (according to control names)
+                    <br />- dispatches onSubmit, $submit, submit events
+                    <br />- if dispatched returns promise: blocks form and show spinner until promise resolved
+                  </li>
+                  <li>
+                    If some control was invalid but switched to disabled then
+                    <br /> - error message hidden but control.$isValid still returns false
+                    <br /> - such control is completely ignored from submit-model and validation (but re-validation
+                    triggered anyway)
+                    <br /> - form.$isValid returns true despite on invalid & disabled controls
+                    <br /> - form.$model returns gathered model including invalid & disabled controls
+                    <br /> - submit-model returns gathered model without disabled controls
+                    <br /> - rules aboves works only for disabled control; for readonly control it works usually
+                  </li>
+                </ol>
+              </section>
+            ),
+          },
+          {
             link: "asterisk-for-required",
             question:
-              "Controls. How to remove asterisk at the end of label for controls with validationRule 'required'",
+              "Controls. How to remove asterisk at the end of label for controls with validationRule [required]",
             answer: (
               <>
                 Apply styles below
@@ -74,8 +102,8 @@ export default function FAQView() {
             question: "Controls. How to change parsing attribute [initvalue]",
             answer: (
               <>
-                When applied attribute [initvalue] controls use method parseValue() to try to find the real. By default
-                it&apos;s search by string-type. But you can override behavior
+                When applied attribute [initvalue] controls use method parseValue(). By default it&apos;s search by
+                string-type. But you can override behavior
                 <Code code={codeParseInitValue} />
               </>
             ),
@@ -129,7 +157,7 @@ const form = document.body.appendChild(document.createElement("wup-form"));
 const el = form.appendChild(document.createElement("wup-text"));
 el.$options.name = undefined; // To completely detach from FormElement skip option name
 // OR
-el.$options.name = ""; // To partially detach (exlcude from model, isChanged, but included in validations, sumbit)
+el.$options.name = ""; // To partially detach (exlcude from model, isChanged, but included in validations, submit)
 /* WARNING: event $change bubbles from control.
  * To subscribe for only attached controls changes you need filter it yourself */
 form.addEventListener("$change", (e) => {
@@ -172,7 +200,7 @@ body fieldset[aria-required="true"] > legend:after {
 }`;
 
 const codeParseInitValue = `js
-WUPRadioControl.prototype.parseValue = function parseValue(attrValue: string) {
+WUPRadioControl.prototype.parse = function parse(stringValue: string) {
   // let's imagine that attrValue is pointer to global key
-  return (window as any)[attrValue];
+  return (window as any)[stringValue];
 };`;

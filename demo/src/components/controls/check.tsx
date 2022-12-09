@@ -18,7 +18,7 @@ export default function CheckControlView() {
       <wup-form
         ref={(el) => {
           if (el) {
-            el.$onSubmit = (e) => console.warn("sumbitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
       >

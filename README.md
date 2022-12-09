@@ -47,21 +47,21 @@ npm install web-ui-pack
 - [x] [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
 - [x] [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
 - [x] [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
+- [x] [Mask/pattern for controls](src/controls//text.mask.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
 - [x] [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
 - [x] [SwitchControl (Toggler)](src/controls/switch.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/switch)
 - [x] [CheckControl (Checkbox)](src/controls/check.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/check)
+- [ ] CheckTreeControl
 - [x] [RadioControl (RadioGroup)](src/controls/radio.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/radio)
 - [x] [SelectControl (ComboBox, Dropdown)](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
-- [ ] Calendar
-- [ ] DateControl
 - [ ] SelectManyControl (MultiSelect)
+- [x] [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
+- [x] DateControl
 - [ ] TextareaControl
 - [ ] NumberControl
-- [ ] Mask/pattern for controls
-- [ ] CheckTreeControl
-- [ ] TimeControl ?
-- [ ] DateTimeControl ?
 - [ ] FileControl
+- [ ] TimeControl
+- [ ] DateTimeControl ?
 - [ ] ImageControl (AvatarEditor)
 - [ ] SearchControl ?
 - [ ] ModalElement
@@ -69,6 +69,7 @@ npm install web-ui-pack
 - [ ] FormModalElement
 - [ ] InfiniteScroll
 - [ ] VirtualScroll
+- [ ] CarouselElement (Slide)
 - [ ] TableElement ?
 
 ## Components
@@ -88,13 +89,11 @@ npm install web-ui-pack
    - In `jsx/tsx` instead of `className` use `class` attribute (React issue)
    - If you change custom html-attributes it will update `$options`, but if you change some option it removes related attribute (for performance reasons). Better to avoid usage attributes at all
 4. **Inheritance**
-
    - Components are developed to be easy customized and inherrited. Use ...$defaults of every class to configure behavior You can rewrite everything that you can imagine without digging a lot in a code. To be sure don't hesitate to take a look on \*.d.ts or source code (there are enough comments to clarify even weird/difficult cases)
    - All Components inherrited from [WUPBaseElement](src/baseElement.ts) that extends default HTMLElement
    - All internal event-callbacks startsWith `got...` (gotReady, gotRemoved)
    - To redefine component just extend it and register with new html tag OR redefine default behavior via prototype functions (if $defaults are not included something). See details in [example](#example)
    - **Inherritance Tree**
-
      - [_HTMLElement_](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement)
        - [_BaseElement_](src/baseElement.ts)
          - [PopupElement](src/popupElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
@@ -108,6 +107,8 @@ npm install web-ui-pack
              - [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
              - [BaseComboControl](src/controls/baseCombo.ts)
                - [SelectControl](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
+               - [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
+           - [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
 
 ---
 
@@ -206,6 +207,9 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 **WARN**: don't use `import {focusFirst} from "web-ui-pack;` because in this case the whole web-ui-pack module traps in compilation of dev-bundle and increases time of compilation
 
 - [**animateDropdown**(el: HTMLElement, timeMs=300, isClose=false)](src/helpers/animateDropdown.ts) ⇒ `Animate (open/close) element as dropdown via scale and counter-scale for children`
+- [**dateCopyTime**(to:Date ,from:Date, utc:bool)](src/helpers/dateCopyTime.ts) ⇒ `Copy hh:mm:ss.fff part from B to A`
+- [**dateFromString**(v:string, format="yyyy-MM-dd hh:mm:ss AZ", options)](src/helpers/dateFromString.ts) ⇒ `Returns parsed date from string based on pointed format`
+- [**dateToString**(v:Date, format="yyyy-MM-dd hh:mm:ss AZ")](src/helpers/dateToString.ts) ⇒ `Returns a string representation of a date-time according to pointed format`
 - [**findScrollParent**(el: HTMLElement)](src/helpers/findScrollParent.ts) ⇒ `Find first parent with active scroll X/Y`
 - [**findScrollParentAll**(e: HTMLElement)](src//helpers/findScrollParent.ts) ⇒ `Find all parents with active scroll X/Y`
 - [**focusFirst**(el: HTMLElement)](src//helpers/focusFirst.ts) ⇒ `Set focus on element or first possible nested element`
@@ -216,10 +220,12 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 - [**observer**](#helpersobserver) ⇒ `converts object to observable (via Proxy) to allow listen for changes`
 - [**onEvent**(...args)](src/helpers/onEvent.ts) ⇒ `More strict (for Typescript) wrapper of addEventListener() that returns callback with removeListener()`
 - [**onFocusGot**(el: HTMLElement, listener: (ev) => void, {debounceMs: 100, once: false, ...})](src/helpers/onFocusGot.ts) ⇒ `Fires when element/children takes focus once (fires again after onFocusLost on element)`
+- [**onScrollStop**(el: HTMLElement, listener: (this: HTMLElement) => void), {once: false, ...}](src/helpers/onScrollStop.ts) ⇒ `Returns callback when scrolling is stopped (via checking scroll position every frame-render)`
 - [**onFocusLost**(el: HTMLElement, listener: (ev) => void, {debounceMs: 100, once: false, ...})](src/helpers/onFocusLost.ts) ⇒ `Fires when element/children completely lost focus`
 - [**onSpy**(object: {}, method: string, listener: (...args) => void](src/helpers/onSpy.ts) ⇒ `Spy on method-call of object`
 - [**promiseWait**(promise: Promise, ms: number, smartOrCallback: boolean | Function) => Promise](src/helpers/promiseWait.ts) ⇒ `Produce Promise during for "no less than pointed time"; it helps for avoding spinner blinking during the very fast api-request in case: pending > waitResponse > resetPending`
 - [**scrollIntoView**(el: HTMLElement, options: WUPScrollOptions) => Promise](src/helpers/scrollIntoView.ts) ⇒ `Scroll the HTMLElement's parent container such that the element is visible to the user and return promise by animation end`
+- [**scrollCarousel**(el: HTMLElement, next: (direction: -1 | 1) => HTMLElement[] | null, options: ScrollOptions) => ScrollResult](src/helpers/scrollCarousel.ts) ⇒ `Function makes pointed element scrollable and implements carousel-scroll behavior (appends new items during the scrolling). Supports swipe/pageUp/pageDown/mouseWheel events.`
 - [**stringLowerCount**(text: string, stopWith?: number)](src/helpers/stringCaseCount.ts) ⇒ `Returns count of chars in lower case (for any language with ignoring numbers, symbols)`
 - [**stringUpperCount**(text: string, stopWith?: number)](src/helpers/stringCaseCount.ts) ⇒ `Returns count of chars in upper case (for any language with ignoring numbers, symbols)`
 - [**stringPrettify**(text: string, changeKebabCase = false)](src/helpers/stringPrettify.ts) ⇒ `Changes camelCase, snakeCase, kebaCase text to user-friendly`

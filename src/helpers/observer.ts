@@ -1,6 +1,6 @@
 /* eslint-disable prefer-rest-params */
 // discussions here https://stackoverflow.com/questions/5100376/how-to-watch-for-array-changes
-import isEqual, { isBothNaN } from "./isEqual";
+import isEqual from "./isEqual";
 
 // #region Helpers
 const arrRemove = <T>(arr: Array<T>, item: T): void => {
@@ -297,9 +297,7 @@ function make<T extends object>(
             const r = v.apply(t, args);
             const next = watchObj.getVal(t);
             // Date possible to be NaN;
-            if (prev !== next && !isBothNaN(prev, next)) {
-              propChanged({ prev, next, prop: watchObj.propKey as string });
-            }
+            !isEqual(prev, next) && propChanged({ prev, next, prop: watchObj.propKey as string });
             return r;
           };
         }
