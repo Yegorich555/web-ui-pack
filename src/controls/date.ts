@@ -283,7 +283,6 @@ export default class WUPDateControl<
 
   protected override gotKeyDown(e: KeyboardEvent): Promise<void> {
     const wasOpen = this.$isOpen;
-    const clnd = this.$refPopup!.firstElementChild as WUPCalendarControl;
     let skipCalendar = false;
     switch (e.key) {
       case "Escape":
@@ -297,6 +296,8 @@ export default class WUPDateControl<
       default:
         break;
     }
+
+    const clnd = this.$refPopup?.firstElementChild as WUPCalendarControl;
     wasOpen && !skipCalendar && clnd.gotKeyDown.call(clnd, e); // skip actions for Escape & Space keys
     const r = !e.defaultPrevented && super.gotKeyDown(e);
     !wasOpen && this.$isOpen && !skipCalendar && clnd.gotKeyDown.call(clnd, e); // case when user press ArrowKey for opening menu

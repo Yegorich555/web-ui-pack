@@ -978,10 +978,11 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 }
 
 // todo NumberInput - set role 'spinbutton'
-/* todo when control disabled/readonly
+/* todo when control disabled
   - need to hide errorMesssage;
   - form > submit must be successfull despite on invalid state of control
   - form > collectOnlyChanges - must skip disabled control (because user can't affect on this)
-  - form > model must inlcude $initValue for disabled control instead of last changed. After submit need to reset $value to $initValue in this case
+  - form > collecModel for all control (excluding disable)
 */
+/* todo when control readonly : need to hide
 /* todo when user sees validation error at first time by focusout need to return focus back */

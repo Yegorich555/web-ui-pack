@@ -372,6 +372,8 @@ describe("control.date", () => {
     expect(el.$isOpen).toBe(false);
     expect(el.$value?.toISOString()).toBe("2018-02-04T13:45:59.000Z"); // it's must store hours
     expect(onChanged).toBeCalledTimes(1);
+
+    expect(isPressKeyPrevented("Home")).toBe(false); // keys must works only for input when is closed
   });
 
   test("value change not affects on popup", async () => {
