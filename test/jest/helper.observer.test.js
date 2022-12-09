@@ -1,4 +1,5 @@
 import observer from "web-ui-pack/helpers/observer";
+// import observer from "../../src/helpers/observer";
 import * as h from "../testHelper";
 
 beforeEach(() => {
@@ -326,13 +327,16 @@ describe("helper.observer", () => {
   });
 
   test("for Date (valueof)", () => {
-    let obj = observer.make(new Date(Date.parse("2007-10-05")));
+    let obj = observer.make(new Date("2007-10-05 00:00"));
     const fn = jest.fn();
     const fn2 = jest.fn();
     observer.onPropChanged(obj, fn);
 
+    obj.setHours(0, 0, 0, 0);
+    expect(fn).toBeCalledTimes(0); // because no changes
+
     let prev = obj.valueOf();
-    let next = obj.setHours(0, 0, 0, 0);
+    let next = obj.setHours(1, 2, 3, 4);
     expect(fn).toBeCalledTimes(1);
     expect(fn).toBeCalledWith({ prev, next, target: obj, prop: "valueOf" });
 

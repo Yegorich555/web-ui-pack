@@ -11,6 +11,7 @@
 - SelectControl. No scroll to selected element at first opening
 - SelectControl. Sometimes menu isn't opened
 - SelectControl. Fix `noItems` appeared on 2nd menu opening when user created a new value
+- Helper. observer. Fix onChange fired even date.setHours didn't change value
 
 **Features**:
 
