@@ -104,6 +104,9 @@ export default class WUPNumberControl<
     if (!ok) {
       return undefined;
     }
+    if (text[0] === "-") {
+      v *= -1; // case: "-123"
+    }
     return v as any;
   }
 
