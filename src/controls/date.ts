@@ -133,7 +133,7 @@ export default class WUPDateControl<
         (v === undefined || setV.some((d) => d.valueOf() === v.valueOf())) && `This date is disabled`,
     },
     firstDayOfWeek: 1,
-    format: locale.dateFormat.toLowerCase(),
+    format: locale.date.toLowerCase(),
   };
 
   $options: WUPDate.Options<ValueType> = {
