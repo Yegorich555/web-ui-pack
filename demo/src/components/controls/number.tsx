@@ -16,12 +16,13 @@ export default function NumberControlView() {
     <Page
       header="NumberControl"
       link="src/controls/number.ts"
-      // features={[
-      //   "Inheritted features from TextControl",
-      //   "Built-in validations (required,min,max)",
-      //   "Possible to increment/decrement via ArrowKeys, Mouse, TouchEvents", // todo implement
-      //   "Built-in mask-currency", // todo implement
-      // ]}
+      features={[
+        "Inheritted features from TextControl",
+        "Built-in validations (required,min,max)",
+        "Increment/decrement via ArrowKeys, Mouse, TouchEvents(Swipe) + keys Shift/Ctrl (only when focused)",
+        "Built-in mask-currency", // todo implement
+      ]}
+      // todo rollback after tests
       // details={{
       //   tag: "wup-num",
       //   cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),

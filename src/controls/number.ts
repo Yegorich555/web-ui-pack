@@ -1,3 +1,5 @@
+import onScroll from "../helpers/onScroll";
+import { onEvent } from "../indexHelpers";
 import WUPBaseControl from "./baseControl";
 import WUPTextControl, { WUPTextIn } from "./text";
 
@@ -110,23 +112,77 @@ export default class WUPNumberControl<
     return v as any;
   }
 
-  protected override gotInput(e: WUPText.GotInputEvent): void {
-    super.gotInput(e);
-    if (!this._opts.mask) {
-      e.target.value = (this.$value ?? "")!.toString(); // todo need to resuse mask-remove-behavior for removing restricted chars
-    }
-    // todo how to use with mask
-    // todo use 'currency' alias here: despite on debounce need to update input according to currency here
+  protected override renderControl(): void {
+    super.renderControl();
+    this.$refInput.setAttribute("role", "spinbutton");
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUPNumber.Options> | null): void {
     super.gotChanges(propsChanged as any);
   }
 
+  protected override gotInput(e: WUPText.GotInputEvent): void {
+    super.gotInput(e);
+    if (!this._opts.mask) {
+      e.target.value = (this.$value as any)?.toString() ?? "";
+    }
+    // todo how to use with mask
+    // todo use 'currency' alias here: despite on debounce need to update input according to currency here
+  }
+
   protected override gotFocus(): Array<() => void> {
     const r = super.gotFocus();
     this.$refInput.setAttribute("inputMode", "numeric"); // textControl removes if mask not applied
+    r.push(onScroll(this, (v) => this.gotIncrement(-1 * v))); // allow inc/dec via scroll/swipe
+    r.push(
+      onEvent(this, "keyup", (e) => {
+        if (!e.shiftKey) delete this._isShiftDown;
+        if (!e.ctrlKey) delete this._isCtrlDown;
+      })
+    );
+    r.push(() => {
+      delete this._isShiftDown;
+      delete this._isCtrlDown;
+    });
     return r;
+  }
+
+  _isShiftDown?: true;
+  _isCtrlDown?: true;
+  protected override gotKeyDown(e: KeyboardEvent): void {
+    super.gotKeyDown(e);
+
+    if (e.shiftKey) this._isShiftDown = true;
+    if (e.ctrlKey) this._isCtrlDown = true;
+
+    let v = 0;
+    switch (e.key) {
+      case "ArrowUp":
+        ++v;
+        break;
+      case "ArrowDown":
+        --v;
+        break;
+      default:
+        break;
+    }
+    if (v) {
+      e.preventDefault();
+      this.gotIncrement(v);
+    }
+  }
+
+  /** Called when user tries to increment/decrement value (via ArrowKeys/Mouse/Swipe) */
+  protected gotIncrement(dval: number): void {
+    if (this.$isReadOnly || this.$isDisabled) {
+      return;
+    }
+    if (this._isShiftDown) dval *= 10;
+    else if (this._isCtrlDown) dval *= 100;
+
+    const next = +(this.$value ?? 0) + dval;
+    this.$refInput.value = next.toString();
+    this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: dval > 0 ? "_inc" : "_dec" }));
   }
 }
 

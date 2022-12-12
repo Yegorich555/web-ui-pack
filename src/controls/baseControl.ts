@@ -987,5 +987,3 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     e.key === "Escape" && !e.shiftKey && !e.altKey && !e.ctrlKey && this.clearValue(); // WARN: Escape works wrong with NVDA because it's enables NVDA-focus-mode
   }
 }
-
-// todo NumberInput - set role 'spinbutton'
