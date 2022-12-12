@@ -64,11 +64,11 @@ describe("control.text", () => {
 
   test("validation: _parse", async () => {
     class TestTextElement extends WUPTextControl {
-      canParse() {
+      canParseInput() {
         return true;
       }
 
-      parse() {
+      parseInput() {
         throw new Error();
       }
     }
@@ -98,7 +98,7 @@ describe("control.text", () => {
     expect(el.$isValid).toBe(true);
 
     // when need to show mask-error once
-    TestTextElement.prototype.canParse = () => false;
+    TestTextElement.prototype.canParseInput = () => false;
     el.$options.mask = "$ 000";
     el.focus();
     await h.wait();

@@ -68,7 +68,7 @@ declare global {
        * * ignores control value, instead it uses `this.refMask` state based on `$refInput.value`
        *  */
       _mask: string;
-      /** If parse() throws exception during the input-change is wrong then pointed message shows
+      /** If parseInput() throws exception during the input-change is wrong then pointed message shows
        * @default "Invalid value"
        * @Rules
        * * processed only by input change (not value-change)
@@ -349,10 +349,15 @@ export default class WUPTextControl<
     return (text || undefined) as unknown as ValueType;
   }
 
-  /** Called before parseValue on gotInput event */
+  /** Called before parseInput on gotInput event */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected canParse(_text: string): boolean {
+  canParseInput(_text: string): boolean {
     return true;
+  }
+
+  /** Called to parse input text to value (related to locale or pointed format) */
+  parseInput(text: string): ValueType | undefined {
+    return this.parse(text);
   }
 
   protected get validations(): WUPText.Options["validations"] {
@@ -493,13 +498,13 @@ export default class WUPTextControl<
     //   return;
     // }
 
-    const canParse = this.canParse(txt);
+    const canParse = this.canParseInput(txt);
     let v = this.$value;
     let errMsg: boolean | string = "";
     /* istanbul ignore else */
     if (canParse) {
       try {
-        v = this.parse(txt);
+        v = this.parseInput(txt);
       } catch (err) {
         errMsg = (err as Error).message || true;
       }

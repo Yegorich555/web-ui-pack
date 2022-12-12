@@ -46,6 +46,7 @@ export default function NumberControlView() {
           mask=""
           maskholder=""
         />
+        {/* todo implement format */}
         <wup-num name="decimal" initValue="10.237" />
         <wup-num name="NumberRequired" validations="myRequiredValidations" />
         <wup-num name="WithMask" mask="0000-0000" />

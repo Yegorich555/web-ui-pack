@@ -1,6 +1,6 @@
 import dateFromString from "../helpers/dateFromString";
 import dateToString from "../helpers/dateToString";
-import { dateCopyTime } from "../indexHelpers";
+import { dateCopyTime, locale } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
 import WUPBaseComboControl, { WUPBaseComboIn } from "./baseCombo";
 import { ValidateFromCases } from "./baseControl";
@@ -13,7 +13,7 @@ import WUPCalendarControl, { PickersEnum, WUPCalendarIn } from "./calendar";
 const tagName = "wup-date";
 export namespace WUPDateIn {
   export interface Defs extends WUPCalendarIn.Def {
-    /** String representation of date (enables mask, - to disable mask set $options.mask="");
+    /** String representation of displayed date (enables mask, - to disable mask set $options.mask="");
      * @defaultValue "yyyy-mm-dd"
      * @tutorial Troubleshooting
      * * with changing $options.format need to change/reset mask/maskholder also */
@@ -46,7 +46,7 @@ declare global {
     interface Defaults<T = Date> extends WUPDateIn.GenDef<T> {}
     interface Options<T = Date> extends WUPDateIn.GenOpt<T> {}
     interface JSXProps<T extends WUPDateControl> extends WUPBaseCombo.JSXProps<T>, WUPDateIn.JSXProps {
-      /** String representation of date (enables mask, - to disable mask set $options.mask="");
+      /** String representation of displayed date (enables mask, - to disable mask set $options.mask="");
        * @defaultValue "yyyy-mm-dd"
        * @deprecated */
       format?: string;
@@ -65,11 +65,14 @@ declare global {
 }
 
 /** Form-control with date picker
+ * @tutorial Troubleshooting
+ * * $options.format related only to displayed text, to work with other date-options like min/max use strict format 'YYYY-MM-DD'
  * @example
   const el = document.createElement("wup-date");
   el.$options.name = "dateOfBirthday";
   el.$initValue = "1990-10-24";
   el.$options.validations = { required: true };
+  el.$options.format = "yyyy-MM-dd";
   const form = document.body.appendChild(document.createElement("wup-form"));
   form.appendChild(el);
   // or HTML
@@ -130,7 +133,7 @@ export default class WUPDateControl<
         (v === undefined || setV.some((d) => d.valueOf() === v.valueOf())) && `This date is disabled`,
     },
     firstDayOfWeek: 1,
-    format: "yyyy-mm-dd",
+    format: locale.dateFormat.toLowerCase(),
   };
 
   $options: WUPDate.Options<ValueType> = {
@@ -142,21 +145,30 @@ export default class WUPDateControl<
 
   protected override _opts = this.$options;
 
-  /** Converts date-string into Date according (to $options.utc & .format)
-   * @tutorial Troubleshooting
-   * * for "yyyy-mm-dd" the correct format is "yyyy-MM-dd" */
+  /** Parse string to Date
+   * @see WUPCalendarControl.$parse */
   override parse(text: string): ValueType | undefined {
+    /* istanbul ignore else */
     if (!text) {
       return undefined;
     }
-    let format = `${this._opts.format.toUpperCase()} hh:mm:ss.fff`;
-    format = this._opts.utc ? `${format}Z` : format;
+    return WUPCalendarControl.$parse(text, !!this._opts.utc) as ValueType;
+  }
+
+  /** Called to parse input text to value (related to locale or pointed format)
+   *  @tutorial Troubleshooting
+   * * for "yyyy-mm-dd" the correct format is "yyyy-MM-dd" */
+  override parseInput(text: string): ValueType | undefined {
+    if (!text) {
+      return undefined;
+    }
+    const format = `${this._opts.format.toUpperCase()} hh:mm:ss.fff${this._opts.utc ? "Z" : ""}`;
     const v = dateFromString(text, format, { throwOutOfRange: true }) ?? undefined;
     return v as any;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected override canParse(_text: string): boolean {
+  override canParseInput(_text: string): boolean {
     return !this.refMask || this.refMask.isCompleted;
   }
 

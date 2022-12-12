@@ -179,6 +179,7 @@ describe("control.date", () => {
       expect(el.$refInput.value).toBe("2022-10-15"); // just for coverage
 
       el.setAttribute("min", "abc");
+      expect(() => jest.advanceTimersByTime(1)).toThrow();
       await h.wait(1);
       expect(el.$options.min).toBe(undefined);
 
@@ -203,7 +204,7 @@ describe("control.date", () => {
     await h.wait(1);
 
     el.focus();
-    const onParse = jest.spyOn(el, "parse");
+    const onParse = jest.spyOn(el, "parseInput");
     const onChange = jest.fn();
     el.addEventListener("$change", onChange);
     await h.userTypeText(el.$refInput, "20221030");

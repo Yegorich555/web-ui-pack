@@ -96,9 +96,23 @@ export default class WUPNumberControl<
 
   protected override _opts = this.$options;
 
+  /** Called when need to format value */
+  protected valueToInput(v: ValueType | undefined): string {
+    // todo implement it according to format
+    return (v as any)?.toString() || "";
+  }
+
   override parse(text: string): ValueType | undefined {
-    // such parsing is better then Number.parseInt because ignores wrong chars
-    let v = 0;
+    const v = Number(text);
+    if (!text || Number.isNaN(v)) {
+      return undefined;
+    }
+    return v as any;
+  }
+
+  override parseInput(text: string): ValueType | undefined {
+    // such parsing is better then Number.parse because ignores wrong chars
+    let v: number | undefined = 0;
     let ok = false;
     let dec: number | null = null;
     let decLn = 1;
@@ -114,18 +128,28 @@ export default class WUPNumberControl<
           decLn *= 10;
         }
       } else if (ascii === locale.sepDecimal.charCodeAt(0)) {
-        // WARN: expected that sepDecimal is single char
+        // WARN: expected: sepDecimal is single char
         dec = 0;
       }
     }
     if (dec) v += dec / decLn;
     if (!ok) {
-      return undefined;
-    }
-    if (text.charCodeAt(0) === 45) {
+      v = undefined;
+    } else if (text.charCodeAt(0) === 45) {
       v *= -1; // case: "-123"
     }
+
+    if (!this._opts.mask) {
+      // it conflicts with mask
+      this.$refInput.value = this.valueToInput(v as any);
+    }
+
     return v as any;
+  }
+
+  protected override setInputValue(v: ValueType | undefined): void {
+    const txt = this.valueToInput(v);
+    super.setInputValue(txt);
   }
 
   protected override renderControl(): void {
@@ -137,13 +161,10 @@ export default class WUPNumberControl<
     super.gotChanges(propsChanged as any);
   }
 
-  protected override gotInput(e: WUPText.GotInputEvent): void {
-    super.gotInput(e);
-    if (!this._opts.mask) {
-      e.target.value = (this.$value as any)?.toString() ?? "";
-    }
-    // todo use 'currency' alias here: despite on debounce need to update input according to currency here
-  }
+  // protected override gotInput(e: WUPText.GotInputEvent): void {
+  //   super.gotInput(e);
+  //   !this._opts.mask && this.setInputValue(this.$value);
+  // }
 
   protected override gotFocus(): Array<() => void> {
     const r = super.gotFocus();

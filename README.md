@@ -211,9 +211,10 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 - [**dateFromString**(v:string, format="yyyy-MM-dd hh:mm:ss AZ", options)](src/helpers/dateFromString.ts) ⇒ `Returns parsed date from string based on pointed format`
 - [**dateToString**(v:Date, format="yyyy-MM-dd hh:mm:ss AZ")](src/helpers/dateToString.ts) ⇒ `Returns a string representation of a date-time according to pointed format`
 - [**findScrollParent**(el: HTMLElement)](src/helpers/findScrollParent.ts) ⇒ `Find first parent with active scroll X/Y`
-- [**findScrollParentAll**(e: HTMLElement)](src//helpers/findScrollParent.ts) ⇒ `Find all parents with active scroll X/Y`
-- [**focusFirst**(el: HTMLElement)](src//helpers/focusFirst.ts) ⇒ `Set focus on element or first possible nested element`
-- [**isIntoView**(el: HTMLElement)](src//helpers/isIntoView.ts) ⇒ `Check if element is visible in scrollable parents`
+- [**findScrollParentAll**(e: HTMLElement)](src/helpers/findScrollParent.ts) ⇒ `Find all parents with active scroll X/Y`
+- [**focusFirst**(el: HTMLElement)](src/helpers/focusFirst.ts) ⇒ `Set focus on element or first possible nested element`
+- [**isIntoView**(el: HTMLElement)](src/helpers/isIntoView.ts) ⇒ `Check if element is visible in scrollable parents`
+- [**locale**](src/helpers/locale.ts) ⇒ `Locale-object with definitions related to user-locale`
 - [**nestedProperty.set**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.set(obj, "value.nestedValue", 1) sets obj.value.nestedValue = 1`
 - [**nestedProperty.get**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.get(obj, "nested.val2", out?: {hasProp?: boolean} ) returns value from obj.nested.val2`
 - [**objectClone**(obj, opts: CloneOptions)](src/helpers/objectClone.ts) ⇒ `converts object to observable (via Proxy) to allow listen for changes`

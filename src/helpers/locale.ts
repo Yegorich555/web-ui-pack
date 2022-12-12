@@ -1,4 +1,4 @@
-export function getNumberFormat(): { sepDecimal: string; sep1000: string } {
+export function getNumberLocale(): { sepDecimal: string; sep1000: string } {
   const s = (1234.5).toLocaleString();
 
   let sep1000: string;
@@ -23,11 +23,6 @@ export function getNumberFormat(): { sepDecimal: string; sep1000: string } {
   return { sep1000, sepDecimal };
 }
 
-function refresh(): void {
-  const r = getNumberFormat();
-  Object.assign(locale, r);
-}
-
 /** Locale-object with definitions related to user-locale;
  * @tutorial Troubleshooting
  * * in JS impossible to define whether user-settings is different from user-locale
@@ -38,10 +33,15 @@ const locale = {
   /** Thouthands separator for number 1,234.5 it's comma */
   sep1000: ",",
   /** Date format, example yyyy-MM-dd */
-  // dateFormat: "yyyy-MM-dd", // todo implement
+  dateFormat: "yyyy-MM-dd", // todo implement
   /** Re-define all values (call it if localization changed) */
-  refresh,
+  refresh: () => {
+    const r = getNumberLocale();
+    Object.assign(locale, r);
+  },
 };
+locale.refresh();
+
 export default locale;
 
 // Intl.NumberFormat("en-US", {
