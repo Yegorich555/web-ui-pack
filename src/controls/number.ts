@@ -1,5 +1,5 @@
 import onScroll from "../helpers/onScroll";
-import { onEvent } from "../indexHelpers";
+import { locale, onEvent } from "../indexHelpers";
 import WUPBaseControl from "./baseControl";
 import WUPTextControl, { WUPTextIn } from "./text";
 
@@ -97,16 +97,28 @@ export default class WUPNumberControl<
   protected override _opts = this.$options;
 
   override parse(text: string): ValueType | undefined {
-    // such parsing is better then Number.parseInt because it ignores wrong chars
+    // such parsing is better then Number.parseInt because ignores wrong chars
     let v = 0;
     let ok = false;
+    let dec: number | null = null;
+    let decLn = 1;
     for (let i = 0; i < text.length; ++i) {
-      const num = text.charCodeAt(i) - 48;
+      const ascii = text.charCodeAt(i);
+      const num = ascii - 48;
       if (num >= 0 && num <= 9) {
         ok = true;
-        v = v * 10 + num;
+        if (dec === null) {
+          v = v * 10 + num;
+        } else {
+          dec = dec * 10 + num;
+          decLn *= 10;
+        }
+      } else if (ascii === locale.sepDecimal.charCodeAt(0)) {
+        // WARN: expected that sepDecimal is single char
+        dec = 0;
       }
     }
+    if (dec) v += dec / decLn;
     if (!ok) {
       return undefined;
     }
@@ -135,26 +147,30 @@ export default class WUPNumberControl<
 
   protected override gotFocus(): Array<() => void> {
     const r = super.gotFocus();
-    this.$refInput.setAttribute("inputMode", "numeric"); // textControl removes if mask not applied
+    this.$refInput.setAttribute("inputMode", "numeric"); // otherwise textControl removes it if mask isn't applied
     r.push(onScroll(this, (v) => this.gotIncrement(-1 * v))); // allow inc/dec via scroll/swipe
     r.push(
       onEvent(this, "keyup", (e) => {
+        if (!e.shiftKey) delete this._isAltDown;
         if (!e.shiftKey) delete this._isShiftDown;
         if (!e.ctrlKey) delete this._isCtrlDown;
       })
     );
     r.push(() => {
+      delete this._isAltDown;
       delete this._isShiftDown;
       delete this._isCtrlDown;
     });
     return r;
   }
 
+  _isAltDown?: true;
   _isShiftDown?: true;
   _isCtrlDown?: true;
   protected override gotKeyDown(e: KeyboardEvent): void {
     super.gotKeyDown(e);
 
+    if (e.altKey) this._isAltDown = true;
     if (e.shiftKey) this._isShiftDown = true;
     if (e.ctrlKey) this._isCtrlDown = true;
 
@@ -180,7 +196,9 @@ export default class WUPNumberControl<
     if (this.$isReadOnly || this.$isDisabled) {
       return;
     }
-    if (this._isShiftDown) dval *= 10;
+
+    if (this._isAltDown) dval *= 0.1;
+    else if (this._isShiftDown) dval *= 10;
     else if (this._isCtrlDown) dval *= 100;
 
     const next = +(this.$value ?? 0) + dval;
@@ -190,13 +208,3 @@ export default class WUPNumberControl<
 }
 
 customElements.define(tagName, WUPNumberControl);
-
-// Intl.NumberFormat("en-US", {
-//   style: "currency",
-//   currency: "USD",
-//   maximumFractionDigits: 0,
-//   minimumFractionDigits: 0,
-// }).format(1234.5); '$1,234.50'
-
-// new Date(2222, 0, 3).toLocaleDateString(); // '1/3/2222'
-// (1234.5).toLocaleString(); // '1,234.5'

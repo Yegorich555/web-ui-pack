@@ -8,6 +8,7 @@ export { default as focusFirst } from "./helpers/focusFirst";
 export { default as isEqual } from "./helpers/isEqual";
 export { isBothNaN } from "./helpers/isEqual";
 export { default as isIntoView } from "./helpers/isIntoView";
+export { default as locale } from "./helpers/locale";
 
 export { default as nestedProperty } from "./helpers/nestedProperty";
 export { default as observer } from "./helpers/observer";
