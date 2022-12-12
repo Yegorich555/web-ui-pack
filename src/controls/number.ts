@@ -20,7 +20,7 @@ export namespace WUPNumberIn {
 
 declare global {
   namespace WUPNumber {
-    interface ValidationMap extends WUPBase.ValidationMap {
+    interface ValidationMap extends WUPBase.ValidationMap, Pick<WUPText.ValidationMap, "_mask"> {
       /** If $value < pointed shows message 'Min value {x}` */
       min: number;
       /** If $value < pointed shows message 'Max value {x}` */
@@ -29,7 +29,9 @@ declare global {
     interface EventMap extends WUPBase.EventMap {}
     interface Defaults<T = number> extends WUPNumberIn.GenDef<T> {}
     interface Options<T = number> extends WUPNumberIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPNumberControl> extends WUPBase.JSXProps<T> {
+
+    // @ts-expect-error
+    interface JSXProps<T extends WUPNumberControl> extends WUPText.JSXProps<T> {
       // some options can be here
     }
   }
@@ -64,6 +66,7 @@ declare global {
   </wup-form>;
  * @see WUPTextControl
  */
+// @ts-expect-error
 export default class WUPNumberControl<
   ValueType = number,
   EventMap extends WUPNumber.EventMap = WUPNumber.EventMap
@@ -75,10 +78,11 @@ export default class WUPNumberControl<
   // }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUPNumber.Defaults<string | number> = {
+  static $defaults: WUPNumber.Defaults<number> = {
     ...WUPTextControl.$defaults,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
+      _mask: WUPTextControl.$defaults.validationRules._mask as any,
       min: (v, setV) => (v == null || v < setV) && `Min value is ${setV}`,
       max: (v, setV) => (v == null || v > setV) && `Max value is ${setV}`,
     },
@@ -126,7 +130,6 @@ export default class WUPNumberControl<
     if (!this._opts.mask) {
       e.target.value = (this.$value as any)?.toString() ?? "";
     }
-    // todo how to use with mask
     // todo use 'currency' alias here: despite on debounce need to update input according to currency here
   }
 

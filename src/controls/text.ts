@@ -66,7 +66,6 @@ declare global {
        * * enabled by default with $options.mask
        * * excluded from listing (for $options.validationShowAll)
        * * ignores control value, instead it uses `this.refMask` state based on `$refInput.value`
-       * * removed by focusout (because input rollback to previous valid value)
        *  */
       _mask: string;
       /** If parse() throws exception during the input-change is wrong then pointed message shows
@@ -641,3 +640,5 @@ customElements.define(tagName, WUPTextControl);
 // NiceToHave: handle Ctrl+Z wup-select etc. cases
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
+
+// todo implement suffix/prefix when user sees but can't to select as part of input

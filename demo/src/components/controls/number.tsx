@@ -20,7 +20,7 @@ export default function NumberControlView() {
         "Inheritted features from TextControl",
         "Built-in validations (required,min,max)",
         "Increment/decrement via ArrowKeys, Mouse, TouchEvents(Swipe) + keys Shift/Ctrl (only when focused)",
-        "Built-in mask-currency", // todo implement
+        "Built-in mask-currency",
       ]}
       // todo rollback after tests
       // details={{
@@ -45,6 +45,7 @@ export default function NumberControlView() {
           validations="window.myNumberValidations"
         />
         <wup-num name="NumberRequired" validations="myRequiredValidations" />
+        <wup-num name="WithMask" mask="0000-0000" />
         <wup-num
           name="readonly"
           ref={(el) => {
