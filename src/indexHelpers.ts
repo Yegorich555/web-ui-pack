@@ -17,6 +17,7 @@ export { default as objectClone } from "./helpers/objectClone";
 export { default as onEvent } from "./helpers/onEvent";
 export { default as onFocusGot } from "./helpers/onFocusGot";
 export { default as onFocusLost } from "./helpers/onFocusLost";
+export { default as onScroll } from "./helpers/onScroll";
 export { default as onScrollStop } from "./helpers/onScrollStop";
 export { default as onSpy } from "./helpers/onSpy";
 // export * from "./helpers/onFocusLost";

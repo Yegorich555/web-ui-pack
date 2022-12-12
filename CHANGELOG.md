@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0 (\_\_\_)
+
+**Features**:
+
+- Added [helpers](README.md#helpers)
+  - [`onScroll`](src/helpers/onScroll.ts)
+
 ## 0.2.0 (Dec 09, 2022)
 
 **Fixes**:
