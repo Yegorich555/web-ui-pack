@@ -110,7 +110,7 @@ export default class WUPNumberControl<
     if (!ok) {
       return undefined;
     }
-    if (text[0] === "-") {
+    if (text.charCodeAt(0) === 45) {
       v *= -1; // case: "-123"
     }
     return v as any;
