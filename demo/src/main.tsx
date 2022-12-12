@@ -20,6 +20,7 @@ import RadioControlView from "./components/controls/radio";
 import CalendarControlView from "./components/controls/calendar";
 import DateControlView from "./components/controls/date";
 import FAQView from "./components/FAQView";
+import NumberControlView from "./components/controls/number";
 
 (window as any).WUPHelpers = WUPHelpers;
 
@@ -38,6 +39,7 @@ const routes: IRoute[] = [
   { path: "controls", label: "Form & Controls", el: ControlsView },
   { path: "control/text", el: TextControlView, isNested: true },
   { path: "control/password", el: PasswordControlView, isNested: true },
+  { path: "control/number", el: NumberControlView, isNested: true },
   { path: "control/switch", el: SwitchControlView, isNested: true },
   { path: "control/check", el: CheckControlView, isNested: true },
   { path: "control/radio", el: RadioControlView, isNested: true },

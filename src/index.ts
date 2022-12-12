@@ -15,3 +15,4 @@ export { default as WUPCheckControl } from "./controls/check";
 export { default as WUPRadioControl } from "./controls/radio";
 export { default as WUPCalendarControl } from "./controls/calendar";
 export { default as WUPDateControl } from "./controls/date";
+export { default as WUPNumberControl } from "./controls/number";

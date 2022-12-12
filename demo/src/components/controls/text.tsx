@@ -79,15 +79,7 @@ export default function TextControlView() {
             }
           }}
         />
-        <wup-text
-          name="disabled"
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "disabled";
-              el.$options.disabled = true;
-            }
-          }}
-        />
+        <wup-text name="disabled" disabled />
         <section>
           <h3>Masked inputs</h3>
           <br />
