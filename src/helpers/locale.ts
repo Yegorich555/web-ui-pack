@@ -12,15 +12,15 @@ export function getNumberLocale(): { sepDecimal: string; sep1000: string } {
   }
 
   let sepDecimal: string;
-  const end = s.length - 2;
   for (let i = s.length - 2; ; --i) {
     const ascii = s.charCodeAt(i);
     if (ascii >= 48 && ascii <= 57) {
-      sepDecimal = s.substring(i, end);
+      sepDecimal = s.substring(i + 1, s.length - 1);
       break;
     }
   }
 
+  console.warn(sepDecimal);
   return { sep1000, sepDecimal };
 }
 
