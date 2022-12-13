@@ -1189,3 +1189,13 @@ customElements.define(tagName, WUPCalendarControl);
  */
 
 // todo add ability to select range
+/* todo months names replace to locale-defined:
+  new Intl.DateTimeFormat(undefined, { month: "short" }).format(new Date()); >>> "Dec"
+  new Intl.DateTimeFormat(undefined, {month: "long"}).format(new Date()); >>> "December"
+
+  new Intl.DateTimeFormat("ru-RU", { month: "short" }).format(new Date()); >>> "дек."
+  new Intl.DateTimeFormat("ru-RU", { month: "long" }).format(new Date()); >>> "декабрь"
+
+  console.warn(new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(new Date())); => 'Tue'
+  console.warn(new Intl.DateTimeFormat("ru-RU", { weekday: "short" }).format(new Date())); => вт
+*/

@@ -10,13 +10,13 @@
     - default value `YYYY-MM-DD`
   - Now
     - changing `$options.format` & attr `[format]` related only to displayed text. All attributes must be pointed in universal format `YYYY-MM-DD`
-    - default value depends on user localization; see [locale](src/helpers/locale.ts)
+    - default value depends on user localization; see [locale](src/helpers/localeInfo.ts)
 
 **Features**:
 
 - Added [helpers](README.md#helpers)
   - [`onScroll`](src/helpers/onScroll.ts)
-  - [`locale`](src/helpers/locale.ts)
+  - [`localeInfo`](src/helpers/localeInfo.ts)
 
 ## 0.2.0 (Dec 09, 2022)
 

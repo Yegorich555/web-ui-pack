@@ -1,6 +1,6 @@
 import dateFromString from "../helpers/dateFromString";
 import dateToString from "../helpers/dateToString";
-import { dateCopyTime, locale } from "../indexHelpers";
+import { dateCopyTime, localeInfo } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
 import WUPBaseComboControl, { WUPBaseComboIn } from "./baseCombo";
 import { ValidateFromCases } from "./baseControl";
@@ -133,7 +133,7 @@ export default class WUPDateControl<
         (v === undefined || setV.some((d) => d.valueOf() === v.valueOf())) && `This date is disabled`,
     },
     firstDayOfWeek: 1,
-    format: locale.date.toLowerCase(),
+    format: localeInfo.date.toLowerCase(),
   };
 
   $options: WUPDate.Options<ValueType> = {

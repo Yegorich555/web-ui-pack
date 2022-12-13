@@ -214,7 +214,7 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 - [**findScrollParentAll**(e: HTMLElement)](src/helpers/findScrollParent.ts) ⇒ `Find all parents with active scroll X/Y`
 - [**focusFirst**(el: HTMLElement)](src/helpers/focusFirst.ts) ⇒ `Set focus on element or first possible nested element`
 - [**isIntoView**(el: HTMLElement)](src/helpers/isIntoView.ts) ⇒ `Check if element is visible in scrollable parents`
-- [**locale**](src/helpers/locale.ts) ⇒ `Locale-object with definitions related to user-locale`
+- [**localeInfo**](src/helpers/localeInfo.ts) ⇒ `Locale-object with definitions related to user-locale`
 - [**nestedProperty.set**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.set(obj, "value.nestedValue", 1) sets obj.value.nestedValue = 1`
 - [**nestedProperty.get**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.get(obj, "nested.val2", out?: {hasProp?: boolean} ) returns value from obj.nested.val2`
 - [**objectClone**(obj, opts: CloneOptions)](src/helpers/objectClone.ts) ⇒ `converts object to observable (via Proxy) to allow listen for changes`

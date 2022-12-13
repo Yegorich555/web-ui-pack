@@ -1,11 +1,27 @@
 import onScroll from "../helpers/onScroll";
-import { locale, onEvent } from "../indexHelpers";
+import { localeInfo, onEvent } from "../indexHelpers";
 import WUPBaseControl from "./baseControl";
 import WUPTextControl, { WUPTextIn } from "./text";
 
 const tagName = "wup-num";
 export namespace WUPNumberIn {
-  export interface Def {}
+  export interface Format {
+    /** Decimal separator; for number 123.4 it's dot
+     * localeInfoInfo @see localeInfo.sepDecimal */
+    sepDecimal?: string;
+    /** Thouthands separator; for number 1,234.5 it's comma
+     *  localeInfoInfo @see localeInfo.sep1000 */
+    sep1000?: string;
+    /** Maximum displayed fraction digits; for 123.45 it's 2
+     * @defaultValue 0 */
+    maxDecimal?: number;
+    /** Minimun displayed fraction digits; if pointed 2 then 123.4 goes to 123.40
+     * @defaultValue 0 */
+    minDecimal?: number;
+  }
+  export interface Def {
+    format?: Format;
+  }
   export interface Opt {}
   export type Generics<
     ValueType = number,
@@ -73,10 +89,6 @@ export default class WUPNumberControl<
 > extends WUPTextControl<ValueType, EventMap> {
   #ctr = this.constructor as typeof WUPNumberControl;
 
-  // static get $style(): string {
-  //   return `${super.$style}`;
-  // }
-
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUPNumber.Defaults<number> = {
     ...WUPTextControl.$defaults,
@@ -96,10 +108,47 @@ export default class WUPNumberControl<
 
   protected override _opts = this.$options;
 
+  /** Returns $options.format joined with defaults */
+  protected get format(): Required<WUPNumberIn.Format> {
+    return {
+      sepDecimal: localeInfo.sepDecimal,
+      sep1000: localeInfo.sep1000,
+      maxDecimal: 0,
+      minDecimal: 0,
+      ...this._opts.format,
+    };
+  }
+  /*
+    options:
+      * sep1000: empty/localeInfo/custom - how to point localeInfo ?
+      * sepDecimal: localeInfo/custom - how to point localeInfo ?
+      * minDecimal
+      * maxDecimal
+    // todo how to do it with string-pattern ?
+    #,###.### - min:0, max:3, sep1000:',' sepDecimal:'.'
+    # ###.#0 - min:1, max:2, sep1000:' ' sepDecimal:'.'
+    # - min:0, max:0, sep1000:'', sepDecimal:localeInfo
+    ####.### - min:0, max:3, sep1000:'' sepDecimal:'.'
+    #,### - ...
+    #.00 - min:2, max:2, sep1000:
+   */
+
   /** Called when need to format value */
   protected valueToInput(v: ValueType | undefined): string {
-    // todo implement it according to format
-    return (v as any)?.toString() || "";
+    if (v == null) {
+      return "";
+    }
+    // eslint-disable-next-line prefer-const
+    let [int, dec] = (v.toString() || "").split(".");
+    if (dec) {
+      const f = this.format;
+      dec = dec.substring(0, Math.min(f.maxDecimal, dec.length));
+      dec += "0".repeat(Math.max(f.minDecimal - dec.length, 0));
+      if (dec.length) {
+        return int + this.format.sepDecimal + dec;
+      }
+    }
+    return int;
   }
 
   override parse(text: string): ValueType | undefined {
@@ -116,6 +165,8 @@ export default class WUPNumberControl<
     let ok = false;
     let dec: number | null = null;
     let decLn = 1;
+    let decI = 0;
+    const f = this.format;
     for (let i = 0; i < text.length; ++i) {
       const ascii = text.charCodeAt(i);
       const num = ascii - 48;
@@ -123,16 +174,19 @@ export default class WUPNumberControl<
         ok = true;
         if (dec === null) {
           v = v * 10 + num;
-        } else {
+        } else if (f.maxDecimal >= ++decI) {
           dec = dec * 10 + num;
           decLn *= 10;
         }
-      } else if (ascii === locale.sepDecimal.charCodeAt(0)) {
+      } else if (ascii === f.sepDecimal.charCodeAt(0)) {
         // WARN: expected: sepDecimal is single char
         dec = 0;
       }
     }
-    if (dec) v += dec / decLn;
+
+    if (dec) {
+      v += dec / decLn;
+    }
     if (!ok) {
       v = undefined;
     } else if (text.charCodeAt(0) === 45) {
@@ -140,7 +194,7 @@ export default class WUPNumberControl<
     }
 
     if (!this._opts.mask) {
-      // it conflicts with mask
+      // otherwise it conflicts with mask
       this.$refInput.value = this.valueToInput(v as any);
     }
 

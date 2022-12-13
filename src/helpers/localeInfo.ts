@@ -1,6 +1,6 @@
 /** Returns number format according to user-locale */
-export function getNumberLocale(): { sepDecimal: string; sep1000: string } {
-  const s = (1234.5).toLocaleString();
+export function getNumberOptions(): { sepDecimal: string; sep1000: string } {
+  const s = (1234.5).toLocaleString(); // '1,234.5'
 
   let sep1000: string;
   for (let i = 1; ; ++i) {
@@ -20,12 +20,16 @@ export function getNumberLocale(): { sepDecimal: string; sep1000: string } {
     }
   }
 
-  console.warn(sepDecimal);
+  // WARN: this method slower
+  // const arr = new Intl.NumberFormat().formatToParts(1234.5);
+  // sep1000 = arr[1].value;
+  // sepDecimal = arr[3].value;
+
   return { sep1000, sepDecimal };
 }
 
 /** Returns date-time formats according to user-locale */
-export function getDateLocale(): { date: string; time: string; dateTime: string } {
+export function getDateFormat(): { date: string; time: string; dateTime: string } {
   // "1/3/2222, 4:05:06 AM";
   const s = new Date(2222, 0, 3, 4, 5, 6).toLocaleString().replace(/AM|am/, "a");
   // const s = "4:05:06 AM, 1/3/2222".replace(/AM|am/, "a");
@@ -99,7 +103,7 @@ export function getDateLocale(): { date: string; time: string; dateTime: string 
  * @tutorial Troubleshooting
  * * in JS impossible to define whether user-settings is different from user-locale
  */
-const locale = {
+const localeInfo = {
   /** Decimal separator for number 123.4 it's dot */
   sepDecimal: ".",
   /** Thouthands separator for number 1,234.5 it's comma */
@@ -112,21 +116,16 @@ const locale = {
   dateTime: "yyyy-MM-dd",
   /** Re-define all values (call it if localization changed) */
   refresh: () => {
-    Object.assign(locale, getNumberLocale(), getDateLocale());
+    const cur = new Intl.DateTimeFormat(undefined).resolvedOptions();
+    if (cur.numberingSystem !== "latn") {
+      console.warn("WUP.LocaleInfo. Not latin numbers are not supported. Setup it itself");
+      return;
+    }
+    Object.assign(localeInfo, getNumberOptions(), getDateFormat());
   },
 };
-locale.refresh();
 
-export default locale;
-
-// Intl.NumberFormat("en-US", {
-//   style: "currency",
-//   currency: "USD",
-//   maximumFractionDigits: 0,
-//   minimumFractionDigits: 0,
-// }).format(1234.5); '$1,234.50'
-
-// new Date(2222, 0, 3).toLocaleDateString(); // '1/3/2222'
-// (1234.5).toLocaleString(); // '1,234.5'
+localeInfo.refresh();
+export default localeInfo;
 
 // todo cover with tests
