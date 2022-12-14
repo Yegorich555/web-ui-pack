@@ -1,5 +1,5 @@
 import onScroll from "../helpers/onScroll";
-import { localeInfo, onEvent } from "../indexHelpers";
+import { localeInfo, mathSumFloat, onEvent } from "../indexHelpers";
 import WUPBaseControl from "./baseControl";
 import WUPTextControl, { WUPTextIn } from "./text";
 
@@ -270,12 +270,15 @@ export default class WUPNumberControl<
       return;
     }
 
-    if (this._isAltDown) dval *= 0.1;
-    else if (this._isShiftDown) dval *= 10;
-    else if (this._isCtrlDown) dval *= 100;
-
-    const next = +(this.$value ?? 0) + dval; // todo 10.53 + 0.1 returns 10.629999999999999
-    console.warn({ next, dval, val: this.$value });
+    const v = +(this.$value ?? 0);
+    let next: number;
+    if (this._isAltDown) {
+      next = mathSumFloat(v, dval * 0.1);
+    } else {
+      if (this._isShiftDown) dval *= 10;
+      else if (this._isCtrlDown) dval *= 100;
+      next = v + dval;
+    }
     this.$refInput.value = next.toString();
     this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: dval > 0 ? "_inc" : "_dec" }));
   }
