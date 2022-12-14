@@ -17,6 +17,7 @@
 - Added [helpers](README.md#helpers)
   - [`onScroll`](src/helpers/onScroll.ts)
   - [`localeInfo`](src/helpers/localeInfo.ts)
+  - [`mathSumFloat`](src/helpers/mathSumFloat.ts)
 
 ## 0.2.0 (Dec 09, 2022)
 
