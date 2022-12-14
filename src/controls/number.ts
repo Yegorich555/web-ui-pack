@@ -19,10 +19,10 @@ export namespace WUPNumberIn {
      * @defaultValue 0 */
     minDecimal?: number;
   }
-  export interface Def {
+  export interface Def {}
+  export interface Opt {
     format?: Format;
   }
-  export interface Opt {}
   export type Generics<
     ValueType = number,
     ValidationKeys extends WUPBase.ValidationMap = WUPNumber.ValidationMap,
@@ -109,7 +109,7 @@ export default class WUPNumberControl<
   protected override _opts = this.$options;
 
   /** Returns $options.format joined with defaults */
-  protected get format(): Required<WUPNumberIn.Format> {
+  get $format(): Required<WUPNumberIn.Format> {
     return {
       sepDecimal: localeInfo.sepDecimal,
       sep1000: localeInfo.sep1000,
@@ -118,21 +118,8 @@ export default class WUPNumberControl<
       ...this._opts.format,
     };
   }
-  /*
-    options:
-      * sep1000: empty/localeInfo/custom - how to point localeInfo ?
-      * sepDecimal: localeInfo/custom - how to point localeInfo ?
-      * minDecimal
-      * maxDecimal
-    // todo how to do it with string-pattern ?
-    #,###.### - min:0, max:3, sep1000:',' sepDecimal:'.'
-    # ###.#0 - min:1, max:2, sep1000:' ' sepDecimal:'.'
-    # - min:0, max:0, sep1000:'', sepDecimal:localeInfo
-    ####.### - min:0, max:3, sep1000:'' sepDecimal:'.'
-    #,### - ...
-    #.00 - min:2, max:2, sep1000:
-   */
 
+  // WARN usage format #.### impossible because unclear what sepDec/sep100 and what if user wants only limit decimal part
   /** Called when need to format value */
   protected valueToInput(v: ValueType | undefined): string {
     if (v == null) {
@@ -140,14 +127,22 @@ export default class WUPNumberControl<
     }
     // eslint-disable-next-line prefer-const
     let [int, dec] = (v.toString() || "").split(".");
+    const f = this.$format;
+
+    if (f.sep1000) {
+      for (let i = int.length - 3; i > 0; i -= 3) {
+        int = `${int.substring(0, i)}${f.sep1000}${int.substring(i)}`;
+      }
+    }
+
     if (dec) {
-      const f = this.format;
       dec = dec.substring(0, Math.min(f.maxDecimal, dec.length));
       dec += "0".repeat(Math.max(f.minDecimal - dec.length, 0));
       if (dec.length) {
-        return int + this.format.sepDecimal + dec;
+        return int + this.$format.sepDecimal + dec;
       }
     }
+
     return int;
   }
 
@@ -166,7 +161,7 @@ export default class WUPNumberControl<
     let dec: number | null = null;
     let decLn = 1;
     let decI = 0;
-    const f = this.format;
+    const f = this.$format;
     for (let i = 0; i < text.length; ++i) {
       const ascii = text.charCodeAt(i);
       const num = ascii - 48;
@@ -179,7 +174,7 @@ export default class WUPNumberControl<
           decLn *= 10;
         }
       } else if (ascii === f.sepDecimal.charCodeAt(0)) {
-        // WARN: expected: sepDecimal is single char
+        // WARN: expected sepDecimal is single char
         dec = 0;
       }
     }
@@ -193,8 +188,11 @@ export default class WUPNumberControl<
       v *= -1; // case: "-123"
     }
 
+    console.warn(v);
     if (!this._opts.mask) {
       // otherwise it conflicts with mask
+      // todo limit to maxSafeInteger
+      // todo show-hide value in this case as it works with mask
       this.$refInput.value = this.valueToInput(v as any);
     }
 
@@ -276,7 +274,8 @@ export default class WUPNumberControl<
     else if (this._isShiftDown) dval *= 10;
     else if (this._isCtrlDown) dval *= 100;
 
-    const next = +(this.$value ?? 0) + dval;
+    const next = +(this.$value ?? 0) + dval; // todo 10.53 + 0.1 returns 10.629999999999999
+    console.warn({ next, dval, val: this.$value });
     this.$refInput.value = next.toString();
     this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: dval > 0 ? "_inc" : "_dec" }));
   }

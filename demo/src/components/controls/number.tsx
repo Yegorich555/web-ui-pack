@@ -20,7 +20,7 @@ export default function NumberControlView() {
         "Inheritted features from TextControl",
         "Built-in validations (required,min,max)",
         "Increment/decrement via ArrowKeys, Mouse, TouchEvents(Swipe) + keys Shift/Ctrl (only when focused)",
-        "Built-in mask-currency",
+        "Different formats (currency, etc.). Use $options.format to redefine defaults",
       ]}
       // todo rollback after tests
       // details={{
@@ -39,7 +39,7 @@ export default function NumberControlView() {
         <wup-num
           name="number"
           label="Number"
-          initValue="10"
+          initValue="1234"
           autoComplete="off"
           autoFocus={false}
           validations="window.myNumberValidations"
@@ -48,7 +48,8 @@ export default function NumberControlView() {
         />
         <wup-num
           name="decimal"
-          initValue="10.237"
+          label="Decimal (see $options.format)"
+          initValue="99.23"
           ref={(el) => {
             if (el) {
               el.$options.format = { maxDecimal: 2 };
