@@ -412,7 +412,9 @@ export default class WUPTextControl<
       // (e as WUPText.GotInputEvent).preventSetValue = () => ((e as WUPText.GotInputEvent).setValuePrevented = true);
       this.gotInput(e as WUPText.GotInputEvent);
     });
-    const r2 = this.appendEvent(this.$refInput, "beforeinput", (e) => this.gotBeforeInput(e), { passive: false });
+    const r2 = this.appendEvent(this.$refInput, "beforeinput", (e) => this.gotBeforeInput(e as WUPText.GotInputEvent), {
+      passive: false,
+    });
 
     /* istanbul ignore else */
     if (!this.$refInput.readOnly) {
@@ -439,6 +441,7 @@ export default class WUPTextControl<
       }
       this.refMask.clearHistory();
     }
+    this.#lastValidSnapshot = undefined;
     super.gotFocusLost();
   }
 
@@ -470,10 +473,10 @@ export default class WUPTextControl<
   }
 
   /** Handler of 'beforeinput' event */
-  protected gotBeforeInput(e: InputEvent): void {
+  protected gotBeforeInput(e: WUPText.GotInputEvent): void {
+    this.#declineInputEnd?.call(this);
     if (this._opts.mask) {
-      this.#maskTimerEnd?.call(this);
-      this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask, this.$refInput.value);
+      this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask, e.target.value);
       this.refMask.handleBeforInput(e);
     }
   }
@@ -510,6 +513,9 @@ export default class WUPTextControl<
       }
     }
 
+    if (this.#declineInputEnd) {
+      return; // don't allow changes if user types wrong char
+    }
     const act = (): void => {
       /* istanbul ignore else */
       if (errMsg) {
@@ -532,12 +538,11 @@ export default class WUPTextControl<
 
   /** Mask object to proccess mask on input */
   refMask?: MaskTextInput;
-  #maskTimerEnd?: () => void; // required to rollback value immediately if user types next (otherwise cursor can shift wrong if type several 'ab' at once)
   /** Called to apply mask-behavior (on "input" event) */
   protected maskInputProcess(e: WUPText.GotInputEvent | null): string {
     const el = this.$refInput;
     const v = el.value;
-    const { maskholder, mask } = this._opts;
+    const { mask } = this._opts;
     this.refMask = this.refMask ?? new MaskTextInput(mask!, "");
     const mi = this.refMask;
 
@@ -558,10 +563,26 @@ export default class WUPTextControl<
       position = r.position;
     }
 
-    const setMaskHolder = (str: string, leftLength: number): void => {
-      if (!maskholder) {
-        return;
-      }
+    if (declinedAdd) {
+      this.#lastValidSnapshot = this.historyToSnapshot(mi.value, position); // fix when ###: "12|" + "3b" => 123|
+      this.declineInput(position);
+    } else {
+      this.#declineInputEnd = undefined;
+      el.value = mi.value;
+      el.selectionStart = position;
+      el.selectionEnd = el.selectionStart;
+    }
+    this.updateMaskHolder(el.value, mi.leftLength - declinedAdd);
+
+    return mi.value;
+  }
+
+  /** Update maskholder if it's defined */
+  private updateMaskHolder(str: string, leftLength: number): void {
+    const { maskholder } = this._opts;
+    if (!maskholder) {
+      return;
+    }
       if (!this.$refMaskholder) {
         const m = document.createElement("span");
         m.setAttribute("aria-hidden", "true");
@@ -573,29 +594,27 @@ export default class WUPTextControl<
       }
       this.$refMaskholder.firstChild!.textContent = str;
       this.$refMaskholder.lastChild!.textContent = maskholder.substring(maskholder.length - leftLength);
-    };
+  }
 
-    const setV = (): void => {
-      el.value = mi.value;
-      setMaskHolder(el.value, mi.leftLength);
-      el.selectionStart = position - declinedAdd;
+    return false;
+  }
+
+  #lastValidSnapshot?: string;
+  #declineInputEnd?: () => void;
+  /** Make undo for input after a 100ms when user typed not allowed symbols */
+  protected declineInput(nextCursorPos?: number): void {
+    this.#declineInputEnd = (): void => {
+      this.#declineInputEnd = undefined;
+      clearTimeout(t);
+      const hist = this.historyFromSnapshot(this.#lastValidSnapshot!);
+      const el = this.$refInput;
+      el.value = hist.v;
+      el.selectionStart = nextCursorPos ?? hist.pos;
       el.selectionEnd = el.selectionStart;
-      this.#maskTimerEnd = undefined;
+      this.refMask && this.updateMaskHolder(hist.v, this.refMask.leftLength);
     };
 
-    if (declinedAdd) {
-      setMaskHolder(v, mi.leftLength - declinedAdd);
-      position += declinedAdd;
-      const t = setTimeout(setV, 100); // set value after time to show user typed value before mask applied
-      this.#maskTimerEnd = () => {
-        clearTimeout(t);
-        setV();
-      };
-    } else {
-      setV();
-    }
-
-    return mi.value;
+    const t = setTimeout(this.#declineInputEnd, 100);
   }
 
   protected override setValue(v: ValueType | undefined, canValidate = true, skipInput = false): boolean | null {

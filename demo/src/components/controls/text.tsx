@@ -94,7 +94,7 @@ export default function TextControlView() {
             }}
           />
           <wup-text name="ipaddr" label="IPaddress" mask="##0.##0.##0.##0" maskholder="xxx.xxx.xxx.xxx" />
-          <wup-text name="num" label="Test suffix" mask="$ ##0 USD" maskholder="$ 000 USD" />
+          <wup-text name="num" label="With suffix" mask="$ ##0 USD" maskholder="$ 000 USD" />
           Features:
           <ul>
             <li>
@@ -105,7 +105,7 @@ export default function TextControlView() {
             </li>
             <li>prediction: all static chars append automatically</li>
             <li>lazy: type next separator on press Space to fill rest required digits with zeros</li>
-            <li>history redo/undo (use Ctrl+Z, Ctrl+Y)</li>
+            <li>history undo/redo (use Ctrl+Z / Ctrl+Shift+Z, Ctrl+Y)</li>
             <li>shows typed declined chars (so user can see that keyboard works) and rollback after 100ms</li>
             <li>possible to delete/append chars in the middle of text</li>
             <li>
