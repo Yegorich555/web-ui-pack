@@ -1,7 +1,7 @@
-// import WUPTextControl from "../../src/controls/text";
-// import MaskTextInput from "../../src/controls/text.mask";
-import WUPTextControl from "web-ui-pack/controls/text";
-import MaskTextInput from "web-ui-pack/controls/text.mask";
+import WUPTextControl from "../../src/controls/text";
+import MaskTextInput from "../../src/controls/text.mask";
+// import WUPTextControl from "web-ui-pack/controls/text";
+// import MaskTextInput from "web-ui-pack/controls/text.mask";
 import * as h from "../testHelper";
 
 /** @type WUPTextControl */
@@ -611,7 +611,7 @@ describe("control.text: mask", () => {
     `);
   });
 
-  test("Ctrl+Z,Ctrl+Y (history redo/undo)", async () => {
+  test("Ctrl+Z,Ctrl+Shift+Z (history redo/undo)", async () => {
     el.$options.mask = "##0.##0.##0.##0";
     el.focus();
     await h.wait(1);
@@ -633,7 +633,7 @@ describe("control.text: mask", () => {
     expect(await h.userUndo(el.$refInput)).toBe("123.4.5.|");
     expect(await h.userUndo(el.$refInput)).toBe("123.4.5|");
 
-    // cover Ctrl+Y
+    // cover Ctrl+Shift+Z
     expect(await h.userRedo(el.$refInput)).toBe("123.4.5.|");
     expect(await h.userRedo(el.$refInput)).toBe("123.4.5.6|");
     expect(await h.userRedo(el.$refInput)).toBe("123.4.5.67|");

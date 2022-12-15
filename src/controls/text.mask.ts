@@ -207,52 +207,9 @@ export default class MaskTextInput {
     this.isCompleted = last.index === endIndex && (!last.isDig || !!last.isCompleted);
   }
 
-  #histUndo: Array<string> = [];
-  #histRedo: Array<string> = [];
-  /** Clear redo/undo history */
-  clearHistory(): void {
-    this.#histUndo.length = 0;
-    this.#histRedo.length = 0;
-  }
-
-  private historyToSnapshot(v: string, position: number): string {
-    return `${v.substring(0, position)}\0${v.substring(position)}`;
-  }
-
-  private historyFromSnapshot(h: string): { v: string; position: number } {
-    const position = h.indexOf("\0");
-    const v = h.substring(0, position) + h.substring(position + 1);
-    return { position, v };
-  }
-
   /* Call it on 'beforeinput' event to improve logic */
   handleBeforInput(e: InputEvent): void {
     const el = e.target as MaskHandledInput;
-
-    let hist;
-    switch (e!.inputType) {
-      case "historyUndo": // Ctrl+Z
-        if (this.#histUndo.length) {
-          hist = this.#histUndo.pop()!;
-          this.#histRedo.push(this.historyToSnapshot(this.value, el.selectionStart || 0));
-        }
-        break;
-      case "historyRedo": // Ctrl+Y
-        if (this.#histRedo.length) {
-          hist = this.#histRedo.pop()!;
-          this.#histUndo.push(this.historyToSnapshot(this.value, el.selectionStart || 0));
-        }
-        break;
-      default: // this.#histUndo.push(cur); see in handleInput
-        break;
-    }
-
-    if (hist) {
-      const rh = this.historyFromSnapshot(hist);
-      el.value = rh.v;
-      el.selectionStart = rh.position;
-      el.selectionEnd = el.selectionStart;
-    }
 
     if (el.selectionStart !== el.selectionEnd) {
       delete el._maskPrev;
@@ -289,7 +246,6 @@ export default class MaskTextInput {
     let declinedAdd = 0;
 
     const saved = el._maskPrev;
-    let isUndoRedo = false;
     if (saved) {
       switch (e!.inputType) {
         case "insertText":
@@ -305,21 +261,10 @@ export default class MaskTextInput {
           position = this.deleteBefore(saved.position);
           declinedAdd = Math.min(v.length - this.value.length, 0);
           break;
-        case "historyUndo":
-          isUndoRedo = true;
-          this.parse(el.value);
-          break;
-        case "historyRedo":
-          isUndoRedo = true;
-          this.parse(el.value);
-          break;
         default:
           // console.warn(e!.inputType);
           this.parse(el.value);
           break;
-      }
-      if (!isUndoRedo && saved.value !== this.value) {
-        this.#histUndo.push(this.historyToSnapshot(saved.value, saved.position)); // WARN: it works only if selectionStart == End
       }
     } else {
       this.parse(el.value);

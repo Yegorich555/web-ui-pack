@@ -434,14 +434,15 @@ export default class WUPTextControl<
 
   protected override gotFocusLost(): void {
     if (this.refMask) {
+      // todo input value can be wrong if (this.#declineInputEnd)
       if (this.refMask.prefix && this.$refInput.value === this.refMask.prefix) {
         this.$refInput.value = ""; // rollback prefix/suffix if user types nothing
         delete (this.$refInput as MaskHandledInput)._maskPrev;
         this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
       }
-      this.refMask.clearHistory();
     }
-    this.#lastValidSnapshot = undefined;
+    delete this._histRedo;
+    delete this._histUndo;
     super.gotFocusLost();
   }
 
@@ -474,7 +475,29 @@ export default class WUPTextControl<
 
   /** Handler of 'beforeinput' event */
   protected gotBeforeInput(e: WUPText.GotInputEvent): void {
-    this.#declineInputEnd?.call(this);
+    this.#declineInputEnd?.call(this); //
+    // todo on text "123" select and type 567 fast; press Ctrl+Z: fire event only once because there is some browser debounce
+    // todo undo-redo works wrong: need to handle it manually via Ctrl+Shift, Ctrl+Shift+Z
+    switch (e!.inputType) {
+      case "historyUndo": // Ctrl+Z
+        this.historyUndoRedo(false);
+        break;
+      case "historyRedo": // Ctrl+Shift+Z
+        this.historyUndoRedo(true);
+        break;
+      default:
+        {
+          if (!this._histUndo) {
+            this._histUndo = [];
+          }
+          const snap = this.historyToSnapshot(e.target.value, e.target.selectionStart || 0);
+          const isChanged = this._histUndo[this._histUndo.length - 1] !== snap;
+          isChanged && this._histUndo!.push(snap);
+        }
+        break;
+    }
+    console.warn(this._histUndo);
+
     if (this._opts.mask) {
       this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask, e.target.value);
       this.refMask.handleBeforInput(e);
@@ -516,6 +539,7 @@ export default class WUPTextControl<
     if (this.#declineInputEnd) {
       return; // don't allow changes if user types wrong char
     }
+
     const act = (): void => {
       /* istanbul ignore else */
       if (errMsg) {
@@ -563,8 +587,11 @@ export default class WUPTextControl<
       position = r.position;
     }
 
+    // todo issue if in empty input with mask ###.###.###.### insert '1|45.789.387.'
+
     if (declinedAdd) {
-      this.#lastValidSnapshot = this.historyToSnapshot(mi.value, position); // fix when ###: "12|" + "3b" => 123|
+      this._histUndo!.pop();
+      this._histUndo!.push(this.historyToSnapshot(mi.value, position)); // fix when ###: "12|" + "3b" => 123|
       this.declineInput(position);
     } else {
       this.#declineInputEnd = undefined;
@@ -583,35 +610,67 @@ export default class WUPTextControl<
     if (!maskholder) {
       return;
     }
-      if (!this.$refMaskholder) {
-        const m = document.createElement("span");
-        m.setAttribute("aria-hidden", "true");
-        m.setAttribute("maskholder", "");
-        m.appendChild(document.createElement("i"));
-        m.append("");
-        this.$refInput.parentElement!.prepend(m);
-        this.$refMaskholder = m;
-      }
-      this.$refMaskholder.firstChild!.textContent = str;
-      this.$refMaskholder.lastChild!.textContent = maskholder.substring(maskholder.length - leftLength);
+    if (!this.$refMaskholder) {
+      const m = document.createElement("span");
+      m.setAttribute("aria-hidden", "true");
+      m.setAttribute("maskholder", "");
+      m.appendChild(document.createElement("i"));
+      m.append("");
+      this.$refInput.parentElement!.prepend(m);
+      this.$refMaskholder = m;
+    }
+    this.$refMaskholder.firstChild!.textContent = str;
+    this.$refMaskholder.lastChild!.textContent = maskholder.substring(maskholder.length - leftLength);
   }
+
+  /** Convert values to history-snapshot; required for undo/redo logic of input */
+  private historyToSnapshot(s: string, pos: number): string {
+    return `${s.substring(0, pos)}\0${s.substring(pos)}`;
+  }
+
+  /** Parse history-snapshot; required for undo/redo logic of input */
+  private historyFromSnapshot(h: string): { v: string; pos: number } {
+    const pos = h.indexOf("\0");
+    const v = h.substring(0, pos) + h.substring(pos + 1);
+    return { pos, v };
+  }
+
+  _histUndo?: Array<string>;
+  _histRedo?: Array<string>;
+  /** Undo/redo input value  */
+  historyUndoRedo(toNext: boolean): boolean {
+    const from = toNext ? this._histRedo : this._histUndo;
+    if (from?.length) {
+      const el = this.$refInput;
+      if (!this._histRedo) {
+        this._histRedo = [];
+      }
+      const to = !toNext ? this._histRedo! : this._histUndo!;
+      to.push(this.historyToSnapshot(el.value, el.selectionStart || 0));
+
+      const hist = this.historyFromSnapshot(from.pop()!);
+      el.value = hist.v;
+      el.selectionStart = hist.pos;
+      el.selectionEnd = hist.pos;
+
+      return true;
+    }
 
     return false;
   }
 
-  #lastValidSnapshot?: string;
   #declineInputEnd?: () => void;
   /** Make undo for input after a 100ms when user typed not allowed symbols */
   protected declineInput(nextCursorPos?: number): void {
     this.#declineInputEnd = (): void => {
       this.#declineInputEnd = undefined;
       clearTimeout(t);
-      const hist = this.historyFromSnapshot(this.#lastValidSnapshot!);
+      const hist = this.historyFromSnapshot(this._histUndo!.pop()!);
       const el = this.$refInput;
       el.value = hist.v;
       el.selectionStart = nextCursorPos ?? hist.pos;
       el.selectionEnd = el.selectionStart;
-      this.refMask && this.updateMaskHolder(hist.v, this.refMask.leftLength);
+      this.refMask && this.updateMaskHolder(el.value, this.refMask.leftLength);
     };
 
     const t = setTimeout(this.#declineInputEnd, 100);
