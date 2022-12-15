@@ -154,6 +154,7 @@ export default class WUPNumberControl<
     return v as any;
   }
 
+  #parseTimerEnd?: () => void; // required to rollback value immediately if user types next (otherwise cursor can shift wrong if type several 'ab' at once)
   override parseInput(text: string): ValueType | undefined {
     // such parsing is better then Number.parse because ignores wrong chars
     let v: number | undefined = 0;
@@ -188,12 +189,24 @@ export default class WUPNumberControl<
       v *= -1; // case: "-123"
     }
 
-    console.warn(v);
     if (!this._opts.mask) {
       // otherwise it conflicts with mask
       // todo limit to maxSafeInteger
-      // todo show-hide value in this case as it works with mask
-      this.$refInput.value = this.valueToInput(v as any);
+      const next = this.valueToInput(v as any);
+      const prev = this.$refInput.value;
+      const declinedChars = prev.length - next.length;
+      console.warn({ prev, next, declinedChars });
+
+      if (this._canShowDeclined && declinedChars > 0) {
+        this.declineInput();
+      } else {
+        this.$refInput.value = next;
+        // el.selectionStart = pos;
+        // el.selectionEnd = el.selectionStart;
+        // testcase: user types "|" + "1234567|" - check cursor
+        // testcase: user types "|123" + "|5678" - check cursor
+        // todo it's wrong when user types |234 + '1' expected 1|.234
+      }
     }
 
     return v as any;
@@ -213,10 +226,27 @@ export default class WUPNumberControl<
     super.gotChanges(propsChanged as any);
   }
 
-  // protected override gotInput(e: WUPText.GotInputEvent): void {
-  //   super.gotInput(e);
-  //   !this._opts.mask && this.setInputValue(this.$value);
-  // }
+  protected override gotBeforeInput(e: InputEvent): void {
+    this.#parseTimerEnd?.call(this);
+    super.gotBeforeInput(e);
+  }
+
+  private _canShowDeclined?: boolean;
+  protected override gotInput(e: WUPText.GotInputEvent): void {
+    if (!this._opts.mask) {
+      switch (e!.inputType) {
+        case "insertText":
+        case "insertFromPaste":
+          this._canShowDeclined = true;
+          break;
+        default:
+          delete this._canShowDeclined;
+          break;
+      }
+    }
+
+    super.gotInput(e);
+  }
 
   protected override gotFocus(): Array<() => void> {
     const r = super.gotFocus();
