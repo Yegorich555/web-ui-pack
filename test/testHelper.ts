@@ -479,12 +479,20 @@ export async function userClick(el: HTMLElement, opts?: MouseEventInit, timeoutM
  * @return cursor snapshot (getInputCursor) */
 export async function userUndo(el: HTMLInputElement): Promise<string> {
   jest.useFakeTimers();
-  el.dispatchEvent(new KeyboardEvent("keydown", { key: "z", ctrlKey: true, bubbles: true }));
-  el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, inputType: "historyUndo" }));
-  el.dispatchEvent(new InputEvent("input", { bubbles: true, data: null, inputType: "historyUndo" }));
+  if (
+    el.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "z", ctrlKey: true, metaKey: true, bubbles: true, cancelable: true })
+    )
+  ) {
+    if (
+      el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, inputType: "historyUndo", cancelable: true }))
+    ) {
+      el.dispatchEvent(new InputEvent("input", { bubbles: true, data: null, inputType: "historyUndo" }));
+    }
+  }
   jest.advanceTimersByTime(20);
   await Promise.resolve();
-  el.dispatchEvent(new KeyboardEvent("keyup", { key: "z", ctrlKey: false, bubbles: true }));
+  el.dispatchEvent(new KeyboardEvent("keyup", { key: "z", ctrlKey: false, metaKey: false, bubbles: true }));
   return getInputCursor(el);
 }
 
@@ -493,12 +501,33 @@ export async function userUndo(el: HTMLInputElement): Promise<string> {
  * @return cursor snapshot (getInputCursor) */
 export async function userRedo(el: HTMLInputElement): Promise<string> {
   jest.useFakeTimers();
-  el.dispatchEvent(new KeyboardEvent("keydown", { key: "y", ctrlKey: true, bubbles: true }));
-  el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, inputType: "historyRedo" }));
-  el.dispatchEvent(new InputEvent("input", { bubbles: true, data: null, inputType: "historyRedo" }));
+  const ok1 = el.dispatchEvent(
+    new KeyboardEvent("keydown", { key: "y", ctrlKey: true, bubbles: true, cancelable: true })
+  );
+  const ok2 = el.dispatchEvent(
+    new KeyboardEvent("keydown", {
+      key: "z",
+      ctrlKey: true,
+      metaKey: true,
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true,
+    })
+  );
+  if (ok1 && ok2) {
+    if (
+      el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, inputType: "historyRedo", cancelable: true }))
+    ) {
+      el.dispatchEvent(new InputEvent("input", { bubbles: true, data: null, inputType: "historyRedo" }));
+    }
+  }
   jest.advanceTimersByTime(20);
   await Promise.resolve();
-  el.dispatchEvent(new KeyboardEvent("keyup", { key: "y", ctrlKey: false, bubbles: true }));
+  el.dispatchEvent(new KeyboardEvent("keyup", { key: "y", ctrlKey: false, metaKey: false, bubbles: true }));
+  el.dispatchEvent(
+    new KeyboardEvent("keyup", { key: "z", ctrlKey: false, metaKey: false, shiftKey: false, bubbles: true })
+  );
+
   return getInputCursor(el);
 }
 
