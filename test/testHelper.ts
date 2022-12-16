@@ -501,7 +501,7 @@ export async function userRedo(el: HTMLInputElement): Promise<string> {
   );
   const okCtrlShiftZ = el.dispatchEvent(
     new KeyboardEvent("keydown", {
-      key: "y",
+      key: "Y",
       ctrlKey: true,
       metaKey: true,
       shiftKey: true,

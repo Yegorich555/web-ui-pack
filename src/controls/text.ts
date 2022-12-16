@@ -473,11 +473,32 @@ export default class WUPTextControl<
     }
   }
 
+  protected override gotKeyDown(e: KeyboardEvent): void {
+    super.gotKeyDown(e);
+    if (e.altKey) {
+      return;
+    }
+
+    // otherwise custom redo/undo works wrong (browser stores to history big chunks and not fired events if history emptied)
+    const isUndo = (e.ctrlKey || e.metaKey) && e.key === "z";
+    const isRedo = ((e.ctrlKey || e.metaKey) && e.key === "Z") || (e.ctrlKey && e.key === "y" && !e.metaKey);
+    if (isRedo || isUndo) {
+      if (isRedo && !this._histRedo?.length) {
+        return;
+      }
+      if (isUndo && !this._histUndo?.length) {
+        return;
+      }
+      e.preventDefault();
+      const inputType = isRedo ? "historyRedo" : "historyUndo";
+      this.$refInput.dispatchEvent(new InputEvent("beforeinput", { cancelable: true, bubbles: true, inputType })) &&
+        this.$refInput.dispatchEvent(new InputEvent("input", { cancelable: false, bubbles: true, inputType }));
+    }
+  }
+
   /** Handler of 'beforeinput' event */
   protected gotBeforeInput(e: WUPText.GotInputEvent): void {
     this.#declineInputEnd?.call(this); //
-    // todo on text "123" select and type 567 fast; press Ctrl+Z: fire event only once because there is some browser debounce
-    // todo undo-redo works wrong: need to handle it manually via Ctrl+Shift, Ctrl+Shift+Z
     switch (e!.inputType) {
       case "historyUndo": // Ctrl+Z
         this.historyUndoRedo(false);
@@ -496,8 +517,6 @@ export default class WUPTextControl<
         }
         break;
     }
-    console.warn(this._histUndo);
-
     if (this._opts.mask) {
       this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask, e.target.value);
       this.refMask.handleBeforInput(e);
