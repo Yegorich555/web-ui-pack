@@ -360,6 +360,11 @@ export default class WUPTextControl<
     return this.parse(text);
   }
 
+  /** Returns true if need to use custom undo/redo (required when input somehow formatted/masked) */
+  protected canHandleUndo(): boolean {
+    return !!this._opts.mask;
+  }
+
   protected get validations(): WUPText.Options["validations"] {
     const vls = (super.validations as WUPText.Options["validations"]) || {};
     if (this._opts.mask && vls._mask === undefined) vls._mask = ""; // enable validation mask based on option mask
@@ -475,9 +480,11 @@ export default class WUPTextControl<
 
   protected override gotKeyDown(e: KeyboardEvent): void {
     super.gotKeyDown(e);
-    if (e.altKey) {
-      return;
-    }
+
+    if (this.canHandleUndo()) {
+      if (e.altKey) {
+        return;
+      }
 
     // otherwise custom redo/undo works wrong (browser stores to history big chunks and not fired events if history emptied)
     const isUndo = (e.ctrlKey || e.metaKey) && e.key === "z";
@@ -492,16 +499,19 @@ export default class WUPTextControl<
       e.preventDefault();
       const inputType = isRedo ? "historyRedo" : "historyUndo";
       this.$refInput.dispatchEvent(new InputEvent("beforeinput", { cancelable: true, bubbles: true, inputType })) &&
-        this.$refInput.dispatchEvent(new InputEvent("input", { cancelable: false, bubbles: true, inputType }));
+          this.$refInput.dispatchEvent(new InputEvent("input", { cancelable: false, bubbles: true, inputType }));
+      }
     }
   }
 
   /** Handler of 'beforeinput' event */
   protected gotBeforeInput(e: WUPText.GotInputEvent): void {
-    this.#declineInputEnd?.call(this); //
-    switch (e!.inputType) {
-      case "historyUndo": // Ctrl+Z
-        this.historyUndoRedo(false);
+    this.#declineInputEnd?.call(this);
+
+    if (this.canHandleUndo()) {
+      switch (e!.inputType) {
+        case "historyUndo": // Ctrl+Z
+          this.historyUndoRedo(false);
         break;
       case "historyRedo": // Ctrl+Shift+Z
         this.historyUndoRedo(true);
@@ -514,9 +524,11 @@ export default class WUPTextControl<
           const snap = this.historyToSnapshot(e.target.value, e.target.selectionStart || 0);
           const isChanged = this._histUndo[this._histUndo.length - 1] !== snap;
           isChanged && this._histUndo!.push(snap);
-        }
-        break;
+          }
+          break;
+      }
     }
+
     if (this._opts.mask) {
       this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask, e.target.value);
       this.refMask.handleBeforInput(e);
@@ -656,8 +668,12 @@ export default class WUPTextControl<
 
   _histUndo?: Array<string>;
   _histRedo?: Array<string>;
-  /** Undo/redo input value  */
+  /** Undo/redo input value
+   * @returns true if action succeed (history not empty) */
   historyUndoRedo(toNext: boolean): boolean {
+    if (!this.canHandleUndo) {
+      return false;
+    }
     const from = toNext ? this._histRedo : this._histUndo;
     if (from?.length) {
       const el = this.$refInput;
@@ -681,6 +697,9 @@ export default class WUPTextControl<
   #declineInputEnd?: () => void;
   /** Make undo for input after a 100ms when user typed not allowed symbols */
   protected declineInput(nextCursorPos?: number): void {
+    if (!this.canHandleUndo) {
+      throw new Error(`${this.tagName}. Custom history disabled (canHandleUndo must return true)`);
+    }
     this.#declineInputEnd = (): void => {
       this.#declineInputEnd = undefined;
       clearTimeout(t);

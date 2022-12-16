@@ -212,6 +212,10 @@ export default class WUPNumberControl<
     return v as any;
   }
 
+  protected override canHandleUndo(): boolean {
+    return true;
+  }
+
   protected override setInputValue(v: ValueType | undefined): void {
     const txt = this.valueToInput(v);
     super.setInputValue(txt);
@@ -226,7 +230,7 @@ export default class WUPNumberControl<
     super.gotChanges(propsChanged as any);
   }
 
-  protected override gotBeforeInput(e: InputEvent): void {
+  protected override gotBeforeInput(e: WUPText.GotInputEvent): void {
     this.#parseTimerEnd?.call(this);
     super.gotBeforeInput(e);
   }
