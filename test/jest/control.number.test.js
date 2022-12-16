@@ -1,5 +1,7 @@
 import { WUPNumberControl } from "web-ui-pack";
 import localeInfo from "web-ui-pack/helpers/localeInfo";
+// import WUPNumberControl from "../../src/controls/number";
+// import localeInfo from "../../src/helpers/localeInfo";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../testHelper";
 
@@ -37,8 +39,15 @@ describe("control.number", () => {
   test("options format", async () => {
     el.focus();
     await h.wait();
-    expect(el.$refInput.getAttribute("inputmode")).toBe("numeric"); // inputmode must be always numeric (even witohut mask)
-    // todo
+    expect(el.$refInput.getAttribute("inputmode")).toBe("numeric"); // inputmode must be always numeric (even without mask)
+
+    el.$value = 1234;
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("1,234");
+
+    el.$options.format = { minDecimal: 2 };
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("1,234.00");
   });
 
   test("with mask", () => {

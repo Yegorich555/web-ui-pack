@@ -50,10 +50,10 @@ export default function NumberControlView() {
         <wup-num
           name="decimal"
           label="Decimal (see $options.format)"
-          initValue="99.53"
+          initValue="99"
           ref={(el) => {
             if (el) {
-              el.$options.format = { maxDecimal: 2 };
+              el.$options.format = { minDecimal: 2 };
             }
           }}
         />

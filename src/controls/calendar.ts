@@ -38,8 +38,6 @@ export namespace WUPCalendarIn {
   }
 
   export interface JSXProps {
-    /** @deprecated default value; format yyyy-MM-dd hh:mm:ss.fff */
-    initValue?: string;
     /** @deprecated Picker that must be rendered at first */
     startWith?: "year" | "month" | "day";
     /** @deprecated User can't select date less than min; format yyyy-MM-dd */
@@ -102,7 +100,10 @@ declare global {
     interface EventMap extends WUPBase.EventMap {}
     interface Defaults<T = string> extends WUPCalendarIn.GenDef<T> {}
     interface Options<T = string> extends WUPCalendarIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPCalendarControl> extends WUPBase.JSXProps<T>, WUPCalendarIn.JSXProps {}
+    interface JSXProps<T extends WUPCalendarControl> extends WUPBase.JSXProps<T>, WUPCalendarIn.JSXProps {
+      /** @deprecated default value; format yyyy-MM-dd hh:mm:ss.fff */
+      initValue?: string;
+    }
   }
 
   // add element to document.createElement

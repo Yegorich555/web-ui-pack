@@ -89,6 +89,12 @@ export default class WUPNumberControl<
 > extends WUPTextControl<ValueType, EventMap> {
   #ctr = this.constructor as typeof WUPNumberControl;
 
+  static get observedOptions(): Array<string> {
+    const arr = super.observedOptions as Array<keyof WUPNumber.Options>;
+    arr.push("format");
+    return arr;
+  }
+
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUPNumber.Defaults<number> = {
     ...WUPTextControl.$defaults,
@@ -125,6 +131,10 @@ export default class WUPNumberControl<
     if (v == null) {
       return "";
     }
+
+    if (this._opts.mask) {
+      return (v as any).toString();
+    }
     // eslint-disable-next-line prefer-const
     let [int, dec] = (v as any).toString().split(".");
     const f = this.$format;
@@ -135,8 +145,8 @@ export default class WUPNumberControl<
       }
     }
 
-    if (dec) {
-      dec = dec.substring(0, Math.min(f.maxDecimal, dec.length));
+    if (dec || f.minDecimal) {
+      dec = dec === undefined ? "" : dec.substring(0, Math.min(f.maxDecimal, dec.length));
       dec += "0".repeat(Math.max(f.minDecimal - dec.length, 0));
       if (dec.length) {
         return int + this.$format.sepDecimal + dec;
@@ -195,7 +205,6 @@ export default class WUPNumberControl<
       const next = this.valueToInput(v as any);
       const prev = this.$refInput.value;
       const declinedChars = prev.length - next.length;
-      console.warn({ prev, next, declinedChars });
 
       if (this._canShowDeclined && declinedChars > 0) {
         this.declineInput();
@@ -228,6 +237,7 @@ export default class WUPNumberControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUPNumber.Options> | null): void {
     super.gotChanges(propsChanged as any);
+    propsChanged?.includes("format") && this.setInputValue(this.$value);
   }
 
   protected override gotBeforeInput(e: WUPText.GotInputEvent): void {
