@@ -410,7 +410,7 @@ export default class WUPTextControl<
 
   protected override gotFocus(): Array<() => void> {
     const arr = super.gotFocus();
-    this.setAttr.call(this.$refInput, "inputMode", this._opts.mask ? "numeric" : "");
+    this.setAttr.call(this.$refInput, "inputmode", this._opts.mask ? "numeric" : "");
 
     const r = this.appendEvent(this.$refInput, "input", (e) => {
       // (e as WUPText.GotInputEvent).setValuePrevented = false;

@@ -254,7 +254,7 @@ export default class WUPNumberControl<
 
   protected override gotFocus(): Array<() => void> {
     const r = super.gotFocus();
-    this.$refInput.setAttribute("inputMode", "numeric"); // otherwise textControl removes it if mask isn't applied
+    this.$refInput.setAttribute("inputmode", "numeric"); // otherwise textControl removes it if mask isn't applied
     r.push(onScroll(this, (v) => this.gotIncrement(-1 * v))); // allow inc/dec via scroll/swipe
     r.push(
       onEvent(this, "keyup", (e) => {

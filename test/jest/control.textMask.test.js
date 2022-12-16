@@ -687,7 +687,7 @@ describe("control.text: mask", () => {
     el.canHandleUndo = () => true;
     await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
     expect(el.$refInput.value).toBe("2");
-    el.declineInput();
+    el.declineInput(); // despite on manuall decline
     expect(el.$refInput.value).toBe("2");
     await h.wait(150);
     expect(el.$refInput.value).toBe("");
