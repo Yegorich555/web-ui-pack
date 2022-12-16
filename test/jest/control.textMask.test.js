@@ -1,7 +1,7 @@
-import WUPTextControl from "../../src/controls/text";
-import MaskTextInput from "../../src/controls/text.mask";
-// import WUPTextControl from "web-ui-pack/controls/text";
-// import MaskTextInput from "web-ui-pack/controls/text.mask";
+// import WUPTextControl from "../../src/controls/text";
+// import MaskTextInput from "../../src/controls/text.mask";
+import WUPTextControl from "web-ui-pack/controls/text";
+import MaskTextInput from "web-ui-pack/controls/text.mask";
 import * as h from "../testHelper";
 
 /** @type WUPTextControl */
@@ -654,6 +654,12 @@ describe("control.text: mask", () => {
     expect(await h.userUndo(el.$refInput)).toBe("+1(|");
     expect(await h.userUndo(el.$refInput)).toBe("+1(|"); // try again - no actions
 
+    // cover ctrl+z+alt
+    const isHandled = !el.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "z", ctrlKey: true, altKey: true, bubbles: true, cancelable: true })
+    );
+    expect(isHandled).toBe(false); // because altKey
+
     // case when char declined and need to rollback to empty string because only prefix lefts
     await h.userTypeText(el.$refInput, "a", { clearPrevious: false });
     expect(el.$refInput.value).toBe("+1(a");
@@ -669,6 +675,22 @@ describe("control.text: mask", () => {
     h.setInputCursor(el.$refInput, "|2");
     expect(await h.userUndo(el.$refInput)).toBe("|");
     expect(await h.userRedo(el.$refInput)).toBe("|2");
+
+    // cover case when no-mask but user called historyUndo
+    el.$value = "";
+    el.$options.mask = undefined;
+    await h.wait(1);
+    expect(el.canHandleUndo()).toBe(false);
+    expect(() => el.historyUndoRedo()).toThrow();
+    expect(() => el.declineInput()).toThrow();
+
+    el.canHandleUndo = () => true;
+    await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
+    expect(el.$refInput.value).toBe("2");
+    el.declineInput();
+    expect(el.$refInput.value).toBe("2");
+    await h.wait(150);
+    expect(el.$refInput.value).toBe("");
   });
 
   test("$opions.mask works properly", async () => {

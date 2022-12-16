@@ -126,7 +126,7 @@ export default class WUPNumberControl<
       return "";
     }
     // eslint-disable-next-line prefer-const
-    let [int, dec] = (v.toString() || "").split(".");
+    let [int, dec] = (v as any).toString().split(".");
     const f = this.$format;
 
     if (f.sep1000) {

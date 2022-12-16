@@ -618,14 +618,11 @@ export default class WUPTextControl<
       position = r.position;
     }
 
-    // todo issue if in empty input with mask ###.###.###.### insert '1|45.789.387.'
-
     if (declinedAdd) {
       this._histUndo!.pop();
       this._histUndo!.push(this.historyToSnapshot(mi.value, position)); // fix when ###: "12|" + "3b" => 123|
       this.declineInput(position);
     } else {
-      this.#declineInputEnd = undefined;
       el.value = mi.value;
       el.selectionStart = position;
       el.selectionEnd = el.selectionStart;
@@ -668,11 +665,11 @@ export default class WUPTextControl<
 
   _histUndo?: Array<string>;
   _histRedo?: Array<string>;
-  /** Undo/redo input value
+  /** Undo/redo input value (only if canHandleUndo() === true)
    * @returns true if action succeed (history not empty) */
   historyUndoRedo(toNext: boolean): boolean {
-    if (!this.canHandleUndo) {
-      return false;
+    if (!this.canHandleUndo()) {
+      throw new Error(`${this.tagName}. Custom history disabled (canHandleUndo must return true)`);
     }
     const from = toNext ? this._histRedo : this._histUndo;
     if (from?.length) {
@@ -695,9 +692,11 @@ export default class WUPTextControl<
   }
 
   #declineInputEnd?: () => void;
-  /** Make undo for input after a 100ms when user typed not allowed symbols */
+  /** Make undo for input after 100ms when user types not allowed chars
+   * @tutorial Troubleshooting
+   * * declineInput doesn't trigger beforeinput & input events (do it manually if required) */
   protected declineInput(nextCursorPos?: number): void {
-    if (!this.canHandleUndo) {
+    if (!this.canHandleUndo()) {
       throw new Error(`${this.tagName}. Custom history disabled (canHandleUndo must return true)`);
     }
     this.#declineInputEnd = (): void => {
