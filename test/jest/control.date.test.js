@@ -4,11 +4,16 @@
  */
 import { WUPDateControl } from "web-ui-pack";
 import { PickersEnum } from "web-ui-pack/controls/calendar";
+import { localeInfo } from "web-ui-pack/indexHelpers";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../testHelper";
 
 beforeAll(() => {
   jest.useFakeTimers();
+  localeInfo.refresh("en-US"); // setup "en-US" locale
+  localeInfo.date = "yyyy-MM-dd"; // set defaults
+  localeInfo.time = "hh:mm:ss.fff a";
+  localeInfo.dateTime = `${localeInfo.date} ${localeInfo.time}`;
   if (new Date().getTimezoneOffset() !== 0) {
     throw new Error(
       `\nMissed timezone 'UTC'.
@@ -285,6 +290,8 @@ describe("control.date", () => {
     el.$initValue = new Date("2022-10-12T13:45:59.000Z");
     el.$options.startWith = PickersEnum.Year;
     await h.wait(1);
+
+    console.warn(localeInfo);
 
     const onChanged = jest.fn();
     el.addEventListener("$change", onChanged);

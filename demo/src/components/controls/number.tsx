@@ -21,6 +21,7 @@ export default function NumberControlView() {
         "Built-in validations (required,min,max)",
         "Increment/decrement via ArrowKeys, Mouse, TouchEvents(Swipe) + keys Shift/Ctrl (only when focused)",
         "Different formats (currency, etc.). Use $options.format to redefine defaults",
+        "Display format depends on user-locale (see web-ui-pack/helpers/localeInfo). Use $options.format or localeInfo (globally)",
       ]}
       // todo rollback after tests
       // details={{
@@ -39,7 +40,7 @@ export default function NumberControlView() {
         <wup-num
           name="number"
           label="Number"
-          initValue="234"
+          initValue="1234"
           autoComplete="off"
           autoFocus={false}
           validations="window.myNumberValidations"
@@ -57,7 +58,7 @@ export default function NumberControlView() {
           }}
         />
         <wup-num name="NumberRequired" validations="myRequiredValidations" />
-        <wup-num name="WithMask" mask="0000-0000" />
+        <wup-num name="WithMask" label="With Mask (mask always ignores pointed format)" mask="0000-0000" />
         <wup-num
           name="readonly"
           ref={(el) => {

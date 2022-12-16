@@ -1,6 +1,6 @@
 /** Returns number format according to user-locale */
-export function getNumberOptions(): { sepDecimal: string; sep1000: string } {
-  const s = (1234.5).toLocaleString(); // '1,234.5'
+export function getNumberOptions(locale?: string): { sepDecimal: string; sep1000: string } {
+  const s = (1234.5).toLocaleString(locale); // '1,234.5'
 
   let sep1000: string;
   for (let i = 1; ; ++i) {
@@ -29,9 +29,9 @@ export function getNumberOptions(): { sepDecimal: string; sep1000: string } {
 }
 
 /** Returns date-time formats according to user-locale */
-export function getDateFormat(): { date: string; time: string; dateTime: string } {
+export function getDateFormat(locale?: string): { date: string; time: string; dateTime: string } {
   // "1/3/2222, 4:05:06 AM";
-  const s = new Date(2222, 0, 3, 4, 5, 6).toLocaleString().replace(/AM|am/, "a");
+  const s = new Date(2222, 0, 3, 4, 5, 6).toLocaleString(locale).replace(/AM|am/, "a");
   // const s = "4:05:06 AM, 1/3/2222".replace(/AM|am/, "a");
   let dateTime = "";
   let startDate: number | null = null;
@@ -115,13 +115,13 @@ const localeInfo = {
   /** Date time format, example yyyy-MM-dd hh:mm:ss.fff a */
   dateTime: "yyyy-MM-dd",
   /** Re-define all values (call it if localization changed) */
-  refresh: () => {
-    const cur = new Intl.DateTimeFormat(undefined).resolvedOptions();
+  refresh: (locale?: string) => {
+    const cur = new Intl.DateTimeFormat(locale).resolvedOptions();
     if (cur.numberingSystem !== "latn") {
-      console.warn("WUP.LocaleInfo. Not latin numbers are not supported. Setup it itself");
+      console.warn(`WUP.LocaleInfo (${cur.locale}). Not latin numbers are not supported. Setup it itself`);
       return;
     }
-    Object.assign(localeInfo, getNumberOptions(), getDateFormat());
+    Object.assign(localeInfo, getNumberOptions(locale), getDateFormat(locale));
   },
 };
 

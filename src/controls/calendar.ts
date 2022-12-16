@@ -38,11 +38,13 @@ export namespace WUPCalendarIn {
   }
 
   export interface JSXProps {
+    /** @deprecated default value; format yyyy-MM-dd hh:mm:ss.fff */
+    initValue?: string;
     /** @deprecated Picker that must be rendered at first */
     startWith?: "year" | "month" | "day";
-    /** @deprecated User can't select date less than min */
+    /** @deprecated User can't select date less than min; format yyyy-MM-dd */
     min?: string;
-    /** @deprecated User can't select date more than max */
+    /** @deprecated User can't select date more than max; format yyyy-MM-dd  */
     max?: string;
     /** @deprecated Dates that user can't choose. Point global obj-key (window.myExclude = [] ) */
     exclude?: string;

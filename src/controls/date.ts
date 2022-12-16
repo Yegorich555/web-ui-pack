@@ -14,7 +14,7 @@ const tagName = "wup-date";
 export namespace WUPDateIn {
   export interface Defs extends WUPCalendarIn.Def {
     /** String representation of displayed date (enables mask, - to disable mask set $options.mask="");
-     * @defaultValue "yyyy-mm-dd"
+     * @defaultValue localeInfo.date
      * @tutorial Troubleshooting
      * * with changing $options.format need to change/reset mask/maskholder also */
     format: string;
@@ -46,8 +46,10 @@ declare global {
     interface Defaults<T = Date> extends WUPDateIn.GenDef<T> {}
     interface Options<T = Date> extends WUPDateIn.GenOpt<T> {}
     interface JSXProps<T extends WUPDateControl> extends WUPBaseCombo.JSXProps<T>, WUPDateIn.JSXProps {
+      /** @deprecated default value; format yyyy-MM-dd hh:mm:ss.fff */
+      initValue?: string;
       /** String representation of displayed date (enables mask, - to disable mask set $options.mask="");
-       * @defaultValue "yyyy-mm-dd"
+       * @defaultValue localeInfo.date
        * @deprecated */
       format?: string;
     }

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`control.num $ariaDetails 1`] = `
+exports[`control.number $ariaDetails 1`] = `
 <wup-num>
   <label
     for="txt1"
@@ -29,7 +29,7 @@ exports[`control.num $ariaDetails 1`] = `
 </wup-num>
 `;
 
-exports[`control.num $ariaDetails 2`] = `
+exports[`control.number $ariaDetails 2`] = `
 <wup-num>
   <label
     for="txt1"
@@ -53,7 +53,7 @@ exports[`control.num $ariaDetails 2`] = `
 </wup-num>
 `;
 
-exports[`control.num $ariaSpeak 1`] = `
+exports[`control.number $ariaSpeak 1`] = `
 <wup-num>
   <label
     for="txt1"
@@ -86,7 +86,7 @@ exports[`control.num $ariaSpeak 1`] = `
 </wup-num>
 `;
 
-exports[`control.num $ariaSpeak 2`] = `
+exports[`control.number $ariaSpeak 2`] = `
 <wup-num>
   <label
     for="txt1"
@@ -111,7 +111,7 @@ exports[`control.num $ariaSpeak 2`] = `
 </wup-num>
 `;
 
-exports[`control.num $show/$hide error 1`] = `
+exports[`control.number $show/$hide error 1`] = `
 <wup-num>
   <label
     for="txt1"
@@ -135,7 +135,7 @@ exports[`control.num $show/$hide error 1`] = `
 </wup-num>
 `;
 
-exports[`control.num $show/$hide error 2`] = `
+exports[`control.number $show/$hide error 2`] = `
 <wup-num
   invalid=""
 >
@@ -176,7 +176,7 @@ exports[`control.num $show/$hide error 2`] = `
 </wup-num>
 `;
 
-exports[`control.num $show/$hide error 3`] = `
+exports[`control.number $show/$hide error 3`] = `
 <wup-num>
   <label
     for="txt1"
@@ -200,9 +200,9 @@ exports[`control.num $show/$hide error 3`] = `
 </wup-num>
 `;
 
-exports[`control.num common tests render + styles 1`] = `<wup-num />`;
+exports[`control.number common tests render + styles 1`] = `<wup-num />`;
 
-exports[`control.num common tests render + styles 2`] = `
+exports[`control.number common tests render + styles 2`] = `
 <style>
   .wup-hidden, [wup-hidden] {
 position: absolute;
@@ -550,7 +550,7 @@ mask-image: var(--ctrl-icon-img);
 </style>
 `;
 
-exports[`control.num validations $options.validationShowAll 1`] = `
+exports[`control.number validations $options.validationShowAll 1`] = `
 <wup-num
   invalid=""
 >
@@ -603,7 +603,7 @@ exports[`control.num validations $options.validationShowAll 1`] = `
 </wup-num>
 `;
 
-exports[`control.num validations $options.validationShowAll 2`] = `
+exports[`control.number validations $options.validationShowAll 2`] = `
 <wup-num>
   <label
     for="txt1"
@@ -628,7 +628,7 @@ exports[`control.num validations $options.validationShowAll 2`] = `
 </wup-num>
 `;
 
-exports[`control.num validations $options.validationShowAll 3`] = `
+exports[`control.number validations $options.validationShowAll 3`] = `
 <wup-num
   invalid=""
 >
@@ -675,7 +675,7 @@ exports[`control.num validations $options.validationShowAll 3`] = `
 </wup-num>
 `;
 
-exports[`control.num validations options.validationCase 1`] = `
+exports[`control.number validations options.validationCase 1`] = `
 <wup-num>
   <label
     for="txt1"
@@ -699,7 +699,7 @@ exports[`control.num validations options.validationCase 1`] = `
 </wup-num>
 `;
 
-exports[`control.num validations options.validationCase 2`] = `
+exports[`control.number validations options.validationCase 2`] = `
 <wup-num
   invalid=""
 >
@@ -746,7 +746,7 @@ exports[`control.num validations options.validationCase 2`] = `
 </wup-num>
 `;
 
-exports[`control.num validations options.validationCase 3`] = `
+exports[`control.number validations options.validationCase 3`] = `
 <wup-num
   invalid=""
 >
@@ -793,7 +793,7 @@ exports[`control.num validations options.validationCase 3`] = `
 </wup-num>
 `;
 
-exports[`control.num validations options.validationCase 4`] = `
+exports[`control.number validations options.validationCase 4`] = `
 <wup-num
   invalid=""
 >
@@ -841,7 +841,7 @@ exports[`control.num validations options.validationCase 4`] = `
 </wup-num>
 `;
 
-exports[`control.num with form 1`] = `
+exports[`control.number with form 1`] = `
 <wup-form
   role="form"
 >

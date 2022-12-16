@@ -1,13 +1,17 @@
 import { WUPNumberControl } from "web-ui-pack";
+import localeInfo from "web-ui-pack/helpers/localeInfo";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../testHelper";
+
+beforeAll(() => {
+  localeInfo.refresh("en-US"); // setup "en-US" locale
+});
 
 /** @type WUPNumberControl */
 let el;
 initTestBaseControl({ type: WUPNumberControl, htmlTag: "wup-num", onInit: (e) => (el = e) });
 
-describe("control.num", () => {
-  // todo numberControl is localeBased so need somehow redefine locale
+describe("control.number", () => {
   testBaseControl({
     initValues: [
       { attrValue: "123", value: 123 },
