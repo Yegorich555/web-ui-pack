@@ -116,12 +116,13 @@ export default class WUPNumberControl<
 
   /** Returns $options.format joined with defaults */
   get $format(): Required<WUPNumberIn.Format> {
+    const f = this._opts.format;
     return {
       sepDecimal: localeInfo.sepDecimal,
       sep1000: localeInfo.sep1000,
-      maxDecimal: 0,
-      minDecimal: 0,
-      ...this._opts.format,
+      ...f,
+      maxDecimal: f?.maxDecimal ?? f?.minDecimal ?? 0,
+      minDecimal: f?.minDecimal ?? 0,
     };
   }
 
@@ -138,14 +139,13 @@ export default class WUPNumberControl<
     // eslint-disable-next-line prefer-const
     let [int, dec] = (v as any).toString().split(".");
     const f = this.$format;
-
     if (f.sep1000) {
       for (let i = int.length - 3; i > 0; i -= 3) {
         int = `${int.substring(0, i)}${f.sep1000}${int.substring(i)}`;
       }
     }
 
-    if (dec || f.minDecimal) {
+    if (dec || f.minDecimal || f.maxDecimal) {
       dec = dec === undefined ? "" : dec.substring(0, Math.min(f.maxDecimal, dec.length));
       dec += "0".repeat(Math.max(f.minDecimal - dec.length, 0));
       if (dec.length) {
