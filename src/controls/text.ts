@@ -438,9 +438,9 @@ export default class WUPTextControl<
   }
 
   protected override gotFocusLost(): void {
+    this.#declineInputEnd?.call(this);
     if (this.refMask) {
-      // todo input value can be wrong if (this.#declineInputEnd)
-      if (this.refMask.prefix && this.$refInput.value === this.refMask.prefix) {
+      if (this.refMask.prefix && this.refMask.value === this.refMask.prefix) {
         this.$refInput.value = ""; // rollback prefix/suffix if user types nothing
         delete (this.$refInput as MaskHandledInput)._maskPrev;
         this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
@@ -486,19 +486,19 @@ export default class WUPTextControl<
         return;
       }
 
-    // otherwise custom redo/undo works wrong (browser stores to history big chunks and not fired events if history emptied)
-    const isUndo = (e.ctrlKey || e.metaKey) && e.key === "z";
-    const isRedo = ((e.ctrlKey || e.metaKey) && e.key === "Z") || (e.ctrlKey && e.key === "y" && !e.metaKey);
-    if (isRedo || isUndo) {
-      if (isRedo && !this._histRedo?.length) {
-        return;
-      }
-      if (isUndo && !this._histUndo?.length) {
-        return;
-      }
-      e.preventDefault();
-      const inputType = isRedo ? "historyRedo" : "historyUndo";
-      this.$refInput.dispatchEvent(new InputEvent("beforeinput", { cancelable: true, bubbles: true, inputType })) &&
+      // otherwise custom redo/undo works wrong (browser stores to history big chunks and not fired events if history emptied)
+      const isUndo = (e.ctrlKey || e.metaKey) && e.key === "z";
+      const isRedo = ((e.ctrlKey || e.metaKey) && e.key === "Z") || (e.ctrlKey && e.key === "y" && !e.metaKey);
+      if (isRedo || isUndo) {
+        if (isRedo && !this._histRedo?.length) {
+          return;
+        }
+        if (isUndo && !this._histUndo?.length) {
+          return;
+        }
+        e.preventDefault();
+        const inputType = isRedo ? "historyRedo" : "historyUndo";
+        this.$refInput.dispatchEvent(new InputEvent("beforeinput", { cancelable: true, bubbles: true, inputType })) &&
           this.$refInput.dispatchEvent(new InputEvent("input", { cancelable: false, bubbles: true, inputType }));
       }
     }
@@ -512,18 +512,18 @@ export default class WUPTextControl<
       switch (e!.inputType) {
         case "historyUndo": // Ctrl+Z
           this.historyUndoRedo(false);
-        break;
-      case "historyRedo": // Ctrl+Shift+Z
-        this.historyUndoRedo(true);
-        break;
-      default:
-        {
-          if (!this._histUndo) {
-            this._histUndo = [];
-          }
-          const snap = this.historyToSnapshot(e.target.value, e.target.selectionStart || 0);
-          const isChanged = this._histUndo[this._histUndo.length - 1] !== snap;
-          isChanged && this._histUndo!.push(snap);
+          break;
+        case "historyRedo": // Ctrl+Shift+Z
+          this.historyUndoRedo(true);
+          break;
+        default:
+          {
+            if (!this._histUndo) {
+              this._histUndo = [];
+            }
+            const snap = this.historyToSnapshot(e.target.value, e.target.selectionStart || 0);
+            const isChanged = this._histUndo[this._histUndo.length - 1] !== snap;
+            isChanged && this._histUndo!.push(snap);
           }
           break;
       }

@@ -654,8 +654,14 @@ describe("control.text: mask", () => {
     expect(await h.userUndo(el.$refInput)).toBe("+1(|");
     expect(await h.userUndo(el.$refInput)).toBe("+1(|"); // try again - no actions
 
-    // cover case when !selectionStart
+    // case when char declined and need to rollback to empty string because only prefix lefts
+    await h.userTypeText(el.$refInput, "a", { clearPrevious: false });
+    expect(el.$refInput.value).toBe("+1(a");
     el.blur();
+    await h.wait();
+    expect(el.$refInput.value).toBe(""); // input must be cleared by blur if was only prefix
+
+    // cover case when !selectionStart
     el.$options.mask = "##0";
     el.$value = "";
     await h.wait(1);
