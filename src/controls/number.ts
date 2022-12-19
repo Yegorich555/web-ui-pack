@@ -164,7 +164,6 @@ export default class WUPNumberControl<
     return v as any;
   }
 
-  #parseTimerEnd?: () => void; // required to rollback value immediately if user types next (otherwise cursor can shift wrong if type several 'ab' at once)
   override parseInput(text: string): ValueType | undefined {
     // such parsing is better then Number.parse because ignores wrong chars
     let v: number | undefined = 0;
@@ -207,6 +206,8 @@ export default class WUPNumberControl<
       const declinedChars = prev.length - next.length;
 
       if (this._canShowDeclined && declinedChars > 0) {
+        // todo 4.|00 + "3" is declined to 4.00
+        console.warn({ next, text });
         this.declineInput(); // todo what about partially decline ? paste ab123
       } else {
         const el = this.$refInput;
@@ -253,7 +254,37 @@ export default class WUPNumberControl<
   }
 
   protected override gotBeforeInput(e: WUPText.GotInputEvent): void {
-    this.#parseTimerEnd?.call(this);
+    if (!this._opts.mask) {
+      const el = e.target;
+      let pos = el.selectionStart || 0;
+      if (pos === el.selectionEnd) {
+        // NiceToHave: 99.|2 + Backspace => we can delete sepDecimal in general
+        switch (e!.inputType) {
+          case "deleteContentForward":
+            {
+              const ascii = el.value.charCodeAt(pos);
+              if (!(ascii >= 48 && ascii <= 57)) {
+                el.selectionStart = pos + 1; // case "1|,234" + Delete => 1|34
+                el.selectionEnd = el.selectionStart;
+              }
+            }
+            break;
+          case "deleteContentBackward":
+            {
+              --pos;
+              const ascii = el.value.charCodeAt(pos);
+              if (!(ascii >= 48 && ascii <= 57)) {
+                el.selectionStart = pos; // case "1,|234" + Backspace => 1|34
+                el.selectionEnd = el.selectionStart;
+              }
+            }
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
     super.gotBeforeInput(e);
   }
 

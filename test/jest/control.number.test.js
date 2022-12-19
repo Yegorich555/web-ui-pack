@@ -54,7 +54,9 @@ describe("control.number", () => {
 
     h.setInputCursor(el.$refInput, "|123");
     expect(await h.userTypeText(el.$refInput, "4", { clearPrevious: false })).toBe("4|,123");
-    // todo issue: expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("4|23"); // expect that user deletes num instead of sep
+    expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("4|23"); // expect: user deletes num instead of sep
+    h.setInputCursor(el.$refInput, "4,|123");
+    expect(await h.userRemove(el.$refInput)).toBe("|123"); // expect: user deletes num instead of sep
 
     el.$value = 1234;
     el.$options.format = { minDecimal: 2 };
