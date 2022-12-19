@@ -1,7 +1,5 @@
 import { WUPNumberControl } from "web-ui-pack";
 import localeInfo from "web-ui-pack/helpers/localeInfo";
-// import WUPNumberControl from "../../src/controls/number";
-// import localeInfo from "../../src/helpers/localeInfo";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../testHelper";
 
@@ -59,7 +57,7 @@ describe("control.number", () => {
     h.setInputCursor(el.$refInput, "|123");
     expect(await h.userTypeText(el.$refInput, "4", { clearPrevious: false })).toBe("4|,123");
     expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("4|23"); // expect: user deletes num instead of sep
-    h.setInputCursor(el.$refInput, "4,|123");
+    h.setInputCursor(el.$refInput, "4,|123", { skipEvent: true });
     expect(await h.userRemove(el.$refInput)).toBe("|123"); // expect: user deletes num instead of sep
 
     el.$value = 1234;
@@ -111,10 +109,53 @@ describe("control.number", () => {
     await h.wait(150);
     expect(el.$value).toBe(Number.MAX_SAFE_INTEGER);
     expect(el.$refInput.value).toBe(Number.MAX_SAFE_INTEGER.toString());
+
+    // can type negative
+    el.$value = -12;
+    expect(el.$refInput.value).toBe("-12");
+    expect(await h.userTypeText(el.$refInput, "9", { clearPrevious: false })).toBe(`-129|`);
+
+    // attr doesn't depend on format
+    el.$options.format = { sep1000: "", sepDecimal: "," };
+    el.setAttribute("initvalue", "1234.5");
+    await h.wait(1);
+    expect(el.$initValue).toBe(1234.5);
+
+    el.setAttribute("initvalue", "");
+    await h.wait(1);
+    expect(el.$initValue).toBe(undefined);
+
+    el.setAttribute("initvalue", "ab123");
+    await h.wait(1);
+    expect(el.$initValue).toBe(undefined);
   });
 
-  test("history undo/redo", () => {
-    // todo
+  test("history undo/redo", async () => {
+    el.$options.format = { maxDecimal: 2 };
+    el.focus();
+    await h.wait();
+
+    expect(await h.userTypeText(el.$refInput, "1234.5", { clearPrevious: false })).toBe("1,234.5|"); // #1 type long text
+    expect(await h.userRemove(el.$refInput)).toBe("1,234.|"); // #2 remove last char
+    expect(await h.userRemove(el.$refInput)).toBe("1,234|"); // #3 remove last char
+    h.setInputCursor(el.$refInput, "1,|234", { skipEvent: true });
+    expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("1|34"); // #4 remove middle char
+    await h.userTypeText(el.$refInput, "a", { clearPrevious: false });
+    await h.wait(150);
+    expect(el.$value).toBe(134);
+    // cover Ctrl+Z
+    expect(h.getInputCursor(el.$refInput)).toBe("1|34");
+    expect(await h.userUndo(el.$refInput)).toBe("1,|234"); // #3
+    expect(await h.userUndo(el.$refInput)).toBe("1,234.|"); // #2
+    expect(el.$value).toBe(1234);
+    expect(await h.userUndo(el.$refInput)).toBe("1,234.5|"); // #1
+
+    // cover Ctrl+Shift+Z
+    expect(await h.userRedo(el.$refInput)).toBe("1,234.|");
+    expect(await h.userRedo(el.$refInput)).toBe("1,|234");
+    expect(el.$value).toBe(1234);
+    expect(await h.userRedo(el.$refInput)).toBe("1|34");
+    expect(el.$value).toBe(134);
   });
 
   test("with mask", () => {

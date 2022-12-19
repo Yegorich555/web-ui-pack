@@ -220,7 +220,7 @@ export default class WUPNumberControl<
       if (hasDeclined && next === this.valueToInput(this.$value)) {
         // WARN: don't compare v === this.$value because $value=4.567 but format can be 4.56
         this.declineInput();
-      } else {
+      } else if (text !== next) {
         const el = this.$refInput;
         // fix cursor position
         const pos = el.selectionStart || 0;
@@ -265,6 +265,8 @@ export default class WUPNumberControl<
   }
 
   protected override gotBeforeInput(e: WUPText.GotInputEvent): void {
+    super.gotBeforeInput(e);
+
     if (!this._opts.mask) {
       const el = e.target;
       let pos = el.selectionStart || 0;
@@ -287,8 +289,6 @@ export default class WUPNumberControl<
         }
       }
     }
-
-    super.gotBeforeInput(e);
   }
 
   private _canShowDeclined?: boolean;

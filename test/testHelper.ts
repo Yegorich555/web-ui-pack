@@ -412,7 +412,7 @@ export function getInputCursor(el: HTMLInputElement) {
 }
 
 /** Set cursor & value to input according to pattern "abc|def" where '|' - cursor position */
-export function setInputCursor(el: HTMLInputElement, cursorPattern: string) {
+export function setInputCursor(el: HTMLInputElement, cursorPattern: string, opts?: { skipEvent: boolean }) {
   const was = el.value;
   const gotValue = cursorPattern.replace(/[|]/g, "");
   // expect(el.value).toBe(gotValue);
@@ -420,7 +420,7 @@ export function setInputCursor(el: HTMLInputElement, cursorPattern: string) {
   el.value = gotValue;
   el.selectionStart = cursorPattern.indexOf("|");
   el.selectionEnd = cursorPattern.lastIndexOf("|");
-  was !== gotValue && el.dispatchEvent(new InputEvent("input", { bubbles: true }));
+  was !== gotValue && !opts?.skipEvent && el.dispatchEvent(new InputEvent("input", { bubbles: true }));
 }
 
 /** Simulates user removes text via backspace: focus + keydown+ keyup + keypress + input events;
