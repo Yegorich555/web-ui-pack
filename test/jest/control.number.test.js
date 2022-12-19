@@ -92,6 +92,14 @@ describe("control.number", () => {
     expect(el.$refInput.value).toBe("1234,00");
     el.$value = 1234.567;
     expect(el.$refInput.value).toBe("1234,56");
+
+    // maxSafeInteger
+    el.$options.format = { sep1000: "" };
+    el.$value = Number.MAX_SAFE_INTEGER;
+    expect(await h.userTypeText(el.$refInput, "9", { clearPrevious: false })).toBe(`${Number.MAX_SAFE_INTEGER}9|`); // show&hide after 100ms
+    await h.wait(150);
+    expect(el.$value).toBe(Number.MAX_SAFE_INTEGER);
+    expect(el.$refInput.value).toBe(Number.MAX_SAFE_INTEGER.toString());
   });
 
   test("history undo/redo", () => {

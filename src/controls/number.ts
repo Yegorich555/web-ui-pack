@@ -36,7 +36,7 @@ export namespace WUPNumberIn {
 
 declare global {
   namespace WUPNumber {
-    interface ValidationMap extends WUPBase.ValidationMap, Pick<WUPText.ValidationMap, "_mask"> {
+    interface ValidationMap extends WUPBase.ValidationMap, Pick<WUPText.ValidationMap, "_mask" /* | "_parse" */> {
       /** If $value < pointed shows message 'Min value {x}` */
       min: number;
       /** If $value < pointed shows message 'Max value {x}` */
@@ -101,6 +101,7 @@ export default class WUPNumberControl<
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
       _mask: WUPTextControl.$defaults.validationRules._mask as any,
+      // _parse: WUPTextControl.$defaults.validationRules._parse as any,
       min: (v, setV) => (v == null || v < setV) && `Min value is ${setV}`,
       max: (v, setV) => (v == null || v > setV) && `Max value is ${setV}`,
     },
@@ -198,16 +199,20 @@ export default class WUPNumberControl<
       v *= -1; // case: "-123"
     }
 
+    if (ok && v! > Number.MAX_SAFE_INTEGER) {
+      // throw new RangeError("Out of range");
+      this.declineInput(); // decline looks better than error "Out of range"
+      return v as any;
+    }
+
     if (!this._opts.mask) {
       // otherwise it conflicts with mask
-      // todo limit to maxSafeInteger
       const next = this.valueToInput(v as any);
       const prev = this.$refInput.value;
       const declinedChars = prev.length - next.length;
 
       if (this._canShowDeclined && declinedChars > 0) {
         // todo 4.|00 + "3" is declined to 4.00
-        console.warn({ next, text });
         this.declineInput(); // todo what about partially decline ? paste ab123
       } else {
         const el = this.$refInput;
@@ -225,7 +230,8 @@ export default class WUPNumberControl<
             --k;
           }
         }
-        el.value = next;
+        // el.value = next;
+        this.setInputValue(v as any); // WARN: it's refreshes onceError but calls valueToInput again
         el.selectionStart = pos + dp;
         el.selectionEnd = el.selectionStart;
       }
