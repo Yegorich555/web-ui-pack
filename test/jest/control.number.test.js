@@ -84,8 +84,11 @@ describe("control.number", () => {
     el.$value = 4;
     expect(el.$refInput.value).toBe("4");
     expect(await h.userTypeText(el.$refInput, ".7", { clearPrevious: false })).toBe("4.7|");
+    expect(await h.userRemove(el.$refInput)).toBe("4.|");
+    expect(await h.userRemove(el.$refInput)).toBe("4|"); // user can delete sepDecimal
 
     el.$options.format = { sepDecimal: ",", minDecimal: 2, sep1000: "" };
+    el.$value = 4.7;
     await h.wait(1);
     expect(el.$refInput.value).toBe("4,70");
     el.$value = 1234;

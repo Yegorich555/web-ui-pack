@@ -272,25 +272,17 @@ export default class WUPNumberControl<
       const el = e.target;
       let pos = el.selectionStart || 0;
       if (pos === el.selectionEnd) {
-        // NiceToHave: 99.|2 + Backspace => we can delete sepDecimal in general
+        let isBefore = false;
         switch (e!.inputType) {
-          case "deleteContentForward":
-            {
-              const ascii = el.value.charCodeAt(pos);
-              if (!(ascii >= 48 && ascii <= 57)) {
-                el.selectionStart = pos + 1; // case "1|,234" + Delete => 1|34
-                el.selectionEnd = el.selectionStart;
-              }
-            }
-            break;
           case "deleteContentBackward":
-            {
-              --pos;
-              const ascii = el.value.charCodeAt(pos);
-              if (!(ascii >= 48 && ascii <= 57)) {
-                el.selectionStart = pos; // case "1,|234" + Backspace => 1|34
-                el.selectionEnd = el.selectionStart;
-              }
+            --pos;
+            isBefore = true;
+          // eslint-disable-next-line no-fallthrough
+          case "deleteContentForward":
+            if (el.value[pos] === this.$format.sep1000) {
+              el.selectionStart = pos + (isBefore ? 0 : 1); // case "1|,234" + Delete => 1|34
+              // el.selectionStart = pos; // case "1,|234" + Backspace => 1|34
+              el.selectionEnd = el.selectionStart;
             }
             break;
           default:
