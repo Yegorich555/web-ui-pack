@@ -43,7 +43,20 @@ describe("control.number", () => {
 
     el.$value = 1234;
     expect(el.$refInput.value).toBe("1,234");
+    h.setInputCursor(el.$refInput, "1,234|");
+    expect(await h.userTypeText(el.$refInput, "5", { clearPrevious: false })).toBe("12,345|");
+    expect(await h.userTypeText(el.$refInput, "6", { clearPrevious: false })).toBe("123,456|");
+    expect(await h.userTypeText(el.$refInput, "7", { clearPrevious: false })).toBe("1,234,567|");
+    expect(await h.userRemove(el.$refInput, { removeCount: 5 })).toBe("12|");
+    expect(await h.userTypeText(el.$refInput, "ab", { clearPrevious: false })).toBe("12b|");
+    await h.wait(150);
+    expect(h.getInputCursor(el.$refInput)).toBe("12|");
 
+    h.setInputCursor(el.$refInput, "|123");
+    expect(await h.userTypeText(el.$refInput, "4", { clearPrevious: false })).toBe("4|,123");
+    // todo issue: expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("4|23"); // expect that user deletes num instead of sep
+
+    el.$value = 1234;
     el.$options.format = { minDecimal: 2 };
     await h.wait(1);
     expect(el.$refInput.value).toBe("1,234.00");
@@ -51,22 +64,36 @@ describe("control.number", () => {
     expect(el.$refInput.value).toBe("234.56");
     el.$value = 4.567;
     expect(el.$refInput.value).toBe("4.56");
+    h.setInputCursor(el.$refInput, "4.56|");
+    expect(await h.userTypeText(el.$refInput, "7", { clearPrevious: false })).toBe("4.567|");
+    await h.wait(150);
+    expect(h.getInputCursor(el.$refInput)).toBe("4.56|");
+    expect(await h.userRemove(el.$refInput)).toBe("4.5|0");
+    expect(await h.userRemove(el.$refInput)).toBe("4|.00");
+    expect(await h.userRemove(el.$refInput)).toBe("|0.00");
+    h.setInputCursor(el.$refInput, "|0.00|");
+    expect(el.$refInput.selectionStart).not.toBe(el.$refInput.selectionEnd);
+    expect(await h.userRemove(el.$refInput)).toBe("|");
 
+    el.$value = 4.5678;
     el.$options.format = { maxDecimal: 3 };
     await h.wait(1);
     expect(el.$refInput.value).toBe("4.567");
     el.$value = 4;
     expect(el.$refInput.value).toBe("4");
+    // todo user can't type decSep expect(await h.userTypeText(el.$refInput, ".78", { clearPrevious: false })).toBe("4.78|");
 
-    el.$options.format = { sepDecimal: ",", minDecimal: 2, sep1000: " " };
+    el.$options.format = { sepDecimal: ",", minDecimal: 2, sep1000: "" };
     await h.wait(1);
     expect(el.$refInput.value).toBe("4,00");
     el.$value = 1234;
-    expect(el.$refInput.value).toBe("1 234,00");
+    expect(el.$refInput.value).toBe("1234,00");
     el.$value = 1234.567;
-    expect(el.$refInput.value).toBe("1 234,56");
+    expect(el.$refInput.value).toBe("1234,56");
+  });
 
-    // todo test userInput
+  test("history undo/redo", () => {
+    // todo
   });
 
   test("with mask", () => {

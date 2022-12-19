@@ -396,6 +396,7 @@ export async function userTypeText(el: HTMLInputElement, text: string, opts = { 
   if (text === "") {
     el.dispatchEvent(new InputEvent("input", { bubbles: true }));
   }
+  return getInputCursor(el);
 }
 
 /** Get cursor of input according in pattern "abc|def" where '|' - cursor position */
@@ -412,13 +413,14 @@ export function getInputCursor(el: HTMLInputElement) {
 
 /** Set cursor & value to input according to pattern "abc|def" where '|' - cursor position */
 export function setInputCursor(el: HTMLInputElement, cursorPattern: string) {
+  const was = el.value;
   const gotValue = cursorPattern.replace(/[|]/g, "");
   // expect(el.value).toBe(gotValue);
   el.focus();
   el.value = gotValue;
   el.selectionStart = cursorPattern.indexOf("|");
   el.selectionEnd = cursorPattern.lastIndexOf("|");
-  el.dispatchEvent(new InputEvent("input", { bubbles: true }));
+  was !== gotValue && el.dispatchEvent(new InputEvent("input", { bubbles: true }));
 }
 
 /** Simulates user removes text via backspace: focus + keydown+ keyup + keypress + input events;
@@ -448,7 +450,11 @@ export async function userRemove(
     if (key === "Backspace" && carretPos > 0) {
       --carretPos;
     }
-    v = v.substring(0, carretPos) + v.substring(carretPos + 1);
+    if (el.selectionStart !== el.selectionEnd) {
+      v = v.substring(0, el.selectionStart!) + v.substring(el.selectionEnd!);
+    } else {
+      v = v.substring(0, carretPos) + v.substring(carretPos + 1);
+    }
     if (el.value !== v) {
       el.value = v;
       el.selectionEnd = carretPos;

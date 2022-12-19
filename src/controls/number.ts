@@ -207,14 +207,26 @@ export default class WUPNumberControl<
       const declinedChars = prev.length - next.length;
 
       if (this._canShowDeclined && declinedChars > 0) {
-        this.declineInput();
+        this.declineInput(); // todo what about partially decline ? paste ab123
       } else {
-        this.$refInput.value = next;
-        // el.selectionStart = pos;
-        // el.selectionEnd = el.selectionStart;
-        // testcase: user types "|" + "1234567|" - check cursor
-        // testcase: user types "|123" + "|5678" - check cursor
-        // todo it's wrong when user types |234 + '1' expected 1|.234
+        const el = this.$refInput;
+        // fix cursor position
+        const pos = el.selectionStart || 0;
+        let dp = 0;
+        // 5,671|,234 + "8" >>> next: 56,718|,234; text: 5,6718|,234 (56718|234)
+        for (let i = 0, k = 0; k < pos; ++i, ++k) {
+          const ascii = text.charCodeAt(k);
+          if (!(ascii >= 48 && ascii <= 57)) {
+            --i;
+            --dp;
+          } else if (next[i] !== text[k]) {
+            ++dp;
+            --k;
+          }
+        }
+        el.value = next;
+        el.selectionStart = pos + dp;
+        el.selectionEnd = el.selectionStart;
       }
     }
 
