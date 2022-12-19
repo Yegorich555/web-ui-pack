@@ -83,11 +83,11 @@ describe("control.number", () => {
     expect(el.$refInput.value).toBe("4.567");
     el.$value = 4;
     expect(el.$refInput.value).toBe("4");
-    // todo user can't type decSep expect(await h.userTypeText(el.$refInput, ".78", { clearPrevious: false })).toBe("4.78|");
+    expect(await h.userTypeText(el.$refInput, ".7", { clearPrevious: false })).toBe("4.7|");
 
     el.$options.format = { sepDecimal: ",", minDecimal: 2, sep1000: "" };
     await h.wait(1);
-    expect(el.$refInput.value).toBe("4,00");
+    expect(el.$refInput.value).toBe("4,70");
     el.$value = 1234;
     expect(el.$refInput.value).toBe("1234,00");
     el.$value = 1234.567;

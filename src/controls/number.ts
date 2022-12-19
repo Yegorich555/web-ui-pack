@@ -165,6 +165,14 @@ export default class WUPNumberControl<
     return v as any;
   }
 
+  override canParseInput(text: string): boolean {
+    const f = this.$format;
+    if (f.maxDecimal > 0 && text.endsWith(f.sepDecimal)) {
+      return false; // case "4.|" - use must able to type '.'
+    }
+    return true;
+  }
+
   override parseInput(text: string): ValueType | undefined {
     // such parsing is better then Number.parse because ignores wrong chars
     let v: number | undefined = 0;

@@ -53,7 +53,7 @@ export default function NumberControlView() {
           initValue="99.2"
           ref={(el) => {
             if (el) {
-              el.$options.format = { minDecimal: 2, maxDecimal: 2 };
+              el.$options.format = { minDecimal: 0, maxDecimal: 2 };
             }
           }}
         />
