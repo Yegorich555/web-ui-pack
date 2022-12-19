@@ -52,6 +52,10 @@ describe("control.number", () => {
     await h.wait(150);
     expect(h.getInputCursor(el.$refInput)).toBe("12|");
 
+    h.setInputCursor(el.$refInput, "34ab|12");
+    el.$refInput.dispatchEvent(new InputEvent("input", { inputType: "insertFromPaste", bubbles: true }));
+    expect(h.getInputCursor(el.$refInput)).toBe("3,4|12");
+
     h.setInputCursor(el.$refInput, "|123");
     expect(await h.userTypeText(el.$refInput, "4", { clearPrevious: false })).toBe("4|,123");
     expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("4|23"); // expect: user deletes num instead of sep
@@ -95,6 +99,10 @@ describe("control.number", () => {
     expect(el.$refInput.value).toBe("1234,00");
     el.$value = 1234.567;
     expect(el.$refInput.value).toBe("1234,56");
+    el.$value = 4.0;
+    await h.wait(1);
+    h.setInputCursor(el.$refInput, "4,|00");
+    expect(await h.userTypeText(el.$refInput, "3", { clearPrevious: false })).toBe("4,3|0");
 
     // maxSafeInteger
     el.$options.format = { sep1000: "" };

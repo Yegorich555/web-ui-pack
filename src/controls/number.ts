@@ -216,18 +216,15 @@ export default class WUPNumberControl<
     if (!this._opts.mask) {
       // otherwise it conflicts with mask
       const next = this.valueToInput(v as any);
-      const prev = this.$refInput.value;
-      const declinedChars = prev.length - next.length;
-
-      if (this._canShowDeclined && declinedChars > 0) {
-        // todo 4.|00 + "3" is declined to 4.00
-        this.declineInput(); // todo what about partially decline ? paste ab123
+      const hasDeclined = this._canShowDeclined && text.length > next.length;
+      if (hasDeclined && next === this.valueToInput(this.$value)) {
+        // WARN: don't compare v === this.$value because $value=4.567 but format can be 4.56
+        this.declineInput();
       } else {
         const el = this.$refInput;
         // fix cursor position
         const pos = el.selectionStart || 0;
         let dp = 0;
-        // 5,671|,234 + "8" >>> next: 56,718|,234; text: 5,6718|,234 (56718|234)
         for (let i = 0, k = 0; k < pos; ++i, ++k) {
           const ascii = text.charCodeAt(k);
           if (!(ascii >= 48 && ascii <= 57)) {
@@ -239,7 +236,7 @@ export default class WUPNumberControl<
           }
         }
         // el.value = next;
-        this.setInputValue(v as any); // WARN: it's refreshes onceError but calls valueToInput again
+        this.setInputValue(v as any); // WARN: it refreshes onceError but calls valueToInput again
         el.selectionStart = pos + dp;
         el.selectionEnd = el.selectionStart;
       }
