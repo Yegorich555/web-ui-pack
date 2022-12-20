@@ -314,8 +314,11 @@ export default class WUPNumberControl<
     r.push(onScroll(this, (v) => this.gotIncrement(-1 * v))); // allow inc/dec via scroll/swipe
     r.push(
       onEvent(this, "keyup", (e) => {
+        /* istanbul ignore else */
         if (!e.altKey) delete this._isAltDown;
+        /* istanbul ignore else */
         if (!e.shiftKey) delete this._isShiftDown;
+        /* istanbul ignore else */
         if (!e.ctrlKey) delete this._isCtrlDown;
       })
     );
@@ -369,9 +372,13 @@ export default class WUPNumberControl<
     const next = hasFloat ? mathSumFloat(v, dval) : v + dval;
 
     const el = this.$refInput;
-    el.value = next.toString();
     const inputType = dval > 0 ? "_inc" : "_dec";
-    el.dispatchEvent(new InputEvent("input", { bubbles: true, inputType }));
+    const data = next.toString();
+    if (el.dispatchEvent(new InputEvent("beforeinput", { inputType, data, bubbles: true, cancelable: true }))) {
+      el.value = data;
+      el.dispatchEvent(new InputEvent("input", { inputType, bubbles: true }));
+      // todo wrong cursor position
+    }
   }
 }
 

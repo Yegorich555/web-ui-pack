@@ -276,11 +276,15 @@ describe("control.number", () => {
     expect(isPrevented).toBe(true);
     expect(el.$value).toBe(111.53);
 
-    await h.wait();
     isPrevented = !el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: 100 })); // scrollDown
     expect(isPrevented).toBe(true);
     expect(el.$value).toBe(11.53);
     el.dispatchEvent(new KeyboardEvent("keyup", { key: "Control", bubbles: true, cancelable: true }));
+    await h.wait(1);
+
+    // history undo must work
+    expect(el.$refInput.value).toBe("11.53");
+    expect(await h.userUndo(el.$refInput)).toBe("111.53|");
 
     // todo test with MAX_SAFE_INTEGER, MIN_SAFE_INTEGER
   });

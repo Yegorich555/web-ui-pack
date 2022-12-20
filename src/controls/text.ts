@@ -508,6 +508,7 @@ export default class WUPTextControl<
   protected gotBeforeInput(e: WUPText.GotInputEvent): void {
     this.#declineInputEnd?.call(this);
 
+    console.warn("before");
     if (this.canHandleUndo()) {
       switch (e!.inputType) {
         case "historyUndo": // Ctrl+Z
