@@ -968,7 +968,9 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       this.goValidate(ValidateFromCases.onChange, true); // validate to define current state
     }
 
-    const r = this.appendEvent(this, "keydown", (e) => !this.$isDisabled && this.gotKeyDown(e), { passive: false });
+    const r = this.appendEvent(this, "keydown", (e) => !this.$isDisabled && !this.$isReadOnly && this.gotKeyDown(e), {
+      passive: false,
+    });
     return [r];
   }
 

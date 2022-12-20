@@ -286,6 +286,23 @@ describe("control.number", () => {
     expect(el.$refInput.value).toBe("11.53");
     expect(await h.userUndo(el.$refInput)).toBe("111.53|");
 
+    // case when input somehow prevented
+    el.gotBeforeInput = (e) => e.preventDefault();
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("111.53"); // no changed because was prevented
+
+    // no action when readonly
+    el.$options.readOnly = true;
+    await h.wait(1);
+    isPrevented = !el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: 100 })); // scrollDown
+    expect(isPrevented).toBe(false);
+    isPrevented = !el.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true })
+    );
+    expect(isPrevented).toBe(false);
+    expect(el.$refInput.value).toBe("111.53");
+
     // todo test with MAX_SAFE_INTEGER, MIN_SAFE_INTEGER
   });
 });

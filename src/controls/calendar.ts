@@ -1115,7 +1115,7 @@ export default class WUPCalendarControl<
 
   override gotKeyDown(e: KeyboardEvent): void {
     super.gotKeyDown(e);
-    if (e.altKey || this.$isReadOnly) {
+    if (e.altKey) {
       return;
     }
 

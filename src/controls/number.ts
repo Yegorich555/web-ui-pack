@@ -311,7 +311,13 @@ export default class WUPNumberControl<
   protected override gotFocus(): Array<() => void> {
     const r = super.gotFocus();
     this.$refInput.setAttribute("inputmode", "numeric"); // otherwise textControl removes it if mask isn't applied
-    r.push(onScroll(this, (v) => this.gotIncrement(-1 * v))); // allow inc/dec via scroll/swipe
+    r.push(
+      onScroll(
+        this, //
+        (v) => this.gotIncrement(-1 * v),
+        { skip: () => this.$isReadOnly || this.$isDisabled }
+      )
+    ); // allow inc/dec via scroll/swipe
     r.push(
       onEvent(this, "keyup", (e) => {
         /* istanbul ignore else */
@@ -359,10 +365,6 @@ export default class WUPNumberControl<
 
   /** Called when user tries to increment/decrement value (via ArrowKeys/Mouse/Swipe) */
   protected gotIncrement(dval: number): void {
-    if (this.$isReadOnly || this.$isDisabled) {
-      return;
-    }
-
     if (this._isAltDown) dval *= 0.1;
     else if (this._isShiftDown) dval *= 10;
     else if (this._isCtrlDown) dval *= 100;
