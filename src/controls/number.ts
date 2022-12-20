@@ -360,18 +360,21 @@ export default class WUPNumberControl<
       return;
     }
 
+    if (this._isAltDown) dval *= 0.1;
+    else if (this._isShiftDown) dval *= 10;
+    else if (this._isCtrlDown) dval *= 100;
+
     const v = +(this.$value ?? 0);
-    let next: number;
-    if (this._isAltDown) {
-      next = mathSumFloat(v, dval * 0.1);
-    } else {
-      if (this._isShiftDown) dval *= 10;
-      else if (this._isCtrlDown) dval *= 100;
-      next = v + dval;
-    }
-    this.$refInput.value = next.toString();
-    this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: dval > 0 ? "_inc" : "_dec" }));
+    const hasFloat = this._isAltDown || v % 1 !== 0;
+    const next = hasFloat ? mathSumFloat(v, dval) : v + dval;
+
+    const el = this.$refInput;
+    el.value = next.toString();
+    const inputType = dval > 0 ? "_inc" : "_dec";
+    el.dispatchEvent(new InputEvent("input", { bubbles: true, inputType }));
   }
 }
 
 customElements.define(tagName, WUPNumberControl);
+
+// todo parse '11.530000000000001' doesn't work

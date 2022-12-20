@@ -231,5 +231,57 @@ describe("control.number", () => {
     expect(el.$value).toBe(11.53);
 
     el.dispatchEvent(new KeyboardEvent("keyup", { key: "Alt", bubbles: true, cancelable: true }));
+
+    // Shift +10
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("11.53");
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Shift", shiftKey: true, bubbles: true, cancelable: true }));
+
+    isPrevented = !el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100 })); // scrollUp
+    expect(isPrevented).toBe(true);
+    expect(el.$value).toBe(21.53);
+
+    isPrevented = !el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
+    expect(isPrevented).toBe(true);
+    expect(el.$value).toBe(31.53);
+
+    isPrevented = !el.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true })
+    );
+    expect(isPrevented).toBe(true);
+    expect(el.$value).toBe(21.53);
+
+    await h.wait();
+    isPrevented = !el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: 100 })); // scrollDown
+    expect(isPrevented).toBe(true);
+    expect(el.$value).toBe(11.53);
+    el.dispatchEvent(new KeyboardEvent("keyup", { key: "Shift", bubbles: true, cancelable: true }));
+
+    // Ctrl +100
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("11.53");
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Control", ctrlKey: true, bubbles: true, cancelable: true }));
+
+    isPrevented = !el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100 })); // scrollUp
+    expect(isPrevented).toBe(true);
+    expect(el.$value).toBe(111.53);
+
+    isPrevented = !el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
+    expect(isPrevented).toBe(true);
+    expect(el.$value).toBe(211.53);
+
+    isPrevented = !el.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true })
+    );
+    expect(isPrevented).toBe(true);
+    expect(el.$value).toBe(111.53);
+
+    await h.wait();
+    isPrevented = !el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: 100 })); // scrollDown
+    expect(isPrevented).toBe(true);
+    expect(el.$value).toBe(11.53);
+    el.dispatchEvent(new KeyboardEvent("keyup", { key: "Control", bubbles: true, cancelable: true }));
+
+    // todo test with MAX_SAFE_INTEGER, MIN_SAFE_INTEGER
   });
 });

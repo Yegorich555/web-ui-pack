@@ -7,6 +7,9 @@ export default function mathSumFloat(a: number, b: number): number {
   // eslint-disable-next-line prefer-const
   let [bint, bdec] = b.toString().split(".");
 
+  if (adec === undefined) adec = "";
+  if (bdec === undefined) bdec = "";
+
   if (adec.length < bdec.length) {
     adec += "0".repeat(bdec.length - adec.length);
   } else if (bdec.length < adec.length) {
