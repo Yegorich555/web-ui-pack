@@ -169,7 +169,7 @@ describe("helper.onScrollStop", () => {
       `"<ul style="max-height: 100px; overflow: hidden;"><li num="5"></li></ul>"`
     );
 
-    // has effect if swipeY several times with big time - render 2 times
+    // has effect if swipeY several times for a long time
     renderNext.mockClear();
     await h.userSwipe(ul.firstElementChild, {
       movements: [

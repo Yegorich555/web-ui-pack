@@ -34,6 +34,7 @@ export default function onScroll(
   );
 
   const rOnTouch = onEvent(el, "touchstart", (ev) => {
+    // WARN: don't prevent touchstart because it can prevent click events
     if (options?.skip?.call(el)) {
       return;
     }
@@ -49,6 +50,7 @@ export default function onScroll(
         const diff = xyNew - xy;
         if (Math.abs(diff) > (options?.swipeDebounceDelta ?? 10)) {
           xy = xyNew;
+          /* istanbul ignore else */
           if (e.timeStamp - stamp > (options?.swipeDebounceMs ?? 300)) {
             stamp = e.timeStamp;
             callback(diff < 0 ? 1 : -1);
