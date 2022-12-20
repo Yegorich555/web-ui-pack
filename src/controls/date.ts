@@ -1,6 +1,7 @@
+import dateCopyTime from "../helpers/dateCopyTime";
 import dateFromString from "../helpers/dateFromString";
 import dateToString from "../helpers/dateToString";
-import { dateCopyTime, localeInfo } from "../indexHelpers";
+import localeInfo from "../helpers/localeInfo";
 import WUPPopupElement from "../popup/popupElement";
 import WUPBaseComboControl, { WUPBaseComboIn } from "./baseCombo";
 import { ValidateFromCases } from "./baseControl";
@@ -17,9 +18,11 @@ export namespace WUPDateIn {
      * @defaultValue localeInfo.date
      * @tutorial Troubleshooting
      * * with changing $options.format need to change/reset mask/maskholder also */
+    format?: string;
+  }
+  export interface Opt extends Pick<WUPCalendarIn.Opt, "min" | "max" | "exclude" | "utc" | "startWith"> {
     format: string;
   }
-  export interface Opt extends Pick<WUPCalendarIn.Opt, "min" | "max" | "exclude" | "utc" | "startWith"> {}
   export interface JSXProps extends Pick<WUPCalendarIn.JSXProps, "min" | "max" | "exclude" | "utc" | "startWith"> {}
 
   export type Generics<
@@ -135,12 +138,13 @@ export default class WUPDateControl<
         (v === undefined || setV.some((d) => d.valueOf() === v.valueOf())) && `This date is disabled`,
     },
     firstDayOfWeek: 1,
-    format: localeInfo.date.toLowerCase(),
+    // format: localeInfo.date.toLowerCase()
   };
 
   $options: WUPDate.Options<ValueType> = {
     ...this.#ctr.$defaults,
     utc: true,
+    format: this.#ctr.$defaults.format || localeInfo.date.toLowerCase(),
     // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory
   };

@@ -291,8 +291,6 @@ describe("control.date", () => {
     el.$options.startWith = PickersEnum.Year;
     await h.wait(1);
 
-    console.warn(localeInfo);
-
     const onChanged = jest.fn();
     el.addEventListener("$change", onChanged);
     el.focus();
