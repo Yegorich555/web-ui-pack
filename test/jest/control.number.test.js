@@ -158,14 +158,78 @@ describe("control.number", () => {
     expect(el.$value).toBe(134);
   });
 
-  test("with mask", () => {
-    // todo
+  test("with mask", async () => {
+    el.$options.mask = "##-##";
+    el.focus();
+    await h.wait(1);
+    expect(await h.userTypeText(el.$refInput, "1", { clearPrevious: false })).toBe("1|");
+    expect(await h.userTypeText(el.$refInput, "2", { clearPrevious: false })).toBe("12-|");
+    expect(el.$value).toBe(12);
+    expect(await h.userTypeText(el.$refInput, "3", { clearPrevious: false })).toBe("12-3|");
+    expect(el.$value).toBe(123);
+    expect(await h.userTypeText(el.$refInput, "4", { clearPrevious: false })).toBe("12-34|");
+    expect(el.$value).toBe(1234);
+
+    el.$value = 5678;
+    expect(el.$refInput.value).toBe("56-78");
   });
 
   test("role spinner & inc/dec", async () => {
     el.focus();
     await h.wait();
     expect(el.$refInput.getAttribute("role")).toBe("spinbutton");
-    // todo
+
+    // dec -1
+    let isPrevented = !el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: 100 })); // scrollDown
+    expect(isPrevented).toBe(true);
+    expect(el.$value).toBe(-1);
+    expect(el.$refInput.value).toBe("-1");
+
+    el.$options.format = { maxDecimal: 2 };
+    el.$value = 1000.53;
+    await h.wait(1);
+
+    isPrevented = !el.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true })
+    );
+    expect(isPrevented).toBe(true);
+    expect(el.$value).toBe(999.53);
+    expect(el.$refInput.value).toBe("999.53");
+
+    // inc +1
+    isPrevented = !el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100 })); // scrollUp
+    expect(isPrevented).toBe(true);
+    expect(el.$value).toBe(1000.53);
+
+    isPrevented = !el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
+    expect(isPrevented).toBe(true);
+    expect(el.$value).toBe(1001.53);
+    expect(el.$refInput.value).toBe("1,001.53");
+
+    // Alt +0.1
+    el.$value = 11.53;
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("11.53");
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Alt", altKey: true, bubbles: true, cancelable: true }));
+
+    isPrevented = !el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100 })); // scrollUp
+    expect(isPrevented).toBe(true);
+    expect(el.$value).toBe(11.63);
+
+    isPrevented = !el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
+    expect(isPrevented).toBe(true);
+    expect(el.$value).toBe(11.73);
+
+    isPrevented = !el.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true })
+    );
+    expect(isPrevented).toBe(true);
+    expect(el.$value).toBe(11.63);
+
+    isPrevented = !el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: 100 })); // scrollDown
+    expect(isPrevented).toBe(true);
+    expect(el.$value).toBe(11.53);
+
+    el.dispatchEvent(new KeyboardEvent("keyup", { key: "Alt", bubbles: true, cancelable: true }));
   });
 });

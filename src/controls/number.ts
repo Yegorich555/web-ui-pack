@@ -314,7 +314,7 @@ export default class WUPNumberControl<
     r.push(onScroll(this, (v) => this.gotIncrement(-1 * v))); // allow inc/dec via scroll/swipe
     r.push(
       onEvent(this, "keyup", (e) => {
-        if (!e.shiftKey) delete this._isAltDown;
+        if (!e.altKey) delete this._isAltDown;
         if (!e.shiftKey) delete this._isShiftDown;
         if (!e.ctrlKey) delete this._isCtrlDown;
       })
