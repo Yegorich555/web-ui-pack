@@ -9,7 +9,7 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
 
   testBaseControl({
     ...opts,
-    initValues: opts.initValues ?? [
+    initValues: opts?.initValues ?? [
       { attrValue: "123", value: "123" },
       { attrValue: "some txt", value: "some txt" },
       { attrValue: "34", value: "34" },
