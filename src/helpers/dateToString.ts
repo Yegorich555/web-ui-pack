@@ -11,6 +11,8 @@ function cutEndString(s: string, length: number): string {
   return s.substring(s.length - length);
 }
 
+// todo support MMM - Sep
+
 /** Returns a string representation of a date-time according to pointed format
  * @param format 'yyyy-MM-dd hh:mm:ss.fff AZ'
  * @example
