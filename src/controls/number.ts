@@ -379,7 +379,6 @@ export default class WUPNumberControl<
     if (el.dispatchEvent(new InputEvent("beforeinput", { inputType, data, bubbles: true, cancelable: true }))) {
       el.value = data;
       el.dispatchEvent(new InputEvent("input", { inputType, bubbles: true }));
-      // todo wrong cursor position
     }
   }
 }

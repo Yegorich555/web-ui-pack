@@ -23,11 +23,10 @@ export default function NumberControlView() {
         "Different formats (currency, etc.). Use $options.format to redefine defaults",
         "Display format depends on user-locale (see web-ui-pack/helpers/localeInfo). Use $options.format or localeInfo (globally)",
       ]}
-      // todo rollback after tests
-      // details={{
-      //   tag: "wup-num",
-      //   cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
-      // }}
+      details={{
+        tag: "wup-num",
+        cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
+      }}
     >
       <wup-form
         ref={(el) => {
@@ -53,12 +52,12 @@ export default function NumberControlView() {
           initValue="99.2"
           ref={(el) => {
             if (el) {
-              el.$options.format = { sepDecimal: ".", sep1000: ",", maxDecimal: 2, minDecimal: 0 };
+              el.$options.format = { maxDecimal: 2, minDecimal: 0 };
             }
           }}
         />
         <wup-num name="NumberRequired" validations="myRequiredValidations" />
-        <wup-num name="WithMask" label="With Mask (mask always ignores pointed format)" mask="0000-0000" />
+        <wup-num name="WithMask" label="With Mask (mask always ignores format)" mask="0000-0000" />
         <wup-num
           name="readonly"
           ref={(el) => {

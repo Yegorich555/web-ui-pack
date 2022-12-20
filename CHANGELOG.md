@@ -14,6 +14,9 @@
 
 **Features**:
 
+- Added elements
+  - [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
+
 - Added [helpers](README.md#helpers)
   - [`onScroll`](src/helpers/onScroll.ts)
   - [`localeInfo`](src/helpers/localeInfo.ts)

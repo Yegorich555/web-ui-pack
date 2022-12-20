@@ -217,12 +217,15 @@ describe("control.number", () => {
     // Alt +0.1
     el.$value = 11.53;
     await h.wait(1);
+    el.$refInput.selectionEnd = 0;
+    el.$refInput.selectionStart = 0;
     expect(el.$refInput.value).toBe("11.53");
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Alt", altKey: true, bubbles: true, cancelable: true }));
 
     isPrevented = !el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100 })); // scrollUp
     expect(isPrevented).toBe(true);
     expect(el.$value).toBe(11.63);
+    expect(h.getInputCursor(el.$refInput)).toBe("11.63|");
 
     isPrevented = !el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
     expect(isPrevented).toBe(true);
