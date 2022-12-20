@@ -128,6 +128,14 @@ describe("control.number", () => {
     el.setAttribute("initvalue", "ab123");
     await h.wait(1);
     expect(el.$initValue).toBe(undefined);
+
+    // infinite loop in parseInput
+    el.$options.format = { sepDecimal: ".", maxDecimal: 2, minDecimal: 0 };
+    await h.wait(1);
+    el.$refInput.value = "11.530000000000001";
+    el.$refInput.dispatchEvent(new InputEvent("input", { inputType: "insertFromPaste", bubbles: true }));
+    expect(h.getInputCursor(el.$refInput)).toBe("11.53|");
+    expect(el.$value).toBe(11.53);
   });
 
   test("history undo/redo", async () => {

@@ -225,7 +225,7 @@ export default class WUPNumberControl<
         // fix cursor position
         const pos = el.selectionStart || 0;
         let dp = 0;
-        for (let i = 0, k = 0; k < pos; ++i, ++k) {
+        for (let i = 0, k = 0; k < pos && i < next.length; ++i, ++k) {
           const ascii = text.charCodeAt(k);
           if (!(ascii >= 48 && ascii <= 57)) {
             --i;
@@ -385,5 +385,3 @@ export default class WUPNumberControl<
 }
 
 customElements.define(tagName, WUPNumberControl);
-
-// todo parse '11.530000000000001' doesn't work
