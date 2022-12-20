@@ -286,7 +286,27 @@ describe("control.number", () => {
     expect(el.$refInput.value).toBe("11.53");
     expect(await h.userUndo(el.$refInput)).toBe("111.53|");
 
+    // MAX_SAFE_INTEGER
+    await h.wait();
+    el.$value = Number.MAX_SAFE_INTEGER; // 9007199254740991
+    expect(el.$refInput.value).toBe(`9,007,199,254,740,991`);
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
+    expect(el.$value).toBe(Number.MAX_SAFE_INTEGER);
+    expect(el.$refInput.value).toBe(`9,007,199,254,740,992`);
+    await h.wait(150);
+    expect(el.$refInput.value).toBe(`9,007,199,254,740,991`);
+
+    // MIN_SAFE_INTEGER;
+    el.$value = Number.MIN_SAFE_INTEGER;
+    expect(el.$refInput.value).toBe(`-9,007,199,254,740,991`);
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+    expect(el.$value).toBe(Number.MIN_SAFE_INTEGER);
+    expect(el.$refInput.value).toBe(`-9,007,199,254,740,992`);
+    await h.wait(150);
+    expect(el.$refInput.value).toBe(`-9,007,199,254,740,991`);
+
     // case when input somehow prevented
+    el.$value = 111.53;
     el.gotBeforeInput = (e) => e.preventDefault();
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
     await h.wait(1);
@@ -302,7 +322,5 @@ describe("control.number", () => {
     );
     expect(isPrevented).toBe(false);
     expect(el.$refInput.value).toBe("111.53");
-
-    // todo test with MAX_SAFE_INTEGER, MIN_SAFE_INTEGER
   });
 });

@@ -207,7 +207,7 @@ export default class WUPNumberControl<
       v *= -1; // case: "-123"
     }
 
-    if (ok && v! > Number.MAX_SAFE_INTEGER) {
+    if (ok && (v! > Number.MAX_SAFE_INTEGER || v! < Number.MIN_SAFE_INTEGER)) {
       // throw new RangeError("Out of range");
       this.declineInput(); // decline looks better than error "Out of range"
       return v as any;
@@ -375,7 +375,7 @@ export default class WUPNumberControl<
 
     const el = this.$refInput;
     const inputType = dval > 0 ? "_inc" : "_dec";
-    const data = next.toString();
+    const data = this.valueToInput(next as any);
     if (el.dispatchEvent(new InputEvent("beforeinput", { inputType, data, bubbles: true, cancelable: true }))) {
       el.value = data;
       el.dispatchEvent(new InputEvent("input", { inputType, bubbles: true }));
