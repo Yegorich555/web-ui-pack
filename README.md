@@ -21,6 +21,7 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
 - Built-in css-variables to use custom color-themes with native ordinary styling (css, scss etc.)
 - Built-in Typescript (coverage types 100%)
 - Built-in `.jsx/.tsx` support (for React/Vue)
+- Supports localizations (based on [localeInfo](src/helpers/localeInfo.ts) helper)
 - Well documented via JSDoc (use intellisense power of your editor to get details about each property/option/usage)
 - Optimized for webpack (build includes only used components and helpers via **side-effects** option)
 - Zero dependancy (don't need to wait for bug-fixing of other packages)

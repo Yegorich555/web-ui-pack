@@ -1,6 +1,3 @@
-/** Locale-object with definitions related to user-locale; use .refresh() to update according to userLocale
- * @tutorial Troubleshooting
- * * in JS impossible to define whether user-settings is different from user-locale */
 export class WUPlocaleInfo {
   /** Last pointed locale
    * @defaultValue "" (en-US with custom dateTime format) */
@@ -186,7 +183,14 @@ export class WUPlocaleInfo {
   }
 }
 
+/** Locale-object with definitions related to user-locale; call localeInfo.refresh() to update according to userLocale
+ *  @defaultValue 'en-US' with custom dateTime format;
+ * @tutorial Troubleshooting
+ * * in JS impossible to define whether user-settings is different from user-locale
+ * * there is no way to define firstDayOfWeek for calendar
+ * * you can redefine/set any property if somehow it locale-definitions don't fit your expectations */
 const localeInfo = new WUPlocaleInfo();
+
 // localeInfo.refresh("en-US");
 export default localeInfo;
 

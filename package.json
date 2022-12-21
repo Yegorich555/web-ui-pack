@@ -58,7 +58,8 @@
     "multiselect",
     "calendar",
     "date",
-    "datepicker"
+    "datepicker",
+    "numeric"
   ],
   "author": "Yegor.Golubchik",
   "license": "MIT",

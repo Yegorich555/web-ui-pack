@@ -1126,6 +1126,7 @@ mask-image: var(--ctrl-icon-img);
         border-radius: var(--ctrl-border-radius);
         box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.1);
         background: none;
+        text-transform: capitalize;
       }
       WUP-CALENDAR label {
         max-width: var(--ctrl-clr-width);
@@ -1187,6 +1188,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         color: inherit;
         background-color: white;
         box-shadow: none;
+        text-transform: inherit;
       }
       WUP-CALENDAR header &gt; button[disabled] {
         pointer-events: none;

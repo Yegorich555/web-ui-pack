@@ -1,7 +1,7 @@
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
 import { WUPcssHidden } from "../styles";
 import scrollCarousel from "../helpers/scrollCarousel";
-import { dateCopyTime } from "../indexHelpers";
+import { dateCopyTime, localeInfo } from "../indexHelpers";
 
 const tagName = "wup-calendar";
 
@@ -157,6 +157,7 @@ export default class WUPCalendarControl<
         border-radius: var(--ctrl-border-radius);
         box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.1);
         background: none;
+        text-transform: capitalize;
       }
       :host label {
         max-width: var(--ctrl-clr-width);
@@ -213,6 +214,7 @@ export default class WUPCalendarControl<
         color: inherit;
         background-color: white;
         box-shadow: none;
+        text-transform: inherit;
       }
       :host header > button[disabled] {
         pointer-events: none;
@@ -315,36 +317,6 @@ export default class WUPCalendarControl<
     const arr = super.observedAttributes as Array<LowerKeys<WUPCalendar.Options>>;
     arr.push("utc", "min", "max", "exclude");
     return arr;
-  }
-
-  // todo replace to locale based; css => text-transform: capitalize;
-  /** Short names of days: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"] */
-  static get $namesDayShort(): string[] {
-    // return ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    return ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
-  }
-
-  /** Names of months: [ "January", "February", "March", ...] */
-  static get $namesMonth(): string[] {
-    return [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-  }
-
-  /** Short names of months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] */
-  static get $namesMonthShort(): string[] {
-    return ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   }
 
   /** Returns days of pointed number-of-month with placeholders of prev, next months
@@ -620,7 +592,7 @@ export default class WUPCalendarControl<
       const days = document.createElement("ul");
       days.setAttribute("aria-hidden", true);
       box.prepend(days);
-      const names = this.#ctr.$namesDayShort;
+      const names = localeInfo.namesDayShort;
       for (let i = 0, n = this._opts.firstDayOfWeek - 1; i < 7; ++i, ++n) {
         const d = add(days, "li");
         if (n >= names.length) {
@@ -635,10 +607,11 @@ export default class WUPCalendarControl<
     const getIndex: WUPCalendarIn.PickerResult["getIndex"] = (b, first) =>
       Math.floor((b.valueOf() - (first as number)) / 86400000);
 
+    const { namesMonth } = localeInfo;
     const renderItems = (ol: HTMLElement, v: Date): WUPCalendarIn.ItemElement[] => {
       const valMonth = v.getUTCMonth();
       const valYear = v.getUTCFullYear();
-      this.$refCalenarTitle.textContent = `${this.#ctr.$namesMonth[valMonth]} ${valYear}`;
+      this.$refCalenarTitle.textContent = `${namesMonth[valMonth]} ${valYear}`;
 
       const items: WUPCalendarIn.ItemElement[] = [];
       const r = this.#ctr.$daysOfMonth(valYear, valMonth, this._opts.firstDayOfWeek);
@@ -710,7 +683,7 @@ export default class WUPCalendarControl<
       const year = v.getUTCFullYear();
       this.$refCalenarTitle.textContent = `${year}`;
 
-      const namesShort = this.#ctr.$namesMonthShort;
+      const namesShort = localeInfo.namesMonthShort;
       const items: WUPCalendarIn.ItemElement[] = [];
       const total = year * pageSize;
 
@@ -993,7 +966,8 @@ export default class WUPCalendarControl<
     if (v) {
       const key = this._opts.utc ? "UTC" : "";
       // prettier-ignore
-      this.$refInput.value = `${v[`get${key}Date`]()} ${this.#ctr.$namesMonth[v[`get${key}Month`]()]} ${v[`get${key}FullYear`]()}`
+      const {namesMonth} = localeInfo
+      this.$refInput.value = `${v[`get${key}Date`]()} ${namesMonth[v[`get${key}Month`]()]} ${v[`get${key}FullYear`]()}`;
     } else {
       this.$refInput.value = "";
     }
@@ -1194,13 +1168,3 @@ customElements.define(tagName, WUPCalendarControl);
  */
 
 // todo add ability to select range
-/* todo months names replace to locale-defined:
-  new Intl.DateTimeFormat(undefined, { month: "short" }).format(new Date()); >>> "Dec"
-  new Intl.DateTimeFormat(undefined, {month: "long"}).format(new Date()); >>> "December"
-
-  new Intl.DateTimeFormat("ru-RU", { month: "short" }).format(new Date()); >>> "дек."
-  new Intl.DateTimeFormat("ru-RU", { month: "long" }).format(new Date()); >>> "декабрь"
-
-  console.warn(new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(new Date())); => 'Tue'
-  console.warn(new Intl.DateTimeFormat("ru-RU", { weekday: "short" }).format(new Date())); => вт
-*/

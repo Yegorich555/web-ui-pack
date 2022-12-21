@@ -11,10 +11,14 @@
   - Now
     - changing `$options.format` & attr `[format]` related only to displayed text. All attributes must be pointed in universal format `YYYY-MM-DD`
     - default value depends on user localization; see [locale](src/helpers/localeInfo.ts)
+- CalendarControl:
+  deprecated static getters `$namesDayShort, $namesMonth, $namesMonthShort` in favor of [`localeInfo`](src/helpers/localeInfo.ts) helper
 
 **Features**:
 
+- Controls **Number, Date, Calendar** are locale based and depeneds on [`localeInfo`](src/helpers/localeInfo.ts) helper
 - Added elements
+
   - [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
 
 - Added [helpers](README.md#helpers)
