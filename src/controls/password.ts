@@ -105,9 +105,7 @@ export default class WUPPasswordControl<
   }
 
   /** Text announced by screen-readers when input cleared; @defaultValue `input cleared` */
-  static get $ariaDescription(): string {
-    return "press Alt + V to show/hide password";
-  }
+  static $ariaDescription = "press Alt + V to show/hide password";
 
   static get $styleRoot(): string {
     return `:root {

@@ -179,9 +179,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   #ctr = this.constructor as typeof WUPBaseControl;
 
   /** Text announced by screen-readers when control cleared; @defaultValue `cleared` */
-  static get $ariaCleared(): string {
-    return "cleared";
-  }
+  static $ariaCleared = "cleared";
 
   /* Array of options names to listen for changes */
   static get observedOptions(): Array<string> {
@@ -194,9 +192,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   /** Text announced by screen-readers; @defaultValue `Error for` */
-  static get $ariaError(): string {
-    return "Error for";
-  }
+  static $ariaError: "Error for";
 
   /** Css-variables related to component */
   static get $styleRoot(): string {

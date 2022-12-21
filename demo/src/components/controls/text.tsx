@@ -121,4 +121,3 @@ export default function TextControlView() {
 }
 
 // todo details about icons before/after
-// todo details about ariaAttributes to change messages
