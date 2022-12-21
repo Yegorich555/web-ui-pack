@@ -14,6 +14,10 @@
 - CalendarControl:
   deprecated static getters `$namesDayShort, $namesMonth, $namesMonthShort` in favor of [`localeInfo`](src/helpers/localeInfo.ts) helper
 
+**Fixes**:
+
+- Helper. promiseWait. Callback called before time end
+
 **Features**:
 
 - Added support **MMM** in format for `dateToString, dateFromString`
@@ -37,8 +41,8 @@
 - SelectControl. Click on custom list-item with nested span doesn't call click-event
 - SelectControl. No scroll to selected element at first opening
 - SelectControl. Sometimes menu isn't opened
-- SelectControl. Fix `noItems` appeared on 2nd menu opening when user created a new value
-- Helper. observer. Fix onChange fired even date.setHours didn't change value
+- SelectControl. `noItems` appeared on 2nd menu opening when user created a new value
+- Helper. observer. onChange fired even date.setHours didn't change value
 
 **Features**:
 
