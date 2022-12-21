@@ -3,10 +3,10 @@
  * * in JS impossible to define whether user-settings is different from user-locale */
 export class WUPlocaleInfo {
   /** Last pointed locale
-   * @defaultValue "en-US-custom" */
-  locale = "en-US-custom";
+   * @defaultValue "" (en-US with custom dateTime format) */
+  locale = "";
   /** User's locale */
-  localeUser = new Intl.DateTimeFormat().resolvedOptions();
+  localeUser = new Intl.DateTimeFormat().resolvedOptions().locale;
   /** Decimal separator for number 123.4 it's dot */
   sepDecimal = ".";
   /** Thouthands separator for number 1,234.5 it's comma */
@@ -26,6 +26,9 @@ export class WUPlocaleInfo {
       return;
     }
     localeInfo.locale = cur.locale;
+    this.#namesMonth = undefined;
+    this.#namesMonthShort = undefined;
+    this.#namesDayShort = undefined;
     Object.assign(localeInfo, this.getNumberOptions(locale), this.getDateFormat(locale));
   }
 
@@ -124,35 +127,78 @@ export class WUPlocaleInfo {
     };
     return r;
   }
+
+  private getDateNames(opts: Intl.DateTimeFormatOptions): string[] {
+    const arr: string[] = [];
+    const f = new Intl.DateTimeFormat(this.locale || "en-US", opts);
+    const dt = new Date(2022, 0, 1);
+    for (let i = 0; i < 12; ++i) {
+      dt.setMonth(i);
+      arr.push(f.format(dt));
+    }
+    return arr;
+  }
+
+  #namesMonth?: string[];
+  /** Names of months: [ "January", "February", "March", ...] */
+  get namesMonth(): string[] {
+    if (this.#namesMonth) {
+      return this.#namesMonth;
+    }
+    return this.getDateNames({ month: "long" });
+  }
+
+  set namesMonth(v: string[] | undefined) {
+    this.#namesMonth = v;
+  }
+
+  #namesMonthShort?: string[];
+  /** Short names of months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] */
+  get namesMonthShort(): string[] {
+    if (this.#namesMonthShort) {
+      return this.#namesMonthShort;
+    }
+    return this.getDateNames({ month: "short" });
+  }
+
+  set namesMonthShort(v: string[] | undefined) {
+    this.#namesMonthShort = v;
+  }
+
+  #namesDayShort?: string[] = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+  /** Short names of days (starts with Monday): ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] */
+  get namesDayShort(): string[] {
+    if (this.#namesDayShort) {
+      return this.#namesDayShort;
+    }
+    const arr: string[] = [];
+    const f = new Intl.DateTimeFormat(this.locale || "en-US", { weekday: "short" });
+    const dt = new Date(2022, 7, 1);
+    for (let i = 1; i < 8; ++i) {
+      dt.setDate(i);
+      arr.push(f.format(dt));
+    }
+    return arr;
+  }
+
+  set namesDayShort(v: string[] | undefined) {
+    this.#namesDayShort = v;
+  }
 }
 
 const localeInfo = new WUPlocaleInfo();
 // localeInfo.refresh("en-US");
 export default localeInfo;
 
-/* todo months names replace to locale-defined:
-  new Intl.DateTimeFormat(undefined, { month: "short" }).format(new Date()); >>> "Dec"
-  new Intl.DateTimeFormat(undefined, {month: "long"}).format(new Date()); >>> "December"
-
-  new Intl.DateTimeFormat("ru-RU", { month: "short" }).format(new Date()); >>> "дек."
-  new Intl.DateTimeFormat("ru-RU", { month: "long" }).format(new Date()); >>> "декабрь"
-
-  console.warn(new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(new Date())); => 'Tue'
-  console.warn(new Intl.DateTimeFormat("ru-RU", { weekday: "short" }).format(new Date())); => вт
-*/
-
 // localeInfo.refresh("ru-RU");
 // localeInfo.refresh("ar-AE");
-
 // const s =
 //   "af-ZA am-ET ar-AE ar-BH ar-DZ ar-EG ar-IQ ar-JO ar-KW ar-LB ar-LY ar-MA arn-CL ar-OM ar-QA ar-SA ar-SD ar-SY ar-TN ar-YE as-IN az-az az-Cyrl-AZ az-Latn-AZ ba-RU be-BY bg-BG bn-BD bn-IN bo-CN br-FR bs-Cyrl-BA bs-Latn-BA ca-ES co-FR cs-CZ cy-GB da-DK de-AT de-CH de-DE de-LI de-LU dsb-DE dv-MV el-CY el-GR en-029 en-AU en-BZ en-CA en-cb en-GB en-IE en-IN en-JM en-MT en-MY en-NZ en-PH en-SG en-TT en-US en-ZA en-ZW es-AR es-BO es-CL es-CO es-CR es-DO es-EC es-ES es-GT es-HN es-MX es-NI es-PA es-PE es-PR es-PY es-SV es-US es-UY es-VE et-EE eu-ES fa-IR fi-FI fil-PH fo-FO fr-BE fr-CA fr-CH fr-FR fr-LU fr-MC fy-NL ga-IE gd-GB gd-ie gl-ES gsw-FR gu-IN ha-Latn-NG he-IL hi-IN hr-BA hr-HR hsb-DE hu-HU hy-AM id-ID ig-NG ii-CN in-ID is-IS it-CH it-IT iu-Cans-CA iu-Latn-CA iw-IL ja-JP ka-GE kk-KZ kl-GL km-KH kn-IN kok-IN ko-KR ky-KG lb-LU lo-LA lt-LT lv-LV mi-NZ mk-MK ml-IN mn-MN mn-Mong-CN moh-CA mr-IN ms-BN ms-MY mt-MT nb-NO ne-NP nl-BE nl-NL nn-NO no-no nso-ZA oc-FR or-IN pa-IN pl-PL prs-AF ps-AF pt-BR pt-PT qut-GT quz-BO quz-EC quz-PE rm-CH ro-mo ro-RO ru-mo ru-RU rw-RW sah-RU sa-IN se-FI se-NO se-SE si-LK sk-SK sl-SI sma-NO sma-SE smj-NO smj-SE smn-FI sms-FI sq-AL sr-BA sr-CS sr-Cyrl-BA sr-Cyrl-CS sr-Cyrl-ME sr-Cyrl-RS sr-Latn-BA sr-Latn-CS sr-Latn-ME sr-Latn-RS sr-ME sr-RS sr-sp sv-FI sv-SE sw-KE syr-SY ta-IN te-IN tg-Cyrl-TJ th-TH tk-TM tlh-QS tn-ZA tr-TR tt-RU tzm-Latn-DZ ug-CN uk-UA ur-PK uz-Cyrl-UZ uz-Latn-UZ uz-uz vi-VN wo-SN xh-ZA yo-NG zh-CN zh-HK zh-MO zh-SG zh-TW zu-ZA";
 // s.split(" ").forEach((l) => {
-//   // localeInfo.refresh(l);
-//   console.warn(
-//     `${l}: ${new Intl.DateTimeFormat(l, { month: "short" }).format(new Date())} | ${new Intl.DateTimeFormat(l, {
-//       month: "long",
-//     }).format(new Date())}`
-//   );
+//   localeInfo.refresh(l);
+//   console.warn(localeInfo.namesDayShort);
+//   // console.warn(localeInfo.namesMonth);
+//   // console.warn(localeInfo.namesMonthShort);
 // });
 
 // NiceToHave (watch): getFirstDayOfWeek: https://github.com/tc39/ecma402/issues/6

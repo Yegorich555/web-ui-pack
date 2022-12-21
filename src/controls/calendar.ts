@@ -317,8 +317,10 @@ export default class WUPCalendarControl<
     return arr;
   }
 
+  // todo replace to locale based; css => text-transform: capitalize;
   /** Short names of days: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"] */
   static get $namesDayShort(): string[] {
+    // return ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     return ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
   }
 
@@ -340,7 +342,7 @@ export default class WUPCalendarControl<
     ];
   }
 
-  /** Short names of days: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] */
+  /** Short names of months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] */
   static get $namesMonthShort(): string[] {
     return ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   }
