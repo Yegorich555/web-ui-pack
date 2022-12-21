@@ -113,6 +113,13 @@ describe("control.date", () => {
       el.$options.maskholder = "mm/dd/yyyy";
       await h.wait(1);
       expect(el.$options.maskholder).toBe("mm/dd/yyyy");
+
+      const ef = h.mockConsoleError();
+      el.$options.format = "MMM-DD/YYYY";
+      await h.wait(1);
+      expect(el.$options.format).toBe("YYYY-MM-DD"); // it rollbacks to default because was not supported format
+      expect(ef).toBeCalledTimes(1);
+      h.unMockConsoleError();
     });
 
     test("attr [startWith]", async () => {

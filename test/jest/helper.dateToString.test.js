@@ -142,6 +142,9 @@ describe("helper.dateToString", () => {
       { v: "2022-01-02 16:23:45.567", txt: "22-01-02" },
       { v: "2023-11-29 01:02:03.567", txt: "23-11-29" },
     ],
+    "MMM d, hh:mm A": [
+      { v: "2022-04-23 16:09:12", txt: "Apr 23, 04:09 PM" }, //
+    ],
   };
 
   Object.keys(obj).forEach((k) => {

@@ -4,6 +4,7 @@
  */
 // import dateFromString from "../../src/helpers/dateFromString";
 import dateFromString from "web-ui-pack/helpers/dateFromString";
+import * as h from "../testHelper";
 
 describe("helper.dateToString", () => {
   const obj = {
@@ -72,6 +73,9 @@ describe("helper.dateToString", () => {
       { v: new Date("2023-07-02 00:00"), txt: "23-07-02" },
       { v: new Date("2025-11-24 00:00"), txt: "25-11-24" },
     ],
+    "MMM d/yyyy, hh:mm A": [
+      { v: new Date("2022-04-23 16:09:00"), txt: "Apr 23/2022, 04:09 PM" }, //
+    ],
   };
 
   Object.keys(obj).forEach((k) => {
@@ -91,6 +95,7 @@ describe("helper.dateToString", () => {
   });
 
   test("invalid date", () => {
+    h.mockConsoleWarn();
     expect(dateFromString(null)).toBe(null);
     expect(dateFromString("", "YYYY-MM-DD")).toBe(null);
     expect(dateFromString("202A-BB-DD", "YYYY-MM-DD")).toBe(null);
@@ -117,5 +122,6 @@ describe("helper.dateToString", () => {
     expect(getOutOfRange("2022-03-103", "yyyy-MM-dd")).toBe(true);
     expect(getOutOfRange("2022-03-0", "yyyy-MM-dd")).toBe(true);
     expect(getOutOfRange("2022-3", "yyyy-MM-dd")).toBe(true);
+    h.unMockConsoleWarn();
   });
 });
