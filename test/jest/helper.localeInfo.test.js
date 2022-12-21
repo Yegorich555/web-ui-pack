@@ -1,21 +1,24 @@
-// import localeInfo from "../../src/helpers/localeInfo";
-import localeInfo from "web-ui-pack/helpers/localeInfo";
+import localeInfo from "../../src/helpers/localeInfo";
+// import localeInfo from "web-ui-pack/helpers/localeInfo";
 import * as h from "../testHelper";
 
 describe("helper.localeInfo", () => {
   test("number format", () => {
     expect((1234.5).toLocaleString("en-US")).toBe("1,234.5");
     localeInfo.refresh("en-US");
+    expect(localeInfo.locale).toBe("en-US");
     expect(localeInfo.sepDecimal).toBe(".");
     expect(localeInfo.sep1000).toBe(",");
 
     expect((1234.5).toLocaleString("ru-RU")).toBe("1\u00A0234,5");
     localeInfo.refresh("ru-RU");
+    expect(localeInfo.locale).toBe("ru-RU");
     expect(localeInfo.sepDecimal).toBe(",");
     expect(localeInfo.sep1000).toBe("\u00A0"); // 160 code (Non-breaking space; &nbsp;)
 
     expect((1234.5).toLocaleString("pl-PL")).toBe("1234,5");
     localeInfo.refresh("pl-PL");
+    expect(localeInfo.locale).toBe("pl-PL");
     expect(localeInfo.sepDecimal).toBe(",");
     expect(localeInfo.sep1000).toBe(""); // empty
   });
