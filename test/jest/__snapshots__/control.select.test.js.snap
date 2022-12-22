@@ -797,7 +797,7 @@ exports[`control.select validations $options.validationShowAll 3`] = `
     <span
       class="wup-hidden"
     >
-      undefined First Name:
+      Error for First Name:
     </span>
     <span>
       This field is required
@@ -913,7 +913,7 @@ exports[`control.select validations options.validationCase 2`] = `
     <span
       class="wup-hidden"
     >
-      undefined First Input:
+      Error for First Input:
     </span>
     <span>
       This field is required
@@ -965,7 +965,7 @@ exports[`control.select validations options.validationCase 3`] = `
     <span
       class="wup-hidden"
     >
-      undefined First Input:
+      Error for First Input:
     </span>
     <span>
       custom err here
@@ -1056,7 +1056,7 @@ exports[`control.select validations options.validationCase 4`] = `
     <span
       class="wup-hidden"
     >
-      undefined First Input:
+      Error for First Input:
     </span>
     <span>
       This field is required

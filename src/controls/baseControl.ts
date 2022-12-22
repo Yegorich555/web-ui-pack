@@ -181,6 +181,9 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Text announced by screen-readers when control cleared; @defaultValue `cleared` */
   static $ariaCleared = "cleared";
 
+  /** Text announced by screen-readers; @defaultValue `Error for` */
+  static $ariaError = "Error for";
+
   /* Array of options names to listen for changes */
   static get observedOptions(): Array<string> {
     return <Array<keyof WUPBase.Options>>["label", "name", "autoComplete", "disabled", "readOnly", "validations"];
@@ -190,9 +193,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   static get observedAttributes(): Array<string> {
     return <Array<LowerKeys<WUPBase.Options>>>["label", "name", "autocomplete", "disabled", "readonly", "initvalue"];
   }
-
-  /** Text announced by screen-readers; @defaultValue `Error for` */
-  static $ariaError: "Error for";
 
   /** Css-variables related to component */
   static get $styleRoot(): string {

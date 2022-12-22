@@ -503,7 +503,7 @@ exports[`control.check validations options.validationCase 2`] = `
     <span
       class="wup-hidden"
     >
-      undefined First Input:
+      Error for First Input:
     </span>
     <span>
       This field is required
@@ -541,7 +541,7 @@ exports[`control.check validations options.validationCase 3`] = `
     <span
       class="wup-hidden"
     >
-      undefined First Input:
+      Error for First Input:
     </span>
     <span>
       custom err here
@@ -579,7 +579,7 @@ exports[`control.check validations options.validationCase 4`] = `
     <span
       class="wup-hidden"
     >
-      undefined First Input:
+      Error for First Input:
     </span>
     <span>
       Always error
