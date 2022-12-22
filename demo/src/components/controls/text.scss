@@ -1,0 +1,16 @@
+.customIcon {
+  > label::before {
+    content: " ";
+    /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
+    mask-image: url("../../assets/logo.png");
+  }
+}
+
+.customIcon2 {
+  > label::before {
+    content: " ";
+    background: center / contain url("../../assets/logo.png") no-repeat;
+    margin-right: 0.25em;
+    // background-size: var(--ctrl-icon-size);
+  }
+}

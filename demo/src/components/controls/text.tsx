@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import Page from "src/elements/page";
 import { WUPTextControl } from "web-ui-pack";
+import styles from "./text.scss";
 
 const sideEffect = WUPTextControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
@@ -21,6 +22,7 @@ export default function TextControlView() {
         "Built-in validations (required,min,max,email). To extend use $defaults.validations",
         "Smart validations on the fly (use $defaults.validationCases)",
         "Powerful accessibility support (keyboard, announcenement)",
+        "Easy to append icons",
         "Mask/maskholder support (options mask & maskholder)",
       ]}
     >
@@ -69,6 +71,12 @@ export default function TextControlView() {
             }
           }}
         />
+        <wup-text
+          name="icons"
+          label="With custom icon as text (use wup-text>label:before & :after)"
+          class={styles.customIcon}
+        />
+        <wup-text name="icons" label="With custom icon as image" class={styles.customIcon2} />
         <wup-text
           initValue="init value here"
           ref={(el) => {
@@ -119,5 +127,3 @@ export default function TextControlView() {
     </Page>
   );
 }
-
-// todo details about icons before/after
