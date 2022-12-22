@@ -455,6 +455,7 @@ export default class WUPTextControl<
         delete this.$refPrefix;
       }
     } else {
+      /* istanbul ignore else */
       if (!el) {
         el = document.createElement("span");
         el.setAttribute("prefix", "");
