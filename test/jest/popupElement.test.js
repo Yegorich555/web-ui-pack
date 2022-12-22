@@ -1348,67 +1348,67 @@ describe("popupElement", () => {
     };
 
     expectIt(WUPPopupElement.$placements.$top.$start.$adjust).toMatchInlineSnapshot(
-      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(140px, 70px);" position="top"></wup-popup><wup-popup-arrow style="transform: translate(154px, 90px) rotate(0deg);"></wup-popup-arrow></body>"`
+      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(140px, 70px);" position="top"></wup-popup><wup-popup-arrow style="transform: translate(154px, 90px) rotate(0.1deg);"></wup-popup-arrow></body>"`
     );
     expect(el.$refArrow).toBeDefined();
 
     expectIt(WUPPopupElement.$placements.$top.$middle.$adjust).toMatchInlineSnapshot(
-      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(170px, 70px);" position="top"></wup-popup><wup-popup-arrow style="transform: translate(180px, 90px) rotate(0deg);"></wup-popup-arrow></body>"`
+      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(170px, 70px);" position="top"></wup-popup><wup-popup-arrow style="transform: translate(180px, 90px) rotate(0.1deg);"></wup-popup-arrow></body>"`
     );
     expectIt(WUPPopupElement.$placements.$top.$end.$adjust).toMatchInlineSnapshot(
-      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(200px, 70px);" position="top"></wup-popup><wup-popup-arrow style="transform: translate(206px, 90px) rotate(0deg);"></wup-popup-arrow></body>"`
+      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(200px, 70px);" position="top"></wup-popup><wup-popup-arrow style="transform: translate(206px, 90px) rotate(0.1deg);"></wup-popup-arrow></body>"`
     );
 
     expectIt(WUPPopupElement.$placements.$bottom.$start.$adjust).toMatchInlineSnapshot(
-      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(140px, 160px);" position="bottom"></wup-popup><wup-popup-arrow style="transform: translate(154px, 150px) rotate(180deg);"></wup-popup-arrow></body>"`
+      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(140px, 160px);" position="bottom"></wup-popup><wup-popup-arrow style="transform: translate(154px, 150px) rotate(180.1deg);"></wup-popup-arrow></body>"`
     );
     expectIt(WUPPopupElement.$placements.$bottom.$middle.$adjust).toMatchInlineSnapshot(
-      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(170px, 160px);" position="bottom"></wup-popup><wup-popup-arrow style="transform: translate(180px, 150px) rotate(180deg);"></wup-popup-arrow></body>"`
+      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(170px, 160px);" position="bottom"></wup-popup><wup-popup-arrow style="transform: translate(180px, 150px) rotate(180.1deg);"></wup-popup-arrow></body>"`
     );
     expectIt(WUPPopupElement.$placements.$bottom.$end.$adjust).toMatchInlineSnapshot(
-      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(200px, 160px);" position="bottom"></wup-popup><wup-popup-arrow style="transform: translate(206px, 150px) rotate(180deg);"></wup-popup-arrow></body>"`
+      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(200px, 160px);" position="bottom"></wup-popup><wup-popup-arrow style="transform: translate(206px, 150px) rotate(180.1deg);"></wup-popup-arrow></body>"`
     );
 
     expectIt(WUPPopupElement.$placements.$left.$start.$adjust).toMatchInlineSnapshot(
-      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(96px, 100px);" position="left"></wup-popup><wup-popup-arrow style="width: 8px; height: 4px; transform: translate(134px, 108px) rotate(-90deg);"></wup-popup-arrow></body>"`
+      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(96px, 100px);" position="left"></wup-popup><wup-popup-arrow style="width: 8px; height: 4px; transform: translate(134px, 108px) rotate(-90.1deg);"></wup-popup-arrow></body>"`
     );
     expectIt(WUPPopupElement.$placements.$left.$middle.$adjust).toMatchInlineSnapshot(
-      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(96px, 115px);" position="left"></wup-popup><wup-popup-arrow style="width: 8px; height: 4px; transform: translate(134px, 123px) rotate(-90deg);"></wup-popup-arrow></body>"`
+      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(96px, 115px);" position="left"></wup-popup><wup-popup-arrow style="width: 8px; height: 4px; transform: translate(134px, 123px) rotate(-90.1deg);"></wup-popup-arrow></body>"`
     );
     expectIt(WUPPopupElement.$placements.$left.$end.$adjust).toMatchInlineSnapshot(
-      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(96px, 130px);" position="left"></wup-popup><wup-popup-arrow style="width: 8px; height: 4px; transform: translate(134px, 138px) rotate(-90deg);"></wup-popup-arrow></body>"`
+      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(96px, 130px);" position="left"></wup-popup><wup-popup-arrow style="width: 8px; height: 4px; transform: translate(134px, 138px) rotate(-90.1deg);"></wup-popup-arrow></body>"`
     );
 
     expectIt(WUPPopupElement.$placements.$right.$start.$adjust).toMatchInlineSnapshot(
-      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(244px, 100px);" position="right"></wup-popup><wup-popup-arrow style="width: 8px; height: 4px; transform: translate(238px, 108px) rotate(90deg);"></wup-popup-arrow></body>"`
+      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(244px, 100px);" position="right"></wup-popup><wup-popup-arrow style="width: 8px; height: 4px; transform: translate(238px, 108px) rotate(90.1deg);"></wup-popup-arrow></body>"`
     );
     expectIt(WUPPopupElement.$placements.$right.$middle.$adjust).toMatchInlineSnapshot(
-      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(244px, 115px);" position="right"></wup-popup><wup-popup-arrow style="width: 8px; height: 4px; transform: translate(238px, 123px) rotate(90deg);"></wup-popup-arrow></body>"`
+      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(244px, 115px);" position="right"></wup-popup><wup-popup-arrow style="width: 8px; height: 4px; transform: translate(238px, 123px) rotate(90.1deg);"></wup-popup-arrow></body>"`
     );
     expectIt(WUPPopupElement.$placements.$right.$end.$adjust).toMatchInlineSnapshot(
-      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(244px, 130px);" position="right"></wup-popup><wup-popup-arrow style="width: 8px; height: 4px; transform: translate(238px, 138px) rotate(90deg);"></wup-popup-arrow></body>"`
+      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(244px, 130px);" position="right"></wup-popup><wup-popup-arrow style="width: 8px; height: 4px; transform: translate(238px, 138px) rotate(90.1deg);"></wup-popup-arrow></body>"`
     );
 
     el.$options.arrowClass = "my-arrow";
     expectIt(WUPPopupElement.$placements.$right.$end.$adjust).toMatchInlineSnapshot(
-      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(244px, 130px);" position="right"></wup-popup><wup-popup-arrow class="my-arrow" style="width: 8px; height: 4px; transform: translate(238px, 138px) rotate(90deg);"></wup-popup-arrow></body>"`
+      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(244px, 130px);" position="right"></wup-popup><wup-popup-arrow class="my-arrow" style="width: 8px; height: 4px; transform: translate(238px, 138px) rotate(90.1deg);"></wup-popup-arrow></body>"`
     );
     // checking with nextSibling
     document.body.appendChild(document.createElement("a"));
     expectIt(WUPPopupElement.$placements.$right.$end.$adjust).toMatchInlineSnapshot(
-      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(244px, 130px);" position="right"></wup-popup><wup-popup-arrow class="my-arrow" style="width: 8px; height: 4px; transform: translate(238px, 138px) rotate(90deg);"></wup-popup-arrow><a></a></body>"`
+      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(244px, 130px);" position="right"></wup-popup><wup-popup-arrow class="my-arrow" style="width: 8px; height: 4px; transform: translate(238px, 138px) rotate(90.1deg);"></wup-popup-arrow><a></a></body>"`
     );
 
     el.$options.arrowOffset = [2, 3];
     expectIt(WUPPopupElement.$placements.$right.$end.$adjust).toMatchInlineSnapshot(
-      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(244px, 130px);" position="right"></wup-popup><wup-popup-arrow class="my-arrow" style="width: 8px; height: 4px; transform: translate(241px, 138px) rotate(90deg);"></wup-popup-arrow><a></a></body>"`
+      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(244px, 130px);" position="right"></wup-popup><wup-popup-arrow class="my-arrow" style="width: 8px; height: 4px; transform: translate(241px, 138px) rotate(90.1deg);"></wup-popup-arrow><a></a></body>"`
     );
 
     WUPPopupElement.$defaults.arrowOffset = [4, 8];
     el = document.body.appendChild(document.createElement("wup-popup"));
     el.$options.arrowEnable = true;
     expectIt(WUPPopupElement.$placements.$right.$end.$adjust).toMatchInlineSnapshot(
-      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(244px, 130px);" position="right"></wup-popup><wup-popup-arrow class="my-arrow" style="width: 8px; height: 4px; transform: translate(241px, 138px) rotate(90deg);"></wup-popup-arrow><a></a><wup-popup></wup-popup></body>"`
+      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(244px, 130px);" position="right"></wup-popup><wup-popup-arrow class="my-arrow" style="width: 8px; height: 4px; transform: translate(241px, 138px) rotate(90.1deg);"></wup-popup-arrow><a></a><wup-popup></wup-popup></body>"`
     );
 
     WUPPopupElement.$defaults.arrowOffset = undefined;

@@ -17,6 +17,7 @@
 **Fixes**:
 
 - Helper. promiseWait. Callback called before time end
+- Popup with arrow. Firefox bug: css filter drop-shadow works wrong with angle 180.0
 
 **Features**:
 
