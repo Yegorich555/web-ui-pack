@@ -180,11 +180,11 @@ export default class MaskTextInput {
     if (l === -2) {
       l = endIndex;
     } else if (l === endIndex - 1 && (this.chunks[l] as IDigChunk).isCompleted) {
-      ++l; // append suffix at the end if all chunks are completed & only lacks suffix
+      ++l; // append postfix at the end if all chunks are completed & only lacks postfix
     } else if (this.options!.prediction && l !== endIndex) {
       const last = this.chunks[l];
       if (last.isDig && last.max === last.text.length) {
-        ++l; // append suffix if prev digitChunk is filled completely
+        ++l; // append postfix if prev digitChunk is filled completely
       }
     }
     this.lastChunk = this.chunks[l];
@@ -223,7 +223,7 @@ export default class MaskTextInput {
       case "insertFromPaste": {
         const { chunk, posChunk } = this.findChunkByCursor(pos);
         if (!chunk.isDig && chunk.index === this.chunks.length - 1) {
-          pos -= posChunk; // move cursor before suffix
+          pos -= posChunk; // move cursor before postfix
           el.selectionStart = pos;
           el.selectionEnd = pos;
         }

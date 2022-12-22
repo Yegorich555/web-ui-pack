@@ -94,7 +94,7 @@ export default function TextControlView() {
             }}
           />
           <wup-text name="ipaddr" label="IPaddress" mask="##0.##0.##0.##0" maskholder="xxx.xxx.xxx.xxx" />
-          <wup-text name="num" label="With suffix" mask="$ ##0 USD" maskholder="$ 000 USD" />
+          <wup-text name="num" label="With postfix" mask="$ ##0 USD" maskholder="$ 000 USD" />
           Features:
           <ul>
             <li>

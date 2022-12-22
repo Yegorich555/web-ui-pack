@@ -522,10 +522,10 @@ describe("control.text: mask", () => {
     expect(proc("$ 123456789")).toBe("$ 123456 USD");
     expect(proc("")).toBe("$ ");
 
-    // WARN: suffix works only with option prediction, but possible without it (extra implementation required)
+    // WARN: postfix works only with option prediction, but possible without it (extra implementation required)
     expect(proc("$ 5")).toBe("$ 5 USD");
     expect(proc("5")).toBe("$ 5 USD");
-    expect(proc("$ 5 US")).toBe("$ 5 USD"); // WARN: in this case input must control caret position and don't allow to remove prefix/suffix
+    expect(proc("$ 5 US")).toBe("$ 5 USD"); // WARN: in this case input must control caret position and don't allow to remove prefix/postfix
 
     const parse = (s) => {
       mi.parse(s);
@@ -534,7 +534,7 @@ describe("control.text: mask", () => {
 
     expect(parse("$ 123456 USD").isCompleted).toBe(true);
     expect(parse("$ 5 USD").isCompleted).toBe(true);
-    expect(parse("$ 5").isCompleted).toBe(true); // because suffix appends in lazy mode
+    expect(parse("$ 5").isCompleted).toBe(true); // because postfix appends in lazy mode
 
     expect(parse("$ 123456 USD", mask).leftLength).toBe(0);
     expect(parse("$ 5 USD", mask).leftLength).toBe(0);

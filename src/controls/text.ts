@@ -441,7 +441,7 @@ export default class WUPTextControl<
     this.#declineInputEnd?.call(this);
     if (this.refMask) {
       if (this.refMask.prefix && this.refMask.value === this.refMask.prefix) {
-        this.$refInput.value = ""; // rollback prefix/suffix if user types nothing
+        this.$refInput.value = ""; // rollback prefix/postfix if user types nothing
         delete (this.$refInput as MaskHandledInput)._maskPrev;
         this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
       }
@@ -604,7 +604,7 @@ export default class WUPTextControl<
     if (!v && !this.$isFocused) {
       el.value = v;
       mi.parse(v);
-      return v; // ignore mask prefix/suffix if user isn't touched input; it appends only by focusGot
+      return v; // ignore mask prefix/postfix if user isn't touched input; it appends only by focusGot
     }
 
     let declinedAdd = 0;
@@ -761,4 +761,4 @@ customElements.define(tagName, WUPTextControl);
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
 
-// todo implement suffix/prefix when user sees but can't to select as part of input
+// todo implement postfix/prefix when user sees but can't to select as part of input
