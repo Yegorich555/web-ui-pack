@@ -1015,8 +1015,10 @@ exports[`control.date validations options.validationCase 3`] = `
         aria-hidden="true"
         maskholder=""
       >
-        <i />
-        yyyy-mm-dd
+        <i>
+          2022-02-28
+        </i>
+        
       </span>
       <input
         aria-autocomplete="list"

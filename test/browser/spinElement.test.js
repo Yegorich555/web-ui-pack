@@ -33,8 +33,8 @@ describe("spinElement", () => {
     expect(t.html).toMatchInlineSnapshot(`
       "<button aria-busy="true">
               <span>Some text</span>
-              <wup-spin aria-label="Loading. Please wait" style="position: absolute; transform: translate(26px, -1.5px) scale(0.425);">
-            <div></div><div fade="" style="border-radius: 0px; transform: translate(-18px, 9.5px) scale(2.35294); width: 76px; height: 21px;"></div></wup-spin></button>"
+              <wup-spin aria-label="Loading. Please wait" style="position: absolute; transform: translate(26px, -1px) scale(0.425);">
+            <div></div><div fade="" style="border-radius: 0px; transform: translate(-18px, 9px) scale(2.35294); width: 76px; height: 21px;"></div></wup-spin></button>"
     `);
     expect(t.rect.width).toBe(t.rect.height);
     expect(t.rect.height).toBeLessThan(t.parentRect.height);
@@ -42,14 +42,14 @@ describe("spinElement", () => {
     expect(t.fadeRect.width).toBe(Math.round(t.parentRect.width));
     expect(t.rect).toMatchInlineSnapshot(`
       {
-        "bottom": 27,
+        "bottom": 27.5,
         "height": 17,
         "left": 37.5,
         "right": 54.5,
-        "top": 10,
+        "top": 10.5,
         "width": 17,
         "x": 37.5,
-        "y": 10,
+        "y": 10.5,
       }
     `);
   });
@@ -65,19 +65,19 @@ describe("spinElement", () => {
     expect(t.html).toMatchInlineSnapshot(`
       "<button aria-busy="true" style="position: relative;">
               <span>Some text</span>
-              <wup-spin aria-label="Loading. Please wait" style="position: absolute; transform: translate(18px, -9.5px) scale(0.425);">
-            <div></div><div fade="" style="border-radius: 0px; transform: translate(-18px, 9.5px) scale(2.35294); width: 76px; height: 21px;"></div></wup-spin></button>"
+              <wup-spin aria-label="Loading. Please wait" style="position: absolute; transform: translate(18px, -9px) scale(0.425);">
+            <div></div><div fade="" style="border-radius: 0px; transform: translate(-18px, 9px) scale(2.35294); width: 76px; height: 21px;"></div></wup-spin></button>"
     `);
     expect(t.rect).toMatchInlineSnapshot(`
       {
-        "bottom": 29,
+        "bottom": 29.5,
         "height": 17,
         "left": 39.5,
         "right": 56.5,
-        "top": 12,
+        "top": 12.5,
         "width": 17,
         "x": 39.5,
-        "y": 12,
+        "y": 12.5,
       }
     `);
   });
@@ -93,19 +93,19 @@ describe("spinElement", () => {
     expect(t.html).toMatchInlineSnapshot(`
       "<button aria-busy="true">
               <span>Some text</span>
-              <wup-spin aria-label="Loading. Please wait" style="position: absolute; transform: translate(18px, -9.5px) scale(0.425);">
-            <div></div><div fade="" style="border-radius: 0px; transform: translate(-18px, 9.5px) scale(2.35294); width: 76px; height: 21px;"></div></wup-spin></button>"
+              <wup-spin aria-label="Loading. Please wait" style="position: absolute; transform: translate(18px, -9px) scale(0.425);">
+            <div></div><div fade="" style="border-radius: 0px; transform: translate(-18px, 9px) scale(2.35294); width: 76px; height: 21px;"></div></wup-spin></button>"
     `);
     expect(t.rect).toMatchInlineSnapshot(`
       {
-        "bottom": 27,
+        "bottom": 27.5,
         "height": 17,
         "left": 37.5,
         "right": 54.5,
-        "top": 10,
+        "top": 10.5,
         "width": 17,
         "x": 37.5,
-        "y": 10,
+        "y": 10.5,
       }
     `);
   });
@@ -117,8 +117,8 @@ describe("spinElement", () => {
     expect(t.html).toMatchInlineSnapshot(`
       "<button aria-busy="true" style="display: none;">
               <span>Some text</span>
-              <wup-spin aria-label="Loading. Please wait" style="position: absolute; transform: translate(18px, -9.5px) scale(0.425); display: none;">
-            <div></div><div fade="" style="border-radius: 0px; transform: translate(-18px, 9.5px) scale(2.35294); width: 76px; height: 21px;"></div></wup-spin></button>"
+              <wup-spin aria-label="Loading. Please wait" style="position: absolute; transform: translate(18px, -9px) scale(0.425); display: none;">
+            <div></div><div fade="" style="border-radius: 0px; transform: translate(-18px, 9px) scale(2.35294); width: 76px; height: 21px;"></div></wup-spin></button>"
     `);
   });
 
