@@ -293,8 +293,8 @@ export default class WUPSpinElement extends WUPBaseElement {
     const h = r.height - offset.top - offset.bottom;
     const scale = this._opts.fit ? Math.min(Math.min(h, w) / this.clientWidth, 1) : 1;
 
-    const left = r.left + offset.left + (w - this.clientWidth) / 2;
-    const top = r.top + offset.top + (h - this.clientHeight) / 2;
+    const left = Math.round(r.left + offset.left + (w - this.clientWidth) / 2);
+    const top = Math.round(r.top + offset.top + (h - this.clientHeight) / 2);
     styleTransform(this, "translate", `${left}px,${top}px`);
     styleTransform(this, "scale", scale === 1 ? "" : `${scale}`);
 
