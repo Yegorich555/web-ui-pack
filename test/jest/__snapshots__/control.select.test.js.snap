@@ -417,32 +417,54 @@ mask-image: var(--ctrl-icon-img);
         WUP-SELECT label &gt; span {
           width: 100%;
           position: relative;
+          display: flex;
+          flex-direction: row-reverse;
         }
         WUP-SELECT input,
-        WUP-SELECT [maskholder] {
-          width: 100%;
-          box-sizing: border-box;
-          font: inherit;
-          color: inherit;
-          margin: 0;
+        WUP-SELECT [maskholder],
+        WUP-SELECT [prefix],
+        WUP-SELECT [postfix] {
           padding: var(--ctrl-padding);
           padding-left: 0;
           padding-right: 0;
-          border: none;
-          background: none;
-          outline: none;
+          font: inherit;
+          color: inherit;
+          margin: 0;
           text-overflow: ellipsis;
           overflow: hidden;
           white-space: nowrap;
         }
-        WUP-SELECT [maskholder] {
-          position: absolute;
-          opacity: 0.65;
+        WUP-SELECT input,
+        WUP-SELECT [maskholder],
+        WUP-SELECT [postfix] {
+          width: 100%;
+          box-sizing: border-box;
+          border: none;
+          background: none;
+          outline: none;
+        }
+        WUP-SELECT [prefix],
+        WUP-SELECT [postfix] {
+          color: var(--ctrl-label);
+          flex-shrink: 0;
+        }
+        WUP-SELECT [maskholder],
+        WUP-SELECT [prefix],
+        WUP-SELECT [postfix] {
           display: none;
           pointer-events: none;
           text-overflow: initial;
+          white-space: pre;
         }
-        WUP-SELECT [maskholder]&gt;i {
+        WUP-SELECT [postfix] {
+          position: absolute;
+        }
+        WUP-SELECT [maskholder] {
+          position: absolute;
+          opacity: 0.65;
+        }
+        WUP-SELECT [maskholder]&gt;i,
+        WUP-SELECT [postfix]&gt;i {
           visibility: hidden;
           font: inherit;
           white-space: pre;
@@ -486,7 +508,11 @@ mask-image: var(--ctrl-icon-img);
           top: 0.2em;
           transform: scale(0.9);
         }
-        WUP-SELECT:focus-within [maskholder] {
+        WUP-SELECT:focus-within [maskholder],
+        WUP-SELECT:focus-within [prefix],
+        WUP-SELECT:focus-within [postfix],
+        WUP-SELECT input:not(:placeholder-shown) ~ [prefix],
+        WUP-SELECT input:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
         }
         /* style for icons */

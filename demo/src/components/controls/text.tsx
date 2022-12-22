@@ -24,6 +24,7 @@ export default function TextControlView() {
         "Powerful accessibility support (keyboard, announcenement)",
         "Easy to append icons",
         "Mask/maskholder support (options mask & maskholder)",
+        "Prefix/postfix support (options prefix & postfix)",
       ]}
     >
       <wup-form
@@ -43,6 +44,8 @@ export default function TextControlView() {
           validations="window.myTextValidations"
           mask=""
           maskholder=""
+          prefix=""
+          postfix=""
         />
         <wup-text name="required" validations="myTextValidations" />
         <wup-text
@@ -61,7 +64,8 @@ export default function TextControlView() {
         />
         <wup-text
           name="withoutClearButton"
-          label="Without clear button (options.clearButton)"
+          label="Without clear button"
+          initValue="Use $options.clearButton"
           ref={(el) => {
             if (el) {
               el.$options.clearButton = false;
@@ -72,11 +76,19 @@ export default function TextControlView() {
           }}
         />
         <wup-text
-          name="icons"
-          label="With custom icon as text (use wup-text>label:before & :after)"
           class={styles.customIcon}
+          name="icons"
+          label="With custom icon as text (css wup-text>label:before & :after)"
+          // initValue="Use css wup-text>label:before & :after"
         />
-        <wup-text name="icons" label="With custom icon as image" class={styles.customIcon2} />
+        <wup-text name="icons2" label="With custom icon as image" class={styles.customIcon2} />
+        <wup-text
+          name="prefixPostfix"
+          label="With prefix & postfix ($options.prefix & .postfix)"
+          prefix="$ "
+          postfix=" USD"
+          initValue="1234"
+        />
         <wup-text
           initValue="init value here"
           ref={(el) => {
@@ -95,6 +107,7 @@ export default function TextControlView() {
             name="phone"
             label="Phone number"
             mask="+1(000) 000-0000"
+            initValue="234"
             ref={(el) => {
               if (el) {
                 el.$options.validations = { required: true };
@@ -102,7 +115,16 @@ export default function TextControlView() {
             }}
           />
           <wup-text name="ipaddr" label="IPaddress" mask="##0.##0.##0.##0" maskholder="xxx.xxx.xxx.xxx" />
-          <wup-text name="num" label="With postfix" mask="$ ##0 USD" maskholder="$ 000 USD" />
+          {/* <wup-text name="num" label="With postfix in mask" mask="$ ##0 USD" maskholder="$ 000 USD" /> */}
+          <wup-text
+            name="num"
+            label="With postfix/prefix & mask"
+            mask="##0"
+            maskholder="000"
+            prefix="$ "
+            postfix=" USD"
+            initValue="123"
+          />
           Features:
           <ul>
             <li>

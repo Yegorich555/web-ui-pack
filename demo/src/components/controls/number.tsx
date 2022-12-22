@@ -56,6 +56,18 @@ export default function NumberControlView() {
             }
           }}
         />
+        <wup-num
+          name="prefixPostfix"
+          label="With postfix prefix"
+          initValue="120.20"
+          prefix="$ "
+          postfix=" USD"
+          ref={(el) => {
+            if (el) {
+              el.$options.format = { maxDecimal: 2, minDecimal: 2 };
+            }
+          }}
+        />
         <wup-num name="NumberRequired" validations="myRequiredValidations" />
         <wup-num name="WithMask" label="With Mask (mask always ignores format)" mask="0000-0000" />
         <wup-num

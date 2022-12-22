@@ -391,32 +391,54 @@ mask-image: var(--ctrl-icon-img);
         WUP-NUM label &gt; span {
           width: 100%;
           position: relative;
+          display: flex;
+          flex-direction: row-reverse;
         }
         WUP-NUM input,
-        WUP-NUM [maskholder] {
-          width: 100%;
-          box-sizing: border-box;
-          font: inherit;
-          color: inherit;
-          margin: 0;
+        WUP-NUM [maskholder],
+        WUP-NUM [prefix],
+        WUP-NUM [postfix] {
           padding: var(--ctrl-padding);
           padding-left: 0;
           padding-right: 0;
-          border: none;
-          background: none;
-          outline: none;
+          font: inherit;
+          color: inherit;
+          margin: 0;
           text-overflow: ellipsis;
           overflow: hidden;
           white-space: nowrap;
         }
-        WUP-NUM [maskholder] {
-          position: absolute;
-          opacity: 0.65;
+        WUP-NUM input,
+        WUP-NUM [maskholder],
+        WUP-NUM [postfix] {
+          width: 100%;
+          box-sizing: border-box;
+          border: none;
+          background: none;
+          outline: none;
+        }
+        WUP-NUM [prefix],
+        WUP-NUM [postfix] {
+          color: var(--ctrl-label);
+          flex-shrink: 0;
+        }
+        WUP-NUM [maskholder],
+        WUP-NUM [prefix],
+        WUP-NUM [postfix] {
           display: none;
           pointer-events: none;
           text-overflow: initial;
+          white-space: pre;
         }
-        WUP-NUM [maskholder]&gt;i {
+        WUP-NUM [postfix] {
+          position: absolute;
+        }
+        WUP-NUM [maskholder] {
+          position: absolute;
+          opacity: 0.65;
+        }
+        WUP-NUM [maskholder]&gt;i,
+        WUP-NUM [postfix]&gt;i {
           visibility: hidden;
           font: inherit;
           white-space: pre;
@@ -460,7 +482,11 @@ mask-image: var(--ctrl-icon-img);
           top: 0.2em;
           transform: scale(0.9);
         }
-        WUP-NUM:focus-within [maskholder] {
+        WUP-NUM:focus-within [maskholder],
+        WUP-NUM:focus-within [prefix],
+        WUP-NUM:focus-within [postfix],
+        WUP-NUM input:not(:placeholder-shown) ~ [prefix],
+        WUP-NUM input:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
         }
         /* style for icons */

@@ -415,32 +415,54 @@ mask-image: var(--ctrl-icon-img);
         WUP-DATE label &gt; span {
           width: 100%;
           position: relative;
+          display: flex;
+          flex-direction: row-reverse;
         }
         WUP-DATE input,
-        WUP-DATE [maskholder] {
-          width: 100%;
-          box-sizing: border-box;
-          font: inherit;
-          color: inherit;
-          margin: 0;
+        WUP-DATE [maskholder],
+        WUP-DATE [prefix],
+        WUP-DATE [postfix] {
           padding: var(--ctrl-padding);
           padding-left: 0;
           padding-right: 0;
-          border: none;
-          background: none;
-          outline: none;
+          font: inherit;
+          color: inherit;
+          margin: 0;
           text-overflow: ellipsis;
           overflow: hidden;
           white-space: nowrap;
         }
-        WUP-DATE [maskholder] {
-          position: absolute;
-          opacity: 0.65;
+        WUP-DATE input,
+        WUP-DATE [maskholder],
+        WUP-DATE [postfix] {
+          width: 100%;
+          box-sizing: border-box;
+          border: none;
+          background: none;
+          outline: none;
+        }
+        WUP-DATE [prefix],
+        WUP-DATE [postfix] {
+          color: var(--ctrl-label);
+          flex-shrink: 0;
+        }
+        WUP-DATE [maskholder],
+        WUP-DATE [prefix],
+        WUP-DATE [postfix] {
           display: none;
           pointer-events: none;
           text-overflow: initial;
+          white-space: pre;
         }
-        WUP-DATE [maskholder]&gt;i {
+        WUP-DATE [postfix] {
+          position: absolute;
+        }
+        WUP-DATE [maskholder] {
+          position: absolute;
+          opacity: 0.65;
+        }
+        WUP-DATE [maskholder]&gt;i,
+        WUP-DATE [postfix]&gt;i {
           visibility: hidden;
           font: inherit;
           white-space: pre;
@@ -484,7 +506,11 @@ mask-image: var(--ctrl-icon-img);
           top: 0.2em;
           transform: scale(0.9);
         }
-        WUP-DATE:focus-within [maskholder] {
+        WUP-DATE:focus-within [maskholder],
+        WUP-DATE:focus-within [prefix],
+        WUP-DATE:focus-within [postfix],
+        WUP-DATE input:not(:placeholder-shown) ~ [prefix],
+        WUP-DATE input:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
         }
         /* style for icons */
@@ -674,15 +700,6 @@ exports[`control.date validations $options.validationShowAll 2`] = `
     for="txt1"
   >
     <span>
-      <span
-        aria-hidden="true"
-        maskholder=""
-      >
-        <i>
-          2022-02-28
-        </i>
-        
-      </span>
       <input
         aria-autocomplete="list"
         aria-describedby="txt3"
@@ -748,15 +765,6 @@ exports[`control.date validations $options.validationShowAll 3`] = `
     for="txt1"
   >
     <span>
-      <span
-        aria-hidden="true"
-        maskholder=""
-      >
-        <i>
-          2022-02-28
-        </i>
-        
-      </span>
       <input
         aria-autocomplete="list"
         aria-describedby="txt6"
@@ -805,15 +813,6 @@ exports[`control.date validations options.validationCase 1`] = `
     for="txt1"
   >
     <span>
-      <span
-        aria-hidden="true"
-        maskholder=""
-      >
-        <i>
-          2022-02-28
-        </i>
-        
-      </span>
       <input
         aria-autocomplete="list"
         aria-expanded="false"
@@ -1016,10 +1015,8 @@ exports[`control.date validations options.validationCase 3`] = `
         aria-hidden="true"
         maskholder=""
       >
-        <i>
-          2022-02-28
-        </i>
-        
+        <i />
+        yyyy-mm-dd
       </span>
       <input
         aria-autocomplete="list"
