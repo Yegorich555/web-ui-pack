@@ -123,7 +123,7 @@ export default function TextControlView() {
             maskholder="000"
             prefix="$ "
             postfix=" USD"
-            initValue="123"
+            initValue="12"
           />
           Features:
           <ul>

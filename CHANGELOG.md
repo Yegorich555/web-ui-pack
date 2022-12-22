@@ -20,7 +20,8 @@
 
 **Features**:
 
-- Added support **MMM** in format for `dateToString, dateFromString`
+- Added $options.prefix & postfix for text-based controls
+- Support **MMM** in format for `dateToString, dateFromString`
 - Controls **Number, Date, Calendar** are locale based and depeneds on [`localeInfo`](src/helpers/localeInfo.ts) helper
 - Added elements
 

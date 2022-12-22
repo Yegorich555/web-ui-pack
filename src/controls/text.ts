@@ -463,6 +463,8 @@ export default class WUPTextControl<
       }
       el.textContent = text;
     }
+    // because postfix depends on prefix
+    this.renderPostfix(this._opts.postfix);
   }
 
   /** Add/update or remove prefix part */
@@ -482,8 +484,10 @@ export default class WUPTextControl<
         this.$refLabel.firstElementChild!.append(el);
         this.$refPostfix = el;
       }
+
       el.firstChild!.textContent =
-        this.$refMaskholder?.textContent || (this.$refPrefix?.textContent || "") + this.$refInput.value;
+        (this.$isFocused && this.$refMaskholder?.textContent) ||
+        (this.$refPrefix?.textContent || "") + this.$refInput.value;
       el.lastChild!.textContent = text;
     }
   }
@@ -503,8 +507,9 @@ export default class WUPTextControl<
 
     /* istanbul ignore else */
     if (!this.$refInput.readOnly) {
-      if (!this.$refInput.value && this._opts.mask) {
+      if (this._opts.mask) {
         this.maskInputProcess(null); // to apply prefix + maskholder
+        this.renderPostfix(this._opts.postfix);
         this.$refInput.selectionStart = this.$refInput.value.length; // move cursor to the end
         this.$refInput.selectionEnd = this.$refInput.selectionStart;
       } else {
@@ -525,6 +530,7 @@ export default class WUPTextControl<
         delete (this.$refInput as MaskHandledInput)._maskPrev;
         this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
       }
+      this.renderPostfix(this._opts.postfix); // postfix depends on maskholder
     }
     delete this._histRedo;
     delete this._histUndo;
