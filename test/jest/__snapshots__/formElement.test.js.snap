@@ -227,10 +227,6 @@ mask-image: var(--ctrl-icon-img);
         WUP-TEXT[invalid]:hover &gt; [menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
         }
-        WUP-TEXT:hover label:before,
-        WUP-TEXT:hover label:after {
-          background-color: var(--ctrl-focus-label);
-        }
       }
         WUP-TEXT {
           cursor: text;

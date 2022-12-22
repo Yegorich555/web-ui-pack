@@ -339,10 +339,12 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         :host[invalid]:hover,
         :host[invalid]:hover > [menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
-        }
-        :host:hover label:before,
-        :host:hover label:after {
-          background-color: var(--ctrl-focus-label);
+        }${
+          //  :host:hover label:before,
+          //  :host:hover label:after {
+          //     background-color: var(--ctrl-focus-label);
+          //  }
+          ""
         }
       }`;
   }

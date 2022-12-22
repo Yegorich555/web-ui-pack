@@ -335,10 +335,6 @@ mask-image: var(--ctrl-icon-img);
         WUP-SWITCH[invalid]:hover &gt; [menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
         }
-        WUP-SWITCH:hover label:before,
-        WUP-SWITCH:hover label:after {
-          background-color: var(--ctrl-focus-label);
-        }
       }
       WUP-SWITCH {
         background: none;
@@ -459,7 +455,7 @@ exports[`control.switch validations options.validationCase 2`] = `
     <span
       class="wup-hidden"
     >
-      Error for First Input:
+      undefined First Input:
     </span>
     <span>
       This field is required
@@ -497,7 +493,7 @@ exports[`control.switch validations options.validationCase 3`] = `
     <span
       class="wup-hidden"
     >
-      Error for First Input:
+      undefined First Input:
     </span>
     <span>
       custom err here
@@ -535,7 +531,7 @@ exports[`control.switch validations options.validationCase 4`] = `
     <span
       class="wup-hidden"
     >
-      Error for First Input:
+      undefined First Input:
     </span>
     <span>
       Always error

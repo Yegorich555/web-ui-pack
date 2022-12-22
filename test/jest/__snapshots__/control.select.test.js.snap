@@ -410,10 +410,6 @@ mask-image: var(--ctrl-icon-img);
         WUP-SELECT[invalid]:hover &gt; [menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
         }
-        WUP-SELECT:hover label:before,
-        WUP-SELECT:hover label:after {
-          background-color: var(--ctrl-focus-label);
-        }
       }
         WUP-SELECT {
           cursor: text;
@@ -801,7 +797,7 @@ exports[`control.select validations $options.validationShowAll 3`] = `
     <span
       class="wup-hidden"
     >
-      Error for First Name:
+      undefined First Name:
     </span>
     <span>
       This field is required
@@ -917,7 +913,7 @@ exports[`control.select validations options.validationCase 2`] = `
     <span
       class="wup-hidden"
     >
-      Error for First Input:
+      undefined First Input:
     </span>
     <span>
       This field is required
@@ -969,7 +965,7 @@ exports[`control.select validations options.validationCase 3`] = `
     <span
       class="wup-hidden"
     >
-      Error for First Input:
+      undefined First Input:
     </span>
     <span>
       custom err here
@@ -1060,7 +1056,7 @@ exports[`control.select validations options.validationCase 4`] = `
     <span
       class="wup-hidden"
     >
-      Error for First Input:
+      undefined First Input:
     </span>
     <span>
       This field is required
