@@ -82,11 +82,15 @@ export default class WUPTextareaControl<
   static get $style(): string {
     return `${super.$style}
         :host textarea {
-          min-height: 7em;
+          min-height: 4em;
           resize: none;
           display: block; ${/* it removes extra space below */ ""}
           white-space: pre-wrap;
           overflow: auto;
+          margin: var(--ctrl-padding);
+          padding: 0;
+          margin-left: 0;
+          margin-right: 0;
         }
         ${WUPcssScrollSmall(":host textarea")}`;
   }
@@ -121,3 +125,6 @@ export default class WUPTextareaControl<
 }
 
 customElements.define(tagName, WUPTextareaControl);
+
+// todo Enter doesn't work
+// todo mouse-cursor-point doesn't work
