@@ -12,12 +12,12 @@
     - changing `$options.format` & attr `[format]` related only to displayed text. All attributes must be pointed in universal format `YYYY-MM-DD`
     - default value depends on user localization; see [locale](src/helpers/localeInfo.ts)
 - CalendarControl:
-  deprecated static getters `$namesDayShort, $namesMonth, $namesMonthShort` in favor of [`localeInfo`](src/helpers/localeInfo.ts) helper
+  - deprecated static getters `$namesDayShort, $namesMonth, $namesMonthShort` in favor of [`localeInfo`](src/helpers/localeInfo.ts) helper
 
 **Fixes**:
 
 - Helper. promiseWait. Callback called before time end
-- Popup with arrow. Firefox bug: css filter drop-shadow works wrong with angle 180.0
+- Popup with arrow. Firefox bug: css filter `drop-shadow` works wrong with angle 180.0
 - SpinElement. Impossible to override color via applying css-var to body `--spin-2`
 
 **Features**:
@@ -28,6 +28,7 @@
 - Added elements
 
   - [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
+  - [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
 
 - Added [helpers](README.md#helpers)
   - [`onScroll`](src/helpers/onScroll.ts)
