@@ -462,7 +462,7 @@ export default class WUPTextControl<
   /** Add/update/remove prefix part */
   protected renderPrefix(text: string | undefined): void {
     let el = this.$refPrefix;
-    if (text == null) {
+    if (!text) {
       if (el) {
         el.remove();
         delete this.$refPrefix;
@@ -484,7 +484,7 @@ export default class WUPTextControl<
   /** Add/update or remove prefix part */
   protected renderPostfix(text: string | undefined): void {
     let el = this.$refPostfix;
-    if (text == null) {
+    if (!text) {
       if (el) {
         el.remove();
         delete this.$refPostfix;
@@ -507,6 +507,7 @@ export default class WUPTextControl<
   }
 
   protected override gotFocus(): Array<() => void> {
+    console.warn("got focus");
     const arr = super.gotFocus();
     this.setAttr.call(this.$refInput, "inputmode", this._opts.mask ? "numeric" : "");
 
