@@ -218,7 +218,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       }
       WUP-SWITCH:focus-within strong,
       WUP-SWITCH:focus-within legend,
-      WUP-SWITCH input:focus + * {
+      WUP-SWITCH input:focus + strong {
         color: var(--ctrl-focus-label);
       }
       WUP-SWITCH:not(:focus-within) strong {
@@ -250,16 +250,20 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-top: 0;
         padding-bottom: 0;
       }
-      WUP-SWITCH input {
+      WUP-SWITCH input,
+      WUP-SWITCH textarea {
         padding: 0;
         margin: 0;
         cursor: inherit;
       }
-      WUP-SWITCH input + * {
+      WUP-SWITCH input + strong,
+      WUP-SWITCH textarea + strong {
         cursor: inherit;
       }
-      WUP-SWITCH input:required + *:after,
-      WUP-SWITCH input[aria-required="true"] + *:after,
+      WUP-SWITCH input:required + strong:after,
+      WUP-SWITCH input[aria-required="true"] + strong:after,
+      WUP-SWITCH textarea:required + strong:after,
+      WUP-SWITCH textarea[aria-required="true"] + strong:after,
       WUP-SWITCH fieldset[aria-required="true"] &gt; legend:after {
         content: "*";
         font-size: larger;

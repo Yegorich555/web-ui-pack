@@ -243,7 +243,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       }
       :host:focus-within strong,
       :host:focus-within legend,
-      :host input:focus + * {
+      :host input:focus + strong {
         color: var(--ctrl-focus-label);
       }
       :host:not(:focus-within) strong {
@@ -275,16 +275,20 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         padding-top: 0;
         padding-bottom: 0;
       }
-      :host input {
+      :host input,
+      :host textarea {
         padding: 0;
         margin: 0;
         cursor: inherit;
       }
-      :host input + * {
+      :host input + strong,
+      :host textarea + strong {
         cursor: inherit;
       }
-      :host input:required + *:after,
-      :host input[aria-required="true"] + *:after,
+      :host input:required + strong:after,
+      :host input[aria-required="true"] + strong:after,
+      :host textarea:required + strong:after,
+      :host textarea[aria-required="true"] + strong:after,
       :host fieldset[aria-required="true"] > legend:after {
         content: "*";
         font-size: larger;

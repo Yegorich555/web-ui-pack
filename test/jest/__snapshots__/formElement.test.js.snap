@@ -110,7 +110,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       }
       WUP-TEXT:focus-within strong,
       WUP-TEXT:focus-within legend,
-      WUP-TEXT input:focus + * {
+      WUP-TEXT input:focus + strong {
         color: var(--ctrl-focus-label);
       }
       WUP-TEXT:not(:focus-within) strong {
@@ -142,16 +142,20 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-top: 0;
         padding-bottom: 0;
       }
-      WUP-TEXT input {
+      WUP-TEXT input,
+      WUP-TEXT textarea {
         padding: 0;
         margin: 0;
         cursor: inherit;
       }
-      WUP-TEXT input + * {
+      WUP-TEXT input + strong,
+      WUP-TEXT textarea + strong {
         cursor: inherit;
       }
-      WUP-TEXT input:required + *:after,
-      WUP-TEXT input[aria-required="true"] + *:after,
+      WUP-TEXT input:required + strong:after,
+      WUP-TEXT input[aria-required="true"] + strong:after,
+      WUP-TEXT textarea:required + strong:after,
+      WUP-TEXT textarea[aria-required="true"] + strong:after,
       WUP-TEXT fieldset[aria-required="true"] &gt; legend:after {
         content: "*";
         font-size: larger;
@@ -238,6 +242,7 @@ mask-image: var(--ctrl-icon-img);
           flex-direction: row-reverse;
         }
         WUP-TEXT input,
+        WUP-TEXT textarea,
         WUP-TEXT [maskholder],
         WUP-TEXT [prefix],
         WUP-TEXT [postfix] {
@@ -252,6 +257,7 @@ mask-image: var(--ctrl-icon-img);
           white-space: nowrap;
         }
         WUP-TEXT input,
+        WUP-TEXT textarea,
         WUP-TEXT [maskholder],
         WUP-TEXT [postfix] {
           width: 100%;
@@ -286,15 +292,18 @@ mask-image: var(--ctrl-icon-img);
           font: inherit;
           white-space: pre;
         }
-        WUP-TEXT input:-webkit-autofill {
+        WUP-TEXT input:-webkit-autofill,
+        WUP-TEXT textarea:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
-        WUP-TEXT input:autofill {
+        WUP-TEXT input:autofill,
+        WUP-TEXT textarea:autofill {
           font: inherit;
           background-clip: text;
         }
-        WUP-TEXT input + * {
+        WUP-TEXT input + strong,
+        WUP-TEXT textarea + strong {
           display: block;
           position: absolute;
           top: 50%;
@@ -312,7 +321,7 @@ mask-image: var(--ctrl-icon-img);
           text-decoration: none;
         }
         @media not all and (prefers-reduced-motion) {
-          WUP-TEXT input + * {
+          WUP-TEXT input + strong {
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }

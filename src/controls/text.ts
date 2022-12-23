@@ -188,6 +188,7 @@ export default class WUPTextControl<
           flex-direction: row-reverse;
         }
         :host input,
+        :host textarea,
         :host [maskholder],
         :host [prefix],
         :host [postfix] {
@@ -202,6 +203,7 @@ export default class WUPTextControl<
           white-space: nowrap;
         }
         :host input,
+        :host textarea,
         :host [maskholder],
         :host [postfix] {
           width: 100%;
@@ -236,15 +238,18 @@ export default class WUPTextControl<
           font: inherit;
           white-space: pre;
         }
-        :host input:-webkit-autofill {
+        :host input:-webkit-autofill,
+        :host textarea:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
-        :host input:autofill {
+        :host input:autofill,
+        :host textarea:autofill {
           font: inherit;
           background-clip: text;
         }
-        :host input + * {
+        :host input + strong,
+        :host textarea + strong {
           display: block;
           position: absolute;
           top: 50%;
@@ -262,7 +267,7 @@ export default class WUPTextControl<
           text-decoration: none;
         }
         @media not all and (prefers-reduced-motion) {
-          :host input + * {
+          :host input + strong {
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }

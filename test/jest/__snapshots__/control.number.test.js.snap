@@ -267,7 +267,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       }
       WUP-NUM:focus-within strong,
       WUP-NUM:focus-within legend,
-      WUP-NUM input:focus + * {
+      WUP-NUM input:focus + strong {
         color: var(--ctrl-focus-label);
       }
       WUP-NUM:not(:focus-within) strong {
@@ -299,16 +299,20 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-top: 0;
         padding-bottom: 0;
       }
-      WUP-NUM input {
+      WUP-NUM input,
+      WUP-NUM textarea {
         padding: 0;
         margin: 0;
         cursor: inherit;
       }
-      WUP-NUM input + * {
+      WUP-NUM input + strong,
+      WUP-NUM textarea + strong {
         cursor: inherit;
       }
-      WUP-NUM input:required + *:after,
-      WUP-NUM input[aria-required="true"] + *:after,
+      WUP-NUM input:required + strong:after,
+      WUP-NUM input[aria-required="true"] + strong:after,
+      WUP-NUM textarea:required + strong:after,
+      WUP-NUM textarea[aria-required="true"] + strong:after,
       WUP-NUM fieldset[aria-required="true"] &gt; legend:after {
         content: "*";
         font-size: larger;
@@ -395,6 +399,7 @@ mask-image: var(--ctrl-icon-img);
           flex-direction: row-reverse;
         }
         WUP-NUM input,
+        WUP-NUM textarea,
         WUP-NUM [maskholder],
         WUP-NUM [prefix],
         WUP-NUM [postfix] {
@@ -409,6 +414,7 @@ mask-image: var(--ctrl-icon-img);
           white-space: nowrap;
         }
         WUP-NUM input,
+        WUP-NUM textarea,
         WUP-NUM [maskholder],
         WUP-NUM [postfix] {
           width: 100%;
@@ -443,15 +449,18 @@ mask-image: var(--ctrl-icon-img);
           font: inherit;
           white-space: pre;
         }
-        WUP-NUM input:-webkit-autofill {
+        WUP-NUM input:-webkit-autofill,
+        WUP-NUM textarea:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
-        WUP-NUM input:autofill {
+        WUP-NUM input:autofill,
+        WUP-NUM textarea:autofill {
           font: inherit;
           background-clip: text;
         }
-        WUP-NUM input + * {
+        WUP-NUM input + strong,
+        WUP-NUM textarea + strong {
           display: block;
           position: absolute;
           top: 50%;
@@ -469,7 +478,7 @@ mask-image: var(--ctrl-icon-img);
           text-decoration: none;
         }
         @media not all and (prefers-reduced-motion) {
-          WUP-NUM input + * {
+          WUP-NUM input + strong {
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }

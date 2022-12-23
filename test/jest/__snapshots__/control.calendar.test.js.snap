@@ -998,7 +998,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       }
       WUP-CALENDAR:focus-within strong,
       WUP-CALENDAR:focus-within legend,
-      WUP-CALENDAR input:focus + * {
+      WUP-CALENDAR input:focus + strong {
         color: var(--ctrl-focus-label);
       }
       WUP-CALENDAR:not(:focus-within) strong {
@@ -1030,16 +1030,20 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-top: 0;
         padding-bottom: 0;
       }
-      WUP-CALENDAR input {
+      WUP-CALENDAR input,
+      WUP-CALENDAR textarea {
         padding: 0;
         margin: 0;
         cursor: inherit;
       }
-      WUP-CALENDAR input + * {
+      WUP-CALENDAR input + strong,
+      WUP-CALENDAR textarea + strong {
         cursor: inherit;
       }
-      WUP-CALENDAR input:required + *:after,
-      WUP-CALENDAR input[aria-required="true"] + *:after,
+      WUP-CALENDAR input:required + strong:after,
+      WUP-CALENDAR input[aria-required="true"] + strong:after,
+      WUP-CALENDAR textarea:required + strong:after,
+      WUP-CALENDAR textarea[aria-required="true"] + strong:after,
       WUP-CALENDAR fieldset[aria-required="true"] &gt; legend:after {
         content: "*";
         font-size: larger;
