@@ -422,6 +422,7 @@ export default class WUPTextControl<
   }
 
   protected override renderControl(): void {
+    /* istanbul ignore else */
     if (this.$refInput.type !== "textarea") {
       (this.$refInput as HTMLInputElement).type = "text";
     }
@@ -507,7 +508,6 @@ export default class WUPTextControl<
   }
 
   protected override gotFocus(): Array<() => void> {
-    console.warn("got focus");
     const arr = super.gotFocus();
     this.setAttr.call(this.$refInput, "inputmode", this._opts.mask ? "numeric" : "");
 

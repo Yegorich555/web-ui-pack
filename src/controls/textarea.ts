@@ -132,5 +132,3 @@ export default class WUPTextareaControl<
 }
 
 customElements.define(tagName, WUPTextareaControl);
-
-// todo mouse-cursor-point doesn't work

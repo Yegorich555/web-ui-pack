@@ -643,7 +643,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         if (this.$isDisabled) {
           return;
         }
-        !(e.target instanceof HTMLInputElement) && e.preventDefault();
+        !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) && e.preventDefault();
         // this required because default focus-effect was prevented
         this.appendEvent(this, "mouseup", () => !this.$isFocused && this.focus(), { once: true });
       },
@@ -986,7 +986,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   /** Called when user pressed key */
-  protected gotKeyDown(e: KeyboardEvent): void {
+  protected gotKeyDown(e: KeyboardEvent & { submitPrevented?: boolean }): void {
     e.key === "Escape" && !e.shiftKey && !e.altKey && !e.ctrlKey && this.clearValue(); // WARN: Escape works wrong with NVDA because it's enables NVDA-focus-mode
   }
 }
