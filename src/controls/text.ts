@@ -508,14 +508,17 @@ export default class WUPTextControl<
 
     /* istanbul ignore else */
     if (!this.$refInput.readOnly) {
+      let canSelectAll = this._opts.selectOnFocus;
       if (this._opts.mask) {
         this.maskInputProcess(null); // to apply prefix + maskholder
+        canSelectAll = canSelectAll && this.refMask!.isCompleted;
         this.renderPostfix(this._opts.postfix);
-        this.$refInput.selectionStart = this.$refInput.value.length; // move cursor to the end
-        this.$refInput.selectionEnd = this.$refInput.selectionStart;
-      } else {
-        this._opts.selectOnFocus && this.$refInput.select();
+        if (!canSelectAll) {
+          this.$refInput.selectionStart = this.$refInput.value.length; // move cursor to the end
+          this.$refInput.selectionEnd = this.$refInput.selectionStart;
+        }
       }
+      canSelectAll && this.$refInput.select();
     }
 
     arr.push(() => setTimeout(r)); // timeout required to handle Event on gotFocusLost
