@@ -4,7 +4,7 @@
  */
 // import dateFromString from "../../src/helpers/dateFromString";
 import dateFromString from "web-ui-pack/helpers/dateFromString";
-import * as h from "../testHelper";
+import * as h from "../../testHelper";
 
 describe("helper.dateToString", () => {
   const obj = {

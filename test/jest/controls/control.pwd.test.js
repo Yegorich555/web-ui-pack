@@ -1,7 +1,7 @@
 import { WUPPasswordControl } from "web-ui-pack";
 import { initTestBaseControl } from "./baseControlTest";
 import testTextControl from "./control.textTest";
-import * as h from "../testHelper";
+import * as h from "../../testHelper";
 
 /** @type WUPPasswordControl */
 let testEl;

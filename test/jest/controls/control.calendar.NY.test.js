@@ -4,7 +4,7 @@
  */
 import { PickersEnum } from "web-ui-pack/controls/calendar";
 import calendarTZtest from "./control.calendar.TZ";
-import * as h from "../testHelper";
+import * as h from "../../testHelper";
 
 /** Test calendar with timezone America/New_York */
 describe(`control.calendar >> timezone: ${window.TZ}, offset: ${new Date(2022, 9, 16).getTimezoneOffset()}`, () => {

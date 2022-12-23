@@ -6,7 +6,7 @@ import { WUPCalendarControl } from "web-ui-pack";
 import { PickersEnum } from "web-ui-pack/controls/calendar";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import calendarTZtest from "./control.calendar.TZ";
-import * as h from "../testHelper";
+import * as h from "../../testHelper";
 
 beforeAll(() => {
   jest.useFakeTimers();

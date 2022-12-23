@@ -1,5 +1,5 @@
 import onScrollStop from "web-ui-pack/helpers/onScrollStop";
-import * as h from "../testHelper";
+import * as h from "../../testHelper";
 
 let next = (n = 5) => Promise.resolve(n);
 

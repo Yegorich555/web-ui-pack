@@ -2,8 +2,8 @@
 /* eslint-disable jest/no-export */
 import WUPBaseComboControl from "web-ui-pack/controls/baseCombo";
 import WUPBaseControl, { ClearActions, ValidationCases } from "web-ui-pack/controls/baseControl";
-import * as h from "../testHelper";
-import { BaseTestOptions } from "../testHelper";
+import * as h from "../../testHelper";
+import { BaseTestOptions } from "../../testHelper";
 
 declare global {
   namespace WUPBase {

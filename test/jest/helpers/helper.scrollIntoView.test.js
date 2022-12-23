@@ -1,5 +1,5 @@
 import scrollIntoView from "web-ui-pack/helpers/scrollIntoView";
-import { useFakeAnimation } from "../testHelper";
+import { useFakeAnimation } from "../../testHelper";
 
 let step = 1;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

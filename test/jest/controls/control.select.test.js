@@ -1,7 +1,7 @@
 import { WUPSelectControl } from "web-ui-pack";
 import { ShowCases } from "web-ui-pack/controls/baseCombo";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
-import * as h from "../testHelper";
+import * as h from "../../testHelper";
 
 const getItems = () => [
   { value: 10, text: "Donny" },

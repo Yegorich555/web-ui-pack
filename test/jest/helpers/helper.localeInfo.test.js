@@ -1,6 +1,6 @@
 // import localeInfo from "../../src/helpers/localeInfo";
 import localeInfo from "web-ui-pack/helpers/localeInfo";
-import * as h from "../testHelper";
+import * as h from "../../testHelper";
 
 describe("helper.localeInfo", () => {
   test("defaults", () => {

@@ -2,7 +2,7 @@
 // import MaskTextInput from "../../src/controls/text.mask";
 import WUPTextControl from "web-ui-pack/controls/text";
 import MaskTextInput from "web-ui-pack/controls/text.mask";
-import * as h from "../testHelper";
+import * as h from "../../testHelper";
 
 /** @type WUPTextControl */
 let el;

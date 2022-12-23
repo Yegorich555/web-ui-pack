@@ -1,5 +1,5 @@
 import animateDropdown from "web-ui-pack/helpers/animateDropdown";
-import { useFakeAnimation } from "../testHelper";
+import { useFakeAnimation } from "../../testHelper";
 
 let step = 1;
 let nextFrame = async () => {};

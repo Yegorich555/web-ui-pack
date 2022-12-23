@@ -1,7 +1,7 @@
 import { WUPTextControl } from "web-ui-pack";
 import { ValidationCases, ClearActions } from "web-ui-pack/controls/baseControl";
 import { testBaseControl } from "./baseControlTest";
-import * as h from "../testHelper";
+import * as h from "../../testHelper";
 
 // eslint-disable-next-line jest/no-export
 export default function testTextControl(getEl: () => WUPTextControl, opts: Parameters<typeof testBaseControl>[0]) {

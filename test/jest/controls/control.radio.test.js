@@ -1,6 +1,6 @@
 import { WUPRadioControl } from "web-ui-pack";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
-import * as h from "../testHelper";
+import * as h from "../../testHelper";
 
 const getItems = () => [
   { value: 10, text: "Donny" },

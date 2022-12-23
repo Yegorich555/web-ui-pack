@@ -1,5 +1,5 @@
 import WUPBaseElement from "web-ui-pack/baseElement";
-import * as h from "../testHelper";
+import * as h from "../../testHelper";
 
 const testAttr = "testattr";
 class TestElement extends WUPBaseElement {

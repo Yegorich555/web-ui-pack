@@ -1,5 +1,5 @@
 import scrollCarousel from "web-ui-pack/helpers/scrollCarousel";
-import * as h from "../testHelper";
+import * as h from "../../testHelper";
 
 let ul = document.createElement("ul");
 

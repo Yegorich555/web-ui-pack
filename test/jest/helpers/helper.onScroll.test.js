@@ -1,5 +1,5 @@
 import onScroll from "web-ui-pack/helpers/onScroll";
-import * as h from "../testHelper";
+import * as h from "../../testHelper";
 
 let el = document.createElement("div");
 beforeEach(() => {

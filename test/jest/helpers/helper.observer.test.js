@@ -1,6 +1,6 @@
 import observer from "web-ui-pack/helpers/observer";
 // import observer from "../../src/helpers/observer";
-import * as h from "../testHelper";
+import * as h from "../../testHelper";
 
 beforeEach(() => {
   // https://stackoverflow.com/questions/51126786/jest-fake-timers-with-promises

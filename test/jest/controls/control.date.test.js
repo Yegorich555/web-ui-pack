@@ -6,7 +6,7 @@ import { WUPDateControl } from "web-ui-pack";
 import { PickersEnum } from "web-ui-pack/controls/calendar";
 // import { localeInfo } from "web-ui-pack/indexHelpers";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
-import * as h from "../testHelper";
+import * as h from "../../testHelper";
 
 beforeAll(() => {
   jest.useFakeTimers();

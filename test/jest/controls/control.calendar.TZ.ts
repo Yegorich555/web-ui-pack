@@ -2,7 +2,7 @@
 import { WUPCalendarControl } from "web-ui-pack";
 import { PickersEnum } from "web-ui-pack/controls/calendar";
 import { initTestBaseControl } from "./baseControlTest";
-import * as h from "../testHelper";
+import * as h from "../../testHelper";
 
 let el: WUPCalendarControl;
 const mockShowNext = () => {
