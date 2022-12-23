@@ -122,9 +122,15 @@ export default class WUPTextareaControl<
   protected override gotChanges(propsChanged: Array<keyof WUPTextarea.Options> | null): void {
     super.gotChanges(propsChanged as any);
   }
+
+  protected override gotKeyDown(e: KeyboardEvent & { submitPrevented?: boolean }): void {
+    super.gotKeyDown(e);
+    if (e.key === "Enter") {
+      e.submitPrevented = true;
+    }
+  }
 }
 
 customElements.define(tagName, WUPTextareaControl);
 
-// todo Enter doesn't work
 // todo mouse-cursor-point doesn't work
