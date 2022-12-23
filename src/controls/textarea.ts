@@ -1,4 +1,5 @@
 import WUPTextControl, { WUPTextIn } from "./text";
+import { WUPcssScrollSmall } from "../styles";
 
 const tagName = "wup-textarea";
 export namespace WUPTextareaIn {
@@ -80,7 +81,14 @@ export default class WUPTextareaControl<
 
   static get $style(): string {
     return `${super.$style}
-       `;
+        :host textarea {
+          min-height: 7em;
+          resize: none;
+          display: block; ${/* it removes extra space below */ ""}
+          white-space: pre-wrap;
+          overflow: auto;
+        }
+        ${WUPcssScrollSmall(":host textarea")}`;
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
@@ -96,7 +104,12 @@ export default class WUPTextareaControl<
 
   protected override _opts = this.$options;
 
-  $refInput = document.createElement("textarea");
+  $refInput = document.createElement("textarea") as HTMLInputElement & HTMLTextAreaElement;
+
+  constructor() {
+    super();
+    this.$refInput.placeholder = " ";
+  }
 
   protected override renderControl(): void {
     super.renderControl();

@@ -51,9 +51,10 @@ export default function TextControlView() {
                 "With long label and custom validations (very very very incredible long label to check if it has ellipsis rule)";
               el.$options.validations = {
                 required: true,
-                max: 10,
+                max: 250,
                 min: (v) => (!v || v.length < 2) && "This is custom error",
               };
+              el.$value = "hello\na\nb\na\nb\na\nb";
             }
           }}
         />
@@ -73,9 +74,9 @@ export default function TextControlView() {
 
         <wup-textarea
           initValue="init value here"
+          name="readonly"
           ref={(el) => {
             if (el) {
-              el.$options.name = "readonly";
               el.$options.readOnly = true;
             }
           }}

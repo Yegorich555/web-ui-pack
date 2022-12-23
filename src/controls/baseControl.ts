@@ -542,7 +542,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Reference to nested HTMLElement */
   $refLabel = document.createElement("label");
   /** Reference to nested HTMLElement */
-  $refInput: HTMLTextAreaElement | HTMLInputElement = document.createElement("input");
+  $refInput = document.createElement("input") as HTMLInputElement;
   /** Reference to nested HTMLElement tied with $options.label */
   $refTitle = document.createElement("strong");
   /** Reference to nested HTMLElement tied with errorMessage */

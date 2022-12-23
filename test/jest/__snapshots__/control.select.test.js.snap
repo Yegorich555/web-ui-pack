@@ -504,15 +504,19 @@ mask-image: var(--ctrl-icon-img);
           text-decoration: none;
         }
         @media not all and (prefers-reduced-motion) {
-          WUP-SELECT input + strong {
+          WUP-SELECT input + strong,
+          WUP-SELECT textarea + strong {
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
-        WUP-SELECT input:not(:focus)::placeholder {
+        WUP-SELECT input:not(:focus)::placeholder,
+        WUP-SELECT textarea:not(:focus)::placeholder {
           color: transparent;
         }
         WUP-SELECT:focus-within input + strong,
+        WUP-SELECT:focus-within textarea + strong,
         WUP-SELECT input:not(:placeholder-shown) + strong,
+        WUP-SELECT textarea:not(:placeholder-shown) + strong,
         WUP-SELECT legend {
           top: 0.2em;
           transform: scale(0.9);
@@ -521,7 +525,9 @@ mask-image: var(--ctrl-icon-img);
         WUP-SELECT:focus-within [prefix],
         WUP-SELECT:focus-within [postfix],
         WUP-SELECT input:not(:placeholder-shown) ~ [prefix],
-        WUP-SELECT input:not(:placeholder-shown) ~ [postfix] {
+        WUP-SELECT input:not(:placeholder-shown) ~ [prefix],
+        WUP-SELECT textarea:not(:placeholder-shown) ~ [postfix],
+        WUP-SELECT textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
         }
         /* style for icons */

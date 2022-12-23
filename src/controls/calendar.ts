@@ -1053,7 +1053,7 @@ export default class WUPCalendarControl<
     const r = super.gotFocus();
     const i = this.$refInput;
     r.push(this.appendEvent(this, "click", (e) => this.gotClick(e), { passive: false }));
-    r.push(this.appendEvent(i, "input", (e) => this.gotInput(e, i)));
+    r.push(this.appendEvent(i, "input", (e) => this.gotInput(e as WUPText.GotInputEvent)));
     // r.push(this.appendEvent(i, "keypress", (e) => e.preventDefault(), { passive: false })); // input is readonly so default keyPress doesn't required
     return r;
   }
@@ -1085,8 +1085,8 @@ export default class WUPCalendarControl<
   }
 
   /** Called when browsers fills the field via autocomplete */
-  protected gotInput(_e: Event, inputEl: HTMLInputElement): void {
-    const v = this.parse(inputEl.value);
+  protected gotInput(e: WUPText.GotInputEvent): void {
+    const v = this.parse(e.target.value);
     this.setValue(v);
   }
 

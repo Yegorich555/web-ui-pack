@@ -267,15 +267,19 @@ export default class WUPTextControl<
           text-decoration: none;
         }
         @media not all and (prefers-reduced-motion) {
-          :host input + strong {
+          :host input + strong,
+          :host textarea + strong {
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
-        :host input:not(:focus)::placeholder {
+        :host input:not(:focus)::placeholder,
+        :host textarea:not(:focus)::placeholder {
           color: transparent;
         }
         :host:focus-within input + strong,
+        :host:focus-within textarea + strong,
         :host input:not(:placeholder-shown) + strong,
+        :host textarea:not(:placeholder-shown) + strong,
         :host legend {
           top: 0.2em;
           transform: scale(0.9);
@@ -284,7 +288,9 @@ export default class WUPTextControl<
         :host:focus-within [prefix],
         :host:focus-within [postfix],
         :host input:not(:placeholder-shown) ~ [prefix],
-        :host input:not(:placeholder-shown) ~ [postfix] {
+        :host input:not(:placeholder-shown) ~ [prefix],
+        :host textarea:not(:placeholder-shown) ~ [postfix],
+        :host textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
         }
         /* style for icons */

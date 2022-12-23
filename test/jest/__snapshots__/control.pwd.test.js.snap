@@ -535,15 +535,19 @@ mask-image: var(--ctrl-icon-img);
           text-decoration: none;
         }
         @media not all and (prefers-reduced-motion) {
-          WUP-PWD input + strong {
+          WUP-PWD input + strong,
+          WUP-PWD textarea + strong {
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
-        WUP-PWD input:not(:focus)::placeholder {
+        WUP-PWD input:not(:focus)::placeholder,
+        WUP-PWD textarea:not(:focus)::placeholder {
           color: transparent;
         }
         WUP-PWD:focus-within input + strong,
+        WUP-PWD:focus-within textarea + strong,
         WUP-PWD input:not(:placeholder-shown) + strong,
+        WUP-PWD textarea:not(:placeholder-shown) + strong,
         WUP-PWD legend {
           top: 0.2em;
           transform: scale(0.9);
@@ -552,7 +556,9 @@ mask-image: var(--ctrl-icon-img);
         WUP-PWD:focus-within [prefix],
         WUP-PWD:focus-within [postfix],
         WUP-PWD input:not(:placeholder-shown) ~ [prefix],
-        WUP-PWD input:not(:placeholder-shown) ~ [postfix] {
+        WUP-PWD input:not(:placeholder-shown) ~ [prefix],
+        WUP-PWD textarea:not(:placeholder-shown) ~ [postfix],
+        WUP-PWD textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
         }
         /* style for icons */

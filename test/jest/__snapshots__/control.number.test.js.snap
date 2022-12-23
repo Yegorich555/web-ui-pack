@@ -478,15 +478,19 @@ mask-image: var(--ctrl-icon-img);
           text-decoration: none;
         }
         @media not all and (prefers-reduced-motion) {
-          WUP-NUM input + strong {
+          WUP-NUM input + strong,
+          WUP-NUM textarea + strong {
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
-        WUP-NUM input:not(:focus)::placeholder {
+        WUP-NUM input:not(:focus)::placeholder,
+        WUP-NUM textarea:not(:focus)::placeholder {
           color: transparent;
         }
         WUP-NUM:focus-within input + strong,
+        WUP-NUM:focus-within textarea + strong,
         WUP-NUM input:not(:placeholder-shown) + strong,
+        WUP-NUM textarea:not(:placeholder-shown) + strong,
         WUP-NUM legend {
           top: 0.2em;
           transform: scale(0.9);
@@ -495,7 +499,9 @@ mask-image: var(--ctrl-icon-img);
         WUP-NUM:focus-within [prefix],
         WUP-NUM:focus-within [postfix],
         WUP-NUM input:not(:placeholder-shown) ~ [prefix],
-        WUP-NUM input:not(:placeholder-shown) ~ [postfix] {
+        WUP-NUM input:not(:placeholder-shown) ~ [prefix],
+        WUP-NUM textarea:not(:placeholder-shown) ~ [postfix],
+        WUP-NUM textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
         }
         /* style for icons */
