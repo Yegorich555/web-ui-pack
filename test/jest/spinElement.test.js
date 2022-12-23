@@ -330,7 +330,7 @@ describe("spinElement", () => {
                background: var(--spin-fade);
             }
             SPIN-A div[fade]::after { content: none; }
-            SPIN-A { --spin-2: transparent; }
+            :root { --spin-2: transparent; }
              SPIN-A div {
                border: var(--spin-item-size) solid;
                border-color: var(--spin-2) var(--spin-1) var(--spin-2) var(--spin-1);
@@ -388,11 +388,11 @@ describe("spinElement", () => {
             @keyframes WUP-SPIN-2-2 {
                 0% { transform: translate(-50%, -50%) rotate(360deg); }
              }
-             SPIN-B {
+             :root {
                 --spin-2: #b35e03;
                 --spin-item-size: max(1px, calc(var(--spin-size) / 12));
-                position: relative;
              }
+             SPIN-B { position: relative; }
              SPIN-B div:nth-child(1) {
                 border: var(--spin-item-size) solid;
                 border-color: transparent var(--spin-1) transparent var(--spin-1);
@@ -518,7 +518,8 @@ describe("spinElement", () => {
                background: var(--spin-fade);
             }
             SPIN-D div[fade]::after { content: none; }
-            SPIN-D { --spin-step: 24deg; position: relative; }
+            :root { --spin-step: 24deg; }
+                  SPIN-D { position: relative; }
                   SPIN-D div {
                     animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
                     position: absolute;
@@ -604,10 +605,8 @@ describe("spinElement", () => {
                     0%,20%,80%,100% { transform: scale(1); background: var(--spin-1) }
                     50% { transform: scale(1.4); background: var(--spin-2) }
                   }
-                  SPIN-E {
-                    --spin-2: #ff5200;
-                    position: relative;
-                  }
+                  :root { --spin-2: #ff5200; }
+                  SPIN-E { position: relative; }
                   SPIN-E div {
                     position: absolute;
                     width: calc(100% / 1.4142135623730951);
@@ -698,10 +697,8 @@ describe("spinElement", () => {
             @keyframes WUP-SPIN-3 {
                     100% { opacity: 0; background: var(--spin-2); }
                   }
-                  SPIN-F {
-                    --spin-item-size: calc(var(--spin-size) / 10);
-                    position: relative;
-                  }
+                  :root { --spin-item-size: calc(var(--spin-size) / 10); }
+                  SPIN-F { position: relative; }
                   SPIN-F div {
                     animation: WUP-SPIN-3 var(--spin-speed) linear infinite;
                     position: absolute;

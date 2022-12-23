@@ -1,5 +1,7 @@
 /* stylelint-disable no-descending-specificity */
 .pageSpin {
+  --spin-2: white;
+
   > div {
     margin-bottom: 30px;
   }
@@ -54,6 +56,10 @@
   --spin-2: transparent;
 }
 
+.spin20 {
+  --spin-2: transparent;
+}
+
 .spin21 {
   // --spin-2: #ff7600;
   --spin-item-size: calc(var(--spin-size) / 2);
@@ -76,6 +82,10 @@
 }
 
 .spin51 {
+  --spin-2: #ff5200;
+}
+
+.spin52 {
   --spin-2: orange;
 }
 
@@ -118,4 +128,8 @@
 
 .spin6-2.spin61 div {
   --spin-2: #fff;
+}
+
+.spin71 {
+  --spin-2: #b35e03;
 }

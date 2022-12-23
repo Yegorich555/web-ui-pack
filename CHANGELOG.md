@@ -18,6 +18,7 @@
 
 - Helper. promiseWait. Callback called before time end
 - Popup with arrow. Firefox bug: css filter drop-shadow works wrong with angle 180.0
+- SpinElement. Impossible to override color via applying css-var to body `--spin-2`
 
 **Features**:
 

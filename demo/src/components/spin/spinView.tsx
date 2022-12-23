@@ -116,13 +116,13 @@ export default function SpinView() {
             <wup-spin inline class={styles.spin11} />
           </div>
           <div>
-            DualRing <wup-spin2 inline />
+            DualRing <wup-spin2 inline class={styles.spin20} />
             <wup-spin2 inline class={styles.spin21} />
             <wup-spin2 inline class={styles.spin22} />
           </div>
           <div>
             TwinDualRing
-            <wup-spin7 inline />
+            <wup-spin7 inline class={styles.spin71} />
           </div>
           <div>
             Roller <wup-spin3 inline />
@@ -133,8 +133,8 @@ export default function SpinView() {
           </div>
           <div>
             DotRing
-            <wup-spin5 inline />
             <wup-spin5 inline class={styles.spin51} />
+            <wup-spin5 inline class={styles.spin52} />
           </div>
           <div className={styles.types}>
             SliceRing
