@@ -417,6 +417,7 @@ export default class WUPCalendarControl<
   /** Called once when need to render label + input */
   renderInput(): { menuId: string } {
     const i = this.$refInput;
+    i.type = "text"; // to allow browser-autofill. type="date" is announced wrong in our case
     i.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", i.id);
     i.setAttribute("role", "combobox");

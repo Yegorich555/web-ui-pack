@@ -653,7 +653,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   protected override gotRender(): void {
     super.gotRender();
-    this.$refInput.type = "text";
     this.renderControl();
   }
 

@@ -411,10 +411,10 @@ export default class WUPTextControl<
   }
 
   protected override renderControl(): void {
+    this.$refInput.type = "text";
     this.$refInput.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", this.$refInput.id);
 
-    this.$refInput.type = "text";
     const s = this.$refLabel.appendChild(document.createElement("span"));
     s.appendChild(this.$refInput); // input appended to span to allow user user :after,:before without padding adjust
     s.appendChild(this.$refTitle);
