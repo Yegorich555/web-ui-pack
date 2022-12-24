@@ -92,6 +92,9 @@ export default class WUPTextareaControl<
           margin-left: 0;
           margin-right: 0;
         }
+        :host textarea + strong {
+          top: 1.6em;
+        }
         ${WUPcssScrollSmall(":host textarea")}`;
   }
 
