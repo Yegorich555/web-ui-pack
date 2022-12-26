@@ -235,6 +235,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       :host strong,
       :host legend {
         color: var(--ctrl-label);
+        pointer-events: none;
       }
       :host:focus-within,
       :host:focus-within > [menu] {
@@ -242,21 +243,18 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         outline: 1px solid var(--ctrl-focus);
       }
       :host:focus-within strong,
-      :host:focus-within legend,
-      :host input:focus + strong {
+      :host:focus-within legend {
         color: var(--ctrl-focus-label);
+        pointer-events: initial;
       }
-      :host:not(:focus-within) strong {
-        pointer-events: none;
-      }
-      [disabled]>:host,
+      [disabled] :host,
       :host[disabled] {
         opacity: 0.6;
         cursor: not-allowed;
         -webkit-user-select: none;
         user-select: none;
       }
-      [disabled]>:host > *,
+      [disabled] :host > *,
       :host[disabled] > * {
         pointer-events: none;
       }
@@ -276,19 +274,16 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         padding-bottom: 0;
       }
       :host input,
-      :host textarea {
+      :host textarea,
+      :host [contenteditable] {
         padding: 0;
         margin: 0;
         cursor: inherit;
       }
-      :host input + strong,
-      :host textarea + strong {
+      :host strong {
         cursor: inherit;
       }
-      :host input:required + strong:after,
-      :host input[aria-required="true"] + strong:after,
-      :host textarea:required + strong:after,
-      :host textarea[aria-required="true"] + strong:after,
+      :host [aria-required="true"] + strong:after,
       :host fieldset[aria-required="true"] > legend:after {
         content: "*";
         font-size: larger;
@@ -643,7 +638,13 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         if (this.$isDisabled) {
           return;
         }
-        !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) && e.preventDefault();
+        const el = e.target as Partial<HTMLElement>;
+        !(
+          el.tagName === "INPUT" ||
+          el.tagName === "TEXTAREA" ||
+          this.$refInput === el ||
+          this.includes.call(this.$refInput, el)
+        ) && e.preventDefault();
         // this required because default focus-effect was prevented
         this.appendEvent(this, "mouseup", () => !this.$isFocused && this.focus(), { once: true });
       },

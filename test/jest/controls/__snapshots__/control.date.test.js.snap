@@ -283,6 +283,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-DATE strong,
       WUP-DATE legend {
         color: var(--ctrl-label);
+        pointer-events: none;
       }
       WUP-DATE:focus-within,
       WUP-DATE:focus-within &gt; [menu] {
@@ -290,21 +291,18 @@ clip: rect(1px, 1px, 1px, 1px);}
         outline: 1px solid var(--ctrl-focus);
       }
       WUP-DATE:focus-within strong,
-      WUP-DATE:focus-within legend,
-      WUP-DATE input:focus + strong {
+      WUP-DATE:focus-within legend {
         color: var(--ctrl-focus-label);
+        pointer-events: initial;
       }
-      WUP-DATE:not(:focus-within) strong {
-        pointer-events: none;
-      }
-      [disabled]&gt;WUP-DATE,
+      [disabled] WUP-DATE,
       WUP-DATE[disabled] {
         opacity: 0.6;
         cursor: not-allowed;
         -webkit-user-select: none;
         user-select: none;
       }
-      [disabled]&gt;WUP-DATE &gt; *,
+      [disabled] WUP-DATE &gt; *,
       WUP-DATE[disabled] &gt; * {
         pointer-events: none;
       }
@@ -324,19 +322,16 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-bottom: 0;
       }
       WUP-DATE input,
-      WUP-DATE textarea {
+      WUP-DATE textarea,
+      WUP-DATE [contenteditable] {
         padding: 0;
         margin: 0;
         cursor: inherit;
       }
-      WUP-DATE input + strong,
-      WUP-DATE textarea + strong {
+      WUP-DATE strong {
         cursor: inherit;
       }
-      WUP-DATE input:required + strong:after,
-      WUP-DATE input[aria-required="true"] + strong:after,
-      WUP-DATE textarea:required + strong:after,
-      WUP-DATE textarea[aria-required="true"] + strong:after,
+      WUP-DATE [aria-required="true"] + strong:after,
       WUP-DATE fieldset[aria-required="true"] &gt; legend:after {
         content: "*";
         font-size: larger;
@@ -424,6 +419,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-DATE input,
         WUP-DATE textarea,
+        WUP-DATE [contenteditable],
         WUP-DATE [maskholder],
         WUP-DATE [prefix],
         WUP-DATE [postfix] {
@@ -439,6 +435,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-DATE input,
         WUP-DATE textarea,
+        WUP-DATE [contenteditable],
         WUP-DATE [maskholder],
         WUP-DATE [postfix] {
           width: 100%;
@@ -474,17 +471,18 @@ mask-image: var(--ctrl-icon-img);
           white-space: pre;
         }
         WUP-DATE input:-webkit-autofill,
-        WUP-DATE textarea:-webkit-autofill {
+        WUP-DATE textarea:-webkit-autofill,
+        WUP-DATE [contenteditable]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
         WUP-DATE input:autofill,
-        WUP-DATE textarea:autofill {
+        WUP-DATE textarea:autofill,
+        WUP-DATE [contenteditable]:autofill {
           font: inherit;
           background-clip: text;
         }
-        WUP-DATE input + strong,
-        WUP-DATE textarea + strong {
+        WUP-DATE strong {
           display: block;
           position: absolute;
           top: 50%;
@@ -502,8 +500,7 @@ mask-image: var(--ctrl-icon-img);
           text-decoration: none;
         }
         @media not all and (prefers-reduced-motion) {
-          WUP-DATE input + strong,
-          WUP-DATE textarea + strong {
+          WUP-DATE strong {
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
@@ -511,10 +508,10 @@ mask-image: var(--ctrl-icon-img);
         WUP-DATE textarea:not(:focus)::placeholder {
           color: transparent;
         }
-        WUP-DATE:focus-within input + strong,
-        WUP-DATE:focus-within textarea + strong,
+        WUP-DATE:focus-within strong,
         WUP-DATE input:not(:placeholder-shown) + strong,
         WUP-DATE textarea:not(:placeholder-shown) + strong,
+        WUP-DATE [contenteditable]:not(:empty) + strong,
         WUP-DATE legend {
           top: 0.2em;
           transform: scale(0.9);
@@ -523,8 +520,8 @@ mask-image: var(--ctrl-icon-img);
         WUP-DATE:focus-within [prefix],
         WUP-DATE:focus-within [postfix],
         WUP-DATE input:not(:placeholder-shown) ~ [prefix],
-        WUP-DATE input:not(:placeholder-shown) ~ [prefix],
-        WUP-DATE textarea:not(:placeholder-shown) ~ [postfix],
+        WUP-DATE input:not(:placeholder-shown) ~ [postfix],
+        WUP-DATE textarea:not(:placeholder-shown) ~ [prefix],
         WUP-DATE textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
         }

@@ -56,7 +56,7 @@ declare global {
  * @tutorial innerHTML @example
  * <label>
  *   <span> // extra span requires to use with icons via label:before, label:after without adjustments
- *      <textarea />
+ *      <span contenteditable="true" />
  *      <strong>{$options.label}</strong>
  *   </span>
  *   <button clear/>
@@ -69,33 +69,25 @@ export default class WUPTextareaControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextareaControl;
 
-  // static get observedOptions(): Array<string> {
-  //   const arr = super.observedOptions as Array<keyof WUPTextarea.Options>;
-  //   arr.push("reverse");
-  //   return arr;
-  // }
-
-  // static get $styleRoot(): string {
-  //   return ``;
-  // }
-
   static get $style(): string {
     return `${super.$style}
-        :host textarea {
+        :host strong { top: 1.6em; }
+        :host [contenteditable] {
           min-height: 4em;
+          max-height: 4em;
           resize: none;
-          display: block; ${/* it removes extra space below */ ""}
+          display: inline-block; ${/* it removes extra space below */ ""}
+          cursor: text;
           white-space: pre-wrap;
+          word-break: break-word;
+          overflow-wrap: break-word;
           overflow: auto;
           margin: var(--ctrl-padding);
           padding: 0;
           margin-left: 0;
           margin-right: 0;
         }
-        :host textarea + strong {
-          top: 1.6em;
-        }
-        ${WUPcssScrollSmall(":host textarea")}`;
+        ${WUPcssScrollSmall(":host [contenteditable]")}`;
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
@@ -111,19 +103,151 @@ export default class WUPTextareaControl<
 
   protected override _opts = this.$options;
 
-  $refInput = document.createElement("textarea") as HTMLInputElement & HTMLTextAreaElement;
-
+  $refInput = document.createElement("span") as HTMLInputElement & HTMLSpanElement;
   constructor() {
     super();
-    this.$refInput.placeholder = " ";
+    // this.$refInput.placeholder = " "; / it doesn't work for span
+    this.$refInput.select = () => {
+      const range = document.createRange();
+      range.selectNodeContents(this.$refInput);
+      const sel = window.getSelection()!;
+      sel.removeAllRanges();
+      sel.addRange(range);
+    };
+    Object.defineProperty(this.$refInput, "value", {
+      set: (v) => (this.$refInput.innerHTML = v),
+      get: () => this.$refInput.innerHTML,
+    });
+
+    Object.defineProperty(this.$refInput, "selectionStart", {
+      set: (start) => (this.selection = { start, end: this.selection!.end }),
+      get: () => this.selection?.start ?? null,
+    });
+
+    Object.defineProperty(this.$refInput, "selectionEnd", {
+      set: (end) => (this.selection = { start: this.selection!.start, end }),
+      get: () => this.selection?.end ?? null,
+    });
+  }
+
+  /** Fix for contenteditable (it doesn't contain selectionStart & selectionEnd props) */
+  private get selection(): null | { start: number; end: number } {
+    if (document.activeElement !== this.$refInput) {
+      return null;
+    }
+    const sel = window.getSelection();
+    if (!sel) {
+      return null;
+    }
+    const range = sel.getRangeAt(0);
+    const pre = range.cloneRange();
+    pre.selectNodeContents(this.$refInput);
+    pre.setEnd(range.startContainer, range.startOffset);
+    const start = pre.toString().length;
+
+    return {
+      start,
+      end: start + range.toString().length,
+    };
+  }
+
+  private set selection(sel) {
+    if (document.activeElement !== this.$refInput) {
+      return;
+    }
+    let charIndex = 0;
+    const range = document.createRange();
+    range.setStart(this.$refInput, 0);
+    range.collapse(true);
+    const nodeStack: Node[] = [this.$refInput];
+    let node;
+    let foundStart = false;
+    let stop = false;
+
+    // from https://stackoverflow.com/questions/13949059/persisting-the-changes-of-range-objects-after-selection-in-html/13950376#13950376
+    if (sel) {
+      // eslint-disable-next-line no-cond-assign
+      while (!stop && (node = nodeStack.pop())) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const nextCharIndex = charIndex + (node as Text).length;
+          if (!foundStart && sel.start >= charIndex && sel.start <= nextCharIndex) {
+            range.setStart(node, sel.start - charIndex);
+            foundStart = true;
+          }
+          if (foundStart && sel.end >= charIndex && sel.end <= nextCharIndex) {
+            range.setEnd(node, sel.end - charIndex);
+            stop = true;
+          }
+          charIndex = nextCharIndex;
+        } else {
+          let i = node.childNodes.length;
+          while (i--) {
+            nodeStack.push(node.childNodes[i]);
+          }
+        }
+      }
+    }
+
+    const s = window.getSelection()!;
+    s.removeAllRanges();
+    s.addRange(range);
   }
 
   protected override renderControl(): void {
     super.renderControl();
+    this.$refInput.setAttribute("contenteditable", true);
+    this.$refInput.setAttribute("role", "textbox");
+    const { id } = this.$refInput;
+    this.$refInput.removeAttribute("id");
+    this.$refInput.setAttribute("aria-labelledby", id);
+    this.$refTitle.id = id;
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUPTextarea.Options> | null): void {
-    super.gotChanges(propsChanged as any);
+  // protected override gotChanges(propsChanged: Array<keyof WUPTextarea.Options> | null): void {
+  //   super.gotChanges(propsChanged as any);
+  // }
+
+  protected override gotBeforeInput(e: WUPText.GotInputEvent): void {
+    super.gotBeforeInput(e);
+    let data: string | null = null;
+    // eslint-disable-next-line default-case
+    switch (e.inputType) {
+      case "insertParagraph":
+        data = "\n";
+        this.insertText(data);
+        break;
+    }
+
+    if (data) {
+      e.preventDefault();
+      this.$refInput.dispatchEvent(new InputEvent("input", { inputType: e.inputType, data }));
+    }
+  }
+
+  protected insertText(text: string): void {
+    const fr = document.createDocumentFragment();
+    // add a new line
+    const content = document.createTextNode(text);
+    fr.appendChild(content);
+    fr.appendChild(document.createTextNode(" " /* "\u00a0" */)); // othwerise chrome doesn't go to next line
+    // fr.appendChild(document.createElement("br")); // add the br, or p, or something else
+    // make the br replace selection
+    let range = window.getSelection()!.getRangeAt(0);
+    range.deleteContents();
+    range.insertNode(fr);
+    // create a new range
+    range = document.createRange();
+    range.setStartAfter(content);
+    range.collapse(true);
+    // make the cursor there
+    const sel = window.getSelection()!;
+    sel.removeAllRanges();
+    sel.addRange(range);
+    // autoscroll to cursor
+    const tempAnchorEl = document.createElement("br");
+    range.insertNode(tempAnchorEl);
+    tempAnchorEl.scrollIntoView({ block: "end" });
+    tempAnchorEl.remove(); // remove after scrolling is done
   }
 
   protected override gotKeyDown(e: KeyboardEvent & { submitPrevented?: boolean }): void {
@@ -135,3 +259,4 @@ export default class WUPTextareaControl<
 }
 
 customElements.define(tagName, WUPTextareaControl);
+// todo check how it works with mask

@@ -189,6 +189,7 @@ export default class WUPTextControl<
         }
         :host input,
         :host textarea,
+        :host [contenteditable],
         :host [maskholder],
         :host [prefix],
         :host [postfix] {
@@ -204,6 +205,7 @@ export default class WUPTextControl<
         }
         :host input,
         :host textarea,
+        :host [contenteditable],
         :host [maskholder],
         :host [postfix] {
           width: 100%;
@@ -239,17 +241,18 @@ export default class WUPTextControl<
           white-space: pre;
         }
         :host input:-webkit-autofill,
-        :host textarea:-webkit-autofill {
+        :host textarea:-webkit-autofill,
+        :host [contenteditable]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
         :host input:autofill,
-        :host textarea:autofill {
+        :host textarea:autofill,
+        :host [contenteditable]:autofill {
           font: inherit;
           background-clip: text;
         }
-        :host input + strong,
-        :host textarea + strong {
+        :host strong {
           display: block;
           position: absolute;
           top: 50%;
@@ -267,8 +270,7 @@ export default class WUPTextControl<
           text-decoration: none;
         }
         @media not all and (prefers-reduced-motion) {
-          :host input + strong,
-          :host textarea + strong {
+          :host strong {
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
@@ -276,10 +278,10 @@ export default class WUPTextControl<
         :host textarea:not(:focus)::placeholder {
           color: transparent;
         }
-        :host:focus-within input + strong,
-        :host:focus-within textarea + strong,
+        :host:focus-within strong,
         :host input:not(:placeholder-shown) + strong,
         :host textarea:not(:placeholder-shown) + strong,
+        :host [contenteditable]:not(:empty) + strong,
         :host legend {
           top: 0.2em;
           transform: scale(0.9);
@@ -288,8 +290,8 @@ export default class WUPTextControl<
         :host:focus-within [prefix],
         :host:focus-within [postfix],
         :host input:not(:placeholder-shown) ~ [prefix],
-        :host input:not(:placeholder-shown) ~ [prefix],
-        :host textarea:not(:placeholder-shown) ~ [postfix],
+        :host input:not(:placeholder-shown) ~ [postfix],
+        :host textarea:not(:placeholder-shown) ~ [prefix],
         :host textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
         }
@@ -406,7 +408,7 @@ export default class WUPTextControl<
 
   /** Called to parse input text to value (related to locale or pointed format) */
   parseInput(text: string): ValueType | undefined {
-    return this.parse(text);
+    return this.parse(text.trim());
   }
 
   /** Returns true if need to use custom undo/redo (required when input somehow formatted/masked) */
@@ -650,6 +652,7 @@ export default class WUPTextControl<
   #inputTimer?: ReturnType<typeof setTimeout>;
   /** Called when user types text OR when need to apply/reset mask (on focusGot, focusLost) */
   protected gotInput(e: WUPText.GotInputEvent): void {
+    // todo trimValue here ???
     const el = e.target as MaskHandledInput;
     let txt = el.value;
 

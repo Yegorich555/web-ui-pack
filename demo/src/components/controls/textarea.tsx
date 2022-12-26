@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import Page from "src/elements/page";
 import { WUPTextareaControl } from "web-ui-pack";
+import styles from "./textarea.scss";
 
 const sideEffect = WUPTextareaControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
@@ -12,13 +13,14 @@ export default function TextControlView() {
     <Page
       header="TextareaControl"
       link="src/controls/textarea.ts"
+      // todo rollback after tests
       // details={{
       //   tag: "wup-textarea",
       //   cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
       // }}
       features={[
-        "Inheritted features from TextControl", //
-        // todo implement "Autoheight (use $options.autoheight)",
+        "Inheritted features from TextControl",
+        "Autoheight (change css rule: wup-textarea [contenteditable] { max-height: none })",
       ]}
     >
       <wup-form
@@ -31,8 +33,8 @@ export default function TextControlView() {
       >
         <wup-textarea
           name="email"
-          label="Text control"
-          initValue="test@google.com"
+          label="Textarea control"
+          initValue=""
           autoComplete="off"
           autoFocus={false}
           validations="window.myTextareaValidations"
@@ -40,23 +42,37 @@ export default function TextControlView() {
           maskholder=""
           prefix=""
           postfix=""
-          // autoheight={false}
         />
-        <wup-textarea name="required" validations="myTextareaValidations" />
         <wup-textarea
+          id="testMe"
           ref={(el) => {
             if (el) {
               el.$options.name = "longName";
-              el.$options.label =
-                "With long label and custom validations (very very very incredible long label to check if it has ellipsis rule)";
+              el.$options.label = "With scroll";
               el.$options.validations = {
                 required: true,
                 max: 250,
                 min: (v) => (!v || v.length < 2) && "This is custom error",
               };
-              el.$value = "hello\na\nb\na\nb\na\nb";
+              el.$value = [
+                "wup-textarea [contenteditable] { ", //
+                "  min-height: 6em; // use css to change default",
+                "}",
+                "or leave as is\n\n",
+              ].join("\n");
             }
           }}
+        />
+        <wup-textarea
+          class={styles.autoh}
+          name="autoH" //
+          label="Autoheight"
+          initValue={[
+            "wup-textarea [contenteditable] { ", //
+            "  max-height: 20em; // use css to limit",
+            "}",
+            "or leave as is",
+          ].join("\n")}
         />
         <wup-textarea
           name="withoutClearButton"

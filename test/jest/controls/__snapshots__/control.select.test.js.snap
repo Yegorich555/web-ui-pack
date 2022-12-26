@@ -285,6 +285,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-SELECT strong,
       WUP-SELECT legend {
         color: var(--ctrl-label);
+        pointer-events: none;
       }
       WUP-SELECT:focus-within,
       WUP-SELECT:focus-within &gt; [menu] {
@@ -292,21 +293,18 @@ clip: rect(1px, 1px, 1px, 1px);}
         outline: 1px solid var(--ctrl-focus);
       }
       WUP-SELECT:focus-within strong,
-      WUP-SELECT:focus-within legend,
-      WUP-SELECT input:focus + strong {
+      WUP-SELECT:focus-within legend {
         color: var(--ctrl-focus-label);
+        pointer-events: initial;
       }
-      WUP-SELECT:not(:focus-within) strong {
-        pointer-events: none;
-      }
-      [disabled]&gt;WUP-SELECT,
+      [disabled] WUP-SELECT,
       WUP-SELECT[disabled] {
         opacity: 0.6;
         cursor: not-allowed;
         -webkit-user-select: none;
         user-select: none;
       }
-      [disabled]&gt;WUP-SELECT &gt; *,
+      [disabled] WUP-SELECT &gt; *,
       WUP-SELECT[disabled] &gt; * {
         pointer-events: none;
       }
@@ -326,19 +324,16 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-bottom: 0;
       }
       WUP-SELECT input,
-      WUP-SELECT textarea {
+      WUP-SELECT textarea,
+      WUP-SELECT [contenteditable] {
         padding: 0;
         margin: 0;
         cursor: inherit;
       }
-      WUP-SELECT input + strong,
-      WUP-SELECT textarea + strong {
+      WUP-SELECT strong {
         cursor: inherit;
       }
-      WUP-SELECT input:required + strong:after,
-      WUP-SELECT input[aria-required="true"] + strong:after,
-      WUP-SELECT textarea:required + strong:after,
-      WUP-SELECT textarea[aria-required="true"] + strong:after,
+      WUP-SELECT [aria-required="true"] + strong:after,
       WUP-SELECT fieldset[aria-required="true"] &gt; legend:after {
         content: "*";
         font-size: larger;
@@ -426,6 +421,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-SELECT input,
         WUP-SELECT textarea,
+        WUP-SELECT [contenteditable],
         WUP-SELECT [maskholder],
         WUP-SELECT [prefix],
         WUP-SELECT [postfix] {
@@ -441,6 +437,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-SELECT input,
         WUP-SELECT textarea,
+        WUP-SELECT [contenteditable],
         WUP-SELECT [maskholder],
         WUP-SELECT [postfix] {
           width: 100%;
@@ -476,17 +473,18 @@ mask-image: var(--ctrl-icon-img);
           white-space: pre;
         }
         WUP-SELECT input:-webkit-autofill,
-        WUP-SELECT textarea:-webkit-autofill {
+        WUP-SELECT textarea:-webkit-autofill,
+        WUP-SELECT [contenteditable]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
         WUP-SELECT input:autofill,
-        WUP-SELECT textarea:autofill {
+        WUP-SELECT textarea:autofill,
+        WUP-SELECT [contenteditable]:autofill {
           font: inherit;
           background-clip: text;
         }
-        WUP-SELECT input + strong,
-        WUP-SELECT textarea + strong {
+        WUP-SELECT strong {
           display: block;
           position: absolute;
           top: 50%;
@@ -504,8 +502,7 @@ mask-image: var(--ctrl-icon-img);
           text-decoration: none;
         }
         @media not all and (prefers-reduced-motion) {
-          WUP-SELECT input + strong,
-          WUP-SELECT textarea + strong {
+          WUP-SELECT strong {
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
@@ -513,10 +510,10 @@ mask-image: var(--ctrl-icon-img);
         WUP-SELECT textarea:not(:focus)::placeholder {
           color: transparent;
         }
-        WUP-SELECT:focus-within input + strong,
-        WUP-SELECT:focus-within textarea + strong,
+        WUP-SELECT:focus-within strong,
         WUP-SELECT input:not(:placeholder-shown) + strong,
         WUP-SELECT textarea:not(:placeholder-shown) + strong,
+        WUP-SELECT [contenteditable]:not(:empty) + strong,
         WUP-SELECT legend {
           top: 0.2em;
           transform: scale(0.9);
@@ -525,8 +522,8 @@ mask-image: var(--ctrl-icon-img);
         WUP-SELECT:focus-within [prefix],
         WUP-SELECT:focus-within [postfix],
         WUP-SELECT input:not(:placeholder-shown) ~ [prefix],
-        WUP-SELECT input:not(:placeholder-shown) ~ [prefix],
-        WUP-SELECT textarea:not(:placeholder-shown) ~ [postfix],
+        WUP-SELECT input:not(:placeholder-shown) ~ [postfix],
+        WUP-SELECT textarea:not(:placeholder-shown) ~ [prefix],
         WUP-SELECT textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
         }

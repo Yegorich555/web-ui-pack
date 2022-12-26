@@ -259,6 +259,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-NUM strong,
       WUP-NUM legend {
         color: var(--ctrl-label);
+        pointer-events: none;
       }
       WUP-NUM:focus-within,
       WUP-NUM:focus-within &gt; [menu] {
@@ -266,21 +267,18 @@ clip: rect(1px, 1px, 1px, 1px);}
         outline: 1px solid var(--ctrl-focus);
       }
       WUP-NUM:focus-within strong,
-      WUP-NUM:focus-within legend,
-      WUP-NUM input:focus + strong {
+      WUP-NUM:focus-within legend {
         color: var(--ctrl-focus-label);
+        pointer-events: initial;
       }
-      WUP-NUM:not(:focus-within) strong {
-        pointer-events: none;
-      }
-      [disabled]&gt;WUP-NUM,
+      [disabled] WUP-NUM,
       WUP-NUM[disabled] {
         opacity: 0.6;
         cursor: not-allowed;
         -webkit-user-select: none;
         user-select: none;
       }
-      [disabled]&gt;WUP-NUM &gt; *,
+      [disabled] WUP-NUM &gt; *,
       WUP-NUM[disabled] &gt; * {
         pointer-events: none;
       }
@@ -300,19 +298,16 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-bottom: 0;
       }
       WUP-NUM input,
-      WUP-NUM textarea {
+      WUP-NUM textarea,
+      WUP-NUM [contenteditable] {
         padding: 0;
         margin: 0;
         cursor: inherit;
       }
-      WUP-NUM input + strong,
-      WUP-NUM textarea + strong {
+      WUP-NUM strong {
         cursor: inherit;
       }
-      WUP-NUM input:required + strong:after,
-      WUP-NUM input[aria-required="true"] + strong:after,
-      WUP-NUM textarea:required + strong:after,
-      WUP-NUM textarea[aria-required="true"] + strong:after,
+      WUP-NUM [aria-required="true"] + strong:after,
       WUP-NUM fieldset[aria-required="true"] &gt; legend:after {
         content: "*";
         font-size: larger;
@@ -400,6 +395,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-NUM input,
         WUP-NUM textarea,
+        WUP-NUM [contenteditable],
         WUP-NUM [maskholder],
         WUP-NUM [prefix],
         WUP-NUM [postfix] {
@@ -415,6 +411,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-NUM input,
         WUP-NUM textarea,
+        WUP-NUM [contenteditable],
         WUP-NUM [maskholder],
         WUP-NUM [postfix] {
           width: 100%;
@@ -450,17 +447,18 @@ mask-image: var(--ctrl-icon-img);
           white-space: pre;
         }
         WUP-NUM input:-webkit-autofill,
-        WUP-NUM textarea:-webkit-autofill {
+        WUP-NUM textarea:-webkit-autofill,
+        WUP-NUM [contenteditable]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
         WUP-NUM input:autofill,
-        WUP-NUM textarea:autofill {
+        WUP-NUM textarea:autofill,
+        WUP-NUM [contenteditable]:autofill {
           font: inherit;
           background-clip: text;
         }
-        WUP-NUM input + strong,
-        WUP-NUM textarea + strong {
+        WUP-NUM strong {
           display: block;
           position: absolute;
           top: 50%;
@@ -478,8 +476,7 @@ mask-image: var(--ctrl-icon-img);
           text-decoration: none;
         }
         @media not all and (prefers-reduced-motion) {
-          WUP-NUM input + strong,
-          WUP-NUM textarea + strong {
+          WUP-NUM strong {
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
@@ -487,10 +484,10 @@ mask-image: var(--ctrl-icon-img);
         WUP-NUM textarea:not(:focus)::placeholder {
           color: transparent;
         }
-        WUP-NUM:focus-within input + strong,
-        WUP-NUM:focus-within textarea + strong,
+        WUP-NUM:focus-within strong,
         WUP-NUM input:not(:placeholder-shown) + strong,
         WUP-NUM textarea:not(:placeholder-shown) + strong,
+        WUP-NUM [contenteditable]:not(:empty) + strong,
         WUP-NUM legend {
           top: 0.2em;
           transform: scale(0.9);
@@ -499,8 +496,8 @@ mask-image: var(--ctrl-icon-img);
         WUP-NUM:focus-within [prefix],
         WUP-NUM:focus-within [postfix],
         WUP-NUM input:not(:placeholder-shown) ~ [prefix],
-        WUP-NUM input:not(:placeholder-shown) ~ [prefix],
-        WUP-NUM textarea:not(:placeholder-shown) ~ [postfix],
+        WUP-NUM input:not(:placeholder-shown) ~ [postfix],
+        WUP-NUM textarea:not(:placeholder-shown) ~ [prefix],
         WUP-NUM textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
         }

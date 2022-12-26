@@ -645,6 +645,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-RADIO strong,
       WUP-RADIO legend {
         color: var(--ctrl-label);
+        pointer-events: none;
       }
       WUP-RADIO:focus-within,
       WUP-RADIO:focus-within &gt; [menu] {
@@ -652,21 +653,18 @@ clip: rect(1px, 1px, 1px, 1px);}
         outline: 1px solid var(--ctrl-focus);
       }
       WUP-RADIO:focus-within strong,
-      WUP-RADIO:focus-within legend,
-      WUP-RADIO input:focus + strong {
+      WUP-RADIO:focus-within legend {
         color: var(--ctrl-focus-label);
+        pointer-events: initial;
       }
-      WUP-RADIO:not(:focus-within) strong {
-        pointer-events: none;
-      }
-      [disabled]&gt;WUP-RADIO,
+      [disabled] WUP-RADIO,
       WUP-RADIO[disabled] {
         opacity: 0.6;
         cursor: not-allowed;
         -webkit-user-select: none;
         user-select: none;
       }
-      [disabled]&gt;WUP-RADIO &gt; *,
+      [disabled] WUP-RADIO &gt; *,
       WUP-RADIO[disabled] &gt; * {
         pointer-events: none;
       }
@@ -686,19 +684,16 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-bottom: 0;
       }
       WUP-RADIO input,
-      WUP-RADIO textarea {
+      WUP-RADIO textarea,
+      WUP-RADIO [contenteditable] {
         padding: 0;
         margin: 0;
         cursor: inherit;
       }
-      WUP-RADIO input + strong,
-      WUP-RADIO textarea + strong {
+      WUP-RADIO strong {
         cursor: inherit;
       }
-      WUP-RADIO input:required + strong:after,
-      WUP-RADIO input[aria-required="true"] + strong:after,
-      WUP-RADIO textarea:required + strong:after,
-      WUP-RADIO textarea[aria-required="true"] + strong:after,
+      WUP-RADIO [aria-required="true"] + strong:after,
       WUP-RADIO fieldset[aria-required="true"] &gt; legend:after {
         content: "*";
         font-size: larger;

@@ -990,6 +990,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-CALENDAR strong,
       WUP-CALENDAR legend {
         color: var(--ctrl-label);
+        pointer-events: none;
       }
       WUP-CALENDAR:focus-within,
       WUP-CALENDAR:focus-within &gt; [menu] {
@@ -997,21 +998,18 @@ clip: rect(1px, 1px, 1px, 1px);}
         outline: 1px solid var(--ctrl-focus);
       }
       WUP-CALENDAR:focus-within strong,
-      WUP-CALENDAR:focus-within legend,
-      WUP-CALENDAR input:focus + strong {
+      WUP-CALENDAR:focus-within legend {
         color: var(--ctrl-focus-label);
+        pointer-events: initial;
       }
-      WUP-CALENDAR:not(:focus-within) strong {
-        pointer-events: none;
-      }
-      [disabled]&gt;WUP-CALENDAR,
+      [disabled] WUP-CALENDAR,
       WUP-CALENDAR[disabled] {
         opacity: 0.6;
         cursor: not-allowed;
         -webkit-user-select: none;
         user-select: none;
       }
-      [disabled]&gt;WUP-CALENDAR &gt; *,
+      [disabled] WUP-CALENDAR &gt; *,
       WUP-CALENDAR[disabled] &gt; * {
         pointer-events: none;
       }
@@ -1031,19 +1029,16 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-bottom: 0;
       }
       WUP-CALENDAR input,
-      WUP-CALENDAR textarea {
+      WUP-CALENDAR textarea,
+      WUP-CALENDAR [contenteditable] {
         padding: 0;
         margin: 0;
         cursor: inherit;
       }
-      WUP-CALENDAR input + strong,
-      WUP-CALENDAR textarea + strong {
+      WUP-CALENDAR strong {
         cursor: inherit;
       }
-      WUP-CALENDAR input:required + strong:after,
-      WUP-CALENDAR input[aria-required="true"] + strong:after,
-      WUP-CALENDAR textarea:required + strong:after,
-      WUP-CALENDAR textarea[aria-required="true"] + strong:after,
+      WUP-CALENDAR [aria-required="true"] + strong:after,
       WUP-CALENDAR fieldset[aria-required="true"] &gt; legend:after {
         content: "*";
         font-size: larger;

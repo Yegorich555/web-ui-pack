@@ -210,6 +210,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-SWITCH strong,
       WUP-SWITCH legend {
         color: var(--ctrl-label);
+        pointer-events: none;
       }
       WUP-SWITCH:focus-within,
       WUP-SWITCH:focus-within &gt; [menu] {
@@ -217,21 +218,18 @@ clip: rect(1px, 1px, 1px, 1px);}
         outline: 1px solid var(--ctrl-focus);
       }
       WUP-SWITCH:focus-within strong,
-      WUP-SWITCH:focus-within legend,
-      WUP-SWITCH input:focus + strong {
+      WUP-SWITCH:focus-within legend {
         color: var(--ctrl-focus-label);
+        pointer-events: initial;
       }
-      WUP-SWITCH:not(:focus-within) strong {
-        pointer-events: none;
-      }
-      [disabled]&gt;WUP-SWITCH,
+      [disabled] WUP-SWITCH,
       WUP-SWITCH[disabled] {
         opacity: 0.6;
         cursor: not-allowed;
         -webkit-user-select: none;
         user-select: none;
       }
-      [disabled]&gt;WUP-SWITCH &gt; *,
+      [disabled] WUP-SWITCH &gt; *,
       WUP-SWITCH[disabled] &gt; * {
         pointer-events: none;
       }
@@ -251,19 +249,16 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-bottom: 0;
       }
       WUP-SWITCH input,
-      WUP-SWITCH textarea {
+      WUP-SWITCH textarea,
+      WUP-SWITCH [contenteditable] {
         padding: 0;
         margin: 0;
         cursor: inherit;
       }
-      WUP-SWITCH input + strong,
-      WUP-SWITCH textarea + strong {
+      WUP-SWITCH strong {
         cursor: inherit;
       }
-      WUP-SWITCH input:required + strong:after,
-      WUP-SWITCH input[aria-required="true"] + strong:after,
-      WUP-SWITCH textarea:required + strong:after,
-      WUP-SWITCH textarea[aria-required="true"] + strong:after,
+      WUP-SWITCH [aria-required="true"] + strong:after,
       WUP-SWITCH fieldset[aria-required="true"] &gt; legend:after {
         content: "*";
         font-size: larger;

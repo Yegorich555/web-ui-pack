@@ -6,12 +6,14 @@ exports[`control.textarea $ariaDetails 1`] = `
     for="txt1"
   >
     <span>
-      <textarea
-        autocomplete="off"
-        id="txt1"
-        placeholder=" "
+      <span
+        aria-labelledby="txt1"
+        contenteditable="true"
+        role="textbox"
       />
-      <strong />
+      <strong
+        id="txt1"
+      />
       <span
         class="wup-hidden"
       >
@@ -33,12 +35,14 @@ exports[`control.textarea $ariaDetails 2`] = `
     for="txt1"
   >
     <span>
-      <textarea
-        autocomplete="off"
-        id="txt1"
-        placeholder=" "
+      <span
+        aria-labelledby="txt1"
+        contenteditable="true"
+        role="textbox"
       />
-      <strong />
+      <strong
+        id="txt1"
+      />
     </span>
     <button
       aria-hidden="true"
@@ -55,13 +59,15 @@ exports[`control.textarea $ariaSpeak 1`] = `
     for="txt1"
   >
     <span>
-      <textarea
+      <span
         aria-describedby="my-test-id txt2 my-test-id2"
-        autocomplete="off"
-        id="txt1"
-        placeholder=" "
+        aria-labelledby="txt1"
+        contenteditable="true"
+        role="textbox"
       />
-      <strong />
+      <strong
+        id="txt1"
+      />
     </span>
     <button
       aria-hidden="true"
@@ -86,13 +92,15 @@ exports[`control.textarea $ariaSpeak 2`] = `
     for="txt1"
   >
     <span>
-      <textarea
+      <span
         aria-describedby="my-test-id my-test-id2"
-        autocomplete="off"
-        id="txt1"
-        placeholder=" "
+        aria-labelledby="txt1"
+        contenteditable="true"
+        role="textbox"
       />
-      <strong />
+      <strong
+        id="txt1"
+      />
     </span>
     <button
       aria-hidden="true"
@@ -109,12 +117,14 @@ exports[`control.textarea $show/$hide error 1`] = `
     for="txt1"
   >
     <span>
-      <textarea
-        autocomplete="off"
-        id="txt1"
-        placeholder=" "
+      <span
+        aria-labelledby="txt1"
+        contenteditable="true"
+        role="textbox"
       />
-      <strong />
+      <strong
+        id="txt1"
+      />
     </span>
     <button
       aria-hidden="true"
@@ -133,13 +143,15 @@ exports[`control.textarea $show/$hide error 2`] = `
     for="txt1"
   >
     <span>
-      <textarea
+      <span
         aria-describedby="txt2"
-        autocomplete="off"
-        id="txt1"
-        placeholder=" "
+        aria-labelledby="txt1"
+        contenteditable="true"
+        role="textbox"
       />
-      <strong />
+      <strong
+        id="txt1"
+      />
     </span>
     <button
       aria-hidden="true"
@@ -170,12 +182,14 @@ exports[`control.textarea $show/$hide error 3`] = `
     for="txt1"
   >
     <span>
-      <textarea
-        autocomplete="off"
-        id="txt1"
-        placeholder=" "
+      <span
+        aria-labelledby="txt1"
+        contenteditable="true"
+        role="textbox"
       />
-      <strong />
+      <strong
+        id="txt1"
+      />
     </span>
     <button
       aria-hidden="true"
@@ -245,6 +259,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-TEXTAREA strong,
       WUP-TEXTAREA legend {
         color: var(--ctrl-label);
+        pointer-events: none;
       }
       WUP-TEXTAREA:focus-within,
       WUP-TEXTAREA:focus-within &gt; [menu] {
@@ -252,21 +267,18 @@ clip: rect(1px, 1px, 1px, 1px);}
         outline: 1px solid var(--ctrl-focus);
       }
       WUP-TEXTAREA:focus-within strong,
-      WUP-TEXTAREA:focus-within legend,
-      WUP-TEXTAREA input:focus + strong {
+      WUP-TEXTAREA:focus-within legend {
         color: var(--ctrl-focus-label);
+        pointer-events: initial;
       }
-      WUP-TEXTAREA:not(:focus-within) strong {
-        pointer-events: none;
-      }
-      [disabled]&gt;WUP-TEXTAREA,
+      [disabled] WUP-TEXTAREA,
       WUP-TEXTAREA[disabled] {
         opacity: 0.6;
         cursor: not-allowed;
         -webkit-user-select: none;
         user-select: none;
       }
-      [disabled]&gt;WUP-TEXTAREA &gt; *,
+      [disabled] WUP-TEXTAREA &gt; *,
       WUP-TEXTAREA[disabled] &gt; * {
         pointer-events: none;
       }
@@ -286,19 +298,16 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-bottom: 0;
       }
       WUP-TEXTAREA input,
-      WUP-TEXTAREA textarea {
+      WUP-TEXTAREA textarea,
+      WUP-TEXTAREA [contenteditable] {
         padding: 0;
         margin: 0;
         cursor: inherit;
       }
-      WUP-TEXTAREA input + strong,
-      WUP-TEXTAREA textarea + strong {
+      WUP-TEXTAREA strong {
         cursor: inherit;
       }
-      WUP-TEXTAREA input:required + strong:after,
-      WUP-TEXTAREA input[aria-required="true"] + strong:after,
-      WUP-TEXTAREA textarea:required + strong:after,
-      WUP-TEXTAREA textarea[aria-required="true"] + strong:after,
+      WUP-TEXTAREA [aria-required="true"] + strong:after,
       WUP-TEXTAREA fieldset[aria-required="true"] &gt; legend:after {
         content: "*";
         font-size: larger;
@@ -386,6 +395,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-TEXTAREA input,
         WUP-TEXTAREA textarea,
+        WUP-TEXTAREA [contenteditable],
         WUP-TEXTAREA [maskholder],
         WUP-TEXTAREA [prefix],
         WUP-TEXTAREA [postfix] {
@@ -401,6 +411,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-TEXTAREA input,
         WUP-TEXTAREA textarea,
+        WUP-TEXTAREA [contenteditable],
         WUP-TEXTAREA [maskholder],
         WUP-TEXTAREA [postfix] {
           width: 100%;
@@ -436,17 +447,18 @@ mask-image: var(--ctrl-icon-img);
           white-space: pre;
         }
         WUP-TEXTAREA input:-webkit-autofill,
-        WUP-TEXTAREA textarea:-webkit-autofill {
+        WUP-TEXTAREA textarea:-webkit-autofill,
+        WUP-TEXTAREA [contenteditable]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
         WUP-TEXTAREA input:autofill,
-        WUP-TEXTAREA textarea:autofill {
+        WUP-TEXTAREA textarea:autofill,
+        WUP-TEXTAREA [contenteditable]:autofill {
           font: inherit;
           background-clip: text;
         }
-        WUP-TEXTAREA input + strong,
-        WUP-TEXTAREA textarea + strong {
+        WUP-TEXTAREA strong {
           display: block;
           position: absolute;
           top: 50%;
@@ -464,8 +476,7 @@ mask-image: var(--ctrl-icon-img);
           text-decoration: none;
         }
         @media not all and (prefers-reduced-motion) {
-          WUP-TEXTAREA input + strong,
-          WUP-TEXTAREA textarea + strong {
+          WUP-TEXTAREA strong {
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
@@ -473,10 +484,10 @@ mask-image: var(--ctrl-icon-img);
         WUP-TEXTAREA textarea:not(:focus)::placeholder {
           color: transparent;
         }
-        WUP-TEXTAREA:focus-within input + strong,
-        WUP-TEXTAREA:focus-within textarea + strong,
+        WUP-TEXTAREA:focus-within strong,
         WUP-TEXTAREA input:not(:placeholder-shown) + strong,
         WUP-TEXTAREA textarea:not(:placeholder-shown) + strong,
+        WUP-TEXTAREA [contenteditable]:not(:empty) + strong,
         WUP-TEXTAREA legend {
           top: 0.2em;
           transform: scale(0.9);
@@ -485,8 +496,8 @@ mask-image: var(--ctrl-icon-img);
         WUP-TEXTAREA:focus-within [prefix],
         WUP-TEXTAREA:focus-within [postfix],
         WUP-TEXTAREA input:not(:placeholder-shown) ~ [prefix],
-        WUP-TEXTAREA input:not(:placeholder-shown) ~ [prefix],
-        WUP-TEXTAREA textarea:not(:placeholder-shown) ~ [postfix],
+        WUP-TEXTAREA input:not(:placeholder-shown) ~ [postfix],
+        WUP-TEXTAREA textarea:not(:placeholder-shown) ~ [prefix],
         WUP-TEXTAREA textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
         }
@@ -570,11 +581,16 @@ mask-image: var(--ctrl-icon-img);
             pointer-events: none;
           }
         }
-        WUP-TEXTAREA textarea {
+        WUP-TEXTAREA strong { top: 1.6em; }
+        WUP-TEXTAREA [contenteditable] {
           min-height: 4em;
+          max-height: 4em;
           resize: none;
-          display: block; 
+          display: inline-block; 
+          cursor: text;
           white-space: pre-wrap;
+          word-break: break-word;
+          overflow-wrap: break-word;
           overflow: auto;
           margin: var(--ctrl-padding);
           padding: 0;
@@ -582,26 +598,26 @@ mask-image: var(--ctrl-icon-img);
           margin-right: 0;
         }
         
-WUP-TEXTAREA textarea::-webkit-scrollbar {
+WUP-TEXTAREA [contenteditable]::-webkit-scrollbar {
   width: 10px; height: 10px;
 }
-WUP-TEXTAREA textarea::-webkit-scrollbar-corner {
+WUP-TEXTAREA [contenteditable]::-webkit-scrollbar-corner {
   background: none;
 }
-WUP-TEXTAREA textarea::-webkit-scrollbar-thumb {
+WUP-TEXTAREA [contenteditable]::-webkit-scrollbar-thumb {
   border: 3px solid rgba(0,0,0,0);
   background-clip: padding-box;
   background-color: var(--scroll, rgba(0,0,0,0.2));
   border-radius: 999px;
 }
-WUP-TEXTAREA textarea::-webkit-scrollbar-track-piece:vertical:start,
-WUP-TEXTAREA textarea::-webkit-scrollbar-track-piece:vertical:end,
-WUP-TEXTAREA textarea::-webkit-scrollbar-track-piece:horizontal:start,
-WUP-TEXTAREA textarea::-webkit-scrollbar-track-piece:horizontal:end {
+WUP-TEXTAREA [contenteditable]::-webkit-scrollbar-track-piece:vertical:start,
+WUP-TEXTAREA [contenteditable]::-webkit-scrollbar-track-piece:vertical:end,
+WUP-TEXTAREA [contenteditable]::-webkit-scrollbar-track-piece:horizontal:start,
+WUP-TEXTAREA [contenteditable]::-webkit-scrollbar-track-piece:horizontal:end {
   margin: 0;
 }
 @media (hover) {
-  WUP-TEXTAREA textarea::-webkit-scrollbar-thumb:hover {
+  WUP-TEXTAREA [contenteditable]::-webkit-scrollbar-thumb:hover {
     background-color: var(--scroll-hover, rgba(0,0,0,0.5));
   }
 }
@@ -614,13 +630,15 @@ exports[`control.textarea options clearButton 1`] = `
     for="txt1"
   >
     <span>
-      <textarea
+      <span
         aria-describedby="txt2"
-        autocomplete="off"
-        id="txt1"
-        placeholder=" "
+        aria-labelledby="txt1"
+        contenteditable="true"
+        role="textbox"
       />
-      <strong />
+      <strong
+        id="txt1"
+      />
     </span>
     <button
       aria-hidden="true"
@@ -643,13 +661,15 @@ exports[`control.textarea options clearButton 2`] = `
     for="txt1"
   >
     <span>
-      <textarea
+      <span
         aria-describedby="txt2"
-        autocomplete="off"
-        id="txt1"
-        placeholder=" "
+        aria-labelledby="txt1"
+        contenteditable="true"
+        role="textbox"
       />
-      <strong />
+      <strong
+        id="txt1"
+      />
     </span>
   </label>
   <section
@@ -669,14 +689,16 @@ exports[`control.textarea validations $options.validationShowAll 1`] = `
     for="txt1"
   >
     <span>
-      <textarea
+      <span
         aria-describedby="txt2"
+        aria-labelledby="txt1"
         aria-required="true"
-        autocomplete="off"
-        id="txt1"
-        placeholder=" "
+        contenteditable="true"
+        role="textbox"
       />
-      <strong />
+      <strong
+        id="txt1"
+      />
     </span>
     <button
       aria-hidden="true"
@@ -723,14 +745,18 @@ exports[`control.textarea validations $options.validationShowAll 2`] = `
     for="txt1"
   >
     <span>
-      <textarea
+      <span
         aria-describedby="txt3"
+        aria-labelledby="txt1"
         aria-required="true"
-        autocomplete="off"
+        contenteditable="true"
+        role="textbox"
+      >
+        123
+      </span>
+      <strong
         id="txt1"
-        placeholder=" "
       />
-      <strong />
     </span>
     <button
       aria-hidden="true"
@@ -783,14 +809,16 @@ exports[`control.textarea validations $options.validationShowAll 3`] = `
     for="txt1"
   >
     <span>
-      <textarea
+      <span
         aria-describedby="txt6"
+        aria-labelledby="txt1"
         aria-required="true"
-        autocomplete="off"
-        id="txt1"
-        placeholder=" "
+        contenteditable="true"
+        role="textbox"
       />
-      <strong>
+      <strong
+        id="txt1"
+      >
         First Name
       </strong>
     </span>
@@ -826,12 +854,16 @@ exports[`control.textarea validations options.validationCase 1`] = `
     for="txt1"
   >
     <span>
-      <textarea
-        autocomplete="off"
+      <span
+        aria-labelledby="txt1"
+        contenteditable="true"
+        role="textbox"
+      >
+        123
+      </span>
+      <strong
         id="txt1"
-        placeholder=" "
       />
-      <strong />
     </span>
     <button
       aria-hidden="true"
@@ -850,14 +882,16 @@ exports[`control.textarea validations options.validationCase 2`] = `
     for="txt1"
   >
     <span>
-      <textarea
+      <span
         aria-describedby="txt3"
+        aria-labelledby="txt1"
         aria-required="true"
-        autocomplete="off"
-        id="txt1"
-        placeholder=" "
+        contenteditable="true"
+        role="textbox"
       />
-      <strong>
+      <strong
+        id="txt1"
+      >
         First Input
       </strong>
     </span>
@@ -894,14 +928,18 @@ exports[`control.textarea validations options.validationCase 3`] = `
     for="txt1"
   >
     <span>
-      <textarea
+      <span
         aria-describedby="txt4"
+        aria-labelledby="txt1"
         aria-required="true"
-        autocomplete="off"
+        contenteditable="true"
+        role="textbox"
+      >
+        123
+      </span>
+      <strong
         id="txt1"
-        placeholder=" "
-      />
-      <strong>
+      >
         First Input
       </strong>
     </span>
@@ -938,14 +976,16 @@ exports[`control.textarea validations options.validationCase 4`] = `
     for="txt1"
   >
     <span>
-      <textarea
+      <span
         aria-describedby="txt5"
+        aria-labelledby="txt1"
         aria-required="true"
-        autocomplete="off"
-        id="txt1"
-        placeholder=" "
+        contenteditable="true"
+        role="textbox"
       />
-      <strong>
+      <strong
+        id="txt1"
+      >
         First Input
       </strong>
     </span>
@@ -984,12 +1024,14 @@ exports[`control.textarea with form 1`] = `
       for="txt1"
     >
       <span>
-        <textarea
-          autocomplete="off"
-          id="txt1"
-          placeholder=" "
+        <span
+          aria-labelledby="txt1"
+          contenteditable="true"
+          role="textbox"
         />
-        <strong>
+        <strong
+          id="txt1"
+        >
           First Input
         </strong>
       </span>

@@ -218,6 +218,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-CHECK strong,
       WUP-CHECK legend {
         color: var(--ctrl-label);
+        pointer-events: none;
       }
       WUP-CHECK:focus-within,
       WUP-CHECK:focus-within &gt; [menu] {
@@ -225,21 +226,18 @@ clip: rect(1px, 1px, 1px, 1px);}
         outline: 1px solid var(--ctrl-focus);
       }
       WUP-CHECK:focus-within strong,
-      WUP-CHECK:focus-within legend,
-      WUP-CHECK input:focus + strong {
+      WUP-CHECK:focus-within legend {
         color: var(--ctrl-focus-label);
+        pointer-events: initial;
       }
-      WUP-CHECK:not(:focus-within) strong {
-        pointer-events: none;
-      }
-      [disabled]&gt;WUP-CHECK,
+      [disabled] WUP-CHECK,
       WUP-CHECK[disabled] {
         opacity: 0.6;
         cursor: not-allowed;
         -webkit-user-select: none;
         user-select: none;
       }
-      [disabled]&gt;WUP-CHECK &gt; *,
+      [disabled] WUP-CHECK &gt; *,
       WUP-CHECK[disabled] &gt; * {
         pointer-events: none;
       }
@@ -259,19 +257,16 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-bottom: 0;
       }
       WUP-CHECK input,
-      WUP-CHECK textarea {
+      WUP-CHECK textarea,
+      WUP-CHECK [contenteditable] {
         padding: 0;
         margin: 0;
         cursor: inherit;
       }
-      WUP-CHECK input + strong,
-      WUP-CHECK textarea + strong {
+      WUP-CHECK strong {
         cursor: inherit;
       }
-      WUP-CHECK input:required + strong:after,
-      WUP-CHECK input[aria-required="true"] + strong:after,
-      WUP-CHECK textarea:required + strong:after,
-      WUP-CHECK textarea[aria-required="true"] + strong:after,
+      WUP-CHECK [aria-required="true"] + strong:after,
       WUP-CHECK fieldset[aria-required="true"] &gt; legend:after {
         content: "*";
         font-size: larger;
