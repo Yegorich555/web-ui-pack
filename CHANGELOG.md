@@ -5,14 +5,19 @@
 **BREAKING CHANGES**:
 
 - DateControl:
+
   - Was
     - changing `$options.format` & attr `[format]` related to all date-strings: attributes `initvalue/min/max`.
     - default value `YYYY-MM-DD`
   - Now
     - changing `$options.format` & attr `[format]` related only to displayed text. All attributes must be pointed in universal format `YYYY-MM-DD`
     - default value depends on user localization; see [locale](src/helpers/localeInfo.ts)
+    - `$options.firstWeekDay` - default value depends on user localization; see [locale](src/helpers/localeInfo.ts)
+
 - CalendarControl:
   - deprecated static getters `$namesDayShort, $namesMonth, $namesMonthShort` in favor of [`localeInfo`](src/helpers/localeInfo.ts) helper
+  - `$options.firstDayOfWeek` is renamed to `firstWeekDay`
+  - `$options.firstWeekDay` - default value depends on user localization; see [locale](src/helpers/localeInfo.ts)
 
 **Fixes**:
 

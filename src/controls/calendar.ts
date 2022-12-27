@@ -19,8 +19,8 @@ export const enum PickersEnum {
 export namespace WUPCalendarIn {
   export interface Def {
     /** First day of week in calendar where 1-Monday, 7-Sunday;
-     * @defaultValue 1 (Monday) */
-    firstDayOfWeek: 1 | 2 | 3 | 4 | 5 | 6 | 7;
+     * @defaultValue localeInfo.firstWeekDay */
+    firstWeekDay?: number;
   }
   export interface Opt {
     /** User can't select date less than min; point new Date(Date.UTC(2022,1,25)) for `utc:true`, or new Date(2022,1,25) */
@@ -35,6 +35,7 @@ export namespace WUPCalendarIn {
     /** Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this
      *  @defaultValue true */
     utc?: boolean;
+    firstWeekDay: number;
   }
 
   export interface JSXProps {
@@ -322,13 +323,13 @@ export default class WUPCalendarControl<
   /** Returns days of pointed number-of-month with placeholders of prev, next months
    * @param year 2022 etc.
    * @param month index of month (0-11)
-   * @param firstDayOfWeek where 1-Monday, 7-Sunday
+   * @param firstWeekDay where 1-Monday, 7-Sunday
    */
-  static $daysOfMonth(year: number, month: number, firstDayOfWeek = 1): WUPCalendar.MonthInfo {
+  static $daysOfMonth(year: number, month: number, firstWeekDay = 1): WUPCalendar.MonthInfo {
     let dt = new Date(year, month + 1, 0); // month in JS is 0-11 index based but here is a hack: returns last day of month
     const r: WUPCalendar.MonthInfo = { total: dt.getDate(), nextTo: 0, first: 0 };
     dt.setDate(1); // reset to first day
-    let shift = (dt.getDay() || 7) - firstDayOfWeek; // days-shift to firstOfWeek // get dayOfWeek  returns Sun...Sat (0...6) and need to normalize to Mon-1 Sun-7
+    let shift = (dt.getDay() || 7) - firstWeekDay; // days-shift to firstOfWeek // get dayOfWeek  returns Sun...Sat (0...6) and need to normalize to Mon-1 Sun-7
     if (shift < 0) {
       shift += 7;
     }
@@ -375,7 +376,6 @@ export default class WUPCalendarControl<
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUPCalendar.Defaults = {
     ...WUPBaseControl.$defaults,
-    firstDayOfWeek: 1,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
     },
@@ -384,6 +384,7 @@ export default class WUPCalendarControl<
   $options: WUPCalendar.Options<ValueType> = {
     ...this.#ctr.$defaults,
     utc: true,
+    firstWeekDay: this.#ctr.$defaults.firstWeekDay || localeInfo.firstWeekDay,
     // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory
   };
@@ -594,7 +595,7 @@ export default class WUPCalendarControl<
       days.setAttribute("aria-hidden", true);
       box.prepend(days);
       const names = localeInfo.namesDayShort;
-      for (let i = 0, n = this._opts.firstDayOfWeek - 1; i < 7; ++i, ++n) {
+      for (let i = 0, n = this._opts.firstWeekDay - 1; i < 7; ++i, ++n) {
         const d = add(days, "li");
         if (n >= names.length) {
           n = 0;
@@ -615,7 +616,7 @@ export default class WUPCalendarControl<
       this.$refCalenarTitle.textContent = `${namesMonth[valMonth]} ${valYear}`;
 
       const items: WUPCalendarIn.ItemElement[] = [];
-      const r = this.#ctr.$daysOfMonth(valYear, valMonth, this._opts.firstDayOfWeek);
+      const r = this.#ctr.$daysOfMonth(valYear, valMonth, this._opts.firstWeekDay);
 
       let iPrev = -999;
       if (ol.children.length) {

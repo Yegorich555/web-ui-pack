@@ -9,6 +9,7 @@ describe("helper.localeInfo", () => {
       WUPlocaleInfo {
         "date": "YYYY-MM-DD",
         "dateTime": "YYYY-MM-DD hh:mm:ss a",
+        "firstWeekDay": 1,
         "locale": "",
         "localeUser": "en-US",
         "sep1000": ",",
@@ -50,6 +51,10 @@ describe("helper.localeInfo", () => {
     localeInfo.locale = "";
     localeInfo.namesDayShort = undefined;
     expect(localeInfo.namesDayShort).toBeDefined();
+
+    Intl.Locale.prototype.weekInfo = { firstDay: 7 };
+    localeInfo.refresh("en-US");
+    expect(localeInfo.firstWeekDay).toBe(7);
   });
 
   test("day short names", () => {

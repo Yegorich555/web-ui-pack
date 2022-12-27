@@ -130,7 +130,7 @@ export default function calendarTZtest() {
             jest.setSystemTime(new Date(2022, curMonth, 16, 23, 49));
             el.remove(); // otherwise option startWith doesn't work
             el.$options.utc = opt.utc;
-            el.$options.firstDayOfWeek = ds.startOfWeek as any;
+            el.$options.firstWeekDay = ds.startOfWeek as any;
             el.$options.startWith = PickersEnum.Day | 0;
             el.$initValue = initDate(2022, curMonth, 5);
             document.body.appendChild(el);

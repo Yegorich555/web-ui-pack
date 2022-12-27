@@ -137,7 +137,7 @@ export default class WUPDateControl<
       exclude: (v, setV) =>
         (v === undefined || setV.some((d) => d.valueOf() === v.valueOf())) && `This date is disabled`,
     },
-    firstDayOfWeek: 1,
+    // firstWeekDay: 1,
     // format: localeInfo.date.toLowerCase()
   };
 
@@ -145,6 +145,7 @@ export default class WUPDateControl<
     ...this.#ctr.$defaults,
     utc: true,
     format: this.#ctr.$defaults.format || localeInfo.date.toLowerCase(),
+    firstWeekDay: this.#ctr.$defaults.firstWeekDay || localeInfo.firstWeekDay,
     // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory
   };

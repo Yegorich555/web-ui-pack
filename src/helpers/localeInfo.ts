@@ -14,6 +14,12 @@ export class WUPlocaleInfo {
   time = "hh:mm:ss a";
   /** Date+Time format, example YYYY-MM-DD hh:mm:ss a */
   dateTime = "YYYY-MM-DD hh:mm:ss a";
+  /** First day of week where 1-Monday, 7-Sunday;
+   * @tutorial Troubleshooting
+   * * detection depeneds on `Intl.Locale.prototype.weekInfo` https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/weekInfo
+   * and works from Chrome99 & Safari 15.4 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/weekInfo#browser_compatibility
+   */
+  firstWeekDay = 1;
 
   /** Re-define all values (call it if localization changed or you want to set another locale) */
   refresh(locale?: string): void {
@@ -27,6 +33,21 @@ export class WUPlocaleInfo {
     this.#namesMonthShort = undefined;
     this.#namesDayShort = undefined;
     Object.assign(localeInfo, this.getNumberOptions(locale), this.getDateFormat(locale));
+
+    try {
+      /* istanbul ignore else */
+      if (Intl.Locale) {
+        // watchfix related issue: https://github.com/tc39/ecma402/issues/6
+        const firstDay = (new Intl.Locale(cur.locale) as any).weekInfo?.firstDay;
+        /* istanbul ignore else */
+        if (firstDay) {
+          this.firstWeekDay = firstDay;
+        }
+      }
+    } catch (error) {
+      /* istanbul ignore next */
+      console.error(error);
+    }
   }
 
   /** Returns number format according to pointed locale or (user-locale if pointed undefined) */
@@ -187,7 +208,7 @@ export class WUPlocaleInfo {
  *  @defaultValue 'en-US' with custom dateTime format;
  * @tutorial Troubleshooting
  * * in JS impossible to define whether user-settings is different from user-locale
- * * there is no way to define firstDayOfWeek for calendar
+ * * there is no way to define firstWeekDay for calendar
  * * you can redefine/set any property if somehow it locale-definitions don't fit your expectations */
 const localeInfo = new WUPlocaleInfo();
 
@@ -204,5 +225,3 @@ export default localeInfo;
 //   // console.warn(localeInfo.namesMonth);
 //   // console.warn(localeInfo.namesMonthShort);
 // });
-
-// NiceToHave (watch): getFirstDayOfWeek: https://github.com/tc39/ecma402/issues/6
