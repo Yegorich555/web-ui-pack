@@ -1,0 +1,562 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`control.switch $ariaDetails 1`] = `
+<wup-switch>
+  <label
+    for="txt1"
+  >
+    <input
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong />
+    <span />
+    <span
+      class="wup-hidden"
+    >
+      Some details for screen-readers
+    </span>
+  </label>
+</wup-switch>
+`;
+
+exports[`control.switch $ariaDetails 2`] = `
+<wup-switch>
+  <label
+    for="txt1"
+  >
+    <input
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong />
+    <span />
+  </label>
+</wup-switch>
+`;
+
+exports[`control.switch $ariaSpeak 1`] = `
+<wup-switch>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-describedby="my-test-id txt2 my-test-id2"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong />
+    <span />
+  </label>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt2"
+  >
+    Hello
+  </section>
+</wup-switch>
+`;
+
+exports[`control.switch $ariaSpeak 2`] = `
+<wup-switch>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-describedby="my-test-id my-test-id2"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong />
+    <span />
+  </label>
+</wup-switch>
+`;
+
+exports[`control.switch $show/$hide error 1`] = `
+<wup-switch>
+  <label
+    for="txt1"
+  >
+    <input
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong />
+    <span />
+  </label>
+</wup-switch>
+`;
+
+exports[`control.switch $show/$hide error 2`] = `
+<wup-switch
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-describedby="txt2"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong />
+    <span />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    role="alert"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      Some custom message here
+    </span>
+  </wup-popup>
+</wup-switch>
+`;
+
+exports[`control.switch $show/$hide error 3`] = `
+<wup-switch>
+  <label
+    for="txt1"
+  >
+    <input
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong />
+    <span />
+  </label>
+</wup-switch>
+`;
+
+exports[`control.switch common tests render + styles 1`] = `<wup-switch />`;
+
+exports[`control.switch common tests render + styles 2`] = `
+<style>
+  .wup-hidden, [wup-hidden] {
+position: absolute;
+height: 1px; width: 1px;
+top:0;left:0;
+overflow: hidden;
+clip: rect(1px, 1px, 1px, 1px);}
+  :root {
+          --base-bg: #fff;
+          --base-text: #232323;
+          --base-focus: #00778d;
+          --base-btn-bg: #009fbc;
+          --base-btn-text: #fff;
+          --base-btn-focus: #005766;
+          --base-btn2-bg: var(--base-btn-text);
+          --base-btn2-text: var(--base-btn-bg);
+          --border-radius: 6px;
+          --anim-time: 200ms;
+          --anim: var(--anim-time, 200ms) cubic-bezier(0, 0, 0.2, 1) 0ms;
+        }
+  :root {
+        --ctrl-padding: 1.5em 1em 0.5em 1em;
+        --ctrl-focus: var(--base-focus);
+        --ctrl-focus-label: var(--base-focus);
+        --ctrl-selected: var(--ctrl-focus-label);
+        --ctrl-label: #5e5e5e;
+        --ctrl-icon: var(--ctrl-label);
+        --ctrl-icon-size: 1em;
+        --ctrl-bg: var(--base-bg);
+        --ctrl-border-radius: var(--border-radius);
+        --ctrl-err-text: #ad0000;
+        --ctrl-err-bg: #fff4fa;
+        --ctrl-err-icon-valid: green;
+        --ctrl-invalid-border: red;
+        --wup-icon-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M674.515 93.949a45.925 45.925 0 0 0-65.022 0L384.001 318.981 158.509 93.487a45.928 45.928 0 0 0-65.022 0c-17.984 17.984-17.984 47.034 0 65.018l225.492 225.494L93.487 609.491c-17.984 17.984-17.984 47.034 0 65.018s47.034 17.984 65.018 0l225.492-225.492 225.492 225.492c17.984 17.984 47.034 17.984 65.018 0s17.984-47.034 0-65.018L449.015 383.999l225.492-225.494c17.521-17.521 17.521-47.034 0-64.559z'/%3E%3C/svg%3E");
+        --wup-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath stroke='black' stroke-width='40' d='M37.691 450.599 224.76 635.864c21.528 21.32 56.11 21.425 77.478 0l428.035-426.23c21.47-21.38 21.425-56.11 0-77.478s-56.11-21.425-77.478 0L263.5 519.647 115.168 373.12c-21.555-21.293-56.108-21.425-77.478 0s-21.425 56.108 0 77.478z'/%3E%3C/svg%3E");
+        --wup-icon-dot: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='20'/%3E%3C/svg%3E");
+      }
+  :root {
+      --ctrl-switch-padding: 1em;
+      --ctrl-switch-on: #fff;
+      --ctrl-switch-off: #fff;
+      --ctrl-switch-shadow: #0003;
+      --ctrl-switch-off-bg: #9f9f9f;
+      --ctrl-switch-on-bg: var(--ctrl-focus);
+      --ctrl-switch-size-h: var(--ctrl-icon-size);
+      --ctrl-switch-size-w: calc(var(--ctrl-switch-size-spot) * 2);
+      --ctrl-switch-size-spot: calc(var(--ctrl-switch-size-h) * 1.4);
+     }
+  
+      WUP-SWITCH {
+        contain: style;
+        display: block;
+        margin-bottom: 20px;
+        position: relative;
+        border-radius: var(--ctrl-border-radius);
+        background: var(--ctrl-bg);
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+      WUP-SWITCH strong,
+      WUP-SWITCH legend {
+        color: var(--ctrl-label);
+        pointer-events: none;
+      }
+      WUP-SWITCH:focus-within,
+      WUP-SWITCH:focus-within &gt; [menu] {
+        z-index: 90010;
+        outline: 1px solid var(--ctrl-focus);
+      }
+      WUP-SWITCH:focus-within strong,
+      WUP-SWITCH:focus-within legend {
+        color: var(--ctrl-focus-label);
+        pointer-events: initial;
+      }
+      [disabled] WUP-SWITCH,
+      WUP-SWITCH[disabled] {
+        opacity: 0.6;
+        cursor: not-allowed;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      [disabled] WUP-SWITCH &gt; *,
+      WUP-SWITCH[disabled] &gt; * {
+        pointer-events: none;
+      }
+      WUP-SWITCH[invalid],
+      WUP-SWITCH[invalid] &gt; [menu] {
+        box-shadow: 0 0 3px 0 var(--ctrl-invalid-border);
+        outline-color: var(--ctrl-invalid-border);
+      }
+      WUP-SWITCH label {
+        display: flex;
+        align-items: center;
+        box-sizing: border-box;
+        font: inherit;
+        cursor: inherit;
+        padding: var(--ctrl-padding);
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+      WUP-SWITCH input,
+      WUP-SWITCH textarea,
+      WUP-SWITCH [contenteditable] {
+        padding: 0;
+        margin: 0;
+        cursor: inherit;
+      }
+      WUP-SWITCH strong {
+        cursor: inherit;
+      }
+      WUP-SWITCH [aria-required="true"] + strong:after,
+      WUP-SWITCH fieldset[aria-required="true"] &gt; legend:after {
+        content: "*";
+        font-size: larger;
+        font-weight: bolder;
+        line-height: 0;
+      }
+      WUP-SWITCH [error] {
+        cursor: pointer;
+        font-size: small;
+        color: var(--ctrl-err-text);
+        background: var(--ctrl-err-bg);
+        max-height: 3em;
+        overflow: auto;
+        overflow: overlay;
+      }
+      WUP-SWITCH [error] ul {
+        margin:0; padding:2px 4px 2px;
+      }
+      WUP-SWITCH [error] li {
+        display: flex;
+        align-items: center;
+        margin-left: -5px;
+      }
+      WUP-SWITCH [error] li:before {
+        content: '';
+        --ctrl-icon-img: var(--wup-icon-dot);
+        --ctrl-icon: var(--ctrl-err-text);
+        
+display: inline-block;
+width: var(--ctrl-icon-size);
+min-height: var(--ctrl-icon-size);
+box-sizing: content-box;
+margin: 0;
+padding: 0 5px;
+flex: 0 0 auto;
+align-self: stretch;
+cursor: pointer;
+border: none;
+box-shadow: none;
+background: var(--ctrl-icon);
+-webkit-mask-size: var(--ctrl-icon-size);
+mask-size: var(--ctrl-icon-size);
+-webkit-mask-repeat: no-repeat;
+mask-repeat: no-repeat;
+-webkit-mask-position: center;
+mask-position: center;
+-webkit-mask-image: var(--ctrl-icon-img);
+mask-image: var(--ctrl-icon-img);
+      }
+      WUP-SWITCH [error] li[valid] {
+        color: var(--ctrl-err-icon-valid);
+      }
+      WUP-SWITCH [error] li[valid]:before {
+        content: '';
+        --ctrl-icon-img: var(--wup-icon-check);
+        --ctrl-icon: var(--ctrl-err-icon-valid);
+      }
+      WUP-SWITCH:focus-within [error] {
+        max-height: none;
+      }
+      @media (hover: hover) {
+        /*WUP-SWITCH:hover {
+          z-index: 90011;
+        }
+        WUP-SWITCH:hover [error] {
+          max-height: none;
+        }*/
+        WUP-SWITCH:hover,
+        WUP-SWITCH:hover &gt; [menu] {
+          box-shadow: 0 0 3px 1px var(--ctrl-focus);
+        }
+        WUP-SWITCH[invalid]:hover,
+        WUP-SWITCH[invalid]:hover &gt; [menu] {
+          box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+        }
+      }
+      WUP-SWITCH {
+        background: none;
+        cursor: pointer;
+      }
+      WUP-SWITCH[readonly] {
+        cursor: initial;
+      }
+      WUP-SWITCH label {
+        padding: var(--ctrl-switch-padding);
+      }
+      WUP-SWITCH strong {
+        box-sizing: border-box;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        font-weight: normal;
+        text-decoration: none;
+        color: var(--ctrl-label);
+      }
+      WUP-SWITCH label&gt;span {
+        margin-left: 0.5em;
+        position: relative;
+        width: var(--ctrl-switch-size-w);
+        min-width: var(--ctrl-switch-size-w);
+        height: var(--ctrl-switch-size-h);
+        border-radius: 999px;
+        background: var(--ctrl-switch-off-bg);
+      }
+      WUP-SWITCH label&gt;span:before {
+        content: "";
+        position: absolute;
+        height: var(--ctrl-switch-size-spot);
+        width: var(--ctrl-switch-size-spot);
+        left: -1px; top: 50%;
+        transform: translateY(-50%);
+        background: var(--ctrl-switch-off);
+        box-shadow: 0 1px 4px 0 var(--ctrl-switch-shadow);
+        border-radius: 50%;
+      }
+      WUP-SWITCH input { 
+position: absolute;
+height: 1px; width: 1px;
+top:0;left:0;
+overflow: hidden;
+clip: rect(1px, 1px, 1px, 1px); }
+      WUP-SWITCH input:checked + * + * {
+        background-color: var(--ctrl-switch-on-bg);
+      }
+      WUP-SWITCH input:checked + * + *:before {
+        background: var(--ctrl-switch-on);
+        left: calc(100% - var(--ctrl-switch-size-w) + var(--ctrl-switch-size-spot) + 1px);
+      }
+      WUP-SWITCH[reverse] label {
+        flex-direction: row-reverse;
+      }
+      WUP-SWITCH[reverse] label&gt;span {
+        margin-left: 0;
+        margin-right: 0.5em;
+      }
+      WUP-SWITCH[reverse] label&gt;strong {
+        margin-right: auto;
+      }
+      @media not all and (prefers-reduced-motion) {
+        WUP-SWITCH label&gt;span { transition: background-color var(--anim); }
+        WUP-SWITCH label&gt;span:before { transition: left var(--anim); }
+      }
+      @media (hover: hover) {
+        WUP-SWITCH:hover label&gt;span:before {
+           box-shadow: 0 0 4px 0 var(--ctrl-focus);
+        }
+      }
+</style>
+`;
+
+exports[`control.switch validations options.validationCase 1`] = `
+<wup-switch>
+  <label
+    for="txt1"
+  >
+    <input
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong />
+    <span />
+  </label>
+</wup-switch>
+`;
+
+exports[`control.switch validations options.validationCase 2`] = `
+<wup-switch
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-describedby="txt3"
+      aria-required="true"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong>
+      First Input
+    </strong>
+    <span />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt3"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+</wup-switch>
+`;
+
+exports[`control.switch validations options.validationCase 3`] = `
+<wup-switch
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-describedby="txt4"
+      aria-required="true"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong>
+      First Input
+    </strong>
+    <span />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt4"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
+</wup-switch>
+`;
+
+exports[`control.switch validations options.validationCase 4`] = `
+<wup-switch
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-describedby="txt5"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong>
+      First Input
+    </strong>
+    <span />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt5"
+    role="alert"
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      Always error
+    </span>
+  </wup-popup>
+</wup-switch>
+`;
+
+exports[`control.switch with form 1`] = `
+<wup-form
+  role="form"
+>
+  <wup-switch>
+    <label
+      for="txt1"
+    >
+      <input
+        autocomplete="off"
+        id="txt1"
+        type="checkbox"
+      />
+      <strong>
+        First Input
+      </strong>
+      <span />
+    </label>
+  </wup-switch>
+</wup-form>
+`;

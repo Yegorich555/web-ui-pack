@@ -384,6 +384,23 @@ describe("formElement", () => {
       await h.wait(1);
       expect($submitEv).toBeCalledTimes(0);
       btnSubmit.removeEventListener("click", prevFn);
+
+      // Enter + ctrl, shift
+      jest.clearAllMocks();
+      inputs[0].dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+      await h.wait(1);
+      expect($submitEv).toBeCalledTimes(1);
+
+      jest.clearAllMocks();
+      inputs[0].dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", shiftKey: true, bubbles: true }));
+      inputs[0].dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, bubbles: true }));
+      await h.wait(1);
+      expect($submitEv).toBeCalledTimes(0);
+
+      inputs[0].addEventListener("keydown", (e) => (e.submitPrevented = true), { once: true });
+      inputs[0].dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, bubbles: true }));
+      await h.wait(1);
+      expect($submitEv).toBeCalledTimes(0);
     });
 
     test("collected model", async () => {

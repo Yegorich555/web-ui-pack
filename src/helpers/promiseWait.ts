@@ -15,34 +15,29 @@
 export default function promiseWait<T>(
   promise: Promise<T>,
   ms: number,
-  smartOrCallback: boolean | Function = true
+  smartOrCallback: boolean | ((isWait: boolean) => any) = true
 ): Promise<T> {
   let catchErr: Error;
   let isResolved = false;
-  let isNeedCall = false;
-
   promise
-    .catch((err) => {
-      catchErr = err;
-      return err;
-    })
-    .finally(() => {
-      isResolved = true;
-      isNeedCall && (smartOrCallback as Function)(false);
-    });
+    .catch((err) => (catchErr = err)) //
+    .finally(() => (isResolved = true));
 
-  return new Promise((resolve, reject) => {
+  const p = new Promise((resolve, reject) => {
     const end = (): void => (catchErr ? reject(catchErr) : resolve(promise));
     const a = setTimeout(end, ms);
+
     smartOrCallback &&
       setTimeout(() => {
         if (isResolved) {
           clearTimeout(a);
           end();
         } else if (typeof smartOrCallback === "function") {
-          isNeedCall = true;
           smartOrCallback(true);
+          p.finally(() => smartOrCallback(false));
         }
       });
   });
+
+  return p as Promise<T>;
 }

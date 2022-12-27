@@ -1,5 +1,45 @@
 # Changelog
 
+## 0.3.0 (\_\_\_)
+
+**BREAKING CHANGES**:
+
+- DateControl:
+
+  - Was
+    - changing `$options.format` & attr `[format]` related to all date-strings: attributes `initvalue/min/max`.
+    - default value `YYYY-MM-DD`
+  - Now
+    - changing `$options.format` & attr `[format]` related only to displayed text. All attributes must be pointed in universal format `YYYY-MM-DD`
+    - default value depends on user localization; see [locale](src/helpers/localeInfo.ts)
+    - `$options.firstWeekDay` - default value depends on user localization; see [locale](src/helpers/localeInfo.ts)
+
+- CalendarControl:
+  - deprecated static getters `$namesDayShort, $namesMonth, $namesMonthShort` in favor of [`localeInfo`](src/helpers/localeInfo.ts) helper
+  - `$options.firstDayOfWeek` is renamed to `firstWeekDay`
+  - `$options.firstWeekDay` - default value depends on user localization; see [locale](src/helpers/localeInfo.ts)
+
+**Fixes**:
+
+- Helper. promiseWait. Callback called before time end
+- Popup with arrow. Firefox bug: css filter `drop-shadow` works wrong with angle 180.0
+- SpinElement. Impossible to override color via applying css-var to body `--spin-2`
+
+**Features**:
+
+- Added $options.prefix & postfix for text-based controls
+- Support **MMM** in format for `dateToString, dateFromString`
+- Controls **Number, Date, Calendar** are locale based and depeneds on [`localeInfo`](src/helpers/localeInfo.ts) helper
+- Added elements
+
+  - [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
+  - [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
+
+- Added [helpers](README.md#helpers)
+  - [`onScroll`](src/helpers/onScroll.ts)
+  - [`localeInfo`](src/helpers/localeInfo.ts)
+  - [`mathSumFloat`](src/helpers/mathSumFloat.ts)
+
 ## 0.2.0 (Dec 09, 2022)
 
 **Fixes**:
@@ -10,8 +50,8 @@
 - SelectControl. Click on custom list-item with nested span doesn't call click-event
 - SelectControl. No scroll to selected element at first opening
 - SelectControl. Sometimes menu isn't opened
-- SelectControl. Fix `noItems` appeared on 2nd menu opening when user created a new value
-- Helper. observer. Fix onChange fired even date.setHours didn't change value
+- SelectControl. `noItems` appeared on 2nd menu opening when user created a new value
+- Helper. observer. onChange fired even date.setHours didn't change value
 
 **Features**:
 

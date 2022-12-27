@@ -475,6 +475,9 @@ export default class WUPFormElement<
       (e) =>
         e.key === "Enter" &&
         !e.defaultPrevented &&
+        !(e as any).submitPrevented && // textarea related
+        !e.shiftKey &&
+        !e.ctrlKey &&
         this.gotSubmit(e, e.target instanceof HTMLElement ? e.target : this),
       { passive: false }
     );

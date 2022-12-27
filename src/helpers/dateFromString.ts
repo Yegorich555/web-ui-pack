@@ -1,3 +1,5 @@
+import localeInfo from "./localeInfo";
+
 /** Returns parsed date from string based on pointed format
  * @param format 'yyyy-MM-dd hh:mm:ss.fff AZ'
  * @example
@@ -8,7 +10,10 @@
  * "yyyy-M-d h:m:s" => "2022-4-23 13:9:12"
  * "dd/MM/yyyy" => "23/04/2022"
  * "yyyy-MM-ddThh:mm:ss.fffZ" // ISOstring
+ * "MMM d/yyyy, hh:mm A" => "Apr 23, 04:09 PM" (depends on localeInfo.namesMonthShort)
  * "YYYYMMDD hhmmss" etc.
+ * @tutorial Troubleshooting
+ * * AM PM in the middle isn't supported (only at the end): use  'hh:mm, d/m/yyyy A' instead 'hh:mm A, d/m/yyyy'
  */
 export default function dateFromString(
   v: string,
@@ -23,6 +28,20 @@ export default function dateFromString(
   if (!v) {
     return null;
   }
+
+  // support for MMM format
+  format = format.replace(/MMM/, () /* (_s: string, _index: number) */ => {
+    localeInfo.namesMonthShort.some((name, i) => {
+      let isFound = false;
+      v = v.replace(name, () => {
+        isFound = true;
+        return (i + 1).toString();
+      });
+      return isFound;
+    });
+    return "M";
+  });
+
   let fLast = format.length - 1;
   const isUTC = format.endsWith("Z") || format.endsWith("z");
   fLast -= isUTC ? 1 : 0;
@@ -131,3 +150,6 @@ function isOutOfRange(
     false
   );
 }
+
+// console.warn(dateFromString("Apr 23/2022, 04:09 PM", "MMM d/yyyy, hh:mm A"));
+// console.warn(dateFromString("04:09 AM, Apr 23/2022", "hh:mm, MMM d/yyyy"));

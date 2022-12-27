@@ -1,7 +1,7 @@
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
 import { WUPcssHidden } from "../styles";
 import scrollCarousel from "../helpers/scrollCarousel";
-import { dateCopyTime } from "../indexHelpers";
+import { dateCopyTime, localeInfo } from "../indexHelpers";
 
 const tagName = "wup-calendar";
 
@@ -19,8 +19,8 @@ export const enum PickersEnum {
 export namespace WUPCalendarIn {
   export interface Def {
     /** First day of week in calendar where 1-Monday, 7-Sunday;
-     * @defaultValue 1 (Monday) */
-    firstDayOfWeek: 1 | 2 | 3 | 4 | 5 | 6 | 7;
+     * @defaultValue localeInfo.firstWeekDay */
+    firstWeekDay?: number;
   }
   export interface Opt {
     /** User can't select date less than min; point new Date(Date.UTC(2022,1,25)) for `utc:true`, or new Date(2022,1,25) */
@@ -35,14 +35,15 @@ export namespace WUPCalendarIn {
     /** Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this
      *  @defaultValue true */
     utc?: boolean;
+    firstWeekDay: number;
   }
 
   export interface JSXProps {
     /** @deprecated Picker that must be rendered at first */
     startWith?: "year" | "month" | "day";
-    /** @deprecated User can't select date less than min */
+    /** @deprecated User can't select date less than min; format yyyy-MM-dd */
     min?: string;
-    /** @deprecated User can't select date more than max */
+    /** @deprecated User can't select date more than max; format yyyy-MM-dd  */
     max?: string;
     /** @deprecated Dates that user can't choose. Point global obj-key (window.myExclude = [] ) */
     exclude?: string;
@@ -100,7 +101,10 @@ declare global {
     interface EventMap extends WUPBase.EventMap {}
     interface Defaults<T = string> extends WUPCalendarIn.GenDef<T> {}
     interface Options<T = string> extends WUPCalendarIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPCalendarControl> extends WUPBase.JSXProps<T>, WUPCalendarIn.JSXProps {}
+    interface JSXProps<T extends WUPCalendarControl> extends WUPBase.JSXProps<T>, WUPCalendarIn.JSXProps {
+      /** @deprecated default value; format yyyy-MM-dd hh:mm:ss.fff */
+      initValue?: string;
+    }
   }
 
   // add element to document.createElement
@@ -154,6 +158,7 @@ export default class WUPCalendarControl<
         border-radius: var(--ctrl-border-radius);
         box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.1);
         background: none;
+        text-transform: capitalize;
       }
       :host label {
         max-width: var(--ctrl-clr-width);
@@ -210,6 +215,7 @@ export default class WUPCalendarControl<
         color: inherit;
         background-color: white;
         box-shadow: none;
+        text-transform: inherit;
       }
       :host header > button[disabled] {
         pointer-events: none;
@@ -314,44 +320,16 @@ export default class WUPCalendarControl<
     return arr;
   }
 
-  /** Short names of days: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"] */
-  static get $namesDayShort(): string[] {
-    return ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
-  }
-
-  /** Names of months: [ "January", "February", "March", ...] */
-  static get $namesMonth(): string[] {
-    return [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-  }
-
-  /** Short names of days: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] */
-  static get $namesMonthShort(): string[] {
-    return ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  }
-
   /** Returns days of pointed number-of-month with placeholders of prev, next months
    * @param year 2022 etc.
    * @param month index of month (0-11)
-   * @param firstDayOfWeek where 1-Monday, 7-Sunday
+   * @param firstWeekDay where 1-Monday, 7-Sunday
    */
-  static $daysOfMonth(year: number, month: number, firstDayOfWeek = 1): WUPCalendar.MonthInfo {
+  static $daysOfMonth(year: number, month: number, firstWeekDay = 1): WUPCalendar.MonthInfo {
     let dt = new Date(year, month + 1, 0); // month in JS is 0-11 index based but here is a hack: returns last day of month
     const r: WUPCalendar.MonthInfo = { total: dt.getDate(), nextTo: 0, first: 0 };
     dt.setDate(1); // reset to first day
-    let shift = (dt.getDay() || 7) - firstDayOfWeek; // days-shift to firstOfWeek // get dayOfWeek  returns Sun...Sat (0...6) and need to normalize to Mon-1 Sun-7
+    let shift = (dt.getDay() || 7) - firstWeekDay; // days-shift to firstOfWeek // get dayOfWeek  returns Sun...Sat (0...6) and need to normalize to Mon-1 Sun-7
     if (shift < 0) {
       shift += 7;
     }
@@ -398,7 +376,6 @@ export default class WUPCalendarControl<
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUPCalendar.Defaults = {
     ...WUPBaseControl.$defaults,
-    firstDayOfWeek: 1,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
     },
@@ -407,6 +384,7 @@ export default class WUPCalendarControl<
   $options: WUPCalendar.Options<ValueType> = {
     ...this.#ctr.$defaults,
     utc: true,
+    firstWeekDay: this.#ctr.$defaults.firstWeekDay || localeInfo.firstWeekDay,
     // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory
   };
@@ -440,6 +418,7 @@ export default class WUPCalendarControl<
   /** Called once when need to render label + input */
   renderInput(): { menuId: string } {
     const i = this.$refInput;
+    i.type = "text"; // to allow browser-autofill. type="date" is announced wrong in our case
     i.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", i.id);
     i.setAttribute("role", "combobox");
@@ -615,8 +594,8 @@ export default class WUPCalendarControl<
       const days = document.createElement("ul");
       days.setAttribute("aria-hidden", true);
       box.prepend(days);
-      const names = this.#ctr.$namesDayShort;
-      for (let i = 0, n = this._opts.firstDayOfWeek - 1; i < 7; ++i, ++n) {
+      const names = localeInfo.namesDayShort;
+      for (let i = 0, n = this._opts.firstWeekDay - 1; i < 7; ++i, ++n) {
         const d = add(days, "li");
         if (n >= names.length) {
           n = 0;
@@ -630,13 +609,14 @@ export default class WUPCalendarControl<
     const getIndex: WUPCalendarIn.PickerResult["getIndex"] = (b, first) =>
       Math.floor((b.valueOf() - (first as number)) / 86400000);
 
+    const { namesMonth } = localeInfo;
     const renderItems = (ol: HTMLElement, v: Date): WUPCalendarIn.ItemElement[] => {
       const valMonth = v.getUTCMonth();
       const valYear = v.getUTCFullYear();
-      this.$refCalenarTitle.textContent = `${this.#ctr.$namesMonth[valMonth]} ${valYear}`;
+      this.$refCalenarTitle.textContent = `${namesMonth[valMonth]} ${valYear}`;
 
       const items: WUPCalendarIn.ItemElement[] = [];
-      const r = this.#ctr.$daysOfMonth(valYear, valMonth, this._opts.firstDayOfWeek);
+      const r = this.#ctr.$daysOfMonth(valYear, valMonth, this._opts.firstWeekDay);
 
       let iPrev = -999;
       if (ol.children.length) {
@@ -705,7 +685,7 @@ export default class WUPCalendarControl<
       const year = v.getUTCFullYear();
       this.$refCalenarTitle.textContent = `${year}`;
 
-      const namesShort = this.#ctr.$namesMonthShort;
+      const namesShort = localeInfo.namesMonthShort;
       const items: WUPCalendarIn.ItemElement[] = [];
       const total = year * pageSize;
 
@@ -988,7 +968,8 @@ export default class WUPCalendarControl<
     if (v) {
       const key = this._opts.utc ? "UTC" : "";
       // prettier-ignore
-      this.$refInput.value = `${v[`get${key}Date`]()} ${this.#ctr.$namesMonth[v[`get${key}Month`]()]} ${v[`get${key}FullYear`]()}`
+      const {namesMonth} = localeInfo
+      this.$refInput.value = `${v[`get${key}Date`]()} ${namesMonth[v[`get${key}Month`]()]} ${v[`get${key}FullYear`]()}`;
     } else {
       this.$refInput.value = "";
     }
@@ -1073,7 +1054,7 @@ export default class WUPCalendarControl<
     const r = super.gotFocus();
     const i = this.$refInput;
     r.push(this.appendEvent(this, "click", (e) => this.gotClick(e), { passive: false }));
-    r.push(this.appendEvent(i, "input", (e) => this.gotInput(e, i)));
+    r.push(this.appendEvent(i, "input", (e) => this.gotInput(e as WUPText.GotInputEvent)));
     // r.push(this.appendEvent(i, "keypress", (e) => e.preventDefault(), { passive: false })); // input is readonly so default keyPress doesn't required
     return r;
   }
@@ -1105,14 +1086,14 @@ export default class WUPCalendarControl<
   }
 
   /** Called when browsers fills the field via autocomplete */
-  protected gotInput(_e: Event, inputEl: HTMLInputElement): void {
-    const v = this.parse(inputEl.value);
+  protected gotInput(e: WUPText.GotInputEvent): void {
+    const v = this.parse(e.target.value);
     this.setValue(v);
   }
 
   override gotKeyDown(e: KeyboardEvent): void {
     super.gotKeyDown(e);
-    if (e.altKey || this.$isReadOnly) {
+    if (e.altKey) {
       return;
     }
 

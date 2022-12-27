@@ -396,6 +396,7 @@ export async function userTypeText(el: HTMLInputElement, text: string, opts = { 
   if (text === "") {
     el.dispatchEvent(new InputEvent("input", { bubbles: true }));
   }
+  return getInputCursor(el);
 }
 
 /** Get cursor of input according in pattern "abc|def" where '|' - cursor position */
@@ -411,14 +412,15 @@ export function getInputCursor(el: HTMLInputElement) {
 }
 
 /** Set cursor & value to input according to pattern "abc|def" where '|' - cursor position */
-export function setInputCursor(el: HTMLInputElement, cursorPattern: string) {
+export function setInputCursor(el: HTMLInputElement, cursorPattern: string, opts?: { skipEvent: boolean }) {
+  const was = el.value;
   const gotValue = cursorPattern.replace(/[|]/g, "");
   // expect(el.value).toBe(gotValue);
   el.focus();
   el.value = gotValue;
   el.selectionStart = cursorPattern.indexOf("|");
   el.selectionEnd = cursorPattern.lastIndexOf("|");
-  el.dispatchEvent(new InputEvent("input", { bubbles: true }));
+  was !== gotValue && !opts?.skipEvent && el.dispatchEvent(new InputEvent("input", { bubbles: true }));
 }
 
 /** Simulates user removes text via backspace: focus + keydown+ keyup + keypress + input events;
@@ -448,7 +450,11 @@ export async function userRemove(
     if (key === "Backspace" && carretPos > 0) {
       --carretPos;
     }
-    v = v.substring(0, carretPos) + v.substring(carretPos + 1);
+    if (el.selectionStart !== el.selectionEnd) {
+      v = v.substring(0, el.selectionStart!) + v.substring(el.selectionEnd!);
+    } else {
+      v = v.substring(0, carretPos) + v.substring(carretPos + 1);
+    }
     if (el.value !== v) {
       el.value = v;
       el.selectionEnd = carretPos;
@@ -479,12 +485,15 @@ export async function userClick(el: HTMLElement, opts?: MouseEventInit, timeoutM
  * @return cursor snapshot (getInputCursor) */
 export async function userUndo(el: HTMLInputElement): Promise<string> {
   jest.useFakeTimers();
-  el.dispatchEvent(new KeyboardEvent("keydown", { key: "z", ctrlKey: true, bubbles: true }));
-  el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, inputType: "historyUndo" }));
-  el.dispatchEvent(new InputEvent("input", { bubbles: true, data: null, inputType: "historyUndo" }));
+  el.dispatchEvent(
+    new KeyboardEvent("keydown", { key: "z", ctrlKey: true, metaKey: true, bubbles: true, cancelable: true })
+  ) &&
+    el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, inputType: "historyUndo", cancelable: true })) &&
+    el.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "historyUndo" }));
+
   jest.advanceTimersByTime(20);
   await Promise.resolve();
-  el.dispatchEvent(new KeyboardEvent("keyup", { key: "z", ctrlKey: false, bubbles: true }));
+  el.dispatchEvent(new KeyboardEvent("keyup", { key: "z", bubbles: true }));
   return getInputCursor(el);
 }
 
@@ -493,12 +502,29 @@ export async function userUndo(el: HTMLInputElement): Promise<string> {
  * @return cursor snapshot (getInputCursor) */
 export async function userRedo(el: HTMLInputElement): Promise<string> {
   jest.useFakeTimers();
-  el.dispatchEvent(new KeyboardEvent("keydown", { key: "y", ctrlKey: true, bubbles: true }));
-  el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, inputType: "historyRedo" }));
-  el.dispatchEvent(new InputEvent("input", { bubbles: true, data: null, inputType: "historyRedo" }));
+  const okCtrlY = el.dispatchEvent(
+    new KeyboardEvent("keydown", { key: "y", ctrlKey: true, bubbles: true, cancelable: true })
+  );
+  const okCtrlShiftZ = el.dispatchEvent(
+    new KeyboardEvent("keydown", {
+      key: "Y",
+      ctrlKey: true,
+      metaKey: true,
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true,
+    })
+  );
+  okCtrlY &&
+    okCtrlShiftZ &&
+    el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, inputType: "historyRedo", cancelable: true })) &&
+    el.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "historyRedo" }));
   jest.advanceTimersByTime(20);
+
   await Promise.resolve();
-  el.dispatchEvent(new KeyboardEvent("keyup", { key: "y", ctrlKey: false, bubbles: true }));
+  el.dispatchEvent(new KeyboardEvent("keyup", { key: "y", bubbles: true }));
+  el.dispatchEvent(new KeyboardEvent("keyup", { key: "z", bubbles: true }));
+
   return getInputCursor(el);
 }
 

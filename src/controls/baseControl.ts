@@ -179,9 +179,10 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   #ctr = this.constructor as typeof WUPBaseControl;
 
   /** Text announced by screen-readers when control cleared; @defaultValue `cleared` */
-  static get $ariaCleared(): string {
-    return "cleared";
-  }
+  static $ariaCleared = "cleared";
+
+  /** Text announced by screen-readers; @defaultValue `Error for` */
+  static $ariaError = "Error for";
 
   /* Array of options names to listen for changes */
   static get observedOptions(): Array<string> {
@@ -191,11 +192,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /* Array of attribute names to listen for changes */
   static get observedAttributes(): Array<string> {
     return <Array<LowerKeys<WUPBase.Options>>>["label", "name", "autocomplete", "disabled", "readonly", "initvalue"];
-  }
-
-  /** Text announced by screen-readers; @defaultValue `Error for` */
-  static get $ariaError(): string {
-    return "Error for";
   }
 
   /** Css-variables related to component */
@@ -239,6 +235,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       :host strong,
       :host legend {
         color: var(--ctrl-label);
+        pointer-events: none;
       }
       :host:focus-within,
       :host:focus-within > [menu] {
@@ -246,21 +243,18 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         outline: 1px solid var(--ctrl-focus);
       }
       :host:focus-within strong,
-      :host:focus-within legend,
-      :host input:focus + * {
+      :host:focus-within legend {
         color: var(--ctrl-focus-label);
+        pointer-events: initial;
       }
-      :host:not(:focus-within) strong {
-        pointer-events: none;
-      }
-      [disabled]>:host,
+      [disabled] :host,
       :host[disabled] {
         opacity: 0.6;
         cursor: not-allowed;
         -webkit-user-select: none;
         user-select: none;
       }
-      [disabled]>:host > *,
+      [disabled] :host > *,
       :host[disabled] > * {
         pointer-events: none;
       }
@@ -279,16 +273,17 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         padding-top: 0;
         padding-bottom: 0;
       }
-      :host input {
+      :host input,
+      :host textarea,
+      :host [contenteditable] {
         padding: 0;
         margin: 0;
         cursor: inherit;
       }
-      :host input + * {
+      :host strong {
         cursor: inherit;
       }
-      :host input:required + *:after,
-      :host input[aria-required="true"] + *:after,
+      :host [aria-required="true"] + strong:after,
       :host fieldset[aria-required="true"] > legend:after {
         content: "*";
         font-size: larger;
@@ -343,10 +338,12 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         :host[invalid]:hover,
         :host[invalid]:hover > [menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
-        }
-        :host:hover label:before,
-        :host:hover label:after {
-          background-color: var(--ctrl-focus-label);
+        }${
+          //  :host:hover label:before,
+          //  :host:hover label:after {
+          //     background-color: var(--ctrl-focus-label);
+          //  }
+          ""
         }
       }`;
   }
@@ -540,7 +537,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   /** Reference to nested HTMLElement */
   $refLabel = document.createElement("label");
   /** Reference to nested HTMLElement */
-  $refInput = document.createElement("input");
+  $refInput = document.createElement("input") as HTMLInputElement;
   /** Reference to nested HTMLElement tied with $options.label */
   $refTitle = document.createElement("strong");
   /** Reference to nested HTMLElement tied with errorMessage */
@@ -641,7 +638,13 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
         if (this.$isDisabled) {
           return;
         }
-        !(e.target instanceof HTMLInputElement) && e.preventDefault();
+        const el = e.target as Partial<HTMLElement>;
+        !(
+          el.tagName === "INPUT" ||
+          el.tagName === "TEXTAREA" ||
+          this.$refInput === el ||
+          this.includes.call(this.$refInput, el)
+        ) && e.preventDefault();
         // this required because default focus-effect was prevented
         this.appendEvent(this, "mouseup", () => !this.$isFocused && this.focus(), { once: true });
       },
@@ -655,7 +658,6 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   protected override gotRender(): void {
     super.gotRender();
-    this.$refInput.type = "text";
     this.renderControl();
   }
 
@@ -968,7 +970,9 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
       this.goValidate(ValidateFromCases.onChange, true); // validate to define current state
     }
 
-    const r = this.appendEvent(this, "keydown", (e) => !this.$isDisabled && this.gotKeyDown(e), { passive: false });
+    const r = this.appendEvent(this, "keydown", (e) => !this.$isDisabled && !this.$isReadOnly && this.gotKeyDown(e), {
+      passive: false,
+    });
     return [r];
   }
 
@@ -983,9 +987,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   /** Called when user pressed key */
-  protected gotKeyDown(e: KeyboardEvent): void {
+  protected gotKeyDown(e: KeyboardEvent & { submitPrevented?: boolean }): void {
     e.key === "Escape" && !e.shiftKey && !e.altKey && !e.ctrlKey && this.clearValue(); // WARN: Escape works wrong with NVDA because it's enables NVDA-focus-mode
   }
 }
-
-// todo NumberInput - set role 'spinbutton'

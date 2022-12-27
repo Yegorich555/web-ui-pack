@@ -38,6 +38,10 @@ export namespace WUPTextIn {
     /** Placeholder for mask. By default it inherits from mask. To disabled it set 'false' or '' (empty string);
      *  for date maskholder can be 'yyyy-mm-dd' */
     maskholder?: string | false;
+    /** Part before input; for example for value "$ 123 USD" prefix is "$ " */
+    prefix?: string;
+    /** Part after input; for example for value "$ 123 USD" prefix is " USD" */
+    postfix?: string;
   }
 
   export type Generics<
@@ -66,10 +70,9 @@ declare global {
        * * enabled by default with $options.mask
        * * excluded from listing (for $options.validationShowAll)
        * * ignores control value, instead it uses `this.refMask` state based on `$refInput.value`
-       * * removed by focusout (because input rollback to previous valid value)
        *  */
       _mask: string;
-      /** If parse() throws exception during the input-change is wrong then pointed message shows
+      /** If parseInput() throws exception during the input-change is wrong then pointed message shows
        * @default "Invalid value"
        * @Rules
        * * processed only by input change (not value-change)
@@ -98,6 +101,12 @@ declare global {
        *  for date maskholder can be 'yyyy-mm-dd'
        *  @deprecated  */
       maskholder?: string;
+      /** Part before input; for example for value "$ 123 USD" prefix is "$ "
+       *  @deprecated  */
+      prefix?: string;
+      /** Part after input; for example for value "$ 123 USD" prefix is " USD"
+       *  @deprecated  */
+      postfix?: string;
     }
     interface GotInputEvent extends InputEvent {
       target: HTMLInputElement;
@@ -150,13 +159,13 @@ export default class WUPTextControl<
 
   static get observedOptions(): Array<string> {
     const arr = super.observedOptions as Array<keyof WUPText.Options>;
-    arr.push("clearButton", "maskholder", "mask");
+    arr.push("clearButton", "maskholder", "mask", "prefix", "postfix");
     return arr;
   }
 
   static get observedAttributes(): Array<string> {
     const arr = super.observedAttributes as Array<LowerKeys<WUPText.Options>>;
-    arr.push("maskholder", "mask");
+    arr.push("maskholder", "mask", "prefix", "postfix");
     return arr;
   }
 
@@ -175,45 +184,75 @@ export default class WUPTextControl<
         :host label > span {
           width: 100%;
           position: relative;
+          display: flex;
+          flex-direction: row-reverse;
         }
         :host input,
-        :host [maskholder] {
-          width: 100%;
-          box-sizing: border-box;
-          font: inherit;
-          color: inherit;
-          margin: 0;
+        :host textarea,
+        :host [contenteditable],
+        :host [maskholder],
+        :host [prefix],
+        :host [postfix] {
           padding: var(--ctrl-padding);
           padding-left: 0;
           padding-right: 0;
-          border: none;
-          background: none;
-          outline: none;
+          font: inherit;
+          color: inherit;
+          margin: 0;
           text-overflow: ellipsis;
           overflow: hidden;
           white-space: nowrap;
         }
-        :host [maskholder] {
-          position: absolute;
-          opacity: 0.65;
+        :host input,
+        :host textarea,
+        :host [contenteditable],
+        :host [maskholder],
+        :host [postfix] {
+          width: 100%;
+          box-sizing: border-box;
+          border: none;
+          background: none;
+          outline: none;
+        }
+        :host [prefix],
+        :host [postfix] {
+          color: var(--ctrl-label);
+          flex-shrink: 0;
+        }
+        :host [maskholder],
+        :host [prefix],
+        :host [postfix] {
           display: none;
           pointer-events: none;
           text-overflow: initial;
+          white-space: pre;
         }
-        :host [maskholder]>i {
+        :host [postfix] {
+          position: absolute;
+        }
+        :host [maskholder] {
+          position: absolute;
+          opacity: 0.65;
+        }
+        :host [maskholder]>i,
+        :host [postfix]>i {
           visibility: hidden;
           font: inherit;
           white-space: pre;
         }
-        :host input:-webkit-autofill {
+        :host input:-webkit-autofill,
+        :host textarea:-webkit-autofill,
+        :host [contenteditable]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
-        :host input:autofill {
+        :host input:autofill,
+        :host textarea:autofill,
+        :host [contenteditable]:autofill {
           font: inherit;
           background-clip: text;
         }
-        :host input + * {
+        :host strong {
           display: block;
           position: absolute;
           top: 50%;
@@ -231,20 +270,29 @@ export default class WUPTextControl<
           text-decoration: none;
         }
         @media not all and (prefers-reduced-motion) {
-          :host input + * {
+          :host strong {
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
-        :host input:not(:focus)::placeholder {
+        :host input:not(:focus)::placeholder,
+        :host textarea:not(:focus)::placeholder {
           color: transparent;
         }
-        :host:focus-within input + strong,
+        :host:focus-within strong,
         :host input:not(:placeholder-shown) + strong,
+        :host textarea:not(:placeholder-shown) + strong,
+        :host [contenteditable]:not(:empty) + strong,
         :host legend {
           top: 0.2em;
           transform: scale(0.9);
         }
-        :host:focus-within [maskholder] {
+        :host:focus-within [maskholder],
+        :host:focus-within [prefix],
+        :host:focus-within [postfix],
+        :host input:not(:placeholder-shown) ~ [prefix],
+        :host input:not(:placeholder-shown) ~ [postfix],
+        :host textarea:not(:placeholder-shown) ~ [prefix],
+        :host textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
         }
         /* style for icons */
@@ -338,6 +386,8 @@ export default class WUPTextControl<
 
   $refBtnClear?: HTMLButtonElement;
   $refMaskholder?: HTMLSpanElement;
+  $refPrefix?: HTMLSpanElement;
+  $refPostfix?: HTMLSpanElement;
 
   constructor() {
     super();
@@ -350,10 +400,20 @@ export default class WUPTextControl<
     return (text || undefined) as unknown as ValueType;
   }
 
-  /** Called before parseValue on gotInput event */
+  /** Called before parseInput on gotInput event */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected canParse(_text: string): boolean {
+  canParseInput(_text: string): boolean {
     return true;
+  }
+
+  /** Called to parse input text to value (related to locale or pointed format) */
+  parseInput(text: string): ValueType | undefined {
+    return this.parse(text.trim());
+  }
+
+  /** Returns true if need to use custom undo/redo (required when input somehow formatted/masked) */
+  protected canHandleUndo(): boolean {
+    return !!this._opts.mask;
   }
 
   protected get validations(): WUPText.Options["validations"] {
@@ -364,10 +424,13 @@ export default class WUPTextControl<
   }
 
   protected override renderControl(): void {
+    /* istanbul ignore else */
+    if (this.$refInput.type !== "textarea") {
+      (this.$refInput as HTMLInputElement).type = "text";
+    }
     this.$refInput.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", this.$refInput.id);
 
-    this.$refInput.type = "text";
     const s = this.$refLabel.appendChild(document.createElement("span"));
     s.appendChild(this.$refInput); // input appended to span to allow user user :after,:before without padding adjust
     s.appendChild(this.$refTitle);
@@ -399,26 +462,79 @@ export default class WUPTextControl<
     return bc;
   }
 
+  /** Add/update/remove prefix part */
+  protected renderPrefix(text: string | undefined): void {
+    let el = this.$refPrefix;
+    if (!text) {
+      if (el) {
+        el.remove();
+        delete this.$refPrefix;
+      }
+    } else {
+      /* istanbul ignore else */
+      if (!el) {
+        el = document.createElement("span");
+        el.setAttribute("prefix", "");
+        this.$refLabel.firstElementChild!.append(el);
+        this.$refPrefix = el;
+      }
+      el.textContent = text;
+    }
+    // because postfix depends on prefix
+    this.renderPostfix(this._opts.postfix);
+  }
+
+  /** Add/update or remove prefix part */
+  protected renderPostfix(text: string | undefined): void {
+    let el = this.$refPostfix;
+    if (!text) {
+      if (el) {
+        el.remove();
+        delete this.$refPostfix;
+      }
+    } else {
+      if (!el) {
+        el = document.createElement("span");
+        el.setAttribute("postfix", "");
+        el.appendChild(document.createElement("i"));
+        el.append("");
+        this.$refLabel.firstElementChild!.append(el);
+        this.$refPostfix = el;
+      }
+
+      el.firstChild!.textContent =
+        (this.$isFocused && this.$refMaskholder?.textContent) ||
+        (this.$refPrefix?.textContent || "") + this.$refInput.value;
+      el.lastChild!.textContent = text;
+    }
+  }
+
   protected override gotFocus(): Array<() => void> {
     const arr = super.gotFocus();
-    this.setAttr.call(this.$refInput, "inputMode", this._opts.mask ? "numeric" : "");
+    this.setAttr.call(this.$refInput, "inputmode", this._opts.mask ? "numeric" : "");
 
     const r = this.appendEvent(this.$refInput, "input", (e) => {
       // (e as WUPText.GotInputEvent).setValuePrevented = false;
       // (e as WUPText.GotInputEvent).preventSetValue = () => ((e as WUPText.GotInputEvent).setValuePrevented = true);
       this.gotInput(e as WUPText.GotInputEvent);
     });
-    const r2 = this.appendEvent(this.$refInput, "beforeinput", (e) => this.gotBeforeInput(e), { passive: false });
+    const r2 = this.appendEvent(this.$refInput, "beforeinput", (e) => this.gotBeforeInput(e as WUPText.GotInputEvent), {
+      passive: false,
+    });
 
     /* istanbul ignore else */
     if (!this.$refInput.readOnly) {
-      if (!this.$refInput.value && this._opts.mask) {
+      let canSelectAll = this._opts.selectOnFocus;
+      if (this._opts.mask) {
         this.maskInputProcess(null); // to apply prefix + maskholder
-        this.$refInput.selectionStart = this.$refInput.value.length; // move cursor to the end
-        this.$refInput.selectionEnd = this.$refInput.selectionStart;
-      } else {
-        this._opts.selectOnFocus && this.$refInput.select();
+        canSelectAll = canSelectAll && this.refMask!.isCompleted;
+        this.renderPostfix(this._opts.postfix);
+        if (!canSelectAll) {
+          this.$refInput.selectionStart = this.$refInput.value.length; // move cursor to the end
+          this.$refInput.selectionEnd = this.$refInput.selectionStart;
+        }
       }
+      canSelectAll && this.$refInput.select();
     }
 
     arr.push(() => setTimeout(r)); // timeout required to handle Event on gotFocusLost
@@ -427,14 +543,17 @@ export default class WUPTextControl<
   }
 
   protected override gotFocusLost(): void {
+    this.#declineInputEnd?.call(this);
     if (this.refMask) {
-      if (this.refMask.prefix && this.$refInput.value === this.refMask.prefix) {
-        this.$refInput.value = ""; // rollback prefix/suffix if user types nothing
+      if (this.refMask.prefix && this.refMask.value === this.refMask.prefix) {
+        this.$refInput.value = ""; // rollback prefix/postfix if user types nothing
         delete (this.$refInput as MaskHandledInput)._maskPrev;
         this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
       }
-      this.refMask.clearHistory();
+      this.renderPostfix(this._opts.postfix); // postfix depends on maskholder
     }
+    delete this._histRedo;
+    delete this._histUndo;
     super.gotFocusLost();
   }
 
@@ -463,13 +582,69 @@ export default class WUPTextControl<
       this.$refBtnClear.remove();
       this.$refBtnClear = undefined;
     }
+    if (!propsChanged || propsChanged.includes("prefix")) {
+      this._opts.prefix = this.getAttribute("prefix") ?? this._opts.prefix;
+      this.renderPrefix(this._opts.prefix);
+    }
+    if (!propsChanged || propsChanged.includes("postfix")) {
+      this._opts.postfix = this.getAttribute("postfix") ?? this._opts.postfix;
+      this.renderPostfix(this._opts.postfix);
+    }
+  }
+
+  protected override gotKeyDown(e: KeyboardEvent): void {
+    super.gotKeyDown(e);
+
+    if (this.canHandleUndo()) {
+      if (e.altKey) {
+        return;
+      }
+
+      // otherwise custom redo/undo works wrong (browser stores to history big chunks and not fired events if history emptied)
+      const isUndo = (e.ctrlKey || e.metaKey) && e.key === "z";
+      const isRedo = ((e.ctrlKey || e.metaKey) && e.key === "Z") || (e.ctrlKey && e.key === "y" && !e.metaKey);
+      if (isRedo || isUndo) {
+        if (isRedo && !this._histRedo?.length) {
+          return;
+        }
+        if (isUndo && !this._histUndo?.length) {
+          return;
+        }
+        e.preventDefault();
+        const inputType = isRedo ? "historyRedo" : "historyUndo";
+        this.$refInput.dispatchEvent(new InputEvent("beforeinput", { cancelable: true, bubbles: true, inputType })) &&
+          this.$refInput.dispatchEvent(new InputEvent("input", { cancelable: false, bubbles: true, inputType }));
+      }
+    }
   }
 
   /** Handler of 'beforeinput' event */
-  protected gotBeforeInput(e: InputEvent): void {
+  protected gotBeforeInput(e: WUPText.GotInputEvent): void {
+    this.#declineInputEnd?.call(this);
+
+    if (this.canHandleUndo()) {
+      switch (e!.inputType) {
+        case "historyUndo": // Ctrl+Z
+          this.historyUndoRedo(false);
+          break;
+        case "historyRedo": // Ctrl+Shift+Z
+          this.historyUndoRedo(true);
+          break;
+        default:
+          {
+            if (!this._histUndo) {
+              this._histUndo = [];
+            }
+            const snap = this.historyToSnapshot(e.target.value, e.target.selectionStart || 0);
+            const isChanged = this._histUndo[this._histUndo.length - 1] !== snap;
+            isChanged && this._histUndo!.push(snap);
+          }
+          break;
+      }
+    }
+
     if (this._opts.mask) {
-      this.#maskTimerEnd?.call(this);
-      this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask, this.$refInput.value);
+      this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask, e.target.value);
       this.refMask.handleBeforInput(e);
     }
   }
@@ -485,6 +660,7 @@ export default class WUPTextControl<
       const prev = el._maskPrev?.value;
       txt = this.maskInputProcess(e);
       if (txt === prev) {
+        this.renderPostfix(this._opts.postfix);
         return; // skip because no changes from previous action
       }
     }
@@ -494,16 +670,22 @@ export default class WUPTextControl<
     //   return;
     // }
 
-    const canParse = this.canParse(txt);
+    const canParse = this.canParseInput(txt);
     let v = this.$value;
     let errMsg: boolean | string = "";
     /* istanbul ignore else */
     if (canParse) {
       try {
-        v = this.parse(txt);
+        v = this.parseInput(txt);
       } catch (err) {
         errMsg = (err as Error).message || true;
       }
+    }
+
+    this.renderPostfix(this._opts.postfix);
+
+    if (this.#declineInputEnd) {
+      return; // don't allow changes if user types wrong char
     }
 
     const act = (): void => {
@@ -528,19 +710,20 @@ export default class WUPTextControl<
 
   /** Mask object to proccess mask on input */
   refMask?: MaskTextInput;
-  #maskTimerEnd?: () => void; // required to rollback value immediately if user types next (otherwise cursor can shift wrong if type several 'ab' at once)
   /** Called to apply mask-behavior (on "input" event) */
   protected maskInputProcess(e: WUPText.GotInputEvent | null): string {
     const el = this.$refInput;
     const v = el.value;
-    const { maskholder, mask } = this._opts;
+    const { mask } = this._opts;
     this.refMask = this.refMask ?? new MaskTextInput(mask!, "");
     const mi = this.refMask;
 
-    if (!v && !this.$isFocused) {
+    const isFocused = this.$isFocused;
+
+    if (!v && !isFocused) {
       el.value = v;
       mi.parse(v);
-      return v; // ignore mask prefix/suffix if user isn't touched input; it appends only by focusGot
+      return v; // ignore mask prefix/postfix if user isn't touched input; it appends only by focusGot
     }
 
     let declinedAdd = 0;
@@ -554,44 +737,99 @@ export default class WUPTextControl<
       position = r.position;
     }
 
-    const setMaskHolder = (str: string, leftLength: number): void => {
-      if (!maskholder) {
-        return;
-      }
-      if (!this.$refMaskholder) {
-        const m = document.createElement("span");
-        m.setAttribute("aria-hidden", "true");
-        m.setAttribute("maskholder", "");
-        m.appendChild(document.createElement("i"));
-        m.append("");
-        this.$refInput.parentElement!.prepend(m);
-        this.$refMaskholder = m;
-      }
-      this.$refMaskholder.firstChild!.textContent = str;
-      this.$refMaskholder.lastChild!.textContent = maskholder.substring(maskholder.length - leftLength);
-    };
-
-    const setV = (): void => {
-      el.value = mi.value;
-      setMaskHolder(el.value, mi.leftLength);
-      el.selectionStart = position - declinedAdd;
-      el.selectionEnd = el.selectionStart;
-      this.#maskTimerEnd = undefined;
-    };
-
     if (declinedAdd) {
-      setMaskHolder(v, mi.leftLength - declinedAdd);
-      position += declinedAdd;
-      const t = setTimeout(setV, 100); // set value after time to show user typed value before mask applied
-      this.#maskTimerEnd = () => {
-        clearTimeout(t);
-        setV();
-      };
+      this._histUndo!.pop();
+      this._histUndo!.push(this.historyToSnapshot(mi.value, position)); // fix when ###: "12|" + "3b" => 123|
+      this.declineInput(position);
     } else {
-      setV();
+      el.value = mi.value;
+      el.selectionStart = position;
+      el.selectionEnd = el.selectionStart;
     }
+    isFocused && this.renderMaskHolder(this._opts.maskholder, mi.leftLength - declinedAdd);
 
     return mi.value;
+  }
+
+  /** Add/update maskholder or skip if it's not defined */
+  private renderMaskHolder(text: string | false | undefined, leftLength: number): void {
+    if (!text) {
+      return;
+    }
+    if (!this.$refMaskholder) {
+      const m = document.createElement("span");
+      m.setAttribute("aria-hidden", "true");
+      m.setAttribute("maskholder", "");
+      m.appendChild(document.createElement("i"));
+      m.append("");
+      this.$refInput.parentElement!.prepend(m);
+      this.$refMaskholder = m;
+    }
+    this.$refMaskholder.firstChild!.textContent = (this._opts.prefix || "") + this.$refInput.value;
+    this.$refMaskholder.lastChild!.textContent = text.substring(text.length - leftLength);
+  }
+
+  /** Convert values to history-snapshot; required for undo/redo logic of input */
+  private historyToSnapshot(s: string, pos: number): string {
+    return `${s.substring(0, pos)}\0${s.substring(pos)}`;
+  }
+
+  /** Parse history-snapshot; required for undo/redo logic of input */
+  private historyFromSnapshot(h: string): { v: string; pos: number } {
+    const pos = h.indexOf("\0");
+    const v = h.substring(0, pos) + h.substring(pos + 1);
+    return { pos, v };
+  }
+
+  _histUndo?: Array<string>;
+  _histRedo?: Array<string>;
+  /** Undo/redo input value (only if canHandleUndo() === true)
+   * @returns true if action succeed (history not empty) */
+  historyUndoRedo(toNext: boolean): boolean {
+    if (!this.canHandleUndo()) {
+      throw new Error(`${this.tagName}. Custom history disabled (canHandleUndo must return true)`);
+    }
+    const from = toNext ? this._histRedo : this._histUndo;
+    if (from?.length) {
+      const el = this.$refInput;
+      if (!this._histRedo) {
+        this._histRedo = [];
+      }
+      const to = !toNext ? this._histRedo! : this._histUndo!;
+      to.push(this.historyToSnapshot(el.value, el.selectionStart || 0));
+
+      const hist = this.historyFromSnapshot(from.pop()!);
+      el.value = hist.v;
+      el.selectionStart = hist.pos;
+      el.selectionEnd = hist.pos;
+
+      return true;
+    }
+
+    return false;
+  }
+
+  #declineInputEnd?: () => void;
+  /** Make undo for input after 100ms when user types not allowed chars
+   * @tutorial Troubleshooting
+   * * declineInput doesn't trigger beforeinput & input events (do it manually if required) */
+  protected declineInput(nextCursorPos?: number): void {
+    if (!this.canHandleUndo()) {
+      throw new Error(`${this.tagName}. Custom history disabled (canHandleUndo must return true)`);
+    }
+    this.#declineInputEnd = (): void => {
+      this.#declineInputEnd = undefined;
+      clearTimeout(t);
+      const hist = this.historyFromSnapshot(this._histUndo!.pop()!);
+      const el = this.$refInput;
+      el.value = hist.v;
+      el.selectionStart = nextCursorPos ?? hist.pos;
+      el.selectionEnd = el.selectionStart;
+      this.refMask && this.renderMaskHolder(this._opts.maskholder, this.refMask.leftLength);
+      this.renderPostfix(this._opts.postfix);
+    };
+
+    const t = setTimeout(this.#declineInputEnd, 100);
   }
 
   protected override setValue(v: ValueType | undefined, canValidate = true, skipInput = false): boolean | null {
@@ -606,6 +844,7 @@ export default class WUPTextControl<
     const str = v != null ? (v as any).toString() : "";
     this.$refInput.value = str;
     this._opts.mask && this.maskInputProcess(null);
+    this.renderPostfix(this._opts.postfix);
     this._onceErrName === this._errName && this.goHideError(); // hide mask-message because value has higher priority than inputValue
   }
 
@@ -641,5 +880,3 @@ customElements.define(tagName, WUPTextControl);
 // NiceToHave: handle Ctrl+Z wup-select etc. cases
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
-
-// testcase: user able to left a valid control despite on validation wrong

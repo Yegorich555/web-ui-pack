@@ -38,6 +38,8 @@ declare global {
 }
 
 /** Flexible animated element with ability to place over target element without position relative
+ * @tutorial Troubleshooting
+ * * when used several spin-types at once: define `--spin-1` & `--spin-2` colors manually per each spin-type
  * @example
  * JS/TS
  * ```js
@@ -293,8 +295,8 @@ export default class WUPSpinElement extends WUPBaseElement {
     const h = r.height - offset.top - offset.bottom;
     const scale = this._opts.fit ? Math.min(Math.min(h, w) / this.clientWidth, 1) : 1;
 
-    const left = r.left + offset.left + (w - this.clientWidth) / 2;
-    const top = r.top + offset.top + (h - this.clientHeight) / 2;
+    const left = Math.round(r.left + offset.left + (w - this.clientWidth) / 2);
+    const top = Math.round(r.top + offset.top + (h - this.clientHeight) / 2);
     styleTransform(this, "translate", `${left}px,${top}px`);
     styleTransform(this, "scale", scale === 1 ? "" : `${scale}`);
 
@@ -360,7 +362,7 @@ export function spinUseDualRing(cls: typeof WUPSpinElement): void {
     cls,
     1,
     () =>
-      `:host { --spin-2: transparent; }
+      `:root { --spin-2: transparent; }
        :host div {
          border: var(--spin-item-size) solid;
          border-color: var(--spin-2) var(--spin-1) var(--spin-2) var(--spin-1);
@@ -376,11 +378,11 @@ export function spinUseTwinDualRing(cls: typeof WUPSpinElement): void {
       `@keyframes WUP-SPIN-2-2 {
           0% { transform: translate(-50%, -50%) rotate(360deg); }
        }
-       :host {
+       :root {
           --spin-2: #b35e03;
           --spin-item-size: max(1px, calc(var(--spin-size) / 12));
-          position: relative;
        }
+       :host { position: relative; }
        :host div:nth-child(1) {
           border: var(--spin-item-size) solid;
           border-color: transparent var(--spin-1) transparent var(--spin-1);
@@ -428,7 +430,8 @@ export function spinUseDotRoller(cls: typeof WUPSpinElement): void {
             :host div:nth-child(${i})::after { transform: rotate(calc(45deg + var(--spin-step) * ${i - 1})); }
             `;
     }
-    return `:host { --spin-step: 24deg; position: relative; }
+    return `:root { --spin-step: 24deg; }
+            :host { position: relative; }
             :host div {
               animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
               position: absolute;
@@ -463,10 +466,8 @@ export function spinUseDotRing(cls: typeof WUPSpinElement): void {
               0%,20%,80%,100% { transform: scale(1); background: var(--spin-1) }
               50% { transform: scale(1.4); background: var(--spin-2) }
             }
-            :host {
-              --spin-2: #ff5200;
-              position: relative;
-            }
+            :root { --spin-2: #ff5200; }
+            :host { position: relative; }
             :host div {
               position: absolute;
               width: calc(100% / 1.4142135623730951);
@@ -502,10 +503,8 @@ export function spinUseSpliceRing(cls: typeof WUPSpinElement): void {
     return `@keyframes WUP-SPIN-3 {
               100% { opacity: 0; background: var(--spin-2); }
             }
-            :host {
-              --spin-item-size: calc(var(--spin-size) / 10);
-              position: relative;
-            }
+            :root { --spin-item-size: calc(var(--spin-size) / 10); }
+            :host { position: relative; }
             :host div {
               animation: WUP-SPIN-3 var(--spin-speed) linear infinite;
               position: absolute;

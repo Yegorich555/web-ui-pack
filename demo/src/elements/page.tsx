@@ -1,4 +1,5 @@
 /* eslint-disable react/destructuring-assignment */
+import linkGit from "src/helpers/linkGit";
 import UserCode, { UserCodeProps } from "./userCode";
 import styles from "./page.scss";
 
@@ -11,15 +12,10 @@ interface Props {
 }
 
 export default function Page(props: React.PropsWithChildren<Props>) {
-  let { link } = props;
-  if (link?.startsWith("src")) {
-    link = `/blob/${DEV ? "develop" : "master"}/${link}`;
-  }
-
   return (
     <div className={props.className}>
       <h2>
-        <a href={`https://github.com/Yegorich555/web-ui-pack${link}`} target="_blank" rel="noreferrer">
+        <a href={linkGit(props.link)} target="_blank" rel="noreferrer">
           {props.header}
         </a>
       </h2>

@@ -223,15 +223,16 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
 
   protected override gotReady(): void {
     super.gotReady();
-    this.appendEvent(this.$refInput, "input", (e) => this.gotInput(e, this.$refInput));
+    this.appendEvent(this.$refInput, "input", (e) => this.gotInput(e));
   }
 
   /** Called when user changes value via click or keyboard */
-  protected gotInput(e: Event, inputEl: HTMLInputElement): void {
+  protected gotInput(e: Event): void {
+    const el = e.target as HTMLInputElement;
     if (this.$isReadOnly) {
-      inputEl.checked = !inputEl.checked;
+      el.checked = !el.checked;
     } else {
-      this.setValue(inputEl.checked);
+      this.setValue(el.checked);
     }
   }
 

@@ -1,4 +1,5 @@
 import onEvent from "./onEvent";
+import onScroll, { IScrollOptions } from "./onScroll";
 import onScrollStop from "./onScrollStop";
 
 /* eslint-disable prefer-destructuring */
@@ -9,17 +10,9 @@ interface ScrollResult {
   scroll: (isNext: boolean) => Promise<void>;
 }
 
-interface ScrollOptions {
-  /** Point true if need to implement scroll by X instead of scroll by Y */
-  isXScroll?: boolean;
+interface ScrollCarouselOptions extends IScrollOptions {
   /** Point 'true' when you need to skip built-in render-functions (for React app, Vue etc.) */
   disableRender?: boolean;
-  /** Time between scrolls during the user-swipe on touchpads
-   * @defaultValue 300 */
-  swipeDebounceMs?: number;
-  /** Min swipe-movement in pixels when need to scroll
-   * @defaultValue 10 */
-  swipeDebounceDelta?: number;
 }
 
 // WARN: this helper is very specific and works only for calendar
@@ -34,7 +27,7 @@ interface ScrollOptions {
 export default function scrollCarousel(
   el: HTMLElement,
   next: (direction: -1 | 1) => HTMLElement[] | null,
-  options?: ScrollOptions
+  options?: ScrollCarouselOptions
 ): ScrollResult {
   el.style.maxHeight = "";
   el.style.maxWidth = "";
@@ -108,16 +101,7 @@ export default function scrollCarousel(
     });
   };
 
-  const rOnWheel = onEvent(
-    el,
-    "wheel",
-    (e) => {
-      e.preventDefault(); // prevent body scroll
-      scroll(e.deltaY > 0);
-    },
-    { passive: false }
-  );
-
+  const rOnScroll = onScroll(el, (d) => scroll(d > 0), options);
   const rOnKeydown = onEvent(
     el,
     "keydown",
@@ -130,35 +114,10 @@ export default function scrollCarousel(
     { passive: false }
   );
 
-  const rOnTouch = onEvent(el, "touchstart", (ev) => {
-    let xy = isYScroll ? ev.touches[0].clientY : ev.touches[0].clientX;
-    let stamp = 0;
-
-    const rOnTouchMove = onEvent(
-      ev.target as HTMLElement, // WARN: it's important to attach to target otherwise event not fired when element is removed: https://developer.mozilla.org/en-US/docs/Web/API/Touch/target
-      "touchmove",
-      (e) => {
-        const xyNew = isYScroll ? e.touches[0].clientY : e.touches[0].clientX;
-        const diff = xyNew - xy;
-        if (Math.abs(diff) > (options?.swipeDebounceDelta ?? 10)) {
-          xy = xyNew;
-          if (e.timeStamp - stamp > (options?.swipeDebounceMs ?? 300)) {
-            stamp = e.timeStamp;
-            scroll(diff < 0);
-          }
-        }
-      },
-      { passive: false } // WARN don't set capture: true; otherwise it's not removed
-    );
-
-    el.addEventListener("touchend", rOnTouchMove, { once: true, passive: true });
-  });
-
   return {
     remove: () => {
-      rOnWheel();
+      rOnScroll();
       rOnKeydown();
-      rOnTouch();
     },
     scroll,
   };

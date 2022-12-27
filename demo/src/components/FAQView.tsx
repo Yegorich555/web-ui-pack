@@ -1,6 +1,7 @@
 import Code from "src/elements/code";
 import FAQ from "src/elements/faq";
 import Page from "src/elements/page";
+import linkGit from "src/helpers/linkGit";
 import styles from "./FAQView.scss";
 
 export default function FAQView() {
@@ -30,6 +31,36 @@ export default function FAQView() {
                 clears attribute to make HTML clearer)
                 <Code code={codeAttrs} />
               </>
+            ),
+          },
+          {
+            link: "locale",
+            question: "What's required for different locales",
+            answer: (
+              <section>
+                <ol>
+                  <li>
+                    Call{" "}
+                    <a href={linkGit("src/helpers/localeInfo.ts")} target="_blank" rel="noreferrer">
+                      localeInfo.refresh()
+                    </a>{" "}
+                    once to update defaults according to user-locale (it updates date,time,number formats and month/date
+                    labels for calendar)
+                  </li>
+                  <li>
+                    Check if all formats fit your expectations via iterating over required locales:{" "}
+                    {/* eslint-disable-next-line react/no-unescaped-entities */}
+                    <b>localeInfo.refresh('en-US')</b> etc. Setup your own formats if js-based formats are wrong for you
+                    (possible redefine every property of <b>localeInfo</b> helper)
+                  </li>
+                  <li>
+                    Redefine all aria-properties of controls/elements according to user language. Such props named{" "}
+                    <b>$aria...</b> and defined as static prop in class
+                    {/* eslint-disable-next-line react/no-unescaped-entities */}.
+                    <b>WUPPasswordControl.$ariaDescription = 'press Alt + V to show/hide password'</b>
+                  </li>
+                </ol>
+              </section>
             ),
           },
           {

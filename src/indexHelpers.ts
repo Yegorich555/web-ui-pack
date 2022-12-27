@@ -8,6 +8,8 @@ export { default as focusFirst } from "./helpers/focusFirst";
 export { default as isEqual } from "./helpers/isEqual";
 export { isBothNaN } from "./helpers/isEqual";
 export { default as isIntoView } from "./helpers/isIntoView";
+export { default as localeInfo } from "./helpers/localeInfo";
+export { default as mathSumFloat } from "./helpers/mathSumFloat";
 
 export { default as nestedProperty } from "./helpers/nestedProperty";
 export { default as observer } from "./helpers/observer";
@@ -17,6 +19,7 @@ export { default as objectClone } from "./helpers/objectClone";
 export { default as onEvent } from "./helpers/onEvent";
 export { default as onFocusGot } from "./helpers/onFocusGot";
 export { default as onFocusLost } from "./helpers/onFocusLost";
+export { default as onScroll } from "./helpers/onScroll";
 export { default as onScrollStop } from "./helpers/onScrollStop";
 export { default as onSpy } from "./helpers/onSpy";
 // export * from "./helpers/onFocusLost";

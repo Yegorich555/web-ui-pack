@@ -102,6 +102,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-TEXT strong,
       WUP-TEXT legend {
         color: var(--ctrl-label);
+        pointer-events: none;
       }
       WUP-TEXT:focus-within,
       WUP-TEXT:focus-within &gt; [menu] {
@@ -109,21 +110,18 @@ clip: rect(1px, 1px, 1px, 1px);}
         outline: 1px solid var(--ctrl-focus);
       }
       WUP-TEXT:focus-within strong,
-      WUP-TEXT:focus-within legend,
-      WUP-TEXT input:focus + * {
+      WUP-TEXT:focus-within legend {
         color: var(--ctrl-focus-label);
+        pointer-events: initial;
       }
-      WUP-TEXT:not(:focus-within) strong {
-        pointer-events: none;
-      }
-      [disabled]&gt;WUP-TEXT,
+      [disabled] WUP-TEXT,
       WUP-TEXT[disabled] {
         opacity: 0.6;
         cursor: not-allowed;
         -webkit-user-select: none;
         user-select: none;
       }
-      [disabled]&gt;WUP-TEXT &gt; *,
+      [disabled] WUP-TEXT &gt; *,
       WUP-TEXT[disabled] &gt; * {
         pointer-events: none;
       }
@@ -142,16 +140,17 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-top: 0;
         padding-bottom: 0;
       }
-      WUP-TEXT input {
+      WUP-TEXT input,
+      WUP-TEXT textarea,
+      WUP-TEXT [contenteditable] {
         padding: 0;
         margin: 0;
         cursor: inherit;
       }
-      WUP-TEXT input + * {
+      WUP-TEXT strong {
         cursor: inherit;
       }
-      WUP-TEXT input:required + *:after,
-      WUP-TEXT input[aria-required="true"] + *:after,
+      WUP-TEXT [aria-required="true"] + strong:after,
       WUP-TEXT fieldset[aria-required="true"] &gt; legend:after {
         content: "*";
         font-size: larger;
@@ -227,10 +226,6 @@ mask-image: var(--ctrl-icon-img);
         WUP-TEXT[invalid]:hover &gt; [menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
         }
-        WUP-TEXT:hover label:before,
-        WUP-TEXT:hover label:after {
-          background-color: var(--ctrl-focus-label);
-        }
       }
         WUP-TEXT {
           cursor: text;
@@ -238,45 +233,75 @@ mask-image: var(--ctrl-icon-img);
         WUP-TEXT label &gt; span {
           width: 100%;
           position: relative;
+          display: flex;
+          flex-direction: row-reverse;
         }
         WUP-TEXT input,
-        WUP-TEXT [maskholder] {
-          width: 100%;
-          box-sizing: border-box;
-          font: inherit;
-          color: inherit;
-          margin: 0;
+        WUP-TEXT textarea,
+        WUP-TEXT [contenteditable],
+        WUP-TEXT [maskholder],
+        WUP-TEXT [prefix],
+        WUP-TEXT [postfix] {
           padding: var(--ctrl-padding);
           padding-left: 0;
           padding-right: 0;
-          border: none;
-          background: none;
-          outline: none;
+          font: inherit;
+          color: inherit;
+          margin: 0;
           text-overflow: ellipsis;
           overflow: hidden;
           white-space: nowrap;
         }
-        WUP-TEXT [maskholder] {
-          position: absolute;
-          opacity: 0.65;
+        WUP-TEXT input,
+        WUP-TEXT textarea,
+        WUP-TEXT [contenteditable],
+        WUP-TEXT [maskholder],
+        WUP-TEXT [postfix] {
+          width: 100%;
+          box-sizing: border-box;
+          border: none;
+          background: none;
+          outline: none;
+        }
+        WUP-TEXT [prefix],
+        WUP-TEXT [postfix] {
+          color: var(--ctrl-label);
+          flex-shrink: 0;
+        }
+        WUP-TEXT [maskholder],
+        WUP-TEXT [prefix],
+        WUP-TEXT [postfix] {
           display: none;
           pointer-events: none;
           text-overflow: initial;
+          white-space: pre;
         }
-        WUP-TEXT [maskholder]&gt;i {
+        WUP-TEXT [postfix] {
+          position: absolute;
+        }
+        WUP-TEXT [maskholder] {
+          position: absolute;
+          opacity: 0.65;
+        }
+        WUP-TEXT [maskholder]&gt;i,
+        WUP-TEXT [postfix]&gt;i {
           visibility: hidden;
           font: inherit;
           white-space: pre;
         }
-        WUP-TEXT input:-webkit-autofill {
+        WUP-TEXT input:-webkit-autofill,
+        WUP-TEXT textarea:-webkit-autofill,
+        WUP-TEXT [contenteditable]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
-        WUP-TEXT input:autofill {
+        WUP-TEXT input:autofill,
+        WUP-TEXT textarea:autofill,
+        WUP-TEXT [contenteditable]:autofill {
           font: inherit;
           background-clip: text;
         }
-        WUP-TEXT input + * {
+        WUP-TEXT strong {
           display: block;
           position: absolute;
           top: 50%;
@@ -294,20 +319,29 @@ mask-image: var(--ctrl-icon-img);
           text-decoration: none;
         }
         @media not all and (prefers-reduced-motion) {
-          WUP-TEXT input + * {
+          WUP-TEXT strong {
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
-        WUP-TEXT input:not(:focus)::placeholder {
+        WUP-TEXT input:not(:focus)::placeholder,
+        WUP-TEXT textarea:not(:focus)::placeholder {
           color: transparent;
         }
-        WUP-TEXT:focus-within input + strong,
+        WUP-TEXT:focus-within strong,
         WUP-TEXT input:not(:placeholder-shown) + strong,
+        WUP-TEXT textarea:not(:placeholder-shown) + strong,
+        WUP-TEXT [contenteditable]:not(:empty) + strong,
         WUP-TEXT legend {
           top: 0.2em;
           transform: scale(0.9);
         }
-        WUP-TEXT:focus-within [maskholder] {
+        WUP-TEXT:focus-within [maskholder],
+        WUP-TEXT:focus-within [prefix],
+        WUP-TEXT:focus-within [postfix],
+        WUP-TEXT input:not(:placeholder-shown) ~ [prefix],
+        WUP-TEXT input:not(:placeholder-shown) ~ [postfix],
+        WUP-TEXT textarea:not(:placeholder-shown) ~ [prefix],
+        WUP-TEXT textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
         }
         /* style for icons */

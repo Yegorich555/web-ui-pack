@@ -1,3 +1,5 @@
+import localeInfo from "./localeInfo";
+
 export function zeroBefore(v: number, length: number): string {
   const s = `${v}`;
   const rc = length - s.length;
@@ -20,6 +22,9 @@ function cutEndString(s: string, length: number): string {
  * "yyyy-MM-dd hh:mm:ss" => "2022-04-23 16:09:12"
  * "yy-M-d h:m:s" => "22-4-23 13:9:12"
  * "dd/MM/yyyy" => "23/04/2022"
+ * "MMM d, hh:mm A" => "Apr 23, 04:09 PM" (depends on localeInfo.namesMonthShort)
+ * @tutorial Troubleshooting
+ * * AM PM in the middle isn't supported (only at the end): use  'hh:mm, d/m/yyyy A' instead 'hh:mm A, d/m/yyyy'
  */
 export default function dateToString(v: Date, format: string): string {
   if (Number.isNaN(v.valueOf())) {
@@ -44,7 +49,11 @@ export default function dateToString(v: Date, format: string): string {
           s += cutEndString(zeroBefore(v[`get${ukey}FullYear`].call(v), cnt), cnt);
           break;
         case "M":
-          s += zeroBefore(v[`get${ukey}Month`].call(v) + 1, cnt);
+          if (cnt === 3) {
+            s += localeInfo.namesMonthShort[v[`get${ukey}Month`].call(v)].substring(0, 3);
+          } else {
+            s += zeroBefore(v[`get${ukey}Month`].call(v) + 1, cnt);
+          }
           break;
         case "d":
         case "D":
