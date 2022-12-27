@@ -21,8 +21,9 @@ declare global {
     interface ValidationMap extends WUPText.ValidationMap {}
     interface EventMap extends WUPText.EventMap {}
     interface Defaults<T = string> extends WUPTextareaIn.GenDef<T> {}
-    interface Options<T = string> extends WUPTextareaIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPTextareaControl> extends WUPText.JSXProps<T> {}
+    interface Options<T = string> extends Omit<WUPTextareaIn.GenOpt<T>, "mask" | "maskholder" | "prefix" | "postfix"> {}
+    interface JSXProps<T extends WUPTextareaControl>
+      extends Omit<WUPText.JSXProps<T>, "mask" | "maskholder" | "prefix" | "postfix"> {}
   }
 
   // add element to document.createElement
@@ -217,9 +218,22 @@ export default class WUPTextareaControl<
     return super.parseInput(text.replace(/^&nbsp;/, ""));
   }
 
-  // protected override gotChanges(propsChanged: Array<keyof WUPTextarea.Options> | null): void {
-  //   super.gotChanges(propsChanged as any);
-  // }
+  protected override gotChanges(propsChanged: Array<keyof WUPTextarea.Options> | null): void {
+    super.gotChanges(propsChanged);
+    const o = this._opts as WUPText.Options;
+    delete o.mask;
+    delete o.maskholder;
+    delete o.prefix;
+    delete o.postfix;
+  }
+
+  protected override renderPrefix(): void {
+    // not supported
+  }
+
+  protected override renderPostfix(): void {
+    // not supported
+  }
 
   // protected override gotBeforeInput(e: WUPText.GotInputEvent): void {
   //   super.gotBeforeInput(e);
@@ -285,4 +299,3 @@ export default class WUPTextareaControl<
 }
 
 customElements.define(tagName, WUPTextareaControl);
-// todo check how it works with mask

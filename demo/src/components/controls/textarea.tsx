@@ -18,7 +18,7 @@ export default function TextControlView() {
         cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
       }}
       features={[
-        "Inheritted features from TextControl",
+        "Inheritted features from TextControl (mask, prefix, postfix are not supported)",
         "Autoheight (change css rule: wup-textarea [contenteditable] { max-height: none })",
       ]}
     >
@@ -37,10 +37,10 @@ export default function TextControlView() {
           autoComplete="off"
           autoFocus={false}
           validations="window.myTextareaValidations"
-          mask=""
-          maskholder=""
-          prefix=""
-          postfix=""
+          // mask=""
+          // maskholder=""
+          // prefix=""
+          // postfix=""
         />
         <wup-textarea
           id="testMe"
