@@ -131,13 +131,13 @@ export default class WUPTextareaControl<
     Object.defineProperty(this.$refInput, "selectionStart", {
       configurable: true,
       set: (start) => (this.selection = { start, end: this.selection?.end as number }),
-      get: () => this.selection?.start,
+      get: () => this.selection?.start ?? null,
     });
 
     Object.defineProperty(this.$refInput, "selectionEnd", {
       configurable: true,
       set: (end) => (this.selection = { start: this.selection?.start as number, end }),
-      get: () => this.selection?.end,
+      get: () => this.selection?.end ?? null,
     });
   }
 
@@ -176,15 +176,18 @@ export default class WUPTextareaControl<
     let stop = false;
 
     // from https://stackoverflow.com/questions/13949059/persisting-the-changes-of-range-objects-after-selection-in-html/13950376#13950376
+    /* istanbul ignore else */
     if (sel) {
       // eslint-disable-next-line no-cond-assign
       while (!stop && (node = nodeStack.pop())) {
         if (node.nodeType === Node.TEXT_NODE) {
           const nextCharIndex = charIndex + (node as Text).length;
+          /* istanbul ignore else */
           if (!foundStart && sel.start >= charIndex && sel.start <= nextCharIndex) {
             range.setStart(node, sel.start - charIndex);
             foundStart = true;
           }
+          /* istanbul ignore else */
           if (foundStart && sel.end >= charIndex && sel.end <= nextCharIndex) {
             range.setEnd(node, sel.end - charIndex);
             stop = true;
@@ -295,6 +298,11 @@ export default class WUPTextareaControl<
     if (e.key === "Enter") {
       e.submitPrevented = true;
     }
+  }
+
+  protected override gotFocusLost(): void {
+    super.gotFocusLost();
+    this.setInputValue(this.$value); // update because newLine is replaced
   }
 }
 

@@ -70,5 +70,14 @@ describe("control.textarea", () => {
     expect(el.selectionEnd).not.toBe(undefined);
     expect(() => (el.selectionStart = 0)).not.toThrow();
     expect(() => (el.selectionEnd = 0)).not.toThrow();
+    jest.spyOn(window, "getSelection").mockImplementationOnce(() => null);
+    expect(el.selectionStart).toBe(null);
+    jest.spyOn(window, "getSelection").mockImplementationOnce(() => null);
+    expect(el.selectionEnd).toBe(null);
+
+    await h.userTypeText(el, "abc", { clearPrevious: false });
+    expect(area.$value?.length).toBe(3); // order is wrong because jsdom doesn't support window.getSelection properly
   });
 });
+
+// WARN: these test are simulation only for coverage; see real e2e test
