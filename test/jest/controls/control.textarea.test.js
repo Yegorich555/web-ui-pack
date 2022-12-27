@@ -80,4 +80,4 @@ describe("control.textarea", () => {
   });
 });
 
-// WARN: these test are simulation only for coverage; see real e2e test
+// WARN: these tests are simulation only for coverage; see real e2e test

@@ -145,8 +145,6 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       el.$refInput.selectionEnd = 0;
       el.blur();
       expect(document.activeElement).not.toBe(el.$refInput);
-      expect(el.$refInput.selectionEnd).toBe(0);
-      expect(el.$refInput.selectionStart).toBe(0);
       el.$options.selectOnFocus = false;
       jest.advanceTimersByTime(1);
 

@@ -91,11 +91,15 @@ export default class WUPTextareaControl<
         ${WUPcssScrollSmall(":host [contenteditable]")}`;
   }
 
-  // todo validations min/max depends on innerHTML but must depends on textContent without /n
-
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUPTextarea.Defaults = {
     ...WUPTextControl.$defaults,
+    validationRules: {
+      ...WUPTextControl.$defaults.validationRules,
+      // WARN: validations min/max must depends only on visible chars
+      min: (v, setV, c) => WUPTextControl.$defaults.validationRules.min!(v?.replace(/\n/g, ""), setV, c),
+      max: (v, setV, c) => WUPTextControl.$defaults.validationRules.max!(v?.replace(/\n/g, ""), setV, c),
+    },
   };
 
   $options: WUPTextarea.Options<ValueType> = {
