@@ -5,11 +5,36 @@ import * as h from "../../testHelper";
 
 /** @type WUPTextareaControl */
 let el;
-initTestBaseControl({ type: WUPTextareaControl, htmlTag: "wup-textarea", onInit: (e) => (el = e) });
+initTestBaseControl({
+  type: WUPTextareaControl,
+  htmlTag: "wup-textarea",
+  onInit: (e) => {
+    el = e;
+    // WARN: it doesn't work in jsdom
+    Object.defineProperty(el.$refInput, "value", {
+      get: () => el.$refInput.innerHTML,
+      set: (v) => {
+        el.$refInput.innerHTML = v;
+        el.$refInput.selectionStart = v.length;
+        el.$refInput.selectionEnd = v.length;
+      },
+    });
+    Object.defineProperty(el.$refInput, "selectionStart", { value: 0, writable: true });
+    Object.defineProperty(el.$refInput, "selectionEnd", { value: 0, writable: true });
+    Object.defineProperty(el.$refInput, "select", {
+      value: () => {
+        el.$refInput.selectionStart = 0;
+        el.$refInput.selectionEnd = el.$refInput.value.length;
+      },
+      writable: true,
+    });
+  },
+});
 
 describe("control.textarea", () => {
   testTextControl(() => el, {
     validations: {},
+    noInputSelection: true,
     // validationsSkip: [],
   });
 
@@ -28,5 +53,20 @@ describe("control.textarea", () => {
     await h.wait(1);
     expect(isPrevented).toBe(false);
     expect(onSubmit).toBeCalledTimes(0);
+  });
+
+  test("custom input props", async () => {
+    const area = document.body.appendChild(document.createElement("wup-textarea"));
+    el = area.$refInput;
+    el.setAttribute("tabindex", "0");
+    expect(() => (el.selectionStart = 0)).not.toThrow();
+    await h.wait(1);
+    el.focus();
+    expect(document.activeElement).toBe(el);
+
+    expect(el.selectionStart).not.toBe(undefined);
+    expect(el.selectionEnd).not.toBe(undefined);
+    expect(() => (el.selectionStart = 0)).not.toThrow();
+    expect(() => (el.selectionEnd = 0)).not.toThrow();
   });
 });

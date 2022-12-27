@@ -652,7 +652,6 @@ export default class WUPTextControl<
   #inputTimer?: ReturnType<typeof setTimeout>;
   /** Called when user types text OR when need to apply/reset mask (on focusGot, focusLost) */
   protected gotInput(e: WUPText.GotInputEvent): void {
-    // todo trimValue here ???
     const el = e.target as MaskHandledInput;
     let txt = el.value;
 

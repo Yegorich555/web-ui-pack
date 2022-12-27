@@ -13,11 +13,10 @@ export default function TextControlView() {
     <Page
       header="TextareaControl"
       link="src/controls/textarea.ts"
-      // todo rollback after tests
-      // details={{
-      //   tag: "wup-textarea",
-      //   cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
-      // }}
+      details={{
+        tag: "wup-textarea",
+        cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
+      }}
       features={[
         "Inheritted features from TextControl",
         "Autoheight (change css rule: wup-textarea [contenteditable] { max-height: none })",
@@ -58,7 +57,7 @@ export default function TextControlView() {
                 "wup-textarea [contenteditable] { ", //
                 "  min-height: 6em; // use css to change default",
                 "}",
-                "or leave as is\n\n",
+                "or leave as is",
               ].join("\n");
             }
           }}

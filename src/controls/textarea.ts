@@ -90,6 +90,8 @@ export default class WUPTextareaControl<
         ${WUPcssScrollSmall(":host [contenteditable]")}`;
   }
 
+  // todo validations min/max depends on innerHTML but must depends on textContent without /n
+
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUPTextarea.Defaults = {
     ...WUPTextControl.$defaults,
@@ -115,18 +117,26 @@ export default class WUPTextareaControl<
       sel.addRange(range);
     };
     Object.defineProperty(this.$refInput, "value", {
+      configurable: true,
       set: (v) => (this.$refInput.innerHTML = v),
-      get: () => this.$refInput.innerHTML,
+      get: () =>
+        this.$refInput.innerHTML
+          // .replace(/\n $/, "\n")
+          .replace(/<div><br><\/div>/g, "\n") // Chrome newLine
+          .replace(/<br>|<div>/g, "\n")
+          .replace(/<\/div>/g, ""),
     });
 
     Object.defineProperty(this.$refInput, "selectionStart", {
-      set: (start) => (this.selection = { start, end: this.selection!.end }),
-      get: () => this.selection?.start ?? null,
+      configurable: true,
+      set: (start) => (this.selection = { start, end: this.selection?.end as number }),
+      get: () => this.selection?.start,
     });
 
     Object.defineProperty(this.$refInput, "selectionEnd", {
-      set: (end) => (this.selection = { start: this.selection!.start, end }),
-      get: () => this.selection?.end ?? null,
+      configurable: true,
+      set: (end) => (this.selection = { start: this.selection?.start as number, end }),
+      get: () => this.selection?.end,
     });
   }
 
@@ -203,52 +213,68 @@ export default class WUPTextareaControl<
     this.$refTitle.id = id;
   }
 
+  override parseInput(text: string): ValueType | undefined {
+    return super.parseInput(text.replace(/^&nbsp;/, ""));
+  }
+
   // protected override gotChanges(propsChanged: Array<keyof WUPTextarea.Options> | null): void {
   //   super.gotChanges(propsChanged as any);
   // }
 
-  protected override gotBeforeInput(e: WUPText.GotInputEvent): void {
-    super.gotBeforeInput(e);
-    let data: string | null = null;
-    // eslint-disable-next-line default-case
-    switch (e.inputType) {
-      case "insertParagraph":
-        data = "\n";
-        this.insertText(data);
-        break;
-    }
+  // protected override gotBeforeInput(e: WUPText.GotInputEvent): void {
+  //   super.gotBeforeInput(e);
+  //   let data: string | null = null;
+  //   switch (e.inputType) {
+  //     case "insertLineBreak":
+  //     case "insertParagraph":
+  //       data = "\n";
+  //       this.insertText(data);
+  //       break;
+  //     default:
+  //       console.warn(e.inputType, e.data);
+  //       break;
+  //   }
 
-    if (data) {
-      e.preventDefault();
-      this.$refInput.dispatchEvent(new InputEvent("input", { inputType: e.inputType, data }));
-    }
-  }
+  //   if (data) {
+  //     e.preventDefault();
+  //     this.$refInput.dispatchEvent(new InputEvent("input", { inputType: e.inputType, data }));
+  //   }
+  // }
 
-  protected insertText(text: string): void {
-    const fr = document.createDocumentFragment();
-    // add a new line
-    const content = document.createTextNode(text);
-    fr.appendChild(content);
-    fr.appendChild(document.createTextNode(" " /* "\u00a0" */)); // othwerise chrome doesn't go to next line
-    // fr.appendChild(document.createElement("br")); // add the br, or p, or something else
-    // make the br replace selection
-    let range = window.getSelection()!.getRangeAt(0);
-    range.deleteContents();
-    range.insertNode(fr);
-    // create a new range
-    range = document.createRange();
-    range.setStartAfter(content);
-    range.collapse(true);
-    // make the cursor there
-    const sel = window.getSelection()!;
-    sel.removeAllRanges();
-    sel.addRange(range);
-    // autoscroll to cursor
-    const tempAnchorEl = document.createElement("br");
-    range.insertNode(tempAnchorEl);
-    tempAnchorEl.scrollIntoView({ block: "end" });
-    tempAnchorEl.remove(); // remove after scrolling is done
-  }
+  // protected override gotInput(e: WUPText.GotInputEvent): void {
+  //   super.gotInput(e);
+  //   console.warn({ v: this.$refInput.value });
+  // }
+
+  // protected insertText(text: string): void {
+  //   let range = window.getSelection()!.getRangeAt(0);
+  //   range.deleteContents(); // delete all prev selected part
+
+  //   const fr = document.createDocumentFragment();
+  //   const content = document.createTextNode(text);
+  //   fr.appendChild(content);
+
+  //   // issue: when insertText: and endswith "\nAbc " need to remove last empty space
+  //   // issue: when delete an empty space: chrome adds <br>
+  //   if (text === "\n" && this.$refInput.selectionEnd === this.$refInput.textContent!.length) {
+  //     fr.appendChild(document.createTextNode(" ")); // WARN: othwerise Chrome doesn't go to next line
+  //   }
+  //   range.insertNode(fr);
+
+  //   // create a new range
+  //   range = document.createRange();
+  //   range.setStartAfter(content);
+  //   range.collapse(true);
+  //   // make the cursor there
+  //   const sel = window.getSelection()!;
+  //   sel.removeAllRanges();
+  //   sel.addRange(range);
+  //   // autoscroll to cursor
+  //   const tempAnchorEl = document.createElement("br");
+  //   range.insertNode(tempAnchorEl);
+  //   tempAnchorEl.scrollIntoView({ block: "nearest" });
+  //   tempAnchorEl.remove(); // remove after scrolling is done
+  // }
 
   protected override gotKeyDown(e: KeyboardEvent & { submitPrevented?: boolean }): void {
     super.gotKeyDown(e);
