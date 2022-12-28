@@ -25,24 +25,40 @@ async function go() {
     throw new Error("Only master branch expected");
   }
 
-  await exec("npm run build-demo"); // run building demo
-  await exec("npm run coverage"); // run tests
-
   /* set date in changelog */
   const monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const dt = new Date();
   const gotDate = `(${monthsShort[dt.getUTCMonth()]} ${dt.getUTCDate()}, ${dt.getUTCFullYear()})`;
-  const txt = fs.readFileSync("./CHANGELOG.md", { encoding: "utf8" }).replace("(___)", gotDate);
+  const txt = fs
+    .readFileSync("./CHANGELOG.md", { encoding: "utf8" })
+    .replace("(___)", gotDate)
+    .replace("(\\_\\_\\_)", gotDate);
   fs.writeFileSync("./CHANGELOG.md", txt, { encoding: "utf8" });
 
+  const ver = /## ([0-9.]+)/.exec(txt)[1];
+
   /* update version in package.json */
-  await exec("npm version patch --commit-hooks false --git-tag-version false", []);
-  await exec("npm run build"); // run build again because version is changed
+  const verReg = /("version": ")([0-9.]+)/;
+  fs.writeFileSync(
+    "./package.json", //
+    fs.readFileSync("./package.json", { encoding: "utf8" }).replace(verReg, `$1${ver}`),
+    { encoding: "utf8" }
+  );
+  fs.writeFileSync(
+    "./package-lock.json",
+    fs.readFileSync("./package-lock.json", { encoding: "utf8" }).replace(verReg, `$1${ver}`),
+    { encoding: "utf8" }
+  );
+  // await exec("npm version patch --commit-hooks false --git-tag-version false", []);
+  // await exec("npm run build"); // run build again because version is changed
+
+  await exec("npm run coverage"); // run tests + publish coverage
+  await exec("npm run build-demo"); // building demo
 
   /* commit files */
-  const { version } = require("./package.json");
-  await exec(`git config core.autocrlf false && git add . && git commit -m "Bump version to ${version}"`, []);
-  await exec(`git tag v${version}`, []);
+  // const { version } = require("./package.json");
+  await exec(`git config core.autocrlf false && git add . && git commit -m "Bump version to ${ver}"`, []);
+  await exec(`git tag v${ver}`, []);
 
   // publish to npm
   // await exec("cd ./dist && npm publish");

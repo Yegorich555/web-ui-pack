@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.0 (\_\_\_)
+## 0.3.0 (Dec 27, 2022)
 
 **BREAKING CHANGES**:
 
