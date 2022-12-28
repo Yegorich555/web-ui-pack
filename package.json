@@ -1,6 +1,6 @@
 {
   "name": "web-ui-pack",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Web package with UI elements",
   "main": "index.js",
   "types": "index.d.ts",
@@ -21,7 +21,7 @@
     "lint": "npm run lint-code && npm run lint-styles && npm run lint-md",
     "build": "node .\\build.copyFiles.js && tsc --listEmittedFiles --incremental && node .\\build.fixConstEnum.js",
     "build-prod": "npm run build",
-    "prepare-publish": "node ./pre-publish.js",
+    "release": "node ./release.js",
     "go-publish": "cd ./dist && npm publish"
   },
   "repository": {
@@ -59,7 +59,8 @@
     "calendar",
     "date",
     "datepicker",
-    "numeric"
+    "numeric",
+    "textarea"
   ],
   "author": "Yegor.Golubchik",
   "license": "MIT",

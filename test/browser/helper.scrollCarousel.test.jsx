@@ -31,8 +31,15 @@ describe("helper.scrollCarousel", () => {
     const el = await page.$("ul");
     const boundingBox = await el.boundingBox();
     await page.mouse.move(boundingBox.x + boundingBox.width / 2, boundingBox.y + boundingBox.height / 2);
-    await page.mouse.wheel({ deltaY: 100 });
-    expect(await page.evaluate(() => document.querySelector("ul").scrollTop)).toBe(0); // scrolling is not started
+    // await page.mouse.wheel({ deltaY: 100 });
+    // WARN if call tests via Windows-RDP animation doesn't work despite browser returns animation-enabled
+    expect(
+      await page.evaluate(() => {
+        const ul = document.querySelector("ul");
+        ul.dispatchEvent(new WheelEvent("wheel", { deltaY: 100, bubbles: true, cancelable: true }));
+        return ul.scrollTop;
+      })
+    ).toBe(0); // scrolling is not started
     expect(await page.evaluate(() => document.body.innerHTML)).toMatchInlineSnapshot(
       `"<div id="app"><ul style="max-height: 54px; overflow: hidden; touch-action: none;"><li>Item 1</li><li>Item 2</li><li>Item 3</li><li>Item 4</li><li>Item 5</li><li>Item 6</li></ul></div>"`
     );
