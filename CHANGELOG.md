@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0 (\_\_\_)
+
+**Fixes**:
+
+- Helper. [`localeInfo`](src/helpers/localeInfo.ts). `AM/PM parsed to 'a' but expected 'A'`
+
 ## 0.3.0 (Dec 27, 2022)
 
 **BREAKING CHANGES**:

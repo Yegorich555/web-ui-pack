@@ -8,13 +8,13 @@ describe("helper.localeInfo", () => {
     expect(localeInfo).toMatchInlineSnapshot(`
       WUPlocaleInfo {
         "date": "YYYY-MM-DD",
-        "dateTime": "YYYY-MM-DD hh:mm:ss a",
+        "dateTime": "YYYY-MM-DD hh:mm:ss A",
         "firstWeekDay": 1,
         "locale": "",
         "localeUser": "en-US",
         "sep1000": ",",
         "sepDecimal": ".",
-        "time": "hh:mm:ss a",
+        "time": "hh:mm:ss A",
       }
     `);
     expect(localeInfo.namesDayShort).toEqual(["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]);
@@ -212,9 +212,9 @@ describe("helper.localeInfo", () => {
   test("date & time format", () => {
     expect(new Date(2222, 0, 3, 4, 5, 6).toLocaleString("en-US")).toBe("1/3/2222, 4:05:06 AM");
     localeInfo.refresh("en-US");
+    expect(localeInfo.dateTime).toBe("M/D/YYYY, h:mm:ss A");
     expect(localeInfo.date).toBe("M/D/YYYY");
-    expect(localeInfo.time).toBe("h:mm:ss a");
-    expect(localeInfo.dateTime).toBe("M/D/YYYY, h:mm:ss a");
+    expect(localeInfo.time).toBe("h:mm:ss A");
 
     expect(new Date(2222, 0, 3, 4, 5, 6).toLocaleString("ru-RU")).toBe("03.01.2222, 04:05:06");
     localeInfo.refresh("ru-RU");

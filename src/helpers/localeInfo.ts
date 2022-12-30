@@ -10,10 +10,10 @@ export class WUPlocaleInfo {
   sep1000 = ",";
   /** Date format, example YYYY-MM-DD */
   date = "YYYY-MM-DD";
-  /** Time format, example hh:mm:ss a */
-  time = "hh:mm:ss a";
-  /** Date+Time format, example YYYY-MM-DD hh:mm:ss a */
-  dateTime = "YYYY-MM-DD hh:mm:ss a";
+  /** Time format, example hh:mm:ss A */
+  time = "hh:mm:ss A";
+  /** Date+Time format, example YYYY-MM-DD hh:mm:ss A */
+  dateTime = "YYYY-MM-DD hh:mm:ss A";
   /** First day of week where 1-Monday, 7-Sunday;
    * @tutorial Troubleshooting
    * * detection depeneds on `Intl.Locale.prototype.weekInfo` https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/weekInfo
@@ -83,8 +83,7 @@ export class WUPlocaleInfo {
   /** Returns date-time formats according to pointed locale or (user-locale if pointed undefined) */
   getDateFormat(locale?: string): { date: string; time: string; dateTime: string } {
     // "1/3/2222, 4:05:06 AM";
-    const s = new Date(2222, 0, 3, 4, 5, 6).toLocaleString(locale).replace(/AM|am/, "a");
-    // const s = "4:05:06 AM, 1/3/2222".replace(/AM|am/, "a");
+    const s = new Date(2222, 0, 3, 4, 5, 6).toLocaleString(locale).replace(/am/, "a").replace(/AM/, "A");
     let dateTime = "";
     let endDate = 0;
     let endTime = 0;
@@ -116,7 +115,8 @@ export class WUPlocaleInfo {
         case 6:
           dateTime += "s";
           break;
-        case 49: // char a
+        case 49: // char a => 97-48
+        case 17: // char A => 65-48
           dateTime += s[i];
           endTime = i;
           break;
