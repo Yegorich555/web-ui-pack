@@ -118,7 +118,7 @@ export default function dateFromString(
 
   const isOut = isOutOfRange(r, isUTC, dt);
   if (isOut && options.throwOutOfRange) {
-    const err = RangeError(dateFromString.rangeErrorMessage) as RangeError & { details: any };
+    const err = RangeError("Out of range") as RangeError & { details: any };
     err.details = { format, raw: v, options, parsed: r };
     console.warn(`${err.message}. Details:`, err.details);
     throw err;
@@ -128,9 +128,6 @@ export default function dateFromString(
 
   return dt;
 }
-
-/** Returns "Out of range" text for error */
-dateFromString.rangeErrorMessage = "Out of range";
 
 function isOutOfRange(
   r: { y: number; M: number; d: number; h: number; m: number; s: number; f: number },

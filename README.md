@@ -204,6 +204,10 @@ declare global {
 
 ---
 
+### CutomTypes
+
+- [WUPTimeObject](src/externalTypes/timeObject.ts) => `Ordinary class Time with hours & minutes`
+
 ### Helpers
 
 use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.

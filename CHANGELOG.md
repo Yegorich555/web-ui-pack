@@ -6,6 +6,10 @@
 
 - Helper. [`localeInfo`](src/helpers/localeInfo.ts). `AM/PM parsed to 'a' but expected 'A'`
 
+**Features**:
+
+- Added [WUPTimeObject](src/externalTypes/timeObject.ts) => `Ordinary class Time with hours & minutes`
+
 ## 0.3.0 (Dec 27, 2022)
 
 **BREAKING CHANGES**:
