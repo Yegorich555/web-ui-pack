@@ -1,20 +1,23 @@
-import WUPBaseElement, { WUP } from "../baseElement";
-import { WUPPopup } from "./popupElement.types";
-import { getOffset, PopupPlacements, WUPPopupPlace } from "./popupPlacements";
+import { ShowCases, HideCases, Animations } from "./popupElement.types";
+import { WUPcssScrollSmall } from "../styles";
+import WUPBaseElement from "../baseElement";
+import { getOffset, PopupPlacements } from "./popupPlacements";
 import { findScrollParentAll } from "../helpers/findScrollParent";
 import WUPPopupArrowElement from "./popupArrowElement";
 import popupListen from "./popupListen";
 import { getBoundingInternalRect, px2Number, styleTransform } from "../helpers/styleHelpers";
-
-export import ShowCases = WUPPopup.ShowCases;
-import { WUPcssScrollSmall } from "../styles";
 import animateDropdown from "../helpers/animateDropdown";
 import isIntoView from "../helpers/isIntoView";
 import objectClone from "../helpers/objectClone";
 
-// code coverage doesn't work either: https://stackoverflow.com/questions/62493593/unable-to-ignore-block-within-react-class-components-with-istanbul-ignore-next-t
-/* c8 ignore next */
-export * from "./popupElement.types";
+// import {
+//   ShowCases as PopupShowCases,
+//   HideCases as PopupHideCases,
+//   Animations as PopupAnimations,
+// } from "./popupElement.types";
+// export import ShowCases = PopupShowCases;
+// export import HideCases = PopupHideCases;
+// export import Animations = PopupAnimations;
 
 const attachLst = new Map<HTMLElement, () => void>();
 
@@ -58,17 +61,17 @@ const attachLst = new Map<HTMLElement, () => void>();
  * * During the closing attr 'hide' is appended (only if css-animation-duration is detected)
  */
 export default class WUPPopupElement<
-  Events extends WUPPopup.EventMap = WUPPopup.EventMap
+  Events extends WUP.Popup.EventMap = WUP.Popup.EventMap
 > extends WUPBaseElement<Events> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPPopupElement;
 
-  static get observedOptions(): Array<keyof WUPPopup.Options> {
+  static get observedOptions(): Array<keyof WUP.Popup.Options> {
     return ["showCase", "target", "placement"];
   }
 
   /* Array of attribute names to monitor for changes */
-  static get observedAttributes(): Array<keyof WUPPopup.Options> {
+  static get observedAttributes(): Array<keyof WUP.Popup.Options> {
     return ["target", "placement"];
   }
 
@@ -89,7 +92,7 @@ export default class WUPPopupElement<
   };
 
   /** Default options. Change it to configure default behavior */
-  static $defaults: Omit<WUPPopup.Options, "target"> = {
+  static $defaults: Omit<WUP.Popup.Options, "target"> = {
     placement: [
       WUPPopupElement.$placements.$top.$middle.$adjust, //
       WUPPopupElement.$placements.$bottom.$middle.$adjust,
@@ -154,7 +157,7 @@ export default class WUPPopupElement<
    *     {
    *       target: document.querySelector("button") as HTMLElement,
    *       text: "Some text here",
-   *       showCase: WUPPopup.ShowCases.onClick,
+   *       showCase: ShowCases.onClick,
    *     },
    *     // (el) => el.class = "popup-attached"
    *   );
@@ -165,7 +168,7 @@ export default class WUPPopupElement<
    * * If popup is hidden and target is removed via `target.parent.innerHTML="another content"` you should fire detach() to avoid memoryLeak
    */
   static $attach<T extends WUPPopupElement>(
-    options: WUPPopup.AttachOptions,
+    options: WUP.Popup.AttachOptions,
     /** Fires when popup is added to document */
     callback?: (el: T) => void
   ): () => void {
@@ -238,7 +241,7 @@ export default class WUPPopupElement<
 
     function detach(): void {
       if (popup) {
-        popup.$isOpen && popup.goHide.call(popup, WUPPopup.HideCases.onManuallCall);
+        popup.$isOpen && popup.goHide.call(popup, HideCases.onManuallCall);
         (popup as T).remove.call(popup);
       }
       r.stopListen();
@@ -252,7 +255,7 @@ export default class WUPPopupElement<
   }
 
   /** All options for this popup. If you want to change common options @see WUPPopupElement.$defaults */
-  $options: WUPPopup.Options = objectClone(this.#ctr.$defaults);
+  $options: WUP.Popup.Options = objectClone(this.#ctr.$defaults);
   protected override _opts = this.$options;
 
   /** Hide popup
@@ -261,8 +264,8 @@ export default class WUPPopupElement<
     return new Promise<void>((resolve) => {
       const f = async (): Promise<void> => {
         // isReady possible false when you fire $hide on disposed element
-        if (this.$isReady && this.#isOpen && (await this.goHide(WUPPopup.HideCases.onManuallCall))) {
-          this._opts.showCase !== WUPPopup.ShowCases.always && this.init(); // re-init to applyShowCase
+        if (this.$isReady && this.#isOpen && (await this.goHide(HideCases.onManuallCall))) {
+          this._opts.showCase !== ShowCases.always && this.init(); // re-init to applyShowCase
         }
         resolve();
       };
@@ -281,7 +284,7 @@ export default class WUPPopupElement<
         } else {
           this.disposeListener(); // remove events
           try {
-            await this.goShow(WUPPopup.ShowCases.always);
+            await this.goShow(ShowCases.always);
             resolve();
           } catch (err) {
             reject(err);
@@ -327,7 +330,7 @@ export default class WUPPopupElement<
       this._opts.target = this.#defineTarget();
 
       if (!this._opts.showCase /* always */) {
-        this.goShow(WUPPopup.ShowCases.always);
+        this.goShow(ShowCases.always);
         return;
       }
 
@@ -343,7 +346,7 @@ export default class WUPPopupElement<
     super.gotChanges(propsChanged);
 
     if (propsChanged) {
-      this.$isOpen && this.goHide(WUPPopup.HideCases.onOptionChange);
+      this.$isOpen && this.goHide(HideCases.onOptionChange);
       this.init(); // possible only if popup is hidden
     }
   }
@@ -401,7 +404,7 @@ export default class WUPPopupElement<
       inherritX: HTMLElement | null;
       animTime: number;
     };
-    placements: Array<WUPPopupPlace.PlaceFunc>;
+    placements: Array<WUP.Popup.Place.PlaceFunc>;
   };
 
   /** Collect/calc all required values into #state (when menu shows) */
@@ -472,8 +475,8 @@ export default class WUPPopupElement<
       this._opts.placement.push(PopupPlacements.$top.$middle.$adjust);
     }
     const adjustRules = this._opts.placement
-      .filter((v) => (v as WUPPopupPlace.AlignFunc).$adjust)
-      .map((v) => (v as WUPPopupPlace.AlignFunc).$adjust);
+      .filter((v) => (v as WUP.Popup.Place.AlignFunc).$adjust)
+      .map((v) => (v as WUP.Popup.Place.AlignFunc).$adjust);
 
     const otherRules = Object.keys(PopupPlacements)
       .filter(
@@ -501,12 +504,12 @@ export default class WUPPopupElement<
   _stopAnimation?: () => void;
   protected goAnimate(animTime: number, isClose: boolean): Promise<boolean> {
     let pr: Promise<boolean>;
-    if (this._opts.animation === WUPPopup.Animations.drawer) {
+    if (this._opts.animation === Animations.drawer) {
       const pa = animateDropdown(this, animTime, isClose);
       pr = new Promise((resolve) => {
         this._stopAnimation = () => {
           delete this._stopAnimation;
-          pa.stop(this._opts.animation !== WUPPopup.Animations.drawer); // rst animation state only if animation changed
+          pa.stop(this._opts.animation !== Animations.drawer); // rst animation state only if animation changed
           resolve(false);
         };
         pa.then(() => resolve(true));
@@ -527,7 +530,7 @@ export default class WUPPopupElement<
 
   /** Shows popup if target defined; returns true if successful */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected goShow(showCase: WUPPopup.ShowCases): boolean | Promise<boolean> {
+  protected goShow(showCase: ShowCases): boolean | Promise<boolean> {
     this._stopAnimation?.call(this);
 
     const e = this.fireEvent("$willShow", { cancelable: true });
@@ -557,7 +560,7 @@ export default class WUPPopupElement<
     const { animTime } = this.#state!.userStyles;
     if (!animTime && window.matchMedia("not all and (prefers-reduced-motion)").matches && this._opts.animation) {
       /* istanbul ignore else */
-      if (this._opts.animation === WUPPopup.Animations.drawer) {
+      if (this._opts.animation === Animations.drawer) {
         console.warn(
           `${this.tagName} style.animationDuration is missed but $options.animation is defined. Please point animation duration via styles`
         );
@@ -579,7 +582,7 @@ export default class WUPPopupElement<
 
   _isClosing?: true;
   /** Hide popup. @hideCase as reason of hide(). Calling 2nd time at once will stop previous hide-animation */
-  protected goHide(hideCase: WUPPopup.HideCases): boolean | Promise<boolean> {
+  protected goHide(hideCase: HideCases): boolean | Promise<boolean> {
     if (!this.#isOpen || this._isClosing) {
       return true;
     }
@@ -608,7 +611,7 @@ export default class WUPPopupElement<
     };
 
     // waitFor only if was ordinary user-action
-    if (hideCase >= WUPPopup.HideCases.onManuallCall && hideCase <= WUPPopup.HideCases.onTargetClick) {
+    if (hideCase >= HideCases.onManuallCall && hideCase <= HideCases.onTargetClick) {
       this.setAttribute("hide", "");
       const { animationDuration: aD } = getComputedStyle(this);
       const animTime = Number.parseFloat(aD.substring(0, aD.length - 1)) * 1000 || 0;
@@ -634,7 +637,7 @@ export default class WUPPopupElement<
     const trg = this._opts.target as HTMLElement;
     // possible when target removed via set innerHTML (in this case remove-hook doesn't work)
     if (!trg.isConnected) {
-      this.goHide(WUPPopup.HideCases.onTargetRemove);
+      this.goHide(HideCases.onTargetRemove);
       this.#attach && this.remove(); // self-removing if $attach()
       return undefined;
     }
@@ -678,7 +681,7 @@ export default class WUPPopupElement<
     }
 
     const fitEl = this._opts.toFitElement || document.body;
-    const fit = getBoundingInternalRect(fitEl) as WUPPopupPlace.Rect;
+    const fit = getBoundingInternalRect(fitEl) as WUP.Popup.Place.Rect;
     fit.el = fitEl;
     const a = this._opts.offsetFitElement;
     if (a) {
@@ -701,7 +704,7 @@ export default class WUPPopupElement<
       this.#refArrow.style.height = "";
     }
 
-    const me: WUPPopupPlace.MeRect = {
+    const me: WUP.Popup.Place.MeRect = {
       // WARN: offsetSize is rounded so 105.2 >>> 105
       w: this.offsetWidth, // clientWidth doesn't include border-size
       h: this.offsetHeight,
@@ -718,7 +721,7 @@ export default class WUPPopupElement<
         : { h: 0, w: 0, offset: { bottom: 0, left: 0, right: 0, top: 0 } },
     };
 
-    const t: WUPPopupPlace.Rect = {
+    const t: WUP.Popup.Place.Rect = {
       el: trg,
       top: tdef.top - me.offset.top,
       left: tdef.left - me.offset.left,
@@ -751,10 +754,10 @@ export default class WUPPopupElement<
     t.height = t.bottom - t.top;
     t.width = t.right - t.left;
 
-    let lastRule: WUPPopupPlace.PlaceFunc;
+    let lastRule: WUP.Popup.Place.PlaceFunc;
 
     const process = (): void => {
-      const hasOveflow = (p: WUPPopupPlace.Result, meSize: { w: number; h: number }): boolean =>
+      const hasOveflow = (p: WUP.Popup.Place.Result, meSize: { w: number; h: number }): boolean =>
         p.left < fit.left ||
         p.top < fit.top ||
         p.freeW < this.#state!.userStyles!.minW ||
@@ -762,7 +765,7 @@ export default class WUPPopupElement<
         p.left + Math.min(meSize.w, p.maxW || Number.MAX_SAFE_INTEGER, this.#state!.userStyles!.maxW) > fit.right ||
         p.top + Math.min(meSize.h, p.maxH || Number.MAX_SAFE_INTEGER, this.#state!.userStyles!.maxH) > fit.bottom;
 
-      let pos: WUPPopupPlace.Result = <WUPPopupPlace.Result>{};
+      let pos: WUP.Popup.Place.Result = <WUP.Popup.Place.Result>{};
       const isOk = this.#state!.placements!.some((pfn) => {
         lastRule = pfn;
         pos = pfn(t, me, fit);
@@ -873,7 +876,7 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUP.JSXProps<WUPPopupElement> &
+      [tagName]: WUP.Base.JSXProps<WUPPopupElement> &
         Partial<{
           /** QuerySelector to find target - anchor that popup uses for placement.
            * If attr.target and $options.target are empty previousSibling will be attached.

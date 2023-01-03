@@ -2,6 +2,10 @@
 
 ## 0.4.0 (\_\_\_)
 
+**BREAKING CHANGES**:
+
+- Namespace WUP is refactored from WUPPopup to WUP.Popup. So re-export enums `ShowCases, HideCases, Animations` without prefix now
+
 **Fixes**:
 
 - Helper. [`localeInfo`](src/helpers/localeInfo.ts). `AM/PM parsed to 'a' but expected 'A'`

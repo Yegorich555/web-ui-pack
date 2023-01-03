@@ -1,4 +1,3 @@
-import { WUPPopupPlace } from "../popup/popupPlacements";
 import { findScrollParentAll } from "./findScrollParent";
 import { getBoundingInternalRect } from "./styleHelpers";
 
@@ -58,8 +57,8 @@ export default function isIntoView(el: HTMLElement, options?: IntoViewOptions): 
   };
 
   interface ISaved {
-    (): Omit<WUPPopupPlace.Rect, "el">;
-    _saved: Omit<WUPPopupPlace.Rect, "el">;
+    (): Omit<WUP.Popup.Place.Rect, "el">;
+    _saved: Omit<WUP.Popup.Place.Rect, "el">;
   }
 
   for (let i = 0; i < scrollParents.length; ++i) {

@@ -1,5 +1,5 @@
-// eslint-disable-next-line import/named
-import WUPPopupElement, { WUPPopup } from "../popup/popupElement";
+import WUPPopupElement from "../popup/popupElement";
+import { ShowCases as PopupShowCases, HideCases as PopupHideCases, Animations } from "../popup/popupElement.types";
 import popupListen from "../popup/popupListen";
 import WUPBaseControl from "./baseControl";
 import WUPTextControl, { WUPTextIn } from "./text";
@@ -18,7 +18,7 @@ export namespace WUPBaseComboIn {
 
   export type Generics<
     ValueType = any,
-    ValidationKeys extends WUPBase.ValidationMap = WUPBaseCombo.ValidationMap,
+    ValidationKeys extends WUP.BaseControl.ValidationMap = WUP.BaseCombo.ValidationMap,
     Defaults = Defs,
     Options = Opt
   > = WUPTextIn.Generics<ValueType, ValidationKeys, Defaults & Defs, Options & Opt>;
@@ -54,9 +54,9 @@ export const enum HideCases {
 }
 
 declare global {
-  namespace WUPBaseCombo {
-    interface ValidationMap extends Omit<WUPText.ValidationMap, "min" | "max" | "email"> {}
-    interface EventMap extends WUPText.EventMap {
+  namespace WUP.BaseCombo {
+    interface ValidationMap extends Omit<WUP.Text.ValidationMap, "min" | "max" | "email"> {}
+    interface EventMap extends WUP.Text.EventMap {
       /** Fires after popup-menu is shown (after animation finishes) */
       $showMenu: Event;
       /** Fires after popup is hidden (after animation finishes) */
@@ -64,7 +64,7 @@ declare global {
     }
     interface Defaults<T = string> extends WUPBaseComboIn.GenDef<T> {}
     interface Options<T = string> extends WUPBaseComboIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPBaseComboControl> extends WUPText.JSXProps<T> {
+    interface JSXProps<T extends WUPBaseComboControl> extends WUP.Text.JSXProps<T> {
       /** @readonly Use [opened] for styling */
       readonly opened?: boolean;
     }
@@ -74,13 +74,13 @@ declare global {
 /** Base abstract form-control for any control with popup-menu (Dropdown, Datepicker etc.) */
 export default abstract class WUPBaseComboControl<
   ValueType = any,
-  EventMap extends WUPBaseCombo.EventMap = WUPBaseCombo.EventMap
+  EventMap extends WUP.BaseCombo.EventMap = WUP.BaseCombo.EventMap
 > extends WUPTextControl<ValueType, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseComboControl;
 
   static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUPBaseCombo.Options>;
+    const arr = super.observedOptions as Array<keyof WUP.BaseCombo.Options>;
     arr.push("readOnlyInput");
     return arr;
   }
@@ -117,7 +117,7 @@ export default abstract class WUPBaseComboControl<
       }`;
   }
 
-  static $defaults: WUPBaseCombo.Defaults<any> = {
+  static $defaults: WUP.BaseCombo.Defaults<any> = {
     ...WUPTextControl.$defaults,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
@@ -127,7 +127,7 @@ export default abstract class WUPBaseComboControl<
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey,
   };
 
-  $options: WUPBaseCombo.Options<ValueType> = {
+  $options: WUP.BaseCombo.Options<ValueType> = {
     ...this.#ctr.$defaults,
     // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory
@@ -166,7 +166,7 @@ export default abstract class WUPBaseComboControl<
     i.setAttribute("aria-expanded", false);
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUPBaseCombo.Options> | null): void {
+  protected override gotChanges(propsChanged: Array<keyof WUP.BaseCombo.Options> | null): void {
     super.gotChanges(propsChanged as any);
 
     this._opts.readOnlyInput
@@ -174,7 +174,7 @@ export default abstract class WUPBaseComboControl<
       : this.$refInput.setAttribute("aria-autocomplete", "list");
   }
 
-  override gotFormChanges(propsChanged: Array<keyof WUPForm.Options | keyof WUPBaseCombo.Options> | null): void {
+  override gotFormChanges(propsChanged: Array<keyof WUP.Form.Options | keyof WUP.BaseCombo.Options> | null): void {
     super.gotFormChanges(propsChanged);
     this.$refInput.readOnly = this.$refInput.readOnly || (this._opts.readOnlyInput as boolean);
 
@@ -187,12 +187,12 @@ export default abstract class WUPBaseComboControl<
       const refs = popupListen(
         {
           target: this,
-          showCase: WUPPopup.ShowCases.onClick | WUPPopup.ShowCases.onFocus,
+          showCase: PopupShowCases.onClick | PopupShowCases.onFocus,
           skipAlreadyFocused: true,
         },
         (s, e) => {
-          const sc = s === WUPPopup.ShowCases.onClick ? ShowCases.onClick : ShowCases.onFocus;
-          if (s === WUPPopup.ShowCases.always) {
+          const sc = s === PopupShowCases.onClick ? ShowCases.onClick : ShowCases.onFocus;
+          if (s === PopupShowCases.always) {
             return this.$refPopup!;
           }
           if (!(sc & this._opts.showCase)) {
@@ -201,12 +201,12 @@ export default abstract class WUPBaseComboControl<
           return this.goShowMenu(sc, e);
         },
         (s, e) => {
-          if (s === WUPPopup.HideCases.onManuallCall) {
+          if (s === PopupHideCases.onManuallCall) {
             return true;
           }
-          if (s !== WUPPopup.HideCases.onPopupClick) {
+          if (s !== PopupHideCases.onPopupClick) {
             return this.goHideMenu(
-              s === WUPPopup.HideCases.onFocusOut || s === WUPPopup.HideCases.onOutsideClick
+              s === PopupHideCases.onFocusOut || s === PopupHideCases.onOutsideClick
                 ? HideCases.onFocusLost
                 : HideCases.onClick,
               e
@@ -263,7 +263,7 @@ export default abstract class WUPBaseComboControl<
     if (!this.$refPopup) {
       const p = document.createElement("wup-popup");
       this.$refPopup = p;
-      p.$options.showCase = WUPPopup.ShowCases.always;
+      p.$options.showCase = PopupShowCases.always;
       p.$options.target = this;
       p.$options.offsetFitElement = [1, 1];
       p.$options.minWidthByTarget = true;
@@ -279,7 +279,7 @@ export default abstract class WUPBaseComboControl<
       ];
 
       p.setAttribute("menu", "");
-      p.$options.animation = WUPPopup.Animations.drawer;
+      p.$options.animation = Animations.drawer;
 
       const menuId = this.#ctr.$uniqueId;
       const i = this.$refInput;
@@ -306,7 +306,7 @@ export default abstract class WUPBaseComboControl<
     const r = this.$refPopup.$show().finally(() => this.fireEvent("$showMenu", { cancelable: false }));
     this.setAttribute("opened", ""); // possible when user calls show & hide sync
     this.$refInput.setAttribute("aria-expanded", true);
-    this.#popupRefs!.show(WUPPopup.ShowCases.always); // call for ref-listener to apply events properly
+    this.#popupRefs!.show(PopupShowCases.always); // call for ref-listener to apply events properly
     isNeedWait && (await r); // WARN: it's important don't wait for animation to assign onShow events fast
 
     return this.$refPopup;
@@ -343,7 +343,7 @@ export default abstract class WUPBaseComboControl<
     /* istanbul ignore else */
     if (wasOpen) {
       this._isHidding = true;
-      this.#popupRefs!.hide(WUPPopup.HideCases.onManuallCall); // call for ref-listener to apply events properly
+      this.#popupRefs!.hide(PopupHideCases.onManuallCall); // call for ref-listener to apply events properly
       await this.$refPopup.$hide();
       delete this._isHidding;
       if (this.#isOpen) {
@@ -442,7 +442,7 @@ export default abstract class WUPBaseComboControl<
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected override gotInput(e: WUPText.GotInputEvent, allowSuper = false): void {
+  protected override gotInput(e: WUP.Text.GotInputEvent, allowSuper = false): void {
     // gotInput possible on browser-autofill so we need filter check if isFocused
     !this.$isOpen && this._opts.showCase & ShowCases.onInput && this.$isFocused && this.goShowMenu(ShowCases.onInput);
     allowSuper && super.gotInput(e);

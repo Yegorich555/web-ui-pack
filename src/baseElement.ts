@@ -14,7 +14,7 @@ let lastUniqueNum = 0;
 const allObservedOptions = new WeakMap<typeof WUPBaseElement, Set<string> | null>();
 
 /** Basic abstract class for every component in web-ui-pack */
-export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.EventMap> extends HTMLElement {
+export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = WUP.Base.EventMap> extends HTMLElement {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseElement;
 
@@ -223,7 +223,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   protected gotChanges(propsChanged: Array<string> | null): void {}
 
   /** Called when element isReady and at least one of observedOptions is changed */
-  protected gotOptionsChanged(e: WUP.OptionEvent): void {
+  protected gotOptionsChanged(e: WUP.Base.OptionEvent): void {
     this._isStopChanges = true;
     e.props.forEach((p) => this.removeAttribute(p)); // remove related attributes otherwise impossible to override
     this.gotChanges(e.props);
@@ -286,7 +286,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
         });
       }); // otherwise attr can't override option if attribute removed
 
-      this.gotChanges(this.#attrChanged as Array<keyof WUPForm.Options>);
+      this.gotChanges(this.#attrChanged as Array<keyof WUP.Form.Options>);
       this._isStopChanges = false;
       this.#attrChanged = undefined;
     });
@@ -409,17 +409,18 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   }
 }
 
-export namespace WUP {
-  export type OptionEvent<T extends Record<string, any> = Record<string, any>> = {
-    props: Array<Extract<keyof T, string>>;
-    target: T;
-  };
-  export type EventMap<T = HTMLElementEventMap> = HTMLElementEventMap & Record<keyof T, Event>;
-  export type JSXProps<T> = React.DetailedHTMLProps<
-    // react doesn't support [className] attr for WebComponents; use [class] instead: https://github.com/facebook/react/issues/4933
-    Omit<React.HTMLAttributes<T>, "className"> & { class?: string | undefined },
-    T
-  >;
+declare global {
+  namespace WUP.Base {
+    type OptionEvent<T extends Record<string, any> = Record<string, any>> = {
+      props: Array<Extract<keyof T, string>>;
+      target: T;
+    };
+    type EventMap<T = HTMLElementEventMap> = HTMLElementEventMap & Record<keyof T, Event>;
+    type JSXProps<T> = React.DetailedHTMLProps<
+      // react doesn't support [className] attr for WebComponents; use [class] instead: https://github.com/facebook/react/issues/4933
+      Omit<React.HTMLAttributes<T>, "className"> & { class?: string | undefined },
+      T
+    >;
+  }
 }
-
 // testcase: check if gotChanges sensitive to attr-case

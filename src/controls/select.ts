@@ -1,4 +1,3 @@
-import { WUP } from "../baseElement";
 import nestedProperty from "../helpers/nestedProperty";
 import onEvent from "../helpers/onEvent";
 import promiseWait from "../helpers/promiseWait";
@@ -21,7 +20,7 @@ export namespace WUPSelectIn {
 
   export interface Opt<T> {
     /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data! */
-    items: WUPSelect.MenuItems<T> | (() => WUPSelect.MenuItems<T> | Promise<WUPSelect.MenuItems<T>>);
+    items: WUP.Select.MenuItems<T> | (() => WUP.Select.MenuItems<T> | Promise<WUP.Select.MenuItems<T>>);
     /** Set true to make input not editable but allow to user select items via popup-menu (ordinary dropdown mode) */
     readOnlyInput?: boolean;
     /** Allow user to create new value (if value not found in items) */
@@ -31,7 +30,7 @@ export namespace WUPSelectIn {
   export type Generics<
     ValueType = any,
     ItemType = ValueType,
-    ValidationKeys extends WUPSelect.ValidationMap = WUPSelect.ValidationMap,
+    ValidationKeys extends WUP.Select.ValidationMap = WUP.Select.ValidationMap,
     Defaults = Defs,
     Options = Opt<ValueType>
   > = WUPBaseComboIn.Generics<ValueType, ValidationKeys, Defaults & Defs, Options & Opt<ItemType>>;
@@ -41,7 +40,7 @@ export namespace WUPSelectIn {
   export type GenOpt<T = any, ItemT = T> = Generics<T, ItemT>["Options"];
 }
 declare global {
-  namespace WUPSelect {
+  namespace WUP.Select {
     interface MenuItem<T> {
       text: string;
       value: T;
@@ -54,11 +53,11 @@ declare global {
     type MenuItemAny<T> = MenuItem<T> | MenuItemFn<T>;
     type MenuItems<T> = MenuItem<T>[] | MenuItemFn<T>[];
 
-    interface ValidationMap extends WUPBaseCombo.ValidationMap {}
-    interface EventMap extends WUPBaseCombo.EventMap {}
+    interface ValidationMap extends WUP.BaseCombo.ValidationMap {}
+    interface EventMap extends WUP.BaseCombo.EventMap {}
     interface Defaults<T = any> extends WUPSelectIn.GenDef<T> {}
     interface Options<T = any, ItemT = T> extends WUPSelectIn.GenOpt<T, ItemT> {}
-    interface JSXProps<T extends WUPSelectControl> extends WUPBaseCombo.JSXProps<T> {
+    interface JSXProps<T extends WUPSelectControl> extends WUP.BaseCombo.JSXProps<T> {
       /** @deprecated Items showed in dropdown-menu. Point global obj-key with items (set `window.inputRadio.items` for `window.inputRadio.items = [{value: 1, text: 'Item 1'}]` ) */
       items?: string;
     }
@@ -70,7 +69,7 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUPSelect.JSXProps<WUPSelectControl>;
+      [tagName]: WUP.Select.JSXProps<WUPSelectControl>;
     }
   }
 }
@@ -111,13 +110,13 @@ declare global {
 export default class WUPSelectControl<
   ValueType = any,
   ItemType = ValueType,
-  EventMap extends WUPSelect.EventMap = WUPSelect.EventMap
+  EventMap extends WUP.Select.EventMap = WUP.Select.EventMap
 > extends WUPBaseComboControl<ValueType, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPSelectControl;
 
   static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUPSelect.Options>;
+    const arr = super.observedOptions as Array<keyof WUP.Select.Options>;
     arr.push("items");
     return arr;
   }
@@ -185,13 +184,13 @@ export default class WUPSelectControl<
     return menuItemText.startsWith(inputValue) || menuItemText.includes(` ${inputValue}`);
   }
 
-  static $defaults: WUPSelect.Defaults = {
+  static $defaults: WUP.Select.Defaults = {
     ...WUPBaseComboControl.$defaults,
     validationRules: { ...WUPBaseComboControl.$defaults.validationRules },
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey | ShowCases.onInput,
   };
 
-  $options: WUPSelect.Options<ValueType, ItemType> = {
+  $options: WUP.Select.Options<ValueType, ItemType> = {
     ...this.#ctr.$defaults,
     items: [],
     // @ts-expect-error
@@ -212,8 +211,8 @@ export default class WUPSelectControl<
       if (arr?.length) {
         r =
           attrValue === ""
-            ? (arr as WUPSelect.MenuItemAny<any>[]).find((o) => o.value == null)
-            : (arr as WUPSelect.MenuItemAny<any>[]).find((o) => o.value && `${o.value}` === attrValue);
+            ? (arr as WUP.Select.MenuItemAny<any>[]).find((o) => o.value == null)
+            : (arr as WUP.Select.MenuItemAny<any>[]).find((o) => o.value && `${o.value}` === attrValue);
       }
 
       (this as any)._noDelInitValueAttr = true;
@@ -233,8 +232,8 @@ export default class WUPSelectControl<
     return spin;
   }
 
-  protected override async gotOptionsChanged(e: WUP.OptionEvent): Promise<void> {
-    const ev = e as unknown as WUP.OptionEvent<WUPSelect.Options>;
+  protected override async gotOptionsChanged(e: WUP.Base.OptionEvent): Promise<void> {
+    const ev = e as unknown as WUP.Base.OptionEvent<WUP.Select.Options>;
     if (ev.props.includes("items")) {
       this.removePopup();
       this._cachedItems = undefined;
@@ -246,7 +245,7 @@ export default class WUPSelectControl<
     super.gotOptionsChanged(e);
   }
 
-  override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null): void {
+  override gotFormChanges(propsChanged: Array<keyof WUP.Form.Options> | null): void {
     super.gotFormChanges(propsChanged);
     this.$refInput.readOnly = this.$refInput.readOnly || (this.$isPending as boolean);
   }
@@ -285,7 +284,7 @@ export default class WUPSelectControl<
   };
 
   /** Items resolved from options */
-  _cachedItems?: WUPSelect.MenuItems<ValueType>;
+  _cachedItems?: WUP.Select.MenuItems<ValueType>;
 
   /** Called when NoItems need to show */
   protected renderMenuNoItems(popup: WUPPopupElement, isReset: boolean): void {
@@ -346,15 +345,15 @@ export default class WUPSelectControl<
   }
 
   /** Method retrieves items from options and shows spinner if required */
-  protected async getItems(): Promise<WUPSelect.MenuItems<ValueType>> {
+  protected async getItems(): Promise<WUP.Select.MenuItems<ValueType>> {
     if (this._cachedItems) {
       return this._cachedItems;
     }
 
     const items =
-      (nestedProperty.get(window, this.getAttribute("items") || "") as WUPRadio.Options["items"]) || this._opts.items;
+      (nestedProperty.get(window, this.getAttribute("items") || "") as WUP.Select.Options["items"]) || this._opts.items;
 
-    let arr: WUPSelect.MenuItems<ValueType>;
+    let arr: WUP.Select.MenuItems<ValueType>;
     if (typeof items === "function") {
       const f = items();
       if (f instanceof Promise) {
@@ -370,7 +369,7 @@ export default class WUPSelectControl<
   }
 
   // Called when need to show text related to value
-  protected valueToText(v: ItemType, items: WUPSelect.MenuItems<ItemType>): string {
+  protected valueToText(v: ItemType, items: WUP.Select.MenuItems<ItemType>): string {
     const i = items.findIndex((o) => this.#ctr.$isEqual(o.value, v));
     if (i === -1) {
       if (this._opts.allowNewValue) {
@@ -396,7 +395,7 @@ export default class WUPSelectControl<
     if (v === undefined) {
       return "";
     }
-    const r = this.getItems().then((items) => this.valueToText(v as any, items as WUPSelect.MenuItems<any>));
+    const r = this.getItems().then((items) => this.valueToText(v as any, items as WUP.Select.MenuItems<any>));
     return r;
   }
 
@@ -424,11 +423,11 @@ export default class WUPSelectControl<
     if (arr.length) {
       if (typeof arr[0].text === "function") {
         arr.forEach((v, i) => {
-          arrLi[i]._text = (v as WUPSelect.MenuItemFn<ValueType>).text(v.value, arrLi[i], i).toLowerCase();
+          arrLi[i]._text = (v as WUP.Select.MenuItemFn<ValueType>).text(v.value, arrLi[i], i).toLowerCase();
         });
       } else {
         arr.forEach((v, i) => {
-          const txt = (v as WUPSelect.MenuItem<ValueType>).text;
+          const txt = (v as WUP.Select.MenuItem<ValueType>).text;
           arrLi[i].textContent = txt;
           arrLi[i]._text = txt.toLowerCase();
         });
@@ -565,7 +564,7 @@ export default class WUPSelectControl<
 
   /** For case when need to menu is opened but items are not rendered yet */
   protected _needFilter?: () => void;
-  protected override gotInput(e: WUPText.GotInputEvent): void {
+  protected override gotInput(e: WUP.Text.GotInputEvent): void {
     this.$isOpen && this.focusMenuItem(null); // reset virtual focus
     super.gotInput(e);
 

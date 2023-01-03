@@ -1,34 +1,38 @@
-export interface IMaskInputOptions {
-  /** Add next constant-symbol to allow user don't worry about non-digit values @default true
-   * @WARN prediction:false is partially supported (delete behavior forces prediction logic) */
-  prediction?: boolean;
-  /** Add missed zero: for pattern '0000-00' and string '1 ' result will be "0001-" @default true   */
-  lazy?: boolean;
-}
+declare global {
+  namespace WUP.Text.Mask {
+    interface DigChunk {
+      index: number;
+      text: string;
+      isTouched?: true;
 
-interface IDigChunk {
-  index: number;
-  text: string;
-  isTouched?: true;
+      isDig: true;
+      min: number;
+      max: number;
+      isCompleted?: boolean;
+    }
+    interface SymChunk {
+      index: number;
+      text: string;
+      isTouched?: true;
+      isDig?: false;
+    }
+    type InputChunk = DigChunk | SymChunk;
+    interface Options {
+      /** Add next constant-symbol to allow user don't worry about non-digit values @default true
+       * @WARN prediction:false is partially supported (delete behavior forces prediction logic) */
+      prediction?: boolean;
+      /** Add missed zero: for pattern '0000-00' and string '1 ' result will be "0001-" @default true   */
+      lazy?: boolean;
+    }
 
-  isDig: true;
-  min: number;
-  max: number;
-  isCompleted?: boolean;
-}
-interface ISymChunk {
-  index: number;
-  text: string;
-  isTouched?: true;
-  isDig?: false;
-}
-type IInputChunk = IDigChunk | ISymChunk;
-export interface MaskHandledInput extends HTMLInputElement {
-  _maskPrev?: {
-    position: number;
-    value: string;
-    insertText: string | null;
-  };
+    interface HandledInput extends HTMLInputElement {
+      _maskPrev?: {
+        position: number;
+        value: string;
+        insertText: string | null;
+      };
+    }
+  }
 }
 
 export default class MaskTextInput {
@@ -37,9 +41,9 @@ export default class MaskTextInput {
   /** Returns text of first chunk if it's static or "" */
   prefix = "";
   /** Pattern splits into chunks. With detailed info about process */
-  chunks: IInputChunk[] = [];
+  chunks: WUP.Text.Mask.InputChunk[] = [];
   /** Last processed chunk */
-  lastChunk: IInputChunk = { index: -1, text: "" };
+  lastChunk: WUP.Text.Mask.InputChunk = { index: -1, text: "" };
   /** Returns whether value completely fits pattern (isComplete) */
   isCompleted = false;
   /** Returns count chars of pattern that missed in value (used to maskHolder) */
@@ -54,7 +58,7 @@ export default class MaskTextInput {
    * * '|0' or '\x00' - static char '0'
    * * '|#' or '\x01' - static char '#'
    *  */
-  constructor(public pattern: string, rawValue: string, private options?: IMaskInputOptions) {
+  constructor(public pattern: string, rawValue: string, private options?: WUP.Text.Mask.Options) {
     this.options = { prediction: true, lazy: true, ...options };
     this.parse(rawValue);
     this.prefix = !this.chunks[0].isDig ? this.chunks[0].text : "";
@@ -66,12 +70,12 @@ export default class MaskTextInput {
   // }
 
   /** Splits pointed pattern to chunks */
-  static parsePattern(pattern: string): IInputChunk[] {
-    const chunks: IInputChunk[] = [];
-    let lastChunk: IInputChunk | null = null;
-    const setToChunk = (char: string, isDigit: boolean | undefined): IInputChunk => {
+  static parsePattern(pattern: string): WUP.Text.Mask.InputChunk[] {
+    const chunks: WUP.Text.Mask.InputChunk[] = [];
+    let lastChunk: WUP.Text.Mask.InputChunk | null = null;
+    const setToChunk = (char: string, isDigit: boolean | undefined): WUP.Text.Mask.InputChunk => {
       if (!lastChunk || lastChunk.isDig !== isDigit) {
-        lastChunk = { text: char } as IDigChunk;
+        lastChunk = { text: char } as WUP.Text.Mask.DigChunk;
         if (isDigit) {
           lastChunk.isDig = true;
           lastChunk.max = 0;
@@ -94,11 +98,11 @@ export default class MaskTextInput {
       const p = pr[i];
       switch (p) {
         case "0":
-          ++(setToChunk(p, true) as IDigChunk).max;
-          ++(lastChunk! as IDigChunk).min;
+          ++(setToChunk(p, true) as WUP.Text.Mask.DigChunk).max;
+          ++(lastChunk! as WUP.Text.Mask.DigChunk).min;
           break;
         case "#":
-          ++(setToChunk(p, true) as IDigChunk).max;
+          ++(setToChunk(p, true) as WUP.Text.Mask.DigChunk).max;
           break;
         case "\x00":
           setToChunk("0", undefined);
@@ -179,7 +183,7 @@ export default class MaskTextInput {
     const endIndex = this.chunks.length - 1;
     if (l === -2) {
       l = endIndex;
-    } else if (l === endIndex - 1 && (this.chunks[l] as IDigChunk).isCompleted) {
+    } else if (l === endIndex - 1 && (this.chunks[l] as WUP.Text.Mask.DigChunk).isCompleted) {
       ++l; // append postfix at the end if all chunks are completed & only lacks postfix
     } else if (this.options!.prediction && l !== endIndex) {
       const last = this.chunks[l];
@@ -209,7 +213,7 @@ export default class MaskTextInput {
 
   /* Call it on 'beforeinput' event to improve logic */
   handleBeforInput(e: InputEvent): void {
-    const el = e.target as MaskHandledInput;
+    const el = e.target as WUP.Text.Mask.HandledInput;
 
     if (el.selectionStart !== el.selectionEnd) {
       delete el._maskPrev;
@@ -239,7 +243,7 @@ export default class MaskTextInput {
 
   /* Call it on 'input' event */
   handleInput(e: InputEvent): { declinedAdd: number; position: number } {
-    const el = e.target as MaskHandledInput;
+    const el = e.target as WUP.Text.Mask.HandledInput;
     const v = el.value;
 
     let position = el.selectionStart || 0;
@@ -275,7 +279,7 @@ export default class MaskTextInput {
   }
 
   /** Returns chunk according to pointed cursor position + position inside chunk */
-  findChunkByCursor(pos: number): { chunk: IInputChunk; posChunk: number } {
+  findChunkByCursor(pos: number): { chunk: WUP.Text.Mask.InputChunk; posChunk: number } {
     const chunk = this.chunks.find((c) => {
       pos -= c.text.length;
       return pos <= 0;
@@ -317,7 +321,7 @@ export default class MaskTextInput {
      * +1(234) 343-4|: remove char, shiftDigits. if lastDigit incompleted: remove next separator chunk
      */
 
-    const resetChunk = (c: IInputChunk): void => {
+    const resetChunk = (c: WUP.Text.Mask.InputChunk): void => {
       delete c.isTouched;
       if (c.isDig) {
         c.text = "#".repeat(c.max - c.min) + "0".repeat(c.min);
@@ -335,8 +339,8 @@ export default class MaskTextInput {
       if (chunk.index === 0 && isBefore) {
         pos = chunk.text.length; // impossible to remove prefix: so set cursor to the end
       } else {
-        const next = this.chunks[chunk.index + 1] as IDigChunk;
-        const prev = this.chunks[chunk.index - 1] as IDigChunk;
+        const next = this.chunks[chunk.index + 1] as WUP.Text.Mask.DigChunk;
+        const prev = this.chunks[chunk.index - 1] as WUP.Text.Mask.DigChunk;
         // case impossible anymore: next && !next.text && resetChunk(next); // clear state next chunk after separator
         const canRemove = prev && !next?.isTouched && prev.text.length !== prev.max && chunk.index !== lastIndex; // whether possible to remove separator
 
@@ -379,7 +383,7 @@ export default class MaskTextInput {
         // shift/recalc chunks
         let prev = chunk;
         for (let i = chunk.index + 2; i < this.chunks.length; i += 2) {
-          const next = this.chunks[i] as IDigChunk;
+          const next = this.chunks[i] as WUP.Text.Mask.DigChunk;
           if (!next.text.length || !next.isTouched) {
             resetChunk(next);
 

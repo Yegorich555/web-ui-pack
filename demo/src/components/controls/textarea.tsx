@@ -6,7 +6,7 @@ import styles from "./textarea.scss";
 const sideEffect = WUPTextareaControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
 
-(window as any).myTextareaValidations = { min: 4 } as WUPTextarea.Options["validations"];
+(window as any).myTextareaValidations = { min: 4 } as WUP.Textarea.Options["validations"];
 
 export default function TextControlView() {
   return (

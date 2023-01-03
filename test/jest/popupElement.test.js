@@ -1,9 +1,7 @@
 /* eslint-disable prefer-rest-params */
 import { WUPPopupElement } from "web-ui-pack";
 import popupListen from "web-ui-pack/popup/popupListen";
-import * as all from "web-ui-pack/popup/popupElement.types";
-import { WUPPopup } from "web-ui-pack/popup/popupElement";
-import * as all2 from "web-ui-pack/popup/popupElement";
+import { Animations, ShowCases } from "web-ui-pack/popup/popupElement.types";
 import * as h from "../testHelper";
 import { TestMouseMoveEvent } from "../testHelper";
 
@@ -79,18 +77,6 @@ afterEach(() => {
 describe("popupElement", () => {
   describe("me", () => {
     h.baseTestComponent(() => document.createElement("wup-popup"), { skipAttrs: true });
-    test("re-import", () => {
-      // just for coverage
-      expect(all).toBeTruthy();
-      expect(all2).toBeTruthy();
-      expect(Object.keys(all2).length > 0).toBe(true);
-      expect(WUPPopup).toBeTruthy();
-      expect(WUPPopup.ShowCases).toBeTruthy();
-      expect(WUPPopup.ShowCases.always).toBeDefined();
-      expect(WUPPopup.HideCases).toBeTruthy();
-      expect(WUPPopup.HideCases.onManuallCall).toBeDefined();
-      expect(Object.keys(WUPPopup).length > 0).toBeTruthy();
-    });
   });
 
   describe("inheritance", () => {
@@ -773,7 +759,7 @@ describe("popupElement", () => {
     expect(el.$isOpen).toBe(true); // because $hide is async
     await h.wait();
     expect(el.$isOpen).toBe(false);
-    el.$options.animation = WUPPopup.Animations.drawer;
+    el.$options.animation = Animations.drawer;
     el.$show();
     expect(el.$isOpen).toBe(true);
     expect(el.outerHTML).toMatchInlineSnapshot(
@@ -1830,7 +1816,7 @@ describe("popupElement", () => {
 
   test("right-click filter", async () => {
     await el.$hide();
-    el.$options.showCase = WUPPopup.ShowCases.onClick;
+    el.$options.showCase = ShowCases.onClick;
     await h.wait();
 
     await h.userClick(trg);
