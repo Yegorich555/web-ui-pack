@@ -9,7 +9,6 @@ import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
 
 beforeAll(() => {
-  jest.useFakeTimers();
   // localeInfo.refresh("en-US"); // setup "en-US" locale
   // localeInfo.date = "yyyy-MM-dd"; // set defaults
   // localeInfo.time = "hh:mm:ss.fff a";
@@ -35,6 +34,7 @@ initTestBaseControl({
   type: WUPDateControl,
   htmlTag: "wup-date",
   onInit: (e) => {
+    jest.setSystemTime(new Date("2022-10-18T12:00:00.000Z")); // 18 Oct 2022 12:00 UTC
     el = e;
 
     const height = 50;

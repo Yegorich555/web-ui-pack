@@ -16,10 +16,24 @@ const mockShowNext = () => {
   };
   return showNext;
 };
+
+beforeEach(() => {
+  jest.useFakeTimers();
+  jest.setSystemTime(new Date("2022-10-18T12:00:00.000Z")); // 18 Oct 2022 12:00 UTC
+});
+
+afterEach(() => {
+  jest.clearAllMocks();
+  jest.restoreAllMocks();
+});
+
 initTestBaseControl({
   type: WUPCalendarControl as any,
   htmlTag: "wup-calendar",
-  onInit: (e) => (el = e as WUPCalendarControl),
+  onInit: (e) => {
+    jest.setSystemTime(new Date("2022-10-18T12:00:00.000Z")); // 18 Oct 2022 12:00 UTC
+    el = e as WUPCalendarControl;
+  },
 });
 
 /** Test function for different timezones */
@@ -122,7 +136,6 @@ export default function calendarTZtest() {
     const initDateStr = (utcString: string) => (opt.utc ? new Date(utcString) : new Date(`${utcString} 00:00`));
 
     describe(`utc=${opt.utc}`, () => {
-      jest.useFakeTimers();
       describe("day picker", () => {
         daysSet.forEach((ds) => {
           test(`firstOfWeek: ${ds.label}`, async () => {
@@ -156,8 +169,9 @@ export default function calendarTZtest() {
             // test click
             const onChange = jest.fn();
             el.addEventListener("$change", onChange);
-
             let item = el.$refCalenarItems.children.item(15) as HTMLElement;
+            expect(onChange).toBeCalledTimes(0);
+            jest.useFakeTimers();
             await h.userClick(item);
             expect(item.getAttribute("aria-selected")).toBe("true");
             expect(el.querySelectorAll("[aria-selected]").length).toBe(1);
