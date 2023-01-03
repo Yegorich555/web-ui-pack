@@ -20,15 +20,22 @@ beforeAll(() => {
   }
 });
 
-/** @type WUPCalendarControl */
-let el;
-initTestBaseControl({ type: WUPCalendarControl, htmlTag: "wup-calendar", onInit: (e) => (el = e) });
-
 /** @type () => Promise<void> */
 let nextFrame;
 beforeEach(() => {
-  nextFrame = h.useFakeAnimation().nextFrame;
   jest.setSystemTime(new Date("2022-10-18T12:00:00.000Z")); // 18 Oct 2022 12:00 UTC
+  nextFrame = h.useFakeAnimation().nextFrame;
+});
+
+/** @type WUPCalendarControl */
+let el;
+initTestBaseControl({
+  type: WUPCalendarControl,
+  htmlTag: "wup-calendar",
+  onInit: (e) => {
+    jest.setSystemTime(new Date("2022-10-18T12:00:00.000Z")); // 18 Oct 2022 12:00 UTC
+    el = e;
+  },
 });
 
 describe("control.calendar", () => {
@@ -172,7 +179,8 @@ describe("control.calendar", () => {
       await nextFrame();
       await nextFrame();
       await nextFrame();
-      jest.advanceTimersByTime(1);
+      // jest.advanceTimersByTime(1);
+      await h.wait(100);
     };
 
     el.remove();
