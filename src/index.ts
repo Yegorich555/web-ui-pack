@@ -2,7 +2,7 @@ import * as WUPHelpers from "./indexHelpers";
 
 export { WUPHelpers };
 
-export { default as WUPTimeObject } from "./externalTypes/timeObject";
+export { default as WUPTimeObject } from "./objects/timeObject";
 
 // export { default as WUPBaseElement } from "./baseElement";
 export { default as WUPPopupElement } from "./popup/popupElement";

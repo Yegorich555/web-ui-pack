@@ -206,7 +206,7 @@ declare global {
 
 ### CutomTypes
 
-- [WUPTimeObject](src/externalTypes/timeObject.ts) => `Ordinary class Time with hours & minutes`
+- [WUPTimeObject](src/objects/timeObject.ts) => `Ordinary class Time with hours & minutes`
 
 ### Helpers
 
