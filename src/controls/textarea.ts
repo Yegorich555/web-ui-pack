@@ -7,7 +7,7 @@ export namespace WUPTextareaIn {
   export interface Opt {}
   export type Generics<
     ValueType = string,
-    ValidationKeys extends WUPText.ValidationMap = WUPTextarea.ValidationMap,
+    ValidationKeys extends WUP.Text.ValidationMap = WUP.Textarea.ValidationMap,
     Defaults = Def,
     Options = Opt
   > = WUPTextIn.Generics<ValueType, ValidationKeys, Defaults & Def, Options & Opt>;
@@ -17,13 +17,13 @@ export namespace WUPTextareaIn {
 }
 
 declare global {
-  namespace WUPTextarea {
-    interface ValidationMap extends WUPText.ValidationMap {}
-    interface EventMap extends WUPText.EventMap {}
+  namespace WUP.Textarea {
+    interface ValidationMap extends WUP.Text.ValidationMap {}
+    interface EventMap extends WUP.Text.EventMap {}
     interface Defaults<T = string> extends WUPTextareaIn.GenDef<T> {}
     interface Options<T = string> extends Omit<WUPTextareaIn.GenOpt<T>, "mask" | "maskholder" | "prefix" | "postfix"> {}
     interface JSXProps<T extends WUPTextareaControl>
-      extends Omit<WUPText.JSXProps<T>, "mask" | "maskholder" | "prefix" | "postfix"> {}
+      extends Omit<WUP.Text.JSXProps<T>, "mask" | "maskholder" | "prefix" | "postfix"> {}
   }
 
   // add element to document.createElement
@@ -34,7 +34,7 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUPTextarea.JSXProps<WUPTextareaControl>;
+      [tagName]: WUP.Textarea.JSXProps<WUPTextareaControl>;
     }
   }
 }
@@ -65,7 +65,7 @@ declare global {
  */
 export default class WUPTextareaControl<
   ValueType = string,
-  EventMap extends WUPTextarea.EventMap = WUPTextarea.EventMap
+  EventMap extends WUP.Textarea.EventMap = WUP.Textarea.EventMap
 > extends WUPTextControl<ValueType, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextareaControl;
@@ -92,7 +92,7 @@ export default class WUPTextareaControl<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUPTextarea.Defaults = {
+  static $defaults: WUP.Textarea.Defaults = {
     ...WUPTextControl.$defaults,
     validationRules: {
       ...WUPTextControl.$defaults.validationRules,
@@ -102,7 +102,7 @@ export default class WUPTextareaControl<
     },
   };
 
-  $options: WUPTextarea.Options<ValueType> = {
+  $options: WUP.Textarea.Options<ValueType> = {
     ...this.#ctr.$defaults,
     // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory
@@ -225,9 +225,9 @@ export default class WUPTextareaControl<
     return super.parseInput(text.replace(/^&nbsp;/, ""));
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUPTextarea.Options> | null): void {
+  protected override gotChanges(propsChanged: Array<keyof WUP.Textarea.Options> | null): void {
     super.gotChanges(propsChanged);
-    const o = this._opts as WUPText.Options;
+    const o = this._opts as WUP.Text.Options;
     delete o.mask;
     delete o.maskholder;
     delete o.prefix;
@@ -242,7 +242,7 @@ export default class WUPTextareaControl<
     // not supported
   }
 
-  // protected override gotBeforeInput(e: WUPText.GotInputEvent): void {
+  // protected override gotBeforeInput(e: WUP.Text.GotInputEvent): void {
   //   super.gotBeforeInput(e);
   //   let data: string | null = null;
   //   switch (e.inputType) {
@@ -262,7 +262,7 @@ export default class WUPTextareaControl<
   //   }
   // }
 
-  // protected override gotInput(e: WUPText.GotInputEvent): void {
+  // protected override gotInput(e: WUP.Text.GotInputEvent): void {
   //   super.gotInput(e);
   //   console.warn({ v: this.$refInput.value });
   // }

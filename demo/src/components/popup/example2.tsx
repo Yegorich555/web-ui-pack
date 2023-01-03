@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from "react";
 import movable from "src/helpers/movable";
-// eslint-disable-next-line import/named
-import WUPPopupElement, { ShowCases, WUPPopup } from "web-ui-pack/popup/popupElement";
+import WUPPopupElement from "web-ui-pack/popup/popupElement";
+import { ShowCases, Animations } from "web-ui-pack/popup/popupElement.types";
 import styles from "./popupView.scss";
 
 // example of attach - use this to avoid overhelmed layout by closed popups
@@ -24,7 +24,7 @@ function attach(el: HTMLElement, opts: { text?: string; innerHTML?: string }) {
       ];
       popup.$options.toFitElement = document.querySelector("#fit") as HTMLElement;
       popup.$options.arrowEnable = false;
-      popup.$options.animation = WUPPopup.Animations.drawer;
+      popup.$options.animation = Animations.drawer;
       setTimeout(() => {
         if (popup.$refArrow) {
           popup.$refArrow.style.background = popup.style.background;

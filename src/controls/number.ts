@@ -25,7 +25,7 @@ export namespace WUPNumberIn {
   }
   export type Generics<
     ValueType = number,
-    ValidationKeys extends WUPBase.ValidationMap = WUPNumber.ValidationMap,
+    ValidationKeys extends WUP.BaseControl.ValidationMap = WUP.Number.ValidationMap,
     Defaults = Def,
     Options = Opt
   > = WUPTextIn.Generics<ValueType, ValidationKeys, Defaults & Def, Options & Opt>;
@@ -35,19 +35,21 @@ export namespace WUPNumberIn {
 }
 
 declare global {
-  namespace WUPNumber {
-    interface ValidationMap extends WUPBase.ValidationMap, Pick<WUPText.ValidationMap, "_mask" /* | "_parse" */> {
+  namespace WUP.Number {
+    interface ValidationMap
+      extends WUP.BaseControl.ValidationMap,
+        Pick<WUP.Text.ValidationMap, "_mask" /* | "_parse" */> {
       /** If $value < pointed shows message 'Min value {x}` */
       min: number;
       /** If $value < pointed shows message 'Max value {x}` */
       max: number;
     }
-    interface EventMap extends WUPBase.EventMap {}
+    interface EventMap extends WUP.BaseControl.EventMap {}
     interface Defaults<T = number> extends WUPNumberIn.GenDef<T> {}
     interface Options<T = number> extends WUPNumberIn.GenOpt<T> {}
 
     // @ts-expect-error
-    interface JSXProps<T extends WUPNumberControl> extends WUPText.JSXProps<T> {
+    interface JSXProps<T extends WUPNumberControl> extends WUP.Text.JSXProps<T> {
       // some options can be here
     }
   }
@@ -60,7 +62,7 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUPNumber.JSXProps<WUPNumberControl>;
+      [tagName]: WUP.Number.JSXProps<WUPNumberControl>;
     }
   }
 }
@@ -85,18 +87,18 @@ declare global {
 // @ts-expect-error
 export default class WUPNumberControl<
   ValueType = number,
-  EventMap extends WUPNumber.EventMap = WUPNumber.EventMap
+  EventMap extends WUP.Number.EventMap = WUP.Number.EventMap
 > extends WUPTextControl<ValueType, EventMap> {
   #ctr = this.constructor as typeof WUPNumberControl;
 
   static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUPNumber.Options>;
+    const arr = super.observedOptions as Array<keyof WUP.Number.Options>;
     arr.push("format");
     return arr;
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUPNumber.Defaults<number> = {
+  static $defaults: WUP.Number.Defaults<number> = {
     ...WUPTextControl.$defaults,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
@@ -107,7 +109,7 @@ export default class WUPNumberControl<
     },
   };
 
-  $options: WUPNumber.Options<ValueType> = {
+  $options: WUP.Number.Options<ValueType> = {
     ...this.#ctr.$defaults,
     // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory
@@ -259,12 +261,12 @@ export default class WUPNumberControl<
     this.$refInput.setAttribute("role", "spinbutton");
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUPNumber.Options> | null): void {
+  protected override gotChanges(propsChanged: Array<keyof WUP.Number.Options> | null): void {
     super.gotChanges(propsChanged as any);
     propsChanged?.includes("format") && this.setInputValue(this.$value);
   }
 
-  protected override gotBeforeInput(e: WUPText.GotInputEvent): void {
+  protected override gotBeforeInput(e: WUP.Text.GotInputEvent): void {
     super.gotBeforeInput(e);
 
     if (!this._opts.mask) {
@@ -292,7 +294,7 @@ export default class WUPNumberControl<
   }
 
   private _canShowDeclined?: boolean;
-  protected override gotInput(e: WUPText.GotInputEvent): void {
+  protected override gotInput(e: WUP.Text.GotInputEvent): void {
     if (!this._opts.mask) {
       switch (e!.inputType) {
         case "insertText":

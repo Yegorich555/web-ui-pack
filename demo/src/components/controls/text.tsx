@@ -6,8 +6,8 @@ import styles from "./text.scss";
 const sideEffect = WUPTextControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
 
-(window as any).myTextValidations = { min: 4 } as WUPText.Options["validations"];
-(window as any).myTextValidations2 = { required: true } as WUPText.Options["validations"];
+(window as any).myTextValidations = { min: 4 } as WUP.Text.Options["validations"];
+(window as any).myTextValidations2 = { required: true } as WUP.Text.Options["validations"];
 
 export default function TextControlView() {
   return (

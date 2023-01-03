@@ -3,7 +3,7 @@ import WUPSelectControl from "./select";
 
 // it's required to extend default validationRules
 declare global {
-  namespace WUPSelect {
+  namespace WUP.Select {
     interface ValidationMap {
       isNumber: boolean;
     }

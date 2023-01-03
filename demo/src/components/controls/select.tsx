@@ -31,7 +31,7 @@ const items = [
 
 (window as any)._someSelectValidations = {
   required: true,
-} as WUPSelect.Options["validations"];
+} as WUP.Select.Options["validations"];
 
 class WUPSpinSelElement extends WUPSpinElement {}
 spinUseDualRing(WUPSpinSelElement);

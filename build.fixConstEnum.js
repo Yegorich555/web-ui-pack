@@ -10,4 +10,7 @@ function fixReExportConstEnum(from, str) {
   fs.writeFileSync(from, txt, { encoding: "utf8" });
 }
 
-fixReExportConstEnum("./dist/popup/popupElement.js", 'import { WUPPopup } from "./popupElement.types";');
+fixReExportConstEnum(
+  "./dist/popup/popupElement.js",
+  'import { ShowCases as PopupShowCases, HideCases as PopupHideCases, Animations as PopupAnimations } from "./popupElement.types";'
+);

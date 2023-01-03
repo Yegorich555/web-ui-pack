@@ -27,7 +27,7 @@ export namespace WUPDateIn {
 
   export type Generics<
     ValueType = Date,
-    ValidationKeys extends WUPDate.ValidationMap = WUPDate.ValidationMap,
+    ValidationKeys extends WUP.Date.ValidationMap = WUP.Date.ValidationMap,
     Defaults = Defs,
     Options = Opt
   > = WUPBaseComboIn.Generics<ValueType, ValidationKeys, Defaults & Defs, Options & Opt>;
@@ -36,8 +36,8 @@ export namespace WUPDateIn {
   export type GenOpt<T = Date> = Generics<T>["Options"];
 }
 declare global {
-  namespace WUPDate {
-    interface ValidationMap extends WUPBase.ValidationMap, Pick<WUPText.ValidationMap, "_mask" | "_parse"> {
+  namespace WUP.Date {
+    interface ValidationMap extends WUP.BaseControl.ValidationMap, Pick<WUP.Text.ValidationMap, "_mask" | "_parse"> {
       /** Enabled if option [min] is pointed; If $value < pointed shows message 'Min date is {x}` */
       min: Date;
       /** Enabled if option [min] is pointed; if $value > pointed shows message 'Max date is {x}` */
@@ -45,10 +45,10 @@ declare global {
       /** Enabled if option [exclude] is pointed; If invalid shows "This date is disabled" */
       exclude: Date[];
     }
-    interface EventMap extends WUPBaseCombo.EventMap {}
+    interface EventMap extends WUP.BaseCombo.EventMap {}
     interface Defaults<T = Date> extends WUPDateIn.GenDef<T> {}
     interface Options<T = Date> extends WUPDateIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPDateControl> extends WUPBaseCombo.JSXProps<T>, WUPDateIn.JSXProps {
+    interface JSXProps<T extends WUPDateControl> extends WUP.BaseCombo.JSXProps<T>, WUPDateIn.JSXProps {
       /** @deprecated default value; format yyyy-MM-dd hh:mm:ss.fff */
       initValue?: string;
       /** String representation of displayed date (enables mask, - to disable mask set $options.mask="");
@@ -64,7 +64,7 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUPDate.JSXProps<WUPDateControl>;
+      [tagName]: WUP.Date.JSXProps<WUPDateControl>;
     }
   }
 }
@@ -87,7 +87,7 @@ declare global {
  */
 export default class WUPDateControl<
   ValueType extends Date = Date,
-  EventMap extends WUPDate.EventMap = WUPDate.EventMap
+  EventMap extends WUP.Date.EventMap = WUP.Date.EventMap
 > extends WUPBaseComboControl<ValueType, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPDateControl;
@@ -112,18 +112,18 @@ export default class WUPDateControl<
   }
 
   static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUPDate.Options>;
+    const arr = super.observedOptions as Array<keyof WUP.Date.Options>;
     arr.push("format");
     return arr;
   }
 
   static get observedAttributes(): Array<string> {
-    const arr = super.observedAttributes as Array<LowerKeys<WUPDate.Options>>;
+    const arr = super.observedAttributes as Array<LowerKeys<WUP.Date.Options>>;
     arr.push("format", "min", "max", "utc", "exclude");
     return arr;
   }
 
-  static $defaults: WUPDate.Defaults<Date> = {
+  static $defaults: WUP.Date.Defaults<Date> = {
     ...WUPBaseComboControl.$defaults,
     // debounceMs: 500,
     validationRules: {
@@ -141,7 +141,7 @@ export default class WUPDateControl<
     // format: localeInfo.date.toLowerCase()
   };
 
-  $options: WUPDate.Options<ValueType> = {
+  $options: WUP.Date.Options<ValueType> = {
     ...this.#ctr.$defaults,
     utc: true,
     format: this.#ctr.$defaults.format || localeInfo.date.toLowerCase(),
@@ -179,7 +179,7 @@ export default class WUPDateControl<
     return !this.refMask || this.refMask.isCompleted;
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUPDate.Options> | null): void {
+  protected override gotChanges(propsChanged: Array<keyof WUP.Date.Options> | null): void {
     this._opts.utc = this.getBoolAttr("utc", this._opts.utc);
     this._opts.format = (this.getAttribute("format") ?? this._opts.format) || "YYYY-MM-DD";
     if (this._opts.format.toUpperCase().includes("MMM")) {
@@ -213,13 +213,13 @@ export default class WUPDateControl<
     super.gotChanges(propsChanged as any);
   }
 
-  protected get validations(): WUPText.Options["validations"] {
-    const vls = (super.validations as WUPDate.Options["validations"])!; // undefined impossible because of textControl || {};
+  protected get validations(): WUP.Text.Options["validations"] {
+    const vls = (super.validations as WUP.Date.Options["validations"])!; // undefined impossible because of textControl || {};
     // user can type not valid value according to options min,max,exclude. So need to enable validations rules in this case
     if (this._opts.min) vls.min = this._opts.min;
     if (this._opts.max) vls.max = this._opts.max;
     if (this._opts.exclude) vls.exclude = this._opts.exclude;
-    return vls as WUPBase.Options["validations"];
+    return vls as WUP.BaseControl.Options["validations"];
   }
 
   protected goValidate(fromCase: ValidateFromCases, silent = false): string | false {
@@ -300,7 +300,7 @@ export default class WUPDateControl<
     // don't call super because validation is appeared
   }
 
-  protected override gotInput(e: WUPText.GotInputEvent): void {
+  protected override gotInput(e: WUP.Text.GotInputEvent): void {
     super.gotInput(e, true);
   }
 

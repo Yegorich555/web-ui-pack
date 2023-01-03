@@ -7,7 +7,7 @@ export namespace WUPCheckIn {
 
   export type Generics<
     ValueType = boolean,
-    ValidationKeys extends WUPCheck.ValidationMap = WUPCheck.ValidationMap,
+    ValidationKeys extends WUP.Check.ValidationMap = WUP.Check.ValidationMap,
     Defaults = Def,
     Options = Opt
   > = WUPSwitchIn.Generics<ValueType, ValidationKeys, Defaults & Def, Options & Opt>;
@@ -17,12 +17,12 @@ export namespace WUPCheckIn {
 }
 
 declare global {
-  namespace WUPCheck {
-    interface ValidationMap extends WUPSwitch.ValidationMap {}
-    interface EventMap extends WUPSwitch.EventMap {}
+  namespace WUP.Check {
+    interface ValidationMap extends WUP.Switch.ValidationMap {}
+    interface EventMap extends WUP.Switch.EventMap {}
     interface Defaults<T = boolean> extends WUPCheckIn.GenDef<T> {}
     interface Options<T = boolean> extends WUPCheckIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPCheckControl> extends WUPSwitch.JSXProps<T> {}
+    interface JSXProps<T extends WUPCheckControl> extends WUP.Switch.JSXProps<T> {}
   }
 
   // add element to document.createElement
@@ -33,7 +33,7 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUPCheck.JSXProps<WUPCheckControl>;
+      [tagName]: WUP.Check.JSXProps<WUPCheckControl>;
     }
   }
 }
@@ -60,7 +60,7 @@ declare global {
  * </label>
  */
 export default class WUPCheckControl<
-  EventMap extends WUPCheck.EventMap = WUPCheck.EventMap
+  EventMap extends WUP.Check.EventMap = WUP.Check.EventMap
 > extends WUPSwitchControl<EventMap> {
   #ctr = this.constructor as typeof WUPCheckControl;
 
@@ -119,12 +119,12 @@ export default class WUPCheckControl<
       }`;
   }
 
-  static $defaults: WUPCheck.Defaults = {
+  static $defaults: WUP.Check.Defaults = {
     ...WUPSwitchControl.$defaults,
     validationRules: { ...WUPSwitchControl.$defaults.validationRules },
   };
 
-  $options: WUPCheck.Options = {
+  $options: WUP.Check.Options = {
     ...this.#ctr.$defaults,
     // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory

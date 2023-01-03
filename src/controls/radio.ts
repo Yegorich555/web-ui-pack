@@ -1,4 +1,3 @@
-import { WUP } from "../baseElement";
 import nestedProperty from "../helpers/nestedProperty";
 import { WUPcssHidden } from "../styles";
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
@@ -12,12 +11,12 @@ export namespace WUPRadioIn {
   }
   export interface Opt<T> {
     /** Items showed as radio-buttons */
-    items: WUPSelect.MenuItems<T> | (() => WUPSelect.MenuItems<T>);
+    items: WUP.Select.MenuItems<T> | (() => WUP.Select.MenuItems<T>);
   }
 
   export type Generics<
     ValueType = any,
-    ValidationKeys extends WUPRadio.ValidationMap = WUPRadio.ValidationMap,
+    ValidationKeys extends WUP.Radio.ValidationMap = WUP.Radio.ValidationMap,
     Defaults = Def,
     Options = Opt<ValueType>
   > = WUPBaseIn.Generics<ValueType, ValidationKeys, Defaults & Def, Options & Opt<ValueType>>;
@@ -27,12 +26,12 @@ export namespace WUPRadioIn {
 }
 
 declare global {
-  namespace WUPRadio {
-    interface ValidationMap extends WUPBase.ValidationMap {}
-    interface EventMap extends WUPBase.EventMap {}
+  namespace WUP.Radio {
+    interface ValidationMap extends WUP.BaseControl.ValidationMap {}
+    interface EventMap extends WUP.BaseControl.EventMap {}
     interface Defaults<T = any> extends WUPRadioIn.GenDef<T> {}
     interface Options<T = any> extends WUPRadioIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPRadioControl> extends WUPBase.JSXProps<T> {
+    interface JSXProps<T extends WUPRadioControl> extends WUP.BaseControl.JSXProps<T> {
       /** Reversed-style (radio+label vs label+radio) */
       reverse?: boolean | "";
       /** @deprecated Items showed as radio-buttons. Point global obj-key with items (set `window.inputRadio.items` for `window.inputRadio.items = [{value: 1, text: 'Item 1'}]` ) */
@@ -48,7 +47,7 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUPRadio.JSXProps<WUPRadioControl>;
+      [tagName]: WUP.Radio.JSXProps<WUPRadioControl>;
     }
   }
 }
@@ -84,7 +83,7 @@ interface ExtInputElement extends HTMLInputElement {
  */
 export default class WUPRadioControl<
   ValueType = any,
-  EventMap extends WUPRadio.EventMap = WUPRadio.EventMap
+  EventMap extends WUP.Radio.EventMap = WUP.Radio.EventMap
 > extends WUPBaseControl<ValueType, EventMap> {
   #ctr = this.constructor as typeof WUPRadioControl;
 
@@ -197,23 +196,23 @@ export default class WUPRadioControl<
   }
 
   static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUPRadio.Options>;
+    const arr = super.observedOptions as Array<keyof WUP.Radio.Options>;
     arr.push("reverse", "items");
     return arr;
   }
 
-  static get observedAttributes(): Array<LowerKeys<WUPRadio.Options>> {
-    const arr = super.observedAttributes as Array<LowerKeys<WUPRadio.Options>>;
+  static get observedAttributes(): Array<LowerKeys<WUP.Radio.Options>> {
+    const arr = super.observedAttributes as Array<LowerKeys<WUP.Radio.Options>>;
     arr.push("reverse", "items");
     return arr;
   }
 
-  static $defaults: WUPRadio.Defaults = {
+  static $defaults: WUP.Radio.Defaults = {
     ...WUPBaseControl.$defaults,
     validationRules: { ...WUPBaseControl.$defaults.validationRules },
   };
 
-  $options: WUPRadio.Options<ValueType> = {
+  $options: WUP.Radio.Options<ValueType> = {
     ...this.#ctr.$defaults,
     // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory
@@ -223,7 +222,7 @@ export default class WUPRadioControl<
 
   /** Called when need to parse attr [initValue] */
   override parse(attrValue: string): ValueType | undefined {
-    const a = this.getItems() as WUPSelect.MenuItem<ValueType>[];
+    const a = this.getItems() as WUP.Select.MenuItem<ValueType>[];
     if (!a?.length) {
       return undefined;
     }
@@ -247,8 +246,8 @@ export default class WUPRadioControl<
   }
 
   /** Items resolved from options */
-  #cachedItems?: WUPSelect.MenuItems<ValueType>;
-  protected getItems(): WUPSelect.MenuItems<ValueType> {
+  #cachedItems?: WUP.Select.MenuItems<ValueType>;
+  protected getItems(): WUP.Select.MenuItems<ValueType> {
     if (!this.#cachedItems) {
       const { items } = this._opts;
       this.#cachedItems = typeof items === "function" ? items() : items;
@@ -288,9 +287,9 @@ export default class WUPRadioControl<
     });
 
     if (arr[0].text && typeof arr[0].text === "function") {
-      arr.forEach((v, i) => (v as WUPSelect.MenuItemFn<ValueType>).text(v.value, arrLi[i], i));
+      arr.forEach((v, i) => (v as WUP.Select.MenuItemFn<ValueType>).text(v.value, arrLi[i], i));
     } else {
-      arr.forEach((v, i) => (arrLi[i].textContent = (v as WUPSelect.MenuItem<ValueType>).text));
+      arr.forEach((v, i) => (arrLi[i].textContent = (v as WUP.Select.MenuItem<ValueType>).text));
     }
 
     this.$refItems[0].tabIndex = 0;
@@ -325,13 +324,13 @@ export default class WUPRadioControl<
     return super.setValue(v, canValidate);
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUPRadio.Options> | null): void {
+  protected override gotChanges(propsChanged: Array<keyof WUP.Radio.Options> | null): void {
     const isNeedRenderItems = !propsChanged || propsChanged.includes("items");
     if (isNeedRenderItems) {
       this.#cachedItems = undefined;
       // it's important to be before super otherwise initValue won't work
       const attr = this.getAttribute("items");
-      this._opts.items = attr ? (nestedProperty.get(window, attr) as WUPRadio.Options["items"]) : this._opts.items;
+      this._opts.items = attr ? (nestedProperty.get(window, attr) as WUP.Radio.Options["items"]) : this._opts.items;
       this.renderItems(this.$refFieldset);
     }
 
@@ -344,7 +343,7 @@ export default class WUPRadioControl<
     this.setAttr.call(this.$refFieldset, "aria-required", !!req);
   }
 
-  override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null): void {
+  override gotFormChanges(propsChanged: Array<keyof WUP.Form.Options> | null): void {
     super.gotFormChanges(propsChanged);
     this.$refInput.disabled = false;
     this.$refInput.readOnly = false;
@@ -352,7 +351,7 @@ export default class WUPRadioControl<
     this.$ariaDetails(this.$isReadOnly ? this.#ctr.$ariaReadonly : null);
   }
 
-  protected override gotOptionsChanged(e: WUP.OptionEvent): void {
+  protected override gotOptionsChanged(e: WUP.Base.OptionEvent): void {
     this._isStopChanges = true;
     e.props.includes("reverse") && this.setAttr("reverse", this._opts.reverse, true);
     super.gotOptionsChanged(e);

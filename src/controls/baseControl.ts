@@ -1,12 +1,12 @@
-import WUPBaseElement, { WUP } from "../baseElement";
+import WUPBaseElement from "../baseElement";
 import WUPFormElement from "../formElement";
 import isEqual from "../helpers/isEqual";
 import nestedProperty from "../helpers/nestedProperty";
 import onFocusLostEv from "../helpers/onFocusLost";
 import onFocusGot from "../helpers/onFocusGot";
 import stringPrettify from "../helpers/stringPrettify";
-// eslint-disable-next-line import/named
-import WUPPopupElement, { ShowCases } from "../popup/popupElement";
+import WUPPopupElement from "../popup/popupElement";
+import { ShowCases } from "../popup/popupElement.types";
 import { WUPcssIcon } from "../styles";
 import IBaseControl from "./baseControl.i";
 
@@ -91,7 +91,7 @@ export namespace WUPBaseIn {
        * @defaultValue clear | resetToInit (both means: resetToInit if exists, 2nd time - clear etc.) */
       clearActions: ClearActions;
     } & ExtraDefaults;
-    Options: Omit<Generics<ValueType, WUPBase.ValidationMap, ExtraDefaults>["Defaults"], "validationRules"> & {
+    Options: Omit<Generics<ValueType, WUP.BaseControl.ValidationMap, ExtraDefaults>["Defaults"], "validationRules"> & {
       /** Title/label of control; if label is missed it's parsed from option [name]. To skip point `label=''` (empty string) */
       label?: string;
       /** Property/key of model (collected by form); For name `firstName` >> `model.firstName`; for `nested.firstName` >> `model.nested.firstName` etc. */
@@ -125,22 +125,22 @@ export namespace WUPBaseIn {
     } & ExtraOptions;
   };
 
-  export type GenDef<T = string> = Generics<T, WUPBase.ValidationMap>["Defaults"];
-  export type GenOpt<T = string> = Generics<T, WUPBase.ValidationMap>["Options"];
+  export type GenDef<T = string> = Generics<T, WUP.BaseControl.ValidationMap>["Defaults"];
+  export type GenOpt<T = string> = Generics<T, WUP.BaseControl.ValidationMap>["Options"];
 }
 
 type StoredItem = HTMLLIElement & { _wupVld: (v: any) => string | false };
 type StoredRefError = HTMLElement & { _wupVldItems?: StoredItem[] };
 
 declare global {
-  namespace WUPBase {
+  namespace WUP.BaseControl {
     interface ValidationMap {
       /** If $value is empty shows message 'This field is required` */
       required: boolean;
     }
     interface Defaults<T = string> extends WUPBaseIn.GenDef<T> {}
     interface Options<T = string> extends WUPBaseIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPBaseControl> extends WUP.JSXProps<T> {
+    interface JSXProps<T extends WUPBaseControl> extends WUP.Base.JSXProps<T> {
       /** @deprecated Title/label for control; */
       label?: string;
       /** @deprecated Property key of model */
@@ -163,7 +163,7 @@ declare global {
       onChange?: never;
     }
 
-    interface EventMap extends WUP.EventMap {
+    interface EventMap extends WUP.Base.EventMap {
       /** Called on value change */
       $change: Event;
     }
@@ -171,7 +171,10 @@ declare global {
 }
 
 /** Base abstract form-control */
-export default abstract class WUPBaseControl<ValueType = any, Events extends WUPBase.EventMap = WUPBase.EventMap>
+export default abstract class WUPBaseControl<
+    ValueType = any,
+    Events extends WUP.BaseControl.EventMap = WUP.BaseControl.EventMap
+  >
   extends WUPBaseElement<Events>
   implements IBaseControl<ValueType>
 {
@@ -186,12 +189,26 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
 
   /* Array of options names to listen for changes */
   static get observedOptions(): Array<string> {
-    return <Array<keyof WUPBase.Options>>["label", "name", "autoComplete", "disabled", "readOnly", "validations"];
+    return <Array<keyof WUP.BaseControl.Options>>[
+      "label",
+      "name",
+      "autoComplete",
+      "disabled",
+      "readOnly",
+      "validations",
+    ];
   }
 
   /* Array of attribute names to listen for changes */
   static get observedAttributes(): Array<string> {
-    return <Array<LowerKeys<WUPBase.Options>>>["label", "name", "autocomplete", "disabled", "readonly", "initvalue"];
+    return <Array<LowerKeys<WUP.BaseControl.Options>>>[
+      "label",
+      "name",
+      "autocomplete",
+      "disabled",
+      "readonly",
+      "initvalue",
+    ];
   }
 
   /** Css-variables related to component */
@@ -360,7 +377,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUPBase.Defaults<any> = {
+  static $defaults: WUP.BaseControl.Defaults<any> = {
     clearActions: ClearActions.clear | ClearActions.resetToInit,
     validateDebounceMs: 500,
     validationCase: ValidationCases.onChangeSmart | ValidationCases.onFocusLost | ValidationCases.onFocusWithValue,
@@ -369,7 +386,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
     },
   };
 
-  $options: WUPBase.Options<ValueType> = {
+  $options: WUP.BaseControl.Options<ValueType> = {
     ...this.#ctr.$defaults,
     // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory
@@ -547,7 +564,7 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   //   super();
   // }
 
-  protected override gotChanges(propsChanged: Array<keyof WUPBase.Options | any> | null): void {
+  protected override gotChanges(propsChanged: Array<keyof WUP.BaseControl.Options | any> | null): void {
     super.gotChanges(propsChanged);
 
     this._opts.label = this.getAttribute("label") ?? this._opts.label;
@@ -676,8 +693,8 @@ export default abstract class WUPBaseControl<ValueType = any, Events extends WUP
   }
 
   /** Returns validations enabled by user */
-  protected get validations(): WUPBase.Options["validations"] | undefined {
-    return this.getRefAttr<WUPBase.Options["validations"]>("validations");
+  protected get validations(): WUP.BaseControl.Options["validations"] | undefined {
+    return this.getRefAttr<WUP.BaseControl.Options["validations"]>("validations");
   }
 
   /** Returns validations functions ready for checking */

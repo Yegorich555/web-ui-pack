@@ -1,10 +1,10 @@
-import WUPBaseElement, { WUP } from "./baseElement";
+import WUPBaseElement from "./baseElement";
 import objectClone from "./helpers/objectClone";
 import { px2Number, styleTransform } from "./helpers/styleHelpers";
 import { getOffset } from "./popup/popupPlacements";
 
 declare global {
-  namespace WUPSpin {
+  namespace WUP.Spin {
     interface Defaults {
       /** Place inside parent as inline-block otherwise overflow target in the center (`position: relative` is not required);
        * @defaultValue false */
@@ -23,7 +23,7 @@ declare global {
       /** Anchor element that need to oveflow by spinner, by default it's parentElement  */
       overflowTarget?: HTMLElement | null;
     }
-    interface JSXProps<T extends WUPSpinElement> extends WUP.JSXProps<T> {
+    interface JSXProps<T extends WUPSpinElement> extends WUP.Base.JSXProps<T> {
       /** Place inside parent as inline-block or overflow target in the center (`position: relative` isnot  required);
        * @defaultValue false */
       inline?: boolean | "";
@@ -65,11 +65,11 @@ declare global {
 export default class WUPSpinElement extends WUPBaseElement {
   #ctr = this.constructor as typeof WUPSpinElement;
 
-  static get observedOptions(): Array<keyof WUPSpin.Options> {
+  static get observedOptions(): Array<keyof WUP.Spin.Options> {
     return ["inline", "overflowTarget", "overflowOffset", "overflowFade", "fit"];
   }
 
-  static get observedAttributes(): Array<LowerKeys<WUPSpin.Options>> {
+  static get observedAttributes(): Array<LowerKeys<WUP.Spin.Options>> {
     return ["inline", "overflowfade", "fit"];
   }
 
@@ -128,14 +128,14 @@ export default class WUPSpinElement extends WUPBaseElement {
       ${this.$styleApplied}`;
   }
 
-  static $defaults: WUPSpin.Defaults = {
+  static $defaults: WUP.Spin.Defaults = {
     overflowOffset: [4, 4],
     overflowFade: true,
   };
 
   static _itemsCount = 1;
 
-  $options: WUPSpin.Options = objectClone(this.#ctr.$defaults);
+  $options: WUP.Spin.Options = objectClone(this.#ctr.$defaults);
   protected override _opts = this.$options;
 
   /** Force to update position (when options changed) */
@@ -172,7 +172,7 @@ export default class WUPSpinElement extends WUPBaseElement {
 
   #prevTarget?: HTMLElement;
   $refFade?: HTMLDivElement;
-  protected override gotChanges(propsChanged: Array<keyof WUPSpin.Options> | null): void {
+  protected override gotChanges(propsChanged: Array<keyof WUP.Spin.Options> | null): void {
     super.gotChanges(propsChanged);
 
     this._opts.inline = this.getBoolAttr("inline", this._opts.inline);
@@ -330,7 +330,7 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUPSpin.JSXProps<WUPSpinElement>;
+      [tagName]: WUP.Spin.JSXProps<WUPSpinElement>;
     }
   }
 }

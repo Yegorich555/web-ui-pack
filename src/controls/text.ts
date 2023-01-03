@@ -1,4 +1,4 @@
-import MaskTextInput, { MaskHandledInput } from "./text.mask";
+import MaskTextInput from "./text.mask";
 import { onEvent } from "../indexHelpers";
 import { WUPcssIcon } from "../styles";
 import WUPBaseControl, { WUPBaseIn } from "./baseControl";
@@ -46,7 +46,7 @@ export namespace WUPTextIn {
 
   export type Generics<
     ValueType = string,
-    ValidationKeys extends WUPBase.ValidationMap = WUPText.ValidationMap,
+    ValidationKeys extends WUP.BaseControl.ValidationMap = WUP.Text.ValidationMap,
     Defaults = Def,
     Options = Opt
   > = WUPBaseIn.Generics<ValueType, ValidationKeys, Defaults & Def, Options & Opt>;
@@ -56,8 +56,8 @@ export namespace WUPTextIn {
 }
 
 declare global {
-  namespace WUPText {
-    interface ValidationMap extends WUPBase.ValidationMap {
+  namespace WUP.Text {
+    interface ValidationMap extends WUP.BaseControl.ValidationMap {
       /** If textLength < pointed shows message 'Min length is {x} characters` */
       min: number;
       /** If textLength > pointed shows message 'Max length is {x} characters` */
@@ -80,10 +80,10 @@ declare global {
        * * excluded from listing (for $options.validationShowAll) */
       _parse: string;
     }
-    interface EventMap extends WUPBase.EventMap {}
+    interface EventMap extends WUP.BaseControl.EventMap {}
     interface Defaults<T = string> extends WUPTextIn.GenDef<T> {}
     interface Options<T = string> extends WUPTextIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPTextControl> extends WUPBase.JSXProps<T> {
+    interface JSXProps<T extends WUPTextControl> extends WUP.BaseControl.JSXProps<T> {
       /**
        * Make input masked
        * @deprecated
@@ -125,7 +125,7 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUPText.JSXProps<WUPTextControl>;
+      [tagName]: WUP.Text.JSXProps<WUPTextControl>;
     }
   }
 }
@@ -152,19 +152,19 @@ declare global {
  */
 export default class WUPTextControl<
   ValueType = string,
-  EventMap extends WUPText.EventMap = WUPText.EventMap
+  EventMap extends WUP.Text.EventMap = WUP.Text.EventMap
 > extends WUPBaseControl<ValueType, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextControl;
 
   static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUPText.Options>;
+    const arr = super.observedOptions as Array<keyof WUP.Text.Options>;
     arr.push("clearButton", "maskholder", "mask", "prefix", "postfix");
     return arr;
   }
 
   static get observedAttributes(): Array<string> {
-    const arr = super.observedAttributes as Array<LowerKeys<WUPText.Options>>;
+    const arr = super.observedAttributes as Array<LowerKeys<WUP.Text.Options>>;
     arr.push("maskholder", "mask", "prefix", "postfix");
     return arr;
   }
@@ -358,7 +358,7 @@ export default class WUPTextControl<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUPText.Defaults<string> = {
+  static $defaults: WUP.Text.Defaults<string> = {
     ...WUPBaseControl.$defaults,
     selectOnFocus: true,
     clearButton: true,
@@ -376,7 +376,7 @@ export default class WUPTextControl<
     },
   };
 
-  $options: WUPText.Options<ValueType> = {
+  $options: WUP.Text.Options<ValueType> = {
     ...this.#ctr.$defaults,
     // @ts-expect-error
     validationRules: undefined, // don't copy it from defaults to optimize memory
@@ -416,8 +416,8 @@ export default class WUPTextControl<
     return !!this._opts.mask;
   }
 
-  protected get validations(): WUPText.Options["validations"] {
-    const vls = (super.validations as WUPText.Options["validations"]) || {};
+  protected get validations(): WUP.Text.Options["validations"] {
+    const vls = (super.validations as WUP.Text.Options["validations"]) || {};
     if (this._opts.mask && vls._mask === undefined) vls._mask = ""; // enable validation mask based on option mask
     if (this._onceErrName === "_parse") vls._parse = "";
     return vls;
@@ -514,13 +514,18 @@ export default class WUPTextControl<
     this.setAttr.call(this.$refInput, "inputmode", this._opts.mask ? "numeric" : "");
 
     const r = this.appendEvent(this.$refInput, "input", (e) => {
-      // (e as WUPText.GotInputEvent).setValuePrevented = false;
-      // (e as WUPText.GotInputEvent).preventSetValue = () => ((e as WUPText.GotInputEvent).setValuePrevented = true);
-      this.gotInput(e as WUPText.GotInputEvent);
+      // (e as WUP.Text.GotInputEvent).setValuePrevented = false;
+      // (e as WUP.Text.GotInputEvent).preventSetValue = () => ((e as WUP.Text.GotInputEvent).setValuePrevented = true);
+      this.gotInput(e as WUP.Text.GotInputEvent);
     });
-    const r2 = this.appendEvent(this.$refInput, "beforeinput", (e) => this.gotBeforeInput(e as WUPText.GotInputEvent), {
-      passive: false,
-    });
+    const r2 = this.appendEvent(
+      this.$refInput,
+      "beforeinput",
+      (e) => this.gotBeforeInput(e as WUP.Text.GotInputEvent),
+      {
+        passive: false,
+      }
+    );
 
     /* istanbul ignore else */
     if (!this.$refInput.readOnly) {
@@ -547,7 +552,7 @@ export default class WUPTextControl<
     if (this.refMask) {
       if (this.refMask.prefix && this.refMask.value === this.refMask.prefix) {
         this.$refInput.value = ""; // rollback prefix/postfix if user types nothing
-        delete (this.$refInput as MaskHandledInput)._maskPrev;
+        delete (this.$refInput as WUP.Text.Mask.HandledInput)._maskPrev;
         this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
       }
       this.renderPostfix(this._opts.postfix); // postfix depends on maskholder
@@ -557,7 +562,7 @@ export default class WUPTextControl<
     super.gotFocusLost();
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUPText.Options> | null): void {
+  protected override gotChanges(propsChanged: Array<keyof WUP.Text.Options> | null): void {
     // apply mask options
     this._opts.mask = this.getAttribute("mask") ?? this._opts.mask;
     this._opts.maskholder = this.getAttribute("maskholder") ?? this._opts.maskholder;
@@ -619,7 +624,7 @@ export default class WUPTextControl<
   }
 
   /** Handler of 'beforeinput' event */
-  protected gotBeforeInput(e: WUPText.GotInputEvent): void {
+  protected gotBeforeInput(e: WUP.Text.GotInputEvent): void {
     this.#declineInputEnd?.call(this);
 
     if (this.canHandleUndo()) {
@@ -651,8 +656,8 @@ export default class WUPTextControl<
 
   #inputTimer?: ReturnType<typeof setTimeout>;
   /** Called when user types text OR when need to apply/reset mask (on focusGot, focusLost) */
-  protected gotInput(e: WUPText.GotInputEvent): void {
-    const el = e.target as MaskHandledInput;
+  protected gotInput(e: WUP.Text.GotInputEvent): void {
+    const el = e.target as WUP.Text.Mask.HandledInput;
     let txt = el.value;
 
     /* istanbul ignore else */
@@ -711,7 +716,7 @@ export default class WUPTextControl<
   /** Mask object to proccess mask on input */
   refMask?: MaskTextInput;
   /** Called to apply mask-behavior (on "input" event) */
-  protected maskInputProcess(e: WUPText.GotInputEvent | null): string {
+  protected maskInputProcess(e: WUP.Text.GotInputEvent | null): string {
     const el = this.$refInput;
     const v = el.value;
     const { mask } = this._opts;
