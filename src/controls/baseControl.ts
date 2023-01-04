@@ -52,14 +52,37 @@ export const enum ValidateFromCases {
   onManualCall,
 }
 
-export namespace WUPBaseIn {
-  export type Generics<ValueType, ValidationKeys, ExtraDefaults = {}, ExtraOptions = {}> = {
-    Validation: (value: ValueType | undefined, setValue: ValidationKeys[keyof ValidationKeys]) => false | string;
-    CustomValidation: (value: ValueType | undefined) => false | string;
-    Defaults: {
+type StoredItem = HTMLLIElement & { _wupVld: (v: any) => string | false };
+type StoredRefError = HTMLElement & { _wupVldItems?: StoredItem[] };
+
+declare global {
+  namespace WUP.BaseControl {
+    interface EventMap extends WUP.Base.EventMap {
+      /** Called on value change */
+      $change: Event;
+    }
+
+    interface ValidityMap {
+      /** If $value is empty shows message 'This field is required` */
+      required: boolean;
+    }
+
+    interface Defaults<T = any, VM = ValidityMap> {
+      /** When to validate control and show error. Validation by onSubmit impossible to disable
+       *  @defaultValue onChangeSmart | onFocusLost | onFocusWithValue | onSubmit */
+      validationCase: ValidationCases;
+      /** Wait for pointed time after valueChange before showError (it's sumarized with $options.debounce); WARN: hide error without debounce
+       *  @defaultValue 500 */
+      validateDebounceMs: number;
+      /** Debounce option for onFocustLost event (for validationCases.onFocusLost); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost;
+       * @defaultValue 100ms */
+      focusDebounceMs?: number;
+      /** Behavior that expected for clearing value inside control (via pressEsc or btnClear)
+       * @defaultValue clear | resetToInit (both means: resetToInit if exists, 2nd time - clear etc.) */
+      clearActions: ClearActions;
       /** Rules defined for control;
        * * all functions must return error-message when value === undefined
-       * * all functions must return error-message if setValue is true/enabled and value doesn't fit some rule
+       * * all functions must return error-message if setValue is `true/enabled` or value doesn't fit a rule
        * * value can be undefined only when a rule named as 'required' or need to collect error-messages @see $options.validationShowAll
        * @example
        * ```
@@ -71,27 +94,10 @@ export namespace WUPBaseIn {
         };
        * ``` */
       validationRules: {
-        [K in keyof ValidationKeys]?: (
-          value: ValueType,
-          setValue: ValidationKeys[K],
-          control: IBaseControl
-        ) => false | string;
+        [K in keyof VM]: (this: IBaseControl, value: T, setValue: VM[K], control: IBaseControl) => false | string;
       };
-      /** When to validate control and show error. Validation by onSubmit impossible to disable
-       *  @defaultValue onChangeSmart | onFocusLost | onFocusWithValue | onSubmit
-       */
-      validationCase: ValidationCases;
-      /** Wait for pointed time after valueChange before showError (it's sumarized with $options.debounce); WARN: hide error without debounce
-       *  @defaultValue 500 */
-      validateDebounceMs: number;
-      /** Debounce option for onFocustLost event (for validationCases.onFocusLost); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost;
-       * @defaultValue 100ms */
-      focusDebounceMs?: number;
-      /** Behavior that expected for clearing value inside control (via pressEsc or btnClear)
-       * @defaultValue clear | resetToInit (both means: resetToInit if exists, 2nd time - clear etc.) */
-      clearActions: ClearActions;
-    } & ExtraDefaults;
-    Options: Omit<Generics<ValueType, WUP.BaseControl.ValidationMap, ExtraDefaults>["Defaults"], "validationRules"> & {
+    }
+    interface Options<T = any, VM = ValidityMap> extends Defaults<T, VM> {
       /** Title/label of control; if label is missed it's parsed from option [name]. To skip point `label=''` (empty string) */
       label?: string;
       /** Property/key of model (collected by form); For name `firstName` >> `model.firstName`; for `nested.firstName` >> `model.nested.firstName` etc. */
@@ -106,66 +112,34 @@ export namespace WUPBaseIn {
       disabled?: boolean;
       /** Disallow copy value; adds attr [readonly] for styling */
       readOnly?: boolean;
-      /** Rules enabled for current control; you can enable defined in $defaults.validationRules or define own directly
+      /** Show all validation-rules with checkpoints as list instead of single error */
+      validationShowAll?: boolean;
+      /** Rules enabled for current control (related to $defaults.validationRules)
        * @example
        * ```
        * const el = document.body.appendChild(document.createElement("wup-text"));
          el.$options.validations = {
            min: 10, // set min 10symbols for $default.validationRules.min
-           custom: (value: string | undefined) => (value === undefined || value === "test-me") && "This is custom error", // custom validation for single element
+           custom: (value: string | undefined) => (value === un\defined || value === "test-me") && "This is custom error", // custom validation for single element
          };
        * ``` */
       validations?:
-        | {
-            [K in keyof ValidationKeys]?: ValidationKeys[K] | ((value: ValueType | undefined) => false | string);
-          }
-        | { [k: string]: (value: ValueType | undefined) => false | string };
-      /** Show all validation-rules with checkpoints as list instead of single error */
-      validationShowAll?: boolean;
-    } & ExtraOptions;
-  };
-
-  export type GenDef<T = string> = Generics<T, WUP.BaseControl.ValidationMap>["Defaults"];
-  export type GenOpt<T = string> = Generics<T, WUP.BaseControl.ValidationMap>["Options"];
-}
-
-type StoredItem = HTMLLIElement & { _wupVld: (v: any) => string | false };
-type StoredRefError = HTMLElement & { _wupVldItems?: StoredItem[] };
-
-declare global {
-  namespace WUP.BaseControl {
-    interface ValidationMap {
-      /** If $value is empty shows message 'This field is required` */
-      required: boolean;
+        | { [K in keyof VM]?: VM[K] | ((value: T | undefined) => false | string) }
+        | { [k: string]: (value: T | undefined) => false | string };
     }
-    interface Defaults<T = string> extends WUPBaseIn.GenDef<T> {}
-    interface Options<T = string> extends WUPBaseIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPBaseControl> extends WUP.Base.JSXProps<T> {
-      /** @deprecated Title/label for control; */
-      label?: string;
-      /** @deprecated Property key of model */
-      name?: string;
-      /** @deprecated Name to autocomplete by browser; */
-      autoComplete?: string;
-      /** Disallow edit/copy value. Use [disabled] for styling */
-      disabled?: boolean;
-      /** Disallow edit value */
-      readOnly?: boolean;
-      /** @deprecated Focus on init */
-      autoFocus?: boolean;
-      /** @deprecated default value (expected formatted for input) */
+
+    interface Attributes extends Pick<Options, "label" | "name" | "autoFocus" | "disabled" | "readOnly"> {
+      /** default value in string/boolean or number representation (depends on `control.prototype.parse()`) */
       initValue?: string | boolean | number;
-      /** @deprecated Rules enabled for current control. Point global obj-key with validations (set `window.validations.input1` for `window.validations.input1 = {required: true}` ) */
+      /** Rules enabled for current control. Point global obj-key with validations (use `window.myValidations` where `window.validations = {required: true}` ) */
       validations?: string;
       /** @readonly Use [invalid] for styling */
       readonly invalid?: boolean;
-      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
-      onChange?: never;
     }
 
-    interface EventMap extends WUP.Base.EventMap {
-      /** Called on value change */
-      $change: Event;
+    interface JSXProps<C = WUPBaseControl> extends WUP.Base.JSXProps<C>, Attributes {
+      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
+      onChange?: never;
     }
   }
 }
@@ -201,8 +175,8 @@ export default abstract class WUPBaseControl<
 
   /* Array of attribute names to listen for changes */
   static get observedAttributes(): Array<string> {
-    return <Array<LowerKeys<WUP.BaseControl.Options>>>[
-      "label",
+    return <Array<LowerKeys<WUP.BaseControl.Attributes>>>[
+      "label", //
       "name",
       "autocomplete",
       "disabled",
@@ -377,7 +351,7 @@ export default abstract class WUPBaseControl<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUP.BaseControl.Defaults<any> = {
+  static $defaults: WUP.BaseControl.Defaults = {
     clearActions: ClearActions.clear | ClearActions.resetToInit,
     validateDebounceMs: 500,
     validationCase: ValidationCases.onChangeSmart | ValidationCases.onFocusLost | ValidationCases.onFocusWithValue,
@@ -386,10 +360,8 @@ export default abstract class WUPBaseControl<
     },
   };
 
-  $options: WUP.BaseControl.Options<ValueType> = {
+  $options: WUP.BaseControl.Options<any> = {
     ...this.#ctr.$defaults,
-    // @ts-expect-error
-    validationRules: undefined, // don't copy it from defaults to optimize memory
   };
 
   protected override _opts = this.$options;
@@ -718,7 +690,7 @@ export default abstract class WUPBaseControl<
           const n = this._opts.name ? `.[${this._opts.name}]` : "";
           throw new Error(`${this.tagName}${n}. Validation rule [${k}] is not found`);
         }
-        err = r(v as unknown as string, vl as boolean, this);
+        err = r.call(this, v as unknown as string, vl as boolean, this);
       }
 
       if (err !== false) {

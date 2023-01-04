@@ -1,20 +1,19 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import Page from "src/elements/page";
-import { WUPPopup } from "web-ui-pack/popup/popupElement.types";
 import Example1 from "./example1";
 import Example2 from "./example2";
 import Example3 from "./example3";
 import Example4 from "./example4";
 import styles from "./popupView.scss";
 
-const opts: Partial<WUPPopup.Options> = {
+const opts: Partial<WUP.Popup.Options> = {
   arrowEnable: true,
   offset: [0, 0, 0, 0],
   arrowOffset: [0, 0, 0, 0],
 };
 
 export default function PopupView() {
-  function setOpts(o: Partial<WUPPopup.Options>) {
+  function setOpts(o: Partial<WUP.Popup.Options>) {
     Object.assign(opts, o);
     document.querySelectorAll("wup-popup").forEach((t) => {
       Object.assign(t.$options, opts);

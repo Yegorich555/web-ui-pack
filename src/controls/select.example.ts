@@ -4,8 +4,8 @@ import WUPSelectControl from "./select";
 // it's required to extend default validationRules
 declare global {
   namespace WUP.Select {
-    interface ValidationMap {
-      isNumber: boolean;
+    interface ValidityMap {
+      isNumber?: boolean;
     }
   }
 }

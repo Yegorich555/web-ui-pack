@@ -7,7 +7,7 @@ import { BaseTestOptions } from "../../testHelper";
 
 declare global {
   namespace WUPBase {
-    interface ValidationMap {
+    interface ValidityMap {
       $alwaysValid: boolean;
       $alwaysInvalid: boolean;
     }

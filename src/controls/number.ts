@@ -1,68 +1,51 @@
 import onScroll from "../helpers/onScroll";
 import { localeInfo, mathSumFloat, onEvent } from "../indexHelpers";
 import WUPBaseControl from "./baseControl";
-import WUPTextControl, { WUPTextIn } from "./text";
+import WUPTextControl from "./text";
 
 const tagName = "wup-num";
-export namespace WUPNumberIn {
-  export interface Format {
-    /** Decimal separator; for number 123.4 it's dot
-     * localeInfoInfo @see localeInfo.sepDecimal */
-    sepDecimal?: string;
-    /** Thouthands separator; for number 1,234.5 it's comma
-     *  localeInfoInfo @see localeInfo.sep1000 */
-    sep1000?: string;
-    /** Maximum displayed fraction digits; for 123.45 it's 2
-     * @defaultValue 0 */
-    maxDecimal?: number;
-    /** Minimun displayed fraction digits; if pointed 2 then 123.4 goes to 123.40
-     * @defaultValue 0 */
-    minDecimal?: number;
-  }
-  export interface Def {}
-  export interface Opt {
-    format?: Format;
-  }
-  export type Generics<
-    ValueType = number,
-    ValidationKeys extends WUP.BaseControl.ValidationMap = WUP.Number.ValidationMap,
-    Defaults = Def,
-    Options = Opt
-  > = WUPTextIn.Generics<ValueType, ValidationKeys, Defaults & Def, Options & Opt>;
-  // type Validation<T = string> = Generics<T>["Validation"];
-  export type GenDef<T = number> = Generics<T>["Defaults"];
-  export type GenOpt<T = number> = Generics<T>["Options"];
-}
 
 declare global {
   namespace WUP.Number {
-    interface ValidationMap
-      extends WUP.BaseControl.ValidationMap,
-        Pick<WUP.Text.ValidationMap, "_mask" /* | "_parse" */> {
+    interface Format {
+      /** Decimal separator; for number 123.4 it's dot
+       * localeInfoInfo @see localeInfo.sepDecimal */
+      sepDecimal?: string;
+      /** Thouthands separator; for number 1,234.5 it's comma
+       *  localeInfoInfo @see localeInfo.sep1000 */
+      sep1000?: string;
+      /** Maximum displayed fraction digits; for 123.45 it's 2
+       * @defaultValue 0 */
+      maxDecimal?: number;
+      /** Minimun displayed fraction digits; if pointed 2 then 123.4 goes to 123.40
+       * @defaultValue 0 */
+      minDecimal?: number;
+    }
+    interface EventMap extends WUP.BaseControl.EventMap {}
+    interface ValidityMap
+      extends WUP.BaseControl.ValidityMap,
+        Pick<WUP.Text.ValidityMap, "_mask" | "min" | "max" /* | "_parse" */> {
       /** If $value < pointed shows message 'Min value {x}` */
       min: number;
       /** If $value < pointed shows message 'Max value {x}` */
       max: number;
     }
-    interface EventMap extends WUP.BaseControl.EventMap {}
-    interface Defaults<T = number> extends WUPNumberIn.GenDef<T> {}
-    interface Options<T = number> extends WUPNumberIn.GenOpt<T> {}
-
-    // @ts-expect-error
-    interface JSXProps<T extends WUPNumberControl> extends WUP.Text.JSXProps<T> {
-      // some options can be here
+    interface Defaults<T = number, VM extends ValidityMap = ValidityMap> extends WUP.Text.Defaults<T, VM> {}
+    interface Options<T = number, VM extends ValidityMap = ValidityMap>
+      extends WUP.Text.Options<T, VM>,
+        Defaults<T, VM> {
+      /** String representation of displayed value */
+      format?: Format;
     }
+    interface Attributes extends WUP.Text.Attributes {}
+    interface JSXProps<C = WUPNumberControl> extends WUP.Text.JSXProps<C>, Attributes {}
   }
-
-  // add element to document.createElement
   interface HTMLElementTagNameMap {
-    [tagName]: WUPNumberControl;
+    [tagName]: WUPNumberControl; // add element to document.createElement
   }
-
-  // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUP.Number.JSXProps<WUPNumberControl>;
+      [tagName]: WUP.Number.JSXProps; // add element to tsx/jsx intellisense
     }
   }
 }
@@ -84,7 +67,6 @@ declare global {
   </wup-form>;
  * @see WUPTextControl
  */
-// @ts-expect-error
 export default class WUPNumberControl<
   ValueType = number,
   EventMap extends WUP.Number.EventMap = WUP.Number.EventMap
@@ -98,7 +80,7 @@ export default class WUPNumberControl<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUP.Number.Defaults<number> = {
+  static $defaults: WUP.Number.Defaults = {
     ...WUPTextControl.$defaults,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
@@ -109,16 +91,16 @@ export default class WUPNumberControl<
     },
   };
 
-  $options: WUP.Number.Options<ValueType> = {
+  // @ts-expect-error reason: validationRules is different
+  $options: WUP.Number.Options = {
     ...this.#ctr.$defaults,
-    // @ts-expect-error
-    validationRules: undefined, // don't copy it from defaults to optimize memory
   };
 
+  // @ts-expect-error reason: validationRules is different
   protected override _opts = this.$options;
 
   /** Returns $options.format joined with defaults */
-  get $format(): Required<WUPNumberIn.Format> {
+  get $format(): Required<WUP.Number.Format> {
     const f = this._opts.format;
     return {
       sepDecimal: localeInfo.sepDecimal,

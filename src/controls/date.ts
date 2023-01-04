@@ -3,41 +3,19 @@ import dateFromString from "../helpers/dateFromString";
 import dateToString from "../helpers/dateToString";
 import localeInfo from "../helpers/localeInfo";
 import WUPPopupElement from "../popup/popupElement";
-import WUPBaseComboControl, { WUPBaseComboIn } from "./baseCombo";
+import WUPBaseComboControl from "./baseCombo";
 import { ValidateFromCases } from "./baseControl";
-import WUPCalendarControl, { PickersEnum, WUPCalendarIn } from "./calendar";
+import WUPCalendarControl, { PickersEnum } from "./calendar";
 
 /* c8 ignore next */
 /* istanbul ignore next */
 !WUPCalendarControl && console.error("!"); // It's required otherwise import is ignored by webpack
 
 const tagName = "wup-date";
-export namespace WUPDateIn {
-  export interface Defs extends WUPCalendarIn.Def {
-    /** String representation of displayed date (enables mask, - to disable mask set $options.mask="");
-     * @defaultValue localeInfo.date
-     * @tutorial Troubleshooting
-     * * with changing $options.format need to change/reset mask/maskholder also */
-    format?: string;
-  }
-  export interface Opt extends Pick<WUPCalendarIn.Opt, "min" | "max" | "exclude" | "utc" | "startWith"> {
-    format: string;
-  }
-  export interface JSXProps extends Pick<WUPCalendarIn.JSXProps, "min" | "max" | "exclude" | "utc" | "startWith"> {}
-
-  export type Generics<
-    ValueType = Date,
-    ValidationKeys extends WUP.Date.ValidationMap = WUP.Date.ValidationMap,
-    Defaults = Defs,
-    Options = Opt
-  > = WUPBaseComboIn.Generics<ValueType, ValidationKeys, Defaults & Defs, Options & Opt>;
-
-  export type GenDef<T = Date> = Generics<T>["Defaults"];
-  export type GenOpt<T = Date> = Generics<T>["Options"];
-}
 declare global {
   namespace WUP.Date {
-    interface ValidationMap extends WUP.BaseControl.ValidationMap, Pick<WUP.Text.ValidationMap, "_mask" | "_parse"> {
+    interface EventMap extends WUP.BaseCombo.EventMap {}
+    interface ValidityMap extends WUP.BaseCombo.ValidityMap, Pick<WUP.Text.ValidityMap, "_mask" | "_parse"> {
       /** Enabled if option [min] is pointed; If $value < pointed shows message 'Min date is {x}` */
       min: Date;
       /** Enabled if option [min] is pointed; if $value > pointed shows message 'Max date is {x}` */
@@ -45,26 +23,31 @@ declare global {
       /** Enabled if option [exclude] is pointed; If invalid shows "This date is disabled" */
       exclude: Date[];
     }
-    interface EventMap extends WUP.BaseCombo.EventMap {}
-    interface Defaults<T = Date> extends WUPDateIn.GenDef<T> {}
-    interface Options<T = Date> extends WUPDateIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPDateControl> extends WUP.BaseCombo.JSXProps<T>, WUPDateIn.JSXProps {
-      /** @deprecated default value; format yyyy-MM-dd hh:mm:ss.fff */
-      initValue?: string;
+    interface Defaults<T = Date, VM = ValidityMap> extends WUP.Calendar.Defaults<T, VM>, WUP.BaseCombo.Defaults<T, VM> {
       /** String representation of displayed date (enables mask, - to disable mask set $options.mask="");
        * @defaultValue localeInfo.date
-       * @deprecated */
+       * @tutorial Troubleshooting
+       * * with changing $options.format need to change/reset mask/maskholder also */
       format?: string;
     }
+    interface Options<T = Date, VM = ValidityMap>
+      extends WUP.Calendar.Options<T, VM>,
+        WUP.BaseCombo.Options<T, VM>,
+        Defaults<T, VM> {
+      format: string;
+      firstWeekDay: number;
+    }
+    interface Attributes extends WUP.Calendar.Attributes, Pick<Defaults, "format"> {}
+    interface JSXProps<C = WUPDateControl> extends WUP.BaseCombo.JSXProps<C>, WUP.Calendar.JSXProps<C>, Attributes {
+      initValue?: string;
+    }
   }
-  // add element to document.createElement
   interface HTMLElementTagNameMap {
-    [tagName]: WUPDateControl;
+    [tagName]: WUPDateControl; // add element to document.createElement
   }
-  // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUP.Date.JSXProps<WUPDateControl>;
+      [tagName]: WUP.Date.JSXProps; // add element to tsx/jsx intellisense
     }
   }
 }
@@ -118,12 +101,12 @@ export default class WUPDateControl<
   }
 
   static get observedAttributes(): Array<string> {
-    const arr = super.observedAttributes as Array<LowerKeys<WUP.Date.Options>>;
+    const arr = super.observedAttributes as Array<LowerKeys<WUP.Date.Attributes>>;
     arr.push("format", "min", "max", "utc", "exclude");
     return arr;
   }
 
-  static $defaults: WUP.Date.Defaults<Date> = {
+  static $defaults: WUP.Date.Defaults = {
     ...WUPBaseComboControl.$defaults,
     // debounceMs: 500,
     validationRules: {
@@ -141,15 +124,15 @@ export default class WUPDateControl<
     // format: localeInfo.date.toLowerCase()
   };
 
-  $options: WUP.Date.Options<ValueType> = {
+  // @ts-expect-error reason: validationRules is different
+  $options: WUP.Date.Options = {
     ...this.#ctr.$defaults,
     utc: true,
     format: this.#ctr.$defaults.format || localeInfo.date.toLowerCase(),
     firstWeekDay: this.#ctr.$defaults.firstWeekDay || localeInfo.firstWeekDay,
-    // @ts-expect-error
-    validationRules: undefined, // don't copy it from defaults to optimize memory
   };
 
+  // @ts-expect-error reason: validationRules is different
   protected override _opts = this.$options;
 
   /** Parse string to Date

@@ -1,40 +1,24 @@
-import WUPTextControl, { WUPTextIn } from "./text";
+import WUPTextControl from "./text";
 import { WUPcssScrollSmall } from "../styles";
 
 const tagName = "wup-textarea";
-export namespace WUPTextareaIn {
-  export interface Def {}
-  export interface Opt {}
-  export type Generics<
-    ValueType = string,
-    ValidationKeys extends WUP.Text.ValidationMap = WUP.Textarea.ValidationMap,
-    Defaults = Def,
-    Options = Opt
-  > = WUPTextIn.Generics<ValueType, ValidationKeys, Defaults & Def, Options & Opt>;
-  // type Validation<T = string> = Generics<T>["Validation"];
-  export type GenDef<T = string> = Generics<T>["Defaults"];
-  export type GenOpt<T = string> = Generics<T>["Options"];
-}
-
 declare global {
   namespace WUP.Textarea {
-    interface ValidationMap extends WUP.Text.ValidationMap {}
     interface EventMap extends WUP.Text.EventMap {}
-    interface Defaults<T = string> extends WUPTextareaIn.GenDef<T> {}
-    interface Options<T = string> extends Omit<WUPTextareaIn.GenOpt<T>, "mask" | "maskholder" | "prefix" | "postfix"> {}
-    interface JSXProps<T extends WUPTextareaControl>
-      extends Omit<WUP.Text.JSXProps<T>, "mask" | "maskholder" | "prefix" | "postfix"> {}
+    interface ValidityMap extends WUP.Text.ValidityMap {}
+    interface Defaults<T = string, VM = ValidityMap> extends WUP.Text.Defaults<T, VM> {}
+    interface Options<T = string, VM = ValidityMap>
+      extends Omit<WUP.Text.Options<T, VM>, "mask" | "maskholder" | "prefix" | "postfix">,
+        Defaults<T, VM> {}
+    interface Attributes extends WUP.Text.Attributes {}
+    interface JSXProps<C = WUPTextareaControl> extends WUP.Text.JSXProps<C>, Attributes {}
   }
-
-  // add element to document.createElement
   interface HTMLElementTagNameMap {
-    [tagName]: WUPTextareaControl;
+    [tagName]: WUPTextareaControl; // add element to document.createElement
   }
-
-  // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUP.Textarea.JSXProps<WUPTextareaControl>;
+      [tagName]: WUP.Textarea.JSXProps; // add element to tsx/jsx intellisense
     }
   }
 }
@@ -97,15 +81,13 @@ export default class WUPTextareaControl<
     validationRules: {
       ...WUPTextControl.$defaults.validationRules,
       // WARN: validations min/max must depends only on visible chars
-      min: (v, setV, c) => WUPTextControl.$defaults.validationRules.min!(v?.replace(/\n/g, ""), setV, c),
-      max: (v, setV, c) => WUPTextControl.$defaults.validationRules.max!(v?.replace(/\n/g, ""), setV, c),
+      min: (v, setV, c) => WUPTextControl.$defaults.validationRules.min.call!(c, v?.replace(/\n/g, ""), setV, c),
+      max: (v, setV, c) => WUPTextControl.$defaults.validationRules.max.call!(c, v?.replace(/\n/g, ""), setV, c),
     },
   };
 
-  $options: WUP.Textarea.Options<ValueType> = {
+  $options: WUP.Textarea.Options = {
     ...this.#ctr.$defaults,
-    // @ts-expect-error
-    validationRules: undefined, // don't copy it from defaults to optimize memory
   };
 
   protected override _opts = this.$options;

@@ -2,31 +2,7 @@ import WUPPopupElement from "../popup/popupElement";
 import { ShowCases as PopupShowCases, HideCases as PopupHideCases, Animations } from "../popup/popupElement.types";
 import popupListen from "../popup/popupListen";
 import WUPBaseControl from "./baseControl";
-import WUPTextControl, { WUPTextIn } from "./text";
-
-export namespace WUPBaseComboIn {
-  export interface Defs {
-    /** Case when menu-popup to show; WARN ShowCases.inputClick doesn't work without ShowCases.click
-     * @defaultValue onPressArrowKey | onClick | onFocus */
-    showCase: ShowCases;
-  }
-
-  export interface Opt {
-    /** Set true to make input not editable but allow to user select items via popup-menu (ordinary dropdown mode) */
-    readOnlyInput?: boolean;
-  }
-
-  export type Generics<
-    ValueType = any,
-    ValidationKeys extends WUP.BaseControl.ValidationMap = WUP.BaseCombo.ValidationMap,
-    Defaults = Defs,
-    Options = Opt
-  > = WUPTextIn.Generics<ValueType, ValidationKeys, Defaults & Defs, Options & Opt>;
-
-  export type Validation<T = any> = Generics<T>["Validation"];
-  export type GenDef<T = any> = Generics<T>["Defaults"];
-  export type GenOpt<T = any> = Generics<T>["Options"];
-}
+import WUPTextControl from "./text";
 
 export const enum ShowCases {
   /** When $showMenu() called programmatically; Don't use it for $options (it's for nested cycle) */
@@ -55,19 +31,24 @@ export const enum HideCases {
 
 declare global {
   namespace WUP.BaseCombo {
-    interface ValidationMap extends Omit<WUP.Text.ValidationMap, "min" | "max" | "email"> {}
     interface EventMap extends WUP.Text.EventMap {
       /** Fires after popup-menu is shown (after animation finishes) */
       $showMenu: Event;
       /** Fires after popup is hidden (after animation finishes) */
       $hideMenu: Event;
     }
-    interface Defaults<T = string> extends WUPBaseComboIn.GenDef<T> {}
-    interface Options<T = string> extends WUPBaseComboIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPBaseComboControl> extends WUP.Text.JSXProps<T> {
-      /** @readonly Use [opened] for styling */
-      readonly opened?: boolean;
+    interface ValidityMap extends Omit<WUP.Text.ValidityMap, "min" | "max" | "email"> {}
+    interface Defaults<T = string, VM = ValidityMap> extends WUP.Text.Defaults<T, VM> {
+      /** Case when menu-popup to show; WARN ShowCases.inputClick doesn't work without ShowCases.click
+       * @defaultValue onPressArrowKey | onClick | onFocus */
+      showCase: ShowCases;
     }
+    interface Options<T = string, VM = ValidityMap> extends WUP.Text.Options<T, VM>, Defaults<T, VM> {
+      /** Set true to make input not editable but allow to user select items via popup-menu (ordinary dropdown mode) */
+      readOnlyInput?: boolean;
+    }
+    interface Attributes extends WUP.Text.Attributes {}
+    interface JSXProps<C = WUPBaseComboControl> extends WUP.Text.JSXProps<C>, Attributes {}
   }
 }
 
@@ -127,12 +108,12 @@ export default abstract class WUPBaseComboControl<
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey,
   };
 
-  $options: WUP.BaseCombo.Options<ValueType> = {
+  // @ts-expect-error reason: validationRules is different
+  $options: WUP.BaseCombo.Options = {
     ...this.#ctr.$defaults,
-    // @ts-expect-error
-    validationRules: undefined, // don't copy it from defaults to optimize memory
   };
 
+  // @ts-expect-error reason: validationRules is different
   protected override _opts = this.$options;
 
   #isOpen = false;

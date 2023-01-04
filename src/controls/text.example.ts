@@ -4,8 +4,8 @@ import WUPTextControl from "./text";
 // it's required to extend default validationRules
 declare global {
   namespace WUP.Text {
-    interface ValidationMap {
-      isNumber: boolean;
+    interface ValidityMap {
+      isNumber?: boolean;
     }
   }
 }

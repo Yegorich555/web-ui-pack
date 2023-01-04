@@ -60,6 +60,7 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
 
   /** Options that applied to element */
   abstract $options: Record<string, any>;
+  protected _opts: Record<string, any> = {};
 
   constructor() {
     super();
@@ -146,7 +147,6 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
   }
 
   /* rawOptions ($options is observed) */
-  protected _opts: Record<string, any> = {};
   #optsObserved?: Observer.Observed<Record<string, any>>;
   #removeObserved?: Func;
   #setOptions(v: Record<string, any>): void {
@@ -411,16 +411,22 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
 
 declare global {
   namespace WUP.Base {
+    /** Cast not-supported props to optional string */
+    type toJSX<T> = {
+      [P in keyof T]?: T[P] extends number | boolean | string | undefined ? T[P] : string;
+    };
     type OptionEvent<T extends Record<string, any> = Record<string, any>> = {
       props: Array<Extract<keyof T, string>>;
       target: T;
     };
     type EventMap<T = HTMLElementEventMap> = HTMLElementEventMap & Record<keyof T, Event>;
-    type JSXProps<T> = React.DetailedHTMLProps<
+
+    type JSXProps<T, Opts extends Record<string, any> = any> = React.DetailedHTMLProps<
       // react doesn't support [className] attr for WebComponents; use [class] instead: https://github.com/facebook/react/issues/4933
       Omit<React.HTMLAttributes<T>, "className"> & { class?: string | undefined },
       T
-    >;
+    > &
+      toJSX<Opts>;
   }
 }
 // testcase: check if gotChanges sensitive to attr-case

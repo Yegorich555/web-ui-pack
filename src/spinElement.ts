@@ -23,7 +23,7 @@ declare global {
       /** Anchor element that need to oveflow by spinner, by default it's parentElement  */
       overflowTarget?: HTMLElement | null;
     }
-    interface JSXProps<T extends WUPSpinElement> extends WUP.Base.JSXProps<T> {
+    interface Attributes {
       /** Place inside parent as inline-block or overflow target in the center (`position: relative` isnot  required);
        * @defaultValue false */
       inline?: boolean | "";
@@ -34,6 +34,7 @@ declare global {
        * @defaultValue false for inline:true, true for inline:false */
       fit?: boolean | "";
     }
+    interface JSXProps<T extends WUPSpinElement> extends WUP.Base.JSXProps<T>, Attributes {}
   }
 }
 
@@ -69,7 +70,7 @@ export default class WUPSpinElement extends WUPBaseElement {
     return ["inline", "overflowTarget", "overflowOffset", "overflowFade", "fit"];
   }
 
-  static get observedAttributes(): Array<LowerKeys<WUP.Spin.Options>> {
+  static get observedAttributes(): Array<LowerKeys<WUP.Spin.Attributes>> {
     return ["inline", "overflowfade", "fit"];
   }
 

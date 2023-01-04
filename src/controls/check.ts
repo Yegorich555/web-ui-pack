@@ -1,39 +1,21 @@
-import WUPSwitchControl, { WUPSwitchIn } from "./switch";
+import WUPSwitchControl from "./switch";
 
 const tagName = "wup-check";
-export namespace WUPCheckIn {
-  export interface Def {}
-  export interface Opt {}
-
-  export type Generics<
-    ValueType = boolean,
-    ValidationKeys extends WUP.Check.ValidationMap = WUP.Check.ValidationMap,
-    Defaults = Def,
-    Options = Opt
-  > = WUPSwitchIn.Generics<ValueType, ValidationKeys, Defaults & Def, Options & Opt>;
-  // type Validation<T = string> = Generics<T>["Validation"];
-  export type GenDef<T = boolean> = Generics<T>["Defaults"];
-  export type GenOpt<T = boolean> = Generics<T>["Options"];
-}
-
 declare global {
   namespace WUP.Check {
-    interface ValidationMap extends WUP.Switch.ValidationMap {}
     interface EventMap extends WUP.Switch.EventMap {}
-    interface Defaults<T = boolean> extends WUPCheckIn.GenDef<T> {}
-    interface Options<T = boolean> extends WUPCheckIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPCheckControl> extends WUP.Switch.JSXProps<T> {}
+    interface ValidityMap extends WUP.Switch.ValidityMap {}
+    interface Defaults<T = boolean, VM = ValidityMap> extends WUP.BaseControl.Defaults<T, VM> {}
+    interface Options<T = boolean, VM = ValidityMap> extends WUP.Switch.Options<T, VM>, Defaults<T, VM> {}
+    interface Attributes extends WUP.Switch.Attributes {}
+    interface JSXProps<C = WUPCheckControl> extends WUP.Switch.JSXProps<C>, Attributes {}
   }
-
-  // add element to document.createElement
   interface HTMLElementTagNameMap {
-    [tagName]: WUPCheckControl;
+    [tagName]: WUPCheckControl; // add element to document.createElement
   }
-
-  // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUP.Check.JSXProps<WUPCheckControl>;
+      [tagName]: WUP.Check.JSXProps; // add element to tsx/jsx intellisense
     }
   }
 }
@@ -126,8 +108,6 @@ export default class WUPCheckControl<
 
   $options: WUP.Check.Options = {
     ...this.#ctr.$defaults,
-    // @ts-expect-error
-    validationRules: undefined, // don't copy it from defaults to optimize memory
   };
 
   protected override _opts = this.$options;

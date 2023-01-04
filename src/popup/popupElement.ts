@@ -71,7 +71,7 @@ export default class WUPPopupElement<
   }
 
   /* Array of attribute names to monitor for changes */
-  static get observedAttributes(): Array<keyof WUP.Popup.Options> {
+  static get observedAttributes(): Array<LowerKeys<WUP.Popup.Options>> {
     return ["target", "placement"];
   }
 

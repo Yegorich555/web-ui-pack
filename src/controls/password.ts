@@ -1,29 +1,12 @@
 import onEvent from "../helpers/onEvent";
 import { stringLowerCount, stringUpperCount } from "../helpers/stringCaseCount";
-import WUPTextControl, { WUPTextIn } from "./text";
+import WUPTextControl from "./text";
 
 const tagName = "wup-pwd";
-export namespace WUPPasswordIn {
-  export interface Def {
-    /** Reversed-style for button-eye
-     * @defaultValue false */
-    reverse?: boolean;
-  }
-  export interface Opt {}
-  export type Generics<
-    ValueType = string,
-    ValidationKeys extends WUP.Text.ValidationMap = WUP.Password.ValidationMap,
-    Defaults = Def,
-    Options = Opt
-  > = WUPTextIn.Generics<ValueType, ValidationKeys, Defaults & Def, Options & Opt>;
-  // type Validation<T = string> = Generics<T>["Validation"];
-  export type GenDef<T = string> = Generics<T>["Defaults"];
-  export type GenOpt<T = string> = Generics<T>["Options"];
-}
-
 declare global {
   namespace WUP.Password {
-    interface ValidationMap extends WUP.Text.ValidationMap {
+    interface EventMap extends WUP.Text.EventMap {}
+    interface ValidityMap extends WUP.Text.ValidityMap {
       /** If count of numbers < pointed shows message 'Must contain at least {x} numbers' */
       minNumber: number;
       /** If count of uppercase letters < pointed shows message 'Must contain at least {x} upper case' */
@@ -35,24 +18,26 @@ declare global {
       /** If $value != with previous siblint wup-pwd.$value shows message 'Passwords must be equal' */
       confirm: boolean;
     }
-    interface EventMap extends WUP.Text.EventMap {}
-    interface Defaults<T = string> extends WUPPasswordIn.GenDef<T> {}
-    interface Options<T = string> extends WUPPasswordIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPPasswordControl> extends WUP.Text.JSXProps<T> {
+    interface Defaults<T = string, VM extends ValidityMap = ValidityMap> extends WUP.Text.Defaults<T, VM> {}
+    interface Options<T = string, VM extends ValidityMap = ValidityMap>
+      extends WUP.Text.Options<T, VM>,
+        Defaults<T, VM> {
+      /** Reversed-style for button-eye
+       * @defaultValue false */
+      reverse?: boolean;
+    }
+    interface Attributes extends WUP.Text.Attributes {
       /** Reversed-style for button-eye */
       reverse?: boolean | "";
     }
+    interface JSXProps<C = WUPPasswordControl> extends WUP.Text.JSXProps<C>, Attributes {}
   }
-
-  // add element to document.createElement
   interface HTMLElementTagNameMap {
-    [tagName]: WUPPasswordControl;
+    [tagName]: WUPPasswordControl; // add element to document.createElement
   }
-
-  // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUP.Password.JSXProps<WUPPasswordControl>;
+      [tagName]: WUP.Password.JSXProps<WUPPasswordControl>; // add element to tsx/jsx intellisense
     }
   }
 }
@@ -92,7 +77,7 @@ declare global {
  * </label>
  */
 export default class WUPPasswordControl<
-  ValueType = string,
+  ValueType extends string = string,
   EventMap extends WUP.Password.EventMap = WUP.Password.EventMap
 > extends WUPTextControl<ValueType, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
@@ -193,10 +178,8 @@ export default class WUPPasswordControl<
     },
   };
 
-  $options: WUP.Password.Options<ValueType> = {
+  $options: WUP.Password.Options<string> = {
     ...this.#ctr.$defaults,
-    // @ts-expect-error
-    validationRules: undefined, // don't copy it from defaults to optimize memory
   };
 
   protected override _opts = this.$options;

@@ -26,7 +26,7 @@ export const enum SubmitActions {
 
 declare global {
   namespace WUP.Form {
-    export interface SubmitEvent<T extends Record<string, any>> extends Event {
+    interface SubmitEvent<T extends Record<string, any>> extends Event {
       /** Model collected from controls */
       $model: Partial<T>;
       /** Form related to submit event */
@@ -39,20 +39,20 @@ declare global {
       $waitFor?: Promise<unknown>;
     }
 
-    export interface EventMap extends WUP.Base.EventMap {
+    interface EventMap extends WUP.Base.EventMap {
       /** Fires before $submit is happened; can be prevented via e.preventDefault() */
       $willSubmit: Omit<SubmitEvent<any>, "$model">;
       /** Fires by user-submit when validation succesfull and model is collected */
       $submit: SubmitEvent<any>;
     }
 
-    export interface Defaults {
+    interface Defaults {
       /** Actions that enabled on submit event; You can point several like: `goToError | collectChanged`
        * @defaultValue goToError | validateUntiFirst | reset | lockOnPending */
       submitActions: SubmitActions;
     }
 
-    export interface Options extends Defaults {
+    interface Options extends Defaults {
       /** Focus first possible element when it's appended to layout */
       autoFocus?: boolean;
       /** Disallow edit/copy value; adds attr [disabled] for styling */
@@ -64,22 +64,24 @@ declare global {
       autoComplete?: boolean;
     }
 
-    export interface JSXProps<T extends WUPBaseElement> extends WUP.Base.JSXProps<T> {
-      /** @deprecated Disallow edit/copy value. Use [disabled] for styling */
+    interface Attributes {
+      /** Disallow edit/copy value. Use [disabled] for styling */
       disabled?: boolean;
-      /** @deprecated Disallow edit value */
+      /** Disallow edit value */
       readOnly?: boolean;
-      /** @deprecated Focus on init */
+      /** Focus on init */
       autoFocus?: boolean;
-      /** @deprecated Enable/disable browser-autocomplete */
+      /** Enable/disable browser-autocomplete */
       autoComplete?: boolean;
+    }
 
+    interface JSXProps<T extends WUPBaseElement> extends WUP.Base.JSXProps<T>, Attributes {
+      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
+      onChange?: never;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willSubmit') instead */
       onWillSubmit?: never;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$submit') instead */
       onSubmit?: never;
-      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
-      onChange?: never;
     }
   }
 }
@@ -148,7 +150,7 @@ export default class WUPFormElement<
   }
 
   /* Array of attribute names to listen for changes */
-  static get observedAttributes(): Array<LowerKeys<WUP.Form.Options>> {
+  static get observedAttributes(): Array<LowerKeys<WUP.Form.Attributes>> {
     return ["disabled", "readonly", "autocomplete"];
   }
 

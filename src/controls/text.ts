@@ -1,63 +1,17 @@
 import MaskTextInput from "./text.mask";
 import { onEvent } from "../indexHelpers";
 import { WUPcssIcon } from "../styles";
-import WUPBaseControl, { WUPBaseIn } from "./baseControl";
+import WUPBaseControl from "./baseControl";
 
 const emailReg =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 const tagName = "wup-text";
-export namespace WUPTextIn {
-  export interface Def {
-    /** Debounce time to wait for user finishes typing to start validate and provide $change event
-     * @defaultValue 0; */
-    debounceMs?: number;
-    /** Select whole text when input got focus (when input is not readonly and not disabled);
-     * @defaultValue true */
-    selectOnFocus: boolean;
-    /** Show/hide clear button. @see ClearActions
-     * @defaultValue true */
-    clearButton: boolean;
-  }
-
-  export interface Opt {
-    /** Make input masked (supports only digit-mask. If you need aphabet please open an issue on Github)
-     * @rules when mask is pointed
-     * * inputmode='numeric' so mobile device show numeric-keyboard
-     * * enables validation 'mask' with error message 'Incomplete value'
-     * @example
-     * "0000-00-00" // for date in format yyyy-mm-dd
-     * "##0.##0.##0.##0" // IPaddress
-     * "+1(000) 000-0000" // phoneNumber
-     * '0' // required digit
-     * '#' // optional digit
-     * '|0' // or '\x00' - static char '0'
-     * '|#' // or '\x01' - static char '#'
-     * */
-    mask?: string;
-    /** Placeholder for mask. By default it inherits from mask. To disabled it set 'false' or '' (empty string);
-     *  for date maskholder can be 'yyyy-mm-dd' */
-    maskholder?: string | false;
-    /** Part before input; for example for value "$ 123 USD" prefix is "$ " */
-    prefix?: string;
-    /** Part after input; for example for value "$ 123 USD" prefix is " USD" */
-    postfix?: string;
-  }
-
-  export type Generics<
-    ValueType = string,
-    ValidationKeys extends WUP.BaseControl.ValidationMap = WUP.Text.ValidationMap,
-    Defaults = Def,
-    Options = Opt
-  > = WUPBaseIn.Generics<ValueType, ValidationKeys, Defaults & Def, Options & Opt>;
-  // type Validation<T = string> = Generics<T>["Validation"];
-  export type GenDef<T = string> = Generics<T>["Defaults"];
-  export type GenOpt<T = string> = Generics<T>["Options"];
-}
 
 declare global {
   namespace WUP.Text {
-    interface ValidationMap extends WUP.BaseControl.ValidationMap {
+    interface EventMap extends WUP.BaseControl.EventMap {}
+    interface ValidityMap extends WUP.BaseControl.ValidityMap {
       /** If textLength < pointed shows message 'Min length is {x} characters` */
       min: number;
       /** If textLength > pointed shows message 'Max length is {x} characters` */
@@ -80,34 +34,47 @@ declare global {
        * * excluded from listing (for $options.validationShowAll) */
       _parse: string;
     }
-    interface EventMap extends WUP.BaseControl.EventMap {}
-    interface Defaults<T = string> extends WUPTextIn.GenDef<T> {}
-    interface Options<T = string> extends WUPTextIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPTextControl> extends WUP.BaseControl.JSXProps<T> {
-      /**
-       * Make input masked
-       * @deprecated
+    interface Defaults<T = string, VM = ValidityMap> extends WUP.BaseControl.Defaults<T, VM> {
+      /** Debounce time to wait for user finishes typing to start validate and provide $change event
+       * @defaultValue 0; */
+      debounceMs?: number;
+      /** Select whole text when input got focus (when input is not readonly and not disabled);
+       * @defaultValue true */
+      selectOnFocus: boolean;
+      /** Show/hide clear button. @see ClearActions
+       * @defaultValue true */
+      clearButton: boolean;
+    }
+
+    interface Options<T = string, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, Defaults<T, VM> {
+      /** Make input masked (supports only digit-mask. If you need aphabet please open an issue on Github)
+       * @rules when mask is pointed
+       * * inputmode='numeric' so mobile device show numeric-keyboard
+       * * enables validation 'mask' with error message 'Incomplete value'
        * @example
-       * "0000-00-00" // date in format yyyy-mm-dd
+       * "0000-00-00" // for date in format yyyy-mm-dd
        * "##0.##0.##0.##0" // IPaddress
        * "+1(000) 000-0000" // phoneNumber
-       * `0` // required digit
+       * '0' // required digit
        * '#' // optional digit
-       * '\0' // for '0' char
-       * '\1' // for '#' char
-       */
+       * '|0' // or '\x00' - static char '0'
+       * '|#' // or '\x01' - static char '#'
+       * */
       mask?: string;
-      /** Placeholder for mask. By default it inherits from mask. To disabled it set 'false' or '' - empty string
-       *  for date maskholder can be 'yyyy-mm-dd'
-       *  @deprecated  */
-      maskholder?: string;
-      /** Part before input; for example for value "$ 123 USD" prefix is "$ "
-       *  @deprecated  */
+      /** Placeholder for mask. By default it inherits from mask. To disabled it set 'false' or '' (empty string);
+       *  for date maskholder can be 'yyyy-mm-dd' */
+      maskholder?: string | false;
+      /** Part before input; for example for value "$ 123 USD" prefix is "$ " */
       prefix?: string;
-      /** Part after input; for example for value "$ 123 USD" prefix is " USD"
-       *  @deprecated  */
+      /** Part after input; for example for value "$ 123 USD" prefix is " USD" */
       postfix?: string;
     }
+
+    interface Attributes
+      extends WUP.BaseControl.Attributes,
+        Pick<Options, "mask" | "maskholder" | "prefix" | "postfix"> {}
+
+    interface JSXProps<C = WUPTextControl> extends WUP.BaseControl.JSXProps<C>, Attributes {}
     interface GotInputEvent extends InputEvent {
       target: HTMLInputElement;
       // /** Call it to prevent calling setValue by input event */
@@ -117,15 +84,13 @@ declare global {
     }
   }
 
-  // add element to document.createElement
   interface HTMLElementTagNameMap {
-    [tagName]: WUPTextControl;
+    [tagName]: WUPTextControl; // add element to document.createElement
   }
 
-  // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUP.Text.JSXProps<WUPTextControl>;
+      [tagName]: WUP.Text.JSXProps; // add element to tsx/jsx intellisense
     }
   }
 }
@@ -164,7 +129,7 @@ export default class WUPTextControl<
   }
 
   static get observedAttributes(): Array<string> {
-    const arr = super.observedAttributes as Array<LowerKeys<WUP.Text.Options>>;
+    const arr = super.observedAttributes as Array<LowerKeys<WUP.Text.Attributes>>;
     arr.push("maskholder", "mask", "prefix", "postfix");
     return arr;
   }
@@ -358,7 +323,7 @@ export default class WUPTextControl<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUP.Text.Defaults<string> = {
+  static $defaults: WUP.Text.Defaults = {
     ...WUPBaseControl.$defaults,
     selectOnFocus: true,
     clearButton: true,
@@ -376,10 +341,8 @@ export default class WUPTextControl<
     },
   };
 
-  $options: WUP.Text.Options<ValueType> = {
+  $options: WUP.Text.Options<string> = {
     ...this.#ctr.$defaults,
-    // @ts-expect-error
-    validationRules: undefined, // don't copy it from defaults to optimize memory
   };
 
   protected override _opts = this.$options;

@@ -4,44 +4,16 @@ import promiseWait from "../helpers/promiseWait";
 import WUPPopupElement from "../popup/popupElement";
 import WUPSpinElement from "../spinElement";
 import { WUPcssIcon, WUPcssScrollSmall } from "../styles";
-import WUPBaseComboControl, { ShowCases, WUPBaseComboIn } from "./baseCombo";
+import WUPBaseComboControl, { ShowCases } from "./baseCombo";
 
 /* c8 ignore next */
 /* istanbul ignore next */
 !WUPSpinElement && console.error("!"); // It's required otherwise import is ignored by webpack
 
 const tagName = "wup-select";
-export namespace WUPSelectIn {
-  export interface Defs {
-    /** Case when menu-popup to show
-     * @defaultValue onPressArrowKey | onClick | onFocus | onInput */
-    showCase: ShowCases;
-  }
-
-  export interface Opt<T> {
-    /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data! */
-    items: WUP.Select.MenuItems<T> | (() => WUP.Select.MenuItems<T> | Promise<WUP.Select.MenuItems<T>>);
-    /** Set true to make input not editable but allow to user select items via popup-menu (ordinary dropdown mode) */
-    readOnlyInput?: boolean;
-    /** Allow user to create new value (if value not found in items) */
-    allowNewValue?: boolean;
-  }
-
-  export type Generics<
-    ValueType = any,
-    ItemType = ValueType,
-    ValidationKeys extends WUP.Select.ValidationMap = WUP.Select.ValidationMap,
-    Defaults = Defs,
-    Options = Opt<ValueType>
-  > = WUPBaseComboIn.Generics<ValueType, ValidationKeys, Defaults & Defs, Options & Opt<ItemType>>;
-
-  export type Validation<T = any> = Generics<T>["Validation"];
-  export type GenDef<T = any> = Generics<T>["Defaults"];
-  export type GenOpt<T = any, ItemT = T> = Generics<T, ItemT>["Options"];
-}
 declare global {
   namespace WUP.Select {
-    interface MenuItem<T> {
+    interface MenuItemText<T> {
       text: string;
       value: T;
     }
@@ -50,26 +22,36 @@ declare global {
       text: (value: T, el: HTMLElement, i: number) => string;
       value: T;
     }
-    type MenuItemAny<T> = MenuItem<T> | MenuItemFn<T>;
-    type MenuItems<T> = MenuItem<T>[] | MenuItemFn<T>[];
 
-    interface ValidationMap extends WUP.BaseCombo.ValidationMap {}
+    type MenuItem<T> = MenuItemText<T> | MenuItemFn<T>;
+    type MenuItems<T> = MenuItemText<T>[] | MenuItemFn<T>[];
+
     interface EventMap extends WUP.BaseCombo.EventMap {}
-    interface Defaults<T = any> extends WUPSelectIn.GenDef<T> {}
-    interface Options<T = any, ItemT = T> extends WUPSelectIn.GenOpt<T, ItemT> {}
-    interface JSXProps<T extends WUPSelectControl> extends WUP.BaseCombo.JSXProps<T> {
-      /** @deprecated Items showed in dropdown-menu. Point global obj-key with items (set `window.inputRadio.items` for `window.inputRadio.items = [{value: 1, text: 'Item 1'}]` ) */
-      items?: string;
+    interface ValidityMap extends WUP.BaseCombo.ValidityMap {}
+    interface Defaults<T = any, VM = ValidityMap> extends WUP.BaseCombo.Defaults<T, VM> {
+      /** Case when menu-popup to show
+       * @defaultValue onPressArrowKey | onClick | onFocus | onInput */
+      showCase: ShowCases;
     }
+    interface Options<T = any, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, Defaults<T, VM> {
+      /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data! */
+      items: MenuItems<T> | (() => MenuItems<T> | Promise<MenuItems<T>>);
+      /** Set true to make input not editable but allow to user select items via popup-menu (ordinary dropdown mode) */
+      readOnlyInput?: boolean;
+      /** Allow user to create new value if value not found in items */
+      allowNewValue?: boolean;
+    }
+    interface Attributes extends WUP.BaseCombo.Attributes {}
+    interface JSXProps<C = WUPSelectControl> extends WUP.BaseCombo.JSXProps<C>, Attributes {}
   }
-  // add element to document.createElement
+
   interface HTMLElementTagNameMap {
-    [tagName]: WUPSelectControl;
+    [tagName]: WUPSelectControl; // add element to document.createElement
   }
-  // add element to tsx/jsx intellisense
+
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUP.Select.JSXProps<WUPSelectControl>;
+      [tagName]: WUP.Select.JSXProps; // add element to tsx/jsx intellisense
     }
   }
 }
@@ -190,16 +172,14 @@ export default class WUPSelectControl<
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey | ShowCases.onInput,
   };
 
-  $options: WUP.Select.Options<ValueType, ItemType> = {
+  $options: WUP.Select.Options = {
     ...this.#ctr.$defaults,
     items: [],
-    // @ts-expect-error
-    validationRules: undefined, // don't copy it from defaults to optimize memory
   };
 
   protected override _opts = this.$options;
 
-  /** Returns is control in pending state (show spinner) */
+  /** Returns whether control in pending state or not (shows spinner) */
   get $isPending(): boolean {
     return !!this.#stopPending;
   }
@@ -211,8 +191,8 @@ export default class WUPSelectControl<
       if (arr?.length) {
         r =
           attrValue === ""
-            ? (arr as WUP.Select.MenuItemAny<any>[]).find((o) => o.value == null)
-            : (arr as WUP.Select.MenuItemAny<any>[]).find((o) => o.value && `${o.value}` === attrValue);
+            ? (arr as WUP.Select.MenuItem<any>[]).find((o) => o.value == null)
+            : (arr as WUP.Select.MenuItem<any>[]).find((o) => o.value && `${o.value}` === attrValue);
       }
 
       (this as any)._noDelInitValueAttr = true;
@@ -427,7 +407,7 @@ export default class WUPSelectControl<
         });
       } else {
         arr.forEach((v, i) => {
-          const txt = (v as WUP.Select.MenuItem<ValueType>).text;
+          const txt = (v as WUP.Select.MenuItemText<ValueType>).text;
           arrLi[i].textContent = txt;
           arrLi[i]._text = txt.toLowerCase();
         });
@@ -617,5 +597,3 @@ export default class WUPSelectControl<
 }
 
 customElements.define(tagName, WUPSelectControl);
-
-// maybe event onCreateNew?
