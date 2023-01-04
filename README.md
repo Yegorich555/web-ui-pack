@@ -21,7 +21,7 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
 - Built-in css-variables to use custom color-themes with native ordinary styling (css, scss etc.)
 - Built-in Typescript (coverage types 100%)
 - Built-in `.jsx/.tsx` support (for React/Vue)
-- Supports different locales (based on [localeInfo](src/helpers/localeInfo.ts) helper)
+- Supports different locales (based on [localeInfo](src/objects/localeInfo.ts) helper)
 - Well documented via JSDoc (use intellisense power of your editor to get details about each property/option/usage)
 - Optimized for webpack (build includes only used components and helpers via **side-effects** option)
 - Zero dependancy (don't need to wait for bug-fixing of other packages)
@@ -58,11 +58,11 @@ npm install web-ui-pack
 - [ ] SelectManyControl (MultiSelect)
 - [x] [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
 - [x] [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
+- [ ] TimeControl
+- [ ] DateTimeControl ?
 - [x] [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
 - [x] [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
 - [ ] FileControl
-- [ ] TimeControl
-- [ ] DateTimeControl ?
 - [ ] ImageControl (AvatarEditor)
 - [ ] SearchControl ?
 - [ ] ModalElement
@@ -221,7 +221,6 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 - [**findScrollParentAll**(e: HTMLElement)](src/helpers/findScrollParent.ts) ⇒ `Find all parents with active scroll X/Y`
 - [**focusFirst**(el: HTMLElement)](src/helpers/focusFirst.ts) ⇒ `Set focus on element or first possible nested element`
 - [**isIntoView**(el: HTMLElement)](src/helpers/isIntoView.ts) ⇒ `Check if element is visible in scrollable parents`
-- [**localeInfo**](src/helpers/localeInfo.ts) ⇒ `Locale-object with definitions related to user-locale`
 - [**mathSumFloat**(a:number,b:number)](src/helpers/mathSumFloat.ts) ⇒ `Sum without float-precision-issue`
 - [**nestedProperty.set**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.set(obj, "value.nestedValue", 1) sets obj.value.nestedValue = 1`
 - [**nestedProperty.get**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.get(obj, "nested.val2", out?: {hasProp?: boolean} ) returns value from obj.nested.val2`
@@ -239,6 +238,11 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 - [**stringLowerCount**(text: string, stopWith?: number)](src/helpers/stringCaseCount.ts) ⇒ `Returns count of chars in lower case (for any language with ignoring numbers, symbols)`
 - [**stringUpperCount**(text: string, stopWith?: number)](src/helpers/stringCaseCount.ts) ⇒ `Returns count of chars in upper case (for any language with ignoring numbers, symbols)`
 - [**stringPrettify**(text: string, changeKebabCase = false)](src/helpers/stringPrettify.ts) ⇒ `Changes camelCase, snakeCase, kebaCase text to user-friendly`
+
+### Objects
+
+- [**localeInfo**](src/objects/localeInfo.ts) ⇒ `Locale-object with definitions related to user-locale`
+- [**TimeObject**](src/objects/timeObject.ts) ⇒ `Plane time object without date`
 
 #### Helpers.Observer
 

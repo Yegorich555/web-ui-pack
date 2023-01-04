@@ -1,5 +1,5 @@
 import { WUPNumberControl } from "web-ui-pack";
-import localeInfo from "web-ui-pack/helpers/localeInfo";
+import localeInfo from "web-ui-pack/objects/localeInfo";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
 

@@ -4,11 +4,12 @@
 
 **BREAKING CHANGES**:
 
-- Namespace WUP is refactored from WUPPopup to WUP.Popup. So re-export enums `ShowCases, HideCases, Animations` without prefix now
+- Namespaces `WUP...` is refactored from `WUPPopup` to `WUP.Popup`. So re-export enums `ShowCases, HideCases, Animations` without prefix now
+- helper localeInfo moved to `web-ui-pack/objects/localeInfo`
 
 **Fixes**:
 
-- Helper. [`localeInfo`](src/helpers/localeInfo.ts). `AM/PM parsed to 'a' but expected 'A'`
+- Helper. [`localeInfo`](src/objects/localeInfo.ts). `AM/PM parsed to 'a' but expected 'A'`
 
 **Features**:
 
@@ -25,13 +26,13 @@
     - default value `YYYY-MM-DD`
   - Now
     - changing `$options.format` & attr `[format]` related only to displayed text. All attributes must be pointed in universal format `YYYY-MM-DD`
-    - default value depends on user localization; see [locale](src/helpers/localeInfo.ts)
-    - `$options.firstWeekDay` - default value depends on user localization; see [locale](src/helpers/localeInfo.ts)
+    - default value depends on user localization; see [locale](src/objects/localeInfo.ts)
+    - `$options.firstWeekDay` - default value depends on user localization; see [locale](src/objects/localeInfo.ts)
 
 - CalendarControl:
-  - deprecated static getters `$namesDayShort, $namesMonth, $namesMonthShort` in favor of [`localeInfo`](src/helpers/localeInfo.ts) helper
+  - deprecated static getters `$namesDayShort, $namesMonth, $namesMonthShort` in favor of [`localeInfo`](src/objects/localeInfo.ts) helper
   - `$options.firstDayOfWeek` is renamed to `firstWeekDay`
-  - `$options.firstWeekDay` - default value depends on user localization; see [locale](src/helpers/localeInfo.ts)
+  - `$options.firstWeekDay` - default value depends on user localization; see [locale](src/objects/localeInfo.ts)
 
 **Fixes**:
 
@@ -43,7 +44,7 @@
 
 - Added $options.prefix & postfix for text-based controls
 - Support **MMM** in format for `dateToString, dateFromString`
-- Controls **Number, Date, Calendar** are locale based and depeneds on [`localeInfo`](src/helpers/localeInfo.ts) helper
+- Controls **Number, Date, Calendar** are locale based and depeneds on [`localeInfo`](src/objects/localeInfo.ts) helper
 - Added elements
 
   - [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
@@ -51,7 +52,7 @@
 
 - Added [helpers](README.md#helpers)
   - [`onScroll`](src/helpers/onScroll.ts)
-  - [`localeInfo`](src/helpers/localeInfo.ts)
+  - [`localeInfo`](src/objects/localeInfo.ts)
   - [`mathSumFloat`](src/helpers/mathSumFloat.ts)
 
 ## 0.2.0 (Dec 09, 2022)

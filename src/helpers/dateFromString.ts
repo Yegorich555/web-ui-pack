@@ -1,4 +1,4 @@
-import localeInfo from "./localeInfo";
+import localeInfo from "../objects/localeInfo";
 
 /** Returns parsed date from string based on pointed format
  * @param format 'yyyy-MM-dd hh:mm:ss.fff AZ'

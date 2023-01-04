@@ -3,7 +3,7 @@
  * @jest-environment-options {"timezone": "UTC"}
  */
 import { WUPTimeObject } from "web-ui-pack";
-import localeInfo from "web-ui-pack/helpers/localeInfo";
+import localeInfo from "web-ui-pack/objects/localeInfo";
 import * as h from "../testHelper";
 
 describe("timeObject", () => {

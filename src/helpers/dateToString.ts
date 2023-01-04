@@ -1,4 +1,4 @@
-import localeInfo from "./localeInfo";
+import localeInfo from "../objects/localeInfo";
 
 export function zeroBefore(v: number, length: number): string {
   const s = `${v}`;

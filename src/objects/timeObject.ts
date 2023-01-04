@@ -1,10 +1,9 @@
-/* eslint-disable no-useless-constructor */
 import dateToString, { zeroBefore } from "../helpers/dateToString";
-import localeInfo from "../helpers/localeInfo";
+import localeInfo from "./localeInfo";
 
 // watch: deprecate in favor of PlainTime: https://caniuse.com/?search=Temporal.PlainTime
 
-/** Time without date */
+/** Plane time-object without date */
 export default class WUPTimeObject {
   hours: number;
   minutes: number;
@@ -55,7 +54,7 @@ export default class WUPTimeObject {
     return `${zeroBefore(this.hours, 2)}:${zeroBefore(this.minutes, 2)}`;
   }
 
-  /** Returns string according to helpers/localeInfo.time format */
+  /** Returns string according to objects/localeInfo.time format */
   toLocaleString(): string {
     return this.format(localeInfo.time);
   }

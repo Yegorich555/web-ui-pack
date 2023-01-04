@@ -1,5 +1,6 @@
 import onScroll from "../helpers/onScroll";
-import { localeInfo, mathSumFloat, onEvent } from "../indexHelpers";
+import { mathSumFloat, onEvent } from "../indexHelpers";
+import localeInfo from "../objects/localeInfo";
 import WUPBaseControl from "./baseControl";
 import WUPTextControl from "./text";
 

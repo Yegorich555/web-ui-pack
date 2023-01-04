@@ -1,5 +1,5 @@
-// import localeInfo from "../../src/helpers/localeInfo";
-import localeInfo from "web-ui-pack/helpers/localeInfo";
+// import localeInfo from "../../src/objects/localeInfo";
+import localeInfo from "web-ui-pack/objects/localeInfo";
 import * as h from "../../testHelper";
 
 describe("helper.localeInfo", () => {

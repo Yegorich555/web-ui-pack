@@ -1,7 +1,8 @@
 import WUPBaseControl from "./baseControl";
 import { WUPcssHidden } from "../styles";
 import scrollCarousel from "../helpers/scrollCarousel";
-import { dateCopyTime, localeInfo } from "../indexHelpers";
+import { dateCopyTime } from "../indexHelpers";
+import localeInfo from "../objects/localeInfo";
 
 const tagName = "wup-calendar";
 
