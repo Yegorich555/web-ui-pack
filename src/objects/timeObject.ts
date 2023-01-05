@@ -16,9 +16,14 @@ export default class WUPTimeObject {
     this.minutes = 0;
     if (args.length === 1) {
       if (typeof args[0] === "string") {
-        const [h, m] = args[0].split(":");
+        const [h, m] = args[0].split(/\W/);
         this.hours = Number.parseInt(h, 10);
         this.minutes = Number.parseInt(m, 10);
+        if (this.hours === 12 && /AM|am$/.test(args[0])) {
+          this.hours = 0;
+        } else if (this.hours !== 12 && /PM|pm$/.test(args[0])) {
+          this.hours += 12;
+        }
       } else {
         this.hours = Math.floor(args[0] / 60);
         this.minutes = args[0] - this.hours * 60;
@@ -28,7 +33,14 @@ export default class WUPTimeObject {
       this.minutes = args[1] as number;
     }
 
-    if (this.hours < 0 || this.hours > 23 || this.minutes < 0 || this.minutes > 59) {
+    if (
+      Number.isNaN(this.hours) ||
+      Number.isNaN(this.minutes) ||
+      this.hours < 0 ||
+      this.hours > 23 ||
+      this.minutes < 0 ||
+      this.minutes > 59
+    ) {
       const err = RangeError("Out of range") as RangeError & { details: any };
       err.details = { parsed: this, args };
       console.warn(`${err.message}. Details:`, err.details);

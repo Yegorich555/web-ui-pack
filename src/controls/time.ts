@@ -115,7 +115,6 @@ export default class WUPTimeControl<
       max: (v, setV, c) =>
         (v === undefined || v > setV) && `Max date is ${setV.format((c as WUPTimeControl)._opts.format)}`,
     },
-    // format: localeInfo.time.toLowerCase()
   };
 
   // @ts-expect-error reason: validationRules is different
@@ -141,8 +140,7 @@ export default class WUPTimeControl<
     if (!text) {
       return undefined;
     }
-    console.warn(text, new WUPTimeObject(text));
-    return new WUPTimeObject(text) as any; // todo add parse formatted value as h-m; hh/mm AM
+    return new WUPTimeObject(text) as any;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -4,7 +4,7 @@
  */
 import { WUPTimeObject } from "web-ui-pack";
 import localeInfo from "web-ui-pack/objects/localeInfo";
-import * as h from "../testHelper";
+import * as h from "../../testHelper";
 
 describe("timeObject", () => {
   test("constructor", () => {
@@ -12,6 +12,7 @@ describe("timeObject", () => {
     expect(new WUPTimeObject(23, 15)).toEqual({ hours: 23, minutes: 15 });
     expect(new WUPTimeObject(123)).toEqual({ hours: 2, minutes: 3 });
     expect(new WUPTimeObject("12:46")).toEqual({ hours: 12, minutes: 46 });
+    expect(new WUPTimeObject("02:09")).toEqual({ hours: 2, minutes: 9 });
 
     h.mockConsoleWarn();
     expect(() => new WUPTimeObject(24, 0)).toThrow();
@@ -19,6 +20,15 @@ describe("timeObject", () => {
     expect(() => new WUPTimeObject(0, -1)).toThrow();
     expect(() => new WUPTimeObject(0, 60)).toThrow();
     h.unMockConsoleWarn();
+
+    expect(new WUPTimeObject("12/46")).toEqual({ hours: 12, minutes: 46 });
+    expect(new WUPTimeObject("12/46 PM")).toEqual({ hours: 12, minutes: 46 });
+    expect(new WUPTimeObject("2-35 AM")).toEqual({ hours: 2, minutes: 35 });
+    expect(new WUPTimeObject("12:10 AM")).toEqual({ hours: 0, minutes: 10 });
+    expect(new WUPTimeObject("12:10 PM")).toEqual({ hours: 12, minutes: 10 });
+    expect(new WUPTimeObject("2:10 PM")).toEqual({ hours: 14, minutes: 10 });
+    expect(new WUPTimeObject("2:35:10.105 AM")).toEqual({ hours: 2, minutes: 35 });
+    expect(new WUPTimeObject("2:35:10.105 am")).toEqual({ hours: 2, minutes: 35 });
   });
 
   test("toString()", () => {

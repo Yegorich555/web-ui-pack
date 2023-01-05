@@ -2,7 +2,7 @@
 import localeInfo from "web-ui-pack/objects/localeInfo";
 import * as h from "../../testHelper";
 
-describe("helper.localeInfo", () => {
+describe("localeInfo", () => {
   test("defaults", () => {
     // WARN: it's important to check default before localeInfo.refresh happened in other tests
     expect(localeInfo).toMatchInlineSnapshot(`
