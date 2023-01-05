@@ -14,6 +14,7 @@
 **Features**:
 
 - Added [WUPTimeObject](src/objects/timeObject.ts) => `Ordinary class Time with hours & minutes`
+- Add [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
 
 ## 0.3.0 (Dec 27, 2022)
 

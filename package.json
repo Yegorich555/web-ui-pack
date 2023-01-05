@@ -59,6 +59,8 @@
     "calendar",
     "date",
     "datepicker",
+    "time",
+    "timepicker",
     "numeric",
     "textarea"
   ],

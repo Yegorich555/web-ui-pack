@@ -9,6 +9,7 @@ interface CssVar {
 
 /** Returns all css-vars definitions */
 export function parseCssVars(str: string): CssVar[] {
+  // todo reg is wrong for url('data:image/png; ...
   const regByTags = /\s*(:*[A-Za-z0-9-]+)\[*\s*[^{ ]*\s*\{\s*([^}]*)\s*}/g;
   const reg = /(--[\w-]+): *([^;]+);/g;
   const vars: CssVar[] = [];
@@ -32,7 +33,6 @@ export function parseCssVars(str: string): CssVar[] {
       !duplicate && uniqueList.add(name);
     }
   }
-
   return vars;
 }
 

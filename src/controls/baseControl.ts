@@ -539,6 +539,8 @@ export default abstract class WUPBaseControl<
   protected override gotChanges(propsChanged: Array<keyof WUP.BaseControl.Options | any> | null): void {
     super.gotChanges(propsChanged);
 
+    // todo instead set prop:undefined: delete to reduce memory ?
+
     this._opts.label = this.getAttribute("label") ?? this._opts.label;
     this._opts.name = this.getAttribute("name") ?? this._opts.name;
     this._opts.autoComplete = this.getAttribute("autoComplete") ?? this._opts.autoComplete;
