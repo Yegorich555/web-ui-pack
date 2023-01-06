@@ -14,7 +14,8 @@
 **Features**:
 
 - Added [WUPTimeObject](src/objects/timeObject.ts) => `Ordinary class Time with hours & minutes`
-- Add [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
+- Added [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
+- Text-mask supports letters (previously only digits can be variabled)
 
 ## 0.3.0 (Dec 27, 2022)
 

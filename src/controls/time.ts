@@ -51,6 +51,7 @@ declare global {
 /** Form-control with time picker
  * @tutorial Troubleshooting
  * * $options.format related only to displayed text, to work with other time-options like min/max use strict format 'hh:mm'
+ * * if increase `--ctrl-icon-size`: change `ctrl-icon-img` to `--ctrl-icon-img: var(--ctrl-time-icon-img-lg)`: otherwise quality is ugly on larger icon
  * @example
   const el = document.createElement("wup-time");
   el.$options.name = "time";
@@ -151,15 +152,15 @@ export default class WUPTimeControl<
   protected override gotChanges(propsChanged: Array<keyof WUP.Time.Options> | null): void {
     this._opts.format = (this.getAttribute("format") ?? this._opts.format)?.replace(/\D{0,1}(ss|SS)/, "") || "hh:mm a";
 
-    // todo mask can't parse AM/PM properly so need to do it manually
     this._opts.mask =
       this._opts.mask ??
       this._opts.format
-        .replace(/hh|HH/g, "00") //
-        .replace(/[hH]/g, "#0")
-        .replace(/mm|MM/g, "00")
-        .replace(/[mM]/g, "#0") // convert hh-mm > 00-00; h/m > #0/#0
-        .replace(/[aA]/, "*{2}"); // todo add to mask *{x,y} pattern
+        .replace(/hh|HH/, "00") //
+        .replace(/[hH]/, "#0")
+        .replace(/mm|MM/, "00")
+        .replace(/[mM]/, "#0") // convert hh-mm > 00-00; h/m > #0/#0
+        .replace(/a/, "/[aApP]/m")
+        .replace(/A/, "/[aApP]/M");
     this._opts.maskholder = this._opts.maskholder ?? this._opts.format.replace(/([mMhH]){1,2}/g, "$1$1");
     this._opts.min = this.parse(this.getAttribute("min") || "") ?? this._opts.min;
     this._opts.max = this.parse(this.getAttribute("max") || "") ?? this._opts.max;

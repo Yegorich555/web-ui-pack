@@ -115,10 +115,9 @@ export default function TextControlView() {
             }}
           />
           <wup-text name="ipaddr" label="IPaddress" mask="##0.##0.##0.##0" maskholder="xxx.xxx.xxx.xxx" />
-          {/* <wup-text name="num" label="With postfix in mask" mask="$ ##0 USD" maskholder="$ 000 USD" /> */}
           <wup-text
             name="num"
-            label="With postfix/prefix & mask"
+            label="With prefix/postfix & mask"
             mask="##0"
             maskholder="000"
             prefix="$ "
@@ -128,10 +127,11 @@ export default function TextControlView() {
           Features:
           <ul>
             <li>
-              supports only numeric mask (to support alphabet-chars create an issue on Github), example:
+              Formats example:
               <br /> $options.mask=<b>"+1(000) 000-0000"</b> - for phone number
               <br /> $options.mask=<b>"##0.##0.##0.##0"</b> - for IP address
-              <br /> where <b>#</b> - optional, <b>0</b> - required number
+              <br /> $options.mask=<b>"*{"{1,5}"}"</b> - any 1..5 chars
+              <br /> where <b>#</b> - optional digit, <b>0</b> - required digit, <b>*</b> - any char
             </li>
             <li>prediction: all static chars append automatically</li>
             <li>lazy: type next separator on press Space to fill rest required digits with zeros</li>
@@ -139,9 +139,9 @@ export default function TextControlView() {
             <li>shows typed declined chars (so user can see that keyboard works) and rollback after 100ms</li>
             <li>possible to delete/append chars in the middle of text</li>
             <li>
-              enables validations.mask by default with message <b>Incomplete value</b>
+              enables <b>validations.mask</b> by default with message <b>Incomplete value</b>
             </li>
-            <li>usage details see in JSDoc: use intellisense to get info during the coding</li>
+            <li>usage details see during the coding (via jsdoc)</li>
           </ul>
         </section>
         <button type="submit">Submit</button>

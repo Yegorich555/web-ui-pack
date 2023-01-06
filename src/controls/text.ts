@@ -47,7 +47,7 @@ declare global {
     }
 
     interface Options<T = string, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, Defaults<T, VM> {
-      /** Make input masked (supports only digit-mask. If you need aphabet please open an issue on Github)
+      /** Make input masked
        * @rules when mask is pointed
        * * inputmode='numeric' so mobile device show numeric-keyboard
        * * enables validation 'mask' with error message 'Incomplete value'
@@ -57,8 +57,11 @@ declare global {
        * "+1(000) 000-0000" // phoneNumber
        * '0' // required digit
        * '#' // optional digit
+       * '*' // any char
+       * '*{1,5}' // - any 1..5 chars
        * '|0' // or '\x00' - static char '0'
        * '|#' // or '\x01' - static char '#'
+       * '|*' // or '\x02' - static char '*'
        * */
       mask?: string;
       /** Placeholder for mask. By default it inherits from mask. To disabled it set 'false' or '' (empty string);

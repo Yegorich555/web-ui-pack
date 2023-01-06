@@ -173,10 +173,10 @@ export default class WUPDateControl<
       this._opts.mask ??
       this._opts.format
         .replace(/[yY]/g, "0")
-        .replace(/dd|DD/g, "00")
-        .replace(/[dD]/g, "#0")
-        .replace(/mm|MM/g, "00")
-        .replace(/[mM]/g, "#0"); // convert yyyy-mm-dd > 0000-00-00; d/m/yyyy > #0/#0/0000
+        .replace(/dd|DD/, "00")
+        .replace(/[dD]/, "#0")
+        .replace(/mm|MM/, "00")
+        .replace(/[mM]/, "#0"); // convert yyyy-mm-dd > 0000-00-00; d/m/yyyy > #0/#0/0000
     this._opts.maskholder = this._opts.maskholder ?? this._opts.format.replace(/([mMdD]){1,2}/g, "$1$1");
     this._opts.min = this.parse(this.getAttribute("min") || "") ?? this._opts.min;
     this._opts.max = this.parse(this.getAttribute("max") || "") ?? this._opts.max;

@@ -1,5 +1,5 @@
-// import WUPTextControl from "../../src/controls/text";
-// import MaskTextInput from "../../src/controls/text.mask";
+// import WUPTextControl from "../../../src/controls/text";
+// import MaskTextInput from "../../../src/controls/text.mask";
 import WUPTextControl from "web-ui-pack/controls/text";
 import MaskTextInput from "web-ui-pack/controls/text.mask";
 import * as h from "../../testHelper";
@@ -579,6 +579,61 @@ describe("control.text: mask", () => {
     expect(await remove()).toBe("$ |"); // because of in prediction need to remove this
   });
 
+  test("*{1,2}", async () => {
+    expect(new MaskTextInput("0 *", "").chunks.map((v) => v.text)).toEqual(["", " ", "*"]);
+    expect(new MaskTextInput("0 **", "").chunks.map((v) => v.text)).toEqual(["", " ", "**"]);
+    expect(new MaskTextInput("0 *{1,2}", "").chunks.map((v) => v.text)).toEqual(["", " ", "**"]);
+    expect(new MaskTextInput("0 *{1,2}", "").chunks.map((v) => v.text)).toEqual(["", " ", "**"]);
+    expect(new MaskTextInput("0 {1,2}", "").chunks.map((v) => v.text)).toEqual(["", " {1,2}"]);
+    expect(new MaskTextInput("0 *{2}", "").chunks.map((v) => v.text)).toEqual(["", " ", "**"]);
+    expect(new MaskTextInput("0 *{2", "").chunks.map((v) => v.text)).toEqual(["", " ", "*", "{2"]);
+
+    h.mockConsoleWarn();
+    expect(() => new MaskTextInput("#*", "")).toThrow(); // because 2 var-chunks at once
+    h.unMockConsoleWarn();
+
+    const mask = "0 *{1,2} suf";
+    const mi = new MaskTextInput(mask, "");
+    const proc = (v = "") => mi.parse(v);
+
+    expect(proc("2 ab suf")).toBe("2 ab suf");
+    expect(proc("2 ab")).toBe("2 ab suf");
+    expect(proc("2 ")).toBe("2 ");
+    expect(proc("2 a")).toBe("2 a suf");
+    expect(proc("2 a suf")).toBe("2 a suf");
+
+    el.$options.mask = "0 *{1,2}?";
+    el.$options.maskholder = "# **?";
+    expect(await h.userTypeText(el.$refInput, "5Bf", { clearPrevious: false })).toBe("5 Bf|?");
+    expect(el.$refMaskholder.innerHTML).toBe("<i>5 Bf?</i>");
+
+    expect(await remove()).toBe("5 B|?");
+    expect(el.$refMaskholder.innerHTML).toBe("<i>5 B?</i>");
+
+    expect(await remove()).toBe("5 |");
+    expect(el.$refMaskholder.innerHTML).toBe("<i>5 </i>**?");
+
+    expect(await h.userTypeText(el.$refInput, "r", { clearPrevious: false })).toBe("5 r|?");
+    expect(el.$refMaskholder.innerHTML).toBe("<i>5 r?</i>");
+    h.setInputCursor(el.$refInput, "5 |r?");
+    expect(await remove({ key: "Delete" })).toBe("5 |");
+
+    el.blur();
+    await h.wait();
+    // cover case when resetChunk(): nonDigit
+    el.$options.mask = "*{2,3} *";
+    el.$options.maskholder = "*** *";
+    el.$value = "";
+    await h.wait(1);
+    expect(await h.userTypeText(el.$refInput, "123a", { clearPrevious: false })).toBe("123 a|");
+    expect(await remove()).toBe("123 |");
+    expect(await remove()).toBe("12|");
+    expect(el.$refMaskholder.innerHTML).toBe("<i>12</i>* *");
+    expect(await remove()).toBe("1|");
+    expect(await remove()).toBe("|");
+    expect(el.$refMaskholder.innerHTML).toBe("<i></i>*** *");
+  });
+
   test("input: numeric if mask applied", async () => {
     el.$options.mask = "0000";
     el.focus();
@@ -592,14 +647,14 @@ describe("control.text: mask", () => {
   });
 
   test("escaped chars: 0, # etc.", () => {
-    expect(new MaskTextInput("a|0 ##0 b|#", "").chunks.map((v) => v.text)).toMatchInlineSnapshot(`
+    expect(new MaskTextInput("a|0 ##0 b|#c|*", "").chunks.map((v) => v.text)).toMatchInlineSnapshot(`
       [
         "a0 ",
         "##0",
-        " b#",
+        " b#c*",
       ]
     `);
-    expect(new MaskTextInput("a||0 ##0 b||#", "").chunks.map((v) => v.text)).toMatchInlineSnapshot(`
+    expect(new MaskTextInput("a||0 ##0 b||#c||*", "").chunks.map((v) => v.text)).toMatchInlineSnapshot(`
       [
         "a|",
         "0",
@@ -607,6 +662,8 @@ describe("control.text: mask", () => {
         "##0",
         " b|",
         "#",
+        "c|",
+        "*",
       ]
     `);
   });
