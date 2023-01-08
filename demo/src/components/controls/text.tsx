@@ -131,6 +131,7 @@ export default function TextControlView() {
               <br /> $options.mask=<b>"+1(000) 000-0000"</b> - for phone number
               <br /> $options.mask=<b>"##0.##0.##0.##0"</b> - for IP address
               <br /> $options.mask=<b>"*{"{1,5}"}"</b> - any 1..5 chars
+              <br /> $options.mask=<b>"//[a-zA-Z]//{"{1,5}"}"</b> - regex /[a-zA-Z]/: 1..5 letters
               <br /> where <b>#</b> - optional digit, <b>0</b> - required digit, <b>*</b> - any char
             </li>
             <li>prediction: all static chars append automatically</li>

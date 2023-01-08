@@ -159,9 +159,15 @@ export default class WUPTimeControl<
         .replace(/[hH]/, "#0")
         .replace(/mm|MM/, "00")
         .replace(/[mM]/, "#0") // convert hh-mm > 00-00; h/m > #0/#0
-        .replace(/a/, "/[aApP]/m")
-        .replace(/A/, "/[aApP]/M");
-    this._opts.maskholder = this._opts.maskholder ?? this._opts.format.replace(/([mMhH]){1,2}/g, "$1$1");
+        .replace(/a/, "//[aApP]//m")
+        .replace(/A/, "//[aApP]//M");
+    this._opts.maskholder =
+      this._opts.maskholder ??
+      this._opts.format
+        .replace(/([mMhH]){1,2}/g, "$1$1")
+        .replace(/a/, "*m")
+        .replace(/A/, "*M");
+
     this._opts.min = this.parse(this.getAttribute("min") || "") ?? this._opts.min;
     this._opts.max = this.parse(this.getAttribute("max") || "") ?? this._opts.max;
     this._opts.step = Number.parseInt(this.getAttribute("step") || "", 10) || 5;
@@ -204,6 +210,7 @@ export default class WUPTimeControl<
 
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
     super.gotInput(e, true);
+    // todo replace a to A, A to a on the fly
   }
 
   // protected override gotKeyDown(e: KeyboardEvent): Promise<void> {
@@ -225,5 +232,3 @@ export default class WUPTimeControl<
 }
 
 customElements.define(tagName, WUPTimeControl);
-
-// todo selectAll doesn't work

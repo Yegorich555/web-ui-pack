@@ -55,13 +55,17 @@ declare global {
        * "0000-00-00" // for date in format yyyy-mm-dd
        * "##0.##0.##0.##0" // IPaddress
        * "+1(000) 000-0000" // phoneNumber
+       * "00:00 /[AP]/M" // time hh:mm AM/PM
        * '0' // required digit
        * '#' // optional digit
        * '*' // any char
        * '*{1,5}' // - any 1..5 chars
+       * '//[a-zA-Z]//' // regex: 1 letter
+       * '//[a-zA-Z]//{1,5}' // regex: 1..5 letters
        * '|0' // or '\x00' - static char '0'
        * '|#' // or '\x01' - static char '#'
        * '|*' // or '\x02' - static char '*'
+       * '|/' // or '\x03' - static char '/'
        * */
       mask?: string;
       /** Placeholder for mask. By default it inherits from mask. To disabled it set 'false' or '' (empty string);
@@ -501,6 +505,7 @@ export default class WUPTextControl<
         canSelectAll = canSelectAll && this.refMask!.isCompleted;
         this.renderPostfix(this._opts.postfix);
         if (!canSelectAll) {
+          // todo such logic to setSelectionRange
           this.$refInput.selectionStart = this.$refInput.value.length; // move cursor to the end
           this.$refInput.selectionEnd = this.$refInput.selectionStart;
         }
@@ -533,6 +538,7 @@ export default class WUPTextControl<
     this._opts.mask = this.getAttribute("mask") ?? this._opts.mask;
     this._opts.maskholder = this.getAttribute("maskholder") ?? this._opts.maskholder;
     if (this._opts.maskholder == null) {
+      // todo get maskholder based on refMask.chunks.map(c=>c.text).join();
       this._opts.maskholder = this._opts.mask;
     }
 

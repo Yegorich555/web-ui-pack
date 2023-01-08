@@ -63,9 +63,12 @@ export default class MaskTextInput {
    * * 0 - required digit
    * * \* - any char
    * * *{1,5} - any 1..5 chars
+   * * //[a-zA-Z]// - regex > 1 letter
+   * * //[a-zA-Z]//{1,5} - regex > 1..5 letters
    * * '|0' or '\x00' - static char '0'
    * * '|#' or '\x01' - static char '#'
    * * '|*' or '\x02' - static char '\*'
+   * * '|/' or '\x03' - static char '/'
    *  */
   constructor(public pattern: string, rawValue: string, private options?: WUP.Text.Mask.Options) {
     this.options = { prediction: true, lazy: true, ...options };
@@ -110,12 +113,12 @@ export default class MaskTextInput {
     };
 
     const pr = pattern
-      .replace(/([^|])\|0/g, "$1\x00")
-      .replace(/([^|])\|#/g, "$1\x01")
-      .replace(/([^|])\|\*/g, "$1\x02")
+      .replace(/([^|]|^)\|0/g, "$1\x00")
+      .replace(/([^|]|^)\|#/g, "$1\x01")
+      .replace(/([^|]|^)\|\*/g, "$1\x02")
+      .replace(/([^|]|^)\|\//g, "$1\x03")
+      .replace(/\/\//g, "\x04")
       .replace(/\|\|/g, "|");
-    // todo extend to regex support
-    // .replace();
 
     // 1st step: define pattern chunks
     for (let i = 0; i < pr.length; ++i) {
@@ -132,6 +135,19 @@ export default class MaskTextInput {
         case "#":
           ++(setToChunk(p, true, this.testDigit) as WUP.Text.Mask.VarChunk).max;
           break;
+        case "\x04":
+          {
+            const end = pr.indexOf("\x04", i + 1);
+            if (end === -1) {
+              setToChunk(p);
+              break;
+            }
+            const reg = new RegExp(pr.substring(i + 1, end));
+            ++(setToChunk("*", true, (s, si) => reg.test(s[si])) as WUP.Text.Mask.VarChunk).max;
+            ++(lastChunk! as WUP.Text.Mask.VarChunk).min;
+            i = end;
+          }
+          break;
         case "\x00":
           setToChunk("0");
           break;
@@ -141,9 +157,13 @@ export default class MaskTextInput {
         case "\x02":
           setToChunk("*");
           break;
+        case "\x03":
+          setToChunk("/");
+          break;
+
         case "{": {
           if (lastChunk!.isVar) {
-            const end = pr.indexOf("}", i);
+            const end = pr.indexOf("}", i + 1);
             if (end === -1) {
               setToChunk(p);
               break;
@@ -505,6 +525,5 @@ export default class MaskTextInput {
 // type/delete 1 2 3 => historyUndo[1,2]
 // Ctrl+Z get historyUndo.pop + push into Redo
 
-// console.warn(...new MaskTextInput("00:00 /[aApP]/m", "").chunks); // todo implement regex
 /* todo auto-maskholder is wrong when mask="0 *{1,2}?" */
-// console.warn(new MaskTextInput("0 *{2", "").chunks);
+// new MaskTextInput("0 /[a-c]/", "").chunks.forEach((c) => console.warn(c.text));
