@@ -481,8 +481,6 @@ export default class WUPTextControl<
 
   protected override gotFocus(): Array<() => void> {
     const arr = super.gotFocus();
-    // todo only if mask contain only numeric vars
-    this.setAttr.call(this.$refInput, "inputmode", this._opts.mask ? "numeric" : "");
 
     const r = this.appendEvent(this.$refInput, "input", (e) => {
       // (e as WUP.Text.GotInputEvent).setValuePrevented = false;
@@ -513,6 +511,8 @@ export default class WUPTextControl<
       }
       canSelectAll && this.$refInput.select();
     }
+    const hasOnlyNums = this.refMask?.chunks.every((c) => !c.isVar || c.pattern[0] !== "*");
+    this.setAttr.call(this.$refInput, "inputmode", hasOnlyNums ? "numeric" : "");
 
     arr.push(() => setTimeout(r)); // timeout required to handle Event on gotFocusLost
     arr.push(r2);

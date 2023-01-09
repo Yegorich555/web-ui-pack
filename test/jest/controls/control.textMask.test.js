@@ -676,8 +676,21 @@ describe("control.text: mask", () => {
 
     el.blur();
     el.$options.mask = undefined;
+    await h.wait(1);
     el.focus();
     expect(el.$refInput.inputMode).toBe("");
+
+    el.blur();
+    el.$options.mask = "0 *";
+    await h.wait(1);
+    el.focus();
+    expect(el.$refInput.inputMode).toBe("");
+
+    el.blur();
+    el.$options.mask = "0000";
+    await h.wait(1);
+    el.focus();
+    expect(el.$refInput.inputMode).toBe("numeric");
   });
 
   test("escaped chars: 0, # etc.", () => {
