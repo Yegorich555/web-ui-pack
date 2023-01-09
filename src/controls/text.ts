@@ -48,7 +48,7 @@ declare global {
 
     interface Options<T = string, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, Defaults<T, VM> {
       /** Make input masked
-       * @rules when mask is pointed
+       * @rules when mask is pointed and contains only numeric vars
        * * inputmode='numeric' so mobile device show numeric-keyboard
        * * enables validation 'mask' with error message 'Incomplete value'
        * @example
@@ -60,7 +60,7 @@ declare global {
        * '#' // optional digit
        * '*' // any char
        * '*{1,5}' // - any 1..5 chars
-       * '//[a-zA-Z]//' // regex: 1 letter
+       * '//[a-zA-Z]//' // regex: 1 letter (WARN: regex must be pointed for checkin only 1 char at once)
        * '//[a-zA-Z]//{1,5}' // regex: 1..5 letters
        * '|0' // or '\x00' - static char '0'
        * '|#' // or '\x01' - static char '#'
@@ -481,6 +481,7 @@ export default class WUPTextControl<
 
   protected override gotFocus(): Array<() => void> {
     const arr = super.gotFocus();
+    // todo only if mask contain only numeric vars
     this.setAttr.call(this.$refInput, "inputmode", this._opts.mask ? "numeric" : "");
 
     const r = this.appendEvent(this.$refInput, "input", (e) => {
@@ -537,17 +538,17 @@ export default class WUPTextControl<
     // apply mask options
     this._opts.mask = this.getAttribute("mask") ?? this._opts.mask;
     this._opts.maskholder = this.getAttribute("maskholder") ?? this._opts.maskholder;
-    if (this._opts.maskholder == null) {
-      // todo get maskholder based on refMask.chunks.map(c=>c.text).join();
-      this._opts.maskholder = this._opts.mask;
-    }
-
-    if (!this._opts.maskholder && this.$refMaskholder) {
-      this.$refMaskholder.remove();
-      delete this.$refMaskholder;
-    }
     if (!this._opts.mask || this._opts.mask !== this.refMask?.pattern) {
       delete this.refMask; // delete if mask is removed or changed (it's recovered again on event)
+    }
+    if (this._opts.mask && this._opts.maskholder == null) {
+      this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask, "");
+      this._opts.maskholder = this.refMask.chunks.map((c) => c.pattern).join("");
+    }
+
+    if ((!this._opts.maskholder || !this._opts.mask) && this.$refMaskholder) {
+      this.$refMaskholder.remove();
+      delete this.$refMaskholder;
     }
 
     super.gotChanges(propsChanged as any);

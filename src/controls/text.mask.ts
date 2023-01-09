@@ -3,9 +3,10 @@ declare global {
     type TestFn = (str: string, charIndex: number) => boolean;
     interface VarChunk {
       index: number;
-      text: string;
+      pattern: string;
       isTouched?: true;
 
+      value: string;
       test: TestFn;
       /** Returns whether chunk is variable or static */
       isVar: true;
@@ -15,10 +16,11 @@ declare global {
     }
     interface StaticChunk {
       index: number;
-      text: string;
+      pattern: string;
       isTouched?: true;
       /** Returns whether chunk is variable or static */
       isVar?: false;
+      value?: undefined;
     }
     type InputChunk = VarChunk | StaticChunk;
     interface Options {
@@ -49,7 +51,7 @@ export default class MaskTextInput {
   /** Pattern splits into chunks. With detailed info about process */
   chunks: WUP.Text.Mask.InputChunk[] = [];
   /** Last processed chunk */
-  lastChunk: WUP.Text.Mask.InputChunk = { index: -1, text: "" };
+  lastChunk: WUP.Text.Mask.InputChunk = { index: -1, pattern: "" };
   /** Returns whether value completely fits pattern (isComplete) */
   isCompleted = false;
   /** Returns count chars of pattern that missed in value (used to maskHolder) */
@@ -73,7 +75,7 @@ export default class MaskTextInput {
   constructor(public pattern: string, rawValue: string, private options?: WUP.Text.Mask.Options) {
     this.options = { prediction: true, lazy: true, ...options };
     this.parse(rawValue);
-    this.prefix = !this.chunks[0].isVar ? this.chunks[0].text : "";
+    this.prefix = !this.chunks[0].isVar ? this.chunks[0].pattern : "";
   }
 
   /** Returns whether char is digit or not */
@@ -98,16 +100,17 @@ export default class MaskTextInput {
     let lastChunk: WUP.Text.Mask.InputChunk | null = null;
     const setToChunk = (char: string, isVar?: boolean, testFn?: WUP.Text.Mask.TestFn): WUP.Text.Mask.InputChunk => {
       if (!lastChunk || (lastChunk as WUP.Text.Mask.VarChunk).test !== testFn) {
-        lastChunk = { text: char } as WUP.Text.Mask.VarChunk;
+        lastChunk = { pattern: char } as WUP.Text.Mask.VarChunk;
         if (isVar) {
           lastChunk.test = testFn!;
           lastChunk.isVar = true;
           lastChunk.max = 0;
           lastChunk.min = 0;
+          lastChunk.value = "";
         }
         lastChunk.index = chunks.push(lastChunk) - 1;
       } else {
-        lastChunk.text += char;
+        lastChunk.pattern += char;
       }
       return lastChunk;
     };
@@ -139,7 +142,7 @@ export default class MaskTextInput {
           {
             const end = pr.indexOf("\x04", i + 1);
             if (end === -1) {
-              setToChunk(p);
+              setToChunk("//");
               break;
             }
             const reg = new RegExp(pr.substring(i + 1, end));
@@ -172,7 +175,7 @@ export default class MaskTextInput {
             const lc = lastChunk! as WUP.Text.Mask.VarChunk;
             lc.min = Math.max(lc.min, +min);
             lc.max = Math.max(lc.max, lc.min, +(max ?? 0));
-            lc.text = lc.text.repeat(lc.max);
+            lc.pattern = lc.pattern.repeat(lc.max);
             i = end;
             break;
           }
@@ -205,29 +208,29 @@ export default class MaskTextInput {
       const chunk = chunks[pi];
       chunk.isTouched = true;
       if (chunk.isVar) {
-        chunk.text = "";
+        chunk.value = "";
         for (let ci = 0; ci < chunk.max && i < value.length; ++ci, ++i) {
           const char = value[i];
           if (chunk.test(value, i)) {
-            if (chunk.isCompleted && chunks[pi + 1]?.text[0] === char) {
+            if (chunk.isCompleted && chunks[pi + 1]?.pattern[0] === char) {
               break; // set the char for next chunk if possible
             }
-            chunk.text += value[i];
-            chunk.isCompleted = chunk.text.length >= chunk.min;
-          } else if (canShift != null && chunks[pi - 1].text[0] === char) {
+            chunk.value += value[i];
+            chunk.isCompleted = chunk.value.length >= chunk.min;
+          } else if (canShift != null && chunks[pi - 1].pattern[0] === char) {
             const prev = chunks[pi - 1];
-            while (prev.text.length > ++canShift && prev.text[canShift] === value[i + 1]) {
+            while (prev.pattern.length > ++canShift && prev.pattern[canShift] === value[i + 1]) {
               ++i; // if chunk.length > 1 need to shift more: "4+1(23" >>> "+1(423"
             }
             --ci;
             continue; // shift behavior: "+1(234) 9675-123" >>> "+1(234) 967-5123"
-          } else if (chunk.isCompleted && chunks[pi + 1]?.text[0] === char) {
+          } else if (chunk.isCompleted && chunks[pi + 1]?.pattern[0] === char) {
             break; // skip chunk if length fits min
           } else if (this.options!.lazy && /[., _+-/\\]/.test(char) && ci && chunk.test === this.#ctr.testDigit) {
             // WARN: it works only for digits
             const cnt = chunk.min - ci;
             if (cnt > 0) {
-              chunk.text = "0".repeat(chunk.min - ci) + chunk.text; // add zero before (lazy mode)
+              chunk.value = "0".repeat(chunk.min - ci) + chunk.value; // add zero before (lazy mode)
             }
             chunk.isCompleted = true;
             // ++i;
@@ -238,8 +241,8 @@ export default class MaskTextInput {
         }
       } else {
         canShift = 0;
-        for (let ci = 0; ci < chunk.text.length && i < value.length; ++ci) {
-          if (chunk.text[ci] === value[i] || /[., _+-/\\]/.test(value[i])) {
+        for (let ci = 0; ci < chunk.pattern.length && i < value.length; ++ci) {
+          if (chunk.pattern[ci] === value[i] || /[., _+-/\\]/.test(value[i])) {
             ++i;
             canShift = null;
           }
@@ -266,7 +269,7 @@ export default class MaskTextInput {
       ++l; // append postfix at the end if all chunks are completed & only lacks postfix
     } else if (this.options!.prediction && l !== endIndex) {
       const last = this.chunks[l];
-      if (last.isVar && last.max === last.text.length) {
+      if (last.isVar && last.max === last.value.length) {
         ++l; // append postfix if prev digitChunk is filled completely
       }
     }
@@ -275,15 +278,15 @@ export default class MaskTextInput {
 
     // find leftLength for maskholder
     const last = this.lastChunk;
-    this.leftLength = last.isVar ? last.max - last.text.length : 0; // if last proccess chunk is digit than need to call diff actual and max
+    this.leftLength = last.isVar ? last.max - last.value.length : 0; // if last proccess chunk is digit than need to call diff actual and max
     for (let i = last.index + 1; i <= endIndex; ++i) {
-      this.leftLength += this.chunks[i].text.length;
+      this.leftLength += this.chunks[i].pattern.length;
     }
 
     // get text from chunks
     this.value = "";
     for (let i = 0; i <= last.index; ++i) {
-      this.value += this.chunks[i].text;
+      this.value += this.chunks[i].value ?? this.chunks[i].pattern;
     }
 
     // define whether all chunks processed
@@ -360,10 +363,10 @@ export default class MaskTextInput {
   /** Returns chunk according to pointed cursor position + position inside chunk */
   findChunkByCursor(pos: number): { chunk: WUP.Text.Mask.InputChunk; posChunk: number } {
     const chunk = this.chunks.find((c) => {
-      pos -= c.text.length;
+      pos -= (c.value ?? c.pattern).length;
       return pos <= 0;
     })!;
-    return { chunk, posChunk: chunk.text.length + pos };
+    return { chunk, posChunk: (chunk.value ?? chunk.pattern).length + pos };
   }
 
   /** Add char at pointed position;
@@ -375,7 +378,7 @@ export default class MaskTextInput {
     if (!atTheEnd) {
       const { chunk, posChunk } = this.findChunkByCursor(pos);
       if (!chunk.isVar) {
-        const shiftRight = chunk.text.length - posChunk;
+        const shiftRight = (chunk.value ?? chunk.pattern).length - posChunk;
         pos += shiftRight; // leap through the static chunk
       }
     }
@@ -388,9 +391,16 @@ export default class MaskTextInput {
     }
     pos = atTheEnd ? this.value.length : pos + 1;
     if (atTheEnd && this.isCompleted && !this.lastChunk.isVar) {
-      pos -= this.lastChunk.text.length;
+      pos -= this.lastChunk.pattern.length;
     }
     return pos;
+  }
+
+  resetChunk(c: WUP.Text.Mask.InputChunk): void {
+    delete c.isTouched;
+    if (c.isVar) {
+      c.value = "";
+    }
   }
 
   private deleteChar(pos: number, isBefore: boolean): number {
@@ -400,19 +410,8 @@ export default class MaskTextInput {
      * +1(234) 343-4|: remove char, shiftDigits. if lastDigit incompleted: remove next separator chunk
      */
 
-    const resetChunk = (c: WUP.Text.Mask.InputChunk): void => {
-      delete c.isTouched;
-      if (c.isVar) {
-        if (c.test === this.#ctr.testDigit) {
-          c.text = "#".repeat(c.max - c.min) + "0".repeat(c.min);
-        } else {
-          c.text = "*".repeat(c.max);
-        }
-      }
-    };
-
     let { chunk, posChunk } = this.findChunkByCursor(pos);
-    if (!isBefore && chunk.isVar && chunk.text.length === posChunk && this.chunks[chunk.index + 1]) {
+    if (!isBefore && chunk.isVar && chunk.value.length === posChunk && this.chunks[chunk.index + 1]) {
       chunk = this.chunks[chunk.index + 1]; // go to next chunk when '4|.789' + Delete
       posChunk = 0;
     }
@@ -420,27 +419,27 @@ export default class MaskTextInput {
     if (!chunk.isVar) {
       const lastIndex = this.chunks.length - 1;
       if (chunk.index === 0 && isBefore) {
-        pos = chunk.text.length; // impossible to remove prefix: so set cursor to the end
+        pos = chunk.pattern.length; // impossible to remove prefix: so set cursor to the end
       } else {
         const next = this.chunks[chunk.index + 1] as WUP.Text.Mask.VarChunk;
         const prev = this.chunks[chunk.index - 1] as WUP.Text.Mask.VarChunk;
         // case impossible anymore: next && !next.text && resetChunk(next); // clear state next chunk after separator
-        const canRemove = prev && !next?.isTouched && prev.text.length !== prev.max && chunk.index !== lastIndex; // whether possible to remove separator
+        const canRemove = prev && !next?.isTouched && prev.value.length !== prev.max && chunk.index !== lastIndex; // whether possible to remove separator
 
-        canRemove && resetChunk(chunk); // clear current chunk if possible
+        canRemove && this.resetChunk(chunk); // clear current chunk if possible
         // 1|-- + delete
         // 1--| + backspace
         if (isBefore) {
           pos -= posChunk; // go to prevChunk
-          posChunk = prev.text.length;
+          posChunk = prev.value.length;
           if (!canRemove && prev) {
-            !next?.isTouched && resetChunk(chunk); // '123.|' + Backspace => 12
+            !next?.isTouched && this.resetChunk(chunk); // '123.|' + Backspace => 12
             chunk = prev; // "123.|456" + Backspace => "12|.456" or "12|4.56" (depends on min of prev)
           }
         } else if (!canRemove) {
           // "123|.456" + Delete
           if (chunk.index !== lastIndex) {
-            pos += chunk.text.length - posChunk; // move cursor to the end
+            pos += chunk.pattern.length - posChunk; // move cursor to the end
           }
           if (next?.isTouched) {
             chunk = next; // if next not empty go to next:  "123|.456" + Delete => "123.|56"
@@ -455,30 +454,30 @@ export default class MaskTextInput {
         --pos;
         --posChunk;
       }
-      if (chunk.text.length === 1) {
+      if (chunk.value.length === 1) {
         const nextIsPostfix = chunk.index === this.chunks.length - 2; // 'pref 1| post' + Backspace => 'pref |'
         const nextVal = this.value.substring(0, pos) + (nextIsPostfix ? "" : this.value.substring(pos + 1));
         this.parse(nextVal); // '123.|4.567' + Delete = > 123.567
         return pos;
       }
-      chunk.text = chunk.text.substring(0, posChunk) + chunk.text.substring(posChunk + 1);
-      chunk.isCompleted = chunk.text.length >= chunk.min;
+      chunk.value = chunk.value.substring(0, posChunk) + chunk.value.substring(posChunk + 1);
+      chunk.isCompleted = chunk.value.length >= chunk.min;
       if (!chunk.isCompleted) {
         // shift/recalc chunks
         let prev = chunk;
         for (let i = chunk.index + 2; i < this.chunks.length; i += 2) {
           const next = this.chunks[i] as WUP.Text.Mask.VarChunk;
-          if (!next.text.length || !next.isTouched) {
-            resetChunk(next);
+          if (!next.value.length || !next.isTouched) {
+            this.resetChunk(next);
             break;
           }
-          prev.text += next.text[0];
-          next.text = next.text.substring(1);
+          prev.value += next.value[0];
+          next.value = next.value.substring(1);
           prev = next;
         }
         if (prev !== chunk) {
           chunk.isCompleted = true;
-          prev.isCompleted = prev.text.length >= prev.min; // recalc last chunk
+          prev.isCompleted = prev.value.length >= prev.min; // recalc last chunk
         } else {
           // if no digit chunks at the right need to remove separator
           const next = this.chunks[chunk.index + 1];
@@ -525,5 +524,4 @@ export default class MaskTextInput {
 // type/delete 1 2 3 => historyUndo[1,2]
 // Ctrl+Z get historyUndo.pop + push into Redo
 
-/* todo auto-maskholder is wrong when mask="0 *{1,2}?" */
-// new MaskTextInput("0 /[a-c]/", "").chunks.forEach((c) => console.warn(c.text));
+// new MaskTextInput("0 //[a-c]//", "").chunks.forEach((c) => console.warn(c));
