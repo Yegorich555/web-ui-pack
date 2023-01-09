@@ -129,8 +129,8 @@ describe("popupElement", () => {
     await page.click("label");
     await page.waitForTimeout(1); // timeout required because of debounceFilters
     const t = await page.evaluate(() => ({ ...t, html: document.body.outerHTML }));
-    expect(t.html).toBe(
-      '<body><div id="app"><label><span>Label text</span><input><wup-popup position="bottom" style="display: block; transform: translate(72px, 39px);">Popup text</wup-popup><wup-popup-arrow style="transform: translate(124px, 29px) rotate(180.1deg);"></wup-popup-arrow></label></div></body>'
+    expect(t.html).toMatchInlineSnapshot(
+      `"<body><div id="app"><label><span>Label text</span><input><wup-popup style="display: block; transform: translate(72px, 39px);" position="bottom">Popup text</wup-popup><wup-popup-arrow style="transform: translate(124px, 29px) rotate(180.1deg);"></wup-popup-arrow></label></div></body>"`
     );
   });
 });

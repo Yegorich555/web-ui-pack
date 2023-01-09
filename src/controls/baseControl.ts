@@ -982,3 +982,5 @@ export default abstract class WUPBaseControl<
     e.key === "Escape" && !e.shiftKey && !e.altKey && !e.ctrlKey && this.clearValue(); // WARN: Escape works wrong with NVDA because it's enables NVDA-focus-mode
   }
 }
+
+// todo add new opts: storeSession/storeLocal/storeUrl: boolean | string;

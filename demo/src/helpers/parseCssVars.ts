@@ -9,9 +9,8 @@ interface CssVar {
 
 /** Returns all css-vars definitions */
 export function parseCssVars(str: string): CssVar[] {
-  // todo reg is wrong for url('data:image/png; ...
   const regByTags = /\s*(:*[A-Za-z0-9-]+)\[*\s*[^{ ]*\s*\{\s*([^}]*)\s*}/g;
-  const reg = /(--[\w-]+): *([^;]+);/g;
+  const reg = /(--[\w-]+): *([^;]+);/g; // WARN reg is wrong for url('data:image/png; ...
   const vars: CssVar[] = [];
   const uniqueList = new Set<string>();
 

@@ -351,6 +351,11 @@ export default class WUPPopupElement<
     }
   }
 
+  protected override connectedCallback(): void {
+    this.style.opacity = "0"; // to prevent render at the left-top corner before first updateState is happend
+    super.connectedCallback();
+  }
+
   /** Defines target on show; @returns HTMLElement | Error */
   #defineTarget(): HTMLElement {
     const attrTrg = this.getAttribute("target");
@@ -556,6 +561,7 @@ export default class WUPPopupElement<
     };
 
     goUpdate();
+    this.style.opacity = "";
 
     const { animTime } = this.#state!.userStyles;
     if (!animTime && window.matchMedia("not all and (prefers-reduced-motion)").matches && this._opts.animation) {

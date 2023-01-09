@@ -159,6 +159,7 @@ exports[`control.text $show/$hide error 2`] = `
     error=""
     id="txt2"
     role="alert"
+    style="opacity: 0;"
   >
     <span
       class="wup-hidden"

@@ -382,6 +382,7 @@ exports[`control.radio $show/$hide error 2`] = `
     error=""
     id="txt6"
     role="alert"
+    style="opacity: 0;"
   >
     <span
       class="wup-hidden"

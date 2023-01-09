@@ -183,6 +183,7 @@ exports[`control.select $show/$hide error 2`] = `
     error=""
     id="txt2"
     role="alert"
+    style="opacity: 0;"
   >
     <span
       class="wup-hidden"
@@ -905,6 +906,7 @@ exports[`control.select validations options.validationCase 2`] = `
   </label>
   <wup-popup
     menu=""
+    style="opacity: 0;"
   >
     <ul
       aria-label="Items"

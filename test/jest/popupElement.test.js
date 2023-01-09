@@ -1394,7 +1394,7 @@ describe("popupElement", () => {
     el = document.body.appendChild(document.createElement("wup-popup"));
     el.$options.arrowEnable = true;
     expectIt(WUPPopupElement.$placements.$right.$end.$adjust).toMatchInlineSnapshot(
-      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(244px, 130px);" position="right"></wup-popup><wup-popup-arrow class="my-arrow" style="width: 8px; height: 4px; transform: translate(241px, 138px) rotate(90.1deg);"></wup-popup-arrow><a></a><wup-popup></wup-popup></body>"`
+      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(244px, 130px);" position="right"></wup-popup><wup-popup-arrow class="my-arrow" style="width: 8px; height: 4px; transform: translate(241px, 138px) rotate(90.1deg);"></wup-popup-arrow><a></a><wup-popup style="opacity: 0;"></wup-popup></body>"`
     );
 
     WUPPopupElement.$defaults.arrowOffset = undefined;
