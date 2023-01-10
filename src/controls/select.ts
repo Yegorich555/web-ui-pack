@@ -135,12 +135,15 @@ export default class WUPSelectControl<
       :host [menu] li {
         padding: 1em;
       }
-      :host [menu] li:hover,
+      @media (hover: hover) {
+        :host [menu] li:hover {
+          color: var(--ctrl-select-current);
+          background: var(--ctrl-select-current-bg);
+        }
+      }
       :host [menu] li[aria-selected="true"] {
         color: var(--ctrl-select-current);
         background: var(--ctrl-select-current-bg);
-      }
-      :host [menu] li[aria-selected="true"] {
         display: flex;
       }
       :host [menu] li[aria-selected="true"]:after {
