@@ -113,10 +113,10 @@ export default class WUPDateControl<
       ...WUPBaseComboControl.$defaults.validationRules,
       min: (v, setV, c) =>
         (v === undefined || v < setV) &&
-        `Min date is ${dateToString(setV, (c as WUPDateControl)._opts.format.toUpperCase())}`,
+        `Min value is ${dateToString(setV, (c as WUPDateControl)._opts.format.toUpperCase())}`,
       max: (v, setV, c) =>
         (v === undefined || v > setV) &&
-        `Max date is ${dateToString(setV, (c as WUPDateControl)._opts.format.toUpperCase())}`,
+        `Max value is ${dateToString(setV, (c as WUPDateControl)._opts.format.toUpperCase())}`,
       exclude: (v, setV) =>
         (v === undefined || setV.some((d) => d.valueOf() === v.valueOf())) && `This date is disabled`,
     },
