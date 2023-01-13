@@ -1,6 +1,6 @@
 import WUPBaseControl from "./baseControl";
 import { WUPcssHidden } from "../styles";
-import scrollCarousel from "../helpers/scrollCarousel";
+import WUPScrolled from "../helpers/scrolled";
 import { dateCopyTime } from "../indexHelpers";
 import localeInfo from "../objects/localeInfo";
 
@@ -449,12 +449,12 @@ export default class WUPCalendarControl<
   _picker: PickersEnum = 0;
   #refreshSelected?: () => void;
   #clearPicker?: (isIn: boolean) => Promise<void>;
-  #showNext?: (isNext: boolean) => Promise<void>;
+  #scrollObj?: WUPScrolled;
 
   /** Call it to manually show next/prev picker-section;
    * @returns promise resolved by scroll-animation-end */
   showNext(isNext: boolean): Promise<void> {
-    return !this.#showNext ? Promise.resolve() : this.#showNext?.call(this, isNext);
+    return !this.#scrollObj ? Promise.resolve() : this.#scrollObj.goTo(isNext);
   }
 
   /** Called when need set/change day/month/year picker */
@@ -515,21 +515,24 @@ export default class WUPCalendarControl<
 
     renderPicker(v);
 
-    const scrollObj = scrollCarousel(this.$refCalenarItems, (n) => {
-      const nextDate = r.next(v, n);
-      const { scrollFrom: from, scrollTo: to } = this.#disabled!;
-      /* istanbul ignore else */
-      if (from != null || to !== null) {
-        const nextDateEnd = r.next(new Date(v), 1).setUTCMilliseconds(-1);
-        if ((from as unknown as Number) > nextDateEnd || (to as unknown as Date) < nextDate) {
-          r.next(v, (-1 * n) as 1);
-          return null;
+    const scrollObj = new WUPScrolled(this.$refCalenarItems, {
+      onRender: (n) => {
+        const nextDate = r.next(v, n);
+        const { scrollFrom: from, scrollTo: to } = this.#disabled!;
+        /* istanbul ignore else */
+        if (from != null || to !== null) {
+          const nextDateEnd = r.next(new Date(v), 1).setUTCMilliseconds(-1);
+          if ((from as unknown as Number) > nextDateEnd || (to as unknown as Date) < nextDate) {
+            r.next(v, (-1 * n) as 1);
+            return null;
+          }
         }
-      }
-      const arr = renderPicker(nextDate);
-      return arr;
+        const arr = renderPicker(nextDate);
+        return arr;
+      },
     });
-    this.#showNext = scrollObj.scroll;
+
+    this.#scrollObj = scrollObj;
 
     this.#clearPicker = async (isOut: boolean) => {
       const box = this.$refCalenar.children[1].children[0] as HTMLElement;
@@ -551,7 +554,7 @@ export default class WUPCalendarControl<
         });
 
       await animate(isOut ? "out" : "in");
-      scrollObj.remove();
+      scrollObj.dispose();
       this.$refCalenarItems.textContent = "";
       this.#refreshSelected = undefined;
 

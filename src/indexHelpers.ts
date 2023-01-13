@@ -23,7 +23,7 @@ export { default as onScrollStop } from "./helpers/onScrollStop";
 export { default as onSpy } from "./helpers/onSpy";
 // export * from "./helpers/onFocusLost";
 export { default as promiseWait } from "./helpers/promiseWait";
-export { default as scrollCarousel } from "./helpers/scrollCarousel";
+export { default as WUPScrolled } from "./helpers/scrolled";
 export { default as scrollIntoView } from "./helpers/scrollIntoView";
 export { default as stringPrettify } from "./helpers/stringPrettify";
 export { stringLowerCount, stringUpperCount } from "./helpers/stringCaseCount";
