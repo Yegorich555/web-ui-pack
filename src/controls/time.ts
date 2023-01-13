@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 import WUPScrolled from "../helpers/scrolled";
 import localeInfo from "../objects/localeInfo";
 import WUPTimeObject from "../objects/timeObject";
@@ -86,6 +87,18 @@ export default class WUPTimeControl<
   // todo fix animate-dropdown affects on mark { translate }
 
   static get $style(): string {
+    const focusStyle = `
+          content: " ";
+          position: absolute;
+          display: block;
+          top: 50%; left: 50%;
+          transform: translate(-50%,-50%);
+          width: 2em;
+          height: 2em;
+          border-radius: 50%;
+          //box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
+          box-shadow: 0 0 3px 1px var(--ctrl-focus);
+    `;
     return `${super.$style}
       :host {
         --ctrl-icon-img: var(--ctrl-time-icon-img-lg);
@@ -137,25 +150,22 @@ export default class WUPTimeControl<
         color: inherit;
         margin: 0;
       }
-      :host [menu] li[focused] {
+      :host [menu] li[aria-selected=true] {
         font-weight: bold;
         color: var(--ctrl-time-current);
+      }
+      :host [menu] li[focused] {
+        position: relative;
+      }
+      :host [menu] li[focused]:after {
+        ${focusStyle}
       }
       @media (hover: hover) {
         :host [menu] li:hover {
           position: relative;
         }
         :host [menu] li:hover:after {
-          content: " ";
-          position: absolute;
-          display: block;
-          top: 50%; left: 50%;
-          transform: translate(-50%,-50%);
-          width: 2em;
-          height: 2em;
-          border-radius: 50%;
-          //box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
+         ${focusStyle}
         }
       }`;
   }
@@ -249,6 +259,9 @@ export default class WUPTimeControl<
     return vls as WUP.BaseControl.Options["validations"];
   }
 
+  $refHours?: HTMLElement & { _scrolled: WUPScrolled; _value: number };
+  $refMinutes?: HTMLElement & { _scrolled: WUPScrolled; _value: number };
+
   protected override async renderMenu(popup: WUPPopupElement, menuId: string, rows = 5): Promise<HTMLElement> {
     popup.$options.minWidthByTarget = false;
 
@@ -278,26 +291,30 @@ export default class WUPTimeControl<
     const renderMinutes = (v: number): HTMLElement => append(lm, v, mm2);
     const { step } = this._opts;
 
-    // render all
-    for (let i = -drows; i <= drows; ++i) {
-      // renderHours((24 + hh + i) % 24);
-      // renderMinutes((60 + mm + i * step) % 60);
-    }
+    const selectNext = (prev: WUP.Scrolled.State, next: WUP.Scrolled.State): void => {
+      // todo sync with input ???
+      this._selectedMenuItem = prev.items[0];
+      next.items[0] && this.selectMenuItem(next.items[0]);
+    };
 
     // carousel for hours
-    const hhScroll = new WUPScrolled(lh, {
+    this.$refHours = lh as any as HTMLElement & { _scrolled: WUPScrolled; _value: number };
+    this.$refHours._scrolled = new WUPScrolled(lh, {
       // hours 0..23 pages 0..23
       pages: { current: h12 ? hh % 12 || 12 : hh, total: h12 ? 12 : 24, before: drows, after: drows, cycled: true },
+      swipeDebounceMs: 100,
       onRender: (_dir, v, prev, next) => {
-        // eslint-disable-next-line prefer-destructuring
-        this._focusedMenuItem = prev.items[0];
-        next.items[0] && this.focusMenuItem(next.items[0]);
-        delete this._focusedMenuItem;
-        return [renderHours(h12 && v === 0 ? 12 : v)];
+        selectNext(prev, next);
+        v = h12 && v === 0 ? 12 : v;
+        this.$refHours!._value = v;
+        return [renderHours(v)];
       },
     });
 
-    const mmScroll = new WUPScrolled(lm, {
+    // carousel for minutes
+    this.$refMinutes = lm as any as HTMLElement & { _scrolled: WUPScrolled; _value: number };
+    this.$refMinutes._scrolled = new WUPScrolled(lm, {
+      swipeDebounceMs: 100,
       // minutes 0..59 pages 0..12
       pages: {
         current: Math.round(mm / step),
@@ -307,27 +324,28 @@ export default class WUPTimeControl<
         cycled: true,
       },
       onRender: (_dir, v, prev, next) => {
-        // eslint-disable-next-line prefer-destructuring
-        this._focusedMenuItem = prev.items[0];
-        next.items[0] && this.focusMenuItem(next.items[0]);
-        delete this._focusedMenuItem;
-        return [renderMinutes(Math.round(v * step))];
+        selectNext(prev, next);
+        v = Math.round(v * step);
+        this.$refMinutes!._value = v;
+        return [renderMinutes(v)];
       },
     });
 
-    // todo handle keyboard
-    // todo add 2 icons open & close
+    // 12AM..1AM...11AM  12PM..1PM....11PM
+    // 00    01    11    12    13     23
 
+    // todo add Ok/Cancel for popup otherwise we can't not that user is finished
     // todo fix render AM/PM
     if (h12) {
       const lower = this._opts.format.endsWith("a");
       const ul = document.createElement("ul");
-      (lower ? ["am", "pm"] : ["AM", "PM"]).forEach((s) => {
+      (lower ? ["pm", "am"] : ["PM", "AM"]).forEach((s) => {
         ul.appendChild(document.createElement("li")).textContent = s;
       });
       popup.appendChild(ul);
     }
 
+    // render hh:mm separator
     const sep = document.createElement("mark");
     sep.setAttribute("aria-hidden", true);
     sep.textContent = /[hH]([^hH])/.exec(this._opts.format)![1]!;
@@ -356,27 +374,46 @@ export default class WUPTimeControl<
     // todo replace a to A, A to a on the fly
   }
 
-  // protected override gotKeyDown(e: KeyboardEvent): Promise<void> {
-  //   const wasOpen = this.$isOpen;
-  //   switch (e.key) {
-  //     case "Test":
-  //       break;
-  //     default:
-  //       break;
-  //   }
-
-  //   const r = !e.defaultPrevented && super.gotKeyDown(e);
-  //   return r || Promise.resolve();
-  // }
-
-  // protected override focusMenuItem(next: HTMLElement | null): void {
-  //   super.focusMenuItem(next);
-  // }
+  protected override gotKeyDown(e: KeyboardEvent): Promise<void> {
+    const wasOpen = this.$isOpen;
+    const r = super.gotKeyDown(e);
+    if (wasOpen) {
+      let isNext = false;
+      switch (e.key) {
+        case "ArrowDown":
+          isNext = true;
+        // eslint-disable-next-line no-fallthrough
+        case "ArrowUp":
+          {
+            let { chunk } = this.refMask!.findChunkByCursor(this.$refInput.selectionStart!);
+            if (!chunk.isVar) {
+              chunk = this.refMask!.chunks[chunk.index + 1];
+            }
+            const hhChunk = this.refMask!.chunks.find((c) => c.isVar)!;
+            const mmChunk = this.refMask!.chunks.find((c, i) => i > hhChunk.index && c.isVar)!;
+            const h12Chunk = this.refMask!.chunks.find((c, i) => i > mmChunk.index && c.isVar);
+            switch (chunk) {
+              case hhChunk:
+                this.$refHours!._scrolled.goTo(isNext);
+                break;
+              case mmChunk:
+                this.$refMinutes!._scrolled.goTo(isNext);
+                break;
+              case h12Chunk:
+                // todo scroll to h12 this.$refMinutes!._scrolled.goTo(isNext);
+                break;
+              default:
+                break;
+            }
+          }
+          break;
+        default:
+          break;
+      }
+    }
+    return r;
+  }
 }
 
 customElements.define(tagName, WUPTimeControl);
 // testcase: increment carousel for hh:mm in both directions
-
-// todo show ":" between hh & mm in popup
-// todo select current in popup
-// todo add Ok/Cancel for popup otherwise we can't not that user is finished
