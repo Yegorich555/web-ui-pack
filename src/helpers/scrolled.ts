@@ -164,6 +164,7 @@ export default class WUPScrolled {
     }
 
     this.tryFixSize();
+    // const prevScroll = { h: this.el.scrollHeight, w: this.el.scrollWidth };
     const restoreScroll = this.saveScroll();
 
     const direction = pageIndex - this.state.index;
@@ -198,20 +199,18 @@ export default class WUPScrolled {
     } else {
       this.el.prepend(...itemsAdd);
       this.pages.unshift(pageAdd);
+      // another way to save scroll doesn't work if goTo applied before previous not finished yet
+      // this.el.scrollTop += this.el.scrollHeight - prevScroll.h;
+      // this.el.scrollLeft += this.el.scrollWidth - prevScroll.w;
+      restoreScroll();
     }
-
-    restoreScroll();
 
     pageAdd.items.forEach((a) => delete (a as any).__scrollRemove);
     nextState.items = nextState.items.length ? nextState.items : itemsAdd; // if only 1 page rendered at once
     this.state = nextState;
 
-    // todo when scroll next, need to remove hidden items ?
     return this.scrollToRange(true, itemsAdd).then(() => {
-      // setTimeout(() => {
-      //   console.warn("remove");
-      pageRemove.items.forEach((a) => (a as any).__scrollRemove && a.remove()); // some items can be reappended
-      // }, 1000);
+      pageRemove.items.forEach((a) => (a as any).__scrollRemove && a.remove()); // some items can be re-appended
     });
   }
 
