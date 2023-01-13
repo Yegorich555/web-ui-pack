@@ -15,7 +15,7 @@ declare global {
       /** Index of added/rendered page; */
       renderIndex: number;
     }
-    interface Options {
+    interface Options extends IScrollOptions {
       /** Page options; skip this if renderin onInit doesn't required  */
       pages?: {
         /** Current page index */
@@ -29,6 +29,8 @@ declare global {
         /** Visible/rendered pages together with current page */
         after?: number;
       };
+      /** Scroll to item that click is fired */
+      scrollToClick?: boolean;
       /**
        * Render callback that must return new items or null if it's ended up
        * @param dir render direction: `1`-next, `-1`-prev
@@ -51,7 +53,7 @@ export default class WUPScrolled {
   /**
    * @param el target to that custom scroll must be applied
    */
-  constructor(protected el: HTMLElement, public options: WUP.Scrolled.Options & IScrollOptions) {
+  constructor(protected el: HTMLElement, public options: WUP.Scrolled.Options) {
     this.state = {
       index: options.pages?.current || 0,
       items: [],
@@ -82,14 +84,13 @@ export default class WUPScrolled {
 
     this.disposeLst.push(onScroll(el, (d) => this.goTo(this.state.index + d), options));
     this.disposeLst.push(onEvent(el, "keydown", this.gotKeyDown, { passive: false }));
-    this.disposeLst.push(onEvent(el, "click", this.gotClick, { passive: false })); // todo only if options allow
+    options.scrollToClick && this.disposeLst.push(onEvent(el, "click", this.gotClick, { passive: false }));
   }
 
   /** Called on keydown event and processed if event isn't prevented */
-  protected gotKeyDown(e: KeyboardEvent): void {
+  gotKeyDown(e: KeyboardEvent): void {
     // PageUp/PageDown to
     if (!e.altKey && !e.shiftKey && !e.ctrlKey && !e.defaultPrevented) {
-      // todo handle by ArrowKeys if options allow
       let inc = 0;
       switch (e.key) {
         case "PageUp":
@@ -97,6 +98,18 @@ export default class WUPScrolled {
           break;
         case "PageDown":
           inc = 1;
+          break;
+        case "ArrowUp":
+          inc = this.options.isXScroll ? 0 : -1;
+          break;
+        case "ArrowDown":
+          inc = this.options.isXScroll ? 0 : 1;
+          break;
+        case "ArrowLeft":
+          inc = !this.options.isXScroll ? 0 : -1;
+          break;
+        case "ArrowRight":
+          inc = !this.options.isXScroll ? 0 : 1;
           break;
         default:
           break;
@@ -107,7 +120,7 @@ export default class WUPScrolled {
   }
 
   /** Get next page according to options.pages */
-  protected incrementPage(pIndex: number, inc: number): number {
+  incrementPage(pIndex: number, inc: number): number {
     pIndex += inc;
     const p = this.options.pages;
     if (p) {
@@ -123,7 +136,7 @@ export default class WUPScrolled {
     return pIndex;
   }
 
-  protected gotClick(e: MouseEvent): void {
+  gotClick(e: MouseEvent): void {
     if (!e.defaultPrevented && !e.button) {
       const { target } = e;
       // todo implement
@@ -214,6 +227,7 @@ export default class WUPScrolled {
     });
   }
 
+  /** Returns function to restore scroll position related to elements */
   saveScroll(): () => void {
     const savedItems = [this.state.items[0], this.state.items[this.state.items.length - 1]];
     return () => this.scrollToRange(false, savedItems);
