@@ -5,7 +5,7 @@ import onScrollStop from "./onScrollStop";
 declare global {
   namespace WUP.Scrolled {
     interface State {
-      /** Page index */
+      /** Page index/value */
       index: number;
       /** Items related to page */
       items: HTMLElement[];
@@ -69,6 +69,7 @@ export default class WUPScrolled {
         const index = this.incrementPage(p.current, i);
         const nextState = i === 1 ? { index: this.state.index, items: curItems! } : this.state;
         const items = options.onRender(1, index, this.state, nextState)!; // WARN visible must be <= total
+        this.el.append(...items);
         this.pages.push({ index, items });
         if (index === p.current) {
           curItems = items;
@@ -83,8 +84,8 @@ export default class WUPScrolled {
     window.requestAnimationFrame(() => this.scrollToRange(false, this.state.items));
 
     this.disposeLst.push(onScroll(el, (d) => this.goTo(this.state.index + d), options));
-    this.disposeLst.push(onEvent(el, "keydown", this.gotKeyDown, { passive: false }));
-    options.scrollToClick && this.disposeLst.push(onEvent(el, "click", this.gotClick, { passive: false }));
+    this.disposeLst.push(onEvent(el, "keydown", (e) => this.gotKeyDown(e), { passive: false }));
+    options.scrollToClick && this.disposeLst.push(onEvent(el, "click", (e) => this.gotClick(e), { passive: false }));
   }
 
   /** Called on keydown event and processed if event isn't prevented */
@@ -139,13 +140,27 @@ export default class WUPScrolled {
   gotClick(e: MouseEvent): void {
     if (!e.defaultPrevented && !e.button) {
       const { target } = e;
-      // todo implement
-      // const to = items.findIndex((a) => a === target || a.contains(target as HTMLElement));
-      // if (to > -1) {
-      //   e.preventDefault();
-      //   const from = items.indexOf(currentEl);
-      //   scroll(to - from);
-      // }
+      const iNext = this.pages.findIndex((pg) =>
+        pg.items.some((a) => a === target || a.contains(target as HTMLElement))
+      );
+      if (iNext > -1) {
+        e.preventDefault();
+        // 11 => 9: inc: -2
+        // 11 => 0: inc: +1
+        let next = this.pages[iNext].index;
+        if (next === this.state.index) {
+          return; // click on the same
+        }
+        if (this.options.pages?.cycled) {
+          const iPrev = this.pages.findIndex((pr) => pr.index === this.state.index);
+          if (next < this.state.index && iNext > iPrev) {
+            next += this.options.pages.total!; // when 11 => 0 and 11 rendered after 0
+          } else if (this.state.index === 0 && iNext < iPrev) {
+            next -= this.options.pages.total!; // when 0 => 11 and 11 rendered before 0
+          }
+        }
+        this.goTo(next);
+      }
     }
   }
 
@@ -169,61 +184,72 @@ export default class WUPScrolled {
   goTo(isNext: boolean): Promise<void>;
   /** Go to specific page */
   goTo(pageIndex: number): Promise<void>;
-  goTo(pageIndex: number | boolean): Promise<void> {
-    if (pageIndex === true) {
-      pageIndex = this.state.index + 1;
-    } else if (pageIndex === false) {
-      pageIndex = this.state.index - 1;
+  goTo(pi: number | boolean): Promise<void> {
+    if (pi === true) {
+      pi = this.state.index + 1;
+    } else if (pi === false) {
+      pi = this.state.index - 1;
     }
 
     this.tryFixSize();
     // const prevScroll = { h: this.el.scrollHeight, w: this.el.scrollWidth };
     const restoreScroll = this.saveScroll();
 
-    const direction = pageIndex - this.state.index;
-    const isNext = pageIndex > this.state.index;
-    pageIndex = this.incrementPage(this.state.index, direction);
-    const renderIndex = this.incrementPage(
-      pageIndex,
-      isNext ? this.options.pages?.after || 0 : (this.options.pages?.before || 0) * -1
-    );
+    const inc = pi - this.state.index;
+    const isNext = pi > this.state.index;
 
-    const nextState: WUP.Scrolled.State = {
-      index: pageIndex,
-      items: this.pages.find((p) => p.index === pageIndex)?.items || [],
-    };
+    const pagesRemove: WUP.Scrolled.State[] = [];
+    let wasAdded = false;
+    // -2: -1: -2,
+    for (let i = 1; i <= Math.abs(inc); ++i) {
+      const dinc = isNext ? 1 : -1;
+      pi = this.incrementPage(this.state.index, dinc);
+      const renderIndex = this.incrementPage(
+        pi,
+        isNext ? this.options.pages?.after || 0 : (this.options.pages?.before || 0) * -1
+      );
 
-    const itemsAdd = this.options.onRender(direction, renderIndex, this.state, nextState);
-    if (!itemsAdd?.length) {
-      return Promise.resolve(); // if no new items
+      const nextState: WUP.Scrolled.State = {
+        index: pi,
+        // eslint-disable-next-line no-loop-func
+        items: this.pages.find((p) => p.index === pi)?.items || [],
+      };
+
+      const itemsAdd = this.options.onRender(dinc, renderIndex, this.state, nextState);
+      if (!itemsAdd?.length) {
+        break; // return Promise.resolve(); // if no new items
+      }
+      wasAdded = true;
+      const pageRemove = isNext ? this.pages.shift()! : this.pages.pop()!;
+      pageRemove.items.forEach((a) => ((a as any).__scrollRemove = true));
+      pagesRemove.push(pageRemove);
+
+      const pageAdd: WUP.Scrolled.State = {
+        index: renderIndex,
+        items: itemsAdd,
+      };
+
+      pageAdd.items.forEach((a) => delete (a as any).__scrollRemove);
+      if (isNext) {
+        this.el.append(...pageAdd.items);
+        this.pages.push(pageAdd);
+      } else {
+        this.el.prepend(...pageAdd.items);
+        this.pages.unshift(pageAdd);
+        // another way to save scroll doesn't work if goTo applied before previous not finished yet
+        // this.el.scrollTop += this.el.scrollHeight - prevScroll.h;
+        // this.el.scrollLeft += this.el.scrollWidth - prevScroll.w;
+      }
+      nextState.items = nextState.items.length ? nextState.items : pageAdd.items; // if only 1 page rendered at once
+      this.state = nextState;
+    }
+    if (!wasAdded) {
+      return Promise.resolve();
     }
 
-    const pageRemove = isNext ? this.pages.shift()! : this.pages.pop()!; // todo case#1 if pageIndex != 1|-1 need to call several goTos at once stepByStep
-    pageRemove.items.forEach((a) => ((a as any).__scrollRemove = true));
-
-    const pageAdd: WUP.Scrolled.State = {
-      index: renderIndex,
-      items: itemsAdd,
-    };
-
-    if (isNext) {
-      this.el.append(...itemsAdd);
-      this.pages.push(pageAdd);
-    } else {
-      this.el.prepend(...itemsAdd);
-      this.pages.unshift(pageAdd);
-      // another way to save scroll doesn't work if goTo applied before previous not finished yet
-      // this.el.scrollTop += this.el.scrollHeight - prevScroll.h;
-      // this.el.scrollLeft += this.el.scrollWidth - prevScroll.w;
-      restoreScroll();
-    }
-
-    pageAdd.items.forEach((a) => delete (a as any).__scrollRemove);
-    nextState.items = nextState.items.length ? nextState.items : itemsAdd; // if only 1 page rendered at once
-    this.state = nextState;
-
-    return this.scrollToRange(true, itemsAdd).then(() => {
-      pageRemove.items.forEach((a) => (a as any).__scrollRemove && a.remove()); // some items can be re-appended
+    !isNext && restoreScroll();
+    return this.scrollToRange(true, this.state.items).then(() => {
+      pagesRemove.forEach((p) => p.items.forEach((a) => (a as any).__scrollRemove && a.remove())); // some items can be re-appended
     });
   }
 
