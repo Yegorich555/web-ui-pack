@@ -89,9 +89,11 @@ export default function dateFromString(
   }
 
   if (h12) {
+    // 12AM..1AM...11AM  12PM..1PM....11PM
+    // 00    01    11    12    13     23
     const char = v[v.length - 2];
     if (char === "P" || char === "p") {
-      r.h += 12;
+      r.h += r.h === 12 ? 0 : 12; // 12PM is 12:00, but 1PM is 13:00
     } else if (char !== "A" && char !== "a") {
       return null;
     } else if (r.h === 12) {
