@@ -84,8 +84,6 @@ export default class WUPTimeControl<
       }`;
   }
 
-  // todo fix animate-dropdown affects on mark { translate }
-
   static get $style(): string {
     const focusStyle = `
           content: " ";
@@ -121,20 +119,9 @@ export default class WUPTimeControl<
         display: inline-block;
         vertical-align: middle;
       }
-      :host ul:after {
-        z-index: -1;
-        content: " ";
-        position: absolute;
-        display: block;
-        top: 50%; left: 50%;
-        transform: translate(-50%,-50%);
-        width: 100%;
-        height: 3em;
-        background: var(--ctrl-time-current-bg);
-      }
       :host [menu] li,
       :host [menu] mark {
-        padding: 1em 1.2em;
+        padding: 1em 1em;
         height: 1em;
         border-radius: 50%;
       }
@@ -142,13 +129,14 @@ export default class WUPTimeControl<
         z-index: -1;
         position: absolute;
         display: block;
-        top: 50%; left: 2em;
+        top: 50%; left: 0; right:0;
         transform: translateY(-50%);
+        margin: 0; padding-left: 2.8em;
+        border-radius: 0;
         font: inherit;
         font-weight: bold;
-        background: none;
+        background: var(--ctrl-time-current-bg);
         color: inherit;
-        margin: 0;
       }
       :host [menu] li[aria-selected=true],
       :host [menu] li[disabled] {
@@ -269,8 +257,8 @@ export default class WUPTimeControl<
   $refMinutes?: HTMLElement & { _scrolled: WUPScrolled; _value: number };
   $refHours12?: HTMLElement & { _scrolled: WUPScrolled; _value: number };
 
-  protected override async renderMenu(popup: WUPPopupElement, menuId: string, rows = 1): Promise<HTMLElement> {
-    // todo with rows = 1 no selected items & AM/PM bold affects on width
+  protected override async renderMenu(popup: WUPPopupElement, menuId: string, rows = 5): Promise<HTMLElement> {
+    // todo with rows = 1 AM/PM bold affects on width
     popup.$options.minWidthByTarget = false;
 
     const append = (parent: HTMLElement, v: number, twoDigs: boolean): HTMLElement => {
@@ -283,18 +271,21 @@ export default class WUPTimeControl<
     const hh = this.$value?.hours || 0;
     const mm = this.$value?.minutes || 0;
 
+    // div required otherwise impossible to center absolute items during the animation
+    const parent = popup.appendChild(document.createElement("div"));
+
     // render hours
     const lh = document.createElement("ul");
     lh.setAttribute("id", menuId);
     // todo what about role="listbox"
-    popup.appendChild(lh);
+    parent.appendChild(lh);
     const h12 = /[aA]$/.test(this._opts.format);
     const hh2 = /[hH]+/g.exec(this._opts.format)![0].length === 2;
     const renderHours = (v: number): HTMLElement => append(lh, v, hh2);
 
     // render minutes
     const lm = document.createElement("ul");
-    popup.appendChild(lm);
+    parent.appendChild(lm);
     const mm2 = /[mM]+/g.exec(this._opts.format)![0].length === 2;
     const renderMinutes = (v: number): HTMLElement => append(lm, v, mm2);
     const { step } = this._opts;
@@ -353,7 +344,7 @@ export default class WUPTimeControl<
       // 00    01    11    12    13     23
       const lower = this._opts.format.endsWith("a");
       const lh12 = document.createElement("ul");
-      popup.appendChild(lh12);
+      parent.appendChild(lh12);
       // carousel for hours
       this.$refHours12 = lh12 as any as HTMLElement & { _scrolled: WUPScrolled; _value: number };
       this.$refHours12._scrolled = new WUPScrolled(lh12, {
@@ -369,8 +360,8 @@ export default class WUPTimeControl<
           selectNext(prev, next);
           this.$refHours12!._value = next.index;
           const item = document.createElement("li");
-          item.textContent = (lower ? ["am", "pm", "am", "am"] : ["AM", "PM", "AM", "AM"])[v];
-          (v === 0 || v === 3) && item.setAttribute("disabled", ""); // WARN: intead of empty need render invisible AM otherwise AM bold affects on width
+          item.textContent = (lower ? ["", "pm", "am", ""] : ["", "PM", "AM", ""])[v];
+          (v === 0 || v === 3) && item.setAttribute("disabled", "");
           return [item];
         },
       });
@@ -381,7 +372,7 @@ export default class WUPTimeControl<
     const sep = document.createElement("mark");
     sep.setAttribute("aria-hidden", true);
     sep.textContent = /[hH]([^hH])/.exec(this._opts.format)![1]!;
-    popup.appendChild(sep);
+    parent.appendChild(sep);
 
     return Promise.resolve(lh);
   }
