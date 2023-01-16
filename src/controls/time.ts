@@ -150,7 +150,8 @@ export default class WUPTimeControl<
         color: inherit;
         margin: 0;
       }
-      :host [menu] li[aria-selected=true] {
+      :host [menu] li[aria-selected=true],
+      :host [menu] li[disabled] {
         font-weight: bold;
         color: var(--ctrl-time-current);
       }
@@ -159,6 +160,11 @@ export default class WUPTimeControl<
       }
       :host [menu] li[focused]:after {
         ${focusStyle}
+      }
+      :host [menu] li[disabled] {
+        pointer-events: none;
+        touch-action: none;
+        color: transparent;
       }
       @media (hover: hover) {
         :host [menu] li:hover {
@@ -261,6 +267,7 @@ export default class WUPTimeControl<
 
   $refHours?: HTMLElement & { _scrolled: WUPScrolled; _value: number };
   $refMinutes?: HTMLElement & { _scrolled: WUPScrolled; _value: number };
+  $refHours12?: HTMLElement & { _scrolled: WUPScrolled; _value: number };
 
   protected override async renderMenu(popup: WUPPopupElement, menuId: string, rows = 5): Promise<HTMLElement> {
     popup.$options.minWidthByTarget = false;
@@ -301,12 +308,13 @@ export default class WUPTimeControl<
     this.$refHours = lh as any as HTMLElement & { _scrolled: WUPScrolled; _value: number };
     this.$refHours._scrolled = new WUPScrolled(lh, {
       // hours 0..23 pages 0..23
-      pages: { current: h12 ? hh % 12 || 12 : hh, total: h12 ? 12 : 24, before: drows, after: drows, cycled: true },
       swipeDebounceMs: 100,
+      scrollToClick: true,
+      pages: { current: h12 ? hh % 12 : hh, total: h12 ? 12 : 24, before: drows, after: drows, cycled: true },
       onRender: (_dir, v, prev, next) => {
         selectNext(prev, next);
         v = h12 && v === 0 ? 12 : v;
-        this.$refHours!._value = v;
+        this.$refHours!._value = next.index;
         return [renderHours(v)];
       },
     });
@@ -315,6 +323,7 @@ export default class WUPTimeControl<
     this.$refMinutes = lm as any as HTMLElement & { _scrolled: WUPScrolled; _value: number };
     this.$refMinutes._scrolled = new WUPScrolled(lm, {
       swipeDebounceMs: 100,
+      scrollToClick: true,
       // minutes 0..59 pages 0..12
       pages: {
         current: Math.round(mm / step),
@@ -326,24 +335,36 @@ export default class WUPTimeControl<
       onRender: (_dir, v, prev, next) => {
         selectNext(prev, next);
         v = Math.round(v * step);
-        this.$refMinutes!._value = v;
+        this.$refMinutes!._value = Math.round(next.index * step);
         return [renderMinutes(v)];
       },
     });
 
-    // 12AM..1AM...11AM  12PM..1PM....11PM
-    // 00    01    11    12    13     23
-
-    // todo add Ok/Cancel for popup otherwise we can't not that user is finished
-    // todo fix render AM/PM
     if (h12) {
+      // 12AM..1AM...11AM  12PM..1PM....11PM
+      // 00    01    11    12    13     23
       const lower = this._opts.format.endsWith("a");
-      const ul = document.createElement("ul");
-      (lower ? ["pm", "am"] : ["PM", "AM"]).forEach((s) => {
-        ul.appendChild(document.createElement("li")).textContent = s;
+      const lh12 = document.createElement("ul");
+      popup.appendChild(lh12);
+      // carousel for hours
+      this.$refHours12 = lh12 as any as HTMLElement & { _scrolled: WUPScrolled; _value: number };
+      this.$refHours12._scrolled = new WUPScrolled(lh12, {
+        swipeDebounceMs: 100,
+        scrollToClick: true,
+        // pm => empty, PM, AM, /*empty*/
+        // am => /*empty*/, PM, AM, empty
+        pages: { current: this.$value?.isPM ? 1 : 2, total: 4, before: Math.min(drows, 1), after: Math.min(drows, 1) },
+        onRender: (_dir, v, prev, next) => {
+          selectNext(prev, next);
+          this.$refHours12!._value = next.index;
+          const item = document.createElement("li");
+          item.textContent = (lower ? ["am", "pm", "am", "am"] : ["AM", "PM", "AM", "AM"])[v];
+          (v === 0 || v === 3) && item.setAttribute("disabled", ""); // WARN: intead of empty need render invisible AM otherwise AM bold affects on width
+          return [item];
+        },
       });
-      popup.appendChild(ul);
     }
+    // todo add Ok/Cancel for popup otherwise we can't define if user is finished
 
     // render hh:mm separator
     const sep = document.createElement("mark");
@@ -385,13 +406,14 @@ export default class WUPTimeControl<
         // eslint-disable-next-line no-fallthrough
         case "ArrowUp":
           {
+            const { chunks: ch } = this.refMask!;
             let { chunk } = this.refMask!.findChunkByCursor(this.$refInput.selectionStart!);
             if (!chunk.isVar) {
-              chunk = this.refMask!.chunks[chunk.index + 1];
+              chunk = ch[chunk.index + 1] || ch[chunk.index - 1]; // when cursor at the end of suffix
             }
-            const hhChunk = this.refMask!.chunks.find((c) => c.isVar)!;
-            const mmChunk = this.refMask!.chunks.find((c, i) => i > hhChunk.index && c.isVar)!;
-            const h12Chunk = this.refMask!.chunks.find((c, i) => i > mmChunk.index && c.isVar);
+            const hhChunk = ch.find((c) => c.isVar)!;
+            const mmChunk = ch.find((c, i) => i > hhChunk.index && c.isVar)!;
+            const h12Chunk = ch.find((c, i) => i > mmChunk.index && c.isVar);
             switch (chunk) {
               case hhChunk:
                 this.$refHours!._scrolled.goTo(isNext);
@@ -400,7 +422,11 @@ export default class WUPTimeControl<
                 this.$refMinutes!._scrolled.goTo(isNext);
                 break;
               case h12Chunk:
-                // todo scroll to h12 this.$refMinutes!._scrolled.goTo(isNext);
+                {
+                  const v = this.$refHours12!._value;
+                  const to = (isNext && v === 2 && 1) || (!isNext && v === 1 && 2) || (isNext ? v + 1 : v - 1);
+                  this.$refHours12!._scrolled.goTo(to);
+                }
                 break;
               default:
                 break;
