@@ -201,7 +201,6 @@ export default class WUPScrolled {
 
     const pagesRemove: WUP.Scrolled.State[] = [];
     let wasAdded = false;
-    // todo when rendered 1 rows: no animation when isNext: true
     // -2: -1: -2,
     for (let i = 1; i <= Math.abs(inc); ++i) {
       const dinc = isNext ? 1 : -1;
@@ -251,8 +250,8 @@ export default class WUPScrolled {
     if (!wasAdded) {
       return Promise.resolve();
     }
+    restoreScroll(); // WARN restore required even items is appended to the end
 
-    !isNext && restoreScroll();
     return this.scrollToRange(true, this.state.items).then(() => {
       pagesRemove.forEach((p) => p.items.forEach((a) => (a as any).__scrollRemove && a.remove())); // some items can be re-appended
     });

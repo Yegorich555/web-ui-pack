@@ -83,9 +83,9 @@ export default class WUPTimeControl<
         --ctrl-time-current-bg: #d9f7fd;
       }`;
   }
-  // WARN: "99" & "AM" in ul:after required to fix width changing by font-bold
 
   static get $style(): string {
+    // WARN: "99" & "AM" in ul:after required to fix width changing by font-bold: https://codepen.io/hexagoncircle/pen/WNrYPLo
     const focusStyle = `
           content: " ";
           position: absolute;
