@@ -269,8 +269,8 @@ export default class WUPTimeControl<
   $refMinutes?: HTMLElement & { _scrolled: WUPScrolled; _value: number };
   $refHours12?: HTMLElement & { _scrolled: WUPScrolled; _value: number };
 
-  protected override async renderMenu(popup: WUPPopupElement, menuId: string, rows = 5): Promise<HTMLElement> {
-    // todo with rows = 1 no selected items & AM/PM bold affects on width5
+  protected override async renderMenu(popup: WUPPopupElement, menuId: string, rows = 1): Promise<HTMLElement> {
+    // todo with rows = 1 no selected items & AM/PM bold affects on width
     popup.$options.minWidthByTarget = false;
 
     const append = (parent: HTMLElement, v: number, twoDigs: boolean): HTMLElement => {
@@ -300,7 +300,6 @@ export default class WUPTimeControl<
     const { step } = this._opts;
 
     const selectNext = (prev: WUP.Scrolled.State, next: WUP.Scrolled.State): void => {
-      // todo sync with input ???
       this._selectedMenuItem = prev.items[0];
       next.items[0] && this.selectMenuItem(next.items[0]);
     };
@@ -313,10 +312,14 @@ export default class WUPTimeControl<
       scrollToClick: true,
       pages: { current: h12 ? hh % 12 : hh, total: h12 ? 12 : 24, before: drows, after: drows, cycled: true },
       onRender: (_dir, v, prev, next) => {
-        selectNext(prev, next);
+        const items = [renderHours(v)];
         v = h12 && v === 0 ? 12 : v;
         this.$refHours!._value = next.index;
-        return [renderHours(v)];
+        if (rows === 1) {
+          next.items = items;
+        }
+        selectNext(prev, next);
+        return items;
       },
     });
 
@@ -334,10 +337,14 @@ export default class WUPTimeControl<
         cycled: true,
       },
       onRender: (_dir, v, prev, next) => {
-        selectNext(prev, next);
+        const items = [renderMinutes(v)];
         v = Math.round(v * step);
         this.$refMinutes!._value = Math.round(next.index * step);
-        return [renderMinutes(v)];
+        if (rows === 1) {
+          next.items = items;
+        }
+        selectNext(prev, next);
+        return items;
       },
     });
 
@@ -400,6 +407,7 @@ export default class WUPTimeControl<
   }
 
   protected override gotKeyDown(e: KeyboardEvent): Promise<void> {
+    // todo handle select
     const wasOpen = this.$isOpen;
     const r = super.gotKeyDown(e);
     if (wasOpen) {

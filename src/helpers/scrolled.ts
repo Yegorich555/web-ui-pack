@@ -65,6 +65,7 @@ export default class WUPScrolled {
       const from = -1 * (p.before ?? 0);
       const to = p.after ?? p.current;
       let curItems: HTMLElement[];
+
       for (let i = from; i <= to; ++i) {
         const index = this.incrementPage(p.current, i);
         const nextState = i === 1 ? { index: this.state.index, items: curItems! } : this.state;
@@ -200,6 +201,7 @@ export default class WUPScrolled {
 
     const pagesRemove: WUP.Scrolled.State[] = [];
     let wasAdded = false;
+    // todo when rendered 1 rows: no animation when isNext: true
     // -2: -1: -2,
     for (let i = 1; i <= Math.abs(inc); ++i) {
       const dinc = isNext ? 1 : -1;
