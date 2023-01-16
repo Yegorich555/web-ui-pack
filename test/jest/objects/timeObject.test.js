@@ -58,6 +58,11 @@ describe("timeObject", () => {
   test("valueOf", () => {
     expect(new WUPTimeObject(10, 46) > new WUPTimeObject(10, 45)).toBe(true);
     expect(new WUPTimeObject(10, 46) < new WUPTimeObject(10, 47)).toBe(true);
+
+    expect(new WUPTimeObject(10, 46).isPM).toBe(false);
+    expect(new WUPTimeObject(11, 59).isPM).toBe(false);
+    expect(new WUPTimeObject(12, 0).isPM).toBe(true);
+    expect(new WUPTimeObject(23, 59).isPM).toBe(true);
   });
 
   test("copyToDate", () => {

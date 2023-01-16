@@ -61,6 +61,11 @@ export default class WUPTimeObject {
     return this.hours * 60 + this.minutes;
   }
 
+  /** Returns whether time is PM or AM */
+  get isPM(): boolean {
+    return this.hours > 11;
+  }
+
   /** Returns string in "hh:mm" format */
   toString(): string {
     return `${zeroBefore(this.hours, 2)}:${zeroBefore(this.minutes, 2)}`;
