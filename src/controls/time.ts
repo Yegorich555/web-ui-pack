@@ -270,6 +270,7 @@ export default class WUPTimeControl<
   $refHours12?: HTMLElement & { _scrolled: WUPScrolled; _value: number };
 
   protected override async renderMenu(popup: WUPPopupElement, menuId: string, rows = 5): Promise<HTMLElement> {
+    // todo with rows = 1 no selected items & AM/PM bold affects on width5
     popup.$options.minWidthByTarget = false;
 
     const append = (parent: HTMLElement, v: number, twoDigs: boolean): HTMLElement => {
@@ -355,6 +356,9 @@ export default class WUPTimeControl<
         // am => /*empty*/, PM, AM, empty
         pages: { current: this.$value?.isPM ? 1 : 2, total: 4, before: Math.min(drows, 1), after: Math.min(drows, 1) },
         onRender: (_dir, v, prev, next) => {
+          if (next.index === 0 || next.index === 3) {
+            return null;
+          }
           selectNext(prev, next);
           this.$refHours12!._value = next.index;
           const item = document.createElement("li");

@@ -191,8 +191,6 @@ export default class WUPScrolled {
       pi = this.state.index - 1;
     }
 
-    // todo need prevent goTo for cycled:false and reached start/end
-
     this.tryFixSize();
     // const prevScroll = { h: this.el.scrollHeight, w: this.el.scrollWidth };
     const restoreScroll = this.saveScroll();
@@ -206,6 +204,9 @@ export default class WUPScrolled {
     for (let i = 1; i <= Math.abs(inc); ++i) {
       const dinc = isNext ? 1 : -1;
       pi = this.incrementPage(this.state.index, dinc);
+      if (this.state.index === pi) {
+        break; // no-render if no changes
+      }
       const renderIndex = this.incrementPage(
         pi,
         isNext ? this.options.pages?.after || 0 : (this.options.pages?.before || 0) * -1
