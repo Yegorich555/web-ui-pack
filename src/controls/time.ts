@@ -79,10 +79,11 @@ export default class WUPTimeControl<
     return `:root {
         --ctrl-time-icon-img-lg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M383.615 0C171.647 0 0 172.032 0 384s171.648 384 383.615 384c212.352 0 384.383-172.032 384.383-384S595.966 0 383.615 0zM384 691.199C214.272 691.199 76.801 553.727 76.801 384S214.273 76.801 384 76.801c169.728 0 307.199 137.472 307.199 307.199S553.727 691.199 384 691.199zm-38.401-499.198h57.6v201.6l172.8 102.528-28.8 47.232-201.6-120.96v-230.4z' /%3E%3C/svg%3E");
         --ctrl-time-icon-img: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAABOAAAATgGxzR8zAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAASxJREFUOI2V00kuRFEUBuCvXqLMrEBIRBeKxCIMrcFAYguMRMz13QYwESxAMxIjXYKEiIHYAQYSTRncU1JRT+FPbnLfOf9/unsetejHPK7wHOcSsyjl8L/QiBW84wMnWItzGrY3LKKYJz5AGZtoy0nQjq3g7H0PshqOiXolBiaDu1Ax9EXZmznkY4zm2LeldnozjKCA8T9kr2AMGUYyDEpDuvtHgFucYzBDC27+Ia7gGq2ZNJDCD6QXDKMnx1cg9fGArh8CDOFM2olpNFX5unEPc9KStNcpdwBHOIzvztDMkNbzTVqSeiigOe47oflqbVmaxeQvQWAquPPVxiL2w7GNjhxhZ2QuYxcN3wlFLEVpH9Lw1rER9zJepZnViKtRkn7dSzzhERfSK9Q85ye76kkmcVhDgAAAAABJRU5ErkJggg==');
-        --ctrl-time-current: inherit;
+        --ctrl-time-current: #000;
         --ctrl-time-current-bg: #d9f7fd;
       }`;
   }
+  // WARN: "99" & "AM" in ul:after required to fix width changing by font-bold
 
   static get $style(): string {
     const focusStyle = `
@@ -120,26 +121,37 @@ export default class WUPTimeControl<
         vertical-align: middle;
       }
       :host [menu] li,
-      :host [menu] mark {
-        padding: 1em 1em;
+      :host [menu] mark,
+      :host [menu] ul:after {
+        padding: 1em;
         height: 1em;
-        border-radius: 50%;
       }
       :host [menu] mark {
         z-index: -1;
         position: absolute;
         display: block;
-        top: 50%; left: 0; right:0;
+        top:50%; left:0; right:0;
         transform: translateY(-50%);
         margin: 0; padding-left: 2.8em;
-        border-radius: 0;
         font: inherit;
-        font-weight: bold;
         background: var(--ctrl-time-current-bg);
-        color: inherit;
+      }
+      :host [menu] ul:after {
+        content: "99";
+        height: 0;
+        margin:0; padding-top:0; padding-bottom:0;
+        visibility: hidden;
+        overflow: hidden;
+        user-select: none;
+        pointer-events: none;
+        display: block;
+      }
+      :host [menu] ul:nth-child(3):after {
+         content: "AM";
       }
       :host [menu] li[aria-selected=true],
-      :host [menu] li[disabled] {
+      :host [menu] mark,
+      :host [menu] ul:after {
         font-weight: bold;
         color: var(--ctrl-time-current);
       }
@@ -149,7 +161,7 @@ export default class WUPTimeControl<
       :host [menu] li[focused]:after {
         ${focusStyle}
       }
-      :host [menu] li[disabled] {
+      :host [menu] li[empty] {
         pointer-events: none;
         touch-action: none;
         color: transparent;
@@ -257,8 +269,7 @@ export default class WUPTimeControl<
   $refMinutes?: HTMLElement & { _scrolled: WUPScrolled; _value: number };
   $refHours12?: HTMLElement & { _scrolled: WUPScrolled; _value: number };
 
-  protected override async renderMenu(popup: WUPPopupElement, menuId: string, rows = 5): Promise<HTMLElement> {
-    // todo with rows = 1 AM/PM bold affects on width
+  protected override async renderMenu(popup: WUPPopupElement, menuId: string, rows = 1): Promise<HTMLElement> {
     popup.$options.minWidthByTarget = false;
 
     const append = (parent: HTMLElement, v: number, twoDigs: boolean): HTMLElement => {
@@ -271,7 +282,7 @@ export default class WUPTimeControl<
     const hh = this.$value?.hours || 0;
     const mm = this.$value?.minutes || 0;
 
-    // div required otherwise impossible to center absolute items during the animation
+    // div required for centering absolute items during the animation
     const parent = popup.appendChild(document.createElement("div"));
 
     // render hours
@@ -306,9 +317,7 @@ export default class WUPTimeControl<
         const items = [renderHours(v)];
         v = h12 && v === 0 ? 12 : v;
         this.$refHours!._value = next.index;
-        if (rows === 1) {
-          next.items = items;
-        }
+        next.items = rows === 1 ? items : next.items;
         selectNext(prev, next);
         return items;
       },
@@ -331,9 +340,7 @@ export default class WUPTimeControl<
         const items = [renderMinutes(v)];
         v = Math.round(v * step);
         this.$refMinutes!._value = Math.round(next.index * step);
-        if (rows === 1) {
-          next.items = items;
-        }
+        next.items = rows === 1 ? items : next.items;
         selectNext(prev, next);
         return items;
       },
@@ -344,6 +351,7 @@ export default class WUPTimeControl<
       // 00    01    11    12    13     23
       const lower = this._opts.format.endsWith("a");
       const lh12 = document.createElement("ul");
+
       parent.appendChild(lh12);
       // carousel for hours
       this.$refHours12 = lh12 as any as HTMLElement & { _scrolled: WUPScrolled; _value: number };
@@ -357,12 +365,14 @@ export default class WUPTimeControl<
           if (next.index === 0 || next.index === 3) {
             return null;
           }
-          selectNext(prev, next);
           this.$refHours12!._value = next.index;
           const item = document.createElement("li");
           item.textContent = (lower ? ["", "pm", "am", ""] : ["", "PM", "AM", ""])[v];
-          (v === 0 || v === 3) && item.setAttribute("disabled", "");
-          return [item];
+          (v === 0 || v === 3) && item.setAttribute("empty", "");
+          const items = [item];
+          next.items = rows === 1 ? items : next.items;
+          selectNext(prev, next);
+          return items;
         },
       });
     }
