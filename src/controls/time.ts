@@ -299,6 +299,8 @@ export default class WUPTimeControl<
   $refHours?: HTMLElement & { _scrolled: WUPScrolled; _value: number };
   $refMinutes?: HTMLElement & { _scrolled: WUPScrolled; _value: number };
   $refHours12?: HTMLElement & { _scrolled: WUPScrolled; _value: number };
+  $refButtonOk?: HTMLButtonElement;
+  $refButtonCancel?: HTMLButtonElement;
 
   protected override async renderMenu(popup: WUPPopupElement, menuId: string, rows = 5): Promise<HTMLElement> {
     popup.$options.minWidthByTarget = false;
@@ -414,10 +416,13 @@ export default class WUPTimeControl<
     btnOk.setAttribute("type", "button");
     btnOk.setAttribute("aria-label", this.#ctr.$ariaOk);
     btnOk.setAttribute("tabindex", -1);
+    this.$refButtonOk = btnOk;
+
     const btnCancel = btns.appendChild(document.createElement("button"));
     btnCancel.setAttribute("type", "button");
     btnCancel.setAttribute("aria-label", this.#ctr.$ariaCancel);
     btnCancel.setAttribute("tabindex", -1);
+    this.$refButtonCancel = btnCancel;
 
     // handle click on buttons
     onEvent(btns, "click", (e) => {
@@ -454,6 +459,8 @@ export default class WUPTimeControl<
     delete this.$refHours;
     delete this.$refHours12;
     delete this.$refMinutes;
+    delete this.$refButtonOk;
+    delete this.$refButtonCancel;
   }
 
   /** Called when need to change/cancel changing & close */
@@ -488,10 +495,14 @@ export default class WUPTimeControl<
     super.gotInput(e, true);
   }
 
+  // todo when user select 12:49 AM + press Enter vld-error "Max value is 10:50PM isn't changed to Min value is 02:30AM"
   protected override gotKeyDown(e: KeyboardEvent): Promise<void> {
-    // todo handle select
     const wasOpen = this.$isOpen;
+    this._focusedMenuItem = this.$refButtonOk; // to handle select (update value when user press enter)
     const r = super.gotKeyDown(e);
+    if (e.altKey || e.shiftKey || e.ctrlKey) {
+      return r;
+    }
     if (wasOpen) {
       let isNext = false;
       switch (e.key) {
