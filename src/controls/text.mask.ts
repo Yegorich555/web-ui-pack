@@ -414,6 +414,9 @@ export default class MaskTextInput {
   }
 
   resetChunk(c: WUP.Text.Mask.InputChunk): void {
+    if (!c) {
+      return;
+    }
     delete c.isTouched;
     if (c.isVar) {
       c.value = "";
@@ -440,7 +443,7 @@ export default class MaskTextInput {
       } else {
         const next = this.chunks[chunk.index + 1] as WUP.Text.Mask.VarChunk;
         const prev = this.chunks[chunk.index - 1] as WUP.Text.Mask.VarChunk;
-        // case impossible anymore: next && !next.text && resetChunk(next); // clear state next chunk after separator
+        // impossible: next && !next.value && this.resetChunk(next); // clear state next chunk after separator
         const canRemove = prev && !next?.isTouched && prev.value.length !== prev.max && chunk.index !== lastIndex; // whether possible to remove separator
 
         canRemove && this.resetChunk(chunk); // clear current chunk if possible
@@ -484,7 +487,7 @@ export default class MaskTextInput {
         let prev = chunk;
         for (let i = chunk.index + 2; i < this.chunks.length; i += 2) {
           const next = this.chunks[i] as WUP.Text.Mask.VarChunk;
-          if (!next.value.length || !next.isTouched) {
+          if (!next.value.length || !next.isTouched || !prev.test(next.value, 0)) {
             this.resetChunk(next);
             break;
           }
@@ -495,6 +498,7 @@ export default class MaskTextInput {
         if (prev !== chunk) {
           chunk.isCompleted = true;
           prev.isCompleted = prev.value.length >= prev.min; // recalc last chunk
+          !prev.isCompleted && this.resetChunk(this.chunks[prev.index + 1]); // reset next separator if prev not completed
         } else {
           // if no digit chunks at the right need to remove separator
           const next = this.chunks[chunk.index + 1];
@@ -503,6 +507,7 @@ export default class MaskTextInput {
       }
     }
 
+    // console.warn("test", objectClone(this.chunks));
     this.updateState();
     return pos;
   }
@@ -521,11 +526,11 @@ export default class MaskTextInput {
 }
 
 // (() => {
-//   const t = new MaskTextInput("$ ##0 USD");
+//   const t = new MaskTextInput("00:00 //[ap]//m", "");
 //   const delAfter = (v: string): void => {
 //     t.parse(v);
 //     const pos = t.deleteAfter(v.indexOf("|"));
-//     console.warn(`${t.value.substring(0, pos)}|${t.value.substring(pos)}`, t.chunks);
+//     console.warn(`'${t.value.substring(0, pos)}|${t.value.substring(pos)}'`, t.chunks);
 //   };
 
 //   const delBefore = (v: string): void => {
@@ -534,13 +539,11 @@ export default class MaskTextInput {
 //     console.warn(`${t.value.substring(0, pos)}|${t.value.substring(pos)}`, t.chunks);
 //   };
 
-//   delBefore("$ 5 USD|");
-//   delAfter("123.4|.789.387");
+//   delBefore("56:78 am|");
+//   delAfter("|56:78 am");
 // })();
 
 // type/delete 1 2 3 => historyUndo[1,2]
 // Ctrl+Z get historyUndo.pop + push into Redo
 
 // new MaskTextInput("0 //[a-c]//", "").chunks.forEach((c) => console.warn(c));
-
-// todo mask issue: '|03:10 PM' + Delete => P isn't removed

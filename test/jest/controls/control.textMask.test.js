@@ -689,6 +689,9 @@ describe("control.text: mask", () => {
     el.$value = "";
     await h.wait(1);
     expect(await h.userTypeText(el.$refInput, "5678a", { clearPrevious: false })).toBe("56:78 a|m");
+
+    h.setInputCursor(el.$refInput, "|56:78 am");
+    expect(await remove({ key: "Delete" })).toBe("|67:8");
   });
 
   test("input: numeric if mask applied", async () => {
