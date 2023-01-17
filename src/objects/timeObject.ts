@@ -10,27 +10,37 @@ export default class WUPTimeObject {
 
   constructor();
   constructor(value: number | string);
-  constructor(hours?: number, minutes?: number);
+  /** @param isPM set true/false if hours is 12h format */
+  constructor(hours: number, minutes: number, isPM?: boolean);
   constructor(...args: any[]) {
     this.hours = 0;
     this.minutes = 0;
+    let isPM: boolean | null | undefined = null;
     if (args.length === 1) {
       if (typeof args[0] === "string") {
         const [h, m] = args[0].split(/\W/);
         this.hours = Number.parseInt(h, 10);
         this.minutes = Number.parseInt(m, 10);
-        if (this.hours === 12 && /AM|am$/.test(args[0])) {
-          this.hours = 0;
-        } else if (this.hours !== 12 && /PM|pm$/.test(args[0])) {
-          this.hours += 12;
+        if (/PM|pm$/.test(args[0])) {
+          isPM = true;
+        } else if (/AM|am$/.test(args[0])) {
+          isPM = false;
         }
       } else {
         this.hours = Math.floor(args[0] / 60);
         this.minutes = args[0] - this.hours * 60;
       }
-    } else if (args.length === 2) {
+    } else if (args.length >= 2) {
       this.hours = args[0] as number;
       this.minutes = args[1] as number;
+      // eslint-disable-next-line prefer-destructuring
+      isPM = args[2];
+    }
+
+    if (this.hours === 12 && isPM === false) {
+      this.hours = 0;
+    } else if (this.hours !== 12 && isPM === true) {
+      this.hours += 12;
     }
 
     if (

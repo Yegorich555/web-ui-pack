@@ -4,12 +4,16 @@
  */
 import { WUPTimeObject } from "web-ui-pack";
 import localeInfo from "web-ui-pack/objects/localeInfo";
+// import localeInfo from "../../../src/objects/localeInfo";
+// import WUPTimeObject from "../../../src/objects/timeObject";
 import * as h from "../../testHelper";
 
 describe("timeObject", () => {
-  test("constructor", () => {
+  test("constructor/init", () => {
     expect(new WUPTimeObject()).toEqual({ hours: 0, minutes: 0 });
     expect(new WUPTimeObject(23, 15)).toEqual({ hours: 23, minutes: 15 });
+    expect(new WUPTimeObject(3, 15, true)).toEqual({ hours: 15, minutes: 15 });
+    expect(new WUPTimeObject(3, 15, false)).toEqual({ hours: 3, minutes: 15 });
     expect(new WUPTimeObject(123)).toEqual({ hours: 2, minutes: 3 });
     expect(new WUPTimeObject("12:46")).toEqual({ hours: 12, minutes: 46 });
     expect(new WUPTimeObject("02:09")).toEqual({ hours: 2, minutes: 9 });
@@ -19,6 +23,7 @@ describe("timeObject", () => {
     expect(() => new WUPTimeObject(-1, 0)).toThrow();
     expect(() => new WUPTimeObject(0, -1)).toThrow();
     expect(() => new WUPTimeObject(0, 60)).toThrow();
+    expect(() => new WUPTimeObject(13, 60, true)).toThrow(); // 13PM is wrong time
     h.unMockConsoleWarn();
 
     expect(new WUPTimeObject("12/46")).toEqual({ hours: 12, minutes: 46 });
