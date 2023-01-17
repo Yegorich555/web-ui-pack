@@ -21,9 +21,9 @@ export default class WUPTimeObject {
         const [h, m] = args[0].split(/\W/);
         this.hours = Number.parseInt(h, 10);
         this.minutes = Number.parseInt(m, 10);
-        if (/PM|pm$/.test(args[0])) {
+        if (/[pP][mM]$/.test(args[0])) {
           isPM = true;
-        } else if (/AM|am$/.test(args[0])) {
+        } else if (/[aA][mM]$/.test(args[0])) {
           isPM = false;
         }
       } else {

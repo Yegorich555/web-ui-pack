@@ -264,8 +264,6 @@ export default class WUPTimeControl<
     if (!text) {
       return undefined;
     }
-    // console.warn(new WUPTimeObject(text));
-    // todo issue: type invalidValue => error, type valid => error still here:
     return new WUPTimeObject(text) as any;
   }
 
