@@ -282,8 +282,8 @@ export default class WUPTimeControl<
         .replace(/[hH]/, "#0")
         .replace(/mm|MM/, "00")
         .replace(/[mM]/, "#0") // convert hh-mm > 00-00; h/m > #0/#0
-        .replace(/a/, "//[aApP]//m")
-        .replace(/A/, "//[aApP]//M");
+        .replace(/a/, "//[ap]//m")
+        .replace(/A/, "//[AP]//M");
     this._opts.maskholder =
       this._opts.maskholder ??
       this._opts.format
@@ -486,7 +486,6 @@ export default class WUPTimeControl<
 
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
     super.gotInput(e, true);
-    // todo replace a to A, A to a on the fly
   }
 
   protected override gotKeyDown(e: KeyboardEvent): Promise<void> {
@@ -540,4 +539,3 @@ customElements.define(tagName, WUPTimeControl);
 // testcase: increment carousel for hh:mm in both directions
 // testcase: open&close menu. change value via input. open menu again: in menu new value must be selected
 // testcase: open&close menu: anything must be selected
-// todo mask issue: '|03:10 PM' + Delete => P isn't removed

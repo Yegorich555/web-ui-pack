@@ -1,6 +1,6 @@
 declare global {
   namespace WUP.Text.Mask {
-    type TestFn = (str: string, charIndex: number) => boolean;
+    type TestFn = (str: string, charIndex: number) => boolean | { value: string };
     interface VarChunk {
       index: number;
       pattern: string;
@@ -146,7 +146,23 @@ export default class MaskTextInput {
               break;
             }
             const reg = new RegExp(pr.substring(i + 1, end));
-            ++(setToChunk("*", true, (s, si) => reg.test(s[si])) as WUP.Text.Mask.VarChunk).max;
+            ++(
+              setToChunk("*", true, (s, si) => {
+                let v = s[si];
+                if (reg.test(v)) {
+                  return true;
+                }
+                v = s[si].toLowerCase();
+                if (reg.test(v)) {
+                  return { value: v };
+                }
+                v = s[si].toUpperCase();
+                if (reg.test(v)) {
+                  return { value: v };
+                }
+                return false;
+              }) as WUP.Text.Mask.VarChunk
+            ).max;
             ++(lastChunk! as WUP.Text.Mask.VarChunk).min;
             i = end;
           }
@@ -211,11 +227,12 @@ export default class MaskTextInput {
         chunk.value = "";
         for (let ci = 0; ci < chunk.max && i < value.length; ++ci, ++i) {
           const char = value[i];
-          if (chunk.test(value, i)) {
+          const r = chunk.test(value, i);
+          if (r) {
             if (chunk.isCompleted && chunks[pi + 1]?.pattern[0] === char) {
               break; // set the char for next chunk if possible
             }
-            chunk.value += value[i];
+            chunk.value += (r as { value: string }).value || value[i];
             chunk.isCompleted = chunk.value.length >= chunk.min;
           } else if (canShift != null && chunks[pi - 1].pattern[0] === char) {
             const prev = chunks[pi - 1];
@@ -525,3 +542,5 @@ export default class MaskTextInput {
 // Ctrl+Z get historyUndo.pop + push into Redo
 
 // new MaskTextInput("0 //[a-c]//", "").chunks.forEach((c) => console.warn(c));
+
+// todo mask issue: '|03:10 PM' + Delete => P isn't removed

@@ -666,6 +666,29 @@ describe("control.text: mask", () => {
     await h.wait(150);
     expect(h.getInputCursor(el.$refInput)).toBe("5 |");
     expect(el.$refMaskholder.innerHTML).toBe("<i>5 </i>**");
+
+    // lowercase/uppercase changing
+    el.blur();
+    await h.wait();
+    el.$options.mask = "00:00 //[AP]//M";
+    el.$options.maskholder = null;
+    el.$value = "";
+    await h.wait(1);
+    expect(await h.userTypeText(el.$refInput, "1234a", { clearPrevious: false })).toBe("12:34 A|M");
+    el.$value = "";
+    await h.wait(1);
+    expect(await h.userTypeText(el.$refInput, "5678P", { clearPrevious: false })).toBe("56:78 P|M");
+
+    el.blur();
+    await h.wait();
+    el.$options.mask = "00:00 //[ap]//m";
+    el.$options.maskholder = null;
+    el.$value = "";
+    await h.wait(1);
+    expect(await h.userTypeText(el.$refInput, "1234P", { clearPrevious: false })).toBe("12:34 p|m");
+    el.$value = "";
+    await h.wait(1);
+    expect(await h.userTypeText(el.$refInput, "5678a", { clearPrevious: false })).toBe("56:78 a|m");
   });
 
   test("input: numeric if mask applied", async () => {
