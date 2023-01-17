@@ -410,7 +410,7 @@ export default class WUPTimeControl<
     const btns = popup.appendChild(document.createElement("div"));
     btns.setAttribute("group", "");
     const btnOk = btns.appendChild(document.createElement("button"));
-    btnOk.setAttribute("type", "button"); // todo line icon-check is thicker than other icons: need normalize
+    btnOk.setAttribute("type", "button");
     btnOk.setAttribute("aria-label", this.#ctr.$ariaOk);
     btnOk.setAttribute("tabindex", -1);
     const btnCancel = btns.appendChild(document.createElement("button"));

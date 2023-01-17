@@ -12,6 +12,7 @@
 
 - Helper. [`localeInfo`](src/objects/localeInfo.ts). `AM/PM parsed to 'a' but expected 'A'`
 - Helper. [`dateFromString`](src/helpers/dateFromString.ts). `12:00 PM throws Error but expected 12:00`
+- Icon **check**. Reduced thikness to fit other texts & icons
 
 **Features**:
 
