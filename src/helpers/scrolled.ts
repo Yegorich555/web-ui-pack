@@ -90,7 +90,7 @@ export default class WUPScrolled {
   }
 
   /** Called on keydown event and processed if event isn't prevented */
-  gotKeyDown(e: KeyboardEvent): void {
+  protected gotKeyDown(e: KeyboardEvent): void {
     // PageUp/PageDown to
     if (!e.altKey && !e.shiftKey && !e.ctrlKey && !e.defaultPrevented) {
       let inc = 0;
@@ -121,24 +121,8 @@ export default class WUPScrolled {
     }
   }
 
-  /** Get next page according to options.pages */
-  incrementPage(pIndex: number, inc: number): number {
-    pIndex += inc;
-    const p = this.options.pages;
-    if (p) {
-      if (p.cycled) {
-        if (!p.total) {
-          throw new Error("option [pages.cycled] doesn't work without [pages.total]");
-        }
-        pIndex = (p.total + pIndex) % p.total;
-      } else {
-        pIndex = Math.min(p.total ? p.total - 1 : pIndex, Math.max(0, pIndex));
-      }
-    }
-    return pIndex;
-  }
-
-  gotClick(e: MouseEvent): void {
+  /** Called on click event */
+  protected gotClick(e: MouseEvent): void {
     if (!e.defaultPrevented && !e.button) {
       const { target } = e;
       const iNext = this.pages.findIndex((pg) =>
@@ -165,8 +149,25 @@ export default class WUPScrolled {
     }
   }
 
+  /** Get next page according to options.pages */
+  incrementPage(pIndex: number, inc: number): number {
+    pIndex += inc;
+    const p = this.options.pages;
+    if (p) {
+      if (p.cycled) {
+        if (!p.total) {
+          throw new Error("option [pages.cycled] doesn't work without [pages.total]");
+        }
+        pIndex = (p.total + pIndex) % p.total;
+      } else {
+        pIndex = Math.min(p.total ? p.total - 1 : pIndex, Math.max(0, pIndex));
+      }
+    }
+    return pIndex;
+  }
+
   /** Set maxHeight, maxWidth otherwise new items affects on scroll-appearance */
-  tryFixSize(): void {
+  protected tryFixSize(): void {
     const { el } = this;
     const { isXScroll } = this.options;
     if ((!isXScroll && el.style.maxHeight) || (isXScroll && el.style.maxWidth)) {
@@ -182,10 +183,10 @@ export default class WUPScrolled {
 
   // WARN expected goTo possible only to visible/rendered pages
   /** Go to next/prev pages */
-  goTo(isNext: boolean): Promise<void>;
+  goTo(isNext: boolean, smooth?: boolean): Promise<void>;
   /** Go to specific page */
-  goTo(pageIndex: number): Promise<void>;
-  goTo(pi: number | boolean): Promise<void> {
+  goTo(pageIndex: number, smooth?: boolean): Promise<void>;
+  goTo(pi: number | boolean, smooth = true): Promise<void> {
     if (pi === true) {
       pi = this.state.index + 1;
     } else if (pi === false) {
@@ -252,7 +253,11 @@ export default class WUPScrolled {
     }
     restoreScroll(); // WARN restore required even items is appended to the end
 
-    return this.scrollToRange(true, this.state.items).then(() => {
+    let r = this.scrollToRange(smooth as true, this.state.items);
+    if (!smooth) {
+      r = Promise.resolve();
+    }
+    return r.then(() => {
       pagesRemove.forEach((p) => p.items.forEach((a) => (a as any).__scrollRemove && a.remove())); // some items can be re-appended
     });
   }

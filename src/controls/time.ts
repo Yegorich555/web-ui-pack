@@ -5,7 +5,7 @@ import localeInfo from "../objects/localeInfo";
 import WUPTimeObject from "../objects/timeObject";
 import WUPPopupElement from "../popup/popupElement";
 import { WUPcssIcon } from "../styles";
-import WUPBaseComboControl, { HideCases } from "./baseCombo";
+import WUPBaseComboControl, { HideCases, ShowCases } from "./baseCombo";
 
 const tagName = "wup-time";
 
@@ -264,6 +264,8 @@ export default class WUPTimeControl<
     if (!text) {
       return undefined;
     }
+    // console.warn(new WUPTimeObject(text));
+    // todo issue: type invalidValue => error, type valid => error still here:
     return new WUPTimeObject(text) as any;
   }
 
@@ -322,6 +324,7 @@ export default class WUPTimeControl<
     const parent = popup.appendChild(document.createElement("div"));
 
     // render hours
+    // todo test WA
     const lh = parent.appendChild(document.createElement("ul"));
     lh.setAttribute("id", menuId); // todo what about role="listbox"
     const h12 = /[aA]$/.test(this._opts.format);
@@ -434,6 +437,27 @@ export default class WUPTimeControl<
     return Promise.resolve(lh);
   }
 
+  protected override async goShowMenu(
+    showCase: ShowCases,
+    e?: MouseEvent | FocusEvent | null,
+    isNeedWait?: boolean
+  ): Promise<WUPPopupElement | null> {
+    const v = this.$value;
+    if (this.$refHours && v) {
+      this.$refHours._scrolled.goTo(v.hours, false);
+      this.$refMinutes!._scrolled.goTo(v.minutes, false);
+      this.$refHours12?._scrolled.goTo(v.isPM ? 2 : 1, false);
+    }
+    return super.goShowMenu(showCase, e, isNeedWait);
+  }
+
+  protected override removePopup(): void {
+    super.removePopup();
+    delete this.$refHours;
+    delete this.$refHours12;
+    delete this.$refMinutes;
+  }
+
   /** Called when need to change/cancel changing & close */
   protected gotBtnsClick(_e: MouseEvent, isOk: boolean): void {
     if (isOk) {
@@ -516,5 +540,6 @@ export default class WUPTimeControl<
 
 customElements.define(tagName, WUPTimeControl);
 // testcase: increment carousel for hh:mm in both directions
-// todo testcase: open&close menu. change value via input. open menu again: in menu new value must be selected
+// testcase: open&close menu. change value via input. open menu again: in menu new value must be selected
 // testcase: open&close menu: anything must be selected
+// todo mask issue: '|03:10 PM' + Delete => P isn't removed

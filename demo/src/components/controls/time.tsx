@@ -44,6 +44,7 @@ export default function TimeControlView() {
           autoComplete="off"
           ref={(el) => {
             if (el) {
+              // todo remove after tests
               el.$options.autoFocus = true;
               setTimeout(() => {
                 el.$showMenu();
