@@ -43,6 +43,9 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
           --base-btn-focus: #005766;
           --base-btn2-bg: var(--base-btn-text);
           --base-btn2-text: var(--base-btn-bg);
+          --base-btn3-bg: var(--base-bg);
+          --base-btn3-text: inherit;
+          --base-sep: #e4e4e4;
           --border-radius: 6px;
           --anim-time: 200ms;
           --anim: var(--anim-time, 200ms) cubic-bezier(0, 0, 0.2, 1) 0ms;

@@ -1,9 +1,11 @@
 /* eslint-disable prefer-destructuring */
+import onEvent from "../helpers/onEvent";
 import WUPScrolled from "../helpers/scrolled";
 import localeInfo from "../objects/localeInfo";
 import WUPTimeObject from "../objects/timeObject";
 import WUPPopupElement from "../popup/popupElement";
-import WUPBaseComboControl from "./baseCombo";
+import { WUPcssIcon } from "../styles";
+import WUPBaseComboControl, { HideCases } from "./baseCombo";
 
 const tagName = "wup-time";
 
@@ -74,12 +76,18 @@ export default class WUPTimeControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTimeControl;
 
+  /** Text announced by screen-readers when button Ok pressed in menu; @defaultValue `Ok` */
+  static $ariaOk = "Ok";
+
+  /** Text announced by screen-readers when button Cancel pressed in menu; @defaultValue `Cancel` */
+  static $ariaCancel = "Cancel";
+
   // --ctrl-time-icon-img-png-20: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAABiAAAAYgH4krHQAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAYJJREFUOI2l1L9qVUEQBvCf5+JFUBBbJQi2SSW+gLFV88ck2tmaBJE8gen8h/gCWklInzZ5h4BKIkkUtFD7BDGF91jsHLJe7tl70Q+GPTvzzcfOnJ1lMLq4h3V8xFHYLtawEJyRMI/PqIfYAWZKQh28zBLe4RHGcTZsPHzvM95zVIMEG7FfWGwjBSos4ThynvUT5jKx66Uy+jCZiU43zi4+hfNBS2KN1ZbYcsT3Q8tdJz1rK7Mk2MGH4MxX2VFfo9eSVMJvvInvqQpXY7P1D2INNmO9VuFibL7+h+CXWC9VUu1wakjSTUwM4dQVvsdmrEC8hQvYxiuc74tfjvUbaTZraQJKOIPH+IkfuJ/FVkLjLWnQa2mcOkNE4Qo24iD8fW3mSJfxIBxLIwg2aF6bh5G7h9NNcDacx9I4jYobkdPD7f7gi0x0Wbn8TpysmeMng0hVJlpLfVmRrsq5sInwNT3r4anyy2TWSU9LtoepklCOrvT316Rn/wiH2JGuxh3ZD8jxB6xmcQf6l8SZAAAAAElFTkSuQmCC');
   static get $styleRoot(): string {
     return `:root {
         --ctrl-time-icon-img-lg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M383.615 0C171.647 0 0 172.032 0 384s171.648 384 383.615 384c212.352 0 384.383-172.032 384.383-384S595.966 0 383.615 0zM384 691.199C214.272 691.199 76.801 553.727 76.801 384S214.273 76.801 384 76.801c169.728 0 307.199 137.472 307.199 307.199S553.727 691.199 384 691.199zm-38.401-499.198h57.6v201.6l172.8 102.528-28.8 47.232-201.6-120.96v-230.4z' /%3E%3C/svg%3E");
         --ctrl-time-icon-img: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAABOAAAATgGxzR8zAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAASxJREFUOI2V00kuRFEUBuCvXqLMrEBIRBeKxCIMrcFAYguMRMz13QYwESxAMxIjXYKEiIHYAQYSTRncU1JRT+FPbnLfOf9/unsetejHPK7wHOcSsyjl8L/QiBW84wMnWItzGrY3LKKYJz5AGZtoy0nQjq3g7H0PshqOiXolBiaDu1Ax9EXZmznkY4zm2LeldnozjKCA8T9kr2AMGUYyDEpDuvtHgFucYzBDC27+Ia7gGq2ZNJDCD6QXDKMnx1cg9fGArh8CDOFM2olpNFX5unEPc9KStNcpdwBHOIzvztDMkNbzTVqSeiigOe47oflqbVmaxeQvQWAquPPVxiL2w7GNjhxhZ2QuYxcN3wlFLEVpH9Lw1rER9zJepZnViKtRkn7dSzzhERfSK9Q85ye76kkmcVhDgAAAAABJRU5ErkJggg==');
-        --ctrl-time-current: #000;
+        --ctrl-time-current: var(--base-text);
         --ctrl-time-current-bg: #d9f7fd;
       }`;
   }
@@ -106,8 +114,7 @@ export default class WUPTimeControl<
       :host wup-calendar {
         margin: 0;
       }
-      :host [menu] {
-        overflow: hidden;
+      :host [menu]>div:first-child {
         position: relative;
       }
       :host [menu] ul {
@@ -166,12 +173,50 @@ export default class WUPTimeControl<
         touch-action: none;
         color: transparent;
       }
+      :host [menu] [group] {
+        display: flex;
+        gap: 1px;
+        background: var(--base-sep);
+        padding-top: 1px;
+      }
+      :host [menu] button:first-child {
+        --ctrl-icon-img: var(--wup-icon-check);
+        --ctrl-icon: green;
+        border-bottom-left-radius: var(--border-radius);
+      }
+      :host [menu] button:last-child {
+        --ctrl-icon-img: var(--wup-icon-cross);
+        --ctrl-icon: var(--ctrl-err-text);
+        border-bottom-right-radius: var(--border-radius);
+      }
+      :host [menu] button {
+        flex: 1 1 50%;
+        display: inline-flex;
+        align-content: center;
+        justify-content: center;
+        height: 2.4em;
+        border-radius: 0;
+        background: none;
+        padding: 0;
+        background: var(--base-btn3-bg);
+      }
+      :host [menu] button:after {
+        ${WUPcssIcon}
+        content: "";
+        padding:0;
+      }
       @media (hover: hover) {
         :host [menu] li:hover {
           position: relative;
         }
         :host [menu] li:hover:after {
          ${focusStyle}
+        }
+        :host [menu] button:hover {
+          box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 10%);
+        }
+        :host [menu] button:hover:first-child:after {
+          --ctrl-icon: green;
         }
       }`;
   }
@@ -252,7 +297,7 @@ export default class WUPTimeControl<
 
     this._opts.min = this.parse(this.getAttribute("min") || "") ?? this._opts.min;
     this._opts.max = this.parse(this.getAttribute("max") || "") ?? this._opts.max;
-    this._opts.step = Number.parseInt(this.getAttribute("step") || "", 10) || 5;
+    this._opts.step = Number.parseInt(this.getAttribute("step") || "", 10) || this.#ctr.$defaults.step;
 
     super.gotChanges(propsChanged as any);
   }
@@ -269,13 +314,18 @@ export default class WUPTimeControl<
   $refMinutes?: HTMLElement & { _scrolled: WUPScrolled; _value: number };
   $refHours12?: HTMLElement & { _scrolled: WUPScrolled; _value: number };
 
-  protected override async renderMenu(popup: WUPPopupElement, menuId: string, rows = 1): Promise<HTMLElement> {
+  protected override async renderMenu(popup: WUPPopupElement, menuId: string, rows = 5): Promise<HTMLElement> {
     popup.$options.minWidthByTarget = false;
 
     const append = (parent: HTMLElement, v: number, twoDigs: boolean): HTMLElement => {
       const li = parent.appendChild(document.createElement("li"));
       li.textContent = twoDigs && v < 10 ? `0${v}` : v.toString();
       return li;
+    };
+    const selectNext = (prev: WUP.Scrolled.State, next: WUP.Scrolled.State): void => {
+      this._selectedMenuItem = prev.items[0];
+      next.items[0] && this.selectMenuItem(next.items[0]);
+      this._selectedMenuItem = undefined; // otherwise selection is cleared after popup-close
     };
 
     const drows = Math.round(rows / 2) - 1;
@@ -286,26 +336,10 @@ export default class WUPTimeControl<
     const parent = popup.appendChild(document.createElement("div"));
 
     // render hours
-    const lh = document.createElement("ul");
-    lh.setAttribute("id", menuId);
-    // todo what about role="listbox"
-    parent.appendChild(lh);
+    const lh = parent.appendChild(document.createElement("ul"));
+    lh.setAttribute("id", menuId); // todo what about role="listbox"
     const h12 = /[aA]$/.test(this._opts.format);
     const hh2 = /[hH]+/g.exec(this._opts.format)![0].length === 2;
-    const renderHours = (v: number): HTMLElement => append(lh, v, hh2);
-
-    // render minutes
-    const lm = document.createElement("ul");
-    parent.appendChild(lm);
-    const mm2 = /[mM]+/g.exec(this._opts.format)![0].length === 2;
-    const renderMinutes = (v: number): HTMLElement => append(lm, v, mm2);
-    const { step } = this._opts;
-
-    const selectNext = (prev: WUP.Scrolled.State, next: WUP.Scrolled.State): void => {
-      this._selectedMenuItem = prev.items[0];
-      next.items[0] && this.selectMenuItem(next.items[0]);
-    };
-
     // carousel for hours
     this.$refHours = lh as any as HTMLElement & { _scrolled: WUPScrolled; _value: number };
     this.$refHours._scrolled = new WUPScrolled(lh, {
@@ -314,7 +348,7 @@ export default class WUPTimeControl<
       scrollToClick: true,
       pages: { current: h12 ? hh % 12 : hh, total: h12 ? 12 : 24, before: drows, after: drows, cycled: true },
       onRender: (_dir, v, prev, next) => {
-        const items = [renderHours(v)];
+        const items = [append(lh, v, hh2)];
         v = h12 && v === 0 ? 12 : v;
         this.$refHours!._value = next.index;
         next.items = rows === 1 ? items : next.items;
@@ -323,6 +357,10 @@ export default class WUPTimeControl<
       },
     });
 
+    // render minutes
+    const lm = parent.appendChild(document.createElement("ul"));
+    const mm2 = /[mM]+/g.exec(this._opts.format)![0].length === 2;
+    const { step } = this._opts;
     // carousel for minutes
     this.$refMinutes = lm as any as HTMLElement & { _scrolled: WUPScrolled; _value: number };
     this.$refMinutes._scrolled = new WUPScrolled(lm, {
@@ -337,7 +375,7 @@ export default class WUPTimeControl<
         cycled: true,
       },
       onRender: (_dir, v, prev, next) => {
-        const items = [renderMinutes(v)];
+        const items = [append(lm, v, mm2)];
         v = Math.round(v * step);
         this.$refMinutes!._value = Math.round(next.index * step);
         next.items = rows === 1 ? items : next.items;
@@ -347,12 +385,11 @@ export default class WUPTimeControl<
     });
 
     if (h12) {
+      // render AM/PM
       // 12AM..1AM...11AM  12PM..1PM....11PM
       // 00    01    11    12    13     23
       const lower = this._opts.format.endsWith("a");
-      const lh12 = document.createElement("ul");
-
-      parent.appendChild(lh12);
+      const lh12 = parent.appendChild(document.createElement("ul"));
       // carousel for hours
       this.$refHours12 = lh12 as any as HTMLElement & { _scrolled: WUPScrolled; _value: number };
       this.$refHours12._scrolled = new WUPScrolled(lh12, {
@@ -360,14 +397,14 @@ export default class WUPTimeControl<
         scrollToClick: true,
         // pm => empty, PM, AM, /*empty*/
         // am => /*empty*/, PM, AM, empty
-        pages: { current: this.$value?.isPM ? 1 : 2, total: 4, before: Math.min(drows, 1), after: Math.min(drows, 1) },
+        pages: { current: this.$value?.isPM ? 2 : 1, total: 4, before: Math.min(drows, 1), after: Math.min(drows, 1) },
         onRender: (_dir, v, prev, next) => {
           if (next.index === 0 || next.index === 3) {
             return null;
           }
           this.$refHours12!._value = next.index;
           const item = document.createElement("li");
-          item.textContent = (lower ? ["", "pm", "am", ""] : ["", "PM", "AM", ""])[v];
+          item.textContent = (lower ? ["", "am", "pm", ""] : ["", "AM", "PM", ""])[v];
           (v === 0 || v === 3) && item.setAttribute("empty", "");
           const items = [item];
           next.items = rows === 1 ? items : next.items;
@@ -376,7 +413,6 @@ export default class WUPTimeControl<
         },
       });
     }
-    // todo add Ok/Cancel for popup otherwise we can't define if user is finished
 
     // render hh:mm separator
     const sep = document.createElement("mark");
@@ -384,7 +420,46 @@ export default class WUPTimeControl<
     sep.textContent = /[hH]([^hH])/.exec(this._opts.format)![1]!;
     parent.appendChild(sep);
 
+    // render Ok/Cancel otherwise we can't define if user is finished
+    const btns = popup.appendChild(document.createElement("div"));
+    btns.setAttribute("group", "");
+    const btnOk = btns.appendChild(document.createElement("button"));
+    btnOk.setAttribute("type", "button"); // todo line icon-check is thicker than other icons: need normalize
+    btnOk.setAttribute("aria-label", this.#ctr.$ariaOk);
+    btnOk.setAttribute("tabindex", -1);
+    const btnCancel = btns.appendChild(document.createElement("button"));
+    btnCancel.setAttribute("type", "button");
+    btnCancel.setAttribute("aria-label", this.#ctr.$ariaCancel);
+    btnCancel.setAttribute("tabindex", -1);
+
+    // handle click on buttons
+    onEvent(btns, "click", (e) => {
+      e.stopPropagation(); // to prevent popup-hide-show
+      const t = e.target as Node | HTMLElement;
+      let isOk: boolean | null = null;
+      if (btnOk === t || this.includes.call(btnOk, t)) {
+        isOk = true;
+      } else if (btnCancel === t || this.includes.call(btnCancel, t)) {
+        isOk = false;
+      }
+      isOk !== null && this.gotBtnsClick(e, isOk);
+    });
+
     return Promise.resolve(lh);
+  }
+
+  /** Called when need to change/cancel changing & close */
+  protected gotBtnsClick(_e: MouseEvent, isOk: boolean): void {
+    if (isOk) {
+      const hh = this.$refHours!._value;
+      const mm = this.$refMinutes!._value;
+      const h12 = this.$refHours12?._value;
+      const v = new WUPTimeObject(hh, mm, h12 ? h12 === 2 : undefined);
+      // todo changing value on the fly doesn't trigger validation
+      this.selectValue(v as ValueType);
+    } else {
+      setTimeout(() => this.goHideMenu(HideCases.onSelect)); // without timeout it handles click by listener and opens again
+    }
   }
 
   protected override setValue(v: ValueType | undefined, canValidate = true, skipInput = false): boolean | null {
@@ -456,3 +531,5 @@ export default class WUPTimeControl<
 
 customElements.define(tagName, WUPTimeControl);
 // testcase: increment carousel for hh:mm in both directions
+// todo testcase: open&close menu. change value via input. open menu again: in menu new value must be selected
+// testcase: open&close menu: anything must be selected

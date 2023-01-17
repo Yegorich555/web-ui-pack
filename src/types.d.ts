@@ -13,7 +13,7 @@ interface ObjectConstructor {
 type Func = (...args: any[]) => any;
 
 interface Element {
-  setAttribute(qualifiedName: string, value: boolean | string): void;
+  setAttribute(qualifiedName: string, value: boolean | string | number): void;
 }
 
 type LowerKeys<T> = keyof {
