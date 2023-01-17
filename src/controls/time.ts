@@ -29,15 +29,11 @@ declare global {
       step: number;
     }
     interface Options<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, Defaults<T, VM> {
-      /** User can't select time less than min */
-      min?: WUPTimeObject;
-      /** User can't select time more than max */
-      max?: WUPTimeObject;
       format: string;
     }
     interface Attributes
       extends WUP.BaseCombo.Attributes,
-        WUP.Base.toJSX<Partial<Pick<Options, "format" | "min" | "max" | "format" | "step">>> {}
+        WUP.Base.toJSX<Partial<Pick<Options, "format" | "format" | "step">>> {}
     interface JSXProps<C = WUPTimeControl> extends WUP.BaseCombo.JSXProps<C>, Attributes {
       initValue?: string;
     }
@@ -229,7 +225,7 @@ export default class WUPTimeControl<
 
   static get observedAttributes(): Array<string> {
     const arr = super.observedAttributes as Array<LowerKeys<WUP.Time.Attributes>>;
-    arr.push("format", "min", "max", "step");
+    arr.push("format", "step");
     return arr;
   }
 
@@ -295,19 +291,9 @@ export default class WUPTimeControl<
         .replace(/a/, "*m")
         .replace(/A/, "*M");
 
-    this._opts.min = this.parse(this.getAttribute("min") || "") ?? this._opts.min;
-    this._opts.max = this.parse(this.getAttribute("max") || "") ?? this._opts.max;
     this._opts.step = Number.parseInt(this.getAttribute("step") || "", 10) || this.#ctr.$defaults.step;
 
     super.gotChanges(propsChanged as any);
-  }
-
-  protected get validations(): WUP.Text.Options["validations"] {
-    const vls = (super.validations as WUP.Time.Options["validations"])!; // undefined impossible because of textControl || {};
-    // user can type not valid value according to options min,max,exclude. So need to enable validations rules in this case
-    if (this._opts.min) vls.min = this._opts.min;
-    if (this._opts.max) vls.max = this._opts.max;
-    return vls as WUP.BaseControl.Options["validations"];
   }
 
   $refHours?: HTMLElement & { _scrolled: WUPScrolled; _value: number };
@@ -455,7 +441,6 @@ export default class WUPTimeControl<
       const mm = this.$refMinutes!._value;
       const h12 = this.$refHours12?._value;
       const v = new WUPTimeObject(hh, mm, h12 ? h12 === 2 : undefined);
-      // todo changing value on the fly doesn't trigger validation
       this.selectValue(v as ValueType);
     } else {
       setTimeout(() => this.goHideMenu(HideCases.onSelect)); // without timeout it handles click by listener and opens again
