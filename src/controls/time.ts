@@ -311,6 +311,7 @@ export default class WUPTimeControl<
       return li;
     };
     const selectNext = (prev: WUP.Scrolled.State, next: WUP.Scrolled.State): void => {
+      this.#lastInputChanged = false;
       this._selectedMenuItem = prev.items[0];
       next.items[0] && this.selectMenuItem(next.items[0]);
       this._selectedMenuItem = undefined; // otherwise selection is cleared after popup-close
@@ -445,6 +446,7 @@ export default class WUPTimeControl<
     e?: MouseEvent | FocusEvent | null,
     isNeedWait?: boolean
   ): Promise<WUPPopupElement | null> {
+    this.#lastInputChanged = false;
     const v = this.$value;
     if (this.$refHours && v) {
       this.$refHours._scrolled.goTo(v.hours, false);
@@ -472,7 +474,7 @@ export default class WUPTimeControl<
       const v = new WUPTimeObject(hh, mm, h12 ? h12 === 2 : undefined);
       this.selectValue(v as ValueType);
     } else {
-      setTimeout(() => this.goHideMenu(HideCases.onSelect)); // without timeout it handles click by listener and opens again
+      setTimeout(() => this.goHideMenu(HideCases.onClick)); // without timeout it handles click by listener and opens again
     }
   }
 
@@ -491,14 +493,23 @@ export default class WUPTimeControl<
     // don't call super because validation is appeared
   }
 
+  #lastInputChanged = false; // if press Enter: need to get value from last touched field (input OR menu)
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
+    this.#lastInputChanged = true;
     super.gotInput(e, true);
   }
 
-  // todo when user select 12:49 AM + press Enter vld-error "Max value is 10:50PM isn't changed to Min value is 02:30AM"
   protected override gotKeyDown(e: KeyboardEvent): Promise<void> {
     const wasOpen = this.$isOpen;
-    this._focusedMenuItem = this.$refButtonOk; // to handle select (update value when user press enter)
+    if (e.key === "Enter") {
+      if (this.#lastInputChanged) {
+        this.focusMenuItem(null);
+        this.goHideMenu(HideCases.OnPressEnter);
+        e.preventDefault();
+      } else {
+        this._focusedMenuItem = this.$refButtonOk; // to handle select (update value when user press enter)
+      }
+    }
     const r = super.gotKeyDown(e);
     if (e.altKey || e.shiftKey || e.ctrlKey) {
       return r;
@@ -511,6 +522,7 @@ export default class WUPTimeControl<
         // eslint-disable-next-line no-fallthrough
         case "ArrowUp":
           {
+            this.#lastInputChanged = false;
             const { chunks: ch } = this.refMask!;
             let { chunk } = this.refMask!.findChunkByCursor(this.$refInput.selectionStart!);
             if (!chunk.isVar) {
