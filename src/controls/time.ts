@@ -122,9 +122,6 @@ export default class WUPTimeControl<
         --ctrl-icon-img: var(--ctrl-time-icon-img-lg);
         --ctrl-icon-img: var(--ctrl-time-icon-img);
       }
-      :host wup-calendar {
-        margin: 0;
-      }
       :host [menu]>div:first-child {
         position: relative;
       }
@@ -179,26 +176,15 @@ export default class WUPTimeControl<
       :host [menu] li[focused]:after {
         ${focusStyle}
       }
-      :host [menu] li[empty] {
+      :host [menu] li[aria-hidden] {
         pointer-events: none;
         touch-action: none;
-        color: transparent;
       }
       :host [menu] [group] {
         display: flex;
         gap: 1px;
-        background: var(--base-sep);
         padding-top: 1px;
-      }
-      :host [menu] button:first-child {
-        --ctrl-icon-img: var(--wup-icon-check);
-        --ctrl-icon: green;
-        border-bottom-left-radius: var(--border-radius);
-      }
-      :host [menu] button:last-child {
-        --ctrl-icon-img: var(--wup-icon-cross);
-        --ctrl-icon: var(--ctrl-err-text);
-        border-bottom-right-radius: var(--border-radius);
+        background: var(--base-sep);
       }
       :host [menu] button {
         flex: 1 1 50%;
@@ -207,9 +193,18 @@ export default class WUPTimeControl<
         justify-content: center;
         height: 2.4em;
         border-radius: 0;
-        background: none;
         padding: 0;
         background: var(--base-btn3-bg);
+      }
+      :host [menu] button:first-child {
+        --ctrl-icon-img: var(--wup-icon-check);
+        --ctrl-icon: var(--ctrl-err-icon-valid);
+        border-bottom-left-radius: var(--border-radius);
+      }
+      :host [menu] button:last-child {
+        --ctrl-icon-img: var(--wup-icon-cross);
+        --ctrl-icon: var(--ctrl-err-text);
+        border-bottom-right-radius: var(--border-radius);
       }
       :host [menu] button:after {
         ${WUPcssIcon}
@@ -225,9 +220,6 @@ export default class WUPTimeControl<
         }
         :host [menu] button:hover {
           box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 10%);
-        }
-        :host [menu] button:hover:first-child:after {
-          --ctrl-icon: green;
         }
       }`;
   }
@@ -287,11 +279,6 @@ export default class WUPTimeControl<
     return !this.refMask || this.refMask.isCompleted;
   }
 
-  // protected override gotRender(): void {
-  //   super.gotRender();
-  //   this.$refInput.setAttribute("role", "spinbutton");
-  // }
-
   protected override gotChanges(propsChanged: Array<keyof WUP.Time.Options> | null): void {
     this._opts.format = (this.getAttribute("format") ?? this._opts.format)?.replace(/\D{0,1}(ss|SS)/, "") || "hh:mm A";
 
@@ -320,14 +307,13 @@ export default class WUPTimeControl<
   $refMenuLists?: WUP.Time.MenuListElement[];
   $refButtonOk?: HTMLButtonElement;
   $refButtonCancel?: HTMLButtonElement;
-  protected get validations(): WUP.Text.Options["validations"] {
+  protected override get validations(): WUP.Text.Options["validations"] {
     const vls = (super.validations as WUP.Time.Options["validations"])!; // undefined impossible because of textControl || {};
     // user can type not valid value according to options min,max,exclude. So need to enable validations rules in this case
     if (this._opts.min) vls.min = this._opts.min;
     if (this._opts.max) vls.max = this._opts.max;
     return vls as WUP.BaseControl.Options["validations"];
   }
-
 
   protected override async renderMenu(popup: WUPPopupElement, menuId: string, rows = 5): Promise<HTMLElement> {
     popup.$options.minWidthByTarget = false;
@@ -341,10 +327,8 @@ export default class WUPTimeControl<
       this.#lastInputChanged = false;
       const el = next.items[0];
       if (el) {
-        const prevItem = prev.items[0];
         // WARN: with such behavior user listens for cnt items in the list but it's wrong since it's carousel with virtualization
         // todo how to notify user that hours isn't valid according to validation
-        this._selectedMenuItem = prevItem;
         this.selectMenuItem(el);
         this._selectedMenuItem = undefined; // otherwise selection is cleared after popup-close
         this._focusedMenuItem && this.focusMenuItem(next.items[0]);
@@ -436,7 +420,6 @@ export default class WUPTimeControl<
           const txt = (lower ? ["", "am", "pm", ""] : ["", "AM", "PM", ""])[v];
           const item = append(lh12, txt, false);
           if (v === 0 || v === 3) {
-            item.setAttribute("empty", "");
             item.setAttribute("aria-hidden", true);
           }
           const items = [item];

@@ -157,7 +157,6 @@ export default abstract class WUPBaseControl<
 
   /** Text announced by screen-readers when control cleared; @defaultValue `cleared` */
   static $ariaCleared = "cleared";
-
   /** Text announced by screen-readers; @defaultValue `Error for` */
   static $ariaError = "Error for";
 
