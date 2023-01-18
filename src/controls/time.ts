@@ -502,7 +502,6 @@ export default class WUPTimeControl<
     delete this.$refMinutes;
     delete this.$refButtonOk;
     delete this.$refButtonCancel;
-    this.#lastActiveMenuList = null;
   }
 
   /** Cast selected items in menu to WUPTimeObject */
@@ -546,38 +545,6 @@ export default class WUPTimeControl<
 
   protected override resetInputValue(): void {
     // don't call super because validation is appeared
-  }
-
-  protected override gotFocus(): Array<() => void> {
-    const r = super.gotFocus();
-
-    // handle selection change on input
-    let caretPos = this.$refInput.selectionStart;
-    const r1 = onEvent(document, "selectionchange", () => {
-      const next = this.$refInput.selectionStart;
-      if (caretPos !== next) {
-        caretPos = next;
-        this.gotSelectionChange(this.$refInput);
-      }
-    });
-    r.push(r1);
-
-    return r;
-  }
-
-  #lastActiveMenuList?: WUP.Time.MenuListElement | null;
-  /** Called when user changed caret position on input */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected gotSelectionChange(_el: HTMLInputElement): void {
-    if (this.$isOpen) {
-      // todo: with such behavior user unable to listen for cursor change on input 'h|h' => 'hh|'
-      const next = this.findActiveMenuList();
-      if (next && this.#lastActiveMenuList !== next) {
-        // if current active menu position changed need to announce it
-        this.#lastActiveMenuList = next;
-        this.focusMenuItem(next!.querySelector("[aria-selected=true]"));
-      }
-    }
   }
 
   #lastInputChanged = false; // if press Enter: need to get value from last touched field (input OR menu)
