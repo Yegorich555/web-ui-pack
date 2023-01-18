@@ -37,6 +37,8 @@ export default class WUPTimeObject {
       isPM = args[2];
     }
 
+    const h12Invalid = isPM != null && (this.hours < 1 || this.hours > 12); // with AM/PM only 1...12 is valid
+
     if (this.hours === 12 && isPM === false) {
       this.hours = 0;
     } else if (this.hours !== 12 && isPM === true) {
@@ -44,13 +46,13 @@ export default class WUPTimeObject {
     }
 
     if (
+      h12Invalid ||
       Number.isNaN(this.hours) ||
       Number.isNaN(this.minutes) ||
       this.hours < 0 ||
       this.hours > 23 ||
       this.minutes < 0 ||
-      this.minutes > 59 ||
-      (isPM != null && (this.hours < 1 || this.hours > 12)) // with AM/PM only 1...12 is valid
+      this.minutes > 59
     ) {
       const err = RangeError("Out of range") as RangeError & { details: any };
       err.details = { parsed: this, args };
