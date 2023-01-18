@@ -3,11 +3,7 @@ import { WUPTimeControl, WUPTimeObject } from "web-ui-pack";
 
 const sideEffect = WUPTimeControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
-(window as any).myTimeValidations = {
-  required: true,
-  min: new WUPTimeObject(2, 30),
-  max: new WUPTimeObject(22, 50),
-} as WUP.Time.Options["validations"];
+(window as any).myTimeValidations = { required: true } as WUP.Time.Options["validations"];
 
 export default function TimeControlView() {
   return (
@@ -38,7 +34,8 @@ export default function TimeControlView() {
         <wup-time
           name="time"
           initValue="23:50"
-          step={1}
+          min="02:30"
+          max="22:50"
           validations="window.myTimeValidations"
           autoFocus={false}
           autoComplete="off"

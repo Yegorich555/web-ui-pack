@@ -29,11 +29,15 @@ declare global {
       step: number;
     }
     interface Options<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, Defaults<T, VM> {
+      /** User can't select time less than min */
+      min?: WUPTimeObject;
+      /** User can't select time more than max */
+      max?: WUPTimeObject;
       format: string;
     }
     interface Attributes
       extends WUP.BaseCombo.Attributes,
-        WUP.Base.toJSX<Partial<Pick<Options, "format" | "format" | "step">>> {}
+        WUP.Base.toJSX<Partial<Pick<Options, "format" | "min" | "max" | "format" | "step">>> {}
     interface JSXProps<C = WUPTimeControl> extends WUP.BaseCombo.JSXProps<C>, Attributes {
       initValue?: string;
     }
@@ -236,7 +240,7 @@ export default class WUPTimeControl<
 
   static get observedAttributes(): Array<string> {
     const arr = super.observedAttributes as Array<LowerKeys<WUP.Time.Attributes>>;
-    arr.push("format", "step");
+    arr.push("format", "min", "max", "step");
     return arr;
   }
 
@@ -307,6 +311,8 @@ export default class WUPTimeControl<
         .replace(/a/, "*m")
         .replace(/A/, "*M");
 
+    this._opts.min = this.parse(this.getAttribute("min") || "") ?? this._opts.min;
+    this._opts.max = this.parse(this.getAttribute("max") || "") ?? this._opts.max;
     this._opts.step = Number.parseInt(this.getAttribute("step") || "", 10) || this.#ctr.$defaults.step;
     super.gotChanges(propsChanged as any);
   }
@@ -314,6 +320,14 @@ export default class WUPTimeControl<
   $refMenuLists?: WUP.Time.MenuListElement[];
   $refButtonOk?: HTMLButtonElement;
   $refButtonCancel?: HTMLButtonElement;
+  protected get validations(): WUP.Text.Options["validations"] {
+    const vls = (super.validations as WUP.Time.Options["validations"])!; // undefined impossible because of textControl || {};
+    // user can type not valid value according to options min,max,exclude. So need to enable validations rules in this case
+    if (this._opts.min) vls.min = this._opts.min;
+    if (this._opts.max) vls.max = this._opts.max;
+    return vls as WUP.BaseControl.Options["validations"];
+  }
+
 
   protected override async renderMenu(popup: WUPPopupElement, menuId: string, rows = 5): Promise<HTMLElement> {
     popup.$options.minWidthByTarget = false;
