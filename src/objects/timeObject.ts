@@ -49,7 +49,8 @@ export default class WUPTimeObject {
       this.hours < 0 ||
       this.hours > 23 ||
       this.minutes < 0 ||
-      this.minutes > 59
+      this.minutes > 59 ||
+      (isPM != null && (this.hours < 1 || this.hours > 12)) // with AM/PM only 1...12 is valid
     ) {
       const err = RangeError("Out of range") as RangeError & { details: any };
       err.details = { parsed: this, args };

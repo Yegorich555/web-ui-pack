@@ -24,6 +24,9 @@ describe("timeObject", () => {
     expect(() => new WUPTimeObject(0, -1)).toThrow();
     expect(() => new WUPTimeObject(0, 60)).toThrow();
     expect(() => new WUPTimeObject(13, 60, true)).toThrow(); // 13PM is wrong time
+    expect(() => new WUPTimeObject("00:00 AM")).toThrow(); // AM/PM can be only 1...12
+    expect(() => new WUPTimeObject("00:00 PM")).toThrow(); // AM/PM can be only 1...12
+    expect(() => new WUPTimeObject("23:00 AM")).toThrow(); // AM/PM can be only 1...12
     h.unMockConsoleWarn();
 
     expect(new WUPTimeObject("12/46")).toEqual({ hours: 12, minutes: 46 });
