@@ -350,6 +350,7 @@ export default abstract class WUPBaseComboControl<
     this._focusedMenuItem?.removeAttribute("focused");
 
     if (next) {
+      next.id = next.id || this.#ctr.$uniqueId;
       next.setAttribute("focused", "");
       this.$refInput.setAttribute("aria-activedescendant", next.id);
       const ifneed = (next as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);

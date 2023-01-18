@@ -399,7 +399,7 @@ export default class WUPSelectControl<
       li.setAttribute("role", "option");
       li.setAttribute("aria-selected", "false");
       const id = this.#ctr.$uniqueId;
-      li.id = id;
+      li.id = id; // todo deprecate it because id is set from baseCombo by focusMenuItem
       return li;
     }) as Array<HTMLLIElement & { _text: string }> & { _focused: number; _selected: number };
 

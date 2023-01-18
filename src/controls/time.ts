@@ -311,9 +311,7 @@ export default class WUPTimeControl<
     super.gotChanges(propsChanged as any);
   }
 
-  $refHours?: WUP.Time.MenuListElement;
-  $refMinutes?: WUP.Time.MenuListElement;
-  $refHours12?: WUP.Time.MenuListElement;
+  $refMenuLists?: WUP.Time.MenuListElement[];
   $refButtonOk?: HTMLButtonElement;
   $refButtonCancel?: HTMLButtonElement;
 
@@ -323,11 +321,8 @@ export default class WUPTimeControl<
     const append = (ul: HTMLElement, v: number | string, twoDigs: boolean): HTMLElement => {
       const li = ul.appendChild(document.createElement("li"));
       li.textContent = twoDigs && v < 10 ? `0${v}` : v.toString();
-      // li.setAttribute("role", "gridcell");
-      // li.setAttribute("aria-selected", "false");
       return li;
     };
-    let isMenuReady = false;
     const selectNext = (prev: WUP.Scrolled.State, next: WUP.Scrolled.State): void => {
       this.#lastInputChanged = false;
       const el = next.items[0];
@@ -336,9 +331,9 @@ export default class WUPTimeControl<
         // WARN: with such behavior user listens for cnt items in the list but it's wrong since it's carousel with virtualization
         // todo how to notify user that hours isn't valid according to validation
         this._selectedMenuItem = prevItem;
-        this.selectMenuItem(el); // NiceToHave: goTo +2 need to change selection only once
+        this.selectMenuItem(el);
         this._selectedMenuItem = undefined; // otherwise selection is cleared after popup-close
-        isMenuReady && this.focusMenuItem(el);
+        this._focusedMenuItem && this.focusMenuItem(next.items[0]);
       }
     };
 
@@ -350,15 +345,16 @@ export default class WUPTimeControl<
     const parent = popup.appendChild(document.createElement("div"));
     parent.setAttribute("id", menuId);
     parent.setAttribute("role", "application");
+    this.$refMenuLists = [];
 
     // render hours
-    const lh = parent.appendChild(document.createElement("ul"));
+    const lh = parent.appendChild(document.createElement("ul")) as any as WUP.Time.MenuListElement;
     lh.setAttribute("aria-label", this.#ctr.$ariaHours);
+    this.$refMenuLists.push(lh);
     const h12 = /[aA]$/.test(this._opts.format);
     const hh2 = /[hH]+/g.exec(this._opts.format)![0].length === 2;
     // carousel for hours
-    this.$refHours = lh as any as WUP.Time.MenuListElement;
-    this.$refHours._scrolled = new WUPScrolled(lh, {
+    lh._scrolled = new WUPScrolled(lh, {
       // hours 0..23 pages 0..23
       swipeDebounceMs: 100,
       scrollToClick: true,
@@ -366,22 +362,22 @@ export default class WUPTimeControl<
       onRender: (_dir, v, prev, next) => {
         v = h12 && v === 0 ? 12 : v;
         const items = [append(lh, v, hh2)];
-        this.$refHours!._value = next.index;
+        lh._value = next.index;
         next.items = rows === 1 ? items : next.items;
         selectNext(prev, next);
         return items;
       },
     });
-    this.$refHours.goto = (v) => this.$refHours!._scrolled.goTo(v);
+    lh.goto = (v) => lh._scrolled.goTo(v);
 
     // render minutes
-    const lm = parent.appendChild(document.createElement("ul"));
+    const lm = parent.appendChild(document.createElement("ul")) as any as WUP.Time.MenuListElement;
     lm.setAttribute("aria-label", this.#ctr.$ariaMinutes);
+    this.$refMenuLists.push(lm);
     const mm2 = /[mM]+/g.exec(this._opts.format)![0].length === 2;
     const { step } = this._opts;
     // carousel for minutes
-    this.$refMinutes = lm as any as WUP.Time.MenuListElement;
-    this.$refMinutes._scrolled = new WUPScrolled(lm, {
+    lm._scrolled = new WUPScrolled(lm, {
       swipeDebounceMs: 100,
       scrollToClick: true,
       // minutes 0..59 pages 0..12
@@ -395,24 +391,24 @@ export default class WUPTimeControl<
       onRender: (_dir, v, prev, next) => {
         const items = [append(lm, v, mm2)];
         v = Math.round(v * step);
-        this.$refMinutes!._value = Math.round(next.index * step);
+        lm._value = Math.round(next.index * step);
         next.items = rows === 1 ? items : next.items;
         selectNext(prev, next);
         return items;
       },
     });
-    this.$refMinutes.goto = (v) => this.$refMinutes!._scrolled.goTo(v);
+    lm.goto = (v) => lm._scrolled.goTo(v);
 
     if (h12) {
       // render AM/PM
       // 12AM..1AM...11AM  12PM..1PM....11PM
       // 00    01    11    12    13     23
       const lower = this._opts.format.endsWith("a");
-      const lh12 = parent.appendChild(document.createElement("ul"));
+      const lh12 = parent.appendChild(document.createElement("ul")) as any as WUP.Time.MenuListElement;
       lh12.setAttribute("aria-label", this.#ctr.$ariaHours12);
+      this.$refMenuLists.push(lh12);
       // carousel for hours
-      this.$refHours12 = lh12 as any as WUP.Time.MenuListElement;
-      this.$refHours12._scrolled = new WUPScrolled(lh12, {
+      lh12._scrolled = new WUPScrolled(lh12, {
         swipeDebounceMs: 100,
         scrollToClick: true,
         // pm => empty, PM, AM, /*empty*/
@@ -422,7 +418,7 @@ export default class WUPTimeControl<
           if (next.index === 0 || next.index === 3) {
             return null;
           }
-          this.$refHours12!._value = next.index;
+          lh12._value = next.index;
           const txt = (lower ? ["", "am", "pm", ""] : ["", "AM", "PM", ""])[v];
           const item = append(lh12, txt, false);
           if (v === 0 || v === 3) {
@@ -435,10 +431,10 @@ export default class WUPTimeControl<
           return items;
         },
       });
-      this.$refHours12.goto = (isNext) => {
-        const v = this.$refHours12!._value;
+      lh12.goto = (isNext) => {
+        const v = lh12._value;
         const to = (isNext && v === 2 && 1) || (!isNext && v === 1 && 2) || (isNext ? v + 1 : v - 1);
-        this.$refHours12!._scrolled.goTo(to);
+        lh12._scrolled.goTo(to);
       };
     }
 
@@ -476,7 +472,6 @@ export default class WUPTimeControl<
       isOk !== null && this.gotBtnsClick(e, isOk);
     });
 
-    isMenuReady = true;
     return Promise.resolve(parent);
   }
 
@@ -487,34 +482,31 @@ export default class WUPTimeControl<
   ): Promise<WUPPopupElement | null> {
     this.#lastInputChanged = false;
     const v = this.$value;
-    if (this.$refHours && v) {
-      this.$refHours._scrolled.goTo(v.hours, false);
-      this.$refMinutes!._scrolled.goTo(v.minutes, false);
-      this.$refHours12?._scrolled.goTo(v.isPM ? 2 : 1, false);
+    if (this.$refMenuLists && v) {
+      this.$refMenuLists[0]._scrolled.goTo(v.hours, false);
+      this.$refMenuLists[1]._scrolled.goTo(v.minutes, false);
+      this.$refMenuLists[2]?._scrolled.goTo(v.isPM ? 2 : 1, false);
     }
     return super.goShowMenu(showCase, e, isNeedWait);
   }
 
   protected override removePopup(): void {
     super.removePopup();
-    delete this.$refHours;
-    delete this.$refHours12;
-    delete this.$refMinutes;
+    delete this.$refMenuLists;
     delete this.$refButtonOk;
     delete this.$refButtonCancel;
   }
 
   /** Cast selected items in menu to WUPTimeObject */
   protected getMenuValue(): ValueType {
-    const hh = this.$refHours!._value;
-    const mm = this.$refMinutes!._value;
-    const h12 = this.$refHours12?._value;
+    const hh = this.$refMenuLists![0]._value;
+    const mm = this.$refMenuLists![1]._value;
+    const h12 = this.$refMenuLists![2]?._value;
     return new WUPTimeObject(h12 != null && hh === 0 ? 12 : hh, mm, h12 ? h12 === 2 : undefined) as ValueType;
   }
 
   protected override focusMenuItem(next: HTMLElement | null): void {
     if (next) {
-      next.id = next.id || this.#ctr.$uniqueId;
       const v = this.getMenuValue();
       const str = this.valueToInput(v) as string;
       next.setAttribute("aria-label", str);
@@ -553,37 +545,10 @@ export default class WUPTimeControl<
     super.gotInput(e, true);
   }
 
-  /** Returns current menu list that user operates with hours/minutes/h12 */
-  protected findActiveMenuList(): WUP.Time.MenuListElement | null {
-    if (!this.$refHours) {
-      return null;
-    }
-    const { chunks: ch } = this.refMask!;
-    let { chunk } = this.refMask!.findChunkByCursor(this.$refInput.selectionStart!);
-    if (!chunk.isVar) {
-      chunk = ch[chunk.index + 1] || ch[chunk.index - 1]; // when cursor at the end of suffix
-    }
-    const hhChunk = ch.find((c) => c.isVar)!;
-    if (chunk === hhChunk) {
-      return this.$refHours!;
-    }
-    const mmChunk = ch.find((c, i) => i > hhChunk.index && c.isVar)!;
-    if (chunk === mmChunk) {
-      return this.$refMinutes!;
-    }
-    const h12Chunk = ch.find((c, i) => i > mmChunk.index && c.isVar);
-    if (chunk === h12Chunk) {
-      return this.$refHours12!;
-    }
-
-    return null;
-  }
-
   protected override gotKeyDown(e: KeyboardEvent): Promise<void> {
     const wasOpen = this.$isOpen;
     if (e.key === "Enter") {
       if (this.#lastInputChanged) {
-        this.focusMenuItem(null);
         this.goHideMenu(HideCases.OnPressEnter);
         e.preventDefault();
       } else {
@@ -595,21 +560,34 @@ export default class WUPTimeControl<
       return r;
     }
     if (wasOpen) {
-      let isNext = false;
+      let isHandled = true;
+      const lst = this.$refMenuLists!;
+      let ind = (this._focusedMenuItem && lst!.findIndex((ref) => ref.contains(this._focusedMenuItem!))) || 0;
       switch (e.key) {
+        case "ArrowLeft":
+          if (ind > 0) --ind;
+          this.focusMenuItem(lst[ind].querySelector("[aria-selected=true]"));
+          break;
+        case "ArrowRight":
+          if (ind < lst.length - 1) ++ind;
+          this.focusMenuItem(lst[ind].querySelector("[aria-selected=true]"));
+          break;
         case "ArrowDown":
-          isNext = true;
-        // eslint-disable-next-line no-fallthrough
+          this._focusedMenuItem = lst[ind].querySelector("[aria-selected=true]");
+          lst[ind].goto(true);
+          break;
         case "ArrowUp":
-          {
-            e.preventDefault();
-            this.#lastInputChanged = false;
-            const ref = this.findActiveMenuList();
-            ref!.goto(isNext);
-          }
+          this._focusedMenuItem = lst[ind].querySelector("[aria-selected=true]");
+          lst[ind].goto(false);
           break;
         default:
+          isHandled = false;
           break;
+      }
+
+      if (isHandled) {
+        e.preventDefault();
+        this.#lastInputChanged = false;
       }
     }
     return r;
