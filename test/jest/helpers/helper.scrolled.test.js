@@ -296,7 +296,7 @@ describe("helper.onScrollStop", () => {
     expect(onRender).not.toBeCalled(); // because it's X-scroll
   });
 
-  test("several pages", async () => {
+  test("several pages (without total & cycled)", async () => {
     const onRender = jest.fn().mockImplementation((dir, renderIndex, prev, next) => {
       const li = createItem(dir, renderIndex);
       prev.items.forEach((el) => el.removeAttribute("cur"));
@@ -305,8 +305,7 @@ describe("helper.onScrollStop", () => {
       next.items.forEach((el) => el.removeAttribute("prev", next.index));
       return [li];
     });
-    onRender.last = () => onRender.mock.calls[onRender.mock.calls.length - 1];
-    const s = new WUPScrolled(ul, { onRender, pages: { current: 2, before: 1, after: 1 } });
+    const s = new WUPScrolled(ul, { onRender, scrollToClick: true, pages: { current: 2, before: 1, after: 1 } });
     await nextFrames(1); // to fire 1st scrollToRange
 
     // during the init if option pages is pointed => render first items
@@ -348,11 +347,73 @@ describe("helper.onScrollStop", () => {
     onRender.mockClear();
     s.goTo(0);
     expect(onRender).toBeCalledTimes(0); // noRender if goto the same page
-
     s.goTo(-1);
     expect(onRender).toBeCalledTimes(0); // noRender to outOfRange
 
-    // todo test goTo last page when options.pages.total is pointed
+    await h.userClick(ul.lastElementChild);
+    expect(onRender).toBeCalledTimes(1);
+    expect(ul.innerHTML).toMatchInlineSnapshot(
+      `"<li num="-1"></li><li num="0" prev="0"></li><li num="1" cur="1"></li><li num="2"></li>"`
+    );
+    await nextFrames(5);
+    expect(ul.innerHTML).toMatchInlineSnapshot(
+      `"<li num="0" prev="0"></li><li num="1" cur="1"></li><li num="2"></li>"`
+    );
+
+    onRender.mockClear();
+    await h.userClick(ul.children.item(1));
+    expect(onRender).toBeCalledTimes(0); // no render if click on the same item
+
+    await h.userClick(ul);
+    expect(onRender).toBeCalledTimes(0); // no render if click not on the item
+
+    await h.userClick(ul.firstElementChild, { button: 1 }); // no render if right-click
+    expect(onRender).toBeCalledTimes(0); // no render if click not on the item
+
+    ul.firstElementChild.onclick = (e) => e.preventDefault();
+    await h.userClick(ul.firstElementChild);
+    expect(onRender).toBeCalledTimes(0); // no render if prevented
+    ul.firstElementChild.onclick = undefined;
+  });
+
+  test("several pages (with total)", async () => {
+    const onRender = jest.fn().mockImplementation((dir, renderIndex, prev, next) => {
+      const li = createItem(dir, renderIndex);
+      prev.items.forEach((el) => el.removeAttribute("cur"));
+      prev.items.forEach((el) => el.setAttribute("prev", prev.index));
+      next.items.forEach((el) => el.setAttribute("cur", next.index));
+      next.items.forEach((el) => el.removeAttribute("prev", next.index));
+      return [li];
+    });
+    const s = new WUPScrolled(ul, { onRender, pages: { current: 2, total: 3 } });
+    await nextFrames(1); // to fire 1st scrollToRange
+    expect(ul.innerHTML).toMatchInlineSnapshot(`"<li num="2"></li>"`); // no attr [cur] because next.items always empty
+    expect(onRender).toBeCalledTimes(1);
+
+    onRender.mockClear();
+    s.goTo(true);
+    expect(onRender).toBeCalledTimes(0); // because cycled=false and no next pages
+
+    s.goTo(false);
+    expect(ul.innerHTML).toMatchInlineSnapshot(`"<li num="1"></li><li num="2" prev="2"></li>"`);
+    await nextFrames(5);
+    expect(ul.innerHTML).toMatchInlineSnapshot(`"<li num="1"></li>"`);
+    expect(onRender).toBeCalledTimes(1);
+
+    onRender.mockClear();
+    const spyThen = jest.fn();
+    s.goTo(0).then(spyThen);
+    await nextFrames(5);
+    expect(onRender).toBeCalledTimes(1);
+    expect(spyThen).toBeCalledTimes(1);
+
+    onRender.mockClear();
+    spyThen.mockClear();
+    s.goTo(1, false).then(spyThen); // goto without smooth
+    expect(ul.innerHTML).toMatchInlineSnapshot(`"<li num="0" prev="0"></li><li num="1"></li>"`);
+    expect(onRender).toBeCalledTimes(1);
+    await h.wait(1);
+    expect(spyThen).toBeCalledTimes(1);
   });
 
   test("dispose()", async () => {

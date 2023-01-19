@@ -61,7 +61,7 @@ export default class WUPScrolled {
     const p = options.pages;
     if (p) {
       const from = -1 * (p.before ?? 0);
-      const to = p.after ?? p.current;
+      const to = p.after ?? 0;
       let curItems: HTMLElement[];
 
       for (let i = from; i <= to; ++i) {
