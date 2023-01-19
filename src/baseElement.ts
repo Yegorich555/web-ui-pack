@@ -48,7 +48,7 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
           --base-sep: #e4e4e4;
           --border-radius: 6px;
           --anim-time: 200ms;
-          --anim: var(--anim-time, 200ms) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
         }`;
   }
 
