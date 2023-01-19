@@ -277,9 +277,11 @@ export default class WUPTextControl<
           mask-image: none;
         }
         :host label:after {
+          cursor: pointer;
           margin-right: calc(var(--ctrl-icon-size) / -2);
         }
         :host label:before {
+          cursor: pointer;
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
         :host label button {
