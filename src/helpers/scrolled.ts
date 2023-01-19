@@ -16,17 +16,19 @@ declare global {
       renderIndex: number;
     }
     interface Options extends IScrollOptions {
-      /** Page options; skip this if renderin onInit doesn't required  */
+      /** Page options; skip this if rendering on init doesn't required  */
       pages?: {
         /** Current page index */
         current: number;
         /** Total count of pages; skip this for infinite-scroll */
         total?: number;
-        /** Whether scrolling must be cycled: when `pageIndex < 0 || pageIndex > total - 1` */
+        /** Whether scrolling must be cycled: when `pageIndex < 0 || pageIndex > last` */
         cycled?: boolean;
-        /** Visible/rendered pages together with current page */
+        /** Visible/rendered pages together with current page;
+         * @tutorial if it's pointed then provide rendering empty-item for pageIndex < 0 (@see Options.onRender) */
         before?: number;
-        /** Visible/rendered pages together with current page */
+        /** Visible/rendered pages together with current page;
+         * @tutorial if pointed `after` & `total` & missed `cycled` then provide rendering empty-item for pageIndex > last (@see Options.onRender) */
         after?: number;
       };
       /** Scroll to item that click is fired */
@@ -146,7 +148,7 @@ export default class WUPScrolled {
   }
 
   /** Get next page according to options.pages */
-  incrementPage(pIndex: number, inc: number): number {
+  incrementPage(pIndex: number, inc: number, restrict = false): number {
     pIndex += inc;
     const p = this.options.pages;
     if (p) {
@@ -155,8 +157,8 @@ export default class WUPScrolled {
           throw new Error("option [pages.cycled] doesn't work without [pages.total]");
         }
         pIndex = (p.total + pIndex) % p.total;
-      } else {
-        pIndex = Math.min(p.total ? p.total - 1 : pIndex, Math.max(0, pIndex));
+      } else if (restrict) {
+        pIndex = Math.min(Math.max(pIndex, 0), p.total ? p.total - 1 : Number.MAX_SAFE_INTEGER);
       }
     }
     return pIndex;
@@ -201,7 +203,7 @@ export default class WUPScrolled {
     // -2: -1: -2,
     for (let i = 1; i <= Math.abs(inc); ++i) {
       const dinc = isNext ? 1 : -1;
-      pi = this.incrementPage(this.state.index, dinc);
+      pi = this.incrementPage(this.state.index, dinc, true);
       if (this.state.index === pi) {
         break; // no-render if no changes
       }

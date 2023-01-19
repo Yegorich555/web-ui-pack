@@ -1,12 +1,13 @@
-import WUPScrolled from "web-ui-pack/helpers/scrolled";
+// import WUPScrolled from "web-ui-pack/helpers/scrolled";
+import WUPScrolled from "../../../src/helpers/scrolled";
 import * as h from "../../testHelper";
 
 let ul = document.createElement("ul");
 
 let nextFrames = (n = 5) => Promise.resolve(n);
 let itemNum = 0;
-const createItem = (i) => {
-  itemNum += i;
+const createItem = (i, forceNum = null) => {
+  itemNum = forceNum ?? itemNum + i;
   const li = document.body.firstElementChild.appendChild(document.createElement("li"));
   li.setAttribute("num", itemNum.toString());
   jest.spyOn(li, "offsetHeight", "get").mockImplementation(() => li.parentElement.offsetHeight);
@@ -36,7 +37,7 @@ afterEach(() => {
 });
 
 describe("helper.onScrollStop", () => {
-  test("single page: wheel & swipe", async () => {
+  test("wheel & swipe", async () => {
     ul.appendChild(createItem(1));
     const onRender = jest.fn().mockImplementation((dir) => [createItem(dir)]);
     onRender.last = () => onRender.mock.calls[onRender.mock.calls.length - 1];
@@ -172,7 +173,7 @@ describe("helper.onScrollStop", () => {
     );
   });
 
-  test("scroll with keyboard", async () => {
+  test("keyboard", async () => {
     ul.appendChild(createItem(1));
     const onRender = jest.fn().mockImplementation((dir) => [createItem(dir)]);
     ul._scrolled = new WUPScrolled(ul, { onRender });
@@ -293,6 +294,65 @@ describe("helper.onScrollStop", () => {
     expect(onRender).not.toBeCalled(); // because it's X-scroll
     ul.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
     expect(onRender).not.toBeCalled(); // because it's X-scroll
+  });
+
+  test("several pages", async () => {
+    const onRender = jest.fn().mockImplementation((dir, renderIndex, prev, next) => {
+      const li = createItem(dir, renderIndex);
+      prev.items.forEach((el) => el.removeAttribute("cur"));
+      prev.items.forEach((el) => el.setAttribute("prev", prev.index));
+      next.items.forEach((el) => el.setAttribute("cur", next.index));
+      next.items.forEach((el) => el.removeAttribute("prev", next.index));
+      return [li];
+    });
+    onRender.last = () => onRender.mock.calls[onRender.mock.calls.length - 1];
+    const s = new WUPScrolled(ul, { onRender, pages: { current: 2, before: 1, after: 1 } });
+    await nextFrames(1); // to fire 1st scrollToRange
+
+    // during the init if option pages is pointed => render first items
+    expect(onRender).toBeCalledTimes(3);
+    expect(ul.innerHTML).toMatchInlineSnapshot(`"<li num="1"></li><li num="2" cur="2"></li><li num="3"></li>"`);
+
+    s.goTo(true);
+    expect(ul.innerHTML).toMatchInlineSnapshot(
+      `"<li num="1"></li><li num="2" prev="2"></li><li num="3" cur="3"></li><li num="4"></li>"`
+    );
+    await nextFrames(5);
+    expect(ul.innerHTML).toMatchInlineSnapshot(
+      `"<li num="2" prev="2"></li><li num="3" cur="3"></li><li num="4"></li>"`
+    );
+    expect(onRender).toBeCalledTimes(4);
+
+    s.goTo(false);
+    expect(ul.innerHTML).toMatchInlineSnapshot(
+      `"<li num="1"></li><li num="2" cur="2"></li><li num="3" prev="3"></li><li num="4"></li>"`
+    );
+    await nextFrames(5);
+    expect(ul.innerHTML).toMatchInlineSnapshot(
+      `"<li num="1"></li><li num="2" cur="2"></li><li num="3" prev="3"></li>"`
+    );
+    expect(onRender).toBeCalledTimes(5);
+
+    expect(s.state.index).toBe(2);
+    onRender.mockClear();
+    s.goTo(0); // current page is placed between before & after pageIndex: -1 (so negative index expected to render current at the center)
+    expect(ul.innerHTML).toMatchInlineSnapshot(
+      `"<li num="-1"></li><li num="0" cur="0"></li><li num="1" prev="1"></li><li num="2" prev="2"></li><li num="3" prev="3"></li>"`
+    );
+    await nextFrames(5);
+    expect(ul.innerHTML).toMatchInlineSnapshot(
+      `"<li num="-1"></li><li num="0" cur="0"></li><li num="1" prev="1"></li>"`
+    );
+    expect(onRender).toBeCalledTimes(2); // because inc was to 2 pages
+
+    onRender.mockClear();
+    s.goTo(0);
+    expect(onRender).toBeCalledTimes(0); // noRender if goto the same page
+
+    s.goTo(-1);
+    expect(onRender).toBeCalledTimes(0); // noRender to outOfRange
+
+    // todo test goTo last page when options.pages.total is pointed
   });
 
   test("dispose()", async () => {

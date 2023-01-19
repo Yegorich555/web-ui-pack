@@ -9,7 +9,7 @@ export interface IScrollOptions {
   /** Min swipe-movement in pixels when need to scroll
    * @defaultValue 10 */
   swipeDebounceDelta?: number;
-  /** Return true to skip scroll event (when element is disabled) */
+  /** Return true to skip scroll event (when element somehow is disabled for example) */
   skip?: () => boolean;
 }
 
