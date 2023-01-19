@@ -11,9 +11,9 @@ const sideEffect = WUPPasswordControl;
   minUpper: 1,
   minLower: 1,
   special: { min: 1, chars: "#!-_?,.@:;'" },
-} as WUPPassword.Options["validations"];
+} as WUP.Password.Options["validations"];
 
-(window as any).myPasswordValidations = { required: true, min: 4 } as WUPPassword.Options["validations"];
+(window as any).myPasswordValidations = { required: true, min: 4 } as WUP.Password.Options["validations"];
 
 export default function PasswordControlView() {
   return (

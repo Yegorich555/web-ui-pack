@@ -7,9 +7,9 @@ const sideEffect = WUPNumberControl;
 (window as any).myNumberValidations = {
   min: 8,
   max: 1000,
-} as WUPNumber.Options["validations"];
+} as WUP.Number.Options["validations"];
 
-(window as any).myRequiredValidations = { required: true } as WUPNumber.Options["validations"];
+(window as any).myRequiredValidations = { required: true } as WUP.Number.Options["validations"];
 
 export default function NumberControlView() {
   return (

@@ -3,7 +3,7 @@ import { WUPDateControl } from "web-ui-pack";
 
 const sideEffect = WUPDateControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
-(window as any).myDateValidations = { required: true } as WUPCalendar.Options["validations"];
+(window as any).myDateValidations = { required: true } as WUP.Calendar.Options["validations"];
 (window as any).myDateExcludeDays = [
   new Date("2022-02-28"),
   new Date("2022-03-16"),
