@@ -118,7 +118,7 @@ export default class WUPDateControl<
         (v === undefined || v > setV) &&
         `Max value is ${dateToString(setV, (c as WUPDateControl)._opts.format.toUpperCase())}`,
       exclude: (v, setV) =>
-        (v === undefined || setV.some((d) => d.valueOf() === v.valueOf())) && `This date is disabled`,
+        (v === undefined || setV.some((d) => d.valueOf() === v.valueOf())) && `This value is disabled`,
     },
     // firstWeekDay: 1,
     // format: localeInfo.date.toLowerCase()
