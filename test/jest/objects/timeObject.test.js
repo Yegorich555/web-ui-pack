@@ -13,8 +13,9 @@ describe("timeObject", () => {
     expect(new WUPTimeObject()).toEqual({ hours: 0, minutes: 0 });
     expect(new WUPTimeObject(23, 15)).toEqual({ hours: 23, minutes: 15 });
     expect(new WUPTimeObject(3, 15, true)).toEqual({ hours: 15, minutes: 15 });
-    expect(new WUPTimeObject(11, 7, true)).toEqual({ hours: 11, minutes: 7 });
+    expect(new WUPTimeObject(11, 7, true)).toEqual({ hours: 23, minutes: 7 });
     expect(new WUPTimeObject(3, 15, false)).toEqual({ hours: 3, minutes: 15 });
+    expect(new WUPTimeObject(11, 7, false)).toEqual({ hours: 11, minutes: 7 });
     expect(new WUPTimeObject(123)).toEqual({ hours: 2, minutes: 3 });
     expect(new WUPTimeObject("12:46")).toEqual({ hours: 12, minutes: 46 });
     expect(new WUPTimeObject("02:09")).toEqual({ hours: 2, minutes: 9 });
