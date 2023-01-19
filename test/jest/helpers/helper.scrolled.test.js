@@ -1,5 +1,5 @@
-// import WUPScrolled from "web-ui-pack/helpers/scrolled";
-import WUPScrolled from "../../../src/helpers/scrolled";
+import WUPScrolled from "web-ui-pack/helpers/scrolled";
+// import WUPScrolled from "../../../src/helpers/scrolled";
 import * as h from "../../testHelper";
 
 let ul = document.createElement("ul");
@@ -305,7 +305,7 @@ describe("helper.onScrollStop", () => {
       next.items.forEach((el) => el.removeAttribute("prev", next.index));
       return [li];
     });
-    const s = new WUPScrolled(ul, { onRender, scrollToClick: true, pages: { current: 2, before: 1, after: 1 } });
+    const s = new WUPScrolled(ul, { onRender, scrollByClick: true, pages: { current: 2, before: 1, after: 1 } });
     await nextFrames(1); // to fire 1st scrollToRange
 
     // during the init if option pages is pointed => render first items
@@ -414,6 +414,28 @@ describe("helper.onScrollStop", () => {
     expect(onRender).toBeCalledTimes(1);
     await h.wait(1);
     expect(spyThen).toBeCalledTimes(1);
+  });
+
+  test("several pages (cycled)", async () => {
+    const onRender = jest.fn().mockImplementation((dir, renderIndex, prev, next) => {
+      const li = createItem(dir, renderIndex);
+      prev.items.forEach((el) => el.removeAttribute("cur"));
+      prev.items.forEach((el) => el.setAttribute("prev", prev.index));
+      next.items.forEach((el) => el.setAttribute("cur", next.index));
+      next.items.forEach((el) => el.removeAttribute("prev", next.index));
+      return [li];
+    });
+    expect(() => new WUPScrolled(ul, { onRender, pages: { current: 2, cycled: true } })).toThrow();
+    const s = new WUPScrolled(ul, {
+      onRender,
+      scrollByClick: true,
+      pages: { current: 11, total: 12, after: 1, cycled: true },
+    });
+    await nextFrames(1); // to fire 1st scrollToRange
+    expect(ul.innerHTML).toMatchInlineSnapshot(`"<li num="11" cur="11"></li><li num="0"></li>"`);
+    expect(onRender).toBeCalledTimes(2);
+
+    // todo cover other cases here
   });
 
   test("dispose()", async () => {

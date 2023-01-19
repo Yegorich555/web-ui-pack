@@ -409,7 +409,7 @@ export default class WUPTimeControl<
     lh._scrolled = new WUPScrolled(lh, {
       // hours 0..23 pages 0..23
       swipeDebounceMs: 100,
-      scrollToClick: true,
+      scrollByClick: true,
       pages: { current: h12 ? hh % 12 : hh, total: h12 ? 12 : 24, before: drows, after: drows, cycled: true },
       onRender: (_dir, v, prev, next) => {
         v = h12 && v === 0 ? 12 : v;
@@ -431,7 +431,7 @@ export default class WUPTimeControl<
     // carousel for minutes
     lm._scrolled = new WUPScrolled(lm, {
       swipeDebounceMs: 100,
-      scrollToClick: true,
+      scrollByClick: true,
       // minutes 0..59 pages 0..12
       pages: {
         current: Math.round(mm / step),
@@ -462,7 +462,7 @@ export default class WUPTimeControl<
       // carousel for hours
       lh12._scrolled = new WUPScrolled(lh12, {
         swipeDebounceMs: 100,
-        scrollToClick: true,
+        scrollByClick: true,
         // pm => empty, PM, AM, /*empty*/
         // am => /*empty*/, PM, AM, empty
         pages: { current: this.$value?.isPM ? 2 : 1, total: 4, before: Math.min(drows, 1), after: Math.min(drows, 1) },

@@ -16,6 +16,9 @@ declare global {
       renderIndex: number;
     }
     interface Options extends IScrollOptions {
+      /** Scroll to target of click event;
+       * @defaultValue false */
+      scrollByClick?: boolean;
       /** Page options; skip this if rendering on init doesn't required  */
       pages?: {
         /** Current page index */
@@ -31,8 +34,6 @@ declare global {
          * @tutorial if pointed `after` & `total` & missed `cycled` then provide rendering empty-item for pageIndex > last (@see Options.onRender) */
         after?: number;
       };
-      /** Scroll to item that click is fired */
-      scrollToClick?: boolean;
       /** Render callback that must return new items or null if it's ended up
        * @param dir render direction: `1`-next, `-1`-prev
        * @param ind rendered page index
@@ -84,7 +85,7 @@ export default class WUPScrolled {
 
     this.disposeLst.push(onScroll(el, (d) => this.goTo(this.state.index + d), options));
     this.disposeLst.push(onEvent(el, "keydown", (e) => this.gotKeyDown(e), { passive: false }));
-    options.scrollToClick && this.disposeLst.push(onEvent(el, "click", (e) => this.gotClick(e), { passive: false }));
+    options.scrollByClick && this.disposeLst.push(onEvent(el, "click", (e) => this.gotClick(e), { passive: false }));
   }
 
   /** Called on keydown event and processed if event isn't prevented */
