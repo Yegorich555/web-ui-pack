@@ -740,6 +740,7 @@ exports[`control.number validations options.validationCase 1`] = `
 exports[`control.number validations options.validationCase 2`] = `
 <wup-num
   invalid=""
+  style="overflow: hidden;"
 >
   <label
     for="txt1"
@@ -787,6 +788,7 @@ exports[`control.number validations options.validationCase 2`] = `
 exports[`control.number validations options.validationCase 3`] = `
 <wup-num
   invalid=""
+  style="overflow: hidden;"
 >
   <label
     for="txt1"
@@ -834,6 +836,7 @@ exports[`control.number validations options.validationCase 3`] = `
 exports[`control.number validations options.validationCase 4`] = `
 <wup-num
   invalid=""
+  style=""
 >
   <label
     for="txt1"
