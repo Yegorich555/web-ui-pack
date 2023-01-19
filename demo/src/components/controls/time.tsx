@@ -4,6 +4,7 @@ import { WUPTimeControl, WUPTimeObject } from "web-ui-pack";
 const sideEffect = WUPTimeControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
 (window as any).myTimeValidations = { required: true } as WUP.Time.Options["validations"];
+(window as any).myTimeExclude = { test: (v: WUPTimeObject) => v.hours === 12 && v.minutes === 48 };
 
 export default function TimeControlView() {
   return (
@@ -20,6 +21,8 @@ export default function TimeControlView() {
       features={[
         "Inheritted features from TextControl",
         "Powerful accessibility support (keyboard, announcenement)",
+        "Scrollable & well animated pickers (with swipe for touchscreens)",
+        "Wide ability to disable particular values (options min/max/exclude)",
         "Display format depends on user-locale (see web-ui-pack/objects/localeInfo). Use $options.format or localeInfo (globally)",
       ]}
     >
@@ -36,6 +39,7 @@ export default function TimeControlView() {
           initValue="23:50"
           min="02:30"
           max="22:50"
+          exclude="window.myTimeExclude"
           validations="window.myTimeValidations"
           autoFocus={false}
           autoComplete="off"

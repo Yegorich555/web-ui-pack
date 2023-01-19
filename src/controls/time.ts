@@ -17,7 +17,8 @@ declare global {
       min: WUPTimeObject;
       /** Enabled if option [min] is pointed; if $value > pointed shows message 'Max time is {x}` */
       max: WUPTimeObject;
-      // todo add option exclude as callback for checking
+      /** User can't select time in excluded range */
+      exclude: { test: (v: WUPTimeObject) => boolean };
     }
     interface Defaults<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Defaults<T, VM> {
       /** String representation of displayed time (enables mask, - to disable mask set $options.mask="");
@@ -34,11 +35,13 @@ declare global {
       min?: WUPTimeObject;
       /** User can't select time more than max */
       max?: WUPTimeObject;
+      /** User can't select time in excluded range */
+      exclude?: { test: (v: WUPTimeObject) => boolean };
       format: string;
     }
     interface Attributes
       extends WUP.BaseCombo.Attributes,
-        WUP.Base.toJSX<Partial<Pick<Options, "format" | "min" | "max" | "format" | "step">>> {}
+        WUP.Base.toJSX<Partial<Pick<Options, "format" | "min" | "max" | "exclude" | "format" | "step">>> {}
     interface JSXProps<C = WUPTimeControl> extends WUP.BaseCombo.JSXProps<C>, Attributes {
       initValue?: string;
     }
@@ -67,7 +70,7 @@ declare global {
   const el = document.createElement("wup-time");
   el.$options.name = "time";
   el.$initValue = new WUPTimeObject(22, 15);
-  el.$options.validations = { required: true, min=new WUPTimeObject(01,05), max=new WUPTimeObject(23,00) };
+  el.$options.validations = { required: true, min=new WUPTimeObject(01,05), max=new WUPTimeObject(23,00), exclude= };
   el.$options.format = "hh-mm A";
   const form = document.body.appendChild(document.createElement("wup-form"));
   form.appendChild(el);
@@ -256,6 +259,7 @@ export default class WUPTimeControl<
         (v === undefined || v < setV) && `Min value is ${setV.format((c as WUPTimeControl)._opts.format)}`,
       max: (v, setV, c) =>
         (v === undefined || v > setV) && `Max value is ${setV.format((c as WUPTimeControl)._opts.format)}`,
+      exclude: (v, fn) => (v === undefined || fn.test(v)) && "This value is disabled",
     },
   };
 
@@ -311,6 +315,7 @@ export default class WUPTimeControl<
 
     this._opts.min = this.parse(this.getAttribute("min") || "") ?? this._opts.min;
     this._opts.max = this.parse(this.getAttribute("max") || "") ?? this._opts.max;
+    this._opts.exclude = this.getRefAttr("exclude");
     this._opts.step = Number.parseInt(this.getAttribute("step") || "", 10) || this.#ctr.$defaults.step;
     super.gotChanges(propsChanged as any);
   }
@@ -323,13 +328,14 @@ export default class WUPTimeControl<
     // user can type not valid value according to options min,max,exclude. So need to enable validations rules in this case
     if (this._opts.min) vls.min = this._opts.min;
     if (this._opts.max) vls.max = this._opts.max;
+    if (this._opts.exclude) vls.exclude = this._opts.exclude;
     return vls as WUP.BaseControl.Options["validations"];
   }
 
   /** Set [disabled] for items according to $options.min & max */
   protected disableItems(): void {
-    const { min, max } = this._opts;
-    if ((!min && !max) || !this.$refMenuLists) {
+    const { min, max, exclude } = this._opts;
+    if ((!min && !max && !exclude) || !this.$refMenuLists) {
       return;
     }
 
@@ -340,7 +346,7 @@ export default class WUPTimeControl<
         const el = lst.children.item(i)!;
         lst._value = (el as any)._value;
         const v = this.getMenuValue();
-        const isDisabled = v < min! || v > max!;
+        const isDisabled = v < min! || v > max! || exclude?.test(v);
         this.setAttr.call(el, "disabled", isDisabled, true);
       }
       lst._value = was;
@@ -357,7 +363,7 @@ export default class WUPTimeControl<
       }
     }
     const v = this.getMenuValue();
-    const isDisabled = v < min! || v > max!;
+    const isDisabled = v < min! || v > max! || exclude?.test(v);
     this.setAttr.call(this.$refButtonOk!, "disabled", isDisabled, true);
   }
 
@@ -566,6 +572,7 @@ export default class WUPTimeControl<
   /** Called when need to change/cancel changing & close */
   protected gotBtnsClick(e: MouseEvent, isOk: boolean): void {
     if (isOk) {
+      // todo if user set invalid value prev error isn't changed to new error; to check it doesn't disable this button and select invalid
       this.selectValue(this.getMenuValue());
     } else {
       setTimeout(() => this.goHideMenu(HideCases.onClick, e)); // without timeout it handles click by listener and opens again
