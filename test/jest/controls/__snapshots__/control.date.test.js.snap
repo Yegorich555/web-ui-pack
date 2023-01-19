@@ -246,7 +246,7 @@ clip: rect(1px, 1px, 1px, 1px);}
           --base-sep: #e4e4e4;
           --border-radius: 6px;
           --anim-time: 200ms;
-          --anim: var(--anim-time, 200ms) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
         }
   :root {
         --ctrl-padding: 1.5em 1em 0.5em 1em;
@@ -372,7 +372,6 @@ margin: 0;
 padding: 0 5px;
 flex: 0 0 auto;
 align-self: stretch;
-cursor: pointer;
 border: none;
 box-shadow: none;
 background: var(--ctrl-icon);
@@ -543,7 +542,6 @@ margin: 0;
 padding: 0 5px;
 flex: 0 0 auto;
 align-self: stretch;
-cursor: pointer;
 border: none;
 box-shadow: none;
 background: var(--ctrl-icon);
@@ -559,9 +557,11 @@ mask-image: var(--ctrl-icon-img);
           mask-image: none;
         }
         WUP-DATE label:after {
+          cursor: pointer;
           margin-right: calc(var(--ctrl-icon-size) / -2);
         }
         WUP-DATE label:before {
+          cursor: pointer;
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
         WUP-DATE label button {
