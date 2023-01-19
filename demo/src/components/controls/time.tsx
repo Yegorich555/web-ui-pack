@@ -43,14 +43,15 @@ export default function TimeControlView() {
           validations="window.myTimeValidations"
           autoFocus={false}
           autoComplete="off"
-          // ref={(el) => {
-          //   if (el) {
-          //     el.$options.autoFocus = true;
-          //     setTimeout(() => {
-          //       el.$showMenu();
-          //     }, 100);
-          //   }
-          // }}
+          ref={(el) => {
+            // todo remove after tests
+            if (el) {
+              el.$options.autoFocus = true;
+              setTimeout(() => {
+                el.$showMenu();
+              }, 100);
+            }
+          }}
         />
         <wup-time name="empty" />
         <wup-time name="another" label="Another format: h-m" format="h-m" />

@@ -839,7 +839,7 @@ exports[`control.pwd validations $options.validationShowAll 2`] = `
   >
     <span>
       <input
-        aria-describedby="txt3"
+        aria-describedby="txt2"
         aria-required="true"
         autocomplete="new-password"
         id="txt1"
@@ -868,7 +868,7 @@ exports[`control.pwd validations $options.validationShowAll 2`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt3"
+    id="txt2"
     role="alert"
     style="display: none;"
   >
@@ -924,7 +924,7 @@ exports[`control.pwd validations $options.validationShowAll 3`] = `
   >
     <span>
       <input
-        aria-describedby="txt6"
+        aria-describedby="txt5"
         aria-required="true"
         autocomplete="new-password"
         id="txt1"
@@ -955,7 +955,7 @@ exports[`control.pwd validations $options.validationShowAll 3`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt6"
+    id="txt5"
     role="alert"
     style="display: none;"
   >

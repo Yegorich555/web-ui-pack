@@ -749,7 +749,7 @@ export default abstract class WUPBaseControl<
     let canShowError = (!silent || this.$refError) && this.canShowError;
 
     if (fromCase === ValidateFromCases.onChange && this._opts.validationCase & ValidationCases.onChangeSmart) {
-      if (errMsg && !this._wasValidNotEmpty) {
+      if (errMsg && !this._wasValidNotEmpty && !this.$refError) {
         canShowError = false;
       }
     }
@@ -757,6 +757,7 @@ export default abstract class WUPBaseControl<
     if (this._isValid && !isEmpty) {
       this._wasValidNotEmpty = true;
     }
+
     if (errMsg) {
       if (canShowError) {
         // don't wait for debounce if we need to update an error
@@ -914,7 +915,7 @@ export default abstract class WUPBaseControl<
     }
 
     this._isValid = undefined;
-    canValidate && this.validateAfterChange();
+    (canValidate || this.$refError) && this.validateAfterChange();
     setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true }));
     return true;
   }

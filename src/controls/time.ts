@@ -572,7 +572,6 @@ export default class WUPTimeControl<
   /** Called when need to change/cancel changing & close */
   protected gotBtnsClick(e: MouseEvent, isOk: boolean): void {
     if (isOk) {
-      // todo if user set invalid value prev error isn't changed to new error; to check it doesn't disable this button and select invalid
       this.selectValue(this.getMenuValue());
     } else {
       setTimeout(() => this.goHideMenu(HideCases.onClick, e)); // without timeout it handles click by listener and opens again

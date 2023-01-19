@@ -700,7 +700,7 @@ exports[`control.text validations $options.validationShowAll 2`] = `
   >
     <span>
       <input
-        aria-describedby="txt3"
+        aria-describedby="txt2"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -719,7 +719,7 @@ exports[`control.text validations $options.validationShowAll 2`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt3"
+    id="txt2"
     role="alert"
     style="display: none;"
   >
@@ -761,7 +761,7 @@ exports[`control.text validations $options.validationShowAll 3`] = `
   >
     <span>
       <input
-        aria-describedby="txt6"
+        aria-describedby="txt5"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -782,7 +782,7 @@ exports[`control.text validations $options.validationShowAll 3`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt6"
+    id="txt5"
     role="alert"
     style="display: none;"
   >

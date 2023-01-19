@@ -750,7 +750,7 @@ exports[`control.textarea validations $options.validationShowAll 2`] = `
   >
     <span>
       <span
-        aria-describedby="txt3"
+        aria-describedby="txt2"
         aria-labelledby="txt1"
         aria-required="true"
         contenteditable="true"
@@ -772,7 +772,7 @@ exports[`control.textarea validations $options.validationShowAll 2`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt3"
+    id="txt2"
     role="alert"
     style="display: none;"
   >
@@ -814,7 +814,7 @@ exports[`control.textarea validations $options.validationShowAll 3`] = `
   >
     <span>
       <span
-        aria-describedby="txt6"
+        aria-describedby="txt5"
         aria-labelledby="txt1"
         aria-required="true"
         contenteditable="true"
@@ -836,7 +836,7 @@ exports[`control.textarea validations $options.validationShowAll 3`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt6"
+    id="txt5"
     role="alert"
     style="display: none;"
   >
