@@ -738,7 +738,7 @@ export default class WUPCalendarControl<
     };
   }
 
-  /** Set [disabled] for items according to $options.exclude */
+  /** Set [disabled] for items according to $options.exclude & min & max */
   protected disableItems(items: WUP.Calendar.IItemElement[], getIndex: WUP.Calendar.IPickerResult["getIndex"]): void {
     const first = items[0]._value;
     let i = 0;

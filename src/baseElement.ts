@@ -405,7 +405,7 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
 
   /**
    * Remove attr if value falseOrEmpty; set '' or 'true' if true for HTMLELement
-   * @param isSetEmpty set if need to '' instead of 'value'
+   * @param isSetEmpty set if need '' instead of 'value'
    */
   setAttr(attr: string, v: boolean | string | undefined | null, isSetEmpty?: boolean): void {
     v ? this.setAttribute(attr, isSetEmpty ? "" : v) : this.removeAttribute(attr);

@@ -17,6 +17,7 @@ declare global {
       min: WUPTimeObject;
       /** Enabled if option [min] is pointed; if $value > pointed shows message 'Max time is {x}` */
       max: WUPTimeObject;
+      // todo add option exclude as callback for checking
     }
     interface Defaults<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Defaults<T, VM> {
       /** String representation of displayed time (enables mask, - to disable mask set $options.mask="");
@@ -180,6 +181,11 @@ export default class WUPTimeControl<
         pointer-events: none;
         touch-action: none;
       }
+      :host [menu] li[disabled] {
+        color: var(--ctrl-err-text);
+        --ctrl-focus: var(--ctrl-err-text);
+        //background-color: var(--ctrl-err-bg);
+      }
       :host [menu] [group] {
         display: flex;
         gap: 1px;
@@ -221,6 +227,11 @@ export default class WUPTimeControl<
         :host [menu] button:hover {
           box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 10%);
         }
+      }
+      :host [menu] button[disabled] {
+         box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 0);
+         cursor: not-allowed;
+         --ctrl-icon: inherit;
       }`;
   }
 
@@ -315,12 +326,48 @@ export default class WUPTimeControl<
     return vls as WUP.BaseControl.Options["validations"];
   }
 
+  /** Set [disabled] for items according to $options.min & max */
+  protected disableItems(): void {
+    const { min, max } = this._opts;
+    if ((!min && !max) || !this.$refMenuLists) {
+      return;
+    }
+
+    for (let n = 0; n < 2; ++n) {
+      const lst = this.$refMenuLists[n];
+      const was = lst._value;
+      for (let i = 0; i < lst.children.length; ++i) {
+        const el = lst.children.item(i)!;
+        lst._value = (el as any)._value;
+        const v = this.getMenuValue();
+        const isDisabled = v < min! || v > max!;
+        this.setAttr.call(el, "disabled", isDisabled, true);
+      }
+      lst._value = was;
+    }
+    const lst = this.$refMenuLists[2];
+    if (lst) {
+      for (let i = 0; i < lst.children.length; ++i) {
+        const el = lst.children.item(i)!;
+        if (el.textContent) {
+          const isPM = (el as any)._value === 2;
+          const isDisabled = (isPM && max! < new WUPTimeObject(12, 0)) || (!isPM && min! > new WUPTimeObject(11, 0));
+          this.setAttr.call(el, "disabled", isDisabled, true);
+        }
+      }
+    }
+    const v = this.getMenuValue();
+    const isDisabled = v < min! || v > max!;
+    this.setAttr.call(this.$refButtonOk!, "disabled", isDisabled, true);
+  }
+
   protected override async renderMenu(popup: WUPPopupElement, menuId: string, rows = 5): Promise<HTMLElement> {
     popup.$options.minWidthByTarget = false;
-
-    const append = (ul: HTMLElement, v: number | string, twoDigs: boolean): HTMLElement => {
+    let isInit = true;
+    const append = (ul: HTMLElement, v: number | string, twoDigs: boolean, savedV?: number): HTMLElement => {
       const li = ul.appendChild(document.createElement("li"));
       li.textContent = twoDigs && v < 10 ? `0${v}` : v.toString();
+      (li as any)._value = savedV ?? v;
       return li;
     };
     const selectNext = (prev: WUP.Scrolled.State, next: WUP.Scrolled.State): void => {
@@ -328,11 +375,12 @@ export default class WUPTimeControl<
       const el = next.items[0];
       if (el) {
         // WARN: with such behavior user listens for cnt items in the list but it's wrong since it's carousel with virtualization
-        // todo how to notify user that hours isn't valid according to validation
+        this._selectedMenuItem = prev.items[0];
         this.selectMenuItem(el);
         this._selectedMenuItem = undefined; // otherwise selection is cleared after popup-close
         this._focusedMenuItem && this.focusMenuItem(next.items[0]);
       }
+      !isInit && this.$isOpen && this.disableItems();
     };
 
     const drows = Math.round(rows / 2) - 1;
@@ -359,7 +407,7 @@ export default class WUPTimeControl<
       pages: { current: h12 ? hh % 12 : hh, total: h12 ? 12 : 24, before: drows, after: drows, cycled: true },
       onRender: (_dir, v, prev, next) => {
         v = h12 && v === 0 ? 12 : v;
-        const items = [append(lh, v, hh2)];
+        const items: HTMLElement[] = [append(lh, v, hh2)];
         lh._value = next.index;
         next.items = rows === 1 ? items : next.items;
         selectNext(prev, next);
@@ -387,8 +435,8 @@ export default class WUPTimeControl<
         cycled: true,
       },
       onRender: (_dir, v, prev, next) => {
-        const items = [append(lm, v, mm2)];
         v = Math.round(v * step);
+        const items = [append(lm, v, mm2)];
         lm._value = Math.round(next.index * step);
         next.items = rows === 1 ? items : next.items;
         selectNext(prev, next);
@@ -418,7 +466,7 @@ export default class WUPTimeControl<
           }
           lh12._value = next.index;
           const txt = (lower ? ["", "am", "pm", ""] : ["", "AM", "PM", ""])[v];
-          const item = append(lh12, txt, false);
+          const item = append(lh12, txt, false, v);
           if (v === 0 || v === 3) {
             item.setAttribute("aria-hidden", true);
           }
@@ -469,6 +517,7 @@ export default class WUPTimeControl<
       isOk !== null && this.gotBtnsClick(e, isOk);
     });
 
+    isInit = false;
     return Promise.resolve(parent);
   }
 
@@ -484,7 +533,9 @@ export default class WUPTimeControl<
       this.$refMenuLists[1]._scrolled.goTo(v.minutes, false);
       this.$refMenuLists[2]?._scrolled.goTo(v.isPM ? 2 : 1, false);
     }
-    return super.goShowMenu(showCase, e, isNeedWait);
+    const r = super.goShowMenu(showCase, e, isNeedWait);
+    this.disableItems();
+    return r;
   }
 
   protected override removePopup(): void {
@@ -513,11 +564,11 @@ export default class WUPTimeControl<
   }
 
   /** Called when need to change/cancel changing & close */
-  protected gotBtnsClick(_e: MouseEvent, isOk: boolean): void {
+  protected gotBtnsClick(e: MouseEvent, isOk: boolean): void {
     if (isOk) {
       this.selectValue(this.getMenuValue());
     } else {
-      setTimeout(() => this.goHideMenu(HideCases.onClick)); // without timeout it handles click by listener and opens again
+      setTimeout(() => this.goHideMenu(HideCases.onClick, e)); // without timeout it handles click by listener and opens again
     }
   }
 

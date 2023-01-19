@@ -7,6 +7,7 @@ overflow: hidden;
 clip: rect(1px, 1px, 1px, 1px);`;
 
 /** Style for icons; vars --ctrl-icon, --ctrl-icon-size, --ctrl-icon-img to customize styling */
+// todo remove 'cursor: pointer' here
 export const WUPcssIcon = `
 display: inline-block;
 width: var(--ctrl-icon-size);
