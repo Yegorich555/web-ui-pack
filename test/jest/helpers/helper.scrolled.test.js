@@ -426,16 +426,44 @@ describe("helper.onScrollStop", () => {
       return [li];
     });
     expect(() => new WUPScrolled(ul, { onRender, pages: { current: 2, cycled: true } })).toThrow();
-    const s = new WUPScrolled(ul, {
+    ul._scrolled = new WUPScrolled(ul, {
       onRender,
       scrollByClick: true,
-      pages: { current: 11, total: 12, after: 1, cycled: true },
+      pages: { current: 11, total: 12, before: 1, after: 1, cycled: true },
     });
     await nextFrames(1); // to fire 1st scrollToRange
-    expect(ul.innerHTML).toMatchInlineSnapshot(`"<li num="11" cur="11"></li><li num="0"></li>"`);
-    expect(onRender).toBeCalledTimes(2);
+    expect(ul.innerHTML).toMatchInlineSnapshot(`"<li num="10"></li><li num="11" cur="11"></li><li num="0"></li>"`);
+    expect(onRender).toBeCalledTimes(3);
 
-    // todo cover other cases here
+    await h.userClick(ul.lastElementChild); // scrolling must be to the nearest item
+    expect(ul.innerHTML).toMatchInlineSnapshot(
+      `"<li num="10"></li><li num="11" prev="11"></li><li num="0" cur="0"></li><li num="1"></li>"`
+    );
+    await nextFrames(5);
+    expect(ul.innerHTML).toMatchInlineSnapshot(
+      `"<li num="11" prev="11"></li><li num="0" cur="0"></li><li num="1"></li>"`
+    );
+    expect(onRender).toBeCalledTimes(4);
+
+    await h.userClick(ul.firstElementChild); // scrolling must be to the nearest item
+    expect(ul.innerHTML).toMatchInlineSnapshot(
+      `"<li num="10"></li><li num="11" cur="11"></li><li num="0" prev="0"></li><li num="1"></li>"`
+    );
+    await nextFrames(5);
+    expect(ul.innerHTML).toMatchInlineSnapshot(
+      `"<li num="10"></li><li num="11" cur="11"></li><li num="0" prev="0"></li>"`
+    );
+    expect(onRender).toBeCalledTimes(5);
+
+    await h.userClick(ul.firstElementChild);
+    expect(ul.innerHTML).toMatchInlineSnapshot(
+      `"<li num="9"></li><li num="10" cur="10"></li><li num="11" prev="11"></li><li num="0" prev="0"></li>"`
+    );
+    await nextFrames(5);
+    expect(ul.innerHTML).toMatchInlineSnapshot(
+      `"<li num="9"></li><li num="10" cur="10"></li><li num="11" prev="11"></li>"`
+    );
+    expect(onRender).toBeCalledTimes(6);
   });
 
   test("dispose()", async () => {
