@@ -397,9 +397,7 @@ export default class WUPSelectControl<
     const arrLi = arr.map(() => {
       const li = ul.appendChild(document.createElement("li"));
       li.setAttribute("role", "option");
-      li.setAttribute("aria-selected", "false");
-      const id = this.#ctr.$uniqueId;
-      li.id = id; // todo deprecate it because id is set from baseCombo by focusMenuItem
+      // li.setAttribute("aria-selected", "false");
       return li;
     }) as Array<HTMLLIElement & { _text: string }> & { _focused: number; _selected: number };
 
@@ -462,6 +460,7 @@ export default class WUPSelectControl<
   }
 
   protected override focusMenuItem(next: HTMLElement | null): void {
+    next && !next.hasAttribute("aria-selected") && next.setAttribute("aria-selected", false);
     super.focusMenuItem(next);
     if (next === null && this._menuItems) {
       this._menuItems.focused = -1;

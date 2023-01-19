@@ -139,10 +139,10 @@ describe("control.select", () => {
     expect(onHide).toBeCalledTimes(0);
     expect(onShow).toBeCalledTimes(1);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3">Donny</li><li role="option" aria-selected="true" id="txt4">Mikky</li><li role="option" aria-selected="false" id="txt5">Leo</li><li role="option" aria-selected="false" id="txt6">Splinter</li></ul>"`
+      `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option">Donny</li><li role="option" aria-selected="true">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
     );
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-select opened=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-owns="txt2" aria-controls="txt2"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label><wup-popup menu="" style="min-width: 100px;"><ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3">Donny</li><li role="option" aria-selected="true" id="txt4">Mikky</li><li role="option" aria-selected="false" id="txt5">Leo</li><li role="option" aria-selected="false" id="txt6">Splinter</li></ul></wup-popup></wup-select>"`
+      `"<wup-select opened=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-owns="txt2" aria-controls="txt2"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label><wup-popup menu="" style="min-width: 100px;"><ul id="txt2" role="listbox" aria-label="Items"><li role="option">Donny</li><li role="option" aria-selected="true">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul></wup-popup></wup-select>"`
     );
 
     // closing by Esc
@@ -151,7 +151,7 @@ describe("control.select", () => {
     expect(el.$isOpen).toBe(false);
     expect(el.$refPopup).toBeDefined(); // disposed only by focus out
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-owns="txt2" aria-controls="txt2"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label><wup-popup menu="" style="min-width: 100px;"><ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3">Donny</li><li role="option" aria-selected="false" id="txt4">Mikky</li><li role="option" aria-selected="false" id="txt5">Leo</li><li role="option" aria-selected="false" id="txt6">Splinter</li></ul></wup-popup></wup-select>"`
+      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-owns="txt2" aria-controls="txt2"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label><wup-popup menu="" style="min-width: 100px;"><ul id="txt2" role="listbox" aria-label="Items"><li role="option">Donny</li><li role="option" aria-selected="false">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul></wup-popup></wup-select>"`
     );
     expect(onHide).toBeCalledTimes(1);
     expect(onShow).toBeCalledTimes(1);
@@ -260,7 +260,7 @@ describe("control.select", () => {
     expect(el.$refInput.readOnly).toBe(true);
     expect(el.$refInput.value).toBeTruthy();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-owns="txt7" aria-controls="txt7" readonly=""><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label></wup-select>"`
+      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-owns="txt5" aria-controls="txt5" readonly=""><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label></wup-select>"`
     );
     el.$refInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
@@ -400,7 +400,7 @@ describe("control.select", () => {
     el.focus();
     await h.wait();
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup menu="" style="min-width: 100px;"><ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3">Donny</li><li role="option" aria-selected="false" id="txt4">Mikky</li><li role="option" aria-selected="false" id="txt5">Leo</li><li role="option" aria-selected="false" id="txt6">Splinter</li></ul></wup-popup>"`
+      `"<wup-popup menu="" style="min-width: 100px;"><ul id="txt2" role="listbox" aria-label="Items"><li role="option">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul></wup-popup>"`
     );
 
     const setItems = async (items) => {
@@ -414,17 +414,17 @@ describe("control.select", () => {
 
     await setItems([]);
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup menu="" style="min-width: 100px;"><ul id="txt7" role="listbox" aria-label="Items"><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul></wup-popup>"`
+      `"<wup-popup menu="" style="min-width: 100px;"><ul id="txt3" role="listbox" aria-label="Items"><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul></wup-popup>"`
     );
 
     await setItems(() => Promise.resolve(getItems()));
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup menu="" style="min-width: 100px;"><ul id="txt8" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt9">Donny</li><li role="option" aria-selected="false" id="txt10">Mikky</li><li role="option" aria-selected="false" id="txt11">Leo</li><li role="option" aria-selected="false" id="txt12">Splinter</li></ul></wup-popup>"`
+      `"<wup-popup menu="" style="min-width: 100px;"><ul id="txt4" role="listbox" aria-label="Items"><li role="option">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul></wup-popup>"`
     );
 
     // menu navigation by arrowKeys
     expect(el.$isOpen).toBe(true);
-    const menuIds = ["txt9", "txt10", "txt11", "txt12"];
+    const menuIds = ["txt5", "txt6", "txt7", "txt8"];
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
     await h.wait(1);
     expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[0]);
@@ -524,20 +524,20 @@ describe("control.select", () => {
     WUPSelectControl.$textNoItems = "";
     await setItems([]);
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup menu="" hidden="" style="min-width: 100px;"><ul id="txt14" role="listbox" aria-label="Items"></ul></wup-popup>"`
+      `"<wup-popup menu="" hidden="" style="min-width: 100px;"><ul id="txt10" role="listbox" aria-label="Items"></ul></wup-popup>"`
     );
     WUPSelectControl.$textNoItems = wasText;
 
     // when items is function with promise
     await setItems(() => Promise.resolve(getItems()));
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt15" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt16">Donny</li><li role="option" aria-selected="false" id="txt17">Mikky</li><li role="option" aria-selected="false" id="txt18">Leo</li><li role="option" aria-selected="false" id="txt19">Splinter</li></ul>"`
+      `"<ul id="txt11" role="listbox" aria-label="Items"><li role="option">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
     );
 
     // when items is function without promise
     await setItems(() => getItems().slice(0, 2));
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt20" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt21">Donny</li><li role="option" aria-selected="false" id="txt22">Mikky</li></ul>"`
+      `"<ul id="txt12" role="listbox" aria-label="Items"><li role="option">Donny</li><li role="option">Mikky</li></ul>"`
     );
 
     // when items has custom render
@@ -567,12 +567,12 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isOpen).toBe(true);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3">Donny</li><li role="option" aria-selected="false" id="txt4">Dona Rose</li><li role="option" aria-selected="false" id="txt5">Leo</li></ul>"`
+      `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option">Donny</li><li role="option">Dona Rose</li><li role="option">Leo</li></ul>"`
     );
 
     await h.userTypeText(el.$refInput, "d");
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3" focused="">Donny</li><li role="option" aria-selected="false" id="txt4">Dona Rose</li><li role="option" aria-selected="false" id="txt5" style="display: none;">Leo</li></ul>"`
+      `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3" focused="">Donny</li><li role="option">Dona Rose</li><li role="option" style="display: none;">Leo</li></ul>"`
     );
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
@@ -599,7 +599,7 @@ describe("control.select", () => {
     await h.userTypeText(el.$refInput, "123");
     expect(el.$isOpen).toBe(true);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3" style="display: none;">Donny</li><li role="option" aria-selected="true" id="txt4" style="display: none;">Dona Rose</li><li role="option" aria-selected="false" id="txt5" style="display: none;">Leo</li><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
+      `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3" style="display: none;">Donny</li><li role="option" aria-selected="true" id="txt4" style="display: none;">Dona Rose</li><li role="option" style="display: none;">Leo</li><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
     );
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
@@ -631,7 +631,7 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isOpen).toBe(true);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt6" role="listbox" aria-label="Items"><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
+      `"<ul id="txt5" role="listbox" aria-label="Items"><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
     );
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
@@ -823,7 +823,7 @@ describe("control.select", () => {
       await h.wait();
       expect(el.$isOpen).toBe(true);
       expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-        `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3" style="" focused="">Donny</li><li role="option" aria-selected="false" id="txt4" style="">Mikky</li><li role="option" aria-selected="false" id="txt5" style="">Leo</li><li role="option" aria-selected="false" id="txt6" style="">Splinter</li><li role="option" aria-disabled="true" aria-selected="false" style="display: none;">No Items</li></ul>"`
+        `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option" style="" aria-selected="false" id="txt3" focused="">Donny</li><li role="option" style="">Mikky</li><li role="option" style="" aria-selected="false">Leo</li><li role="option" style="">Splinter</li><li role="option" aria-disabled="true" aria-selected="false" style="display: none;">No Items</li></ul>"`
       );
 
       // user can select value by focus left
