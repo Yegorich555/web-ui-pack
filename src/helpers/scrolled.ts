@@ -31,13 +31,11 @@ declare global {
       };
       /** Scroll to item that click is fired */
       scrollToClick?: boolean;
-      /**
-       * Render callback that must return new items or null if it's ended up
+      /** Render callback that must return new items or null if it's ended up
        * @param dir render direction: `1`-next, `-1`-prev
        * @param ind rendered page index
        * @param prev previous/current pageState
-       * @param next next/expected pageState
-       */
+       * @param next next/expected pageState */
       onRender: (dir: number, ind: number, prev: State, next: State) => HTMLElement[] | null;
     }
   }
@@ -50,9 +48,7 @@ export default class WUPScrolled {
   /** All rendered pages */
   pages: WUP.Scrolled.State[] = [];
 
-  /**
-   * @param el target to that custom scroll must be applied
-   */
+  /** @param el target to that custom scroll must be applied */
   constructor(protected el: HTMLElement, public options: WUP.Scrolled.Options) {
     this.state = {
       index: options.pages?.current || 0,
