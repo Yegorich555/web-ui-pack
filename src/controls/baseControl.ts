@@ -833,8 +833,6 @@ export default abstract class WUPBaseControl<
     hiddenLbl.className = this.#ctr.classNameHidden;
     p.appendChild(document.createElement("span"));
     this.$refError = this.appendChild(p);
-    // popup need to refresh if content is placed at the top, minimized (we need to update position)
-    this.$refError.appendEvent(this, "focusout", () => this.$refError?.$refresh());
     return p;
   }
 
