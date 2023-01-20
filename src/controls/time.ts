@@ -616,18 +616,49 @@ export default class WUPTimeControl<
     super.gotInput(e, true);
   }
 
+  /** Returns current menu list index that user operates with hours/minutes/h12 */
+  protected findActiveMenuList(): number {
+    if (!this.$refMenuLists) {
+      return -1;
+    }
+    const { chunks: ch } = this.refMask!;
+    let { chunk } = this.refMask!.findChunkByCursor(this.$refInput.selectionStart!);
+    if (!chunk.isVar) {
+      chunk = ch[chunk.index + 1] || ch[chunk.index - 1]; // when cursor at the end of suffix
+    }
+    const hhChunk = ch.find((c) => c.isVar)!;
+    if (chunk === hhChunk) {
+      return 0;
+    }
+    const mmChunk = ch.find((c, i) => i > hhChunk.index && c.isVar)!;
+    if (chunk === mmChunk) {
+      return 1;
+    }
+    const h12Chunk = ch.find((c, i) => i > mmChunk.index && c.isVar);
+    if (chunk === h12Chunk) {
+      return 2;
+    }
+
+    return 0;
+  }
+
   protected override gotKeyDown(e: KeyboardEvent): Promise<void> {
     const wasOpen = this.$isOpen;
-    if (e.key === "Enter") {
+    const isExtraKey = e.altKey || e.shiftKey || e.ctrlKey;
+
+    // handle Enter key when menu is open
+    if (!isExtraKey && wasOpen && e.key === "Enter") {
+      e.preventDefault();
       if (this.#lastInputChanged) {
         this.goHideMenu(HideCases.OnPressEnter);
-        e.preventDefault();
-      } else {
-        this._focusedMenuItem = this.$refButtonOk; // to handle select (update value when user press enter)
+      } else if (!this.$refButtonOk!.disabled) {
+        this.$refButtonOk!.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }));
       }
+      return Promise.resolve();
     }
+
     const r = super.gotKeyDown(e);
-    if (e.altKey || e.shiftKey || e.ctrlKey) {
+    if (isExtraKey) {
       return r;
     }
 
@@ -635,7 +666,10 @@ export default class WUPTimeControl<
       let isHandled = true;
       let isNext = false;
       const lst = this.$refMenuLists!;
-      let ind = (this._focusedMenuItem && lst!.findIndex((ref) => ref.contains(this._focusedMenuItem!))) || 0;
+      let ind =
+        (this._focusedMenuItem && lst!.findIndex((ref) => ref.contains(this._focusedMenuItem!))) ??
+        this.findActiveMenuList();
+
       switch (e.key) {
         case "ArrowLeft":
           if (ind > 0) --ind;
@@ -652,7 +686,7 @@ export default class WUPTimeControl<
           if (!wasOpen) {
             this.focusMenuItem(lst[ind].querySelector("[aria-selected=true]"));
           } else {
-            this._focusedMenuItem = lst[ind].querySelector("[aria-selected=true]");
+            this._focusedMenuItem = lst[ind].querySelector("[aria-selected=true]"); // otherwise focusNext not fired on next render
             lst[ind].goToNext(isNext);
           }
           break;
@@ -674,5 +708,6 @@ customElements.define(tagName, WUPTimeControl);
 // testcase: increment carousel for hh:mm in both directions
 // testcase: open&close menu. change value via input. open menu again: in menu new value must be selected
 // testcase: open&close menu: anything must be selected
+// testcase: open&close menu & change value & open menu: new items must appeared according to menu
 
 // todo h:m - try to input 01:23 => expected 1:23
