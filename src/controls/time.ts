@@ -49,7 +49,8 @@ declare global {
     interface MenuListElement extends HTMLElement {
       _scrolled: WUPScrolled;
       _value: number;
-      goto(isNext: boolean): void;
+      goToNext(isNext: boolean): void;
+      reinit(): void;
     }
   }
   interface HTMLElementTagNameMap {
@@ -232,7 +233,7 @@ export default class WUPTimeControl<
         }
       }
       :host [menu] button[disabled] {
-         box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 0);
+         box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 5%);
          cursor: not-allowed;
          --ctrl-icon: inherit;
       }`;
@@ -390,8 +391,6 @@ export default class WUPTimeControl<
     };
 
     const drows = Math.round(rows / 2) - 1;
-    const hh = this.$value?.hours || 0;
-    const mm = this.$value?.minutes || 0;
 
     // div required for centering absolute items during the animation
     const parent = popup.appendChild(document.createElement("div"));
@@ -400,6 +399,10 @@ export default class WUPTimeControl<
     this.$refMenuLists = [];
 
     // render hours
+    const getCurHours = (): number => {
+      const hh = this.$value?.hours || 0;
+      return h12 ? hh % 12 : hh;
+    };
     const lh = parent.appendChild(document.createElement("ul")) as any as WUP.Time.MenuListElement;
     lh.setAttribute("aria-label", this.#ctr.$ariaHours);
     this.$refMenuLists.push(lh);
@@ -410,7 +413,7 @@ export default class WUPTimeControl<
       // hours 0..23 pages 0..23
       swipeDebounceMs: 100,
       scrollByClick: true,
-      pages: { current: h12 ? hh % 12 : hh, total: h12 ? 12 : 24, before: drows, after: drows, cycled: true },
+      pages: { current: getCurHours(), total: h12 ? 12 : 24, before: drows, after: drows, cycled: true },
       onRender: (_dir, v, prev, next) => {
         v = h12 && v === 0 ? 12 : v;
         const items: HTMLElement[] = [append(lh, v, hh2)];
@@ -420,9 +423,14 @@ export default class WUPTimeControl<
         return items;
       },
     });
-    lh.goto = (v) => lh._scrolled.goTo(v);
+    lh.goToNext = (v) => lh._scrolled.goTo(v);
+    lh.reinit = () => {
+      lh._scrolled.options.pages!.current = getCurHours();
+      lh._scrolled.init();
+    };
 
     // render minutes
+    const getCurMinutes = (): number => Math.round((this.$value?.minutes || 0) / step);
     const lm = parent.appendChild(document.createElement("ul")) as any as WUP.Time.MenuListElement;
     lm.setAttribute("aria-label", this.#ctr.$ariaMinutes);
     this.$refMenuLists.push(lm);
@@ -434,7 +442,7 @@ export default class WUPTimeControl<
       scrollByClick: true,
       // minutes 0..59 pages 0..12
       pages: {
-        current: Math.round(mm / step),
+        current: getCurMinutes(),
         total: Math.round(60 / step),
         before: drows,
         after: drows,
@@ -449,7 +457,11 @@ export default class WUPTimeControl<
         return items;
       },
     });
-    lm.goto = (v) => lm._scrolled.goTo(v);
+    lm.goToNext = (v) => lm._scrolled.goTo(v);
+    lm.reinit = () => {
+      lm._scrolled.options.pages!.current = getCurMinutes();
+      lm._scrolled.init();
+    };
 
     if (h12) {
       // render AM/PM
@@ -482,7 +494,7 @@ export default class WUPTimeControl<
           return items;
         },
       });
-      lh12.goto = (isNext) => {
+      lh12.goToNext = (isNext) => {
         const v = lh12._value;
         const to = (isNext && v === 2 && 1) || (!isNext && v === 1 && 2) || (isNext ? v + 1 : v - 1);
         lh12._scrolled.goTo(to);
@@ -532,15 +544,20 @@ export default class WUPTimeControl<
     e?: MouseEvent | FocusEvent | null,
     isNeedWait?: boolean
   ): Promise<WUPPopupElement | null> {
-    this.#lastInputChanged = false;
-    const v = this.$value;
-    if (this.$refMenuLists && v) {
-      this.$refMenuLists[0]._scrolled.goTo(v.hours, false);
-      this.$refMenuLists[1]._scrolled.goTo(v.minutes, false);
-      this.$refMenuLists[2]?._scrolled.goTo(v.isPM ? 2 : 1, false);
-    }
     const r = super.goShowMenu(showCase, e, isNeedWait);
-    this.disableItems();
+
+    this.#lastInputChanged = false;
+    if (r != null) {
+      const v = this.$value;
+      if (this.$refMenuLists && v) {
+        const menuV = this.getMenuValue();
+        menuV.hours !== v.hours && this.$refMenuLists[0].reinit();
+        menuV.minutes !== v.minutes && this.$refMenuLists[1].reinit();
+        this.$refMenuLists[2]?._scrolled.goTo(v.isPM ? 2 : 1, false);
+      }
+      this.disableItems();
+    }
+
     return r;
   }
 
@@ -613,8 +630,10 @@ export default class WUPTimeControl<
     if (e.altKey || e.shiftKey || e.ctrlKey) {
       return r;
     }
-    if (wasOpen) {
+
+    if (this.$isOpen) {
       let isHandled = true;
+      let isNext = false;
       const lst = this.$refMenuLists!;
       let ind = (this._focusedMenuItem && lst!.findIndex((ref) => ref.contains(this._focusedMenuItem!))) || 0;
       switch (e.key) {
@@ -627,12 +646,15 @@ export default class WUPTimeControl<
           this.focusMenuItem(lst[ind].querySelector("[aria-selected=true]"));
           break;
         case "ArrowDown":
-          this._focusedMenuItem = lst[ind].querySelector("[aria-selected=true]");
-          lst[ind].goto(true);
-          break;
+          isNext = true;
+        // eslint-disable-next-line no-fallthrough
         case "ArrowUp":
-          this._focusedMenuItem = lst[ind].querySelector("[aria-selected=true]");
-          lst[ind].goto(false);
+          if (!wasOpen) {
+            this.focusMenuItem(lst[ind].querySelector("[aria-selected=true]"));
+          } else {
+            this._focusedMenuItem = lst[ind].querySelector("[aria-selected=true]");
+            lst[ind].goToNext(isNext);
+          }
           break;
         default:
           isHandled = false;

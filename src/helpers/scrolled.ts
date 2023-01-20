@@ -47,19 +47,30 @@ declare global {
 /** Makes pointed element as scrollable-carousel */
 export default class WUPScrolled {
   /** Current/centered page */
+  // @ts-expect-error because TS doesn't know about init-method
   state: WUP.Scrolled.State;
   /** All rendered pages */
   pages: WUP.Scrolled.State[] = [];
 
   /** @param el target to that custom scroll must be applied */
   constructor(protected el: HTMLElement, public options: WUP.Scrolled.Options) {
+    this.init();
+
+    this.disposeLst.push(onScroll(el, (d) => this.goTo(this.state.index + d), options));
+    this.disposeLst.push(onEvent(el, "keydown", (e) => this.gotKeyDown(e), { passive: false }));
+    options.scrollByClick && this.disposeLst.push(onEvent(el, "click", (e) => this.gotClick(e), { passive: false }));
+  }
+
+  init(): void {
+    this.pages.forEach((p) => p.items.forEach((a) => a.remove()));
     this.state = {
-      index: options.pages?.current || 0,
+      index: this.options.pages?.current || 0,
       items: [],
     };
+    this.pages = [];
 
     // render first visible pages if user pointed option
-    const p = options.pages;
+    const p = this.options.pages;
     if (p) {
       const from = -1 * (p.before ?? 0);
       const to = p.after ?? 0;
@@ -68,7 +79,7 @@ export default class WUPScrolled {
       for (let i = from; i <= to; ++i) {
         const index = this.incrementPage(p.current, i);
         const nextState = i === 1 ? { index: this.state.index, items: curItems! } : this.state;
-        const items = options.onRender(1, index, this.state, nextState)!; // WARN visible must be <= total
+        const items = this.options.onRender(1, index, this.state, nextState)!; // WARN visible must be <= total
         this.el.append(...items);
         this.pages.push({ index, items });
         if (index === p.current) {
@@ -77,15 +88,12 @@ export default class WUPScrolled {
       }
       this.state.items = curItems!;
     } else {
-      this.state.items = Array.prototype.slice.call(el.children) as HTMLElement[];
+      this.state.items = Array.prototype.slice.call(this.el.children) as HTMLElement[];
       this.pages.push(this.state);
     }
+
     // wait for next frame otherwise parent height can be wrong
     window.requestAnimationFrame(() => this.scrollToRange(false, this.state.items));
-
-    this.disposeLst.push(onScroll(el, (d) => this.goTo(this.state.index + d), options));
-    this.disposeLst.push(onEvent(el, "keydown", (e) => this.gotKeyDown(e), { passive: false }));
-    options.scrollByClick && this.disposeLst.push(onEvent(el, "click", (e) => this.gotClick(e), { passive: false }));
   }
 
   /** Called on keydown event and processed if event isn't prevented */
@@ -169,6 +177,7 @@ export default class WUPScrolled {
   protected tryFixSize(): void {
     const { el } = this;
     const { isXScroll } = this.options;
+
     if ((!isXScroll && el.style.maxHeight) || (isXScroll && el.style.maxWidth)) {
       return;
     }
@@ -196,7 +205,7 @@ export default class WUPScrolled {
     // const prevScroll = { h: this.el.scrollHeight, w: this.el.scrollWidth };
     const restoreScroll = this.saveScroll();
 
-    const inc = pi - this.state.index;
+    const inc = pi - this.state.index; // todo need to find nearest like it works with click & option.cycled
     const isNext = pi > this.state.index;
 
     const pagesRemove: WUP.Scrolled.State[] = [];

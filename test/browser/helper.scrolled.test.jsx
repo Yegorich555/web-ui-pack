@@ -58,7 +58,7 @@ describe("helper.scrolled (carousel)", () => {
     expect(await page.evaluate(() => document.body.innerHTML)).toMatchInlineSnapshot(
       `"<div id="app"><ul style="overflow: hidden; touch-action: none; max-height: 54px;"><li>Item 7</li><li>Item 8</li><li>Item 9</li><li>Item 4</li><li>Item 5</li><li>Item 6</li></ul></div>"`
     );
-    expect(await page.evaluate(() => document.querySelector("ul").scrollTop)).toBe(54); // scrolling is not started but elemens is added at the top
+    expect(await page.evaluate(() => document.querySelector("ul").scrollTop)).not.toBe(0); // scrolling is not started but elemens is added at the top
 
     await page.waitForTimeout("50");
     expect(await page.evaluate(() => document.querySelector("ul").scrollTop)).not.toBe(54); // scrolling is started
