@@ -54,11 +54,11 @@ const attachLst = new Map<HTMLElement, () => void>();
  * ```
  * @tutorial Troubleshooting:
  * * You can set minWidth, minHeight to prevent squizing of popup or don't use rule '.$adjust'
- * * Don't override styles: transform (possible to override only for animation), display
- * * Don't use inline styles" maxWidth, maxHeight
+ * * Don't override styles: display, transform (possible to override only for animation)
+ * * Don't use inline styles: maxWidth, maxHeight
  * * If target removed (when popup $isOpen) and appended again you need to update $options.target (because $options.target cleared)
  * * Popup has overflow 'auto'; If you change to 'visible' it will apply maxWidth/maxHeight to first children (because popup must be restricted by maxSize to avoid layout issues)
- * * During the closing attr 'hide' is appended (only if css-animation-duration is detected)
+ * * During the closing attr 'hide' is appended only if css-animation-duration is detected
  */
 export default class WUPPopupElement<
   Events extends WUP.Popup.EventMap = WUP.Popup.EventMap
@@ -398,6 +398,7 @@ export default class WUPPopupElement<
   #state?: {
     scrollParents?: HTMLElement[];
     prevRect?: DOMRect;
+    prevSize?: { w: number; h: number };
     frameId: number;
     userStyles: {
       maxW: number;
@@ -556,6 +557,7 @@ export default class WUPPopupElement<
         const id = window.requestAnimationFrame(goUpdate);
         if (this.#state) {
           this.#state.frameId = id;
+          this.#state!.prevSize = { w: this.offsetWidth, h: this.offsetHeight };
         }
       }
     };
@@ -655,14 +657,16 @@ export default class WUPPopupElement<
     }
 
     if (
-      // issue: it's wrong if minWidth, minHeight etc. is changed and doesn't affect on layout sizes directly
-      this.#state?.prevRect &&
-      this.#state.prevRect.top === tRect.top &&
-      this.#state.prevRect.left === tRect.left &&
-      this.#state.prevRect.width === tRect.width &&
-      this.#state.prevRect.height === tRect.height
+      this.#state!.prevRect &&
+      this.#state!.prevRect.top === tRect.top &&
+      this.#state!.prevRect.left === tRect.left &&
+      this.#state!.prevRect.width === tRect.width &&
+      this.#state!.prevRect.height === tRect.height &&
+      this.#state!.prevSize &&
+      this.#state!.prevSize.h === this.offsetHeight &&
+      this.#state!.prevSize.w === this.offsetWidth
     ) {
-      return this.#state.prevRect;
+      return this.#state!.prevRect;
     }
 
     const tdef: Omit<DOMRect, "toJSON" | "x" | "y"> = {
@@ -840,10 +844,9 @@ export default class WUPPopupElement<
     };
 
     process();
-
     /* re-calc is required to avoid case when popup unexpectedly affects on layout:
       layout bug: Yscroll appears/disappears when display:flex; heigth:100vh > position:absolute; right:-10px
-      issue: posible with cnt==2 issue will be reproduced
+      issue: posible with cnt==2 it's reprodusable
       */
     return t.el.getBoundingClientRect();
   };

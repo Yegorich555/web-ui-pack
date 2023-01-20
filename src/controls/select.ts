@@ -573,7 +573,7 @@ export default class WUPSelectControl<
       filter();
     }
 
-    this.$refPopup!.$refresh();
+    // this.$refPopup!.$refresh(); // it doesn't required anymore because popup listens for own sizes
   }
 
   protected override gotFocusLost(): void {
