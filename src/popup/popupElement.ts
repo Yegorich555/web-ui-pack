@@ -59,7 +59,6 @@ const attachLst = new Map<HTMLElement, () => void>();
  * * If target removed (when popup $isOpen) and appended again you need to update $options.target (because $options.target cleared)
  * * Popup has overflow 'auto'; If you change to 'visible' it will apply maxWidth/maxHeight to first children (because popup must be restricted by maxSize to avoid layout issues)
  * * During the closing attr 'hide' is appended only if css-animation-duration is detected
- * * Popup placed far from target: it's possible if one of popup-parents has style transform; to fix this don't use transform or place popup outside such parent (to <body/> etc.)
  */
 export default class WUPPopupElement<
   Events extends WUP.Popup.EventMap = WUP.Popup.EventMap
@@ -767,7 +766,7 @@ export default class WUPPopupElement<
 
     let lastRule: WUP.Popup.Place.PlaceFunc;
 
-    const process = (): void => {
+    const process = (): WUP.Popup.Place.Result => {
       const hasOveflow = (p: WUP.Popup.Place.Result, meSize: { w: number; h: number }): boolean =>
         p.left < fit.left ||
         p.top < fit.top ||
@@ -842,13 +841,23 @@ export default class WUPPopupElement<
       // transform has performance benefits in comparison with positioning
       styleTransform(this, "translate", `${pos.left}px, ${pos.top}px`);
       this.setAttribute("position", pos.attr);
+      return pos;
     };
 
-    process();
+    const pos = process();
+
+    // fix: when parent.transform.translate affects on popup
+    const meRect = this.getBoundingClientRect();
+    const dx = meRect.left - pos.left;
+    const dy = meRect.top - pos.top;
+    if (dx || dy) {
+      styleTransform(this, "translate", `${pos.left - dx}px, ${pos.top - dy}px`);
+      this.#refArrow && styleTransform(this.#refArrow, "translate", `${pos.arrowLeft - dx}px, ${pos.arrowTop - dy}px`);
+    }
+
     /* re-calc is required to avoid case when popup unexpectedly affects on layout:
       layout bug: Yscroll appears/disappears when display:flex; heigth:100vh > position:absolute; right:-10px
-      issue: posible with cnt==2 it's reprodusable
-      */
+      with cnt==2 it's reprodusable */
     return t.el.getBoundingClientRect();
   };
 

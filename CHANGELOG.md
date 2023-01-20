@@ -15,6 +15,7 @@
 - Helper. [`dateFromString`](src/helpers/dateFromString.ts). `12:00 PM throws Error but expected 12:00`
 - Icon **check**. Reduced thikness to fit other texts & icons
 - Popup. Changing content size doesn't recalc popup position
+- Popup. Wrong position if parent has style transform.translate
 
 **Features**:
 

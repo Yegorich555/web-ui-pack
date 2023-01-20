@@ -18,6 +18,26 @@ beforeEach(() => {
   jest.spyOn(document.body, "scrollLeft", "set").mockImplementation(() => 0);
   jest.spyOn(document.body.parentElement, "scrollLeft", "set").mockImplementation(() => 0);
 
+  // fix case when popup rect must be changed according to transform
+  function mockPopupRect() {
+    /** @type WUPPopupElement */
+    const a = this;
+    const tr = /translate\(([^)]+)\)/.exec(a.style.transform);
+    const [x, y] = tr ? tr[1].split(",").map((s) => Number.parseFloat(s.trim())) : [0, 0];
+    return {
+      x,
+      y,
+      top: y,
+      left: x,
+      bottom: 0,
+      height: a.offsetHeight,
+      width: a.offsetWidth,
+      right: 0,
+      toJSON: () => "",
+    };
+  }
+  jest.spyOn(WUPPopupElement.prototype, "getBoundingClientRect").mockImplementation(mockPopupRect);
+
   jest.spyOn(document.body, "getBoundingClientRect").mockReturnValue({
     x: 0,
     y: 0,
@@ -1914,5 +1934,31 @@ describe("popupElement", () => {
     await h.userClick(el);
     await h.wait();
     expect(el.$isOpen).toBe(false);
+  });
+
+  test("popup with parent transform.translate", async () => {
+    const { nextFrame } = h.useFakeAnimation();
+    el.remove();
+    el = document.createElement("wup-popup");
+    el.$options.showCase = 0; // always
+    el.$options.arrowEnable = true;
+    el.$options.target = trg;
+    document.body.appendChild(el);
+
+    await nextFrame();
+    expect(document.body.innerHTML).toMatchInlineSnapshot(
+      `"<div id="targetId">some text</div><wup-popup style="display: block; transform: translate(190px, 100px);" position="top"></wup-popup><wup-popup-arrow style="transform: translate(184px, 100px) rotate(0.1deg);"></wup-popup-arrow>"`
+    );
+
+    trg.parentElement.style.transform = "translate(-50%,-50%)";
+    const rect = trg.getBoundingClientRect();
+    jest.spyOn(trg, "getBoundingClientRect").mockReturnValue({ ...rect, left: 0, x: 0 });
+    const rectEl = el.getBoundingClientRect();
+    jest.spyOn(el, "getBoundingClientRect").mockReturnValue({ ...rectEl, left: 19, x: 19 }); // simulate case when parent transform affects on positioning
+
+    await nextFrame();
+    expect(document.body.innerHTML).toMatchInlineSnapshot(
+      `"<div id="targetId">some text</div><wup-popup style="display: block; transform: translate(221px, 100px);" position="top"></wup-popup><wup-popup-arrow style="transform: translate(215px, 100px) rotate(0.1deg);"></wup-popup-arrow>"`
+    );
   });
 });
