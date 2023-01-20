@@ -59,6 +59,7 @@ const attachLst = new Map<HTMLElement, () => void>();
  * * If target removed (when popup $isOpen) and appended again you need to update $options.target (because $options.target cleared)
  * * Popup has overflow 'auto'; If you change to 'visible' it will apply maxWidth/maxHeight to first children (because popup must be restricted by maxSize to avoid layout issues)
  * * During the closing attr 'hide' is appended only if css-animation-duration is detected
+ * * Popup placed far from target: it's possible if one of popup-parents has style transform; to fix this don't use transform or place popup outside such parent (to <body/> etc.)
  */
 export default class WUPPopupElement<
   Events extends WUP.Popup.EventMap = WUP.Popup.EventMap
