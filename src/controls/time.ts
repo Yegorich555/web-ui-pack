@@ -702,6 +702,11 @@ export default class WUPTimeControl<
     }
     return r;
   }
+
+  protected override gotFocusLost(): void {
+    this.setInputValue(this.$value); // case: h:m - try to input 01:23 => expected 1:23
+    super.gotFocusLost();
+  }
 }
 
 customElements.define(tagName, WUPTimeControl);
@@ -709,5 +714,4 @@ customElements.define(tagName, WUPTimeControl);
 // testcase: open&close menu. change value via input. open menu again: in menu new value must be selected
 // testcase: open&close menu: anything must be selected
 // testcase: open&close menu & change value & open menu: new items must appeared according to menu
-
-// todo h:m - try to input 01:23 => expected 1:23
+// testcase: h:m - try to input 01:23 => expected 1:23
