@@ -664,7 +664,8 @@ export default class WUPTextControl<
 
     this.renderPostfix(this._opts.postfix);
 
-    if (this.#declineInputEnd) {
+    // todo cover case#1: when user types in the middle mask can shift & remove last invalid char. In this case need to setValue because it's valid
+    if (this.#declineInputEnd && (!canParse || errMsg)) {
       return; // don't allow changes if user types wrong char
     }
 
@@ -720,6 +721,7 @@ export default class WUPTextControl<
     if (declinedAdd) {
       this._histUndo!.pop();
       this._histUndo!.push(this.historyToSnapshot(mi.value, position)); // fix when ###: "12|" + "3b" => 123|
+      // todo case#1 '|11:15 PM' + '0' => goes to valid '01:15 PM' but declineInput is called
       this.declineInput(position);
     } else {
       el.value = mi.value;
