@@ -426,7 +426,7 @@ describe("helper.onScrollStop", () => {
       return [li];
     });
     expect(() => new WUPScrolled(ul, { onRender, pages: { current: 2, cycled: true } })).toThrow();
-    ul._scrolled = new WUPScrolled(ul, {
+    const s = new WUPScrolled(ul, {
       onRender,
       scrollByClick: true,
       pages: { current: 11, total: 12, before: 1, after: 1, cycled: true },
@@ -464,6 +464,10 @@ describe("helper.onScrollStop", () => {
       `"<li num="9"></li><li num="10" cur="10"></li><li num="11" prev="11"></li>"`
     );
     expect(onRender).toBeCalledTimes(6);
+
+    s.goTo(9);
+    await nextFrames(5);
+    expect(onRender).toBeCalledTimes(7);
   });
 
   test("dispose()", async () => {

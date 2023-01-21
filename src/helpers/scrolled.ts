@@ -139,19 +139,8 @@ export default class WUPScrolled {
         e.preventDefault();
         // 11 => 9: inc: -2
         // 11 => 0: inc: +1
-        let next = this.pages[iNext].index;
-        if (next === this.state.index) {
-          return; // click on the same
-        }
-        if (this.options.pages?.cycled) {
-          const iPrev = this.pages.findIndex((pr) => pr.index === this.state.index);
-          if (next < this.state.index && iNext > iPrev) {
-            next += this.options.pages.total!; // when 11 => 0 and 11 rendered after 0
-          } else if (this.state.index === 0 && iNext < iPrev) {
-            next -= this.options.pages.total!; // when 0 => 11 and 11 rendered before 0
-          }
-        }
-        this.goTo(next);
+        const next = this.pages[iNext].index;
+        next !== this.state.index && this.goTo(next);
       }
     }
   }
@@ -205,7 +194,18 @@ export default class WUPScrolled {
     // const prevScroll = { h: this.el.scrollHeight, w: this.el.scrollWidth };
     const restoreScroll = this.saveScroll();
 
-    const inc = pi - this.state.index; // todo need to find nearest like it works with click & option.cycled
+    // find nearest
+    if (this.options.pages?.cycled) {
+      const iPrev = this.pages.findIndex((pr) => pr.index === this.state.index);
+      const iNext = this.pages.findIndex((pr) => pr.index === pi);
+      if (pi < this.state.index && iNext > iPrev) {
+        pi += this.options.pages.total!; // when 11 => 0 and 11 rendered after 0
+      } else if (this.state.index === 0 && iNext < iPrev) {
+        pi -= this.options.pages.total!; // when 0 => 11 and 11 rendered before 0
+      }
+    }
+
+    const inc = pi - this.state.index;
     const isNext = pi > this.state.index;
 
     const pagesRemove: WUP.Scrolled.State[] = [];
