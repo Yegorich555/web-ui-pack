@@ -468,6 +468,12 @@ describe("helper.onScrollStop", () => {
     s.goTo(9);
     await nextFrames(5);
     expect(onRender).toBeCalledTimes(7);
+
+    // conver re-init
+    s.options.pages.current = 1;
+    s.init();
+    await nextFrames(5);
+    expect(ul.innerHTML).toMatchInlineSnapshot(`"<li num="0"></li><li num="1" cur="1"></li><li num="2"></li>"`);
   });
 
   test("dispose()", async () => {
