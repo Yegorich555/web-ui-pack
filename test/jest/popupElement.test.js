@@ -10,6 +10,12 @@ let el;
 /** @type HTMLElement */
 let trg; // target for popup
 
+/** Returns whether top & left are int or float values */
+function positionIsInteger() {
+  const rectEl = el.getBoundingClientRect();
+  return { left: Number.isInteger(rectEl.left) ? "int" : "float", top: Number.isInteger(rectEl.top) ? "int" : "float" };
+}
+
 // simulate layout
 beforeEach(() => {
   jest.useFakeTimers();
@@ -1188,8 +1194,9 @@ describe("popupElement", () => {
     trgRect.right = width + x;
     // expected bottom.middle position because at left/top not enough space
     (await expectIt([WUPPopupElement.$placements.$left.$start.$adjust])).toMatchInlineSnapshot(
-      `"<wup-popup style="display: block; transform: translate(55.5px, 61px);" position="bottom"></wup-popup>"`
+      `"<wup-popup style="display: block; transform: translate(56px, 61px);" position="bottom"></wup-popup>"`
     );
+    expect(positionIsInteger()).toEqual({ left: "int", top: "int" });
 
     // checking $resizeWidth - expected left.start with maxWidth
     (await expectIt([WUPPopupElement.$placements.$left.$start.$adjust.$resizeWidth])).toMatchInlineSnapshot(
@@ -1216,8 +1223,9 @@ describe("popupElement", () => {
       return y + 1;
     });
     (await expectIt([WUPPopupElement.$placements.$left.$start.$resizeWidth])).toMatchInlineSnapshot(
-      `"<wup-popup style="display: block; transform: translate(55.5px, 61px);" position="bottom"></wup-popup>"`
+      `"<wup-popup style="display: block; transform: translate(56px, 61px);" position="bottom"></wup-popup>"`
     );
+    expect(positionIsInteger()).toEqual({ left: "int", top: "int" });
     // cover case when maxWidthByTarget=true
     el.$options.maxWidthByTarget = true;
     (await expectIt([WUPPopupElement.$placements.$left.$start.$resizeWidth])).toMatchInlineSnapshot(
@@ -1225,7 +1233,7 @@ describe("popupElement", () => {
     );
     el.$options.maxWidthByTarget = false;
     (await expectIt([WUPPopupElement.$placements.$left.$start.$resizeWidth])).toMatchInlineSnapshot(
-      `"<wup-popup style="display: block; transform: translate(55.5px, 61px);" position="bottom"></wup-popup>"`
+      `"<wup-popup style="display: block; transform: translate(56px, 61px);" position="bottom"></wup-popup>"`
     );
 
     // test case when not enough space

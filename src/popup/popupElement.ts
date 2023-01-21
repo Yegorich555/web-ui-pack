@@ -823,16 +823,20 @@ export default class WUPPopupElement<
         if (pos.arrowLeft == null) {
           checkSize(this.offsetWidth);
           pos.arrowLeft = t.left + t.width / 2 - me.arrow.w / 2; // attach to middle of target
-          pos.arrowLeft = Math.min(
-            Math.max(pos.arrowLeft, pos.left + this.#state!.userStyles.borderRadius), // align to popup
-            pos.left + this.offsetWidth - me.arrow.w - this.#state!.userStyles.borderRadius // align to popup
+          pos.arrowLeft = Math.round(
+            Math.min(
+              Math.max(pos.arrowLeft, pos.left + this.#state!.userStyles.borderRadius), // align to popup
+              pos.left + this.offsetWidth - me.arrow.w - this.#state!.userStyles.borderRadius // align to popup
+            )
           );
         } else if (pos.arrowTop == null) {
           checkSize(this.offsetHeight);
           pos.arrowTop = t.top + t.height / 2 - me.arrow.h / 2; // attach to middle of target
-          pos.arrowTop = Math.min(
-            Math.max(pos.arrowTop, pos.top + this.#state!.userStyles.borderRadius + me.arrow.h / 2), // align to popup
-            pos.top + this.offsetHeight - this.#state!.userStyles.borderRadius - me.arrow.w / 2 - me.arrow.h / 2 // align to popup
+          pos.arrowTop = Math.round(
+            Math.min(
+              Math.max(pos.arrowTop, pos.top + this.#state!.userStyles.borderRadius + me.arrow.h / 2), // align to popup
+              pos.top + this.offsetHeight - this.#state!.userStyles.borderRadius - me.arrow.w / 2 - me.arrow.h / 2 // align to popup
+            )
           );
         }
         this.#refArrow.style.transform = `translate(${pos.arrowLeft}px, ${pos.arrowTop}px) rotate(${pos.arrowAngle}.1deg)`; // WARN Firefox bug: css filter dropshadow works wrong with angle 180.0

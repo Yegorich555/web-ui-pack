@@ -4,7 +4,7 @@
 
 **BREAKING CHANGES**:
 
-- Namespaces `WUP...` is refactored from `WUPPopup` to `WUP.Popup`. So re-export enums `ShowCases, HideCases, Animations` without prefix now
+- Namespaces like `WUP...` is refactored from `WUPPopup` to `WUP.Popup` etc. So re-export enums `ShowCases, HideCases, Animations` without prefix now
 - helper localeInfo moved to `web-ui-pack/objects/localeInfo`
 - helper scrollCarousel refactored to [WUPScrolled](src/helpers/scrolled.ts) class
 - DateControl. Changed validation message from `This date is disabled` to `This value is disabled`
@@ -16,6 +16,7 @@
 - Icon **check**. Reduced thikness to fit other texts & icons
 - Popup. Changing content size doesn't recalc popup position
 - Popup. Wrong position if parent has style transform.translate
+- Popup. Content is blured if transform.translate with float values
 
 **Features**:
 

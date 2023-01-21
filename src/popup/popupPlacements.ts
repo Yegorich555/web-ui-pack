@@ -142,7 +142,7 @@ $top.$start = <WUP.Popup.Place.AlignFunc>function yStart(this: WUP.Popup.Place.R
   return this;
 };
 $top.$middle = <WUP.Popup.Place.AlignFunc>function yMiddle(this: WUP.Popup.Place.Result, t, me, fit) {
-  this.left = t.left + (t.width - me.w) / 2;
+  this.left = t.left + Math.round((t.width - me.w) / 2);
   this.freeW = fit.width;
   return this;
 };
@@ -176,7 +176,7 @@ const $left = <WUP.Popup.Place.EdgeFunc>function left(t, me, fit): ReturnType<WU
     left: t.left - me.w - me.arrow.h,
     freeW,
     arrowAngle: -90,
-    arrowLeft: t.left - me.arrow.h - (me.arrow.w - me.arrow.h) / 2 - me.arrow.offset.left,
+    arrowLeft: t.left - me.arrow.h - Math.round((me.arrow.w - me.arrow.h) / 2) - me.arrow.offset.left,
   };
 };
 $left.$start = <WUP.Popup.Place.AlignFunc>function xStart(this: WUP.Popup.Place.Result, t, _me, fit) {
@@ -185,7 +185,7 @@ $left.$start = <WUP.Popup.Place.AlignFunc>function xStart(this: WUP.Popup.Place.
   return this;
 };
 $left.$middle = <WUP.Popup.Place.AlignFunc>function xMiddle(this: WUP.Popup.Place.Result, t, me, fit) {
-  this.top = t.top + (t.height - me.h) / 2;
+  this.top = t.top + Math.round((t.height - me.h) / 2);
   this.freeH = fit.height;
   return this;
 };
@@ -204,7 +204,7 @@ const $right = <WUP.Popup.Place.EdgeFunc>function right(t, me, fit): ReturnType<
     left: t.right + me.arrow.h,
     freeW: fit.right - t.right,
     arrowAngle: 90,
-    arrowLeft: t.right - (me.arrow.w - me.arrow.h) / 2 + me.arrow.offset.right,
+    arrowLeft: t.right - Math.round((me.arrow.w - me.arrow.h) / 2) + me.arrow.offset.right,
   };
 };
 $right.$start = $left.$start;
