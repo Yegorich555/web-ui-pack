@@ -327,8 +327,7 @@ export default class MaskTextInput {
         const { chunk, posChunk } = this.findChunkByCursor(pos);
         if (!chunk.isVar && chunk.index === this.chunks.length - 1) {
           pos -= posChunk; // move cursor before postfix
-          el.selectionStart = pos;
-          el.selectionEnd = pos;
+          el.setSelectionRange(pos, pos);
         }
       }
     }

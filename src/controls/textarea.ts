@@ -114,6 +114,13 @@ export default class WUPTextareaControl<
           .replace(/<\/div>/g, ""),
     });
 
+    Object.defineProperty(this.$refInput, "setSelectionRange", {
+      configurable: true,
+      value: (start: number | null, end: number | null): void => {
+        this.selection = { start: start || 0, end: end || 0 };
+      },
+    });
+
     Object.defineProperty(this.$refInput, "selectionStart", {
       configurable: true,
       set: (start) => (this.selection = { start, end: this.selection?.end as number }),
@@ -293,3 +300,5 @@ export default class WUPTextareaControl<
 }
 
 customElements.define(tagName, WUPTextareaControl);
+
+// todo by default ctrl+B - bold, ctrl+I - italic works but maybe user don't expect it

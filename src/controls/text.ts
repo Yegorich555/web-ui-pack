@@ -506,9 +506,8 @@ export default class WUPTextControl<
         canSelectAll = canSelectAll && this.refMask!.isCompleted;
         this.renderPostfix(this._opts.postfix);
         if (!canSelectAll) {
-          // todo such logic to setSelectionRange
-          this.$refInput.selectionStart = this.$refInput.value.length; // move cursor to the end
-          this.$refInput.selectionEnd = this.$refInput.selectionStart;
+          const end = this.$refInput.value.length;
+          this.$refInput.setSelectionRange(end, end); // move cursor to the end
         }
       }
       canSelectAll && this.$refInput.select();
@@ -708,25 +707,24 @@ export default class WUPTextControl<
     }
 
     let declinedAdd = 0;
-    let position = el.selectionStart || 0;
+    let pos = el.selectionStart || 0;
     if (!e) {
       mi.parse(v);
-      position = mi.value.length; // fix case: mask with prefix + call .clearValue()
+      pos = mi.value.length; // fix case: mask with prefix + call .clearValue()
     } else {
       const r = mi.handleInput(e);
       declinedAdd = r.declinedAdd;
-      position = r.position;
+      pos = r.position;
     }
 
     if (declinedAdd) {
       this._histUndo!.pop();
-      this._histUndo!.push(this.historyToSnapshot(mi.value, position)); // fix when ###: "12|" + "3b" => 123|
+      this._histUndo!.push(this.historyToSnapshot(mi.value, pos)); // fix when ###: "12|" + "3b" => 123|
       // todo case#1 '|11:15 PM' + '0' => goes to valid '01:15 PM' but declineInput is called
-      this.declineInput(position);
+      this.declineInput(pos);
     } else {
       el.value = mi.value;
-      el.selectionStart = position;
-      el.selectionEnd = el.selectionStart;
+      el.setSelectionRange(pos, pos);
     }
     isFocused && this.renderMaskHolder(this._opts.maskholder, mi.leftLength - declinedAdd);
 
@@ -782,9 +780,7 @@ export default class WUPTextControl<
 
       const hist = this.historyFromSnapshot(from.pop()!);
       el.value = hist.v;
-      el.selectionStart = hist.pos;
-      el.selectionEnd = hist.pos;
-
+      el.setSelectionRange(hist.pos, hist.pos);
       return true;
     }
 
@@ -805,8 +801,8 @@ export default class WUPTextControl<
       const hist = this.historyFromSnapshot(this._histUndo!.pop()!);
       const el = this.$refInput;
       el.value = hist.v;
-      el.selectionStart = nextCursorPos ?? hist.pos;
-      el.selectionEnd = el.selectionStart;
+      const pos = nextCursorPos ?? hist.pos;
+      el.setSelectionRange(pos, pos);
       this.refMask && this.renderMaskHolder(this._opts.maskholder, this.refMask.leftLength);
       this.renderPostfix(this._opts.postfix);
     };

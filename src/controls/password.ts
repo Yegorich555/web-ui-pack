@@ -218,8 +218,7 @@ export default class WUPPasswordControl<
     this.$refBtnEye.setAttribute("eye", isOff ? "off" : "");
     this.$refInput.type = isOff ? "text" : "password";
     window.requestAnimationFrame(() => {
-      this.$refInput.selectionEnd = end;
-      this.$refInput.selectionStart = start;
+      this.$refInput.setSelectionRange(start, end);
     }); // otherwise selection is reset
   }
 

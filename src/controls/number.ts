@@ -222,8 +222,8 @@ export default class WUPNumberControl<
         }
         // el.value = next;
         this.setInputValue(v as any); // WARN: it refreshes onceError but calls valueToInput again
-        el.selectionStart = pos + dp;
-        el.selectionEnd = el.selectionStart;
+        const end = pos + dp;
+        el.setSelectionRange(end, end);
       }
     }
 
@@ -264,9 +264,8 @@ export default class WUPNumberControl<
           // eslint-disable-next-line no-fallthrough
           case "deleteContentForward":
             if (el.value[pos] === this.$format.sep1000) {
-              el.selectionStart = pos + (isBefore ? 0 : 1); // case "1|,234" + Delete => 1|34
-              // el.selectionStart = pos; // case "1,|234" + Backspace => 1|34
-              el.selectionEnd = el.selectionStart;
+              pos += isBefore ? 0 : 1; // case "1|,234" + Delete => 1|34
+              el.setSelectionRange(pos, pos);
             }
             break;
           default:
