@@ -27,7 +27,9 @@ declare global {
        * * with changing $options.format need to change/reset mask/maskholder also */
       format?: string;
       /** Increment value in minutes
-       *  @defaultValue 1 */
+       *  @defaultValue 1
+       * @tutorial Troubleshooting
+       * If set step = 5 user still able to set minutes not divisible step */
       step: number;
     }
     interface Options<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, Defaults<T, VM> {
@@ -664,23 +666,22 @@ export default class WUPTimeControl<
       let isHandled = true;
       let isNext = false;
       const lst = this.$refMenuLists!;
-      let ind =
-        (this._focusedMenuItem && lst!.findIndex((ref) => ref.contains(this._focusedMenuItem!))) ??
-        this.findActiveMenuList();
-
+      let ind = (this._focusedMenuItem && lst!.findIndex((ref) => ref.contains(this._focusedMenuItem!))) || 0;
+      const initFocus = (i: number): number => (this._focusedMenuItem ? i : this.findActiveMenuList());
       switch (e.key) {
         case "ArrowLeft":
-          if (ind > 0) --ind;
+          ind = Math.max(0, initFocus(ind - 1));
           this.focusMenuItem(lst[ind].querySelector("[aria-selected=true]"));
           break;
         case "ArrowRight":
-          if (ind < lst.length - 1) ++ind;
+          ind = Math.min(lst.length - 1, initFocus(ind + 1));
           this.focusMenuItem(lst[ind].querySelector("[aria-selected=true]"));
           break;
         case "ArrowDown":
           isNext = true;
         // eslint-disable-next-line no-fallthrough
         case "ArrowUp":
+          ind = initFocus(ind);
           if (!wasOpen) {
             this.focusMenuItem(lst[ind].querySelector("[aria-selected=true]"));
           } else {
@@ -708,9 +709,5 @@ export default class WUPTimeControl<
 }
 
 customElements.define(tagName, WUPTimeControl);
-// testcase: increment carousel for hh:mm in both directions
 // testcase: open&close menu. change value via input. open menu again: in menu new value must be selected
 // testcase: open&close menu & change value & open menu: new items must appeared according to menu
-// testcase: h:m - try to input 01:23 => expected 1:23
-
-// NiceToHave: when step=5 & user types 15:23 - need somehow prevent it ???
