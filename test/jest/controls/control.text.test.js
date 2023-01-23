@@ -185,5 +185,8 @@ describe("control.text", () => {
     }
     expect(el.$refError).toBe(undefined);
     expect(el.$value).toBe(undefined);
+
+    // just for coverage
+    expect(el.parse("")).toBe(undefined);
   });
 });

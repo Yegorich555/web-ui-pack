@@ -663,7 +663,6 @@ export default class WUPTextControl<
 
     this.renderPostfix(this._opts.postfix);
 
-    // todo cover case#1: when user types in the middle mask can shift & remove last invalid char. In this case need to setValue because it's valid
     if (this.#declineInputEnd && (!canParse || errMsg)) {
       return; // don't allow changes if user types wrong char
     }

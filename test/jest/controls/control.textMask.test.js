@@ -690,8 +690,22 @@ describe("control.text: mask", () => {
     await h.wait(1);
     expect(await h.userTypeText(el.$refInput, "5678a", { clearPrevious: false })).toBe("56:78 a|m");
 
+    // cover case when 1 char is appended and next is removed
     h.setInputCursor(el.$refInput, "|56:78 am");
-    expect(await remove({ key: "Delete" })).toBe("|67:8");
+    await h.userTypeText(el.$refInput, "1", { clearPrevious: false });
+    await h.wait(150);
+    expect(h.getInputCursor(el.$refInput)).toBe("1|5:67 am");
+    expect(el.$value).toBe("15:67 am");
+
+    jest.spyOn(el, "canParseInput").mockReturnValueOnce(false);
+    await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
+    expect(h.getInputCursor(el.$refInput)).toBe("12|5:67 am");
+    await h.wait(150);
+    expect(h.getInputCursor(el.$refInput)).toBe("12|:56 am");
+    expect(el.$value).toBe("15:67 am"); // because canParse false and char is declined
+
+    h.setInputCursor(el.$refInput, "|15:67 am");
+    expect(await remove({ key: "Delete" })).toBe("|56:7");
   });
 
   test("input: numeric if mask applied", async () => {
@@ -854,8 +868,12 @@ describe("control.text: mask", () => {
     await h.wait(1);
     await h.userTypeText(el.$refInput, "3", { clearPrevious: false });
     expect(h.getInputCursor(el.$refInput)).toBe("23|");
-
     expect(el.refMask?.pattern).toBe("#0"); // checking if new pattern is applied
+
+    el.blur();
+    el.focus();
+    await h.wait(1);
+    expect(h.getInputCursor(el.$refInput)).toBe("|23|"); // all selected if refMask.isCompleted
 
     // maskholder is reset if mask is removed
     el.blur();
