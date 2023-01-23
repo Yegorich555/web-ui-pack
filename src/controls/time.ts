@@ -317,7 +317,8 @@ export default class WUPTimeControl<
     this._opts.min = this.parse(this.getAttribute("min") || "") ?? this._opts.min;
     this._opts.max = this.parse(this.getAttribute("max") || "") ?? this._opts.max;
     this._opts.exclude = this.getRefAttr("exclude");
-    this._opts.step = Number.parseInt(this.getAttribute("step") || "", 10) || this.#ctr.$defaults.step;
+    this._opts.step =
+      Number.parseInt(this.getAttribute("step") || "", 10) || this._opts.step || this.#ctr.$defaults.step;
     super.gotChanges(propsChanged as any);
   }
 
@@ -713,6 +714,7 @@ export default class WUPTimeControl<
 customElements.define(tagName, WUPTimeControl);
 // testcase: increment carousel for hh:mm in both directions
 // testcase: open&close menu. change value via input. open menu again: in menu new value must be selected
-// testcase: open&close menu: anything must be selected
 // testcase: open&close menu & change value & open menu: new items must appeared according to menu
 // testcase: h:m - try to input 01:23 => expected 1:23
+
+// NiceToHave: when step=5 & user types 15:23 - need somehow prevent it ???
