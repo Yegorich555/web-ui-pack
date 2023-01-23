@@ -234,6 +234,7 @@ export default class WUPDateControl<
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     el.gotFormChanges = () => {}; // it's must be completely detached from formElement
     el.$refInput = this.$refInput;
+    el.$options.validations = this.validations!.required ? { required: true } : undefined;
     el.$options.startWith = this._opts.startWith;
     el.$options.exclude = this._opts.exclude;
     el.$options.max = this._opts.max;

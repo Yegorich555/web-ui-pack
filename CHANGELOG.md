@@ -18,6 +18,7 @@
 - Popup. Wrong position if parent has style transform.translate
 - Popup. Content is blured if transform.translate with float values
 - DateControl. Clearing input doesn't reset $value
+- DateControl. Required asterisk is removed by opening menu
 
 **Features**:
 

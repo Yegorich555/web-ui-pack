@@ -122,7 +122,9 @@ declare global {
            min: 10, // set min 10symbols for $default.validationRules.min
            custom: (value: string | undefined) => (value === un\defined || value === "test-me") && "This is custom error", // custom validation for single element
          };
-       * ``` */
+       * ```
+       * @tutorial Troubleshooting
+       ** If setup validations via attr it doesn't affect on $options.validations directly. Instead use el.validations getter instead */
       validations?:
         | { [K in keyof VM]?: VM[K] | ((value: T | undefined) => false | string) }
         | { [k: string]: (value: T | undefined) => false | string };
