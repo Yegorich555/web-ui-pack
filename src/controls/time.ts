@@ -616,31 +616,31 @@ export default class WUPTimeControl<
     super.gotInput(e, true);
   }
 
-  /** Returns current menu list index that user operates with hours/minutes/h12 */
-  protected findActiveMenuList(): number {
-    if (!this.$refMenuLists) {
-      return -1;
-    }
-    const { chunks: ch } = this.refMask!;
-    let { chunk } = this.refMask!.findChunkByCursor(this.$refInput.selectionStart!);
-    if (!chunk.isVar) {
-      chunk = ch[chunk.index + 1] || ch[chunk.index - 1]; // when cursor at the end of suffix
-    }
-    const hhChunk = ch.find((c) => c.isVar)!;
-    if (chunk === hhChunk) {
-      return 0;
-    }
-    const mmChunk = ch.find((c, i) => i > hhChunk.index && c.isVar)!;
-    if (chunk === mmChunk) {
-      return 1;
-    }
-    const h12Chunk = ch.find((c, i) => i > mmChunk.index && c.isVar);
-    if (chunk === h12Chunk) {
-      return 2;
-    }
+  // /** Returns current menu list index that user operates with hours/minutes/h12 */
+  // protected findActiveMenuList(): number {
+  //   if (!this.$refMenuLists) {
+  //     return -1;
+  //   }
+  //   const { chunks: ch } = this.refMask!;
+  //   let { chunk } = this.refMask!.findChunkByCursor(this.$refInput.selectionStart!);
+  //   if (!chunk.isVar) {
+  //     chunk = ch[chunk.index + 1] || ch[chunk.index - 1]; // when cursor at the end of suffix
+  //   }
+  //   const hhChunk = ch.find((c) => c.isVar)!;
+  //   if (chunk === hhChunk) {
+  //     return 0;
+  //   }
+  //   const mmChunk = ch.find((c, i) => i > hhChunk.index && c.isVar)!;
+  //   if (chunk === mmChunk) {
+  //     return 1;
+  //   }
+  //   const h12Chunk = ch.find((c, i) => i > mmChunk.index && c.isVar);
+  //   if (chunk === h12Chunk) {
+  //     return 2;
+  //   }
 
-    return 0;
-  }
+  //   return 0;
+  // }
 
   protected override gotKeyDown(e: KeyboardEvent): Promise<void> {
     const wasOpen = this.$isOpen;
@@ -667,7 +667,7 @@ export default class WUPTimeControl<
       let isNext = false;
       const lst = this.$refMenuLists!;
       let ind = (this._focusedMenuItem && lst!.findIndex((ref) => ref.contains(this._focusedMenuItem!))) || 0;
-      const initFocus = (i: number): number => (this._focusedMenuItem ? i : this.findActiveMenuList());
+      const initFocus = (i: number): number => (this._focusedMenuItem ? i : 0 /* this.findActiveMenuList() */);
       switch (e.key) {
         case "ArrowLeft":
           ind = Math.max(0, initFocus(ind - 1));

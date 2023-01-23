@@ -433,7 +433,6 @@ describe("control.date", () => {
     // todo continue testing Enter/Esc keys
     // todo clicks-testing
     // todo scroll-testing: increment carousel for hh:mm in both directions
-    // todo open menu & check focus when cursor above the specific chunk
     return;
     expect(isPressKeyPrevented("Enter")).toBe(true);
     await h.wait();
