@@ -149,9 +149,6 @@ export default class WUPDateControl<
    *  @tutorial Troubleshooting
    * * for "yyyy-mm-dd" the correct format is "yyyy-MM-dd" */
   override parseInput(text: string): ValueType | undefined {
-    if (!text) {
-      return undefined;
-    }
     const format = `${this._opts.format.toUpperCase()} hh:mm:ss.fff${this._opts.utc ? "Z" : ""}`;
     const v = dateFromString(text, format, { throwOutOfRange: true }) ?? undefined;
     return v as any;
@@ -264,7 +261,7 @@ export default class WUPDateControl<
     if (isChanged) {
       const c = this.$refPopup?.firstElementChild as WUPCalendarControl;
       if (c) {
-        c._isStopChanges = true; // to prevend hidding popup by calendar valueChange
+        c._isStopChanges = true; // to prevent hidding popup by calendar valueChange
         c.$value = v && !Number.isNaN(v.valueOf()) ? v : undefined;
         setTimeout(() => (c._isStopChanges = false)); // without timeout calendar $changeEvent is fired
       }

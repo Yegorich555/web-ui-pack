@@ -175,4 +175,15 @@ describe("control.text", () => {
     await h.wait(1);
     expect(el.$refPostfix.innerHTML).toMatchInlineSnapshot(`"<i>$ 1</i> USD"`);
   });
+
+  test("user can remove all", async () => {
+    el.$value = "he";
+    await h.wait(1);
+    // removing all
+    while (el.$refInput.value) {
+      await h.userRemove(el.$refInput);
+    }
+    expect(el.$refError).toBe(undefined);
+    expect(el.$value).toBe(undefined);
+  });
 });

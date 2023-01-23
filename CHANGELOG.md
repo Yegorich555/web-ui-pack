@@ -17,6 +17,7 @@
 - Popup. Changing content size doesn't recalc popup position
 - Popup. Wrong position if parent has style transform.translate
 - Popup. Content is blured if transform.translate with float values
+- DateControl. Clearing input doesn't reset $value
 
 **Features**:
 

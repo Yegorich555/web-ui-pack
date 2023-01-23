@@ -155,84 +155,77 @@ describe("control.date", () => {
     });
   });
 
-  // test("user inputs value", async () => {
-  //   const form = document.body.appendChild(document.createElement("wup-form"));
-  //   form.appendChild(el);
-  //   const onSubmit = jest.fn();
-  //   form.$onSubmit = onSubmit;
-  //   el.$options.name = "testDate";
-  //   await h.wait(1);
-  //   el.focus();
-  //   const onParse = jest.spyOn(el, "parseInput");
-  //   const onChange = jest.fn();
-  //   el.addEventListener("$change", onChange);
-  //   await h.userTypeText(el.$refInput, "20221030");
-  //   await h.wait(150);
-  //   expect(el.$isOpen).toBe(true);
-  //   expect(el.$refInput.value).toBe("2022-10-30"); // becahuse mask is applied
-  //   expect(el.$isValid).toBe(true);
-  //   expect(el.$refError).toBe(undefined);
-  //   // el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
-  //   expect(onChange).toBeCalledTimes(1);
-  //   expect(onParse).toBeCalled();
-  //   expect(el.$value?.toISOString()).toBe("2022-10-30T00:00:00.000Z"); // value changed without key "Enter" because user completed input
-  //   expect(el.$isOpen).toBe(true);
-  //   el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
-  //   await h.wait();
-  //   expect(el.$isOpen).toBe(false);
-  //   expect(onSubmit).toBeCalledTimes(0); // 1st Enter only hides popup
-  //   el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
-  //   await h.wait(1);
-  //   expect(onSubmit).toBeCalledTimes(1); // 2st Enter sumbits
-  //   onSubmit.mockClear();
-  //   expect(await h.userRemove(el.$refInput)).toBe("2022-10-3|");
-  //   await h.wait(); // wait for validation.debounce
-  //   expect(el.$refError.innerHTML).toMatchInlineSnapshot(
-  //     `"<span class="wup-hidden">Error for Test Date:</span><span>Incomplete value</span>"`
-  //   );
-  //   expect(el.$isOpen).toBe(false); // menu must stay closed
-  //   h.mockConsoleWarn();
-  //   await h.userTypeText(el.$refInput, "9", { clearPrevious: false });
-  //   h.unMockConsoleWarn();
-  //   expect(el.$refInput.value).toBe("2022-10-39");
-  //   await h.wait(1);
-  //   expect(el.$refError.innerHTML).toMatchInlineSnapshot(
-  //     `"<span class="wup-hidden">Error for Test Date:</span><span>Invalid value</span>"`
-  //   );
-  //   expect(el.$value?.toISOString()).toBe("2022-10-30T00:00:00.000Z"); // value the same
-  //   expect(el.$isOpen).toBe(false);
-  //   expect(onSubmit).toBeCalledTimes(0);
-  //   el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
-  //   await h.wait();
-  //   expect(el.$value?.toISOString()).toBe("2022-10-30T00:00:00.000Z"); // value the same
-  //   expect(el.$isOpen).toBe(false);
-  //   expect(el.$refError.innerHTML).toMatchInlineSnapshot(
-  //     `"<span class="wup-hidden">Error for Test Date:</span><span>Invalid value</span>"`
-  //   ); // value lefts the same
-  //   expect(el.$isValid).toBe(false);
-  //   expect(onSubmit).toBeCalledTimes(0);
-  //   // check if changing saves hours
-  //   el.$value = new Date("2022-10-16T13:45:56.000Z");
-  //   await h.wait(1);
-  //   onChange.mockClear();
-  //   expect(el.$refInput.value).toBe("2022-10-16");
-  //   h.setInputCursor(el.$refInput, "2022-10-16|");
-  //   await h.userRemove(el.$refInput);
-  //   await h.userTypeText(el.$refInput, "6", { clearPrevious: false });
-  //   await h.wait();
-  //   expect(el.$value?.toISOString()).toBe("2022-10-16T13:45:56.000Z");
-  //   expect(onChange).toBeCalledTimes(0); // no change because value the same
-  //   await h.userRemove(el.$refInput);
-  //   await h.userTypeText(el.$refInput, "5", { clearPrevious: false });
-  //   await h.wait();
-  //   expect(el.$value?.toISOString()).toBe("2022-10-15T13:45:56.000Z");
-  //   expect(onChange).toBeCalledTimes(1);
-  //   // just for coverage (cases impossible in ordinary flow)
-  //   expect(el.parseInput("")).toBe(undefined);
-  //   expect(el.parseInput("b022-10-16")).toBe(undefined);
-  //   el.$options.utc = false;
-  //   expect(el.parseInput("2022-10-16").toISOString()).toBe(new Date("2022-10-16").toISOString());
-  // });
+  test("user inputs value", async () => {
+    const form = document.body.appendChild(document.createElement("wup-form"));
+    form.appendChild(el);
+    const onSubmit = jest.fn();
+    form.$onSubmit = onSubmit;
+    el.$options.name = "test";
+    await h.wait(1);
+    el.focus();
+    const onParse = jest.spyOn(el, "parseInput");
+    const onChange = jest.fn();
+    el.addEventListener("$change", onChange);
+
+    expect(el.$options.format).toBe("hh:mm A");
+    await h.userTypeText(el.$refInput, "0123a");
+    await h.wait(150);
+    expect(el.$isOpen).toBe(true);
+    expect(el.$refInput.value).toBe("01:23 AM"); // because mask is applied
+    expect(el.$isValid).toBe(true);
+    expect(el.$refError).toBe(undefined);
+    // el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    expect(onChange).toBeCalledTimes(1);
+    expect(onParse).toBeCalled();
+    expect(el.$value).toEqual(new WUPTimeObject(1, 23)); // value changed without key "Enter" because user completed input
+    expect(el.$isOpen).toBe(true);
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    expect(onSubmit).toBeCalledTimes(0); // 1st Enter only hides popup
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(onSubmit).toBeCalledTimes(1); // 2st Enter sumbits
+    onSubmit.mockClear();
+    expect(await h.userRemove(el.$refInput)).toBe("01:23 |");
+    expect(await h.userRemove(el.$refInput)).toBe("01:2|");
+    expect(await h.userRemove(el.$refInput)).toBe("01:|");
+    await h.wait(); // wait for validation.debounce
+    expect(el.$refError.innerHTML).toMatchInlineSnapshot(
+      `"<span class="wup-hidden">Error for Test:</span><span>Incomplete value</span>"`
+    );
+    expect(el.$isOpen).toBe(false); // menu must stay closed
+
+    h.mockConsoleWarn();
+    await h.userTypeText(el.$refInput, "92A", { clearPrevious: false });
+    h.unMockConsoleWarn();
+    expect(el.$refInput.value).toBe("01:92 AM");
+    await h.wait(1);
+    expect(el.$refError.innerHTML).toMatchInlineSnapshot(
+      `"<span class="wup-hidden">Error for Test:</span><span>Invalid value</span>"`
+    );
+    expect(el.$value).toEqual(new WUPTimeObject(1, 23)); // value the same
+    expect(el.$isOpen).toBe(false);
+    expect(onSubmit).toBeCalledTimes(0);
+
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(el.$value).toEqual(new WUPTimeObject(1, 23)); // value the same
+    expect(el.$isOpen).toBe(false);
+    expect(el.$refError.innerHTML).toMatchInlineSnapshot(
+      `"<span class="wup-hidden">Error for Test:</span><span>Invalid value</span>"`
+    ); // value lefts the same
+    expect(el.$isValid).toBe(false);
+    expect(onSubmit).toBeCalledTimes(0);
+
+    // removing all
+    while (el.$refInput.value) {
+      await h.userRemove(el.$refInput);
+    }
+    expect(el.$refError).toBe(undefined);
+    expect(el.$value).toBe(undefined);
+  });
+
   // test("menu navigation", async () => {
   //   const form = document.body.appendChild(document.createElement("wup-form"));
   //   form.appendChild(el);

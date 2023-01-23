@@ -287,8 +287,14 @@ describe("control.date", () => {
     expect(el.$value?.toISOString()).toBe("2022-10-15T13:45:56.000Z");
     expect(onChange).toBeCalledTimes(1);
 
+    // removing all
+    while (el.$refInput.value) {
+      await h.userRemove(el.$refInput);
+    }
+    expect(el.$refError).toBe(undefined);
+    expect(el.$value).toBe(undefined);
+
     // just for coverage (cases impossible in ordinary flow)
-    expect(el.parseInput("")).toBe(undefined);
     expect(el.parseInput("b022-10-16")).toBe(undefined);
     el.$options.utc = false;
     expect(el.parseInput("2022-10-16").toISOString()).toBe(new Date("2022-10-16").toISOString());

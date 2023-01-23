@@ -649,13 +649,13 @@ export default class WUPTextControl<
     //   return;
     // }
 
-    const canParse = this.canParseInput(txt);
+    const canParse = !txt || this.canParseInput(txt);
     let v = this.$value;
     let errMsg: boolean | string = "";
     /* istanbul ignore else */
     if (canParse) {
       try {
-        v = this.parseInput(txt);
+        v = !txt ? undefined : this.parseInput(txt);
       } catch (err) {
         errMsg = (err as Error).message || true;
       }

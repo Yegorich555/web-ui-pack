@@ -275,7 +275,6 @@ export default class WUPTimeControl<
 
   /** Parse string to WUPTimeObject */
   override parse(text: string): ValueType | undefined {
-    /* istanbul ignore else */
     if (!text) {
       return undefined;
     }
@@ -284,9 +283,6 @@ export default class WUPTimeControl<
 
   /** Called to parse input text to value (related to locale or pointed format) */
   override parseInput(text: string): ValueType | undefined {
-    if (!text) {
-      return undefined;
-    }
     return new WUPTimeObject(text) as any;
   }
 
