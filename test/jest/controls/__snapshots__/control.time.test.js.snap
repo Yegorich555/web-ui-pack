@@ -1,0 +1,1352 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`control.date $ariaDetails 1`] = `
+<wup-time>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+      <span
+        class="wup-hidden"
+      >
+        Some details for screen-readers
+      </span>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+</wup-time>
+`;
+
+exports[`control.date $ariaDetails 2`] = `
+<wup-time>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+</wup-time>
+`;
+
+exports[`control.date $ariaSpeak 1`] = `
+<wup-time>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-describedby="my-test-id txt2 my-test-id2"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt2"
+  >
+    Hello
+  </section>
+</wup-time>
+`;
+
+exports[`control.date $ariaSpeak 2`] = `
+<wup-time>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-describedby="my-test-id my-test-id2"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+</wup-time>
+`;
+
+exports[`control.date $show/$hide error 1`] = `
+<wup-time>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+</wup-time>
+`;
+
+exports[`control.date $show/$hide error 2`] = `
+<wup-time
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-describedby="txt2"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    role="alert"
+    style="opacity: 0;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      Some custom message here
+    </span>
+  </wup-popup>
+</wup-time>
+`;
+
+exports[`control.date $show/$hide error 3`] = `
+<wup-time>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+</wup-time>
+`;
+
+exports[`control.date common tests render + styles 1`] = `<wup-time />`;
+
+exports[`control.date common tests render + styles 2`] = `
+<style>
+  .wup-hidden, [wup-hidden] {
+position: absolute;
+height: 1px; width: 1px;
+top:0;left:0;
+overflow: hidden;
+clip: rect(1px, 1px, 1px, 1px);}
+  :root {
+          --base-bg: #fff;
+          --base-text: #232323;
+          --base-focus: #00778d;
+          --base-btn-bg: #009fbc;
+          --base-btn-text: #fff;
+          --base-btn-focus: #005766;
+          --base-btn2-bg: var(--base-btn-text);
+          --base-btn2-text: var(--base-btn-bg);
+          --base-btn3-bg: var(--base-bg);
+          --base-btn3-text: inherit;
+          --base-sep: #e4e4e4;
+          --border-radius: 6px;
+          --anim-time: 200ms;
+          --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+        }
+  :root {
+        --ctrl-padding: 1.5em 1em 0.5em 1em;
+        --ctrl-focus: var(--base-focus);
+        --ctrl-focus-label: var(--base-focus);
+        --ctrl-selected: var(--ctrl-focus-label);
+        --ctrl-label: #5e5e5e;
+        --ctrl-icon: var(--ctrl-label);
+        --ctrl-icon-size: 1em;
+        --ctrl-bg: var(--base-bg);
+        --ctrl-border-radius: var(--border-radius);
+        --ctrl-err-text: #ad0000;
+        --ctrl-err-bg: #fff4fa;
+        --ctrl-err-icon-valid: green;
+        --ctrl-invalid-border: red;
+        --wup-icon-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M674.515 93.949a45.925 45.925 0 0 0-65.022 0L384.001 318.981 158.509 93.487a45.928 45.928 0 0 0-65.022 0c-17.984 17.984-17.984 47.034 0 65.018l225.492 225.494L93.487 609.491c-17.984 17.984-17.984 47.034 0 65.018s47.034 17.984 65.018 0l225.492-225.492 225.492 225.492c17.984 17.984 47.034 17.984 65.018 0s17.984-47.034 0-65.018L449.015 383.999l225.492-225.494c17.521-17.521 17.521-47.034 0-64.559z'/%3E%3C/svg%3E");
+        --wup-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M37.691 450.599 224.76 635.864c21.528 21.32 56.11 21.425 77.478 0l428.035-426.23c21.47-21.38 21.425-56.11 0-77.478s-56.11-21.425-77.478 0L263.5 519.647 115.168 373.12c-21.555-21.293-56.108-21.425-77.478 0s-21.425 56.108 0 77.478z'/%3E%3C/svg%3E");
+        --wup-icon-dot: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='20'/%3E%3C/svg%3E");
+      }
+  :root {
+      --ctrl-clear-hover: rgba(255,0,0,0.1);
+      --ctrl-clear-hover-size: 22px;
+     }
+  :root {
+        --ctrl-time-icon-img-lg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M383.615 0C171.647 0 0 172.032 0 384s171.648 384 383.615 384c212.352 0 384.383-172.032 384.383-384S595.966 0 383.615 0zM384 691.199C214.272 691.199 76.801 553.727 76.801 384S214.273 76.801 384 76.801c169.728 0 307.199 137.472 307.199 307.199S553.727 691.199 384 691.199zm-38.401-499.198h57.6v201.6l172.8 102.528-28.8 47.232-201.6-120.96v-230.4z' /%3E%3C/svg%3E");
+        --ctrl-time-icon-img: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAABOAAAATgGxzR8zAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAASxJREFUOI2V00kuRFEUBuCvXqLMrEBIRBeKxCIMrcFAYguMRMz13QYwESxAMxIjXYKEiIHYAQYSTRncU1JRT+FPbnLfOf9/unsetejHPK7wHOcSsyjl8L/QiBW84wMnWItzGrY3LKKYJz5AGZtoy0nQjq3g7H0PshqOiXolBiaDu1Ax9EXZmznkY4zm2LeldnozjKCA8T9kr2AMGUYyDEpDuvtHgFucYzBDC27+Ia7gGq2ZNJDCD6QXDKMnx1cg9fGArh8CDOFM2olpNFX5unEPc9KStNcpdwBHOIzvztDMkNbzTVqSeiigOe47oflqbVmaxeQvQWAquPPVxiL2w7GNjhxhZ2QuYxcN3wlFLEVpH9Lw1rER9zJepZnViKtRkn7dSzzhERfSK9Q85ye76kkmcVhDgAAAAABJRU5ErkJggg==');
+        --ctrl-time-current: var(--base-text);
+        --ctrl-time-current-bg: #d9f7fd;
+      }
+  
+      WUP-TIME {
+        contain: style;
+        display: block;
+        margin-bottom: 20px;
+        position: relative;
+        border-radius: var(--ctrl-border-radius);
+        background: var(--ctrl-bg);
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+      WUP-TIME strong,
+      WUP-TIME legend {
+        color: var(--ctrl-label);
+        pointer-events: none;
+      }
+      WUP-TIME:focus-within,
+      WUP-TIME:focus-within &gt; [menu] {
+        z-index: 90010;
+        outline: 1px solid var(--ctrl-focus);
+      }
+      WUP-TIME:focus-within strong,
+      WUP-TIME:focus-within legend {
+        color: var(--ctrl-focus-label);
+        pointer-events: initial;
+      }
+      [disabled] WUP-TIME,
+      WUP-TIME[disabled] {
+        opacity: 0.6;
+        cursor: not-allowed;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      [disabled] WUP-TIME &gt; *,
+      WUP-TIME[disabled] &gt; * {
+        pointer-events: none;
+      }
+      WUP-TIME[invalid],
+      WUP-TIME[invalid] &gt; [menu] {
+        box-shadow: 0 0 3px 0 var(--ctrl-invalid-border);
+        outline-color: var(--ctrl-invalid-border);
+      }
+      WUP-TIME label {
+        display: flex;
+        align-items: center;
+        box-sizing: border-box;
+        font: inherit;
+        cursor: inherit;
+        padding: var(--ctrl-padding);
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+      WUP-TIME input,
+      WUP-TIME textarea,
+      WUP-TIME [contenteditable] {
+        padding: 0;
+        margin: 0;
+        cursor: inherit;
+      }
+      WUP-TIME strong {
+        cursor: inherit;
+      }
+      WUP-TIME [aria-required="true"] + strong:after,
+      WUP-TIME fieldset[aria-required="true"] &gt; legend:after {
+        content: "*";
+        font-size: larger;
+        font-weight: bolder;
+        line-height: 0;
+      }
+      WUP-TIME [error] {
+        cursor: pointer;
+        font-size: small;
+        color: var(--ctrl-err-text);
+        background: var(--ctrl-err-bg);
+        max-height: 3em;
+        overflow: auto;
+        overflow: overlay;
+      }
+      WUP-TIME [error] ul {
+        margin:0; padding:2px 4px 2px;
+      }
+      WUP-TIME [error] li {
+        display: flex;
+        align-items: center;
+        margin-left: -5px;
+      }
+      WUP-TIME [error] li:before {
+        content: '';
+        --ctrl-icon-img: var(--wup-icon-dot);
+        --ctrl-icon: var(--ctrl-err-text);
+        
+display: inline-block;
+width: var(--ctrl-icon-size);
+min-height: var(--ctrl-icon-size);
+box-sizing: content-box;
+margin: 0;
+padding: 0 5px;
+flex: 0 0 auto;
+align-self: stretch;
+border: none;
+box-shadow: none;
+background: var(--ctrl-icon);
+-webkit-mask-size: var(--ctrl-icon-size);
+mask-size: var(--ctrl-icon-size);
+-webkit-mask-repeat: no-repeat;
+mask-repeat: no-repeat;
+-webkit-mask-position: center;
+mask-position: center;
+-webkit-mask-image: var(--ctrl-icon-img);
+mask-image: var(--ctrl-icon-img);
+      }
+      WUP-TIME [error] li[valid] {
+        color: var(--ctrl-err-icon-valid);
+      }
+      WUP-TIME [error] li[valid]:before {
+        content: '';
+        --ctrl-icon-img: var(--wup-icon-check);
+        --ctrl-icon: var(--ctrl-err-icon-valid);
+      }
+      WUP-TIME:focus-within [error] {
+        max-height: none;
+      }
+      @media (hover: hover) {
+        /*WUP-TIME:hover {
+          z-index: 90011;
+        }
+        WUP-TIME:hover [error] {
+          max-height: none;
+        }*/
+        WUP-TIME:hover,
+        WUP-TIME:hover &gt; [menu] {
+          box-shadow: 0 0 3px 1px var(--ctrl-focus);
+        }
+        WUP-TIME[invalid]:hover,
+        WUP-TIME[invalid]:hover &gt; [menu] {
+          box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+        }
+      }
+        WUP-TIME {
+          cursor: text;
+        }
+        WUP-TIME label &gt; span {
+          width: 100%;
+          position: relative;
+          display: flex;
+          flex-direction: row-reverse;
+        }
+        WUP-TIME input,
+        WUP-TIME textarea,
+        WUP-TIME [contenteditable],
+        WUP-TIME [maskholder],
+        WUP-TIME [prefix],
+        WUP-TIME [postfix] {
+          padding: var(--ctrl-padding);
+          padding-left: 0;
+          padding-right: 0;
+          font: inherit;
+          color: inherit;
+          margin: 0;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
+        }
+        WUP-TIME input,
+        WUP-TIME textarea,
+        WUP-TIME [contenteditable],
+        WUP-TIME [maskholder],
+        WUP-TIME [postfix] {
+          width: 100%;
+          box-sizing: border-box;
+          border: none;
+          background: none;
+          outline: none;
+        }
+        WUP-TIME [prefix],
+        WUP-TIME [postfix] {
+          color: var(--ctrl-label);
+          flex-shrink: 0;
+        }
+        WUP-TIME [maskholder],
+        WUP-TIME [prefix],
+        WUP-TIME [postfix] {
+          display: none;
+          pointer-events: none;
+          text-overflow: initial;
+          white-space: pre;
+        }
+        WUP-TIME [postfix] {
+          position: absolute;
+        }
+        WUP-TIME [maskholder] {
+          position: absolute;
+          opacity: 0.65;
+        }
+        WUP-TIME [maskholder]&gt;i,
+        WUP-TIME [postfix]&gt;i {
+          visibility: hidden;
+          font: inherit;
+          white-space: pre;
+        }
+        WUP-TIME input:-webkit-autofill,
+        WUP-TIME textarea:-webkit-autofill,
+        WUP-TIME [contenteditable]:-webkit-autofill {
+          font: inherit;
+          -webkit-background-clip: text;
+        }
+        WUP-TIME input:autofill,
+        WUP-TIME textarea:autofill,
+        WUP-TIME [contenteditable]:autofill {
+          font: inherit;
+          background-clip: text;
+        }
+        WUP-TIME strong {
+          display: block;
+          position: absolute;
+          top: 50%;
+          left: 0;
+          padding: 0;
+          margin: 0;
+          box-sizing: border-box;
+          max-width: 100%;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
+          transform-origin: top left;
+          transform: translateY(-50%);
+          font-weight: normal;
+          text-decoration: none;
+        }
+        @media not all and (prefers-reduced-motion) {
+          WUP-TIME strong {
+            transition: top var(--anim), transform var(--anim), color var(--anim);
+          }
+        }
+        WUP-TIME input:not(:focus)::placeholder,
+        WUP-TIME textarea:not(:focus)::placeholder {
+          color: transparent;
+        }
+        WUP-TIME:focus-within strong,
+        WUP-TIME input:not(:placeholder-shown) + strong,
+        WUP-TIME textarea:not(:placeholder-shown) + strong,
+        WUP-TIME [contenteditable]:not(:empty) + strong,
+        WUP-TIME legend {
+          top: 0.2em;
+          transform: scale(0.9);
+        }
+        WUP-TIME:focus-within [maskholder],
+        WUP-TIME:focus-within [prefix],
+        WUP-TIME:focus-within [postfix],
+        WUP-TIME input:not(:placeholder-shown) ~ [prefix],
+        WUP-TIME input:not(:placeholder-shown) ~ [postfix],
+        WUP-TIME textarea:not(:placeholder-shown) ~ [prefix],
+        WUP-TIME textarea:not(:placeholder-shown) ~ [postfix] {
+          display: inline-block;
+        }
+        /* style for icons */
+        WUP-TIME label button,
+        WUP-TIME label button:after,
+        WUP-TIME label:after,
+        WUP-TIME label:before {
+          
+display: inline-block;
+width: var(--ctrl-icon-size);
+min-height: var(--ctrl-icon-size);
+box-sizing: content-box;
+margin: 0;
+padding: 0 5px;
+flex: 0 0 auto;
+align-self: stretch;
+border: none;
+box-shadow: none;
+background: var(--ctrl-icon);
+-webkit-mask-size: var(--ctrl-icon-size);
+mask-size: var(--ctrl-icon-size);
+-webkit-mask-repeat: no-repeat;
+mask-repeat: no-repeat;
+-webkit-mask-position: center;
+mask-position: center;
+-webkit-mask-image: var(--ctrl-icon-img);
+mask-image: var(--ctrl-icon-img);
+          -webkit-mask-image: none;
+          mask-image: none;
+        }
+        WUP-TIME label:after {
+          cursor: pointer;
+          margin-right: calc(var(--ctrl-icon-size) / -2);
+        }
+        WUP-TIME label:before {
+          cursor: pointer;
+          margin-left: calc(var(--ctrl-icon-size) / -2);
+        }
+        WUP-TIME label button {
+           z-index: 1;
+           contain: strict;
+        }
+        WUP-TIME label&gt;span + button {
+          margin-right: -0.5em;
+        }
+        WUP-TIME button[clear] {
+          position: relative;
+          background: none;
+        }
+        WUP-TIME button[clear]:after {
+          content: "";
+          padding: 0;
+          -webkit-mask-image: var(--wup-icon-cross);
+          mask-image: var(--wup-icon-cross);
+        }
+        WUP-TIME button[clear]:after,
+        WUP-TIME button[clear]:before {
+          position: absolute;
+          top: 50%; left: 50%;
+          transform: translate(-50%, -50%);
+          width: 100%;
+          padding-top: 100%;
+        }
+        WUP-TIME button[clear]:before {
+          width: var(--ctrl-clear-hover-size);
+          padding-top: var(--ctrl-clear-hover-size);
+        }
+        @media (hover: hover) {
+          WUP-TIME button[clear]:hover {
+            box-shadow: none;
+          }
+          WUP-TIME button[clear]:hover:before {
+            content: "";
+            border-radius: 50%;
+            box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
+          }
+          WUP-TIME button[clear]:hover:after {
+            background-color: var(--ctrl-err-text);
+          }
+          WUP-TIME[readonly] button[clear] {
+            pointer-events: none;
+          }
+        }
+      WUP-TIME {
+        cursor: pointer;
+      }
+      WUP-TIME input {
+        cursor: text;
+      }
+      WUP-TIME input:placeholder-shown,
+      WUP-TIME input:read-only {
+        cursor: pointer;
+      }
+      WUP-TIME label::after {
+        content: "";
+        -webkit-mask-image: var(--ctrl-icon-img);
+        mask-image: var(--ctrl-icon-img);
+      }
+      @media not all and (prefers-reduced-motion) {
+        WUP-TIME label::after {
+          transition: transform var(--anim);
+        }
+      }
+      WUP-TIME button[clear] {
+        margin: 0;
+      }
+      WUP-TIME [menu] {
+        padding: 0;
+        max-height: 300px;
+        z-index: 90010;
+      }
+      WUP-TIME {
+        --ctrl-icon-img: var(--ctrl-time-icon-img-lg);
+        --ctrl-icon-img: var(--ctrl-time-icon-img);
+      }
+      WUP-TIME [menu]&gt;div:first-child {
+        position: relative;
+      }
+      WUP-TIME [menu] ul {
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+        cursor: pointer;
+        overflow: auto;
+        text-align: center;
+        display: inline-block;
+        vertical-align: middle;
+      }
+      WUP-TIME [menu] li,
+      WUP-TIME [menu] mark,
+      WUP-TIME [menu] ul:after {
+        padding: 1em;
+        height: 1em;
+      }
+      WUP-TIME [menu] mark {
+        z-index: -1;
+        position: absolute;
+        display: block;
+        top:50%; left:0; right:0;
+        transform: translateY(-50%);
+        margin: 0; padding-left: 2.8em;
+        font: inherit;
+        background: var(--ctrl-time-current-bg);
+      }
+      WUP-TIME [menu] ul:after {
+        content: "99";
+        height: 0;
+        margin:0; padding-top:0; padding-bottom:0;
+        visibility: hidden;
+        overflow: hidden;
+        user-select: none;
+        pointer-events: none;
+        display: block;
+      }
+      WUP-TIME [menu] ul:nth-child(3):after {
+         content: "AM";
+      }
+      WUP-TIME [menu] li[aria-selected=true],
+      WUP-TIME [menu] mark,
+      WUP-TIME [menu] ul:after {
+        font-weight: bold;
+        color: var(--ctrl-time-current);
+      }
+      WUP-TIME [menu] li[focused] {
+        position: relative;
+      }
+      WUP-TIME [menu] li[focused]:after {
+        
+          content: " ";
+          position: absolute;
+          display: block;
+          top: 50%; left: 50%;
+          transform: translate(-50%,-50%);
+          width: 2em;
+          height: 2em;
+          border-radius: 50%;
+          //box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
+          box-shadow: 0 0 3px 1px var(--ctrl-focus);
+    
+      }
+      WUP-TIME [menu] li[aria-hidden] {
+        pointer-events: none;
+        touch-action: none;
+      }
+      WUP-TIME [menu] li[disabled] {
+        color: var(--ctrl-err-text);
+        --ctrl-focus: var(--ctrl-err-text);
+        //background-color: var(--ctrl-err-bg);
+      }
+      WUP-TIME [menu] [group] {
+        display: flex;
+        gap: 1px;
+        padding-top: 1px;
+        background: var(--base-sep);
+      }
+      WUP-TIME [menu] button {
+        flex: 1 1 50%;
+        display: inline-flex;
+        align-content: center;
+        justify-content: center;
+        height: 2.4em;
+        border-radius: 0;
+        padding: 0;
+        background: var(--base-btn3-bg);
+      }
+      WUP-TIME [menu] button:first-child {
+        --ctrl-icon-img: var(--wup-icon-check);
+        --ctrl-icon: var(--ctrl-err-icon-valid);
+        border-bottom-left-radius: var(--border-radius);
+      }
+      WUP-TIME [menu] button:last-child {
+        --ctrl-icon-img: var(--wup-icon-cross);
+        --ctrl-icon: var(--ctrl-err-text);
+        border-bottom-right-radius: var(--border-radius);
+      }
+      WUP-TIME [menu] button:after {
+        
+display: inline-block;
+width: var(--ctrl-icon-size);
+min-height: var(--ctrl-icon-size);
+box-sizing: content-box;
+margin: 0;
+padding: 0 5px;
+flex: 0 0 auto;
+align-self: stretch;
+border: none;
+box-shadow: none;
+background: var(--ctrl-icon);
+-webkit-mask-size: var(--ctrl-icon-size);
+mask-size: var(--ctrl-icon-size);
+-webkit-mask-repeat: no-repeat;
+mask-repeat: no-repeat;
+-webkit-mask-position: center;
+mask-position: center;
+-webkit-mask-image: var(--ctrl-icon-img);
+mask-image: var(--ctrl-icon-img);
+        content: "";
+        padding:0;
+      }
+      @media (hover: hover) {
+        WUP-TIME [menu] li:hover {
+          position: relative;
+        }
+        WUP-TIME [menu] li:hover:after {
+         
+          content: " ";
+          position: absolute;
+          display: block;
+          top: 50%; left: 50%;
+          transform: translate(-50%,-50%);
+          width: 2em;
+          height: 2em;
+          border-radius: 50%;
+          //box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
+          box-shadow: 0 0 3px 1px var(--ctrl-focus);
+    
+        }
+        WUP-TIME [menu] button:hover {
+          box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 10%);
+        }
+      }
+      WUP-TIME [menu] button[disabled] {
+         box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 5%);
+         cursor: not-allowed;
+         --ctrl-icon: inherit;
+      }
+</style>
+`;
+
+exports[`control.date validations $options.validationShowAll 1`] = `
+<wup-time
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-describedby="txt2"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    role="alert"
+    style="max-width: 100px;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      This field is required
+    </span>
+    <ul
+      aria-hidden="true"
+    >
+      <li>
+        Min value is 02:28 AM
+      </li>
+      <li>
+        Max value is 11:15 PM
+      </li>
+      <li>
+        This value is disabled
+      </li>
+    </ul>
+  </wup-popup>
+</wup-time>
+`;
+
+exports[`control.date validations $options.validationShowAll 2`] = `
+<wup-time>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+</wup-time>
+`;
+
+exports[`control.date validations $options.validationShowAll 3`] = `
+<wup-time
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-describedby="txt5"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong>
+        First Name
+      </strong>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt5"
+    role="alert"
+    style="max-width: 100px;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Name:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+</wup-time>
+`;
+
+exports[`control.date validations options.validationCase 1`] = `
+<wup-time>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+</wup-time>
+`;
+
+exports[`control.date validations options.validationCase 2`] = `
+<wup-time
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <span
+        aria-hidden="true"
+        maskholder=""
+      >
+        <i />
+        hh:mm *M
+      </span>
+      <input
+        aria-autocomplete="list"
+        aria-controls="txt2"
+        aria-describedby="txt4"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-owns="txt2"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong>
+        First Input
+      </strong>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+  <wup-popup
+    menu=""
+    style="opacity: 0;"
+  >
+    <div
+      id="txt2"
+      role="application"
+    >
+      <ul
+        aria-label="Hours"
+        style="overflow: hidden;"
+      >
+        <li>
+          12
+        </li>
+        <li>
+          01
+        </li>
+        <li
+          aria-selected="true"
+        >
+          02
+        </li>
+        <li>
+          03
+        </li>
+        <li>
+          04
+        </li>
+      </ul>
+      <ul
+        aria-label="Minutes"
+        style="overflow: hidden;"
+      >
+        <li>
+          26
+        </li>
+        <li>
+          27
+        </li>
+        <li
+          aria-selected="true"
+        >
+          28
+        </li>
+        <li>
+          29
+        </li>
+        <li>
+          30
+        </li>
+      </ul>
+      <ul
+        aria-label="AM PM"
+        style="overflow: hidden;"
+      >
+        <li
+          aria-hidden="true"
+        />
+        <li
+          aria-selected="true"
+        >
+          AM
+        </li>
+        <li>
+          PM
+        </li>
+      </ul>
+      <mark
+        aria-hidden="true"
+      >
+        :
+      </mark>
+    </div>
+    <div
+      group=""
+    >
+      <button
+        aria-label="Ok"
+        tabindex="-1"
+        type="button"
+      />
+      <button
+        aria-label="Cancel"
+        tabindex="-1"
+        type="button"
+      />
+    </div>
+  </wup-popup>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt4"
+    style="max-width: 100px;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+</wup-time>
+`;
+
+exports[`control.date validations options.validationCase 3`] = `
+<wup-time
+  invalid=""
+  opened=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <span
+        aria-hidden="true"
+        maskholder=""
+      >
+        <i>
+          02:28 AM
+        </i>
+        
+      </span>
+      <input
+        aria-autocomplete="list"
+        aria-controls="txt5"
+        aria-describedby="txt6"
+        aria-expanded="true"
+        aria-haspopup="listbox"
+        aria-owns="txt5"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong>
+        First Input
+      </strong>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt6"
+    style="max-width: 100px;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
+  <wup-popup
+    menu=""
+    style=""
+  >
+    <div
+      id="txt5"
+      role="application"
+    >
+      <ul
+        aria-label="Hours"
+        style="overflow: hidden;"
+      >
+        <li>
+          12
+        </li>
+        <li>
+          01
+        </li>
+        <li
+          aria-selected="true"
+        >
+          02
+        </li>
+        <li>
+          03
+        </li>
+        <li>
+          04
+        </li>
+      </ul>
+      <ul
+        aria-label="Minutes"
+        style="overflow: hidden;"
+      >
+        <li>
+          26
+        </li>
+        <li>
+          27
+        </li>
+        <li
+          aria-selected="true"
+        >
+          28
+        </li>
+        <li>
+          29
+        </li>
+        <li>
+          30
+        </li>
+      </ul>
+      <ul
+        aria-label="AM PM"
+        style="overflow: hidden;"
+      >
+        <li
+          aria-hidden="true"
+        />
+        <li
+          aria-selected="true"
+        >
+          AM
+        </li>
+        <li>
+          PM
+        </li>
+      </ul>
+      <mark
+        aria-hidden="true"
+      >
+        :
+      </mark>
+    </div>
+    <div
+      group=""
+    >
+      <button
+        aria-label="Ok"
+        tabindex="-1"
+        type="button"
+      />
+      <button
+        aria-label="Cancel"
+        tabindex="-1"
+        type="button"
+      />
+    </div>
+  </wup-popup>
+</wup-time>
+`;
+
+exports[`control.date validations options.validationCase 4`] = `
+<wup-time
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <span
+        aria-hidden="true"
+        maskholder=""
+      >
+        <i />
+        hh:mm *M
+      </span>
+      <input
+        aria-autocomplete="list"
+        aria-controls="txt5"
+        aria-describedby="txt7"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-owns="txt5"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong>
+        First Input
+      </strong>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt7"
+    role="alert"
+    style="max-width: 100px;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+</wup-time>
+`;
+
+exports[`control.date with form 1`] = `
+<wup-form
+  role="form"
+>
+  <wup-time>
+    <label
+      for="txt1"
+    >
+      <span>
+        <input
+          aria-autocomplete="list"
+          aria-expanded="false"
+          aria-haspopup="listbox"
+          autocomplete="off"
+          id="txt1"
+          placeholder=" "
+          role="combobox"
+          type="text"
+        />
+        <strong>
+          First Input
+        </strong>
+      </span>
+      <button
+        aria-hidden="true"
+        clear=""
+        tabindex="-1"
+      />
+    </label>
+  </wup-time>
+</wup-form>
+`;

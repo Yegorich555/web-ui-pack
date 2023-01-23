@@ -400,7 +400,7 @@ export default class WUPTimeControl<
 
     // render hours
     const getCurHours = (): number => {
-      const hh = this.$value?.hours || 0;
+      const hh = this.$value ? this.$value.hours : new Date().getHours();
       return h12 ? hh % 12 : hh;
     };
     const lh = parent.appendChild(document.createElement("ul")) as any as WUP.Time.MenuListElement;
@@ -430,7 +430,8 @@ export default class WUPTimeControl<
     };
 
     // render minutes
-    const getCurMinutes = (): number => Math.round((this.$value?.minutes || 0) / step);
+    const getCurMinutes = (): number =>
+      Math.round((this.$value ? this.$value.minutes : new Date().getMinutes()) / step);
     const lm = parent.appendChild(document.createElement("ul")) as any as WUP.Time.MenuListElement;
     lm.setAttribute("aria-label", this.#ctr.$ariaMinutes);
     this.$refMenuLists.push(lm);

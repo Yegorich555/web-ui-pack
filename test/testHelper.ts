@@ -106,6 +106,7 @@ export interface BaseTestOptions {
   attrs: Record<
     string,
     {
+      /** Set true if removing attr doesn't remove option but rollbacks to default */
       onRemove?: boolean;
       skip?: boolean;
       value?: string;
