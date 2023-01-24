@@ -12,6 +12,7 @@ import styles from "./main.scss";
 
 import ControlsView from "./components/controls/controlsView";
 import SpinView from "./components/spin/spinView";
+import CircleView from "./components/circleView";
 import TextControlView from "./components/controls/text";
 import TextareaControlView from "./components/controls/textarea";
 import PasswordControlView from "./components/controls/password";
@@ -39,6 +40,7 @@ const baseURL = process.env.BASE_URL || "/";
 const routes: IRoute[] = [
   { path: "popup", el: PopupView },
   { path: "spin", el: SpinView },
+  { path: "circle", el: CircleView },
   { path: "controls", label: "Form & Controls", el: ControlsView },
   { path: "control/text", el: TextControlView, isNested: true },
   { path: "control/textarea", el: TextareaControlView, isNested: true },
