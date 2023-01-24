@@ -11,6 +11,9 @@ declare global {
       /** Border/corner radius of each segment 0..w/2 (no more than width)
        * @defaultValue 2 */
       corner: number;
+      /** Enable background circle
+       * @defaultValue true */
+      back: boolean;
       /** Angle from that rendering is started 0..360 (degrees)
        * @defaultValue 0 */
       from: number;
@@ -18,17 +21,12 @@ declare global {
        * @defaultValue 360 */
       to: number;
 
-      /** Enable background circle
-       * @defaultValue true */
-      back: boolean;
-
-      // todo do we need valueMin, valueMax ?
-      /** Min value that fits angleMin
+      /** Min expected value (if min & max is missed then items values must absolute from 0 to 360)
        * @defaultValue 0 */
-      valueMin: number;
-      /** Max value that fits angleMax
-       * @defaultValue 360 */
-      valueMax: number;
+      min?: number;
+      /** Max expected value (if min & max is missed then items values must absolute from 0 to 360)
+       * @defaultValue 100 */
+      max?: number;
     }
 
     interface Options extends Defaults {
@@ -78,9 +76,10 @@ export default class WUPCircleElement extends WUPBaseElement {
       :host {
         contain: style;
         display: block;
-        margin: auto;
         position: relative;
         overflow: hidden;
+        margin: auto;
+        padding: 2px;
       }
       :host strong {
         display: block;
@@ -108,26 +107,14 @@ export default class WUPCircleElement extends WUPBaseElement {
       `;
   }
 
-  /** Padding of rendered svg */
-  static padding = 2;
-  /** Radius of arcs */
-  static r = 50;
-  /** Returns [x,y] coordinates */
-  static get center(): [number, number] {
-    const xy = this.r + this.padding;
-    return [xy, xy];
-  }
-
   static $defaults: WUP.Circle.Defaults = {
     width: 14,
     corner: 3,
-    from: 0,
     back: true,
-
-    // todo implement
+    from: 0,
     to: 360,
-    valueMin: 0,
-    valueMax: 360,
+    min: 0,
+    max: 100,
   };
 
   $options: WUP.Circle.Options = {
@@ -136,6 +123,11 @@ export default class WUPCircleElement extends WUPBaseElement {
   };
 
   protected override _opts = this.$options;
+
+  /** Creates new svg-part */
+  protected make<K extends keyof SVGElementTagNameMap>(tag: string): SVGElementTagNameMap[K] {
+    return document.createElementNS("http://www.w3.org/2000/svg", tag) as SVGElementTagNameMap[K];
+  }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Circle.Options> | null): void {
     super.gotChanges(propsChanged);
@@ -147,60 +139,95 @@ export default class WUPCircleElement extends WUPBaseElement {
     this._opts.from = this.getNumAttr("from")!;
     this._opts.to = this.getNumAttr("to")!;
 
-    // this.$refItems.textContent = "";
-    this.$refSVG.textContent = ""; // clean before new render
+    if (propsChanged) {
+      this.$refItems.textContent = "";
+      this.$refSVG.textContent = ""; // clean before new render
+    }
     this.gotRender();
   }
 
-  $refSVG = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  $refItems = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  $refLabel = document.createElement("strong");
+  $refSVG = this.make("svg");
+  $refItems = this.make("g");
+  $refLabel?: HTMLElement;
 
   /** Called on every changeEvent */
   protected override gotRender(): void {
-    const { center } = this.#ctr;
-
-    // todo implement: this.appendChild(this.$refLabel);
     // example: https://medium.com/@pppped/how-to-code-a-responsive-circular-percentage-chart-with-svg-and-css-3632f8cd7705
-    this.$refSVG.setAttribute("viewBox", `0 0 ${center[0] * 2} ${center[1] * 2}`);
+    this.$refSVG.setAttribute("viewBox", `0 0 100 100`);
+    this.$refSVG.setAttribute("role", "img");
+    const title = this.$refSVG.appendChild(this.make("title"));
+    title.textContent = "Some description for WA here"; // todo check it for WA
     this.$refSVG.appendChild(this.$refItems);
-    this.appendChild(this.$refSVG);
 
-    this.gotRenderItems();
-  }
-
-  /** Called every time as need to update/re-render segments */
-  protected gotRenderItems(): void {
-    const { items } = this._opts;
-
+    // render background cicle
     if (this._opts.back) {
       // render background circle
-      const back = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      const back = this.make("path");
       back.setAttribute("d", this.drawArc(this._opts.from, this._opts.to));
       this.$refSVG.prepend(back);
     }
 
-    // todo develop animation ?
-
+    // render items
+    // todo develop animation here
+    const { items } = this._opts;
     let angleFrom = this._opts.from;
+    let angleTo = 0;
+    let end = 0;
+
+    let { min, max } = this._opts;
+    if (items.length > 1) {
+      min = 0; // items.reduce((v, item) => (item.value < v ? item.value : v), 0);
+      max = items.reduce((v, item) => item.value + v, 0);
+    }
+
     for (let i = 0; i < items.length; ++i) {
       const a = items[i];
-      // render valued Arc
       const v = a.value;
-      const angleTo = v; // todo recalc value to angle
+      angleTo = this.valueToAngle(v, min, max) + end;
 
-      const path = this.$refItems.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "path"));
+      const path = this.$refItems.appendChild(this.make("path"));
       path.setAttribute("d", this.drawArc(angleFrom, angleTo));
       a.color && path.setAttribute("fill", a.color);
-
-      angleFrom = angleTo; // todo extra space between segments here
+      end = angleTo;
+      angleFrom = angleTo; // todo add extra space between segments here
     }
+
+    // render/remove label
+    if (items.length === 1) {
+      this.$refLabel = this.$refLabel ?? this.appendChild(document.createElement("strong"));
+      const rawV = items[0].value;
+      const perc = Math.round(((angleTo - this._opts.from) * 100) / (this._opts.to - this._opts.from));
+      this.renderLabel(this.$refLabel, perc, rawV);
+    } else {
+      this.$refLabel?.remove();
+      this.$refLabel = undefined;
+    }
+
+    this.appendChild(this.$refSVG);
+  }
+
+  /** Convert value to angle according to options min,max,from,to */
+  protected valueToAngle(v: number, min: number | null | undefined, max: number | null | undefined): number {
+    const { from, to } = this._opts;
+    if (min == null || max == null) {
+      return v; // if min & max is null than value is pointed in degress
+    }
+
+    // WARN: theoritaclly possible to get 1deg out for rendering several segments with Math.round
+    const r = Math.round(scaleValue(v, min, max, from, to));
+    return r;
+  }
+
+  /** Called every time as need to text-value */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  renderLabel(label: HTMLElement, percent: number, rawValue: number): void {
+    label.textContent = `${percent}%`;
   }
 
   /** Returns svg-path for Arc according to options */
   protected drawArc(angleFrom: number, angleTo: number): string {
-    const { center } = this.#ctr;
-    const { r } = this.#ctr;
+    const r = 50;
+    const center: [number, number] = [r, r];
     return drawArc(center, r, this._opts.width, angleFrom, angleTo, this._opts.corner);
   }
 
@@ -292,4 +319,10 @@ export function drawArc(
     `A ${cornerR} ${cornerR} 0 0 1 ${iStart[0]} ${iStart[1]}`, // inner start corner
     "Z", // end path
   ].join(" ");
+}
+
+/** Scale value from one range to another; 4..20mA to 0..100deg for instance */
+export function scaleValue(v: number, fromMin: number, fromMax: number, toMin: number, toMax: number): number {
+  const span = (toMax - toMin) / (fromMax - fromMin);
+  return span * (v - fromMin) + toMin;
 }

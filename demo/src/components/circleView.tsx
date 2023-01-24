@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import Page from "src/elements/page";
 import { WUPCircleElement } from "web-ui-pack";
+import styles from "./circleView.scss";
 
 const sideEffect = WUPCircleElement;
 !sideEffect && console.error("Missed"); // It's required otherwise import is ignored by webpack
@@ -29,6 +30,8 @@ export default function CircleView() {
           back
           from={0}
           to={360}
+          min={0}
+          max={100}
           width={14}
           corner={3}
           items="window.circleItems"
@@ -43,6 +46,7 @@ export default function CircleView() {
         </small>
         <wup-circle
           style={{ width: "100px", height: "50px" }} //
+          class={styles.half}
           from={-90}
           to={90}
           corner={7}
@@ -58,12 +62,12 @@ export default function CircleView() {
           ref={(el) => {
             if (el) {
               el.$options.items = [
-                { value: 45 },
-                { value: 70 },
-                { value: 85 },
-                { value: 120 },
-                { value: 220 },
-                { value: 360 },
+                { value: 12 },
+                { value: 10 },
+                { value: 13 },
+                { value: 27 },
+                { value: 15 },
+                { value: 23 },
               ];
             }
           }}
