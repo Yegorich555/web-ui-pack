@@ -386,6 +386,19 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
     return a === null ? alt : a !== "false";
   }
 
+  /** Parse attribute and return result; if attr missed or invalid => returns this._opts[attr] */
+  getNumAttr(attr: string): number | undefined {
+    const a = this.getAttribute(attr);
+    if (a === null) {
+      return this._opts[attr];
+    }
+    const v = +a;
+    if (Number.isNaN(v)) {
+      return this._opts[attr];
+    }
+    return v;
+  }
+
   /** Returns value from window[key] according to [attr]="key" or $options[key] if attr is missed */
   getRefAttr<T>(attr: string): T | undefined {
     const a = this.getAttribute(attr);
