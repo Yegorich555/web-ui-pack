@@ -122,6 +122,10 @@ export default class WUPCircleElement extends WUPBaseElement {
     items: [],
   };
 
+  $refSVG = this.make("svg");
+  $refItems = this.make("g");
+  $refLabel?: HTMLElement;
+
   protected override _opts = this.$options;
 
   /** Creates new svg-part */
@@ -143,32 +147,21 @@ export default class WUPCircleElement extends WUPBaseElement {
       this.$refItems.textContent = "";
       this.$refSVG.textContent = ""; // clean before new render
     }
-    this.gotRender();
+    this.gotRenderItems();
   }
 
-  $refSVG = this.make("svg");
-  $refItems = this.make("g");
-  $refLabel?: HTMLElement;
-
-  /** Called on every changeEvent */
-  protected override gotRender(): void {
-    // example: https://medium.com/@pppped/how-to-code-a-responsive-circular-percentage-chart-with-svg-and-css-3632f8cd7705
-    this.$refSVG.setAttribute("viewBox", `0 0 100 100`);
-    this.$refSVG.setAttribute("role", "img");
-    const title = this.$refSVG.appendChild(this.make("title"));
-    title.textContent = "Some description for WA here"; // todo check it for WA
-    this.$refSVG.appendChild(this.$refItems);
-
-    // render background cicle
+  protected gotRenderItems(): void {
+    // render background circle
     if (this._opts.back) {
       // render background circle
       const back = this.make("path");
       back.setAttribute("d", this.drawArc(this._opts.from, this._opts.to));
-      this.$refSVG.prepend(back);
+      this.$refSVG.appendChild(back);
     }
 
     // render items
     // todo develop animation here
+    this.$refSVG.appendChild(this.$refItems);
     const { items } = this._opts;
     let angleFrom = this._opts.from;
     let angleTo = 0;
@@ -202,6 +195,16 @@ export default class WUPCircleElement extends WUPBaseElement {
       this.$refLabel?.remove();
       this.$refLabel = undefined;
     }
+  }
+
+  /** Called on every changeEvent */
+  protected override gotRender(): void {
+    super.gotRender();
+    // example: https://medium.com/@pppped/how-to-code-a-responsive-circular-percentage-chart-with-svg-and-css-3632f8cd7705
+    this.$refSVG.setAttribute("viewBox", `0 0 100 100`);
+    this.$refSVG.setAttribute("role", "img");
+    const title = this.$refSVG.appendChild(this.make("title"));
+    title.textContent = "Some description for WA here"; // todo check it for WA
 
     this.appendChild(this.$refSVG);
   }
