@@ -76,6 +76,7 @@ export default class WUPCircleElement extends WUPBaseElement {
   static get $style(): string {
     return `${super.$style}
       :host {
+        contain: style;
         display: block;
         margin: auto;
         position: relative;
@@ -88,6 +89,10 @@ export default class WUPCircleElement extends WUPBaseElement {
         top: 50%; left: 50%;
         font-size: larger;
         color: var(--circle-label);
+      }
+      :host svg {
+        overflow: visible;
+        display: block;
       }
       :host svg>path {
         stroke-width: 0;
