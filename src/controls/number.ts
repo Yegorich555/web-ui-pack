@@ -187,15 +187,15 @@ export default class WUPNumberControl<
       v += dec / decLn;
     }
     if (!ok) {
-      v = undefined;
+      v = undefined; // case impossible but maybe...
     } else if (text.charCodeAt(0) === 45) {
       v *= -1; // case: "-123"
     }
 
     if (ok && (v! > Number.MAX_SAFE_INTEGER || v! < Number.MIN_SAFE_INTEGER)) {
-      // throw new RangeError("Out of range");
       this.declineInput(); // decline looks better than error "Out of range"
-      return v as any;
+      throw new RangeError("Out of range");
+      // return v as any;
     }
 
     if (!this._opts.mask) {

@@ -180,6 +180,9 @@ describe("control.number", () => {
 
     el.$value = 5678;
     expect(el.$refInput.value).toBe("56-78");
+
+    // just for coverage
+    expect(el.parseInput("")).toBe(undefined);
   });
 
   test("role spinner & inc/dec", async () => {
