@@ -33,7 +33,7 @@ export default function CircleView() {
           min={0}
           max={100}
           width={14}
-          corner={3}
+          corner={0.25}
           items="window.circleItems"
         />
       </section>
@@ -49,7 +49,7 @@ export default function CircleView() {
           class={styles.half}
           from={-90}
           to={90}
-          corner={7}
+          corner={0.5}
           items="window.circleItems"
         />
       </section>
@@ -67,6 +67,7 @@ export default function CircleView() {
                 { value: 13 },
                 { value: 27 },
                 { value: 15 },
+                { value: 23 },
                 { value: 23 },
               ];
             }

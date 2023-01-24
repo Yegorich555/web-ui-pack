@@ -5,11 +5,11 @@ const tagName = "wup-circle";
 declare global {
   namespace WUP.Circle {
     interface Defaults {
-      /** Width of each segment expected 1..100 (perecentage)
+      /** Width of each segment; expected 1..100 (perecentage)
        * @defaultValue 10 */
       width: number;
-      /** Border/corner radius of each segment 0..w/2 (no more than width)
-       * @defaultValue 2 */
+      /** Border/corner radius of each segment; expected 0..0.5 where 0.5 is 50% of wdith
+       * @defaultValue 0.25 */
       corner: number;
       /** Enable background circle
        * @defaultValue true */
@@ -20,7 +20,6 @@ declare global {
       /** Angle from that rendering is started 0..360 (degrees)
        * @defaultValue 360 */
       to: number;
-
       /** Min expected value (if min & max is missed then items values must absolute from 0 to 360)
        * @defaultValue 0 */
       min?: number;
@@ -109,7 +108,7 @@ export default class WUPCircleElement extends WUPBaseElement {
 
   static $defaults: WUP.Circle.Defaults = {
     width: 14,
-    corner: 3,
+    corner: 0.5,
     back: true,
     from: 0,
     to: 360,
@@ -217,7 +216,7 @@ export default class WUPCircleElement extends WUPBaseElement {
     }
 
     // WARN: theoritaclly possible to get 1deg out for rendering several segments with Math.round
-    const r = Math.round(scaleValue(v, min, max, from, to));
+    const r = scaleValue(v, min, max, from, to);
     return r;
   }
 
@@ -282,7 +281,7 @@ export function drawArc(
 
   const inR = r - width;
   const circumference = Math.abs(angleTo - angleFrom);
-  cornerR = Math.min(width / 2, cornerR);
+  cornerR = Math.min(width / 2, width * cornerR);
   if (360 * (cornerR / (Math.PI * (r - width))) > Math.abs(angleFrom - angleTo)) {
     cornerR = (circumference / 360) * inR * Math.PI;
   }
