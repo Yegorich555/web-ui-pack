@@ -329,14 +329,17 @@ export function useFakeAnimation() {
   jest.useFakeTimers();
   let i = 0;
   const animateFrames: Array<Function> = [];
-  const nextFrame = async () => {
-    await Promise.resolve();
-    jest.advanceTimersByTime(step);
-    ++i;
-    const old = [...animateFrames];
-    animateFrames.length = 0;
-    old.forEach((f) => f(i * step));
-    await Promise.resolve();
+  const nextFrame = async (count = 1) => {
+    for (let c = 0; c < count; ++c) {
+      await Promise.resolve();
+      jest.advanceTimersByTime(step);
+      ++i;
+      const old = [...animateFrames];
+      animateFrames.length = 0;
+      // eslint-disable-next-line no-loop-func
+      old.forEach((f) => f(i * step));
+      await Promise.resolve();
+    }
   };
 
   jest.spyOn(window, "requestAnimationFrame").mockImplementation((fn) => {

@@ -102,35 +102,36 @@ describe("control.date", () => {
       expect(el.$options.maskholder).toBe("hh:mm *M");
       el.focus();
       await h.wait();
-      expect(el.$refMenuLists[0]).toMatchInlineSnapshot(`
-        <ul
-          aria-label="Hours"
-          style="overflow: hidden;"
-        >
-          <li>
-            10
-          </li>
-          <li>
-            11
-          </li>
-          <li
-            aria-selected="true"
-          >
-            12
-          </li>
-          <li>
-            01
-          </li>
-          <li>
-            02
-          </li>
-        </ul>
+      expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
+        [
+          "<li>10</li><li>11</li><li aria-selected="true">12</li><li>01</li><li>02</li>",
+          "<li>21</li><li>22</li><li aria-selected="true">23</li><li>24</li><li>25</li>",
+          "<li aria-hidden="true"></li><li aria-selected="true">AM</li><li>PM</li>",
+        ]
       `);
-      el.$hideMenu();
-      await h.wait();
-      document.activeElement.blur();
       await h.wait();
 
+      el.blur();
+      await h.wait();
+      el.$options.format = "hh:mm a";
+      el.$options.mask = undefined;
+      el.$options.maskholder = undefined;
+      await h.wait(1);
+      expect(el.$options.mask).toBe("00:00 //[ap]//m");
+      expect(el.$options.maskholder).toBe("hh:mm *m");
+      el.focus();
+      await h.wait();
+      expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
+        [
+          "<li>10</li><li>11</li><li aria-selected="true">12</li><li>01</li><li>02</li>",
+          "<li>21</li><li>22</li><li aria-selected="true">23</li><li>24</li><li>25</li>",
+          "<li aria-hidden="true"></li><li aria-selected="true">am</li><li>pm</li>",
+        ]
+      `);
+      await h.wait();
+
+      el.blur();
+      await h.wait();
       el.$value = new WUPTimeObject(23, 0);
       el.$options.format = "h-m";
       el.$options.mask = undefined;
@@ -141,52 +142,10 @@ describe("control.date", () => {
       el.focus();
       await h.wait();
 
-      expect(el.$refMenuLists).toMatchInlineSnapshot(`
+      expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
         [
-          <ul
-            aria-label="Hours"
-            style="overflow: hidden;"
-          >
-            <li>
-              21
-            </li>
-            <li>
-              22
-            </li>
-            <li
-              aria-selected="true"
-            >
-              23
-            </li>
-            <li>
-              0
-            </li>
-            <li>
-              1
-            </li>
-          </ul>,
-          <ul
-            aria-label="Minutes"
-            style="overflow: hidden;"
-          >
-            <li>
-              58
-            </li>
-            <li>
-              59
-            </li>
-            <li
-              aria-selected="true"
-            >
-              0
-            </li>
-            <li>
-              1
-            </li>
-            <li>
-              2
-            </li>
-          </ul>,
+          "<li>21</li><li>22</li><li aria-selected="true">23</li><li>0</li><li>1</li>",
+          "<li>58</li><li>59</li><li aria-selected="true">0</li><li>1</li><li>2</li>",
         ]
       `);
 
@@ -430,52 +389,159 @@ describe("control.date", () => {
     expect(isPressKeyPrevented("ArrowLeft")).toBe(true);
     expect(el.querySelector("[focused]")?.textContent).toBe("11"); // no horizontal cycling
 
-    // todo continue testing Enter/Esc keys
-    // todo clicks-testing
-    // todo scroll-testing: increment carousel for hh:mm in both directions
-    return;
+    // submit by Enter
     expect(isPressKeyPrevented("Enter")).toBe(true);
     await h.wait();
-    expect(el.$value?.toISOString()).toBe("2033-01-01T13:45:59.000Z"); // it's must store hours
+    expect(el.$value).toEqual(new WUPTimeObject(11, 58));
+    expect(el.$refInput.value).toBe("11:58 AM");
     expect(onChanged).toBeCalledTimes(1);
     expect(onSubmit).toBeCalledTimes(0);
     expect(el.$isValid).toBe(true);
     expect(isPressKeyPrevented("Enter")).toBe(true);
     await h.wait(1);
     expect(onSubmit).toBeCalledTimes(1);
+    expect(el.$isOpen).toBe(false);
+
+    // changing value to check if menu is refreshed according to ones
+    el.$value = undefined;
+    await h.wait(1);
+    await h.userTypeText(el.$refInput, "05:37 PM");
+    expect(el.$value).toEqual(new WUPTimeObject(17, 37));
+
     // checking if user can use mouse properly
     onChanged.mockClear();
     expect(el.$isOpen).toBe(false);
     expect(isPressKeyPrevented("ArrowDown")).toBe(true); // open menu by arrow key
     await h.wait();
     expect(el.$isOpen).toBe(true);
-    expect(el.querySelector("[calendar='day']")).toBeTruthy(); // dayPicker because it was stored previously by calendar
-    // force to remove calendar (to startWith year again)
-    el.blur();
-    await h.wait(1);
-    el.focus();
+    expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
+      [
+        "<li>03</li><li>04</li><li aria-selected="true" aria-label="05:37 PM" id="txt83" focused="">05</li><li>06</li><li>07</li>",
+        "<li>35</li><li>36</li><li aria-selected="true">37</li><li>38</li><li>39</li>",
+        "<li aria-selected="false" id="txt82">AM</li><li aria-selected="true" id="txt81">PM</li><li aria-hidden="true"></li>",
+      ]
+    `);
+
+    await h.userClick(el.$refMenuLists[0].firstElementChild);
     await h.wait();
-    expect(el.querySelector("[calendar='year']")).toBeTruthy();
-    await h.userClick(el.$refPopup.firstChild.$refCalenarItems.firstElementChild); // click on 2018
+    expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
+      [
+        "<li>01</li><li>02</li><li aria-selected="true" aria-label="03:37 PM" id="txt85" focused="">03</li><li aria-selected="false" id="txt84">04</li><li aria-selected="false" id="txt83">05</li>",
+        "<li>35</li><li>36</li><li aria-selected="true">37</li><li>38</li><li>39</li>",
+        "<li aria-selected="false" id="txt82">AM</li><li aria-selected="true" id="txt81">PM</li><li aria-hidden="true"></li>",
+      ]
+    `);
+
+    await h.userClick(el.$refMenuLists[1].lastElementChild);
     await h.wait();
-    expect(el.querySelector("[calendar='month']")).toBeTruthy();
-    await h.userClick(el.$refPopup.firstChild.$refCalenarItems.children[1]); // click on Feb
+    expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
+      [
+        "<li>01</li><li>02</li><li aria-selected="true" id="txt85">03</li><li aria-selected="false" id="txt84">04</li><li aria-selected="false" id="txt83">05</li>",
+        "<li aria-selected="false">37</li><li aria-selected="false" id="txt86">38</li><li aria-selected="true" aria-label="03:39 PM" id="txt87" focused="">39</li><li>40</li><li>41</li>",
+        "<li aria-selected="false" id="txt82">AM</li><li aria-selected="true" id="txt81">PM</li><li aria-hidden="true"></li>",
+      ]
+    `);
+
+    await h.userClick(el.$refMenuLists[2].lastElementChild);
     await h.wait();
-    expect(el.querySelector("[calendar='day']")).toBeTruthy();
-    expect(el.$refPopup.firstChild.$refCalenarTitle.textContent).toBe("February 2018");
-    await h.userClick(el.$refPopup.firstChild.$refCalenarItems.children[6]); // click on 4 February 2018
+    expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
+      [
+        "<li>01</li><li>02</li><li aria-selected="true" id="txt85">03</li><li aria-selected="false" id="txt84">04</li><li aria-selected="false" id="txt83">05</li>",
+        "<li aria-selected="false">37</li><li aria-selected="false" id="txt86">38</li><li aria-selected="true" aria-label="03:39 PM" id="txt87" focused="">39</li><li>40</li><li>41</li>",
+        "<li aria-selected="false" id="txt82">AM</li><li aria-selected="true" id="txt81">PM</li><li aria-hidden="true"></li>",
+      ]
+    `);
+
+    // click on btnOk
+    await h.userClick(el.$refButtonOk.parentElement); // outside click - just for coverage
+    await h.userClick(el.$refButtonOk);
     await h.wait();
     expect(el.$isOpen).toBe(false);
-    expect(el.$value?.toISOString()).toBe("2018-02-04T13:45:59.000Z"); // it's must store hours
+    expect(el.$value).toEqual(new WUPTimeObject(15, 39));
     expect(onChanged).toBeCalledTimes(1);
-    expect(isPressKeyPrevented("Home")).toBe(false); // keys must works only for input when is closed
+
+    // click on btnCancel
+    onChanged.mockClear();
+    expect(isPressKeyPrevented("ArrowDown")).toBe(true); // open menu by arrow key
+    expect(el.$isOpen).toBe(true);
+    await h.wait();
+    await h.userClick(el.$refMenuLists[0].firstElementChild);
+    await h.wait();
+    await h.userClick(el.$refButtonCancel);
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    expect(el.$value).toEqual(new WUPTimeObject(15, 39)); // no changes because popup is closed by cancelling
+    expect(onChanged).toBeCalledTimes(0);
+
+    el.$value = new WUPTimeObject(0, 0);
+    expect(isPressKeyPrevented("ArrowDown")).toBe(true); // open menu by arrow key
+    await h.wait();
+    expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
+      [
+        "<li>10</li><li>11</li><li aria-selected="true" aria-label="12:00 AM" id="txt90" focused="">12</li><li>01</li><li>02</li>",
+        "<li>58</li><li>59</li><li aria-selected="true">00</li><li>01</li><li>02</li>",
+        "<li aria-hidden="true"></li><li aria-selected="true" id="txt82">AM</li><li aria-selected="false" id="txt81">PM</li>",
+      ]
+    `);
+    el.$refMenuLists[0].dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100 })); // scrollUp
+    el.$refMenuLists[1].dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100 })); // scrollUp
+    el.$refMenuLists[2].dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100 })); // scrollUp
+    await h.wait();
+    expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
+      [
+        "<li>09</li><li>10</li><li aria-selected="true" id="txt103">11</li><li aria-selected="false" id="txt102">12</li><li aria-selected="false" id="txt101">01</li>",
+        "<li>57</li><li>58</li><li aria-selected="true" aria-label="11:59 AM" id="txt164" focused="">59</li><li aria-selected="false" id="txt163">00</li><li aria-selected="false" id="txt162">01</li>",
+        "<li aria-hidden="true"></li><li aria-selected="true" id="txt82">AM</li><li aria-selected="false" id="txt81">PM</li>",
+      ]
+    `);
   });
 
-  test("options min/max/exclude", () => {
-    // todo test rendering disabled items here
+  test("menu in 1 row", async () => {
+    const orig = el.renderMenu;
+    el.renderMenu = function renderMenu(popup, menuId, rows) {
+      rows = 1;
+      orig.call(el, popup, menuId, rows);
+    };
+
+    el.focus();
+    await h.wait();
+    const isPressKeyPrevented = (key = "Arrow", opts = { shiftKey: false, ctrlKey: false }) => {
+      const isPrevented = !el.$refInput.dispatchEvent(
+        new KeyboardEvent("keydown", { key, cancelable: true, bubbles: true, ...opts })
+      );
+      return isPrevented;
+    };
+
+    expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
+      [
+        "<li aria-selected="true">12</li>",
+        "<li aria-selected="true">23</li>",
+        "<li aria-selected="true">AM</li>",
+      ]
+    `);
+    expect(isPressKeyPrevented("ArrowDown")).toBe(true);
+    expect(isPressKeyPrevented("ArrowDown")).toBe(true);
+
+    expect(isPressKeyPrevented("ArrowRight")).toBe(true);
+    expect(isPressKeyPrevented("ArrowDown")).toBe(true);
+
+    expect(isPressKeyPrevented("ArrowRight")).toBe(true);
+    expect(isPressKeyPrevented("ArrowDown")).toBe(true);
+    await h.wait();
+    expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
+      [
+        "<li aria-selected="true" id="txt14">02</li>",
+        "<li aria-selected="true" id="txt16">24</li>",
+        "<li aria-selected="true" aria-label="02:24 PM" id="txt18" focused="">PM</li>",
+      ]
+    `);
+    expect(isPressKeyPrevented("ArrowUp")).toBe(true);
+    expect(el.$refMenuLists[2].innerHTML).toMatchInlineSnapshot(
+      `"<li aria-selected="true" aria-label="02:24 AM" id="txt19" focused="">AM</li><li aria-selected="false" id="txt18">PM</li>"`
+    );
   });
 
-  test("value change not affects on popup", async () => {
+  test("value change not affects on menu", async () => {
     el.focus();
     await h.wait();
     expect(el.$isOpen).toBe(true);
@@ -483,5 +549,84 @@ describe("control.date", () => {
     el.$value = new WUPTimeObject(12, 56);
     await h.wait();
     expect(el.$isOpen).toBe(true);
+  });
+
+  test("menu with options min/max/exclude", async () => {
+    const onChange = jest.fn();
+    el.addEventListener("$change", onChange);
+    el.$options.min = new WUPTimeObject(3, 50);
+    el.$options.max = new WUPTimeObject(23, 50);
+    el.$options.exclude = { test: (v) => v === new WUPTimeObject(14, 0).valueOf() };
+    await h.wait(1);
+
+    el.focus();
+    await h.wait();
+    expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
+      [
+        "<li>10</li><li>11</li><li aria-selected="true" disabled="">12</li><li disabled="">01</li><li disabled="">02</li>",
+        "<li disabled="">21</li><li disabled="">22</li><li aria-selected="true" disabled="">23</li><li disabled="">24</li><li disabled="">25</li>",
+        "<li aria-hidden="true"></li><li aria-selected="true">AM</li><li>PM</li>",
+      ]
+    `);
+    expect(el.$refButtonOk.parentElement.outerHTML).toMatchInlineSnapshot(
+      `"<div group=""><button type="button" aria-label="Ok" tabindex="-1" disabled=""></button><button type="button" aria-label="Cancel" tabindex="-1"></button></div>"`
+    );
+    expect(el.$refButtonOk.disabled).toBe(true);
+    const isPrevented = !el.$refInput.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })
+    );
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+    expect(isPrevented).toBe(true);
+    expect(onChange).toBeCalledTimes(0); // because selected value is not allowed
+
+    await h.userClick(el.$refMenuLists[0].firstElementChild);
+    await h.wait();
+    expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
+      [
+        "<li>08</li><li>09</li><li aria-selected="true">10</li><li aria-selected="false">11</li><li aria-selected="false" disabled="">12</li>",
+        "<li>21</li><li>22</li><li aria-selected="true">23</li><li>24</li><li>25</li>",
+        "<li aria-hidden="true"></li><li aria-selected="true">AM</li><li>PM</li>",
+      ]
+    `);
+    expect(el.$refButtonOk.disabled).toBe(false);
+
+    // PM must be disabled
+    el.blur();
+    await h.wait();
+    el.$options.max = new WUPTimeObject(11, 50);
+    el.focus();
+    await h.wait();
+    expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
+      [
+        "<li>10</li><li>11</li><li aria-selected="true" disabled="">12</li><li disabled="">01</li><li disabled="">02</li>",
+        "<li disabled="">21</li><li disabled="">22</li><li aria-selected="true" disabled="">23</li><li disabled="">24</li><li disabled="">25</li>",
+        "<li aria-hidden="true"></li><li aria-selected="true">AM</li><li disabled="">PM</li>",
+      ]
+    `);
+
+    // again with 24h format
+    await h.wait();
+    el.blur();
+    await h.wait();
+    el.$options.format = "hh:mm";
+    await h.wait(1);
+    el.focus();
+    await h.wait();
+    expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
+      [
+        "<li>10</li><li>11</li><li aria-selected="true" disabled="">12</li><li disabled="">13</li><li disabled="">14</li>",
+        "<li disabled="">21</li><li disabled="">22</li><li aria-selected="true" disabled="">23</li><li disabled="">24</li><li disabled="">25</li>",
+      ]
+    `);
+
+    // just for coverage
+    await h.wait();
+    el.blur();
+    await h.wait();
+    jest.spyOn(el, "canShowMenu").mockReturnValueOnce(false);
+    expect(() => el.focus()).not.toThrow();
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
   });
 });

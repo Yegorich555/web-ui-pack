@@ -547,16 +547,14 @@ export default class WUPTimeControl<
     const r = super.goShowMenu(showCase, e, isNeedWait);
 
     this.#lastInputChanged = false;
-    if (r != null) {
-      const v = this.$value;
-      if (this.$refMenuLists && v) {
-        const menuV = this.getMenuValue();
-        menuV.hours !== v.hours && this.$refMenuLists[0].reinit();
-        menuV.minutes !== v.minutes && this.$refMenuLists[1].reinit();
-        this.$refMenuLists[2]?._scrolled.goTo(v.isPM ? 2 : 1, false);
-      }
-      this.disableItems();
+    const v = this.$value;
+    if (this.$refMenuLists && v) {
+      const menuV = this.getMenuValue();
+      menuV.hours !== v.hours && this.$refMenuLists[0].reinit();
+      menuV.minutes !== v.minutes && this.$refMenuLists[1].reinit();
+      this.$refMenuLists[2]?._scrolled.goTo(v.isPM ? 2 : 1, false);
     }
+    this.disableItems();
 
     return r;
   }
@@ -709,5 +707,3 @@ export default class WUPTimeControl<
 }
 
 customElements.define(tagName, WUPTimeControl);
-// testcase: open&close menu. change value via input. open menu again: in menu new value must be selected
-// testcase: open&close menu & change value & open menu: new items must appeared according to menu
