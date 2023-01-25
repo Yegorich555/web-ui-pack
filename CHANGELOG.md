@@ -4,32 +4,33 @@
 
 **BREAKING CHANGES**:
 
-- Namespaces like `WUP...` is refactored from `WUPPopup` to `WUP.Popup` etc. So re-export enums `ShowCases, HideCases, Animations` without prefix now
-- helper **localeInfo** moved to `web-ui-pack/objects/localeInfo`
+- Namespaces `WUP...` is refactored from `WUPPopup` to `WUP.Popup` etc. So re-export enums `ShowCases, HideCases, Animations` without prefix now
+- helper **localeInfo** moved into `web-ui-pack/objects/localeInfo`
 - helper **scrollCarousel** refactored to [WUPScrolled](src/helpers/scrolled.ts) class
 - helper **mathSumFloat** moved into [`web-ui-pack/helpers/math`](src/helpers/math.ts)
 - helper **stringUpperCount** moved into [`web-ui-pack/helpers/string`](src/helpers/string.ts)
 - helper **stringLowerCount** moved into [`web-ui-pack/helpers/string`](src/helpers/string.ts)
 - helper **stringPrettify** moved into [`web-ui-pack/helpers/string`](src/helpers/string.ts)
-- DateControl. Changed validation message from `This date is disabled` to `This value is disabled`
+- [DateControl](src/controls/date.ts). Changed validation message from `This date is disabled` to `This value is disabled`
 
 **Fixes**:
 
 - Helper. [`localeInfo`](src/objects/localeInfo.ts). `AM/PM parsed to 'a' but expected 'A'`
 - Helper. [`dateFromString`](src/helpers/dateFromString.ts). `12:00 PM throws Error but expected 12:00`
 - Icon **check**. Reduced thikness to fit other texts & icons
-- Popup. Changing content size doesn't recalc popup position
-- Popup. Wrong position if parent has style transform.translate
-- Popup. Content is blured if transform.translate with float values
-- DateControl. Clearing input doesn't reset $value
-- DateControl. Required asterisk is removed by opening menu
+- [Popup](src/popup/popupElement.ts). Changing content size doesn't recalc popup position
+- [Popup](src/popup/popupElement.ts). Wrong position if parent has style transform.translate
+- [Popup](src/popup/popupElement.ts). Content is blured if transform.translate with float values
+- [DateControl](src/controls/date.ts). Clearing input doesn't reset $value
+- [DateControl](src/controls/date.ts). Required asterisk is removed by opening menu
 
-**Features**:
+**New**:
 
-- Added [WUPTimeObject](src/objects/timeObject.ts) => `Ordinary class Time with hours & minutes`
-- Added [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
-- Added helper [mathScaleValue](src/helpers/mathScaleValue)
-- Text-mask supports letters (previously only digits can be variabled)
+- [WUPTimeObject](src/objects/timeObject.ts) => `Ordinary class Time with hours & minutes`
+- [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
+- [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
+- helper [mathScaleValue](src/helpers/mathScaleValue)
+- Text based controls. **Mask** supports letters also (previously only digits can be variabled)
 
 ## 0.3.0 (Dec 27, 2022)
 

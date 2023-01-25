@@ -54,7 +54,23 @@ declare global {
   }
 }
 
-/** Arc/circle chart based on SVG */
+/** Arc/circle chart based on SVG
+ * @example
+ * <wup-circle
+ *   back="true"
+ *   from="0"
+ *   to="360"
+ *   space="2"
+ *   min="0"
+ *   max="100"
+ *   width="14"
+ *   corner="0.25"
+ *   items="window.circleItems"
+ *  ></wup-circle>
+ * // or JS/TS
+ * const el = document.createElement("wup-circle");
+ * el.$options.items = [{value:20}]; // etc.
+ * document.body.appendChild(el); */
 export default class WUPCircleElement extends WUPBaseElement {
   #ctr = this.constructor as typeof WUPCircleElement;
 
