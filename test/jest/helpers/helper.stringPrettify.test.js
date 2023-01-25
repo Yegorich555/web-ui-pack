@@ -1,4 +1,4 @@
-import stringPrettify from "web-ui-pack/helpers/stringPrettify";
+import { stringPrettify } from "web-ui-pack/indexHelpers";
 
 describe("helper.stringPrettify", () => {
   test("camelCase", () => {

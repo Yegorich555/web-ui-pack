@@ -25,5 +25,4 @@ export { default as onSpy } from "./helpers/onSpy";
 export { default as promiseWait } from "./helpers/promiseWait";
 export { default as WUPScrolled } from "./helpers/scrolled";
 export { default as scrollIntoView } from "./helpers/scrollIntoView";
-export { default as stringPrettify } from "./helpers/stringPrettify";
-export { stringLowerCount, stringUpperCount } from "./helpers/stringCaseCount";
+export { stringPrettify, stringLowerCount, stringUpperCount } from "./helpers/string";

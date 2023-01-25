@@ -4,7 +4,7 @@ import isEqual from "../helpers/isEqual";
 import nestedProperty from "../helpers/nestedProperty";
 import onFocusLostEv from "../helpers/onFocusLost";
 import onFocusGot from "../helpers/onFocusGot";
-import stringPrettify from "../helpers/stringPrettify";
+import { stringPrettify } from "../helpers/string";
 import WUPPopupElement from "../popup/popupElement";
 import { ShowCases } from "../popup/popupElement.types";
 import { WUPcssIcon } from "../styles";

@@ -1,5 +1,5 @@
 import onEvent from "../helpers/onEvent";
-import { stringLowerCount, stringUpperCount } from "../helpers/stringCaseCount";
+import { stringLowerCount, stringUpperCount } from "../helpers/string";
 import WUPTextControl from "./text";
 
 const tagName = "wup-pwd";

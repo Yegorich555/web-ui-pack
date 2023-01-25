@@ -8,6 +8,9 @@
 - helper **localeInfo** moved to `web-ui-pack/objects/localeInfo`
 - helper **scrollCarousel** refactored to [WUPScrolled](src/helpers/scrolled.ts) class
 - helper **mathSumFloat** moved into [`web-ui-pack/helpers/math`](src/helpers/math.ts)
+- helper **stringUpperCount** moved into [`web-ui-pack/helpers/string`](src/helpers/string.ts)
+- helper **stringLowerCount** moved into [`web-ui-pack/helpers/string`](src/helpers/string.ts)
+- helper **stringPrettify** moved into [`web-ui-pack/helpers/string`](src/helpers/string.ts)
 - DateControl. Changed validation message from `This date is disabled` to `This value is disabled`
 
 **Fixes**:

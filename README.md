@@ -237,9 +237,9 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 - [**promiseWait**(promise: Promise, ms: number, smartOrCallback: boolean | Function) => Promise](src/helpers/promiseWait.ts) ⇒ `Produce Promise during for "no less than pointed time"; it helps for avoding spinner blinking during the very fast api-request in case: pending > waitResponse > resetPending`
 - [**scrollIntoView**(el: HTMLElement, options: WUPScrollOptions) => Promise](src/helpers/scrollIntoView.ts) ⇒ `Scroll the HTMLElement's parent container such that the element is visible to the user and return promise by animation end`
 - [class **WUPScrolled**](src/helpers/scrolled.ts) ⇒ `Class makes pointed element scrollable and implements carousel-scroll behavior (appends new items during the scrolling). Supports swipe/pageUp/pageDown/mouseWheel events.`
-- [**stringLowerCount**(text: string, stopWith?: number)](src/helpers/stringCaseCount.ts) ⇒ `Returns count of chars in lower case (for any language with ignoring numbers, symbols)`
-- [**stringUpperCount**(text: string, stopWith?: number)](src/helpers/stringCaseCount.ts) ⇒ `Returns count of chars in upper case (for any language with ignoring numbers, symbols)`
-- [**stringPrettify**(text: string, changeKebabCase = false)](src/helpers/stringPrettify.ts) ⇒ `Changes camelCase, snakeCase, kebaCase text to user-friendly`
+- [**stringLowerCount**(text: string, stopWith?: number)](src/helpers/string.ts) ⇒ `Returns count of chars in lower case (for any language with ignoring numbers, symbols)`
+- [**stringUpperCount**(text: string, stopWith?: number)](src/helpers/string.ts) ⇒ `Returns count of chars in upper case (for any language with ignoring numbers, symbols)`
+- [**stringPrettify**(text: string, changeKebabCase = false)](src/helpers/string.ts) ⇒ `Changes camelCase, snakeCase, kebaCase text to user-friendly`
 
 ### Objects
 
