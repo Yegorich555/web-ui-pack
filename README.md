@@ -222,7 +222,8 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 - [**findScrollParentAll**(e: HTMLElement)](src/helpers/findScrollParent.ts) ⇒ `Find all parents with active scroll X/Y`
 - [**focusFirst**(el: HTMLElement)](src/helpers/focusFirst.ts) ⇒ `Set focus on element or first possible nested element`
 - [**isIntoView**(el: HTMLElement)](src/helpers/isIntoView.ts) ⇒ `Check if element is visible in scrollable parents`
-- [**mathSumFloat**(a:number,b:number)](src/helpers/mathSumFloat.ts) ⇒ `Sum without float-precision-issue`
+- [**mathSumFloat**(a:number,b:number)](src/helpers/math.ts) ⇒ `Sum without float-precision-issue`
+- [**mathScaleValue**(v: number, fromMin: number, fromMax: number, toMin: number, toMax: number)](src/helpers/math.ts) ⇒ `Scale value from one range to another`
 - [**nestedProperty.set**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.set(obj, "value.nestedValue", 1) sets obj.value.nestedValue = 1`
 - [**nestedProperty.get**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.get(obj, "nested.val2", out?: {hasProp?: boolean} ) returns value from obj.nested.val2`
 - [**objectClone**(obj, opts: CloneOptions)](src/helpers/objectClone.ts) ⇒ `converts object to observable (via Proxy) to allow listen for changes`

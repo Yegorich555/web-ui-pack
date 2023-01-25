@@ -5,8 +5,9 @@
 **BREAKING CHANGES**:
 
 - Namespaces like `WUP...` is refactored from `WUPPopup` to `WUP.Popup` etc. So re-export enums `ShowCases, HideCases, Animations` without prefix now
-- helper localeInfo moved to `web-ui-pack/objects/localeInfo`
-- helper scrollCarousel refactored to [WUPScrolled](src/helpers/scrolled.ts) class
+- helper **localeInfo** moved to `web-ui-pack/objects/localeInfo`
+- helper **scrollCarousel** refactored to [WUPScrolled](src/helpers/scrolled.ts) class
+- helper **mathSumFloat** moved into [`web-ui-pack/helpers/math`](src/helpers/math.ts)
 - DateControl. Changed validation message from `This date is disabled` to `This value is disabled`
 
 **Fixes**:
@@ -24,6 +25,7 @@
 
 - Added [WUPTimeObject](src/objects/timeObject.ts) => `Ordinary class Time with hours & minutes`
 - Added [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
+- Added helper [mathScaleValue](src/helpers/mathScaleValue)
 - Text-mask supports letters (previously only digits can be variabled)
 
 ## 0.3.0 (Dec 27, 2022)

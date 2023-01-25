@@ -1,4 +1,5 @@
 import WUPBaseElement from "./baseElement";
+import { mathScaleValue } from "./helpers/math";
 
 const tagName = "wup-circle";
 
@@ -179,7 +180,7 @@ export default class WUPCircleElement extends WUPBaseElement {
     for (let i = 0; i < items.length; ++i) {
       const a = items[i];
       const v = a.value;
-      angleTo = scaleValue(v, vMin, vMax, angleMin, angleMax) + (angleFrom - angleMin);
+      angleTo = mathScaleValue(v, vMin, vMax, angleMin, angleMax) + (angleFrom - angleMin);
       const path = this.$refItems.appendChild(this.make("path"));
       path.setAttribute("d", this.drawArc(angleFrom, angleTo));
       a.color && path.setAttribute("fill", a.color);
@@ -304,22 +305,6 @@ export function drawArc(
     "Z", // end path
   ].join(" ");
 }
-
-/** Scale value from one range to another; 4..20mA to 0..100deg for instance */
-export function scaleValue(v: number, fromMin: number, fromMax: number, toMin: number, toMax: number): number {
-  const span = (toMax - toMin) / (fromMax - fromMin);
-  return span * (v - fromMin) + toMin;
-}
-
-/** Apply transform.rotate on point */
-// function rotate(cx: number, cy: number, x: number, y: number, angle: number): [number, number] {
-//   const rad = (Math.PI / 180) * angle;
-//   const cos = Math.cos(rad);
-//   const sin = Math.sin(rad);
-//   const nx = cos * (x - cx) - sin * (y - cy) + cx;
-//   const ny = cos * (y - cy) + sin * (x - cx) + cy;
-//   return [nx, ny];
-// }
 
 // example: https://medium.com/@pppped/how-to-code-a-responsive-circular-percentage-chart-with-svg-and-css-3632f8cd7705
 // similar https://github.com/w8r/svg-arc-corners
