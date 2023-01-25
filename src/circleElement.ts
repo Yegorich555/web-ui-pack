@@ -8,25 +8,25 @@ declare global {
       /** Width of each segment; expected 1..100 (perecentage)
        * @defaultValue 10 */
       width: number;
-      /** Border/corner radius of each segment; expected 0..0.5 where 0.5 is 50% of wdith
+      /** Border/corner radius of each segment; expected 0..0.5 where 0.5 == 50% of `$options.wdith`
        * @defaultValue 0.25 */
       corner: number;
       /** Enable background circle
        * @defaultValue true */
       back: boolean;
-      /** Angle from that rendering is started 0..360 (degrees)
+      /** Angle from that rendering is started -360..360 (degrees)
        * @defaultValue 0 */
       from: number;
-      /** Angle from that rendering is started 0..360 (degrees)
+      /** Angle from that rendering is started -360..360 (degrees)
        * @defaultValue 360 */
       to: number;
-      /** Min expected value (if min & max is missed then items values must absolute from 0 to 360)
+      /** Min possible value that fits `options.from`
        * @defaultValue 0 */
-      min?: number;
-      /** Max expected value (if min & max is missed then items values must absolute from 0 to 360)
+      min: number;
+      /** Max possible value that fits `options.to`
        * @defaultValue 100 */
-      max?: number;
-      /** Space between segments
+      max: number;
+      /** Space between segments; expected 0...20 (degrees)
        * @defaultValue 2 */
       space: number;
     }
@@ -41,6 +41,7 @@ declare global {
       > {}
     interface JSXProps<C = WUPCircleElement> extends WUP.Base.JSXProps<C>, Attributes {}
   }
+
   interface HTMLElementTagNameMap {
     [tagName]: WUPCircleElement; // add element to document.createElement
   }
@@ -56,7 +57,7 @@ export default class WUPCircleElement extends WUPBaseElement {
   #ctr = this.constructor as typeof WUPCircleElement;
 
   static get observedOptions(): Array<keyof WUP.Circle.Options> {
-    return ["items", "width", "back", "corner", "from", "to", "min", "max", "space"];
+    return this.observedAttributes;
   }
 
   static get observedAttributes(): Array<LowerKeys<WUP.Circle.Attributes>> {
@@ -78,36 +79,35 @@ export default class WUPCircleElement extends WUPBaseElement {
   static get $style(): string {
     return `${super.$style}
       :host {
-        contain: style;
+        contain: style layout paint;
         display: block;
         position: relative;
         overflow: hidden;
         margin: auto;
         padding: 2px;
       }
-      :host strong {
+      :host>strong {
         display: block;
         position: absolute;
         transform: translate(-50%,-50%);
         top: 50%; left: 50%;
         font-size: larger;
       }
-      :host svg {
+      :host>svg {
         overflow: visible;
         display: block;
       }
-      :host path {
+      :host>svg path {
         stroke-width: 0;
         fill-rule: evenodd;
       }
-      :host svg>path { fill: var(--circle-0); }
-      :host g>path:nth-child(1) { fill: var(--circle-1); }
-      :host g>path:nth-child(2) { fill: var(--circle-2); }
-      :host g>path:nth-child(3) { fill: var(--circle-3); }
-      :host g>path:nth-child(4) { fill: var(--circle-4); }
-      :host g>path:nth-child(5) { fill: var(--circle-5); }
-      :host g>path:nth-child(6) { fill: var(--circle-6); }
-      `;
+      :host>svg>path { fill: var(--circle-0); }
+      :host>svg>g>path:nth-child(1) { fill: var(--circle-1); }
+      :host>svg>g>path:nth-child(2) { fill: var(--circle-2); }
+      :host>svg>g>path:nth-child(3) { fill: var(--circle-3); }
+      :host>svg>g>path:nth-child(4) { fill: var(--circle-4); }
+      :host>svg>g>path:nth-child(5) { fill: var(--circle-5); }
+      :host>svg>g>path:nth-child(6) { fill: var(--circle-6); }`;
   }
 
   static $defaults: WUP.Circle.Defaults = {
