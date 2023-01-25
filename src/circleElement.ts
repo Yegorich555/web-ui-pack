@@ -1,4 +1,5 @@
 import WUPBaseElement from "./baseElement";
+import { animateTry } from "./helpers/animateDropdown";
 import { mathScaleValue } from "./helpers/math";
 
 const tagName = "wup-circle";
@@ -86,6 +87,7 @@ export default class WUPCircleElement extends WUPBaseElement {
         overflow: hidden;
         margin: auto;
         padding: 2px;
+        --anim-time: 400ms;
       }
       :host>strong {
         display: block;
@@ -154,7 +156,10 @@ export default class WUPCircleElement extends WUPBaseElement {
     this.gotRenderItems();
   }
 
+  _animation?: WUP.PromiseCancel<void>;
   protected gotRenderItems(): void {
+    this._animation?.stop(false);
+
     const angleMin = this._opts.from;
     let angleMax = this._opts.to;
     // render background circle
@@ -165,27 +170,37 @@ export default class WUPCircleElement extends WUPBaseElement {
     }
 
     // render items
-    // todo develop animation here
     this.$refSVG.appendChild(this.$refItems);
     const { items, space } = this._opts;
     let vMin = this._opts.min ?? 0;
     let vMax = this._opts.max ?? 360;
+    const animTime = Number.parseInt(getComputedStyle(this).getPropertyValue("--anim-time"), 10); // WARN: expected anim-time: 200ms
     if (items.length > 1) {
       vMin = 0;
       vMax = items.reduce((v, item) => item.value + v, 0);
-      angleMax -= (items.length - (angleMax === 360 ? 0 : 1)) * space;
+      angleMax -= (items.length - (angleMax - angleMin === 360 ? 0 : 1)) * space;
     }
+
     let angleTo = 0;
     let angleFrom = angleMin;
-    for (let i = 0; i < items.length; ++i) {
-      const a = items[i];
-      const v = a.value;
-      angleTo = mathScaleValue(v, vMin, vMax, angleMin, angleMax) + (angleFrom - angleMin);
-      const path = this.$refItems.appendChild(this.make("path"));
-      path.setAttribute("d", this.drawArc(angleFrom, angleTo));
-      a.color && path.setAttribute("fill", a.color);
-      angleFrom = angleTo + space;
-    }
+    (async () => {
+      for (let i = 0; i < items.length; ++i) {
+        const a = items[i];
+        const v = a.value;
+        angleTo = mathScaleValue(v, vMin, vMax, angleMin, angleMax) + (angleFrom - angleMin);
+        const path = this.$refItems.appendChild(this.make("path"));
+        a.color && path.setAttribute("fill", a.color);
+
+        const ms = items.length === 1 ? animTime : mathScaleValue(v, vMin, vMax, 0, animTime);
+        const from = angleFrom;
+        this._animation = animateTry(from, angleTo, ms, (animV) => {
+          path.setAttribute("d", this.drawArc(from, animV));
+        });
+        await this._animation.catch().finally(() => delete this._animation);
+
+        angleFrom = angleTo + space;
+      }
+    })();
 
     // render/remove label
     let ariaLbl = "";

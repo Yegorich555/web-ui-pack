@@ -60,6 +60,8 @@ export default function CircleView() {
         <wup-circle
           back={false}
           style={{ maxWidth: "100px" }}
+          from={-90}
+          to={270}
           ref={(el) => {
             if (el) {
               el.$options.items = [
