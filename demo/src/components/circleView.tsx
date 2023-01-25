@@ -26,10 +26,11 @@ export default function CircleView() {
         <h3>Default</h3>
         <small>(single full circle segment with corners 3 and background circle)</small>
         <wup-circle
-          style={{ width: "100px" }} //
+          style={{ maxWidth: "100px" }}
           back
           from={0}
           to={360}
+          space={2}
           min={0}
           max={100}
           width={14}
@@ -45,7 +46,7 @@ export default function CircleView() {
           <b>WARN:</b> don't forget to reduce height in half of size (via styles)
         </small>
         <wup-circle
-          style={{ width: "100px", height: "50px" }} //
+          style={{ maxWidth: "100px" }}
           class={styles.half}
           from={-90}
           to={90}
@@ -58,9 +59,33 @@ export default function CircleView() {
         <small>(point several items in $options.items)</small>
         <wup-circle
           back={false}
-          style={{ width: "200px" }}
+          style={{ maxWidth: "100px" }}
           ref={(el) => {
             if (el) {
+              el.$options.items = [
+                { value: 12 },
+                { value: 10 },
+                { value: 13 },
+                { value: 27 },
+                { value: 15 },
+                { value: 23 },
+                { value: 23 },
+              ];
+            }
+          }}
+        />
+        <small>
+          point options <b>from=-90 & to=90</b>
+        </small>
+        <wup-circle
+          back={false}
+          style={{ maxWidth: "100px" }}
+          // class={styles.half}
+          ref={(el) => {
+            if (el) {
+              // todo half circle doesn't work
+              el.$options.from = -90;
+              el.$options.to = 90;
               el.$options.items = [
                 { value: 12 },
                 { value: 10 },

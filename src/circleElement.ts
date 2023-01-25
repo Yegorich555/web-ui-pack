@@ -26,6 +26,9 @@ declare global {
       /** Max expected value (if min & max is missed then items values must absolute from 0 to 360)
        * @defaultValue 100 */
       max?: number;
+      /** Space between segments
+       * @defaultValue 2 */
+      space: number;
     }
 
     interface Options extends Defaults {
@@ -33,7 +36,9 @@ declare global {
       items: Array<{ value: number; color?: string }>;
     }
     interface Attributes
-      extends WUP.Base.toJSX<Partial<Pick<Options, "back" | "width" | "from" | "to" | "items" | "corner">>> {}
+      extends WUP.Base.toJSX<
+        Partial<Pick<Options, "back" | "width" | "from" | "to" | "items" | "corner" | "min" | "max" | "space">>
+      > {}
     interface JSXProps<C = WUPCircleElement> extends WUP.Base.JSXProps<C>, Attributes {}
   }
   interface HTMLElementTagNameMap {
@@ -51,11 +56,11 @@ export default class WUPCircleElement extends WUPBaseElement {
   #ctr = this.constructor as typeof WUPCircleElement;
 
   static get observedOptions(): Array<keyof WUP.Circle.Options> {
-    return ["items", "width", "back", "corner", "from", "to"];
+    return ["items", "width", "back", "corner", "from", "to", "min", "max", "space"];
   }
 
   static get observedAttributes(): Array<LowerKeys<WUP.Circle.Attributes>> {
-    return ["items", "width", "back", "corner", "from", "to"];
+    return ["items", "width", "back", "corner", "from", "to", "min", "max", "space"];
   }
 
   static get $styleRoot(): string {
@@ -108,12 +113,13 @@ export default class WUPCircleElement extends WUPBaseElement {
 
   static $defaults: WUP.Circle.Defaults = {
     width: 14,
-    corner: 0.5,
+    corner: 0.25,
     back: true,
     from: 0,
     to: 360,
     min: 0,
     max: 100,
+    space: 2,
   };
 
   $options: WUP.Circle.Options = {
@@ -136,11 +142,10 @@ export default class WUPCircleElement extends WUPBaseElement {
     super.gotChanges(propsChanged);
 
     this._opts.items = this.getRefAttr("items") || [];
-    this._opts.width = this.getNumAttr("width")!;
     this._opts.back = this.getBoolAttr("back", this._opts.back);
-    this._opts.corner = this.getNumAttr("corner")!;
-    this._opts.from = this.getNumAttr("from")!;
-    this._opts.to = this.getNumAttr("to")!;
+    ["width", "corner", "from", "to", "min", "max", "space"].forEach((key) => {
+      (this._opts as any)[key] = this.getNumAttr(key)!;
+    });
 
     if (propsChanged) {
       this.$refItems.textContent = "";
@@ -161,27 +166,30 @@ export default class WUPCircleElement extends WUPBaseElement {
     // render items
     // todo develop animation here
     this.$refSVG.appendChild(this.$refItems);
-    const { items } = this._opts;
+    const { items, space } = this._opts;
     let angleFrom = this._opts.from;
     let angleTo = 0;
     let end = 0;
 
-    let { min, max } = this._opts;
+    let vMin = this._opts.min ?? 0;
+    let vMax = this._opts.max ?? 360;
+    let angleMax = this._opts.to;
     if (items.length > 1) {
-      min = 0; // items.reduce((v, item) => (item.value < v ? item.value : v), 0);
-      max = items.reduce((v, item) => item.value + v, 0);
+      vMin = 0; // items.reduce((v, item) => (item.value < v ? item.value : v), 0);
+      vMax = items.reduce((v, item) => item.value + v, 0);
+      angleMax -= items.length * space;
     }
 
     for (let i = 0; i < items.length; ++i) {
       const a = items[i];
       const v = a.value;
-      angleTo = this.valueToAngle(v, min, max) + end;
+      angleTo = scaleValue(v, vMin, vMax, this._opts.from, angleMax) + end; // this.valueToAngle(v, min, max) + end;
 
       const path = this.$refItems.appendChild(this.make("path"));
       path.setAttribute("d", this.drawArc(angleFrom, angleTo));
       a.color && path.setAttribute("fill", a.color);
-      end = angleTo;
-      angleFrom = angleTo; // todo add extra space between segments here
+      end = angleTo + space;
+      angleFrom = angleTo + space;
     }
 
     // render/remove label
@@ -208,19 +216,18 @@ export default class WUPCircleElement extends WUPBaseElement {
     this.appendChild(this.$refSVG);
   }
 
-  /** Convert value to angle according to options min,max,from,to */
-  protected valueToAngle(v: number, min: number | null | undefined, max: number | null | undefined): number {
-    const { from, to } = this._opts;
-    if (min == null || max == null) {
-      return v; // if min & max is null than value is pointed in degress
-    }
+  // /** Convert value to angle according to options min,max,from,to */
+  // protected valueToAngle(v: number, min: number | null | undefined, max: number | null | undefined): number {
+  //   const { from, to } = this._opts;
+  //   if (min == null || max == null) {
+  //     return v; // if min & max is null than value is pointed in degress
+  //   }
 
-    // WARN: theoritaclly possible to get 1deg out for rendering several segments with Math.round
-    const r = scaleValue(v, min, max, from, to);
-    return r;
-  }
+  //   const r = scaleValue(v, min, max, from, to);
+  //   return r;
+  // }
 
-  /** Called every time as need to text-value */
+  /** Called every time as need text-value */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   renderLabel(label: HTMLElement, percent: number, rawValue: number): void {
     label.textContent = `${percent}%`;
@@ -245,11 +252,6 @@ export default class WUPCircleElement extends WUPBaseElement {
 
 customElements.define(tagName, WUPCircleElement);
 
-function pointOnArc(center: [number, number], r: number, angle: number): [number, number] {
-  const radians = ((angle - 90) * Math.PI) / 180.0;
-  return [center[0] + r * Math.cos(radians), center[1] + r * Math.sin(radians)];
-}
-
 /** Returns svg-path for Cirle according to options */
 export function drawCircle(center: [number, number], r: number, width: number): string {
   const inR = r - width;
@@ -264,6 +266,12 @@ export function drawCircle(center: [number, number], r: number, width: number): 
     `A${inR} ${inR} 0 1 0 ${x - inR} ${y}`,
     "Z",
   ].join(" ");
+}
+
+/** Returns x,y for point in the circle */
+function pointOnArc(center: [number, number], r: number, angle: number): [number, number] {
+  const radians = ((angle - 90) * Math.PI) / 180.0;
+  return [center[0] + r * Math.cos(radians), center[1] + r * Math.sin(radians)];
 }
 
 /** Returns svg-path for Arc according to options */
