@@ -78,14 +78,13 @@ export default function CircleView() {
           point options <b>from=-90 & to=90</b>
         </small>
         <wup-circle
-          back={false}
           style={{ maxWidth: "100px" }}
-          // class={styles.half}
+          class={styles.half}
+          back={false}
+          from={-90}
+          to={90}
           ref={(el) => {
             if (el) {
-              // todo half circle doesn't work
-              el.$options.from = -90;
-              el.$options.to = 90;
               el.$options.items = [
                 { value: 12 },
                 { value: 10 },

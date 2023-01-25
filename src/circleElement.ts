@@ -91,17 +91,16 @@ export default class WUPCircleElement extends WUPBaseElement {
         transform: translate(-50%,-50%);
         top: 50%; left: 50%;
         font-size: larger;
-        color: var(--circle-label);
       }
       :host svg {
         overflow: visible;
         display: block;
       }
-      :host svg>path {
+      :host path {
         stroke-width: 0;
         fill-rule: evenodd;
-        fill: var(--circle-0);
       }
+      :host svg>path { fill: var(--circle-0); }
       :host g>path:nth-child(1) { fill: var(--circle-1); }
       :host g>path:nth-child(2) { fill: var(--circle-2); }
       :host g>path:nth-child(3) { fill: var(--circle-3); }
@@ -155,11 +154,12 @@ export default class WUPCircleElement extends WUPBaseElement {
   }
 
   protected gotRenderItems(): void {
+    const angleMin = this._opts.from;
+    let angleMax = this._opts.to;
     // render background circle
     if (this._opts.back) {
-      // render background circle
       const back = this.make("path");
-      back.setAttribute("d", this.drawArc(this._opts.from, this._opts.to));
+      back.setAttribute("d", this.drawArc(angleMin, angleMax));
       this.$refSVG.appendChild(back);
     }
 
@@ -167,28 +167,22 @@ export default class WUPCircleElement extends WUPBaseElement {
     // todo develop animation here
     this.$refSVG.appendChild(this.$refItems);
     const { items, space } = this._opts;
-    let angleFrom = this._opts.from;
-    let angleTo = 0;
-    let end = 0;
-
     let vMin = this._opts.min ?? 0;
     let vMax = this._opts.max ?? 360;
-    let angleMax = this._opts.to;
     if (items.length > 1) {
       vMin = 0; // items.reduce((v, item) => (item.value < v ? item.value : v), 0);
       vMax = items.reduce((v, item) => item.value + v, 0);
-      angleMax -= items.length * space;
+      angleMax -= (items.length - (angleMax === 360 ? 0 : 1)) * space;
     }
-
+    let angleTo = 0;
+    let angleFrom = angleMin;
     for (let i = 0; i < items.length; ++i) {
       const a = items[i];
       const v = a.value;
-      angleTo = scaleValue(v, vMin, vMax, this._opts.from, angleMax) + end; // this.valueToAngle(v, min, max) + end;
-
+      angleTo = scaleValue(v, vMin, vMax, angleMin, angleMax) + (angleFrom - angleMin); // this.valueToAngle(v, min, max) + end;
       const path = this.$refItems.appendChild(this.make("path"));
       path.setAttribute("d", this.drawArc(angleFrom, angleTo));
       a.color && path.setAttribute("fill", a.color);
-      end = angleTo + space;
       angleFrom = angleTo + space;
     }
 
@@ -207,7 +201,6 @@ export default class WUPCircleElement extends WUPBaseElement {
   /** Called on every changeEvent */
   protected override gotRender(): void {
     super.gotRender();
-    // example: https://medium.com/@pppped/how-to-code-a-responsive-circular-percentage-chart-with-svg-and-css-3632f8cd7705
     this.$refSVG.setAttribute("viewBox", `0 0 100 100`);
     this.$refSVG.setAttribute("role", "img");
     const title = this.$refSVG.appendChild(this.make("title"));
@@ -336,3 +329,7 @@ export function scaleValue(v: number, fromMin: number, fromMax: number, toMin: n
   const span = (toMax - toMin) / (fromMax - fromMin);
   return span * (v - fromMin) + toMin;
 }
+
+// example: https://medium.com/@pppped/how-to-code-a-responsive-circular-percentage-chart-with-svg-and-css-3632f8cd7705
+// similar https://github.com/w8r/svg-arc-corners
+// demo https://milevski.co/svg-arc-corners/demo/
