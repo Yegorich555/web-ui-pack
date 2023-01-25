@@ -187,15 +187,19 @@ export default class WUPCircleElement extends WUPBaseElement {
     }
 
     // render/remove label
+    let ariaLbl = "";
     if (items.length === 1) {
       this.$refLabel = this.$refLabel ?? this.appendChild(document.createElement("strong"));
       const rawV = items[0].value;
       const perc = Math.round(((angleTo - this._opts.from) * 100) / (this._opts.to - this._opts.from));
       this.renderLabel(this.$refLabel, perc, rawV);
+      ariaLbl = this.$refLabel.textContent!;
     } else {
-      this.$refLabel?.remove();
-      this.$refLabel = undefined;
+      this.$refLabel && this.$refLabel.remove();
+      delete this.$refLabel;
+      ariaLbl = `Values: ${items.map((a) => a.value).join(",")}`;
     }
+    this.$refSVG.setAttribute("aria-label", ariaLbl);
   }
 
   /** Called on every changeEvent */
@@ -203,9 +207,6 @@ export default class WUPCircleElement extends WUPBaseElement {
     super.gotRender();
     this.$refSVG.setAttribute("viewBox", `0 0 100 100`);
     this.$refSVG.setAttribute("role", "img");
-    const title = this.$refSVG.appendChild(this.make("title"));
-    title.textContent = "Some description for WA here"; // todo check it for WA
-
     this.appendChild(this.$refSVG);
   }
 
