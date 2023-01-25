@@ -170,7 +170,7 @@ export default class WUPCircleElement extends WUPBaseElement {
     let vMin = this._opts.min ?? 0;
     let vMax = this._opts.max ?? 360;
     if (items.length > 1) {
-      vMin = 0; // items.reduce((v, item) => (item.value < v ? item.value : v), 0);
+      vMin = 0;
       vMax = items.reduce((v, item) => item.value + v, 0);
       angleMax -= (items.length - (angleMax === 360 ? 0 : 1)) * space;
     }
@@ -179,7 +179,7 @@ export default class WUPCircleElement extends WUPBaseElement {
     for (let i = 0; i < items.length; ++i) {
       const a = items[i];
       const v = a.value;
-      angleTo = scaleValue(v, vMin, vMax, angleMin, angleMax) + (angleFrom - angleMin); // this.valueToAngle(v, min, max) + end;
+      angleTo = scaleValue(v, vMin, vMax, angleMin, angleMax) + (angleFrom - angleMin);
       const path = this.$refItems.appendChild(this.make("path"));
       path.setAttribute("d", this.drawArc(angleFrom, angleTo));
       a.color && path.setAttribute("fill", a.color);
@@ -209,17 +209,6 @@ export default class WUPCircleElement extends WUPBaseElement {
     this.appendChild(this.$refSVG);
   }
 
-  // /** Convert value to angle according to options min,max,from,to */
-  // protected valueToAngle(v: number, min: number | null | undefined, max: number | null | undefined): number {
-  //   const { from, to } = this._opts;
-  //   if (min == null || max == null) {
-  //     return v; // if min & max is null than value is pointed in degress
-  //   }
-
-  //   const r = scaleValue(v, min, max, from, to);
-  //   return r;
-  // }
-
   /** Called every time as need text-value */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   renderLabel(label: HTMLElement, percent: number, rawValue: number): void {
@@ -232,15 +221,6 @@ export default class WUPCircleElement extends WUPBaseElement {
     const center: [number, number] = [r, r];
     return drawArc(center, r, this._opts.width, angleFrom, angleTo, this._opts.corner);
   }
-
-  // rotate(cx: number, cy: number, x: number, y: number, angle: number): [number, number] {
-  //   const rad = (Math.PI / 180) * angle;
-  //   const cos = Math.cos(rad);
-  //   const sin = Math.sin(rad);
-  //   const nx = cos * (x - cx) - sin * (y - cy) + cx;
-  //   const ny = cos * (y - cy) + sin * (x - cx) + cy;
-  //   return [nx, ny];
-  // }
 }
 
 customElements.define(tagName, WUPCircleElement);
@@ -329,6 +309,16 @@ export function scaleValue(v: number, fromMin: number, fromMax: number, toMin: n
   const span = (toMax - toMin) / (fromMax - fromMin);
   return span * (v - fromMin) + toMin;
 }
+
+/** Apply transform.rotate on point */
+// function rotate(cx: number, cy: number, x: number, y: number, angle: number): [number, number] {
+//   const rad = (Math.PI / 180) * angle;
+//   const cos = Math.cos(rad);
+//   const sin = Math.sin(rad);
+//   const nx = cos * (x - cx) - sin * (y - cy) + cx;
+//   const ny = cos * (y - cy) + sin * (x - cx) + cy;
+//   return [nx, ny];
+// }
 
 // example: https://medium.com/@pppped/how-to-code-a-responsive-circular-percentage-chart-with-svg-and-css-3632f8cd7705
 // similar https://github.com/w8r/svg-arc-corners
