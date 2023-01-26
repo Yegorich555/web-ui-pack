@@ -389,12 +389,12 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
   /** Parse attribute and return result; if attr missed or invalid => returns this._opts[attr] */
   getNumAttr(attr: string): number | undefined {
     const a = this.getAttribute(attr);
-    if (a === null) {
+    if (a == null || a === "") {
       return this._opts[attr];
     }
     const v = +a;
     if (Number.isNaN(v)) {
-      return this._opts[attr];
+      console.error(`${this.tagName}. Expected number for attribute [${attr}] but pointed '${a}'`);
     }
     return v;
   }
@@ -402,12 +402,12 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
   /** Returns value from window[key] according to [attr]="key" or $options[key] if attr is missed */
   getRefAttr<T>(attr: string): T | undefined {
     const a = this.getAttribute(attr);
-    if (a === null) {
+    if (a == null || a === "") {
       return this._opts[attr];
     }
     const v = nestedProperty.get(window, a);
     if (v === undefined) {
-      throw new Error(
+      console.error(
         `${this.tagName}. Value not found according to attribute [${attr}] in '${
           a.startsWith("window.") ? a : `window.${a}`
         }'`

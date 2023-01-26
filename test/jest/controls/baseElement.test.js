@@ -92,18 +92,44 @@ describe("baseElement", () => {
   });
 
   test("getRefAttr", () => {
-    el.setAttribute("testRef", "window._model.firstName");
-    expect(() => el.getRefAttr("testRef")).toThrow();
-    el.setAttribute("testRef", "_model.firstName");
-    expect(() => el.getRefAttr("testRef")).toThrow();
+    el.setAttribute("tr", "window._model.firstName");
+    const onErr = h.mockConsoleError();
+    el.getRefAttr("tr");
+    expect(onErr).toBeCalledTimes(1);
+    el.setAttribute("tr", "_model.firstName");
+    el.getRefAttr("tr");
+    expect(onErr).toBeCalledTimes(2);
 
     window._model = { firstName: "Den" };
-    el.setAttribute("testRef", "_model.firstName");
-    expect(el.getRefAttr("testRef")).toBe("Den");
+    el.setAttribute("tr", "_model.firstName");
+    expect(el.getRefAttr("tr")).toBe("Den");
 
     window._model = { firstName: "Wiki" };
-    el.setAttribute("testRef", "window._model.firstName");
-    expect(el.getRefAttr("testRef")).toBe("Wiki");
+    el.setAttribute("tr", "window._model.firstName");
+    expect(el.getRefAttr("tr")).toBe("Wiki");
+
+    el.removeAttribute("tr");
+    expect(el.getRefAttr("tr")).toBe(undefined);
+    el._opts.tr = { me: true };
+    expect(el.getRefAttr("tr")).toEqual({ me: true });
+
+    h.unMockConsoleError();
+  });
+
+  test("getNumAttr", () => {
+    el.setAttribute("tn", "abc");
+    const onErr = h.mockConsoleError();
+    el.getNumAttr("tn");
+    expect(onErr).toBeCalledTimes(1);
+
+    el.setAttribute("tn", "123");
+    expect(el.getNumAttr("tn")).toBe(123);
+
+    el.removeAttribute("tn");
+    expect(el.getNumAttr("tn")).toBe(undefined);
+    el._opts.tn = 56;
+    expect(el.getNumAttr("tn")).toBe(56);
+    h.unMockConsoleError();
   });
 
   test("fireEvent", () => {

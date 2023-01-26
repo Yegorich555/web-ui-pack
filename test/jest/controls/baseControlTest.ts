@@ -389,7 +389,10 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
         expect(el.$isValid).toBe(true);
 
         (window as any)._testVld = undefined;
-        expect(() => el.$validate()).toThrowError(); // because key is pointed but value undefined
+        const onErr = h.mockConsoleError();
+        expect(() => el.$validate()).not.toThrow(); // because key is pointed but value undefined
+        expect(onErr).toBeCalled();
+        h.unMockConsoleError();
       });
     }
 
