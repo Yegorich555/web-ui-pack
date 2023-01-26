@@ -7,9 +7,9 @@ const sideEffect = WUPNumberControl;
 (window as any).myNumberValidations = {
   min: 8,
   max: 1000,
-} as WUPNumber.Options["validations"];
+} as WUP.Number.Options["validations"];
 
-(window as any).myRequiredValidations = { required: true } as WUPNumber.Options["validations"];
+(window as any).myRequiredValidations = { required: true } as WUP.Number.Options["validations"];
 
 export default function NumberControlView() {
   return (
@@ -21,7 +21,7 @@ export default function NumberControlView() {
         "Built-in validations (required,min,max)",
         "Increment/decrement via ArrowKeys, Mouse, TouchEvents(Swipe) + keys Shift/Ctrl (only when focused)",
         "Different formats (currency, etc.). Use $options.format to redefine defaults",
-        "Display format depends on user-locale (see web-ui-pack/helpers/localeInfo). Use $options.format or localeInfo (globally)",
+        "Display format depends on user-locale (see web-ui-pack/objects/localeInfo). Use $options.format or localeInfo (globally)",
       ]}
       details={{
         tag: "wup-num",

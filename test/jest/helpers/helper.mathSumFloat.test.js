@@ -1,4 +1,4 @@
-import mathSumFloat from "web-ui-pack/helpers/mathSumFloat";
+import { mathSumFloat } from "web-ui-pack/helpers/math";
 
 describe("helper.mathSumFloat", () => {
   test("both float", () => {

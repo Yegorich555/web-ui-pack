@@ -31,6 +31,7 @@ module.exports = {
     "react/prop-types": "off",
     "react/jsx-props-no-spreading": "off",
     "react/no-access-state-in-setstate": "off",
+    "@typescript-eslint/no-this-alias": "off",
     "@typescript-eslint/no-shadow": "error",
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-non-null-assertion": "off",

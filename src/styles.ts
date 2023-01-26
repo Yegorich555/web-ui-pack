@@ -16,7 +16,6 @@ margin: 0;
 padding: 0 5px;
 flex: 0 0 auto;
 align-self: stretch;
-cursor: pointer;
 border: none;
 box-shadow: none;
 background: var(--ctrl-icon);

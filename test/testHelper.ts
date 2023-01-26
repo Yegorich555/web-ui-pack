@@ -106,6 +106,7 @@ export interface BaseTestOptions {
   attrs: Record<
     string,
     {
+      /** Set true if removing attr doesn't remove option but rollbacks to default */
       onRemove?: boolean;
       skip?: boolean;
       value?: string;
@@ -271,9 +272,9 @@ export function handleRejection() {
   const rst = fn.mockClear;
   (fn.mockClear as any) = () => {
     rst();
-    global.setUnhandledReject(null as any);
+    (global as any).setUnhandledReject(null as any);
   };
-  global.setUnhandledReject(fn);
+  (global as any).setUnhandledReject(fn);
   return fn;
 }
 
@@ -328,14 +329,17 @@ export function useFakeAnimation() {
   jest.useFakeTimers();
   let i = 0;
   const animateFrames: Array<Function> = [];
-  const nextFrame = async () => {
-    await Promise.resolve();
-    jest.advanceTimersByTime(step);
-    ++i;
-    const old = [...animateFrames];
-    animateFrames.length = 0;
-    old.forEach((f) => f(i * step));
-    await Promise.resolve();
+  const nextFrame = async (count = 1) => {
+    for (let c = 0; c < count; ++c) {
+      await Promise.resolve();
+      jest.advanceTimersByTime(step);
+      ++i;
+      const old = [...animateFrames];
+      animateFrames.length = 0;
+      // eslint-disable-next-line no-loop-func
+      old.forEach((f) => f(i * step));
+      await Promise.resolve();
+    }
   };
 
   jest.spyOn(window, "requestAnimationFrame").mockImplementation((fn) => {
@@ -363,7 +367,6 @@ export async function wait(t = 1000) {
 
 /** Simulate user type text (send values to the end of input): focus + keydown+ keyup + keypress + input events */
 export async function userTypeText(el: HTMLInputElement, text: string, opts = { clearPrevious: true }) {
-  jest.useFakeTimers();
   el.focus();
   if (opts?.clearPrevious) {
     el.value = "";
@@ -429,7 +432,6 @@ export async function userRemove(
   el: HTMLInputElement,
   opts?: { removeCount: number; key: "Backspace" | "Delete" }
 ): Promise<string> {
-  jest.useFakeTimers();
   el.focus();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   opts = { removeCount: 1, key: "Backspace", ...opts };
@@ -471,7 +473,6 @@ export async function userRemove(
 
 /** Simulate user mouse click with 100ms between mouseDown and mouseUp */
 export async function userClick(el: HTMLElement, opts?: MouseEventInit, timeoutMouseUp = 100) {
-  jest.useFakeTimers();
   const o = () => ({ bubbles: true, cancelable: true, pageX: 1, pageY: 1, ...opts });
   const isOk = el.dispatchEvent(new MouseEvent("mousedown", o()));
   isOk && el.focus();
@@ -484,7 +485,6 @@ export async function userClick(el: HTMLElement, opts?: MouseEventInit, timeoutM
  * WARN: in reality onBeforeInput event calls only if history.legth >= 1
  * @return cursor snapshot (getInputCursor) */
 export async function userUndo(el: HTMLInputElement): Promise<string> {
-  jest.useFakeTimers();
   el.dispatchEvent(
     new KeyboardEvent("keydown", { key: "z", ctrlKey: true, metaKey: true, bubbles: true, cancelable: true })
   ) &&
@@ -501,7 +501,6 @@ export async function userUndo(el: HTMLInputElement): Promise<string> {
  * WARN: in reality onBeforeInput event calls only if history.legth >= 1
  * @return cursor snapshot (getInputCursor) */
 export async function userRedo(el: HTMLInputElement): Promise<string> {
-  jest.useFakeTimers();
   const okCtrlY = el.dispatchEvent(
     new KeyboardEvent("keydown", { key: "y", ctrlKey: true, bubbles: true, cancelable: true })
   );

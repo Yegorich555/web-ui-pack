@@ -23,7 +23,7 @@ const items = [
 
 (window as any)._someRadioValidations = {
   required: true,
-} as WUPRadio.Options["validations"];
+} as WUP.Radio.Options["validations"];
 
 (window as any).storedRadioItems = {
   items: items.slice(0, 4),
@@ -104,7 +104,7 @@ export default function RadioControlView() {
               if (el) {
                 el.$options.name = "customized";
                 el.$options.items = () => {
-                  const renderText: WUPSelect.MenuItemFn<number>["text"] = (value, li, i) => {
+                  const renderText: WUP.Select.MenuItemFn<number>["text"] = (value, li, i) => {
                     li.innerHTML = `<b>Value</b>: ${value}, <span style="color: red">index</span>: ${i}`;
                     return li.textContent as string;
                   };

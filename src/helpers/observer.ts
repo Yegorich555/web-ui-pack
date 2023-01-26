@@ -335,7 +335,7 @@ function make<T extends object>(
  * const obj = observer.make(raw);
  * const removeListener = observer.onPropChanged(obj, (e) => console.warn(e));
  * const removeListener2 = observer.onChanged(obj, (e) => console.warn(e));
- * obj.period = 5;
+ * obj.period = 5; // events are fired after 1ms
  * removeListener();
  * removeListener2();
  */

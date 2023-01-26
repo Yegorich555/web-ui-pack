@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/no-autofocus */
-const onScrollStop = require("web-ui-pack/helpers/onScrollStop");
+const onScrollStop = require("web-ui-pack/helpers/onScrollStop").default;
 
 beforeAll(async () => {
   await page.evaluate(() => {

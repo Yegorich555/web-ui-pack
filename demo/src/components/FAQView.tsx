@@ -41,7 +41,7 @@ export default function FAQView() {
                 <ol>
                   <li>
                     Call{" "}
-                    <a href={linkGit("src/helpers/localeInfo.ts")} target="_blank" rel="noreferrer">
+                    <a href={linkGit("src/objects/localeInfo.ts")} target="_blank" rel="noreferrer">
                       localeInfo.refresh()
                     </a>{" "}
                     once to update defaults according to user-locale (it updates date,time,number formats and month/date

@@ -3,7 +3,7 @@ import { WUPDateControl } from "web-ui-pack";
 
 const sideEffect = WUPDateControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
-(window as any).myDateValidations = { required: true } as WUPCalendar.Options["validations"];
+(window as any).myDateValidations = { required: true } as WUP.Calendar.Options["validations"];
 (window as any).myDateExcludeDays = [
   new Date("2022-02-28"),
   new Date("2022-03-16"),
@@ -28,7 +28,7 @@ export default function DateControlView() {
         "Wide ability to disable particular dates (options min/max/exclude)",
         "No dependancy for working with dates (usage momentjs doesn't make sense)",
         "Saves hours. So $value='2022-11-06 23:50' & click on '20 Dec' => '2022-12-20 23:50'",
-        "Display format depends on user-locale (see web-ui-pack/helpers/localeInfo). Use $options.format or localeInfo (globally)",
+        "Display format depends on user-locale (see web-ui-pack/objects/localeInfo). Use $options.format or localeInfo (globally)",
       ]}
     >
       <wup-form

@@ -57,7 +57,7 @@ describe("formElement", () => {
     expect(t.$isValid).toBe(false);
     expect(t.html).toMatchInlineSnapshot(`
       "<wup-form role="form">
-              <wup-text name="firstName" id="inp1" invalid=""><label for="wup3"><span><input placeholder=" " type="text" id="wup3" autocomplete="off" aria-required="true" aria-describedby="wup5"><strong>First Name</strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label><wup-popup error="" aria-live="off" aria-atomic="true" id="wup5" role="alert" position="bottom" style="display: block; max-width: 500px; transform: translate(150px, 56px);"><span class="wup-hidden">Error for First Name:</span><span>This field is required</span></wup-popup></wup-text>
+              <wup-text name="firstName" id="inp1" invalid=""><label for="wup3"><span><input placeholder=" " type="text" id="wup3" autocomplete="off" aria-required="true" aria-describedby="wup5"><strong>First Name</strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label><wup-popup error="" aria-live="off" aria-atomic="true" id="wup5" role="alert" style="display: block; max-width: 500px; transform: translate(150px, 56px);" position="bottom"><span class="wup-hidden">Error for First Name:</span><span>This field is required</span></wup-popup></wup-text>
               <wup-text name="lastName" id="inp2"><label for="wup4"><span><input placeholder=" " type="text" id="wup4" autocomplete="off" aria-required="true"><strong>Last Name</strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label></wup-text>
               <button type="submit">Submit</button>
             </wup-form>"
@@ -72,7 +72,7 @@ describe("formElement", () => {
     expect(t.html).toMatchInlineSnapshot(`
       "<wup-form role="form">
               <wup-text name="firstName" id="inp1"><label for="wup3"><span><input placeholder=" " type="text" id="wup3" autocomplete="off" aria-required="true"><strong>First Name</strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label></wup-text>
-              <wup-text name="lastName" id="inp2" invalid=""><label for="wup4"><span><input placeholder=" " type="text" id="wup4" autocomplete="off" aria-required="true" aria-describedby="wup6"><strong>Last Name</strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label><wup-popup error="" aria-live="off" aria-atomic="true" id="wup6" role="alert" position="bottom" style="display: block; max-width: 500px; transform: translate(150px, 126px);"><span class="wup-hidden">Error for Last Name:</span><span>This field is required</span></wup-popup></wup-text>
+              <wup-text name="lastName" id="inp2" invalid=""><label for="wup4"><span><input placeholder=" " type="text" id="wup4" autocomplete="off" aria-required="true" aria-describedby="wup6"><strong>Last Name</strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label><wup-popup error="" aria-live="off" aria-atomic="true" id="wup6" role="alert" style="display: block; max-width: 500px; transform: translate(150px, 126px);" position="bottom"><span class="wup-hidden">Error for Last Name:</span><span>This field is required</span></wup-popup></wup-text>
               <button type="submit">Submit</button>
             </wup-form>"
     `);

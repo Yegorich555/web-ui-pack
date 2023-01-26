@@ -1,40 +1,24 @@
-import WUPTextControl, { WUPTextIn } from "./text";
+import WUPTextControl from "./text";
 import { WUPcssScrollSmall } from "../styles";
 
 const tagName = "wup-textarea";
-export namespace WUPTextareaIn {
-  export interface Def {}
-  export interface Opt {}
-  export type Generics<
-    ValueType = string,
-    ValidationKeys extends WUPText.ValidationMap = WUPTextarea.ValidationMap,
-    Defaults = Def,
-    Options = Opt
-  > = WUPTextIn.Generics<ValueType, ValidationKeys, Defaults & Def, Options & Opt>;
-  // type Validation<T = string> = Generics<T>["Validation"];
-  export type GenDef<T = string> = Generics<T>["Defaults"];
-  export type GenOpt<T = string> = Generics<T>["Options"];
-}
-
 declare global {
-  namespace WUPTextarea {
-    interface ValidationMap extends WUPText.ValidationMap {}
-    interface EventMap extends WUPText.EventMap {}
-    interface Defaults<T = string> extends WUPTextareaIn.GenDef<T> {}
-    interface Options<T = string> extends Omit<WUPTextareaIn.GenOpt<T>, "mask" | "maskholder" | "prefix" | "postfix"> {}
-    interface JSXProps<T extends WUPTextareaControl>
-      extends Omit<WUPText.JSXProps<T>, "mask" | "maskholder" | "prefix" | "postfix"> {}
+  namespace WUP.Textarea {
+    interface EventMap extends WUP.Text.EventMap {}
+    interface ValidityMap extends WUP.Text.ValidityMap {}
+    interface Defaults<T = string, VM = ValidityMap> extends WUP.Text.Defaults<T, VM> {}
+    interface Options<T = string, VM = ValidityMap>
+      extends Omit<WUP.Text.Options<T, VM>, "mask" | "maskholder" | "prefix" | "postfix">,
+        Defaults<T, VM> {}
+    interface Attributes extends WUP.Text.Attributes {}
+    interface JSXProps<C = WUPTextareaControl> extends WUP.Text.JSXProps<C>, Attributes {}
   }
-
-  // add element to document.createElement
   interface HTMLElementTagNameMap {
-    [tagName]: WUPTextareaControl;
+    [tagName]: WUPTextareaControl; // add element to document.createElement
   }
-
-  // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUPTextarea.JSXProps<WUPTextareaControl>;
+      [tagName]: WUP.Textarea.JSXProps; // add element to tsx/jsx intellisense
     }
   }
 }
@@ -65,7 +49,7 @@ declare global {
  */
 export default class WUPTextareaControl<
   ValueType = string,
-  EventMap extends WUPTextarea.EventMap = WUPTextarea.EventMap
+  EventMap extends WUP.Textarea.EventMap = WUP.Textarea.EventMap
 > extends WUPTextControl<ValueType, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextareaControl;
@@ -92,20 +76,18 @@ export default class WUPTextareaControl<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUPTextarea.Defaults = {
+  static $defaults: WUP.Textarea.Defaults = {
     ...WUPTextControl.$defaults,
     validationRules: {
       ...WUPTextControl.$defaults.validationRules,
       // WARN: validations min/max must depends only on visible chars
-      min: (v, setV, c) => WUPTextControl.$defaults.validationRules.min!(v?.replace(/\n/g, ""), setV, c),
-      max: (v, setV, c) => WUPTextControl.$defaults.validationRules.max!(v?.replace(/\n/g, ""), setV, c),
+      min: (v, setV, c) => WUPTextControl.$defaults.validationRules.min.call!(c, v?.replace(/\n/g, ""), setV, c),
+      max: (v, setV, c) => WUPTextControl.$defaults.validationRules.max.call!(c, v?.replace(/\n/g, ""), setV, c),
     },
   };
 
-  $options: WUPTextarea.Options<ValueType> = {
+  $options: WUP.Textarea.Options = {
     ...this.#ctr.$defaults,
-    // @ts-expect-error
-    validationRules: undefined, // don't copy it from defaults to optimize memory
   };
 
   protected override _opts = this.$options;
@@ -130,6 +112,13 @@ export default class WUPTextareaControl<
           .replace(/<div><br><\/div>/g, "\n") // Chrome newLine
           .replace(/<br>|<div>/g, "\n")
           .replace(/<\/div>/g, ""),
+    });
+
+    Object.defineProperty(this.$refInput, "setSelectionRange", {
+      configurable: true,
+      value: (start: number | null, end: number | null): void => {
+        this.selection = { start: start || 0, end: end || 0 };
+      },
     });
 
     Object.defineProperty(this.$refInput, "selectionStart", {
@@ -225,9 +214,9 @@ export default class WUPTextareaControl<
     return super.parseInput(text.replace(/^&nbsp;/, ""));
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUPTextarea.Options> | null): void {
+  protected override gotChanges(propsChanged: Array<keyof WUP.Textarea.Options> | null): void {
     super.gotChanges(propsChanged);
-    const o = this._opts as WUPText.Options;
+    const o = this._opts as WUP.Text.Options;
     delete o.mask;
     delete o.maskholder;
     delete o.prefix;
@@ -242,7 +231,7 @@ export default class WUPTextareaControl<
     // not supported
   }
 
-  // protected override gotBeforeInput(e: WUPText.GotInputEvent): void {
+  // protected override gotBeforeInput(e: WUP.Text.GotInputEvent): void {
   //   super.gotBeforeInput(e);
   //   let data: string | null = null;
   //   switch (e.inputType) {
@@ -262,7 +251,7 @@ export default class WUPTextareaControl<
   //   }
   // }
 
-  // protected override gotInput(e: WUPText.GotInputEvent): void {
+  // protected override gotInput(e: WUP.Text.GotInputEvent): void {
   //   super.gotInput(e);
   //   console.warn({ v: this.$refInput.value });
   // }
@@ -311,3 +300,5 @@ export default class WUPTextareaControl<
 }
 
 customElements.define(tagName, WUPTextareaControl);
+
+// todo by default ctrl+B - bold, ctrl+I - italic works but maybe user don't expect it

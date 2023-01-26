@@ -28,6 +28,13 @@ initTestBaseControl({
       },
       writable: true,
     });
+    Object.defineProperty(el.$refInput, "setSelectionRange", {
+      value: (start, end) => {
+        el.$refInput.selectionStart = start;
+        el.$refInput.selectionEnd = end;
+      },
+      writable: true,
+    });
   },
 });
 
@@ -68,8 +75,10 @@ describe("control.textarea", () => {
 
     expect(el.selectionStart).not.toBe(undefined);
     expect(el.selectionEnd).not.toBe(undefined);
+    expect(el.setSelectionRange).not.toBe(undefined);
     expect(() => (el.selectionStart = 0)).not.toThrow();
     expect(() => (el.selectionEnd = 0)).not.toThrow();
+    expect(() => el.setSelectionRange(0, 0)).not.toThrow();
     jest.spyOn(window, "getSelection").mockImplementationOnce(() => null);
     expect(el.selectionStart).toBe(null);
     jest.spyOn(window, "getSelection").mockImplementationOnce(() => null);

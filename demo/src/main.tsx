@@ -9,8 +9,10 @@ import PopupView from "./components/popup/popupView";
 import iconGit from "./assets/gitIcon.svg";
 import imgLogo from "./assets/logo.png";
 import styles from "./main.scss";
+
 import ControlsView from "./components/controls/controlsView";
 import SpinView from "./components/spin/spinView";
+import CircleView from "./components/circleView";
 import TextControlView from "./components/controls/text";
 import TextareaControlView from "./components/controls/textarea";
 import PasswordControlView from "./components/controls/password";
@@ -20,8 +22,9 @@ import CheckControlView from "./components/controls/check";
 import RadioControlView from "./components/controls/radio";
 import CalendarControlView from "./components/controls/calendar";
 import DateControlView from "./components/controls/date";
-import FAQView from "./components/FAQView";
+import TimeControlView from "./components/controls/time";
 import NumberControlView from "./components/controls/number";
+import FAQView from "./components/FAQView";
 
 (window as any).WUPHelpers = WUPHelpers;
 
@@ -37,6 +40,7 @@ const baseURL = process.env.BASE_URL || "/";
 const routes: IRoute[] = [
   { path: "popup", el: PopupView },
   { path: "spin", el: SpinView },
+  { path: "circle", el: CircleView },
   { path: "controls", label: "Form & Controls", el: ControlsView },
   { path: "control/text", el: TextControlView, isNested: true },
   { path: "control/textarea", el: TextareaControlView, isNested: true },
@@ -49,6 +53,7 @@ const routes: IRoute[] = [
   // { path: "control/selectMany", el: SelectManyControlView, isNested: true },
   { path: "control/calendar", el: CalendarControlView, isNested: true },
   { path: "control/date", el: DateControlView, isNested: true },
+  { path: "control/time", el: TimeControlView, isNested: true },
   { path: "faq", label: "FAQ", el: FAQView },
 ];
 

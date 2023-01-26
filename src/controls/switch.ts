@@ -1,50 +1,31 @@
-import { WUP } from "../baseElement";
 import { WUPcssHidden } from "../styles";
-import WUPBaseControl, { WUPBaseIn } from "./baseControl";
+import WUPBaseControl from "./baseControl";
 
 const tagName = "wup-switch";
-export namespace WUPSwitchIn {
-  export interface Def {
-    /** Reversed-style (switch+label for true vs label+switch)
-     * @defaultValue false */
-    reverse?: boolean;
-  }
-  export interface Opt {}
-
-  export type Generics<
-    ValueType = boolean,
-    ValidationKeys extends WUPSwitch.ValidationMap = WUPSwitch.ValidationMap,
-    Defaults = Def,
-    Options = Opt
-  > = WUPBaseIn.Generics<ValueType, ValidationKeys, Defaults & Def, Options & Opt>;
-  // type Validation<T = string> = Generics<T>["Validation"];
-  export type GenDef<T = boolean> = Generics<T>["Defaults"];
-  export type GenOpt<T = boolean> = Generics<T>["Options"];
-}
-
 declare global {
-  namespace WUPSwitch {
-    interface ValidationMap extends Omit<WUPBase.ValidationMap, "required"> {}
-    interface EventMap extends WUPBase.EventMap {}
-    interface Defaults<T = boolean> extends WUPSwitchIn.GenDef<T> {}
-    interface Options<T = boolean> extends WUPSwitchIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPSwitchControl> extends WUPBase.JSXProps<T> {
+  namespace WUP.Switch {
+    interface EventMap extends WUP.BaseControl.EventMap {}
+    interface ValidityMap extends WUP.BaseControl.ValidityMap {}
+    interface Defaults<T = boolean, VM = ValidityMap> extends WUP.BaseControl.Defaults<T, VM> {}
+    interface Options<T = boolean, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, Defaults<T, VM> {
+      /** Reversed-style (switch+label for true vs label+switch)
+       * @defaultValue false */
+      reverse?: boolean;
+    }
+    interface Attributes extends WUP.BaseControl.Attributes {
+      /** InitValue for control */
+      defaultChecked?: boolean;
       /** Reversed-style (switch+label vs label+switch) */
       reverse?: boolean | "";
-      /** @deprecated This attr doesn't work with React (react-issue) */
-      defaultChecked?: boolean;
     }
+    interface JSXProps<C = WUPSwitchControl> extends WUP.BaseControl.JSXProps<C>, Attributes {}
   }
-
-  // add element to document.createElement
   interface HTMLElementTagNameMap {
-    [tagName]: WUPSwitchControl;
+    [tagName]: WUPSwitchControl; // add element to document.createElement
   }
-
-  // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUPSwitch.JSXProps<WUPSwitchControl>;
+      [tagName]: WUP.Switch.JSXProps; // add element to tsx/jsx intellisense
     }
   }
 }
@@ -70,10 +51,9 @@ declare global {
  *   </span>
  * </label>
  */
-export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPSwitch.EventMap> extends WUPBaseControl<
-  boolean,
-  EventMap
-> {
+export default class WUPSwitchControl<
+  EventMap extends WUP.Switch.EventMap = WUP.Switch.EventMap
+> extends WUPBaseControl<boolean, EventMap> {
   #ctr = this.constructor as typeof WUPSwitchControl;
 
   static get $styleRoot(): string {
@@ -161,26 +141,24 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
   }
 
   static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUPSwitch.Options>;
+    const arr = super.observedOptions as Array<keyof WUP.Switch.Options>;
     arr.push("reverse");
     return arr;
   }
 
-  static get observedAttributes(): Array<LowerKeys<WUPSwitch.Options> | "defaultchecked"> {
-    const arr = super.observedAttributes as Array<LowerKeys<WUPSwitch.Options> | "defaultchecked">;
+  static get observedAttributes(): Array<string> {
+    const arr = super.observedAttributes as Array<LowerKeys<WUP.Switch.Attributes>>;
     arr.push("reverse", "defaultchecked");
     return arr;
   }
 
-  static $defaults: WUPSwitch.Defaults = {
+  static $defaults: WUP.Switch.Defaults = {
     ...WUPBaseControl.$defaults,
     validationRules: { ...WUPBaseControl.$defaults.validationRules },
   };
 
-  $options: WUPSwitch.Options = {
+  $options: WUP.Switch.Options = {
     ...this.#ctr.$defaults,
-    // @ts-expect-error
-    validationRules: undefined, // don't copy it from defaults to optimize memory
   };
 
   protected override _opts = this.$options;
@@ -242,7 +220,7 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
     return r;
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUPSwitch.Options | any> | null): void {
+  protected override gotChanges(propsChanged: Array<keyof WUP.Switch.Options | any> | null): void {
     super.gotChanges(propsChanged as any);
 
     this._opts.reverse = this.getBoolAttr("reverse", this._opts.reverse);
@@ -258,13 +236,13 @@ export default class WUPSwitchControl<EventMap extends WUPSwitch.EventMap = WUPS
     }
   }
 
-  protected override gotOptionsChanged(e: WUP.OptionEvent): void {
+  protected override gotOptionsChanged(e: WUP.Base.OptionEvent): void {
     this._isStopChanges = true;
     e.props.includes("reverse") && this.setAttr("reverse", this._opts.reverse, true);
     super.gotOptionsChanged(e);
   }
 
-  override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null): void {
+  override gotFormChanges(propsChanged: Array<keyof WUP.Form.Options> | null): void {
     super.gotFormChanges(propsChanged);
     this.setAttr.call(this.$refInput, "aria-readonly", this.$isReadOnly);
   }

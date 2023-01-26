@@ -1,4 +1,4 @@
-export { default as animateDropdown } from "./helpers/animateDropdown";
+export { animateDropdown, animate } from "./helpers/animate";
 export { default as dateCopyTime } from "./helpers/dateCopyTime";
 export { default as dateFromString } from "./helpers/dateFromString";
 export { default as dateToString } from "./helpers/dateToString";
@@ -8,8 +8,7 @@ export { default as focusFirst } from "./helpers/focusFirst";
 export { default as isEqual } from "./helpers/isEqual";
 export { isBothNaN } from "./helpers/isEqual";
 export { default as isIntoView } from "./helpers/isIntoView";
-export { default as localeInfo } from "./helpers/localeInfo";
-export { default as mathSumFloat } from "./helpers/mathSumFloat";
+export { mathSumFloat, mathScaleValue } from "./helpers/math";
 
 export { default as nestedProperty } from "./helpers/nestedProperty";
 export { default as observer } from "./helpers/observer";
@@ -24,7 +23,6 @@ export { default as onScrollStop } from "./helpers/onScrollStop";
 export { default as onSpy } from "./helpers/onSpy";
 // export * from "./helpers/onFocusLost";
 export { default as promiseWait } from "./helpers/promiseWait";
-export { default as scrollCarousel } from "./helpers/scrollCarousel";
+export { default as WUPScrolled } from "./helpers/scrolled";
 export { default as scrollIntoView } from "./helpers/scrollIntoView";
-export { default as stringPrettify } from "./helpers/stringPrettify";
-export { stringLowerCount, stringUpperCount } from "./helpers/stringCaseCount";
+export { stringPrettify, stringLowerCount, stringUpperCount } from "./helpers/string";

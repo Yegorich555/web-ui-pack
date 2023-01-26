@@ -1,14 +1,10 @@
-import WUPBaseControl, { WUPBaseIn } from "./baseControl";
+import WUPBaseControl from "./baseControl";
 import { WUPcssHidden } from "../styles";
-import scrollCarousel from "../helpers/scrollCarousel";
-import { dateCopyTime, localeInfo } from "../indexHelpers";
+import WUPScrolled from "../helpers/scrolled";
+import { dateCopyTime } from "../indexHelpers";
+import localeInfo from "../objects/localeInfo";
 
 const tagName = "wup-calendar";
-
-const add: <K extends keyof HTMLElementTagNameMap>(el: HTMLElement, tagName: K) => HTMLElementTagNameMap[K] = (
-  el,
-  tag
-) => el.appendChild(document.createElement(tag));
 
 export const enum PickersEnum {
   Day = 0,
@@ -16,78 +12,28 @@ export const enum PickersEnum {
   Year,
 }
 
-export namespace WUPCalendarIn {
-  export interface Def {
-    /** First day of week in calendar where 1-Monday, 7-Sunday;
-     * @defaultValue localeInfo.firstWeekDay */
-    firstWeekDay?: number;
-  }
-  export interface Opt {
-    /** User can't select date less than min; point new Date(Date.UTC(2022,1,25)) for `utc:true`, or new Date(2022,1,25) */
-    min?: Date;
-    /** User can't select date more than max; point new Date(Date.UTC(2022,1,25)) for `utc:true`, or new Date(2022,1,25) */
-    max?: Date;
-    /** Picker that must be rendered at first; if undefined then when isEmpty - year, otherwise - day;
-     * @not observed (affects only on init) */
-    startWith?: PickersEnum;
-    /** Dates that user can't choose (disabled dates) */
-    exclude?: Date[];
-    /** Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this
-     *  @defaultValue true */
-    utc?: boolean;
-    firstWeekDay: number;
-  }
-
-  export interface JSXProps {
-    /** @deprecated Picker that must be rendered at first */
-    startWith?: "year" | "month" | "day";
-    /** @deprecated User can't select date less than min; format yyyy-MM-dd */
-    min?: string;
-    /** @deprecated User can't select date more than max; format yyyy-MM-dd  */
-    max?: string;
-    /** @deprecated Dates that user can't choose. Point global obj-key (window.myExclude = [] ) */
-    exclude?: string;
-    /** Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this
-     *  @deprecated true */
-    utc?: boolean;
-  }
-
-  export type Generics<
-    ValueType = string,
-    ValidationKeys extends WUPBase.ValidationMap = WUPCalendar.ValidationMap,
-    Defaults = Def,
-    Options = Opt
-  > = WUPBaseIn.Generics<ValueType, ValidationKeys, Defaults & Def, Options & Opt>;
-  // type Validation<T = string> = Generics<T>["Validation"];
-  export type GenDef<T = string> = Generics<T>["Defaults"];
-  export type GenOpt<T = string> = Generics<T>["Options"];
-
-  export interface PickerResult {
-    renderItems: (ol: HTMLElement, v: Date) => ItemElement[];
-    getIndex: (v: Date, firstValue: number) => number;
-    next: (v: Date, n: number) => Date;
-    onItemClick: (e: MouseEvent & { target: HTMLElement }, targetValue: number) => void;
-  }
-
-  export interface ItemElement extends HTMLElement {
-    _value: number;
-  }
-
-  /** UTC-normalized params for disabled dates */
-  export interface INormalized {
-    months: number[];
-    years: number[];
-    scrollFrom?: number;
-    scrollTo?: number;
-    min: Date | undefined;
-    max: Date | undefined;
-    exclude: Date[] | undefined;
-  }
-}
-
 declare global {
-  namespace WUPCalendar {
-    interface MonthInfo {
+  namespace WUP.Calendar {
+    interface IItemElement extends HTMLElement {
+      _value: number;
+    }
+    interface IPickerResult {
+      renderItems: (ol: HTMLElement, v: Date) => IItemElement[];
+      getIndex: (v: Date, firstValue: number) => number;
+      next: (v: Date, n: number) => Date;
+      onItemClick: (e: MouseEvent & { target: HTMLElement }, targetValue: number) => void;
+    }
+    /** UTC-normalized params for disabled dates */
+    interface INormalized {
+      months: number[];
+      years: number[];
+      scrollFrom?: number;
+      scrollTo?: number;
+      min: Date | undefined;
+      max: Date | undefined;
+      exclude: Date[] | undefined;
+    }
+    interface IMonthInfo {
       /** Total days in month */
       total: number;
       /** Previous days-range for placeholders */
@@ -97,28 +43,58 @@ declare global {
       /** ValueOf first Date of result in UTC */
       first: number;
     }
-    interface ValidationMap extends WUPBase.ValidationMap {}
-    interface EventMap extends WUPBase.EventMap {}
-    interface Defaults<T = string> extends WUPCalendarIn.GenDef<T> {}
-    interface Options<T = string> extends WUPCalendarIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPCalendarControl> extends WUPBase.JSXProps<T>, WUPCalendarIn.JSXProps {
-      /** @deprecated default value; format yyyy-MM-dd hh:mm:ss.fff */
+    interface EventMap extends WUP.BaseControl.EventMap {}
+    interface ValidityMap extends WUP.BaseControl.ValidityMap {}
+    interface Defaults<T = Date, VM = ValidityMap> extends WUP.BaseControl.Defaults<T, VM> {
+      /** First day of week in calendar where 1-Monday, 7-Sunday;
+       * @defaultValue localeInfo.firstWeekDay */
+      firstWeekDay?: number;
+    }
+    interface Options<T = Date, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, Defaults<T, VM> {
+      /** User can't select date less than min; point new Date(Date.UTC(2022,1,25)) for `utc:true`, or new Date(2022,1,25) */
+      min?: Date;
+      /** User can't select date more than max; point new Date(Date.UTC(2022,1,25)) for `utc:true`, or new Date(2022,1,25) */
+      max?: Date;
+      /** Picker that must be rendered at first; if undefined then when isEmpty - year, otherwise - day;
+       * @not observed (affects only on init) */
+      startWith?: PickersEnum;
+      /** Dates that user can't choose (disabled dates) */
+      exclude?: Date[];
+      /** Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this
+       *  @defaultValue true */
+      utc?: boolean;
+      firstWeekDay: number;
+    }
+    interface Attributes extends WUP.BaseControl.Attributes, Pick<Options, "utc"> {
+      /** Picker that must be rendered at first */
+      startWith?: "year" | "month" | "day";
+      /** User can't select date less than min; format yyyy-MM-dd */
+      min?: string;
+      /** User can't select date more than max; format yyyy-MM-dd  */
+      max?: string;
+      /** Dates that user can't choose. Point global obj-key (window.myExclude = [] ) */
+      exclude?: string;
+      /** default value; format yyyy-MM-dd hh:mm:ss.fff */
+      initValue?: string;
+    }
+    interface JSXProps<C = WUPCalendarControl> extends WUP.BaseControl.JSXProps<C>, Attributes {
       initValue?: string;
     }
   }
-
-  // add element to document.createElement
   interface HTMLElementTagNameMap {
-    [tagName]: WUPCalendarControl;
+    [tagName]: WUPCalendarControl; // add element to document.createElement
   }
-
-  // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUPCalendar.JSXProps<WUPCalendarControl>;
+      [tagName]: WUP.Calendar.JSXProps; // add element to tsx/jsx intellisense
     }
   }
 }
+
+const add: <K extends keyof HTMLElementTagNameMap>(el: HTMLElement, tagName: K) => HTMLElementTagNameMap[K] = (
+  el,
+  tag
+) => el.appendChild(document.createElement(tag));
 
 /** Form-control as date picker
  * @example
@@ -135,7 +111,7 @@ declare global {
  */
 export default class WUPCalendarControl<
   ValueType extends Date = Date,
-  EventMap extends WUPCalendar.EventMap = WUPCalendar.EventMap
+  EventMap extends WUP.Calendar.EventMap = WUP.Calendar.EventMap
 > extends WUPBaseControl<ValueType, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPCalendarControl;
@@ -309,13 +285,13 @@ export default class WUPCalendarControl<
   }
 
   static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUPCalendar.Options>;
+    const arr = super.observedOptions as Array<keyof WUP.Calendar.Options>;
     arr.push("utc", "min", "max", "exclude");
     return arr;
   }
 
-  static get observedAttributes(): Array<LowerKeys<WUPCalendar.Options>> {
-    const arr = super.observedAttributes as Array<LowerKeys<WUPCalendar.Options>>;
+  static get observedAttributes(): Array<string> {
+    const arr = super.observedAttributes as Array<LowerKeys<WUP.Calendar.Attributes>>;
     arr.push("utc", "min", "max", "exclude");
     return arr;
   }
@@ -325,9 +301,9 @@ export default class WUPCalendarControl<
    * @param month index of month (0-11)
    * @param firstWeekDay where 1-Monday, 7-Sunday
    */
-  static $daysOfMonth(year: number, month: number, firstWeekDay = 1): WUPCalendar.MonthInfo {
+  static $daysOfMonth(year: number, month: number, firstWeekDay = 1): WUP.Calendar.IMonthInfo {
     let dt = new Date(year, month + 1, 0); // month in JS is 0-11 index based but here is a hack: returns last day of month
-    const r: WUPCalendar.MonthInfo = { total: dt.getDate(), nextTo: 0, first: 0 };
+    const r: WUP.Calendar.IMonthInfo = { total: dt.getDate(), nextTo: 0, first: 0 };
     dt.setDate(1); // reset to first day
     let shift = (dt.getDay() || 7) - firstWeekDay; // days-shift to firstOfWeek // get dayOfWeek  returns Sun...Sat (0...6) and need to normalize to Mon-1 Sun-7
     if (shift < 0) {
@@ -374,19 +350,17 @@ export default class WUPCalendarControl<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUPCalendar.Defaults = {
+  static $defaults: WUP.Calendar.Defaults = {
     ...WUPBaseControl.$defaults,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
     },
   };
 
-  $options: WUPCalendar.Options<ValueType> = {
+  $options: WUP.Calendar.Options<ValueType> = {
     ...this.#ctr.$defaults,
     utc: true,
     firstWeekDay: this.#ctr.$defaults.firstWeekDay || localeInfo.firstWeekDay,
-    // @ts-expect-error
-    validationRules: undefined, // don't copy it from defaults to optimize memory
   };
 
   protected override _opts = this.$options;
@@ -413,7 +387,7 @@ export default class WUPCalendarControl<
   /** Reference to header-button */
   $refCalenarTitle = document.createElement("button");
   /** Reference to container with items */
-  $refCalenarItems: HTMLOListElement & { _items?: WUPCalendarIn.ItemElement[] } = document.createElement("ol");
+  $refCalenarItems: HTMLOListElement & { _items?: WUP.Calendar.IItemElement[] } = document.createElement("ol");
 
   /** Called once when need to render label + input */
   renderInput(): { menuId: string } {
@@ -452,18 +426,18 @@ export default class WUPCalendarControl<
 
   /** Appends calendar item to parent or replace previous */
   protected appendItem(
-    prevEl: WUPCalendarIn.ItemElement | undefined | null,
+    prevEl: WUP.Calendar.IItemElement | undefined | null,
     text: string,
     v: number
-  ): WUPCalendarIn.ItemElement {
-    let el: WUPCalendarIn.ItemElement;
+  ): WUP.Calendar.IItemElement {
+    let el: WUP.Calendar.IItemElement;
     if (prevEl) {
       el = prevEl;
       while (el.attributes.length > 0) {
         el.removeAttributeNode(el.attributes[0]);
       }
     } else {
-      el = add(this.$refCalenarItems, "li") as unknown as WUPCalendarIn.ItemElement;
+      el = add(this.$refCalenarItems, "li") as unknown as WUP.Calendar.IItemElement;
     }
     el.setAttribute("role", "gridcell");
     el.textContent = text;
@@ -475,12 +449,12 @@ export default class WUPCalendarControl<
   _picker: PickersEnum = 0;
   #refreshSelected?: () => void;
   #clearPicker?: (isIn: boolean) => Promise<void>;
-  #showNext?: (isNext: boolean) => Promise<void>;
+  #scrollObj?: WUPScrolled;
 
   /** Call it to manually show next/prev picker-section;
    * @returns promise resolved by scroll-animation-end */
   showNext(isNext: boolean): Promise<void> {
-    return !this.#showNext ? Promise.resolve() : this.#showNext?.call(this, isNext);
+    return !this.#scrollObj ? Promise.resolve() : this.#scrollObj.goTo(isNext);
   }
 
   /** Called when need set/change day/month/year picker */
@@ -488,7 +462,7 @@ export default class WUPCalendarControl<
     await this.#clearPicker?.call(this, pickerNext - this._picker > 0);
     this._picker = pickerNext;
 
-    let r: WUPCalendarIn.PickerResult;
+    let r: WUP.Calendar.IPickerResult;
     let type: string;
     switch (pickerNext) {
       case PickersEnum.Year:
@@ -510,7 +484,7 @@ export default class WUPCalendarControl<
     this.$refCalenar.setAttribute("calendar", type);
     this.#handleClickItem = r.onItemClick;
 
-    const renderPicker = (next: Date): WUPCalendarIn.ItemElement[] => {
+    const renderPicker = (next: Date): WUP.Calendar.IItemElement[] => {
       this._pickerValue = next;
       const a = r.renderItems(this.$refCalenarItems, next);
       this.$refCalenarItems._items = a;
@@ -541,21 +515,24 @@ export default class WUPCalendarControl<
 
     renderPicker(v);
 
-    const scrollObj = scrollCarousel(this.$refCalenarItems, (n) => {
-      const nextDate = r.next(v, n);
-      const { scrollFrom: from, scrollTo: to } = this.#disabled!;
-      /* istanbul ignore else */
-      if (from != null || to !== null) {
-        const nextDateEnd = r.next(new Date(v), 1).setUTCMilliseconds(-1);
-        if ((from as unknown as Number) > nextDateEnd || (to as unknown as Date) < nextDate) {
-          r.next(v, (-1 * n) as 1);
-          return null;
+    const scrollObj = new WUPScrolled(this.$refCalenarItems, {
+      onRender: (n) => {
+        const nextDate = r.next(v, n);
+        const { scrollFrom: from, scrollTo: to } = this.#disabled!;
+        /* istanbul ignore else */
+        if (from != null || to !== null) {
+          const nextDateEnd = r.next(new Date(v), 1).setUTCMilliseconds(-1);
+          if ((from as unknown as Number) > nextDateEnd || (to as unknown as Date) < nextDate) {
+            r.next(v, (-1 * n) as 1);
+            return null;
+          }
         }
-      }
-      const arr = renderPicker(nextDate);
-      return arr;
+        const arr = renderPicker(nextDate);
+        return arr;
+      },
     });
-    this.#showNext = scrollObj.scroll;
+
+    this.#scrollObj = scrollObj;
 
     this.#clearPicker = async (isOut: boolean) => {
       const box = this.$refCalenar.children[1].children[0] as HTMLElement;
@@ -577,7 +554,7 @@ export default class WUPCalendarControl<
         });
 
       await animate(isOut ? "out" : "in");
-      scrollObj.remove();
+      scrollObj.dispose();
       this.$refCalenarItems.textContent = "";
       this.#refreshSelected = undefined;
 
@@ -587,7 +564,7 @@ export default class WUPCalendarControl<
 
   /** Returns result to render day picker */
   #isDayWeeksAdded = false;
-  protected getDayPicker(): WUPCalendarIn.PickerResult {
+  protected getDayPicker(): WUP.Calendar.IPickerResult {
     // render daysOfWeek
     if (!this.#isDayWeeksAdded) {
       const box = this.$refCalenarItems.parentElement!;
@@ -606,16 +583,16 @@ export default class WUPCalendarControl<
     }
 
     // WARN: the whole calendar must be in UTC, otherwise getIndex is wrong for locales with DST (daylightSavingTime)
-    const getIndex: WUPCalendarIn.PickerResult["getIndex"] = (b, first) =>
+    const getIndex: WUP.Calendar.IPickerResult["getIndex"] = (b, first) =>
       Math.floor((b.valueOf() - (first as number)) / 86400000);
 
     const { namesMonth } = localeInfo;
-    const renderItems = (ol: HTMLElement, v: Date): WUPCalendarIn.ItemElement[] => {
+    const renderItems = (ol: HTMLElement, v: Date): WUP.Calendar.IItemElement[] => {
       const valMonth = v.getUTCMonth();
       const valYear = v.getUTCFullYear();
       this.$refCalenarTitle.textContent = `${namesMonth[valMonth]} ${valYear}`;
 
-      const items: WUPCalendarIn.ItemElement[] = [];
+      const items: WUP.Calendar.IItemElement[] = [];
       const r = this.#ctr.$daysOfMonth(valYear, valMonth, this._opts.firstWeekDay);
 
       let iPrev = -999;
@@ -626,7 +603,7 @@ export default class WUPCalendarControl<
       let i = 0;
       const addItem = (n: number, attr: string): void => {
         const d = this.appendItem(
-          ol.children.item(iPrev) as WUPCalendarIn.ItemElement,
+          ol.children.item(iPrev) as WUP.Calendar.IItemElement,
           n.toString(),
           r.first + i * 86400000
         );
@@ -674,19 +651,19 @@ export default class WUPCalendarControl<
   }
 
   /** Returns result to render month picker */
-  protected getMonthPicker(dateToRound: Date): WUPCalendarIn.PickerResult {
+  protected getMonthPicker(dateToRound: Date): WUP.Calendar.IPickerResult {
     const pageSize = 12;
     dateToRound.setUTCMonth(0, 1); // required to define rendered range for min/max
 
-    const getIndex: WUPCalendarIn.PickerResult["getIndex"] = //
+    const getIndex: WUP.Calendar.IPickerResult["getIndex"] = //
       (b, first) => b.getUTCFullYear() * pageSize + b.getUTCMonth() - first;
 
-    const renderItems = (ol: HTMLElement, v: Date): WUPCalendarIn.ItemElement[] => {
+    const renderItems = (ol: HTMLElement, v: Date): WUP.Calendar.IItemElement[] => {
       const year = v.getUTCFullYear();
       this.$refCalenarTitle.textContent = `${year}`;
 
       const namesShort = localeInfo.namesMonthShort;
-      const items: WUPCalendarIn.ItemElement[] = [];
+      const items: WUP.Calendar.IItemElement[] = [];
       const total = year * pageSize;
 
       let iPrev = -999;
@@ -694,8 +671,8 @@ export default class WUPCalendarControl<
         iPrev = getIndex(new Date(Date.UTC(year, 0)), (ol.children.item(0) as any)._value);
       }
 
-      const addItem = (n: string, i: number): WUPCalendarIn.ItemElement => {
-        const d = this.appendItem(ol.children.item(iPrev) as WUPCalendarIn.ItemElement, n, total + i);
+      const addItem = (n: string, i: number): WUP.Calendar.IItemElement => {
+        const d = this.appendItem(ol.children.item(iPrev) as WUP.Calendar.IItemElement, n, total + i);
         items.push(d);
         ++iPrev;
         return d;
@@ -724,7 +701,7 @@ export default class WUPCalendarControl<
   }
 
   /** Returns result to render year picker */
-  protected getYearPicker(dateToRound: Date): WUPCalendarIn.PickerResult {
+  protected getYearPicker(dateToRound: Date): WUP.Calendar.IPickerResult {
     const pageSize = 16;
 
     const getFirst = (v: Date): number => {
@@ -735,11 +712,11 @@ export default class WUPCalendarControl<
     dateToRound.setUTCMonth(0, 1);
     dateToRound.setUTCFullYear(getFirst(dateToRound)); // required to define rendered range for min/max
 
-    const renderItems = (_ol: HTMLElement, v: Date): WUPCalendarIn.ItemElement[] => {
+    const renderItems = (_ol: HTMLElement, v: Date): WUP.Calendar.IItemElement[] => {
       let year = getFirst(v);
 
       this.$refCalenarTitle.textContent = `${year} ... ${year + pageSize - 1}`;
-      const items: WUPCalendarIn.ItemElement[] = [];
+      const items: WUP.Calendar.IItemElement[] = [];
       let i = 0;
       for (i = 0; i < pageSize; ++i) {
         const d = this.appendItem(undefined, year.toString(), year);
@@ -761,8 +738,8 @@ export default class WUPCalendarControl<
     };
   }
 
-  /** Set [disabled] for items according to $options.exclude */
-  protected disableItems(items: WUPCalendarIn.ItemElement[], getIndex: WUPCalendarIn.PickerResult["getIndex"]): void {
+  /** Set [disabled] for items according to $options.exclude & min & max */
+  protected disableItems(items: WUP.Calendar.IItemElement[], getIndex: WUP.Calendar.IPickerResult["getIndex"]): void {
     const first = items[0]._value;
     let i = 0;
 
@@ -820,10 +797,10 @@ export default class WUPCalendarControl<
     }
   }
 
-  #disabled?: WUPCalendarIn.INormalized;
+  #disabled?: WUP.Calendar.INormalized;
   /** Returns utc-normalized object based on options;
    *  where monthValue: y*12 + m, yearValue: y */
-  calcDisabled(): WUPCalendarIn.INormalized {
+  calcDisabled(): WUP.Calendar.INormalized {
     const months: number[] = [];
     const years: number[] = [];
 
@@ -990,7 +967,7 @@ export default class WUPCalendarControl<
     this.changePicker(v, this._opts.startWith ?? (this.$isEmpty ? PickersEnum.Year : PickersEnum.Day));
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUPCalendar.Options> | null): void {
+  protected override gotChanges(propsChanged: Array<keyof WUP.Calendar.Options> | null): void {
     this._opts.utc = this.getBoolAttr("utc", this._opts.utc);
     super.gotChanges(propsChanged);
 
@@ -1032,7 +1009,7 @@ export default class WUPCalendarControl<
     isNeedRecalc && this.$refreshPicker();
   }
 
-  override gotFormChanges(propsChanged: Array<keyof WUPForm.Options> | null): void {
+  override gotFormChanges(propsChanged: Array<keyof WUP.Form.Options> | null): void {
     super.gotFormChanges(propsChanged);
 
     const i = this.$refInput;
@@ -1054,12 +1031,12 @@ export default class WUPCalendarControl<
     const r = super.gotFocus();
     const i = this.$refInput;
     r.push(this.appendEvent(this, "click", (e) => this.gotClick(e), { passive: false }));
-    r.push(this.appendEvent(i, "input", (e) => this.gotInput(e as WUPText.GotInputEvent)));
+    r.push(this.appendEvent(i, "input", (e) => this.gotInput(e as WUP.Text.GotInputEvent)));
     // r.push(this.appendEvent(i, "keypress", (e) => e.preventDefault(), { passive: false })); // input is readonly so default keyPress doesn't required
     return r;
   }
 
-  #handleClickItem?: WUPCalendarIn.PickerResult["onItemClick"];
+  #handleClickItem?: WUP.Calendar.IPickerResult["onItemClick"];
   /** Called when user clicks on calendar */
   protected gotClick(e: MouseEvent): void {
     if (e.button || this.$isReadOnly || this.$isDisabled) {
@@ -1086,7 +1063,7 @@ export default class WUPCalendarControl<
   }
 
   /** Called when browsers fills the field via autocomplete */
-  protected gotInput(e: WUPText.GotInputEvent): void {
+  protected gotInput(e: WUP.Text.GotInputEvent): void {
     const v = this.parse(e.target.value);
     this.setValue(v);
   }

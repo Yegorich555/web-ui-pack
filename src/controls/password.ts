@@ -1,29 +1,12 @@
 import onEvent from "../helpers/onEvent";
-import { stringLowerCount, stringUpperCount } from "../helpers/stringCaseCount";
-import WUPTextControl, { WUPTextIn } from "./text";
+import { stringLowerCount, stringUpperCount } from "../helpers/string";
+import WUPTextControl from "./text";
 
 const tagName = "wup-pwd";
-export namespace WUPPasswordIn {
-  export interface Def {
-    /** Reversed-style for button-eye
-     * @defaultValue false */
-    reverse?: boolean;
-  }
-  export interface Opt {}
-  export type Generics<
-    ValueType = string,
-    ValidationKeys extends WUPText.ValidationMap = WUPPassword.ValidationMap,
-    Defaults = Def,
-    Options = Opt
-  > = WUPTextIn.Generics<ValueType, ValidationKeys, Defaults & Def, Options & Opt>;
-  // type Validation<T = string> = Generics<T>["Validation"];
-  export type GenDef<T = string> = Generics<T>["Defaults"];
-  export type GenOpt<T = string> = Generics<T>["Options"];
-}
-
 declare global {
-  namespace WUPPassword {
-    interface ValidationMap extends WUPText.ValidationMap {
+  namespace WUP.Password {
+    interface EventMap extends WUP.Text.EventMap {}
+    interface ValidityMap extends WUP.Text.ValidityMap {
       /** If count of numbers < pointed shows message 'Must contain at least {x} numbers' */
       minNumber: number;
       /** If count of uppercase letters < pointed shows message 'Must contain at least {x} upper case' */
@@ -35,24 +18,26 @@ declare global {
       /** If $value != with previous siblint wup-pwd.$value shows message 'Passwords must be equal' */
       confirm: boolean;
     }
-    interface EventMap extends WUPText.EventMap {}
-    interface Defaults<T = string> extends WUPPasswordIn.GenDef<T> {}
-    interface Options<T = string> extends WUPPasswordIn.GenOpt<T> {}
-    interface JSXProps<T extends WUPPasswordControl> extends WUPText.JSXProps<T> {
+    interface Defaults<T = string, VM extends ValidityMap = ValidityMap> extends WUP.Text.Defaults<T, VM> {}
+    interface Options<T = string, VM extends ValidityMap = ValidityMap>
+      extends WUP.Text.Options<T, VM>,
+        Defaults<T, VM> {
+      /** Reversed-style for button-eye
+       * @defaultValue false */
+      reverse?: boolean;
+    }
+    interface Attributes extends WUP.Text.Attributes {
       /** Reversed-style for button-eye */
       reverse?: boolean | "";
     }
+    interface JSXProps<C = WUPPasswordControl> extends WUP.Text.JSXProps<C>, Attributes {}
   }
-
-  // add element to document.createElement
   interface HTMLElementTagNameMap {
-    [tagName]: WUPPasswordControl;
+    [tagName]: WUPPasswordControl; // add element to document.createElement
   }
-
-  // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUPPassword.JSXProps<WUPPasswordControl>;
+      [tagName]: WUP.Password.JSXProps<WUPPasswordControl>; // add element to tsx/jsx intellisense
     }
   }
 }
@@ -92,14 +77,14 @@ declare global {
  * </label>
  */
 export default class WUPPasswordControl<
-  ValueType = string,
-  EventMap extends WUPPassword.EventMap = WUPPassword.EventMap
+  ValueType extends string = string,
+  EventMap extends WUP.Password.EventMap = WUP.Password.EventMap
 > extends WUPTextControl<ValueType, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPPasswordControl;
 
   static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUPPassword.Options>;
+    const arr = super.observedOptions as Array<keyof WUP.Password.Options>;
     arr.push("reverse");
     return arr;
   }
@@ -152,7 +137,7 @@ export default class WUPPasswordControl<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUPPassword.Defaults = {
+  static $defaults: WUP.Password.Defaults = {
     ...WUPTextControl.$defaults,
     validationRules: {
       ...WUPTextControl.$defaults.validationRules,
@@ -193,10 +178,8 @@ export default class WUPPasswordControl<
     },
   };
 
-  $options: WUPPassword.Options<ValueType> = {
+  $options: WUP.Password.Options<string> = {
     ...this.#ctr.$defaults,
-    // @ts-expect-error
-    validationRules: undefined, // don't copy it from defaults to optimize memory
   };
 
   protected override _opts = this.$options;
@@ -235,12 +218,11 @@ export default class WUPPasswordControl<
     this.$refBtnEye.setAttribute("eye", isOff ? "off" : "");
     this.$refInput.type = isOff ? "text" : "password";
     window.requestAnimationFrame(() => {
-      this.$refInput.selectionEnd = end;
-      this.$refInput.selectionStart = start;
+      this.$refInput.setSelectionRange(start, end);
     }); // otherwise selection is reset
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUPPassword.Options> | null): void {
+  protected override gotChanges(propsChanged: Array<keyof WUP.Password.Options> | null): void {
     super.gotChanges(propsChanged as any);
     this.$refInput.autocomplete = this.$autoComplete || "new-password"; // otherwise form with email+password ignores autocomplete: "off" if previously it was saved
     // it can be ignored by browsers. To fix > https://stackoverflow.com/questions/2530/how-do-you-disable-browser-autocomplete-on-web-form-field-input-tags

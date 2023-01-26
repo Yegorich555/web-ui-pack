@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.4.0 (\_\_\_)
+
+**BREAKING CHANGES**:
+
+- Namespaces `WUP...` is refactored from `WUPPopup` to `WUP.Popup` etc. So re-export enums `ShowCases, HideCases, Animations` without prefix now
+- helper **animateDropdown** moved into [`web-ui-pack/helpers/animate`](src/helpers/animate.ts)
+- helper **localeInfo** moved into [`web-ui-pack/objects/localeInfo`](src/objects/localeInfo.ts)
+- helper **scrollCarousel** refactored to [WUPScrolled](src/helpers/scrolled.ts) class
+- helper **mathSumFloat** moved into [`web-ui-pack/helpers/math`](src/helpers/math.ts)
+- helper **stringUpperCount** moved into [`web-ui-pack/helpers/string`](src/helpers/string.ts)
+- helper **stringLowerCount** moved into [`web-ui-pack/helpers/string`](src/helpers/string.ts)
+- helper **stringPrettify** moved into [`web-ui-pack/helpers/string`](src/helpers/string.ts)
+- [DateControl](src/controls/date.ts). Changed validation message from `This date is disabled` to `This value is disabled`
+
+**Fixes**:
+
+- Helper. [`localeInfo`](src/objects/localeInfo.ts). `AM/PM parsed to 'a' but expected 'A'`
+- Helper. [`dateFromString`](src/helpers/dateFromString.ts). `12:00 PM throws Error but expected 12:00`
+- Icon **check**. Reduced thikness to fit other texts & icons
+- [Popup](src/popup/popupElement.ts). Changing content size doesn't recalc popup position
+- [Popup](src/popup/popupElement.ts). Wrong position if parent has style transform.translate
+- [Popup](src/popup/popupElement.ts). Content is blured if transform.translate with float values
+- [DateControl](src/controls/date.ts). Clearing input doesn't reset $value
+- [DateControl](src/controls/date.ts). Required asterisk is removed by opening menu
+
+**New**:
+
+- [WUPTimeObject](src/objects/timeObject.ts) => `Ordinary class Time with hours & minutes`
+- [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
+- [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
+- helper [mathScaleValue](src/helpers/mathScaleValue)
+- Text based controls. **Mask** supports letters also (previously only digits can be variabled)
+
 ## 0.3.0 (Dec 27, 2022)
 
 **BREAKING CHANGES**:
@@ -11,13 +44,13 @@
     - default value `YYYY-MM-DD`
   - Now
     - changing `$options.format` & attr `[format]` related only to displayed text. All attributes must be pointed in universal format `YYYY-MM-DD`
-    - default value depends on user localization; see [locale](src/helpers/localeInfo.ts)
-    - `$options.firstWeekDay` - default value depends on user localization; see [locale](src/helpers/localeInfo.ts)
+    - default value depends on user localization; see [locale](src/objects/localeInfo.ts)
+    - `$options.firstWeekDay` - default value depends on user localization; see [locale](src/objects/localeInfo.ts)
 
 - CalendarControl:
-  - deprecated static getters `$namesDayShort, $namesMonth, $namesMonthShort` in favor of [`localeInfo`](src/helpers/localeInfo.ts) helper
+  - deprecated static getters `$namesDayShort, $namesMonth, $namesMonthShort` in favor of [`localeInfo`](src/objects/localeInfo.ts) helper
   - `$options.firstDayOfWeek` is renamed to `firstWeekDay`
-  - `$options.firstWeekDay` - default value depends on user localization; see [locale](src/helpers/localeInfo.ts)
+  - `$options.firstWeekDay` - default value depends on user localization; see [locale](src/objects/localeInfo.ts)
 
 **Fixes**:
 
@@ -29,7 +62,7 @@
 
 - Added $options.prefix & postfix for text-based controls
 - Support **MMM** in format for `dateToString, dateFromString`
-- Controls **Number, Date, Calendar** are locale based and depeneds on [`localeInfo`](src/helpers/localeInfo.ts) helper
+- Controls **Number, Date, Calendar** are locale based and depeneds on [`localeInfo`](src/objects/localeInfo.ts) helper
 - Added elements
 
   - [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
@@ -37,7 +70,7 @@
 
 - Added [helpers](README.md#helpers)
   - [`onScroll`](src/helpers/onScroll.ts)
-  - [`localeInfo`](src/helpers/localeInfo.ts)
+  - [`localeInfo`](src/objects/localeInfo.ts)
   - [`mathSumFloat`](src/helpers/mathSumFloat.ts)
 
 ## 0.2.0 (Dec 09, 2022)

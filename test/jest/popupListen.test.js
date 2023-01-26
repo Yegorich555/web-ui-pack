@@ -1,4 +1,4 @@
-import { WUPPopup } from "web-ui-pack/popup/popupElement.types";
+import { ShowCases } from "web-ui-pack/popup/popupElement.types";
 import popupListen from "web-ui-pack/popup/popupListen";
 import * as h from "../testHelper";
 
@@ -39,7 +39,7 @@ afterEach(() => {
 describe("popupListen", () => {
   test("default behavior", async () => {
     const spy = h.spyEventListeners();
-    ref = popupListen({ target, showCase: WUPPopup.ShowCases.onClick }, onShow, onHide);
+    ref = popupListen({ target, showCase: ShowCases.onClick }, onShow, onHide);
 
     target.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
@@ -58,7 +58,7 @@ describe("popupListen", () => {
 
   test("memory leak", async () => {
     const spy = h.spyEventListeners();
-    ref = popupListen({ target, showCase: WUPPopup.ShowCases.onClick }, onShow, onHide);
+    ref = popupListen({ target, showCase: ShowCases.onClick }, onShow, onHide);
 
     target.dispatchEvent(new MouseEvent("click", { bubbles: true })); // open
     await h.wait();
@@ -71,7 +71,7 @@ describe("popupListen", () => {
   });
 
   test("open/show outside listener", async () => {
-    ref = popupListen({ target, showCase: WUPPopup.ShowCases.onClick }, onShow, onHide);
+    ref = popupListen({ target, showCase: ShowCases.onClick }, onShow, onHide);
     // checking self-call show
     const origShow = onShow.getMockImplementation();
 
@@ -127,7 +127,7 @@ describe("popupListen", () => {
   });
 
   test("open/show takes time (for animation)", async () => {
-    ref = popupListen({ target, showCase: WUPPopup.ShowCases.onClick }, onShow, onHide);
+    ref = popupListen({ target, showCase: ShowCases.onClick }, onShow, onHide);
     // WARN it's very important to provide element for onShow without awaiting (to allow hiding as fast as possible)
     const origHide = onHide.getMockImplementation();
     onHide.mockImplementation(() => {
@@ -182,7 +182,7 @@ describe("popupListen", () => {
   });
 
   test("show/hide is prevented", async () => {
-    ref = popupListen({ target, showCase: WUPPopup.ShowCases.onClick }, onShow, onHide);
+    ref = popupListen({ target, showCase: ShowCases.onClick }, onShow, onHide);
 
     onShow.mockImplementationOnce(() => null);
     target.dispatchEvent(new MouseEvent("click", { bubbles: true })); // show
@@ -205,7 +205,7 @@ describe("popupListen", () => {
   });
 
   test("hide waits for show end", async () => {
-    ref = popupListen({ target, showCase: WUPPopup.ShowCases.onClick }, onShow, onHide);
+    ref = popupListen({ target, showCase: ShowCases }, onShow, onHide);
     const origShow = onShow.getMockImplementation();
     onShow.mockImplementation(() => {
       const r = origShow();

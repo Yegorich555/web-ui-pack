@@ -1,4 +1,4 @@
-import localeInfo from "./localeInfo";
+import localeInfo from "../objects/localeInfo";
 
 /** Returns parsed date from string based on pointed format
  * @param format 'yyyy-MM-dd hh:mm:ss.fff AZ'
@@ -89,9 +89,11 @@ export default function dateFromString(
   }
 
   if (h12) {
+    // 12AM..1AM...11AM  12PM..1PM....11PM
+    // 00    01    11    12    13     23
     const char = v[v.length - 2];
     if (char === "P" || char === "p") {
-      r.h += 12;
+      r.h += r.h === 12 ? 0 : 12; // 12PM is 12:00, but 1PM is 13:00
     } else if (char !== "A" && char !== "a") {
       return null;
     } else if (r.h === 12) {
@@ -118,7 +120,7 @@ export default function dateFromString(
 
   const isOut = isOutOfRange(r, isUTC, dt);
   if (isOut && options.throwOutOfRange) {
-    const err = RangeError(dateFromString.rangeErrorMessage) as RangeError & { details: any };
+    const err = RangeError("Out of range") as RangeError & { details: any };
     err.details = { format, raw: v, options, parsed: r };
     console.warn(`${err.message}. Details:`, err.details);
     throw err;
@@ -128,9 +130,6 @@ export default function dateFromString(
 
   return dt;
 }
-
-/** Returns "Out of range" text for error */
-dateFromString.rangeErrorMessage = "Out of range";
 
 function isOutOfRange(
   r: { y: number; M: number; d: number; h: number; m: number; s: number; f: number },

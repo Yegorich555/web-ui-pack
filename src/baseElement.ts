@@ -14,7 +14,7 @@ let lastUniqueNum = 0;
 const allObservedOptions = new WeakMap<typeof WUPBaseElement, Set<string> | null>();
 
 /** Basic abstract class for every component in web-ui-pack */
-export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.EventMap> extends HTMLElement {
+export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = WUP.Base.EventMap> extends HTMLElement {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseElement;
 
@@ -43,9 +43,12 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
           --base-btn-focus: #005766;
           --base-btn2-bg: var(--base-btn-text);
           --base-btn2-text: var(--base-btn-bg);
+          --base-btn3-bg: var(--base-bg);
+          --base-btn3-text: inherit;
+          --base-sep: #e4e4e4;
           --border-radius: 6px;
           --anim-time: 200ms;
-          --anim: var(--anim-time, 200ms) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
         }`;
   }
 
@@ -60,6 +63,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
 
   /** Options that applied to element */
   abstract $options: Record<string, any>;
+  protected _opts: Record<string, any> = {};
 
   constructor() {
     super();
@@ -146,7 +150,6 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   }
 
   /* rawOptions ($options is observed) */
-  protected _opts: Record<string, any> = {};
   #optsObserved?: Observer.Observed<Record<string, any>>;
   #removeObserved?: Func;
   #setOptions(v: Record<string, any>): void {
@@ -223,7 +226,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   protected gotChanges(propsChanged: Array<string> | null): void {}
 
   /** Called when element isReady and at least one of observedOptions is changed */
-  protected gotOptionsChanged(e: WUP.OptionEvent): void {
+  protected gotOptionsChanged(e: WUP.Base.OptionEvent): void {
     this._isStopChanges = true;
     e.props.forEach((p) => this.removeAttribute(p)); // remove related attributes otherwise impossible to override
     this.gotChanges(e.props);
@@ -234,7 +237,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   protected gotRender(): void {}
 
   #isFirstConn = true;
-  #readyTimeout?: number;
+  #readyTimeout?: ReturnType<typeof setTimeout>;
   /** Browser calls this method when the element is added to the document */
   protected connectedCallback(): void {
     // async requires otherwise attributeChangedCallback doesn't set immediately
@@ -254,7 +257,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
   }
 
   _isStopChanges = true;
-  #attrTimer?: number;
+  #attrTimer?: ReturnType<typeof setTimeout>;
   #attrChanged?: string[];
   /** Called when element isReady and one of observedAttributes is changed */
   protected gotAttributeChanged(name: string, oldValue: string, newValue: string): void {
@@ -286,7 +289,7 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
         });
       }); // otherwise attr can't override option if attribute removed
 
-      this.gotChanges(this.#attrChanged as Array<keyof WUPForm.Options>);
+      this.gotChanges(this.#attrChanged as Array<keyof WUP.Form.Options>);
       this._isStopChanges = false;
       this.#attrChanged = undefined;
     });
@@ -383,15 +386,28 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
     return a === null ? alt : a !== "false";
   }
 
+  /** Parse attribute and return result; if attr missed or invalid => returns this._opts[attr] */
+  getNumAttr(attr: string): number | undefined {
+    const a = this.getAttribute(attr);
+    if (a == null || a === "") {
+      return this._opts[attr];
+    }
+    const v = +a;
+    if (Number.isNaN(v)) {
+      console.error(`${this.tagName}. Expected number for attribute [${attr}] but pointed '${a}'`);
+    }
+    return v;
+  }
+
   /** Returns value from window[key] according to [attr]="key" or $options[key] if attr is missed */
   getRefAttr<T>(attr: string): T | undefined {
     const a = this.getAttribute(attr);
-    if (a === null) {
+    if (a == null || a === "") {
       return this._opts[attr];
     }
     const v = nestedProperty.get(window, a);
     if (v === undefined) {
-      throw new Error(
+      console.error(
         `${this.tagName}. Value not found according to attribute [${attr}] in '${
           a.startsWith("window.") ? a : `window.${a}`
         }'`
@@ -402,24 +418,31 @@ export default abstract class WUPBaseElement<Events extends WUP.EventMap = WUP.E
 
   /**
    * Remove attr if value falseOrEmpty; set '' or 'true' if true for HTMLELement
-   * @param isSetEmpty set if need to '' instead of 'value'
+   * @param isSetEmpty set if need '' instead of 'value'
    */
   setAttr(attr: string, v: boolean | string | undefined | null, isSetEmpty?: boolean): void {
     v ? this.setAttribute(attr, isSetEmpty ? "" : v) : this.removeAttribute(attr);
   }
 }
 
-export namespace WUP {
-  export type OptionEvent<T extends Record<string, any> = Record<string, any>> = {
-    props: Array<Extract<keyof T, string>>;
-    target: T;
-  };
-  export type EventMap<T = HTMLElementEventMap> = HTMLElementEventMap & Record<keyof T, Event>;
-  export type JSXProps<T> = React.DetailedHTMLProps<
-    // react doesn't support [className] attr for WebComponents; use [class] instead: https://github.com/facebook/react/issues/4933
-    Omit<React.HTMLAttributes<T>, "className"> & { class?: string | undefined },
-    T
-  >;
-}
+declare global {
+  namespace WUP.Base {
+    /** Cast not-supported props to optional string */
+    type toJSX<T> = {
+      [P in keyof T]?: T[P] extends number | boolean | string | undefined ? T[P] : string;
+    };
+    type OptionEvent<T extends Record<string, any> = Record<string, any>> = {
+      props: Array<Extract<keyof T, string>>;
+      target: T;
+    };
+    type EventMap<T = HTMLElementEventMap> = HTMLElementEventMap & Record<keyof T, Event>;
 
+    type JSXProps<T, Opts extends Record<string, any> = any> = React.DetailedHTMLProps<
+      // react doesn't support [className] attr for WebComponents; use [class] instead: https://github.com/facebook/react/issues/4933
+      Omit<React.HTMLAttributes<T>, "className"> & { class?: string | undefined },
+      T
+    > &
+      toJSX<Opts>;
+  }
+}
 // testcase: check if gotChanges sensitive to attr-case

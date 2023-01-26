@@ -1,9 +1,7 @@
 /* eslint-disable prefer-rest-params */
 import { WUPPopupElement } from "web-ui-pack";
 import popupListen from "web-ui-pack/popup/popupListen";
-import * as all from "web-ui-pack/popup/popupElement.types";
-import { WUPPopup } from "web-ui-pack/popup/popupElement";
-import * as all2 from "web-ui-pack/popup/popupElement";
+import { Animations, ShowCases } from "web-ui-pack/popup/popupElement.types";
 import * as h from "../testHelper";
 import { TestMouseMoveEvent } from "../testHelper";
 
@@ -12,6 +10,12 @@ let el;
 /** @type HTMLElement */
 let trg; // target for popup
 
+/** Returns whether top & left are int or float values */
+function positionIsInteger() {
+  const rectEl = el.getBoundingClientRect();
+  return { left: Number.isInteger(rectEl.left) ? "int" : "float", top: Number.isInteger(rectEl.top) ? "int" : "float" };
+}
+
 // simulate layout
 beforeEach(() => {
   jest.useFakeTimers();
@@ -19,6 +23,26 @@ beforeEach(() => {
   jest.spyOn(document.body.parentElement, "scrollTop", "set").mockImplementation(() => 0);
   jest.spyOn(document.body, "scrollLeft", "set").mockImplementation(() => 0);
   jest.spyOn(document.body.parentElement, "scrollLeft", "set").mockImplementation(() => 0);
+
+  // fix case when popup rect must be changed according to transform
+  function mockPopupRect() {
+    /** @type WUPPopupElement */
+    const a = this;
+    const tr = /translate\(([^)]+)\)/.exec(a.style.transform);
+    const [x, y] = tr ? tr[1].split(",").map((s) => Number.parseFloat(s.trim())) : [0, 0];
+    return {
+      x,
+      y,
+      top: y,
+      left: x,
+      bottom: 0,
+      height: a.offsetHeight,
+      width: a.offsetWidth,
+      right: 0,
+      toJSON: () => "",
+    };
+  }
+  jest.spyOn(WUPPopupElement.prototype, "getBoundingClientRect").mockImplementation(mockPopupRect);
 
   jest.spyOn(document.body, "getBoundingClientRect").mockReturnValue({
     x: 0,
@@ -79,18 +103,6 @@ afterEach(() => {
 describe("popupElement", () => {
   describe("me", () => {
     h.baseTestComponent(() => document.createElement("wup-popup"), { skipAttrs: true });
-    test("re-import", () => {
-      // just for coverage
-      expect(all).toBeTruthy();
-      expect(all2).toBeTruthy();
-      expect(Object.keys(all2).length > 0).toBe(true);
-      expect(WUPPopup).toBeTruthy();
-      expect(WUPPopup.ShowCases).toBeTruthy();
-      expect(WUPPopup.ShowCases.always).toBeDefined();
-      expect(WUPPopup.HideCases).toBeTruthy();
-      expect(WUPPopup.HideCases.onManuallCall).toBeDefined();
-      expect(Object.keys(WUPPopup).length > 0).toBeTruthy();
-    });
   });
 
   describe("inheritance", () => {
@@ -733,6 +745,7 @@ describe("popupElement", () => {
   });
 
   test("$options.animation", async () => {
+    const { nextFrame } = h.useFakeAnimation();
     el.$options.showCase = 0;
     await h.wait();
     expect(el.outerHTML).toMatchInlineSnapshot(
@@ -741,25 +754,6 @@ describe("popupElement", () => {
 
     el.appendChild(document.createElement("div"));
     el.appendChild(document.createElement("div"));
-    let i = 0;
-    const animateFrames = [];
-    const nextFrame = () => {
-      // jest.advanceTimersByTime(1000 / 60);
-      ++i;
-      const old = [...animateFrames];
-      animateFrames.length = 0;
-      old.forEach((f) => f(i));
-    };
-
-    jest.spyOn(window, "requestAnimationFrame").mockImplementation((fn) => {
-      animateFrames.push(fn);
-      return fn;
-    });
-
-    jest.spyOn(window, "cancelAnimationFrame").mockImplementation((fn) => {
-      const ind = animateFrames.indexOf(fn);
-      ind > -1 && animateFrames.splice(ind, 1);
-    });
     const orig = window.getComputedStyle;
     const spyStyle = jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
       if (elem === el) {
@@ -773,54 +767,46 @@ describe("popupElement", () => {
     expect(el.$isOpen).toBe(true); // because $hide is async
     await h.wait();
     expect(el.$isOpen).toBe(false);
-    el.$options.animation = WUPPopup.Animations.drawer;
+    el.$options.animation = Animations.drawer;
     el.$show();
     expect(el.$isOpen).toBe(true);
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style="transform: translate(190px, 100px); display: block; animation-name: none;" position="top"><div></div><div></div></wup-popup>"`
     );
 
-    nextFrame();
+    await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style="transform: translate(190px, 100px) scaleY(0); display: block; animation-name: none; transform-origin: bottom;" position="top"><div></div><div></div></wup-popup>"`
     );
-
-    nextFrame();
+    await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(190px, 100px) scaleY(0.0033333333333333335); display: block; animation-name: none; transform-origin: bottom;" position="top"><div style="transform: scaleY(300); transform-origin: bottom;"></div><div style="transform: scaleY(300); transform-origin: bottom;"></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(190px, 100px) scaleY(0.055555555555555566); display: block; animation-name: none; transform-origin: bottom;" position="top"><div style="transform: scaleY(17.999999999999996); transform-origin: bottom;"></div><div style="transform: scaleY(17.999999999999996); transform-origin: bottom;"></div></wup-popup>"`
     );
 
-    nextFrame();
+    await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(190px, 100px) scaleY(0.006666666666666667); display: block; animation-name: none; transform-origin: bottom;" position="top"><div style="transform: scaleY(150); transform-origin: bottom;"></div><div style="transform: scaleY(150); transform-origin: bottom;"></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(190px, 100px) scaleY(0.1111111111111111); display: block; animation-name: none; transform-origin: bottom;" position="top"><div style="transform: scaleY(9); transform-origin: bottom;"></div><div style="transform: scaleY(9); transform-origin: bottom;"></div></wup-popup>"`
     );
 
     el.$hide();
     expect(el.$isOpen).toBe(true); // because $hide is async
     await Promise.resolve();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(190px, 100px) scaleY(0.006666666666666667); display: block; animation-name: none; transform-origin: bottom;" position="top" hide=""><div style="transform: scaleY(150); transform-origin: bottom;"></div><div style="transform: scaleY(150); transform-origin: bottom;"></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(190px, 100px) scaleY(0.1111111111111111); display: block; animation-name: none; transform-origin: bottom;" position="top" hide=""><div style="transform: scaleY(9); transform-origin: bottom;"></div><div style="transform: scaleY(9); transform-origin: bottom;"></div></wup-popup>"`
     );
 
-    nextFrame();
+    await nextFrame(2);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(190px, 100px) scaleY(0.006666666666666667); display: block; animation-name: none; transform-origin: bottom;" position="top" hide=""><div style="transform: scaleY(150); transform-origin: bottom;"></div><div style="transform: scaleY(150); transform-origin: bottom;"></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(190px, 100px) scaleY(0.05555555555555553); display: block; animation-name: none; transform-origin: bottom;" position="top" hide=""><div style="transform: scaleY(18.000000000000007); transform-origin: bottom;"></div><div style="transform: scaleY(18.000000000000007); transform-origin: bottom;"></div></wup-popup>"`
     );
 
-    nextFrame();
-    expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(190px, 100px) scaleY(0.0033333333333333335); display: block; animation-name: none; transform-origin: bottom;" position="top" hide=""><div style="transform: scaleY(300); transform-origin: bottom;"></div><div style="transform: scaleY(300); transform-origin: bottom;"></div></wup-popup>"`
-    );
-
-    nextFrame();
-    await h.wait(0);
+    await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style="transform: translate(190px, 100px); animation-name: none;" position="top"><div style=""></div><div style=""></div></wup-popup>"`
     );
-
     await h.wait();
+    await nextFrame();
     expect(el.$isOpen).toBe(false);
-    nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style="transform: translate(190px, 100px); animation-name: none;" position="top"><div style=""></div><div style=""></div></wup-popup>"`
     );
@@ -832,50 +818,49 @@ describe("popupElement", () => {
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style="transform: translate(140px, 150px); display: block; animation-name: none;" position="bottom"><div style=""></div><div style=""></div></wup-popup>"`
     );
-    nextFrame();
+    await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style="transform: translate(140px, 150px) scaleY(0); display: block; animation-name: none; transform-origin: top;" position="bottom"><div style=""></div><div style=""></div></wup-popup>"`
     );
-    nextFrame();
+    await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(140px, 150px) scaleY(0.0033333333333333335); display: block; animation-name: none; transform-origin: top;" position="bottom"><div style="transform: scaleY(300); transform-origin: bottom;"></div><div style="transform: scaleY(300); transform-origin: bottom;"></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(140px, 150px) scaleY(0.055555555555555525); display: block; animation-name: none; transform-origin: top;" position="bottom"><div style="transform: scaleY(18.00000000000001); transform-origin: bottom;"></div><div style="transform: scaleY(18.00000000000001); transform-origin: bottom;"></div></wup-popup>"`
     );
 
     // checking how it works if options is changed during the animation
     el.$options.placement = [WUPPopupElement.$placements.$top.$start.$adjust];
     await h.wait(); // options is async
-    nextFrame();
+    await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.0033333333333333335); transform-origin: bottom; display: block; animation-name: none;" position="top"><div style="transform: scaleY(300); transform-origin: bottom;"></div><div style="transform: scaleY(300); transform-origin: bottom;"></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.055555555555555525); transform-origin: bottom; display: block; animation-name: none;" position="top"><div style="transform: scaleY(18.00000000000001); transform-origin: bottom;"></div><div style="transform: scaleY(18.00000000000001); transform-origin: bottom;"></div></wup-popup>"`
     );
-    nextFrame();
+    await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.006666666666666667); transform-origin: bottom; display: block; animation-name: none;" position="top"><div style="transform: scaleY(150); transform-origin: bottom;"></div><div style="transform: scaleY(150); transform-origin: bottom;"></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.11111111111111105); transform-origin: bottom; display: block; animation-name: none;" position="top"><div style="transform: scaleY(9.000000000000005); transform-origin: bottom;"></div><div style="transform: scaleY(9.000000000000005); transform-origin: bottom;"></div></wup-popup>"`
     );
     el.$hide(); // force to hide during the show-animation
-    nextFrame();
+    await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.006666666666666667); transform-origin: bottom; display: block; animation-name: none;" position="top" hide=""><div style="transform: scaleY(150); transform-origin: bottom;"></div><div style="transform: scaleY(150); transform-origin: bottom;"></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.11111111111111105); transform-origin: bottom; display: block; animation-name: none;" position="top" hide=""><div style="transform: scaleY(9.000000000000005); transform-origin: bottom;"></div><div style="transform: scaleY(9.000000000000005); transform-origin: bottom;"></div></wup-popup>"`
     );
-    nextFrame();
+
+    await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.0033333333333333335); transform-origin: bottom; display: block; animation-name: none;" position="top" hide=""><div style="transform: scaleY(300); transform-origin: bottom;"></div><div style="transform: scaleY(300); transform-origin: bottom;"></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.05555555555555543); transform-origin: bottom; display: block; animation-name: none;" position="top" hide=""><div style="transform: scaleY(18.000000000000043); transform-origin: bottom;"></div><div style="transform: scaleY(18.000000000000043); transform-origin: bottom;"></div></wup-popup>"`
     );
     el.$show(); // force to show during the hide-animation
-    nextFrame();
-    await h.wait(1);
+    await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.0033333333333333335); transform-origin: bottom; display: block; animation-name: none;" position="top"><div style="transform: scaleY(300); transform-origin: bottom;"></div><div style="transform: scaleY(300); transform-origin: bottom;"></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.05555555555555543); transform-origin: bottom; display: block; animation-name: none;" position="top"><div style="transform: scaleY(18.000000000000043); transform-origin: bottom;"></div><div style="transform: scaleY(18.000000000000043); transform-origin: bottom;"></div></wup-popup>"`
     );
-    nextFrame();
+    await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.006666666666666667); transform-origin: bottom; display: block; animation-name: none;" position="top"><div style="transform: scaleY(150); transform-origin: bottom;"></div><div style="transform: scaleY(150); transform-origin: bottom;"></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.11111111111111105); transform-origin: bottom; display: block; animation-name: none;" position="top"><div style="transform: scaleY(9.000000000000005); transform-origin: bottom;"></div><div style="transform: scaleY(9.000000000000005); transform-origin: bottom;"></div></wup-popup>"`
     );
 
     // checking when element is removed
     el.remove();
-    nextFrame();
-    await h.wait(); // reset animation is async
+    await nextFrame();
     // WARN styles haven't been removed because expected that item destroyed
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style="transform: translate(140px, 100px); display: block; animation-name: none;" position="top"><div style=""></div><div style=""></div></wup-popup>"`
@@ -896,7 +881,7 @@ describe("popupElement", () => {
     h.unMockConsoleWarn();
     expect(el.$isOpen).toBe(true);
     expect(spyConsole).toBeCalled();
-    nextFrame(); // no-animation expected
+    await nextFrame(); // no-animation expected
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style="transform: translate(140px, 100px); display: block;" position="top"><div style=""></div><div style=""></div></wup-popup>"`
     );
@@ -1182,8 +1167,9 @@ describe("popupElement", () => {
     trgRect.right = width + x;
     // expected bottom.middle position because at left/top not enough space
     (await expectIt([WUPPopupElement.$placements.$left.$start.$adjust])).toMatchInlineSnapshot(
-      `"<wup-popup style="display: block; transform: translate(55.5px, 61px);" position="bottom"></wup-popup>"`
+      `"<wup-popup style="display: block; transform: translate(56px, 61px);" position="bottom"></wup-popup>"`
     );
+    expect(positionIsInteger()).toEqual({ left: "int", top: "int" });
 
     // checking $resizeWidth - expected left.start with maxWidth
     (await expectIt([WUPPopupElement.$placements.$left.$start.$adjust.$resizeWidth])).toMatchInlineSnapshot(
@@ -1210,8 +1196,9 @@ describe("popupElement", () => {
       return y + 1;
     });
     (await expectIt([WUPPopupElement.$placements.$left.$start.$resizeWidth])).toMatchInlineSnapshot(
-      `"<wup-popup style="display: block; transform: translate(55.5px, 61px);" position="bottom"></wup-popup>"`
+      `"<wup-popup style="display: block; transform: translate(56px, 61px);" position="bottom"></wup-popup>"`
     );
+    expect(positionIsInteger()).toEqual({ left: "int", top: "int" });
     // cover case when maxWidthByTarget=true
     el.$options.maxWidthByTarget = true;
     (await expectIt([WUPPopupElement.$placements.$left.$start.$resizeWidth])).toMatchInlineSnapshot(
@@ -1219,7 +1206,7 @@ describe("popupElement", () => {
     );
     el.$options.maxWidthByTarget = false;
     (await expectIt([WUPPopupElement.$placements.$left.$start.$resizeWidth])).toMatchInlineSnapshot(
-      `"<wup-popup style="display: block; transform: translate(55.5px, 61px);" position="bottom"></wup-popup>"`
+      `"<wup-popup style="display: block; transform: translate(56px, 61px);" position="bottom"></wup-popup>"`
     );
 
     // test case when not enough space
@@ -1408,7 +1395,7 @@ describe("popupElement", () => {
     el = document.body.appendChild(document.createElement("wup-popup"));
     el.$options.arrowEnable = true;
     expectIt(WUPPopupElement.$placements.$right.$end.$adjust).toMatchInlineSnapshot(
-      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(244px, 130px);" position="right"></wup-popup><wup-popup-arrow class="my-arrow" style="width: 8px; height: 4px; transform: translate(241px, 138px) rotate(90.1deg);"></wup-popup-arrow><a></a><wup-popup></wup-popup></body>"`
+      `"<body><div id="targetId">some text</div><wup-popup style="display: block; transform: translate(244px, 130px);" position="right"></wup-popup><wup-popup-arrow class="my-arrow" style="width: 8px; height: 4px; transform: translate(241px, 138px) rotate(90.1deg);"></wup-popup-arrow><a></a><wup-popup style="opacity: 0;"></wup-popup></body>"`
     );
 
     WUPPopupElement.$defaults.arrowOffset = undefined;
@@ -1830,7 +1817,7 @@ describe("popupElement", () => {
 
   test("right-click filter", async () => {
     await el.$hide();
-    el.$options.showCase = WUPPopup.ShowCases.onClick;
+    el.$options.showCase = ShowCases.onClick;
     await h.wait();
 
     await h.userClick(trg);
@@ -1928,5 +1915,31 @@ describe("popupElement", () => {
     await h.userClick(el);
     await h.wait();
     expect(el.$isOpen).toBe(false);
+  });
+
+  test("popup with parent transform.translate", async () => {
+    const { nextFrame } = h.useFakeAnimation();
+    el.remove();
+    el = document.createElement("wup-popup");
+    el.$options.showCase = 0; // always
+    el.$options.arrowEnable = true;
+    el.$options.target = trg;
+    document.body.appendChild(el);
+
+    await nextFrame();
+    expect(document.body.innerHTML).toMatchInlineSnapshot(
+      `"<div id="targetId">some text</div><wup-popup style="display: block; transform: translate(190px, 100px);" position="top"></wup-popup><wup-popup-arrow style="transform: translate(184px, 100px) rotate(0.1deg);"></wup-popup-arrow>"`
+    );
+
+    trg.parentElement.style.transform = "translate(-50%,-50%)";
+    const rect = trg.getBoundingClientRect();
+    jest.spyOn(trg, "getBoundingClientRect").mockReturnValue({ ...rect, left: 0, x: 0 });
+    const rectEl = el.getBoundingClientRect();
+    jest.spyOn(el, "getBoundingClientRect").mockReturnValue({ ...rectEl, left: 19, x: 19 }); // simulate case when parent transform affects on positioning
+
+    await nextFrame();
+    expect(document.body.innerHTML).toMatchInlineSnapshot(
+      `"<div id="targetId">some text</div><wup-popup style="display: block; transform: translate(221px, 100px);" position="top"></wup-popup><wup-popup-arrow style="transform: translate(215px, 100px) rotate(0.1deg);"></wup-popup-arrow>"`
+    );
   });
 });

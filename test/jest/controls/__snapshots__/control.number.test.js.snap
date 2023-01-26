@@ -165,6 +165,7 @@ exports[`control.number $show/$hide error 2`] = `
     error=""
     id="txt2"
     role="alert"
+    style="opacity: 0;"
   >
     <span
       class="wup-hidden"
@@ -219,9 +220,12 @@ clip: rect(1px, 1px, 1px, 1px);}
           --base-btn-focus: #005766;
           --base-btn2-bg: var(--base-btn-text);
           --base-btn2-text: var(--base-btn-bg);
+          --base-btn3-bg: var(--base-bg);
+          --base-btn3-text: inherit;
+          --base-sep: #e4e4e4;
           --border-radius: 6px;
           --anim-time: 200ms;
-          --anim: var(--anim-time, 200ms) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
         }
   :root {
         --ctrl-padding: 1.5em 1em 0.5em 1em;
@@ -238,7 +242,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         --ctrl-err-icon-valid: green;
         --ctrl-invalid-border: red;
         --wup-icon-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M674.515 93.949a45.925 45.925 0 0 0-65.022 0L384.001 318.981 158.509 93.487a45.928 45.928 0 0 0-65.022 0c-17.984 17.984-17.984 47.034 0 65.018l225.492 225.494L93.487 609.491c-17.984 17.984-17.984 47.034 0 65.018s47.034 17.984 65.018 0l225.492-225.492 225.492 225.492c17.984 17.984 47.034 17.984 65.018 0s17.984-47.034 0-65.018L449.015 383.999l225.492-225.494c17.521-17.521 17.521-47.034 0-64.559z'/%3E%3C/svg%3E");
-        --wup-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath stroke='black' stroke-width='40' d='M37.691 450.599 224.76 635.864c21.528 21.32 56.11 21.425 77.478 0l428.035-426.23c21.47-21.38 21.425-56.11 0-77.478s-56.11-21.425-77.478 0L263.5 519.647 115.168 373.12c-21.555-21.293-56.108-21.425-77.478 0s-21.425 56.108 0 77.478z'/%3E%3C/svg%3E");
+        --wup-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M37.691 450.599 224.76 635.864c21.528 21.32 56.11 21.425 77.478 0l428.035-426.23c21.47-21.38 21.425-56.11 0-77.478s-56.11-21.425-77.478 0L263.5 519.647 115.168 373.12c-21.555-21.293-56.108-21.425-77.478 0s-21.425 56.108 0 77.478z'/%3E%3C/svg%3E");
         --wup-icon-dot: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='20'/%3E%3C/svg%3E");
       }
   :root {
@@ -344,7 +348,6 @@ margin: 0;
 padding: 0 5px;
 flex: 0 0 auto;
 align-self: stretch;
-cursor: pointer;
 border: none;
 box-shadow: none;
 background: var(--ctrl-icon);
@@ -515,7 +518,6 @@ margin: 0;
 padding: 0 5px;
 flex: 0 0 auto;
 align-self: stretch;
-cursor: pointer;
 border: none;
 box-shadow: none;
 background: var(--ctrl-icon);
@@ -531,9 +533,11 @@ mask-image: var(--ctrl-icon-img);
           mask-image: none;
         }
         WUP-NUM label:after {
+          cursor: pointer;
           margin-right: calc(var(--ctrl-icon-size) / -2);
         }
         WUP-NUM label:before {
+          cursor: pointer;
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
         WUP-NUM label button {
@@ -736,6 +740,7 @@ exports[`control.number validations options.validationCase 1`] = `
 exports[`control.number validations options.validationCase 2`] = `
 <wup-num
   invalid=""
+  style="overflow: hidden;"
 >
   <label
     for="txt1"
@@ -783,6 +788,7 @@ exports[`control.number validations options.validationCase 2`] = `
 exports[`control.number validations options.validationCase 3`] = `
 <wup-num
   invalid=""
+  style="overflow: hidden;"
 >
   <label
     for="txt1"
@@ -830,6 +836,7 @@ exports[`control.number validations options.validationCase 3`] = `
 exports[`control.number validations options.validationCase 4`] = `
 <wup-num
   invalid=""
+  style=""
 >
   <label
     for="txt1"

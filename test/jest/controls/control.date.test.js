@@ -9,7 +9,6 @@ import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
 
 beforeAll(() => {
-  jest.useFakeTimers();
   // localeInfo.refresh("en-US"); // setup "en-US" locale
   // localeInfo.date = "yyyy-MM-dd"; // set defaults
   // localeInfo.time = "hh:mm:ss.fff a";
@@ -35,6 +34,7 @@ initTestBaseControl({
   type: WUPDateControl,
   htmlTag: "wup-date",
   onInit: (e) => {
+    jest.setSystemTime(new Date("2022-10-18T12:00:00.000Z")); // 18 Oct 2022 12:00 UTC
     el = e;
 
     const height = 50;
@@ -287,8 +287,14 @@ describe("control.date", () => {
     expect(el.$value?.toISOString()).toBe("2022-10-15T13:45:56.000Z");
     expect(onChange).toBeCalledTimes(1);
 
+    // removing all
+    while (el.$refInput.value) {
+      await h.userRemove(el.$refInput);
+    }
+    expect(el.$refError).toBe(undefined);
+    expect(el.$value).toBe(undefined);
+
     // just for coverage (cases impossible in ordinary flow)
-    expect(el.parseInput("")).toBe(undefined);
     expect(el.parseInput("b022-10-16")).toBe(undefined);
     el.$options.utc = false;
     expect(el.parseInput("2022-10-16").toISOString()).toBe(new Date("2022-10-16").toISOString());

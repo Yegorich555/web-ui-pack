@@ -1,6 +1,6 @@
 //  import { useEffect } from "react";
-// eslint-disable-next-line import/named
-import WUPPopupElement, { ShowCases } from "web-ui-pack/popup/popupElement";
+import WUPPopupElement from "web-ui-pack/popup/popupElement";
+import { ShowCases } from "web-ui-pack/popup/popupElement.types";
 import styles from "./popupView.scss";
 
 export default function Example4() {

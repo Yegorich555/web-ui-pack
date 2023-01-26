@@ -21,7 +21,7 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
 - Built-in css-variables to use custom color-themes with native ordinary styling (css, scss etc.)
 - Built-in Typescript (coverage types 100%)
 - Built-in `.jsx/.tsx` support (for React/Vue)
-- Supports different locales (based on [localeInfo](src/helpers/localeInfo.ts) helper)
+- Supports different locales (based on [localeInfo](src/objects/localeInfo.ts) helper)
 - Well documented via JSDoc (use intellisense power of your editor to get details about each property/option/usage)
 - Optimized for webpack (build includes only used components and helpers via **side-effects** option)
 - Zero dependancy (don't need to wait for bug-fixing of other packages)
@@ -46,6 +46,7 @@ npm install web-ui-pack
 - [x] [Helper.Observer](#helpersobserver)
 - [x] [PopupElement](#example) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
 - [x] [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
+- [x] [CircleElement](src/circleElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/circle)
 - [x] [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
 - [x] [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
 - [x] [Mask/pattern for controls](src/controls//text.mask.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
@@ -58,11 +59,11 @@ npm install web-ui-pack
 - [ ] SelectManyControl (MultiSelect)
 - [x] [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
 - [x] [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
+- [x] [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
+- [ ] DateTimeControl ?
 - [x] [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
 - [x] [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
 - [ ] FileControl
-- [ ] TimeControl
-- [ ] DateTimeControl ?
 - [ ] ImageControl (AvatarEditor)
 - [ ] SearchControl ?
 - [ ] ModalElement
@@ -111,6 +112,7 @@ npm install web-ui-pack
              - [_BaseComboControl_](src/controls/baseCombo.ts)
                - [SelectControl](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
                - [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
+               - [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
            - [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
 
 ---
@@ -204,12 +206,16 @@ declare global {
 
 ---
 
+### CutomTypes
+
+- [WUPTimeObject](src/objects/timeObject.ts) => `Ordinary class Time with hours & minutes`
+
 ### Helpers
 
 use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 **WARN**: don't use `import {focusFirst} from "web-ui-pack;` because in this case the whole web-ui-pack module traps in compilation of dev-bundle and increases time of compilation
 
-- [**animateDropdown**(el: HTMLElement, timeMs=300, isClose=false)](src/helpers/animateDropdown.ts) ⇒ `Animate (open/close) element as dropdown via scale and counter-scale for children`
+- [**animateDropdown**(el: HTMLElement, ms:number, isClose=false)](src/helpers/animate.ts) ⇒ `Animate (open/close) element as dropdown via scale and counter-scale for children`
 - [**dateCopyTime**(to:Date ,from:Date, utc:bool)](src/helpers/dateCopyTime.ts) ⇒ `Copy hh:mm:ss.fff part from B to A`
 - [**dateFromString**(v:string, format="yyyy-MM-dd hh:mm:ss AZ", options)](src/helpers/dateFromString.ts) ⇒ `Returns parsed date from string based on pointed format`
 - [**dateToString**(v:Date, format="yyyy-MM-dd hh:mm:ss AZ")](src/helpers/dateToString.ts) ⇒ `Returns a string representation of a date-time according to pointed format`
@@ -217,8 +223,8 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 - [**findScrollParentAll**(e: HTMLElement)](src/helpers/findScrollParent.ts) ⇒ `Find all parents with active scroll X/Y`
 - [**focusFirst**(el: HTMLElement)](src/helpers/focusFirst.ts) ⇒ `Set focus on element or first possible nested element`
 - [**isIntoView**(el: HTMLElement)](src/helpers/isIntoView.ts) ⇒ `Check if element is visible in scrollable parents`
-- [**localeInfo**](src/helpers/localeInfo.ts) ⇒ `Locale-object with definitions related to user-locale`
-- [**mathSumFloat**(a:number,b:number)](src/helpers/mathSumFloat.ts) ⇒ `Sum without float-precision-issue`
+- [**mathSumFloat**(a:number,b:number)](src/helpers/math.ts) ⇒ `Sum without float-precision-issue`
+- [**mathScaleValue**(v: number, fromMin: number, fromMax: number, toMin: number, toMax: number)](src/helpers/math.ts) ⇒ `Scale value from one range to another`
 - [**nestedProperty.set**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.set(obj, "value.nestedValue", 1) sets obj.value.nestedValue = 1`
 - [**nestedProperty.get**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.get(obj, "nested.val2", out?: {hasProp?: boolean} ) returns value from obj.nested.val2`
 - [**objectClone**(obj, opts: CloneOptions)](src/helpers/objectClone.ts) ⇒ `converts object to observable (via Proxy) to allow listen for changes`
@@ -231,10 +237,15 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 - [**onSpy**(object: {}, method: string, listener: (...args) => void](src/helpers/onSpy.ts) ⇒ `Spy on method-call of object`
 - [**promiseWait**(promise: Promise, ms: number, smartOrCallback: boolean | Function) => Promise](src/helpers/promiseWait.ts) ⇒ `Produce Promise during for "no less than pointed time"; it helps for avoding spinner blinking during the very fast api-request in case: pending > waitResponse > resetPending`
 - [**scrollIntoView**(el: HTMLElement, options: WUPScrollOptions) => Promise](src/helpers/scrollIntoView.ts) ⇒ `Scroll the HTMLElement's parent container such that the element is visible to the user and return promise by animation end`
-- [**scrollCarousel**(el: HTMLElement, next: (direction: -1 | 1) => HTMLElement[] | null, options: ScrollOptions) => ScrollResult](src/helpers/scrollCarousel.ts) ⇒ `Function makes pointed element scrollable and implements carousel-scroll behavior (appends new items during the scrolling). Supports swipe/pageUp/pageDown/mouseWheel events.`
-- [**stringLowerCount**(text: string, stopWith?: number)](src/helpers/stringCaseCount.ts) ⇒ `Returns count of chars in lower case (for any language with ignoring numbers, symbols)`
-- [**stringUpperCount**(text: string, stopWith?: number)](src/helpers/stringCaseCount.ts) ⇒ `Returns count of chars in upper case (for any language with ignoring numbers, symbols)`
-- [**stringPrettify**(text: string, changeKebabCase = false)](src/helpers/stringPrettify.ts) ⇒ `Changes camelCase, snakeCase, kebaCase text to user-friendly`
+- [class **WUPScrolled**](src/helpers/scrolled.ts) ⇒ `Class makes pointed element scrollable and implements carousel-scroll behavior (appends new items during the scrolling). Supports swipe/pageUp/pageDown/mouseWheel events.`
+- [**stringLowerCount**(text: string, stopWith?: number)](src/helpers/string.ts) ⇒ `Returns count of chars in lower case (for any language with ignoring numbers, symbols)`
+- [**stringUpperCount**(text: string, stopWith?: number)](src/helpers/string.ts) ⇒ `Returns count of chars in upper case (for any language with ignoring numbers, symbols)`
+- [**stringPrettify**(text: string, changeKebabCase = false)](src/helpers/string.ts) ⇒ `Changes camelCase, snakeCase, kebaCase text to user-friendly`
+
+### Objects
+
+- [**localeInfo**](src/objects/localeInfo.ts) ⇒ `Locale-object with definitions related to user-locale`
+- [**TimeObject**](src/objects/timeObject.ts) ⇒ `Plane time object without date`
 
 #### Helpers.Observer
 

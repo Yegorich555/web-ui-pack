@@ -1,5 +1,5 @@
 import { WUPNumberControl } from "web-ui-pack";
-import localeInfo from "web-ui-pack/helpers/localeInfo";
+import localeInfo from "web-ui-pack/objects/localeInfo";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
 
@@ -180,6 +180,9 @@ describe("control.number", () => {
 
     el.$value = 5678;
     expect(el.$refInput.value).toBe("56-78");
+
+    // just for coverage
+    expect(el.parseInput("")).toBe(undefined);
   });
 
   test("role spinner & inc/dec", async () => {

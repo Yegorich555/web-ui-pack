@@ -9,17 +9,20 @@ export interface IScrollOptions {
   /** Min swipe-movement in pixels when need to scroll
    * @defaultValue 10 */
   swipeDebounceDelta?: number;
-  /** Return true to skip scroll event (when element is disabled) */
+  /** Return true to skip scroll event (when element somehow is disabled for example) */
   skip?: () => boolean;
 }
 
-/** Handles wheel & touch events for custom scrolling
+/** Handles wheel & touch events for custom scrolling (without real scroll)
  * @returns remove/destroy function to remove related events */
 export default function onScroll(
   el: HTMLElement,
   callback: (direction: -1 | 1) => void,
   options?: IScrollOptions
 ): () => void {
+  el.style.overflow = "hidden";
+  el.style.touchAction = "none";
+
   const rOnWheel = onEvent(
     el,
     "wheel",
@@ -66,6 +69,8 @@ export default function onScroll(
   const remove = (): void => {
     rOnWheel();
     rOnTouch();
+    el.style.overflow = "";
+    el.style.touchAction = "";
   };
   return remove;
 }
