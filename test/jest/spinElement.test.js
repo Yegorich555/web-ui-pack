@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-imports
 import { WUPSpinElement } from "web-ui-pack";
 import {
   spinUseDualRing,

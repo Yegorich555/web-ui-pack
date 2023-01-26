@@ -272,9 +272,9 @@ export function handleRejection() {
   const rst = fn.mockClear;
   (fn.mockClear as any) = () => {
     rst();
-    global.setUnhandledReject(null as any);
+    (global as any).setUnhandledReject(null as any);
   };
-  global.setUnhandledReject(fn);
+  (global as any).setUnhandledReject(fn);
   return fn;
 }
 
