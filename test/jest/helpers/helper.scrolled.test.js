@@ -53,9 +53,7 @@ describe("helper.onScrollStop", () => {
       `"<ul style="overflow: hidden; max-height: 100px;"><li num="1"></li><li num="2"></li></ul>"`
     ); // expected 2items: 2 after 1
     await nextFrames(5);
-    expect(ul.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="overflow: hidden; max-height: 100px;"><li num="2"></li></ul>"`
-    ); // expected only 2nd item
+    expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="2"></li></ul>"`); // expected only 2nd item
     expect(onRender.last()).toMatchInlineSnapshot(`
       [
         1,
@@ -85,9 +83,7 @@ describe("helper.onScrollStop", () => {
       `"<ul style="overflow: hidden; max-height: 100px;"><li num="1"></li><li num="2"></li></ul>"`
     );
     await nextFrames(5);
-    expect(ul.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="overflow: hidden; max-height: 100px;"><li num="1"></li></ul>"`
-    );
+    expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="1"></li></ul>"`);
     expect(onRender.last()).toMatchInlineSnapshot(`
       [
         -1,
@@ -116,9 +112,7 @@ describe("helper.onScrollStop", () => {
       `"<ul style="overflow: hidden; max-height: 100px;"><li num="0"></li><li num="1"></li></ul>"`
     );
     await nextFrames(5);
-    expect(ul.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="overflow: hidden; max-height: 100px;"><li num="0"></li></ul>"`
-    );
+    expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="0"></li></ul>"`);
 
     expect(s.state).toMatchInlineSnapshot(`
       {
@@ -137,9 +131,7 @@ describe("helper.onScrollStop", () => {
       `"<ul style="overflow: hidden; max-height: 100px;"><li num="0"></li><li num="1"></li></ul>"`
     );
     await nextFrames(5);
-    expect(ul.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="overflow: hidden; max-height: 100px;"><li num="1"></li></ul>"`
-    );
+    expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="1"></li></ul>"`);
 
     // swipeDown => scrollUp
     await h.userSwipe(ul.firstElementChild, { movements: [{ dx: 0, dy: 50 }] });
@@ -147,9 +139,7 @@ describe("helper.onScrollStop", () => {
       `"<ul style="overflow: hidden; max-height: 100px;"><li num="0"></li><li num="1"></li></ul>"`
     );
     await nextFrames(5);
-    expect(ul.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="overflow: hidden; max-height: 100px;"><li num="0"></li></ul>"`
-    );
+    expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="0"></li></ul>"`);
 
     // no new items - no scroll
     onRender.mockImplementation(() => []);
@@ -191,9 +181,7 @@ describe("helper.onScrollStop", () => {
       `"<ul style="overflow: hidden; max-height: 100px;" tabindex="0"><li num="1"></li><li num="2"></li></ul>"`
     );
     await nextFrames(5);
-    expect(ul.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="overflow: hidden; max-height: 100px;" tabindex="0"><li num="2"></li></ul>"`
-    );
+    expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;" tabindex="0"><li num="2"></li></ul>"`);
 
     // PageUp
     ul.dispatchEvent(new KeyboardEvent("keydown", { key: "PageUp", bubbles: true, cancelable: true }));
@@ -202,25 +190,19 @@ describe("helper.onScrollStop", () => {
       `"<ul style="overflow: hidden; max-height: 100px;" tabindex="0"><li num="1"></li><li num="2"></li></ul>"`
     );
     await nextFrames(5);
-    expect(ul.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="overflow: hidden; max-height: 100px;" tabindex="0"><li num="1"></li></ul>"`
-    );
+    expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;" tabindex="0"><li num="1"></li></ul>"`);
 
     // ArrowDown
     ul.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
     expect(onRender).toBeCalledTimes(3);
     await nextFrames(5);
-    expect(ul.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="overflow: hidden; max-height: 100px;" tabindex="0"><li num="2"></li></ul>"`
-    );
+    expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;" tabindex="0"><li num="2"></li></ul>"`);
 
     // ArrowUp
     ul.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
     expect(onRender).toBeCalledTimes(4);
     await nextFrames(5);
-    expect(ul.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="overflow: hidden; max-height: 100px;" tabindex="0"><li num="1"></li></ul>"`
-    );
+    expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;" tabindex="0"><li num="1"></li></ul>"`);
 
     onRender.mockClear();
     ul.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true, cancelable: true }));
@@ -259,9 +241,7 @@ describe("helper.onScrollStop", () => {
       `"<ul style="overflow: hidden; max-width: 60px;"><li num="1"></li><li num="2"></li></ul>"`
     );
     await nextFrames(5);
-    expect(ul.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="overflow: hidden; max-width: 60px;"><li num="2"></li></ul>"`
-    );
+    expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="2"></li></ul>"`);
 
     // swipeRight=> scrollLeft
     await h.userSwipe(ul.firstElementChild, { movements: [{ dx: 50, dy: 0 }] });
@@ -269,25 +249,19 @@ describe("helper.onScrollStop", () => {
       `"<ul style="overflow: hidden; max-width: 60px;"><li num="1"></li><li num="2"></li></ul>"`
     );
     await nextFrames(5);
-    expect(ul.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="overflow: hidden; max-width: 60px;"><li num="1"></li></ul>"`
-    );
+    expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="1"></li></ul>"`);
 
     // ArrowDown
     ul.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
     expect(onRender).toBeCalledTimes(3);
     await nextFrames(5);
-    expect(ul.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="overflow: hidden; max-width: 60px;"><li num="2"></li></ul>"`
-    );
+    expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="2"></li></ul>"`);
 
     // ArrowUp
     ul.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true, cancelable: true }));
     expect(onRender).toBeCalledTimes(4);
     await nextFrames(5);
-    expect(ul.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="overflow: hidden; max-width: 60px;"><li num="1"></li></ul>"`
-    );
+    expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="1"></li></ul>"`);
 
     onRender.mockClear();
     ul.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));

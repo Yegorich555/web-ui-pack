@@ -178,6 +178,7 @@ export default class WUPScrolled {
     if (el.offsetWidth && isXScroll && !maxWidth?.endsWith("px")) el.style.maxWidth = `${el.offsetWidth}px`;
   }
 
+  #scrollNum = 0;
   // WARN expected goTo possible only to visible/rendered pages
   /** Go to next/prev pages */
   goTo(isNext: boolean, smooth?: boolean): Promise<void>;
@@ -260,13 +261,23 @@ export default class WUPScrolled {
       return Promise.resolve();
     }
     restoreScroll(); // WARN restore required even items is appended to the end
-
     let r = this.scrollToRange(smooth as true, this.state.items);
+
+    ++this.#scrollNum;
+    const rstMaxSize = (): void => {
+      if (--this.#scrollNum === 0) {
+        this.el.style.maxHeight = "";
+        this.el.style.maxWidth = "";
+      }
+    };
     if (!smooth) {
       r = Promise.resolve();
+      rstMaxSize();
     }
+
     return r.then(() => {
       pagesRemove.forEach((p) => p.items.forEach((a) => (a as any).__scrollRemove && a.remove())); // some items can be re-appended
+      rstMaxSize();
     });
   }
 

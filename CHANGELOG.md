@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0 (\_\_\_)
+
+**Fixes**:
+
+- [CalendarControl](src/controls/calendar.ts). Different pickers height after scrolling
+- helper [WUPScrolled](src/helpers/scrolled.ts). maxHeight left after scrolling finished
+
 ## 0.4.0 (Jan 26, 2023)
 
 **BREAKING CHANGES**:
