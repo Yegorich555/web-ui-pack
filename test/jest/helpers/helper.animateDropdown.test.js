@@ -1,4 +1,4 @@
-import animateDropdown from "web-ui-pack/helpers/animateDropdown";
+import { animateDropdown } from "web-ui-pack/helpers/animate";
 import { useFakeAnimation } from "../../testHelper";
 
 let step = 1;
@@ -28,7 +28,7 @@ describe("helper.animateDropdown", () => {
   test("ordinary open/hide with 1 children", async () => {
     let p = animateDropdown(el, step * 3, false);
     let isResolved = false;
-    p.then(() => (isResolved = true));
+    p.then(() => (isResolved = true)).catch(() => null);
 
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<ul style="animation-name: none;"><ul><li>Some text here</li></ul></ul>"`
@@ -49,7 +49,7 @@ describe("helper.animateDropdown", () => {
     await nextFrame();
     expect(isResolved).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: top; transform: scaleY(0.6666666666666665);"><ul style="transform: scaleY(1.5000000000000004); transform-origin: bottom;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="animation-name: none; transform-origin: top; transform: scaleY(0.6666666666666666);"><ul style="transform: scaleY(1.5); transform-origin: bottom;"><li>Some text here</li></ul></ul>"`
     );
 
     await nextFrame();
@@ -61,7 +61,7 @@ describe("helper.animateDropdown", () => {
     // close
     isResolved = false;
     p = animateDropdown(el, step * 3, true);
-    p.then(() => (isResolved = true));
+    p.then(() => (isResolved = true)).catch(() => null);
     await nextFrame();
     expect(isResolved).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
@@ -77,7 +77,7 @@ describe("helper.animateDropdown", () => {
     await nextFrame();
     expect(isResolved).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: top; transform: scaleY(0.3333333333333335);"><ul style="transform: scaleY(2.9999999999999987); transform-origin: bottom;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="animation-name: none; transform-origin: top; transform: scaleY(0.33333333333333337);"><ul style="transform: scaleY(2.9999999999999996); transform-origin: bottom;"><li>Some text here</li></ul></ul>"`
     );
 
     await nextFrame();
@@ -89,7 +89,7 @@ describe("helper.animateDropdown", () => {
     // try open again
     isResolved = false;
     p = animateDropdown(el, step * 3); // isClose doesn't required
-    p.then(() => (isResolved = true));
+    p.then(() => (isResolved = true)).catch(() => null);
     await nextFrame();
     expect(isResolved).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
@@ -147,7 +147,7 @@ describe("helper.animateDropdown", () => {
     // open
     let p = animateDropdown(el, step * 3, false);
     let isResolvedOpen = false;
-    p.then(() => (isResolvedOpen = true));
+    p.then(() => (isResolvedOpen = true)).catch(() => null);
 
     await nextFrame();
     expect(isResolvedOpen).toBe(false);
@@ -164,38 +164,40 @@ describe("helper.animateDropdown", () => {
     await nextFrame();
     expect(isResolvedOpen).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: top; transform: scaleY(0.6666666666666665);"><ul style="transform: scaleY(1.5000000000000004); transform-origin: bottom;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="animation-name: none; transform-origin: top; transform: scaleY(0.6666666666666666);"><ul style="transform: scaleY(1.5); transform-origin: bottom;"><li>Some text here</li></ul></ul>"`
     );
 
     // close
+    p.stop(false);
     let isResolvedClose = false;
     p = animateDropdown(el, step * 3, true);
-    p.then(() => (isResolvedClose = true));
+    p.then(() => (isResolvedClose = true)).catch(() => null);
 
     await nextFrame();
     expect(isResolvedOpen).toBe(false);
     expect(isResolvedClose).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: top; transform: scaleY(0.6666666666666665);"><ul style="transform: scaleY(1.5000000000000004); transform-origin: bottom;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="animation-name: none; transform-origin: top; transform: scaleY(0.6666666666666666);"><ul style="transform: scaleY(1.5); transform-origin: bottom;"><li>Some text here</li></ul></ul>"`
     );
 
     await nextFrame();
     expect(isResolvedOpen).toBe(false);
     expect(isResolvedClose).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: top; transform: scaleY(0.3333333333333331);"><ul style="transform: scaleY(3.000000000000002); transform-origin: bottom;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="animation-name: none; transform-origin: top; transform: scaleY(0.3333333333333332);"><ul style="transform: scaleY(3.0000000000000013); transform-origin: bottom;"><li>Some text here</li></ul></ul>"`
     );
 
     // open
+    p.stop(false);
     p = animateDropdown(el, step * 3, false);
     let isResolvedOpen2 = false;
-    p.then(() => (isResolvedOpen2 = true));
+    p.then(() => (isResolvedOpen2 = true)).catch(() => null);
     await nextFrame();
     expect(isResolvedOpen).toBe(false);
     expect(isResolvedOpen2).toBe(false);
     expect(isResolvedClose).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: top; transform: scaleY(0.3333333333333331);"><ul style="transform: scaleY(3.000000000000002); transform-origin: bottom;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="animation-name: none; transform-origin: top; transform: scaleY(0.3333333333333332);"><ul style="transform: scaleY(3.0000000000000013); transform-origin: bottom;"><li>Some text here</li></ul></ul>"`
     );
 
     await nextFrame();
@@ -203,15 +205,7 @@ describe("helper.animateDropdown", () => {
     expect(isResolvedOpen2).toBe(false);
     expect(isResolvedClose).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: top; transform: scaleY(0.6666666666666665);"><ul style="transform: scaleY(1.5000000000000004); transform-origin: bottom;"><li>Some text here</li></ul></ul>"`
-    );
-
-    await nextFrame();
-    expect(isResolvedOpen).toBe(false);
-    expect(isResolvedOpen2).toBe(false);
-    expect(isResolvedClose).toBe(false);
-    expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: top; transform: scaleY(1);"><ul style="transform: scaleY(1); transform-origin: bottom;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="animation-name: none; transform-origin: top; transform: scaleY(0.6666666666666666);"><ul style="transform: scaleY(1.5); transform-origin: bottom;"><li>Some text here</li></ul></ul>"`
     );
 
     await nextFrame();
@@ -235,7 +229,7 @@ describe("helper.animateDropdown", () => {
     animateDropdown(div, step * 3, false);
     await nextFrame();
     expect(document.body.innerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: top; transform: scaleY(0.6666666666666665);"><ul style="transform: scaleY(1.5000000000000004); transform-origin: bottom;"><li>Some text here</li></ul></ul><div style="animation-name: none; transform-origin: top; transform: scaleY(0);"></div>"`
+      `"<ul style="animation-name: none; transform-origin: top; transform: scaleY(0.6666666666666666);"><ul style="transform: scaleY(1.5); transform-origin: bottom;"><li>Some text here</li></ul></ul><div style="animation-name: none; transform-origin: top; transform: scaleY(0);"></div>"`
     );
     await nextFrame();
     expect(document.body.innerHTML).toMatchInlineSnapshot(
@@ -297,41 +291,39 @@ describe("helper.animateDropdown", () => {
   });
 
   test("el removed during the animation", async () => {
+    const spyThen = jest.fn();
     const p = animateDropdown(el, step * 2, false);
-    let isResolved = false;
-    p.then(() => (isResolved = true));
+    p.then(spyThen).catch(() => null);
 
     await nextFrame();
     await nextFrame();
     el.remove();
     await nextFrame();
-    expect(isResolved).toBe(true);
+    expect(spyThen).not.toBeCalled();
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<ul style="animation-name: none;"><ul style=""><li>Some text here</li></ul></ul>"`
     );
   });
 
   test("stop animation", async () => {
-    let isResolved = false;
+    const spyThen = jest.fn();
     let p = animateDropdown(el, step * 2, false);
-    p.then(() => (isResolved = true));
+    p.then(spyThen).catch(() => null);
 
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<ul style="animation-name: none; transform-origin: top; transform: scaleY(0);"><ul><li>Some text here</li></ul></ul>"`
     );
     p.stop();
-    expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none;"><ul><li>Some text here</li></ul></ul>"`
-    );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<ul style="animation-name: none;"><ul><li>Some text here</li></ul></ul>"`
     );
-    expect(isResolved).toBe(false);
+    expect(spyThen).toBeCalled();
 
+    spyThen.mockClear();
     p = animateDropdown(el, step * 2, false);
-    p.then(() => (isResolved = true));
+    p.then(spyThen).catch(() => null);
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<ul style="animation-name: none; transform-origin: top; transform: scaleY(0);"><ul><li>Some text here</li></ul></ul>"`
@@ -342,7 +334,7 @@ describe("helper.animateDropdown", () => {
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<ul style="animation-name: none; transform-origin: top; transform: scaleY(0);"><ul><li>Some text here</li></ul></ul>"`
     );
-    expect(isResolved).toBe(false);
+    expect(spyThen).not.toBeCalled();
   });
 
   test("options timeMs is 0", async () => {
@@ -351,7 +343,7 @@ describe("helper.animateDropdown", () => {
     p.then(() => (isResolved = true));
     await nextFrame();
     expect(p.stop).toBeDefined();
-    expect(p.stop).not.toThrow();
+    expect(() => p.stop()).not.toThrow();
     expect(isResolved).toBe(true);
     expect(el.outerHTML).toMatchInlineSnapshot(`"<ul><ul><li>Some text here</li></ul></ul>"`);
   });

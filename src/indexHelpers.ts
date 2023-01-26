@@ -1,4 +1,4 @@
-export { default as animateDropdown } from "./helpers/animateDropdown";
+export { animateDropdown, animate } from "./helpers/animate";
 export { default as dateCopyTime } from "./helpers/dateCopyTime";
 export { default as dateFromString } from "./helpers/dateFromString";
 export { default as dateToString } from "./helpers/dateToString";

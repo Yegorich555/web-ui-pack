@@ -5,7 +5,8 @@
 **BREAKING CHANGES**:
 
 - Namespaces `WUP...` is refactored from `WUPPopup` to `WUP.Popup` etc. So re-export enums `ShowCases, HideCases, Animations` without prefix now
-- helper **localeInfo** moved into `web-ui-pack/objects/localeInfo`
+- helper **animateDropdown** moved into [`web-ui-pack/helpers/animate`](src/helpers/animate.ts)
+- helper **localeInfo** moved into [`web-ui-pack/objects/localeInfo`](src/objects/localeInfo.ts)
 - helper **scrollCarousel** refactored to [WUPScrolled](src/helpers/scrolled.ts) class
 - helper **mathSumFloat** moved into [`web-ui-pack/helpers/math`](src/helpers/math.ts)
 - helper **stringUpperCount** moved into [`web-ui-pack/helpers/string`](src/helpers/string.ts)

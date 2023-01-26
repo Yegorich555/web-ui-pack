@@ -1,5 +1,5 @@
 import WUPBaseElement from "./baseElement";
-import { animateTry } from "./helpers/animateDropdown";
+import { animate } from "./helpers/animate";
 import { mathScaleValue } from "./helpers/math";
 
 const tagName = "wup-circle";
@@ -209,7 +209,7 @@ export default class WUPCircleElement extends WUPBaseElement {
 
         const ms = items.length === 1 ? animTime : mathScaleValue(v, vMin, vMax, 0, animTime);
         const from = angleFrom;
-        this._animation = animateTry(from, angleTo, ms, (animV) => {
+        this._animation = animate(from, angleTo, ms, (animV) => {
           path.setAttribute("d", this.drawArc(from, animV));
         });
         await this._animation.catch().finally(() => delete this._animation);

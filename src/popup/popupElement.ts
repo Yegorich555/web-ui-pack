@@ -6,7 +6,7 @@ import { findScrollParentAll } from "../helpers/findScrollParent";
 import WUPPopupArrowElement from "./popupArrowElement";
 import popupListen from "./popupListen";
 import { getBoundingInternalRect, px2Number, styleTransform } from "../helpers/styleHelpers";
-import animateDropdown from "../helpers/animateDropdown";
+import { animateDropdown } from "../helpers/animate";
 import isIntoView from "../helpers/isIntoView";
 import objectClone from "../helpers/objectClone";
 
@@ -512,13 +512,13 @@ export default class WUPPopupElement<
     let pr: Promise<boolean>;
     if (this._opts.animation === Animations.drawer) {
       const pa = animateDropdown(this, animTime, isClose);
-      pr = new Promise((resolve) => {
+      pr = new Promise((res, rej) => {
         this._stopAnimation = () => {
           delete this._stopAnimation;
           pa.stop(this._opts.animation !== Animations.drawer); // rst animation state only if animation changed
-          resolve(false);
+          res(false);
         };
-        pa.then(() => resolve(true));
+        pa.then(() => res(true)).catch(rej);
       });
     } else {
       pr = new Promise((resolve) => {
@@ -579,13 +579,15 @@ export default class WUPPopupElement<
       return true;
     }
 
-    return this.goAnimate(animTime, false).then((isOk) => {
-      if (!isOk) {
-        return false;
-      }
-      wasClosed && this.fireEvent("$show", { cancelable: false });
-      return true;
-    });
+    return this.goAnimate(animTime, false)
+      .then((isOk) => {
+        if (!isOk) {
+          return false;
+        }
+        wasClosed && this.fireEvent("$show", { cancelable: false });
+        return true;
+      })
+      .catch(() => false);
   }
 
   _isClosing?: true;

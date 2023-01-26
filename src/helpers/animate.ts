@@ -1,8 +1,6 @@
 import { mathScaleValue } from "./math";
 import { styleTransform } from "./styleHelpers";
 
-const frames = new Map<HTMLElement, number>();
-
 declare global {
   namespace WUP {
     interface PromiseCancel<T> extends Promise<T> {
@@ -17,31 +15,18 @@ declare global {
   }
 }
 
-// todo rewrite animteDropdown to use with tryAnimate
-
 /** Animate (open/close) element as dropdown via scale and counter-scale for children
- * @param timeMs Animation time @defaultValue 300ms
+ * @param ms animation time
  * @returns Promise that resolved by animation end
  * Rules
  * * To define direction set attribute to element position="top" or position="bottom"
- * * If call it again on the same element it wil continue/revert previous animation
- * * If call it again with reverted [isClose] previous promise (for open-end) is never resolved */
-export default function animateDropdown(
-  el: HTMLElement,
-  /* istanbul ignore next */
-  timeMs = 300,
-  isClose = false
-): WUP.PromiseCancel<void> {
-  const stored = frames.get(el);
-  if (stored) {
-    window.cancelAnimationFrame(stored);
-    frames.delete(el);
-  }
-  if (!timeMs) {
+ * * Before call it again on the same element don't forget to call stop(false) to cancel prev animation
+ * * Don't forget to handle promise.catch for cases when animation is cancelled */
+export function animateDropdown(el: HTMLElement, ms: number, isClose = false): WUP.PromiseCancel<void> {
+  if (!ms) {
     const p = Promise.resolve();
     return Object.assign(p, { stop: () => p });
   }
-
   el.style.animationName = "none"; // disable default css-animation
 
   // get previous scaleY and extract transform without scaleY
@@ -71,7 +56,6 @@ export default function animateDropdown(
   }
 
   const reset = (): void => {
-    frames.delete(el);
     styleTransform(el, "scaleY", "");
     el.style.transformOrigin = "";
     nested.forEach((e) => {
@@ -80,61 +64,27 @@ export default function animateDropdown(
     });
   };
 
-  const p = new Promise((resolve) => {
-    // reset inline styles
-    const finish = (): void => {
-      resolve();
-      reset();
-    };
+  // define from-to ranges
+  const to = isClose ? 0 : 1;
+  const { from } = parseScale(el);
+  ms *= Math.abs(to - from); // recalc left-animTime (if element is partially opened and need to hide it)
 
-    // define from-to ranges
-    const to = isClose ? 0 : 1;
-    const { from } = parseScale(el);
-
-    // recalc left-animTime based on current animation (if element is partially opened and need to hide it)
-    timeMs *= Math.abs(to - from);
-
-    let start = 0;
-    const animate = (t: DOMHighResTimeStamp): void => {
-      if (!el.isConnected) {
-        finish(); // possible when item is removed unexpectedly
-        return;
-      }
-
-      if (!start) {
-        start = t;
-      }
-
-      const cur = Math.min(t - start, timeMs); // to make sure the element stops at exactly pointed value
-      const v = cur / timeMs;
-      const scale = from + (to - from) * v;
-
-      el.style.transformOrigin = el.getAttribute("position") === "top" ? "bottom" : "top";
-      styleTransform(el, "scaleY", scale);
-      scale !== 0 &&
-        nested.forEach((e) => {
-          e.el.style.transform = `${e.prev}scaleY(${1 / scale})`;
-          e.el.style.transformOrigin = "bottom";
-        });
-
-      if (cur === timeMs) {
-        finish();
-        return;
-      }
-
-      frames.set(el, window.requestAnimationFrame(animate));
-    };
-    frames.set(el, window.requestAnimationFrame(animate));
-  }) as WUP.PromiseCancel<void>;
-
-  p.stop = (isRst = true) => {
-    const frameId = frames.get(el);
-    if (frameId != null) {
-      window.cancelAnimationFrame(frameId);
-      isRst ? reset() : frames.delete(el);
+  const p = animate(from, to, ms, (v, _t, isLast) => {
+    if (!el.isConnected) {
+      p.stop(false);
     }
-    return Promise.resolve();
-  };
+    if (isLast || !el.isConnected) {
+      reset();
+      return;
+    }
+    el.style.transformOrigin = el.getAttribute("position") === "top" ? "bottom" : "top";
+    styleTransform(el, "scaleY", v);
+    v !== 0 &&
+      nested.forEach((e) => {
+        e.el.style.transform = `${e.prev}scaleY(${1 / v})`;
+        e.el.style.transformOrigin = "bottom";
+      });
+  });
 
   return p;
 }
@@ -146,7 +96,7 @@ export default function animateDropdown(
  * @param callback fired on every window.requestAnimationFrame() is fired
  * @param force set `true` to ignore window.matchMedia("(prefers-reduced-motion)")
  * @returns promise with extra functions; resolves when animation is finished & rejectes when animation is canceled */
-export function animateTry(
+export function animate(
   from: number,
   to: number,
   ms: number,
@@ -178,7 +128,6 @@ export function animateTry(
     frameId = window.requestAnimationFrame(step);
   }) as WUP.PromiseCancel<void>;
 
-  // todo testcase: call animate().stop() in NODEJS it throws err but in Chrome not
   p.stop = (isFinish = true) => {
     if (!isFinish) {
       frameId && window.cancelAnimationFrame(frameId);
@@ -189,10 +138,7 @@ export function animateTry(
     return p;
   };
 
-  // todo develop p.rollback ???
-  // p.rollback = ()=>{
-
-  // }
-
+  // NiceToHave: develop p.rollback
+  // p.rollback = ()=>{ ... }
   return p;
 }
