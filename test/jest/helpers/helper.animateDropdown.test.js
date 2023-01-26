@@ -147,7 +147,7 @@ describe("helper.animateDropdown", () => {
     // open
     let p = animateDropdown(el, step * 3, false);
     let isResolvedOpen = false;
-    p.then(() => (isResolvedOpen = true)).catch(() => null);
+    p.then((v) => (isResolvedOpen = v)).catch(() => null);
 
     await nextFrame();
     expect(isResolvedOpen).toBe(false);
@@ -171,7 +171,7 @@ describe("helper.animateDropdown", () => {
     p.stop(false);
     let isResolvedClose = false;
     p = animateDropdown(el, step * 3, true);
-    p.then(() => (isResolvedClose = true)).catch(() => null);
+    p.then((v) => (isResolvedClose = v)).catch(() => null);
 
     await nextFrame();
     expect(isResolvedOpen).toBe(false);
@@ -299,7 +299,7 @@ describe("helper.animateDropdown", () => {
     await nextFrame();
     el.remove();
     await nextFrame();
-    expect(spyThen).not.toBeCalled();
+    expect(spyThen).lastCalledWith(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<ul style="animation-name: none;"><ul style=""><li>Some text here</li></ul></ul>"`
     );
@@ -334,7 +334,7 @@ describe("helper.animateDropdown", () => {
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<ul style="animation-name: none; transform-origin: top; transform: scaleY(0);"><ul><li>Some text here</li></ul></ul>"`
     );
-    expect(spyThen).not.toBeCalled();
+    expect(spyThen).lastCalledWith(false);
   });
 
   test("options timeMs is 0", async () => {

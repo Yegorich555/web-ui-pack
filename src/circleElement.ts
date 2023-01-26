@@ -172,7 +172,7 @@ export default class WUPCircleElement extends WUPBaseElement {
     this.gotRenderItems();
   }
 
-  _animation?: WUP.PromiseCancel<void>;
+  _animation?: WUP.PromiseCancel<boolean>;
   protected gotRenderItems(): void {
     this._animation?.stop(false);
 

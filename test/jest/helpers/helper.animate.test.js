@@ -91,17 +91,15 @@ describe("helper.animate", () => {
     spy.mockClear();
     spyThen.mockClear();
     spyThenStop.mockClear();
-    const spyCatch = jest.fn();
     p = animate(0, 100, step * 2, spy);
-    p.then(spyThen).catch(spyCatch);
+    p.then(spyThen);
 
     p.stop(false).then(spyThenStop);
     expect(spy).not.toBeCalled();
     expect(spyThen).not.toBeCalled();
     await nextFrame();
     expect(spy).not.toBeCalled();
-    expect(spyThen).not.toBeCalled();
-    expect(spyCatch).toBeCalledTimes(1);
+    expect(spyThen).lastCalledWith(false);
     expect(spyThenStop).toBeCalledTimes(1);
   });
 

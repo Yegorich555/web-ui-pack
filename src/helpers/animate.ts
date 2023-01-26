@@ -10,21 +10,20 @@ declare global {
        * * isFinish:true - Promise is resolved
        * * isFinish:false - Promise is rejected
        * @returns promise resolved when animation stop process is done */
-      stop: (isFinish?: boolean) => Promise<void>;
+      stop: (isFinish?: boolean) => Promise<T>;
     }
   }
 }
 
 /** Animate (open/close) element as dropdown via scale and counter-scale for children
  * @param ms animation time
- * @returns Promise that resolved by animation end
+ * @returns Promise<isFinished> that resolved by animation end;
  * Rules
  * * To define direction set attribute to element position="top" or position="bottom"
- * * Before call it again on the same element don't forget to call stop(false) to cancel prev animation
- * * Don't forget to handle promise.catch for cases when animation is cancelled */
-export function animateDropdown(el: HTMLElement, ms: number, isClose = false): WUP.PromiseCancel<void> {
+ * * Before call it again on the same element don't forget to call stop(false) to cancel prev animation */
+export function animateDropdown(el: HTMLElement, ms: number, isClose = false): WUP.PromiseCancel<boolean> {
   if (!ms) {
-    const p = Promise.resolve();
+    const p = Promise.resolve(false);
     return Object.assign(p, { stop: () => p });
   }
   el.style.animationName = "none"; // disable default css-animation
@@ -95,20 +94,20 @@ export function animateDropdown(el: HTMLElement, ms: number, isClose = false): W
  * @param ms time of animation
  * @param callback fired on every window.requestAnimationFrame() is fired
  * @param force set `true` to ignore window.matchMedia("(prefers-reduced-motion)")
- * @returns promise with extra functions; resolves when animation is finished & rejectes when animation is canceled */
+ * @returns promise with extra functions; resolves `true` when animation is finished or resolves `false` when animation is canceled */
 export function animate(
   from: number,
   to: number,
   ms: number,
   callback: (v: number, ms: number, isLast: boolean, timeStamp: number) => void,
   force?: boolean
-): WUP.PromiseCancel<void> {
+): WUP.PromiseCancel<boolean> {
   let isFinished = ms < 10 || (!force && window.matchMedia("(prefers-reduced-motion)").matches);
 
   let frameId: number | undefined;
-  let rejMe: (err: any) => void;
-  const p = new Promise<void>((res, rej) => {
-    rejMe = rej;
+  let resMe: (isEnd: boolean) => void;
+  const p = new Promise<boolean>((res) => {
+    resMe = res;
     let start = 0;
     const step = (t: number): void => {
       if (start === 0) {
@@ -122,19 +121,19 @@ export function animate(
       }
 
       callback(v, elapsed, isLast, t);
-      isLast && res();
+      isLast && res(true);
     };
 
     frameId = window.requestAnimationFrame(step);
-  }) as WUP.PromiseCancel<void>;
+  }) as WUP.PromiseCancel<boolean>;
 
   p.stop = (isFinish = true) => {
     if (!isFinish) {
       frameId && window.cancelAnimationFrame(frameId);
-      rejMe(new Error("Animation cancelled by stop(isFinish:false)"));
-      return Promise.resolve();
+      resMe(false);
+    } else {
+      isFinished = true;
     }
-    isFinished = true;
     return p;
   };
 

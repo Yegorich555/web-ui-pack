@@ -509,29 +509,22 @@ export default class WUPPopupElement<
   /** Required to stop previous animations/timeouts (for case when option animation is changed) */
   _stopAnimation?: () => void;
   protected goAnimate(animTime: number, isClose: boolean): Promise<boolean> {
-    let pr: Promise<boolean>;
     if (this._opts.animation === Animations.drawer) {
       const pa = animateDropdown(this, animTime, isClose);
-      pr = new Promise((res, rej) => {
-        this._stopAnimation = () => {
-          delete this._stopAnimation;
-          pa.stop(this._opts.animation !== Animations.drawer); // rst animation state only if animation changed
-          res(false);
-        };
-        pa.then(() => res(true)).catch(rej);
-      });
-    } else {
-      pr = new Promise((resolve) => {
-        const t = setTimeout(() => resolve(true), animTime);
-        this._stopAnimation = () => {
-          delete this._stopAnimation;
-          clearTimeout(t);
-          resolve(false);
-        };
-      });
+      this._stopAnimation = () => {
+        delete this._stopAnimation;
+        pa.stop(this._opts.animation !== Animations.drawer); // rst animation state only if animation changed
+      };
+      return pa;
     }
-
-    return pr;
+    return new Promise((resolve) => {
+      const t = setTimeout(() => resolve(true), animTime);
+      this._stopAnimation = () => {
+        delete this._stopAnimation;
+        clearTimeout(t);
+        resolve(false);
+      };
+    });
   }
 
   /** Shows popup if target defined; returns true if successful */
@@ -579,15 +572,13 @@ export default class WUPPopupElement<
       return true;
     }
 
-    return this.goAnimate(animTime, false)
-      .then((isOk) => {
-        if (!isOk) {
-          return false;
-        }
-        wasClosed && this.fireEvent("$show", { cancelable: false });
-        return true;
-      })
-      .catch(() => false);
+    return this.goAnimate(animTime, false).then((isOk) => {
+      if (!isOk) {
+        return false;
+      }
+      wasClosed && this.fireEvent("$show", { cancelable: false });
+      return true;
+    });
   }
 
   _isClosing?: true;

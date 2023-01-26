@@ -237,7 +237,7 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
   protected gotRender(): void {}
 
   #isFirstConn = true;
-  #readyTimeout?: number;
+  #readyTimeout?: ReturnType<typeof setTimeout>;
   /** Browser calls this method when the element is added to the document */
   protected connectedCallback(): void {
     // async requires otherwise attributeChangedCallback doesn't set immediately
@@ -257,7 +257,7 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
   }
 
   _isStopChanges = true;
-  #attrTimer?: number;
+  #attrTimer?: ReturnType<typeof setTimeout>;
   #attrChanged?: string[];
   /** Called when element isReady and one of observedAttributes is changed */
   protected gotAttributeChanged(name: string, oldValue: string, newValue: string): void {
