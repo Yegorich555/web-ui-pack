@@ -7,6 +7,10 @@
 - [CalendarControl](src/controls/calendar.ts). Different pickers height after scrolling
 - helper [WUPScrolled](src/helpers/scrolled.ts). maxHeight left after scrolling finished
 
+**New**:
+
+- [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin). Added type **hash**
+
 ## 0.4.0 (Jan 26, 2023)
 
 **BREAKING CHANGES**:
@@ -36,7 +40,6 @@
 
 - [WUPTimeObject](src/objects/timeObject.ts) => `Ordinary class Time with hours & minutes`
 - [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
-- [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
 - helper [mathScaleValue](src/helpers/mathScaleValue)
 - Text based controls. **Mask** supports letters also (previously only digits can be variabled)
 

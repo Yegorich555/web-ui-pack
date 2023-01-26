@@ -9,7 +9,7 @@
   section {
     & > small {
       display: block;
-      margin-bottom: 10px;
+      margin-bottom: var(--spin-pad);
 
       > strong {
         color: #ad0000;
@@ -37,7 +37,9 @@
   .types {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: var(--spin-end);
+    justify-content: center;
+    margin: 0 var(--spin-pad);
 
     > div {
       display: flex;
@@ -132,4 +134,9 @@
 
 .spin71 {
   --spin-2: #b35e03;
+}
+
+.spin82 {
+  --spin-1: #94e7d8;
+  --spin-2: #36d7b7;
 }

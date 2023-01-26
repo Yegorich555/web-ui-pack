@@ -6,6 +6,7 @@ import {
   spinUseDotRoller,
   spinUseDotRing,
   spinUseSpliceRing,
+  spinUseHash,
 } from "web-ui-pack/spinElement";
 import * as h from "../testHelper";
 
@@ -116,6 +117,7 @@ describe("spinElement", () => {
               100% { transform: rotate(360deg); }
             }
             WUP-SPIN {
+              contain: style;
               z-index: 100;
               width: var(--spin-size);
               height: var(--spin-size);
@@ -303,6 +305,7 @@ describe("spinElement", () => {
               100% { transform: rotate(360deg); }
             }
             SPIN-A {
+              contain: style;
               z-index: 100;
               width: var(--spin-size);
               height: var(--spin-size);
@@ -358,6 +361,7 @@ describe("spinElement", () => {
               100% { transform: rotate(360deg); }
             }
             SPIN-B {
+              contain: style;
               z-index: 100;
               width: var(--spin-size);
               height: var(--spin-size);
@@ -430,6 +434,7 @@ describe("spinElement", () => {
               100% { transform: rotate(360deg); }
             }
             SPIN-C {
+              contain: style;
               z-index: 100;
               width: var(--spin-size);
               height: var(--spin-size);
@@ -491,6 +496,7 @@ describe("spinElement", () => {
               100% { transform: rotate(360deg); }
             }
             SPIN-D {
+              contain: style;
               z-index: 100;
               width: var(--spin-size);
               height: var(--spin-size);
@@ -574,6 +580,7 @@ describe("spinElement", () => {
               100% { transform: rotate(360deg); }
             }
             SPIN-E {
+              contain: style;
               z-index: 100;
               width: var(--spin-size);
               height: var(--spin-size);
@@ -667,6 +674,7 @@ describe("spinElement", () => {
               100% { transform: rotate(360deg); }
             }
             SPIN-F {
+              contain: style;
               z-index: 100;
               width: var(--spin-size);
               height: var(--spin-size);
@@ -761,6 +769,113 @@ describe("spinElement", () => {
                       transform: rotate(330deg);
                     }
                   </style>"
+    `);
+  });
+
+  test("style > spinUseHash", () => {
+    document.head.firstChild.textContent = "";
+    document.body.innerHTML = "";
+    class SpinG extends WUPSpinElement {}
+    customElements.define("spin-g", SpinG);
+    spinUseHash(SpinG);
+    document.body.appendChild(document.createElement("spin-g"));
+    jest.advanceTimersToNextTimer();
+
+    expect(document.body.innerHTML).toMatchInlineSnapshot(
+      `"<spin-g style="position: absolute; transform: translate(300px,200px);" aria-label="Loading. Please wait"><div></div><div></div><div fade="" style="transform: translate(-300px,-200px); width: 600px; height: 400px;"></div></spin-g>"`
+    );
+    expect(document.head.innerHTML).toMatchInlineSnapshot(`
+      "<style>
+            @keyframes WUP-SPIN-1 {
+              100% { transform: rotate(360deg); }
+            }
+            SPIN-G {
+              contain: style;
+              z-index: 100;
+              width: var(--spin-size);
+              height: var(--spin-size);
+              top:0; left:0;
+              pointer-events: none;
+            }
+            SPIN-G,
+            SPIN-G div {
+              display: inline-block;
+              box-sizing: border-box;
+              border-radius: 50%;
+            }
+            SPIN-G div {
+              animation: WUP-SPIN-1 var(--spin-speed) linear infinite;
+              width: 100%; height: 100%;
+              left:0; top:0;
+            }
+            SPIN-G div[fade] {
+               display: block;
+               position: absolute;
+               left:0; top:0;
+               animation: none;
+               border: none;
+               border-radius: var(--border-radius);
+               transform: none;
+               z-index: -1;
+               background: var(--spin-fade);
+            }
+            SPIN-G div[fade]::after { content: none; }
+            @keyframes WUP-SPIN-4-1 {
+                  0% {
+                    width: var(--spin-item-size);
+                    box-shadow: var(--spin-1) var(--spin-end) var(--spin-pad2), var(--spin-1) var(--spin-start) var(--spin-pad);
+                  }
+                  35% {
+                    width: var(--spin-size);
+                    box-shadow: var(--spin-1) 0 var(--spin-pad2), var(--spin-1) 0 var(--spin-pad);
+                  }
+                  70% {
+                    width: var(--spin-item-size);
+                    box-shadow: var(--spin-1) var(--spin-start) var(--spin-pad2), var(--spin-1) var(--spin-end) var(--spin-pad);
+                  }
+                  100% { box-shadow: var(--spin-1) var(--spin-end) var(--spin-pad2), var(--spin-1) var(--spin-start) var(--spin-pad); }
+                }
+                @keyframes WUP-SPIN-4-2 {
+                  0% {
+                    height: var(--spin-item-size);
+                    box-shadow: var(--spin-2) var(--spin-pad) var(--spin-end), var(--spin-2) var(--spin-pad2) var(--spin-start);
+                  }
+                  35% {
+                    height: var(--spin-size);
+                    box-shadow: var(--spin-2) var(--spin-pad) 0, var(--spin-2) var(--spin-pad2) 0;
+                  }
+                  70% {
+                    height: var(--spin-item-size);
+                    box-shadow: var(--spin-2) var(--spin-pad) var(--spin-start), var(--spin-2) var(--spin-pad2) var(--spin-end);
+                  }
+                  100% { box-shadow: var(--spin-2) var(--spin-pad) var(--spin-end), var(--spin-2) var(--spin-pad2) var(--spin-start); }
+                }
+                :root {
+                  --spin-2: #b35e03;
+                  --spin-item-size: calc(var(--spin-size) / 8);
+                  --spin-end: calc((var(--spin-size) - var(--spin-item-size)) / 2);
+                  --spin-start: calc((var(--spin-end)) * -1);
+                  --spin-pad: calc(var(--spin-size) / 2 - var(--spin-size) / 3 + var(--spin-item-size) / 3);
+                  --spin-pad2: calc(-1 * var(--spin-pad));
+                }
+                SPIN-G {
+                  position: relative;
+                  padding: 3px;
+                }
+                SPIN-G>div {
+                  position: absolute;
+                  transform: translate(-50%, -50%) rotate(165deg);
+                  top:50%; left:50%;
+                  width: var(--spin-item-size);
+                  height: var(--spin-item-size);
+                  border-radius: calc(var(--spin-item-size) / 2);
+                }
+                SPIN-G>div:nth-child(1) {
+                  animation: var(--spin-speed) ease 0s infinite normal none running WUP-SPIN-4-1;
+                }
+                SPIN-G>div:nth-child(2) {
+                  animation: var(--spin-speed) ease 0s infinite normal none running WUP-SPIN-4-2;
+                }</style>"
     `);
   });
 });
