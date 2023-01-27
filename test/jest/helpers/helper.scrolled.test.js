@@ -4,7 +4,7 @@ import * as h from "../../testHelper";
 
 let ul = document.createElement("ul");
 
-let nextFrames = (n = 5) => Promise.resolve(n);
+let nextFrame = (n = 5) => Promise.resolve(n);
 let itemNum = 0;
 const createItem = (i, forceNum = null) => {
   itemNum = forceNum ?? itemNum + i;
@@ -17,13 +17,7 @@ const createItem = (i, forceNum = null) => {
 
 beforeEach(() => {
   jest.useFakeTimers();
-  const na = h.useFakeAnimation().nextFrame;
-  nextFrames = async (n) => {
-    for (let i = 0; i < n; ++i) {
-      await na();
-    }
-    return n;
-  };
+  nextFrame = h.useFakeAnimation().nextFrame;
   ul = document.body.appendChild(document.createElement("ul"));
   jest.spyOn(ul, "offsetHeight", "get").mockImplementation(() => 100);
   jest.spyOn(ul, "offsetWidth", "get").mockImplementation(() => 60);
@@ -43,7 +37,7 @@ describe("helper.onScrollStop", () => {
     onRender.last = () => onRender.mock.calls[onRender.mock.calls.length - 1];
     const s = new WUPScrolled(ul, { onRender });
     expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="1"></li></ul>"`);
-    await nextFrames(1); // to fire 1st scrollToRange
+    await nextFrame(1); // to fire 1st scrollToRange
     expect(onRender).toBeCalledTimes(0);
     expect(s.state.items).toEqual(Array.prototype.slice.call(ul.children));
 
@@ -52,7 +46,7 @@ describe("helper.onScrollStop", () => {
     expect(ul.outerHTML).toMatchInlineSnapshot(
       `"<ul style="overflow: hidden; max-height: 100px;"><li num="1"></li><li num="2"></li></ul>"`
     ); // expected 2items: 2 after 1
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="2"></li></ul>"`); // expected only 2nd item
     expect(onRender.last()).toMatchInlineSnapshot(`
       [
@@ -82,7 +76,7 @@ describe("helper.onScrollStop", () => {
     expect(ul.outerHTML).toMatchInlineSnapshot(
       `"<ul style="overflow: hidden; max-height: 100px;"><li num="1"></li><li num="2"></li></ul>"`
     );
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="1"></li></ul>"`);
     expect(onRender.last()).toMatchInlineSnapshot(`
       [
@@ -111,7 +105,7 @@ describe("helper.onScrollStop", () => {
     expect(ul.outerHTML).toMatchInlineSnapshot(
       `"<ul style="overflow: hidden; max-height: 100px;"><li num="0"></li><li num="1"></li></ul>"`
     );
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="0"></li></ul>"`);
 
     expect(s.state).toMatchInlineSnapshot(`
@@ -130,7 +124,7 @@ describe("helper.onScrollStop", () => {
     expect(ul.outerHTML).toMatchInlineSnapshot(
       `"<ul style="overflow: hidden; max-height: 100px;"><li num="0"></li><li num="1"></li></ul>"`
     );
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="1"></li></ul>"`);
 
     // swipeDown => scrollUp
@@ -138,7 +132,7 @@ describe("helper.onScrollStop", () => {
     expect(ul.outerHTML).toMatchInlineSnapshot(
       `"<ul style="overflow: hidden; max-height: 100px;"><li num="0"></li><li num="1"></li></ul>"`
     );
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="0"></li></ul>"`);
 
     // no new items - no scroll
@@ -147,7 +141,7 @@ describe("helper.onScrollStop", () => {
     expect(ul.outerHTML).toMatchInlineSnapshot(
       `"<ul style="overflow: hidden; max-height: 100px;"><li num="0"></li></ul>"`
     );
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.outerHTML).toMatchInlineSnapshot(
       `"<ul style="overflow: hidden; max-height: 100px;"><li num="0"></li></ul>"`
     );
@@ -157,7 +151,7 @@ describe("helper.onScrollStop", () => {
     expect(ul.outerHTML).toMatchInlineSnapshot(
       `"<ul style="overflow: hidden; max-height: 100px;"><li num="0"></li></ul>"`
     );
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.outerHTML).toMatchInlineSnapshot(
       `"<ul style="overflow: hidden; max-height: 100px;"><li num="0"></li></ul>"`
     );
@@ -168,7 +162,7 @@ describe("helper.onScrollStop", () => {
     const onRender = jest.fn().mockImplementation((dir) => [createItem(dir)]);
     ul._scrolled = new WUPScrolled(ul, { onRender });
     expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="1"></li></ul>"`);
-    await nextFrames(1); // to fire 1st scrollToRange
+    await nextFrame(1); // to fire 1st scrollToRange
     expect(onRender).toBeCalledTimes(0);
 
     ul.setAttribute("tabindex", "0");
@@ -180,7 +174,7 @@ describe("helper.onScrollStop", () => {
     expect(ul.outerHTML).toMatchInlineSnapshot(
       `"<ul style="overflow: hidden; max-height: 100px;" tabindex="0"><li num="1"></li><li num="2"></li></ul>"`
     );
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;" tabindex="0"><li num="2"></li></ul>"`);
 
     // PageUp
@@ -189,19 +183,19 @@ describe("helper.onScrollStop", () => {
     expect(ul.outerHTML).toMatchInlineSnapshot(
       `"<ul style="overflow: hidden; max-height: 100px;" tabindex="0"><li num="1"></li><li num="2"></li></ul>"`
     );
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;" tabindex="0"><li num="1"></li></ul>"`);
 
     // ArrowDown
     ul.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
     expect(onRender).toBeCalledTimes(3);
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;" tabindex="0"><li num="2"></li></ul>"`);
 
     // ArrowUp
     ul.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
     expect(onRender).toBeCalledTimes(4);
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;" tabindex="0"><li num="1"></li></ul>"`);
 
     onRender.mockClear();
@@ -230,7 +224,7 @@ describe("helper.onScrollStop", () => {
     onRender.last = () => onRender.mock.calls[onRender.mock.calls.length - 1];
     ul._scrolled = new WUPScrolled(ul, { onRender, isXScroll: true });
     expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="1"></li></ul>"`);
-    await nextFrames(1); // to fire 1st scrollToRange
+    await nextFrame(1); // to fire 1st scrollToRange
 
     await h.userSwipe(ul.firstElementChild, { movements: [{ dx: 0, dy: -50 }] });
     expect(onRender).not.toBeCalled();
@@ -240,7 +234,7 @@ describe("helper.onScrollStop", () => {
     expect(ul.outerHTML).toMatchInlineSnapshot(
       `"<ul style="overflow: hidden; max-width: 60px;"><li num="1"></li><li num="2"></li></ul>"`
     );
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="2"></li></ul>"`);
 
     // swipeRight=> scrollLeft
@@ -248,19 +242,19 @@ describe("helper.onScrollStop", () => {
     expect(ul.outerHTML).toMatchInlineSnapshot(
       `"<ul style="overflow: hidden; max-width: 60px;"><li num="1"></li><li num="2"></li></ul>"`
     );
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="1"></li></ul>"`);
 
     // ArrowDown
     ul.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
     expect(onRender).toBeCalledTimes(3);
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="2"></li></ul>"`);
 
     // ArrowUp
     ul.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true, cancelable: true }));
     expect(onRender).toBeCalledTimes(4);
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="1"></li></ul>"`);
 
     onRender.mockClear();
@@ -280,7 +274,7 @@ describe("helper.onScrollStop", () => {
       return [li];
     });
     const s = new WUPScrolled(ul, { onRender, scrollByClick: true, pages: { current: 2, before: 1, after: 1 } });
-    await nextFrames(1); // to fire 1st scrollToRange
+    await nextFrame(1); // to fire 1st scrollToRange
 
     // during the init if option pages is pointed => render first items
     expect(onRender).toBeCalledTimes(3);
@@ -290,7 +284,7 @@ describe("helper.onScrollStop", () => {
     expect(ul.innerHTML).toMatchInlineSnapshot(
       `"<li num="1"></li><li num="2" prev="2"></li><li num="3" cur="3"></li><li num="4"></li>"`
     );
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.innerHTML).toMatchInlineSnapshot(
       `"<li num="2" prev="2"></li><li num="3" cur="3"></li><li num="4"></li>"`
     );
@@ -300,7 +294,7 @@ describe("helper.onScrollStop", () => {
     expect(ul.innerHTML).toMatchInlineSnapshot(
       `"<li num="1"></li><li num="2" cur="2"></li><li num="3" prev="3"></li><li num="4"></li>"`
     );
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.innerHTML).toMatchInlineSnapshot(
       `"<li num="1"></li><li num="2" cur="2"></li><li num="3" prev="3"></li>"`
     );
@@ -312,7 +306,7 @@ describe("helper.onScrollStop", () => {
     expect(ul.innerHTML).toMatchInlineSnapshot(
       `"<li num="-1"></li><li num="0" cur="0"></li><li num="1" prev="1"></li><li num="2" prev="2"></li><li num="3" prev="3"></li>"`
     );
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.innerHTML).toMatchInlineSnapshot(
       `"<li num="-1"></li><li num="0" cur="0"></li><li num="1" prev="1"></li>"`
     );
@@ -329,7 +323,7 @@ describe("helper.onScrollStop", () => {
     expect(ul.innerHTML).toMatchInlineSnapshot(
       `"<li num="-1"></li><li num="0" prev="0"></li><li num="1" cur="1"></li><li num="2"></li>"`
     );
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.innerHTML).toMatchInlineSnapshot(
       `"<li num="0" prev="0"></li><li num="1" cur="1"></li><li num="2"></li>"`
     );
@@ -360,7 +354,7 @@ describe("helper.onScrollStop", () => {
       return [li];
     });
     const s = new WUPScrolled(ul, { onRender, pages: { current: 2, total: 3 } });
-    await nextFrames(1); // to fire 1st scrollToRange
+    await nextFrame(1); // to fire 1st scrollToRange
     expect(ul.innerHTML).toMatchInlineSnapshot(`"<li num="2"></li>"`); // no attr [cur] because next.items always empty
     expect(onRender).toBeCalledTimes(1);
 
@@ -370,14 +364,14 @@ describe("helper.onScrollStop", () => {
 
     s.goTo(false);
     expect(ul.innerHTML).toMatchInlineSnapshot(`"<li num="1"></li><li num="2" prev="2"></li>"`);
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.innerHTML).toMatchInlineSnapshot(`"<li num="1"></li>"`);
     expect(onRender).toBeCalledTimes(1);
 
     onRender.mockClear();
     const spyThen = jest.fn();
     s.goTo(0).then(spyThen);
-    await nextFrames(5);
+    await nextFrame(5);
     expect(onRender).toBeCalledTimes(1);
     expect(spyThen).toBeCalledTimes(1);
 
@@ -405,49 +399,88 @@ describe("helper.onScrollStop", () => {
       scrollByClick: true,
       pages: { current: 11, total: 12, before: 1, after: 1, cycled: true },
     });
-    await nextFrames(1); // to fire 1st scrollToRange
+    await nextFrame(1); // to fire 1st scrollToRange
     expect(ul.innerHTML).toMatchInlineSnapshot(`"<li num="10"></li><li num="11" cur="11"></li><li num="0"></li>"`);
     expect(onRender).toBeCalledTimes(3);
 
+    onRender.mockClear();
     await h.userClick(ul.lastElementChild); // scrolling must be to the nearest item
+    expect(onRender).toBeCalledTimes(1);
     expect(ul.innerHTML).toMatchInlineSnapshot(
       `"<li num="10"></li><li num="11" prev="11"></li><li num="0" cur="0"></li><li num="1"></li>"`
     );
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.innerHTML).toMatchInlineSnapshot(
       `"<li num="11" prev="11"></li><li num="0" cur="0"></li><li num="1"></li>"`
     );
-    expect(onRender).toBeCalledTimes(4);
 
+    // via click
+    onRender.mockClear();
     await h.userClick(ul.firstElementChild); // scrolling must be to the nearest item
+    expect(onRender).toBeCalledTimes(1);
     expect(ul.innerHTML).toMatchInlineSnapshot(
       `"<li num="10"></li><li num="11" cur="11"></li><li num="0" prev="0"></li><li num="1"></li>"`
     );
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.innerHTML).toMatchInlineSnapshot(
       `"<li num="10"></li><li num="11" cur="11"></li><li num="0" prev="0"></li>"`
     );
-    expect(onRender).toBeCalledTimes(5);
 
+    // via goTo
+    onRender.mockClear();
+    s.goTo(0);
+    expect(onRender).toBeCalledTimes(1);
+    expect(ul.innerHTML).toMatchInlineSnapshot(
+      `"<li num="10"></li><li num="11" prev="11"></li><li num="0" cur="0"></li><li num="1"></li>"`
+    );
+    await nextFrame(5);
+    expect(ul.innerHTML).toMatchInlineSnapshot(
+      `"<li num="11" prev="11"></li><li num="0" cur="0"></li><li num="1"></li>"`
+    );
+
+    onRender.mockClear();
+    s.goTo(false);
+    expect(onRender).toBeCalledTimes(1);
+    expect(ul.innerHTML).toMatchInlineSnapshot(
+      `"<li num="10"></li><li num="11" cur="11"></li><li num="0" prev="0"></li><li num="1"></li>"`
+    );
+    await nextFrame(5);
+    expect(ul.innerHTML).toMatchInlineSnapshot(
+      `"<li num="10"></li><li num="11" cur="11"></li><li num="0" prev="0"></li>"`
+    );
+
+    onRender.mockClear();
     await h.userClick(ul.firstElementChild);
+    expect(onRender).toBeCalledTimes(1);
     expect(ul.innerHTML).toMatchInlineSnapshot(
       `"<li num="9"></li><li num="10" cur="10"></li><li num="11" prev="11"></li><li num="0" prev="0"></li>"`
     );
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.innerHTML).toMatchInlineSnapshot(
       `"<li num="9"></li><li num="10" cur="10"></li><li num="11" prev="11"></li>"`
     );
-    expect(onRender).toBeCalledTimes(6);
 
-    s.goTo(9);
-    await nextFrames(5);
-    expect(onRender).toBeCalledTimes(7);
+    onRender.mockClear();
+    s.goTo(8); // curent: 10
+    await nextFrame(5);
+    expect(onRender).toBeCalledTimes(2);
 
-    // conver re-init
-    s.options.pages.current = 1;
+    // cover re-init
+    s.options.pages.current = 1; // without total & cycled
     s.init();
-    await nextFrames(5);
+    await nextFrame(5);
     expect(ul.innerHTML).toMatchInlineSnapshot(`"<li num="0"></li><li num="1" cur="1"></li><li num="2"></li>"`);
+
+    // single page: without options.pages
+    onRender.mockClear();
+    s.options.pages = undefined;
+    itemNum = 0;
+    createItem(0);
+    expect(() => s.init()).not.toThrow();
+    s.goTo(3);
+    expect(onRender).toBeCalledTimes(3);
+    await nextFrame(5);
+    expect(ul.innerHTML).toMatchInlineSnapshot(`"<li num="3"></li>"`);
   });
 
   test("dispose()", async () => {

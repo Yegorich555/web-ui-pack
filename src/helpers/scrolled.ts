@@ -56,7 +56,7 @@ export default class WUPScrolled {
   constructor(protected el: HTMLElement, public options: WUP.Scrolled.Options) {
     this.init();
 
-    this.disposeLst.push(onScroll(el, (d) => this.goTo(this.state.index + d), options));
+    this.disposeLst.push(onScroll(el, (v) => this.goTo(v === 1), options));
     this.disposeLst.push(onEvent(el, "keydown", (e) => this.gotKeyDown(e), { passive: false }));
     options.scrollByClick && this.disposeLst.push(onEvent(el, "click", (e) => this.gotClick(e), { passive: false }));
   }
@@ -123,8 +123,10 @@ export default class WUPScrolled {
         default:
           break;
       }
-      inc && e.preventDefault();
-      this.goTo(this.state.index + inc);
+      if (inc) {
+        e.preventDefault();
+        this.goTo(inc === 1);
+      }
     }
   }
 
@@ -146,7 +148,7 @@ export default class WUPScrolled {
   }
 
   /** Get next page according to options.pages */
-  incrementPage(pIndex: number, inc: number, restrict = false): number {
+  incrementPage(pIndex: number, inc: number, allowOverflow?: boolean): number {
     pIndex += inc;
     const p = this.options.pages;
     if (p) {
@@ -155,7 +157,7 @@ export default class WUPScrolled {
           throw new Error("option [pages.cycled] doesn't work without [pages.total]");
         }
         pIndex = (p.total + pIndex) % p.total;
-      } else if (restrict) {
+      } else if (!allowOverflow) {
         pIndex = Math.min(Math.max(pIndex, 0), p.total ? p.total - 1 : Number.MAX_SAFE_INTEGER);
       }
     }
@@ -178,6 +180,18 @@ export default class WUPScrolled {
     if (el.offsetWidth && isXScroll && !maxWidth?.endsWith("px")) el.style.maxWidth = `${el.offsetWidth}px`;
   }
 
+  /** Returns nearest way between prev & next if cycled */
+  getNearest(prev: number, next: number, total: number): { isForward: boolean; count: number } {
+    const diff1 = next - prev;
+    const cnt1 = Math.abs(diff1);
+    const diff2 = total - cnt1;
+    const cnt2 = Math.abs(diff2);
+    if (cnt1 <= cnt2) {
+      return { isForward: diff1 > 0, count: cnt1 };
+    }
+    return { isForward: diff1 < diff2, count: cnt2 };
+  }
+
   #scrollNum = 0;
   // WARN expected goTo possible only to visible/rendered pages
   /** Go to next/prev pages */
@@ -185,42 +199,49 @@ export default class WUPScrolled {
   /** Go to specific page */
   goTo(pageIndex: number, smooth?: boolean): Promise<void>;
   goTo(pi: number | boolean, smooth = true): Promise<void> {
+    let isForward: boolean;
+    let count = 1; // render count
     if (pi === true) {
-      pi = this.state.index + 1;
+      isForward = true;
     } else if (pi === false) {
-      pi = this.state.index - 1;
+      isForward = false;
+    } else {
+      const p = this.options.pages;
+      pi = p ? Math.max(0, pi) : pi;
+      pi = p?.total ? Math.min(pi, p.total) : pi; // don't allow goTo outside range
+      if (p?.cycled) {
+        const r = this.getNearest(this.state.index, pi, p.total!);
+        isForward = r.isForward;
+        count = r.count;
+      } else {
+        const diff = pi - this.state.index;
+        isForward = diff > 0;
+        count = Math.abs(diff);
+      }
+    }
+
+    if (pi === this.state.index) {
+      return Promise.resolve(); // no-changes
     }
 
     this.tryFixSize();
     // const prevScroll = { h: this.el.scrollHeight, w: this.el.scrollWidth };
     const restoreScroll = this.saveScroll();
 
-    // find nearest
-    if (this.options.pages?.cycled) {
-      const iPrev = this.pages.findIndex((pr) => pr.index === this.state.index);
-      const iNext = this.pages.findIndex((pr) => pr.index === pi);
-      if (pi < this.state.index && iNext > iPrev) {
-        pi += this.options.pages.total!; // when 11 => 0 and 11 rendered after 0
-      } else if (this.state.index === 0 && iNext < iPrev) {
-        pi -= this.options.pages.total!; // when 0 => 11 and 11 rendered before 0
-      }
-    }
-
-    const inc = pi - this.state.index;
-    const isNext = pi > this.state.index;
-
     const pagesRemove: WUP.Scrolled.State[] = [];
     let wasAdded = false;
+
     // -2: -1: -2,
-    for (let i = 1; i <= Math.abs(inc); ++i) {
-      const dinc = isNext ? 1 : -1;
-      pi = this.incrementPage(this.state.index, dinc, true);
+    for (let i = 1; i <= count; ++i) {
+      const inc = isForward ? 1 : -1;
+      pi = this.incrementPage(this.state.index, inc);
       if (this.state.index === pi) {
         break; // no-render if no changes
       }
       const renderIndex = this.incrementPage(
         pi,
-        isNext ? this.options.pages?.after || 0 : (this.options.pages?.before || 0) * -1
+        isForward ? this.options.pages?.after || 0 : (this.options.pages?.before || 0) * -1,
+        true
       );
 
       const nextState: WUP.Scrolled.State = {
@@ -229,12 +250,12 @@ export default class WUPScrolled {
         items: this.pages.find((p) => p.index === pi)?.items || [],
       };
 
-      const itemsAdd = this.options.onRender(dinc, renderIndex, this.state, nextState);
+      const itemsAdd = this.options.onRender(inc, renderIndex, this.state, nextState);
       if (!itemsAdd?.length) {
         break; // return Promise.resolve(); // if no new items
       }
       wasAdded = true;
-      const pageRemove = isNext ? this.pages.shift()! : this.pages.pop()!;
+      const pageRemove = isForward ? this.pages.shift()! : this.pages.pop()!;
       pageRemove.items.forEach((a) => ((a as any).__scrollRemove = true));
       pagesRemove.push(pageRemove);
 
@@ -244,7 +265,7 @@ export default class WUPScrolled {
       };
 
       pageAdd.items.forEach((a) => delete (a as any).__scrollRemove);
-      if (isNext) {
+      if (isForward) {
         this.el.append(...pageAdd.items);
         this.pages.push(pageAdd);
       } else {
@@ -257,6 +278,7 @@ export default class WUPScrolled {
       nextState.items = nextState.items.length ? nextState.items : pageAdd.items; // if only 1 page rendered at once
       this.state = nextState;
     }
+
     if (!wasAdded) {
       return Promise.resolve();
     }
