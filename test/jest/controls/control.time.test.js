@@ -295,6 +295,8 @@ describe("control.date", () => {
       `"<div id="txt2" role="application"><ul aria-label="Hours" style="overflow: hidden;"><li>10</li><li>11</li><li aria-selected="true">12</li><li>01</li><li>02</li></ul><ul aria-label="Minutes" style="overflow: hidden;"><li>57</li><li>58</li><li aria-selected="true">59</li><li>00</li><li>01</li></ul><ul aria-label="AM PM" style="overflow: hidden;"><li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true"></li></ul><mark aria-hidden="true">:</mark></div><div group=""><button type="button" aria-label="Ok" tabindex="-1"></button><button type="button" aria-label="Cancel" tabindex="-1"></button></div>"`
     );
 
+    const { nextFrame } = h.useFakeAnimation();
+
     const isPressKeyPrevented = (key = "Arrow", opts = { shiftKey: false, ctrlKey: false }) => {
       const isPrevented = !el.$refInput.dispatchEvent(
         new KeyboardEvent("keydown", { key, cancelable: true, bubbles: true, ...opts })
@@ -308,19 +310,22 @@ describe("control.date", () => {
 
     expect(isPressKeyPrevented("ArrowDown")).toBe(true);
     expect(el.querySelector("[focused]")?.textContent).toBe("01");
+    await nextFrame(5);
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
-        "<li>10</li><li>11</li><li aria-selected="false" id="txt3">12</li><li aria-selected="true" aria-label="01:59 PM" id="txt4" focused="">01</li><li>02</li><li>03</li>",
+        "<li>11</li><li aria-selected="false" id="txt3">12</li><li aria-selected="true" aria-label="01:59 PM" id="txt4" focused="">01</li><li>02</li><li>03</li>",
         "<li>57</li><li>58</li><li aria-selected="true">59</li><li>00</li><li>01</li>",
         "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true"></li>",
       ]
     `);
+
     expect(isPressKeyPrevented("ArrowUp")).toBe(true);
     expect(isPressKeyPrevented("ArrowUp")).toBe(true);
     expect(el.querySelector("[focused]")?.textContent).toBe("11");
+    await nextFrame(5);
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
-        "<li>09</li><li>10</li><li aria-selected="true" aria-label="11:59 PM" id="txt17" focused="">11</li><li aria-selected="false" id="txt16">12</li><li aria-selected="false" id="txt15">01</li><li aria-selected="false" id="txt14">02</li><li aria-selected="false" id="txt13">03</li><li aria-selected="false" id="txt12">04</li><li aria-selected="false" id="txt11">05</li><li aria-selected="false" id="txt10">06</li><li aria-selected="false" id="txt9">07</li><li aria-selected="false" id="txt8">08</li><li aria-selected="false" id="txt7">09</li><li aria-selected="false" id="txt6">10</li><li>10</li><li aria-selected="false" id="txt5">11</li><li aria-selected="false" id="txt3">12</li><li aria-selected="false" id="txt4">01</li><li>02</li><li>03</li>",
+        "<li>09</li><li>10</li><li aria-selected="true" aria-label="11:59 PM" id="txt5" focused="">11</li><li aria-selected="false" id="txt3">12</li><li aria-selected="false" id="txt4">01</li>",
         "<li>57</li><li>58</li><li aria-selected="true">59</li><li>00</li><li>01</li>",
         "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true"></li>",
       ]
@@ -336,20 +341,22 @@ describe("control.date", () => {
 
     expect(isPressKeyPrevented("ArrowDown")).toBe(true);
     expect(el.querySelector("[focused]")?.textContent).toBe("00");
+    await nextFrame(5);
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
-        "<li>09</li><li>10</li><li aria-selected="true" id="txt17">11</li><li aria-selected="false" id="txt16">12</li><li aria-selected="false" id="txt15">01</li><li aria-selected="false" id="txt14">02</li><li aria-selected="false" id="txt13">03</li><li aria-selected="false" id="txt12">04</li><li aria-selected="false" id="txt11">05</li><li aria-selected="false" id="txt10">06</li><li aria-selected="false" id="txt9">07</li><li aria-selected="false" id="txt8">08</li><li aria-selected="false" id="txt7">09</li><li aria-selected="false" id="txt6">10</li><li>10</li><li aria-selected="false" id="txt5">11</li><li aria-selected="false" id="txt3">12</li><li aria-selected="false" id="txt4">01</li><li>02</li><li>03</li>",
-        "<li>57</li><li>58</li><li aria-selected="false" id="txt18">59</li><li aria-selected="true" aria-label="11:00 PM" id="txt19" focused="">00</li><li>01</li><li>02</li>",
+        "<li>09</li><li>10</li><li aria-selected="true" id="txt5">11</li><li aria-selected="false" id="txt3">12</li><li aria-selected="false" id="txt4">01</li>",
+        "<li>58</li><li aria-selected="false" id="txt6">59</li><li aria-selected="true" aria-label="11:00 PM" id="txt7" focused="">00</li><li>01</li><li>02</li>",
         "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true"></li>",
       ]
     `);
     expect(isPressKeyPrevented("ArrowUp")).toBe(true);
     expect(isPressKeyPrevented("ArrowUp")).toBe(true);
     expect(el.querySelector("[focused]")?.textContent).toBe("58");
+    await nextFrame(5);
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
-        "<li>09</li><li>10</li><li aria-selected="true" id="txt17">11</li><li aria-selected="false" id="txt16">12</li><li aria-selected="false" id="txt15">01</li><li aria-selected="false" id="txt14">02</li><li aria-selected="false" id="txt13">03</li><li aria-selected="false" id="txt12">04</li><li aria-selected="false" id="txt11">05</li><li aria-selected="false" id="txt10">06</li><li aria-selected="false" id="txt9">07</li><li aria-selected="false" id="txt8">08</li><li aria-selected="false" id="txt7">09</li><li aria-selected="false" id="txt6">10</li><li>10</li><li aria-selected="false" id="txt5">11</li><li aria-selected="false" id="txt3">12</li><li aria-selected="false" id="txt4">01</li><li>02</li><li>03</li>",
-        "<li>56</li><li>57</li><li aria-selected="true" aria-label="11:58 PM" id="txt80" focused="">58</li><li aria-selected="false" id="txt79">59</li><li aria-selected="false" id="txt78">00</li><li aria-selected="false" id="txt77">01</li><li aria-selected="false" id="txt76">02</li><li aria-selected="false" id="txt75">03</li><li aria-selected="false" id="txt74">04</li><li aria-selected="false" id="txt73">05</li><li aria-selected="false" id="txt72">06</li><li aria-selected="false" id="txt71">07</li><li aria-selected="false" id="txt70">08</li><li aria-selected="false" id="txt69">09</li><li aria-selected="false" id="txt68">10</li><li aria-selected="false" id="txt67">11</li><li aria-selected="false" id="txt66">12</li><li aria-selected="false" id="txt65">13</li><li aria-selected="false" id="txt64">14</li><li aria-selected="false" id="txt63">15</li><li aria-selected="false" id="txt62">16</li><li aria-selected="false" id="txt61">17</li><li aria-selected="false" id="txt60">18</li><li aria-selected="false" id="txt59">19</li><li aria-selected="false" id="txt58">20</li><li aria-selected="false" id="txt57">21</li><li aria-selected="false" id="txt56">22</li><li aria-selected="false" id="txt55">23</li><li aria-selected="false" id="txt54">24</li><li aria-selected="false" id="txt53">25</li><li aria-selected="false" id="txt52">26</li><li aria-selected="false" id="txt51">27</li><li aria-selected="false" id="txt50">28</li><li aria-selected="false" id="txt49">29</li><li aria-selected="false" id="txt48">30</li><li aria-selected="false" id="txt47">31</li><li aria-selected="false" id="txt46">32</li><li aria-selected="false" id="txt45">33</li><li aria-selected="false" id="txt44">34</li><li aria-selected="false" id="txt43">35</li><li aria-selected="false" id="txt42">36</li><li aria-selected="false" id="txt41">37</li><li aria-selected="false" id="txt40">38</li><li aria-selected="false" id="txt39">39</li><li aria-selected="false" id="txt38">40</li><li aria-selected="false" id="txt37">41</li><li aria-selected="false" id="txt36">42</li><li aria-selected="false" id="txt35">43</li><li aria-selected="false" id="txt34">44</li><li aria-selected="false" id="txt33">45</li><li aria-selected="false" id="txt32">46</li><li aria-selected="false" id="txt31">47</li><li aria-selected="false" id="txt30">48</li><li aria-selected="false" id="txt29">49</li><li aria-selected="false" id="txt28">50</li><li aria-selected="false" id="txt27">51</li><li aria-selected="false" id="txt26">52</li><li aria-selected="false" id="txt25">53</li><li aria-selected="false" id="txt24">54</li><li aria-selected="false" id="txt23">55</li><li aria-selected="false" id="txt22">56</li><li aria-selected="false" id="txt21">57</li><li>57</li><li aria-selected="false" id="txt20">58</li><li aria-selected="false" id="txt18">59</li><li aria-selected="false" id="txt19">00</li><li>01</li><li>02</li>",
+        "<li>09</li><li>10</li><li aria-selected="true" id="txt5">11</li><li aria-selected="false" id="txt3">12</li><li aria-selected="false" id="txt4">01</li>",
+        "<li>56</li><li>57</li><li aria-selected="true" aria-label="11:58 PM" id="txt8" focused="">58</li><li aria-selected="false" id="txt6">59</li><li aria-selected="false" id="txt7">00</li>",
         "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true"></li>",
       ]
     `);
@@ -362,20 +369,22 @@ describe("control.date", () => {
 
     expect(isPressKeyPrevented("ArrowDown")).toBe(true);
     expect(el.querySelector("[focused]")?.textContent).toBe("AM");
+    await nextFrame(5);
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
-        "<li>09</li><li>10</li><li aria-selected="true" id="txt17">11</li><li aria-selected="false" id="txt16">12</li><li aria-selected="false" id="txt15">01</li><li aria-selected="false" id="txt14">02</li><li aria-selected="false" id="txt13">03</li><li aria-selected="false" id="txt12">04</li><li aria-selected="false" id="txt11">05</li><li aria-selected="false" id="txt10">06</li><li aria-selected="false" id="txt9">07</li><li aria-selected="false" id="txt8">08</li><li aria-selected="false" id="txt7">09</li><li aria-selected="false" id="txt6">10</li><li>10</li><li aria-selected="false" id="txt5">11</li><li aria-selected="false" id="txt3">12</li><li aria-selected="false" id="txt4">01</li><li>02</li><li>03</li>",
-        "<li>56</li><li>57</li><li aria-selected="true" id="txt80">58</li><li aria-selected="false" id="txt79">59</li><li aria-selected="false" id="txt78">00</li><li aria-selected="false" id="txt77">01</li><li aria-selected="false" id="txt76">02</li><li aria-selected="false" id="txt75">03</li><li aria-selected="false" id="txt74">04</li><li aria-selected="false" id="txt73">05</li><li aria-selected="false" id="txt72">06</li><li aria-selected="false" id="txt71">07</li><li aria-selected="false" id="txt70">08</li><li aria-selected="false" id="txt69">09</li><li aria-selected="false" id="txt68">10</li><li aria-selected="false" id="txt67">11</li><li aria-selected="false" id="txt66">12</li><li aria-selected="false" id="txt65">13</li><li aria-selected="false" id="txt64">14</li><li aria-selected="false" id="txt63">15</li><li aria-selected="false" id="txt62">16</li><li aria-selected="false" id="txt61">17</li><li aria-selected="false" id="txt60">18</li><li aria-selected="false" id="txt59">19</li><li aria-selected="false" id="txt58">20</li><li aria-selected="false" id="txt57">21</li><li aria-selected="false" id="txt56">22</li><li aria-selected="false" id="txt55">23</li><li aria-selected="false" id="txt54">24</li><li aria-selected="false" id="txt53">25</li><li aria-selected="false" id="txt52">26</li><li aria-selected="false" id="txt51">27</li><li aria-selected="false" id="txt50">28</li><li aria-selected="false" id="txt49">29</li><li aria-selected="false" id="txt48">30</li><li aria-selected="false" id="txt47">31</li><li aria-selected="false" id="txt46">32</li><li aria-selected="false" id="txt45">33</li><li aria-selected="false" id="txt44">34</li><li aria-selected="false" id="txt43">35</li><li aria-selected="false" id="txt42">36</li><li aria-selected="false" id="txt41">37</li><li aria-selected="false" id="txt40">38</li><li aria-selected="false" id="txt39">39</li><li aria-selected="false" id="txt38">40</li><li aria-selected="false" id="txt37">41</li><li aria-selected="false" id="txt36">42</li><li aria-selected="false" id="txt35">43</li><li aria-selected="false" id="txt34">44</li><li aria-selected="false" id="txt33">45</li><li aria-selected="false" id="txt32">46</li><li aria-selected="false" id="txt31">47</li><li aria-selected="false" id="txt30">48</li><li aria-selected="false" id="txt29">49</li><li aria-selected="false" id="txt28">50</li><li aria-selected="false" id="txt27">51</li><li aria-selected="false" id="txt26">52</li><li aria-selected="false" id="txt25">53</li><li aria-selected="false" id="txt24">54</li><li aria-selected="false" id="txt23">55</li><li aria-selected="false" id="txt22">56</li><li aria-selected="false" id="txt21">57</li><li>57</li><li aria-selected="false" id="txt20">58</li><li aria-selected="false" id="txt18">59</li><li aria-selected="false" id="txt19">00</li><li>01</li><li>02</li>",
-        "<li aria-hidden="true"></li><li aria-selected="true" aria-label="11:58 AM" id="txt82" focused="">AM</li><li aria-selected="false" id="txt81">PM</li><li aria-hidden="true"></li>",
+        "<li>09</li><li>10</li><li aria-selected="true" id="txt5">11</li><li aria-selected="false" id="txt3">12</li><li aria-selected="false" id="txt4">01</li>",
+        "<li>56</li><li>57</li><li aria-selected="true" id="txt8">58</li><li aria-selected="false" id="txt6">59</li><li aria-selected="false" id="txt7">00</li>",
+        "<li aria-hidden="true"></li><li aria-selected="true" aria-label="11:58 AM" id="txt10" focused="">AM</li><li aria-selected="false" id="txt9">PM</li>",
       ]
     `);
     expect(isPressKeyPrevented("ArrowUp")).toBe(true);
     expect(el.querySelector("[focused]")?.textContent).toBe("PM");
+    await nextFrame(5);
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
-        "<li>09</li><li>10</li><li aria-selected="true" id="txt17">11</li><li aria-selected="false" id="txt16">12</li><li aria-selected="false" id="txt15">01</li><li aria-selected="false" id="txt14">02</li><li aria-selected="false" id="txt13">03</li><li aria-selected="false" id="txt12">04</li><li aria-selected="false" id="txt11">05</li><li aria-selected="false" id="txt10">06</li><li aria-selected="false" id="txt9">07</li><li aria-selected="false" id="txt8">08</li><li aria-selected="false" id="txt7">09</li><li aria-selected="false" id="txt6">10</li><li>10</li><li aria-selected="false" id="txt5">11</li><li aria-selected="false" id="txt3">12</li><li aria-selected="false" id="txt4">01</li><li>02</li><li>03</li>",
-        "<li>56</li><li>57</li><li aria-selected="true" id="txt80">58</li><li aria-selected="false" id="txt79">59</li><li aria-selected="false" id="txt78">00</li><li aria-selected="false" id="txt77">01</li><li aria-selected="false" id="txt76">02</li><li aria-selected="false" id="txt75">03</li><li aria-selected="false" id="txt74">04</li><li aria-selected="false" id="txt73">05</li><li aria-selected="false" id="txt72">06</li><li aria-selected="false" id="txt71">07</li><li aria-selected="false" id="txt70">08</li><li aria-selected="false" id="txt69">09</li><li aria-selected="false" id="txt68">10</li><li aria-selected="false" id="txt67">11</li><li aria-selected="false" id="txt66">12</li><li aria-selected="false" id="txt65">13</li><li aria-selected="false" id="txt64">14</li><li aria-selected="false" id="txt63">15</li><li aria-selected="false" id="txt62">16</li><li aria-selected="false" id="txt61">17</li><li aria-selected="false" id="txt60">18</li><li aria-selected="false" id="txt59">19</li><li aria-selected="false" id="txt58">20</li><li aria-selected="false" id="txt57">21</li><li aria-selected="false" id="txt56">22</li><li aria-selected="false" id="txt55">23</li><li aria-selected="false" id="txt54">24</li><li aria-selected="false" id="txt53">25</li><li aria-selected="false" id="txt52">26</li><li aria-selected="false" id="txt51">27</li><li aria-selected="false" id="txt50">28</li><li aria-selected="false" id="txt49">29</li><li aria-selected="false" id="txt48">30</li><li aria-selected="false" id="txt47">31</li><li aria-selected="false" id="txt46">32</li><li aria-selected="false" id="txt45">33</li><li aria-selected="false" id="txt44">34</li><li aria-selected="false" id="txt43">35</li><li aria-selected="false" id="txt42">36</li><li aria-selected="false" id="txt41">37</li><li aria-selected="false" id="txt40">38</li><li aria-selected="false" id="txt39">39</li><li aria-selected="false" id="txt38">40</li><li aria-selected="false" id="txt37">41</li><li aria-selected="false" id="txt36">42</li><li aria-selected="false" id="txt35">43</li><li aria-selected="false" id="txt34">44</li><li aria-selected="false" id="txt33">45</li><li aria-selected="false" id="txt32">46</li><li aria-selected="false" id="txt31">47</li><li aria-selected="false" id="txt30">48</li><li aria-selected="false" id="txt29">49</li><li aria-selected="false" id="txt28">50</li><li aria-selected="false" id="txt27">51</li><li aria-selected="false" id="txt26">52</li><li aria-selected="false" id="txt25">53</li><li aria-selected="false" id="txt24">54</li><li aria-selected="false" id="txt23">55</li><li aria-selected="false" id="txt22">56</li><li aria-selected="false" id="txt21">57</li><li>57</li><li aria-selected="false" id="txt20">58</li><li aria-selected="false" id="txt18">59</li><li aria-selected="false" id="txt19">00</li><li>01</li><li>02</li>",
-        "<li aria-hidden="true"></li><li aria-selected="false" id="txt82">AM</li><li aria-selected="true" id="txt81" aria-label="11:58 PM" focused="">PM</li><li aria-hidden="true"></li><li aria-hidden="true"></li>",
+        "<li>09</li><li>10</li><li aria-selected="true" id="txt5">11</li><li aria-selected="false" id="txt3">12</li><li aria-selected="false" id="txt4">01</li>",
+        "<li>56</li><li>57</li><li aria-selected="true" id="txt8">58</li><li aria-selected="false" id="txt6">59</li><li aria-selected="false" id="txt7">00</li>",
+        "<li aria-selected="false" id="txt10">AM</li><li aria-selected="true" id="txt9" aria-label="11:58 PM" focused="">PM</li><li aria-hidden="true"></li>",
       ]
     `);
     expect(isPressKeyPrevented("ArrowDown")).toBe(true);
@@ -409,6 +418,8 @@ describe("control.date", () => {
     expect(el.$value).toEqual(new WUPTimeObject(17, 37));
 
     // checking if user can use mouse properly
+    await nextFrame(5);
+    await h.wait();
     onChanged.mockClear();
     expect(el.$isOpen).toBe(false);
     expect(isPressKeyPrevented("ArrowDown")).toBe(true); // open menu by arrow key
@@ -416,39 +427,42 @@ describe("control.date", () => {
     expect(el.$isOpen).toBe(true);
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
-        "<li>03</li><li>04</li><li aria-selected="true" aria-label="05:37 PM" id="txt83" focused="">05</li><li>06</li><li>07</li>",
+        "<li>03</li><li>04</li><li aria-selected="true" aria-label="05:37 PM" id="txt12" focused="">05</li><li>06</li><li>07</li>",
         "<li>35</li><li>36</li><li aria-selected="true">37</li><li>38</li><li>39</li>",
-        "<li aria-selected="false" id="txt82">AM</li><li aria-selected="true" id="txt81">PM</li><li aria-hidden="true"></li>",
+        "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true"></li>",
       ]
     `);
 
     await h.userClick(el.$refMenuLists[0].firstElementChild);
     await h.wait();
+    await nextFrame(5);
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
-        "<li>01</li><li>02</li><li aria-selected="true" aria-label="03:37 PM" id="txt85" focused="">03</li><li aria-selected="false" id="txt84">04</li><li aria-selected="false" id="txt83">05</li>",
+        "<li>01</li><li>02</li><li aria-selected="true" aria-label="03:37 PM" id="txt14" focused="">03</li><li aria-selected="false" id="txt13">04</li><li aria-selected="false" id="txt12">05</li>",
         "<li>35</li><li>36</li><li aria-selected="true">37</li><li>38</li><li>39</li>",
-        "<li aria-selected="false" id="txt82">AM</li><li aria-selected="true" id="txt81">PM</li><li aria-hidden="true"></li>",
+        "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true"></li>",
       ]
     `);
 
     await h.userClick(el.$refMenuLists[1].lastElementChild);
     await h.wait();
+    await nextFrame(5);
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
-        "<li>01</li><li>02</li><li aria-selected="true" id="txt85">03</li><li aria-selected="false" id="txt84">04</li><li aria-selected="false" id="txt83">05</li>",
-        "<li aria-selected="false">37</li><li aria-selected="false" id="txt86">38</li><li aria-selected="true" aria-label="03:39 PM" id="txt87" focused="">39</li><li>40</li><li>41</li>",
-        "<li aria-selected="false" id="txt82">AM</li><li aria-selected="true" id="txt81">PM</li><li aria-hidden="true"></li>",
+        "<li>01</li><li>02</li><li aria-selected="true" id="txt14">03</li><li aria-selected="false" id="txt13">04</li><li aria-selected="false" id="txt12">05</li>",
+        "<li aria-selected="false">37</li><li aria-selected="false" id="txt15">38</li><li aria-selected="true" aria-label="03:39 PM" id="txt16" focused="">39</li><li>40</li><li>41</li>",
+        "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true"></li>",
       ]
     `);
 
     await h.userClick(el.$refMenuLists[2].lastElementChild);
     await h.wait();
+    await nextFrame(5);
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
-        "<li>01</li><li>02</li><li aria-selected="true" id="txt85">03</li><li aria-selected="false" id="txt84">04</li><li aria-selected="false" id="txt83">05</li>",
-        "<li aria-selected="false">37</li><li aria-selected="false" id="txt86">38</li><li aria-selected="true" aria-label="03:39 PM" id="txt87" focused="">39</li><li>40</li><li>41</li>",
-        "<li aria-selected="false" id="txt82">AM</li><li aria-selected="true" id="txt81">PM</li><li aria-hidden="true"></li>",
+        "<li>01</li><li>02</li><li aria-selected="true" id="txt14">03</li><li aria-selected="false" id="txt13">04</li><li aria-selected="false" id="txt12">05</li>",
+        "<li aria-selected="false">37</li><li aria-selected="false" id="txt15">38</li><li aria-selected="true" aria-label="03:39 PM" id="txt16" focused="">39</li><li>40</li><li>41</li>",
+        "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true"></li>",
       ]
     `);
 
@@ -476,22 +490,24 @@ describe("control.date", () => {
     el.$value = new WUPTimeObject(0, 0);
     expect(isPressKeyPrevented("ArrowDown")).toBe(true); // open menu by arrow key
     await h.wait();
+    await nextFrame(5);
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
-        "<li>10</li><li>11</li><li aria-selected="true" aria-label="12:00 AM" id="txt90" focused="">12</li><li>01</li><li>02</li>",
+        "<li>10</li><li>11</li><li aria-selected="true" aria-label="12:00 AM" id="txt19" focused="">12</li><li>01</li><li>02</li>",
         "<li>58</li><li>59</li><li aria-selected="true">00</li><li>01</li><li>02</li>",
-        "<li aria-hidden="true"></li><li aria-selected="true" id="txt82">AM</li><li aria-selected="false" id="txt81">PM</li>",
+        "<li aria-hidden="true"></li><li aria-selected="true">AM</li><li aria-selected="false">PM</li>",
       ]
     `);
     el.$refMenuLists[0].dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100 })); // scrollUp
     el.$refMenuLists[1].dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100 })); // scrollUp
     el.$refMenuLists[2].dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100 })); // scrollUp
     await h.wait();
+    await nextFrame(5);
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
-        "<li>09</li><li>10</li><li aria-selected="true" id="txt103">11</li><li aria-selected="false" id="txt102">12</li><li aria-selected="false" id="txt101">01</li>",
-        "<li>57</li><li>58</li><li aria-selected="true" aria-label="11:59 AM" id="txt164" focused="">59</li><li aria-selected="false" id="txt163">00</li><li aria-selected="false" id="txt162">01</li>",
-        "<li aria-hidden="true"></li><li aria-selected="true" id="txt82">AM</li><li aria-selected="false" id="txt81">PM</li>",
+        "<li>09</li><li>10</li><li aria-selected="true" id="txt20">11</li><li aria-selected="false" id="txt19">12</li><li>01</li>",
+        "<li>57</li><li>58</li><li aria-selected="true" aria-label="11:59 AM" id="txt21" focused="">59</li><li aria-selected="false">00</li><li>01</li>",
+        "<li aria-hidden="true"></li><li aria-selected="true">AM</li><li aria-selected="false">PM</li>",
       ]
     `);
   });
@@ -530,14 +546,14 @@ describe("control.date", () => {
     await h.wait();
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
-        "<li aria-selected="true" id="txt14">02</li>",
-        "<li aria-selected="true" id="txt16">24</li>",
-        "<li aria-selected="true" aria-label="02:24 PM" id="txt18" focused="">PM</li>",
+        "<li aria-selected="true" id="txt4">02</li>",
+        "<li aria-selected="true" id="txt6">24</li>",
+        "<li aria-selected="true" aria-label="02:24 PM" id="txt8" focused="">PM</li>",
       ]
     `);
     expect(isPressKeyPrevented("ArrowUp")).toBe(true);
     expect(el.$refMenuLists[2].innerHTML).toMatchInlineSnapshot(
-      `"<li aria-selected="true" aria-label="02:24 AM" id="txt19" focused="">AM</li><li aria-selected="false" id="txt18">PM</li>"`
+      `"<li aria-selected="true" aria-label="02:24 AM" id="txt9" focused="">AM</li><li aria-selected="false" id="txt8">PM</li>"`
     );
   });
 
