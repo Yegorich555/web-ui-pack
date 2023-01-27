@@ -8,6 +8,7 @@ import WUPSpin4Element from "./spin4";
 import WUPSpin5Element from "./spin5";
 import WUPSpin6Element from "./spin6";
 import WUPSpin7Element from "./spin7";
+import WUPSpin8Element from "./spin8";
 import styles from "./spinView.scss";
 
 const sideEffect =
@@ -17,7 +18,8 @@ const sideEffect =
   WUPSpin4Element &&
   WUPSpin5Element &&
   WUPSpin6Element &&
-  WUPSpin7Element;
+  WUPSpin7Element &&
+  WUPSpin8Element;
 !sideEffect && console.error("Missed"); // It's required otherwise import is ignored by webpack
 
 export default function SpinView() {
@@ -136,6 +138,7 @@ export default function SpinView() {
             <wup-spin5 inline class={styles.spin51} />
             <wup-spin5 inline class={styles.spin52} />
           </div>
+
           <div className={styles.types}>
             SliceRing
             <div>
@@ -154,6 +157,11 @@ export default function SpinView() {
               <wup-spin6 inline class={`${styles.spin64} ${styles["spin6-2"]}`} />
               <wup-spin6 inline class={`${styles.spin65} ${styles["spin6-2"]}`} />
             </div>
+          </div>
+
+          <div>
+            Hash
+            <wup-spin8 inline class={styles.spin82} />
           </div>
         </div>
       </section>

@@ -39,6 +39,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         100% { transform: rotate(360deg); }
       }
       WUP-SPIN {
+        contain: style;
         z-index: 100;
         width: var(--spin-size);
         height: var(--spin-size);

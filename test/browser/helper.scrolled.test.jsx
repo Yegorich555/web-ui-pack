@@ -51,7 +51,7 @@ describe("helper.scrolled (carousel)", () => {
     await page.waitForTimeout("1000");
     expect(await page.evaluate(() => document.querySelector("ul").scrollTop)).toBe(0); // scrolling is finished and prev items removed
     expect(await page.evaluate(() => document.body.innerHTML)).toMatchInlineSnapshot(
-      `"<div id="app"><ul style="overflow: hidden; touch-action: none; max-height: 54px;"><li>Item 4</li><li>Item 5</li><li>Item 6</li></ul></div>"`
+      `"<div id="app"><ul style="overflow: hidden; touch-action: none;"><li>Item 4</li><li>Item 5</li><li>Item 6</li></ul></div>"`
     );
 
     await page.mouse.wheel({ deltaY: -100 });
@@ -66,7 +66,7 @@ describe("helper.scrolled (carousel)", () => {
     await page.waitForTimeout("1000");
     expect(await page.evaluate(() => document.querySelector("ul").scrollTop)).toBe(0); // scrolling is finished and prev items removed
     expect(await page.evaluate(() => document.body.innerHTML)).toMatchInlineSnapshot(
-      `"<div id="app"><ul style="overflow: hidden; touch-action: none; max-height: 54px;"><li>Item 7</li><li>Item 8</li><li>Item 9</li></ul></div>"`
+      `"<div id="app"><ul style="overflow: hidden; touch-action: none;"><li>Item 7</li><li>Item 8</li><li>Item 9</li></ul></div>"`
     );
   });
 });

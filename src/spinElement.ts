@@ -97,6 +97,7 @@ export default class WUPSpinElement extends WUPBaseElement {
         100% { transform: rotate(360deg); }
       }
       :host {
+        contain: style;
         z-index: 100;
         width: var(--spin-size);
         height: var(--spin-size);
@@ -519,4 +520,68 @@ export function spinUseSpliceRing(cls: typeof WUPSpinElement): void {
             }
             ${s}`;
   });
+}
+
+/** Apply on class to change spinner-style */
+export function spinUseHash(cls: typeof WUPSpinElement): void {
+  spinSetStyle(
+    cls,
+    2,
+    () => `@keyframes WUP-SPIN-4-1 {
+            0% {
+              width: var(--spin-item-size);
+              box-shadow: var(--spin-1) var(--spin-end) var(--spin-pad2), var(--spin-1) var(--spin-start) var(--spin-pad);
+            }
+            35% {
+              width: var(--spin-size);
+              box-shadow: var(--spin-1) 0 var(--spin-pad2), var(--spin-1) 0 var(--spin-pad);
+            }
+            70% {
+              width: var(--spin-item-size);
+              box-shadow: var(--spin-1) var(--spin-start) var(--spin-pad2), var(--spin-1) var(--spin-end) var(--spin-pad);
+            }
+            100% { box-shadow: var(--spin-1) var(--spin-end) var(--spin-pad2), var(--spin-1) var(--spin-start) var(--spin-pad); }
+          }
+          @keyframes WUP-SPIN-4-2 {
+            0% {
+              height: var(--spin-item-size);
+              box-shadow: var(--spin-2) var(--spin-pad) var(--spin-end), var(--spin-2) var(--spin-pad2) var(--spin-start);
+            }
+            35% {
+              height: var(--spin-size);
+              box-shadow: var(--spin-2) var(--spin-pad) 0, var(--spin-2) var(--spin-pad2) 0;
+            }
+            70% {
+              height: var(--spin-item-size);
+              box-shadow: var(--spin-2) var(--spin-pad) var(--spin-start), var(--spin-2) var(--spin-pad2) var(--spin-end);
+            }
+            100% { box-shadow: var(--spin-2) var(--spin-pad) var(--spin-end), var(--spin-2) var(--spin-pad2) var(--spin-start); }
+          }
+          :root {
+            --spin-2: #b35e03;
+            --spin-item-size: calc(var(--spin-size) / 8);
+            --spin-end: calc((var(--spin-size) - var(--spin-item-size)) / 2);
+            --spin-start: calc((var(--spin-end)) * -1);
+            --spin-pad: calc(var(--spin-size) / 2 - var(--spin-size) / 3 + var(--spin-item-size) / 3);
+            --spin-pad2: calc(-1 * var(--spin-pad));
+          }
+          :host {
+            position: relative;
+            padding: 3px;
+          }
+          :host>div {
+            position: absolute;
+            transform: translate(-50%, -50%) rotate(165deg);
+            top:50%; left:50%;
+            width: var(--spin-item-size);
+            height: var(--spin-item-size);
+            border-radius: calc(var(--spin-item-size) / 2);
+          }
+          :host>div:nth-child(1) {
+            animation: var(--spin-speed) ease 0s infinite normal none running WUP-SPIN-4-1;
+          }
+          :host>div:nth-child(2) {
+            animation: var(--spin-speed) ease 0s infinite normal none running WUP-SPIN-4-2;
+          }`
+  );
 }
