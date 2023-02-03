@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0 (\_\_\_)
+
+**Fixes**:
+
+- helper [`onFocusLost`](src/helpers/onFocusLost.ts). Isn't fired if stopPropagation is called
+
+- **New**:
+
+- todo add something new
+
 ## 0.4.1 (Jan 27, 2023)
 
 **Fixes**:
