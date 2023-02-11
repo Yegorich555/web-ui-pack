@@ -416,12 +416,18 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
     return v as T;
   }
 
-  /**
-   * Remove attr if value falseOrEmpty; set '' or 'true' if true for HTMLELement
-   * @param isSetEmpty set if need '' instead of 'value'
-   */
+  /** Remove attr if value falseOrEmpty; set '' or 'true' if true for HTMLELement
+   * @param isSetEmpty set if need '' instead of 'value' */
   setAttr(attr: string, v: boolean | string | undefined | null, isSetEmpty?: boolean): void {
     v ? this.setAttribute(attr, isSetEmpty ? "" : v) : this.removeAttribute(attr);
+  }
+
+  /** Remove all children in fastest way */
+  removeChildren(): void {
+    // benchmark: https://measurethat.net/Benchmarks/Show/23474/2/remove-all-children-from-dom-element-2
+    while (this.firstChild) {
+      this.removeChild(this.firstChild);
+    }
   }
 }
 
@@ -445,4 +451,5 @@ declare global {
       toJSX<Opts>;
   }
 }
-// testcase: check if gotChanges sensitive to attr-case
+// todo use replaceChildren  https://developer.mozilla.org/en-US/docs/Web/API/Element/replaceChildren or implement own where need to remove first
+// https://measurethat.net/Benchmarks/Show/23478/1/replace-text-content-on-dom-element-2

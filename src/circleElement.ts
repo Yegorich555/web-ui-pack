@@ -166,8 +166,8 @@ export default class WUPCircleElement extends WUPBaseElement {
     });
 
     if (propsChanged) {
-      this.$refItems.textContent = "";
-      this.$refSVG.textContent = ""; // clean before new render
+      this.removeChildren.call(this.$refItems); // NiceToHave: instead of re-init update/remove required children
+      this.removeChildren.call(this.$refSVG); // clean before new render
     }
     this.gotRenderItems();
   }

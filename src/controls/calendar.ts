@@ -555,7 +555,7 @@ export default class WUPCalendarControl<
 
       await animate(isOut ? "out" : "in");
       scrollObj.dispose();
-      this.$refCalenarItems.textContent = "";
+      this.removeChildren.call(this.$refCalenarItems);
       this.#refreshSelected = undefined;
 
       animate(isOut ? "out2" : "in2").then(() => box.removeAttribute("zoom")); // WARN: it's important not to wait
