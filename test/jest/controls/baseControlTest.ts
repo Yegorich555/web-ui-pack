@@ -102,6 +102,11 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       await h.wait(1);
       expect(el.getAttribute("initvalue")).toBe(null);
       expect(el.$initValue).toStrictEqual(cfg.emptyValue);
+
+      el.setAttribute("initvalue", "");
+      expect(() => jest.advanceTimersByTime(1)).not.toThrow();
+      await h.wait(1);
+      expect(el.$initValue).toStrictEqual(cfg.emptyValue);
     });
 
     test("$initValue vs $value", () => {

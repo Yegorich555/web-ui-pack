@@ -185,7 +185,7 @@ export default class WUPSwitchControl<
   }
 
   override parse(text: string): boolean | undefined {
-    return text === "" || text.toLowerCase() === "true";
+    return text.toLowerCase() === "true";
   }
 
   protected override renderControl(): void {

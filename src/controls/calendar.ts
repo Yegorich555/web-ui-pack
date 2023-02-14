@@ -375,7 +375,6 @@ export default class WUPCalendarControl<
 
   /** Converts date-string into Date according (to $options.utc), @see WUPCalendarControl.$parse */
   override parse(text: string): ValueType | undefined {
-    /* istanbul ignore else */
     if (!text) {
       return undefined;
     }

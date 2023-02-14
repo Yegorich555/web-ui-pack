@@ -138,7 +138,6 @@ export default class WUPDateControl<
   /** Parse string to Date
    * @see WUPCalendarControl.$parse */
   override parse(text: string): ValueType | undefined {
-    /* istanbul ignore else */
     if (!text) {
       return undefined;
     }
