@@ -223,16 +223,11 @@ export default class WUPSwitchControl<
   protected override gotChanges(propsChanged: Array<keyof WUP.Switch.Options | any> | null): void {
     super.gotChanges(propsChanged as any);
 
-    this._opts.reverse = this.getBoolAttr("reverse", this._opts.reverse);
+    this._opts.reverse = this.getAttr("reverse", "bool");
     this.setAttr("reverse", this._opts.reverse, true);
 
     if (!propsChanged || propsChanged.includes("defaultchecked")) {
-      const attr = this.getAttribute("defaultchecked");
-      if (attr) {
-        this.$initValue = attr !== "false";
-      } else if (propsChanged) {
-        this.$initValue = false; // removed attr >> remove initValue
-      }
+      this.$initValue = this.getAttr("defaultchecked", "bool", false)!;
     }
   }
 

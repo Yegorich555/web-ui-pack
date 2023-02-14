@@ -112,6 +112,7 @@ export default class WUPPopupElement<
   }
 
   static get $style(): string {
+    // todo animation without { to or 100% } - doesn't work on Safari 14-
     return `${super.$style}
       :host {
         z-index: 90000;

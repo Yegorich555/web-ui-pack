@@ -537,8 +537,8 @@ export default class WUPTextControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Text.Options> | null): void {
     // apply mask options
-    this._opts.mask = this.getAttribute("mask") ?? this._opts.mask;
-    this._opts.maskholder = this.getAttribute("maskholder") ?? this._opts.maskholder;
+    this._opts.mask = this.getAttr("mask");
+    this._opts.maskholder = this.getAttr("maskholder");
     if (!this._opts.mask || this._opts.mask !== this.refMask?.pattern) {
       delete this.refMask; // delete if mask is removed or changed (it's recovered again on event)
     }
@@ -562,11 +562,11 @@ export default class WUPTextControl<
       this.$refBtnClear = undefined;
     }
     if (!propsChanged || propsChanged.includes("prefix")) {
-      this._opts.prefix = this.getAttribute("prefix") ?? this._opts.prefix;
+      this._opts.prefix = this.getAttr("prefix");
       this.renderPrefix(this._opts.prefix);
     }
     if (!propsChanged || propsChanged.includes("postfix")) {
-      this._opts.postfix = this.getAttribute("postfix") ?? this._opts.postfix;
+      this._opts.postfix = this.getAttr("postfix");
       this.renderPostfix(this._opts.postfix);
     }
   }

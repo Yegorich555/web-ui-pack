@@ -968,7 +968,7 @@ export default class WUPCalendarControl<
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Calendar.Options> | null): void {
-    this._opts.utc = this.getBoolAttr("utc", this._opts.utc);
+    this._opts.utc = this.getAttr("utc", "bool");
     super.gotChanges(propsChanged);
 
     (this.$isReadOnly || this.$isDisabled) && this.focusItem(null);
@@ -990,9 +990,9 @@ export default class WUPCalendarControl<
       }
     }
 
-    this._opts.min = this.parse(this.getAttribute("min") || "") ?? this._opts.min;
-    this._opts.max = this.parse(this.getAttribute("max") || "") ?? this._opts.max;
-    this._opts.exclude = this.getRefAttr<Date[]>("exclude");
+    this._opts.min = this.getAttr("min", "obj");
+    this._opts.max = this.getAttr("max", "obj");
+    this._opts.exclude = this.getAttr<Date[]>("exclude", "ref");
     if (!propsChanged || propsChanged.includes("exclude")) {
       this._opts.exclude?.sort((a, b) => a.valueOf() - b.valueOf());
     }

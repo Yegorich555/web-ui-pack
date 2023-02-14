@@ -6,7 +6,7 @@ import * as h from "../../testHelper";
 import { BaseTestOptions } from "../../testHelper";
 
 declare global {
-  namespace WUPBase {
+  namespace WUP.BaseControl {
     interface ValidityMap {
       $alwaysValid: boolean;
       $alwaysInvalid: boolean;
@@ -169,6 +169,18 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$options.autoComplete = false;
       jest.advanceTimersByTime(1);
       expect(el.$refInput.autocomplete).toBe(cfg.autoCompleteOff);
+
+      el.setAttribute("autocomplete", "false");
+      jest.advanceTimersByTime(1);
+      expect(el.$options.autoComplete).toBe(false);
+
+      el.setAttribute("autocomplete", "true");
+      jest.advanceTimersByTime(1);
+      expect(el.$options.autoComplete).toBe(true);
+
+      el.setAttribute("autocomplete", "email");
+      jest.advanceTimersByTime(1);
+      expect(el.$options.autoComplete).toBe("email");
     });
 
     test("autoFocus", () => {
@@ -616,6 +628,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
           expect(el.$refInput.getAttribute("aria-required")).toBe("true");
         }
 
+        // @ts-expect-error
         const defMsg = elType.$defaults.validationRules![ruleName]!(vld.failValue as any, vld.set, el);
         expect(defMsg).toBeTruthy();
         expect(el.$validate()).toBe(defMsg);

@@ -15,6 +15,8 @@ declare global {
   }
 }
 
+// todo animateDropdown left/right
+
 /** Animate (open/close) element as dropdown via scale and counter-scale for children
  * @param ms animation time
  * @returns Promise<isFinished> that resolved by animation end;

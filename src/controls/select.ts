@@ -1,4 +1,3 @@
-import nestedProperty from "../helpers/nestedProperty";
 import onEvent from "../helpers/onEvent";
 import promiseWait from "../helpers/promiseWait";
 import WUPPopupElement from "../popup/popupElement";
@@ -332,9 +331,7 @@ export default class WUPSelectControl<
     if (this._cachedItems) {
       return this._cachedItems;
     }
-
-    const items =
-      (nestedProperty.get(window, this.getAttribute("items") || "") as WUP.Select.Options["items"]) || this._opts.items;
+    const items = this.getAttr<WUP.Select.Options["items"]>("items", "ref") || [];
 
     let arr: WUP.Select.MenuItems<ValueType>;
     if (typeof items === "function") {

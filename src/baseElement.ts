@@ -202,6 +202,11 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
     }
   }
 
+  /** Called when need to parse attribute */
+  parse(text: string): any {
+    return text;
+  }
+
   #isReady = false;
   /** Called when element is added to document */
   protected gotReady(): void {
@@ -373,47 +378,55 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
     this.disposeLst.length = 0;
   }
 
-  /** Returns true if el is instance of Node and contains pointer element */
+  /** Returns true if el is instance of Node and contains pointer element
+   * @tutorial Troubleshooting
+   * * if element has position `fixed` or `absolute` then returns false */
   includes(el: unknown): boolean {
     return el instanceof Node && this.contains(el);
   }
 
-  /** Parse attribute and return result */
-  getBoolAttr(attr: string, alt: boolean): boolean;
-  getBoolAttr(attr: string, alt: boolean | undefined): boolean | undefined;
-  getBoolAttr(attr: string, alt: boolean | undefined): boolean | undefined {
+  /** Parse attribute and return result; if attr missed or invalid => returns pointed alt value OR $options[attr] */
+  getAttr(attr: string, type?: "string", alt?: string): string | undefined;
+  getAttr(attr: string, type: "bool", alt?: boolean): boolean | undefined;
+  getAttr(attr: string, type: "number", alt?: number): number | undefined;
+  /** Returns value from window[key] according to [attr]="key"; if attr missed or invalid => returns pointed alt value OR $options[attr] */
+  getAttr<T>(attr: string, type: "obj", alt?: T): T;
+  /** Returns value according to this.parse(); if attr missed or invalid => returns pointed alt value OR $options[attr] */
+  getAttr<T>(attr: string, type: "ref", alt?: T): T;
+  getAttr(attr: string, type?: string, alt?: any): any {
     const a = this.getAttribute(attr);
-    return a === null ? alt : a !== "false";
-  }
-
-  /** Parse attribute and return result; if attr missed or invalid => returns this._opts[attr] */
-  getNumAttr(attr: string): number | undefined {
-    const a = this.getAttribute(attr);
-    if (a == null || a === "") {
-      return this._opts[attr];
+    if (a == null) {
+      return alt !== undefined ? alt : this._opts[attr];
     }
-    const v = +a;
-    if (Number.isNaN(v)) {
-      console.error(`${this.tagName}. Expected number for attribute [${attr}] but pointed '${a}'`);
+    switch (type) {
+      case "bool":
+        return a !== "false";
+      case "number": {
+        const v = +a;
+        if (Number.isNaN(v)) {
+          console.error(`${this.tagName}. Expected number for attribute [${attr}] but pointed '${a}'`);
+          return alt !== undefined ? alt : this._opts[attr];
+        }
+        return v;
+      }
+      case "ref": {
+        const v = nestedProperty.get(window, a);
+        if (v === undefined) {
+          console.error(
+            `${this.tagName}. Value not found according to attribute [${attr}] in '${
+              a.startsWith("window.") ? a : `window.${a}`
+            }'`
+          );
+          return alt !== undefined ? alt : this._opts[attr];
+        }
+        return v;
+      }
+      case "obj": {
+        return this.parse(a);
+      }
+      default:
+        return a; // string
     }
-    return v;
-  }
-
-  /** Returns value from window[key] according to [attr]="key" or $options[key] if attr is missed */
-  getRefAttr<T>(attr: string): T | undefined {
-    const a = this.getAttribute(attr);
-    if (a == null || a === "") {
-      return this._opts[attr];
-    }
-    const v = nestedProperty.get(window, a);
-    if (v === undefined) {
-      console.error(
-        `${this.tagName}. Value not found according to attribute [${attr}] in '${
-          a.startsWith("window.") ? a : `window.${a}`
-        }'`
-      );
-    }
-    return v as T;
   }
 
   /** Remove attr if value falseOrEmpty; set '' or 'true' if true for HTMLELement

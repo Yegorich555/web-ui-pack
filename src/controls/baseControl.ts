@@ -130,7 +130,8 @@ declare global {
         | { [k: string]: (value: T | undefined) => false | string };
     }
 
-    interface Attributes extends Pick<Options, "label" | "name" | "autoFocus" | "disabled" | "readOnly"> {
+    interface Attributes
+      extends Pick<Options, "label" | "name" | "autoFocus" | "disabled" | "readOnly" | "autoComplete"> {
       /** default value in string/boolean or number representation (depends on `control.prototype.parse()`) */
       initValue?: string | boolean | number;
       /** Rules enabled for current control. Point global obj-key with validations (use `window.myValidations` where `window.validations = {required: true}` ) */
@@ -541,14 +542,27 @@ export default abstract class WUPBaseControl<
   protected override gotChanges(propsChanged: Array<keyof WUP.BaseControl.Options | any> | null): void {
     super.gotChanges(propsChanged);
 
-    // todo instead set prop:undefined: delete to reduce memory ?
+    this._opts.label = this.getAttr("label");
+    this._opts.name = this.getAttr("name");
 
-    this._opts.label = this.getAttribute("label") ?? this._opts.label;
-    this._opts.name = this.getAttribute("name") ?? this._opts.name;
-    this._opts.autoComplete = this.getAttribute("autoComplete") ?? this._opts.autoComplete;
-    this._opts.disabled = this.getBoolAttr("disabled", this._opts.disabled);
-    this._opts.readOnly = this.getBoolAttr("readOnly", this._opts.readOnly);
-    this._opts.autoFocus = this.getBoolAttr("autoFocus", this._opts.autoFocus);
+    const a = this.getAttribute("autocomplete");
+    switch (a) {
+      case null:
+      case "":
+        break; // skip attribute in this case
+      case "false":
+        this._opts.autoComplete = false;
+        break;
+      case "true":
+        this._opts.autoComplete = true;
+        break;
+      default:
+        this._opts.autoComplete = a;
+        break;
+    }
+    this._opts.disabled = this.getAttr("disabled", "bool");
+    this._opts.readOnly = this.getAttr("readonly", "bool", this._opts.readOnly);
+    this._opts.autoFocus = this.getAttr("autofocus", "bool", this._opts.autoFocus);
 
     const i = this.$refInput;
     // set label
@@ -670,7 +684,7 @@ export default abstract class WUPBaseControl<
 
   /** Returns validations enabled by user */
   protected get validations(): WUP.BaseControl.Options["validations"] | undefined {
-    return this.getRefAttr<WUP.BaseControl.Options["validations"]>("validations");
+    return this.getAttr<WUP.BaseControl.Options["validations"]>("validations", "ref");
   }
 
   /** Returns validations functions ready for checking */

@@ -294,7 +294,7 @@ export default class WUPTimeControl<
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Time.Options> | null): void {
-    this._opts.format = (this.getAttribute("format") ?? this._opts.format)?.replace(/\D{0,1}(ss|SS)/, "") || "hh:mm A";
+    this._opts.format = this.getAttr("format")?.replace(/\D{0,1}(ss|SS)/, "") || "hh:mm A";
 
     this._opts.mask =
       this._opts.mask ??
@@ -312,11 +312,10 @@ export default class WUPTimeControl<
         .replace(/a/, "*m")
         .replace(/A/, "*M");
 
-    this._opts.min = this.parse(this.getAttribute("min") || "") ?? this._opts.min;
-    this._opts.max = this.parse(this.getAttribute("max") || "") ?? this._opts.max;
-    this._opts.exclude = this.getRefAttr("exclude");
-    this._opts.step =
-      Number.parseInt(this.getAttribute("step") || "", 10) || this._opts.step || this.#ctr.$defaults.step;
+    this._opts.min = this.getAttr("min", "obj");
+    this._opts.max = this.getAttr("max", "obj");
+    this._opts.exclude = this.getAttr("exclude", "ref");
+    this._opts.step = this.getAttr("step", "number") || this.#ctr.$defaults.step;
     super.gotChanges(propsChanged as any);
   }
 

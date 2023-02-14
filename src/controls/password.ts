@@ -228,7 +228,7 @@ export default class WUPPasswordControl<
     // it can be ignored by browsers. To fix > https://stackoverflow.com/questions/2530/how-do-you-disable-browser-autocomplete-on-web-form-field-input-tags
     // https://stackoverflow.com/questions/11708092/detecting-browser-autofill
 
-    this._opts.reverse = this.getBoolAttr("reverse", this._opts.reverse);
+    this._opts.reverse = this.getAttr("reverse", "bool");
     this.setAttr("reverse", this._opts.reverse, true);
   }
 

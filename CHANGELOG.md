@@ -2,6 +2,10 @@
 
 ## 0.5.0 (\_\_\_)
 
+**BREAKING CHANGES**:
+
+- Internals. Methods getNumAttr, getRefAttr, getBoolAttr is refactored to single getAttr()
+
 **Fixes**:
 
 - helper [`onFocusLost`](src/helpers/onFocusLost.ts). Isn't fired if stopPropagation is called

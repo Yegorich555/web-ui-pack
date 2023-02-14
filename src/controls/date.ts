@@ -160,8 +160,8 @@ export default class WUPDateControl<
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Date.Options> | null): void {
-    this._opts.utc = this.getBoolAttr("utc", this._opts.utc);
-    this._opts.format = (this.getAttribute("format") ?? this._opts.format) || "YYYY-MM-DD";
+    this._opts.utc = this.getAttr("utc", "bool");
+    this._opts.format = this.getAttr("format") || "YYYY-MM-DD";
     if (this._opts.format.toUpperCase().includes("MMM")) {
       console.error(`${this.tagName}. 'MMM' in format isn't supported`);
       this._opts.format = "YYYY-MM-DD";
@@ -175,9 +175,9 @@ export default class WUPDateControl<
         .replace(/mm|MM/, "00")
         .replace(/[mM]/, "#0"); // convert yyyy-mm-dd > 0000-00-00; d/m/yyyy > #0/#0/0000
     this._opts.maskholder = this._opts.maskholder ?? this._opts.format.replace(/([mMdD]){1,2}/g, "$1$1");
-    this._opts.min = this.parse(this.getAttribute("min") || "") ?? this._opts.min;
-    this._opts.max = this.parse(this.getAttribute("max") || "") ?? this._opts.max;
-    this._opts.exclude = this.getRefAttr<Date[]>("exclude");
+    this._opts.min = this.getAttr("min", "obj");
+    this._opts.max = this.getAttr("max", "obj");
+    this._opts.exclude = this.getAttr<Date[]>("exclude", "ref");
 
     const attr = this.getAttribute("startwith");
     if (attr != null) {

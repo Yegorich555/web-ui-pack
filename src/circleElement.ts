@@ -159,10 +159,10 @@ export default class WUPCircleElement extends WUPBaseElement {
   protected override gotChanges(propsChanged: Array<keyof WUP.Circle.Options> | null): void {
     super.gotChanges(propsChanged);
 
-    this._opts.items = this.getRefAttr("items") || [];
-    this._opts.back = this.getBoolAttr("back", this._opts.back);
+    this._opts.items = this.getAttr("items", "ref") || [];
+    this._opts.back = this.getAttr("back", "bool") || false;
     ["width", "corner", "from", "to", "min", "max", "space"].forEach((key) => {
-      (this._opts as any)[key] = this.getNumAttr(key)!;
+      (this._opts as any)[key] = this.getAttr(key, "number")!;
     });
 
     if (propsChanged) {

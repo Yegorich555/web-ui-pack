@@ -177,9 +177,9 @@ export default class WUPSpinElement extends WUPBaseElement {
   protected override gotChanges(propsChanged: Array<keyof WUP.Spin.Options> | null): void {
     super.gotChanges(propsChanged);
 
-    this._opts.inline = this.getBoolAttr("inline", this._opts.inline);
-    this._opts.fit = this.getBoolAttr("fit", this._opts.fit ?? !this._opts.inline);
-    this._opts.overflowFade = this.getBoolAttr("overflowFade", this._opts.overflowFade);
+    this._opts.inline = this.getAttr("inline", "bool");
+    this._opts.fit = this.getAttr("fit", "bool", this._opts.fit ?? !this._opts.inline);
+    this._opts.overflowFade = this.getAttr("overflowfade", "bool", this._opts.overflowFade)!;
 
     this.style.cssText = "";
     this.#prevRect = undefined;
@@ -219,7 +219,7 @@ export default class WUPSpinElement extends WUPBaseElement {
       this.$refFade?.remove();
       this.$refFade = undefined;
 
-      if (this.getBoolAttr("fit", this._opts.fit)) {
+      if (this.getAttr("fit", "bool", this._opts.fit)) {
         const goUpdate = (): void => {
           this.style.position = "absolute";
           const p = this.parentElement as HTMLElement;
@@ -373,6 +373,8 @@ export function spinUseDualRing(cls: typeof WUPSpinElement): void {
 }
 
 export function spinUseTwinDualRing(cls: typeof WUPSpinElement): void {
+  // todo animation without { to or 100% } - doesn't work on Safari 14-
+
   spinSetStyle(
     cls,
     2,
