@@ -442,6 +442,17 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
       this.removeChild(this.firstChild);
     }
   }
+
+  // Uncomment if it's required
+  // /** Replace all children of node with nodes, while replacing strings in nodes with equivalent Text nodes */
+  // replaceChildren(...nodes: (string | Node)[]): void {
+  // https://measurethat.net/Benchmarks/Show/23478/1/replace-text-content-on-dom-element-2
+  //   if (super.replaceChildren as any) {
+  //     return super.replaceChildren(...nodes);
+  //   }
+  //   this.removeChildren();
+  //   return this.append(...nodes);
+  // }
 }
 
 declare global {
@@ -464,5 +475,3 @@ declare global {
       toJSX<Opts>;
   }
 }
-// todo use replaceChildren  https://developer.mozilla.org/en-US/docs/Web/API/Element/replaceChildren or implement own where need to remove first
-// https://measurethat.net/Benchmarks/Show/23478/1/replace-text-content-on-dom-element-2

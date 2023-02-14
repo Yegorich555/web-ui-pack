@@ -393,6 +393,7 @@ describe("spinElement", () => {
             SPIN-B div[fade]::after { content: none; }
             @keyframes WUP-SPIN-2-2 {
                 0% { transform: translate(-50%, -50%) rotate(360deg); }
+                100% { transform: translate(-50%, -50%) rotate(0deg); }
              }
              :root {
                 --spin-2: #b35e03;

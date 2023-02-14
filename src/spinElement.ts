@@ -373,14 +373,13 @@ export function spinUseDualRing(cls: typeof WUPSpinElement): void {
 }
 
 export function spinUseTwinDualRing(cls: typeof WUPSpinElement): void {
-  // todo animation without { to or 100% } - doesn't work on Safari 14-
-
   spinSetStyle(
     cls,
     2,
     () =>
       `@keyframes WUP-SPIN-2-2 {
           0% { transform: translate(-50%, -50%) rotate(360deg); }
+          100% { transform: translate(-50%, -50%) rotate(0deg); }
        }
        :root {
           --spin-2: #b35e03;
