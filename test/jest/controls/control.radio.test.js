@@ -76,6 +76,12 @@ describe("control.radio", () => {
     expect(el.innerHTML).toMatchInlineSnapshot(
       `"<fieldset><legend><strong></strong></legend><label for="txt15"><input id="txt15" type="radio" name="txt14473" tabindex="0" autocomplete="off"><span>testVal123_0</span></label></fieldset>"`
     );
+
+    h.mockConsoleError();
+    el.setAttribute("items", "");
+    jest.advanceTimersByTime(1);
+    expect(el.$options.items?.length).toBe(0);
+    h.unMockConsoleError();
   });
 
   test("parsing $initValue", () => {
