@@ -73,6 +73,15 @@ describe("control.select", () => {
     expect(el.$value).toBe(undefined);
     expect(el.$initValue).toBe(undefined);
     expect(el.$refInput.value).toBeFalsy();
+
+    delete el._cachedItems;
+    h.mockConsoleError();
+    el.setAttribute("items", "");
+    jest.advanceTimersByTime(1);
+    el.$initValue = undefined;
+    expect(el.$options.items?.length).toBe(0);
+    expect((await el.getItems())?.length).toBe(0);
+    h.unMockConsoleError();
   });
 
   test("pending state", async () => {
@@ -787,6 +796,7 @@ describe("control.select", () => {
       const onChange = jest.fn();
       el.addEventListener("$change", onChange);
       await h.wait();
+      expect(el.$options.allowNewValue).toBe(true);
 
       const check = async (arr, event) => {
         for (let i = 0; i < arr.length; ++i) {

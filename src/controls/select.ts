@@ -40,7 +40,12 @@ declare global {
       /** Allow user to create new value if value not found in items */
       allowNewValue?: boolean;
     }
-    interface Attributes extends WUP.BaseCombo.Attributes {}
+    interface Attributes extends WUP.BaseCombo.Attributes {
+      /** Items showed in dropdown-menu. Point global obj-key with items (set `window.items` for `window.items = [{value: 1, text: 'Item 1'}]` ) */
+      items?: string;
+      /** Allow user to create new value if value not found in items */
+      allownewvalue?: boolean | "";
+    }
     interface JSXProps<C = WUPSelectControl> extends WUP.BaseCombo.JSXProps<C>, Attributes {}
   }
 
@@ -98,7 +103,13 @@ export default class WUPSelectControl<
 
   static get observedOptions(): Array<string> {
     const arr = super.observedOptions as Array<keyof WUP.Select.Options>;
-    arr.push("items");
+    arr.push("items", "allowNewValue");
+    return arr;
+  }
+
+  static get observedAttributes(): Array<string> {
+    const arr = super.observedAttributes as Array<LowerKeys<WUP.Select.Attributes>>;
+    arr.push("items", "allownewvalue");
     return arr;
   }
 
@@ -214,17 +225,18 @@ export default class WUPSelectControl<
     return spin;
   }
 
-  protected override async gotOptionsChanged(e: WUP.Base.OptionEvent): Promise<void> {
-    const ev = e as unknown as WUP.Base.OptionEvent<WUP.Select.Options>;
-    if (ev.props.includes("items")) {
+  protected override gotChanges(propsChanged: Array<keyof WUP.Select.Options> | null): void {
+    const isUpdateItems = !propsChanged || propsChanged.includes("items");
+    if (isUpdateItems) {
       this.removePopup();
       this._cachedItems = undefined;
-      /* istanbul ignore else */
-      if (ev.props.length === 1) {
-        return; // skip re-init if only $options.items is changed
-      }
+      // it's important to be before super otherwise initValue won't work
+      this._opts.items = this.getAttr<WUP.Radio.Options["items"]>("items", "ref") || [];
     }
-    super.gotOptionsChanged(e);
+
+    super.gotChanges(propsChanged as any);
+
+    this._opts.allowNewValue = this.getAttr("allownewvalue", "bool", this._opts.allowNewValue);
   }
 
   override gotFormChanges(propsChanged: Array<keyof WUP.Form.Options> | null): void {
@@ -331,7 +343,7 @@ export default class WUPSelectControl<
     if (this._cachedItems) {
       return this._cachedItems;
     }
-    const items = this.getAttr<WUP.Select.Options["items"]>("items", "ref") || [];
+    const { items } = this._opts;
 
     let arr: WUP.Select.MenuItems<ValueType>;
     if (typeof items === "function") {
