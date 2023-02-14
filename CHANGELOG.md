@@ -11,6 +11,7 @@
 - helper [`onFocusLost`](src/helpers/onFocusLost.ts). Isn't fired if stopPropagation is called
 - [SwitchControl](src/controls/switch.ts). [CheckControl](src/controls/check.ts). Attribute `initvalue=''` sets value to `true` (expected `false`)
 - [SpinElement](src/spinElement.ts). Animation for TwinDualRing doesn't work on Safari 14-
+- [PopupElement](src/popup/popupElement.ts). Animation for opacity doesn't work on Safari 14-
 
 - **New**:
 
@@ -47,9 +48,9 @@
 - Helper. [`localeInfo`](src/objects/localeInfo.ts). `AM/PM parsed to 'a' but expected 'A'`
 - Helper. [`dateFromString`](src/helpers/dateFromString.ts). `12:00 PM throws Error but expected 12:00`
 - Icon **check**. Reduced thikness to fit other texts & icons
-- [Popup](src/popup/popupElement.ts). Changing content size doesn't recalc popup position
-- [Popup](src/popup/popupElement.ts). Wrong position if parent has style transform.translate
-- [Popup](src/popup/popupElement.ts). Content is blured if transform.translate with float values
+- [PopupElement](src/popup/popupElement.ts). Changing content size doesn't recalc popup position
+- [PopupElement](src/popup/popupElement.ts). Wrong position if parent has style transform.translate
+- [PopupElement](src/popup/popupElement.ts). Content is blured if transform.translate with float values
 - [DateControl](src/controls/date.ts). Clearing input doesn't reset $value
 - [DateControl](src/controls/date.ts). Required asterisk is removed by opening menu
 

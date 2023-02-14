@@ -112,7 +112,6 @@ export default class WUPPopupElement<
   }
 
   static get $style(): string {
-    // todo animation without { to or 100% } - doesn't work on Safari 14-
     return `${super.$style}
       :host {
         z-index: 90000;
@@ -135,6 +134,7 @@ export default class WUPPopupElement<
         }
         @keyframes WUP-POPUP-a1 {
           from {opacity: 0;}
+          to {opacity: 1;}
         }
         :host[hide],
         :host[hide]+:host-arrow {
@@ -144,8 +144,7 @@ export default class WUPPopupElement<
           to {opacity: 0;}
         }
        }
-      ${WUPcssScrollSmall(":host")}
-     `;
+      ${WUPcssScrollSmall(":host")}`;
   }
 
   /** Listen for target according to showCase and create/remove popup when it's required (by show/hide).
