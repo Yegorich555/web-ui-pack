@@ -2,6 +2,7 @@
 import Page from "src/elements/page";
 import { WUPSelectManyControl, WUPSpinElement } from "web-ui-pack";
 import { spinUseDualRing } from "web-ui-pack/spinElement";
+import styles from "./selectMany.scss";
 
 const sideEffect = WUPSelectManyControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
@@ -47,7 +48,7 @@ export default function SelectManyControlView() {
       features={[
         "Inheritted features from SelectControl", //
         "Possible to select several items",
-        // "Possible to order via Drag&Drop", // todo implement drag & drop (also between several multiselects)
+        "Possible to order via Drag&Drop",
       ]}
     >
       <wup-form
@@ -69,7 +70,23 @@ export default function SelectManyControlView() {
             if (el) {
               setTimeout(() => {
                 el.$initValue = [11, 13];
-              }); // todo without timeout setInitValue doesn't work: mention it in troubleshooting
+              }); // todo without timeout setInitValue doesn't work: todo mention it in troubleshooting
+            }
+          }}
+        />
+        <wup-select-many
+          class={styles.withDelIcon}
+          ref={(el) => {
+            if (el) {
+              el.$options.name = "withRemoveIcon";
+              el.$options.label = "Items with remove icon (use css-var --ctrl-select-item-del-display)";
+              el.$options.items = items;
+              el.$initValue = items.map((it) => it.value).splice(0, 8);
+
+              setTimeout(() => {
+                el.$refInput.focus();
+                el.$refInput.value = "Test long text";
+              }, 400);
             }
           }}
         />

@@ -1,0 +1,9 @@
+.withDelIcon {
+  --ctrl-select-item-del-display: inline-block;
+  // --ctrl-select-gap: 2px;
+
+  [item] {
+    display: inline-flex;
+    align-items: center;
+  }
+}

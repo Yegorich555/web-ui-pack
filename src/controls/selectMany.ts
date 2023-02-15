@@ -35,12 +35,12 @@ export default class WUPSelectManyControl<
     return `:root {
         --ctrl-select-item: inherit;
         --ctrl-select-item-bg: rgba(0,0,0,0.04);
-        --ctrl-select-item-del-display: inline-block;
+        --ctrl-select-item-del-display: none;
         --ctrl-select-item-del: var(--ctrl-icon);
         --ctrl-select-item-del-hover: var(--ctrl-selected);
         --ctrl-select-item-del-img: var(--wup-icon-cross);
         --ctrl-select-item-del-size: 0.8em;
-        --ctrl-select-gap: 7px;
+        --ctrl-select-gap: 6px;
       }`;
   }
 
@@ -50,32 +50,31 @@ export default class WUPSelectManyControl<
         margin: calc(var(--ctrl-select-gap) / 2);
       }
       :host label > span {
-        display: flex;
         flex-wrap: wrap;
+        flex-direction: row;
         padding: var(--ctrl-padding);
         padding-left: 0; padding-right: 0;
         margin: calc(var(--ctrl-select-gap) / -2);
       }
-      :host label > span > span,
+      :host [item],
       :host input {
         margin: calc(var(--ctrl-select-gap) / 2);
         padding: var(--ctrl-select-gap);
       }
       :host input {
+        flex: 1 1 auto;
         width: 0;
         min-width: 2em;
         padding-left: 0; padding-right: 0;
         background: #f7d4f7;
       }
-      :host label > span > span {
-        display: flex;
-        align-items: center;
+      :host [item] {
         color: var(--ctrl-select-item);
         background-color: var(--ctrl-select-item-bg);
         border-radius: var(--ctrl-border-radius);
         cursor: pointer;
       }
-      :host label > span > span:after {
+      :host [item]:after {
         --ctrl-icon: var(--ctrl-select-item-del);
         --ctrl-icon-size: var(--ctrl-select-item-del-size);
         --ctrl-icon-img: var(--ctrl-select-item-del-img);
@@ -86,14 +85,14 @@ export default class WUPSelectManyControl<
         margin-left: 0.5em;
       }
       @media (hover: hover) {
-        :host label > span > span:hover {
+        :host [item]:hover {
           text-decoration: line-through;
           color: var(--ctrl-err-text);
           background-color: var(--ctrl-err-bg);
         }
-        :host label > span > span:hover:after {
+        :host [item]:hover:after {
           --ctrl-icon: var(--ctrl-err-text);
-        }
+         }
       }`;
   }
 
@@ -125,6 +124,7 @@ export default class WUPSelectManyControl<
           _wupValue: ValueType;
         };
         r.setAttribute("aria-hidden", true);
+        r.setAttribute("item", "");
         refs.push(r);
       }
 
@@ -156,8 +156,9 @@ export default class WUPSelectManyControl<
 
 customElements.define(tagName, WUPSelectManyControl);
 
+// todo show in menu items excluded based on value
+// todo add style-remove based for touch-screen
+
 // todo ability to type free-text without selection
 // todo click on item > remove item
 // todo ability to remove items via keyboard - need support keyLeft, keyRight with selection via aria-activedescendant
-// todo show in menu items excluded based on value
-// todo autoresize of input based on text - maybe visually hide input and use contenteditable ???
