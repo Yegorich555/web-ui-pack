@@ -8,12 +8,14 @@ import {
   WUPCheckControl,
   WUPRadioControl,
   WUPPasswordControl,
+  WUPSelectManyControl,
 } from "web-ui-pack";
 
 const sideEffect =
   WUPTextControl &&
   WUPPasswordControl &&
   WUPSelectControl &&
+  WUPSelectManyControl &&
   WUPSpinElement &&
   WUPSwitchControl &&
   WUPCheckControl &&
