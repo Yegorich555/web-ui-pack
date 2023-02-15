@@ -37,7 +37,7 @@ export function parseCssVars(str: string): CssVar[] {
 
 /** Returns all css-vars that used by pointed tag */
 export function parseUsedCssVars(str: string, tagName: string): Set<string> {
-  const regTag = new RegExp(`${tagName} *[^{]+{([^}]+)}`, "g");
+  const regTag = new RegExp(`${tagName}[ :[>][^{]+{([^}]+)}`, "g");
   const reg = /var\((--[\w-]+)/g;
   const vars = new Set<string>();
   while (1) {
@@ -87,7 +87,7 @@ export default function getUsedCssVars(scanEl: WUPBaseElement<any>, opts?: Optio
   const usedSet = parseUsedCssVars(str, scanEl.tagName);
   const allVars = parseCssVars(str);
   const usedVars = allVars.filter(
-    (v) => usedSet.has(v.name) && (v.tagName === scanEl.tagName || v.tagName === ":root" || v.tagName === "body")
+    (v) => usedSet.has(v.name) && v.tagName === scanEl.tagName /* || v.tagName === ":root" || v.tagName === "body" */
   );
 
   const reusedVars = parseReusedVars(usedVars);
