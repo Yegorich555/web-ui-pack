@@ -273,7 +273,7 @@ clip: rect(1px, 1px, 1px, 1px);}
   :root {
         --ctrl-date-icon-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M652.801 76.8c42.24 0 76.8 34.56 76.8 76.8v537.601c0 42.24-34.56 76.8-76.8 76.8H115.2c-42.624 0-76.8-34.56-76.8-76.8l.384-537.601c0-42.24 33.792-76.8 76.416-76.8h38.4V0h76.8v76.8h307.2V0h76.8v76.8h38.4zM192 345.6h76.8v76.8H192v-76.8zm230.4 0v76.8h-76.8v-76.8h76.8zm153.601 0h-76.8v76.8h76.8v-76.8zM115.2 691.2h537.601V268.8H115.2v422.4z'/%3E%3C/svg%3E");
       }
-
+  
       WUP-DATE {
         contain: style;
         display: block;
@@ -292,7 +292,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-DATE:focus-within,
       WUP-DATE:focus-within &gt; [menu] {
         z-index: 90010;
-        outline: 1px solid var(--ctrl-focus);
+        box-shadow: 0 0 0 1px var(--ctrl-focus);
       }
       WUP-DATE:focus-within strong,
       WUP-DATE:focus-within legend {
@@ -312,8 +312,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       }
       WUP-DATE[invalid],
       WUP-DATE[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 0 var(--ctrl-invalid-border);
-        outline-color: var(--ctrl-invalid-border);
+        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
       WUP-DATE label {
         display: flex;
@@ -363,7 +362,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         content: '';
         --ctrl-icon-img: var(--wup-icon-dot);
         --ctrl-icon: var(--ctrl-err-text);
-
+        
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
@@ -533,7 +532,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-DATE label button:after,
         WUP-DATE label:after,
         WUP-DATE label:before {
-
+          
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
@@ -1036,7 +1035,7 @@ exports[`control.date validations options.validationCase 3`] = `
         <i>
           2022-02-28
         </i>
-
+        
       </span>
       <input
         aria-autocomplete="list"

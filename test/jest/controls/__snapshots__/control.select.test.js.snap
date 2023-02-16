@@ -275,7 +275,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         --ctrl-select-current: inherit;
         --ctrl-select-current-bg: #d9f7fd;
       }
-
+  
       WUP-SELECT {
         contain: style;
         display: block;
@@ -294,7 +294,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-SELECT:focus-within,
       WUP-SELECT:focus-within &gt; [menu] {
         z-index: 90010;
-        outline: 1px solid var(--ctrl-focus);
+        box-shadow: 0 0 0 1px var(--ctrl-focus);
       }
       WUP-SELECT:focus-within strong,
       WUP-SELECT:focus-within legend {
@@ -314,8 +314,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       }
       WUP-SELECT[invalid],
       WUP-SELECT[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 0 var(--ctrl-invalid-border);
-        outline-color: var(--ctrl-invalid-border);
+        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
       WUP-SELECT label {
         display: flex;
@@ -365,7 +364,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         content: '';
         --ctrl-icon-img: var(--wup-icon-dot);
         --ctrl-icon: var(--ctrl-err-text);
-
+        
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
@@ -535,7 +534,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-SELECT label button:after,
         WUP-SELECT label:after,
         WUP-SELECT label:before {
-
+          
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
@@ -656,7 +655,7 @@ mask-image: var(--ctrl-icon-img);
         overflow: auto;
         max-height: 300px;
       }
-
+      
 WUP-SELECT [menu]&gt;ul::-webkit-scrollbar {
   width: 10px; height: 10px;
 }
@@ -697,7 +696,7 @@ WUP-SELECT [menu]&gt;ul::-webkit-scrollbar-track-piece:horizontal:end {
       WUP-SELECT [menu] li[aria-selected="true"]:after {
         content: "";
         --ctrl-icon-img: var(--wup-icon-check);
-
+        
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);

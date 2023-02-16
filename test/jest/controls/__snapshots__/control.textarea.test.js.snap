@@ -249,7 +249,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       --ctrl-clear-hover: rgba(255,0,0,0.1);
       --ctrl-clear-hover-size: 22px;
      }
-
+  
       WUP-TEXTAREA {
         contain: style;
         display: block;
@@ -268,7 +268,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-TEXTAREA:focus-within,
       WUP-TEXTAREA:focus-within &gt; [menu] {
         z-index: 90010;
-        outline: 1px solid var(--ctrl-focus);
+        box-shadow: 0 0 0 1px var(--ctrl-focus);
       }
       WUP-TEXTAREA:focus-within strong,
       WUP-TEXTAREA:focus-within legend {
@@ -288,8 +288,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       }
       WUP-TEXTAREA[invalid],
       WUP-TEXTAREA[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 0 var(--ctrl-invalid-border);
-        outline-color: var(--ctrl-invalid-border);
+        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
       WUP-TEXTAREA label {
         display: flex;
@@ -339,7 +338,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         content: '';
         --ctrl-icon-img: var(--wup-icon-dot);
         --ctrl-icon: var(--ctrl-err-text);
-
+        
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
@@ -509,7 +508,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-TEXTAREA label button:after,
         WUP-TEXTAREA label:after,
         WUP-TEXTAREA label:before {
-
+          
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
@@ -590,7 +589,7 @@ mask-image: var(--ctrl-icon-img);
           min-height: 4em;
           max-height: 4em;
           resize: none;
-          display: inline-block;
+          display: inline-block; 
           cursor: text;
           white-space: pre-wrap;
           word-break: break-word;
@@ -601,7 +600,7 @@ mask-image: var(--ctrl-icon-img);
           margin-left: 0;
           margin-right: 0;
         }
-
+        
 WUP-TEXTAREA [contenteditable]::-webkit-scrollbar {
   width: 10px; height: 10px;
 }

@@ -234,7 +234,7 @@ export default abstract class WUPBaseControl<
       :host:focus-within,
       :host:focus-within > [menu] {
         z-index: 90010;
-        outline: 1px solid var(--ctrl-focus);
+        box-shadow: 0 0 0 1px var(--ctrl-focus);
       }
       :host:focus-within strong,
       :host:focus-within legend {
@@ -254,8 +254,7 @@ export default abstract class WUPBaseControl<
       }
       :host[invalid],
       :host[invalid] > [menu] {
-        box-shadow: 0 0 3px 0 var(--ctrl-invalid-border);
-        outline-color: var(--ctrl-invalid-border);
+        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
       :host label {
         display: flex;
