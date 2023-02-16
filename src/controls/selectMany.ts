@@ -1,3 +1,4 @@
+import { onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
 import { WUPcssIcon } from "../styles";
 import WUPSelectControl from "./select";
@@ -84,7 +85,7 @@ export default class WUPSelectManyControl<
         padding: 0;
         margin-left: 0.5em;
       }
-      @media (hover: hover) {
+     @media (hover: hover) {
         :host [item]:hover {
           text-decoration: line-through;
           color: var(--ctrl-err-text);
@@ -92,7 +93,10 @@ export default class WUPSelectManyControl<
         }
         :host [item]:hover:after {
           --ctrl-icon: var(--ctrl-err-text);
-         }
+        }
+      }
+      @media not all and (pointer: fine) {
+        :host [item] { user-select: none; } ${/* to show remove-decoration instead of text-selection */ ""}
       }`;
   }
 
@@ -136,7 +140,6 @@ export default class WUPSelectManyControl<
     const r = await super.renderMenu(popup, menuId);
     r.setAttribute("aria-multiselectable", "true");
     this.filterMenuItems();
-    // todo NoItems are not rendered again if selectAll, hide & open again
     return r;
   }
 
@@ -205,12 +208,29 @@ export default class WUPSelectManyControl<
     super.gotChanges(propsChanged);
     this.#refTitleAria.textContent = this.$refTitle.textContent;
   }
+
+  protected override gotFocus(): Array<() => void> {
+    const r = super.gotFocus();
+    r.push(
+      onEvent(this.$refInput.parentElement!, "click", (e) => {
+        const t = e.target;
+        const eli = this.$refItems?.findIndex((li) => li === t || this.includes.call(li, t));
+        if (eli != null && eli > -1) {
+          e.stopPropagation(); // to prevent open/hide popup
+          // todo prevent openByFocus in this case ?
+          this.$value!.splice(eli, 1);
+          this.setValue([...this.$value!]);
+        }
+      })
+    );
+    return r;
+  }
 }
 
 customElements.define(tagName, WUPSelectManyControl);
 
-// todo click on item > remove item
 // todo add style-remove for touch-screen (when user presses tap need to fire hover effect)
 // todo allowNewValue
 // todo keyboard
 // todo develop autowidth for input so it can render in the same row without new empty row
+// todo drag & drop

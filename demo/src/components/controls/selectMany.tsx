@@ -48,7 +48,7 @@ export default function SelectManyControlView() {
       features={[
         "Inheritted features from SelectControl", //
         "Possible to select several items",
-        "Possible to order via Drag&Drop",
+        // "Possible to order via Drag&Drop",
       ]}
     >
       <wup-form
@@ -68,9 +68,8 @@ export default function SelectManyControlView() {
           autoFocus={false}
           ref={(el) => {
             if (el) {
-              setTimeout(() => {
-                el.$initValue = [11, 13];
-              }); // todo without timeout setInitValue doesn't work: todo mention it in troubleshooting
+              setTimeout(() => (el.$initValue = [11, 13, 14]));
+              setTimeout(() => (el.$value = [11, 12]), 1000);
             }
           }}
         />
@@ -79,18 +78,13 @@ export default function SelectManyControlView() {
           ref={(el) => {
             if (el) {
               el.$options.name = "withRemoveIcon";
-              el.$options.label = "Items with remove icon (use css-var --ctrl-select-item-del-display)";
+              el.$options.label = "With remove icon (use css-var --ctrl-select-item-del-display)";
               el.$options.items = items;
               el.$initValue = items.map((it) => it.value).splice(0, 8);
 
               setTimeout(() => {
-                el.$value = items.map((it) => it.value); // .splice(0, 5);
+                el.$value = items.map((it) => it.value);
               }, 1000);
-
-              // setTimeout(() => {
-              //   el.$refInput.focus();
-              //   el.$refInput.value = "Test long text";
-              // }, 400);
             }
           }}
         />

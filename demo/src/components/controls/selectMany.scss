@@ -9,4 +9,21 @@
     display: inline-flex;
     align-items: center;
   }
+
+  @media not all and (pointer: fine) {
+    [item] {
+      user-select: none; // to allow show user decoration
+    }
+
+    [item]:active {
+      text-decoration: line-through;
+      color: var(--ctrl-err-text);
+      // background-color: var(--ctrl-err-bg);
+      background: lightgreen;
+    }
+
+    [item]:active:after {
+      --ctrl-icon: var(--ctrl-err-text);
+    }
+  }
 }
