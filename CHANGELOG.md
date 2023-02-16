@@ -12,6 +12,7 @@
 - [SwitchControl](src/controls/switch.ts). [CheckControl](src/controls/check.ts). Attribute `initvalue=''` sets value to `true` (expected `false`)
 - [SpinElement](src/spinElement.ts). Animation for TwinDualRing doesn't work on Safari 14-
 - [PopupElement](src/popup/popupElement.ts). Animation for opacity doesn't work on Safari 14-
+- Global. Hover effect on Android devices (expected: no-hover on touch-screens)
 
 - **New**:
 

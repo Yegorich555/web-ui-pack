@@ -313,7 +313,7 @@ export default class WUPTextControl<
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
         }
-        @media (hover: hover) {
+        @media (hover: hover) and (pointer: fine) {
           :host button[clear]:hover {
             box-shadow: none;
           }

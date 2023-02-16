@@ -223,7 +223,7 @@ export default class WUPTimeControl<
         content: "";
         padding:0;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         :host [menu] li:hover {
           position: relative;
         }

@@ -149,7 +149,7 @@ export default class WUPSelectControl<
       :host [menu] li {
         padding: 1em;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         :host [menu] li:hover {
           color: var(--ctrl-select-current);
           background: var(--ctrl-select-current-bg);

@@ -980,7 +980,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       --ctrl-clr-cell-gap: 0px;
       --ctrl-clr-padding: calc(4px + var(--ctrl-clr-cell-gap) / 2);
     }
-  
+
       WUP-CALENDAR {
         contain: style;
         display: block;
@@ -1070,7 +1070,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         content: '';
         --ctrl-icon-img: var(--wup-icon-dot);
         --ctrl-icon: var(--ctrl-err-text);
-        
+
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
@@ -1102,7 +1102,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-CALENDAR:focus-within [error] {
         max-height: none;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         /*WUP-CALENDAR:hover {
           z-index: 90011;
         }
@@ -1236,7 +1236,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-CALENDAR li[focused][aria-selected] {
         text-decoration: underline;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         WUP-CALENDAR header&gt;button:hover {
           background-color: var(--ctrl-clr-selected-bg);
           color: var(--ctrl-clr-selected);

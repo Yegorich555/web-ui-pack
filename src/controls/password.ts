@@ -125,7 +125,7 @@ export default class WUPPasswordControl<
         :host[reverse] button[eye="off"] {
           --ctrl-icon-img: var(--wup-icon-eye);
         }
-        @media (hover: hover) {
+        @media (hover: hover) and (pointer: fine) {
           :host button[eye]:hover {
             box-shadow: none;
             background-color: var(--ctrl-focus-label);

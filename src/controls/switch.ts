@@ -133,7 +133,7 @@ export default class WUPSwitchControl<
         :host label>span { transition: background-color var(--anim); }
         :host label>span:before { transition: left var(--anim); }
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         :host:hover label>span:before {
            box-shadow: 0 0 4px 0 var(--ctrl-focus);
         }

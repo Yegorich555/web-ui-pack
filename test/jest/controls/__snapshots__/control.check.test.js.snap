@@ -208,7 +208,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         --ctrl-check-shadow: #0003;
         --ctrl-check-size: calc(var(--ctrl-icon-size) * 1.2);
       }
-  
+
       WUP-CHECK {
         contain: style;
         display: block;
@@ -298,7 +298,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         content: '';
         --ctrl-icon-img: var(--wup-icon-dot);
         --ctrl-icon: var(--ctrl-err-text);
-        
+
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
@@ -330,7 +330,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-CHECK:focus-within [error] {
         max-height: none;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         /*WUP-CHECK:hover {
           z-index: 90011;
         }
@@ -385,7 +385,7 @@ mask-image: var(--ctrl-icon-img);
         box-shadow: 0 1px 4px 0 var(--ctrl-switch-shadow);
         border-radius: 50%;
       }
-      WUP-CHECK input { 
+      WUP-CHECK input {
 position: absolute;
 height: 1px; width: 1px;
 top:0;left:0;
@@ -412,7 +412,7 @@ clip: rect(1px, 1px, 1px, 1px); }
         WUP-CHECK label&gt;span { transition: background-color var(--anim); }
         WUP-CHECK label&gt;span:before { transition: left var(--anim); }
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         WUP-CHECK:hover label&gt;span:before {
            box-shadow: 0 0 4px 0 var(--ctrl-focus);
         }
@@ -452,7 +452,7 @@ clip: rect(1px, 1px, 1px, 1px); }
         -webkit-mask-position: center;
         mask-position: center;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         WUP-CHECK:hover label&gt;span {
           box-shadow: 0 0 4px 0 var(--ctrl-focus);
         }

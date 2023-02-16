@@ -275,7 +275,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         --ctrl-select-current: inherit;
         --ctrl-select-current-bg: #d9f7fd;
       }
-  
+
       WUP-SELECT {
         contain: style;
         display: block;
@@ -365,7 +365,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         content: '';
         --ctrl-icon-img: var(--wup-icon-dot);
         --ctrl-icon: var(--ctrl-err-text);
-        
+
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
@@ -397,7 +397,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-SELECT:focus-within [error] {
         max-height: none;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         /*WUP-SELECT:hover {
           z-index: 90011;
         }
@@ -535,7 +535,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-SELECT label button:after,
         WUP-SELECT label:after,
         WUP-SELECT label:before {
-          
+
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
@@ -595,7 +595,7 @@ mask-image: var(--ctrl-icon-img);
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
         }
-        @media (hover: hover) {
+        @media (hover: hover) and (pointer: fine) {
           WUP-SELECT button[clear]:hover {
             box-shadow: none;
           }
@@ -656,7 +656,7 @@ mask-image: var(--ctrl-icon-img);
         overflow: auto;
         max-height: 300px;
       }
-      
+
 WUP-SELECT [menu]&gt;ul::-webkit-scrollbar {
   width: 10px; height: 10px;
 }
@@ -683,7 +683,7 @@ WUP-SELECT [menu]&gt;ul::-webkit-scrollbar-track-piece:horizontal:end {
       WUP-SELECT [menu] li {
         padding: 1em;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         WUP-SELECT [menu] li:hover {
           color: var(--ctrl-select-current);
           background: var(--ctrl-select-current-bg);
@@ -697,7 +697,7 @@ WUP-SELECT [menu]&gt;ul::-webkit-scrollbar-track-piece:horizontal:end {
       WUP-SELECT [menu] li[aria-selected="true"]:after {
         content: "";
         --ctrl-icon-img: var(--wup-icon-check);
-        
+
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);

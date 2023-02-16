@@ -249,7 +249,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       --ctrl-clear-hover: rgba(255,0,0,0.1);
       --ctrl-clear-hover-size: 22px;
      }
-  
+
       WUP-NUM {
         contain: style;
         display: block;
@@ -339,7 +339,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         content: '';
         --ctrl-icon-img: var(--wup-icon-dot);
         --ctrl-icon: var(--ctrl-err-text);
-        
+
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
@@ -371,7 +371,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-NUM:focus-within [error] {
         max-height: none;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         /*WUP-NUM:hover {
           z-index: 90011;
         }
@@ -509,7 +509,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-NUM label button:after,
         WUP-NUM label:after,
         WUP-NUM label:before {
-          
+
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
@@ -569,7 +569,7 @@ mask-image: var(--ctrl-icon-img);
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
         }
-        @media (hover: hover) {
+        @media (hover: hover) and (pointer: fine) {
           WUP-NUM button[clear]:hover {
             box-shadow: none;
           }

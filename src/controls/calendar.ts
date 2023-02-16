@@ -241,7 +241,7 @@ export default class WUPCalendarControl<
       :host li[focused][aria-selected] {
         text-decoration: underline;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         :host header>button:hover {
           background-color: var(--ctrl-clr-selected-bg);
           color: var(--ctrl-clr-selected);

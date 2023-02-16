@@ -187,7 +187,7 @@ export default class WUPFormElement<
         :host [type='submit']:focus {
           outline: 2px solid var(--btn-submit-focus);
         }
-        @media (hover: hover) {
+        @media (hover: hover) and (pointer: fine) {
           :host [type='submit']:hover {
              box-shadow: inset 0 0 0 99999px rgba(0,0,0,0.2);
           }

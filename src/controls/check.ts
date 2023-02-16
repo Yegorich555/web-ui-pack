@@ -94,7 +94,7 @@ export default class WUPCheckControl<
         -webkit-mask-position: center;
         mask-position: center;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         :host:hover label>span {
           box-shadow: 0 0 4px 0 var(--ctrl-focus);
         }

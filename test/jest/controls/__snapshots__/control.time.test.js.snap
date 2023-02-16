@@ -276,7 +276,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         --ctrl-time-current: var(--base-text);
         --ctrl-time-current-bg: #d9f7fd;
       }
-  
+
       WUP-TIME {
         contain: style;
         display: block;
@@ -366,7 +366,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         content: '';
         --ctrl-icon-img: var(--wup-icon-dot);
         --ctrl-icon: var(--ctrl-err-text);
-        
+
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
@@ -398,7 +398,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-TIME:focus-within [error] {
         max-height: none;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         /*WUP-TIME:hover {
           z-index: 90011;
         }
@@ -536,7 +536,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-TIME label button:after,
         WUP-TIME label:after,
         WUP-TIME label:before {
-          
+
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
@@ -596,7 +596,7 @@ mask-image: var(--ctrl-icon-img);
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
         }
-        @media (hover: hover) {
+        @media (hover: hover) and (pointer: fine) {
           WUP-TIME button[clear]:hover {
             box-shadow: none;
           }
@@ -696,7 +696,7 @@ mask-image: var(--ctrl-icon-img);
         position: relative;
       }
       WUP-TIME [menu] li[focused]:after {
-        
+
           content: " ";
           position: absolute;
           display: block;
@@ -707,7 +707,7 @@ mask-image: var(--ctrl-icon-img);
           border-radius: 50%;
           //box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
-    
+
       }
       WUP-TIME [menu] li[aria-hidden] {
         pointer-events: none;
@@ -745,7 +745,7 @@ mask-image: var(--ctrl-icon-img);
         border-bottom-right-radius: var(--border-radius);
       }
       WUP-TIME [menu] button:after {
-        
+
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
@@ -768,12 +768,12 @@ mask-image: var(--ctrl-icon-img);
         content: "";
         padding:0;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         WUP-TIME [menu] li:hover {
           position: relative;
         }
         WUP-TIME [menu] li:hover:after {
-         
+
           content: " ";
           position: absolute;
           display: block;
@@ -784,7 +784,7 @@ mask-image: var(--ctrl-icon-img);
           border-radius: 50%;
           //box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
-    
+
         }
         WUP-TIME [menu] button:hover {
           box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 10%);
@@ -1125,7 +1125,7 @@ exports[`control.date validations options.validationCase 3`] = `
         <i>
           02:28 AM
         </i>
-        
+
       </span>
       <input
         aria-autocomplete="list"

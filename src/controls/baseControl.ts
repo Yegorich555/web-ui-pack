@@ -318,7 +318,7 @@ export default abstract class WUPBaseControl<
       :host:focus-within [error] {
         max-height: none;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         /*:host:hover {
           z-index: 90011;
         }

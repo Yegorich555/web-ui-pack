@@ -164,7 +164,7 @@ export default class WUPRadioControl<
       :host input:focus + *:after {
          box-shadow: 0 0 1px var(--ctrl-radio-border-size) var(--ctrl-selected);
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         :host input + *:hover {
           color: var(--ctrl-selected);
         }
