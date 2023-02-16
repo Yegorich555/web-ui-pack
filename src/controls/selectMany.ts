@@ -107,6 +107,7 @@ export default class WUPSelectManyControl<
 
   protected override _opts = this.$options;
 
+  /** Items selected & rendered on control */
   $refItems?: Array<HTMLElement & { _wupValue: ValueType }>;
   /** Copy of $refTitle element to fix reading title as first (resolves accessibility issue) */
   $refTitleAria = document.createElement("span");
@@ -124,6 +125,7 @@ export default class WUPSelectManyControl<
     return r;
   }
 
+  /** Called to update/remove selected items on control */
   protected renderItems(v: ValueType[], items: WUP.Select.MenuItems<any>): void {
     const refs = this.$refItems ?? [];
     v.forEach((vi, i) => {
@@ -141,6 +143,10 @@ export default class WUPSelectManyControl<
         r._wupValue = vi;
       }
     });
+    for (let i = v.length; i < refs.length; ++i) {
+      refs[i].remove(); // remove previous items
+    }
+
     this.$refItems = refs;
   }
 

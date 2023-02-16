@@ -83,6 +83,11 @@ export default function SelectManyControlView() {
               el.$options.items = items;
               el.$initValue = items.map((it) => it.value).splice(0, 8);
 
+              setTimeout(() => {
+                el.$value = items.map((it) => it.value).splice(0, 5);
+                console.warn(el.$value);
+              }, 1000);
+
               // setTimeout(() => {
               //   el.$refInput.focus();
               //   el.$refInput.value = "Test long text";
