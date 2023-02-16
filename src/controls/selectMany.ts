@@ -70,33 +70,40 @@ export default class WUPSelectManyControl<
         background: #f7d4f7;
       }
       :host [item] {
+        --ctrl-icon: var(--ctrl-select-item-del);
+        --ctrl-icon-size: var(--ctrl-select-item-del-size);
+        --ctrl-icon-img: var(--ctrl-select-item-del-img);
         color: var(--ctrl-select-item);
         background-color: var(--ctrl-select-item-bg);
         border-radius: var(--ctrl-border-radius);
         cursor: pointer;
       }
       :host [item]:after {
-        --ctrl-icon: var(--ctrl-select-item-del);
-        --ctrl-icon-size: var(--ctrl-select-item-del-size);
-        --ctrl-icon-img: var(--ctrl-select-item-del-img);
         ${WUPcssIcon}
         display: var(--ctrl-select-item-del-display);
         content: "";
         padding: 0;
         margin-left: 0.5em;
       }
-     @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         :host [item]:hover {
+          --ctrl-icon: var(--ctrl-err-text);
           text-decoration: line-through;
           color: var(--ctrl-err-text);
           background-color: var(--ctrl-err-bg);
         }
-        :host [item]:hover:after {
-          --ctrl-icon: var(--ctrl-err-text);
-        }
       }
       @media not all and (pointer: fine) {
-        :host [item] { user-select: none; } ${/* to show remove-decoration instead of text-selection */ ""}
+        :host [item]:active {${"" /* on Safari active is event on during the touchMove, but android: none */}
+          --ctrl-icon: var(--ctrl-err-text);
+          text-decoration: line-through;
+          color: var(--ctrl-err-text);
+          background-color: var(--ctrl-err-bg);
+        }
+        :host [item] {
+          user-select: none;
+          -webkit-user-select: none;
+        }${/* to show remove-decoration instead of text-selection */ ""}
       }`;
   }
 
@@ -174,6 +181,7 @@ export default class WUPSelectManyControl<
       v = v ?? [];
       this.renderItems(v, items);
       // todo develop anotherway for input because in current way it autoselected
+      // todo blank-string autoselected on IOS if user touchStart+Move on item
       return " "; // otherwise broken css:placeholder-shown & screenReaders reads 'Blank'
     });
 
@@ -211,6 +219,7 @@ export default class WUPSelectManyControl<
 
   protected override gotFocus(): Array<() => void> {
     const r = super.gotFocus();
+    // todo at first time when element isn't in focus maybe prevent removing by click on touch devices ?
     r.push(
       onEvent(this.$refInput.parentElement!, "click", (e) => {
         const t = e.target;
@@ -229,7 +238,6 @@ export default class WUPSelectManyControl<
 
 customElements.define(tagName, WUPSelectManyControl);
 
-// todo add style-remove for touch-screen (when user presses tap need to fire hover effect)
 // todo allowNewValue
 // todo keyboard
 // todo develop autowidth for input so it can render in the same row without new empty row
