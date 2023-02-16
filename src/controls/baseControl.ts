@@ -509,7 +509,7 @@ export default abstract class WUPBaseControl<
       el.id = this.#ctr.$uniqueId;
       const i = this.$refInput;
       const an = "aria-describedby";
-      i.setAttribute(an, `${this.$refInput.getAttribute(an) || ""} ${el.id}`.trimStart());
+      i.setAttribute(an, `${i.getAttribute(an) || ""} ${el.id}`.trimStart());
       this.appendChild(el);
       setTimeout(() => (el.textContent = text), 100); // otherwise reader doesn't announce section
       setTimeout(() => {

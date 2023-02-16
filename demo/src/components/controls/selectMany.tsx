@@ -60,8 +60,8 @@ export default function SelectManyControlView() {
       >
         <wup-select-many
           items="inputSelect.items"
-          name="select"
-          label="Select"
+          name="selectMany"
+          label="Select Many"
           // initValue={items[8].value.toString()} // todo implement
           validations="window._someSelectValidations"
           autoComplete="off"
@@ -83,10 +83,10 @@ export default function SelectManyControlView() {
               el.$options.items = items;
               el.$initValue = items.map((it) => it.value).splice(0, 8);
 
-              setTimeout(() => {
-                el.$refInput.focus();
-                el.$refInput.value = "Test long text";
-              }, 400);
+              // setTimeout(() => {
+              //   el.$refInput.focus();
+              //   el.$refInput.value = "Test long text";
+              // }, 400);
             }
           }}
         />

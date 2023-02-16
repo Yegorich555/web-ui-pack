@@ -108,6 +108,15 @@ export default class WUPSelectManyControl<
   protected override _opts = this.$options;
 
   $refItems?: Array<HTMLElement & { _wupValue: ValueType }>;
+  /** Copy of $refTitle element to fix reading title as first (resolves accessibility issue) */
+  $refTitleAria = document.createElement("span");
+
+  protected override renderControl(): void {
+    super.renderControl();
+    this.$refTitleAria.className = this.#ctr.classNameHidden;
+    this.$refTitle.parentElement!.prepend(this.$refTitleAria);
+    this.$refTitle.setAttribute("aria-hidden", "true");
+  }
 
   protected override async renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> {
     const r = await super.renderMenu(popup, menuId);
@@ -123,7 +132,6 @@ export default class WUPSelectManyControl<
         r = this.$refInput.parentNode!.insertBefore(document.createElement("span"), this.$refInput) as HTMLElement & {
           _wupValue: ValueType;
         };
-        r.setAttribute("aria-hidden", true);
         r.setAttribute("item", "");
         refs.push(r);
       }
@@ -140,7 +148,7 @@ export default class WUPSelectManyControl<
     const r = this.getItems().then((items) => {
       v = v ?? [];
       this.renderItems(v, items);
-      return `Selected ${v.length} of ${items.length}`; // required to suppress reading blank need to set opacity 0 ???
+      return " "; // It's importent to return " " string to avoid reading "Blank" by screenReaders
     });
 
     return r;
@@ -151,6 +159,11 @@ export default class WUPSelectManyControl<
     const arr = this.$value || [];
     arr.push(v);
     super.selectValue(arr);
+  }
+
+  protected override gotChanges(propsChanged: Array<keyof WUP.SelectMany.Options> | null): void {
+    super.gotChanges(propsChanged);
+    this.$refTitleAria.textContent = this.$refTitle.textContent;
   }
 }
 
