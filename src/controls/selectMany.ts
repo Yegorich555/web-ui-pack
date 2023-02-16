@@ -96,6 +96,19 @@ export default class WUPSelectManyControl<
       }`;
   }
 
+  static override $filterMenuItem(
+    this: WUPSelectManyControl,
+    menuItemText: string,
+    menuItemValue: any,
+    inputValue: string,
+    inputRawValue: string
+  ): boolean {
+    if (this.$value?.includes(menuItemValue)) {
+      return false;
+    }
+    return super.$filterMenuItem.call(this, menuItemText, menuItemValue, inputValue, inputRawValue);
+  }
+
   static $defaults: WUP.SelectMany.Defaults = {
     ...WUPSelectControl.$defaults,
   };
@@ -110,23 +123,25 @@ export default class WUPSelectManyControl<
   /** Items selected & rendered on control */
   $refItems?: Array<HTMLElement & { _wupValue: ValueType }>;
   /** Copy of $refTitle element to fix reading title as first (resolves accessibility issue) */
-  $refTitleAria = document.createElement("span");
+  #refTitleAria = document.createElement("span");
 
   protected override renderControl(): void {
     super.renderControl();
-    this.$refTitleAria.className = this.#ctr.classNameHidden;
-    this.$refTitle.parentElement!.prepend(this.$refTitleAria);
+    this.#refTitleAria.className = this.#ctr.classNameHidden;
+    this.$refTitle.parentElement!.prepend(this.#refTitleAria);
     this.$refTitle.setAttribute("aria-hidden", "true");
   }
 
   protected override async renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> {
     const r = await super.renderMenu(popup, menuId);
     r.setAttribute("aria-multiselectable", "true");
+    this.filterMenuItems();
+    // todo NoItems are not rendered again if selectAll, hide & open again
     return r;
   }
 
   /** Called to update/remove selected items on control */
-  protected renderItems(v: ValueType[], items: WUP.Select.MenuItems<any>): void {
+  protected renderItems(v: ValueType[], all: WUP.Select.MenuItems<any>): void {
     const refs = this.$refItems ?? [];
     v.forEach((vi, i) => {
       let r = refs[i];
@@ -139,14 +154,15 @@ export default class WUPSelectManyControl<
       }
 
       if (r._wupValue !== vi) {
-        r.textContent = this.valueToText(vi, items);
+        r.textContent = this.valueToText(vi, all);
         r._wupValue = vi;
       }
     });
-    for (let i = v.length; i < refs.length; ++i) {
-      refs[i].remove(); // remove previous items
-    }
 
+    const toRemove = refs.length - v.length;
+    toRemove > 0 && refs.splice(v.length, toRemove).forEach((el) => el.remove()); // remove previous items
+
+    this.$refPopup && this.filterMenuItems();
     this.$refItems = refs;
   }
 
@@ -154,30 +170,47 @@ export default class WUPSelectManyControl<
     const r = this.getItems().then((items) => {
       v = v ?? [];
       this.renderItems(v, items);
-      return " "; // It's importent to return " " string to avoid reading "Blank" by screenReaders
+      // todo develop anotherway for input because in current way it autoselected
+      return " "; // otherwise broken css:placeholder-shown & screenReaders reads 'Blank'
     });
 
     return r;
   }
 
-  // @ts-expect-error
-  protected override selectValue(v: ValueType): void {
+  // @ts-expect-error - because expected v: ValueType[]
+  protected override selectValue(v: ValueType, canHideMenu = true): void {
     const arr = this.$value || [];
     arr.push(v);
-    super.selectValue(arr);
+    canHideMenu = canHideMenu && arr.length === this._opts.items.length;
+    super.selectValue(arr, canHideMenu);
+  }
+
+  // @ts-expect-error - because expected v: ValueType[]
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected selectMenuItemByValue(v: ValueType | undefined): void {
+    /* skip this because item is filtered/hidden in this case */
+  }
+
+  /** Select item (hide item) */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected override selectMenuItem(next: HTMLElement | null): void {
+    /* skip this because item is filtered/hidden in this case */
+  }
+
+  protected override clearFilterMenuItems(): void {
+    /* skip this because default filtering doesn't reset after re-opening menu */
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.SelectMany.Options> | null): void {
     super.gotChanges(propsChanged);
-    this.$refTitleAria.textContent = this.$refTitle.textContent;
+    this.#refTitleAria.textContent = this.$refTitle.textContent;
   }
 }
 
 customElements.define(tagName, WUPSelectManyControl);
 
-// todo show in menu items excluded based on value
-// todo add style-remove based for touch-screen
-
-// todo ability to type free-text without selection
 // todo click on item > remove item
-// todo ability to remove items via keyboard - need support keyLeft, keyRight with selection via aria-activedescendant
+// todo add style-remove for touch-screen (when user presses tap need to fire hover effect)
+// todo allowNewValue
+// todo keyboard
+// todo develop autowidth for input so it can render in the same row without new empty row

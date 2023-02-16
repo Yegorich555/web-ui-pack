@@ -84,8 +84,7 @@ export default function SelectManyControlView() {
               el.$initValue = items.map((it) => it.value).splice(0, 8);
 
               setTimeout(() => {
-                el.$value = items.map((it) => it.value).splice(0, 5);
-                console.warn(el.$value);
+                el.$value = items.map((it) => it.value); // .splice(0, 5);
               }, 1000);
 
               // setTimeout(() => {

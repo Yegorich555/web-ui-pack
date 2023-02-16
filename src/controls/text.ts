@@ -155,9 +155,9 @@ export default class WUPTextControl<
         }
         :host label > span {
           width: 100%;
-          position: relative; ${/* to position <strong /> relative to input */ ""}
+          position: relative;${/* to position <strong /> relative to input */ ""}
           display: flex;
-          flex-direction: row-reverse; ${/* required for reading <strong /> 1st */ ""}
+          flex-direction: row-reverse;${/* required for reading <strong /> 1st */ ""}
         }
         :host input,
         :host textarea,

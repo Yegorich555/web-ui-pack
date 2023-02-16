@@ -24,6 +24,10 @@ declare global {
 
     type MenuItem<T> = MenuItemText<T> | MenuItemFn<T>;
     type MenuItems<T> = MenuItemText<T>[] | MenuItemFn<T>[];
+    interface MenuItemElement extends HTMLLIElement {
+      _value: any;
+      _text: string;
+    }
 
     interface EventMap extends WUP.BaseCombo.EventMap {}
     interface ValidityMap extends WUP.BaseCombo.ValidityMap {}
@@ -173,10 +177,22 @@ export default class WUPSelectControl<
   /** Text for aria-label of <ul> element */
   static $ariaLabelItems = "Items";
 
-  /** Function to filter menuItems based on inputValue; all values are in lowerCase */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  static $filterMenuItem(menuItemText: string, inputValue: string, inputRawValue: string): boolean {
-    return menuItemText.startsWith(inputValue) || menuItemText.includes(` ${inputValue}`);
+  /** Function to filter menuItems based on inputValue
+   * @param menuItemText textcontent in lowercase
+   * @param menuItemValue value related to items[x].value
+   * @param inputValue normalized input value (trimStart + lowercase)
+   * @param inputRawValue input value without normalization
+   * @returns true if menuItem must be visible in menu
+   */
+  static $filterMenuItem(
+    this: WUPSelectControl,
+    menuItemText: string,
+    menuItemValue: any,
+    inputValue: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    inputRawValue: string
+  ): boolean {
+    return !inputValue || menuItemText.startsWith(inputValue) || menuItemText.includes(` ${inputValue}`);
   }
 
   static $defaults: WUP.Select.Defaults = {
@@ -270,7 +286,7 @@ export default class WUPSelectControl<
 
   /** All items of current menu */
   _menuItems?: {
-    all: Array<HTMLLIElement & { _text: string }>;
+    all: WUP.Select.MenuItemElement[];
     /** Index of items filtered by input */
     filtered?: Array<number>;
     /** Index (in 'filtered' otherwise in 'all' array) of item that has virtual-focus; */
@@ -324,7 +340,7 @@ export default class WUPSelectControl<
         const parent = t.parentElement as HTMLElement;
         /* istanbul ignore else */
         if (parent === ul) {
-          this.gotMenuItemClick(e, t as HTMLLIElement & { _text: string });
+          this.gotMenuItemClick(e, t as WUP.Select.MenuItemElement);
           break;
         }
         t = parent;
@@ -400,15 +416,16 @@ export default class WUPSelectControl<
   }
 
   /** Create menuItems as array of HTMLLiElement with option _text required to filtering by input (otherwise content can be html-structure) */
-  protected async renderMenuItems(ul: HTMLUListElement): Promise<Array<HTMLLIElement & { _text: string }>> {
+  protected async renderMenuItems(ul: HTMLUListElement): Promise<WUP.Select.MenuItemElement[]> {
     const arr = await this.getItems();
 
-    const arrLi = arr.map(() => {
-      const li = ul.appendChild(document.createElement("li"));
+    const arrLi = arr.map((a) => {
+      const li = ul.appendChild(document.createElement("li")) as WUP.Select.MenuItemElement;
       li.setAttribute("role", "option");
       // li.setAttribute("aria-selected", "false");
+      li._value = a.value;
       return li;
-    }) as Array<HTMLLIElement & { _text: string }> & { _focused: number; _selected: number };
+    }) as Array<WUP.Select.MenuItemElement> & { _focused: number; _selected: number };
 
     if (arr.length) {
       if (typeof arr[0].text === "function") {
@@ -428,7 +445,7 @@ export default class WUPSelectControl<
   }
 
   /** Called when need to setValue & close base on clicked item */
-  protected gotMenuItemClick(_e: MouseEvent, item: HTMLLIElement & { _text: string }): void {
+  protected gotMenuItemClick(_e: MouseEvent, item: WUP.Select.MenuItemElement): void {
     const i = this._menuItems!.all.indexOf(item);
     const o = this._cachedItems![i];
     this.selectValue(o.value);
@@ -445,9 +462,7 @@ export default class WUPSelectControl<
     }
 
     if (this.$refPopup && showCase !== ShowCases.onInput && this._menuItems!.filtered) {
-      this._menuItems!.all.forEach((li) => (li.style.display = "")); // reset styles after filtering
-      delete this._menuItems!.filtered;
-      this.renderMenuNoItems(this.$refPopup, true); // remove NoItems
+      this.clearFilterMenuItems();
     }
 
     const popup = await super.goShowMenu(showCase, e, isNeedWait);
@@ -511,7 +526,7 @@ export default class WUPSelectControl<
     // firstFocused can be selected/current
     if (this._menuItems!.focused === -1 && this._selectedMenuItem) {
       if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-        focusIndex = this._menuItems!.all.indexOf(this._selectedMenuItem as HTMLLIElement & { _text: string });
+        focusIndex = this._menuItems!.all.indexOf(this._selectedMenuItem as WUP.Select.MenuItemElement);
         // case impossible because with filtered items we have this._menuItems!.focused !== -1
         // if (this._menuItems.filtered) {
         //   focusIndex = this._menuItems.filtered.indexOf(focusIndex);
@@ -553,33 +568,48 @@ export default class WUPSelectControl<
     }
   }
 
-  /** For case when need to menu is opened but items are not rendered yet */
+  /** Called to filter menuItems (on input change etc.) */
+  protected filterMenuItems(): void {
+    const rawV = this.$refInput.value;
+    const v = rawV.trimStart().toLowerCase();
+
+    const filtered: number[] = [];
+    this._menuItems!.all.forEach((li, i) => {
+      const isOk = this.#ctr.$filterMenuItem.call(this, li._text, li._value, v, rawV);
+      isOk && filtered!.push(i);
+      this.filterMenuItem(li, !isOk);
+    });
+    this._menuItems!.filtered = v ? filtered : undefined;
+    const hasVisible = filtered.length !== 0;
+    this.renderMenuNoItems(this.$refPopup!, hasVisible);
+    hasVisible && rawV !== "" && !this._opts.allowNewValue && this.focusMenuItemByIndex(0);
+  }
+
+  /** Called on showMenu when user opened it without input-change */
+  protected clearFilterMenuItems(): void {
+    this._menuItems!.all.forEach((li) => this.filterMenuItem(li, false)); // reset styles after filtering
+    delete this._menuItems!.filtered;
+    const hasVisible = this._menuItems!.all.length !== 0;
+    this.renderMenuNoItems(this.$refPopup!, hasVisible); // remove NoItems
+  }
+
+  /** Called to hide/show menuItem */
+  protected filterMenuItem(el: HTMLElement, hide: boolean): void {
+    el.style.display = hide ? "none" : "";
+  }
+
+  /** For case when menu is opened but items are not rendered */
   protected _needFilter?: () => void;
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
     this.$isOpen && this.focusMenuItem(null); // reset virtual focus
     super.gotInput(e);
 
-    const rawV = e.target.value;
-    const v = rawV.trimStart().toLowerCase();
-
     delete this._needFilter;
-    const filter = (): void => {
-      const filtered: number[] = [];
-      this._menuItems!.all.forEach((li, i) => {
-        const isOk = !v || this.#ctr.$filterMenuItem(li._text, v, rawV);
-        isOk && filtered!.push(i);
-        li.style.display = isOk ? "" : "none";
-      });
-      this._menuItems!.filtered = filtered;
-      const hasVisible = filtered.length !== 0;
-      this.renderMenuNoItems(this.$refPopup!, hasVisible);
-      hasVisible && rawV !== "" && !this._opts.allowNewValue && this.focusMenuItemByIndex(0);
-    };
 
     if (!this._menuItems) {
-      this._needFilter = filter;
+      this._needFilter = this.filterMenuItems;
     } else {
-      filter();
+      this.filterMenuItems();
     }
 
     // this.$refPopup!.$refresh(); // it doesn't required anymore because popup listens for own sizes
