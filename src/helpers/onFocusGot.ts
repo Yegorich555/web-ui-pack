@@ -5,7 +5,7 @@ import onFocusLost from "./onFocusLost";
  * @param {HTMLElement} element HTMLElement to apply `.addEventListener`
  * @param {Function} listener Callback invoked on event
  * @param options OnFocusLostOptions. onFocusGot depends on onFocusLost
- * @return Callback with `.removeEventListener`. Call it to remove listener
+ * @return dispose() function. Call it to remove listener
  * */
 export default function onFocusGot(
   element: HTMLElement,

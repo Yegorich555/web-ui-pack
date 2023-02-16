@@ -923,3 +923,6 @@ declare global {
 // todo: popup overflows scrollbar of fitElement does it correct ?
 // todo 2 popups can oveflow each other
 /* we need option to try place several popups at once without oveflow. Example on wup-pwd page: issue with 2 errors */
+
+// todo popup can't be more than 100vw & 100vh
+// todo sometimes popup placed in wrong position on mobileApp & selectMany (when switch to another)

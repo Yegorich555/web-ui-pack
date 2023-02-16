@@ -172,10 +172,10 @@ export default abstract class WUPBaseComboControl<
           skipAlreadyFocused: true,
         },
         (s, e) => {
-          const sc = s === PopupShowCases.onClick ? ShowCases.onClick : ShowCases.onFocus;
           if (s === PopupShowCases.always) {
             return this.$refPopup!;
           }
+          const sc = s === PopupShowCases.onClick ? ShowCases.onClick : ShowCases.onFocus;
           if (!(sc & this._opts.showCase)) {
             return null;
           }
