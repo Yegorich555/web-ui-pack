@@ -490,6 +490,7 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=false $
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         2021
       </button>
@@ -661,6 +662,7 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=false $
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         2023
       </button>
@@ -1052,6 +1054,7 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=false d
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -1346,6 +1349,7 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=false d
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -1640,6 +1644,7 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=false d
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -1914,6 +1919,7 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=false m
     <button
       aria-hidden="true"
       tabindex="-1"
+      type="button"
     >
       2022
     </button>
@@ -2026,6 +2032,7 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=false y
       aria-hidden="true"
       disabled=""
       tabindex="-1"
+      type="button"
     >
       2018 ... 2033
     </button>
@@ -2614,6 +2621,7 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=true $o
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         2021
       </button>
@@ -2785,6 +2793,7 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=true $o
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         2023
       </button>
@@ -3176,6 +3185,7 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=true da
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -3470,6 +3480,7 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=true da
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -3764,6 +3775,7 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=true da
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -4038,6 +4050,7 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=true mo
     <button
       aria-hidden="true"
       tabindex="-1"
+      type="button"
     >
       2022
     </button>
@@ -4150,6 +4163,7 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=true ye
       aria-hidden="true"
       disabled=""
       tabindex="-1"
+      type="button"
     >
       2018 ... 2033
     </button>

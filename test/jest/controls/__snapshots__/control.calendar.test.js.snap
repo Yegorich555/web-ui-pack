@@ -35,6 +35,7 @@ exports[`control.calendar $ariaDetails 1`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -163,6 +164,7 @@ exports[`control.calendar $ariaDetails 2`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -292,6 +294,7 @@ exports[`control.calendar $ariaSpeak 1`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -429,6 +432,7 @@ exports[`control.calendar $ariaSpeak 2`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -557,6 +561,7 @@ exports[`control.calendar $show/$hide error 1`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -688,6 +693,7 @@ exports[`control.calendar $show/$hide error 2`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -831,6 +837,7 @@ exports[`control.calendar $show/$hide error 3`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -1951,6 +1958,7 @@ exports[`control.calendar utc=false $options.min & .max 4`] = `
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         2021
       </button>
@@ -2122,6 +2130,7 @@ exports[`control.calendar utc=false $options.min & .max 5`] = `
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         2023
       </button>
@@ -2513,6 +2522,7 @@ exports[`control.calendar utc=false day picker firstOfWeek: Monday 1`] = `
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -2807,6 +2817,7 @@ exports[`control.calendar utc=false day picker firstOfWeek: Sunday 1`] = `
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -3101,6 +3112,7 @@ exports[`control.calendar utc=false day picker firstOfWeek: Tuesday 1`] = `
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -3375,6 +3387,7 @@ exports[`control.calendar utc=false month picker 1`] = `
     <button
       aria-hidden="true"
       tabindex="-1"
+      type="button"
     >
       2022
     </button>
@@ -3487,6 +3500,7 @@ exports[`control.calendar utc=false year picker 1`] = `
       aria-hidden="true"
       disabled=""
       tabindex="-1"
+      type="button"
     >
       2018 ... 2033
     </button>
@@ -4075,6 +4089,7 @@ exports[`control.calendar utc=true $options.min & .max 4`] = `
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         2021
       </button>
@@ -4246,6 +4261,7 @@ exports[`control.calendar utc=true $options.min & .max 5`] = `
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         2023
       </button>
@@ -4637,6 +4653,7 @@ exports[`control.calendar utc=true day picker firstOfWeek: Monday 1`] = `
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -4931,6 +4948,7 @@ exports[`control.calendar utc=true day picker firstOfWeek: Sunday 1`] = `
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -5225,6 +5243,7 @@ exports[`control.calendar utc=true day picker firstOfWeek: Tuesday 1`] = `
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -5499,6 +5518,7 @@ exports[`control.calendar utc=true month picker 1`] = `
     <button
       aria-hidden="true"
       tabindex="-1"
+      type="button"
     >
       2022
     </button>
@@ -5611,6 +5631,7 @@ exports[`control.calendar utc=true year picker 1`] = `
       aria-hidden="true"
       disabled=""
       tabindex="-1"
+      type="button"
     >
       2018 ... 2033
     </button>
@@ -5743,6 +5764,7 @@ exports[`control.calendar validations $options.validationShowAll 1`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -5887,6 +5909,7 @@ exports[`control.calendar validations $options.validationShowAll 2`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -6022,6 +6045,7 @@ exports[`control.calendar validations $options.validationShowAll 3`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -6168,6 +6192,7 @@ exports[`control.calendar validations options.validationCase 1`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -6303,6 +6328,7 @@ exports[`control.calendar validations options.validationCase 2`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -6453,6 +6479,7 @@ exports[`control.calendar validations options.validationCase 3`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -6604,6 +6631,7 @@ exports[`control.calendar validations options.validationCase 4`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -6755,6 +6783,7 @@ exports[`control.calendar with form 1`] = `
           aria-hidden="true"
           disabled=""
           tabindex="-1"
+          type="button"
         >
           2018 ... 2033
         </button>

@@ -23,6 +23,7 @@ exports[`control.text $ariaDetails 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-text>
@@ -46,6 +47,7 @@ exports[`control.text $ariaDetails 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-text>
@@ -70,6 +72,7 @@ exports[`control.text $ariaSpeak 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <section
@@ -102,6 +105,7 @@ exports[`control.text $ariaSpeak 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-text>
@@ -125,6 +129,7 @@ exports[`control.text $show/$hide error 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-text>
@@ -151,6 +156,7 @@ exports[`control.text $show/$hide error 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -189,6 +195,7 @@ exports[`control.text $show/$hide error 3`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-text>
@@ -599,6 +606,7 @@ exports[`control.text options clearButton 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <section
@@ -657,6 +665,7 @@ exports[`control.text validations $options.validationShowAll 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -712,6 +721,7 @@ exports[`control.text validations $options.validationShowAll 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -775,6 +785,7 @@ exports[`control.text validations $options.validationShowAll 3`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -815,6 +826,7 @@ exports[`control.text validations options.validationCase 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-text>
@@ -844,6 +856,7 @@ exports[`control.text validations options.validationCase 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -889,6 +902,7 @@ exports[`control.text validations options.validationCase 3`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -934,6 +948,7 @@ exports[`control.text validations options.validationCase 4`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -979,6 +994,7 @@ exports[`control.text with form 1`] = `
         aria-hidden="true"
         clear=""
         tabindex="-1"
+        type="button"
       />
     </label>
   </wup-text>

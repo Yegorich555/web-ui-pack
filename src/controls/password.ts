@@ -197,6 +197,7 @@ export default class WUPPasswordControl<
     const b = this.$refBtnEye;
     b.setAttribute("eye", "");
     b.setAttribute("aria-hidden", true);
+    b.setAttribute("type", "button");
     b.tabIndex = -1;
     onEvent(
       b,

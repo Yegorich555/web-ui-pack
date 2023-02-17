@@ -415,6 +415,7 @@ export default class WUPCalendarControl<
     /* */ h.appendChild(this.$refCalenarTitle);
     this.$refCalenarTitle.setAttribute("tabindex", "-1");
     this.$refCalenarTitle.setAttribute("aria-hidden", true);
+    this.$refCalenarTitle.setAttribute("type", "button");
     const box = add(this.$refCalenar, "div");
     const animBox = add(box, "div");
     /* */ animBox.appendChild(this.$refCalenarItems);

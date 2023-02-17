@@ -124,16 +124,16 @@ describe("control.text", () => {
     el.$options.prefix = "$ ";
     await h.wait(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong></strong><span prefix="">$ </span></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
+      `"<label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong></strong><span prefix="">$ </span></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label>"`
     );
     el.$value = "abc";
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong></strong><span prefix="">$ </span></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
+      `"<label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong></strong><span prefix="">$ </span></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label>"`
     );
     await h.userTypeText(el.$refInput, "hello");
     await h.wait(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong></strong><span prefix="">$ </span></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
+      `"<label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong></strong><span prefix="">$ </span></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label>"`
     );
   });
 
@@ -141,16 +141,16 @@ describe("control.text", () => {
     el.$options.postfix = " USD";
     await h.wait(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong></strong><span postfix=""><i></i> USD</span></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
+      `"<label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong></strong><span postfix=""><i></i> USD</span></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label>"`
     );
     el.$value = "abc";
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong></strong><span postfix=""><i>abc</i> USD</span></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
+      `"<label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong></strong><span postfix=""><i>abc</i> USD</span></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label>"`
     );
     await h.userTypeText(el.$refInput, "hello");
     await h.wait(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong></strong><span postfix=""><i>hello</i> USD</span></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
+      `"<label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong></strong><span postfix=""><i>hello</i> USD</span></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label>"`
     );
 
     // depends on prefix

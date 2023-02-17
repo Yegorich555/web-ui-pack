@@ -23,11 +23,13 @@ exports[`control.pwd $ariaDetails 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-pwd>
@@ -51,11 +53,13 @@ exports[`control.pwd $ariaDetails 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-pwd>
@@ -85,11 +89,13 @@ exports[`control.pwd $ariaSpeak 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <section
@@ -127,11 +133,13 @@ exports[`control.pwd $ariaSpeak 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-pwd>
@@ -160,11 +168,13 @@ exports[`control.pwd $show/$hide error 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-pwd>
@@ -196,11 +206,13 @@ exports[`control.pwd $show/$hide error 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -244,11 +256,13 @@ exports[`control.pwd $show/$hide error 3`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-pwd>
@@ -701,11 +715,13 @@ exports[`control.pwd options clearButton 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <section
@@ -741,6 +757,7 @@ exports[`control.pwd options clearButton 2`] = `
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <section
@@ -779,11 +796,13 @@ exports[`control.pwd validations $options.validationShowAll 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -856,11 +875,13 @@ exports[`control.pwd validations $options.validationShowAll 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -943,11 +964,13 @@ exports[`control.pwd validations $options.validationShowAll 3`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -993,11 +1016,13 @@ exports[`control.pwd validations options.validationCase 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-pwd>
@@ -1032,11 +1057,13 @@ exports[`control.pwd validations options.validationCase 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -1087,11 +1114,13 @@ exports[`control.pwd validations options.validationCase 3`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -1142,11 +1171,13 @@ exports[`control.pwd validations options.validationCase 4`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -1197,11 +1228,13 @@ exports[`control.pwd with form 1`] = `
         aria-hidden="true"
         clear=""
         tabindex="-1"
+        type="button"
       />
       <button
         aria-hidden="true"
         eye=""
         tabindex="-1"
+        type="button"
       />
     </label>
   </wup-pwd>

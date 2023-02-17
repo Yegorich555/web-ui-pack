@@ -75,7 +75,7 @@ describe("helper.promiseWait", () => {
       .then(fnThen)
       .finally(fnFinally);
     await new Promise((resolve) => setTimeout(resolve, 100));
-    expect(fnFinally).toBeCalledTimes(0);
+    expect(fnFinally).toBeCalledTimes(0); // WARN: sometimes issue here
     expect(fn).toBeCalledTimes(1);
     expect(fn).lastCalledWith(true);
     await new Promise((resolve) => setTimeout(resolve, 600));

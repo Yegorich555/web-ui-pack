@@ -419,8 +419,9 @@ export default class WUPTextControl<
       this.$refLabel.appendChild(bc);
     }
     bc.setAttribute("clear", "");
+    bc.setAttribute("tabindex", -1);
     bc.setAttribute("aria-hidden", true);
-    bc.tabIndex = -1;
+    bc.setAttribute("type", "button");
     onEvent(
       bc,
       "click",
