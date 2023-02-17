@@ -208,6 +208,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$value).toBe(cfg.initValues[0].value);
 
       el.focus();
+      await h.wait(1);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
       expect(el.$value).toBe(undefined);
@@ -431,10 +432,12 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$options.validationCase = ValidationCases.onChange | 0;
       expect(el).toMatchSnapshot();
       el.focus();
+      await h.wait(1);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
-      el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
+      el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened and prev-Esc closed it but not affect on input clearing
 
       expect(el.$isEmpty).toBe(true);
+      el.blur();
       await h.wait();
       expect(el.$refError).toBeDefined();
       expect(el).toMatchSnapshot();
@@ -492,6 +495,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       await h.wait();
 
       el.focus();
+      await h.wait(1);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
       el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
       expect(el.$isEmpty).toBe(true);

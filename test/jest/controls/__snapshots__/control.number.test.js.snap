@@ -750,7 +750,7 @@ exports[`control.number validations options.validationCase 1`] = `
 exports[`control.number validations options.validationCase 2`] = `
 <wup-num
   invalid=""
-  style="overflow: hidden;"
+  style=""
 >
   <label
     for="txt1"
@@ -782,6 +782,7 @@ exports[`control.number validations options.validationCase 2`] = `
     aria-live="off"
     error=""
     id="txt3"
+    role="alert"
     style="display: none;"
   >
     <span

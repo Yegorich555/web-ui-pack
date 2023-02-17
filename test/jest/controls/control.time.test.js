@@ -53,7 +53,7 @@ initTestBaseControl({
   },
 });
 
-describe("control.date", () => {
+describe("control.time", () => {
   testBaseControl({
     noInputSelection: true,
     initValues: [
@@ -81,7 +81,7 @@ describe("control.date", () => {
     attrs: {
       min: { value: "02:28" },
       max: { value: "23:15" },
-      step: { onRemove: true },
+      step: { onRemove: true, value: "5" },
       exclude: { refGlobal: { test: (v) => v.valueOf() === new WUPTimeObject("15:40").valueOf() } },
       mask: { skip: true },
       maskholder: { skip: true },

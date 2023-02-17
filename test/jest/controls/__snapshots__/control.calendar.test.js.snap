@@ -6429,6 +6429,7 @@ exports[`control.calendar validations options.validationCase 2`] = `
     aria-live="off"
     error=""
     id="txt4"
+    role="alert"
     style="display: none;"
   >
     <span

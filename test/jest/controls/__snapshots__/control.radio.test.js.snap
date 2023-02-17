@@ -1226,6 +1226,7 @@ exports[`control.radio validations options.validationCase 2`] = `
     aria-live="off"
     error=""
     id="txt7"
+    role="alert"
     style="display: none;"
   >
     <span

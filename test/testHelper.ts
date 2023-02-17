@@ -391,6 +391,7 @@ export async function userTypeText(el: HTMLInputElement, text: string, opts = { 
     el.dispatchEvent(new KeyboardEvent("keyup", { key, bubbles: true }));
 
     if (i !== text.length - 1) {
+      await Promise.resolve();
       jest.advanceTimersByTime(20);
       await Promise.resolve();
     }

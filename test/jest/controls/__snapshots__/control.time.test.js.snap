@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`control.date $ariaDetails 1`] = `
+exports[`control.time $ariaDetails 1`] = `
 <wup-time>
   <label
     for="txt1"
@@ -33,7 +33,7 @@ exports[`control.date $ariaDetails 1`] = `
 </wup-time>
 `;
 
-exports[`control.date $ariaDetails 2`] = `
+exports[`control.time $ariaDetails 2`] = `
 <wup-time>
   <label
     for="txt1"
@@ -61,7 +61,7 @@ exports[`control.date $ariaDetails 2`] = `
 </wup-time>
 `;
 
-exports[`control.date $ariaSpeak 1`] = `
+exports[`control.time $ariaSpeak 1`] = `
 <wup-time>
   <label
     for="txt1"
@@ -98,7 +98,7 @@ exports[`control.date $ariaSpeak 1`] = `
 </wup-time>
 `;
 
-exports[`control.date $ariaSpeak 2`] = `
+exports[`control.time $ariaSpeak 2`] = `
 <wup-time>
   <label
     for="txt1"
@@ -127,7 +127,7 @@ exports[`control.date $ariaSpeak 2`] = `
 </wup-time>
 `;
 
-exports[`control.date $show/$hide error 1`] = `
+exports[`control.time $show/$hide error 1`] = `
 <wup-time>
   <label
     for="txt1"
@@ -155,7 +155,7 @@ exports[`control.date $show/$hide error 1`] = `
 </wup-time>
 `;
 
-exports[`control.date $show/$hide error 2`] = `
+exports[`control.time $show/$hide error 2`] = `
 <wup-time
   invalid=""
 >
@@ -201,7 +201,7 @@ exports[`control.date $show/$hide error 2`] = `
 </wup-time>
 `;
 
-exports[`control.date $show/$hide error 3`] = `
+exports[`control.time $show/$hide error 3`] = `
 <wup-time>
   <label
     for="txt1"
@@ -229,9 +229,9 @@ exports[`control.date $show/$hide error 3`] = `
 </wup-time>
 `;
 
-exports[`control.date common tests render + styles 1`] = `<wup-time />`;
+exports[`control.time common tests render + styles 1`] = `<wup-time />`;
 
-exports[`control.date common tests render + styles 2`] = `
+exports[`control.time common tests render + styles 2`] = `
 <style>
   .wup-hidden, [wup-hidden] {
 position: absolute;
@@ -804,7 +804,7 @@ mask-image: var(--ctrl-icon-img);
 </style>
 `;
 
-exports[`control.date validations $options.validationShowAll 1`] = `
+exports[`control.time validations $options.validationShowAll 1`] = `
 <wup-time
   invalid=""
 >
@@ -864,7 +864,7 @@ exports[`control.date validations $options.validationShowAll 1`] = `
 </wup-time>
 `;
 
-exports[`control.date validations $options.validationShowAll 2`] = `
+exports[`control.time validations $options.validationShowAll 2`] = `
 <wup-time>
   <label
     for="txt1"
@@ -893,7 +893,7 @@ exports[`control.date validations $options.validationShowAll 2`] = `
 </wup-time>
 `;
 
-exports[`control.date validations $options.validationShowAll 3`] = `
+exports[`control.time validations $options.validationShowAll 3`] = `
 <wup-time
   invalid=""
 >
@@ -944,7 +944,7 @@ exports[`control.date validations $options.validationShowAll 3`] = `
 </wup-time>
 `;
 
-exports[`control.date validations options.validationCase 1`] = `
+exports[`control.time validations options.validationCase 1`] = `
 <wup-time>
   <label
     for="txt1"
@@ -972,7 +972,7 @@ exports[`control.date validations options.validationCase 1`] = `
 </wup-time>
 `;
 
-exports[`control.date validations options.validationCase 2`] = `
+exports[`control.time validations options.validationCase 2`] = `
 <wup-time
   invalid=""
 >
@@ -1014,7 +1014,7 @@ exports[`control.date validations options.validationCase 2`] = `
   </label>
   <wup-popup
     menu=""
-    style="opacity: 0;"
+    style=""
   >
     <div
       id="txt2"
@@ -1106,6 +1106,7 @@ exports[`control.date validations options.validationCase 2`] = `
     aria-live="off"
     error=""
     id="txt4"
+    role="alert"
     style="max-width: 100px;"
   >
     <span
@@ -1120,7 +1121,7 @@ exports[`control.date validations options.validationCase 2`] = `
 </wup-time>
 `;
 
-exports[`control.date validations options.validationCase 3`] = `
+exports[`control.time validations options.validationCase 3`] = `
 <wup-time
   invalid=""
   opened=""
@@ -1140,11 +1141,11 @@ exports[`control.date validations options.validationCase 3`] = `
       </span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt5"
-        aria-describedby="txt6"
+        aria-controls="txt2"
+        aria-describedby="txt5"
         aria-expanded="true"
         aria-haspopup="listbox"
-        aria-owns="txt5"
+        aria-owns="txt2"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -1164,27 +1165,11 @@ exports[`control.date validations options.validationCase 3`] = `
     />
   </label>
   <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt6"
-    style="max-width: 100px;"
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      custom err here
-    </span>
-  </wup-popup>
-  <wup-popup
     menu=""
     style=""
   >
     <div
-      id="txt5"
+      id="txt2"
       role="application"
     >
       <ul
@@ -1268,12 +1253,29 @@ exports[`control.date validations options.validationCase 3`] = `
       />
     </div>
   </wup-popup>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt5"
+    style="max-width: 100px;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
 </wup-time>
 `;
 
-exports[`control.date validations options.validationCase 4`] = `
+exports[`control.time validations options.validationCase 4`] = `
 <wup-time
   invalid=""
+  opened=""
 >
   <label
     for="txt1"
@@ -1288,11 +1290,11 @@ exports[`control.date validations options.validationCase 4`] = `
       </span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt5"
+        aria-controls="txt6"
         aria-describedby="txt7"
-        aria-expanded="false"
+        aria-expanded="true"
         aria-haspopup="listbox"
-        aria-owns="txt5"
+        aria-owns="txt6"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -1311,6 +1313,95 @@ exports[`control.date validations options.validationCase 4`] = `
       type="button"
     />
   </label>
+  <wup-popup
+    menu=""
+    style=""
+  >
+    <div
+      id="txt6"
+      role="application"
+    >
+      <ul
+        aria-label="Hours"
+        style="overflow: hidden;"
+      >
+        <li>
+          10
+        </li>
+        <li>
+          11
+        </li>
+        <li
+          aria-selected="true"
+        >
+          12
+        </li>
+        <li>
+          01
+        </li>
+        <li>
+          02
+        </li>
+      </ul>
+      <ul
+        aria-label="Minutes"
+        style="overflow: hidden;"
+      >
+        <li>
+          21
+        </li>
+        <li>
+          22
+        </li>
+        <li
+          aria-selected="true"
+        >
+          23
+        </li>
+        <li>
+          24
+        </li>
+        <li>
+          25
+        </li>
+      </ul>
+      <ul
+        aria-label="AM PM"
+        style="overflow: hidden;"
+      >
+        <li
+          aria-hidden="true"
+        />
+        <li
+          aria-selected="true"
+        >
+          AM
+        </li>
+        <li>
+          PM
+        </li>
+      </ul>
+      <mark
+        aria-hidden="true"
+      >
+        :
+      </mark>
+    </div>
+    <div
+      group=""
+    >
+      <button
+        aria-label="Ok"
+        tabindex="-1"
+        type="button"
+      />
+      <button
+        aria-label="Cancel"
+        tabindex="-1"
+        type="button"
+      />
+    </div>
+  </wup-popup>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
@@ -1331,7 +1422,7 @@ exports[`control.date validations options.validationCase 4`] = `
 </wup-time>
 `;
 
-exports[`control.date with form 1`] = `
+exports[`control.time with form 1`] = `
 <wup-form
   role="form"
 >

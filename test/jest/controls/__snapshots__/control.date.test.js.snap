@@ -903,203 +903,12 @@ exports[`control.date validations options.validationCase 2`] = `
   </label>
   <wup-popup
     menu=""
-    style="opacity: 0;"
-  >
-    <wup-calendar>
-      <div
-        calendar="year"
-        id="txt2"
-      >
-        <header>
-          <button
-            aria-hidden="true"
-            disabled=""
-            tabindex="-1"
-            type="button"
-          >
-            2018 ... 2033
-          </button>
-        </header>
-        <div>
-          <div>
-            <ol
-              role="grid"
-              style="overflow: hidden;"
-            >
-              <li
-                role="gridcell"
-              >
-                2018
-              </li>
-              <li
-                role="gridcell"
-              >
-                2019
-              </li>
-              <li
-                role="gridcell"
-              >
-                2020
-              </li>
-              <li
-                role="gridcell"
-              >
-                2021
-              </li>
-              <li
-                aria-current="date"
-                role="gridcell"
-              >
-                2022
-              </li>
-              <li
-                role="gridcell"
-              >
-                2023
-              </li>
-              <li
-                role="gridcell"
-              >
-                2024
-              </li>
-              <li
-                role="gridcell"
-              >
-                2025
-              </li>
-              <li
-                role="gridcell"
-              >
-                2026
-              </li>
-              <li
-                role="gridcell"
-              >
-                2027
-              </li>
-              <li
-                role="gridcell"
-              >
-                2028
-              </li>
-              <li
-                role="gridcell"
-              >
-                2029
-              </li>
-              <li
-                role="gridcell"
-              >
-                2030
-              </li>
-              <li
-                role="gridcell"
-              >
-                2031
-              </li>
-              <li
-                role="gridcell"
-              >
-                2032
-              </li>
-              <li
-                role="gridcell"
-              >
-                2033
-              </li>
-            </ol>
-          </div>
-        </div>
-      </div>
-    </wup-calendar>
-  </wup-popup>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt4"
-    style="max-width: 100px;"
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      This field is required
-    </span>
-  </wup-popup>
-</wup-date>
-`;
-
-exports[`control.date validations options.validationCase 3`] = `
-<wup-date
-  invalid=""
-  opened=""
->
-  <label
-    for="txt1"
-  >
-    <span>
-      <span
-        aria-hidden="true"
-        maskholder=""
-      >
-        <i>
-          2022-02-28
-        </i>
-        
-      </span>
-      <input
-        aria-autocomplete="list"
-        aria-controls="txt5"
-        aria-describedby="txt6"
-        aria-expanded="true"
-        aria-haspopup="listbox"
-        aria-owns="txt5"
-        aria-required="true"
-        autocomplete="off"
-        id="txt1"
-        inputmode="numeric"
-        placeholder=" "
-        role="combobox"
-        type="text"
-      />
-      <strong>
-        First Input
-      </strong>
-    </span>
-    <button
-      aria-hidden="true"
-      clear=""
-      tabindex="-1"
-      type="button"
-    />
-  </label>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt6"
-    style="max-width: 100px;"
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      custom err here
-    </span>
-  </wup-popup>
-  <wup-popup
-    menu=""
     style=""
   >
     <wup-calendar>
       <div
         calendar="day"
-        id="txt5"
+        id="txt2"
       >
         <header>
           <button
@@ -1372,6 +1181,366 @@ exports[`control.date validations options.validationCase 3`] = `
       </div>
     </wup-calendar>
   </wup-popup>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt4"
+    role="alert"
+    style="max-width: 100px;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+</wup-date>
+`;
+
+exports[`control.date validations options.validationCase 3`] = `
+<wup-date
+  invalid=""
+  opened=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <span
+        aria-hidden="true"
+        maskholder=""
+      >
+        <i>
+          2022-02-28
+        </i>
+        
+      </span>
+      <input
+        aria-autocomplete="list"
+        aria-controls="txt2"
+        aria-describedby="txt5"
+        aria-expanded="true"
+        aria-haspopup="listbox"
+        aria-owns="txt2"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        inputmode="numeric"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong>
+        First Input
+      </strong>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+  <wup-popup
+    menu=""
+    style=""
+  >
+    <wup-calendar>
+      <div
+        calendar="day"
+        id="txt2"
+      >
+        <header>
+          <button
+            aria-hidden="true"
+            tabindex="-1"
+            type="button"
+          >
+            February 2022
+          </button>
+        </header>
+        <div>
+          <div>
+            <ul
+              aria-hidden="true"
+            >
+              <li>
+                Mo
+              </li>
+              <li>
+                Tu
+              </li>
+              <li>
+                We
+              </li>
+              <li>
+                Th
+              </li>
+              <li>
+                Fr
+              </li>
+              <li>
+                Sa
+              </li>
+              <li>
+                Su
+              </li>
+            </ul>
+            <ol
+              role="grid"
+              style="overflow: hidden;"
+            >
+              <li
+                prev=""
+                role="gridcell"
+              >
+                31
+              </li>
+              <li
+                role="gridcell"
+              >
+                1
+              </li>
+              <li
+                role="gridcell"
+              >
+                2
+              </li>
+              <li
+                role="gridcell"
+              >
+                3
+              </li>
+              <li
+                role="gridcell"
+              >
+                4
+              </li>
+              <li
+                role="gridcell"
+              >
+                5
+              </li>
+              <li
+                role="gridcell"
+              >
+                6
+              </li>
+              <li
+                role="gridcell"
+              >
+                7
+              </li>
+              <li
+                role="gridcell"
+              >
+                8
+              </li>
+              <li
+                role="gridcell"
+              >
+                9
+              </li>
+              <li
+                role="gridcell"
+              >
+                10
+              </li>
+              <li
+                role="gridcell"
+              >
+                11
+              </li>
+              <li
+                role="gridcell"
+              >
+                12
+              </li>
+              <li
+                role="gridcell"
+              >
+                13
+              </li>
+              <li
+                role="gridcell"
+              >
+                14
+              </li>
+              <li
+                role="gridcell"
+              >
+                15
+              </li>
+              <li
+                role="gridcell"
+              >
+                16
+              </li>
+              <li
+                role="gridcell"
+              >
+                17
+              </li>
+              <li
+                role="gridcell"
+              >
+                18
+              </li>
+              <li
+                role="gridcell"
+              >
+                19
+              </li>
+              <li
+                role="gridcell"
+              >
+                20
+              </li>
+              <li
+                role="gridcell"
+              >
+                21
+              </li>
+              <li
+                role="gridcell"
+              >
+                22
+              </li>
+              <li
+                role="gridcell"
+              >
+                23
+              </li>
+              <li
+                role="gridcell"
+              >
+                24
+              </li>
+              <li
+                role="gridcell"
+              >
+                25
+              </li>
+              <li
+                role="gridcell"
+              >
+                26
+              </li>
+              <li
+                role="gridcell"
+              >
+                27
+              </li>
+              <li
+                aria-selected="true"
+                role="gridcell"
+              >
+                28
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                1
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                2
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                3
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                4
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                5
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                6
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                7
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                8
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                9
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                10
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                11
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                12
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                13
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </wup-calendar>
+  </wup-popup>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt5"
+    style="max-width: 100px;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
 </wup-date>
 `;
 
@@ -1392,11 +1561,11 @@ exports[`control.date validations options.validationCase 4`] = `
       </span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt7"
-        aria-describedby="txt8"
+        aria-controls="txt6"
+        aria-describedby="txt7"
         aria-expanded="false"
         aria-haspopup="listbox"
-        aria-owns="txt7"
+        aria-owns="txt6"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -1420,7 +1589,7 @@ exports[`control.date validations options.validationCase 4`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt8"
+    id="txt7"
     role="alert"
     style="max-width: 100px;"
   >
