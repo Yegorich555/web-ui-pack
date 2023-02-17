@@ -221,16 +221,21 @@ export default class WUPSelectManyControl<
     const r = super.gotFocus();
     // todo at first time when element isn't in focus maybe prevent removing by click on touch devices ?
     r.push(
-      onEvent(this.$refInput.parentElement!, "click", (e) => {
-        const t = e.target;
-        const eli = this.$refItems?.findIndex((li) => li === t || this.includes.call(li, t));
-        if (eli != null && eli > -1) {
-          e.stopPropagation(); // to prevent open/hide popup
-          // todo prevent openByFocus in this case ?
-          this.$value!.splice(eli, 1);
-          this.setValue([...this.$value!]);
-        }
-      })
+      onEvent(
+        this.$refInput.parentElement!,
+        "click",
+        (e) => {
+          const t = e.target;
+          const eli = this.$refItems?.findIndex((li) => li === t || this.includes.call(li, t));
+          if (eli != null && eli > -1) {
+            e.preventDefault(); // to prevent open/hide popup
+            // todo prevent openByFocus in this case ?
+            this.$value!.splice(eli, 1);
+            this.setValue([...this.$value!]);
+          }
+        },
+        { passive: false }
+      )
     );
     return r;
   }

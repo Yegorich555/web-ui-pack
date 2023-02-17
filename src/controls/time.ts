@@ -522,17 +522,22 @@ export default class WUPTimeControl<
     this.$refButtonCancel = btnCancel;
 
     // handle click on buttons
-    onEvent(btns, "click", (e) => {
-      e.stopPropagation(); // to prevent popup-hide-show
-      const t = e.target as Node | HTMLElement;
-      let isOk: boolean | null = null;
-      if (btnOk === t || this.includes.call(btnOk, t)) {
-        isOk = true;
-      } else if (btnCancel === t || this.includes.call(btnCancel, t)) {
-        isOk = false;
-      }
-      isOk !== null && this.gotBtnsClick(e, isOk);
-    });
+    onEvent(
+      btns,
+      "click",
+      (e) => {
+        e.preventDefault(); // to prevent popup-hide-show
+        const t = e.target as Node | HTMLElement;
+        let isOk: boolean | null = null;
+        if (btnOk === t || this.includes.call(btnOk, t)) {
+          isOk = true;
+        } else if (btnCancel === t || this.includes.call(btnCancel, t)) {
+          isOk = false;
+        }
+        isOk !== null && this.gotBtnsClick(e, isOk);
+      },
+      { passive: false }
+    );
 
     isInit = false;
     return Promise.resolve(parent);

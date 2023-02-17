@@ -204,7 +204,6 @@ export default class WUPPasswordControl<
       "click",
       (e) => {
         e.preventDefault(); // prevent from submit
-        e.stopPropagation();
         this.toggleVisibility();
       },
       { passive: false }

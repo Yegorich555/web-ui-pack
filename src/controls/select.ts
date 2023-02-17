@@ -332,20 +332,25 @@ export default class WUPSelectControl<
     this._menuItems = { all, focused: -1 };
     !all.length && this.renderMenuNoItems(popup, false);
     // it happens on every show because by hide it dispose events
-    onEvent(ul, "click", (e) => {
-      e.stopPropagation(); // to prevent popup-hide-show
+    onEvent(
+      ul,
+      "click",
+      (e) => {
+        e.preventDefault(); // to prevent popup-hide-show
 
-      let t = e.target as Node | HTMLElement;
-      while (1) {
-        const parent = t.parentElement as HTMLElement;
-        /* istanbul ignore else */
-        if (parent === ul) {
-          this.gotMenuItemClick(e, t as WUP.Select.MenuItemElement);
-          break;
+        let t = e.target as Node | HTMLElement;
+        while (1) {
+          const parent = t.parentElement as HTMLElement;
+          /* istanbul ignore else */
+          if (parent === ul) {
+            this.gotMenuItemClick(e, t as WUP.Select.MenuItemElement);
+            break;
+          }
+          t = parent;
         }
-        t = parent;
-      }
-    });
+      },
+      { passive: false }
+    );
 
     if (this._needFilter) {
       this._needFilter();

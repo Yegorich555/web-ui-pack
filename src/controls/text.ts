@@ -426,7 +426,6 @@ export default class WUPTextControl<
       bc,
       "click",
       (e) => {
-        e.stopPropagation(); // prevent from affect on parent
         e.preventDefault(); // prevent from submit
         this.clearValue();
       },
