@@ -107,6 +107,10 @@ export default class WUPSelectManyControl<
       }`;
   }
 
+  static override $isEmpty(v: unknown[]): boolean {
+    return !v || v.length === 0;
+  }
+
   static override $filterMenuItem(
     this: WUPSelectManyControl,
     menuItemText: string,
