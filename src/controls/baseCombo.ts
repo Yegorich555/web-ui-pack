@@ -7,7 +7,8 @@ import WUPTextControl from "./text";
 export const enum ShowCases {
   /** When $showMenu() called programmatically; Don't use it for $options (it's for nested cycle) */
   onManualCall = 1,
-  /** When control got focus */
+  /** When control got focus; ignores case when user changed value by click on item on clearButton
+   * to change such behavior update WUPBaseComboControl.prototype.canShowMenu */
   onFocus = 1 << 1,
   /** When user clicks on control (beside editable not-empty input) */
   onClick = 1 << 2,
@@ -208,7 +209,7 @@ export default abstract class WUPBaseComboControl<
   protected abstract focusMenuItemByKeydown(e: KeyboardEvent): void;
 
   /** Override to change show-behavior */
-  canShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean {
+  canShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean | Promise<boolean> {
     if (this.$isReadOnly) {
       return false;
     }
@@ -225,6 +226,22 @@ export default abstract class WUPBaseComboControl<
     ) {
       return false; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
     }
+
+    if (showCase === ShowCases.onFocus) {
+      const was = this.$value;
+      return new Promise((res) => {
+        // WARN: if click on btnClear with control.emptyValue - no changes and popup appeares
+        setTimeout(() => {
+          const isChangedByClick = !this.#ctr.$isEqual(was, this.$value);
+          return res(!isChangedByClick); // click on item or btnClear & control gets focus: need to not open menu because user makes action for changing value
+        });
+      });
+    }
+
+    if (showCase === ShowCases.onClick && e?.defaultPrevented) {
+      return false; // click on item or btnClear
+    }
+
     return true;
   }
 
@@ -236,7 +253,12 @@ export default abstract class WUPBaseComboControl<
     if (this.#isOpen) {
       return this.$refPopup!;
     }
-    if (!this.canShowMenu(showCase, e)) {
+
+    let can = this.canShowMenu(showCase, e);
+    if (can instanceof Promise) {
+      can = await can;
+    }
+    if (!can) {
       return null;
     }
 
@@ -309,6 +331,11 @@ export default abstract class WUPBaseComboControl<
     ) {
       return false; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
     }
+
+    if (hideCase === HideCases.onClick && e?.defaultPrevented) {
+      return false; // user clicks on item or btnClear
+    }
+
     return true;
   }
 
@@ -318,23 +345,20 @@ export default abstract class WUPBaseComboControl<
     if (!this.$refPopup || this._isHidding) {
       return false;
     }
-    const wasOpen = this.#isOpen;
     if (!this.canHideMenu(hideCase, e)) {
       return false;
     }
     this.#isOpen = false;
-    if (wasOpen) {
-      this._isHidding = true;
-      this.#popupRefs!.hide(PopupHideCases.onManuallCall); // call for ref-listener to apply events properly
-      await this.$refPopup.$hide();
-      delete this._isHidding;
-      if (this.#isOpen) {
-        return false; // possible when popup opened again during the animation
-      }
-      // remove popup only by focusOut to optimize resources
-      if (hideCase === HideCases.onFocusLost) {
-        this.removePopup();
-      }
+    this._isHidding = true;
+    this.#popupRefs!.hide(PopupHideCases.onManuallCall); // call for ref-listener to apply events properly
+    await this.$refPopup.$hide();
+    delete this._isHidding;
+    if (this.#isOpen) {
+      return false; // possible when popup opened again during the animation
+    }
+    // remove popup only by focusOut to optimize resources
+    if (hideCase === HideCases.onFocusLost) {
+      this.removePopup();
     }
 
     this.removeAttribute("opened");

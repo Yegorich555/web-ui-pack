@@ -123,12 +123,28 @@ describe("control.select", () => {
     expect(el.$isOpen).toBe(false);
     expect(el.$refInput.value).toBe("Donny");
     expect(mockRequest).toBeCalledTimes(1);
+
     // checking cached items
     el.$value = 20;
     await h.wait(10);
     expect(mockRequest).toBeCalledTimes(1);
     expect(el.$isPending).toBe(false); // no pending because items were cached
     expect(el.$refInput.value).toBe("Mikky");
+
+    // when menu is opening but user moved focus to another;
+    el.blur();
+    await h.wait();
+    el.$options.items = () => {
+      mockRequest();
+      return new Promise((resolve) => setTimeout(() => resolve(getItems()), 100));
+    };
+    await h.wait(1);
+    el.focus();
+    await h.wait(10);
+    expect(el.$isOpen).toBe(true);
+    el.blur();
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
   });
 
   test("$show/$hide menu", async () => {
@@ -141,6 +157,7 @@ describe("control.select", () => {
 
     // opening by focus
     el.focus();
+    await h.wait();
     expect(document.activeElement).toBe(el.$refInput);
     expect(el.$isOpen).toBe(true);
     expect(el.$refPopup).toBeDefined();
@@ -562,6 +579,11 @@ describe("control.select", () => {
     el.$value = 123;
     await h.wait();
     expect(el.$refInput.value).toBe("testVal-123_0");
+
+    // cover impossible case
+    const el2 = document.body.appendChild(document.createElement("wup-select"));
+    await h.wait(1);
+    expect(() => el2.focusMenuItemByKeydown(new KeyboardEvent("keydown", { key: "ArrowDown" }))).toThrow();
   });
 
   test("menu filtering by input", async () => {
@@ -665,6 +687,7 @@ describe("control.select", () => {
     await h.wait();
 
     el.focus();
+    await h.wait();
     expect(el.$isOpen).toBe(true);
 
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
@@ -694,7 +717,7 @@ describe("control.select", () => {
     // expect(el.$isOpen).toBe(true);
   });
 
-  test("select by menu item click", async () => {
+  test("select by click on menu-item", async () => {
     el.focus();
     await h.wait();
     expect(el.$isOpen).toBe(true);
@@ -723,6 +746,29 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isOpen).toBe(false);
     expect(el.$value).toBe(20);
+  });
+
+  test("no opening by click on btnClear", async () => {
+    el.$value = 10;
+    await h.wait(1);
+    el.focus();
+    el.$refBtnClear.click();
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    expect(el.$isFocused).toBe(true);
+
+    el.$refBtnClear.click();
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    expect(el.$isFocused).toBe(true);
+
+    el.$refLabel.click();
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+
+    el.$refBtnClear.click();
+    await h.wait();
+    expect(el.$isOpen).toBe(true); // no hide if was click on button-clear
   });
 
   describe("options", () => {

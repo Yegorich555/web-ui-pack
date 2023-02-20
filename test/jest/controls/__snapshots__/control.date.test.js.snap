@@ -1221,11 +1221,11 @@ exports[`control.date validations options.validationCase 3`] = `
       </span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt2"
+        aria-controls="txt6"
         aria-describedby="txt5"
         aria-expanded="true"
         aria-haspopup="listbox"
-        aria-owns="txt2"
+        aria-owns="txt6"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -1246,13 +1246,29 @@ exports[`control.date validations options.validationCase 3`] = `
     />
   </label>
   <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt5"
+    style="max-width: 100px;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
+  <wup-popup
     menu=""
     style=""
   >
     <wup-calendar>
       <div
         calendar="day"
-        id="txt2"
+        id="txt6"
       >
         <header>
           <button
@@ -1525,22 +1541,6 @@ exports[`control.date validations options.validationCase 3`] = `
       </div>
     </wup-calendar>
   </wup-popup>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt5"
-    style="max-width: 100px;"
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      custom err here
-    </span>
-  </wup-popup>
 </wup-date>
 `;
 
@@ -1561,11 +1561,11 @@ exports[`control.date validations options.validationCase 4`] = `
       </span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt6"
-        aria-describedby="txt7"
+        aria-controls="txt7"
+        aria-describedby="txt8"
         aria-expanded="false"
         aria-haspopup="listbox"
-        aria-owns="txt6"
+        aria-owns="txt7"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -1589,7 +1589,7 @@ exports[`control.date validations options.validationCase 4`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt7"
+    id="txt8"
     role="alert"
     style="max-width: 100px;"
   >

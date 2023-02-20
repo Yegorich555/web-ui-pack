@@ -1141,11 +1141,11 @@ exports[`control.time validations options.validationCase 3`] = `
       </span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt2"
+        aria-controls="txt6"
         aria-describedby="txt5"
         aria-expanded="true"
         aria-haspopup="listbox"
-        aria-owns="txt2"
+        aria-owns="txt6"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -1165,11 +1165,27 @@ exports[`control.time validations options.validationCase 3`] = `
     />
   </label>
   <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt5"
+    style="max-width: 100px;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
+  <wup-popup
     menu=""
     style=""
   >
     <div
-      id="txt2"
+      id="txt6"
       role="application"
     >
       <ul
@@ -1252,22 +1268,6 @@ exports[`control.time validations options.validationCase 3`] = `
         type="button"
       />
     </div>
-  </wup-popup>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt5"
-    style="max-width: 100px;"
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      custom err here
-    </span>
   </wup-popup>
 </wup-time>
 `;

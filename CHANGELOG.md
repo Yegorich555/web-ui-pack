@@ -14,6 +14,7 @@
 - [PopupElement](src/popup/popupElement.ts). Animation for opacity doesn't work on Safari 14-
 - Global. Hover effect on Android devices (expected: no-hover on touch-screens)
 - Global. Focus frame isn't rouned on Safari
+- Combobox based controls (Select, Date, Time). Now popup isn't open if user clears control and it gets focus at the same time
 
 - **New**:
 

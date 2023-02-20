@@ -548,8 +548,9 @@ export default class WUPTimeControl<
     e?: MouseEvent | FocusEvent | null,
     isNeedWait?: boolean
   ): Promise<WUPPopupElement | null> {
-    const r = super.goShowMenu(showCase, e, isNeedWait);
+    const r = await super.goShowMenu(showCase, e, isNeedWait);
 
+    // WARN: it works with long delay if isNeedWait==true; to fix this need to deprecate isNeedWait
     this.#lastInputChanged = false;
     const v = this.$value;
     if (this.$refMenuLists && v) {
@@ -583,7 +584,7 @@ export default class WUPTimeControl<
     if (isOk) {
       this.selectValue(this.getMenuValue());
     } else {
-      setTimeout(() => this.goHideMenu(HideCases.onClick, e)); // without timeout it handles click by listener and opens again
+      setTimeout(() => this.goHideMenu(HideCases.OnPressEsc, e)); // without timeout it handles click by listener and opens again
     }
   }
 

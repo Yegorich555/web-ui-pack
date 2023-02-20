@@ -203,6 +203,7 @@ describe("control.date", () => {
 
       el.$options.utc = true;
       el.focus();
+      await h.wait();
       expect(el.$refPopup.firstChild.$options.utc).toBe(true);
     });
   });

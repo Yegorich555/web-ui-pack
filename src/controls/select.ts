@@ -504,7 +504,7 @@ export default class WUPSelectControl<
 
   protected override focusMenuItemByKeydown(e: KeyboardEvent): void {
     if (!this._menuItems) {
-      return;
+      throw new Error(`${this.tagName}. Calling impossible on empty menu`);
     }
     const { length } = this._menuItems.filtered || this._menuItems.all;
     let focusIndex: number | null = null;
