@@ -1275,7 +1275,6 @@ exports[`control.time validations options.validationCase 3`] = `
 exports[`control.time validations options.validationCase 4`] = `
 <wup-time
   invalid=""
-  opened=""
 >
   <label
     for="txt1"
@@ -1292,7 +1291,7 @@ exports[`control.time validations options.validationCase 4`] = `
         aria-autocomplete="list"
         aria-controls="txt6"
         aria-describedby="txt7"
-        aria-expanded="true"
+        aria-expanded="false"
         aria-haspopup="listbox"
         aria-owns="txt6"
         aria-required="true"
@@ -1313,95 +1312,6 @@ exports[`control.time validations options.validationCase 4`] = `
       type="button"
     />
   </label>
-  <wup-popup
-    menu=""
-    style=""
-  >
-    <div
-      id="txt6"
-      role="application"
-    >
-      <ul
-        aria-label="Hours"
-        style="overflow: hidden;"
-      >
-        <li>
-          10
-        </li>
-        <li>
-          11
-        </li>
-        <li
-          aria-selected="true"
-        >
-          12
-        </li>
-        <li>
-          01
-        </li>
-        <li>
-          02
-        </li>
-      </ul>
-      <ul
-        aria-label="Minutes"
-        style="overflow: hidden;"
-      >
-        <li>
-          21
-        </li>
-        <li>
-          22
-        </li>
-        <li
-          aria-selected="true"
-        >
-          23
-        </li>
-        <li>
-          24
-        </li>
-        <li>
-          25
-        </li>
-      </ul>
-      <ul
-        aria-label="AM PM"
-        style="overflow: hidden;"
-      >
-        <li
-          aria-hidden="true"
-        />
-        <li
-          aria-selected="true"
-        >
-          AM
-        </li>
-        <li>
-          PM
-        </li>
-      </ul>
-      <mark
-        aria-hidden="true"
-      >
-        :
-      </mark>
-    </div>
-    <div
-      group=""
-    >
-      <button
-        aria-label="Ok"
-        tabindex="-1"
-        type="button"
-      />
-      <button
-        aria-label="Cancel"
-        tabindex="-1"
-        type="button"
-      />
-    </div>
-  </wup-popup>
   <wup-popup
     aria-atomic="true"
     aria-live="off"

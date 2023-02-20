@@ -366,7 +366,7 @@ export default class WUPTimeControl<
     this.setAttr.call(this.$refButtonOk!, "disabled", isDisabled, true);
   }
 
-  protected override async renderMenu(popup: WUPPopupElement, menuId: string, rows = 5): Promise<HTMLElement> {
+  protected override renderMenu(popup: WUPPopupElement, menuId: string, rows = 5): HTMLElement {
     popup.$options.minWidthByTarget = false;
     let isInit = true;
     const append = (ul: HTMLElement, v: number | string, twoDigs: boolean, savedV?: number): HTMLElement => {
@@ -540,7 +540,7 @@ export default class WUPTimeControl<
     );
 
     isInit = false;
-    return Promise.resolve(parent);
+    return parent;
   }
 
   protected override async goShowMenu(
@@ -576,16 +576,6 @@ export default class WUPTimeControl<
     const mm = this.$refMenuLists![1]._value;
     const h12 = this.$refMenuLists![2]?._value;
     return new WUPTimeObject(h12 != null && hh === 0 ? 12 : hh, mm, h12 ? h12 === 2 : undefined) as ValueType;
-  }
-
-  protected override focusMenuItem(next: HTMLElement | null): void {
-    if (next) {
-      const v = this.getMenuValue();
-      const str = this.valueToInput(v) as string;
-      next.setAttribute("aria-label", str);
-    }
-    this._focusedMenuItem?.removeAttribute("aria-label");
-    super.focusMenuItem(next);
   }
 
   /** Called when need to change/cancel changing & close */
@@ -644,7 +634,55 @@ export default class WUPTimeControl<
   //   return 0;
   // }
 
-  protected override gotKeyDown(e: KeyboardEvent): Promise<void> {
+  protected override focusMenuItem(next: HTMLElement | null): void {
+    if (next) {
+      const v = this.getMenuValue();
+      const str = this.valueToInput(v) as string;
+      next.setAttribute("aria-label", str);
+    }
+    this._focusedMenuItem?.removeAttribute("aria-label");
+    super.focusMenuItem(next);
+  }
+
+  protected override focusMenuItemByKeydown(e: KeyboardEvent): void {
+    let isHandled = true;
+    let isNext = false;
+    const lst = this.$refMenuLists!;
+    let ind = (this._focusedMenuItem && lst!.findIndex((ref) => ref.contains(this._focusedMenuItem!))) || 0;
+    const initFocus = (i: number): number => (this._focusedMenuItem ? i : 0 /* this.findActiveMenuList() */);
+    switch (e.key) {
+      case "ArrowLeft":
+        ind = Math.max(0, initFocus(ind - 1));
+        this.focusMenuItem(lst[ind].querySelector("[aria-selected=true]"));
+        break;
+      case "ArrowRight":
+        ind = Math.min(lst.length - 1, initFocus(ind + 1));
+        this.focusMenuItem(lst[ind].querySelector("[aria-selected=true]"));
+        break;
+      case "ArrowDown":
+        isNext = true;
+      // eslint-disable-next-line no-fallthrough
+      case "ArrowUp":
+        ind = initFocus(ind);
+        if (!this._focusedMenuItem) {
+          this.focusMenuItem(lst[ind].querySelector("[aria-selected=true]"));
+        } else {
+          this._focusedMenuItem = lst[ind].querySelector("[aria-selected=true]"); // otherwise focusNext not fired on next render
+          lst[ind].goToNext(isNext);
+        }
+        break;
+      default:
+        isHandled = false;
+        break;
+    }
+
+    if (isHandled) {
+      e.preventDefault();
+      this.#lastInputChanged = false;
+    }
+  }
+
+  protected override gotKeyDown(e: KeyboardEvent): void {
     const wasOpen = this.$isOpen;
     const isExtraKey = e.altKey || e.shiftKey || e.ctrlKey;
 
@@ -654,54 +692,13 @@ export default class WUPTimeControl<
       if (this.#lastInputChanged) {
         this.goHideMenu(HideCases.OnPressEnter);
       } else if (!this.$refButtonOk!.disabled) {
+        // todo isolate event
         this.$refButtonOk!.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }));
       }
-      return Promise.resolve();
+      return;
     }
 
-    const r = super.gotKeyDown(e);
-    if (isExtraKey) {
-      return r;
-    }
-
-    if (this.$isOpen) {
-      let isHandled = true;
-      let isNext = false;
-      const lst = this.$refMenuLists!;
-      let ind = (this._focusedMenuItem && lst!.findIndex((ref) => ref.contains(this._focusedMenuItem!))) || 0;
-      const initFocus = (i: number): number => (this._focusedMenuItem ? i : 0 /* this.findActiveMenuList() */);
-      switch (e.key) {
-        case "ArrowLeft":
-          ind = Math.max(0, initFocus(ind - 1));
-          this.focusMenuItem(lst[ind].querySelector("[aria-selected=true]"));
-          break;
-        case "ArrowRight":
-          ind = Math.min(lst.length - 1, initFocus(ind + 1));
-          this.focusMenuItem(lst[ind].querySelector("[aria-selected=true]"));
-          break;
-        case "ArrowDown":
-          isNext = true;
-        // eslint-disable-next-line no-fallthrough
-        case "ArrowUp":
-          ind = initFocus(ind);
-          if (!wasOpen) {
-            this.focusMenuItem(lst[ind].querySelector("[aria-selected=true]"));
-          } else {
-            this._focusedMenuItem = lst[ind].querySelector("[aria-selected=true]"); // otherwise focusNext not fired on next render
-            lst[ind].goToNext(isNext);
-          }
-          break;
-        default:
-          isHandled = false;
-          break;
-      }
-
-      if (isHandled) {
-        e.preventDefault();
-        this.#lastInputChanged = false;
-      }
-    }
-    return r;
+    super.gotKeyDown(e);
   }
 
   protected override gotFocusLost(): void {

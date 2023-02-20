@@ -433,7 +433,7 @@ describe("control.select", () => {
 
     // menu navigation by arrowKeys
     expect(el.$isOpen).toBe(true);
-    const menuIds = ["txt5", "txt6", "txt7", "txt8"];
+    const menuIds = ["txt5", "txt6", "txt7", "txt8"]; // WARN it's depeneds on test code before
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
     await h.wait(1);
     expect(el.$refInput.getAttribute("aria-activedescendant")).toBe(menuIds[0]);

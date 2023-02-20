@@ -217,7 +217,7 @@ export default class WUPDateControl<
     return r;
   }
 
-  protected override async renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> {
+  protected override renderMenu(popup: WUPPopupElement, menuId: string): HTMLElement {
     popup.$options.minWidthByTarget = false;
 
     const el = document.createElement("wup-calendar");
@@ -249,7 +249,7 @@ export default class WUPDateControl<
     });
 
     popup.appendChild(el);
-    return Promise.resolve(el);
+    return el;
   }
 
   protected override setValue(v: ValueType | undefined, canValidate = true, skipInput = false): boolean | null {
@@ -284,29 +284,6 @@ export default class WUPDateControl<
     super.gotInput(e, true);
   }
 
-  protected override gotKeyDown(e: KeyboardEvent): Promise<void> {
-    const wasOpen = this.$isOpen;
-    let skipCalendar = false;
-    switch (e.key) {
-      case "Escape":
-      case " ":
-        skipCalendar = true;
-        break;
-      case "Home":
-      case "End":
-        skipCalendar = e.shiftKey || e.ctrlKey; // skip only if pressed shift + Home/End
-        break;
-      default:
-        break;
-    }
-
-    const clnd = this.$refPopup?.firstElementChild as WUPCalendarControl;
-    wasOpen && !skipCalendar && clnd.gotKeyDown.call(clnd, e); // skip actions for Escape & Space keys
-    const r = !e.defaultPrevented && super.gotKeyDown(e);
-    !wasOpen && this.$isOpen && !skipCalendar && clnd.gotKeyDown.call(clnd, e); // case when user press ArrowKey for opening menu
-    return r || Promise.resolve();
-  }
-
   protected override focusMenuItem(next: HTMLElement | null): void {
     // WARN: it's important don't use call super... because the main logic is implemented inside calendar
     // can be fired from baseCombo => when need to clear selection
@@ -318,6 +295,11 @@ export default class WUPDateControl<
       this.$refInput.removeAttribute("aria-activedescendant");
     }
     this._focusedMenuItem = next;
+  }
+
+  protected focusMenuItemByKeydown(e: KeyboardEvent): void {
+    const clnd = this.$refPopup?.firstElementChild as WUPCalendarControl;
+    clnd.gotKeyDown.call(clnd, e);
   }
 }
 

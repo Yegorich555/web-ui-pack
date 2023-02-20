@@ -459,7 +459,7 @@ export default class WUPSelectControl<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override async goShowMenu(
     showCase: ShowCases,
-    e?: MouseEvent | FocusEvent | null,
+    e?: MouseEvent | FocusEvent | KeyboardEvent | null,
     isNeedWait?: boolean
   ): Promise<WUPPopupElement | null> {
     if (this.$isPending) {
@@ -471,12 +471,8 @@ export default class WUPSelectControl<
     }
 
     const popup = await super.goShowMenu(showCase, e, isNeedWait);
-    if (!popup) {
-      return null;
-    }
-
     // set aria-selected
-    this.selectMenuItemByValue(this.$value);
+    popup && this.selectMenuItemByValue(this.$value);
     return popup;
   }
 
@@ -506,39 +502,17 @@ export default class WUPSelectControl<
     this._menuItems!.focused = index;
   }
 
-  protected override async gotKeyDown(e: KeyboardEvent): Promise<void> {
-    // pending event disables gotKeyDown so it's case impossible
-    // if (this.$isPending) {
-    //   return;
-    // }
-    const wasOpen = this.$isOpen;
-    if (wasOpen && this._opts.allowNewValue && !this._focusedMenuItem && e.key === "Enter") {
-      const txt = this.$refInput.value.trim();
-      const v = txt ? this.findValueByText(txt) ?? (txt as any) : undefined;
-      // this.selectValue(v);
-      // e.preventDefault();
-      // return;
-      this.setValue(v);
-    }
-    await super.gotKeyDown(e);
-    if (!this.$isOpen || e.altKey || e.shiftKey || e.ctrlKey || !this._menuItems) {
+  protected override focusMenuItemByKeydown(e: KeyboardEvent): void {
+    if (!this._menuItems) {
       return;
     }
-
-    const { length } = this._menuItems!.filtered || this._menuItems!.all;
+    const { length } = this._menuItems.filtered || this._menuItems.all;
     let focusIndex: number | null = null;
 
     // firstFocused can be selected/current
-    if (this._menuItems!.focused === -1 && this._selectedMenuItem) {
+    if (this._menuItems.focused === -1 && this._selectedMenuItem) {
       if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-        focusIndex = this._menuItems!.all.indexOf(this._selectedMenuItem as WUP.Select.MenuItemElement);
-        // case impossible because with filtered items we have this._menuItems!.focused !== -1
-        // if (this._menuItems.filtered) {
-        //   focusIndex = this._menuItems.filtered.indexOf(focusIndex);
-        // }
-        // if (focusIndex === -1) {
-        //   focusIndex = null;
-        // }
+        focusIndex = this._menuItems.all.indexOf(this._selectedMenuItem as WUP.Select.MenuItemElement);
       }
     }
 
@@ -546,13 +520,13 @@ export default class WUPSelectControl<
       switch (e.key) {
         case "ArrowDown":
           {
-            let cur = this._menuItems!.focused;
+            let cur = this._menuItems.focused;
             focusIndex = ++cur >= length ? 0 : cur;
           }
           break;
         case "ArrowUp":
           {
-            let cur = wasOpen ? this._menuItems!.focused : length;
+            let cur = this._menuItems.focused; // : length;
             focusIndex = --cur < 0 ? length - 1 : cur;
           }
           break;
@@ -571,6 +545,23 @@ export default class WUPSelectControl<
       e.preventDefault();
       this.focusMenuItemByIndex(focusIndex);
     }
+  }
+
+  protected override gotKeyDown(e: KeyboardEvent): void {
+    // pending event disables gotKeyDown so case impossible
+    // if (this.$isPending) {
+    //   return;
+    // }
+    const wasOpen = this.$isOpen;
+    if (wasOpen && this._opts.allowNewValue && !this._focusedMenuItem && e.key === "Enter") {
+      const txt = this.$refInput.value.trim();
+      const v = txt ? this.findValueByText(txt) ?? (txt as any) : undefined;
+      // this.selectValue(v);
+      // e.preventDefault();
+      // return;
+      this.setValue(v);
+    }
+    super.gotKeyDown(e);
   }
 
   /** Called to filter menuItems (on input change etc.) */

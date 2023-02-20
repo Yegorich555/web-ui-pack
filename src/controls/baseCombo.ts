@@ -204,9 +204,11 @@ export default abstract class WUPBaseComboControl<
   protected abstract renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> | HTMLElement;
   /** Called when need to transfer current value to input */
   protected abstract valueToInput(v: ValueType | undefined): string | Promise<string>;
+  /** Called on user's keyDown to apply focus on popup-menu items */
+  protected abstract focusMenuItemByKeydown(e: KeyboardEvent): void;
 
   /** Override to change show-behavior */
-  canShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | null): boolean {
+  canShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean {
     if (this.$isReadOnly) {
       return false;
     }
@@ -228,7 +230,7 @@ export default abstract class WUPBaseComboControl<
 
   protected async goShowMenu(
     showCase: ShowCases,
-    e?: MouseEvent | FocusEvent | null,
+    e?: MouseEvent | FocusEvent | KeyboardEvent | null,
     isNeedWait?: boolean
   ): Promise<WUPPopupElement | null> {
     if (this.#isOpen) {
@@ -321,7 +323,6 @@ export default abstract class WUPBaseComboControl<
       return false;
     }
     this.#isOpen = false;
-    /* istanbul ignore else */
     if (wasOpen) {
       this._isHidding = true;
       this.#popupRefs!.hide(PopupHideCases.onManuallCall); // call for ref-listener to apply events properly
@@ -374,7 +375,7 @@ export default abstract class WUPBaseComboControl<
     this._selectedMenuItem = next;
   }
 
-  protected override async gotKeyDown(e: KeyboardEvent): Promise<void> {
+  protected override gotKeyDown(e: KeyboardEvent): void {
     // don't allow to process Esc-key when menu is opened
     const isEscPrevent = this.#isOpen && e.key === "Escape";
     !isEscPrevent && super.gotKeyDown(e);
@@ -383,17 +384,14 @@ export default abstract class WUPBaseComboControl<
       return;
     }
 
-    if (this._opts.showCase & ShowCases.onPressArrowKey) {
-      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-        e.preventDefault(); // to prevent parent-scroll
-        if (!this.#isOpen) {
-          await this.goShowMenu(ShowCases.onPressArrowKey, null); // , true);
+    if (!this.#isOpen) {
+      if (this._opts.showCase & ShowCases.onPressArrowKey) {
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+          e.preventDefault(); // to prevent parent-scroll
+          this.goShowMenu(ShowCases.onPressArrowKey, e).then(() => this.focusMenuItemByKeydown(e));
           return;
         }
       }
-    }
-
-    if (!this.#isOpen) {
       return;
     }
 
@@ -401,24 +399,27 @@ export default abstract class WUPBaseComboControl<
       case "Escape":
         e.preventDefault();
         this.resetInputValue();
-        await this.goHideMenu(HideCases.OnPressEsc);
+        this.goHideMenu(HideCases.OnPressEsc);
         break;
       case "Enter":
-        // case " ": user can type space; we should not use this as click
         e.preventDefault();
         {
           const el = this._focusedMenuItem;
           if (el && !el.hasAttribute("disabled")) {
             const isHandled = !el.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }));
+            /* istanbul ignore else */
             if (isHandled) {
               return; // skip hidding menu if itemClick isHandled
             }
           }
-          await this.goHideMenu(HideCases.OnPressEnter);
           this.resetInputValue();
+          this.goHideMenu(HideCases.OnPressEnter);
         }
         break;
+      case " ":
+        break; // don't process " " because it can fire clickEvent on buttons
       default:
+        this.focusMenuItemByKeydown(e);
         break;
     }
   }

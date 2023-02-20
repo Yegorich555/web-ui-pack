@@ -535,25 +535,25 @@ describe("control.time", () => {
         "<li aria-selected="true">AM</li>",
       ]
     `);
-    expect(isPressKeyPrevented("ArrowDown")).toBe(true);
-    expect(isPressKeyPrevented("ArrowDown")).toBe(true);
+    expect(isPressKeyPrevented("ArrowDown")).toBe(true); // 12 hh
+    expect(isPressKeyPrevented("ArrowDown")).toBe(true); // 01 hh
 
-    expect(isPressKeyPrevented("ArrowRight")).toBe(true);
-    expect(isPressKeyPrevented("ArrowDown")).toBe(true);
+    expect(isPressKeyPrevented("ArrowRight")).toBe(true); // 23 mm
+    expect(isPressKeyPrevented("ArrowDown")).toBe(true); // 24 mm
 
-    expect(isPressKeyPrevented("ArrowRight")).toBe(true);
-    expect(isPressKeyPrevented("ArrowDown")).toBe(true);
+    expect(isPressKeyPrevented("ArrowRight")).toBe(true); // AM
+    expect(isPressKeyPrevented("ArrowDown")).toBe(true); // PM
     await h.wait();
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
-        "<li aria-selected="true" id="txt4">02</li>",
+        "<li aria-selected="true" id="txt4">01</li>",
         "<li aria-selected="true" id="txt6">24</li>",
-        "<li aria-selected="true" aria-label="02:24 PM" id="txt8" focused="">PM</li>",
+        "<li aria-selected="true" aria-label="01:24 PM" id="txt8" focused="">PM</li>",
       ]
     `);
     expect(isPressKeyPrevented("ArrowUp")).toBe(true);
     expect(el.$refMenuLists[2].innerHTML).toMatchInlineSnapshot(
-      `"<li aria-selected="true" aria-label="02:24 AM" id="txt9" focused="">AM</li><li aria-selected="false" id="txt8">PM</li>"`
+      `"<li aria-selected="true" aria-label="01:24 AM" id="txt9" focused="">AM</li><li aria-selected="false" id="txt8">PM</li>"`
     );
   });
 
