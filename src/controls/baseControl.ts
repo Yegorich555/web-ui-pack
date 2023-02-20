@@ -580,7 +580,11 @@ export default abstract class WUPBaseControl<
       const attr = this.getAttribute("initvalue");
       if (attr !== null) {
         (this as any)._noDelInitValueAttr = true;
-        this.$initValue = this.parse(attr);
+        try {
+          this.$initValue = this.parse(attr);
+        } catch (err) {
+          this.throwError(err);
+        }
         delete (this as any)._noDelInitValueAttr;
       } else if (propsChanged) {
         this.$initValue = undefined; // removed attr >> remove initValue

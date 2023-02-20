@@ -114,12 +114,12 @@ describe("control.date", () => {
       await h.wait(1);
       expect(el.$options.maskholder).toBe("mm/dd/yyyy");
 
-      const ef = h.mockConsoleError();
+      const onErr = jest.spyOn(el, "throwError").mockImplementationOnce(() => {});
       el.$options.format = "MMM-DD/YYYY";
       await h.wait(1);
       expect(el.$options.format).toBe("YYYY-MM-DD"); // it rollbacks to default because was not supported format
-      expect(ef).toBeCalledTimes(1);
-      h.unMockConsoleError();
+      expect(onErr).toBeCalledTimes(1);
+      expect(onErr.mock.lastCall[0]).toMatchInlineSnapshot(`"'MMM' in format isn't supported"`);
     });
 
     test("attr [startWith]", async () => {

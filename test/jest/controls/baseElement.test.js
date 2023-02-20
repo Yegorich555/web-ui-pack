@@ -316,7 +316,7 @@ describe("baseElement", () => {
 
   test("getNumAttr", () => {
     el.setAttribute("tn", "abc");
-    const onErr = h.mockConsoleError();
+    const onErr = jest.spyOn(el, "throwError");
     el.getAttr("tn", "number");
     expect(onErr).toBeCalledTimes(1);
 
@@ -336,7 +336,7 @@ describe("baseElement", () => {
 
   test("getRefAttr", () => {
     el.setAttribute("tr", "window._model.firstName");
-    const onErr = h.mockConsoleError();
+    const onErr = jest.spyOn(el, "throwError");
     el.getAttr("tr", "ref");
     expect(onErr).toBeCalledTimes(1);
     el.setAttribute("tr", "_model.firstName");
@@ -372,6 +372,14 @@ describe("baseElement", () => {
     el.setAttribute("tob", '{"me":2}');
     el.parse = (s) => JSON.parse(s);
     expect(el.getAttr("tob", "obj")).toEqual({ me: 2 });
+
+    el.setAttribute("tob", "wrong text");
+    const onErr = jest.spyOn(el, "throwError");
+    el.parse = () => {
+      throw new Error("Simulated err");
+    };
+    expect(el.getAttr("tob", "obj", "alt-text")).toBe("alt-text");
+    expect(onErr).toBeCalledTimes(1);
   });
 
   test("getStrAttr", () => {

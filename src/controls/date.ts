@@ -162,7 +162,7 @@ export default class WUPDateControl<
     this._opts.utc = this.getAttr("utc", "bool");
     this._opts.format = this.getAttr("format") || "YYYY-MM-DD";
     if (this._opts.format.toUpperCase().includes("MMM")) {
-      console.error(`${this.tagName}. 'MMM' in format isn't supported`);
+      this.throwError(`'MMM' in format isn't supported`);
       this._opts.format = "YYYY-MM-DD";
     }
     this._opts.mask =

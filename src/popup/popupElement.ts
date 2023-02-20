@@ -926,3 +926,4 @@ declare global {
 
 // todo popup can't be more than 100vw & 100vh
 // todo sometimes popup placed in wrong position on mobileApp & selectMany (when switch to another)
+// todo refactor show & hide so user can call show several times and get the same promise

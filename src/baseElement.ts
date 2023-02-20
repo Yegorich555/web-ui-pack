@@ -395,8 +395,9 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
   getAttr<T>(attr: string, type: "ref", alt?: T): T;
   getAttr(attr: string, type?: string, alt?: any): any {
     const a = this.getAttribute(attr);
+    const nullResult = alt !== undefined ? alt : this._opts[attr];
     if (a == null) {
-      return alt !== undefined ? alt : this._opts[attr];
+      return nullResult;
     }
     switch (type) {
       case "bool":
@@ -404,25 +405,28 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
       case "number": {
         const v = +a;
         if (Number.isNaN(v)) {
-          console.error(`${this.tagName}. Expected number for attribute [${attr}] but pointed '${a}'`);
-          return alt !== undefined ? alt : this._opts[attr];
+          this.throwError(`Expected number for attribute [${attr}] but pointed '${a}'`);
+          return nullResult;
         }
         return v;
       }
       case "ref": {
         const v = nestedProperty.get(window, a);
         if (v === undefined) {
-          console.error(
-            `${this.tagName}. Value not found according to attribute [${attr}] in '${
-              a.startsWith("window.") ? a : `window.${a}`
-            }'`
+          this.throwError(
+            `Value not found according to attribute [${attr}] in '${a.startsWith("window.") ? a : `window.${a}`}'`
           );
-          return alt !== undefined ? alt : this._opts[attr];
+          return nullResult;
         }
         return v;
       }
       case "obj": {
-        return this.parse(a);
+        try {
+          return this.parse(a);
+        } catch (err) {
+          this.throwError(err);
+          return nullResult;
+        }
       }
       default:
         return a; // string
@@ -441,6 +445,14 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
     while (this.firstChild) {
       this.removeChild(this.firstChild);
     }
+  }
+
+  /** Throws unhanled error via empty setTimeout */
+  throwError(err: string | Error | unknown): void {
+    const e = new Error(`${this.tagName}. ${err}`, { cause: err });
+    setTimeout(() => {
+      throw e;
+    });
   }
 
   // Uncomment if it's required

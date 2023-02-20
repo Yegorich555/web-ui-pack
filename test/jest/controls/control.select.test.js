@@ -75,13 +75,16 @@ describe("control.select", () => {
     expect(el.$refInput.value).toBeFalsy();
 
     delete el._cachedItems;
-    h.mockConsoleError();
+
+    const onErr = jest.spyOn(el, "throwError").mockImplementationOnce(() => {});
     el.setAttribute("items", "");
     jest.advanceTimersByTime(1);
     el.$initValue = undefined;
     expect(el.$options.items?.length).toBe(0);
     expect((await el.getItems())?.length).toBe(0);
-    h.unMockConsoleError();
+    expect(onErr.mock.lastCall[0]).toMatchInlineSnapshot(
+      `"Value not found according to attribute [items] in 'window.'"`
+    );
   });
 
   test("pending state", async () => {

@@ -103,8 +103,17 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.getAttribute("initvalue")).toBe(null);
       expect(el.$initValue).toStrictEqual(cfg.emptyValue);
 
+      await h.wait();
       el.setAttribute("initvalue", "");
       expect(() => jest.advanceTimersByTime(1)).not.toThrow();
+      await h.wait(1);
+      expect(el.$initValue).toStrictEqual(cfg.emptyValue);
+
+      el.parse = () => {
+        throw new Error("Test err");
+      };
+      el.setAttribute("initvalue", "wrong value");
+      expect(() => jest.advanceTimersByTime(1)).toThrow();
       await h.wait(1);
       expect(el.$initValue).toStrictEqual(cfg.emptyValue);
     });
@@ -407,7 +416,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
         expect(el.$isValid).toBe(true);
 
         (window as any)._testVld = undefined;
-        const onErr = h.mockConsoleError();
+        const onErr = jest.spyOn(el, "throwError");
         expect(() => el.$validate()).not.toThrow(); // because key is pointed but value undefined
         expect(onErr).toBeCalled();
         h.unMockConsoleError();
