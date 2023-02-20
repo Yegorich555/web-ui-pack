@@ -87,6 +87,15 @@ describe("control.textarea", () => {
     await h.userTypeText(el, "abc", { clearPrevious: false });
     expect(area.$value?.length).toBe(3); // order is wrong because jsdom doesn't support window.getSelection properly
   });
+
+  test("key modifiers disabled", async () => {
+    el.focus();
+    await h.wait(1);
+    const isPrevented = !el.$refInput.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "B", ctrlKey: true, bubbles: true, cancelable: true })
+    );
+    expect(isPrevented).toBe(true);
+  });
 });
 
 // WARN: these tests are simulation only for coverage; see real e2e test

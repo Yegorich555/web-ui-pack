@@ -287,6 +287,9 @@ export default class WUPTextareaControl<
   // }
 
   protected override gotKeyDown(e: KeyboardEvent & { submitPrevented?: boolean }): void {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault(); // prevent Bold,Italic etc. styles until textrich is developed
+    }
     super.gotKeyDown(e);
     if (e.key === "Enter") {
       e.submitPrevented = true;
@@ -300,5 +303,3 @@ export default class WUPTextareaControl<
 }
 
 customElements.define(tagName, WUPTextareaControl);
-
-// todo by default ctrl+B - bold, ctrl+I - italic works but maybe user don't expect it
