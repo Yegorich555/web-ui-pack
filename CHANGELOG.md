@@ -21,6 +21,7 @@
 - [SpinElement](src/spinElement.ts). Animation for TwinDualRing doesn't work on Safari 14-
 - [SpinElement](src/spinElement.ts). Wrong render on option `fit` on Safari 14-
 - [PopupElement](src/popup/popupElement.ts). Animation for opacity doesn't work on Safari 14-
+- [PopupElement](src/popup/popupElement.ts). Animation affects on bluring text if scroll body during the animation
 
 - **New**:
 

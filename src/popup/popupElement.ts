@@ -848,6 +848,8 @@ export default class WUPPopupElement<
     const dx = meRect.left - pos.left;
     const dy = meRect.top - pos.top;
     if (dx || dy) {
+      // console.error("issue", { dx, dy });
+      // todo issue here: somehow it happened during the dropdownAnimation and works wrong: try to open/hide several times in a short time
       styleTransform(this, "translate", `${pos.left - dx}px, ${pos.top - dy}px`);
       this.#refArrow && styleTransform(this.#refArrow, "translate", `${pos.arrowLeft - dx}px, ${pos.arrowTop - dy}px`);
     }
@@ -927,3 +929,5 @@ declare global {
 // todo popup can't be more than 100vw & 100vh
 // todo sometimes popup placed in wrong position on mobileApp & selectMany (when switch to another)
 // todo refactor show & hide so user can call show several times and get the same promise
+
+// manual testcase: show as dropdown & scroll parent - blur effect can appear

@@ -35,16 +35,16 @@ export function animateDropdown(el: HTMLElement, ms: number, isClose = false): W
   const parseScale = (e: HTMLElement): { prev: string; from: number } => {
     let prev = e.style.transform;
     let from = isClose ? 1 : 0;
-    const r = reg.exec(e.style.transform);
+    const r = reg.exec(prev);
     if (r) {
       // remove scale from transform
-      prev = e.style.transform.replace(r[0], "");
+      prev = prev.replace(r[0], ""); // remove scale from transform
       from = Number.parseFloat(r[1]); // warn % isn't supported
     }
+    prev = prev.replace("translateZ(0px)", ""); // remove prev translateZ(0) from transform
     if (prev) {
       prev = `${prev.trim().replace("  ", " ")} `; // extra-space to prepare add scaleY without extra logic
     }
-
     return { prev, from };
   };
 
@@ -63,6 +63,11 @@ export function animateDropdown(el: HTMLElement, ms: number, isClose = false): W
       e.el.style.transform = e.prev.trimEnd();
       e.el.style.transformOrigin = "";
     });
+    // refresh layout otherwise blur effect possible if scroll during the animation
+    const was = el.style.display;
+    el.style.display = "none";
+    (reset as any)._cached = el.offsetHeight;
+    el.style.display = was;
   };
 
   // define from-to ranges
@@ -82,7 +87,7 @@ export function animateDropdown(el: HTMLElement, ms: number, isClose = false): W
     styleTransform(el, "scaleY", v);
     v !== 0 &&
       nested.forEach((e) => {
-        e.el.style.transform = `${e.prev}scaleY(${1 / v})`;
+        e.el.style.transform = `${e.prev}scaleY(${1 / v}) translateZ(0px)`; // it improves text-render during the scrolling & animation
         e.el.style.transformOrigin = "bottom";
       });
   });

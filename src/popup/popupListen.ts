@@ -271,3 +271,6 @@ popupListen.$defaults = {
   hoverShowTimeout: 200,
   hoverHideTimeout: 500,
 };
+
+// todo issue. SelectControl: mousedown on icon, mousemove, mouseup on icon - popup not closed but it works for opening
+// todo deprecate filter for dblClick because it works wrong in browsers
