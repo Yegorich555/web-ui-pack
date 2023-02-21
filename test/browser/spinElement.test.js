@@ -142,7 +142,7 @@ describe("spinElement", () => {
     expect(t.html).toMatchInlineSnapshot(`
       "<button aria-busy="true">
               <span>Some text</span>
-              <wup-spin aria-label="Loading. Please wait" style="--spin-size:15px; --spin-item-size: calc( calc( 3em / 8) * 0.375);">
+              <wup-spin aria-label="Loading. Please wait" style="--spin-size: 14px; --spin-item-size: calc( calc( 3em / 8) * 0.35);">
             <div></div></wup-spin></button>"
     `);
   });

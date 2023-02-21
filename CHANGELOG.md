@@ -11,6 +11,7 @@
 - helper [`onFocusLost`](src/helpers/onFocusLost.ts). Isn't fired if stopPropagation is called
 - [SwitchControl](src/controls/switch.ts). [CheckControl](src/controls/check.ts). Attribute `initvalue=''` sets value to `true` (expected `false`)
 - [SpinElement](src/spinElement.ts). Animation for TwinDualRing doesn't work on Safari 14-
+- [SpinElement](src/spinElement.ts). Wrong render on option `fit` on Safari 14-
 - [PopupElement](src/popup/popupElement.ts). Animation for opacity doesn't work on Safari 14-
 - Controls. Hover effect on Android devices (expected: no-hover on touch-screens)
 - Controls. Focus frame isn't rouned on Safari

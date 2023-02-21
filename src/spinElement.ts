@@ -219,25 +219,28 @@ export default class WUPSpinElement extends WUPBaseElement {
       this.$refFade?.remove();
       this.$refFade = undefined;
 
-      if (this.getAttr("fit", "bool", this._opts.fit)) {
+      if (this._opts.fit) {
         const goUpdate = (): void => {
-          this.style.position = "absolute";
+          this.style.display = "none";
           const p = this.parentElement as HTMLElement;
           const r = { width: p.clientWidth, height: p.clientHeight, left: 0, top: 0 };
-          this.style.position = "";
+          this.style.display = "";
           if (this.#prevRect && this.#prevRect.width === r.width && this.#prevRect.height === r.height) {
             return;
           }
+
+          this.style.cssText = ""; // otherwise getPropertyValue is wrong
           const ps = getComputedStyle(p);
           const { paddingTop, paddingLeft, paddingBottom, paddingRight } = ps;
           const innW = r.width - px2Number(paddingLeft) - px2Number(paddingRight);
           const innH = r.height - px2Number(paddingTop) - px2Number(paddingBottom);
-          const sz = Math.min(innH, innW);
+          let sz = Math.min(innH, innW);
+          sz -= sz % 2; // 17px => 16px: Safari issue > placed wrong with odd width
           const varItemSize = ps.getPropertyValue("--spin-item-size");
-          const scale = Math.min(Math.min(innW, innH) / this.clientWidth, 1);
+          const scale = Math.min(sz / this.clientWidth, 1);
           // styleTransform(this, "scale", scale === 1 ? "" : `${scale}`); // wrong because it doesn't affect on the layout size
           // this.style.zoom = scale; // zoom isn't supported by FireFox
-          this.style.cssText = `--spin-size:${sz}px; --spin-item-size: calc(${varItemSize} * ${scale})`;
+          this.style.cssText = `--spin-size: ${sz}px; --spin-item-size: calc(${varItemSize} * ${scale})`;
           // this.style.width = `${sz}px`;
           // this.style.height = `${sz}px`;
 
@@ -303,6 +306,7 @@ export default class WUPSpinElement extends WUPBaseElement {
     styleTransform(this, "scale", scale === 1 ? "" : `${scale}`);
 
     if (this.$refFade) {
+      // todo apply fixes from popup - when transformation is inherrit
       styleTransform(this.$refFade, "translate", `${r.left - left}px,${r.top - top}px`);
       styleTransform(this.$refFade, "scale", scale === 1 || !scale ? "" : `${1 / scale}`);
       /* istanbul ignore else */

@@ -455,6 +455,15 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
     });
   }
 
+  // /** Forces to recalc render-logic of browser */
+  // refreshRender(): void {
+  //   const was = this.style.display;
+  //   this.style.display = was === "none" ? "block" : "none";
+  //   (this as any).__fixRefresh = this.offsetHeight; // no need to store this anywhere, the reference is enough
+  //   this.style.display = was;
+  //   delete (this as any).__fixRefresh;
+  // }
+
   // Uncomment if it's required
   // /** Replace all children of node with nodes, while replacing strings in nodes with equivalent Text nodes */
   // replaceChildren(...nodes: (string | Node)[]): void {
