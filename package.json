@@ -13,6 +13,7 @@
     "test-minify": "node .\\test\\minification\\start.js",
     "coverage": "npm test -- --coverageReporters=lcov && coveralls < coverage\\lcov.info && shx rm -rf .\\coverage && echo \nCoverage: published\n",
     "start": ".\\node_modules\\.bin\\webpack serve --open --config demo/webpack.devServer.js",
+    "start-host": ".\\node_modules\\.bin\\webpack serve --open --config demo/webpack.devServer.js --host=0.0.0.0",
     "build-demo": ".\\node_modules\\.bin\\webpack --mode production --config demo/webpack.prod.js",
     "build-demo-dev": ".\\node_modules\\.bin\\webpack --mode development --config demo/webpack.dev.js --watch",
     "lint-code": ".\\node_modules\\.bin\\eslint --fix --cache ./**/*.{js,jsx,ts,tsx,json}",

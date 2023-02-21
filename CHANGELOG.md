@@ -14,6 +14,7 @@
 - [PopupElement](src/popup/popupElement.ts). Animation for opacity doesn't work on Safari 14-
 - Global. Hover effect on Android devices (expected: no-hover on touch-screens)
 - Global. Focus frame isn't rouned on Safari
+- Global. Attributes `initvalue,min,max` for controls Date & Calendar doesn't work on Safari (Date.parse(yyyy-MM-dd) doesn't work by default)
 - Global. Controls are not rendered if parsing initvalue is wrong
 - Combobox based controls (Select, Date, Time). Now popup isn't open if user clears control and it gets focus at the same time
 - [TextareaControl](src/controls/textarea.ts). `Ctrl + B` makes text bold but it's unexpected for plain textarea

@@ -1,7 +1,7 @@
 import WUPBaseControl from "./baseControl";
 import { WUPcssHidden } from "../styles";
 import WUPScrolled from "../helpers/scrolled";
-import { dateCopyTime } from "../indexHelpers";
+import { dateCopyTime, dateFromString } from "../indexHelpers";
 import localeInfo from "../objects/localeInfo";
 
 const tagName = "wup-calendar";
@@ -331,22 +331,13 @@ export default class WUPCalendarControl<
    * "2022-10-25T02:40:00.000Z" >> returns UTC Date (argument `asUTC:false` is ignored)
    */
   static $parse(yyyyMMdd: string, asUTC: boolean): Date {
-    const dt = Date.parse(yyyyMMdd);
-    if (Number.isNaN(dt)) {
-      throw new Error(`Impossible to parse date from '${yyyyMMdd}'`);
+    const sep = yyyyMMdd.includes("T") ? "T" : " ";
+    const format = `YYYY-MM-DD${sep}hh:mm:ss.fff${asUTC || yyyyMMdd.endsWith("Z") ? "Z" : ""}`;
+    const v = dateFromString(yyyyMMdd, format, { throwOutOfRange: true });
+    if (v == null) {
+      throw new Error(`Impossible to parse date from '${yyyyMMdd}'. Expected format '${format}'`);
     }
-    /* by default
-       2022-10-25 >> utc
-       2022-10-25 00:00 >> local
-       2022-10-25T00:00 >> local
-    */
-    const v = new Date(dt);
-    const isUTC = yyyyMMdd.length === 10;
-    if (!yyyyMMdd.endsWith("Z") && isUTC !== asUTC) {
-      v.setMinutes(v.getMinutes() + (isUTC ? 1 : -1) * v.getTimezoneOffset());
-    }
-
-    return v;
+    return v!; // null impossible here
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
