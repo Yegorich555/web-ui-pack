@@ -723,7 +723,7 @@ export default class WUPTextControl<
       this.declineInput(pos);
     } else {
       el.value = mi.value;
-      el.setSelectionRange(pos, pos);
+      document.activeElement === el && el.setSelectionRange(pos, pos); // without checking on focus setSelectionRange sets focus on Safari
     }
     isFocused && this.renderMaskHolder(this._opts.maskholder, mi.leftLength - declinedAdd);
 
