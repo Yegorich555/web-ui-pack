@@ -546,7 +546,7 @@ export default class WUPPopupElement<
     const goUpdate = (): void => {
       // possible if hidden by target-remove
       if (this.#isOpen) {
-        this.#state!.prevRect = this.#updatePosition();
+        this.#state!.prevRect = this.updatePosition();
         const id = window.requestAnimationFrame(goUpdate);
         if (this.#state) {
           this.#state.frameId = id;
@@ -634,7 +634,7 @@ export default class WUPPopupElement<
   }
 
   /** Update position of popup. Call this method in cases when you changed options */
-  #updatePosition = (): DOMRect | undefined => {
+  protected updatePosition(): DOMRect | undefined {
     const trg = this._opts.target as HTMLElement;
     // possible when target removed via set innerHTML (in this case remove-hook doesn't work)
     if (!trg.isConnected) {
@@ -856,7 +856,7 @@ export default class WUPPopupElement<
       layout bug: Yscroll appears/disappears when display:flex; heigth:100vh > position:absolute; right:-10px
       with cnt==2 it's reprodusable */
     return t.el.getBoundingClientRect();
-  };
+  }
 
   protected override gotRemoved(): void {
     this.#isOpen = false;

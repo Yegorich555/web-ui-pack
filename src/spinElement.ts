@@ -208,7 +208,7 @@ export default class WUPSpinElement extends WUPBaseElement {
       }
       this.style.position = "absolute";
       const goUpdate = (): void => {
-        this.#prevRect = this.#updatePosition();
+        this.#prevRect = this.updatePosition();
         // possible if hidden by target-remove
         this.#frameId = window.requestAnimationFrame(goUpdate);
       };
@@ -264,7 +264,7 @@ export default class WUPSpinElement extends WUPBaseElement {
   #prevRect?: Pick<DOMRect, "width" | "height" | "top" | "left">;
   #frameId?: number;
   /** Update position. Call this method in cases when you changed options */
-  #updatePosition = (): Pick<DOMRect, "width" | "height" | "top" | "left"> | undefined => {
+  protected updatePosition(): Pick<DOMRect, "width" | "height" | "top" | "left"> | undefined {
     const trg = this.target;
     if (!trg.clientWidth || !trg.clientHeight) {
       this.style.display = "none"; // hide if target is not displayed
@@ -302,11 +302,10 @@ export default class WUPSpinElement extends WUPBaseElement {
 
     const left = Math.round(r.left + offset.left + (w - this.clientWidth) / 2);
     const top = Math.round(r.top + offset.top + (h - this.clientHeight) / 2);
-    styleTransform(this, "translate", `${left}px,${top}px`);
+    styleTransform(this, "translate", `${left}px,${top}px`); // WARN: parent transform not affects on element how it works in popup
     styleTransform(this, "scale", scale === 1 ? "" : `${scale}`);
 
     if (this.$refFade) {
-      // todo apply fixes from popup - when transformation is inherrit
       styleTransform(this.$refFade, "translate", `${r.left - left}px,${r.top - top}px`);
       styleTransform(this.$refFade, "scale", scale === 1 || !scale ? "" : `${1 / scale}`);
       /* istanbul ignore else */
@@ -320,7 +319,7 @@ export default class WUPSpinElement extends WUPBaseElement {
     }
 
     return r;
-  };
+  }
 }
 
 spinUseRing(WUPSpinElement);
