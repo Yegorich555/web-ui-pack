@@ -1794,7 +1794,7 @@ describe("popupElement", () => {
     expect(myel.$isOpen).toBe(true);
   });
 
-  test("double-click filter", async () => {
+  /* test("double-click filter", async () => {
     await el.$hide();
     el.$options.showCase = 1 << 2; // click
     await h.wait();
@@ -1813,7 +1813,7 @@ describe("popupElement", () => {
     await doubleClick(trg);
     await h.wait(100);
     expect(el.$isOpen).toBe(true); // because 2nd click is filtered
-  });
+  }); */
 
   test("right-click filter", async () => {
     await el.$hide();

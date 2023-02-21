@@ -151,7 +151,7 @@ export default function popupListen(
 
     onShowEvent(document, "click", (e) => {
       preventClickAfterFocus = false; // mostly it doesn't make sense but maybe it's possible
-      if (wasMouseMove || e.detail === 2 || e.button) {
+      if (wasMouseMove || /* e.detail >= 2 || */ e.button) {
         wasMouseMove = false;
         return;
       }
@@ -181,7 +181,7 @@ export default function popupListen(
         debounceTimeout ||
         wasOutsideClick ||
         openedByHover ||
-        e.detail === 2 || // it's double-click
+        // e.detail >= 2 || // it's double-click
         e.button || // it's not left-click
         wasMouseMove;
 
@@ -273,4 +273,3 @@ popupListen.$defaults = {
 };
 
 // todo issue. SelectControl: mousedown on icon, mousemove, mouseup on icon - popup not closed but it works for opening
-// todo deprecate filter for dblClick because it works wrong in browsers
