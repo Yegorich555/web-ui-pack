@@ -9,17 +9,18 @@
 **Fixes**:
 
 - helper [`onFocusLost`](src/helpers/onFocusLost.ts). Isn't fired if stopPropagation is called
+- [TimeControl](src/controls/time.ts). Extra margin for menu-buttons on Safari
 - [SwitchControl](src/controls/switch.ts). [CheckControl](src/controls/check.ts). Attribute `initvalue=''` sets value to `true` (expected `false`)
-- [SpinElement](src/spinElement.ts). Animation for TwinDualRing doesn't work on Safari 14-
-- [SpinElement](src/spinElement.ts). Wrong render on option `fit` on Safari 14-
-- [PopupElement](src/popup/popupElement.ts). Animation for opacity doesn't work on Safari 14-
+- [TextareaControl](src/controls/textarea.ts). `Ctrl + B` makes text bold but it's unexpected for plain textarea
 - Controls. Hover effect on Android devices (expected: no-hover on touch-screens)
 - Controls. Focus frame isn't rouned on Safari
 - Controls. Attributes `initvalue,min,max` for controls Date & Calendar doesn't work on Safari (Date.parse(yyyy-MM-dd) doesn't work by default)
 - Controls. Controls are not rendered if parsing initvalue is wrong
 - Controls. (Select, Date, Time). Now popup isn't opened if user clears control and it gets focus at the same time
 - Controls. Unexpected autofocus on mask-inputs on Safari
-- [TextareaControl](src/controls/textarea.ts). `Ctrl + B` makes text bold but it's unexpected for plain textarea
+- [SpinElement](src/spinElement.ts). Animation for TwinDualRing doesn't work on Safari 14-
+- [SpinElement](src/spinElement.ts). Wrong render on option `fit` on Safari 14-
+- [PopupElement](src/popup/popupElement.ts). Animation for opacity doesn't work on Safari 14-
 
 - **New**:
 

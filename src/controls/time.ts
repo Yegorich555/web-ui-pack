@@ -205,7 +205,7 @@ export default class WUPTimeControl<
         justify-content: center;
         height: 2.4em;
         border-radius: 0;
-        padding: 0;
+        padding: 0; margin: 0;
         background: var(--base-btn3-bg);
       }
       :host [menu] button:first-child {
