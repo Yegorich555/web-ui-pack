@@ -55,7 +55,7 @@ const attachLst = new Map<HTMLElement, () => void>();
  * @tutorial Troubleshooting:
  * * You can set minWidth, minHeight to prevent squizing of popup or don't use rule '.$adjust'
  * * Don't override styles: display, transform (possible to override only for animation)
- * * Don't use inline styles: maxWidth, maxHeight
+ * * Don't use inline styles: maxWidth, maxHeight, minWidth, minHeight
  * * If target removed (when popup $isOpen) and appended again you need to update $options.target (because $options.target cleared)
  * * Popup has overflow 'auto'; If you change to 'visible' it will apply maxWidth/maxHeight to first children (because popup must be restricted by maxSize to avoid layout issues)
  * * During the closing attr 'hide' is appended only if css-animation-duration is detected
@@ -118,14 +118,15 @@ export default class WUPPopupElement<
         display: none;
         position: fixed!important;
         top: 0; left: 0;
-        padding: 4px;
-        margin: 0;
+        padding: 4px; margin: 0;
+        max-width: calc(100vw - 2px);
+        max-height: calc(100vh - 2px);
+        overflow: auto;
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
         box-shadow: 0 1px var(--popup-shadow-size) 0 #00000033;
         background: white;
         text-overflow: ellipsis;
-        overflow: auto;
       }
       @media not all and (prefers-reduced-motion) {
         :host,
@@ -664,27 +665,6 @@ export default class WUPPopupElement<
       return this.#state!.prevRect;
     }
 
-    const tdef: Omit<DOMRect, "toJSON" | "x" | "y"> = {
-      height: Math.round(tRect.height),
-      width: Math.round(tRect.width),
-      top: Math.round(tRect.top),
-      left: Math.round(tRect.left),
-      bottom: Math.round(tRect.bottom),
-      right: Math.round(tRect.right),
-    };
-
-    if (this._opts.minWidthByTarget) {
-      this.style.minWidth = `${tdef.width}px`;
-    } else if (this.style.minWidth) {
-      this.style.minWidth = "";
-    }
-
-    if (this._opts.minHeightByTarget) {
-      this.style.minHeight = `${tdef.height}px`;
-    } else if (this.style.minHeight) {
-      this.style.minHeight = "";
-    }
-
     const fitEl = this._opts.toFitElement || document.body;
     const fit = getBoundingInternalRect(fitEl) as WUP.Popup.Place.Rect;
     fit.el = fitEl;
@@ -698,8 +678,29 @@ export default class WUPPopupElement<
       fit.height = fit.bottom - fit.top;
     }
 
+    const tdef: Omit<DOMRect, "toJSON" | "x" | "y"> = {
+      height: Math.round(tRect.height),
+      width: Math.round(tRect.width),
+      top: Math.round(tRect.top),
+      left: Math.round(tRect.left),
+      bottom: Math.round(tRect.bottom),
+      right: Math.round(tRect.right),
+    };
+
+    if (this._opts.minWidthByTarget) {
+      this.style.minWidth = `${Math.min(tdef.width, this.#state!.userStyles.maxW)}px`;
+    } else if (this.style.minWidth) {
+      this.style.minWidth = "";
+    }
+
+    if (this._opts.minHeightByTarget) {
+      this.style.minHeight = `${Math.min(tdef.height, this.#state!.userStyles.maxH)}px`;
+    } else if (this.style.minHeight) {
+      this.style.minHeight = "";
+    }
+
     this.style.display = "block";
-    const _defMaxWidth = this._opts.maxWidthByTarget ? `${tdef.width}px` : "";
+    const _defMaxWidth = this._opts.maxWidthByTarget ? `${Math.min(tdef.width, this.#state!.userStyles.maxW)}px` : "";
     this.setMaxWidth(_defMaxWidth); // resetting is required to get default size
     this.setMaxHeight(""); // resetting is required to get default size
 
@@ -930,7 +931,6 @@ declare global {
 // todo 2 popups can oveflow each other
 /* we need option to try place several popups at once without oveflow. Example on wup-pwd page: issue with 2 errors */
 
-// todo popup can't be more than 100vw & 100vh
 // todo refactor show & hide so user can call show several times and get the same promise
 
 // manual testcase: show as dropdown & scroll parent - blur effect can appear

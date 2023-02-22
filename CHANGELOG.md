@@ -6,7 +6,7 @@
 
 - Internals. Methods getNumAttr, getRefAttr, getBoolAttr is refactored to single getAttr()
 
-**Fixes**:
+**Fixes/Improvements**:
 
 - helper [`onFocusLost`](src/helpers/onFocusLost.ts). Isn't fired if stopPropagation is called
 - [TimeControl](src/controls/time.ts). Extra margin for menu-buttons on Safari
@@ -25,6 +25,7 @@
 - [PopupElement](src/popup/popupElement.ts). Fix wrong position during dropdownAnimation and several show/hide at once
 - [PopupElement](src/popup/popupElement.ts). Allow to open/close on double-click
 - [PopupElement](src/popup/popupElement.ts). Fix 2nd $show() has predefined max size & position can be different
+- [PopupElement](src/popup/popupElement.ts). Now popup max size 100vw & 100vh (by default - depends on css-styles). Earlier poup could be > 100vw if target > 100vw
 
 - **New**:
 

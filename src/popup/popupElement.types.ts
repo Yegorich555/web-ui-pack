@@ -49,11 +49,11 @@ declare global {
       offsetFitElement?: [number, number, number, number] | [number, number];
       /** Inside edges of fitElement popup is positioned and can't overflow fitElement; {body} by default */
       toFitElement?: HTMLElement | null;
-      /** Sets minWidth 100% of targetWidth */
+      /** Sets minWidth 100% of targetWidth; it can't be more than css-style min-width */
       minWidthByTarget?: boolean;
-      /** Sets maxWidth 100% of targetWidth */
+      /** Sets maxWidth 100% of targetWidth; it can't be more than css-style max-width */
       maxWidthByTarget?: boolean;
-      /** Sets minHeight 100% of targetWidth */
+      /** Sets minHeight 100% of targetWidth; it can't be more than css-style min-height */
       minHeightByTarget?: boolean;
       /** Case when popup need to show;
        * @defaultValue ShowCases.onClick

@@ -37,14 +37,15 @@ clip: rect(1px, 1px, 1px, 1px);}
         display: none;
         position: fixed!important;
         top: 0; left: 0;
-        padding: 4px;
-        margin: 0;
+        padding: 4px; margin: 0;
+        max-width: calc(100vw - 2px);
+        max-height: calc(100vh - 2px);
+        overflow: auto;
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
         box-shadow: 0 1px var(--popup-shadow-size) 0 #00000033;
         background: white;
         text-overflow: ellipsis;
-        overflow: auto;
       }
       @media not all and (prefers-reduced-motion) {
         WUP-POPUP,
@@ -93,14 +94,15 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
         display: none;
         position: fixed!important;
         top: 0; left: 0;
-        padding: 4px;
-        margin: 0;
+        padding: 4px; margin: 0;
+        max-width: calc(100vw - 2px);
+        max-height: calc(100vh - 2px);
+        overflow: auto;
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
         box-shadow: 0 1px var(--popup-shadow-size) 0 #00000033;
         background: white;
         text-overflow: ellipsis;
-        overflow: auto;
       }
       @media not all and (prefers-reduced-motion) {
         TEST-EL,
@@ -183,14 +185,15 @@ clip: rect(1px, 1px, 1px, 1px);}
         display: none;
         position: fixed!important;
         top: 0; left: 0;
-        padding: 4px;
-        margin: 0;
+        padding: 4px; margin: 0;
+        max-width: calc(100vw - 2px);
+        max-height: calc(100vh - 2px);
+        overflow: auto;
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
         box-shadow: 0 1px var(--popup-shadow-size) 0 #00000033;
         background: white;
         text-overflow: ellipsis;
-        overflow: auto;
       }
       @media not all and (prefers-reduced-motion) {
         WUP-POPUP,
@@ -239,14 +242,15 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
         display: none;
         position: fixed!important;
         top: 0; left: 0;
-        padding: 4px;
-        margin: 0;
+        padding: 4px; margin: 0;
+        max-width: calc(100vw - 2px);
+        max-height: calc(100vh - 2px);
+        overflow: auto;
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
         box-shadow: 0 1px var(--popup-shadow-size) 0 #00000033;
         background: white;
         text-overflow: ellipsis;
-        overflow: auto;
       }
       @media not all and (prefers-reduced-motion) {
         TEST-EL,
