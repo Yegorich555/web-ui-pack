@@ -836,11 +836,11 @@ export default class WUPPopupElement<
       }
 
       // transform has performance benefits in comparison with positioning
-      styleTransform(this, "translate", `${pos.left}px, ${pos.top}px`);
+      this.style.transform = `translate(${pos.left}px, ${pos.top}px)`;
       this.setAttribute("position", pos.attr);
       return pos;
     };
-
+    const was = styleTransform(this, "translate", ""); // remove prev transformation and save scale transformation
     const pos = process();
 
     // fix: when parent.transform.translate affects on popup
@@ -848,10 +848,12 @@ export default class WUPPopupElement<
     const dx = meRect.left - pos.left;
     const dy = meRect.top - pos.top;
     if (dx || dy) {
-      // console.error("issue", { dx, dy });
-      // todo issue here: somehow it happened during the dropdownAnimation and works wrong: try to open/hide several times in a short time
       styleTransform(this, "translate", `${pos.left - dx}px, ${pos.top - dy}px`);
       this.#refArrow && styleTransform(this.#refArrow, "translate", `${pos.arrowLeft - dx}px, ${pos.arrowTop - dy}px`);
+    }
+    if (was) {
+      // otherwise getBoundingClientRect returns element position according to scale applied from dropdownAnimation
+      this.style.transform += ` ${was}`; // rollback scale transformation
     }
 
     /* re-calc is required to avoid case when popup unexpectedly affects on layout:

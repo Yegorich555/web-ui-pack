@@ -24,9 +24,9 @@ type TransformFunctions =
 /** Replaces [translate] in el.style.transform
  * @example
  * el.style.transform('translate(-10px, 20%)');
- * styleTransform(el, 'translate', '0,0' )
- */
-export function styleTransform(el: HTMLElement, prop: TransformFunctions, value: string | number): void {
+ * styleTransform(el, 'translate', '-10px, 20%' )
+ * @returns el.style.transform */
+export function styleTransform(el: HTMLElement, prop: TransformFunctions, value: string | number): string {
   const reg = new RegExp(`( )*${prop}\\(([%d \\w.,-]+)\\)( )*`);
   const setValue = value || value === 0;
   let isDone = !setValue;
@@ -37,6 +37,7 @@ export function styleTransform(el: HTMLElement, prop: TransformFunctions, value:
       })
     : el.style.transform.replace(reg, " ").trim();
   el.style.transform = isDone ? s : `${el.style.transform} ${prop}(${value})`.trimStart();
+  return el.style.transform;
 }
 
 /** Converts '23px' to number 23 */
