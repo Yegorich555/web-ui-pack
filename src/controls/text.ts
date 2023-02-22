@@ -151,6 +151,7 @@ export default class WUPTextControl<
   static get $style(): string {
     return `${super.$style}
         :host {
+          contain: style;
           cursor: text;
         }
         :host label > span {
@@ -292,7 +293,6 @@ export default class WUPTextControl<
           margin-right: -0.5em;
         }
         :host button[clear] {
-          position: relative;
           background: none;
         }
         :host button[clear]:after {

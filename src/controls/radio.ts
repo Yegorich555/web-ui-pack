@@ -87,6 +87,7 @@ export default class WUPRadioControl<
     // :host input + *:after >> not relative because 1.2em of 14px provides round-pixel-issue and not always rounded items
     return `${super.$style}
       :host {
+        position: relative;
         padding: var(--ctrl-padding);
       }
       :host fieldset {

@@ -325,7 +325,6 @@ clip: rect(1px, 1px, 1px, 1px);}
         contain: style;
         display: block;
         margin-bottom: 20px;
-        position: relative;
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
         cursor: pointer;
@@ -458,6 +457,7 @@ mask-image: var(--ctrl-icon-img);
         }
       }
         WUP-PWD {
+          contain: style;
           cursor: text;
         }
         WUP-PWD label &gt; span {
@@ -618,7 +618,6 @@ mask-image: var(--ctrl-icon-img);
           margin-right: -0.5em;
         }
         WUP-PWD button[clear] {
-          position: relative;
           background: none;
         }
         WUP-PWD button[clear]:after {

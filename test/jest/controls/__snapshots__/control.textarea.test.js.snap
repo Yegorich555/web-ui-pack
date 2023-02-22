@@ -261,7 +261,6 @@ clip: rect(1px, 1px, 1px, 1px);}
         contain: style;
         display: block;
         margin-bottom: 20px;
-        position: relative;
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
         cursor: pointer;
@@ -394,6 +393,7 @@ mask-image: var(--ctrl-icon-img);
         }
       }
         WUP-TEXTAREA {
+          contain: style;
           cursor: text;
         }
         WUP-TEXTAREA label &gt; span {
@@ -554,7 +554,6 @@ mask-image: var(--ctrl-icon-img);
           margin-right: -0.5em;
         }
         WUP-TEXTAREA button[clear] {
-          position: relative;
           background: none;
         }
         WUP-TEXTAREA button[clear]:after {

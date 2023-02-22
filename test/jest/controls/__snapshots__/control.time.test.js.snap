@@ -288,7 +288,6 @@ clip: rect(1px, 1px, 1px, 1px);}
         contain: style;
         display: block;
         margin-bottom: 20px;
-        position: relative;
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
         cursor: pointer;
@@ -421,6 +420,7 @@ mask-image: var(--ctrl-icon-img);
         }
       }
         WUP-TIME {
+          contain: style;
           cursor: text;
         }
         WUP-TIME label &gt; span {
@@ -581,7 +581,6 @@ mask-image: var(--ctrl-icon-img);
           margin-right: -0.5em;
         }
         WUP-TIME button[clear] {
-          position: relative;
           background: none;
         }
         WUP-TIME button[clear]:after {
