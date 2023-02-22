@@ -286,8 +286,9 @@ export default class WUPTextControl<
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
         :host label button {
-           z-index: 1;
-           contain: strict;
+          contain: strict;
+          position: relative;${/* fix for Safari */ ""}
+          z-index: 1;
         }
         :host label>span + button {
           margin-right: -0.5em;
@@ -857,3 +858,4 @@ customElements.define(tagName, WUPTextControl);
 // NiceToHave: handle Ctrl+Z wup-select etc. cases
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
+// todo text autoselect is annoying on TouchScreens!!!
