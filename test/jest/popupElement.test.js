@@ -576,22 +576,29 @@ describe("popupElement", () => {
     a.$options.minHeightByTarget = true;
     document.body.append(a);
     jest.spyOn(a.previousElementSibling, "getBoundingClientRect").mockReturnValue(trg.getBoundingClientRect());
-    jest.advanceTimersToNextTimer(); // wait for ready/init
-    // WARN: layout impossible to test with unit; all layout tests see in e2e
-    expect(a.style.minWidth).toBeDefined();
-    expect(a.style.minHeight).toBeDefined();
+    await h.wait();
+    expect(a.style.minWidth).toBeTruthy();
+    expect(a.style.minHeight).toBeTruthy();
 
     jest.clearAllTimers();
+    const { nextFrame } = h.useFakeAnimation();
     const a2 = document.createElement(el.tagName);
     a2.$options.showCase = 0; // always
-    a2.style.minWidth = `${1}px`;
-    a2.style.minHeight = `${2}px`;
+    a2.style.minWidth = "1px";
+    a2.style.minHeight = "2px";
     a2.$options.toFitElement = null;
     document.body.append(a2);
     jest.spyOn(a2.previousElementSibling, "getBoundingClientRect").mockReturnValue(trg.getBoundingClientRect());
-    jest.advanceTimersToNextTimer(); // wait for ready/init
-    expect(a2.style.minWidth).toBeDefined();
-    expect(a2.style.minHeight).toBeDefined();
+    await h.wait();
+    expect(a2.style.minWidth).toBeFalsy(); // it's cleared because by default inline width not allowed
+    expect(a2.style.minHeight).toBeFalsy();
+    // cover case when minWidth & minHeight is set previously by rule
+    a2.$refresh();
+    a2.style.minWidth = "1px";
+    a2.style.minHeight = "2px";
+    await nextFrame();
+    expect(a2.style.minWidth).toBeFalsy();
+    expect(a2.style.minHeight).toBeFalsy();
     jest.clearAllTimers();
 
     /** @type typeof el */

@@ -419,6 +419,8 @@ export default class WUPPopupElement<
     this.#state!.prevRect = undefined;
     this.setMaxWidth(""); // reset styles to default to avoid bugs and previous state
     this.setMaxHeight(""); // it works only when styles is defined before popup is opened
+    this.style.minWidth = ""; // reset styles to default to avoid bugs and previous state
+    this.style.minHeight = ""; // reset styles to default to avoid bugs and previous state
 
     this._opts.target = this._opts.target || this.#defineTarget();
     if (!(this._opts.target as HTMLElement).isConnected) {
@@ -929,7 +931,6 @@ declare global {
 /* we need option to try place several popups at once without oveflow. Example on wup-pwd page: issue with 2 errors */
 
 // todo popup can't be more than 100vw & 100vh
-// todo sometimes popup placed in wrong position on mobileApp & selectMany (when switch to another)
 // todo refactor show & hide so user can call show several times and get the same promise
 
 // manual testcase: show as dropdown & scroll parent - blur effect can appear

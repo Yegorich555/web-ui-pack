@@ -24,6 +24,7 @@
 - [PopupElement](src/popup/popupElement.ts). Animation affects on bluring text if scroll body during the animation
 - [PopupElement](src/popup/popupElement.ts). Fix wrong position during dropdownAnimation and several show/hide at once
 - [PopupElement](src/popup/popupElement.ts). Allow to open/close on double-click
+- [PopupElement](src/popup/popupElement.ts). Fix 2nd $show() has predefined max size & position can be different
 
 - **New**:
 
