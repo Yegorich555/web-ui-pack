@@ -569,62 +569,60 @@ describe("popupElement", () => {
 
   test("$options.minWidth/minHeight/maxWidth by target", async () => {
     // just for coverage
-    /** @type typeof el */
-    const a = document.createElement(el.tagName);
-    a.$options.showCase = 0; // always
-    a.$options.minWidthByTarget = true;
-    a.$options.minHeightByTarget = true;
-    document.body.append(a);
-    jest.spyOn(a.previousElementSibling, "getBoundingClientRect").mockReturnValue(trg.getBoundingClientRect());
+    el = document.createElement(el.tagName);
+    el.$options.showCase = 0; // always
+    el.$options.minWidthByTarget = true;
+    el.$options.minHeightByTarget = true;
+    document.body.append(el);
+    jest.spyOn(el.previousElementSibling, "getBoundingClientRect").mockReturnValue(trg.getBoundingClientRect());
     await h.wait();
-    expect(a.style.minWidth).toBeTruthy();
-    expect(a.style.minHeight).toBeTruthy();
+    expect(el.style.minWidth).toBeTruthy();
+    expect(el.style.minHeight).toBeTruthy();
 
     jest.clearAllTimers();
     const { nextFrame } = h.useFakeAnimation();
-    const a2 = document.createElement(el.tagName);
-    a2.$options.showCase = 0; // always
-    a2.style.minWidth = "1px";
-    a2.style.minHeight = "2px";
-    a2.$options.toFitElement = null;
-    document.body.append(a2);
-    jest.spyOn(a2.previousElementSibling, "getBoundingClientRect").mockReturnValue(trg.getBoundingClientRect());
+    el = document.createElement(el.tagName);
+    el.$options.showCase = 0; // always
+    el.style.minWidth = "1px";
+    el.style.minHeight = "2px";
+    el.$options.toFitElement = null;
+    document.body.append(el);
+    jest.spyOn(el.previousElementSibling, "getBoundingClientRect").mockReturnValue(trg.getBoundingClientRect());
     await h.wait();
-    expect(a2.style.minWidth).toBeFalsy(); // it's cleared because by default inline width not allowed
-    expect(a2.style.minHeight).toBeFalsy();
+    expect(el.style.minWidth).toBeFalsy(); // it's cleared because by default inline width not allowed
+    expect(el.style.minHeight).toBeFalsy();
     // cover case when minWidth & minHeight is set previously by rule
-    a2.$refresh();
-    a2.style.minWidth = "1px";
-    a2.style.minHeight = "2px";
+    el.$refresh();
+    el.style.minWidth = "1px";
+    el.style.minHeight = "2px";
     await nextFrame();
-    expect(a2.style.minWidth).toBeFalsy();
-    expect(a2.style.minHeight).toBeFalsy();
+    expect(el.style.minWidth).toBeFalsy();
+    expect(el.style.minHeight).toBeFalsy();
     jest.clearAllTimers();
 
-    /** @type typeof el */
-    const a3 = document.createElement(el.tagName);
-    a3.$options.showCase = 0; // always
-    a3.$options.maxWidthByTarget = false;
-    document.body.append(a3);
-    jest.spyOn(a3.previousElementSibling, "getBoundingClientRect").mockReturnValue(trg.getBoundingClientRect());
+    el = document.createElement(el.tagName);
+    el.$options.showCase = 0; // always
+    el.$options.maxWidthByTarget = false;
+    document.body.append(el);
+    jest.spyOn(el.previousElementSibling, "getBoundingClientRect").mockReturnValue(trg.getBoundingClientRect());
     jest.advanceTimersByTime(1000); // wait for ready/init
     await Promise.resolve(); // onShow/onHide is async
-    expect(a3.$isOpen).toBe(true);
-    expect(a3.isConnected).toBe(true);
+    expect(el.$isOpen).toBe(true);
+    expect(el.isConnected).toBe(true);
     // WARN: layout impossible to test with unit; all layout tests see in e2e
-    expect(a3.style.maxWidth).toBe("");
+    expect(el.style.maxWidth).toBe("");
 
-    a3.$hide();
+    el.$hide();
     jest.advanceTimersByTime(1000); // wait for ready/init
     await Promise.resolve(); // onShow/onHide is async
-    expect(a3.$isOpen).toBe(false);
-    expect(a3.isConnected).toBe(true);
-    a3.$options.maxWidthByTarget = true;
-    a3.$show();
+    expect(el.$isOpen).toBe(false);
+    expect(el.isConnected).toBe(true);
+    el.$options.maxWidthByTarget = true;
+    el.$show();
     jest.advanceTimersByTime(1000); // wait for ready/init
     await Promise.resolve(); // onShow/onHide is async
     // WARN: layout impossible to test with unit; all layout tests see in e2e
-    expect(a3.style.maxWidth).not.toBe("");
+    expect(el.style.maxWidth).not.toBe("");
   });
 
   test("$options.offsetFitElement", async () => {

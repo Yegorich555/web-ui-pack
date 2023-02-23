@@ -634,3 +634,5 @@ export default class WUPSelectControl<
 }
 
 customElements.define(tagName, WUPSelectControl);
+
+// todo issue: touch on icon-dropdown calls click btnClear instead of open/show

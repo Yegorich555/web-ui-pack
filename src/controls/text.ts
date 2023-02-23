@@ -287,7 +287,7 @@ export default class WUPTextControl<
         }
         :host label button {
           contain: strict;
-          position: relative;${/* fix for Safari */ ""}
+          position: relative;
           z-index: 1;
         }
         :host label>span + button {
