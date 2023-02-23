@@ -133,28 +133,8 @@ export default function popupListen(
       }
     });
 
-    let wasMouseMove = false; // fix when user makes t.mousedown, mousemove, body.mouseup
-    appendEvent(t, "mousedown", (ev) => {
-      wasMouseMove = false;
-      if (ev.button) {
-        // only for leftButton === 0
-        return;
-      }
-      const r = onEvent(
-        t,
-        "mousemove",
-        (e) => (wasMouseMove = e.movementX !== 0 || e.movementY !== 0), // it's required otherwise browser can provide move with 0 0 changes
-        { once: true, passive: true }
-      );
-      document.addEventListener("mouseup", r, { once: true, passive: true });
-    });
-
     onShowEvent(document, "click", (e) => {
       preventClickAfterFocus = false; // mostly it doesn't make sense but maybe it's possible
-      if (wasMouseMove || /* e.detail >= 2 || */ e.button) {
-        wasMouseMove = false;
-        return;
-      }
       // filter click from target because we have target event for this
       const isTarget = t === e.target || (e.target instanceof Node && t.contains(e.target));
       if (!isTarget) {
@@ -182,8 +162,7 @@ export default function popupListen(
         wasOutsideClick ||
         openedByHover ||
         // e.detail >= 2 || // it's double-click
-        e.button || // it's not left-click
-        wasMouseMove;
+        e.button; // it's not left-click
 
       if (!skip) {
         if (!openedEl) {
@@ -271,5 +250,3 @@ popupListen.$defaults = {
   hoverShowTimeout: 200,
   hoverHideTimeout: 500,
 };
-
-// todo issue. SelectControl: mousedown on icon, mousemove, mouseup on icon - popup not closed but it works for opening

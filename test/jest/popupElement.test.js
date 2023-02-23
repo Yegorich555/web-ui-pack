@@ -3,7 +3,6 @@ import { WUPPopupElement } from "web-ui-pack";
 import popupListen from "web-ui-pack/popup/popupListen";
 import { Animations, ShowCases } from "web-ui-pack/popup/popupElement.types";
 import * as h from "../testHelper";
-import { TestMouseMoveEvent } from "../testHelper";
 
 /** @type WUPPopupElement */
 let el;
@@ -1851,49 +1850,6 @@ describe("popupElement", () => {
     await h.userClick(trg, { button: 0 });
     await h.wait();
     expect(el.$isOpen).toBe(false); // because left-button
-  });
-
-  test("target.mousedown > mousemove > body.mouseup", async () => {
-    await el.$hide();
-    el.$options.showCase = 1 << 2; // click
-    await h.wait();
-    expect(el.$isOpen).toBe(false);
-
-    trg.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
-    await h.wait(30);
-    trg.dispatchEvent(new TestMouseMoveEvent("mousemove", { bubbles: true, movementX: 2, movementY: 0 }));
-    await h.wait(100);
-    document.body.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
-    document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    await h.wait(300);
-    expect(el.$isOpen).toBe(false); // because click cancelled outside target
-
-    await h.userClick(trg);
-    await h.wait();
-    expect(el.$isOpen).toBe(true);
-
-    // again when popup is open
-    trg.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
-    await h.wait(30);
-    trg.dispatchEvent(new TestMouseMoveEvent("mousemove", { bubbles: true, movementX: 0, movementY: 2 }));
-    await h.wait(100);
-    document.body.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
-    document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    await h.wait(300);
-    expect(el.$isOpen).toBe(true); // because click cancelled outside target
-
-    await h.userClick(trg); // otherwise wasMouseMove isn't cleared
-    await h.wait(300);
-    expect(el.$isOpen).toBe(false); // because click cancelled outside target
-
-    await h.wait();
-    // cover case when browser somehow sends mousemove 0
-    trg.dispatchEvent(new TestMouseMoveEvent("mousedown", { bubbles: true }));
-    trg.dispatchEvent(new TestMouseMoveEvent("mousemove", { bubbles: true, movementX: 0, movementY: 0 }));
-    trg.dispatchEvent(new TestMouseMoveEvent("mouseup", { bubbles: true }));
-    trg.dispatchEvent(new TestMouseMoveEvent("click", { bubbles: true }));
-    await h.wait();
-    expect(el.$isOpen).toBe(true);
   });
 
   test("popupListen: handle error on show", async () => {
