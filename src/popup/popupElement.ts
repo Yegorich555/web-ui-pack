@@ -400,6 +400,7 @@ export default class WUPPopupElement<
     scrollParents?: HTMLElement[];
     prevRect?: DOMRect;
     prevSize?: { w: number; h: number };
+    prevScreenSize?: { w: number; h: number };
     frameId: number;
     userStyles: {
       maxW: number;
@@ -417,7 +418,6 @@ export default class WUPPopupElement<
   /** Collect/calc all required values into #state (when menu shows) */
   protected buildState(): void {
     this.#state = {} as any;
-    this.#state!.prevRect = undefined;
     this.setMaxWidth(null); // reset styles to default to avoid bugs and previous state
     this.setMaxHeight(null); // it works only when styles is defined before popup is opened
     this.style.minWidth = ""; // reset styles to default to avoid bugs and previous state
@@ -650,8 +650,13 @@ export default class WUPPopupElement<
       this.style.display = "none"; // hide if target is not displayed
       return this.#state!.prevRect;
     }
+    const screenSize = viewportSize();
+    const isScreenChanged =
+      this.#state!.prevScreenSize &&
+      (this.#state!.prevScreenSize.w !== screenSize.vw || this.#state!.prevScreenSize.h !== screenSize.vh);
 
     if (
+      !isScreenChanged &&
       this.#state!.prevRect &&
       this.#state!.prevRect.top === tRect.top &&
       this.#state!.prevRect.left === tRect.left &&
@@ -663,6 +668,12 @@ export default class WUPPopupElement<
     ) {
       return this.#state!.prevRect;
     }
+    if (isScreenChanged) {
+      const was = this.style.animationName;
+      this.buildState(); // rebuild state because possible difference on mediaquery
+      this.style.animationName = was; // otherwise dropdownAnimation changed to opacity
+    }
+    this.#state!.prevScreenSize = { w: screenSize.vw, h: screenSize.vh };
 
     const fitEl = this._opts.toFitElement || document.body;
     const fit = getBoundingInternalRect(fitEl) as WUP.Popup.Place.Rect;
@@ -686,11 +697,16 @@ export default class WUPPopupElement<
       right: Math.round(tRect.right),
     };
 
-    // todo issue on device rotation: this.#state!.userStyles.maxW returns old value if pointed 'maxW: 100vw;'
     // popupSize must be <= viewportSize
-    const vp = viewportSize(); // WARN is fitEl positioned in container with *vw then on Safari possible +- extra margin it's ok and must be fixed by developer on parent side
-    const maxW = Math.min(this.#state!.userStyles.maxW || Number.MAX_SAFE_INTEGER, vp.vw - (a ? a[2] ?? a[0] : 0) * 2);
-    const maxH = Math.min(this.#state!.userStyles.maxH || Number.MAX_SAFE_INTEGER, vp.vh - (a ? a[3] ?? a[1] : 0) * 2);
+    // WARN is fitEl positioned in container with *vw then on Safari possible +- extra margin it's ok and must be fixed by developer on parent side
+    const maxW = Math.min(
+      this.#state!.userStyles.maxW || Number.MAX_SAFE_INTEGER,
+      screenSize.vw - (a ? a[2] ?? a[0] : 0) * 2
+    );
+    const maxH = Math.min(
+      this.#state!.userStyles.maxH || Number.MAX_SAFE_INTEGER,
+      screenSize.vh - (a ? a[3] ?? a[1] : 0) * 2
+    );
     if (this._opts.minWidthByTarget) {
       this.style.minWidth = `${Math.min(tdef.width, maxW)}px`;
     } else if (this.style.minWidth) {
@@ -712,16 +728,16 @@ export default class WUPPopupElement<
       _defMaxW = Math.min(tdef.width, maxW);
     } else {
       this.setMaxWidth(0); // reset to get the real offsetWidth
-      if (this.offsetWidth > vp.vw) {
-        _defMaxW = vp.vw; // maxWidth can't be > 100vw or userStyles.maxW
+      if (this.offsetWidth > screenSize.vw) {
+        _defMaxW = screenSize.vw; // maxWidth can't be > 100vw or userStyles.maxW
       }
     }
     _defMaxW !== 0 && this.setMaxWidth(_defMaxW); // resetting is required to get default size
 
     // detect whether need to apply maxHeight inline style
     let _defMaxH = 0; // zero means: don't apply inline style
-    if (this.offsetHeight > vp.vh) {
-      _defMaxH = vp.vh;
+    if (this.offsetHeight > screenSize.vh) {
+      _defMaxH = screenSize.vh;
     }
     _defMaxH !== 0 && this.setMaxHeight(_defMaxH); // resetting is required to get default size
 
@@ -952,7 +968,6 @@ declare global {
 /* we need option to try place several popups at once without oveflow. Example on wup-pwd page: issue with 2 errors */
 
 // todo refactor show & hide so user can call show several times and get the same promise
-// todo translate floatHeight value on transform
 // NiceToHave add 'position: center' to place as modal when content is big and no spaces anymore
 
 // manual testcase: show as dropdown & scroll parent - blur effect can appear

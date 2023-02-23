@@ -16,17 +16,18 @@
 - Controls. Focus frame isn't rouned on Safari
 - Controls. Attributes `initvalue,min,max` for controls Date & Calendar doesn't work on Safari (Date.parse(yyyy-MM-dd) doesn't work by default)
 - Controls. Controls are not rendered if parsing initvalue is wrong
-- Controls. (Select, Date, Time). Now popup isn't opened if user clears control and it gets focus at the same time
+- Controls. (Select, Date, Time). Now popup isn't opened if user clears control and gets focus at the same time
 - Controls. Unexpected autofocus on mask-inputs on Safari
 - Controls. Annoying autoselect on touchscreens. Now $options.selectOnFocus is disabled by default
 - [SpinElement](src/spinElement.ts). Animation for TwinDualRing doesn't work on Safari 14-
 - [SpinElement](src/spinElement.ts). Wrong render on option `fit` on Safari 14-
 - [PopupElement](src/popup/popupElement.ts). Animation for opacity doesn't work on Safari 14-
-- [PopupElement](src/popup/popupElement.ts). Animation affects on bluring text if scroll body during the animation
+- [PopupElement](src/popup/popupElement.ts). Animation affects on bluring text if user scroll body during the animation
 - [PopupElement](src/popup/popupElement.ts). Fix wrong position during dropdownAnimation and several show/hide at once
 - [PopupElement](src/popup/popupElement.ts). Allow to open/close on double-click
-- [PopupElement](src/popup/popupElement.ts). Fix 2nd $show() has predefined max size & position can be different
-- [PopupElement](src/popup/popupElement.ts). Now popup max size 100vw & 100vh (by default - depends on css-styles). Earlier poup could be > 100vw if target > 100vw
+- [PopupElement](src/popup/popupElement.ts). Fix 2nd $show() has predefined maxSize & position can be different
+- [PopupElement](src/popup/popupElement.ts). Now popup has max size 100vw & 100vh (by default). Earlier popup could be > 100vw
+- [PopupElement](src/popup/popupElement.ts). No-updates on screensize changes. Now popup position & size changes with device-rotation
 
 - **New**:
 

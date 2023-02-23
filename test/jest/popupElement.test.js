@@ -1962,4 +1962,42 @@ describe("popupElement", () => {
       `"<div id="targetId">some text</div><wup-popup style="display: block; transform: translate(221px, 100px);" position="top"></wup-popup><wup-popup-arrow style="transform: translate(215px, 100px) rotate(0.1deg);"></wup-popup-arrow>"`
     );
   });
+
+  test("update on screesize changes", async () => {
+    const { nextFrame } = h.useFakeAnimation();
+
+    h.mockConsoleError(); // error on not-enough space
+    expect(window.innerWidth).toBe(1024);
+    expect(window.innerHeight).toBe(768);
+    jest.spyOn(el, "offsetHeight", "get").mockReturnValue(2000);
+    jest.spyOn(el, "offsetWidth", "get").mockReturnValue(2000);
+    el.$options.placement = [WUPPopupElement.$placements.$left.$start];
+    await h.wait();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style="display: block; max-width: 1024px; max-height: 768px; transform: translate(240px, 0px);" position="right"></wup-popup>"`
+    );
+
+    const spyStyle = jest.spyOn(window, "getComputedStyle");
+    await nextFrame();
+    expect(spyStyle).toBeCalledTimes(0);
+
+    // case on device rotation
+    window.innerWidth = 600;
+    window.innerHeight = 800;
+    await nextFrame();
+    expect(spyStyle).toBeCalledTimes(1);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style="display: block; max-width: 600px; max-height: 800px; transform: translate(0px, 0px);" position="top"></wup-popup>"`
+    );
+
+    window.innerHeight -= 80; // simulate mobile-keyboard opening
+    await nextFrame();
+    await nextFrame();
+    expect(spyStyle).toBeCalledTimes(2);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style="display: block; max-width: 600px; max-height: 720px; transform: translate(0px, 0px);" position="top"></wup-popup>"`
+    );
+
+    h.unMockConsoleError();
+  });
 });
