@@ -865,6 +865,7 @@ describe("control.text: mask", () => {
     // possible to add mask after a time
     expect(h.getInputCursor(el.$refInput)).toBe("2|");
     el.$options.mask = "#0";
+    el.$options.selectOnFocus = true;
     await h.wait(1);
     await h.userTypeText(el.$refInput, "3", { clearPrevious: false });
     expect(h.getInputCursor(el.$refInput)).toBe("23|");

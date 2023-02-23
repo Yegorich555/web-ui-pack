@@ -22,7 +22,11 @@ describe("control.pwd", () => {
     });
 
   test("btn-eye", async () => {
-    await page.evaluate(() => (document.getElementById("trueEl").$value = "Ab123"));
+    await page.evaluate(() => {
+      const el = document.getElementById("trueEl");
+      el.$value = "Ab123";
+      el.$options.selectOnFocus = true;
+    });
 
     let t = await getInfo();
     expect(t.activeElementId).not.toBe(t.trueId);

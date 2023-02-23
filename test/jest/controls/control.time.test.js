@@ -283,6 +283,7 @@ describe("control.time", () => {
     form.appendChild(el);
     const onSubmit = jest.fn();
     form.$onSubmit = onSubmit;
+    el.$options.selectOnFocus = true;
     el.$options.name = "test";
     el.$initValue = new WUPTimeObject(12, 59);
     await h.wait(1);

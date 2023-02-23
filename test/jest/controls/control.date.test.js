@@ -309,6 +309,7 @@ describe("control.date", () => {
     el.$options.name = "testDate";
     el.$initValue = new Date("2022-10-12T13:45:59.000Z");
     el.$options.startWith = PickersEnum.Year;
+    el.$options.selectOnFocus = true;
     await h.wait(1);
 
     const onChanged = jest.fn();

@@ -39,7 +39,7 @@ declare global {
        * @defaultValue 0; */
       debounceMs?: number;
       /** Select whole text when input got focus (when input is not readonly and not disabled);
-       * @defaultValue true */
+       * @defaultValue false */
       selectOnFocus: boolean;
       /** Show/hide clear button. @see ClearActions
        * @defaultValue true */
@@ -335,7 +335,7 @@ export default class WUPTextControl<
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUP.Text.Defaults = {
     ...WUPBaseControl.$defaults,
-    selectOnFocus: true,
+    selectOnFocus: false,
     clearButton: true,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
@@ -858,4 +858,3 @@ customElements.define(tagName, WUPTextControl);
 // NiceToHave: handle Ctrl+Z wup-select etc. cases
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
-// todo text autoselect is annoying on TouchScreens!!!

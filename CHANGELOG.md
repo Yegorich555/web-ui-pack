@@ -18,6 +18,7 @@
 - Controls. Controls are not rendered if parsing initvalue is wrong
 - Controls. (Select, Date, Time). Now popup isn't opened if user clears control and it gets focus at the same time
 - Controls. Unexpected autofocus on mask-inputs on Safari
+- Controls. Annoying autoselect on touchscreens. Now $options.selectOnFocus is disabled by default
 - [SpinElement](src/spinElement.ts). Animation for TwinDualRing doesn't work on Safari 14-
 - [SpinElement](src/spinElement.ts). Wrong render on option `fit` on Safari 14-
 - [PopupElement](src/popup/popupElement.ts). Animation for opacity doesn't work on Safari 14-
