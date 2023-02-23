@@ -1217,22 +1217,37 @@ describe("popupElement", () => {
     // test case when not enough space
     const fn = h.mockConsoleError();
     jest.clearAllTimers();
-    jest.spyOn(el, "offsetHeight", "get").mockReturnValue(1000);
-    jest.spyOn(el, "offsetWidth", "get").mockReturnValue(1000);
+    jest.spyOn(el, "offsetHeight", "get").mockReturnValue(2000);
+    jest.spyOn(el, "offsetWidth", "get").mockReturnValue(2000);
     jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
       if (elem === el) {
-        return { minWidth: "1000px", minHeight: "1000px", animationDuration: "0s" };
+        return { minWidth: "2000px", minHeight: "2000px", animationDuration: "0s" };
       }
       return orig(elem);
     });
     (await expectIt([WUPPopupElement.$placements.$left.$start])).toMatchInlineSnapshot(
-      `"<wup-popup style="display: block; transform: translate(112px, 0px);" position="right"></wup-popup>"`
+      `"<wup-popup style="display: block; max-width: 1024px; max-height: 768px; transform: translate(112px, 0px);" position="right"></wup-popup>"`
     );
     expect(fn).toBeCalledTimes(1);
 
     el.$options.offsetFitElement = [2, 3, 4, 8];
     (await expectIt([WUPPopupElement.$placements.$left.$start])).toMatchInlineSnapshot(
-      `"<wup-popup style="display: block; transform: translate(112px, 2px);" position="right"></wup-popup>"`
+      `"<wup-popup style="display: block; max-width: 1024px; max-height: 768px; transform: translate(112px, 2px);" position="right"></wup-popup>"`
+    );
+
+    // case when user-style-size bigger then viewport size
+    el.$hide();
+    await h.wait();
+    jest.clearAllTimers();
+    jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
+      if (elem === el) {
+        /** @type CSSStyleDeclaration */
+        return { maxWidth: "3000px", maxHeight: "3000px", animationDuration: "0.3s", animationName: "WUP-POPUP-a1" };
+      }
+      return orig(elem);
+    });
+    (await expectIt([WUPPopupElement.$placements.$left.$start])).toMatchInlineSnapshot(
+      `"<wup-popup style="display: block; max-width: 1024px; max-height: 768px; transform: translate(112px, 2px);" position="right"></wup-popup>"`
     );
 
     h.unMockConsoleError();

@@ -38,8 +38,6 @@ clip: rect(1px, 1px, 1px, 1px);}
         position: fixed!important;
         top: 0; left: 0;
         padding: 4px; margin: 0;
-        max-width: calc(100vw - 2px);
-        max-height: calc(100vh - 2px);
         overflow: auto;
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
@@ -95,8 +93,6 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
         position: fixed!important;
         top: 0; left: 0;
         padding: 4px; margin: 0;
-        max-width: calc(100vw - 2px);
-        max-height: calc(100vh - 2px);
         overflow: auto;
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
@@ -186,8 +182,6 @@ clip: rect(1px, 1px, 1px, 1px);}
         position: fixed!important;
         top: 0; left: 0;
         padding: 4px; margin: 0;
-        max-width: calc(100vw - 2px);
-        max-height: calc(100vh - 2px);
         overflow: auto;
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
@@ -243,8 +237,6 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
         position: fixed!important;
         top: 0; left: 0;
         padding: 4px; margin: 0;
-        max-width: calc(100vw - 2px);
-        max-height: calc(100vh - 2px);
         overflow: auto;
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);

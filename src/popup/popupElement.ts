@@ -9,6 +9,7 @@ import { getBoundingInternalRect, px2Number, styleTransform } from "../helpers/s
 import { animateDropdown } from "../helpers/animate";
 import isIntoView from "../helpers/isIntoView";
 import objectClone from "../helpers/objectClone";
+import viewportSize from "../helpers/viewportSize";
 
 // import {
 //   ShowCases as PopupShowCases,
@@ -59,6 +60,7 @@ const attachLst = new Map<HTMLElement, () => void>();
  * * If target removed (when popup $isOpen) and appended again you need to update $options.target (because $options.target cleared)
  * * Popup has overflow 'auto'; If you change to 'visible' it will apply maxWidth/maxHeight to first children (because popup must be restricted by maxSize to avoid layout issues)
  * * During the closing attr 'hide' is appended only if css-animation-duration is detected
+ * * Popup can't be more than 100vw & 100vh (impossible to disable the rule)
  */
 export default class WUPPopupElement<
   Events extends WUP.Popup.EventMap = WUP.Popup.EventMap
@@ -119,8 +121,6 @@ export default class WUPPopupElement<
         position: fixed!important;
         top: 0; left: 0;
         padding: 4px; margin: 0;
-        max-width: calc(100vw - 2px);
-        max-height: calc(100vh - 2px);
         overflow: auto;
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
@@ -381,16 +381,16 @@ export default class WUPPopupElement<
   }
 
   #refArrow?: WUPPopupArrowElement;
-  protected setMaxHeight(v: string): void {
-    this.style.maxHeight = v;
 
+  protected setMaxHeight(px: number | null): void {
+    this.style.maxHeight = px ? `${px}px` : "";
     if (this.#state?.userStyles?.inherritY) {
       this.#state.userStyles.inherritY.style.maxHeight = this.style.maxHeight;
     }
   }
 
-  protected setMaxWidth(v: string): void {
-    this.style.maxWidth = v;
+  protected setMaxWidth(px: number | null): void {
+    this.style.maxWidth = px ? `${px}px` : "";
     if (this.#state?.userStyles?.inherritX) {
       this.#state.userStyles.inherritX.style.maxWidth = this.style.maxWidth;
     }
@@ -418,8 +418,8 @@ export default class WUPPopupElement<
   protected buildState(): void {
     this.#state = {} as any;
     this.#state!.prevRect = undefined;
-    this.setMaxWidth(""); // reset styles to default to avoid bugs and previous state
-    this.setMaxHeight(""); // it works only when styles is defined before popup is opened
+    this.setMaxWidth(null); // reset styles to default to avoid bugs and previous state
+    this.setMaxHeight(null); // it works only when styles is defined before popup is opened
     this.style.minWidth = ""; // reset styles to default to avoid bugs and previous state
     this.style.minHeight = ""; // reset styles to default to avoid bugs and previous state
 
@@ -442,12 +442,11 @@ export default class WUPPopupElement<
     if (!(child instanceof HTMLElement)) {
       child = null;
     }
-
     this.#state!.userStyles = {
-      maxW: px2Number(style.maxWidth) || Number.MAX_SAFE_INTEGER,
+      maxW: px2Number(style.maxWidth),
       minW: Math.max(5, px2Number(style.paddingRight) + px2Number(style.paddingLeft), px2Number(style.minWidth)),
 
-      maxH: px2Number(style.maxHeight) || Number.MAX_SAFE_INTEGER,
+      maxH: px2Number(style.maxHeight),
       minH: Math.max(5, px2Number(style.paddingTop) + px2Number(style.paddingBottom), px2Number(style.minHeight)),
 
       borderRadius: 0,
@@ -687,22 +686,44 @@ export default class WUPPopupElement<
       right: Math.round(tRect.right),
     };
 
+    // todo issue on device rotation: this.#state!.userStyles.maxW returns old value if pointed 'maxW: 100vw;'
+    // popupSize must be <= viewportSize
+    const vp = viewportSize(); // WARN is fitEl positioned in container with *vw then on Safari possible +- extra margin it's ok and must be fixed by developer on parent side
+    const maxW = Math.min(this.#state!.userStyles.maxW || Number.MAX_SAFE_INTEGER, vp.vw - (a ? a[2] ?? a[0] : 0) * 2);
+    const maxH = Math.min(this.#state!.userStyles.maxH || Number.MAX_SAFE_INTEGER, vp.vh - (a ? a[3] ?? a[1] : 0) * 2);
     if (this._opts.minWidthByTarget) {
-      this.style.minWidth = `${Math.min(tdef.width, this.#state!.userStyles.maxW)}px`;
+      this.style.minWidth = `${Math.min(tdef.width, maxW)}px`;
     } else if (this.style.minWidth) {
       this.style.minWidth = "";
     }
 
     if (this._opts.minHeightByTarget) {
-      this.style.minHeight = `${Math.min(tdef.height, this.#state!.userStyles.maxH)}px`;
+      this.style.minHeight = `${Math.min(tdef.height, maxH)}px`;
     } else if (this.style.minHeight) {
       this.style.minHeight = "";
     }
 
     this.style.display = "block";
-    const _defMaxWidth = this._opts.maxWidthByTarget ? `${Math.min(tdef.width, this.#state!.userStyles.maxW)}px` : "";
-    this.setMaxWidth(_defMaxWidth); // resetting is required to get default size
-    this.setMaxHeight(""); // resetting is required to get default size
+
+    // detect whether need to apply maxWidth inline style
+    this.setMaxHeight(0); // reset before maxWidth because it influent on maxWidth
+    let _defMaxW = 0; // zero means: don't apply inline style
+    if (this._opts.maxWidthByTarget) {
+      _defMaxW = Math.min(tdef.width, maxW);
+    } else {
+      this.setMaxWidth(0); // reset to get the real offsetWidth
+      if (this.offsetWidth > vp.vw) {
+        _defMaxW = vp.vw; // maxWidth can't be > 100vw or userStyles.maxW
+      }
+    }
+    _defMaxW !== 0 && this.setMaxWidth(_defMaxW); // resetting is required to get default size
+
+    // detect whether need to apply maxHeight inline style
+    let _defMaxH = 0; // zero means: don't apply inline style
+    if (this.offsetHeight > vp.vh) {
+      _defMaxH = vp.vh;
+    }
+    _defMaxH !== 0 && this.setMaxHeight(_defMaxH); // resetting is required to get default size
 
     if (this.#refArrow) {
       this.#refArrow.style.display = "";
@@ -768,21 +789,21 @@ export default class WUPPopupElement<
         p.top < fit.top ||
         p.freeW < this.#state!.userStyles!.minW ||
         p.freeH < this.#state!.userStyles!.minH ||
-        p.left + Math.min(meSize.w, p.maxW || Number.MAX_SAFE_INTEGER, this.#state!.userStyles!.maxW) > fit.right ||
-        p.top + Math.min(meSize.h, p.maxH || Number.MAX_SAFE_INTEGER, this.#state!.userStyles!.maxH) > fit.bottom;
+        p.left + Math.min(meSize.w, p.maxW || Number.MAX_SAFE_INTEGER, maxW) > fit.right ||
+        p.top + Math.min(meSize.h, p.maxH || Number.MAX_SAFE_INTEGER, maxH) > fit.bottom;
 
       let pos: WUP.Popup.Place.Result = <WUP.Popup.Place.Result>{};
-      const isOk = this.#state!.placements!.some((pfn) => {
+      const isOk = this.#state!.placements!.some((pfn, i) => {
         lastRule = pfn;
         pos = pfn(t, me, fit);
         let ok = !hasOveflow(pos, me);
         if (ok) {
           // maxW/H can be null if resize is not required
-          if (pos.maxW != null && this.#state!.userStyles.maxW > pos.maxW) {
-            this.setMaxWidth(`${pos.maxW}px`);
+          if (pos.maxW != null && !_defMaxW /* || _defMaxW > pos.maxW */) {
+            this.setMaxWidth(pos.maxW);
           }
-          if (pos.maxH != null && this.#state!.userStyles.maxH > pos.maxH) {
-            this.setMaxHeight(`${pos.maxH}px`);
+          if (pos.maxH != null && !_defMaxH /* || _defMaxH > pos.maxH */) {
+            this.setMaxHeight(pos.maxH);
           }
           // re-check because maxWidth can affect on height
           if (this.offsetHeight !== me.h || this.offsetWidth !== me.w) {
@@ -792,8 +813,8 @@ export default class WUPPopupElement<
             /* istanbul ignore else */
             if (!ok) {
               // reset styles if need to look for another position
-              this.setMaxWidth(_defMaxWidth); // resetting is required to get default size
-              this.setMaxHeight("");
+              this.setMaxWidth(_defMaxW); // resetting is required to get default size
+              this.setMaxHeight(_defMaxH);
             }
           }
         }
@@ -858,7 +879,6 @@ export default class WUPPopupElement<
       // otherwise getBoundingClientRect returns element position according to scale applied from dropdownAnimation
       this.style.transform += ` ${was}`; // rollback scale transformation
     }
-
     /* re-calc is required to avoid case when popup unexpectedly affects on layout:
       layout bug: Yscroll appears/disappears when display:flex; heigth:100vh > position:absolute; right:-10px
       with cnt==2 it's reprodusable */
@@ -932,5 +952,7 @@ declare global {
 /* we need option to try place several popups at once without oveflow. Example on wup-pwd page: issue with 2 errors */
 
 // todo refactor show & hide so user can call show several times and get the same promise
+// todo translate floatHeight value on transform
+// NiceToHave add 'position: center' to place as modal when content is big and no spaces anymore
 
 // manual testcase: show as dropdown & scroll parent - blur effect can appear
