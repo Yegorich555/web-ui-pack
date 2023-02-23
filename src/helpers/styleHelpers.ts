@@ -69,8 +69,8 @@ export function getBoundingInternalRect(
   // we don't need other borders (right/bottom) because of clientSize without borders
   const { borderTopWidth, borderLeftWidth } = options?.computedStyle ?? getComputedStyle(el);
   let { left, top } = options?.elRect ?? el.getBoundingClientRect();
-  top += px2Number(borderTopWidth);
-  left += px2Number(borderLeftWidth);
+  top = Math.round(top + px2Number(borderTopWidth));
+  left = Math.round(left + px2Number(borderLeftWidth));
   const r: CustomRect = {
     top,
     left,

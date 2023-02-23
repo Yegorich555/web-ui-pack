@@ -881,12 +881,12 @@ export default class WUPPopupElement<
       return pos;
     };
     const was = styleTransform(this, "translate", ""); // remove prev transformation and save scale transformation
-    const pos = process();
+    const pos = process(); // WARN: important to get always transform without float values otherwise Chrome render blurred text (event after animation end but if during the animation was float transformations)
 
     // fix: when parent.transform.translate affects on popup
     const meRect = this.getBoundingClientRect();
-    const dx = meRect.left - pos.left;
-    const dy = meRect.top - pos.top;
+    const dx = Math.round(meRect.left - pos.left);
+    const dy = Math.round(meRect.top - pos.top);
     if (dx || dy) {
       styleTransform(this, "translate", `${pos.left - dx}px, ${pos.top - dy}px`);
       this.#refArrow && styleTransform(this.#refArrow, "translate", `${pos.arrowLeft - dx}px, ${pos.arrowTop - dy}px`);
