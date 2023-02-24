@@ -101,12 +101,18 @@ declare global {
     }
 
     interface EventMap extends WUP.Base.EventMap {
-      /** Fires before show is happened; can be prevented via e.preventDefault() */
-      $willShow: Event;
+      /** Fires before show is happened;
+       * @tutorial rules
+       * * can be prevented via e.preventDefault()
+       * * use event.detail.showCase to filter by showCase */
+      $willShow: CustomEvent;
       /** Fires after popup is shown (after animation finishes) */
       $show: Event;
-      /** Fires before hide is happened; can be prevented via e.preventDefault() */
-      $willHide: Event;
+      /** Fires before hide is happened;
+       * @tutorial rules
+       * * can be prevented via e.preventDefault()
+       * * use event.detail.hideCase to filter by hideCase */
+      $willHide: CustomEvent;
       /** Fires after popup is hidden (after animation finishes) */
       $hide: Event;
     }

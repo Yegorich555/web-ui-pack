@@ -335,8 +335,8 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
   /* eslint-enable max-len */
 
   /** Calls dispatchEvent and returns created event */
-  fireEvent<K extends keyof Events>(type: K, eventInit?: EventInit): Event {
-    const ev = new Event(type as string, eventInit);
+  fireEvent<K extends keyof Events>(type: K, eventInit?: CustomEventInit): Event {
+    const ev = new CustomEvent(type as string, eventInit);
     super.dispatchEvent(ev as Event);
     return ev;
   }

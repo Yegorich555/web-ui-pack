@@ -746,6 +746,7 @@ describe("popupElement", () => {
     await h.wait();
     b.goHide(); // just for coverage
     expect(b.$isOpen).toBe(false);
+    expect(() => b.$refresh()).not.toThrow(); // for coverage
   });
 
   test("$options.animation", async () => {

@@ -535,6 +535,7 @@ export default class WUPPopupElement<
     this._stopAnimation?.call(this);
 
     const e = this.fireEvent("$willShow", { cancelable: true });
+    const e = this.fireEvent("$willShow", { cancelable: true, detail: { showCase } });
     if (e.defaultPrevented) {
       return false;
     }
@@ -591,7 +592,7 @@ export default class WUPPopupElement<
     }
     this._stopAnimation?.call(this);
 
-    const e = this.fireEvent("$willHide", { cancelable: true });
+    const e = this.fireEvent("$willHide", { cancelable: true, detail: { hideCase } });
     if (e.defaultPrevented) {
       return false;
     }
