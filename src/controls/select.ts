@@ -635,4 +635,4 @@ export default class WUPSelectControl<
 
 customElements.define(tagName, WUPSelectControl);
 
-// todo issue: touch on icon-dropdown calls click btnClear instead of open/show
+// WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation

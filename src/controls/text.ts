@@ -527,7 +527,9 @@ export default class WUPTextControl<
       if (this.refMask.prefix && this.refMask.value === this.refMask.prefix) {
         this.$refInput.value = ""; // rollback prefix/postfix if user types nothing
         delete (this.$refInput as WUP.Text.Mask.HandledInput)._maskPrev;
-        this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
+        setTimeout(() => {
+          this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
+        });
       }
       this.renderPostfix(this._opts.postfix); // postfix depends on maskholder
     }
@@ -592,8 +594,12 @@ export default class WUPTextControl<
         }
         e.preventDefault();
         const inputType = isRedo ? "historyRedo" : "historyUndo";
-        this.$refInput.dispatchEvent(new InputEvent("beforeinput", { cancelable: true, bubbles: true, inputType })) &&
-          this.$refInput.dispatchEvent(new InputEvent("input", { cancelable: false, bubbles: true, inputType }));
+        setTimeout(() => {
+          this.$refInput.dispatchEvent(new InputEvent("beforeinput", { cancelable: true, bubbles: true, inputType })) &&
+            setTimeout(() =>
+              this.$refInput.dispatchEvent(new InputEvent("input", { cancelable: false, bubbles: true, inputType }))
+            );
+        });
       }
     }
   }

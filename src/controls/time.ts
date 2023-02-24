@@ -693,8 +693,9 @@ export default class WUPTimeControl<
       if (this.#lastInputChanged) {
         this.goHideMenu(HideCases.OnPressEnter);
       } else if (!this.$refButtonOk!.disabled) {
-        // todo isolate event
-        this.$refButtonOk!.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }));
+        setTimeout(() =>
+          this.$refButtonOk!.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }))
+        );
       }
       return;
     }

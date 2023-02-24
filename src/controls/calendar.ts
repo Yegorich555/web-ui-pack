@@ -1068,7 +1068,6 @@ export default class WUPCalendarControl<
     let isHandled = true;
     const isDayPicker = this._picker === PickersEnum.Day;
     const items = this.$refCalenarItems._items!;
-    // prettier-ignore
     switch (e.key) {
       case "Enter":
         isHandled = this.#focused != null; // WARN: submit by enter impossible if user focused item
@@ -1076,7 +1075,7 @@ export default class WUPCalendarControl<
       case " ": {
         const el = this.#focused;
         if (el && !el.hasAttribute("disabled")) {
-          el.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }));
+          setTimeout(() => el.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true })));
         }
         break;
       }

@@ -360,10 +360,15 @@ export default class WUPNumberControl<
     const el = this.$refInput;
     const inputType = dval > 0 ? "_inc" : "_dec";
     const data = this.valueToInput(next as any);
-    if (el.dispatchEvent(new InputEvent("beforeinput", { inputType, data, bubbles: true, cancelable: true }))) {
-      el.value = data;
-      el.dispatchEvent(new InputEvent("input", { inputType, bubbles: true }));
-    }
+    setTimeout(() => {
+      const isPrevented = !el.dispatchEvent(
+        new InputEvent("beforeinput", { inputType, data, bubbles: true, cancelable: true })
+      );
+      if (!isPrevented) {
+        el.value = data;
+        setTimeout(() => el.dispatchEvent(new InputEvent("input", { inputType, bubbles: true })));
+      }
+    });
   }
 }
 
