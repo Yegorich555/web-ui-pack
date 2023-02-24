@@ -455,21 +455,6 @@ describe("baseElement", () => {
     expect(isPassive).toBe(true);
   });
 
-  test("overriden dispatchEvent", () => {
-    const fn = jest.fn();
-    el.addEventListener("click", fn);
-    el.dispatchEvent(new Event("click"));
-    expect(fn).toBeCalledTimes(1);
-    expect(fn.mock.calls[0][0]).toBeInstanceOf(Event);
-
-    expect(() => el.dispatchEvent("click")).not.toThrow();
-    expect(fn).toBeCalledTimes(2);
-
-    fn.mockClear();
-    expect(() => el.dispatchEvent("click", { bubbles: true })).not.toThrow();
-    expect(fn.mock.calls[0][0].bubbles).toBe(true);
-  });
-
   test("focus", () => {
     class Test extends WUPBaseElement {}
     customElements.define("test-el", Test);

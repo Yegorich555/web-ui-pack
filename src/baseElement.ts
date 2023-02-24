@@ -308,13 +308,6 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
       this.gotAttributeChanged(name, oldValue, newValue);
   }
 
-  dispatchEvent<K extends keyof Events>(type: K, eventInit?: EventInit): boolean;
-  dispatchEvent(event: Event): boolean;
-  dispatchEvent(ev: Event | string, eventInit?: EventInit): boolean {
-    if (typeof ev === "string") ev = new Event(ev, eventInit);
-    return super.dispatchEvent(ev as Event);
-  }
-
   // watchfix: how to change  listener: (this: WUPBaseElement) to generic: https://github.com/microsoft/TypeScript/issues/299
   /* eslint-disable max-len */
   // prettier-ignore
@@ -334,10 +327,10 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
   }
   /* eslint-enable max-len */
 
-  /** Calls dispatchEvent and returns created event */
+  /** Inits customEvent & calls dispatchEvent and returns created event */
   fireEvent<K extends keyof Events>(type: K, eventInit?: CustomEventInit): Event {
     const ev = new CustomEvent(type as string, eventInit);
-    super.dispatchEvent(ev as Event);
+    super.dispatchEvent(ev);
     return ev;
   }
 
