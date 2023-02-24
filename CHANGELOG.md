@@ -6,7 +6,7 @@
 
 - Internals. Methods getNumAttr, getRefAttr, getBoolAttr is refactored to single getAttr()
 
-**Fixes/Improvements**:
+**Fixes**:
 
 - helper [`onFocusLost`](src/helpers/onFocusLost.ts). Isn't fired if stopPropagation is called
 - [TimeControl](src/controls/time.ts). Extra margin for menu-buttons on Safari
@@ -30,9 +30,13 @@
 - [PopupElement](src/popup/popupElement.ts). No-updates on screensize changes. Now popup position & size changes with device-rotation
 - [PopupElement](src/popup/popupElement.ts). No popup if mousedown>move>up>click on target
 
-- **New**:
+**New**:
 
-- todo add something new
+- [PopupElement](src/popup/popupElement.ts).
+  - Added properties `$isClose, $isOpening, $isClosing`
+  - Calling `$show() & $hide()` possible several times at once without re-rendering
+  - Events `$willShow & $willHide` have property `detail.showCase & detail.hideCase`
+  - Added rule: popup can't be more than `window.innerWidth & window.innerHeight`. The rule impossible to disable!
 
 ## 0.4.1 (Jan 27, 2023)
 

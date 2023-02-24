@@ -301,14 +301,13 @@ export default abstract class WUPBaseComboControl<
         return null;
       }
       this.appendChild(p); // WARN: it will show onInit
-      this.$refPopup.addEventListener("$willShow", (ev) => ev.preventDefault(), { once: true }); // otherwise popup shows by init and impossible to wait for result (only via event)
       // eslint-disable-next-line no-promise-executor-return
       await new Promise((res) => setTimeout(res)); // wait for appending to body so size is defined and possible to scroll
     }
     if (!this.#isOpen) {
       return null; // possible when user calls show & hide sync
     }
-    const r = this.$refPopup.$show().finally(() => this.fireEvent("$showMenu", { cancelable: false }));
+    const r = this.$refPopup.$show().then(() => this.fireEvent("$showMenu", { cancelable: false }));
     this.setAttribute("opened", ""); // possible when user calls show & hide sync
     this.$refInput.setAttribute("aria-expanded", true);
     this.#popupRefs!.show(PopupShowCases.always); // call for ref-listener to apply events properly

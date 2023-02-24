@@ -259,36 +259,48 @@ export default class WUPPopupElement<
   $options: WUP.Popup.Options = objectClone(this.#ctr.$defaults);
   protected override _opts = this.$options;
 
+  #whenHide?: Promise<any>;
   /** Hide popup
-   * @returns Promise resolved by animation time */
-  $hide(): Promise<void> {
-    return new Promise<void>((resolve) => {
+   * @returns Promise resolved true if successful by animation-end */
+  $hide(): Promise<boolean> {
+    if (this.#whenHide) {
+      return this.#whenHide;
+    }
+    return new Promise<boolean>((resolve) => {
       const f = async (): Promise<void> => {
-        // isReady possible false when you fire $hide on disposed element
-        if (this.$isReady && this.#isOpen && (await this.goHide(HideCases.onManuallCall))) {
-          this._opts.showCase !== ShowCases.always && this.init(); // re-init to applyShowCase
+        // isReady false when you fire $hide on disposed element
+        let isOk = true;
+        if (this.$isReady) {
+          isOk = await this.goHide(HideCases.onManuallCall);
+          if (isOk) {
+            this._opts.showCase !== ShowCases.always && this.init(); // re-init to applyShowCase
+          }
         }
-        resolve();
+        resolve(isOk);
       };
-      // timeout - possible when el is created but not attached to document yet
       this.$isReady ? f() : setTimeout(f, 1); // 1ms need to wait forReady
     });
   }
 
-  /** Show popup; it disables $options.showCase and rollbacks by $hide().
-   * @returns Promise resolved by animation time */
-  $show(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+  #whenShow?: Promise<any>;
+  /** Show popup; it disables/ignores $options.showCase and rollbacks by $hide().
+   * @returns Promise resolved by animation-end
+   * @throws (rejects) error if popup not appended on layout */
+  $show(): Promise<boolean> {
+    /*  if (this.#whenShow) {
+      return this.#whenShow;
+    } */ // WARN: don't use this logic becaues manual $show method must remove listeners
+    return new Promise<boolean>((resolve, reject) => {
       const f = async (): Promise<void> => {
         if (!this.$isReady) {
           reject(new Error(`${this.tagName}. Impossible to show: not appended to document`));
         } else {
           this.disposeListener(); // remove events
           try {
-            await this.goShow(ShowCases.always);
-            resolve();
+            const isOk = await this.goShow(ShowCases.always);
+            resolve(isOk);
           } catch (err) {
-            reject(err);
+            reject(err); // here promise in promise. So handling is required
           }
         }
       };
@@ -297,15 +309,39 @@ export default class WUPPopupElement<
     });
   }
 
-  /** Force to update position when popup $isOpen. Call this if popup content is changed */
+  /** Force to update position. Call this if related styles are changed & need to recalc position */
   $refresh(): void {
-    /* istanbul ignore else */
-    if (this.#state) this.#state.prevRect = undefined;
+    this.#state && this.buildState();
   }
 
-  /** Returns if popup is opened */
+  /** Returns if popup is opened (before show-animation is started)
+   * @tutorial Troubleshooting
+   * * stack: $show() > `$isOpen:true` > opening > opened
+   * * stack: $hide() > closing > closed > `$isOpen:false`
+   * * to listen to animation-end use events `$show` & `$hide` OR methods `$show().then(...)` & `$hide().then(... )` */
   get $isOpen(): boolean {
     return this.#isOpen;
+  }
+
+  /** Returns if popup is closed (after hide-animation is ended)
+   * @tutorial Troubleshooting
+   * * stack: $show() > `$isClose:false` > opening > opened
+   * * stack: $hide() > closing > closed > `$isClose:true`
+   * * to listen to animation-end use events `$show` & `$hide` OR methods `$show().then(...)` & `$hide().then(... )` */
+  get $isClose(): boolean {
+    return !this.#isOpen && !this.$isClosing;
+  }
+
+  #isClosing?: true;
+  /** Returns if popup is closing (only if animation enabled) */
+  get $isClosing(): boolean {
+    return this.#isClosing === true;
+  }
+
+  #isOpening?: true;
+  /** Returns if popup is opening (only if animation enabled) */
+  get $isOpening(): boolean {
+    return this.#isOpening === true;
   }
 
   /** Returns arrowElement if $options.arrowEnable=true and after popup $isOpen */
@@ -530,22 +566,25 @@ export default class WUPPopupElement<
   }
 
   /** Shows popup if target defined; returns true if successful */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected goShow(showCase: ShowCases): boolean | Promise<boolean> {
-    this._stopAnimation?.call(this);
-
-    const e = this.fireEvent("$willShow", { cancelable: true });
+    if (this.#isOpen && !this.#isClosing && !this.#isOpening) {
+      return true;
+    }
+    if (this.#whenShow) {
+      return this.#whenShow;
+    }
     const e = this.fireEvent("$willShow", { cancelable: true, detail: { showCase } });
     if (e.defaultPrevented) {
       return false;
     }
-
+    this.#whenHide = undefined;
+    this.#isClosing = undefined;
+    this._stopAnimation?.call(this);
     this.#state && window.cancelAnimationFrame(this.#state.frameId);
     this.buildState();
     const wasClosed = !this.#isOpen;
     this.#isOpen = true;
 
-    // possible when show fired againg with new values
     const goUpdate = (): void => {
       // possible if hidden by target-remove
       if (this.#isOpen) {
@@ -575,31 +614,37 @@ export default class WUPPopupElement<
       return true;
     }
 
-    return this.goAnimate(animTime, false).then((isOk) => {
+    this.#isOpening = true;
+    this.#whenShow = this.goAnimate(animTime, false).then((isOk) => {
+      this.#isOpening = undefined;
       if (!isOk) {
         return false;
       }
       wasClosed && this.fireEvent("$show", { cancelable: false });
       return true;
     });
+    return this.#whenShow;
   }
 
-  _isClosing?: true;
   /** Hide popup. @hideCase as reason of hide(). Calling 2nd time at once will stop previous hide-animation */
   protected goHide(hideCase: HideCases): boolean | Promise<boolean> {
-    if (!this.#isOpen || this._isClosing) {
+    if (!this.#isOpen && !this.#isClosing && !this.#isOpening) {
       return true;
     }
-    this._stopAnimation?.call(this);
+    if (this.#whenHide) {
+      return this.#whenHide;
+    }
 
     const e = this.fireEvent("$willHide", { cancelable: true, detail: { hideCase } });
     if (e.defaultPrevented) {
       return false;
     }
-
-    this._isClosing = true;
+    this.#whenShow = undefined;
+    this.#isOpening = undefined;
+    this._stopAnimation?.call(this);
+    this.#isClosing = true;
     const finishHide = (): void => {
-      delete this._isClosing;
+      this.#isClosing = undefined;
       delete this._stopAnimation;
       this.style.display = "";
       this.removeAttribute("hide");
@@ -620,8 +665,8 @@ export default class WUPPopupElement<
       const { animationDuration: aD } = getComputedStyle(this);
       const animTime = Number.parseFloat(aD.substring(0, aD.length - 1)) * 1000 || 0;
       if (animTime) {
-        return this.goAnimate(animTime, true).then((isOk) => {
-          delete this._isClosing;
+        this.#whenHide = this.goAnimate(animTime, true).then((isOk) => {
+          this.#isClosing = undefined;
           this.removeAttribute("hide");
           if (!isOk) {
             return false;
@@ -629,6 +674,7 @@ export default class WUPPopupElement<
           finishHide();
           return true;
         });
+        return this.#whenHide;
       }
     }
 
@@ -810,7 +856,7 @@ export default class WUPPopupElement<
         p.top + Math.min(meSize.h, p.maxH || Number.MAX_SAFE_INTEGER, maxH) > fit.bottom;
 
       let pos: WUP.Popup.Place.Result = <WUP.Popup.Place.Result>{};
-      const isOk = this.#state!.placements!.some((pfn, i) => {
+      const isOk = this.#state!.placements!.some((pfn) => {
         lastRule = pfn;
         pos = pfn(t, me, fit);
         let ok = !hasOveflow(pos, me);
@@ -904,6 +950,10 @@ export default class WUPPopupElement<
 
   protected override gotRemoved(): void {
     this.#isOpen = false;
+    this.#isClosing = undefined;
+    this.#isOpening = undefined;
+    this.#whenHide = undefined;
+    this.#whenShow = undefined;
     this.#state?.frameId && window.cancelAnimationFrame(this.#state.frameId);
     this.#state = undefined;
     this.#refArrow?.remove();
@@ -964,11 +1014,8 @@ declare global {
   }
 }
 
-// todo: popup overflows scrollbar of fitElement does it correct ?
+// manual testcase: show as dropdown & scroll parent - blur effect can appear
+
+// NiceToHave add 'position: center' to place as modal when content is big and no spaces anymore
 // todo 2 popups can oveflow each other
 /* we need option to try place several popups at once without oveflow. Example on wup-pwd page: issue with 2 errors */
-
-// todo refactor show & hide so user can call show several times and get the same promise
-// NiceToHave add 'position: center' to place as modal when content is big and no spaces anymore
-
-// manual testcase: show as dropdown & scroll parent - blur effect can appear
