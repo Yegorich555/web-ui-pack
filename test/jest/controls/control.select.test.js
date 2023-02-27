@@ -232,6 +232,7 @@ describe("control.select", () => {
     el.$showMenu();
     await h.wait();
     expect(el.$isOpen).toBe(true);
+    el.focus(); // without focus click events are not handled
     document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     expect(el.$isOpen).toBe(false);
@@ -259,6 +260,7 @@ describe("control.select", () => {
     expect(el.$isOpen).toBe(true);
 
     // stay open even by popupClick
+    el.focus(); // without focus click events are not handled
     el.$refPopup.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     expect(el.$isOpen).toBe(true);
@@ -289,7 +291,7 @@ describe("control.select", () => {
     expect(el.$refInput.readOnly).toBe(true);
     expect(el.$refInput.value).toBeTruthy();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-owns="txt5" aria-controls="txt5" readonly=""><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-select>"`
+      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-owns="txt2" aria-controls="txt2" readonly=""><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-select>"`
     );
     el.$refInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
@@ -360,6 +362,7 @@ describe("control.select", () => {
 
     // checking if sync-call works as expected
     el.$showMenu();
+    el.focus();
     el.$hideMenu();
     await h.wait();
     expect(el.$isOpen).toBe(false);
@@ -540,6 +543,7 @@ describe("control.select", () => {
     // open again and check if selectedValue is correct
     el.$value = getItems()[3].value;
     await h.wait();
+    expect(el.$isFocused).toBe(true);
     el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     expect(el.$isOpen).toBe(true);
@@ -661,6 +665,7 @@ describe("control.select", () => {
     const err = h.mockConsoleError();
     el.$options.items = [];
     await h.wait();
+    expect(el.$isFocused).toBe(true);
     el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     expect(el.$isOpen).toBe(true);
@@ -791,6 +796,13 @@ describe("control.select", () => {
       await h.wait();
       expect(el.$isOpen).toBe(false);
 
+      el.blur();
+      await h.wait();
+      el.focus();
+      el.click(); // simulate mouseClick + focus
+      await h.wait();
+      expect(el.$isOpen).toBe(true);
+
       // showCase: onInput
       await h.userTypeText(el.$refInput, "d");
       expect(el.$isOpen).toBe(true);
@@ -806,6 +818,9 @@ describe("control.select", () => {
       el.click();
       await h.wait();
       expect(el.$isOpen).toBe(true);
+      el.focus();
+      await h.wait(1);
+
       el.click();
       await h.wait();
       expect(el.$isOpen).toBe(false);
@@ -814,6 +829,14 @@ describe("control.select", () => {
       await h.wait();
       expect(el.$isOpen).toBe(false);
 
+      el.$showMenu();
+      await h.wait();
+      el.click();
+      await h.wait();
+      expect(el.$isOpen).toBe(true); // no-hidding when click option is disabled
+
+      el.$hideMenu();
+      await h.wait();
       // showCase: inputClick
       el.$options.showCase |= ShowCases.onClick; // enable click again
       await h.userClick(el.$refInput);

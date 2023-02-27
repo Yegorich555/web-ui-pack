@@ -371,11 +371,19 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
     this.disposeLst.length = 0;
   }
 
-  /** Returns true if el is instance of Node and contains pointer element
+  /** Returns true if el is instance of Node and contains pointed element
    * @tutorial Troubleshooting
    * * if element has position `fixed` or `absolute` then returns false */
   includes(el: unknown): boolean {
     return el instanceof Node && this.contains(el);
+  }
+
+  /** Returns true if element contains eventTarget or it's eventTarget
+   * @tutorial Troubleshooting
+   * * if element has position `fixed` or `absolute` then returns false */
+  includesTarget(e: Event): boolean {
+    const t = e.target;
+    return this === t || this.includes(t);
   }
 
   /** Parse attribute and return result; if attr missed or invalid => returns pointed alt value OR $options[attr] */

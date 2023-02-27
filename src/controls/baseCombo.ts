@@ -1,6 +1,6 @@
+import { onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
-import { ShowCases as PopupShowCases, HideCases as PopupHideCases, Animations } from "../popup/popupElement.types";
-import popupListen from "../popup/popupListen";
+import { ShowCases as PopupShowCases, Animations } from "../popup/popupElement.types";
 import WUPBaseControl from "./baseControl";
 import WUPTextControl from "./text";
 
@@ -137,7 +137,6 @@ export default abstract class WUPBaseComboControl<
 
   /** Reference to popupMenu */
   $refPopup?: WUPPopupElement;
-  #popupRefs?: ReturnType<typeof popupListen>;
 
   protected override renderControl(): void {
     super.renderControl();
@@ -161,44 +160,7 @@ export default abstract class WUPBaseComboControl<
     this.$refInput.readOnly = this.$refInput.readOnly || (this._opts.readOnlyInput as boolean);
 
     const isMenuEnabled = !this.$isDisabled && !this.$isReadOnly;
-    if (!isMenuEnabled) {
-      this.#popupRefs?.stopListen.call(this.#popupRefs); // remove all possible prev-eventListeners
-      this.#popupRefs = undefined;
-      this.removePopup();
-    } else if (!this.#popupRefs) {
-      const refs = popupListen(
-        {
-          target: this,
-          showCase: PopupShowCases.onClick | PopupShowCases.onFocus,
-          skipAlreadyFocused: true,
-        },
-        (s, e) => {
-          if (s === PopupShowCases.always) {
-            return this.$refPopup!;
-          }
-          const sc = s === PopupShowCases.onClick ? ShowCases.onClick : ShowCases.onFocus;
-          if (!(sc & this._opts.showCase)) {
-            return null;
-          }
-          return this.goShowMenu(sc, e);
-        },
-        (s, e) => {
-          if (s === PopupHideCases.onManuallCall) {
-            return true;
-          }
-          if (s !== PopupHideCases.onPopupClick) {
-            return this.goHideMenu(
-              s === PopupHideCases.onFocusOut || s === PopupHideCases.onOutsideClick
-                ? HideCases.onFocusLost
-                : HideCases.onClick,
-              e
-            );
-          }
-          return false;
-        }
-      );
-      this.#popupRefs = refs;
-    }
+    !isMenuEnabled && this.removePopup();
   }
 
   /** Called when need to create menu in opened popup */
@@ -208,26 +170,35 @@ export default abstract class WUPBaseComboControl<
   /** Called on user's keyDown to apply focus on popup-menu items */
   protected abstract focusMenuItemByKeydown(e: KeyboardEvent): void;
 
-  /** Override to change show-behavior */
-  canShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean | Promise<boolean> {
-    if (this.$isReadOnly) {
-      return false;
-    }
-
-    if (this._opts.showCase & ShowCases.onClickInput) {
-      return true;
-    }
-
-    if (
-      showCase === ShowCases.onClick &&
+  /** Returns whether possible to use input-click as dropdown behavior */
+  isLockInputDrodpown(e: Event): boolean {
+    return (
+      !(this._opts.showCase & ShowCases.onClickInput) &&
+      e.type === "click" &&
       e!.target instanceof HTMLInputElement &&
       !e!.target.readOnly &&
       e!.target.value !== ""
-    ) {
+    );
+  }
+
+  /** Override to change show-behavior */
+  canShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean | Promise<boolean> {
+    if (this.$isReadOnly || this.$isDisabled) {
+      return false;
+    }
+
+    if (e && this.isLockInputDrodpown(e!)) {
       return false; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
     }
 
-    if (showCase === ShowCases.onFocus) {
+    if (showCase === ShowCases.onClick) {
+      if (!(this._opts.showCase & ShowCases.onClick)) {
+        return false;
+      }
+    } else if (showCase === ShowCases.onFocus) {
+      if (!(this._opts.showCase & ShowCases.onFocus)) {
+        return false;
+      }
       const was = this.$value;
       return new Promise((res) => {
         // WARN: if click on btnClear with control.emptyValue - no changes and popup appeares
@@ -237,11 +208,6 @@ export default abstract class WUPBaseComboControl<
         });
       });
     }
-
-    if (showCase === ShowCases.onClick && e?.defaultPrevented) {
-      return false; // click on item or btnClear
-    }
-
     return true;
   }
 
@@ -310,7 +276,6 @@ export default abstract class WUPBaseComboControl<
     const r = this.$refPopup.$show().then(() => this.fireEvent("$showMenu", { cancelable: false }));
     this.setAttribute("opened", ""); // possible when user calls show & hide sync
     this.$refInput.setAttribute("aria-expanded", true);
-    this.#popupRefs!.show(PopupShowCases.always); // call for ref-listener to apply events properly
     isNeedWait && (await r); // WARN: it's important don't wait for animation to assign onShow events fast
 
     return this.$refPopup;
@@ -318,22 +283,23 @@ export default abstract class WUPBaseComboControl<
 
   /** Override to change hide-behavior */
   canHideMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): boolean {
-    if (this._opts.showCase & ShowCases.onClickInput) {
-      return true;
-    }
-
-    if (
-      hideCase === HideCases.onClick &&
-      e!.target instanceof HTMLInputElement &&
-      !e!.target.readOnly &&
-      e!.target.value !== ""
-    ) {
+    if (e && this.isLockInputDrodpown(e!)) {
       return false; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
     }
 
-    if (hideCase === HideCases.onClick && e?.defaultPrevented) {
-      return false; // user clicks on item or btnClear
+    if (hideCase === HideCases.onClick) {
+      if (!(this._opts.showCase & ShowCases.onClick)) {
+        return false;
+      }
+      if (this.$refPopup!.includesTarget(e!)) {
+        return false; // popupClick
+      }
     }
+
+    // always hide by focusLost
+    // if (hideCase === HideCases.onFocusLost && !(this._opts.showCase & ShowCases.onFocus)) {
+    //   return false;
+    // }
 
     return true;
   }
@@ -349,7 +315,6 @@ export default abstract class WUPBaseComboControl<
     }
     this.#isOpen = false;
     this._isHidding = true;
-    this.#popupRefs!.hide(PopupHideCases.onManuallCall); // call for ref-listener to apply events properly
     await this.$refPopup.$hide();
     delete this._isHidding;
     if (this.#isOpen) {
@@ -454,8 +419,36 @@ export default abstract class WUPBaseComboControl<
     allowSuper && super.gotInput(e);
   }
 
+  protected override gotFocus(ev: FocusEvent): Array<() => void> {
+    const arr = super.gotFocus(ev);
+
+    this.goShowMenu(ShowCases.onFocus, ev);
+
+    let wasClosed: ReturnType<typeof setTimeout> | false = setTimeout(() => (wasClosed = false)); // preventClickAfterFocus if showByFocus was successful
+    let lblClick: ReturnType<typeof setTimeout> | false = false; // fix when labelOnClick > inputOnClick > inputOnFocus
+    const dsps = onEvent(this, "click", (e) => {
+      const skip = e.defaultPrevented || e.button || lblClick; // e.button > 0 if not left-click
+      if (!skip) {
+        if (wasClosed) {
+          this.goShowMenu(ShowCases.onClick, e); // menu must be opened by focus but rejected: othewise need skip the hideByClick after focus
+        } else {
+          !this.#isOpen ? this.goShowMenu(ShowCases.onClick, e) : this.goHideMenu(HideCases.onClick, e);
+        }
+      }
+      lblClick = setTimeout(() => (lblClick = false));
+    });
+
+    const dsps2 = onEvent(document, "click", (e) => {
+      !lblClick && setTimeout(() => this.$isFocused && this.goHideMenu(HideCases.onClick, e)); // timeout to prevent show before focusLost
+    });
+
+    arr.push(dsps, dsps2);
+    return arr;
+  }
+
   protected override gotFocusLost(): void {
     !this.#isOpen && !this._isHidding && this.removePopup(); // otherwise it's removed by hidingMenu
+    this.goHideMenu(HideCases.onFocusLost);
     this.resetInputValue(); // to update/rollback input according to result
     super.gotFocusLost();
   }
@@ -496,9 +489,6 @@ export default abstract class WUPBaseComboControl<
 
   protected override gotRemoved(): void {
     this.removePopup();
-    // remove resources for case when control can be appended again
-    this.#popupRefs?.stopListen.call(this);
-    this.#popupRefs = undefined;
     super.gotRemoved();
   }
 }

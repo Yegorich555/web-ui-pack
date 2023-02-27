@@ -1067,11 +1067,11 @@ exports[`control.select validations options.validationCase 4`] = `
     <span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt6"
-        aria-describedby="txt7"
+        aria-controls="txt7"
+        aria-describedby="txt8"
         aria-expanded="false"
         aria-haspopup="listbox"
-        aria-owns="txt6"
+        aria-owns="txt7"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -1094,7 +1094,7 @@ exports[`control.select validations options.validationCase 4`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt7"
+    id="txt8"
     role="alert"
     style="max-width: 100px;"
   >
