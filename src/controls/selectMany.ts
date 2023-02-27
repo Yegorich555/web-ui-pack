@@ -48,6 +48,7 @@ export default class WUPSelectManyControl<
   static get $style(): string {
     return `${super.$style}
       :host strong {
+        top: 1.6em;
         margin: calc(var(--ctrl-select-gap) / 2);
       }
       :host label > span {
@@ -184,9 +185,8 @@ export default class WUPSelectManyControl<
     const r = this.getItems().then((items) => {
       v = v ?? [];
       this.renderItems(v, items);
-      // todo develop anotherway for input because in current way it autoselected
       // todo blank-string autoselected on IOS if user touchStart+Move on item
-      return " "; // otherwise broken css:placeholder-shown & screenReaders reads 'Blank'
+      return v?.length ? " " : ""; // otherwise broken css:placeholder-shown & screenReaders reads 'Blank'
     });
 
     return r;
@@ -233,7 +233,6 @@ export default class WUPSelectManyControl<
           const eli = this.$refItems?.findIndex((li) => li === t || this.includes.call(li, t));
           if (eli != null && eli > -1) {
             e.preventDefault(); // to prevent open/hide popup
-            // todo prevent openByFocus in this case ?
             this.$value!.splice(eli, 1);
             this.setValue([...this.$value!]);
           }

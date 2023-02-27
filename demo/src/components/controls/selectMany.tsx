@@ -73,6 +73,7 @@ export default function SelectManyControlView() {
             }
           }}
         />
+        <wup-select-many label="Empty" />
         <wup-select-many
           class={styles.withDelIcon}
           ref={(el) => {
