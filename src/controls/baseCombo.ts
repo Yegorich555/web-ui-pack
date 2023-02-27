@@ -393,15 +393,16 @@ export default abstract class WUPBaseComboControl<
         e.preventDefault();
         {
           const el = this._focusedMenuItem;
-          if (el && !el.hasAttribute("disabled")) {
-            const isHandled = !el.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }));
-            /* istanbul ignore else */
-            if (isHandled) {
-              return; // skip hidding menu if itemClick isHandled
+          setTimeout(() => {
+            const isPrevented =
+              el &&
+              !el.hasAttribute("disabled") &&
+              !el.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }));
+            if (!isPrevented) {
+              this.resetInputValue();
+              this.goHideMenu(HideCases.OnPressEnter);
             }
-          }
-          this.resetInputValue();
-          this.goHideMenu(HideCases.OnPressEnter);
+          });
         }
         break;
       case " ":

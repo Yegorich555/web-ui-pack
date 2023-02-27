@@ -375,6 +375,16 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isOpen).toBe(false);
 
+    // cover hide after show when menu is opening
+    el.$options.items = () => new Promise((res) => setTimeout(() => res([]), 100));
+    await h.wait(1);
+    el.$showMenu();
+    expect(el.$isOpen).toBe(true);
+    await h.wait(10);
+    el.$hideMenu();
+    expect(el.$isOpen).toBe(false);
+    await h.wait();
+
     // case: popups are visible and not closed (if change focus by Tab)
     const orig = window.getComputedStyle;
     jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
