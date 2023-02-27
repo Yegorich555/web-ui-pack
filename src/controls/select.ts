@@ -343,7 +343,8 @@ export default class WUPSelectControl<
           const parent = t.parentElement as HTMLElement;
           /* istanbul ignore else */
           if (parent === ul) {
-            this.gotMenuItemClick(e, t as WUP.Select.MenuItemElement);
+            const isDisabled = (t as HTMLElement).hasAttribute("aria-disabled");
+            !isDisabled && this.gotMenuItemClick(e, t as WUP.Select.MenuItemElement);
             break;
           }
           t = parent;

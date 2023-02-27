@@ -467,6 +467,12 @@ describe("control.select", () => {
       `"<wup-popup menu="" style="min-width: 100px;"><ul id="txt3" role="listbox" aria-label="Items"><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul></wup-popup>"`
     );
 
+    // click on No-Items
+    const onErr = h.mockConsoleError();
+    expect(() => el.$refPopup.querySelector("li").click()).not.toThrow();
+    expect(onErr).not.toBeCalled();
+    h.unMockConsoleError();
+
     await setItems(() => Promise.resolve(getItems()));
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup menu="" style="min-width: 100px;"><ul id="txt4" role="listbox" aria-label="Items"><li role="option">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul></wup-popup>"`
