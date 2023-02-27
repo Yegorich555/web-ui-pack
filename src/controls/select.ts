@@ -502,8 +502,8 @@ export default class WUPSelectControl<
 
   protected override focusMenuItemByKeydown(e: KeyboardEvent): void {
     if (!this._menuItems) {
-      // todo error happend when user goes to another by menuItems still is loading: need to skip this case
-      throw new Error(`${this.tagName}. Impossible on empty menu`);
+      return; // possible when user goes to another but menuItems still is loading
+      // throw new Error(`${this.tagName}. Impossible on empty menu`);
     }
     const { length } = this._menuItems.filtered || this._menuItems.all;
     let focusIndex: number | null = null;
@@ -635,12 +635,3 @@ export default class WUPSelectControl<
 customElements.define(tagName, WUPSelectControl);
 
 // WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation
-
-// setTimeout(async () => {
-//   const el = document.querySelector("wup-select")!;
-//   await el.$showMenu();
-//   el.focus();
-//   await new Promise((res) => setTimeout(res, 100));
-//   document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-//   // todo issue - outside click must close
-// }, 500);

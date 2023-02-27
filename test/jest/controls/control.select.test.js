@@ -602,7 +602,7 @@ describe("control.select", () => {
     // cover impossible case
     const el2 = document.body.appendChild(document.createElement("wup-select"));
     await h.wait(1);
-    expect(() => el2.focusMenuItemByKeydown(new KeyboardEvent("keydown", { key: "ArrowDown" }))).toThrow();
+    expect(() => el2.focusMenuItemByKeydown(new KeyboardEvent("keydown", { key: "ArrowDown" }))).not.toThrow();
   });
 
   test("menu filtering by input", async () => {
