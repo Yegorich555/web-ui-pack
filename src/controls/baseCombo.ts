@@ -422,16 +422,15 @@ export default abstract class WUPBaseComboControl<
 
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
     const arr = super.gotFocus(ev);
-
     this.goShowMenu(ShowCases.onFocus, ev);
 
-    let wasClosed: ReturnType<typeof setTimeout> | false = setTimeout(() => (wasClosed = false)); // preventClickAfterFocus if showByFocus was successful
+    let clickAfterFocus = true; // prevent clickAfterFocus
     let lblClick: ReturnType<typeof setTimeout> | false = false; // fix when labelOnClick > inputOnClick > inputOnFocus
     const dsps = onEvent(this, "click", (e) => {
       const skip = e.defaultPrevented || e.button || lblClick; // e.button > 0 if not left-click
       if (!skip) {
-        if (wasClosed) {
-          this.goShowMenu(ShowCases.onClick, e); // menu must be opened by focus but rejected: othewise need skip the hideByClick after focus
+        if (clickAfterFocus) {
+          this.goShowMenu(ShowCases.onClick, e); // menu must be opened if openByFocus is rejected
         } else {
           !this.#isOpen ? this.goShowMenu(ShowCases.onClick, e) : this.goHideMenu(HideCases.onClick, e);
         }
@@ -442,6 +441,14 @@ export default abstract class WUPBaseComboControl<
     const dsps2 = onEvent(document, "click", (e) => {
       !lblClick && setTimeout(() => this.$isFocused && this.goHideMenu(HideCases.onClick, e)); // timeout to prevent show before focusLost
     });
+
+    document.addEventListener(
+      "pointerdown",
+      () => {
+        clickAfterFocus = false;
+      },
+      { once: true, passive: true, capture: true }
+    );
 
     arr.push(dsps, dsps2);
     return arr;
@@ -468,7 +475,6 @@ export default abstract class WUPBaseComboControl<
   protected override setInputValue(v: ValueType | undefined): void {
     const p = this.valueToInput(v);
     if (p instanceof Promise) {
-      // todo try to avoid promise here and use super.setInputValue instead
       p.then((s) => super.setInputValue(s));
     } else {
       super.setInputValue(p);

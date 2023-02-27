@@ -475,9 +475,11 @@ export async function userRemove(
 /** Simulate user mouse click with 100ms between mouseDown and mouseUp */
 export async function userClick(el: HTMLElement, opts?: MouseEventInit, timeoutMouseUp = 100) {
   const o = () => ({ bubbles: true, cancelable: true, pageX: 1, pageY: 1, ...opts });
+  el.dispatchEvent(new MouseEvent("pointerdown", o()));
   const isOk = el.dispatchEvent(new MouseEvent("mousedown", o()));
   isOk && el.focus();
   timeoutMouseUp && (await wait(timeoutMouseUp));
+  el.dispatchEvent(new MouseEvent("pointerup", o()));
   el.dispatchEvent(new MouseEvent("mouseup", o()));
   el.dispatchEvent(new MouseEvent("click", o()));
 }

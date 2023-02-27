@@ -238,13 +238,13 @@ describe("control.select", () => {
     expect(el.$isOpen).toBe(false);
 
     // open by click control
-    el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.userClick(el);
     await h.wait();
     expect(document.activeElement).toBe(el.$refInput);
     expect(el.$isOpen).toBe(true);
 
     // hide by click control again
-    el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.userClick(el);
     await h.wait();
     expect(document.activeElement).toBe(el.$refInput);
     expect(el.$isOpen).toBe(false);
@@ -286,6 +286,7 @@ describe("control.select", () => {
     expect(el.$isOpen).toBe(false);
 
     // opening when click on input with readonly (to allow user edit input value without menu)
+    el.blur();
     el.$options.readOnlyInput = true;
     await h.wait();
     expect(el.$refInput.readOnly).toBe(true);
@@ -293,11 +294,18 @@ describe("control.select", () => {
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-owns="txt2" aria-controls="txt2" readonly=""><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-select>"`
     );
-    el.$refInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.userClick(el.$refInput);
     await h.wait();
-    expect(el.$isOpen).toBe(true);
+    expect(el.$isOpen).toBe(true); // because got focus by user click
+    await h.userClick(el.$refInput);
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+
     el.$options.readOnlyInput = false;
+    await h.wait(1);
+    await h.userClick(el.$refInput);
     await h.wait();
+    expect(el.$isOpen).toBe(false); // no-effect because by default click on input is filtered
 
     // checking with disabled
     el.$showMenu();
@@ -376,7 +384,7 @@ describe("control.select", () => {
     expect(el.$isOpen).toBe(false);
 
     // cover hide after show when menu is opening
-    el.$options.items = () => new Promise((res) => setTimeout(() => res([]), 100));
+    el.$options.items = () => new Promise((res) => setTimeout(() => res(getItems()), 100));
     await h.wait(1);
     el.$showMenu();
     expect(el.$isOpen).toBe(true);
@@ -833,7 +841,7 @@ describe("control.select", () => {
       el.focus();
       await h.wait(1);
 
-      el.click();
+      await h.userClick(el);
       await h.wait();
       expect(el.$isOpen).toBe(false);
       el.$options.showCase &= ~ShowCases.onClick; // remove option

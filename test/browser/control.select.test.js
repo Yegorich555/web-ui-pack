@@ -25,13 +25,19 @@ describe("control.select", () => {
   test("show/hide by title click", async () => {
     expect((await getInfo()).isOpen).toBe(false);
 
+    const click = () =>
+      page.evaluate(() => {
+        const el = document.querySelector("#trueEl strong");
+        el.dispatchEvent(new MouseEvent("pointerdown"));
+        el.click();
+        return new Promise((res) => setTimeout(res, 100));
+      });
+
     // await page.click("#trueEl strong"); // click on title --> ordinary click doesn't work on <strong>
-    await page.evaluate(() => document.querySelector("#trueEl strong").click()); // click on title
-    await page.waitForTimeout(100);
+    await click(); // click on title
     expect((await getInfo()).isOpen).toBe(true);
 
-    await page.evaluate(() => document.querySelector("#trueEl strong").click()); // click on title must close popup
-    await page.waitForTimeout(100);
+    await click(); // click on title
     expect((await getInfo()).isOpen).toBe(false);
   });
 
