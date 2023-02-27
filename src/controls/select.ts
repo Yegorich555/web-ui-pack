@@ -459,8 +459,7 @@ export default class WUPSelectControl<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override async goShowMenu(
     showCase: ShowCases,
-    e?: MouseEvent | FocusEvent | KeyboardEvent | null,
-    isNeedWait?: boolean
+    e?: MouseEvent | FocusEvent | KeyboardEvent | null
   ): Promise<WUPPopupElement | null> {
     if (this.$isPending) {
       return null;
@@ -470,9 +469,8 @@ export default class WUPSelectControl<
       this.clearFilterMenuItems();
     }
 
-    const popup = await super.goShowMenu(showCase, e, isNeedWait);
-    // set aria-selected
-    popup && this.selectMenuItemByValue(this.$value);
+    const popup = await super.goShowMenu(showCase, e);
+    popup && this.selectMenuItemByValue(this.$value); // set aria-selected
     return popup;
   }
 

@@ -545,12 +545,10 @@ export default class WUPTimeControl<
 
   protected override async goShowMenu(
     showCase: ShowCases,
-    e?: MouseEvent | FocusEvent | null,
-    isNeedWait?: boolean
+    e?: MouseEvent | FocusEvent | null
   ): Promise<WUPPopupElement | null> {
-    const r = await super.goShowMenu(showCase, e, isNeedWait);
+    const r = await super.goShowMenu(showCase, e);
 
-    // WARN: it works with long delay if isNeedWait==true; to fix this need to deprecate isNeedWait
     this.#lastInputChanged = false;
     const v = this.$value;
     if (this.$refMenuLists && v) {
