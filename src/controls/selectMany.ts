@@ -221,8 +221,8 @@ export default class WUPSelectManyControl<
     this.#refTitleAria.textContent = this.$refTitle.textContent;
   }
 
-  protected override gotFocus(): Array<() => void> {
-    const r = super.gotFocus();
+  protected override gotFocus(ev: FocusEvent): Array<() => void> {
+    const r = super.gotFocus(ev);
     // todo at first time when element isn't in focus maybe prevent removing by click on touch devices ?
     r.push(
       onEvent(

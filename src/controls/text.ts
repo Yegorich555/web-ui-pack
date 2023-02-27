@@ -482,8 +482,8 @@ export default class WUPTextControl<
     }
   }
 
-  protected override gotFocus(): Array<() => void> {
-    const arr = super.gotFocus();
+  protected override gotFocus(ev: FocusEvent): Array<() => void> {
+    const arr = super.gotFocus(ev);
 
     const r = this.appendEvent(this.$refInput, "input", (e) => {
       // (e as WUP.Text.GotInputEvent).setValuePrevented = false;
@@ -494,9 +494,7 @@ export default class WUPTextControl<
       this.$refInput,
       "beforeinput",
       (e) => this.gotBeforeInput(e as WUP.Text.GotInputEvent),
-      {
-        passive: false,
-      }
+      { passive: false }
     );
 
     /* istanbul ignore else */

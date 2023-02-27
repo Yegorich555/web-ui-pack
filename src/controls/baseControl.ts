@@ -623,8 +623,8 @@ export default abstract class WUPBaseControl<
   protected override gotReady(): void {
     super.gotReady();
 
-    const onFocusGotHandler = (): void => {
-      const arr = this.gotFocus();
+    const onFocusGotHandler = (e: FocusEvent): void => {
+      const arr = this.gotFocus(e);
       const r = onFocusLostEv(this, () => {
         this.gotFocusLost();
         arr.forEach((f) => f());
@@ -968,7 +968,8 @@ export default abstract class WUPBaseControl<
   }
 
   /** Called when element got focus; must return array of RemoveFunctions called on FocusLost */
-  protected gotFocus(): Array<() => void> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected gotFocus(ev: FocusEvent): Array<() => void> {
     this.$refError?.$refresh();
 
     const c = this._opts.validationCase;

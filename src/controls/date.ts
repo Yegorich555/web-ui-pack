@@ -227,7 +227,7 @@ export default class WUPDateControl<
     };
     el.focusItem = (a) => this.focusMenuItem(a);
     el.focus = () => true; // to not allow to focus calendar itselft
-    el.gotFocus.call(el);
+    el.gotFocus.call(el, new FocusEvent("focusin"));
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     el.setInputValue = () => {};
     // eslint-disable-next-line @typescript-eslint/no-empty-function

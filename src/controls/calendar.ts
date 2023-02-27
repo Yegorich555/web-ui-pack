@@ -1018,8 +1018,8 @@ export default class WUPCalendarControl<
     super.gotFocusLost();
   }
 
-  override gotFocus(): Array<() => void> {
-    const r = super.gotFocus();
+  override gotFocus(ev: FocusEvent): Array<() => void> {
+    const r = super.gotFocus(ev);
     const i = this.$refInput;
     r.push(this.appendEvent(this, "click", (e) => this.gotClick(e), { passive: false }));
     r.push(this.appendEvent(i, "input", (e) => this.gotInput(e as WUP.Text.GotInputEvent)));

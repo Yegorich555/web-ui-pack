@@ -292,8 +292,8 @@ export default class WUPNumberControl<
     super.gotInput(e);
   }
 
-  protected override gotFocus(): Array<() => void> {
-    const r = super.gotFocus();
+  protected override gotFocus(ev: FocusEvent): Array<() => void> {
+    const r = super.gotFocus(ev);
     this.$refInput.setAttribute("inputmode", "numeric"); // otherwise textControl removes it if mask isn't applied
     r.push(
       onScroll(
