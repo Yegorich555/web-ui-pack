@@ -162,7 +162,6 @@ export default class WUPTextControl<
         }
         :host input,
         :host textarea,
-        :host [contenteditable],
         :host [maskholder],
         :host [prefix],
         :host [postfix] {

@@ -1,4 +1,3 @@
-import { WUPcssScrollSmall } from "../styles";
 import WUPTextControl from "./text";
 import WUPTextareaInput from "./textarea.input";
 
@@ -65,19 +64,10 @@ export default class WUPTextareaControl<
         :host [contenteditable] {
           min-height: 4em;
           max-height: 4em;
-          resize: none;
-          display: inline-block; ${/* it removes extra space below */ ""}
-          cursor: text;
-          white-space: pre-wrap;
-          word-break: break-word;
-          overflow-wrap: break-word;
-          overflow: auto;
           margin: var(--ctrl-padding);
-          padding: 0;
           margin-left: 0;
           margin-right: 0;
-        }
-        ${WUPcssScrollSmall(":host [contenteditable]")}`;
+        }`;
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */

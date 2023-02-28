@@ -431,7 +431,6 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-TIME input,
         WUP-TIME textarea,
-        WUP-TIME [contenteditable],
         WUP-TIME [maskholder],
         WUP-TIME [prefix],
         WUP-TIME [postfix] {

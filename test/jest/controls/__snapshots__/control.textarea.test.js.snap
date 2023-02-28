@@ -404,7 +404,6 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-TEXTAREA input,
         WUP-TEXTAREA textarea,
-        WUP-TEXTAREA [contenteditable],
         WUP-TEXTAREA [maskholder],
         WUP-TEXTAREA [prefix],
         WUP-TEXTAREA [postfix] {
@@ -595,40 +594,41 @@ mask-image: var(--ctrl-icon-img);
         WUP-TEXTAREA [contenteditable] {
           min-height: 4em;
           max-height: 4em;
-          resize: none;
+          margin: var(--ctrl-padding);
+          margin-left: 0;
+          margin-right: 0;
+        }
+  WUP-AREAINPUT {
           display: inline-block; 
           cursor: text;
           white-space: pre-wrap;
           word-break: break-word;
           overflow-wrap: break-word;
           overflow: auto;
-          margin: var(--ctrl-padding);
-          padding: 0;
-          margin-left: 0;
-          margin-right: 0;
+          margin: 0; padding: 0;
         }
         
-WUP-TEXTAREA [contenteditable]::-webkit-scrollbar {
+WUP-AREAINPUT::-webkit-scrollbar {
   width: 10px; height: 10px;
   cursor: pointer;
 }
-WUP-TEXTAREA [contenteditable]::-webkit-scrollbar-corner {
+WUP-AREAINPUT::-webkit-scrollbar-corner {
   background: none;
 }
-WUP-TEXTAREA [contenteditable]::-webkit-scrollbar-thumb {
+WUP-AREAINPUT::-webkit-scrollbar-thumb {
   border: 3px solid rgba(0,0,0,0);
   background-clip: padding-box;
   background-color: var(--scroll, rgba(0,0,0,0.2));
   border-radius: 999px;
 }
-WUP-TEXTAREA [contenteditable]::-webkit-scrollbar-track-piece:vertical:start,
-WUP-TEXTAREA [contenteditable]::-webkit-scrollbar-track-piece:vertical:end,
-WUP-TEXTAREA [contenteditable]::-webkit-scrollbar-track-piece:horizontal:start,
-WUP-TEXTAREA [contenteditable]::-webkit-scrollbar-track-piece:horizontal:end {
+WUP-AREAINPUT::-webkit-scrollbar-track-piece:vertical:start,
+WUP-AREAINPUT::-webkit-scrollbar-track-piece:vertical:end,
+WUP-AREAINPUT::-webkit-scrollbar-track-piece:horizontal:start,
+WUP-AREAINPUT::-webkit-scrollbar-track-piece:horizontal:end {
   margin: 0;
 }
 @media (hover) {
-  WUP-TEXTAREA [contenteditable]::-webkit-scrollbar-thumb:hover {
+  WUP-AREAINPUT::-webkit-scrollbar-thumb:hover {
     background-color: var(--scroll-hover, rgba(0,0,0,0.5));
   }
 }

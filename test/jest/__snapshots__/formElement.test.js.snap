@@ -240,7 +240,6 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-TEXT input,
         WUP-TEXT textarea,
-        WUP-TEXT [contenteditable],
         WUP-TEXT [maskholder],
         WUP-TEXT [prefix],
         WUP-TEXT [postfix] {

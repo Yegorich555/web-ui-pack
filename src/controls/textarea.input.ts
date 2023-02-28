@@ -1,21 +1,33 @@
 // import WUPBaseElement from "../baseElement";
-// import { WUPcssScrollSmall } from "../styles";
+import WUPBaseElement from "../baseElement";
+import { WUPcssScrollSmall } from "../styles";
 
+let isFirst = true;
 /** Represents contenteditable element with custom input props as value, select etc. */
 export default class WUPTextareaInput extends HTMLElement {
-  // static get $style(): string {
-  //   return `${super.$style}
-  //       :host {
-  //         display: inline-block; ${/* it removes extra space below */ ""}
-  //         cursor: text;
-  //         white-space: pre-wrap;
-  //         word-break: break-word;
-  //         overflow-wrap: break-word;
-  //         overflow: auto;
-  //         margin: 0; padding: 0;
-  //       }
-  //       ${WUPcssScrollSmall(":host")}`;
-  // }
+  /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
+  #ctr = this.constructor as typeof WUPTextareaInput;
+
+  static get $style(): string {
+    return `:host {
+          display: inline-block; ${/* it removes extra space below */ ""}
+          cursor: text;
+          white-space: pre-wrap;
+          word-break: break-word;
+          overflow-wrap: break-word;
+          overflow: auto;
+          margin: 0; padding: 0;
+        }
+        ${WUPcssScrollSmall(":host")}`;
+  }
+
+  constructor() {
+    super();
+    if (isFirst) {
+      WUPBaseElement.$refStyle!.append(this.#ctr.$style.replace(/:host/g, `${this.tagName}`));
+      isFirst = false;
+    }
+  }
 
   $options: Record<string, any> = {};
   #isInit = true;
@@ -26,7 +38,6 @@ export default class WUPTextareaInput extends HTMLElement {
       this.#isInit = false;
       // this.placeholder = " "; / it doesn't work for span
     }
-    // super.connectedCallback();
   }
 
   /** Makes the selection equal to the current object. */

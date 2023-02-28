@@ -430,7 +430,6 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-SELECT input,
         WUP-SELECT textarea,
-        WUP-SELECT [contenteditable],
         WUP-SELECT [maskholder],
         WUP-SELECT [prefix],
         WUP-SELECT [postfix] {

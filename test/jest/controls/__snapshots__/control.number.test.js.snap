@@ -404,7 +404,6 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-NUM input,
         WUP-NUM textarea,
-        WUP-NUM [contenteditable],
         WUP-NUM [maskholder],
         WUP-NUM [prefix],
         WUP-NUM [postfix] {

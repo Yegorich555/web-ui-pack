@@ -468,7 +468,6 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-PWD input,
         WUP-PWD textarea,
-        WUP-PWD [contenteditable],
         WUP-PWD [maskholder],
         WUP-PWD [prefix],
         WUP-PWD [postfix] {
