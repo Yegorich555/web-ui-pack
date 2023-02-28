@@ -35,8 +35,8 @@ export default class WUPTextareaInput extends HTMLElement {
     if (this.#isInit) {
       this.setAttribute("contenteditable", "true");
       this.setAttribute("role", "textbox");
+      this.setAttribute("aria-multiline", "true");
       this.#isInit = false;
-      // this.placeholder = " "; / it doesn't work for span
     }
   }
 
@@ -47,6 +47,15 @@ export default class WUPTextareaInput extends HTMLElement {
     const sel = window.getSelection()!;
     sel.removeAllRanges();
     sel.addRange(range);
+  }
+
+  /* Get/set readonly */
+  get readOnly(): boolean {
+    return this.hasAttribute("aria-readonly");
+  }
+
+  set readOnly(v: boolean) {
+    WUPBaseElement.prototype.setAttr.call(this, "aria-readonly", v);
   }
 
   /** Get/set innerHTML (br converted into '\n') */

@@ -8,6 +8,7 @@ exports[`control.textarea $ariaDetails 1`] = `
     <span>
       <wup-areainput
         aria-labelledby="txt1"
+        aria-multiline="true"
         contenteditable="true"
         role="textbox"
       />
@@ -38,6 +39,7 @@ exports[`control.textarea $ariaDetails 2`] = `
     <span>
       <wup-areainput
         aria-labelledby="txt1"
+        aria-multiline="true"
         contenteditable="true"
         role="textbox"
       />
@@ -64,6 +66,7 @@ exports[`control.textarea $ariaSpeak 1`] = `
       <wup-areainput
         aria-describedby="my-test-id txt2 my-test-id2"
         aria-labelledby="txt1"
+        aria-multiline="true"
         contenteditable="true"
         role="textbox"
       />
@@ -98,6 +101,7 @@ exports[`control.textarea $ariaSpeak 2`] = `
       <wup-areainput
         aria-describedby="my-test-id my-test-id2"
         aria-labelledby="txt1"
+        aria-multiline="true"
         contenteditable="true"
         role="textbox"
       />
@@ -123,6 +127,7 @@ exports[`control.textarea $show/$hide error 1`] = `
     <span>
       <wup-areainput
         aria-labelledby="txt1"
+        aria-multiline="true"
         contenteditable="true"
         role="textbox"
       />
@@ -151,6 +156,7 @@ exports[`control.textarea $show/$hide error 2`] = `
       <wup-areainput
         aria-describedby="txt2"
         aria-labelledby="txt1"
+        aria-multiline="true"
         contenteditable="true"
         role="textbox"
       />
@@ -191,6 +197,7 @@ exports[`control.textarea $show/$hide error 3`] = `
     <span>
       <wup-areainput
         aria-labelledby="txt1"
+        aria-multiline="true"
         contenteditable="true"
         role="textbox"
       />
@@ -644,6 +651,7 @@ exports[`control.textarea options clearButton 1`] = `
       <wup-areainput
         aria-describedby="txt2"
         aria-labelledby="txt1"
+        aria-multiline="true"
         contenteditable="true"
         role="textbox"
       />
@@ -676,6 +684,7 @@ exports[`control.textarea options clearButton 2`] = `
       <wup-areainput
         aria-describedby="txt2"
         aria-labelledby="txt1"
+        aria-multiline="true"
         contenteditable="true"
         role="textbox"
       />
@@ -704,6 +713,7 @@ exports[`control.textarea validations $options.validationShowAll 1`] = `
       <wup-areainput
         aria-describedby="txt2"
         aria-labelledby="txt1"
+        aria-multiline="true"
         aria-required="true"
         contenteditable="true"
         role="textbox"
@@ -761,6 +771,7 @@ exports[`control.textarea validations $options.validationShowAll 2`] = `
       <wup-areainput
         aria-describedby="txt2"
         aria-labelledby="txt1"
+        aria-multiline="true"
         aria-required="true"
         contenteditable="true"
         role="textbox"
@@ -826,6 +837,7 @@ exports[`control.textarea validations $options.validationShowAll 3`] = `
       <wup-areainput
         aria-describedby="txt5"
         aria-labelledby="txt1"
+        aria-multiline="true"
         aria-required="true"
         contenteditable="true"
         role="textbox"
@@ -871,6 +883,7 @@ exports[`control.textarea validations options.validationCase 1`] = `
     <span>
       <wup-areainput
         aria-labelledby="txt1"
+        aria-multiline="true"
         contenteditable="true"
         role="textbox"
       >
@@ -901,6 +914,7 @@ exports[`control.textarea validations options.validationCase 2`] = `
       <wup-areainput
         aria-describedby="txt3"
         aria-labelledby="txt1"
+        aria-multiline="true"
         aria-required="true"
         contenteditable="true"
         role="textbox"
@@ -949,6 +963,7 @@ exports[`control.textarea validations options.validationCase 3`] = `
       <wup-areainput
         aria-describedby="txt4"
         aria-labelledby="txt1"
+        aria-multiline="true"
         aria-required="true"
         contenteditable="true"
         role="textbox"
@@ -998,6 +1013,7 @@ exports[`control.textarea validations options.validationCase 4`] = `
       <wup-areainput
         aria-describedby="txt5"
         aria-labelledby="txt1"
+        aria-multiline="true"
         aria-required="true"
         contenteditable="true"
         role="textbox"
@@ -1046,6 +1062,7 @@ exports[`control.textarea with form 1`] = `
       <span>
         <wup-areainput
           aria-labelledby="txt1"
+          aria-multiline="true"
           contenteditable="true"
           role="textbox"
         />
