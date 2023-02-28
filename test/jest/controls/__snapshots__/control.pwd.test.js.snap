@@ -371,10 +371,15 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-bottom: 0;
       }
       WUP-PWD input,
-      WUP-PWD textarea,
-      WUP-PWD [contenteditable] {
+      WUP-PWD textarea {
         padding: 0;
         margin: 0;
+        cursor: inherit;
+      }
+      WUP-PWD [contenteditable] {
+        margin: var(--ctrl-padding);
+        margin-left: 0;
+        margin-right: 0;
         cursor: inherit;
       }
       WUP-PWD strong {

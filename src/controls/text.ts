@@ -177,7 +177,7 @@ export default class WUPTextControl<
         }
         :host input,
         :host textarea,
-        :host [contenteditable],
+        :host [contenteditable=true],
         :host [maskholder],
         :host [postfix] {
           width: 100%;
@@ -214,13 +214,13 @@ export default class WUPTextControl<
         }
         :host input:-webkit-autofill,
         :host textarea:-webkit-autofill,
-        :host [contenteditable]:-webkit-autofill {
+        :host [contenteditable=true]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
         :host input:autofill,
         :host textarea:autofill,
-        :host [contenteditable]:autofill {
+        :host [contenteditable=true]:autofill {
           font: inherit;
           background-clip: text;
         }
@@ -253,7 +253,7 @@ export default class WUPTextControl<
         :host:focus-within strong,
         :host input:not(:placeholder-shown) + strong,
         :host textarea:not(:placeholder-shown) + strong,
-        :host [contenteditable]:not(:empty) + strong,
+        :host [contenteditable=true]:not(:empty) + strong,
         :host legend {
           top: 0.2em;
           transform: scale(0.9);

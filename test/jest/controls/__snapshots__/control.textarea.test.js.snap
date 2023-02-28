@@ -314,10 +314,15 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-bottom: 0;
       }
       WUP-TEXTAREA input,
-      WUP-TEXTAREA textarea,
-      WUP-TEXTAREA [contenteditable] {
+      WUP-TEXTAREA textarea {
         padding: 0;
         margin: 0;
+        cursor: inherit;
+      }
+      WUP-TEXTAREA [contenteditable] {
+        margin: var(--ctrl-padding);
+        margin-left: 0;
+        margin-right: 0;
         cursor: inherit;
       }
       WUP-TEXTAREA strong {
@@ -601,9 +606,6 @@ mask-image: var(--ctrl-icon-img);
         WUP-TEXTAREA [contenteditable] {
           min-height: 4em;
           max-height: 4em;
-          margin: var(--ctrl-padding);
-          margin-left: 0;
-          margin-right: 0;
         }
   WUP-AREAINPUT {
           display: inline-block; 

@@ -61,12 +61,9 @@ export default class WUPTextareaControl<
   static get $style(): string {
     return `${super.$style}
         :host strong { top: 1.6em; }
-        :host [contenteditable] {
+        :host [contenteditable=true] {
           min-height: 4em;
           max-height: 4em;
-          margin: var(--ctrl-padding);
-          margin-left: 0;
-          margin-right: 0;
         }`;
   }
 
@@ -87,7 +84,7 @@ export default class WUPTextareaControl<
 
   protected override _opts = this.$options;
 
-  $refInput = document.createElement("wup-areainput") as HTMLInputElement; //  document.createElement("span") as HTMLInputElement & HTMLSpanElement;
+  $refInput = document.createElement("wup-areainput") as HTMLInputElement;
 
   protected override renderControl(): void {
     super.renderControl();

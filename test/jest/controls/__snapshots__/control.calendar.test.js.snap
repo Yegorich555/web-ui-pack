@@ -1038,10 +1038,15 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-bottom: 0;
       }
       WUP-CALENDAR input,
-      WUP-CALENDAR textarea,
-      WUP-CALENDAR [contenteditable] {
+      WUP-CALENDAR textarea {
         padding: 0;
         margin: 0;
+        cursor: inherit;
+      }
+      WUP-CALENDAR [contenteditable] {
+        margin: var(--ctrl-padding);
+        margin-left: 0;
+        margin-right: 0;
         cursor: inherit;
       }
       WUP-CALENDAR strong {

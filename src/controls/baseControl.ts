@@ -266,10 +266,15 @@ export default abstract class WUPBaseControl<
         padding-bottom: 0;
       }
       :host input,
-      :host textarea,
-      :host [contenteditable] {
+      :host textarea {
         padding: 0;
         margin: 0;
+        cursor: inherit;
+      }
+      :host [contenteditable=true] {
+        margin: var(--ctrl-padding);
+        margin-left: 0;
+        margin-right: 0;
         cursor: inherit;
       }
       :host strong {
