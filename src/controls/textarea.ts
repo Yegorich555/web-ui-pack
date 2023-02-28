@@ -46,7 +46,9 @@ declare global {
  *   </span>
  *   <button clear/>
  * </label>
- */
+ * @tutorial Troubleshooting
+ * * known issue: NVDA doesn't read multiline text https://github.com/nvaccess/nvda/issues/13369
+ * to resolve it set WUPTextareaControl.$defaults.selectOnFocus = true */
 export default class WUPTextareaControl<
   ValueType = string,
   EventMap extends WUP.Textarea.EventMap = WUP.Textarea.EventMap
