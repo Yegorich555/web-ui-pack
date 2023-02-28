@@ -665,6 +665,7 @@ mask-image: var(--ctrl-icon-img);
       
 WUP-SELECT [menu]&gt;ul::-webkit-scrollbar {
   width: 10px; height: 10px;
+  cursor: pointer;
 }
 WUP-SELECT [menu]&gt;ul::-webkit-scrollbar-corner {
   background: none;

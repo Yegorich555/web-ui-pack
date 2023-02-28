@@ -32,6 +32,7 @@ mask-image: var(--ctrl-icon-img);`;
 export const WUPcssScrollSmall = (tag: string): string => `
 ${tag}::-webkit-scrollbar {
   width: 10px; height: 10px;
+  cursor: pointer;
 }
 ${tag}::-webkit-scrollbar-corner {
   background: none;

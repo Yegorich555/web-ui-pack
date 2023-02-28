@@ -65,6 +65,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       
 WUP-POPUP::-webkit-scrollbar {
   width: 10px; height: 10px;
+  cursor: pointer;
 }
 WUP-POPUP::-webkit-scrollbar-corner {
   background: none;
@@ -120,6 +121,7 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
       
 TEST-EL::-webkit-scrollbar {
   width: 10px; height: 10px;
+  cursor: pointer;
 }
 TEST-EL::-webkit-scrollbar-corner {
   background: none;
@@ -209,6 +211,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       
 WUP-POPUP::-webkit-scrollbar {
   width: 10px; height: 10px;
+  cursor: pointer;
 }
 WUP-POPUP::-webkit-scrollbar-corner {
   background: none;
@@ -264,6 +267,7 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
       
 TEST-EL::-webkit-scrollbar {
   width: 10px; height: 10px;
+  cursor: pointer;
 }
 TEST-EL::-webkit-scrollbar-corner {
   background: none;
