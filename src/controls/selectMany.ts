@@ -225,11 +225,8 @@ export default class WUPSelectManyControl<
   }
 
   protected override valueToInput(v: ValueType[] | undefined): string {
-    if (this.$isFocused) {
-      return "";
-    }
     // todo blank-string autoselected on IOS if user touchStart+Move on item
-    return v?.length ? " " : ""; // otherwise broken css:placeholder-shown
+    return this.$isFocused || !v?.length ? "" : " "; // otherwise broken css:placeholder-shown
   }
 
   // @ts-expect-error - because expected v: ValueType[]
@@ -266,20 +263,27 @@ export default class WUPSelectManyControl<
       this.$refInput.parentElement!,
       "click",
       (e) => {
-          if (this.$isDisabled || this.$isReadOnly) {
-            return;
-          }
-          const t = e.target;
-          const eli = this.$refItems?.findIndex((li) => li === t || this.includes.call(li, t));
-          if (eli != null && eli > -1) {
-            e.preventDefault(); // to prevent open/hide popup
-            this.$value!.splice(eli, 1);
-            this.setValue([...this.$value!]);
-          }
-        },
-        { passive: false }
+        if (this.$isDisabled || this.$isReadOnly) {
+          return;
+        }
+        const t = e.target;
+        const eli = this.$refItems?.findIndex((li) => li === t || this.includes.call(li, t));
+        if (eli != null && eli > -1) {
+          e.preventDefault(); // to prevent open/hide popup
+          this.$value!.splice(eli, 1);
+          this.setValue([...this.$value!]);
+        }
+      },
+      { passive: false }
     );
     r.push(dsps);
+
+    const dsps2 = onEvent(this.$refInput, "blur", () => {
+      if (!this.$refInput.value) {
+        this.$refInput.value = " "; // fix label position trigerring: testcase focus>long mouseDown outside>blur - label must save position
+      }
+    });
+    r.push(dsps2);
 
     return r;
   }
