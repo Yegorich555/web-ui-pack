@@ -258,15 +258,14 @@ export default class WUPSelectManyControl<
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
     const r = super.gotFocus(ev);
 
-    this.$refItems?.length && this.$ariaSpeak(this.$refItems.map((el) => el.textContent).join(","));
+    this.$refItems?.length && this.$ariaSpeak(this.$refItems.map((el) => el.textContent).join(","), 0);
     this.$refInput.value = "";
 
     // todo at first time when element isn't in focus maybe prevent removing by click on touch devices ?
-    r.push(
-      onEvent(
-        this.$refInput.parentElement!,
-        "click",
-        (e) => {
+    const dsps = onEvent(
+      this.$refInput.parentElement!,
+      "click",
+      (e) => {
           if (this.$isDisabled || this.$isReadOnly) {
             return;
           }
@@ -279,8 +278,9 @@ export default class WUPSelectManyControl<
           }
         },
         { passive: false }
-      )
     );
+    r.push(dsps);
+
     return r;
   }
 }

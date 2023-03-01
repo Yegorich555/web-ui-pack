@@ -500,7 +500,7 @@ export default abstract class WUPBaseControl<
   }
 
   /** Announce text by screenReaders if element is focused */
-  $ariaSpeak(text: string): void {
+  $ariaSpeak(text: string, delayMs = 100): void {
     // don't use speechSynthesis because it's announce despite on screen-reader settings - can be disabled
     // text && speechSynthesis && speechSynthesis.speak(new SpeechSynthesisUtterance(text)); // watchfix: https://stackoverflow.com/questions/72907960/web-accessibility-window-speechsynthesis-vs-role-alert
     /* istanbul ignore else */
@@ -514,7 +514,7 @@ export default abstract class WUPBaseControl<
       const an = "aria-describedby";
       i.setAttribute(an, `${i.getAttribute(an) || ""} ${el.id}`.trimStart());
       this.appendChild(el);
-      setTimeout(() => (el.textContent = text), 100); // otherwise reader doesn't announce section
+      setTimeout(() => (el.textContent = text), delayMs); // otherwise reader doesn't announce section
       setTimeout(() => {
         el.remove();
         const a = i.getAttribute(an);
