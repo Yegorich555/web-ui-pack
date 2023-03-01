@@ -178,6 +178,12 @@ export default class WUPSelectManyControl<
   /** Items selected & rendered on control */
   $refItems?: Array<HTMLElement & { _wupValue: ValueType }>;
 
+  protected override renderControl(): void {
+    super.renderControl();
+    // todo develop autowidth for input so it can render in the same row without new empty row
+    // this.$refInput.className = this.#ctr.classNameHidden;
+  }
+
   protected override async renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> {
     const r = await super.renderMenu(popup, menuId);
     r.setAttribute("aria-multiselectable", "true");
@@ -212,15 +218,18 @@ export default class WUPSelectManyControl<
     this.$refItems = refs;
   }
 
-  protected override valueToInput(v: ValueType[] | undefined): Promise<string> | string {
-    const r = this.getItems().then((items) => {
-      v = v ?? [];
-      this.renderItems(v, items);
-      // todo blank-string autoselected on IOS if user touchStart+Move on item
-      return v?.length ? " " : ""; // otherwise broken css:placeholder-shown
-    });
+  protected override setValue(v: ValueType[], canValidate = true, skipInput = false): boolean | null {
+    const isChanged = super.setValue(v, canValidate, skipInput);
+    isChanged && this.getItems().then((items) => this.renderItems(v ?? [], items));
+    return isChanged;
+  }
 
-    return r;
+  protected override valueToInput(v: ValueType[] | undefined): string {
+    if (this.$isFocused) {
+      return "";
+    }
+    // todo blank-string autoselected on IOS if user touchStart+Move on item
+    return v?.length ? " " : ""; // otherwise broken css:placeholder-shown
   }
 
   // @ts-expect-error - because expected v: ValueType[]
@@ -228,7 +237,7 @@ export default class WUPSelectManyControl<
     const arr = this.$value || [];
     arr.push(v);
     canHideMenu = canHideMenu && arr.length === this._opts.items.length;
-    super.selectValue(arr, canHideMenu);
+    super.selectValue([...arr], canHideMenu);
   }
 
   // @ts-expect-error - because expected v: ValueType[]
@@ -244,10 +253,6 @@ export default class WUPSelectManyControl<
 
   protected override clearFilterMenuItems(): void {
     /* skip this because default filtering doesn't reset after re-opening menu */
-  }
-
-  protected override gotChanges(propsChanged: Array<keyof WUP.SelectMany.Options> | null): void {
-    super.gotChanges(propsChanged);
   }
 
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
@@ -284,7 +289,6 @@ customElements.define(tagName, WUPSelectManyControl);
 
 // todo allowNewValue
 // todo keyboard
-// todo develop autowidth for input so it can render in the same row without new empty row
 // todo drag & drop
 
 /**
