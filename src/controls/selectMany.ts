@@ -26,6 +26,45 @@ declare global {
   }
 }
 
+/** Form-control with dropdown/combobox behavior & ability to select several items
+ * @example
+  const el = document.createElement("wup-select-many");
+  el.$options.name = "gender";
+  el.$options.items = [
+    { value: 1, text: "Male" },
+    { value: 2, text: "Female" },
+    { value: 3, text: "Other/Skip" },
+  ];
+  el.$initValue = [3];
+  el.$options.validations = { required: true };
+  const form = document.body.appendChild(document.createElement("wup-form"));
+  form.appendChild(el);
+  // or HTML
+  <wup-form>
+    <wup-select-many name="gender" initvalue="window.myInitValue" validations="myValidations" items="myDropdownItems" />
+  </wup-form>;
+  @tutorial Troubleshooting
+ * * Accessibility. Screen readers announce 'blank' when focus on not-empty control.
+   Solution not found (using contenteditable fixes this but provides more other bugs)
+ * @tutorial innerHTML @example
+ * <label>
+ *   <span> // extra span requires to use with icons via label:before, label:after without adjustments
+ *      <span [item]>Item 1</span>
+ *      <span [item]>Item 2</span>
+ *      // etc/
+ *      <input/>
+ *      <strong>{$options.label}</strong>
+ *   </span>
+ *   <button clear/>
+ *   <wup-popup menu>
+ *      <ul>
+ *          <li>Item 1</li>
+ *          <li>Item 2</li>
+ *          // etc/
+ *      </ul>
+ *   </wup-popup>
+ * </label>
+ */
 export default class WUPSelectManyControl<
   ValueType = any,
   EventMap extends WUP.SelectMany.EventMap = WUP.SelectMany.EventMap
@@ -177,9 +216,8 @@ export default class WUPSelectManyControl<
     const r = this.getItems().then((items) => {
       v = v ?? [];
       this.renderItems(v, items);
-      // return this.$refItems?.map((el) => el.textContent).join(",") || "";
       // todo blank-string autoselected on IOS if user touchStart+Move on item
-      return v?.length ? " " : ""; // otherwise broken css:placeholder-shown & screenReaders reads 'Blank'
+      return v?.length ? " " : ""; // otherwise broken css:placeholder-shown
     });
 
     return r;
@@ -199,7 +237,6 @@ export default class WUPSelectManyControl<
     /* skip this because item is filtered/hidden in this case */
   }
 
-  /** Select item (hide item) */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override selectMenuItem(next: HTMLElement | null): void {
     /* skip this because item is filtered/hidden in this case */
@@ -217,6 +254,7 @@ export default class WUPSelectManyControl<
     const r = super.gotFocus(ev);
 
     this.$refItems?.length && this.$ariaSpeak(this.$refItems.map((el) => el.textContent).join(","));
+    this.$refInput.value = "";
 
     // todo at first time when element isn't in focus maybe prevent removing by click on touch devices ?
     r.push(
@@ -250,7 +288,7 @@ customElements.define(tagName, WUPSelectManyControl);
 // todo drag & drop
 
 /**
- * known issues:
+ * known issues when 'contenteditable':
  *
  *  <span contenteditalbe='true'>
  *    <span></span>
