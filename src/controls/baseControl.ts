@@ -523,7 +523,7 @@ export default abstract class WUPBaseControl<
           const aNext = a.replace(el.id, "").replace("  ", " ").trim();
           aNext ? i.setAttribute(an, aNext) : i.removeAttribute(an);
         }
-      }, 200);
+      }, 500);
     }
   }
 

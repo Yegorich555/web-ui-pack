@@ -138,15 +138,6 @@ export default class WUPSelectManyControl<
 
   /** Items selected & rendered on control */
   $refItems?: Array<HTMLElement & { _wupValue: ValueType }>;
-  /** Copy of $refTitle element to fix reading title as first (resolves accessibility issue) */
-  #refTitleAria = document.createElement("span");
-
-  protected override renderControl(): void {
-    super.renderControl();
-    this.#refTitleAria.className = this.#ctr.classNameHidden;
-    this.$refTitle.parentElement!.prepend(this.#refTitleAria);
-    this.$refTitle.setAttribute("aria-hidden", "true");
-  }
 
   protected override async renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> {
     const r = await super.renderMenu(popup, menuId);
@@ -165,6 +156,7 @@ export default class WUPSelectManyControl<
           _wupValue: ValueType;
         };
         r.setAttribute("item", "");
+        r.setAttribute("aria-hidden", true);
         refs.push(r);
       }
 
@@ -219,11 +211,13 @@ export default class WUPSelectManyControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUP.SelectMany.Options> | null): void {
     super.gotChanges(propsChanged);
-    this.#refTitleAria.textContent = this.$refTitle.textContent;
   }
 
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
     const r = super.gotFocus(ev);
+
+    this.$refItems?.length && this.$ariaSpeak(this.$refItems.map((el) => el.textContent).join(","));
+
     // todo at first time when element isn't in focus maybe prevent removing by click on touch devices ?
     r.push(
       onEvent(
@@ -254,3 +248,20 @@ customElements.define(tagName, WUPSelectManyControl);
 // todo keyboard
 // todo develop autowidth for input so it can render in the same row without new empty row
 // todo drag & drop
+
+/**
+ * known issues:
+ *
+ *  <span contenteditalbe='true'>
+ *    <span></span>
+ *    <span contenteditalbe='false'>Item 1</span>
+ *    <span></span>
+ *    <span contenteditalbe='false'>Item 2</span>
+ *    <span>Input text here</span>
+ *  </span>
+ * 01. NVDA. Reads only first line (the same issue for textarea)
+ * 02. NVDA. Reads only first item in Firefox (when :after exists)
+ * 1. Firefox. Carret position is wrong/missed between Items is use try to use ArrowKeys
+ * 2. Firefox. Carret position is missed if no empty spans between items
+ * 3. Without contenteditalbe='false' browser moves cursor into item, but it should be outside
+ */
