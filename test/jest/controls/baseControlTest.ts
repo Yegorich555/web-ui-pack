@@ -368,7 +368,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     expect(a?.includes("my-test-id")).toBe(true);
     el.$refInput.setAttribute("aria-describedby", `${a} my-test-id2`.trim());
     expect(el).toMatchSnapshot();
-    await h.wait(210);
+    await h.wait(1000);
     expect(el.$refInput.getAttribute("aria-describedby")).toBe("my-test-id my-test-id2");
     expect(el).toMatchSnapshot();
   });

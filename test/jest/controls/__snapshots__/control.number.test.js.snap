@@ -312,7 +312,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         margin: 0;
         cursor: inherit;
       }
-      WUP-NUM [contenteditable] {
+      WUP-NUM [contenteditable=true] {
         margin: var(--ctrl-padding);
         margin-left: 0;
         margin-right: 0;
@@ -424,7 +424,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-NUM input,
         WUP-NUM textarea,
-        WUP-NUM [contenteditable],
+        WUP-NUM [contenteditable=true],
         WUP-NUM [maskholder],
         WUP-NUM [postfix] {
           width: 100%;
@@ -461,13 +461,13 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-NUM input:-webkit-autofill,
         WUP-NUM textarea:-webkit-autofill,
-        WUP-NUM [contenteditable]:-webkit-autofill {
+        WUP-NUM [contenteditable=true]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
         WUP-NUM input:autofill,
         WUP-NUM textarea:autofill,
-        WUP-NUM [contenteditable]:autofill {
+        WUP-NUM [contenteditable=true]:autofill {
           font: inherit;
           background-clip: text;
         }
@@ -500,7 +500,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-NUM:focus-within strong,
         WUP-NUM input:not(:placeholder-shown) + strong,
         WUP-NUM textarea:not(:placeholder-shown) + strong,
-        WUP-NUM [contenteditable]:not(:empty) + strong,
+        WUP-NUM [contenteditable=true]:not(:empty) + strong,
         WUP-NUM legend {
           top: 0.2em;
           transform: scale(0.9);

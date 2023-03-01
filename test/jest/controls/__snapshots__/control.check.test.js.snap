@@ -264,7 +264,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         margin: 0;
         cursor: inherit;
       }
-      WUP-CHECK [contenteditable] {
+      WUP-CHECK [contenteditable=true] {
         margin: var(--ctrl-padding);
         margin-left: 0;
         margin-right: 0;

@@ -336,7 +336,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         margin: 0;
         cursor: inherit;
       }
-      WUP-DATE [contenteditable] {
+      WUP-DATE [contenteditable=true] {
         margin: var(--ctrl-padding);
         margin-left: 0;
         margin-right: 0;
@@ -448,7 +448,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-DATE input,
         WUP-DATE textarea,
-        WUP-DATE [contenteditable],
+        WUP-DATE [contenteditable=true],
         WUP-DATE [maskholder],
         WUP-DATE [postfix] {
           width: 100%;
@@ -485,13 +485,13 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-DATE input:-webkit-autofill,
         WUP-DATE textarea:-webkit-autofill,
-        WUP-DATE [contenteditable]:-webkit-autofill {
+        WUP-DATE [contenteditable=true]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
         WUP-DATE input:autofill,
         WUP-DATE textarea:autofill,
-        WUP-DATE [contenteditable]:autofill {
+        WUP-DATE [contenteditable=true]:autofill {
           font: inherit;
           background-clip: text;
         }
@@ -524,7 +524,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-DATE:focus-within strong,
         WUP-DATE input:not(:placeholder-shown) + strong,
         WUP-DATE textarea:not(:placeholder-shown) + strong,
-        WUP-DATE [contenteditable]:not(:empty) + strong,
+        WUP-DATE [contenteditable=true]:not(:empty) + strong,
         WUP-DATE legend {
           top: 0.2em;
           transform: scale(0.9);

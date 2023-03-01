@@ -319,7 +319,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         margin: 0;
         cursor: inherit;
       }
-      WUP-TEXTAREA [contenteditable] {
+      WUP-TEXTAREA [contenteditable=true] {
         margin: var(--ctrl-padding);
         margin-left: 0;
         margin-right: 0;
@@ -431,7 +431,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-TEXTAREA input,
         WUP-TEXTAREA textarea,
-        WUP-TEXTAREA [contenteditable],
+        WUP-TEXTAREA [contenteditable=true],
         WUP-TEXTAREA [maskholder],
         WUP-TEXTAREA [postfix] {
           width: 100%;
@@ -468,13 +468,13 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-TEXTAREA input:-webkit-autofill,
         WUP-TEXTAREA textarea:-webkit-autofill,
-        WUP-TEXTAREA [contenteditable]:-webkit-autofill {
+        WUP-TEXTAREA [contenteditable=true]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
         WUP-TEXTAREA input:autofill,
         WUP-TEXTAREA textarea:autofill,
-        WUP-TEXTAREA [contenteditable]:autofill {
+        WUP-TEXTAREA [contenteditable=true]:autofill {
           font: inherit;
           background-clip: text;
         }
@@ -507,7 +507,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-TEXTAREA:focus-within strong,
         WUP-TEXTAREA input:not(:placeholder-shown) + strong,
         WUP-TEXTAREA textarea:not(:placeholder-shown) + strong,
-        WUP-TEXTAREA [contenteditable]:not(:empty) + strong,
+        WUP-TEXTAREA [contenteditable=true]:not(:empty) + strong,
         WUP-TEXTAREA legend {
           top: 0.2em;
           transform: scale(0.9);
@@ -603,7 +603,7 @@ mask-image: var(--ctrl-icon-img);
           }
         }
         WUP-TEXTAREA strong { top: 1.6em; }
-        WUP-TEXTAREA [contenteditable] {
+        WUP-TEXTAREA [contenteditable=true] {
           min-height: 4em;
           max-height: 4em;
         }

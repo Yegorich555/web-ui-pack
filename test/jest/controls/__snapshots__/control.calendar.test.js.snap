@@ -1043,7 +1043,7 @@ clip: rect(1px, 1px, 1px, 1px);}
         margin: 0;
         cursor: inherit;
       }
-      WUP-CALENDAR [contenteditable] {
+      WUP-CALENDAR [contenteditable=true] {
         margin: var(--ctrl-padding);
         margin-left: 0;
         margin-right: 0;
@@ -2112,7 +2112,7 @@ exports[`control.calendar utc=false $options.min & .max 5`] = `
     <span>
       <input
         aria-controls="txt2"
-        aria-describedby="txt5 txt6"
+        aria-describedby="txt4 txt5 txt6"
         aria-owns="txt2"
         aria-readonly="false"
         autocomplete="off"
@@ -2273,6 +2273,14 @@ exports[`control.calendar utc=false $options.min & .max 5`] = `
       </div>
     </div>
   </div>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt4"
+  >
+    2021
+  </section>
   <section
     aria-atomic="true"
     aria-live="off"
@@ -4243,7 +4251,7 @@ exports[`control.calendar utc=true $options.min & .max 5`] = `
     <span>
       <input
         aria-controls="txt2"
-        aria-describedby="txt5 txt6"
+        aria-describedby="txt4 txt5 txt6"
         aria-owns="txt2"
         aria-readonly="false"
         autocomplete="off"
@@ -4404,6 +4412,14 @@ exports[`control.calendar utc=true $options.min & .max 5`] = `
       </div>
     </div>
   </div>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt4"
+  >
+    2021
+  </section>
   <section
     aria-atomic="true"
     aria-live="off"
