@@ -933,6 +933,7 @@ exports[`control.select validations options.validationCase 2`] = `
       aria-label="Items"
       id="txt2"
       role="listbox"
+      tabindex="-1"
     >
       <li
         aria-selected="false"
@@ -1035,6 +1036,7 @@ exports[`control.select validations options.validationCase 3`] = `
       aria-label="Items"
       id="txt6"
       role="listbox"
+      tabindex="-1"
     >
       <li
         aria-selected="true"

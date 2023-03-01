@@ -327,6 +327,7 @@ export default class WUPSelectControl<
     ul.setAttribute("id", menuId);
     ul.setAttribute("role", "listbox");
     ul.setAttribute("aria-label", this.#ctr.$ariaLabelItems);
+    ul.setAttribute("tabindex", -1); // otherwise Firefox move focus into it by keydown 'tab'
 
     const all = await this.renderMenuItems(ul);
     this._menuItems = { all, focused: -1 };
