@@ -24,6 +24,7 @@ const items = [
 
 (window as any).inputSelect = {
   items,
+  initValue: [items[0].value, items[1].value],
 };
 
 class WUPSpinSel2Element extends WUPSpinElement {}
@@ -60,16 +61,16 @@ export default function SelectManyControlView() {
         }}
       >
         <wup-select-many
-          items="inputSelect.items"
+          items="window.inputSelect.items"
           name="selectMany"
           label="Select Many"
-          // initValue={items[8].value.toString()} // todo implement
+          initValue="window.inputSelect.initValue"
           validations="window._someSelectValidations"
           autoComplete="off"
           autoFocus={false}
           ref={(el) => {
             if (el) {
-              setTimeout(() => (el.$initValue = [11, 13, 14]));
+              // setTimeout(() => (el.$initValue = [11, 13, 14]));
               // setTimeout(() => (el.$value = [11, 12]), 1000);
             }
           }}

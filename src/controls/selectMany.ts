@@ -1,4 +1,4 @@
-import { onEvent } from "../indexHelpers";
+import { nestedProperty, onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
 import { WUPcssIcon } from "../styles";
 import WUPSelectControl from "./select";
@@ -178,6 +178,10 @@ export default class WUPSelectManyControl<
 
   /** Items selected & rendered on control */
   $refItems?: Array<HTMLElement & { _wupValue: ValueType }>;
+
+  override parse(attrValue: string): ValueType[] | undefined {
+    return nestedProperty.get(window, attrValue);
+  }
 
   protected override async renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> {
     const r = await super.renderMenu(popup, menuId);
