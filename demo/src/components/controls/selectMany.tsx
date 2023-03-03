@@ -70,11 +70,11 @@ export default function SelectManyControlView() {
           ref={(el) => {
             if (el) {
               setTimeout(() => (el.$initValue = [11, 13, 14]));
-              setTimeout(() => (el.$value = [11, 12]), 1000);
+              // setTimeout(() => (el.$value = [11, 12]), 1000);
             }
           }}
         />
-        <wup-select-many label="Empty" />
+        <wup-select-many label="Empty" items="inputSelect.items" />
         <wup-select-many
           class={styles.withDelIcon}
           ref={(el) => {
@@ -82,11 +82,8 @@ export default function SelectManyControlView() {
               el.$options.name = "withRemoveIcon";
               el.$options.label = "With remove icon (use css-var --ctrl-select-item-del-display)";
               el.$options.items = items;
-              el.$initValue = items.map((it) => it.value).splice(0, 8);
-
-              setTimeout(() => {
-                el.$value = items.map((it) => it.value);
-              }, 1000);
+              el.$initValue = items.map((it) => it.value).splice(0, 8); // todo it doesn't work
+              setTimeout(() => (el.$value = items.map((it) => it.value)));
             }
           }}
         />

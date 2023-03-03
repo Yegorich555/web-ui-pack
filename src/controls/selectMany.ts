@@ -133,7 +133,9 @@ export default class WUPSelectManyControl<
         }
       }
       @media not all and (pointer: fine) {
-        :host [item]:active {${"" /* on Safari active is event on during the touchMove, but android: none */}
+        :host:focus-within [item]:active {${
+          "" /* WARN: on Safari active is event on during the touchMove, but android: none */
+        }
           --ctrl-icon: var(--ctrl-err-text);
           text-decoration: line-through;
           color: var(--ctrl-err-text);
@@ -176,12 +178,6 @@ export default class WUPSelectManyControl<
 
   /** Items selected & rendered on control */
   $refItems?: Array<HTMLElement & { _wupValue: ValueType }>;
-
-  protected override renderControl(): void {
-    super.renderControl();
-    // todo develop autowidth for input so it can render in the same row without new empty row
-    // this.$refInput.className = this.#ctr.classNameHidden;
-  }
 
   protected override async renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> {
     const r = await super.renderMenu(popup, menuId);
@@ -267,12 +263,17 @@ export default class WUPSelectManyControl<
     this.$refInput.value = "";
     this.toggleHideInput();
 
-    // todo at first time when element isn't in focus maybe prevent removing by click on touch devices ?
+    // https://stackoverflow.com/questions/4817029/whats-the-best-way-to-detect-a-touch-screen-device-using-javascript
+    // WARN: the right way is 'window.matchMedia("(pointer: coarse)").matches' but we must be correlated with css-hover styles
+    const isTouchScreen = !window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    let preventClickAfterFocus = isTouchScreen; // allow focus by touch-click instead of focus+removeItem (otherwise difficult to focus control without removing item when no space)
+    isTouchScreen && setTimeout(() => (preventClickAfterFocus = false)); // todo prevent active state- from css style in this case
+
     const dsps = onEvent(
       this.$refInput.parentElement!,
       "click",
       (e) => {
-        if (this.$isDisabled || this.$isReadOnly) {
+        if (this.$isDisabled || this.$isReadOnly || preventClickAfterFocus) {
           return;
         }
         const t = e.target;
