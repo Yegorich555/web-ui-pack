@@ -355,7 +355,7 @@ width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
 box-sizing: content-box;
 margin: 0;
-padding: 0 5px;
+padding: 5px;
 flex: 0 0 auto;
 align-self: stretch;
 border: none;
@@ -525,7 +525,7 @@ width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
 box-sizing: content-box;
 margin: 0;
-padding: 0 5px;
+padding: 5px;
 flex: 0 0 auto;
 align-self: stretch;
 border: none;
@@ -560,6 +560,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-NUM button[clear] {
           background: none;
+          align-self: center;
         }
         WUP-NUM button[clear]:after {
           content: "";
@@ -573,7 +574,6 @@ mask-image: var(--ctrl-icon-img);
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           width: 100%;
-          padding-top: 100%;
         }
         WUP-NUM button[clear]:before {
           width: var(--ctrl-clear-hover-size);

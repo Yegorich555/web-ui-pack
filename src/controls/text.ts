@@ -294,6 +294,7 @@ export default class WUPTextControl<
         }
         :host button[clear] {
           background: none;
+          align-self: center;
         }
         :host button[clear]:after {
           content: "";
@@ -307,7 +308,6 @@ export default class WUPTextControl<
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           width: 100%;
-          padding-top: 100%;
         }
         :host button[clear]:before {
           width: var(--ctrl-clear-hover-size);
