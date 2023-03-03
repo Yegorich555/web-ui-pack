@@ -52,6 +52,7 @@ export default function SelectManyControlView() {
       ]}
     >
       <wup-form
+        class={styles.test}
         ref={(el) => {
           if (el) {
             el.$onSubmit = (e) => console.warn("sumbitted model", e.$model);

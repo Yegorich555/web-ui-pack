@@ -107,7 +107,6 @@ export default class WUPSelectManyControl<
         width: 0;
         min-width: 2em;
         padding-left: 0; padding-right: 0;
-        background: #f7d4f7;
       }
       :host [item] {
         --ctrl-icon: var(--ctrl-select-item-del);
@@ -224,7 +223,16 @@ export default class WUPSelectManyControl<
     return isChanged;
   }
 
+  /** Hide/Show input when it's required to fix the following case:
+   *
+   *  All items + input in flexbox so when no-enough space for input in the last line it moves input to new line and creates extra space */
+  protected toggleHideInput(): void {
+    const canShow = this.$isEmpty || (this.$isFocused && !(this._opts.readOnly || this._opts.readOnlyInput));
+    this.$refInput.className = canShow ? "" : this.#ctr.classNameHidden;
+  }
+
   protected override valueToInput(v: ValueType[] | undefined): string {
+    this.toggleHideInput();
     // todo blank-string autoselected on IOS if user touchStart+Move on item
     return this.$isFocused || !v?.length ? "" : " "; // otherwise broken css:placeholder-shown
   }
@@ -257,6 +265,7 @@ export default class WUPSelectManyControl<
 
     this.$refItems?.length && this.$ariaSpeak(this.$refItems.map((el) => el.textContent).join(","), 0);
     this.$refInput.value = "";
+    this.toggleHideInput();
 
     // todo at first time when element isn't in focus maybe prevent removing by click on touch devices ?
     const dsps = onEvent(
@@ -286,6 +295,11 @@ export default class WUPSelectManyControl<
     r.push(dsps2);
 
     return r;
+  }
+
+  protected override gotFocusLost(): void {
+    super.gotFocusLost();
+    this.toggleHideInput();
   }
 }
 

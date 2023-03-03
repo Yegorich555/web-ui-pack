@@ -1,12 +1,12 @@
 .withDelIcon {
   --ctrl-select-item-del-display: inline-block;
-  // --ctrl-select-gap: 2px;
-  label > span {
-    // flex-direction: row;
-  }
 
   [item] {
     display: inline-flex;
     align-items: center;
   }
+}
+
+.test {
+  // some extra styles possible here
 }
