@@ -267,7 +267,7 @@ export default class WUPSelectManyControl<
     // WARN: the right way is 'window.matchMedia("(pointer: coarse)").matches' but we must be correlated with css-hover styles
     const isTouchScreen = !window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     let preventClickAfterFocus = isTouchScreen; // allow focus by touch-click instead of focus+removeItem (otherwise difficult to focus control without removing item when no space)
-    isTouchScreen && setTimeout(() => (preventClickAfterFocus = false)); // todo prevent active state- from css style in this case
+    isTouchScreen && setTimeout(() => (preventClickAfterFocus = false));
 
     const dsps = onEvent(
       this.$refInput.parentElement!,
