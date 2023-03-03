@@ -41,7 +41,7 @@ declare global {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-select-many name="gender" initvalue="window.myInitValue" validations="myValidations" items="myDropdownItems" />
+    <wup-select-many name="gender" initvalue="window.myInitValue" validations="myValidations" items="window.myDropdownItems" />
   </wup-form>;
   @tutorial Troubleshooting
  * * Accessibility. Screen readers announce 'blank' when focus on not-empty control.
@@ -148,7 +148,7 @@ export default class WUPSelectManyControl<
       }`;
   }
 
-  static override $isEmpty(v: unknown[]): boolean {
+  static override $isEmpty(v: unknown[] | undefined): boolean {
     return !v || v.length === 0;
   }
 
@@ -217,22 +217,22 @@ export default class WUPSelectManyControl<
     this.$refItems = refs;
   }
 
-  protected override setValue(v: ValueType[], canValidate = true, skipInput = false): boolean | null {
-    const isChanged = super.setValue(v, canValidate, skipInput);
-    isChanged && this.getItems().then((items) => this.renderItems(v ?? [], items));
-    return isChanged;
-  }
-
   /** Hide/Show input when it's required to fix the following case:
    *
    *  All items + input in flexbox so when no-enough space for input in the last line it moves input to new line and creates extra space */
-  protected toggleHideInput(): void {
-    const canShow = this.$isEmpty || (this.$isFocused && !(this._opts.readOnly || this._opts.readOnlyInput));
+  protected toggleHideInput(v: ValueType[] | undefined): void {
+    // WARN we can't use this.$isEmpty because valueToInput > toggleHideInput is called before value set
+    const canShow = this.#ctr.$isEmpty(v) || (this.$isFocused && !(this._opts.readOnly || this._opts.readOnlyInput));
     this.$refInput.className = canShow ? "" : this.#ctr.classNameHidden;
   }
 
-  protected override valueToInput(v: ValueType[] | undefined): string {
-    this.toggleHideInput();
+  protected resetInputValue(): void {
+    this.valueToInput(this.$value, true);
+  }
+
+  protected override valueToInput(v: ValueType[] | undefined, isReset?: boolean): string {
+    !isReset && this.getItems().then((items) => this.renderItems(v ?? [], items));
+    this.toggleHideInput(v);
     // todo blank-string autoselected on IOS if user touchStart+Move on item
     return this.$isFocused || !v?.length ? "" : " "; // otherwise broken css:placeholder-shown
   }
@@ -265,7 +265,7 @@ export default class WUPSelectManyControl<
 
     this.$refItems?.length && this.$ariaSpeak(this.$refItems.map((el) => el.textContent).join(","), 0);
     this.$refInput.value = "";
-    this.toggleHideInput();
+    this.toggleHideInput(this.$value);
 
     // https://stackoverflow.com/questions/4817029/whats-the-best-way-to-detect-a-touch-screen-device-using-javascript
     // WARN: the right way is 'window.matchMedia("(pointer: coarse)").matches' but we must be correlated with css-hover styles

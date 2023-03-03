@@ -83,8 +83,8 @@ export default function SelectManyControlView() {
               el.$options.name = "withRemoveIcon";
               el.$options.label = "With remove icon (use css-var --ctrl-select-item-del-display)";
               el.$options.items = items;
-              el.$initValue = items.map((it) => it.value).splice(0, 8); // todo it doesn't work
-              setTimeout(() => (el.$value = items.map((it) => it.value)));
+              el.$initValue = items.map((it) => it.value);
+              // setTimeout(() => (el.$value = items.map((it) => it.value)));
             }
           }}
         />
