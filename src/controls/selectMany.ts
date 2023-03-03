@@ -227,7 +227,7 @@ export default class WUPSelectManyControl<
   }
 
   protected resetInputValue(): void {
-    this.valueToInput(this.$value, true);
+    this.$refInput.value = this.valueToInput(this.$value, true);
   }
 
   protected override valueToInput(v: ValueType[] | undefined, isReset?: boolean): string {
