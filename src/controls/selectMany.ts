@@ -304,7 +304,7 @@ export default class WUPSelectManyControl<
 
   protected override gotFocusLost(): void {
     super.gotFocusLost();
-    this.toggleHideInput();
+    this.toggleHideInput(this.$value);
   }
 }
 
@@ -313,6 +313,7 @@ customElements.define(tagName, WUPSelectManyControl);
 // todo allowNewValue
 // todo keyboard
 // todo drag & drop
+// todo animation for delete
 
 /**
  * known issues when 'contenteditable':
