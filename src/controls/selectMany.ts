@@ -295,7 +295,7 @@ export default class WUPSelectManyControl<
     }
 
     this.$value!.splice(index, 1);
-    this.setValue([...this.$value!]);
+    this.setValue(this.$value!.length ? [...this.$value!] : undefined);
   }
 
   protected override gotFocus(ev: FocusEvent): Array<() => void> {

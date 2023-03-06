@@ -1,4 +1,5 @@
 import { WUPSelectManyControl } from "web-ui-pack";
+import { isAnimEnabled } from "web-ui-pack/helpers/animate";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
 
@@ -119,6 +120,61 @@ describe("control.selectMany", () => {
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
       `"<ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="" aria-selected="false" id="txt8" focused="">Donny</li><li role="option" aria-selected="false" id="txt4" style="display: none;">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option" style="display: none;" aria-selected="false" id="txt6">Splinter</li><li role="option" aria-disabled="true" aria-selected="false" style="display: none;">No Items</li></ul>"`
     );
+  });
+
+  test("animation for removed item", async () => {
+    jest.spyOn(window, "matchMedia").mockImplementation((s) => ({ matches: s !== "(prefers-reduced-motion)" })); // simulate 'prefers-reduced-motion' === false
+    expect(isAnimEnabled()).toBe(true);
+
+    const orig = window.getComputedStyle;
+    /** @type CSSStyleDeclaration */
+    const objStyle = {
+      getPropertyValue() {
+        return " 200ms";
+      },
+    };
+    jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
+      if (elem === el) {
+        return objStyle;
+      }
+      return orig(elem);
+    });
+
+    el.$initValue = [10, 30];
+    await h.wait(1);
+    expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
+      `"<span item="" aria-hidden="true">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" class="wup-hidden"><strong></strong>"`
+    );
+
+    // remove item by click
+    jest.spyOn(el.$refItems[0], "offsetWidth", "get").mockReturnValue("33px");
+    await h.userClick(el.$refItems[0], undefined, 10);
+    expect(el.$value).toStrictEqual([30]);
+    // animation for [removed]
+    expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
+      `"<span item="" aria-hidden="true" removed="">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" class="" aria-describedby="txt2 txt3"><strong></strong>"`
+    );
+    await h.wait();
+    expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
+      `"<span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" class=""><strong></strong>"`
+    );
+    expect(el.$isOpen).toBe(false); // because not-open by value-change
+
+    // without animation
+    jest.spyOn(window, "matchMedia").mockImplementation(() => ({ matches: true })); // simulate 'prefers-reduced-motion' === true
+    expect(isAnimEnabled()).toBe(false);
+    jest.spyOn(el.$refItems[0], "offsetWidth", "get").mockReturnValue("33px");
+    await h.userClick(el.$refItems[0], undefined);
+    expect(el.$value).toStrictEqual(undefined);
+    // without animation for [removed]
+    expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
+      `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" class=""><strong></strong>"`
+    );
+    await h.wait();
+    expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
+      `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" class=""><strong></strong>"`
+    );
+    expect(el.$isOpen).toBe(false); // because not-open by value-change
   });
 });
 
