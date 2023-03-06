@@ -1010,11 +1010,11 @@ exports[`control.selectMany validations options.validationCase 2`] = `
     <span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt2"
-        aria-describedby="txt4"
+        aria-controls="txt3"
+        aria-describedby="txt5"
         aria-expanded="false"
         aria-haspopup="listbox"
-        aria-owns="txt2"
+        aria-owns="txt3"
         aria-required="true"
         autocomplete="off"
         class=""
@@ -1041,7 +1041,7 @@ exports[`control.selectMany validations options.validationCase 2`] = `
     <ul
       aria-label="Items"
       aria-multiselectable="true"
-      id="txt2"
+      id="txt3"
       role="listbox"
       tabindex="-1"
     >
@@ -1072,7 +1072,7 @@ exports[`control.selectMany validations options.validationCase 2`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt4"
+    id="txt5"
     role="alert"
     style="max-width: 100px;"
   >
@@ -1105,11 +1105,11 @@ exports[`control.selectMany validations options.validationCase 3`] = `
       </span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt6"
-        aria-describedby="txt5"
+        aria-controls="txt8"
+        aria-describedby="txt6"
         aria-expanded="true"
         aria-haspopup="listbox"
-        aria-owns="txt6"
+        aria-owns="txt8"
         aria-required="true"
         autocomplete="off"
         class=""
@@ -1133,7 +1133,7 @@ exports[`control.selectMany validations options.validationCase 3`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt5"
+    id="txt6"
     style="max-width: 100px;"
   >
     <span
@@ -1152,7 +1152,7 @@ exports[`control.selectMany validations options.validationCase 3`] = `
     <ul
       aria-label="Items"
       aria-multiselectable="true"
-      id="txt6"
+      id="txt8"
       role="listbox"
       tabindex="-1"
     >
@@ -1192,11 +1192,11 @@ exports[`control.selectMany validations options.validationCase 4`] = `
     <span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt7"
-        aria-describedby="txt8"
+        aria-controls="txt9"
+        aria-describedby="txt10"
         aria-expanded="false"
         aria-haspopup="listbox"
-        aria-owns="txt7"
+        aria-owns="txt9"
         aria-required="true"
         autocomplete="off"
         class=""
@@ -1220,7 +1220,7 @@ exports[`control.selectMany validations options.validationCase 4`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt8"
+    id="txt10"
     role="alert"
     style="max-width: 100px;"
   >

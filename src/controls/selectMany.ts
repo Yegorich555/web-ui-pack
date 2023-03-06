@@ -225,8 +225,17 @@ export default class WUPSelectManyControl<
 
     const toRemove = refs.length - v.length;
     toRemove > 0 && refs.splice(v.length, toRemove).forEach((el) => !el.hasAttribute("removed") && el.remove()); // remove previous items
-    this.$refPopup && this.filterMenuItems();
+    this.$refPopup && this.filterMenuItems(); // NiceToHave it can be optimized because on Remove/Select we can hide/show specific item
     this.$refItems = refs;
+
+    this.ariaSpeakValue();
+  }
+
+  /** Announce items as single value on change if element is focused */
+  protected ariaSpeakValue(): void {
+    this.$isFocused &&
+      this.$refItems?.length &&
+      this.$ariaSpeak(this.$refItems.map((el) => el.textContent).join(","), 0);
   }
 
   /** Hide/Show input when it's required to fix the following case:
@@ -254,6 +263,7 @@ export default class WUPSelectManyControl<
     arr.push(v);
     canHideMenu = canHideMenu && arr.length === this._opts.items.length;
     super.selectValue([...arr], canHideMenu);
+    this.focusMenuItem(null);
   }
 
   // @ts-expect-error - because expected v: ValueType[]
@@ -274,7 +284,6 @@ export default class WUPSelectManyControl<
   /** Called to remove item with animation */
   protected removeValue(index: number): void {
     const item = this.$refItems![index];
-
     const isAnim = isAnimEnabled();
     if (isAnim) {
       this.$refItems!.splice(index, 1); // otherwise item is replaced
@@ -292,7 +301,7 @@ export default class WUPSelectManyControl<
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
     const r = super.gotFocus(ev);
 
-    this.$refItems?.length && this.$ariaSpeak(this.$refItems.map((el) => el.textContent).join(","), 0);
+    this.ariaSpeakValue();
     this.$refInput.value = "";
     this.toggleHideInput(this.$value);
 
@@ -339,7 +348,7 @@ export default class WUPSelectManyControl<
 customElements.define(tagName, WUPSelectManyControl);
 
 // todo allowNewValue
-// todo keyboard
+// todo keyboard & focus behavior (including menu - focus is wrong on filtered items)
 // todo drag & drop
 
 /**
