@@ -165,6 +165,7 @@ export default class WUPSelectControl<
         --ctrl-icon-img: var(--wup-icon-check);
         ${WUPcssIcon}
         margin-left: auto;
+        padding: 0;
       }
       :host [menu] li[focused] {
         box-shadow: inset 0 0 4px 0 var(--ctrl-focus);
