@@ -34,6 +34,7 @@
 
 **New**:
 
+- [SelectManyControl](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany)
 - [PopupElement](src/popup/popupElement.ts).
   - Added properties `$isClose, $isOpening, $isClosing`
   - Calling `$show() & $hide()` possible several times at once without re-rendering
