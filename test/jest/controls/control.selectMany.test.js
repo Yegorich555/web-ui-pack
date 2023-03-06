@@ -120,6 +120,55 @@ describe("control.selectMany", () => {
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
       `"<ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="" aria-selected="false" id="txt8" focused="">Donny</li><li role="option" aria-selected="false" id="txt4" style="display: none;">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option" style="display: none;" aria-selected="false" id="txt6">Splinter</li><li role="option" aria-disabled="true" aria-selected="false" style="display: none;">No Items</li></ul>"`
     );
+
+    el.$options.disabled = true;
+    await h.userClick(el.$refItems[0]);
+    expect(el.$value).toStrictEqual([30, 20, 40]);
+    el.$options.disabled = false;
+
+    el.$options.readOnly = true;
+    await h.userClick(el.$refItems[0]);
+    expect(el.$value).toStrictEqual([30, 20, 40]);
+    el.$options.readOnly = false;
+
+    await h.userClick(el.$refInput.parentElement); // just for coverage
+    expect(el.$value).toStrictEqual([30, 20, 40]);
+
+    // touch-click on item doesn't remove item but allow to focus control first - othewise user can't focus on touchscreens
+    el.blur();
+    await h.wait();
+    jest
+      .spyOn(window, "matchMedia")
+      .mockImplementationOnce((s) => ({ matches: s !== "(hover: hover) and (pointer: fine)" })); // simulate touchscreen
+    expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
+      `"<span item="" aria-hidden="true">Leo</span><span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" class="wup-hidden" aria-owns="txt10" aria-controls="txt10"><strong></strong>"`
+    );
+    const item = el.$refItems[0];
+    await h.userTap(item);
+    await h.wait();
+    expect(el.$isFocused).toBe(true);
+    expect(el.$isOpen).toBe(true); // 1st tap only to focus control
+    // item must be not-removed
+    expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
+      `"<span item="" aria-hidden="true">Leo</span><span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" class="" aria-owns="txt13" aria-controls="txt13"><strong></strong>"`
+    );
+
+    await h.userTap(item);
+    await h.wait();
+    // 2nd tap removes item
+    expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
+      `"<span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" class="" aria-owns="txt13" aria-controls="txt13"><strong></strong>"`
+    );
+
+    // input hidden if readOnlyInput and values exist
+    el.blur();
+    el.$options.readOnlyInput = true;
+    el.focus();
+    await h.wait(1);
+    expect(el.$refInput.outerHTML).toMatchInlineSnapshot(
+      `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" class="wup-hidden" aria-owns="txt16" aria-controls="txt16" aria-describedby="txt15" readonly="">"`
+    );
+    el.$options.readOnlyInput = false;
   });
 
   test("animation for removed item", async () => {
@@ -148,7 +197,7 @@ describe("control.selectMany", () => {
 
     // remove item by click
     jest.spyOn(el.$refItems[0], "offsetWidth", "get").mockReturnValue("33px");
-    await h.userClick(el.$refItems[0], undefined, 10);
+    await h.userClick(el.$refItems[0], undefined);
     expect(el.$value).toStrictEqual([30]);
     // animation for [removed]
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
@@ -177,5 +226,3 @@ describe("control.selectMany", () => {
     expect(el.$isOpen).toBe(false); // because not-open by value-change
   });
 });
-
-// manual testcase (close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click

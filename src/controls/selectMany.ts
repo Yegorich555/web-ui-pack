@@ -138,7 +138,8 @@ export default class WUPSelectManyControl<
       }
       @media not all and (pointer: fine) {
         :host:focus-within [item]:active {${
-          "" /* WARN: on Safari active is event on during the touchMove, but android: none */
+          "" // todo issue 1st touch set focus and makes item:active for small time - but it's wrong
+          /* WARN: on Safari active is event on during the touchMove, but android: none */
         }
           --ctrl-icon: var(--ctrl-err-text);
           text-decoration: line-through;
@@ -315,7 +316,7 @@ export default class WUPSelectManyControl<
       this.$refInput.parentElement!,
       "click",
       (e) => {
-        if (this.$isDisabled || this.$isReadOnly || preventClickAfterFocus) {
+        if (e.button || this.$isDisabled || this.$isReadOnly || preventClickAfterFocus) {
           return;
         }
         const t = e.target;

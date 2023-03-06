@@ -484,6 +484,40 @@ export async function userClick(el: HTMLElement, opts?: MouseEventInit, timeoutM
   el.dispatchEvent(new MouseEvent("click", o()));
 }
 
+/** Simulate user touch click with 100ms between mouseDown and mouseUp */
+export async function userTap(el: HTMLElement, opts?: MouseEventInit) {
+  const o = () => ({ bubbles: true, cancelable: true, pageX: 1, pageY: 1, ...opts });
+  el.dispatchEvent(new MouseEvent("pointerdown", o()));
+  el.dispatchEvent(
+    new TouchEvent("touchstart", {
+      touches: [
+        {
+          clientX: 1,
+          clientY: 1,
+          force: 1,
+          identifier: 0,
+          pageX: 1,
+          pageY: 1,
+          radiusX: 10,
+          radiusY: 10,
+          rotationAngle: 0,
+          screenX: 1,
+          screenY: 1,
+          target: el,
+        },
+      ],
+      ...o,
+    })
+  );
+  el.dispatchEvent(new MouseEvent("pointerup", o()));
+  el.dispatchEvent(new TouchEvent("touchend", { touches: [], ...o() }));
+
+  const isOk = el.dispatchEvent(new MouseEvent("mousedown", o()));
+  isOk && el.focus();
+  el.dispatchEvent(new MouseEvent("mouseup", o()));
+  el.dispatchEvent(new MouseEvent("click", o()));
+}
+
 /** Simulate user press Ctrl+Z on input;
  * WARN: in reality onBeforeInput event calls only if history.legth >= 1
  * @return cursor snapshot (getInputCursor) */
