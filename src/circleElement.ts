@@ -340,3 +340,5 @@ export function drawArc(
 // example: https://medium.com/@pppped/how-to-code-a-responsive-circular-percentage-chart-with-svg-and-css-3632f8cd7705
 // similar https://github.com/w8r/svg-arc-corners
 // demo https://milevski.co/svg-arc-corners/demo/
+
+// todo issue if value === 0

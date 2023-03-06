@@ -109,7 +109,7 @@ export function animate(
   callback: (v: number, ms: number, isLast: boolean, timeStamp: number) => void,
   force?: boolean
 ): WUP.PromiseCancel<boolean> {
-  let isFinished = ms < 10 || (!force && window.matchMedia("(prefers-reduced-motion)").matches);
+  let isFinished = ms < 10 || (!force && !isAnimEnabled());
 
   let frameId: number | undefined;
   let resMe: (isEnd: boolean) => void;
@@ -147,4 +147,9 @@ export function animate(
   // NiceToHave: develop p.rollback
   // p.rollback = ()=>{ ... }
   return p;
+}
+
+/** Returns whether user don't 'prefers-reduced-motion' or do based on css-media `@media (prefers-reduced-motion)` */
+export function isAnimEnabled(): boolean {
+  return !window.matchMedia("(prefers-reduced-motion)").matches;
 }

@@ -1,3 +1,4 @@
+import { isAnimEnabled } from "../helpers/animate";
 import { nestedProperty, onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
 import { WUPcssIcon } from "../styles";
@@ -116,6 +117,9 @@ export default class WUPSelectManyControl<
         background-color: var(--ctrl-select-item-bg);
         border-radius: var(--ctrl-border-radius);
         cursor: pointer;
+        box-sizing: border-box;
+        white-space: nowrap;
+        overflow: hidden;
       }
       :host [item]:after {
         ${WUPcssIcon}
@@ -145,6 +149,15 @@ export default class WUPSelectManyControl<
           user-select: none;
           -webkit-user-select: none;
         }${/* to show remove-decoration instead of text-selection */ ""}
+      }
+      @media not all and (prefers-reduced-motion) {
+        :host [item][removed] {
+          transition: all var(--anim-time) ease-in-out;
+          padding-left: 0; padding-right: 0;
+          margin-left: 0; margin-right: 0;
+          width: 0;
+          opacity: 0;
+        }
       }`;
   }
 
@@ -211,8 +224,7 @@ export default class WUPSelectManyControl<
     });
 
     const toRemove = refs.length - v.length;
-    toRemove > 0 && refs.splice(v.length, toRemove).forEach((el) => el.remove()); // remove previous items
-
+    toRemove > 0 && refs.splice(v.length, toRemove).forEach((el) => !el.hasAttribute("removed") && el.remove()); // remove previous items
     this.$refPopup && this.filterMenuItems();
     this.$refItems = refs;
   }
@@ -233,7 +245,6 @@ export default class WUPSelectManyControl<
   protected override valueToInput(v: ValueType[] | undefined, isReset?: boolean): string {
     !isReset && this.getItems().then((items) => this.renderItems(v ?? [], items));
     this.toggleHideInput(v);
-    // todo blank-string autoselected on IOS if user touchStart+Move on item
     return this.$isFocused || !v?.length ? "" : " "; // otherwise broken css:placeholder-shown
   }
 
@@ -260,6 +271,24 @@ export default class WUPSelectManyControl<
     /* skip this because default filtering doesn't reset after re-opening menu */
   }
 
+  /** Called to remove item with animation */
+  protected removeValue(index: number): void {
+    const item = this.$refItems![index];
+
+    const isAnim = isAnimEnabled();
+    if (isAnim) {
+      this.$refItems!.splice(index, 1); // otherwise item is replaced
+      item.style.width = `${item.offsetWidth}px`;
+      item.setAttribute("removed", "");
+      setTimeout(() => (item.style.width = ""));
+      const ms = Number.parseInt(window.getComputedStyle(item).getPropertyValue("--anim-time"), 10); // WARN: expected anim-time: 200ms
+      setTimeout(() => item.remove(), ms); // otherwise item is removed immediately in setValue...
+    }
+
+    this.$value!.splice(index, 1);
+    this.setValue([...this.$value!]);
+  }
+
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
     const r = super.gotFocus(ev);
 
@@ -284,8 +313,7 @@ export default class WUPSelectManyControl<
         const eli = this.$refItems?.findIndex((li) => li === t || this.includes.call(li, t));
         if (eli != null && eli > -1) {
           e.preventDefault(); // to prevent open/hide popup
-          this.$value!.splice(eli, 1);
-          this.setValue([...this.$value!]);
+          this.removeValue(eli);
         }
       },
       { passive: false }
@@ -313,7 +341,6 @@ customElements.define(tagName, WUPSelectManyControl);
 // todo allowNewValue
 // todo keyboard
 // todo drag & drop
-// todo animation for delete
 
 /**
  * known issues when 'contenteditable':
