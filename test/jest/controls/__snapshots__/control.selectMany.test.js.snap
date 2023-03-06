@@ -1,0 +1,1271 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`control.selectMany $ariaDetails 1`] = `
+<wup-select-many>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+      <span
+        class="wup-hidden"
+      >
+        Some details for screen-readers
+      </span>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+</wup-select-many>
+`;
+
+exports[`control.selectMany $ariaDetails 2`] = `
+<wup-select-many>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+</wup-select-many>
+`;
+
+exports[`control.selectMany $ariaSpeak 1`] = `
+<wup-select-many>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-describedby="my-test-id txt2 my-test-id2"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt2"
+  >
+    Hello
+  </section>
+</wup-select-many>
+`;
+
+exports[`control.selectMany $ariaSpeak 2`] = `
+<wup-select-many>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-describedby="my-test-id my-test-id2"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+</wup-select-many>
+`;
+
+exports[`control.selectMany $show/$hide error 1`] = `
+<wup-select-many>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+</wup-select-many>
+`;
+
+exports[`control.selectMany $show/$hide error 2`] = `
+<wup-select-many
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-describedby="txt2"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    role="alert"
+    style="opacity: 0;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      Some custom message here
+    </span>
+  </wup-popup>
+</wup-select-many>
+`;
+
+exports[`control.selectMany $show/$hide error 3`] = `
+<wup-select-many>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+</wup-select-many>
+`;
+
+exports[`control.selectMany common tests render + styles 1`] = `<wup-select-many />`;
+
+exports[`control.selectMany common tests render + styles 2`] = `
+<style>
+  .wup-hidden, [wup-hidden] {
+position: absolute;
+height: 1px; width: 1px;
+top:0;left:0;
+overflow: hidden;
+clip: rect(1px, 1px, 1px, 1px);}
+  :root {
+          --base-bg: #fff;
+          --base-text: #232323;
+          --base-focus: #00778d;
+          --base-btn-bg: #009fbc;
+          --base-btn-text: #fff;
+          --base-btn-focus: #005766;
+          --base-btn2-bg: var(--base-btn-text);
+          --base-btn2-text: var(--base-btn-bg);
+          --base-btn3-bg: var(--base-bg);
+          --base-btn3-text: inherit;
+          --base-sep: #e4e4e4;
+          --border-radius: 6px;
+          --anim-time: 200ms;
+          --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+        }
+  :root {
+        --ctrl-padding: 1.5em 1em 0.5em 1em;
+        --ctrl-focus: var(--base-focus);
+        --ctrl-focus-label: var(--base-focus);
+        --ctrl-selected: var(--ctrl-focus-label);
+        --ctrl-label: #5e5e5e;
+        --ctrl-icon: var(--ctrl-label);
+        --ctrl-icon-size: 1em;
+        --ctrl-bg: var(--base-bg);
+        --ctrl-border-radius: var(--border-radius);
+        --ctrl-err-text: #ad0000;
+        --ctrl-err-bg: #fff4fa;
+        --ctrl-err-icon-valid: green;
+        --ctrl-invalid-border: red;
+        --wup-icon-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M674.515 93.949a45.925 45.925 0 0 0-65.022 0L384.001 318.981 158.509 93.487a45.928 45.928 0 0 0-65.022 0c-17.984 17.984-17.984 47.034 0 65.018l225.492 225.494L93.487 609.491c-17.984 17.984-17.984 47.034 0 65.018s47.034 17.984 65.018 0l225.492-225.492 225.492 225.492c17.984 17.984 47.034 17.984 65.018 0s17.984-47.034 0-65.018L449.015 383.999l225.492-225.494c17.521-17.521 17.521-47.034 0-64.559z'/%3E%3C/svg%3E");
+        --wup-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M37.691 450.599 224.76 635.864c21.528 21.32 56.11 21.425 77.478 0l428.035-426.23c21.47-21.38 21.425-56.11 0-77.478s-56.11-21.425-77.478 0L263.5 519.647 115.168 373.12c-21.555-21.293-56.108-21.425-77.478 0s-21.425 56.108 0 77.478z'/%3E%3C/svg%3E");
+        --wup-icon-dot: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='20'/%3E%3C/svg%3E");
+      }
+  :root {
+      --ctrl-clear-hover: rgba(255,0,0,0.1);
+      --ctrl-clear-hover-size: 22px;
+     }
+  :root {
+        --ctrl-select-icon-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m16.078 258.214 329.139 329.139c21.449 21.449 56.174 21.449 77.567 0l329.139-329.139c21.449-21.449 21.449-56.174 0-77.567s-56.174-21.449-77.567 0L384 471.003 93.644 180.647c-21.449-21.449-56.173-21.449-77.567 0s-21.449 56.173 0 77.567z'/%3E%3C/svg%3E");
+        --ctrl-select-current: inherit;
+        --ctrl-select-current-bg: #d9f7fd;
+      }
+  :root {
+        --ctrl-select-item: inherit;
+        --ctrl-select-item-bg: rgba(0,0,0,0.04);
+        --ctrl-select-item-del-display: none;
+        --ctrl-select-item-del: var(--ctrl-icon);
+        --ctrl-select-item-del-hover: var(--ctrl-selected);
+        --ctrl-select-item-del-img: var(--wup-icon-cross);
+        --ctrl-select-item-del-size: 0.8em;
+        --ctrl-select-gap: 6px;
+      }
+  
+      WUP-SELECT-MANY {
+        contain: style;
+        display: block;
+        margin-bottom: 20px;
+        border-radius: var(--ctrl-border-radius);
+        background: var(--ctrl-bg);
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+      WUP-SELECT-MANY strong,
+      WUP-SELECT-MANY legend {
+        color: var(--ctrl-label);
+        pointer-events: none;
+      }
+      WUP-SELECT-MANY:focus-within,
+      WUP-SELECT-MANY:focus-within &gt; [menu] {
+        z-index: 90010;
+        box-shadow: 0 0 0 1px var(--ctrl-focus);
+      }
+      WUP-SELECT-MANY:focus-within strong,
+      WUP-SELECT-MANY:focus-within legend {
+        color: var(--ctrl-focus-label);
+        pointer-events: initial;
+      }
+      [disabled] WUP-SELECT-MANY,
+      WUP-SELECT-MANY[disabled] {
+        opacity: 0.6;
+        cursor: not-allowed;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      [disabled] WUP-SELECT-MANY &gt; *,
+      WUP-SELECT-MANY[disabled] &gt; * {
+        pointer-events: none;
+      }
+      WUP-SELECT-MANY[invalid],
+      WUP-SELECT-MANY[invalid] &gt; [menu] {
+        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+      }
+      WUP-SELECT-MANY label {
+        display: flex;
+        align-items: center;
+        box-sizing: border-box;
+        font: inherit;
+        cursor: inherit;
+        padding: var(--ctrl-padding);
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+      WUP-SELECT-MANY input,
+      WUP-SELECT-MANY textarea {
+        padding: 0;
+        margin: 0;
+        cursor: inherit;
+      }
+      WUP-SELECT-MANY [contenteditable=true] {
+        margin: var(--ctrl-padding);
+        margin-left: 0;
+        margin-right: 0;
+        cursor: inherit;
+      }
+      WUP-SELECT-MANY strong {
+        cursor: inherit;
+      }
+      WUP-SELECT-MANY [aria-required="true"] + strong:after,
+      WUP-SELECT-MANY fieldset[aria-required="true"] &gt; legend:after {
+        content: "*";
+        font-size: larger;
+        font-weight: bolder;
+        line-height: 0;
+      }
+      WUP-SELECT-MANY [error] {
+        cursor: pointer;
+        font-size: small;
+        color: var(--ctrl-err-text);
+        background: var(--ctrl-err-bg);
+        max-height: 3em;
+        overflow: auto;
+        overflow: overlay;
+      }
+      WUP-SELECT-MANY [error] ul {
+        margin:0; padding:2px 4px 2px;
+      }
+      WUP-SELECT-MANY [error] li {
+        display: flex;
+        align-items: center;
+        margin-left: -5px;
+      }
+      WUP-SELECT-MANY [error] li:before {
+        content: '';
+        --ctrl-icon-img: var(--wup-icon-dot);
+        --ctrl-icon: var(--ctrl-err-text);
+        
+display: inline-block;
+width: var(--ctrl-icon-size);
+min-height: var(--ctrl-icon-size);
+box-sizing: content-box;
+margin: 0;
+padding: 5px;
+flex: 0 0 auto;
+align-self: stretch;
+border: none;
+box-shadow: none;
+background: var(--ctrl-icon);
+-webkit-mask-size: var(--ctrl-icon-size);
+mask-size: var(--ctrl-icon-size);
+-webkit-mask-repeat: no-repeat;
+mask-repeat: no-repeat;
+-webkit-mask-position: center;
+mask-position: center;
+-webkit-mask-image: var(--ctrl-icon-img);
+mask-image: var(--ctrl-icon-img);
+      }
+      WUP-SELECT-MANY [error] li[valid] {
+        color: var(--ctrl-err-icon-valid);
+      }
+      WUP-SELECT-MANY [error] li[valid]:before {
+        content: '';
+        --ctrl-icon-img: var(--wup-icon-check);
+        --ctrl-icon: var(--ctrl-err-icon-valid);
+      }
+      WUP-SELECT-MANY:focus-within [error] {
+        max-height: none;
+      }
+      @media (hover: hover) and (pointer: fine) {
+        /*WUP-SELECT-MANY:hover {
+          z-index: 90011;
+        }
+        WUP-SELECT-MANY:hover [error] {
+          max-height: none;
+        }*/
+        WUP-SELECT-MANY:hover,
+        WUP-SELECT-MANY:hover &gt; [menu] {
+          box-shadow: 0 0 3px 1px var(--ctrl-focus);
+        }
+        WUP-SELECT-MANY[invalid]:hover,
+        WUP-SELECT-MANY[invalid]:hover &gt; [menu] {
+          box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+        }
+      }
+        WUP-SELECT-MANY {
+          contain: style;
+          cursor: text;
+        }
+        WUP-SELECT-MANY label &gt; span {
+          width: 100%;
+          position: relative;
+          display: flex;
+          flex-direction: row-reverse;
+        }
+        WUP-SELECT-MANY input,
+        WUP-SELECT-MANY textarea,
+        WUP-SELECT-MANY [maskholder],
+        WUP-SELECT-MANY [prefix],
+        WUP-SELECT-MANY [postfix] {
+          padding: var(--ctrl-padding);
+          padding-left: 0;
+          padding-right: 0;
+          font: inherit;
+          color: inherit;
+          margin: 0;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
+        }
+        WUP-SELECT-MANY input,
+        WUP-SELECT-MANY textarea,
+        WUP-SELECT-MANY [contenteditable=true],
+        WUP-SELECT-MANY [maskholder],
+        WUP-SELECT-MANY [postfix] {
+          width: 100%;
+          box-sizing: border-box;
+          border: none;
+          background: none;
+          outline: none;
+        }
+        WUP-SELECT-MANY [prefix],
+        WUP-SELECT-MANY [postfix] {
+          color: var(--ctrl-label);
+          flex-shrink: 0;
+        }
+        WUP-SELECT-MANY [maskholder],
+        WUP-SELECT-MANY [prefix],
+        WUP-SELECT-MANY [postfix] {
+          display: none;
+          pointer-events: none;
+          text-overflow: initial;
+          white-space: pre;
+        }
+        WUP-SELECT-MANY [postfix] {
+          position: absolute;
+        }
+        WUP-SELECT-MANY [maskholder] {
+          position: absolute;
+          opacity: 0.65;
+        }
+        WUP-SELECT-MANY [maskholder]&gt;i,
+        WUP-SELECT-MANY [postfix]&gt;i {
+          visibility: hidden;
+          font: inherit;
+          white-space: pre;
+        }
+        WUP-SELECT-MANY input:-webkit-autofill,
+        WUP-SELECT-MANY textarea:-webkit-autofill,
+        WUP-SELECT-MANY [contenteditable=true]:-webkit-autofill {
+          font: inherit;
+          -webkit-background-clip: text;
+        }
+        WUP-SELECT-MANY input:autofill,
+        WUP-SELECT-MANY textarea:autofill,
+        WUP-SELECT-MANY [contenteditable=true]:autofill {
+          font: inherit;
+          background-clip: text;
+        }
+        WUP-SELECT-MANY strong {
+          display: block;
+          position: absolute;
+          top: 50%;
+          left: 0;
+          padding: 0;
+          margin: 0;
+          box-sizing: border-box;
+          max-width: 100%;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
+          transform-origin: top left;
+          transform: translateY(-50%);
+          font-weight: normal;
+          text-decoration: none;
+        }
+        @media not all and (prefers-reduced-motion) {
+          WUP-SELECT-MANY strong {
+            transition: top var(--anim), transform var(--anim), color var(--anim);
+          }
+        }
+        WUP-SELECT-MANY input:not(:focus)::placeholder,
+        WUP-SELECT-MANY textarea:not(:focus)::placeholder {
+          color: transparent;
+        }
+        WUP-SELECT-MANY:focus-within strong,
+        WUP-SELECT-MANY input:not(:placeholder-shown) + strong,
+        WUP-SELECT-MANY textarea:not(:placeholder-shown) + strong,
+        WUP-SELECT-MANY [contenteditable=true]:not(:empty) + strong,
+        WUP-SELECT-MANY legend {
+          top: 0.2em;
+          transform: scale(0.9);
+        }
+        WUP-SELECT-MANY:focus-within [maskholder],
+        WUP-SELECT-MANY:focus-within [prefix],
+        WUP-SELECT-MANY:focus-within [postfix],
+        WUP-SELECT-MANY input:not(:placeholder-shown) ~ [prefix],
+        WUP-SELECT-MANY input:not(:placeholder-shown) ~ [postfix],
+        WUP-SELECT-MANY textarea:not(:placeholder-shown) ~ [prefix],
+        WUP-SELECT-MANY textarea:not(:placeholder-shown) ~ [postfix] {
+          display: inline-block;
+        }
+        /* style for icons */
+        WUP-SELECT-MANY label button,
+        WUP-SELECT-MANY label button:after,
+        WUP-SELECT-MANY label:after,
+        WUP-SELECT-MANY label:before {
+          
+display: inline-block;
+width: var(--ctrl-icon-size);
+min-height: var(--ctrl-icon-size);
+box-sizing: content-box;
+margin: 0;
+padding: 5px;
+flex: 0 0 auto;
+align-self: stretch;
+border: none;
+box-shadow: none;
+background: var(--ctrl-icon);
+-webkit-mask-size: var(--ctrl-icon-size);
+mask-size: var(--ctrl-icon-size);
+-webkit-mask-repeat: no-repeat;
+mask-repeat: no-repeat;
+-webkit-mask-position: center;
+mask-position: center;
+-webkit-mask-image: var(--ctrl-icon-img);
+mask-image: var(--ctrl-icon-img);
+          -webkit-mask-image: none;
+          mask-image: none;
+        }
+        WUP-SELECT-MANY label:after {
+          cursor: pointer;
+          margin-right: calc(var(--ctrl-icon-size) / -2);
+        }
+        WUP-SELECT-MANY label:before {
+          cursor: pointer;
+          margin-left: calc(var(--ctrl-icon-size) / -2);
+        }
+        WUP-SELECT-MANY label button {
+          contain: strict;
+          position: relative;
+          z-index: 1;
+        }
+        WUP-SELECT-MANY label&gt;span + button {
+          margin-right: -0.5em;
+        }
+        WUP-SELECT-MANY button[clear] {
+          background: none;
+          align-self: center;
+        }
+        WUP-SELECT-MANY button[clear]:after {
+          content: "";
+          padding: 0;
+          -webkit-mask-image: var(--wup-icon-cross);
+          mask-image: var(--wup-icon-cross);
+        }
+        WUP-SELECT-MANY button[clear]:after,
+        WUP-SELECT-MANY button[clear]:before {
+          position: absolute;
+          top: 50%; left: 50%;
+          transform: translate(-50%, -50%);
+          width: 100%;
+        }
+        WUP-SELECT-MANY button[clear]:before {
+          width: var(--ctrl-clear-hover-size);
+          padding-top: var(--ctrl-clear-hover-size);
+        }
+        @media (hover: hover) and (pointer: fine) {
+          WUP-SELECT-MANY button[clear]:hover {
+            box-shadow: none;
+          }
+          WUP-SELECT-MANY button[clear]:hover:before {
+            content: "";
+            border-radius: 50%;
+            box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
+          }
+          WUP-SELECT-MANY button[clear]:hover:after {
+            background-color: var(--ctrl-err-text);
+          }
+          WUP-SELECT-MANY[readonly] button[clear] {
+            pointer-events: none;
+          }
+        }
+      WUP-SELECT-MANY {
+        cursor: pointer;
+      }
+      WUP-SELECT-MANY input {
+        cursor: text;
+      }
+      WUP-SELECT-MANY input:placeholder-shown,
+      WUP-SELECT-MANY input:read-only {
+        cursor: pointer;
+      }
+      WUP-SELECT-MANY label::after {
+        content: "";
+        -webkit-mask-image: var(--ctrl-icon-img);
+        mask-image: var(--ctrl-icon-img);
+      }
+      @media not all and (prefers-reduced-motion) {
+        WUP-SELECT-MANY label::after {
+          transition: transform var(--anim);
+        }
+      }
+      WUP-SELECT-MANY button[clear] {
+        margin: 0;
+      }
+      WUP-SELECT-MANY [menu] {
+        padding: 0;
+        max-height: 300px;
+        z-index: 90010;
+      }
+      WUP-SELECT-MANY {
+        --ctrl-icon-img: var(--ctrl-select-icon-img);
+      }
+      WUP-SELECT-MANY[opened] label::after {
+        transform: rotate(180deg);
+      }
+      WUP-SELECT-MANY [menu] {
+        overflow: hidden;
+      }
+      WUP-SELECT-MANY [menu] ul {
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+        cursor: pointer;
+        overflow: auto;
+        max-height: 300px;
+      }
+      
+WUP-SELECT-MANY [menu]&gt;ul::-webkit-scrollbar {
+  width: 10px; height: 10px;
+  cursor: pointer;
+}
+WUP-SELECT-MANY [menu]&gt;ul::-webkit-scrollbar-corner {
+  background: none;
+}
+WUP-SELECT-MANY [menu]&gt;ul::-webkit-scrollbar-thumb {
+  border: 3px solid rgba(0,0,0,0);
+  background-clip: padding-box;
+  background-color: var(--scroll, rgba(0,0,0,0.2));
+  border-radius: 999px;
+}
+WUP-SELECT-MANY [menu]&gt;ul::-webkit-scrollbar-track-piece:vertical:start,
+WUP-SELECT-MANY [menu]&gt;ul::-webkit-scrollbar-track-piece:vertical:end,
+WUP-SELECT-MANY [menu]&gt;ul::-webkit-scrollbar-track-piece:horizontal:start,
+WUP-SELECT-MANY [menu]&gt;ul::-webkit-scrollbar-track-piece:horizontal:end {
+  margin: 0;
+}
+@media (hover) {
+  WUP-SELECT-MANY [menu]&gt;ul::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scroll-hover, rgba(0,0,0,0.5));
+  }
+}
+      WUP-SELECT-MANY [menu] li {
+        padding: 1em;
+      }
+      @media (hover: hover) and (pointer: fine) {
+        WUP-SELECT-MANY [menu] li:hover {
+          color: var(--ctrl-select-current);
+          background: var(--ctrl-select-current-bg);
+        }
+      }
+      WUP-SELECT-MANY [menu] li[aria-selected="true"] {
+        color: var(--ctrl-select-current);
+        background: var(--ctrl-select-current-bg);
+        display: flex;
+      }
+      WUP-SELECT-MANY [menu] li[aria-selected="true"]:after {
+        content: "";
+        --ctrl-icon-img: var(--wup-icon-check);
+        
+display: inline-block;
+width: var(--ctrl-icon-size);
+min-height: var(--ctrl-icon-size);
+box-sizing: content-box;
+margin: 0;
+padding: 5px;
+flex: 0 0 auto;
+align-self: stretch;
+border: none;
+box-shadow: none;
+background: var(--ctrl-icon);
+-webkit-mask-size: var(--ctrl-icon-size);
+mask-size: var(--ctrl-icon-size);
+-webkit-mask-repeat: no-repeat;
+mask-repeat: no-repeat;
+-webkit-mask-position: center;
+mask-position: center;
+-webkit-mask-image: var(--ctrl-icon-img);
+mask-image: var(--ctrl-icon-img);
+        margin-left: auto;
+      }
+      WUP-SELECT-MANY [menu] li[focused] {
+        box-shadow: inset 0 0 4px 0 var(--ctrl-focus);
+        border-radius: var(--ctrl-border-radius);
+      }
+      WUP-SELECT-MANY strong {
+        top: 1.6em;
+        margin: calc(var(--ctrl-select-gap) / 2);
+      }
+      WUP-SELECT-MANY label &gt; span {
+        flex-wrap: wrap;
+        flex-direction: row;
+        padding: var(--ctrl-padding);
+        padding-left: 0; padding-right: 0;
+        margin: calc(var(--ctrl-select-gap) / -2);
+      }
+      WUP-SELECT-MANY [item],
+      WUP-SELECT-MANY input {
+        margin: calc(var(--ctrl-select-gap) / 2);
+        padding: var(--ctrl-select-gap);
+      }
+      WUP-SELECT-MANY input {
+        flex: 1 1 auto;
+        width: 0;
+        min-width: 2em;
+        padding-left: 0; padding-right: 0;
+      }
+      WUP-SELECT-MANY [item] {
+        --ctrl-icon: var(--ctrl-select-item-del);
+        --ctrl-icon-size: var(--ctrl-select-item-del-size);
+        --ctrl-icon-img: var(--ctrl-select-item-del-img);
+        color: var(--ctrl-select-item);
+        background-color: var(--ctrl-select-item-bg);
+        border-radius: var(--ctrl-border-radius);
+        cursor: pointer;
+        box-sizing: border-box;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+      WUP-SELECT-MANY [item]:after {
+        
+display: inline-block;
+width: var(--ctrl-icon-size);
+min-height: var(--ctrl-icon-size);
+box-sizing: content-box;
+margin: 0;
+padding: 5px;
+flex: 0 0 auto;
+align-self: stretch;
+border: none;
+box-shadow: none;
+background: var(--ctrl-icon);
+-webkit-mask-size: var(--ctrl-icon-size);
+mask-size: var(--ctrl-icon-size);
+-webkit-mask-repeat: no-repeat;
+mask-repeat: no-repeat;
+-webkit-mask-position: center;
+mask-position: center;
+-webkit-mask-image: var(--ctrl-icon-img);
+mask-image: var(--ctrl-icon-img);
+        display: var(--ctrl-select-item-del-display);
+        content: "";
+        padding: 0;
+        margin-left: 0.5em;
+      }
+      @media (hover: hover) and (pointer: fine) {
+        WUP-SELECT-MANY [item]:hover {
+          --ctrl-icon: var(--ctrl-err-text);
+          text-decoration: line-through;
+          color: var(--ctrl-err-text);
+          background-color: var(--ctrl-err-bg);
+        }
+      }
+      @media not all and (pointer: fine) {
+        WUP-SELECT-MANY:focus-within [item]:active {
+          --ctrl-icon: var(--ctrl-err-text);
+          text-decoration: line-through;
+          color: var(--ctrl-err-text);
+          background-color: var(--ctrl-err-bg);
+        }
+        WUP-SELECT-MANY [item] {
+          user-select: none;
+          -webkit-user-select: none;
+        }
+      }
+      @media not all and (prefers-reduced-motion) {
+        WUP-SELECT-MANY [item][removed] {
+          transition: all var(--anim-time) ease-in-out;
+          padding-left: 0; padding-right: 0;
+          margin-left: 0; margin-right: 0;
+          width: 0;
+          opacity: 0;
+        }
+      }
+</style>
+`;
+
+exports[`control.selectMany validations $options.validationShowAll 1`] = `
+<wup-select-many
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-describedby="txt2"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    role="alert"
+    style="max-width: 100px;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+</wup-select-many>
+`;
+
+exports[`control.selectMany validations $options.validationShowAll 2`] = `
+<wup-select-many>
+  <label
+    for="txt1"
+  >
+    <span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Donny
+      </span>
+      <input
+        aria-autocomplete="list"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-required="true"
+        autocomplete="off"
+        class="wup-hidden"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+</wup-select-many>
+`;
+
+exports[`control.selectMany validations $options.validationShowAll 3`] = `
+<wup-select-many
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-describedby="txt5"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-required="true"
+        autocomplete="off"
+        class=""
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong>
+        First Name
+      </strong>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt5"
+    role="alert"
+    style="max-width: 100px;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Name:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+</wup-select-many>
+`;
+
+exports[`control.selectMany validations options.validationCase 1`] = `
+<wup-select-many>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        class="wup-hidden"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+</wup-select-many>
+`;
+
+exports[`control.selectMany validations options.validationCase 2`] = `
+<wup-select-many
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-controls="txt2"
+        aria-describedby="txt4"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-owns="txt2"
+        aria-required="true"
+        autocomplete="off"
+        class=""
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong>
+        First Input
+      </strong>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+  <wup-popup
+    menu=""
+    style="min-width: 100px;"
+  >
+    <ul
+      aria-label="Items"
+      aria-multiselectable="true"
+      id="txt2"
+      role="listbox"
+      tabindex="-1"
+    >
+      <li
+        role="option"
+        style=""
+      >
+        Donny
+      </li>
+      <li
+        role="option"
+      >
+        Mikky
+      </li>
+      <li
+        role="option"
+      >
+        Leo
+      </li>
+      <li
+        role="option"
+      >
+        Splinter
+      </li>
+    </ul>
+  </wup-popup>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt4"
+    role="alert"
+    style="max-width: 100px;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+</wup-select-many>
+`;
+
+exports[`control.selectMany validations options.validationCase 3`] = `
+<wup-select-many
+  invalid=""
+  opened=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Donny
+      </span>
+      <input
+        aria-autocomplete="list"
+        aria-controls="txt6"
+        aria-describedby="txt5"
+        aria-expanded="true"
+        aria-haspopup="listbox"
+        aria-owns="txt6"
+        aria-required="true"
+        autocomplete="off"
+        class=""
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong>
+        First Input
+      </strong>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt5"
+    style="max-width: 100px;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
+  <wup-popup
+    menu=""
+    style="min-width: 100px;"
+  >
+    <ul
+      aria-label="Items"
+      aria-multiselectable="true"
+      id="txt6"
+      role="listbox"
+      tabindex="-1"
+    >
+      <li
+        role="option"
+        style="display: none;"
+      >
+        Donny
+      </li>
+      <li
+        role="option"
+      >
+        Mikky
+      </li>
+      <li
+        role="option"
+      >
+        Leo
+      </li>
+      <li
+        role="option"
+      >
+        Splinter
+      </li>
+    </ul>
+  </wup-popup>
+</wup-select-many>
+`;
+
+exports[`control.selectMany validations options.validationCase 4`] = `
+<wup-select-many
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <input
+        aria-autocomplete="list"
+        aria-controls="txt7"
+        aria-describedby="txt8"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-owns="txt7"
+        aria-required="true"
+        autocomplete="off"
+        class=""
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong>
+        First Input
+      </strong>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt8"
+    role="alert"
+    style="max-width: 100px;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+</wup-select-many>
+`;
+
+exports[`control.selectMany with form 1`] = `
+<wup-form
+  role="form"
+>
+  <wup-select-many>
+    <label
+      for="txt1"
+    >
+      <span>
+        <input
+          aria-autocomplete="list"
+          aria-expanded="false"
+          aria-haspopup="listbox"
+          autocomplete="off"
+          id="txt1"
+          placeholder=" "
+          role="combobox"
+          type="text"
+        />
+        <strong>
+          First Input
+        </strong>
+      </span>
+      <button
+        aria-hidden="true"
+        clear=""
+        tabindex="-1"
+        type="button"
+      />
+    </label>
+  </wup-select-many>
+</wup-form>
+`;
