@@ -78,7 +78,6 @@ export default class WUPSelectManyControl<
         --ctrl-select-item-bg: rgba(0,0,0,0.04);
         --ctrl-select-item-del-display: none;
         --ctrl-select-item-del: var(--ctrl-icon);
-        --ctrl-select-item-del-hover: var(--ctrl-selected);
         --ctrl-select-item-del-img: var(--wup-icon-cross);
         --ctrl-select-item-del-size: 0.8em;
         --ctrl-select-gap: 6px;

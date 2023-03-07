@@ -5,6 +5,7 @@
 **BREAKING CHANGES**:
 
 - Internals. Methods getNumAttr, getRefAttr, getBoolAttr is refactored to single getAttr()
+- [SelectControl](src/controls/select.ts). Simplified menu styling
 
 **Fixes**:
 
@@ -132,10 +133,10 @@
 - Controls. [Blue highlight blink on tap action](https://stackoverflow.com/questions/25704650/disable-blue-highlight-when-touch-press-object-with-cursorpointer)
 - Controls. Click on button `Clear` throws console.error
 - Controls. Validation gets undefined value but must be skipped in this case (value is undefined only for messages or validations.required)
-- SelectControl. Click on custom list-item with nested span doesn't call click-event
-- SelectControl. No scroll to selected element at first opening
-- SelectControl. Sometimes menu isn't opened
-- SelectControl. `noItems` appeared on 2nd menu opening when user created a new value
+- [SelectControl](src/controls/select.ts). Click on custom list-item with nested span doesn't call click-event
+- [SelectControl](src/controls/select.ts). No scroll to selected element at first opening
+- [SelectControl](src/controls/select.ts). Sometimes menu isn't opened
+- [SelectControl](src/controls/select.ts). `noItems` appeared on 2nd menu opening when user created a new value
 - Helper. observer. onChange fired even date.setHours didn't change value
 
 **Features**:
