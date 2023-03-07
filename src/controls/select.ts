@@ -577,7 +577,8 @@ export default class WUPSelectControl<
       isOk && filtered!.push(i);
       this.filterMenuItem(li, !isOk);
     });
-    this._menuItems!.filtered = v ? filtered : undefined;
+    const hasFiltered = filtered.length !== this._menuItems!.all.length;
+    this._menuItems!.filtered = hasFiltered ? filtered : undefined;
     const hasVisible = filtered.length !== 0;
     this.renderMenuNoItems(this.$refPopup!, hasVisible);
     hasVisible && rawV !== "" && !this._opts.allowNewValue && this.focusMenuItemByIndex(0);

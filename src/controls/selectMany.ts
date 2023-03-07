@@ -349,7 +349,7 @@ export default class WUPSelectManyControl<
 customElements.define(tagName, WUPSelectManyControl);
 
 // todo allowNewValue
-// todo keyboard & focus behavior (including menu - focus is wrong on filtered items)
+// todo keyboard
 // todo drag & drop
 
 /**

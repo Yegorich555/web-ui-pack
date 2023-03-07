@@ -114,10 +114,10 @@ describe("control.selectMany", () => {
     await h.wait();
     expect(el.$isOpen).toBe(true);
     expect(el.$refInput.outerHTML).toMatchInlineSnapshot(
-      `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" class="" aria-owns="txt3" aria-controls="txt3" aria-activedescendant="txt10">"`
+      `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" class="" aria-owns="txt3" aria-controls="txt3">"`
     );
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="display: none;" aria-selected="false" id="txt10" focused="">Donny</li><li role="option" aria-selected="false" id="txt4" style="display: none;">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option" style="display: none;" aria-selected="false" id="txt8">Splinter</li><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
+      `"<ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="display: none;">Donny</li><li role="option" aria-selected="false" id="txt4" style="display: none;">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option" style="display: none;" aria-selected="false" id="txt8">Splinter</li><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
     );
 
     await h.userClick(el.$refItems[0]); // remove item by click
@@ -125,7 +125,7 @@ describe("control.selectMany", () => {
     expect(el.$isOpen).toBe(true);
     expect(el.$value).toStrictEqual([30, 20, 40]); // because selected Splinter
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="" aria-selected="false" id="txt10" focused="">Donny</li><li role="option" aria-selected="false" id="txt4" style="display: none;">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option" style="display: none;" aria-selected="false" id="txt8">Splinter</li><li role="option" aria-disabled="true" aria-selected="false" style="display: none;">No Items</li></ul>"`
+      `"<ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="">Donny</li><li role="option" aria-selected="false" id="txt4" style="display: none;">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option" style="display: none;" aria-selected="false" id="txt8">Splinter</li><li role="option" aria-disabled="true" aria-selected="false" style="display: none;">No Items</li></ul>"`
     );
 
     el.$options.disabled = true;
@@ -148,7 +148,7 @@ describe("control.selectMany", () => {
       .spyOn(window, "matchMedia")
       .mockImplementationOnce((s) => ({ matches: s !== "(hover: hover) and (pointer: fine)" })); // simulate touchscreen
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true">Leo</span><span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" class="wup-hidden" aria-owns="txt12" aria-controls="txt12"><strong></strong>"`
+      `"<span item="" aria-hidden="true">Leo</span><span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" class="wup-hidden" aria-owns="txt11" aria-controls="txt11"><strong></strong>"`
     );
     const item = el.$refItems[0];
     await h.userTap(item);
@@ -157,14 +157,14 @@ describe("control.selectMany", () => {
     expect(el.$isOpen).toBe(true); // 1st tap only to focus control
     // item must be not-removed
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true">Leo</span><span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" class="" aria-owns="txt15" aria-controls="txt15"><strong></strong>"`
+      `"<span item="" aria-hidden="true">Leo</span><span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" class="" aria-owns="txt14" aria-controls="txt14"><strong></strong>"`
     );
 
     await h.userTap(item);
     await h.wait();
     // 2nd tap removes item
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" class="" aria-owns="txt15" aria-controls="txt15"><strong></strong>"`
+      `"<span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" class="" aria-owns="txt14" aria-controls="txt14"><strong></strong>"`
     );
 
     // input hidden if readOnlyInput and values exist
@@ -173,7 +173,7 @@ describe("control.selectMany", () => {
     el.focus();
     await h.wait(1);
     expect(el.$refInput.outerHTML).toMatchInlineSnapshot(
-      `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" class="wup-hidden" aria-owns="txt18" aria-controls="txt18" aria-describedby="txt17" readonly="">"`
+      `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" class="wup-hidden" aria-owns="txt17" aria-controls="txt17" aria-describedby="txt16" readonly="">"`
     );
     el.$options.readOnlyInput = false;
 
@@ -245,5 +245,32 @@ describe("control.selectMany", () => {
       `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" class=""><strong></strong>"`
     );
     expect(el.$isOpen).toBe(false); // because not-open by value-change
+  });
+
+  test("menu: focus behavior", async () => {
+    el.$value = [getItems()[0].value];
+    el.focus();
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="display: none;">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
+    );
+    expect(el.querySelector("[focused]")).toBeFalsy();
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+    expect(el.querySelector("[focused]").textContent).toBe(getItems()[1].text); // 2nd item because 1st is hidden - because selected
+
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 20]);
+    expect(el.$isOpen).toBe(true);
+    expect(el.querySelector("[focused]")).toBeFalsy();
+
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+    expect(el.querySelector("[focused]").textContent).toBe(getItems()[2].text); // 3rd item
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+    expect(el.querySelector("[focused]").textContent).toBe(getItems()[3].text); // last item
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+    expect(el.querySelector("[focused]").textContent).toBe(getItems()[2].text); // 3rd item
   });
 });

@@ -342,3 +342,4 @@ export function drawArc(
 // demo https://milevski.co/svg-arc-corners/demo/
 
 // todo issue if value === 0
+// todo if $value=[20, 5000] - then small values rendered in 1px - it's looks bad... Need somehow normalize to min-size
