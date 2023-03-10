@@ -971,14 +971,14 @@ describe("control.select", () => {
       expect(h.getInputCursor(el.$refInput)).toBe("Donny, |"); // extra space must be added
       expect(onChange).toBeCalledTimes(1);
       expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-        `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" id="txt3" aria-selected="true" focused="">Donny</li><li role="option" style="">Mikky</li><li role="option" style="">Leo</li><li role="option" style="">Splinter</li></ul>"`
+        `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true" id="txt3" focused="">Donny</li><li role="option" style="">Mikky</li><li role="option" style="">Leo</li><li role="option" style="">Splinter</li></ul>"`
       );
 
       // try again on 2nd value
       expect(await h.userTypeText(el.$refInput, "l", { clearPrevious: false })).toBe("Donny, l|");
       await h.wait(1);
       expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-        `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" id="txt3" aria-selected="true" style="display: none;">Donny</li><li role="option" style="display: none;">Mikky</li><li role="option" style="" aria-selected="false" id="txt4" focused="">Leo</li><li role="option" style="display: none;">Splinter</li></ul>"`
+        `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true" id="txt3" style="display: none;">Donny</li><li role="option" style="display: none;">Mikky</li><li role="option" style="" aria-selected="false" id="txt4" focused="">Leo</li><li role="option" style="display: none;">Splinter</li></ul>"`
       );
       el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
       await h.wait();
@@ -986,7 +986,7 @@ describe("control.select", () => {
       expect(h.getInputCursor(el.$refInput)).toBe("Donny, Leo, |"); // extra space must be added
       expect(onChange).toBeCalledTimes(2);
       expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-        `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" id="txt3" aria-selected="true" style="">Donny</li><li role="option" style="">Mikky</li><li role="option" style="" aria-selected="true" id="txt4" focused="">Leo</li><li role="option" style="">Splinter</li></ul>"`
+        `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true" id="txt3" style="">Donny</li><li role="option" style="">Mikky</li><li role="option" style="" aria-selected="true" id="txt4" focused="">Leo</li><li role="option" style="">Splinter</li></ul>"`
       );
 
       // try to delete last item
@@ -996,7 +996,7 @@ describe("control.select", () => {
       expect(h.getInputCursor(el.$refInput)).toBe("Donny, |"); // item is removed by single "Delete"
       expect(onChange).toBeCalledTimes(3);
       expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-        `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" id="txt3" aria-selected="true" style="" focused="">Donny</li><li role="option" style="">Mikky</li><li role="option" style="" id="txt4">Leo</li><li role="option" style="">Splinter</li></ul>"`
+        `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true" id="txt3" style="" focused="">Donny</li><li role="option" style="">Mikky</li><li role="option" style="" id="txt4">Leo</li><li role="option" style="">Splinter</li></ul>"`
       );
 
       // removing again
@@ -1131,7 +1131,7 @@ describe("control.select", () => {
       await h.wait();
       expect(el.$refInput.value).toBe("Mikky, don");
       expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-        `"<ul id="txt12" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option">Donny</li><li role="option">Donny2</li><li role="option" style="display: none;" aria-selected="true">Mikky</li><li role="option" style="display: none;">Leo</li></ul>"`
+        `"<ul id="txt12" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option">Donny</li><li role="option">Donny2</li><li role="option" aria-selected="true" style="display: none;">Mikky</li><li role="option" style="display: none;">Leo</li></ul>"`
       );
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true })); // focus 1st visible item in menu
       expect(el.querySelector("[focused]")?.textContent).toBe("Donny");

@@ -368,6 +368,7 @@ export async function wait(t = 1000) {
 /** Simulate user type text (send values to the end of input): focus + keydown+ keyup + keypress + input events */
 export async function userTypeText(el: HTMLInputElement, text: string, opts = { clearPrevious: true }) {
   el.focus();
+  await wait(10);
   if (opts?.clearPrevious) {
     el.value = "";
   }

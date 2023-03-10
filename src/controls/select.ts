@@ -396,10 +396,6 @@ export default class WUPSelectControl<
       { passive: false }
     );
 
-    if (this._needFilter) {
-      this._needFilter();
-      delete this._needFilter;
-    }
     return ul;
   }
 
@@ -689,19 +685,12 @@ export default class WUPSelectControl<
     return !!this._opts.multiple;
   }
 
-  /** For case when menu is opened but items are not rendered yet */
-  protected _needFilter?: () => void; // todo remove it and don't allow to type text before: because isBusy must be shown
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
     this.$isOpen && this.focusMenuItem(null); // reset virtual focus: // WARN it's not good enough when this._opts.multiple
     super.gotInput(e, false);
 
     const filter = (): void => {
-      delete this._needFilter;
-      if (!this._menuItems) {
-        this._needFilter = this.filterMenuItems; //
-      } else {
-        this.filterMenuItems();
-      }
+      this.filterMenuItems();
     };
 
     let isChanged = false;
