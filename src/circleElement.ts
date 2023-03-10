@@ -205,7 +205,7 @@ export default class WUPCircleElement extends WUPBaseElement {
         const v = a.value;
         angleTo = mathScaleValue(v, vMin, vMax, angleMin, angleMax) + (angleFrom - angleMin);
         const path = this.$refItems.appendChild(this.make("path"));
-        a.color && path.setAttribute("fill", a.color);
+        a.color && path.setAttribute("fill", a.color); // todo need to use inline style 'fill' instead othewise it doesn't work
 
         const ms = items.length === 1 ? animTime : mathScaleValue(v, vMin, vMax, 0, animTime);
         const from = angleFrom;
