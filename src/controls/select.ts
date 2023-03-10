@@ -289,11 +289,10 @@ export default class WUPSelectControl<
       // it's important to be before super otherwise initValue won't work
       this._opts.items = this.getAttr<WUP.Radio.Options["items"]>("items", "ref") || [];
     }
-
-    super.gotChanges(propsChanged as any);
-
     this._opts.allowNewValue = this.getAttr("allownewvalue", "bool", this._opts.allowNewValue);
     this._opts.multiple = this.getAttr("multiple", "bool", this._opts.multiple);
+
+    super.gotChanges(propsChanged as any);
   }
 
   override gotFormChanges(propsChanged: Array<keyof WUP.Form.Options> | null): void {

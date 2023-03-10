@@ -682,6 +682,7 @@ export default abstract class WUPBaseControl<
 
     super.connectedCallback();
     this.$form = WUPFormElement.$tryConnect(this);
+    this.#isDirty = false; // reset state after re-appended
   }
 
   protected override gotRemoved(): void {

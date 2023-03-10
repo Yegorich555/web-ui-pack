@@ -27,6 +27,7 @@ const items = [
 
 (window as any).inputSelect = {
   items,
+  initArr: [items[0].value, items[1].value],
 };
 
 (window as any)._someSelectValidations = {
@@ -69,7 +70,7 @@ export default function SelectControlView() {
         }}
       >
         <wup-select
-          items="inputSelect.items"
+          items="window.inputSelect.items"
           name="select"
           label="Select"
           initValue={items[8].value.toString()}
@@ -79,12 +80,14 @@ export default function SelectControlView() {
           autoFocus={false}
         />
         <wup-select
+          initValue="window.inputSelect.initArr"
+          multiple
           ref={(el) => {
             if (el) {
               el.$options.name = "multiple";
-              el.$options.multiple = true;
-              // el.$options.allowNewValue = true;
               el.$options.items = items;
+              // el.$options.multiple = true;
+              // el.$options.allowNewValue = true;
               // el.$initValue = [items[0].value, items[1].value];
             }
           }}

@@ -22,7 +22,7 @@ const items = [
   // { text: (v, li, i) => li.append(v.toString()), value: 124 },
 ];
 
-(window as any).inputSelect = {
+(window as any).inputSmany = {
   items,
   initValue: [items[0].value, items[1].value],
 };
@@ -61,10 +61,10 @@ export default function SelectManyControlView() {
         }}
       >
         <wup-select-many
-          items="window.inputSelect.items"
+          items="window.inputSmany.items"
           name="selectMany"
           label="Select Many"
-          initValue="window.inputSelect.initValue"
+          initValue="window.inputSmany.initValue"
           validations="window._someSelectValidations"
           autoComplete="off"
           autoFocus={false}
@@ -75,7 +75,7 @@ export default function SelectManyControlView() {
             }
           }}
         />
-        <wup-select-many label="Empty" items="inputSelect.items" />
+        <wup-select-many label="Empty" items="inputSmany.items" />
         <wup-select-many
           class={styles.withDelIcon}
           ref={(el) => {
