@@ -543,7 +543,7 @@ export default class WUPSelectControl<
     const popup = await super.goShowMenu(showCase, e);
     if (popup) {
       this.selectMenuItemByValue(this.$value); // set aria-selected
-      this._selectedMenuItem?.scrollIntoView({ block: "center" }); // fix: sometimes scrollIntoViewIfNeeded works wrong during the opening menu
+      setTimeout(() => this._selectedMenuItem?.scrollIntoView({ block: "center" }), 50); // fix: sometimes scrollIntoViewIfNeeded works wrong during the opening menu
     }
     return popup;
   }
