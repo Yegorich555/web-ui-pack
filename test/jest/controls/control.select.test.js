@@ -953,6 +953,66 @@ describe("control.select", () => {
       await h.wait(1);
       expect(el.$refInput.value).toBe("");
     });
+
+    test("multiple", async () => {
+      const onChange = jest.fn();
+      el.addEventListener("$change", onChange);
+      el.$options.items = getItems();
+      el.$options.multiple = true;
+      await h.wait(1);
+
+      // type 1st text-value
+      expect(await h.userTypeText(el.$refInput, "don", { clearPrevious: false })).toBe("don|");
+      await h.wait(1);
+      expect(onChange).toBeCalledTimes(0);
+      expect(await h.userTypeText(el.$refInput, "ny,", { clearPrevious: false })).toBe("donny,|");
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([10]);
+      expect(h.getInputCursor(el.$refInput)).toBe("Donny, |"); // extra space must be added
+      expect(onChange).toBeCalledTimes(1);
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" id="txt3" aria-selected="true" focused="">Donny</li><li role="option" style="">Mikky</li><li role="option" style="">Leo</li><li role="option" style="">Splinter</li></ul>"`
+      );
+
+      // try again on 2nd value
+      expect(await h.userTypeText(el.$refInput, "l", { clearPrevious: false })).toBe("Donny, l|");
+      await h.wait(1);
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" id="txt3" aria-selected="true" style="display: none;">Donny</li><li role="option" style="display: none;">Mikky</li><li role="option" style="" aria-selected="false" id="txt4" focused="">Leo</li><li role="option" style="display: none;">Splinter</li></ul>"`
+      );
+      el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+      await h.wait();
+      expect(el.$value).toStrictEqual([10, 30]);
+      expect(h.getInputCursor(el.$refInput)).toBe("Donny, Leo, |"); // extra space must be added
+      expect(onChange).toBeCalledTimes(2);
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" id="txt3" aria-selected="true" style="">Donny</li><li role="option" style="">Mikky</li><li role="option" style="" aria-selected="true" id="txt4" focused="">Leo</li><li role="option" style="">Splinter</li></ul>"`
+      );
+
+      // try to delete last item
+      await h.userRemove(el.$refInput, { removeCount: 1, key: "Backspace" }); // removing ',' removes also previous item
+      await h.wait(10);
+      expect(el.$value).toStrictEqual([10]);
+      expect(h.getInputCursor(el.$refInput)).toBe("Donny, |"); // item is removed by single "Delete"
+      expect(onChange).toBeCalledTimes(3);
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" id="txt3" aria-selected="true" style="" focused="">Donny</li><li role="option" style="">Mikky</li><li role="option" style="" id="txt4">Leo</li><li role="option" style="">Splinter</li></ul>"`
+      );
+
+      // removing again
+      await h.userRemove(el.$refInput, { removeCount: 1, key: "Backspace" }); // removing ',' removes also previous item
+      await h.wait(10);
+      expect(el.$value).toBe(undefined);
+      expect(h.getInputCursor(el.$refInput)).toBe("|"); // item is removed by single "Delete"
+      expect(onChange).toBeCalledTimes(4);
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" id="txt3" style="">Donny</li><li role="option" style="">Mikky</li><li role="option" style="" id="txt4">Leo</li><li role="option" style="">Splinter</li></ul>"`
+      );
+
+      // todo test type text in the middle
+      // todo test removing in the middle
+      // todo tests with allownewvalue
+    });
   });
 });
 

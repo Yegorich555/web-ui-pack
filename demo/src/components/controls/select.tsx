@@ -57,6 +57,7 @@ export default function SelectControlView() {
         "Pending state with spinner if $options.items is a function with promise-result",
         "Possible to customize render of items (via $options.items; see below...)",
         "Possible to create any value not pointed in items (via $options.allowNewValue)",
+        "Possible to select multiple items (via $options.multiple)",
       ]}
     >
       <wup-form
@@ -72,9 +73,21 @@ export default function SelectControlView() {
           name="select"
           label="Select"
           initValue={items[8].value.toString()}
+          multiple={false}
           validations="window._someSelectValidations"
           autoComplete="off"
           autoFocus={false}
+        />
+        <wup-select
+          ref={(el) => {
+            if (el) {
+              el.$options.name = "multiple";
+              el.$options.multiple = true;
+              // el.$options.allowNewValue = true;
+              el.$options.items = items;
+              // el.$initValue = [items[0].value, items[1].value];
+            }
+          }}
         />
         <wup-select
           ref={(el) => {

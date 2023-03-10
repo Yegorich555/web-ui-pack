@@ -35,6 +35,7 @@
 
 **New**:
 
+- [SelectControl](src/controls/select.ts). Added option `multiple` (attribute \[multiple] & $options.multiple)
 - [SelectManyControl](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany)
 - [PopupElement](src/popup/popupElement.ts).
   - Added properties `$isClose, $isOpening, $isClosing`

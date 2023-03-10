@@ -1,5 +1,5 @@
 import { isAnimEnabled } from "../helpers/animate";
-import { nestedProperty, onEvent } from "../indexHelpers";
+import { onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
 import { WUPcssIcon } from "../styles";
 import WUPSelectControl from "./select";
@@ -184,6 +184,7 @@ export default class WUPSelectManyControl<
 
   $options: WUP.SelectMany.Options = {
     ...this.#ctr.$defaults,
+    multiple: true, // todo lock this option
     items: [],
   };
 
@@ -192,13 +193,13 @@ export default class WUPSelectManyControl<
   /** Items selected & rendered on control */
   $refItems?: Array<HTMLElement & { _wupValue: ValueType }>;
 
-  override parse(attrValue: string): ValueType[] | undefined {
-    return nestedProperty.get(window, attrValue);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  canParseInput(_text: string): boolean {
+    return false; // disable behavior from select[mulitple]
   }
 
   protected override async renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> {
     const r = await super.renderMenu(popup, menuId);
-    r.setAttribute("aria-multiselectable", "true");
     this.filterMenuItems();
     return r;
   }
@@ -248,7 +249,7 @@ export default class WUPSelectManyControl<
   }
 
   protected resetInputValue(): void {
-    this.$refInput.value = this.valueToInput(this.$value, true);
+    this.$refInput.value = this.valueToInput(this.$value as ValueType[], true);
   }
 
   protected override valueToInput(v: ValueType[] | undefined, isReset?: boolean): string {
@@ -259,10 +260,8 @@ export default class WUPSelectManyControl<
 
   // @ts-expect-error - because expected v: ValueType[]
   protected override selectValue(v: ValueType, canHideMenu = true): void {
-    const arr = this.$value || [];
-    arr.push(v);
-    canHideMenu = canHideMenu && arr.length === this._opts.items.length;
-    super.selectValue([...arr], canHideMenu);
+    canHideMenu = canHideMenu || (this.$value !== undefined && this.$value.length + 1 === this._menuItems!.all!.length);
+    super.selectValue(v as any, canHideMenu);
     this.focusMenuItem(null);
   }
 
