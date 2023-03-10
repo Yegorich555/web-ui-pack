@@ -80,15 +80,13 @@ export default function SelectControlView() {
           autoFocus={false}
         />
         <wup-select
+          name="multiple"
           initValue="window.inputSelect.initArr"
+          items="window.inputSelect.items"
           multiple
           ref={(el) => {
             if (el) {
-              el.$options.name = "multiple";
-              el.$options.items = items;
-              // el.$options.multiple = true;
               // el.$options.allowNewValue = true;
-              // el.$initValue = [items[0].value, items[1].value];
             }
           }}
         />

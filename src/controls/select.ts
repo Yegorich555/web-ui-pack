@@ -605,7 +605,7 @@ export default class WUPSelectControl<
     let focusIndex: number | null = null;
 
     // firstFocused can be selected/current
-    if (this._menuItems.focused === -1 && this._selectedMenuItem) {
+    if (this._menuItems.focused === -1 && this._selectedMenuItem && !this._selectedMenuItem.style.display) {
       if (e.key === "ArrowDown" || e.key === "ArrowUp") {
         focusIndex = this._menuItems.all.indexOf(this._selectedMenuItem as WUP.Select.MenuItemElement);
       }

@@ -1085,7 +1085,59 @@ describe("control.select", () => {
       );
       el.selectValue(10); // de-select just for coverage
 
-      // todo tests with allownewvalue
+      // with allownewvalue
+      el.blur();
+      el.$value = undefined;
+      el.$options.allowNewValue = true;
+      el.$options.items = [
+        { value: 10, text: "Donny" },
+        { value: 11, text: "Donny2" },
+        { value: 20, text: "Mikky" },
+        { value: 30, text: "Leo" },
+      ];
+      await h.wait();
+      await h.userTypeText(el.$refInput, "abcd,");
+      await h.wait(1);
+      expect(el.$value).toStrictEqual(["abcd"]);
+      expect(h.getInputCursor(el.$refInput)).toBe("abcd, |");
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt9" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="">Donny</li><li role="option" style="">Donny2</li><li role="option" style="">Mikky</li><li role="option" style="">Leo</li><li role="option" aria-disabled="true" aria-selected="false" style="display: none;">No Items</li></ul>"`
+      );
+      await h.userTypeText(el.$refInput, "hi,", { clearPrevious: false });
+      await h.wait(1);
+      expect(el.$value).toStrictEqual(["abcd", "hi"]);
+      await h.userRemove(el.$refInput);
+      await h.wait(1);
+      expect(el.$value).toStrictEqual(["abcd"]);
+
+      el.blur();
+      await h.wait();
+      await h.userTypeText(el.$refInput, "Don", { clearPrevious: false });
+      await h.wait(1);
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt10" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option">Donny</li><li role="option">Donny2</li><li role="option" style="display: none;">Mikky</li><li role="option" style="display: none;">Leo</li></ul>"`
+      );
+      el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true })); // focus 1st visible item in menu
+      expect(el.querySelector("[focused]")?.textContent).toBe("Donny");
+      el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); // select focused item in menu
+      await h.wait(1);
+      expect(el.$value).toStrictEqual(["abcd", 10]);
+
+      // possible issue: ArrowDown selects 2nd instead 1st
+      el.blur();
+      el.$value = [20];
+      await h.wait();
+      await h.userTypeText(el.$refInput, "don", { clearPrevious: false });
+      await h.wait();
+      expect(el.$refInput.value).toBe("Mikky, don");
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt12" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option">Donny</li><li role="option">Donny2</li><li role="option" style="display: none;" aria-selected="true">Mikky</li><li role="option" style="display: none;">Leo</li></ul>"`
+      );
+      el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true })); // focus 1st visible item in menu
+      expect(el.querySelector("[focused]")?.textContent).toBe("Donny");
+      el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); // select focused item in menu
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([20, 10]);
     });
   });
 });
