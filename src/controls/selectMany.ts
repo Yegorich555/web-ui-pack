@@ -4,7 +4,7 @@ import WUPPopupElement from "../popup/popupElement";
 import { WUPcssIcon } from "../styles";
 import WUPSelectControl from "./select";
 
-const tagName = "wup-select-many";
+const tagName = "wup-selectmany";
 
 declare global {
   namespace WUP.SelectMany {
@@ -29,7 +29,7 @@ declare global {
 
 /** Form-control with dropdown/combobox behavior & ability to select several items
  * @example
-  const el = document.createElement("wup-select-many");
+  const el = document.createElement("wup-selectmany");
   el.$options.name = "gender";
   el.$options.items = [
     { value: 1, text: "Male" },
@@ -42,7 +42,7 @@ declare global {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-select-many name="gender" initvalue="window.myInitValue" validations="myValidations" items="window.myDropdownItems" />
+    <wup-selectmany name="gender" initvalue="window.myInitValue" validations="myValidations" items="window.myDropdownItems" />
   </wup-form>;
   @tutorial Troubleshooting
  * * Accessibility. Screen readers announce 'blank' when focus on not-empty control.

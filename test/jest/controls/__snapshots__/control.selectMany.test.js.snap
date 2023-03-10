@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`control.selectMany $ariaDetails 1`] = `
-<wup-select-many>
+<wup-selectmany>
   <label
     for="txt1"
   >
@@ -30,11 +30,11 @@ exports[`control.selectMany $ariaDetails 1`] = `
       type="button"
     />
   </label>
-</wup-select-many>
+</wup-selectmany>
 `;
 
 exports[`control.selectMany $ariaDetails 2`] = `
-<wup-select-many>
+<wup-selectmany>
   <label
     for="txt1"
   >
@@ -58,11 +58,11 @@ exports[`control.selectMany $ariaDetails 2`] = `
       type="button"
     />
   </label>
-</wup-select-many>
+</wup-selectmany>
 `;
 
 exports[`control.selectMany $ariaSpeak 1`] = `
-<wup-select-many>
+<wup-selectmany>
   <label
     for="txt1"
   >
@@ -95,11 +95,11 @@ exports[`control.selectMany $ariaSpeak 1`] = `
   >
     Hello
   </section>
-</wup-select-many>
+</wup-selectmany>
 `;
 
 exports[`control.selectMany $ariaSpeak 2`] = `
-<wup-select-many>
+<wup-selectmany>
   <label
     for="txt1"
   >
@@ -124,11 +124,11 @@ exports[`control.selectMany $ariaSpeak 2`] = `
       type="button"
     />
   </label>
-</wup-select-many>
+</wup-selectmany>
 `;
 
 exports[`control.selectMany $show/$hide error 1`] = `
-<wup-select-many>
+<wup-selectmany>
   <label
     for="txt1"
   >
@@ -152,11 +152,11 @@ exports[`control.selectMany $show/$hide error 1`] = `
       type="button"
     />
   </label>
-</wup-select-many>
+</wup-selectmany>
 `;
 
 exports[`control.selectMany $show/$hide error 2`] = `
-<wup-select-many
+<wup-selectmany
   invalid=""
 >
   <label
@@ -198,11 +198,11 @@ exports[`control.selectMany $show/$hide error 2`] = `
       Some custom message here
     </span>
   </wup-popup>
-</wup-select-many>
+</wup-selectmany>
 `;
 
 exports[`control.selectMany $show/$hide error 3`] = `
-<wup-select-many>
+<wup-selectmany>
   <label
     for="txt1"
   >
@@ -226,10 +226,10 @@ exports[`control.selectMany $show/$hide error 3`] = `
       type="button"
     />
   </label>
-</wup-select-many>
+</wup-selectmany>
 `;
 
-exports[`control.selectMany common tests render + styles 1`] = `<wup-select-many />`;
+exports[`control.selectMany common tests render + styles 1`] = `<wup-selectmany />`;
 
 exports[`control.selectMany common tests render + styles 2`] = `
 <style>
@@ -289,8 +289,8 @@ clip: rect(1px, 1px, 1px, 1px);}
         --ctrl-select-item-del-size: 0.8em;
         --ctrl-select-gap: 6px;
       }
-  
-      WUP-SELECT-MANY {
+
+      wup-selectmany {
         contain: style;
         display: block;
         margin-bottom: 20px;
@@ -299,37 +299,37 @@ clip: rect(1px, 1px, 1px, 1px);}
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;
       }
-      WUP-SELECT-MANY strong,
-      WUP-SELECT-MANY legend {
+      wup-selectmany strong,
+      wup-selectmany legend {
         color: var(--ctrl-label);
         pointer-events: none;
       }
-      WUP-SELECT-MANY:focus-within,
-      WUP-SELECT-MANY:focus-within &gt; [menu] {
+      wup-selectmany:focus-within,
+      wup-selectmany:focus-within &gt; [menu] {
         z-index: 90010;
         box-shadow: 0 0 0 1px var(--ctrl-focus);
       }
-      WUP-SELECT-MANY:focus-within strong,
-      WUP-SELECT-MANY:focus-within legend {
+      wup-selectmany:focus-within strong,
+      wup-selectmany:focus-within legend {
         color: var(--ctrl-focus-label);
         pointer-events: initial;
       }
-      [disabled] WUP-SELECT-MANY,
-      WUP-SELECT-MANY[disabled] {
+      [disabled] wup-selectmany,
+      wup-selectmany[disabled] {
         opacity: 0.6;
         cursor: not-allowed;
         -webkit-user-select: none;
         user-select: none;
       }
-      [disabled] WUP-SELECT-MANY &gt; *,
-      WUP-SELECT-MANY[disabled] &gt; * {
+      [disabled] wup-selectmany &gt; *,
+      wup-selectmany[disabled] &gt; * {
         pointer-events: none;
       }
-      WUP-SELECT-MANY[invalid],
-      WUP-SELECT-MANY[invalid] &gt; [menu] {
+      wup-selectmany[invalid],
+      wup-selectmany[invalid] &gt; [menu] {
         box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
-      WUP-SELECT-MANY label {
+      wup-selectmany label {
         display: flex;
         align-items: center;
         box-sizing: border-box;
@@ -339,29 +339,29 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-top: 0;
         padding-bottom: 0;
       }
-      WUP-SELECT-MANY input,
-      WUP-SELECT-MANY textarea {
+      wup-selectmany input,
+      wup-selectmany textarea {
         padding: 0;
         margin: 0;
         cursor: inherit;
       }
-      WUP-SELECT-MANY [contenteditable=true] {
+      wup-selectmany [contenteditable=true] {
         margin: var(--ctrl-padding);
         margin-left: 0;
         margin-right: 0;
         cursor: inherit;
       }
-      WUP-SELECT-MANY strong {
+      wup-selectmany strong {
         cursor: inherit;
       }
-      WUP-SELECT-MANY [aria-required="true"] + strong:after,
-      WUP-SELECT-MANY fieldset[aria-required="true"] &gt; legend:after {
+      wup-selectmany [aria-required="true"] + strong:after,
+      wup-selectmany fieldset[aria-required="true"] &gt; legend:after {
         content: "*";
         font-size: larger;
         font-weight: bolder;
         line-height: 0;
       }
-      WUP-SELECT-MANY [error] {
+      wup-selectmany [error] {
         cursor: pointer;
         font-size: small;
         color: var(--ctrl-err-text);
@@ -370,19 +370,19 @@ clip: rect(1px, 1px, 1px, 1px);}
         overflow: auto;
         overflow: overlay;
       }
-      WUP-SELECT-MANY [error] ul {
+      wup-selectmany [error] ul {
         margin:0; padding:2px 4px 2px;
       }
-      WUP-SELECT-MANY [error] li {
+      wup-selectmany [error] li {
         display: flex;
         align-items: center;
         margin-left: -5px;
       }
-      WUP-SELECT-MANY [error] li:before {
+      wup-selectmany [error] li:before {
         content: '';
         --ctrl-icon-img: var(--wup-icon-dot);
         --ctrl-icon: var(--ctrl-err-text);
-        
+
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
@@ -403,48 +403,48 @@ mask-position: center;
 -webkit-mask-image: var(--ctrl-icon-img);
 mask-image: var(--ctrl-icon-img);
       }
-      WUP-SELECT-MANY [error] li[valid] {
+      wup-selectmany [error] li[valid] {
         color: var(--ctrl-err-icon-valid);
       }
-      WUP-SELECT-MANY [error] li[valid]:before {
+      wup-selectmany [error] li[valid]:before {
         content: '';
         --ctrl-icon-img: var(--wup-icon-check);
         --ctrl-icon: var(--ctrl-err-icon-valid);
       }
-      WUP-SELECT-MANY:focus-within [error] {
+      wup-selectmany:focus-within [error] {
         max-height: none;
       }
       @media (hover: hover) and (pointer: fine) {
-        /*WUP-SELECT-MANY:hover {
+        /*wup-selectmany:hover {
           z-index: 90011;
         }
-        WUP-SELECT-MANY:hover [error] {
+        wup-selectmany:hover [error] {
           max-height: none;
         }*/
-        WUP-SELECT-MANY:hover,
-        WUP-SELECT-MANY:hover &gt; [menu] {
+        wup-selectmany:hover,
+        wup-selectmany:hover &gt; [menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
-        WUP-SELECT-MANY[invalid]:hover,
-        WUP-SELECT-MANY[invalid]:hover &gt; [menu] {
+        wup-selectmany[invalid]:hover,
+        wup-selectmany[invalid]:hover &gt; [menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
         }
       }
-        WUP-SELECT-MANY {
+        wup-selectmany {
           contain: style;
           cursor: text;
         }
-        WUP-SELECT-MANY label &gt; span {
+        wup-selectmany label &gt; span {
           width: 100%;
           position: relative;
           display: flex;
           flex-direction: row-reverse;
         }
-        WUP-SELECT-MANY input,
-        WUP-SELECT-MANY textarea,
-        WUP-SELECT-MANY [maskholder],
-        WUP-SELECT-MANY [prefix],
-        WUP-SELECT-MANY [postfix] {
+        wup-selectmany input,
+        wup-selectmany textarea,
+        wup-selectmany [maskholder],
+        wup-selectmany [prefix],
+        wup-selectmany [postfix] {
           padding: var(--ctrl-padding);
           padding-left: 0;
           padding-right: 0;
@@ -455,56 +455,56 @@ mask-image: var(--ctrl-icon-img);
           overflow: hidden;
           white-space: nowrap;
         }
-        WUP-SELECT-MANY input,
-        WUP-SELECT-MANY textarea,
-        WUP-SELECT-MANY [contenteditable=true],
-        WUP-SELECT-MANY [maskholder],
-        WUP-SELECT-MANY [postfix] {
+        wup-selectmany input,
+        wup-selectmany textarea,
+        wup-selectmany [contenteditable=true],
+        wup-selectmany [maskholder],
+        wup-selectmany [postfix] {
           width: 100%;
           box-sizing: border-box;
           border: none;
           background: none;
           outline: none;
         }
-        WUP-SELECT-MANY [prefix],
-        WUP-SELECT-MANY [postfix] {
+        wup-selectmany [prefix],
+        wup-selectmany [postfix] {
           color: var(--ctrl-label);
           flex-shrink: 0;
         }
-        WUP-SELECT-MANY [maskholder],
-        WUP-SELECT-MANY [prefix],
-        WUP-SELECT-MANY [postfix] {
+        wup-selectmany [maskholder],
+        wup-selectmany [prefix],
+        wup-selectmany [postfix] {
           display: none;
           pointer-events: none;
           text-overflow: initial;
           white-space: pre;
         }
-        WUP-SELECT-MANY [postfix] {
+        wup-selectmany [postfix] {
           position: absolute;
         }
-        WUP-SELECT-MANY [maskholder] {
+        wup-selectmany [maskholder] {
           position: absolute;
           opacity: 0.65;
         }
-        WUP-SELECT-MANY [maskholder]&gt;i,
-        WUP-SELECT-MANY [postfix]&gt;i {
+        wup-selectmany [maskholder]&gt;i,
+        wup-selectmany [postfix]&gt;i {
           visibility: hidden;
           font: inherit;
           white-space: pre;
         }
-        WUP-SELECT-MANY input:-webkit-autofill,
-        WUP-SELECT-MANY textarea:-webkit-autofill,
-        WUP-SELECT-MANY [contenteditable=true]:-webkit-autofill {
+        wup-selectmany input:-webkit-autofill,
+        wup-selectmany textarea:-webkit-autofill,
+        wup-selectmany [contenteditable=true]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
-        WUP-SELECT-MANY input:autofill,
-        WUP-SELECT-MANY textarea:autofill,
-        WUP-SELECT-MANY [contenteditable=true]:autofill {
+        wup-selectmany input:autofill,
+        wup-selectmany textarea:autofill,
+        wup-selectmany [contenteditable=true]:autofill {
           font: inherit;
           background-clip: text;
         }
-        WUP-SELECT-MANY strong {
+        wup-selectmany strong {
           display: block;
           position: absolute;
           top: 50%;
@@ -522,37 +522,37 @@ mask-image: var(--ctrl-icon-img);
           text-decoration: none;
         }
         @media not all and (prefers-reduced-motion) {
-          WUP-SELECT-MANY strong {
+          wup-selectmany strong {
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
-        WUP-SELECT-MANY input:not(:focus)::placeholder,
-        WUP-SELECT-MANY textarea:not(:focus)::placeholder {
+        wup-selectmany input:not(:focus)::placeholder,
+        wup-selectmany textarea:not(:focus)::placeholder {
           color: transparent;
         }
-        WUP-SELECT-MANY:focus-within strong,
-        WUP-SELECT-MANY input:not(:placeholder-shown) + strong,
-        WUP-SELECT-MANY textarea:not(:placeholder-shown) + strong,
-        WUP-SELECT-MANY [contenteditable=true]:not(:empty) + strong,
-        WUP-SELECT-MANY legend {
+        wup-selectmany:focus-within strong,
+        wup-selectmany input:not(:placeholder-shown) + strong,
+        wup-selectmany textarea:not(:placeholder-shown) + strong,
+        wup-selectmany [contenteditable=true]:not(:empty) + strong,
+        wup-selectmany legend {
           top: 0.2em;
           transform: scale(0.9);
         }
-        WUP-SELECT-MANY:focus-within [maskholder],
-        WUP-SELECT-MANY:focus-within [prefix],
-        WUP-SELECT-MANY:focus-within [postfix],
-        WUP-SELECT-MANY input:not(:placeholder-shown) ~ [prefix],
-        WUP-SELECT-MANY input:not(:placeholder-shown) ~ [postfix],
-        WUP-SELECT-MANY textarea:not(:placeholder-shown) ~ [prefix],
-        WUP-SELECT-MANY textarea:not(:placeholder-shown) ~ [postfix] {
+        wup-selectmany:focus-within [maskholder],
+        wup-selectmany:focus-within [prefix],
+        wup-selectmany:focus-within [postfix],
+        wup-selectmany input:not(:placeholder-shown) ~ [prefix],
+        wup-selectmany input:not(:placeholder-shown) ~ [postfix],
+        wup-selectmany textarea:not(:placeholder-shown) ~ [prefix],
+        wup-selectmany textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
         }
         /* style for icons */
-        WUP-SELECT-MANY label button,
-        WUP-SELECT-MANY label button:after,
-        WUP-SELECT-MANY label:after,
-        WUP-SELECT-MANY label:before {
-          
+        wup-selectmany label button,
+        wup-selectmany label button:after,
+        wup-selectmany label:after,
+        wup-selectmany label:before {
+
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
@@ -575,97 +575,97 @@ mask-image: var(--ctrl-icon-img);
           -webkit-mask-image: none;
           mask-image: none;
         }
-        WUP-SELECT-MANY label:after {
+        wup-selectmany label:after {
           cursor: pointer;
           margin-right: calc(var(--ctrl-icon-size) / -2);
         }
-        WUP-SELECT-MANY label:before {
+        wup-selectmany label:before {
           cursor: pointer;
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
-        WUP-SELECT-MANY label button {
+        wup-selectmany label button {
           contain: strict;
           position: relative;
           z-index: 1;
         }
-        WUP-SELECT-MANY label&gt;span + button {
+        wup-selectmany label&gt;span + button {
           margin-right: -0.5em;
         }
-        WUP-SELECT-MANY button[clear] {
+        wup-selectmany button[clear] {
           background: none;
           align-self: center;
         }
-        WUP-SELECT-MANY button[clear]:after {
+        wup-selectmany button[clear]:after {
           content: "";
           padding: 0;
           -webkit-mask-image: var(--wup-icon-cross);
           mask-image: var(--wup-icon-cross);
         }
-        WUP-SELECT-MANY button[clear]:after,
-        WUP-SELECT-MANY button[clear]:before {
+        wup-selectmany button[clear]:after,
+        wup-selectmany button[clear]:before {
           position: absolute;
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           width: 100%;
         }
-        WUP-SELECT-MANY button[clear]:before {
+        wup-selectmany button[clear]:before {
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
         }
         @media (hover: hover) and (pointer: fine) {
-          WUP-SELECT-MANY button[clear]:hover {
+          wup-selectmany button[clear]:hover {
             box-shadow: none;
           }
-          WUP-SELECT-MANY button[clear]:hover:before {
+          wup-selectmany button[clear]:hover:before {
             content: "";
             border-radius: 50%;
             box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
           }
-          WUP-SELECT-MANY button[clear]:hover:after {
+          wup-selectmany button[clear]:hover:after {
             background-color: var(--ctrl-err-text);
           }
-          WUP-SELECT-MANY[readonly] button[clear] {
+          wup-selectmany[readonly] button[clear] {
             pointer-events: none;
           }
         }
-      WUP-SELECT-MANY {
+      wup-selectmany {
         cursor: pointer;
       }
-      WUP-SELECT-MANY input {
+      wup-selectmany input {
         cursor: text;
       }
-      WUP-SELECT-MANY input:placeholder-shown,
-      WUP-SELECT-MANY input:read-only {
+      wup-selectmany input:placeholder-shown,
+      wup-selectmany input:read-only {
         cursor: pointer;
       }
-      WUP-SELECT-MANY label::after {
+      wup-selectmany label::after {
         content: "";
         -webkit-mask-image: var(--ctrl-icon-img);
         mask-image: var(--ctrl-icon-img);
       }
       @media not all and (prefers-reduced-motion) {
-        WUP-SELECT-MANY label::after {
+        wup-selectmany label::after {
           transition: transform var(--anim);
         }
       }
-      WUP-SELECT-MANY button[clear] {
+      wup-selectmany button[clear] {
         margin: 0;
       }
-      WUP-SELECT-MANY [menu] {
+      wup-selectmany [menu] {
         padding: 0;
         max-height: 300px;
         z-index: 90010;
       }
-      WUP-SELECT-MANY {
+      wup-selectmany {
         --ctrl-icon-img: var(--ctrl-select-icon-img);
       }
-      WUP-SELECT-MANY[opened] label::after {
+      wup-selectmany[opened] label::after {
         transform: rotate(180deg);
       }
-      WUP-SELECT-MANY [menu] {
+      wup-selectmany [menu] {
         overflow: hidden;
       }
-      WUP-SELECT-MANY [menu] ul {
+      wup-selectmany [menu] ul {
         margin: 0;
         padding: 0;
         list-style-type: none;
@@ -673,48 +673,48 @@ mask-image: var(--ctrl-icon-img);
         overflow: auto;
         max-height: 300px;
       }
-      
-WUP-SELECT-MANY [menu]&gt;ul::-webkit-scrollbar {
+
+wup-selectmany [menu]&gt;ul::-webkit-scrollbar {
   width: 10px; height: 10px;
   cursor: pointer;
 }
-WUP-SELECT-MANY [menu]&gt;ul::-webkit-scrollbar-corner {
+wup-selectmany [menu]&gt;ul::-webkit-scrollbar-corner {
   background: none;
 }
-WUP-SELECT-MANY [menu]&gt;ul::-webkit-scrollbar-thumb {
+wup-selectmany [menu]&gt;ul::-webkit-scrollbar-thumb {
   border: 3px solid rgba(0,0,0,0);
   background-clip: padding-box;
   background-color: var(--scroll, rgba(0,0,0,0.2));
   border-radius: 999px;
 }
-WUP-SELECT-MANY [menu]&gt;ul::-webkit-scrollbar-track-piece:vertical:start,
-WUP-SELECT-MANY [menu]&gt;ul::-webkit-scrollbar-track-piece:vertical:end,
-WUP-SELECT-MANY [menu]&gt;ul::-webkit-scrollbar-track-piece:horizontal:start,
-WUP-SELECT-MANY [menu]&gt;ul::-webkit-scrollbar-track-piece:horizontal:end {
+wup-selectmany [menu]&gt;ul::-webkit-scrollbar-track-piece:vertical:start,
+wup-selectmany [menu]&gt;ul::-webkit-scrollbar-track-piece:vertical:end,
+wup-selectmany [menu]&gt;ul::-webkit-scrollbar-track-piece:horizontal:start,
+wup-selectmany [menu]&gt;ul::-webkit-scrollbar-track-piece:horizontal:end {
   margin: 0;
 }
 @media (hover) {
-  WUP-SELECT-MANY [menu]&gt;ul::-webkit-scrollbar-thumb:hover {
+  wup-selectmany [menu]&gt;ul::-webkit-scrollbar-thumb:hover {
     background-color: var(--scroll-hover, rgba(0,0,0,0.5));
   }
 }
-      WUP-SELECT-MANY [menu] li {
+      wup-selectmany [menu] li {
         padding: 1em;
         border-radius: var(--ctrl-border-radius);
       }
       @media (hover: hover) and (pointer: fine) {
-        WUP-SELECT-MANY [menu] li:hover {
+        wup-selectmany [menu] li:hover {
           box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
         }
       }
-      WUP-SELECT-MANY [menu] li[aria-selected="true"] {
+      wup-selectmany [menu] li[aria-selected="true"] {
         color: var(--ctrl-selected);
         display: flex;
       }
-      WUP-SELECT-MANY [menu] li[aria-selected="true"]:after {
+      wup-selectmany [menu] li[aria-selected="true"]:after {
         content: "";
         --ctrl-icon-img: var(--wup-icon-check);
-        
+
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
@@ -738,32 +738,32 @@ mask-image: var(--ctrl-icon-img);
         margin-left: auto;
         padding: 0;
       }
-      WUP-SELECT-MANY [menu] li[focused] {
+      wup-selectmany [menu] li[focused] {
         box-shadow: inset 0 0 4px 0 var(--ctrl-focus);
       }
-      WUP-SELECT-MANY strong {
+      wup-selectmany strong {
         top: 1.6em;
         margin: calc(var(--ctrl-select-gap) / 2);
       }
-      WUP-SELECT-MANY label &gt; span {
+      wup-selectmany label &gt; span {
         flex-wrap: wrap;
         flex-direction: row;
         padding: var(--ctrl-padding);
         padding-left: 0; padding-right: 0;
         margin: calc(var(--ctrl-select-gap) / -2);
       }
-      WUP-SELECT-MANY [item],
-      WUP-SELECT-MANY input {
+      wup-selectmany [item],
+      wup-selectmany input {
         margin: calc(var(--ctrl-select-gap) / 2);
         padding: var(--ctrl-select-gap);
       }
-      WUP-SELECT-MANY input {
+      wup-selectmany input {
         flex: 1 1 auto;
         width: 0;
         min-width: 2em;
         padding-left: 0; padding-right: 0;
       }
-      WUP-SELECT-MANY [item] {
+      wup-selectmany [item] {
         --ctrl-icon: var(--ctrl-select-item-del);
         --ctrl-icon-size: var(--ctrl-select-item-del-size);
         --ctrl-icon-img: var(--ctrl-select-item-del-img);
@@ -775,8 +775,8 @@ mask-image: var(--ctrl-icon-img);
         white-space: nowrap;
         overflow: hidden;
       }
-      WUP-SELECT-MANY [item]:after {
-        
+      wup-selectmany [item]:after {
+
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
@@ -802,7 +802,7 @@ mask-image: var(--ctrl-icon-img);
         margin-left: 0.5em;
       }
       @media (hover: hover) and (pointer: fine) {
-        WUP-SELECT-MANY [item]:hover {
+        wup-selectmany [item]:hover {
           --ctrl-icon: var(--ctrl-err-text);
           text-decoration: line-through;
           color: var(--ctrl-err-text);
@@ -810,19 +810,19 @@ mask-image: var(--ctrl-icon-img);
         }
       }
       @media not all and (pointer: fine) {
-        WUP-SELECT-MANY:focus-within [item]:active {
+        wup-selectmany:focus-within [item]:active {
           --ctrl-icon: var(--ctrl-err-text);
           text-decoration: line-through;
           color: var(--ctrl-err-text);
           background-color: var(--ctrl-err-bg);
         }
-        WUP-SELECT-MANY [item] {
+        wup-selectmany [item] {
           user-select: none;
           -webkit-user-select: none;
         }
       }
       @media not all and (prefers-reduced-motion) {
-        WUP-SELECT-MANY [item][removed] {
+        wup-selectmany [item][removed] {
           transition: all var(--anim-time) ease-in-out;
           padding-left: 0; padding-right: 0;
           margin-left: 0; margin-right: 0;
@@ -834,7 +834,7 @@ mask-image: var(--ctrl-icon-img);
 `;
 
 exports[`control.selectMany validations $options.validationShowAll 1`] = `
-<wup-select-many
+<wup-selectmany
   invalid=""
 >
   <label
@@ -877,11 +877,11 @@ exports[`control.selectMany validations $options.validationShowAll 1`] = `
       This field is required
     </span>
   </wup-popup>
-</wup-select-many>
+</wup-selectmany>
 `;
 
 exports[`control.selectMany validations $options.validationShowAll 2`] = `
-<wup-select-many>
+<wup-selectmany>
   <label
     for="txt1"
   >
@@ -913,11 +913,11 @@ exports[`control.selectMany validations $options.validationShowAll 2`] = `
       type="button"
     />
   </label>
-</wup-select-many>
+</wup-selectmany>
 `;
 
 exports[`control.selectMany validations $options.validationShowAll 3`] = `
-<wup-select-many
+<wup-selectmany
   invalid=""
 >
   <label
@@ -965,11 +965,11 @@ exports[`control.selectMany validations $options.validationShowAll 3`] = `
       This field is required
     </span>
   </wup-popup>
-</wup-select-many>
+</wup-selectmany>
 `;
 
 exports[`control.selectMany validations options.validationCase 1`] = `
-<wup-select-many>
+<wup-selectmany>
   <label
     for="txt1"
   >
@@ -994,11 +994,11 @@ exports[`control.selectMany validations options.validationCase 1`] = `
       type="button"
     />
   </label>
-</wup-select-many>
+</wup-selectmany>
 `;
 
 exports[`control.selectMany validations options.validationCase 2`] = `
-<wup-select-many
+<wup-selectmany
   invalid=""
 >
   <label
@@ -1082,11 +1082,11 @@ exports[`control.selectMany validations options.validationCase 2`] = `
       This field is required
     </span>
   </wup-popup>
-</wup-select-many>
+</wup-selectmany>
 `;
 
 exports[`control.selectMany validations options.validationCase 3`] = `
-<wup-select-many
+<wup-selectmany
   invalid=""
   opened=""
 >
@@ -1176,11 +1176,11 @@ exports[`control.selectMany validations options.validationCase 3`] = `
       </li>
     </ul>
   </wup-popup>
-</wup-select-many>
+</wup-selectmany>
 `;
 
 exports[`control.selectMany validations options.validationCase 4`] = `
-<wup-select-many
+<wup-selectmany
   invalid=""
 >
   <label
@@ -1230,14 +1230,14 @@ exports[`control.selectMany validations options.validationCase 4`] = `
       This field is required
     </span>
   </wup-popup>
-</wup-select-many>
+</wup-selectmany>
 `;
 
 exports[`control.selectMany with form 1`] = `
 <wup-form
   role="form"
 >
-  <wup-select-many>
+  <wup-selectmany>
     <label
       for="txt1"
     >
@@ -1263,6 +1263,6 @@ exports[`control.selectMany with form 1`] = `
         type="button"
       />
     </label>
-  </wup-select-many>
+  </wup-selectmany>
 </wup-form>
 `;

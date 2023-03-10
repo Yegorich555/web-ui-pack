@@ -22,7 +22,7 @@ const items = [
   // { text: (v, li, i) => li.append(v.toString()), value: 124 },
 ];
 
-(window as any).inputSmany = {
+(window as any).inputSelectMany = {
   items,
   initValue: [items[0].value, items[1].value],
 };
@@ -43,7 +43,7 @@ export default function SelectManyControlView() {
       header="SelectManyControl"
       link="src/controls/selectMany.ts"
       details={{
-        tag: "wup-select-many",
+        tag: "wup-selectmany",
         cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
       }}
       features={[
@@ -60,11 +60,11 @@ export default function SelectManyControlView() {
           }
         }}
       >
-        <wup-select-many
-          items="window.inputSmany.items"
+        <wup-selectmany
+          items="window.inputSelectMany.items"
           name="selectMany"
           label="Select Many"
-          initValue="window.inputSmany.initValue"
+          initValue="window.inputSelectMany.initValue"
           validations="window._someSelectValidations"
           autoComplete="off"
           autoFocus={false}
@@ -75,8 +75,8 @@ export default function SelectManyControlView() {
             }
           }}
         />
-        <wup-select-many label="Empty" items="inputSmany.items" />
-        <wup-select-many
+        <wup-selectmany label="Empty" items="inputSelectMany.items" />
+        <wup-selectmany
           class={styles.withDelIcon}
           ref={(el) => {
             if (el) {
@@ -88,7 +88,7 @@ export default function SelectManyControlView() {
             }
           }}
         />
-        {/* <wup-select-many
+        {/* <wup-selectmany
           ref={(el) => {
             if (el) {
               el.$options.name = "withPending";
@@ -97,7 +97,7 @@ export default function SelectManyControlView() {
             }
           }}
         />
-        <wup-select-many
+        <wup-selectmany
           ref={(el) => {
             if (el) {
               el.$options.name = "customSpin";
@@ -115,7 +115,7 @@ export default function SelectManyControlView() {
             }
           }}
         />
-        <wup-select-many
+        <wup-selectmany
           ref={(el) => {
             if (el) {
               el.$options.name = "asDropdown";
@@ -126,7 +126,7 @@ export default function SelectManyControlView() {
             }
           }}
         />
-        <wup-select-many
+        <wup-selectmany
           ref={(el) => {
             if (el) {
               el.$options.name = "disabled";
@@ -135,7 +135,7 @@ export default function SelectManyControlView() {
             }
           }}
         />
-        <wup-select-many
+        <wup-selectmany
           ref={(el) => {
             if (el) {
               el.$options.name = "readonly";
@@ -144,7 +144,7 @@ export default function SelectManyControlView() {
             }
           }}
         />
-        <wup-select-many
+        <wup-selectmany
           initValue="13"
           ref={(el) => {
             if (el) {
@@ -154,7 +154,7 @@ export default function SelectManyControlView() {
             }
           }}
         />
-        <wup-select-many
+        <wup-selectmany
           initValue="14"
           ref={(el) => {
             if (el) {

@@ -91,7 +91,7 @@ export default function ControlsView() {
             }
           }}
         />
-        {/* <wup-select-many
+        {/* <wup-selectmany
           class={styles.multiCustom}
           ref={(el) => {
             if (el) {

@@ -14,7 +14,7 @@ const getItems = () => [
 let el;
 initTestBaseControl({
   type: WUPSelectManyControl,
-  htmlTag: "wup-select-many",
+  htmlTag: "wup-selectmany",
   onInit: (e) => {
     el = e;
     el.$options.items = getItems();
