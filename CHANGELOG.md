@@ -22,6 +22,7 @@
 - Combobox controls (Select, Date, Time). Now popup isn't opened if user clears control and gets focus at the same time
 - Combobox controls (Select, Date, Time). Click on disabled item throws console.error
 - Combobox controls (Select, Date, Time). Focus goes to menu-list by keydown 'Tab' in Firefox
+- [SelectControl](src/controls/select.ts). Sometimes popup isn't not scrolled to selected item during the opening
 - [SpinElement](src/spinElement.ts). Animation for TwinDualRing doesn't work on Safari 14-
 - [SpinElement](src/spinElement.ts). Wrong render on option `fit` on Safari 14-
 - [PopupElement](src/popup/popupElement.ts). Animation for opacity doesn't work on Safari 14-

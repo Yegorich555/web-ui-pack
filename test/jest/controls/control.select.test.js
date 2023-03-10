@@ -379,6 +379,7 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isOpen).toBe(true);
     el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.wait(1);
     el.blur();
     await h.wait();
     expect(el.$isOpen).toBe(false);

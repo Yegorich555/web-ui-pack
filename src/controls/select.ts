@@ -540,13 +540,16 @@ export default class WUPSelectControl<
     }
 
     const popup = await super.goShowMenu(showCase, e);
-    popup && this.selectMenuItemByValue(this.$value); // set aria-selected
+    if (popup) {
+      this.selectMenuItemByValue(this.$value); // set aria-selected
+      this._selectedMenuItem?.scrollIntoView({ block: "center" }); // fix: sometimes scrollIntoViewIfNeeded works wrong during the opening menu
+    }
     return popup;
   }
 
   protected override selectMenuItem(next: HTMLElement | null): void {
     if (this._opts.multiple) {
-      this._selectedMenuItem = undefined;
+      this._selectedMenuItem = undefined; // othewise multiple selection not allowed in combobox
     }
     super.selectMenuItem(next);
   }
@@ -750,5 +753,4 @@ customElements.define(tagName, WUPSelectControl);
 // NiceToHave: option to allow autoselect item without pressing Enter
 // WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation
 
-// todo 1st scroll to selected sometimes doesn't work
 // todo sometimes pending not closed after blur
