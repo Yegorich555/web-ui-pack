@@ -422,7 +422,7 @@ export default abstract class WUPBaseComboControl<
 
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
     const arr = super.gotFocus(ev);
-    this.goShowMenu(ShowCases.onFocus, ev);
+    const r = this.goShowMenu(ShowCases.onFocus, ev);
 
     let clickAfterFocus = true; // prevent clickAfterFocus
     let lblClick: ReturnType<typeof setTimeout> | false = false; // fix when labelOnClick > inputOnClick > inputOnFocus
@@ -430,7 +430,7 @@ export default abstract class WUPBaseComboControl<
       const skip = e.defaultPrevented || e.button || lblClick; // e.button > 0 if not left-click
       if (!skip) {
         if (clickAfterFocus) {
-          this.goShowMenu(ShowCases.onClick, e); // menu must be opened if openByFocus is rejected
+          r.finally(() => this.goShowMenu(ShowCases.onClick, e)); // menu must be opened if openByFocus is rejected
         } else {
           !this.#isOpen ? this.goShowMenu(ShowCases.onClick, e) : this.goHideMenu(HideCases.onClick, e);
         }
@@ -485,7 +485,8 @@ export default abstract class WUPBaseComboControl<
   protected removePopup(): void {
     this.$refPopup?.remove();
     this.$refPopup = undefined;
-    delete this._focusedMenuItem;
+    this._focusedMenuItem = undefined;
+    this._selectedMenuItem = undefined;
     if (this.#isOpen) {
       this.#isOpen = false;
       this.removeAttribute("opened");
