@@ -1009,6 +1009,21 @@ describe("control.select", () => {
         `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" id="txt3" style="">Donny</li><li role="option" style="">Mikky</li><li role="option" style="" id="txt4">Leo</li><li role="option" style="">Splinter</li></ul>"`
       );
 
+      // type in the middle - declineInput
+      el.$value = [10, 20, 30];
+      await h.wait(1);
+      expect(el.$refInput.value).toBe("Donny, Mikky, Leo, ");
+      h.setInputCursor(el.$refInput, "Donny, Mikky|, Leo, ");
+      expect(await h.userTypeText(el.$refInput, "a", { clearPrevious: false })).toBe("Donny, Mikkya|, Leo, ");
+      await h.wait(200);
+      expect(h.getInputCursor(el.$refInput)).toBe("Donny, Mikky, Leo, |");
+      // removing in the middle
+      h.setInputCursor(el.$refInput, "Donny, Mikky|, Leo, ");
+      await h.userRemove(el.$refInput);
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([10, 30]);
+      expect(h.getInputCursor(el.$refInput)).toBe("Donny, Leo, |"); // NiceToHave: move cursor to next/prev according to Backspace/Delete
+
       // initvalue
       el = document.body.appendChild(document.createElement("wup-select"));
       el.$options.items = getItems();
@@ -1034,9 +1049,42 @@ describe("control.select", () => {
       await h.wait();
       expect(el.$refInput.value).toBe("Mikky");
 
-      // todo test if user can toggle via click on menu item again
-      // todo test type text in the middle
-      // todo test removing in the middle
+      // click-toggle behavior
+      el.focus();
+      await h.wait();
+      expect(el.$isOpen).toBe(true);
+      await h.userClick(el.querySelector("li")); // select 1st item
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([20, 10]);
+      // all items must be visible
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt8" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true">Donny</li><li role="option" aria-selected="true">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
+      );
+      await h.userClick(el.querySelector("li")); // de-select 1st item
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([20]);
+      expect(el.$refInput.value).toBe("Mikky, ");
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt8" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="false">Donny</li><li role="option" aria-selected="true">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
+      );
+
+      await h.userClick(el.querySelectorAll("li")[1]); // de-select 2nd item
+      await h.wait(1);
+      expect(el.$value).toStrictEqual(undefined);
+      expect(el.$refInput.value).toBe("");
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt8" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option">Donny</li><li role="option" aria-selected="false">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
+      );
+
+      await h.userClick(el.querySelectorAll("li")[0]); // select 1st item
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([10]);
+      expect(el.$refInput.value).toBe("Donny, ");
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt8" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
+      );
+      el.selectValue(10); // de-select just for coverage
+
       // todo tests with allownewvalue
     });
   });
