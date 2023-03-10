@@ -387,12 +387,15 @@ describe("control.select", () => {
     // cover hide after show when menu is opening
     el.$options.items = () => new Promise((res) => setTimeout(() => res(getItems()), 100));
     await h.wait(1);
-    el.$showMenu();
+    el.focus();
+    el.click();
+    await h.wait(10);
     expect(el.$isOpen).toBe(true);
     await h.wait(10);
-    el.$hideMenu();
-    expect(el.$isOpen).toBe(false);
+    el.blur();
     await h.wait();
+    expect(el.$isOpen).toBe(false);
+    expect(el.$refPopup).toBeFalsy();
 
     // case: popups are visible and not closed (if change focus by Tab)
     const orig = window.getComputedStyle;

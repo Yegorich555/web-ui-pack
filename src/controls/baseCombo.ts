@@ -430,7 +430,7 @@ export default abstract class WUPBaseComboControl<
       const skip = e.defaultPrevented || e.button || lblClick; // e.button > 0 if not left-click
       if (!skip) {
         if (clickAfterFocus) {
-          r.finally(() => this.goShowMenu(ShowCases.onClick, e)); // menu must be opened if openByFocus is rejected
+          r.finally(() => this.$isFocused && this.goShowMenu(ShowCases.onClick, e)); // menu must be opened if openByFocus is rejected
         } else {
           !this.#isOpen ? this.goShowMenu(ShowCases.onClick, e) : this.goHideMenu(HideCases.onClick, e);
         }

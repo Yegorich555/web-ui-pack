@@ -753,5 +753,3 @@ customElements.define(tagName, WUPSelectControl);
 
 // NiceToHave: option to allow autoselect item without pressing Enter
 // WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation
-
-// todo sometimes pending not closed after blur
