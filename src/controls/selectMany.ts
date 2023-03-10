@@ -10,7 +10,11 @@ declare global {
   namespace WUP.SelectMany {
     interface EventMap extends WUP.BaseCombo.EventMap {}
     interface ValidityMap extends WUP.BaseCombo.ValidityMap {}
-    interface Defaults<T = any, VM = ValidityMap> extends WUP.Select.Defaults<T, VM> {}
+    interface Defaults<T = any, VM = ValidityMap> extends WUP.Select.Defaults<T, VM> {
+      /** Hide items in menu that selected
+       * @defaultValue false */
+      hideSelected?: boolean;
+    }
     interface Options<T = any, VM = ValidityMap> extends WUP.Select.Options<T, VM>, Defaults<T, VM> {}
     interface Attributes extends WUP.Select.Attributes {}
     interface JSXProps<C = WUPSelectManyControl> extends WUP.Select.JSXProps<C>, Attributes {}
@@ -172,7 +176,7 @@ export default class WUPSelectManyControl<
     inputValue: string,
     inputRawValue: string
   ): boolean {
-    if (this.$value?.includes(menuItemValue)) {
+    if (this._opts.hideSelected && this.$value?.includes(menuItemValue)) {
       return false;
     }
     return super.$filterMenuItem.call(this, menuItemText, menuItemValue, inputValue, inputRawValue);
@@ -268,22 +272,19 @@ export default class WUPSelectManyControl<
   protected override selectValue(v: ValueType, canHideMenu = true): void {
     canHideMenu = canHideMenu || (this.$value !== undefined && this.$value.length + 1 === this._menuItems!.all!.length);
     super.selectValue(v as any, canHideMenu);
-    this.focusMenuItem(null);
+    this._opts.hideSelected && this.focusMenuItem(null);
   }
 
-  // @ts-expect-error - because expected v: ValueType[]
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected selectMenuItemByValue(v: ValueType | undefined): void {
-    /* skip this because item is filtered/hidden in this case */
+  protected selectMenuItemByValue(v: ValueType[] | undefined): void {
+    !this._opts.hideSelected && super.selectMenuItemByValue(v);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override selectMenuItem(next: HTMLElement | null): void {
-    /* skip this because item is filtered/hidden in this case */
+    !this._opts.hideSelected && super.selectMenuItem(next);
   }
 
   protected override clearFilterMenuItems(): void {
-    /* skip this because default filtering doesn't reset after re-opening menu */
+    !this._opts.hideSelected && super.clearFilterMenuItems(); // skip this because default filtering doesn't reset after re-opening menu
   }
 
   /** Called to remove item with animation */

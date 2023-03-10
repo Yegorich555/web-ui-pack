@@ -56,6 +56,7 @@ describe("control.selectMany", () => {
   });
 
   test("items rendering", async () => {
+    el.$options.hideSelected = true;
     el.$initValue = [10, 30];
     await h.wait(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
@@ -193,6 +194,7 @@ describe("control.selectMany", () => {
   });
 
   test("animation for removed item", async () => {
+    el.$options.hideSelected = true;
     jest.spyOn(window, "matchMedia").mockImplementation((s) => ({ matches: s !== "(prefers-reduced-motion)" })); // simulate 'prefers-reduced-motion' === false
     expect(isAnimEnabled()).toBe(true);
 
@@ -248,6 +250,7 @@ describe("control.selectMany", () => {
   });
 
   test("menu: focus behavior", async () => {
+    el.$options.hideSelected = true;
     el.$value = [getItems()[0].value];
     el.focus();
     await h.wait();
@@ -272,5 +275,9 @@ describe("control.selectMany", () => {
     expect(el.querySelector("[focused]").textContent).toBe(getItems()[3].text); // last item
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
     expect(el.querySelector("[focused]").textContent).toBe(getItems()[2].text); // 3rd item
+  });
+
+  test("option [hideSelected]", async () => {
+    // todo add tests here
   });
 });

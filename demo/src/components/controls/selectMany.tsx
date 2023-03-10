@@ -75,7 +75,15 @@ export default function SelectManyControlView() {
             }
           }}
         />
-        <wup-selectmany label="Empty" items="inputSelectMany.items" />
+        <wup-selectmany
+          label="With option hideSelected"
+          items="inputSelectMany.items"
+          ref={(el) => {
+            if (el) {
+              el.$options.hideSelected = true;
+            }
+          }}
+        />
         <wup-selectmany
           class={styles.withDelIcon}
           ref={(el) => {
@@ -88,50 +96,14 @@ export default function SelectManyControlView() {
             }
           }}
         />
-        {/* <wup-selectmany
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "withPending";
-              el.$options.label = "With pending (set promise to $options.items)";
-              el.$options.items = () => new Promise((resolve) => setTimeout(() => resolve(items), 3000));
-            }
-          }}
-        />
-        <wup-selectmany
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "customSpin";
-              el.$options.label = "CustomSpin: see WUPSpinElement types or override renderSpin() method";
-              el.$options.items = () => new Promise((resolve) => setTimeout(() => resolve(items), 3000));
-              el.renderSpin = function renderCustomSpin(this: WUPSelectControl) {
-                const spin = document.createElement("wup-spin-sel");
-                spin.$options.fit = true;
-                spin.$options.overflowFade = true;
-                spin.$options.overflowTarget = this;
-                this.appendChild(spin);
-                return spin;
-              };
-              el.$initValue = 13;
-            }
-          }}
-        />
-        <wup-selectmany
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "asDropdown";
-              el.$options.label = "As dropdown ($options.readOnlyInput)";
-              el.$options.items = items;
-              // el.$initValue = ir - 3;
-              el.$options.readOnlyInput = true;
-            }
-          }}
-        />
+
         <wup-selectmany
           ref={(el) => {
             if (el) {
               el.$options.name = "disabled";
               el.$options.items = items;
               el.$options.disabled = true;
+              el.$initValue = [12];
             }
           }}
         />
@@ -140,31 +112,22 @@ export default function SelectManyControlView() {
             if (el) {
               el.$options.name = "readonly";
               el.$options.items = items;
-              el.$options.readOnly = true;
+              el.$options.readOnly = true; // todo disable hover state for readonly
+              el.$initValue = [11];
             }
           }}
         />
         <wup-selectmany
-          initValue="13"
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "withoutClearButton";
-              el.$options.items = items;
-              el.$options.clearButton = false;
-            }
-          }}
-        />
-        <wup-selectmany
-          initValue="14"
           ref={(el) => {
             if (el) {
               el.$options.name = "allowsNewValue";
-              el.$options.label = "Allows New Value ($options.allowNewValue)";
+              el.$options.label = "Allow New Value ($options.allowNewValue)";
               el.$options.items = items;
               el.$options.allowNewValue = true;
+              // todo allowNewValue doesn't allow >1 value & closes popup after 'Enter'
             }
           }}
-        /> */}
+        />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

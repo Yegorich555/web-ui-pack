@@ -1043,8 +1043,8 @@ exports[`control.selectMany validations options.validationCase 2`] = `
       tabindex="-1"
     >
       <li
+        aria-selected="true"
         role="option"
-        style=""
       >
         Donny
       </li>
@@ -1154,8 +1154,8 @@ exports[`control.selectMany validations options.validationCase 3`] = `
       tabindex="-1"
     >
       <li
+        aria-selected="true"
         role="option"
-        style="display: none;"
       >
         Donny
       </li>
