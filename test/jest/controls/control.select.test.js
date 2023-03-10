@@ -768,6 +768,9 @@ describe("control.select", () => {
     await h.userClick(el);
     await h.wait();
     expect(el.$isOpen).toBe(true);
+    expect(() =>
+      arrLi[2].parentElement.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }))
+    ).not.toThrow();
     await h.userClick(arrLi[2]);
     await h.wait();
     expect(el.$isOpen).toBe(false);

@@ -381,10 +381,11 @@ export default class WUPSelectControl<
         e.preventDefault(); // to prevent popup-hide-show
 
         let t = e.target as Node | HTMLElement;
+        if (t === ul) {
+          return;
+        }
         while (1) {
-          // todo exception: t is null when click on ul direclty
           const parent = t.parentElement as HTMLElement;
-          /* istanbul ignore else */
           if (parent === ul) {
             const isDisabled = (t as HTMLElement).hasAttribute("aria-disabled");
             !isDisabled && this.gotMenuItemClick(e, t as WUP.Select.MenuItemElement);
