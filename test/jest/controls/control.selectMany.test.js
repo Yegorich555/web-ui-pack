@@ -50,7 +50,7 @@ describe("control.selectMany", () => {
     ],
     validations: {},
     validationsSkip: ["_parse", "_mask"],
-    attrs: { items: { skip: true } },
+    attrs: { items: { skip: true }, multiple: { skip: true } },
     $options: { items: { skip: true } },
     onCreateNew: (e) => (e.$options.items = getItems()),
   });
@@ -189,7 +189,7 @@ describe("control.selectMany", () => {
     await h.wait();
     expect(el.$refInput.value).toBe(" ");
 
-    expect(el.clearFilterMenuItems).not.toThrow(); // for coverage
+    expect(() => el.clearFilterMenuItems()).not.toThrow(); // for coverage
   });
 
   test("animation for removed item", async () => {

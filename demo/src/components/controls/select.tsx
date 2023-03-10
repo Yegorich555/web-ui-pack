@@ -160,8 +160,8 @@ export default function SelectControlView() {
           initValue="14"
           ref={(el) => {
             if (el) {
-              el.$options.name = "allowsNewValue";
-              el.$options.label = "Allows New Value ($options.allowNewValue)";
+              el.$options.name = "allowNewValue";
+              el.$options.label = "Allow New Value ($options.allowNewValue)";
               el.$options.items = items;
               el.$options.allowNewValue = true;
             }
