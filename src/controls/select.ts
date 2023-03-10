@@ -543,9 +543,22 @@ export default class WUPSelectControl<
     const popup = await super.goShowMenu(showCase, e);
     if (popup) {
       this.selectMenuItemByValue(this.$value); // set aria-selected
-      setTimeout(() => this._selectedMenuItem?.scrollIntoView({ block: "center" }), 50); // fix: sometimes scrollIntoViewIfNeeded works wrong during the opening menu
+      setTimeout(() => this.getFirstSelected()?.scrollIntoView({ block: "center" }), 50); // fix: sometimes scrollIntoViewIfNeeded works wrong during the opening menu
     }
     return popup;
+  }
+
+  /** Returns first selected visible item */
+  protected getFirstSelected(): WUP.Select.MenuItemElement | undefined {
+    if (this._selectedMenuItem) {
+      const items = this._selectedMenuItem.parentElement!.querySelectorAll("[aria-selected=true]");
+      for (let i = 0, item = items[0] as HTMLElement; i < items.length; item = items[++i] as HTMLElement) {
+        if (!item.style.display) {
+          return item as WUP.Select.MenuItemElement;
+        }
+      }
+    }
+    return undefined;
   }
 
   protected override selectMenuItem(next: HTMLElement | null): void {
@@ -605,9 +618,12 @@ export default class WUPSelectControl<
     let focusIndex: number | null = null;
 
     // firstFocused can be selected/current
-    if (this._menuItems.focused === -1 && this._selectedMenuItem && !this._selectedMenuItem.style.display) {
+    if (this._menuItems.focused === -1) {
       if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-        focusIndex = this._menuItems.all.indexOf(this._selectedMenuItem as WUP.Select.MenuItemElement);
+        const item = this.getFirstSelected();
+        if (item) {
+          focusIndex = this._menuItems.all.indexOf(item as WUP.Select.MenuItemElement);
+        }
       }
     }
 
