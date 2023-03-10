@@ -184,7 +184,7 @@ export default class WUPSelectManyControl<
 
   $options: WUP.SelectMany.Options = {
     ...this.#ctr.$defaults,
-    multiple: true, // todo lock this option
+    multiple: true,
     items: [],
   };
 
@@ -196,6 +196,12 @@ export default class WUPSelectManyControl<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   canParseInput(_text: string): boolean {
     return false; // disable behavior from select[mulitple]
+  }
+
+  protected override gotChanges(propsChanged: Array<keyof WUP.Select.Options> | null): void {
+    this._opts.multiple = true;
+    this.removeAttribute("multiple");
+    super.gotChanges(propsChanged);
   }
 
   protected override async renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> {
