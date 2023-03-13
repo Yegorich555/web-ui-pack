@@ -278,6 +278,27 @@ describe("control.selectMany", () => {
   });
 
   test("option [hideSelected]", async () => {
-    // todo add tests here
+    el.$options.hideSelected = false; // tests with 'true' see above
+    el.$value = [getItems()[0].value];
+    el.focus();
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
+    );
+
+    await h.userTypeText(el.$refInput, "m");
+    await h.wait(100);
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 20]);
+    expect(el.$refInput.value).toBe("");
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true" style="">Donny</li><li role="option" aria-selected="true" id="txt4" focused="">Mikky</li><li role="option" style="">Leo</li><li role="option" style="">Splinter</li></ul>"`
+    );
+
+    el.selectValue(30); // just for coverage
+    await h.wait(100);
+    expect(el.$value).toStrictEqual([10, 20, 30]);
   });
 });
