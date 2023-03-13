@@ -112,7 +112,7 @@ export default function SelectManyControlView() {
             if (el) {
               el.$options.name = "readonly";
               el.$options.items = items;
-              el.$options.readOnly = true; // todo disable hover state for readonly
+              el.$options.readOnly = true;
               el.$initValue = [11];
             }
           }}

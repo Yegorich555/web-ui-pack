@@ -801,6 +801,10 @@ mask-image: var(--ctrl-icon-img);
         padding: 0;
         margin-left: 0.5em;
       }
+      WUP-SELECTMANY[readonly] [item] {
+        pointer-events: none;
+        touch-action: none;
+      }
       @media (hover: hover) and (pointer: fine) {
         WUP-SELECTMANY [item]:hover {
           --ctrl-icon: var(--ctrl-err-text);
@@ -810,12 +814,6 @@ mask-image: var(--ctrl-icon-img);
         }
       }
       @media not all and (pointer: fine) {
-        WUP-SELECTMANY:focus-within [item]:active {
-          --ctrl-icon: var(--ctrl-err-text);
-          text-decoration: line-through;
-          color: var(--ctrl-err-text);
-          background-color: var(--ctrl-err-bg);
-        }
         WUP-SELECTMANY [item] {
           user-select: none;
           -webkit-user-select: none;

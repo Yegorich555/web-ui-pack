@@ -131,6 +131,10 @@ export default class WUPSelectManyControl<
         padding: 0;
         margin-left: 0.5em;
       }
+      :host[readonly] [item] {
+        pointer-events: none;
+        touch-action: none;
+      }
       @media (hover: hover) and (pointer: fine) {
         :host [item]:hover {
           --ctrl-icon: var(--ctrl-err-text);
@@ -140,19 +144,10 @@ export default class WUPSelectManyControl<
         }
       }
       @media not all and (pointer: fine) {
-        :host:focus-within [item]:active {${
-          "" // todo issue 1st touch set focus and makes item:active for small time - but it's wrong
-          /* WARN: on Safari active is event on during the touchMove, but android: none */
-        }
-          --ctrl-icon: var(--ctrl-err-text);
-          text-decoration: line-through;
-          color: var(--ctrl-err-text);
-          background-color: var(--ctrl-err-bg);
-        }
         :host [item] {
           user-select: none;
           -webkit-user-select: none;
-        }${/* to show remove-decoration instead of text-selection */ ""}
+        }${/* don't allow select text on blocks to allow custom touch-logic */ ""}
       }
       @media not all and (prefers-reduced-motion) {
         :host [item][removed] {

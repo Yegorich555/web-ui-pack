@@ -511,6 +511,9 @@ describe("control.time", () => {
         "<li aria-hidden="true"></li><li aria-selected="true">AM</li><li aria-selected="false">PM</li>",
       ]
     `);
+
+    expect(el.$isOpen).toBe(true);
+    expect(() => el.$showMenu()).not.toThrow(); // just for coverage
   });
 
   test("menu in 1 row", async () => {
