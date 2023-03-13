@@ -301,4 +301,198 @@ describe("control.selectMany", () => {
     await h.wait(100);
     expect(el.$value).toStrictEqual([10, 20, 30]);
   });
+
+  test("keyboard support", async () => {
+    el.focus();
+    await h.wait(1);
+    function handledKeydown(key = "") {
+      return !el.dispatchEvent(new KeyboardEvent("keydown", { key, cancelable: true, bubbles: true }));
+    }
+    expect(handledKeydown("ArrowLeft")).toBe(false); // because no value - no items
+    expect(handledKeydown("ArrowRight")).toBe(false);
+    expect(handledKeydown("Backspace")).toBe(false);
+    expect(handledKeydown("Delete")).toBe(false);
+    el.blur();
+    await h.wait();
+
+    el.$value = [10, 40];
+    el.focus();
+    await h.wait();
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Donny</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
+      ]
+    `);
+    expect(handledKeydown("ArrowRight")).toBe(false); // nothing to focus
+    await h.userTypeText(el.$refInput, "mi");
+    expect(handledKeydown("ArrowLeft")).toBe(false); // because carret at the end of input
+
+    el.$refInput.selectionStart = 0;
+    el.$refInput.selectionEnd = 0;
+    expect(handledKeydown("ArrowLeft")).toBe(true); // focus last item
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Donny</span>",
+        "<span item="" id="txt6" focused="" role="option">Splinter</span>",
+      ]
+    `);
+    expect(handledKeydown("ArrowLeft")).toBe(true); // focus 1st item
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" id="txt7" focused="" role="option">Donny</span>",
+        "<span item="" id="txt6" aria-hidden="true">Splinter</span>",
+      ]
+    `);
+    expect(handledKeydown("ArrowLeft")).toBe(false); // stay on the same position
+
+    expect(handledKeydown("ArrowRight")).toBe(true);
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" id="txt7" aria-hidden="true">Donny</span>",
+        "<span item="" id="txt6" focused="" role="option">Splinter</span>",
+      ]
+    `);
+    expect(handledKeydown("ArrowRight")).toBe(true);
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" id="txt7" aria-hidden="true">Donny</span>",
+        "<span item="" id="txt6" aria-hidden="true">Splinter</span>",
+      ]
+    `);
+    expect(handledKeydown("ArrowRight")).toBe(false); // stay on the same position
+
+    // Backspace key
+    expect(handledKeydown("Delete")).toBe(false); // nothing to delete when carret at the right
+    expect(handledKeydown("Backspace")).toBe(true); // 1st time - select, 2nd - delete
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" id="txt7" aria-hidden="true">Donny</span>",
+        "<span item="" id="txt6" focused="" role="option">Splinter</span>",
+      ]
+    `);
+    expect(handledKeydown("Backspace")).toBe(true); // 1st time - select, 2nd - delete
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" id="txt7" focused="" role="option">Donny</span>",
+      ]
+    `);
+    expect(el.$value).toStrictEqual([10]);
+    expect(handledKeydown("Backspace")).toBe(true); // again
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`[]`);
+
+    // Delete key
+    el.$value = [10, 20];
+    await h.wait();
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+      ]
+    `);
+    expect(handledKeydown("ArrowLeft")).toBe(true);
+    expect(handledKeydown("ArrowLeft")).toBe(true); // select 1st
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" id="txt10" focused="" role="option">Donny</span>",
+        "<span item="" id="txt9" aria-hidden="true">Mikky</span>",
+      ]
+    `);
+    expect(handledKeydown("Delete")).toBe(true); // delete 1st, focus on next
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" id="txt9" focused="" role="option">Mikky</span>",
+      ]
+    `);
+    expect(el.$value).toStrictEqual([20]);
+    expect(handledKeydown("Delete")).toBe(true);
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`[]`);
+
+    // Enter key
+    el.$value = [10, 20];
+    await h.wait();
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+      ]
+    `);
+    expect(handledKeydown("ArrowLeft")).toBe(true); // select last
+    expect(handledKeydown("Enter")).toBe(true); // delete item because Enter == click
+    await h.wait(10);
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" id="txt13" focused="" role="option">Donny</span>",
+      ]
+    `);
+    expect(el.$value).toStrictEqual([10]);
+    expect(handledKeydown("Enter")).toBe(true); // delete item because Enter == click
+    await h.wait(10);
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`[]`);
+    expect(el.$value).toBe(undefined);
+
+    // focus between menu & items
+    el.$value = [30, 40];
+    await h.wait();
+    expect(el.$isOpen).toBe(true);
+    // focusing item
+    expect(handledKeydown("ArrowLeft")).toBe(true);
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" id="txt16" focused="" role="option">Splinter</span>",
+      ]
+    `);
+    expect(el._menuItems.all.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<li role="option" style="">Donny</li>",
+        "<li role="option" id="txt5">Mikky</li>",
+        "<li role="option" style="" aria-selected="true">Leo</li>",
+        "<li role="option" style="" aria-selected="true">Splinter</li>",
+      ]
+    `);
+    // focusing menu-item
+    expect(handledKeydown("ArrowDown")).toBe(true);
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" id="txt16" aria-hidden="true">Splinter</span>",
+      ]
+    `);
+    expect(el._menuItems.all.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<li role="option" style="">Donny</li>",
+        "<li role="option" id="txt5">Mikky</li>",
+        "<li role="option" style="" aria-selected="true" id="txt17" focused="">Leo</li>",
+        "<li role="option" style="" aria-selected="true">Splinter</li>",
+      ]
+    `);
+    // focusing item
+    expect(handledKeydown("ArrowLeft")).toBe(true);
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" id="txt16" focused="" role="option">Splinter</span>",
+      ]
+    `);
+    expect(el._menuItems.all.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<li role="option" style="">Donny</li>",
+        "<li role="option" id="txt5">Mikky</li>",
+        "<li role="option" style="" aria-selected="true" id="txt17">Leo</li>",
+        "<li role="option" style="" aria-selected="true">Splinter</li>",
+      ]
+    `);
+
+    // clearing state on blur
+    expect(el.$isFocused).toBe(true);
+    el.blur();
+    await h.wait();
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" id="txt16" aria-hidden="true">Splinter</span>",
+      ]
+    `);
+  });
 });

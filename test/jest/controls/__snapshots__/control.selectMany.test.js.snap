@@ -801,6 +801,15 @@ mask-image: var(--ctrl-icon-img);
         padding: 0;
         margin-left: 0.5em;
       }
+      WUP-SELECTMANY [item][focused] {
+        box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
+      }
+      WUP-SELECTMANY [item][removed] {
+        --ctrl-icon: var(--ctrl-err-text);
+        text-decoration: line-through;
+        color: var(--ctrl-err-text);
+        background-color: var(--ctrl-err-bg);
+      }
       WUP-SELECTMANY[readonly] [item] {
         pointer-events: none;
         touch-action: none;
@@ -822,6 +831,7 @@ mask-image: var(--ctrl-icon-img);
       @media not all and (prefers-reduced-motion) {
         WUP-SELECTMANY [item][removed] {
           transition: all var(--anim-time) ease-in-out;
+          transition-property: margin, padding, width, opacity;
           padding-left: 0; padding-right: 0;
           margin-left: 0; margin-right: 0;
           width: 0;

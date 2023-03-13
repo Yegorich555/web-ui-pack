@@ -49,6 +49,7 @@ export default function SelectManyControlView() {
       features={[
         "Inheritted features from SelectControl", //
         "Possible to select several items",
+        "Perfect keyboard support",
         // "Possible to order via Drag&Drop",
       ]}
     >

@@ -131,6 +131,15 @@ export default class WUPSelectManyControl<
         padding: 0;
         margin-left: 0.5em;
       }
+      :host [item][focused] {
+        box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
+      }
+      :host [item][removed] {
+        --ctrl-icon: var(--ctrl-err-text);
+        text-decoration: line-through;
+        color: var(--ctrl-err-text);
+        background-color: var(--ctrl-err-bg);
+      }
       :host[readonly] [item] {
         pointer-events: none;
         touch-action: none;
@@ -152,6 +161,7 @@ export default class WUPSelectManyControl<
       @media not all and (prefers-reduced-motion) {
         :host [item][removed] {
           transition: all var(--anim-time) ease-in-out;
+          transition-property: margin, padding, width, opacity;
           padding-left: 0; padding-right: 0;
           margin-left: 0; margin-right: 0;
           width: 0;
@@ -270,6 +280,32 @@ export default class WUPSelectManyControl<
     this._opts.hideSelected && this.focusMenuItem(null);
   }
 
+  /** Index of focused value-item */
+  _focusIndex?: number;
+  /** Focus value-item by index (related to this.$refItems) */
+  protected focusItemByIndex(i: number | null): void {
+    const el = i == null ? null : this.$refItems![i];
+    this.focusMenuItem(el);
+    if (el) {
+      el.setAttribute("role", "option"); // otherwise NVDA doesn't allow to use Arrow to goto
+      el.removeAttribute("aria-hidden");
+      el.removeAttribute("aria-selected"); // attribute appended by selectControl
+    }
+    this._focusIndex = i ?? undefined;
+  }
+
+  protected override focusMenuItem(next: HTMLElement | null): void {
+    if (this._focusIndex != null) {
+      const prev = this.$refItems![this._focusIndex];
+      if (prev) {
+        prev.setAttribute("aria-hidden", true);
+        prev.removeAttribute("role");
+      }
+      this._focusIndex = undefined;
+    }
+    super.focusMenuItem(next);
+  }
+
   protected selectMenuItemByValue(v: ValueType[] | undefined): void {
     !this._opts.hideSelected && super.selectMenuItemByValue(v);
   }
@@ -293,6 +329,7 @@ export default class WUPSelectManyControl<
       setTimeout(() => (item.style.width = ""));
       const ms = Number.parseInt(window.getComputedStyle(item).getPropertyValue("--anim-time"), 10); // WARN: expected anim-time: 200ms
       setTimeout(() => item.remove(), ms); // otherwise item is removed immediately in setValue...
+      this._focusIndex === index && this.focusItemByIndex(null);
     }
 
     this.$value!.splice(index, 1);
@@ -343,13 +380,67 @@ export default class WUPSelectManyControl<
   protected override gotFocusLost(): void {
     super.gotFocusLost();
     this.toggleHideInput(this.$value);
+    this.focusItemByIndex(null);
+  }
+
+  protected override gotKeyDown(e: KeyboardEvent): void {
+    super.gotKeyDown(e);
+
+    if (this.$refInput.selectionEnd === 0 && this.$refItems?.length) {
+      let handled = true;
+      let next = this._focusIndex ?? null;
+      switch (e.key) {
+        case "Enter":
+          this._focusIndex = undefined; // WARN Enter fired click after empty timout but need to reset index immediately to focus next
+          next = Math.max(0, (next ?? this.$refItems.length) - 1);
+          break;
+        case "Backspace":
+          if (next != null) {
+            this.removeValue(next);
+            if (!this.$refItems.length) {
+              next = null; // WARN: focus prev in the next "ArrowLeft" block
+              break;
+            }
+          }
+        // eslint-disable-next-line no-fallthrough
+        case "ArrowLeft":
+          next = Math.max(0, (next ?? this.$refItems.length) - 1);
+          break;
+        case "Delete":
+          if (next != null) {
+            this.removeValue(next);
+            if (!this.$refItems.length) {
+              next = null;
+              break;
+            }
+            --next; // WARN: focus prev in the next "ArrowLeft" block
+          }
+        // eslint-disable-next-line no-fallthrough
+        case "ArrowRight":
+          if (next != null) {
+            next = Math.min(this.$refItems.length - 1, next + 1);
+            if (next === this._focusIndex) {
+              next = null; // move focus to input if was selected last
+            }
+          } else {
+            handled = false;
+          }
+          break;
+        default:
+          handled = false;
+          break;
+      }
+      if (handled && this._focusIndex !== next) {
+        e.preventDefault();
+        this.focusItemByIndex(next);
+      }
+    }
   }
 }
 
 customElements.define(tagName, WUPSelectManyControl);
 
 // todo allowNewValue
-// todo keyboard
 // todo drag & drop
 
 /**
