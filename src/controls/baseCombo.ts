@@ -305,7 +305,6 @@ export default abstract class WUPBaseComboControl<
   }
 
   protected _isHidding?: true;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected async goHideMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): Promise<boolean> {
     if (!this.$refPopup || this._isHidding) {
       return false;
@@ -413,7 +412,6 @@ export default abstract class WUPBaseComboControl<
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override gotInput(e: WUP.Text.GotInputEvent, allowSuper = false): void {
     // gotInput possible on browser-autofill so we need filter check if isFocused
     !this.$isOpen && this._opts.showCase & ShowCases.onInput && this.$isFocused && this.goShowMenu(ShowCases.onInput);

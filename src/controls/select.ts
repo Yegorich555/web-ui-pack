@@ -707,7 +707,7 @@ export default class WUPSelectControl<
 
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
     this.$isOpen && this.focusMenuItem(null); // reset virtual focus: // WARN it's not good enough when this._opts.multiple
-    super.gotInput(e, false);
+    super.gotInput(e);
 
     const filter = (): void => {
       this.filterMenuItems();

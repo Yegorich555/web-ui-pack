@@ -383,6 +383,7 @@ describe("control.select", () => {
     el.blur();
     await h.wait();
     expect(el.$isOpen).toBe(false);
+    expect(el.$refPopup).toBeFalsy();
 
     // cover hide after show when menu is opening
     el.$options.items = () => new Promise((res) => setTimeout(() => res(getItems()), 100));
@@ -396,6 +397,19 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isOpen).toBe(false);
     expect(el.$refPopup).toBeFalsy();
+
+    // case show & hide sync when focused
+    el.$options.items = () => new Promise((res) => setTimeout(() => res(getItems()), 100));
+    await h.wait(1);
+    el.focus();
+    await h.wait(10);
+    expect(el.$isOpen).toBe(true);
+    await h.userClick(el);
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    expect(el.$refPopup).toBeTruthy();
+    el.blur();
+    await h.wait();
 
     // case: popups are visible and not closed (if change focus by Tab)
     const orig = window.getComputedStyle;
