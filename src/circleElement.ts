@@ -190,7 +190,8 @@ export default class WUPCircleElement extends WUPBaseElement {
     const { items, space } = this._opts;
     let vMin = this._opts.min ?? 0;
     let vMax = this._opts.max ?? 360;
-    const animTime = Number.parseInt(getComputedStyle(this).getPropertyValue("--anim-time"), 10); // WARN: expected anim-time: 200ms
+    const style = getComputedStyle(this);
+    const animTime = Number.parseInt(style.getPropertyValue("--anim-time"), 10); // WARN: expected anim-time: 200ms
     if (items.length > 1) {
       vMin = 0;
       vMax = items.reduce((v, item) => item.value + v, 0);
@@ -205,7 +206,11 @@ export default class WUPCircleElement extends WUPBaseElement {
         const v = a.value;
         angleTo = mathScaleValue(v, vMin, vMax, angleMin, angleMax) + (angleFrom - angleMin);
         const path = this.$refItems.appendChild(this.make("path"));
-        a.color && path.setAttribute("fill", a.color); // todo need to use inline style 'fill' instead othewise it doesn't work
+        const col = a.color || style.getPropertyValue(`--circle-${i + 1}`);
+        col && path.setAttribute("fill", col); // only for saving as file-image
+        if (a.color) {
+          path.style.fill = a.color; // attr [fill] can't override css-rules
+        }
 
         const ms = items.length === 1 ? animTime : mathScaleValue(v, vMin, vMax, 0, animTime);
         const from = angleFrom;

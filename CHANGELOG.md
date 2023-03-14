@@ -28,11 +28,12 @@
 - [PopupElement](src/popup/popupElement.ts). Animation for opacity doesn't work on Safari 14-
 - [PopupElement](src/popup/popupElement.ts). Animation affects on bluring text if user scroll body during the animation
 - [PopupElement](src/popup/popupElement.ts). Wrong position during dropdownAnimation and several show/hide at once
-- [PopupElement](src/popup/popupElement.ts). Allow to open/close on double-click
+- [PopupElement](src/popup/popupElement.ts). Allow to open/close on double-click (because on Chrome double-click works with long delay)
 - [PopupElement](src/popup/popupElement.ts). 2nd $show() has predefined maxSize & position can be different
 - [PopupElement](src/popup/popupElement.ts). Now popup has max size 100vw & 100vh (by default). Earlier popup could be > 100vw
 - [PopupElement](src/popup/popupElement.ts). No-updates on screensize changes. Now popup position & size changes with device-rotation
 - [PopupElement](src/popup/popupElement.ts). No popup if mousedown>move>up>click on target
+- [CircleElement](src/circleElement.ts). Fix items **color** doesn't work (because attr `[fill]` can't override css-rule)
 
 **New**:
 
@@ -55,6 +56,7 @@
 **New**:
 
 - [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin). Added type **hash**
+- [CircleElement](src/circleElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/circle)
 
 ## 0.4.0 (Jan 26, 2023)
 
