@@ -40,6 +40,10 @@ initTestBaseControl({
   },
 });
 
+function handledKeydown(key = "") {
+  return !el.dispatchEvent(new KeyboardEvent("keydown", { key, cancelable: true, bubbles: true }));
+}
+
 describe("control.selectMany", () => {
   testBaseControl({
     noInputSelection: true,
@@ -305,9 +309,6 @@ describe("control.selectMany", () => {
   test("keyboard support", async () => {
     el.focus();
     await h.wait(1);
-    function handledKeydown(key = "") {
-      return !el.dispatchEvent(new KeyboardEvent("keydown", { key, cancelable: true, bubbles: true }));
-    }
     expect(handledKeydown("ArrowLeft")).toBe(false); // because no value - no items
     expect(handledKeydown("ArrowRight")).toBe(false);
     expect(handledKeydown("Backspace")).toBe(false);
@@ -520,5 +521,60 @@ describe("control.selectMany", () => {
         "<li role="option" aria-selected="true" id="txt22" focused="">Splinter</li>",
       ]
     `);
+  });
+
+  test("option [allowNewValue]", async () => {
+    el.$options.allowNewValue = true;
+    el.$value = [40];
+    await h.wait(1);
+    el.focus();
+    await h.wait();
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Splinter</span>",
+      ]
+    `);
+
+    const onChange = jest.fn();
+    el.addEventListener("$change", onChange);
+    await h.userTypeText(el.$refInput, "hello-123");
+    expect(handledKeydown("Enter")).toBe(true);
+    await h.wait();
+    expect(el.$value).toStrictEqual([40, "hello-123"]);
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Splinter</span>",
+        "<span item="" aria-hidden="true">hello-123</span>",
+      ]
+    `);
+    expect(el.$refInput.value).toBe("");
+    expect(el.$isOpen).toBe(true);
+    expect(onChange).toBeCalledTimes(1);
+
+    expect(handledKeydown("Enter")).toBe(true);
+    await h.wait(1);
+    expect(el.$value).toStrictEqual([40, "hello-123"]);
+    expect(onChange).toBeCalledTimes(1); // no-changes when input is empty
+
+    await h.userTypeText(el.$refInput, "hello-123");
+    expect(handledKeydown("Enter")).toBe(true);
+    await h.wait(1);
+    expect(el.$value).toStrictEqual([40, "hello-123"]);
+    expect(onChange).toBeCalledTimes(1); // no-duplicates
+
+    await h.userTypeText(el.$refInput, "Halo");
+    expect(handledKeydown("Enter")).toBe(true);
+    await h.wait(1);
+    expect(el.$value).toStrictEqual([40, "hello-123", "Halo"]);
+    expect(onChange).toBeCalledTimes(2); // allow > 1
+
+    el.$value = undefined;
+    await h.wait(1);
+    onChange.mockClear();
+    await h.userTypeText(el.$refInput, "grey");
+    expect(handledKeydown("Enter")).toBe(true);
+    await h.wait(1);
+    expect(el.$value).toStrictEqual(["grey"]); // cover case when $value is undefined
+    expect(onChange).toBeCalledTimes(1);
   });
 });

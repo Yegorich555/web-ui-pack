@@ -1,7 +1,6 @@
 /* eslint-disable no-promise-executor-return */
 import Page from "src/elements/page";
-import { WUPSelectManyControl, WUPSpinElement } from "web-ui-pack";
-import { spinUseDualRing } from "web-ui-pack/spinElement";
+import { WUPSelectManyControl } from "web-ui-pack";
 import styles from "./selectMany.scss";
 
 const sideEffect = WUPSelectManyControl;
@@ -26,16 +25,6 @@ const items = [
   items,
   initValue: [items[0].value, items[1].value],
 };
-
-class WUPSpinSel2Element extends WUPSpinElement {}
-spinUseDualRing(WUPSpinSel2Element);
-const tagName = "wup-spin-sel2";
-customElements.define(tagName, WUPSpinSel2Element);
-declare global {
-  interface HTMLElementTagNameMap {
-    [tagName]: WUPSpinSel2Element;
-  }
-}
 
 export default function SelectManyControlView() {
   return (
@@ -69,12 +58,6 @@ export default function SelectManyControlView() {
           validations="window._someSelectValidations"
           autoComplete="off"
           autoFocus={false}
-          ref={(el) => {
-            if (el) {
-              // setTimeout(() => (el.$initValue = [11, 13, 14]));
-              // setTimeout(() => (el.$value = [11, 12]), 1000);
-            }
-          }}
         />
         <wup-selectmany
           label="With option hideSelected"
@@ -93,41 +76,35 @@ export default function SelectManyControlView() {
               el.$options.label = "With remove icon (use css-var --ctrl-select-item-del-display)";
               el.$options.items = items;
               el.$initValue = items.map((it) => it.value);
-              // setTimeout(() => (el.$value = items.map((it) => it.value)));
-            }
-          }}
-        />
-
-        <wup-selectmany
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "disabled";
-              el.$options.items = items;
-              el.$options.disabled = true;
-              el.$initValue = [12];
             }
           }}
         />
         <wup-selectmany
+          name="disabled"
+          disabled
           ref={(el) => {
             if (el) {
-              el.$options.name = "readonly";
               el.$options.items = items;
-              el.$options.readOnly = true;
-              el.$initValue = [11];
+              el.$initValue = [12, 15];
             }
           }}
         />
         <wup-selectmany
+          name="readonly"
+          readOnly
           ref={(el) => {
             if (el) {
-              el.$options.name = "allowsNewValue";
-              el.$options.label = "Allow New Value ($options.allowNewValue)";
               el.$options.items = items;
-              el.$options.allowNewValue = true;
-              // todo allowNewValue doesn't allow >1 value & closes popup after 'Enter'
+              el.$initValue = [12, 15];
             }
           }}
+        />
+        <wup-selectmany
+          label="Allow New Value ($options.allowNewValue)"
+          allownewvalue
+          name="allowNewValue"
+          items="inputSelectMany.items"
+          initValue="window.inputSelectMany.initValue"
         />
         <button type="submit">Submit</button>
       </wup-form>

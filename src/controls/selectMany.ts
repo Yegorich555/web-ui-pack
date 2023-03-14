@@ -15,7 +15,10 @@ declare global {
        * @defaultValue false */
       hideSelected?: boolean;
     }
-    interface Options<T = any, VM = ValidityMap> extends WUP.Select.Options<T, VM>, Defaults<T, VM> {}
+    interface Options<T = any, VM = ValidityMap> extends WUP.Select.Options<T, VM>, Defaults<T, VM> {
+      /** Constant that impossible to change */
+      multiple: true;
+    }
     interface Attributes extends WUP.Select.Attributes {}
     interface JSXProps<C = WUPSelectManyControl> extends WUP.Select.JSXProps<C>, Attributes {}
   }
@@ -203,8 +206,20 @@ export default class WUPSelectManyControl<
   $refItems?: Array<HTMLElement & { _wupValue: ValueType }>;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  canParseInput(_text: string): boolean {
+  override canParseInput(_text: string): boolean {
     return false; // disable behavior from select[mulitple]
+  }
+
+  override parseInput(text: string): ValueType[] | undefined {
+    // WARN must be called only on allowNewValue
+    // @ts-expect-error: because it's constant true
+    this._opts.multiple = false;
+    const vi = super.parseInput(text) as ValueType | undefined;
+    this._opts.multiple = true;
+    if (vi === undefined || this.$value?.some((v) => this.#ctr.$isEqual(v, vi))) {
+      return this.$value; // no-changes, no-duplicates
+    }
+    return this.$value ? [...this.$value, vi] : [vi];
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Select.Options> | null): void {
@@ -391,9 +406,9 @@ export default class WUPSelectManyControl<
       let next = this._focusIndex ?? null;
       switch (e.key) {
         case "Enter":
-          if (this._focusIndex != null) {
+          if (next != null) {
             this._focusIndex = undefined; // WARN Enter fired click after empty timout but need to reset index immediately to focus next
-            next = Math.max(0, (next ?? this.$refItems.length) - 1);
+            next = Math.max(0, next - 1);
           } else {
             handled = false; // it must be skipped if handled above otherwise auto-focus on select menu item by Enter
           }
@@ -444,7 +459,6 @@ export default class WUPSelectManyControl<
 
 customElements.define(tagName, WUPSelectManyControl);
 
-// todo allowNewValue
 // todo drag & drop
 
 /**

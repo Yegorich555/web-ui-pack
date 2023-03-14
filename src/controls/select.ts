@@ -660,11 +660,11 @@ export default class WUPSelectControl<
 
   protected override gotKeyDown(e: KeyboardEvent): void {
     // if (this.$isPending) {return;} // pending event disables gotKeyDown so case impossible
-    if (this.$isOpen && !this._focusedMenuItem && e.key === "Enter") {
-      this._opts.allowNewValue && this.setValue(this.parseInput(this.$refInput.value));
-      e.preventDefault();
+    if (this._opts.allowNewValue && e.key === "Enter" && !this._focusedMenuItem) {
+      this.setValue(this.parseInput(this.$refInput.value));
+      this._opts.multiple && e.preventDefault(); // prevent closing by keydown
     }
-    super.gotKeyDown(e);
+    !e.defaultPrevented && super.gotKeyDown(e);
   }
 
   /** Called to filter menuItems (on input change etc.) */

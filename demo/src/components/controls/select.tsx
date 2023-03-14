@@ -86,7 +86,7 @@ export default function SelectControlView() {
           multiple
           ref={(el) => {
             if (el) {
-              // el.$options.allowNewValue = true;
+              el.$options.allowNewValue = true;
             }
           }}
         />
