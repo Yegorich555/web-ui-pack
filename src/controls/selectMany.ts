@@ -391,8 +391,12 @@ export default class WUPSelectManyControl<
       let next = this._focusIndex ?? null;
       switch (e.key) {
         case "Enter":
-          this._focusIndex = undefined; // WARN Enter fired click after empty timout but need to reset index immediately to focus next
-          next = Math.max(0, (next ?? this.$refItems.length) - 1);
+          if (this._focusIndex != null) {
+            this._focusIndex = undefined; // WARN Enter fired click after empty timout but need to reset index immediately to focus next
+            next = Math.max(0, (next ?? this.$refItems.length) - 1);
+          } else {
+            handled = false; // it must be skipped if handled above otherwise auto-focus on select menu item by Enter
+          }
           break;
         case "Backspace":
           if (next != null) {

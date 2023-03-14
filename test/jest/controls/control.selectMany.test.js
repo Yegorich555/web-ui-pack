@@ -364,14 +364,14 @@ describe("control.selectMany", () => {
 
     // Backspace key
     expect(handledKeydown("Delete")).toBe(false); // nothing to delete when carret at the right
-    expect(handledKeydown("Backspace")).toBe(true); // 1st time - select, 2nd - delete
+    expect(handledKeydown("Backspace")).toBe(true); // 1st time - focus, 2nd - delete
     expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
       [
         "<span item="" id="txt7" aria-hidden="true">Donny</span>",
         "<span item="" id="txt6" focused="" role="option">Splinter</span>",
       ]
     `);
-    expect(handledKeydown("Backspace")).toBe(true); // 1st time - select, 2nd - delete
+    expect(handledKeydown("Backspace")).toBe(true); // 1st time - focus, 2nd - delete
     expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
       [
         "<span item="" id="txt7" focused="" role="option">Donny</span>",
@@ -391,7 +391,7 @@ describe("control.selectMany", () => {
       ]
     `);
     expect(handledKeydown("ArrowLeft")).toBe(true);
-    expect(handledKeydown("ArrowLeft")).toBe(true); // select 1st
+    expect(handledKeydown("ArrowLeft")).toBe(true); // focus 1st
     expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
       [
         "<span item="" id="txt10" focused="" role="option">Donny</span>",
@@ -417,7 +417,7 @@ describe("control.selectMany", () => {
         "<span item="" aria-hidden="true">Mikky</span>",
       ]
     `);
-    expect(handledKeydown("ArrowLeft")).toBe(true); // select last
+    expect(handledKeydown("ArrowLeft")).toBe(true); // focus last
     expect(handledKeydown("Enter")).toBe(true); // delete item because Enter == click
     await h.wait(10);
     expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
@@ -433,8 +433,8 @@ describe("control.selectMany", () => {
 
     // focus between menu & items
     el.$value = [30, 40];
+    el.focus();
     await h.wait();
-    expect(el.$isOpen).toBe(true);
     // focusing item
     expect(handledKeydown("ArrowLeft")).toBe(true);
     expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
@@ -492,6 +492,32 @@ describe("control.selectMany", () => {
       [
         "<span item="" aria-hidden="true">Leo</span>",
         "<span item="" id="txt16" aria-hidden="true">Splinter</span>",
+      ]
+    `);
+
+    // Enter key & menu-item focused
+    el.$value = [30];
+    el.focus();
+    await h.wait();
+    expect(handledKeydown("ArrowDown")).toBe(true);
+    expect(handledKeydown("ArrowDown")).toBe(true);
+    expect(el.querySelector("[focused]").outerHTML).toMatchInlineSnapshot(
+      `"<li role="option" aria-selected="false" id="txt22" focused="">Splinter</li>"`
+    );
+    expect(handledKeydown("Enter")).toBe(true); // select item because Enter == click
+    await h.wait();
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
+      ]
+    `);
+    expect(el._menuItems.all.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<li role="option">Donny</li>",
+        "<li role="option">Mikky</li>",
+        "<li role="option" aria-selected="true" id="txt21">Leo</li>",
+        "<li role="option" aria-selected="true" id="txt22" focused="">Splinter</li>",
       ]
     `);
   });

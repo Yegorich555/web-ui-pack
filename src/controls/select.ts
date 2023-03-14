@@ -662,6 +662,7 @@ export default class WUPSelectControl<
     // if (this.$isPending) {return;} // pending event disables gotKeyDown so case impossible
     if (this.$isOpen && !this._focusedMenuItem && e.key === "Enter") {
       this._opts.allowNewValue && this.setValue(this.parseInput(this.$refInput.value));
+      e.preventDefault();
     }
     super.gotKeyDown(e);
   }
