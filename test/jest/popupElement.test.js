@@ -563,9 +563,7 @@ describe("popupElement", () => {
     trgInput.dispatchEvent(ev);
     await h.wait();
     expect(a.$isOpen).toBe(true); // stay opened because wasOpened by focus from click
-    trgInput.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
-    trgInput.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
-    trgInput.dispatchEvent(ev);
+    await h.userClick(trgInput);
     await h.wait();
     expect(a.$isOpen).toBe(false); // 2nd click will close (but if click is fired without mousedown it doesn't work)
   });

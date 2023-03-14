@@ -300,10 +300,15 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-bottom: 0;
       }
       WUP-TEXT input,
-      WUP-TEXT textarea,
-      WUP-TEXT [contenteditable] {
+      WUP-TEXT textarea {
         padding: 0;
         margin: 0;
+        cursor: inherit;
+      }
+      WUP-TEXT [contenteditable=true] {
+        margin: var(--ctrl-padding);
+        margin-left: 0;
+        margin-right: 0;
         cursor: inherit;
       }
       WUP-TEXT strong {
@@ -343,7 +348,7 @@ width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
 box-sizing: content-box;
 margin: 0;
-padding: 0 5px;
+padding: 5px;
 flex: 0 0 auto;
 align-self: stretch;
 border: none;
@@ -397,7 +402,6 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-TEXT input,
         WUP-TEXT textarea,
-        WUP-TEXT [contenteditable],
         WUP-TEXT [maskholder],
         WUP-TEXT [prefix],
         WUP-TEXT [postfix] {
@@ -413,7 +417,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-TEXT input,
         WUP-TEXT textarea,
-        WUP-TEXT [contenteditable],
+        WUP-TEXT [contenteditable=true],
         WUP-TEXT [maskholder],
         WUP-TEXT [postfix] {
           width: 100%;
@@ -450,13 +454,13 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-TEXT input:-webkit-autofill,
         WUP-TEXT textarea:-webkit-autofill,
-        WUP-TEXT [contenteditable]:-webkit-autofill {
+        WUP-TEXT [contenteditable=true]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
         WUP-TEXT input:autofill,
         WUP-TEXT textarea:autofill,
-        WUP-TEXT [contenteditable]:autofill {
+        WUP-TEXT [contenteditable=true]:autofill {
           font: inherit;
           background-clip: text;
         }
@@ -489,7 +493,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-TEXT:focus-within strong,
         WUP-TEXT input:not(:placeholder-shown) + strong,
         WUP-TEXT textarea:not(:placeholder-shown) + strong,
-        WUP-TEXT [contenteditable]:not(:empty) + strong,
+        WUP-TEXT [contenteditable=true]:not(:empty) + strong,
         WUP-TEXT legend {
           top: 0.2em;
           transform: scale(0.9);
@@ -514,7 +518,7 @@ width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
 box-sizing: content-box;
 margin: 0;
-padding: 0 5px;
+padding: 5px;
 flex: 0 0 auto;
 align-self: stretch;
 border: none;
@@ -549,6 +553,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-TEXT button[clear] {
           background: none;
+          align-self: center;
         }
         WUP-TEXT button[clear]:after {
           content: "";
@@ -562,7 +567,6 @@ mask-image: var(--ctrl-icon-img);
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           width: 100%;
-          padding-top: 100%;
         }
         WUP-TEXT button[clear]:before {
           width: var(--ctrl-clear-hover-size);

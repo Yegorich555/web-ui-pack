@@ -208,13 +208,7 @@ export default function popupListen(
         preventClickAfterFocus = !!(opts.showCase & ShowCases.onClick);
         await show(ShowCases.onFocus, e);
         if (preventClickAfterFocus) {
-          const rst = (): void => {
-            preventClickAfterFocus = false;
-            r1();
-            r2();
-          };
-          const r1 = appendEvent(document, "touchstart", rst); // mousdown isn't not called when user touch-move-end
-          const r2 = appendEvent(document, "mousedown", rst);
+          appendEvent(document, "pointerdown", () => (preventClickAfterFocus = false), { once: true }); // pointerdown includes touchstart & mousedown
         }
       }
     };

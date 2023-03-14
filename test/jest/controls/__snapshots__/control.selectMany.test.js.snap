@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`control.time $ariaDetails 1`] = `
-<wup-time>
+exports[`control.selectMany $ariaDetails 1`] = `
+<wup-selectmany>
   <label
     for="txt1"
   >
@@ -30,11 +30,11 @@ exports[`control.time $ariaDetails 1`] = `
       type="button"
     />
   </label>
-</wup-time>
+</wup-selectmany>
 `;
 
-exports[`control.time $ariaDetails 2`] = `
-<wup-time>
+exports[`control.selectMany $ariaDetails 2`] = `
+<wup-selectmany>
   <label
     for="txt1"
   >
@@ -58,11 +58,11 @@ exports[`control.time $ariaDetails 2`] = `
       type="button"
     />
   </label>
-</wup-time>
+</wup-selectmany>
 `;
 
-exports[`control.time $ariaSpeak 1`] = `
-<wup-time>
+exports[`control.selectMany $ariaSpeak 1`] = `
+<wup-selectmany>
   <label
     for="txt1"
   >
@@ -95,11 +95,11 @@ exports[`control.time $ariaSpeak 1`] = `
   >
     Hello
   </section>
-</wup-time>
+</wup-selectmany>
 `;
 
-exports[`control.time $ariaSpeak 2`] = `
-<wup-time>
+exports[`control.selectMany $ariaSpeak 2`] = `
+<wup-selectmany>
   <label
     for="txt1"
   >
@@ -124,11 +124,11 @@ exports[`control.time $ariaSpeak 2`] = `
       type="button"
     />
   </label>
-</wup-time>
+</wup-selectmany>
 `;
 
-exports[`control.time $show/$hide error 1`] = `
-<wup-time>
+exports[`control.selectMany $show/$hide error 1`] = `
+<wup-selectmany>
   <label
     for="txt1"
   >
@@ -152,11 +152,11 @@ exports[`control.time $show/$hide error 1`] = `
       type="button"
     />
   </label>
-</wup-time>
+</wup-selectmany>
 `;
 
-exports[`control.time $show/$hide error 2`] = `
-<wup-time
+exports[`control.selectMany $show/$hide error 2`] = `
+<wup-selectmany
   invalid=""
 >
   <label
@@ -198,11 +198,11 @@ exports[`control.time $show/$hide error 2`] = `
       Some custom message here
     </span>
   </wup-popup>
-</wup-time>
+</wup-selectmany>
 `;
 
-exports[`control.time $show/$hide error 3`] = `
-<wup-time>
+exports[`control.selectMany $show/$hide error 3`] = `
+<wup-selectmany>
   <label
     for="txt1"
   >
@@ -226,12 +226,12 @@ exports[`control.time $show/$hide error 3`] = `
       type="button"
     />
   </label>
-</wup-time>
+</wup-selectmany>
 `;
 
-exports[`control.time common tests render + styles 1`] = `<wup-time />`;
+exports[`control.selectMany common tests render + styles 1`] = `<wup-selectmany />`;
 
-exports[`control.time common tests render + styles 2`] = `
+exports[`control.selectMany common tests render + styles 2`] = `
 <style>
   .wup-hidden, [wup-hidden] {
 position: absolute;
@@ -278,13 +278,19 @@ clip: rect(1px, 1px, 1px, 1px);}
       --ctrl-clear-hover-size: 22px;
      }
   :root {
-        --ctrl-time-icon-img-lg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M383.615 0C171.647 0 0 172.032 0 384s171.648 384 383.615 384c212.352 0 384.383-172.032 384.383-384S595.966 0 383.615 0zM384 691.199C214.272 691.199 76.801 553.727 76.801 384S214.273 76.801 384 76.801c169.728 0 307.199 137.472 307.199 307.199S553.727 691.199 384 691.199zm-38.401-499.198h57.6v201.6l172.8 102.528-28.8 47.232-201.6-120.96v-230.4z' /%3E%3C/svg%3E");
-        --ctrl-time-icon-img: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAABOAAAATgGxzR8zAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAASxJREFUOI2V00kuRFEUBuCvXqLMrEBIRBeKxCIMrcFAYguMRMz13QYwESxAMxIjXYKEiIHYAQYSTRncU1JRT+FPbnLfOf9/unsetejHPK7wHOcSsyjl8L/QiBW84wMnWItzGrY3LKKYJz5AGZtoy0nQjq3g7H0PshqOiXolBiaDu1Ax9EXZmznkY4zm2LeldnozjKCA8T9kr2AMGUYyDEpDuvtHgFucYzBDC27+Ia7gGq2ZNJDCD6QXDKMnx1cg9fGArh8CDOFM2olpNFX5unEPc9KStNcpdwBHOIzvztDMkNbzTVqSeiigOe47oflqbVmaxeQvQWAquPPVxiL2w7GNjhxhZ2QuYxcN3wlFLEVpH9Lw1rER9zJepZnViKtRkn7dSzzhERfSK9Q85ye76kkmcVhDgAAAAABJRU5ErkJggg==');
-        --ctrl-time-current: var(--base-text);
-        --ctrl-time-current-bg: #d9f7fd;
+        --ctrl-select-icon-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m16.078 258.214 329.139 329.139c21.449 21.449 56.174 21.449 77.567 0l329.139-329.139c21.449-21.449 21.449-56.174 0-77.567s-56.174-21.449-77.567 0L384 471.003 93.644 180.647c-21.449-21.449-56.173-21.449-77.567 0s-21.449 56.173 0 77.567z'/%3E%3C/svg%3E");
+      }
+  :root {
+        --ctrl-select-item: inherit;
+        --ctrl-select-item-bg: rgba(0,0,0,0.04);
+        --ctrl-select-item-del-display: none;
+        --ctrl-select-item-del: var(--ctrl-icon);
+        --ctrl-select-item-del-img: var(--wup-icon-cross);
+        --ctrl-select-item-del-size: 0.8em;
+        --ctrl-select-gap: 6px;
       }
   
-      WUP-TIME {
+      WUP-SELECTMANY {
         contain: style;
         display: block;
         margin-bottom: 20px;
@@ -293,37 +299,37 @@ clip: rect(1px, 1px, 1px, 1px);}
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;
       }
-      WUP-TIME strong,
-      WUP-TIME legend {
+      WUP-SELECTMANY strong,
+      WUP-SELECTMANY legend {
         color: var(--ctrl-label);
         pointer-events: none;
       }
-      WUP-TIME:focus-within,
-      WUP-TIME:focus-within &gt; [menu] {
+      WUP-SELECTMANY:focus-within,
+      WUP-SELECTMANY:focus-within &gt; [menu] {
         z-index: 90010;
         box-shadow: 0 0 0 1px var(--ctrl-focus);
       }
-      WUP-TIME:focus-within strong,
-      WUP-TIME:focus-within legend {
+      WUP-SELECTMANY:focus-within strong,
+      WUP-SELECTMANY:focus-within legend {
         color: var(--ctrl-focus-label);
         pointer-events: initial;
       }
-      [disabled] WUP-TIME,
-      WUP-TIME[disabled] {
+      [disabled] WUP-SELECTMANY,
+      WUP-SELECTMANY[disabled] {
         opacity: 0.6;
         cursor: not-allowed;
         -webkit-user-select: none;
         user-select: none;
       }
-      [disabled] WUP-TIME &gt; *,
-      WUP-TIME[disabled] &gt; * {
+      [disabled] WUP-SELECTMANY &gt; *,
+      WUP-SELECTMANY[disabled] &gt; * {
         pointer-events: none;
       }
-      WUP-TIME[invalid],
-      WUP-TIME[invalid] &gt; [menu] {
+      WUP-SELECTMANY[invalid],
+      WUP-SELECTMANY[invalid] &gt; [menu] {
         box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
-      WUP-TIME label {
+      WUP-SELECTMANY label {
         display: flex;
         align-items: center;
         box-sizing: border-box;
@@ -333,29 +339,29 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-top: 0;
         padding-bottom: 0;
       }
-      WUP-TIME input,
-      WUP-TIME textarea {
+      WUP-SELECTMANY input,
+      WUP-SELECTMANY textarea {
         padding: 0;
         margin: 0;
         cursor: inherit;
       }
-      WUP-TIME [contenteditable=true] {
+      WUP-SELECTMANY [contenteditable=true] {
         margin: var(--ctrl-padding);
         margin-left: 0;
         margin-right: 0;
         cursor: inherit;
       }
-      WUP-TIME strong {
+      WUP-SELECTMANY strong {
         cursor: inherit;
       }
-      WUP-TIME [aria-required="true"] + strong:after,
-      WUP-TIME fieldset[aria-required="true"] &gt; legend:after {
+      WUP-SELECTMANY [aria-required="true"] + strong:after,
+      WUP-SELECTMANY fieldset[aria-required="true"] &gt; legend:after {
         content: "*";
         font-size: larger;
         font-weight: bolder;
         line-height: 0;
       }
-      WUP-TIME [error] {
+      WUP-SELECTMANY [error] {
         cursor: pointer;
         font-size: small;
         color: var(--ctrl-err-text);
@@ -364,15 +370,15 @@ clip: rect(1px, 1px, 1px, 1px);}
         overflow: auto;
         overflow: overlay;
       }
-      WUP-TIME [error] ul {
+      WUP-SELECTMANY [error] ul {
         margin:0; padding:2px 4px 2px;
       }
-      WUP-TIME [error] li {
+      WUP-SELECTMANY [error] li {
         display: flex;
         align-items: center;
         margin-left: -5px;
       }
-      WUP-TIME [error] li:before {
+      WUP-SELECTMANY [error] li:before {
         content: '';
         --ctrl-icon-img: var(--wup-icon-dot);
         --ctrl-icon: var(--ctrl-err-text);
@@ -397,48 +403,48 @@ mask-position: center;
 -webkit-mask-image: var(--ctrl-icon-img);
 mask-image: var(--ctrl-icon-img);
       }
-      WUP-TIME [error] li[valid] {
+      WUP-SELECTMANY [error] li[valid] {
         color: var(--ctrl-err-icon-valid);
       }
-      WUP-TIME [error] li[valid]:before {
+      WUP-SELECTMANY [error] li[valid]:before {
         content: '';
         --ctrl-icon-img: var(--wup-icon-check);
         --ctrl-icon: var(--ctrl-err-icon-valid);
       }
-      WUP-TIME:focus-within [error] {
+      WUP-SELECTMANY:focus-within [error] {
         max-height: none;
       }
       @media (hover: hover) and (pointer: fine) {
-        /*WUP-TIME:hover {
+        /*WUP-SELECTMANY:hover {
           z-index: 90011;
         }
-        WUP-TIME:hover [error] {
+        WUP-SELECTMANY:hover [error] {
           max-height: none;
         }*/
-        WUP-TIME:hover,
-        WUP-TIME:hover &gt; [menu] {
+        WUP-SELECTMANY:hover,
+        WUP-SELECTMANY:hover &gt; [menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
-        WUP-TIME[invalid]:hover,
-        WUP-TIME[invalid]:hover &gt; [menu] {
+        WUP-SELECTMANY[invalid]:hover,
+        WUP-SELECTMANY[invalid]:hover &gt; [menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
         }
       }
-        WUP-TIME {
+        WUP-SELECTMANY {
           contain: style;
           cursor: text;
         }
-        WUP-TIME label &gt; span {
+        WUP-SELECTMANY label &gt; span {
           width: 100%;
           position: relative;
           display: flex;
           flex-direction: row-reverse;
         }
-        WUP-TIME input,
-        WUP-TIME textarea,
-        WUP-TIME [maskholder],
-        WUP-TIME [prefix],
-        WUP-TIME [postfix] {
+        WUP-SELECTMANY input,
+        WUP-SELECTMANY textarea,
+        WUP-SELECTMANY [maskholder],
+        WUP-SELECTMANY [prefix],
+        WUP-SELECTMANY [postfix] {
           padding: var(--ctrl-padding);
           padding-left: 0;
           padding-right: 0;
@@ -449,56 +455,56 @@ mask-image: var(--ctrl-icon-img);
           overflow: hidden;
           white-space: nowrap;
         }
-        WUP-TIME input,
-        WUP-TIME textarea,
-        WUP-TIME [contenteditable=true],
-        WUP-TIME [maskholder],
-        WUP-TIME [postfix] {
+        WUP-SELECTMANY input,
+        WUP-SELECTMANY textarea,
+        WUP-SELECTMANY [contenteditable=true],
+        WUP-SELECTMANY [maskholder],
+        WUP-SELECTMANY [postfix] {
           width: 100%;
           box-sizing: border-box;
           border: none;
           background: none;
           outline: none;
         }
-        WUP-TIME [prefix],
-        WUP-TIME [postfix] {
+        WUP-SELECTMANY [prefix],
+        WUP-SELECTMANY [postfix] {
           color: var(--ctrl-label);
           flex-shrink: 0;
         }
-        WUP-TIME [maskholder],
-        WUP-TIME [prefix],
-        WUP-TIME [postfix] {
+        WUP-SELECTMANY [maskholder],
+        WUP-SELECTMANY [prefix],
+        WUP-SELECTMANY [postfix] {
           display: none;
           pointer-events: none;
           text-overflow: initial;
           white-space: pre;
         }
-        WUP-TIME [postfix] {
+        WUP-SELECTMANY [postfix] {
           position: absolute;
         }
-        WUP-TIME [maskholder] {
+        WUP-SELECTMANY [maskholder] {
           position: absolute;
           opacity: 0.65;
         }
-        WUP-TIME [maskholder]&gt;i,
-        WUP-TIME [postfix]&gt;i {
+        WUP-SELECTMANY [maskholder]&gt;i,
+        WUP-SELECTMANY [postfix]&gt;i {
           visibility: hidden;
           font: inherit;
           white-space: pre;
         }
-        WUP-TIME input:-webkit-autofill,
-        WUP-TIME textarea:-webkit-autofill,
-        WUP-TIME [contenteditable=true]:-webkit-autofill {
+        WUP-SELECTMANY input:-webkit-autofill,
+        WUP-SELECTMANY textarea:-webkit-autofill,
+        WUP-SELECTMANY [contenteditable=true]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
-        WUP-TIME input:autofill,
-        WUP-TIME textarea:autofill,
-        WUP-TIME [contenteditable=true]:autofill {
+        WUP-SELECTMANY input:autofill,
+        WUP-SELECTMANY textarea:autofill,
+        WUP-SELECTMANY [contenteditable=true]:autofill {
           font: inherit;
           background-clip: text;
         }
-        WUP-TIME strong {
+        WUP-SELECTMANY strong {
           display: block;
           position: absolute;
           top: 50%;
@@ -516,36 +522,36 @@ mask-image: var(--ctrl-icon-img);
           text-decoration: none;
         }
         @media not all and (prefers-reduced-motion) {
-          WUP-TIME strong {
+          WUP-SELECTMANY strong {
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
-        WUP-TIME input:not(:focus)::placeholder,
-        WUP-TIME textarea:not(:focus)::placeholder {
+        WUP-SELECTMANY input:not(:focus)::placeholder,
+        WUP-SELECTMANY textarea:not(:focus)::placeholder {
           color: transparent;
         }
-        WUP-TIME:focus-within strong,
-        WUP-TIME input:not(:placeholder-shown) + strong,
-        WUP-TIME textarea:not(:placeholder-shown) + strong,
-        WUP-TIME [contenteditable=true]:not(:empty) + strong,
-        WUP-TIME legend {
+        WUP-SELECTMANY:focus-within strong,
+        WUP-SELECTMANY input:not(:placeholder-shown) + strong,
+        WUP-SELECTMANY textarea:not(:placeholder-shown) + strong,
+        WUP-SELECTMANY [contenteditable=true]:not(:empty) + strong,
+        WUP-SELECTMANY legend {
           top: 0.2em;
           transform: scale(0.9);
         }
-        WUP-TIME:focus-within [maskholder],
-        WUP-TIME:focus-within [prefix],
-        WUP-TIME:focus-within [postfix],
-        WUP-TIME input:not(:placeholder-shown) ~ [prefix],
-        WUP-TIME input:not(:placeholder-shown) ~ [postfix],
-        WUP-TIME textarea:not(:placeholder-shown) ~ [prefix],
-        WUP-TIME textarea:not(:placeholder-shown) ~ [postfix] {
+        WUP-SELECTMANY:focus-within [maskholder],
+        WUP-SELECTMANY:focus-within [prefix],
+        WUP-SELECTMANY:focus-within [postfix],
+        WUP-SELECTMANY input:not(:placeholder-shown) ~ [prefix],
+        WUP-SELECTMANY input:not(:placeholder-shown) ~ [postfix],
+        WUP-SELECTMANY textarea:not(:placeholder-shown) ~ [prefix],
+        WUP-SELECTMANY textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
         }
         /* style for icons */
-        WUP-TIME label button,
-        WUP-TIME label button:after,
-        WUP-TIME label:after,
-        WUP-TIME label:before {
+        WUP-SELECTMANY label button,
+        WUP-SELECTMANY label button:after,
+        WUP-SELECTMANY label:after,
+        WUP-SELECTMANY label:before {
           
 display: inline-block;
 width: var(--ctrl-icon-size);
@@ -569,192 +575,145 @@ mask-image: var(--ctrl-icon-img);
           -webkit-mask-image: none;
           mask-image: none;
         }
-        WUP-TIME label:after {
+        WUP-SELECTMANY label:after {
           cursor: pointer;
           margin-right: calc(var(--ctrl-icon-size) / -2);
         }
-        WUP-TIME label:before {
+        WUP-SELECTMANY label:before {
           cursor: pointer;
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
-        WUP-TIME label button {
+        WUP-SELECTMANY label button {
           contain: strict;
           position: relative;
           z-index: 1;
         }
-        WUP-TIME label&gt;span + button {
+        WUP-SELECTMANY label&gt;span + button {
           margin-right: -0.5em;
         }
-        WUP-TIME button[clear] {
+        WUP-SELECTMANY button[clear] {
           background: none;
           align-self: center;
         }
-        WUP-TIME button[clear]:after {
+        WUP-SELECTMANY button[clear]:after {
           content: "";
           padding: 0;
           -webkit-mask-image: var(--wup-icon-cross);
           mask-image: var(--wup-icon-cross);
         }
-        WUP-TIME button[clear]:after,
-        WUP-TIME button[clear]:before {
+        WUP-SELECTMANY button[clear]:after,
+        WUP-SELECTMANY button[clear]:before {
           position: absolute;
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           width: 100%;
         }
-        WUP-TIME button[clear]:before {
+        WUP-SELECTMANY button[clear]:before {
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
         }
         @media (hover: hover) and (pointer: fine) {
-          WUP-TIME button[clear]:hover {
+          WUP-SELECTMANY button[clear]:hover {
             box-shadow: none;
           }
-          WUP-TIME button[clear]:hover:before {
+          WUP-SELECTMANY button[clear]:hover:before {
             content: "";
             border-radius: 50%;
             box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
           }
-          WUP-TIME button[clear]:hover:after {
+          WUP-SELECTMANY button[clear]:hover:after {
             background-color: var(--ctrl-err-text);
           }
-          WUP-TIME[readonly] button[clear] {
+          WUP-SELECTMANY[readonly] button[clear] {
             pointer-events: none;
           }
         }
-      WUP-TIME {
+      WUP-SELECTMANY {
         cursor: pointer;
       }
-      WUP-TIME input {
+      WUP-SELECTMANY input {
         cursor: text;
       }
-      WUP-TIME input:placeholder-shown,
-      WUP-TIME input:read-only {
+      WUP-SELECTMANY input:placeholder-shown,
+      WUP-SELECTMANY input:read-only {
         cursor: pointer;
       }
-      WUP-TIME label::after {
+      WUP-SELECTMANY label::after {
         content: "";
         -webkit-mask-image: var(--ctrl-icon-img);
         mask-image: var(--ctrl-icon-img);
       }
       @media not all and (prefers-reduced-motion) {
-        WUP-TIME label::after {
+        WUP-SELECTMANY label::after {
           transition: transform var(--anim);
         }
       }
-      WUP-TIME button[clear] {
+      WUP-SELECTMANY button[clear] {
         margin: 0;
       }
-      WUP-TIME [menu] {
+      WUP-SELECTMANY [menu] {
         padding: 0;
         max-height: 300px;
         z-index: 90010;
       }
-      WUP-TIME {
-        --ctrl-icon-img: var(--ctrl-time-icon-img-lg);
-        --ctrl-icon-img: var(--ctrl-time-icon-img);
+      WUP-SELECTMANY {
+        --ctrl-icon-img: var(--ctrl-select-icon-img);
       }
-      WUP-TIME [menu]&gt;div:first-child {
-        position: relative;
+      WUP-SELECTMANY[opened] label::after {
+        transform: rotate(180deg);
       }
-      WUP-TIME [menu] ul {
+      WUP-SELECTMANY [menu] {
+        overflow: hidden;
+      }
+      WUP-SELECTMANY [menu] ul {
         margin: 0;
         padding: 0;
         list-style-type: none;
         cursor: pointer;
         overflow: auto;
-        text-align: center;
-        display: inline-block;
-        vertical-align: middle;
+        max-height: 300px;
       }
-      WUP-TIME [menu] li,
-      WUP-TIME [menu] mark,
-      WUP-TIME [menu] ul:after {
+      
+WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar {
+  width: 10px; height: 10px;
+  cursor: pointer;
+}
+WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar-corner {
+  background: none;
+}
+WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar-thumb {
+  border: 3px solid rgba(0,0,0,0);
+  background-clip: padding-box;
+  background-color: var(--scroll, rgba(0,0,0,0.2));
+  border-radius: 999px;
+}
+WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar-track-piece:vertical:start,
+WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar-track-piece:vertical:end,
+WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar-track-piece:horizontal:start,
+WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar-track-piece:horizontal:end {
+  margin: 0;
+}
+@media (hover) {
+  WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scroll-hover, rgba(0,0,0,0.5));
+  }
+}
+      WUP-SELECTMANY [menu] li {
         padding: 1em;
-        height: 1em;
+        border-radius: var(--ctrl-border-radius);
       }
-      WUP-TIME [menu] mark {
-        z-index: -1;
-        position: absolute;
-        display: block;
-        top:50%; left:0; right:0;
-        transform: translateY(-50%);
-        margin: 0; padding-left: 2.8em;
-        font: inherit;
-        background: var(--ctrl-time-current-bg);
+      @media (hover: hover) and (pointer: fine) {
+        WUP-SELECTMANY [menu] li:hover {
+          box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
+        }
       }
-      WUP-TIME [menu] ul:after {
-        content: "99";
-        height: 0;
-        margin:0; padding-top:0; padding-bottom:0;
-        visibility: hidden;
-        overflow: hidden;
-        user-select: none;
-        pointer-events: none;
-        display: block;
-      }
-      WUP-TIME [menu] ul:nth-child(3):after {
-         content: "AM";
-      }
-      WUP-TIME [menu] li[aria-selected=true],
-      WUP-TIME [menu] mark,
-      WUP-TIME [menu] ul:after {
-        font-weight: bold;
-        color: var(--ctrl-time-current);
-      }
-      WUP-TIME [menu] li[focused] {
-        position: relative;
-      }
-      WUP-TIME [menu] li[focused]:after {
-        
-          content: " ";
-          position: absolute;
-          display: block;
-          top: 50%; left: 50%;
-          transform: translate(-50%,-50%);
-          width: 2em;
-          height: 2em;
-          border-radius: 50%;
-          //box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
-    
-      }
-      WUP-TIME [menu] li[aria-hidden] {
-        pointer-events: none;
-        touch-action: none;
-      }
-      WUP-TIME [menu] li[disabled] {
-        color: var(--ctrl-err-text);
-        --ctrl-focus: var(--ctrl-err-text);
-        //background-color: var(--ctrl-err-bg);
-      }
-      WUP-TIME [menu] [group] {
+      WUP-SELECTMANY [menu] li[aria-selected="true"] {
+        color: var(--ctrl-selected);
         display: flex;
-        gap: 1px;
-        padding-top: 1px;
-        background: var(--base-sep);
       }
-      WUP-TIME [menu] button {
-        flex: 1 1 50%;
-        display: inline-flex;
-        align-content: center;
-        justify-content: center;
-        height: 2.4em;
-        border-radius: 0;
-        padding: 0; margin: 0;
-        background: var(--base-btn3-bg);
-      }
-      WUP-TIME [menu] button:first-child {
+      WUP-SELECTMANY [menu] li[aria-selected="true"]:after {
+        content: "";
         --ctrl-icon-img: var(--wup-icon-check);
-        --ctrl-icon: var(--ctrl-err-icon-valid);
-        border-bottom-left-radius: var(--border-radius);
-      }
-      WUP-TIME [menu] button:last-child {
-        --ctrl-icon-img: var(--wup-icon-cross);
-        --ctrl-icon: var(--ctrl-err-text);
-        border-bottom-right-radius: var(--border-radius);
-      }
-      WUP-TIME [menu] button:after {
         
 display: inline-block;
 width: var(--ctrl-icon-size);
@@ -775,41 +734,115 @@ mask-repeat: no-repeat;
 mask-position: center;
 -webkit-mask-image: var(--ctrl-icon-img);
 mask-image: var(--ctrl-icon-img);
+        background: var(--ctrl-selected);
+        margin-left: auto;
+        padding: 0;
+      }
+      WUP-SELECTMANY [menu] li[focused] {
+        box-shadow: inset 0 0 4px 0 var(--ctrl-focus);
+      }
+      WUP-SELECTMANY strong {
+        top: 1.6em;
+        margin: calc(var(--ctrl-select-gap) / 2);
+      }
+      WUP-SELECTMANY label &gt; span {
+        flex-wrap: wrap;
+        flex-direction: row;
+        padding: var(--ctrl-padding);
+        padding-left: 0; padding-right: 0;
+        margin: calc(var(--ctrl-select-gap) / -2);
+      }
+      WUP-SELECTMANY [item],
+      WUP-SELECTMANY input {
+        margin: calc(var(--ctrl-select-gap) / 2);
+        padding: var(--ctrl-select-gap);
+      }
+      WUP-SELECTMANY input {
+        flex: 1 1 auto;
+        width: 0;
+        min-width: 2em;
+        padding-left: 0; padding-right: 0;
+      }
+      WUP-SELECTMANY [item] {
+        --ctrl-icon: var(--ctrl-select-item-del);
+        --ctrl-icon-size: var(--ctrl-select-item-del-size);
+        --ctrl-icon-img: var(--ctrl-select-item-del-img);
+        color: var(--ctrl-select-item);
+        background-color: var(--ctrl-select-item-bg);
+        border-radius: var(--ctrl-border-radius);
+        cursor: pointer;
+        box-sizing: border-box;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+      WUP-SELECTMANY [item]:after {
+        
+display: inline-block;
+width: var(--ctrl-icon-size);
+min-height: var(--ctrl-icon-size);
+box-sizing: content-box;
+margin: 0;
+padding: 5px;
+flex: 0 0 auto;
+align-self: stretch;
+border: none;
+box-shadow: none;
+background: var(--ctrl-icon);
+-webkit-mask-size: var(--ctrl-icon-size);
+mask-size: var(--ctrl-icon-size);
+-webkit-mask-repeat: no-repeat;
+mask-repeat: no-repeat;
+-webkit-mask-position: center;
+mask-position: center;
+-webkit-mask-image: var(--ctrl-icon-img);
+mask-image: var(--ctrl-icon-img);
+        display: var(--ctrl-select-item-del-display);
         content: "";
-        padding:0;
+        padding: 0;
+        margin-left: 0.5em;
+      }
+      WUP-SELECTMANY [item][focused] {
+        box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
+      }
+      WUP-SELECTMANY [item][removed] {
+        --ctrl-icon: var(--ctrl-err-text);
+        text-decoration: line-through;
+        color: var(--ctrl-err-text);
+        background-color: var(--ctrl-err-bg);
+      }
+      WUP-SELECTMANY[readonly] [item] {
+        pointer-events: none;
+        touch-action: none;
       }
       @media (hover: hover) and (pointer: fine) {
-        WUP-TIME [menu] li:hover {
-          position: relative;
-        }
-        WUP-TIME [menu] li:hover:after {
-         
-          content: " ";
-          position: absolute;
-          display: block;
-          top: 50%; left: 50%;
-          transform: translate(-50%,-50%);
-          width: 2em;
-          height: 2em;
-          border-radius: 50%;
-          //box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
-    
-        }
-        WUP-TIME [menu] button:hover {
-          box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 10%);
+        WUP-SELECTMANY [item]:hover {
+          --ctrl-icon: var(--ctrl-err-text);
+          text-decoration: line-through;
+          color: var(--ctrl-err-text);
+          background-color: var(--ctrl-err-bg);
         }
       }
-      WUP-TIME [menu] button[disabled] {
-         box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 5%);
-         cursor: not-allowed;
-         --ctrl-icon: inherit;
+      @media not all and (pointer: fine) {
+        WUP-SELECTMANY [item] {
+          user-select: none;
+          -webkit-user-select: none;
+        }
+      }
+      @media not all and (prefers-reduced-motion) {
+        WUP-SELECTMANY [item][removed] {
+          transition: all var(--anim-time) ease-in-out;
+          transition-property: margin, padding, width, opacity;
+          padding-left: 0; padding-right: 0;
+          margin-left: 0; margin-right: 0;
+          width: 0;
+          opacity: 0;
+        }
       }
 </style>
 `;
 
-exports[`control.time validations $options.validationShowAll 1`] = `
-<wup-time
+exports[`control.selectMany validations $options.validationShowAll 1`] = `
+<wup-selectmany
   invalid=""
 >
   <label
@@ -851,35 +884,29 @@ exports[`control.time validations $options.validationShowAll 1`] = `
     <span>
       This field is required
     </span>
-    <ul
-      aria-hidden="true"
-    >
-      <li>
-        Min value is 02:28 AM
-      </li>
-      <li>
-        Max value is 11:15 PM
-      </li>
-      <li>
-        This value is disabled
-      </li>
-    </ul>
   </wup-popup>
-</wup-time>
+</wup-selectmany>
 `;
 
-exports[`control.time validations $options.validationShowAll 2`] = `
-<wup-time>
+exports[`control.selectMany validations $options.validationShowAll 2`] = `
+<wup-selectmany>
   <label
     for="txt1"
   >
     <span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Donny
+      </span>
       <input
         aria-autocomplete="list"
         aria-expanded="false"
         aria-haspopup="listbox"
         aria-required="true"
         autocomplete="off"
+        class="wup-hidden"
         id="txt1"
         placeholder=" "
         role="combobox"
@@ -894,11 +921,11 @@ exports[`control.time validations $options.validationShowAll 2`] = `
       type="button"
     />
   </label>
-</wup-time>
+</wup-selectmany>
 `;
 
-exports[`control.time validations $options.validationShowAll 3`] = `
-<wup-time
+exports[`control.selectMany validations $options.validationShowAll 3`] = `
+<wup-selectmany
   invalid=""
 >
   <label
@@ -912,6 +939,7 @@ exports[`control.time validations $options.validationShowAll 3`] = `
         aria-haspopup="listbox"
         aria-required="true"
         autocomplete="off"
+        class=""
         id="txt1"
         placeholder=" "
         role="combobox"
@@ -945,11 +973,11 @@ exports[`control.time validations $options.validationShowAll 3`] = `
       This field is required
     </span>
   </wup-popup>
-</wup-time>
+</wup-selectmany>
 `;
 
-exports[`control.time validations options.validationCase 1`] = `
-<wup-time>
+exports[`control.selectMany validations options.validationCase 1`] = `
+<wup-selectmany>
   <label
     for="txt1"
   >
@@ -959,6 +987,7 @@ exports[`control.time validations options.validationCase 1`] = `
         aria-expanded="false"
         aria-haspopup="listbox"
         autocomplete="off"
+        class="wup-hidden"
         id="txt1"
         placeholder=" "
         role="combobox"
@@ -973,33 +1002,27 @@ exports[`control.time validations options.validationCase 1`] = `
       type="button"
     />
   </label>
-</wup-time>
+</wup-selectmany>
 `;
 
-exports[`control.time validations options.validationCase 2`] = `
-<wup-time
+exports[`control.selectMany validations options.validationCase 2`] = `
+<wup-selectmany
   invalid=""
 >
   <label
     for="txt1"
   >
     <span>
-      <span
-        aria-hidden="true"
-        maskholder=""
-      >
-        <i />
-        hh:mm *M
-      </span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt2"
-        aria-describedby="txt4"
+        aria-controls="txt3"
+        aria-describedby="txt5"
         aria-expanded="false"
         aria-haspopup="listbox"
-        aria-owns="txt2"
+        aria-owns="txt3"
         aria-required="true"
         autocomplete="off"
+        class=""
         id="txt1"
         placeholder=" "
         role="combobox"
@@ -1018,98 +1041,43 @@ exports[`control.time validations options.validationCase 2`] = `
   </label>
   <wup-popup
     menu=""
-    style=""
+    style="min-width: 100px;"
   >
-    <div
-      id="txt2"
-      role="application"
+    <ul
+      aria-label="Items"
+      aria-multiselectable="true"
+      id="txt3"
+      role="listbox"
+      tabindex="-1"
     >
-      <ul
-        aria-label="Hours"
-        style="overflow: hidden;"
+      <li
+        aria-selected="true"
+        role="option"
       >
-        <li>
-          12
-        </li>
-        <li>
-          01
-        </li>
-        <li
-          aria-selected="true"
-        >
-          02
-        </li>
-        <li>
-          03
-        </li>
-        <li>
-          04
-        </li>
-      </ul>
-      <ul
-        aria-label="Minutes"
-        style="overflow: hidden;"
+        Donny
+      </li>
+      <li
+        role="option"
       >
-        <li>
-          26
-        </li>
-        <li>
-          27
-        </li>
-        <li
-          aria-selected="true"
-        >
-          28
-        </li>
-        <li>
-          29
-        </li>
-        <li>
-          30
-        </li>
-      </ul>
-      <ul
-        aria-label="AM PM"
-        style="overflow: hidden;"
+        Mikky
+      </li>
+      <li
+        role="option"
       >
-        <li
-          aria-hidden="true"
-        />
-        <li
-          aria-selected="true"
-        >
-          AM
-        </li>
-        <li>
-          PM
-        </li>
-      </ul>
-      <mark
-        aria-hidden="true"
+        Leo
+      </li>
+      <li
+        role="option"
       >
-        :
-      </mark>
-    </div>
-    <div
-      group=""
-    >
-      <button
-        aria-label="Ok"
-        tabindex="-1"
-        type="button"
-      />
-      <button
-        aria-label="Cancel"
-        tabindex="-1"
-        type="button"
-      />
-    </div>
+        Splinter
+      </li>
+    </ul>
   </wup-popup>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt4"
+    id="txt5"
     role="alert"
     style="max-width: 100px;"
   >
@@ -1122,11 +1090,11 @@ exports[`control.time validations options.validationCase 2`] = `
       This field is required
     </span>
   </wup-popup>
-</wup-time>
+</wup-selectmany>
 `;
 
-exports[`control.time validations options.validationCase 3`] = `
-<wup-time
+exports[`control.selectMany validations options.validationCase 3`] = `
+<wup-selectmany
   invalid=""
   opened=""
 >
@@ -1136,22 +1104,20 @@ exports[`control.time validations options.validationCase 3`] = `
     <span>
       <span
         aria-hidden="true"
-        maskholder=""
+        item=""
       >
-        <i>
-          02:28 AM
-        </i>
-        
+        Donny
       </span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt6"
-        aria-describedby="txt5"
+        aria-controls="txt8"
+        aria-describedby="txt6"
         aria-expanded="true"
         aria-haspopup="listbox"
-        aria-owns="txt6"
+        aria-owns="txt8"
         aria-required="true"
         autocomplete="off"
+        class=""
         id="txt1"
         placeholder=" "
         role="combobox"
@@ -1172,7 +1138,7 @@ exports[`control.time validations options.validationCase 3`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt5"
+    id="txt6"
     style="max-width: 100px;"
   >
     <span
@@ -1186,120 +1152,59 @@ exports[`control.time validations options.validationCase 3`] = `
   </wup-popup>
   <wup-popup
     menu=""
-    style=""
+    style="min-width: 100px;"
   >
-    <div
-      id="txt6"
-      role="application"
+    <ul
+      aria-label="Items"
+      aria-multiselectable="true"
+      id="txt8"
+      role="listbox"
+      tabindex="-1"
     >
-      <ul
-        aria-label="Hours"
-        style="overflow: hidden;"
+      <li
+        aria-selected="true"
+        role="option"
       >
-        <li>
-          12
-        </li>
-        <li>
-          01
-        </li>
-        <li
-          aria-selected="true"
-        >
-          02
-        </li>
-        <li>
-          03
-        </li>
-        <li>
-          04
-        </li>
-      </ul>
-      <ul
-        aria-label="Minutes"
-        style="overflow: hidden;"
+        Donny
+      </li>
+      <li
+        role="option"
       >
-        <li>
-          26
-        </li>
-        <li>
-          27
-        </li>
-        <li
-          aria-selected="true"
-        >
-          28
-        </li>
-        <li>
-          29
-        </li>
-        <li>
-          30
-        </li>
-      </ul>
-      <ul
-        aria-label="AM PM"
-        style="overflow: hidden;"
+        Mikky
+      </li>
+      <li
+        role="option"
       >
-        <li
-          aria-hidden="true"
-        />
-        <li
-          aria-selected="true"
-        >
-          AM
-        </li>
-        <li>
-          PM
-        </li>
-      </ul>
-      <mark
-        aria-hidden="true"
+        Leo
+      </li>
+      <li
+        role="option"
       >
-        :
-      </mark>
-    </div>
-    <div
-      group=""
-    >
-      <button
-        aria-label="Ok"
-        tabindex="-1"
-        type="button"
-      />
-      <button
-        aria-label="Cancel"
-        tabindex="-1"
-        type="button"
-      />
-    </div>
+        Splinter
+      </li>
+    </ul>
   </wup-popup>
-</wup-time>
+</wup-selectmany>
 `;
 
-exports[`control.time validations options.validationCase 4`] = `
-<wup-time
+exports[`control.selectMany validations options.validationCase 4`] = `
+<wup-selectmany
   invalid=""
 >
   <label
     for="txt1"
   >
     <span>
-      <span
-        aria-hidden="true"
-        maskholder=""
-      >
-        <i />
-        hh:mm *M
-      </span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt7"
-        aria-describedby="txt8"
+        aria-controls="txt9"
+        aria-describedby="txt10"
         aria-expanded="false"
         aria-haspopup="listbox"
-        aria-owns="txt7"
+        aria-owns="txt9"
         aria-required="true"
         autocomplete="off"
+        class=""
         id="txt1"
         placeholder=" "
         role="combobox"
@@ -1320,7 +1225,7 @@ exports[`control.time validations options.validationCase 4`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt8"
+    id="txt10"
     role="alert"
     style="max-width: 100px;"
   >
@@ -1333,14 +1238,14 @@ exports[`control.time validations options.validationCase 4`] = `
       This field is required
     </span>
   </wup-popup>
-</wup-time>
+</wup-selectmany>
 `;
 
-exports[`control.time with form 1`] = `
+exports[`control.selectMany with form 1`] = `
 <wup-form
   role="form"
 >
-  <wup-time>
+  <wup-selectmany>
     <label
       for="txt1"
     >
@@ -1366,6 +1271,6 @@ exports[`control.time with form 1`] = `
         type="button"
       />
     </label>
-  </wup-time>
+  </wup-selectmany>
 </wup-form>
 `;

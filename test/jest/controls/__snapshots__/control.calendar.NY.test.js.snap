@@ -640,7 +640,7 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=false $
     <span>
       <input
         aria-controls="txt2"
-        aria-describedby="txt5 txt6"
+        aria-describedby="txt4 txt5 txt6"
         aria-owns="txt2"
         aria-readonly="false"
         autocomplete="off"
@@ -801,6 +801,14 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=false $
       </div>
     </div>
   </div>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt4"
+  >
+    2021
+  </section>
   <section
     aria-atomic="true"
     aria-live="off"
@@ -2771,7 +2779,7 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=true $o
     <span>
       <input
         aria-controls="txt2"
-        aria-describedby="txt5 txt6"
+        aria-describedby="txt4 txt5 txt6"
         aria-owns="txt2"
         aria-readonly="false"
         autocomplete="off"
@@ -2932,6 +2940,14 @@ exports[`control.calendar >> timezone: America/New_York, offset: 240 utc=true $o
       </div>
     </div>
   </div>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt4"
+  >
+    2021
+  </section>
   <section
     aria-atomic="true"
     aria-live="off"

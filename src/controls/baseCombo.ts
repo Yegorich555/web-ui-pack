@@ -305,7 +305,6 @@ export default abstract class WUPBaseComboControl<
   }
 
   protected _isHidding?: true;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected async goHideMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): Promise<boolean> {
     if (!this.$refPopup || this._isHidding) {
       return false;
@@ -413,7 +412,6 @@ export default abstract class WUPBaseComboControl<
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override gotInput(e: WUP.Text.GotInputEvent, allowSuper = false): void {
     // gotInput possible on browser-autofill so we need filter check if isFocused
     !this.$isOpen && this._opts.showCase & ShowCases.onInput && this.$isFocused && this.goShowMenu(ShowCases.onInput);
@@ -422,7 +420,7 @@ export default abstract class WUPBaseComboControl<
 
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
     const arr = super.gotFocus(ev);
-    this.goShowMenu(ShowCases.onFocus, ev);
+    const r = this.goShowMenu(ShowCases.onFocus, ev);
 
     let clickAfterFocus = true; // prevent clickAfterFocus
     let lblClick: ReturnType<typeof setTimeout> | false = false; // fix when labelOnClick > inputOnClick > inputOnFocus
@@ -430,7 +428,7 @@ export default abstract class WUPBaseComboControl<
       const skip = e.defaultPrevented || e.button || lblClick; // e.button > 0 if not left-click
       if (!skip) {
         if (clickAfterFocus) {
-          this.goShowMenu(ShowCases.onClick, e); // menu must be opened if openByFocus is rejected
+          r.finally(() => this.$isFocused && this.goShowMenu(ShowCases.onClick, e)); // menu must be opened if openByFocus is rejected
         } else {
           !this.#isOpen ? this.goShowMenu(ShowCases.onClick, e) : this.goHideMenu(HideCases.onClick, e);
         }
@@ -485,7 +483,8 @@ export default abstract class WUPBaseComboControl<
   protected removePopup(): void {
     this.$refPopup?.remove();
     this.$refPopup = undefined;
-    delete this._focusedMenuItem;
+    this._focusedMenuItem = undefined;
+    this._selectedMenuItem = undefined;
     if (this.#isOpen) {
       this.#isOpen = false;
       this.removeAttribute("opened");

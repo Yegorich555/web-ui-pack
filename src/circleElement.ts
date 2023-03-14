@@ -205,7 +205,7 @@ export default class WUPCircleElement extends WUPBaseElement {
         const v = a.value;
         angleTo = mathScaleValue(v, vMin, vMax, angleMin, angleMax) + (angleFrom - angleMin);
         const path = this.$refItems.appendChild(this.make("path"));
-        a.color && path.setAttribute("fill", a.color);
+        a.color && path.setAttribute("fill", a.color); // todo need to use inline style 'fill' instead othewise it doesn't work
 
         const ms = items.length === 1 ? animTime : mathScaleValue(v, vMin, vMax, 0, animTime);
         const from = angleFrom;
@@ -340,3 +340,6 @@ export function drawArc(
 // example: https://medium.com/@pppped/how-to-code-a-responsive-circular-percentage-chart-with-svg-and-css-3632f8cd7705
 // similar https://github.com/w8r/svg-arc-corners
 // demo https://milevski.co/svg-arc-corners/demo/
+
+// todo issue if value === 0
+// todo if $value=[20, 5000] - then small values rendered in 1px - it's looks bad... Need somehow normalize to min-size

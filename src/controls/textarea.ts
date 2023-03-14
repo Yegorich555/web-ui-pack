@@ -1,5 +1,7 @@
 import WUPTextControl from "./text";
-import { WUPcssScrollSmall } from "../styles";
+import WUPTextareaInput from "./textarea.input";
+
+(WUPTextareaInput as any).sideEffects = true; // to fix sideEffects
 
 const tagName = "wup-textarea";
 declare global {
@@ -59,22 +61,10 @@ export default class WUPTextareaControl<
   static get $style(): string {
     return `${super.$style}
         :host strong { top: 1.6em; }
-        :host [contenteditable] {
+        :host [contenteditable=true] {
           min-height: 4em;
           max-height: 4em;
-          resize: none;
-          display: inline-block; ${/* it removes extra space below */ ""}
-          cursor: text;
-          white-space: pre-wrap;
-          word-break: break-word;
-          overflow-wrap: break-word;
-          overflow: auto;
-          margin: var(--ctrl-padding);
-          padding: 0;
-          margin-left: 0;
-          margin-right: 0;
-        }
-        ${WUPcssScrollSmall(":host [contenteditable]")}`;
+        }`;
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
@@ -94,126 +84,14 @@ export default class WUPTextareaControl<
 
   protected override _opts = this.$options;
 
-  $refInput = document.createElement("span") as HTMLInputElement & HTMLSpanElement;
-  constructor() {
-    super();
-    // this.$refInput.placeholder = " "; / it doesn't work for span
-    this.$refInput.select = () => {
-      const range = document.createRange();
-      range.selectNodeContents(this.$refInput);
-      const sel = window.getSelection()!;
-      sel.removeAllRanges();
-      sel.addRange(range);
-    };
-    Object.defineProperty(this.$refInput, "value", {
-      configurable: true,
-      set: (v) => (this.$refInput.innerHTML = v),
-      get: () =>
-        this.$refInput.innerHTML
-          // .replace(/\n $/, "\n")
-          .replace(/<div><br><\/div>/g, "\n") // Chrome newLine
-          .replace(/<br>|<div>/g, "\n")
-          .replace(/<\/div>/g, ""),
-    });
-
-    Object.defineProperty(this.$refInput, "setSelectionRange", {
-      configurable: true,
-      value: (start: number | null, end: number | null): void => {
-        this.selection = { start: start || 0, end: end || 0 };
-      },
-    });
-
-    Object.defineProperty(this.$refInput, "selectionStart", {
-      configurable: true,
-      set: (start) => (this.selection = { start, end: this.selection?.end as number }),
-      get: () => this.selection?.start ?? null,
-    });
-
-    Object.defineProperty(this.$refInput, "selectionEnd", {
-      configurable: true,
-      set: (end) => (this.selection = { start: this.selection?.start as number, end }),
-      get: () => this.selection?.end ?? null,
-    });
-  }
-
-  /** Fix for contenteditable (it doesn't contain selectionStart & selectionEnd props) */
-  private get selection(): null | { start: number; end: number } {
-    if (document.activeElement !== this.$refInput) {
-      return null;
-    }
-    const sel = window.getSelection();
-    if (!sel) {
-      return null;
-    }
-    const range = sel.getRangeAt(0);
-    const pre = range.cloneRange();
-    pre.selectNodeContents(this.$refInput);
-    pre.setEnd(range.startContainer, range.startOffset);
-    const start = pre.toString().length;
-
-    return {
-      start,
-      end: start + range.toString().length,
-    };
-  }
-
-  private set selection(sel) {
-    if (document.activeElement !== this.$refInput) {
-      return;
-    }
-    let charIndex = 0;
-    const range = document.createRange();
-    range.setStart(this.$refInput, 0);
-    range.collapse(true);
-    const nodeStack: Node[] = [this.$refInput];
-    let node;
-    let foundStart = false;
-    let stop = false;
-
-    // from https://stackoverflow.com/questions/13949059/persisting-the-changes-of-range-objects-after-selection-in-html/13950376#13950376
-    /* istanbul ignore else */
-    if (sel) {
-      // eslint-disable-next-line no-cond-assign
-      while (!stop && (node = nodeStack.pop())) {
-        if (node.nodeType === Node.TEXT_NODE) {
-          const nextCharIndex = charIndex + (node as Text).length;
-          /* istanbul ignore else */
-          if (!foundStart && sel.start >= charIndex && sel.start <= nextCharIndex) {
-            range.setStart(node, sel.start - charIndex);
-            foundStart = true;
-          }
-          /* istanbul ignore else */
-          if (foundStart && sel.end >= charIndex && sel.end <= nextCharIndex) {
-            range.setEnd(node, sel.end - charIndex);
-            stop = true;
-          }
-          charIndex = nextCharIndex;
-        } else {
-          let i = node.childNodes.length;
-          while (i--) {
-            nodeStack.push(node.childNodes[i]);
-          }
-        }
-      }
-    }
-
-    const s = window.getSelection()!;
-    s.removeAllRanges();
-    s.addRange(range);
-  }
+  $refInput = document.createElement("wup-areainput") as HTMLInputElement;
 
   protected override renderControl(): void {
     super.renderControl();
-    this.$refInput.setAttribute("contenteditable", true);
-    this.$refInput.setAttribute("role", "textbox");
     const { id } = this.$refInput;
     this.$refInput.removeAttribute("id");
     this.$refInput.setAttribute("aria-labelledby", id);
     this.$refTitle.id = id;
-  }
-
-  override parseInput(text: string): ValueType | undefined {
-    return super.parseInput(text.replace(/^&nbsp;/, ""));
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Textarea.Options> | null): void {
@@ -305,3 +183,5 @@ export default class WUPTextareaControl<
 }
 
 customElements.define(tagName, WUPTextareaControl);
+
+// todo issue: cursor is wrong for custom scroll-bar

@@ -168,10 +168,10 @@ describe("control.select", () => {
     expect(onHide).toBeCalledTimes(0);
     expect(onShow).toBeCalledTimes(1);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option">Donny</li><li role="option" aria-selected="true">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
+      `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option" aria-selected="true">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
     );
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-select opened=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-owns="txt2" aria-controls="txt2"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label><wup-popup menu="" style="min-width: 100px;"><ul id="txt2" role="listbox" aria-label="Items"><li role="option">Donny</li><li role="option" aria-selected="true">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul></wup-popup></wup-select>"`
+      `"<wup-select opened=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-owns="txt2" aria-controls="txt2"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label><wup-popup menu="" style="min-width: 100px;"><ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option" aria-selected="true">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul></wup-popup></wup-select>"`
     );
 
     // closing by Esc
@@ -180,7 +180,7 @@ describe("control.select", () => {
     expect(el.$isOpen).toBe(false);
     expect(el.$refPopup).toBeDefined(); // disposed only by focus out
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-owns="txt2" aria-controls="txt2"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label><wup-popup menu="" style="min-width: 100px;"><ul id="txt2" role="listbox" aria-label="Items"><li role="option">Donny</li><li role="option" aria-selected="false">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul></wup-popup></wup-select>"`
+      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-owns="txt2" aria-controls="txt2"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label><wup-popup menu="" style="min-width: 100px;"><ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option" aria-selected="false">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul></wup-popup></wup-select>"`
     );
     expect(onHide).toBeCalledTimes(1);
     expect(onShow).toBeCalledTimes(1);
@@ -379,18 +379,36 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isOpen).toBe(true);
     el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.wait(1);
     el.blur();
     await h.wait();
     expect(el.$isOpen).toBe(false);
+    expect(el.$refPopup).toBeFalsy();
 
     // cover hide after show when menu is opening
     el.$options.items = () => new Promise((res) => setTimeout(() => res(getItems()), 100));
     await h.wait(1);
-    el.$showMenu();
+    el.focus();
+    el.click();
+    await h.wait(10);
     expect(el.$isOpen).toBe(true);
     await h.wait(10);
-    el.$hideMenu();
+    el.blur();
+    await h.wait();
     expect(el.$isOpen).toBe(false);
+    expect(el.$refPopup).toBeFalsy();
+
+    // case show & hide sync when focused
+    el.$options.items = () => new Promise((res) => setTimeout(() => res(getItems()), 100));
+    await h.wait(1);
+    el.focus();
+    await h.wait(10);
+    expect(el.$isOpen).toBe(true);
+    await h.userClick(el);
+    await h.wait();
+    expect(el.$isOpen).toBe(false);
+    expect(el.$refPopup).toBeTruthy();
+    el.blur();
     await h.wait();
 
     // case: popups are visible and not closed (if change focus by Tab)
@@ -450,7 +468,7 @@ describe("control.select", () => {
     el.focus();
     await h.wait();
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup menu="" style="min-width: 100px;"><ul id="txt2" role="listbox" aria-label="Items"><li role="option">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul></wup-popup>"`
+      `"<wup-popup menu="" style="min-width: 100px;"><ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul></wup-popup>"`
     );
 
     const setItems = async (items) => {
@@ -464,7 +482,7 @@ describe("control.select", () => {
 
     await setItems([]);
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup menu="" style="min-width: 100px;"><ul id="txt3" role="listbox" aria-label="Items"><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul></wup-popup>"`
+      `"<wup-popup menu="" style="min-width: 100px;"><ul id="txt3" role="listbox" aria-label="Items" tabindex="-1"><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul></wup-popup>"`
     );
 
     // click on No-Items
@@ -475,7 +493,7 @@ describe("control.select", () => {
 
     await setItems(() => Promise.resolve(getItems()));
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup menu="" style="min-width: 100px;"><ul id="txt4" role="listbox" aria-label="Items"><li role="option">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul></wup-popup>"`
+      `"<wup-popup menu="" style="min-width: 100px;"><ul id="txt4" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul></wup-popup>"`
     );
 
     // menu navigation by arrowKeys
@@ -581,7 +599,7 @@ describe("control.select", () => {
     WUPSelectControl.$textNoItems = "";
     await setItems([]);
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup menu="" hidden="" style="min-width: 100px;"><ul id="txt10" role="listbox" aria-label="Items"></ul></wup-popup>"`
+      `"<wup-popup menu="" hidden="" style="min-width: 100px;"><ul id="txt10" role="listbox" aria-label="Items" tabindex="-1"></ul></wup-popup>"`
     );
     WUPSelectControl.$textNoItems = wasText;
 
@@ -590,13 +608,13 @@ describe("control.select", () => {
     el.testMe = false;
     expect(el.$isOpen).toBe(true);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt11" role="listbox" aria-label="Items"><li role="option">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option" aria-selected="true">Splinter</li></ul>"`
+      `"<ul id="txt11" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option" aria-selected="true">Splinter</li></ul>"`
     );
 
     // when items is function without promise
     await setItems(() => getItems().slice(0, 2));
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt12" role="listbox" aria-label="Items"><li role="option">Donny</li><li role="option">Mikky</li></ul>"`
+      `"<ul id="txt12" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option">Mikky</li></ul>"`
     );
 
     // when items has custom render
@@ -631,12 +649,12 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isOpen).toBe(true);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option">Donny</li><li role="option">Dona Rose</li><li role="option">Leo</li></ul>"`
+      `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option">Dona Rose</li><li role="option">Leo</li></ul>"`
     );
 
     await h.userTypeText(el.$refInput, "d");
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3" focused="">Donny</li><li role="option">Dona Rose</li><li role="option" style="display: none;">Leo</li></ul>"`
+      `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option" aria-selected="false" id="txt3" focused="">Donny</li><li role="option">Dona Rose</li><li role="option" style="display: none;">Leo</li></ul>"`
     );
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
@@ -663,7 +681,7 @@ describe("control.select", () => {
     await h.userTypeText(el.$refInput, "123");
     expect(el.$isOpen).toBe(true);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option" aria-selected="false" id="txt3" style="display: none;">Donny</li><li role="option" aria-selected="true" id="txt4" style="display: none;">Dona Rose</li><li role="option" style="display: none;">Leo</li><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
+      `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option" aria-selected="false" id="txt3" style="display: none;">Donny</li><li role="option" aria-selected="true" id="txt4" style="display: none;">Dona Rose</li><li role="option" style="display: none;">Leo</li><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
     );
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
@@ -696,7 +714,7 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isOpen).toBe(true);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt5" role="listbox" aria-label="Items"><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
+      `"<ul id="txt5" role="listbox" aria-label="Items" tabindex="-1"><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
     );
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
@@ -767,6 +785,9 @@ describe("control.select", () => {
     await h.userClick(el);
     await h.wait();
     expect(el.$isOpen).toBe(true);
+    expect(() =>
+      arrLi[2].parentElement.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }))
+    ).not.toThrow();
     await h.userClick(arrLi[2]);
     await h.wait();
     expect(el.$isOpen).toBe(false);
@@ -931,7 +952,7 @@ describe("control.select", () => {
       await h.wait();
       expect(el.$isOpen).toBe(true);
       expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-        `"<ul id="txt2" role="listbox" aria-label="Items"><li role="option" style="" aria-selected="false" id="txt3" focused="">Donny</li><li role="option" style="">Mikky</li><li role="option" style="" aria-selected="false">Leo</li><li role="option" style="">Splinter</li><li role="option" aria-disabled="true" aria-selected="false" style="display: none;">No Items</li></ul>"`
+        `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option" style="" aria-selected="false" id="txt3" focused="">Donny</li><li role="option" style="">Mikky</li><li role="option" style="" aria-selected="false">Leo</li><li role="option" style="">Splinter</li><li role="option" aria-disabled="true" aria-selected="false" style="display: none;">No Items</li></ul>"`
       );
 
       // user can select value by focus left
@@ -952,6 +973,192 @@ describe("control.select", () => {
       el.$value = null;
       await h.wait(1);
       expect(el.$refInput.value).toBe("");
+    });
+
+    test("multiple", async () => {
+      const onChange = jest.fn();
+      el.addEventListener("$change", onChange);
+      el.$options.items = getItems();
+      el.$options.multiple = true;
+      await h.wait(1);
+
+      // type 1st text-value
+      expect(await h.userTypeText(el.$refInput, "don", { clearPrevious: false })).toBe("don|");
+      await h.wait(1);
+      expect(onChange).toBeCalledTimes(0);
+      expect(await h.userTypeText(el.$refInput, "ny,", { clearPrevious: false })).toBe("donny,|");
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([10]);
+      expect(h.getInputCursor(el.$refInput)).toBe("Donny, |"); // extra space must be added
+      expect(onChange).toBeCalledTimes(1);
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true" id="txt3" focused="">Donny</li><li role="option" style="">Mikky</li><li role="option" style="">Leo</li><li role="option" style="">Splinter</li></ul>"`
+      );
+
+      // try again on 2nd value
+      expect(await h.userTypeText(el.$refInput, "l", { clearPrevious: false })).toBe("Donny, l|");
+      await h.wait(1);
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true" id="txt3" style="display: none;">Donny</li><li role="option" style="display: none;">Mikky</li><li role="option" style="" aria-selected="false" id="txt4" focused="">Leo</li><li role="option" style="display: none;">Splinter</li></ul>"`
+      );
+      el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+      await h.wait();
+      expect(el.$value).toStrictEqual([10, 30]);
+      expect(h.getInputCursor(el.$refInput)).toBe("Donny, Leo, |"); // extra space must be added
+      expect(onChange).toBeCalledTimes(2);
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true" id="txt3" style="">Donny</li><li role="option" style="">Mikky</li><li role="option" style="" aria-selected="true" id="txt4" focused="">Leo</li><li role="option" style="">Splinter</li></ul>"`
+      );
+
+      // try to delete last item
+      await h.userRemove(el.$refInput, { removeCount: 1, key: "Backspace" }); // removing ',' removes also previous item
+      await h.wait(10);
+      expect(el.$value).toStrictEqual([10]);
+      expect(h.getInputCursor(el.$refInput)).toBe("Donny, |"); // item is removed by single "Delete"
+      expect(onChange).toBeCalledTimes(3);
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true" id="txt3" style="" focused="">Donny</li><li role="option" style="">Mikky</li><li role="option" style="" id="txt4">Leo</li><li role="option" style="">Splinter</li></ul>"`
+      );
+
+      // removing again
+      await h.userRemove(el.$refInput, { removeCount: 1, key: "Backspace" }); // removing ',' removes also previous item
+      await h.wait(10);
+      expect(el.$value).toBe(undefined);
+      expect(h.getInputCursor(el.$refInput)).toBe("|"); // item is removed by single "Delete"
+      expect(onChange).toBeCalledTimes(4);
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" id="txt3" style="">Donny</li><li role="option" style="">Mikky</li><li role="option" style="" id="txt4">Leo</li><li role="option" style="">Splinter</li></ul>"`
+      );
+
+      // type in the middle - declineInput
+      el.$value = [10, 20, 30];
+      await h.wait(1);
+      expect(el.$refInput.value).toBe("Donny, Mikky, Leo, ");
+      h.setInputCursor(el.$refInput, "Donny, Mikky|, Leo, ");
+      expect(await h.userTypeText(el.$refInput, "a", { clearPrevious: false })).toBe("Donny, Mikkya|, Leo, ");
+      await h.wait(200);
+      expect(h.getInputCursor(el.$refInput)).toBe("Donny, Mikky, Leo, |");
+      // removing in the middle
+      h.setInputCursor(el.$refInput, "Donny, Mikky|, Leo, ");
+      await h.userRemove(el.$refInput);
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([10, 30]);
+      expect(h.getInputCursor(el.$refInput)).toBe("Donny, Leo, |"); // NiceToHave: move cursor to next/prev according to Backspace/Delete
+
+      // initvalue
+      el = document.body.appendChild(document.createElement("wup-select"));
+      el.$options.items = getItems();
+      window.initv = [20];
+      el.setAttribute("initvalue", "window.initv");
+      el.setAttribute("multiple", "");
+      await h.wait();
+      expect(el.$options.multiple).toBe(true);
+      expect(el.$initValue).toStrictEqual([20]);
+      expect(el.$refInput.value).toBe("Mikky");
+      el.focus();
+      await h.wait();
+      expect(h.getInputCursor(el.$refInput)).toBe("Mikky, |");
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt6" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option">Donny</li><li role="option" aria-selected="true">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
+      );
+      expect(await h.userTypeText(el.$refInput, "l", { clearPrevious: false })).toBe("Mikky, l|");
+      await h.wait();
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt6" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="display: none;">Donny</li><li role="option" aria-selected="true" style="display: none;">Mikky</li><li role="option" aria-selected="false" id="txt7" focused="">Leo</li><li role="option" style="display: none;">Splinter</li></ul>"`
+      );
+      el.blur();
+      await h.wait();
+      expect(el.$refInput.value).toBe("Mikky");
+
+      // click-toggle behavior
+      el.focus();
+      await h.wait();
+      expect(el.$isOpen).toBe(true);
+      await h.userClick(el.querySelector("li")); // select 1st item
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([20, 10]);
+      // all items must be visible
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt8" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true">Donny</li><li role="option" aria-selected="true">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
+      );
+      await h.userClick(el.querySelector("li")); // de-select 1st item
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([20]);
+      expect(el.$refInput.value).toBe("Mikky, ");
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt8" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="false">Donny</li><li role="option" aria-selected="true">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
+      );
+
+      await h.userClick(el.querySelectorAll("li")[1]); // de-select 2nd item
+      await h.wait(1);
+      expect(el.$value).toStrictEqual(undefined);
+      expect(el.$refInput.value).toBe("");
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt8" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option">Donny</li><li role="option" aria-selected="false">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
+      );
+
+      await h.userClick(el.querySelectorAll("li")[0]); // select 1st item
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([10]);
+      expect(el.$refInput.value).toBe("Donny, ");
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt8" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
+      );
+      el.selectValue(10); // de-select just for coverage
+
+      // with allownewvalue
+      el.blur();
+      el.$value = undefined;
+      el.$options.allowNewValue = true;
+      el.$options.items = [
+        { value: 10, text: "Donny" },
+        { value: 11, text: "Donny2" },
+        { value: 20, text: "Mikky" },
+        { value: 30, text: "Leo" },
+      ];
+      await h.wait();
+      await h.userTypeText(el.$refInput, "abcd,");
+      await h.wait(1);
+      expect(el.$value).toStrictEqual(["abcd"]);
+      expect(h.getInputCursor(el.$refInput)).toBe("abcd, |");
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt9" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="">Donny</li><li role="option" style="">Donny2</li><li role="option" style="">Mikky</li><li role="option" style="">Leo</li><li role="option" aria-disabled="true" aria-selected="false" style="display: none;">No Items</li></ul>"`
+      );
+      await h.userTypeText(el.$refInput, "hi,", { clearPrevious: false });
+      await h.wait(1);
+      expect(el.$value).toStrictEqual(["abcd", "hi"]);
+      await h.userRemove(el.$refInput);
+      await h.wait(1);
+      expect(el.$value).toStrictEqual(["abcd"]);
+
+      el.blur();
+      await h.wait();
+      await h.userTypeText(el.$refInput, "Don", { clearPrevious: false });
+      await h.wait(1);
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt10" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option">Donny</li><li role="option">Donny2</li><li role="option" style="display: none;">Mikky</li><li role="option" style="display: none;">Leo</li></ul>"`
+      );
+      el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true })); // focus 1st visible item in menu
+      expect(el.querySelector("[focused]")?.textContent).toBe("Donny");
+      el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); // select focused item in menu
+      await h.wait(1);
+      expect(el.$value).toStrictEqual(["abcd", 10]);
+
+      // possible issue: ArrowDown selects 2nd instead 1st
+      el.blur();
+      el.$value = [20];
+      await h.wait();
+      await h.userTypeText(el.$refInput, "don", { clearPrevious: false });
+      await h.wait();
+      expect(el.$refInput.value).toBe("Mikky, don");
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt12" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option">Donny</li><li role="option">Donny2</li><li role="option" aria-selected="true" style="display: none;">Mikky</li><li role="option" style="display: none;">Leo</li></ul>"`
+      );
+      el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true })); // focus 1st visible item in menu
+      expect(el.querySelector("[focused]")?.textContent).toBe("Donny");
+      el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); // select focused item in menu
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([20, 10]);
     });
   });
 });

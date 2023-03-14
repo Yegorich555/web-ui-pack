@@ -1,7 +1,6 @@
 /* eslint-disable no-promise-executor-return */
 import Page from "src/elements/page";
-import { WUPSelectManyControl, WUPSpinElement } from "web-ui-pack";
-import { spinUseDualRing } from "web-ui-pack/spinElement";
+import { WUPSelectManyControl } from "web-ui-pack";
 import styles from "./selectMany.scss";
 
 const sideEffect = WUPSelectManyControl;
@@ -22,19 +21,10 @@ const items = [
   // { text: (v, li, i) => li.append(v.toString()), value: 124 },
 ];
 
-(window as any).inputSelect = {
+(window as any).inputSelectMany = {
   items,
+  initValue: [items[0].value, items[1].value],
 };
-
-class WUPSpinSel2Element extends WUPSpinElement {}
-spinUseDualRing(WUPSpinSel2Element);
-const tagName = "wup-spin-sel2";
-customElements.define(tagName, WUPSpinSel2Element);
-declare global {
-  interface HTMLElementTagNameMap {
-    [tagName]: WUPSpinSel2Element;
-  }
-}
 
 export default function SelectManyControlView() {
   return (
@@ -42,130 +32,80 @@ export default function SelectManyControlView() {
       header="SelectManyControl"
       link="src/controls/selectMany.ts"
       details={{
-        tag: "wup-select-many",
+        tag: "wup-selectmany",
         cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
       }}
       features={[
         "Inheritted features from SelectControl", //
         "Possible to select several items",
+        "Perfect keyboard support",
         // "Possible to order via Drag&Drop",
       ]}
     >
       <wup-form
+        class={styles.test}
         ref={(el) => {
           if (el) {
             el.$onSubmit = (e) => console.warn("sumbitted model", e.$model);
           }
         }}
       >
-        <wup-select-many
-          items="inputSelect.items"
+        <wup-selectmany
+          items="window.inputSelectMany.items"
           name="selectMany"
           label="Select Many"
-          // initValue={items[8].value.toString()} // todo implement
+          initValue="window.inputSelectMany.initValue"
           validations="window._someSelectValidations"
           autoComplete="off"
           autoFocus={false}
+        />
+        <wup-selectmany
+          label="With option hideSelected"
+          items="inputSelectMany.items"
           ref={(el) => {
             if (el) {
-              setTimeout(() => (el.$initValue = [11, 13, 14]));
-              setTimeout(() => (el.$value = [11, 12]), 1000);
+              el.$options.hideSelected = true;
             }
           }}
         />
-        <wup-select-many label="Empty" />
-        <wup-select-many
+        <wup-selectmany
           class={styles.withDelIcon}
           ref={(el) => {
             if (el) {
               el.$options.name = "withRemoveIcon";
               el.$options.label = "With remove icon (use css-var --ctrl-select-item-del-display)";
               el.$options.items = items;
-              el.$initValue = items.map((it) => it.value).splice(0, 8);
-
-              setTimeout(() => {
-                el.$value = items.map((it) => it.value);
-              }, 1000);
+              el.$initValue = items.map((it) => it.value);
             }
           }}
         />
-        {/* <wup-select-many
+        <wup-selectmany
+          name="disabled"
+          disabled
           ref={(el) => {
             if (el) {
-              el.$options.name = "withPending";
-              el.$options.label = "With pending (set promise to $options.items)";
-              el.$options.items = () => new Promise((resolve) => setTimeout(() => resolve(items), 3000));
-            }
-          }}
-        />
-        <wup-select-many
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "customSpin";
-              el.$options.label = "CustomSpin: see WUPSpinElement types or override renderSpin() method";
-              el.$options.items = () => new Promise((resolve) => setTimeout(() => resolve(items), 3000));
-              el.renderSpin = function renderCustomSpin(this: WUPSelectControl) {
-                const spin = document.createElement("wup-spin-sel");
-                spin.$options.fit = true;
-                spin.$options.overflowFade = true;
-                spin.$options.overflowTarget = this;
-                this.appendChild(spin);
-                return spin;
-              };
-              el.$initValue = 13;
-            }
-          }}
-        />
-        <wup-select-many
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "asDropdown";
-              el.$options.label = "As dropdown ($options.readOnlyInput)";
               el.$options.items = items;
-              // el.$initValue = ir - 3;
-              el.$options.readOnlyInput = true;
+              el.$initValue = [12, 15];
             }
           }}
         />
-        <wup-select-many
+        <wup-selectmany
+          name="readonly"
+          readOnly
           ref={(el) => {
             if (el) {
-              el.$options.name = "disabled";
               el.$options.items = items;
-              el.$options.disabled = true;
+              el.$initValue = [12, 15];
             }
           }}
         />
-        <wup-select-many
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "readonly";
-              el.$options.items = items;
-              el.$options.readOnly = true;
-            }
-          }}
+        <wup-selectmany
+          label="Allow New Value ($options.allowNewValue)"
+          allownewvalue
+          name="allowNewValue"
+          items="inputSelectMany.items"
+          initValue="window.inputSelectMany.initValue"
         />
-        <wup-select-many
-          initValue="13"
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "withoutClearButton";
-              el.$options.items = items;
-              el.$options.clearButton = false;
-            }
-          }}
-        />
-        <wup-select-many
-          initValue="14"
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "allowsNewValue";
-              el.$options.label = "Allows New Value ($options.allowNewValue)";
-              el.$options.items = items;
-              el.$options.allowNewValue = true;
-            }
-          }}
-        /> */}
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

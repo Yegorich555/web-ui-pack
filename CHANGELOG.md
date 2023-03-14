@@ -5,6 +5,7 @@
 **BREAKING CHANGES**:
 
 - Internals. Methods getNumAttr, getRefAttr, getBoolAttr is refactored to single getAttr()
+- [SelectControl](src/controls/select.ts). Simplified menu styling
 
 **Fixes**:
 
@@ -20,19 +21,23 @@
 - Controls. Annoying autoselect on touchscreens. Now $options.selectOnFocus is disabled by default
 - Combobox controls (Select, Date, Time). Now popup isn't opened if user clears control and gets focus at the same time
 - Combobox controls (Select, Date, Time). Click on disabled item throws console.error
+- Combobox controls (Select, Date, Time). Focus goes to menu-list by keydown 'Tab' in Firefox
+- [SelectControl](src/controls/select.ts). Sometimes popup isn't not scrolled to selected item during the opening
 - [SpinElement](src/spinElement.ts). Animation for TwinDualRing doesn't work on Safari 14-
 - [SpinElement](src/spinElement.ts). Wrong render on option `fit` on Safari 14-
 - [PopupElement](src/popup/popupElement.ts). Animation for opacity doesn't work on Safari 14-
 - [PopupElement](src/popup/popupElement.ts). Animation affects on bluring text if user scroll body during the animation
-- [PopupElement](src/popup/popupElement.ts). Fix wrong position during dropdownAnimation and several show/hide at once
+- [PopupElement](src/popup/popupElement.ts). Wrong position during dropdownAnimation and several show/hide at once
 - [PopupElement](src/popup/popupElement.ts). Allow to open/close on double-click
-- [PopupElement](src/popup/popupElement.ts). Fix 2nd $show() has predefined maxSize & position can be different
+- [PopupElement](src/popup/popupElement.ts). 2nd $show() has predefined maxSize & position can be different
 - [PopupElement](src/popup/popupElement.ts). Now popup has max size 100vw & 100vh (by default). Earlier popup could be > 100vw
 - [PopupElement](src/popup/popupElement.ts). No-updates on screensize changes. Now popup position & size changes with device-rotation
 - [PopupElement](src/popup/popupElement.ts). No popup if mousedown>move>up>click on target
 
 **New**:
 
+- [SelectControl](src/controls/select.ts). Added option `multiple` (attribute \[multiple] & $options.multiple)
+- [SelectManyControl](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany)
 - [PopupElement](src/popup/popupElement.ts).
   - Added properties `$isClose, $isOpening, $isClosing`
   - Calling `$show() & $hide()` possible several times at once without re-rendering
@@ -130,10 +135,10 @@
 - Controls. [Blue highlight blink on tap action](https://stackoverflow.com/questions/25704650/disable-blue-highlight-when-touch-press-object-with-cursorpointer)
 - Controls. Click on button `Clear` throws console.error
 - Controls. Validation gets undefined value but must be skipped in this case (value is undefined only for messages or validations.required)
-- SelectControl. Click on custom list-item with nested span doesn't call click-event
-- SelectControl. No scroll to selected element at first opening
-- SelectControl. Sometimes menu isn't opened
-- SelectControl. `noItems` appeared on 2nd menu opening when user created a new value
+- [SelectControl](src/controls/select.ts). Click on custom list-item with nested span doesn't call click-event
+- [SelectControl](src/controls/select.ts). No scroll to selected element at first opening
+- [SelectControl](src/controls/select.ts). Sometimes menu isn't opened
+- [SelectControl](src/controls/select.ts). `noItems` appeared on 2nd menu opening when user created a new value
 - Helper. observer. onChange fired even date.setHours didn't change value
 
 **Features**:

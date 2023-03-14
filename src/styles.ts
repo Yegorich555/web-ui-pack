@@ -13,7 +13,7 @@ width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
 box-sizing: content-box;
 margin: 0;
-padding: 0 5px;
+padding: 5px;
 flex: 0 0 auto;
 align-self: stretch;
 border: none;
@@ -32,6 +32,7 @@ mask-image: var(--ctrl-icon-img);`;
 export const WUPcssScrollSmall = (tag: string): string => `
 ${tag}::-webkit-scrollbar {
   width: 10px; height: 10px;
+  cursor: pointer;
 }
 ${tag}::-webkit-scrollbar-corner {
   background: none;

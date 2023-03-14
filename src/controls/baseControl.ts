@@ -207,7 +207,7 @@ export default abstract class WUPBaseControl<
         --wup-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M37.691 450.599 224.76 635.864c21.528 21.32 56.11 21.425 77.478 0l428.035-426.23c21.47-21.38 21.425-56.11 0-77.478s-56.11-21.425-77.478 0L263.5 519.647 115.168 373.12c-21.555-21.293-56.108-21.425-77.478 0s-21.425 56.108 0 77.478z'/%3E%3C/svg%3E");
         --wup-icon-dot: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='20'/%3E%3C/svg%3E");
       }`;
-    // todo change icons to fonts: wupfont
+    // NiceToHave: change icons to fonts: wupfont
   }
 
   /** StyleContent related to component */
@@ -266,10 +266,15 @@ export default abstract class WUPBaseControl<
         padding-bottom: 0;
       }
       :host input,
-      :host textarea,
-      :host [contenteditable] {
+      :host textarea {
         padding: 0;
         margin: 0;
+        cursor: inherit;
+      }
+      :host [contenteditable=true] {
+        margin: var(--ctrl-padding);
+        margin-left: 0;
+        margin-right: 0;
         cursor: inherit;
       }
       :host strong {
@@ -495,7 +500,7 @@ export default abstract class WUPBaseControl<
   }
 
   /** Announce text by screenReaders if element is focused */
-  $ariaSpeak(text: string): void {
+  $ariaSpeak(text: string, delayMs = 100): void {
     // don't use speechSynthesis because it's announce despite on screen-reader settings - can be disabled
     // text && speechSynthesis && speechSynthesis.speak(new SpeechSynthesisUtterance(text)); // watchfix: https://stackoverflow.com/questions/72907960/web-accessibility-window-speechsynthesis-vs-role-alert
     /* istanbul ignore else */
@@ -509,7 +514,7 @@ export default abstract class WUPBaseControl<
       const an = "aria-describedby";
       i.setAttribute(an, `${i.getAttribute(an) || ""} ${el.id}`.trimStart());
       this.appendChild(el);
-      setTimeout(() => (el.textContent = text), 100); // otherwise reader doesn't announce section
+      setTimeout(() => (el.textContent = text), delayMs); // otherwise reader doesn't announce section
       setTimeout(() => {
         el.remove();
         const a = i.getAttribute(an);
@@ -518,7 +523,7 @@ export default abstract class WUPBaseControl<
           const aNext = a.replace(el.id, "").replace("  ", " ").trim();
           aNext ? i.setAttribute(an, aNext) : i.removeAttribute(an);
         }
-      }, 200);
+      }, 500);
     }
   }
 
@@ -677,6 +682,7 @@ export default abstract class WUPBaseControl<
 
     super.connectedCallback();
     this.$form = WUPFormElement.$tryConnect(this);
+    this.#isDirty = false; // reset state after re-appended
   }
 
   protected override gotRemoved(): void {
