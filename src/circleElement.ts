@@ -29,7 +29,7 @@ declare global {
       /** Max possible value that fits `options.to`
        * @defaultValue 100 */
       max: number;
-      /** Space between segments; expected 0...20 (degrees)
+      /** Space between segments; expected 0..20 (degrees)
        * @defaultValue 2 */
       space: number;
     }
@@ -173,12 +173,59 @@ export default class WUPCircleElement extends WUPBaseElement {
     this.gotRenderItems();
   }
 
+  /** Returns array of render-angles according to pointed arguments */
+  protected mapItems(
+    valueMin: number,
+    valueMax: number,
+    angleMin: number,
+    angleMax: number,
+    space: number,
+    items: WUP.Circle.Options["items"]
+  ): Array<{ angleFrom: number; angleTo: number; ms: number; color: string }> {
+    if (items.length > 1) {
+      valueMin = 0;
+      valueMax = items.reduce((v, item) => item.value + v, 0);
+      angleMax -= (items.length - (angleMax - angleMin === 360 ? 0 : 1)) * space;
+    }
+
+    let angleTo = 0;
+    let angleFrom = angleMin;
+
+    const style = getComputedStyle(this);
+    const animTime = parseMsTime(style.getPropertyValue("--anim-time"));
+    // calc
+    const arr: Array<{ angleFrom: number; angleTo: number; ms: number; color: string }> = [];
+    for (let i = 0; i < items.length; ++i) {
+      const a = items[i];
+      const v = a.value;
+      angleTo = mathScaleValue(v, valueMin, valueMax, angleMin, angleMax) + (angleFrom - angleMin);
+      arr.push({
+        angleFrom,
+        angleTo,
+        ms: items.length === 1 ? animTime : mathScaleValue(v, valueMin, valueMax, 0, animTime),
+        color: a.color || style.getPropertyValue(`--circle-${i + 1}`).trimStart(),
+      });
+      // for the next step
+      angleFrom = angleTo + space;
+    }
+    if (arr[arr.length - 1].angleTo > this._opts.to) {
+      console.error(arr);
+    }
+
+    return arr;
+  }
+
   _animation?: WUP.PromiseCancel<boolean>;
   protected gotRenderItems(): void {
     this._animation?.stop(false);
 
     const angleMin = this._opts.from;
-    let angleMax = this._opts.to;
+    const angleMax = this._opts.to;
+    const vMin = this._opts.min ?? 0;
+    const vMax = this._opts.max ?? 360;
+    const { items } = this._opts;
+    const arr = this.mapItems(vMin, vMax, angleMin, angleMax, this._opts.space, items);
+
     // render background circle
     if (this._opts.back) {
       const back = this.make("path");
@@ -188,39 +235,22 @@ export default class WUPCircleElement extends WUPBaseElement {
 
     // render items
     this.$refSVG.appendChild(this.$refItems);
-    const { items, space } = this._opts;
-    let vMin = this._opts.min ?? 0;
-    let vMax = this._opts.max ?? 360;
-    const style = getComputedStyle(this);
-    const animTime = parseMsTime(style.getPropertyValue("--anim-time"));
-    if (items.length > 1) {
-      vMin = 0;
-      vMax = items.reduce((v, item) => item.value + v, 0);
-      angleMax -= (items.length - (angleMax - angleMin === 360 ? 0 : 1)) * space;
-    }
 
-    let angleTo = 0;
-    let angleFrom = angleMin;
     (async () => {
       for (let i = 0; i < items.length; ++i) {
-        const a = items[i];
-        const v = a.value;
-        angleTo = mathScaleValue(v, vMin, vMax, angleMin, angleMax) + (angleFrom - angleMin);
+        const c = arr[i];
+        // apply colors
         const path = this.$refItems.appendChild(this.make("path"));
-        const col = a.color || style.getPropertyValue(`--circle-${i + 1}`);
-        col && path.setAttribute("fill", col); // only for saving as file-image
+        c.color && path.setAttribute("fill", c.color); // only for saving as file-image
+        const a = items[i];
         if (a.color) {
           path.style.fill = a.color; // attr [fill] can't override css-rules
         }
-
-        const ms = items.length === 1 ? animTime : mathScaleValue(v, vMin, vMax, 0, animTime);
-        const from = angleFrom;
-        this._animation = animate(from, angleTo, ms, (animV) => {
-          path.setAttribute("d", this.drawArc(from, animV));
+        // animate
+        this._animation = animate(c.angleFrom, c.angleTo, c.ms, (animV) => {
+          path.setAttribute("d", this.drawArc(c.angleFrom, animV));
         });
         await this._animation.catch().finally(() => delete this._animation);
-
-        angleFrom = angleTo + space;
       }
     })();
 
@@ -229,7 +259,7 @@ export default class WUPCircleElement extends WUPBaseElement {
     if (items.length === 1) {
       this.$refLabel = this.$refLabel ?? this.appendChild(document.createElement("strong"));
       const rawV = items[0].value;
-      const perc = Math.round(((angleTo - this._opts.from) * 100) / (this._opts.to - this._opts.from));
+      const perc = Math.round(((arr[0].angleTo - this._opts.from) * 100) / (this._opts.to - this._opts.from));
       this.renderLabel(this.$refLabel, perc, rawV);
       ariaLbl = this.$refLabel.textContent!;
     } else {
