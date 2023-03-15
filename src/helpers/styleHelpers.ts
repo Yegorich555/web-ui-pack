@@ -85,3 +85,16 @@ export function getBoundingInternalRect(
 
   return r;
 }
+
+/** Parse '0.2s' to 200, '200ms' to '200'
+ * If parsing is wrong returns 0 */
+export function parseMsTime(v: string): number {
+  let t = Number.parseInt(v, 10);
+  if (!v.endsWith("ms")) {
+    t *= 1000;
+  }
+  if (Number.isNaN(t)) {
+    return 0;
+  }
+  return t;
+}

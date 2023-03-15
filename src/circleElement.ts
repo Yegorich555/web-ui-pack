@@ -1,6 +1,7 @@
 import WUPBaseElement from "./baseElement";
 import { animate } from "./helpers/animate";
 import { mathScaleValue } from "./helpers/math";
+import { parseMsTime } from "./helpers/styleHelpers";
 
 const tagName = "wup-circle";
 
@@ -191,7 +192,7 @@ export default class WUPCircleElement extends WUPBaseElement {
     let vMin = this._opts.min ?? 0;
     let vMax = this._opts.max ?? 360;
     const style = getComputedStyle(this);
-    const animTime = Number.parseInt(style.getPropertyValue("--anim-time"), 10); // WARN: expected anim-time: 200ms
+    const animTime = parseMsTime(style.getPropertyValue("--anim-time"));
     if (items.length > 1) {
       vMin = 0;
       vMax = items.reduce((v, item) => item.value + v, 0);
@@ -346,5 +347,4 @@ export function drawArc(
 // similar https://github.com/w8r/svg-arc-corners
 // demo https://milevski.co/svg-arc-corners/demo/
 
-// todo issue if value === 0
 // todo if $value=[20, 5000] - then small values rendered in 1px - it's looks bad... Need somehow normalize to min-size
