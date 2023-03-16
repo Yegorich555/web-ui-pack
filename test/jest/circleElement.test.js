@@ -35,6 +35,7 @@ describe("circleElement", () => {
       min: { value: "4" },
       max: { value: "20" },
       space: { value: "2" },
+      minsize: { value: "10" },
     },
     $options: { items: { refGlobal: getItems() } },
     onCreateNew: (e) => (e.$options.items = getItems()),
@@ -280,5 +281,58 @@ describe("circleElement", () => {
         "<path d="M 89.99693537713449 73.7169804241039 A 3.5 3.5 0 0 1 91.11844059292036 78.44773880656385 A 50 50 0 1 1 44.76428660556784 0.2748825516584219 A 3.5 3.5 0 0 1 48.37717340333367 3.528326543612053 L 48.62146988025118 10.524062332745721 A 3.5 3.5 0 0 1 45.257191107932286 14.313787482932241 A 36 36 0 1 0 79.03680160011521 71.28060508621752 A 3.5 3.5 0 0 1 83.97589134186694 70.14668229574417 Z"></path>",
       ]
     `);
+  });
+
+  test("option minsize", async () => {
+    const map = (items = [5], minSize = 10, angleMin = 0, angleMax = 360, space = 2) =>
+      WUPCircleElement.prototype.mapItems(
+        null,
+        null,
+        angleMin,
+        angleMax,
+        space,
+        minSize,
+        400, // animtime
+        items.map((value) => ({ value }))
+      );
+
+    expect(map([1, 100, 200])).toStrictEqual([
+      { angleFrom: 0, angleTo: 10, ms: 11.299435028248588, v: 10 },
+      { angleFrom: 12, angleTo: 125.19601328903653, ms: 127.90509976162319, v: 113.19601328903653 },
+      { angleFrom: 127.19601328903653, angleTo: 358, ms: 260.79546521012816, v: 230.80398671096344 },
+    ]);
+    expect(map([4, 100, 200])).toStrictEqual([
+      { angleFrom: 0, angleTo: 10, ms: 11.299435028248588, v: 10 },
+      { angleFrom: 12, angleTo: 125.77631578947368, ms: 128.5608088016652, v: 113.77631578947368 },
+      { angleFrom: 127.77631578947368, angleTo: 358, ms: 260.13975617008623, v: 230.2236842105263 },
+    ]);
+
+    // all values must be >= 10
+    expect(map([1, 25, 170, 2, 1], 10, -90, 90)).toStrictEqual([
+      { angleFrom: -90, angleTo: -80, ms: 23.25581395348837, v: 10 },
+      { angleFrom: -78, angleTo: -68, ms: 23.25581395348837, v: 10 },
+      { angleFrom: -66, angleTo: 66, ms: 306.9767441860465, v: 132 },
+      { angleFrom: 68, angleTo: 78, ms: 23.25581395348837, v: 10 },
+      { angleFrom: 80, angleTo: 90, ms: 23.25581395348837, v: 10 },
+    ]);
+
+    expect(map([1, 25, 170, 2, 1], 6, -90, 90)).toStrictEqual([
+      { angleFrom: -90, angleTo: -84, ms: 13.953488372093023, v: 6 },
+      { angleFrom: -82, angleTo: -67.66331658291458, ms: 33.34112422578006, v: 14.336683417085425 },
+      { angleFrom: -65.66331658291458, angleTo: 74, ms: 324.79841065794085, v: 139.66331658291458 },
+      { angleFrom: 76, angleTo: 82, ms: 13.953488372093023, v: 6 },
+      { angleFrom: 84, angleTo: 90, ms: 13.953488372093023, v: 6 },
+    ]);
+
+    // test case when not enough space because minSize is too big - in this case minSize is ignored
+    h.mockConsoleError();
+    expect(map([1, 25, 170, 2, 1], 40, -90, 90)).toStrictEqual([
+      { angleFrom: -90, angleTo: -89.1356783919598, ms: 2.0100502512562786, v: 0.8643216080401999 },
+      { angleFrom: -87.1356783919598, angleTo: -65.52763819095478, ms: 50.25125628140703, v: 21.608040201005025 },
+      { angleFrom: -63.527638190954775, angleTo: 83.4070351758794, ms: 341.70854271356785, v: 146.93467336683418 },
+      { angleFrom: 85.4070351758794, angleTo: 87.1356783919598, ms: 4.020100502512557, v: 1.7286432160803997 },
+      { angleFrom: 89.1356783919598, angleTo: 90, ms: 2.0100502512562786, v: 0.8643216080401999 },
+    ]);
+    h.unMockConsoleError();
   });
 });

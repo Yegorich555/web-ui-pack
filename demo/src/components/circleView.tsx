@@ -31,6 +31,7 @@ export default function CircleView() {
           from={0}
           to={360}
           space={2}
+          minsize={10}
           min={0}
           max={100}
           width={14}
@@ -89,7 +90,7 @@ export default function CircleView() {
             if (el) {
               el.$options.items = [
                 { value: 12 },
-                { value: 10 },
+                { value: 1 },
                 { value: 13 },
                 { value: 27 },
                 { value: 15 },

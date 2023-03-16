@@ -32,6 +32,9 @@ declare global {
       /** Space between segments; expected 0..20 (degrees)
        * @defaultValue 2 */
       space: number;
+      /** Min segment size - to avoid rendering extra-small segments; expected 0..20 (degrees)
+       * @defaultValue 10 */
+      minsize: number;
     }
 
     interface Options extends Defaults {
@@ -40,7 +43,9 @@ declare global {
     }
     interface Attributes
       extends WUP.Base.toJSX<
-        Partial<Pick<Options, "back" | "width" | "from" | "to" | "items" | "corner" | "min" | "max" | "space">>
+        Partial<
+          Pick<Options, "back" | "width" | "from" | "to" | "items" | "corner" | "min" | "max" | "space" | "minsize">
+        >
       > {}
     interface JSXProps<C = WUPCircleElement> extends WUP.Base.JSXProps<C>, Attributes {}
   }
@@ -80,7 +85,7 @@ export default class WUPCircleElement extends WUPBaseElement {
   }
 
   static get observedAttributes(): Array<LowerKeys<WUP.Circle.Attributes>> {
-    return ["items", "width", "back", "corner", "from", "to", "min", "max", "space"];
+    return ["items", "width", "back", "corner", "from", "to", "min", "max", "space", "minsize"];
   }
 
   static get $styleRoot(): string {
@@ -139,6 +144,7 @@ export default class WUPCircleElement extends WUPBaseElement {
     min: 0,
     max: 100,
     space: 2,
+    minsize: 10,
   };
 
   $options: WUP.Circle.Options = {
@@ -162,7 +168,7 @@ export default class WUPCircleElement extends WUPBaseElement {
 
     this._opts.items = this.getAttr("items", "ref") || [];
     this._opts.back = this.getAttr("back", "bool") || false;
-    ["width", "corner", "from", "to", "min", "max", "space"].forEach((key) => {
+    ["width", "corner", "from", "to", "min", "max", "space", "minsize"].forEach((key) => {
       (this._opts as any)[key] = this.getAttr(key, "number")!;
     });
 
@@ -174,43 +180,73 @@ export default class WUPCircleElement extends WUPBaseElement {
   }
 
   /** Returns array of render-angles according to pointed arguments */
-  protected mapItems(
+  mapItems(
     valueMin: number,
     valueMax: number,
     angleMin: number,
     angleMax: number,
     space: number,
+    minSize: number,
+    animTime: number,
     items: WUP.Circle.Options["items"]
-  ): Array<{ angleFrom: number; angleTo: number; ms: number; color: string }> {
+  ): Array<{ angleFrom: number; angleTo: number; ms: number }> {
     if (items.length > 1) {
       valueMin = 0;
       valueMax = items.reduce((v, item) => item.value + v, 0);
       angleMax -= (items.length - (angleMax - angleMin === 360 ? 0 : 1)) * space;
     }
-
-    let angleTo = 0;
     let angleFrom = angleMin;
 
-    const style = getComputedStyle(this);
-    const animTime = parseMsTime(style.getPropertyValue("--anim-time"));
-    // calc
-    const arr: Array<{ angleFrom: number; angleTo: number; ms: number; color: string }> = [];
-    for (let i = 0; i < items.length; ++i) {
-      const a = items[i];
-      const v = a.value;
-      angleTo = mathScaleValue(v, valueMin, valueMax, angleMin, angleMax) + (angleFrom - angleMin);
-      arr.push({
-        angleFrom,
-        angleTo,
-        ms: items.length === 1 ? animTime : mathScaleValue(v, valueMin, valueMax, 0, animTime),
-        color: a.color || style.getPropertyValue(`--circle-${i + 1}`).trimStart(),
+    let diff = 0;
+    let diffCnt = 0;
+    type MappedItem = { angleFrom: number; angleTo: number; ms: number; v: number };
+    // calc angle-value per item
+    const arr: MappedItem[] = items.map((s) => {
+      const v = mathScaleValue(s.value, valueMin, valueMax, angleMin, angleMax) - angleMin;
+      const a = { angleFrom: 0, angleTo: 0, ms: 0, v };
+      if (v !== 0 && v < minSize) {
+        diff += minSize - v; // gather sum of difference to apply later
+        ++diffCnt;
+        a.v = minSize; // not allow angle to be < minSize
+      }
+      return a;
+    });
+    // smash difference to other segments
+    if (diff !== 0) {
+      let cnt = arr.length - diffCnt;
+      arr.forEach((a) => {
+        if (a.v > minSize) {
+          let v = diff / cnt;
+          let next = a.v - v;
+          if (next < minSize) {
+            v -= minSize - next;
+            next = minSize;
+          }
+          a.v = next;
+          diff -= v;
+          --cnt;
+        }
       });
-      // for the next step
-      angleFrom = angleTo + space;
     }
-    if (arr[arr.length - 1].angleTo > this._opts.to) {
-      console.error(arr);
+    if (diff > 0) {
+      // possible issue when items so many that we don't have enough-space
+      console.error(
+        "WUP-CIRCLE. Impossible to increase segments up to $options.minSize. Change [minSize] or filter items yourself. arguments:",
+        { valueMin, valueMax, angleMin, angleMax, space, minSize, animTime, items }
+      );
+      // assign values without minSize
+      items.forEach((s, i) => {
+        arr[i].v = mathScaleValue(s.value, valueMin, valueMax, angleMin, angleMax) - angleMin;
+      });
     }
+    // calc result
+    const totalAngle = angleMax - angleMin;
+    arr.forEach((a) => {
+      a.angleFrom = angleFrom;
+      a.angleTo = angleFrom + a.v;
+      a.ms = items.length === 1 ? animTime : Math.abs((a.v * animTime) / totalAngle);
+      angleFrom = a.angleTo + space;
+    });
 
     return arr;
   }
@@ -224,7 +260,11 @@ export default class WUPCircleElement extends WUPBaseElement {
     const vMin = this._opts.min ?? 0;
     const vMax = this._opts.max ?? 360;
     const { items } = this._opts;
-    const arr = this.mapItems(vMin, vMax, angleMin, angleMax, this._opts.space, items);
+
+    const style = getComputedStyle(this);
+    const animTime = parseMsTime(style.getPropertyValue("--anim-time"));
+
+    const arr = this.mapItems(vMin, vMax, angleMin, angleMax, this._opts.space, this._opts.minsize, animTime, items);
 
     // render background circle
     if (this._opts.back) {
@@ -238,11 +278,12 @@ export default class WUPCircleElement extends WUPBaseElement {
 
     (async () => {
       for (let i = 0; i < items.length; ++i) {
+        const a = items[i];
         const c = arr[i];
         // apply colors
         const path = this.$refItems.appendChild(this.make("path"));
-        c.color && path.setAttribute("fill", c.color); // only for saving as file-image
-        const a = items[i];
+        const col = a.color || style.getPropertyValue(`--circle-${i + 1}`).trim();
+        col && path.setAttribute("fill", col); // only for saving as file-image
         if (a.color) {
           path.style.fill = a.color; // attr [fill] can't override css-rules
         }
@@ -377,4 +418,4 @@ export function drawArc(
 // similar https://github.com/w8r/svg-arc-corners
 // demo https://milevski.co/svg-arc-corners/demo/
 
-// todo if $value=[20, 5000] - then small values rendered in 1px - it's looks bad... Need somehow normalize to min-size
+// todo develop tooltips on segments
