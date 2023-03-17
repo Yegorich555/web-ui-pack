@@ -328,7 +328,6 @@ export default class WUPCircleElement extends WUPBaseElement {
     this.$refSVG.appendChild(this.$refItems);
 
     (async () => {
-      // todo impossible to decline animation if next render is fired before: need to render all pathes before animation
       let hasTooltip = false;
       for (let i = 0; i < items.length; ++i) {
         const a = items[i];
