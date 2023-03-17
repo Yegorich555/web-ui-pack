@@ -25,31 +25,31 @@
 
 **Fixes**:
 
-- helper [`onFocusLost`](src/helpers/onFocusLost.ts). Isn't fired if stopPropagation is called
-- [TimeControl](src/controls/time.ts). Extra margin for menu-buttons on Safari
-- [SwitchControl](src/controls/switch.ts). [CheckControl](src/controls/check.ts). Attribute `initvalue=''` sets value to `true` (expected `false`)
-- [TextareaControl](src/controls/textarea.ts). `Ctrl + B` makes text bold but it's unexpected for plain textarea
-- Controls. Hover effect on Android devices (expected: no-hover on touch-screens)
-- Controls. Focus frame isn't rouned on Safari
-- Controls. Attributes `initvalue,min,max` for controls Date & Calendar doesn't work on Safari (Date.parse(yyyy-MM-dd) doesn't work by default)
-- Controls. Controls are not rendered if parsing initvalue is wrong
-- Controls. Unexpected autofocus on mask-inputs on Safari
-- Controls. Annoying autoselect on touchscreens. Now $options.selectOnFocus is disabled by default
+- helper [`onFocusLost`](src/helpers/onFocusLost.ts). _Isn't fired if stopPropagation is called_
+- [TimeControl](src/controls/time.ts). _Extra margin for menu-buttons on Safari_
+- [SwitchControl](src/controls/switch.ts). [CheckControl](src/controls/check.ts). _Attribute `initvalue=''` sets value to `true` (expected `false`)_
+- [TextareaControl](src/controls/textarea.ts). _`Ctrl + B` makes text bold but it's unexpected for plain textarea_
+- Controls. _Hover effect on Android devices (expected: no-hover on touch-screens)_
+- Controls. _Focus frame isn't rouned on Safari_
+- Controls. _Attributes `initvalue,min,max` for controls Date & Calendar doesn't work on Safari (Date.parse(yyyy-MM-dd) doesn't work by default)_
+- Controls. _Controls are not rendered if parsing initvalue is wrong_
+- Controls. _Unexpected autofocus on mask-inputs on Safari_
+- Controls. _Annoying autoselect on touchscreens._ Now $options.selectOnFocus is disabled by default
 - Combobox controls (Select, Date, Time). Now popup isn't opened if user clears control and gets focus at the same time
-- Combobox controls (Select, Date, Time). Click on disabled item throws console.error
-- Combobox controls (Select, Date, Time). Focus goes to menu-list by keydown 'Tab' in Firefox
-- [SelectControl](src/controls/select.ts). Sometimes popup isn't not scrolled to selected item during the opening
-- [SpinElement](src/spinElement.ts). Animation for TwinDualRing doesn't work on Safari 14-
-- [SpinElement](src/spinElement.ts). Wrong render on option `fit` on Safari 14-
-- [PopupElement](src/popup/popupElement.ts). Animation for opacity doesn't work on Safari 14-
-- [PopupElement](src/popup/popupElement.ts). Animation affects on bluring text if user scroll body during the animation
-- [PopupElement](src/popup/popupElement.ts). Wrong position during dropdownAnimation and several show/hide at once
-- [PopupElement](src/popup/popupElement.ts). Allow to show/hide on double-click (because on Chrome double-click works with long delay)
-- [PopupElement](src/popup/popupElement.ts). 2nd $show() has predefined maxSize & position can be different
-- [PopupElement](src/popup/popupElement.ts). Now popup has max size 100vw & 100vh (by default). Earlier popup could be > 100vw
-- [PopupElement](src/popup/popupElement.ts). No-updates on screensize changes. Now popup position & size changes with device-rotation
-- [PopupElement](src/popup/popupElement.ts). No popup if mousedown>move>up>click on target
-- [CircleElement](src/circleElement.ts). Fix items **color** doesn't work (because attr `[fill]` can't override css-rule)
+- Combobox controls (Select, Date, Time). _Click on disabled item throws console.error_
+- Combobox controls (Select, Date, Time). _Focus goes to menu-list by keydown 'Tab' in Firefox_
+- [SelectControl](src/controls/select.ts). _Sometimes popup isn't not scrolled to selected item during the opening_
+- [SpinElement](src/spinElement.ts). _Animation for TwinDualRing doesn't work on Safari 14-_
+- [SpinElement](src/spinElement.ts). _Wrong render on option `fit` on Safari 14-_
+- [PopupElement](src/popup/popupElement.ts). _Animation for opacity doesn't work on Safari 14-_
+- [PopupElement](src/popup/popupElement.ts). _Animation affects on bluring text if user scroll body during the animation_
+- [PopupElement](src/popup/popupElement.ts). _Wrong position during dropdownAnimation and several show/hide at once_
+- [PopupElement](src/popup/popupElement.ts). Allow to show/hide on double-click (because on some browsers double-click works with huge delay)
+- [PopupElement](src/popup/popupElement.ts). _2nd $show() has predefined maxSize & position can be different_
+- [PopupElement](src/popup/popupElement.ts). _Popup could be > 100vw_. Now popup has max size 100vw & 100vh (by default)
+- [PopupElement](src/popup/popupElement.ts). _No-updates on screensize changes._ Now popup position & size changes with device-rotation
+- [PopupElement](src/popup/popupElement.ts). _No popup if mousedown>move>up>click on target_
+- [CircleElement](src/circleElement.ts). _Items **color** doesn't work (because attr `[fill]` can't override css-rule)_
 
 ## 0.4.1 (Jan 27, 2023)
 
