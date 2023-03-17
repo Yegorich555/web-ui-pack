@@ -682,6 +682,12 @@ export default class WUPPopupElement<
     return true;
   }
 
+  /** Returns `target.getBoundingClientRect()` Use function to change placement logic based on target-rect
+   * @WARN it's called with screen-frequency (per frame) */
+  getTargetRect(target: HTMLElement): DOMRect {
+    return target.getBoundingClientRect();
+  }
+
   /** Update position of popup. Call this method in cases when you changed options */
   protected updatePosition(): DOMRect | undefined {
     const trg = this._opts.target as HTMLElement;
@@ -692,7 +698,7 @@ export default class WUPPopupElement<
       return undefined;
     }
 
-    const tRect = trg.getBoundingClientRect();
+    const tRect = this.getTargetRect(trg);
     if (!tRect.width || !tRect.height) {
       this.style.display = "none"; // hide if target is not displayed
       return this.#state!.prevRect;
@@ -1019,4 +1025,3 @@ declare global {
 
 // NiceToHave add 'position: centerScreen' to place as modal when content is big and no spaces anymore
 // NiceToHave 2 popups can oveflow each other: need option to try place several popups at once without oveflow. Example on wup-pwd page: issue with 2 errors
-// todo split logic to getTargetRect() - to allow user hook into logic partially
