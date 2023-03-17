@@ -329,7 +329,7 @@ export default class WUPPopupElement<
    * * stack: $hide() > closing > closed > `$isClose:true`
    * * to listen to animation-end use events `$show` & `$hide` OR methods `$show().then(...)` & `$hide().then(... )` */
   get $isClose(): boolean {
-    return !this.#isOpen && !this.$isClosing;
+    return !this.#isOpen && !this.$isClosing; // todo change to $isHidding & isHidden & isShowed & isShowing
   }
 
   #isClosing?: true;
@@ -794,12 +794,13 @@ export default class WUPPopupElement<
       this.#refArrow.style.height = "";
     }
 
+    const { offset } = this._opts;
     const me: WUP.Popup.Place.MeRect = {
       // WARN: offsetSize is rounded so 105.2 >>> 105
       w: this.offsetWidth, // clientWidth doesn't include border-size
       h: this.offsetHeight,
       el: this,
-      offset: getOffset(this._opts.offset),
+      offset: getOffset(typeof offset === "function" ? offset.call(this, tRect) : offset),
       minH: this.#state!.userStyles!.minH,
       minW: this.#state!.userStyles!.minW,
       arrow: this.#refArrow
@@ -1016,6 +1017,6 @@ declare global {
 
 // manual testcase: show as dropdown & scroll parent - blur effect can appear
 
-// NiceToHave add 'position: center' to place as modal when content is big and no spaces anymore
-// todo 2 popups can oveflow each other
-/* we need option to try place several popups at once without oveflow. Example on wup-pwd page: issue with 2 errors */
+// NiceToHave add 'position: centerScreen' to place as modal when content is big and no spaces anymore
+// NiceToHave 2 popups can oveflow each other: need option to try place several popups at once without oveflow. Example on wup-pwd page: issue with 2 errors
+// todo split logic to getTargetRect() - to allow user hook into logic partially

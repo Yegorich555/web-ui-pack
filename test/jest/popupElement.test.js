@@ -665,6 +665,15 @@ describe("popupElement", () => {
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style="display: block; transform: translate(190px, 99px);" position="top"></wup-popup>"`
     );
+    el.$hide();
+    await h.wait();
+
+    el.$options.offset = (r) => [-r.height / 2, -r.height / 2]; // around center of target
+    el.$show();
+    await h.wait();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style="display: block; transform: translate(190px, 125px);" position="top"></wup-popup>"`
+    );
 
     WUPPopupElement.$defaults.offsetFitElement = undefined;
     WUPPopupElement.$defaults.offset = undefined;

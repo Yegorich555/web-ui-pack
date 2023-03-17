@@ -40,6 +40,7 @@
 - [SelectManyControl](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany)
 - [SelectControl](src/controls/select.ts). Added option `multiple` (attribute \[multiple] & $options.multiple)
 - [PopupElement](src/popup/popupElement.ts).
+  - Option `offset` can be function
   - Added properties `$isClose, $isOpening, $isClosing`
   - Calling `$show() & $hide()` possible several times at once without re-rendering
   - Events `$willShow & $willHide` have property `detail.showCase & detail.hideCase`
