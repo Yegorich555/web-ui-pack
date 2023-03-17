@@ -8,6 +8,21 @@
 - [SelectControl](src/controls/select.ts). Simplified menu styling
 - [PopupElement](src/popup/popupElement.ts). Prop `$isOpen` deprecated in favor of `$isShown`
 
+**New**:
+
+- [SelectManyControl](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany)
+- [SelectControl](src/controls/select.ts). Added option `multiple` (attribute \[multiple] & $options.multiple)
+- [PopupElement](src/popup/popupElement.ts)
+  - Option `target` can be SVGElement
+  - Option `offset` can be function
+  - Added properties `$isShown, $isHidden, $isShowing, $isHidding`
+  - Added rule: popup can't be more than `window.innerWidth & window.innerHeight`. The rule impossible to disable!
+  - Calling `$show() & $hide()` possible several times at once without re-rendering
+  - Events `$willShow & $willHide` have properties `detail.showCase & detail.hideCase`
+- [CircleElement](src/circleElement.ts)
+  - Added option `minsize` (attribute \[minsize] & $options.minsize)
+  - Added option `tooltip` per item ($options.items[0].tooltip)
+
 **Fixes**:
 
 - helper [`onFocusLost`](src/helpers/onFocusLost.ts). Isn't fired if stopPropagation is called
@@ -36,33 +51,18 @@
 - [PopupElement](src/popup/popupElement.ts). No popup if mousedown>move>up>click on target
 - [CircleElement](src/circleElement.ts). Fix items **color** doesn't work (because attr `[fill]` can't override css-rule)
 
+## 0.4.1 (Jan 27, 2023)
+
 **New**:
 
-- [SelectManyControl](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany)
-- [SelectControl](src/controls/select.ts). Added option `multiple` (attribute \[multiple] & $options.multiple)
-- [PopupElement](src/popup/popupElement.ts)
-  - Option `target` can be SVGElement
-  - Option `offset` can be function
-  - Added properties `$isShown, $isHidden, $isShowing, $isHidding`
-  - Added rule: popup can't be more than `window.innerWidth & window.innerHeight`. The rule impossible to disable!
-  - Calling `$show() & $hide()` possible several times at once without re-rendering
-  - Events `$willShow & $willHide` have properties `detail.showCase & detail.hideCase`
-- [CircleElement](src/circleElement.ts)
-  - Added option `minsize` (attribute \[minsize] & $options.minsize)
-  - Added option `tooltip` per item ($options.items[0].tooltip)
-
-## 0.4.1 (Jan 27, 2023)
+- [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin). Added type **hash**
+- [CircleElement](src/circleElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/circle)
 
 **Fixes**:
 
 - [CalendarControl](src/controls/calendar.ts). Different pickers height after scrolling
 - helper [WUPScrolled](src/helpers/scrolled.ts). maxHeight left after scrolling finished
 - helper [WUPScrolled](src/helpers/scrolled.ts). goto previous sometimes scrolles through the whole range
-
-**New**:
-
-- [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin). Added type **hash**
-- [CircleElement](src/circleElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/circle)
 
 ## 0.4.0 (Jan 26, 2023)
 
@@ -78,6 +78,13 @@
 - helper **stringPrettify** moved into [`web-ui-pack/helpers/string`](src/helpers/string.ts)
 - [DateControl](src/controls/date.ts). Changed validation message from `This date is disabled` to `This value is disabled`
 
+**New**:
+
+- [WUPTimeObject](src/objects/timeObject.ts) => `Ordinary class Time with hours & minutes`
+- [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
+- helper [mathScaleValue](src/helpers/mathScaleValue)
+- Text based controls. **Mask** supports letters also (previously only digits can be variabled)
+
 **Fixes**:
 
 - Helper. [`localeInfo`](src/objects/localeInfo.ts). `AM/PM parsed to 'a' but expected 'A'`
@@ -89,19 +96,11 @@
 - [DateControl](src/controls/date.ts). Clearing input doesn't reset $value
 - [DateControl](src/controls/date.ts). Required asterisk is removed by opening menu
 
-**New**:
-
-- [WUPTimeObject](src/objects/timeObject.ts) => `Ordinary class Time with hours & minutes`
-- [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
-- helper [mathScaleValue](src/helpers/mathScaleValue)
-- Text based controls. **Mask** supports letters also (previously only digits can be variabled)
-
 ## 0.3.0 (Dec 27, 2022)
 
 **BREAKING CHANGES**:
 
 - DateControl:
-
   - Was
     - changing `$options.format` & attr `[format]` related to all date-strings: attributes `initvalue/min/max`.
     - default value `YYYY-MM-DD`
@@ -109,11 +108,23 @@
     - changing `$options.format` & attr `[format]` related only to displayed text. All attributes must be pointed in universal format `YYYY-MM-DD`
     - default value depends on user localization; see [locale](src/objects/localeInfo.ts)
     - `$options.firstWeekDay` - default value depends on user localization; see [locale](src/objects/localeInfo.ts)
-
 - CalendarControl:
   - deprecated static getters `$namesDayShort, $namesMonth, $namesMonthShort` in favor of [`localeInfo`](src/objects/localeInfo.ts) helper
   - `$options.firstDayOfWeek` is renamed to `firstWeekDay`
   - `$options.firstWeekDay` - default value depends on user localization; see [locale](src/objects/localeInfo.ts)
+
+**New**:
+
+- Added $options.prefix & postfix for text-based controls
+- Support **MMM** in format for `dateToString, dateFromString`
+- Controls **Number, Date, Calendar** are locale based and depeneds on [`localeInfo`](src/objects/localeInfo.ts) helper
+- Added elements
+  - [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
+  - [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
+- Added [helpers](README.md#helpers)
+  - [`onScroll`](src/helpers/onScroll.ts)
+  - [`localeInfo`](src/objects/localeInfo.ts)
+  - [`mathSumFloat`](src/helpers/mathSumFloat.ts)
 
 **Fixes**:
 
@@ -121,35 +132,9 @@
 - Popup with arrow. Firefox bug: css filter `drop-shadow` works wrong with angle 180.0
 - SpinElement. Impossible to override color via applying css-var to body `--spin-2`
 
-**Features**:
-
-- Added $options.prefix & postfix for text-based controls
-- Support **MMM** in format for `dateToString, dateFromString`
-- Controls **Number, Date, Calendar** are locale based and depeneds on [`localeInfo`](src/objects/localeInfo.ts) helper
-- Added elements
-
-  - [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
-  - [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
-
-- Added [helpers](README.md#helpers)
-  - [`onScroll`](src/helpers/onScroll.ts)
-  - [`localeInfo`](src/objects/localeInfo.ts)
-  - [`mathSumFloat`](src/helpers/mathSumFloat.ts)
-
 ## 0.2.0 (Dec 09, 2022)
 
-**Fixes**:
-
-- Controls. [Blue highlight blink on tap action](https://stackoverflow.com/questions/25704650/disable-blue-highlight-when-touch-press-object-with-cursorpointer)
-- Controls. Click on button `Clear` throws console.error
-- Controls. Validation gets undefined value but must be skipped in this case (value is undefined only for messages or validations.required)
-- [SelectControl](src/controls/select.ts). Click on custom list-item with nested span doesn't call click-event
-- [SelectControl](src/controls/select.ts). No scroll to selected element at first opening
-- [SelectControl](src/controls/select.ts). Sometimes menu isn't opened
-- [SelectControl](src/controls/select.ts). `noItems` appeared on 2nd menu opening when user created a new value
-- Helper. observer. onChange fired even date.setHours didn't change value
-
-**Features**:
+**New**:
 
 - Controls throws error if attr [validations] has object-key to undefined value
 - Added [mask](http://localhost:8015/control/text) for text based controls
@@ -163,6 +148,17 @@
   - [`onScrollStop`](src/helpers/onScrollStop.ts)
   - [`scrollCarousel`](src/helpers/scrollCarousel.ts)
 
+**Fixes**:
+
+- Controls. [Blue highlight blink on tap action](https://stackoverflow.com/questions/25704650/disable-blue-highlight-when-touch-press-object-with-cursorpointer)
+- Controls. Click on button `Clear` throws console.error
+- Controls. Validation gets undefined value but must be skipped in this case (value is undefined only for messages or validations.required)
+- [SelectControl](src/controls/select.ts). Click on custom list-item with nested span doesn't call click-event
+- [SelectControl](src/controls/select.ts). No scroll to selected element at first opening
+- [SelectControl](src/controls/select.ts). Sometimes menu isn't opened
+- [SelectControl](src/controls/select.ts). `noItems` appeared on 2nd menu opening when user created a new value
+- Helper. observer. onChange fired even date.setHours didn't change value
+
 ## 0.1.2 (Oct 4, 2022)
 
 - Hotfix: gotReady() calls gotChanges() when element disconnected (possible in React)
@@ -174,7 +170,7 @@
 - helpers reorganized to WUPHelpers (`WUPHelpers.isEqual`, `WUPHelpers.focusFirst` etc.)
 - PopupElement. Renamed $arrowElement to $refArrow
 
-**Features**:
+**New**:
 
 - Optimized for webpack (via [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free))
 - Optimized memory consumption (removed auto-bind functions)
