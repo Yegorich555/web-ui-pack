@@ -58,6 +58,8 @@ export default function CircleView() {
       <section>
         <h3>Segmented</h3>
         <small>(point several items in $options.items)</small>
+        <br />
+        <small>(point label per item to show tooltip)</small>
         <wup-circle
           back={false}
           style={{ maxWidth: "100px" }}
@@ -66,13 +68,13 @@ export default function CircleView() {
           ref={(el) => {
             if (el) {
               el.$options.items = [
-                { value: 12 },
-                { value: 10 },
-                { value: 13 },
-                { value: 27 },
-                { value: 15 },
-                { value: 23 },
-                { value: 23 },
+                { value: 12, tooltip: "Item 1\nvalue: {#}" },
+                { value: 10, tooltip: (item) => `Custom tooltip\nvalue: ${item.value}` },
+                { value: 13, tooltip: "Item 3\nvalue: {#}" },
+                { value: 27, tooltip: "Item 4\nvalue: {#}" },
+                { value: 15, tooltip: "Item 5\nvalue: {#}" },
+                { value: 23, tooltip: "Item 6\nvalue: {#}" },
+                { value: 23, tooltip: "Item 7\nvalue: {#}" },
               ];
             }
           }}

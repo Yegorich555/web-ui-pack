@@ -64,4 +64,15 @@ Element.prototype.scrollBy =
     }
   }; // it's not implemented in jsdom
 
+// JSDOM doesn't contain definition for innerText
+Object.defineProperty(Element.prototype, "innerText", {
+  configurable: true,
+  get: function getV() {
+    return this.innerHTML;
+  },
+  set: function setV(v) {
+    this.innerHTML = v;
+  },
+});
+
 window.matchMedia = window.matchMedia || (() => ({ matches: false }));

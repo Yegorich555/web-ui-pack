@@ -1,12 +1,41 @@
 import WUPBaseElement from "./baseElement";
+import WUPPopupElement from "./popup/popupElement";
+import { ShowCases } from "./popup/popupElement.types";
 import { animate } from "./helpers/animate";
 import { mathScaleValue } from "./helpers/math";
 import { parseMsTime } from "./helpers/styleHelpers";
+import { onEvent } from "./indexHelpers";
+
+// example: https://medium.com/@pppped/how-to-code-a-responsive-circular-percentage-chart-with-svg-and-css-3632f8cd7705
+// similar https://github.com/w8r/svg-arc-corners
+// demo https://milevski.co/svg-arc-corners/demo/
 
 const tagName = "wup-circle";
 
 declare global {
   namespace WUP.Circle {
+    interface Item {
+      value: number;
+      color?: string;
+      /** Point any text | function to show tooltip
+       * @hints
+       * * set `Item value {#}` to use tooltip where `{#}` is pointed value
+       * * point function to use custom logic
+       * * override `WUPCircleElement.prototype.renderTooltip` to use custom logic
+       * * to change hover-timeouts see `WUPCircleElement.$defaults.hover...`
+       * * use below example to use custom logic @example
+       *  items = [{
+       *    value: 5,
+       *    label: (item, popup) => {
+       *     setTimeout(()=>popup.innerHTML=...);
+       *     return ""
+       *  }] */
+      tooltip?: string | ((item: Item, popup: WUPPopupElement) => string);
+    }
+    interface SVGItem extends SVGPathElement {
+      _relatedItem: Item;
+      _hasTooltip?: true;
+    }
     interface Defaults {
       /** Width of each segment; expected 1..100 (perecentage)
        * @defaultValue 10 */
@@ -35,11 +64,17 @@ declare global {
       /** Min segment size - to avoid rendering extra-small segments; expected 0..20 (degrees)
        * @defaultValue 10 */
       minsize: number;
+      /** Timeout in ms before popup shows on hover of target;
+       * @defaultValue inherrited from WUPPopupElement.$defaults.hoverShowTimeout */
+      hoverShowTimeout: number;
+      /** Timeout in ms before popup hides on mouse-leave of target;
+       * @defaultValue 0 */
+      hoverHideTimeout: number;
     }
 
     interface Options extends Defaults {
       /** Items related to circle-segments */
-      items: Array<{ value: number; color?: string }>;
+      items: Item[];
     }
     interface Attributes
       extends WUP.Base.toJSX<
@@ -103,10 +138,10 @@ export default class WUPCircleElement extends WUPBaseElement {
   static get $style(): string {
     return `${super.$style}
       :host {
-        contain: style layout paint;
+        contain: style ;
         display: block;
         position: relative;
-        overflow: hidden;
+        overflow: visible;
         margin: auto;
         padding: 2px;
         --anim-time: 400ms;
@@ -132,7 +167,21 @@ export default class WUPCircleElement extends WUPBaseElement {
       :host>svg>g>path:nth-child(3) { fill: var(--circle-3); }
       :host>svg>g>path:nth-child(4) { fill: var(--circle-4); }
       :host>svg>g>path:nth-child(5) { fill: var(--circle-5); }
-      :host>svg>g>path:nth-child(6) { fill: var(--circle-6); }`;
+      :host>svg>g>path:nth-child(6) { fill: var(--circle-6); }
+      :host>wup-popup,
+      :host>wup-popup-arrow {
+        white-space: pre;
+        pointer-events: none;
+        user-select: none;
+        touch-action: none;
+      }
+      :host>wup-popup {
+        background: rgba(255,255,255,0.9)
+      }
+      :host>wup-popup-arrow:before {
+        opacity: 0.9;
+        margin: 0;
+      }`;
   }
 
   static $defaults: WUP.Circle.Defaults = {
@@ -145,6 +194,8 @@ export default class WUPCircleElement extends WUPBaseElement {
     max: 100,
     space: 2,
     minsize: 10,
+    hoverShowTimeout: WUPPopupElement.$defaults.hoverShowTimeout,
+    hoverHideTimeout: 0,
   };
 
   $options: WUP.Circle.Options = {
@@ -277,6 +328,8 @@ export default class WUPCircleElement extends WUPBaseElement {
     this.$refSVG.appendChild(this.$refItems);
 
     (async () => {
+      // todo impossible to decline animation if next render is fired before: need to render all pathes before animation
+      let hasTooltip = false;
       for (let i = 0; i < items.length; ++i) {
         const a = items[i];
         const c = arr[i];
@@ -287,12 +340,18 @@ export default class WUPCircleElement extends WUPBaseElement {
         if (a.color) {
           path.style.fill = a.color; // attr [fill] can't override css-rules
         }
+        if (a.tooltip) {
+          hasTooltip = true;
+          (path as any)._hasTooltip = true;
+        }
+        (path as any)._relatedItem = a;
         // animate
         this._animation = animate(c.angleFrom, c.angleTo, c.ms, (animV) => {
           path.setAttribute("d", this.drawArc(c.angleFrom, animV));
         });
         await this._animation.catch().finally(() => delete this._animation);
       }
+      this.useTooltip(hasTooltip);
     })();
 
     // render/remove label
@@ -309,6 +368,76 @@ export default class WUPCircleElement extends WUPBaseElement {
       ariaLbl = `Values: ${items.map((a) => a.value).join(",")}`;
     }
     this.$refSVG.setAttribute("aria-label", ariaLbl);
+  }
+
+  /** Called when need to show popup over segment */
+  renderTooltip(segment: WUP.Circle.SVGItem): WUPPopupElement {
+    const popup = document.createElement("wup-popup");
+    popup.$options.showCase = ShowCases.always;
+    popup.$options.target = segment;
+    popup.$options.arrowEnable = true;
+    popup.$options.offset = (r) => [-r.height / 2, -r.width / 2]; // center of the target
+    const item = segment._relatedItem;
+    const lbl = item.tooltip!;
+    popup.innerText =
+      typeof lbl === "function" ? lbl.call(this, item, popup) : lbl.replace("{#}", item.value.toString());
+
+    return this.appendChild(popup);
+  }
+
+  /** List of functions to remove tooltipListener */
+  _tooltipDisposeLst?: Array<() => void>;
+  /** Apply tooltip listener;
+   * @returns array of dispose functions */
+  protected useTooltip(isEnable: boolean): void {
+    if (!isEnable) {
+      this._tooltipDisposeLst?.forEach((fn) => fn());
+      this._tooltipDisposeLst = undefined;
+      return;
+    }
+    if (this._tooltipDisposeLst) {
+      return;
+    }
+    // impossible to use popupListen because it listens for single target but we need per each segment
+    const r = onEvent(
+      this,
+      "mouseenter", // mouseenter is fired even with touch event (mouseleave fired with touch outside in this case)
+      (e) => {
+        // NiceToHave: rewrite popupListen to use here
+        const t = e.target as WUP.Circle.SVGItem & {
+          _tid?: ReturnType<typeof setTimeout>;
+          _tooltip?: WUPPopupElement;
+        };
+        if (t._hasTooltip) {
+          t._tid && clearTimeout(t._tid); // remove timer for mouseleave
+          t._tid = setTimeout(() => {
+            if (t._tooltip) t._tooltip.$show();
+            else t._tooltip = this.renderTooltip(t);
+          }, this._opts.hoverShowTimeout);
+
+          onEvent(
+            e.target as HTMLElement,
+            "mouseleave",
+            () => {
+              t._tid && clearTimeout(t._tid); // remove timer for mouseenter
+              t._tid = setTimeout(() => {
+                t._tooltip?.$hide().finally(() => {
+                  // popup can be opened when user returns mouse back in a short time
+                  if (t._tooltip && !t._tooltip!.$isOpen) {
+                    t._tooltip!.remove();
+                    t._tooltip = undefined;
+                  }
+                });
+                t._tid = undefined;
+              }, this._opts.hoverHideTimeout);
+            },
+            { once: true }
+          );
+        }
+      },
+      { capture: true, passive: true }
+    );
+    this._tooltipDisposeLst = [r];
   }
 
   /** Called on every changeEvent */
@@ -413,9 +542,3 @@ export function drawArc(
     "Z", // end path
   ].join(" ");
 }
-
-// example: https://medium.com/@pppped/how-to-code-a-responsive-circular-percentage-chart-with-svg-and-css-3632f8cd7705
-// similar https://github.com/w8r/svg-arc-corners
-// demo https://milevski.co/svg-arc-corners/demo/
-
-// todo develop tooltips on segments

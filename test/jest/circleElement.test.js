@@ -1,5 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-imports
-import { WUPCircleElement } from "web-ui-pack";
+import { WUPPopupElement, WUPCircleElement } from "web-ui-pack";
 import * as h from "../testHelper";
 
 let nextFrame = async () => {};
@@ -334,5 +333,102 @@ describe("circleElement", () => {
       { angleFrom: 89.1356783919598, angleTo: 90, ms: 2.0100502512562786, v: 0.8643216080401999 },
     ]);
     h.unMockConsoleError();
+  });
+
+  test("tooltips", async () => {
+    el.$options.back = false;
+    el.$options.hoverHideTimeout = 50;
+    el.$options.hoverShowTimeout = 200;
+    el.$options.items = [
+      { value: 5, tooltip: "Item 1; value {#}%" },
+      {
+        value: 24,
+        tooltip: (item, popup) => {
+          popup.style.background = "red";
+          return `Me ${item.value}`;
+        },
+      },
+    ];
+    await nextFrame(20);
+    expect(Array.prototype.slice.call(el.$refItems.children).map((v) => v.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<path d="M 50 3.5 A 3.5 3.5 0 0 1 53.497142366876645 0.12244998733601875 A 50 50 0 0 1 92.1078530260513 23.038384441275365 A 3.5 3.5 0 0 1 90.818167851057 27.72608760718187 L 84.67349742186562 31.079149687821157 A 3.5 3.5 0 0 1 79.77803903326033 29.769617123405094 A 36 36 0 0 0 53.49448884497292 14.170004916099138 A 3.5 3.5 0 0 1 50 10.5 Z"></path>",
+        "<path d="M 91.57065085817706 29.1641897871107 A 3.5 3.5 0 0 1 96.15716154583689 30.77718964273132 A 50 50 0 1 1 44.76428660556784 0.2748825516584219 A 3.5 3.5 0 0 1 48.37717340333367 3.528326543612053 L 48.62146988025118 10.524062332745721 A 3.5 3.5 0 0 1 45.257191107932286 14.313787482932241 A 36 36 0 1 0 83.59756391931091 37.06927307968277 A 3.5 3.5 0 0 1 85.31270341716117 32.30076336754565 Z"></path>",
+      ]
+    `);
+
+    // default hover logic
+    const onTooltip = jest.spyOn(WUPCircleElement.prototype, "renderTooltip");
+    // hover on 1st item where tooltip is text
+    el.$refItems.children[0].dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait(100);
+    expect(onTooltip).toBeCalledTimes(0); // because waiting for 200ms
+    await h.wait(200);
+    expect(onTooltip).toBeCalledTimes(1);
+    expect(el.querySelector("wup-popup").innerHTML).toMatchInlineSnapshot(`"Item 1; value 5%"`);
+
+    el.$refItems.children[0].dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await h.wait(40);
+    expect(el.querySelector("wup-popup")).toBeDefined(); // because waiting for 50ms
+    await h.wait(50);
+    expect(el.querySelector("wup-popup")).toBeFalsy();
+
+    // hover on 1st item where tooltip is function
+    el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait(300);
+    expect(onTooltip).toBeCalledTimes(2);
+    expect(el.querySelector("wup-popup").outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style="background: red; display: none;">Me 24</wup-popup>"`
+    );
+
+    // checking debounce timeouts
+    onTooltip.mockClear();
+    el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await h.wait(10);
+    el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    expect(el.querySelector("wup-popup")).toBeDefined(); // small time - no hidden
+    await h.wait();
+    expect(onTooltip).toBeCalledTimes(0); // no new actions because prev popup still here
+    expect(el.querySelector("wup-popup")).toBeDefined();
+    expect(el.querySelector("wup-popup").$options.offset({ height: 100, width: 8 })).toStrictEqual([-50, -4]); // center of target
+
+    // show-hide during the animation
+    const orig = window.getComputedStyle;
+    jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
+      if (elem instanceof WUPPopupElement) {
+        /** @type CSSStyleDeclaration */
+        return { animationDuration: "0.3s", animationName: "WUP-POPUP-a1", borderRadius: "2px" };
+      }
+      return orig(elem);
+    });
+
+    el.$options.hoverShowTimeout = 0;
+    el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await h.wait(el.$options.hoverHideTimeout);
+    expect(el.querySelector("wup-popup").$isClosing).toBe(true);
+    el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait();
+    expect(el.querySelector("wup-popup").$isClosing).toBe(false);
+    expect(el.querySelector("wup-popup").$isOpen).toBe(true);
+
+    // new items
+    onTooltip.mockClear();
+    el.$options.hoverShowTimeout = 200;
+    el.$options.items = [
+      { value: 100, tooltip: "Item 1; {#}" },
+      { value: 12, tooltip: "Item 2; {#}" },
+    ];
+    await nextFrame(20);
+    el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait();
+    expect(onTooltip).toBeCalledTimes(1); // only 1 listener must be
+
+    // dispose listener
+    onTooltip.mockClear();
+    el.$options.items = [{ value: 5 }, { value: 24 }];
+    await nextFrame(20);
+    el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait();
+    expect(onTooltip).toBeCalledTimes(0); // no new actions because no tooltips anymore
   });
 });

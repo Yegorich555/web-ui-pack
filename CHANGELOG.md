@@ -39,14 +39,16 @@
 
 - [SelectManyControl](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany)
 - [SelectControl](src/controls/select.ts). Added option `multiple` (attribute \[multiple] & $options.multiple)
-- [PopupElement](src/popup/popupElement.ts).
+- [PopupElement](src/popup/popupElement.ts)
   - Option `target` can be SVGElement
   - Option `offset` can be function
   - Added properties `$isClose, $isOpening, $isClosing`
   - Added rule: popup can't be more than `window.innerWidth & window.innerHeight`. The rule impossible to disable!
   - Calling `$show() & $hide()` possible several times at once without re-rendering
   - Events `$willShow & $willHide` have properties `detail.showCase & detail.hideCase`
-- [CircleElement](src/circleElement.ts). Added option `minsize` (attribute \[minsize] & $options.minsize)
+- [CircleElement](src/circleElement.ts)
+  - Added option `minsize` (attribute \[minsize] & $options.minsize)
+  - Added option `tooltip` per item ($options.items[0].tooltip)
 
 ## 0.4.1 (Jan 27, 2023)
 
