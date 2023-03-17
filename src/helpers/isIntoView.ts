@@ -32,7 +32,7 @@ interface IntoViewResult {
 }
 
 /** Check if element is visible in scrollable parents */
-export default function isIntoView(el: HTMLElement, options?: IntoViewOptions): IntoViewResult {
+export default function isIntoView(el: Element, options?: IntoViewOptions): IntoViewResult {
   const scrollParents = options?.scrollParents || findScrollParentAll(el) || [document.body];
 
   let child: BasicRect = options?.elRect ?? el.getBoundingClientRect();

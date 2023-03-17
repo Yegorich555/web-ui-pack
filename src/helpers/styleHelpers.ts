@@ -56,7 +56,7 @@ interface CustomRect {
 
 /* Returns bounding rectangular without borders and scroll (simulate box-sizing: border-box) */
 export function getBoundingInternalRect(
-  el: HTMLElement,
+  el: Element,
   options?: {
     computedStyle?: CSSStyleDeclaration;
     ignoreCache?: boolean;

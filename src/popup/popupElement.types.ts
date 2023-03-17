@@ -35,7 +35,7 @@ declare global {
     interface Options {
       /** Anchor that popup uses for placement. If attr.target and $options.target are empty previousSibling will be attached.
        * attr target="{querySelector}" has hire priority than .options.target */
-      target?: HTMLElement | null;
+      target?: HTMLElement | SVGElement | null;
       /** Placement rules relative to target; example Placements.bottom.start or Placements.bottom.start.adjust
        * Point several to define alternate behavior (when space are not enough)
        * @hints
@@ -99,7 +99,7 @@ declare global {
     }
 
     interface AttachOptions extends Partial<Omit<Options, "target">> {
-      target: HTMLElement;
+      target: HTMLElement | SVGElement;
       text: string | undefined | null;
       tagName?: string;
     }

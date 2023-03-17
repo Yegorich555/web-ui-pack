@@ -29,7 +29,7 @@ declare global {
       left: number;
     }
     interface Rect extends PositionRect {
-      el: HTMLElement;
+      el: Element;
       width: number;
       height: number;
     }

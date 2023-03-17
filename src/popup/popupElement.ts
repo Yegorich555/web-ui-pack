@@ -20,7 +20,7 @@ import viewportSize from "../helpers/viewportSize";
 // export import HideCases = PopupHideCases;
 // export import Animations = PopupAnimations;
 
-const attachLst = new Map<HTMLElement, () => void>();
+const attachLst = new Map<HTMLElement | SVGElement, () => void>();
 
 /** PopupElement
  * @example
@@ -188,7 +188,7 @@ export default class WUPPopupElement<
       if (popup && !popup.$options.target) {
         popup.$options.target = options.target;
       }
-      const opts = popup ? { ...options, ...popup.$options, target: popup.$options.target as HTMLElement } : options;
+      const opts = popup ? { ...options, ...popup.$options, target: popup.$options.target! } : options;
       let isHidding = false;
 
       const refs = popupListen(
@@ -393,27 +393,24 @@ export default class WUPPopupElement<
     super.connectedCallback();
   }
 
-  /** Defines target on show; @returns HTMLElement | Error */
-  #defineTarget(): HTMLElement {
+  /** Defines target on show; @returns Element | Error */
+  #defineTarget(): HTMLElement | SVGElement {
+    let el: Element | null;
     const attrTrg = this.getAttribute("target");
     if (attrTrg) {
-      const el = document.querySelector(attrTrg);
-      if (el instanceof HTMLElement) {
-        return el;
-      }
-      throw new Error(`${this.tagName}. Target as HTMLElement not found for '${attrTrg}'`);
-    }
-
-    if (this._opts.target) {
+      el = document.querySelector(attrTrg);
+    } else if (this._opts.target) {
       return this._opts.target;
+    } else {
+      el = this.previousElementSibling;
     }
-
-    const el = this.previousElementSibling;
-    if (el instanceof HTMLElement) {
+    if (el instanceof HTMLElement || el instanceof SVGElement) {
       return el;
     }
 
-    throw new Error(`${this.tagName}. Target is not defined`);
+    throw new Error(
+      `${this.tagName}. Target as HTMLElement|SVGElement is not defined'${attrTrg ? ` for ${attrTrg}` : ""}'`
+    );
   }
 
   #refArrow?: WUPPopupArrowElement;
@@ -444,8 +441,8 @@ export default class WUPPopupElement<
       minH: number;
       minW: number;
       borderRadius: number;
-      inherritY: HTMLElement | null;
-      inherritX: HTMLElement | null;
+      inherritY: HTMLElement | SVGElement | null;
+      inherritX: HTMLElement | SVGElement | null;
       animTime: number;
     };
     placements: Array<WUP.Popup.Place.PlaceFunc>;
@@ -460,7 +457,7 @@ export default class WUPPopupElement<
     this.style.minHeight = ""; // reset styles to default to avoid bugs and previous state
 
     this._opts.target = this._opts.target || this.#defineTarget();
-    if (!(this._opts.target as HTMLElement).isConnected) {
+    if (!this._opts.target!.isConnected) {
       throw new Error(`${this.tagName}. Target is not appended to document`);
     }
 
@@ -475,7 +472,7 @@ export default class WUPPopupElement<
     const style = getComputedStyle(this);
 
     let child = this.children.item(0);
-    if (!(child instanceof HTMLElement)) {
+    if (!(child instanceof HTMLElement) && !(child instanceof SVGElement)) {
       child = null;
     }
     this.#state!.userStyles = {
@@ -500,9 +497,9 @@ export default class WUPPopupElement<
       // insert arrow after popup
       const nextEl = this.nextSibling;
       if (nextEl) {
-        (this.parentNode as HTMLElement).insertBefore(el, nextEl);
+        this.parentElement!.insertBefore(el, nextEl);
       } else {
-        (this.parentNode as HTMLElement).appendChild(el);
+        this.parentElement!.appendChild(el);
       }
 
       if (this._opts.arrowClass) {
@@ -684,13 +681,13 @@ export default class WUPPopupElement<
 
   /** Returns `target.getBoundingClientRect()` Use function to change placement logic based on target-rect
    * @WARN it's called with screen-frequency (per frame) */
-  getTargetRect(target: HTMLElement): DOMRect {
+  getTargetRect(target: Element): DOMRect {
     return target.getBoundingClientRect();
   }
 
   /** Update position of popup. Call this method in cases when you changed options */
   protected updatePosition(): DOMRect | undefined {
-    const trg = this._opts.target as HTMLElement;
+    const trg = this._opts.target!;
     // possible when target removed via set innerHTML (in this case remove-hook doesn't work)
     if (!trg.isConnected) {
       this.goHide(HideCases.onTargetRemove);

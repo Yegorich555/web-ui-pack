@@ -10,7 +10,7 @@ import { HideCases, ShowCases } from "./popupElement.types";
  *   callbacks results as fast as it's possible without waiting for animation */
 export default function popupListen(
   options: {
-    target: HTMLElement;
+    target: Element;
     showCase?: ShowCases;
     hoverShowTimeout?: number;
     hoverHideTimeout?: number;

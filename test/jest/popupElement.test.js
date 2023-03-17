@@ -983,25 +983,22 @@ describe("popupElement", () => {
   });
 
   test("attrs", () => {
-    /** @type typeof el */
-    const a = document.createElement(el.tagName);
-    a.$options.showCase = 0;
-    document.body.prepend(a);
+    el = document.createElement(el.tagName);
+    el.$options.showCase = 0;
+    document.body.prepend(el);
     expect(() => jest.advanceTimersByTime(1000)).toThrow(); // because of target not defined
     jest.clearAllMocks();
-    expect(a.$isOpen).toBe(false);
-    expect(a.$options.target == null).toBe(true);
+    expect(el.$isOpen).toBe(false);
+    expect(el.$options.target == null).toBe(true);
 
     // attr 'target'
-    a.setAttribute("target", `#${trg.getAttribute("id")}`);
-    a.setAttribute("placement", "top-start");
+    el.setAttribute("target", `#${trg.getAttribute("id")}`);
+    el.setAttribute("placement", "top-start");
     jest.advanceTimersToNextTimer();
-    expect(a.$options.target).toBeDefined();
-    expect(a.$isOpen).toBe(true);
+    expect(el.$options.target).toBeDefined();
+    expect(el.$isOpen).toBe(true);
 
-    const svg = document.body.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "svg"));
-    svg.setAttribute("id", "svgId");
-    a.setAttribute("target", "#svgId");
+    el.setAttribute("target", "#not-found-id");
     expect(() => jest.advanceTimersByTime(1000)).toThrow(); // because of target is defined but not HTMLELement
   });
 
