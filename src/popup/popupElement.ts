@@ -57,7 +57,7 @@ const attachLst = new Map<HTMLElement | SVGElement, () => void>();
  * * You can set minWidth, minHeight to prevent squizing of popup or don't use rule '.$adjust'
  * * Don't override styles: display, transform (possible to override only for animation)
  * * Don't use inline styles: maxWidth, maxHeight, minWidth, minHeight
- * * If target removed (when popup $isOpen) and appended again you need to update $options.target (because $options.target cleared)
+ * * If target removed (when popup $isShown) and appended again you need to update $options.target (because $options.target cleared)
  * * Popup has overflow 'auto'; If you change to 'visible' it will apply maxWidth/maxHeight to first children (because popup must be restricted by maxSize to avoid layout issues)
  * * During the closing attr 'hide' is appended only if css-animation-duration is detected
  * * Popup can't be more than 100vw & 100vh (impossible to disable the rule)
@@ -242,7 +242,7 @@ export default class WUPPopupElement<
 
     function detach(): void {
       if (popup) {
-        popup.$isOpen && popup.goHide.call(popup, HideCases.onManuallCall);
+        popup.$isShown && popup.goHide.call(popup, HideCases.onManuallCall);
         (popup as T).remove.call(popup);
       }
       r.stopListen();
@@ -314,37 +314,42 @@ export default class WUPPopupElement<
     this.#state && this.buildState();
   }
 
+  /** @deprecated use `$isShown` */
+  get $isOpen(): boolean {
+    return this.#isShown;
+  }
+
   /** Returns if popup is opened (before show-animation is started)
    * @tutorial Troubleshooting
-   * * stack: $show() > `$isOpen:true` > opening > opened
-   * * stack: $hide() > closing > closed > `$isOpen:false`
+   * * stack: $show() > `$isShown:true` > showing > shown
+   * * stack: $hide() > hidding > hidden > `$isShown:false`
    * * to listen to animation-end use events `$show` & `$hide` OR methods `$show().then(...)` & `$hide().then(... )` */
-  get $isOpen(): boolean {
-    return this.#isOpen;
+  get $isShown(): boolean {
+    return this.#isShown;
   }
 
   /** Returns if popup is closed (after hide-animation is ended)
    * @tutorial Troubleshooting
-   * * stack: $show() > `$isClose:false` > opening > opened
-   * * stack: $hide() > closing > closed > `$isClose:true`
+   * * stack: $show() > `$isHidden:false` >  showing > shown
+   * * stack: $hide() > hidding > hidden > `$isHidden:true`
    * * to listen to animation-end use events `$show` & `$hide` OR methods `$show().then(...)` & `$hide().then(... )` */
-  get $isClose(): boolean {
-    return !this.#isOpen && !this.$isClosing; // todo change to $isHidding & isHidden & isShowed & isShowing
+  get $isHidden(): boolean {
+    return !this.#isShown && !this.$isHidding;
   }
 
-  #isClosing?: true;
-  /** Returns if popup is closing (only if animation enabled) */
-  get $isClosing(): boolean {
-    return this.#isClosing === true;
+  #isHidding?: true;
+  /** Returns if popup is hidding (only if animation enabled) */
+  get $isHidding(): boolean {
+    return this.#isHidding === true;
   }
 
-  #isOpening?: true;
-  /** Returns if popup is opening (only if animation enabled) */
-  get $isOpening(): boolean {
-    return this.#isOpening === true;
+  #isShowing?: true;
+  /** Returns if popup is showing (only if animation enabled) */
+  get $isShowing(): boolean {
+    return this.#isShowing === true;
   }
 
-  /** Returns arrowElement if $options.arrowEnable=true and after popup $isOpen */
+  /** Returns arrowElement if $options.arrowEnable=true and after popup $isShown */
   get $refArrow(): WUPPopupArrowElement | null {
     return this.#refArrow || null;
   }
@@ -354,7 +359,7 @@ export default class WUPPopupElement<
     this.init();
   }
 
-  #isOpen = false;
+  #isShown = false;
   #listenRefs?: ReturnType<typeof popupListen>;
   #attach?: () => ReturnType<typeof popupListen>; // func to use alternative target
   /** Called after gotReady() and $show() (to reinit according to options) */
@@ -383,7 +388,7 @@ export default class WUPPopupElement<
     super.gotChanges(propsChanged);
 
     if (propsChanged) {
-      this.$isOpen && this.goHide(HideCases.onOptionChange);
+      this.$isShown && this.goHide(HideCases.onOptionChange);
       this.init(); // possible only if popup is hidden
     }
   }
@@ -543,9 +548,9 @@ export default class WUPPopupElement<
 
   /** Required to stop previous animations/timeouts (for case when option animation is changed) */
   _stopAnimation?: () => void;
-  protected goAnimate(animTime: number, isClose: boolean): Promise<boolean> {
+  protected goAnimate(animTime: number, isHidden: boolean): Promise<boolean> {
     if (this._opts.animation === Animations.drawer) {
-      const pa = animateDropdown(this, animTime, isClose);
+      const pa = animateDropdown(this, animTime, isHidden);
       this._stopAnimation = () => {
         delete this._stopAnimation;
         pa.stop(this._opts.animation !== Animations.drawer); // rst animation state only if animation changed
@@ -564,7 +569,7 @@ export default class WUPPopupElement<
 
   /** Shows popup if target defined; returns true if successful */
   protected goShow(showCase: ShowCases): boolean | Promise<boolean> {
-    if (this.#isOpen && !this.#isClosing && !this.#isOpening) {
+    if (this.#isShown && !this.#isHidding && !this.#isShowing) {
       return true;
     }
     if (this.#whenShow) {
@@ -575,16 +580,16 @@ export default class WUPPopupElement<
       return false;
     }
     this.#whenHide = undefined;
-    this.#isClosing = undefined;
+    this.#isHidding = undefined;
     this._stopAnimation?.call(this);
     this.#state && window.cancelAnimationFrame(this.#state.frameId);
     this.buildState();
-    const wasClosed = !this.#isOpen;
-    this.#isOpen = true;
+    const wasClosed = !this.#isShown;
+    this.#isShown = true;
 
     const goUpdate = (): void => {
       // possible if hidden by target-remove
-      if (this.#isOpen) {
+      if (this.#isShown) {
         this.#state!.prevRect = this.updatePosition();
         const id = window.requestAnimationFrame(goUpdate);
         if (this.#state) {
@@ -611,9 +616,9 @@ export default class WUPPopupElement<
       return true;
     }
 
-    this.#isOpening = true;
+    this.#isShowing = true;
     this.#whenShow = this.goAnimate(animTime, false).then((isOk) => {
-      this.#isOpening = undefined;
+      this.#isShowing = undefined;
       if (!isOk) {
         return false;
       }
@@ -625,7 +630,7 @@ export default class WUPPopupElement<
 
   /** Hide popup. @hideCase as reason of hide(). Calling 2nd time at once will stop previous hide-animation */
   protected goHide(hideCase: HideCases): boolean | Promise<boolean> {
-    if (!this.#isOpen && !this.#isClosing && !this.#isOpening) {
+    if (!this.#isShown && !this.#isHidding && !this.#isShowing) {
       return true;
     }
     if (this.#whenHide) {
@@ -637,15 +642,15 @@ export default class WUPPopupElement<
       return false;
     }
     this.#whenShow = undefined;
-    this.#isOpening = undefined;
+    this.#isShowing = undefined;
     this._stopAnimation?.call(this);
-    this.#isClosing = true;
+    this.#isHidding = true;
     const finishHide = (): void => {
-      this.#isClosing = undefined;
+      this.#isHidding = undefined;
       delete this._stopAnimation;
       this.style.display = "";
       this.removeAttribute("hide");
-      this.#isOpen = false;
+      this.#isShown = false;
       this.#state && window.cancelAnimationFrame(this.#state.frameId);
       this.#state = undefined;
 
@@ -663,7 +668,7 @@ export default class WUPPopupElement<
       const animTime = Number.parseFloat(aD.substring(0, aD.length - 1)) * 1000 || 0;
       if (animTime) {
         this.#whenHide = this.goAnimate(animTime, true).then((isOk) => {
-          this.#isClosing = undefined;
+          this.#isHidding = undefined;
           this.removeAttribute("hide");
           if (!isOk) {
             return false;
@@ -953,9 +958,9 @@ export default class WUPPopupElement<
   }
 
   protected override gotRemoved(): void {
-    this.#isOpen = false;
-    this.#isClosing = undefined;
-    this.#isOpening = undefined;
+    this.#isShown = false;
+    this.#isHidding = undefined;
+    this.#isShowing = undefined;
     this.#whenHide = undefined;
     this.#whenShow = undefined;
     this.#state?.frameId && window.cancelAnimationFrame(this.#state.frameId);

@@ -6,6 +6,7 @@
 
 - Internals. Methods getNumAttr, getRefAttr, getBoolAttr is refactored to single getAttr()
 - [SelectControl](src/controls/select.ts). Simplified menu styling
+- [PopupElement](src/popup/popupElement.ts). Prop `$isOpen` deprecated in favor of `$isShown`
 
 **Fixes**:
 
@@ -28,7 +29,7 @@
 - [PopupElement](src/popup/popupElement.ts). Animation for opacity doesn't work on Safari 14-
 - [PopupElement](src/popup/popupElement.ts). Animation affects on bluring text if user scroll body during the animation
 - [PopupElement](src/popup/popupElement.ts). Wrong position during dropdownAnimation and several show/hide at once
-- [PopupElement](src/popup/popupElement.ts). Allow to open/close on double-click (because on Chrome double-click works with long delay)
+- [PopupElement](src/popup/popupElement.ts). Allow to show/hide on double-click (because on Chrome double-click works with long delay)
 - [PopupElement](src/popup/popupElement.ts). 2nd $show() has predefined maxSize & position can be different
 - [PopupElement](src/popup/popupElement.ts). Now popup has max size 100vw & 100vh (by default). Earlier popup could be > 100vw
 - [PopupElement](src/popup/popupElement.ts). No-updates on screensize changes. Now popup position & size changes with device-rotation
@@ -42,7 +43,7 @@
 - [PopupElement](src/popup/popupElement.ts)
   - Option `target` can be SVGElement
   - Option `offset` can be function
-  - Added properties `$isClose, $isOpening, $isClosing`
+  - Added properties `$isShown, $isHidden, $isShowing, $isHidding`
   - Added rule: popup can't be more than `window.innerWidth & window.innerHeight`. The rule impossible to disable!
   - Calling `$show() & $hide()` possible several times at once without re-rendering
   - Events `$willShow & $willHide` have properties `detail.showCase & detail.hideCase`

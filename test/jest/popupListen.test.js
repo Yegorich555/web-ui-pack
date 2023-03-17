@@ -6,7 +6,7 @@ import * as h from "../testHelper";
 let target;
 /** @type HTMLDivElement */
 let popup;
-let isOpen = false;
+let isShown = false;
 let onShow = jest.fn();
 let onHide = jest.fn();
 /** @type ReturnType<typeof popupListen> */
@@ -17,14 +17,14 @@ beforeEach(() => {
   jest.clearAllMocks();
   target = document.body.appendChild(document.createElement("input"));
   onShow = jest.fn().mockImplementation(() => {
-    isOpen = true;
+    isShown = true;
     if (!popup) {
       popup = document.body.appendChild(document.createElement("div"));
     }
     return popup;
   });
   onHide = jest.fn().mockImplementation(() => {
-    isOpen = false;
+    isShown = false;
     return true;
   });
 });
@@ -32,7 +32,7 @@ beforeEach(() => {
 afterEach(() => {
   document.body.innerHTML = "";
   popup = null;
-  isOpen = false;
+  isShown = false;
   ref?.stopListen();
 });
 
@@ -45,13 +45,13 @@ describe("popupListen", () => {
     await h.wait();
     expect(onShow).toBeCalledTimes(1);
     expect(onHide).not.toBeCalled();
-    expect(isOpen).toBe(true);
+    expect(isShown).toBe(true);
 
     target.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     expect(onShow).toBeCalledTimes(1);
     expect(onHide).toBeCalledTimes(1);
-    expect(isOpen).toBe(false);
+    expect(isShown).toBe(false);
     ref.stopListen();
     spy.check();
   });
@@ -85,13 +85,13 @@ describe("popupListen", () => {
     target.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     expect(onShow).toBeCalledTimes(1);
-    expect(isOpen).toBe(true);
+    expect(isShown).toBe(true);
 
     ref.show(); // call it manually to check if it works as expected
     await h.wait();
     expect(onShow).toBeCalledTimes(1);
     expect(onHide).not.toBeCalled();
-    expect(isOpen).toBe(true);
+    expect(isShown).toBe(true);
 
     // checking self-call hide
     jest.clearAllMocks();
@@ -105,20 +105,20 @@ describe("popupListen", () => {
     target.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     expect(onHide).toBeCalledTimes(1);
-    expect(isOpen).toBe(false);
+    expect(isShown).toBe(false);
 
     ref.hide();
     await h.wait();
     expect(onHide).toBeCalledTimes(1);
-    expect(isOpen).toBe(false);
+    expect(isShown).toBe(false);
 
     ref.show();
     await h.wait();
-    expect(isOpen).toBe(true);
+    expect(isShown).toBe(true);
 
     ref.hide();
     await h.wait();
-    expect(isOpen).toBe(false);
+    expect(isShown).toBe(false);
 
     // jest.clearAllMocks();
     // onShow();
@@ -148,7 +148,7 @@ describe("popupListen", () => {
     await h.wait(101);
     expect(onShow).toBeCalledTimes(1);
     expect(onHide).not.toBeCalled();
-    expect(isOpen).toBe(true);
+    expect(isShown).toBe(true);
 
     target.dispatchEvent(new MouseEvent("click", { bubbles: true })); // hide
     await h.wait(1);
@@ -157,7 +157,7 @@ describe("popupListen", () => {
     await h.wait(101);
     expect(onShow).toBeCalledTimes(1);
     expect(onHide).toBeCalledTimes(1);
-    expect(isOpen).toBe(false);
+    expect(isShown).toBe(false);
 
     // user calls show & hide immediately
     jest.clearAllMocks();
@@ -167,7 +167,7 @@ describe("popupListen", () => {
     await h.wait();
     expect(onShow).toBeCalledTimes(1);
     expect(onHide).toBeCalledTimes(1);
-    expect(isOpen).toBe(false);
+    expect(isShown).toBe(false);
 
     jest.clearAllMocks();
     ref.show();
@@ -178,7 +178,7 @@ describe("popupListen", () => {
     await h.wait();
     expect(onShow).toBeCalledTimes(2);
     expect(onHide).toBeCalledTimes(1);
-    expect(isOpen).toBe(true);
+    expect(isShown).toBe(true);
   });
 
   test("show/hide is prevented", async () => {
@@ -191,7 +191,7 @@ describe("popupListen", () => {
     await h.wait(1);
     expect(onShow).toBeCalledTimes(2);
     expect(onHide).not.toBeCalled();
-    expect(isOpen).toBe(true);
+    expect(isShown).toBe(true);
 
     jest.clearAllMocks();
     onHide.mockImplementationOnce(() => false);
@@ -201,7 +201,7 @@ describe("popupListen", () => {
     await h.wait(1);
     expect(onShow).not.toBeCalled();
     expect(onHide).toBeCalledTimes(2);
-    expect(isOpen).toBe(false);
+    expect(isShown).toBe(false);
   });
 
   test("hide waits for show end", async () => {

@@ -405,11 +405,11 @@ describe("circleElement", () => {
     el.$options.hoverShowTimeout = 0;
     el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
     await h.wait(el.$options.hoverHideTimeout);
-    expect(el.querySelector("wup-popup").$isClosing).toBe(true);
+    expect(el.querySelector("wup-popup").$isHidding).toBe(true);
     el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
     await h.wait();
-    expect(el.querySelector("wup-popup").$isClosing).toBe(false);
-    expect(el.querySelector("wup-popup").$isOpen).toBe(true);
+    expect(el.querySelector("wup-popup").$isHidding).toBe(false);
+    expect(el.querySelector("wup-popup").$isShown).toBe(true);
 
     // new items
     onTooltip.mockClear();

@@ -529,7 +529,7 @@ export default class WUPSelectControl<
     showCase: ShowCases,
     e?: MouseEvent | FocusEvent | KeyboardEvent | null
   ): Promise<WUPPopupElement | null> {
-    if (this.$isOpen) {
+    if (this.$isShown) {
       return this.$refPopup!;
     }
     if (this.$isPending) {
@@ -570,7 +570,7 @@ export default class WUPSelectControl<
 
   /** Select menu item if value !== undefined and menu is opened */
   protected selectMenuItemByValue(v: ValueType | undefined): void {
-    if (this.$isOpen) {
+    if (this.$isShown) {
       const findAndSelect = (vi: ValueType): number => {
         const i = this._cachedItems!.findIndex((item) => this.#ctr.$isEqual(item.value, vi));
         this.selectMenuItem(this._menuItems!.all[i] || null);
@@ -707,7 +707,7 @@ export default class WUPSelectControl<
   }
 
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
-    this.$isOpen && this.focusMenuItem(null); // reset virtual focus: // WARN it's not good enough when this._opts.multiple
+    this.$isShown && this.focusMenuItem(null); // reset virtual focus: // WARN it's not good enough when this._opts.multiple
     super.gotInput(e);
 
     const filter = (): void => {

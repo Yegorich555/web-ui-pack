@@ -88,7 +88,7 @@ describe("helper.animateDropdown", () => {
 
     // try open again
     isResolved = false;
-    p = animateDropdown(el, step * 3); // isClose doesn't required
+    p = animateDropdown(el, step * 3); // isHidden doesn't required
     p.then(() => (isResolved = true)).catch(() => null);
     await nextFrame();
     expect(isResolved).toBe(false);

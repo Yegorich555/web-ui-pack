@@ -117,10 +117,10 @@ export default abstract class WUPBaseComboControl<
   // @ts-expect-error reason: validationRules is different
   protected override _opts = this.$options;
 
-  #isOpen = false;
+  #isShown = false;
   /** Returns if popup-menu is opened */
-  get $isOpen(): boolean {
-    return this.#isOpen;
+  get $isShown(): boolean {
+    return this.#isShown;
   }
 
   /** Hide popup-menu
@@ -133,7 +133,7 @@ export default abstract class WUPBaseComboControl<
    * @returns Promise resolved resolved by animation time */
   async $showMenu(): Promise<void> {
     await this.goShowMenu(ShowCases.onManualCall);
-    this.#isOpen && (await this.$refPopup!.$show()); // wait for popup show-end
+    this.#isShown && (await this.$refPopup!.$show()); // wait for popup show-end
   }
 
   /** Reference to popupMenu */
@@ -216,7 +216,7 @@ export default abstract class WUPBaseComboControl<
     showCase: ShowCases,
     e?: MouseEvent | FocusEvent | KeyboardEvent | null
   ): Promise<WUPPopupElement | null> {
-    if (this.#isOpen) {
+    if (this.#isShown) {
       return this.$refPopup!;
     }
 
@@ -228,7 +228,7 @@ export default abstract class WUPBaseComboControl<
       return null;
     }
 
-    this.#isOpen = true;
+    this.#isShown = true;
     // this.$hideError(); // it resolves overflow menu vs error
 
     if (!this.$refPopup) {
@@ -262,7 +262,7 @@ export default abstract class WUPBaseComboControl<
 
       const fcs = this.$isFocused;
       if (!fcs && wasFcs) {
-        this.#isOpen = false;
+        this.#isShown = false;
         this.removePopup(); // fix case when user waited for loading and moved focus to another
         return null;
       }
@@ -270,7 +270,7 @@ export default abstract class WUPBaseComboControl<
       // eslint-disable-next-line no-promise-executor-return
       await new Promise((res) => setTimeout(res)); // wait for appending to body so size is defined and possible to scroll
     }
-    if (!this.#isOpen) {
+    if (!this.#isShown) {
       return null; // possible when user calls show & hide sync
     }
     this.$refPopup.$show().then(() => this.fireEvent("$showMenu", { cancelable: false }));
@@ -312,11 +312,11 @@ export default abstract class WUPBaseComboControl<
     if (!this.canHideMenu(hideCase, e)) {
       return false;
     }
-    this.#isOpen = false;
+    this.#isShown = false;
     this._isHidding = true;
     await this.$refPopup.$hide();
     delete this._isHidding;
-    if (this.#isOpen) {
+    if (this.#isShown) {
       return false; // possible when popup opened again during the animation
     }
     // remove popup only by focusOut to optimize resources
@@ -364,14 +364,14 @@ export default abstract class WUPBaseComboControl<
 
   protected override gotKeyDown(e: KeyboardEvent): void {
     // don't allow to process Esc-key when menu is opened
-    const isEscPrevent = this.#isOpen && e.key === "Escape";
+    const isEscPrevent = this.#isShown && e.key === "Escape";
     !isEscPrevent && super.gotKeyDown(e);
 
     if (e.altKey || e.shiftKey || e.ctrlKey) {
       return;
     }
 
-    if (!this.#isOpen) {
+    if (!this.#isShown) {
       if (this._opts.showCase & ShowCases.onPressArrowKey) {
         if (e.key === "ArrowDown" || e.key === "ArrowUp") {
           e.preventDefault(); // to prevent parent-scroll
@@ -414,7 +414,7 @@ export default abstract class WUPBaseComboControl<
 
   protected override gotInput(e: WUP.Text.GotInputEvent, allowSuper = false): void {
     // gotInput possible on browser-autofill so we need filter check if isFocused
-    !this.$isOpen && this._opts.showCase & ShowCases.onInput && this.$isFocused && this.goShowMenu(ShowCases.onInput);
+    !this.$isShown && this._opts.showCase & ShowCases.onInput && this.$isFocused && this.goShowMenu(ShowCases.onInput);
     allowSuper && super.gotInput(e);
   }
 
@@ -430,7 +430,7 @@ export default abstract class WUPBaseComboControl<
         if (clickAfterFocus) {
           r.finally(() => this.$isFocused && this.goShowMenu(ShowCases.onClick, e)); // menu must be opened if openByFocus is rejected
         } else {
-          !this.#isOpen ? this.goShowMenu(ShowCases.onClick, e) : this.goHideMenu(HideCases.onClick, e);
+          !this.#isShown ? this.goShowMenu(ShowCases.onClick, e) : this.goHideMenu(HideCases.onClick, e);
         }
       }
       lblClick = setTimeout(() => (lblClick = false));
@@ -453,7 +453,7 @@ export default abstract class WUPBaseComboControl<
   }
 
   protected override gotFocusLost(): void {
-    !this.#isOpen && !this._isHidding && this.removePopup(); // otherwise it's removed by hidingMenu
+    !this.#isShown && !this._isHidding && this.removePopup(); // otherwise it's removed by hidingMenu
     this.goHideMenu(HideCases.onFocusLost);
     this.resetInputValue(); // to update/rollback input according to result
     super.gotFocusLost();
@@ -485,8 +485,8 @@ export default abstract class WUPBaseComboControl<
     this.$refPopup = undefined;
     this._focusedMenuItem = undefined;
     this._selectedMenuItem = undefined;
-    if (this.#isOpen) {
-      this.#isOpen = false;
+    if (this.#isShown) {
+      this.#isShown = false;
       this.removeAttribute("opened");
       this.$refInput.setAttribute("aria-expanded", false);
       this.$refInput.removeAttribute("aria-activedescendant");
@@ -502,18 +502,18 @@ export default abstract class WUPBaseComboControl<
 // WARN about chaining
 /*
  $showMenu().then(()=> console.warn('done'))
- isOpen: true >>> create popup,
- isOpening: true
+ isShown: true >>> create popup,
+ isShowing: true
  ...fetch menu-items (takes time)... >>> render popup with items
  ...animation (takes time)...
- isOpening: false
+ isShowing: false
  >>> console.warn('done')
  show-event
  */
 
 /*
  $hideMenu().then(()=> console.warn('done'))
- isOpen: false
+ isShown: false
  isHidding: true
  ...animation...
  isHidding: false >>> remove popup if focus out
