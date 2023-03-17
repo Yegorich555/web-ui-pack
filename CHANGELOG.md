@@ -25,19 +25,19 @@
 
 **Fixes**:
 
-- helper [`onFocusLost`](src/helpers/onFocusLost.ts). _Isn't fired if stopPropagation is called_
+- **helper** [`onFocusLost`](src/helpers/onFocusLost.ts). _Isn't fired if stopPropagation is called_
 - [TimeControl](src/controls/time.ts). _Extra margin for menu-buttons on Safari_
 - [SwitchControl](src/controls/switch.ts). [CheckControl](src/controls/check.ts). _Attribute `initvalue=''` sets value to `true` (expected `false`)_
 - [TextareaControl](src/controls/textarea.ts). _`Ctrl + B` makes text bold but it's unexpected for plain textarea_
-- Controls. _Hover effect on Android devices (expected: no-hover on touch-screens)_
-- Controls. _Focus frame isn't rouned on Safari_
-- Controls. _Attributes `initvalue,min,max` for controls Date & Calendar doesn't work on Safari (Date.parse(yyyy-MM-dd) doesn't work by default)_
-- Controls. _Controls are not rendered if parsing initvalue is wrong_
-- Controls. _Unexpected autofocus on mask-inputs on Safari_
-- Controls. _Annoying autoselect on touchscreens._ Now $options.selectOnFocus is disabled by default
-- Combobox controls (Select, Date, Time). Now popup isn't opened if user clears control and gets focus at the same time
-- Combobox controls (Select, Date, Time). _Click on disabled item throws console.error_
-- Combobox controls (Select, Date, Time). _Focus goes to menu-list by keydown 'Tab' in Firefox_
+- **Controls**. _Hover effect on Android devices (expected: no-hover on touch-screens)_
+- **Controls**. _Focus frame isn't rouned on Safari_
+- **Controls**. _Attributes `initvalue,min,max` for controls Date & Calendar doesn't work on Safari (Date.parse(yyyy-MM-dd) doesn't work by default)_
+- **Controls**. _Controls are not rendered if parsing initvalue is wrong_
+- **Controls**. _Unexpected autofocus on mask-inputs on Safari_
+- **Controls**. _Annoying autoselect on touchscreens._ Now $options.selectOnFocus is disabled by default
+- **Combobox controls (Select, Date, Time)**. Now popup isn't opened if user clears control and gets focus at the same time
+- **Combobox controls (Select, Date, Time)**. _Click on disabled item throws console.error_
+- **Combobox controls (Select, Date, Time)**. _Focus goes to menu-list by keydown 'Tab' in Firefox_
 - [SelectControl](src/controls/select.ts). _Sometimes popup isn't not scrolled to selected item during the opening_
 - [SpinElement](src/spinElement.ts). _Animation for TwinDualRing doesn't work on Safari 14-_
 - [SpinElement](src/spinElement.ts). _Wrong render on option `fit` on Safari 14-_
