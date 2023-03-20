@@ -1,4 +1,5 @@
 import { isAnimEnabled } from "../helpers/animate";
+import { parseMsTime } from "../helpers/styleHelpers";
 import { onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
 import { WUPcssIcon } from "../styles";
@@ -342,7 +343,7 @@ export default class WUPSelectManyControl<
       item.style.width = `${item.offsetWidth}px`;
       item.setAttribute("removed", "");
       setTimeout(() => (item.style.width = ""));
-      const ms = Number.parseInt(window.getComputedStyle(item).getPropertyValue("--anim-time"), 10); // WARN: expected anim-time: 200ms
+      const ms = parseMsTime(window.getComputedStyle(item).getPropertyValue("--anim-time"));
       setTimeout(() => item.remove(), ms); // otherwise item is removed immediately in setValue...
       this._focusIndex === index && this.focusItemByIndex(null);
     }

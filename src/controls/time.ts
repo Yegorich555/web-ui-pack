@@ -385,7 +385,7 @@ export default class WUPTimeControl<
         this._selectedMenuItem = undefined; // otherwise selection is cleared after popup-close
         this._focusedMenuItem && this.focusMenuItem(next.items[0]);
       }
-      !isInit && this.$isOpen && this.disableItems();
+      !isInit && this.$isShown && this.disableItems();
     };
 
     const drows = Math.round(rows / 2) - 1;
@@ -682,7 +682,7 @@ export default class WUPTimeControl<
   }
 
   protected override gotKeyDown(e: KeyboardEvent): void {
-    const wasOpen = this.$isOpen;
+    const wasOpen = this.$isShown;
     const isExtraKey = e.altKey || e.shiftKey || e.ctrlKey;
 
     // handle Enter key when menu is open

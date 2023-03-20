@@ -29,7 +29,7 @@ declare global {
       left: number;
     }
     interface Rect extends PositionRect {
-      el: HTMLElement;
+      el: Element;
       width: number;
       height: number;
     }
@@ -277,9 +277,9 @@ export function getOffset(
     return { top: 0, left: 0, bottom: 0, right: 0 };
   }
   return {
-    top: offset[0],
-    right: offset[1],
-    bottom: offset[2] ?? offset[0],
-    left: offset[3] ?? offset[1],
+    top: Math.round(offset[0]),
+    right: Math.round(offset[1]),
+    bottom: Math.round(offset[2] ?? offset[0]),
+    left: Math.round(offset[3] ?? offset[1]),
   };
 }

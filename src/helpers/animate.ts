@@ -17,13 +17,13 @@ declare global {
 
 // todo animateDropdown left/right
 
-/** Animate (open/close) element as dropdown via scale and counter-scale for children
+/** Animate (show/hide) element as dropdown via scale and counter-scale for children
  * @param ms animation time
  * @returns Promise<isFinished> that resolved by animation end;
  * Rules
  * * To define direction set attribute to element position="top" or position="bottom"
  * * Before call it again on the same element don't forget to call stop(false) to cancel prev animation */
-export function animateDropdown(el: HTMLElement, ms: number, isClose = false): WUP.PromiseCancel<boolean> {
+export function animateDropdown(el: HTMLElement, ms: number, isHidden = false): WUP.PromiseCancel<boolean> {
   if (!ms) {
     const p = Promise.resolve(false);
     return Object.assign(p, { stop: () => p });
@@ -34,7 +34,7 @@ export function animateDropdown(el: HTMLElement, ms: number, isClose = false): W
   const reg = / *scaleY\(([%\d \w.-]+)\) */;
   const parseScale = (e: HTMLElement): { prev: string; from: number } => {
     let prev = e.style.transform;
-    let from = isClose ? 1 : 0;
+    let from = isHidden ? 1 : 0;
     const r = reg.exec(prev);
     if (r) {
       // remove scale from transform
@@ -71,7 +71,7 @@ export function animateDropdown(el: HTMLElement, ms: number, isClose = false): W
   };
 
   // define from-to ranges
-  const to = isClose ? 0 : 1;
+  const to = isHidden ? 0 : 1;
   const { from } = parseScale(el);
   ms *= Math.abs(to - from); // recalc left-animTime (if element is partially opened and need to hide it)
 

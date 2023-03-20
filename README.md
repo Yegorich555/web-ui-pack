@@ -84,7 +84,7 @@ npm install web-ui-pack
 
 1. **Naming**
    - All components named as `WUP..Element`, `WUP..Control` and has `<wup-...>` html-tags
-   - Public properties/options/events/methods startsWith `$...` (events `$onShow`, `$onHide`, methods `$show`, `$hide`, props like `$isOpen` etc.)
+   - Public properties/options/events/methods startsWith `$...` (events `$onShow`, `$onHide`, methods `$show`, `$hide`, props like `$isShown` etc.)
    - Every component/class has static `$defaults` (common options for current class) and personal `$options` (per each component). See details in [example](#example)
    - `$options` are observed. So changing options affects on component immediately after empty timeout (every component has static `observedOptions` as set of watched options)
 2. **Usage**
@@ -220,7 +220,7 @@ declare global {
 use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 **WARN**: don't use `import {focusFirst} from "web-ui-pack;` because in this case the whole web-ui-pack module traps in compilation of dev-bundle and increases time of compilation
 
-- [**animateDropdown**(el: HTMLElement, ms:number, isClose=false)](src/helpers/animate.ts) ⇒ `Animate (open/close) element as dropdown via scale and counter-scale for children`
+- [**animateDropdown**(el: HTMLElement, ms:number, isHidden=false)](src/helpers/animate.ts) ⇒ `Animate (show/hide) element as dropdown via scale and counter-scale for children`
 - [**dateCopyTime**(to:Date ,from:Date, utc:bool)](src/helpers/dateCopyTime.ts) ⇒ `Copy hh:mm:ss.fff part from B to A`
 - [**dateFromString**(v:string, format="yyyy-MM-dd hh:mm:ss AZ", options)](src/helpers/dateFromString.ts) ⇒ `Returns parsed date from string based on pointed format`
 - [**dateToString**(v:Date, format="yyyy-MM-dd hh:mm:ss AZ")](src/helpers/dateToString.ts) ⇒ `Returns a string representation of a date-time according to pointed format`

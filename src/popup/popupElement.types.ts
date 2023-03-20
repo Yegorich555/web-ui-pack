@@ -35,15 +35,19 @@ declare global {
     interface Options {
       /** Anchor that popup uses for placement. If attr.target and $options.target are empty previousSibling will be attached.
        * attr target="{querySelector}" has hire priority than .options.target */
-      target?: HTMLElement | null;
-      /**
-       * Placement rules relative to target; example Placements.bottom.start or Placements.bottom.start.adjust
+      target?: HTMLElement | SVGElement | null;
+      /** Placement rules relative to target; example Placements.bottom.start or Placements.bottom.start.adjust
        * Point several to define alternate behavior (when space are not enough)
-       */
+       * @hints
+       * * to place around center of target use option offset @example
+       * popup.$options.offset = (r) => [-r.height / 2, -r.width / 2]; */
       placement: Array<WUP.Popup.Place.PlaceFunc>;
       /** Virtual margin of targetElement (relative to popup)
        *  [top, right, bottom, left] or [top/bottom, right/left] in px */
-      offset?: [number, number, number, number] | [number, number];
+      offset?:
+        | [number, number, number, number]
+        | [number, number]
+        | ((targetRect: DOMRect) => [number, number, number, number] | [number, number]);
       /** Virtual padding of fitElement
        *  [top, right, bottom, left] or [top/bottom, right/left] in px */
       offsetFitElement?: [number, number, number, number] | [number, number];
@@ -95,7 +99,7 @@ declare global {
     }
 
     interface AttachOptions extends Partial<Omit<Options, "target">> {
-      target: HTMLElement;
+      target: HTMLElement | SVGElement;
       text: string | undefined | null;
       tagName?: string;
     }

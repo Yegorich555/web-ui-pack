@@ -48,7 +48,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       @media not all and (prefers-reduced-motion) {
         WUP-POPUP,
         WUP-POPUP+WUP-POPUP-arrow {
-          animation: WUP-POPUP-a1 var(--popup-anim) ease-in-out forwards;
+          animation: WUP-POPUP-a1 var(--popup-anim) ease-in-out;
         }
         @keyframes WUP-POPUP-a1 {
           from {opacity: 0;}
@@ -104,7 +104,7 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
       @media not all and (prefers-reduced-motion) {
         TEST-EL,
         TEST-EL+TEST-EL-arrow {
-          animation: WUP-POPUP-a1 var(--popup-anim) ease-in-out forwards;
+          animation: WUP-POPUP-a1 var(--popup-anim) ease-in-out;
         }
         @keyframes WUP-POPUP-a1 {
           from {opacity: 0;}
@@ -194,7 +194,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       @media not all and (prefers-reduced-motion) {
         WUP-POPUP,
         WUP-POPUP+WUP-POPUP-arrow {
-          animation: WUP-POPUP-a1 var(--popup-anim) ease-in-out forwards;
+          animation: WUP-POPUP-a1 var(--popup-anim) ease-in-out;
         }
         @keyframes WUP-POPUP-a1 {
           from {opacity: 0;}
@@ -250,7 +250,7 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
       @media not all and (prefers-reduced-motion) {
         TEST-EL,
         TEST-EL+TEST-EL-arrow {
-          animation: WUP-POPUP-a1 var(--popup-anim) ease-in-out forwards;
+          animation: WUP-POPUP-a1 var(--popup-anim) ease-in-out;
         }
         @keyframes WUP-POPUP-a1 {
           from {opacity: 0;}

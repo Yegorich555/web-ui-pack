@@ -211,7 +211,7 @@ describe("control.time", () => {
     expect(el.$options.format).toBe("hh:mm A");
     await h.userTypeText(el.$refInput, "0123a");
     await h.wait(150);
-    expect(el.$isOpen).toBe(true);
+    expect(el.$isShown).toBe(true);
     expect(el.$refInput.value).toBe("01:23 AM"); // because mask is applied
     expect(el.$isValid).toBe(true);
     expect(el.$refError).toBe(undefined);
@@ -219,10 +219,10 @@ describe("control.time", () => {
     expect(onChange).toBeCalledTimes(1);
     expect(onParse).toBeCalled();
     expect(el.$value).toEqual(new WUPTimeObject(1, 23)); // value changed without key "Enter" because user completed input
-    expect(el.$isOpen).toBe(true);
+    expect(el.$isShown).toBe(true);
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
-    expect(el.$isOpen).toBe(false);
+    expect(el.$isShown).toBe(false);
     expect(onSubmit).toBeCalledTimes(0); // 1st Enter only hides popup
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait(1);
@@ -235,7 +235,7 @@ describe("control.time", () => {
     expect(el.$refError.innerHTML).toMatchInlineSnapshot(
       `"<span class="wup-hidden">Error for Test:</span><span>Incomplete value</span>"`
     );
-    expect(el.$isOpen).toBe(false); // menu must stay closed
+    expect(el.$isShown).toBe(false); // menu must stay closed
 
     h.mockConsoleWarn();
     await h.userTypeText(el.$refInput, "92A", { clearPrevious: false });
@@ -246,13 +246,13 @@ describe("control.time", () => {
       `"<span class="wup-hidden">Error for Test:</span><span>Invalid value</span>"`
     );
     expect(el.$value).toEqual(new WUPTimeObject(1, 23)); // value the same
-    expect(el.$isOpen).toBe(false);
+    expect(el.$isShown).toBe(false);
     expect(onSubmit).toBeCalledTimes(0);
 
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
     expect(el.$value).toEqual(new WUPTimeObject(1, 23)); // value the same
-    expect(el.$isOpen).toBe(false);
+    expect(el.$isShown).toBe(false);
     expect(el.$refError.innerHTML).toMatchInlineSnapshot(
       `"<span class="wup-hidden">Error for Test:</span><span>Invalid value</span>"`
     ); // value lefts the same
@@ -410,7 +410,7 @@ describe("control.time", () => {
     expect(isPressKeyPrevented("Enter")).toBe(true);
     await h.wait(1);
     expect(onSubmit).toBeCalledTimes(1);
-    expect(el.$isOpen).toBe(false);
+    expect(el.$isShown).toBe(false);
 
     // changing value to check if menu is refreshed according to ones
     el.$value = undefined;
@@ -422,10 +422,10 @@ describe("control.time", () => {
     await nextFrame(5);
     await h.wait();
     onChanged.mockClear();
-    expect(el.$isOpen).toBe(false);
+    expect(el.$isShown).toBe(false);
     expect(isPressKeyPrevented("ArrowDown")).toBe(true); // open menu by arrow key
     await h.wait();
-    expect(el.$isOpen).toBe(true);
+    expect(el.$isShown).toBe(true);
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
         "<li>03</li><li>04</li><li aria-selected="true" aria-label="05:37 PM" id="txt12" focused="">05</li><li>06</li><li>07</li>",
@@ -471,20 +471,20 @@ describe("control.time", () => {
     await h.userClick(el.$refButtonOk.parentElement); // outside click - just for coverage
     await h.userClick(el.$refButtonOk);
     await h.wait();
-    expect(el.$isOpen).toBe(false);
+    expect(el.$isShown).toBe(false);
     expect(el.$value).toEqual(new WUPTimeObject(15, 39));
     expect(onChanged).toBeCalledTimes(1);
 
     // click on btnCancel
     onChanged.mockClear();
     expect(isPressKeyPrevented("ArrowDown")).toBe(true); // open menu by arrow key
-    expect(el.$isOpen).toBe(true);
+    expect(el.$isShown).toBe(true);
     await h.wait();
     await h.userClick(el.$refMenuLists[0].firstElementChild);
     await h.wait();
     await h.userClick(el.$refButtonCancel);
     await h.wait();
-    expect(el.$isOpen).toBe(false);
+    expect(el.$isShown).toBe(false);
     expect(el.$value).toEqual(new WUPTimeObject(15, 39)); // no changes because popup is closed by cancelling
     expect(onChanged).toBeCalledTimes(0);
 
@@ -512,7 +512,7 @@ describe("control.time", () => {
       ]
     `);
 
-    expect(el.$isOpen).toBe(true);
+    expect(el.$isShown).toBe(true);
     expect(() => el.$showMenu()).not.toThrow(); // just for coverage
   });
 
@@ -564,11 +564,11 @@ describe("control.time", () => {
   test("value change not affects on menu", async () => {
     el.focus();
     await h.wait();
-    expect(el.$isOpen).toBe(true);
+    expect(el.$isShown).toBe(true);
 
     el.$value = new WUPTimeObject(12, 56);
     await h.wait();
-    expect(el.$isOpen).toBe(true);
+    expect(el.$isShown).toBe(true);
   });
 
   test("menu with options min/max/exclude", async () => {
@@ -596,7 +596,7 @@ describe("control.time", () => {
       new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })
     );
     await h.wait();
-    expect(el.$isOpen).toBe(true);
+    expect(el.$isShown).toBe(true);
     expect(isPrevented).toBe(true);
     expect(onChange).toBeCalledTimes(0); // because selected value is not allowed
 
@@ -647,6 +647,6 @@ describe("control.time", () => {
     jest.spyOn(el, "canShowMenu").mockReturnValueOnce(false);
     expect(() => el.focus()).not.toThrow();
     await h.wait();
-    expect(el.$isOpen).toBe(false);
+    expect(el.$isShown).toBe(false);
   });
 });

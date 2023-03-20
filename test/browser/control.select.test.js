@@ -17,13 +17,13 @@ describe("control.select", () => {
         activeElementId: document.activeElement.id,
         trueId: el.$refInput.id,
         html: el.outerHTML,
-        isOpen: el.$isOpen,
+        isShown: el.$isShown,
         isMenuExists: !!el.$refPopup,
       };
     });
 
   test("show/hide by title click", async () => {
-    expect((await getInfo()).isOpen).toBe(false);
+    expect((await getInfo()).isShown).toBe(false);
 
     const click = () =>
       page.evaluate(() => {
@@ -35,10 +35,10 @@ describe("control.select", () => {
 
     // await page.click("#trueEl strong"); // click on title --> ordinary click doesn't work on <strong>
     await click(); // click on title
-    expect((await getInfo()).isOpen).toBe(true);
+    expect((await getInfo()).isShown).toBe(true);
 
     await click(); // click on title
-    expect((await getInfo()).isOpen).toBe(false);
+    expect((await getInfo()).isShown).toBe(false);
   });
 
   test("show by arrowKey + scrollTo", async () => {
@@ -70,12 +70,12 @@ describe("control.select", () => {
     expect(await page.evaluate(() => document.querySelector("#trueEl [menu]").scrollTop)).toBe(0);
     await page.click("#trueEl strong");
     await page.waitForTimeout(500);
-    expect((await getInfo()).isOpen).toBe(false);
+    expect((await getInfo()).isShown).toBe(false);
 
     // open by ArrowKey
     await page.keyboard.press("ArrowUp");
     await page.waitForTimeout(500);
-    expect((await getInfo()).isOpen).toBe(true);
+    expect((await getInfo()).isShown).toBe(true);
     expect(
       await page.evaluate(() => {
         const el = document.querySelector("#trueEl [menu]");
@@ -90,19 +90,19 @@ describe("control.select", () => {
     await page.evaluate(() => document.getElementById("trueEl").focus());
     await page.waitForTimeout(310); // animation takes 300ms by default
     let r = await getInfo();
-    expect(r.isOpen).toBe(true);
+    expect(r.isShown).toBe(true);
     expect(r.isMenuExists).toBe(true);
 
     // hide
     await page.evaluate(() => document.activeElement.blur());
     await page.waitForTimeout(250); // animation takes 300ms by default but we wait partially
     r = await getInfo();
-    expect(r.isOpen).toBe(false);
+    expect(r.isShown).toBe(false);
     expect(r.isMenuExists).toBe(true); // because still closing
 
     await page.waitForTimeout(100); // animation takes 300ms by default
     r = await getInfo();
-    expect(r.isOpen).toBe(false);
+    expect(r.isShown).toBe(false);
     expect(r.isMenuExists).toBe(false); // because removed after animation end
 
     // case: focus again during the closing by focusout must open
@@ -114,6 +114,6 @@ describe("control.select", () => {
     await page.waitForTimeout(300);
     r = await getInfo();
     expect(r.isMenuExists).toBe(true);
-    expect(r.isOpen).toBe(true);
+    expect(r.isShown).toBe(true);
   });
 });

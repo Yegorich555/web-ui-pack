@@ -37,10 +37,10 @@ clip: rect(1px, 1px, 1px, 1px);}
         }
   
       WUP-CIRCLE {
-        contain: style layout paint;
+        contain: style ;
         display: block;
         position: relative;
-        overflow: hidden;
+        overflow: visible;
         margin: auto;
         padding: 2px;
         --anim-time: 400ms;
@@ -67,5 +67,19 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-CIRCLE&gt;svg&gt;g&gt;path:nth-child(4) { fill: var(--circle-4); }
       WUP-CIRCLE&gt;svg&gt;g&gt;path:nth-child(5) { fill: var(--circle-5); }
       WUP-CIRCLE&gt;svg&gt;g&gt;path:nth-child(6) { fill: var(--circle-6); }
+      WUP-CIRCLE&gt;wup-popup,
+      WUP-CIRCLE&gt;wup-popup-arrow {
+        white-space: pre;
+        pointer-events: none;
+        user-select: none;
+        touch-action: none;
+      }
+      WUP-CIRCLE&gt;wup-popup {
+        background: rgba(255,255,255,0.9)
+      }
+      WUP-CIRCLE&gt;wup-popup-arrow:before {
+        opacity: 0.9;
+        margin: 0;
+      }
 </style>
 `;

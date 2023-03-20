@@ -2,7 +2,7 @@
 // best solution: https://stackoverflow.com/questions/4880381/check-whether-html-element-has-scrollbars
 
 /** Find first parent with active scroll X/Y */
-export default function findScrollParent(el: HTMLElement): HTMLElement | null {
+export default function findScrollParent(el: Element): HTMLElement | null {
   const p = el.parentElement;
   if (!p) {
     return null;
@@ -30,13 +30,13 @@ export default function findScrollParent(el: HTMLElement): HTMLElement | null {
 }
 
 /** Find all parents with active scroll X/Y */
-export function findScrollParentAll(el: HTMLElement): HTMLElement[] | null {
-  let l: HTMLElement | null = el;
-  const arr = [];
+export function findScrollParentAll(el: Element): HTMLElement[] | null {
+  let l: Element | null = el;
+  const arr: HTMLElement[] = [];
   // eslint-disable-next-line no-constant-condition
   while (1) {
     l = findScrollParent(l);
-    if (l) arr.push(l);
+    if (l) arr.push(l as HTMLElement);
     else break;
   }
   return arr.length ? arr : null;
