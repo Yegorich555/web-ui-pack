@@ -417,11 +417,16 @@ describe("circleElement", () => {
     el.$options.items = [
       { value: 100, tooltip: "Item 1; {#}" },
       { value: 12, tooltip: "Item 2; {#}" },
+      { value: 40 }, // without tooltip
     ];
     await nextFrame(20);
     el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
     await h.wait();
     expect(onTooltip).toBeCalledTimes(1); // only 1 listener must be
+
+    onTooltip.mockClear();
+    el.$refItems.children[2].dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    expect(onTooltip).not.toBeCalled(); // because no tooltip
 
     // dispose listener
     onTooltip.mockClear();
