@@ -35,7 +35,8 @@ describe("helper.onEvent", () => {
     const fn = jest.fn();
     const spyOn = jest.spyOn(document, "addEventListener");
     const spyOff = jest.spyOn(document, "removeEventListener");
-    const remove = onEvent(document, "click", fn, { once: true });
+    const opts = { once: true };
+    const remove = onEvent(document, "click", fn, opts);
 
     document.dispatchEvent(new Event("click"));
     expect(spyOn).toBeCalledTimes(1);
@@ -50,6 +51,9 @@ describe("helper.onEvent", () => {
     remove();
     expect(spyOn).toBeCalledTimes(1);
     expect(spyOff).toBeCalledTimes(2);
+    expect(spyOff.mock.lastCall[0]).toBe("click");
+    expect(spyOff.mock.lastCall[2]).toBe(opts);
+    expect(spyOff.mock.lastCall[2]).toEqual({ once: true, passive: true });
     expect(fn).not.toHaveBeenCalled();
   });
 
@@ -69,5 +73,18 @@ describe("helper.onEvent", () => {
     expect(spyOn).toBeCalledTimes(1);
     expect(fn).toBeCalledTimes(1);
     remove();
+
+    let opts = { passive: false };
+    const spyOff = jest.spyOn(document, "removeEventListener");
+    remove = onEvent(document, "click", fn, opts);
+    expect(opts.passive).toBe(false);
+    remove();
+    expect(spyOff.mock.lastCall[2]).toBe(opts);
+
+    opts = { passive: false, once: true };
+    remove = onEvent(document, "click", fn, opts);
+    expect(opts).toEqual({ passive: false, once: true });
+    remove();
+    expect(spyOff.mock.lastCall[2]).toBe(opts);
   });
 });
