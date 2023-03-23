@@ -8,7 +8,7 @@ const sideEffect = WUPSelectManyControl;
 
 let ir = 10;
 const items = [
-  { text: "Item N 1", value: ++ir },
+  { text: "Im", value: ++ir },
   { text: "Item N 2", value: ++ir },
   { text: "Item N 3", value: ++ir },
   { text: "Item N 4", value: ++ir },

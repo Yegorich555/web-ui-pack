@@ -1,4 +1,4 @@
-import { isAnimEnabled } from "../helpers/animate";
+import { animate, isAnimEnabled } from "../helpers/animate";
 import { parseMsTime } from "../helpers/styleHelpers";
 import { onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
@@ -15,12 +15,16 @@ declare global {
       /** Hide items in menu that selected
        * @defaultValue false */
       hideSelected?: boolean;
+      /** Allow user to change ordering of items
+       * @defaultValue true */
+      sortable: boolean;
     }
+
     interface Options<T = any, VM = ValidityMap> extends WUP.Select.Options<T, VM>, Defaults<T, VM> {
-      /** Constant that impossible to change */
+      /** Constant value that impossible to change */
       multiple: true;
     }
-    interface Attributes extends WUP.Select.Attributes {}
+    interface Attributes extends WUP.Select.Attributes, Pick<Partial<Options>, "sortable"> {}
     interface JSXProps<C = WUPSelectManyControl> extends WUP.Select.JSXProps<C>, Attributes {}
   }
 
@@ -80,6 +84,18 @@ export default class WUPSelectManyControl<
 > extends WUPSelectControl<ValueType[], ValueType, EventMap> {
   #ctr = this.constructor as typeof WUPSelectManyControl;
 
+  static get observedOptions(): Array<string> {
+    const arr = super.observedOptions as Array<keyof WUP.SelectMany.Options>;
+    arr.push("sortable");
+    return arr;
+  }
+
+  static get observedAttributes(): Array<string> {
+    const arr = super.observedAttributes as Array<LowerKeys<WUP.SelectMany.Attributes>>;
+    arr.push("sortable");
+    return arr;
+  }
+
   static get $styleRoot(): string {
     return `:root {
         --ctrl-select-item: inherit;
@@ -135,7 +151,9 @@ export default class WUPSelectManyControl<
         padding: 0;
         margin-left: 0.5em;
       }
-      :host [item][focused] {
+      :host [item][focused],
+      :host [item][drag],
+      :host [item][drop] {
         box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
       }
       :host [item][removed] {
@@ -171,6 +189,19 @@ export default class WUPSelectManyControl<
           width: 0;
           opacity: 0;
         }
+      }
+      :host [item][drag] {
+        z-index: 99999;
+        position: fixed;
+        left:0; top:0;
+        cursor: grabbing;
+        text-decoration: none;
+        --ctrl-icon: var(--ctrl-select-item-del);
+        color: var(--ctrl-select-item);
+        background-color: var(--ctrl-select-item-bg);
+      }
+      :host [item][drop] {
+        opacity: 0.5;
       }`;
   }
 
@@ -193,6 +224,7 @@ export default class WUPSelectManyControl<
 
   static $defaults: WUP.SelectMany.Defaults = {
     ...WUPSelectControl.$defaults,
+    sortable: true,
   };
 
   $options: WUP.SelectMany.Options = {
@@ -227,6 +259,125 @@ export default class WUPSelectManyControl<
     this._opts.multiple = true;
     this.removeAttribute("multiple");
     super.gotChanges(propsChanged);
+
+    this._opts.sortable = this.getAttr("sortable", "bool") ?? false;
+    if (this._opts.sortable) {
+      !this._disposeDragdrop && this.applyDragdrop();
+    } else {
+      this._disposeDragdrop?.call(this);
+      this._disposeDragdrop = undefined;
+    }
+  }
+
+  /** Call it to remove dragdrop loggic */
+  _disposeDragdrop?: () => void;
+  /** Called to apply dragdrop logic */
+  protected applyDragdrop(): void {
+    this._disposeDragdrop = onEvent(this, "pointerdown", (e) => {
+      if (this.$isReadOnly || this.$isDisabled) {
+        return;
+      }
+
+      const t = e.target;
+      const eli = this.$refItems?.findIndex((item) => t === item || this.includes.call(item, t));
+      if (eli === -1 || eli === undefined) {
+        return;
+      }
+
+      const el = this.$refItems![eli];
+      let dr: HTMLElement;
+
+      let isWaitTouch = false; // wait for touch to detect if possible to prevent scrollByTouch (browser can cancel pointer events if swipe)
+      let r0 = onEvent(
+        document,
+        "touchstart",
+        () => {
+          isWaitTouch = true;
+          r0 = onEvent(
+            document,
+            "touchmove",
+            (ev) => {
+              if (ev.cancelable) {
+                ev.preventDefault(); // prevent scrolling by touch if possible
+                isWaitTouch = false;
+              }
+            },
+            { passive: false, capture: true }
+          );
+        },
+        { capture: true }
+      );
+
+      const r1 = onEvent(document, "pointermove", (ev) => {
+        if (isWaitTouch) {
+          return;
+        }
+        // init
+        if (!dr) {
+          // clone draggable element
+          dr = el.cloneNode(true) as HTMLElement;
+          dr.setAttribute("drag", "");
+          dr.style.width = `${el.offsetWidth}px`;
+          dr.style.height = `${el.offsetHeight}px`;
+          el.parentElement!.prepend(dr);
+          el.setAttribute("drop", ""); // mark current element
+        }
+
+        // set position
+        const x = ev.clientX - el.offsetWidth / 2;
+        const y = ev.clientY - el.offsetHeight / 2;
+        dr.style.transform = `translate(${x}px, ${y}px)`;
+        // find nearest item
+        let nearest = eli;
+        const rects = this.$refItems!.map((item) => item.getBoundingClientRect());
+        let dist = Number.MAX_SAFE_INTEGER; // distance between centers
+        rects.forEach((r, i) => {
+          const dx = ev.clientX - (r.x + r.width / 2);
+          const dy = ev.clientY - (r.y + r.height / 2);
+          const c = Math.sqrt(dx * dx + dy * dy);
+          if (c < dist) {
+            dist = c;
+            nearest = i;
+          }
+        });
+        // define left/right side
+        if (eli !== nearest) {
+          const trg = this.$refItems![nearest];
+          const r = rects[nearest];
+          const isLeft = Math.abs(r.x - ev.clientX) < Math.abs(r.x + r.width - ev.clientX);
+
+          if (isLeft) {
+            trg.parentElement!.insertBefore(el, this.$refItems![nearest]);
+          } else {
+            trg.parentElement!.insertBefore(el, this.$refItems![nearest].nextElementSibling!);
+          }
+        }
+      });
+
+      // todo removing logic when element outside & style
+      const cancel = (): void => {
+        if (dr) {
+          const animTime = parseMsTime(window.getComputedStyle(el).getPropertyValue("--anim-time"));
+          const from = dr.getBoundingClientRect();
+          const to = el.getBoundingClientRect();
+          const diff = { x: to.x - from.x, y: to.y - from.y };
+          // return element back
+          animate(0, 1, animTime, (v) => {
+            dr.style.transform = `translate(${from.x + diff.x * v}px, ${from.y + diff.y * v}px)`;
+          }).finally(() => {
+            el.removeAttribute("drop");
+            dr.remove();
+          });
+        }
+        r0();
+        r1();
+        r2();
+        r3();
+      };
+
+      const r2 = onEvent(document, "pointerup", cancel, { capture: true });
+      const r3 = onEvent(document, "pointercancel", cancel, { capture: true }); // pointerup not called if touchmove can't be cancelled and browser scrolls
+    });
   }
 
   protected override async renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> {
@@ -360,8 +511,7 @@ export default class WUPSelectManyControl<
     this.toggleHideInput(this.$value);
 
     // https://stackoverflow.com/questions/4817029/whats-the-best-way-to-detect-a-touch-screen-device-using-javascript
-    // WARN: the right way is 'window.matchMedia("(pointer: coarse)").matches' but we must be correlated with css-hover styles
-    const isTouchScreen = !window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    const isTouchScreen = !window.matchMedia("(hover: hover) and (pointer: fine)").matches; // WARN: 'window.matchMedia("(pointer: coarse)").matches' but it's correlated with css-hover styles
     let preventClickAfterFocus = isTouchScreen; // allow focus by touch-click instead of focus+removeItem (otherwise difficult to focus control without removing item when no space)
     isTouchScreen && setTimeout(() => (preventClickAfterFocus = false));
 
@@ -460,8 +610,6 @@ export default class WUPSelectManyControl<
 
 customElements.define(tagName, WUPSelectManyControl);
 
-// todo drag & drop
-
 /**
  * known issues when 'contenteditable':
  *
@@ -478,3 +626,6 @@ customElements.define(tagName, WUPSelectManyControl);
  * 2. Firefox. Carret position is missed if no empty spans between items
  * 3. Without contenteditalbe='false' browser moves cursor into item, but it should be outside
  */
+
+// todo remove focus-style on click to remove - ugly blink effect
+// todo popup can change position during the hidding by focuslost when input is goes invisible and control size is reduced
