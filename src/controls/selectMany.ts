@@ -315,6 +315,7 @@ export default class WUPSelectManyControl<
       );
 
       let isInside = true;
+      let isThrottle = false;
       const r1 = onEvent(document, "pointermove", (ev) => {
         if (isWaitTouch) {
           return;
@@ -341,6 +342,11 @@ export default class WUPSelectManyControl<
         if (!isInside) {
           return; // skip new place detection when item outside control
         }
+        if (isThrottle) {
+          return;
+        }
+
+        // todo improve finding nearest. Because if center near to 2nd line but near to item on the 1st line it gets unexpected result
         // find nearest item
         let nearest = eli;
         let dist = Number.MAX_SAFE_INTEGER; // distance between centers
@@ -365,6 +371,8 @@ export default class WUPSelectManyControl<
           } else {
             trg.parentElement!.insertBefore(el, this.$refItems![nearest].nextElementSibling!);
           }
+          isThrottle = true;
+          setTimeout(() => (isThrottle = false), 100); // to prevent fast changing position
         }
       });
 
