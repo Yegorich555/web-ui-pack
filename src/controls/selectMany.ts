@@ -1,4 +1,5 @@
 import { animate, isAnimEnabled } from "../helpers/animate";
+import isOverlap from "../helpers/isOverlap";
 import { parseMsTime } from "../helpers/styleHelpers";
 import { onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
@@ -156,7 +157,8 @@ export default class WUPSelectManyControl<
       :host [item][drop] {
         box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
       }
-      :host [item][removed] {
+      :host [item][removed],
+      :host [item][drag][remove]  {
         --ctrl-icon: var(--ctrl-err-text);
         text-decoration: line-through;
         color: var(--ctrl-err-text);
@@ -308,6 +310,7 @@ export default class WUPSelectManyControl<
         { capture: true }
       );
 
+      let isInside = true;
       const r1 = onEvent(document, "pointermove", (ev) => {
         if (isWaitTouch) {
           return;
@@ -322,15 +325,20 @@ export default class WUPSelectManyControl<
           el.parentElement!.prepend(dr);
           el.setAttribute("drop", ""); // mark current element
         }
-
         // set position
         const x = ev.clientX - el.offsetWidth / 2;
         const y = ev.clientY - el.offsetHeight / 2;
         dr.style.transform = `translate(${x}px, ${y}px)`;
+        // define if element inside control (if outside - remove logic)
+        isInside = isOverlap(this.getBoundingClientRect(), dr.getBoundingClientRect());
+        this.setAttr.call(dr, "remove", !isInside, true);
+        if (!isInside) {
+          return; // skip new place detection when item outside control
+        }
         // find nearest item
         let nearest = eli;
-        const rects = this.$refItems!.map((item) => item.getBoundingClientRect());
         let dist = Number.MAX_SAFE_INTEGER; // distance between centers
+        const rects = this.$refItems!.map((item) => item.getBoundingClientRect());
         rects.forEach((r, i) => {
           const dx = ev.clientX - (r.x + r.width / 2);
           const dy = ev.clientY - (r.y + r.height / 2);
@@ -354,20 +362,32 @@ export default class WUPSelectManyControl<
         }
       });
 
-      // todo removing logic when element outside & style
       const cancel = (): void => {
         if (dr) {
-          const animTime = parseMsTime(window.getComputedStyle(el).getPropertyValue("--anim-time"));
-          const from = dr.getBoundingClientRect();
-          const to = el.getBoundingClientRect();
-          const diff = { x: to.x - from.x, y: to.y - from.y };
-          // return element back
-          animate(0, 1, animTime, (v) => {
-            dr.style.transform = `translate(${from.x + diff.x * v}px, ${from.y + diff.y * v}px)`;
-          }).finally(() => {
+          if (!isInside) {
             el.removeAttribute("drop");
             dr.remove();
-          });
+            this.removeValue(eli); // todo improve animation here. Now it looks ugly
+            setTimeout(() => {
+              this.blur();
+              // this.$hideMenu();
+            }, 1);
+          } else {
+            const animTime = parseMsTime(window.getComputedStyle(el).getPropertyValue("--anim-time"));
+            const from = dr.getBoundingClientRect();
+            const to = el.getBoundingClientRect();
+            const diff = { x: to.x - from.x, y: to.y - from.y };
+            // return element back
+            animate(0, 1, animTime, (v) => {
+              dr.style.transform = `translate(${from.x + diff.x * v}px, ${from.y + diff.y * v}px)`;
+            }).finally(() => {
+              el.removeAttribute("drop");
+              dr.remove();
+              if (!isInside) {
+                this.removeValue(eli); // stodo improve animation here. Now it looks ugly
+              }
+            });
+          }
         }
         r0();
         r1();
