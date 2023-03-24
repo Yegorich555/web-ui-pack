@@ -4,6 +4,7 @@ import { parseMsTime } from "../helpers/styleHelpers";
 import { onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
 import { WUPcssIcon } from "../styles";
+import { ShowCases } from "./baseCombo";
 import WUPSelectControl from "./select";
 
 const tagName = "wup-selectmany";
@@ -271,11 +272,14 @@ export default class WUPSelectManyControl<
     }
   }
 
+  /** It prevents menu opening if user tries sorting and focus got after mouseUp */
+  _wasSortAfterClick?: boolean;
   /** Call it to remove dragdrop loggic */
   _disposeDragdrop?: () => void;
   /** Called to apply dragdrop logic */
   protected applyDragdrop(): void {
     this._disposeDragdrop = onEvent(this, "pointerdown", (e) => {
+      this._wasSortAfterClick = false;
       if (this.$isReadOnly || this.$isDisabled) {
         return;
       }
@@ -315,8 +319,10 @@ export default class WUPSelectManyControl<
         if (isWaitTouch) {
           return;
         }
+        // todo if move fast hover effect can blink on control because for a small time mouse not hover draggable item
         // init
         if (!dr) {
+          this._wasSortAfterClick = true;
           // clone draggable element
           dr = el.cloneNode(true) as HTMLElement;
           dr.setAttribute("drag", "");
@@ -367,11 +373,8 @@ export default class WUPSelectManyControl<
           if (!isInside) {
             el.removeAttribute("drop");
             dr.remove();
+            // todo when element got focus after then input can appear in the new line and goes to line upper after removing element
             this.removeValue(eli); // todo improve animation here. Now it looks ugly
-            setTimeout(() => {
-              this.blur();
-              // this.$hideMenu();
-            }, 1);
           } else {
             const animTime = parseMsTime(window.getComputedStyle(el).getPropertyValue("--anim-time"));
             const from = dr.getBoundingClientRect();
@@ -383,9 +386,6 @@ export default class WUPSelectManyControl<
             }).finally(() => {
               el.removeAttribute("drop");
               dr.remove();
-              if (!isInside) {
-                this.removeValue(eli); // stodo improve animation here. Now it looks ugly
-              }
             });
           }
         }
@@ -398,6 +398,13 @@ export default class WUPSelectManyControl<
       const r2 = onEvent(document, "pointerup", cancel, { capture: true });
       const r3 = onEvent(document, "pointercancel", cancel, { capture: true }); // pointerup not called if touchmove can't be cancelled and browser scrolls
     });
+  }
+
+  override canShowMenu(
+    showCase: ShowCases,
+    e?: MouseEvent | FocusEvent | KeyboardEvent | null
+  ): boolean | Promise<boolean> {
+    return !this._wasSortAfterClick && super.canShowMenu(showCase, e);
   }
 
   protected override async renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> {
