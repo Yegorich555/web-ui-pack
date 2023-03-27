@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.5.0 (\_\_\_)
+## 0.5.0 (Mar 27, 2023)
 
 **BREAKING CHANGES**:
 
