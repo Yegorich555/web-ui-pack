@@ -27,6 +27,7 @@ const items = [
 
 (window as any).inputSelect = {
   items,
+  initArr: [items[0].value, items[1].value],
 };
 
 (window as any)._someSelectValidations = {
@@ -57,6 +58,7 @@ export default function SelectControlView() {
         "Pending state with spinner if $options.items is a function with promise-result",
         "Possible to customize render of items (via $options.items; see below...)",
         "Possible to create any value not pointed in items (via $options.allowNewValue)",
+        "Possible to select multiple items (via $options.multiple)",
       ]}
     >
       <wup-form
@@ -68,13 +70,25 @@ export default function SelectControlView() {
         }}
       >
         <wup-select
-          items="inputSelect.items"
+          items="window.inputSelect.items"
           name="select"
           label="Select"
           initValue={items[8].value.toString()}
+          multiple={false}
           validations="window._someSelectValidations"
           autoComplete="off"
           autoFocus={false}
+        />
+        <wup-select
+          name="multiple"
+          initValue="window.inputSelect.initArr"
+          items="window.inputSelect.items"
+          multiple
+          ref={(el) => {
+            if (el) {
+              el.$options.allowNewValue = true;
+            }
+          }}
         />
         <wup-select
           ref={(el) => {
@@ -146,8 +160,8 @@ export default function SelectControlView() {
           initValue="14"
           ref={(el) => {
             if (el) {
-              el.$options.name = "allowsNewValue";
-              el.$options.label = "Allows New Value ($options.allowNewValue)";
+              el.$options.name = "allowNewValue";
+              el.$options.label = "Allow New Value ($options.allowNewValue)";
               el.$options.items = items;
               el.$options.allowNewValue = true;
             }

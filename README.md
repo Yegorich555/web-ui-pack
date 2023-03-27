@@ -45,33 +45,37 @@ npm install web-ui-pack
 - [x] [Helpers](#helpers)
 - [x] [Helper.Observer](#helpersobserver)
 - [x] [PopupElement](#example) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
+  - [ ] Tooltip
 - [x] [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
 - [x] [CircleElement](src/circleElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/circle)
 - [x] [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
-- [x] [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
-- [x] [Mask/pattern for controls](src/controls//text.mask.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
-- [x] [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
-- [x] [SwitchControl (Toggler)](src/controls/switch.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/switch)
-- [x] [CheckControl (Checkbox)](src/controls/check.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/check)
-- [ ] CheckTreeControl
-- [x] [RadioControl (RadioGroup)](src/controls/radio.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/radio)
-- [x] [SelectControl (ComboBox, Dropdown)](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
-- [ ] SelectManyControl (MultiSelect)
-- [x] [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
-- [x] [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
-- [x] [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
-- [ ] DateTimeControl ?
-- [x] [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
-- [x] [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
-- [ ] FileControl
-- [ ] ImageControl (AvatarEditor)
-- [ ] SearchControl ?
+  - [x] [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
+    - [x] [Mask/pattern for controls](src/controls//text.mask.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
+  - [x] [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
+  - [x] [SwitchControl (Toggler)](src/controls/switch.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/switch)
+  - [x] [CheckControl (Checkbox)](src/controls/check.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/check)
+    - [ ] CheckTreeControl
+  - [x] [RadioControl (RadioGroup)](src/controls/radio.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/radio)
+  - [x] [SelectControl (ComboBox)](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
+  - [x] [SelectManyControl (MultiSelect)](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany)
+  - [x] [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
+  - [x] [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
+  - [x] [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
+  - [ ] DateTimeControl ?
+  - [x] [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
+  - [x] [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
+  - [ ] SliderControl (progress bar)
+  - [ ] FileControl
+  - [ ] SearchControl ?
+  - [ ] ImageControl (AvatarEditor)
+- [ ] Dropdown
+- [ ] MediaPlayer
 - [ ] ModalElement
 - [ ] ConfirmModalElement
 - [ ] FormModalElement
 - [ ] InfiniteScroll
 - [ ] VirtualScroll
-- [ ] CarouselElement (Slide)
+- [ ] CarouselElement (Slide show)
 - [ ] TableElement ?
 
 ## Components
@@ -80,7 +84,7 @@ npm install web-ui-pack
 
 1. **Naming**
    - All components named as `WUP..Element`, `WUP..Control` and has `<wup-...>` html-tags
-   - Public properties/options/events/methods startsWith `$...` (events `$onShow`, `$onHide`, methods `$show`, `$hide`, props like `$isOpen` etc.)
+   - Public properties/options/events/methods startsWith `$...` (events `$onShow`, `$onHide`, methods `$show`, `$hide`, props like `$isShown` etc.)
    - Every component/class has static `$defaults` (common options for current class) and personal `$options` (per each component). See details in [example](#example)
    - `$options` are observed. So changing options affects on component immediately after empty timeout (every component has static `observedOptions` as set of watched options)
 2. **Usage**
@@ -111,6 +115,7 @@ npm install web-ui-pack
              - [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
              - [_BaseComboControl_](src/controls/baseCombo.ts)
                - [SelectControl](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
+                 - [SelectManyControl](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany)
                - [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
                - [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
            - [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
@@ -215,7 +220,7 @@ declare global {
 use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 **WARN**: don't use `import {focusFirst} from "web-ui-pack;` because in this case the whole web-ui-pack module traps in compilation of dev-bundle and increases time of compilation
 
-- [**animateDropdown**(el: HTMLElement, ms:number, isClose=false)](src/helpers/animate.ts) ⇒ `Animate (open/close) element as dropdown via scale and counter-scale for children`
+- [**animateDropdown**(el: HTMLElement, ms:number, isHidden=false)](src/helpers/animate.ts) ⇒ `Animate (show/hide) element as dropdown via scale and counter-scale for children`
 - [**dateCopyTime**(to:Date ,from:Date, utc:bool)](src/helpers/dateCopyTime.ts) ⇒ `Copy hh:mm:ss.fff part from B to A`
 - [**dateFromString**(v:string, format="yyyy-MM-dd hh:mm:ss AZ", options)](src/helpers/dateFromString.ts) ⇒ `Returns parsed date from string based on pointed format`
 - [**dateToString**(v:Date, format="yyyy-MM-dd hh:mm:ss AZ")](src/helpers/dateToString.ts) ⇒ `Returns a string representation of a date-time according to pointed format`

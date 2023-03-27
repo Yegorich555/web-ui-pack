@@ -14,7 +14,7 @@ function setEvent(): void {
     document,
     "mousedown",
     ({ button, defaultPrevented }) => (isMouseDown = !button && !defaultPrevented), // filter only for LeftClick
-    { passive: true }
+    { passive: true, capture: true }
   );
 
   // click fires after mouseup but provides better mechanism
@@ -26,7 +26,7 @@ function setEvent(): void {
       onMouseUp.length = 0;
       isMouseDown = false;
     },
-    { passive: true }
+    { passive: true, capture: true }
   );
 
   /* istanbul ignore else */

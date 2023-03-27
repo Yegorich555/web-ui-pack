@@ -1,4 +1,3 @@
-import nestedProperty from "../helpers/nestedProperty";
 import { WUPcssHidden } from "../styles";
 import WUPBaseControl from "./baseControl";
 
@@ -88,6 +87,7 @@ export default class WUPRadioControl<
     // :host input + *:after >> not relative because 1.2em of 14px provides round-pixel-issue and not always rounded items
     return `${super.$style}
       :host {
+        position: relative;
         padding: var(--ctrl-padding);
       }
       :host fieldset {
@@ -165,7 +165,7 @@ export default class WUPRadioControl<
       :host input:focus + *:after {
          box-shadow: 0 0 1px var(--ctrl-radio-border-size) var(--ctrl-selected);
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         :host input + *:hover {
           color: var(--ctrl-selected);
         }
@@ -309,14 +309,13 @@ export default class WUPRadioControl<
     if (isNeedRenderItems) {
       this.#cachedItems = undefined;
       // it's important to be before super otherwise initValue won't work
-      const attr = this.getAttribute("items");
-      this._opts.items = attr ? (nestedProperty.get(window, attr) as WUP.Radio.Options["items"]) : this._opts.items;
+      this._opts.items = this.getAttr<WUP.Radio.Options["items"]>("items", "ref") || [];
       this.renderItems(this.$refFieldset);
     }
 
     super.gotChanges(propsChanged as any);
 
-    this._opts.reverse = this.getBoolAttr("reverse", this._opts.reverse);
+    this._opts.reverse = this.getAttr("reverse", "bool");
     this.setAttr("reverse", this._opts.reverse, true);
 
     const req = this.validations?.required;

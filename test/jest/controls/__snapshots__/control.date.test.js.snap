@@ -27,6 +27,7 @@ exports[`control.date $ariaDetails 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-date>
@@ -54,6 +55,7 @@ exports[`control.date $ariaDetails 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-date>
@@ -82,6 +84,7 @@ exports[`control.date $ariaSpeak 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <section
@@ -118,6 +121,7 @@ exports[`control.date $ariaSpeak 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-date>
@@ -145,6 +149,7 @@ exports[`control.date $show/$hide error 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-date>
@@ -175,6 +180,7 @@ exports[`control.date $show/$hide error 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -217,6 +223,7 @@ exports[`control.date $show/$hide error 3`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-date>
@@ -228,10 +235,12 @@ exports[`control.date common tests render + styles 2`] = `
 <style>
   .wup-hidden, [wup-hidden] {
 position: absolute;
-height: 1px; width: 1px;
+height:1px; width:1px;
 top:0;left:0;
-overflow: hidden;
-clip: rect(1px, 1px, 1px, 1px);}
+overflow:hidden;
+clip:rect(1px,1px,1px,1px);
+min-width:initial;
+padding:0;}
   :root {
           --base-bg: #fff;
           --base-text: #232323;
@@ -278,7 +287,6 @@ clip: rect(1px, 1px, 1px, 1px);}
         contain: style;
         display: block;
         margin-bottom: 20px;
-        position: relative;
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
         cursor: pointer;
@@ -292,7 +300,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-DATE:focus-within,
       WUP-DATE:focus-within &gt; [menu] {
         z-index: 90010;
-        outline: 1px solid var(--ctrl-focus);
+        box-shadow: 0 0 0 1px var(--ctrl-focus);
       }
       WUP-DATE:focus-within strong,
       WUP-DATE:focus-within legend {
@@ -312,8 +320,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       }
       WUP-DATE[invalid],
       WUP-DATE[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 0 var(--ctrl-invalid-border);
-        outline-color: var(--ctrl-invalid-border);
+        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
       WUP-DATE label {
         display: flex;
@@ -326,10 +333,15 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-bottom: 0;
       }
       WUP-DATE input,
-      WUP-DATE textarea,
-      WUP-DATE [contenteditable] {
+      WUP-DATE textarea {
         padding: 0;
         margin: 0;
+        cursor: inherit;
+      }
+      WUP-DATE [contenteditable=true] {
+        margin: var(--ctrl-padding);
+        margin-left: 0;
+        margin-right: 0;
         cursor: inherit;
       }
       WUP-DATE strong {
@@ -369,7 +381,7 @@ width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
 box-sizing: content-box;
 margin: 0;
-padding: 0 5px;
+padding: 5px;
 flex: 0 0 auto;
 align-self: stretch;
 border: none;
@@ -395,7 +407,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-DATE:focus-within [error] {
         max-height: none;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         /*WUP-DATE:hover {
           z-index: 90011;
         }
@@ -412,6 +424,7 @@ mask-image: var(--ctrl-icon-img);
         }
       }
         WUP-DATE {
+          contain: style;
           cursor: text;
         }
         WUP-DATE label &gt; span {
@@ -422,7 +435,6 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-DATE input,
         WUP-DATE textarea,
-        WUP-DATE [contenteditable],
         WUP-DATE [maskholder],
         WUP-DATE [prefix],
         WUP-DATE [postfix] {
@@ -438,7 +450,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-DATE input,
         WUP-DATE textarea,
-        WUP-DATE [contenteditable],
+        WUP-DATE [contenteditable=true],
         WUP-DATE [maskholder],
         WUP-DATE [postfix] {
           width: 100%;
@@ -475,13 +487,13 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-DATE input:-webkit-autofill,
         WUP-DATE textarea:-webkit-autofill,
-        WUP-DATE [contenteditable]:-webkit-autofill {
+        WUP-DATE [contenteditable=true]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
         WUP-DATE input:autofill,
         WUP-DATE textarea:autofill,
-        WUP-DATE [contenteditable]:autofill {
+        WUP-DATE [contenteditable=true]:autofill {
           font: inherit;
           background-clip: text;
         }
@@ -514,7 +526,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-DATE:focus-within strong,
         WUP-DATE input:not(:placeholder-shown) + strong,
         WUP-DATE textarea:not(:placeholder-shown) + strong,
-        WUP-DATE [contenteditable]:not(:empty) + strong,
+        WUP-DATE [contenteditable=true]:not(:empty) + strong,
         WUP-DATE legend {
           top: 0.2em;
           transform: scale(0.9);
@@ -539,7 +551,7 @@ width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
 box-sizing: content-box;
 margin: 0;
-padding: 0 5px;
+padding: 5px;
 flex: 0 0 auto;
 align-self: stretch;
 border: none;
@@ -565,15 +577,16 @@ mask-image: var(--ctrl-icon-img);
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
         WUP-DATE label button {
-           z-index: 1;
-           contain: strict;
+          contain: strict;
+          position: relative;
+          z-index: 1;
         }
         WUP-DATE label&gt;span + button {
           margin-right: -0.5em;
         }
         WUP-DATE button[clear] {
-          position: relative;
           background: none;
+          align-self: center;
         }
         WUP-DATE button[clear]:after {
           content: "";
@@ -587,13 +600,12 @@ mask-image: var(--ctrl-icon-img);
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           width: 100%;
-          padding-top: 100%;
         }
         WUP-DATE button[clear]:before {
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
         }
-        @media (hover: hover) {
+        @media (hover: hover) and (pointer: fine) {
           WUP-DATE button[clear]:hover {
             box-shadow: none;
           }
@@ -675,6 +687,7 @@ exports[`control.date validations $options.validationShowAll 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -734,6 +747,7 @@ exports[`control.date validations $options.validationShowAll 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -801,6 +815,7 @@ exports[`control.date validations $options.validationShowAll 3`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -845,6 +860,7 @@ exports[`control.date validations options.validationCase 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-date>
@@ -888,112 +904,282 @@ exports[`control.date validations options.validationCase 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
     menu=""
-    style="opacity: 0;"
+    style=""
   >
     <wup-calendar>
       <div
-        calendar="year"
+        calendar="day"
         id="txt2"
       >
         <header>
           <button
             aria-hidden="true"
-            disabled=""
             tabindex="-1"
+            type="button"
           >
-            2018 ... 2033
+            February 2022
           </button>
         </header>
         <div>
           <div>
+            <ul
+              aria-hidden="true"
+            >
+              <li>
+                Mo
+              </li>
+              <li>
+                Tu
+              </li>
+              <li>
+                We
+              </li>
+              <li>
+                Th
+              </li>
+              <li>
+                Fr
+              </li>
+              <li>
+                Sa
+              </li>
+              <li>
+                Su
+              </li>
+            </ul>
             <ol
               role="grid"
               style="overflow: hidden;"
             >
               <li
+                prev=""
                 role="gridcell"
               >
-                2018
+                31
               </li>
               <li
                 role="gridcell"
               >
-                2019
+                1
               </li>
               <li
                 role="gridcell"
               >
-                2020
+                2
               </li>
               <li
                 role="gridcell"
               >
-                2021
-              </li>
-              <li
-                aria-current="date"
-                role="gridcell"
-              >
-                2022
+                3
               </li>
               <li
                 role="gridcell"
               >
-                2023
+                4
               </li>
               <li
                 role="gridcell"
               >
-                2024
+                5
               </li>
               <li
                 role="gridcell"
               >
-                2025
+                6
               </li>
               <li
                 role="gridcell"
               >
-                2026
+                7
               </li>
               <li
                 role="gridcell"
               >
-                2027
+                8
               </li>
               <li
                 role="gridcell"
               >
-                2028
+                9
               </li>
               <li
                 role="gridcell"
               >
-                2029
+                10
               </li>
               <li
                 role="gridcell"
               >
-                2030
+                11
               </li>
               <li
                 role="gridcell"
               >
-                2031
+                12
               </li>
               <li
                 role="gridcell"
               >
-                2032
+                13
               </li>
               <li
                 role="gridcell"
               >
-                2033
+                14
+              </li>
+              <li
+                role="gridcell"
+              >
+                15
+              </li>
+              <li
+                role="gridcell"
+              >
+                16
+              </li>
+              <li
+                role="gridcell"
+              >
+                17
+              </li>
+              <li
+                role="gridcell"
+              >
+                18
+              </li>
+              <li
+                role="gridcell"
+              >
+                19
+              </li>
+              <li
+                role="gridcell"
+              >
+                20
+              </li>
+              <li
+                role="gridcell"
+              >
+                21
+              </li>
+              <li
+                role="gridcell"
+              >
+                22
+              </li>
+              <li
+                role="gridcell"
+              >
+                23
+              </li>
+              <li
+                role="gridcell"
+              >
+                24
+              </li>
+              <li
+                role="gridcell"
+              >
+                25
+              </li>
+              <li
+                role="gridcell"
+              >
+                26
+              </li>
+              <li
+                role="gridcell"
+              >
+                27
+              </li>
+              <li
+                aria-selected="true"
+                role="gridcell"
+              >
+                28
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                1
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                2
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                3
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                4
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                5
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                6
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                7
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                8
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                9
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                10
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                11
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                12
+              </li>
+              <li
+                next=""
+                role="gridcell"
+              >
+                13
               </li>
             </ol>
           </div>
@@ -1006,6 +1192,7 @@ exports[`control.date validations options.validationCase 2`] = `
     aria-live="off"
     error=""
     id="txt4"
+    role="alert"
     style="max-width: 100px;"
   >
     <span
@@ -1040,11 +1227,11 @@ exports[`control.date validations options.validationCase 3`] = `
       </span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt5"
-        aria-describedby="txt6"
+        aria-controls="txt6"
+        aria-describedby="txt5"
         aria-expanded="true"
         aria-haspopup="listbox"
-        aria-owns="txt5"
+        aria-owns="txt6"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -1061,13 +1248,14 @@ exports[`control.date validations options.validationCase 3`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt6"
+    id="txt5"
     style="max-width: 100px;"
   >
     <span
@@ -1086,12 +1274,13 @@ exports[`control.date validations options.validationCase 3`] = `
     <wup-calendar>
       <div
         calendar="day"
-        id="txt5"
+        id="txt6"
       >
         <header>
           <button
             aria-hidden="true"
             tabindex="-1"
+            type="button"
           >
             February 2022
           </button>
@@ -1399,6 +1588,7 @@ exports[`control.date validations options.validationCase 4`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -1448,6 +1638,7 @@ exports[`control.date with form 1`] = `
         aria-hidden="true"
         clear=""
         tabindex="-1"
+        type="button"
       />
     </label>
   </wup-date>

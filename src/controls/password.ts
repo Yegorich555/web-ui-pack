@@ -125,7 +125,7 @@ export default class WUPPasswordControl<
         :host[reverse] button[eye="off"] {
           --ctrl-icon-img: var(--wup-icon-eye);
         }
-        @media (hover: hover) {
+        @media (hover: hover) and (pointer: fine) {
           :host button[eye]:hover {
             box-shadow: none;
             background-color: var(--ctrl-focus-label);
@@ -197,13 +197,13 @@ export default class WUPPasswordControl<
     const b = this.$refBtnEye;
     b.setAttribute("eye", "");
     b.setAttribute("aria-hidden", true);
+    b.setAttribute("type", "button");
     b.tabIndex = -1;
     onEvent(
       b,
       "click",
       (e) => {
         e.preventDefault(); // prevent from submit
-        e.stopPropagation();
         this.toggleVisibility();
       },
       { passive: false }
@@ -228,7 +228,7 @@ export default class WUPPasswordControl<
     // it can be ignored by browsers. To fix > https://stackoverflow.com/questions/2530/how-do-you-disable-browser-autocomplete-on-web-form-field-input-tags
     // https://stackoverflow.com/questions/11708092/detecting-browser-autofill
 
-    this._opts.reverse = this.getBoolAttr("reverse", this._opts.reverse);
+    this._opts.reverse = this.getAttr("reverse", "bool");
     this.setAttr("reverse", this._opts.reverse, true);
   }
 

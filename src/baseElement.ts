@@ -202,6 +202,11 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
     }
   }
 
+  /** Called when need to parse attribute */
+  parse(text: string): any {
+    return text;
+  }
+
   #isReady = false;
   /** Called when element is added to document */
   protected gotReady(): void {
@@ -303,13 +308,6 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
       this.gotAttributeChanged(name, oldValue, newValue);
   }
 
-  dispatchEvent<K extends keyof Events>(type: K, eventInit?: EventInit): boolean;
-  dispatchEvent(event: Event): boolean;
-  dispatchEvent(ev: Event | string, eventInit?: EventInit): boolean {
-    if (typeof ev === "string") ev = new Event(ev, eventInit);
-    return super.dispatchEvent(ev as Event);
-  }
-
   // watchfix: how to change  listener: (this: WUPBaseElement) to generic: https://github.com/microsoft/TypeScript/issues/299
   /* eslint-disable max-len */
   // prettier-ignore
@@ -329,10 +327,10 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
   }
   /* eslint-enable max-len */
 
-  /** Calls dispatchEvent and returns created event */
-  fireEvent<K extends keyof Events>(type: K, eventInit?: EventInit): Event {
-    const ev = new Event(type as string, eventInit);
-    super.dispatchEvent(ev as Event);
+  /** Inits customEvent & calls dispatchEvent and returns created event */
+  fireEvent<K extends keyof Events>(type: K, eventInit?: CustomEventInit): Event {
+    const ev = new CustomEvent(type as string, eventInit);
+    super.dispatchEvent(ev);
     return ev;
   }
 
@@ -373,56 +371,110 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
     this.disposeLst.length = 0;
   }
 
-  /** Returns true if el is instance of Node and contains pointer element */
+  /** Returns true if el is instance of Node and contains pointed element
+   * @tutorial Troubleshooting
+   * * if element has position `fixed` or `absolute` then returns false */
   includes(el: unknown): boolean {
     return el instanceof Node && this.contains(el);
   }
 
-  /** Parse attribute and return result */
-  getBoolAttr(attr: string, alt: boolean): boolean;
-  getBoolAttr(attr: string, alt: boolean | undefined): boolean | undefined;
-  getBoolAttr(attr: string, alt: boolean | undefined): boolean | undefined {
-    const a = this.getAttribute(attr);
-    return a === null ? alt : a !== "false";
+  /** Returns true if element contains eventTarget or it's eventTarget
+   * @tutorial Troubleshooting
+   * * if element has position `fixed` or `absolute` then returns false */
+  includesTarget(e: Event): boolean {
+    const t = e.target;
+    return this === t || this.includes(t);
   }
 
-  /** Parse attribute and return result; if attr missed or invalid => returns this._opts[attr] */
-  getNumAttr(attr: string): number | undefined {
+  /** Parse attribute and return result; if attr missed or invalid => returns pointed alt value OR $options[attr] */
+  getAttr(attr: string, type?: "string", alt?: string): string | undefined;
+  getAttr(attr: string, type: "bool", alt?: boolean): boolean | undefined;
+  getAttr(attr: string, type: "number", alt?: number): number | undefined;
+  /** Returns value from window[key] according to [attr]="key"; if attr missed or invalid => returns pointed alt value OR $options[attr] */
+  getAttr<T>(attr: string, type: "obj", alt?: T): T;
+  /** Returns value according to this.parse(); if attr missed or invalid => returns pointed alt value OR $options[attr] */
+  getAttr<T>(attr: string, type: "ref", alt?: T): T;
+  getAttr(attr: string, type?: string, alt?: any): any {
     const a = this.getAttribute(attr);
-    if (a == null || a === "") {
-      return this._opts[attr];
+    const nullResult = alt !== undefined ? alt : this._opts[attr];
+    if (a == null) {
+      return nullResult;
     }
-    const v = +a;
-    if (Number.isNaN(v)) {
-      console.error(`${this.tagName}. Expected number for attribute [${attr}] but pointed '${a}'`);
+    switch (type) {
+      case "bool":
+        return a !== "false";
+      case "number": {
+        const v = +a;
+        if (Number.isNaN(v)) {
+          this.throwError(`Expected number for attribute [${attr}] but pointed '${a}'`);
+          return nullResult;
+        }
+        return v;
+      }
+      case "ref": {
+        const v = nestedProperty.get(window, a);
+        if (v === undefined) {
+          this.throwError(
+            `Value not found according to attribute [${attr}] in '${a.startsWith("window.") ? a : `window.${a}`}'`
+          );
+          return nullResult;
+        }
+        return v;
+      }
+      case "obj": {
+        try {
+          return this.parse(a);
+        } catch (err) {
+          this.throwError(err);
+          return nullResult;
+        }
+      }
+      default:
+        return a; // string
     }
-    return v;
   }
 
-  /** Returns value from window[key] according to [attr]="key" or $options[key] if attr is missed */
-  getRefAttr<T>(attr: string): T | undefined {
-    const a = this.getAttribute(attr);
-    if (a == null || a === "") {
-      return this._opts[attr];
-    }
-    const v = nestedProperty.get(window, a);
-    if (v === undefined) {
-      console.error(
-        `${this.tagName}. Value not found according to attribute [${attr}] in '${
-          a.startsWith("window.") ? a : `window.${a}`
-        }'`
-      );
-    }
-    return v as T;
-  }
-
-  /**
-   * Remove attr if value falseOrEmpty; set '' or 'true' if true for HTMLELement
-   * @param isSetEmpty set if need '' instead of 'value'
-   */
+  /** Remove attr if value falseOrEmpty; set '' or 'true' if true for HTMLELement
+   * @param isSetEmpty set if need '' instead of 'value' */
   setAttr(attr: string, v: boolean | string | undefined | null, isSetEmpty?: boolean): void {
     v ? this.setAttribute(attr, isSetEmpty ? "" : v) : this.removeAttribute(attr);
   }
+
+  /** Remove all children in fastest way */
+  removeChildren(): void {
+    // benchmark: https://measurethat.net/Benchmarks/Show/23474/2/remove-all-children-from-dom-element-2
+    while (this.firstChild) {
+      this.removeChild(this.firstChild);
+    }
+  }
+
+  /** Throws unhanled error via empty setTimeout */
+  throwError(err: string | Error | unknown): void {
+    const e = new Error(`${this.tagName}. ${err}`, { cause: err });
+    setTimeout(() => {
+      throw e;
+    });
+  }
+
+  // /** Forces to recalc render-logic of browser */
+  // refreshRender(): void {
+  //   const was = this.style.display;
+  //   this.style.display = was === "none" ? "block" : "none";
+  //   (this as any).__fixRefresh = this.offsetHeight; // no need to store this anywhere, the reference is enough
+  //   this.style.display = was;
+  //   delete (this as any).__fixRefresh;
+  // }
+
+  // Uncomment if it's required
+  // /** Replace all children of node with nodes, while replacing strings in nodes with equivalent Text nodes */
+  // replaceChildren(...nodes: (string | Node)[]): void {
+  // https://measurethat.net/Benchmarks/Show/23478/1/replace-text-content-on-dom-element-2
+  //   if (super.replaceChildren as any) {
+  //     return super.replaceChildren(...nodes);
+  //   }
+  //   this.removeChildren();
+  //   return this.append(...nodes);
+  // }
 }
 
 declare global {
@@ -445,4 +497,3 @@ declare global {
       toJSX<Opts>;
   }
 }
-// testcase: check if gotChanges sensitive to attr-case

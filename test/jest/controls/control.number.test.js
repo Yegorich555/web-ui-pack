@@ -193,6 +193,7 @@ describe("control.number", () => {
     // dec -1
     let isPrevented = !el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: 100 })); // scrollDown
     expect(isPrevented).toBe(true);
+    await h.wait(1);
     expect(el.$value).toBe(-1);
     expect(el.$refInput.value).toBe("-1");
 
@@ -203,16 +204,19 @@ describe("control.number", () => {
     isPrevented = !el.dispatchEvent(
       new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true })
     );
+    await h.wait(1);
     expect(isPrevented).toBe(true);
     expect(el.$value).toBe(999.53);
     expect(el.$refInput.value).toBe("999.53");
 
     // inc +1
     isPrevented = !el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100 })); // scrollUp
+    await h.wait(1);
     expect(isPrevented).toBe(true);
     expect(el.$value).toBe(1000.53);
 
     isPrevented = !el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
+    await h.wait(1);
     expect(isPrevented).toBe(true);
     expect(el.$value).toBe(1001.53);
     expect(el.$refInput.value).toBe("1,001.53");
@@ -224,49 +228,57 @@ describe("control.number", () => {
     el.$refInput.selectionStart = 0;
     expect(el.$refInput.value).toBe("11.53");
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Alt", altKey: true, bubbles: true, cancelable: true }));
+    await h.wait(1);
 
     isPrevented = !el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100 })); // scrollUp
+    await h.wait(1);
     expect(isPrevented).toBe(true);
     expect(el.$value).toBe(11.63);
     expect(h.getInputCursor(el.$refInput)).toBe("11.63|");
 
     isPrevented = !el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
+    await h.wait(1);
     expect(isPrevented).toBe(true);
     expect(el.$value).toBe(11.73);
 
     isPrevented = !el.dispatchEvent(
       new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true })
     );
+    await h.wait(1);
     expect(isPrevented).toBe(true);
     expect(el.$value).toBe(11.63);
 
     isPrevented = !el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: 100 })); // scrollDown
+    await h.wait(1);
     expect(isPrevented).toBe(true);
     expect(el.$value).toBe(11.53);
 
     el.dispatchEvent(new KeyboardEvent("keyup", { key: "Alt", bubbles: true, cancelable: true }));
-
     // Shift +10
     await h.wait(1);
     expect(el.$refInput.value).toBe("11.53");
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Shift", shiftKey: true, bubbles: true, cancelable: true }));
 
     isPrevented = !el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100 })); // scrollUp
+    await h.wait(1);
     expect(isPrevented).toBe(true);
     expect(el.$value).toBe(21.53);
 
     isPrevented = !el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
+    await h.wait(1);
     expect(isPrevented).toBe(true);
     expect(el.$value).toBe(31.53);
 
     isPrevented = !el.dispatchEvent(
       new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true })
     );
+    await h.wait(1);
     expect(isPrevented).toBe(true);
     expect(el.$value).toBe(21.53);
 
     await h.wait();
     isPrevented = !el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: 100 })); // scrollDown
+    await h.wait(1);
     expect(isPrevented).toBe(true);
     expect(el.$value).toBe(11.53);
     el.dispatchEvent(new KeyboardEvent("keyup", { key: "Shift", bubbles: true, cancelable: true }));
@@ -275,22 +287,26 @@ describe("control.number", () => {
     await h.wait(1);
     expect(el.$refInput.value).toBe("11.53");
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Control", ctrlKey: true, bubbles: true, cancelable: true }));
-
+    await h.wait(1);
     isPrevented = !el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100 })); // scrollUp
+    await h.wait(1);
     expect(isPrevented).toBe(true);
     expect(el.$value).toBe(111.53);
 
     isPrevented = !el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
+    await h.wait(1);
     expect(isPrevented).toBe(true);
     expect(el.$value).toBe(211.53);
 
     isPrevented = !el.dispatchEvent(
       new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true })
     );
+    await h.wait(1);
     expect(isPrevented).toBe(true);
     expect(el.$value).toBe(111.53);
 
     isPrevented = !el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: 100 })); // scrollDown
+    await h.wait(1);
     expect(isPrevented).toBe(true);
     expect(el.$value).toBe(11.53);
     el.dispatchEvent(new KeyboardEvent("keyup", { key: "Control", bubbles: true, cancelable: true }));
@@ -305,6 +321,7 @@ describe("control.number", () => {
     el.$value = Number.MAX_SAFE_INTEGER; // 9007199254740991
     expect(el.$refInput.value).toBe(`9,007,199,254,740,991`);
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
+    await h.wait(1);
     expect(el.$value).toBe(Number.MAX_SAFE_INTEGER);
     expect(el.$refInput.value).toBe(`9,007,199,254,740,992`);
     await h.wait(150);
@@ -314,6 +331,7 @@ describe("control.number", () => {
     el.$value = Number.MIN_SAFE_INTEGER;
     expect(el.$refInput.value).toBe(`-9,007,199,254,740,991`);
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+    await h.wait(1);
     expect(el.$value).toBe(Number.MIN_SAFE_INTEGER);
     expect(el.$refInput.value).toBe(`-9,007,199,254,740,992`);
     await h.wait(150);
@@ -330,10 +348,12 @@ describe("control.number", () => {
     el.$options.readOnly = true;
     await h.wait(1);
     isPrevented = !el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: 100 })); // scrollDown
+    await h.wait(1);
     expect(isPrevented).toBe(false);
     isPrevented = !el.dispatchEvent(
       new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true })
     );
+    await h.wait(1);
     expect(isPrevented).toBe(false);
     expect(el.$refInput.value).toBe("111.53");
   });

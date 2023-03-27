@@ -24,9 +24,9 @@ type TransformFunctions =
 /** Replaces [translate] in el.style.transform
  * @example
  * el.style.transform('translate(-10px, 20%)');
- * styleTransform(el, 'translate', '0,0' )
- */
-export function styleTransform(el: HTMLElement, prop: TransformFunctions, value: string | number): void {
+ * styleTransform(el, 'translate', '-10px, 20%' )
+ * @returns el.style.transform */
+export function styleTransform(el: HTMLElement, prop: TransformFunctions, value: string | number): string {
   const reg = new RegExp(`( )*${prop}\\(([%d \\w.,-]+)\\)( )*`);
   const setValue = value || value === 0;
   let isDone = !setValue;
@@ -37,6 +37,7 @@ export function styleTransform(el: HTMLElement, prop: TransformFunctions, value:
       })
     : el.style.transform.replace(reg, " ").trim();
   el.style.transform = isDone ? s : `${el.style.transform} ${prop}(${value})`.trimStart();
+  return el.style.transform;
 }
 
 /** Converts '23px' to number 23 */
@@ -55,7 +56,7 @@ interface CustomRect {
 
 /* Returns bounding rectangular without borders and scroll (simulate box-sizing: border-box) */
 export function getBoundingInternalRect(
-  el: HTMLElement,
+  el: Element,
   options?: {
     computedStyle?: CSSStyleDeclaration;
     ignoreCache?: boolean;
@@ -68,8 +69,8 @@ export function getBoundingInternalRect(
   // we don't need other borders (right/bottom) because of clientSize without borders
   const { borderTopWidth, borderLeftWidth } = options?.computedStyle ?? getComputedStyle(el);
   let { left, top } = options?.elRect ?? el.getBoundingClientRect();
-  top += px2Number(borderTopWidth);
-  left += px2Number(borderLeftWidth);
+  top = Math.round(top + px2Number(borderTopWidth));
+  left = Math.round(left + px2Number(borderLeftWidth));
   const r: CustomRect = {
     top,
     left,
@@ -83,4 +84,17 @@ export function getBoundingInternalRect(
   setTimeout(() => delete (el as any)._savedBoundingRect);
 
   return r;
+}
+
+/** Parse '0.2s' to 200, '200ms' to '200'
+ * If parsing is wrong returns 0 */
+export function parseMsTime(v: string): number {
+  let t = Number.parseInt(v, 10);
+  if (!v.endsWith("ms")) {
+    t *= 1000;
+  }
+  if (Number.isNaN(t)) {
+    return 0;
+  }
+  return t;
 }

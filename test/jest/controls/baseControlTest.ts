@@ -6,7 +6,7 @@ import * as h from "../../testHelper";
 import { BaseTestOptions } from "../../testHelper";
 
 declare global {
-  namespace WUPBase {
+  namespace WUP.BaseControl {
     interface ValidityMap {
       $alwaysValid: boolean;
       $alwaysInvalid: boolean;
@@ -102,6 +102,20 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       await h.wait(1);
       expect(el.getAttribute("initvalue")).toBe(null);
       expect(el.$initValue).toStrictEqual(cfg.emptyValue);
+
+      await h.wait();
+      el.setAttribute("initvalue", "");
+      expect(() => jest.advanceTimersByTime(1)).not.toThrow();
+      await h.wait(1);
+      expect(el.$initValue).toStrictEqual(cfg.emptyValue);
+
+      el.parse = () => {
+        throw new Error("Test err");
+      };
+      el.setAttribute("initvalue", "wrong value");
+      expect(() => jest.advanceTimersByTime(1)).toThrow();
+      await h.wait(1);
+      expect(el.$initValue).toStrictEqual(cfg.emptyValue);
     });
 
     test("$initValue vs $value", () => {
@@ -169,6 +183,18 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$options.autoComplete = false;
       jest.advanceTimersByTime(1);
       expect(el.$refInput.autocomplete).toBe(cfg.autoCompleteOff);
+
+      el.setAttribute("autocomplete", "false");
+      jest.advanceTimersByTime(1);
+      expect(el.$options.autoComplete).toBe(false);
+
+      el.setAttribute("autocomplete", "true");
+      jest.advanceTimersByTime(1);
+      expect(el.$options.autoComplete).toBe(true);
+
+      el.setAttribute("autocomplete", "email");
+      jest.advanceTimersByTime(1);
+      expect(el.$options.autoComplete).toBe("email");
     });
 
     test("autoFocus", () => {
@@ -191,6 +217,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$value).toBe(cfg.initValues[0].value);
 
       el.focus();
+      await h.wait(1);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
       expect(el.$value).toBe(undefined);
@@ -341,7 +368,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     expect(a?.includes("my-test-id")).toBe(true);
     el.$refInput.setAttribute("aria-describedby", `${a} my-test-id2`.trim());
     expect(el).toMatchSnapshot();
-    await h.wait(210);
+    await h.wait(1000);
     expect(el.$refInput.getAttribute("aria-describedby")).toBe("my-test-id my-test-id2");
     expect(el).toMatchSnapshot();
   });
@@ -389,7 +416,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
         expect(el.$isValid).toBe(true);
 
         (window as any)._testVld = undefined;
-        const onErr = h.mockConsoleError();
+        const onErr = jest.spyOn(el, "throwError");
         expect(() => el.$validate()).not.toThrow(); // because key is pointed but value undefined
         expect(onErr).toBeCalled();
         h.unMockConsoleError();
@@ -414,10 +441,12 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$options.validationCase = ValidationCases.onChange | 0;
       expect(el).toMatchSnapshot();
       el.focus();
+      await h.wait(1);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
-      el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
+      el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened and prev-Esc closed it but not affect on input clearing
 
       expect(el.$isEmpty).toBe(true);
+      el.blur();
       await h.wait();
       expect(el.$refError).toBeDefined();
       expect(el).toMatchSnapshot();
@@ -475,6 +504,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       await h.wait();
 
       el.focus();
+      await h.wait(1);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
       el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
       expect(el.$isEmpty).toBe(true);
@@ -616,6 +646,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
           expect(el.$refInput.getAttribute("aria-required")).toBe("true");
         }
 
+        // @ts-expect-error
         const defMsg = elType.$defaults.validationRules![ruleName]!(vld.failValue as any, vld.set, el);
         expect(defMsg).toBeTruthy();
         expect(el.$validate()).toBe(defMsg);

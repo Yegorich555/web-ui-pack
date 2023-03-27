@@ -85,10 +85,11 @@ export function testTextControl({ isComboCtrl } = {}) {
     await page.waitForTimeout(100); // wait for popup
 
     await page.click("[error]");
+    await page.waitForTimeout(100); // wait for popup
     let t = await page.getInfo();
     expect(t.id).toBe(t.trueId);
 
-    // click on error of 2nd control hides error and opens popup
+    // for combobox click on error control hides error and opens popup
     if (!isComboCtrl) {
       await page.click("[error]");
       t = await page.getInfo();

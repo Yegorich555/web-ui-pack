@@ -35,25 +35,29 @@ declare global {
     interface Options {
       /** Anchor that popup uses for placement. If attr.target and $options.target are empty previousSibling will be attached.
        * attr target="{querySelector}" has hire priority than .options.target */
-      target?: HTMLElement | null;
-      /**
-       * Placement rules relative to target; example Placements.bottom.start or Placements.bottom.start.adjust
+      target?: HTMLElement | SVGElement | null;
+      /** Placement rules relative to target; example Placements.bottom.start or Placements.bottom.start.adjust
        * Point several to define alternate behavior (when space are not enough)
-       */
+       * @hints
+       * * to place around center of target use option offset @example
+       * popup.$options.offset = (r) => [-r.height / 2, -r.width / 2]; */
       placement: Array<WUP.Popup.Place.PlaceFunc>;
       /** Virtual margin of targetElement (relative to popup)
        *  [top, right, bottom, left] or [top/bottom, right/left] in px */
-      offset?: [number, number, number, number] | [number, number];
+      offset?:
+        | [number, number, number, number]
+        | [number, number]
+        | ((targetRect: DOMRect) => [number, number, number, number] | [number, number]);
       /** Virtual padding of fitElement
        *  [top, right, bottom, left] or [top/bottom, right/left] in px */
       offsetFitElement?: [number, number, number, number] | [number, number];
       /** Inside edges of fitElement popup is positioned and can't overflow fitElement; {body} by default */
       toFitElement?: HTMLElement | null;
-      /** Sets minWidth 100% of targetWidth */
+      /** Sets minWidth 100% of targetWidth; it can't be more than css-style min-width */
       minWidthByTarget?: boolean;
-      /** Sets maxWidth 100% of targetWidth */
+      /** Sets maxWidth 100% of targetWidth; it can't be more than css-style max-width */
       maxWidthByTarget?: boolean;
-      /** Sets minHeight 100% of targetWidth */
+      /** Sets minHeight 100% of targetWidth; it can't be more than css-style min-height */
       minHeightByTarget?: boolean;
       /** Case when popup need to show;
        * @defaultValue ShowCases.onClick
@@ -95,18 +99,24 @@ declare global {
     }
 
     interface AttachOptions extends Partial<Omit<Options, "target">> {
-      target: HTMLElement;
+      target: HTMLElement | SVGElement;
       text: string | undefined | null;
       tagName?: string;
     }
 
     interface EventMap extends WUP.Base.EventMap {
-      /** Fires before show is happened; can be prevented via e.preventDefault() */
-      $willShow: Event;
+      /** Fires before show is happened;
+       * @tutorial rules
+       * * can be prevented via e.preventDefault()
+       * * use event.detail.showCase to filter by showCase */
+      $willShow: CustomEvent;
       /** Fires after popup is shown (after animation finishes) */
       $show: Event;
-      /** Fires before hide is happened; can be prevented via e.preventDefault() */
-      $willHide: Event;
+      /** Fires before hide is happened;
+       * @tutorial rules
+       * * can be prevented via e.preventDefault()
+       * * use event.detail.hideCase to filter by hideCase */
+      $willHide: CustomEvent;
       /** Fires after popup is hidden (after animation finishes) */
       $hide: Event;
     }

@@ -133,7 +133,7 @@ export default class WUPSwitchControl<
         :host label>span { transition: background-color var(--anim); }
         :host label>span:before { transition: left var(--anim); }
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         :host:hover label>span:before {
            box-shadow: 0 0 4px 0 var(--ctrl-focus);
         }
@@ -185,7 +185,7 @@ export default class WUPSwitchControl<
   }
 
   override parse(text: string): boolean | undefined {
-    return text === "" || text.toLowerCase() === "true";
+    return text.toLowerCase() === "true";
   }
 
   protected override renderControl(): void {
@@ -223,16 +223,11 @@ export default class WUPSwitchControl<
   protected override gotChanges(propsChanged: Array<keyof WUP.Switch.Options | any> | null): void {
     super.gotChanges(propsChanged as any);
 
-    this._opts.reverse = this.getBoolAttr("reverse", this._opts.reverse);
+    this._opts.reverse = this.getAttr("reverse", "bool");
     this.setAttr("reverse", this._opts.reverse, true);
 
     if (!propsChanged || propsChanged.includes("defaultchecked")) {
-      const attr = this.getAttribute("defaultchecked");
-      if (attr) {
-        this.$initValue = attr !== "false";
-      } else if (propsChanged) {
-        this.$initValue = false; // removed attr >> remove initValue
-      }
+      this.$initValue = this.getAttr("defaultchecked", "bool", false)!;
     }
   }
 

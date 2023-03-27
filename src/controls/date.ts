@@ -138,7 +138,6 @@ export default class WUPDateControl<
   /** Parse string to Date
    * @see WUPCalendarControl.$parse */
   override parse(text: string): ValueType | undefined {
-    /* istanbul ignore else */
     if (!text) {
       return undefined;
     }
@@ -160,10 +159,10 @@ export default class WUPDateControl<
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Date.Options> | null): void {
-    this._opts.utc = this.getBoolAttr("utc", this._opts.utc);
-    this._opts.format = (this.getAttribute("format") ?? this._opts.format) || "YYYY-MM-DD";
+    this._opts.utc = this.getAttr("utc", "bool");
+    this._opts.format = this.getAttr("format") || "YYYY-MM-DD";
     if (this._opts.format.toUpperCase().includes("MMM")) {
-      console.error(`${this.tagName}. 'MMM' in format isn't supported`);
+      this.throwError(`'MMM' in format isn't supported`);
       this._opts.format = "YYYY-MM-DD";
     }
     this._opts.mask =
@@ -175,9 +174,9 @@ export default class WUPDateControl<
         .replace(/mm|MM/, "00")
         .replace(/[mM]/, "#0"); // convert yyyy-mm-dd > 0000-00-00; d/m/yyyy > #0/#0/0000
     this._opts.maskholder = this._opts.maskholder ?? this._opts.format.replace(/([mMdD]){1,2}/g, "$1$1");
-    this._opts.min = this.parse(this.getAttribute("min") || "") ?? this._opts.min;
-    this._opts.max = this.parse(this.getAttribute("max") || "") ?? this._opts.max;
-    this._opts.exclude = this.getRefAttr<Date[]>("exclude");
+    this._opts.min = this.getAttr("min", "obj");
+    this._opts.max = this.getAttr("max", "obj");
+    this._opts.exclude = this.getAttr<Date[]>("exclude", "ref");
 
     const attr = this.getAttribute("startwith");
     if (attr != null) {
@@ -218,7 +217,7 @@ export default class WUPDateControl<
     return r;
   }
 
-  protected override async renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> {
+  protected override renderMenu(popup: WUPPopupElement, menuId: string): HTMLElement {
     popup.$options.minWidthByTarget = false;
 
     const el = document.createElement("wup-calendar");
@@ -228,7 +227,7 @@ export default class WUPDateControl<
     };
     el.focusItem = (a) => this.focusMenuItem(a);
     el.focus = () => true; // to not allow to focus calendar itselft
-    el.gotFocus.call(el);
+    el.gotFocus.call(el, new FocusEvent("focusin"));
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     el.setInputValue = () => {};
     // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -250,7 +249,7 @@ export default class WUPDateControl<
     });
 
     popup.appendChild(el);
-    return Promise.resolve(el);
+    return el;
   }
 
   protected override setValue(v: ValueType | undefined, canValidate = true, skipInput = false): boolean | null {
@@ -285,29 +284,6 @@ export default class WUPDateControl<
     super.gotInput(e, true);
   }
 
-  protected override gotKeyDown(e: KeyboardEvent): Promise<void> {
-    const wasOpen = this.$isOpen;
-    let skipCalendar = false;
-    switch (e.key) {
-      case "Escape":
-      case " ":
-        skipCalendar = true;
-        break;
-      case "Home":
-      case "End":
-        skipCalendar = e.shiftKey || e.ctrlKey; // skip only if pressed shift + Home/End
-        break;
-      default:
-        break;
-    }
-
-    const clnd = this.$refPopup?.firstElementChild as WUPCalendarControl;
-    wasOpen && !skipCalendar && clnd.gotKeyDown.call(clnd, e); // skip actions for Escape & Space keys
-    const r = !e.defaultPrevented && super.gotKeyDown(e);
-    !wasOpen && this.$isOpen && !skipCalendar && clnd.gotKeyDown.call(clnd, e); // case when user press ArrowKey for opening menu
-    return r || Promise.resolve();
-  }
-
   protected override focusMenuItem(next: HTMLElement | null): void {
     // WARN: it's important don't use call super... because the main logic is implemented inside calendar
     // can be fired from baseCombo => when need to clear selection
@@ -319,6 +295,11 @@ export default class WUPDateControl<
       this.$refInput.removeAttribute("aria-activedescendant");
     }
     this._focusedMenuItem = next;
+  }
+
+  protected focusMenuItemByKeydown(e: KeyboardEvent): void {
+    const clnd = this.$refPopup?.firstElementChild as WUPCalendarControl;
+    clnd.gotKeyDown.call(clnd, e);
   }
 }
 

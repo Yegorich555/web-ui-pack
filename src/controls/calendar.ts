@@ -1,7 +1,7 @@
 import WUPBaseControl from "./baseControl";
 import { WUPcssHidden } from "../styles";
 import WUPScrolled from "../helpers/scrolled";
-import { dateCopyTime } from "../indexHelpers";
+import { dateCopyTime, dateFromString } from "../indexHelpers";
 import localeInfo from "../objects/localeInfo";
 
 const tagName = "wup-calendar";
@@ -241,7 +241,7 @@ export default class WUPCalendarControl<
       :host li[focused][aria-selected] {
         text-decoration: underline;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         :host header>button:hover {
           background-color: var(--ctrl-clr-selected-bg);
           color: var(--ctrl-clr-selected);
@@ -331,22 +331,13 @@ export default class WUPCalendarControl<
    * "2022-10-25T02:40:00.000Z" >> returns UTC Date (argument `asUTC:false` is ignored)
    */
   static $parse(yyyyMMdd: string, asUTC: boolean): Date {
-    const dt = Date.parse(yyyyMMdd);
-    if (Number.isNaN(dt)) {
-      throw new Error(`Impossible to parse date from '${yyyyMMdd}'`);
+    const sep = yyyyMMdd.includes("T") ? "T" : " ";
+    const format = `YYYY-MM-DD${sep}hh:mm:ss.fff${asUTC || yyyyMMdd.endsWith("Z") ? "Z" : ""}`;
+    const v = dateFromString(yyyyMMdd, format, { throwOutOfRange: true });
+    if (v == null) {
+      throw new Error(`Impossible to parse date from '${yyyyMMdd}'. Expected format '${format}'`);
     }
-    /* by default
-       2022-10-25 >> utc
-       2022-10-25 00:00 >> local
-       2022-10-25T00:00 >> local
-    */
-    const v = new Date(dt);
-    const isUTC = yyyyMMdd.length === 10;
-    if (!yyyyMMdd.endsWith("Z") && isUTC !== asUTC) {
-      v.setMinutes(v.getMinutes() + (isUTC ? 1 : -1) * v.getTimezoneOffset());
-    }
-
-    return v;
+    return v!; // null impossible here
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
@@ -375,7 +366,6 @@ export default class WUPCalendarControl<
 
   /** Converts date-string into Date according (to $options.utc), @see WUPCalendarControl.$parse */
   override parse(text: string): ValueType | undefined {
-    /* istanbul ignore else */
     if (!text) {
       return undefined;
     }
@@ -416,6 +406,7 @@ export default class WUPCalendarControl<
     /* */ h.appendChild(this.$refCalenarTitle);
     this.$refCalenarTitle.setAttribute("tabindex", "-1");
     this.$refCalenarTitle.setAttribute("aria-hidden", true);
+    this.$refCalenarTitle.setAttribute("type", "button");
     const box = add(this.$refCalenar, "div");
     const animBox = add(box, "div");
     /* */ animBox.appendChild(this.$refCalenarItems);
@@ -555,7 +546,7 @@ export default class WUPCalendarControl<
 
       await animate(isOut ? "out" : "in");
       scrollObj.dispose();
-      this.$refCalenarItems.textContent = "";
+      this.removeChildren.call(this.$refCalenarItems);
       this.#refreshSelected = undefined;
 
       animate(isOut ? "out2" : "in2").then(() => box.removeAttribute("zoom")); // WARN: it's important not to wait
@@ -968,7 +959,7 @@ export default class WUPCalendarControl<
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Calendar.Options> | null): void {
-    this._opts.utc = this.getBoolAttr("utc", this._opts.utc);
+    this._opts.utc = this.getAttr("utc", "bool");
     super.gotChanges(propsChanged);
 
     (this.$isReadOnly || this.$isDisabled) && this.focusItem(null);
@@ -990,9 +981,9 @@ export default class WUPCalendarControl<
       }
     }
 
-    this._opts.min = this.parse(this.getAttribute("min") || "") ?? this._opts.min;
-    this._opts.max = this.parse(this.getAttribute("max") || "") ?? this._opts.max;
-    this._opts.exclude = this.getRefAttr<Date[]>("exclude");
+    this._opts.min = this.getAttr("min", "obj");
+    this._opts.max = this.getAttr("max", "obj");
+    this._opts.exclude = this.getAttr<Date[]>("exclude", "ref");
     if (!propsChanged || propsChanged.includes("exclude")) {
       this._opts.exclude?.sort((a, b) => a.valueOf() - b.valueOf());
     }
@@ -1027,8 +1018,8 @@ export default class WUPCalendarControl<
     super.gotFocusLost();
   }
 
-  override gotFocus(): Array<() => void> {
-    const r = super.gotFocus();
+  override gotFocus(ev: FocusEvent): Array<() => void> {
+    const r = super.gotFocus(ev);
     const i = this.$refInput;
     r.push(this.appendEvent(this, "click", (e) => this.gotClick(e), { passive: false }));
     r.push(this.appendEvent(i, "input", (e) => this.gotInput(e as WUP.Text.GotInputEvent)));
@@ -1077,7 +1068,6 @@ export default class WUPCalendarControl<
     let isHandled = true;
     const isDayPicker = this._picker === PickersEnum.Day;
     const items = this.$refCalenarItems._items!;
-    // prettier-ignore
     switch (e.key) {
       case "Enter":
         isHandled = this.#focused != null; // WARN: submit by enter impossible if user focused item
@@ -1085,7 +1075,7 @@ export default class WUPCalendarControl<
       case " ": {
         const el = this.#focused;
         if (el && !el.hasAttribute("disabled")) {
-          el.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }));
+          setTimeout(() => el.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true })));
         }
         break;
       }

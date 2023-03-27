@@ -151,10 +151,12 @@ exports[`control.check common tests render + styles 2`] = `
 <style>
   .wup-hidden, [wup-hidden] {
 position: absolute;
-height: 1px; width: 1px;
+height:1px; width:1px;
 top:0;left:0;
-overflow: hidden;
-clip: rect(1px, 1px, 1px, 1px);}
+overflow:hidden;
+clip:rect(1px,1px,1px,1px);
+min-width:initial;
+padding:0;}
   :root {
           --base-bg: #fff;
           --base-text: #232323;
@@ -213,7 +215,6 @@ clip: rect(1px, 1px, 1px, 1px);}
         contain: style;
         display: block;
         margin-bottom: 20px;
-        position: relative;
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
         cursor: pointer;
@@ -227,7 +228,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-CHECK:focus-within,
       WUP-CHECK:focus-within &gt; [menu] {
         z-index: 90010;
-        outline: 1px solid var(--ctrl-focus);
+        box-shadow: 0 0 0 1px var(--ctrl-focus);
       }
       WUP-CHECK:focus-within strong,
       WUP-CHECK:focus-within legend {
@@ -247,8 +248,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       }
       WUP-CHECK[invalid],
       WUP-CHECK[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 0 var(--ctrl-invalid-border);
-        outline-color: var(--ctrl-invalid-border);
+        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
       WUP-CHECK label {
         display: flex;
@@ -261,10 +261,15 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-bottom: 0;
       }
       WUP-CHECK input,
-      WUP-CHECK textarea,
-      WUP-CHECK [contenteditable] {
+      WUP-CHECK textarea {
         padding: 0;
         margin: 0;
+        cursor: inherit;
+      }
+      WUP-CHECK [contenteditable=true] {
+        margin: var(--ctrl-padding);
+        margin-left: 0;
+        margin-right: 0;
         cursor: inherit;
       }
       WUP-CHECK strong {
@@ -304,7 +309,7 @@ width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
 box-sizing: content-box;
 margin: 0;
-padding: 0 5px;
+padding: 5px;
 flex: 0 0 auto;
 align-self: stretch;
 border: none;
@@ -330,7 +335,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-CHECK:focus-within [error] {
         max-height: none;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         /*WUP-CHECK:hover {
           z-index: 90011;
         }
@@ -387,10 +392,12 @@ mask-image: var(--ctrl-icon-img);
       }
       WUP-CHECK input { 
 position: absolute;
-height: 1px; width: 1px;
+height:1px; width:1px;
 top:0;left:0;
-overflow: hidden;
-clip: rect(1px, 1px, 1px, 1px); }
+overflow:hidden;
+clip:rect(1px,1px,1px,1px);
+min-width:initial;
+padding:0; }
       WUP-CHECK input:checked + * + * {
         background-color: var(--ctrl-switch-on-bg);
       }
@@ -412,7 +419,7 @@ clip: rect(1px, 1px, 1px, 1px); }
         WUP-CHECK label&gt;span { transition: background-color var(--anim); }
         WUP-CHECK label&gt;span:before { transition: left var(--anim); }
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         WUP-CHECK:hover label&gt;span:before {
            box-shadow: 0 0 4px 0 var(--ctrl-focus);
         }
@@ -452,7 +459,7 @@ clip: rect(1px, 1px, 1px, 1px); }
         -webkit-mask-position: center;
         mask-position: center;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         WUP-CHECK:hover label&gt;span {
           box-shadow: 0 0 4px 0 var(--ctrl-focus);
         }
@@ -500,6 +507,7 @@ exports[`control.check validations options.validationCase 2`] = `
     aria-live="off"
     error=""
     id="txt3"
+    role="alert"
     style="display: none;"
   >
     <span

@@ -35,6 +35,7 @@ exports[`control.calendar $ariaDetails 1`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -163,6 +164,7 @@ exports[`control.calendar $ariaDetails 2`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -292,6 +294,7 @@ exports[`control.calendar $ariaSpeak 1`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -429,6 +432,7 @@ exports[`control.calendar $ariaSpeak 2`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -557,6 +561,7 @@ exports[`control.calendar $show/$hide error 1`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -688,6 +693,7 @@ exports[`control.calendar $show/$hide error 2`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -831,6 +837,7 @@ exports[`control.calendar $show/$hide error 3`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -935,10 +942,12 @@ exports[`control.calendar common tests render + styles 2`] = `
 <style>
   .wup-hidden, [wup-hidden] {
 position: absolute;
-height: 1px; width: 1px;
+height:1px; width:1px;
 top:0;left:0;
-overflow: hidden;
-clip: rect(1px, 1px, 1px, 1px);}
+overflow:hidden;
+clip:rect(1px,1px,1px,1px);
+min-width:initial;
+padding:0;}
   :root {
           --base-bg: #fff;
           --base-text: #232323;
@@ -985,7 +994,6 @@ clip: rect(1px, 1px, 1px, 1px);}
         contain: style;
         display: block;
         margin-bottom: 20px;
-        position: relative;
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
         cursor: pointer;
@@ -999,7 +1007,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-CALENDAR:focus-within,
       WUP-CALENDAR:focus-within &gt; [menu] {
         z-index: 90010;
-        outline: 1px solid var(--ctrl-focus);
+        box-shadow: 0 0 0 1px var(--ctrl-focus);
       }
       WUP-CALENDAR:focus-within strong,
       WUP-CALENDAR:focus-within legend {
@@ -1019,8 +1027,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       }
       WUP-CALENDAR[invalid],
       WUP-CALENDAR[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 0 var(--ctrl-invalid-border);
-        outline-color: var(--ctrl-invalid-border);
+        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
       WUP-CALENDAR label {
         display: flex;
@@ -1033,10 +1040,15 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-bottom: 0;
       }
       WUP-CALENDAR input,
-      WUP-CALENDAR textarea,
-      WUP-CALENDAR [contenteditable] {
+      WUP-CALENDAR textarea {
         padding: 0;
         margin: 0;
+        cursor: inherit;
+      }
+      WUP-CALENDAR [contenteditable=true] {
+        margin: var(--ctrl-padding);
+        margin-left: 0;
+        margin-right: 0;
         cursor: inherit;
       }
       WUP-CALENDAR strong {
@@ -1076,7 +1088,7 @@ width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
 box-sizing: content-box;
 margin: 0;
-padding: 0 5px;
+padding: 5px;
 flex: 0 0 auto;
 align-self: stretch;
 border: none;
@@ -1102,7 +1114,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-CALENDAR:focus-within [error] {
         max-height: none;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         /*WUP-CALENDAR:hover {
           z-index: 90011;
         }
@@ -1141,10 +1153,12 @@ mask-image: var(--ctrl-icon-img);
       }
       WUP-CALENDAR input {
 position: absolute;
-height: 1px; width: 1px;
+height:1px; width:1px;
 top:0;left:0;
-overflow: hidden;
-clip: rect(1px, 1px, 1px, 1px);}
+overflow:hidden;
+clip:rect(1px,1px,1px,1px);
+min-width:initial;
+padding:0;}
       WUP-CALENDAR [calendar] {
         --ctrl-clr-cell-day-w: calc(var(--ctrl-clr-width) / 7 - var(--ctrl-clr-cell-gap));
         --ctrl-clr-h: calc((var(--ctrl-clr-cell-day-w) + var(--ctrl-clr-cell-gap)) * 6);
@@ -1236,7 +1250,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-CALENDAR li[focused][aria-selected] {
         text-decoration: underline;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         WUP-CALENDAR header&gt;button:hover {
           background-color: var(--ctrl-clr-selected-bg);
           color: var(--ctrl-clr-selected);
@@ -1952,6 +1966,7 @@ exports[`control.calendar utc=false $options.min & .max 4`] = `
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         2021
       </button>
@@ -2101,7 +2116,7 @@ exports[`control.calendar utc=false $options.min & .max 5`] = `
     <span>
       <input
         aria-controls="txt2"
-        aria-describedby="txt5 txt6"
+        aria-describedby="txt4 txt5 txt6"
         aria-owns="txt2"
         aria-readonly="false"
         autocomplete="off"
@@ -2123,6 +2138,7 @@ exports[`control.calendar utc=false $options.min & .max 5`] = `
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         2023
       </button>
@@ -2261,6 +2277,14 @@ exports[`control.calendar utc=false $options.min & .max 5`] = `
       </div>
     </div>
   </div>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt4"
+  >
+    2021
+  </section>
   <section
     aria-atomic="true"
     aria-live="off"
@@ -2514,6 +2538,7 @@ exports[`control.calendar utc=false day picker firstOfWeek: Monday 1`] = `
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -2808,6 +2833,7 @@ exports[`control.calendar utc=false day picker firstOfWeek: Sunday 1`] = `
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -3102,6 +3128,7 @@ exports[`control.calendar utc=false day picker firstOfWeek: Tuesday 1`] = `
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -3376,6 +3403,7 @@ exports[`control.calendar utc=false month picker 1`] = `
     <button
       aria-hidden="true"
       tabindex="-1"
+      type="button"
     >
       2022
     </button>
@@ -3488,6 +3516,7 @@ exports[`control.calendar utc=false year picker 1`] = `
       aria-hidden="true"
       disabled=""
       tabindex="-1"
+      type="button"
     >
       2018 ... 2033
     </button>
@@ -4076,6 +4105,7 @@ exports[`control.calendar utc=true $options.min & .max 4`] = `
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         2021
       </button>
@@ -4225,7 +4255,7 @@ exports[`control.calendar utc=true $options.min & .max 5`] = `
     <span>
       <input
         aria-controls="txt2"
-        aria-describedby="txt5 txt6"
+        aria-describedby="txt4 txt5 txt6"
         aria-owns="txt2"
         aria-readonly="false"
         autocomplete="off"
@@ -4247,6 +4277,7 @@ exports[`control.calendar utc=true $options.min & .max 5`] = `
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         2023
       </button>
@@ -4385,6 +4416,14 @@ exports[`control.calendar utc=true $options.min & .max 5`] = `
       </div>
     </div>
   </div>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt4"
+  >
+    2021
+  </section>
   <section
     aria-atomic="true"
     aria-live="off"
@@ -4638,6 +4677,7 @@ exports[`control.calendar utc=true day picker firstOfWeek: Monday 1`] = `
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -4932,6 +4972,7 @@ exports[`control.calendar utc=true day picker firstOfWeek: Sunday 1`] = `
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -5226,6 +5267,7 @@ exports[`control.calendar utc=true day picker firstOfWeek: Tuesday 1`] = `
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -5500,6 +5542,7 @@ exports[`control.calendar utc=true month picker 1`] = `
     <button
       aria-hidden="true"
       tabindex="-1"
+      type="button"
     >
       2022
     </button>
@@ -5612,6 +5655,7 @@ exports[`control.calendar utc=true year picker 1`] = `
       aria-hidden="true"
       disabled=""
       tabindex="-1"
+      type="button"
     >
       2018 ... 2033
     </button>
@@ -5744,6 +5788,7 @@ exports[`control.calendar validations $options.validationShowAll 1`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -5888,6 +5933,7 @@ exports[`control.calendar validations $options.validationShowAll 2`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -6023,6 +6069,7 @@ exports[`control.calendar validations $options.validationShowAll 3`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -6169,6 +6216,7 @@ exports[`control.calendar validations options.validationCase 1`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -6304,6 +6352,7 @@ exports[`control.calendar validations options.validationCase 2`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -6404,6 +6453,7 @@ exports[`control.calendar validations options.validationCase 2`] = `
     aria-live="off"
     error=""
     id="txt4"
+    role="alert"
     style="display: none;"
   >
     <span
@@ -6454,6 +6504,7 @@ exports[`control.calendar validations options.validationCase 3`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -6605,6 +6656,7 @@ exports[`control.calendar validations options.validationCase 4`] = `
         aria-hidden="true"
         disabled=""
         tabindex="-1"
+        type="button"
       >
         2018 ... 2033
       </button>
@@ -6756,6 +6808,7 @@ exports[`control.calendar with form 1`] = `
           aria-hidden="true"
           disabled=""
           tabindex="-1"
+          type="button"
         >
           2018 ... 2033
         </button>

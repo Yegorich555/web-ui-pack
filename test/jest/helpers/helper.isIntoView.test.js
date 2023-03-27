@@ -1,8 +1,5 @@
 import isIntoView from "web-ui-pack/helpers/isIntoView";
 
-const vH = Math.max(document.documentElement.clientHeight, window.innerHeight);
-const vW = Math.max(document.documentElement.clientWidth, window.innerWidth);
-
 const bodySize = {
   width: 400,
   height: 600,
@@ -234,7 +231,7 @@ describe("helper.isIntoView", () => {
       visible: false,
     });
 
-    moveTo(0, vH + 1); // hiddenY in viewport
+    moveTo(0, window.innerHeight + 1); // hiddenY in viewport
     expect(isIntoView(el)).toEqual({
       hidden: document.documentElement,
       hiddenX: false,
@@ -245,7 +242,7 @@ describe("helper.isIntoView", () => {
       visible: false,
     });
 
-    moveTo(vW + 1, 0); // hiddenX in viewport
+    moveTo(window.innerWidth + 1, 0); // hiddenX in viewport
     expect(isIntoView(el)).toEqual({
       hidden: document.documentElement,
       hiddenX: document.documentElement,
@@ -256,7 +253,7 @@ describe("helper.isIntoView", () => {
       visible: false,
     });
 
-    expect(vH).toBeGreaterThan(bodySize.height);
+    expect(window.innerHeight).toBeGreaterThan(bodySize.height);
     moveTo(0, bodySize.height - 10); // partialHiddenY in body
     expect(isIntoView(el)).toEqual({
       hidden: false,
@@ -268,7 +265,7 @@ describe("helper.isIntoView", () => {
       visible: false,
     });
 
-    expect(vW).toBeGreaterThan(bodySize.width);
+    expect(window.innerWidth).toBeGreaterThan(bodySize.width);
     moveTo(bodySize.width - 10, 0); // partialHiddenX in body
     expect(isIntoView(el)).toEqual({
       hidden: false,

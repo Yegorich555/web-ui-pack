@@ -1,5 +1,6 @@
 import { findScrollParentAll } from "./findScrollParent";
 import { getBoundingInternalRect } from "./styleHelpers";
+import viewportSize from "./viewportSize";
 
 type BasicRect = Pick<DOMRect, "top" | "right" | "bottom" | "left">;
 
@@ -31,7 +32,7 @@ interface IntoViewResult {
 }
 
 /** Check if element is visible in scrollable parents */
-export default function isIntoView(el: HTMLElement, options?: IntoViewOptions): IntoViewResult {
+export default function isIntoView(el: Element, options?: IntoViewOptions): IntoViewResult {
   const scrollParents = options?.scrollParents || findScrollParentAll(el) || [document.body];
 
   let child: BasicRect = options?.elRect ?? el.getBoundingClientRect();
@@ -43,8 +44,7 @@ export default function isIntoView(el: HTMLElement, options?: IntoViewOptions): 
       bottom: child.bottom + (options.offset[2] ?? options.offset[0]),
     };
   }
-  const vH = Math.max(document.documentElement.clientHeight, window.innerHeight);
-  const vW = Math.max(document.documentElement.clientWidth, window.innerWidth);
+  const vp = viewportSize();
   const r: IntoViewResult = {
     hiddenX: false,
     hiddenY: false,
@@ -76,10 +76,10 @@ export default function isIntoView(el: HTMLElement, options?: IntoViewOptions): 
     });
 
     const isHiddenY = // checking if visible in viewPort also
-      ((child.top > vH || child.bottom < 0) && document.documentElement) ||
+      ((child.top > vp.vh || child.bottom < 0) && document.documentElement) ||
       ((p().top >= child.bottom || p().bottom <= child.top) && !isVisY && scrollParents[i]);
     const isHiddenX =
-      ((child.left > vW || child.right < 0) && document.documentElement) ||
+      ((child.left > vp.vw || child.right < 0) && document.documentElement) ||
       ((p().left >= child.right || p().right <= child.left) && !isVisX && scrollParents[i]);
 
     /* istanbul ignore else */
@@ -87,7 +87,7 @@ export default function isIntoView(el: HTMLElement, options?: IntoViewOptions): 
       r.hiddenY = isHiddenY;
     } else if (!r.hiddenY) {
       r.partialHiddenY =
-        ((child.top < 0 || child.bottom > vH) && document.documentElement) ||
+        ((child.top < 0 || child.bottom > vp.vh) && document.documentElement) ||
         ((child.top < p().top || child.bottom > p().bottom) && !isVisY && scrollParents[i]);
     }
     /* istanbul ignore else */
@@ -95,7 +95,7 @@ export default function isIntoView(el: HTMLElement, options?: IntoViewOptions): 
       r.hiddenX = isHiddenX;
     } else if (!r.hiddenX) {
       r.partialHiddenX =
-        ((child.left < 0 || child.right > vW) && document.documentElement) ||
+        ((child.left < 0 || child.right > vp.vw) && document.documentElement) ||
         ((child.left < p().left || child.right > p().right) && !isVisX && scrollParents[i]);
     }
 

@@ -76,6 +76,14 @@ describe("control.radio", () => {
     expect(el.innerHTML).toMatchInlineSnapshot(
       `"<fieldset><legend><strong></strong></legend><label for="txt15"><input id="txt15" type="radio" name="txt14473" tabindex="0" autocomplete="off"><span>testVal123_0</span></label></fieldset>"`
     );
+
+    const onErr = jest.spyOn(el, "throwError").mockImplementationOnce(() => {});
+    el.setAttribute("items", "");
+    jest.advanceTimersByTime(1);
+    expect(el.$options.items?.length).toBe(0);
+    expect(onErr.mock.lastCall[0]).toMatchInlineSnapshot(
+      `"Value not found according to attribute [items] in 'window.'"`
+    );
   });
 
   test("parsing $initValue", () => {

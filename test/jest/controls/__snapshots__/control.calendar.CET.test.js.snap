@@ -490,6 +490,7 @@ exports[`control.calendar >> timezone: CET, offset: -120 utc=false $options.min 
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         2021
       </button>
@@ -639,7 +640,7 @@ exports[`control.calendar >> timezone: CET, offset: -120 utc=false $options.min 
     <span>
       <input
         aria-controls="txt2"
-        aria-describedby="txt5 txt6"
+        aria-describedby="txt4 txt5 txt6"
         aria-owns="txt2"
         aria-readonly="false"
         autocomplete="off"
@@ -661,6 +662,7 @@ exports[`control.calendar >> timezone: CET, offset: -120 utc=false $options.min 
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         2023
       </button>
@@ -799,6 +801,14 @@ exports[`control.calendar >> timezone: CET, offset: -120 utc=false $options.min 
       </div>
     </div>
   </div>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt4"
+  >
+    2021
+  </section>
   <section
     aria-atomic="true"
     aria-live="off"
@@ -1052,6 +1062,7 @@ exports[`control.calendar >> timezone: CET, offset: -120 utc=false day picker fi
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -1346,6 +1357,7 @@ exports[`control.calendar >> timezone: CET, offset: -120 utc=false day picker fi
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -1640,6 +1652,7 @@ exports[`control.calendar >> timezone: CET, offset: -120 utc=false day picker fi
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -1914,6 +1927,7 @@ exports[`control.calendar >> timezone: CET, offset: -120 utc=false month picker 
     <button
       aria-hidden="true"
       tabindex="-1"
+      type="button"
     >
       2022
     </button>
@@ -2026,6 +2040,7 @@ exports[`control.calendar >> timezone: CET, offset: -120 utc=false year picker 1
       aria-hidden="true"
       disabled=""
       tabindex="-1"
+      type="button"
     >
       2018 ... 2033
     </button>
@@ -2614,6 +2629,7 @@ exports[`control.calendar >> timezone: CET, offset: -120 utc=true $options.min &
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         2021
       </button>
@@ -2763,7 +2779,7 @@ exports[`control.calendar >> timezone: CET, offset: -120 utc=true $options.min &
     <span>
       <input
         aria-controls="txt2"
-        aria-describedby="txt5 txt6"
+        aria-describedby="txt4 txt5 txt6"
         aria-owns="txt2"
         aria-readonly="false"
         autocomplete="off"
@@ -2785,6 +2801,7 @@ exports[`control.calendar >> timezone: CET, offset: -120 utc=true $options.min &
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         2023
       </button>
@@ -2923,6 +2940,14 @@ exports[`control.calendar >> timezone: CET, offset: -120 utc=true $options.min &
       </div>
     </div>
   </div>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt4"
+  >
+    2021
+  </section>
   <section
     aria-atomic="true"
     aria-live="off"
@@ -3176,6 +3201,7 @@ exports[`control.calendar >> timezone: CET, offset: -120 utc=true day picker fir
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -3470,6 +3496,7 @@ exports[`control.calendar >> timezone: CET, offset: -120 utc=true day picker fir
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -3764,6 +3791,7 @@ exports[`control.calendar >> timezone: CET, offset: -120 utc=true day picker fir
       <button
         aria-hidden="true"
         tabindex="-1"
+        type="button"
       >
         December 2022
       </button>
@@ -4038,6 +4066,7 @@ exports[`control.calendar >> timezone: CET, offset: -120 utc=true month picker 1
     <button
       aria-hidden="true"
       tabindex="-1"
+      type="button"
     >
       2022
     </button>
@@ -4150,6 +4179,7 @@ exports[`control.calendar >> timezone: CET, offset: -120 utc=true year picker 1`
       aria-hidden="true"
       disabled=""
       tabindex="-1"
+      type="button"
     >
       2018 ... 2033
     </button>

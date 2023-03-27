@@ -22,7 +22,11 @@ describe("control.pwd", () => {
     });
 
   test("btn-eye", async () => {
-    await page.evaluate(() => (document.getElementById("trueEl").$value = "Ab123"));
+    await page.evaluate(() => {
+      const el = document.getElementById("trueEl");
+      el.$value = "Ab123";
+      el.$options.selectOnFocus = true;
+    });
 
     let t = await getInfo();
     expect(t.activeElementId).not.toBe(t.trueId);
@@ -34,7 +38,7 @@ describe("control.pwd", () => {
     expect(t.activeElementId).toBe(t.trueId);
     expect(t.selection).toEqual([0, 5]);
     expect(t.html).toMatchInlineSnapshot(
-      `"<wup-pwd id="trueEl"><label for="wup7"><span><input placeholder=" " type="text" id="wup7" autocomplete="new-password"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button clear="" aria-hidden="true" tabindex="-1"></button><button eye="off" aria-hidden="true" tabindex="-1"></button></label></wup-pwd>"`
+      `"<wup-pwd id="trueEl"><label for="wup7"><span><input placeholder=" " type="text" id="wup7" autocomplete="new-password"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button><button eye="off" aria-hidden="true" type="button" tabindex="-1"></button></label></wup-pwd>"`
     );
     expect(t.h).toBe(44); // height can change because style changed
 
@@ -44,7 +48,7 @@ describe("control.pwd", () => {
     expect(t.activeElementId).toBe(t.trueId);
     expect(t.selection).toEqual([0, 5]);
     expect(t.html).toMatchInlineSnapshot(
-      `"<wup-pwd id="trueEl"><label for="wup7"><span><input placeholder=" " type="password" id="wup7" autocomplete="new-password"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button clear="" aria-hidden="true" tabindex="-1"></button><button eye="" aria-hidden="true" tabindex="-1"></button></label></wup-pwd>"`
+      `"<wup-pwd id="trueEl"><label for="wup7"><span><input placeholder=" " type="password" id="wup7" autocomplete="new-password"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button><button eye="" aria-hidden="true" type="button" tabindex="-1"></button></label></wup-pwd>"`
     );
     expect(t.h).toBe(44);
 

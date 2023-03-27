@@ -130,7 +130,8 @@ declare global {
         | { [k: string]: (value: T | undefined) => false | string };
     }
 
-    interface Attributes extends Pick<Options, "label" | "name" | "autoFocus" | "disabled" | "readOnly"> {
+    interface Attributes
+      extends Pick<Options, "label" | "name" | "autoFocus" | "disabled" | "readOnly" | "autoComplete"> {
       /** default value in string/boolean or number representation (depends on `control.prototype.parse()`) */
       initValue?: string | boolean | number;
       /** Rules enabled for current control. Point global obj-key with validations (use `window.myValidations` where `window.validations = {required: true}` ) */
@@ -206,7 +207,7 @@ export default abstract class WUPBaseControl<
         --wup-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M37.691 450.599 224.76 635.864c21.528 21.32 56.11 21.425 77.478 0l428.035-426.23c21.47-21.38 21.425-56.11 0-77.478s-56.11-21.425-77.478 0L263.5 519.647 115.168 373.12c-21.555-21.293-56.108-21.425-77.478 0s-21.425 56.108 0 77.478z'/%3E%3C/svg%3E");
         --wup-icon-dot: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='20'/%3E%3C/svg%3E");
       }`;
-    // todo change icons to fonts: wupfont
+    // NiceToHave: change icons to fonts: wupfont
   }
 
   /** StyleContent related to component */
@@ -217,7 +218,6 @@ export default abstract class WUPBaseControl<
         contain: style;
         display: block;
         margin-bottom: 20px;
-        position: relative;
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
         cursor: pointer;
@@ -233,7 +233,7 @@ export default abstract class WUPBaseControl<
       :host:focus-within,
       :host:focus-within > [menu] {
         z-index: 90010;
-        outline: 1px solid var(--ctrl-focus);
+        box-shadow: 0 0 0 1px var(--ctrl-focus);
       }
       :host:focus-within strong,
       :host:focus-within legend {
@@ -253,8 +253,7 @@ export default abstract class WUPBaseControl<
       }
       :host[invalid],
       :host[invalid] > [menu] {
-        box-shadow: 0 0 3px 0 var(--ctrl-invalid-border);
-        outline-color: var(--ctrl-invalid-border);
+        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
       :host label {
         display: flex;
@@ -267,10 +266,15 @@ export default abstract class WUPBaseControl<
         padding-bottom: 0;
       }
       :host input,
-      :host textarea,
-      :host [contenteditable] {
+      :host textarea {
         padding: 0;
         margin: 0;
+        cursor: inherit;
+      }
+      :host [contenteditable=true] {
+        margin: var(--ctrl-padding);
+        margin-left: 0;
+        margin-right: 0;
         cursor: inherit;
       }
       :host strong {
@@ -317,7 +321,7 @@ export default abstract class WUPBaseControl<
       :host:focus-within [error] {
         max-height: none;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         /*:host:hover {
           z-index: 90011;
         }
@@ -496,7 +500,7 @@ export default abstract class WUPBaseControl<
   }
 
   /** Announce text by screenReaders if element is focused */
-  $ariaSpeak(text: string): void {
+  $ariaSpeak(text: string, delayMs = 100): void {
     // don't use speechSynthesis because it's announce despite on screen-reader settings - can be disabled
     // text && speechSynthesis && speechSynthesis.speak(new SpeechSynthesisUtterance(text)); // watchfix: https://stackoverflow.com/questions/72907960/web-accessibility-window-speechsynthesis-vs-role-alert
     /* istanbul ignore else */
@@ -508,9 +512,9 @@ export default abstract class WUPBaseControl<
       el.id = this.#ctr.$uniqueId;
       const i = this.$refInput;
       const an = "aria-describedby";
-      i.setAttribute(an, `${this.$refInput.getAttribute(an) || ""} ${el.id}`.trimStart());
+      i.setAttribute(an, `${i.getAttribute(an) || ""} ${el.id}`.trimStart());
       this.appendChild(el);
-      setTimeout(() => (el.textContent = text), 100); // otherwise reader doesn't announce section
+      setTimeout(() => (el.textContent = text), delayMs); // otherwise reader doesn't announce section
       setTimeout(() => {
         el.remove();
         const a = i.getAttribute(an);
@@ -519,7 +523,7 @@ export default abstract class WUPBaseControl<
           const aNext = a.replace(el.id, "").replace("  ", " ").trim();
           aNext ? i.setAttribute(an, aNext) : i.removeAttribute(an);
         }
-      }, 200);
+      }, 500);
     }
   }
 
@@ -541,14 +545,27 @@ export default abstract class WUPBaseControl<
   protected override gotChanges(propsChanged: Array<keyof WUP.BaseControl.Options | any> | null): void {
     super.gotChanges(propsChanged);
 
-    // todo instead set prop:undefined: delete to reduce memory ?
+    this._opts.label = this.getAttr("label");
+    this._opts.name = this.getAttr("name");
 
-    this._opts.label = this.getAttribute("label") ?? this._opts.label;
-    this._opts.name = this.getAttribute("name") ?? this._opts.name;
-    this._opts.autoComplete = this.getAttribute("autoComplete") ?? this._opts.autoComplete;
-    this._opts.disabled = this.getBoolAttr("disabled", this._opts.disabled);
-    this._opts.readOnly = this.getBoolAttr("readOnly", this._opts.readOnly);
-    this._opts.autoFocus = this.getBoolAttr("autoFocus", this._opts.autoFocus);
+    const a = this.getAttribute("autocomplete");
+    switch (a) {
+      case null:
+      case "":
+        break; // skip attribute in this case
+      case "false":
+        this._opts.autoComplete = false;
+        break;
+      case "true":
+        this._opts.autoComplete = true;
+        break;
+      default:
+        this._opts.autoComplete = a;
+        break;
+    }
+    this._opts.disabled = this.getAttr("disabled", "bool");
+    this._opts.readOnly = this.getAttr("readonly", "bool", this._opts.readOnly);
+    this._opts.autoFocus = this.getAttr("autofocus", "bool", this._opts.autoFocus);
 
     const i = this.$refInput;
     // set label
@@ -567,7 +584,11 @@ export default abstract class WUPBaseControl<
       const attr = this.getAttribute("initvalue");
       if (attr !== null) {
         (this as any)._noDelInitValueAttr = true;
-        this.$initValue = this.parse(attr);
+        try {
+          this.$initValue = this.parse(attr);
+        } catch (err) {
+          this.throwError(err);
+        }
         delete (this as any)._noDelInitValueAttr;
       } else if (propsChanged) {
         this.$initValue = undefined; // removed attr >> remove initValue
@@ -607,8 +628,8 @@ export default abstract class WUPBaseControl<
   protected override gotReady(): void {
     super.gotReady();
 
-    const onFocusGotHandler = (): void => {
-      const arr = this.gotFocus();
+    const onFocusGotHandler = (e: FocusEvent): void => {
+      const arr = this.gotFocus(e);
       const r = onFocusLostEv(this, () => {
         this.gotFocusLost();
         arr.forEach((f) => f());
@@ -661,6 +682,7 @@ export default abstract class WUPBaseControl<
 
     super.connectedCallback();
     this.$form = WUPFormElement.$tryConnect(this);
+    this.#isDirty = false; // reset state after re-appended
   }
 
   protected override gotRemoved(): void {
@@ -670,7 +692,7 @@ export default abstract class WUPBaseControl<
 
   /** Returns validations enabled by user */
   protected get validations(): WUP.BaseControl.Options["validations"] | undefined {
-    return this.getRefAttr<WUP.BaseControl.Options["validations"]>("validations");
+    return this.getAttr<WUP.BaseControl.Options["validations"]>("validations", "ref");
   }
 
   /** Returns validations functions ready for checking */
@@ -952,7 +974,8 @@ export default abstract class WUPBaseControl<
   }
 
   /** Called when element got focus; must return array of RemoveFunctions called on FocusLost */
-  protected gotFocus(): Array<() => void> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected gotFocus(ev: FocusEvent): Array<() => void> {
     this.$refError?.$refresh();
 
     const c = this._opts.validationCase;

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`control.date $ariaDetails 1`] = `
+exports[`control.time $ariaDetails 1`] = `
 <wup-time>
   <label
     for="txt1"
@@ -27,12 +27,13 @@ exports[`control.date $ariaDetails 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-time>
 `;
 
-exports[`control.date $ariaDetails 2`] = `
+exports[`control.time $ariaDetails 2`] = `
 <wup-time>
   <label
     for="txt1"
@@ -54,12 +55,13 @@ exports[`control.date $ariaDetails 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-time>
 `;
 
-exports[`control.date $ariaSpeak 1`] = `
+exports[`control.time $ariaSpeak 1`] = `
 <wup-time>
   <label
     for="txt1"
@@ -82,6 +84,7 @@ exports[`control.date $ariaSpeak 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <section
@@ -95,7 +98,7 @@ exports[`control.date $ariaSpeak 1`] = `
 </wup-time>
 `;
 
-exports[`control.date $ariaSpeak 2`] = `
+exports[`control.time $ariaSpeak 2`] = `
 <wup-time>
   <label
     for="txt1"
@@ -118,12 +121,13 @@ exports[`control.date $ariaSpeak 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-time>
 `;
 
-exports[`control.date $show/$hide error 1`] = `
+exports[`control.time $show/$hide error 1`] = `
 <wup-time>
   <label
     for="txt1"
@@ -145,12 +149,13 @@ exports[`control.date $show/$hide error 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-time>
 `;
 
-exports[`control.date $show/$hide error 2`] = `
+exports[`control.time $show/$hide error 2`] = `
 <wup-time
   invalid=""
 >
@@ -175,6 +180,7 @@ exports[`control.date $show/$hide error 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -195,7 +201,7 @@ exports[`control.date $show/$hide error 2`] = `
 </wup-time>
 `;
 
-exports[`control.date $show/$hide error 3`] = `
+exports[`control.time $show/$hide error 3`] = `
 <wup-time>
   <label
     for="txt1"
@@ -217,21 +223,24 @@ exports[`control.date $show/$hide error 3`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-time>
 `;
 
-exports[`control.date common tests render + styles 1`] = `<wup-time />`;
+exports[`control.time common tests render + styles 1`] = `<wup-time />`;
 
-exports[`control.date common tests render + styles 2`] = `
+exports[`control.time common tests render + styles 2`] = `
 <style>
   .wup-hidden, [wup-hidden] {
 position: absolute;
-height: 1px; width: 1px;
+height:1px; width:1px;
 top:0;left:0;
-overflow: hidden;
-clip: rect(1px, 1px, 1px, 1px);}
+overflow:hidden;
+clip:rect(1px,1px,1px,1px);
+min-width:initial;
+padding:0;}
   :root {
           --base-bg: #fff;
           --base-text: #232323;
@@ -281,7 +290,6 @@ clip: rect(1px, 1px, 1px, 1px);}
         contain: style;
         display: block;
         margin-bottom: 20px;
-        position: relative;
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
         cursor: pointer;
@@ -295,7 +303,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-TIME:focus-within,
       WUP-TIME:focus-within &gt; [menu] {
         z-index: 90010;
-        outline: 1px solid var(--ctrl-focus);
+        box-shadow: 0 0 0 1px var(--ctrl-focus);
       }
       WUP-TIME:focus-within strong,
       WUP-TIME:focus-within legend {
@@ -315,8 +323,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       }
       WUP-TIME[invalid],
       WUP-TIME[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 0 var(--ctrl-invalid-border);
-        outline-color: var(--ctrl-invalid-border);
+        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
       WUP-TIME label {
         display: flex;
@@ -329,10 +336,15 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-bottom: 0;
       }
       WUP-TIME input,
-      WUP-TIME textarea,
-      WUP-TIME [contenteditable] {
+      WUP-TIME textarea {
         padding: 0;
         margin: 0;
+        cursor: inherit;
+      }
+      WUP-TIME [contenteditable=true] {
+        margin: var(--ctrl-padding);
+        margin-left: 0;
+        margin-right: 0;
         cursor: inherit;
       }
       WUP-TIME strong {
@@ -372,7 +384,7 @@ width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
 box-sizing: content-box;
 margin: 0;
-padding: 0 5px;
+padding: 5px;
 flex: 0 0 auto;
 align-self: stretch;
 border: none;
@@ -398,7 +410,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-TIME:focus-within [error] {
         max-height: none;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         /*WUP-TIME:hover {
           z-index: 90011;
         }
@@ -415,6 +427,7 @@ mask-image: var(--ctrl-icon-img);
         }
       }
         WUP-TIME {
+          contain: style;
           cursor: text;
         }
         WUP-TIME label &gt; span {
@@ -425,7 +438,6 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-TIME input,
         WUP-TIME textarea,
-        WUP-TIME [contenteditable],
         WUP-TIME [maskholder],
         WUP-TIME [prefix],
         WUP-TIME [postfix] {
@@ -441,7 +453,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-TIME input,
         WUP-TIME textarea,
-        WUP-TIME [contenteditable],
+        WUP-TIME [contenteditable=true],
         WUP-TIME [maskholder],
         WUP-TIME [postfix] {
           width: 100%;
@@ -478,13 +490,13 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-TIME input:-webkit-autofill,
         WUP-TIME textarea:-webkit-autofill,
-        WUP-TIME [contenteditable]:-webkit-autofill {
+        WUP-TIME [contenteditable=true]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
         WUP-TIME input:autofill,
         WUP-TIME textarea:autofill,
-        WUP-TIME [contenteditable]:autofill {
+        WUP-TIME [contenteditable=true]:autofill {
           font: inherit;
           background-clip: text;
         }
@@ -517,7 +529,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-TIME:focus-within strong,
         WUP-TIME input:not(:placeholder-shown) + strong,
         WUP-TIME textarea:not(:placeholder-shown) + strong,
-        WUP-TIME [contenteditable]:not(:empty) + strong,
+        WUP-TIME [contenteditable=true]:not(:empty) + strong,
         WUP-TIME legend {
           top: 0.2em;
           transform: scale(0.9);
@@ -542,7 +554,7 @@ width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
 box-sizing: content-box;
 margin: 0;
-padding: 0 5px;
+padding: 5px;
 flex: 0 0 auto;
 align-self: stretch;
 border: none;
@@ -568,15 +580,16 @@ mask-image: var(--ctrl-icon-img);
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
         WUP-TIME label button {
-           z-index: 1;
-           contain: strict;
+          contain: strict;
+          position: relative;
+          z-index: 1;
         }
         WUP-TIME label&gt;span + button {
           margin-right: -0.5em;
         }
         WUP-TIME button[clear] {
-          position: relative;
           background: none;
+          align-self: center;
         }
         WUP-TIME button[clear]:after {
           content: "";
@@ -590,13 +603,12 @@ mask-image: var(--ctrl-icon-img);
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           width: 100%;
-          padding-top: 100%;
         }
         WUP-TIME button[clear]:before {
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
         }
-        @media (hover: hover) {
+        @media (hover: hover) and (pointer: fine) {
           WUP-TIME button[clear]:hover {
             box-shadow: none;
           }
@@ -731,7 +743,7 @@ mask-image: var(--ctrl-icon-img);
         justify-content: center;
         height: 2.4em;
         border-radius: 0;
-        padding: 0;
+        padding: 0; margin: 0;
         background: var(--base-btn3-bg);
       }
       WUP-TIME [menu] button:first-child {
@@ -751,7 +763,7 @@ width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
 box-sizing: content-box;
 margin: 0;
-padding: 0 5px;
+padding: 5px;
 flex: 0 0 auto;
 align-self: stretch;
 border: none;
@@ -768,7 +780,7 @@ mask-image: var(--ctrl-icon-img);
         content: "";
         padding:0;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         WUP-TIME [menu] li:hover {
           position: relative;
         }
@@ -798,7 +810,7 @@ mask-image: var(--ctrl-icon-img);
 </style>
 `;
 
-exports[`control.date validations $options.validationShowAll 1`] = `
+exports[`control.time validations $options.validationShowAll 1`] = `
 <wup-time
   invalid=""
 >
@@ -824,6 +836,7 @@ exports[`control.date validations $options.validationShowAll 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -857,7 +870,7 @@ exports[`control.date validations $options.validationShowAll 1`] = `
 </wup-time>
 `;
 
-exports[`control.date validations $options.validationShowAll 2`] = `
+exports[`control.time validations $options.validationShowAll 2`] = `
 <wup-time>
   <label
     for="txt1"
@@ -880,12 +893,13 @@ exports[`control.date validations $options.validationShowAll 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-time>
 `;
 
-exports[`control.date validations $options.validationShowAll 3`] = `
+exports[`control.time validations $options.validationShowAll 3`] = `
 <wup-time
   invalid=""
 >
@@ -913,6 +927,7 @@ exports[`control.date validations $options.validationShowAll 3`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -935,7 +950,7 @@ exports[`control.date validations $options.validationShowAll 3`] = `
 </wup-time>
 `;
 
-exports[`control.date validations options.validationCase 1`] = `
+exports[`control.time validations options.validationCase 1`] = `
 <wup-time>
   <label
     for="txt1"
@@ -957,12 +972,13 @@ exports[`control.date validations options.validationCase 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-time>
 `;
 
-exports[`control.date validations options.validationCase 2`] = `
+exports[`control.time validations options.validationCase 2`] = `
 <wup-time
   invalid=""
 >
@@ -999,11 +1015,12 @@ exports[`control.date validations options.validationCase 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
     menu=""
-    style="opacity: 0;"
+    style=""
   >
     <div
       id="txt2"
@@ -1095,6 +1112,7 @@ exports[`control.date validations options.validationCase 2`] = `
     aria-live="off"
     error=""
     id="txt4"
+    role="alert"
     style="max-width: 100px;"
   >
     <span
@@ -1109,7 +1127,7 @@ exports[`control.date validations options.validationCase 2`] = `
 </wup-time>
 `;
 
-exports[`control.date validations options.validationCase 3`] = `
+exports[`control.time validations options.validationCase 3`] = `
 <wup-time
   invalid=""
   opened=""
@@ -1129,11 +1147,11 @@ exports[`control.date validations options.validationCase 3`] = `
       </span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt5"
-        aria-describedby="txt6"
+        aria-controls="txt6"
+        aria-describedby="txt5"
         aria-expanded="true"
         aria-haspopup="listbox"
-        aria-owns="txt5"
+        aria-owns="txt6"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -1149,13 +1167,14 @@ exports[`control.date validations options.validationCase 3`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt6"
+    id="txt5"
     style="max-width: 100px;"
   >
     <span
@@ -1172,7 +1191,7 @@ exports[`control.date validations options.validationCase 3`] = `
     style=""
   >
     <div
-      id="txt5"
+      id="txt6"
       role="application"
     >
       <ul
@@ -1259,7 +1278,7 @@ exports[`control.date validations options.validationCase 3`] = `
 </wup-time>
 `;
 
-exports[`control.date validations options.validationCase 4`] = `
+exports[`control.time validations options.validationCase 4`] = `
 <wup-time
   invalid=""
 >
@@ -1276,11 +1295,11 @@ exports[`control.date validations options.validationCase 4`] = `
       </span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt5"
-        aria-describedby="txt7"
+        aria-controls="txt7"
+        aria-describedby="txt8"
         aria-expanded="false"
         aria-haspopup="listbox"
-        aria-owns="txt5"
+        aria-owns="txt7"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -1296,13 +1315,14 @@ exports[`control.date validations options.validationCase 4`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt7"
+    id="txt8"
     role="alert"
     style="max-width: 100px;"
   >
@@ -1318,7 +1338,7 @@ exports[`control.date validations options.validationCase 4`] = `
 </wup-time>
 `;
 
-exports[`control.date with form 1`] = `
+exports[`control.time with form 1`] = `
 <wup-form
   role="form"
 >
@@ -1345,6 +1365,7 @@ exports[`control.date with form 1`] = `
         aria-hidden="true"
         clear=""
         tabindex="-1"
+        type="button"
       />
     </label>
   </wup-time>

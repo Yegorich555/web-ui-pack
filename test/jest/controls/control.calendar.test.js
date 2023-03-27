@@ -425,6 +425,7 @@ describe("control.calendar", () => {
 
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Home", cancelable: true, bubbles: true }));
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: " ", cancelable: true, bubbles: true }));
+    await h.wait(1);
     expect(el.$value.toISOString()).toBe("2023-03-01T00:00:00.000Z");
     expect(isPrevented).toBe(true);
 
@@ -437,6 +438,7 @@ describe("control.calendar", () => {
 
     isPrevented = null;
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", cancelable: true, bubbles: true }));
+    await h.wait(1);
     expect(el.$value.toISOString()).toBe("2022-03-01T00:00:00.000Z");
     expect(isPrevented).toBe(true);
 

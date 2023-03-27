@@ -74,7 +74,7 @@ describe("control.text: mask", () => {
     el.focus();
     await h.wait(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<label for="txt1"><span><span aria-hidden="true" maskholder=""><i></i>yyyy-mm-dd</span><input placeholder=" " type="text" id="txt1" autocomplete="off" inputmode="numeric"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
+      `"<label for="txt1"><span><span aria-hidden="true" maskholder=""><i></i>yyyy-mm-dd</span><input placeholder=" " type="text" id="txt1" autocomplete="off" inputmode="numeric"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label>"`
     );
 
     const typeText = [
@@ -204,7 +204,7 @@ describe("control.text: mask", () => {
     el.focus();
     await h.wait(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<label for="txt1"><span><span aria-hidden="true" maskholder=""><i></i>yyyy/mm/dd</span><input placeholder=" " type="text" id="txt1" autocomplete="off" inputmode="numeric"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
+      `"<label for="txt1"><span><span aria-hidden="true" maskholder=""><i></i>yyyy/mm/dd</span><input placeholder=" " type="text" id="txt1" autocomplete="off" inputmode="numeric"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label>"`
     );
 
     const typeText = [
@@ -325,7 +325,7 @@ describe("control.text: mask", () => {
     el.focus();
     await h.wait(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<label for="txt1"><span><span aria-hidden="true" maskholder=""><i></i>xxx.xxx.xxx.xxx</span><input placeholder=" " type="text" id="txt1" autocomplete="off" inputmode="numeric"><strong></strong></span><button clear="" aria-hidden="true" tabindex="-1"></button></label>"`
+      `"<label for="txt1"><span><span aria-hidden="true" maskholder=""><i></i>xxx.xxx.xxx.xxx</span><input placeholder=" " type="text" id="txt1" autocomplete="off" inputmode="numeric"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label>"`
     );
 
     const typeText = [
@@ -865,6 +865,7 @@ describe("control.text: mask", () => {
     // possible to add mask after a time
     expect(h.getInputCursor(el.$refInput)).toBe("2|");
     el.$options.mask = "#0";
+    el.$options.selectOnFocus = true;
     await h.wait(1);
     await h.userTypeText(el.$refInput, "3", { clearPrevious: false });
     expect(h.getInputCursor(el.$refInput)).toBe("23|");

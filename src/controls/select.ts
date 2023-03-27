@@ -25,6 +25,10 @@ declare global {
 
     type MenuItem<T> = MenuItemText<T> | MenuItemFn<T>;
     type MenuItems<T> = MenuItemText<T>[] | MenuItemFn<T>[];
+    interface MenuItemElement extends HTMLLIElement {
+      _value: any;
+      _text: string;
+    }
 
     interface EventMap extends WUP.BaseCombo.EventMap {}
     interface ValidityMap extends WUP.BaseCombo.ValidityMap {}
@@ -36,12 +40,22 @@ declare global {
     interface Options<T = any, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, Defaults<T, VM> {
       /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data! */
       items: MenuItems<T> | (() => MenuItems<T> | Promise<MenuItems<T>>);
-      /** Set true to make input not editable but allow to user select items via popup-menu (ordinary dropdown mode) */
+      /** Set true to make input not editable but allow to user select items via popup-menu (ordinary dropdown mode)
+       *  @defaultValue false */
       readOnlyInput?: boolean;
-      /** Allow user to create new value if value not found in items */
+      /** Allow user to create new value if value not found in items
+       * @defaultValue false */
       allowNewValue?: boolean;
+      /** Allow to select multiple values; in this case $value & $initValue must contain Array<ValueType>
+       * * @defaultValue false */
+      multiple?: boolean;
     }
-    interface Attributes extends WUP.BaseCombo.Attributes {}
+    interface Attributes extends WUP.BaseCombo.Attributes, Pick<Options, "multiple"> {
+      /** Items showed in dropdown-menu. Point global obj-key with items (set `window.items` for `window.items = [{value: 1, text: 'Item 1'}]` ) */
+      items?: string;
+      /** Allow user to create new value if value not found in items */
+      allownewvalue?: boolean | "";
+    }
     interface JSXProps<C = WUPSelectControl> extends WUP.BaseCombo.JSXProps<C>, Attributes {}
   }
 
@@ -90,7 +104,7 @@ declare global {
  * </label>
  */
 export default class WUPSelectControl<
-  ValueType = any,
+  ValueType = any | any[],
   ItemType = ValueType,
   EventMap extends WUP.Select.EventMap = WUP.Select.EventMap
 > extends WUPBaseComboControl<ValueType, EventMap> {
@@ -99,15 +113,19 @@ export default class WUPSelectControl<
 
   static get observedOptions(): Array<string> {
     const arr = super.observedOptions as Array<keyof WUP.Select.Options>;
-    arr.push("items");
+    arr.push("items", "allowNewValue", "multiple");
+    return arr;
+  }
+
+  static get observedAttributes(): Array<string> {
+    const arr = super.observedAttributes as Array<LowerKeys<WUP.Select.Attributes>>;
+    arr.push("items", "allownewvalue", "multiple");
     return arr;
   }
 
   static get $styleRoot(): string {
     return `:root {
         --ctrl-select-icon-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m16.078 258.214 329.139 329.139c21.449 21.449 56.174 21.449 77.567 0l329.139-329.139c21.449-21.449 21.449-56.174 0-77.567s-56.174-21.449-77.567 0L384 471.003 93.644 180.647c-21.449-21.449-56.173-21.449-77.567 0s-21.449 56.173 0 77.567z'/%3E%3C/svg%3E");
-        --ctrl-select-current: inherit;
-        --ctrl-select-current-bg: #d9f7fd;
       }`;
   }
 
@@ -134,27 +152,27 @@ export default class WUPSelectControl<
       ${WUPcssScrollSmall(":host [menu]>ul")}
       :host [menu] li {
         padding: 1em;
+        border-radius: var(--ctrl-border-radius);
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         :host [menu] li:hover {
-          color: var(--ctrl-select-current);
-          background: var(--ctrl-select-current-bg);
+          box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
         }
       }
       :host [menu] li[aria-selected="true"] {
-        color: var(--ctrl-select-current);
-        background: var(--ctrl-select-current-bg);
+        color: var(--ctrl-selected);
         display: flex;
       }
       :host [menu] li[aria-selected="true"]:after {
         content: "";
         --ctrl-icon-img: var(--wup-icon-check);
         ${WUPcssIcon}
+        background: var(--ctrl-selected);
         margin-left: auto;
+        padding: 0;
       }
       :host [menu] li[focused] {
         box-shadow: inset 0 0 4px 0 var(--ctrl-focus);
-        border-radius: var(--ctrl-border-radius);
       }`;
   }
 
@@ -163,10 +181,22 @@ export default class WUPSelectControl<
   /** Text for aria-label of <ul> element */
   static $ariaLabelItems = "Items";
 
-  /** Function to filter menuItems based on inputValue; all values are in lowerCase */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  static $filterMenuItem(menuItemText: string, inputValue: string, inputRawValue: string): boolean {
-    return menuItemText.startsWith(inputValue) || menuItemText.includes(` ${inputValue}`);
+  /** Function to filter menuItems based on inputValue
+   * @param menuItemText textcontent in lowercase
+   * @param menuItemValue value related to items[x].value
+   * @param inputValue normalized input value (trimStart + lowercase)
+   * @param inputRawValue input value without normalization
+   * @returns true if menuItem must be visible in menu
+   */
+  static $filterMenuItem(
+    this: WUPSelectControl,
+    menuItemText: string,
+    menuItemValue: any,
+    inputValue: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    inputRawValue: string
+  ): boolean {
+    return !inputValue || menuItemText.startsWith(inputValue) || menuItemText.includes(` ${inputValue}`);
   }
 
   static $defaults: WUP.Select.Defaults = {
@@ -189,6 +219,9 @@ export default class WUPSelectControl<
 
   /** Called when need to parse attr [initValue] */
   override parse(attrValue: string): ValueType | undefined {
+    if (this._opts.multiple) {
+      return nestedProperty.get(window, attrValue);
+    }
     this.getItems().then((arr) => {
       let r;
       if (arr?.length) {
@@ -205,6 +238,39 @@ export default class WUPSelectControl<
     return this.$initValue;
   }
 
+  override parseInput(text: string): ValueType | undefined {
+    let v: Array<any> | ValueType | undefined;
+    if (!this._opts.multiple) {
+      const s = text.trim();
+      v = s ? this.findValueByText(s) ?? (s as any) : undefined;
+    } else {
+      // WARN it works only with allowNewValue
+      v = text.split(",").map((si) => si.trim()) as Array<string>;
+      v = v
+        .filter((si, i) => (v as Array<ValueType>).indexOf(si) === i) // allow only unique values
+        .map((si) => {
+          if (!si) {
+            return undefined;
+          }
+          const vi = this.findValueByText(si);
+          return vi ?? (this._opts.allowNewValue ? si : vi);
+        })
+        .filter((vi) => vi !== undefined);
+      if (!v.length) {
+        return undefined;
+      }
+    }
+    return v as ValueType;
+  }
+
+  /** It's called with option allowNewValue to find value related to text */
+  protected findValueByText(txt: string): ValueType | undefined {
+    const s = txt.toLowerCase();
+    const i = this._menuItems?.all.findIndex((o) => o._text === s) as number;
+    const r = i > -1 ? this._cachedItems![i].value : undefined;
+    return r;
+  }
+
   /** Called on every spin-render */
   renderSpin(): WUPSpinElement {
     const spin = document.createElement("wup-spin");
@@ -215,17 +281,18 @@ export default class WUPSelectControl<
     return spin;
   }
 
-  protected override async gotOptionsChanged(e: WUP.Base.OptionEvent): Promise<void> {
-    const ev = e as unknown as WUP.Base.OptionEvent<WUP.Select.Options>;
-    if (ev.props.includes("items")) {
+  protected override gotChanges(propsChanged: Array<keyof WUP.Select.Options> | null): void {
+    const isUpdateItems = !propsChanged || propsChanged.includes("items");
+    if (isUpdateItems) {
       this.removePopup();
       this._cachedItems = undefined;
-      /* istanbul ignore else */
-      if (ev.props.length === 1) {
-        return; // skip re-init if only $options.items is changed
-      }
+      // it's important to be before super otherwise initValue won't work
+      this._opts.items = this.getAttr<WUP.Radio.Options["items"]>("items", "ref") || [];
     }
-    super.gotOptionsChanged(e);
+    this._opts.allowNewValue = this.getAttr("allownewvalue", "bool", this._opts.allowNewValue);
+    this._opts.multiple = this.getAttr("multiple", "bool", this._opts.multiple);
+
+    super.gotChanges(propsChanged as any);
   }
 
   override gotFormChanges(propsChanged: Array<keyof WUP.Form.Options> | null): void {
@@ -259,7 +326,7 @@ export default class WUPSelectControl<
 
   /** All items of current menu */
   _menuItems?: {
-    all: Array<HTMLLIElement & { _text: string }>;
+    all: WUP.Select.MenuItemElement[];
     /** Index of items filtered by input */
     filtered?: Array<number>;
     /** Index (in 'filtered' otherwise in 'all' array) of item that has virtual-focus; */
@@ -300,30 +367,36 @@ export default class WUPSelectControl<
     ul.setAttribute("id", menuId);
     ul.setAttribute("role", "listbox");
     ul.setAttribute("aria-label", this.#ctr.$ariaLabelItems);
+    ul.setAttribute("tabindex", -1); // otherwise Firefox move focus into it by keydown 'tab'
+    this.setAttr.call(ul, "aria-multiselectable", this._opts.multiple === true);
 
     const all = await this.renderMenuItems(ul);
     this._menuItems = { all, focused: -1 };
     !all.length && this.renderMenuNoItems(popup, false);
     // it happens on every show because by hide it dispose events
-    onEvent(ul, "click", (e) => {
-      e.stopPropagation(); // to prevent popup-hide-show
+    onEvent(
+      ul,
+      "click",
+      (e) => {
+        e.preventDefault(); // to prevent popup-hide-show
 
-      let t = e.target as Node | HTMLElement;
-      while (1) {
-        const parent = t.parentElement as HTMLElement;
-        /* istanbul ignore else */
-        if (parent === ul) {
-          this.gotMenuItemClick(e, t as HTMLLIElement & { _text: string });
-          break;
+        let t = e.target as Node | HTMLElement;
+        if (t === ul) {
+          return;
         }
-        t = parent;
-      }
-    });
+        while (1) {
+          const parent = t.parentElement as HTMLElement;
+          if (parent === ul) {
+            const isDisabled = (t as HTMLElement).hasAttribute("aria-disabled");
+            !isDisabled && this.gotMenuItemClick(e, t as WUP.Select.MenuItemElement);
+            break;
+          }
+          t = parent;
+        }
+      },
+      { passive: false }
+    );
 
-    if (this._needFilter) {
-      this._needFilter();
-      delete this._needFilter;
-    }
     return ul;
   }
 
@@ -332,9 +405,7 @@ export default class WUPSelectControl<
     if (this._cachedItems) {
       return this._cachedItems;
     }
-
-    const items =
-      (nestedProperty.get(window, this.getAttribute("items") || "") as WUP.Select.Options["items"]) || this._opts.items;
+    const { items } = this._opts;
 
     let arr: WUP.Select.MenuItems<ValueType>;
     if (typeof items === "function") {
@@ -375,31 +446,31 @@ export default class WUPSelectControl<
   }
 
   protected override valueToInput(v: ValueType | undefined): Promise<string> | string {
-    if (v === undefined) {
+    if (v === undefined || (this._opts.multiple && !(v as Array<ValueType>).length)) {
       return "";
     }
-    const r = this.getItems().then((items) => this.valueToText(v as any, items as WUP.Select.MenuItems<any>));
-    return r;
-  }
-
-  /** It's called with option allowNewValue to find value related to text */
-  protected findValueByText(txt: string): ValueType | undefined {
-    const s = txt.toLowerCase();
-    const i = this._menuItems?.all.findIndex((o) => o._text === s) as number;
-    const r = i > -1 ? this._cachedItems![i].value : undefined;
+    // WARN: possible case when value changed but prev getItems.then still in progress
+    const r = this.getItems().then((items) => {
+      if (this._opts.multiple) {
+        const s = (v as Array<any>)?.map((vi) => this.valueToText(vi, items as WUP.Select.MenuItems<any>)).join(", ");
+        return this.$isFocused ? `${s}, ` : s;
+      }
+      return this.valueToText(v as any, items as WUP.Select.MenuItems<any>);
+    });
     return r;
   }
 
   /** Create menuItems as array of HTMLLiElement with option _text required to filtering by input (otherwise content can be html-structure) */
-  protected async renderMenuItems(ul: HTMLUListElement): Promise<Array<HTMLLIElement & { _text: string }>> {
+  protected async renderMenuItems(ul: HTMLUListElement): Promise<WUP.Select.MenuItemElement[]> {
     const arr = await this.getItems();
 
-    const arrLi = arr.map(() => {
-      const li = ul.appendChild(document.createElement("li"));
+    const arrLi = arr.map((a) => {
+      const li = ul.appendChild(document.createElement("li")) as WUP.Select.MenuItemElement;
       li.setAttribute("role", "option");
       // li.setAttribute("aria-selected", "false");
+      li._value = a.value;
       return li;
-    }) as Array<HTMLLIElement & { _text: string }> & { _focused: number; _selected: number };
+    }) as Array<WUP.Select.MenuItemElement> & { _focused: number; _selected: number };
 
     if (arr.length) {
       if (typeof arr[0].text === "function") {
@@ -419,43 +490,104 @@ export default class WUPSelectControl<
   }
 
   /** Called when need to setValue & close base on clicked item */
-  protected gotMenuItemClick(_e: MouseEvent, item: HTMLLIElement & { _text: string }): void {
+  protected gotMenuItemClick(_e: MouseEvent, item: WUP.Select.MenuItemElement): void {
     const i = this._menuItems!.all.indexOf(item);
     const o = this._cachedItems![i];
-    this.selectValue(o.value);
+    const canOff = this._opts.multiple && item.getAttribute("aria-selected") === "true";
+    this.selectValue(o.value, !this._opts.multiple);
+    canOff && item.setAttribute("aria-selected", "false");
+  }
+
+  protected override selectValue(v: ValueType, canHideMenu = true): void {
+    if (this._opts.multiple) {
+      let arr = this.$value as Array<ValueType>;
+      if (!arr?.length) {
+        v = [v] as any;
+      } else {
+        const i = arr.indexOf(v);
+        if (i !== -1) {
+          if (arr.length === 1) {
+            arr = undefined as any;
+            // this.selectMenuItem(null);
+          } else {
+            arr = [...arr];
+            arr.splice(i, 1);
+          }
+        } else {
+          arr = [...arr, v];
+        }
+        v = arr as any;
+      }
+    }
+    super.selectValue(v, canHideMenu);
+
+    this._opts.multiple && this.clearFilterMenuItems();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override async goShowMenu(
     showCase: ShowCases,
-    e?: MouseEvent | FocusEvent | null,
-    isNeedWait?: boolean
+    e?: MouseEvent | FocusEvent | KeyboardEvent | null
   ): Promise<WUPPopupElement | null> {
+    if (this.$isShown) {
+      return this.$refPopup!;
+    }
     if (this.$isPending) {
       return null;
     }
 
     if (this.$refPopup && showCase !== ShowCases.onInput && this._menuItems!.filtered) {
-      this._menuItems!.all.forEach((li) => (li.style.display = "")); // reset styles after filtering
-      delete this._menuItems!.filtered;
-      this.renderMenuNoItems(this.$refPopup, true); // remove NoItems
+      this.clearFilterMenuItems();
     }
 
-    const popup = await super.goShowMenu(showCase, e, isNeedWait);
-    if (!popup) {
-      return null;
+    const popup = await super.goShowMenu(showCase, e);
+    if (popup) {
+      this.selectMenuItemByValue(this.$value); // set aria-selected
+      setTimeout(() => this.getFirstSelected()?.scrollIntoView({ block: "center" }), 50); // fix: sometimes scrollIntoViewIfNeeded works wrong during the opening menu
     }
-
-    // set aria-selected
-    this.selectMenuItemByValue(this.$value);
     return popup;
+  }
+
+  /** Returns first selected visible item */
+  protected getFirstSelected(): WUP.Select.MenuItemElement | undefined {
+    if (this._selectedMenuItem) {
+      const items = this._selectedMenuItem.parentElement!.querySelectorAll("[aria-selected=true]");
+      for (let i = 0, item = items[0] as HTMLElement; i < items.length; item = items[++i] as HTMLElement) {
+        if (!item.style.display) {
+          return item as WUP.Select.MenuItemElement;
+        }
+      }
+    }
+    return undefined;
+  }
+
+  protected override selectMenuItem(next: HTMLElement | null): void {
+    if (this._opts.multiple) {
+      this._selectedMenuItem = undefined; // othewise multiple selection not allowed in combobox
+    }
+    super.selectMenuItem(next);
   }
 
   /** Select menu item if value !== undefined and menu is opened */
   protected selectMenuItemByValue(v: ValueType | undefined): void {
-    if (v !== undefined && this.$isOpen) {
-      const i = this._cachedItems!.findIndex((item) => this.#ctr.$isEqual(item.value, v));
-      this.selectMenuItem(this._menuItems!.all[i] || null);
+    if (this.$isShown) {
+      const findAndSelect = (vi: ValueType): number => {
+        const i = this._cachedItems!.findIndex((item) => this.#ctr.$isEqual(item.value, vi));
+        this.selectMenuItem(this._menuItems!.all[i] || null);
+        return i;
+      };
+      v === undefined && this._selectedMenuItem && this.selectMenuItem(null);
+
+      if (!this._opts.multiple) {
+        v !== undefined && findAndSelect(v);
+      } else {
+        const set = new Set<number>();
+        v !== undefined && (v as Array<any>).forEach((vi) => set.add(findAndSelect(vi)));
+        // deselect others
+        this._menuItems!.all.forEach(
+          (el, i) => !set.has(i) && el.hasAttribute("aria-selected") && el.removeAttribute("aria-selected")
+        );
+      }
     }
   }
 
@@ -477,39 +609,21 @@ export default class WUPSelectControl<
     this._menuItems!.focused = index;
   }
 
-  protected override async gotKeyDown(e: KeyboardEvent): Promise<void> {
-    // pending event disables gotKeyDown so it's case impossible
-    // if (this.$isPending) {
-    //   return;
-    // }
-    const wasOpen = this.$isOpen;
-    if (wasOpen && this._opts.allowNewValue && !this._focusedMenuItem && e.key === "Enter") {
-      const txt = this.$refInput.value.trim();
-      const v = txt ? this.findValueByText(txt) ?? (txt as any) : undefined;
-      // this.selectValue(v);
-      // e.preventDefault();
-      // return;
-      this.setValue(v);
+  protected override focusMenuItemByKeydown(e: KeyboardEvent): void {
+    if (!this._menuItems) {
+      return; // possible when user goes to another but menuItems still is loading
+      // throw new Error(`${this.tagName}. Impossible on empty menu`);
     }
-    await super.gotKeyDown(e);
-    if (!this.$isOpen || e.altKey || e.shiftKey || e.ctrlKey || !this._menuItems) {
-      return;
-    }
-
-    const { length } = this._menuItems!.filtered || this._menuItems!.all;
+    const { length } = this._menuItems.filtered || this._menuItems.all;
     let focusIndex: number | null = null;
 
     // firstFocused can be selected/current
-    if (this._menuItems!.focused === -1 && this._selectedMenuItem) {
+    if (this._menuItems.focused === -1) {
       if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-        focusIndex = this._menuItems!.all.indexOf(this._selectedMenuItem as HTMLLIElement & { _text: string });
-        // case impossible because with filtered items we have this._menuItems!.focused !== -1
-        // if (this._menuItems.filtered) {
-        //   focusIndex = this._menuItems.filtered.indexOf(focusIndex);
-        // }
-        // if (focusIndex === -1) {
-        //   focusIndex = null;
-        // }
+        const item = this.getFirstSelected();
+        if (item) {
+          focusIndex = this._menuItems.all.indexOf(item as WUP.Select.MenuItemElement);
+        }
       }
     }
 
@@ -517,13 +631,13 @@ export default class WUPSelectControl<
       switch (e.key) {
         case "ArrowDown":
           {
-            let cur = this._menuItems!.focused;
+            let cur = this._menuItems.focused;
             focusIndex = ++cur >= length ? 0 : cur;
           }
           break;
         case "ArrowUp":
           {
-            let cur = wasOpen ? this._menuItems!.focused : length;
+            let cur = this._menuItems.focused; // : length;
             focusIndex = --cur < 0 ? length - 1 : cur;
           }
           break;
@@ -544,50 +658,104 @@ export default class WUPSelectControl<
     }
   }
 
-  /** For case when need to menu is opened but items are not rendered yet */
-  protected _needFilter?: () => void;
+  protected override gotKeyDown(e: KeyboardEvent): void {
+    // if (this.$isPending) {return;} // pending event disables gotKeyDown so case impossible
+    if (this._opts.allowNewValue && e.key === "Enter" && !this._focusedMenuItem) {
+      this.setValue(this.parseInput(this.$refInput.value));
+      this._opts.multiple && e.preventDefault(); // prevent closing by keydown
+    }
+    !e.defaultPrevented && super.gotKeyDown(e);
+  }
+
+  /** Called to filter menuItems (on input change etc.) */
+  protected filterMenuItems(): void {
+    const rawV = this.$refInput.value;
+    let v = rawV;
+    if (this._opts.multiple) {
+      v = rawV.substring(rawV.lastIndexOf(",") + 1, rawV.length);
+    }
+    v = v.trim().toLowerCase();
+
+    const filtered: number[] = [];
+    this._menuItems!.all.forEach((li, i) => {
+      const isOk = this.#ctr.$filterMenuItem.call(this, li._text, li._value, v, rawV);
+      isOk && filtered!.push(i);
+      this.filterMenuItem(li, !isOk);
+    });
+    const hasFiltered = filtered.length !== this._menuItems!.all.length;
+    this._menuItems!.filtered = hasFiltered ? filtered : undefined;
+    const hasVisible = filtered.length !== 0;
+    this.renderMenuNoItems(this.$refPopup!, hasVisible);
+    hasVisible && rawV !== "" && !this._opts.allowNewValue && this.focusMenuItemByIndex(0);
+  }
+
+  /** Called on showMenu when user opened it without input-change */
+  protected clearFilterMenuItems(): void {
+    this._menuItems!.all.forEach((li) => this.filterMenuItem(li, false)); // reset styles after filtering
+    delete this._menuItems!.filtered;
+    const hasVisible = this._menuItems!.all.length !== 0;
+    this.renderMenuNoItems(this.$refPopup!, hasVisible); // remove NoItems
+  }
+
+  /** Called to hide/show menuItem */
+  protected filterMenuItem(el: HTMLElement, hide: boolean): void {
+    el.style.display = hide ? "none" : "";
+  }
+
+  protected override canHandleUndo(): boolean {
+    return !!this._opts.multiple;
+  }
+
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
-    this.$isOpen && this.focusMenuItem(null); // reset virtual focus
+    this.$isShown && this.focusMenuItem(null); // reset virtual focus: // WARN it's not good enough when this._opts.multiple
     super.gotInput(e);
 
-    const rawV = e.target.value;
-    const v = rawV.trimStart().toLowerCase();
-
-    delete this._needFilter;
     const filter = (): void => {
-      const filtered: number[] = [];
-      this._menuItems!.all.forEach((li, i) => {
-        const isOk = !v || this.#ctr.$filterMenuItem(li._text, v, rawV);
-        isOk && filtered!.push(i);
-        li.style.display = isOk ? "" : "none";
-      });
-      this._menuItems!.filtered = filtered;
-      const hasVisible = filtered.length !== 0;
-      this.renderMenuNoItems(this.$refPopup!, hasVisible);
-      hasVisible && rawV !== "" && !this._opts.allowNewValue && this.focusMenuItemByIndex(0);
+      this.filterMenuItems();
     };
 
-    if (!this._menuItems) {
-      this._needFilter = filter;
-    } else {
-      filter();
+    let isChanged = false;
+    // user can append item by ',' at the end or remove immediately
+    if (this._opts.multiple && this.canParseInput(this.$refInput.value)) {
+      let str = this.$refInput.value;
+      const isDeleted = e.inputType.startsWith("deleteContent");
+      if (this.$refInput.selectionStart !== str.length && !isDeleted) {
+        this.declineInput(str.length); // don't allow to type text in the middle
+      } else {
+        const isRemove = str.endsWith(",") && isDeleted; // 'Item1, Item2, |' + Backspace => remove 'Item2'
+        const iEnd = str.lastIndexOf(isRemove ? ", " : ",");
+        str = str.substring(0, iEnd); // allow user filter via typing in the end of input => 'Item1, Item2,|'
+        const next = this.parseInput(str) as Array<ValueType> | undefined;
+        // case 1: user removes 'Item1,| Item2|' - setValue [Item1]
+        // case 2: user adds `Item1,| Item2,| -- setValue [Item1, Item2]
+        isChanged = (next || []).length !== ((this.$value as Array<ValueType> | undefined) || []).length;
+        isChanged && this.setValue(next as any);
+      }
     }
+    isChanged ? setTimeout(filter, 1) : filter(); // setValue updates input only after Promise and we need to wait for: NiceToHave deprecate value
+  }
 
-    // this.$refPopup!.$refresh(); // it doesn't required anymore because popup listens for own sizes
+  protected override gotFocus(e: FocusEvent): Array<() => void> {
+    const r = super.gotFocus(e);
+    if (this._opts.multiple) {
+      if (!this.$isDisabled && !this.$isReadOnly && !this._opts.readOnlyInput && this.$refInput.value) {
+        this.$refInput.value += ", "; // add delimiter at the end
+      }
+    }
+    return r;
   }
 
   protected override gotFocusLost(): void {
-    if (this._opts.allowNewValue) {
-      // to allow user left value without press Enter
-      const txt = this.$refInput.value.trim();
-      const v = txt ? this.findValueByText(txt) ?? (txt as any) : undefined;
-      this.setValue(v);
+    if (this._opts.multiple) {
+      this.$refInput.value = this.$refInput.value.replace(/, *$/, ""); // remove delimiter
     }
+    this._opts.allowNewValue && this.setValue(this.parseInput(this.$refInput.value)); // to allow user left value without pressing Enter
     super.gotFocusLost();
   }
 
   protected override setValue(v: ValueType | undefined, canValidate = true, skipInput = false): boolean | null {
     const r = super.setValue(v, canValidate, skipInput);
+    // todo method setValue must contain the following prop 'details': fromInput, $valueChange, from $select etc. & need to call selectMenuItemByValue when setValue not from useSelect
     r && this.selectMenuItemByValue(v);
     return r;
   }
@@ -599,3 +767,6 @@ export default class WUPSelectControl<
 }
 
 customElements.define(tagName, WUPSelectControl);
+
+// NiceToHave: option to allow autoselect item without pressing Enter
+// WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation

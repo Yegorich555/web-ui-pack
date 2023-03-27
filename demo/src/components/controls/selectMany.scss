@@ -1,0 +1,15 @@
+.withDelIcon {
+  --ctrl-select-item-del-display: inline-block;
+
+  [item] {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+.test {
+  // some extra styles possible here
+  [item][focused] {
+    // box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
+  }
+}

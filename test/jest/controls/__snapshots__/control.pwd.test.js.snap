@@ -23,11 +23,13 @@ exports[`control.pwd $ariaDetails 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-pwd>
@@ -51,11 +53,13 @@ exports[`control.pwd $ariaDetails 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-pwd>
@@ -85,11 +89,13 @@ exports[`control.pwd $ariaSpeak 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <section
@@ -127,11 +133,13 @@ exports[`control.pwd $ariaSpeak 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-pwd>
@@ -160,11 +168,13 @@ exports[`control.pwd $show/$hide error 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-pwd>
@@ -196,11 +206,13 @@ exports[`control.pwd $show/$hide error 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -244,11 +256,13 @@ exports[`control.pwd $show/$hide error 3`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-pwd>
@@ -260,10 +274,12 @@ exports[`control.pwd common tests render + styles 2`] = `
 <style>
   .wup-hidden, [wup-hidden] {
 position: absolute;
-height: 1px; width: 1px;
+height:1px; width:1px;
 top:0;left:0;
-overflow: hidden;
-clip: rect(1px, 1px, 1px, 1px);}
+overflow:hidden;
+clip:rect(1px,1px,1px,1px);
+min-width:initial;
+padding:0;}
   :root {
           --base-bg: #fff;
           --base-text: #232323;
@@ -311,7 +327,6 @@ clip: rect(1px, 1px, 1px, 1px);}
         contain: style;
         display: block;
         margin-bottom: 20px;
-        position: relative;
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
         cursor: pointer;
@@ -325,7 +340,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-PWD:focus-within,
       WUP-PWD:focus-within &gt; [menu] {
         z-index: 90010;
-        outline: 1px solid var(--ctrl-focus);
+        box-shadow: 0 0 0 1px var(--ctrl-focus);
       }
       WUP-PWD:focus-within strong,
       WUP-PWD:focus-within legend {
@@ -345,8 +360,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       }
       WUP-PWD[invalid],
       WUP-PWD[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 0 var(--ctrl-invalid-border);
-        outline-color: var(--ctrl-invalid-border);
+        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
       WUP-PWD label {
         display: flex;
@@ -359,10 +373,15 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-bottom: 0;
       }
       WUP-PWD input,
-      WUP-PWD textarea,
-      WUP-PWD [contenteditable] {
+      WUP-PWD textarea {
         padding: 0;
         margin: 0;
+        cursor: inherit;
+      }
+      WUP-PWD [contenteditable=true] {
+        margin: var(--ctrl-padding);
+        margin-left: 0;
+        margin-right: 0;
         cursor: inherit;
       }
       WUP-PWD strong {
@@ -402,7 +421,7 @@ width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
 box-sizing: content-box;
 margin: 0;
-padding: 0 5px;
+padding: 5px;
 flex: 0 0 auto;
 align-self: stretch;
 border: none;
@@ -428,7 +447,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-PWD:focus-within [error] {
         max-height: none;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         /*WUP-PWD:hover {
           z-index: 90011;
         }
@@ -445,6 +464,7 @@ mask-image: var(--ctrl-icon-img);
         }
       }
         WUP-PWD {
+          contain: style;
           cursor: text;
         }
         WUP-PWD label &gt; span {
@@ -455,7 +475,6 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-PWD input,
         WUP-PWD textarea,
-        WUP-PWD [contenteditable],
         WUP-PWD [maskholder],
         WUP-PWD [prefix],
         WUP-PWD [postfix] {
@@ -471,7 +490,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-PWD input,
         WUP-PWD textarea,
-        WUP-PWD [contenteditable],
+        WUP-PWD [contenteditable=true],
         WUP-PWD [maskholder],
         WUP-PWD [postfix] {
           width: 100%;
@@ -508,13 +527,13 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-PWD input:-webkit-autofill,
         WUP-PWD textarea:-webkit-autofill,
-        WUP-PWD [contenteditable]:-webkit-autofill {
+        WUP-PWD [contenteditable=true]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
         WUP-PWD input:autofill,
         WUP-PWD textarea:autofill,
-        WUP-PWD [contenteditable]:autofill {
+        WUP-PWD [contenteditable=true]:autofill {
           font: inherit;
           background-clip: text;
         }
@@ -547,7 +566,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-PWD:focus-within strong,
         WUP-PWD input:not(:placeholder-shown) + strong,
         WUP-PWD textarea:not(:placeholder-shown) + strong,
-        WUP-PWD [contenteditable]:not(:empty) + strong,
+        WUP-PWD [contenteditable=true]:not(:empty) + strong,
         WUP-PWD legend {
           top: 0.2em;
           transform: scale(0.9);
@@ -572,7 +591,7 @@ width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
 box-sizing: content-box;
 margin: 0;
-padding: 0 5px;
+padding: 5px;
 flex: 0 0 auto;
 align-self: stretch;
 border: none;
@@ -598,15 +617,16 @@ mask-image: var(--ctrl-icon-img);
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
         WUP-PWD label button {
-           z-index: 1;
-           contain: strict;
+          contain: strict;
+          position: relative;
+          z-index: 1;
         }
         WUP-PWD label&gt;span + button {
           margin-right: -0.5em;
         }
         WUP-PWD button[clear] {
-          position: relative;
           background: none;
+          align-self: center;
         }
         WUP-PWD button[clear]:after {
           content: "";
@@ -620,13 +640,12 @@ mask-image: var(--ctrl-icon-img);
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           width: 100%;
-          padding-top: 100%;
         }
         WUP-PWD button[clear]:before {
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
         }
-        @media (hover: hover) {
+        @media (hover: hover) and (pointer: fine) {
           WUP-PWD button[clear]:hover {
             box-shadow: none;
           }
@@ -666,7 +685,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-PWD[reverse] button[eye="off"] {
           --ctrl-icon-img: var(--wup-icon-eye);
         }
-        @media (hover: hover) {
+        @media (hover: hover) and (pointer: fine) {
           WUP-PWD button[eye]:hover {
             box-shadow: none;
             background-color: var(--ctrl-focus-label);
@@ -702,11 +721,13 @@ exports[`control.pwd options clearButton 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <section
@@ -742,6 +763,7 @@ exports[`control.pwd options clearButton 2`] = `
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <section
@@ -780,11 +802,13 @@ exports[`control.pwd validations $options.validationShowAll 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -857,11 +881,13 @@ exports[`control.pwd validations $options.validationShowAll 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -944,11 +970,13 @@ exports[`control.pwd validations $options.validationShowAll 3`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -994,11 +1022,13 @@ exports[`control.pwd validations options.validationCase 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-pwd>
@@ -1033,11 +1063,13 @@ exports[`control.pwd validations options.validationCase 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -1045,6 +1077,7 @@ exports[`control.pwd validations options.validationCase 2`] = `
     aria-live="off"
     error=""
     id="txt3"
+    role="alert"
     style="display: none;"
   >
     <span
@@ -1088,11 +1121,13 @@ exports[`control.pwd validations options.validationCase 3`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -1143,11 +1178,13 @@ exports[`control.pwd validations options.validationCase 4`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
     <button
       aria-hidden="true"
       eye=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -1198,11 +1235,13 @@ exports[`control.pwd with form 1`] = `
         aria-hidden="true"
         clear=""
         tabindex="-1"
+        type="button"
       />
       <button
         aria-hidden="true"
         eye=""
         tabindex="-1"
+        type="button"
       />
     </label>
   </wup-pwd>

@@ -10,7 +10,7 @@ import { HideCases, ShowCases } from "./popupElement.types";
  *   callbacks results as fast as it's possible without waiting for animation */
 export default function popupListen(
   options: {
-    target: HTMLElement;
+    target: Element;
     showCase?: ShowCases;
     hoverShowTimeout?: number;
     hoverHideTimeout?: number;
@@ -133,28 +133,8 @@ export default function popupListen(
       }
     });
 
-    let wasMouseMove = false; // fix when user makes t.mousedown, mousemove, body.mouseup
-    appendEvent(t, "mousedown", (ev) => {
-      wasMouseMove = false;
-      if (ev.button) {
-        // only for leftButton === 0
-        return;
-      }
-      const r = onEvent(
-        t,
-        "mousemove",
-        (e) => (wasMouseMove = e.movementX !== 0 || e.movementY !== 0), // it's required otherwise browser can provide move with 0 0 changes
-        { once: true, passive: true }
-      );
-      document.addEventListener("mouseup", () => r(), { once: true, passive: true });
-    });
-
     onShowEvent(document, "click", (e) => {
       preventClickAfterFocus = false; // mostly it doesn't make sense but maybe it's possible
-      if (wasMouseMove || e.detail === 2 || e.button) {
-        wasMouseMove = false;
-        return;
-      }
       // filter click from target because we have target event for this
       const isTarget = t === e.target || (e.target instanceof Node && t.contains(e.target));
       if (!isTarget) {
@@ -181,9 +161,8 @@ export default function popupListen(
         debounceTimeout ||
         wasOutsideClick ||
         openedByHover ||
-        e.detail === 2 || // it's double-click
-        e.button || // it's not left-click
-        wasMouseMove;
+        // e.detail >= 2 || // it's double-click
+        e.button; // it's not left-click
 
       if (!skip) {
         if (!openedEl) {
@@ -229,13 +208,7 @@ export default function popupListen(
         preventClickAfterFocus = !!(opts.showCase & ShowCases.onClick);
         await show(ShowCases.onFocus, e);
         if (preventClickAfterFocus) {
-          const rst = (): void => {
-            preventClickAfterFocus = false;
-            r1();
-            r2();
-          };
-          const r1 = appendEvent(document, "touchstart", rst); // mousdown isn't not called when user touch-move-end
-          const r2 = appendEvent(document, "mousedown", rst);
+          appendEvent(document, "pointerdown", () => (preventClickAfterFocus = false), { once: true }); // pointerdown includes touchstart & mousedown
         }
       }
     };

@@ -29,7 +29,7 @@ declare global {
       left: number;
     }
     interface Rect extends PositionRect {
-      el: HTMLElement;
+      el: Element;
       width: number;
       height: number;
     }
@@ -242,21 +242,30 @@ Object.keys(PopupPlacements).forEach((kp) => {
     p[key] = <WUP.Popup.Place.AlignFunc>o[fnName];
     const v = p[key];
     // adding .adjust to each WUP.Popup.Place.AlignFunc
-    v.$adjust = <WUP.Popup.Place.AdjustFunc>function adjust(t, me, fit) {
-      return prevFn.$adjust.call(v(t, me, fit), t, me, fit);
-    };
-    v.$adjust.$resizeHeight = function resizeH(t, me, fit) {
-      return resizeHeight.call(v.$adjust(t, me, fit), t, me, fit);
-    };
-    v.$adjust.$resizeWidth = function resizeW(t, me, fit) {
-      return resizeWidth.call(v.$adjust(t, me, fit), t, me, fit);
-    };
-    v.$resizeHeight = function resizeH(t, me, fit) {
-      return resizeHeight.call(v(t, me, fit), t, me, fit);
-    };
-    v.$resizeWidth = function resizeW(t, me, fit) {
-      return resizeWidth.call(v(t, me, fit), t, me, fit);
-    };
+    const vname1 = `${fnName}_adjust`;
+    v.$adjust = {
+      [vname1]: <WUP.Popup.Place.AdjustFunc>((t, me, fit) => prevFn.$adjust.call(v(t, me, fit), t, me, fit)),
+    }[vname1];
+
+    let vname = `${vname1}_resizeHeight`;
+    v.$adjust.$resizeHeight = {
+      [vname]: <WUP.Popup.Place.PlaceFunc>((t, me, fit) => resizeHeight.call(v.$adjust(t, me, fit), t, me, fit)),
+    }[vname];
+
+    vname = `${vname1}_resizeWidth`;
+    v.$adjust.$resizeWidth = {
+      [vname]: <WUP.Popup.Place.PlaceFunc>((t, me, fit) => resizeWidth.call(v.$adjust(t, me, fit), t, me, fit)),
+    }[vname];
+
+    vname = `${fnName}_resizeHeight`;
+    v.$resizeHeight = {
+      [vname]: <WUP.Popup.Place.PlaceFunc>((t, me, fit) => resizeHeight.call(v(t, me, fit), t, me, fit)),
+    }[vname];
+
+    vname = `${fnName}_resizeWidth`;
+    v.$resizeWidth = {
+      [vname]: <WUP.Popup.Place.PlaceFunc>((t, me, fit) => resizeWidth.call(v(t, me, fit), t, me, fit)),
+    }[vname];
   });
 });
 
@@ -268,9 +277,9 @@ export function getOffset(
     return { top: 0, left: 0, bottom: 0, right: 0 };
   }
   return {
-    top: offset[0],
-    right: offset[1],
-    bottom: offset[2] ?? offset[0],
-    left: offset[3] ?? offset[1],
+    top: Math.round(offset[0]),
+    right: Math.round(offset[1]),
+    bottom: Math.round(offset[2] ?? offset[0]),
+    left: Math.round(offset[3] ?? offset[1]),
   };
 }

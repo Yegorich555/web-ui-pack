@@ -39,7 +39,7 @@ declare global {
        * @defaultValue 0; */
       debounceMs?: number;
       /** Select whole text when input got focus (when input is not readonly and not disabled);
-       * @defaultValue true */
+       * @defaultValue false */
       selectOnFocus: boolean;
       /** Show/hide clear button. @see ClearActions
        * @defaultValue true */
@@ -151,17 +151,17 @@ export default class WUPTextControl<
   static get $style(): string {
     return `${super.$style}
         :host {
+          contain: style;
           cursor: text;
         }
         :host label > span {
           width: 100%;
-          position: relative;
+          position: relative;${/* to position <strong /> relative to input */ ""}
           display: flex;
-          flex-direction: row-reverse;
+          flex-direction: row-reverse;${/* required for reading <strong /> 1st */ ""}
         }
         :host input,
         :host textarea,
-        :host [contenteditable],
         :host [maskholder],
         :host [prefix],
         :host [postfix] {
@@ -177,7 +177,7 @@ export default class WUPTextControl<
         }
         :host input,
         :host textarea,
-        :host [contenteditable],
+        :host [contenteditable=true],
         :host [maskholder],
         :host [postfix] {
           width: 100%;
@@ -214,13 +214,13 @@ export default class WUPTextControl<
         }
         :host input:-webkit-autofill,
         :host textarea:-webkit-autofill,
-        :host [contenteditable]:-webkit-autofill {
+        :host [contenteditable=true]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
         :host input:autofill,
         :host textarea:autofill,
-        :host [contenteditable]:autofill {
+        :host [contenteditable=true]:autofill {
           font: inherit;
           background-clip: text;
         }
@@ -253,7 +253,7 @@ export default class WUPTextControl<
         :host:focus-within strong,
         :host input:not(:placeholder-shown) + strong,
         :host textarea:not(:placeholder-shown) + strong,
-        :host [contenteditable]:not(:empty) + strong,
+        :host [contenteditable=true]:not(:empty) + strong,
         :host legend {
           top: 0.2em;
           transform: scale(0.9);
@@ -285,15 +285,16 @@ export default class WUPTextControl<
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
         :host label button {
-           z-index: 1;
-           contain: strict;
+          contain: strict;
+          position: relative;
+          z-index: 1;
         }
         :host label>span + button {
           margin-right: -0.5em;
         }
         :host button[clear] {
-          position: relative;
           background: none;
+          align-self: center;
         }
         :host button[clear]:after {
           content: "";
@@ -307,13 +308,12 @@ export default class WUPTextControl<
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           width: 100%;
-          padding-top: 100%;
         }
         :host button[clear]:before {
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
         }
-        @media (hover: hover) {
+        @media (hover: hover) and (pointer: fine) {
           :host button[clear]:hover {
             box-shadow: none;
           }
@@ -334,7 +334,7 @@ export default class WUPTextControl<
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUP.Text.Defaults = {
     ...WUPBaseControl.$defaults,
-    selectOnFocus: true,
+    selectOnFocus: false,
     clearButton: true,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
@@ -419,13 +419,13 @@ export default class WUPTextControl<
       this.$refLabel.appendChild(bc);
     }
     bc.setAttribute("clear", "");
+    bc.setAttribute("tabindex", -1);
     bc.setAttribute("aria-hidden", true);
-    bc.tabIndex = -1;
+    bc.setAttribute("type", "button");
     onEvent(
       bc,
       "click",
       (e) => {
-        e.stopPropagation(); // prevent from affect on parent
         e.preventDefault(); // prevent from submit
         this.clearValue();
       },
@@ -481,8 +481,8 @@ export default class WUPTextControl<
     }
   }
 
-  protected override gotFocus(): Array<() => void> {
-    const arr = super.gotFocus();
+  protected override gotFocus(ev: FocusEvent): Array<() => void> {
+    const arr = super.gotFocus(ev);
 
     const r = this.appendEvent(this.$refInput, "input", (e) => {
       // (e as WUP.Text.GotInputEvent).setValuePrevented = false;
@@ -493,9 +493,7 @@ export default class WUPTextControl<
       this.$refInput,
       "beforeinput",
       (e) => this.gotBeforeInput(e as WUP.Text.GotInputEvent),
-      {
-        passive: false,
-      }
+      { passive: false }
     );
 
     /* istanbul ignore else */
@@ -526,7 +524,9 @@ export default class WUPTextControl<
       if (this.refMask.prefix && this.refMask.value === this.refMask.prefix) {
         this.$refInput.value = ""; // rollback prefix/postfix if user types nothing
         delete (this.$refInput as WUP.Text.Mask.HandledInput)._maskPrev;
-        this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
+        setTimeout(() => {
+          this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
+        });
       }
       this.renderPostfix(this._opts.postfix); // postfix depends on maskholder
     }
@@ -537,8 +537,8 @@ export default class WUPTextControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Text.Options> | null): void {
     // apply mask options
-    this._opts.mask = this.getAttribute("mask") ?? this._opts.mask;
-    this._opts.maskholder = this.getAttribute("maskholder") ?? this._opts.maskholder;
+    this._opts.mask = this.getAttr("mask");
+    this._opts.maskholder = this.getAttr("maskholder");
     if (!this._opts.mask || this._opts.mask !== this.refMask?.pattern) {
       delete this.refMask; // delete if mask is removed or changed (it's recovered again on event)
     }
@@ -562,11 +562,11 @@ export default class WUPTextControl<
       this.$refBtnClear = undefined;
     }
     if (!propsChanged || propsChanged.includes("prefix")) {
-      this._opts.prefix = this.getAttribute("prefix") ?? this._opts.prefix;
+      this._opts.prefix = this.getAttr("prefix");
       this.renderPrefix(this._opts.prefix);
     }
     if (!propsChanged || propsChanged.includes("postfix")) {
-      this._opts.postfix = this.getAttribute("postfix") ?? this._opts.postfix;
+      this._opts.postfix = this.getAttr("postfix");
       this.renderPostfix(this._opts.postfix);
     }
   }
@@ -591,8 +591,12 @@ export default class WUPTextControl<
         }
         e.preventDefault();
         const inputType = isRedo ? "historyRedo" : "historyUndo";
-        this.$refInput.dispatchEvent(new InputEvent("beforeinput", { cancelable: true, bubbles: true, inputType })) &&
-          this.$refInput.dispatchEvent(new InputEvent("input", { cancelable: false, bubbles: true, inputType }));
+        setTimeout(() => {
+          this.$refInput.dispatchEvent(new InputEvent("beforeinput", { cancelable: true, bubbles: true, inputType })) &&
+            setTimeout(() =>
+              this.$refInput.dispatchEvent(new InputEvent("input", { cancelable: false, bubbles: true, inputType }))
+            );
+        });
       }
     }
   }
@@ -723,7 +727,7 @@ export default class WUPTextControl<
       this.declineInput(pos);
     } else {
       el.value = mi.value;
-      el.setSelectionRange(pos, pos);
+      document.activeElement === el && el.setSelectionRange(pos, pos); // without checking on focus setSelectionRange sets focus on Safari
     }
     isFocused && this.renderMaskHolder(this._opts.maskholder, mi.leftLength - declinedAdd);
 

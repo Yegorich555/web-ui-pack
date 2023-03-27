@@ -24,6 +24,7 @@ exports[`control.number $ariaDetails 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-num>
@@ -48,6 +49,7 @@ exports[`control.number $ariaDetails 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-num>
@@ -73,6 +75,7 @@ exports[`control.number $ariaSpeak 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <section
@@ -106,6 +109,7 @@ exports[`control.number $ariaSpeak 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-num>
@@ -130,6 +134,7 @@ exports[`control.number $show/$hide error 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-num>
@@ -157,6 +162,7 @@ exports[`control.number $show/$hide error 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -196,6 +202,7 @@ exports[`control.number $show/$hide error 3`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-num>
@@ -207,10 +214,12 @@ exports[`control.number common tests render + styles 2`] = `
 <style>
   .wup-hidden, [wup-hidden] {
 position: absolute;
-height: 1px; width: 1px;
+height:1px; width:1px;
 top:0;left:0;
-overflow: hidden;
-clip: rect(1px, 1px, 1px, 1px);}
+overflow:hidden;
+clip:rect(1px,1px,1px,1px);
+min-width:initial;
+padding:0;}
   :root {
           --base-bg: #fff;
           --base-text: #232323;
@@ -254,7 +263,6 @@ clip: rect(1px, 1px, 1px, 1px);}
         contain: style;
         display: block;
         margin-bottom: 20px;
-        position: relative;
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
         cursor: pointer;
@@ -268,7 +276,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-NUM:focus-within,
       WUP-NUM:focus-within &gt; [menu] {
         z-index: 90010;
-        outline: 1px solid var(--ctrl-focus);
+        box-shadow: 0 0 0 1px var(--ctrl-focus);
       }
       WUP-NUM:focus-within strong,
       WUP-NUM:focus-within legend {
@@ -288,8 +296,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       }
       WUP-NUM[invalid],
       WUP-NUM[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 0 var(--ctrl-invalid-border);
-        outline-color: var(--ctrl-invalid-border);
+        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
       WUP-NUM label {
         display: flex;
@@ -302,10 +309,15 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-bottom: 0;
       }
       WUP-NUM input,
-      WUP-NUM textarea,
-      WUP-NUM [contenteditable] {
+      WUP-NUM textarea {
         padding: 0;
         margin: 0;
+        cursor: inherit;
+      }
+      WUP-NUM [contenteditable=true] {
+        margin: var(--ctrl-padding);
+        margin-left: 0;
+        margin-right: 0;
         cursor: inherit;
       }
       WUP-NUM strong {
@@ -345,7 +357,7 @@ width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
 box-sizing: content-box;
 margin: 0;
-padding: 0 5px;
+padding: 5px;
 flex: 0 0 auto;
 align-self: stretch;
 border: none;
@@ -371,7 +383,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-NUM:focus-within [error] {
         max-height: none;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         /*WUP-NUM:hover {
           z-index: 90011;
         }
@@ -388,6 +400,7 @@ mask-image: var(--ctrl-icon-img);
         }
       }
         WUP-NUM {
+          contain: style;
           cursor: text;
         }
         WUP-NUM label &gt; span {
@@ -398,7 +411,6 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-NUM input,
         WUP-NUM textarea,
-        WUP-NUM [contenteditable],
         WUP-NUM [maskholder],
         WUP-NUM [prefix],
         WUP-NUM [postfix] {
@@ -414,7 +426,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-NUM input,
         WUP-NUM textarea,
-        WUP-NUM [contenteditable],
+        WUP-NUM [contenteditable=true],
         WUP-NUM [maskholder],
         WUP-NUM [postfix] {
           width: 100%;
@@ -451,13 +463,13 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-NUM input:-webkit-autofill,
         WUP-NUM textarea:-webkit-autofill,
-        WUP-NUM [contenteditable]:-webkit-autofill {
+        WUP-NUM [contenteditable=true]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
         WUP-NUM input:autofill,
         WUP-NUM textarea:autofill,
-        WUP-NUM [contenteditable]:autofill {
+        WUP-NUM [contenteditable=true]:autofill {
           font: inherit;
           background-clip: text;
         }
@@ -490,7 +502,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-NUM:focus-within strong,
         WUP-NUM input:not(:placeholder-shown) + strong,
         WUP-NUM textarea:not(:placeholder-shown) + strong,
-        WUP-NUM [contenteditable]:not(:empty) + strong,
+        WUP-NUM [contenteditable=true]:not(:empty) + strong,
         WUP-NUM legend {
           top: 0.2em;
           transform: scale(0.9);
@@ -515,7 +527,7 @@ width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
 box-sizing: content-box;
 margin: 0;
-padding: 0 5px;
+padding: 5px;
 flex: 0 0 auto;
 align-self: stretch;
 border: none;
@@ -541,15 +553,16 @@ mask-image: var(--ctrl-icon-img);
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
         WUP-NUM label button {
-           z-index: 1;
-           contain: strict;
+          contain: strict;
+          position: relative;
+          z-index: 1;
         }
         WUP-NUM label&gt;span + button {
           margin-right: -0.5em;
         }
         WUP-NUM button[clear] {
-          position: relative;
           background: none;
+          align-self: center;
         }
         WUP-NUM button[clear]:after {
           content: "";
@@ -563,13 +576,12 @@ mask-image: var(--ctrl-icon-img);
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           width: 100%;
-          padding-top: 100%;
         }
         WUP-NUM button[clear]:before {
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
         }
-        @media (hover: hover) {
+        @media (hover: hover) and (pointer: fine) {
           WUP-NUM button[clear]:hover {
             box-shadow: none;
           }
@@ -611,6 +623,7 @@ exports[`control.number validations $options.validationShowAll 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -661,6 +674,7 @@ exports[`control.number validations $options.validationShowAll 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-num>
@@ -691,6 +705,7 @@ exports[`control.number validations $options.validationShowAll 3`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -732,6 +747,7 @@ exports[`control.number validations options.validationCase 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-num>
@@ -740,7 +756,7 @@ exports[`control.number validations options.validationCase 1`] = `
 exports[`control.number validations options.validationCase 2`] = `
 <wup-num
   invalid=""
-  style="overflow: hidden;"
+  style=""
 >
   <label
     for="txt1"
@@ -764,6 +780,7 @@ exports[`control.number validations options.validationCase 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -771,6 +788,7 @@ exports[`control.number validations options.validationCase 2`] = `
     aria-live="off"
     error=""
     id="txt3"
+    role="alert"
     style="display: none;"
   >
     <span
@@ -812,6 +830,7 @@ exports[`control.number validations options.validationCase 3`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -860,6 +879,7 @@ exports[`control.number validations options.validationCase 4`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -906,6 +926,7 @@ exports[`control.number with form 1`] = `
         aria-hidden="true"
         clear=""
         tabindex="-1"
+        type="button"
       />
     </label>
   </wup-num>

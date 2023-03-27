@@ -25,6 +25,7 @@ import DateControlView from "./components/controls/date";
 import TimeControlView from "./components/controls/time";
 import NumberControlView from "./components/controls/number";
 import FAQView from "./components/FAQView";
+import SelectManyControlView from "./components/controls/selectMany";
 
 (window as any).WUPHelpers = WUPHelpers;
 
@@ -50,7 +51,7 @@ const routes: IRoute[] = [
   { path: "control/check", el: CheckControlView, isNested: true },
   { path: "control/radio", el: RadioControlView, isNested: true },
   { path: "control/select", el: SelectControlView, isNested: true },
-  // { path: "control/selectMany", el: SelectManyControlView, isNested: true },
+  { path: "control/selectMany", el: SelectManyControlView, isNested: true },
   { path: "control/calendar", el: CalendarControlView, isNested: true },
   { path: "control/date", el: DateControlView, isNested: true },
   { path: "control/time", el: TimeControlView, isNested: true },

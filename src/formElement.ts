@@ -183,11 +183,12 @@ export default class WUPFormElement<
           font-weight: bold;
           background: var(--btn-submit-bg);
           color: var(--btn-submit-text);
+          outline: none;
         }
         :host [type='submit']:focus {
-          outline: 2px solid var(--btn-submit-focus);
+          border-color: var(--btn-submit-focus);
         }
-        @media (hover: hover) {
+        @media (hover: hover) and (pointer: fine) {
           :host [type='submit']:hover {
              box-shadow: inset 0 0 0 99999px rgba(0,0,0,0.2);
           }
@@ -438,10 +439,10 @@ export default class WUPFormElement<
   ): void {
     super.gotChanges(propsChanged);
 
-    this._opts.disabled = this.getBoolAttr("disabled", this._opts.disabled);
-    this._opts.readOnly = this.getBoolAttr("readonly", this._opts.readOnly);
-    this._opts.autoComplete = this.getBoolAttr("autoComplete", this._opts.autoComplete);
-    this._opts.autoFocus = this.getBoolAttr("autoFocus", this._opts.autoFocus);
+    this._opts.disabled = this.getAttr("disabled", "bool");
+    this._opts.readOnly = this.getAttr("readonly", "bool", this._opts.readOnly);
+    this._opts.autoComplete = this.getAttr("autocomplete", "bool", this._opts.autoComplete);
+    this._opts.autoFocus = this.getAttr("autofocus", "bool", this._opts.autoFocus);
 
     this.setAttr("readonly", this._opts.readOnly, true);
     this.setAttr("disabled", this._opts.disabled, true);

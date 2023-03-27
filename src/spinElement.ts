@@ -177,9 +177,9 @@ export default class WUPSpinElement extends WUPBaseElement {
   protected override gotChanges(propsChanged: Array<keyof WUP.Spin.Options> | null): void {
     super.gotChanges(propsChanged);
 
-    this._opts.inline = this.getBoolAttr("inline", this._opts.inline);
-    this._opts.fit = this.getBoolAttr("fit", this._opts.fit ?? !this._opts.inline);
-    this._opts.overflowFade = this.getBoolAttr("overflowFade", this._opts.overflowFade);
+    this._opts.inline = this.getAttr("inline", "bool");
+    this._opts.fit = this.getAttr("fit", "bool", this._opts.fit ?? !this._opts.inline);
+    this._opts.overflowFade = this.getAttr("overflowfade", "bool", this._opts.overflowFade)!;
 
     this.style.cssText = "";
     this.#prevRect = undefined;
@@ -208,7 +208,7 @@ export default class WUPSpinElement extends WUPBaseElement {
       }
       this.style.position = "absolute";
       const goUpdate = (): void => {
-        this.#prevRect = this.#updatePosition();
+        this.#prevRect = this.updatePosition();
         // possible if hidden by target-remove
         this.#frameId = window.requestAnimationFrame(goUpdate);
       };
@@ -219,25 +219,28 @@ export default class WUPSpinElement extends WUPBaseElement {
       this.$refFade?.remove();
       this.$refFade = undefined;
 
-      if (this.getBoolAttr("fit", this._opts.fit)) {
+      if (this._opts.fit) {
         const goUpdate = (): void => {
-          this.style.position = "absolute";
+          this.style.display = "none";
           const p = this.parentElement as HTMLElement;
           const r = { width: p.clientWidth, height: p.clientHeight, left: 0, top: 0 };
-          this.style.position = "";
+          this.style.display = "";
           if (this.#prevRect && this.#prevRect.width === r.width && this.#prevRect.height === r.height) {
             return;
           }
+
+          this.style.cssText = ""; // otherwise getPropertyValue is wrong
           const ps = getComputedStyle(p);
           const { paddingTop, paddingLeft, paddingBottom, paddingRight } = ps;
           const innW = r.width - px2Number(paddingLeft) - px2Number(paddingRight);
           const innH = r.height - px2Number(paddingTop) - px2Number(paddingBottom);
-          const sz = Math.min(innH, innW);
+          let sz = Math.min(innH, innW);
+          sz -= sz % 2; // 17px => 16px: Safari issue > placed wrong with odd width
           const varItemSize = ps.getPropertyValue("--spin-item-size");
-          const scale = Math.min(Math.min(innW, innH) / this.clientWidth, 1);
+          const scale = Math.min(sz / this.clientWidth, 1);
           // styleTransform(this, "scale", scale === 1 ? "" : `${scale}`); // wrong because it doesn't affect on the layout size
           // this.style.zoom = scale; // zoom isn't supported by FireFox
-          this.style.cssText = `--spin-size:${sz}px; --spin-item-size: calc(${varItemSize} * ${scale})`;
+          this.style.cssText = `--spin-size: ${sz}px; --spin-item-size: calc(${varItemSize} * ${scale})`;
           // this.style.width = `${sz}px`;
           // this.style.height = `${sz}px`;
 
@@ -261,7 +264,7 @@ export default class WUPSpinElement extends WUPBaseElement {
   #prevRect?: Pick<DOMRect, "width" | "height" | "top" | "left">;
   #frameId?: number;
   /** Update position. Call this method in cases when you changed options */
-  #updatePosition = (): Pick<DOMRect, "width" | "height" | "top" | "left"> | undefined => {
+  protected updatePosition(): Pick<DOMRect, "width" | "height" | "top" | "left"> | undefined {
     const trg = this.target;
     if (!trg.clientWidth || !trg.clientHeight) {
       this.style.display = "none"; // hide if target is not displayed
@@ -299,7 +302,7 @@ export default class WUPSpinElement extends WUPBaseElement {
 
     const left = Math.round(r.left + offset.left + (w - this.clientWidth) / 2);
     const top = Math.round(r.top + offset.top + (h - this.clientHeight) / 2);
-    styleTransform(this, "translate", `${left}px,${top}px`);
+    styleTransform(this, "translate", `${left}px,${top}px`); // WARN: parent transform not affects on element how it works in popup
     styleTransform(this, "scale", scale === 1 ? "" : `${scale}`);
 
     if (this.$refFade) {
@@ -316,7 +319,7 @@ export default class WUPSpinElement extends WUPBaseElement {
     }
 
     return r;
-  };
+  }
 }
 
 spinUseRing(WUPSpinElement);
@@ -379,6 +382,7 @@ export function spinUseTwinDualRing(cls: typeof WUPSpinElement): void {
     () =>
       `@keyframes WUP-SPIN-2-2 {
           0% { transform: translate(-50%, -50%) rotate(360deg); }
+          100% { transform: translate(-50%, -50%) rotate(0deg); }
        }
        :root {
           --spin-2: #b35e03;

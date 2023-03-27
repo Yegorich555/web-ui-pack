@@ -6,8 +6,9 @@ exports[`control.textarea $ariaDetails 1`] = `
     for="txt1"
   >
     <span>
-      <span
+      <wup-areainput
         aria-labelledby="txt1"
+        aria-multiline="true"
         contenteditable="true"
         role="textbox"
       />
@@ -24,6 +25,7 @@ exports[`control.textarea $ariaDetails 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-textarea>
@@ -35,8 +37,9 @@ exports[`control.textarea $ariaDetails 2`] = `
     for="txt1"
   >
     <span>
-      <span
+      <wup-areainput
         aria-labelledby="txt1"
+        aria-multiline="true"
         contenteditable="true"
         role="textbox"
       />
@@ -48,6 +51,7 @@ exports[`control.textarea $ariaDetails 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-textarea>
@@ -59,9 +63,10 @@ exports[`control.textarea $ariaSpeak 1`] = `
     for="txt1"
   >
     <span>
-      <span
+      <wup-areainput
         aria-describedby="my-test-id txt2 my-test-id2"
         aria-labelledby="txt1"
+        aria-multiline="true"
         contenteditable="true"
         role="textbox"
       />
@@ -73,6 +78,7 @@ exports[`control.textarea $ariaSpeak 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <section
@@ -92,9 +98,10 @@ exports[`control.textarea $ariaSpeak 2`] = `
     for="txt1"
   >
     <span>
-      <span
+      <wup-areainput
         aria-describedby="my-test-id my-test-id2"
         aria-labelledby="txt1"
+        aria-multiline="true"
         contenteditable="true"
         role="textbox"
       />
@@ -106,6 +113,7 @@ exports[`control.textarea $ariaSpeak 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-textarea>
@@ -117,8 +125,9 @@ exports[`control.textarea $show/$hide error 1`] = `
     for="txt1"
   >
     <span>
-      <span
+      <wup-areainput
         aria-labelledby="txt1"
+        aria-multiline="true"
         contenteditable="true"
         role="textbox"
       />
@@ -130,6 +139,7 @@ exports[`control.textarea $show/$hide error 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-textarea>
@@ -143,9 +153,10 @@ exports[`control.textarea $show/$hide error 2`] = `
     for="txt1"
   >
     <span>
-      <span
+      <wup-areainput
         aria-describedby="txt2"
         aria-labelledby="txt1"
+        aria-multiline="true"
         contenteditable="true"
         role="textbox"
       />
@@ -157,6 +168,7 @@ exports[`control.textarea $show/$hide error 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -183,8 +195,9 @@ exports[`control.textarea $show/$hide error 3`] = `
     for="txt1"
   >
     <span>
-      <span
+      <wup-areainput
         aria-labelledby="txt1"
+        aria-multiline="true"
         contenteditable="true"
         role="textbox"
       />
@@ -196,6 +209,7 @@ exports[`control.textarea $show/$hide error 3`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-textarea>
@@ -207,10 +221,12 @@ exports[`control.textarea common tests render + styles 2`] = `
 <style>
   .wup-hidden, [wup-hidden] {
 position: absolute;
-height: 1px; width: 1px;
+height:1px; width:1px;
 top:0;left:0;
-overflow: hidden;
-clip: rect(1px, 1px, 1px, 1px);}
+overflow:hidden;
+clip:rect(1px,1px,1px,1px);
+min-width:initial;
+padding:0;}
   :root {
           --base-bg: #fff;
           --base-text: #232323;
@@ -254,7 +270,6 @@ clip: rect(1px, 1px, 1px, 1px);}
         contain: style;
         display: block;
         margin-bottom: 20px;
-        position: relative;
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
         cursor: pointer;
@@ -268,7 +283,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       WUP-TEXTAREA:focus-within,
       WUP-TEXTAREA:focus-within &gt; [menu] {
         z-index: 90010;
-        outline: 1px solid var(--ctrl-focus);
+        box-shadow: 0 0 0 1px var(--ctrl-focus);
       }
       WUP-TEXTAREA:focus-within strong,
       WUP-TEXTAREA:focus-within legend {
@@ -288,8 +303,7 @@ clip: rect(1px, 1px, 1px, 1px);}
       }
       WUP-TEXTAREA[invalid],
       WUP-TEXTAREA[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 0 var(--ctrl-invalid-border);
-        outline-color: var(--ctrl-invalid-border);
+        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
       WUP-TEXTAREA label {
         display: flex;
@@ -302,10 +316,15 @@ clip: rect(1px, 1px, 1px, 1px);}
         padding-bottom: 0;
       }
       WUP-TEXTAREA input,
-      WUP-TEXTAREA textarea,
-      WUP-TEXTAREA [contenteditable] {
+      WUP-TEXTAREA textarea {
         padding: 0;
         margin: 0;
+        cursor: inherit;
+      }
+      WUP-TEXTAREA [contenteditable=true] {
+        margin: var(--ctrl-padding);
+        margin-left: 0;
+        margin-right: 0;
         cursor: inherit;
       }
       WUP-TEXTAREA strong {
@@ -345,7 +364,7 @@ width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
 box-sizing: content-box;
 margin: 0;
-padding: 0 5px;
+padding: 5px;
 flex: 0 0 auto;
 align-self: stretch;
 border: none;
@@ -371,7 +390,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-TEXTAREA:focus-within [error] {
         max-height: none;
       }
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         /*WUP-TEXTAREA:hover {
           z-index: 90011;
         }
@@ -388,6 +407,7 @@ mask-image: var(--ctrl-icon-img);
         }
       }
         WUP-TEXTAREA {
+          contain: style;
           cursor: text;
         }
         WUP-TEXTAREA label &gt; span {
@@ -398,7 +418,6 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-TEXTAREA input,
         WUP-TEXTAREA textarea,
-        WUP-TEXTAREA [contenteditable],
         WUP-TEXTAREA [maskholder],
         WUP-TEXTAREA [prefix],
         WUP-TEXTAREA [postfix] {
@@ -414,7 +433,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-TEXTAREA input,
         WUP-TEXTAREA textarea,
-        WUP-TEXTAREA [contenteditable],
+        WUP-TEXTAREA [contenteditable=true],
         WUP-TEXTAREA [maskholder],
         WUP-TEXTAREA [postfix] {
           width: 100%;
@@ -451,13 +470,13 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-TEXTAREA input:-webkit-autofill,
         WUP-TEXTAREA textarea:-webkit-autofill,
-        WUP-TEXTAREA [contenteditable]:-webkit-autofill {
+        WUP-TEXTAREA [contenteditable=true]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
         }
         WUP-TEXTAREA input:autofill,
         WUP-TEXTAREA textarea:autofill,
-        WUP-TEXTAREA [contenteditable]:autofill {
+        WUP-TEXTAREA [contenteditable=true]:autofill {
           font: inherit;
           background-clip: text;
         }
@@ -490,7 +509,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-TEXTAREA:focus-within strong,
         WUP-TEXTAREA input:not(:placeholder-shown) + strong,
         WUP-TEXTAREA textarea:not(:placeholder-shown) + strong,
-        WUP-TEXTAREA [contenteditable]:not(:empty) + strong,
+        WUP-TEXTAREA [contenteditable=true]:not(:empty) + strong,
         WUP-TEXTAREA legend {
           top: 0.2em;
           transform: scale(0.9);
@@ -515,7 +534,7 @@ width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
 box-sizing: content-box;
 margin: 0;
-padding: 0 5px;
+padding: 5px;
 flex: 0 0 auto;
 align-self: stretch;
 border: none;
@@ -541,15 +560,16 @@ mask-image: var(--ctrl-icon-img);
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
         WUP-TEXTAREA label button {
-           z-index: 1;
-           contain: strict;
+          contain: strict;
+          position: relative;
+          z-index: 1;
         }
         WUP-TEXTAREA label&gt;span + button {
           margin-right: -0.5em;
         }
         WUP-TEXTAREA button[clear] {
-          position: relative;
           background: none;
+          align-self: center;
         }
         WUP-TEXTAREA button[clear]:after {
           content: "";
@@ -563,13 +583,12 @@ mask-image: var(--ctrl-icon-img);
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           width: 100%;
-          padding-top: 100%;
         }
         WUP-TEXTAREA button[clear]:before {
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
         }
-        @media (hover: hover) {
+        @media (hover: hover) and (pointer: fine) {
           WUP-TEXTAREA button[clear]:hover {
             box-shadow: none;
           }
@@ -586,42 +605,41 @@ mask-image: var(--ctrl-icon-img);
           }
         }
         WUP-TEXTAREA strong { top: 1.6em; }
-        WUP-TEXTAREA [contenteditable] {
+        WUP-TEXTAREA [contenteditable=true] {
           min-height: 4em;
           max-height: 4em;
-          resize: none;
+        }
+  WUP-AREAINPUT {
           display: inline-block; 
           cursor: text;
           white-space: pre-wrap;
           word-break: break-word;
           overflow-wrap: break-word;
           overflow: auto;
-          margin: var(--ctrl-padding);
-          padding: 0;
-          margin-left: 0;
-          margin-right: 0;
+          margin: 0; padding: 0;
         }
         
-WUP-TEXTAREA [contenteditable]::-webkit-scrollbar {
+WUP-AREAINPUT::-webkit-scrollbar {
   width: 10px; height: 10px;
+  cursor: pointer;
 }
-WUP-TEXTAREA [contenteditable]::-webkit-scrollbar-corner {
+WUP-AREAINPUT::-webkit-scrollbar-corner {
   background: none;
 }
-WUP-TEXTAREA [contenteditable]::-webkit-scrollbar-thumb {
+WUP-AREAINPUT::-webkit-scrollbar-thumb {
   border: 3px solid rgba(0,0,0,0);
   background-clip: padding-box;
   background-color: var(--scroll, rgba(0,0,0,0.2));
   border-radius: 999px;
 }
-WUP-TEXTAREA [contenteditable]::-webkit-scrollbar-track-piece:vertical:start,
-WUP-TEXTAREA [contenteditable]::-webkit-scrollbar-track-piece:vertical:end,
-WUP-TEXTAREA [contenteditable]::-webkit-scrollbar-track-piece:horizontal:start,
-WUP-TEXTAREA [contenteditable]::-webkit-scrollbar-track-piece:horizontal:end {
+WUP-AREAINPUT::-webkit-scrollbar-track-piece:vertical:start,
+WUP-AREAINPUT::-webkit-scrollbar-track-piece:vertical:end,
+WUP-AREAINPUT::-webkit-scrollbar-track-piece:horizontal:start,
+WUP-AREAINPUT::-webkit-scrollbar-track-piece:horizontal:end {
   margin: 0;
 }
 @media (hover) {
-  WUP-TEXTAREA [contenteditable]::-webkit-scrollbar-thumb:hover {
+  WUP-AREAINPUT::-webkit-scrollbar-thumb:hover {
     background-color: var(--scroll-hover, rgba(0,0,0,0.5));
   }
 }
@@ -634,9 +652,10 @@ exports[`control.textarea options clearButton 1`] = `
     for="txt1"
   >
     <span>
-      <span
+      <wup-areainput
         aria-describedby="txt2"
         aria-labelledby="txt1"
+        aria-multiline="true"
         contenteditable="true"
         role="textbox"
       />
@@ -648,6 +667,7 @@ exports[`control.textarea options clearButton 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <section
@@ -665,9 +685,10 @@ exports[`control.textarea options clearButton 2`] = `
     for="txt1"
   >
     <span>
-      <span
+      <wup-areainput
         aria-describedby="txt2"
         aria-labelledby="txt1"
+        aria-multiline="true"
         contenteditable="true"
         role="textbox"
       />
@@ -693,9 +714,10 @@ exports[`control.textarea validations $options.validationShowAll 1`] = `
     for="txt1"
   >
     <span>
-      <span
+      <wup-areainput
         aria-describedby="txt2"
         aria-labelledby="txt1"
+        aria-multiline="true"
         aria-required="true"
         contenteditable="true"
         role="textbox"
@@ -708,6 +730,7 @@ exports[`control.textarea validations $options.validationShowAll 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -749,15 +772,16 @@ exports[`control.textarea validations $options.validationShowAll 2`] = `
     for="txt1"
   >
     <span>
-      <span
+      <wup-areainput
         aria-describedby="txt2"
         aria-labelledby="txt1"
+        aria-multiline="true"
         aria-required="true"
         contenteditable="true"
         role="textbox"
       >
         123
-      </span>
+      </wup-areainput>
       <strong
         id="txt1"
       />
@@ -766,6 +790,7 @@ exports[`control.textarea validations $options.validationShowAll 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -813,9 +838,10 @@ exports[`control.textarea validations $options.validationShowAll 3`] = `
     for="txt1"
   >
     <span>
-      <span
+      <wup-areainput
         aria-describedby="txt5"
         aria-labelledby="txt1"
+        aria-multiline="true"
         aria-required="true"
         contenteditable="true"
         role="textbox"
@@ -830,6 +856,7 @@ exports[`control.textarea validations $options.validationShowAll 3`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -858,13 +885,14 @@ exports[`control.textarea validations options.validationCase 1`] = `
     for="txt1"
   >
     <span>
-      <span
+      <wup-areainput
         aria-labelledby="txt1"
+        aria-multiline="true"
         contenteditable="true"
         role="textbox"
       >
         123
-      </span>
+      </wup-areainput>
       <strong
         id="txt1"
       />
@@ -873,6 +901,7 @@ exports[`control.textarea validations options.validationCase 1`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
 </wup-textarea>
@@ -886,9 +915,10 @@ exports[`control.textarea validations options.validationCase 2`] = `
     for="txt1"
   >
     <span>
-      <span
+      <wup-areainput
         aria-describedby="txt3"
         aria-labelledby="txt1"
+        aria-multiline="true"
         aria-required="true"
         contenteditable="true"
         role="textbox"
@@ -903,6 +933,7 @@ exports[`control.textarea validations options.validationCase 2`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -910,6 +941,7 @@ exports[`control.textarea validations options.validationCase 2`] = `
     aria-live="off"
     error=""
     id="txt3"
+    role="alert"
     style="display: none;"
   >
     <span
@@ -932,15 +964,16 @@ exports[`control.textarea validations options.validationCase 3`] = `
     for="txt1"
   >
     <span>
-      <span
+      <wup-areainput
         aria-describedby="txt4"
         aria-labelledby="txt1"
+        aria-multiline="true"
         aria-required="true"
         contenteditable="true"
         role="textbox"
       >
         123
-      </span>
+      </wup-areainput>
       <strong
         id="txt1"
       >
@@ -951,6 +984,7 @@ exports[`control.textarea validations options.validationCase 3`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -980,9 +1014,10 @@ exports[`control.textarea validations options.validationCase 4`] = `
     for="txt1"
   >
     <span>
-      <span
+      <wup-areainput
         aria-describedby="txt5"
         aria-labelledby="txt1"
+        aria-multiline="true"
         aria-required="true"
         contenteditable="true"
         role="textbox"
@@ -997,6 +1032,7 @@ exports[`control.textarea validations options.validationCase 4`] = `
       aria-hidden="true"
       clear=""
       tabindex="-1"
+      type="button"
     />
   </label>
   <wup-popup
@@ -1028,8 +1064,9 @@ exports[`control.textarea with form 1`] = `
       for="txt1"
     >
       <span>
-        <span
+        <wup-areainput
           aria-labelledby="txt1"
+          aria-multiline="true"
           contenteditable="true"
           role="textbox"
         />
@@ -1043,6 +1080,7 @@ exports[`control.textarea with form 1`] = `
         aria-hidden="true"
         clear=""
         tabindex="-1"
+        type="button"
       />
     </label>
   </wup-textarea>

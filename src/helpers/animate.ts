@@ -15,13 +15,15 @@ declare global {
   }
 }
 
-/** Animate (open/close) element as dropdown via scale and counter-scale for children
+// todo animateDropdown left/right
+
+/** Animate (show/hide) element as dropdown via scale and counter-scale for children
  * @param ms animation time
  * @returns Promise<isFinished> that resolved by animation end;
  * Rules
  * * To define direction set attribute to element position="top" or position="bottom"
  * * Before call it again on the same element don't forget to call stop(false) to cancel prev animation */
-export function animateDropdown(el: HTMLElement, ms: number, isClose = false): WUP.PromiseCancel<boolean> {
+export function animateDropdown(el: HTMLElement, ms: number, isHidden = false): WUP.PromiseCancel<boolean> {
   if (!ms) {
     const p = Promise.resolve(false);
     return Object.assign(p, { stop: () => p });
@@ -32,17 +34,17 @@ export function animateDropdown(el: HTMLElement, ms: number, isClose = false): W
   const reg = / *scaleY\(([%\d \w.-]+)\) */;
   const parseScale = (e: HTMLElement): { prev: string; from: number } => {
     let prev = e.style.transform;
-    let from = isClose ? 1 : 0;
-    const r = reg.exec(e.style.transform);
+    let from = isHidden ? 1 : 0;
+    const r = reg.exec(prev);
     if (r) {
       // remove scale from transform
-      prev = e.style.transform.replace(r[0], "");
+      prev = prev.replace(r[0], ""); // remove scale from transform
       from = Number.parseFloat(r[1]); // warn % isn't supported
     }
+    prev = prev.replace("translateZ(0px)", ""); // remove prev translateZ(0) from transform
     if (prev) {
       prev = `${prev.trim().replace("  ", " ")} `; // extra-space to prepare add scaleY without extra logic
     }
-
     return { prev, from };
   };
 
@@ -61,10 +63,15 @@ export function animateDropdown(el: HTMLElement, ms: number, isClose = false): W
       e.el.style.transform = e.prev.trimEnd();
       e.el.style.transformOrigin = "";
     });
+    // refresh layout otherwise blur effect possible if scroll during the animation
+    const was = el.style.display;
+    el.style.display = "none";
+    (reset as any)._cached = el.offsetHeight;
+    el.style.display = was;
   };
 
   // define from-to ranges
-  const to = isClose ? 0 : 1;
+  const to = isHidden ? 0 : 1;
   const { from } = parseScale(el);
   ms *= Math.abs(to - from); // recalc left-animTime (if element is partially opened and need to hide it)
 
@@ -80,7 +87,7 @@ export function animateDropdown(el: HTMLElement, ms: number, isClose = false): W
     styleTransform(el, "scaleY", v);
     v !== 0 &&
       nested.forEach((e) => {
-        e.el.style.transform = `${e.prev}scaleY(${1 / v})`;
+        e.el.style.transform = `${e.prev}scaleY(${1 / v}) translateZ(0px)`; // it improves text-render during the scrolling & animation
         e.el.style.transformOrigin = "bottom";
       });
   });
@@ -102,7 +109,7 @@ export function animate(
   callback: (v: number, ms: number, isLast: boolean, timeStamp: number) => void,
   force?: boolean
 ): WUP.PromiseCancel<boolean> {
-  let isFinished = ms < 10 || (!force && window.matchMedia("(prefers-reduced-motion)").matches);
+  let isFinished = ms < 10 || (!force && !isAnimEnabled());
 
   let frameId: number | undefined;
   let resMe: (isEnd: boolean) => void;
@@ -140,4 +147,9 @@ export function animate(
   // NiceToHave: develop p.rollback
   // p.rollback = ()=>{ ... }
   return p;
+}
+
+/** Returns whether user don't 'prefers-reduced-motion' or do based on css-media `@media (prefers-reduced-motion)` */
+export function isAnimEnabled(): boolean {
+  return !window.matchMedia("(prefers-reduced-motion)").matches;
 }

@@ -1,10 +1,12 @@
 /** Style for visually hidden but accessible for screenReaders */
 export const WUPcssHidden = `
 position: absolute;
-height: 1px; width: 1px;
+height:1px; width:1px;
 top:0;left:0;
-overflow: hidden;
-clip: rect(1px, 1px, 1px, 1px);`;
+overflow:hidden;
+clip:rect(1px,1px,1px,1px);
+min-width:initial;
+padding:0;`;
 
 /** Style for icons; vars --ctrl-icon, --ctrl-icon-size, --ctrl-icon-img to customize styling */
 export const WUPcssIcon = `
@@ -13,7 +15,7 @@ width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
 box-sizing: content-box;
 margin: 0;
-padding: 0 5px;
+padding: 5px;
 flex: 0 0 auto;
 align-self: stretch;
 border: none;
@@ -32,6 +34,7 @@ mask-image: var(--ctrl-icon-img);`;
 export const WUPcssScrollSmall = (tag: string): string => `
 ${tag}::-webkit-scrollbar {
   width: 10px; height: 10px;
+  cursor: pointer;
 }
 ${tag}::-webkit-scrollbar-corner {
   background: none;

@@ -8,12 +8,14 @@ import {
   WUPCheckControl,
   WUPRadioControl,
   WUPPasswordControl,
+  WUPSelectManyControl,
 } from "web-ui-pack";
 
 const sideEffect =
   WUPTextControl &&
   WUPPasswordControl &&
   WUPSelectControl &&
+  WUPSelectManyControl &&
   WUPSpinElement &&
   WUPSwitchControl &&
   WUPCheckControl &&
@@ -89,7 +91,7 @@ export default function ControlsView() {
             }
           }}
         />
-        {/* <wup-select-many
+        {/* <wup-selectmany
           class={styles.multiCustom}
           ref={(el) => {
             if (el) {
