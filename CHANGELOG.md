@@ -25,6 +25,7 @@
 
 **Fixes**:
 
+- **Global**. _Sometimes events are not disposed_. Fix for helper onEvent (need to remove events with options as is)
 - **helper** [`onFocusLost`](src/helpers/onFocusLost.ts). _Isn't fired if stopPropagation is called_
 - [TimeControl](src/controls/time.ts). _Extra margin for menu-buttons on Safari_
 - [SwitchControl](src/controls/switch.ts). [CheckControl](src/controls/check.ts). _Attribute `initvalue=''` sets value to `true` (expected `false`)_

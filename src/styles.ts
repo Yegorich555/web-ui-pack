@@ -1,10 +1,12 @@
 /** Style for visually hidden but accessible for screenReaders */
 export const WUPcssHidden = `
 position: absolute;
-height: 1px; width: 1px;
+height:1px; width:1px;
 top:0;left:0;
-overflow: hidden;
-clip: rect(1px, 1px, 1px, 1px);`;
+overflow:hidden;
+clip:rect(1px,1px,1px,1px);
+min-width:initial;
+padding:0;`;
 
 /** Style for icons; vars --ctrl-icon, --ctrl-icon-size, --ctrl-icon-img to customize styling */
 export const WUPcssIcon = `

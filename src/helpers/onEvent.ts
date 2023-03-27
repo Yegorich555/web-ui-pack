@@ -1,4 +1,6 @@
-/** Apply el.addEventListener and return el.removeEventListener function; use passive:true by default; */
+/** Apply el.addEventListener and return el.removeEventListener function; use passive:true by default;
+ * @tutorial Troubleshooting
+ * * don't change argument `options` after the function call otherwise removineListener can be skipped */
 export default function onEvent<
   T extends keyof E,
   K extends HTMLElement | Document,
@@ -15,7 +17,15 @@ export default function onEvent<
   ) => any,
   options?: boolean | AddEventListenerOptions
 ): () => void {
-  const remove = (): void => element.removeEventListener(type as string, wrapper);
+  if (typeof options !== "boolean") {
+    if (options == null) {
+      options = { passive: true };
+    } else if (options.passive == null) {
+      options.passive = true;
+    }
+  }
+
+  const remove = (): void => element.removeEventListener(type as string, wrapper, options);
 
   function wrapper(this: K, e: Event): void {
     listener.call(
@@ -27,11 +37,7 @@ export default function onEvent<
     );
     (options as AddEventListenerOptions)?.once && remove();
   }
-  element.addEventListener(
-    type as string,
-    wrapper,
-    typeof options !== "boolean" ? { passive: true, ...options } : options
-  );
+  element.addEventListener(type as string, wrapper, options);
   return remove;
 }
 
