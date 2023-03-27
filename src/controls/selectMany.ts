@@ -285,7 +285,7 @@ export default class WUPSelectManyControl<
       }
 
       const t = e.target;
-      const eli = this.$refItems?.findIndex((item) => t === item || this.includes.call(item, t));
+      let eli = (this.$refItems && this.$refItems.findIndex((item) => t === item || this.includes.call(item, t)))!;
       if (eli === -1 || eli === undefined) {
         return;
       }
@@ -346,12 +346,35 @@ export default class WUPSelectManyControl<
           return;
         }
 
-        // todo improve finding nearest. Because if center near to 2nd line but near to item on the 1st line it gets unexpected result
-        // find nearest item
-        let nearest = eli;
+        // find nearest line
+        let nearest = eli; // index of nearest item
+        let nearestEnd = eli; // index of last item in the nearest line
         let dist = Number.MAX_SAFE_INTEGER; // distance between centers
         const rects = this.$refItems!.map((item) => item.getBoundingClientRect());
-        rects.forEach((r, i) => {
+        let lineY = 0;
+        rects.some((r, i) => {
+          const nextLineY = r.y + r.height / 2;
+          if (Math.abs(nextLineY - lineY) > 3) {
+            // compare with 3px because centers can be not aligned properly
+            lineY = nextLineY; // it's next line
+            const c = Math.abs(ev.clientY - lineY);
+            if (c < dist) {
+              dist = c;
+              nearest = i; // index of 1st item in the nearest line
+              nearestEnd = i;
+            } else {
+              return true; // break search because next line is further then previous
+            }
+          } else {
+            nearestEnd += 1;
+          }
+          return false;
+        });
+        // find nearest item in the nearest line
+        dist = Number.MAX_SAFE_INTEGER;
+        // console.warn(nearest, nearestEnd, linei);
+        for (let i = nearest; i <= nearestEnd; ++i) {
+          const r = rects[i];
           const dx = ev.clientX - (r.x + r.width / 2);
           const dy = ev.clientY - (r.y + r.height / 2);
           const c = Math.sqrt(dx * dx + dy * dy);
@@ -359,22 +382,35 @@ export default class WUPSelectManyControl<
             dist = c;
             nearest = i;
           }
-        });
+        }
+
         // define left/right side
         if (eli !== nearest) {
           const trg = this.$refItems![nearest];
           const r = rects[nearest];
           const isLeft = Math.abs(r.x - ev.clientX) < Math.abs(r.x + r.width - ev.clientX);
-
-          if (isLeft) {
-            trg.parentElement!.insertBefore(el, this.$refItems![nearest]);
-          } else {
-            trg.parentElement!.insertBefore(el, this.$refItems![nearest].nextElementSibling!);
+          let nextEli = eli;
+          if (nearest < eli) {
+            nextEli = isLeft ? nearest : nearest + 1; // shift from right to left
+          } else if (nearest > eli) {
+            nextEli = isLeft ? nearest - 1 : nearest; // shift from left to right
           }
-          isThrottle = true;
-          setTimeout(() => (isThrottle = false), 100); // to prevent fast changing position
+
+          if (nextEli !== eli) {
+            if (isLeft) {
+              trg.parentElement!.insertBefore(el, trg);
+            } else {
+              trg.parentElement!.insertBefore(el, trg.nextElementSibling);
+            }
+            this.$refItems!.splice(nextEli, 0, this.$refItems!.splice(eli, 1)[0]);
+            eli = nextEli;
+            isThrottle = true;
+            setTimeout(() => (isThrottle = false), 100); // to prevent fast changing position
+          }
         }
       });
+
+      // todo during the sorting need somehow to hide input or reduce it to small enough. Otherwise resizing is possible and it works ugly
 
       const cancel = (): void => {
         if (dr) {
@@ -384,6 +420,7 @@ export default class WUPSelectManyControl<
             // todo when element got focus after then input can appear in the new line and goes to line upper after removing element
             this.removeValue(eli); // todo improve animation here. Now it looks ugly
           } else {
+            // todo fire change event here if were changes
             const animTime = parseMsTime(window.getComputedStyle(el).getPropertyValue("--anim-time"));
             const from = dr.getBoundingClientRect();
             const to = el.getBoundingClientRect();
