@@ -5,6 +5,7 @@
 **Fixes**:
 
 - **Controls**. _Need to add border by default otherwise it's invisible on the white body_
+- **CircleElement**. _Wrong tooltip position when segment is half of circle_
 
 ## 0.5.0 (Mar 27, 2023)
 

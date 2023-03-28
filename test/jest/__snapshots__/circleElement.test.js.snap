@@ -39,12 +39,11 @@ padding:0;}
         }
   
       WUP-CIRCLE {
-        contain: style ;
+        contain: style;
         display: block;
         position: relative;
         overflow: visible;
         margin: auto;
-        padding: 2px;
         --anim-time: 400ms;
       }
       WUP-CIRCLE&gt;strong {

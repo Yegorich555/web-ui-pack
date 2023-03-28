@@ -76,3 +76,12 @@ Object.defineProperty(Element.prototype, "innerText", {
 });
 
 window.matchMedia = window.matchMedia || (() => ({ matches: false }));
+window.DOMRect = {
+  fromRect: (other) => {
+    const x = other?.x || 0;
+    const y = other?.y || 0;
+    const width = other?.width || 0;
+    const height = other?.height || 0;
+    return { x, y, left: x, top: y, width, height, right: width + x, bottom: height + y };
+  },
+};
