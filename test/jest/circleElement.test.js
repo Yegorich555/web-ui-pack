@@ -378,7 +378,7 @@ describe("circleElement", () => {
     await h.wait(300);
     expect(onTooltip).toBeCalledTimes(2);
     expect(el.querySelector("wup-popup").outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="background: red; display: none;">Me 24</wup-popup>"`
+      `"<wup-popup style="background: red;">Me 24</wup-popup>"`
     );
 
     // checking debounce timeouts
@@ -390,7 +390,16 @@ describe("circleElement", () => {
     await h.wait();
     expect(onTooltip).toBeCalledTimes(0); // no new actions because prev popup still here
     expect(el.querySelector("wup-popup")).toBeDefined();
-    expect(el.querySelector("wup-popup").$options.offset({ height: 100, width: 8 })).toStrictEqual([-50, -4]); // center of target
+    expect(el.querySelector("wup-popup").getTargetRect({ x: 100, y: 40 })).toStrictEqual({
+      bottom: 87.01,
+      height: 0.01,
+      left: 28,
+      right: 28.01,
+      top: 87,
+      width: 0.01,
+      x: 28,
+      y: 87,
+    }); // center of target
 
     // show-hide during the animation
     const orig = window.getComputedStyle;

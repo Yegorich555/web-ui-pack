@@ -198,6 +198,7 @@ export default abstract class WUPBaseControl<
         --ctrl-icon: var(--ctrl-label);
         --ctrl-icon-size: 1em;
         --ctrl-bg: var(--base-bg);
+        --ctrl-border: #e6e6e6;
         --ctrl-border-radius: var(--border-radius);
         --ctrl-err-text: #ad0000;
         --ctrl-err-bg: #fff4fa;
@@ -218,6 +219,7 @@ export default abstract class WUPBaseControl<
         contain: style;
         display: block;
         margin-bottom: 20px;
+        box-shadow: 0 0 0 1px var(--ctrl-border);
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
         cursor: pointer;

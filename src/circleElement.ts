@@ -2,7 +2,7 @@ import WUPBaseElement from "./baseElement";
 import WUPPopupElement from "./popup/popupElement";
 import { ShowCases } from "./popup/popupElement.types";
 import { animate } from "./helpers/animate";
-import { mathScaleValue } from "./helpers/math";
+import { mathScaleValue, rotate } from "./helpers/math";
 import { parseMsTime } from "./helpers/styleHelpers";
 import { onEvent } from "./indexHelpers";
 
@@ -11,6 +11,7 @@ import { onEvent } from "./indexHelpers";
 // demo https://milevski.co/svg-arc-corners/demo/
 
 const tagName = "wup-circle";
+const radius = 50;
 
 declare global {
   namespace WUP.Circle {
@@ -35,6 +36,7 @@ declare global {
     interface SVGItem extends SVGPathElement {
       _relatedItem: Item;
       _hasTooltip?: true;
+      _center: { x: number; y: number };
     }
     interface Defaults {
       /** Width of each segment; expected 1..100 (perecentage)
@@ -138,12 +140,11 @@ export default class WUPCircleElement extends WUPBaseElement {
   static get $style(): string {
     return `${super.$style}
       :host {
-        contain: style ;
+        contain: style;
         display: block;
         position: relative;
         overflow: visible;
         margin: auto;
-        padding: 2px;
         --anim-time: 400ms;
       }
       :host>strong {
@@ -329,21 +330,27 @@ export default class WUPCircleElement extends WUPBaseElement {
 
     (async () => {
       let hasTooltip = false;
+      const hw = this._opts.width / 2;
       for (let i = 0; i < items.length; ++i) {
         const a = items[i];
         const c = arr[i];
         // apply colors
-        const path = this.$refItems.appendChild(this.make("path"));
+        const path = this.$refItems.appendChild(this.make("path")) as WUP.Circle.SVGItem;
         const col = a.color || style.getPropertyValue(`--circle-${i + 1}`).trim();
         col && path.setAttribute("fill", col); // only for saving as file-image
         if (a.color) {
           path.style.fill = a.color; // attr [fill] can't override css-rules
         }
+
+        path._center = { x: radius, y: hw };
         if (a.tooltip) {
           hasTooltip = true;
-          (path as any)._hasTooltip = true;
+          path._hasTooltip = true;
+          // calc center for tooltip
+          const ca = c.angleFrom + (c.angleTo - c.angleFrom) / 2;
+          [path._center.x, path._center.y] = rotate(radius, radius, radius, hw, ca);
         }
-        (path as any)._relatedItem = a;
+        path._relatedItem = a;
         // animate
         this._animation = animate(c.angleFrom, c.angleTo, c.ms, (animV) => {
           path.setAttribute("d", this.drawArc(c.angleFrom, animV));
@@ -375,7 +382,13 @@ export default class WUPCircleElement extends WUPBaseElement {
     popup.$options.showCase = ShowCases.always;
     popup.$options.target = segment;
     popup.$options.arrowEnable = true;
-    popup.$options.offset = (r) => [-r.height / 2, -r.width / 2]; // center of the target
+    // place in the center of drawed path
+    popup.getTargetRect = () => {
+      const r = this.getBoundingClientRect();
+      const x = r.x + segment._center.x;
+      const y = r.y + segment._center.y;
+      return DOMRect.fromRect({ x, y, width: 0.01, height: 0.01 });
+    };
     const item = segment._relatedItem;
     const lbl = item.tooltip!;
     popup.innerText =
@@ -455,7 +468,7 @@ export default class WUPCircleElement extends WUPBaseElement {
 
   /** Returns svg-path for Arc according to options */
   protected drawArc(angleFrom: number, angleTo: number): string {
-    const r = 50;
+    const r = radius;
     const center: [number, number] = [r, r];
     return drawArc(center, r, this._opts.width, angleFrom, angleTo, this._opts.corner);
   }
