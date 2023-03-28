@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.1 (\_\_\_)
+
+**Fixes**:
+
+- **Controls**. _Need to add border by default otherwise it's invisible on the white body_
+
 ## 0.5.0 (Mar 27, 2023)
 
 **BREAKING CHANGES**:
