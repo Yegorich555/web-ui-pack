@@ -69,7 +69,7 @@ export default function CircleView() {
             if (el) {
               el.$options.items = [
                 { value: 12, tooltip: "Item 1\nvalue: {#}" },
-                { value: 10, tooltip: (item) => `Custom tooltip\nvalue: ${item.value}` },
+                { value: 100, tooltip: (item) => `Custom tooltip\nvalue: ${item.value}` },
                 { value: 13, tooltip: "Item 3\nvalue: {#}" },
                 { value: 27, tooltip: "Item 4\nvalue: {#}" },
                 { value: 15, tooltip: "Item 5\nvalue: {#}" },

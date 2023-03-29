@@ -232,7 +232,7 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 - [**mathScaleValue**(v: number, fromMin: number, fromMax: number, toMin: number, toMax: number)](src/helpers/math.ts) ⇒ `Scale value from one range to another`
 - [**nestedProperty.set**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.set(obj, "value.nestedValue", 1) sets obj.value.nestedValue = 1`
 - [**nestedProperty.get**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.get(obj, "nested.val2", out?: {hasProp?: boolean} ) returns value from obj.nested.val2`
-- [**objectClone**(obj, opts: CloneOptions)](src/helpers/objectClone.ts) ⇒ `converts object to observable (via Proxy) to allow listen for changes`
+- [**objectClone**(obj, opts: CloneOptions)](src/helpers/objectClone.ts) ⇒ `deep cloning object`
 - [**observer**](#helpersobserver) ⇒ `converts object to observable (via Proxy) to allow listen for changes`
 - [**onEvent**(...args)](src/helpers/onEvent.ts) ⇒ `More strict (for Typescript) wrapper of addEventListener() that returns callback with removeListener()`
 - [**onFocusGot**(el: HTMLElement, listener: (ev) => void, {debounceMs: 100, once: false, ...})](src/helpers/onFocusGot.ts) ⇒ `Fires when element/children takes focus once (fires again after onFocusLost on element)`
