@@ -1,6 +1,6 @@
 {
   "name": "web-ui-pack",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Web package with UI elements",
   "main": "index.js",
   "types": "index.d.ts",
