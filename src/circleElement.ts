@@ -349,15 +349,6 @@ export default class WUPCircleElement extends WUPBaseElement {
           // calc center for tooltip
           const ca = c.angleFrom + (c.angleTo - c.angleFrom) / 2;
           [path._center.x, path._center.y] = rotate(radius, radius, radius, hw, ca);
-
-          const d = this.appendChild(document.createElement("div"));
-          this.style.position = "relative";
-          d.style.position = "absolute";
-          d.style.left = `${path._center.x}px`;
-          d.style.top = `${path._center.y}px`;
-          d.style.background = "red";
-          d.style.width = "2px";
-          d.style.height = "2px";
         }
         path._relatedItem = a;
         // animate
@@ -393,10 +384,10 @@ export default class WUPCircleElement extends WUPBaseElement {
     popup.$options.arrowEnable = true;
     // place in the center of drawed path
     popup.getTargetRect = () => {
-      const r = this.getBoundingClientRect();
-      const sz = Math.min(r.width, r.height) / 100;
-      const x = r.x + segment._center.x * sz;
-      const y = r.y + segment._center.y * sz;
+      const r = this.$refSVG.getBoundingClientRect();
+      const scale = Math.min(r.width, r.height) / 100;
+      const x = r.x + segment._center.x * scale;
+      const y = r.y + segment._center.y * scale;
       return DOMRect.fromRect({ x, y, width: 0.01, height: 0.01 });
     };
     const item = segment._relatedItem;
