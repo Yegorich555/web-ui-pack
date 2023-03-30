@@ -62,7 +62,7 @@ export default function CircleView() {
         <small>(point label per item to show tooltip)</small>
         <wup-circle
           back={false}
-          style={{ maxWidth: "100px" }}
+          style={{ maxWidth: "120px" }}
           from={-90}
           to={270}
           ref={(el) => {
@@ -83,7 +83,6 @@ export default function CircleView() {
           point options <b>from=-90 & to=90</b>
         </small>
         <wup-circle
-          style={{ maxWidth: "100px" }}
           class={styles.half}
           back={false}
           from={-90}
