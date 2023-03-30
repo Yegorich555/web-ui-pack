@@ -772,11 +772,15 @@ mask-image: var(--ctrl-icon-img);
           max-height: none;
         }*/
         WUP-RADIO:hover,
-        WUP-RADIO:hover &gt; [menu] {
+        WUP-RADIO:hover&gt;[menu],
+        WUP-RADIO[hovered],
+        WUP-RADIO[hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         WUP-RADIO[invalid]:hover,
-        WUP-RADIO[invalid]:hover &gt; [menu] {
+        WUP-RADIO[invalid]:hover&gt;[menu]
+        WUP-RADIO[invalid][hovered],
+        WUP-RADIO[invalid][hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
         }
       }

@@ -393,11 +393,15 @@ mask-image: var(--ctrl-icon-img);
           max-height: none;
         }*/
         WUP-NUM:hover,
-        WUP-NUM:hover &gt; [menu] {
+        WUP-NUM:hover&gt;[menu],
+        WUP-NUM[hovered],
+        WUP-NUM[hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         WUP-NUM[invalid]:hover,
-        WUP-NUM[invalid]:hover &gt; [menu] {
+        WUP-NUM[invalid]:hover&gt;[menu]
+        WUP-NUM[invalid][hovered],
+        WUP-NUM[invalid][hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
         }
       }

@@ -426,11 +426,15 @@ mask-image: var(--ctrl-icon-img);
           max-height: none;
         }*/
         WUP-SELECTMANY:hover,
-        WUP-SELECTMANY:hover &gt; [menu] {
+        WUP-SELECTMANY:hover&gt;[menu],
+        WUP-SELECTMANY[hovered],
+        WUP-SELECTMANY[hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         WUP-SELECTMANY[invalid]:hover,
-        WUP-SELECTMANY[invalid]:hover &gt; [menu] {
+        WUP-SELECTMANY[invalid]:hover&gt;[menu]
+        WUP-SELECTMANY[invalid][hovered],
+        WUP-SELECTMANY[invalid][hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
         }
       }
@@ -805,10 +809,13 @@ mask-image: var(--ctrl-icon-img);
         padding: 0;
         margin-left: 0.5em;
       }
-      WUP-SELECTMANY [item][focused] {
+      WUP-SELECTMANY [item][focused],
+      WUP-SELECTMANY [item][drag],
+      WUP-SELECTMANY [item][drop] {
         box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
       }
-      WUP-SELECTMANY [item][removed] {
+      WUP-SELECTMANY [item][removed],
+      WUP-SELECTMANY [item][drag][remove]  {
         --ctrl-icon: var(--ctrl-err-text);
         text-decoration: line-through;
         color: var(--ctrl-err-text);
@@ -841,6 +848,19 @@ mask-image: var(--ctrl-icon-img);
           width: 0;
           opacity: 0;
         }
+      }
+      WUP-SELECTMANY [item][drag] {
+        z-index: 99999;
+        position: fixed;
+        left:0; top:0;
+        cursor: grabbing;
+        text-decoration: none;
+        --ctrl-icon: var(--ctrl-select-item-del);
+        color: var(--ctrl-select-item);
+        background-color: var(--ctrl-select-item-bg);
+      }
+      WUP-SELECTMANY [item][drop] {
+        opacity: 0.5;
       }
 </style>
 `;

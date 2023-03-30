@@ -229,11 +229,15 @@ mask-image: var(--ctrl-icon-img);
           max-height: none;
         }*/
         WUP-TEXT:hover,
-        WUP-TEXT:hover &gt; [menu] {
+        WUP-TEXT:hover&gt;[menu],
+        WUP-TEXT[hovered],
+        WUP-TEXT[hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         WUP-TEXT[invalid]:hover,
-        WUP-TEXT[invalid]:hover &gt; [menu] {
+        WUP-TEXT[invalid]:hover&gt;[menu]
+        WUP-TEXT[invalid][hovered],
+        WUP-TEXT[invalid][hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
         }
       }

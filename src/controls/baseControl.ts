@@ -331,11 +331,15 @@ export default abstract class WUPBaseControl<
           max-height: none;
         }*/
         :host:hover,
-        :host:hover > [menu] {
+        :host:hover>[menu],
+        :host[hovered],
+        :host[hovered]>[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         :host[invalid]:hover,
-        :host[invalid]:hover > [menu] {
+        :host[invalid]:hover>[menu]
+        :host[invalid][hovered],
+        :host[invalid][hovered]>[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
         }${
           //  :host:hover label:before,

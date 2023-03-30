@@ -320,7 +320,6 @@ export default class WUPSelectManyControl<
         if (isWaitTouch) {
           return;
         }
-        // todo if move fast hover effect can blink on control because for a small time mouse not hover draggable item
         // init
         if (!dr) {
           this._wasSortAfterClick = true;
@@ -331,6 +330,7 @@ export default class WUPSelectManyControl<
           dr.style.height = `${el.offsetHeight}px`;
           el.parentElement!.prepend(dr);
           el.setAttribute("drop", ""); // mark current element
+          this.setAttribute("hovered", ""); // if pick item and move cursor fast control-focus-frame is blinking because because cursor much faster than js events
         }
         // set position
         const x = ev.clientX - el.offsetWidth / 2;
@@ -414,6 +414,7 @@ export default class WUPSelectManyControl<
 
       const cancel = (): void => {
         if (dr) {
+          this.removeAttribute("hovered");
           if (!isInside) {
             el.removeAttribute("drop");
             dr.remove();
@@ -449,6 +450,7 @@ export default class WUPSelectManyControl<
     showCase: ShowCases,
     e?: MouseEvent | FocusEvent | KeyboardEvent | null
   ): boolean | Promise<boolean> {
+    // todo when false then exception if try to input text
     return !this._wasSortAfterClick && super.canShowMenu(showCase, e);
   }
 
@@ -699,5 +701,4 @@ customElements.define(tagName, WUPSelectManyControl);
  * 3. Without contenteditalbe='false' browser moves cursor into item, but it should be outside
  */
 
-// todo remove focus-style on click to remove - ugly blink effect
 // todo popup can change position during the hidding by focuslost when input is goes invisible and control size is reduced
