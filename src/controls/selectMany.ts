@@ -204,7 +204,7 @@ export default class WUPSelectManyControl<
         background-color: var(--ctrl-select-item-bg);
       }
       :host [item][drop] {
-        opacity: 0.5;
+        opacity: 0.7;
       }`;
   }
 
@@ -421,7 +421,6 @@ export default class WUPSelectManyControl<
             // todo when element got focus after then input can appear in the new line and goes to line upper after removing element
             this.removeValue(eli); // todo improve animation here. Now it looks ugly
           } else {
-            // todo fire change event here if were changes
             const animTime = parseMsTime(window.getComputedStyle(el).getPropertyValue("--anim-time"));
             const from = dr.getBoundingClientRect();
             const to = el.getBoundingClientRect();
@@ -433,6 +432,8 @@ export default class WUPSelectManyControl<
               el.removeAttribute("drop");
               dr.remove();
             });
+            // change value
+            this.setValue(this.$refItems!.map((a) => a._wupValue));
           }
         }
         r0();
@@ -701,4 +702,4 @@ customElements.define(tagName, WUPSelectManyControl);
  * 3. Without contenteditalbe='false' browser moves cursor into item, but it should be outside
  */
 
-// todo popup can change position during the hidding by focuslost when input is goes invisible and control size is reduced
+// todo popup can change position during the hidding by focuslost when input is goes invisible and control size is reduced - need somehow block changing position
