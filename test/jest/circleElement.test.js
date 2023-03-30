@@ -390,16 +390,19 @@ describe("circleElement", () => {
     await h.wait();
     expect(onTooltip).toBeCalledTimes(0); // no new actions because prev popup still here
     expect(el.querySelector("wup-popup")).toBeDefined();
-    expect(el.querySelector("wup-popup").getTargetRect({ x: 100, y: 40 })).toStrictEqual({
-      bottom: 87.01,
-      height: 0.01,
-      left: 28,
-      right: 28.01,
-      top: 87,
-      width: 0.01,
-      x: 28,
-      y: 87,
-    }); // center of target
+    jest.spyOn(el.$refSVG, "getBoundingClientRect").mockReturnValue({ x: 5, y: 8, width: 300, height: 280 });
+    expect(el.querySelector("wup-popup").getTargetRect({ x: 100, y: 40 })).toMatchInlineSnapshot(`
+      {
+        "bottom": 251.60999999999999,
+        "height": 0.01,
+        "left": 83.39999999999999,
+        "right": 83.41,
+        "top": 251.6,
+        "width": 0.01,
+        "x": 83.39999999999999,
+        "y": 251.6,
+      }
+    `); // center of target
 
     // show-hide during the animation
     const orig = window.getComputedStyle;

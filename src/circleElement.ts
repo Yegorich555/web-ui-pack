@@ -384,9 +384,10 @@ export default class WUPCircleElement extends WUPBaseElement {
     popup.$options.arrowEnable = true;
     // place in the center of drawed path
     popup.getTargetRect = () => {
-      const r = this.getBoundingClientRect();
-      const x = r.x + segment._center.x;
-      const y = r.y + segment._center.y;
+      const r = this.$refSVG.getBoundingClientRect();
+      const scale = Math.min(r.width, r.height) / 100;
+      const x = r.x + segment._center.x * scale;
+      const y = r.y + segment._center.y * scale;
       return DOMRect.fromRect({ x, y, width: 0.01, height: 0.01 });
     };
     const item = segment._relatedItem;
