@@ -14,7 +14,7 @@ export default function Example4() {
         To avoid such behavior change option <b>toFitElement</b> (<b>document.body</b> by default)
       </small>
       <div
-        className={styles.scrollBlock}
+        className={`${styles.scrollBlock} scrolled`}
         ref={() => {
           // el?.scrollTo({ top: 70 });
           // setTimeout(() => {

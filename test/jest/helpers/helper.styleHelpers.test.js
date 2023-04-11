@@ -1,4 +1,5 @@
 import { getBoundingInternalRect, px2Number, styleTransform } from "web-ui-pack/helpers/styleHelpers";
+import { useBuiltinStyle, WUPcssScrollSmall, WUPcssButton } from "web-ui-pack/styles";
 
 /** @type HTMLElement */
 let el;
@@ -69,5 +70,97 @@ describe("helper.styleHelpers", () => {
     `);
     expect(getBoundingInternalRect(el, { ignoreCache: true })).toBeDefined();
     expect(getBoundingInternalRect(el)).toBeDefined();
+  });
+
+  test("useBuiltinStyle", () => {
+    useBuiltinStyle(WUPcssScrollSmall(".scrolled"));
+    expect(document.head.innerHTML).toMatchInlineSnapshot(`
+      "<style>
+      .scrolled::-webkit-scrollbar {
+        width: 10px; height: 10px;
+        cursor: pointer;
+      }
+      .scrolled::-webkit-scrollbar-corner {
+        background: none;
+      }
+      .scrolled::-webkit-scrollbar-thumb {
+        border: 3px solid rgba(0,0,0,0);
+        background-clip: padding-box;
+        background-color: var(--scroll, rgba(0,0,0,0.2));
+        border-radius: 999px;
+      }
+      .scrolled::-webkit-scrollbar-track-piece:vertical:start,
+      .scrolled::-webkit-scrollbar-track-piece:vertical:end,
+      .scrolled::-webkit-scrollbar-track-piece:horizontal:start,
+      .scrolled::-webkit-scrollbar-track-piece:horizontal:end {
+        margin: 0;
+      }
+      @media (hover) {
+        .scrolled::-webkit-scrollbar-thumb:hover {
+          background-color: var(--scroll-hover, rgba(0,0,0,0.5));
+        }
+      }</style>"
+    `);
+
+    useBuiltinStyle(WUPcssButton(".btn"));
+    expect(document.head.innerHTML).toMatchInlineSnapshot(`
+      "<style>
+      .scrolled::-webkit-scrollbar {
+        width: 10px; height: 10px;
+        cursor: pointer;
+      }
+      .scrolled::-webkit-scrollbar-corner {
+        background: none;
+      }
+      .scrolled::-webkit-scrollbar-thumb {
+        border: 3px solid rgba(0,0,0,0);
+        background-clip: padding-box;
+        background-color: var(--scroll, rgba(0,0,0,0.2));
+        border-radius: 999px;
+      }
+      .scrolled::-webkit-scrollbar-track-piece:vertical:start,
+      .scrolled::-webkit-scrollbar-track-piece:vertical:end,
+      .scrolled::-webkit-scrollbar-track-piece:horizontal:start,
+      .scrolled::-webkit-scrollbar-track-piece:horizontal:end {
+        margin: 0;
+      }
+      @media (hover) {
+        .scrolled::-webkit-scrollbar-thumb:hover {
+          background-color: var(--scroll-hover, rgba(0,0,0,0.5));
+        }
+      }
+      .btn {
+        box-shadow: none;
+        border: 1px solid var(--btn-submit-bg);
+        border-radius: var(--border-radius);
+        box-sizing: border-box;
+        padding: 0.5em;
+        margin: 1em 0;
+        min-width: 10em;
+        cursor: pointer;
+        font: inherit;
+        font-weight: bold;
+        background: var(--btn-submit-bg);
+        color: var(--btn-submit-text);
+        outline: none;
+      }
+      .btn:focus {
+        border-color: var(--btn-submit-focus);
+      }
+      @media (hover: hover) and (pointer: fine) {
+        .btn:hover {
+            box-shadow: inset 0 0 0 99999px rgba(0,0,0,0.2);
+        }
+      }
+      .btn[disabled] {
+        opacity: 0.3;
+        cursor: not-allowed;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      .btn[aria-busy] {
+        cursor: wait;
+      }</style>"
+    `);
   });
 });

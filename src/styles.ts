@@ -31,7 +31,8 @@ mask-position: center;
 mask-image: var(--ctrl-icon-img);`;
 
 /** Style for small-scroll; vars --scroll, --scroll-hover to customize styling */
-export const WUPcssScrollSmall = (tag: string): string => `
+export function WUPcssScrollSmall(tag: string): string {
+  return `
 ${tag}::-webkit-scrollbar {
   width: 10px; height: 10px;
   cursor: pointer;
@@ -56,3 +57,52 @@ ${tag}::-webkit-scrollbar-track-piece:horizontal:end {
     background-color: var(--scroll-hover, rgba(0,0,0,0.5));
   }
 }`;
+}
+
+/** Returns default style for primary/submit button */
+export function WUPcssButton(tag: string): string {
+  return `
+${tag} {
+  box-shadow: none;
+  border: 1px solid var(--btn-submit-bg);
+  border-radius: var(--border-radius);
+  box-sizing: border-box;
+  padding: 0.5em;
+  margin: 1em 0;
+  min-width: 10em;
+  cursor: pointer;
+  font: inherit;
+  font-weight: bold;
+  background: var(--btn-submit-bg);
+  color: var(--btn-submit-text);
+  outline: none;
+}
+${tag}:focus {
+  border-color: var(--btn-submit-focus);
+}
+@media (hover: hover) and (pointer: fine) {
+  ${tag}:hover {
+      box-shadow: inset 0 0 0 99999px rgba(0,0,0,0.2);
+  }
+}
+${tag}[disabled] {
+  opacity: 0.3;
+  cursor: not-allowed;
+  -webkit-user-select: none;
+  user-select: none;
+}
+${tag}[aria-busy] {
+  cursor: wait;
+}`;
+}
+
+let refStyle: HTMLStyleElement | undefined;
+/** Use this function to prepend css-style via JS into document.head */
+export function useBuiltinStyle(cssString: string): HTMLStyleElement {
+  if (!refStyle) {
+    refStyle = document.createElement("style");
+    document.head.prepend(refStyle);
+  }
+  refStyle.append(cssString);
+  return refStyle;
+}
