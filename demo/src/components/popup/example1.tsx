@@ -8,7 +8,7 @@ export default function Example1() {
         <button
           id="trg"
           type="button"
-          className={styles.trg}
+          className={[styles.trg, "btn"].join(" ")}
           ref={(el) =>
             setTimeout(() => {
               el?.click();

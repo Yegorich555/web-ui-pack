@@ -58,6 +58,8 @@ h1 {
     background-color: $basicBgColor;
     border: $borderStyle;
     border-top: none;
+    height: calc(100vh - #{$h1Height} - 2px);
+    overflow: auto;
 
     > div:last-child {
       margin-top: auto;

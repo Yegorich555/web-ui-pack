@@ -24,7 +24,7 @@ export default function Example4() {
       >
         <button
           type="button"
-          className={styles.trg2}
+          className={[styles.trg2, "btn"].join(" ")}
           ref={(el) => {
             if (el) {
               // el.style.transform = "translate(-38px, 10px)";
