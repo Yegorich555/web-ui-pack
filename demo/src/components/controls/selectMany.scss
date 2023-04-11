@@ -9,7 +9,16 @@
 
 .test {
   // some extra styles possible here
-  [item]:hover:not([drag]) {
-    // box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
-  }
+  // label > span {
+  //   background: yellowgreen;
+  // }
+
+  // input {
+  //   background: red;
+  // }
+
+  // input:placeholder-shown,
+  // input:not(:focus) {
+  //   padding-left: calc(var(--ctrl-select-gap));
+  // }
 }

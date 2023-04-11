@@ -131,8 +131,15 @@ export default class WUPSelectManyControl<
       :host input {
         flex: 1 1 auto;
         width: 0;
-        min-width: 2em;
+        min-width: 1em;
         padding-left: 0; padding-right: 0;
+      }
+      :host[filled] input:placeholder-shown,
+      :host[filled] input:not(:focus) {
+        min-width: 0;
+        padding-left: calc(var(--ctrl-select-gap));
+        margin-right: 0;
+        margin-left: calc(-1 * var(--ctrl-select-gap));
       }
       :host [item] {
         --ctrl-icon: var(--ctrl-select-item-del);
@@ -410,16 +417,13 @@ export default class WUPSelectManyControl<
         }
       });
 
-      // todo during the sorting need somehow to hide input or reduce it to small enough. Otherwise resizing is possible and it works ugly
-
       const cancel = (): void => {
         if (dr) {
           this.removeAttribute("hovered");
           if (!isInside) {
             el.removeAttribute("drop");
             dr.remove();
-            // todo when element got focus after then input can appear in the new line and goes to line upper after removing element
-            this.removeValue(eli); // todo improve animation here. Now it looks ugly
+            this.removeValue(eli);
           } else {
             const animTime = parseMsTime(window.getComputedStyle(el).getPropertyValue("--anim-time"));
             const from = dr.getBoundingClientRect();
@@ -496,22 +500,12 @@ export default class WUPSelectManyControl<
       this.$ariaSpeak(this.$refItems.map((el) => el.textContent).join(","), 0);
   }
 
-  /** Hide/Show input when it's required to fix the following case:
-   *
-   *  All items + input in flexbox so when no-enough space for input in the last line it moves input to new line and creates extra space */
-  protected toggleHideInput(v: ValueType[] | undefined): void {
-    // WARN we can't use this.$isEmpty because valueToInput > toggleHideInput is called before value set
-    const canShow = this.#ctr.$isEmpty(v) || (this.$isFocused && !(this._opts.readOnly || this._opts.readOnlyInput));
-    this.$refInput.className = canShow ? "" : this.#ctr.classNameHidden;
-  }
-
   protected resetInputValue(): void {
     this.$refInput.value = this.valueToInput(this.$value as ValueType[], true);
   }
 
   protected override valueToInput(v: ValueType[] | undefined, isReset?: boolean): string {
     !isReset && this.getItems().then((items) => this.renderItems(v ?? [], items));
-    this.toggleHideInput(v);
     return this.$isFocused || !v?.length ? "" : " "; // otherwise broken css:placeholder-shown
   }
 
@@ -578,12 +572,17 @@ export default class WUPSelectManyControl<
     this.setValue(this.$value!.length ? [...this.$value!] : undefined);
   }
 
+  protected override setValue(v: ValueType[] | undefined, canValidate = true, skipInput = false): boolean | null {
+    const isChanged = super.setValue(v, canValidate, skipInput);
+    isChanged !== false && this.setAttr("filled", !this.$isEmpty, true);
+    return isChanged;
+  }
+
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
     const r = super.gotFocus(ev);
 
     this.ariaSpeakValue();
     this.$refInput.value = "";
-    this.toggleHideInput(this.$value);
 
     // https://stackoverflow.com/questions/4817029/whats-the-best-way-to-detect-a-touch-screen-device-using-javascript
     const isTouchScreen = !window.matchMedia("(hover: hover) and (pointer: fine)").matches; // WARN: 'window.matchMedia("(pointer: coarse)").matches' but it's correlated with css-hover styles
@@ -609,9 +608,8 @@ export default class WUPSelectManyControl<
     r.push(dsps);
 
     const dsps2 = onEvent(this.$refInput, "blur", () => {
-      if (!this.$refInput.value) {
-        this.$refInput.value = " "; // fix label position trigerring: testcase focus>long mouseDown outside>blur - label must save position
-      }
+      this.$refInput.value = " "; // fix label position trigerring: testcase focus>long mouseDown outside>blur - label must save position
+      onEvent(this.$refInput, "focus", () => (this.$refInput.value = ""), { once: true }); // case: user click on browser console and click again on control: in this case gotFocus isn't fired
     });
     r.push(dsps2);
 
@@ -620,7 +618,6 @@ export default class WUPSelectManyControl<
 
   protected override gotFocusLost(): void {
     super.gotFocusLost();
-    this.toggleHideInput(this.$value);
     this.focusItemByIndex(null);
   }
 
