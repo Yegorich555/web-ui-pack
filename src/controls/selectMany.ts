@@ -17,9 +17,9 @@ declare global {
       /** Hide items in menu that selected
        * @defaultValue false */
       hideSelected?: boolean;
-      /** Allow user to change ordering of items
+      /** Allow user to change ordering of items; Use drag&drop or keyboard Shift/Ctrl/Meta + arrows to change item position
        * @defaultValue true */
-      sortable: boolean;
+      sortable: boolean; // todo make default false
     }
 
     interface Options<T = any, VM = ValidityMap> extends WUP.Select.Options<T, VM>, Defaults<T, VM> {
@@ -624,58 +624,97 @@ export default class WUPSelectManyControl<
   protected override gotKeyDown(e: KeyboardEvent): void {
     super.gotKeyDown(e);
 
-    if (this.$refInput.selectionEnd === 0 && this.$refItems?.length) {
-      let handled = true;
-      let next = this._focusIndex ?? null;
+    if (!(this.$refInput.selectionEnd === 0 && this.$refItems?.length)) {
+      return;
+    }
+
+    let handled = true;
+    if (e.ctrlKey || e.metaKey || e.shiftKey) {
+      if (!this._opts.sortable || this._focusIndex == null) {
+        return;
+      }
+      const prev = this._focusIndex;
+      const trg = this.$refItems[prev];
+      let isR = false;
+      const lastInd = this.$refItems.length - 1;
       switch (e.key) {
-        case "Enter":
-          if (next != null) {
-            this._focusIndex = undefined; // WARN Enter fired click after empty timout but need to reset index immediately to focus next
-            next = Math.max(0, next - 1);
-          } else {
-            handled = false; // it must be skipped if handled above otherwise auto-focus on select menu item by Enter
-          }
-          break;
-        case "Backspace":
-          if (next != null) {
-            this.removeValue(next);
-            if (!this.$refItems.length) {
-              next = null; // WARN: focus prev in the next "ArrowLeft" block
-              break;
-            }
-          }
-        // eslint-disable-next-line no-fallthrough
         case "ArrowLeft":
-          next = Math.max(0, (next ?? this.$refItems.length) - 1);
+          this._focusIndex = this._focusIndex > 0 ? this._focusIndex - 1 : lastInd;
           break;
-        case "Delete":
-          if (next != null) {
-            this.removeValue(next);
-            if (!this.$refItems.length) {
-              next = null;
-              break;
-            }
-            --next; // WARN: focus prev in the next "ArrowLeft" block
-          }
-        // eslint-disable-next-line no-fallthrough
         case "ArrowRight":
-          if (next != null) {
-            next = Math.min(this.$refItems.length - 1, next + 1);
-            if (next === this._focusIndex) {
-              next = null; // move focus to input if was selected last
-            }
-          } else {
-            handled = false;
-          }
+          this._focusIndex = this._focusIndex < lastInd ? this._focusIndex + 1 : 0;
+          isR = true;
           break;
         default:
           handled = false;
           break;
       }
-      if (handled && this._focusIndex !== next) {
+
+      if (handled) {
         e.preventDefault();
-        this.focusItemByIndex(next);
+        if (prev !== this._focusIndex) {
+          trg.parentElement!.insertBefore(
+            trg,
+            this._focusIndex === lastInd
+              ? this.$refInput
+              : this.$refItems[isR && this._focusIndex !== 0 ? this._focusIndex + 1 : this._focusIndex]
+          );
+          this.$refItems.splice(this._focusIndex, 0, this.$refItems.splice(prev, 1)[0]);
+          this.setValue(this.$refItems.map((a) => a._wupValue));
+        }
       }
+      return;
+    }
+
+    let next = this._focusIndex ?? null;
+    switch (e.key) {
+      case "Enter":
+        if (next != null) {
+          this._focusIndex = undefined; // WARN Enter fired click after empty timout but need to reset index immediately to focus next
+          next = Math.max(0, next - 1);
+        } else {
+          handled = false; // it must be skipped if handled above otherwise auto-focus on select menu item by Enter
+        }
+        break;
+      case "Backspace":
+        if (next != null) {
+          this.removeValue(next);
+          if (!this.$refItems.length) {
+            next = null; // WARN: focus prev in the next "ArrowLeft" block
+            break;
+          }
+        }
+      // eslint-disable-next-line no-fallthrough
+      case "ArrowLeft":
+        next = Math.max(0, (next ?? this.$refItems.length) - 1);
+        break;
+      case "Delete":
+        if (next != null) {
+          this.removeValue(next);
+          if (!this.$refItems.length) {
+            next = null;
+            break;
+          }
+          --next; // WARN: focus prev in the next "ArrowLeft" block
+        }
+      // eslint-disable-next-line no-fallthrough
+      case "ArrowRight":
+        if (next != null) {
+          next = Math.min(this.$refItems.length - 1, next + 1);
+          if (next === this._focusIndex) {
+            next = null; // move focus to input if was selected last
+          }
+        } else {
+          handled = false;
+        }
+        break;
+      default:
+        handled = false;
+        break;
+    }
+    if (handled && this._focusIndex !== next) {
+      e.preventDefault();
+      this.focusItemByIndex(next);
     }
   }
 }
@@ -700,3 +739,4 @@ customElements.define(tagName, WUPSelectManyControl);
  */
 
 // todo popup can change position during the hidding by focuslost when input is goes invisible and control size is reduced - need somehow block changing position
+// todo sorting with keyboard
