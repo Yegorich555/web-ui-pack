@@ -345,11 +345,15 @@ mask-image: var(--ctrl-icon-img);
           max-height: none;
         }*/
         WUP-CHECK:hover,
-        WUP-CHECK:hover &gt; [menu] {
+        WUP-CHECK:hover&gt;[menu],
+        WUP-CHECK[hovered],
+        WUP-CHECK[hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         WUP-CHECK[invalid]:hover,
-        WUP-CHECK[invalid]:hover &gt; [menu] {
+        WUP-CHECK[invalid]:hover&gt;[menu]
+        WUP-CHECK[invalid][hovered],
+        WUP-CHECK[invalid][hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
         }
       }

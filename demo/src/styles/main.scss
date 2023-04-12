@@ -44,7 +44,7 @@ h2 {
   }
 }
 
-button {
+.btn {
   box-shadow: none;
   color: $basicActiveColor;
   background: $basicActiveBgColor;
@@ -71,6 +71,7 @@ h3 {
   margin-bottom: 0.2em;
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 h3 + small {
   font-size: 12px;
 }

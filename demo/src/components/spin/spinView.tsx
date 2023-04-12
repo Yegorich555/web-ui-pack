@@ -44,7 +44,7 @@ export default function SpinView() {
           <br />
           By default parent is overlayed by shadowBox (option <b>overflowShadow</b>) <b />
         </small>
-        <button type="button" style={{ position: "relative" }}>
+        <button className="btn" type="button" style={{ position: "relative" }}>
           Button with relative position
           <wup-spin overflowFade="" fit="" inline={false} />
         </button>
@@ -65,7 +65,7 @@ export default function SpinView() {
             </li>
           </ul>
         </small>
-        <button type="button">
+        <button className="btn" type="button">
           Button without relative position
           <wup-spin />
         </button>
@@ -75,7 +75,7 @@ export default function SpinView() {
         <small>
           Spinner placed outside button (option <b>overflowTarget</b>) and parent has <b>position: relative</b>
         </small>
-        <button type="button" id="spinTarget">
+        <button className="btn" type="button" id="spinTarget">
           Button without relative position
         </button>
         <wup-spin
@@ -96,12 +96,12 @@ export default function SpinView() {
           <br />
           (use option <b>fit</b> OR css to fix: <b>{`button>wup-spin{ --spin-size: 14px; -spin-item-size: 6px}`}</b>)
         </small>
-        <button type="submit" className={styles.btnAlign}>
+        <button type="submit" className={[styles.btnAlign, "btn"].join(" ")}>
           <wup-spin inline />
           Pending...
         </button>
         <br />
-        <button type="submit" className={styles.btnAlign}>
+        <button type="submit" className={[styles.btnAlign, "btn"].join(" ")}>
           <wup-spin inline="" fit="" />
           With option 'fit'
         </button>

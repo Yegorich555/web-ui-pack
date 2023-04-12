@@ -139,6 +139,16 @@ export default function FAQView() {
               </>
             ),
           },
+          {
+            link: "shared-styles",
+            question: "Styles. How to reuse built-in styles",
+            answer: (
+              <>
+                Some styles (scroll, button submit etc.) are shared and placed in web-ui-pack/styles.js
+                <Code code={codeSharedStyles} />
+              </>
+            ),
+          },
         ]}
       />
     </Page>
@@ -235,3 +245,11 @@ WUPRadioControl.prototype.parse = function parse(stringValue: string) {
   // let's imagine that attrValue is pointer to global key
   return (window as any)[stringValue];
 };`;
+
+const codeSharedStyles = `js
+import { useBuiltinStyle, WUPcssScrollSmall } from "web-ui-pack/styles";
+// prepend scroll style for class '.scrolled' into document.head
+useBuiltinStyle(WUPcssScrollSmall(".scrolled"));
+// prepend button style for class '.btn' into document.head
+useBuiltinStyle(WUPcssButton(".btn"));
+`;

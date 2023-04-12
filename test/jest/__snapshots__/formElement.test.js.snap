@@ -40,38 +40,39 @@ padding:0;}
           max-width: 500px;
           margin: auto;
         }
-        WUP-FORM [type='submit'] {
-          box-shadow: none;
-          border: 1px solid var(--btn-submit-bg);
-          border-radius: var(--border-radius);
-          box-sizing: border-box;
-          padding: 0.5em;
-          margin: 1em 0;
-          min-width: 10em;
-          cursor: pointer;
-          font: inherit;
-          font-weight: bold;
-          background: var(--btn-submit-bg);
-          color: var(--btn-submit-text);
-          outline: none;
-        }
-        WUP-FORM [type='submit']:focus {
-          border-color: var(--btn-submit-focus);
-        }
-        @media (hover: hover) and (pointer: fine) {
-          WUP-FORM [type='submit']:hover {
-             box-shadow: inset 0 0 0 99999px rgba(0,0,0,0.2);
-          }
-        }
-        WUP-FORM [type='submit'][disabled] {
-          opacity: 0.3;
-          cursor: not-allowed;
-          -webkit-user-select: none;
-          user-select: none;
-        }
-        WUP-FORM [type='submit'][aria-busy] {
-          cursor: wait;
-        }
+        
+WUP-FORM [type='submit'] {
+  box-shadow: none;
+  border: 1px solid var(--btn-submit-bg);
+  border-radius: var(--border-radius);
+  box-sizing: border-box;
+  padding: 0.5em;
+  margin: 1em 0;
+  min-width: 10em;
+  cursor: pointer;
+  font: inherit;
+  font-weight: bold;
+  background: var(--btn-submit-bg);
+  color: var(--btn-submit-text);
+  outline: none;
+}
+WUP-FORM [type='submit']:focus {
+  border-color: var(--btn-submit-focus);
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-FORM [type='submit']:hover {
+      box-shadow: inset 0 0 0 99999px rgba(0,0,0,0.2);
+  }
+}
+WUP-FORM [type='submit'][disabled] {
+  opacity: 0.3;
+  cursor: not-allowed;
+  -webkit-user-select: none;
+  user-select: none;
+}
+WUP-FORM [type='submit'][aria-busy] {
+  cursor: wait;
+}
   :root {
         --ctrl-padding: 1.5em 1em 0.5em 1em;
         --ctrl-focus: var(--base-focus);
@@ -229,11 +230,15 @@ mask-image: var(--ctrl-icon-img);
           max-height: none;
         }*/
         WUP-TEXT:hover,
-        WUP-TEXT:hover &gt; [menu] {
+        WUP-TEXT:hover&gt;[menu],
+        WUP-TEXT[hovered],
+        WUP-TEXT[hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         WUP-TEXT[invalid]:hover,
-        WUP-TEXT[invalid]:hover &gt; [menu] {
+        WUP-TEXT[invalid]:hover&gt;[menu]
+        WUP-TEXT[invalid][hovered],
+        WUP-TEXT[invalid][hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
         }
       }

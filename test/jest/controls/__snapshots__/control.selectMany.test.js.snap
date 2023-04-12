@@ -426,11 +426,15 @@ mask-image: var(--ctrl-icon-img);
           max-height: none;
         }*/
         WUP-SELECTMANY:hover,
-        WUP-SELECTMANY:hover &gt; [menu] {
+        WUP-SELECTMANY:hover&gt;[menu],
+        WUP-SELECTMANY[hovered],
+        WUP-SELECTMANY[hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         WUP-SELECTMANY[invalid]:hover,
-        WUP-SELECTMANY[invalid]:hover &gt; [menu] {
+        WUP-SELECTMANY[invalid]:hover&gt;[menu]
+        WUP-SELECTMANY[invalid][hovered],
+        WUP-SELECTMANY[invalid][hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
         }
       }
@@ -764,8 +768,15 @@ mask-image: var(--ctrl-icon-img);
       WUP-SELECTMANY input {
         flex: 1 1 auto;
         width: 0;
-        min-width: 2em;
+        min-width: 1em;
         padding-left: 0; padding-right: 0;
+      }
+      WUP-SELECTMANY[filled] input:placeholder-shown,
+      WUP-SELECTMANY[filled] input:not(:focus) {
+        min-width: 0;
+        padding-left: calc(var(--ctrl-select-gap));
+        margin-right: 0;
+        margin-left: calc(-1 * var(--ctrl-select-gap));
       }
       WUP-SELECTMANY [item] {
         --ctrl-icon: var(--ctrl-select-item-del);
@@ -805,10 +816,13 @@ mask-image: var(--ctrl-icon-img);
         padding: 0;
         margin-left: 0.5em;
       }
-      WUP-SELECTMANY [item][focused] {
+      WUP-SELECTMANY [item][focused],
+      WUP-SELECTMANY [item][drag],
+      WUP-SELECTMANY [item][drop] {
         box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
       }
-      WUP-SELECTMANY [item][removed] {
+      WUP-SELECTMANY [item][removed],
+      WUP-SELECTMANY [item][drag][remove]  {
         --ctrl-icon: var(--ctrl-err-text);
         text-decoration: line-through;
         color: var(--ctrl-err-text);
@@ -841,6 +855,19 @@ mask-image: var(--ctrl-icon-img);
           width: 0;
           opacity: 0;
         }
+      }
+      WUP-SELECTMANY [item][drag] {
+        z-index: 99999;
+        position: fixed;
+        left:0; top:0;
+        cursor: grabbing;
+        text-decoration: none;
+        --ctrl-icon: var(--ctrl-select-item-del);
+        color: var(--ctrl-select-item);
+        background-color: var(--ctrl-select-item-bg);
+      }
+      WUP-SELECTMANY [item][drop] {
+        opacity: 0.7;
       }
 </style>
 `;
@@ -893,7 +920,9 @@ exports[`control.selectMany validations $options.validationShowAll 1`] = `
 `;
 
 exports[`control.selectMany validations $options.validationShowAll 2`] = `
-<wup-selectmany>
+<wup-selectmany
+  filled=""
+>
   <label
     for="txt1"
   >
@@ -910,7 +939,6 @@ exports[`control.selectMany validations $options.validationShowAll 2`] = `
         aria-haspopup="listbox"
         aria-required="true"
         autocomplete="off"
-        class="wup-hidden"
         id="txt1"
         placeholder=" "
         role="combobox"
@@ -943,7 +971,6 @@ exports[`control.selectMany validations $options.validationShowAll 3`] = `
         aria-haspopup="listbox"
         aria-required="true"
         autocomplete="off"
-        class=""
         id="txt1"
         placeholder=" "
         role="combobox"
@@ -981,7 +1008,9 @@ exports[`control.selectMany validations $options.validationShowAll 3`] = `
 `;
 
 exports[`control.selectMany validations options.validationCase 1`] = `
-<wup-selectmany>
+<wup-selectmany
+  filled=""
+>
   <label
     for="txt1"
   >
@@ -991,7 +1020,6 @@ exports[`control.selectMany validations options.validationCase 1`] = `
         aria-expanded="false"
         aria-haspopup="listbox"
         autocomplete="off"
-        class="wup-hidden"
         id="txt1"
         placeholder=" "
         role="combobox"
@@ -1026,7 +1054,6 @@ exports[`control.selectMany validations options.validationCase 2`] = `
         aria-owns="txt3"
         aria-required="true"
         autocomplete="off"
-        class=""
         id="txt1"
         placeholder=" "
         role="combobox"
@@ -1099,6 +1126,7 @@ exports[`control.selectMany validations options.validationCase 2`] = `
 
 exports[`control.selectMany validations options.validationCase 3`] = `
 <wup-selectmany
+  filled=""
   invalid=""
   opened=""
 >
@@ -1121,7 +1149,6 @@ exports[`control.selectMany validations options.validationCase 3`] = `
         aria-owns="txt8"
         aria-required="true"
         autocomplete="off"
-        class=""
         id="txt1"
         placeholder=" "
         role="combobox"
@@ -1208,7 +1235,6 @@ exports[`control.selectMany validations options.validationCase 4`] = `
         aria-owns="txt9"
         aria-required="true"
         autocomplete="off"
-        class=""
         id="txt1"
         placeholder=" "
         role="combobox"

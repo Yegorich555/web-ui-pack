@@ -58,6 +58,7 @@ h1 {
     background-color: $basicBgColor;
     border: $borderStyle;
     border-top: none;
+    height: calc(100vh - #{$h1Height} - 2px);
 
     > div:last-child {
       margin-top: auto;
@@ -96,7 +97,6 @@ h1 {
 
   main {
     width: calc(100vw - #{$navWidth});
-    overflow: auto;
     padding: 10px;
 
     /* stylelint-disable-next-line no-descending-specificity */

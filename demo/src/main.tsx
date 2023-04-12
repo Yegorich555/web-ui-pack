@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import ReactDom from "react-dom";
 import { BrowserRouter, Routes, Route, Navigate, NavLink, useNavigate } from "react-router-dom";
 import { WUPHelpers } from "web-ui-pack";
+import { useBuiltinStyle, WUPcssButton, WUPcssScrollSmall } from "web-ui-pack/styles";
 import PopupView from "./components/popup/popupView";
 
 import iconGit from "./assets/gitIcon.svg";
@@ -86,7 +87,7 @@ export default function AppContainer() {
         </a>
       </h1>
       <div className={styles.page}>
-        <nav className={styles.leftBar}>
+        <nav className={`${styles.leftBar} scrolled`}>
           <ul>
             {routes.map((r) => (
               <li key={r.path}>
@@ -102,7 +103,7 @@ export default function AppContainer() {
             ))}
           </ul>
         </nav>
-        <main>
+        <main className="scrolled">
           <Routes>
             {routes.map((r) => (
               <Route key={r.path} path={r.url} element={React.createElement(r.el)} />
@@ -115,9 +116,20 @@ export default function AppContainer() {
   );
 }
 
+const el = document.getElementById("app")!;
 ReactDom.render(
   <BrowserRouter>
-    <AppContainer />{" "}
+    <AppContainer />
   </BrowserRouter>,
-  document.getElementById("app")
+  el
 );
+
+useBuiltinStyle(
+  `${WUPcssScrollSmall(".scrolled")}
+  .scrolled {
+     overflow: auto;
+  }`
+);
+
+useBuiltinStyle(WUPcssScrollSmall(".scrolled"));
+useBuiltinStyle(WUPcssButton(".btn"));
