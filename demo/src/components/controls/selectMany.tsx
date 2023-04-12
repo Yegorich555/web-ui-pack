@@ -39,7 +39,7 @@ export default function SelectManyControlView() {
         "Inheritted features from SelectControl", //
         "Possible to select several items",
         "Perfect keyboard support",
-        // "Possible to order via Drag&Drop",
+        "Possible to order/sort via drag&drop (use pointer) or keyboard(Arrows + Shift)",
       ]}
     >
       <wup-form
@@ -57,6 +57,7 @@ export default function SelectManyControlView() {
           initValue="window.inputSelectMany.initValue"
           validations="window._someSelectValidations"
           autoComplete="off"
+          sortable={false}
           autoFocus={false}
         />
         <wup-selectmany
@@ -105,6 +106,18 @@ export default function SelectManyControlView() {
           name="allowNewValue"
           items="inputSelectMany.items"
           initValue="window.inputSelectMany.initValue"
+        />
+        <wup-selectmany
+          label="Options sortable=true - use drag&drop OR keyboard arrows + Shift"
+          sortable
+          name="sorted"
+          items="inputSelectMany.items"
+          ref={(el) => {
+            if (el) {
+              el.$options.items = items;
+              el.$initValue = [12, 15, 16, 17, 18];
+            }
+          }}
         />
         <button type="submit">Submit</button>
       </wup-form>

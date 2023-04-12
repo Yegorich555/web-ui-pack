@@ -18,8 +18,8 @@ declare global {
        * @defaultValue false */
       hideSelected?: boolean;
       /** Allow user to change ordering of items; Use drag&drop or keyboard Shift/Ctrl/Meta + arrows to change item position
-       * @defaultValue true */
-      sortable: boolean; // todo make default false
+       * @defaultValue false */
+      sortable?: boolean;
     }
 
     interface Options<T = any, VM = ValidityMap> extends WUP.Select.Options<T, VM>, Defaults<T, VM> {
@@ -234,7 +234,6 @@ export default class WUPSelectManyControl<
 
   static $defaults: WUP.SelectMany.Defaults = {
     ...WUPSelectControl.$defaults,
-    sortable: true,
   };
 
   $options: WUP.SelectMany.Options = {
@@ -629,7 +628,7 @@ export default class WUPSelectManyControl<
     }
 
     let handled = true;
-    if (e.ctrlKey || e.metaKey || e.shiftKey) {
+    if (e.shiftKey) {
       if (!this._opts.sortable || this._focusIndex == null) {
         return;
       }
