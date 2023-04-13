@@ -651,16 +651,16 @@ export default class WUPSelectManyControl<
 
       if (handled) {
         e.preventDefault();
-        if (prev !== this._focusIndex) {
-          trg.parentElement!.insertBefore(
-            trg,
-            this._focusIndex === lastInd
-              ? this.$refInput
-              : this.$refItems[isR && this._focusIndex !== 0 ? this._focusIndex + 1 : this._focusIndex]
-          );
-          this.$refItems.splice(this._focusIndex, 0, this.$refItems.splice(prev, 1)[0]);
-          this.setValue(this.$refItems.map((a) => a._wupValue));
-        }
+        // if (prev !== this._focusIndex) {
+        trg.parentElement!.insertBefore(
+          trg,
+          this._focusIndex === lastInd
+            ? this.$refInput
+            : this.$refItems[isR && this._focusIndex !== 0 ? this._focusIndex + 1 : this._focusIndex]
+        );
+        this.$refItems.splice(this._focusIndex, 0, this.$refItems.splice(prev, 1)[0]);
+        this.setValue(this.$refItems.map((a) => a._wupValue));
+        // }
       }
       return;
     }

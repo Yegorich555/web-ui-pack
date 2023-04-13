@@ -40,8 +40,8 @@ initTestBaseControl({
   },
 });
 
-function handledKeydown(key = "") {
-  return !el.dispatchEvent(new KeyboardEvent("keydown", { key, cancelable: true, bubbles: true }));
+function handledKeydown(key = "", opts = undefined) {
+  return !el.dispatchEvent(new KeyboardEvent("keydown", { key, cancelable: true, bubbles: true, ...opts }));
 }
 
 describe("control.selectMany", () => {
@@ -577,4 +577,118 @@ describe("control.selectMany", () => {
     expect(el.$value).toStrictEqual(["grey"]); // cover case when $value is undefined
     expect(onChange).toBeCalledTimes(1);
   });
+
+  test("sortable: keyboard", async () => {
+    const onChanged = jest.fn();
+    el.$value = [10, 20, 30];
+    el.$options.sortable = true;
+    await h.wait(1);
+    el.addEventListener("$change", onChanged);
+    el.focus();
+    await h.wait();
+    el.$hideMenu();
+    await h.wait();
+    expect(handledKeydown("ArrowLeft", { shiftKey: true })).toBe(false); // because not item focused
+
+    el.$refInput.selectionStart = 0;
+    el.$refInput.selectionEnd = 0;
+    expect(handledKeydown("ArrowLeft")).toBe(true); // focus last item
+    await h.wait(1);
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" id="txt4" focused="" role="option">Leo</span>",
+      ]
+    `);
+
+    // move to left
+    expect(handledKeydown("ArrowLeft", { shiftKey: true })).toBe(true);
+    await h.wait();
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Donny</span>",
+        "<span item="" id="txt4" focused="" role="option">Leo</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+      ]
+    `);
+    expect(el.$value).toStrictEqual([10, 30, 20]);
+    expect(onChanged).toBeCalledTimes(1);
+    await h.wait(1);
+
+    // move to left
+    expect(handledKeydown("ArrowLeft", { shiftKey: true })).toBe(true);
+    await h.wait();
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" id="txt4" focused="" role="option">Leo</span>",
+        "<span item="" aria-hidden="true">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+      ]
+    `);
+    expect(el.$value).toStrictEqual([30, 10, 20]);
+    expect(onChanged).toBeCalledTimes(2);
+    await h.wait(1);
+
+    // move to left
+    expect(handledKeydown("ArrowLeft", { shiftKey: true })).toBe(true);
+    await h.wait();
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" id="txt4" focused="" role="option">Leo</span>",
+      ]
+    `);
+    expect(el.$value).toStrictEqual([10, 20, 30]);
+    expect(onChanged).toBeCalledTimes(3);
+    await h.wait(1);
+
+    onChanged.mockClear();
+    // move to right
+    expect(handledKeydown("ArrowRight", { shiftKey: true })).toBe(true);
+    await h.wait();
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" id="txt4" focused="" role="option">Leo</span>",
+        "<span item="" aria-hidden="true">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+      ]
+    `);
+    expect(el.$value).toStrictEqual([30, 10, 20]);
+    expect(onChanged).toBeCalledTimes(1);
+    await h.wait(1);
+
+    // move to right
+    expect(handledKeydown("ArrowRight", { shiftKey: true })).toBe(true);
+    await h.wait();
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Donny</span>",
+        "<span item="" id="txt4" focused="" role="option">Leo</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+      ]
+    `);
+    expect(el.$value).toStrictEqual([10, 30, 20]);
+    expect(onChanged).toBeCalledTimes(2);
+    await h.wait(1);
+
+    // move to right
+    expect(handledKeydown("ArrowRight", { shiftKey: true })).toBe(true);
+    await h.wait();
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" id="txt4" focused="" role="option">Leo</span>",
+      ]
+    `);
+    expect(el.$value).toStrictEqual([10, 20, 30]);
+    expect(onChanged).toBeCalledTimes(3);
+    await h.wait(1);
+
+    expect(handledKeydown("W", { shiftKey: true })).toBe(false);
+  });
+
+  // todo drag&drop with mouse
 });
