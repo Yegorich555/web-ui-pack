@@ -372,7 +372,8 @@ export default class WUPSelectControl<
 
     const all = await this.renderMenuItems(ul);
     this._menuItems = { all, focused: -1 };
-    !all.length && this.renderMenuNoItems(popup, false);
+    !all.length ? this.renderMenuNoItems(popup, false) : this.#filterOnGotItems?.call(this);
+    this.#filterOnGotItems = undefined;
     // it happens on every show because by hide it dispose events
     onEvent(
       ul,
@@ -706,12 +707,18 @@ export default class WUPSelectControl<
     return !!this._opts.multiple;
   }
 
+  #filterOnGotItems?: () => void;
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
     this.$isShown && this.focusMenuItem(null); // reset virtual focus: // WARN it's not good enough when this._opts.multiple
     super.gotInput(e);
 
     const filter = (): void => {
-      this.filterMenuItems();
+      this.#filterOnGotItems = undefined;
+      if (this.$isShown && this._cachedItems) {
+        this.filterMenuItems();
+      } else if (this.$isShown) {
+        this.#filterOnGotItems = this.filterMenuItems;
+      }
     };
 
     let isChanged = false;
@@ -732,6 +739,7 @@ export default class WUPSelectControl<
         isChanged && this.setValue(next as any);
       }
     }
+
     isChanged ? setTimeout(filter, 1) : filter(); // setValue updates input only after Promise and we need to wait for: NiceToHave deprecate value
   }
 

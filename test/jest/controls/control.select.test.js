@@ -729,6 +729,23 @@ describe("control.select", () => {
     expect(err).toBeCalledTimes(1); // because value not found in items
     expect(el.$refInput.value).toMatchInlineSnapshot(`"Error: not found for "`);
     h.unMockConsoleError();
+
+    // case when menu is hidden 1st time and opened 2nd by input
+    document.body.innerHTML = "";
+    /** @type WUPSelectControl */
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.items = () => new Promise((res) => setTimeout(() => res(getItems()), 100));
+    jest.spyOn(el, "canShowMenu").mockReturnValueOnce(false);
+    await h.wait(1);
+    el.focus();
+    await h.wait();
+    expect(el.$isShown).toBe(false);
+    await expect(h.userTypeText(el.$refInput, "D")).resolves.not.toThrow(); // todo issue here because input don't wait for promise
+    await h.wait();
+    expect(el.$isShown).toBe(true);
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt7" role="listbox" aria-label="Items" tabindex="-1"><li role="option" aria-selected="false" id="txt8" focused="">Donny</li><li role="option" style="display: none;">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option" style="display: none;">Splinter</li></ul>"`
+    );
   });
 
   test("submit by Enter key", async () => {

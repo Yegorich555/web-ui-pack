@@ -419,6 +419,7 @@ export default class WUPSelectManyControl<
 
       const cancel = (): void => {
         if (dr) {
+          setTimeout(() => (this._wasSortAfterClick = false), 1);
           this.removeAttribute("hovered");
           if (!isInside) {
             el.removeAttribute("drop");
@@ -455,7 +456,6 @@ export default class WUPSelectManyControl<
     showCase: ShowCases,
     e?: MouseEvent | FocusEvent | KeyboardEvent | null
   ): boolean | Promise<boolean> {
-    // todo when false then exception if try to input text
     return !this._wasSortAfterClick && super.canShowMenu(showCase, e);
   }
 

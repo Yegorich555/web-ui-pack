@@ -1013,5 +1013,64 @@ describe("control.selectMany", () => {
     trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
     await nextFrame(50);
     expect(el.outerHTML).toBe(was);
+
+    // test menu is hidden after click + sorting
+    el.blur();
+    await h.wait();
+    trg.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
+    h.userMouseMove(trg, { x: w, y: hi / 2 });
+    trg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    // simulate focusing when user makes mouse down > move+sort > up
+    el.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }));
+    el.focus();
+    await nextFrame(50);
+    await expect(h.userTypeText(el.$refInput, "l")).resolves.not.toThrow();
+    await h.wait();
+    expect(el.$isShown).toBe(true);
+    expect(el.$refPopup).toMatchInlineSnapshot(`
+      <wup-popup
+        menu=""
+        style="min-width: 180px;"
+      >
+        <ul
+          aria-label="Items"
+          aria-multiselectable="true"
+          id="txt6"
+          role="listbox"
+          tabindex="-1"
+        >
+          <li
+            aria-selected="true"
+            role="option"
+            style="display: none;"
+          >
+            Donny
+          </li>
+          <li
+            role="option"
+            style="display: none;"
+          >
+            Mikky
+          </li>
+          <li
+            aria-selected="true"
+            focused=""
+            id="txt7"
+            role="option"
+          >
+            Leo
+          </li>
+          <li
+            aria-selected="true"
+            role="option"
+            style="display: none;"
+          >
+            Splinter
+          </li>
+        </ul>
+      </wup-popup>
+    `);
   });
 });
