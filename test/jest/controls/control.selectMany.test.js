@@ -975,10 +975,43 @@ describe("control.selectMany", () => {
     await h.wait();
 
     // handling touch events
+    onChanged.mockClear();
+    // case when touch event impossible to prevent because browser decides to scroll
     trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
     trg.dispatchEvent(new MouseEvent("touchstart", { cancelable: true, bubbles: true }));
-    h.userMouseMove(fakeTrg, { x: 0, y: 0 });
-    // todo finish it expect(trg.parentElement.querySelector("[drag]"));
-    // todo test disposing events
+    h.userMouseMove(trg, { x: 0, y: 0 });
+    expect(el.querySelector("[drag]")).toBeFalsy();
+    trg.dispatchEvent(new MouseEvent("touchmove", { cancelable: false, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointercancel", { cancelable: false, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("touchend", { cancelable: false, bubbles: true }));
+    await h.wait(1);
+    expect(onChanged).toBeCalledTimes(0);
+
+    // case when touch event possible to prevent
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("touchstart", { cancelable: true, bubbles: true }));
+    const isPrevented = !trg.dispatchEvent(new MouseEvent("touchmove", { cancelable: true, bubbles: true }));
+    expect(isPrevented).toBe(true);
+    h.userMouseMove(trg, { x: w, y: 0 });
+    expect(el.querySelector("[drag]")).toBeTruthy();
+    bindDragEl();
+    trg.dispatchEvent(new MouseEvent("touchend", { cancelable: false, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await nextFrame(50);
+    expect(onChanged).toBeCalledTimes(1);
+
+    // test disposing - no sort listener when option is disabled
+    el.$options.sortable = false;
+    await h.wait(1);
+    was = el.outerHTML;
+    trg.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
+    h.userMouseMove(trg, { x: 1000, y: 1000 });
+    expect(el.outerHTML).toBe(was);
+    trg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await nextFrame(50);
+    expect(el.outerHTML).toBe(was);
   });
 });
