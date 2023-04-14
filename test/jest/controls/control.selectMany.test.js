@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 import { WUPSelectManyControl } from "web-ui-pack";
 import { isAnimEnabled } from "web-ui-pack/helpers/animate";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
@@ -690,5 +691,294 @@ describe("control.selectMany", () => {
     expect(handledKeydown("W", { shiftKey: true })).toBe(false);
   });
 
-  // todo drag&drop with mouse
+  test("sortable: drag&drop", async () => {
+    const onChanged = jest.fn();
+    el.$value = [10, 20, 30, 40];
+    el.$options.sortable = true;
+    await h.wait(1);
+    el.addEventListener("$change", onChanged);
+    const hi = 30;
+    const w = 60;
+    h.setupLayout(el, { x: 0, y: 0, h: hi * 2, w: w * 3 });
+    const updateLayout = () => {
+      // 1st line
+      // WARN: Items doesn't change own position
+      h.setupLayout(el.$refItems[0], { x: 0, y: 0, h: hi, w }); // 1st
+      h.setupLayout(el.$refItems[1], { x: w, y: 0, h: hi, w }); // 2nd
+      h.setupLayout(el.$refItems[2], { x: w * 2, y: 0, h: hi, w }); // 3rd
+      // 2nd line
+      h.setupLayout(el.$refItems[3], { x: 0, y: hi, h: hi, w }); // 1st
+    };
+    updateLayout();
+    let trg = el.$refItems[0];
+    const getChildren = () => Array.prototype.slice.call(trg.parentElement.children).map((a) => a.outerHTML);
+
+    // ordinary mouse move
+    trg.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
+    expect(el).toMatchSnapshot();
+    // move to center of trg
+    h.userMouseMove(trg, { x: trg.offsetWidth / 2, y: trg.offsetHeight / 2 });
+    expect(getChildren()).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(0px, 0px);">Donny</span>",
+        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
+        "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
+        "<strong></strong>",
+      ]
+    `);
+    expect(el).toMatchSnapshot();
+
+    /** @type HTMLElement */
+    let dragEl;
+    /* Simulate getBoundingClientRect for draggable element */
+    const bindDragEl = () => {
+      dragEl = trg.parentElement.querySelector("[drag]");
+      jest.spyOn(dragEl, "getBoundingClientRect").mockImplementation(() => {
+        const width = +/([0-9]+)/.exec(dragEl.style.width)[1];
+        const height = +/([0-9]+)/.exec(dragEl.style.height)[1];
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars, prefer-const
+        let [_, x, y] = /([0-9]+)\D+([0-9]+)/.exec(dragEl.style.transform);
+        x = Number(x);
+        y = Number(y);
+        return { x, y, width, height, top: y, left: x, right: width + x, bottom: height + y };
+      });
+    };
+    bindDragEl(); // simulate getBoundingClientRect for draggable element
+
+    // move to right of 2nd item
+    updateLayout();
+    let r = el.$refItems[1].getBoundingClientRect();
+    h.userMouseMove(dragEl, { x: r.right, y: trg.offsetHeight / 2 });
+    expect(getChildren()).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(90px, 0px);">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
+        "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
+        "<strong></strong>",
+      ]
+    `);
+
+    // checking thottling here
+    updateLayout();
+    r = el.$refItems[2].getBoundingClientRect();
+    h.userMouseMove(trg, { x: r.right, y: trg.offsetHeight / 2 });
+    expect(getChildren()).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(150px, 0px);">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
+        "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
+        "<strong></strong>",
+      ]
+    `); // no -effect because throttling
+    await h.wait(5);
+    expect(onChanged).toBeCalledTimes(0); // because user don't mouseup
+
+    // move to the end of 1st line after throtling
+    await h.wait(); // wait for throttling to get new position at the right side of 2nd item
+    updateLayout();
+    h.userMouseMove(trg, { x: r.right - 2, y: trg.offsetHeight / 2 + 5 });
+    expect(getChildren()).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(148px, 5px);">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
+        "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
+        "<strong></strong>",
+      ]
+    `);
+    await h.wait(5);
+    expect(onChanged).toBeCalledTimes(0); // because user don't mouseup
+
+    // move to the 2nd - right side
+    await h.wait(); // wait for throttling
+    updateLayout();
+    h.userMouseMove(trg, { x: w * 2, y: 0 });
+    expect(getChildren()).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(90px, -15px);">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
+        "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
+        "<strong></strong>",
+      ]
+    `);
+    // move to the 1st - left side
+    await h.wait(); // wait for throttling
+    updateLayout();
+    h.userMouseMove(trg, { x: 0, y: 0 });
+    expect(getChildren()).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(-30px, -15px);">Donny</span>",
+        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
+        "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
+        "<strong></strong>",
+      ]
+    `);
+
+    // moving to 2nd line; left side
+    await h.wait(); // wait for throttling to get new position at the right side of 2nd item
+    updateLayout();
+    h.userMouseMove(trg, { x: 0, y: trg.offsetHeight + 5 });
+    expect(getChildren()).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(-30px, 20px);">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
+        "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
+        "<strong></strong>",
+      ]
+    `);
+    await h.wait(5);
+    expect(onChanged).toBeCalledTimes(0); // because user don't mouseup
+
+    // moving to 2nd line; right side
+    await h.wait(); // wait for throttling to get new position at the right side of 2nd item
+    h.userMouseMove(trg, { x: trg.offsetWidth, y: trg.offsetHeight + 5 });
+    expect(getChildren()).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(30px, 20px);">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
+        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
+        "<strong></strong>",
+      ]
+    `);
+    await h.wait(5);
+    expect(onChanged).toBeCalledTimes(0); // because user doesn't mouseup
+    updateLayout();
+    bindDragEl();
+
+    const { nextFrame } = h.useFakeAnimation(); // animation for return mirrored element
+    trg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait(1);
+    expect(onChanged).toBeCalledTimes(1);
+    expect(el.$value).toStrictEqual([20, 30, 40, 10]);
+    expect(dragEl.outerHTML).toMatchInlineSnapshot(
+      `"<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(30px, 20px);">Donny</span>"`
+    );
+    await nextFrame(5);
+    expect(dragEl.outerHTML).toMatchInlineSnapshot(
+      `"<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(0px, 30px);">Donny</span>"`
+    );
+    await nextFrame(50);
+    expect(getChildren()).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
+        "<span item="" aria-hidden="true">Donny</span>",
+        "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
+        "<strong></strong>",
+      ]
+    `);
+
+    expect(el).toMatchSnapshot();
+
+    // test removing when outside
+    trg = el.$refItems[0];
+    trg.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
+    // move outside of control
+    h.userMouseMove(trg, { x: 5, y: 5 });
+    bindDragEl(); // simulate getBoundingClientRect for draggable element
+    h.userMouseMove(trg, { x: 1000, y: 1000 });
+    expect(getChildren()).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(970px, 985px);" remove="">Mikky</span>",
+        "<span item="" aria-hidden="true" drop="">Mikky</span>",
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
+        "<span item="" aria-hidden="true">Donny</span>",
+        "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
+        "<strong></strong>",
+      ]
+    `);
+    trg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await nextFrame(50);
+    expect(onChanged).toBeCalledTimes(2);
+    expect(el.$value).toStrictEqual([30, 40, 10]);
+    expect(el).toMatchSnapshot();
+
+    // cancel without move
+    trg = el.$refItems[0];
+    let was = el.outerHTML;
+    trg.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await nextFrame(50);
+    expect(el.outerHTML).toBe(was);
+
+    // no-action when readonly
+    el.$options.readOnly = true;
+    await h.wait(1);
+    was = el.outerHTML;
+    trg.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
+    h.userMouseMove(trg, { x: 1000, y: 1000 });
+    expect(el.outerHTML).toBe(was);
+    trg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await nextFrame(50);
+    expect(el.outerHTML).toBe(was);
+    el.$options.readOnly = false;
+
+    // no-action when disabled
+    el.$options.disabled = true;
+    await h.wait(1);
+    was = el.outerHTML;
+    trg.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
+    h.userMouseMove(trg, { x: 1000, y: 1000 });
+    expect(el.outerHTML).toBe(was);
+    trg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await nextFrame(50);
+    expect(el.outerHTML).toBe(was);
+    el.$options.disabled = false;
+    await h.wait(1);
+
+    // no-action when click outside items
+    was = el.outerHTML;
+    const fakeTrg = trg.parentElement;
+    fakeTrg.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
+    fakeTrg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
+    h.userMouseMove(fakeTrg, { x: 1000, y: 1000 });
+    expect(el.outerHTML).toBe(was);
+    fakeTrg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
+    fakeTrg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await nextFrame(50);
+    expect(el.outerHTML).toBe(was);
+    await h.wait();
+
+    // handling touch events
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("touchstart", { cancelable: true, bubbles: true }));
+    h.userMouseMove(fakeTrg, { x: 0, y: 0 });
+    // todo finish it expect(trg.parentElement.querySelector("[drag]"));
+    // todo test disposing events
+  });
 });

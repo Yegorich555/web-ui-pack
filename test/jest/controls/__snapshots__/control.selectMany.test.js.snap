@@ -872,6 +872,226 @@ mask-image: var(--ctrl-icon-img);
 </style>
 `;
 
+exports[`control.selectMany sortable: drag&drop 1`] = `
+<wup-selectmany
+  filled=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Donny
+      </span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Mikky
+      </span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Leo
+      </span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Splinter
+      </span>
+      <input
+        aria-autocomplete="list"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+</wup-selectmany>
+`;
+
+exports[`control.selectMany sortable: drag&drop 3`] = `
+<wup-selectmany
+  filled=""
+  hovered=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <span
+        aria-hidden="true"
+        drag=""
+        item=""
+        style="width: 60px; height: 30px; transform: translate(0px, 0px);"
+      >
+        Donny
+      </span>
+      <span
+        aria-hidden="true"
+        drop=""
+        item=""
+      >
+        Donny
+      </span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Mikky
+      </span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Leo
+      </span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Splinter
+      </span>
+      <input
+        aria-autocomplete="list"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+</wup-selectmany>
+`;
+
+exports[`control.selectMany sortable: drag&drop 14`] = `
+<wup-selectmany
+  filled=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Mikky
+      </span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Leo
+      </span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Splinter
+      </span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Donny
+      </span>
+      <input
+        aria-autocomplete="list"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+</wup-selectmany>
+`;
+
+exports[`control.selectMany sortable: drag&drop 16`] = `
+<wup-selectmany
+  filled=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Leo
+      </span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Splinter
+      </span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Donny
+      </span>
+      <input
+        aria-autocomplete="list"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+</wup-selectmany>
+`;
+
 exports[`control.selectMany validations $options.validationShowAll 1`] = `
 <wup-selectmany
   invalid=""

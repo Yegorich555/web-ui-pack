@@ -398,7 +398,8 @@ export default class WUPSelectManyControl<
           let nextEli = eli;
           if (nearest < eli) {
             nextEli = isLeft ? nearest : nearest + 1; // shift from right to left
-          } else if (nearest > eli) {
+          } else {
+            // if (nearest > eli) {
             nextEli = isLeft ? nearest - 1 : nearest; // shift from left to right
           }
 
@@ -738,4 +739,3 @@ customElements.define(tagName, WUPSelectManyControl);
  */
 
 // todo popup can change position during the hidding by focuslost when input is goes invisible and control size is reduced - need somehow block changing position
-// todo sorting with keyboard

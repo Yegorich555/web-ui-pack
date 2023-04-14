@@ -603,3 +603,41 @@ export class TestMouseMoveEvent extends MouseEvent {
     }
   }
 }
+
+/** Setup width, height and layout position for pointed element */
+export function setupLayout(el: HTMLElement, opts: { x: number; y: number; h: number; w: number }) {
+  jest.spyOn(el, "offsetHeight", "get").mockReturnValue(opts.h);
+  jest.spyOn(el, "clientHeight", "get").mockReturnValue(opts.h);
+
+  jest.spyOn(el, "offsetWidth", "get").mockReturnValue(opts.w);
+  jest.spyOn(el, "clientWidth", "get").mockReturnValue(opts.w);
+  const rect = {
+    x: opts.x,
+    y: opts.y,
+    left: opts.x,
+    top: opts.y,
+    height: opts.h,
+    width: opts.w,
+    bottom: opts.y + opts.h,
+    right: opts.x + opts.w,
+    toJSON: () => JSON.stringify(rect),
+  };
+  jest.spyOn(el, "getBoundingClientRect").mockReturnValue(rect);
+}
+
+/** Simulate mouse pointer move to pointed position */
+export function userMouseMove(el: HTMLElement, { x, y }: { x: number; y: number }) {
+  const opts = {
+    clientX: x,
+    clientY: y,
+    movementX: x - userMouseMove.stored.x,
+    movementY: y - userMouseMove.stored.y,
+    cancelable: false,
+    bubbles: true,
+  };
+  userMouseMove.stored = { x, y };
+  el.dispatchEvent(new MouseEvent("mousemove", { ...opts }));
+  el.dispatchEvent(new MouseEvent("pointermove", { ...opts }));
+}
+
+userMouseMove.stored = { x: 0, y: 0 };
