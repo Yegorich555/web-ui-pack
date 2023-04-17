@@ -740,7 +740,7 @@ describe("control.select", () => {
     el.focus();
     await h.wait();
     expect(el.$isShown).toBe(false);
-    await expect(h.userTypeText(el.$refInput, "D")).resolves.not.toThrow(); // todo issue here because input don't wait for promise
+    await expect(h.userTypeText(el.$refInput, "D")).resolves.not.toThrow();
     await h.wait();
     expect(el.$isShown).toBe(true);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(

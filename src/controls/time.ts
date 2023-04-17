@@ -199,11 +199,13 @@ export default class WUPTimeControl<
         background: var(--base-sep);
       }
       :host [menu] button {
+        cursor: pointer;
         flex: 1 1 50%;
         display: inline-flex;
         align-content: center;
         justify-content: center;
         height: 2.4em;
+        border: none;
         border-radius: 0;
         padding: 0; margin: 0;
         background: var(--base-btn3-bg);
