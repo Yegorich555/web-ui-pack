@@ -670,18 +670,20 @@ mask-image: var(--ctrl-icon-img);
       WUP-SELECTMANY[opened] label::after {
         transform: rotate(180deg);
       }
-      WUP-SELECTMANY [menu] {
-        overflow: hidden;
-      }
-      WUP-SELECTMANY [menu] ul {
-        margin: 0;
-        padding: 0;
-        list-style-type: none;
-        cursor: pointer;
-        overflow: auto;
-        max-height: 300px;
-      }
       
+WUP-SELECTMANY [menu] {
+  overflow: hidden;
+  padding: 0;
+}
+WUP-SELECTMANY [menu]&gt;ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  cursor: pointer;
+  overflow: auto;
+  max-height: 300px;
+}
+
 WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar {
   width: 10px; height: 10px;
   cursor: pointer;
@@ -710,23 +712,23 @@ WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar-track-piece:horizontal:end {
     cursor: pointer;
   }
 }
-      WUP-SELECTMANY [menu] li {
-        padding: 1em;
-        border-radius: var(--ctrl-border-radius);
-      }
-      @media (hover: hover) and (pointer: fine) {
-        WUP-SELECTMANY [menu] li:hover {
-          box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
-        }
-      }
-      WUP-SELECTMANY [menu] li[aria-selected="true"] {
-        color: var(--ctrl-selected);
-        display: flex;
-      }
-      WUP-SELECTMANY [menu] li[aria-selected="true"]:after {
-        content: "";
-        --ctrl-icon-img: var(--wup-icon-check);
-        
+WUP-SELECTMANY [menu] li {
+  padding: 1em;
+  border-radius: var(--border-radius);
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-SELECTMANY [menu] li:hover {
+    box-shadow: inset 0 0 3px 0 var(--base-focus);
+  }
+}
+WUP-SELECTMANY [menu] li[aria-selected="true"] {
+  color: var(--ctrl-selected);
+  display: flex;
+}
+WUP-SELECTMANY [menu] li[aria-selected="true"]:after {
+  content: "";
+  --ctrl-icon-img: var(--wup-icon-check);
+  
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
@@ -746,13 +748,13 @@ mask-repeat: no-repeat;
 mask-position: center;
 -webkit-mask-image: var(--ctrl-icon-img);
 mask-image: var(--ctrl-icon-img);
-        background: var(--ctrl-selected);
-        margin-left: auto;
-        padding: 0;
-      }
-      WUP-SELECTMANY [menu] li[focused] {
-        box-shadow: inset 0 0 4px 0 var(--ctrl-focus);
-      }
+  background: var(--ctrl-selected);
+  margin-left: auto;
+  padding: 0;
+}
+WUP-SELECTMANY [menu] li[focused] {
+  box-shadow: inset 0 0 4px 0 var(--base-focus);
+}
       WUP-SELECTMANY strong {
         top: 1.6em;
         margin: calc(var(--ctrl-select-gap) / 2);

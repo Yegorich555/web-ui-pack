@@ -204,11 +204,11 @@ export default class WUPCircleElement extends WUPBaseElement {
     items: [],
   };
 
+  protected override _opts = this.$options;
+
   $refSVG = this.make("svg");
   $refItems = this.make("g");
   $refLabel?: HTMLElement;
-
-  protected override _opts = this.$options;
 
   /** Creates new svg-part */
   protected make<K extends keyof SVGElementTagNameMap>(tag: string): SVGElementTagNameMap[K] {

@@ -208,7 +208,7 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
   }
 
   #isReady = false;
-  /** Called when element is added to document */
+  /** Called when element is added to document (after empty timeout - at the end of call stack) */
   protected gotReady(): void {
     this.#readyTimeout = undefined;
     this.#isReady = true;

@@ -102,6 +102,48 @@ ${tag}[aria-busy] {
 }`;
 }
 
+/** Returns default style for popup menu */
+export function WUPcssMenu(tag: string): string {
+  return `
+${tag} {
+  overflow: hidden;
+  padding: 0;
+}
+${tag}>ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  cursor: pointer;
+  overflow: auto;
+  max-height: 300px;
+}
+${WUPcssScrollSmall(`${tag}>ul`)}
+${tag} li {
+  padding: 1em;
+  border-radius: var(--border-radius);
+}
+@media (hover: hover) and (pointer: fine) {
+  ${tag} li:hover {
+    box-shadow: inset 0 0 3px 0 var(--base-focus);
+  }
+}
+${tag} li[aria-selected="true"] {
+  color: var(--ctrl-selected);
+  display: flex;
+}
+${tag} li[aria-selected="true"]:after {
+  content: "";
+  --ctrl-icon-img: var(--wup-icon-check);
+  ${WUPcssIcon}
+  background: var(--ctrl-selected);
+  margin-left: auto;
+  padding: 0;
+}
+${tag} li[focused] {
+  box-shadow: inset 0 0 4px 0 var(--base-focus);
+}`;
+}
+
 let refStyle: HTMLStyleElement | undefined;
 /** Use this function to prepend css-style via JS into document.head */
 export function useBuiltinStyle(cssString: string): HTMLStyleElement {

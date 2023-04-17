@@ -661,18 +661,20 @@ mask-image: var(--ctrl-icon-img);
       WUP-SELECT[opened] label::after {
         transform: rotate(180deg);
       }
-      WUP-SELECT [menu] {
-        overflow: hidden;
-      }
-      WUP-SELECT [menu] ul {
-        margin: 0;
-        padding: 0;
-        list-style-type: none;
-        cursor: pointer;
-        overflow: auto;
-        max-height: 300px;
-      }
       
+WUP-SELECT [menu] {
+  overflow: hidden;
+  padding: 0;
+}
+WUP-SELECT [menu]&gt;ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  cursor: pointer;
+  overflow: auto;
+  max-height: 300px;
+}
+
 WUP-SELECT [menu]&gt;ul::-webkit-scrollbar {
   width: 10px; height: 10px;
   cursor: pointer;
@@ -701,23 +703,23 @@ WUP-SELECT [menu]&gt;ul::-webkit-scrollbar-track-piece:horizontal:end {
     cursor: pointer;
   }
 }
-      WUP-SELECT [menu] li {
-        padding: 1em;
-        border-radius: var(--ctrl-border-radius);
-      }
-      @media (hover: hover) and (pointer: fine) {
-        WUP-SELECT [menu] li:hover {
-          box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
-        }
-      }
-      WUP-SELECT [menu] li[aria-selected="true"] {
-        color: var(--ctrl-selected);
-        display: flex;
-      }
-      WUP-SELECT [menu] li[aria-selected="true"]:after {
-        content: "";
-        --ctrl-icon-img: var(--wup-icon-check);
-        
+WUP-SELECT [menu] li {
+  padding: 1em;
+  border-radius: var(--border-radius);
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-SELECT [menu] li:hover {
+    box-shadow: inset 0 0 3px 0 var(--base-focus);
+  }
+}
+WUP-SELECT [menu] li[aria-selected="true"] {
+  color: var(--ctrl-selected);
+  display: flex;
+}
+WUP-SELECT [menu] li[aria-selected="true"]:after {
+  content: "";
+  --ctrl-icon-img: var(--wup-icon-check);
+  
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
@@ -737,13 +739,13 @@ mask-repeat: no-repeat;
 mask-position: center;
 -webkit-mask-image: var(--ctrl-icon-img);
 mask-image: var(--ctrl-icon-img);
-        background: var(--ctrl-selected);
-        margin-left: auto;
-        padding: 0;
-      }
-      WUP-SELECT [menu] li[focused] {
-        box-shadow: inset 0 0 4px 0 var(--ctrl-focus);
-      }
+  background: var(--ctrl-selected);
+  margin-left: auto;
+  padding: 0;
+}
+WUP-SELECT [menu] li[focused] {
+  box-shadow: inset 0 0 4px 0 var(--base-focus);
+}
 </style>
 `;
 
