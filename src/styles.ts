@@ -70,7 +70,7 @@ export function WUPcssButton(tag: string): string {
   return `
 ${tag} {
   box-shadow: none;
-  border: 1px solid var(--btn-submit-bg);
+  border: 1px solid var(--base-btn-bg);
   border-radius: var(--border-radius);
   box-sizing: border-box;
   padding: 0.5em;
@@ -79,12 +79,12 @@ ${tag} {
   cursor: pointer;
   font: inherit;
   font-weight: bold;
-  background: var(--btn-submit-bg);
-  color: var(--btn-submit-text);
+  background: var(--base-btn-bg);
+  color: var(--base-btn-text);
   outline: none;
 }
 ${tag}:focus {
-  border-color: var(--btn-submit-focus);
+  border-color: var(--base-btn-focus);
 }
 @media (hover: hover) and (pointer: fine) {
   ${tag}:hover {
