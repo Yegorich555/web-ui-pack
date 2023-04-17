@@ -30,7 +30,9 @@ mask-position: center;
 -webkit-mask-image: var(--ctrl-icon-img);
 mask-image: var(--ctrl-icon-img);`;
 
-/** Style for small-scroll; vars --scroll, --scroll-hover to customize styling */
+/** Style for small-scroll; vars --scroll, --scroll-hover to customize styling
+ * @tutorial Troubleshooting
+ * * cursor:pointer; doesn't work - this Chromium issue https://stackoverflow.com/questions/64402424/why-does-the-css-cursor-property-not-work-for-the-styled-scrollbar */
 export function WUPcssScrollSmall(tag: string): string {
   return `
 ${tag}::-webkit-scrollbar {
@@ -39,22 +41,26 @@ ${tag}::-webkit-scrollbar {
 }
 ${tag}::-webkit-scrollbar-corner {
   background: none;
+  cursor: pointer;
 }
 ${tag}::-webkit-scrollbar-thumb {
   border: 3px solid rgba(0,0,0,0);
   background-clip: padding-box;
   background-color: var(--scroll, rgba(0,0,0,0.2));
   border-radius: 999px;
+  cursor: pointer;
 }
 ${tag}::-webkit-scrollbar-track-piece:vertical:start,
 ${tag}::-webkit-scrollbar-track-piece:vertical:end,
 ${tag}::-webkit-scrollbar-track-piece:horizontal:start,
 ${tag}::-webkit-scrollbar-track-piece:horizontal:end {
   margin: 0;
+  cursor: pointer;
 }
 @media (hover) {
   ${tag}::-webkit-scrollbar-thumb:hover {
     background-color: var(--scroll-hover, rgba(0,0,0,0.5));
+    cursor: pointer;
   }
 }`;
 }
@@ -82,7 +88,7 @@ ${tag}:focus {
 }
 @media (hover: hover) and (pointer: fine) {
   ${tag}:hover {
-      box-shadow: inset 0 0 0 99999px rgba(0,0,0,0.2);
+    box-shadow: inset 0 0 0 99999px rgba(0,0,0,0.2);
   }
 }
 ${tag}[disabled] {

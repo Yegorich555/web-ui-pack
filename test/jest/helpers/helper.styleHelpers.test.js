@@ -82,22 +82,26 @@ describe("helper.styleHelpers", () => {
       }
       .scrolled::-webkit-scrollbar-corner {
         background: none;
+        cursor: pointer;
       }
       .scrolled::-webkit-scrollbar-thumb {
         border: 3px solid rgba(0,0,0,0);
         background-clip: padding-box;
         background-color: var(--scroll, rgba(0,0,0,0.2));
         border-radius: 999px;
+        cursor: pointer;
       }
       .scrolled::-webkit-scrollbar-track-piece:vertical:start,
       .scrolled::-webkit-scrollbar-track-piece:vertical:end,
       .scrolled::-webkit-scrollbar-track-piece:horizontal:start,
       .scrolled::-webkit-scrollbar-track-piece:horizontal:end {
         margin: 0;
+        cursor: pointer;
       }
       @media (hover) {
         .scrolled::-webkit-scrollbar-thumb:hover {
           background-color: var(--scroll-hover, rgba(0,0,0,0.5));
+          cursor: pointer;
         }
       }</style>"
     `);
@@ -111,22 +115,26 @@ describe("helper.styleHelpers", () => {
       }
       .scrolled::-webkit-scrollbar-corner {
         background: none;
+        cursor: pointer;
       }
       .scrolled::-webkit-scrollbar-thumb {
         border: 3px solid rgba(0,0,0,0);
         background-clip: padding-box;
         background-color: var(--scroll, rgba(0,0,0,0.2));
         border-radius: 999px;
+        cursor: pointer;
       }
       .scrolled::-webkit-scrollbar-track-piece:vertical:start,
       .scrolled::-webkit-scrollbar-track-piece:vertical:end,
       .scrolled::-webkit-scrollbar-track-piece:horizontal:start,
       .scrolled::-webkit-scrollbar-track-piece:horizontal:end {
         margin: 0;
+        cursor: pointer;
       }
       @media (hover) {
         .scrolled::-webkit-scrollbar-thumb:hover {
           background-color: var(--scroll-hover, rgba(0,0,0,0.5));
+          cursor: pointer;
         }
       }
       .btn {
@@ -149,7 +157,7 @@ describe("helper.styleHelpers", () => {
       }
       @media (hover: hover) and (pointer: fine) {
         .btn:hover {
-            box-shadow: inset 0 0 0 99999px rgba(0,0,0,0.2);
+          box-shadow: inset 0 0 0 99999px rgba(0,0,0,0.2);
         }
       }
       .btn[disabled] {
