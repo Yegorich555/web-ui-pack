@@ -1,6 +1,6 @@
 import WUPBaseElement from "./baseElement";
 import WUPPopupElement from "./popup/popupElement";
-import { ShowCases } from "./popup/popupElement.types";
+import { Animations, ShowCases } from "./popup/popupElement.types";
 import { WUPcssButton, WUPcssMenu } from "./styles";
 
 const tagName = "wup-dropdown";
@@ -81,24 +81,30 @@ export default class WUPDropdownElement extends WUPBaseElement {
   protected override gotChanges(propsChanged: Array<keyof WUP.Dropdown.Options> | null): void {
     super.gotChanges(propsChanged);
 
-    this._opts.direction = (this.getAttr("direction", "string") as "bottom") || "bottom";
+    // todo click on item inside closes popup but it maybe wrong - need option for this
+    // todo hover effect is wrong - if user hovers popup after showing it closes
+    // todo this._opts.direction = (this.getAttr("direction", "string") as "bottom") || "bottom";
     this.$refPopup.$options.showCase = this.$options.showCase && ShowCases.onClick;
-    this.$refPopup.$options.minWidthByTarget = true;
-    this.$refPopup.$options.minHeightByTarget = true;
-    this.$refPopup.$options.placement = [
-      WUPPopupElement.$placements.$bottom.$start,
-      WUPPopupElement.$placements.$bottom.$end,
-    ];
-    // todo this.$refPopup.$options.animation =
+    this.$refPopup.$options.animation = Animations.drawer;
   }
 
   protected override gotReady(): void {
     this.$refTitle = this.firstElementChild as HTMLElement;
     this.$refPopup = this.lastElementChild as WUPPopupElement;
     if (this.$refTitle === this.$refPopup || !this.$refPopup.$show) {
-      this.throwError("Invalid structure.Expected 1st element: any, last element: wup-popup");
+      this.throwError("Invalid structure. Expected 1st element: <any/>, last element: <wup-popup/>");
+    } else {
+      this.$refPopup.setAttribute("menu", "");
+      this.$refPopup.$options.minWidthByTarget = true;
+      this.$refPopup.$options.minHeightByTarget = true;
+      // todo user must be able to change direction
+      if (!this.$refPopup.hasAttribute("placement")) {
+        this.$refPopup.$options.placement = [
+          WUPPopupElement.$placements.$bottom.$start,
+          WUPPopupElement.$placements.$bottom.$end,
+        ];
+      }
     }
-    this.$refPopup.setAttribute("menu", "");
     super.gotReady();
   }
 }
