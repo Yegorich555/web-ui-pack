@@ -1,4 +1,6 @@
 .custom {
+  margin: 6px;
+
   button {
     display: flex;
     align-items: center;
@@ -17,21 +19,31 @@
   }
 
   [menu] {
-    background: none;
     box-shadow: none;
-  }
+    background: none;
 
-  [menu] ul {
-    display: flex;
-    gap: 4px;
-    padding: 4px;
-  }
-
-  [menu] li {
-    padding: 0;
-
-    &:hover {
-      box-shadow: none;
+    button {
+      background: cornflowerblue;
     }
+
+    ul {
+      display: flex;
+      padding: 2px;
+    }
+
+    li {
+      padding: 0;
+      margin: 2px;
+
+      &:hover {
+        box-shadow: none;
+      }
+    }
+  }
+}
+
+.vertical {
+  [menu] ul {
+    flex-direction: column;
   }
 }

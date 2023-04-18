@@ -32,6 +32,66 @@ export default function DropdownView() {
       </section>
       <section>
         <h3>Customized</h3>
+        {/* todo dropdown animation works ugly on custom forms */}
+        <wup-dropdown class={styles.custom}>
+          <button type="button">{"<"}</button>
+          <wup-popup
+            placement="left-middle"
+            // ref={(el) => {
+            //   if (el) {
+            //     el.$options.offset = (r) => [-r.height / 2, -r.width / 2];
+            //   }
+            // }}
+          >
+            <ul>
+              <li>
+                <button type="button">A</button>
+              </li>
+              <li>
+                <button type="button">B</button>
+              </li>
+              <li>
+                <button type="button">C</button>
+              </li>
+            </ul>
+          </wup-popup>
+        </wup-dropdown>
+        <wup-dropdown class={`${styles.custom} ${styles.vertical}`}>
+          <button type="button">
+            <span style={{ transform: "rotate(90deg)" }}>{">"}</span>
+          </button>
+          <wup-popup placement="bottom-middle">
+            <ul>
+              <li>
+                <button type="button">A</button>
+              </li>
+              <li>
+                <button type="button">B</button>
+              </li>
+              <li>
+                <button type="button">C</button>
+              </li>
+            </ul>
+          </wup-popup>
+        </wup-dropdown>
+        <wup-dropdown class={`${styles.custom} ${styles.vertical}`}>
+          <button type="button">
+            <span style={{ transform: "rotate(-90deg)" }}>{">"}</span>
+          </button>
+          <wup-popup placement="top-middle">
+            <ul>
+              <li>
+                <button type="button">A</button>
+              </li>
+              <li>
+                <button type="button">B</button>
+              </li>
+              <li>
+                <button type="button">C</button>
+              </li>
+            </ul>
+          </wup-popup>
+        </wup-dropdown>
         <wup-dropdown class={styles.custom}>
           <button type="button">{">"}</button>
           <wup-popup placement="right-middle">
