@@ -2,6 +2,10 @@
 
 ## 0.5.3 (\_\_\_)
 
+**Fixes**:
+
+- **helper** [`animateDropdown`](src/helpers/animate.ts). _Wrong for left,right,top directions_
+
 **New**:
 
 - Added ability to reuse built-in styles (scroll,button['submit'] etc.). See [FAQ/sharedStyles](https://yegorich555.github.io/web-ui-pack/faq#shared-styles)

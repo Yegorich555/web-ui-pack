@@ -15,8 +15,6 @@ declare global {
   }
 }
 
-// todo animateDropdown left/right
-
 /** Animate (show/hide) element as dropdown via scale and counter-scale for children
  * @param ms animation time
  * @returns Promise<isFinished> that resolved by animation end;
@@ -31,7 +29,7 @@ export function animateDropdown(el: HTMLElement, ms: number, isHidden = false): 
   el.style.animationName = "none"; // disable default css-animation
 
   // get previous scaleY and extract transform without scaleY
-  const reg = / *scaleY\(([%\d \w.-]+)\) */;
+  const reg = / *scale[YX]\(([%\d \w.-]+)\) */;
   const parseScale = (e: HTMLElement): { prev: string; from: number } => {
     let prev = e.style.transform;
     let from = isHidden ? 1 : 0;
@@ -58,6 +56,7 @@ export function animateDropdown(el: HTMLElement, ms: number, isHidden = false): 
 
   const reset = (): void => {
     styleTransform(el, "scaleY", "");
+    styleTransform(el, "scaleX", "");
     el.style.transformOrigin = "";
     nested.forEach((e) => {
       e.el.style.transform = e.prev.trimEnd();
@@ -83,12 +82,23 @@ export function animateDropdown(el: HTMLElement, ms: number, isHidden = false): 
       reset();
       return;
     }
-    el.style.transformOrigin = el.getAttribute("position") === "top" ? "bottom" : "top";
-    styleTransform(el, "scaleY", v);
+    const pos = el.getAttribute("position");
+    let tmo = "bottom";
+    let tmo2 = "top";
+    let scale = "scaleY" as "scaleY" | "scaleX";
+    /* prettier-ignore */
+    switch (pos) {
+      case "bottom": tmo="top"; tmo2="bottom"; break;
+      case "left": tmo="right"; scale="scaleX"; tmo2 = "left"; break;
+      case "right": tmo="left"; scale = "scaleX"; tmo2 = "right"; break;
+      default: break; // case "top": break;
+    }
+    el.style.transformOrigin = tmo;
+    styleTransform(el, scale, v);
     v !== 0 &&
       nested.forEach((e) => {
-        e.el.style.transform = `${e.prev}scaleY(${1 / v}) translateZ(0px)`; // it improves text-render during the scrolling & animation
-        e.el.style.transformOrigin = "bottom";
+        e.el.style.transform = `${e.prev + scale}(${1 / v}) translateZ(0px)`; // it improves text-render during the scrolling & animation
+        e.el.style.transformOrigin = tmo2;
       });
   });
 
