@@ -1,13 +1,13 @@
-import animate from "./animate";
+import animate, { isAnimEnabled } from "./animate";
 import { styleTransform } from "./styleHelpers";
 
 /** Animate (show/hide) element as dropdown via scale and counter-scale for children
  * @param ms animation time
  * @returns Promise<isFinished> that resolved by animation end;
  * Rules
- * * To define direction set attribute to element position="top" or position="bottom"
+ * * To define direction set attribute to element position="top" (or "bottom", "left", "right")
  * * Before call it again on the same element don't forget to call stop(false) to cancel prev animation */
-export default function animateDropdown(el: HTMLElement, ms: number, isClose = false): WUP.PromiseCancel<boolean> {
+export default function animateDropdown(el: HTMLElement, ms: number, isHide = false): WUP.PromiseCancel<boolean> {
   if (!ms) {
     const p = Promise.resolve(false);
     return Object.assign(p, { stop: () => p });
@@ -18,7 +18,7 @@ export default function animateDropdown(el: HTMLElement, ms: number, isClose = f
   const reg = / *scale[YX]\(([%\d \w.-]+)\) */;
   const parseScale = (e: HTMLElement): { prev: string; from: number } => {
     let prev = e.style.transform;
-    let from = isClose ? 1 : 0;
+    let from = isHide ? 1 : 0;
     const r = reg.exec(prev);
     if (r) {
       // remove scale from transform
@@ -56,14 +56,11 @@ export default function animateDropdown(el: HTMLElement, ms: number, isClose = f
   };
 
   // define from-to ranges
-  const to = isClose ? 0 : 1;
+  const to = isHide ? 0 : 1;
   const { from } = parseScale(el);
   ms *= Math.abs(to - from); // recalc left-animTime (if element is partially opened and need to hide it)
 
-  const p = animate(from, to, ms, (v, t, isLast) => {
-    if (t >= ms / 2) {
-      // return; // todo remove after tests
-    }
+  const p = animate(from, to, ms, (v, _t, isLast) => {
     if (!el.isConnected) {
       p.stop(false);
     }
@@ -90,6 +87,73 @@ export default function animateDropdown(el: HTMLElement, ms: number, isClose = f
         e.el.style.transformOrigin = tmo2;
       });
   });
+
+  return p;
+}
+
+/** Animate (show/hide) element as dropdown via moving items to position (animation per each item via inline styles)
+ * @param target element from that items must appear
+ * @param items collection that need to animate
+ * @param ms animation time
+ * @returns Promise<isFinished> that resolved by animation end;
+ * Rules
+ * * To define direction set attribute to element position="top" (or "bottom", "left", "right")
+ * * Before call it again on the same element don't forget to call stop(false) to cancel prev animation
+ * * Check if every parent up to target has oveflow: visible (otherwise it doesn't work) */
+export function animateStack(
+  target: Element,
+  items: (HTMLElement | SVGElement)[] | HTMLCollection,
+  ms: number,
+  isHide = false
+): WUP.PromiseCancel<boolean> {
+  const isFinished = ms < 10 || /*! force && */ !isAnimEnabled();
+  if (isFinished) {
+    const p = Promise.resolve(isFinished);
+    return Object.assign(p, { stop: () => p });
+  }
+
+  const r0 = target.getBoundingClientRect();
+  const zi = ((Number.parseInt(getComputedStyle(target).zIndex, 10) || 1) - 1).toString();
+  const arr = Array.prototype.slice.call(items) as (HTMLElement | SVGElement)[];
+  let resMe: (isEnd: boolean) => void;
+
+  const parent = arr[0].parentElement!;
+  parent.style.overflow = "visible"; // otherwise items is hidden under target
+  arr.forEach((a) => {
+    // todo sometimes blink issues on open-action when animation outside popup
+    const r = a.getBoundingClientRect();
+    a.style.zIndex = zi;
+    // todo this is wrong if prev animation is stopped
+    // a.style.transition = "none"; // disable animation to apply translate option immediately
+    // todo different directions
+    console.warn(a.outerHTML);
+    const from = `translateX(${Math.round(r0.left - r.left)}px)`;
+    const to = `translateX(0)`;
+
+    // const was = a.style.transform;
+    a.style.transform = isHide ? to : from;
+    window.requestAnimationFrame(() => {
+      // todo need extra option to animate step by step so 3 goes to 1st position, 2 goes to 2nd etc...
+      a.style.transition = `transform ${ms}ms ease-out`;
+      a.style.transform = isHide ? from : to;
+      setTimeout(() => {
+        resMe(true);
+        a.style.transition = "";
+        parent.style.overflow = "";
+        a.style.transform = "";
+        // setTimeout(() => (a.style.transform = "")); // without timeout possible blink effect
+      }, ms);
+    });
+  });
+
+  const p = new Promise<boolean>((res) => {
+    resMe = res;
+  }) as WUP.PromiseCancel<boolean>;
+
+  p.stop = () => {
+    resMe(false);
+    return p;
+  };
 
   return p;
 }

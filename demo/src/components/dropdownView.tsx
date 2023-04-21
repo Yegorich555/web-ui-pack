@@ -26,22 +26,32 @@ export default function DropdownView() {
               <li>Home</li>
               <li>Products</li>
               <li>Profile</li>
+              <li>Very</li>
+              <li>or</li>
+              <li>not</li>
+              <li>very</li>
+              <li>long</li>
+              <li>list</li>
             </ul>
           </wup-popup>
         </wup-dropdown>
       </section>
       <section>
         <h3>Customized</h3>
-        {/* todo dropdown animation works ugly on custom forms */}
-        <wup-dropdown class={styles.custom}>
+        <wup-dropdown class={`${styles.custom} ${styles.left}`}>
           <button type="button">{"<"}</button>
           <wup-popup
+            // todo if left don't have space - select oposite
             placement="left-middle"
-            // ref={(el) => {
-            //   if (el) {
-            //     el.$options.offset = (r) => [-r.height / 2, -r.width / 2];
-            //   }
-            // }}
+            ref={(el) => {
+              if (el) {
+                el.$options.offset = (r) => {
+                  const m = [Math.round(-r.height / 2), Math.round(-r.width / 2)] as [number, number];
+                  (el.firstElementChild as HTMLElement).style.margin = `${-m[0]}px ${-m[1]}px`;
+                  return m;
+                };
+              }
+            }}
           >
             <ul>
               <li>
@@ -52,6 +62,9 @@ export default function DropdownView() {
               </li>
               <li>
                 <button type="button">C</button>
+              </li>
+              <li>
+                <button type="button">C2</button>
               </li>
             </ul>
           </wup-popup>
@@ -92,9 +105,17 @@ export default function DropdownView() {
             </ul>
           </wup-popup>
         </wup-dropdown>
-        <wup-dropdown class={styles.custom}>
+        <wup-dropdown class={`${styles.custom} ${styles.right}`}>
           <button type="button">{">"}</button>
-          <wup-popup placement="right-middle">
+          <wup-popup
+            placement="right-middle"
+            ref={(el) => {
+              if (el) {
+                // setTimeout(() => {
+                el.$show();
+              }
+            }}
+          >
             <ul>
               <li>
                 <button type="button">A</button>

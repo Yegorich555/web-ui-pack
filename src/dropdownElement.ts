@@ -1,4 +1,5 @@
 import WUPBaseElement from "./baseElement";
+import { animateStack } from "./helpers/animateDropdown";
 import WUPPopupElement from "./popup/popupElement";
 import { Animations, ShowCases } from "./popup/popupElement.types";
 import { WUPcssButton, WUPcssMenu } from "./styles";
@@ -15,7 +16,7 @@ declare global {
        * @defaultValue ShowCases.onClick | ShowCases.onHover - (onClick and onHover) */
       showCase: ShowCases; // todo implement
       /* todo animation stacked - item apeares one by one */
-      // animation: "drawer" | "stacked" | "opacity";
+      animation: "drawer" | "stacked" | "opacity" | "none";
     }
     interface Options extends Defaults {}
     interface Attributes extends WUP.Base.toJSX<Options> {}
@@ -65,6 +66,7 @@ export default class WUPDropdownElement extends WUPBaseElement {
   static $defaults: WUP.Dropdown.Defaults = {
     direction: "bottom",
     showCase: ShowCases.onClick | ShowCases.onHover,
+    animation: "stacked",
   };
 
   $options: WUP.Dropdown.Options = {
@@ -85,7 +87,7 @@ export default class WUPDropdownElement extends WUPBaseElement {
     // todo hover effect is wrong - if user hovers popup after showing it closes
     // todo this._opts.direction = (this.getAttr("direction", "string") as "bottom") || "bottom";
     this.$refPopup.$options.showCase = this.$options.showCase && ShowCases.onClick;
-    this.$refPopup.$options.animation = Animations.drawer;
+    this.$refPopup.$options.animation = Animations.default;
   }
 
   protected override gotReady(): void {
@@ -103,6 +105,41 @@ export default class WUPDropdownElement extends WUPBaseElement {
           WUPPopupElement.$placements.$bottom.$start,
           WUPPopupElement.$placements.$bottom.$end,
         ];
+      }
+
+      const style = getComputedStyle(this.$refPopup);
+      const animTime =
+        Number.parseFloat(style.animationDuration.substring(0, style.animationDuration.length - 1)) * 1000;
+
+      // todo move logic to popup
+      if (!this.$refPopup.$options.animation) {
+        this.$refPopup.addEventListener("$willShow", () => {
+          this.$refPopup.firstElementChild!.style.opacity = 0;
+          setTimeout(() => {
+            const trg = this.$refPopup.$options.target!;
+            const ul = this.$refPopup.firstElementChild as HTMLElement;
+            animateStack(trg, ul.children, animTime - 10, false).then(() =>
+              setTimeout(() => this.$refPopup.$hide(), 500)
+            );
+            this.$refPopup.firstElementChild!.style.opacity = 1;
+          });
+        });
+        this.$refPopup.addEventListener("$willHide", () => {
+          setTimeout(() => {
+            const trg = this.$refPopup.$options.target!;
+            const ul = this.$refPopup.firstElementChild as HTMLElement;
+            animateStack(trg, ul.children, animTime - 10, true).then(() =>
+              setTimeout(() => this.$refPopup.$show(), 500)
+            );
+          });
+        });
+      } else {
+        this.$refPopup.addEventListener("$show", () => {
+          setTimeout(() => this.$refPopup.$hide(), 500);
+        });
+        this.$refPopup.addEventListener("$hide", () => {
+          setTimeout(() => this.$refPopup.$show(), 500);
+        });
       }
     }
     super.gotReady();

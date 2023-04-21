@@ -2,6 +2,9 @@
   margin: 6px;
 
   button {
+    z-index: 80001;
+    position: relative;
+
     display: flex;
     align-items: center;
     justify-content: center;
@@ -19,8 +22,10 @@
   }
 
   [menu] {
+    z-index: 80000;
     box-shadow: none;
     background: none;
+    // overflow: visible;
 
     button {
       background: cornflowerblue;
@@ -45,5 +50,14 @@
 .vertical {
   [menu] ul {
     flex-direction: column;
+  }
+}
+
+.right {
+  [menu] {
+    --popup-anim: 500ms;
+    opacity: 1 !important;
+    // background: red;
+    overflow: visible;
   }
 }

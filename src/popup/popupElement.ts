@@ -1027,3 +1027,4 @@ declare global {
 
 // NiceToHave add 'position: centerScreen' to place as modal when content is big and no spaces anymore
 // NiceToHave 2 popups can oveflow each other: need option to try place several popups at once without oveflow. Example on wup-pwd page: issue with 2 errors
+// todo implement mode "alert". When need to show popup at specific place/target and hide after time OR events ?
