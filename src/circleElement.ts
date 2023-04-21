@@ -1,7 +1,7 @@
 import WUPBaseElement from "./baseElement";
 import WUPPopupElement from "./popup/popupElement";
 import { ShowCases } from "./popup/popupElement.types";
-import { animate } from "./helpers/animate";
+import animate from "./helpers/animate";
 import { mathScaleValue, rotate } from "./helpers/math";
 import { parseMsTime } from "./helpers/styleHelpers";
 import { onEvent } from "./indexHelpers";

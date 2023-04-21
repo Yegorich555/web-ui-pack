@@ -1,4 +1,4 @@
-import { animate, isAnimEnabled } from "../helpers/animate";
+import animate, { isAnimEnabled } from "../helpers/animate";
 import isOverlap from "../helpers/isOverlap";
 import { parseMsTime } from "../helpers/styleHelpers";
 import { onEvent } from "../indexHelpers";

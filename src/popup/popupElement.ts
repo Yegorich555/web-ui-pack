@@ -6,7 +6,7 @@ import { findScrollParentAll } from "../helpers/findScrollParent";
 import WUPPopupArrowElement from "./popupArrowElement";
 import popupListen from "./popupListen";
 import { getBoundingInternalRect, px2Number, styleTransform } from "../helpers/styleHelpers";
-import { animateDropdown } from "../helpers/animate";
+import animateDropdown from "../helpers/animateDropdown";
 import isIntoView from "../helpers/isIntoView";
 import objectClone from "../helpers/objectClone";
 import viewportSize from "../helpers/viewportSize";

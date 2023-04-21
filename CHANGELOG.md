@@ -2,6 +2,10 @@
 
 ## 0.5.3 (\_\_\_)
 
+**BREAKING CHANGES**:
+
+- helper **animateDropdown** moved into [`web-ui-pack/helpers/animateDropdown`](src/helpers/animateDropdown.ts)
+
 **Fixes**:
 
 - **helper** [`animateDropdown`](src/helpers/animate.ts). _Wrong for left,right,top directions_

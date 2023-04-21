@@ -1,4 +1,4 @@
-import { animateDropdown } from "web-ui-pack/helpers/animate";
+import animateDropdown from "web-ui-pack/helpers/animateDropdown";
 import { useFakeAnimation } from "../../testHelper";
 
 let step = 1;
