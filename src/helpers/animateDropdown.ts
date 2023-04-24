@@ -126,7 +126,7 @@ export function animateStack(
     const from = isVertical
       ? `translateY(${Math.round(r0.top - r.top)}px)`
       : `translateX(${Math.round(r0.left - r.left)}px)`;
-    const to = `translate${isVertical ? "Y" : "X"}(0)`;
+    const to = "";
     a.style.transform = isHide ? to : from;
     (a as any)._to = isHide ? from : to;
   });
