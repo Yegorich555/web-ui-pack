@@ -12,8 +12,6 @@ export default function animateDropdown(el: HTMLElement, ms: number, isHide = fa
     const p = Promise.resolve(false);
     return Object.assign(p, { stop: () => p });
   }
-  el.style.animationName = "none"; // disable default css-animation
-
   // get previous scaleY and extract transform without scaleY
   const reg = / *scale[YX]\(([%\d \w.-]+)\) */;
   const parseScale = (e: HTMLElement): { prev: string; from: number } => {
@@ -104,7 +102,8 @@ export function animateStack(
   target: Element,
   items: (HTMLElement | SVGElement)[] | HTMLCollection,
   ms: number,
-  isHide = false
+  isHide = false,
+  isVertical = true
 ): WUP.PromiseCancel<boolean> {
   const isFinished = ms < 10 || /*! force && */ !isAnimEnabled();
   if (isFinished) {
@@ -120,30 +119,33 @@ export function animateStack(
   const parent = arr[0].parentElement!;
   parent.style.overflow = "visible"; // otherwise items is hidden under target
   arr.forEach((a) => {
-    // todo sometimes blink issues on open-action when animation outside popup
     const r = a.getBoundingClientRect();
     a.style.zIndex = zi;
     // todo this is wrong if prev animation is stopped
     // a.style.transition = "none"; // disable animation to apply translate option immediately
-    // todo different directions
-    console.warn(a.outerHTML);
-    const from = `translateX(${Math.round(r0.left - r.left)}px)`;
-    const to = `translateX(0)`;
-
-    // const was = a.style.transform;
+    const from = isVertical
+      ? `translateY(${Math.round(r0.top - r.top)}px)`
+      : `translateX(${Math.round(r0.left - r.left)}px)`;
+    const to = `translate${isVertical ? "Y" : "X"}(0)`;
     a.style.transform = isHide ? to : from;
-    window.requestAnimationFrame(() => {
+    (a as any)._to = isHide ? from : to;
+  });
+
+  window.requestAnimationFrame(() => {
+    arr.forEach((a) => {
       // todo need extra option to animate step by step so 3 goes to 1st position, 2 goes to 2nd etc...
       a.style.transition = `transform ${ms}ms ease-out`;
-      a.style.transform = isHide ? from : to;
-      setTimeout(() => {
-        resMe(true);
+      a.style.transform = (a as any)._to;
+    });
+    setTimeout(() => {
+      resMe(true);
+      // reset styles
+      arr.forEach((a) => {
         a.style.transition = "";
         parent.style.overflow = "";
-        a.style.transform = "";
-        // setTimeout(() => (a.style.transform = "")); // without timeout possible blink effect
-      }, ms);
-    });
+        setTimeout(() => (a.style.transform = ""), 1); // to avoid possible blink effect when need to hide
+      });
+    }, ms); // wait end of animation
   });
 
   const p = new Promise<boolean>((res) => {

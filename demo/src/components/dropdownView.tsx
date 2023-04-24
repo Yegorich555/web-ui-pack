@@ -112,7 +112,7 @@ export default function DropdownView() {
             ref={(el) => {
               if (el) {
                 // setTimeout(() => {
-                el.$show();
+                // el.$show();
               }
             }}
           >

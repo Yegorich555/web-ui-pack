@@ -28,6 +28,13 @@ export const enum Animations {
   default = 0,
   /** Dropdown/drawer animation. It's implemented via JS */
   drawer,
+  /** Animate (show/hide) element as dropdown via moving every item to position step by step
+   * @tutorial expected structure
+   * * use attr [items] `<div items><button>item 1</button>...</div>`
+   * * use <li/> `<ul><li><button>item 1</button></li>...</ul>`
+   * * use nested structure <div><button>item 1</button>...</div>
+   * * or use without wrapper <button>item 1</button>... */
+  stack,
 }
 
 declare global {

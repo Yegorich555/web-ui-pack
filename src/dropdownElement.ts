@@ -1,5 +1,4 @@
 import WUPBaseElement from "./baseElement";
-import { animateStack } from "./helpers/animateDropdown";
 import WUPPopupElement from "./popup/popupElement";
 import { Animations, ShowCases } from "./popup/popupElement.types";
 import { WUPcssButton, WUPcssMenu } from "./styles";
@@ -87,7 +86,7 @@ export default class WUPDropdownElement extends WUPBaseElement {
     // todo hover effect is wrong - if user hovers popup after showing it closes
     // todo this._opts.direction = (this.getAttr("direction", "string") as "bottom") || "bottom";
     this.$refPopup.$options.showCase = this.$options.showCase && ShowCases.onClick;
-    this.$refPopup.$options.animation = Animations.default;
+    this.$refPopup.$options.animation = Animations.stack;
   }
 
   protected override gotReady(): void {
@@ -107,40 +106,12 @@ export default class WUPDropdownElement extends WUPBaseElement {
         ];
       }
 
-      const style = getComputedStyle(this.$refPopup);
-      const animTime =
-        Number.parseFloat(style.animationDuration.substring(0, style.animationDuration.length - 1)) * 1000;
-
-      // todo move logic to popup
-      if (!this.$refPopup.$options.animation) {
-        this.$refPopup.addEventListener("$willShow", () => {
-          this.$refPopup.firstElementChild!.style.opacity = 0;
-          setTimeout(() => {
-            const trg = this.$refPopup.$options.target!;
-            const ul = this.$refPopup.firstElementChild as HTMLElement;
-            animateStack(trg, ul.children, animTime - 10, false).then(() =>
-              setTimeout(() => this.$refPopup.$hide(), 500)
-            );
-            this.$refPopup.firstElementChild!.style.opacity = 1;
-          });
-        });
-        this.$refPopup.addEventListener("$willHide", () => {
-          setTimeout(() => {
-            const trg = this.$refPopup.$options.target!;
-            const ul = this.$refPopup.firstElementChild as HTMLElement;
-            animateStack(trg, ul.children, animTime - 10, true).then(() =>
-              setTimeout(() => this.$refPopup.$show(), 500)
-            );
-          });
-        });
-      } else {
-        this.$refPopup.addEventListener("$show", () => {
-          setTimeout(() => this.$refPopup.$hide(), 500);
-        });
-        this.$refPopup.addEventListener("$hide", () => {
-          setTimeout(() => this.$refPopup.$show(), 500);
-        });
-      }
+      // this.$refPopup.addEventListener("$show", () => {
+      //   setTimeout(() => this.$refPopup.$hide(), 1000);
+      // });
+      // this.$refPopup.addEventListener("$hide", () => {
+      //   setTimeout(() => this.$refPopup.$show(), 1000);
+      // });
     }
     super.gotReady();
   }

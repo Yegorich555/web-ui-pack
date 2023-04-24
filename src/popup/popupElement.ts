@@ -6,7 +6,7 @@ import { findScrollParentAll } from "../helpers/findScrollParent";
 import WUPPopupArrowElement from "./popupArrowElement";
 import popupListen from "./popupListen";
 import { getBoundingInternalRect, px2Number, styleTransform } from "../helpers/styleHelpers";
-import animateDropdown from "../helpers/animateDropdown";
+import animateDropdown, { animateStack } from "../helpers/animateDropdown";
 import isIntoView from "../helpers/isIntoView";
 import objectClone from "../helpers/objectClone";
 import viewportSize from "../helpers/viewportSize";
@@ -144,7 +144,14 @@ export default class WUPPopupElement<
         @keyframes WUP-POPUP-a2 {
           to {opacity: 0;}
         }
-       }
+      }
+      :host[anim=drawer] {
+        animation: none;
+      }
+      :host[anim=stack] {
+        animation-name: custom;
+        overflow: visible;
+      }
       ${WUPcssScrollSmall(":host")}`;
   }
 
@@ -550,6 +557,7 @@ export default class WUPPopupElement<
   _stopAnimation?: () => void;
   protected goAnimate(animTime: number, isHidden: boolean): Promise<boolean> {
     if (this._opts.animation === Animations.drawer) {
+      this.setAttribute("anim", "drawer");
       const pa = animateDropdown(this, animTime, isHidden);
       this._stopAnimation = () => {
         delete this._stopAnimation;
@@ -557,6 +565,25 @@ export default class WUPPopupElement<
       };
       return pa;
     }
+
+    if (this._opts.animation === Animations.stack) {
+      this.setAttribute("anim", "stack");
+      const items =
+        this.querySelector("[items]") || // <div items><button>item 1</button>...</div>
+        this.querySelector("li")?.parentElement!.children || // <ul><li>item 1</li>...</ul>
+        (this.children.length > 1 && this.children) || // <button>item 1</button>...
+        this.children.item(0)?.children || // <div><button>item 1</button>...</div>
+        this.children; // <button>item 1</button>
+      const pos = this.getAttribute("position");
+      const isVertical = pos === "bottom" || pos === "top";
+      const pa = animateStack(this.$options.target!, items as HTMLCollection, animTime, isHidden, isVertical);
+      this._stopAnimation = () => {
+        delete this._stopAnimation;
+        pa.stop(this._opts.animation !== Animations.stack); // rst animation state only if animation changed
+      };
+      return pa;
+    }
+
     return new Promise((resolve) => {
       const t = setTimeout(() => resolve(true), animTime);
       this._stopAnimation = () => {
