@@ -111,49 +111,59 @@ export function animateStack(
     return Object.assign(p, { stop: () => p });
   }
 
-  const r0 = target.getBoundingClientRect();
-  const zi = ((Number.parseInt(getComputedStyle(target).zIndex, 10) || 1) - 1).toString();
-  const arr = Array.prototype.slice.call(items) as (HTMLElement | SVGElement)[];
-  let resMe: (isEnd: boolean) => void;
-
+  const arr = Array.prototype.slice.call(items) as ((HTMLElement | SVGElement) & { _hideStyle?: string })[];
   const parent = arr[0].parentElement!;
   parent.style.overflow = "visible"; // otherwise items is hidden under target
-  arr.forEach((a) => {
-    const r = a.getBoundingClientRect();
-    a.style.zIndex = zi;
-    // todo this is wrong if prev animation is stopped
-    // a.style.transition = "none"; // disable animation to apply translate option immediately
-    const from = isVertical
-      ? `translateY(${Math.round(r0.top - r.top)}px)`
-      : `translateX(${Math.round(r0.left - r.left)}px)`;
-    const to = "";
-    a.style.transform = isHide ? to : from;
-    (a as any)._to = isHide ? from : to;
-  });
+  let resMe: (isEnd: boolean) => void;
 
+  // calc hideStyle position or use previous saved: when showing>partially show> hidding
+  if (arr[0]._hideStyle === undefined) {
+    const r0 = target.getBoundingClientRect();
+    const zi = ((Number.parseInt(getComputedStyle(target).zIndex, 10) || 1) - 1).toString();
+    arr.forEach((a) => {
+      const r = a.getBoundingClientRect();
+      a.style.zIndex = zi; // setup  zIndex to be hidden under target
+      a._hideStyle = isVertical // WARN: possible issue if opening horizontal > stop > hidding vertical
+        ? `translateY(${Math.round(r0.top - r.top)}px)`
+        : `translateX(${Math.round(r0.left - r.left)}px)`;
+      if (!isHide) {
+        a.style.transform = a._hideStyle; // setup startPosition under target
+      }
+    });
+  }
+
+  const reset = (): void => {
+    // reset styles
+    arr.forEach((a) => {
+      delete a._hideStyle;
+      a.style.zIndex = "";
+      a.style.transition = "";
+      parent.style.overflow = "";
+    });
+    setTimeout(() => arr.forEach((a) => (a.style.transform = "")), 1); // timeout to avoid possible blink effect when need to hide
+  };
+
+  let tid: ReturnType<typeof setTimeout>;
   window.requestAnimationFrame(() => {
     arr.forEach((a) => {
       // todo need extra option to animate step by step so 3 goes to 1st position, 2 goes to 2nd etc...
+      // console.warn("=>", a.outerHTML);
       a.style.transition = `transform ${ms}ms ease-out`;
-      a.style.transform = (a as any)._to;
+      a.style.transform = isHide ? a._hideStyle! : "";
     });
-    setTimeout(() => {
+    tid = setTimeout(() => {
       resMe(true);
-      // reset styles
-      arr.forEach((a) => {
-        a.style.transition = "";
-        parent.style.overflow = "";
-        setTimeout(() => (a.style.transform = ""), 1); // to avoid possible blink effect when need to hide
-      });
+      reset();
     }, ms); // wait end of animation
   });
 
   const p = new Promise<boolean>((res) => {
     resMe = res;
   }) as WUP.PromiseCancel<boolean>;
-
-  p.stop = () => {
-    resMe(false);
+  p.stop = (isFinish = true) => {
+    isFinish && reset();
+    resMe(isFinish);
+    tid && clearTimeout(tid);
     return p;
   };
 

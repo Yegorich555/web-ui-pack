@@ -6,8 +6,8 @@ declare global {
       /** Call it when you need to stop promise immediately;
        *  @param isFinish finish promise immediately @defaultValue true
        *  @tutorial
-       * * isFinish:true - Promise is resolved
-       * * isFinish:false - Promise is rejected
+       * * isFinish:true - Promise is resolved with true & finish state
+       * * isFinish:false - Promise is resolved with false & animation won't achive finish state
        * @returns promise resolved when animation stop process is done */
       stop: (isFinish?: boolean) => Promise<T>;
     }
