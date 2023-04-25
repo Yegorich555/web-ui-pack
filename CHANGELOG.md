@@ -14,6 +14,7 @@
 
 - Added ability to reuse built-in styles (scroll,button['submit'] etc.). See [FAQ/sharedStyles](https://yegorich555.github.io/web-ui-pack/faq#shared-styles)
 - [SelectManyControl](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany). Added ability to sort/order items via drag&drop OR Arrows + Shift
+- Added helper [**animateStack**](src/helpers/animate.ts)
 
 ## 0.5.2 (Mar 29, 2023)
 
