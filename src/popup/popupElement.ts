@@ -95,7 +95,7 @@ export default class WUPPopupElement<
   };
 
   /** Default options. Change it to configure default behavior */
-  static $defaults: Omit<WUP.Popup.Options, "target"> = {
+  static $defaults: WUP.Popup.Defaults = {
     placement: [
       WUPPopupElement.$placements.$top.$middle.$adjust, //
       WUPPopupElement.$placements.$bottom.$middle.$adjust,
@@ -147,7 +147,7 @@ export default class WUPPopupElement<
         }
       }
       :host[anim=drawer] {
-        animation: none;
+        animation-name: custom;
       }
       :host[anim=stack] {
         animation-name: custom;

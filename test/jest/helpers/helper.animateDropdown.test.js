@@ -30,33 +30,29 @@ describe("helper.animateDropdown", () => {
     let isResolved = false;
     p.then(() => (isResolved = true)).catch(() => null);
 
-    expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none;"><ul><li>Some text here</li></ul></ul>"`
-    );
+    expect(el.outerHTML).toMatchInlineSnapshot(`"<ul><ul><li>Some text here</li></ul></ul>"`);
     // open
     await nextFrame();
     expect(isResolved).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(0);"><ul><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(0);"><ul><li>Some text here</li></ul></ul>"`
     );
 
     await nextFrame();
     expect(isResolved).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(0.33333333333333337);"><ul style="transform: scaleY(2.9999999999999996) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(0.33333333333333337);"><ul style="transform: scaleY(2.9999999999999996) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
     );
 
     await nextFrame();
     expect(isResolved).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(0.6666666666666666);"><ul style="transform: scaleY(1.5) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(0.6666666666666666);"><ul style="transform: scaleY(1.5) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
     );
 
     await nextFrame();
     expect(isResolved).toBe(true);
-    expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none;"><ul style=""><li>Some text here</li></ul></ul>"`
-    );
+    expect(el.outerHTML).toMatchInlineSnapshot(`"<ul style=""><ul style=""><li>Some text here</li></ul></ul>"`);
 
     // close
     isResolved = false;
@@ -65,26 +61,24 @@ describe("helper.animateDropdown", () => {
     await nextFrame();
     expect(isResolved).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(1);"><ul style="transform: scaleY(1) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(1);"><ul style="transform: scaleY(1) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
     );
 
     await nextFrame();
     expect(isResolved).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(0.6666666666666669);"><ul style="transform: scaleY(1.4999999999999996) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(0.6666666666666669);"><ul style="transform: scaleY(1.4999999999999996) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
     );
 
     await nextFrame();
     expect(isResolved).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(0.33333333333333337);"><ul style="transform: scaleY(2.9999999999999996) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(0.33333333333333337);"><ul style="transform: scaleY(2.9999999999999996) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
     );
 
     await nextFrame();
     expect(isResolved).toBe(true);
-    expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none;"><ul style=""><li>Some text here</li></ul></ul>"`
-    );
+    expect(el.outerHTML).toMatchInlineSnapshot(`"<ul style=""><ul style=""><li>Some text here</li></ul></ul>"`);
 
     // try open again
     isResolved = false;
@@ -93,26 +87,24 @@ describe("helper.animateDropdown", () => {
     await nextFrame();
     expect(isResolved).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(0);"><ul style=""><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(0);"><ul style=""><li>Some text here</li></ul></ul>"`
     );
 
     await nextFrame();
     expect(isResolved).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(0.3333333333333337);"><ul style="transform: scaleY(2.999999999999997) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(0.3333333333333337);"><ul style="transform: scaleY(2.999999999999997) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
     );
 
     await nextFrame();
     expect(isResolved).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(0.6666666666666669);"><ul style="transform: scaleY(1.4999999999999996) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(0.6666666666666669);"><ul style="transform: scaleY(1.4999999999999996) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
     );
 
     await nextFrame();
     expect(isResolved).toBe(true);
-    expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none;"><ul style=""><li>Some text here</li></ul></ul>"`
-    );
+    expect(el.outerHTML).toMatchInlineSnapshot(`"<ul style=""><ul style=""><li>Some text here</li></ul></ul>"`);
 
     // try close again
     isResolved = false;
@@ -121,26 +113,24 @@ describe("helper.animateDropdown", () => {
     await nextFrame();
     expect(isResolved).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(1);"><ul style="transform: scaleY(1) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(1);"><ul style="transform: scaleY(1) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
     );
 
     await nextFrame();
     expect(isResolved).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(0.6666666666666669);"><ul style="transform: scaleY(1.4999999999999996) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(0.6666666666666669);"><ul style="transform: scaleY(1.4999999999999996) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
     );
 
     await nextFrame();
     expect(isResolved).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(0.33333333333333315);"><ul style="transform: scaleY(3.0000000000000018) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(0.33333333333333315);"><ul style="transform: scaleY(3.0000000000000018) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
     );
 
     await nextFrame();
     expect(isResolved).toBe(true);
-    expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none;"><ul style=""><li>Some text here</li></ul></ul>"`
-    );
+    expect(el.outerHTML).toMatchInlineSnapshot(`"<ul style=""><ul style=""><li>Some text here</li></ul></ul>"`);
   });
 
   test("open > partial wait > hide", async () => {
@@ -152,19 +142,19 @@ describe("helper.animateDropdown", () => {
     await nextFrame();
     expect(isResolvedOpen).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(0);"><ul><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(0);"><ul><li>Some text here</li></ul></ul>"`
     );
 
     await nextFrame();
     expect(isResolvedOpen).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(0.33333333333333337);"><ul style="transform: scaleY(2.9999999999999996) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(0.33333333333333337);"><ul style="transform: scaleY(2.9999999999999996) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
     );
 
     await nextFrame();
     expect(isResolvedOpen).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(0.6666666666666666);"><ul style="transform: scaleY(1.5) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(0.6666666666666666);"><ul style="transform: scaleY(1.5) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
     );
 
     // close
@@ -177,14 +167,14 @@ describe("helper.animateDropdown", () => {
     expect(isResolvedOpen).toBe(false);
     expect(isResolvedClose).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(0.6666666666666666);"><ul style="transform: scaleY(1.5) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(0.6666666666666666);"><ul style="transform: scaleY(1.5) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
     );
 
     await nextFrame();
     expect(isResolvedOpen).toBe(false);
     expect(isResolvedClose).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(0.3333333333333332);"><ul style="transform: scaleY(3.0000000000000013) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(0.3333333333333332);"><ul style="transform: scaleY(3.0000000000000013) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
     );
 
     // open
@@ -197,7 +187,7 @@ describe("helper.animateDropdown", () => {
     expect(isResolvedOpen2).toBe(false);
     expect(isResolvedClose).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(0.3333333333333332);"><ul style="transform: scaleY(3.0000000000000013) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(0.3333333333333332);"><ul style="transform: scaleY(3.0000000000000013) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
     );
 
     await nextFrame();
@@ -205,16 +195,14 @@ describe("helper.animateDropdown", () => {
     expect(isResolvedOpen2).toBe(false);
     expect(isResolvedClose).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(0.6666666666666666);"><ul style="transform: scaleY(1.5) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(0.6666666666666666);"><ul style="transform: scaleY(1.5) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
     );
 
     await nextFrame();
     expect(isResolvedOpen).toBe(false);
     expect(isResolvedOpen2).toBe(true);
     expect(isResolvedClose).toBe(false);
-    expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none;"><ul style=""><li>Some text here</li></ul></ul>"`
-    );
+    expect(el.outerHTML).toMatchInlineSnapshot(`"<ul style=""><ul style=""><li>Some text here</li></ul></ul>"`);
   });
 
   test("open > hide for many in parallel", async () => {
@@ -222,26 +210,26 @@ describe("helper.animateDropdown", () => {
     await nextFrame();
     await nextFrame();
     expect(document.body.innerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(0.33333333333333337);"><ul style="transform: scaleY(2.9999999999999996) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(0.33333333333333337);"><ul style="transform: scaleY(2.9999999999999996) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
     );
 
     const div = document.body.appendChild(document.createElement("div"));
     animateDropdown(div, step * 3, false);
     await nextFrame();
     expect(document.body.innerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(0.6666666666666666);"><ul style="transform: scaleY(1.5) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul><div style="animation-name: none; transform-origin: bottom; transform: scaleY(0);"></div>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(0.6666666666666666);"><ul style="transform: scaleY(1.5) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul><div style="transform-origin: bottom; transform: scaleY(0);"></div>"`
     );
     await nextFrame();
     expect(document.body.innerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none;"><ul style=""><li>Some text here</li></ul></ul><div style="animation-name: none; transform-origin: bottom; transform: scaleY(0.3333333333333334);"></div>"`
+      `"<ul style=""><ul style=""><li>Some text here</li></ul></ul><div style="transform-origin: bottom; transform: scaleY(0.3333333333333334);"></div>"`
     );
     await nextFrame();
     expect(document.body.innerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none;"><ul style=""><li>Some text here</li></ul></ul><div style="animation-name: none; transform-origin: bottom; transform: scaleY(0.6666666666666669);"></div>"`
+      `"<ul style=""><ul style=""><li>Some text here</li></ul></ul><div style="transform-origin: bottom; transform: scaleY(0.6666666666666669);"></div>"`
     );
     await nextFrame();
     expect(document.body.innerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none;"><ul style=""><li>Some text here</li></ul></ul><div style="animation-name: none;"></div>"`
+      `"<ul style=""><ul style=""><li>Some text here</li></ul></ul><div style=""></div>"`
     );
   });
 
@@ -251,19 +239,19 @@ describe("helper.animateDropdown", () => {
 
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul position="top" style="animation-name: none; transform-origin: bottom; transform: scaleY(0);"><ul><li>Some text here</li></ul></ul>"`
+      `"<ul position="top" style="transform-origin: bottom; transform: scaleY(0);"><ul><li>Some text here</li></ul></ul>"`
     );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul position="top" style="animation-name: none; transform-origin: bottom; transform: scaleY(0.5);"><ul style="transform: scaleY(2) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
+      `"<ul position="top" style="transform-origin: bottom; transform: scaleY(0.5);"><ul style="transform: scaleY(2) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
     );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul position="top" style="animation-name: none; transform-origin: bottom; transform: scaleY(0.9999999999999998);"><ul style="transform: scaleY(1.0000000000000002) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
+      `"<ul position="top" style="transform-origin: bottom; transform: scaleY(0.9999999999999998);"><ul style="transform: scaleY(1.0000000000000002) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
     );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul position="top" style="animation-name: none;"><ul style=""><li>Some text here</li></ul></ul>"`
+      `"<ul position="top" style=""><ul style=""><li>Some text here</li></ul></ul>"`
     );
   });
 
@@ -273,19 +261,19 @@ describe("helper.animateDropdown", () => {
 
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul position="bottom" style="animation-name: none; transform-origin: top; transform: scaleY(0);"><ul><li>Some text here</li></ul></ul>"`
+      `"<ul position="bottom" style="transform-origin: top; transform: scaleY(0);"><ul><li>Some text here</li></ul></ul>"`
     );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul position="bottom" style="animation-name: none; transform-origin: top; transform: scaleY(0.5);"><ul style="transform: scaleY(2) translateZ(0px); transform-origin: bottom;"><li>Some text here</li></ul></ul>"`
+      `"<ul position="bottom" style="transform-origin: top; transform: scaleY(0.5);"><ul style="transform: scaleY(2) translateZ(0px); transform-origin: bottom;"><li>Some text here</li></ul></ul>"`
     );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul position="bottom" style="animation-name: none; transform-origin: top; transform: scaleY(0.9999999999999998);"><ul style="transform: scaleY(1.0000000000000002) translateZ(0px); transform-origin: bottom;"><li>Some text here</li></ul></ul>"`
+      `"<ul position="bottom" style="transform-origin: top; transform: scaleY(0.9999999999999998);"><ul style="transform: scaleY(1.0000000000000002) translateZ(0px); transform-origin: bottom;"><li>Some text here</li></ul></ul>"`
     );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul position="bottom" style="animation-name: none;"><ul style=""><li>Some text here</li></ul></ul>"`
+      `"<ul position="bottom" style=""><ul style=""><li>Some text here</li></ul></ul>"`
     );
   });
 
@@ -295,19 +283,19 @@ describe("helper.animateDropdown", () => {
 
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul position="left" style="animation-name: none; transform-origin: right; transform: scaleX(0);"><ul><li>Some text here</li></ul></ul>"`
+      `"<ul position="left" style="transform-origin: right; transform: scaleX(0);"><ul><li>Some text here</li></ul></ul>"`
     );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul position="left" style="animation-name: none; transform-origin: right; transform: scaleX(0.5);"><ul style="transform: scaleX(2) translateZ(0px); transform-origin: left;"><li>Some text here</li></ul></ul>"`
+      `"<ul position="left" style="transform-origin: right; transform: scaleX(0.5);"><ul style="transform: scaleX(2) translateZ(0px); transform-origin: left;"><li>Some text here</li></ul></ul>"`
     );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul position="left" style="animation-name: none; transform-origin: right; transform: scaleX(0.9999999999999998);"><ul style="transform: scaleX(1.0000000000000002) translateZ(0px); transform-origin: left;"><li>Some text here</li></ul></ul>"`
+      `"<ul position="left" style="transform-origin: right; transform: scaleX(0.9999999999999998);"><ul style="transform: scaleX(1.0000000000000002) translateZ(0px); transform-origin: left;"><li>Some text here</li></ul></ul>"`
     );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul position="left" style="animation-name: none;"><ul style=""><li>Some text here</li></ul></ul>"`
+      `"<ul position="left" style=""><ul style=""><li>Some text here</li></ul></ul>"`
     );
   });
 
@@ -317,19 +305,19 @@ describe("helper.animateDropdown", () => {
 
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul position="right" style="animation-name: none; transform-origin: left; transform: scaleX(0);"><ul><li>Some text here</li></ul></ul>"`
+      `"<ul position="right" style="transform-origin: left; transform: scaleX(0);"><ul><li>Some text here</li></ul></ul>"`
     );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul position="right" style="animation-name: none; transform-origin: left; transform: scaleX(0.5);"><ul style="transform: scaleX(2) translateZ(0px); transform-origin: right;"><li>Some text here</li></ul></ul>"`
+      `"<ul position="right" style="transform-origin: left; transform: scaleX(0.5);"><ul style="transform: scaleX(2) translateZ(0px); transform-origin: right;"><li>Some text here</li></ul></ul>"`
     );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul position="right" style="animation-name: none; transform-origin: left; transform: scaleX(0.9999999999999998);"><ul style="transform: scaleX(1.0000000000000002) translateZ(0px); transform-origin: right;"><li>Some text here</li></ul></ul>"`
+      `"<ul position="right" style="transform-origin: left; transform: scaleX(0.9999999999999998);"><ul style="transform: scaleX(1.0000000000000002) translateZ(0px); transform-origin: right;"><li>Some text here</li></ul></ul>"`
     );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul position="right" style="animation-name: none;"><ul style=""><li>Some text here</li></ul></ul>"`
+      `"<ul position="right" style=""><ul style=""><li>Some text here</li></ul></ul>"`
     );
   });
 
@@ -339,19 +327,19 @@ describe("helper.animateDropdown", () => {
 
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="transform: translate(-50%,-50%) scaleY(0); animation-name: none; transform-origin: bottom;"><ul><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform: translate(-50%,-50%) scaleY(0); transform-origin: bottom;"><ul><li>Some text here</li></ul></ul>"`
     );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="transform: translate(-50%,-50%) scaleY(0.5); animation-name: none; transform-origin: bottom;"><ul style="transform: scaleY(2) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform: translate(-50%,-50%) scaleY(0.5); transform-origin: bottom;"><ul style="transform: scaleY(2) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
     );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="transform: translate(-50%,-50%) scaleY(0.9999999999999998); animation-name: none; transform-origin: bottom;"><ul style="transform: scaleY(1.0000000000000002) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform: translate(-50%,-50%) scaleY(0.9999999999999998); transform-origin: bottom;"><ul style="transform: scaleY(1.0000000000000002) translateZ(0px); transform-origin: top;"><li>Some text here</li></ul></ul>"`
     );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="transform: translate(-50%,-50%); animation-name: none;"><ul style=""><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform: translate(-50%,-50%);"><ul style=""><li>Some text here</li></ul></ul>"`
     );
     expect(el.style.transform).toBe("translate(-50%,-50%)");
   });
@@ -366,9 +354,7 @@ describe("helper.animateDropdown", () => {
     el.remove();
     await nextFrame();
     expect(spyThen).lastCalledWith(false);
-    expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none;"><ul style=""><li>Some text here</li></ul></ul>"`
-    );
+    expect(el.outerHTML).toMatchInlineSnapshot(`"<ul style=""><ul style=""><li>Some text here</li></ul></ul>"`);
   });
 
   test("stop animation", async () => {
@@ -378,13 +364,11 @@ describe("helper.animateDropdown", () => {
 
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(0);"><ul><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(0);"><ul><li>Some text here</li></ul></ul>"`
     );
     p.stop();
     await nextFrame();
-    expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none;"><ul><li>Some text here</li></ul></ul>"`
-    );
+    expect(el.outerHTML).toMatchInlineSnapshot(`"<ul style=""><ul><li>Some text here</li></ul></ul>"`);
     expect(spyThen).toBeCalled();
 
     spyThen.mockClear();
@@ -392,13 +376,13 @@ describe("helper.animateDropdown", () => {
     p.then(spyThen).catch(() => null);
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(0);"><ul><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(0);"><ul><li>Some text here</li></ul></ul>"`
     );
     p.stop(false);
     await nextFrame();
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="animation-name: none; transform-origin: bottom; transform: scaleY(0);"><ul><li>Some text here</li></ul></ul>"`
+      `"<ul style="transform-origin: bottom; transform: scaleY(0);"><ul><li>Some text here</li></ul></ul>"`
     );
     expect(spyThen).lastCalledWith(false);
   });

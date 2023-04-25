@@ -24,7 +24,7 @@ export const enum HideCases {
 }
 
 export const enum Animations {
-  /** Via opacity */
+  /** Via opacity/css-style */
   default = 0,
   /** Dropdown/drawer animation. It's implemented via JS */
   drawer,
@@ -39,16 +39,38 @@ export const enum Animations {
 
 declare global {
   namespace WUP.Popup {
-    interface Options {
+    interface Defaults {
+      /** Placement rules relative to target;
+       * @defaultValue `[
+       *   WUPPopupElement.$placements.$top.$middle.$adjust, //
+       *   WUPPopupElement.$placements.$bottom.$middle.$adjust,
+       * ]`
+       * @example // to place around center of target use option offset
+       * popup.$options.offset = (r) => [-r.height / 2, -r.width / 2]; */
+      placement: Array<WUP.Popup.Place.PlaceFunc>;
+      /** Inside edges of fitElement popup is positioned and can't overflow fitElement;
+       * @defaultValue `document.body` */
+      toFitElement: HTMLElement;
+      /** Case when popup need to show;
+       * @defaultValue `ShowCases.onClick`
+       * @example
+       * // use `|` to to join cases
+       * showCase=ShowCases.onFocus | ShowCases.onClick;  */
+      showCase: ShowCases;
+      /** Timeout in ms before popup shows on hover of target (for ShowCases.onHover);
+       * @defaultValue 200ms */
+      hoverShowTimeout: number;
+      /** Timeout in ms before popup hides on mouse-leave of target (for ShowCases.onHover);
+       * @defaultValue 500ms  */
+      hoverHideTimeout: number;
+      /** Animation that applied to popup
+       * @defaultValue `Animations.default (opacity)` */
+      animation?: Animations;
+    }
+    interface Options extends Defaults {
       /** Anchor that popup uses for placement. If attr.target and $options.target are empty previousSibling will be attached.
        * attr target="{querySelector}" has hire priority than .options.target */
       target?: HTMLElement | SVGElement | null;
-      /** Placement rules relative to target; example Placements.bottom.start or Placements.bottom.start.adjust
-       * Point several to define alternate behavior (when space are not enough)
-       * @hints
-       * * to place around center of target use option offset @example
-       * popup.$options.offset = (r) => [-r.height / 2, -r.width / 2]; */
-      placement: Array<WUP.Popup.Place.PlaceFunc>;
       /** Virtual margin of targetElement (relative to popup)
        *  [top, right, bottom, left] or [top/bottom, right/left] in px */
       offset?:
@@ -58,29 +80,12 @@ declare global {
       /** Virtual padding of fitElement
        *  [top, right, bottom, left] or [top/bottom, right/left] in px */
       offsetFitElement?: [number, number, number, number] | [number, number];
-      /** Inside edges of fitElement popup is positioned and can't overflow fitElement; {body} by default */
-      toFitElement?: HTMLElement | null;
       /** Sets minWidth 100% of targetWidth; it can't be more than css-style min-width */
       minWidthByTarget?: boolean;
       /** Sets maxWidth 100% of targetWidth; it can't be more than css-style max-width */
       maxWidthByTarget?: boolean;
       /** Sets minHeight 100% of targetWidth; it can't be more than css-style min-height */
       minHeightByTarget?: boolean;
-      /** Case when popup need to show;
-       * @defaultValue ShowCases.onClick
-       * @example
-       * showCase=ShowCases.onFocus | ShowCases.onClick // to join cases
-       * */
-      showCase: ShowCases;
-      /** Timeout in ms before popup shows on hover of target (for ShowCases.onHover);
-       * @defaultValue 200ms */
-      hoverShowTimeout: number;
-      /** Timeout in ms before popup hides on mouse-leave of target (for ShowCases.onHover);
-       * @defaultValue 500ms  */
-      hoverHideTimeout: number;
-      /** Debounce option for onFocustLost event (for ShowCases.onFocus); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost;
-       * @defaultValue 100ms */
-      focusDebounceMs?: number;
       /** Set true to show arrow with popup; @false by default;
        *  Arrow is placed after popup so it's easy to access (via style @see arrowClass or popupElement.$refArrow) */
       arrowEnable?: boolean;
@@ -100,9 +105,6 @@ declare global {
       /** Virtual margin for targetElement related to arrow
        *  [top, right, bottom, left] or [top/bottom, right/left] in px */
       arrowOffset?: [number, number, number, number] | [number, number];
-      /** Animation that applied to popup
-       * @defaultValue Animations.default */
-      animation?: Animations;
     }
 
     interface AttachOptions extends Partial<Omit<Options, "target">> {

@@ -65,7 +65,7 @@ padding:0;}
         }
       }
       WUP-POPUP[anim=drawer] {
-        animation: none;
+        animation-name: custom;
       }
       WUP-POPUP[anim=stack] {
         animation-name: custom;
@@ -132,7 +132,7 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
         }
       }
       TEST-EL[anim=drawer] {
-        animation: none;
+        animation-name: custom;
       }
       TEST-EL[anim=stack] {
         animation-name: custom;
@@ -235,7 +235,7 @@ padding:0;}
         }
       }
       WUP-POPUP[anim=drawer] {
-        animation: none;
+        animation-name: custom;
       }
       WUP-POPUP[anim=stack] {
         animation-name: custom;
@@ -302,7 +302,7 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
         }
       }
       TEST-EL[anim=drawer] {
-        animation: none;
+        animation-name: custom;
       }
       TEST-EL[anim=stack] {
         animation-name: custom;
