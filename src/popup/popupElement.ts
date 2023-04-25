@@ -573,7 +573,7 @@ export default class WUPPopupElement<
         this.querySelector("[items]") || // <div items><button>item 1</button>...</div>
         this.querySelector("li")?.parentElement!.children || // <ul><li>item 1</li>...</ul>
         (this.children.length > 1 && this.children) || // <button>item 1</button>...
-        this.children.item(0)?.children || // <div><button>item 1</button>...</div>
+        (this.children[0]?.children.length && this.children[0]!.children) || // <div><button>item 1</button>...</div>
         this.children; // <button>item 1</button>
       const pos = this.getAttribute("position");
       const isVertical = pos === "bottom" || pos === "top";

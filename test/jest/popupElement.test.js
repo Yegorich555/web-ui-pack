@@ -769,7 +769,7 @@ describe("popupElement", () => {
     expect(() => b.$refresh()).not.toThrow(); // for coverage
   });
 
-  test("$options.animation", async () => {
+  test("$options.animation: drawer", async () => {
     const { nextFrame } = h.useFakeAnimation();
     el.$options.showCase = 0;
     await h.wait();
@@ -981,6 +981,77 @@ describe("popupElement", () => {
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style="display: block; transform: translate(140px, 100px);" position="top" anim="drawer"><div style=""></div><div style=""></div></wup-popup>"`
     );
+  });
+
+  test("$options.animation: stack", async () => {
+    // WARN: there is only code coverage. For full animation tests see helpers/animateStack
+    const { nextFrame } = h.useFakeAnimation();
+    el.$options.showCase = 0;
+    el.$options.animation = Animations.stack;
+    const orig = window.getComputedStyle;
+    jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
+      if (elem === el) {
+        /** @type CSSStyleDeclaration */
+        return { animationDuration: "0.3s", animationName: "WUP-POPUP-a1" };
+      }
+      return orig(elem);
+    });
+    el.innerHTML = "<ul><li>Item 1</li><li>Item 2</></ul>";
+
+    // vertical
+    el.$options.placement = [WUPPopupElement.$placements.$top.$middle];
+    await nextFrame(2);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style="display: block; transform: translate(190px, 100px);" position="top" anim="stack"><ul style="overflow: visible; z-index: 0;"><li style="transition: transform 300ms ease-out;">Item 1</li><li style="transition: transform 300ms ease-out;">Item 2</li></ul></wup-popup>"`
+    );
+    await nextFrame(50);
+    expect(el.innerHTML).toMatchInlineSnapshot(`"<ul style=""><li style="">Item 1</li><li style="">Item 2</li></ul>"`);
+    el.$hide();
+    await nextFrame(50);
+
+    // horizontal
+    el.$options.placement = [WUPPopupElement.$placements.$left.$middle];
+    el.$show();
+    await nextFrame(50);
+    expect(el.innerHTML).toMatchInlineSnapshot(`"<ul style=""><li style="">Item 1</li><li style="">Item 2</li></ul>"`);
+    el.$hide();
+    await nextFrame(50);
+
+    // selector [item]
+    el.innerHTML = "<div [items]><button>Item1</button><button>Item2</button></div>";
+    el.$show();
+    await nextFrame(50);
+    expect(el.innerHTML).toMatchInlineSnapshot(
+      `"<div [items]="" style=""><button style="">Item1</button><button style="">Item2</button></div>"`
+    );
+    el.$hide();
+    await nextFrame(50);
+
+    // root of popup
+    el.innerHTML = "<button>Item1</button><button>Item2</button>";
+    el.$show();
+    await nextFrame(50);
+    expect(el.innerHTML).toMatchInlineSnapshot(`"<button style="">Item1</button><button style="">Item2</button>"`);
+    el.$hide();
+    await nextFrame(50);
+
+    // inside wrapper
+    el.innerHTML = "<div><button>Item1</button><button>Item2</button></div>";
+    el.$show();
+    await nextFrame(50);
+    expect(el.innerHTML).toMatchInlineSnapshot(
+      `"<div style=""><button style="">Item1</button><button style="">Item2</button></div>"`
+    );
+    el.$hide();
+    await nextFrame(50);
+
+    // exclusion for single item
+    el.innerHTML = "<button>Item1</button>";
+    el.$show();
+    await nextFrame(50);
+    expect(el.innerHTML).toMatchInlineSnapshot(`"<button style="">Item1</button>"`);
+    el.$hide();
+    await nextFrame(50);
   });
 
   test("attrs", () => {
