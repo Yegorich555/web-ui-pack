@@ -63,7 +63,14 @@ padding:0;}
         @keyframes WUP-POPUP-a2 {
           to {opacity: 0;}
         }
-       }
+      }
+      WUP-POPUP[anim=drawer] {
+        animation: none;
+      }
+      WUP-POPUP[anim=stack] {
+        animation-name: custom;
+        overflow: visible;
+      }
       
 WUP-POPUP::-webkit-scrollbar {
   width: 10px; height: 10px;
@@ -123,7 +130,14 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
         @keyframes WUP-POPUP-a2 {
           to {opacity: 0;}
         }
-       }
+      }
+      TEST-EL[anim=drawer] {
+        animation: none;
+      }
+      TEST-EL[anim=stack] {
+        animation-name: custom;
+        overflow: visible;
+      }
       
 TEST-EL::-webkit-scrollbar {
   width: 10px; height: 10px;
@@ -219,7 +233,14 @@ padding:0;}
         @keyframes WUP-POPUP-a2 {
           to {opacity: 0;}
         }
-       }
+      }
+      WUP-POPUP[anim=drawer] {
+        animation: none;
+      }
+      WUP-POPUP[anim=stack] {
+        animation-name: custom;
+        overflow: visible;
+      }
       
 WUP-POPUP::-webkit-scrollbar {
   width: 10px; height: 10px;
@@ -279,7 +300,14 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
         @keyframes WUP-POPUP-a2 {
           to {opacity: 0;}
         }
-       }
+      }
+      TEST-EL[anim=drawer] {
+        animation: none;
+      }
+      TEST-EL[anim=stack] {
+        animation-name: custom;
+        overflow: visible;
+      }
       
 TEST-EL::-webkit-scrollbar {
   width: 10px; height: 10px;
