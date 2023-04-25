@@ -297,7 +297,7 @@ export default class WUPPopupElement<
   $show(): Promise<boolean> {
     /*  if (this.#whenShow) {
       return this.#whenShow;
-    } */ // WARN: don't use this logic becaues manual $show method must remove listeners
+    } */ // WARN: don't use this logic because manual $show method must remove listeners
     return new Promise<boolean>((resolve, reject) => {
       const f = async (): Promise<void> => {
         if (!this.$isReady) {

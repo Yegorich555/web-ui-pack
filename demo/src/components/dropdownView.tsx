@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import Page from "src/elements/page";
 import { WUPDropdownElement } from "web-ui-pack";
+import { Animations } from "web-ui-pack/popup/popupElement.types";
 import styles from "./dropdownView.scss";
 
 const sideEffect = WUPDropdownElement;
@@ -13,14 +14,31 @@ export default function DropdownView() {
       link="src/dropdownElement.ts"
       details={{
         tag: "wup-dropdown",
+        customHTML: [
+          `html
+<wup-dropdown>
+  <button type="button">Click me</button>
+  <wup-popup placement="left-start">
+      <ul>
+        <li>Home</li>
+        <li>Products</li>
+        <li>Profile</li>
+      </ul>
+   </wup-popup>
+</wup-dropdown>`,
+        ],
       }}
-      features={["Todo "]}
+      features={[
+        "Built-in animations: opacity, drawer, stack",
+        "Easy to customize behavior via options of <wup-dropdown> & <wup-popup>",
+        "Accessibility support", // todo accessibility
+      ]}
     >
       <section>
-        <h3>Default</h3>
+        <h3>Default (animation: drawer)</h3>
         {/* <small>some details here</small> */}
         <wup-dropdown>
-          <button type="button">Default</button>
+          <button type="button">Click me</button>
           <wup-popup>
             <ul>
               <li>Home</li>
@@ -37,19 +55,18 @@ export default function DropdownView() {
         </wup-dropdown>
       </section>
       <section>
-        <h3>Customized</h3>
+        <h3>Customized (animation: stack)</h3>
+        <small>use popup options directly to change direction</small>
         <wup-dropdown class={`${styles.custom} ${styles.left}`}>
           <button type="button">{"<"}</button>
           <wup-popup
-            // todo if left don't have space - select oposite
+            // todo if don't have space - select oposite
             placement="left-middle"
             ref={(el) => {
               if (el) {
-                el.$options.offset = (r) => {
-                  const m = [Math.round(-r.height / 2), Math.round(-r.width / 2)] as [number, number];
-                  (el.firstElementChild as HTMLElement).style.margin = `${-m[0]}px ${-m[1]}px`;
-                  return m;
-                };
+                setTimeout(() => {
+                  el.$options.animation = Animations.stack;
+                });
               }
             }}
           >
@@ -73,7 +90,16 @@ export default function DropdownView() {
           <button type="button">
             <span style={{ transform: "rotate(90deg)" }}>{">"}</span>
           </button>
-          <wup-popup placement="bottom-middle">
+          <wup-popup
+            placement="bottom-middle"
+            ref={(el) => {
+              if (el) {
+                setTimeout(() => {
+                  el.$options.animation = Animations.stack;
+                });
+              }
+            }}
+          >
             <ul>
               <li>
                 <button type="button">A</button>
@@ -91,7 +117,16 @@ export default function DropdownView() {
           <button type="button">
             <span style={{ transform: "rotate(-90deg)" }}>{">"}</span>
           </button>
-          <wup-popup placement="top-middle">
+          <wup-popup
+            placement="top-middle"
+            ref={(el) => {
+              if (el) {
+                setTimeout(() => {
+                  el.$options.animation = Animations.stack;
+                });
+              }
+            }}
+          >
             <ul>
               <li>
                 <button type="button">A</button>
@@ -111,8 +146,9 @@ export default function DropdownView() {
             placement="right-middle"
             ref={(el) => {
               if (el) {
-                // setTimeout(() => {
-                // el.$show();
+                setTimeout(() => {
+                  el.$options.animation = Animations.stack;
+                });
               }
             }}
           >

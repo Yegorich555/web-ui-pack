@@ -8,14 +8,18 @@ const tagName = "wup-dropdown";
 declare global {
   namespace WUP.Dropdown {
     interface Defaults {
-      /** Direction for opened menu
-       * @defaultValue "bottom" */
-      direction: "right" | "top" | "left" | "bottom";
+      /** Animation that applied to popup;
+       * @defaultValue `Animations.drawer`
+       * @tutorial Troubleshooting
+       * * to change option for specific element change it for `<wup-popup/>` direclty after timeout
+       * @example setTimeout(() => this.$refPopup.$options.animation = Animations.stack) */
+      animation: Animations;
       /** Case when popup need to show;
-       * @defaultValue ShowCases.onClick | ShowCases.onHover - (onClick and onHover) */
-      showCase: ShowCases; // todo implement
-      /* todo animation stacked - item apeares one by one */
-      animation: "drawer" | "stacked" | "opacity" | "none";
+       * @defaultValue `ShowCases.onClick`
+       * @tutorial Troubleshooting
+       * * to change option for specific element change it for `<wup-popup/>` direclty after timeout
+       * @example setTimeout(() => this.$refPopup.$options.showCase = ShowCases.onFocus | ShowCases.onClick) */
+      showCase: ShowCases;
     }
     interface Options extends Defaults {}
     interface Attributes extends WUP.Base.toJSX<Options> {}
@@ -36,18 +40,9 @@ declare global {
 /** Example of usage */
 export default class WUPDropdownElement extends WUPBaseElement {
   #ctr = this.constructor as typeof WUPDropdownElement;
-
-  static get observedOptions(): Array<keyof WUP.Dropdown.Options> {
-    return ["showCase"]; // , "placement"];
-  }
-
-  static get observedAttributes(): Array<LowerKeys<WUP.Dropdown.Attributes>> {
-    return ["direction"]; // , "placement"];
-  }
-
-  static get $styleRoot(): string {
-    return `:root {}`;
-  }
+  /*  static get observedOptions(): Array<keyof WUP.Dropdown.Options> { return []; }
+  static get observedAttributes(): Array<LowerKeys<WUP.Dropdown.Attributes>> { return []; }
+  static get $styleRoot(): string { return ""; } */
 
   static get $style(): string {
     return `${super.$style}
@@ -63,9 +58,8 @@ export default class WUPDropdownElement extends WUPBaseElement {
   }
 
   static $defaults: WUP.Dropdown.Defaults = {
-    direction: "bottom",
-    showCase: ShowCases.onClick | ShowCases.onHover,
-    animation: "stacked",
+    animation: Animations.drawer,
+    showCase: ShowCases.onClick,
   };
 
   $options: WUP.Dropdown.Options = {
@@ -79,15 +73,9 @@ export default class WUPDropdownElement extends WUPBaseElement {
 
   protected override _opts = this.$options;
 
-  protected override gotChanges(propsChanged: Array<keyof WUP.Dropdown.Options> | null): void {
+  /* protected override gotChanges(propsChanged: Array<keyof WUP.Dropdown.Options> | null): void {
     super.gotChanges(propsChanged);
-
-    // todo click on item inside closes popup but it maybe wrong - need option for this
-    // todo hover effect is wrong - if user hovers popup after showing it closes
-    // todo this._opts.direction = (this.getAttr("direction", "string") as "bottom") || "bottom";
-    this.$refPopup.$options.showCase = this.$options.showCase && ShowCases.onClick;
-    this.$refPopup.$options.animation = Animations.stack;
-  }
+  } */
 
   protected override gotReady(): void {
     this.$refTitle = this.firstElementChild as HTMLElement;
@@ -95,23 +83,27 @@ export default class WUPDropdownElement extends WUPBaseElement {
     if (this.$refTitle === this.$refPopup || !this.$refPopup.$show) {
       this.throwError("Invalid structure. Expected 1st element: <any/>, last element: <wup-popup/>");
     } else {
+      // todo click on item inside closes popup but it maybe wrong - need option for this
+      // todo hover effect is wrong - if user hovers popup after showing it closes
+
       this.$refPopup.setAttribute("menu", "");
       this.$refPopup.$options.minWidthByTarget = true;
       this.$refPopup.$options.minHeightByTarget = true;
-      // todo user must be able to change direction
+      this.$refPopup.$options.showCase = this.$options.showCase;
+      this.$refPopup.$options.animation = this.$options.animation;
+      // WARN: this is default rule impossible to override via defaults
       if (!this.$refPopup.hasAttribute("placement")) {
         this.$refPopup.$options.placement = [
           WUPPopupElement.$placements.$bottom.$start,
           WUPPopupElement.$placements.$bottom.$end,
+          WUPPopupElement.$placements.$top.$start,
+          WUPPopupElement.$placements.$top.$end,
+          WUPPopupElement.$placements.$bottom.$start.$resizeHeight,
+          WUPPopupElement.$placements.$bottom.$end.$resizeHeight,
+          WUPPopupElement.$placements.$top.$start.$resizeHeight,
+          WUPPopupElement.$placements.$top.$end.$resizeHeight,
         ];
       }
-
-      // this.$refPopup.addEventListener("$show", () => {
-      //   setTimeout(() => this.$refPopup.$hide(), 1000);
-      // });
-      // this.$refPopup.addEventListener("$hide", () => {
-      //   setTimeout(() => this.$refPopup.$show(), 1000);
-      // });
     }
     super.gotReady();
   }
