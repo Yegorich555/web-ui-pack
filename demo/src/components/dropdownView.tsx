@@ -60,7 +60,6 @@ export default function DropdownView() {
         <wup-dropdown class={`${styles.custom} ${styles.left}`}>
           <button type="button">{"<"}</button>
           <wup-popup
-            // todo if don't have space - select oposite
             placement="left-middle"
             ref={(el) => {
               if (el) {

@@ -79,19 +79,37 @@ export default class WUPPopupElement<
   }
 
   static $placements = PopupPlacements;
-  static $placementAttrs = {
-    "top-start": PopupPlacements.$top.$start.$adjust,
-    "top-middle": PopupPlacements.$top.$middle.$adjust,
-    "top-end": PopupPlacements.$top.$end.$adjust,
-    "bottom-start": PopupPlacements.$bottom.$start.$adjust,
-    "bottom-middle": PopupPlacements.$bottom.$middle.$adjust,
-    "bottom-end": PopupPlacements.$bottom.$end.$adjust,
-    "left-start": PopupPlacements.$left.$start.$adjust,
-    "left-middle": PopupPlacements.$left.$middle.$adjust,
-    "left-end": PopupPlacements.$left.$end.$adjust,
-    "right-start": PopupPlacements.$right.$start.$adjust,
-    "right-middle": PopupPlacements.$right.$middle.$adjust,
-    "right-end": PopupPlacements.$right.$end.$adjust,
+
+  /** Returns placement */
+  static $placementAttrs = (attr: WUP.Popup.Attributes["placement"]): Array<WUP.Popup.Place.PlaceFunc> | undefined => {
+    switch (attr) {
+      case "top-start":
+        return [PopupPlacements.$top.$start.$adjust, PopupPlacements.$bottom.$start.$adjust];
+      case "top-middle":
+        return [PopupPlacements.$top.$middle.$adjust, PopupPlacements.$bottom.$middle.$adjust];
+      case "top-end":
+        return [PopupPlacements.$top.$end.$adjust, PopupPlacements.$bottom.$end.$adjust];
+      case "bottom-start":
+        return [PopupPlacements.$bottom.$start.$adjust, PopupPlacements.$top.$start.$adjust];
+      case "bottom-middle":
+        return [PopupPlacements.$bottom.$middle.$adjust, PopupPlacements.$top.$middle.$adjust];
+      case "bottom-end":
+        return [PopupPlacements.$bottom.$end.$adjust, PopupPlacements.$top.$end.$adjust];
+      case "left-start":
+        return [PopupPlacements.$left.$start.$adjust, PopupPlacements.$right.$start.$adjust];
+      case "left-middle":
+        return [PopupPlacements.$left.$middle.$adjust, PopupPlacements.$right.$middle.$adjust];
+      case "left-end":
+        return [PopupPlacements.$left.$end.$adjust, PopupPlacements.$right.$end.$adjust];
+      case "right-start":
+        return [PopupPlacements.$right.$start.$adjust, PopupPlacements.$left.$start.$adjust];
+      case "right-middle":
+        return [PopupPlacements.$right.$middle.$adjust, PopupPlacements.$left.$middle.$adjust];
+      case "right-end":
+        return [PopupPlacements.$right.$end.$adjust, PopupPlacements.$left.$end.$adjust];
+      default:
+        return undefined;
+    }
   };
 
   /** Default options. Change it to configure default behavior */
@@ -395,10 +413,13 @@ export default class WUPPopupElement<
   protected override gotChanges(propsChanged: Array<string> | null): void {
     super.gotChanges(propsChanged);
 
-    if (propsChanged) {
-      this.$isShown && this.goHide(HideCases.onOptionChange);
-      this.init(); // possible only if popup is hidden
-    }
+    propsChanged && this.$isShown && this.goHide(HideCases.onOptionChange);
+
+    const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.$placementAttrs;
+    const p = pAttr && WUPPopupElement.$placementAttrs(pAttr);
+    this._opts.placement = p || this._opts.placement || [...this.#ctr.$defaults.placement];
+
+    propsChanged && this.init(); // possible only if popup is hidden
   }
 
   protected override connectedCallback(): void {
@@ -473,10 +494,6 @@ export default class WUPPopupElement<
     if (!this._opts.target!.isConnected) {
       throw new Error(`${this.tagName}. Target is not appended to document`);
     }
-
-    const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.$placementAttrs;
-    const p = pAttr && WUPPopupElement.$placementAttrs[pAttr];
-    this._opts.placement = p ? [p] : this._opts.placement;
 
     if (!this._opts.animation) {
       this.style.transform = ""; // otherwise animation will broken if we reset
@@ -1023,30 +1040,7 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUP.Base.JSXProps<WUPPopupElement> &
-        Partial<{
-          /** QuerySelector to find target - anchor that popup uses for placement.
-           * If attr.target and $options.target are empty previousSibling will be attached.
-           * Popup defines target on show()
-           *
-           * attr `target` has hire priority than ref.options.target
-           *  */
-          target: string;
-          /** Placement rule (relative to target); applied on show(). Call show() again to apply changed options */
-          placement: keyof typeof WUPPopupElement.$placementAttrs;
-          /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$show') instead */
-          onShow: never;
-          /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$hide') instead */
-          onHide: never;
-          /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willHide') instead */
-          onWillHide: never;
-          /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willShow') instead */
-          onWillShow: never;
-          /** @readonly Result position; use this to restyle animation etc. */
-          readonly position: "top" | "left" | "bottom" | "right";
-          /** @readonly Hide state; use this to hide-animation */
-          readonly hide: "";
-        }>;
+      [tagName]: WUP.Base.JSXProps<WUPPopupElement> & WUP.Popup.Attributes;
     }
   }
 }

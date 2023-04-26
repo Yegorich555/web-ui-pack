@@ -1054,7 +1054,7 @@ describe("popupElement", () => {
     await nextFrame(50);
   });
 
-  test("attrs", () => {
+  test("attr: target", async () => {
     el = document.createElement(el.tagName);
     el.$options.showCase = 0;
     document.body.prepend(el);
@@ -1065,13 +1065,90 @@ describe("popupElement", () => {
 
     // attr 'target'
     el.setAttribute("target", `#${trg.getAttribute("id")}`);
-    el.setAttribute("placement", "top-start");
     jest.advanceTimersToNextTimer();
     expect(el.$options.target).toBeDefined();
     expect(el.$isShown).toBe(true);
 
     el.setAttribute("target", "#not-found-id");
     expect(() => jest.advanceTimersByTime(1000)).toThrow(); // because of target is defined but not HTMLELement
+  });
+
+  test("attr: placement", async () => {
+    el.$hide();
+    await h.wait();
+
+    el.setAttribute("placement", "top-start");
+    await h.wait();
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$top$start_adjust $bottom$start_adjust"`
+    );
+    el.setAttribute("placement", "top-middle");
+    await h.wait(1);
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$top$middle_adjust $bottom$middle_adjust"`
+    );
+    el.setAttribute("placement", "top-end");
+    await h.wait(1);
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$top$end_adjust $bottom$end_adjust"`
+    );
+
+    el.setAttribute("placement", "bottom-start");
+    await h.wait(1);
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$bottom$start_adjust $top$start_adjust"`
+    );
+    el.setAttribute("placement", "bottom-middle");
+    await h.wait(1);
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$bottom$middle_adjust $top$middle_adjust"`
+    );
+    el.setAttribute("placement", "bottom-end");
+    await h.wait(1);
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$bottom$end_adjust $top$end_adjust"`
+    );
+
+    el.setAttribute("placement", "left-start");
+    await h.wait(1);
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$left$start_adjust $right$start_adjust"`
+    );
+    el.setAttribute("placement", "left-middle");
+    await h.wait(1);
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$left$middle_adjust $right$middle_adjust"`
+    );
+    el.setAttribute("placement", "left-end");
+    await h.wait(1);
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$left$end_adjust $right$end_adjust"`
+    );
+
+    el.setAttribute("placement", "right-start");
+    await h.wait(1);
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$right$start_adjust $left$start_adjust"`
+    );
+    el.setAttribute("placement", "right-middle");
+    await h.wait(1);
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$right$middle_adjust $left$middle_adjust"`
+    );
+    el.setAttribute("placement", "right-end");
+    await h.wait(1);
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$right$end_adjust $left$end_adjust"`
+    );
+
+    el.removeAttribute("placement", "");
+    await h.wait(1);
+    expect(el.$options.placement).toStrictEqual(WUPPopupElement.$defaults.placement);
+    expect(el.$options.placement).not.toBe(WUPPopupElement.$defaults.placement);
+
+    el.setAttribute("placement", "---");
+    await h.wait(1);
+    expect(el.$options.placement).toStrictEqual(WUPPopupElement.$defaults.placement);
   });
 
   test("remove", async () => {

@@ -107,6 +107,42 @@ declare global {
       arrowOffset?: [number, number, number, number] | [number, number];
     }
 
+    interface Attributes {
+      placement?:
+        | "top-start"
+        | "top-middle"
+        | "top-end"
+        | "bottom-start"
+        | "bottom-middle"
+        | "bottom-end"
+        | "left-start"
+        | "left-middle"
+        | "left-end"
+        | "right-start"
+        | "right-middle"
+        | "right-end";
+      /** QuerySelector to find target - anchor that popup uses for placement.
+       * If attr.target and $options.target are empty previousSibling will be attached.
+       * Popup defines target on show()
+       *
+       * attr `target` has hire priority than ref.options.target
+       *  */
+      target?: string;
+      /** Placement rule (relative to target); applied on show(). Call show() again to apply changed options */
+      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$show') instead */
+      onShow?: never;
+      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$hide') instead */
+      onHide?: never;
+      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willHide') instead */
+      onWillHide?: never;
+      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willShow') instead */
+      onWillShow?: never;
+      /** @readonly Result position; use this to restyle animation etc. */
+      readonly position?: "top" | "left" | "bottom" | "right";
+      /** @readonly Hide state; use this to hide-animation */
+      readonly hide?: "";
+    }
+
     interface AttachOptions extends Partial<Omit<Options, "target">> {
       target: HTMLElement | SVGElement;
       text: string | undefined | null;
