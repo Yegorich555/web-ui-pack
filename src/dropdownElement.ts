@@ -7,7 +7,7 @@ const tagName = "wup-dropdown";
 // todo use same options from WUPPOpupDefaults so user can redefine popupDefault without affecting directly
 declare global {
   namespace WUP.Dropdown {
-    interface Defaults {
+    interface Defaults /* extends WUP.Popup.Defaults */ {
       /** Animation that applied to popup;
        * @defaultValue `Animations.drawer`
        * @tutorial Troubleshooting
@@ -20,6 +20,9 @@ declare global {
        * * to change option for specific element change it for `<wup-popup/>` directly after timeout
        * @example setTimeout(() => this.$refPopup.$options.showCase = ShowCases.onFocus | ShowCases.onClick) */
       showCase: ShowCases;
+      /** Hide on popup click
+       * @defaultValue true */
+      hideOnClick: boolean;
     }
     interface Options extends Defaults {}
     interface Attributes extends WUP.Base.toJSX<Options> {}
@@ -40,9 +43,6 @@ declare global {
 /** Example of usage */
 export default class WUPDropdownElement extends WUPBaseElement {
   #ctr = this.constructor as typeof WUPDropdownElement;
-  /*  static get observedOptions(): Array<keyof WUP.Dropdown.Options> { return []; }
-  static get observedAttributes(): Array<LowerKeys<WUP.Dropdown.Attributes>> { return []; }
-  static get $styleRoot(): string { return ""; } */
 
   static get $style(): string {
     return `${super.$style}
@@ -58,24 +58,22 @@ export default class WUPDropdownElement extends WUPBaseElement {
   }
 
   static $defaults: WUP.Dropdown.Defaults = {
+    // ...WUPPopupElement.$defaults,
     animation: Animations.drawer,
     showCase: ShowCases.onClick | ShowCases.onHover,
+    hideOnClick: true,
   };
 
   $options: WUP.Dropdown.Options = {
     ...this.#ctr.$defaults,
   };
 
+  protected override _opts = this.$options;
+
   /** Reference to nested HTMLElement tied with $options.label */
   $refTitle = this.firstElementChild as HTMLElement;
   /** Reference to popupMenu */
   $refPopup = this.lastElementChild as WUPPopupElement;
-
-  protected override _opts = this.$options;
-
-  /* protected override gotChanges(propsChanged: Array<keyof WUP.Dropdown.Options> | null): void {
-    super.gotChanges(propsChanged);
-  } */
 
   protected override gotReady(): void {
     this.$refTitle = this.firstElementChild as HTMLElement;
@@ -101,17 +99,17 @@ export default class WUPDropdownElement extends WUPBaseElement {
           WUPPopupElement.$placements.$top.$end.$resizeHeight,
         ];
       }
-      this.$refPopup.goHide = this.goHidePopup;
+      this.$refPopup.goHide = this.goHidePopup.bind(this);
     }
     super.gotReady();
   }
 
-  protected goHidePopup(this: WUPPopupElement, hideCase: HideCases): boolean | Promise<boolean> {
-    // todo click on item inside closes popup but it maybe wrong - need option for this
-    if (hideCase === HideCases.onMouseLeave) {
-      console.warn("mouseLeave");
+  protected goHidePopup(hideCase: HideCases): boolean | Promise<boolean> {
+    // todo impossible to hide by click on target if opened by hover
+    if (hideCase === HideCases.onPopupClick && !this._opts.hideOnClick) {
+      return false;
     }
-    return WUPPopupElement.prototype.goHide.call(this, hideCase);
+    return WUPPopupElement.prototype.goHide.call(this.$refPopup!, hideCase);
   }
 }
 
