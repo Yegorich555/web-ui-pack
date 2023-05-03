@@ -17,7 +17,8 @@
 - [SelectManyControl](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany). Added ability to sort/order items via drag&drop OR Arrows + Shift
 - Added helper [**animateStack**](src/helpers/animate.ts)
 - [PopupElement](src/popup/popupElement.ts)
-  - Added option **animation: Animations.stack** for [PopupElement](src/popup/popupElement.ts)
+  - Added option **animation: Animations.stack**
+  - Added support for attribute **[animation]**  ("stack","drawer","") : `<wup-popup animation="stack">...</wup-popup>`
   - Extended attribute **placement**. Now it has predefined opposite rules (so `right-middle` means `[right-middle, left-middle]`)
 
 ## 0.5.2 (Mar 29, 2023)

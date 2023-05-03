@@ -64,10 +64,10 @@ padding:0;}
           to {opacity: 0;}
         }
       }
-      WUP-POPUP[anim=drawer] {
+      WUP-POPUP[animation=drawer] {
         animation-name: custom;
       }
-      WUP-POPUP[anim=stack] {
+      WUP-POPUP[animation=stack] {
         animation-name: custom;
         overflow: visible;
       }
@@ -131,10 +131,10 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
           to {opacity: 0;}
         }
       }
-      TEST-EL[anim=drawer] {
+      TEST-EL[animation=drawer] {
         animation-name: custom;
       }
-      TEST-EL[anim=stack] {
+      TEST-EL[animation=stack] {
         animation-name: custom;
         overflow: visible;
       }
@@ -234,10 +234,10 @@ padding:0;}
           to {opacity: 0;}
         }
       }
-      WUP-POPUP[anim=drawer] {
+      WUP-POPUP[animation=drawer] {
         animation-name: custom;
       }
-      WUP-POPUP[anim=stack] {
+      WUP-POPUP[animation=stack] {
         animation-name: custom;
         overflow: visible;
       }
@@ -301,10 +301,10 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
           to {opacity: 0;}
         }
       }
-      TEST-EL[anim=drawer] {
+      TEST-EL[animation=drawer] {
         animation-name: custom;
       }
-      TEST-EL[anim=stack] {
+      TEST-EL[animation=stack] {
         animation-name: custom;
         overflow: visible;
       }

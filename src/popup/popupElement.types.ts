@@ -62,7 +62,7 @@ declare global {
       /** Timeout in ms before popup hides on mouse-leave of target (for ShowCases.onHover);
        * @defaultValue 500ms  */
       hoverHideTimeout: number;
-      /** Animation that applied to popup
+      /** Animation applied to popup
        * @defaultValue `Animations.default (opacity)` */
       animation?: Animations;
     }
@@ -124,8 +124,7 @@ declare global {
        * If attr.target and $options.target are empty previousSibling will be attached.
        * Popup defines target on show()
        *
-       * attr `target` has hire priority than ref.options.target
-       *  */
+       * attr `target` has hire priority than ref.options.target */
       target?: string;
       /** Placement rule (relative to target); applied on show(). Call show() again to apply changed options */
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$show') instead */
@@ -140,6 +139,8 @@ declare global {
       readonly position?: "top" | "left" | "bottom" | "right";
       /** @readonly Hide state; use this to hide-animation */
       readonly hide?: "";
+      /** Animation applied to popup */
+      animation?: "" | "default" | "drawer" | "stack";
     }
 
     interface AttachOptions extends Partial<Omit<Options, "target">> {

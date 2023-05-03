@@ -75,7 +75,7 @@ export default class WUPPopupElement<
 
   /* Array of attribute names to monitor for changes */
   static get observedAttributes(): Array<LowerKeys<WUP.Popup.Options>> {
-    return ["target", "placement"];
+    return ["target", "placement", "animation"];
   }
 
   static $placements = PopupPlacements;
@@ -164,10 +164,10 @@ export default class WUPPopupElement<
           to {opacity: 0;}
         }
       }
-      :host[anim=drawer] {
+      :host[animation=drawer] {
         animation-name: custom;
       }
-      :host[anim=stack] {
+      :host[animation=stack] {
         animation-name: custom;
         overflow: visible;
       }
@@ -415,10 +415,27 @@ export default class WUPPopupElement<
 
     propsChanged && this.$isShown && this.goHide(HideCases.onOptionChange);
 
+    // attr placement
     const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.$placementAttrs;
     const p = pAttr && WUPPopupElement.$placementAttrs(pAttr);
     this._opts.placement = p || this._opts.placement || [...this.#ctr.$defaults.placement];
-
+    // attr animation
+    const aAnim = this.getAttribute("animation");
+    switch (aAnim) {
+      case "":
+      case "default":
+        this._opts.animation = Animations.default;
+        break;
+      case "drawer":
+        this._opts.animation = Animations.drawer;
+        break;
+      case "stack":
+        this._opts.animation = Animations.stack;
+        break;
+      default:
+        break;
+    }
+    // re-init
     propsChanged && this.init(); // possible only if popup is hidden
   }
 
@@ -574,8 +591,11 @@ export default class WUPPopupElement<
   /** Required to stop previous animations/timeouts (for case when option animation is changed) */
   _stopAnimation?: () => void;
   protected goAnimate(animTime: number, isHidden: boolean): Promise<boolean> {
+    this._isStopChanges = true;
     if (this._opts.animation === Animations.drawer) {
-      this.setAttribute("anim", "drawer");
+      this.setAttribute("animation", "drawer");
+      this._isStopChanges = false;
+
       const pa = animateDropdown(this, animTime, isHidden);
       this._stopAnimation = () => {
         delete this._stopAnimation;
@@ -585,7 +605,9 @@ export default class WUPPopupElement<
     }
 
     if (this._opts.animation === Animations.stack) {
-      this.setAttribute("anim", "stack");
+      this.setAttribute("animation", "stack");
+      this._isStopChanges = false;
+
       const items =
         this.querySelector("[items]") || // <div items><button>item 1</button>...</div>
         this.querySelector("li")?.parentElement!.children || // <ul><li>item 1</li>...</ul>
@@ -601,6 +623,9 @@ export default class WUPPopupElement<
       };
       return pa;
     }
+
+    this.removeAttribute("animation");
+    this._isStopChanges = false;
 
     return new Promise((resolve) => {
       const t = setTimeout(() => resolve(true), animTime);

@@ -1,7 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 import Page from "src/elements/page";
 import { WUPDropdownElement } from "web-ui-pack";
-import { Animations } from "web-ui-pack/popup/popupElement.types";
 import styles from "./dropdownView.scss";
 
 const sideEffect = WUPDropdownElement;
@@ -59,17 +58,7 @@ export default function DropdownView() {
         <small>use popup options directly to change direction</small>
         <wup-dropdown class={`${styles.custom} ${styles.left}`}>
           <button type="button">{"<"}</button>
-          <wup-popup
-            placement="left-middle"
-            ref={(el) => {
-              if (el) {
-                setTimeout(() => {
-                  // todo setup this via attr
-                  el.$options.animation = Animations.stack;
-                });
-              }
-            }}
-          >
+          <wup-popup placement="left-middle" animation="stack">
             <ul>
               <li>
                 <button type="button">A</button>
@@ -90,16 +79,7 @@ export default function DropdownView() {
           <button type="button">
             <span style={{ transform: "rotate(90deg)" }}>{">"}</span>
           </button>
-          <wup-popup
-            placement="bottom-middle"
-            ref={(el) => {
-              if (el) {
-                setTimeout(() => {
-                  el.$options.animation = Animations.stack;
-                });
-              }
-            }}
-          >
+          <wup-popup placement="bottom-middle" animation="stack">
             <ul>
               <li>
                 <button type="button">A</button>
@@ -117,16 +97,7 @@ export default function DropdownView() {
           <button type="button">
             <span style={{ transform: "rotate(-90deg)" }}>{">"}</span>
           </button>
-          <wup-popup
-            placement="top-middle"
-            ref={(el) => {
-              if (el) {
-                setTimeout(() => {
-                  el.$options.animation = Animations.stack;
-                });
-              }
-            }}
-          >
+          <wup-popup placement="top-middle" animation="stack">
             <ul>
               <li>
                 <button type="button">A</button>
@@ -142,16 +113,7 @@ export default function DropdownView() {
         </wup-dropdown>
         <wup-dropdown class={`${styles.custom} ${styles.right}`}>
           <button type="button">{">"}</button>
-          <wup-popup
-            placement="right-middle"
-            ref={(el) => {
-              if (el) {
-                setTimeout(() => {
-                  el.$options.animation = Animations.stack;
-                });
-              }
-            }}
-          >
+          <wup-popup placement="right-middle" animation="stack">
             <ul>
               <li>
                 <button type="button">A</button>
