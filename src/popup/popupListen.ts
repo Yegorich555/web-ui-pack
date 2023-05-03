@@ -129,7 +129,6 @@ export default function popupListen(
     let lastActive: HTMLElement | null = null;
     onShowEvent(document, "focusin", ({ target }) => {
       const isMe = openedEl === target || includes(target);
-      /* istanbul ignore else */
       if (!isMe) {
         lastActive = target as HTMLElement;
       }
@@ -225,12 +224,11 @@ export default function popupListen(
     onRemoveCallbacks.push(onFocusGot(t, onFocused, { debounceMs: opts.focusDebounceMs }));
 
     const blur = async (e: FocusEvent): Promise<void> => {
-      /* istanbul ignore else */
+      /* istanbul ignore else - case impossible but better always to check this */
       if (openedEl) {
         const isToMe = openedEl === document.activeElement || openedEl === e.relatedTarget;
         const isToMeInside = !isToMe && includes(document.activeElement || e.relatedTarget);
         !isToMe && !isToMeInside && (await hide(HideCases.onFocusOut, e));
-        /* istanbul ignore else */
         if (!openedEl) {
           openedByHover = false;
         }

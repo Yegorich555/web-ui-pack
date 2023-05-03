@@ -424,7 +424,7 @@ describe("popupElement", () => {
     await h.wait();
     expect(a.$isShown).toBe(false);
 
-    trg.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.userClick(trg);
     await h.wait(0);
     expect(a.$isShown).toBe(true);
     trg.dispatchEvent(new MouseEvent("click", { bubbles: true }));
@@ -527,15 +527,13 @@ describe("popupElement", () => {
     expect(spyHide).lastCalledWith(1);
 
     // open again by click
-    e = new MouseEvent("click", { bubbles: true });
-    trgInput.dispatchEvent(e);
+    trgInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     expect(a.$isShown).toBe(true); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
     expect(spyShow).lastCalledWith(1 << 2);
 
     // close by click again
-    e = new MouseEvent("click", { bubbles: true });
-    trgInput.dispatchEvent(e);
+    await h.userClick(trgInput);
     await h.wait();
     expect(a.$isShown).toBe(false);
     expect(spyHide).lastCalledWith(5);
@@ -620,6 +618,17 @@ describe("popupElement", () => {
     trgInput.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
     await h.wait(50);
     expect(a.$isShown).toBe(false);
+
+    // focus returns to target or lastActive element
+    const btnInside = a.appendChild(document.createElement("button"));
+    await h.wait();
+    await h.userClick(trgInput, undefined, 0); // WARN: somehow default timeout doesn't work in tests
+    await h.wait();
+    expect(a.$isShown).toBe(true);
+    await h.userClick(btnInside); // it simulates focus on btn also
+    await h.wait();
+    expect(a.$isShown).toBe(false);
+    expect(document.activeElement).toBe(trgInput); // focus must return back to input
   });
 
   test("$options.minWidth/minHeight/maxWidth by target", async () => {
