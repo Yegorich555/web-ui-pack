@@ -72,7 +72,9 @@ export default function popupListen(
     }).finally(() => (show._isDoing = false));
     await show._isDoing;
     // timeout required to avoid immediate hide by bubbling events to root
-    openedEl && setTimeout(() => openedEl && onShowCallbacks.forEach((f) => onHideCallbacks.push(f())));
+    if (openedEl) {
+      setTimeout(() => openedEl && onShowCallbacks.forEach((f) => onHideCallbacks.push(f())));
+    }
   }
   show._isDoing = false as Promise<void> | boolean; // required to prevent infinite-calling from parent
 
@@ -119,7 +121,7 @@ export default function popupListen(
 
   // apply showCase
   let preventClickAfterFocus = false;
-  let openedByHover = false;
+  let openedByHover: false | ReturnType<typeof setTimeout> = false;
   let debounceTimeout: ReturnType<typeof setTimeout> | undefined;
   // onClick
   if (opts.showCase & ShowCases.onClick) {
@@ -184,16 +186,20 @@ export default function popupListen(
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
     const ev = (ms: number, isMouseIn: boolean, e: MouseEvent): void => {
       timeoutId && clearTimeout(timeoutId);
-      openedByHover = isMouseIn;
       if ((isMouseIn && !openedEl) || (!isMouseIn && openedEl))
-        timeoutId = setTimeout(
-          () =>
-            t.isConnected && // possible when target removed via innerHTML
-            (isMouseIn
-              ? show(ShowCases.onHover, e) //
-              : hide(HideCases.onMouseLeave, e)),
-          ms
-        );
+        timeoutId = setTimeout(() => {
+          if (!t.isConnected) {
+            return; // possible when target removed via innerHTML
+          }
+          openedByHover && clearTimeout(openedByHover);
+          if (isMouseIn) {
+            openedByHover = setTimeout(() => (openedByHover = false), 300); // allow hide by click when shown by hover (300ms to prevent unexpected click & hover colision)
+            show(ShowCases.onHover, e);
+          } else {
+            openedByHover = false;
+            hide(HideCases.onMouseLeave, e);
+          }
+        }, ms);
       else timeoutId = undefined;
     };
     const enter = (e: MouseEvent): void => ev(opts.hoverShowTimeout, true, e);

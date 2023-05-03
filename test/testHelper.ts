@@ -481,7 +481,10 @@ export async function userClick(el: HTMLElement, opts?: MouseEventInit, timeoutM
   const o = () => ({ bubbles: true, cancelable: true, pageX: 1, pageY: 1, ...opts });
   el.dispatchEvent(new MouseEvent("pointerdown", o()));
   const isOk = el.dispatchEvent(new MouseEvent("mousedown", o()));
-  isOk && el.focus();
+  if (isOk) {
+    el.focus();
+    el.dispatchEvent(new Event("focusin", { bubbles: true }));
+  }
   timeoutMouseUp && (await wait(timeoutMouseUp));
   el.dispatchEvent(new MouseEvent("pointerup", o()));
   el.dispatchEvent(new MouseEvent("mouseup", o()));

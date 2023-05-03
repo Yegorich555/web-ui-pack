@@ -350,12 +350,12 @@ describe("popupElement", () => {
     jest.advanceTimersToNextTimer(); // onReady has timeout
     expect(a.$isShown).toBe(false);
 
-    trg.dispatchEvent(new Event("focusin"));
+    trg.dispatchEvent(new Event("focusin", { bubbles: true }));
     await h.wait(1); // wait for promise onShow is async
     expect(a.$isShown).toBe(true);
     expect(spyShow).toBeCalledTimes(1);
     expect(spyShow).lastCalledWith(1 << 1);
-    trg.dispatchEvent(new Event("focusout"));
+    trg.dispatchEvent(new Event("focusout", { bubbles: true }));
     await h.wait(1); // wait for promise onHide is async
     expect(spyShow).toBeCalledTimes(1); // no new triggers because focus stay
     // jest.advanceTimersToNextTimer(); // focusLost has timeout
@@ -464,7 +464,7 @@ describe("popupElement", () => {
     expect(a.$isShown).toBe(false); // click outside == close
     expect(spyHide).lastCalledWith(3);
 
-    // check focus on target > on hide
+    // focus on target > on hide
     document.activeElement.blur();
     f = jest.spyOn(document, "activeElement", "get").mockReturnValue(null);
     /** @type typeof el */
@@ -582,6 +582,44 @@ describe("popupElement", () => {
     await h.userClick(trgInput);
     await h.wait();
     expect(a.$isShown).toBe(false); // 2nd click will close (but if click is fired without mousedown it doesn't work)
+
+    // open by hover & close by click
+    trgInput.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait();
+    expect(a.$isShown).toBe(true);
+    trgInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.wait();
+    expect(a.$isShown).toBe(false);
+    // again + click immeditely
+    trgInput.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait(50);
+    trgInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.wait();
+    expect(a.$isShown).toBe(true); // prev click skipped because debounce hover-click: 300ms
+    trgInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.wait();
+    expect(a.$isShown).toBe(false);
+    // again hover>leave>hover>click immediately
+    trgInput.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait(50);
+    trgInput.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await h.wait(50);
+    trgInput.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait(50);
+    trgInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.wait();
+    expect(a.$isShown).toBe(true);
+    trgInput.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await h.wait();
+    expect(a.$isShown).toBe(false);
+    // for coverage
+    a.$options.hoverHideTimeout = 10; // WARN: this time must be less 300ms (debounce for hover-click)
+    a.init();
+    trgInput.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait(a.$options.hoverShowTimeout);
+    trgInput.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await h.wait(50);
+    expect(a.$isShown).toBe(false);
   });
 
   test("$options.minWidth/minHeight/maxWidth by target", async () => {

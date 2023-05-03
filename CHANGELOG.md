@@ -10,6 +10,7 @@
 
 - **helper** [`animateDropdown`](src/helpers/animate.ts). _Wrong for left,right,top directions_
 - [PopupElement](src/popup/popupElement.ts). _Popup hides by mouseenter if was opened by target.mouseenter_
+- [PopupElement](src/popup/popupElement.ts). _Popup impossible to hide by click if opened by hover_
 
 **New**:
 
@@ -18,7 +19,7 @@
 - Added helper [**animateStack**](src/helpers/animate.ts)
 - [PopupElement](src/popup/popupElement.ts)
   - Added option **animation: Animations.stack**
-  - Added support for attribute **[animation]**  ("stack","drawer","") : `<wup-popup animation="stack">...</wup-popup>`
+  - Added support for attribute **[animation]** ("stack","drawer","") : `<wup-popup animation="stack">...</wup-popup>`
   - Extended attribute **placement**. Now it has predefined opposite rules (so `right-middle` means `[right-middle, left-middle]`)
 
 ## 0.5.2 (Mar 29, 2023)

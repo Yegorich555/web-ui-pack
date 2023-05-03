@@ -114,7 +114,6 @@ export default class WUPDropdownElement extends WUPBaseElement {
 
   /** Custom function to override default `WUPPopupElement.prototype.goHide` */
   protected goHidePopup(hideCase: HideCases): boolean | Promise<boolean> {
-    // todo impossible to hide by click on target if opened by hover
     if (hideCase === HideCases.onPopupClick && !this._opts.hideOnClick) {
       return false;
     }
