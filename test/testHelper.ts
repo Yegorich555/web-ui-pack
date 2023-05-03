@@ -279,7 +279,7 @@ export function handleRejection() {
 }
 
 export function spyEventListeners(otherElements: Array<any>) {
-  const spy = [document, document.body, HTMLElement.prototype, ...(otherElements ?? [])].map((s) => {
+  const spyArr = [document, document.body, HTMLElement.prototype, ...(otherElements ?? [])].map((s) => {
     const me = {
       on: jest.spyOn(s, "addEventListener"),
       onCalls: [{ el: HTMLElement.prototype, name: "array names" }],
@@ -291,21 +291,24 @@ export function spyEventListeners(otherElements: Array<any>) {
       get: () =>
         me.on.mock.calls
           .filter((c) => (c as any)[2]?.once !== true)
-          .map((c, i) => ({ el: me.on.mock.instances[i], name: `${c[0]} ${me.on.mock.instances[i] || me.itemName}` })),
+          .map((c, i) => ({
+            el: me.on.mock.instances[i],
+            name: `${c[0]} ${me.on.mock.instances[i].constructor.name || me.itemName}`,
+          })),
       // .sort(),
     });
     Object.defineProperty(me, "offCalls", {
       get: () =>
         me.off.mock.calls.map((c, i) => ({
-          el: me.on.mock.instances[i],
-          name: `${c[0]} ${me.off.mock.instances[i] || me.itemName}`,
+          el: me.off.mock.instances[i],
+          name: `${c[0]} ${me.off.mock.instances[i].constructor.name || me.itemName}`,
         })), // .sort(),
     });
     return me;
   });
 
   const check = () => {
-    spy.forEach((s) => {
+    spyArr.forEach((s) => {
       // checking if removed every listener that was added
       const onCalls = s.onCalls
         .filter((c) => c.el.isConnected) // skip for elements that's removed itself
@@ -320,7 +323,7 @@ export function spyEventListeners(otherElements: Array<any>) {
     });
   };
 
-  return Object.assign(spy, { check });
+  return Object.assign(spyArr, { check });
 }
 
 /** Mock window.requestAnimationFrame */
