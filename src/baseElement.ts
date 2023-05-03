@@ -61,8 +61,11 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
     return "wup-hidden";
   }
 
-  /** Options that applied to element */
+  /** Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item */
+  static $defaults: Record<string, any>;
+  /** Options inherrited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally */
   abstract $options: Record<string, any>;
+  /** Raw part of $options for internal usage (.$options is Proxy object and better avoid useless extra-calles via Proxy) */
   protected _opts: Record<string, any> = {};
 
   constructor() {

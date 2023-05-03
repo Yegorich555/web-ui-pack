@@ -43,8 +43,7 @@ declare global {
       /** Placement rules relative to target;
        * @defaultValue `[
        *   WUPPopupElement.$placements.$top.$middle.$adjust, //
-       *   WUPPopupElement.$placements.$bottom.$middle.$adjust,
-       * ]`
+       *   WUPPopupElement.$placements.$bottom.$middle.$adjust ]`
        * @example // to place around center of target use option offset
        * popup.$options.offset = (r) => [-r.height / 2, -r.width / 2]; */
       placement: Array<WUP.Popup.Place.PlaceFunc>;

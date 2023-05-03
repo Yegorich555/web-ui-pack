@@ -1,13 +1,13 @@
 import WUPBaseElement from "./baseElement";
+import { objectClone } from "./indexHelpers";
 import WUPPopupElement from "./popup/popupElement";
 import { Animations, HideCases, ShowCases } from "./popup/popupElement.types";
 import { WUPcssButton, WUPcssMenu } from "./styles";
 
 const tagName = "wup-dropdown";
-// todo use same options from WUPPOpupDefaults so user can redefine popupDefault without affecting directly
 declare global {
   namespace WUP.Dropdown {
-    interface Defaults /* extends WUP.Popup.Defaults */ {
+    interface Defaults extends WUP.Popup.Defaults {
       /** Animation that applied to popup;
        * @defaultValue `Animations.drawer`
        * @tutorial Troubleshooting
@@ -23,9 +23,20 @@ declare global {
       /** Hide on popup click
        * @defaultValue true */
       hideOnClick: boolean;
+      /** Placement rules relative to target;
+       * @defaultValue `[
+            WUPPopupElement.$placements.$bottom.$start,
+            WUPPopupElement.$placements.$bottom.$end,
+            WUPPopupElement.$placements.$top.$start,
+            WUPPopupElement.$placements.$top.$end,
+            WUPPopupElement.$placements.$bottom.$start.$resizeHeight,
+            WUPPopupElement.$placements.$bottom.$end.$resizeHeight,
+            WUPPopupElement.$placements.$top.$start.$resizeHeight,
+            WUPPopupElement.$placements.$top.$end.$resizeHeight ]` */
+      placement: Array<WUP.Popup.Place.PlaceFunc>;
     }
     interface Options extends Defaults {}
-    interface Attributes extends WUP.Base.toJSX<Options> {}
+    interface Attributes {}
     interface JSXProps<C = WUPDropdownElement> extends WUP.Base.JSXProps<C>, Attributes {}
   }
 
@@ -57,17 +68,28 @@ export default class WUPDropdownElement extends WUPBaseElement {
       }${WUPcssMenu(":host [menu]")}`;
   }
 
+  /** Default options applied to every element. Change it to configure default behavior */
   static $defaults: WUP.Dropdown.Defaults = {
-    // ...WUPPopupElement.$defaults,
+    ...WUPPopupElement.$defaults,
     animation: Animations.drawer,
     showCase: ShowCases.onClick | ShowCases.onHover,
     hideOnClick: true,
+    placement: [
+      WUPPopupElement.$placements.$bottom.$start,
+      WUPPopupElement.$placements.$bottom.$end,
+      WUPPopupElement.$placements.$top.$start,
+      WUPPopupElement.$placements.$top.$end,
+      WUPPopupElement.$placements.$bottom.$start.$resizeHeight,
+      WUPPopupElement.$placements.$bottom.$end.$resizeHeight,
+      WUPPopupElement.$placements.$top.$start.$resizeHeight,
+      WUPPopupElement.$placements.$top.$end.$resizeHeight,
+    ],
   };
 
-  $options: WUP.Dropdown.Options = {
-    ...this.#ctr.$defaults,
-  };
-
+  /** Options inherrited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally
+   * @tutorial Troubleshooting
+   * * Popup-related options are not observed so to change it use `WUPDropdownElement.$defaults` or `element.$refPopup.$options` direclty */
+  $options: WUP.Dropdown.Options = objectClone(this.#ctr.$defaults);
   protected override _opts = this.$options;
 
   /** Reference to nested HTMLElement tied with $options.label */
@@ -82,28 +104,15 @@ export default class WUPDropdownElement extends WUPBaseElement {
       this.throwError("Invalid structure. Expected 1st element: <any/>, last element: <wup-popup/>");
     } else {
       this.$refPopup.setAttribute("menu", "");
+      Object.assign(this.$refPopup.$options, this.$options);
       this.$refPopup.$options.minWidthByTarget = true;
       this.$refPopup.$options.minHeightByTarget = true;
-      this.$refPopup.$options.showCase = this.$options.showCase;
-      this.$refPopup.$options.animation = this.$options.animation;
-      // WARN: this is default rule impossible to override via defaults
-      if (!this.$refPopup.hasAttribute("placement")) {
-        this.$refPopup.$options.placement = [
-          WUPPopupElement.$placements.$bottom.$start,
-          WUPPopupElement.$placements.$bottom.$end,
-          WUPPopupElement.$placements.$top.$start,
-          WUPPopupElement.$placements.$top.$end,
-          WUPPopupElement.$placements.$bottom.$start.$resizeHeight,
-          WUPPopupElement.$placements.$bottom.$end.$resizeHeight,
-          WUPPopupElement.$placements.$top.$start.$resizeHeight,
-          WUPPopupElement.$placements.$top.$end.$resizeHeight,
-        ];
-      }
       this.$refPopup.goHide = this.goHidePopup.bind(this);
     }
     super.gotReady();
   }
 
+  /** Custom function to override default `WUPPopupElement.prototype.goHide` */
   protected goHidePopup(hideCase: HideCases): boolean | Promise<boolean> {
     // todo impossible to hide by click on target if opened by hover
     if (hideCase === HideCases.onPopupClick && !this._opts.hideOnClick) {

@@ -64,6 +64,7 @@ export default function DropdownView() {
             ref={(el) => {
               if (el) {
                 setTimeout(() => {
+                  // todo setup this via attr
                   el.$options.animation = Animations.stack;
                 });
               }

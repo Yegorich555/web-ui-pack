@@ -362,7 +362,6 @@ export default abstract class WUPBaseControl<
     return v === "" || v === undefined;
   }
 
-  /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUP.BaseControl.Defaults = {
     clearActions: ClearActions.clear | ClearActions.resetToInit,
     validateDebounceMs: 500,
