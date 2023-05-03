@@ -9,6 +9,7 @@
 **Fixes**:
 
 - **helper** [`animateDropdown`](src/helpers/animate.ts). _Wrong for left,right,top directions_
+- [PopupElement](src/popup/popupElement.ts). _Popup hides by mouseenter if was opened by target.mouseenter_
 
 **New**:
 

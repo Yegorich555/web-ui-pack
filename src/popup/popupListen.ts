@@ -196,9 +196,13 @@ export default function popupListen(
         );
       else timeoutId = undefined;
     };
-    appendEvent(t, "mouseenter", (e) => ev(opts.hoverShowTimeout, true, e));
-    // use only appendEvent; with onShowEvent it doesn't work properly (because filtered by timeout)
-    appendEvent(t, "mouseleave", (e) => ev(opts.hoverHideTimeout, false, e));
+    const enter = (e: MouseEvent): void => ev(opts.hoverShowTimeout, true, e);
+    const leave = (e: MouseEvent): void => ev(opts.hoverHideTimeout, false, e);
+    appendEvent(t, "mouseenter", enter);
+    appendEvent(t, "mouseleave", leave); // use only appendEvent; with onShowEvent it doesn't work properly (because filtered by timeout)
+    // case when mouseEnter to popup: need stay opened
+    onShowCallbacks.push(() => onEvent(openedEl!, "mouseenter", enter));
+    onShowCallbacks.push(() => onEvent(openedEl!, "mouseleave", leave));
   }
 
   // onFocus

@@ -1,10 +1,10 @@
 import WUPBaseElement from "./baseElement";
 import WUPPopupElement from "./popup/popupElement";
-import { Animations, ShowCases } from "./popup/popupElement.types";
+import { Animations, HideCases, ShowCases } from "./popup/popupElement.types";
 import { WUPcssButton, WUPcssMenu } from "./styles";
 
 const tagName = "wup-dropdown";
-
+// todo use same options from WUPPOpupDefaults so user can redefine popupDefault without affecting directly
 declare global {
   namespace WUP.Dropdown {
     interface Defaults {
@@ -17,7 +17,7 @@ declare global {
       /** Case when popup need to show;
        * @defaultValue `ShowCases.onClick`
        * @tutorial Troubleshooting
-       * * to change option for specific element change it for `<wup-popup/>` direclty after timeout
+       * * to change option for specific element change it for `<wup-popup/>` directly after timeout
        * @example setTimeout(() => this.$refPopup.$options.showCase = ShowCases.onFocus | ShowCases.onClick) */
       showCase: ShowCases;
     }
@@ -59,7 +59,7 @@ export default class WUPDropdownElement extends WUPBaseElement {
 
   static $defaults: WUP.Dropdown.Defaults = {
     animation: Animations.drawer,
-    showCase: ShowCases.onClick,
+    showCase: ShowCases.onClick | ShowCases.onHover,
   };
 
   $options: WUP.Dropdown.Options = {
@@ -83,9 +83,6 @@ export default class WUPDropdownElement extends WUPBaseElement {
     if (this.$refTitle === this.$refPopup || !this.$refPopup.$show) {
       this.throwError("Invalid structure. Expected 1st element: <any/>, last element: <wup-popup/>");
     } else {
-      // todo click on item inside closes popup but it maybe wrong - need option for this
-      // todo hover effect is wrong - if user hovers popup after showing it closes
-
       this.$refPopup.setAttribute("menu", "");
       this.$refPopup.$options.minWidthByTarget = true;
       this.$refPopup.$options.minHeightByTarget = true;
@@ -104,8 +101,17 @@ export default class WUPDropdownElement extends WUPBaseElement {
           WUPPopupElement.$placements.$top.$end.$resizeHeight,
         ];
       }
+      this.$refPopup.goHide = this.goHidePopup;
     }
     super.gotReady();
+  }
+
+  protected goHidePopup(this: WUPPopupElement, hideCase: HideCases): boolean | Promise<boolean> {
+    // todo click on item inside closes popup but it maybe wrong - need option for this
+    if (hideCase === HideCases.onMouseLeave) {
+      console.warn("mouseLeave");
+    }
+    return WUPPopupElement.prototype.goHide.call(this, hideCase);
   }
 }
 

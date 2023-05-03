@@ -313,6 +313,21 @@ describe("popupElement", () => {
     expect(a.$isShown).toBe(false);
     expect(spyHide.mock.calls[spyHide.mock.calls.length - 1][0]).toBe(1);
 
+    // hover on popup - no close event
+    trg.dispatchEvent(new MouseEvent("mouseenter"));
+    await h.wait(a.$options.hoverShowTimeout); // event listener has timeout
+    await h.wait();
+    expect(a.$isShown).toBe(true);
+    trg.testMe = true;
+    trg.dispatchEvent(new MouseEvent("mouseleave"));
+    a.dispatchEvent(new MouseEvent("mouseenter"));
+    await h.wait(a.$options.hoverHideTimeout * 2);
+    expect(a.$isShown).toBe(true); // no hide if hover on popup
+    // hide by mouseleave
+    a.dispatchEvent(new MouseEvent("mouseleave"));
+    await h.wait(a.$options.hoverHideTimeout);
+    expect(a.$isShown).toBe(false);
+
     jest.clearAllMocks();
     trg.dispatchEvent(new MouseEvent("mouseenter"));
     trg.dispatchEvent(new MouseEvent("mouseleave"));

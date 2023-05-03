@@ -674,7 +674,7 @@ export default class WUPPopupElement<
   }
 
   /** Hide popup. @hideCase as reason of hide(). Calling 2nd time at once will stop previous hide-animation */
-  protected goHide(hideCase: HideCases): boolean | Promise<boolean> {
+  goHide(hideCase: HideCases): boolean | Promise<boolean> {
     if (!this.#isShown && !this.#isHidding && !this.#isShowing) {
       return true;
     }
