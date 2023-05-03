@@ -7,7 +7,7 @@ import { WUPcssButton, WUPcssMenu } from "./styles";
 const tagName = "wup-dropdown";
 declare global {
   namespace WUP.Dropdown {
-    interface Defaults extends WUP.Popup.Defaults {
+    interface Defaults extends WUP.Popup.Defaults, Pick<WUP.Popup.Options, "minWidthByTarget" | "minHeightByTarget"> {
       /** Animation that applied to popup;
        * @defaultValue `Animations.drawer`
        * @tutorial Troubleshooting
@@ -34,6 +34,12 @@ declare global {
             WUPPopupElement.$placements.$top.$start.$resizeHeight,
             WUPPopupElement.$placements.$top.$end.$resizeHeight ]` */
       placement: Array<WUP.Popup.Place.PlaceFunc>;
+      /** Sets minWidth 100% of targetWidth; it can't be more than css-style min-width
+       * @defaultValue true */
+      minWidthByTarget: boolean;
+      /** Sets minHeight 100% of targetWidth; it can't be more than css-style min-height
+       *  @defaultValue true */
+      minHeightByTarget: boolean;
     }
     interface Options extends Defaults {}
     interface Attributes {}
@@ -74,6 +80,8 @@ export default class WUPDropdownElement extends WUPBaseElement {
     animation: Animations.drawer,
     showCase: ShowCases.onClick | ShowCases.onHover,
     hideOnClick: true,
+    minHeightByTarget: true,
+    minWidthByTarget: true,
     placement: [
       WUPPopupElement.$placements.$bottom.$start,
       WUPPopupElement.$placements.$bottom.$end,
@@ -105,8 +113,6 @@ export default class WUPDropdownElement extends WUPBaseElement {
     } else {
       this.$refPopup.setAttribute("menu", "");
       Object.assign(this.$refPopup.$options, this.$options);
-      this.$refPopup.$options.minWidthByTarget = true;
-      this.$refPopup.$options.minHeightByTarget = true;
       this.$refPopup.goHide = this.goHidePopup.bind(this);
     }
     super.gotReady();

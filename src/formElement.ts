@@ -504,4 +504,4 @@ declare global {
   }
 }
 
-// todo show success result in modal window
+// todo show success result in <wup-alert> at the right angle + add autosafe option
