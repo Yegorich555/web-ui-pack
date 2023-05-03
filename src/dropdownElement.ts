@@ -86,7 +86,7 @@ export default class WUPDropdownElement extends WUPBaseElement {
     ],
   };
 
-  /** Options inherrited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally
+  /** Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally
    * @tutorial Troubleshooting
    * * Popup-related options are not observed so to change it use `WUPDropdownElement.$defaults` or `element.$refPopup.$options` direclty */
   $options: WUP.Dropdown.Options = objectClone(this.#ctr.$defaults);

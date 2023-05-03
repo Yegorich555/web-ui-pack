@@ -105,7 +105,7 @@ declare global {
       /** Focus element when it's appended to layout */
       autoFocus?: boolean;
       /** Name to autocomplete by browser; Point `true` to inherit from $options.name or some string
-       *  if control has no autocomplete option then it's inherrited from form
+       *  if control has no autocomplete option then it's inherited from form
        * @defaultValue false */
       autoComplete?: string | boolean;
       /** Disallow edit/copy value; adds attr [disabled] for styling */

@@ -32,7 +32,7 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
     return "";
   }
 
-  /** StyleContent related to component & inherrited components */
+  /** StyleContent related to component & inherited components */
   static get $styleRoot(): string {
     return `:root {
           --base-bg: #fff;
@@ -63,7 +63,7 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
 
   /** Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item */
   static $defaults: Record<string, any>;
-  /** Options inherrited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally */
+  /** Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally */
   abstract $options: Record<string, any>;
   /** Raw part of $options for internal usage (.$options is Proxy object and better avoid useless extra-calles via Proxy) */
   protected _opts: Record<string, any> = {};

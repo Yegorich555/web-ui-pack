@@ -451,15 +451,15 @@ export default class WUPPopupElement<
 
   protected setMaxHeight(px: number | null): void {
     this.style.maxHeight = px ? `${px}px` : "";
-    if (this.#state?.userStyles?.inherritY) {
-      this.#state.userStyles.inherritY.style.maxHeight = this.style.maxHeight;
+    if (this.#state?.userStyles?.inheritY) {
+      this.#state.userStyles.inheritY.style.maxHeight = this.style.maxHeight;
     }
   }
 
   protected setMaxWidth(px: number | null): void {
     this.style.maxWidth = px ? `${px}px` : "";
-    if (this.#state?.userStyles?.inherritX) {
-      this.#state.userStyles.inherritX.style.maxWidth = this.style.maxWidth;
+    if (this.#state?.userStyles?.inheritX) {
+      this.#state.userStyles.inheritX.style.maxWidth = this.style.maxWidth;
     }
   }
 
@@ -475,8 +475,8 @@ export default class WUPPopupElement<
       minH: number;
       minW: number;
       borderRadius: number;
-      inherritY: HTMLElement | SVGElement | null;
-      inherritX: HTMLElement | SVGElement | null;
+      inheritY: HTMLElement | SVGElement | null;
+      inheritX: HTMLElement | SVGElement | null;
       animTime: number;
     };
     placements: Array<WUP.Popup.Place.PlaceFunc>;
@@ -513,9 +513,9 @@ export default class WUPPopupElement<
       minH: Math.max(5, px2Number(style.paddingTop) + px2Number(style.paddingBottom), px2Number(style.minHeight)),
 
       borderRadius: 0,
-      // fix `maxSize inherritance doesn't work for customElements`
-      inherritY: child && style.overflowY === "visible" ? child : null,
-      inherritX: child && style.overflowX === "visible" ? child : null,
+      // fix `maxSize inheritance doesn't work for customElements`
+      inheritY: child && style.overflowY === "visible" ? child : null,
+      inheritX: child && style.overflowX === "visible" ? child : null,
       animTime: Number.parseFloat(style.animationDuration.substring(0, style.animationDuration.length - 1)) * 1000,
     };
 

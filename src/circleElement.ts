@@ -67,7 +67,7 @@ declare global {
        * @defaultValue 10 */
       minsize: number;
       /** Timeout in ms before popup shows on hover of target;
-       * @defaultValue inherrited from WUPPopupElement.$defaults.hoverShowTimeout */
+       * @defaultValue inherited from WUPPopupElement.$defaults.hoverShowTimeout */
       hoverShowTimeout: number;
       /** Timeout in ms before popup hides on mouse-leave of target;
        * @defaultValue 0 */
