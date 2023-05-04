@@ -109,7 +109,7 @@ ${tag} {
   overflow: hidden;
   padding: 0;
 }
-${tag}>ul {
+${tag} ul {
   margin: 0;
   padding: 0;
   list-style-type: none;
@@ -117,7 +117,7 @@ ${tag}>ul {
   overflow: auto;
   max-height: 300px;
 }
-${WUPcssScrollSmall(`${tag}>ul`)}
+${WUPcssScrollSmall(`${tag} ul`)}
 ${tag} li {
   padding: 1em;
   border-radius: var(--border-radius);

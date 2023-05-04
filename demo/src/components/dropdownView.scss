@@ -10,15 +10,7 @@
     justify-content: center;
     height: 34px;
     width: 34px;
-    background: var(--base-btn-bg);
-    color: var(--base-btn-text);
     border-radius: 9999px;
-    border: none;
-    cursor: pointer;
-
-    &:hover {
-      box-shadow: inset 0 0 0 99999px rgba(0, 0, 0, 0.2);
-    }
   }
 
   [menu] {
@@ -28,7 +20,7 @@
     // overflow: visible;
 
     button {
-      background: cornflowerblue;
+      --base-btn-bg: cornflowerblue;
     }
 
     ul {
@@ -39,9 +31,10 @@
     li {
       padding: 0;
       margin: 2px;
+      border-radius: 9999px;
 
-      &:hover {
-        box-shadow: none;
+      &[focused] > button {
+        box-shadow: 0 0 4px 0 var(--base-focus);
       }
     }
   }
@@ -50,12 +43,5 @@
 .vertical {
   [menu] ul {
     flex-direction: column;
-  }
-}
-
-.right {
-  [menu] {
-    // --popup-anim: 5000ms;
-    // background: red;
   }
 }

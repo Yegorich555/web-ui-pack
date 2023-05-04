@@ -638,7 +638,7 @@ export default class WUPPopupElement<
   }
 
   /** Shows popup if target defined; returns true if successful */
-  protected goShow(showCase: ShowCases): boolean | Promise<boolean> {
+  goShow(showCase: ShowCases): boolean | Promise<boolean> {
     if (this.#isShown && !this.#isHidding && !this.#isShowing) {
       return true;
     }

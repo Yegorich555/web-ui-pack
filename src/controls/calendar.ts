@@ -513,7 +513,7 @@ export default class WUPCalendarControl<
         /* istanbul ignore else */
         if (from != null || to !== null) {
           const nextDateEnd = r.next(new Date(v), 1).setUTCMilliseconds(-1);
-          if ((from as unknown as Number) > nextDateEnd || (to as unknown as Date) < nextDate) {
+          if ((from as unknown as number) > nextDateEnd || (to as unknown as Date) < nextDate) {
             r.next(v, (-1 * n) as 1);
             return null;
           }

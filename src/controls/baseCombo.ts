@@ -332,6 +332,7 @@ export default abstract class WUPBaseComboControl<
     return true;
   }
 
+  /** Current focused menu-item (via aria-activedescendant) */
   _focusedMenuItem?: HTMLElement | null;
   /** Focus/resetFocus for item (via aria-activedescendant) */
   protected focusMenuItem(next: HTMLElement | null): void {

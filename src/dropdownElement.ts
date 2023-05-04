@@ -15,7 +15,7 @@ declare global {
        * @example setTimeout(() => this.$refPopup.$options.animation = Animations.stack) */
       animation: Animations;
       /** Case when popup need to show;
-       * @defaultValue `ShowCases.onClick`
+       * @defaultValue `ShowCases.onClick | ShowCases.onHover | ShowCases.onFocus`
        * @tutorial Troubleshooting
        * * to change option for specific element change it for `<wup-popup/>` directly after timeout
        * @example setTimeout(() => this.$refPopup.$options.showCase = ShowCases.onFocus | ShowCases.onClick) */
@@ -66,8 +66,8 @@ export default class WUPDropdownElement extends WUPBaseElement {
       :host {
         contain: style;
         display: inline-block;
-      }${WUPcssButton(":host>button")}
-      :host>button {
+      }${WUPcssButton(":host button")}
+      :host button {
         min-width: initial;
         margin: 0;
         padding: 0.7em;
@@ -78,7 +78,7 @@ export default class WUPDropdownElement extends WUPBaseElement {
   static $defaults: WUP.Dropdown.Defaults = {
     ...WUPPopupElement.$defaults,
     animation: Animations.drawer,
-    showCase: ShowCases.onClick | ShowCases.onHover,
+    showCase: ShowCases.onClick, // todo uncomment | ShowCases.onHover | ShowCases.onFocus,
     hideOnClick: true,
     minHeightByTarget: true,
     minWidthByTarget: true,
@@ -104,6 +104,8 @@ export default class WUPDropdownElement extends WUPBaseElement {
   $refTitle = this.firstElementChild as HTMLElement;
   /** Reference to popupMenu */
   $refPopup = this.lastElementChild as WUPPopupElement;
+  /** Reference to list */
+  $refMenu = this.lastElementChild as HTMLElement;
 
   protected override gotReady(): void {
     this.$refTitle = this.firstElementChild as HTMLElement;
@@ -112,18 +114,128 @@ export default class WUPDropdownElement extends WUPBaseElement {
       this.throwError("Invalid structure. Expected 1st element: <any/>, last element: <wup-popup/>");
     } else {
       this.$refPopup.setAttribute("menu", "");
-      Object.assign(this.$refPopup.$options, this.$options);
+      this.$refPopup.goShow = this.goShowPopup.bind(this);
       this.$refPopup.goHide = this.goHidePopup.bind(this);
+      Object.assign(this.$refPopup.$options, this.$options);
+
+      // WA
+      const menu = (this.$refPopup.querySelector("ul,ol,[items]") as HTMLElement) || this.$refPopup;
+      menu.id = menu.id || this.#ctr.$uniqueId;
+      this.$refMenu = menu;
+
+      const lbl = this.$refTitle;
+      lbl.setAttribute("aria-owns", menu.id);
+      lbl.setAttribute("aria-controls", menu.id);
+      lbl.setAttribute("aria-haspopup", "listbox");
+      lbl.setAttribute("aria-expanded", false);
+
+      // !menu.hasAttribute("role") && menu.setAttribute("role", "listbox");
+      // li.setAttribute("role", "option");
+      !menu.hasAttribute("tabindex") && menu.setAttribute("tabindex", -1); // todo check it: otherwise Firefox move focus into it by keydown 'tab'
+
+      // lbl.id = lbl.id || this.#ctr.$uniqueId;
+      // menu.setAttribute("aria-labelledby", lbl.id);
+      this.appendEvent(this, "keydown", (e) => !this.hasAttribute("disabled") && this.gotKeyDown(e), {
+        passive: false,
+      });
     }
     super.gotReady();
   }
 
   /** Custom function to override default `WUPPopupElement.prototype.goHide` */
+  protected goShowPopup(showCase: ShowCases): boolean | Promise<boolean> {
+    const p = WUPPopupElement.prototype.goShow.call(this.$refPopup, showCase);
+    this.$refPopup.$options.target!.setAttribute("aria-expanded", true);
+    this.addEventListener("keydown", this.gotKeyDown);
+    return p;
+  }
+
+  /** Custom function to override default `WUPPopupElement.prototype.goHide` */
   protected goHidePopup(hideCase: HideCases): boolean | Promise<boolean> {
+    // todo need hide by focusOut even if no ShowCases.onFocus
     if (hideCase === HideCases.onPopupClick && !this._opts.hideOnClick) {
       return false;
     }
-    return WUPPopupElement.prototype.goHide.call(this.$refPopup!, hideCase);
+    const p = WUPPopupElement.prototype.goHide.call(this.$refPopup, hideCase);
+    this.$refPopup.$options.target!.setAttribute("aria-expanded", false);
+    this.focusMenuItem(null);
+    return p;
+  }
+
+  /** Current focused menu-item (via aria-activedescendant) */
+  _focusedMenuItem?: Element | null;
+  /** Focus/resetFocus for item (via aria-activedescendant) */
+  protected focusMenuItem(next: Element | null): void {
+    // WARN: it's dupicate of WUPBaseComboControl.prototype.focusMenuItem
+    this._focusedMenuItem?.removeAttribute("focused");
+
+    if (next) {
+      next.id = next.id || this.#ctr.$uniqueId;
+      next.setAttribute("focused", "");
+      this.$refTitle.setAttribute("aria-activedescendant", next.id);
+      const ifneed = (next as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
+      ifneed ? ifneed.call(next, false) : next.scrollIntoView();
+    } else {
+      this.$refTitle.removeAttribute("aria-activedescendant");
+    }
+    this._focusedMenuItem = next;
+  }
+
+  /** Called when user pressed key */
+  protected gotKeyDown(e: KeyboardEvent): void {
+    // todo need to prevent focus inside by Tab ???
+    // todo what if menuItems is controls ???? In this case need to remove this logic ???
+    if (e.defaultPrevented || e.altKey || e.shiftKey || e.ctrlKey) {
+      return;
+    }
+    let handled = true;
+    const isHidden = this.$refPopup.$isHidden;
+
+    let focused = this._focusedMenuItem;
+    switch (e.key) {
+      case "ArrowDown":
+      case "ArrowRight":
+        focused = focused?.nextElementSibling || this.$refMenu.firstElementChild;
+        break;
+      case "ArrowUp":
+      case "ArrowLeft":
+        focused = focused?.previousElementSibling || this.$refMenu.lastElementChild;
+        break;
+      default:
+        handled = false;
+    }
+    handled && this.$refPopup.$isHidden && this.$refPopup.$show();
+
+    if (!handled) {
+      if (isHidden) {
+        switch (e.key) {
+          case "Space":
+          case "Enter":
+            this.$refPopup.$show();
+            break;
+          default:
+            handled = false;
+        }
+      } else {
+        switch (e.key) {
+          case "Escape":
+            this.$refPopup.$hide();
+            break;
+          case "Home":
+            focused = this.$refMenu.firstElementChild;
+            break;
+          case "End":
+            focused = this.$refMenu.lastElementChild;
+            break;
+          default:
+            handled = false;
+        }
+      }
+    }
+    if (handled) {
+      e.preventDefault();
+      focused && focused !== this._focusedMenuItem && setTimeout(() => this.focusMenuItem(focused!), isHidden ? 1 : 0); // 1ms wait for opening popup
+    }
   }
 }
 

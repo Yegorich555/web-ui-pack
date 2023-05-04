@@ -17,7 +17,7 @@ export default function DropdownView() {
           `html
 <wup-dropdown>
   <button type="button">Click me</button>
-  <wup-popup placement="left-start">
+  <wup-popup placement="left-start" animation="drawer">
       <ul>
         <li>Home</li>
         <li>Products</li>
@@ -30,7 +30,7 @@ export default function DropdownView() {
       features={[
         "Built-in animations: opacity, drawer, stack",
         "Easy to customize behavior via options of <wup-dropdown> & <wup-popup>",
-        "Accessibility support", // todo accessibility
+        "Accessibility support", // todo accessibility & keyboard
       ]}
     >
       <section>
@@ -55,10 +55,11 @@ export default function DropdownView() {
       </section>
       <section>
         <h3>Customized (animation: stack)</h3>
-        <small>use popup options directly to change direction</small>
-        <wup-dropdown class={`${styles.custom} ${styles.left}`}>
+        <small>use popup $options.placement to change direction</small>
+        <wup-dropdown class={styles.custom}>
           <button type="button">{"<"}</button>
           <wup-popup placement="left-middle" animation="stack">
+            {/* todo need to change direction of items */}
             <ul>
               <li>
                 <button type="button">A</button>
@@ -98,6 +99,7 @@ export default function DropdownView() {
             <span style={{ transform: "rotate(-90deg)" }}>{">"}</span>
           </button>
           <wup-popup placement="top-middle" animation="stack">
+            {/* todo need to change direction of items */}
             <ul>
               <li>
                 <button type="button">A</button>
@@ -111,7 +113,7 @@ export default function DropdownView() {
             </ul>
           </wup-popup>
         </wup-dropdown>
-        <wup-dropdown class={`${styles.custom} ${styles.right}`}>
+        <wup-dropdown class={styles.custom}>
           <button type="button">{">"}</button>
           <wup-popup placement="right-middle" animation="stack">
             <ul>
