@@ -4,7 +4,7 @@ import WUPBaseElement from "../baseElement";
 import { getOffset, PopupPlacements } from "./popupPlacements";
 import { findScrollParentAll } from "../helpers/findScrollParent";
 import WUPPopupArrowElement from "./popupArrowElement";
-import popupListen from "./popupListen";
+import PopupListener from "./popupListener";
 import { getBoundingInternalRect, px2Number, styleTransform } from "../helpers/styleHelpers";
 import animateDropdown from "../helpers/animateDropdown";
 import animateStack from "../helpers/animateStack";
@@ -217,7 +217,7 @@ export default class WUPPopupElement<
       const opts = popup ? { ...options, ...popup.$options, target: popup.$options.target! } : options;
       let isHidding = false;
 
-      const refs = popupListen(
+      const lstn = new PopupListener(
         opts,
         (v) => {
           isHidding = false;
@@ -232,7 +232,7 @@ export default class WUPPopupElement<
             p.#attach = () => {
               // extra function to skip useless 1st attach on init
               p.#attach = attach; // this is required to rebind events on re-init
-              return refs;
+              return lstn;
             };
 
             callback?.call(this, p);
@@ -241,7 +241,7 @@ export default class WUPPopupElement<
           if (!popup.goShow.call(popup, v)) {
             /* istanbul ignore else */
             if (isCreate) {
-              popup!.#listenRefs = undefined; // otherwise remove() destroys events
+              popup!.#refListener = undefined; // otherwise remove() destroys events
               popup.remove.call(popup);
             }
             return null;
@@ -254,7 +254,7 @@ export default class WUPPopupElement<
           const ok = await popup!.goHide.call(popup, v);
           /* istanbul ignore else */
           if (ok && isHidding) {
-            popup!.#listenRefs = undefined; // otherwise remove() destroys events
+            popup!.#refListener = undefined; // otherwise remove() destroys events
             popup!.remove.call(popup);
             popup = undefined;
           }
@@ -262,7 +262,7 @@ export default class WUPPopupElement<
         }
       );
 
-      return refs;
+      return lstn;
     };
     const r = attach();
 
@@ -386,14 +386,14 @@ export default class WUPPopupElement<
   }
 
   #isShown = false;
-  #listenRefs?: ReturnType<typeof popupListen>;
-  #attach?: () => ReturnType<typeof popupListen>; // func to use alternative target
+  #refListener?: PopupListener;
+  #attach?: () => PopupListener; // func to use alternative target
   /** Called after gotReady() and $show() (to reinit according to options) */
   protected init(): void {
     this.disposeListener(); // remove previously added events
 
     if (this.#attach) {
-      this.#listenRefs = this.#attach();
+      this.#refListener = this.#attach();
     } else {
       this._opts.target = this.#defineTarget();
 
@@ -402,7 +402,7 @@ export default class WUPPopupElement<
         return;
       }
 
-      this.#listenRefs = popupListen(
+      this.#refListener = new PopupListener(
         this._opts as typeof this._opts & { target: HTMLElement },
         (v) => (this.goShow(v) ? this : null),
         (v) => this.goHide(v)
@@ -1043,8 +1043,8 @@ export default class WUPPopupElement<
   /** Call when need to reinit */
   protected disposeListener(): void {
     // possible on reinit when need to rebound events
-    this.#listenRefs?.stopListen();
-    this.#listenRefs = undefined;
+    this.#refListener?.stopListen();
+    this.#refListener = undefined;
   }
 
   protected override dispose(): void {

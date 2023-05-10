@@ -15,7 +15,12 @@ interface Options {
   /** By default when listener is applied on focused element it provides immediate onShow event. You can disable this */
   skipAlreadyFocused?: boolean;
 }
-export class PopupListener {
+
+/** Listen for target according to showCase. If target removed call stopListen + don't forget to remove popup yourself;
+ * @tutorial Troubleshooting/rules:
+ * * To allow user hide/show popup before previous action is ended provide for onShow and onHide-
+ *   callbacks results as fast as it's possible without waiting for animation */
+export default class PopupListener {
   static $defaults = {
     showCase: ShowCases.onClick,
     hoverShowTimeout: 200,
@@ -251,27 +256,3 @@ export class PopupListener {
     }
   }
 }
-
-/** Listen for target according to showCase. If target removed call stopListen + don't forget to remove popup yourself;
- * @tutorial Troubleshooting/rules:
- * * To allow user hide/show popup before previous action is ended provide for onShow and onHide-
- *   callbacks results as fast as it's possible without waiting for animation */
-export default function popupListen(
-  options: Options,
-  /** If succesfull callback must return HTMLElement */
-  onShow: (showCase: ShowCases, ev: MouseEvent | FocusEvent | null) => HTMLElement | null | Promise<HTMLElement | null>,
-  onHide: (hideCase: HideCases, ev: MouseEvent | FocusEvent | null) => boolean | Promise<boolean>
-): {
-  /** Fire it when target is removed manually (to remove all added related eventListeners) */
-  stopListen: () => void;
-  /** Fire it before hiding (to ability to show in the feature by listened events) when you need to hide outside listener (manually) */
-  hide: (hideCase: HideCases) => Promise<void>;
-  /** Fire it before showing (to ability to hide in the feature by listened events) when you need to show outside listener (manually) */
-  show: (showCase: ShowCases) => Promise<void>;
-} {
-  const l = new PopupListener(options, onShow, onHide);
-  // todo useless stopListen fired from popup onInit
-  return { stopListen: () => l.stopListen(), hide: (c) => l.hide(c), show: (c) => l.show(c) };
-}
-
-popupListen.$defaults = PopupListener.$defaults;
