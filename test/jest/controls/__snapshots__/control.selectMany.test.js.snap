@@ -675,7 +675,7 @@ WUP-SELECTMANY [menu] {
   overflow: hidden;
   padding: 0;
 }
-WUP-SELECTMANY [menu]&gt;ul {
+WUP-SELECTMANY [menu] ul {
   margin: 0;
   padding: 0;
   list-style-type: none;
@@ -684,30 +684,30 @@ WUP-SELECTMANY [menu]&gt;ul {
   max-height: 300px;
 }
 
-WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar {
+WUP-SELECTMANY [menu] ul::-webkit-scrollbar {
   width: 10px; height: 10px;
   cursor: pointer;
 }
-WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar-corner {
+WUP-SELECTMANY [menu] ul::-webkit-scrollbar-corner {
   background: none;
   cursor: pointer;
 }
-WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar-thumb {
+WUP-SELECTMANY [menu] ul::-webkit-scrollbar-thumb {
   border: 3px solid rgba(0,0,0,0);
   background-clip: padding-box;
   background-color: var(--scroll, rgba(0,0,0,0.2));
   border-radius: 999px;
   cursor: pointer;
 }
-WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar-track-piece:vertical:start,
-WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar-track-piece:vertical:end,
-WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar-track-piece:horizontal:start,
-WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar-track-piece:horizontal:end {
+WUP-SELECTMANY [menu] ul::-webkit-scrollbar-track-piece:vertical:start,
+WUP-SELECTMANY [menu] ul::-webkit-scrollbar-track-piece:vertical:end,
+WUP-SELECTMANY [menu] ul::-webkit-scrollbar-track-piece:horizontal:start,
+WUP-SELECTMANY [menu] ul::-webkit-scrollbar-track-piece:horizontal:end {
   margin: 0;
   cursor: pointer;
 }
 @media (hover) {
-  WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar-thumb:hover {
+  WUP-SELECTMANY [menu] ul::-webkit-scrollbar-thumb:hover {
     background-color: var(--scroll-hover, rgba(0,0,0,0.5));
     cursor: pointer;
   }
