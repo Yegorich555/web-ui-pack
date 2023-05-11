@@ -1,9 +1,8 @@
-import focusFirst from "../helpers/focusFirst";
 import onEvent, { onEventType } from "../helpers/onEvent";
 import onFocusGot from "../helpers/onFocusGot";
 import onFocusLost from "../helpers/onFocusLost";
+import { focusFirst } from "../indexHelpers";
 import { HideCases, ShowCases } from "./popupElement.types";
-
 // todo popup must be always closed by focusout & Esc if it wasn't prevented
 
 interface Options {
@@ -46,7 +45,7 @@ export default class PopupListener {
     this.listen();
   }
 
-  openedEl: HTMLElement | null = null;
+  openedEl: Element | null = null;
   isShowing?: boolean | Promise<unknown>; // required to prevent infinite-calling from parent
   isHidding?: boolean | Promise<unknown>; // required to prevent infinite-calling from parent
   /** Events that must be added on show; Should return removeCallbacks/onHideCallbacks */
@@ -59,6 +58,7 @@ export default class PopupListener {
       return;
     }
     this.isShowing = true;
+    this.#lastActive = document.activeElement;
     // eslint-disable-next-line no-async-promise-executor
     this.isShowing = new Promise<void>(async (res, rej) => {
       try {
@@ -93,12 +93,30 @@ export default class PopupListener {
     if (!this.openedEl || this.isHidding) {
       return;
     }
+    const isMeFocused = this.isMe(document.activeElement);
     const was = this.openedEl; // required when user clicks again during the hidding > we need to show in this case
     this.openedEl = null;
     this.onHideRef();
     try {
       this.isHidding = true;
+      // console.warn("hidding");
       const isOk = await this.onHide(hideCase, e || null);
+      // console.warn("hidden"); // todo we are waiting for hidding
+      if (isOk) {
+        // todo during the hidding if we waits user can press Tab and focus goes to popupContent. But it must be prevented
+
+        // case1: popupClick > focus lastActive or target
+        // case2: hide & focus in popup > focus lastActive or target
+        const needFocusBack = isMeFocused || hideCase === HideCases.onPopupClick;
+        if (needFocusBack) {
+          const next =
+            this.options.target === this.#lastActive || this.includes.call(this.options.target, this.#lastActive)
+              ? this.#lastActive
+              : this.options.target; // focus target on item inside target if popup was focused
+          next !== document.activeElement && focusFirst(next as HTMLElement);
+        }
+        this.#lastActive = undefined;
+      }
       if (!isOk && !this.openedEl) {
         this.openedEl = was; // rollback if onHide was prevented and onShow wasn't called again during the hidding
         this.onShowCallbacks.forEach((f) => this.onHideCallbacks.push(f()));
@@ -122,10 +140,15 @@ export default class PopupListener {
     this.onShowCallbacks.push(() => onEvent(...args));
   }
 
-  includes(el: unknown): boolean {
-    return el instanceof Node && (this.openedEl as HTMLElement).contains(el);
+  includes(this: Element, el: unknown): boolean {
+    return el instanceof Node && this.contains(el);
   }
 
+  isMe(el: unknown): boolean {
+    return this.openedEl === this.options.target || this.includes.call(this.openedEl!, el);
+  }
+
+  #lastActive?: Element | null;
   listen(): void {
     const opts = this.options as Required<Options>;
     const t = opts.target as HTMLElement;
@@ -133,32 +156,30 @@ export default class PopupListener {
     let preventClickAfterFocus = false;
     let openedByHover: false | ReturnType<typeof setTimeout> = false;
     let debounceTimeout: ReturnType<typeof setTimeout> | undefined;
+
+    this.onShowEvent(document, "focusin", ({ target }) => {
+      if (!this.isMe(target)) {
+        this.#lastActive = target as Element; // case when focus changes inside target
+      }
+    });
+
     // onClick
     if (opts.showCase & ShowCases.onClick) {
       let wasOutsideClick = false; // fix when labelOnClick > inputOnClick
-      let lastActive: HTMLElement | null = null;
-      this.onShowEvent(document, "focusin", ({ target }) => {
-        const isMe = this.openedEl === target || this.includes(target);
-        if (!isMe) {
-          lastActive = target as HTMLElement;
-        }
-      });
 
       this.onShowEvent(document, "click", (e) => {
         preventClickAfterFocus = false; // mostly it doesn't make sense but maybe it's possible
         // filter click from target because we have target event for this
-        const isTarget = t === e.target || (e.target instanceof Node && t.contains(e.target));
-        if (!isTarget) {
-          const isMeClick = this.openedEl === e.target || this.includes(e.target);
-          if (isMeClick) {
-            // todo during the hidding user can press Tab and focus goes to popupContent. But it must be prevented
-            focusFirst((lastActive || t) as HTMLElement);
-            this.hide(HideCases.onPopupClick, e);
-          } else {
-            this.hide(HideCases.onOutsideClick, e);
-            wasOutsideClick = true;
-            setTimeout(() => (wasOutsideClick = false), 50);
-          }
+        const isTarget = this.includes.call(t, e.target);
+        if (isTarget) {
+          return;
+        }
+        if (this.isMe(e.target)) {
+          this.hide(HideCases.onPopupClick, e);
+        } else {
+          this.hide(HideCases.onOutsideClick, e);
+          wasOutsideClick = true;
+          setTimeout(() => (wasOutsideClick = false), 50);
         }
       });
 
@@ -175,14 +196,12 @@ export default class PopupListener {
           openedByHover ||
           // e.detail >= 2 || // it's double-click
           e.button; // it's not left-click
-
         if (!skip) {
           if (!this.openedEl) {
-            lastActive = document.activeElement as HTMLElement;
             this.show(ShowCases.onClick, e);
           } else {
-            const isMeClick = this.openedEl === e.target || this.includes(e.target);
-            this.hide(isMeClick ? HideCases.onPopupClick : HideCases.onTargetClick, e);
+            // popupClick possible when popup inside target
+            this.hide(this.isMe(e.target) ? HideCases.onPopupClick : HideCases.onTargetClick, e);
           }
         }
 
@@ -217,8 +236,8 @@ export default class PopupListener {
       this.appendEvent(t, "mouseenter", enter);
       this.appendEvent(t, "mouseleave", leave); // use only appendEvent; with onShowEvent it doesn't work properly (because filtered by timeout)
       // case when mouseEnter to popup: need stay opened
-      this.onShowCallbacks.push(() => onEvent(this.openedEl!, "mouseenter", enter));
-      this.onShowCallbacks.push(() => onEvent(this.openedEl!, "mouseleave", leave));
+      this.onShowCallbacks.push(() => onEvent(this.openedEl as HTMLElement, "mouseenter", enter));
+      this.onShowCallbacks.push(() => onEvent(this.openedEl as HTMLElement, "mouseleave", leave));
     }
 
     // onFocus
@@ -238,7 +257,7 @@ export default class PopupListener {
         /* istanbul ignore else - case impossible but better always to check this */
         if (this.openedEl) {
           const isToMe = this.openedEl === document.activeElement || this.openedEl === e.relatedTarget;
-          const isToMeInside = !isToMe && this.includes(document.activeElement || e.relatedTarget);
+          const isToMeInside = !isToMe && this.isMe(document.activeElement || e.relatedTarget);
           !isToMe && !isToMeInside && (await this.hide(HideCases.onFocusOut, e));
           if (!this.openedEl) {
             openedByHover = false;
