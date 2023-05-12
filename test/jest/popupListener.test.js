@@ -5,7 +5,7 @@ import * as h from "../testHelper";
 
 /** @type HTMLInputElement */
 let trg;
-/** @type HTMLDivElement */
+/** @type HTMLSpanElement */
 let el;
 let isShown = false;
 let onShow = jest.fn();
@@ -63,6 +63,20 @@ describe("popupListener", () => {
     const spy = h.spyEventListeners();
     ref = new PopupListener({ target: trg, showCase: ShowCases.onClick }, onShow, onHide);
 
+    trg.dispatchEvent(new MouseEvent("click", { bubbles: true })); // open
+    await h.wait();
+    trg.dispatchEvent(new MouseEvent("click", { bubbles: true })); // hide
+    await h.wait();
+    trg.dispatchEvent(new MouseEvent("click", { bubbles: true })); // open
+    await h.wait();
+    ref.stopListen();
+    spy.check();
+
+    ref = new PopupListener(
+      { target: trg, showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onHover },
+      onShow,
+      onHide
+    );
     trg.dispatchEvent(new MouseEvent("click", { bubbles: true })); // open
     await h.wait();
     trg.dispatchEvent(new MouseEvent("click", { bubbles: true })); // hide
@@ -356,5 +370,38 @@ describe("popupListener", () => {
     await h.userClick(trg, { button: 0 });
     await h.wait();
     expect(el.$isShown).toBe(false); // because left-button
+  });
+
+  test("focus behavior", async () => {
+    ref = new PopupListener({ target: trg, showCase: ShowCases.onClick | ShowCases.onFocus }, onShow, onHide);
+    // focus target by hide
+    trg.focus();
+    await h.wait();
+    expect(document.activeElement).toBe(trg);
+    expect(isShown).toBe(true);
+    const btnInside = el.appendChild(document.createElement("button"));
+    await h.userClick(btnInside);
+    expect(isShown).toBe(false);
+    expect(document.activeElement).toBe(trg); // after click inside popup focus goes to target
+
+    // hideByBlur must allow focus next without forcing focus target
+    await h.userClick(trg);
+    await h.wait();
+    expect(isShown).toBe(true);
+    expect(document.activeElement).toBe(trg);
+    const next = document.body.appendChild(document.createElement("button"));
+    await h.userPressTab(next); // simulate Tab + focusNext
+    expect(document.activeElement).toBe(next);
+    expect(isShown).toBe(false);
+
+    // focus into popup don't close popup
+    await h.userClick(trg);
+    await h.wait();
+    expect(isShown).toBe(true);
+    await h.userPressTab(btnInside); // simulate Tab + focus to element inside popup
+    expect(isShown).toBe(true);
+    await h.userPressTab(next); // simulate Tab + focusNext
+    expect(document.activeElement).toBe(next);
+    expect(isShown).toBe(false); // focus from popup to outside must close popup
   });
 });

@@ -3,7 +3,6 @@ import onFocusLost from "../helpers/onFocusLost";
 import { focusFirst } from "../indexHelpers";
 import { HideCases, ShowCases } from "./popupElement.types";
 // todo popup must be closed by Esc if it wasn't prevented
-// todo openByFocus + focus something inside: popup is closed and focus missed
 interface Options {
   target: HTMLElement | SVGElement;
   showCase?: ShowCases;
@@ -52,7 +51,7 @@ export default class PopupListener {
       return;
     }
     this.isShowing = true;
-    this.#lastActive = document.activeElement as unknown as HTMLOrSVGElement;
+    this.#lastActive = document.activeElement as HTMLElement | SVGElement;
     // eslint-disable-next-line no-async-promise-executor
     this.isShowing = new Promise<void>(async (res, rej) => {
       try {
@@ -86,7 +85,7 @@ export default class PopupListener {
       // console.warn("hidden"); // todo we are waiting for hidding for real popup
       if (isOk) {
         this.#openedByHover = false;
-        // todo during the hidding if we waits user can press Tab and focus goes to popupContent. But it must be prevented
+        // todo during the hidding if we waits user can press Tab and focus goes to popupContent and opens again
 
         // case1: popupClick > focus lastActive or target
         // case2: hide & focus in popup > focus lastActive or target
@@ -97,6 +96,7 @@ export default class PopupListener {
               ? this.#lastActive
               : this.options.target; // focus target on item inside target if popup was focused
           next !== document.activeElement && focusFirst(next as HTMLElement);
+          // todo maybe when focusOut from popup need return back to target ?
         }
         this.#lastActive = undefined;
       }
@@ -226,9 +226,11 @@ export default class PopupListener {
         /* istanbul ignore else - case impossible but better always to check this */
         if (this.openedEl) {
           const e = ev as FocusEvent;
-          const isToMe = this.openedEl === document.activeElement || this.openedEl === e.relatedTarget;
-          const isToMeInside = !isToMe && this.isMe(document.activeElement || e.relatedTarget);
-          !isToMe && !isToMeInside && this.hide(HideCases.onFocusOut, e);
+          const next = e.relatedTarget || document.activeElement;
+          const isToMe = this.isMe(next);
+          const t = this.options.target;
+          const isToTarget = t === next || this.includes.call(t, next);
+          !isToMe && !isToTarget && this.hide(HideCases.onFocusOut, e);
         }
         break;
     }
@@ -239,8 +241,10 @@ export default class PopupListener {
   #defargs: AddEventListenerOptions = { passive: true };
   #disposeFocus?: () => void;
   #disposeFocusLost?: () => void;
+  #disposeFocusLost2?: () => void;
   /** Called on init to apply eventListeners */
   listen(): void {
+    // todo on react listen applies 2 times for popup
     this.handleEventsDocument = this.handleEventsDocument.bind(this);
     this.handleEvents = this.handleEvents.bind(this);
 
@@ -256,7 +260,6 @@ export default class PopupListener {
     if (showCase & ShowCases.onFocus) {
       this.#disposeFocus = onFocusGot(t as HTMLElement, this.handleEvents, {
         debounceMs: this.options.focusDebounceMs,
-        passive: false,
       });
       // isAlreadyFocused
       const a = document.activeElement;
@@ -283,6 +286,9 @@ export default class PopupListener {
       this.#disposeFocusLost = onFocusLost(t as HTMLElement, this.handleEvents, {
         debounceMs: this.options.focusDebounceMs,
       });
+      this.#disposeFocusLost2 = onFocusLost(el, this.handleEvents, {
+        debounceMs: this.options.focusDebounceMs,
+      });
     }
   }
 
@@ -293,6 +299,7 @@ export default class PopupListener {
     this.openedEl?.removeEventListener("mouseenter", this.handleEvents, this.#defargs);
     this.openedEl?.removeEventListener("mouseleave", this.handleEvents, this.#defargs);
     this.#disposeFocusLost?.call(this);
+    this.#disposeFocusLost2?.call(this);
   }
 
   /** Remove all event listeners */
