@@ -78,7 +78,7 @@ export default class WUPDropdownElement extends WUPBaseElement {
   static $defaults: WUP.Dropdown.Defaults = {
     ...WUPPopupElement.$defaults,
     animation: Animations.drawer,
-    showCase: ShowCases.onClick, // todo uncomment | ShowCases.onHover | ShowCases.onFocus,
+    showCase: ShowCases.onClick | ShowCases.onHover | ShowCases.onFocus,
     hideOnClick: true,
     minHeightByTarget: true,
     minWidthByTarget: true,

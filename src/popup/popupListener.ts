@@ -137,7 +137,7 @@ export default class PopupListener {
 
   // add event by popup.onShow and remove by onHide
   onShowEvent<K extends keyof HTMLElementEventMap>(...args: Parameters<onEventType<K, Document | HTMLElement>>): void {
-    this.onShowCallbacks.push(() => onEvent(...args));
+    this.onShowCallbacks.push(() => onEvent(...args)); // todo remove it to avoid extra function
   }
 
   includes(this: Element, el: unknown): boolean {
@@ -148,129 +148,156 @@ export default class PopupListener {
     return this.openedEl === this.options.target || this.includes.call(this.openedEl!, el);
   }
 
+  #preventClickAfterFocus?: boolean;
+  #wasOutsideClick?: boolean; // fix when labelOnClick > inputOnClick
+  handleEventDocument(e: Event): void {
+    // eslint-disable-next-line default-case
+    switch (e.type) {
+      case "focusin":
+        if (!this.isMe(e.target)) {
+          this.#lastActive = e.target as Element; // case when focus changes inside target
+        }
+        break;
+      case "click":
+        {
+          this.#preventClickAfterFocus = false; // mostly it doesn't make sense but maybe it's possible
+          // filter click from target because we have target event for this
+          const isTarget = this.includes.call(this.options.target, e.target);
+          if (isTarget) {
+            return;
+          }
+          if (this.isMe(e.target)) {
+            this.hide(HideCases.onPopupClick, e as MouseEvent);
+          } else {
+            this.hide(HideCases.onOutsideClick, e as MouseEvent);
+            this.#wasOutsideClick = true;
+            setTimeout(() => (this.#wasOutsideClick = false), 50);
+          }
+        }
+        break;
+    }
+  }
+
+  #openedByHover?: ReturnType<typeof setTimeout> | false;
+  #debounceClick?: ReturnType<typeof setTimeout>;
+  #hoverTimeout?: ReturnType<typeof setTimeout>;
+
+  handleEventTarget(ev: Event): void {
+    // eslint-disable-next-line default-case
+    switch (ev.type) {
+      case "click":
+        {
+          const e = ev as MouseEvent;
+          if (!e.pageX) {
+            // pageX is null or 0 if it was called programmatically
+            this.#preventClickAfterFocus = false; // test-case: focus without click > show....click programatically on target > it should hide
+          }
+          const skip =
+            this.#preventClickAfterFocus ||
+            this.#debounceClick ||
+            this.#wasOutsideClick ||
+            this.#openedByHover ||
+            // e.detail >= 2 || // it's double-click
+            e.button; // it's not left-click
+          if (skip) {
+            return;
+          }
+          // popupClick possible when popup inside target
+          this.openedEl
+            ? this.hide(this.isMe(e.target) ? HideCases.onPopupClick : HideCases.onTargetClick, e)
+            : this.show(ShowCases.onClick, e);
+          // fix when labelOnClick > inputOnClick > inputOnFocus
+          this.#debounceClick = setTimeout(() => (this.#debounceClick = undefined), 1);
+        }
+        break;
+      case "mouseenter":
+        this.#hoverTimeout && clearTimeout(this.#hoverTimeout);
+        if (!this.openedEl) {
+          this.#hoverTimeout = setTimeout(() => {
+            if (!this.options.target.isConnected) {
+              return; // possible when target removed via innerHTML
+            }
+            this.#openedByHover && clearTimeout(this.#openedByHover);
+            this.#openedByHover = setTimeout(() => (this.#openedByHover = false), 300); // allow hide by click when shown by hover (300ms to prevent unexpected click & hover colision)
+            this.show(ShowCases.onHover, ev as MouseEvent);
+          }, this.options.hoverShowTimeout);
+        }
+        break;
+      case "mouseleave":
+        this.#hoverTimeout && clearTimeout(this.#hoverTimeout);
+        if (this.openedEl) {
+          this.#hoverTimeout = setTimeout(() => {
+            this.#openedByHover && clearTimeout(this.#openedByHover);
+            this.#openedByHover = false;
+            this.hide(HideCases.onMouseLeave, ev as MouseEvent);
+          }, this.options.hoverHideTimeout);
+        }
+        break;
+      case "focusin":
+        if (!this.openedEl || this.#debounceClick) {
+          this.#preventClickAfterFocus = !!(this.options.showCase! & ShowCases.onClick);
+          this.show(ShowCases.onFocus, ev as FocusEvent).then(() => {
+            if (this.#preventClickAfterFocus) {
+              this.appendEvent(document, "pointerdown", () => (this.#preventClickAfterFocus = false), {
+                once: true,
+                capture: true,
+              }); // pointerdown includes touchstart & mousedown
+            }
+          });
+        }
+        break;
+      case "focusout":
+        /* istanbul ignore else - case impossible but better always to check this */
+        if (this.openedEl) {
+          const e = ev as FocusEvent;
+          const isToMe = this.openedEl === document.activeElement || this.openedEl === e.relatedTarget;
+          const isToMeInside = !isToMe && this.isMe(document.activeElement || e.relatedTarget);
+          !isToMe &&
+            !isToMeInside &&
+            this.hide(HideCases.onFocusOut, e).then(() => {
+              this.#openedByHover = false; // todo do we need this ?
+            });
+        }
+        break;
+    }
+  }
+
+  /** Last focused element before popup is opened */
   #lastActive?: Element | null;
   listen(): void {
+    this.handleEventDocument = this.handleEventDocument.bind(this);
+    this.handleEventTarget = this.handleEventTarget.bind(this);
+
     const opts = this.options as Required<Options>;
     const t = opts.target as HTMLElement;
-    // apply showCase
-    let preventClickAfterFocus = false;
-    let openedByHover: false | ReturnType<typeof setTimeout> = false;
-    let debounceTimeout: ReturnType<typeof setTimeout> | undefined;
 
-    this.onShowEvent(document, "focusin", ({ target }) => {
-      if (!this.isMe(target)) {
-        this.#lastActive = target as Element; // case when focus changes inside target
-      }
-    });
+    this.onShowEvent(document, "focusin", this.handleEventDocument);
 
     // onClick
     if (opts.showCase & ShowCases.onClick) {
-      let wasOutsideClick = false; // fix when labelOnClick > inputOnClick
-
-      this.onShowEvent(document, "click", (e) => {
-        preventClickAfterFocus = false; // mostly it doesn't make sense but maybe it's possible
-        // filter click from target because we have target event for this
-        const isTarget = this.includes.call(t, e.target);
-        if (isTarget) {
-          return;
-        }
-        if (this.isMe(e.target)) {
-          this.hide(HideCases.onPopupClick, e);
-        } else {
-          this.hide(HideCases.onOutsideClick, e);
-          wasOutsideClick = true;
-          setTimeout(() => (wasOutsideClick = false), 50);
-        }
-      });
-
-      this.appendEvent(t, "click", (e) => {
-        if (!e.pageX) {
-          // pageX is null or 0 if it was called programmatically
-          preventClickAfterFocus = false; // test-case: focus without click > show....click programatically on target > it should hide
-        }
-
-        const skip =
-          preventClickAfterFocus ||
-          debounceTimeout ||
-          wasOutsideClick ||
-          openedByHover ||
-          // e.detail >= 2 || // it's double-click
-          e.button; // it's not left-click
-        if (!skip) {
-          if (!this.openedEl) {
-            this.show(ShowCases.onClick, e);
-          } else {
-            // popupClick possible when popup inside target
-            this.hide(this.isMe(e.target) ? HideCases.onPopupClick : HideCases.onTargetClick, e);
-          }
-        }
-
-        // fix when labelOnClick > inputOnClick > inputOnFocus
-        debounceTimeout = setTimeout(() => (debounceTimeout = undefined), 1);
-      });
+      this.onShowEvent(document, "click", this.handleEventDocument);
+      this.appendEvent(t, "click", this.handleEventTarget);
     }
 
     // onHover
     if (opts.showCase & ShowCases.onHover) {
-      let timeoutId: ReturnType<typeof setTimeout> | undefined;
-      const ev = (ms: number, isMouseIn: boolean, e: MouseEvent): void => {
-        timeoutId && clearTimeout(timeoutId);
-        if ((isMouseIn && !this.openedEl) || (!isMouseIn && this.openedEl))
-          timeoutId = setTimeout(() => {
-            if (!t.isConnected) {
-              return; // possible when target removed via innerHTML
-            }
-            openedByHover && clearTimeout(openedByHover);
-            if (isMouseIn) {
-              openedByHover = setTimeout(() => (openedByHover = false), 300); // allow hide by click when shown by hover (300ms to prevent unexpected click & hover colision)
-              this.show(ShowCases.onHover, e);
-            } else {
-              openedByHover = false;
-              this.hide(HideCases.onMouseLeave, e);
-            }
-          }, ms);
-        else timeoutId = undefined;
-      };
-      const enter = (e: MouseEvent): void => ev(opts.hoverShowTimeout, true, e);
-      const leave = (e: MouseEvent): void => ev(opts.hoverHideTimeout, false, e);
-      this.appendEvent(t, "mouseenter", enter);
-      this.appendEvent(t, "mouseleave", leave); // use only appendEvent; with onShowEvent it doesn't work properly (because filtered by timeout)
-      // case when mouseEnter to popup: need stay opened
-      this.onShowCallbacks.push(() => onEvent(this.openedEl as HTMLElement, "mouseenter", enter));
-      this.onShowCallbacks.push(() => onEvent(this.openedEl as HTMLElement, "mouseleave", leave));
+      this.appendEvent(t, "mouseenter", this.handleEventTarget);
+      this.appendEvent(t, "mouseleave", this.handleEventTarget); // use only appendEvent; with onShowEvent it doesn't work properly (because filtered by timeout)
+      // todo simplify onShowCallbacks to single one
+      this.onShowCallbacks.push(() => onEvent(this.openedEl as HTMLElement, "mouseenter", this.handleEventTarget));
+      this.onShowCallbacks.push(() => onEvent(this.openedEl as HTMLElement, "mouseleave", this.handleEventTarget));
     }
 
     // onFocus
     if (opts.showCase & ShowCases.onFocus) {
-      const onFocused = async (e: FocusEvent): Promise<void> => {
-        if (!this.openedEl || debounceTimeout) {
-          preventClickAfterFocus = !!(opts.showCase & ShowCases.onClick);
-          await this.show(ShowCases.onFocus, e);
-          if (preventClickAfterFocus) {
-            this.appendEvent(document, "pointerdown", () => (preventClickAfterFocus = false), { once: true }); // pointerdown includes touchstart & mousedown
-          }
-        }
-      };
-      this.onRemoveCallbacks.push(onFocusGot(t, onFocused, { debounceMs: opts.focusDebounceMs }));
-
-      const blur = async (e: FocusEvent): Promise<void> => {
-        /* istanbul ignore else - case impossible but better always to check this */
-        if (this.openedEl) {
-          const isToMe = this.openedEl === document.activeElement || this.openedEl === e.relatedTarget;
-          const isToMeInside = !isToMe && this.isMe(document.activeElement || e.relatedTarget);
-          !isToMe && !isToMeInside && (await this.hide(HideCases.onFocusOut, e));
-          if (!this.openedEl) {
-            openedByHover = false;
-          }
-        }
-      };
-
-      this.onShowCallbacks.push(() => onFocusLost(t, blur, { debounceMs: opts.focusDebounceMs }));
+      this.onRemoveCallbacks.push(onFocusGot(t, this.handleEventTarget, { debounceMs: opts.focusDebounceMs }));
+      this.onShowCallbacks.push(() => onFocusLost(t, this.handleEventTarget, { debounceMs: opts.focusDebounceMs }));
+      // isAlreadyFocused
       const a = document.activeElement;
-      if (!opts.skipAlreadyFocused && (a === t || (a instanceof HTMLElement && t.contains(a)))) {
-        // isAlreadyFocused
-        onFocused(new FocusEvent("focus"));
-        preventClickAfterFocus = false;
+      // todo deprecate option
+      if (!opts.skipAlreadyFocused && (a === t || t.contains(a))) {
+        this.handleEventTarget(new FocusEvent("focusin"));
+        this.#preventClickAfterFocus = false;
       }
     }
   }

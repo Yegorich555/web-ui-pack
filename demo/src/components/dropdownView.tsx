@@ -56,9 +56,9 @@ export default function DropdownView() {
       <section>
         <h3>Customized (animation: stack)</h3>
         <small>use popup $options.placement to change direction</small>
-        <wup-dropdown class={styles.custom}>
+        <wup-dropdown class={styles.custom} id="t5">
           <button type="button">{"<"}</button>
-          <wup-popup placement="left-middle" animation="stack">
+          <wup-popup placement="left-middle" animation="stack" target="#t5">
             {/* todo need to change direction of items */}
             <ul>
               <li>
