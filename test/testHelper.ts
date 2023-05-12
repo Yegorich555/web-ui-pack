@@ -493,21 +493,42 @@ export async function userRemove(
 /** Simulate user mouse click with 100ms between mouseDown and mouseUp */
 export async function userClick(el: HTMLElement, opts?: MouseEventInit, timeoutMouseUp = 100) {
   const o = () => ({ bubbles: true, cancelable: true, pageX: 1, pageY: 1, ...opts });
-  el.dispatchEvent(new MouseEvent("pointerdown", o()));
-  const isOk = el.dispatchEvent(new MouseEvent("mousedown", o()));
+  const mouseEvent = (type = "click") => {
+    const args = o();
+    const e = new MouseEvent(type, args);
+    // otherwise pageX, pageY doesn't work via constructor
+    // @ts-ignore
+    e.pageX = args.pageX;
+    // @ts-ignore
+
+    e.pageY = args.pageY;
+    return e;
+  };
+  el.dispatchEvent(mouseEvent("pointerdown"));
+  const isOk = el.dispatchEvent(mouseEvent("mousedown"));
   if (isOk) {
     el.focus();
     el.dispatchEvent(new Event("focusin", { bubbles: true }));
   }
   timeoutMouseUp && (await wait(timeoutMouseUp));
-  el.dispatchEvent(new MouseEvent("pointerup", o()));
-  el.dispatchEvent(new MouseEvent("mouseup", o()));
-  el.dispatchEvent(new MouseEvent("click", o()));
+  el.dispatchEvent(mouseEvent("pointerup"));
+  el.dispatchEvent(mouseEvent("mouseup"));
+  el.dispatchEvent(mouseEvent("click"));
 }
 
 /** Simulate user touch click with 100ms between mouseDown and mouseUp */
 export async function userTap(el: HTMLElement, opts?: MouseEventInit) {
   const o = () => ({ bubbles: true, cancelable: true, pageX: 1, pageY: 1, ...opts });
+  const mouseEvent = (type = "click") => {
+    const args = o();
+    const e = new MouseEvent(type, args);
+    // otherwise pageX, pageY doesn't work via constructor
+    // @ts-ignore
+    e.pageX = args.pageX;
+    // @ts-ignore
+    e.pageY = args.pageY;
+    return e;
+  };
   el.dispatchEvent(new MouseEvent("pointerdown", o()));
   el.dispatchEvent(
     new TouchEvent("touchstart", {
@@ -530,13 +551,13 @@ export async function userTap(el: HTMLElement, opts?: MouseEventInit) {
       ...o,
     })
   );
-  el.dispatchEvent(new MouseEvent("pointerup", o()));
+  el.dispatchEvent(mouseEvent("pointerup"));
   el.dispatchEvent(new TouchEvent("touchend", { touches: [], ...o() }));
 
-  const isOk = el.dispatchEvent(new MouseEvent("mousedown", o()));
+  const isOk = el.dispatchEvent(mouseEvent("mousedown"));
   isOk && el.focus();
-  el.dispatchEvent(new MouseEvent("mouseup", o()));
-  el.dispatchEvent(new MouseEvent("click", o()));
+  el.dispatchEvent(mouseEvent("mouseup"));
+  el.dispatchEvent(mouseEvent("click"));
 }
 
 /** Simulate user press Ctrl+Z on input;
@@ -661,3 +682,19 @@ export function userMouseMove(el: HTMLElement, { x, y }: { x: number; y: number 
 }
 
 userMouseMove.stored = { x: 0, y: 0 };
+
+/** Simulate pressing key Tab */
+export async function userPressTab(next: HTMLElement) {
+  const el = document.activeElement || document.body;
+  const key = "Tab";
+  if (!el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }))) {
+    return;
+  }
+  el.dispatchEvent(new KeyboardEvent("keypress", { key, bubbles: true }));
+  el.dispatchEvent(new FocusEvent("focusout", { bubbles: true, relatedTarget: next }));
+
+  next.focus();
+  next.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+  await wait(50);
+  next.dispatchEvent(new KeyboardEvent("keyup", { key, bubbles: true }));
+}
