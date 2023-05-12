@@ -208,7 +208,7 @@ export default class PopupListener {
         }
         break;
       case "focusin":
-        if (!this.openedEl || this.#debounceClick) {
+        if (!this.openedEl) {
           this.#preventClickAfterFocus = !!(this.options.showCase! & ShowCases.onClick);
           this.show(ShowCases.onFocus, ev as FocusEvent).then(() => {
             if (this.#preventClickAfterFocus) {

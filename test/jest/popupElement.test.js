@@ -387,17 +387,6 @@ describe("popupElement", () => {
     expect(a.$isShown).toBe(false);
     f0.mockRestore();
 
-    // when showCase = focus. need to show() if target isAlreadyFocused
-    a.remove();
-    trg.setAttribute("tabindex", "0");
-    trg.focus();
-    expect(document.activeElement.id).toBe("targetId");
-    document.body.appendChild(a);
-    a.$options.showCase = 1 << 1; // onFocus
-    jest.advanceTimersToNextTimer(); // onReady has timeout
-    expect(a.$isShown).toBe(true); // because of trg is alreadyFocused
-    trg.removeAttribute("tabindex");
-
     // focus moves to element inside popup > no-hide
     /** @type typeof el */
     let a2 = document.body.appendChild(document.createElement(el.tagName));

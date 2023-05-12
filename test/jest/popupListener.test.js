@@ -40,7 +40,7 @@ afterEach(() => {
 });
 
 describe("popupListener", () => {
-  test("default behavior", async () => {
+  test("showCase.onClick", async () => {
     const spy = h.spyEventListeners();
     ref = new PopupListener({ target: trg, showCase: ShowCases.onClick }, onShow, onHide);
 
@@ -57,6 +57,10 @@ describe("popupListener", () => {
     expect(isShown).toBe(false);
     ref.stopListen();
     spy.check();
+  });
+
+  test("showCase.onHover", async () => {
+    // todo test cases here: move logic from popupElement.test
   });
 
   test("memory leak", async () => {
@@ -330,7 +334,8 @@ describe("popupListener", () => {
     expect(el.$isShown).toBe(true); // because 2nd click is filtered
   }); */
 
-  test("handle error on show", async () => {
+  test("handle errors", async () => {
+    // todo tests exceptions about target
     el = document.body.appendChild(document.createElement("wup-popup"));
     el.$options.target = trg;
     el.$options.showCase = 0;
@@ -400,8 +405,46 @@ describe("popupListener", () => {
     expect(isShown).toBe(true);
     await h.userPressTab(btnInside); // simulate Tab + focus to element inside popup
     expect(isShown).toBe(true);
+    await h.userPressTab(trg); // simulate Tab + focus to target back
+    expect(isShown).toBe(true);
     await h.userPressTab(next); // simulate Tab + focusNext
     expect(document.activeElement).toBe(next);
     expect(isShown).toBe(false); // focus from popup to outside must close popup
+
+    // target already focused when applied listener
+    trg = document.body.appendChild(document.createElement(trg.tagName));
+    trg.focus();
+    ref = new PopupListener({ target: trg, showCase: ShowCases.onFocus }, onShow, onHide);
+    await h.wait();
+    expect(isShown).toBe(true);
+    // focusout to body (when no relatedTarget)
+    // await h.userPressTab(null); // simulate Tab + focusNext
+    el.dispatchEvent(new FocusEvent("focusout", { bubbles: true, relatedTarget: undefined }));
+    document.activeElement.blur();
+    expect(isShown).toBe(false);
+
+    // cover case when popupOpened by click and focus changed inside target: by closing focus >> return focus to target
+    trg = document.body.appendChild(document.createElement("div"));
+    const tin1 = trg.appendChild(document.createElement("button"));
+    const tin2 = trg.appendChild(document.createElement("input"));
+    ref = new PopupListener({ target: trg, showCase: ShowCases.onClick }, onShow, onHide);
+    await h.userClick(tin1);
+    await h.wait();
+    expect(isShown).toBe(true);
+    await h.userPressTab(tin2);
+    expect(isShown).toBe(true);
+    await h.userClick(btnInside);
+    await h.wait();
+    expect(isShown).toBe(false);
+    expect(document.activeElement).toBe(tin2);
+
+    // cover case when click on popup moves focus to body because popup don't haven tabindex
+    await h.userClick(tin1);
+    await h.wait();
+    expect(isShown).toBe(true);
+    await h.userClick(el);
+    await h.wait();
+    expect(isShown).toBe(false);
+    expect(document.activeElement).toBe(tin1);
   });
 });

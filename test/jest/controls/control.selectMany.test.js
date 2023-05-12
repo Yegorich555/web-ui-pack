@@ -154,7 +154,7 @@ describe("control.selectMany", () => {
       .spyOn(window, "matchMedia")
       .mockImplementationOnce((s) => ({ matches: s !== "(hover: hover) and (pointer: fine)" })); // simulate touchscreen
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true">Leo</span><span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-owns="txt11" aria-controls="txt11"><strong></strong>"`
+      `"<span item="" aria-hidden="true">Leo</span><span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-owns="txt12" aria-controls="txt12"><strong></strong>"`
     );
     const item = el.$refItems[0];
     await h.userTap(item);
@@ -163,14 +163,14 @@ describe("control.selectMany", () => {
     expect(el.$isShown).toBe(true); // 1st tap only to focus control
     // item must be not-removed
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true">Leo</span><span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-owns="txt14" aria-controls="txt14"><strong></strong>"`
+      `"<span item="" aria-hidden="true">Leo</span><span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-owns="txt12" aria-controls="txt12"><strong></strong>"`
     );
 
     await h.userTap(item);
     await h.wait();
     // 2nd tap removes item
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-owns="txt14" aria-controls="txt14"><strong></strong>"`
+      `"<span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-owns="txt12" aria-controls="txt12"><strong></strong>"`
     );
 
     // input hidden if readOnlyInput and values exist
@@ -179,7 +179,7 @@ describe("control.selectMany", () => {
     el.focus();
     await h.wait(1);
     expect(el.$refInput.outerHTML).toMatchInlineSnapshot(
-      `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-owns="txt17" aria-controls="txt17" aria-describedby="txt16" readonly="">"`
+      `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-owns="txt16" aria-controls="txt16" aria-describedby="txt15" readonly="">"`
     );
     el.$options.readOnlyInput = false;
 
