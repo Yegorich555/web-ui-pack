@@ -11,8 +11,6 @@ interface Options {
   hoverShowTimeout?: number;
   hoverHideTimeout?: number;
   focusDebounceMs?: number;
-  /** By default when listener is applied on focused element it provides immediate onShow event. You can disable this */
-  skipAlreadyFocused?: boolean;
 }
 
 /** Listen for target according to showCase. If target removed call stopListen + don't forget to remove popup yourself;
@@ -103,6 +101,7 @@ export default class PopupListener {
       const isOk = await this.onHide(hideCase, e || null);
       // console.warn("hidden"); // todo we are waiting for hidding
       if (isOk) {
+        this.#openedByHover = false;
         // todo during the hidding if we waits user can press Tab and focus goes to popupContent. But it must be prevented
 
         // case1: popupClick > focus lastActive or target
@@ -252,11 +251,7 @@ export default class PopupListener {
           const e = ev as FocusEvent;
           const isToMe = this.openedEl === document.activeElement || this.openedEl === e.relatedTarget;
           const isToMeInside = !isToMe && this.isMe(document.activeElement || e.relatedTarget);
-          !isToMe &&
-            !isToMeInside &&
-            this.hide(HideCases.onFocusOut, e).then(() => {
-              this.#openedByHover = false; // todo do we need this ?
-            });
+          !isToMe && !isToMeInside && this.hide(HideCases.onFocusOut, e);
         }
         break;
     }
@@ -294,8 +289,7 @@ export default class PopupListener {
       this.onShowCallbacks.push(() => onFocusLost(t, this.handleEventTarget, { debounceMs: opts.focusDebounceMs }));
       // isAlreadyFocused
       const a = document.activeElement;
-      // todo deprecate option
-      if (!opts.skipAlreadyFocused && (a === t || t.contains(a))) {
+      if (a === t || t.contains(a)) {
         this.handleEventTarget(new FocusEvent("focusin"));
         this.#preventClickAfterFocus = false;
       }
