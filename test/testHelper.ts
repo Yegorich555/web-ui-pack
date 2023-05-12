@@ -309,15 +309,29 @@ export function spyEventListeners(otherElements: Array<any>) {
 
   const check = () => {
     spyArr.forEach((s) => {
+      const strict = false;
       // checking if removed every listener that was added
-      const onCalls = s.onCalls
+      let onCalls = s.onCalls
         .filter((c) => c.el.isConnected) // skip for elements that's removed itself
         .map((c) => c.name)
         .sort();
-      const offCalls = s.offCalls
+      let offCalls = s.offCalls
         .filter((c) => c.el.isConnected) // skip for elements that's removed itself
         .map((c) => c.name)
         .sort();
+      if (!strict) {
+        // show only missed offCalls: possible when onCalls.length < offCalls.length
+        let from = 0;
+        onCalls = onCalls.filter((c) => {
+          const i = offCalls.indexOf(c, from);
+          if (i > -1) {
+            from = i + 1;
+            return false;
+          }
+          return true;
+        });
+        offCalls = [];
+      }
 
       expect(onCalls).toEqual(offCalls);
     });

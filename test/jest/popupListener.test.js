@@ -22,7 +22,7 @@ beforeEach(() => {
   onShow = jest.fn().mockImplementation(() => {
     isShown = true;
     if (!el) {
-      el = document.body.appendChild(document.createElement("div"));
+      el = document.body.appendChild(document.createElement("span"));
     }
     return el;
   });

@@ -1,12 +1,11 @@
-import onEvent, { onEventType } from "../helpers/onEvent";
 import onFocusGot from "../helpers/onFocusGot";
 import onFocusLost from "../helpers/onFocusLost";
 import { focusFirst } from "../indexHelpers";
 import { HideCases, ShowCases } from "./popupElement.types";
-// todo popup must be always closed by focusout & Esc if it wasn't prevented
-
+// todo popup must be closed by Esc if it wasn't prevented
+// todo openByFocus + focus something inside: popup is closed and focus missed
 interface Options {
-  target: Element;
+  target: HTMLElement | SVGElement;
   showCase?: ShowCases;
   hoverShowTimeout?: number;
   hoverHideTimeout?: number;
@@ -46,17 +45,14 @@ export default class PopupListener {
   openedEl: Element | null = null;
   isShowing?: boolean | Promise<unknown>; // required to prevent infinite-calling from parent
   isHidding?: boolean | Promise<unknown>; // required to prevent infinite-calling from parent
-  /** Events that must be added on show; Should return removeCallbacks/onHideCallbacks */
-  onShowCallbacks: Array<() => () => void> = [];
-  onHideCallbacks: Array<() => void> = [];
-  onRemoveCallbacks: Array<() => void> = [];
 
+  /** Called on show */
   async show(showCase: ShowCases, e?: MouseEvent | FocusEvent): Promise<void> {
     if (this.openedEl || this.isShowing) {
       return;
     }
     this.isShowing = true;
-    this.#lastActive = document.activeElement;
+    this.#lastActive = document.activeElement as unknown as HTMLOrSVGElement;
     // eslint-disable-next-line no-async-promise-executor
     this.isShowing = new Promise<void>(async (res, rej) => {
       try {
@@ -69,37 +65,25 @@ export default class PopupListener {
     await this.isShowing;
     // timeout required to avoid immediate hide by bubbling events to root
     if (this.openedEl) {
-      setTimeout(() => this.openedEl && this.onShowCallbacks.forEach((f) => this.onHideCallbacks.push(f())));
+      setTimeout(() => this.openedEl && this.listenOnShow());
     }
   }
 
-  onHideRef(): void {
-    this.onHideCallbacks.forEach((f) => f());
-    this.onHideCallbacks.length = 0;
-  }
-
-  stopListen(): void {
-    this.openedEl = null;
-    this.onRemoveCallbacks.forEach((f) => f());
-    this.onRemoveCallbacks.length = 0;
-    this.onHideRef();
-    this.onShowCallbacks.length = 0;
-  }
-
+  /** Called on hide */
   async hide(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): Promise<void> {
     this.isShowing && (await this.isShowing); // todo need option how to wait for showing or hide immediately
     if (!this.openedEl || this.isHidding) {
       return;
     }
     const isMeFocused = this.isMe(document.activeElement);
+    this.disposeOnHide();
     const was = this.openedEl; // required when user clicks again during the hidding > we need to show in this case
     this.openedEl = null;
-    this.onHideRef();
     try {
       this.isHidding = true;
       // console.warn("hidding");
       const isOk = await this.onHide(hideCase, e || null);
-      // console.warn("hidden"); // todo we are waiting for hidding
+      // console.warn("hidden"); // todo we are waiting for hidding for real popup
       if (isOk) {
         this.#openedByHover = false;
         // todo during the hidding if we waits user can press Tab and focus goes to popupContent. But it must be prevented
@@ -118,7 +102,7 @@ export default class PopupListener {
       }
       if (!isOk && !this.openedEl) {
         this.openedEl = was; // rollback if onHide was prevented and onShow wasn't called again during the hidding
-        this.onShowCallbacks.forEach((f) => this.onHideCallbacks.push(f()));
+        this.listenOnShow();
       }
     } catch (error) {
       Promise.reject(error); // handle error from onHide
@@ -126,35 +110,25 @@ export default class PopupListener {
     this.isHidding = false;
   }
 
-  appendEvent<K extends keyof HTMLElementEventMap>(
-    ...args: Parameters<onEventType<K, HTMLElement | Document>>
-  ): () => void {
-    const r = onEvent(...args);
-    this.onRemoveCallbacks.push(r);
-    return r;
-  }
-
-  // add event by popup.onShow and remove by onHide
-  onShowEvent<K extends keyof HTMLElementEventMap>(...args: Parameters<onEventType<K, Document | HTMLElement>>): void {
-    this.onShowCallbacks.push(() => onEvent(...args)); // todo remove it to avoid extra function
-  }
-
+  /** Returns whether el is part of another  */
   includes(this: Element, el: unknown): boolean {
     return el instanceof Node && this.contains(el);
   }
 
+  /** Returns whether element if part of openedElement */
   isMe(el: unknown): boolean {
-    return this.openedEl === this.options.target || this.includes.call(this.openedEl!, el);
+    return this.openedEl === el || this.includes.call(this.openedEl!, el);
   }
 
   #preventClickAfterFocus?: boolean;
   #wasOutsideClick?: boolean; // fix when labelOnClick > inputOnClick
-  handleEventDocument(e: Event): void {
+  /** Single event handler */
+  handleEventsDocument(e: Event): void {
     // eslint-disable-next-line default-case
     switch (e.type) {
       case "focusin":
         if (!this.isMe(e.target)) {
-          this.#lastActive = e.target as Element; // case when focus changes inside target
+          this.#lastActive = e.target as HTMLElement; // case when focus changes inside target
         }
         break;
       case "click":
@@ -181,7 +155,8 @@ export default class PopupListener {
   #debounceClick?: ReturnType<typeof setTimeout>;
   #hoverTimeout?: ReturnType<typeof setTimeout>;
 
-  handleEventTarget(ev: Event): void {
+  /** Single event handler */
+  handleEvents(ev: Event): void {
     // eslint-disable-next-line default-case
     switch (ev.type) {
       case "click":
@@ -237,9 +212,11 @@ export default class PopupListener {
           this.#preventClickAfterFocus = !!(this.options.showCase! & ShowCases.onClick);
           this.show(ShowCases.onFocus, ev as FocusEvent).then(() => {
             if (this.#preventClickAfterFocus) {
-              this.appendEvent(document, "pointerdown", () => (this.#preventClickAfterFocus = false), {
+              // WARN: event is self-destroyed on 1st event so not required to dispose it
+              document.addEventListener("pointerdown", () => (this.#preventClickAfterFocus = false), {
                 once: true,
                 capture: true,
+                passive: true,
               }); // pointerdown includes touchstart & mousedown
             }
           });
@@ -258,41 +235,73 @@ export default class PopupListener {
   }
 
   /** Last focused element before popup is opened */
-  #lastActive?: Element | null;
+  #lastActive?: HTMLOrSVGElement | null;
+  #defargs: AddEventListenerOptions = { passive: true };
+  #disposeFocus?: () => void;
+  #disposeFocusLost?: () => void;
+  /** Called on init to apply eventListeners */
   listen(): void {
-    this.handleEventDocument = this.handleEventDocument.bind(this);
-    this.handleEventTarget = this.handleEventTarget.bind(this);
+    this.handleEventsDocument = this.handleEventsDocument.bind(this);
+    this.handleEvents = this.handleEvents.bind(this);
 
-    const opts = this.options as Required<Options>;
-    const t = opts.target as HTMLElement;
+    const { target: t, showCase } = this.options as Required<Options>;
 
-    this.onShowEvent(document, "focusin", this.handleEventDocument);
-
-    // onClick
-    if (opts.showCase & ShowCases.onClick) {
-      this.onShowEvent(document, "click", this.handleEventDocument);
-      this.appendEvent(t, "click", this.handleEventTarget);
+    if (showCase & ShowCases.onClick) {
+      t.addEventListener("click", this.handleEvents, this.#defargs);
     }
-
-    // onHover
-    if (opts.showCase & ShowCases.onHover) {
-      this.appendEvent(t, "mouseenter", this.handleEventTarget);
-      this.appendEvent(t, "mouseleave", this.handleEventTarget); // use only appendEvent; with onShowEvent it doesn't work properly (because filtered by timeout)
-      // todo simplify onShowCallbacks to single one
-      this.onShowCallbacks.push(() => onEvent(this.openedEl as HTMLElement, "mouseenter", this.handleEventTarget));
-      this.onShowCallbacks.push(() => onEvent(this.openedEl as HTMLElement, "mouseleave", this.handleEventTarget));
+    if (showCase & ShowCases.onHover) {
+      t.addEventListener("mouseenter", this.handleEvents, this.#defargs);
+      t.addEventListener("mouseleave", this.handleEvents, this.#defargs); // use only appendEvent; with onShowEvent it doesn't work properly (because filtered by timeout)
     }
-
-    // onFocus
-    if (opts.showCase & ShowCases.onFocus) {
-      this.onRemoveCallbacks.push(onFocusGot(t, this.handleEventTarget, { debounceMs: opts.focusDebounceMs }));
-      this.onShowCallbacks.push(() => onFocusLost(t, this.handleEventTarget, { debounceMs: opts.focusDebounceMs }));
+    if (showCase & ShowCases.onFocus) {
+      this.#disposeFocus = onFocusGot(t as HTMLElement, this.handleEvents, {
+        debounceMs: this.options.focusDebounceMs,
+        passive: false,
+      });
       // isAlreadyFocused
       const a = document.activeElement;
       if (a === t || t.contains(a)) {
-        this.handleEventTarget(new FocusEvent("focusin"));
+        this.handleEvents(new FocusEvent("focusin"));
         this.#preventClickAfterFocus = false;
       }
     }
+  }
+
+  /** Called to add extra events when show */
+  listenOnShow(): void {
+    const el = this.openedEl as HTMLElement;
+    document.addEventListener("focusin", this.handleEventsDocument, this.#defargs);
+    const { target: t, showCase } = this.options as Required<Options>;
+    if (showCase & ShowCases.onClick) {
+      document.addEventListener("click", this.handleEventsDocument, this.#defargs);
+    }
+    if (showCase & ShowCases.onHover) {
+      el.addEventListener("mouseenter", this.handleEvents, this.#defargs);
+      el.addEventListener("mouseleave", this.handleEvents, this.#defargs);
+    }
+    if (showCase & ShowCases.onFocus) {
+      this.#disposeFocusLost = onFocusLost(t as HTMLElement, this.handleEvents, {
+        debounceMs: this.options.focusDebounceMs,
+      });
+    }
+  }
+
+  /** Called to remove extra events when hide */
+  disposeOnHide(): void {
+    document.removeEventListener("focusin", this.handleEventsDocument, this.#defargs);
+    document.removeEventListener("click", this.handleEventsDocument, this.#defargs);
+    this.openedEl?.removeEventListener("mouseenter", this.handleEvents, this.#defargs);
+    this.openedEl?.removeEventListener("mouseleave", this.handleEvents, this.#defargs);
+    this.#disposeFocusLost?.call(this);
+  }
+
+  /** Remove all event listeners */
+  stopListen(): void {
+    this.disposeOnHide();
+    ["click", "mouseenter", "mouseleave"].forEach((ev) =>
+      this.options.target.removeEventListener(ev, this.handleEvents, this.#defargs)
+    );
+    this.#disposeFocus?.call(this);
+    this.openedEl = null;
   }
 }
