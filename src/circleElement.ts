@@ -398,13 +398,12 @@ export default class WUPCircleElement extends WUPBaseElement {
     return this.appendChild(popup);
   }
 
-  /** List of functions to remove tooltipListener */
-  _tooltipDisposeLst?: Array<() => void>;
-  /** Apply tooltip listener;
-   * @returns array of dispose functions */
+  /** Function to remove tooltipListener */
+  _tooltipDisposeLst?: () => void;
+  /** Apply tooltip listener; */
   protected useTooltip(isEnable: boolean): void {
     if (!isEnable) {
-      this._tooltipDisposeLst?.forEach((fn) => fn());
+      this._tooltipDisposeLst?.call(this);
       this._tooltipDisposeLst = undefined;
       return;
     }
@@ -412,7 +411,7 @@ export default class WUPCircleElement extends WUPBaseElement {
       return;
     }
     // impossible to use popupListen because it listens for single target but we need per each segment
-    const r = onEvent(
+    this._tooltipDisposeLst = onEvent(
       this,
       "mouseenter", // mouseenter is fired even with touch event (mouseleave fired with touch outside in this case)
       (e) => {
@@ -450,7 +449,6 @@ export default class WUPCircleElement extends WUPBaseElement {
       },
       { capture: true, passive: true }
     );
-    this._tooltipDisposeLst = [r];
   }
 
   /** Called on every changeEvent */
