@@ -753,5 +753,23 @@ describe("popupListener", () => {
     await h.wait();
     expect(isShown).toBe(false);
     f0.mockRestore();
+
+    // special case
+    expect(document.activeElement).not.toBe(trg);
+    ref = new PopupListener(
+      { target: trg, showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onHover },
+      onShow,
+      onHide
+    );
+    trg.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.userClick(trg);
+    await h.wait();
+    expect(isShown).toBe(true);
+    const btn = el.appendChild(document.createElement("button"));
+    await h.userPressTab(btn);
+    trg.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await h.wait();
+    expect(isShown).toBe(false);
+    expect(document.activeElement).toBe(tin1);
   });
 });

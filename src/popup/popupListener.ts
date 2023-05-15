@@ -69,6 +69,7 @@ export default class PopupListener {
     }
   }
 
+  #preventFocusEvent?: boolean;
   /** Called on hide */
   async hide(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): Promise<void> {
     this.isShowing && (await this.isShowing); // todo need option how to wait for showing or hide immediately
@@ -95,7 +96,9 @@ export default class PopupListener {
             this.options.target === this.#lastActive || this.includes.call(this.options.target, this.#lastActive)
               ? this.#lastActive
               : this.options.target; // focus target on item inside target if popup was focused
+          this.#preventFocusEvent = true;
           next !== document.activeElement && focusFirst(next as HTMLElement);
+          this.#preventFocusEvent = false;
         }
         this.#lastActive = undefined;
       }
@@ -215,7 +218,7 @@ export default class PopupListener {
         }
         break;
       case "focusin":
-        if (!this.openedEl) {
+        if (!this.openedEl && !this.#preventFocusEvent) {
           this.#preventClickAfterFocus = !!(this.options.showCase! & ShowCases.onClick);
           this.show(ShowCases.onFocus, ev as FocusEvent).then(() => {
             if (this.#preventClickAfterFocus) {
