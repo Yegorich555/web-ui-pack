@@ -44,23 +44,288 @@ describe("popupListener", () => {
     const spy = h.spyEventListeners();
     ref = new PopupListener({ target: trg, showCase: ShowCases.onClick }, onShow, onHide);
 
-    trg.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    await h.userClick(trg);
+    await h.wait();
+    expect(onShow).toBeCalledTimes(1);
+    expect(onShow.mock.calls[0]).toMatchInlineSnapshot(`
+      [
+        4,
+        MouseEvent {
+          "isTrusted": false,
+          "pageX": 1,
+          "pageY": 1,
+        },
+      ]
+    `); // onTargetClick
+    expect(onHide).not.toBeCalled();
+    expect(isShown).toBe(true);
+
+    await h.userClick(trg);
+    await h.wait();
+    expect(onShow).toBeCalledTimes(1);
+    expect(onHide).toBeCalledTimes(1);
+    expect(onHide.mock.calls[0]).toMatchInlineSnapshot(`
+      [
+        5,
+        MouseEvent {
+          "isTrusted": false,
+          "pageX": 1,
+          "pageY": 1,
+        },
+      ]
+    `); // onTargetClick
+    expect(isShown).toBe(false);
+    // open again
+    document.body.innerHTML = "<div id='trg'><button></button><span id='popup'></span></div>";
+    trg = document.getElementById("trg");
+    el = document.getElementById("popup");
+    ref = new PopupListener({ target: trg, showCase: ShowCases.onClick }, onShow, onHide);
+    jest.clearAllMocks();
+    await h.userClick(trg);
     await h.wait();
     expect(onShow).toBeCalledTimes(1);
     expect(onHide).not.toBeCalled();
     expect(isShown).toBe(true);
-
-    trg.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    // hide by popup click
+    await h.userClick(el);
     await h.wait();
     expect(onShow).toBeCalledTimes(1);
     expect(onHide).toBeCalledTimes(1);
+    expect(onHide.mock.calls[0][0]).toBe(4); // onPopupClick
     expect(isShown).toBe(false);
+
     ref.stopListen();
     spy.check();
   });
 
   test("showCase.onHover", async () => {
-    // todo test cases here: move logic from popupElement.test
+    const spy = h.spyEventListeners();
+    ref = new PopupListener({ target: trg, showCase: ShowCases.onHover }, onShow, onHide);
+
+    trg.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    expect(isShown).toBe(false);
+    await h.wait(ref.options.hoverShowTimeout); // event listener has timeout
+    expect(isShown).toBe(true);
+    expect(onShow.mock.calls[0]).toMatchInlineSnapshot(`
+      [
+        1,
+        MouseEvent {
+          "isTrusted": false,
+        },
+      ]
+    `);
+
+    trg.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    expect(isShown).toBe(true);
+    await h.wait(ref.options.hoverHideTimeout); // event listener has timeout
+    expect(isShown).toBe(false);
+    expect(onHide.mock.calls[0]).toMatchInlineSnapshot(`
+      [
+        1,
+        MouseEvent {
+          "isTrusted": false,
+        },
+      ]
+    `);
+
+    // checking debounce
+    jest.clearAllMocks();
+    trg.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait(10);
+    trg.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await h.wait(10);
+    trg.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait(10);
+    trg.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await h.wait();
+    expect(isShown).toBe(false);
+    expect(onShow).toBeCalledTimes(0);
+    // hover on popup - no close event
+    trg.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait();
+    expect(isShown).toBe(true);
+    trg.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    el.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait();
+    expect(isShown).toBe(true); // no hide if hover on popup
+    // hide by mouseleave
+    el.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await h.wait();
+    expect(isShown).toBe(false);
+
+    ref.stopListen();
+    spy.check();
+
+    // case when content inside target
+    jest.clearAllMocks();
+    document.body.innerHTML = "<div id='trg'><button></button><span id='popup'></span></div>";
+    trg = document.getElementById("trg");
+    el = document.getElementById("popup");
+    ref = new PopupListener({ target: trg, showCase: ShowCases.onHover }, onShow, onHide);
+    trg.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait();
+    expect(isShown).toBe(true);
+    trg.firstElementChild.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait();
+    expect(onShow).toBeCalledTimes(1);
+    trg.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await h.wait();
+
+    trg.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    trg.remove();
+    jest.advanceTimersByTime(ref.options.hoverShowTimeout + ref.options.hoverHideTimeout); // event listener has timeout
+    expect(isShown).toBe(false); // because removed
+    document.body.appendChild(trg);
+    await h.wait();
+
+    // cover #openedByHover
+    jest.clearAllMocks();
+    onShow.mockImplementationOnce(() => null);
+    trg.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait(ref.options.hoverShowTimeout + 10); // #openedByHover: true
+    trg.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true })); // simulate child inside
+    await h.wait(ref.options.hoverShowTimeout + 10); // clear previous #openedByHover
+    expect(isShown).toBe(true);
+    expect(onShow).toBeCalledTimes(2);
+    trg.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await h.wait();
+    expect(isShown).toBe(false);
+    // hide
+    jest.clearAllMocks();
+    trg.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait(ref.options.hoverShowTimeout + 10); // #openedByHover: true
+    expect(isShown).toBe(true);
+    ref.options.hoverHideTimeout = 10; // must be less 3#openedByHover=300ms
+    trg.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await h.wait(ref.options.hoverHideTimeout + 10); // clear previous #openedByHover
+    expect(onHide).toBeCalledTimes(1);
+    expect(isShown).toBe(false);
+  });
+
+  test("showCase.focus", async () => {
+    const spy = h.spyEventListeners();
+    ref = new PopupListener({ target: trg, showCase: ShowCases.onFocus }, onShow, onHide);
+
+    trg.dispatchEvent(new Event("focusin", { bubbles: true }));
+    await h.wait(1);
+    expect(isShown).toBe(true);
+    expect(onShow.mock.calls[0]).toMatchInlineSnapshot(`
+      [
+        2,
+        Event {
+          "isTrusted": false,
+        },
+      ]
+    `);
+
+    trg.dispatchEvent(new Event("focusout", { bubbles: true }));
+    await h.wait(1);
+    expect(isShown).toBe(false);
+    expect(onHide.mock.calls[0]).toMatchInlineSnapshot(`
+      [
+        2,
+        Event {
+          "isTrusted": false,
+        },
+      ]
+    `);
+
+    jest.clearAllMocks();
+    trg.dispatchEvent(new Event("focusin", { bubbles: true }));
+    trg.dispatchEvent(new Event("focusout", { bubbles: true }));
+    el.dispatchEvent(new Event("focusin", { bubbles: true }));
+    el.dispatchEvent(new Event("focusin", { bubbles: true })); // simulate children event
+    await h.wait();
+    expect(isShown).toBe(true);
+    expect(onShow).toBeCalledTimes(1);
+
+    el.dispatchEvent(new Event("focusout", { bubbles: true }));
+    el.dispatchEvent(new Event("focusout", { bubbles: true })); // simulate children event
+    await h.wait(1);
+    expect(isShown).toBe(false);
+    expect(onHide).toBeCalledTimes(1);
+
+    ref.stopListen();
+    spy.check();
+  });
+
+  test("showCase.all", async () => {
+    ref = new PopupListener(
+      { target: trg, showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onHover },
+      onShow,
+      onHide
+    );
+
+    // full simulation of hover>click>hoverPopup>clickPopup
+    trg.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait(10);
+    await h.userClick(trg);
+    await h.wait();
+    expect(isShown).toBe(true);
+    expect(onShow).toBeCalledTimes(1);
+    expect(onHide).toBeCalledTimes(0);
+    trg.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await h.wait(10);
+    el.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait(10);
+    await h.userClick(el);
+    el.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await h.wait();
+    expect(isShown).toBe(false);
+    expect(onShow).toBeCalledTimes(1);
+    expect(onHide).toBeCalledTimes(1);
+
+    // user clicks on target when it shows by hover
+    jest.clearAllMocks();
+    trg.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait(ref.options.hoverShowTimeout + 10);
+    await h.userClick(trg); // despite on huge timeout - no close because debounce 300ms
+    await h.wait();
+    expect(isShown).toBe(true);
+    expect(onShow).toBeCalledTimes(1);
+    expect(onHide).toBeCalledTimes(0);
+    trg.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await h.wait();
+    expect(isShown).toBe(false);
+    expect(onShow).toBeCalledTimes(1);
+    expect(onHide).toBeCalledTimes(1);
+
+    // the same without click
+    jest.clearAllMocks();
+    trg.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait();
+    expect(isShown).toBe(true);
+    expect(onShow).toBeCalledTimes(1);
+    expect(onHide).toBeCalledTimes(0);
+    trg.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await h.wait(10);
+    el.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait(10);
+    el.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await h.wait();
+    expect(isShown).toBe(false);
+    expect(onShow).toBeCalledTimes(1);
+    expect(onHide).toBeCalledTimes(1);
+
+    // user opens by focus
+    document.activeElement.blur();
+    await h.wait();
+    jest.clearAllMocks();
+    // open by focus
+    await h.userPressTab(trg);
+    expect(isShown).toBe(true);
+    expect(onShow).toBeCalledTimes(1);
+    expect(onHide).toBeCalledTimes(0);
+    await h.userPressTab(el); // focus inside popup - no changes
+    expect(isShown).toBe(true);
+    expect(onShow).toBeCalledTimes(1);
+    expect(onHide).toBeCalledTimes(0);
+    // close by click outside
+    await h.userClick(document.body);
+    await h.wait();
+    expect(isShown).toBe(false);
+    expect(onShow).toBeCalledTimes(1);
+    expect(onHide).toBeCalledTimes(1);
   });
 
   test("memory leak", async () => {
@@ -311,6 +576,18 @@ describe("popupListener", () => {
     refs.show(0);
     await h.wait();
     expect(el.$isShown).toBe(true);
+
+    expect(isShown).toBe(false);
+    expect(() => new PopupListener({ target: undefined }, onShow, onHide)).toThrow();
+    expect(() => new PopupListener({ target: document.createElement("div") }, onShow, onHide)).toThrow();
+    ref = new PopupListener({ target: trg }, onShow, () => {
+      throw new Error("hello");
+    });
+    await h.userClick(trg);
+    await h.wait();
+    expect(isShown).toBe(true);
+    await h.userClick(trg); // no error because handled by try
+    // await h.wait();
   });
 
   /* test("double-click filter", async () => {
@@ -335,7 +612,6 @@ describe("popupListener", () => {
   }); */
 
   test("handle errors", async () => {
-    // todo tests exceptions about target
     el = document.body.appendChild(document.createElement("wup-popup"));
     el.$options.target = trg;
     el.$options.showCase = 0;
@@ -446,5 +722,16 @@ describe("popupListener", () => {
     await h.wait();
     expect(isShown).toBe(false);
     expect(document.activeElement).toBe(tin1);
+
+    // checking case when document.activeElement is null/not-null (possible on Firefox/Safari)
+    tin1.blur();
+    await h.userClick(tin1);
+    await h.wait();
+    expect(isShown).toBe(true);
+    const f0 = jest.spyOn(document, "activeElement", "get").mockReturnValue(null); // just for coverage
+    await h.userClick(el);
+    await h.wait();
+    expect(isShown).toBe(false);
+    f0.mockRestore();
   });
 });

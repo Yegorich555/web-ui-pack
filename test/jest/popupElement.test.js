@@ -288,194 +288,10 @@ describe("popupElement", () => {
   test("$options.showCase", async () => {
     /** @type typeof el */
     const a = document.createElement(el.tagName);
-    a.$options.target = trg;
-
     const spyShow = jest.spyOn(a, "goShow");
     const spyHide = jest.spyOn(a, "goHide");
-
-    // only hover
-    document.body.appendChild(a);
-    a.$options.showCase = 1; // onHover
-    jest.advanceTimersToNextTimer(); // onReady has timeout
-    expect(a.$isShown).toBe(false);
-    expect(a.$isOpen).toBe(false);
-
-    trg.dispatchEvent(new MouseEvent("mouseenter"));
-    await h.wait(a.$options.hoverShowTimeout); // event listener has timeout
-    expect(spyShow).toBeCalledTimes(1);
-    expect(a.$isShown).toBe(true);
-    expect(spyShow).lastCalledWith(1);
-
-    trg.dispatchEvent(new MouseEvent("mouseleave"));
-    await h.wait(a.$options.hoverHideTimeout); // event listener has timeout
-    expect(a.$isShown).toBe(false);
-    expect(spyHide.mock.calls[spyHide.mock.calls.length - 1][0]).toBe(1);
-
-    // hover on popup - no close event
-    trg.dispatchEvent(new MouseEvent("mouseenter"));
-    await h.wait(a.$options.hoverShowTimeout); // event listener has timeout
-    await h.wait();
-    expect(a.$isShown).toBe(true);
-    trg.testMe = true;
-    trg.dispatchEvent(new MouseEvent("mouseleave"));
-    a.dispatchEvent(new MouseEvent("mouseenter"));
-    await h.wait(a.$options.hoverHideTimeout * 2);
-    expect(a.$isShown).toBe(true); // no hide if hover on popup
-    // hide by mouseleave
-    a.dispatchEvent(new MouseEvent("mouseleave"));
-    await h.wait(a.$options.hoverHideTimeout);
-    expect(a.$isShown).toBe(false);
-
-    jest.clearAllMocks();
-    trg.dispatchEvent(new MouseEvent("mouseenter"));
-    trg.dispatchEvent(new MouseEvent("mouseleave"));
-    trg.dispatchEvent(new MouseEvent("mouseenter"));
-    trg.dispatchEvent(new MouseEvent("mouseleave"));
-    jest.advanceTimersByTime(a.$options.hoverShowTimeout + a.$options.hoverHideTimeout); // event listener has timeout
-    expect(a.$isShown).toBe(false);
-    expect(spyShow).not.toBeCalled();
-
-    trg.dispatchEvent(new MouseEvent("mouseenter"));
-    trg.remove();
-    jest.advanceTimersByTime(a.$options.hoverShowTimeout + a.$options.hoverHideTimeout); // event listener has timeout
-    expect(a.$isShown).toBe(false); // because removed
-    document.body.appendChild(trg);
-
-    // onlyFocus
-    a.remove();
-    document.body.appendChild(a);
-    a.$options.showCase = 1 << 1; // onFocus
-    jest.advanceTimersToNextTimer(); // onReady has timeout
-    expect(a.$isShown).toBe(false);
-
-    trg.dispatchEvent(new Event("focusin", { bubbles: true }));
-    await h.wait(1); // wait for promise onShow is async
-    expect(a.$isShown).toBe(true);
-    expect(spyShow).toBeCalledTimes(1);
-    expect(spyShow).lastCalledWith(1 << 1);
-    trg.dispatchEvent(new Event("focusout", { bubbles: true }));
-    await h.wait(1); // wait for promise onHide is async
-    expect(spyShow).toBeCalledTimes(1); // no new triggers because focus stay
-    // jest.advanceTimersToNextTimer(); // focusLost has timeout
-    expect(a.$isShown).toBe(false);
-
     const trgInput = trg.appendChild(document.createElement("input"));
-    const trgInput2 = trg.appendChild(document.createElement("input"));
-    // checking focusin-throttling
-    jest.clearAllMocks();
-    trgInput.focus();
-    expect(a.$isShown).toBe(true);
-    trgInput2.focus();
-    trgInput.focus();
-    await h.wait(1); // wait for promise onShow is async
 
-    expect(a.$isShown).toBe(true);
-    expect(spyHide).not.toBeCalled(); // because div haven't been lost focus
-    trgInput.blur();
-    await h.wait(1); // wait for promise onShow is async
-    expect(a.$isShown).toBe(false);
-    expect(spyShow).toBeCalledTimes(1); // checking if throttling-filter works
-    expect(spyShow).lastCalledWith(1 << 1); // checking if throttling-filter works
-    expect(spyHide.mock.calls[spyHide.mock.calls.length - 1][0]).toBe(2); // because div haven't been lost focus
-
-    // checking case when document.activeElement is null/not-null (possible on Firefox/Safari)
-    trgInput.focus();
-    await h.wait(1); // wait for promise onShow is async
-    expect(a.$isShown).toBe(true);
-    const f0 = jest.spyOn(document, "activeElement", "get").mockReturnValue(null); // just for coverage
-    trgInput.blur();
-    expect(a.$isShown).toBe(false);
-    f0.mockRestore();
-
-    // focus moves to element inside popup > no-hide
-    /** @type typeof el */
-    let a2 = document.body.appendChild(document.createElement(el.tagName));
-    const a2Input = a2.appendChild(document.createElement("input"));
-    a2.$options.showCase = 1 << 1;
-    a2.$options.target = trgInput;
-    jest.advanceTimersToNextTimer();
-    trgInput.focus();
-    expect(a2.$isShown).toBe(true);
-    let f = jest.spyOn(document, "activeElement", "get").mockReturnValue(null);
-    a2Input.focus();
-    jest.advanceTimersToNextTimer(); // focusLost has debounce
-    expect(a2.$isShown).toBe(true);
-    f.mockRestore();
-
-    // onlyClick
-    jest.clearAllMocks();
-    a.remove();
-    document.body.appendChild(a);
-    a.$options.showCase = 1 << 2; // onClick
-    jest.advanceTimersToNextTimer(); // onReady has timeout
-    await h.wait();
-    expect(a.$isShown).toBe(false);
-
-    await h.userClick(trg);
-    await h.wait(0);
-    expect(a.$isShown).toBe(true);
-    trg.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    expect(a.$isShown).toBe(true); // because previous event is skipped (due to debounceTimeout)
-    expect(spyShow).toBeCalledTimes(1);
-    expect(spyShow).lastCalledWith(1 << 2);
-    await h.wait(50); // onClick has debounce timeout
-    expect(a.$isShown).toBe(true); // because previous event is skipped (due to debounceTimeout)
-
-    let e = new MouseEvent("click", { bubbles: true });
-    trg.dispatchEvent(e);
-    await h.wait();
-    expect(a.$isShown).toBe(false);
-    expect(spyHide).toBeCalledTimes(1);
-    expect(spyHide).lastCalledWith(5);
-    await h.wait(50);
-
-    trgInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    await h.wait();
-    expect(a.$isShown).toBe(true); // click on input inside
-
-    await h.wait();
-    e = new MouseEvent("click", { bubbles: true });
-    a.dispatchEvent(e);
-    await h.wait();
-    expect(a.$isShown).toBe(false); // click onMe == close
-    expect(spyHide).lastCalledWith(4);
-
-    trgInput2.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    await h.wait();
-    expect(a.$isShown).toBe(true); // click on input2 inside
-
-    await h.wait();
-    e = new MouseEvent("click", { bubbles: true });
-    document.body.dispatchEvent(e);
-    await h.wait();
-    expect(a.$isShown).toBe(false); // click outside == close
-    expect(spyHide).lastCalledWith(3);
-
-    // focus on target > on hide
-    document.activeElement.blur();
-    f = jest.spyOn(document, "activeElement", "get").mockReturnValue(null);
-    /** @type typeof el */
-    a2 = document.body.appendChild(document.createElement(el.tagName));
-    a2.$options.showCase = 1 << 2;
-    a2.$options.target = trgInput;
-    jest.advanceTimersToNextTimer();
-    trgInput.click();
-    await h.wait();
-    expect(a2.$isShown).toBe(true);
-    const onFocus = jest.spyOn(trgInput, "focus");
-    a2.click();
-    await h.wait();
-
-    expect(a2.$isShown).toBe(false);
-    expect(onFocus).toBeCalled(); // because focus must me moved back
-    f.mockRestore();
-    a2.remove();
-
-    // test all: onHover | onFocus | onClick
-    jest.clearAllTimers();
-    jest.clearAllMocks();
-    a.remove();
-    document.activeElement?.blur();
     document.body.appendChild(a);
     a.$options.showCase = 0b111111111;
     a.$options.target = trgInput; // only for testing
@@ -507,8 +323,7 @@ describe("popupElement", () => {
     trgInput.dispatchEvent(new Event("mouseenter", { bubbles: true }));
     await h.wait(a.$options.hoverShowTimeout); // mouseenter has debounce timeout
     expect(a.$isShown).toBe(true); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
-    e = new MouseEvent("mouseleave", { bubbles: true });
-    trgInput.dispatchEvent(e);
+    trgInput.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
     await h.wait(a.$options.hoverHideTimeout); // mouseenter has debounce timeout
     expect(a.$isShown).toBe(false); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
     expect(spyHide).lastCalledWith(1);
@@ -527,76 +342,6 @@ describe("popupElement", () => {
     trgInput.blur();
     spyShow.mockClear();
 
-    // simulate click-focus without mouseenter
-    // jest.advanceTimersByTime(el.$options.focusDebounceMs);
-    trgInput.dispatchEvent(new Event("touchstart", { bubbles: true })); // just for coverage 100%
-    trgInput.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
-    expect(a.$isShown).toBe(false);
-    trgInput.focus();
-    expect(spyShow).lastCalledWith(1 << 1);
-    await h.wait(1);
-    expect(a.$isShown).toBe(true); // show by focus
-    trgInput.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
-    let ev = new MouseEvent("click", { bubbles: true });
-    ev.pageX = 20; // required otherwise it's filtered from synthetic events
-    trgInput.dispatchEvent(ev);
-    await h.wait(50);
-    expect(a.$isShown).toBe(true); // stay opened because wasOpened by focus from click
-
-    // simulate mouse-click again
-    trgInput.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
-    trgInput.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
-    trgInput.dispatchEvent(ev);
-    await h.wait(50);
-    expect(a.$isShown).toBe(false); // 2nd click will close (but if click is fired without mousedown it doesn't work)
-    expect(spyHide).lastCalledWith(5);
-
-    // checking again when events doesn't propagate to body
-    trgInput.blur();
-    ev = new MouseEvent("click", { bubbles: false });
-    ev.pageX = 20; // required otherwise it's filtered from synthetic events
-    await h.wait();
-    trgInput.dispatchEvent(new MouseEvent("mousedown", { bubbles: false }));
-    trgInput.focus();
-    await h.wait(1);
-    expect(a.$isShown).toBe(true); // show by focus
-    trgInput.dispatchEvent(new MouseEvent("mouseup", { bubbles: false }));
-    trgInput.dispatchEvent(ev);
-    await h.wait();
-    expect(a.$isShown).toBe(true); // stay opened because wasOpened by focus from click
-    await h.userClick(trgInput);
-    await h.wait();
-    expect(a.$isShown).toBe(false); // 2nd click will close (but if click is fired without mousedown it doesn't work)
-
-    // open by hover & close by click
-    trgInput.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
-    await h.wait();
-    expect(a.$isShown).toBe(true);
-    trgInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    await h.wait();
-    expect(a.$isShown).toBe(false);
-    // again + click immeditely
-    trgInput.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
-    await h.wait(50);
-    trgInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    await h.wait();
-    expect(a.$isShown).toBe(true); // prev click skipped because debounce hover-click: 300ms
-    trgInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    await h.wait();
-    expect(a.$isShown).toBe(false);
-    // again hover>leave>hover>click immediately
-    trgInput.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
-    await h.wait(50);
-    trgInput.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
-    await h.wait(50);
-    trgInput.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
-    await h.wait(50);
-    trgInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    await h.wait();
-    expect(a.$isShown).toBe(true);
-    trgInput.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
-    await h.wait();
-    expect(a.$isShown).toBe(false);
     // for coverage
     a.$options.hoverHideTimeout = 10; // WARN: this time must be less 300ms (debounce for hover-click)
     a.init();
@@ -605,17 +350,12 @@ describe("popupElement", () => {
     trgInput.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
     await h.wait(50);
     expect(a.$isShown).toBe(false);
+    expect(a.$isOpen).toBe(false); // deprecate it
 
-    // focus returns to target or lastActive element
-    const btnInside = a.appendChild(document.createElement("button"));
+    a.remove();
+    a.$hide();
     await h.wait();
-    await h.userClick(trgInput, undefined, 0); // WARN: somehow default timeout doesn't work in tests
-    await h.wait();
-    expect(a.$isShown).toBe(true);
-    await h.userClick(btnInside); // it simulates focus on btn also
-    await h.wait();
-    expect(a.$isShown).toBe(false);
-    expect(document.activeElement).toBe(trgInput); // focus must return back to input
+    expect(a.$isShown).toBe(false); // because remmoved
   });
 
   test("$options.minWidth/minHeight/maxWidth by target", async () => {

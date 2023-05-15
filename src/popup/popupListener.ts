@@ -47,7 +47,7 @@ export default class PopupListener {
 
   /** Called on show */
   async show(showCase: ShowCases, e?: MouseEvent | FocusEvent): Promise<void> {
-    if (this.openedEl || this.isShowing) {
+    if (this.openedEl || this.isShowing || !this.options.target.isConnected) {
       return;
     }
     this.isShowing = true;
@@ -86,7 +86,6 @@ export default class PopupListener {
       if (isOk) {
         this.#openedByHover = false;
         // todo during the hidding if we waits user can press Tab and focus goes to popupContent and opens again
-
         // case1: popupClick > focus lastActive or target
         // case2: hide & focus in popup > focus lastActive or target
         const needFocusBack = isMeFocused || hideCase === HideCases.onPopupClick;
@@ -188,9 +187,6 @@ export default class PopupListener {
         this.#hoverTimeout && clearTimeout(this.#hoverTimeout);
         if (!this.openedEl) {
           this.#hoverTimeout = setTimeout(() => {
-            if (!this.options.target.isConnected) {
-              return; // possible when target removed via innerHTML
-            }
             this.#openedByHover && clearTimeout(this.#openedByHover);
             this.#openedByHover = setTimeout(() => (this.#openedByHover = false), 300); // allow hide by click when shown by hover (300ms to prevent unexpected click & hover colision)
             this.show(ShowCases.onHover, ev as MouseEvent);
