@@ -687,22 +687,27 @@ export function userMouseMove(el: HTMLElement, { x, y }: { x: number; y: number 
 
 userMouseMove.stored = { x: 0, y: 0 };
 
-/** Simulate pressing key Tab */
-export async function userPressTab(next: HTMLElement | null) {
-  const el = document.activeElement || document.body;
-  const key = "Tab";
-  if (!el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }))) {
+/** Simulate pressing key */
+export async function userPressKey(el: Element, opts: Partial<KeyboardEvent>, between?: () => void) {
+  if (!el.dispatchEvent(new KeyboardEvent("keydown", { ...opts, bubbles: true, cancelable: true }))) {
     return;
   }
-  el.dispatchEvent(new KeyboardEvent("keypress", { key, bubbles: true }));
-  // el.dispatchEvent(new FocusEvent("focusout", { bubbles: true, relatedTarget: next }));
-
-  if (!next) {
-    (document.activeElement as HTMLElement)?.blur?.call(document.activeElement);
-  } else {
-    next.focus();
-    next.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
-  }
+  el.dispatchEvent(new KeyboardEvent("keypress", { ...opts, bubbles: true }));
+  between?.call(el);
   await wait(50);
-  el.dispatchEvent(new KeyboardEvent("keyup", { key, bubbles: true }));
+  el.dispatchEvent(new KeyboardEvent("keyup", { ...opts, bubbles: true }));
+}
+
+/** Simulate pressing key Tab + focus event */
+export async function userPressTab(next: HTMLElement | null) {
+  const el = document.activeElement || document.body;
+  userPressKey(el, { key: "Tab" }, () => {
+    // el.dispatchEvent(new FocusEvent("focusout", { bubbles: true, relatedTarget: next }));
+    if (!next) {
+      (document.activeElement as HTMLElement)?.blur?.call(document.activeElement);
+    } else {
+      next.focus();
+      next.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+    }
+  });
 }

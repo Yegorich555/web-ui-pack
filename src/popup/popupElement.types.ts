@@ -1,26 +1,33 @@
 export const enum ShowCases {
   /** Show when it's added to document; to hide call $hide() (outsideClick event can be helpful) */
   always = 0,
-  /** On mouseEnter event of target; hide by mouseLeave; if popup shown by mouseEnter it can'be closed by click (onHover partially suppress onClick case)  */
+  /** On `mouseenter` event of target; hide by `mouseleave` */
   onHover = 1,
-  /** On focusIn event of target; hide by focusOut (also on click if PopupShowCases.onClick included) */
+  /** On `focusIn` event of target; hide by `focusout` (also on click if PopupShowCases.onClick included) */
   onFocus = 1 << 1,
-  /** On click event of target; hide by click anywhere */
+  /** On `click` event of target; hide by click anywhere */
   onClick = 1 << 2,
 }
 
 export const enum HideCases {
   /** When $hide() is called programmatically */
   onManuallCall,
+  /** When mouse left target & popup */
   onMouseLeave,
+  /** When focus left target & popup */
   onFocusOut,
+  /** When was click outside target & popup */
   onOutsideClick,
+  /** When was click on popup */
   onPopupClick,
+  /** When was click on target & popup was opened */
   onTargetClick,
   /** When target removed from document */
   onTargetRemove,
   /** When options or attributes changes */
   onOptionChange,
+  /** When user pressed Escape button */
+  onPressEsc,
 }
 
 export const enum Animations {

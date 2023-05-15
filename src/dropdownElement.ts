@@ -218,9 +218,6 @@ export default class WUPDropdownElement extends WUPBaseElement {
         }
       } else {
         switch (e.key) {
-          case "Escape":
-            this.$refPopup.$hide();
-            break;
           case "Home":
             focused = this.$refMenu.firstElementChild;
             break;

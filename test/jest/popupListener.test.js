@@ -326,6 +326,26 @@ describe("popupListener", () => {
     expect(isShown).toBe(false);
     expect(onShow).toBeCalledTimes(1);
     expect(onHide).toBeCalledTimes(1);
+
+    // close by Escape
+    await h.userClick(trg);
+    await h.wait();
+    expect(isShown).toBe(true);
+    await h.userPressKey(trg, { key: "Escape" });
+    expect(isShown).toBe(false);
+
+    await h.userClick(trg);
+    await h.wait();
+    expect(isShown).toBe(true);
+    trg.onkeydown = (e) => e.preventDefault();
+    await h.userPressKey(trg, { key: "Escape" });
+    expect(isShown).toBe(true); // because prevented
+
+    await h.wait();
+    trg.addEventListener("click", (e) => e.preventDefault(), { capture: true });
+    await h.userClick(trg);
+    await h.wait();
+    expect(isShown).toBe(true); // because prevented
   });
 
   test("memory leak", async () => {

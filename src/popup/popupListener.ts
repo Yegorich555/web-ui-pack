@@ -1,8 +1,9 @@
+import { KeyboardEvent } from "react";
 import onFocusGot from "../helpers/onFocusGot";
 import onFocusLost from "../helpers/onFocusLost";
 import { focusFirst } from "../indexHelpers";
 import { HideCases, ShowCases } from "./popupElement.types";
-// todo popup must be closed by Esc if it wasn't prevented
+
 interface Options {
   target: HTMLElement | SVGElement;
   showCase?: ShowCases;
@@ -95,7 +96,6 @@ export default class PopupListener {
               ? this.#lastActive
               : this.options.target; // focus target on item inside target if popup was focused
           next !== document.activeElement && focusFirst(next as HTMLElement);
-          // todo maybe when focusOut from popup need return back to target ?
         }
         this.#lastActive = undefined;
       }
@@ -123,6 +123,9 @@ export default class PopupListener {
   #wasOutsideClick?: boolean; // fix when labelOnClick > inputOnClick
   /** Single event handler */
   handleEventsDocument(e: Event): void {
+    if (e.defaultPrevented) {
+      return;
+    }
     // eslint-disable-next-line default-case
     switch (e.type) {
       case "focusin":
@@ -147,6 +150,11 @@ export default class PopupListener {
           }
         }
         break;
+      case "keydown":
+        if ((e as unknown as KeyboardEvent).key === "Escape") {
+          this.hide(HideCases.onPressEsc, e as MouseEvent);
+        }
+        break;
     }
   }
 
@@ -156,6 +164,9 @@ export default class PopupListener {
 
   /** Single event handler */
   handleEvents(ev: Event): void {
+    if (ev.defaultPrevented) {
+      return;
+    }
     // eslint-disable-next-line default-case
     switch (ev.type) {
       case "click":
@@ -270,6 +281,8 @@ export default class PopupListener {
   listenOnShow(): void {
     const el = this.openedEl as HTMLElement;
     document.addEventListener("focusin", this.handleEventsDocument, this.#defargs);
+    document.addEventListener("keydown", this.handleEventsDocument, this.#defargs);
+
     const { target: t, showCase } = this.options as Required<Options>;
     if (showCase & ShowCases.onClick) {
       document.addEventListener("click", this.handleEventsDocument, this.#defargs);
@@ -290,6 +303,7 @@ export default class PopupListener {
 
   /** Called to remove extra events when hide */
   disposeOnHide(): void {
+    document.removeEventListener("keydown", this.handleEventsDocument, this.#defargs);
     document.removeEventListener("focusin", this.handleEventsDocument, this.#defargs);
     document.removeEventListener("click", this.handleEventsDocument, this.#defargs);
     this.openedEl?.removeEventListener("mouseenter", this.handleEvents, this.#defargs);
@@ -301,9 +315,10 @@ export default class PopupListener {
   /** Remove all event listeners */
   stopListen(): void {
     this.disposeOnHide();
-    ["click", "mouseenter", "mouseleave"].forEach((ev) =>
-      this.options.target.removeEventListener(ev, this.handleEvents, this.#defargs)
-    );
+    const t = this.options.target;
+    t.removeEventListener("click", this.handleEvents, this.#defargs);
+    t.removeEventListener("mouseenter", this.handleEvents, this.#defargs);
+    t.removeEventListener("mouseleave", this.handleEvents, this.#defargs);
     this.#disposeFocus?.call(this);
     this.openedEl = null;
   }
