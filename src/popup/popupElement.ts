@@ -401,7 +401,6 @@ export default class WUPPopupElement<
         this.goShow(ShowCases.always);
         return;
       }
-
       this.#refListener = new PopupListener(
         this._opts as typeof this._opts & { target: HTMLElement },
         (v) => (this.goShow(v) ? this : null),
@@ -436,7 +435,7 @@ export default class WUPPopupElement<
         break;
     }
     // re-init
-    propsChanged && this.init(); // possible only if popup is hidden
+    propsChanged && this.init(); // only if popup is hidden
   }
 
   protected override connectedCallback(): void {

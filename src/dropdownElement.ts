@@ -116,7 +116,16 @@ export default class WUPDropdownElement extends WUPBaseElement {
       this.$refPopup.setAttribute("menu", "");
       this.$refPopup.goShow = this.goShowPopup.bind(this);
       this.$refPopup.goHide = this.goHidePopup.bind(this);
+      // @ts-expect-error
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      this.$refPopup.init = () => {};
       Object.assign(this.$refPopup.$options, this.$options);
+      setTimeout(() => {
+        // @ts-expect-error
+        delete this.$refPopup.init;
+        // @ts-expect-error
+        this.$refPopup.init(); // init manually otherwise it can trigger several times
+      });
 
       // WA
       const menu = (this.$refPopup.querySelector("ul,ol,[items]") as HTMLElement) || this.$refPopup;

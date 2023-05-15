@@ -251,7 +251,6 @@ export default class PopupListener {
   #disposeFocusLost2?: () => void;
   /** Called on init to apply eventListeners */
   listen(): void {
-    // todo on react listen applies 2 times for popup
     this.handleEventsDocument = this.handleEventsDocument.bind(this);
     this.handleEvents = this.handleEvents.bind(this);
 
