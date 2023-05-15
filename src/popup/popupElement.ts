@@ -731,7 +731,8 @@ export default class WUPPopupElement<
     };
 
     // waitFor only if was ordinary user-action
-    if (hideCase >= HideCases.onManuallCall && hideCase <= HideCases.onTargetClick) {
+    const skipWait = hideCase === HideCases.onOptionChange || hideCase === HideCases.onTargetRemove;
+    if (!skipWait) {
       this.setAttribute("hide", "");
       const { animationDuration: aD } = getComputedStyle(this);
       const animTime = Number.parseFloat(aD.substring(0, aD.length - 1)) * 1000 || 0;

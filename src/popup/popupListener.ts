@@ -86,7 +86,7 @@ export default class PopupListener {
       // console.warn("hidden"); // todo we are waiting for hidding for real popup
       if (isOk) {
         this.#openedByHover = false;
-        // todo during the hidding if we waits user can press Tab and focus goes to popupContent and opens again
+        // todo during the hidding if wait user can press Tab and focus goes to popupContent and opens again
         // case1: popupClick > focus lastActive or target
         // case2: hide & focus in popup > focus lastActive or target
         const needFocusBack = isMeFocused || hideCase === HideCases.onPopupClick;

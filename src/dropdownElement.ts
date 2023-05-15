@@ -246,3 +246,4 @@ export default class WUPDropdownElement extends WUPBaseElement {
 }
 
 customElements.define(tagName, WUPDropdownElement);
+// todo open: popupPage 1st > open Droddown page > style for animationStack is wrong (items hidden by target)
