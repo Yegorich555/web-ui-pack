@@ -1,3 +1,4 @@
+/* stylelint-disable no-descending-specificity */
 .custom {
   margin: 6px;
 
@@ -13,35 +14,42 @@
     border-radius: 9999px;
   }
 
-  [menu] {
+  > wup-popup {
     z-index: 80000;
     box-shadow: none;
     background: none;
-    // overflow: visible;
 
     button {
       --base-btn-bg: cornflowerblue;
     }
 
-    ul {
+    > ul {
       display: flex;
       padding: 2px;
+
+      > li {
+        padding: 0;
+        margin: 2px;
+        border-radius: 9999px;
+
+        &[focused] > button {
+          box-shadow: 0 0 4px 0 var(--base-focus);
+        }
+      }
     }
 
-    li {
-      padding: 0;
-      margin: 2px;
-      border-radius: 9999px;
-
-      &[focused] > button {
-        box-shadow: 0 0 4px 0 var(--base-focus);
-      }
+    &[position="left"] > ul {
+      flex-direction: row-reverse;
     }
   }
 }
 
-.vertical {
-  [menu] ul {
+.vertical > wup-popup {
+  > ul {
     flex-direction: column;
+  }
+
+  &[position="top"] > ul {
+    flex-direction: column-reverse;
   }
 }

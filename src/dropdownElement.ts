@@ -15,7 +15,7 @@ declare global {
        * @example setTimeout(() => this.$refPopup.$options.animation = Animations.stack) */
       animation: Animations;
       /** Case when popup need to show;
-       * @defaultValue `ShowCases.onClick | ShowCases.onHover | ShowCases.onFocus`
+       * @defaultValue `ShowCases.onClick | ShowCases.onFocus`
        * @tutorial Troubleshooting
        * * to change option for specific element change it for `<wup-popup/>` directly after timeout
        * @example setTimeout(() => this.$refPopup.$options.showCase = ShowCases.onFocus | ShowCases.onClick) */
@@ -56,8 +56,23 @@ declare global {
   }
 }
 
-// todo example of usage
-/** Example of usage */
+/** DropdownElement
+ * @example
+ * ```html
+  <wup-dropdown class="custom">
+    <button type="button">Click Me</button>
+    <wup-popup placement="bottom-middle" animation="stack">
+      <ul>
+        <li><button type="button">A</button></li>
+        <li><button type="button">B</button></li>
+        <li><button type="button">C</button></li>
+      </ul>
+    </wup-popup>
+  </wup-dropdown>
+ * ```
+ * @tutorial Troubleshooting
+ * * in comparison with Combobox Dropdown doesn't contain input but can contain in popup any items (like nav-menu etc.)
+ */
 export default class WUPDropdownElement extends WUPBaseElement {
   #ctr = this.constructor as typeof WUPDropdownElement;
 
@@ -78,7 +93,7 @@ export default class WUPDropdownElement extends WUPBaseElement {
   static $defaults: WUP.Dropdown.Defaults = {
     ...WUPPopupElement.$defaults,
     animation: Animations.drawer,
-    showCase: ShowCases.onClick | ShowCases.onHover | ShowCases.onFocus,
+    showCase: ShowCases.onClick | ShowCases.onFocus,
     hideOnClick: true,
     minHeightByTarget: true,
     minWidthByTarget: true,
@@ -116,14 +131,14 @@ export default class WUPDropdownElement extends WUPBaseElement {
       this.$refPopup.setAttribute("menu", "");
       this.$refPopup.goShow = this.goShowPopup.bind(this);
       this.$refPopup.goHide = this.goHidePopup.bind(this);
-      // @ts-expect-error
+      // @ts-expect-error - because protected
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       this.$refPopup.init = () => {};
       Object.assign(this.$refPopup.$options, this.$options);
       setTimeout(() => {
-        // @ts-expect-error
+        // @ts-expect-error - because protected
         delete this.$refPopup.init;
-        // @ts-expect-error
+        // @ts-expect-error - because protected
         this.$refPopup.init(); // init manually otherwise it can trigger several times
       });
 
@@ -140,7 +155,7 @@ export default class WUPDropdownElement extends WUPBaseElement {
 
       // !menu.hasAttribute("role") && menu.setAttribute("role", "listbox");
       // li.setAttribute("role", "option");
-      !menu.hasAttribute("tabindex") && menu.setAttribute("tabindex", -1); // todo check it: otherwise Firefox move focus into it by keydown 'tab'
+      !menu.hasAttribute("tabindex") && menu.setAttribute("tabindex", -1); // otherwise Firefox move focus into it by keydown 'Tab'
 
       // lbl.id = lbl.id || this.#ctr.$uniqueId;
       // menu.setAttribute("aria-labelledby", lbl.id);
@@ -191,7 +206,7 @@ export default class WUPDropdownElement extends WUPBaseElement {
 
   /** Called when user pressed key */
   protected gotKeyDown(e: KeyboardEvent): void {
-    // todo need to prevent focus inside by Tab ???
+    // todo sometimes selection via keydown not required
     // todo what if menuItems is controls ???? In this case need to remove this logic ???
     if (e.defaultPrevented || e.altKey || e.shiftKey || e.ctrlKey) {
       return;

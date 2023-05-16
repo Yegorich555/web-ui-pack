@@ -30,7 +30,7 @@ export default function DropdownView() {
       features={[
         "Built-in animations: opacity, drawer, stack",
         "Easy to customize behavior via options of <wup-dropdown> & <wup-popup>",
-        "Accessibility support", // todo accessibility & keyboard
+        "Accessibility support",
       ]}
     >
       <section>
@@ -56,10 +56,9 @@ export default function DropdownView() {
       <section>
         <h3>Customized (animation: stack)</h3>
         <small>use popup $options.placement to change direction</small>
-        <wup-dropdown class={styles.custom} id="t5">
+        <wup-dropdown class={styles.custom}>
           <button type="button">{"<"}</button>
-          <wup-popup placement="left-middle" animation="stack" target="#t5">
-            {/* todo need to change direction of items */}
+          <wup-popup placement="left-middle" animation="stack">
             <ul>
               <li>
                 <button type="button">A</button>
@@ -77,8 +76,8 @@ export default function DropdownView() {
           </wup-popup>
         </wup-dropdown>
         <wup-dropdown class={`${styles.custom} ${styles.vertical}`}>
-          <button type="button">
-            <span style={{ transform: "rotate(90deg)" }}>{">"}</span>
+          <button type="button" style={{ transform: "rotate(90deg)" }}>
+            {">"}
           </button>
           <wup-popup placement="bottom-middle" animation="stack">
             <ul>
@@ -95,11 +94,10 @@ export default function DropdownView() {
           </wup-popup>
         </wup-dropdown>
         <wup-dropdown class={`${styles.custom} ${styles.vertical}`}>
-          <button type="button">
-            <span style={{ transform: "rotate(-90deg)" }}>{">"}</span>
+          <button type="button" style={{ transform: "rotate(-90deg)" }}>
+            {">"}
           </button>
           <wup-popup placement="top-middle" animation="stack">
-            {/* todo need to change direction of items */}
             <ul>
               <li>
                 <button type="button">A</button>
