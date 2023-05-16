@@ -672,7 +672,6 @@ mask-image: var(--ctrl-icon-img);
       }
       
 WUP-SELECTMANY [menu] {
-  overflow: hidden;
   padding: 0;
 }
 WUP-SELECTMANY [menu] ul {

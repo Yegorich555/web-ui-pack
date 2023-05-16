@@ -106,7 +106,6 @@ ${tag}[aria-busy] {
 export function WUPcssMenu(tag: string): string {
   return `
 ${tag} {
-  overflow: hidden;
   padding: 0;
 }
 ${tag} ul {
