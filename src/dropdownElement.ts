@@ -161,7 +161,6 @@ export default class WUPDropdownElement extends WUPBaseElement {
 
   /** Custom function to override default `WUPPopupElement.prototype.goHide` */
   protected goHidePopup(hideCase: HideCases): boolean | Promise<boolean> {
-    // todo need hide by focusOut even if no ShowCases.onFocus
     if (hideCase === HideCases.onPopupClick && !this._opts.hideOnClick) {
       return false;
     }
@@ -247,3 +246,4 @@ export default class WUPDropdownElement extends WUPBaseElement {
 
 customElements.define(tagName, WUPDropdownElement);
 // todo open: popupPage 1st > open Droddown page > style for animationStack is wrong (items hidden by target)
+// todo hover+click - after small time popup is closed if animation is long

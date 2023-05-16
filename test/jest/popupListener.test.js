@@ -754,7 +754,7 @@ describe("popupListener", () => {
     expect(isShown).toBe(false);
     f0.mockRestore();
 
-    // special case
+    // special case when popup can be opened again
     expect(document.activeElement).not.toBe(trg);
     ref = new PopupListener(
       { target: trg, showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onHover },
@@ -771,5 +771,27 @@ describe("popupListener", () => {
     await h.wait();
     expect(isShown).toBe(false);
     expect(document.activeElement).toBe(tin1);
+
+    // popup focusing during the hiding is prevented
+    await h.userClick(trg);
+    await h.wait();
+    expect(isShown).toBe(true);
+    onHide.mockImplementationOnce(
+      () =>
+        new Promise((res) =>
+          setTimeout(() => {
+            res(true);
+            isShown = false;
+          }, 400)
+        )
+    );
+    await h.userClick(trg);
+    expect(isShown).toBe(true); // because closing takes time
+    await h.userPressTab(el);
+    expect(document.activeElement).toBe(tin1);
+    await h.wait();
+    expect(isShown).toBe(false);
   });
 });
+
+// todo globaly fix typo `hiding` not `hidding`
