@@ -5,6 +5,7 @@
 **BREAKING CHANGES**:
 
 - helper **animateDropdown** moved into [`web-ui-pack/helpers/animateDropdown`](src/helpers/animateDropdown.ts)
+- [PopupElement](src/popup/popupElement.ts). Fixed typo `$isHiding` vs `$isHiding`
 
 **Fixes**:
 

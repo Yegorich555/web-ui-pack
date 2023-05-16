@@ -547,7 +547,7 @@ describe("popupListener", () => {
     expect(onHide).toBeCalledTimes(1);
   });
 
-  test("hidding by click twice", async () => {
+  test("hiding by click twice", async () => {
     el = document.body.appendChild(document.createElement("wup-popup"));
     el.$options.target = trg;
     el.$options.showCase = 0;
@@ -806,4 +806,4 @@ describe("popupListener", () => {
   });
 });
 
-// todo globaly fix typo `hiding` not `hidding`
+// todo globaly fix typo `hiding` not `hiding`

@@ -26,14 +26,14 @@ export default function animateStack(
   const parent = arr[0].parentElement!;
   let resMe: (isEnd: boolean) => void;
 
-  // calc hideStyle position or use previous saved: when showing>partially show> hidding
+  // calc hideStyle position or use previous saved: when showing>partially show> hiding
   if (arr[0]._hideStyle === undefined) {
     parent.style.overflow = "visible"; // otherwise items is hidden under target
     parent.style.zIndex = ((Number.parseInt(getComputedStyle(target).zIndex, 10) || 1) - 1).toString(); // setup  zIndex to be hidden under target
     const r0 = target.getBoundingClientRect();
     arr.forEach((a) => {
       const r = a.getBoundingClientRect();
-      a._hideStyle = isVertical // WARN: possible issue if opening horizontal > stop > hidding vertical
+      a._hideStyle = isVertical // WARN: possible issue if opening horizontal > stop > hiding vertical
         ? `translateY(${Math.round(r0.top - r.top)}px)`
         : `translateX(${Math.round(r0.left - r.left)}px)`;
       if (!isHide) {

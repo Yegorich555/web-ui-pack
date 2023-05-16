@@ -44,7 +44,7 @@ export default class PopupListener {
 
   openedEl: Element | null = null;
   isShowing?: boolean | Promise<unknown>; // required to prevent infinite-calling from parent
-  isHidding?: boolean | Promise<unknown>; // required to prevent infinite-calling from parent
+  isHiding?: boolean | Promise<unknown>; // required to prevent infinite-calling from parent
 
   /** Called on show */
   async show(showCase: ShowCases, e?: MouseEvent | FocusEvent): Promise<void> {
@@ -72,15 +72,15 @@ export default class PopupListener {
   /** Called on hide */
   async hide(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): Promise<void> {
     this.isShowing && (await this.isShowing);
-    if (!this.openedEl || this.isHidding) {
+    if (!this.openedEl || this.isHiding) {
       return;
     }
     this.disposeOnHide();
-    const was = this.openedEl; // required when user clicks again during the hidding > we need to show in this case
+    const was = this.openedEl; // required when user clicks again during the hiding > we need to show in this case
     this.openedEl = null;
     try {
-      this.isHidding = true;
-      // console.warn("hidding");
+      this.isHiding = true;
+      // console.warn("hiding");
       // todo hideCase on popupClick must focus target immediately or don't wait for hideAnimation
       // prevent focusing popupContent during the hiding
       const r = onEvent(was as HTMLElement, "focusin", ({ relatedTarget }) => {
@@ -88,7 +88,7 @@ export default class PopupListener {
       });
       const isOk = await this.onHide(hideCase, e || null);
       r();
-      // console.warn("hidden"); // todo we are waiting for hidding for real popup: fix this in popup
+      // console.warn("hidden"); // todo we are waiting for hiding for real popup: fix this in popup
       if (isOk) {
         this.#openedByHover = false;
         // case1: popupClick > focus lastActive or target
@@ -99,16 +99,16 @@ export default class PopupListener {
         this.#lastActive = undefined;
       }
       if (!isOk && !this.openedEl) {
-        this.openedEl = was; // rollback if onHide was prevented and onShow wasn't called again during the hidding
+        this.openedEl = was; // rollback if onHide was prevented and onShow wasn't called again during the hiding
         this.listenOnShow();
       }
     } catch (error) {
       Promise.reject(error); // handle error from onHide
     }
-    this.isHidding = false;
+    this.isHiding = false;
   }
 
-  /** Returns focus back during the hidding */
+  /** Returns focus back during the hiding */
   focusBack(relatedTarget: Element | EventTarget | { focus: () => void } | null): void {
     this.#preventFocusEvent = true;
     const t = this.options.target;

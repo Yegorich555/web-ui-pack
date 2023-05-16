@@ -215,12 +215,12 @@ export default class WUPPopupElement<
         popup.$options.target = options.target;
       }
       const opts = popup ? { ...options, ...popup.$options, target: popup.$options.target! } : options;
-      let isHidding = false;
+      let isHiding = false;
 
       const lstn = new PopupListener(
         opts,
         (v) => {
-          isHidding = false;
+          isHiding = false;
           const isCreate = !popup;
           if (!popup) {
             const p = document.body.appendChild(document.createElement(opts.tagName ?? tagName) as T);
@@ -250,10 +250,10 @@ export default class WUPPopupElement<
           return popup;
         },
         async (v) => {
-          isHidding = true;
+          isHiding = true;
           const ok = await popup!.goHide.call(popup, v);
           /* istanbul ignore else */
-          if (ok && isHidding) {
+          if (ok && isHiding) {
             popup!.#refListener = undefined; // otherwise remove() destroys events
             popup!.remove.call(popup);
             popup = undefined;
@@ -348,7 +348,7 @@ export default class WUPPopupElement<
   /** Returns if popup is opened (before show-animation is started)
    * @tutorial Troubleshooting
    * * stack: $show() > `$isShown:true` > showing > shown
-   * * stack: $hide() > hidding > hidden > `$isShown:false`
+   * * stack: $hide() > hiding > hidden > `$isShown:false`
    * * to listen to animation-end use events `$show` & `$hide` OR methods `$show().then(...)` & `$hide().then(... )` */
   get $isShown(): boolean {
     return this.#isShown;
@@ -357,16 +357,16 @@ export default class WUPPopupElement<
   /** Returns if popup is closed (after hide-animation is ended)
    * @tutorial Troubleshooting
    * * stack: $show() > `$isHidden:false` >  showing > shown
-   * * stack: $hide() > hidding > hidden > `$isHidden:true`
+   * * stack: $hide() > hiding > hidden > `$isHidden:true`
    * * to listen to animation-end use events `$show` & `$hide` OR methods `$show().then(...)` & `$hide().then(... )` */
   get $isHidden(): boolean {
-    return !this.#isShown && !this.$isHidding;
+    return !this.#isShown && !this.$isHiding;
   }
 
-  #isHidding?: true;
-  /** Returns if popup is hidding (only if animation enabled) */
-  get $isHidding(): boolean {
-    return this.#isHidding === true;
+  #isHiding?: true;
+  /** Returns if popup is hiding (only if animation enabled) */
+  get $isHiding(): boolean {
+    return this.#isHiding === true;
   }
 
   #isShowing?: true;
@@ -638,7 +638,7 @@ export default class WUPPopupElement<
 
   /** Shows popup if target defined; returns true if successful */
   goShow(showCase: ShowCases): boolean | Promise<boolean> {
-    if (this.#isShown && !this.#isHidding && !this.#isShowing) {
+    if (this.#isShown && !this.#isHiding && !this.#isShowing) {
       return true;
     }
     if (this.#whenShow) {
@@ -649,7 +649,7 @@ export default class WUPPopupElement<
       return false;
     }
     this.#whenHide = undefined;
-    this.#isHidding = undefined;
+    this.#isHiding = undefined;
     this._stopAnimation?.call(this);
     this.#state && window.cancelAnimationFrame(this.#state.frameId);
     this.buildState();
@@ -699,7 +699,7 @@ export default class WUPPopupElement<
 
   /** Hide popup. @hideCase as reason of hide(). Calling 2nd time at once will stop previous hide-animation */
   goHide(hideCase: HideCases): boolean | Promise<boolean> {
-    if (!this.#isShown && !this.#isHidding && !this.#isShowing) {
+    if (!this.#isShown && !this.#isHiding && !this.#isShowing) {
       return true;
     }
     if (this.#whenHide) {
@@ -713,9 +713,9 @@ export default class WUPPopupElement<
     this.#whenShow = undefined;
     this.#isShowing = undefined;
     this._stopAnimation?.call(this);
-    this.#isHidding = true;
+    this.#isHiding = true;
     const finishHide = (): void => {
-      this.#isHidding = undefined;
+      this.#isHiding = undefined;
       delete this._stopAnimation;
       this.style.display = "";
       this.removeAttribute("hide");
@@ -738,7 +738,7 @@ export default class WUPPopupElement<
       const animTime = Number.parseFloat(aD.substring(0, aD.length - 1)) * 1000 || 0;
       if (animTime) {
         this.#whenHide = this.goAnimate(animTime, true).then((isOk) => {
-          this.#isHidding = undefined;
+          this.#isHiding = undefined;
           this.removeAttribute("hide");
           if (!isOk) {
             return false;
@@ -1029,7 +1029,7 @@ export default class WUPPopupElement<
 
   protected override gotRemoved(): void {
     this.#isShown = false;
-    this.#isHidding = undefined;
+    this.#isHiding = undefined;
     this.#isShowing = undefined;
     this.#whenHide = undefined;
     this.#whenShow = undefined;
