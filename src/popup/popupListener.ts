@@ -301,15 +301,15 @@ export default class PopupListener {
       el.addEventListener("mouseenter", this.handleEvents, this.#defargs);
       el.addEventListener("mouseleave", this.handleEvents, this.#defargs);
     }
-    if (showCase & ShowCases.onFocus) {
-      // todo use focusLost forever
-      this.#disposeFocusLost = onFocusLost(t as HTMLElement, this.handleEvents, {
-        debounceMs: this.options.focusDebounceMs,
-      });
-      this.#disposeFocusLost2 = onFocusLost(el, this.handleEvents, {
-        debounceMs: this.options.focusDebounceMs,
-      });
-    }
+    // if (showCase & ShowCases.onFocus) {
+    // WARN: use focusLost forever for accessibility purpose
+    this.#disposeFocusLost = onFocusLost(t as HTMLElement, this.handleEvents, {
+      debounceMs: this.options.focusDebounceMs,
+    });
+    this.#disposeFocusLost2 = onFocusLost(el, this.handleEvents, {
+      debounceMs: this.options.focusDebounceMs,
+    });
+    // }
   }
 
   /** Called to remove extra events when hide */
