@@ -86,7 +86,6 @@ export default class PopupListener {
       const r = onEvent(was as HTMLElement, "focusin", ({ relatedTarget }) => {
         this.focusBack(relatedTarget); // WARN: it returns focus to target but better move focus forward - but it's impossible
       });
-      // was.setAttribute("pointer-events", true);
       const isOk = await this.onHide(hideCase, e || null);
       r();
       // console.warn("hidden"); // todo we are waiting for hidding for real popup: fix this in popup
@@ -227,7 +226,7 @@ export default class PopupListener {
         }
         break;
       case "focusin":
-        if (!this.openedEl && !this.#preventFocusEvent) {
+        if (!this.openedEl && !this.#preventFocusEvent && !this.#openedByHover) {
           this.#preventClickAfterFocus = !!(this.options.showCase! & ShowCases.onClick);
           this.show(ShowCases.onFocus, ev as FocusEvent).then(() => {
             if (this.#preventClickAfterFocus) {

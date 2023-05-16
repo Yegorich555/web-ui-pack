@@ -257,6 +257,16 @@ describe("popupListener", () => {
     );
 
     // full simulation of hover>click>hoverPopup>clickPopup
+    onShow.mockImplementationOnce(
+      () =>
+        new Promise((res) =>
+          setTimeout(() => {
+            isShown = true;
+            el = document.body.appendChild(document.createElement("span"));
+            res(el);
+          }, 300)
+        )
+    );
     trg.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
     await h.wait(10);
     await h.userClick(trg);
@@ -264,6 +274,7 @@ describe("popupListener", () => {
     expect(isShown).toBe(true);
     expect(onShow).toBeCalledTimes(1);
     expect(onHide).toBeCalledTimes(0);
+    expect(document.activeElement).toBe(trg);
     trg.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
     await h.wait(10);
     el.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
@@ -276,6 +287,7 @@ describe("popupListener", () => {
     expect(onHide).toBeCalledTimes(1);
 
     // user clicks on target when it shows by hover
+    document.activeElement.blur();
     jest.clearAllMocks();
     trg.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
     await h.wait(ref.options.hoverShowTimeout + 10);
