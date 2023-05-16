@@ -159,9 +159,6 @@ export default class WUPDropdownElement extends WUPBaseElement {
 
       // lbl.id = lbl.id || this.#ctr.$uniqueId;
       // menu.setAttribute("aria-labelledby", lbl.id);
-      this.appendEvent(this, "keydown", (e) => !this.hasAttribute("disabled") && this.gotKeyDown(e), {
-        passive: false,
-      });
     }
     super.gotReady();
   }
@@ -170,7 +167,6 @@ export default class WUPDropdownElement extends WUPBaseElement {
   protected goShowPopup(showCase: ShowCases): boolean | Promise<boolean> {
     const p = WUPPopupElement.prototype.goShow.call(this.$refPopup, showCase);
     this.$refPopup.$options.target!.setAttribute("aria-expanded", true);
-    this.addEventListener("keydown", this.gotKeyDown);
     return p;
   }
 
@@ -181,81 +177,7 @@ export default class WUPDropdownElement extends WUPBaseElement {
     }
     const p = WUPPopupElement.prototype.goHide.call(this.$refPopup, hideCase);
     this.$refPopup.$options.target!.setAttribute("aria-expanded", false);
-    this.focusMenuItem(null);
     return p;
-  }
-
-  /** Current focused menu-item (via aria-activedescendant) */
-  _focusedMenuItem?: Element | null;
-  /** Focus/resetFocus for item (via aria-activedescendant) */
-  protected focusMenuItem(next: Element | null): void {
-    // WARN: it's dupicate of WUPBaseComboControl.prototype.focusMenuItem
-    this._focusedMenuItem?.removeAttribute("focused");
-
-    if (next) {
-      next.id = next.id || this.#ctr.$uniqueId;
-      next.setAttribute("focused", "");
-      this.$refTitle.setAttribute("aria-activedescendant", next.id);
-      const ifneed = (next as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
-      ifneed ? ifneed.call(next, false) : next.scrollIntoView();
-    } else {
-      this.$refTitle.removeAttribute("aria-activedescendant");
-    }
-    this._focusedMenuItem = next;
-  }
-
-  /** Called when user pressed key */
-  protected gotKeyDown(e: KeyboardEvent): void {
-    // todo sometimes selection via keydown not required
-    // todo what if menuItems is controls ???? In this case need to remove this logic ???
-    if (e.defaultPrevented || e.altKey || e.shiftKey || e.ctrlKey) {
-      return;
-    }
-    let handled = true;
-    const isHidden = this.$refPopup.$isHidden;
-
-    let focused = this._focusedMenuItem;
-    switch (e.key) {
-      case "ArrowDown":
-      case "ArrowRight":
-        focused = focused?.nextElementSibling || this.$refMenu.firstElementChild;
-        break;
-      case "ArrowUp":
-      case "ArrowLeft":
-        focused = focused?.previousElementSibling || this.$refMenu.lastElementChild;
-        break;
-      default:
-        handled = false;
-    }
-    handled && this.$refPopup.$isHidden && this.$refPopup.$show();
-
-    if (!handled) {
-      if (isHidden) {
-        switch (e.key) {
-          case "Space":
-          case "Enter":
-            this.$refPopup.$show();
-            break;
-          default:
-            handled = false;
-        }
-      } else {
-        switch (e.key) {
-          case "Home":
-            focused = this.$refMenu.firstElementChild;
-            break;
-          case "End":
-            focused = this.$refMenu.lastElementChild;
-            break;
-          default:
-            handled = false;
-        }
-      }
-    }
-    if (handled) {
-      e.preventDefault();
-      focused && focused !== this._focusedMenuItem && setTimeout(() => this.focusMenuItem(focused!), isHidden ? 1 : 0); // 1ms wait for opening popup
-    }
   }
 }
 
