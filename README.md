@@ -68,7 +68,7 @@ npm install web-ui-pack
   - [ ] FileControl
   - [ ] SearchControl ?
   - [ ] ImageControl (AvatarEditor)
-- [ ] Dropdown
+- [x] [DropdownElement](src/dropdownElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/dropdown)
 - [ ] MediaPlayer
 - [ ] ModalElement
 - [ ] ConfirmModalElement
@@ -87,8 +87,9 @@ npm install web-ui-pack
    - Public properties/options/events/methods startsWith `$...` (events `$onShow`, `$onHide`, methods `$show`, `$hide`, props like `$isShown` etc.)
    - Every component/class has static `$defaults` (common options for current class) and personal `$options` (per each component). See details in [example](#example)
    - `$options` are observed. So changing options affects on component immediately after empty timeout (every component has static `observedOptions` as set of watched options)
+   - all custom `attributes` updates `$options` automatically. So `document.querySelector('wup-spin').$options.inline` equal to `<wup-spin inline />`
 2. **Usage**
-   - For webpack [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free) switched on (it's for optimization). But **if you don't use webpack** don't import from `web-ui-pack` directly (due to tree-shaking can be not smart enough). Instead use `web-ui-pack/path-to-element`
+   - For webpack [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free) switched on (for optimization). But **if you don't use webpack** don't import from `web-ui-pack` directly (due to tree-shaking can be not smart enough). Instead use `web-ui-pack/path-to-element`
    - Every component has a good JSDoc so go ahead and read details directly during the coding
    - Library compiled into ESNext. To avoid unexpected issues include this package into babel (use `exclude: /node_modules\/(?!(web-ui-pack)\/).*/` for babel-loader)
 3. **Limitations**
@@ -99,11 +100,13 @@ npm install web-ui-pack
    - All Components inherited from [WUPBaseElement](src/baseElement.ts) that extends default HTMLElement
    - All internal event-callbacks startsWith `got...` (gotReady, gotRemoved)
    - To redefine component just extend it and register with new html tag OR redefine default behavior via prototype functions (if $defaults are not included something). See details in [example](#example)
-   - **inheritance Tree**
+   - **Inheritance Tree**
      - [_HTMLElement_](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement)
        - [_BaseElement_](src/baseElement.ts)
          - [PopupElement](src/popupElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
+         - [DropdownElement](src/dropdownElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/dropdown)
          - [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
+         - [CircleElement](src/circleElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/circle)
          - [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
          - [_BaseControl_](src/controls/baseControl.ts)
            - [SwitchControl](src/controls/switch.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/switch)
@@ -211,10 +214,6 @@ declare global {
 
 ---
 
-### CutomTypes
-
-- [WUPTimeObject](src/objects/timeObject.ts) => `Ordinary class Time with hours & minutes`
-
 ### Helpers
 
 use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
@@ -234,7 +233,7 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 - [**nestedProperty.set**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.set(obj, "value.nestedValue", 1) sets obj.value.nestedValue = 1`
 - [**nestedProperty.get**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.get(obj, "nested.val2", out?: {hasProp?: boolean} ) returns value from obj.nested.val2`
 - [**objectClone**](src/helpers/objectClone.ts) ⇒ `deep cloning object`
-- [**observer**](#helpersobserver) ⇒ `converts object to observable (via Proxy) to allow listen for changes`
+- [**observer**](src/helpers/observer.md) ⇒ `converts object to observable (via Proxy) to allow listen for changes`
 - [**onEvent**](src/helpers/onEvent.ts) ⇒ `More strict (for Typescript) wrapper of addEventListener() that returns callback with removeListener()`
 - [**onFocusGot**](src/helpers/onFocusGot.ts) ⇒ `Fires when element/children takes focus once (fires again after onFocusLost on element)`
 - [**onScroll**](src/helpers/onScrollStop.ts) ⇒ `Handles wheel & touch events for custom scrolling`
@@ -252,52 +251,6 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 
 - [**localeInfo**](src/objects/localeInfo.ts) ⇒ `Locale-object with definitions related to user-locale`
 - [**TimeObject**](src/objects/timeObject.ts) ⇒ `Plane time object without date`
-
-#### Helpers.Observer
-
-```js
-import observer from "web-ui-pack/helpers/observer";
-
-const rawNestedObj = { val: 1 };
-const raw = { date: new Date(), period: 3, nestedObj: rawNestedObj, arr: ["a"] };
-const obj = observer.make(raw);
-const removeListener = observer.onPropChanged(obj, (e) => console.warn("prop changed", e)); // calls per each changing
-const removeListener2 = observer.onChanged(obj, (e) => console.warn("object changed", e)); // calls once after changing of bunch props
-obj.period = 5; // fire onPropChanged
-obj.date.setHours(0, 0, 0, 0); // fire onPropChanged
-obj.nestedObj.val = 2; // fire onPropChanged
-obj.arr.push("b"); // fire onPropChanged
-
-obj.nestedObj = rawNestedObj; // fire onPropChanged
-obj.nestedObj = rawNestedObj; // WARNING: it fire events again because rawNestedObj !== obj.nestedObj
-
-removeListener(); // unsubscribe
-removeListener2(); // unsubscribe
-
-// before timeout will be fired onChanged (single time)
-setTimeout(() => {
-  console.warn("WARNING: raw vs observable", {
-    equal: raw === obj,
-    equalByValueOf: raw.valueOf() === obj.valueOf(),
-    isRawObserved: observer.isObserved(raw),
-    isObjObserved: observer.isObserved(obj),
-  });
-  // because after assigning to observable it converted to observable also
-  console.warn("WARNING: rawNestedObj vs observable", {
-    equal: rawNestedObj === obj.nestedObj,
-    equalByValueOf: rawNestedObj.valueOf() === obj.nestedObj.valueOf(),
-    isRawObserved: observer.isObserved(rawNestedObj),
-    isNestedObserved: observer.isObserved(obj.nestedObj),
-  });
-});
-```
-
-##### Troubleshooting & Rules
-
-- Every object assigned to `observed` is converted to `observed` also
-- When you change array in most cases you get changing `length`; also `sort`/`reverse` triggers events
-- WeakMap, WeakSet, HTMLElement are not supported (not observed)
-- All objects compares by `valueOf()` so you maybe interested in custom valueOf to avoid unexpected issues
 
 ---
 

@@ -165,6 +165,7 @@ export default class WUPDropdownElement extends WUPBaseElement {
 
   /** Custom function to override default `WUPPopupElement.prototype.goHide` */
   protected goShowPopup(showCase: ShowCases): boolean | Promise<boolean> {
+    // todo need somehow prevent closing by click inside if user works with controls inside
     const p = WUPPopupElement.prototype.goShow.call(this.$refPopup, showCase);
     this.$refPopup.$options.target!.setAttribute("aria-expanded", true);
     return p;
