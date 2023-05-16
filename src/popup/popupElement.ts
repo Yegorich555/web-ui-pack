@@ -404,7 +404,7 @@ export default class WUPPopupElement<
       this.#refListener = new PopupListener(
         this._opts as typeof this._opts & { target: HTMLElement },
         (v) => (this.goShow(v) ? this : null),
-        (v) => this.goHide(v)
+        (v) => !!this.goHide(v)
       );
     }
   }

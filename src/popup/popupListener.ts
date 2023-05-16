@@ -80,15 +80,12 @@ export default class PopupListener {
     this.openedEl = null;
     try {
       this.isHiding = true;
-      // console.warn("hiding");
-      // todo hideCase on popupClick must focus target immediately or don't wait for hideAnimation
       // prevent focusing popupContent during the hiding
       const r = onEvent(was as HTMLElement, "focusin", ({ relatedTarget }) => {
         this.focusBack(relatedTarget); // WARN: it returns focus to target but better move focus forward - but it's impossible
       });
-      const isOk = await this.onHide(hideCase, e || null);
+      const isOk = await this.onHide.call(was, hideCase, e || null);
       r();
-      // console.warn("hidden"); // todo we are waiting for hiding for real popup: fix this in popup
       if (isOk) {
         this.#openedByHover = false;
         // case1: popupClick > focus lastActive or target
