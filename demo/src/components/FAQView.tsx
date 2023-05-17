@@ -10,6 +10,43 @@ export default function FAQView() {
       <FAQ
         items={[
           {
+            link: "difficult",
+            question: "How to use this? Need always look into source code to get details",
+            answer: (
+              <>
+                You do it in a wrong way OR intellisense in editor does not work. So check these rules:
+                <section>
+                  <ol>
+                    <li>
+                      Intellisense must work - otherwise coding in notepad does not make sense at all. Try import
+                      required component at first. Check{" "}
+                      <a href="https://github.com/Yegorich555/web-ui-pack/tree/master/demo">source-code of demo</a> to
+                      compare with your solution
+                    </li>
+                    <li>
+                      All components are similar to native (like <b>input, div, span</b> etc). They have also
+                      attributes, events, internal functions and logic
+                    </li>
+                    <li>
+                      All custom events, methods starts with <b>$...</b> (
+                      <b>$options, $defaults, $isChanged, $isShown,</b> event <b>$change</b> etc.)
+                    </li>
+                    <li>
+                      Every component has <b>$options</b> that inheritted from static <b>$defaults</b>. Use static{" "}
+                      <b>$defaults</b> to change global behavior or <b>$options</b> to change behavior for specific
+                      component
+                    </li>
+                    <li>All custom attributes are provided on each demo-page (see HTML-section)</li>
+                    <li>
+                      All custom attibutes affects <b>$options</b> with same name
+                    </li>
+                    <li>Use css-variables to change default style (see CSS-section on demo pages)</li>
+                  </ol>
+                </section>
+              </>
+            ),
+          },
+          {
             link: "redefine-styles",
             question: "How to redefine styles",
             answer: (

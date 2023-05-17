@@ -43,7 +43,6 @@ npm install web-ui-pack
 ## TODO
 
 - [x] [Helpers](#helpers)
-- [x] [Helper.Observer](#helpersobserver)
 - [x] [PopupElement](#example) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
   - [ ] Tooltip
 - [x] [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
@@ -290,3 +289,7 @@ Be sure that you familiar with [common rules](#components)
 > WUPSelectControl.$defaults.validateDebounceMs = 500;
 > // etc.
 > ```
+
+### FAQ
+
+see [demo/faq](https://yegorich555.github.io/web-ui-pack/faq)
