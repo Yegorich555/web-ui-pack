@@ -219,7 +219,7 @@ export default class WUPPopupElement<
 
       const lstn = new PopupListener(
         opts,
-        (v) => {
+        (v, e) => {
           isHiding = false;
           const isCreate = !popup;
           if (!popup) {
@@ -238,7 +238,7 @@ export default class WUPPopupElement<
             callback?.call(this, p);
           }
 
-          if (!popup.goShow.call(popup, v)) {
+          if (!popup.goShow.call(popup, v, e)) {
             /* istanbul ignore else */
             if (isCreate) {
               popup!.#refListener = undefined; // otherwise remove() destroys events
@@ -249,9 +249,9 @@ export default class WUPPopupElement<
 
           return popup;
         },
-        async (v) => {
+        async (v, e) => {
           isHiding = true;
-          const ok = await popup!.goHide.call(popup, v);
+          const ok = await popup!.goHide.call(popup, v, e);
           /* istanbul ignore else */
           if (ok && isHiding) {
             popup!.#refListener = undefined; // otherwise remove() destroys events
@@ -268,7 +268,7 @@ export default class WUPPopupElement<
 
     function detach(): void {
       if (popup) {
-        popup.$isShown && popup.goHide.call(popup, HideCases.onManuallCall);
+        popup.$isShown && popup.goHide.call(popup, HideCases.onManuallCall, null);
         (popup as T).remove.call(popup);
       }
       r.stopListen();
@@ -297,7 +297,7 @@ export default class WUPPopupElement<
         // isReady false when you fire $hide on disposed element
         let isOk = true;
         if (this.$isReady) {
-          isOk = await this.goHide(HideCases.onManuallCall);
+          isOk = await this.goHide(HideCases.onManuallCall, null);
           if (isOk) {
             this._opts.showCase !== ShowCases.always && this.init(); // re-init to applyShowCase
           }
@@ -323,7 +323,7 @@ export default class WUPPopupElement<
         } else {
           this.disposeListener(); // remove events
           try {
-            const isOk = await this.goShow(ShowCases.always);
+            const isOk = await this.goShow(ShowCases.always, null);
             resolve(isOk);
           } catch (err) {
             reject(err); // here promise in promise. So handling is required
@@ -398,13 +398,13 @@ export default class WUPPopupElement<
       this._opts.target = this.#defineTarget();
 
       if (!this._opts.showCase /* always */) {
-        this.goShow(ShowCases.always);
+        this.goShow(ShowCases.always, null);
         return;
       }
       this.#refListener = new PopupListener(
         this._opts as typeof this._opts & { target: HTMLElement },
-        (v) => (this.goShow(v) ? this : null),
-        (v) => !!this.goHide(v)
+        (v, e) => (this.goShow(v, e) ? this : null),
+        (v, e) => !!this.goHide(v, e)
       );
     }
   }
@@ -412,7 +412,7 @@ export default class WUPPopupElement<
   protected override gotChanges(propsChanged: Array<string> | null): void {
     super.gotChanges(propsChanged);
 
-    propsChanged && this.$isShown && this.goHide(HideCases.onOptionChange);
+    propsChanged && this.$isShown && this.goHide(HideCases.onOptionChange, null);
 
     // attr placement
     const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.$placementAttrs;
@@ -637,7 +637,9 @@ export default class WUPPopupElement<
   }
 
   /** Shows popup if target defined; returns true if successful */
-  goShow(showCase: ShowCases): boolean | Promise<boolean> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  goShow(showCase: ShowCases, ev: MouseEvent | FocusEvent | null): boolean | Promise<boolean> {
+    // todo feature: openManually but close by listener. In this case need trigger refListener.show()
     if (this.#isShown && !this.#isHiding && !this.#isShowing) {
       return true;
     }
@@ -698,7 +700,9 @@ export default class WUPPopupElement<
   }
 
   /** Hide popup. @hideCase as reason of hide(). Calling 2nd time at once will stop previous hide-animation */
-  goHide(hideCase: HideCases): boolean | Promise<boolean> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  goHide(hideCase: HideCases, ev: MouseEvent | FocusEvent | KeyboardEvent | null): boolean | Promise<boolean> {
+    // todo feature: openByListener but close manually. In this case need trigger refListener.hide()
     if (!this.#isShown && !this.#isHiding && !this.#isShowing) {
       return true;
     }
@@ -765,7 +769,7 @@ export default class WUPPopupElement<
     const trg = this._opts.target!;
     // possible when target removed via set innerHTML (in this case remove-hook doesn't work)
     if (!trg.isConnected) {
-      this.goHide(HideCases.onTargetRemove);
+      this.goHide(HideCases.onTargetRemove, null);
       this.#attach && this.remove(); // self-removing if $attach()
       return undefined;
     }

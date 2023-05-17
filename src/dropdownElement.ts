@@ -164,19 +164,21 @@ export default class WUPDropdownElement extends WUPBaseElement {
   }
 
   /** Custom function to override default `WUPPopupElement.prototype.goHide` */
-  protected goShowPopup(showCase: ShowCases): boolean | Promise<boolean> {
-    // todo need somehow prevent closing by click inside if user works with controls inside
-    const p = WUPPopupElement.prototype.goShow.call(this.$refPopup, showCase);
+  protected goShowPopup(showCase: ShowCases, ev: MouseEvent | FocusEvent | null): boolean | Promise<boolean> {
+    const p = WUPPopupElement.prototype.goShow.call(this.$refPopup, showCase, ev);
     this.$refPopup.$options.target!.setAttribute("aria-expanded", true);
     return p;
   }
 
   /** Custom function to override default `WUPPopupElement.prototype.goHide` */
-  protected goHidePopup(hideCase: HideCases): boolean | Promise<boolean> {
+  protected goHidePopup(
+    hideCase: HideCases,
+    ev: MouseEvent | FocusEvent | KeyboardEvent | null
+  ): boolean | Promise<boolean> {
     if (hideCase === HideCases.onPopupClick && !this._opts.hideOnClick) {
       return false;
     }
-    const p = WUPPopupElement.prototype.goHide.call(this.$refPopup, hideCase);
+    const p = WUPPopupElement.prototype.goHide.call(this.$refPopup, hideCase, ev);
     this.$refPopup.$options.target!.setAttribute("aria-expanded", false);
     return p;
   }

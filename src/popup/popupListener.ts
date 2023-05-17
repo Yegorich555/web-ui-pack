@@ -1,4 +1,3 @@
-import { KeyboardEvent } from "react";
 import onFocusGot from "../helpers/onFocusGot";
 import onFocusLost from "../helpers/onFocusLost";
 import { focusFirst, onEvent } from "../indexHelpers";
@@ -29,7 +28,10 @@ export default class PopupListener {
       showCase: ShowCases,
       ev: MouseEvent | FocusEvent | null
     ) => HTMLElement | null | Promise<HTMLElement | null>,
-    public onHide: (hideCase: HideCases, ev: MouseEvent | FocusEvent | null) => boolean | Promise<boolean>
+    public onHide: (
+      hideCase: HideCases,
+      ev: MouseEvent | FocusEvent | KeyboardEvent | null
+    ) => boolean | Promise<boolean>
   ) {
     this.options = { ...PopupListener.$defaults, ...options };
     const t = this.options.target;
@@ -47,7 +49,7 @@ export default class PopupListener {
   isHiding?: boolean | Promise<unknown>; // required to prevent infinite-calling from parent
 
   /** Called on show */
-  async show(showCase: ShowCases, e?: MouseEvent | FocusEvent): Promise<void> {
+  async show(showCase: ShowCases, e: MouseEvent | FocusEvent | null): Promise<void> {
     if (this.openedEl || this.isShowing || !this.options.target.isConnected) {
       return;
     }
@@ -56,7 +58,7 @@ export default class PopupListener {
     // eslint-disable-next-line no-async-promise-executor
     this.isShowing = new Promise<void>(async (res, rej) => {
       try {
-        this.openedEl = await this.onShow(showCase, e || null);
+        this.openedEl = await this.onShow(showCase, e);
         res();
       } catch (err) {
         rej(err);
@@ -70,7 +72,7 @@ export default class PopupListener {
   }
 
   /** Called on hide */
-  async hide(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): Promise<void> {
+  async hide(hideCase: HideCases, e: MouseEvent | FocusEvent | KeyboardEvent | null): Promise<void> {
     this.isShowing && (await this.isShowing);
     if (!this.openedEl || this.isHiding) {
       return;
