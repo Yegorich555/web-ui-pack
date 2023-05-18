@@ -24,8 +24,9 @@
   - Added support for attribute **[animation]** ("stack","drawer","") : `<wup-popup animation="stack">...</wup-popup>`
   - Extended attribute **placement**. Now it has predefined opposite rules (so `right-middle` means `[right-middle, left-middle]`)
   - Reduced memory consumption via significant refactoring listeners & callback
-  - Popup **always closed by keydown Escape**`** if wasn't prevented (if was opened via default listener)
+  - Popup **always closed by keydown Escape**`\*\* if wasn't prevented (if was opened via default listener)
   - Popup **always closed by focusLost of target & popup** for accessibility purpose (if was opened via default listener)
+  - Ability to call **\$show()** and **\$hide()** with working listeners (previously manuall **$show()** removed all listeners)
 
 ## 0.5.2 (Mar 29, 2023)
 

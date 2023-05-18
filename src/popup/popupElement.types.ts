@@ -1,5 +1,5 @@
 export const enum ShowCases {
-  /** Show when it's added to document; to hide call $hide() (outsideClick event can be helpful) */
+  /** No listener - only manual call `.$hide()` & `.$show()` */
   always = 0,
   /** On `mouseenter` event of target; hide by `mouseleave` */
   onHover = 1,

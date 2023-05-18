@@ -299,10 +299,11 @@ describe("popupElement", () => {
     expect(a.$isShown).toBe(false);
 
     // open by mouseenter-click-focus
-    trgInput.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    let ev = new MouseEvent("mouseenter", { bubbles: true });
+    trgInput.dispatchEvent(ev);
     await h.wait(a.$options.hoverShowTimeout); // mouseenter has debounce timeout
     expect(a.$isShown).toBe(true);
-    expect(spyShow).lastCalledWith(1);
+    expect(spyShow).lastCalledWith(1, ev);
     trgInput.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
     trgInput.focus();
     trgInput.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
@@ -323,22 +324,24 @@ describe("popupElement", () => {
     trgInput.dispatchEvent(new Event("mouseenter", { bubbles: true }));
     await h.wait(a.$options.hoverShowTimeout); // mouseenter has debounce timeout
     expect(a.$isShown).toBe(true); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
-    trgInput.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    ev = new MouseEvent("mouseleave", { bubbles: true });
+    trgInput.dispatchEvent(ev);
     await h.wait(a.$options.hoverHideTimeout); // mouseenter has debounce timeout
     expect(a.$isShown).toBe(false); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
-    expect(spyHide).lastCalledWith(1);
+    expect(spyHide).lastCalledWith(1, ev);
 
     // open again by click
-    trgInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    ev = new MouseEvent("click", { bubbles: true });
+    trgInput.dispatchEvent(ev);
     await h.wait();
     expect(a.$isShown).toBe(true); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
-    expect(spyShow).lastCalledWith(1 << 2);
+    expect(spyShow).lastCalledWith(1 << 2, ev);
 
     // close by click again
     await h.userClick(trgInput);
     await h.wait();
     expect(a.$isShown).toBe(false);
-    expect(spyHide).lastCalledWith(5);
+    expect(spyHide.mock.lastCall[0]).toBe(5);
     trgInput.blur();
     spyShow.mockClear();
 
@@ -976,7 +979,7 @@ describe("popupElement", () => {
     // try to append and open
     document.body.appendChild(el);
     jest.advanceTimersToNextTimer();
-    expect(el.$show).not.toThrow();
+    expect(() => el.$show()).not.toThrow();
     expect(el.$isShown).toBe(true);
   });
 
@@ -1866,5 +1869,33 @@ describe("popupElement", () => {
     );
 
     h.unMockConsoleError();
+  });
+
+  test("show/hide manually + listener", async () => {
+    /** @type typeof el */
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.target = trg;
+    await h.wait();
+
+    expect(el.$isShown).toBe(false);
+    await h.userClick(trg); // open by listener
+    await h.wait();
+    expect(el.$isShown).toBe(true);
+    el.$hide(); // hide manually
+    await h.wait();
+    expect(el.$isShown).toBe(false);
+    await h.userClick(trg); // open by listener
+    await h.wait();
+    expect(el.$isShown).toBe(true);
+
+    await h.userClick(trg); // open by listener
+    await h.wait();
+    expect(el.$isShown).toBe(false);
+    el.$show();
+    await h.wait();
+    expect(el.$isShown).toBe(true);
+    await h.userClick(trg); // open by listener
+    await h.wait();
+    expect(el.$isShown).toBe(false);
   });
 });

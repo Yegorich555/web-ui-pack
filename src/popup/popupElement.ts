@@ -297,9 +297,11 @@ export default class WUPPopupElement<
         // isReady false when you fire $hide on disposed element
         let isOk = true;
         if (this.$isReady) {
-          isOk = await this.goHide(HideCases.onManuallCall, null);
-          if (isOk) {
-            this._opts.showCase !== ShowCases.always && this.init(); // re-init to applyShowCase
+          if (this.#refListener) {
+            await this.#refListener.hide(HideCases.onManuallCall, null);
+            isOk = !this.#refListener.openedEl;
+          } else {
+            isOk = await this.goHide(HideCases.onManuallCall, null);
           }
         }
         resolve(isOk);
@@ -309,21 +311,26 @@ export default class WUPPopupElement<
   }
 
   #whenShow?: Promise<any>;
-  /** Show popup; it disables/ignores $options.showCase and rollbacks by $hide().
+  /** Show popup
    * @returns Promise resolved by animation-end
    * @throws (rejects) error if popup not appended on layout */
   $show(): Promise<boolean> {
-    /*  if (this.#whenShow) {
+    if (this.#whenShow) {
       return this.#whenShow;
-    } */ // WARN: don't use this logic because manual $show method must remove listeners
+    }
     return new Promise<boolean>((resolve, reject) => {
       const f = async (): Promise<void> => {
         if (!this.$isReady) {
           reject(new Error(`${this.tagName}. Impossible to show: not appended to document`));
         } else {
-          this.disposeListener(); // remove events
           try {
-            const isOk = await this.goShow(ShowCases.always, null);
+            let isOk = true;
+            if (this.#refListener) {
+              await this.#refListener.show(ShowCases.always, null);
+              isOk = !!this.#refListener.openedEl;
+            } else {
+              isOk = await this.goShow(ShowCases.always, null);
+            }
             resolve(isOk);
           } catch (err) {
             reject(err); // here promise in promise. So handling is required
@@ -639,7 +646,6 @@ export default class WUPPopupElement<
   /** Shows popup if target defined; returns true if successful */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   goShow(showCase: ShowCases, ev: MouseEvent | FocusEvent | null): boolean | Promise<boolean> {
-    // todo feature: openManually but close by listener. In this case need trigger refListener.show()
     if (this.#isShown && !this.#isHiding && !this.#isShowing) {
       return true;
     }
@@ -702,7 +708,6 @@ export default class WUPPopupElement<
   /** Hide popup. @hideCase as reason of hide(). Calling 2nd time at once will stop previous hide-animation */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   goHide(hideCase: HideCases, ev: MouseEvent | FocusEvent | KeyboardEvent | null): boolean | Promise<boolean> {
-    // todo feature: openByListener but close manually. In this case need trigger refListener.hide()
     if (!this.#isShown && !this.#isHiding && !this.#isShowing) {
       return true;
     }
