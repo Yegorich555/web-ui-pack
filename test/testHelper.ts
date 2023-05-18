@@ -279,7 +279,7 @@ export function handleRejection() {
 }
 
 export function spyEventListeners(otherElements: Array<any>) {
-  const spy = [document, document.body, HTMLElement.prototype, ...(otherElements ?? [])].map((s) => {
+  const spyArr = [document, document.body, HTMLElement.prototype, ...(otherElements ?? [])].map((s) => {
     const me = {
       on: jest.spyOn(s, "addEventListener"),
       onCalls: [{ el: HTMLElement.prototype, name: "array names" }],
@@ -291,36 +291,53 @@ export function spyEventListeners(otherElements: Array<any>) {
       get: () =>
         me.on.mock.calls
           .filter((c) => (c as any)[2]?.once !== true)
-          .map((c, i) => ({ el: me.on.mock.instances[i], name: `${c[0]} ${me.on.mock.instances[i] || me.itemName}` })),
+          .map((c, i) => ({
+            el: me.on.mock.instances[i],
+            name: `${c[0]} ${me.on.mock.instances[i].constructor.name || me.itemName}`,
+          })),
       // .sort(),
     });
     Object.defineProperty(me, "offCalls", {
       get: () =>
         me.off.mock.calls.map((c, i) => ({
-          el: me.on.mock.instances[i],
-          name: `${c[0]} ${me.off.mock.instances[i] || me.itemName}`,
+          el: me.off.mock.instances[i],
+          name: `${c[0]} ${me.off.mock.instances[i].constructor.name || me.itemName}`,
         })), // .sort(),
     });
     return me;
   });
 
   const check = () => {
-    spy.forEach((s) => {
+    spyArr.forEach((s) => {
+      const strict = false;
       // checking if removed every listener that was added
-      const onCalls = s.onCalls
+      let onCalls = s.onCalls
         .filter((c) => c.el.isConnected) // skip for elements that's removed itself
         .map((c) => c.name)
         .sort();
-      const offCalls = s.offCalls
+      let offCalls = s.offCalls
         .filter((c) => c.el.isConnected) // skip for elements that's removed itself
         .map((c) => c.name)
         .sort();
+      if (!strict) {
+        // show only missed offCalls: possible when onCalls.length < offCalls.length
+        let from = 0;
+        onCalls = onCalls.filter((c) => {
+          const i = offCalls.indexOf(c, from);
+          if (i > -1) {
+            from = i + 1;
+            return false;
+          }
+          return true;
+        });
+        offCalls = [];
+      }
 
       expect(onCalls).toEqual(offCalls);
     });
   };
 
-  return Object.assign(spy, { check });
+  return Object.assign(spyArr, { check });
 }
 
 /** Mock window.requestAnimationFrame */
@@ -476,18 +493,46 @@ export async function userRemove(
 /** Simulate user mouse click with 100ms between mouseDown and mouseUp */
 export async function userClick(el: HTMLElement, opts?: MouseEventInit, timeoutMouseUp = 100) {
   const o = () => ({ bubbles: true, cancelable: true, pageX: 1, pageY: 1, ...opts });
-  el.dispatchEvent(new MouseEvent("pointerdown", o()));
-  const isOk = el.dispatchEvent(new MouseEvent("mousedown", o()));
-  isOk && el.focus();
+  const mouseEvent = (type = "click") => {
+    const args = o();
+    const e = new MouseEvent(type, args);
+    // otherwise pageX, pageY doesn't work via constructor
+    // @ts-ignore
+    e.pageX = args.pageX;
+    // @ts-ignore
+
+    e.pageY = args.pageY;
+    return e;
+  };
+  el.dispatchEvent(mouseEvent("pointerdown"));
+  const isOk = el.dispatchEvent(mouseEvent("mousedown"));
+  if (isOk) {
+    el.focus();
+    if (document.activeElement !== el) {
+      // case when click on div moves focus to body
+      (document.activeElement as HTMLElement)?.blur.call(document.activeElement);
+    }
+    document.activeElement?.dispatchEvent(new Event("focusin", { bubbles: true }));
+  }
   timeoutMouseUp && (await wait(timeoutMouseUp));
-  el.dispatchEvent(new MouseEvent("pointerup", o()));
-  el.dispatchEvent(new MouseEvent("mouseup", o()));
-  el.dispatchEvent(new MouseEvent("click", o()));
+  el.dispatchEvent(mouseEvent("pointerup"));
+  el.dispatchEvent(mouseEvent("mouseup"));
+  el.dispatchEvent(mouseEvent("click"));
 }
 
 /** Simulate user touch click with 100ms between mouseDown and mouseUp */
 export async function userTap(el: HTMLElement, opts?: MouseEventInit) {
   const o = () => ({ bubbles: true, cancelable: true, pageX: 1, pageY: 1, ...opts });
+  const mouseEvent = (type = "click") => {
+    const args = o();
+    const e = new MouseEvent(type, args);
+    // otherwise pageX, pageY doesn't work via constructor
+    // @ts-ignore
+    e.pageX = args.pageX;
+    // @ts-ignore
+    e.pageY = args.pageY;
+    return e;
+  };
   el.dispatchEvent(new MouseEvent("pointerdown", o()));
   el.dispatchEvent(
     new TouchEvent("touchstart", {
@@ -510,13 +555,13 @@ export async function userTap(el: HTMLElement, opts?: MouseEventInit) {
       ...o,
     })
   );
-  el.dispatchEvent(new MouseEvent("pointerup", o()));
+  el.dispatchEvent(mouseEvent("pointerup"));
   el.dispatchEvent(new TouchEvent("touchend", { touches: [], ...o() }));
 
-  const isOk = el.dispatchEvent(new MouseEvent("mousedown", o()));
+  const isOk = el.dispatchEvent(mouseEvent("mousedown"));
   isOk && el.focus();
-  el.dispatchEvent(new MouseEvent("mouseup", o()));
-  el.dispatchEvent(new MouseEvent("click", o()));
+  el.dispatchEvent(mouseEvent("mouseup"));
+  el.dispatchEvent(mouseEvent("click"));
 }
 
 /** Simulate user press Ctrl+Z on input;
@@ -641,3 +686,28 @@ export function userMouseMove(el: HTMLElement, { x, y }: { x: number; y: number 
 }
 
 userMouseMove.stored = { x: 0, y: 0 };
+
+/** Simulate pressing key */
+export async function userPressKey(el: Element, opts: Partial<KeyboardEvent>, between?: () => void) {
+  if (!el.dispatchEvent(new KeyboardEvent("keydown", { ...opts, bubbles: true, cancelable: true }))) {
+    return;
+  }
+  el.dispatchEvent(new KeyboardEvent("keypress", { ...opts, bubbles: true }));
+  between?.call(el);
+  await wait(50);
+  el.dispatchEvent(new KeyboardEvent("keyup", { ...opts, bubbles: true }));
+}
+
+/** Simulate pressing key Tab + focus event */
+export async function userPressTab(next: HTMLElement | null) {
+  const el = document.activeElement || document.body;
+  userPressKey(el, { key: "Tab" }, () => {
+    // el.dispatchEvent(new FocusEvent("focusout", { bubbles: true, relatedTarget: next }));
+    if (!next) {
+      (document.activeElement as HTMLElement)?.blur?.call(document.activeElement);
+    } else {
+      next.focus();
+      next.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+    }
+  });
+}

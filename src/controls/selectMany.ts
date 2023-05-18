@@ -1,4 +1,4 @@
-import { animate, isAnimEnabled } from "../helpers/animate";
+import animate, { isAnimEnabled } from "../helpers/animate";
 import isOverlap from "../helpers/isOverlap";
 import { parseMsTime } from "../helpers/styleHelpers";
 import { onEvent } from "../indexHelpers";
@@ -738,6 +738,6 @@ customElements.define(tagName, WUPSelectManyControl);
  * 3. Without contenteditalbe='false' browser moves cursor into item, but it should be outside
  */
 
-/* todo popup can change position during the hidding by focuslost when input is goes invisible and control size is reduced - need somehow block changing position-priority
+/* todo popup can change position during the hiding by focuslost when input is goes invisible and control size is reduced - need somehow block changing position-priority
 when popup is opened => don't change bottom...top if menu or control height changed. Change bottom to top only during the scrolling
  */

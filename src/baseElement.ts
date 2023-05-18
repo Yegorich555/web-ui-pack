@@ -32,7 +32,7 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
     return "";
   }
 
-  /** StyleContent related to component & inherrited components */
+  /** StyleContent related to component & inherited components */
   static get $styleRoot(): string {
     return `:root {
           --base-bg: #fff;
@@ -61,8 +61,11 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
     return "wup-hidden";
   }
 
-  /** Options that applied to element */
+  /** Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item */
+  static $defaults: Record<string, any>;
+  /** Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally */
   abstract $options: Record<string, any>;
+  /** Raw part of $options for internal usage (.$options is Proxy object and better avoid useless extra-calles via Proxy) */
   protected _opts: Record<string, any> = {};
 
   constructor() {
@@ -208,7 +211,7 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
   }
 
   #isReady = false;
-  /** Called when element is added to document */
+  /** Called when element is added to document (after empty timeout - at the end of call stack) */
   protected gotReady(): void {
     this.#readyTimeout = undefined;
     this.#isReady = true;
@@ -327,6 +330,7 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
   }
   /* eslint-enable max-len */
 
+  // todo every firing custom event must call also 'on[event]' function like el.onclick.... etc
   /** Inits customEvent & calls dispatchEvent and returns created event */
   fireEvent<K extends keyof Events>(type: K, eventInit?: CustomEventInit): Event {
     const ev = new CustomEvent(type as string, eventInit);

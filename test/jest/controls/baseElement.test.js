@@ -48,7 +48,7 @@ describe("baseElement", () => {
     expect(WUPBaseElement.$uniqueId).not.toBe(WUPBaseElement.$uniqueId);
   });
 
-  test("style inherritance", () => {
+  test("style inheritance", () => {
     expect(WUPBaseElement.$style).toBeDefined();
     expect(WUPBaseElement.$styleRoot).toBeTruthy();
     jest.spyOn(WUPBaseElement, "$style", "get").mockReturnValue(":host { display: block }");

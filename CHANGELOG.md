@@ -1,11 +1,32 @@
 # Changelog
 
-## 0.5.3 (\_\_\_)
+## 0.6.0 (\_\_\_)
 
-**New**:
+**BREAKING CHANGES**:
 
+- helper **animateDropdown** moved into [`web-ui-pack/helpers/animateDropdown`](src/helpers/animateDropdown.ts)
+- [PopupElement](src/popup/popupElement.ts). Fixed typo `$isHidding` to `$isHiding`
+
+**Fixes**:
+
+- **helper** [`animateDropdown`](src/helpers/animate.ts). _Wrong for left,right,top directions_
+- [PopupElement](src/popup/popupElement.ts). _Popup hides by mouseenter if was opened by target.mouseenter_
+- [PopupElement](src/popup/popupElement.ts). _Popup impossible to hide by click if opened by hover_
+
+**New/Features**:
+
+- [DropdownElement](src/dropdownElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/dropdown)
 - Added ability to reuse built-in styles (scroll,button['submit'] etc.). See [FAQ/sharedStyles](https://yegorich555.github.io/web-ui-pack/faq#shared-styles)
 - [SelectManyControl](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany). Added ability to sort/order items via drag&drop OR Arrows + Shift
+- Added helper [**animateStack**](src/helpers/animate.ts)
+- [PopupElement](src/popup/popupElement.ts)
+  - Added option **animation: Animations.stack**
+  - Added support for attribute **[animation]** ("stack","drawer","") : `<wup-popup animation="stack">...</wup-popup>`
+  - Extended attribute **placement**. Now it has predefined opposite rules (so `right-middle` means `[right-middle, left-middle]`)
+  - Reduced memory consumption via significant refactoring listeners & callback
+  - Popup **always closed by keydown Escape**`\*\* if wasn't prevented (if was opened via default listener)
+  - Popup **always closed by focusLost of target & popup** for accessibility purpose (if was opened via default listener)
+  - Ability to call **\$show()** and **\$hide()** with working listeners (previously manuall **$show()** removed all listeners)
 
 ## 0.5.2 (Mar 29, 2023)
 

@@ -1,7 +1,7 @@
 import WUPBaseElement from "./baseElement";
 import WUPPopupElement from "./popup/popupElement";
 import { ShowCases } from "./popup/popupElement.types";
-import { animate } from "./helpers/animate";
+import animate from "./helpers/animate";
 import { mathScaleValue, rotate } from "./helpers/math";
 import { parseMsTime } from "./helpers/styleHelpers";
 import { onEvent } from "./indexHelpers";
@@ -67,7 +67,7 @@ declare global {
        * @defaultValue 10 */
       minsize: number;
       /** Timeout in ms before popup shows on hover of target;
-       * @defaultValue inherrited from WUPPopupElement.$defaults.hoverShowTimeout */
+       * @defaultValue inherited from WUPPopupElement.$defaults.hoverShowTimeout */
       hoverShowTimeout: number;
       /** Timeout in ms before popup hides on mouse-leave of target;
        * @defaultValue 0 */
@@ -204,11 +204,11 @@ export default class WUPCircleElement extends WUPBaseElement {
     items: [],
   };
 
+  protected override _opts = this.$options;
+
   $refSVG = this.make("svg");
   $refItems = this.make("g");
   $refLabel?: HTMLElement;
-
-  protected override _opts = this.$options;
 
   /** Creates new svg-part */
   protected make<K extends keyof SVGElementTagNameMap>(tag: string): SVGElementTagNameMap[K] {
@@ -398,13 +398,12 @@ export default class WUPCircleElement extends WUPBaseElement {
     return this.appendChild(popup);
   }
 
-  /** List of functions to remove tooltipListener */
-  _tooltipDisposeLst?: Array<() => void>;
-  /** Apply tooltip listener;
-   * @returns array of dispose functions */
+  /** Function to remove tooltipListener */
+  _tooltipDisposeLst?: () => void;
+  /** Apply tooltip listener; */
   protected useTooltip(isEnable: boolean): void {
     if (!isEnable) {
-      this._tooltipDisposeLst?.forEach((fn) => fn());
+      this._tooltipDisposeLst?.call(this);
       this._tooltipDisposeLst = undefined;
       return;
     }
@@ -412,7 +411,7 @@ export default class WUPCircleElement extends WUPBaseElement {
       return;
     }
     // impossible to use popupListen because it listens for single target but we need per each segment
-    const r = onEvent(
+    this._tooltipDisposeLst = onEvent(
       this,
       "mouseenter", // mouseenter is fired even with touch event (mouseleave fired with touch outside in this case)
       (e) => {
@@ -450,7 +449,6 @@ export default class WUPCircleElement extends WUPBaseElement {
       },
       { capture: true, passive: true }
     );
-    this._tooltipDisposeLst = [r];
   }
 
   /** Called on every changeEvent */

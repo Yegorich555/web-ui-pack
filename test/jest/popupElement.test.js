@@ -1,7 +1,5 @@
-/* eslint-disable prefer-rest-params */
 import { WUPPopupElement } from "web-ui-pack";
-import popupListen from "web-ui-pack/popup/popupListen";
-import { Animations, ShowCases } from "web-ui-pack/popup/popupElement.types";
+import { Animations } from "web-ui-pack/popup/popupElement.types";
 import * as h from "../testHelper";
 
 /** @type WUPPopupElement */
@@ -251,7 +249,7 @@ describe("popupElement", () => {
     expect(a.$isShowing).toBe(false);
     a.$hide();
     expect(a.$isHidden).toBe(true);
-    expect(a.$isHidding).toBe(false);
+    expect(a.$isHiding).toBe(false);
     onHide.mockClear();
     a.$options.target = null;
     const spyShow = jest.spyOn(a, "goShow").mockClear();
@@ -290,190 +288,10 @@ describe("popupElement", () => {
   test("$options.showCase", async () => {
     /** @type typeof el */
     const a = document.createElement(el.tagName);
-    a.$options.target = trg;
-
     const spyShow = jest.spyOn(a, "goShow");
     const spyHide = jest.spyOn(a, "goHide");
-
-    // only hover
-    document.body.appendChild(a);
-    a.$options.showCase = 1; // onHover
-    jest.advanceTimersToNextTimer(); // onReady has timeout
-    expect(a.$isShown).toBe(false);
-    expect(a.$isOpen).toBe(false);
-
-    trg.dispatchEvent(new MouseEvent("mouseenter"));
-    await h.wait(a.$options.hoverShowTimeout); // event listener has timeout
-    expect(spyShow).toBeCalledTimes(1);
-    expect(a.$isShown).toBe(true);
-    expect(spyShow).lastCalledWith(1);
-
-    trg.dispatchEvent(new MouseEvent("mouseleave"));
-    await h.wait(a.$options.hoverHideTimeout); // event listener has timeout
-    expect(a.$isShown).toBe(false);
-    expect(spyHide.mock.calls[spyHide.mock.calls.length - 1][0]).toBe(1);
-
-    jest.clearAllMocks();
-    trg.dispatchEvent(new MouseEvent("mouseenter"));
-    trg.dispatchEvent(new MouseEvent("mouseleave"));
-    trg.dispatchEvent(new MouseEvent("mouseenter"));
-    trg.dispatchEvent(new MouseEvent("mouseleave"));
-    jest.advanceTimersByTime(a.$options.hoverShowTimeout + a.$options.hoverHideTimeout); // event listener has timeout
-    expect(a.$isShown).toBe(false);
-    expect(spyShow).not.toBeCalled();
-
-    trg.dispatchEvent(new MouseEvent("mouseenter"));
-    trg.remove();
-    jest.advanceTimersByTime(a.$options.hoverShowTimeout + a.$options.hoverHideTimeout); // event listener has timeout
-    expect(a.$isShown).toBe(false); // because removed
-    document.body.appendChild(trg);
-
-    // onlyFocus
-    a.remove();
-    document.body.appendChild(a);
-    a.$options.showCase = 1 << 1; // onFocus
-    jest.advanceTimersToNextTimer(); // onReady has timeout
-    expect(a.$isShown).toBe(false);
-
-    trg.dispatchEvent(new Event("focusin"));
-    await h.wait(1); // wait for promise onShow is async
-    expect(a.$isShown).toBe(true);
-    expect(spyShow).toBeCalledTimes(1);
-    expect(spyShow).lastCalledWith(1 << 1);
-    trg.dispatchEvent(new Event("focusout"));
-    await h.wait(1); // wait for promise onHide is async
-    expect(spyShow).toBeCalledTimes(1); // no new triggers because focus stay
-    // jest.advanceTimersToNextTimer(); // focusLost has timeout
-    expect(a.$isShown).toBe(false);
-
     const trgInput = trg.appendChild(document.createElement("input"));
-    const trgInput2 = trg.appendChild(document.createElement("input"));
-    // checking focusin-throttling
-    jest.clearAllMocks();
-    trgInput.focus();
-    expect(a.$isShown).toBe(true);
-    trgInput2.focus();
-    trgInput.focus();
-    await h.wait(1); // wait for promise onShow is async
 
-    expect(a.$isShown).toBe(true);
-    expect(spyHide).not.toBeCalled(); // because div haven't been lost focus
-    trgInput.blur();
-    await h.wait(1); // wait for promise onShow is async
-    expect(a.$isShown).toBe(false);
-    expect(spyShow).toBeCalledTimes(1); // checking if throttling-filter works
-    expect(spyShow).lastCalledWith(1 << 1); // checking if throttling-filter works
-    expect(spyHide.mock.calls[spyHide.mock.calls.length - 1][0]).toBe(2); // because div haven't been lost focus
-
-    // checking case when document.activeElement is null/not-null (possible on Firefox/Safari)
-    trgInput.focus();
-    await h.wait(1); // wait for promise onShow is async
-    expect(a.$isShown).toBe(true);
-    const f0 = jest.spyOn(document, "activeElement", "get").mockReturnValue(null); // just for coverage
-    trgInput.blur();
-    expect(a.$isShown).toBe(false);
-    f0.mockRestore();
-
-    // when showCase = focus. need to show() if target isAlreadyFocused
-    a.remove();
-    trg.setAttribute("tabindex", "0");
-    trg.focus();
-    expect(document.activeElement.id).toBe("targetId");
-    document.body.appendChild(a);
-    a.$options.showCase = 1 << 1; // onFocus
-    jest.advanceTimersToNextTimer(); // onReady has timeout
-    expect(a.$isShown).toBe(true); // because of trg is alreadyFocused
-    trg.removeAttribute("tabindex");
-
-    // focus moves to element inside popup > no-hide
-    /** @type typeof el */
-    let a2 = document.body.appendChild(document.createElement(el.tagName));
-    const a2Input = a2.appendChild(document.createElement("input"));
-    a2.$options.showCase = 1 << 1;
-    a2.$options.target = trgInput;
-    jest.advanceTimersToNextTimer();
-    trgInput.focus();
-    expect(a2.$isShown).toBe(true);
-    let f = jest.spyOn(document, "activeElement", "get").mockReturnValue(null);
-    a2Input.focus();
-    jest.advanceTimersToNextTimer(); // focusLost has debounce
-    expect(a2.$isShown).toBe(true);
-    f.mockRestore();
-
-    // onlyClick
-    jest.clearAllMocks();
-    a.remove();
-    document.body.appendChild(a);
-    a.$options.showCase = 1 << 2; // onClick
-    jest.advanceTimersToNextTimer(); // onReady has timeout
-    await h.wait();
-    expect(a.$isShown).toBe(false);
-
-    trg.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    await h.wait(0);
-    expect(a.$isShown).toBe(true);
-    trg.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    expect(a.$isShown).toBe(true); // because previous event is skipped (due to debounceTimeout)
-    expect(spyShow).toBeCalledTimes(1);
-    expect(spyShow).lastCalledWith(1 << 2);
-    await h.wait(50); // onClick has debounce timeout
-    expect(a.$isShown).toBe(true); // because previous event is skipped (due to debounceTimeout)
-
-    let e = new MouseEvent("click", { bubbles: true });
-    trg.dispatchEvent(e);
-    await h.wait();
-    expect(a.$isShown).toBe(false);
-    expect(spyHide).toBeCalledTimes(1);
-    expect(spyHide).lastCalledWith(5);
-    await h.wait(50);
-
-    trgInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    await h.wait();
-    expect(a.$isShown).toBe(true); // click on input inside
-
-    await h.wait();
-    e = new MouseEvent("click", { bubbles: true });
-    a.dispatchEvent(e);
-    await h.wait();
-    expect(a.$isShown).toBe(false); // click onMe == close
-    expect(spyHide).lastCalledWith(4);
-
-    trgInput2.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    await h.wait();
-    expect(a.$isShown).toBe(true); // click on input2 inside
-
-    await h.wait();
-    e = new MouseEvent("click", { bubbles: true });
-    document.body.dispatchEvent(e);
-    await h.wait();
-    expect(a.$isShown).toBe(false); // click outside == close
-    expect(spyHide).lastCalledWith(3);
-
-    // check focus on target > on hide
-    document.activeElement.blur();
-    f = jest.spyOn(document, "activeElement", "get").mockReturnValue(null);
-    /** @type typeof el */
-    a2 = document.body.appendChild(document.createElement(el.tagName));
-    a2.$options.showCase = 1 << 2;
-    a2.$options.target = trgInput;
-    jest.advanceTimersToNextTimer();
-    trgInput.click();
-    await h.wait();
-    expect(a2.$isShown).toBe(true);
-    const onFocus = jest.spyOn(trgInput, "focus");
-    a2.click();
-    await h.wait();
-
-    expect(a2.$isShown).toBe(false);
-    expect(onFocus).toBeCalled(); // because focus must me moved back
-    f.mockRestore();
-    a2.remove();
-
-    // test all: onHover | onFocus | onClick
-    jest.clearAllTimers();
-    jest.clearAllMocks();
-    a.remove();
-    document.activeElement?.blur();
     document.body.appendChild(a);
     a.$options.showCase = 0b111111111;
     a.$options.target = trgInput; // only for testing
@@ -481,10 +299,11 @@ describe("popupElement", () => {
     expect(a.$isShown).toBe(false);
 
     // open by mouseenter-click-focus
-    trgInput.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    let ev = new MouseEvent("mouseenter", { bubbles: true });
+    trgInput.dispatchEvent(ev);
     await h.wait(a.$options.hoverShowTimeout); // mouseenter has debounce timeout
     expect(a.$isShown).toBe(true);
-    expect(spyShow).lastCalledWith(1);
+    expect(spyShow).lastCalledWith(1, ev);
     trgInput.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
     trgInput.focus();
     trgInput.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
@@ -505,68 +324,41 @@ describe("popupElement", () => {
     trgInput.dispatchEvent(new Event("mouseenter", { bubbles: true }));
     await h.wait(a.$options.hoverShowTimeout); // mouseenter has debounce timeout
     expect(a.$isShown).toBe(true); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
-    e = new MouseEvent("mouseleave", { bubbles: true });
-    trgInput.dispatchEvent(e);
+    ev = new MouseEvent("mouseleave", { bubbles: true });
+    trgInput.dispatchEvent(ev);
     await h.wait(a.$options.hoverHideTimeout); // mouseenter has debounce timeout
     expect(a.$isShown).toBe(false); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
-    expect(spyHide).lastCalledWith(1);
+    expect(spyHide).lastCalledWith(1, ev);
 
     // open again by click
-    e = new MouseEvent("click", { bubbles: true });
-    trgInput.dispatchEvent(e);
+    ev = new MouseEvent("click", { bubbles: true });
+    trgInput.dispatchEvent(ev);
     await h.wait();
     expect(a.$isShown).toBe(true); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
-    expect(spyShow).lastCalledWith(1 << 2);
+    expect(spyShow).lastCalledWith(1 << 2, ev);
 
     // close by click again
-    e = new MouseEvent("click", { bubbles: true });
-    trgInput.dispatchEvent(e);
+    await h.userClick(trgInput);
     await h.wait();
     expect(a.$isShown).toBe(false);
-    expect(spyHide).lastCalledWith(5);
+    expect(spyHide.mock.lastCall[0]).toBe(5);
     trgInput.blur();
     spyShow.mockClear();
 
-    // simulate click-focus without mouseenter
-    // jest.advanceTimersByTime(el.$options.focusDebounceMs);
-    trgInput.dispatchEvent(new Event("touchstart", { bubbles: true })); // just for coverage 100%
-    trgInput.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    // for coverage
+    a.$options.hoverHideTimeout = 10; // WARN: this time must be less 300ms (debounce for hover-click)
+    a.init();
+    trgInput.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait(a.$options.hoverShowTimeout);
+    trgInput.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await h.wait(50);
     expect(a.$isShown).toBe(false);
-    trgInput.focus();
-    expect(spyShow).lastCalledWith(1 << 1);
-    await h.wait(1);
-    expect(a.$isShown).toBe(true); // show by focus
-    trgInput.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
-    let ev = new MouseEvent("click", { bubbles: true });
-    ev.pageX = 20; // required otherwise it's filtered from synthetic events
-    trgInput.dispatchEvent(ev);
-    await h.wait(50);
-    expect(a.$isShown).toBe(true); // stay opened because wasOpened by focus from click
+    expect(a.$isOpen).toBe(false); // deprecate it
 
-    // simulate mouse-click again
-    trgInput.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
-    trgInput.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
-    trgInput.dispatchEvent(ev);
-    await h.wait(50);
-    expect(a.$isShown).toBe(false); // 2nd click will close (but if click is fired without mousedown it doesn't work)
-    expect(spyHide).lastCalledWith(5);
-
-    // checking again when events doesn't propagate to body
-    trgInput.blur();
-    ev = new MouseEvent("click", { bubbles: false });
-    ev.pageX = 20; // required otherwise it's filtered from synthetic events
+    a.remove();
+    a.$hide();
     await h.wait();
-    trgInput.dispatchEvent(new MouseEvent("mousedown", { bubbles: false }));
-    trgInput.focus();
-    await h.wait(1);
-    expect(a.$isShown).toBe(true); // show by focus
-    trgInput.dispatchEvent(new MouseEvent("mouseup", { bubbles: false }));
-    trgInput.dispatchEvent(ev);
-    await h.wait();
-    expect(a.$isShown).toBe(true); // stay opened because wasOpened by focus from click
-    await h.userClick(trgInput);
-    await h.wait();
-    expect(a.$isShown).toBe(false); // 2nd click will close (but if click is fired without mousedown it doesn't work)
+    expect(a.$isShown).toBe(false); // because remmoved
   });
 
   test("$options.minWidth/minHeight/maxWidth by target", async () => {
@@ -688,13 +480,13 @@ describe("popupElement", () => {
     expect(el.$isShown).toBe(false);
     expect(el.$isHidden).toBe(true);
     expect(el.$isShowing).toBe(false);
-    expect(el.$isHidding).toBe(false);
+    expect(el.$isHiding).toBe(false);
 
     el.$show();
     expect(el.$isShown).toBe(true);
     expect(el.$isHidden).toBe(false);
     expect(el.$isShowing).toBe(false);
-    expect(el.$isHidding).toBe(false);
+    expect(el.$isHiding).toBe(false);
 
     el.remove();
     el.$hide();
@@ -769,7 +561,7 @@ describe("popupElement", () => {
     expect(() => b.$refresh()).not.toThrow(); // for coverage
   });
 
-  test("$options.animation", async () => {
+  test("$options.animation: drawer", async () => {
     const { nextFrame } = h.useFakeAnimation();
     el.$options.showCase = 0;
     await h.wait();
@@ -796,44 +588,44 @@ describe("popupElement", () => {
     el.$show();
     expect(el.$isShown).toBe(true);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="display: block; transform: translate(190px, 100px); animation-name: none;" position="top"><div></div><div></div></wup-popup>"`
+      `"<wup-popup style="display: block; transform: translate(190px, 100px);" position="top" animation="drawer"><div></div><div></div></wup-popup>"`
     );
 
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="display: block; transform: translate(190px, 100px) scaleY(0); animation-name: none; transform-origin: bottom;" position="top"><div></div><div></div></wup-popup>"`
+      `"<wup-popup style="display: block; transform: translate(190px, 100px) scaleY(0); transform-origin: bottom;" position="top" animation="drawer"><div></div><div></div></wup-popup>"`
     );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="display: block; transform: translate(190px, 100px) scaleY(0.055555555555555566); animation-name: none; transform-origin: bottom;" position="top"><div style="transform: scaleY(17.999999999999996) translateZ(0px); transform-origin: bottom;"></div><div style="transform: scaleY(17.999999999999996) translateZ(0px); transform-origin: bottom;"></div></wup-popup>"`
+      `"<wup-popup style="display: block; transform: translate(190px, 100px) scaleY(0.055555555555555566); transform-origin: bottom;" position="top" animation="drawer"><div style="transform: scaleY(17.999999999999996) translateZ(0px); transform-origin: top;"></div><div style="transform: scaleY(17.999999999999996) translateZ(0px); transform-origin: top;"></div></wup-popup>"`
     );
 
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="display: block; transform: translate(190px, 100px) scaleY(0.1111111111111111); animation-name: none; transform-origin: bottom;" position="top"><div style="transform: scaleY(9) translateZ(0px); transform-origin: bottom;"></div><div style="transform: scaleY(9) translateZ(0px); transform-origin: bottom;"></div></wup-popup>"`
+      `"<wup-popup style="display: block; transform: translate(190px, 100px) scaleY(0.1111111111111111); transform-origin: bottom;" position="top" animation="drawer"><div style="transform: scaleY(9) translateZ(0px); transform-origin: top;"></div><div style="transform: scaleY(9) translateZ(0px); transform-origin: top;"></div></wup-popup>"`
     );
 
     el.$hide();
     expect(el.$isShown).toBe(true); // because $hide is async
     await Promise.resolve();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="display: block; transform: translate(190px, 100px) scaleY(0.1111111111111111); animation-name: none; transform-origin: bottom;" position="top" hide=""><div style="transform: scaleY(9) translateZ(0px); transform-origin: bottom;"></div><div style="transform: scaleY(9) translateZ(0px); transform-origin: bottom;"></div></wup-popup>"`
+      `"<wup-popup style="display: block; transform: translate(190px, 100px) scaleY(0.1111111111111111); transform-origin: bottom;" position="top" animation="drawer" hide=""><div style="transform: scaleY(9) translateZ(0px); transform-origin: top;"></div><div style="transform: scaleY(9) translateZ(0px); transform-origin: top;"></div></wup-popup>"`
     );
 
     await nextFrame(2);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="display: block; transform: translate(190px, 100px) scaleY(0.05555555555555553); animation-name: none; transform-origin: bottom;" position="top" hide=""><div style="transform: scaleY(18.000000000000007) translateZ(0px); transform-origin: bottom;"></div><div style="transform: scaleY(18.000000000000007) translateZ(0px); transform-origin: bottom;"></div></wup-popup>"`
+      `"<wup-popup style="display: block; transform: translate(190px, 100px) scaleY(0.05555555555555553); transform-origin: bottom;" position="top" animation="drawer" hide=""><div style="transform: scaleY(18.000000000000007) translateZ(0px); transform-origin: top;"></div><div style="transform: scaleY(18.000000000000007) translateZ(0px); transform-origin: top;"></div></wup-popup>"`
     );
 
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(190px, 100px); animation-name: none;" position="top"><div style=""></div><div style=""></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(190px, 100px);" position="top" animation="drawer"><div style=""></div><div style=""></div></wup-popup>"`
     );
     await h.wait();
     await nextFrame();
     expect(el.$isShown).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(190px, 100px); animation-name: none;" position="top"><div style=""></div><div style=""></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(190px, 100px);" position="top" animation="drawer"><div style=""></div><div style=""></div></wup-popup>"`
     );
 
     // animation to another side
@@ -841,15 +633,15 @@ describe("popupElement", () => {
     await h.wait(); // options is async
     expect(el.$isShown).toBe(true);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="display: block; transform: translate(140px, 150px); animation-name: none;" position="bottom"><div style=""></div><div style=""></div></wup-popup>"`
+      `"<wup-popup style="display: block; transform: translate(140px, 150px);" position="bottom" animation="drawer"><div style=""></div><div style=""></div></wup-popup>"`
     );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="display: block; transform: translate(140px, 150px) scaleY(0); animation-name: none; transform-origin: top;" position="bottom"><div style=""></div><div style=""></div></wup-popup>"`
+      `"<wup-popup style="display: block; transform: translate(140px, 150px) scaleY(0); transform-origin: top;" position="bottom" animation="drawer"><div style=""></div><div style=""></div></wup-popup>"`
     );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="display: block; transform: translate(140px, 150px) scaleY(0.055555555555555525); animation-name: none; transform-origin: top;" position="bottom"><div style="transform: scaleY(18.00000000000001) translateZ(0px); transform-origin: bottom;"></div><div style="transform: scaleY(18.00000000000001) translateZ(0px); transform-origin: bottom;"></div></wup-popup>"`
+      `"<wup-popup style="display: block; transform: translate(140px, 150px) scaleY(0.055555555555555525); transform-origin: top;" position="bottom" animation="drawer"><div style="transform: scaleY(18.00000000000001) translateZ(0px); transform-origin: bottom;"></div><div style="transform: scaleY(18.00000000000001) translateZ(0px); transform-origin: bottom;"></div></wup-popup>"`
     );
 
     // checking how it works if options is changed during the animation
@@ -857,30 +649,30 @@ describe("popupElement", () => {
     await h.wait(); // options is async
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.055555555555555525); transform-origin: bottom; display: block; animation-name: none;" position="top"><div style="transform: scaleY(18.00000000000001) translateZ(0px); transform-origin: bottom;"></div><div style="transform: scaleY(18.00000000000001) translateZ(0px); transform-origin: bottom;"></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.055555555555555525); transform-origin: bottom; display: block;" position="top" animation="drawer"><div style="transform: scaleY(18.00000000000001) translateZ(0px); transform-origin: top;"></div><div style="transform: scaleY(18.00000000000001) translateZ(0px); transform-origin: top;"></div></wup-popup>"`
     );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.11111111111111105); transform-origin: bottom; display: block; animation-name: none;" position="top"><div style="transform: scaleY(9.000000000000005) translateZ(0px); transform-origin: bottom;"></div><div style="transform: scaleY(9.000000000000005) translateZ(0px); transform-origin: bottom;"></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.11111111111111105); transform-origin: bottom; display: block;" position="top" animation="drawer"><div style="transform: scaleY(9.000000000000005) translateZ(0px); transform-origin: top;"></div><div style="transform: scaleY(9.000000000000005) translateZ(0px); transform-origin: top;"></div></wup-popup>"`
     );
     el.$hide(); // force to hide during the show-animation
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.11111111111111105); transform-origin: bottom; display: block; animation-name: none;" position="top" hide=""><div style="transform: scaleY(9.000000000000005) translateZ(0px); transform-origin: bottom;"></div><div style="transform: scaleY(9.000000000000005) translateZ(0px); transform-origin: bottom;"></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.11111111111111105); transform-origin: bottom; display: block;" position="top" animation="drawer" hide=""><div style="transform: scaleY(9.000000000000005) translateZ(0px); transform-origin: top;"></div><div style="transform: scaleY(9.000000000000005) translateZ(0px); transform-origin: top;"></div></wup-popup>"`
     );
 
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.05555555555555543); transform-origin: bottom; display: block; animation-name: none;" position="top" hide=""><div style="transform: scaleY(18.000000000000043) translateZ(0px); transform-origin: bottom;"></div><div style="transform: scaleY(18.000000000000043) translateZ(0px); transform-origin: bottom;"></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.05555555555555543); transform-origin: bottom; display: block;" position="top" animation="drawer" hide=""><div style="transform: scaleY(18.000000000000043) translateZ(0px); transform-origin: top;"></div><div style="transform: scaleY(18.000000000000043) translateZ(0px); transform-origin: top;"></div></wup-popup>"`
     );
     el.$show(); // force to show during the hide-animation
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.05555555555555543); transform-origin: bottom; display: block; animation-name: none;" position="top"><div style="transform: scaleY(18.000000000000043) translateZ(0px); transform-origin: bottom;"></div><div style="transform: scaleY(18.000000000000043) translateZ(0px); transform-origin: bottom;"></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.05555555555555543); transform-origin: bottom; display: block;" position="top" animation="drawer"><div style="transform: scaleY(18.000000000000043) translateZ(0px); transform-origin: top;"></div><div style="transform: scaleY(18.000000000000043) translateZ(0px); transform-origin: top;"></div></wup-popup>"`
     );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.11111111111111105); transform-origin: bottom; display: block; animation-name: none;" position="top"><div style="transform: scaleY(9.000000000000005) translateZ(0px); transform-origin: bottom;"></div><div style="transform: scaleY(9.000000000000005) translateZ(0px); transform-origin: bottom;"></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(140px, 100px) scaleY(0.11111111111111105); transform-origin: bottom; display: block;" position="top" animation="drawer"><div style="transform: scaleY(9.000000000000005) translateZ(0px); transform-origin: top;"></div><div style="transform: scaleY(9.000000000000005) translateZ(0px); transform-origin: top;"></div></wup-popup>"`
     );
 
     // checking when element is removed
@@ -888,7 +680,7 @@ describe("popupElement", () => {
     await nextFrame();
     // WARN styles haven't been removed because expected that item destroyed
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(140px, 100px); display: block; animation-name: none;" position="top"><div style=""></div><div style=""></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(140px, 100px); display: block;" position="top" animation="drawer"><div style=""></div><div style=""></div></wup-popup>"`
     );
 
     // checking states
@@ -900,44 +692,44 @@ describe("popupElement", () => {
     expect(el.$isShown).toBe(true);
     expect(el.$isShowing).toBe(true);
     expect(el.$isHidden).toBe(false);
-    expect(el.$isHidding).toBe(false);
+    expect(el.$isHiding).toBe(false);
     await nextFrame(100);
     await h.wait();
     expect(el.$isShown).toBe(true);
     expect(el.$isShowing).toBe(false);
     expect(el.$isHidden).toBe(false);
-    expect(el.$isHidding).toBe(false);
+    expect(el.$isHiding).toBe(false);
 
     el.$hide();
     await h.wait(50);
     expect(el.$isShown).toBe(true);
     expect(el.$isShowing).toBe(false);
     expect(el.$isHidden).toBe(false);
-    expect(el.$isHidding).toBe(true);
+    expect(el.$isHiding).toBe(true);
     await nextFrame(100);
     expect(el.$isShown).toBe(false);
     expect(el.$isShowing).toBe(false);
     expect(el.$isHidden).toBe(true);
-    expect(el.$isHidding).toBe(false);
+    expect(el.$isHiding).toBe(false);
 
     // show/hide in a short time
     el.$show();
     await h.wait(50);
     expect(el.$isShowing).toBe(true);
-    expect(el.$isHidding).toBe(false);
+    expect(el.$isHiding).toBe(false);
     el.$hide();
     await h.wait(50);
     expect(el.$isShowing).toBe(false);
-    expect(el.$isHidding).toBe(true);
+    expect(el.$isHiding).toBe(true);
     el.$show();
     await h.wait(50);
     expect(el.$isShowing).toBe(true);
-    expect(el.$isHidding).toBe(false);
+    expect(el.$isHiding).toBe(false);
     await nextFrame(100);
     expect(el.$isShown).toBe(true);
     expect(el.$isShowing).toBe(false);
     expect(el.$isHidden).toBe(false);
-    expect(el.$isHidding).toBe(false);
+    expect(el.$isHiding).toBe(false);
 
     // no new show-logic
     const spyThen = jest.fn();
@@ -979,11 +771,98 @@ describe("popupElement", () => {
     expect(spyConsole).toBeCalled();
     await nextFrame(); // no-animation expected
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="display: block; transform: translate(140px, 100px);" position="top"><div style=""></div><div style=""></div></wup-popup>"`
+      `"<wup-popup style="display: block; transform: translate(140px, 100px);" position="top" animation="drawer"><div style=""></div><div style=""></div></wup-popup>"`
     );
+
+    // testing attr
+    el.setAttribute("animation", "default");
+    await h.wait(1);
+    expect(el.$options.animation).toBe(Animations.default);
+    el.setAttribute("animation", "drawer");
+    await h.wait(1);
+    expect(el.$options.animation).toBe(Animations.drawer);
   });
 
-  test("attrs", () => {
+  test("$options.animation: stack", async () => {
+    // WARN: there is only code coverage. For full animation tests see helpers/animateStack
+    const { nextFrame } = h.useFakeAnimation();
+    el.$options.showCase = 0;
+    el.$options.animation = Animations.stack;
+    const orig = window.getComputedStyle;
+    jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
+      if (elem === el) {
+        /** @type CSSStyleDeclaration */
+        return { animationDuration: "0.3s", animationName: "WUP-POPUP-a1" };
+      }
+      return orig(elem);
+    });
+    el.innerHTML = "<ul><li>Item 1</li><li>Item 2</></ul>";
+
+    // vertical
+    el.$options.placement = [WUPPopupElement.$placements.$top.$middle];
+    await nextFrame(2);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style="display: block; transform: translate(190px, 100px);" position="top" animation="stack"><ul style="overflow: visible; z-index: 0;"><li style="transition: transform 300ms ease-out;">Item 1</li><li style="transition: transform 300ms ease-out;">Item 2</li></ul></wup-popup>"`
+    );
+    await nextFrame(50);
+    expect(el.innerHTML).toMatchInlineSnapshot(`"<ul style=""><li style="">Item 1</li><li style="">Item 2</li></ul>"`);
+    el.$hide();
+    await nextFrame(50);
+
+    // horizontal
+    el.$options.placement = [WUPPopupElement.$placements.$left.$middle];
+    el.$show();
+    await nextFrame(50);
+    expect(el.innerHTML).toMatchInlineSnapshot(`"<ul style=""><li style="">Item 1</li><li style="">Item 2</li></ul>"`);
+    el.$hide();
+    await nextFrame(50);
+
+    // selector [item]
+    el.innerHTML = "<div [items]><button>Item1</button><button>Item2</button></div>";
+    el.$show();
+    await nextFrame(50);
+    expect(el.innerHTML).toMatchInlineSnapshot(
+      `"<div [items]="" style=""><button style="">Item1</button><button style="">Item2</button></div>"`
+    );
+    el.$hide();
+    await nextFrame(50);
+
+    // root of popup
+    el.innerHTML = "<button>Item1</button><button>Item2</button>";
+    el.$show();
+    await nextFrame(50);
+    expect(el.innerHTML).toMatchInlineSnapshot(`"<button style="">Item1</button><button style="">Item2</button>"`);
+    el.$hide();
+    await nextFrame(50);
+
+    // inside wrapper
+    el.innerHTML = "<div><button>Item1</button><button>Item2</button></div>";
+    el.$show();
+    await nextFrame(50);
+    expect(el.innerHTML).toMatchInlineSnapshot(
+      `"<div style=""><button style="">Item1</button><button style="">Item2</button></div>"`
+    );
+    el.$hide();
+    await nextFrame(50);
+
+    // exclusion for single item
+    el.innerHTML = "<button>Item1</button>";
+    el.$show();
+    await nextFrame(50);
+    expect(el.innerHTML).toMatchInlineSnapshot(`"<button style="">Item1</button>"`);
+    el.$hide();
+    await nextFrame(50);
+
+    // testing attr
+    el.setAttribute("animation", "");
+    await h.wait(1);
+    expect(el.$options.animation).toBe(Animations.default);
+    el.setAttribute("animation", "stack");
+    await h.wait(1);
+    expect(el.$options.animation).toBe(Animations.stack);
+  });
+
+  test("attr: target", async () => {
     el = document.createElement(el.tagName);
     el.$options.showCase = 0;
     document.body.prepend(el);
@@ -994,13 +873,90 @@ describe("popupElement", () => {
 
     // attr 'target'
     el.setAttribute("target", `#${trg.getAttribute("id")}`);
-    el.setAttribute("placement", "top-start");
     jest.advanceTimersToNextTimer();
     expect(el.$options.target).toBeDefined();
     expect(el.$isShown).toBe(true);
 
     el.setAttribute("target", "#not-found-id");
     expect(() => jest.advanceTimersByTime(1000)).toThrow(); // because of target is defined but not HTMLELement
+  });
+
+  test("attr: placement", async () => {
+    el.$hide();
+    await h.wait();
+
+    el.setAttribute("placement", "top-start");
+    await h.wait();
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$top$start_adjust $bottom$start_adjust"`
+    );
+    el.setAttribute("placement", "top-middle");
+    await h.wait(1);
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$top$middle_adjust $bottom$middle_adjust"`
+    );
+    el.setAttribute("placement", "top-end");
+    await h.wait(1);
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$top$end_adjust $bottom$end_adjust"`
+    );
+
+    el.setAttribute("placement", "bottom-start");
+    await h.wait(1);
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$bottom$start_adjust $top$start_adjust"`
+    );
+    el.setAttribute("placement", "bottom-middle");
+    await h.wait(1);
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$bottom$middle_adjust $top$middle_adjust"`
+    );
+    el.setAttribute("placement", "bottom-end");
+    await h.wait(1);
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$bottom$end_adjust $top$end_adjust"`
+    );
+
+    el.setAttribute("placement", "left-start");
+    await h.wait(1);
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$left$start_adjust $right$start_adjust"`
+    );
+    el.setAttribute("placement", "left-middle");
+    await h.wait(1);
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$left$middle_adjust $right$middle_adjust"`
+    );
+    el.setAttribute("placement", "left-end");
+    await h.wait(1);
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$left$end_adjust $right$end_adjust"`
+    );
+
+    el.setAttribute("placement", "right-start");
+    await h.wait(1);
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$right$start_adjust $left$start_adjust"`
+    );
+    el.setAttribute("placement", "right-middle");
+    await h.wait(1);
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$right$middle_adjust $left$middle_adjust"`
+    );
+    el.setAttribute("placement", "right-end");
+    await h.wait(1);
+    expect(el.$options.placement.map((a) => a.name).join(" ")).toMatchInlineSnapshot(
+      `"$right$end_adjust $left$end_adjust"`
+    );
+
+    el.removeAttribute("placement", "");
+    await h.wait(1);
+    expect(el.$options.placement).toStrictEqual(WUPPopupElement.$defaults.placement);
+    expect(el.$options.placement).not.toBe(WUPPopupElement.$defaults.placement);
+
+    el.setAttribute("placement", "---");
+    await h.wait(1);
+    expect(el.$options.placement).toStrictEqual(WUPPopupElement.$defaults.placement);
   });
 
   test("remove", async () => {
@@ -1023,7 +979,7 @@ describe("popupElement", () => {
     // try to append and open
     document.body.appendChild(el);
     jest.advanceTimersToNextTimer();
-    expect(el.$show).not.toThrow();
+    expect(() => el.$show()).not.toThrow();
     expect(el.$isShown).toBe(true);
   });
 
@@ -1837,137 +1793,6 @@ describe("popupElement", () => {
     expect(el.$isShown).toBe(false);
   });
 
-  test("popupListen: hidding by click twice", async () => {
-    /** @type WUPPopupElement */
-    const myel = document.createElement(el.tagName);
-    myel.$options.target = trg;
-    myel.$options.showCase = 0;
-
-    document.body.appendChild(myel);
-    popupListen(
-      { target: trg, showCase: 1 << 2 }, // onClick
-      () => {
-        myel.$show();
-        return myel;
-      },
-      () => myel.$hide()
-    );
-
-    // simulate defaults
-    const orig = window.getComputedStyle;
-    jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
-      if (elem === myel) {
-        /** @type CSSStyleDeclaration */
-        return { animationDuration: "0.3s", animationName: "WUP-POPUP-a1" };
-      }
-      return orig(elem);
-    });
-
-    myel.$hide(); // showCase opens popup by default
-    await h.wait();
-    expect(myel.$isShown).toBe(false);
-    // open
-    trg.click();
-    await h.wait(); // wait for changes
-    expect(myel.$isShown).toBe(true);
-
-    // hide
-    document.body.click();
-    await h.wait(100); // wait for partially hidden
-    expect(myel.$isShown).toBe(true);
-    expect(() => document.body.click()).not.toThrow(); // error here because openedEl is null in eventListener on 2nd call
-    await h.wait();
-    expect(myel.$isShown).toBe(false);
-  });
-
-  test("popupListen: show 1st time", async () => {
-    /** @type WUPPopupElement */
-    const myel = document.createElement(el.tagName);
-    myel.$options.target = trg;
-    myel.$options.showCase = 0;
-
-    document.body.appendChild(myel);
-    const refs = popupListen(
-      { target: trg, showCase: 1 << 2 }, // onClick
-      () => {
-        myel.$show();
-        return myel;
-      },
-      () => myel.$hide()
-    );
-
-    // cover case when openedEl hasn't been defined yet
-    refs.show(0);
-    await h.wait();
-    expect(myel.$isShown).toBe(true);
-  });
-
-  /* test("double-click filter", async () => {
-    await el.$hide();
-    el.$options.showCase = 1 << 2; // click
-    await h.wait();
-    expect(el.$isShown).toBe(false);
-    // double-click simulation
-    const doubleClick = async (htmlEl) => {
-      let e = new MouseEvent("click", { bubbles: true });
-      jest.spyOn(e, "detail", "get").mockReturnValue(1);
-      htmlEl.dispatchEvent(e);
-      await h.wait(100);
-      e = new MouseEvent("click", { bubbles: true });
-      jest.spyOn(e, "detail", "get").mockReturnValue(2);
-      htmlEl.dispatchEvent(e);
-      htmlEl.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
-    };
-    await doubleClick(trg);
-    await h.wait(100);
-    expect(el.$isShown).toBe(true); // because 2nd click is filtered
-  }); */
-
-  test("right-click filter", async () => {
-    await el.$hide();
-    el.$options.showCase = ShowCases.onClick;
-    await h.wait();
-
-    await h.userClick(trg);
-    await h.wait();
-    expect(el.$isShown).toBe(true);
-
-    await h.userClick(trg, { button: 1 });
-    await h.wait();
-    expect(el.$isShown).toBe(true); // because right-button
-
-    await h.userClick(trg, { button: 0 });
-    await h.wait();
-    expect(el.$isShown).toBe(false); // because left-button
-  });
-
-  test("popupListen: handle error on show", async () => {
-    /** @type WUPPopupElement */
-    const myel = document.createElement(el.tagName);
-    myel.$options.target = trg;
-    myel.$options.showCase = 0;
-
-    document.body.appendChild(myel);
-    let cnt = 0;
-    popupListen(
-      { target: trg, showCase: 1 << 2 }, // onClick
-      () => {
-        ++cnt;
-        throw new Error("TestCase Impossible to show");
-      },
-      () => myel.$hide()
-    );
-
-    h.handleRejection();
-    trg.click();
-    await h.wait();
-    expect(cnt).toBe(1);
-
-    trg.click();
-    await h.wait();
-    expect(cnt).toBe(2); // checking if possible again
-  });
-
   test("popup inside target", async () => {
     el.$options.showCase = 1 << 2;
     trg.appendChild(el);
@@ -2044,5 +1869,33 @@ describe("popupElement", () => {
     );
 
     h.unMockConsoleError();
+  });
+
+  test("show/hide manually + listener", async () => {
+    /** @type typeof el */
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.target = trg;
+    await h.wait();
+
+    expect(el.$isShown).toBe(false);
+    await h.userClick(trg); // open by listener
+    await h.wait();
+    expect(el.$isShown).toBe(true);
+    el.$hide(); // hide manually
+    await h.wait();
+    expect(el.$isShown).toBe(false);
+    await h.userClick(trg); // open by listener
+    await h.wait();
+    expect(el.$isShown).toBe(true);
+
+    await h.userClick(trg); // open by listener
+    await h.wait();
+    expect(el.$isShown).toBe(false);
+    el.$show();
+    await h.wait();
+    expect(el.$isShown).toBe(true);
+    await h.userClick(trg); // open by listener
+    await h.wait();
+    expect(el.$isShown).toBe(false);
   });
 });

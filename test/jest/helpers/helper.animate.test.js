@@ -1,4 +1,4 @@
-import { animate } from "web-ui-pack/helpers/animate";
+import animate from "web-ui-pack/helpers/animate";
 import { useFakeAnimation } from "../../testHelper";
 
 let step = 1;

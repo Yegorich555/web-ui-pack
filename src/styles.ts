@@ -70,7 +70,7 @@ export function WUPcssButton(tag: string): string {
   return `
 ${tag} {
   box-shadow: none;
-  border: 1px solid var(--btn-submit-bg);
+  border: 1px solid var(--base-btn-bg);
   border-radius: var(--border-radius);
   box-sizing: border-box;
   padding: 0.5em;
@@ -79,12 +79,12 @@ ${tag} {
   cursor: pointer;
   font: inherit;
   font-weight: bold;
-  background: var(--btn-submit-bg);
-  color: var(--btn-submit-text);
+  background: var(--base-btn-bg);
+  color: var(--base-btn-text);
   outline: none;
 }
 ${tag}:focus {
-  border-color: var(--btn-submit-focus);
+  border-color: var(--base-btn-focus);
 }
 @media (hover: hover) and (pointer: fine) {
   ${tag}:hover {
@@ -99,6 +99,48 @@ ${tag}[disabled] {
 }
 ${tag}[aria-busy] {
   cursor: wait;
+}`;
+}
+
+/** Returns default style for popup menu */
+export function WUPcssMenu(tag: string): string {
+  return `
+${tag} {
+  padding: 0;
+  overflow: hidden;
+}
+${tag} ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  cursor: pointer;
+  overflow: auto;
+  max-height: 300px;
+}
+${WUPcssScrollSmall(`${tag} ul`)}
+${tag} li {
+  padding: 1em;
+  border-radius: var(--border-radius);
+}
+@media (hover: hover) and (pointer: fine) {
+  ${tag} li:hover {
+    box-shadow: inset 0 0 3px 0 var(--base-focus);
+  }
+}
+${tag} li[aria-selected="true"] {
+  color: var(--ctrl-selected);
+  display: flex;
+}
+${tag} li[aria-selected="true"]:after {
+  content: "";
+  --ctrl-icon-img: var(--wup-icon-check);
+  ${WUPcssIcon}
+  background: var(--ctrl-selected);
+  margin-left: auto;
+  padding: 0;
+}
+${tag} li[focused] {
+  box-shadow: inset 0 0 4px 0 var(--base-focus);
 }`;
 }
 

@@ -60,7 +60,7 @@ declare global {
       disabled?: boolean;
       /** Disallow copy value; adds attr [readonly] for styling */
       readOnly?: boolean;
-      /** Enable/disable browser-autocomplete; if control has no autocomplete option then it's inherrited from form
+      /** Enable/disable browser-autocomplete; if control has no autocomplete option then it's inherited from form
        *  @defaultValue false */
       autoComplete?: boolean;
     }
@@ -504,4 +504,4 @@ declare global {
   }
 }
 
-// todo show success result in modal window
+// todo show success result in <wup-alert> at the right angle + add autosafe option

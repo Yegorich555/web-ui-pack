@@ -3,7 +3,7 @@ import onEvent from "../helpers/onEvent";
 import promiseWait from "../helpers/promiseWait";
 import WUPPopupElement from "../popup/popupElement";
 import WUPSpinElement from "../spinElement";
-import { WUPcssIcon, WUPcssScrollSmall } from "../styles";
+import { WUPcssMenu } from "../styles";
 import WUPBaseComboControl, { ShowCases } from "./baseCombo";
 
 /* c8 ignore next */
@@ -138,42 +138,7 @@ export default class WUPSelectControl<
       :host[opened] label::after {
         transform: rotate(180deg);
       }
-      :host [menu] {
-        overflow: hidden;
-      }
-      :host [menu] ul {
-        margin: 0;
-        padding: 0;
-        list-style-type: none;
-        cursor: pointer;
-        overflow: auto;
-        max-height: 300px;
-      }
-      ${WUPcssScrollSmall(":host [menu]>ul")}
-      :host [menu] li {
-        padding: 1em;
-        border-radius: var(--ctrl-border-radius);
-      }
-      @media (hover: hover) and (pointer: fine) {
-        :host [menu] li:hover {
-          box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
-        }
-      }
-      :host [menu] li[aria-selected="true"] {
-        color: var(--ctrl-selected);
-        display: flex;
-      }
-      :host [menu] li[aria-selected="true"]:after {
-        content: "";
-        --ctrl-icon-img: var(--wup-icon-check);
-        ${WUPcssIcon}
-        background: var(--ctrl-selected);
-        margin-left: auto;
-        padding: 0;
-      }
-      :host [menu] li[focused] {
-        box-shadow: inset 0 0 4px 0 var(--ctrl-focus);
-      }`;
+      ${WUPcssMenu(":host [menu]")}`;
   }
 
   /** Text for listbox when no items are displayed */

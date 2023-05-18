@@ -1,4 +1,5 @@
 import onFocusGot from "web-ui-pack/helpers/onFocusGot";
+import { userPressTab } from "../../testHelper";
 
 jest.useFakeTimers();
 
@@ -111,28 +112,44 @@ describe("helper.onFocusGot", () => {
   });
 
   // case possible when user moves focus into dev-console
-  test("focusout but activeElement stay", () => {
-    const in1 = document.body.appendChild(document.createElement("input"));
+  test("focusout but activeElement stay", async () => {
+    const div = document.body.appendChild(document.createElement("div"));
+    const in1 = div.appendChild(document.createElement("input"));
+    const in2 = div.appendChild(document.createElement("input"));
+
     const fn = jest.fn();
-    const remove = onFocusGot(in1, fn);
+    let remove = onFocusGot(div, fn);
 
     in1.focus();
     fn.mockClear();
     // hook for simulation case when activeElement is not changed
-    jest.spyOn(document, "activeElement", "get").mockImplementation(() => in1);
+    const r = jest.spyOn(document, "activeElement", "get").mockImplementation(() => in1);
     in1.blur();
     expect(document.activeElement).toBe(in1);
+    r.mockRestore();
     in1.focus();
     expect(document.activeElement).toBe(in1);
     expect(fn).not.toBeCalled(); // onFocusGot isn't fired because activeElement isn't changed so focus wasn't lost previously
 
     // try again
-    in1.blur();
-    in1.focus();
-    expect(document.activeElement).toBe(in1);
+    in2.focus();
+    expect(document.activeElement).toBe(in2);
     expect(fn).not.toBeCalled();
 
+    const btn = document.body.appendChild(document.createElement("button"));
+    await userPressTab(btn);
+    expect(fn).not.toBeCalled();
+
+    in1.focus();
+    expect(fn).toBeCalledTimes(1);
     remove();
+
+    // case when previously was focused
+    fn.mockClear();
+    expect(document.activeElement).toBe(in1);
+    remove = onFocusGot(div, fn);
+    in2.focus();
+    expect(fn).not.toBeCalled(); // because focus for <div/> not changed
   });
 
   test("remove before event fired", () => {

@@ -4,9 +4,10 @@ import WUPBaseElement from "../baseElement";
 import { getOffset, PopupPlacements } from "./popupPlacements";
 import { findScrollParentAll } from "../helpers/findScrollParent";
 import WUPPopupArrowElement from "./popupArrowElement";
-import popupListen from "./popupListen";
+import PopupListener from "./popupListener";
 import { getBoundingInternalRect, px2Number, styleTransform } from "../helpers/styleHelpers";
-import { animateDropdown } from "../helpers/animate";
+import animateDropdown from "../helpers/animateDropdown";
+import animateStack from "../helpers/animateStack";
 import isIntoView from "../helpers/isIntoView";
 import objectClone from "../helpers/objectClone";
 import viewportSize from "../helpers/viewportSize";
@@ -74,27 +75,45 @@ export default class WUPPopupElement<
 
   /* Array of attribute names to monitor for changes */
   static get observedAttributes(): Array<LowerKeys<WUP.Popup.Options>> {
-    return ["target", "placement"];
+    return ["target", "placement", "animation"];
   }
 
   static $placements = PopupPlacements;
-  static $placementAttrs = {
-    "top-start": PopupPlacements.$top.$start.$adjust,
-    "top-middle": PopupPlacements.$top.$middle.$adjust,
-    "top-end": PopupPlacements.$top.$end.$adjust,
-    "bottom-start": PopupPlacements.$bottom.$start.$adjust,
-    "bottom-middle": PopupPlacements.$bottom.$middle.$adjust,
-    "bottom-end": PopupPlacements.$bottom.$end.$adjust,
-    "left-start": PopupPlacements.$left.$start.$adjust,
-    "left-middle": PopupPlacements.$left.$middle.$adjust,
-    "left-end": PopupPlacements.$left.$end.$adjust,
-    "right-start": PopupPlacements.$right.$start.$adjust,
-    "right-middle": PopupPlacements.$right.$middle.$adjust,
-    "right-end": PopupPlacements.$right.$end.$adjust,
+
+  /** Returns placement */
+  static $placementAttrs = (attr: WUP.Popup.Attributes["placement"]): Array<WUP.Popup.Place.PlaceFunc> | undefined => {
+    switch (attr) {
+      case "top-start":
+        return [PopupPlacements.$top.$start.$adjust, PopupPlacements.$bottom.$start.$adjust];
+      case "top-middle":
+        return [PopupPlacements.$top.$middle.$adjust, PopupPlacements.$bottom.$middle.$adjust];
+      case "top-end":
+        return [PopupPlacements.$top.$end.$adjust, PopupPlacements.$bottom.$end.$adjust];
+      case "bottom-start":
+        return [PopupPlacements.$bottom.$start.$adjust, PopupPlacements.$top.$start.$adjust];
+      case "bottom-middle":
+        return [PopupPlacements.$bottom.$middle.$adjust, PopupPlacements.$top.$middle.$adjust];
+      case "bottom-end":
+        return [PopupPlacements.$bottom.$end.$adjust, PopupPlacements.$top.$end.$adjust];
+      case "left-start":
+        return [PopupPlacements.$left.$start.$adjust, PopupPlacements.$right.$start.$adjust];
+      case "left-middle":
+        return [PopupPlacements.$left.$middle.$adjust, PopupPlacements.$right.$middle.$adjust];
+      case "left-end":
+        return [PopupPlacements.$left.$end.$adjust, PopupPlacements.$right.$end.$adjust];
+      case "right-start":
+        return [PopupPlacements.$right.$start.$adjust, PopupPlacements.$left.$start.$adjust];
+      case "right-middle":
+        return [PopupPlacements.$right.$middle.$adjust, PopupPlacements.$left.$middle.$adjust];
+      case "right-end":
+        return [PopupPlacements.$right.$end.$adjust, PopupPlacements.$left.$end.$adjust];
+      default:
+        return undefined;
+    }
   };
 
   /** Default options. Change it to configure default behavior */
-  static $defaults: Omit<WUP.Popup.Options, "target"> = {
+  static $defaults: WUP.Popup.Defaults = {
     placement: [
       WUPPopupElement.$placements.$top.$middle.$adjust, //
       WUPPopupElement.$placements.$bottom.$middle.$adjust,
@@ -144,7 +163,14 @@ export default class WUPPopupElement<
         @keyframes WUP-POPUP-a2 {
           to {opacity: 0;}
         }
-       }
+      }
+      :host[animation=drawer] {
+        animation-name: custom;
+      }
+      :host[animation=stack] {
+        animation-name: custom;
+        overflow: visible;
+      }
       ${WUPcssScrollSmall(":host")}`;
   }
 
@@ -189,12 +215,12 @@ export default class WUPPopupElement<
         popup.$options.target = options.target;
       }
       const opts = popup ? { ...options, ...popup.$options, target: popup.$options.target! } : options;
-      let isHidding = false;
+      let isHiding = false;
 
-      const refs = popupListen(
+      const lstn = new PopupListener(
         opts,
-        (v) => {
-          isHidding = false;
+        (v, e) => {
+          isHiding = false;
           const isCreate = !popup;
           if (!popup) {
             const p = document.body.appendChild(document.createElement(opts.tagName ?? tagName) as T);
@@ -206,16 +232,16 @@ export default class WUPPopupElement<
             p.#attach = () => {
               // extra function to skip useless 1st attach on init
               p.#attach = attach; // this is required to rebind events on re-init
-              return refs;
+              return lstn;
             };
 
             callback?.call(this, p);
           }
 
-          if (!popup.goShow.call(popup, v)) {
+          if (!popup.goShow.call(popup, v, e)) {
             /* istanbul ignore else */
             if (isCreate) {
-              popup!.#listenRefs = undefined; // otherwise remove() destroys events
+              popup!.#refListener = undefined; // otherwise remove() destroys events
               popup.remove.call(popup);
             }
             return null;
@@ -223,12 +249,12 @@ export default class WUPPopupElement<
 
           return popup;
         },
-        async (v) => {
-          isHidding = true;
-          const ok = await popup!.goHide.call(popup, v);
+        async (v, e) => {
+          isHiding = true;
+          const ok = await popup!.goHide.call(popup, v, e);
           /* istanbul ignore else */
-          if (ok && isHidding) {
-            popup!.#listenRefs = undefined; // otherwise remove() destroys events
+          if (ok && isHiding) {
+            popup!.#refListener = undefined; // otherwise remove() destroys events
             popup!.remove.call(popup);
             popup = undefined;
           }
@@ -236,13 +262,13 @@ export default class WUPPopupElement<
         }
       );
 
-      return refs;
+      return lstn;
     };
     const r = attach();
 
     function detach(): void {
       if (popup) {
-        popup.$isShown && popup.goHide.call(popup, HideCases.onManuallCall);
+        popup.$isShown && popup.goHide.call(popup, HideCases.onManuallCall, null);
         (popup as T).remove.call(popup);
       }
       r.stopListen();
@@ -271,9 +297,11 @@ export default class WUPPopupElement<
         // isReady false when you fire $hide on disposed element
         let isOk = true;
         if (this.$isReady) {
-          isOk = await this.goHide(HideCases.onManuallCall);
-          if (isOk) {
-            this._opts.showCase !== ShowCases.always && this.init(); // re-init to applyShowCase
+          if (this.#refListener) {
+            await this.#refListener.hide(HideCases.onManuallCall, null);
+            isOk = !this.#refListener.openedEl;
+          } else {
+            isOk = await this.goHide(HideCases.onManuallCall, null);
           }
         }
         resolve(isOk);
@@ -283,21 +311,26 @@ export default class WUPPopupElement<
   }
 
   #whenShow?: Promise<any>;
-  /** Show popup; it disables/ignores $options.showCase and rollbacks by $hide().
+  /** Show popup
    * @returns Promise resolved by animation-end
    * @throws (rejects) error if popup not appended on layout */
   $show(): Promise<boolean> {
-    /*  if (this.#whenShow) {
+    if (this.#whenShow) {
       return this.#whenShow;
-    } */ // WARN: don't use this logic becaues manual $show method must remove listeners
+    }
     return new Promise<boolean>((resolve, reject) => {
       const f = async (): Promise<void> => {
         if (!this.$isReady) {
           reject(new Error(`${this.tagName}. Impossible to show: not appended to document`));
         } else {
-          this.disposeListener(); // remove events
           try {
-            const isOk = await this.goShow(ShowCases.always);
+            let isOk = true;
+            if (this.#refListener) {
+              await this.#refListener.show(ShowCases.always, null);
+              isOk = !!this.#refListener.openedEl;
+            } else {
+              isOk = await this.goShow(ShowCases.always, null);
+            }
             resolve(isOk);
           } catch (err) {
             reject(err); // here promise in promise. So handling is required
@@ -322,7 +355,7 @@ export default class WUPPopupElement<
   /** Returns if popup is opened (before show-animation is started)
    * @tutorial Troubleshooting
    * * stack: $show() > `$isShown:true` > showing > shown
-   * * stack: $hide() > hidding > hidden > `$isShown:false`
+   * * stack: $hide() > hiding > hidden > `$isShown:false`
    * * to listen to animation-end use events `$show` & `$hide` OR methods `$show().then(...)` & `$hide().then(... )` */
   get $isShown(): boolean {
     return this.#isShown;
@@ -331,16 +364,16 @@ export default class WUPPopupElement<
   /** Returns if popup is closed (after hide-animation is ended)
    * @tutorial Troubleshooting
    * * stack: $show() > `$isHidden:false` >  showing > shown
-   * * stack: $hide() > hidding > hidden > `$isHidden:true`
+   * * stack: $hide() > hiding > hidden > `$isHidden:true`
    * * to listen to animation-end use events `$show` & `$hide` OR methods `$show().then(...)` & `$hide().then(... )` */
   get $isHidden(): boolean {
-    return !this.#isShown && !this.$isHidding;
+    return !this.#isShown && !this.$isHiding;
   }
 
-  #isHidding?: true;
-  /** Returns if popup is hidding (only if animation enabled) */
-  get $isHidding(): boolean {
-    return this.#isHidding === true;
+  #isHiding?: true;
+  /** Returns if popup is hiding (only if animation enabled) */
+  get $isHiding(): boolean {
+    return this.#isHiding === true;
   }
 
   #isShowing?: true;
@@ -360,26 +393,25 @@ export default class WUPPopupElement<
   }
 
   #isShown = false;
-  #listenRefs?: ReturnType<typeof popupListen>;
-  #attach?: () => ReturnType<typeof popupListen>; // func to use alternative target
+  #refListener?: PopupListener;
+  #attach?: () => PopupListener; // func to use alternative target
   /** Called after gotReady() and $show() (to reinit according to options) */
   protected init(): void {
     this.disposeListener(); // remove previously added events
 
     if (this.#attach) {
-      this.#listenRefs = this.#attach();
+      this.#refListener = this.#attach();
     } else {
       this._opts.target = this.#defineTarget();
 
       if (!this._opts.showCase /* always */) {
-        this.goShow(ShowCases.always);
+        this.goShow(ShowCases.always, null);
         return;
       }
-
-      this.#listenRefs = popupListen(
+      this.#refListener = new PopupListener(
         this._opts as typeof this._opts & { target: HTMLElement },
-        (v) => (this.goShow(v) ? this : null),
-        (v) => this.goHide(v)
+        (v, e) => (this.goShow(v, e) ? this : null),
+        (v, e) => !!this.goHide(v, e)
       );
     }
   }
@@ -387,10 +419,30 @@ export default class WUPPopupElement<
   protected override gotChanges(propsChanged: Array<string> | null): void {
     super.gotChanges(propsChanged);
 
-    if (propsChanged) {
-      this.$isShown && this.goHide(HideCases.onOptionChange);
-      this.init(); // possible only if popup is hidden
+    propsChanged && this.$isShown && this.goHide(HideCases.onOptionChange, null);
+
+    // attr placement
+    const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.$placementAttrs;
+    const p = pAttr && WUPPopupElement.$placementAttrs(pAttr);
+    this._opts.placement = p || this._opts.placement || [...this.#ctr.$defaults.placement];
+    // attr animation
+    const aAnim = this.getAttribute("animation");
+    switch (aAnim) {
+      case "":
+      case "default":
+        this._opts.animation = Animations.default;
+        break;
+      case "drawer":
+        this._opts.animation = Animations.drawer;
+        break;
+      case "stack":
+        this._opts.animation = Animations.stack;
+        break;
+      default:
+        break;
     }
+    // re-init
+    propsChanged && this.init(); // only if popup is hidden
   }
 
   protected override connectedCallback(): void {
@@ -422,15 +474,15 @@ export default class WUPPopupElement<
 
   protected setMaxHeight(px: number | null): void {
     this.style.maxHeight = px ? `${px}px` : "";
-    if (this.#state?.userStyles?.inherritY) {
-      this.#state.userStyles.inherritY.style.maxHeight = this.style.maxHeight;
+    if (this.#state?.userStyles?.inheritY) {
+      this.#state.userStyles.inheritY.style.maxHeight = this.style.maxHeight;
     }
   }
 
   protected setMaxWidth(px: number | null): void {
     this.style.maxWidth = px ? `${px}px` : "";
-    if (this.#state?.userStyles?.inherritX) {
-      this.#state.userStyles.inherritX.style.maxWidth = this.style.maxWidth;
+    if (this.#state?.userStyles?.inheritX) {
+      this.#state.userStyles.inheritX.style.maxWidth = this.style.maxWidth;
     }
   }
 
@@ -446,8 +498,8 @@ export default class WUPPopupElement<
       minH: number;
       minW: number;
       borderRadius: number;
-      inherritY: HTMLElement | SVGElement | null;
-      inherritX: HTMLElement | SVGElement | null;
+      inheritY: HTMLElement | SVGElement | null;
+      inheritX: HTMLElement | SVGElement | null;
       animTime: number;
     };
     placements: Array<WUP.Popup.Place.PlaceFunc>;
@@ -465,10 +517,6 @@ export default class WUPPopupElement<
     if (!this._opts.target!.isConnected) {
       throw new Error(`${this.tagName}. Target is not appended to document`);
     }
-
-    const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.$placementAttrs;
-    const p = pAttr && WUPPopupElement.$placementAttrs[pAttr];
-    this._opts.placement = p ? [p] : this._opts.placement;
 
     if (!this._opts.animation) {
       this.style.transform = ""; // otherwise animation will broken if we reset
@@ -488,9 +536,9 @@ export default class WUPPopupElement<
       minH: Math.max(5, px2Number(style.paddingTop) + px2Number(style.paddingBottom), px2Number(style.minHeight)),
 
       borderRadius: 0,
-      // fix `maxSize inherritance doesn't work for customElements`
-      inherritY: child && style.overflowY === "visible" ? child : null,
-      inherritX: child && style.overflowX === "visible" ? child : null,
+      // fix `maxSize inheritance doesn't work for customElements`
+      inheritY: child && style.overflowY === "visible" ? child : null,
+      inheritX: child && style.overflowX === "visible" ? child : null,
       animTime: Number.parseFloat(style.animationDuration.substring(0, style.animationDuration.length - 1)) * 1000,
     };
 
@@ -549,7 +597,11 @@ export default class WUPPopupElement<
   /** Required to stop previous animations/timeouts (for case when option animation is changed) */
   _stopAnimation?: () => void;
   protected goAnimate(animTime: number, isHidden: boolean): Promise<boolean> {
+    this._isStopChanges = true;
     if (this._opts.animation === Animations.drawer) {
+      this.setAttribute("animation", "drawer");
+      this._isStopChanges = false;
+
       const pa = animateDropdown(this, animTime, isHidden);
       this._stopAnimation = () => {
         delete this._stopAnimation;
@@ -557,6 +609,30 @@ export default class WUPPopupElement<
       };
       return pa;
     }
+
+    if (this._opts.animation === Animations.stack) {
+      this.setAttribute("animation", "stack");
+      this._isStopChanges = false;
+
+      const items =
+        this.querySelector("[items]") || // <div items><button>item 1</button>...</div>
+        this.querySelector("li")?.parentElement!.children || // <ul><li>item 1</li>...</ul>
+        (this.children.length > 1 && this.children) || // <button>item 1</button>...
+        (this.children[0]?.children.length && this.children[0]!.children) || // <div><button>item 1</button>...</div>
+        this.children; // <button>item 1</button>
+      const pos = this.getAttribute("position");
+      const isVertical = pos === "bottom" || pos === "top";
+      const pa = animateStack(this.$options.target!, items as HTMLCollection, animTime, isHidden, isVertical);
+      this._stopAnimation = () => {
+        delete this._stopAnimation;
+        pa.stop(this._opts.animation !== Animations.stack); // rst animation state only if animation changed
+      };
+      return pa;
+    }
+
+    this.removeAttribute("animation");
+    this._isStopChanges = false;
+
     return new Promise((resolve) => {
       const t = setTimeout(() => resolve(true), animTime);
       this._stopAnimation = () => {
@@ -568,8 +644,9 @@ export default class WUPPopupElement<
   }
 
   /** Shows popup if target defined; returns true if successful */
-  protected goShow(showCase: ShowCases): boolean | Promise<boolean> {
-    if (this.#isShown && !this.#isHidding && !this.#isShowing) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  goShow(showCase: ShowCases, ev: MouseEvent | FocusEvent | null): boolean | Promise<boolean> {
+    if (this.#isShown && !this.#isHiding && !this.#isShowing) {
       return true;
     }
     if (this.#whenShow) {
@@ -580,7 +657,7 @@ export default class WUPPopupElement<
       return false;
     }
     this.#whenHide = undefined;
-    this.#isHidding = undefined;
+    this.#isHiding = undefined;
     this._stopAnimation?.call(this);
     this.#state && window.cancelAnimationFrame(this.#state.frameId);
     this.buildState();
@@ -629,8 +706,9 @@ export default class WUPPopupElement<
   }
 
   /** Hide popup. @hideCase as reason of hide(). Calling 2nd time at once will stop previous hide-animation */
-  protected goHide(hideCase: HideCases): boolean | Promise<boolean> {
-    if (!this.#isShown && !this.#isHidding && !this.#isShowing) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  goHide(hideCase: HideCases, ev: MouseEvent | FocusEvent | KeyboardEvent | null): boolean | Promise<boolean> {
+    if (!this.#isShown && !this.#isHiding && !this.#isShowing) {
       return true;
     }
     if (this.#whenHide) {
@@ -644,9 +722,9 @@ export default class WUPPopupElement<
     this.#whenShow = undefined;
     this.#isShowing = undefined;
     this._stopAnimation?.call(this);
-    this.#isHidding = true;
+    this.#isHiding = true;
     const finishHide = (): void => {
-      this.#isHidding = undefined;
+      this.#isHiding = undefined;
       delete this._stopAnimation;
       this.style.display = "";
       this.removeAttribute("hide");
@@ -662,13 +740,14 @@ export default class WUPPopupElement<
     };
 
     // waitFor only if was ordinary user-action
-    if (hideCase >= HideCases.onManuallCall && hideCase <= HideCases.onTargetClick) {
+    const skipWait = hideCase === HideCases.onOptionChange || hideCase === HideCases.onTargetRemove;
+    if (!skipWait) {
       this.setAttribute("hide", "");
       const { animationDuration: aD } = getComputedStyle(this);
       const animTime = Number.parseFloat(aD.substring(0, aD.length - 1)) * 1000 || 0;
       if (animTime) {
         this.#whenHide = this.goAnimate(animTime, true).then((isOk) => {
-          this.#isHidding = undefined;
+          this.#isHiding = undefined;
           this.removeAttribute("hide");
           if (!isOk) {
             return false;
@@ -695,7 +774,7 @@ export default class WUPPopupElement<
     const trg = this._opts.target!;
     // possible when target removed via set innerHTML (in this case remove-hook doesn't work)
     if (!trg.isConnected) {
-      this.goHide(HideCases.onTargetRemove);
+      this.goHide(HideCases.onTargetRemove, null);
       this.#attach && this.remove(); // self-removing if $attach()
       return undefined;
     }
@@ -959,7 +1038,7 @@ export default class WUPPopupElement<
 
   protected override gotRemoved(): void {
     this.#isShown = false;
-    this.#isHidding = undefined;
+    this.#isHiding = undefined;
     this.#isShowing = undefined;
     this.#whenHide = undefined;
     this.#whenShow = undefined;
@@ -973,8 +1052,8 @@ export default class WUPPopupElement<
   /** Call when need to reinit */
   protected disposeListener(): void {
     // possible on reinit when need to rebound events
-    this.#listenRefs?.stopListen();
-    this.#listenRefs = undefined;
+    this.#refListener?.stopListen();
+    this.#refListener = undefined;
   }
 
   protected override dispose(): void {
@@ -995,30 +1074,7 @@ declare global {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: WUP.Base.JSXProps<WUPPopupElement> &
-        Partial<{
-          /** QuerySelector to find target - anchor that popup uses for placement.
-           * If attr.target and $options.target are empty previousSibling will be attached.
-           * Popup defines target on show()
-           *
-           * attr `target` has hire priority than ref.options.target
-           *  */
-          target: string;
-          /** Placement rule (relative to target); applied on show(). Call show() again to apply changed options */
-          placement: keyof typeof WUPPopupElement.$placementAttrs;
-          /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$show') instead */
-          onShow: never;
-          /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$hide') instead */
-          onHide: never;
-          /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willHide') instead */
-          onWillHide: never;
-          /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willShow') instead */
-          onWillShow: never;
-          /** @readonly Result position; use this to restyle animation etc. */
-          readonly position: "top" | "left" | "bottom" | "right";
-          /** @readonly Hide state; use this to hide-animation */
-          readonly hide: "";
-        }>;
+      [tagName]: WUP.Base.JSXProps<WUPPopupElement> & WUP.Popup.Attributes;
     }
   }
 }

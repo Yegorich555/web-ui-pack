@@ -22,7 +22,7 @@ export default function Example1() {
             <br /> click me
           </small>
         </button>
-        <wup-popup target="#trg" placement="top-start">
+        <wup-popup target="#trg" placement="top-start" animation="default">
           top.start
         </wup-popup>
         <wup-popup target="#trg" placement="top-middle">
