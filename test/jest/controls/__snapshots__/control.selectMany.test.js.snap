@@ -673,6 +673,7 @@ mask-image: var(--ctrl-icon-img);
       
 WUP-SELECTMANY [menu] {
   padding: 0;
+  overflow: hidden;
 }
 WUP-SELECTMANY [menu] ul {
   margin: 0;

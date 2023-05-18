@@ -107,6 +107,7 @@ export function WUPcssMenu(tag: string): string {
   return `
 ${tag} {
   padding: 0;
+  overflow: hidden;
 }
 ${tag} ul {
   margin: 0;

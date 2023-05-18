@@ -664,6 +664,7 @@ mask-image: var(--ctrl-icon-img);
       
 WUP-SELECT [menu] {
   padding: 0;
+  overflow: hidden;
 }
 WUP-SELECT [menu] ul {
   margin: 0;
