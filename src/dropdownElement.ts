@@ -22,7 +22,7 @@ declare global {
       showCase: ShowCases;
       /** Hide on popup click
        * @defaultValue true */
-      hideOnClick: boolean;
+      hideOnPopupClick: boolean;
       /** Placement rules relative to target;
        * @defaultValue `[
             WUPPopupElement.$placements.$bottom.$start,
@@ -94,7 +94,7 @@ export default class WUPDropdownElement extends WUPBaseElement {
     ...WUPPopupElement.$defaults,
     animation: Animations.drawer,
     showCase: ShowCases.onClick | ShowCases.onFocus,
-    hideOnClick: true,
+    hideOnPopupClick: true,
     minHeightByTarget: true,
     minWidthByTarget: true,
     placement: [
@@ -175,7 +175,7 @@ export default class WUPDropdownElement extends WUPBaseElement {
     hideCase: HideCases,
     ev: MouseEvent | FocusEvent | KeyboardEvent | null
   ): boolean | Promise<boolean> {
-    if (hideCase === HideCases.onPopupClick && !this._opts.hideOnClick) {
+    if (hideCase === HideCases.onPopupClick && !this._opts.hideOnPopupClick) {
       return false;
     }
     const p = WUPPopupElement.prototype.goHide.call(this.$refPopup, hideCase, ev);
