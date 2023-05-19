@@ -815,7 +815,7 @@ exports[`control.number validations options.validationCase 2`] = `
 exports[`control.number validations options.validationCase 3`] = `
 <wup-num
   invalid=""
-  style="overflow: hidden;"
+  style=""
 >
   <label
     for="txt1"

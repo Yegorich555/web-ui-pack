@@ -15,6 +15,7 @@
 - [NumberControl](src/controls/number.ts).
   - _`-234` showed as `-,234`_
   - _error message min/max is not formatted as input_
+  - _useless inline style 'overflow' on focus_
 - **Controls**. _Asterisk is visible on empty label when value is required_
 
 **New/Features**:

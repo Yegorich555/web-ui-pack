@@ -304,6 +304,7 @@ export default class WUPNumberControl<
         { skip: () => this.$isReadOnly || this.$isDisabled }
       )
     ); // allow inc/dec via scroll/swipe
+    this.style.overflow = ""; // disable inline-style from onScroll helper
     r.push(
       onEvent(this, "keyup", (e) => {
         /* istanbul ignore else */
