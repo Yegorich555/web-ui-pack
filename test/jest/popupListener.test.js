@@ -805,5 +805,3 @@ describe("popupListener", () => {
     expect(isShown).toBe(false);
   });
 });
-
-// todo globaly fix typo `hiding` not `hiding`

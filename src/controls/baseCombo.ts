@@ -117,6 +117,11 @@ export default abstract class WUPBaseComboControl<
   // @ts-expect-error reason: validationRules is different
   protected override _opts = this.$options;
 
+  /** Fires after popup-menu is shown (after animation finishes) */
+  $onShowMenu?: (e: Event) => void;
+  /** Fires after popup is hidden (after animation finishes) */
+  $onHideMenu?: (e: Event) => void;
+
   #isShown = false;
   /** Returns if popup-menu is opened */
   get $isShown(): boolean {

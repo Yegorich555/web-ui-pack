@@ -1,5 +1,5 @@
 import WUPBaseElement from "web-ui-pack/baseElement";
-import * as h from "../../testHelper";
+import * as h from "../testHelper";
 
 const testAttr = "testattr";
 class TestElement extends WUPBaseElement {
@@ -394,11 +394,40 @@ describe("baseElement", () => {
     const fn = jest.fn();
     el.addEventListener("click", fn);
 
-    const ev = el.fireEvent("click", { bubbles: true });
+    let ev = el.fireEvent("click", { bubbles: true });
     expect(ev).toBeInstanceOf(Event);
     expect(ev.bubbles).toBe(true);
     expect(fn).toHaveBeenCalledTimes(1);
     expect(fn.mock.calls[0][0]).toBe(ev);
+
+    // event calls also function
+    el.$onShowMe = jest.fn();
+    ev = el.fireEvent("$showMe");
+    expect(el.$onShowMe).toBeCalledTimes(1);
+    expect(el.$onShowMe).lastCalledWith(ev);
+
+    // no function
+    jest.clearAllMocks();
+    el.$onShowMe = undefined;
+    expect(() => el.fireEvent("$showMe")).not.toThrow();
+
+    // stopImmediatePropagation
+    el.addEventListener("$showMe", fn);
+    el.$onShowMe = jest.fn();
+    ev = el.fireEvent("$showMe");
+    expect(fn).toBeCalledTimes(1);
+    expect(el.$onShowMe).toBeCalledTimes(1);
+    jest.clearAllMocks();
+    fn.mockImplementation((e) => e.stopImmediatePropagation());
+    ev = el.fireEvent("$showMe");
+    expect(fn).toBeCalledTimes(1);
+    expect(el.$onShowMe).not.toBeCalled(); // because stopImmediatePropagation is called
+
+    // without prefix '$'
+    jest.clearAllMocks();
+    el.$onTestCustom = fn;
+    el.fireEvent("testCustom");
+    expect(el.$onTestCustom).not.toBeCalled();
   });
 
   test("appendEvent", () => {

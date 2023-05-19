@@ -285,6 +285,21 @@ export default class WUPPopupElement<
   $options: WUP.Popup.Options = objectClone(this.#ctr.$defaults);
   protected override _opts = this.$options;
 
+  /** Fires before show is happened;
+   * @tutorial rules
+   * * can be prevented via e.preventDefault()
+   * * use event.detail.showCase to filter by showCase */
+  $onWillShow?: (e: CustomEvent) => void;
+  /** Fires after popup is shown (after animation finishes) */
+  $onShow?: (e: Event) => void;
+  /** Fires before hide is happened;
+   * @tutorial rules
+   * * can be prevented via e.preventDefault()
+   * * use event.detail.hideCase to filter by hideCase */
+  $onWillHide?: (e: CustomEvent) => void;
+  /** Fires after popup is hidden (after animation finishes) */
+  $onHide?: (e: Event) => void;
+
   #whenHide?: Promise<any>;
   /** Hide popup
    * @returns Promise resolved true if successful by animation-end */

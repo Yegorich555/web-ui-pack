@@ -151,10 +151,16 @@ describe("popupElement", () => {
     const onHide = jest.fn();
     const onWillShow = jest.fn();
     const onWillHide = jest.fn();
+
     a.addEventListener("$show", onShow);
     a.addEventListener("$hide", onHide);
     a.addEventListener("$willShow", onWillShow);
     a.addEventListener("$willHide", onWillHide);
+
+    a.$onShow = jest.fn();
+    a.$onHide = jest.fn();
+    a.$onWillShow = jest.fn();
+    a.$onWillHide = jest.fn();
 
     expect(gotReady).toBeCalledTimes(0);
     expect(init).toBeCalledTimes(0);
@@ -172,8 +178,10 @@ describe("popupElement", () => {
     expect(a.$isShown).toBe(true);
     await h.wait();
     expect(onShow).toBeCalledTimes(1);
+    expect(a.$onShow).toBeCalledTimes(1);
     expect(onShow.mock.calls[0][0]).toBeInstanceOf(Event);
     expect(onWillShow).toBeCalledTimes(1);
+    expect(a.$onWillShow).toBeCalledTimes(1);
     expect(onWillShow.mock.calls[0][0]).toBeInstanceOf(Event);
     expect(onHide).not.toBeCalled();
     expect(onWillHide).not.toBeCalled();
@@ -183,7 +191,9 @@ describe("popupElement", () => {
     expect(a.$isShown).toBe(false);
     jest.advanceTimersByTime(1);
     expect(onHide).toBeCalledTimes(1);
+    expect(a.$onHide).toBeCalledTimes(1);
     expect(onWillHide).toBeCalledTimes(1);
+    expect(a.$onWillHide).toBeCalledTimes(1);
 
     jest.clearAllMocks();
     const r = (e) => e.preventDefault();

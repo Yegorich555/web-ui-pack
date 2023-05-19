@@ -228,6 +228,11 @@ export default class WUPFormElement<
 
   protected override _opts = this.$options;
 
+  /** Dispatched on submit. Return promise to lock form and show spinner */
+  $onSubmit?: (ev: WUP.Form.SubmitEvent<Model>) => void | Promise<unknown>;
+  /** Dispatched on submit */
+  // It's not required but called: $onsubmit?: (ev: WUP.Form.SubmitEvent<Model>) => void;
+
   /** All controls related to form */
   $controls: IBaseControl<any>[] = [];
 
@@ -286,9 +291,6 @@ export default class WUPFormElement<
   get $isChanged(): boolean {
     return this.$controls.some((c) => c.$options.name && c.$isChanged);
   }
-
-  /** Dispatched on submit. Return promise to lock form and show spinner */
-  $onSubmit?: (ev: WUP.Form.SubmitEvent<Model>) => void | Promise<unknown>;
 
   /** Called on every spin-render */
   renderSpin(target: HTMLElement): WUPSpinElement {

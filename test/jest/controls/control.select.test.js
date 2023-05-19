@@ -157,6 +157,8 @@ describe("control.select", () => {
     const onHide = jest.fn();
     el.addEventListener("$showMenu", onShow);
     el.addEventListener("$hideMenu", onHide);
+    el.$onShowMenu = jest.fn();
+    el.$onHideMenu = jest.fn();
 
     // opening by focus
     el.focus();
@@ -167,6 +169,7 @@ describe("control.select", () => {
     await h.wait();
     expect(onHide).toBeCalledTimes(0);
     expect(onShow).toBeCalledTimes(1);
+    expect(el.$onShowMenu).toBeCalledTimes(1);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
       `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option" aria-selected="true">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
     );
@@ -183,6 +186,7 @@ describe("control.select", () => {
       `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-owns="txt2" aria-controls="txt2"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label><wup-popup menu="" style="min-width: 100px;"><ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option" aria-selected="false">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul></wup-popup></wup-select>"`
     );
     expect(onHide).toBeCalledTimes(1);
+    expect(el.$onHideMenu).toBeCalledTimes(1);
     expect(onShow).toBeCalledTimes(1);
 
     // opening by call $show()

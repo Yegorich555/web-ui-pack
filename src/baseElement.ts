@@ -330,11 +330,22 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
   }
   /* eslint-enable max-len */
 
-  // todo every firing custom event must call also 'on[event]' function like el.onclick.... etc
   /** Inits customEvent & calls dispatchEvent and returns created event */
   fireEvent<K extends keyof Events>(type: K, eventInit?: CustomEventInit): Event {
+    let isStopped = false;
     const ev = new CustomEvent(type as string, eventInit);
+    ev.stopImmediatePropagation = () => {
+      isStopped = true;
+      CustomEvent.prototype.stopImmediatePropagation.call(ev);
+    };
     super.dispatchEvent(ev);
+    if (!isStopped) {
+      const isCustom = (type as string).startsWith("$");
+      if (isCustom) {
+        const str = (type as string).substring(1, 2).toUpperCase() + (type as string).substring(2);
+        (this as any)[`$on${str}`]?.call(this, ev);
+      }
+    }
     return ev;
   }
 

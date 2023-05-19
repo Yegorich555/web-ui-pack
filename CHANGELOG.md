@@ -33,6 +33,7 @@
   - Popup **always closed by focusLost of target & popup** for accessibility purpose (if was opened via default listener)
   - Ability to call **\$show()** and **\$hide()** with working listeners (previously manuall **$show()** removed all listeners)
   - **Controls**. Able to setup `$defaults.validations` (like `WUPNumberControl.$validations = {min: 0}` etc.)
+- **Global**. Added custom callbacks for events. So event `popup.addEventListner("$show",e=>...)` equal to `popup.$onShow = (e)=>...`
 
 ## 0.5.2 (Mar 29, 2023)
 

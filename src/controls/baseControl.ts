@@ -381,6 +381,9 @@ export default abstract class WUPBaseControl<
 
   protected override _opts = this.$options;
 
+  /** Called on value change */
+  $onChange?: (e: Event) => void;
+
   #value?: ValueType;
   /** Current value of control; You can change it without affecting on $isDirty state */
   get $value(): ValueType | undefined {
