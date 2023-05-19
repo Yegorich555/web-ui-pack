@@ -352,6 +352,9 @@ padding:0;}
       WUP-TIME strong {
         cursor: inherit;
       }
+      WUP-TIME strong:empty {
+        display: none;
+      }
       WUP-TIME [aria-required="true"] + strong:after,
       WUP-TIME fieldset[aria-required="true"] &gt; legend:after {
         content: "*";

@@ -704,6 +704,9 @@ padding:0;}
       WUP-RADIO strong {
         cursor: inherit;
       }
+      WUP-RADIO strong:empty {
+        display: none;
+      }
       WUP-RADIO [aria-required="true"] + strong:after,
       WUP-RADIO fieldset[aria-required="true"] &gt; legend:after {
         content: "*";

@@ -277,6 +277,9 @@ padding:0;}
       WUP-CHECK strong {
         cursor: inherit;
       }
+      WUP-CHECK strong:empty {
+        display: none;
+      }
       WUP-CHECK [aria-required="true"] + strong:after,
       WUP-CHECK fieldset[aria-required="true"] &gt; legend:after {
         content: "*";

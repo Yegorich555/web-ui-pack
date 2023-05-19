@@ -162,6 +162,9 @@ WUP-FORM [type='submit'][aria-busy] {
       WUP-TEXT strong {
         cursor: inherit;
       }
+      WUP-TEXT strong:empty {
+        display: none;
+      }
       WUP-TEXT [aria-required="true"] + strong:after,
       WUP-TEXT fieldset[aria-required="true"] &gt; legend:after {
         content: "*";

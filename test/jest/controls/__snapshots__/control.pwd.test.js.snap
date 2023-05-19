@@ -389,6 +389,9 @@ padding:0;}
       WUP-PWD strong {
         cursor: inherit;
       }
+      WUP-PWD strong:empty {
+        display: none;
+      }
       WUP-PWD [aria-required="true"] + strong:after,
       WUP-PWD fieldset[aria-required="true"] &gt; legend:after {
         content: "*";

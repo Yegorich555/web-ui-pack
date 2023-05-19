@@ -282,6 +282,9 @@ export default abstract class WUPBaseControl<
       :host strong {
         cursor: inherit;
       }
+      :host strong:empty {
+        display: none;
+      }
       :host [aria-required="true"] + strong:after,
       :host fieldset[aria-required="true"] > legend:after {
         content: "*";

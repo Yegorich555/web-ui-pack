@@ -349,6 +349,9 @@ padding:0;}
       WUP-SELECT strong {
         cursor: inherit;
       }
+      WUP-SELECT strong:empty {
+        display: none;
+      }
       WUP-SELECT [aria-required="true"] + strong:after,
       WUP-SELECT fieldset[aria-required="true"] &gt; legend:after {
         content: "*";

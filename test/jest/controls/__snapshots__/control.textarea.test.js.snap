@@ -332,6 +332,9 @@ padding:0;}
       WUP-TEXTAREA strong {
         cursor: inherit;
       }
+      WUP-TEXTAREA strong:empty {
+        display: none;
+      }
       WUP-TEXTAREA [aria-required="true"] + strong:after,
       WUP-TEXTAREA fieldset[aria-required="true"] &gt; legend:after {
         content: "*";

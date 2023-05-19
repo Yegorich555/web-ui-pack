@@ -1056,6 +1056,9 @@ padding:0;}
       WUP-CALENDAR strong {
         cursor: inherit;
       }
+      WUP-CALENDAR strong:empty {
+        display: none;
+      }
       WUP-CALENDAR [aria-required="true"] + strong:after,
       WUP-CALENDAR fieldset[aria-required="true"] &gt; legend:after {
         content: "*";

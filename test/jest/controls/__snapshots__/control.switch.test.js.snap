@@ -269,6 +269,9 @@ padding:0;}
       WUP-SWITCH strong {
         cursor: inherit;
       }
+      WUP-SWITCH strong:empty {
+        display: none;
+      }
       WUP-SWITCH [aria-required="true"] + strong:after,
       WUP-SWITCH fieldset[aria-required="true"] &gt; legend:after {
         content: "*";
