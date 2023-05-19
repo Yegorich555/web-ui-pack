@@ -656,7 +656,7 @@ exports[`control.number validations $options.validationShowAll 1`] = `
         Min value is 5
       </li>
       <li>
-        Max value is 1000
+        Max value is 1,000
       </li>
     </ul>
   </wup-popup>

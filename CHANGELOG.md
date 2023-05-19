@@ -12,7 +12,9 @@
 - **helper** [`animateDropdown`](src/helpers/animate.ts). _Wrong for left,right,top directions_
 - [PopupElement](src/popup/popupElement.ts). _Popup hides by mouseenter if was opened by target.mouseenter_
 - [PopupElement](src/popup/popupElement.ts). _Popup impossible to hide by click if opened by hover_
-- [NumberControl](src/controls/number.ts). _`-234` showed as `-,234`_
+- [NumberControl](src/controls/number.ts).
+  - _`-234` showed as `-,234`_
+  - _error message min/max is not formatted as input_
 - **Controls**. _Asterisk is visible on empty label when value is required_
 
 **New/Features**:

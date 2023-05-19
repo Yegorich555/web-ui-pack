@@ -88,8 +88,8 @@ export default class WUPNumberControl<
       ...WUPBaseControl.$defaults.validationRules,
       _mask: WUPTextControl.$defaults.validationRules._mask as any,
       // _parse: WUPTextControl.$defaults.validationRules._parse as any,
-      min: (v, setV) => (v == null || v < setV) && `Min value is ${setV}`,
-      max: (v, setV) => (v == null || v > setV) && `Max value is ${setV}`,
+      min: (v, setV, c) => (v == null || v < setV) && `Min value is ${(c as WUPNumberControl).valueToInput(setV)}`,
+      max: (v, setV, c) => (v == null || v > setV) && `Max value is ${(c as WUPNumberControl).valueToInput(setV)}`,
     },
   };
 
@@ -115,7 +115,7 @@ export default class WUPNumberControl<
 
   // WARN usage format #.### impossible because unclear what sepDec/sep100 and what if user wants only limit decimal part
   /** Called when need to format value */
-  protected valueToInput(v: ValueType | undefined): string {
+  valueToInput(v: ValueType | undefined): string {
     if (v == null) {
       return "";
     }
