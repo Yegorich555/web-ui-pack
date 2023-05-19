@@ -126,7 +126,8 @@ export default class WUPNumberControl<
     let [int, dec] = (v as any).toString().split(".");
     const f = this.$format;
     if (f.sep1000) {
-      for (let i = int.length - 3; i > 0; i -= 3) {
+      const to = (v as number)! > 0 ? 0 : 1;
+      for (let i = int.length - 3; i > to; i -= 3) {
         int = `${int.substring(0, i)}${f.sep1000}${int.substring(i)}`;
       }
     }
