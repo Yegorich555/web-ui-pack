@@ -81,6 +81,7 @@ export default class WUPNumberControl<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
+  // @ts-expect-error - min: string & min: number is invalid
   static $defaults: WUP.Number.Defaults = {
     ...WUPTextControl.$defaults,
     validationRules: {

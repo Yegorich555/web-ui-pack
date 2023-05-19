@@ -12,6 +12,7 @@ import IBaseControl from "./baseControl.i";
 
 /** Cases of validation for WUP Controls */
 export const enum ValidationCases {
+  none = 0,
   /** Wait for first user-change > wait for valid > wait for invalid >> show error;
    *  When invalid: wait for valid > hide error > wait for invalid > show error
    *  Also you can check $options.validateDebounceMs */
@@ -96,6 +97,20 @@ declare global {
       validationRules: {
         [K in keyof VM]: (this: IBaseControl, value: T, setValue: VM[K], control: IBaseControl) => false | string;
       };
+      /** Rules enabled for current control (related to $defaults.validationRules)
+       * @example
+       * ```
+       * const el = document.body.appendChild(document.createElement("wup-text"));
+         el.$options.validations = {
+           min: 10, // set min 10symbols for $default.validationRules.min
+           custom: (value: string | undefined) => (value === un\defined || value === "test-me") && "This is custom error", // custom validation for single element
+         };
+       * ```
+       * @tutorial Troubleshooting
+       ** If setup validations via attr it doesn't affect on $options.validations directly. Instead use el.validations getter instead */
+      validations?:
+        | { [K in keyof VM]?: VM[K] | ((value: T | undefined) => false | string) }
+        | { [k: string]: (value: T | undefined) => false | string };
     }
     interface Options<T = any, VM = ValidityMap> extends Defaults<T, VM> {
       /** Title/label of control; if label is missed it's parsed from option [name]. To skip point `label=''` (empty string) */
@@ -114,20 +129,6 @@ declare global {
       readOnly?: boolean;
       /** Show all validation-rules with checkpoints as list instead of single error */
       validationShowAll?: boolean;
-      /** Rules enabled for current control (related to $defaults.validationRules)
-       * @example
-       * ```
-       * const el = document.body.appendChild(document.createElement("wup-text"));
-         el.$options.validations = {
-           min: 10, // set min 10symbols for $default.validationRules.min
-           custom: (value: string | undefined) => (value === un\defined || value === "test-me") && "This is custom error", // custom validation for single element
-         };
-       * ```
-       * @tutorial Troubleshooting
-       ** If setup validations via attr it doesn't affect on $options.validations directly. Instead use el.validations getter instead */
-      validations?:
-        | { [K in keyof VM]?: VM[K] | ((value: T | undefined) => false | string) }
-        | { [k: string]: (value: T | undefined) => false | string };
     }
 
     interface Attributes
@@ -698,9 +699,11 @@ export default abstract class WUPBaseControl<
     this.$form?.$controls.splice(this.$form.$controls.indexOf(this), 1);
   }
 
-  /** Returns validations enabled by user */
+  /** Returns validations enabled by user & defaults */
   protected get validations(): WUP.BaseControl.Options["validations"] | undefined {
-    return this.getAttr<WUP.BaseControl.Options["validations"]>("validations", "ref");
+    const def = this.#ctr.$defaults.validations;
+    const opt = this.getAttr<WUP.BaseControl.Options["validations"]>("validations", "ref");
+    return def ? { ...def, ...opt } : opt;
   }
 
   /** Returns validations functions ready for checking */

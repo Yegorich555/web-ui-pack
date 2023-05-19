@@ -373,7 +373,7 @@ export default class WUPTimeControl<
     let isInit = true;
     const append = (ul: HTMLElement, v: number | string, twoDigs: boolean, savedV?: number): HTMLElement => {
       const li = ul.appendChild(document.createElement("li"));
-      li.textContent = twoDigs && v < 10 ? `0${v}` : v.toString();
+      li.textContent = twoDigs && +v < 10 ? `0${v}` : v.toString();
       (li as any)._value = savedV ?? v;
       return li;
     };

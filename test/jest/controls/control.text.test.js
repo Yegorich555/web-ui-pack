@@ -120,6 +120,27 @@ describe("control.text", () => {
     );
   });
 
+  test("$defaults.validations", () => {
+    class TestVldElement extends WUPTextControl {
+      $defaults = { ...WUPTextControl.$defaults };
+      $options = { ...TestVldElement.$defaults };
+      _opts = this.$options;
+    }
+
+    customElements.define("test-vld", TestVldElement);
+    el = document.body.appendChild(document.createElement("test-vld"));
+
+    TestVldElement.$defaults.validations = { required: true };
+    expect(el.validations).toStrictEqual({ required: true });
+
+    el.$options.validations = { min: 2 };
+    expect(el.validations).toStrictEqual({ required: true, min: 2 });
+
+    el.$options.validations = { required: false };
+    expect(el.validations).toStrictEqual({ required: false });
+    delete TestVldElement.$defaults.validations;
+  });
+
   test("prefix", async () => {
     el.$options.prefix = "$ ";
     await h.wait(1);
