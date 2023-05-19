@@ -352,6 +352,9 @@ padding:0;}
       WUP-TIME strong {
         cursor: inherit;
       }
+      WUP-TIME strong:empty {
+        display: none;
+      }
       WUP-TIME [aria-required="true"] + strong:after,
       WUP-TIME fieldset[aria-required="true"] &gt; legend:after {
         content: "*";
@@ -420,11 +423,15 @@ mask-image: var(--ctrl-icon-img);
           max-height: none;
         }*/
         WUP-TIME:hover,
-        WUP-TIME:hover &gt; [menu] {
+        WUP-TIME:hover&gt;[menu],
+        WUP-TIME[hovered],
+        WUP-TIME[hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         WUP-TIME[invalid]:hover,
-        WUP-TIME[invalid]:hover &gt; [menu] {
+        WUP-TIME[invalid]:hover&gt;[menu]
+        WUP-TIME[invalid][hovered],
+        WUP-TIME[invalid][hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
         }
       }
@@ -739,11 +746,13 @@ mask-image: var(--ctrl-icon-img);
         background: var(--base-sep);
       }
       WUP-TIME [menu] button {
+        cursor: pointer;
         flex: 1 1 50%;
         display: inline-flex;
         align-content: center;
         justify-content: center;
         height: 2.4em;
+        border: none;
         border-radius: 0;
         padding: 0; margin: 0;
         background: var(--base-btn3-bg);

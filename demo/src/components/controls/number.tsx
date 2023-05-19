@@ -19,7 +19,7 @@ export default function NumberControlView() {
       features={[
         "Inheritted features from TextControl",
         "Built-in validations (required,min,max)",
-        "Increment/decrement via ArrowKeys, Mouse, TouchEvents(Swipe) + keys Shift/Ctrl (only when focused)",
+        "Increment/decrement via ArrowKeys, Mouse, TouchEvents(Swipe) + keys Shift/Ctrl/Alt (only when focused)",
         "Different formats (currency, etc.). Use $options.format to redefine defaults",
         "Display format depends on user-locale (see web-ui-pack/objects/localeInfo). Use $options.format or localeInfo (globally)",
       ]}

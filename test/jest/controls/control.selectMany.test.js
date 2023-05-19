@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 import { WUPSelectManyControl } from "web-ui-pack";
 import { isAnimEnabled } from "web-ui-pack/helpers/animate";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
@@ -40,8 +41,8 @@ initTestBaseControl({
   },
 });
 
-function handledKeydown(key = "") {
-  return !el.dispatchEvent(new KeyboardEvent("keydown", { key, cancelable: true, bubbles: true }));
+function handledKeydown(key = "", opts = undefined) {
+  return !el.dispatchEvent(new KeyboardEvent("keydown", { key, cancelable: true, bubbles: true, ...opts }));
 }
 
 describe("control.selectMany", () => {
@@ -64,18 +65,18 @@ describe("control.selectMany", () => {
     el.$initValue = [10, 30];
     await h.wait(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<label for="txt1"><span><span item="" aria-hidden="true">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" class="wup-hidden"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label>"`
+      `"<label for="txt1"><span><span item="" aria-hidden="true">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label>"`
     );
 
     el.focus(); // opening menu by focus
     await h.wait(1);
     expect(el.$isShown).toBe(true);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<label for="txt1"><span><span item="" aria-hidden="true">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" class="" aria-describedby="txt2" aria-owns="txt3" aria-controls="txt3"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label><section aria-live="off" aria-atomic="true" class="wup-hidden" id="txt2">Donny,Leo</section><wup-popup menu="" style="min-width: 100px;"><ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="display: none;">Donny</li><li role="option">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option">Splinter</li></ul></wup-popup>"`
+      `"<label for="txt1"><span><span item="" aria-hidden="true">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-describedby="txt2" aria-owns="txt3" aria-controls="txt3"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label><section aria-live="off" aria-atomic="true" class="wup-hidden" id="txt2">Donny,Leo</section><wup-popup menu="" style="min-width: 100px;"><ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="display: none;">Donny</li><li role="option">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option">Splinter</li></ul></wup-popup>"`
     );
     await h.wait();
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<label for="txt1"><span><span item="" aria-hidden="true">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" class="" aria-owns="txt3" aria-controls="txt3"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label><wup-popup menu="" style="min-width: 100px;"><ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="display: none;">Donny</li><li role="option">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option">Splinter</li></ul></wup-popup>"`
+      `"<label for="txt1"><span><span item="" aria-hidden="true">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-owns="txt3" aria-controls="txt3"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label><wup-popup menu="" style="min-width: 100px;"><ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="display: none;">Donny</li><li role="option">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option">Splinter</li></ul></wup-popup>"`
     );
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
       `"<ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="display: none;">Donny</li><li role="option">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option">Splinter</li></ul>"`
@@ -119,7 +120,7 @@ describe("control.selectMany", () => {
     await h.wait();
     expect(el.$isShown).toBe(true);
     expect(el.$refInput.outerHTML).toMatchInlineSnapshot(
-      `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" class="" aria-owns="txt3" aria-controls="txt3">"`
+      `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-owns="txt3" aria-controls="txt3">"`
     );
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
       `"<ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="display: none;">Donny</li><li role="option" aria-selected="false" id="txt4" style="display: none;">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option" style="display: none;" aria-selected="false" id="txt8">Splinter</li><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
@@ -153,7 +154,7 @@ describe("control.selectMany", () => {
       .spyOn(window, "matchMedia")
       .mockImplementationOnce((s) => ({ matches: s !== "(hover: hover) and (pointer: fine)" })); // simulate touchscreen
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true">Leo</span><span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" class="wup-hidden" aria-owns="txt11" aria-controls="txt11"><strong></strong>"`
+      `"<span item="" aria-hidden="true">Leo</span><span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-owns="txt12" aria-controls="txt12"><strong></strong>"`
     );
     const item = el.$refItems[0];
     await h.userTap(item);
@@ -162,14 +163,14 @@ describe("control.selectMany", () => {
     expect(el.$isShown).toBe(true); // 1st tap only to focus control
     // item must be not-removed
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true">Leo</span><span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" class="" aria-owns="txt14" aria-controls="txt14"><strong></strong>"`
+      `"<span item="" aria-hidden="true">Leo</span><span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-owns="txt12" aria-controls="txt12"><strong></strong>"`
     );
 
     await h.userTap(item);
     await h.wait();
     // 2nd tap removes item
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" class="" aria-owns="txt14" aria-controls="txt14"><strong></strong>"`
+      `"<span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-owns="txt12" aria-controls="txt12"><strong></strong>"`
     );
 
     // input hidden if readOnlyInput and values exist
@@ -178,7 +179,7 @@ describe("control.selectMany", () => {
     el.focus();
     await h.wait(1);
     expect(el.$refInput.outerHTML).toMatchInlineSnapshot(
-      `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" class="wup-hidden" aria-owns="txt17" aria-controls="txt17" aria-describedby="txt16" readonly="">"`
+      `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-owns="txt16" aria-controls="txt16" aria-describedby="txt15" readonly="">"`
     );
     el.$options.readOnlyInput = false;
 
@@ -187,7 +188,7 @@ describe("control.selectMany", () => {
     document.body.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
     el.blur();
     await h.wait(100);
-    expect(el.$refInput.value).toBe("Mik");
+    expect(el.$refInput.value).toBe(" ");
     document.body.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
     document.body.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }));
     document.body.focus();
@@ -219,7 +220,7 @@ describe("control.selectMany", () => {
     el.$initValue = [10, 30];
     await h.wait(1);
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" class="wup-hidden"><strong></strong>"`
+      `"<span item="" aria-hidden="true">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list"><strong></strong>"`
     );
 
     // remove item by click
@@ -228,11 +229,11 @@ describe("control.selectMany", () => {
     expect(el.$value).toStrictEqual([30]);
     // animation for [removed]
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true" removed="">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" class="" aria-describedby="txt2 txt3"><strong></strong>"`
+      `"<span item="" aria-hidden="true" removed="">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-describedby="txt2 txt3"><strong></strong>"`
     );
     await h.wait();
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" class=""><strong></strong>"`
+      `"<span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list"><strong></strong>"`
     );
     expect(el.$isShown).toBe(false); // because not-open by value-change
 
@@ -244,11 +245,11 @@ describe("control.selectMany", () => {
     expect(el.$value).toStrictEqual(undefined);
     // without animation for [removed]
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" class=""><strong></strong>"`
+      `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list"><strong></strong>"`
     );
     await h.wait();
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" class=""><strong></strong>"`
+      `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list"><strong></strong>"`
     );
     expect(el.$isShown).toBe(false); // because not-open by value-change
   });
@@ -576,5 +577,500 @@ describe("control.selectMany", () => {
     await h.wait(1);
     expect(el.$value).toStrictEqual(["grey"]); // cover case when $value is undefined
     expect(onChange).toBeCalledTimes(1);
+  });
+
+  test("sortable: keyboard", async () => {
+    const onChanged = jest.fn();
+    el.$value = [10, 20, 30];
+    el.$options.sortable = true;
+    await h.wait(1);
+    el.addEventListener("$change", onChanged);
+    el.focus();
+    await h.wait();
+    el.$hideMenu();
+    await h.wait();
+    expect(handledKeydown("ArrowLeft", { shiftKey: true })).toBe(false); // because not item focused
+
+    el.$refInput.selectionStart = 0;
+    el.$refInput.selectionEnd = 0;
+    expect(handledKeydown("ArrowLeft")).toBe(true); // focus last item
+    await h.wait(1);
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" id="txt4" focused="" role="option">Leo</span>",
+      ]
+    `);
+
+    // move to left
+    expect(handledKeydown("ArrowLeft", { shiftKey: true })).toBe(true);
+    await h.wait();
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Donny</span>",
+        "<span item="" id="txt4" focused="" role="option">Leo</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+      ]
+    `);
+    expect(el.$value).toStrictEqual([10, 30, 20]);
+    expect(onChanged).toBeCalledTimes(1);
+    await h.wait(1);
+
+    // move to left
+    expect(handledKeydown("ArrowLeft", { shiftKey: true })).toBe(true);
+    await h.wait();
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" id="txt4" focused="" role="option">Leo</span>",
+        "<span item="" aria-hidden="true">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+      ]
+    `);
+    expect(el.$value).toStrictEqual([30, 10, 20]);
+    expect(onChanged).toBeCalledTimes(2);
+    await h.wait(1);
+
+    // move to left
+    expect(handledKeydown("ArrowLeft", { shiftKey: true })).toBe(true);
+    await h.wait();
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" id="txt4" focused="" role="option">Leo</span>",
+      ]
+    `);
+    expect(el.$value).toStrictEqual([10, 20, 30]);
+    expect(onChanged).toBeCalledTimes(3);
+    await h.wait(1);
+
+    onChanged.mockClear();
+    // move to right
+    expect(handledKeydown("ArrowRight", { shiftKey: true })).toBe(true);
+    await h.wait();
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" id="txt4" focused="" role="option">Leo</span>",
+        "<span item="" aria-hidden="true">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+      ]
+    `);
+    expect(el.$value).toStrictEqual([30, 10, 20]);
+    expect(onChanged).toBeCalledTimes(1);
+    await h.wait(1);
+
+    // move to right
+    expect(handledKeydown("ArrowRight", { shiftKey: true })).toBe(true);
+    await h.wait();
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Donny</span>",
+        "<span item="" id="txt4" focused="" role="option">Leo</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+      ]
+    `);
+    expect(el.$value).toStrictEqual([10, 30, 20]);
+    expect(onChanged).toBeCalledTimes(2);
+    await h.wait(1);
+
+    // move to right
+    expect(handledKeydown("ArrowRight", { shiftKey: true })).toBe(true);
+    await h.wait();
+    expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" id="txt4" focused="" role="option">Leo</span>",
+      ]
+    `);
+    expect(el.$value).toStrictEqual([10, 20, 30]);
+    expect(onChanged).toBeCalledTimes(3);
+    await h.wait(1);
+
+    expect(handledKeydown("W", { shiftKey: true })).toBe(false);
+  });
+
+  test("sortable: drag&drop", async () => {
+    const onChanged = jest.fn();
+    el.$value = [10, 20, 30, 40];
+    el.$options.sortable = true;
+    await h.wait(1);
+    el.addEventListener("$change", onChanged);
+    const hi = 30;
+    const w = 60;
+    h.setupLayout(el, { x: 0, y: 0, h: hi * 2, w: w * 3 });
+    const updateLayout = () => {
+      // 1st line
+      // WARN: Items doesn't change own position
+      h.setupLayout(el.$refItems[0], { x: 0, y: 0, h: hi, w }); // 1st
+      h.setupLayout(el.$refItems[1], { x: w, y: 0, h: hi, w }); // 2nd
+      h.setupLayout(el.$refItems[2], { x: w * 2, y: 0, h: hi, w }); // 3rd
+      // 2nd line
+      h.setupLayout(el.$refItems[3], { x: 0, y: hi, h: hi, w }); // 1st
+    };
+    updateLayout();
+    let trg = el.$refItems[0];
+    const getChildren = () => Array.prototype.slice.call(trg.parentElement.children).map((a) => a.outerHTML);
+
+    // ordinary mouse move
+    trg.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
+    expect(el).toMatchSnapshot();
+    // move to center of trg
+    h.userMouseMove(trg, { x: trg.offsetWidth / 2, y: trg.offsetHeight / 2 });
+    expect(getChildren()).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(0px, 0px);">Donny</span>",
+        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
+        "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
+        "<strong></strong>",
+      ]
+    `);
+    expect(el).toMatchSnapshot();
+
+    /** @type HTMLElement */
+    let dragEl;
+    /* Simulate getBoundingClientRect for draggable element */
+    const bindDragEl = () => {
+      dragEl = trg.parentElement.querySelector("[drag]");
+      jest.spyOn(dragEl, "getBoundingClientRect").mockImplementation(() => {
+        const width = +/([0-9]+)/.exec(dragEl.style.width)[1];
+        const height = +/([0-9]+)/.exec(dragEl.style.height)[1];
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars, prefer-const
+        let [_, x, y] = /([0-9]+)\D+([0-9]+)/.exec(dragEl.style.transform);
+        x = Number(x);
+        y = Number(y);
+        return { x, y, width, height, top: y, left: x, right: width + x, bottom: height + y };
+      });
+    };
+    bindDragEl(); // simulate getBoundingClientRect for draggable element
+
+    // move to right of 2nd item
+    updateLayout();
+    let r = el.$refItems[1].getBoundingClientRect();
+    h.userMouseMove(dragEl, { x: r.right, y: trg.offsetHeight / 2 });
+    expect(getChildren()).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(90px, 0px);">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
+        "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
+        "<strong></strong>",
+      ]
+    `);
+
+    // checking thottling here
+    updateLayout();
+    r = el.$refItems[2].getBoundingClientRect();
+    h.userMouseMove(trg, { x: r.right, y: trg.offsetHeight / 2 });
+    expect(getChildren()).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(150px, 0px);">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
+        "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
+        "<strong></strong>",
+      ]
+    `); // no -effect because throttling
+    await h.wait(5);
+    expect(onChanged).toBeCalledTimes(0); // because user don't mouseup
+
+    // move to the end of 1st line after throtling
+    await h.wait(); // wait for throttling to get new position at the right side of 2nd item
+    updateLayout();
+    h.userMouseMove(trg, { x: r.right - 2, y: trg.offsetHeight / 2 + 5 });
+    expect(getChildren()).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(148px, 5px);">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
+        "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
+        "<strong></strong>",
+      ]
+    `);
+    await h.wait(5);
+    expect(onChanged).toBeCalledTimes(0); // because user don't mouseup
+
+    // move to the 2nd - right side
+    await h.wait(); // wait for throttling
+    updateLayout();
+    h.userMouseMove(trg, { x: w * 2, y: 0 });
+    expect(getChildren()).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(90px, -15px);">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
+        "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
+        "<strong></strong>",
+      ]
+    `);
+    // move to the 1st - left side
+    await h.wait(); // wait for throttling
+    updateLayout();
+    h.userMouseMove(trg, { x: 0, y: 0 });
+    expect(getChildren()).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(-30px, -15px);">Donny</span>",
+        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
+        "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
+        "<strong></strong>",
+      ]
+    `);
+
+    // moving to 2nd line; left side
+    await h.wait(); // wait for throttling to get new position at the right side of 2nd item
+    updateLayout();
+    h.userMouseMove(trg, { x: 0, y: trg.offsetHeight + 5 });
+    expect(getChildren()).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(-30px, 20px);">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
+        "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
+        "<strong></strong>",
+      ]
+    `);
+    await h.wait(5);
+    expect(onChanged).toBeCalledTimes(0); // because user don't mouseup
+
+    // moving to 2nd line; right side
+    await h.wait(); // wait for throttling to get new position at the right side of 2nd item
+    h.userMouseMove(trg, { x: trg.offsetWidth, y: trg.offsetHeight + 5 });
+    expect(getChildren()).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(30px, 20px);">Donny</span>",
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
+        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
+        "<strong></strong>",
+      ]
+    `);
+    await h.wait(5);
+    expect(onChanged).toBeCalledTimes(0); // because user doesn't mouseup
+    updateLayout();
+    bindDragEl();
+
+    const { nextFrame } = h.useFakeAnimation(); // animation for return mirrored element
+    trg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait(1);
+    expect(onChanged).toBeCalledTimes(1);
+    expect(el.$value).toStrictEqual([20, 30, 40, 10]);
+    expect(dragEl.outerHTML).toMatchInlineSnapshot(
+      `"<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(30px, 20px);">Donny</span>"`
+    );
+    await nextFrame(5);
+    expect(dragEl.outerHTML).toMatchInlineSnapshot(
+      `"<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(0px, 30px);">Donny</span>"`
+    );
+    await nextFrame(50);
+    expect(getChildren()).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true">Mikky</span>",
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
+        "<span item="" aria-hidden="true">Donny</span>",
+        "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
+        "<strong></strong>",
+      ]
+    `);
+
+    expect(el).toMatchSnapshot();
+
+    // test removing when outside
+    trg = el.$refItems[0];
+    trg.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
+    // move outside of control
+    h.userMouseMove(trg, { x: 5, y: 5 });
+    bindDragEl(); // simulate getBoundingClientRect for draggable element
+    h.userMouseMove(trg, { x: 1000, y: 1000 });
+    expect(getChildren()).toMatchInlineSnapshot(`
+      [
+        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(970px, 985px);" remove="">Mikky</span>",
+        "<span item="" aria-hidden="true" drop="">Mikky</span>",
+        "<span item="" aria-hidden="true">Leo</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
+        "<span item="" aria-hidden="true">Donny</span>",
+        "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
+        "<strong></strong>",
+      ]
+    `);
+    trg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await nextFrame(50);
+    expect(onChanged).toBeCalledTimes(2);
+    expect(el.$value).toStrictEqual([30, 40, 10]);
+    expect(el).toMatchSnapshot();
+
+    // cancel without move
+    trg = el.$refItems[0];
+    let was = el.outerHTML;
+    trg.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await nextFrame(50);
+    expect(el.outerHTML).toBe(was);
+
+    // no-action when readonly
+    el.$options.readOnly = true;
+    await h.wait(1);
+    was = el.outerHTML;
+    trg.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
+    h.userMouseMove(trg, { x: 1000, y: 1000 });
+    expect(el.outerHTML).toBe(was);
+    trg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await nextFrame(50);
+    expect(el.outerHTML).toBe(was);
+    el.$options.readOnly = false;
+
+    // no-action when disabled
+    el.$options.disabled = true;
+    await h.wait(1);
+    was = el.outerHTML;
+    trg.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
+    h.userMouseMove(trg, { x: 1000, y: 1000 });
+    expect(el.outerHTML).toBe(was);
+    trg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await nextFrame(50);
+    expect(el.outerHTML).toBe(was);
+    el.$options.disabled = false;
+    await h.wait(1);
+
+    // no-action when click outside items
+    was = el.outerHTML;
+    const fakeTrg = trg.parentElement;
+    fakeTrg.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
+    fakeTrg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
+    h.userMouseMove(fakeTrg, { x: 1000, y: 1000 });
+    expect(el.outerHTML).toBe(was);
+    fakeTrg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
+    fakeTrg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await nextFrame(50);
+    expect(el.outerHTML).toBe(was);
+    await h.wait();
+
+    // handling touch events
+    onChanged.mockClear();
+    // case when touch event impossible to prevent because browser decides to scroll
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("touchstart", { cancelable: true, bubbles: true }));
+    h.userMouseMove(trg, { x: 0, y: 0 });
+    expect(el.querySelector("[drag]")).toBeFalsy();
+    trg.dispatchEvent(new MouseEvent("touchmove", { cancelable: false, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointercancel", { cancelable: false, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("touchend", { cancelable: false, bubbles: true }));
+    await h.wait(1);
+    expect(onChanged).toBeCalledTimes(0);
+
+    // case when touch event possible to prevent
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("touchstart", { cancelable: true, bubbles: true }));
+    const isPrevented = !trg.dispatchEvent(new MouseEvent("touchmove", { cancelable: true, bubbles: true }));
+    expect(isPrevented).toBe(true);
+    h.userMouseMove(trg, { x: w, y: 0 });
+    expect(el.querySelector("[drag]")).toBeTruthy();
+    bindDragEl();
+    trg.dispatchEvent(new MouseEvent("touchend", { cancelable: false, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await nextFrame(50);
+    expect(onChanged).toBeCalledTimes(1);
+
+    // test disposing - no sort listener when option is disabled
+    el.$options.sortable = false;
+    await h.wait(1);
+    was = el.outerHTML;
+    trg.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
+    h.userMouseMove(trg, { x: 1000, y: 1000 });
+    expect(el.outerHTML).toBe(was);
+    trg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await nextFrame(50);
+    expect(el.outerHTML).toBe(was);
+
+    // test menu is hidden after click + sorting
+    el.blur();
+    await h.wait();
+    trg.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
+    h.userMouseMove(trg, { x: w, y: hi / 2 });
+    trg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
+    trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    // simulate focusing when user makes mouse down > move+sort > up
+    el.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }));
+    el.focus();
+    await nextFrame(50);
+    await expect(h.userTypeText(el.$refInput, "l")).resolves.not.toThrow();
+    await h.wait();
+    expect(el.$isShown).toBe(true);
+    expect(el.$refPopup).toMatchInlineSnapshot(`
+      <wup-popup
+        menu=""
+        style="min-width: 180px;"
+      >
+        <ul
+          aria-label="Items"
+          aria-multiselectable="true"
+          id="txt6"
+          role="listbox"
+          tabindex="-1"
+        >
+          <li
+            aria-selected="true"
+            role="option"
+            style="display: none;"
+          >
+            Donny
+          </li>
+          <li
+            role="option"
+            style="display: none;"
+          >
+            Mikky
+          </li>
+          <li
+            aria-selected="true"
+            focused=""
+            id="txt7"
+            role="option"
+          >
+            Leo
+          </li>
+          <li
+            aria-selected="true"
+            role="option"
+            style="display: none;"
+          >
+            Splinter
+          </li>
+        </ul>
+      </wup-popup>
+    `);
   });
 });

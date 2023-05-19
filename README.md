@@ -43,7 +43,6 @@ npm install web-ui-pack
 ## TODO
 
 - [x] [Helpers](#helpers)
-- [x] [Helper.Observer](#helpersobserver)
 - [x] [PopupElement](#example) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
   - [ ] Tooltip
 - [x] [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
@@ -68,7 +67,7 @@ npm install web-ui-pack
   - [ ] FileControl
   - [ ] SearchControl ?
   - [ ] ImageControl (AvatarEditor)
-- [ ] Dropdown
+- [x] [DropdownElement](src/dropdownElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/dropdown)
 - [ ] MediaPlayer
 - [ ] ModalElement
 - [ ] ConfirmModalElement
@@ -87,23 +86,26 @@ npm install web-ui-pack
    - Public properties/options/events/methods startsWith `$...` (events `$onShow`, `$onHide`, methods `$show`, `$hide`, props like `$isShown` etc.)
    - Every component/class has static `$defaults` (common options for current class) and personal `$options` (per each component). See details in [example](#example)
    - `$options` are observed. So changing options affects on component immediately after empty timeout (every component has static `observedOptions` as set of watched options)
+   - all custom `attributes` updates `$options` automatically. So `document.querySelector('wup-spin').$options.inline` equal to `<wup-spin inline />`
 2. **Usage**
-   - For webpack [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free) switched on (it's for optimization). But **if you don't use webpack** don't import from `web-ui-pack` directly (due to tree-shaking can be not smart enough). Instead use `web-ui-pack/path-to-element`
+   - For webpack [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free) switched on (for optimization). But **if you don't use webpack** don't import from `web-ui-pack` directly (due to tree-shaking can be not smart enough). Instead use `web-ui-pack/path-to-element`
    - Every component has a good JSDoc so go ahead and read details directly during the coding
    - Library compiled into ESNext. To avoid unexpected issues include this package into babel (use `exclude: /node_modules\/(?!(web-ui-pack)\/).*/` for babel-loader)
 3. **Limitations**
    - In `jsx/tsx` instead of `className` use `class` attribute (React issue)
    - If you change custom html-attributes it will update `$options`, but if you change some option it removes related attribute (for performance reasons). Better to avoid usage attributes at all
 4. **Inheritance**
-   - Components are developed to be easy customized and inherrited. Use ...$defaults of every class to configure behavior You can rewrite everything that you can imagine without digging a lot in a code. To be sure don't hesitate to take a look on \*.d.ts or source code (there are enough comments to clarify even weird/difficult cases)
-   - All Components inherrited from [WUPBaseElement](src/baseElement.ts) that extends default HTMLElement
+   - Components are developed to be easy customized and inherited. Use ...$defaults of every class to configure behavior You can rewrite everything that you can imagine without digging a lot in a code. To be sure don't hesitate to take a look on \*.d.ts or source code (there are enough comments to clarify even weird/difficult cases)
+   - All Components inherited from [WUPBaseElement](src/baseElement.ts) that extends default HTMLElement
    - All internal event-callbacks startsWith `got...` (gotReady, gotRemoved)
    - To redefine component just extend it and register with new html tag OR redefine default behavior via prototype functions (if $defaults are not included something). See details in [example](#example)
-   - **Inherritance Tree**
+   - **Inheritance Tree**
      - [_HTMLElement_](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement)
        - [_BaseElement_](src/baseElement.ts)
          - [PopupElement](src/popupElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
+         - [DropdownElement](src/dropdownElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/dropdown)
          - [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
+         - [CircleElement](src/circleElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/circle)
          - [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
          - [_BaseControl_](src/controls/baseControl.ts)
            - [SwitchControl](src/controls/switch.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/switch)
@@ -211,92 +213,43 @@ declare global {
 
 ---
 
-### CutomTypes
-
-- [WUPTimeObject](src/objects/timeObject.ts) => `Ordinary class Time with hours & minutes`
-
 ### Helpers
 
 use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 **WARN**: don't use `import {focusFirst} from "web-ui-pack;` because in this case the whole web-ui-pack module traps in compilation of dev-bundle and increases time of compilation
 
-- [**animateDropdown**(el: HTMLElement, ms:number, isHidden=false)](src/helpers/animate.ts) ⇒ `Animate (show/hide) element as dropdown via scale and counter-scale for children`
-- [**dateCopyTime**(to:Date ,from:Date, utc:bool)](src/helpers/dateCopyTime.ts) ⇒ `Copy hh:mm:ss.fff part from B to A`
-- [**dateFromString**(v:string, format="yyyy-MM-dd hh:mm:ss AZ", options)](src/helpers/dateFromString.ts) ⇒ `Returns parsed date from string based on pointed format`
-- [**dateToString**(v:Date, format="yyyy-MM-dd hh:mm:ss AZ")](src/helpers/dateToString.ts) ⇒ `Returns a string representation of a date-time according to pointed format`
-- [**findScrollParent**(el: HTMLElement)](src/helpers/findScrollParent.ts) ⇒ `Find first parent with active scroll X/Y`
-- [**findScrollParentAll**(e: HTMLElement)](src/helpers/findScrollParent.ts) ⇒ `Find all parents with active scroll X/Y`
-- [**focusFirst**(el: HTMLElement)](src/helpers/focusFirst.ts) ⇒ `Set focus on element or first possible nested element`
-- [**isIntoView**(el: HTMLElement)](src/helpers/isIntoView.ts) ⇒ `Check if element is visible in scrollable parents`
-- [**mathSumFloat**(a:number,b:number)](src/helpers/math.ts) ⇒ `Sum without float-precision-issue`
-- [**mathScaleValue**(v: number, fromMin: number, fromMax: number, toMin: number, toMax: number)](src/helpers/math.ts) ⇒ `Scale value from one range to another`
+- [**animateDropdown**](src/helpers/animateDropdown.ts) ⇒ `Animate (show/hide) element as dropdown via scale and counter-scale for children`
+- [**animateStack**](src/helpers/animateDropdown.ts) ⇒ `Animate (show/hide) every element via moving from target to own position`
+- [**dateCopyTime**](src/helpers/dateCopyTime.ts) ⇒ `Copy hh:mm:ss.fff part from B to A`
+- [**dateFromString**](src/helpers/dateFromString.ts) ⇒ `Returns parsed date from string based on pointed format`
+- [**dateToString**](src/helpers/dateToString.ts) ⇒ `Returns a string representation of a date-time according to pointed format`
+- [**findScrollParent**](src/helpers/findScrollParent.ts) ⇒ `Find first parent with active scroll X/Y`
+- [**findScrollParentAll**](src/helpers/findScrollParent.ts) ⇒ `Find all parents with active scroll X/Y`
+- [**focusFirst**](src/helpers/focusFirst.ts) ⇒ `Set focus on element or first possible nested element`
+- [**isIntoView**](src/helpers/isIntoView.ts) ⇒ `Check if element is visible in scrollable parents`
+- [**mathSumFloat**](src/helpers/math.ts) ⇒ `Sum without float-precision-issue`
+- [**mathScaleValue**](src/helpers/math.ts) ⇒ `Scale value from one range to another`
 - [**nestedProperty.set**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.set(obj, "value.nestedValue", 1) sets obj.value.nestedValue = 1`
 - [**nestedProperty.get**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.get(obj, "nested.val2", out?: {hasProp?: boolean} ) returns value from obj.nested.val2`
-- [**objectClone**(obj, opts: CloneOptions)](src/helpers/objectClone.ts) ⇒ `deep cloning object`
-- [**observer**](#helpersobserver) ⇒ `converts object to observable (via Proxy) to allow listen for changes`
-- [**onEvent**(...args)](src/helpers/onEvent.ts) ⇒ `More strict (for Typescript) wrapper of addEventListener() that returns callback with removeListener()`
-- [**onFocusGot**(el: HTMLElement, listener: (ev) => void, {debounceMs: 100, once: false, ...})](src/helpers/onFocusGot.ts) ⇒ `Fires when element/children takes focus once (fires again after onFocusLost on element)`
-- [**onScroll**(el: HTMLElement, listener: (this: HTMLElement) => void), options](src/helpers/onScrollStop.ts) ⇒ `Handles wheel & touch events for custom scrolling`
-- [**onScrollStop**(el: HTMLElement, listener: (this: HTMLElement) => void), {once: false, ...}](src/helpers/onScrollStop.ts) ⇒ `Returns callback when scrolling is stopped (via checking scroll position every frame-render)`
-- [**onFocusLost**(el: HTMLElement, listener: (ev) => void, {debounceMs: 100, once: false, ...})](src/helpers/onFocusLost.ts) ⇒ `Fires when element/children completely lost focus`
-- [**onSpy**(object: {}, method: string, listener: (...args) => void](src/helpers/onSpy.ts) ⇒ `Spy on method-call of object`
-- [**promiseWait**(promise: Promise, ms: number, smartOrCallback: boolean | Function) => Promise](src/helpers/promiseWait.ts) ⇒ `Produce Promise during for "no less than pointed time"; it helps for avoding spinner blinking during the very fast api-request in case: pending > waitResponse > resetPending`
-- [**scrollIntoView**(el: HTMLElement, options: WUPScrollOptions) => Promise](src/helpers/scrollIntoView.ts) ⇒ `Scroll the HTMLElement's parent container such that the element is visible to the user and return promise by animation end`
+- [**objectClone**](src/helpers/objectClone.ts) ⇒ `deep cloning object`
+- [**observer**](src/helpers/observer.md) ⇒ `converts object to observable (via Proxy) to allow listen for changes`
+- [**onEvent**](src/helpers/onEvent.ts) ⇒ `More strict (for Typescript) wrapper of addEventListener() that returns callback with removeListener()`
+- [**onFocusGot**](src/helpers/onFocusGot.ts) ⇒ `Fires when element/children takes focus once (fires again after onFocusLost on element)`
+- [**onScroll**](src/helpers/onScrollStop.ts) ⇒ `Handles wheel & touch events for custom scrolling`
+- [**onScrollStop**](src/helpers/onScrollStop.ts) ⇒ `Returns callback when scrolling is stopped (via checking scroll position every frame-render)`
+- [**onFocusLost**](src/helpers/onFocusLost.ts) ⇒ `Fires when element/children completely lost focus`
+- [**onSpy**](src/helpers/onSpy.ts) ⇒ `Spy on method-call of object`
+- [**promiseWait**](src/helpers/promiseWait.ts) ⇒ `Produce Promise during for "no less than pointed time"; it helps for avoding spinner blinking during the very fast api-request in case: pending > waitResponse > resetPending`
+- [**scrollIntoView**](src/helpers/scrollIntoView.ts) ⇒ `Scroll the HTMLElement's parent container such that the element is visible to the user and return promise by animation end`
 - [class **WUPScrolled**](src/helpers/scrolled.ts) ⇒ `Class makes pointed element scrollable and implements carousel-scroll behavior (appends new items during the scrolling). Supports swipe/pageUp/pageDown/mouseWheel events.`
-- [**stringLowerCount**(text: string, stopWith?: number)](src/helpers/string.ts) ⇒ `Returns count of chars in lower case (for any language with ignoring numbers, symbols)`
-- [**stringUpperCount**(text: string, stopWith?: number)](src/helpers/string.ts) ⇒ `Returns count of chars in upper case (for any language with ignoring numbers, symbols)`
-- [**stringPrettify**(text: string, changeKebabCase = false)](src/helpers/string.ts) ⇒ `Changes camelCase, snakeCase, kebaCase text to user-friendly`
+- [**stringLowerCount**](src/helpers/string.ts) ⇒ `Returns count of chars in lower case (for any language with ignoring numbers, symbols)`
+- [**stringUpperCount**](src/helpers/string.ts) ⇒ `Returns count of chars in upper case (for any language with ignoring numbers, symbols)`
+- [**stringPrettify**](src/helpers/string.ts) ⇒ `Changes camelCase, snakeCase, kebaCase text to user-friendly`
 
 ### Objects
 
 - [**localeInfo**](src/objects/localeInfo.ts) ⇒ `Locale-object with definitions related to user-locale`
 - [**TimeObject**](src/objects/timeObject.ts) ⇒ `Plane time object without date`
-
-#### Helpers.Observer
-
-```js
-import observer from "web-ui-pack/helpers/observer";
-
-const rawNestedObj = { val: 1 };
-const raw = { date: new Date(), period: 3, nestedObj: rawNestedObj, arr: ["a"] };
-const obj = observer.make(raw);
-const removeListener = observer.onPropChanged(obj, (e) => console.warn("prop changed", e)); // calls per each changing
-const removeListener2 = observer.onChanged(obj, (e) => console.warn("object changed", e)); // calls once after changing of bunch props
-obj.period = 5; // fire onPropChanged
-obj.date.setHours(0, 0, 0, 0); // fire onPropChanged
-obj.nestedObj.val = 2; // fire onPropChanged
-obj.arr.push("b"); // fire onPropChanged
-
-obj.nestedObj = rawNestedObj; // fire onPropChanged
-obj.nestedObj = rawNestedObj; // WARNING: it fire events again because rawNestedObj !== obj.nestedObj
-
-removeListener(); // unsubscribe
-removeListener2(); // unsubscribe
-
-// before timeout will be fired onChanged (single time)
-setTimeout(() => {
-  console.warn("WARNING: raw vs observable", {
-    equal: raw === obj,
-    equalByValueOf: raw.valueOf() === obj.valueOf(),
-    isRawObserved: observer.isObserved(raw),
-    isObjObserved: observer.isObserved(obj),
-  });
-  // because after assigning to observable it converted to observable also
-  console.warn("WARNING: rawNestedObj vs observable", {
-    equal: rawNestedObj === obj.nestedObj,
-    equalByValueOf: rawNestedObj.valueOf() === obj.nestedObj.valueOf(),
-    isRawObserved: observer.isObserved(rawNestedObj),
-    isNestedObserved: observer.isObserved(obj.nestedObj),
-  });
-});
-```
-
-##### Troubleshooting & Rules
-
-- Every object assigned to `observed` is converted to `observed` also
-- When you change array in most cases you get changing `length`; also `sort`/`reverse` triggers events
-- WeakMap, WeakSet, HTMLElement are not supported (not observed)
-- All objects compares by `valueOf()` so you maybe interested in custom valueOf to avoid unexpected issues
 
 ---
 
@@ -336,3 +289,7 @@ Be sure that you familiar with [common rules](#components)
 > WUPSelectControl.$defaults.validateDebounceMs = 500;
 > // etc.
 > ```
+
+### FAQ
+
+see [demo/faq](https://yegorich555.github.io/web-ui-pack/faq)

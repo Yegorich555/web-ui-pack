@@ -63,7 +63,14 @@ padding:0;}
         @keyframes WUP-POPUP-a2 {
           to {opacity: 0;}
         }
-       }
+      }
+      WUP-POPUP[animation=drawer] {
+        animation-name: custom;
+      }
+      WUP-POPUP[animation=stack] {
+        animation-name: custom;
+        overflow: visible;
+      }
       
 WUP-POPUP::-webkit-scrollbar {
   width: 10px; height: 10px;
@@ -71,22 +78,26 @@ WUP-POPUP::-webkit-scrollbar {
 }
 WUP-POPUP::-webkit-scrollbar-corner {
   background: none;
+  cursor: pointer;
 }
 WUP-POPUP::-webkit-scrollbar-thumb {
   border: 3px solid rgba(0,0,0,0);
   background-clip: padding-box;
   background-color: var(--scroll, rgba(0,0,0,0.2));
   border-radius: 999px;
+  cursor: pointer;
 }
 WUP-POPUP::-webkit-scrollbar-track-piece:vertical:start,
 WUP-POPUP::-webkit-scrollbar-track-piece:vertical:end,
 WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:start,
 WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
   margin: 0;
+  cursor: pointer;
 }
 @media (hover) {
   WUP-POPUP::-webkit-scrollbar-thumb:hover {
     background-color: var(--scroll-hover, rgba(0,0,0,0.5));
+    cursor: pointer;
   }
 }
   
@@ -119,7 +130,14 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
         @keyframes WUP-POPUP-a2 {
           to {opacity: 0;}
         }
-       }
+      }
+      TEST-EL[animation=drawer] {
+        animation-name: custom;
+      }
+      TEST-EL[animation=stack] {
+        animation-name: custom;
+        overflow: visible;
+      }
       
 TEST-EL::-webkit-scrollbar {
   width: 10px; height: 10px;
@@ -127,22 +145,26 @@ TEST-EL::-webkit-scrollbar {
 }
 TEST-EL::-webkit-scrollbar-corner {
   background: none;
+  cursor: pointer;
 }
 TEST-EL::-webkit-scrollbar-thumb {
   border: 3px solid rgba(0,0,0,0);
   background-clip: padding-box;
   background-color: var(--scroll, rgba(0,0,0,0.2));
   border-radius: 999px;
+  cursor: pointer;
 }
 TEST-EL::-webkit-scrollbar-track-piece:vertical:start,
 TEST-EL::-webkit-scrollbar-track-piece:vertical:end,
 TEST-EL::-webkit-scrollbar-track-piece:horizontal:start,
 TEST-EL::-webkit-scrollbar-track-piece:horizontal:end {
   margin: 0;
+  cursor: pointer;
 }
 @media (hover) {
   TEST-EL::-webkit-scrollbar-thumb:hover {
     background-color: var(--scroll-hover, rgba(0,0,0,0.5));
+    cursor: pointer;
   }
 }
 </style>
@@ -211,7 +233,14 @@ padding:0;}
         @keyframes WUP-POPUP-a2 {
           to {opacity: 0;}
         }
-       }
+      }
+      WUP-POPUP[animation=drawer] {
+        animation-name: custom;
+      }
+      WUP-POPUP[animation=stack] {
+        animation-name: custom;
+        overflow: visible;
+      }
       
 WUP-POPUP::-webkit-scrollbar {
   width: 10px; height: 10px;
@@ -219,22 +248,26 @@ WUP-POPUP::-webkit-scrollbar {
 }
 WUP-POPUP::-webkit-scrollbar-corner {
   background: none;
+  cursor: pointer;
 }
 WUP-POPUP::-webkit-scrollbar-thumb {
   border: 3px solid rgba(0,0,0,0);
   background-clip: padding-box;
   background-color: var(--scroll, rgba(0,0,0,0.2));
   border-radius: 999px;
+  cursor: pointer;
 }
 WUP-POPUP::-webkit-scrollbar-track-piece:vertical:start,
 WUP-POPUP::-webkit-scrollbar-track-piece:vertical:end,
 WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:start,
 WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
   margin: 0;
+  cursor: pointer;
 }
 @media (hover) {
   WUP-POPUP::-webkit-scrollbar-thumb:hover {
     background-color: var(--scroll-hover, rgba(0,0,0,0.5));
+    cursor: pointer;
   }
 }
   
@@ -267,7 +300,14 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
         @keyframes WUP-POPUP-a2 {
           to {opacity: 0;}
         }
-       }
+      }
+      TEST-EL[animation=drawer] {
+        animation-name: custom;
+      }
+      TEST-EL[animation=stack] {
+        animation-name: custom;
+        overflow: visible;
+      }
       
 TEST-EL::-webkit-scrollbar {
   width: 10px; height: 10px;
@@ -275,22 +315,26 @@ TEST-EL::-webkit-scrollbar {
 }
 TEST-EL::-webkit-scrollbar-corner {
   background: none;
+  cursor: pointer;
 }
 TEST-EL::-webkit-scrollbar-thumb {
   border: 3px solid rgba(0,0,0,0);
   background-clip: padding-box;
   background-color: var(--scroll, rgba(0,0,0,0.2));
   border-radius: 999px;
+  cursor: pointer;
 }
 TEST-EL::-webkit-scrollbar-track-piece:vertical:start,
 TEST-EL::-webkit-scrollbar-track-piece:vertical:end,
 TEST-EL::-webkit-scrollbar-track-piece:horizontal:start,
 TEST-EL::-webkit-scrollbar-track-piece:horizontal:end {
   margin: 0;
+  cursor: pointer;
 }
 @media (hover) {
   TEST-EL::-webkit-scrollbar-thumb:hover {
     background-color: var(--scroll-hover, rgba(0,0,0,0.5));
+    cursor: pointer;
   }
 }
 </style>

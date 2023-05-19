@@ -325,6 +325,9 @@ padding:0;}
       WUP-NUM strong {
         cursor: inherit;
       }
+      WUP-NUM strong:empty {
+        display: none;
+      }
       WUP-NUM [aria-required="true"] + strong:after,
       WUP-NUM fieldset[aria-required="true"] &gt; legend:after {
         content: "*";
@@ -393,11 +396,15 @@ mask-image: var(--ctrl-icon-img);
           max-height: none;
         }*/
         WUP-NUM:hover,
-        WUP-NUM:hover &gt; [menu] {
+        WUP-NUM:hover&gt;[menu],
+        WUP-NUM[hovered],
+        WUP-NUM[hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         WUP-NUM[invalid]:hover,
-        WUP-NUM[invalid]:hover &gt; [menu] {
+        WUP-NUM[invalid]:hover&gt;[menu]
+        WUP-NUM[invalid][hovered],
+        WUP-NUM[invalid][hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
         }
       }
@@ -649,7 +656,7 @@ exports[`control.number validations $options.validationShowAll 1`] = `
         Min value is 5
       </li>
       <li>
-        Max value is 1000
+        Max value is 1,000
       </li>
     </ul>
   </wup-popup>
@@ -808,7 +815,7 @@ exports[`control.number validations options.validationCase 2`] = `
 exports[`control.number validations options.validationCase 3`] = `
 <wup-num
   invalid=""
-  style="overflow: hidden;"
+  style=""
 >
   <label
     for="txt1"

@@ -358,6 +358,9 @@ padding:0;}
       WUP-SELECTMANY strong {
         cursor: inherit;
       }
+      WUP-SELECTMANY strong:empty {
+        display: none;
+      }
       WUP-SELECTMANY [aria-required="true"] + strong:after,
       WUP-SELECTMANY fieldset[aria-required="true"] &gt; legend:after {
         content: "*";
@@ -426,11 +429,15 @@ mask-image: var(--ctrl-icon-img);
           max-height: none;
         }*/
         WUP-SELECTMANY:hover,
-        WUP-SELECTMANY:hover &gt; [menu] {
+        WUP-SELECTMANY:hover&gt;[menu],
+        WUP-SELECTMANY[hovered],
+        WUP-SELECTMANY[hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         WUP-SELECTMANY[invalid]:hover,
-        WUP-SELECTMANY[invalid]:hover &gt; [menu] {
+        WUP-SELECTMANY[invalid]:hover&gt;[menu]
+        WUP-SELECTMANY[invalid][hovered],
+        WUP-SELECTMANY[invalid][hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
         }
       }
@@ -666,59 +673,65 @@ mask-image: var(--ctrl-icon-img);
       WUP-SELECTMANY[opened] label::after {
         transform: rotate(180deg);
       }
-      WUP-SELECTMANY [menu] {
-        overflow: hidden;
-      }
-      WUP-SELECTMANY [menu] ul {
-        margin: 0;
-        padding: 0;
-        list-style-type: none;
-        cursor: pointer;
-        overflow: auto;
-        max-height: 300px;
-      }
       
-WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar {
+WUP-SELECTMANY [menu] {
+  padding: 0;
+  overflow: hidden;
+}
+WUP-SELECTMANY [menu] ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  cursor: pointer;
+  overflow: auto;
+  max-height: 300px;
+}
+
+WUP-SELECTMANY [menu] ul::-webkit-scrollbar {
   width: 10px; height: 10px;
   cursor: pointer;
 }
-WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar-corner {
+WUP-SELECTMANY [menu] ul::-webkit-scrollbar-corner {
   background: none;
+  cursor: pointer;
 }
-WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar-thumb {
+WUP-SELECTMANY [menu] ul::-webkit-scrollbar-thumb {
   border: 3px solid rgba(0,0,0,0);
   background-clip: padding-box;
   background-color: var(--scroll, rgba(0,0,0,0.2));
   border-radius: 999px;
+  cursor: pointer;
 }
-WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar-track-piece:vertical:start,
-WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar-track-piece:vertical:end,
-WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar-track-piece:horizontal:start,
-WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar-track-piece:horizontal:end {
+WUP-SELECTMANY [menu] ul::-webkit-scrollbar-track-piece:vertical:start,
+WUP-SELECTMANY [menu] ul::-webkit-scrollbar-track-piece:vertical:end,
+WUP-SELECTMANY [menu] ul::-webkit-scrollbar-track-piece:horizontal:start,
+WUP-SELECTMANY [menu] ul::-webkit-scrollbar-track-piece:horizontal:end {
   margin: 0;
+  cursor: pointer;
 }
 @media (hover) {
-  WUP-SELECTMANY [menu]&gt;ul::-webkit-scrollbar-thumb:hover {
+  WUP-SELECTMANY [menu] ul::-webkit-scrollbar-thumb:hover {
     background-color: var(--scroll-hover, rgba(0,0,0,0.5));
+    cursor: pointer;
   }
 }
-      WUP-SELECTMANY [menu] li {
-        padding: 1em;
-        border-radius: var(--ctrl-border-radius);
-      }
-      @media (hover: hover) and (pointer: fine) {
-        WUP-SELECTMANY [menu] li:hover {
-          box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
-        }
-      }
-      WUP-SELECTMANY [menu] li[aria-selected="true"] {
-        color: var(--ctrl-selected);
-        display: flex;
-      }
-      WUP-SELECTMANY [menu] li[aria-selected="true"]:after {
-        content: "";
-        --ctrl-icon-img: var(--wup-icon-check);
-        
+WUP-SELECTMANY [menu] li {
+  padding: 1em;
+  border-radius: var(--border-radius);
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-SELECTMANY [menu] li:hover {
+    box-shadow: inset 0 0 3px 0 var(--base-focus);
+  }
+}
+WUP-SELECTMANY [menu] li[aria-selected="true"] {
+  color: var(--ctrl-selected);
+  display: flex;
+}
+WUP-SELECTMANY [menu] li[aria-selected="true"]:after {
+  content: "";
+  --ctrl-icon-img: var(--wup-icon-check);
+  
 display: inline-block;
 width: var(--ctrl-icon-size);
 min-height: var(--ctrl-icon-size);
@@ -738,13 +751,13 @@ mask-repeat: no-repeat;
 mask-position: center;
 -webkit-mask-image: var(--ctrl-icon-img);
 mask-image: var(--ctrl-icon-img);
-        background: var(--ctrl-selected);
-        margin-left: auto;
-        padding: 0;
-      }
-      WUP-SELECTMANY [menu] li[focused] {
-        box-shadow: inset 0 0 4px 0 var(--ctrl-focus);
-      }
+  background: var(--ctrl-selected);
+  margin-left: auto;
+  padding: 0;
+}
+WUP-SELECTMANY [menu] li[focused] {
+  box-shadow: inset 0 0 4px 0 var(--base-focus);
+}
       WUP-SELECTMANY strong {
         top: 1.6em;
         margin: calc(var(--ctrl-select-gap) / 2);
@@ -764,8 +777,15 @@ mask-image: var(--ctrl-icon-img);
       WUP-SELECTMANY input {
         flex: 1 1 auto;
         width: 0;
-        min-width: 2em;
+        min-width: 1em;
         padding-left: 0; padding-right: 0;
+      }
+      WUP-SELECTMANY[filled] input:placeholder-shown,
+      WUP-SELECTMANY[filled] input:not(:focus) {
+        min-width: 0;
+        padding-left: calc(var(--ctrl-select-gap));
+        margin-right: 0;
+        margin-left: calc(-1 * var(--ctrl-select-gap));
       }
       WUP-SELECTMANY [item] {
         --ctrl-icon: var(--ctrl-select-item-del);
@@ -805,10 +825,13 @@ mask-image: var(--ctrl-icon-img);
         padding: 0;
         margin-left: 0.5em;
       }
-      WUP-SELECTMANY [item][focused] {
+      WUP-SELECTMANY [item][focused],
+      WUP-SELECTMANY [item][drag],
+      WUP-SELECTMANY [item][drop] {
         box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
       }
-      WUP-SELECTMANY [item][removed] {
+      WUP-SELECTMANY [item][removed],
+      WUP-SELECTMANY [item][drag][remove]  {
         --ctrl-icon: var(--ctrl-err-text);
         text-decoration: line-through;
         color: var(--ctrl-err-text);
@@ -842,7 +865,240 @@ mask-image: var(--ctrl-icon-img);
           opacity: 0;
         }
       }
+      WUP-SELECTMANY [item][drag] {
+        z-index: 99999;
+        position: fixed;
+        left:0; top:0;
+        cursor: grabbing;
+        text-decoration: none;
+        --ctrl-icon: var(--ctrl-select-item-del);
+        color: var(--ctrl-select-item);
+        background-color: var(--ctrl-select-item-bg);
+      }
+      WUP-SELECTMANY [item][drop] {
+        opacity: 0.7;
+      }
 </style>
+`;
+
+exports[`control.selectMany sortable: drag&drop 1`] = `
+<wup-selectmany
+  filled=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Donny
+      </span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Mikky
+      </span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Leo
+      </span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Splinter
+      </span>
+      <input
+        aria-autocomplete="list"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+</wup-selectmany>
+`;
+
+exports[`control.selectMany sortable: drag&drop 3`] = `
+<wup-selectmany
+  filled=""
+  hovered=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <span
+        aria-hidden="true"
+        drag=""
+        item=""
+        style="width: 60px; height: 30px; transform: translate(0px, 0px);"
+      >
+        Donny
+      </span>
+      <span
+        aria-hidden="true"
+        drop=""
+        item=""
+      >
+        Donny
+      </span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Mikky
+      </span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Leo
+      </span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Splinter
+      </span>
+      <input
+        aria-autocomplete="list"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+</wup-selectmany>
+`;
+
+exports[`control.selectMany sortable: drag&drop 14`] = `
+<wup-selectmany
+  filled=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Mikky
+      </span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Leo
+      </span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Splinter
+      </span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Donny
+      </span>
+      <input
+        aria-autocomplete="list"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+</wup-selectmany>
+`;
+
+exports[`control.selectMany sortable: drag&drop 16`] = `
+<wup-selectmany
+  filled=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Leo
+      </span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Splinter
+      </span>
+      <span
+        aria-hidden="true"
+        item=""
+      >
+        Donny
+      </span>
+      <input
+        aria-autocomplete="list"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        autocomplete="off"
+        id="txt1"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong />
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+</wup-selectmany>
 `;
 
 exports[`control.selectMany validations $options.validationShowAll 1`] = `
@@ -893,7 +1149,9 @@ exports[`control.selectMany validations $options.validationShowAll 1`] = `
 `;
 
 exports[`control.selectMany validations $options.validationShowAll 2`] = `
-<wup-selectmany>
+<wup-selectmany
+  filled=""
+>
   <label
     for="txt1"
   >
@@ -910,7 +1168,6 @@ exports[`control.selectMany validations $options.validationShowAll 2`] = `
         aria-haspopup="listbox"
         aria-required="true"
         autocomplete="off"
-        class="wup-hidden"
         id="txt1"
         placeholder=" "
         role="combobox"
@@ -943,7 +1200,6 @@ exports[`control.selectMany validations $options.validationShowAll 3`] = `
         aria-haspopup="listbox"
         aria-required="true"
         autocomplete="off"
-        class=""
         id="txt1"
         placeholder=" "
         role="combobox"
@@ -981,7 +1237,9 @@ exports[`control.selectMany validations $options.validationShowAll 3`] = `
 `;
 
 exports[`control.selectMany validations options.validationCase 1`] = `
-<wup-selectmany>
+<wup-selectmany
+  filled=""
+>
   <label
     for="txt1"
   >
@@ -991,7 +1249,6 @@ exports[`control.selectMany validations options.validationCase 1`] = `
         aria-expanded="false"
         aria-haspopup="listbox"
         autocomplete="off"
-        class="wup-hidden"
         id="txt1"
         placeholder=" "
         role="combobox"
@@ -1026,7 +1283,6 @@ exports[`control.selectMany validations options.validationCase 2`] = `
         aria-owns="txt3"
         aria-required="true"
         autocomplete="off"
-        class=""
         id="txt1"
         placeholder=" "
         role="combobox"
@@ -1099,6 +1355,7 @@ exports[`control.selectMany validations options.validationCase 2`] = `
 
 exports[`control.selectMany validations options.validationCase 3`] = `
 <wup-selectmany
+  filled=""
   invalid=""
   opened=""
 >
@@ -1121,7 +1378,6 @@ exports[`control.selectMany validations options.validationCase 3`] = `
         aria-owns="txt8"
         aria-required="true"
         autocomplete="off"
-        class=""
         id="txt1"
         placeholder=" "
         role="combobox"
@@ -1208,7 +1464,6 @@ exports[`control.selectMany validations options.validationCase 4`] = `
         aria-owns="txt9"
         aria-required="true"
         autocomplete="off"
-        class=""
         id="txt1"
         placeholder=" "
         role="combobox"

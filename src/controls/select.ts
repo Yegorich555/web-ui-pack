@@ -3,7 +3,7 @@ import onEvent from "../helpers/onEvent";
 import promiseWait from "../helpers/promiseWait";
 import WUPPopupElement from "../popup/popupElement";
 import WUPSpinElement from "../spinElement";
-import { WUPcssIcon, WUPcssScrollSmall } from "../styles";
+import { WUPcssMenu } from "../styles";
 import WUPBaseComboControl, { ShowCases } from "./baseCombo";
 
 /* c8 ignore next */
@@ -138,42 +138,7 @@ export default class WUPSelectControl<
       :host[opened] label::after {
         transform: rotate(180deg);
       }
-      :host [menu] {
-        overflow: hidden;
-      }
-      :host [menu] ul {
-        margin: 0;
-        padding: 0;
-        list-style-type: none;
-        cursor: pointer;
-        overflow: auto;
-        max-height: 300px;
-      }
-      ${WUPcssScrollSmall(":host [menu]>ul")}
-      :host [menu] li {
-        padding: 1em;
-        border-radius: var(--ctrl-border-radius);
-      }
-      @media (hover: hover) and (pointer: fine) {
-        :host [menu] li:hover {
-          box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
-        }
-      }
-      :host [menu] li[aria-selected="true"] {
-        color: var(--ctrl-selected);
-        display: flex;
-      }
-      :host [menu] li[aria-selected="true"]:after {
-        content: "";
-        --ctrl-icon-img: var(--wup-icon-check);
-        ${WUPcssIcon}
-        background: var(--ctrl-selected);
-        margin-left: auto;
-        padding: 0;
-      }
-      :host [menu] li[focused] {
-        box-shadow: inset 0 0 4px 0 var(--ctrl-focus);
-      }`;
+      ${WUPcssMenu(":host [menu]")}`;
   }
 
   /** Text for listbox when no items are displayed */
@@ -372,7 +337,8 @@ export default class WUPSelectControl<
 
     const all = await this.renderMenuItems(ul);
     this._menuItems = { all, focused: -1 };
-    !all.length && this.renderMenuNoItems(popup, false);
+    !all.length ? this.renderMenuNoItems(popup, false) : this.#filterOnGotItems?.call(this);
+    this.#filterOnGotItems = undefined;
     // it happens on every show because by hide it dispose events
     onEvent(
       ul,
@@ -706,12 +672,18 @@ export default class WUPSelectControl<
     return !!this._opts.multiple;
   }
 
+  #filterOnGotItems?: () => void;
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
     this.$isShown && this.focusMenuItem(null); // reset virtual focus: // WARN it's not good enough when this._opts.multiple
     super.gotInput(e);
 
     const filter = (): void => {
-      this.filterMenuItems();
+      this.#filterOnGotItems = undefined;
+      if (this.$isShown && this._cachedItems) {
+        this.filterMenuItems();
+      } else if (this.$isShown) {
+        this.#filterOnGotItems = this.filterMenuItems;
+      }
     };
 
     let isChanged = false;
@@ -732,6 +704,7 @@ export default class WUPSelectControl<
         isChanged && this.setValue(next as any);
       }
     }
+
     isChanged ? setTimeout(filter, 1) : filter(); // setValue updates input only after Promise and we need to wait for: NiceToHave deprecate value
   }
 

@@ -2,6 +2,7 @@ import WUPBaseElement from "./baseElement";
 import IBaseControl from "./controls/baseControl.i";
 import { nestedProperty, promiseWait, scrollIntoView } from "./indexHelpers";
 import WUPSpinElement from "./spinElement";
+import { WUPcssButton } from "./styles";
 
 /* c8 ignore next */
 /* istanbul ignore next */
@@ -59,7 +60,7 @@ declare global {
       disabled?: boolean;
       /** Disallow copy value; adds attr [readonly] for styling */
       readOnly?: boolean;
-      /** Enable/disable browser-autocomplete; if control has no autocomplete option then it's inherrited from form
+      /** Enable/disable browser-autocomplete; if control has no autocomplete option then it's inherited from form
        *  @defaultValue false */
       autoComplete?: boolean;
     }
@@ -170,38 +171,7 @@ export default class WUPFormElement<
           max-width: 500px;
           margin: auto;
         }
-        :host [type='submit'] {
-          box-shadow: none;
-          border: 1px solid var(--btn-submit-bg);
-          border-radius: var(--border-radius);
-          box-sizing: border-box;
-          padding: 0.5em;
-          margin: 1em 0;
-          min-width: 10em;
-          cursor: pointer;
-          font: inherit;
-          font-weight: bold;
-          background: var(--btn-submit-bg);
-          color: var(--btn-submit-text);
-          outline: none;
-        }
-        :host [type='submit']:focus {
-          border-color: var(--btn-submit-focus);
-        }
-        @media (hover: hover) and (pointer: fine) {
-          :host [type='submit']:hover {
-             box-shadow: inset 0 0 0 99999px rgba(0,0,0,0.2);
-          }
-        }
-        :host [type='submit'][disabled] {
-          opacity: 0.3;
-          cursor: not-allowed;
-          -webkit-user-select: none;
-          user-select: none;
-        }
-        :host [type='submit'][aria-busy] {
-          cursor: wait;
-        }`;
+        ${WUPcssButton(":host [type='submit']")}`;
   }
 
   /** Find form related to control,register and apply initModel if initValue undefined */
@@ -257,6 +227,11 @@ export default class WUPFormElement<
   };
 
   protected override _opts = this.$options;
+
+  /** Dispatched on submit. Return promise to lock form and show spinner */
+  $onSubmit?: (ev: WUP.Form.SubmitEvent<Model>) => void | Promise<unknown>;
+  /** Dispatched on submit */
+  // It's not required but called: $onsubmit?: (ev: WUP.Form.SubmitEvent<Model>) => void;
 
   /** All controls related to form */
   $controls: IBaseControl<any>[] = [];
@@ -316,9 +291,6 @@ export default class WUPFormElement<
   get $isChanged(): boolean {
     return this.$controls.some((c) => c.$options.name && c.$isChanged);
   }
-
-  /** Dispatched on submit. Return promise to lock form and show spinner */
-  $onSubmit?: (ev: WUP.Form.SubmitEvent<Model>) => void | Promise<unknown>;
 
   /** Called on every spin-render */
   renderSpin(target: HTMLElement): WUPSpinElement {
@@ -534,4 +506,4 @@ declare global {
   }
 }
 
-// todo show success result in modal window
+// todo show success result in <wup-alert> at the right angle + add autosafe option

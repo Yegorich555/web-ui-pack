@@ -357,4 +357,27 @@ describe("control.number", () => {
     expect(isPrevented).toBe(false);
     expect(el.$refInput.value).toBe("111.53");
   });
+
+  test("thousand separtor", () => {
+    el.$value = 123;
+    expect(el.$refInput.value).toBe("123");
+
+    el.$value = 1234;
+    expect(el.$refInput.value).toBe("1,234");
+
+    el.$value = 15234;
+    expect(el.$refInput.value).toBe("15,234");
+
+    el.$value = 1506234;
+    expect(el.$refInput.value).toBe("1,506,234");
+
+    el.$value = -123;
+    expect(el.$refInput.value).toBe("-123");
+
+    el.$value = -1234;
+    expect(el.$refInput.value).toBe("-1,234");
+
+    el.$value = -1506234;
+    expect(el.$refInput.value).toBe("-1,506,234");
+  });
 });

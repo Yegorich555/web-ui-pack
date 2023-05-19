@@ -81,14 +81,15 @@ export default class WUPNumberControl<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
+  // @ts-expect-error - min: string & min: number is invalid
   static $defaults: WUP.Number.Defaults = {
     ...WUPTextControl.$defaults,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
       _mask: WUPTextControl.$defaults.validationRules._mask as any,
       // _parse: WUPTextControl.$defaults.validationRules._parse as any,
-      min: (v, setV) => (v == null || v < setV) && `Min value is ${setV}`,
-      max: (v, setV) => (v == null || v > setV) && `Max value is ${setV}`,
+      min: (v, setV, c) => (v == null || v < setV) && `Min value is ${(c as WUPNumberControl).valueToInput(setV)}`,
+      max: (v, setV, c) => (v == null || v > setV) && `Max value is ${(c as WUPNumberControl).valueToInput(setV)}`,
     },
   };
 
@@ -114,7 +115,7 @@ export default class WUPNumberControl<
 
   // WARN usage format #.### impossible because unclear what sepDec/sep100 and what if user wants only limit decimal part
   /** Called when need to format value */
-  protected valueToInput(v: ValueType | undefined): string {
+  valueToInput(v: ValueType | undefined): string {
     if (v == null) {
       return "";
     }
@@ -126,7 +127,8 @@ export default class WUPNumberControl<
     let [int, dec] = (v as any).toString().split(".");
     const f = this.$format;
     if (f.sep1000) {
-      for (let i = int.length - 3; i > 0; i -= 3) {
+      const to = (v as number)! > 0 ? 0 : 1;
+      for (let i = int.length - 3; i > to; i -= 3) {
         int = `${int.substring(0, i)}${f.sep1000}${int.substring(i)}`;
       }
     }
@@ -302,6 +304,7 @@ export default class WUPNumberControl<
         { skip: () => this.$isReadOnly || this.$isDisabled }
       )
     ); // allow inc/dec via scroll/swipe
+    this.style.overflow = ""; // disable inline-style from onScroll helper
     r.push(
       onEvent(this, "keyup", (e) => {
         /* istanbul ignore else */

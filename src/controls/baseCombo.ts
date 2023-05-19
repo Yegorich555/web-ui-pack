@@ -117,6 +117,11 @@ export default abstract class WUPBaseComboControl<
   // @ts-expect-error reason: validationRules is different
   protected override _opts = this.$options;
 
+  /** Fires after popup-menu is shown (after animation finishes) */
+  $onShowMenu?: (e: Event) => void;
+  /** Fires after popup is hidden (after animation finishes) */
+  $onHideMenu?: (e: Event) => void;
+
   #isShown = false;
   /** Returns if popup-menu is opened */
   get $isShown(): boolean {
@@ -304,18 +309,18 @@ export default abstract class WUPBaseComboControl<
     return true;
   }
 
-  protected _isHidding?: true;
+  protected _isHiding?: true;
   protected async goHideMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): Promise<boolean> {
-    if (!this.$refPopup || this._isHidding) {
+    if (!this.$refPopup || this._isHiding) {
       return false;
     }
     if (!this.canHideMenu(hideCase, e)) {
       return false;
     }
     this.#isShown = false;
-    this._isHidding = true;
+    this._isHiding = true;
     await this.$refPopup.$hide();
-    delete this._isHidding;
+    delete this._isHiding;
     if (this.#isShown) {
       return false; // possible when popup opened again during the animation
     }
@@ -332,6 +337,7 @@ export default abstract class WUPBaseComboControl<
     return true;
   }
 
+  /** Current focused menu-item (via aria-activedescendant) */
   _focusedMenuItem?: HTMLElement | null;
   /** Focus/resetFocus for item (via aria-activedescendant) */
   protected focusMenuItem(next: HTMLElement | null): void {
@@ -453,7 +459,7 @@ export default abstract class WUPBaseComboControl<
   }
 
   protected override gotFocusLost(): void {
-    !this.#isShown && !this._isHidding && this.removePopup(); // otherwise it's removed by hidingMenu
+    !this.#isShown && !this._isHiding && this.removePopup(); // otherwise it's removed by hidingMenu
     this.goHideMenu(HideCases.onFocusLost);
     this.resetInputValue(); // to update/rollback input according to result
     super.gotFocusLost();
@@ -514,9 +520,9 @@ export default abstract class WUPBaseComboControl<
 /*
  $hideMenu().then(()=> console.warn('done'))
  isShown: false
- isHidding: true
+ isHiding: true
  ...animation...
- isHidding: false >>> remove popup if focus out
+ isHiding: false >>> remove popup if focus out
  >>> console.warn('done')
  hide-event
  */

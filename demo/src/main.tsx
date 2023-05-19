@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import ReactDom from "react-dom";
 import { BrowserRouter, Routes, Route, Navigate, NavLink, useNavigate } from "react-router-dom";
 import { WUPHelpers } from "web-ui-pack";
+import { useBuiltinStyle, WUPcssButton, WUPcssScrollSmall } from "web-ui-pack/styles";
 import PopupView from "./components/popup/popupView";
 
 import iconGit from "./assets/gitIcon.svg";
@@ -13,6 +14,8 @@ import styles from "./main.scss";
 import ControlsView from "./components/controls/controlsView";
 import SpinView from "./components/spin/spinView";
 import CircleView from "./components/circleView";
+import DropdownView from "./components/dropdownView";
+
 import TextControlView from "./components/controls/text";
 import TextareaControlView from "./components/controls/textarea";
 import PasswordControlView from "./components/controls/password";
@@ -42,6 +45,7 @@ const routes: IRoute[] = [
   { path: "popup", el: PopupView },
   { path: "spin", el: SpinView },
   { path: "circle", el: CircleView },
+  { path: "dropdown", el: DropdownView },
   { path: "controls", label: "Form & Controls", el: ControlsView },
   { path: "control/text", el: TextControlView, isNested: true },
   { path: "control/textarea", el: TextareaControlView, isNested: true },
@@ -86,7 +90,7 @@ export default function AppContainer() {
         </a>
       </h1>
       <div className={styles.page}>
-        <nav className={styles.leftBar}>
+        <nav className={`${styles.leftBar} scrolled`}>
           <ul>
             {routes.map((r) => (
               <li key={r.path}>
@@ -102,7 +106,7 @@ export default function AppContainer() {
             ))}
           </ul>
         </nav>
-        <main>
+        <main className="scrolled">
           <Routes>
             {routes.map((r) => (
               <Route key={r.path} path={r.url} element={React.createElement(r.el)} />
@@ -115,9 +119,20 @@ export default function AppContainer() {
   );
 }
 
+const el = document.getElementById("app")!;
 ReactDom.render(
   <BrowserRouter>
-    <AppContainer />{" "}
+    <AppContainer />
   </BrowserRouter>,
-  document.getElementById("app")
+  el
 );
+
+useBuiltinStyle(
+  `${WUPcssScrollSmall(".scrolled")}
+  .scrolled {
+     overflow: auto;
+  }`
+);
+
+useBuiltinStyle(WUPcssScrollSmall(".scrolled"));
+useBuiltinStyle(WUPcssButton(".btn"));

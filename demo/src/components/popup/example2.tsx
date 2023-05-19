@@ -96,6 +96,7 @@ export default function Example2() {
       </small>
       <div className={styles.fitBlock} id="fit">
         <button
+          className="btn"
           id="btnDropdownWithAttach"
           type="button"
           ref={setTitle(`<div>I must feet div with border <br/>(changed option <b>toFitElement</b>)

@@ -349,6 +349,9 @@ padding:0;}
       WUP-DATE strong {
         cursor: inherit;
       }
+      WUP-DATE strong:empty {
+        display: none;
+      }
       WUP-DATE [aria-required="true"] + strong:after,
       WUP-DATE fieldset[aria-required="true"] &gt; legend:after {
         content: "*";
@@ -417,11 +420,15 @@ mask-image: var(--ctrl-icon-img);
           max-height: none;
         }*/
         WUP-DATE:hover,
-        WUP-DATE:hover &gt; [menu] {
+        WUP-DATE:hover&gt;[menu],
+        WUP-DATE[hovered],
+        WUP-DATE[hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         WUP-DATE[invalid]:hover,
-        WUP-DATE[invalid]:hover &gt; [menu] {
+        WUP-DATE[invalid]:hover&gt;[menu]
+        WUP-DATE[invalid][hovered],
+        WUP-DATE[invalid][hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
         }
       }

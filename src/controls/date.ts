@@ -261,7 +261,7 @@ export default class WUPDateControl<
     if (isChanged) {
       const c = this.$refPopup?.firstElementChild as WUPCalendarControl;
       if (c) {
-        c._isStopChanges = true; // to prevent hidding popup by calendar valueChange
+        c._isStopChanges = true; // to prevent hiding popup by calendar valueChange
         c.$value = v && !Number.isNaN(v.valueOf()) ? v : undefined;
         setTimeout(() => (c._isStopChanges = false)); // without timeout calendar $changeEvent is fired
       }

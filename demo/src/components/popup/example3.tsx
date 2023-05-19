@@ -11,6 +11,7 @@ export default function Example3() {
       </small>
       <div className={styles.fitBlock} id="fit2">
         <button
+          className="btn"
           type="button"
           ref={(el) => {
             if (el) {

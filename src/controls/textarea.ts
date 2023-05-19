@@ -183,5 +183,3 @@ export default class WUPTextareaControl<
 }
 
 customElements.define(tagName, WUPTextareaControl);
-
-// todo issue: cursor is wrong for custom scroll-bar

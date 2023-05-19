@@ -104,6 +104,7 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       el.$options.validationCase = ValidationCases.onChange | 0; // just for coverage
       const spyChange = jest.fn();
       el.addEventListener("$change", spyChange);
+      el.$onChange = jest.fn();
 
       expect(el.$value).toBe(undefined);
       await h.userTypeText(el.$refInput, initV);
@@ -112,6 +113,7 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       expect(el.$refInput.value).toBe(initV);
       expect(el.$value).toBe(initV);
       expect(spyChange).toBeCalledTimes(1);
+      expect(el.$onChange).toBeCalledTimes(1);
       await h.userTypeText(el.$refInput, ""); // just for coverage
 
       el.$options.debounceMs = 0;

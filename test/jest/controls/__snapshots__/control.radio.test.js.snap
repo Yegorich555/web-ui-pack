@@ -704,6 +704,9 @@ padding:0;}
       WUP-RADIO strong {
         cursor: inherit;
       }
+      WUP-RADIO strong:empty {
+        display: none;
+      }
       WUP-RADIO [aria-required="true"] + strong:after,
       WUP-RADIO fieldset[aria-required="true"] &gt; legend:after {
         content: "*";
@@ -772,11 +775,15 @@ mask-image: var(--ctrl-icon-img);
           max-height: none;
         }*/
         WUP-RADIO:hover,
-        WUP-RADIO:hover &gt; [menu] {
+        WUP-RADIO:hover&gt;[menu],
+        WUP-RADIO[hovered],
+        WUP-RADIO[hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         WUP-RADIO[invalid]:hover,
-        WUP-RADIO[invalid]:hover &gt; [menu] {
+        WUP-RADIO[invalid]:hover&gt;[menu]
+        WUP-RADIO[invalid][hovered],
+        WUP-RADIO[invalid][hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
         }
       }

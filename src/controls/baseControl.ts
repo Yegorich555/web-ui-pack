@@ -12,6 +12,7 @@ import IBaseControl from "./baseControl.i";
 
 /** Cases of validation for WUP Controls */
 export const enum ValidationCases {
+  none = 0,
   /** Wait for first user-change > wait for valid > wait for invalid >> show error;
    *  When invalid: wait for valid > hide error > wait for invalid > show error
    *  Also you can check $options.validateDebounceMs */
@@ -96,24 +97,6 @@ declare global {
       validationRules: {
         [K in keyof VM]: (this: IBaseControl, value: T, setValue: VM[K], control: IBaseControl) => false | string;
       };
-    }
-    interface Options<T = any, VM = ValidityMap> extends Defaults<T, VM> {
-      /** Title/label of control; if label is missed it's parsed from option [name]. To skip point `label=''` (empty string) */
-      label?: string;
-      /** Property/key of model (collected by form); For name `firstName` >> `model.firstName`; for `nested.firstName` >> `model.nested.firstName` etc. */
-      name?: string;
-      /** Focus element when it's appended to layout */
-      autoFocus?: boolean;
-      /** Name to autocomplete by browser; Point `true` to inherit from $options.name or some string
-       *  if control has no autocomplete option then it's inherrited from form
-       * @defaultValue false */
-      autoComplete?: string | boolean;
-      /** Disallow edit/copy value; adds attr [disabled] for styling */
-      disabled?: boolean;
-      /** Disallow copy value; adds attr [readonly] for styling */
-      readOnly?: boolean;
-      /** Show all validation-rules with checkpoints as list instead of single error */
-      validationShowAll?: boolean;
       /** Rules enabled for current control (related to $defaults.validationRules)
        * @example
        * ```
@@ -128,6 +111,24 @@ declare global {
       validations?:
         | { [K in keyof VM]?: VM[K] | ((value: T | undefined) => false | string) }
         | { [k: string]: (value: T | undefined) => false | string };
+    }
+    interface Options<T = any, VM = ValidityMap> extends Defaults<T, VM> {
+      /** Title/label of control; if label is missed it's parsed from option [name]. To skip point `label=''` (empty string) */
+      label?: string;
+      /** Property/key of model (collected by form); For name `firstName` >> `model.firstName`; for `nested.firstName` >> `model.nested.firstName` etc. */
+      name?: string;
+      /** Focus element when it's appended to layout */
+      autoFocus?: boolean;
+      /** Name to autocomplete by browser; Point `true` to inherit from $options.name or some string
+       *  if control has no autocomplete option then it's inherited from form
+       * @defaultValue false */
+      autoComplete?: string | boolean;
+      /** Disallow edit/copy value; adds attr [disabled] for styling */
+      disabled?: boolean;
+      /** Disallow copy value; adds attr [readonly] for styling */
+      readOnly?: boolean;
+      /** Show all validation-rules with checkpoints as list instead of single error */
+      validationShowAll?: boolean;
     }
 
     interface Attributes
@@ -282,6 +283,9 @@ export default abstract class WUPBaseControl<
       :host strong {
         cursor: inherit;
       }
+      :host strong:empty {
+        display: none;
+      }
       :host [aria-required="true"] + strong:after,
       :host fieldset[aria-required="true"] > legend:after {
         content: "*";
@@ -331,11 +335,15 @@ export default abstract class WUPBaseControl<
           max-height: none;
         }*/
         :host:hover,
-        :host:hover > [menu] {
+        :host:hover>[menu],
+        :host[hovered],
+        :host[hovered]>[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         :host[invalid]:hover,
-        :host[invalid]:hover > [menu] {
+        :host[invalid]:hover>[menu]
+        :host[invalid][hovered],
+        :host[invalid][hovered]>[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
         }${
           //  :host:hover label:before,
@@ -358,7 +366,6 @@ export default abstract class WUPBaseControl<
     return v === "" || v === undefined;
   }
 
-  /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUP.BaseControl.Defaults = {
     clearActions: ClearActions.clear | ClearActions.resetToInit,
     validateDebounceMs: 500,
@@ -373,6 +380,9 @@ export default abstract class WUPBaseControl<
   };
 
   protected override _opts = this.$options;
+
+  /** Called on value change */
+  $onChange?: (e: Event) => void;
 
   #value?: ValueType;
   /** Current value of control; You can change it without affecting on $isDirty state */
@@ -692,9 +702,11 @@ export default abstract class WUPBaseControl<
     this.$form?.$controls.splice(this.$form.$controls.indexOf(this), 1);
   }
 
-  /** Returns validations enabled by user */
+  /** Returns validations enabled by user & defaults */
   protected get validations(): WUP.BaseControl.Options["validations"] | undefined {
-    return this.getAttr<WUP.BaseControl.Options["validations"]>("validations", "ref");
+    const def = this.#ctr.$defaults.validations;
+    const opt = this.getAttr<WUP.BaseControl.Options["validations"]>("validations", "ref");
+    return def ? { ...def, ...opt } : opt;
   }
 
   /** Returns validations functions ready for checking */

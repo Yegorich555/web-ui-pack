@@ -199,11 +199,13 @@ export default class WUPTimeControl<
         background: var(--base-sep);
       }
       :host [menu] button {
+        cursor: pointer;
         flex: 1 1 50%;
         display: inline-flex;
         align-content: center;
         justify-content: center;
         height: 2.4em;
+        border: none;
         border-radius: 0;
         padding: 0; margin: 0;
         background: var(--base-btn3-bg);
@@ -371,7 +373,7 @@ export default class WUPTimeControl<
     let isInit = true;
     const append = (ul: HTMLElement, v: number | string, twoDigs: boolean, savedV?: number): HTMLElement => {
       const li = ul.appendChild(document.createElement("li"));
-      li.textContent = twoDigs && v < 10 ? `0${v}` : v.toString();
+      li.textContent = twoDigs && +v < 10 ? `0${v}` : v.toString();
       (li as any)._value = savedV ?? v;
       return li;
     };

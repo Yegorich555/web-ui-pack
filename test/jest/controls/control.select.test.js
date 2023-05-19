@@ -157,6 +157,8 @@ describe("control.select", () => {
     const onHide = jest.fn();
     el.addEventListener("$showMenu", onShow);
     el.addEventListener("$hideMenu", onHide);
+    el.$onShowMenu = jest.fn();
+    el.$onHideMenu = jest.fn();
 
     // opening by focus
     el.focus();
@@ -167,6 +169,7 @@ describe("control.select", () => {
     await h.wait();
     expect(onHide).toBeCalledTimes(0);
     expect(onShow).toBeCalledTimes(1);
+    expect(el.$onShowMenu).toBeCalledTimes(1);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
       `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option" aria-selected="true">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
     );
@@ -183,6 +186,7 @@ describe("control.select", () => {
       `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-owns="txt2" aria-controls="txt2"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label><wup-popup menu="" style="min-width: 100px;"><ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option" aria-selected="false">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul></wup-popup></wup-select>"`
     );
     expect(onHide).toBeCalledTimes(1);
+    expect(el.$onHideMenu).toBeCalledTimes(1);
     expect(onShow).toBeCalledTimes(1);
 
     // opening by call $show()
@@ -729,6 +733,23 @@ describe("control.select", () => {
     expect(err).toBeCalledTimes(1); // because value not found in items
     expect(el.$refInput.value).toMatchInlineSnapshot(`"Error: not found for "`);
     h.unMockConsoleError();
+
+    // case when menu is hidden 1st time and opened 2nd by input
+    document.body.innerHTML = "";
+    /** @type WUPSelectControl */
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.items = () => new Promise((res) => setTimeout(() => res(getItems()), 100));
+    jest.spyOn(el, "canShowMenu").mockReturnValueOnce(false);
+    await h.wait(1);
+    el.focus();
+    await h.wait();
+    expect(el.$isShown).toBe(false);
+    await expect(h.userTypeText(el.$refInput, "D")).resolves.not.toThrow();
+    await h.wait();
+    expect(el.$isShown).toBe(true);
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt7" role="listbox" aria-label="Items" tabindex="-1"><li role="option" aria-selected="false" id="txt8" focused="">Donny</li><li role="option" style="display: none;">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option" style="display: none;">Splinter</li></ul>"`
+    );
   });
 
   test("submit by Enter key", async () => {
@@ -880,7 +901,7 @@ describe("control.select", () => {
       await h.wait();
       el.click();
       await h.wait();
-      expect(el.$isShown).toBe(true); // no-hidding when click option is disabled
+      expect(el.$isShown).toBe(true); // no-hiding when click option is disabled
 
       el.$hideMenu();
       await h.wait();

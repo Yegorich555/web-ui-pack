@@ -1,3 +1,5 @@
+// WARN: don't change the file to d.ts otherwise TS skip this in build result: https://stackoverflow.com/questions/56018167/typescript-does-not-copy-d-ts-files-to-build
+
 export default interface IBaseControl<ValueType = any> extends HTMLElement {
   $value: ValueType | undefined;
   $initValue: ValueType | undefined;
