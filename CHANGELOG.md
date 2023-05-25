@@ -4,7 +4,8 @@
 
 **New/Features**:
 
-- **Controls**. Internal `setValue` has reason now
+- **Controls**. Internal `setValue` has argument reason now
+- **Controls**. Event `$change` and callback `$onChange` has prop `detail: SetValueReason` now
 
 ## 0.6.0 (May 19, 2023)
 

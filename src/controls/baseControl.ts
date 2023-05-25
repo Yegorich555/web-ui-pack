@@ -69,7 +69,7 @@ declare global {
   namespace WUP.BaseControl {
     interface EventMap extends WUP.Base.EventMap {
       /** Called on value change */
-      $change: Event;
+      $change: CustomEvent & { detail: SetValueReasons };
     }
 
     interface ValidityMap {
@@ -391,7 +391,7 @@ export default abstract class WUPBaseControl<
   protected override _opts = this.$options;
 
   /** Called on value change */
-  $onChange?: (e: Event) => void;
+  $onChange?: (e: CustomEvent & { detail: SetValueReasons }) => void;
 
   #value?: ValueType;
   /** Current value of control; You can change it without affecting on $isDirty state */
@@ -958,8 +958,7 @@ export default abstract class WUPBaseControl<
     this._isValid = undefined;
     const canVld = reason !== SetValueReasons.manual;
     (canVld || this.$refError) && this.validateAfterChange();
-    // todo add $reason to Event
-    setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true }));
+    setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true, detail: reason }));
     return true;
   }
 
