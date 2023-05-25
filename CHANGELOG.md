@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.1 (\_\_\_)
+
+**New/Features**:
+
+- **Controls**. Internal `setValue` has reason now
+
 ## 0.6.0 (May 19, 2023)
 
 **BREAKING CHANGES**:

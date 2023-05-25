@@ -5,6 +5,7 @@ import WUPPopupElement from "../popup/popupElement";
 import WUPSpinElement from "../spinElement";
 import { WUPcssMenu } from "../styles";
 import WUPBaseComboControl, { ShowCases } from "./baseCombo";
+import { SetValueReasons } from "./baseControl";
 
 /* c8 ignore next */
 /* istanbul ignore next */
@@ -627,7 +628,7 @@ export default class WUPSelectControl<
   protected override gotKeyDown(e: KeyboardEvent): void {
     // if (this.$isPending) {return;} // pending event disables gotKeyDown so case impossible
     if (this._opts.allowNewValue && e.key === "Enter" && !this._focusedMenuItem) {
-      this.setValue(this.parseInput(this.$refInput.value));
+      this.setValue(this.parseInput(this.$refInput.value), SetValueReasons.userInput);
       this._opts.multiple && e.preventDefault(); // prevent closing by keydown
     }
     !e.defaultPrevented && super.gotKeyDown(e);
@@ -701,7 +702,7 @@ export default class WUPSelectControl<
         // case 1: user removes 'Item1,| Item2|' - setValue [Item1]
         // case 2: user adds `Item1,| Item2,| -- setValue [Item1, Item2]
         isChanged = (next || []).length !== ((this.$value as Array<ValueType> | undefined) || []).length;
-        isChanged && this.setValue(next as any);
+        isChanged && this.setValue(next as any, SetValueReasons.userInput);
       }
     }
 
@@ -722,12 +723,12 @@ export default class WUPSelectControl<
     if (this._opts.multiple) {
       this.$refInput.value = this.$refInput.value.replace(/, *$/, ""); // remove delimiter
     }
-    this._opts.allowNewValue && this.setValue(this.parseInput(this.$refInput.value)); // to allow user left value without pressing Enter
+    this._opts.allowNewValue && this.setValue(this.parseInput(this.$refInput.value), SetValueReasons.userInput); // to allow user left value without pressing Enter
     super.gotFocusLost();
   }
 
-  protected override setValue(v: ValueType | undefined, canValidate = true, skipInput = false): boolean | null {
-    const r = super.setValue(v, canValidate, skipInput);
+  protected override setValue(v: ValueType | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
+    const r = super.setValue(v, reason, skipInput);
     // todo method setValue must contain the following prop 'details': fromInput, $valueChange, from $select etc. & need to call selectMenuItemByValue when setValue not from useSelect
     r && this.selectMenuItemByValue(v);
     return r;

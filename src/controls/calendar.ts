@@ -1,4 +1,4 @@
-import WUPBaseControl from "./baseControl";
+import WUPBaseControl, { SetValueReasons } from "./baseControl";
 import { WUPcssHidden } from "../styles";
 import WUPScrolled from "../helpers/scrolled";
 import { dateCopyTime, dateFromString } from "../indexHelpers";
@@ -634,7 +634,7 @@ export default class WUPCalendarControl<
         }
         const prev = this.$value || this.$initValue;
         prev && dateCopyTime(dt, prev, !!this._opts.utc);
-        this.setValue(dt as ValueType);
+        this.setValue(dt as ValueType, SetValueReasons.userInput);
         this.$ariaSpeak(this.$refInput.value);
         // this.focusItem(target);
       },
@@ -924,8 +924,8 @@ export default class WUPCalendarControl<
     el?.setAttribute("aria-selected", "true");
   }
 
-  protected override setValue(v: ValueType | undefined, canValidate = true): boolean | null {
-    const r = super.setValue(v, canValidate);
+  protected override setValue(v: ValueType | undefined, reason: SetValueReasons): boolean | null {
+    const r = super.setValue(v, reason);
     this.setInputValue(v);
     this.#refreshSelected?.call(this);
     return r;
@@ -943,8 +943,8 @@ export default class WUPCalendarControl<
     }
   }
 
-  protected override clearValue(canValidate = true): void {
-    super.clearValue(canValidate);
+  protected override clearValue(): void {
+    super.clearValue();
     this.$isEmpty && this.selectItem(undefined);
   }
 
@@ -1056,7 +1056,7 @@ export default class WUPCalendarControl<
   /** Called when browsers fills the field via autocomplete */
   protected gotInput(e: WUP.Text.GotInputEvent): void {
     const v = this.parse(e.target.value);
-    this.setValue(v);
+    this.setValue(v, SetValueReasons.userInput);
   }
 
   override gotKeyDown(e: KeyboardEvent): void {

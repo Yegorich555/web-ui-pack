@@ -5,6 +5,7 @@ import { onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
 import { WUPcssIcon } from "../styles";
 import { ShowCases } from "./baseCombo";
+import { SetValueReasons } from "./baseControl";
 import WUPSelectControl from "./select";
 
 const tagName = "wup-selectmany";
@@ -438,7 +439,10 @@ export default class WUPSelectManyControl<
               dr.remove();
             });
             // change value
-            this.setValue(this.$refItems!.map((a) => a._wupValue));
+            this.setValue(
+              this.$refItems!.map((a) => a._wupValue),
+              SetValueReasons.userInput
+            );
           }
         }
         r0();
@@ -569,11 +573,11 @@ export default class WUPSelectManyControl<
     }
 
     this.$value!.splice(index, 1);
-    this.setValue(this.$value!.length ? [...this.$value!] : undefined);
+    this.setValue(this.$value!.length ? [...this.$value!] : undefined, SetValueReasons.userInput);
   }
 
-  protected override setValue(v: ValueType[] | undefined, canValidate = true, skipInput = false): boolean | null {
-    const isChanged = super.setValue(v, canValidate, skipInput);
+  protected override setValue(v: ValueType[] | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
+    const isChanged = super.setValue(v, reason, skipInput);
     isChanged !== false && this.setAttr("filled", !this.$isEmpty, true);
     return isChanged;
   }
@@ -660,7 +664,10 @@ export default class WUPSelectManyControl<
             : this.$refItems[isR && this._focusIndex !== 0 ? this._focusIndex + 1 : this._focusIndex]
         );
         this.$refItems.splice(this._focusIndex, 0, this.$refItems.splice(prev, 1)[0]);
-        this.setValue(this.$refItems.map((a) => a._wupValue));
+        this.setValue(
+          this.$refItems.map((a) => a._wupValue),
+          SetValueReasons.userInput
+        );
         // }
       }
       return;

@@ -1,7 +1,7 @@
 import MaskTextInput from "./text.mask";
 import { onEvent } from "../indexHelpers";
 import { WUPcssIcon } from "../styles";
-import WUPBaseControl from "./baseControl";
+import WUPBaseControl, { SetValueReasons } from "./baseControl";
 
 const emailReg =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -676,7 +676,7 @@ export default class WUPTextControl<
       if (errMsg) {
         this.validateOnce({ _parse: this.validations?._parse || "" }, true);
       } else if (canParse) {
-        this.setValue(v, true, true);
+        this.setValue(v, SetValueReasons.userInput, true);
       } else if (this._opts.mask) {
         this.validateOnce({ _mask: this.validations?._mask || "" });
       }
@@ -813,9 +813,9 @@ export default class WUPTextControl<
     const t = setTimeout(this.#declineInputEnd, 100);
   }
 
-  protected override setValue(v: ValueType | undefined, canValidate = true, skipInput = false): boolean | null {
+  protected override setValue(v: ValueType | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
     !skipInput && this.setInputValue(v);
-    const isChanged = super.setValue(v, canValidate);
+    const isChanged = super.setValue(v, reason);
     this._isValid !== false && this.goHideError();
     return isChanged;
   }

@@ -1,7 +1,7 @@
 import { onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
 import { ShowCases as PopupShowCases, Animations } from "../popup/popupElement.types";
-import WUPBaseControl from "./baseControl";
+import WUPBaseControl, { SetValueReasons } from "./baseControl";
 import WUPTextControl from "./text";
 
 export const enum ShowCases {
@@ -467,7 +467,7 @@ export default abstract class WUPBaseComboControl<
 
   /** Called when user selected new value from menu and need to hide menu */
   protected selectValue(v: ValueType, canHideMenu = true): void {
-    this.setValue(v);
+    this.setValue(v, SetValueReasons.userInput);
     canHideMenu && setTimeout(() => this.goHideMenu(HideCases.onSelect)); // without timeout it handles click by listener and opens again
   }
 

@@ -1,5 +1,5 @@
 import { WUPcssHidden } from "../styles";
-import WUPBaseControl from "./baseControl";
+import WUPBaseControl, { SetValueReasons } from "./baseControl";
 
 const tagName = "wup-radio";
 declare global {
@@ -221,7 +221,7 @@ export default class WUPRadioControl<
     if (this.$isReadOnly) {
       e.target.checked = !e.target.checked;
     } else {
-      this.setValue(e.target._value);
+      this.setValue(e.target._value, SetValueReasons.userInput);
     }
   }
 
@@ -299,9 +299,9 @@ export default class WUPRadioControl<
     this.$refLabel = this.$refInput.parentElement as HTMLLabelElement;
   }
 
-  protected override setValue(v: ValueType, canValidate = true): boolean | null {
+  protected override setValue(v: ValueType, reason: SetValueReasons): boolean | null {
     this.$isReady && this.checkInput(v); // otherwise it will be checked from renderItems
-    return super.setValue(v, canValidate);
+    return super.setValue(v, reason);
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Radio.Options> | null): void {

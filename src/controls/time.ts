@@ -6,6 +6,7 @@ import WUPTimeObject from "../objects/timeObject";
 import WUPPopupElement from "../popup/popupElement";
 import { WUPcssIcon } from "../styles";
 import WUPBaseComboControl, { HideCases, ShowCases } from "./baseCombo";
+import { SetValueReasons } from "./baseControl";
 
 const tagName = "wup-time";
 
@@ -588,8 +589,8 @@ export default class WUPTimeControl<
     }
   }
 
-  protected override setValue(v: ValueType | undefined, canValidate = true, skipInput = false): boolean | null {
-    return super.setValue(v, canValidate, skipInput);
+  protected override setValue(v: ValueType | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
+    return super.setValue(v, reason, skipInput);
   }
 
   protected override valueToInput(v: ValueType | undefined): Promise<string> | string {

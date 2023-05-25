@@ -4,7 +4,7 @@ import dateToString from "../helpers/dateToString";
 import localeInfo from "../objects/localeInfo";
 import WUPPopupElement from "../popup/popupElement";
 import WUPBaseComboControl from "./baseCombo";
-import { ValidateFromCases } from "./baseControl";
+import { SetValueReasons, ValidateFromCases } from "./baseControl";
 import WUPCalendarControl, { PickersEnum } from "./calendar";
 
 /* c8 ignore next */
@@ -252,12 +252,12 @@ export default class WUPDateControl<
     return el;
   }
 
-  protected override setValue(v: ValueType | undefined, canValidate = true, skipInput = false): boolean | null {
+  protected override setValue(v: ValueType | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
     if (v && skipInput) {
       const prev = this.$value || this.$initValue;
       prev && dateCopyTime(v, prev, !!this._opts.utc); // copy time if was changing from input (calendar do it itself)
     }
-    const isChanged = super.setValue(v, canValidate, skipInput);
+    const isChanged = super.setValue(v, reason, skipInput);
     if (isChanged) {
       const c = this.$refPopup?.firstElementChild as WUPCalendarControl;
       if (c) {

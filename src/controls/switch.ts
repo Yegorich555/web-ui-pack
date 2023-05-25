@@ -1,5 +1,5 @@
 import { WUPcssHidden } from "../styles";
-import WUPBaseControl from "./baseControl";
+import WUPBaseControl, { SetValueReasons } from "./baseControl";
 
 const tagName = "wup-switch";
 declare global {
@@ -210,12 +210,12 @@ export default class WUPSwitchControl<
     if (this.$isReadOnly) {
       el.checked = !el.checked;
     } else {
-      this.setValue(el.checked);
+      this.setValue(el.checked, SetValueReasons.userInput);
     }
   }
 
-  protected override setValue(v: boolean, canValidate = true): boolean | null {
-    const r = super.setValue(v, canValidate);
+  protected override setValue(v: boolean, reason: SetValueReasons): boolean | null {
+    const r = super.setValue(v, reason);
     this.$refInput.checked = !!v;
     return r;
   }

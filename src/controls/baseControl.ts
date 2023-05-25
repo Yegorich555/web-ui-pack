@@ -10,6 +10,15 @@ import { ShowCases } from "../popup/popupElement.types";
 import { WUPcssIcon } from "../styles";
 import IBaseControl from "./baseControl.i";
 
+export const enum SetValueReasons {
+  /** When clearing happened (by Esc or ClearButton click) */
+  clear = 1,
+  /** When `control.$value = 'some value'` */
+  manual,
+  /** When user changes on UI */
+  userInput,
+}
+
 /** Cases of validation for WUP Controls */
 export const enum ValidationCases {
   none = 0,
@@ -392,7 +401,7 @@ export default abstract class WUPBaseControl<
 
   set $value(v: ValueType | undefined) {
     const was = this.#isDirty;
-    this.setValue(v, false);
+    this.setValue(v, SetValueReasons.manual);
     this.#isDirty = was;
   }
 
@@ -933,11 +942,7 @@ export default abstract class WUPBaseControl<
   }
 
   /** Fire this method to update value & validate; returns null when not $isReady, true if changed */
-  protected setValue(
-    v: ValueType | undefined,
-    /* istanbul ignore next */
-    canValidate = true
-  ): boolean | null {
+  protected setValue(v: ValueType | undefined, reason: SetValueReasons): boolean | null {
     const prev = this.#value;
     this.#value = v;
     if (!this.$isReady) {
@@ -951,7 +956,9 @@ export default abstract class WUPBaseControl<
     }
 
     this._isValid = undefined;
-    (canValidate || this.$refError) && this.validateAfterChange();
+    const canVld = reason !== SetValueReasons.manual;
+    (canVld || this.$refError) && this.validateAfterChange();
+    // todo add $reason to Event
     setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true }));
     return true;
   }
@@ -966,7 +973,7 @@ export default abstract class WUPBaseControl<
 
   #prevValue = this.#value;
   /* Called when user pressed Esc-key or button-clear */
-  protected clearValue(canValidate = true): void {
+  protected clearValue(): void {
     const was = this.#value;
 
     let v: ValueType | undefined;
@@ -981,7 +988,7 @@ export default abstract class WUPBaseControl<
       v = this.$isEmpty ? this.#prevValue : undefined;
     }
 
-    this.setValue(v, canValidate);
+    this.setValue(v, SetValueReasons.clear);
     this.#prevValue = was;
 
     this.$isEmpty ? this.$ariaSpeak(this.#ctr.$ariaCleared) : this.$refInput.select();
