@@ -84,7 +84,7 @@ export default class WUPRadioControl<
   }
 
   static get $style(): string {
-    // :host input + *:after >> not relative because 1.2em of 14px provides round-pixel-issue and not always rounded items
+    // :host input + span:after >> not relative because 1.2em of 14px provides round-pixel-issue and not always rounded items
     return `${super.$style}
       :host {
         position: relative;
@@ -120,7 +120,7 @@ export default class WUPRadioControl<
         padding: 0;
       }
       :host input {${WUPcssHidden}}
-      :host input + * {
+      :host input + span {
         padding: var(--ctrl-radio-gap);
         display: inline-flex;
         align-items: center;
@@ -130,7 +130,7 @@ export default class WUPRadioControl<
       :host[readonly] label {
          cursor: default;
       }
-      :host input + *:after {
+      :host input + span:after {
         content: "";
         width: var(--ctrl-radio-size);
         height: var(--ctrl-radio-size);
@@ -141,35 +141,35 @@ export default class WUPRadioControl<
         border-radius: 50%;
         margin-left: 0.5em;
       }
-      :host fieldset[aria-required="true"] input + *:after {
+      :host fieldset[aria-required="true"] input + span:after {
         content: "";
       }
-      :host[reverse] input + * {
+      :host[reverse] input + span {
         flex-direction: row-reverse;
       }
-      :host[reverse] input + *:after {
+      :host[reverse] input + span:after {
         margin-left: 0;
         margin-right: 0.5em;
       }
-      :host input:checked + *:after {
+      :host input:checked + span:after {
         background-color: var(--ctrl-radio-on);
       }
       @media not all and (prefers-reduced-motion) {
-        :host input + *:after {
+        :host input + span:after {
           transition: background-color var(--anim);
         }
       }
-      :host input:focus + * {
+      :host input:focus + span {
         color: var(--ctrl-selected);
       }
-      :host input:focus + *:after {
+      :host input:focus + span:after {
          box-shadow: 0 0 1px var(--ctrl-radio-border-size) var(--ctrl-selected);
       }
       @media (hover: hover) and (pointer: fine) {
-        :host input + *:hover {
+        :host input + span:hover {
           color: var(--ctrl-selected);
         }
-        :host input + *:hover:after {
+        :host input + span:hover:after {
           box-shadow: 0 0 1px var(--ctrl-radio-border-size) var(--ctrl-selected);
         }
       }

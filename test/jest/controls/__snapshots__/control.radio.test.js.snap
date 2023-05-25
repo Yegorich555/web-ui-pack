@@ -828,7 +828,7 @@ overflow:hidden;
 clip:rect(1px,1px,1px,1px);
 min-width:initial;
 padding:0;}
-      WUP-RADIO input + * {
+      WUP-RADIO input + span {
         padding: var(--ctrl-radio-gap);
         display: inline-flex;
         align-items: center;
@@ -838,7 +838,7 @@ padding:0;}
       WUP-RADIO[readonly] label {
          cursor: default;
       }
-      WUP-RADIO input + *:after {
+      WUP-RADIO input + span:after {
         content: "";
         width: var(--ctrl-radio-size);
         height: var(--ctrl-radio-size);
@@ -849,35 +849,35 @@ padding:0;}
         border-radius: 50%;
         margin-left: 0.5em;
       }
-      WUP-RADIO fieldset[aria-required="true"] input + *:after {
+      WUP-RADIO fieldset[aria-required="true"] input + span:after {
         content: "";
       }
-      WUP-RADIO[reverse] input + * {
+      WUP-RADIO[reverse] input + span {
         flex-direction: row-reverse;
       }
-      WUP-RADIO[reverse] input + *:after {
+      WUP-RADIO[reverse] input + span:after {
         margin-left: 0;
         margin-right: 0.5em;
       }
-      WUP-RADIO input:checked + *:after {
+      WUP-RADIO input:checked + span:after {
         background-color: var(--ctrl-radio-on);
       }
       @media not all and (prefers-reduced-motion) {
-        WUP-RADIO input + *:after {
+        WUP-RADIO input + span:after {
           transition: background-color var(--anim);
         }
       }
-      WUP-RADIO input:focus + * {
+      WUP-RADIO input:focus + span {
         color: var(--ctrl-selected);
       }
-      WUP-RADIO input:focus + *:after {
+      WUP-RADIO input:focus + span:after {
          box-shadow: 0 0 1px var(--ctrl-radio-border-size) var(--ctrl-selected);
       }
       @media (hover: hover) and (pointer: fine) {
-        WUP-RADIO input + *:hover {
+        WUP-RADIO input + span:hover {
           color: var(--ctrl-selected);
         }
-        WUP-RADIO input + *:hover:after {
+        WUP-RADIO input + span:hover:after {
           box-shadow: 0 0 1px var(--ctrl-radio-border-size) var(--ctrl-selected);
         }
       }
