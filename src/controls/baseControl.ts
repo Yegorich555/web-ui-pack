@@ -17,6 +17,8 @@ export const enum SetValueReasons {
   manual,
   /** When user changes on UI */
   userInput,
+  /** When user selected existed option on UI and don't need to call selectMenuItem again (for combobox) */
+  userSelect,
 }
 
 /** Cases of validation for WUP Controls */

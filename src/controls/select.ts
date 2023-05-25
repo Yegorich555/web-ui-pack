@@ -729,8 +729,7 @@ export default class WUPSelectControl<
 
   protected override setValue(v: ValueType | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
     const r = super.setValue(v, reason, skipInput);
-    // todo method setValue must contain the following prop 'details': fromInput, $valueChange, from $select etc. & need to call selectMenuItemByValue when setValue not from useSelect
-    r && this.selectMenuItemByValue(v);
+    r && reason !== SetValueReasons.userSelect && this.selectMenuItemByValue(v);
     return r;
   }
 
