@@ -729,7 +729,7 @@ export default class WUPSelectControl<
 
   protected override setValue(v: ValueType | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
     const r = super.setValue(v, reason, skipInput);
-    r && reason !== SetValueReasons.userSelect && this.selectMenuItemByValue(v);
+    r && this.selectMenuItemByValue(v);
     return r;
   }
 

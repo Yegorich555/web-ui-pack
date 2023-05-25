@@ -11,10 +11,10 @@ import { WUPcssIcon } from "../styles";
 import IBaseControl from "./baseControl.i";
 
 export const enum SetValueReasons {
-  /** When clearing happened (by Esc or ClearButton click) */
-  clear = 1,
   /** When `control.$value = 'some value'` */
-  manual,
+  manual = 1,
+  /** When clearing happened (by Esc or ClearButton click) */
+  clear,
   /** When user changes on UI */
   userInput,
   /** When user selected existed option on UI and don't need to call selectMenuItem again (for combobox) */
