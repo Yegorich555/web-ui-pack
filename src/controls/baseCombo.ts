@@ -467,7 +467,7 @@ export default abstract class WUPBaseComboControl<
 
   /** Called when user selected new value from menu and need to hide menu */
   protected selectValue(v: ValueType, canHideMenu = true): void {
-    this.setValue(v, SetValueReasons.userInput);
+    this.setValue(v, SetValueReasons.userSelect);
     canHideMenu && setTimeout(() => this.goHideMenu(HideCases.onSelect)); // without timeout it handles click by listener and opens again
   }
 
