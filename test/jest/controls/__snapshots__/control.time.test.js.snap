@@ -429,7 +429,7 @@ mask-image: var(--ctrl-icon-img);
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         WUP-TIME[invalid]:hover,
-        WUP-TIME[invalid]:hover&gt;[menu]
+        WUP-TIME[invalid]:hover&gt;[menu],
         WUP-TIME[invalid][hovered],
         WUP-TIME[invalid][hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);

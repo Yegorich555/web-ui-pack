@@ -1133,7 +1133,7 @@ mask-image: var(--ctrl-icon-img);
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         WUP-CALENDAR[invalid]:hover,
-        WUP-CALENDAR[invalid]:hover&gt;[menu]
+        WUP-CALENDAR[invalid]:hover&gt;[menu],
         WUP-CALENDAR[invalid][hovered],
         WUP-CALENDAR[invalid][hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);

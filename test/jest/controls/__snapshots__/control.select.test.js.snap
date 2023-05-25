@@ -426,7 +426,7 @@ mask-image: var(--ctrl-icon-img);
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         WUP-SELECT[invalid]:hover,
-        WUP-SELECT[invalid]:hover&gt;[menu]
+        WUP-SELECT[invalid]:hover&gt;[menu],
         WUP-SELECT[invalid][hovered],
         WUP-SELECT[invalid][hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);

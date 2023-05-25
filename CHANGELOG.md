@@ -2,6 +2,10 @@
 
 ## 0.6.1 (\_\_\_)
 
+**Fixes**:
+
+- **Combobox controls (Select, Date, Time)**. _Menu border is blue when invalid + hover_
+
 **New/Features**:
 
 - **Controls**. Internal `setValue` has argument reason now

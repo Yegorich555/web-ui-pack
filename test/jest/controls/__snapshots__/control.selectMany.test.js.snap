@@ -435,7 +435,7 @@ mask-image: var(--ctrl-icon-img);
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         WUP-SELECTMANY[invalid]:hover,
-        WUP-SELECTMANY[invalid]:hover&gt;[menu]
+        WUP-SELECTMANY[invalid]:hover&gt;[menu],
         WUP-SELECTMANY[invalid][hovered],
         WUP-SELECTMANY[invalid][hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
