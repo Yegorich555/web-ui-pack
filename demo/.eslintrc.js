@@ -2,6 +2,9 @@ module.exports = {
   globals: {
     DEV: true,
   },
+  rules: {
+    "react/destructuring-assignment": "off",
+  },
   settings: {
     "import/resolver": {
       typescript: {

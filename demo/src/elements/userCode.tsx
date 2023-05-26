@@ -7,14 +7,16 @@ import WUPBaseElement from "web-ui-pack/baseElement";
 import WUPBaseControl from "web-ui-pack/controls/baseControl";
 import { WUPFormElement, WUPPasswordControl, WUPRadioControl, WUPSwitchControl } from "web-ui-pack";
 import styles from "./userCode.scss";
-import pageStyles from "./page.scss";
 import Code from "./code";
+import Tabs from "./tabs";
 
 export interface UserCodeProps {
   tag?: `wup-${string}`;
   customHTML?: string[];
   /** Set of alternative values for css-vars. Possible whe css-var used several times and need to skip the real-value */
+  // eslint-disable-next-line react/no-unused-prop-types
   cssVarAlt?: Map<string, string>;
+  // eslint-disable-next-line react/no-unused-prop-types
   excludeCssVars?: string[];
 }
 
@@ -57,24 +59,32 @@ function renderHTMLCode(tag: string, customHTML: string[] | undefined): string |
   if (el instanceof WUPSwitchControl || el instanceof WUPPasswordControl || el instanceof WUPRadioControl) {
     parsedAttrs.push({ name: "reverse", value: "false" });
   }
-  const isSingleLine = parsedAttrs.length < 4;
+  const parsedCode = `html
+<${tag}
+  ${parsedAttrs.map((a) => a.name + (!a.value ? "" : `="${a.value}"`)).join("\n  ")}
+></${tag}>`;
 
+  return <Code code={parsedCode} />;
+}
+
+function renderCssVars(props: UserCodeProps) {
+  const el = document.createElement(props.tag!);
+  if (!(el instanceof WUPBaseElement)) {
+    throw new Error("Only WUPBaseElement expected");
+  }
+
+  const usedVars = getUsedCssVars(el, { isDistinct: true });
   return (
-    <code className={styles.htmlCode}>
-      {"<"}
-      <span className={styles.htmlTag}>{tag}</span>
-      <ul className={[styles.htmlAttr, isSingleLine ? styles.htmlAttrSingle : ""].join(" ")}>
-        {parsedAttrs.map((a) => (
-          <li key={a.name}>
-            <span>{a.name}</span>
-            {!a.value ? "" : `="${a.value}"`}
-          </li>
-        ))}
+    <code className={styles.cssVars}>
+      <ul>
+        {(props.excludeCssVars ? usedVars.filter((v) => !props.excludeCssVars!.includes(v.name)) : usedVars).map(
+          (v) => (
+            <li key={v.name + v.value}>
+              <span>{v.name}</span>: <span>{renderCssValue(v.value, props.cssVarAlt?.get(v.name))}</span>;
+            </li>
+          )
+        )}
       </ul>
-      {">"}
-      {"</"}
-      <span className={styles.htmlTag}>{tag}</span>
-      {">"}
     </code>
   );
 }
@@ -83,38 +93,18 @@ export default function UserCode(props: React.PropsWithChildren<UserCodeProps>) 
   if (!props.tag) {
     return null;
   }
-  const el = document.createElement(props.tag);
-  if (!(el instanceof WUPBaseElement)) {
-    throw new Error("Only WUPBaseElement expected");
-  }
-
-  const usedVars = getUsedCssVars(el, { isDistinct: true });
-
   return (
-    <>
-      <section className={pageStyles.smallText}>
-        <h3>
-          HTML{" "}
-          <small className={styles.headerDetails}>
-            (using <b>$options</b> instead of attributes is preferable)
-          </small>
-        </h3>
-        {renderHTMLCode(props.tag, props.customHTML)}
-      </section>
-      <section className={pageStyles.smallText}>
-        <h3>CSS variables</h3>
-        <code className={styles.cssVars}>
-          <ul>
-            {(props.excludeCssVars ? usedVars.filter((v) => !props.excludeCssVars!.includes(v.name)) : usedVars).map(
-              (v) => (
-                <li key={v.name + v.value}>
-                  <span>{v.name}</span>: <span>{renderCssValue(v.value, props.cssVarAlt?.get(v.name))}</span>;
-                </li>
-              )
-            )}
-          </ul>
-        </code>
-      </section>
-    </>
+    <Tabs
+      items={[
+        {
+          label: "HTML",
+          render: renderHTMLCode(props.tag!, props.customHTML),
+        },
+        {
+          label: "CSS vars",
+          render: renderCssVars(props),
+        },
+      ]}
+    />
   );
 }

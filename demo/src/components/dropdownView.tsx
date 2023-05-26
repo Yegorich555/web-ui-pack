@@ -11,6 +11,11 @@ export default function DropdownView() {
     <Page //
       header="WUPDropdownElement"
       link="src/dropdownElement.ts"
+      features={[
+        "Built-in animations: opacity, drawer, stack",
+        "Easy to customize behavior via options of <wup-dropdown> & <wup-popup>",
+        "Accessibility support",
+      ]}
       details={{
         tag: "wup-dropdown",
         customHTML: [
@@ -27,11 +32,6 @@ export default function DropdownView() {
 </wup-dropdown>`,
         ],
       }}
-      features={[
-        "Built-in animations: opacity, drawer, stack",
-        "Easy to customize behavior via options of <wup-dropdown> & <wup-popup>",
-        "Accessibility support",
-      ]}
     >
       <section>
         <h3>Default (animation: drawer)</h3>
