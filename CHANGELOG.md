@@ -5,6 +5,7 @@
 **Fixes**:
 
 - **Combobox controls (Select, Date, Time)**. _Menu border is blue when invalid + hover_
+- **Combobox controls (Select, Date, Time)**. _Sometimes menu not scrolled to selected item by opening_
 
 **New/Features**:
 

@@ -347,12 +347,24 @@ export default abstract class WUPBaseComboControl<
       next.id = next.id || this.#ctr.$uniqueId;
       next.setAttribute("focused", "");
       this.$refInput.setAttribute("aria-activedescendant", next.id);
-      const ifneed = (next as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
-      ifneed ? ifneed.call(next, false) : next.scrollIntoView();
+      this.tryScrollTo(next);
     } else {
       this.$refInput.removeAttribute("aria-activedescendant");
     }
     this._focusedMenuItem = next;
+  }
+
+  #scrolltid?: ReturnType<typeof setTimeout>;
+  /** Scroll to element if previous scroll is not in processing (debounce by empty timeout) */
+  tryScrollTo(el: HTMLElement): void {
+    if (this.#scrolltid) {
+      return;
+    }
+    this.#scrolltid = setTimeout(() => {
+      this.#scrolltid = undefined;
+      const ifneed = (el as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
+      ifneed ? ifneed.call(el, false) : el.scrollIntoView();
+    });
   }
 
   _selectedMenuItem?: HTMLElement | null;
@@ -361,8 +373,7 @@ export default abstract class WUPBaseComboControl<
     this._selectedMenuItem?.setAttribute("aria-selected", false);
     if (next) {
       next.setAttribute("aria-selected", true);
-      const ifneed = (next as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
-      ifneed ? ifneed.call(next, false) : next.scrollIntoView();
+      this.tryScrollTo(next);
     }
 
     this._selectedMenuItem = next;
