@@ -37,7 +37,8 @@ export namespace Observer {
   export interface IObserver {
     /** Returns @true if object is observed (converted via observer.make()) */
     isObserved(obj: any): boolean;
-    /** Make observable object to detect changes; @see Proxy */
+    /** Make observable object to detect changes;
+     * @see {@link Proxy} */
     make<T extends object>(obj: T): Observer.Observed<T>;
     /** Listen for any props changing on the observed; callback is called per each prop-changing
      * @returns callback to removeListener */

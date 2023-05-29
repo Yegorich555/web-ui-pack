@@ -92,6 +92,8 @@ declare global {
   }
   namespace JSX {
     interface IntrinsicElements {
+      /** Arc/circle chart based on SVG
+       *  @see {@link WUPCircleElement} */
       [tagName]: WUP.Circle.JSXProps; // add element to tsx/jsx intellisense
     }
   }

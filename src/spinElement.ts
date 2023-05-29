@@ -3,6 +3,7 @@ import objectClone from "./helpers/objectClone";
 import { px2Number, styleTransform } from "./helpers/styleHelpers";
 import { getOffset } from "./popup/popupPlacements";
 
+const tagName = "wup-spin";
 declare global {
   namespace WUP.Spin {
     interface Defaults {
@@ -35,6 +36,17 @@ declare global {
       fit?: boolean | "";
     }
     interface JSXProps<T extends WUPSpinElement> extends WUP.Base.JSXProps<T>, Attributes {}
+  }
+
+  interface HTMLElementTagNameMap {
+    [tagName]: WUPSpinElement; // add element to document.createElement
+  }
+  namespace JSX {
+    interface IntrinsicElements {
+      /** Flexible animated element with ability to place over target element without position relative
+       * @see {@link WUPSpinElement} */
+      [tagName]: WUP.Spin.JSXProps<WUPSpinElement>; // add element to tsx/jsx intellisense
+    }
   }
 }
 
@@ -323,22 +335,7 @@ export default class WUPSpinElement extends WUPBaseElement {
 }
 
 spinUseRing(WUPSpinElement);
-const tagName = "wup-spin";
 customElements.define(tagName, WUPSpinElement);
-
-declare global {
-  // add element to document.createElement
-  interface HTMLElementTagNameMap {
-    [tagName]: WUPSpinElement;
-  }
-
-  // add element to tsx/jsx intellisense
-  namespace JSX {
-    interface IntrinsicElements {
-      [tagName]: WUP.Spin.JSXProps<WUPSpinElement>;
-    }
-  }
-}
 
 /** Basic function to change spinner-style */
 export function spinSetStyle(cls: typeof WUPSpinElement, itemsCount: number, getter: () => string): void {

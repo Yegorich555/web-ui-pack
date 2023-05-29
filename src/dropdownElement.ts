@@ -51,12 +51,14 @@ declare global {
   }
   namespace JSX {
     interface IntrinsicElements {
+      /** Dropdown element
+       *  @see {@link WUPDropdownElement} */
       [tagName]: WUP.Dropdown.JSXProps; // add element to tsx/jsx intellisense
     }
   }
 }
 
-/** DropdownElement
+/** Dropdown element
  * @example
  * ```html
   <wup-dropdown class="custom">

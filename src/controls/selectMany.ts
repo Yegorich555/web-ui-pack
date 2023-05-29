@@ -34,15 +34,16 @@ declare global {
   interface HTMLElementTagNameMap {
     [tagName]: WUPSelectManyControl; // add element to document.createElement
   }
-
   namespace JSX {
     interface IntrinsicElements {
+      /** Form-control with dropdown/combobox behavior
+       *  @see {@link WUPSelectManyControl} */
       [tagName]: WUP.SelectMany.JSXProps; // add element to tsx/jsx intellisense
     }
   }
 }
 
-/** Form-control with dropdown/combobox behavior & ability to select several items
+/** Form-control with dropdown/combobox behavior
  * @example
   const el = document.createElement("wup-selectmany");
   el.$options.name = "gender";

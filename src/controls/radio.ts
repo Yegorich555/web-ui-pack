@@ -22,11 +22,14 @@ declare global {
     }
     interface JSXProps<C = WUPRadioControl> extends WUP.BaseControl.JSXProps<C>, Attributes {}
   }
+
   interface HTMLElementTagNameMap {
     [tagName]: WUPRadioControl; // add element to document.createElement
   }
   namespace JSX {
     interface IntrinsicElements {
+      /** Form-control with radio buttons
+       *  @see {@link WUPRadioControl} */
       [tagName]: WUP.Radio.JSXProps<WUPRadioControl>; // add element to tsx/jsx intellisense
     }
   }

@@ -41,7 +41,8 @@ declare global {
       /** Select whole text when input got focus (when input is not readonly and not disabled);
        * @defaultValue false */
       selectOnFocus: boolean;
-      /** Show/hide clear button. @see ClearActions
+      /** Show/hide clear button
+       * @see {@link ClearActions} from `web-ui-pack/baseControl`
        * @defaultValue true */
       clearButton: boolean;
     }
@@ -94,9 +95,10 @@ declare global {
   interface HTMLElementTagNameMap {
     [tagName]: WUPTextControl; // add element to document.createElement
   }
-
   namespace JSX {
     interface IntrinsicElements {
+      /** Form-control with text input
+       *  @see {@link WUPTextControl} */
       [tagName]: WUP.Text.JSXProps; // add element to tsx/jsx intellisense
     }
   }

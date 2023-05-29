@@ -47,12 +47,14 @@ declare global {
   }
   namespace JSX {
     interface IntrinsicElements {
+      /** Form-control with datepicker
+       *  @see {@link WUPDateControl} */
       [tagName]: WUP.Date.JSXProps; // add element to tsx/jsx intellisense
     }
   }
 }
 
-/** Form-control with date picker
+/** Form-control with datepicker
  * @tutorial Troubleshooting
  * * $options.format related only to displayed text, to work with other date-options like min/max use strict format 'YYYY-MM-DD'
  * @example
@@ -136,7 +138,7 @@ export default class WUPDateControl<
   protected override _opts = this.$options;
 
   /** Parse string to Date
-   * @see WUPCalendarControl.$parse */
+   * @see {@link WUPCalendarControl.$parse} */
   override parse(text: string): ValueType | undefined {
     if (!text) {
       return undefined;

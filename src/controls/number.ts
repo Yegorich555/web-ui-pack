@@ -10,10 +10,10 @@ declare global {
   namespace WUP.Number {
     interface Format {
       /** Decimal separator; for number 123.4 it's dot
-       * localeInfoInfo @see localeInfo.sepDecimal */
+       *  @see {@link localeInfo.sepDecimal} */
       sepDecimal?: string;
       /** Thouthands separator; for number 1,234.5 it's comma
-       *  localeInfoInfo @see localeInfo.sep1000 */
+       *  @see {@link localeInfo.sep1000} */
       sep1000?: string;
       /** Maximum displayed fraction digits; for 123.45 it's 2
        * @defaultValue 0 */
@@ -46,6 +46,8 @@ declare global {
   }
   namespace JSX {
     interface IntrinsicElements {
+      /** Form-control with number input
+       *  @see {@link WUPNumberControl} */
       [tagName]: WUP.Number.JSXProps; // add element to tsx/jsx intellisense
     }
   }
@@ -66,8 +68,7 @@ declare global {
   <wup-form>
     <wup-num name="number" validations="myValidations"/>
   </wup-form>;
- * @see WUPTextControl
- */
+ * @see {@link WUPTextControl} */
 export default class WUPNumberControl<
   ValueType = number,
   EventMap extends WUP.Number.EventMap = WUP.Number.EventMap

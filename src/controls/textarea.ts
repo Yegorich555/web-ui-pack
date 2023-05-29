@@ -15,17 +15,20 @@ declare global {
     interface Attributes extends WUP.Text.Attributes {}
     interface JSXProps<C = WUPTextareaControl> extends WUP.Text.JSXProps<C>, Attributes {}
   }
+
   interface HTMLElementTagNameMap {
     [tagName]: WUPTextareaControl; // add element to document.createElement
   }
   namespace JSX {
     interface IntrinsicElements {
+      /** Form-control with multiline text-input
+       *  @see {@link WUPTextareaControl} */
       [tagName]: WUP.Textarea.JSXProps; // add element to tsx/jsx intellisense
     }
   }
 }
 
-/** Form-control with text-input
+/** Form-control with multiline text-input
  * @example
   const el = document.createElement("wup-textarea");
   el.$options.name = "textarea";

@@ -15,6 +15,8 @@ declare global {
   }
   namespace JSX {
     interface IntrinsicElements {
+      /** Form-control with checkbox
+       *  @see {@link WUPCheckControl} */
       [tagName]: WUP.Check.JSXProps; // add element to tsx/jsx intellisense
     }
   }

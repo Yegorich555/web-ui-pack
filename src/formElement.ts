@@ -25,6 +25,7 @@ export const enum SubmitActions {
   lockOnPending = 1 << 4,
 }
 
+const tagName = "wup-form";
 declare global {
   namespace WUP.Form {
     interface SubmitEvent<T extends Record<string, any>> extends Event {
@@ -85,11 +86,22 @@ declare global {
       onSubmit?: never;
     }
   }
+
+  interface HTMLElementTagNameMap {
+    [tagName]: WUPFormElement; // add element to document.createElement
+  }
+  namespace JSX {
+    interface IntrinsicElements {
+      /** Wrapper of FormHTMLElement that collect values from controls
+       *  @see {@link WUPFormElement} */
+      [tagName]: WUP.Form.JSXProps<WUPFormElement>; // add element to tsx/jsx intellisense
+    }
+  }
 }
 
 const formStore: WUPFormElement[] = [];
 
-/** Default Form-HTMLElement that collect values from controls
+/** Wrapper of FormHTMLElement that collect values from controls
  * @example
  *  // init form
  *  const form = document.createElement("wup-form");
@@ -242,7 +254,8 @@ export default class WUPFormElement<
   }
 
   _model?: Partial<Model>;
-  /** Model related to every control inside (with $options.name); @see BaseControl...$value */
+  /** Model related to every control inside (with $options.name);
+   *  @see {@link BaseControl.prototype.$value} */
   get $model(): Partial<Model> {
     return Object.assign(this._model || {}, this.#ctr.$modelFromControls({}, this.$controls, "$value"));
   }
@@ -256,7 +269,8 @@ export default class WUPFormElement<
   }
 
   _initModel?: Partial<Model>;
-  /** Default/init model related to every control inside; @see BaseControl...$initValue */
+  /** Default/init model related to every control inside;
+   *  @see {@link BaseControl.prototype.$initValue} */
   get $initModel(): Partial<Model> {
     // it's required to avoid case when model has more props than controls
     return this.#ctr.$modelFromControls(this._initModel || {}, this.$controls, "$initValue");
@@ -489,21 +503,6 @@ export default class WUPFormElement<
   }
 }
 
-const tagName = "wup-form";
 customElements.define(tagName, WUPFormElement);
-
-declare global {
-  // add element to document.createElement
-  interface HTMLElementTagNameMap {
-    [tagName]: WUPFormElement;
-  }
-
-  // add element to tsx/jsx intellisense
-  namespace JSX {
-    interface IntrinsicElements {
-      [tagName]: WUP.Form.JSXProps<WUPFormElement>;
-    }
-  }
-}
 
 // todo show success result in <wup-alert> at the right angle + add autosafe option

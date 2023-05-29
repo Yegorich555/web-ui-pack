@@ -81,11 +81,14 @@ declare global {
       initValue?: string;
     }
   }
+
   interface HTMLElementTagNameMap {
     [tagName]: WUPCalendarControl; // add element to document.createElement
   }
   namespace JSX {
     interface IntrinsicElements {
+      /** Form-control represented by date picker
+       *  @see {@link WUPCalendarControl} */
       [tagName]: WUP.Calendar.JSXProps; // add element to tsx/jsx intellisense
     }
   }
@@ -96,7 +99,7 @@ const add: <K extends keyof HTMLElementTagNameMap>(el: HTMLElement, tagName: K) 
   tag
 ) => el.appendChild(document.createElement(tag));
 
-/** Form-control as date picker
+/** Form-control represented by date picker
  * @example
   const el = document.createElement("wup-calendar");
   el.$options.name = "dateOfBirthday";
@@ -364,7 +367,8 @@ export default class WUPCalendarControl<
     }
   }
 
-  /** Converts date-string into Date according (to $options.utc), @see WUPCalendarControl.$parse */
+  /** Converts date-string into Date according (to $options.utc)
+   * @see {@link WUPCalendarControl.$parse} */
   override parse(text: string): ValueType | undefined {
     if (!text) {
       return undefined;

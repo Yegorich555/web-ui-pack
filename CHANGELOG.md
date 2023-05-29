@@ -11,6 +11,7 @@
 
 - **Controls**. Internal `setValue` has argument reason now
 - **Controls**. Event `$change` and callback `$onChange` has prop `detail: SetValueReason` now
+- **Glolbal**. Added JSDoc comments for `jsx/tsx` files (previously hovering on `<wup-text>` showed nothing)
 
 ## 0.6.0 (May 19, 2023)
 

@@ -32,17 +32,20 @@ declare global {
     }
     interface JSXProps<C = WUPPasswordControl> extends WUP.Text.JSXProps<C>, Attributes {}
   }
+
   interface HTMLElementTagNameMap {
     [tagName]: WUPPasswordControl; // add element to document.createElement
   }
   namespace JSX {
     interface IntrinsicElements {
+      /** Form-control with password input
+       *  @see {@link WUPPasswordControl} */
       [tagName]: WUP.Password.JSXProps<WUPPasswordControl>; // add element to tsx/jsx intellisense
     }
   }
 }
 
-/** Form-control with text-input
+/** Form-control with password input
  * @example
   const el = document.createElement("wup-pwd");
   el.$options.name = "password";
@@ -74,8 +77,7 @@ declare global {
  *      <strong>{$options.label}</strong>
  *   </span>
  *   <button clear/>
- * </label>
- */
+ * </label> */
 export default class WUPPasswordControl<
   ValueType extends string = string,
   EventMap extends WUP.Password.EventMap = WUP.Password.EventMap

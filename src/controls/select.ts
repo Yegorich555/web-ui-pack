@@ -63,9 +63,10 @@ declare global {
   interface HTMLElementTagNameMap {
     [tagName]: WUPSelectControl; // add element to document.createElement
   }
-
   namespace JSX {
     interface IntrinsicElements {
+      /** Form-control with dropdown/combobox behavior
+       *  @see {@link WUPSelectControl} */
       [tagName]: WUP.Select.JSXProps; // add element to tsx/jsx intellisense
     }
   }

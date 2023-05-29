@@ -56,17 +56,20 @@ declare global {
       reinit(): void;
     }
   }
+
   interface HTMLElementTagNameMap {
     [tagName]: WUPTimeControl; // add element to document.createElement
   }
   namespace JSX {
     interface IntrinsicElements {
+      /** Form-control with timepicker
+       *  @see {@link WUPTimeControl} */
       [tagName]: WUP.Time.JSXProps; // add element to tsx/jsx intellisense
     }
   }
 }
 
-/** Form-control with time picker
+/** Form-control with timepicker
  * @tutorial Troubleshooting
  * * $options.format related only to displayed text, to work with other time-options like min/max use strict format 'hh:mm'
  * * if increase `--ctrl-icon-size`: change `ctrl-icon-img` to `--ctrl-icon-img: var(--ctrl-time-icon-img-lg)`: otherwise quality is ugly on larger icon

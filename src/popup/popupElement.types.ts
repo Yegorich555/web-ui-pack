@@ -93,7 +93,7 @@ declare global {
       /** Sets minHeight 100% of targetWidth; it can't be more than css-style min-height */
       minHeightByTarget?: boolean;
       /** Set true to show arrow with popup; @false by default;
-       *  Arrow is placed after popup so it's easy to access (via style @see arrowClass or popupElement.$refArrow) */
+       *  Arrow is placed after popup so it's easy to access (via style @see {@link arrowClass} or @see {@link WUPPopupElement.$refArrow) */
       arrowEnable?: boolean;
       /** Setup arrow class and use ::before to add background-image or content;
        * Limitation: arrow developed with ratio 2:1(w:h). You can't change it directly. Use only ::before, ::after to reach you goal

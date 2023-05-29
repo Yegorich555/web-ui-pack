@@ -20,11 +20,14 @@ declare global {
     }
     interface JSXProps<C = WUPSwitchControl> extends WUP.BaseControl.JSXProps<C>, Attributes {}
   }
+
   interface HTMLElementTagNameMap {
     [tagName]: WUPSwitchControl; // add element to document.createElement
   }
   namespace JSX {
     interface IntrinsicElements {
+      /** Form-control with toggle button
+       *  @see {@link WUPSwitchControl} */
       [tagName]: WUP.Switch.JSXProps; // add element to tsx/jsx intellisense
     }
   }
