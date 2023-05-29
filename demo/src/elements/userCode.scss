@@ -29,3 +29,12 @@
     }
   }
 }
+
+.colorBlock {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  user-select: none;
+  box-shadow: 0 0 1px 0 gray;
+  margin: 0 2px;
+}

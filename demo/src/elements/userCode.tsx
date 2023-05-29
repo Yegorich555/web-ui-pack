@@ -24,6 +24,29 @@ function renderCssValue(v: string, alt: string | undefined): string | JSX.Elemen
   if (alt) {
     return <small>{alt}</small>;
   }
+  let isColor = v[0] === "#" || v.startsWith("rgb");
+  if (v) {
+    // set style as color-value and check if color is changed
+    const el = document.createElement("span");
+    const def = "rgb(1, 1, 1)";
+    el.style.color = def;
+    el.style.color = v;
+    el.style.position = "absolute";
+    document.body.appendChild(el);
+    const gotColor = window.getComputedStyle(el).color;
+    if (def !== gotColor && gotColor !== "rgb(0, 0, 0)") {
+      isColor = true;
+    }
+    el.remove();
+  }
+  if (isColor) {
+    return (
+      <>
+        <span style={{ background: v }} className={styles.colorBlock} />
+        {v}
+      </>
+    );
+  }
   return v;
 }
 
@@ -109,5 +132,4 @@ export default function UserCode(props: React.PropsWithChildren<UserCodeProps>) 
   );
 }
 
-// todo for HTML add desc "equal to empty"
 // todo add JS example for defaults
