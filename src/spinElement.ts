@@ -93,7 +93,7 @@ export default class WUPSpinElement extends WUPBaseElement {
           --spin-speed: 1.2s;
           --spin-size: 3em;
           --spin-item-size: calc(var(--spin-size) / 8);
-          --spin-fade: #ffffff6e;
+          --spin-fade: rgba(255,255,255,0.43);
         }`;
   }
 
