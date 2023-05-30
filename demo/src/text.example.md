@@ -1,6 +1,6 @@
 # Code style
 
-Logic below contains best practice for re-using web-ui-pack elements. The main idea is create Component native to you framework and use web-ui-pack elements inside. Using web-ui-pack elements everywhere directly isn't recommended because in this case you need to import components to `main.ts` and if you somehow don't use these anymore it won't be removed by optimizator.
+Logic below contains best practice for re-using web-ui-pack elements. The main idea is create Component native to your framework and use web-ui-pack elements inside. Using web-ui-pack elements everywhere directly isn't recommended because in this case you need to import components to `main.ts` and if you somehow don't use these anymore it won't be removed by optimizator.
 
 ## Bad practice
 
@@ -9,17 +9,24 @@ Code below shows case when developer desides to use WUPTextControl everywhere.
 ```jsx
 // main.ts
 import { WUPTextControl } from "web-ui-pack";
-!WUPTextControl && console.error("!"); // required to avoide side-effects optimization issue
+!WUPTextControl && console.error("!"); // required to avoid side-effects - optimization feature/issue
 // other files..tsx
-<wup-text name="email" />; // If remove <wup-text/> everywhere it still imported in the build result because inlcuded in main.ts
+<wup-text name="email" />;
+// If remove <wup-text/> everywhere it's still imported in the build because inlcuded in `main.ts`
 ```
+---
+## Good practice
 
 ## Step 1 - global localeInfo
 
 ```js
 // main.ts
 import { localeInfo } from "web-ui-pack";
-localeInfo.refresh(); // use this once to update date & number formats according to user-locale
+// use this to update date & number formats according to user locale
+localeInfo.refresh();
+// OR setup specific locale that doesn't depend on user OS settings
+// localeInfo.refresh("fr-FR");
+// OR skip this if you satisfied with defaults "en-US"
 ```
 
 ## Step 2 - override/extend defaults
@@ -33,14 +40,11 @@ WUPTextControl.$defaults.clearButton = true;
 
 // #2.0 override messages according to required language
 const defVld = { ...WUPTextControl.$defaults.validationRules };
+const vld = WUPTextControl.$defaults.validationRules;
 // rule "min"
-WUPTextControl.$defaults.validationRules.min = (v, setV, c) =>
-  defVld.min.call(c, v, setV, c) && `Min length ${setV} chars`;
+vld.min = (v, setV, c) => defVld.min.call(c, v, setV, c) && `Min length ${setV} chars`;
 // rule "email"
-const emailReg =
-  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-WUPTextControl.$defaults.validationRules.email = (v, setV) =>
-  setV && (!v || !emailReg.test(v)) && "Invalid email address";
+vld.email = (v, setV) => setV && (!v || !v.includes("@")) && "Invalid email address";
 
 // #2.1 override ariaMessages according to required language
 WUPTextControl.$ariaError = "Error for";
@@ -54,7 +58,7 @@ declare global {
     }
   }
 }
-WUPTextControl.$defaults.validationRules.isNumber = (v) => !/^[0-9]*$/.test(v) && "Please enter a valid number";
+vld.isNumber = (v) => !/^[0-9]*$/.test(v) && "Please enter a valid number";
 ```
 
 ## Step 3 - use inside component
@@ -67,8 +71,7 @@ WUPTextControl.$defaults.validationRules.isNumber = (v) => !/^[0-9]*$/.test(v) &
 // textControl.tsx
 import React from "react";
 
-/* #4 reuse web-ui-pack control inside component
- in this case if you don't import TextControl component at all this part of code will be skipped from build - it's good for optimization */
+// #4 reuse web-ui-pack control inside component
 
 interface Props extends Partial<WUP.Text.Options> {
   className?: string;
@@ -80,7 +83,7 @@ interface Props extends Partial<WUP.Text.Options> {
 export class TextControl extends React.Component<Props> {
   domEl = {} as WUPTextControl;
 
-  /* Apply props to $options */
+  /* Apply React props to $options */
   updateOptions(nextProps: Props | null): void {
     Object.assign(this.domEl.$options, this.props);
     this.domEl.$onChange = this.props.onChange;
@@ -101,7 +104,8 @@ export class TextControl extends React.Component<Props> {
   shouldComponentUpdate(nextProps: Readonly<Props>): boolean {
     const isChanged = this.props !== nextProps;
     isChanged && this.updateOptions(nextProps);
-    return this.props.className !== nextProps.className; // update render only if className is changed otherwise apply props directly to options
+    // update render only if className is changed otherwise apply props directly to options
+    return this.props.className !== nextProps.className;
   }
 
   /* Called init and every time when shouldComponentUpdate returns `true`*/
