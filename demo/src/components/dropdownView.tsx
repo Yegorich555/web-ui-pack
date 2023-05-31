@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import Page from "src/elements/page";
 import { WUPDropdownElement } from "web-ui-pack";
+import GitIconLink from "src/elements/gitIconLink";
 import styles from "./dropdownView.scss";
 
 const sideEffect = WUPDropdownElement;
@@ -54,7 +55,10 @@ export default function DropdownView() {
         </wup-dropdown>
       </section>
       <section>
-        <h3>Customized (animation: stack)</h3>
+        <h3>
+          Customized (animation: stack)
+          <GitIconLink href="demo/src/components/dropdownView.tsx" />
+        </h3>
         <small>use popup $options.placement to change direction</small>
         <wup-dropdown class={styles.custom}>
           <button type="button">{"<"}</button>

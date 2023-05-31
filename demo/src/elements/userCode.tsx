@@ -133,7 +133,7 @@ export default function UserCode(props: React.PropsWithChildren<UserCodeProps>) 
           render: (
             <div style={{ padding: "1em" }}>
               See common example{" "}
-              <a href={linkGit("CODESTYLE.md")} target="blank">
+              <a href={linkGit("CODESTYLE.md")} target="_blank" rel="noreferrer">
                 here
               </a>
             </div>
