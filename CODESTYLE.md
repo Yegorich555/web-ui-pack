@@ -19,16 +19,26 @@ import { WUPTextControl } from "web-ui-pack";
 
 ## Good practice
 
-## Step 1 - global localeInfo
+## Step 1 - global localeInfo & builtin-styles
 
 ```js
 // main.ts
 import { localeInfo } from "web-ui-pack";
+import { useBuiltinStyle, WUPcssScrollSmall } from "web-ui-pack/styles";
 // use this to update date & number formats according to user locale
 localeInfo.refresh();
 // OR setup specific locale that doesn't depend on user OS settings
 // localeInfo.refresh("fr-FR");
 // OR skip this if you satisfied with defaults "en-US"
+
+// use this to apply scroll-style from web-ui-pack to all elements with class=".scrolled"
+useBuiltinStyle(
+  `${WUPcssScrollSmall(".scrolled")}
+  .scrolled {
+     overflow: auto;
+  }`
+);
+
 ```
 
 ## Step 2 - override/extend defaults
