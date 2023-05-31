@@ -142,3 +142,31 @@ export function LoginComponent() {
   );
 }
 ```
+
+## Override styles
+
+Use css variables globally
+
+```css
+body {
+  --base-focus: #00778d;
+  --border-radius: 6px;
+  --ctrl-label: #5e5e5e;
+  --ctrl-err-text: #ad0000;
+  --ctrl-invalid-border: red;
+}
+/* OR */
+wup-num,
+wup-text {
+  --ctrl-padding: 12px 14px;
+}
+```
+
+Use css variables per class for specific case
+
+```css
+.my-custom-class {
+  --ctrl-err-text: red;
+  --ctrl-invalid-border: red;
+}
+```
