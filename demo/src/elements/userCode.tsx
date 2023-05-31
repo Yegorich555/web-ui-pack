@@ -6,6 +6,7 @@ import getUsedCssVars from "src/helpers/parseCssVars";
 import WUPBaseElement from "web-ui-pack/baseElement";
 import WUPBaseControl from "web-ui-pack/controls/baseControl";
 import { WUPFormElement, WUPPasswordControl, WUPRadioControl, WUPSwitchControl } from "web-ui-pack";
+import linkGit from "src/helpers/linkGit";
 import styles from "./userCode.scss";
 import Code from "./code";
 import Tabs from "./tabs";
@@ -127,9 +128,18 @@ export default function UserCode(props: React.PropsWithChildren<UserCodeProps>) 
           label: "CSS vars",
           render: renderCssVars(props),
         },
+        {
+          label: "JS/TS",
+          render: (
+            <div style={{ padding: "1em" }}>
+              See common example{" "}
+              <a href={linkGit("CODESTYLE.md")} target="blank">
+                here
+              </a>
+            </div>
+          ),
+        },
       ]}
     />
   );
 }
-
-// todo add JS example for defaults

@@ -14,7 +14,9 @@ import { WUPTextControl } from "web-ui-pack";
 <wup-text name="email" />;
 // If remove <wup-text/> everywhere it's still imported in the build because inlcuded in `main.ts`
 ```
+
 ---
+
 ## Good practice
 
 ## Step 1 - global localeInfo

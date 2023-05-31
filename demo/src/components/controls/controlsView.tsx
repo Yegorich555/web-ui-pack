@@ -136,6 +136,7 @@ const customHTML = [
   <button type="submit">Submit</button>
 </wup-form>;`,
   `js
+// js/ts
 const form = document.querySelector("wup-form")!;
 form.$onSubmit = (e) => {
   // post request here
