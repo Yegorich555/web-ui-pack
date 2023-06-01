@@ -403,6 +403,8 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
 
   /** Parse attribute and return result; if attr missed or invalid => returns pointed alt value OR $options[attr] */
   getAttr(attr: string, type?: "string", alt?: string): string | undefined;
+  /** Returns `bool if attr is `false` or `true`, `true` if "" or string if exists */
+  getAttr(attr: string, type: "boolOrString", alt?: string | boolean): string | boolean | undefined;
   getAttr(attr: string, type: "bool", alt?: boolean): boolean | undefined;
   getAttr(attr: string, type: "number", alt?: number): number | undefined;
   /** Returns value from window[key] according to [attr]="key"; if attr missed or invalid => returns pointed alt value OR $options[attr] */
@@ -443,6 +445,15 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
           this.throwError(err);
           return nullResult;
         }
+      }
+      case "boolOrString": {
+        if (a === "" || a === "true") {
+          return true;
+        }
+        if (a === "false") {
+          return false;
+        }
+        return a;
       }
       default:
         return a; // string

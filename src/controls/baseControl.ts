@@ -571,21 +571,7 @@ export default abstract class WUPBaseControl<
     this._opts.label = this.getAttr("label");
     this._opts.name = this.getAttr("name");
 
-    const a = this.getAttribute("autocomplete");
-    switch (a) {
-      case null:
-      case "":
-        break; // skip attribute in this case
-      case "false":
-        this._opts.autoComplete = false;
-        break;
-      case "true":
-        this._opts.autoComplete = true;
-        break;
-      default:
-        this._opts.autoComplete = a;
-        break;
-    }
+    this._opts.autoComplete = this.getAttr("autocomplete", "boolOrString", this._opts.autoComplete);
     this._opts.disabled = this.getAttr("disabled", "bool");
     this._opts.readOnly = this.getAttr("readonly", "bool", this._opts.readOnly);
     this._opts.autoFocus = this.getAttr("autofocus", "bool", this._opts.autoFocus);
@@ -1025,7 +1011,7 @@ export default abstract class WUPBaseControl<
 
   /** Called when user pressed key */
   protected gotKeyDown(e: KeyboardEvent & { submitPrevented?: boolean }): void {
-    e.key === "Escape" && !e.shiftKey && !e.altKey && !e.ctrlKey && this.clearValue(); // WARN: Escape works wrong with NVDA because it's enables NVDA-focus-mode
+    e.key === "Escape" && !e.shiftKey && !e.altKey && !e.ctrlKey && this.clearValue(); // WARN: Escape works wrong with NVDA because it enables NVDA-focus-mode
   }
 }
 
