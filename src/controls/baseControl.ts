@@ -950,7 +950,7 @@ export default abstract class WUPBaseControl<
 
   /** Called to serialize value from URL/localStorage */
   valueFromUrl(str: string): ValueType | undefined {
-    return this.parse(str); // todo don't forget to parse according to stored
+    return this.parse(str);
   }
 
   /** Called to serialize value to URL/localStorage & must return '' if remove or string representation */
@@ -988,8 +988,7 @@ export default abstract class WUPBaseControl<
   }
 
   /** Save value to storage storage according to options `skey`, `storage` and `name` */
-  protected storageSet(v: ValueType | undefined): void {
-    const key = this._opts.skey === true ? this._opts.name : this._opts.skey;
+  protected storageSet(v: ValueType | undefined, key: string): void {
     try {
       if (key) {
         let strg: Storage | Pick<Storage, "removeItem" | "setItem">;
@@ -1016,7 +1015,7 @@ export default abstract class WUPBaseControl<
             strg = window.localStorage;
             break;
         }
-        // todo test when value: null, 0
+        // todo test when value: null
         if (this.#ctr.$isEmpty(v)) {
           strg.removeItem(key);
         } else {
@@ -1046,7 +1045,9 @@ export default abstract class WUPBaseControl<
     this._isValid = undefined;
     const canVld = reason !== SetValueReasons.manual;
     (canVld || this.$refError) && this.validateAfterChange();
-    this.storageSet(v);
+    // save to storage
+    const sk = this._opts.skey === true ? this._opts.name : this._opts.skey;
+    sk && this.storageSet(v, sk);
     setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true, detail: reason }));
     return true;
   }

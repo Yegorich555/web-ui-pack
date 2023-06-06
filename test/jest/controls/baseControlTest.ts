@@ -332,6 +332,9 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     });
 
     test("skey", async () => {
+      if (cfg.attrs?.skey?.skip) {
+        return;
+      }
       // local storage
       const sSet = jest.spyOn(Storage.prototype, "setItem");
       const sGet = jest.spyOn(Storage.prototype, "getItem");

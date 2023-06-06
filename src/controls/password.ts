@@ -241,9 +241,8 @@ export default class WUPPasswordControl<
     super.gotKeyDown(e);
   }
 
-  // todo cover with tests
   protected override storageSet(): void {
-    console.error("Saving to storage isn't allowed for password-control");
+    console.error("Saving not allowed for password. Remove [skey]!");
   }
 }
 
