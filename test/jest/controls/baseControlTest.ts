@@ -56,6 +56,7 @@ export function initTestBaseControl<T extends WUPBaseControl>(cfg: InitOptions<T
 interface ValueToAttr<T> {
   value: T;
   attrValue: string;
+  urlValue?: string;
 }
 
 interface TestOptions<T> extends BaseTestOptions {
@@ -328,6 +329,56 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       jest.advanceTimersByTime(1);
       expect(el.$refTitle.textContent).toBe("");
       expect(el.$refInput.getAttribute("aria-label")).toBe(null);
+    });
+
+    test("skey", async () => {
+      // local storage
+      const sSet = jest.spyOn(Storage.prototype, "setItem");
+      const sGet = jest.spyOn(Storage.prototype, "getItem");
+      el.$options.name = "firstName";
+      el.$options.skey = true;
+      el.$value = cfg.initValues[0].value;
+      await h.wait(1);
+      expect(sSet).toBeCalledTimes(1);
+      expect(sSet).lastCalledWith(
+        "firstName",
+        cfg.initValues[0].urlValue ?? (cfg.initValues[0].value as any).toString()
+      );
+      expect(window.localStorage.getItem("firstName")).toBeDefined(); // (cfg.initValues[0].attrValue);
+      // getItem on init
+      jest.clearAllMocks();
+      el = document.body.appendChild(document.createElement(el.tagName)) as WUPBaseControl;
+      el.$options.name = "firstName";
+      el.$options.skey = true;
+      await h.wait(1);
+      expect(sGet).toBeCalledTimes(1);
+      expect(sGet).lastCalledWith("firstName");
+      expect(el.$initValue).toStrictEqual(cfg.initValues[0].value);
+
+      // session storage
+      el.$options.storage = "session";
+      el.$options.skey = "name2";
+      await h.wait(1);
+      jest.clearAllMocks();
+      expect(el.$initValue).toStrictEqual(cfg.initValues[0].value);
+      el.$value = cfg.initValues[1].value;
+      await h.wait(1);
+      expect(sSet).toBeCalledTimes(1);
+      expect(sSet).lastCalledWith("name2", cfg.initValues[1].urlValue ?? (cfg.initValues[1].value as any).toString());
+      expect(window.sessionStorage.getItem("name2")).toBeDefined(); // .toBe(cfg.initValues[1].attrValue);
+      // getItem on init
+      jest.clearAllMocks();
+      el = document.body.appendChild(document.createElement(el.tagName)) as WUPBaseControl;
+      el.$options.storage = "session";
+      el.$options.skey = "name2";
+      await h.wait(1);
+      expect(sGet).toBeCalledTimes(1);
+      expect(sGet).lastCalledWith("name2");
+      expect(el.$initValue).toStrictEqual(cfg.initValues[1].value);
+
+      // todo test Url
+      window.localStorage.clear();
+      window.sessionStorage.clear();
     });
   });
 

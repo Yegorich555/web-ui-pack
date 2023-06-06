@@ -122,6 +122,10 @@ declare global {
       validations?:
         | { [K in keyof VM]?: VM[K] | ((value: T | undefined) => false | string) }
         | { [k: string]: (value: T | undefined) => false | string };
+      /** Storage for saving value
+       * @see {@link WUP.BaseControl.Options.storekey}
+       * @defaultValue "local" */
+      storage?: "local" | "session" | "url";
     }
     interface Options<T = any, VM = ValidityMap> extends Defaults<T, VM> {
       /** Title/label of control; if label is missed it's parsed from option [name]. To skip point `label=''` (empty string) */
@@ -140,10 +144,16 @@ declare global {
       readOnly?: boolean;
       /** Show all validation-rules with checkpoints as list instead of single error */
       validationShowAll?: boolean;
+      /** Storage key for auto saving value in storage; Point empty string or `true` to inherit from $options.name or some string
+       * @see {@link WUP.BaseControl.Defaults.storage} */
+      skey?: boolean | string;
     }
 
     interface Attributes
-      extends Pick<Options, "label" | "name" | "autoFocus" | "disabled" | "readOnly" | "autoComplete"> {
+      extends Pick<
+        Options,
+        "label" | "name" | "autoFocus" | "disabled" | "readOnly" | "autoComplete" | "skey" | "storage"
+      > {
       /** default value in string/boolean or number representation (depends on `control.prototype.parse()`) */
       initValue?: string | boolean | number;
       /** Rules enabled for current control. Point global obj-key with validations (use `window.myValidations` where `window.validations = {required: true}` ) */
@@ -184,6 +194,7 @@ export default abstract class WUPBaseControl<
       "disabled",
       "readOnly",
       "validations",
+      "skey",
     ];
   }
 
@@ -196,6 +207,8 @@ export default abstract class WUPBaseControl<
       "disabled",
       "readonly",
       "initvalue",
+      "skey",
+      "storage",
     ];
   }
 
@@ -575,6 +588,8 @@ export default abstract class WUPBaseControl<
     this._opts.disabled = this.getAttr("disabled", "bool");
     this._opts.readOnly = this.getAttr("readonly", "bool", this._opts.readOnly);
     this._opts.autoFocus = this.getAttr("autofocus", "bool", this._opts.autoFocus);
+    this._opts.skey = this.getAttr("skey", "boolOrString", this._opts.skey);
+    this._opts.storage = this.getAttr("storage", "string", this._opts.storage) as "local";
 
     const i = this.$refInput;
     // set label
@@ -608,6 +623,10 @@ export default abstract class WUPBaseControl<
       if (!propsChanged || propsChanged.includes("name")) {
         this.$initValue = nestedProperty.get(this.$form._initModel as any, this._opts.name);
       }
+    }
+    // retrieve value from store
+    if (this.$initValue === undefined && this._opts.skey) {
+      this.$initValue = this.storageGet();
     }
 
     this.gotFormChanges(propsChanged);
@@ -929,6 +948,87 @@ export default abstract class WUPBaseControl<
     }
   }
 
+  /** Called to serialize value from URL/localStorage */
+  valueFromUrl(str: string): ValueType | undefined {
+    return this.parse(str); // todo don't forget to parse according to stored
+  }
+
+  /** Called to serialize value to URL/localStorage & must return '' if remove or string representation */
+  valueToUrl(v: ValueType | null): string {
+    if (v == null) {
+      return "null";
+    }
+    return v.toString();
+    // todo store bool "1" or delete
+    // todo store array 'ab!1!23' where splitter !
+  }
+
+  /** Get & parse value from storage according to options `skey`, `storage` and `name` */
+  protected storageGet(): ValueType | undefined {
+    const key = this._opts.skey === true ? this._opts.name : this._opts.skey;
+    if (key) {
+      let v: string | null;
+      switch (this._opts.storage) {
+        case "session":
+          v = window.sessionStorage.getItem(key);
+          break;
+        case "url":
+          v = new URLSearchParams(window.location.search).get(decodeURIComponent(key));
+          v = v != null ? decodeURIComponent(v) : v;
+          break;
+        default:
+          v = window.localStorage.getItem(key);
+          break;
+      }
+      if (v != null) {
+        return this.valueFromUrl(v);
+      }
+    }
+    return this.$initValue;
+  }
+
+  /** Save value to storage storage according to options `skey`, `storage` and `name` */
+  protected storageSet(v: ValueType | undefined): void {
+    const key = this._opts.skey === true ? this._opts.name : this._opts.skey;
+    try {
+      if (key) {
+        let strg: Storage | Pick<Storage, "removeItem" | "setItem">;
+        switch (this._opts.storage) {
+          case "session":
+            strg = window.sessionStorage;
+            break;
+          case "url":
+            {
+              const url = new URL(window.location.href);
+              strg = {
+                removeItem: (k) => {
+                  url.searchParams.delete(k);
+                  window.history.replaceState(null, "", url); // OR window.history.pushState(null, null, url);
+                },
+                setItem: (k, val) => {
+                  url.searchParams.set(k, val);
+                  window.history.replaceState(null, "", url); // OR window.history.pushState(null, null, url);
+                },
+              };
+            }
+            break;
+          default:
+            strg = window.localStorage;
+            break;
+        }
+        // todo test when value: null, 0
+        if (this.#ctr.$isEmpty(v)) {
+          strg.removeItem(key);
+        } else {
+          const sv = this.valueToUrl(v!);
+          sv === "" ? strg.removeItem(key) : strg.setItem(key, sv);
+        }
+      }
+    } catch (err) {
+      this.throwError(err); // re-throw error when storage is full
+    }
+  }
+
   /** Fire this method to update value & validate; returns null when not $isReady, true if changed */
   protected setValue(v: ValueType | undefined, reason: SetValueReasons): boolean | null {
     const prev = this.#value;
@@ -946,6 +1046,7 @@ export default abstract class WUPBaseControl<
     this._isValid = undefined;
     const canVld = reason !== SetValueReasons.manual;
     (canVld || this.$refError) && this.validateAfterChange();
+    this.storageSet(v);
     setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true, detail: reason }));
     return true;
   }
@@ -1014,5 +1115,3 @@ export default abstract class WUPBaseControl<
     e.key === "Escape" && !e.shiftKey && !e.altKey && !e.ctrlKey && this.clearValue(); // WARN: Escape works wrong with NVDA because it enables NVDA-focus-mode
   }
 }
-
-// todo add new opts: storeSession/storeLocal/storeUrl: boolean | string;

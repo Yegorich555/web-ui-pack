@@ -171,7 +171,8 @@ export default abstract class WUPBaseComboControl<
 
   /** Called when need to create menu in opened popup */
   protected abstract renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> | HTMLElement;
-  /** Called when need to transfer current value to input */
+  /** Called when need to transfer current value to text-input */
+  // todo remove promise here
   protected abstract valueToInput(v: ValueType | undefined): string | Promise<string>;
   /** Called on user's keyDown to apply focus on popup-menu items */
   protected abstract focusMenuItemByKeydown(e: KeyboardEvent): void;

@@ -160,6 +160,10 @@ export default class WUPDateControl<
     return !this.refMask || this.refMask.isCompleted;
   }
 
+  override valueToUrl(v: ValueType): string {
+    return dateToString(v, "yyyy-MM-dd");
+  }
+
   protected override gotChanges(propsChanged: Array<keyof WUP.Date.Options> | null): void {
     this._opts.utc = this.getAttr("utc", "bool");
     this._opts.format = this.getAttr("format") || "YYYY-MM-DD";
@@ -304,6 +308,7 @@ export default class WUPDateControl<
     clnd.gotKeyDown.call(clnd, e);
   }
 }
+// todo if parse throws Error impossible to open picker
 
 customElements.define(tagName, WUPDateControl);
 // NiceToHave: role 'spinbutton" + changing input value via scrolling: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/spinbutton_role

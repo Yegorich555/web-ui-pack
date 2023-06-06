@@ -48,13 +48,17 @@ export default function DateControlView() {
           startWith="day"
           utc
           validations="window.myDateValidations"
-          autoFocus={false}
-          autoComplete="off"
         />
         <wup-date name="empty" />
         <wup-date name="another" label="Another format: yyyy-m-d" format="yyyy-m-d" />
         <wup-date name="disabled" disabled />
         <wup-date name="readonly" readOnly />
+        <wup-date //
+          name="saveUrl"
+          label="With saving to URL (see $options.skey & storage)"
+          skey
+          storage="url"
+        />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

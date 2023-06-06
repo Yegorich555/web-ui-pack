@@ -57,9 +57,9 @@ describe("control.time", () => {
   testBaseControl({
     noInputSelection: true,
     initValues: [
-      { attrValue: "02:28", value: new WUPTimeObject("02:28") },
-      { attrValue: "23:16", value: new WUPTimeObject("23:16") },
-      { attrValue: "12:20", value: new WUPTimeObject("12:20") },
+      { attrValue: "02:28", value: new WUPTimeObject("02:28"), urlValue: "02-28" },
+      { attrValue: "23:16", value: new WUPTimeObject("23:16"), urlValue: "23-16" },
+      { attrValue: "12:20", value: new WUPTimeObject("12:20"), urlValue: "12-20" },
     ],
     validations: {
       min: {

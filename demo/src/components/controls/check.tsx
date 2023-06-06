@@ -22,7 +22,7 @@ export default function CheckControlView() {
           }
         }}
       >
-        <wup-check name="check" label="Check" initValue={false} reverse={false} autoComplete="off" autoFocus={false} />
+        <wup-check name="check" label="Check" initValue={false} reverse={false} />
         <wup-check
           ref={(el) => {
             if (el) {
@@ -42,6 +42,12 @@ export default function CheckControlView() {
         <wup-check name="checked" ref={(el) => el?.setAttribute("defaultChecked", "")} />
         <wup-check name="disabled" disabled initValue />
         <wup-check name="readonly" readOnly initValue />
+        <wup-switch //
+          name="saveUrlCheck"
+          label="With saving to URL (see $options.skey & storage)"
+          skey
+          storage="url"
+        />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

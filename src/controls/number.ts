@@ -115,7 +115,6 @@ export default class WUPNumberControl<
   }
 
   // WARN usage format #.### impossible because unclear what sepDec/sep100 and what if user wants only limit decimal part
-  /** Called when need to format value */
   valueToInput(v: ValueType | undefined): string {
     if (v == null) {
       return "";

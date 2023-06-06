@@ -1,7 +1,7 @@
 import WUPBaseControl, { SetValueReasons } from "./baseControl";
 import { WUPcssHidden } from "../styles";
 import WUPScrolled from "../helpers/scrolled";
-import { dateCopyTime, dateFromString } from "../indexHelpers";
+import { dateCopyTime, dateFromString, dateToString } from "../indexHelpers";
 import localeInfo from "../objects/localeInfo";
 
 const tagName = "wup-calendar";
@@ -417,6 +417,10 @@ export default class WUPCalendarControl<
     this.$refCalenarItems.setAttribute("role", "grid");
     this.appendChild(this.$refCalenar);
     // WARN: for render picker see gotReady
+  }
+
+  override valueToUrl(v: ValueType): string {
+    return dateToString(v, "yyyy-MM-dd");
   }
 
   /** Appends calendar item to parent or replace previous */

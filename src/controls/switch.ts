@@ -191,6 +191,15 @@ export default class WUPSwitchControl<
     return text.toLowerCase() === "true";
   }
 
+  override valueFromUrl(str: string): boolean {
+    console.warn({ str });
+    return str === "1";
+  }
+
+  override valueToUrl(v: boolean): string {
+    return v ? "1" : "";
+  }
+
   protected override renderControl(): void {
     this.$refInput.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", this.$refInput.id);
@@ -225,12 +234,13 @@ export default class WUPSwitchControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Switch.Options | any> | null): void {
     super.gotChanges(propsChanged as any);
+    // todo form.$initModel & storageGet don't work because $initValue is false by default
 
     this._opts.reverse = this.getAttr("reverse", "bool");
     this.setAttr("reverse", this._opts.reverse, true);
 
     if (!propsChanged || propsChanged.includes("defaultchecked")) {
-      this.$initValue = this.getAttr("defaultchecked", "bool", false)!;
+      this.$initValue = this.getAttr("defaultchecked", "bool", this.$initValue)!;
     }
   }
 

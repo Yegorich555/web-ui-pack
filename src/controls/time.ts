@@ -299,6 +299,10 @@ export default class WUPTimeControl<
     return !this.refMask || this.refMask.isCompleted;
   }
 
+  override valueToUrl(v: ValueType): string {
+    return v.toString("-");
+  }
+
   protected override gotChanges(propsChanged: Array<keyof WUP.Time.Options> | null): void {
     this._opts.format = this.getAttr("format")?.replace(/\D{0,1}(ss|SS)/, "") || "hh:mm A";
 

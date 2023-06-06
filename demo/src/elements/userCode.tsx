@@ -80,6 +80,11 @@ function renderHTMLCode(tag: string, customHTML: string[] | undefined): string |
     parsedAttrs.push({ name: "readonly", value: "false" });
     parsedAttrs.push({ name: "autofocus", value: "false" });
   }
+  if (el instanceof WUPBaseControl) {
+    parsedAttrs.push({ name: "autocomplete", value: "off" });
+    parsedAttrs.push({ name: "storage", value: "local" });
+    parsedAttrs.push({ name: "skey", value: "false" });
+  }
   if (el instanceof WUPSwitchControl || el instanceof WUPPasswordControl || el instanceof WUPRadioControl) {
     parsedAttrs.push({ name: "reverse", value: "false" });
   }

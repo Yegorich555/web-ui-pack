@@ -506,3 +506,4 @@ export default class WUPFormElement<
 customElements.define(tagName, WUPFormElement);
 
 // todo show success result in <wup-alert> at the right angle + add autosafe option
+// todo autosafe into localStorage for cases when user unexpectedly reloaded browser
