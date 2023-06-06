@@ -950,7 +950,7 @@ export default abstract class WUPBaseControl<
 
   /** Called to serialize value from URL/localStorage */
   valueFromUrl(str: string): ValueType | undefined {
-    return this.parse(str);
+    return str === "null" ? (null as ValueType) : this.parse(str);
   }
 
   /** Called to serialize value to URL/localStorage & must return '' if remove or string representation */
@@ -959,7 +959,7 @@ export default abstract class WUPBaseControl<
       return "null";
     }
     return v.toString();
-    // todo store bool "1" or delete
+    // todo test bool "1" or delete
     // todo store array 'ab!1!23' where splitter !
   }
 

@@ -98,6 +98,17 @@ export default function RadioControlView() {
             }
           }}
         />
+        <wup-radio //
+          name="saveUrlRadio"
+          label="With saving to URL (see $options.skey & storage)"
+          skey
+          storage="url"
+          ref={(el) => {
+            if (el) {
+              el.$options.items = items;
+            }
+          }}
+        />
         <section>
           <wup-radio
             ref={(el) => {

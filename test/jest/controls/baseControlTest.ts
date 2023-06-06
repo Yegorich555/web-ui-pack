@@ -338,24 +338,22 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       // local storage
       const sSet = jest.spyOn(Storage.prototype, "setItem");
       const sGet = jest.spyOn(Storage.prototype, "getItem");
-      el.$options.name = "firstName";
+      el.$options.name = "name1";
       el.$options.skey = true;
       el.$value = cfg.initValues[0].value;
       await h.wait(1);
       expect(sSet).toBeCalledTimes(1);
-      expect(sSet).lastCalledWith(
-        "firstName",
-        cfg.initValues[0].urlValue ?? (cfg.initValues[0].value as any).toString()
-      );
-      expect(window.localStorage.getItem("firstName")).toBeDefined(); // (cfg.initValues[0].attrValue);
+      expect(sSet).lastCalledWith("name1", cfg.initValues[0].urlValue ?? (cfg.initValues[0].value as any).toString());
+      expect(window.localStorage.getItem("name1")).toBeDefined(); // (cfg.initValues[0].attrValue);
       // getItem on init
       jest.clearAllMocks();
       el = document.body.appendChild(document.createElement(el.tagName)) as WUPBaseControl;
-      el.$options.name = "firstName";
+      cfg.onCreateNew(el);
+      el.$options.name = "name1";
       el.$options.skey = true;
       await h.wait(1);
       expect(sGet).toBeCalledTimes(1);
-      expect(sGet).lastCalledWith("firstName");
+      expect(sGet).lastCalledWith("name1");
       expect(el.$initValue).toStrictEqual(cfg.initValues[0].value);
 
       // session storage
@@ -372,6 +370,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       // getItem on init
       jest.clearAllMocks();
       el = document.body.appendChild(document.createElement(el.tagName)) as WUPBaseControl;
+      cfg.onCreateNew(el);
       el.$options.storage = "session";
       el.$options.skey = "name2";
       await h.wait(1);

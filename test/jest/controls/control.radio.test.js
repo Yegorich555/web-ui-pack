@@ -193,4 +193,25 @@ describe("control.radio", () => {
     el.focus();
     expect(document.activeElement).toBe(el.$refItems[0]);
   });
+
+  test("storage with falsy value", async () => {
+    const items = getItems();
+    items[0].value = null;
+
+    let el = testEl;
+    el.$options.skey = "rd";
+    el.$options.items = items;
+    el.$value = null;
+    await h.wait(1);
+    expect(window.localStorage.getItem("rd")).toBe("null");
+
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.items = items;
+    expect(el.$value).toBe(undefined);
+    el.$options.skey = "rd";
+    await h.wait(1);
+    expect(el.$value).toBe(null);
+
+    window.localStorage.clear();
+  });
 });

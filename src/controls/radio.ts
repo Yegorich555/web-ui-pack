@@ -62,8 +62,7 @@ interface ExtInputElement extends HTMLInputElement {
  *   <label> <input/> <span/> </label>
  *   <label> <input/> <span/> </label>
  *   // etc.
- * </fieldset>
- */
+ * </fieldset> */
 export default class WUPRadioControl<
   ValueType = any,
   EventMap extends WUP.Radio.EventMap = WUP.Radio.EventMap
