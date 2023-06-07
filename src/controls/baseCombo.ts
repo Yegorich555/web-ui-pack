@@ -170,10 +170,9 @@ export default abstract class WUPBaseComboControl<
   }
 
   /** Called when need to create menu in opened popup */
-  protected abstract renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> | HTMLElement;
+  protected abstract renderMenu(popup: WUPPopupElement, menuId: string): HTMLElement;
   /** Called when need to transfer current value to text-input */
-  // todo remove promise here
-  protected abstract valueToInput(v: ValueType | undefined): string | Promise<string>;
+  protected abstract valueToInput(v: ValueType | undefined): string;
   /** Called on user's keyDown to apply focus on popup-menu items */
   protected abstract focusMenuItemByKeydown(e: KeyboardEvent): void;
 
@@ -490,11 +489,7 @@ export default abstract class WUPBaseComboControl<
 
   protected override setInputValue(v: ValueType | undefined): void {
     const p = this.valueToInput(v);
-    if (p instanceof Promise) {
-      p.then((s) => super.setInputValue(s));
-    } else {
-      super.setInputValue(p);
-    }
+    super.setInputValue(p);
   }
 
   /** Called when popup must be removed (by focus out OR if control removed) */

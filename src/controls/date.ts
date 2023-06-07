@@ -275,7 +275,7 @@ export default class WUPDateControl<
     return isChanged;
   }
 
-  protected override valueToInput(v: ValueType | undefined): Promise<string> | string {
+  protected override valueToInput(v: ValueType | undefined): string {
     if (v === undefined) {
       return "";
     }

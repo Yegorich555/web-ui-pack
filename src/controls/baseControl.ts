@@ -606,6 +606,22 @@ export default abstract class WUPBaseControl<
     this.setAttr("readonly", this._opts.readOnly, true);
     this.setAttr.call(this.$refInput, "aria-required", !!this.validations?.required);
 
+    this.setupInitValue(propsChanged);
+    this.gotFormChanges(propsChanged);
+  }
+
+  /** Called on control/form Init and every time as control/form options changed. Method contains changes related to form `disabled`,`readonly` etc. */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  gotFormChanges(propsChanged: Array<string> | null): void {
+    const i = this.$refInput;
+    i.disabled = this.$isDisabled;
+    i.readOnly = this.$isReadOnly;
+    i.autocomplete = this.$autoComplete || "off";
+    this.$refError && !this.canShowError && this.goHideError(); // hide error if user can't touch the control
+  }
+
+  /** Called on Init and options/attributes changes to update $initValue */
+  setupInitValue(propsChanged: Array<keyof WUP.BaseControl.Options | any> | null): void {
     // lowercase for attribute-changes otherwise it's wrong
     if (!propsChanged || propsChanged.includes("initvalue")) {
       const attr = this.getAttribute("initvalue");
@@ -631,18 +647,6 @@ export default abstract class WUPBaseControl<
     if (this.$initValue === undefined && this._opts.skey) {
       this.$initValue = this.storageGet();
     }
-
-    this.gotFormChanges(propsChanged);
-  }
-
-  /** Called on control/form Init and every time as control/form options changed. Method contains changes related to form `disabled`,`readonly` etc. */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  gotFormChanges(propsChanged: Array<string> | null): void {
-    const i = this.$refInput;
-    i.disabled = this.$isDisabled;
-    i.readOnly = this.$isReadOnly;
-    i.autocomplete = this.$autoComplete || "off";
-    this.$refError && !this.canShowError && this.goHideError(); // hide error if user can't touch the control
   }
 
   /** Returns true on !$isDisabled */
@@ -1125,3 +1129,10 @@ export default abstract class WUPBaseControl<
     e.key === "Escape" && !e.shiftKey && !e.altKey && !e.ctrlKey && this.clearValue(); // WARN: Escape works wrong with NVDA because it enables NVDA-focus-mode
   }
 }
+
+/* todo issue:
+set before ready:
+              el.$value = 11;
+              el.$initValue = 13;
+expected 11 but got 13
+*/

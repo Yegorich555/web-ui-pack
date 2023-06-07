@@ -600,7 +600,7 @@ export default class WUPTimeControl<
     return super.setValue(v, reason, skipInput);
   }
 
-  protected override valueToInput(v: ValueType | undefined): Promise<string> | string {
+  protected override valueToInput(v: ValueType | undefined): string {
     if (v === undefined) {
       return "";
     }

@@ -464,8 +464,8 @@ export default class WUPSelectManyControl<
     return !this._wasSortAfterClick && super.canShowMenu(showCase, e);
   }
 
-  protected override async renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> {
-    const r = await super.renderMenu(popup, menuId);
+  protected override renderMenu(popup: WUPPopupElement, menuId: string): HTMLElement {
+    const r = super.renderMenu(popup, menuId);
     this.filterMenuItems();
     return r;
   }
@@ -510,7 +510,7 @@ export default class WUPSelectManyControl<
   }
 
   protected override valueToInput(v: ValueType[] | undefined, isReset?: boolean): string {
-    !isReset && this.getItems().then((items) => this.renderItems(v ?? [], items));
+    !isReset && this.renderItems(v ?? [], this.getItems());
     return this.$isFocused || !v?.length ? "" : " "; // otherwise broken css:placeholder-shown
   }
 
