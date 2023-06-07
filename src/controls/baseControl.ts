@@ -962,7 +962,6 @@ export default abstract class WUPBaseControl<
       return "null";
     }
     return v.toString();
-    // todo test bool "1" or delete
   }
 
   /** Get & parse value from storage according to options `skey`, `storage` and `name` */
@@ -970,7 +969,6 @@ export default abstract class WUPBaseControl<
     const key = this._opts.skey === true ? this._opts.name : this._opts.skey;
     if (key) {
       let v: string | null;
-      // todo for session & localStorage use JSON.stringify & JSON.parse to be universal for all types of value
       switch (this._opts.storage) {
         case "session":
           v = window.sessionStorage.getItem(key);

@@ -194,7 +194,8 @@ describe("control.radio", () => {
     expect(document.activeElement).toBe(el.$refItems[0]);
   });
 
-  test("storage with falsy value", async () => {
+  test("storage", async () => {
+    // with falsy value
     const items = getItems();
     items[0].value = null;
 
@@ -211,7 +212,15 @@ describe("control.radio", () => {
     el.$options.skey = "rd";
     await h.wait(1);
     expect(el.$value).toBe(null);
-
     window.localStorage.clear();
+
+    // value is complex object
+    items[0].value = { name: "Serge" };
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.items = items;
+    el.$options.skey = "rd";
+    await h.wait(1);
+    el.$value = items[0].value;
+    expect(() => jest.advanceTimersByTime(1000)).toThrow(); // complex value isn't supported
   });
 });
