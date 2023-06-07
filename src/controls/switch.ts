@@ -185,19 +185,9 @@ export default class WUPSwitchControl<
   set $value(v: boolean) {
     super.$value = !!v;
   }
-  /*
-  constructor() {
-    super();
-    this.$initValue = !!this.$initValue;
-  } */
 
   override parse(text: string): boolean | undefined {
-    // todo add ability to use 1 as true
-    return /* text === "1" || */ text.toLowerCase() === "true";
-  }
-
-  override valueFromUrl(str: string): boolean {
-    return str === "1";
+    return text === "1" || text.toLowerCase() === "true";
   }
 
   override valueToUrl(v: boolean): string | null {
