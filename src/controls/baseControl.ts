@@ -144,7 +144,11 @@ declare global {
       readOnly?: boolean;
       /** Show all validation-rules with checkpoints as list instead of single error */
       validationShowAll?: boolean;
-      /** Storage key for auto saving value in storage; Point empty string or `true` to inherit from $options.name or some string
+      /** Storage key for auto saving value in storage;
+       * @tutorial rules
+       * * Point empty string or `true` to inherit from $options.name
+       * * Expected value can be converted toString & parsed from string itself.
+       * Override valueFromUrl & valueToUrl to change serializing (for complex objects, arrays etc.)
        * @see {@link WUP.BaseControl.Defaults.storage} */
       skey?: boolean | string;
     }
@@ -948,19 +952,18 @@ export default abstract class WUPBaseControl<
     }
   }
 
-  /** Called to serialize value from URL/localStorage */
+  /** Called to serialize value from URL; override it if you have unexpected object */
   valueFromUrl(str: string): ValueType | undefined {
     return str === "null" ? (null as ValueType) : this.parse(str);
   }
 
-  /** Called to serialize value to URL/localStorage & must return '' if remove or string representation */
+  /** Called to serialize value to URL & must return '' if need to remove */
   valueToUrl(v: ValueType | null): string {
     if (v == null) {
       return "null";
     }
     return v.toString();
     // todo test bool "1" or delete
-    // todo store array 'ab!1!23' where splitter !
   }
 
   /** Get & parse value from storage according to options `skey`, `storage` and `name` */
@@ -968,6 +971,7 @@ export default abstract class WUPBaseControl<
     const key = this._opts.skey === true ? this._opts.name : this._opts.skey;
     if (key) {
       let v: string | null;
+      // todo for session & localStorage use JSON.stringify & JSON.parse to be universal for all types of value
       switch (this._opts.storage) {
         case "session":
           v = window.sessionStorage.getItem(key);

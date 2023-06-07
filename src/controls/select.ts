@@ -230,6 +230,22 @@ export default class WUPSelectControl<
     return v as ValueType;
   }
 
+  valueFromUrl(str: string): ValueType | undefined {
+    console.error("not implemented"); // todo don't use promise in getItems otherwise impossible to do it sync
+    return undefined;
+    if (this.$options.multiple) {
+      return str.split("_").map((si) => super.valueFromUrl(si)) as any;
+    }
+    return super.valueFromUrl(str) as any;
+  }
+
+  valueToUrl(v: ValueType): string {
+    if (this.$options.multiple) {
+      return (v as Array<any>).map((vi) => super.valueToUrl(vi)).join("_");
+    }
+    return super.valueToUrl(v);
+  }
+
   /** It's called with option allowNewValue to find value related to text */
   protected findValueByText(txt: string): ValueType | undefined {
     const s = txt.toLowerCase();

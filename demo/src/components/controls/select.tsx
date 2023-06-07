@@ -167,6 +167,17 @@ export default function SelectControlView() {
             }
           }}
         />
+        <wup-select //
+          name="saveUrlSelect"
+          label="With saving to URL (see $options.skey & storage)"
+          skey
+          storage="url"
+          ref={(el) => {
+            if (el) {
+              el.$options.items = items;
+            }
+          }}
+        />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

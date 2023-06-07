@@ -201,6 +201,7 @@ export default class WUPRadioControl<
   };
 
   protected override _opts = this.$options;
+  // todo since value can be even Date need to use JSON for storage and URL
 
   /** Called when need to parse attr [initValue] */
   override parse(attrValue: string): ValueType | undefined {
