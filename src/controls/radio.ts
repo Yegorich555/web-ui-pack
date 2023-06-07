@@ -201,16 +201,6 @@ export default class WUPRadioControl<
   };
 
   protected override _opts = this.$options;
-  valueToUrl(v: ValueType | null): string | null {
-    if (v != null && typeof v === "object") {
-      this.throwError(
-        new Error(
-          "Option `skey` with object-values are not supported. Override `valueToUrl` & `valueFromUrl` to fix it"
-        )
-      );
-    }
-    return super.valueToUrl(v);
-  }
 
   /** Called when need to parse attr [initValue] */
   override parse(attrValue: string): ValueType | undefined {

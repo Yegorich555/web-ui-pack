@@ -951,15 +951,23 @@ export default abstract class WUPBaseControl<
     }
   }
 
-  /** Called to serialize value from URL; override it if you have unexpected object */
+  /** Called to serialize value from URL/storage; override it if you have unexpected object */
   valueFromUrl(str: string): ValueType | undefined {
     return str === "null" ? (null as ValueType) : this.parse(str);
   }
 
-  /** Called to serialize value to URL & must return null if need to remove */
+  /** Called to serialize value to URL/storage & must return null if need to remove */
   valueToUrl(v: ValueType | null): string | null {
     if (v == null) {
       return "null";
+    }
+    if (typeof v === "object") {
+      this.throwError(
+        new Error(
+          "Option `skey` with object-values are not supported. Override `valueToUrl` & `valueFromUrl` to fix it"
+        )
+      );
+      return null;
     }
     return v.toString();
   }
