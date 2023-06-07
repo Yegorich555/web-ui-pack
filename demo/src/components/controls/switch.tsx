@@ -13,6 +13,7 @@ export default function SwitchControlView() {
         "Easy to change size of items via css-variables (ctrl-switch-size...)", //
         "Possible to reverse label",
         "Powerful accessibility support (keyboard, announcenement)",
+        "Ability to save value to localStorage, sessionStorage, URL (options skey & storage)",
       ]}
       details={{
         tag: "wup-switch",
