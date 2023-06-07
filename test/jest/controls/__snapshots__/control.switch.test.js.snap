@@ -468,45 +468,6 @@ exports[`control.switch validations options.validationCase 2`] = `
     aria-live="off"
     error=""
     id="txt3"
-    role="alert"
-    style="display: none;"
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      This field is required
-    </span>
-  </wup-popup>
-</wup-switch>
-`;
-
-exports[`control.switch validations options.validationCase 3`] = `
-<wup-switch
-  invalid=""
->
-  <label
-    for="txt1"
-  >
-    <input
-      aria-describedby="txt4"
-      aria-required="true"
-      autocomplete="off"
-      id="txt1"
-      type="checkbox"
-    />
-    <strong>
-      First Input
-    </strong>
-    <span />
-  </label>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt4"
     style="display: none;"
   >
     <span
@@ -521,7 +482,7 @@ exports[`control.switch validations options.validationCase 3`] = `
 </wup-switch>
 `;
 
-exports[`control.switch validations options.validationCase 4`] = `
+exports[`control.switch validations options.validationCase 3`] = `
 <wup-switch
   invalid=""
 >
@@ -529,7 +490,7 @@ exports[`control.switch validations options.validationCase 4`] = `
     for="txt1"
   >
     <input
-      aria-describedby="txt5"
+      aria-describedby="txt4"
       autocomplete="off"
       id="txt1"
       type="checkbox"
@@ -543,7 +504,7 @@ exports[`control.switch validations options.validationCase 4`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt5"
+    id="txt4"
     role="alert"
     style="display: none;"
   >

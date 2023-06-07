@@ -155,6 +155,10 @@ export default class WUPSwitchControl<
     return arr;
   }
 
+  static $isEqual(v1: boolean | undefined, v2: boolean | undefined): boolean {
+    return !!v1 === !!v2;
+  }
+
   static $defaults: WUP.Switch.Defaults = {
     ...WUPBaseControl.$defaults,
     validationRules: { ...WUPBaseControl.$defaults.validationRules },
@@ -166,38 +170,38 @@ export default class WUPSwitchControl<
 
   protected override _opts = this.$options;
 
-  get $initValue(): boolean {
-    return super.$initValue as boolean;
+  get $initValue(): boolean | undefined {
+    return super.$initValue;
   }
 
-  set $initValue(v: boolean) {
-    super.$initValue = !!v;
+  set $initValue(v: boolean | undefined) {
+    super.$initValue = v;
   }
 
   get $value(): boolean {
-    return super.$value as boolean;
+    return !!super.$value as boolean;
   }
 
   set $value(v: boolean) {
     super.$value = !!v;
   }
-
+  /*
   constructor() {
     super();
     this.$initValue = !!this.$initValue;
-  }
+  } */
 
   override parse(text: string): boolean | undefined {
-    return text.toLowerCase() === "true";
+    // todo add ability to use 1 as true
+    return /* text === "1" || */ text.toLowerCase() === "true";
   }
 
   override valueFromUrl(str: string): boolean {
-    console.warn({ str });
     return str === "1";
   }
 
-  override valueToUrl(v: boolean): string {
-    return v ? "1" : "";
+  override valueToUrl(v: boolean): string | null {
+    return v ? "1" : null;
   }
 
   protected override renderControl(): void {
@@ -234,13 +238,14 @@ export default class WUPSwitchControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Switch.Options | any> | null): void {
     super.gotChanges(propsChanged as any);
-    // todo form.$initModel & storageGet don't work because $initValue is false by default
 
     this._opts.reverse = this.getAttr("reverse", "bool");
     this.setAttr("reverse", this._opts.reverse, true);
 
-    if (!propsChanged || propsChanged.includes("defaultchecked")) {
-      this.$initValue = this.getAttr("defaultchecked", "bool", this.$initValue)!;
+    if (!propsChanged) {
+      this.$initValue = this.getAttr("defaultchecked", "bool", this.$initValue);
+    } else if (propsChanged.includes("defaultchecked")) {
+      this.$initValue = this.getAttr("defaultchecked", "bool", undefined);
     }
   }
 

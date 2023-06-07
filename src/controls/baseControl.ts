@@ -462,8 +462,7 @@ export default abstract class WUPBaseControl<
   }
 
   /** Returns if value changed (by comparisson with $initValue via static.isEqual option)
-   *  By default values compared by valueOf if it's possible
-   */
+   *  By default values compared by valueOf if it's possible */
   get $isChanged(): boolean {
     return !this.#ctr.$isEqual(this.$value, this.#initValue);
   }
@@ -957,8 +956,8 @@ export default abstract class WUPBaseControl<
     return str === "null" ? (null as ValueType) : this.parse(str);
   }
 
-  /** Called to serialize value to URL & must return '' if need to remove */
-  valueToUrl(v: ValueType | null): string {
+  /** Called to serialize value to URL & must return null if need to remove */
+  valueToUrl(v: ValueType | null): string | null {
     if (v == null) {
       return "null";
     }
@@ -1019,12 +1018,12 @@ export default abstract class WUPBaseControl<
             strg = window.localStorage;
             break;
         }
-        // todo test when value: null
+
         if (this.#ctr.$isEmpty(v)) {
           strg.removeItem(key);
         } else {
           const sv = this.valueToUrl(v!);
-          sv === "" ? strg.removeItem(key) : strg.setItem(key, sv);
+          sv === null ? strg.removeItem(key) : strg.setItem(key, sv);
         }
       }
     } catch (err) {

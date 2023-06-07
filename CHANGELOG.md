@@ -6,6 +6,7 @@
 
 - **Combobox controls (Select, Date, Time)**. _Menu border is blue when invalid + hover_
 - **Combobox controls (Select, Date, Time)**. _Sometimes menu not scrolled to selected item by opening_
+- [SwitchControl](src/controls/switch.ts). [CheckControl](src/controls/check.ts). _form.$initModel is ignored_
 
 **New/Features**:
 

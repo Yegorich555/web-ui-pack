@@ -239,7 +239,7 @@ export default class WUPSelectControl<
     return super.valueFromUrl(str) as any;
   }
 
-  valueToUrl(v: ValueType): string {
+  valueToUrl(v: ValueType): string | null {
     if (this.$options.multiple) {
       return (v as Array<any>).map((vi) => super.valueToUrl(vi)).join("_");
     }

@@ -56,11 +56,14 @@ export function initTestBaseControl<T extends WUPBaseControl>(cfg: InitOptions<T
 interface ValueToAttr<T> {
   value: T;
   attrValue: string;
-  urlValue?: string;
+  urlValue?: string | null;
 }
 
 interface TestOptions<T> extends BaseTestOptions {
+  /** For switch it's false */
   emptyValue?: any;
+  /** For switch it's undefined */
+  emptyInitValue?: any;
   initValues: [ValueToAttr<T>, ValueToAttr<T>, ValueToAttr<T>];
   validations: Record<string, { set: any; failValue: T | undefined; trueValue: T }>;
   validationsSkip?: string[];
@@ -102,7 +105,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.removeAttribute("initvalue");
       await h.wait(1);
       expect(el.getAttribute("initvalue")).toBe(null);
-      expect(el.$initValue).toStrictEqual(cfg.emptyValue);
+      expect(el.$initValue).toStrictEqual(cfg.emptyInitValue);
 
       await h.wait();
       el.setAttribute("initvalue", "");
@@ -221,19 +224,19 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       await h.wait(1);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
-      expect(el.$value).toBe(undefined);
+      expect(el.$value).toBe(cfg.emptyValue);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       expect(el.$value).toBe(cfg.initValues[0].value); // rollback to previous value
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      expect(el.$value).toBe(undefined);
+      expect(el.$value).toBe(cfg.emptyValue);
 
       el.$value = cfg.initValues[2].value;
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      expect(el.$value).toBe(undefined);
+      expect(el.$value).toBe(cfg.emptyValue);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       expect(el.$value).toBe(cfg.initValues[2].value);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      expect(el.$value).toBe(undefined);
+      expect(el.$value).toBe(cfg.emptyValue);
 
       // only reset to init
       el.$value = cfg.initValues[0].value;
@@ -260,12 +263,12 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       expect(el.$value).toBe(cfg.initValues[1].value);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      expect(el.$value).toBe(undefined);
+      expect(el.$value).toBe(cfg.emptyValue);
 
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       expect(el.$value).toBe(cfg.initValues[1].value);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      expect(el.$value).toBe(undefined);
+      expect(el.$value).toBe(cfg.emptyValue);
     });
 
     test("disabled", () => {
@@ -338,6 +341,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       // local storage
       const sSet = jest.spyOn(Storage.prototype, "setItem");
       const sGet = jest.spyOn(Storage.prototype, "getItem");
+      const sRem = jest.spyOn(Storage.prototype, "removeItem");
       el.$options.name = "name1";
       el.$options.skey = true;
       el.$value = cfg.initValues[0].value;
@@ -348,7 +352,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       // getItem on init
       jest.clearAllMocks();
       el = document.body.appendChild(document.createElement(el.tagName)) as WUPBaseControl;
-      cfg.onCreateNew(el);
+      cfg.onCreateNew?.call(cfg, el);
       el.$options.name = "name1";
       el.$options.skey = true;
       await h.wait(1);
@@ -364,19 +368,26 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$initValue).toStrictEqual(cfg.initValues[0].value);
       el.$value = cfg.initValues[1].value;
       await h.wait(1);
-      expect(sSet).toBeCalledTimes(1);
-      expect(sSet).lastCalledWith("name2", cfg.initValues[1].urlValue ?? (cfg.initValues[1].value as any).toString());
+      if (cfg.initValues[1].urlValue === null) {
+        expect(sRem).toBeCalledTimes(1);
+        expect(sRem).lastCalledWith("name2");
+      } else {
+        expect(sSet).toBeCalledTimes(1);
+        expect(sSet).lastCalledWith("name2", cfg.initValues[1].urlValue ?? (cfg.initValues[1].value as any).toString());
+      }
+      el.$value = cfg.initValues[2].value;
+      await h.wait(1);
       expect(window.sessionStorage.getItem("name2")).toBeDefined(); // .toBe(cfg.initValues[1].attrValue);
       // getItem on init
       jest.clearAllMocks();
       el = document.body.appendChild(document.createElement(el.tagName)) as WUPBaseControl;
-      cfg.onCreateNew(el);
+      cfg.onCreateNew?.call(cfg, el);
       el.$options.storage = "session";
       el.$options.skey = "name2";
       await h.wait(1);
       expect(sGet).toBeCalledTimes(1);
       expect(sGet).lastCalledWith("name2");
-      expect(el.$initValue).toStrictEqual(cfg.initValues[1].value);
+      expect(el.$initValue).toStrictEqual(cfg.initValues[2].value);
 
       // todo test Url
       window.localStorage.clear();
@@ -501,8 +512,10 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$isEmpty).toBe(true);
       el.blur();
       await h.wait();
-      expect(el.$refError).toBeDefined();
-      expect(el).toMatchSnapshot();
+      if (cfg.emptyValue === cfg.emptyInitValue) {
+        expect(el.$refError).toBeDefined();
+        expect(el).toMatchSnapshot();
+      }
 
       // onFocusWithValue
       el.$hideError();
@@ -512,14 +525,17 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.focus();
       await h.wait();
       expect(el.$refError).not.toBeDefined();
-      expect(el.$isValid).toBe(false);
-      expect(el.$refError).not.toBeDefined();
+      if (cfg.emptyValue === cfg.emptyInitValue) {
+        expect(el.$isValid).toBe(false);
+        expect(el.$refError).not.toBeDefined();
+      }
       el.blur();
 
       el.$value = cfg.initValues[0].value;
       el.focus();
       await h.wait();
       expect(el.$refError).toBeDefined();
+      expect(el.$isValid).toBe(false);
       expect(el).toMatchSnapshot();
 
       // onFocusLost
@@ -556,17 +572,19 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$value = cfg.initValues[0].value;
       await h.wait();
 
-      el.focus();
-      await h.wait(1);
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
-      el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
-      expect(el.$isEmpty).toBe(true);
-      await h.wait();
-      expect(el.$refError).toBeDefined(); // because previously was valid and now need to show invalid state
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
-      expect(el.$isEmpty).toBe(false);
-      await h.wait();
-      expect(el.$refError).not.toBeDefined();
+      if (cfg.emptyValue === cfg.emptyInitValue) {
+        el.focus();
+        await h.wait(1);
+        el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
+        el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
+        expect(el.$isEmpty).toBe(true);
+        await h.wait();
+        expect(el.$refError).toBeDefined(); // because previously was valid and now need to show invalid state
+        el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
+        expect(el.$isEmpty).toBe(false);
+        await h.wait();
+        expect(el.$refError).not.toBeDefined();
+      }
 
       // cover case when el is invalid previously
       el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
@@ -585,11 +603,13 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       // @ts-ignore
       el.setValue(cfg.initValues[1].value);
       expect(el.$isValid).toBe(true); // was valid
-      // @ts-ignore
-      el.setValue(undefined);
-      expect(el.$isValid).toBe(false);
-      await h.wait();
-      expect(el.$refError).toBeDefined();
+      if (cfg.emptyValue === cfg.emptyInitValue) {
+        // @ts-ignore
+        el.setValue(undefined);
+        expect(el.$isValid).toBe(false);
+        await h.wait();
+        expect(el.$refError).toBeDefined();
+      }
 
       // cover case when focusOut but error left
       el.$value = cfg.initValues[0].value;
