@@ -189,18 +189,16 @@ export default class WUPSelectControl<
     if (this._opts.multiple) {
       return nestedProperty.get(window, attrValue);
     }
-    if (this._cachedItems) {
-      const arr = this.getItems();
-      if (arr?.length) {
-        const r =
-          attrValue === ""
-            ? (arr as WUP.Select.MenuItem<any>[]).find((o) => o.value == null)
-            : (arr as WUP.Select.MenuItem<any>[]).find((o) => o.value && `${o.value}` === attrValue);
-        return r?.value;
-      }
-      return undefined;
+    // WARN: parse must be called only after items is fetched
+    const arr = this.getItems();
+    if (arr?.length) {
+      const r =
+        attrValue === ""
+          ? (arr as WUP.Select.MenuItem<any>[]).find((o) => o.value == null)
+          : (arr as WUP.Select.MenuItem<any>[]).find((o) => o.value && `${o.value}` === attrValue);
+      return r?.value;
     }
-    return attrValue as any;
+    return undefined;
   }
 
   override parseInput(text: string): ValueType | undefined {
@@ -284,6 +282,7 @@ export default class WUPSelectControl<
         delete this._onPendingValue;
         this._onPendingInitValue?.call(this);
         delete this._onPendingInitValue;
+        this.$isFocused && setTimeout(() => this.goShowMenu(ShowCases.onFocus, null)); // timeout required to showMenu after pending changes
         return data;
       });
     }
@@ -397,8 +396,7 @@ export default class WUPSelectControl<
 
     const all = this.renderMenuItems(ul);
     this._menuItems = { all, focused: -1 };
-    !all.length ? this.renderMenuNoItems(popup, false) : this.#filterOnGotItems?.call(this);
-    this.#filterOnGotItems = undefined;
+    !all.length && this.renderMenuNoItems(popup, false);
     // it happens on every show because by hide it dispose events
     onEvent(
       ul,
@@ -429,7 +427,7 @@ export default class WUPSelectControl<
   /** Method returns items defined based on $options.items */
   protected getItems(): WUP.Select.MenuItems<ValueType> {
     if (!this._cachedItems) {
-      this.throwError(new Error("No cached items"));
+      this.throwError(new Error("Internal bug. No cached items"));
       return [];
     }
     return this._cachedItems;
@@ -543,6 +541,13 @@ export default class WUPSelectControl<
     this._opts.multiple && this.clearFilterMenuItems();
   }
 
+  canShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean | Promise<boolean> {
+    if (this.$isPending) {
+      return false;
+    }
+    return super.canShowMenu(showCase, e);
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override async goShowMenu(
     showCase: ShowCases,
@@ -551,16 +556,13 @@ export default class WUPSelectControl<
     if (this.$isShown) {
       return this.$refPopup!;
     }
-    if (this.$isPending) {
-      return null;
-    }
 
     if (this.$refPopup && showCase !== ShowCases.onInput && this._menuItems!.filtered) {
       this.clearFilterMenuItems();
     }
 
     const popup = await super.goShowMenu(showCase, e);
-    this.selectMenuItemByValue(this.$value); // set aria-selected
+    popup && this.selectMenuItemByValue(this.$value); // set aria-selected
     return popup;
   }
 
@@ -722,19 +724,11 @@ export default class WUPSelectControl<
     return !!this._opts.multiple;
   }
 
-  #filterOnGotItems?: () => void;
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
     this.$isShown && this.focusMenuItem(null); // reset virtual focus: // WARN it's not good enough when this._opts.multiple
     super.gotInput(e);
 
-    const filter = (): void => {
-      this.#filterOnGotItems = undefined;
-      if (this.$isShown && this._cachedItems) {
-        this.filterMenuItems();
-      } else if (this.$isShown) {
-        this.#filterOnGotItems = this.filterMenuItems;
-      }
-    };
+    const filter = (): any => this.$isShown && this.filterMenuItems();
 
     let isChanged = false;
     // user can append item by ',' at the end or remove immediately
@@ -792,3 +786,4 @@ customElements.define(tagName, WUPSelectControl);
 
 // NiceToHave: option to allow autoselect item without pressing Enter
 // WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation
+// todo init + wait 10ms >>> el.$options.items = [...]; el.$value = 10 - works wrong

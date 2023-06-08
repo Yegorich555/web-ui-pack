@@ -85,6 +85,17 @@ describe("control.select", () => {
     expect(onErr.mock.lastCall[0]).toMatchInlineSnapshot(
       `"Value not found according to attribute [items] in 'window.'"`
     );
+
+    // when need to parse but items must be fetched before
+    document.body.innerHTML = "";
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.items = new Promise((res) => setTimeout(() => res(getItems(), 100)));
+    el.setAttribute("initvalue", "10");
+    await h.wait();
+    expect(el.$isPending).toBe(false);
+    expect(el.$initValue).toBe(10);
+    expect(el.$value).toBe(10);
+    expect(el.$refInput.value).toBe("Donny");
   });
 
   test("pending state", async () => {
@@ -115,10 +126,12 @@ describe("control.select", () => {
       mockRequest();
       return new Promise((resolve) => setTimeout(() => resolve(getItems()), 100));
     };
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("");
     el.$value = 10;
     await h.wait(10);
-    expect(el.$refInput.value).toBe("");
     expect(el.$isPending).toBe(true);
+    expect(el.$refInput.value).toBe("");
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true })); // keydown events must be skipped because of pending
     el.$showMenu(); // showMenu must be skipped because of pending
     // await h.userClick(el); // WARN; somehow it blocks Promise.resolve - it's test-issue
@@ -144,10 +157,19 @@ describe("control.select", () => {
     await h.wait(1);
     el.focus();
     await h.wait(10);
-    expect(el.$isShown).toBe(true);
+    expect(el.$isShown).toBe(false);
     el.blur();
     await h.wait();
     expect(el.$isShown).toBe(false);
+
+    el.$options.items = () => Promise.resolve(null);
+    await h.wait();
+    expect(el._cachedItems).toStrictEqual([]); // empty array to avoid future bugs if somehow fetch returns nothing
+
+    // cover case when somehow items not fetched before
+    el = document.body.appendChild(document.createElement(el.tagName));
+    expect(el.getItems()).toStrictEqual([]);
+    expect(() => jest.advanceTimersByTime(1)).toThrow(); // because items not fetched yet but gotItems is called
   });
 
   test("$show/$hide menu", async () => {
@@ -389,32 +411,6 @@ describe("control.select", () => {
     expect(el.$isShown).toBe(false);
     expect(el.$refPopup).toBeFalsy();
 
-    // cover hide after show when menu is opening
-    el.$options.items = () => new Promise((res) => setTimeout(() => res(getItems()), 100));
-    await h.wait(1);
-    el.focus();
-    el.click();
-    await h.wait(10);
-    expect(el.$isShown).toBe(true);
-    await h.wait(10);
-    el.blur();
-    await h.wait();
-    expect(el.$isShown).toBe(false);
-    expect(el.$refPopup).toBeFalsy();
-
-    // case show & hide sync when focused
-    el.$options.items = () => new Promise((res) => setTimeout(() => res(getItems()), 100));
-    await h.wait(1);
-    el.focus();
-    await h.wait(10);
-    expect(el.$isShown).toBe(true);
-    await h.userClick(el);
-    await h.wait();
-    expect(el.$isShown).toBe(false);
-    expect(el.$refPopup).toBeTruthy();
-    el.blur();
-    await h.wait();
-
     // case: popups are visible and not closed (if change focus by Tab)
     const orig = window.getComputedStyle;
     jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
@@ -452,7 +448,6 @@ describe("control.select", () => {
 
     // test if $showMenu() resolve only when popup is show-end
     document.body.innerHTML = "";
-    /** @type WUPSelectControl */
     el = document.body.appendChild(document.createElement(el.tagName));
     await h.wait();
     expect(el.$refPopup).toBeFalsy();
@@ -736,14 +731,14 @@ describe("control.select", () => {
 
     // case when menu is hidden 1st time and opened 2nd by input
     document.body.innerHTML = "";
-    /** @type WUPSelectControl */
     el = document.body.appendChild(document.createElement(el.tagName));
     el.$options.items = () => new Promise((res) => setTimeout(() => res(getItems()), 100));
-    jest.spyOn(el, "canShowMenu").mockReturnValueOnce(false);
+    const onCanShow = jest.spyOn(el, "canShowMenu").mockReturnValue(false);
     await h.wait(1);
     el.focus();
     await h.wait();
     expect(el.$isShown).toBe(false);
+    onCanShow.mockRestore();
     await expect(h.userTypeText(el.$refInput, "D")).resolves.not.toThrow();
     await h.wait();
     expect(el.$isShown).toBe(true);
@@ -1007,10 +1002,9 @@ describe("control.select", () => {
       expect(await h.userTypeText(el.$refInput, "don", { clearPrevious: false })).toBe("don|");
       await h.wait(1);
       expect(onChange).toBeCalledTimes(0);
-      expect(await h.userTypeText(el.$refInput, "ny,", { clearPrevious: false })).toBe("donny,|");
+      expect(await h.userTypeText(el.$refInput, "ny,", { clearPrevious: false })).toBe("Donny, |"); // extra space must be added
       await h.wait(1);
       expect(el.$value).toStrictEqual([10]);
-      expect(h.getInputCursor(el.$refInput)).toBe("Donny, |"); // extra space must be added
       expect(onChange).toBeCalledTimes(1);
       expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
         `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true" id="txt3" focused="">Donny</li><li role="option" style="">Mikky</li><li role="option" style="">Leo</li><li role="option" style="">Splinter</li></ul>"`

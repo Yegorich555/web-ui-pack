@@ -371,3 +371,5 @@ export default observer;
   obj.v = 2; // propsChanged
   obj.v = 1 // props not changed but event is called (because we use async)
 */
+
+// todo it doesn't work when option is Promise.resolve(null)
