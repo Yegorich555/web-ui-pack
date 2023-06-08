@@ -21,12 +21,12 @@
 
 **BREAKING CHANGES**:
 
-- helper **animateDropdown** moved into [`web-ui-pack/helpers/animateDropdown`](src/helpers/animateDropdown.ts)
+- helper **animateDropdown** moved into [web-ui-pack/helpers/animateDropdown](src/helpers/animateDropdown.ts)
 - [PopupElement](src/popup/popupElement.ts). Fixed typo `$isHidding` to `$isHiding`
 
 **Fixes**:
 
-- **helper** [`animateDropdown`](src/helpers/animate.ts). _Wrong for left,right,top directions_
+- helper [animateDropdown](src/helpers/animate.ts). _Wrong for left,right,top directions_
 - [PopupElement](src/popup/popupElement.ts). _Popup hides by mouseenter if was opened by target.mouseenter_
 - [PopupElement](src/popup/popupElement.ts). _Popup impossible to hide by click if opened by hover_
 - [NumberControl](src/controls/number.ts).
@@ -63,7 +63,7 @@
 
 **BREAKING CHANGES**:
 
-- Internals. Methods getNumAttr, getRefAttr, getBoolAttr is refactored to single getAttr()
+- Internals. Methods `getNumAttr`, `getRefAttr`, `getBoolAttr` is refactored to single `getAttr`
 - [SelectControl](src/controls/select.ts). Simplified menu styling
 - [PopupElement](src/popup/popupElement.ts). Prop `$isOpen` deprecated in favor of `$isShown`
 
@@ -85,7 +85,7 @@
 **Fixes**:
 
 - **Global**. _Sometimes events are not disposed_. Fix for helper onEvent (need to remove events with options as is)
-- **helper** [`onFocusLost`](src/helpers/onFocusLost.ts). _Isn't fired if stopPropagation is called_
+- helper [onFocusLost](src/helpers/onFocusLost.ts). _Isn't fired if stopPropagation is called_
 - [TimeControl](src/controls/time.ts). _Extra margin for menu-buttons on Safari_
 - [SwitchControl](src/controls/switch.ts). [CheckControl](src/controls/check.ts). _Attribute `initvalue=''` sets value to `true` (expected `false`)_
 - [TextareaControl](src/controls/textarea.ts). _`Ctrl + B` makes text bold but it's unexpected for plain textarea_
@@ -129,13 +129,13 @@
 **BREAKING CHANGES**:
 
 - Namespaces `WUP...` is refactored from `WUPPopup` to `WUP.Popup` etc. So re-export enums `ShowCases, HideCases, Animations` without prefix now
-- helper **animateDropdown** moved into [`web-ui-pack/helpers/animate`](src/helpers/animate.ts)
-- helper **localeInfo** moved into [`web-ui-pack/objects/localeInfo`](src/objects/localeInfo.ts)
+- helper **animateDropdown** moved into [web-ui-pack/helpers/animate](src/helpers/animate.ts)
+- helper **localeInfo** moved into [web-ui-pack/objects/localeInfo](src/objects/localeInfo.ts)
 - helper **scrollCarousel** refactored to [WUPScrolled](src/helpers/scrolled.ts) class
-- helper **mathSumFloat** moved into [`web-ui-pack/helpers/math`](src/helpers/math.ts)
-- helper **stringUpperCount** moved into [`web-ui-pack/helpers/string`](src/helpers/string.ts)
-- helper **stringLowerCount** moved into [`web-ui-pack/helpers/string`](src/helpers/string.ts)
-- helper **stringPrettify** moved into [`web-ui-pack/helpers/string`](src/helpers/string.ts)
+- helper **mathSumFloat** moved into [web-ui-pack/helpers/math](src/helpers/math.ts)
+- helper **stringUpperCount** moved into [web-ui-pack/helpers/string](src/helpers/string.ts)
+- helper **stringLowerCount** moved into [web-ui-pack/helpers/string](src/helpers/string.ts)
+- helper **stringPrettify** moved into [web-ui-pack/helpers/string](src/helpers/string.ts)
 - [DateControl](src/controls/date.ts). Changed validation message from `This date is disabled` to `This value is disabled`
 
 **New**:
@@ -143,12 +143,12 @@
 - [WUPTimeObject](src/objects/timeObject.ts) => `Ordinary class Time with hours & minutes`
 - [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
 - helper [mathScaleValue](src/helpers/mathScaleValue)
-- Text based controls. **Mask** supports letters also (previously only digits can be variabled)
+- **Text based controls**. **Mask** supports letters also (previously only digits can be variabled)
 
 **Fixes**:
 
-- Helper. [`localeInfo`](src/objects/localeInfo.ts). `AM/PM parsed to 'a' but expected 'A'`
-- Helper. [`dateFromString`](src/helpers/dateFromString.ts). `12:00 PM throws Error but expected 12:00`
+- helper [localeInfo](src/objects/localeInfo.ts). `AM/PM parsed to 'a' but expected 'A'`
+- helper [dateFromString](src/helpers/dateFromString.ts). `12:00 PM throws Error but expected 12:00`
 - Icon **check**. Reduced thikness to fit other texts & icons
 - [PopupElement](src/popup/popupElement.ts). Changing content size doesn't recalc popup position
 - [PopupElement](src/popup/popupElement.ts). Wrong position if parent has style transform.translate
@@ -160,7 +160,7 @@
 
 **BREAKING CHANGES**:
 
-- DateControl:
+- [DateControl](src/controls/date.ts):
   - Was
     - changing `$options.format` & attr `[format]` related to all date-strings: attributes `initvalue/min/max`.
     - default value `YYYY-MM-DD`
@@ -168,56 +168,56 @@
     - changing `$options.format` & attr `[format]` related only to displayed text. All attributes must be pointed in universal format `YYYY-MM-DD`
     - default value depends on user localization; see [locale](src/objects/localeInfo.ts)
     - `$options.firstWeekDay` - default value depends on user localization; see [locale](src/objects/localeInfo.ts)
-- CalendarControl:
-  - deprecated static getters `$namesDayShort, $namesMonth, $namesMonthShort` in favor of [`localeInfo`](src/objects/localeInfo.ts) helper
+- [CalendarControl](src/controls/calendar.ts):
+  - deprecated static getters `$namesDayShort, $namesMonth, $namesMonthShort` in favor of [localeInfo](src/objects/localeInfo.ts) helper
   - `$options.firstDayOfWeek` is renamed to `firstWeekDay`
   - `$options.firstWeekDay` - default value depends on user localization; see [locale](src/objects/localeInfo.ts)
 
 **New**:
 
-- Added $options.prefix & postfix for text-based controls
-- Support **MMM** in format for `dateToString, dateFromString`
-- Controls **Number, Date, Calendar** are locale based and depeneds on [`localeInfo`](src/objects/localeInfo.ts) helper
+- Helpers [dateToString](src/helpers/dateToString.ts), [dateFromString](src/helpers/dateFromString.ts). Added support **MMM** format
+- **Text based controls**. Added `$options` `prefix` & `postfix`
+- Controls **Number, Date, Calendar** are locale based and depeneds on [localeInfo](src/objects/localeInfo.ts) helper
 - Added elements
   - [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
   - [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
 - Added [helpers](README.md#helpers)
-  - [`onScroll`](src/helpers/onScroll.ts)
-  - [`localeInfo`](src/objects/localeInfo.ts)
-  - [`mathSumFloat`](src/helpers/mathSumFloat.ts)
+  - [onScroll](src/helpers/onScroll.ts)
+  - [localeInfo](src/objects/localeInfo.ts)
+  - [mathSumFloat](src/helpers/mathSumFloat.ts)
 
 **Fixes**:
 
-- Helper. promiseWait. Callback called before time end
-- Popup with arrow. Firefox bug: css filter `drop-shadow` works wrong with angle 180.0
-- SpinElement. Impossible to override color via applying css-var to body `--spin-2`
+- helper [promiseWait](src/helpers/promiseWait.ts). _Callback called before time end_
+- [PopupElement](src/popup/popupElement.ts) with arrow. _Firefox bug: css filter `drop-shadow` works wrong with angle 180.0_
+- [SpinElement](src/spinElement.ts). _Impossible to override color via applying css-var to body `--spin-2`_
 
 ## 0.2.0 (Dec 09, 2022)
 
 **New**:
 
-- Controls throws error if attr [validations] has object-key to undefined value
+- **Controls** throws error if attr [validations] has object-key to undefined value
 - Added [mask](http://localhost:8015/control/text) for text based controls
 - Added elements
   - [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
   - [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
 - Added [helpers](README.md#helpers)
-  - [`dateCopyTime`](src/helpers/dateCopyTime.ts)
-  - [`dateFromString`](src/helpers/dateFromString.ts)
-  - [`dateToString`](src/helpers/dateToString.ts)
-  - [`onScrollStop`](src/helpers/onScrollStop.ts)
-  - [`scrollCarousel`](src/helpers/scrollCarousel.ts)
+  - [dateCopyTime](src/helpers/dateCopyTime.ts)
+  - [dateFromString](src/helpers/dateFromString.ts)
+  - [dateToString](src/helpers/dateToString.ts)
+  - [onScrollStop](src/helpers/onScrollStop.ts)
+  - [scrollCarousel](src/helpers/scrollCarousel.ts)
 
 **Fixes**:
 
-- Controls. [Blue highlight blink on tap action](https://stackoverflow.com/questions/25704650/disable-blue-highlight-when-touch-press-object-with-cursorpointer)
-- Controls. Click on button `Clear` throws console.error
-- Controls. Validation gets undefined value but must be skipped in this case (value is undefined only for messages or validations.required)
-- [SelectControl](src/controls/select.ts). Click on custom list-item with nested span doesn't call click-event
-- [SelectControl](src/controls/select.ts). No scroll to selected element at first opening
-- [SelectControl](src/controls/select.ts). Sometimes menu isn't opened
-- [SelectControl](src/controls/select.ts). `noItems` appeared on 2nd menu opening when user created a new value
-- Helper. observer. onChange fired even date.setHours didn't change value
+- **Controls**. [Blue highlight blink on tap action](https://stackoverflow.com/questions/25704650/disable-blue-highlight-when-touch-press-object-with-cursorpointer)
+- **Controls**. _Click on button `Clear` throws console.error_
+- **Controls**. _Validation gets undefined value but must be skipped in this case (value is undefined only for messages or validations.required)_
+- [SelectControl](src/controls/select.ts). _Click on custom list-item with nested span doesn't call click-event_
+- [SelectControl](src/controls/select.ts). _No scroll to selected element at first opening_
+- [SelectControl](src/controls/select.ts). _Sometimes menu isn't opened_
+- [SelectControl](src/controls/select.ts). _`noItems` appeared on 2nd menu opening when user created a new value_
+- helper [observer](src/helpers/observer.ts). _onChange fired even date.setHours didn't change value_
 
 ## 0.1.2 (Oct 4, 2022)
 
@@ -228,21 +228,21 @@
 **BREAKING CHANGES**:
 
 - helpers reorganized to WUPHelpers (`WUPHelpers.isEqual`, `WUPHelpers.focusFirst` etc.)
-- PopupElement. Renamed $arrowElement to $refArrow
+- [PopupElement](src/popup/popupElement.ts). Renamed `$arrowElement` to `$refArrow`
 
 **New**:
 
 - Optimized for webpack (via [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free))
 - Optimized memory consumption (removed auto-bind functions)
 - Added [helpers](README.md#helpers)
-  - [`animateDropdown`](src/helpers/animateDropdown.ts)
-  - [`findScrollParentAll`](src/helpers/findScrollParent.ts)
-  - [`objectClone`](src/helpers/objectClone.ts)
-  - [`isIntoView`](src/helpers/isIntoView.ts)
-  - [`scrollIntoView`](src/helpers/scrollIntoView.ts)
-  - [`stringLowerCount`](src/helpers/stringCaseCount.ts)
-  - [`stringUpperCount`](src/helpers/stringCaseCount.ts)
-  - [`onSpy`](src/helpers/onSpy.ts)
+  - [animateDropdown](src/helpers/animateDropdown.ts)
+  - [findScrollParentAll](src/helpers/findScrollParent.ts)
+  - [objectClone](src/helpers/objectClone.ts)
+  - [isIntoView](src/helpers/isIntoView.ts)
+  - [scrollIntoView](src/helpers/scrollIntoView.ts)
+  - [stringLowerCount](src/helpers/stringCaseCount.ts)
+  - [stringUpperCount](src/helpers/stringCaseCount.ts)
+  - [onSpy](src/helpers/onSpy.ts)
 - Added elements
   - [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
   - [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
@@ -252,10 +252,10 @@
   - [CheckControl](src/controls/check.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/check)
   - [RadioControl](src/controls/radio.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/radio)
   - [SelectControl](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
-- Helper [nestedProperty](src/helpers/nestedProperty.ts): added option `out.hasProp`
-- Helper [promiseWait](src/helpers/promiseWait.ts): added option `smartOrCallback` to prevent useless pending on already resolved promises
+- helper [nestedProperty](src/helpers/nestedProperty.ts): added option `out.hasProp`
+- helper [promiseWait](src/helpers/promiseWait.ts): added option `smartOrCallback` to prevent useless pending on already resolved promises
 
-- [`PopupElement`](src/popup/popupElement.ts)
+- [PopupElement](src/popup/popupElement.ts)
   - Renamed $arrowElement to $refArrow
   - Added $refresh() - to force update/recalc position when nested content is changed
   - Added option **animation** with animation-drawer
@@ -267,35 +267,35 @@
 
 ## 0.0.5 (Apr 4, 2022)
 
-- Fixed helper [`onFocusLost`](src/helpers/onFocusLost.ts): missed callback when user clicks several times fast
-- [`PopupElement`](src/popup/popupElement.ts)
+- Fixed helper [onFocusLost](src/helpers/onFocusLost.ts): missed callback when user clicks several times fast
+- [PopupElement](src/popup/popupElement.ts)
   - Fixed behavior on target-remove
   - Deprecated shadow mode
   - Fixed half-pixel issue on arrow
 
 ## 0.0.4 (Apr 1, 2022)
 
-- [`PopupElement`](src/popup/popupElement.ts)
+- [PopupElement](src/popup/popupElement.ts)
   - Fixed $options.offset
   - Fixed behavior on target-remove
-- Added helper [`onSpy`](src/helpers/onSpy.ts) to spy on method-call
+- Added helper [onSpy](src/helpers/onSpy.ts) to spy on method-call
 
 ## 0.0.3 (Mar 29, 2022)
 
-- Added [`PopupElement`](src/popup/popupElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
+- Added [PopupElement](src/popup/popupElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
 - Added [helpers](README.md#helpers)
-  - [`stringPrettify`](src/helpers/stringPrettify.ts)
-  - [`onEvent`](src/helpers/onEvent.ts)
-  - [`onFocusGot`](src/helpers/onFocusGot.ts)
-  - [`onFocusLost`](src/helpers/onFocusLost.ts)
-  - [`observer`](src/helpers/observer.ts)
-  - [`findScrollParent`](src/helpers/findScrollParent.ts)
+  - [stringPrettify](src/helpers/stringPrettify.ts)
+  - [onEvent](src/helpers/onEvent.ts)
+  - [onFocusGot](src/helpers/onFocusGot.ts)
+  - [onFocusLost](src/helpers/onFocusLost.ts)
+  - [observer](src/helpers/observer.ts)
+  - [findScrollParent](src/helpers/findScrollParent.ts)
 - Removed helper `detectFocusLeft` in favor `onFocusLost`
 
 ## 0.0.2 (Nov 30, 2021)
 
 - Added [helpers](README.md#helpers)
   - `detectFocusLeft`
-  - [`focusFirst`](src/helpers/focusFirst.ts)
-  - [`nestedProperty.set/get`](src/helpers/nestedProperty.ts)
-  - [`promiseWait`](src/helpers/promiseWait.ts)
+  - [focusFirst](src/helpers/focusFirst.ts)
+  - [nestedProperty.set/get](src/helpers/nestedProperty.ts)
+  - [promiseWait](src/helpers/promiseWait.ts)

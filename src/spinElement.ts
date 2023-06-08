@@ -372,6 +372,7 @@ export function spinUseDualRing(cls: typeof WUPSpinElement): void {
   );
 }
 
+/** Apply on class to change spinner-style */
 export function spinUseTwinDualRing(cls: typeof WUPSpinElement): void {
   spinSetStyle(
     cls,
