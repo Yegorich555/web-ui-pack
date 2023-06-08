@@ -951,7 +951,7 @@ export default class WUPCalendarControl<
     }
   }
 
-  protected override clearValue(): void {
+  override clearValue(): void {
     super.clearValue();
     this.$isEmpty && this.selectItem(undefined);
   }

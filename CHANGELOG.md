@@ -10,8 +10,10 @@
 
 **New/Features**:
 
-- **Controls**. Internal `setValue` has argument reason now
-- **Controls**. Event `$change` and callback `$onChange` has prop `detail: SetValueReason` now
+- **Controls**
+  - Internal `setValue` has argument `reason` now
+  - Event `$change` and callback `$onChange` has prop `detail: SetValueReason` now
+  - Added `$defaults.storage` and `$options.skey` to store/get value in different storages `local/session/url`
 - **Glolbal**. Added JSDoc comments for `jsx/tsx` files (previously hovering on `<wup-text>` showed nothing)
 
 ## 0.6.0 (May 19, 2023)

@@ -986,7 +986,7 @@ export default abstract class WUPBaseControl<
           v = window.sessionStorage.getItem(key);
           break;
         case "url":
-          v = new URLSearchParams(window.location.search).get(decodeURIComponent(key));
+          v = new URLSearchParams(window.location.search).get(decodeURIComponent(key).replace(/\+/g, " ")); // regex require for form-url-decode 's+t' => 's t'
           v = v != null ? decodeURIComponent(v) : v;
           break;
         default:
@@ -1003,38 +1003,36 @@ export default abstract class WUPBaseControl<
   /** Save value to storage storage according to options `skey`, `storage` and `name` */
   protected storageSet(v: ValueType | undefined, key: string): void {
     try {
-      if (key) {
-        let strg: Storage | Pick<Storage, "removeItem" | "setItem">;
-        switch (this._opts.storage) {
-          case "session":
-            strg = window.sessionStorage;
-            break;
-          case "url":
-            {
-              const url = new URL(window.location.href);
-              strg = {
-                removeItem: (k) => {
-                  url.searchParams.delete(k);
-                  window.history.replaceState(null, "", url); // OR window.history.pushState(null, null, url);
-                },
-                setItem: (k, val) => {
-                  url.searchParams.set(k, val);
-                  window.history.replaceState(null, "", url); // OR window.history.pushState(null, null, url);
-                },
-              };
-            }
-            break;
-          default:
-            strg = window.localStorage;
-            break;
-        }
+      let strg: Storage | Pick<Storage, "removeItem" | "setItem">;
+      switch (this._opts.storage) {
+        case "session":
+          strg = window.sessionStorage;
+          break;
+        case "url":
+          {
+            const url = new URL(window.location.href);
+            strg = {
+              removeItem: (k) => {
+                url.searchParams.delete(k);
+                window.history.replaceState(null, "", url); // OR window.history.pushState(null, null, url);
+              },
+              setItem: (k, val) => {
+                url.searchParams.set(k, val);
+                window.history.replaceState(null, "", url); // OR window.history.pushState(null, null, url);
+              },
+            };
+          }
+          break;
+        default:
+          strg = window.localStorage;
+          break;
+      }
 
-        if (this.#ctr.$isEmpty(v)) {
-          strg.removeItem(key);
-        } else {
-          const sv = this.valueToUrl(v!);
-          sv === null ? strg.removeItem(key) : strg.setItem(key, sv);
-        }
+      if (this.#ctr.$isEmpty(v)) {
+        strg.removeItem(key);
+      } else {
+        const sv = this.valueToUrl(v!);
+        sv === null ? strg.removeItem(key) : strg.setItem(key, sv);
       }
     } catch (err) {
       this.throwError(err); // re-throw error when storage is full
@@ -1075,7 +1073,7 @@ export default abstract class WUPBaseControl<
 
   #prevValue = this.#value;
   /* Called when user pressed Esc-key or button-clear */
-  protected clearValue(): void {
+  clearValue(): void {
     const was = this.#value;
 
     let v: ValueType | undefined;

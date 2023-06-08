@@ -335,13 +335,15 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     });
 
     test("skey", async () => {
+      const onThrowErr = jest.spyOn(WUPBaseControl.prototype, "throwError");
       if (cfg.attrs?.skey?.skip) {
-        return;
+        return; // for password isn't allowed
       }
       // local storage
       const sSet = jest.spyOn(Storage.prototype, "setItem");
       const sGet = jest.spyOn(Storage.prototype, "getItem");
       const sRem = jest.spyOn(Storage.prototype, "removeItem");
+      el.$options.clearActions = ClearActions.clear | 0;
       el.$options.name = "name1";
       el.$options.skey = true;
       el.$value = cfg.initValues[0].value;
@@ -359,6 +361,26 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(sGet).toBeCalledTimes(1);
       expect(sGet).lastCalledWith("name1");
       expect(el.$initValue).toStrictEqual(cfg.initValues[0].value);
+      expect(onThrowErr).not.toBeCalled();
+
+      // clearing value
+      el.clearValue();
+      await h.wait(1);
+      expect(sRem).toBeCalledTimes(1);
+      expect(onThrowErr).not.toBeCalled();
+
+      // storage is full
+      if (cfg.initValues[1].urlValue !== null) {
+        sSet.mockImplementationOnce(() => {
+          throw new Error("Storage is exceeded");
+        });
+        el.$value = cfg.initValues[1].value;
+        await expect(h.wait()).rejects.toThrow();
+        el.$value = cfg.initValues[0].value;
+        await expect(h.wait()).resolves.not.toThrow(); // because exception was once
+      }
+      onThrowErr.mockClear();
+      await h.wait();
 
       // session storage
       el.$options.storage = "session";
@@ -366,8 +388,9 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       await h.wait(1);
       jest.clearAllMocks();
       expect(el.$initValue).toStrictEqual(cfg.initValues[0].value);
-      el.$value = cfg.initValues[1].value;
-      await h.wait(1);
+      el.$value = cfg.initValues[0].value;
+      el.$value = cfg.initValues[1].value; // to call change event
+      await h.wait();
       if (cfg.initValues[1].urlValue === null) {
         expect(sRem).toBeCalledTimes(1);
         expect(sRem).lastCalledWith("name2");
@@ -388,10 +411,32 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(sGet).toBeCalledTimes(1);
       expect(sGet).lastCalledWith("name2");
       expect(el.$initValue).toStrictEqual(cfg.initValues[2].value);
+      expect(onThrowErr).not.toBeCalled();
 
-      // todo test Url
       window.localStorage.clear();
       window.sessionStorage.clear();
+      jest.clearAllMocks();
+
+      // browser url
+      cfg.onCreateNew?.call(cfg, el);
+      el.$options.storage = "url";
+      el.$options.skey = "su";
+      await h.wait(1);
+      expect(window.location.href).toBe("http://localhost/");
+      const testValues = cfg.initValues[1];
+      el.$value = testValues.value;
+      await h.wait(1);
+      const strVal = testValues.urlValue === undefined ? (testValues.value as any).toString() : testValues.urlValue;
+      const params = strVal == null ? "" : `?su=${window.encodeURIComponent(strVal).replace(/%20/g, "+")}`;
+      expect(window.location.href).toBe(`http://localhost/${params}`);
+      // getItem on init
+      el = document.body.appendChild(document.createElement(el.tagName)) as WUPBaseControl;
+      cfg.onCreateNew?.call(cfg, el);
+      el.$options.storage = "url";
+      el.$options.skey = "su";
+      await h.wait(1);
+      expect(el.$initValue).toStrictEqual(cfg.initValues[1].urlValue === null ? undefined : testValues.value);
+      expect(onThrowErr).not.toBeCalled();
     });
   });
 

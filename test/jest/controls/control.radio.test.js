@@ -1,4 +1,5 @@
 import { WUPRadioControl } from "web-ui-pack";
+import WUPBaseControl from "web-ui-pack/controls/baseControl";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
 
@@ -195,16 +196,21 @@ describe("control.radio", () => {
   });
 
   test("storage", async () => {
+    let el = testEl;
+    const onThrowErr = jest.spyOn(WUPBaseControl.prototype, "throwError");
+    const onConsoleErr = h.mockConsoleError();
     // with falsy value
     const items = getItems();
     items[0].value = null;
 
-    let el = testEl;
     el.$options.skey = "rd";
     el.$options.items = items;
+    await h.wait(1);
     el.$value = null;
     await h.wait(1);
     expect(window.localStorage.getItem("rd")).toBe("null");
+    expect(onThrowErr).not.toBeCalled();
+    expect(onConsoleErr).not.toBeCalled();
 
     el = document.body.appendChild(document.createElement(el.tagName));
     el.$options.items = items;
@@ -213,14 +219,20 @@ describe("control.radio", () => {
     await h.wait(1);
     expect(el.$value).toBe(null);
     window.localStorage.clear();
+    await h.wait();
+    expect(onConsoleErr).not.toBeCalled();
+    expect(onThrowErr).not.toBeCalled();
 
     // value is complex object
     items[0].value = { name: "Serge" };
     el = document.body.appendChild(document.createElement(el.tagName));
     el.$options.items = items;
+    await h.wait(1);
     el.$options.skey = "rd";
     await h.wait(1);
     el.$value = items[0].value;
     expect(() => jest.advanceTimersByTime(1000)).toThrow(); // complex value isn't supported
+    expect(onThrowErr).toBeCalled();
+    // todo issue here when value is complex object expect(onConsoleErr).not.toBeCalled();
   });
 });
