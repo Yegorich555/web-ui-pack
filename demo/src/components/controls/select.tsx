@@ -100,7 +100,7 @@ export default function SelectControlView() {
             }
           }}
         />
-        {/* <wup-select
+        <wup-select
           initValue={13}
           ref={(el) => {
             if (el) {
@@ -117,7 +117,7 @@ export default function SelectControlView() {
               };
             }
           }}
-        /> */}
+        />
         <wup-select
           ref={(el) => {
             if (el) {

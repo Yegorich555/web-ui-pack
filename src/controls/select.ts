@@ -316,10 +316,6 @@ export default class WUPSelectControl<
     } else {
       // case1: attr [initValue] > parse > setValue
       // case2: $value > setValue
-      /* todo issue
-         el.$value = 11;
-         el.$initValue = 13; it overrides $value from above!
-      */
       this._onPendingInitValue = () => super.setupInitValue(propsChanged);
     }
   }
@@ -333,13 +329,11 @@ export default class WUPSelectControl<
 
     if (v) {
       this.$refInput.setAttribute("aria-busy", true);
-      const wasDisabled = this._opts.disabled; // todo looks useless
       const refSpin = this.renderSpin();
       this.$refInput.readOnly = true;
       this.#stopPending = () => {
         this.$refInput.readOnly = this.$isReadOnly;
         this.#stopPending = undefined;
-        this.$options.disabled = wasDisabled;
         this.$refInput.removeAttribute("aria-busy");
         refSpin.remove();
       };
