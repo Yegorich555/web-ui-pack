@@ -27,7 +27,9 @@ const pathThrough = <R>(fn: () => R): Promise<R> =>
     resolve(fn());
   });
 
-const isObject = (obj: any): boolean => typeof obj === "object" && obj !== null && !(obj instanceof HTMLElement);
+/** Returs true if object is valid Record<string, any> and need to iterate props */
+const isRecord = (obj: any): boolean =>
+  obj !== null && typeof obj === "object" && !(obj instanceof HTMLElement) && !(obj instanceof Promise);
 const isDate = (obj: any): boolean => Object.prototype.toString.call(obj) === "[object Date]";
 
 // #endregion
@@ -258,7 +260,7 @@ function make<T extends object>(
         // prev can be Proxy or Raw
         // next can be Proxy or Raw
         lstObserved.get(prev)?.parentRefs.delete(ref);
-        if (isObject(next)) {
+        if (isRecord(next)) {
           next = make(next, { key: prop as string, ref });
         }
       }
@@ -278,7 +280,7 @@ function make<T extends object>(
       }
 
       // remove parent from this object
-      if (isObject(prev)) {
+      if (isRecord(prev)) {
         const v = proxy[prop as keyof T] as unknown as Observer.Observed;
         (lstObserved.get(v) as Ref<object>).parentRefs.delete(ref);
       }
@@ -311,7 +313,7 @@ function make<T extends object>(
   const proxy = new Proxy(obj, proxyHandler);
   lstObserved.set(proxy, ref as Ref<object>);
   lstObjProxy.set(obj, proxy);
-  if (isObject(obj) && obj.valueOf() === obj) {
+  if (isRecord(obj) && obj.valueOf() === obj) {
     // warn: possible error if object isn't extensible
     Object.defineProperty(proxy, "valueOf", { value: () => obj.valueOf, enumerable: false });
   }
@@ -320,7 +322,7 @@ function make<T extends object>(
   // it doesn't required because object keys is null: if (!isDate && !(obj instanceof Map || obj instanceof Set)) {
   Object.keys(obj).forEach((k) => {
     const v = obj[k] as any;
-    if (isObject(v)) {
+    if (isRecord(v)) {
       proxy[k] = make(v, { ref, key: k }) as never;
     }
   });
@@ -371,5 +373,3 @@ export default observer;
   obj.v = 2; // propsChanged
   obj.v = 1 // props not changed but event is called (because we use async)
 */
-
-// todo it doesn't work when option is Promise.resolve(null)

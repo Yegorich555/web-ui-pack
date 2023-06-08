@@ -733,4 +733,12 @@ describe("helper.observer", () => {
     expect(Object.keys(raw)).toHaveLength(2);
     expect(Object.keys(obj)).toHaveLength(2);
   });
+
+  test("ignore complex instanses", async () => {
+    const raw = { pr: Promise.resolve(null), el: document.createElement("div") };
+    const obj = observer.make(raw);
+    await expect(obj.pr).resolves.not.toThrow();
+    expect(observer.isObserved(obj.pr)).toBe(false);
+    expect(observer.isObserved(obj.el)).toBe(false);
+  });
 });
