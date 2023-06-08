@@ -262,15 +262,15 @@ export default abstract class WUPBaseComboControl<
       i.setAttribute("aria-owns", menuId);
       i.setAttribute("aria-controls", menuId);
 
-      const wasFcs = this.$isFocused;
-      await this.renderMenu(p, menuId);
-
-      const fcs = this.$isFocused;
-      if (!fcs && wasFcs) {
-        this.#isShown = false;
-        this.removePopup(); // fix case when user waited for loading and moved focus to another
-        return null;
-      }
+      // const wasFcs = this.$isFocused;
+      this.renderMenu(p, menuId);
+      // rollback the logic if renderMenu() returns Promise
+      // const fcs = this.$isFocused;
+      // if (!fcs && wasFcs) {
+      //   this.#isShown = false;
+      //   this.removePopup(); // fix case when user waited for loading and moved focus to another
+      //   return null;
+      // }
       this.appendChild(p); // WARN: it will show onInit
       // eslint-disable-next-line no-promise-executor-return
       await new Promise((res) => setTimeout(res)); // wait for appending to body so size is defined and possible to scroll
@@ -311,7 +311,7 @@ export default abstract class WUPBaseComboControl<
 
   protected _isHiding?: true;
   protected async goHideMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): Promise<boolean> {
-    if (!this.$refPopup || this._isHiding) {
+    if (!this.#isShown || this._isHiding) {
       return false;
     }
     if (!this.canHideMenu(hideCase, e)) {
@@ -319,7 +319,7 @@ export default abstract class WUPBaseComboControl<
     }
     this.#isShown = false;
     this._isHiding = true;
-    await this.$refPopup.$hide();
+    await this.$refPopup?.$hide();
     delete this._isHiding;
     if (this.#isShown) {
       return false; // possible when popup opened again during the animation

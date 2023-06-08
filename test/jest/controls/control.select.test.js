@@ -411,6 +411,17 @@ describe("control.select", () => {
     expect(el.$isShown).toBe(false);
     expect(el.$refPopup).toBeFalsy();
 
+    // cover hide after show while menu is opening
+    expect(el.$refPopup).toBeFalsy();
+    const renderMenu = jest.spyOn(WUPSelectControl.prototype, "renderMenu");
+    el.$showMenu();
+    expect(renderMenu).toBeCalledTimes(1);
+    el.$hideMenu();
+    await h.wait(10);
+    expect(el.$isShown).toBe(false);
+    await h.wait();
+    expect(el.$isShown).toBe(false);
+
     // case: popups are visible and not closed (if change focus by Tab)
     const orig = window.getComputedStyle;
     jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
