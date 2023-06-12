@@ -8,8 +8,16 @@ declare global {
     interface ValidityMap extends WUP.BaseControl.ValidityMap {}
     interface Defaults<T = any, VM = ValidityMap> extends WUP.BaseControl.Defaults<T, VM> {}
     interface Options<T = any, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, Defaults<T, VM> {
-      /** Items showed as radio-buttons */
-      items: WUP.Select.MenuItems<T> | (() => WUP.Select.MenuItems<T>);
+      /** Items showed as radio-buttons
+       * @tutorial Troubleshooting
+       * * array items is converted to Proxy (observer) so
+       * ```js
+       * const items = [text: "1", value: {name: "Janny"}]
+       * el.$options.items = items;
+       * setTimeout(()=> console.warn(el.$options.items === items)},1) // returns 'false'
+       * setTimeout(()=> console.warn(el.$options.items[0].value === items[0].value)},1) // returns 'true'
+       * ``` */
+      items: WUP.Select.MenuItems<T> | (() => WUP.Select.MenuItems<T>); // NiceToHave: remove items from observed options to get/set to avoid Proxy issues
       /** Reversed-style (radio+label for true vs label+radio)
        * @defaultValue false */
       reverse?: boolean;
@@ -36,7 +44,7 @@ declare global {
 }
 
 interface ExtInputElement extends HTMLInputElement {
-  _value: any;
+  _index: number;
 }
 
 /** Form-control with radio buttons
@@ -223,7 +231,7 @@ export default class WUPRadioControl<
     if (this.$isReadOnly) {
       e.target.checked = !e.target.checked;
     } else {
-      this.setValue(e.target._value, SetValueReasons.userInput);
+      this.setValue(this.getItems()[e.target._index].value, SetValueReasons.userInput);
     }
   }
 
@@ -253,14 +261,13 @@ export default class WUPRadioControl<
       return;
     }
     const nm = this.#ctr.$uniqueId + (Date.now() % 1000);
-    const arrLi = arr.map((item) => {
+    const arrLi = arr.map((_item, i) => {
       const lbl = document.createElement("label");
       const inp = lbl.appendChild(document.createElement("input")) as ExtInputElement;
       const tit = lbl.appendChild(document.createElement("span"));
       this.$refItems.push(inp);
       inp.id = this.#ctr.$uniqueId;
-      inp._value = item.value;
-
+      inp._index = i;
       lbl.setAttribute("for", inp.id);
       inp.type = "radio";
       inp.name = nm; // required otherwise tabbing, arrow-keys doesn't work inside single fieldset
@@ -286,7 +293,7 @@ export default class WUPRadioControl<
       // eslint-disable-next-line prefer-destructuring
       this.$refInput = this.$refItems[0] || this.$refInput;
     } else {
-      const item = this.$refItems.find((inp) => inp._value === v);
+      const item = this.$refItems[this.getItems().findIndex((a) => a.value === v)];
       if (!item) {
         console.error(`${this.tagName}${this._opts.name ? `[${this._opts.name}]` : ""}. Not found in items`, {
           items: this._opts.items,

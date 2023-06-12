@@ -8,6 +8,7 @@
 - **Combobox controls (Select, Date, Time)**. _Sometimes menu not scrolled to selected item by opening_
 - [SwitchControl](src/controls/switch.ts). [CheckControl](src/controls/check.ts). _form.$initModel is ignored_
 - helper [observer](src/helpers/observer.ts). _Exception on promise-property_
+- [RadioControl](src/controls/radio.ts). _$options.items with object-values doesn't work_
 
 **New/Features**:
 

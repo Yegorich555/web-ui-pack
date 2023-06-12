@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 import { WUPRadioControl } from "web-ui-pack";
 import WUPBaseControl from "web-ui-pack/controls/baseControl";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
@@ -85,6 +86,31 @@ describe("control.radio", () => {
     expect(onErr.mock.lastCall[0]).toMatchInlineSnapshot(
       `"Value not found according to attribute [items] in 'window.'"`
     );
+  });
+
+  test("options.items is complex object", async () => {
+    const onErr = h.mockConsoleError();
+    const el = testEl;
+    const items = [
+      { text: "a1", value: { name: "Dik" } },
+      { text: "a2", value: { name: "Yomma" } },
+    ];
+    el.$options.items = items;
+    jest.advanceTimersByTime(1); // to apply changes
+    el.$value = "hi";
+    await h.wait();
+    expect(onErr).toBeCalledTimes(1); // value not found in itmes
+    expect(el.$options.items).not.toBe(items); // because $options.items is Proxy
+
+    onErr.mockClear();
+    el.$value = items[1].value;
+    await h.wait();
+    expect(onErr).not.toBeCalled();
+
+    onErr.mockClear();
+    el.$value = el.$options.items[0].value;
+    await h.wait();
+    expect(onErr).not.toBeCalled();
   });
 
   test("parsing $initValue", () => {
@@ -230,9 +256,11 @@ describe("control.radio", () => {
     await h.wait(1);
     el.$options.skey = "rd";
     await h.wait(1);
+    onConsoleErr.mockClear();
+    // eslint-disable-next-line prefer-destructuring
     el.$value = items[0].value;
     expect(() => jest.advanceTimersByTime(1000)).toThrow(); // complex value isn't supported
     expect(onThrowErr).toBeCalled();
-    // todo issue here when value is complex object expect(onConsoleErr).not.toBeCalled();
+    expect(onConsoleErr).not.toBeCalled();
   });
 });
