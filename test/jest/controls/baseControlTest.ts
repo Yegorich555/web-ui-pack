@@ -1,7 +1,7 @@
 /* eslint-disable jest/no-conditional-expect */
 /* eslint-disable jest/no-export */
 import WUPBaseComboControl from "web-ui-pack/controls/baseCombo";
-import WUPBaseControl, { ClearActions, ValidationCases } from "web-ui-pack/controls/baseControl";
+import WUPBaseControl, { ClearActions, ValidationCases, ValidateFromCases } from "web-ui-pack/controls/baseControl";
 import * as h from "../../testHelper";
 import { BaseTestOptions } from "../../testHelper";
 
@@ -605,10 +605,11 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$initValue = cfg.initValues[0].value;
       el.$options.validationCase = ValidationCases.onInit | 0;
       el.$options.validations = { custom: () => "custom err here", required: true, c2: () => false };
+      // @ts-expect-error
       const onVld = jest.spyOn(el.$options.validations!, "custom");
       await h.wait();
       expect(el.$refError).toBeDefined();
-      expect(onVld).lastCalledWith(el.$initValue, el);
+      expect(onVld).lastCalledWith(el.$initValue, el, ValidateFromCases.onInit);
 
       // onChangeSmart
       el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;

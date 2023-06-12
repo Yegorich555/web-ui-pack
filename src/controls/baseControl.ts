@@ -64,7 +64,7 @@ export const enum ValidateFromCases {
   onManualCall,
 }
 
-type StoredItem = HTMLLIElement & { _wupVld: (v: any) => string | false };
+type StoredItem = HTMLLIElement & { _wupVld: (v: any, reason: ValidateFromCases | null) => string | false };
 type StoredRefError = HTMLElement & { _wupVldItems?: StoredItem[] };
 
 declare global {
@@ -78,6 +78,11 @@ declare global {
       /** If $value is empty shows message 'This field is required` */
       required: boolean;
     }
+    type ValidityFunction<T> = (
+      value: T | undefined,
+      control: IBaseControl,
+      reason: ValidateFromCases | null
+    ) => false | string;
 
     interface Defaults<T = any, VM = ValidityMap> {
       /** When to validate control and show error. Validation by onSubmit impossible to disable
@@ -106,7 +111,13 @@ declare global {
         };
        * ``` */
       validationRules: {
-        [K in keyof VM]: (this: IBaseControl, value: T, setValue: VM[K], control: IBaseControl) => false | string;
+        [K in keyof VM]: (
+          this: IBaseControl,
+          value: T,
+          setValue: VM[K],
+          control: IBaseControl,
+          reason: ValidateFromCases | null
+        ) => false | string;
       };
       /** Rules enabled for current control (related to $defaults.validationRules)
        * @example
@@ -119,9 +130,7 @@ declare global {
        * ```
        * @tutorial Troubleshooting
        ** If setup validations via attr it doesn't affect on $options.validations directly. Instead use el.validations getter instead */
-      validations?:
-        | { [K in keyof VM]?: VM[K] | ((value: T | undefined, control: IBaseControl) => false | string) }
-        | { [k: string]: (value: T | undefined, control: IBaseControl) => false | string };
+      validations?: { [K in keyof VM]?: VM[K] | ValidityFunction<T> } | { [k: string]: ValidityFunction<T> };
       /** Storage for saving value
        * @see {@link WUP.BaseControl.Options.storekey}
        * @defaultValue "local" */
@@ -733,19 +742,21 @@ export default abstract class WUPBaseControl<
   }
 
   /** Returns validations functions ready for checking */
-  protected get validationsRules(): Array<(v: ValueType | undefined) => string | false> {
+  protected get validationsRules(): Array<
+    (v: ValueType | undefined, reason: ValidateFromCases | null) => string | false
+  > {
     const vls = this.validations;
 
     if (!vls) {
       return [];
     }
 
-    const check = (v: ValueType | undefined, k: string | number): string | false => {
+    const check = (v: ValueType | undefined, k: string | number, reason: ValidateFromCases | null): string | false => {
       const vl = vls[k as "required"];
 
       let err: false | string;
       if (typeof vl === "function") {
-        err = vl(v as any, this);
+        err = vl(v as any, this, reason);
       } else {
         const rules = this.#ctr.$defaults.validationRules;
         const r = rules[k as "required"];
@@ -753,7 +764,7 @@ export default abstract class WUPBaseControl<
           const n = this._opts.name ? `.[${this._opts.name}]` : "";
           throw new Error(`${this.tagName}${n}. Validation rule [${k}] is not found`);
         }
-        err = r.call(this, v as unknown as string, vl as boolean, this);
+        err = r.call(this, v as unknown as string, vl as boolean, this, reason);
       }
 
       if (err !== false) {
@@ -771,7 +782,12 @@ export default abstract class WUPBaseControl<
         if (k2 === "required") return 1;
         return 0;
       })
-      .map((key) => ({ [key]: (v: ValueType | undefined) => check.call(self, v, key) }[key])); // make object to create named function
+      .map(
+        (key) =>
+          ({ [key]: (v: ValueType | undefined, reason: ValidateFromCases | null) => check.call(self, v, key, reason) }[
+            key
+          ])
+      ); // make object to create named function
     return arr;
   }
 
@@ -797,7 +813,7 @@ export default abstract class WUPBaseControl<
     this._isValid = !vls.some((fn) => {
       // process empty value only on rule 'required'; for others skip if value is empty
       const skipRule = isEmpty && fn.name[0] !== "_" && fn.name !== "required"; // undefined only for 'required' rule; for others: skip if value = undefined
-      const err = !skipRule && fn(v);
+      const err = !skipRule && fn(v, fromCase);
       if (err) {
         this._errName = fn.name;
         errMsg = err;
@@ -855,7 +871,7 @@ export default abstract class WUPBaseControl<
         const li = ul.appendChild(document.createElement("li")) as StoredItem;
         li._wupVld = vls[i];
         p._wupVldItems.push(li);
-        const err = vls[i](undefined);
+        const err = vls[i](undefined, null);
         if (err) {
           li.textContent = err;
         } else {
@@ -871,7 +887,7 @@ export default abstract class WUPBaseControl<
     }
 
     const v = this.$value;
-    p._wupVldItems.forEach((li) => this.setAttr.call(li, "valid", li._wupVld(v) === false, true));
+    p._wupVldItems.forEach((li) => this.setAttr.call(li, "valid", li._wupVld(v, null) === false, true));
   }
 
   protected renderError(): WUPPopupElement {
@@ -1138,4 +1154,3 @@ expected 11 but got 13
 // NiceToHave when control is disabled need to show tooltip with reason
 // NiceToHave when control is readonly need to show tooltip with reason
 // todo when control readonly/disabled/required - need to hide button[clear]
-// todo add reason to validation function

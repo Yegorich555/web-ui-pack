@@ -76,8 +76,8 @@ export default class WUPTextareaControl<
     validationRules: {
       ...WUPTextControl.$defaults.validationRules,
       // WARN: validations min/max must depends only on visible chars
-      min: (v, setV, c) => WUPTextControl.$defaults.validationRules.min.call!(c, v?.replace(/\n/g, ""), setV, c),
-      max: (v, setV, c) => WUPTextControl.$defaults.validationRules.max.call!(c, v?.replace(/\n/g, ""), setV, c),
+      min: (v, setV, c, r) => WUPTextControl.$defaults.validationRules.min.call!(c, v?.replace(/\n/g, ""), setV, c, r),
+      max: (v, setV, c, r) => WUPTextControl.$defaults.validationRules.max.call!(c, v?.replace(/\n/g, ""), setV, c, r),
     },
   };
 
