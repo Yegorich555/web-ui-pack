@@ -120,8 +120,8 @@ declare global {
        * @tutorial Troubleshooting
        ** If setup validations via attr it doesn't affect on $options.validations directly. Instead use el.validations getter instead */
       validations?:
-        | { [K in keyof VM]?: VM[K] | ((value: T | undefined) => false | string) }
-        | { [k: string]: (value: T | undefined) => false | string };
+        | { [K in keyof VM]?: VM[K] | ((value: T | undefined, control: IBaseControl) => false | string) }
+        | { [k: string]: (value: T | undefined, control: IBaseControl) => false | string };
       /** Storage for saving value
        * @see {@link WUP.BaseControl.Options.storekey}
        * @defaultValue "local" */
@@ -745,7 +745,7 @@ export default abstract class WUPBaseControl<
 
       let err: false | string;
       if (typeof vl === "function") {
-        err = vl(v as any);
+        err = vl(v as any, this);
       } else {
         const rules = this.#ctr.$defaults.validationRules;
         const r = rules[k as "required"];
@@ -1117,7 +1117,7 @@ export default abstract class WUPBaseControl<
     if (this._opts.validationCase & ValidationCases.onFocusLost) {
       // const wasErr = !!this._errMsg;
       this.goValidate(ValidateFromCases.onFocusLost);
-      // todo test & rollback it when error will be visible over popup: for selectControl the color is changed but error not visible and menu stays opened
+      // NiceToHave test & rollback it when error will be visible over popup: for selectControl the color is changed but error not visible and menu stays opened
       // this._errMsg && !wasErr && this.focus(); // user sees validation error at first time: return focus back once
     }
   }
@@ -1134,3 +1134,8 @@ set before ready:
               el.$initValue = 13;
 expected 11 but got 13
 */
+
+// NiceToHave when control is disabled need to show tooltip with reason
+// NiceToHave when control is readonly need to show tooltip with reason
+// todo when control readonly/disabled/required - need to hide button[clear]
+// todo add reason to validation function

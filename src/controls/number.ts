@@ -376,3 +376,5 @@ export default class WUPNumberControl<
 }
 
 customElements.define(tagName, WUPNumberControl);
+
+// todo mask ##.## and value 25.## - `Incomplete value` msg but it's wrong because '.' is added automatically

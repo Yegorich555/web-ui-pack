@@ -605,8 +605,10 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$initValue = cfg.initValues[0].value;
       el.$options.validationCase = ValidationCases.onInit | 0;
       el.$options.validations = { custom: () => "custom err here", required: true, c2: () => false };
+      const onVld = jest.spyOn(el.$options.validations!, "custom");
       await h.wait();
       expect(el.$refError).toBeDefined();
+      expect(onVld).lastCalledWith(el.$initValue, el);
 
       // onChangeSmart
       el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;

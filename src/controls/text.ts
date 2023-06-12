@@ -2,6 +2,7 @@ import MaskTextInput from "./text.mask";
 import { onEvent } from "../indexHelpers";
 import { WUPcssIcon } from "../styles";
 import WUPBaseControl, { SetValueReasons } from "./baseControl";
+import IBaseControl from "./baseControl.i";
 
 const emailReg =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -834,7 +835,7 @@ export default class WUPTextControl<
   _onceErrName?: string;
   /** Called when inputValue != $value and need to show error on the fly by input-change */
   protected validateOnce(
-    rule: { [key: string]: boolean | string | ((v: any) => false | string) },
+    rule: { [key: string]: boolean | string | ((v: any, c: IBaseControl) => false | string) },
     force = false
   ): void {
     const prev = this._wasValidNotEmpty;

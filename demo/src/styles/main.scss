@@ -68,6 +68,7 @@ section {
     margin: 0;
   }
 
+  /* stylelint-disable-next-line no-descending-specificity */
   > small {
     display: block;
   }
