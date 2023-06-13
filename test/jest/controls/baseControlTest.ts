@@ -170,6 +170,22 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$value = cfg.initValues[1].value;
       jest.advanceTimersByTime(1);
       expect(spyChange).toBeCalledTimes(1);
+
+      // $initValue not override $value
+      el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
+      cfg.onCreateNew?.call(cfg, el);
+      el.$value = cfg.initValues[0].value;
+      el.$initValue = cfg.initValues[1].value;
+      jest.advanceTimersByTime(1);
+      expect(el.$value).toBe(cfg.initValues[0].value);
+      // $initValue is changeable
+      el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
+      cfg.onCreateNew?.call(cfg, el);
+      el.$initValue = cfg.initValues[0].value;
+      el.$initValue = cfg.initValues[1].value;
+      jest.advanceTimersByTime(1);
+      expect(el.$initValue).toBe(cfg.initValues[1].value);
+      expect(el.$value).toBe(el.$initValue);
     });
   });
 

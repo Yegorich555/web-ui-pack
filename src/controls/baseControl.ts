@@ -442,7 +442,7 @@ export default abstract class WUPBaseControl<
 
   set $initValue(v: ValueType | undefined) {
     const was = this.#initValue;
-    const canUpdate = !this.$isReady || (!this.$isDirty && !this.$isChanged);
+    const canUpdate = (!this.$isReady && this.$value === undefined) || (!this.$isDirty && !this.$isChanged);
     this.#initValue = v;
     if (canUpdate && !this.#ctr.$isEqual(v, was)) {
       // WARN: comparing required for SelectControl when during the parse it waits for promise
@@ -1145,13 +1145,6 @@ export default abstract class WUPBaseControl<
     e.key === "Escape" && !e.shiftKey && !e.altKey && !e.ctrlKey && this.clearValue(); // WARN: Escape works wrong with NVDA because it enables NVDA-focus-mode
   }
 }
-
-/* todo issue:
-set before ready:
-              el.$value = 11;
-              el.$initValue = 13;
-expected 11 but got 13
-*/
 
 // NiceToHave when control is disabled need to show tooltip with reason
 // NiceToHave when control is readonly need to show tooltip with reason
