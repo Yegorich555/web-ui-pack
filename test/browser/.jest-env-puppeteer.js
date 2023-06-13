@@ -34,7 +34,7 @@ async function injectFile(page, filePath) {
 }
 
 const handleConsole = (msg) => {
-  console[msg._type || "warn"]("\x1b[33m", msg._text, "\x1b[0m");
+  msg._text !== undefined && console[msg._type || "warn"]("\x1b[33m", msg._text, "\x1b[0m");
 };
 
 const handleError = (error) => {
