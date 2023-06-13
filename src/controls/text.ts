@@ -822,14 +822,15 @@ export default class WUPTextControl<
   }
 
   protected override setValue(v: ValueType | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
-    !skipInput && this.setInputValue(v);
+    !skipInput && this.setInputValue(v, reason);
     const isChanged = super.setValue(v, reason);
     this._isValid !== false && this.goHideError();
     return isChanged;
   }
 
   /** Called to update/reset value for <input/> */
-  protected setInputValue(v: ValueType | undefined | string): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected setInputValue(v: ValueType | undefined | string, reason: SetValueReasons): void {
     const str = v != null ? (v as any).toString() : "";
     this.$refInput.value = str;
     this._opts.mask && this.maskInputProcess(null);

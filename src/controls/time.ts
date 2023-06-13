@@ -712,7 +712,7 @@ export default class WUPTimeControl<
   }
 
   protected override gotFocusLost(): void {
-    this.setInputValue(this.$value); // case: h:m - try to input 01:23 => expected 1:23
+    this.setInputValue(this.$value, SetValueReasons.userSelect); // case: h:m - try to input 01:23 => expected 1:23
     super.gotFocusLost();
   }
 }

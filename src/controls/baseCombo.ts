@@ -484,12 +484,12 @@ export default abstract class WUPBaseComboControl<
 
   /* Reset input to currentValue; called on focusOut, press Escape, Enter */
   protected resetInputValue(): void {
-    this.setInputValue(this.$value);
+    this.setInputValue(this.$value, SetValueReasons.clear);
   }
 
-  protected override setInputValue(v: ValueType | undefined): void {
+  protected override setInputValue(v: ValueType | undefined, reason: SetValueReasons): void {
     const p = this.valueToInput(v);
-    super.setInputValue(p);
+    super.setInputValue(p, reason);
   }
 
   /** Called when popup must be removed (by focus out OR if control removed) */

@@ -1,7 +1,7 @@
 import onScroll from "../helpers/onScroll";
 import { mathSumFloat, onEvent } from "../indexHelpers";
 import localeInfo from "../objects/localeInfo";
-import WUPBaseControl from "./baseControl";
+import WUPBaseControl, { SetValueReasons } from "./baseControl";
 import WUPTextControl from "./text";
 
 const tagName = "wup-num";
@@ -223,7 +223,7 @@ export default class WUPNumberControl<
           }
         }
         // el.value = next;
-        this.setInputValue(v as any); // WARN: it refreshes onceError but calls valueToInput again
+        this.setInputValue(v as any, SetValueReasons.userInput); // WARN: it refreshes onceError but calls valueToInput again
         const end = pos + dp;
         el.setSelectionRange(end, end);
       }
@@ -236,9 +236,9 @@ export default class WUPNumberControl<
     return true;
   }
 
-  protected override setInputValue(v: ValueType | undefined): void {
+  protected override setInputValue(v: ValueType | undefined, reason: SetValueReasons): void {
     const txt = this.valueToInput(v);
-    super.setInputValue(txt);
+    super.setInputValue(txt, reason);
   }
 
   protected override renderControl(): void {
@@ -248,7 +248,7 @@ export default class WUPNumberControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Number.Options> | null): void {
     super.gotChanges(propsChanged as any);
-    propsChanged?.includes("format") && this.setInputValue(this.$value);
+    propsChanged?.includes("format") && this.setInputValue(this.$value, SetValueReasons.userInput);
   }
 
   protected override gotBeforeInput(e: WUP.Text.GotInputEvent): void {

@@ -1,3 +1,4 @@
+import { SetValueReasons } from "./baseControl";
 import WUPTextControl from "./text";
 import WUPTextareaInput from "./textarea.input";
 
@@ -181,7 +182,7 @@ export default class WUPTextareaControl<
 
   protected override gotFocusLost(): void {
     super.gotFocusLost();
-    this.setInputValue(this.$value); // update because newLine is replaced
+    this.setInputValue(this.$value, SetValueReasons.userInput); // update because newLine is replaced
   }
 }
 

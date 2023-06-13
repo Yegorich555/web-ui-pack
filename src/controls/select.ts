@@ -450,7 +450,7 @@ export default class WUPSelectControl<
     return item.text;
   }
 
-  protected override setInputValue(v: ValueType | undefined): void {
+  protected override setInputValue(v: ValueType | undefined, reason: SetValueReasons): void {
     if (this._cachedItems) {
       super.setInputValue(v);
     } else {
