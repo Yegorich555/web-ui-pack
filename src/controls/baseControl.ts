@@ -624,11 +624,16 @@ export default abstract class WUPBaseControl<
   /** Called on control/form Init and every time as control/form options changed. Method contains changes related to form `disabled`,`readonly` etc. */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gotFormChanges(propsChanged: Array<string> | null): void {
+    this.setupInput();
+    this.$refError && !this.canShowError && this.goHideError(); // hide error if user can't touch the control
+  }
+
+  /** Called to update disabled/readonly/autocomplete options on input */
+  setupInput(): void {
     const i = this.$refInput;
     i.disabled = this.$isDisabled;
     i.readOnly = this.$isReadOnly;
     i.autocomplete = this.$autoComplete || "off";
-    this.$refError && !this.canShowError && this.goHideError(); // hide error if user can't touch the control
   }
 
   /** Called on Init and options/attributes changes to update $initValue */

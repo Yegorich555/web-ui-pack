@@ -282,7 +282,8 @@ export default class WUPRadioControl<
     }
 
     this.$refItems[0].tabIndex = 0;
-    this.checkInput(this.$value); // required for case when user changed items
+    // when user changed items
+    setTimeout(() => this.checkInput(this.$value)); // timeout to fix case when el.$options.items=... el.$value=...
   }
 
   /** Called when need to update check-state of inputs */
@@ -304,12 +305,15 @@ export default class WUPRadioControl<
         this.$refInput = item;
       }
     }
-
+    this.setupInput();
     this.$refLabel = this.$refInput.parentElement as HTMLLabelElement;
   }
 
   protected override setValue(v: ValueType, reason: SetValueReasons): boolean | null {
-    this.$isReady && this.checkInput(v); // otherwise it will be checked from renderItems
+    if (this.$isReady) {
+      // timeout to fix case when el.$options.items=... el.$value=...
+      reason === SetValueReasons.manual ? setTimeout(() => this.checkInput(v)) : this.checkInput(v); // otherwise it will be checked from renderItems
+    }
     return super.setValue(v, reason);
   }
 

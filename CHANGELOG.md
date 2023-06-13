@@ -8,7 +8,8 @@
 - **Combobox controls (Select, Date, Time)**. _Menu border is blue when invalid + hover_
 - **Combobox controls (Select, Date, Time)**. _Sometimes menu not scrolled to selected item by opening_
 - [SwitchControl](src/controls/switch.ts). [CheckControl](src/controls/check.ts). _form.$initModel is ignored_
-- [RadioControl](src/controls/radio.ts). _$options.items with object-values doesn't work_
+- [RadioControl](src/controls/radio.ts). _`$options.items` with object-values doesn't work_
+- [RadioControl](src/controls/radio.ts). _set in a row `$options.items=...` and `$value=...` doesn't work_
 - helper [observer](src/helpers/observer.ts). _Exception on promise-property_
 
 **New/Features**:

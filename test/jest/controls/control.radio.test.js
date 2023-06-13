@@ -88,7 +88,33 @@ describe("control.radio", () => {
     );
   });
 
-  test("options.items is complex object", async () => {
+  test("$options.items & $value", () => {
+    testEl = document.body.appendChild(document.createElement(testEl.tagName));
+    const el = testEl;
+    const onErr = h.mockConsoleError();
+    // before ready
+    el.$options.items = [{ text: "Helica", value: 10 }];
+    el.$value = 10;
+    jest.advanceTimersByTime(2);
+    expect(onErr).not.toBeCalled();
+    expect(el.innerHTML).toMatchInlineSnapshot(
+      `"<fieldset><legend><strong></strong></legend><label for="txt7"><input id="txt7" type="radio" name="txt6473" tabindex="0" autocomplete="off"><span>Helica</span></label></fieldset>"`
+    );
+    // after ready
+    el.$options.items = [{ text: "Harry", value: 11 }];
+    el.$value = 11;
+    jest.advanceTimersByTime(2);
+    expect(onErr).not.toBeCalled();
+    expect(el.innerHTML).toMatchInlineSnapshot(
+      `"<fieldset><legend><strong></strong></legend><label for="txt9"><input id="txt9" type="radio" name="txt8473" tabindex="0" autocomplete="off"><span>Harry</span></label></fieldset>"`
+    );
+
+    el.$options.items = [{ text: "Helica", value: 5 }];
+    jest.advanceTimersByTime(2);
+    expect(onErr).toBeCalledTimes(1); // because it doesn't fit value 11
+  });
+
+  test("$options.items is complex object", async () => {
     const onErr = h.mockConsoleError();
     const el = testEl;
     const items = [
@@ -211,6 +237,7 @@ describe("control.radio", () => {
   test("focus on current input", () => {
     const el = testEl;
     el.$value = 20;
+    jest.advanceTimersByTime(1);
     expect(el.$refInput).toBe(el.$refItems[1]);
     el.focus();
     expect(document.activeElement).toBe(el.$refItems[1]);
