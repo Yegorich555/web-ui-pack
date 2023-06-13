@@ -308,7 +308,6 @@ export default class WUPDateControl<
     clnd.gotKeyDown.call(clnd, e);
   }
 }
-// todo if parse throws Error impossible to open picker
 
 customElements.define(tagName, WUPDateControl);
 // NiceToHave: role 'spinbutton" + changing input value via scrolling: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/spinbutton_role

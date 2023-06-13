@@ -19,7 +19,7 @@
   - Event `$change` and callback `$onChange` has prop `detail: SetValueReason` now
   - Added `$defaults.storage` and `$options.skey` to store/get value in different storages `local/session/url`
   - Extended custom validation to `(value, control, reason) => false | string`. Was `(value) => false | string`
-  - Hidden btnClear by default for disabled/readonly/required
+  - Hide `button[clear]` by default for disabled/readonly/required
 - **Glolbal**. Added JSDoc comments for `jsx/tsx` files (previously hovering on `<wup-text>` showed nothing)
 
 ## 0.6.0 (May 19, 2023)
