@@ -297,6 +297,7 @@ export default class WUPTextControl<
         :host button[clear] {
           background: none;
           align-self: center;
+          cursor: pointer;
         }
         :host button[clear]:after {
           content: "";
@@ -314,6 +315,11 @@ export default class WUPTextControl<
         :host button[clear]:before {
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
+        }
+        :host[disabled] button[clear],
+        :host[readonly] button[clear],
+        :host[required] button[clear] {
+          display: none;
         }
         @media (hover: hover) and (pointer: fine) {
           :host button[clear]:hover {

@@ -64,25 +64,6 @@ export default function RadioControlView() {
         <wup-radio
           ref={(el) => {
             if (el) {
-              el.$options.name = "test"; // todo remove the control
-              setTimeout(() => {
-                const _items = [
-                  { text: "a1", value: { name: "Dik" } },
-                  { text: "a2", value: { name: "Yomma" } },
-                ];
-                el.$options.items = _items;
-                setTimeout(() => {
-                  el.$value = _items[1].value;
-                  console.warn(_items[0].value === el.$options.items[0].value);
-                  // el.$value = _items[0].value;
-                }, 1);
-              }, 300);
-            }
-          }}
-        />
-        <wup-radio
-          ref={(el) => {
-            if (el) {
               el.$options.name = "disabled";
               el.$options.disabled = true;
               el.$options.items = items.slice(0, 4);

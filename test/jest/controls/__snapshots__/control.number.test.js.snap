@@ -572,6 +572,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-NUM button[clear] {
           background: none;
           align-self: center;
+          cursor: pointer;
         }
         WUP-NUM button[clear]:after {
           content: "";
@@ -589,6 +590,11 @@ mask-image: var(--ctrl-icon-img);
         WUP-NUM button[clear]:before {
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
+        }
+        WUP-NUM[disabled] button[clear],
+        WUP-NUM[readonly] button[clear],
+        WUP-NUM[required] button[clear] {
+          display: none;
         }
         @media (hover: hover) and (pointer: fine) {
           WUP-NUM button[clear]:hover {
@@ -612,6 +618,7 @@ mask-image: var(--ctrl-icon-img);
 exports[`control.number validations $options.validationShowAll 1`] = `
 <wup-num
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -664,7 +671,9 @@ exports[`control.number validations $options.validationShowAll 1`] = `
 `;
 
 exports[`control.number validations $options.validationShowAll 2`] = `
-<wup-num>
+<wup-num
+  required=""
+>
   <label
     for="txt1"
   >
@@ -692,6 +701,7 @@ exports[`control.number validations $options.validationShowAll 2`] = `
 exports[`control.number validations $options.validationShowAll 3`] = `
 <wup-num
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -765,6 +775,7 @@ exports[`control.number validations options.validationCase 1`] = `
 exports[`control.number validations options.validationCase 2`] = `
 <wup-num
   invalid=""
+  required=""
   style=""
 >
   <label
@@ -815,6 +826,7 @@ exports[`control.number validations options.validationCase 2`] = `
 exports[`control.number validations options.validationCase 3`] = `
 <wup-num
   invalid=""
+  required=""
   style=""
 >
   <label
@@ -864,6 +876,7 @@ exports[`control.number validations options.validationCase 3`] = `
 exports[`control.number validations options.validationCase 4`] = `
 <wup-num
   invalid=""
+  required=""
   style=""
 >
   <label

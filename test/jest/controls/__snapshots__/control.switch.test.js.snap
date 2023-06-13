@@ -447,6 +447,7 @@ exports[`control.switch validations options.validationCase 1`] = `
 exports[`control.switch validations options.validationCase 2`] = `
 <wup-switch
   invalid=""
+  required=""
 >
   <label
     for="txt1"

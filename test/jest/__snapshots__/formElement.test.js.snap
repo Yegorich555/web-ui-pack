@@ -409,6 +409,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-TEXT button[clear] {
           background: none;
           align-self: center;
+          cursor: pointer;
         }
         WUP-TEXT button[clear]:after {
           content: "";
@@ -426,6 +427,11 @@ mask-image: var(--ctrl-icon-img);
         WUP-TEXT button[clear]:before {
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
+        }
+        WUP-TEXT[disabled] button[clear],
+        WUP-TEXT[readonly] button[clear],
+        WUP-TEXT[required] button[clear] {
+          display: none;
         }
         @media (hover: hover) and (pointer: fine) {
           WUP-TEXT button[clear]:hover {

@@ -579,6 +579,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-TEXTAREA button[clear] {
           background: none;
           align-self: center;
+          cursor: pointer;
         }
         WUP-TEXTAREA button[clear]:after {
           content: "";
@@ -596,6 +597,11 @@ mask-image: var(--ctrl-icon-img);
         WUP-TEXTAREA button[clear]:before {
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
+        }
+        WUP-TEXTAREA[disabled] button[clear],
+        WUP-TEXTAREA[readonly] button[clear],
+        WUP-TEXTAREA[required] button[clear] {
+          display: none;
         }
         @media (hover: hover) and (pointer: fine) {
           WUP-TEXTAREA button[clear]:hover {
@@ -722,6 +728,7 @@ exports[`control.textarea options clearButton 2`] = `
 exports[`control.textarea validations $options.validationShowAll 1`] = `
 <wup-textarea
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -780,6 +787,7 @@ exports[`control.textarea validations $options.validationShowAll 1`] = `
 exports[`control.textarea validations $options.validationShowAll 2`] = `
 <wup-textarea
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -846,6 +854,7 @@ exports[`control.textarea validations $options.validationShowAll 2`] = `
 exports[`control.textarea validations $options.validationShowAll 3`] = `
 <wup-textarea
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -923,6 +932,7 @@ exports[`control.textarea validations options.validationCase 1`] = `
 exports[`control.textarea validations options.validationCase 2`] = `
 <wup-textarea
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -972,6 +982,7 @@ exports[`control.textarea validations options.validationCase 2`] = `
 exports[`control.textarea validations options.validationCase 3`] = `
 <wup-textarea
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -1022,6 +1033,7 @@ exports[`control.textarea validations options.validationCase 3`] = `
 exports[`control.textarea validations options.validationCase 4`] = `
 <wup-textarea
   invalid=""
+  required=""
 >
   <label
     for="txt1"

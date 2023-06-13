@@ -596,6 +596,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-DATE button[clear] {
           background: none;
           align-self: center;
+          cursor: pointer;
         }
         WUP-DATE button[clear]:after {
           content: "";
@@ -613,6 +614,11 @@ mask-image: var(--ctrl-icon-img);
         WUP-DATE button[clear]:before {
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
+        }
+        WUP-DATE[disabled] button[clear],
+        WUP-DATE[readonly] button[clear],
+        WUP-DATE[required] button[clear] {
+          display: none;
         }
         @media (hover: hover) and (pointer: fine) {
           WUP-DATE button[clear]:hover {
@@ -673,6 +679,7 @@ mask-image: var(--ctrl-icon-img);
 exports[`control.date validations $options.validationShowAll 1`] = `
 <wup-date
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -733,6 +740,7 @@ exports[`control.date validations $options.validationShowAll 1`] = `
 exports[`control.date validations $options.validationShowAll 2`] = `
 <wup-date
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -799,6 +807,7 @@ exports[`control.date validations $options.validationShowAll 2`] = `
 exports[`control.date validations $options.validationShowAll 3`] = `
 <wup-date
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -878,6 +887,7 @@ exports[`control.date validations options.validationCase 1`] = `
 exports[`control.date validations options.validationCase 2`] = `
 <wup-date
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -920,7 +930,9 @@ exports[`control.date validations options.validationCase 2`] = `
     menu=""
     style=""
   >
-    <wup-calendar>
+    <wup-calendar
+      required=""
+    >
       <div
         calendar="day"
         id="txt2"
@@ -1220,6 +1232,7 @@ exports[`control.date validations options.validationCase 3`] = `
 <wup-date
   invalid=""
   opened=""
+  required=""
 >
   <label
     for="txt1"
@@ -1280,7 +1293,9 @@ exports[`control.date validations options.validationCase 3`] = `
     menu=""
     style=""
   >
-    <wup-calendar>
+    <wup-calendar
+      required=""
+    >
       <div
         calendar="day"
         id="txt6"
@@ -1562,6 +1577,7 @@ exports[`control.date validations options.validationCase 3`] = `
 exports[`control.date validations options.validationCase 4`] = `
 <wup-date
   invalid=""
+  required=""
 >
   <label
     for="txt1"

@@ -5766,6 +5766,7 @@ exports[`control.calendar utc=true year picker 1`] = `
 exports[`control.calendar validations $options.validationShowAll 1`] = `
 <wup-calendar
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -5912,7 +5913,9 @@ exports[`control.calendar validations $options.validationShowAll 1`] = `
 `;
 
 exports[`control.calendar validations $options.validationShowAll 2`] = `
-<wup-calendar>
+<wup-calendar
+  required=""
+>
   <label
     for="txt1"
   >
@@ -6045,6 +6048,7 @@ exports[`control.calendar validations $options.validationShowAll 2`] = `
 exports[`control.calendar validations $options.validationShowAll 3`] = `
 <wup-calendar
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -6328,6 +6332,7 @@ exports[`control.calendar validations options.validationCase 1`] = `
 exports[`control.calendar validations options.validationCase 2`] = `
 <wup-calendar
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -6480,6 +6485,7 @@ exports[`control.calendar validations options.validationCase 2`] = `
 exports[`control.calendar validations options.validationCase 3`] = `
 <wup-calendar
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -6632,6 +6638,7 @@ exports[`control.calendar validations options.validationCase 3`] = `
 exports[`control.calendar validations options.validationCase 4`] = `
 <wup-calendar
   invalid=""
+  required=""
 >
   <label
     for="txt1"

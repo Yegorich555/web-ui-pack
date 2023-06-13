@@ -599,6 +599,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-TIME button[clear] {
           background: none;
           align-self: center;
+          cursor: pointer;
         }
         WUP-TIME button[clear]:after {
           content: "";
@@ -616,6 +617,11 @@ mask-image: var(--ctrl-icon-img);
         WUP-TIME button[clear]:before {
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
+        }
+        WUP-TIME[disabled] button[clear],
+        WUP-TIME[readonly] button[clear],
+        WUP-TIME[required] button[clear] {
+          display: none;
         }
         @media (hover: hover) and (pointer: fine) {
           WUP-TIME button[clear]:hover {
@@ -824,6 +830,7 @@ mask-image: var(--ctrl-icon-img);
 exports[`control.time validations $options.validationShowAll 1`] = `
 <wup-time
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -882,7 +889,9 @@ exports[`control.time validations $options.validationShowAll 1`] = `
 `;
 
 exports[`control.time validations $options.validationShowAll 2`] = `
-<wup-time>
+<wup-time
+  required=""
+>
   <label
     for="txt1"
   >
@@ -913,6 +922,7 @@ exports[`control.time validations $options.validationShowAll 2`] = `
 exports[`control.time validations $options.validationShowAll 3`] = `
 <wup-time
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -992,6 +1002,7 @@ exports[`control.time validations options.validationCase 1`] = `
 exports[`control.time validations options.validationCase 2`] = `
 <wup-time
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -1142,6 +1153,7 @@ exports[`control.time validations options.validationCase 3`] = `
 <wup-time
   invalid=""
   opened=""
+  required=""
 >
   <label
     for="txt1"
@@ -1292,6 +1304,7 @@ exports[`control.time validations options.validationCase 3`] = `
 exports[`control.time validations options.validationCase 4`] = `
 <wup-time
   invalid=""
+  required=""
 >
   <label
     for="txt1"

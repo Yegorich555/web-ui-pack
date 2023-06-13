@@ -636,6 +636,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-PWD button[clear] {
           background: none;
           align-self: center;
+          cursor: pointer;
         }
         WUP-PWD button[clear]:after {
           content: "";
@@ -653,6 +654,11 @@ mask-image: var(--ctrl-icon-img);
         WUP-PWD button[clear]:before {
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
+        }
+        WUP-PWD[disabled] button[clear],
+        WUP-PWD[readonly] button[clear],
+        WUP-PWD[required] button[clear] {
+          display: none;
         }
         @media (hover: hover) and (pointer: fine) {
           WUP-PWD button[clear]:hover {
@@ -787,6 +793,7 @@ exports[`control.pwd options clearButton 2`] = `
 exports[`control.pwd validations $options.validationShowAll 1`] = `
 <wup-pwd
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -866,6 +873,7 @@ exports[`control.pwd validations $options.validationShowAll 1`] = `
 exports[`control.pwd validations $options.validationShowAll 2`] = `
 <wup-pwd
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -953,6 +961,7 @@ exports[`control.pwd validations $options.validationShowAll 2`] = `
 exports[`control.pwd validations $options.validationShowAll 3`] = `
 <wup-pwd
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -1046,6 +1055,7 @@ exports[`control.pwd validations options.validationCase 1`] = `
 exports[`control.pwd validations options.validationCase 2`] = `
 <wup-pwd
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -1104,6 +1114,7 @@ exports[`control.pwd validations options.validationCase 2`] = `
 exports[`control.pwd validations options.validationCase 3`] = `
 <wup-pwd
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -1161,6 +1172,7 @@ exports[`control.pwd validations options.validationCase 3`] = `
 exports[`control.pwd validations options.validationCase 4`] = `
 <wup-pwd
   invalid=""
+  required=""
 >
   <label
     for="txt1"

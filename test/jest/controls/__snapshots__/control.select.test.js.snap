@@ -596,6 +596,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-SELECT button[clear] {
           background: none;
           align-self: center;
+          cursor: pointer;
         }
         WUP-SELECT button[clear]:after {
           content: "";
@@ -613,6 +614,11 @@ mask-image: var(--ctrl-icon-img);
         WUP-SELECT button[clear]:before {
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
+        }
+        WUP-SELECT[disabled] button[clear],
+        WUP-SELECT[readonly] button[clear],
+        WUP-SELECT[required] button[clear] {
+          display: none;
         }
         @media (hover: hover) and (pointer: fine) {
           WUP-SELECT button[clear]:hover {
@@ -755,6 +761,7 @@ WUP-SELECT [menu] li[focused] {
 exports[`control.select validations $options.validationShowAll 1`] = `
 <wup-select
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -800,7 +807,9 @@ exports[`control.select validations $options.validationShowAll 1`] = `
 `;
 
 exports[`control.select validations $options.validationShowAll 2`] = `
-<wup-select>
+<wup-select
+  required=""
+>
   <label
     for="txt1"
   >
@@ -831,6 +840,7 @@ exports[`control.select validations $options.validationShowAll 2`] = `
 exports[`control.select validations $options.validationShowAll 3`] = `
 <wup-select
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -910,6 +920,7 @@ exports[`control.select validations options.validationCase 1`] = `
 exports[`control.select validations options.validationCase 2`] = `
 <wup-select
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -997,6 +1008,7 @@ exports[`control.select validations options.validationCase 3`] = `
 <wup-select
   invalid=""
   opened=""
+  required=""
 >
   <label
     for="txt1"
@@ -1082,6 +1094,7 @@ exports[`control.select validations options.validationCase 3`] = `
 exports[`control.select validations options.validationCase 4`] = `
 <wup-select
   invalid=""
+  required=""
 >
   <label
     for="txt1"

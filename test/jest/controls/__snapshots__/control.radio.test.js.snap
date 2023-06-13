@@ -888,6 +888,7 @@ padding:0;}
 exports[`control.radio validations $options.validationShowAll 1`] = `
 <wup-radio
   invalid=""
+  required=""
 >
   <fieldset
     aria-describedby="txt6"
@@ -967,7 +968,9 @@ exports[`control.radio validations $options.validationShowAll 1`] = `
 `;
 
 exports[`control.radio validations $options.validationShowAll 2`] = `
-<wup-radio>
+<wup-radio
+  required=""
+>
   <fieldset
     aria-required="true"
   >
@@ -1032,6 +1035,7 @@ exports[`control.radio validations $options.validationShowAll 2`] = `
 exports[`control.radio validations $options.validationShowAll 3`] = `
 <wup-radio
   invalid=""
+  required=""
 >
   <fieldset
     aria-describedby="txt9"
@@ -1177,6 +1181,7 @@ exports[`control.radio validations options.validationCase 1`] = `
 exports[`control.radio validations options.validationCase 2`] = `
 <wup-radio
   invalid=""
+  required=""
 >
   <fieldset
     aria-describedby="txt7"
@@ -1262,6 +1267,7 @@ exports[`control.radio validations options.validationCase 2`] = `
 exports[`control.radio validations options.validationCase 3`] = `
 <wup-radio
   invalid=""
+  required=""
 >
   <fieldset
     aria-describedby="txt8"
@@ -1346,6 +1352,7 @@ exports[`control.radio validations options.validationCase 3`] = `
 exports[`control.radio validations options.validationCase 4`] = `
 <wup-radio
   invalid=""
+  required=""
 >
   <fieldset
     aria-describedby="txt9"

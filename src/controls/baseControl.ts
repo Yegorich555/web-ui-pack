@@ -613,7 +613,9 @@ export default abstract class WUPBaseControl<
     // set other props
     this.setAttr("disabled", this._opts.disabled, true);
     this.setAttr("readonly", this._opts.readOnly, true);
-    this.setAttr.call(this.$refInput, "aria-required", !!this.validations?.required);
+    const isRequired = !!this.validations?.required;
+    this.setAttr("required", isRequired, true);
+    this.setAttr.call(this.$refInput, "aria-required", isRequired);
 
     this.setupInitValue(propsChanged);
     this.gotFormChanges(propsChanged);
@@ -1153,4 +1155,3 @@ expected 11 but got 13
 
 // NiceToHave when control is disabled need to show tooltip with reason
 // NiceToHave when control is readonly need to show tooltip with reason
-// todo when control readonly/disabled/required - need to hide button[clear]
