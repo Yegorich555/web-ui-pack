@@ -13,6 +13,7 @@
 - [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). _Set in a row `$options.items=...` and `$value=...` doesn't work_
 - [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). _Arrow changes control size during rotation_
 - [PopupElement](src/popup/popupElement.ts). _Wrong position if target inside body and html is scrollable instead of body_
+- [NumberControl](src/controls/number.ts). _Pattern `0.#` and value `2` shows error `Incomplete value`_
 - helper [observer](src/helpers/observer.ts). _Exception on promise-property_
 
 **New/Features**:

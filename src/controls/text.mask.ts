@@ -52,8 +52,10 @@ export default class MaskTextInput {
   chunks: WUP.Text.Mask.InputChunk[] = [];
   /** Last processed chunk */
   lastChunk: WUP.Text.Mask.InputChunk = { index: -1, pattern: "" };
-  /** Returns whether value completely fits pattern (isComplete) */
+  /** Returns whether value fits pattern (isComplete) `'#.#' + '2' => true` */
   isCompleted = false;
+  /** Returns whether value completely fits pattern (isComplete) `'#.#' + '2.2' => true` */
+  isCompletedFull = false;
   /** Returns count chars of pattern that missed in value (used to maskHolder) */
   leftLength = 0;
 
@@ -306,8 +308,10 @@ export default class MaskTextInput {
       this.value += this.chunks[i].value ?? this.chunks[i].pattern;
     }
 
+    const isLeftRequired = this.chunks.some((c, i) => i > last.index && (c as WUP.Text.Mask.VarChunk).min);
     // define whether all chunks processed
-    this.isCompleted = last.index === endIndex && (!last.isVar || !!last.isCompleted);
+    this.isCompleted = (last.index === endIndex || !isLeftRequired) && (!last.isVar || !!last.isCompleted);
+    this.isCompletedFull = this.isCompleted && last.index === endIndex;
   }
 
   /* Call it on 'beforeinput' event to improve logic */
@@ -406,7 +410,7 @@ export default class MaskTextInput {
       return prevPos; // return prevPosition if char isn't appended
     }
     pos = atTheEnd ? this.value.length : pos + 1;
-    if (atTheEnd && this.isCompleted && !this.lastChunk.isVar) {
+    if (atTheEnd && this.isCompletedFull && !this.lastChunk.isVar) {
       pos -= this.lastChunk.pattern.length;
     }
     return pos;
