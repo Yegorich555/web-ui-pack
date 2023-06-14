@@ -137,6 +137,10 @@ export default class WUPSelectControl<
       :host {
         --ctrl-icon-img: var(--ctrl-select-icon-img);
       }
+      :host label::after {
+        height: 100%;
+        align-self: center;
+      }
       :host[opened] label::after {
         transform: rotate(180deg);
       }
@@ -782,4 +786,3 @@ customElements.define(tagName, WUPSelectControl);
 
 // NiceToHave: option to allow autoselect item without pressing Enter
 // WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation
-/*

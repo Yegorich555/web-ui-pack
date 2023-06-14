@@ -676,6 +676,10 @@ mask-image: var(--ctrl-icon-img);
       WUP-SELECTMANY {
         --ctrl-icon-img: var(--ctrl-select-icon-img);
       }
+      WUP-SELECTMANY label::after {
+        height: 100%;
+        align-self: center;
+      }
       WUP-SELECTMANY[opened] label::after {
         transform: rotate(180deg);
       }

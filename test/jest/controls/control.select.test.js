@@ -117,7 +117,7 @@ describe("control.select", () => {
 
     el.$options.items = [{ text: "Helica", value: 5 }];
     jest.advanceTimersByTime(2);
-    expect(onErr).toBeCalledTimes(1); // because it doesn't fit value 11 - // todo issue here
+    expect(onErr).toBeCalledTimes(1); // because it doesn't fit value 11
   });
 
   test("pending state", async () => {

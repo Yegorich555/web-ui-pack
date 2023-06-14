@@ -667,6 +667,10 @@ mask-image: var(--ctrl-icon-img);
       WUP-SELECT {
         --ctrl-icon-img: var(--ctrl-select-icon-img);
       }
+      WUP-SELECT label::after {
+        height: 100%;
+        align-self: center;
+      }
       WUP-SELECT[opened] label::after {
         transform: rotate(180deg);
       }
