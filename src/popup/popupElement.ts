@@ -953,7 +953,10 @@ export default class WUPPopupElement<
 
       // fix cases when target is partiallyHidden by scrollableParent
       // suggestion: if height/width is very small we can use another side
-      const scrollRect = getBoundingInternalRect(this.#state!.scrollParents[0]); // warn: it's important to fit only first parent
+      let sp = this.#state!.scrollParents[0];
+      /* istanbul ignore next */
+      sp = sp === document.documentElement ? document.body : sp; // when scrollParent is html element then rect.top can be negative: to test place target at bottom body+margin taget+html vert.scroll
+      const scrollRect = getBoundingInternalRect(sp); // warn: it's important to fit only first parent
       t.top = Math.max(scrollRect.top, t.top);
       t.bottom = Math.min(scrollRect.bottom, t.bottom);
       t.left = Math.max(scrollRect.left, t.left);

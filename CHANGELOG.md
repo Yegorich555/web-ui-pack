@@ -11,6 +11,7 @@
 - [RadioControl](src/controls/radio.ts). _`$options.items` with object-values doesn't work_
 - [RadioControl](src/controls/radio.ts). _set in a row `$options.items=...` and `$value=...` doesn't work_
 - [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). _set in a row `$options.items=...` and `$value=...` doesn't work_
+- [PopupElement](src/popup/popupElement.ts). _Wrong position if target inside body and html is scrollable instead of body_
 - helper [observer](src/helpers/observer.ts). _Exception on promise-property_
 
 **New/Features**:
