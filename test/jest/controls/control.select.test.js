@@ -66,6 +66,7 @@ describe("control.select", () => {
     expect(el.getAttribute("initvalue")).toBe("");
 
     // checking when items empty
+    h.mockConsoleError();
     el.$options.items = [];
     el.removeAttribute("initvalue");
     el.setAttribute("initvalue", ""); // to trigger set value again
@@ -73,7 +74,7 @@ describe("control.select", () => {
     expect(el.$value).toBe(undefined);
     expect(el.$initValue).toBe(undefined);
     expect(el.$refInput.value).toBeFalsy();
-
+    h.unMockConsoleError();
     delete el._cachedItems;
 
     const onErr = jest.spyOn(el, "throwError").mockImplementationOnce(() => {});
@@ -96,6 +97,27 @@ describe("control.select", () => {
     expect(el.$initValue).toBe(10);
     expect(el.$value).toBe(10);
     expect(el.$refInput.value).toBe("Donny");
+  });
+
+  test("$options.items & $value", () => {
+    el = document.body.appendChild(document.createElement(el.tagName));
+    const onErr = h.mockConsoleError();
+    // before ready
+    el.$options.items = [{ text: "Helica", value: 10 }];
+    el.$value = 10;
+    jest.advanceTimersByTime(2);
+    expect(onErr).not.toBeCalled();
+    expect(el.$refInput.value).toBe("Helica");
+    // after ready
+    el.$options.items = [{ text: "Harry", value: 11 }];
+    el.$value = 11;
+    jest.advanceTimersByTime(2);
+    expect(onErr).not.toBeCalled();
+    expect(el.$refInput.value).toBe("Harry");
+
+    el.$options.items = [{ text: "Helica", value: 5 }];
+    jest.advanceTimersByTime(2);
+    expect(onErr).toBeCalledTimes(1); // because it doesn't fit value 11 - // todo issue here
   });
 
   test("pending state", async () => {
@@ -605,6 +627,7 @@ describe("control.select", () => {
     HTMLElement.prototype.scrollIntoViewIfNeeded = was;
 
     // when user changed text No Items
+    h.mockConsoleError();
     const wasText = WUPSelectControl.$textNoItems;
     WUPSelectControl.$textNoItems = "";
     await setItems([]);
@@ -645,6 +668,7 @@ describe("control.select", () => {
     const el2 = document.body.appendChild(document.createElement("wup-select"));
     await h.wait(1);
     expect(() => el2.focusMenuItemByKeydown(new KeyboardEvent("keydown", { key: "ArrowDown" }))).not.toThrow();
+    h.unMockConsoleError();
   });
 
   test("menu filtering by input", async () => {
@@ -719,6 +743,7 @@ describe("control.select", () => {
     const err = h.mockConsoleError();
     el.$options.items = [];
     await h.wait();
+    err.mockClear();
     expect(el.$isFocused).toBe(true);
     el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();

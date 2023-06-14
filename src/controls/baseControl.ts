@@ -13,7 +13,7 @@ import IBaseControl from "./baseControl.i";
 export const enum SetValueReasons {
   /** When `control.$value = 'some value'` */
   manual = 1,
-  /** When clearing happened (by Esc or ClearButton click) */
+  /** When clearing happened (by Esc or ClearButton click) OR reset to previous value */
   clear,
   /** When user changes on UI */
   userInput,

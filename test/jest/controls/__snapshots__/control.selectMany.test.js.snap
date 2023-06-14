@@ -1286,11 +1286,11 @@ exports[`control.selectMany validations options.validationCase 2`] = `
     <span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt3"
+        aria-controls="txt2"
         aria-describedby="txt5"
         aria-expanded="false"
         aria-haspopup="listbox"
-        aria-owns="txt3"
+        aria-owns="txt2"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -1316,7 +1316,7 @@ exports[`control.selectMany validations options.validationCase 2`] = `
     <ul
       aria-label="Items"
       aria-multiselectable="true"
-      id="txt3"
+      id="txt2"
       role="listbox"
       tabindex="-1"
     >

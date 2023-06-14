@@ -261,8 +261,6 @@ export default class WUPSelectControl<
     return spin;
   }
 
-  /** Required to wait for fetching items to setInputValue */
-  _onPendingValue?: () => void;
   /** Required to wait for fetching items to setup initValue */
   _onPendingInitValue?: () => void;
   /** Called to get/fetch items based on $options.items */
@@ -274,19 +272,21 @@ export default class WUPSelectControl<
     if (typeof d === "function") {
       d = d();
     }
-
+    const act = (): void => {
+      this._onPendingInitValue?.call(this);
+      delete this._onPendingInitValue;
+      this.setInputValue(this.$value, SetValueReasons.clear);
+    };
     if (d instanceof Promise) {
       return promiseWait(d, 300, (v) => this.changePending(v)).then((data) => {
         this._cachedItems = data || [];
-        this._onPendingValue?.call(this);
-        delete this._onPendingValue;
-        this._onPendingInitValue?.call(this);
-        delete this._onPendingInitValue;
+        act();
         this.$isFocused && setTimeout(() => this.goShowMenu(ShowCases.onFocus, null)); // timeout required to showMenu after pending changes
         return data;
       });
     }
     this._cachedItems = d;
+    act();
     return d;
   }
 
@@ -452,9 +452,11 @@ export default class WUPSelectControl<
 
   protected override setInputValue(v: ValueType | undefined, reason: SetValueReasons): void {
     if (this._cachedItems) {
-      super.setInputValue(v);
+      reason === SetValueReasons.manual
+        ? setTimeout(() => super.setInputValue(v, reason)) // timeout to fix case when el.$options.items=... el.$value=...
+        : super.setInputValue(v, reason);
     } else {
-      this._onPendingValue = () => this.setInputValue(v);
+      // skip because it's fired from fetchItems()
     }
   }
 
@@ -780,4 +782,4 @@ customElements.define(tagName, WUPSelectControl);
 
 // NiceToHave: option to allow autoselect item without pressing Enter
 // WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation
-// todo init + wait 10ms >>> el.$options.items = [...]; el.$value = 10 - works wrong
+/*
