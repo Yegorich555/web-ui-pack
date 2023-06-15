@@ -50,7 +50,7 @@ export default function CalendarControlView() {
           validations="window.myCalendarValidations"
         />
         <wup-calendar name="disabled" label="Disabled" disabled utc />
-        <wup-calendar name="disabled" label="Readonly" readOnly utc />
+        <wup-calendar name="readonly" label="Readonly" readOnly utc />
         <wup-calendar //
           // todo 1st click on calendar move focus almost at the top page
           name="saveUrlClnd"
