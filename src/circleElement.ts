@@ -127,6 +127,10 @@ export default class WUPCircleElement extends WUPBaseElement {
     return ["items", "width", "back", "corner", "from", "to", "min", "max", "space", "minsize"];
   }
 
+  static get nameUnique(): string {
+    return "WUPCircleElement";
+  }
+
   static get $styleRoot(): string {
     return `:root {
           --circle-0: var(--base-sep);

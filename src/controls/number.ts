@@ -81,6 +81,10 @@ export default class WUPNumberControl<
     return arr;
   }
 
+  static get nameUnique(): string {
+    return "WUPNumberControl";
+  }
+
   /** Default options - applied to every element. Change it to configure default behavior */
   // @ts-expect-error - min: string & min: number is invalid
   static $defaults: WUP.Number.Defaults = {

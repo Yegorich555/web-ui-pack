@@ -225,6 +225,10 @@ export default abstract class WUPBaseControl<
     ];
   }
 
+  static get nameUnique(): string {
+    return "WUPBaseControl";
+  }
+
   /** Css-variables related to component */
   static get $styleRoot(): string {
     return `:root {

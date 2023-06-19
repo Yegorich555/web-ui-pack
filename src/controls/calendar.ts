@@ -119,6 +119,10 @@ export default class WUPCalendarControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPCalendarControl;
 
+  static get nameUnique(): string {
+    return "WUPCalendarControl";
+  }
+
   static get $styleRoot(): string {
     return `:root {
       --ctrl-clr-selected: #fff;

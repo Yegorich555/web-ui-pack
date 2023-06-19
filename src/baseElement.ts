@@ -18,6 +18,11 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseElement;
 
+  /** Required otherwise constructor name can reduced in optimizator */
+  static get nameUnique(): string {
+    return "WUPBaseElement";
+  }
+
   /** Reference to global style element used by web-ui-pack */
   static get $refStyle(): HTMLStyleElement | null {
     return window.WUPrefStyle || null;
@@ -134,12 +139,13 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
         }
         return protos;
       };
+      // NiceToHave refactor to append styles via CDN or somehow else
       const protos = findAllProtos(this, []);
-
       protos.reverse().forEach((p) => {
         // append $styleRoot
-        if (!appendedStyles.has(p.name)) {
-          appendedStyles.add(p.name);
+        const nm = p.nameUnique;
+        if (!appendedStyles.has(nm)) {
+          appendedStyles.add(nm);
           if (Object.prototype.hasOwnProperty.call(p, "$styleRoot")) {
             const s = p.$styleRoot;
             s && refStyle.append(s);

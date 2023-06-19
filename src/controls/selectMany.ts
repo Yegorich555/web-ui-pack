@@ -100,6 +100,10 @@ export default class WUPSelectManyControl<
     return arr;
   }
 
+  static get nameUnique(): string {
+    return "WUPSelectManyControl";
+  }
+
   static get $styleRoot(): string {
     return `:root {
         --ctrl-select-item: inherit;

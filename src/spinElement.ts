@@ -86,6 +86,10 @@ export default class WUPSpinElement extends WUPBaseElement {
     return ["inline", "overflowfade", "fit"];
   }
 
+  static get nameUnique(): string {
+    return "WUPSpinElement";
+  }
+
   static get $styleRoot(): string {
     return `:root {
           --spin-1: #ffa500;

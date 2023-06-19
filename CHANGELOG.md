@@ -15,6 +15,7 @@
 - [PopupElement](src/popup/popupElement.ts). _Wrong position if target inside body and html is scrollable instead of body_
 - [NumberControl](src/controls/number.ts). _Pattern `0.#` and value `2` shows error `Incomplete value`_
 - helper [observer](src/helpers/observer.ts). _Exception on promise-property_
+- **Global**. _Sometimes some css-vars not appended to styles in production (as result black Circle)_
 
 **New/Features**:
 

@@ -48,6 +48,10 @@ export default class WUPCheckControl<
 > extends WUPSwitchControl<EventMap> {
   #ctr = this.constructor as typeof WUPCheckControl;
 
+  static get nameUnique(): string {
+    return "WUPCheckControl";
+  }
+
   static get $styleRoot(): string {
     return `:root {
         --ctrl-check-off-bg: #fff;

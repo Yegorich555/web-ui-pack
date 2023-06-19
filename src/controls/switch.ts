@@ -1,3 +1,4 @@
+// eslint-disable-next-line max-classes-per-file
 import { WUPcssHidden } from "../styles";
 import WUPBaseControl, { SetValueReasons } from "./baseControl";
 
@@ -58,6 +59,10 @@ export default class WUPSwitchControl<
   EventMap extends WUP.Switch.EventMap = WUP.Switch.EventMap
 > extends WUPBaseControl<boolean, EventMap> {
   #ctr = this.constructor as typeof WUPSwitchControl;
+
+  static get nameUnique(): string {
+    return "WUPSwitchControl";
+  }
 
   static get $styleRoot(): string {
     return `:root {
