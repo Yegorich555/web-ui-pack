@@ -136,6 +136,7 @@ export default class WUPCalendarControl<
   static get $style(): string {
     return `${super.$style}
       :host {
+        position: relative;
         max-width: fit-content;
         margin: auto auto 20px;
         border-radius: var(--ctrl-border-radius);

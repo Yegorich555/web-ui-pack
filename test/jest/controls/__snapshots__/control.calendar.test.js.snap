@@ -1140,6 +1140,7 @@ mask-image: var(--ctrl-icon-img);
         }
       }
       WUP-CALENDAR {
+        position: relative;
         max-width: fit-content;
         margin: auto auto 20px;
         border-radius: var(--ctrl-border-radius);

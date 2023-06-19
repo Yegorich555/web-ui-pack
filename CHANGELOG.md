@@ -16,6 +16,7 @@
 - [NumberControl](src/controls/number.ts). _Pattern `0.#` and value `2` shows error `Incomplete value`_
 - helper [observer](src/helpers/observer.ts). _Exception on promise-property_
 - **Global**. _Sometimes some css-vars not appended to styles in production (as result black Circle)_
+- [CalendarControl](src/controls/calendar.ts). _Wrong autoscroll to top page after 1st focus_
 
 **New/Features**:
 
