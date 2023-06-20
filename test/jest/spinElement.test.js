@@ -88,7 +88,6 @@ describe("spinElement", () => {
       "<style>.wup-hidden, [wup-hidden] {
       position: absolute;
       height:1px; width:1px;
-      top:0;left:0;
       overflow:hidden;
       clip:rect(1px,1px,1px,1px);
       min-width:initial;
