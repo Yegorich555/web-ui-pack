@@ -14,6 +14,7 @@ import Tabs from "./tabs";
 export interface UserCodeProps {
   tag?: `wup-${string}`;
   customHTML?: string[];
+  customJS?: string;
   /** Set of alternative values for css-vars. Possible whe css-var used several times and need to skip the real-value */
   // eslint-disable-next-line react/no-unused-prop-types
   cssVarAlt?: Map<string, string>;
@@ -135,7 +136,9 @@ export default function UserCode(props: React.PropsWithChildren<UserCodeProps>) 
         },
         {
           label: "JS/TS",
-          render: (
+          render: props.customJS ? (
+            <Code code={props.customJS} />
+          ) : (
             <div style={{ padding: "1em" }}>
               See common example{" "}
               <a href={linkGit("CODESTYLE.md")} target="_blank" rel="noreferrer">

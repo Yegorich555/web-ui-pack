@@ -61,16 +61,16 @@ export default function ControlsView() {
           Pending state with spinner if return promise for <b>$onSubmit()</b> method
         </>,
       ]}
-      details={{ tag: "wup-form", customHTML }}
+      details={{ tag: "wup-form", customHTML, customJS }}
     >
       <wup-form
         autoComplete={false}
+        disabled={false}
+        readOnly={false}
         ref={(el) => {
           if (el) {
             el.$initModel = { text: "test-me@google.com" };
             el.$isPending = false;
-            el.$options.disabled = false;
-            el.$options.readOnly = false;
             el.$onSubmit = (e) => {
               console.warn("submitted model", e.$model);
               // eslint-disable-next-line no-promise-executor-return
@@ -133,10 +133,12 @@ const customHTML = [
   <wup-text name="lastName" />
   <wup-text name="email"/>
   <wup-pwd name="password"/>
+  ...
   <button type="submit">Submit</button>
-</wup-form>;`,
-  `js
-// js/ts
+</wup-form>`,
+];
+
+const customJS = `js
 const form = document.querySelector("wup-form")!;
 form.$onSubmit = (e) => {
   // post request here
@@ -164,5 +166,4 @@ pwd.$options.validations = {
   minLower: 1,
   special: { min: 1, chars: "#!-_?,.@:;'" },
 };
-pwd.$options.validationShowAll = true;`,
-];
+pwd.$options.validationShowAll = true;`;
