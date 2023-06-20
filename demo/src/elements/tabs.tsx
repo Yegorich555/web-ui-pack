@@ -11,7 +11,6 @@ interface Props {
 }
 
 // todo rewrite with <wup-tabs />: https://www.w3.org/WAI/ARIA/apg/patterns/tabs/examples/tabs-automatic/
-
 export default function Tabs(props: Props): JSX.Element {
   const [current, setCurrent] = useState(0);
   const onClick = useCallback((e: React.MouseEvent) => {
