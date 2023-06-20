@@ -1003,9 +1003,14 @@ export default abstract class WUPBaseControl<
     return v.toString();
   }
 
+  /** Returns storage key based on options `skey` and `name` */
+  get storageKey(): string | undefined | false {
+    return this._opts.skey === true ? this._opts.name : this._opts.skey;
+  }
+
   /** Get & parse value from storage according to options `skey`, `storage` and `name` */
   protected storageGet(): ValueType | undefined {
-    const key = this._opts.skey === true ? this._opts.name : this._opts.skey;
+    const key = this.storageKey;
     if (key) {
       let v: string | null;
       switch (this._opts.storage) {
@@ -1028,7 +1033,11 @@ export default abstract class WUPBaseControl<
   }
 
   /** Save value to storage storage according to options `skey`, `storage` and `name` */
-  protected storageSet(v: ValueType | undefined, key: string): void {
+  protected storageSet(v: ValueType | undefined): void {
+    const key = this.storageKey;
+    if (!key) {
+      return; // possible when _opts.name is empty
+    }
     try {
       let strg: Storage | Pick<Storage, "removeItem" | "setItem">;
       switch (this._opts.storage) {
@@ -1084,8 +1093,7 @@ export default abstract class WUPBaseControl<
     const canVld = reason !== SetValueReasons.manual;
     (canVld || this.$refError) && this.validateAfterChange();
     // save to storage
-    const sk = this._opts.skey === true ? this._opts.name : this._opts.skey;
-    sk && this.storageSet(v, sk);
+    this._opts.skey && this.storageSet(v);
     setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true, detail: reason }));
     return true;
   }

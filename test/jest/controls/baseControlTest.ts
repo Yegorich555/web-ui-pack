@@ -385,6 +385,19 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(sRem).toBeCalledTimes(1);
       expect(onThrowErr).not.toBeCalled();
 
+      // name is empty
+      jest.clearAllMocks();
+      el.$options.name = "";
+      el.$options.skey = true;
+      await h.wait(1);
+      expect(sGet).toBeCalledTimes(0);
+      el.$value = cfg.initValues[2].value;
+      await h.wait(1);
+      expect(sSet).toBeCalledTimes(0); // because name is missed
+      el.clearValue();
+      el.$options.name = "name1";
+      await h.wait(1);
+
       // storage is full
       if (cfg.initValues[1].urlValue !== null) {
         sSet.mockImplementationOnce(() => {
