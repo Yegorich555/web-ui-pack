@@ -60,16 +60,20 @@ export default function ControlsView() {
         <>
           Pending state with spinner if return promise for <b>$onSubmit()</b> method
         </>,
+        <>
+          Option <b>autoSave</b> prevents losing not-sumbitted data
+        </>,
       ]}
       details={{ tag: "wup-form", customHTML, customJS }}
     >
       <wup-form
         autoComplete={false}
+        autoSave="true"
         disabled={false}
         readOnly={false}
         ref={(el) => {
           if (el) {
-            el.$initModel = { text: "test-me@google.com" };
+            // el.$initModel = { text: "test-me@google.com" };
             el.$isPending = false;
             el.$onSubmit = (e) => {
               console.warn("submitted model", e.$model);
@@ -93,17 +97,16 @@ export default function ControlsView() {
             }
           }}
         />
-        {/* <wup-selectmany
-          class={styles.multiCustom}
+        <wup-selectmany
           ref={(el) => {
             if (el) {
               el.$options.items = items;
               el.$options.name = "selectMany";
-              el.$options.label = "Select Many (development...)";
+              el.$options.label = "Select Many";
               el.$initValue = [items[0].value, items[2].value];
             }
           }}
-        /> */}
+        />
 
         <wup-switch name="switch" />
         <wup-check name="checkbox" />
@@ -115,6 +118,8 @@ export default function ControlsView() {
             }
           }}
         />
+        <wup-date name="date" />
+        <wup-time name="time" />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>
@@ -124,10 +129,11 @@ export default function ControlsView() {
 const customHTML = [
   `html
 <wup-form
-  autoComplete={false}
-  readOnly={false}
-  disabled={false}
-  autoFocus={false}
+  autoComplete="false"
+  autoSave="false"
+  readOnly="false"
+  disabled="false"
+  autoFocus="false"
 >
   <wup-text name="firstName"/>
   <wup-text name="lastName" />

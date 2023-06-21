@@ -20,6 +20,7 @@
 
 **New/Features**:
 
+- [FormElement](src/formElement.ts). Added option `autoSave` to prevent losing not-submitted data
 - **Controls**
   - Internal `setValue` has argument `reason` now
   - Event `$change` and callback `$onChange` has prop `detail: SetValueReason` now

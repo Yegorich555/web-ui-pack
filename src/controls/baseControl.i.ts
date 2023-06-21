@@ -24,4 +24,5 @@ export default interface IBaseControl<ValueType = any> extends HTMLElement {
   gotFormChanges: (propsChanged: Array<string> | null) => void;
   validateBySubmit: () => string | false;
   readonly canShowError: boolean;
+  parse(text: string): ValueType | undefined;
 }

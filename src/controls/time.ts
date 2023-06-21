@@ -722,3 +722,4 @@ export default class WUPTimeControl<
 }
 
 customElements.define(tagName, WUPTimeControl);
+// todo when opened to top: scroll visible in animation
