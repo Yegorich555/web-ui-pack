@@ -68,7 +68,7 @@ export default function ControlsView() {
     >
       <wup-form
         autoComplete={false}
-        autoSave="true"
+        autoSave="false"
         disabled={false}
         readOnly={false}
         ref={(el) => {

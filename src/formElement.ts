@@ -451,14 +451,16 @@ export default class WUPFormElement<
         this.#autoSaveT = setTimeout(() => this._opts.autoSave && this.storageSave(), 700);
       });
 
-      setTimeout(() => {
-        const m = this.storageGet();
-        if (m) {
-          this._preventStorageSave = true;
-          this.$model = { ...this._initModel, ...m, ...this._model };
-          setTimeout(() => delete this._preventStorageSave);
-        }
-      }, 2); // timeout required to wait for init controls
+      // works only on init
+      !propsChanged &&
+        setTimeout(() => {
+          const m = this.storageGet();
+          if (m) {
+            this._preventStorageSave = true;
+            this.$model = { ...this._initModel, ...m, ...this._model };
+            setTimeout(() => delete this._preventStorageSave);
+          }
+        }, 2); // timeout required to wait for init controls
     } else if (this.#autoSaveRemEv) {
       this.#autoSaveRemEv.call(this);
       this.#autoSaveRemEv = undefined;
@@ -540,7 +542,7 @@ export default class WUPFormElement<
           .join(",")}`;
   }
 
-  /** Get & parse value from storage according to options `skey`, `storage` and `name` */
+  /** Get & parse value from storage according to option `autoSave`, $model */
   storageGet(): Partial<Model> | null {
     try {
       const key = this.storageKey;
@@ -576,30 +578,40 @@ export default class WUPFormElement<
   }
 
   _preventStorageSave?: boolean;
-  /** Save/remove model to storage according to option `autoSave`, $model */
-  storageSave(model: null | Record<string, any> = {}): void {
+  /** Save/remove model (only changes) to storage according to option `autoSave`, $model
+   * @returns model saved to localStorage or Null if removed */
+  storageSave(model: null | Record<string, any> = {}): Partial<Model> | null {
     try {
+      const storage = window.localStorage;
       if (model == null) {
-        window.localStorage.removeItem(this.storageKey);
-      } else {
-        const m: Partial<Model> = {}; // plain model without nested objects
-        this.$controls.forEach((c) => {
-          // ignore password controls and controls without names
-          if (c.$options.name && c.tagName !== "WUP-PWD") {
-            const v = c.$value;
-            if (c.$isChanged && v !== undefined) {
-              if (typeof v === "object" && !v.toJSON && !Array.isArray(v)) {
-                return; // skip complex objects that not serializable: otherwise it can throw err on parse
-              }
-              m[c.$options.name as keyof Model] = v; // get only changed values
-            }
-          }
-        });
-        window.localStorage.setItem(this.storageKey, JSON.stringify(m));
+        storage.removeItem(this.storageKey);
+        return null;
       }
+
+      const m: Partial<Model> = {}; // plain model without nested objects
+      let hasChanges = false;
+      this.$controls.forEach((c) => {
+        // ignore password controls and controls without names
+        if (c.$options.name && c.tagName !== "WUP-PWD") {
+          const v = c.$value;
+          if (c.$isChanged && v !== undefined) {
+            if (typeof v === "object" && !v.toJSON && !Array.isArray(v)) {
+              return; // skip complex objects that not serializable: otherwise it can throw err on parse
+            }
+            m[c.$options.name as keyof Model] = v; // get only changed values
+            hasChanges = true;
+          }
+        }
+      });
+      if (hasChanges) {
+        storage.setItem(this.storageKey, JSON.stringify(m));
+        return m;
+      }
+      storage.removeItem(this.storageKey);
     } catch (err) {
       this.throwError(err); // re-throw error when storage is full
     }
+    return null;
   }
 
   protected override disconnectedCallback(): void {

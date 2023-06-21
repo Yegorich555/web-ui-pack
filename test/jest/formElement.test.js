@@ -1,4 +1,4 @@
-import { WUPFormElement, WUPTextControl } from "web-ui-pack";
+import { WUPFormElement, WUPTextControl, WUPDateControl, WUPSelectControl } from "web-ui-pack";
 import { SubmitActions } from "web-ui-pack/formElement";
 import * as h from "../testHelper";
 
@@ -14,7 +14,7 @@ beforeEach(() => {
   let lastUniqueNum = 0;
   jest.spyOn(WUPTextControl, "$uniqueId", "get").mockImplementation(() => `txt${++lastUniqueNum}`);
 
-  (!WUPFormElement || !WUPTextControl) && console.errr("missed");
+  (!WUPFormElement || !WUPTextControl || !WUPDateControl || !WUPSelectControl) && console.errr("missed");
   el = document.body.appendChild(document.createElement("wup-form"));
   const inp1 = el.appendChild(document.createElement("wup-text"));
   inp1.$options.name = "email";
@@ -56,9 +56,12 @@ describe("formElement", () => {
     expect(inputs[2].$initValue).toBe("without name");
     expect(el.$model).toEqual({ email: "some@email.com", firstName: "hello from 2" });
 
-    el.$initModel = { firstName: "Nick" };
+    const im = { firstName: "Nick" };
+    el.$initModel = im;
     expect(inputs[0].$initValue).toBe("some@email.com");
     expect(inputs[1].$initValue).toBe("Nick");
+    expect(el.$model).toEqual({ email: "some@email.com", firstName: "Nick" });
+    el.$initModel = im; // just for coverage
     expect(el.$model).toEqual({ email: "some@email.com", firstName: "Nick" });
 
     el.$initModel = { email: "tas@google.com", firstName: "Tasy" };
@@ -72,7 +75,10 @@ describe("formElement", () => {
     expect(el.$model).toEqual({ email: "v@email.en", firstName: "Mike" });
     expect(el.$initModel).toEqual({ email: "tas@google.com", firstName: "Tasy" });
 
-    el.$model = { email: "true@mail.com" };
+    const m = { email: "true@mail.com" };
+    el.$model = m;
+    expect(el.$model).toEqual({ email: "true@mail.com", firstName: "Mike" });
+    el.$model = m; // just for coverage
     expect(el.$model).toEqual({ email: "true@mail.com", firstName: "Mike" });
 
     el.$model = { email: "next@em.com", firstName: "Tisha", lastName: "Turunen" };
@@ -461,6 +467,7 @@ describe("formElement", () => {
       expect(el.outerHTML).toMatchInlineSnapshot(
         `"<wup-form role="form"><wup-text><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong>Email</strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off"><strong>First Name</strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><button type="submit"></button></wup-form>"`
       );
+      el.$isPending = false; // just for coverage
 
       const submitFn = (e) => (e.$waitFor = new Promise((resolve) => setTimeout(() => resolve("true"), 500)));
       el.addEventListener("$submit", submitFn);
@@ -650,6 +657,130 @@ describe("formElement", () => {
         );
         await h.wait();
       });
+    });
+
+    test("option 'autoSave'", async () => {
+      const sSet = jest.spyOn(Storage.prototype, "setItem");
+      const sRem = jest.spyOn(Storage.prototype, "removeItem");
+      // storageKey depends on options
+      expect(el.storageKey).toMatchInlineSnapshot(`"/?email,firstName"`);
+      el.$options.autoSave = "customKey";
+      expect(el.storageKey).toBe("customKey");
+
+      expect(el.storageGet()).toBe(null); // because nothing stored
+      expect(el.storageSave()).toBe(null); // because nothing changed
+      // save to storage on changes
+      inputs[0].$value = "Mike@gmail.com";
+      await h.wait(1001);
+      expect(sSet).toBeCalledTimes(1);
+      expect(sSet).lastCalledWith("customKey", '{"email":"Mike@gmail.com"}');
+
+      jest.clearAllMocks();
+      inputs[0].$value = inputs[0].$initValue;
+      await h.wait(1001);
+      expect(sSet).toBeCalledTimes(0);
+      expect(sRem).toBeCalledTimes(1); // because no changes
+      expect(sRem).lastCalledWith("customKey");
+      expect(el.storageSave(null)).toBe(null); // because nothing changed
+      expect(sRem).toBeCalledTimes(2); // because removing is called with Null
+
+      const reinit = async () => {
+        jest.clearAllMocks();
+        document.body.innerHTML = "";
+        inputs.length = 0;
+        el = document.body.appendChild(document.createElement(el.tagName));
+        el.$options.autoSave = "customKey";
+
+        const inp1 = el.appendChild(document.createElement("wup-text"));
+        inp1.$options.name = "email";
+        const inp2 = el.appendChild(document.createElement("wup-text"));
+        inp2.$options.name = "prof.firstName";
+        const inp3 = el.appendChild(document.createElement("wup-text"));
+        inp3.$options.name = "";
+        const inp4 = el.appendChild(document.createElement("wup-date"));
+        inp4.$options.name = "dt";
+        const inp5 = el.appendChild(document.createElement("wup-select"));
+        inp5.$options.name = "sel";
+        inp5.$options.multiple = true;
+        inp5.$options.items = [
+          { text: "Item 1", value: 1 },
+          { text: "Item 2", value: 2 },
+          { text: "Item 3", value: 3 },
+        ];
+        const inp6 = el.appendChild(document.createElement("wup-select"));
+        inp6.$options.name = "sel-complex";
+        inp6.$options.items = [
+          { text: "Item 1", value: { id: 1 } },
+          { text: "Item 2", value: { id: 2 } },
+          { text: "Item 3", value: { id: 3 } },
+        ];
+        inputs.push(inp1, inp2, inp3, inp4, inp5, inp6);
+
+        btnSubmit = el.appendChild(document.createElement("button"));
+        btnSubmit.type = "submit";
+        await h.wait();
+      };
+
+      await reinit();
+      inputs[0].$value = "Mike@gmail.com";
+      inputs[1].$value = "MikeGrane";
+      inputs[2].$value = "WithoutName";
+      inputs[3].$value = new Date("2023-01-10");
+      inputs[4].$value = [2, 3];
+      // eslint-disable-next-line prefer-destructuring
+      inputs[5].$value = inputs[5].$options.items[0].value; // this must be skipped from serialization
+      await h.wait(1001);
+      expect(sSet).toBeCalledTimes(1);
+      expect(sSet).lastCalledWith(
+        "customKey",
+        '{"email":"Mike@gmail.com","prof.firstName":"MikeGrane","dt":"2023-01-10T00:00:00.000Z","sel":[2,3]}'
+      );
+
+      // reinit html to check if stored value is applied to inputs
+      await reinit();
+      expect(el._initModel).toBe(undefined);
+      expect(el._model).toMatchInlineSnapshot(`
+        {
+          "dt": 2023-01-10T00:00:00.000Z,
+          "email": "Mike@gmail.com",
+          "prof": {
+            "firstName": "MikeGrane",
+          },
+          "sel": [
+            2,
+            3,
+          ],
+        }
+      `);
+      expect(inputs[0].$value).toBe("Mike@gmail.com");
+      expect(inputs[0].$initValue).toBe(undefined);
+      expect(inputs[0].$isChanged).toBe(true);
+
+      expect(inputs[1].$value).toBe("MikeGrane");
+      expect(inputs[1].$initValue).toBe(undefined);
+      expect(inputs[1].$isChanged).toBe(true);
+
+      expect(inputs[2].$value).toBe(undefined);
+      expect(inputs[2].$initValue).toBe(undefined);
+      expect(inputs[2].$isChanged).toBe(false); // no name
+
+      expect(inputs[3].$value).toStrictEqual(new Date("2023-01-10"));
+      expect(inputs[3].$initValue).toBe(undefined);
+      expect(inputs[3].$isChanged).toBe(true);
+
+      expect(inputs[4].$value).toStrictEqual([2, 3]);
+      expect(inputs[4].$initValue).toBe(undefined);
+      expect(inputs[4].$isChanged).toBe(true);
+
+      expect(inputs[5].$value).toBe(undefined); // because complex object
+      expect(inputs[5].$initValue).toBe(undefined);
+      expect(inputs[5].$isChanged).toBe(false);
+
+      // storage must be cleard by succesful submit
+      jest.clearAllMocks();
+      btnSubmit.click();
+      await h.wait();
+      expect(sRem).toBeCalledTimes(1);
     });
   });
 });
