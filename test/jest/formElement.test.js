@@ -781,6 +781,22 @@ describe("formElement", () => {
       btnSubmit.click();
       await h.wait();
       expect(sRem).toBeCalledTimes(1);
+
+      // storage is full
+      sSet.mockImplementationOnce(() => {
+        throw new Error("Storage is exceeded");
+      });
+      inputs[0].$value = "Angela@gmail.com";
+      await expect(h.wait()).rejects.toThrow();
+
+      // storage contains invalid model
+      window.localStorage.setItem("customKey", "ordinary string");
+      expect(el.storageGet()).toBe(null);
+      await expect(h.wait()).rejects.toThrow();
+
+      // storage contains valid model but no matched controls
+      window.localStorage.setItem("customKey", '{"missedControl":"Mrs"}');
+      expect(el.storageGet()).toBe(null);
     });
   });
 });
