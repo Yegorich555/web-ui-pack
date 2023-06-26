@@ -943,7 +943,6 @@ exports[`control.calendar common tests render + styles 2`] = `
   .wup-hidden, [wup-hidden] {
 position: absolute;
 height:1px; width:1px;
-top:0;left:0;
 overflow:hidden;
 clip:rect(1px,1px,1px,1px);
 min-width:initial;
@@ -1133,7 +1132,7 @@ mask-image: var(--ctrl-icon-img);
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         WUP-CALENDAR[invalid]:hover,
-        WUP-CALENDAR[invalid]:hover&gt;[menu]
+        WUP-CALENDAR[invalid]:hover&gt;[menu],
         WUP-CALENDAR[invalid][hovered],
         WUP-CALENDAR[invalid][hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
@@ -1163,7 +1162,6 @@ mask-image: var(--ctrl-icon-img);
       WUP-CALENDAR input {
 position: absolute;
 height:1px; width:1px;
-top:0;left:0;
 overflow:hidden;
 clip:rect(1px,1px,1px,1px);
 min-width:initial;
@@ -5766,6 +5764,7 @@ exports[`control.calendar utc=true year picker 1`] = `
 exports[`control.calendar validations $options.validationShowAll 1`] = `
 <wup-calendar
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -5912,7 +5911,9 @@ exports[`control.calendar validations $options.validationShowAll 1`] = `
 `;
 
 exports[`control.calendar validations $options.validationShowAll 2`] = `
-<wup-calendar>
+<wup-calendar
+  required=""
+>
   <label
     for="txt1"
   >
@@ -6045,6 +6046,7 @@ exports[`control.calendar validations $options.validationShowAll 2`] = `
 exports[`control.calendar validations $options.validationShowAll 3`] = `
 <wup-calendar
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -6328,6 +6330,7 @@ exports[`control.calendar validations options.validationCase 1`] = `
 exports[`control.calendar validations options.validationCase 2`] = `
 <wup-calendar
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -6480,6 +6483,7 @@ exports[`control.calendar validations options.validationCase 2`] = `
 exports[`control.calendar validations options.validationCase 3`] = `
 <wup-calendar
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -6632,6 +6636,7 @@ exports[`control.calendar validations options.validationCase 3`] = `
 exports[`control.calendar validations options.validationCase 4`] = `
 <wup-calendar
   invalid=""
+  required=""
 >
   <label
     for="txt1"

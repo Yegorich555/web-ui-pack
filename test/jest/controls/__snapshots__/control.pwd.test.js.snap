@@ -275,7 +275,6 @@ exports[`control.pwd common tests render + styles 2`] = `
   .wup-hidden, [wup-hidden] {
 position: absolute;
 height:1px; width:1px;
-top:0;left:0;
 overflow:hidden;
 clip:rect(1px,1px,1px,1px);
 min-width:initial;
@@ -466,7 +465,7 @@ mask-image: var(--ctrl-icon-img);
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         WUP-PWD[invalid]:hover,
-        WUP-PWD[invalid]:hover&gt;[menu]
+        WUP-PWD[invalid]:hover&gt;[menu],
         WUP-PWD[invalid][hovered],
         WUP-PWD[invalid][hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
@@ -636,6 +635,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-PWD button[clear] {
           background: none;
           align-self: center;
+          cursor: pointer;
         }
         WUP-PWD button[clear]:after {
           content: "";
@@ -653,6 +653,11 @@ mask-image: var(--ctrl-icon-img);
         WUP-PWD button[clear]:before {
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
+        }
+        WUP-PWD[disabled] button[clear],
+        WUP-PWD[readonly] button[clear],
+        WUP-PWD[required] button[clear] {
+          display: none;
         }
         @media (hover: hover) and (pointer: fine) {
           WUP-PWD button[clear]:hover {
@@ -787,6 +792,7 @@ exports[`control.pwd options clearButton 2`] = `
 exports[`control.pwd validations $options.validationShowAll 1`] = `
 <wup-pwd
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -866,6 +872,7 @@ exports[`control.pwd validations $options.validationShowAll 1`] = `
 exports[`control.pwd validations $options.validationShowAll 2`] = `
 <wup-pwd
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -953,6 +960,7 @@ exports[`control.pwd validations $options.validationShowAll 2`] = `
 exports[`control.pwd validations $options.validationShowAll 3`] = `
 <wup-pwd
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -1046,6 +1054,7 @@ exports[`control.pwd validations options.validationCase 1`] = `
 exports[`control.pwd validations options.validationCase 2`] = `
 <wup-pwd
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -1104,6 +1113,7 @@ exports[`control.pwd validations options.validationCase 2`] = `
 exports[`control.pwd validations options.validationCase 3`] = `
 <wup-pwd
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -1161,6 +1171,7 @@ exports[`control.pwd validations options.validationCase 3`] = `
 exports[`control.pwd validations options.validationCase 4`] = `
 <wup-pwd
   invalid=""
+  required=""
 >
   <label
     for="txt1"

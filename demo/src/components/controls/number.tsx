@@ -40,11 +40,11 @@ export default function NumberControlView() {
           name="number"
           label="Number"
           initValue="1234"
-          autoComplete="off"
-          autoFocus={false}
           validations="window.myNumberValidations"
           mask=""
           maskholder=""
+          prefix=""
+          postfix=""
         />
         <wup-num
           name="decimal"
@@ -80,6 +80,12 @@ export default function NumberControlView() {
           }}
         />
         <wup-num name="disabled" disabled />
+        <wup-num //
+          name="saveUrlNum"
+          label="With saving to URL (see $options.skey & storage)"
+          skey
+          storage="url"
+        />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

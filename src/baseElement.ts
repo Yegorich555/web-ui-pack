@@ -18,6 +18,11 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseElement;
 
+  /** Required otherwise constructor name can reduced in optimizator */
+  static get nameUnique(): string {
+    return "WUPBaseElement";
+  }
+
   /** Reference to global style element used by web-ui-pack */
   static get $refStyle(): HTMLStyleElement | null {
     return window.WUPrefStyle || null;
@@ -134,12 +139,13 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
         }
         return protos;
       };
+      // NiceToHave refactor to append styles via CDN or somehow else
       const protos = findAllProtos(this, []);
-
       protos.reverse().forEach((p) => {
         // append $styleRoot
-        if (!appendedStyles.has(p.name)) {
-          appendedStyles.add(p.name);
+        const nm = p.nameUnique;
+        if (!appendedStyles.has(nm)) {
+          appendedStyles.add(nm);
           if (Object.prototype.hasOwnProperty.call(p, "$styleRoot")) {
             const s = p.$styleRoot;
             s && refStyle.append(s);
@@ -403,6 +409,8 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
 
   /** Parse attribute and return result; if attr missed or invalid => returns pointed alt value OR $options[attr] */
   getAttr(attr: string, type?: "string", alt?: string): string | undefined;
+  /** Returns `bool if attr is `false` or `true`, `true` if "" or string if exists */
+  getAttr(attr: string, type: "boolOrString", alt?: string | boolean): string | boolean | undefined;
   getAttr(attr: string, type: "bool", alt?: boolean): boolean | undefined;
   getAttr(attr: string, type: "number", alt?: number): number | undefined;
   /** Returns value from window[key] according to [attr]="key"; if attr missed or invalid => returns pointed alt value OR $options[attr] */
@@ -443,6 +451,15 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
           this.throwError(err);
           return nullResult;
         }
+      }
+      case "boolOrString": {
+        if (a === "" || a === "true") {
+          return true;
+        }
+        if (a === "false") {
+          return false;
+        }
+        return a;
       }
       default:
         return a; // string

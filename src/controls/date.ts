@@ -4,7 +4,7 @@ import dateToString from "../helpers/dateToString";
 import localeInfo from "../objects/localeInfo";
 import WUPPopupElement from "../popup/popupElement";
 import WUPBaseComboControl from "./baseCombo";
-import { ValidateFromCases } from "./baseControl";
+import { SetValueReasons, ValidateFromCases } from "./baseControl";
 import WUPCalendarControl, { PickersEnum } from "./calendar";
 
 /* c8 ignore next */
@@ -47,12 +47,14 @@ declare global {
   }
   namespace JSX {
     interface IntrinsicElements {
+      /** Form-control with datepicker
+       *  @see {@link WUPDateControl} */
       [tagName]: WUP.Date.JSXProps; // add element to tsx/jsx intellisense
     }
   }
 }
 
-/** Form-control with date picker
+/** Form-control with datepicker
  * @tutorial Troubleshooting
  * * $options.format related only to displayed text, to work with other date-options like min/max use strict format 'YYYY-MM-DD'
  * @example
@@ -74,6 +76,10 @@ export default class WUPDateControl<
 > extends WUPBaseComboControl<ValueType, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPDateControl;
+
+  static get nameUnique(): string {
+    return "WUPDateControl";
+  }
 
   static get $styleRoot(): string {
     return `:root {
@@ -136,7 +142,7 @@ export default class WUPDateControl<
   protected override _opts = this.$options;
 
   /** Parse string to Date
-   * @see WUPCalendarControl.$parse */
+   * @see {@link WUPCalendarControl.$parse} */
   override parse(text: string): ValueType | undefined {
     if (!text) {
       return undefined;
@@ -156,6 +162,10 @@ export default class WUPDateControl<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override canParseInput(_text: string): boolean {
     return !this.refMask || this.refMask.isCompleted;
+  }
+
+  override valueToUrl(v: ValueType): string {
+    return dateToString(v, "yyyy-MM-dd");
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Date.Options> | null): void {
@@ -252,12 +262,12 @@ export default class WUPDateControl<
     return el;
   }
 
-  protected override setValue(v: ValueType | undefined, canValidate = true, skipInput = false): boolean | null {
+  protected override setValue(v: ValueType | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
     if (v && skipInput) {
       const prev = this.$value || this.$initValue;
       prev && dateCopyTime(v, prev, !!this._opts.utc); // copy time if was changing from input (calendar do it itself)
     }
-    const isChanged = super.setValue(v, canValidate, skipInput);
+    const isChanged = super.setValue(v, reason, skipInput);
     if (isChanged) {
       const c = this.$refPopup?.firstElementChild as WUPCalendarControl;
       if (c) {
@@ -269,7 +279,7 @@ export default class WUPDateControl<
     return isChanged;
   }
 
-  protected override valueToInput(v: ValueType | undefined): Promise<string> | string {
+  protected override valueToInput(v: ValueType | undefined): string {
     if (v === undefined) {
       return "";
     }

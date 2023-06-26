@@ -1,3 +1,4 @@
+import { SetValueReasons } from "./baseControl";
 import WUPTextControl from "./text";
 import WUPTextareaInput from "./textarea.input";
 
@@ -15,17 +16,20 @@ declare global {
     interface Attributes extends WUP.Text.Attributes {}
     interface JSXProps<C = WUPTextareaControl> extends WUP.Text.JSXProps<C>, Attributes {}
   }
+
   interface HTMLElementTagNameMap {
     [tagName]: WUPTextareaControl; // add element to document.createElement
   }
   namespace JSX {
     interface IntrinsicElements {
+      /** Form-control with multiline text-input
+       *  @see {@link WUPTextareaControl} */
       [tagName]: WUP.Textarea.JSXProps; // add element to tsx/jsx intellisense
     }
   }
 }
 
-/** Form-control with text-input
+/** Form-control with multiline text-input
  * @example
   const el = document.createElement("wup-textarea");
   el.$options.name = "textarea";
@@ -58,6 +62,10 @@ export default class WUPTextareaControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextareaControl;
 
+  static get nameUnique(): string {
+    return "WUPTextareaControl";
+  }
+
   static get $style(): string {
     return `${super.$style}
         :host strong { top: 1.6em; }
@@ -73,8 +81,8 @@ export default class WUPTextareaControl<
     validationRules: {
       ...WUPTextControl.$defaults.validationRules,
       // WARN: validations min/max must depends only on visible chars
-      min: (v, setV, c) => WUPTextControl.$defaults.validationRules.min.call!(c, v?.replace(/\n/g, ""), setV, c),
-      max: (v, setV, c) => WUPTextControl.$defaults.validationRules.max.call!(c, v?.replace(/\n/g, ""), setV, c),
+      min: (v, setV, c, r) => WUPTextControl.$defaults.validationRules.min.call!(c, v?.replace(/\n/g, ""), setV, c, r),
+      max: (v, setV, c, r) => WUPTextControl.$defaults.validationRules.max.call!(c, v?.replace(/\n/g, ""), setV, c, r),
     },
   };
 
@@ -178,7 +186,7 @@ export default class WUPTextareaControl<
 
   protected override gotFocusLost(): void {
     super.gotFocusLost();
-    this.setInputValue(this.$value); // update because newLine is replaced
+    this.setInputValue(this.$value, SetValueReasons.userInput); // update because newLine is replaced
   }
 }
 

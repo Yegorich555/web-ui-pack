@@ -26,7 +26,7 @@ const items = [
 } as WUP.Radio.Options["validations"];
 
 (window as any).storedRadioItems = {
-  items: items.slice(0, 4),
+  items,
 };
 
 export default function RadioControlView() {
@@ -66,25 +66,8 @@ export default function RadioControlView() {
             if (el) {
               el.$options.name = "disabled";
               el.$options.disabled = true;
-              el.$options.items = items;
-            }
-          }}
-        />
-        <wup-radio
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "readonly";
-              el.$options.items = items;
-              el.$options.readOnly = true;
-            }
-          }}
-        />
-        <wup-radio
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "withInitValue";
-              el.$options.items = items;
-              el.$initValue = ir - 2;
+              el.$options.items = items.slice(0, 4);
+              el.$initValue = el.$options.items[1].value;
             }
           }}
         />
@@ -92,9 +75,28 @@ export default function RadioControlView() {
           initValue="13"
           ref={(el) => {
             if (el) {
+              el.$options.name = "readonly";
+              el.$options.items = items.slice(0, 4);
+            }
+          }}
+        />
+        <wup-radio
+          ref={(el) => {
+            if (el) {
               el.$options.name = "reversed";
-              el.$options.items = items;
+              el.$options.items = items.slice(0, 4);
               el.$options.reverse = true;
+            }
+          }}
+        />
+        <wup-radio //
+          name="saveUrlRadio"
+          label="With saving to URL (see $options.skey & storage)"
+          skey
+          storage="url"
+          ref={(el) => {
+            if (el) {
+              el.$options.items = items;
             }
           }}
         />

@@ -1,7 +1,7 @@
 /* eslint-disable jest/no-conditional-expect */
 /* eslint-disable jest/no-export */
 import WUPBaseComboControl from "web-ui-pack/controls/baseCombo";
-import WUPBaseControl, { ClearActions, ValidationCases } from "web-ui-pack/controls/baseControl";
+import WUPBaseControl, { ClearActions, ValidationCases, ValidateFromCases } from "web-ui-pack/controls/baseControl";
 import * as h from "../../testHelper";
 import { BaseTestOptions } from "../../testHelper";
 
@@ -56,10 +56,14 @@ export function initTestBaseControl<T extends WUPBaseControl>(cfg: InitOptions<T
 interface ValueToAttr<T> {
   value: T;
   attrValue: string;
+  urlValue?: string | null;
 }
 
 interface TestOptions<T> extends BaseTestOptions {
+  /** For switch it's false */
   emptyValue?: any;
+  /** For switch it's undefined */
+  emptyInitValue?: any;
   initValues: [ValueToAttr<T>, ValueToAttr<T>, ValueToAttr<T>];
   validations: Record<string, { set: any; failValue: T | undefined; trueValue: T }>;
   validationsSkip?: string[];
@@ -101,7 +105,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.removeAttribute("initvalue");
       await h.wait(1);
       expect(el.getAttribute("initvalue")).toBe(null);
-      expect(el.$initValue).toStrictEqual(cfg.emptyValue);
+      expect(el.$initValue).toStrictEqual(cfg.emptyInitValue);
 
       await h.wait();
       el.setAttribute("initvalue", "");
@@ -166,6 +170,22 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$value = cfg.initValues[1].value;
       jest.advanceTimersByTime(1);
       expect(spyChange).toBeCalledTimes(1);
+
+      // $initValue not override $value
+      el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
+      cfg.onCreateNew?.call(cfg, el);
+      el.$value = cfg.initValues[0].value;
+      el.$initValue = cfg.initValues[1].value;
+      jest.advanceTimersByTime(1);
+      expect(el.$value).toBe(cfg.initValues[0].value);
+      // $initValue is changeable
+      el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
+      cfg.onCreateNew?.call(cfg, el);
+      el.$initValue = cfg.initValues[0].value;
+      el.$initValue = cfg.initValues[1].value;
+      jest.advanceTimersByTime(1);
+      expect(el.$initValue).toBe(cfg.initValues[1].value);
+      expect(el.$value).toBe(el.$initValue);
     });
   });
 
@@ -220,19 +240,19 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       await h.wait(1);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
-      expect(el.$value).toBe(undefined);
+      expect(el.$value).toBe(cfg.emptyValue);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       expect(el.$value).toBe(cfg.initValues[0].value); // rollback to previous value
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      expect(el.$value).toBe(undefined);
+      expect(el.$value).toBe(cfg.emptyValue);
 
       el.$value = cfg.initValues[2].value;
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      expect(el.$value).toBe(undefined);
+      expect(el.$value).toBe(cfg.emptyValue);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       expect(el.$value).toBe(cfg.initValues[2].value);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      expect(el.$value).toBe(undefined);
+      expect(el.$value).toBe(cfg.emptyValue);
 
       // only reset to init
       el.$value = cfg.initValues[0].value;
@@ -259,12 +279,12 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       expect(el.$value).toBe(cfg.initValues[1].value);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      expect(el.$value).toBe(undefined);
+      expect(el.$value).toBe(cfg.emptyValue);
 
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       expect(el.$value).toBe(cfg.initValues[1].value);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      expect(el.$value).toBe(undefined);
+      expect(el.$value).toBe(cfg.emptyValue);
     });
 
     test("disabled", () => {
@@ -328,6 +348,124 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       jest.advanceTimersByTime(1);
       expect(el.$refTitle.textContent).toBe("");
       expect(el.$refInput.getAttribute("aria-label")).toBe(null);
+    });
+
+    test("skey", async () => {
+      const onThrowErr = jest.spyOn(WUPBaseControl.prototype, "throwError");
+      if (cfg.attrs?.skey?.skip) {
+        return; // for password isn't allowed
+      }
+      // local storage
+      const sSet = jest.spyOn(Storage.prototype, "setItem");
+      const sGet = jest.spyOn(Storage.prototype, "getItem");
+      const sRem = jest.spyOn(Storage.prototype, "removeItem");
+      el.$options.clearActions = ClearActions.clear | 0;
+      el.$options.name = "name1";
+      el.$options.skey = true;
+      el.$value = cfg.initValues[0].value;
+      await h.wait(1);
+      expect(sSet).toBeCalledTimes(1);
+      expect(sSet).lastCalledWith("name1", cfg.initValues[0].urlValue ?? (cfg.initValues[0].value as any).toString());
+      expect(window.localStorage.getItem("name1")).toBeDefined(); // (cfg.initValues[0].attrValue);
+      // getItem on init
+      jest.clearAllMocks();
+      el = document.body.appendChild(document.createElement(el.tagName)) as WUPBaseControl;
+      cfg.onCreateNew?.call(cfg, el);
+      el.$options.name = "name1";
+      el.$options.skey = true;
+      await h.wait(1);
+      expect(sGet).toBeCalledTimes(1);
+      expect(sGet).lastCalledWith("name1");
+      expect(el.$initValue).toStrictEqual(cfg.initValues[0].value);
+      expect(onThrowErr).not.toBeCalled();
+
+      // clearing value
+      el.clearValue();
+      await h.wait(1);
+      expect(sRem).toBeCalledTimes(1);
+      expect(onThrowErr).not.toBeCalled();
+
+      // name is empty
+      jest.clearAllMocks();
+      el.$options.name = "";
+      el.$options.skey = true;
+      await h.wait(1);
+      expect(sGet).toBeCalledTimes(0);
+      el.$value = cfg.initValues[2].value;
+      await h.wait(1);
+      expect(sSet).toBeCalledTimes(0); // because name is missed
+      el.clearValue();
+      el.$options.name = "name1";
+      await h.wait(1);
+
+      // storage is full
+      if (cfg.initValues[1].urlValue !== null) {
+        sSet.mockImplementationOnce(() => {
+          throw new Error("Storage is exceeded");
+        });
+        el.$value = cfg.initValues[1].value;
+        await expect(h.wait()).rejects.toThrow();
+        el.$value = cfg.initValues[0].value;
+        await expect(h.wait()).resolves.not.toThrow(); // because exception was once
+      }
+      onThrowErr.mockClear();
+      await h.wait();
+
+      // session storage
+      el.$options.storage = "session";
+      el.$options.skey = "name2";
+      await h.wait(1);
+      jest.clearAllMocks();
+      expect(el.$initValue).toStrictEqual(cfg.initValues[0].value);
+      el.$value = cfg.initValues[0].value;
+      el.$value = cfg.initValues[1].value; // to call change event
+      await h.wait();
+      if (cfg.initValues[1].urlValue === null) {
+        expect(sRem).toBeCalledTimes(1);
+        expect(sRem).lastCalledWith("name2");
+      } else {
+        expect(sSet).toBeCalledTimes(1);
+        expect(sSet).lastCalledWith("name2", cfg.initValues[1].urlValue ?? (cfg.initValues[1].value as any).toString());
+      }
+      el.$value = cfg.initValues[2].value;
+      await h.wait(1);
+      expect(window.sessionStorage.getItem("name2")).toBeDefined(); // .toBe(cfg.initValues[1].attrValue);
+      // getItem on init
+      jest.clearAllMocks();
+      el = document.body.appendChild(document.createElement(el.tagName)) as WUPBaseControl;
+      cfg.onCreateNew?.call(cfg, el);
+      el.$options.storage = "session";
+      el.$options.skey = "name2";
+      await h.wait(1);
+      expect(sGet).toBeCalledTimes(1);
+      expect(sGet).lastCalledWith("name2");
+      expect(el.$initValue).toStrictEqual(cfg.initValues[2].value);
+      expect(onThrowErr).not.toBeCalled();
+
+      window.localStorage.clear();
+      window.sessionStorage.clear();
+      jest.clearAllMocks();
+
+      // browser url
+      cfg.onCreateNew?.call(cfg, el);
+      el.$options.storage = "url";
+      el.$options.skey = "su";
+      await h.wait(1);
+      expect(window.location.href).toBe("http://localhost/");
+      const testValues = cfg.initValues[1];
+      el.$value = testValues.value;
+      await h.wait(1);
+      const strVal = testValues.urlValue === undefined ? (testValues.value as any).toString() : testValues.urlValue;
+      const params = strVal == null ? "" : `?su=${window.encodeURIComponent(strVal).replace(/%20/g, "+")}`;
+      expect(window.location.href).toBe(`http://localhost/${params}`);
+      // getItem on init
+      el = document.body.appendChild(document.createElement(el.tagName)) as WUPBaseControl;
+      cfg.onCreateNew?.call(cfg, el);
+      el.$options.storage = "url";
+      el.$options.skey = "su";
+      await h.wait(1);
+      expect(el.$initValue).toStrictEqual(cfg.initValues[1].urlValue === null ? undefined : testValues.value);
+      expect(onThrowErr).not.toBeCalled();
     });
   });
 
@@ -448,8 +586,10 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$isEmpty).toBe(true);
       el.blur();
       await h.wait();
-      expect(el.$refError).toBeDefined();
-      expect(el).toMatchSnapshot();
+      if (cfg.emptyValue === cfg.emptyInitValue) {
+        expect(el.$refError).toBeDefined();
+        expect(el).toMatchSnapshot();
+      }
 
       // onFocusWithValue
       el.$hideError();
@@ -459,14 +599,17 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.focus();
       await h.wait();
       expect(el.$refError).not.toBeDefined();
-      expect(el.$isValid).toBe(false);
-      expect(el.$refError).not.toBeDefined();
+      if (cfg.emptyValue === cfg.emptyInitValue) {
+        expect(el.$isValid).toBe(false);
+        expect(el.$refError).not.toBeDefined();
+      }
       el.blur();
 
       el.$value = cfg.initValues[0].value;
       el.focus();
       await h.wait();
       expect(el.$refError).toBeDefined();
+      expect(el.$isValid).toBe(false);
       expect(el).toMatchSnapshot();
 
       // onFocusLost
@@ -491,8 +634,11 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$initValue = cfg.initValues[0].value;
       el.$options.validationCase = ValidationCases.onInit | 0;
       el.$options.validations = { custom: () => "custom err here", required: true, c2: () => false };
+      // @ts-expect-error
+      const onVld = jest.spyOn(el.$options.validations!, "custom");
       await h.wait();
       expect(el.$refError).toBeDefined();
+      expect(onVld).lastCalledWith(el.$initValue, el, ValidateFromCases.onInit);
 
       // onChangeSmart
       el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
@@ -503,17 +649,19 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$value = cfg.initValues[0].value;
       await h.wait();
 
-      el.focus();
-      await h.wait(1);
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
-      el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
-      expect(el.$isEmpty).toBe(true);
-      await h.wait();
-      expect(el.$refError).toBeDefined(); // because previously was valid and now need to show invalid state
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
-      expect(el.$isEmpty).toBe(false);
-      await h.wait();
-      expect(el.$refError).not.toBeDefined();
+      if (cfg.emptyValue === cfg.emptyInitValue) {
+        el.focus();
+        await h.wait(1);
+        el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
+        el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
+        expect(el.$isEmpty).toBe(true);
+        await h.wait();
+        expect(el.$refError).toBeDefined(); // because previously was valid and now need to show invalid state
+        el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
+        expect(el.$isEmpty).toBe(false);
+        await h.wait();
+        expect(el.$refError).not.toBeDefined();
+      }
 
       // cover case when el is invalid previously
       el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
@@ -532,11 +680,13 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       // @ts-ignore
       el.setValue(cfg.initValues[1].value);
       expect(el.$isValid).toBe(true); // was valid
-      // @ts-ignore
-      el.setValue(undefined);
-      expect(el.$isValid).toBe(false);
-      await h.wait();
-      expect(el.$refError).toBeDefined();
+      if (cfg.emptyValue === cfg.emptyInitValue) {
+        // @ts-ignore
+        el.setValue(undefined);
+        expect(el.$isValid).toBe(false);
+        await h.wait();
+        expect(el.$refError).toBeDefined();
+      }
 
       // cover case when focusOut but error left
       el.$value = cfg.initValues[0].value;

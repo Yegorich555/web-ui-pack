@@ -1,7 +1,7 @@
-import WUPBaseControl from "./baseControl";
+import WUPBaseControl, { SetValueReasons } from "./baseControl";
 import { WUPcssHidden } from "../styles";
 import WUPScrolled from "../helpers/scrolled";
-import { dateCopyTime, dateFromString } from "../indexHelpers";
+import { dateCopyTime, dateFromString, dateToString } from "../indexHelpers";
 import localeInfo from "../objects/localeInfo";
 
 const tagName = "wup-calendar";
@@ -81,11 +81,14 @@ declare global {
       initValue?: string;
     }
   }
+
   interface HTMLElementTagNameMap {
     [tagName]: WUPCalendarControl; // add element to document.createElement
   }
   namespace JSX {
     interface IntrinsicElements {
+      /** Form-control represented by date picker
+       *  @see {@link WUPCalendarControl} */
       [tagName]: WUP.Calendar.JSXProps; // add element to tsx/jsx intellisense
     }
   }
@@ -96,7 +99,7 @@ const add: <K extends keyof HTMLElementTagNameMap>(el: HTMLElement, tagName: K) 
   tag
 ) => el.appendChild(document.createElement(tag));
 
-/** Form-control as date picker
+/** Form-control represented by date picker
  * @example
   const el = document.createElement("wup-calendar");
   el.$options.name = "dateOfBirthday";
@@ -115,6 +118,10 @@ export default class WUPCalendarControl<
 > extends WUPBaseControl<ValueType, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPCalendarControl;
+
+  static get nameUnique(): string {
+    return "WUPCalendarControl";
+  }
 
   static get $styleRoot(): string {
     return `:root {
@@ -364,7 +371,8 @@ export default class WUPCalendarControl<
     }
   }
 
-  /** Converts date-string into Date according (to $options.utc), @see WUPCalendarControl.$parse */
+  /** Converts date-string into Date according (to $options.utc)
+   * @see {@link WUPCalendarControl.$parse} */
   override parse(text: string): ValueType | undefined {
     if (!text) {
       return undefined;
@@ -413,6 +421,10 @@ export default class WUPCalendarControl<
     this.$refCalenarItems.setAttribute("role", "grid");
     this.appendChild(this.$refCalenar);
     // WARN: for render picker see gotReady
+  }
+
+  override valueToUrl(v: ValueType): string {
+    return dateToString(v, "yyyy-MM-dd");
   }
 
   /** Appends calendar item to parent or replace previous */
@@ -634,7 +646,7 @@ export default class WUPCalendarControl<
         }
         const prev = this.$value || this.$initValue;
         prev && dateCopyTime(dt, prev, !!this._opts.utc);
-        this.setValue(dt as ValueType);
+        this.setValue(dt as ValueType, SetValueReasons.userInput);
         this.$ariaSpeak(this.$refInput.value);
         // this.focusItem(target);
       },
@@ -924,8 +936,8 @@ export default class WUPCalendarControl<
     el?.setAttribute("aria-selected", "true");
   }
 
-  protected override setValue(v: ValueType | undefined, canValidate = true): boolean | null {
-    const r = super.setValue(v, canValidate);
+  protected override setValue(v: ValueType | undefined, reason: SetValueReasons): boolean | null {
+    const r = super.setValue(v, reason);
     this.setInputValue(v);
     this.#refreshSelected?.call(this);
     return r;
@@ -943,8 +955,8 @@ export default class WUPCalendarControl<
     }
   }
 
-  protected override clearValue(canValidate = true): void {
-    super.clearValue(canValidate);
+  override clearValue(): void {
+    super.clearValue();
     this.$isEmpty && this.selectItem(undefined);
   }
 
@@ -1056,7 +1068,7 @@ export default class WUPCalendarControl<
   /** Called when browsers fills the field via autocomplete */
   protected gotInput(e: WUP.Text.GotInputEvent): void {
     const v = this.parse(e.target.value);
-    this.setValue(v);
+    this.setValue(v, SetValueReasons.userInput);
   }
 
   override gotKeyDown(e: KeyboardEvent): void {

@@ -41,21 +41,17 @@ export default function TimeControlView() {
           max="22:50"
           exclude="window.myTimeExclude"
           validations="window.myTimeValidations"
-          autoFocus={false}
-          autoComplete="off"
-          // ref={(el) => {
-          //   if (el) {
-          //     el.$options.autoFocus = true;
-          //     setTimeout(() => {
-          //       el.$showMenu();
-          //     }, 100);
-          //   }
-          // }}
         />
         <wup-time name="empty" />
-        <wup-time name="another" label="Another format: h-m" format="h-m" />
+        <wup-time name="another" label="Another format: h-m (options format)" format="h-m" />
         <wup-time name="disabled" disabled />
         <wup-time name="readonly" readOnly />
+        <wup-time //
+          name="saveUrlTime"
+          label="With saving to URL (see $options.skey & storage)"
+          skey
+          storage="url"
+        />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

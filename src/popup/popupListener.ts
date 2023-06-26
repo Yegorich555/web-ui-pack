@@ -3,7 +3,7 @@ import onFocusLost from "../helpers/onFocusLost";
 import { focusFirst, onEvent } from "../indexHelpers";
 import { HideCases, ShowCases } from "./popupElement.types";
 
-interface Options {
+export interface PopupListenerOptions {
   target: HTMLElement | SVGElement;
   showCase?: ShowCases;
   hoverShowTimeout?: number;
@@ -23,7 +23,7 @@ export default class PopupListener {
   };
 
   constructor(
-    public options: Options,
+    public options: PopupListenerOptions,
     public onShow: (
       showCase: ShowCases,
       ev: MouseEvent | FocusEvent | null
@@ -264,7 +264,7 @@ export default class PopupListener {
     this.handleEventsDocument = this.handleEventsDocument.bind(this);
     this.handleEvents = this.handleEvents.bind(this);
 
-    const { target: t, showCase } = this.options as Required<Options>;
+    const { target: t, showCase } = this.options as Required<PopupListenerOptions>;
 
     if (showCase & ShowCases.onClick) {
       t.addEventListener("click", this.handleEvents, this.#defargs);
@@ -292,7 +292,7 @@ export default class PopupListener {
     document.addEventListener("focusin", this.handleEventsDocument, this.#defargs);
     document.addEventListener("keydown", this.handleEventsDocument, this.#defargs);
 
-    const { target: t, showCase } = this.options as Required<Options>;
+    const { target: t, showCase } = this.options as Required<PopupListenerOptions>;
     if (showCase & ShowCases.onClick) {
       document.addEventListener("click", this.handleEventsDocument, this.#defargs);
     }

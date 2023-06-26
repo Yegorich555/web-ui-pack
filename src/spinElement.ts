@@ -3,6 +3,7 @@ import objectClone from "./helpers/objectClone";
 import { px2Number, styleTransform } from "./helpers/styleHelpers";
 import { getOffset } from "./popup/popupPlacements";
 
+const tagName = "wup-spin";
 declare global {
   namespace WUP.Spin {
     interface Defaults {
@@ -35,6 +36,17 @@ declare global {
       fit?: boolean | "";
     }
     interface JSXProps<T extends WUPSpinElement> extends WUP.Base.JSXProps<T>, Attributes {}
+  }
+
+  interface HTMLElementTagNameMap {
+    [tagName]: WUPSpinElement; // add element to document.createElement
+  }
+  namespace JSX {
+    interface IntrinsicElements {
+      /** Flexible animated element with ability to place over target element without position relative
+       * @see {@link WUPSpinElement} */
+      [tagName]: WUP.Spin.JSXProps<WUPSpinElement>; // add element to tsx/jsx intellisense
+    }
   }
 }
 
@@ -74,6 +86,10 @@ export default class WUPSpinElement extends WUPBaseElement {
     return ["inline", "overflowfade", "fit"];
   }
 
+  static get nameUnique(): string {
+    return "WUPSpinElement";
+  }
+
   static get $styleRoot(): string {
     return `:root {
           --spin-1: #ffa500;
@@ -81,7 +97,7 @@ export default class WUPSpinElement extends WUPBaseElement {
           --spin-speed: 1.2s;
           --spin-size: 3em;
           --spin-item-size: calc(var(--spin-size) / 8);
-          --spin-fade: #ffffff6e;
+          --spin-fade: rgba(255,255,255,0.43);
         }`;
   }
 
@@ -323,22 +339,7 @@ export default class WUPSpinElement extends WUPBaseElement {
 }
 
 spinUseRing(WUPSpinElement);
-const tagName = "wup-spin";
 customElements.define(tagName, WUPSpinElement);
-
-declare global {
-  // add element to document.createElement
-  interface HTMLElementTagNameMap {
-    [tagName]: WUPSpinElement;
-  }
-
-  // add element to tsx/jsx intellisense
-  namespace JSX {
-    interface IntrinsicElements {
-      [tagName]: WUP.Spin.JSXProps<WUPSpinElement>;
-    }
-  }
-}
 
 /** Basic function to change spinner-style */
 export function spinSetStyle(cls: typeof WUPSpinElement, itemsCount: number, getter: () => string): void {
@@ -375,6 +376,7 @@ export function spinUseDualRing(cls: typeof WUPSpinElement): void {
   );
 }
 
+/** Apply on class to change spinner-style */
 export function spinUseTwinDualRing(cls: typeof WUPSpinElement): void {
   spinSetStyle(
     cls,

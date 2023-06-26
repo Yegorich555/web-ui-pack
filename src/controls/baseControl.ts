@@ -10,6 +10,17 @@ import { ShowCases } from "../popup/popupElement.types";
 import { WUPcssIcon } from "../styles";
 import IBaseControl from "./baseControl.i";
 
+export const enum SetValueReasons {
+  /** When `control.$value = 'some value'` */
+  manual = 1,
+  /** When clearing happened (by Esc or ClearButton click) OR reset to previous value */
+  clear,
+  /** When user changes on UI */
+  userInput,
+  /** When user selected existed option on UI and don't need to call selectMenuItem again (for combobox) */
+  userSelect,
+}
+
 /** Cases of validation for WUP Controls */
 export const enum ValidationCases {
   none = 0,
@@ -53,20 +64,25 @@ export const enum ValidateFromCases {
   onManualCall,
 }
 
-type StoredItem = HTMLLIElement & { _wupVld: (v: any) => string | false };
+type StoredItem = HTMLLIElement & { _wupVld: (v: any, reason: ValidateFromCases | null) => string | false };
 type StoredRefError = HTMLElement & { _wupVldItems?: StoredItem[] };
 
 declare global {
   namespace WUP.BaseControl {
     interface EventMap extends WUP.Base.EventMap {
       /** Called on value change */
-      $change: Event;
+      $change: CustomEvent & { detail: SetValueReasons };
     }
 
     interface ValidityMap {
       /** If $value is empty shows message 'This field is required` */
       required: boolean;
     }
+    type ValidityFunction<T> = (
+      value: T | undefined,
+      control: IBaseControl,
+      reason: ValidateFromCases | null
+    ) => false | string;
 
     interface Defaults<T = any, VM = ValidityMap> {
       /** When to validate control and show error. Validation by onSubmit impossible to disable
@@ -95,7 +111,13 @@ declare global {
         };
        * ``` */
       validationRules: {
-        [K in keyof VM]: (this: IBaseControl, value: T, setValue: VM[K], control: IBaseControl) => false | string;
+        [K in keyof VM]: (
+          this: IBaseControl,
+          value: T,
+          setValue: VM[K],
+          control: IBaseControl,
+          reason: ValidateFromCases | null
+        ) => false | string;
       };
       /** Rules enabled for current control (related to $defaults.validationRules)
        * @example
@@ -108,9 +130,11 @@ declare global {
        * ```
        * @tutorial Troubleshooting
        ** If setup validations via attr it doesn't affect on $options.validations directly. Instead use el.validations getter instead */
-      validations?:
-        | { [K in keyof VM]?: VM[K] | ((value: T | undefined) => false | string) }
-        | { [k: string]: (value: T | undefined) => false | string };
+      validations?: { [K in keyof VM]?: VM[K] | ValidityFunction<T> } | { [k: string]: ValidityFunction<T> };
+      /** Storage for saving value
+       * @see {@link WUP.BaseControl.Options.storekey}
+       * @defaultValue "local" */
+      storage?: "local" | "session" | "url";
     }
     interface Options<T = any, VM = ValidityMap> extends Defaults<T, VM> {
       /** Title/label of control; if label is missed it's parsed from option [name]. To skip point `label=''` (empty string) */
@@ -129,10 +153,20 @@ declare global {
       readOnly?: boolean;
       /** Show all validation-rules with checkpoints as list instead of single error */
       validationShowAll?: boolean;
+      /** Storage key for auto saving value in storage;
+       * @tutorial rules
+       * * Point empty string or `true` to inherit from $options.name
+       * * Expected value can be converted toString & parsed from string itself.
+       * Override valueFromUrl & valueToUrl to change serializing (for complex objects, arrays etc.)
+       * @see {@link WUP.BaseControl.Defaults.storage} */
+      skey?: boolean | string;
     }
 
     interface Attributes
-      extends Pick<Options, "label" | "name" | "autoFocus" | "disabled" | "readOnly" | "autoComplete"> {
+      extends Pick<
+        Options,
+        "label" | "name" | "autoFocus" | "disabled" | "readOnly" | "autoComplete" | "skey" | "storage"
+      > {
       /** default value in string/boolean or number representation (depends on `control.prototype.parse()`) */
       initValue?: string | boolean | number;
       /** Rules enabled for current control. Point global obj-key with validations (use `window.myValidations` where `window.validations = {required: true}` ) */
@@ -173,6 +207,7 @@ export default abstract class WUPBaseControl<
       "disabled",
       "readOnly",
       "validations",
+      "skey",
     ];
   }
 
@@ -185,7 +220,13 @@ export default abstract class WUPBaseControl<
       "disabled",
       "readonly",
       "initvalue",
+      "skey",
+      "storage",
     ];
+  }
+
+  static get nameUnique(): string {
+    return "WUPBaseControl";
   }
 
   /** Css-variables related to component */
@@ -341,7 +382,7 @@ export default abstract class WUPBaseControl<
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         :host[invalid]:hover,
-        :host[invalid]:hover>[menu]
+        :host[invalid]:hover>[menu],
         :host[invalid][hovered],
         :host[invalid][hovered]>[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
@@ -382,7 +423,7 @@ export default abstract class WUPBaseControl<
   protected override _opts = this.$options;
 
   /** Called on value change */
-  $onChange?: (e: Event) => void;
+  $onChange?: (e: CustomEvent & { detail: SetValueReasons }) => void;
 
   #value?: ValueType;
   /** Current value of control; You can change it without affecting on $isDirty state */
@@ -392,7 +433,7 @@ export default abstract class WUPBaseControl<
 
   set $value(v: ValueType | undefined) {
     const was = this.#isDirty;
-    this.setValue(v, false);
+    this.setValue(v, SetValueReasons.manual);
     this.#isDirty = was;
   }
 
@@ -405,7 +446,7 @@ export default abstract class WUPBaseControl<
 
   set $initValue(v: ValueType | undefined) {
     const was = this.#initValue;
-    const canUpdate = !this.$isReady || (!this.$isDirty && !this.$isChanged);
+    const canUpdate = (!this.$isReady && this.$value === undefined) || (!this.$isDirty && !this.$isChanged);
     this.#initValue = v;
     if (canUpdate && !this.#ctr.$isEqual(v, was)) {
       // WARN: comparing required for SelectControl when during the parse it waits for promise
@@ -434,8 +475,7 @@ export default abstract class WUPBaseControl<
   }
 
   /** Returns if value changed (by comparisson with $initValue via static.isEqual option)
-   *  By default values compared by valueOf if it's possible
-   */
+   *  By default values compared by valueOf if it's possible */
   get $isChanged(): boolean {
     return !this.#ctr.$isEqual(this.$value, this.#initValue);
   }
@@ -560,24 +600,12 @@ export default abstract class WUPBaseControl<
     this._opts.label = this.getAttr("label");
     this._opts.name = this.getAttr("name");
 
-    const a = this.getAttribute("autocomplete");
-    switch (a) {
-      case null:
-      case "":
-        break; // skip attribute in this case
-      case "false":
-        this._opts.autoComplete = false;
-        break;
-      case "true":
-        this._opts.autoComplete = true;
-        break;
-      default:
-        this._opts.autoComplete = a;
-        break;
-    }
+    this._opts.autoComplete = this.getAttr("autocomplete", "boolOrString", this._opts.autoComplete);
     this._opts.disabled = this.getAttr("disabled", "bool");
     this._opts.readOnly = this.getAttr("readonly", "bool", this._opts.readOnly);
     this._opts.autoFocus = this.getAttr("autofocus", "bool", this._opts.autoFocus);
+    this._opts.skey = this.getAttr("skey", "boolOrString", this._opts.skey);
+    this._opts.storage = this.getAttr("storage", "string", this._opts.storage) as "local";
 
     const i = this.$refInput;
     // set label
@@ -589,8 +617,31 @@ export default abstract class WUPBaseControl<
     // set other props
     this.setAttr("disabled", this._opts.disabled, true);
     this.setAttr("readonly", this._opts.readOnly, true);
-    this.setAttr.call(this.$refInput, "aria-required", !!this.validations?.required);
+    const isRequired = !!this.validations?.required;
+    this.setAttr("required", isRequired, true);
+    this.setAttr.call(this.$refInput, "aria-required", isRequired);
 
+    this.setupInitValue(propsChanged);
+    this.gotFormChanges(propsChanged);
+  }
+
+  /** Called on control/form Init and every time as control/form options changed. Method contains changes related to form `disabled`,`readonly` etc. */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  gotFormChanges(propsChanged: Array<string> | null): void {
+    this.setupInput();
+    this.$refError && !this.canShowError && this.goHideError(); // hide error if user can't touch the control
+  }
+
+  /** Called to update disabled/readonly/autocomplete options on input */
+  setupInput(): void {
+    const i = this.$refInput;
+    i.disabled = this.$isDisabled;
+    i.readOnly = this.$isReadOnly;
+    i.autocomplete = this.$autoComplete || "off";
+  }
+
+  /** Called on Init and options/attributes changes to update $initValue */
+  setupInitValue(propsChanged: Array<keyof WUP.BaseControl.Options | any> | null): void {
     // lowercase for attribute-changes otherwise it's wrong
     if (!propsChanged || propsChanged.includes("initvalue")) {
       const attr = this.getAttribute("initvalue");
@@ -612,18 +663,10 @@ export default abstract class WUPBaseControl<
         this.$initValue = nestedProperty.get(this.$form._initModel as any, this._opts.name);
       }
     }
-
-    this.gotFormChanges(propsChanged);
-  }
-
-  /** Called on control/form Init and every time as control/form options changed. Method contains changes related to form `disabled`,`readonly` etc. */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  gotFormChanges(propsChanged: Array<string> | null): void {
-    const i = this.$refInput;
-    i.disabled = this.$isDisabled;
-    i.readOnly = this.$isReadOnly;
-    i.autocomplete = this.$autoComplete || "off";
-    this.$refError && !this.canShowError && this.goHideError(); // hide error if user can't touch the control
+    // retrieve value from store
+    if (this.$initValue === undefined && this._opts.skey) {
+      this.$initValue = this.storageGet();
+    }
   }
 
   /** Returns true on !$isDisabled */
@@ -710,19 +753,21 @@ export default abstract class WUPBaseControl<
   }
 
   /** Returns validations functions ready for checking */
-  protected get validationsRules(): Array<(v: ValueType | undefined) => string | false> {
+  protected get validationsRules(): Array<
+    (v: ValueType | undefined, reason: ValidateFromCases | null) => string | false
+  > {
     const vls = this.validations;
 
     if (!vls) {
       return [];
     }
 
-    const check = (v: ValueType | undefined, k: string | number): string | false => {
+    const check = (v: ValueType | undefined, k: string | number, reason: ValidateFromCases | null): string | false => {
       const vl = vls[k as "required"];
 
       let err: false | string;
       if (typeof vl === "function") {
-        err = vl(v as any);
+        err = vl(v as any, this, reason);
       } else {
         const rules = this.#ctr.$defaults.validationRules;
         const r = rules[k as "required"];
@@ -730,7 +775,7 @@ export default abstract class WUPBaseControl<
           const n = this._opts.name ? `.[${this._opts.name}]` : "";
           throw new Error(`${this.tagName}${n}. Validation rule [${k}] is not found`);
         }
-        err = r.call(this, v as unknown as string, vl as boolean, this);
+        err = r.call(this, v as unknown as string, vl as boolean, this, reason);
       }
 
       if (err !== false) {
@@ -748,7 +793,12 @@ export default abstract class WUPBaseControl<
         if (k2 === "required") return 1;
         return 0;
       })
-      .map((key) => ({ [key]: (v: ValueType | undefined) => check.call(self, v, key) }[key])); // make object to create named function
+      .map(
+        (key) =>
+          ({ [key]: (v: ValueType | undefined, reason: ValidateFromCases | null) => check.call(self, v, key, reason) }[
+            key
+          ])
+      ); // make object to create named function
     return arr;
   }
 
@@ -774,7 +824,7 @@ export default abstract class WUPBaseControl<
     this._isValid = !vls.some((fn) => {
       // process empty value only on rule 'required'; for others skip if value is empty
       const skipRule = isEmpty && fn.name[0] !== "_" && fn.name !== "required"; // undefined only for 'required' rule; for others: skip if value = undefined
-      const err = !skipRule && fn(v);
+      const err = !skipRule && fn(v, fromCase);
       if (err) {
         this._errName = fn.name;
         errMsg = err;
@@ -832,7 +882,7 @@ export default abstract class WUPBaseControl<
         const li = ul.appendChild(document.createElement("li")) as StoredItem;
         li._wupVld = vls[i];
         p._wupVldItems.push(li);
-        const err = vls[i](undefined);
+        const err = vls[i](undefined, null);
         if (err) {
           li.textContent = err;
         } else {
@@ -848,7 +898,7 @@ export default abstract class WUPBaseControl<
     }
 
     const v = this.$value;
-    p._wupVldItems.forEach((li) => this.setAttr.call(li, "valid", li._wupVld(v) === false, true));
+    p._wupVldItems.forEach((li) => this.setAttr.call(li, "valid", li._wupVld(v, null) === false, true));
   }
 
   protected renderError(): WUPPopupElement {
@@ -932,12 +982,101 @@ export default abstract class WUPBaseControl<
     }
   }
 
+  /** Called to serialize value from URL/storage; override it if you have unexpected object */
+  valueFromUrl(str: string): ValueType | undefined {
+    return str === "null" ? (null as ValueType) : this.parse(str);
+  }
+
+  /** Called to serialize value to URL/storage & must return null if need to remove */
+  valueToUrl(v: ValueType | null): string | null {
+    if (v == null) {
+      return "null";
+    }
+    if (typeof v === "object") {
+      this.throwError(
+        new Error(
+          "Option `skey` with object-values are not supported. Override `valueToUrl` & `valueFromUrl` to fix it"
+        )
+      );
+      return null;
+    }
+    return v.toString();
+  }
+
+  /** Returns storage key based on options `skey` and `name` */
+  get storageKey(): string | undefined | false {
+    return this._opts.skey === true ? this._opts.name : this._opts.skey;
+  }
+
+  /** Get & parse value from storage according to options `skey`, `storage` and `name` */
+  protected storageGet(): ValueType | undefined {
+    const key = this.storageKey;
+    if (key) {
+      let v: string | null;
+      switch (this._opts.storage) {
+        case "session":
+          v = window.sessionStorage.getItem(key);
+          break;
+        case "url":
+          v = new URLSearchParams(window.location.search).get(decodeURIComponent(key).replace(/\+/g, " ")); // regex require for form-url-decode 's+t' => 's t'
+          v = v != null ? decodeURIComponent(v) : v;
+          break;
+        default:
+          v = window.localStorage.getItem(key);
+          break;
+      }
+      if (v != null) {
+        return this.valueFromUrl(v);
+      }
+    }
+    return this.$initValue;
+  }
+
+  /** Save value to storage storage according to options `skey`, `storage` and `name` */
+  protected storageSet(v: ValueType | undefined): void {
+    const key = this.storageKey;
+    if (!key) {
+      return; // possible when _opts.name is empty
+    }
+    try {
+      let strg: Storage | Pick<Storage, "removeItem" | "setItem">;
+      switch (this._opts.storage) {
+        case "session":
+          strg = window.sessionStorage;
+          break;
+        case "url":
+          {
+            const url = new URL(window.location.href);
+            strg = {
+              removeItem: (k) => {
+                url.searchParams.delete(k);
+                window.history.replaceState(null, "", url); // OR window.history.pushState(null, null, url);
+              },
+              setItem: (k, val) => {
+                url.searchParams.set(k, val);
+                window.history.replaceState(null, "", url); // OR window.history.pushState(null, null, url);
+              },
+            };
+          }
+          break;
+        default:
+          strg = window.localStorage;
+          break;
+      }
+
+      if (this.#ctr.$isEmpty(v)) {
+        strg.removeItem(key);
+      } else {
+        const sv = this.valueToUrl(v!);
+        sv === null ? strg.removeItem(key) : strg.setItem(key, sv);
+      }
+    } catch (err) {
+      this.throwError(err); // re-throw error when storage is full
+    }
+  }
+
   /** Fire this method to update value & validate; returns null when not $isReady, true if changed */
-  protected setValue(
-    v: ValueType | undefined,
-    /* istanbul ignore next */
-    canValidate = true
-  ): boolean | null {
+  protected setValue(v: ValueType | undefined, reason: SetValueReasons): boolean | null {
     const prev = this.#value;
     this.#value = v;
     if (!this.$isReady) {
@@ -951,8 +1090,11 @@ export default abstract class WUPBaseControl<
     }
 
     this._isValid = undefined;
-    (canValidate || this.$refError) && this.validateAfterChange();
-    setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true }));
+    const canVld = reason !== SetValueReasons.manual;
+    (canVld || this.$refError) && this.validateAfterChange();
+    // save to storage
+    this._opts.skey && this.storageSet(v);
+    setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true, detail: reason }));
     return true;
   }
 
@@ -966,7 +1108,7 @@ export default abstract class WUPBaseControl<
 
   #prevValue = this.#value;
   /* Called when user pressed Esc-key or button-clear */
-  protected clearValue(canValidate = true): void {
+  clearValue(): void {
     const was = this.#value;
 
     let v: ValueType | undefined;
@@ -981,7 +1123,7 @@ export default abstract class WUPBaseControl<
       v = this.$isEmpty ? this.#prevValue : undefined;
     }
 
-    this.setValue(v, canValidate);
+    this.setValue(v, SetValueReasons.clear);
     this.#prevValue = was;
 
     this.$isEmpty ? this.$ariaSpeak(this.#ctr.$ariaCleared) : this.$refInput.select();
@@ -1010,15 +1152,16 @@ export default abstract class WUPBaseControl<
     if (this._opts.validationCase & ValidationCases.onFocusLost) {
       // const wasErr = !!this._errMsg;
       this.goValidate(ValidateFromCases.onFocusLost);
-      // todo test & rollback it when error will be visible over popup: for selectControl the color is changed but error not visible and menu stays opened
+      // NiceToHave test & rollback it when error will be visible over popup: for selectControl the color is changed but error not visible and menu stays opened
       // this._errMsg && !wasErr && this.focus(); // user sees validation error at first time: return focus back once
     }
   }
 
   /** Called when user pressed key */
   protected gotKeyDown(e: KeyboardEvent & { submitPrevented?: boolean }): void {
-    e.key === "Escape" && !e.shiftKey && !e.altKey && !e.ctrlKey && this.clearValue(); // WARN: Escape works wrong with NVDA because it's enables NVDA-focus-mode
+    e.key === "Escape" && !e.shiftKey && !e.altKey && !e.ctrlKey && this.clearValue(); // WARN: Escape works wrong with NVDA because it enables NVDA-focus-mode
   }
 }
 
-// todo add new opts: storeSession/storeLocal/storeUrl: boolean | string;
+// NiceToHave when control is disabled need to show tooltip with reason
+// NiceToHave when control is readonly need to show tooltip with reason

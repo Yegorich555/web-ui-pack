@@ -236,7 +236,6 @@ exports[`control.date common tests render + styles 2`] = `
   .wup-hidden, [wup-hidden] {
 position: absolute;
 height:1px; width:1px;
-top:0;left:0;
 overflow:hidden;
 clip:rect(1px,1px,1px,1px);
 min-width:initial;
@@ -426,7 +425,7 @@ mask-image: var(--ctrl-icon-img);
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         WUP-DATE[invalid]:hover,
-        WUP-DATE[invalid]:hover&gt;[menu]
+        WUP-DATE[invalid]:hover&gt;[menu],
         WUP-DATE[invalid][hovered],
         WUP-DATE[invalid][hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
@@ -596,6 +595,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-DATE button[clear] {
           background: none;
           align-self: center;
+          cursor: pointer;
         }
         WUP-DATE button[clear]:after {
           content: "";
@@ -613,6 +613,11 @@ mask-image: var(--ctrl-icon-img);
         WUP-DATE button[clear]:before {
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
+        }
+        WUP-DATE[disabled] button[clear],
+        WUP-DATE[readonly] button[clear],
+        WUP-DATE[required] button[clear] {
+          display: none;
         }
         @media (hover: hover) and (pointer: fine) {
           WUP-DATE button[clear]:hover {
@@ -673,6 +678,7 @@ mask-image: var(--ctrl-icon-img);
 exports[`control.date validations $options.validationShowAll 1`] = `
 <wup-date
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -733,6 +739,7 @@ exports[`control.date validations $options.validationShowAll 1`] = `
 exports[`control.date validations $options.validationShowAll 2`] = `
 <wup-date
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -799,6 +806,7 @@ exports[`control.date validations $options.validationShowAll 2`] = `
 exports[`control.date validations $options.validationShowAll 3`] = `
 <wup-date
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -878,6 +886,7 @@ exports[`control.date validations options.validationCase 1`] = `
 exports[`control.date validations options.validationCase 2`] = `
 <wup-date
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -920,7 +929,9 @@ exports[`control.date validations options.validationCase 2`] = `
     menu=""
     style=""
   >
-    <wup-calendar>
+    <wup-calendar
+      required=""
+    >
       <div
         calendar="day"
         id="txt2"
@@ -1220,6 +1231,7 @@ exports[`control.date validations options.validationCase 3`] = `
 <wup-date
   invalid=""
   opened=""
+  required=""
 >
   <label
     for="txt1"
@@ -1280,7 +1292,9 @@ exports[`control.date validations options.validationCase 3`] = `
     menu=""
     style=""
   >
-    <wup-calendar>
+    <wup-calendar
+      required=""
+    >
       <div
         calendar="day"
         id="txt6"
@@ -1562,6 +1576,7 @@ exports[`control.date validations options.validationCase 3`] = `
 exports[`control.date validations options.validationCase 4`] = `
 <wup-date
   invalid=""
+  required=""
 >
   <label
     for="txt1"

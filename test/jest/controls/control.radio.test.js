@@ -1,4 +1,6 @@
+/* eslint-disable prefer-destructuring */
 import { WUPRadioControl } from "web-ui-pack";
+import WUPBaseControl from "web-ui-pack/controls/baseControl";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
 
@@ -84,6 +86,57 @@ describe("control.radio", () => {
     expect(onErr.mock.lastCall[0]).toMatchInlineSnapshot(
       `"Value not found according to attribute [items] in 'window.'"`
     );
+  });
+
+  test("$options.items & $value", () => {
+    testEl = document.body.appendChild(document.createElement(testEl.tagName));
+    const el = testEl;
+    const onErr = h.mockConsoleError();
+    // before ready
+    el.$options.items = [{ text: "Helica", value: 10 }];
+    el.$value = 10;
+    jest.advanceTimersByTime(2);
+    expect(onErr).not.toBeCalled();
+    expect(el.innerHTML).toMatchInlineSnapshot(
+      `"<fieldset><legend><strong></strong></legend><label for="txt7"><input id="txt7" type="radio" name="txt6473" tabindex="0" autocomplete="off"><span>Helica</span></label></fieldset>"`
+    );
+    // after ready
+    el.$options.items = [{ text: "Harry", value: 11 }];
+    el.$value = 11;
+    jest.advanceTimersByTime(2);
+    expect(onErr).not.toBeCalled();
+    expect(el.innerHTML).toMatchInlineSnapshot(
+      `"<fieldset><legend><strong></strong></legend><label for="txt9"><input id="txt9" type="radio" name="txt8473" tabindex="0" autocomplete="off"><span>Harry</span></label></fieldset>"`
+    );
+
+    el.$options.items = [{ text: "Helica", value: 5 }];
+    jest.advanceTimersByTime(2);
+    expect(onErr).toBeCalledTimes(1); // because it doesn't fit value 11
+  });
+
+  test("$options.items is complex object", async () => {
+    const onErr = h.mockConsoleError();
+    const el = testEl;
+    const items = [
+      { text: "a1", value: { name: "Dik" } },
+      { text: "a2", value: { name: "Yomma" } },
+    ];
+    el.$options.items = items;
+    jest.advanceTimersByTime(1); // to apply changes
+    el.$value = "hi";
+    await h.wait();
+    expect(onErr).toBeCalledTimes(1); // value not found in itmes
+    expect(el.$options.items).not.toBe(items); // because $options.items is Proxy
+
+    onErr.mockClear();
+    el.$value = items[1].value;
+    await h.wait();
+    expect(onErr).not.toBeCalled();
+
+    onErr.mockClear();
+    el.$value = el.$options.items[0].value;
+    await h.wait();
+    expect(onErr).not.toBeCalled();
   });
 
   test("parsing $initValue", () => {
@@ -184,6 +237,7 @@ describe("control.radio", () => {
   test("focus on current input", () => {
     const el = testEl;
     el.$value = 20;
+    jest.advanceTimersByTime(1);
     expect(el.$refInput).toBe(el.$refItems[1]);
     el.focus();
     expect(document.activeElement).toBe(el.$refItems[1]);
@@ -192,5 +246,48 @@ describe("control.radio", () => {
     el.$refItems[1].disabled = true;
     el.focus();
     expect(document.activeElement).toBe(el.$refItems[0]);
+  });
+
+  test("storage", async () => {
+    let el = testEl;
+    const onThrowErr = jest.spyOn(WUPBaseControl.prototype, "throwError");
+    const onConsoleErr = h.mockConsoleError();
+    // with falsy value
+    const items = getItems();
+    items[0].value = null;
+
+    el.$options.skey = "rd";
+    el.$options.items = items;
+    await h.wait(1);
+    el.$value = null;
+    await h.wait(1);
+    expect(window.localStorage.getItem("rd")).toBe("null");
+    expect(onThrowErr).not.toBeCalled();
+    expect(onConsoleErr).not.toBeCalled();
+
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.items = items;
+    expect(el.$value).toBe(undefined);
+    el.$options.skey = "rd";
+    await h.wait(1);
+    expect(el.$value).toBe(null);
+    window.localStorage.clear();
+    await h.wait();
+    expect(onConsoleErr).not.toBeCalled();
+    expect(onThrowErr).not.toBeCalled();
+
+    // value is complex object
+    items[0].value = { name: "Serge" };
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.items = items;
+    await h.wait(1);
+    el.$options.skey = "rd";
+    await h.wait(1);
+    onConsoleErr.mockClear();
+    // eslint-disable-next-line prefer-destructuring
+    el.$value = items[0].value;
+    expect(() => jest.advanceTimersByTime(1000)).toThrow(); // complex value isn't supported
+    expect(onThrowErr).toBeCalled();
+    expect(onConsoleErr).not.toBeCalled();
   });
 });

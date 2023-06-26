@@ -1,7 +1,7 @@
 import MaskTextInput from "./text.mask";
 import { onEvent } from "../indexHelpers";
 import { WUPcssIcon } from "../styles";
-import WUPBaseControl from "./baseControl";
+import WUPBaseControl, { SetValueReasons } from "./baseControl";
 
 const emailReg =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -41,7 +41,8 @@ declare global {
       /** Select whole text when input got focus (when input is not readonly and not disabled);
        * @defaultValue false */
       selectOnFocus: boolean;
-      /** Show/hide clear button. @see ClearActions
+      /** Show/hide clear button
+       * @see {@link ClearActions} from `web-ui-pack/baseControl`
        * @defaultValue true */
       clearButton: boolean;
     }
@@ -94,9 +95,10 @@ declare global {
   interface HTMLElementTagNameMap {
     [tagName]: WUPTextControl; // add element to document.createElement
   }
-
   namespace JSX {
     interface IntrinsicElements {
+      /** Form-control with text input
+       *  @see {@link WUPTextControl} */
       [tagName]: WUP.Text.JSXProps; // add element to tsx/jsx intellisense
     }
   }
@@ -139,6 +141,10 @@ export default class WUPTextControl<
     const arr = super.observedAttributes as Array<LowerKeys<WUP.Text.Attributes>>;
     arr.push("maskholder", "mask", "prefix", "postfix");
     return arr;
+  }
+
+  static get nameUnique(): string {
+    return "WUPTextControl";
   }
 
   static get $styleRoot(): string {
@@ -295,6 +301,7 @@ export default class WUPTextControl<
         :host button[clear] {
           background: none;
           align-self: center;
+          cursor: pointer;
         }
         :host button[clear]:after {
           content: "";
@@ -312,6 +319,11 @@ export default class WUPTextControl<
         :host button[clear]:before {
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
+        }
+        :host[disabled] button[clear],
+        :host[readonly] button[clear],
+        :host[required] button[clear] {
+          display: none;
         }
         @media (hover: hover) and (pointer: fine) {
           :host button[clear]:hover {
@@ -676,7 +688,7 @@ export default class WUPTextControl<
       if (errMsg) {
         this.validateOnce({ _parse: this.validations?._parse || "" }, true);
       } else if (canParse) {
-        this.setValue(v, true, true);
+        this.setValue(v, SetValueReasons.userInput, true);
       } else if (this._opts.mask) {
         this.validateOnce({ _mask: this.validations?._mask || "" });
       }
@@ -723,7 +735,6 @@ export default class WUPTextControl<
     if (declinedAdd) {
       this._histUndo!.pop();
       this._histUndo!.push(this.historyToSnapshot(mi.value, pos)); // fix when ###: "12|" + "3b" => 123|
-      // todo case#1 '|11:15 PM' + '0' => goes to valid '01:15 PM' but declineInput is called
       this.declineInput(pos);
     } else {
       el.value = mi.value;
@@ -813,15 +824,16 @@ export default class WUPTextControl<
     const t = setTimeout(this.#declineInputEnd, 100);
   }
 
-  protected override setValue(v: ValueType | undefined, canValidate = true, skipInput = false): boolean | null {
-    !skipInput && this.setInputValue(v);
-    const isChanged = super.setValue(v, canValidate);
+  protected override setValue(v: ValueType | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
+    !skipInput && this.setInputValue(v, reason);
+    const isChanged = super.setValue(v, reason);
     this._isValid !== false && this.goHideError();
     return isChanged;
   }
 
   /** Called to update/reset value for <input/> */
-  protected setInputValue(v: ValueType | undefined | string): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected setInputValue(v: ValueType | undefined | string, reason: SetValueReasons): void {
     const str = v != null ? (v as any).toString() : "";
     this.$refInput.value = str;
     this._opts.mask && this.maskInputProcess(null);
@@ -832,7 +844,7 @@ export default class WUPTextControl<
   _onceErrName?: string;
   /** Called when inputValue != $value and need to show error on the fly by input-change */
   protected validateOnce(
-    rule: { [key: string]: boolean | string | ((v: any) => false | string) },
+    rule: { [key: string]: boolean | string | WUP.BaseControl.ValidityFunction<string> },
     force = false
   ): void {
     const prev = this._wasValidNotEmpty;

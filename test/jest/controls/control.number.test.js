@@ -358,7 +358,7 @@ describe("control.number", () => {
     expect(el.$refInput.value).toBe("111.53");
   });
 
-  test("thousand separtor", () => {
+  test("1000s separtor", () => {
     el.$value = 123;
     expect(el.$refInput.value).toBe("123");
 
@@ -379,5 +379,19 @@ describe("control.number", () => {
 
     el.$value = -1506234;
     expect(el.$refInput.value).toBe("-1,506,234");
+  });
+
+  test("storage with falsy value", async () => {
+    el.$options.skey = "nm";
+    el.$value = 0;
+    await h.wait(1);
+    expect(window.localStorage.getItem("nm")).toBe("0");
+    el = document.body.appendChild(document.createElement(el.tagName));
+    expect(el.$value).toBe(undefined);
+    el.$options.skey = "nm";
+    await h.wait(1);
+    expect(el.$value).toBe(0);
+
+    window.localStorage.clear();
   });
 });

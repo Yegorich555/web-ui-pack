@@ -5,6 +5,7 @@ import { onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
 import { WUPcssIcon } from "../styles";
 import { ShowCases } from "./baseCombo";
+import { SetValueReasons } from "./baseControl";
 import WUPSelectControl from "./select";
 
 const tagName = "wup-selectmany";
@@ -33,15 +34,16 @@ declare global {
   interface HTMLElementTagNameMap {
     [tagName]: WUPSelectManyControl; // add element to document.createElement
   }
-
   namespace JSX {
     interface IntrinsicElements {
+      /** Form-control with dropdown/combobox behavior
+       *  @see {@link WUPSelectManyControl} */
       [tagName]: WUP.SelectMany.JSXProps; // add element to tsx/jsx intellisense
     }
   }
 }
 
-/** Form-control with dropdown/combobox behavior & ability to select several items
+/** Form-control with dropdown/combobox behavior
  * @example
   const el = document.createElement("wup-selectmany");
   el.$options.name = "gender";
@@ -96,6 +98,10 @@ export default class WUPSelectManyControl<
     const arr = super.observedAttributes as Array<LowerKeys<WUP.SelectMany.Attributes>>;
     arr.push("sortable");
     return arr;
+  }
+
+  static get nameUnique(): string {
+    return "WUPSelectManyControl";
   }
 
   static get $styleRoot(): string {
@@ -438,7 +444,10 @@ export default class WUPSelectManyControl<
               dr.remove();
             });
             // change value
-            this.setValue(this.$refItems!.map((a) => a._wupValue));
+            this.setValue(
+              this.$refItems!.map((a) => a._wupValue),
+              SetValueReasons.userInput
+            );
           }
         }
         r0();
@@ -459,8 +468,8 @@ export default class WUPSelectManyControl<
     return !this._wasSortAfterClick && super.canShowMenu(showCase, e);
   }
 
-  protected override async renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> {
-    const r = await super.renderMenu(popup, menuId);
+  protected override renderMenu(popup: WUPPopupElement, menuId: string): HTMLElement {
+    const r = super.renderMenu(popup, menuId);
     this.filterMenuItems();
     return r;
   }
@@ -505,7 +514,7 @@ export default class WUPSelectManyControl<
   }
 
   protected override valueToInput(v: ValueType[] | undefined, isReset?: boolean): string {
-    !isReset && this.getItems().then((items) => this.renderItems(v ?? [], items));
+    !isReset && setTimeout(() => this.renderItems(v ?? [], this.getItems())); // timeout required otherwise filter is reset by empty input
     return this.$isFocused || !v?.length ? "" : " "; // otherwise broken css:placeholder-shown
   }
 
@@ -569,11 +578,11 @@ export default class WUPSelectManyControl<
     }
 
     this.$value!.splice(index, 1);
-    this.setValue(this.$value!.length ? [...this.$value!] : undefined);
+    this.setValue(this.$value!.length ? [...this.$value!] : undefined, SetValueReasons.userInput);
   }
 
-  protected override setValue(v: ValueType[] | undefined, canValidate = true, skipInput = false): boolean | null {
-    const isChanged = super.setValue(v, canValidate, skipInput);
+  protected override setValue(v: ValueType[] | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
+    const isChanged = super.setValue(v, reason, skipInput);
     isChanged !== false && this.setAttr("filled", !this.$isEmpty, true);
     return isChanged;
   }
@@ -660,7 +669,10 @@ export default class WUPSelectManyControl<
             : this.$refItems[isR && this._focusIndex !== 0 ? this._focusIndex + 1 : this._focusIndex]
         );
         this.$refItems.splice(this._focusIndex, 0, this.$refItems.splice(prev, 1)[0]);
-        this.setValue(this.$refItems.map((a) => a._wupValue));
+        this.setValue(
+          this.$refItems.map((a) => a._wupValue),
+          SetValueReasons.userInput
+        );
         // }
       }
       return;

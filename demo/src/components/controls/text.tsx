@@ -26,6 +26,7 @@ export default function TextControlView() {
         "Easy to append icons",
         "Mask/maskholder support (options mask & maskholder)",
         "Prefix/postfix support (options prefix & postfix)",
+        "Ability to save value to localStorage, sessionStorage, URL (options skey & storage)",
       ]}
     >
       <wup-form
@@ -40,8 +41,6 @@ export default function TextControlView() {
           name="email"
           label="Text control"
           initValue="test@google.com"
-          autoComplete="off"
-          autoFocus={false}
           validations="window.myTextValidations"
           mask=""
           maskholder=""
@@ -100,6 +99,12 @@ export default function TextControlView() {
           }}
         />
         <wup-text name="disabled" disabled />
+        <wup-text //
+          name="saveUrl"
+          label="With saving to URL (see $options.skey & storage)"
+          skey
+          storage="url"
+        />
         <section>
           <h3>Masked inputs</h3>
           <br />

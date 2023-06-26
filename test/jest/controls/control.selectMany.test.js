@@ -50,7 +50,7 @@ describe("control.selectMany", () => {
     noInputSelection: true,
     initValues: [
       { attrValue: "window.$1Value", value: [10] },
-      { attrValue: "window.$2Value", value: [20, 40] },
+      { attrValue: "window.$2Value", value: [20, 40], urlValue: "20_40" },
       { attrValue: "window.$3Value", value: [30] },
     ],
     validations: {},
@@ -229,7 +229,7 @@ describe("control.selectMany", () => {
     expect(el.$value).toStrictEqual([30]);
     // animation for [removed]
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true" removed="">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-describedby="txt2 txt3"><strong></strong>"`
+      `"<span item="" aria-hidden="true" removed="">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-describedby="txt2"><strong></strong>"`
     );
     await h.wait();
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
@@ -241,8 +241,9 @@ describe("control.selectMany", () => {
     jest.spyOn(window, "matchMedia").mockImplementation(() => ({ matches: true })); // simulate 'prefers-reduced-motion' === true
     expect(isAnimEnabled()).toBe(false);
     jest.spyOn(el.$refItems[0], "offsetWidth", "get").mockReturnValue("33px");
-    await h.userClick(el.$refItems[0], undefined);
+    await h.userClick(el.$refItems[0]);
     expect(el.$value).toStrictEqual(undefined);
+    await h.wait();
     // without animation for [removed]
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
       `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list"><strong></strong>"`

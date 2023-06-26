@@ -25,6 +25,7 @@ export const enum SubmitActions {
   lockOnPending = 1 << 4,
 }
 
+const tagName = "wup-form";
 declare global {
   namespace WUP.Form {
     interface SubmitEvent<T extends Record<string, any>> extends Event {
@@ -51,6 +52,12 @@ declare global {
       /** Actions that enabled on submit event; You can point several like: `goToError | collectChanged`
        * @defaultValue goToError | validateUntiFirst | reset | lockOnPending */
       submitActions: SubmitActions;
+      /** Whether need to store data in localStorage to prevent losing till submitted;
+       * @defaultValue false
+       * @tutorial Troubleshooting
+       * * It doesn't save values that are complex objects. So `wup-select.$options.items = [{text: "N1",value: {id:1,name:'Nik'} }]` is skipped
+       * * Point string-value if default storage-key doesn't fit: based on `url+control.names` @see{@link WUPFormElement.storageKey} */
+      autoSave?: boolean | string;
     }
 
     interface Options extends Defaults {
@@ -65,18 +72,15 @@ declare global {
       autoComplete?: boolean;
     }
 
-    interface Attributes {
-      /** Disallow edit/copy value. Use [disabled] for styling */
-      disabled?: boolean;
-      /** Disallow edit value */
-      readOnly?: boolean;
-      /** Focus on init */
-      autoFocus?: boolean;
-      /** Enable/disable browser-autocomplete */
-      autoComplete?: boolean;
-    }
+    interface Attributes extends Pick<Options, "disabled" | "readOnly" | "autoComplete" | "autoFocus" | "autoSave"> {}
 
-    interface JSXProps<T extends WUPBaseElement> extends WUP.Base.JSXProps<T>, Attributes {
+    interface JSXProps<T extends WUPFormElement> extends WUP.Base.JSXProps<T>, Attributes {
+      /** Whether need to store data in localStorage to prevent losing till submitted;
+       * @defaultValue false
+       * @tutorial Troubleshooting
+       * * It doesn't save values that are complex objects. So `wup-select.$options.items = [{text: "N1",value: {id:1,name:'Nik'} }]` is skipped
+       * * Point string-value if default storage-key doesn't fit: based on `url+control.names` @see{@link WUPFormElement.storageKey} */
+      autoSave?: string;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
       onChange?: never;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willSubmit') instead */
@@ -85,11 +89,22 @@ declare global {
       onSubmit?: never;
     }
   }
+
+  interface HTMLElementTagNameMap {
+    [tagName]: WUPFormElement; // add element to document.createElement
+  }
+  namespace JSX {
+    interface IntrinsicElements {
+      /** Wrapper of FormHTMLElement that collect values from controls
+       *  @see {@link WUPFormElement} */
+      [tagName]: WUP.Form.JSXProps<WUPFormElement>; // add element to tsx/jsx intellisense
+    }
+  }
 }
 
 const formStore: WUPFormElement[] = [];
 
-/** Default Form-HTMLElement that collect values from controls
+/** Wrapper of FormHTMLElement that collect values from controls
  * @example
  *  // init form
  *  const form = document.createElement("wup-form");
@@ -147,12 +162,16 @@ export default class WUPFormElement<
 
   /** Options that need to watch for changes; use gotOptionsChanged() */
   static get observedOptions(): Array<keyof WUP.Form.Options> {
-    return ["disabled", "readOnly", "autoComplete"];
+    return ["disabled", "readOnly", "autoComplete", "autoSave"];
   }
 
   /* Array of attribute names to listen for changes */
   static get observedAttributes(): Array<LowerKeys<WUP.Form.Attributes>> {
-    return ["disabled", "readonly", "autocomplete"];
+    return ["disabled", "readonly", "autocomplete", "autosave"];
+  }
+
+  static get nameUnique(): string {
+    return "WUPFormElement";
   }
 
   static get $styleRoot(): string {
@@ -183,7 +202,7 @@ export default class WUPFormElement<
 
   /** Map model to control-values */
   static $modelToControls<T extends Record<string, any>>(
-    m: T,
+    m: T | undefined,
     controls: IBaseControl[],
     prop: keyof Pick<IBaseControl, "$value" | "$initValue">
   ): void {
@@ -191,7 +210,7 @@ export default class WUPFormElement<
     controls.forEach((c) => {
       const key = c.$options.name;
       if (key) {
-        const v = nestedProperty.get(m, key, out);
+        const v = m && nestedProperty.get(m, key, out);
         if (out.hasProp) {
           c[prop] = v;
         }
@@ -242,13 +261,13 @@ export default class WUPFormElement<
   }
 
   _model?: Partial<Model>;
-  /** Model related to every control inside (with $options.name); @see BaseControl...$value */
+  /** Model related to every control inside (with $options.name);
+   *  @see {@link BaseControl.prototype.$value} */
   get $model(): Partial<Model> {
     return Object.assign(this._model || {}, this.#ctr.$modelFromControls({}, this.$controls, "$value"));
   }
 
   set $model(m: Partial<Model>) {
-    /* istanbul ignore else */
     if (m !== this._model) {
       this._model = m;
       this.#ctr.$modelToControls(m, this.$controls, "$value");
@@ -256,14 +275,14 @@ export default class WUPFormElement<
   }
 
   _initModel?: Partial<Model>;
-  /** Default/init model related to every control inside; @see BaseControl...$initValue */
-  get $initModel(): Partial<Model> {
+  /** Default/init model related to every control inside;
+   *  @see {@link BaseControl.prototype.$initValue} */
+  get $initModel(): Partial<Model> | undefined {
     // it's required to avoid case when model has more props than controls
     return this.#ctr.$modelFromControls(this._initModel || {}, this.$controls, "$initValue");
   }
 
-  set $initModel(m: Partial<Model>) {
-    /* istanbul ignore else */
+  set $initModel(m: Partial<Model> | undefined) {
     if (m !== this._initModel) {
       this._initModel = m;
       this.#ctr.$modelToControls(m, this.$controls, "$initValue");
@@ -276,7 +295,6 @@ export default class WUPFormElement<
   }
 
   set $isPending(v: boolean) {
-    /* istanbul ignore else */
     if (v !== this.$isPending) {
       this.changePending(v);
     }
@@ -397,6 +415,7 @@ export default class WUPFormElement<
       this.dispatchEvent(ev2);
 
       promiseWait(Promise.all([p1, ev.$waitFor]), 300, (v: boolean) => this.changePending(v)).then(() => {
+        this._opts.autoSave && this.storageSave(null); // clear storage after submit
         if (needReset) {
           arrCtrl.forEach((v) => (v.$isDirty = false));
           this.$initModel = this.$model;
@@ -405,6 +424,9 @@ export default class WUPFormElement<
     });
   }
 
+  /** Auto-safe debounce timeout */
+  #autoSaveT?: ReturnType<typeof setTimeout>;
+  #autoSaveRemEv?: () => void;
   #hasControlChanges?: boolean;
   protected override gotChanges(
     propsChanged: Array<keyof WUP.Form.Options | LowerKeys<WUP.Form.Options>> | null
@@ -418,6 +440,31 @@ export default class WUPFormElement<
 
     this.setAttr("readonly", this._opts.readOnly, true);
     this.setAttr("disabled", this._opts.disabled, true);
+
+    this._opts.autoSave = this.getAttr("autosave", "boolOrString", this._opts.autoSave);
+    if (this._opts.autoSave) {
+      this.#autoSaveRemEv = this.appendEvent(this, "$change", () => {
+        if (this._preventStorageSave) {
+          return;
+        }
+        this.#autoSaveT && clearTimeout(this.#autoSaveT);
+        this.#autoSaveT = setTimeout(() => this._opts.autoSave && this.storageSave(), 700);
+      });
+
+      // works only on init
+      !propsChanged &&
+        setTimeout(() => {
+          const m = this.storageGet();
+          if (m) {
+            this._preventStorageSave = true;
+            this.$model = { ...this._initModel, ...m, ...this._model };
+            setTimeout(() => delete this._preventStorageSave);
+          }
+        }, 2); // timeout required to wait for init controls
+    } else if (this.#autoSaveRemEv) {
+      this.#autoSaveRemEv.call(this);
+      this.#autoSaveRemEv = undefined;
+    }
 
     const p = propsChanged;
     if (this.#hasControlChanges || p?.includes("disabled")) {
@@ -483,27 +530,96 @@ export default class WUPFormElement<
     formStore.push(this);
   }
 
+  /** Returns storage key based on url+control-names or `$options.autoSave` if `string` */
+  get storageKey(): string {
+    const sn = this._opts.autoSave;
+    return typeof sn === "string"
+      ? sn
+      : `${window.location.pathname}?${this.$controls
+          .map((c) => c.$options.name)
+          .filter((v) => v)
+          .sort()
+          .join(",")}`;
+  }
+
+  /** Get & parse value from storage according to option `autoSave`, $model */
+  storageGet(): Partial<Model> | null {
+    try {
+      const key = this.storageKey;
+      const sv = window.localStorage.getItem(key);
+      if (sv) {
+        const m = JSON.parse(sv) as Partial<Model>;
+        let hasVals = false;
+        this.$controls.forEach((c) => {
+          const n = c.$options.name;
+          if (!n) {
+            return;
+          }
+          const v = m[n];
+          if (v === undefined) {
+            return;
+          }
+          const parsed = typeof v === "string" ? c.parse(v) : v;
+          nestedProperty.set(m, n, parsed);
+          if (n.includes(".")) {
+            delete m[n];
+          }
+          hasVals = true;
+        });
+        if (!hasVals) {
+          return null;
+        }
+        return m;
+      }
+    } catch (err) {
+      this.throwError(err); // re-throw error when storage is full
+    }
+    return null;
+  }
+
+  _preventStorageSave?: boolean;
+  /** Save/remove model (only changes) to storage according to option `autoSave`, $model
+   * @returns model saved to localStorage or Null if removed */
+  storageSave(model: null | Record<string, any> = {}): Partial<Model> | null {
+    try {
+      const storage = window.localStorage;
+      if (model == null) {
+        storage.removeItem(this.storageKey);
+        return null;
+      }
+
+      const m: Partial<Model> = {}; // plain model without nested objects
+      let hasChanges = false;
+      this.$controls.forEach((c) => {
+        // ignore password controls and controls without names
+        if (c.$options.name && c.tagName !== "WUP-PWD") {
+          const v = c.$value;
+          if (c.$isChanged && v !== undefined) {
+            if (typeof v === "object" && !v.toJSON && !Array.isArray(v)) {
+              return; // skip complex objects that not serializable: otherwise it can throw err on parse
+            }
+            m[c.$options.name as keyof Model] = v; // get only changed values
+            hasChanges = true;
+          }
+        }
+      });
+      if (hasChanges) {
+        storage.setItem(this.storageKey, JSON.stringify(m));
+        return m;
+      }
+      storage.removeItem(this.storageKey);
+    } catch (err) {
+      this.throwError(err); // re-throw error when storage is full
+    }
+    return null;
+  }
+
   protected override disconnectedCallback(): void {
     super.disconnectedCallback();
     formStore.splice(formStore.indexOf(this), 1);
   }
 }
 
-const tagName = "wup-form";
 customElements.define(tagName, WUPFormElement);
 
-declare global {
-  // add element to document.createElement
-  interface HTMLElementTagNameMap {
-    [tagName]: WUPFormElement;
-  }
-
-  // add element to tsx/jsx intellisense
-  namespace JSX {
-    interface IntrinsicElements {
-      [tagName]: WUP.Form.JSXProps<WUPFormElement>;
-    }
-  }
-}
-
-// todo show success result in <wup-alert> at the right angle + add autosafe option
+// todo show success result in <wup-alert> at the right angle + add autoSubmit option

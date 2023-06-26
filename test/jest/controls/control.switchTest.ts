@@ -6,11 +6,12 @@ export default function testSwitchControl(getEl: () => WUPSwitchControl, opts: P
   testBaseControl({
     ...opts,
     emptyValue: false,
+    emptyInitValue: undefined,
     noInputSelection: true,
     initValues: [
-      { attrValue: "true", value: true },
-      { attrValue: "false", value: false },
-      { attrValue: "true", value: true },
+      { attrValue: "true", value: true, urlValue: "1" },
+      { attrValue: "false", value: false, urlValue: null },
+      { attrValue: "true", value: true, urlValue: "1" },
     ],
     validations: {
       ...opts?.validations,
@@ -22,7 +23,7 @@ export default function testSwitchControl(getEl: () => WUPSwitchControl, opts: P
   test("defaultChecked", () => {
     const el = getEl();
     expect(el.$refInput.type).toBe("checkbox");
-    expect(el.$initValue).toBe(false);
+    expect(el.$initValue).toBe(undefined);
 
     el.setAttribute("defaultchecked", "true");
     jest.advanceTimersByTime(1);
@@ -42,7 +43,7 @@ export default function testSwitchControl(getEl: () => WUPSwitchControl, opts: P
     el.removeAttribute("defaultchecked");
     el.$options.readOnly = true;
     jest.advanceTimersByTime(1);
-    expect(el.$initValue).toBe(false);
+    expect(el.$initValue).toBe(undefined);
   });
 
   test("user clicks on checkbox", () => {

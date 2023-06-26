@@ -141,8 +141,9 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
     // });
     if (obj instanceof WUPBaseElement) {
       test("render + styles", () => {
-        expect(obj).toMatchSnapshot();
         const c = Object.getPrototypeOf(obj).constructor as typeof WUPBaseElement;
+        expect(c.nameUnique).toBe(c.name); // these names must be matched
+        expect(obj).toMatchSnapshot();
         expect(c.$refStyle).toMatchSnapshot();
       });
 

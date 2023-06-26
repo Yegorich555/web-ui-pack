@@ -51,12 +51,14 @@ declare global {
   }
   namespace JSX {
     interface IntrinsicElements {
+      /** Dropdown element
+       *  @see {@link WUPDropdownElement} */
       [tagName]: WUP.Dropdown.JSXProps; // add element to tsx/jsx intellisense
     }
   }
 }
 
-/** DropdownElement
+/** Dropdown element
  * @example
  * ```html
   <wup-dropdown class="custom">
@@ -75,6 +77,10 @@ declare global {
  */
 export default class WUPDropdownElement extends WUPBaseElement {
   #ctr = this.constructor as typeof WUPDropdownElement;
+
+  static get nameUnique(): string {
+    return "WUPDropdownElement";
+  }
 
   static get $style(): string {
     return `${super.$style}

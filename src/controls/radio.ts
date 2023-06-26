@@ -1,5 +1,5 @@
 import { WUPcssHidden } from "../styles";
-import WUPBaseControl from "./baseControl";
+import WUPBaseControl, { SetValueReasons } from "./baseControl";
 
 const tagName = "wup-radio";
 declare global {
@@ -8,8 +8,16 @@ declare global {
     interface ValidityMap extends WUP.BaseControl.ValidityMap {}
     interface Defaults<T = any, VM = ValidityMap> extends WUP.BaseControl.Defaults<T, VM> {}
     interface Options<T = any, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, Defaults<T, VM> {
-      /** Items showed as radio-buttons */
-      items: WUP.Select.MenuItems<T> | (() => WUP.Select.MenuItems<T>);
+      /** Items showed as radio-buttons
+       * @tutorial Troubleshooting
+       * * array items is converted to Proxy (observer) so
+       * ```js
+       * const items = [text: "1", value: {name: "Janny"}]
+       * el.$options.items = items;
+       * setTimeout(()=> console.warn(el.$options.items === items)},1) // returns 'false'
+       * setTimeout(()=> console.warn(el.$options.items[0].value === items[0].value)},1) // returns 'true'
+       * ``` */
+      items: WUP.Select.MenuItems<T> | (() => WUP.Select.MenuItems<T>); // NiceToHave: remove items from observed options to get/set to avoid Proxy issues
       /** Reversed-style (radio+label for true vs label+radio)
        * @defaultValue false */
       reverse?: boolean;
@@ -22,18 +30,21 @@ declare global {
     }
     interface JSXProps<C = WUPRadioControl> extends WUP.BaseControl.JSXProps<C>, Attributes {}
   }
+
   interface HTMLElementTagNameMap {
     [tagName]: WUPRadioControl; // add element to document.createElement
   }
   namespace JSX {
     interface IntrinsicElements {
+      /** Form-control with radio buttons
+       *  @see {@link WUPRadioControl} */
       [tagName]: WUP.Radio.JSXProps<WUPRadioControl>; // add element to tsx/jsx intellisense
     }
   }
 }
 
 interface ExtInputElement extends HTMLInputElement {
-  _value: any;
+  _index: number;
 }
 
 /** Form-control with radio buttons
@@ -59,8 +70,7 @@ interface ExtInputElement extends HTMLInputElement {
  *   <label> <input/> <span/> </label>
  *   <label> <input/> <span/> </label>
  *   // etc.
- * </fieldset>
- */
+ * </fieldset> */
 export default class WUPRadioControl<
   ValueType = any,
   EventMap extends WUP.Radio.EventMap = WUP.Radio.EventMap
@@ -69,6 +79,10 @@ export default class WUPRadioControl<
 
   /** Custom text that announced by screen-readers. Redefine it to use with another language */
   static $ariaReadonly = "readonly";
+
+  static get nameUnique(): string {
+    return "WUPRadioControl";
+  }
 
   static get $styleRoot(): string {
     return `:root {
@@ -84,7 +98,7 @@ export default class WUPRadioControl<
   }
 
   static get $style(): string {
-    // :host input + *:after >> not relative because 1.2em of 14px provides round-pixel-issue and not always rounded items
+    // :host input + span:after >> not relative because 1.2em of 14px provides round-pixel-issue and not always rounded items
     return `${super.$style}
       :host {
         position: relative;
@@ -120,7 +134,7 @@ export default class WUPRadioControl<
         padding: 0;
       }
       :host input {${WUPcssHidden}}
-      :host input + * {
+      :host input + span {
         padding: var(--ctrl-radio-gap);
         display: inline-flex;
         align-items: center;
@@ -130,7 +144,7 @@ export default class WUPRadioControl<
       :host[readonly] label {
          cursor: default;
       }
-      :host input + *:after {
+      :host input + span:after {
         content: "";
         width: var(--ctrl-radio-size);
         height: var(--ctrl-radio-size);
@@ -141,35 +155,35 @@ export default class WUPRadioControl<
         border-radius: 50%;
         margin-left: 0.5em;
       }
-      :host fieldset[aria-required="true"] input + *:after {
+      :host fieldset[aria-required="true"] input + span:after {
         content: "";
       }
-      :host[reverse] input + * {
+      :host[reverse] input + span {
         flex-direction: row-reverse;
       }
-      :host[reverse] input + *:after {
+      :host[reverse] input + span:after {
         margin-left: 0;
         margin-right: 0.5em;
       }
-      :host input:checked + *:after {
+      :host input:checked + span:after {
         background-color: var(--ctrl-radio-on);
       }
       @media not all and (prefers-reduced-motion) {
-        :host input + *:after {
+        :host input + span:after {
           transition: background-color var(--anim);
         }
       }
-      :host input:focus + * {
+      :host input:focus + span {
         color: var(--ctrl-selected);
       }
-      :host input:focus + *:after {
+      :host input:focus + span:after {
          box-shadow: 0 0 1px var(--ctrl-radio-border-size) var(--ctrl-selected);
       }
       @media (hover: hover) and (pointer: fine) {
-        :host input + *:hover {
+        :host input + span:hover {
           color: var(--ctrl-selected);
         }
-        :host input + *:hover:after {
+        :host input + span:hover:after {
           box-shadow: 0 0 1px var(--ctrl-radio-border-size) var(--ctrl-selected);
         }
       }
@@ -221,7 +235,7 @@ export default class WUPRadioControl<
     if (this.$isReadOnly) {
       e.target.checked = !e.target.checked;
     } else {
-      this.setValue(e.target._value);
+      this.setValue(this.getItems()[e.target._index].value, SetValueReasons.userInput);
     }
   }
 
@@ -251,14 +265,13 @@ export default class WUPRadioControl<
       return;
     }
     const nm = this.#ctr.$uniqueId + (Date.now() % 1000);
-    const arrLi = arr.map((item) => {
+    const arrLi = arr.map((_item, i) => {
       const lbl = document.createElement("label");
       const inp = lbl.appendChild(document.createElement("input")) as ExtInputElement;
       const tit = lbl.appendChild(document.createElement("span"));
       this.$refItems.push(inp);
       inp.id = this.#ctr.$uniqueId;
-      inp._value = item.value;
-
+      inp._index = i;
       lbl.setAttribute("for", inp.id);
       inp.type = "radio";
       inp.name = nm; // required otherwise tabbing, arrow-keys doesn't work inside single fieldset
@@ -273,7 +286,8 @@ export default class WUPRadioControl<
     }
 
     this.$refItems[0].tabIndex = 0;
-    this.checkInput(this.$value); // required for case when user changed items
+    // when user changed items
+    setTimeout(() => this.checkInput(this.$value)); // timeout to fix case when el.$options.items=... el.$value=...
   }
 
   /** Called when need to update check-state of inputs */
@@ -284,7 +298,7 @@ export default class WUPRadioControl<
       // eslint-disable-next-line prefer-destructuring
       this.$refInput = this.$refItems[0] || this.$refInput;
     } else {
-      const item = this.$refItems.find((inp) => inp._value === v);
+      const item = this.$refItems[this.getItems().findIndex((a) => a.value === v)];
       if (!item) {
         console.error(`${this.tagName}${this._opts.name ? `[${this._opts.name}]` : ""}. Not found in items`, {
           items: this._opts.items,
@@ -295,13 +309,16 @@ export default class WUPRadioControl<
         this.$refInput = item;
       }
     }
-
+    this.setupInput();
     this.$refLabel = this.$refInput.parentElement as HTMLLabelElement;
   }
 
-  protected override setValue(v: ValueType, canValidate = true): boolean | null {
-    this.$isReady && this.checkInput(v); // otherwise it will be checked from renderItems
-    return super.setValue(v, canValidate);
+  protected override setValue(v: ValueType, reason: SetValueReasons): boolean | null {
+    if (this.$isReady) {
+      // timeout to fix case when el.$options.items=... el.$value=...
+      reason === SetValueReasons.manual ? setTimeout(() => this.checkInput(v)) : this.checkInput(v); // otherwise it will be checked from renderItems
+    }
+    return super.setValue(v, reason);
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Radio.Options> | null): void {

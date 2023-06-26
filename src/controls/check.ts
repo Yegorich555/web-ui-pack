@@ -15,6 +15,8 @@ declare global {
   }
   namespace JSX {
     interface IntrinsicElements {
+      /** Form-control with checkbox
+       *  @see {@link WUPCheckControl} */
       [tagName]: WUP.Check.JSXProps; // add element to tsx/jsx intellisense
     }
   }
@@ -45,6 +47,10 @@ export default class WUPCheckControl<
   EventMap extends WUP.Check.EventMap = WUP.Check.EventMap
 > extends WUPSwitchControl<EventMap> {
   #ctr = this.constructor as typeof WUPCheckControl;
+
+  static get nameUnique(): string {
+    return "WUPCheckControl";
+  }
 
   static get $styleRoot(): string {
     return `:root {

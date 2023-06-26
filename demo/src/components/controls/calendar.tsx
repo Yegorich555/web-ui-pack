@@ -48,11 +48,15 @@ export default function CalendarControlView() {
           startWith="day"
           utc
           validations="window.myCalendarValidations"
-          autoFocus={false}
-          autoComplete="off"
         />
         <wup-calendar name="disabled" label="Disabled" disabled utc />
-        <wup-calendar name="disabled" label="Readonly" readOnly utc />
+        <wup-calendar name="readonly" label="Readonly" readOnly utc />
+        <wup-calendar //
+          name="saveUrlClnd"
+          label="With saving to URL (see $options.skey & storage)"
+          skey
+          storage="url"
+        />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

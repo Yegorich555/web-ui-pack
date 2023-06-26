@@ -1,7 +1,7 @@
 import onScroll from "../helpers/onScroll";
 import { mathSumFloat, onEvent } from "../indexHelpers";
 import localeInfo from "../objects/localeInfo";
-import WUPBaseControl from "./baseControl";
+import WUPBaseControl, { SetValueReasons } from "./baseControl";
 import WUPTextControl from "./text";
 
 const tagName = "wup-num";
@@ -10,10 +10,10 @@ declare global {
   namespace WUP.Number {
     interface Format {
       /** Decimal separator; for number 123.4 it's dot
-       * localeInfoInfo @see localeInfo.sepDecimal */
+       *  @see {@link localeInfo.sepDecimal} */
       sepDecimal?: string;
       /** Thouthands separator; for number 1,234.5 it's comma
-       *  localeInfoInfo @see localeInfo.sep1000 */
+       *  @see {@link localeInfo.sep1000} */
       sep1000?: string;
       /** Maximum displayed fraction digits; for 123.45 it's 2
        * @defaultValue 0 */
@@ -46,6 +46,8 @@ declare global {
   }
   namespace JSX {
     interface IntrinsicElements {
+      /** Form-control with number input
+       *  @see {@link WUPNumberControl} */
       [tagName]: WUP.Number.JSXProps; // add element to tsx/jsx intellisense
     }
   }
@@ -66,8 +68,7 @@ declare global {
   <wup-form>
     <wup-num name="number" validations="myValidations"/>
   </wup-form>;
- * @see WUPTextControl
- */
+ * @see {@link WUPTextControl} */
 export default class WUPNumberControl<
   ValueType = number,
   EventMap extends WUP.Number.EventMap = WUP.Number.EventMap
@@ -78,6 +79,10 @@ export default class WUPNumberControl<
     const arr = super.observedOptions as Array<keyof WUP.Number.Options>;
     arr.push("format");
     return arr;
+  }
+
+  static get nameUnique(): string {
+    return "WUPNumberControl";
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
@@ -114,7 +119,6 @@ export default class WUPNumberControl<
   }
 
   // WARN usage format #.### impossible because unclear what sepDec/sep100 and what if user wants only limit decimal part
-  /** Called when need to format value */
   valueToInput(v: ValueType | undefined): string {
     if (v == null) {
       return "";
@@ -223,7 +227,7 @@ export default class WUPNumberControl<
           }
         }
         // el.value = next;
-        this.setInputValue(v as any); // WARN: it refreshes onceError but calls valueToInput again
+        this.setInputValue(v as any, SetValueReasons.userInput); // WARN: it refreshes onceError but calls valueToInput again
         const end = pos + dp;
         el.setSelectionRange(end, end);
       }
@@ -236,9 +240,9 @@ export default class WUPNumberControl<
     return true;
   }
 
-  protected override setInputValue(v: ValueType | undefined): void {
+  protected override setInputValue(v: ValueType | undefined, reason: SetValueReasons): void {
     const txt = this.valueToInput(v);
-    super.setInputValue(txt);
+    super.setInputValue(txt, reason);
   }
 
   protected override renderControl(): void {
@@ -248,7 +252,7 @@ export default class WUPNumberControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Number.Options> | null): void {
     super.gotChanges(propsChanged as any);
-    propsChanged?.includes("format") && this.setInputValue(this.$value);
+    propsChanged?.includes("format") && this.setInputValue(this.$value, SetValueReasons.userInput);
   }
 
   protected override gotBeforeInput(e: WUP.Text.GotInputEvent): void {

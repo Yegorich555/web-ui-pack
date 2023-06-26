@@ -1,0 +1,27 @@
+.gitLink {
+  display: inline-block;
+  position: relative;
+  padding: 4px 10px;
+  padding-right: 34px;
+  margin-right: -24px;
+  border-radius: $borderRadius;
+  text-decoration: none;
+  color: $activeLinkColor;
+
+  &::after {
+    content: " ";
+    display: block;
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    right: 10px;
+    top: 46%;
+    transform: translateY(-50%);
+    background: url("../assets/gitIcon.svg") no-repeat;
+    background-size: contain;
+  }
+
+  &:hover {
+    opacity: 0.8;
+  }
+}

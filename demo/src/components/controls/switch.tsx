@@ -13,6 +13,7 @@ export default function SwitchControlView() {
         "Easy to change size of items via css-variables (ctrl-switch-size...)", //
         "Possible to reverse label",
         "Powerful accessibility support (keyboard, announcenement)",
+        "Ability to save value to localStorage, sessionStorage, URL (options skey & storage)",
       ]}
       details={{
         tag: "wup-switch",
@@ -22,17 +23,16 @@ export default function SwitchControlView() {
       <wup-form
         ref={(el) => {
           if (el) {
+            el.$initModel = { reversed: true };
             el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
       >
-        <wup-switch
+        <wup-switch //
           name="switch"
           label="Switch"
           initValue={false}
           reverse={false}
-          autoComplete="off"
-          autoFocus={false}
         />
         <wup-switch
           ref={(el) => {
@@ -51,15 +51,13 @@ export default function SwitchControlView() {
         />
         {/* otherwise in React inline [defaultChecked] doesn't work */}
         <wup-switch name="defaultChecked" ref={(el) => el?.setAttribute("defaultChecked", "")} />
-        <wup-switch name="disabled" initValue="" disabled />
-        <wup-switch
-          name="readonly"
-          readOnly
-          ref={(el) => {
-            if (el) {
-              el.$initValue = true;
-            }
-          }}
+        <wup-switch name="disabled" disabled />
+        <wup-switch name="readonly" readOnly initValue />
+        <wup-switch //
+          name="saveUrlSwitch"
+          label="With saving to URL (see $options.skey & storage)"
+          skey
+          storage="url"
         />
         <button type="submit">Submit</button>
       </wup-form>

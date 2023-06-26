@@ -1,7 +1,7 @@
 import { onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
 import { ShowCases as PopupShowCases, Animations } from "../popup/popupElement.types";
-import WUPBaseControl from "./baseControl";
+import WUPBaseControl, { SetValueReasons } from "./baseControl";
 import WUPTextControl from "./text";
 
 export const enum ShowCases {
@@ -65,6 +65,10 @@ export default abstract class WUPBaseComboControl<
     const arr = super.observedOptions as Array<keyof WUP.BaseCombo.Options>;
     arr.push("readOnlyInput");
     return arr;
+  }
+
+  static get nameUnique(): string {
+    return "WUPBaseComboControl";
   }
 
   static get $style(): string {
@@ -170,9 +174,9 @@ export default abstract class WUPBaseComboControl<
   }
 
   /** Called when need to create menu in opened popup */
-  protected abstract renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> | HTMLElement;
-  /** Called when need to transfer current value to input */
-  protected abstract valueToInput(v: ValueType | undefined): string | Promise<string>;
+  protected abstract renderMenu(popup: WUPPopupElement, menuId: string): HTMLElement;
+  /** Called when need to transfer current value to text-input */
+  protected abstract valueToInput(v: ValueType | undefined): string;
   /** Called on user's keyDown to apply focus on popup-menu items */
   protected abstract focusMenuItemByKeydown(e: KeyboardEvent): void;
 
@@ -262,15 +266,15 @@ export default abstract class WUPBaseComboControl<
       i.setAttribute("aria-owns", menuId);
       i.setAttribute("aria-controls", menuId);
 
-      const wasFcs = this.$isFocused;
-      await this.renderMenu(p, menuId);
-
-      const fcs = this.$isFocused;
-      if (!fcs && wasFcs) {
-        this.#isShown = false;
-        this.removePopup(); // fix case when user waited for loading and moved focus to another
-        return null;
-      }
+      // const wasFcs = this.$isFocused;
+      this.renderMenu(p, menuId);
+      // rollback the logic if renderMenu() returns Promise
+      // const fcs = this.$isFocused;
+      // if (!fcs && wasFcs) {
+      //   this.#isShown = false;
+      //   this.removePopup(); // fix case when user waited for loading and moved focus to another
+      //   return null;
+      // }
       this.appendChild(p); // WARN: it will show onInit
       // eslint-disable-next-line no-promise-executor-return
       await new Promise((res) => setTimeout(res)); // wait for appending to body so size is defined and possible to scroll
@@ -311,7 +315,7 @@ export default abstract class WUPBaseComboControl<
 
   protected _isHiding?: true;
   protected async goHideMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): Promise<boolean> {
-    if (!this.$refPopup || this._isHiding) {
+    if (!this.#isShown || this._isHiding) {
       return false;
     }
     if (!this.canHideMenu(hideCase, e)) {
@@ -319,7 +323,7 @@ export default abstract class WUPBaseComboControl<
     }
     this.#isShown = false;
     this._isHiding = true;
-    await this.$refPopup.$hide();
+    await this.$refPopup?.$hide();
     delete this._isHiding;
     if (this.#isShown) {
       return false; // possible when popup opened again during the animation
@@ -347,12 +351,24 @@ export default abstract class WUPBaseComboControl<
       next.id = next.id || this.#ctr.$uniqueId;
       next.setAttribute("focused", "");
       this.$refInput.setAttribute("aria-activedescendant", next.id);
-      const ifneed = (next as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
-      ifneed ? ifneed.call(next, false) : next.scrollIntoView();
+      this.tryScrollTo(next);
     } else {
       this.$refInput.removeAttribute("aria-activedescendant");
     }
     this._focusedMenuItem = next;
+  }
+
+  #scrolltid?: ReturnType<typeof setTimeout>;
+  /** Scroll to element if previous scroll is not in processing (debounce by empty timeout) */
+  tryScrollTo(el: HTMLElement): void {
+    if (this.#scrolltid) {
+      return;
+    }
+    this.#scrolltid = setTimeout(() => {
+      this.#scrolltid = undefined;
+      const ifneed = (el as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
+      ifneed ? ifneed.call(el, false) : el.scrollIntoView();
+    });
   }
 
   _selectedMenuItem?: HTMLElement | null;
@@ -361,8 +377,7 @@ export default abstract class WUPBaseComboControl<
     this._selectedMenuItem?.setAttribute("aria-selected", false);
     if (next) {
       next.setAttribute("aria-selected", true);
-      const ifneed = (next as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
-      ifneed ? ifneed.call(next, false) : next.scrollIntoView();
+      this.tryScrollTo(next);
     }
 
     this._selectedMenuItem = next;
@@ -467,22 +482,18 @@ export default abstract class WUPBaseComboControl<
 
   /** Called when user selected new value from menu and need to hide menu */
   protected selectValue(v: ValueType, canHideMenu = true): void {
-    this.setValue(v);
+    this.setValue(v, SetValueReasons.userSelect);
     canHideMenu && setTimeout(() => this.goHideMenu(HideCases.onSelect)); // without timeout it handles click by listener and opens again
   }
 
   /* Reset input to currentValue; called on focusOut, press Escape, Enter */
   protected resetInputValue(): void {
-    this.setInputValue(this.$value);
+    this.setInputValue(this.$value, SetValueReasons.clear);
   }
 
-  protected override setInputValue(v: ValueType | undefined): void {
+  protected override setInputValue(v: ValueType | undefined, reason: SetValueReasons): void {
     const p = this.valueToInput(v);
-    if (p instanceof Promise) {
-      p.then((s) => super.setInputValue(s));
-    } else {
-      super.setInputValue(p);
-    }
+    super.setInputValue(p, reason);
   }
 
   /** Called when popup must be removed (by focus out OR if control removed) */

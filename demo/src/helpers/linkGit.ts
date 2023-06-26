@@ -1,6 +1,7 @@
 /** Returns link to github of current repo */
 export default function linkGit(link: string | undefined | null): string {
-  if (link?.startsWith("src")) {
+  const isFile = /.[a-z]{2,3}$/.test(link || "");
+  if (link?.startsWith("src") || isFile) {
     link = `/blob/${DEV ? "develop" : "master"}/${link}`;
   }
 

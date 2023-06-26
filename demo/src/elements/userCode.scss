@@ -6,6 +6,9 @@
 }
 
 .cssVars {
+  margin: 4px;
+  font-size: smaller;
+
   ul {
     list-style-type: none;
     margin: 0;
@@ -27,33 +30,11 @@
   }
 }
 
-.htmlCode {
-  .htmlTag {
-    color: #0d7310;
-  }
-
-  .htmlAttr {
-    color: #a95b3d;
-    display: block;
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-
-    & > li {
-      padding-left: 1em;
-
-      > span {
-        color: #1973b8;
-      }
-    }
-  }
-
-  .htmlAttrSingle {
-    display: inline;
-
-    & > li {
-      display: inline;
-      padding-left: 0.5em;
-    }
-  }
+.colorBlock {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  user-select: none;
+  box-shadow: 0 0 1px 0 gray;
+  margin: 0 2px;
 }

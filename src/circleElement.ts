@@ -92,6 +92,8 @@ declare global {
   }
   namespace JSX {
     interface IntrinsicElements {
+      /** Arc/circle chart based on SVG
+       *  @see {@link WUPCircleElement} */
       [tagName]: WUP.Circle.JSXProps; // add element to tsx/jsx intellisense
     }
   }
@@ -123,6 +125,10 @@ export default class WUPCircleElement extends WUPBaseElement {
 
   static get observedAttributes(): Array<LowerKeys<WUP.Circle.Attributes>> {
     return ["items", "width", "back", "corner", "from", "to", "min", "max", "space", "minsize"];
+  }
+
+  static get nameUnique(): string {
+    return "WUPCircleElement";
   }
 
   static get $styleRoot(): string {

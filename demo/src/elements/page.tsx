@@ -1,7 +1,7 @@
 /* eslint-disable react/destructuring-assignment */
-import linkGit from "src/helpers/linkGit";
 import UserCode, { UserCodeProps } from "./userCode";
 import styles from "./page.scss";
+import GitIconLink from "./gitIconLink";
 
 interface Props {
   header: string;
@@ -15,9 +15,7 @@ export default function Page(props: React.PropsWithChildren<Props>) {
   return (
     <div className={props.className}>
       <h2>
-        <a href={linkGit(props.link)} target="_blank" rel="noreferrer">
-          {props.header}
-        </a>
+        <GitIconLink href={props.link}>{props.header}</GitIconLink>
       </h2>
 
       {props.features === null ? null : (

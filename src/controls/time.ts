@@ -6,6 +6,7 @@ import WUPTimeObject from "../objects/timeObject";
 import WUPPopupElement from "../popup/popupElement";
 import { WUPcssIcon } from "../styles";
 import WUPBaseComboControl, { HideCases, ShowCases } from "./baseCombo";
+import { SetValueReasons } from "./baseControl";
 
 const tagName = "wup-time";
 
@@ -55,17 +56,20 @@ declare global {
       reinit(): void;
     }
   }
+
   interface HTMLElementTagNameMap {
     [tagName]: WUPTimeControl; // add element to document.createElement
   }
   namespace JSX {
     interface IntrinsicElements {
+      /** Form-control with timepicker
+       *  @see {@link WUPTimeControl} */
       [tagName]: WUP.Time.JSXProps; // add element to tsx/jsx intellisense
     }
   }
 }
 
-/** Form-control with time picker
+/** Form-control with timepicker
  * @tutorial Troubleshooting
  * * $options.format related only to displayed text, to work with other time-options like min/max use strict format 'hh:mm'
  * * if increase `--ctrl-icon-size`: change `ctrl-icon-img` to `--ctrl-icon-img: var(--ctrl-time-icon-img-lg)`: otherwise quality is ugly on larger icon
@@ -100,6 +104,10 @@ export default class WUPTimeControl<
   /** Aria-label for list in menu; @defaultValue `AM PM` */
   static $ariaHours12 = "AM PM";
 
+  static get nameUnique(): string {
+    return "WUPTimeControl";
+  }
+
   // --ctrl-time-icon-img-png-20: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAABiAAAAYgH4krHQAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAYJJREFUOI2l1L9qVUEQBvCf5+JFUBBbJQi2SSW+gLFV88ck2tmaBJE8gen8h/gCWklInzZ5h4BKIkkUtFD7BDGF91jsHLJe7tl70Q+GPTvzzcfOnJ1lMLq4h3V8xFHYLtawEJyRMI/PqIfYAWZKQh28zBLe4RHGcTZsPHzvM95zVIMEG7FfWGwjBSos4ThynvUT5jKx66Uy+jCZiU43zi4+hfNBS2KN1ZbYcsT3Q8tdJz1rK7Mk2MGH4MxX2VFfo9eSVMJvvInvqQpXY7P1D2INNmO9VuFibL7+h+CXWC9VUu1wakjSTUwM4dQVvsdmrEC8hQvYxiuc74tfjvUbaTZraQJKOIPH+IkfuJ/FVkLjLWnQa2mcOkNE4Qo24iD8fW3mSJfxIBxLIwg2aF6bh5G7h9NNcDacx9I4jYobkdPD7f7gi0x0Wbn8TpysmeMng0hVJlpLfVmRrsq5sInwNT3r4anyy2TWSU9LtoepklCOrvT316Rn/wiH2JGuxh3ZD8jxB6xmcQf6l8SZAAAAAElFTkSuQmCC');
   static get $styleRoot(): string {
     return `:root {
@@ -128,6 +136,9 @@ export default class WUPTimeControl<
       :host {
         --ctrl-icon-img: var(--ctrl-time-icon-img-lg);
         --ctrl-icon-img: var(--ctrl-time-icon-img);
+      }
+      :host [menu] {
+        overflow: hidden;
       }
       :host [menu]>div:first-child {
         position: relative;
@@ -293,6 +304,10 @@ export default class WUPTimeControl<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override canParseInput(_text: string): boolean {
     return !this.refMask || this.refMask.isCompleted;
+  }
+
+  override valueToUrl(v: ValueType): string {
+    return v.toString("-");
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Time.Options> | null): void {
@@ -588,11 +603,11 @@ export default class WUPTimeControl<
     }
   }
 
-  protected override setValue(v: ValueType | undefined, canValidate = true, skipInput = false): boolean | null {
-    return super.setValue(v, canValidate, skipInput);
+  protected override setValue(v: ValueType | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
+    return super.setValue(v, reason, skipInput);
   }
 
-  protected override valueToInput(v: ValueType | undefined): Promise<string> | string {
+  protected override valueToInput(v: ValueType | undefined): string {
     if (v === undefined) {
       return "";
     }
@@ -704,7 +719,7 @@ export default class WUPTimeControl<
   }
 
   protected override gotFocusLost(): void {
-    this.setInputValue(this.$value); // case: h:m - try to input 01:23 => expected 1:23
+    this.setInputValue(this.$value, SetValueReasons.userSelect); // case: h:m - try to input 01:23 => expected 1:23
     super.gotFocusLost();
   }
 }

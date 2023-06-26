@@ -34,8 +34,6 @@ export default function TextControlView() {
           name="email"
           label="Textarea control"
           initValue=""
-          autoComplete="off"
-          autoFocus={false}
           validations="window.myTextareaValidations"
           // mask=""
           // maskholder=""
@@ -97,6 +95,12 @@ export default function TextControlView() {
           }}
         />
         <wup-textarea name="disabled" disabled />
+        <wup-textarea //
+          name="saveLsTa"
+          label="With saving to localStorage (see $options.skey & storage)"
+          skey
+          value="Type text & reload page"
+        />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

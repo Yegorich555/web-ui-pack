@@ -14,34 +14,6 @@ h2 {
   margin: auto;
   text-align: center;
   margin-bottom: 10px;
-
-  > a {
-    display: inline-block;
-    position: relative;
-    padding: 4px 10px;
-    padding-right: 34px;
-    margin-right: -24px;
-    border-radius: $borderRadius;
-    text-decoration: none;
-    color: $activeLinkColor;
-
-    &:hover {
-      opacity: 0.8;
-
-      &::after {
-        content: " ";
-        display: block;
-        position: absolute;
-        width: 20px;
-        height: 20px;
-        right: 10px;
-        top: 46%;
-        transform: translateY(-50%);
-        background: url("../assets/gitIcon.svg") no-repeat;
-        background-size: contain;
-      }
-    }
-  }
 }
 
 .btn {
@@ -96,6 +68,7 @@ section {
     margin: 0;
   }
 
+  /* stylelint-disable-next-line no-descending-specificity */
   > small {
     display: block;
   }

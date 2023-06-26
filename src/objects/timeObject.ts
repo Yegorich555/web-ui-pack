@@ -80,8 +80,8 @@ export default class WUPTimeObject {
   }
 
   /** Returns string in "hh:mm" format */
-  toString(): string {
-    return `${zeroBefore(this.hours, 2)}:${zeroBefore(this.minutes, 2)}`;
+  toString(sep = ":"): string {
+    return `${zeroBefore(this.hours, 2)}${sep}${zeroBefore(this.minutes, 2)}`;
   }
 
   /** Returns string according to objects/localeInfo.time format */

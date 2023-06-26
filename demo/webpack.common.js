@@ -51,6 +51,7 @@ module.exports = function (env, argv) {
     },
     module: {
       rules: [
+        { test: /\.txt/, type: "asset/source" },
         // rule for js, jsx files
         {
           test: /\.(ts|tsx)$/,

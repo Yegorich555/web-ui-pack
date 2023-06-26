@@ -23,7 +23,21 @@ import viewportSize from "../helpers/viewportSize";
 
 const attachLst = new Map<HTMLElement | SVGElement, () => void>();
 
-/** PopupElement
+const tagName = "wup-popup";
+declare global {
+  interface HTMLElementTagNameMap {
+    [tagName]: WUPPopupElement; // add element to document.createElement
+  }
+  namespace JSX {
+    interface IntrinsicElements {
+      /**  Popup element
+       *  @see {@link WUPPopupElement} */
+      [tagName]: WUP.Base.JSXProps<WUPPopupElement> & WUP.Popup.Attributes; // add element to tsx/jsx intellisense
+    }
+  }
+}
+
+/** Popup element
  * @example
  * JS/TS
  * ```js
@@ -76,6 +90,10 @@ export default class WUPPopupElement<
   /* Array of attribute names to monitor for changes */
   static get observedAttributes(): Array<LowerKeys<WUP.Popup.Options>> {
     return ["target", "placement", "animation"];
+  }
+
+  static get nameUnique(): string {
+    return "WUPPopupElement";
   }
 
   static $placements = PopupPlacements;
@@ -281,7 +299,8 @@ export default class WUPPopupElement<
     return detach;
   }
 
-  /** All options for this popup. If you want to change common options @see WUPPopupElement.$defaults */
+  /** All options for this popup. If you want to change common options
+   *  @see {@link WUPPopupElement.$defaults} */
   $options: WUP.Popup.Options = objectClone(this.#ctr.$defaults);
   protected override _opts = this.$options;
 
@@ -938,7 +957,10 @@ export default class WUPPopupElement<
 
       // fix cases when target is partiallyHidden by scrollableParent
       // suggestion: if height/width is very small we can use another side
-      const scrollRect = getBoundingInternalRect(this.#state!.scrollParents[0]); // warn: it's important to fit only first parent
+      let sp = this.#state!.scrollParents[0];
+      /* istanbul ignore next */
+      sp = sp === document.documentElement ? document.body : sp; // when scrollParent is html element then rect.top can be negative: to test place target at bottom body+margin taget+html vert.scroll
+      const scrollRect = getBoundingInternalRect(sp); // warn: it's important to fit only first parent
       t.top = Math.max(scrollRect.top, t.top);
       t.bottom = Math.min(scrollRect.bottom, t.bottom);
       t.left = Math.max(scrollRect.left, t.left);
@@ -1077,23 +1099,7 @@ export default class WUPPopupElement<
   }
 }
 
-const tagName = "wup-popup";
 customElements.define(tagName, WUPPopupElement);
-
-declare global {
-  // add element to document.createElement
-  interface HTMLElementTagNameMap {
-    [tagName]: WUPPopupElement;
-  }
-
-  // add element to tsx/jsx intellisense
-  namespace JSX {
-    interface IntrinsicElements {
-      [tagName]: WUP.Base.JSXProps<WUPPopupElement> & WUP.Popup.Attributes;
-    }
-  }
-}
-
 // manual testcase: show as dropdown & scroll parent - blur effect can appear
 
 // NiceToHave add 'position: centerScreen' to place as modal when content is big and no spaces anymore

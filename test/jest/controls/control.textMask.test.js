@@ -511,6 +511,11 @@ describe("control.text: mask", () => {
     expect(h.getInputCursor(el.$refInput)).toBe("+1(2|");
   });
 
+  test("#.#", async () => {
+    expect(new MaskTextInput("#.#", "2").isCompleted).toBe(true); // because others are optional
+    expect(new MaskTextInput("#0.#", "2").isCompleted).toBe(true); // because others are optional
+  });
+
   test("$ #####0 USD", async () => {
     const mask = "$ #####0 USD";
     const mi = new MaskTextInput(mask, "");

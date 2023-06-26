@@ -41,9 +41,9 @@ initTestBaseControl({
 describe("control.calendar", () => {
   testBaseControl({
     initValues: [
-      { attrValue: "2022-02-28", value: new Date("2022-02-28") },
-      { attrValue: "2022-03-16", value: new Date("2022-03-16") },
-      { attrValue: "2022-05-20", value: new Date("2022-05-20") },
+      { attrValue: "2022-02-28", value: new Date("2022-02-28"), urlValue: "2022-02-28" },
+      { attrValue: "2022-03-16", value: new Date("2022-03-16"), urlValue: "2022-03-16" },
+      { attrValue: "2022-05-20", value: new Date("2022-05-20"), urlValue: "2022-05-20" },
     ],
     validations: {},
     attrs: {

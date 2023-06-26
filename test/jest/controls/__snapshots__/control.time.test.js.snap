@@ -236,7 +236,6 @@ exports[`control.time common tests render + styles 2`] = `
   .wup-hidden, [wup-hidden] {
 position: absolute;
 height:1px; width:1px;
-top:0;left:0;
 overflow:hidden;
 clip:rect(1px,1px,1px,1px);
 min-width:initial;
@@ -429,7 +428,7 @@ mask-image: var(--ctrl-icon-img);
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         WUP-TIME[invalid]:hover,
-        WUP-TIME[invalid]:hover&gt;[menu]
+        WUP-TIME[invalid]:hover&gt;[menu],
         WUP-TIME[invalid][hovered],
         WUP-TIME[invalid][hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
@@ -599,6 +598,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-TIME button[clear] {
           background: none;
           align-self: center;
+          cursor: pointer;
         }
         WUP-TIME button[clear]:after {
           content: "";
@@ -616,6 +616,11 @@ mask-image: var(--ctrl-icon-img);
         WUP-TIME button[clear]:before {
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
+        }
+        WUP-TIME[disabled] button[clear],
+        WUP-TIME[readonly] button[clear],
+        WUP-TIME[required] button[clear] {
+          display: none;
         }
         @media (hover: hover) and (pointer: fine) {
           WUP-TIME button[clear]:hover {
@@ -664,6 +669,9 @@ mask-image: var(--ctrl-icon-img);
       WUP-TIME {
         --ctrl-icon-img: var(--ctrl-time-icon-img-lg);
         --ctrl-icon-img: var(--ctrl-time-icon-img);
+      }
+      WUP-TIME [menu] {
+        overflow: hidden;
       }
       WUP-TIME [menu]&gt;div:first-child {
         position: relative;
@@ -824,6 +832,7 @@ mask-image: var(--ctrl-icon-img);
 exports[`control.time validations $options.validationShowAll 1`] = `
 <wup-time
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -882,7 +891,9 @@ exports[`control.time validations $options.validationShowAll 1`] = `
 `;
 
 exports[`control.time validations $options.validationShowAll 2`] = `
-<wup-time>
+<wup-time
+  required=""
+>
   <label
     for="txt1"
   >
@@ -913,6 +924,7 @@ exports[`control.time validations $options.validationShowAll 2`] = `
 exports[`control.time validations $options.validationShowAll 3`] = `
 <wup-time
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -992,6 +1004,7 @@ exports[`control.time validations options.validationCase 1`] = `
 exports[`control.time validations options.validationCase 2`] = `
 <wup-time
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -1142,6 +1155,7 @@ exports[`control.time validations options.validationCase 3`] = `
 <wup-time
   invalid=""
   opened=""
+  required=""
 >
   <label
     for="txt1"
@@ -1292,6 +1306,7 @@ exports[`control.time validations options.validationCase 3`] = `
 exports[`control.time validations options.validationCase 4`] = `
 <wup-time
   invalid=""
+  required=""
 >
   <label
     for="txt1"

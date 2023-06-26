@@ -1,5 +1,6 @@
+// eslint-disable-next-line max-classes-per-file
 import { WUPcssHidden } from "../styles";
-import WUPBaseControl from "./baseControl";
+import WUPBaseControl, { SetValueReasons } from "./baseControl";
 
 const tagName = "wup-switch";
 declare global {
@@ -20,11 +21,14 @@ declare global {
     }
     interface JSXProps<C = WUPSwitchControl> extends WUP.BaseControl.JSXProps<C>, Attributes {}
   }
+
   interface HTMLElementTagNameMap {
     [tagName]: WUPSwitchControl; // add element to document.createElement
   }
   namespace JSX {
     interface IntrinsicElements {
+      /** Form-control with toggle button
+       *  @see {@link WUPSwitchControl} */
       [tagName]: WUP.Switch.JSXProps; // add element to tsx/jsx intellisense
     }
   }
@@ -55,6 +59,10 @@ export default class WUPSwitchControl<
   EventMap extends WUP.Switch.EventMap = WUP.Switch.EventMap
 > extends WUPBaseControl<boolean, EventMap> {
   #ctr = this.constructor as typeof WUPSwitchControl;
+
+  static get nameUnique(): string {
+    return "WUPSwitchControl";
+  }
 
   static get $styleRoot(): string {
     return `:root {
@@ -152,6 +160,10 @@ export default class WUPSwitchControl<
     return arr;
   }
 
+  static $isEqual(v1: boolean | undefined, v2: boolean | undefined): boolean {
+    return !!v1 === !!v2;
+  }
+
   static $defaults: WUP.Switch.Defaults = {
     ...WUPBaseControl.$defaults,
     validationRules: { ...WUPBaseControl.$defaults.validationRules },
@@ -163,29 +175,28 @@ export default class WUPSwitchControl<
 
   protected override _opts = this.$options;
 
-  get $initValue(): boolean {
-    return super.$initValue as boolean;
+  get $initValue(): boolean | undefined {
+    return super.$initValue;
   }
 
-  set $initValue(v: boolean) {
-    super.$initValue = !!v;
+  set $initValue(v: boolean | undefined) {
+    super.$initValue = v;
   }
 
   get $value(): boolean {
-    return super.$value as boolean;
+    return !!super.$value as boolean;
   }
 
   set $value(v: boolean) {
     super.$value = !!v;
   }
 
-  constructor() {
-    super();
-    this.$initValue = !!this.$initValue;
+  override parse(text: string): boolean | undefined {
+    return text === "1" || text.toLowerCase() === "true";
   }
 
-  override parse(text: string): boolean | undefined {
-    return text.toLowerCase() === "true";
+  override valueToUrl(v: boolean): string | null {
+    return v ? "1" : null;
   }
 
   protected override renderControl(): void {
@@ -210,12 +221,12 @@ export default class WUPSwitchControl<
     if (this.$isReadOnly) {
       el.checked = !el.checked;
     } else {
-      this.setValue(el.checked);
+      this.setValue(el.checked, SetValueReasons.userInput);
     }
   }
 
-  protected override setValue(v: boolean, canValidate = true): boolean | null {
-    const r = super.setValue(v, canValidate);
+  protected override setValue(v: boolean, reason: SetValueReasons): boolean | null {
+    const r = super.setValue(v, reason);
     this.$refInput.checked = !!v;
     return r;
   }
@@ -226,8 +237,10 @@ export default class WUPSwitchControl<
     this._opts.reverse = this.getAttr("reverse", "bool");
     this.setAttr("reverse", this._opts.reverse, true);
 
-    if (!propsChanged || propsChanged.includes("defaultchecked")) {
-      this.$initValue = this.getAttr("defaultchecked", "bool", false)!;
+    if (!propsChanged) {
+      this.$initValue = this.getAttr("defaultchecked", "bool", this.$initValue);
+    } else if (propsChanged.includes("defaultchecked")) {
+      this.$initValue = this.getAttr("defaultchecked", "bool", undefined);
     }
   }
 

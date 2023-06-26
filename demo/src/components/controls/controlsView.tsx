@@ -9,9 +9,11 @@ import {
   WUPRadioControl,
   WUPPasswordControl,
   WUPSelectManyControl,
+  WUPFormElement,
 } from "web-ui-pack";
 
 const sideEffect =
+  WUPFormElement &&
   WUPTextControl &&
   WUPPasswordControl &&
   WUPSelectControl &&
@@ -58,17 +60,21 @@ export default function ControlsView() {
         <>
           Pending state with spinner if return promise for <b>$onSubmit()</b> method
         </>,
+        <>
+          Option <b>autoSave</b> prevents losing not-sumbitted data
+        </>,
       ]}
-      details={{ tag: "wup-form", customHTML }}
+      details={{ tag: "wup-form", customHTML, customJS }}
     >
       <wup-form
         autoComplete={false}
+        autoSave="false"
+        disabled={false}
+        readOnly={false}
         ref={(el) => {
           if (el) {
-            el.$initModel = { text: "test-me@google.com" };
+            // el.$initModel = { text: "test-me@google.com" };
             el.$isPending = false;
-            el.$options.disabled = false;
-            el.$options.readOnly = false;
             el.$onSubmit = (e) => {
               console.warn("submitted model", e.$model);
               // eslint-disable-next-line no-promise-executor-return
@@ -91,17 +97,16 @@ export default function ControlsView() {
             }
           }}
         />
-        {/* <wup-selectmany
-          class={styles.multiCustom}
+        <wup-selectmany
           ref={(el) => {
             if (el) {
               el.$options.items = items;
               el.$options.name = "selectMany";
-              el.$options.label = "Select Many (development...)";
+              el.$options.label = "Select Many";
               el.$initValue = [items[0].value, items[2].value];
             }
           }}
-        /> */}
+        />
 
         <wup-switch name="switch" />
         <wup-check name="checkbox" />
@@ -113,6 +118,8 @@ export default function ControlsView() {
             }
           }}
         />
+        <wup-date name="date" />
+        <wup-time name="time" />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>
@@ -122,18 +129,22 @@ export default function ControlsView() {
 const customHTML = [
   `html
 <wup-form
-  autoComplete={false}
-  readOnly={false}
-  disabled={false}
-  autoFocus={false}
+  autoComplete="false"
+  autoSave="false"
+  readOnly="false"
+  disabled="false"
+  autoFocus="false"
 >
   <wup-text name="firstName"/>
   <wup-text name="lastName" />
   <wup-text name="email"/>
   <wup-pwd name="password"/>
+  ...
   <button type="submit">Submit</button>
-</wup-form>;`,
-  `js
+</wup-form>`,
+];
+
+const customJS = `js
 const form = document.querySelector("wup-form")!;
 form.$onSubmit = (e) => {
   // post request here
@@ -161,5 +172,4 @@ pwd.$options.validations = {
   minLower: 1,
   special: { min: 1, chars: "#!-_?,.@:;'" },
 };
-pwd.$options.validationShowAll = true;`,
-];
+pwd.$options.validationShowAll = true;`;

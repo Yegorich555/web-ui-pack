@@ -94,12 +94,14 @@ export default function SelectControlView() {
           ref={(el) => {
             if (el) {
               el.$options.name = "withPending";
-              el.$options.label = "With pending (set promise to $options.items)";
+              el.$options.label = "With pending (set Promise to $options.items)";
               el.$options.items = () => new Promise((resolve) => setTimeout(() => resolve(items), 3000));
+              // el.$initValue = 13;
             }
           }}
         />
         <wup-select
+          initValue={13}
           ref={(el) => {
             if (el) {
               el.$options.name = "customSpin";
@@ -113,7 +115,6 @@ export default function SelectControlView() {
                 this.appendChild(spin);
                 return spin;
               };
-              el.$initValue = 13;
             }
           }}
         />
@@ -164,6 +165,17 @@ export default function SelectControlView() {
               el.$options.label = "Allow New Value ($options.allowNewValue)";
               el.$options.items = items;
               el.$options.allowNewValue = true;
+            }
+          }}
+        />
+        <wup-select //
+          name="saveUrlSelect"
+          label="With saving to URL (see $options.skey & storage)"
+          skey
+          storage="url"
+          ref={(el) => {
+            if (el) {
+              el.$options.items = items;
             }
           }}
         />

@@ -236,7 +236,6 @@ exports[`control.selectMany common tests render + styles 2`] = `
   .wup-hidden, [wup-hidden] {
 position: absolute;
 height:1px; width:1px;
-top:0;left:0;
 overflow:hidden;
 clip:rect(1px,1px,1px,1px);
 min-width:initial;
@@ -435,7 +434,7 @@ mask-image: var(--ctrl-icon-img);
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         WUP-SELECTMANY[invalid]:hover,
-        WUP-SELECTMANY[invalid]:hover&gt;[menu]
+        WUP-SELECTMANY[invalid]:hover&gt;[menu],
         WUP-SELECTMANY[invalid][hovered],
         WUP-SELECTMANY[invalid][hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
@@ -605,6 +604,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-SELECTMANY button[clear] {
           background: none;
           align-self: center;
+          cursor: pointer;
         }
         WUP-SELECTMANY button[clear]:after {
           content: "";
@@ -622,6 +622,11 @@ mask-image: var(--ctrl-icon-img);
         WUP-SELECTMANY button[clear]:before {
           width: var(--ctrl-clear-hover-size);
           padding-top: var(--ctrl-clear-hover-size);
+        }
+        WUP-SELECTMANY[disabled] button[clear],
+        WUP-SELECTMANY[readonly] button[clear],
+        WUP-SELECTMANY[required] button[clear] {
+          display: none;
         }
         @media (hover: hover) and (pointer: fine) {
           WUP-SELECTMANY button[clear]:hover {
@@ -669,6 +674,10 @@ mask-image: var(--ctrl-icon-img);
       }
       WUP-SELECTMANY {
         --ctrl-icon-img: var(--ctrl-select-icon-img);
+      }
+      WUP-SELECTMANY label::after {
+        height: 100%;
+        align-self: center;
       }
       WUP-SELECTMANY[opened] label::after {
         transform: rotate(180deg);
@@ -1104,6 +1113,7 @@ exports[`control.selectMany sortable: drag&drop 16`] = `
 exports[`control.selectMany validations $options.validationShowAll 1`] = `
 <wup-selectmany
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -1151,6 +1161,7 @@ exports[`control.selectMany validations $options.validationShowAll 1`] = `
 exports[`control.selectMany validations $options.validationShowAll 2`] = `
 <wup-selectmany
   filled=""
+  required=""
 >
   <label
     for="txt1"
@@ -1188,6 +1199,7 @@ exports[`control.selectMany validations $options.validationShowAll 2`] = `
 exports[`control.selectMany validations $options.validationShowAll 3`] = `
 <wup-selectmany
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -1269,6 +1281,7 @@ exports[`control.selectMany validations options.validationCase 1`] = `
 exports[`control.selectMany validations options.validationCase 2`] = `
 <wup-selectmany
   invalid=""
+  required=""
 >
   <label
     for="txt1"
@@ -1276,11 +1289,11 @@ exports[`control.selectMany validations options.validationCase 2`] = `
     <span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt3"
+        aria-controls="txt2"
         aria-describedby="txt5"
         aria-expanded="false"
         aria-haspopup="listbox"
-        aria-owns="txt3"
+        aria-owns="txt2"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -1306,7 +1319,7 @@ exports[`control.selectMany validations options.validationCase 2`] = `
     <ul
       aria-label="Items"
       aria-multiselectable="true"
-      id="txt3"
+      id="txt2"
       role="listbox"
       tabindex="-1"
     >
@@ -1358,6 +1371,7 @@ exports[`control.selectMany validations options.validationCase 3`] = `
   filled=""
   invalid=""
   opened=""
+  required=""
 >
   <label
     for="txt1"
@@ -1450,6 +1464,7 @@ exports[`control.selectMany validations options.validationCase 3`] = `
 exports[`control.selectMany validations options.validationCase 4`] = `
 <wup-selectmany
   invalid=""
+  required=""
 >
   <label
     for="txt1"

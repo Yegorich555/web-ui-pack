@@ -127,6 +127,7 @@ npm install web-ui-pack
 ### Example
 
 Check how you can use every element/control (popupElement for example)
+Also check [code style example](/CODESTYLE.md)
 
 Typescript
 

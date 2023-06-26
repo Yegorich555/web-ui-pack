@@ -88,7 +88,6 @@ describe("spinElement", () => {
       "<style>.wup-hidden, [wup-hidden] {
       position: absolute;
       height:1px; width:1px;
-      top:0;left:0;
       overflow:hidden;
       clip:rect(1px,1px,1px,1px);
       min-width:initial;
@@ -113,7 +112,7 @@ describe("spinElement", () => {
                 --spin-speed: 1.2s;
                 --spin-size: 3em;
                 --spin-item-size: calc(var(--spin-size) / 8);
-                --spin-fade: #ffffff6e;
+                --spin-fade: rgba(255,255,255,0.43);
               }
             @keyframes WUP-SPIN-1 {
               100% { transform: rotate(360deg); }

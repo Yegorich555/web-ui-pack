@@ -588,7 +588,6 @@ exports[`control.radio common tests render + styles 2`] = `
   .wup-hidden, [wup-hidden] {
 position: absolute;
 height:1px; width:1px;
-top:0;left:0;
 overflow:hidden;
 clip:rect(1px,1px,1px,1px);
 min-width:initial;
@@ -781,7 +780,7 @@ mask-image: var(--ctrl-icon-img);
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
         }
         WUP-RADIO[invalid]:hover,
-        WUP-RADIO[invalid]:hover&gt;[menu]
+        WUP-RADIO[invalid]:hover&gt;[menu],
         WUP-RADIO[invalid][hovered],
         WUP-RADIO[invalid][hovered]&gt;[menu] {
           box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
@@ -823,12 +822,11 @@ mask-image: var(--ctrl-icon-img);
       WUP-RADIO input {
 position: absolute;
 height:1px; width:1px;
-top:0;left:0;
 overflow:hidden;
 clip:rect(1px,1px,1px,1px);
 min-width:initial;
 padding:0;}
-      WUP-RADIO input + * {
+      WUP-RADIO input + span {
         padding: var(--ctrl-radio-gap);
         display: inline-flex;
         align-items: center;
@@ -838,7 +836,7 @@ padding:0;}
       WUP-RADIO[readonly] label {
          cursor: default;
       }
-      WUP-RADIO input + *:after {
+      WUP-RADIO input + span:after {
         content: "";
         width: var(--ctrl-radio-size);
         height: var(--ctrl-radio-size);
@@ -849,35 +847,35 @@ padding:0;}
         border-radius: 50%;
         margin-left: 0.5em;
       }
-      WUP-RADIO fieldset[aria-required="true"] input + *:after {
+      WUP-RADIO fieldset[aria-required="true"] input + span:after {
         content: "";
       }
-      WUP-RADIO[reverse] input + * {
+      WUP-RADIO[reverse] input + span {
         flex-direction: row-reverse;
       }
-      WUP-RADIO[reverse] input + *:after {
+      WUP-RADIO[reverse] input + span:after {
         margin-left: 0;
         margin-right: 0.5em;
       }
-      WUP-RADIO input:checked + *:after {
+      WUP-RADIO input:checked + span:after {
         background-color: var(--ctrl-radio-on);
       }
       @media not all and (prefers-reduced-motion) {
-        WUP-RADIO input + *:after {
+        WUP-RADIO input + span:after {
           transition: background-color var(--anim);
         }
       }
-      WUP-RADIO input:focus + * {
+      WUP-RADIO input:focus + span {
         color: var(--ctrl-selected);
       }
-      WUP-RADIO input:focus + *:after {
+      WUP-RADIO input:focus + span:after {
          box-shadow: 0 0 1px var(--ctrl-radio-border-size) var(--ctrl-selected);
       }
       @media (hover: hover) and (pointer: fine) {
-        WUP-RADIO input + *:hover {
+        WUP-RADIO input + span:hover {
           color: var(--ctrl-selected);
         }
-        WUP-RADIO input + *:hover:after {
+        WUP-RADIO input + span:hover:after {
           box-shadow: 0 0 1px var(--ctrl-radio-border-size) var(--ctrl-selected);
         }
       }
@@ -888,6 +886,7 @@ padding:0;}
 exports[`control.radio validations $options.validationShowAll 1`] = `
 <wup-radio
   invalid=""
+  required=""
 >
   <fieldset
     aria-describedby="txt6"
@@ -967,7 +966,9 @@ exports[`control.radio validations $options.validationShowAll 1`] = `
 `;
 
 exports[`control.radio validations $options.validationShowAll 2`] = `
-<wup-radio>
+<wup-radio
+  required=""
+>
   <fieldset
     aria-required="true"
   >
@@ -1032,6 +1033,7 @@ exports[`control.radio validations $options.validationShowAll 2`] = `
 exports[`control.radio validations $options.validationShowAll 3`] = `
 <wup-radio
   invalid=""
+  required=""
 >
   <fieldset
     aria-describedby="txt9"
@@ -1177,6 +1179,7 @@ exports[`control.radio validations options.validationCase 1`] = `
 exports[`control.radio validations options.validationCase 2`] = `
 <wup-radio
   invalid=""
+  required=""
 >
   <fieldset
     aria-describedby="txt7"
@@ -1262,6 +1265,7 @@ exports[`control.radio validations options.validationCase 2`] = `
 exports[`control.radio validations options.validationCase 3`] = `
 <wup-radio
   invalid=""
+  required=""
 >
   <fieldset
     aria-describedby="txt8"
@@ -1346,6 +1350,7 @@ exports[`control.radio validations options.validationCase 3`] = `
 exports[`control.radio validations options.validationCase 4`] = `
 <wup-radio
   invalid=""
+  required=""
 >
   <fieldset
     aria-describedby="txt9"
