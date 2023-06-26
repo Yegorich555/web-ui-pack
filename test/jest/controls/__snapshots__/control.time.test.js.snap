@@ -670,6 +670,9 @@ mask-image: var(--ctrl-icon-img);
         --ctrl-icon-img: var(--ctrl-time-icon-img-lg);
         --ctrl-icon-img: var(--ctrl-time-icon-img);
       }
+      WUP-TIME [menu] {
+        overflow: hidden;
+      }
       WUP-TIME [menu]&gt;div:first-child {
         position: relative;
       }

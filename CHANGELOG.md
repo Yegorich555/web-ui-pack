@@ -17,6 +17,7 @@
 - helper [observer](src/helpers/observer.ts). _Exception on promise-property_
 - **Global**. _Sometimes some css-vars not appended to styles in production (as result black Circle)_
 - [CalendarControl](src/controls/calendar.ts). _Wrong autoscroll to top page after 1st focus_
+- [TimeControl](src/controls/time.ts). _Scrollbar is visible when menu opens to top_
 
 **New/Features**:
 

@@ -137,6 +137,9 @@ export default class WUPTimeControl<
         --ctrl-icon-img: var(--ctrl-time-icon-img-lg);
         --ctrl-icon-img: var(--ctrl-time-icon-img);
       }
+      :host [menu] {
+        overflow: hidden;
+      }
       :host [menu]>div:first-child {
         position: relative;
       }
@@ -722,4 +725,3 @@ export default class WUPTimeControl<
 }
 
 customElements.define(tagName, WUPTimeControl);
-// todo when opened to top: scroll visible in animation
