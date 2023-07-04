@@ -516,8 +516,10 @@ export default class WUPSelectControl<
     const i = this._menuItems!.all.indexOf(item);
     const o = this._cachedItems![i];
     const canOff = this._opts.multiple && item.getAttribute("aria-selected") === "true";
-    this.selectValue(o.value, !this._opts.multiple);
+    this.selectMenuItem(canOff ? null : item); // select/deselect
     canOff && item.setAttribute("aria-selected", "false");
+
+    this.selectValue(o.value, !this._opts.multiple);
   }
 
   protected override selectValue(v: ValueType, canHideMenu = true): void {
@@ -586,7 +588,7 @@ export default class WUPSelectControl<
 
   protected override selectMenuItem(next: HTMLElement | null): void {
     if (this._opts.multiple) {
-      this._selectedMenuItem = undefined; // othewise multiple selection not allowed in combobox
+      this._selectedMenuItem = undefined; // otherwise multiple selection not allowed in combobox
     }
     super.selectMenuItem(next);
   }
@@ -777,7 +779,7 @@ export default class WUPSelectControl<
 
   protected override setValue(v: ValueType | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
     const r = super.setValue(v, reason, skipInput);
-    r && this.selectMenuItemByValue(v);
+    r && reason !== SetValueReasons.userSelect && this.selectMenuItemByValue(v);
     return r;
   }
 

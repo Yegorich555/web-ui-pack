@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.2 (\_\_\_/)
+
+**Fixes**:
+
+- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). _Menu scrolled to 1st selected item if even select last one (when multiple is allowed)_
+
 ## 0.6.1 (Jun 26, 2023)
 
 **Fixes**:

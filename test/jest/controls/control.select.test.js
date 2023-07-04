@@ -1145,7 +1145,7 @@ describe("control.select", () => {
       expect(el.$value).toStrictEqual(undefined);
       expect(el.$refInput.value).toBe("");
       expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-        `"<ul id="txt8" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option">Donny</li><li role="option" aria-selected="false">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
+        `"<ul id="txt8" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="false">Donny</li><li role="option" aria-selected="false">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
       );
 
       await h.userClick(el.querySelectorAll("li")[0]); // select 1st item
@@ -1153,7 +1153,7 @@ describe("control.select", () => {
       expect(el.$value).toStrictEqual([10]);
       expect(el.$refInput.value).toBe("Donny, ");
       expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-        `"<ul id="txt8" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
+        `"<ul id="txt8" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true">Donny</li><li role="option" aria-selected="false">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
       );
       el.selectValue(10); // de-select just for coverage
 
