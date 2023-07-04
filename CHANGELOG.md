@@ -5,6 +5,7 @@
 **Fixes**:
 
 - [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). _Menu scrolled to 1st selected item if even select last one (when multiple is allowed)_
+- [SelectManyControl](src/controls/selectMany.ts). _Menu hides when user selects all items - but it's maybe wrong_
 
 ## 0.6.1 (Jun 26, 2023)
 
