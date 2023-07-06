@@ -195,6 +195,7 @@ export default class WUPScrolled {
     return { isForward: diff1 < diff2, count: cnt2 };
   }
 
+  /** Required to remove maxH, maxW only when scrolling is finished (otherwise is user scrolls fast size can be changed) */
   #scrollNum = 0;
   // WARN expected goTo possible only to visible/rendered pages
   /** Go to next/prev pages */
@@ -228,6 +229,12 @@ export default class WUPScrolled {
     }
 
     this.tryFixSize();
+    const rstMaxSize = (): void => {
+      if (this.#scrollNum === 0) {
+        this.el.style.maxHeight = "";
+        this.el.style.maxWidth = "";
+      }
+    };
     // const prevScroll = { h: this.el.scrollHeight, w: this.el.scrollWidth };
     const restoreScroll = this.saveScroll();
 
@@ -255,6 +262,7 @@ export default class WUPScrolled {
 
       const itemsAdd = this.options.onRender(inc, renderIndex, this.state, nextState);
       if (!itemsAdd?.length) {
+        rstMaxSize();
         break; // return Promise.resolve(); // if no new items
       }
       wasAdded = true;
@@ -289,19 +297,13 @@ export default class WUPScrolled {
     let r = this.scrollToRange(smooth as true, this.state.items);
 
     ++this.#scrollNum;
-    const rstMaxSize = (): void => {
-      if (--this.#scrollNum === 0) {
-        this.el.style.maxHeight = "";
-        this.el.style.maxWidth = "";
-      }
-    };
     if (!smooth) {
       r = Promise.resolve();
-      rstMaxSize();
     }
 
     return r.then(() => {
       pagesRemove.forEach((p) => p.items.forEach((a) => (a as any).__scrollRemove && a.remove())); // some items can be re-appended
+      --this.#scrollNum;
       rstMaxSize();
     });
   }
