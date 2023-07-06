@@ -646,7 +646,7 @@ export default class WUPCalendarControl<
         }
         const prev = this.$value || this.$initValue;
         prev && dateCopyTime(dt, prev, !!this._opts.utc);
-        this.setValue(dt as ValueType, SetValueReasons.userInput);
+        this.setValue(dt as ValueType, SetValueReasons.userSelect);
         this.$ariaSpeak(this.$refInput.value);
         // this.focusItem(target);
       },
@@ -936,7 +936,7 @@ export default class WUPCalendarControl<
     el?.setAttribute("aria-selected", "true");
   }
 
-  protected override setValue(v: ValueType | undefined, reason: SetValueReasons): boolean | null {
+  override setValue(v: ValueType | undefined, reason: SetValueReasons): boolean | null {
     const r = super.setValue(v, reason);
     this.setInputValue(v);
     this.#refreshSelected?.call(this);
@@ -1149,3 +1149,4 @@ customElements.define(tagName, WUPCalendarControl);
  */
 
 // todo add ability to select range
+// todo when min & max pointed need to startWith from 1st available year OR even need option for this

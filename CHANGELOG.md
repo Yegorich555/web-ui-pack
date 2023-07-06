@@ -7,6 +7,7 @@
 - [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). _Menu scrolled to 1st selected item if even select last one (when multiple is allowed)_
 - [SelectManyControl](src/controls/selectMany.ts). _Menu hides when user selects all items - but it's maybe wrong_
 - [CalendarControl](src/controls/calendar.ts). _Wrong size of monthPicker if previously scroll dayPicker to min/max date_
+- [DateControl](src/controls/date.ts). _Menu isn't closed if click on the selected date_
 
 ## 0.6.1 (Jun 26, 2023)
 

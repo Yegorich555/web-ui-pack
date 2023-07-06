@@ -253,11 +253,14 @@ export default class WUPDateControl<
     el.$options.validationCase = 0; // disable any validations for control
     const v = this.$value;
     el.$initValue = v && !Number.isNaN(v.valueOf()) ? v : undefined;
-    el.addEventListener("$change", (e) => {
-      e.stopPropagation(); // otherwise date change event fired twice
-      !el._isStopChanges && this.selectValue(el.$value as any);
-    });
-
+    el.setValue = (val, reason) => {
+      const r = WUPCalendarControl.prototype.setValue.call(el, val, reason);
+      if (reason === SetValueReasons.userSelect) {
+        this.selectValue(el.$value as any);
+      }
+      return r;
+    };
+    el.$onChange = (e) => e.stopPropagation(); // otherwise date change event fired twice
     popup.appendChild(el);
     return el;
   }
@@ -317,3 +320,4 @@ customElements.define(tagName, WUPDateControl);
 // NiceToHave: role 'spinbutton" + changing input value via scrolling: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/spinbutton_role
 // NiceToHave: allowYear, allowMonth, allowDays based on format: "YYYY-MM" - only for selection year & month
 // NiceToHave: alt-behavior; when user press Alt allow to use arrowKeys to navigate in input - use logic for all comboboxes
+// todo click on icon - menu is opened but body click called twice

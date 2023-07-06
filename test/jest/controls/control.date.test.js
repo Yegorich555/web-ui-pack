@@ -411,5 +411,15 @@ describe("control.date", () => {
     el.$value = new Date("2015-09-26");
     await h.wait();
     expect(el.$isShown).toBe(true);
+
+    el.blur();
+    await h.wait();
+    el.focus();
+    await h.wait();
+    const cur = el.$refPopup.querySelector("[aria-selected]");
+    expect(cur).toBeDefined();
+    await h.userClick(cur);
+    await h.wait();
+    expect(el.$isShown).toBe(false); // click on the same date must hide popup
   });
 });
