@@ -336,22 +336,25 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
   }
   /* eslint-enable max-len */
 
-  /** Inits customEvent & calls dispatchEvent and returns created event */
+  /** Inits customEvent & calls dispatchEvent and returns created event
+   * @tutorial Troubleshooting
+   * * Default event bubbling: el.event.click > el.onclick >>> parent.event.click > parent.onclick etc.
+   * * Custom event bubbling: el.$onclick > el.event.$click >>> parent.event.$click otherwise impossible to stop propagation from on['event] of target directly */
   fireEvent<K extends keyof Events>(type: K, eventInit?: CustomEventInit): Event {
-    let isStopped = false;
     const ev = new CustomEvent(type as string, eventInit);
-    ev.stopImmediatePropagation = () => {
-      isStopped = true;
-      CustomEvent.prototype.stopImmediatePropagation.call(ev);
-    };
-    super.dispatchEvent(ev);
-    if (!isStopped) {
-      const isCustom = (type as string).startsWith("$");
-      if (isCustom) {
-        const str = (type as string).substring(1, 2).toUpperCase() + (type as string).substring(2);
-        (this as any)[`$on${str}`]?.call(this, ev);
-      }
+
+    let sip = false;
+    const isCustom = (type as string).startsWith("$");
+    if (isCustom) {
+      ev.stopImmediatePropagation = () => {
+        sip = true;
+        CustomEvent.prototype.stopImmediatePropagation.call(ev);
+      };
+      const str = (type as string).substring(1, 2).toUpperCase() + (type as string).substring(2);
+      (this as any)[`$on${str}`]?.call(this, ev);
     }
+
+    !sip && super.dispatchEvent(ev);
     return ev;
   }
 
