@@ -511,6 +511,24 @@ describe("control.text: mask", () => {
     expect(h.getInputCursor(el.$refInput)).toBe("+1(2|");
   });
 
+  test("+0 (000) 000-0000", async () => {
+    const mask = "+0 (000) 000-0000";
+    el.$options.mask = mask;
+    el.$options.maskholder = mask;
+    el.focus();
+    await h.wait(1);
+    h.setInputCursor(el.$refInput, "|");
+    expect(await h.userTypeText(el.$refInput, "1", { clearPrevious: false })).toBe("+1 (|");
+    expect(await h.userTypeText(el.$refInput, "234", { clearPrevious: false })).toBe("+1 (234) |");
+
+    expect(await h.userTypeText(el.$refInput, "567", { clearPrevious: false })).toBe("+1 (234) 567-|");
+    h.setInputCursor(el.$refInput, "+1 (|234) 567-");
+    expect(await h.userRemove(el.$refInput)).toBe("+|2 (345) 67");
+    // expect(await h.userRemove(el.$refInput));
+
+    // todo selectAll + type "4" - cursor in wrong place
+  });
+
   test("#.#", async () => {
     expect(new MaskTextInput("#.#", "2").isCompleted).toBe(true); // because others are optional
     expect(new MaskTextInput("#0.#", "2").isCompleted).toBe(true); // because others are optional
@@ -706,7 +724,7 @@ describe("control.text: mask", () => {
     await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
     expect(h.getInputCursor(el.$refInput)).toBe("12|5:67 am");
     await h.wait(150);
-    expect(h.getInputCursor(el.$refInput)).toBe("12|:56 am");
+    expect(h.getInputCursor(el.$refInput)).toBe("12:|56 am");
     expect(el.$value).toBe("15:67 am"); // because canParse false and char is declined
 
     h.setInputCursor(el.$refInput, "|15:67 am");

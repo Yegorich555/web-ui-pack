@@ -389,19 +389,35 @@ export default class MaskTextInput {
     return { chunk, posChunk: (chunk.value ?? chunk.pattern).length + pos };
   }
 
+  /** Leap through static chunk if required */
+  adjustCaret(pos: number): number {
+    const r = this.findChunkByCursor(pos);
+
+    if (
+      r.chunk.isVar &&
+      r.chunk.value.length === r.chunk.max &&
+      r.posChunk === r.chunk.max &&
+      r.chunk.index !== this.chunks.length - 2
+    ) {
+      pos += r.chunk.max - r.posChunk;
+      r.chunk = this.chunks[r.chunk.index + 1]; // leap through the full var chunk if caret at the end
+      r.posChunk = r.chunk.pattern.length; // `|+0 (000)` & '1' => `+1 (|000)`
+      pos += r.posChunk;
+    }
+    if (!r.chunk.isVar) {
+      const shiftRight = (r.chunk.value ?? r.chunk.pattern).length - r.posChunk;
+      pos += shiftRight; // leap through the static chunk (except posftix)
+    }
+    return pos;
+  }
+
   /** Add char at pointed position;
    *  @returns next cursor position */
   insert(char: string, pos: number): number {
     const prevPos = pos;
 
     const atTheEnd = pos >= this.value.length;
-    if (!atTheEnd) {
-      const { chunk, posChunk } = this.findChunkByCursor(pos);
-      if (!chunk.isVar) {
-        const shiftRight = (chunk.value ?? chunk.pattern).length - posChunk;
-        pos += shiftRight; // leap through the static chunk
-      }
-    }
+    pos = atTheEnd ? pos : this.adjustCaret(pos); // leap through the static chunk
     const prev = this.value;
     const next = prev.substring(0, pos) + char + prev.substring(pos);
     this.parse(next);
@@ -409,9 +425,13 @@ export default class MaskTextInput {
     if (this.value === prev) {
       return prevPos; // return prevPosition if char isn't appended
     }
-    pos = atTheEnd ? this.value.length : pos + 1;
-    if (atTheEnd && this.isCompletedFull && !this.lastChunk.isVar) {
-      pos -= this.lastChunk.pattern.length;
+    if (atTheEnd) {
+      pos = this.value.length;
+      if (this.isCompletedFull && !this.lastChunk.isVar) {
+        pos -= this.lastChunk.pattern.length;
+      }
+    } else {
+      pos = this.adjustCaret(pos + 1); // leap through the static chunk
     }
     return pos;
   }

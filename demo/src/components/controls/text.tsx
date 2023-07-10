@@ -111,8 +111,8 @@ export default function TextControlView() {
           <wup-text
             name="phone"
             label="Phone number"
-            mask="+1(000) 000-0000"
-            initValue="234"
+            mask="+0 (000) 000-0000"
+            initValue="+1 (234) 567-"
             ref={(el) => {
               if (el) {
                 el.$options.validations = { required: true };
