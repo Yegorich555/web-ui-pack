@@ -140,6 +140,7 @@ declare global {
       /** Title/label of control; if label is missed it's parsed from option [name]. To skip point `label=''` (empty string) */
       label?: string;
       /** Property/key of model (collected by form); For name `firstName` >> `model.firstName`; for `nested.firstName` >> `model.nested.firstName` etc. */
+      // todo leave more details about detach from Form
       name?: string;
       /** Focus element when it's appended to layout */
       autoFocus?: boolean;
@@ -159,7 +160,7 @@ declare global {
        * * Expected value can be converted toString & parsed from string itself.
        * Override valueFromUrl & valueToUrl to change serializing (for complex objects, arrays etc.)
        * @see {@link WUP.BaseControl.Defaults.storage} */
-      skey?: boolean | string;
+      skey?: boolean | string; // todo issue in React: it affects on ini but need to develop way to gather initModel and send to api request
     }
 
     interface Attributes
@@ -407,8 +408,9 @@ export default abstract class WUPBaseControl<
     return v === "" || v === undefined;
   }
 
+  // todo changing global-common-defaults from anouther project doesn't affect on controls
   static $defaults: WUP.BaseControl.Defaults = {
-    clearActions: ClearActions.clear | ClearActions.resetToInit,
+    clearActions: ClearActions.clear /* | ClearActions.resetToInit */,
     validateDebounceMs: 500,
     validationCase: ValidationCases.onChangeSmart | ValidationCases.onFocusLost | ValidationCases.onFocusWithValue,
     validationRules: {
@@ -1120,7 +1122,7 @@ export default abstract class WUPBaseControl<
         v = this.#prevValue;
       }
     } else if (this._opts.clearActions & ClearActions.clear) {
-      v = this.$isEmpty ? this.#prevValue : undefined;
+      v = this.$isEmpty ? this.#prevValue : undefined; // todo ClearActions.clear must ONLY clear
     }
 
     this.setValue(v, SetValueReasons.clear);
