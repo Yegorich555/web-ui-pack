@@ -524,7 +524,6 @@ describe("control.text: mask", () => {
     expect(await h.userTypeText(el.$refInput, "567", { clearPrevious: false })).toBe("+1 (234) 567-|");
     h.setInputCursor(el.$refInput, "+1 (|234) 567-");
     expect(await h.userRemove(el.$refInput)).toBe("+|2 (345) 67");
-    // expect(await h.userRemove(el.$refInput));
 
     // todo selectAll + type "4" - cursor in wrong place
   });

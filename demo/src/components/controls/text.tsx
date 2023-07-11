@@ -116,6 +116,7 @@ export default function TextControlView() {
             ref={(el) => {
               if (el) {
                 el.$options.validations = { required: true };
+                el.$options.autoFocus = true;
               }
             }}
           />
