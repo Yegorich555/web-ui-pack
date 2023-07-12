@@ -733,6 +733,8 @@ export default class WUPTextControl<
     }
 
     if (declinedAdd) {
+      // todo somehow history is wrong sometimes
+      // todo instead of pop just replace latest
       this._histUndo!.pop();
       this._histUndo!.push(this.historyToSnapshot(mi.value, pos)); // fix when ###: "12|" + "3b" => 123|
       this.declineInput(pos);

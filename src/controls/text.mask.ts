@@ -369,11 +369,12 @@ export default class MaskTextInput {
           break;
         default:
           // console.warn(e!.inputType);
-          this.parse(el.value);
+          this.parse(v);
           break;
       }
     } else {
-      this.parse(el.value);
+      this.parse(v);
+      // todo find exact position of inserted value
     }
     delete el._maskPrev;
 

@@ -403,7 +403,7 @@ export async function userTypeText(el: HTMLInputElement, text: string, opts = { 
     }
     const v = el.value;
     let carretPos = el.selectionStart ?? el.value.length;
-    el.value = v.substring(0, carretPos) + key + v.substring(carretPos);
+    el.value = v.substring(0, carretPos) + key + v.substring(el.selectionEnd ?? carretPos);
     el.selectionStart = ++carretPos;
     el.selectionEnd = el.selectionStart;
     el.dispatchEvent(new InputEvent("input", { bubbles: true, data: key, inputType }));
