@@ -134,7 +134,7 @@ export default function TextControlView() {
           <ul>
             <li>
               Formats example:
-              <br /> $options.mask=<b>"+1(000) 000-0000"</b> - for phone number
+              <br /> $options.mask=<b>"+0 (000) 000-0000"</b> - for phone number
               <br /> $options.mask=<b>"##0.##0.##0.##0"</b> - for IP address
               <br /> $options.mask=<b>"*{"{1,5}"}"</b> - any 1..5 chars
               <br /> $options.mask=<b>"//[a-zA-Z]//{"{1,5}"}"</b> - regex /[a-zA-Z]/: 1..5 letters

@@ -217,8 +217,9 @@ export default class MaskTextInput {
   }
 
   /** Converts pointed value to masked-value and update internal state */
-  parse(value: string): string {
+  parse(value: string, lazy?: boolean): string {
     const chunks = MaskTextInput.parsePattern(this.pattern);
+    lazy ??= this.options!.lazy;
 
     let canShift: number | null = null;
     let pi = 0;
@@ -245,7 +246,7 @@ export default class MaskTextInput {
             continue; // shift behavior: "+1(234) 9675-123" >>> "+1(234) 967-5123"
           } else if (chunk.isCompleted && chunks[pi + 1]?.pattern[0] === char) {
             break; // skip chunk if length fits min
-          } else if (this.options!.lazy && /[., _+-/\\]/.test(char) && ci && chunk.test === this.#ctr.testDigit) {
+          } else if (lazy && /[., _+-/\\]/.test(char) && ci && chunk.test === this.#ctr.testDigit) {
             // WARN: it works only for digits
             const cnt = chunk.min - ci;
             if (cnt > 0) {
@@ -369,12 +370,11 @@ export default class MaskTextInput {
           break;
         default:
           // console.warn(e!.inputType);
-          this.parse(v);
+          this.parse(v, false);
           break;
       }
     } else {
-      this.parse(v);
-      // todo find exact position of inserted value
+      this.parse(v, false);
     }
     delete el._maskPrev;
 
@@ -421,7 +421,7 @@ export default class MaskTextInput {
     pos = atTheEnd ? pos : this.adjustCaret(pos); // leap through the static chunk
     const prev = this.value;
     const next = prev.substring(0, pos) + char + prev.substring(pos);
-    this.parse(next);
+    this.parse(next, char.length !== 1 ? false : undefined); //  parse without lazy if it was insertFromPaste
 
     if (this.value === prev) {
       return prevPos; // return prevPosition if char isn't appended
@@ -513,10 +513,7 @@ export default class MaskTextInput {
       if (chunk.value.length === 1) {
         const nextIsPostfix = chunk.index === this.chunks.length - 2; // 'pref 1| post' + Backspace => 'pref |'
         const nextVal = this.value.substring(0, pos) + (nextIsPostfix ? "" : this.value.substring(pos + 1));
-        const l = this.options!.lazy;
-        this.options!.lazy = false; // temp disable lazy to fix for "+1 (|234) 567-" => with lazy we have '+2 (345) 067-'
-        this.parse(nextVal); // '123.|4.567' + Delete = > 123.567
-        this.options!.lazy = l;
+        this.parse(nextVal, false); // '123.|4.567' + Delete = > 123.567
         return pos;
       }
       chunk.value = chunk.value.substring(0, posChunk) + chunk.value.substring(posChunk + 1);

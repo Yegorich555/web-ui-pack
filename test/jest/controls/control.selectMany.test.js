@@ -329,7 +329,7 @@ describe("control.selectMany", () => {
     `);
     expect(handledKeydown("ArrowRight")).toBe(false); // nothing to focus
     await h.userTypeText(el.$refInput, "mi");
-    expect(handledKeydown("ArrowLeft")).toBe(false); // because carret at the end of input
+    expect(handledKeydown("ArrowLeft")).toBe(false); // because caret at the end of input
 
     el.$refInput.selectionStart = 0;
     el.$refInput.selectionEnd = 0;

@@ -383,8 +383,12 @@ export async function wait(t = 1000) {
   }
 }
 
-/** Simulate user type text (send values to the end of input): focus + keydown+ keyup + keypress + input events */
-export async function userTypeText(el: HTMLInputElement, text: string, opts = { clearPrevious: true }) {
+/** Simulate user typse text (send values to the end of input): focus + keydown+ keyup + keypress + input events */
+export async function userTypeText(
+  el: HTMLInputElement,
+  text: string,
+  opts = { clearPrevious: true }
+): Promise<string> {
   el.focus();
   await wait(10);
   if (opts?.clearPrevious) {
@@ -402,9 +406,9 @@ export async function userTypeText(el: HTMLInputElement, text: string, opts = { 
       continue;
     }
     const v = el.value;
-    let carretPos = el.selectionStart ?? el.value.length;
-    el.value = v.substring(0, carretPos) + key + v.substring(el.selectionEnd ?? carretPos);
-    el.selectionStart = ++carretPos;
+    let caretPos = el.selectionStart ?? el.value.length;
+    el.value = v.substring(0, caretPos) + key + v.substring(el.selectionEnd ?? caretPos);
+    el.selectionStart = ++caretPos;
     el.selectionEnd = el.selectionStart;
     el.dispatchEvent(new InputEvent("input", { bubbles: true, data: key, inputType }));
     el.dispatchEvent(new KeyboardEvent("keyup", { key, bubbles: true }));
@@ -422,7 +426,29 @@ export async function userTypeText(el: HTMLInputElement, text: string, opts = { 
   return getInputCursor(el);
 }
 
-/** Get cursor of input according in pattern "abc|def" where '|' - cursor position */
+/** Simulate user inserts text */
+export async function userInsertText(el: HTMLInputElement, text: string): Promise<string> {
+  el.focus();
+  await wait(10);
+  const inputType = "insertFromPaste";
+
+  if (el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, cancelable: true, data: text, inputType }))) {
+    const v = el.value;
+    let caretPos = el.selectionStart ?? el.value.length;
+    el.value = v.substring(0, caretPos) + text + v.substring(el.selectionEnd ?? caretPos);
+    el.selectionStart = ++caretPos;
+    el.selectionEnd = el.selectionStart;
+    el.dispatchEvent(new InputEvent("input", { bubbles: true, data: text, inputType }));
+
+    await Promise.resolve();
+    jest.advanceTimersByTime(20);
+    await Promise.resolve();
+  }
+
+  return getInputCursor(el);
+}
+
+/** Get caret of input according in pattern "abc|def" where '|' - cursor position */
 export function getInputCursor(el: HTMLInputElement) {
   const v = el.value;
   if (el.selectionStart == null || el.selectionEnd == null) {
@@ -468,19 +494,19 @@ export async function userRemove(
     }
 
     let v = el.value;
-    let carretPos = el.selectionStart ?? v.length;
-    if (key === "Backspace" && carretPos > 0) {
-      --carretPos;
+    let caretPos = el.selectionStart ?? v.length;
+    if (key === "Backspace" && caretPos > 0) {
+      --caretPos;
     }
     if (el.selectionStart !== el.selectionEnd) {
       v = v.substring(0, el.selectionStart!) + v.substring(el.selectionEnd!);
     } else {
-      v = v.substring(0, carretPos) + v.substring(carretPos + 1);
+      v = v.substring(0, caretPos) + v.substring(caretPos + 1);
     }
     if (el.value !== v) {
       el.value = v;
-      el.selectionEnd = carretPos;
-      el.selectionStart = carretPos;
+      el.selectionEnd = caretPos;
+      el.selectionStart = caretPos;
       el.dispatchEvent(new InputEvent("input", { bubbles: true, data: null, inputType }));
     }
     jest.advanceTimersByTime(20);

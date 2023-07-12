@@ -525,6 +525,12 @@ describe("control.text: mask", () => {
     h.setInputCursor(el.$refInput, "+1 (|234) 567-");
     expect(await h.userRemove(el.$refInput)).toBe("+|2 (345) 67");
 
+    h.setInputCursor(el.$refInput, "+|");
+    expect(await h.userTypeText(el.$refInput, "11111111111", { clearPrevious: false })).toBe("+1 (111) 111-1111|");
+    h.setInputCursor(el.$refInput, "+1 (1|11) 111-1111");
+    await h.userInsertText(el.$refInput, "23456");
+    await h.wait();
+    expect(h.getInputCursor(el.$refInput)).toBe("+1 (12|3) 456-1111"); // todo caret is wrong - will be fixed soon
     // todo fix this
     // h.setInputCursor(el.$refInput, "|+2 (345) 67|");
     // expect(await h.userTypeText(el.$refInput, "8", { clearPrevious: false })).toBe("+8 (|");
