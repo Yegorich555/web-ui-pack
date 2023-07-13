@@ -241,14 +241,12 @@ describe("control.text: mask", () => {
 
     // append wrong chars when cursor in the middle
     h.setInputCursor(el.$refInput, "1|234/56/78");
-    await h.userTypeText(el.$refInput, "ab", { clearPrevious: false });
-    expect(h.getInputCursor(el.$refInput)).toBe("1b|234/56/78");
+    expect(await h.userTypeText(el.$refInput, "ab", { clearPrevious: false })).toBe("1b|234/56/78");
     await h.wait(150); // when user types invalid char it shows and hides after a time
     expect(h.getInputCursor(el.$refInput)).toBe("1|234/56/78");
 
     h.setInputCursor(el.$refInput, "|123");
-    await h.userTypeText(el.$refInput, "ab", { clearPrevious: false });
-    expect(h.getInputCursor(el.$refInput)).toBe("b|123");
+    expect(await h.userTypeText(el.$refInput, "ab", { clearPrevious: false })).toBe("b|123");
     await h.wait(150); // when user types invalid char it shows and hides after a time
     expect(h.getInputCursor(el.$refInput)).toBe("|123");
 
@@ -467,16 +465,14 @@ describe("control.text: mask", () => {
     // type in the middle
     h.setInputCursor(el.$refInput, "+1(234) 9|75-123");
     // type 'ab'
-    await h.userTypeText(el.$refInput, "ab", { clearPrevious: false });
-    expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 9b|75-123");
+    expect(await h.userTypeText(el.$refInput, "ab", { clearPrevious: false })).toBe("+1(234) 9b|75-123");
     expect(el.$refMaskholder.innerHTML).toBe("<i>+1(234) 9b75-123</i>");
     await h.wait(150);
     expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 9|75-123");
     expect(el.$refMaskholder.innerHTML).toBe("<i>+1(234) 975-123</i>0");
     // type digits
     h.setInputCursor(el.$refInput, "+1(234) 9|75-123");
-    await h.userTypeText(el.$refInput, "4", { clearPrevious: false });
-    expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 94|7-5123"); // digits must be shifted
+    expect(await h.userTypeText(el.$refInput, "4", { clearPrevious: false })).toBe("+1(234) 94|7-5123"); // digits must be shifted
 
     const arr = [
       { from: "|+1(", add: "2", to: "+1(2|" },
@@ -489,8 +485,7 @@ describe("control.text: mask", () => {
     for (let i = 0; i < arr.length; ++i) {
       const a = arr[i];
       h.setInputCursor(el.$refInput, a.from);
-      await h.userTypeText(el.$refInput, a.add, { clearPrevious: false });
-      expect(h.getInputCursor(el.$refInput)).toBe(a.to); // cursor must be shifted with digits
+      expect(await h.userTypeText(el.$refInput, a.add, { clearPrevious: false })).toBe(a.to);
     }
 
     // removing
@@ -522,8 +517,7 @@ describe("control.text: mask", () => {
     expect(await remove({ key: "Delete" })).toBe("+1(|3");
 
     h.setInputCursor(el.$refInput, "|+1(");
-    await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
-    expect(h.getInputCursor(el.$refInput)).toBe("+1(2|");
+    expect(await h.userTypeText(el.$refInput, "2", { clearPrevious: false })).toBe("+1(2|");
   });
 
   test("+0 (000) 000-0000", async () => {
@@ -607,8 +601,7 @@ describe("control.text: mask", () => {
     expect(h.getInputCursor(el.$refInput)).toBe("$ 52| USD");
 
     h.setInputCursor(el.$refInput, "$ 123456 USD|");
-    await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
-    expect(h.getInputCursor(el.$refInput)).toBe("$ 1234562| USD");
+    expect(await h.userTypeText(el.$refInput, "2", { clearPrevious: false })).toBe("$ 1234562| USD");
     await h.wait(150);
     expect(h.getInputCursor(el.$refInput)).toBe("$ 123456| USD");
 
@@ -752,8 +745,7 @@ describe("control.text: mask", () => {
     expect(el.$value).toBe("15:67 am");
 
     jest.spyOn(el, "canParseInput").mockReturnValueOnce(false);
-    await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
-    expect(h.getInputCursor(el.$refInput)).toBe("12|5:67 am");
+    expect(await h.userTypeText(el.$refInput, "2", { clearPrevious: false })).toBe("12|5:67 am");
     await h.wait(150);
     expect(h.getInputCursor(el.$refInput)).toBe("12:|56 am");
     expect(el.$value).toBe("15:67 am"); // because canParse false and char is declined
@@ -812,8 +804,7 @@ describe("control.text: mask", () => {
     await h.wait(1);
 
     // make different actions before undo
-    await h.userTypeText(el.$refInput, "1234.5.67", { clearPrevious: false }); // #1 type long text
-    expect(h.getInputCursor(el.$refInput)).toBe("123.4.5.67|");
+    expect(await h.userTypeText(el.$refInput, "1234.5.67", { clearPrevious: false })).toBe("123.4.5.67|"); // #1 type long text
     expect(await h.userRemove(el.$refInput)).toBe("123.4.5.6|"); // #2 remove last char
     h.setInputCursor(el.$refInput, "1|23.4.5.6");
     expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("1|3.4.5.6"); // #3 remove middle char
