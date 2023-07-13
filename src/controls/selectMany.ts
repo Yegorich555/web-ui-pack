@@ -520,8 +520,6 @@ export default class WUPSelectManyControl<
 
   // @ts-expect-error - because expected v: ValueType[]
   protected override selectValue(v: ValueType, canHideMenu = true): void {
-    // todo remove line below because it's not clear if user finished selection or not
-    // canHideMenu = canHideMenu || (this.$value !== undefined && this.$value.length + 1 === this._menuItems!.all!.length);
     super.selectValue(v as any, canHideMenu);
     this._opts.hideSelected && this.focusMenuItem(null);
   }
