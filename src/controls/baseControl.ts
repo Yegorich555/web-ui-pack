@@ -139,8 +139,10 @@ declare global {
     interface Options<T = any, VM = ValidityMap> extends Defaults<T, VM> {
       /** Title/label of control; if label is missed it's parsed from option [name]. To skip point `label=''` (empty string) */
       label?: string;
-      /** Property/key of model (collected by form); For name `firstName` >> `model.firstName`; for `nested.firstName` >> `model.nested.firstName` etc. */
-      // todo leave more details about detach from Form
+      /** Property/key of model (collected by form); For name `firstName` >> `model.firstName`; for `nested.firstName` >> `model.nested.firstName` etc.
+       * * @tutorial
+       * * point `undefined` to completely detach from FormElement
+       * * point `''`(empty string) to partially detach (exlcude from `form.$model`, `form.$isChanged`, but included in validations & submit) */
       name?: string;
       /** Focus element when it's appended to layout */
       autoFocus?: boolean;
