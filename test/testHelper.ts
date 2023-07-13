@@ -434,9 +434,9 @@ export async function userInsertText(el: HTMLInputElement, text: string): Promis
 
   if (el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, cancelable: true, data: text, inputType }))) {
     const v = el.value;
-    let caretPos = el.selectionStart ?? el.value.length;
+    const caretPos = el.selectionStart ?? el.value.length;
     el.value = v.substring(0, caretPos) + text + v.substring(el.selectionEnd ?? caretPos);
-    el.selectionStart = ++caretPos;
+    el.selectionStart = caretPos + text.length;
     el.selectionEnd = el.selectionStart;
     el.dispatchEvent(new InputEvent("input", { bubbles: true, data: text, inputType }));
 

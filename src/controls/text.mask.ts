@@ -216,11 +216,13 @@ export default class MaskTextInput {
     return chunks;
   }
 
-  /** Converts pointed value to masked-value and update internal state */
-  parse(value: string, lazy?: boolean): string {
+  /** Converts pointed value to masked-value and update internal state
+   * @returns new input-carret position */
+  parse(value: string, lazy?: boolean, caret?: number): number {
     const chunks = MaskTextInput.parsePattern(this.pattern);
     lazy ??= this.options!.lazy;
-
+    caret ??= 0;
+    const caretWas = caret;
     let canShift: number | null = null;
     let pi = 0;
     for (let i = 0; pi < chunks.length; ++pi) {
@@ -257,6 +259,9 @@ export default class MaskTextInput {
             break;
           } else {
             --ci; // otherwise skip this char
+            if (i < caretWas) {
+              --caret; // "1abc|234" => "1|23.4" - shift caret left
+            }
           }
         }
       } else {
@@ -265,6 +270,8 @@ export default class MaskTextInput {
           if (chunk.pattern[ci] === value[i] || /[., _+-/\\]/.test(value[i])) {
             ++i;
             canShift = null;
+          } else if (i < caretWas) {
+            ++caret; // "1234|" => "123.4|" - shift caret right
           }
         }
       }
@@ -275,7 +282,8 @@ export default class MaskTextInput {
 
     this.chunks = chunks;
     this.updateState();
-    return this.value;
+    caret = Math.min(this.value.length, caret); // when declined some chars at the end
+    return caret;
   }
 
   /** Update state based on chunks; call it when chunks are changed to recalc value etc. */
@@ -318,27 +326,23 @@ export default class MaskTextInput {
   /* Call it on 'beforeinput' event to improve logic */
   handleBeforInput(e: InputEvent): void {
     const el = e.target as WUP.Text.Mask.HandledInput;
-
     if (el.selectionStart !== el.selectionEnd) {
       delete el._maskPrev;
       return;
     }
-
-    let pos = el.selectionStart || 0;
-    // eslint-disable-next-line default-case
-    switch (e!.inputType) {
-      case "insertText":
-      case "insertFromPaste": {
-        const { chunk, posChunk } = this.findChunkByCursor(pos);
-        if (!chunk.isVar && chunk.index === this.chunks.length - 1) {
-          pos -= posChunk; // move cursor before postfix
-          el.setSelectionRange(pos, pos);
-        }
-      }
-    }
-
+    // WARN: looks like it's not required - rollback if it's false
+    // const pos = el.selectionStart || 0;
+    // // eslint-disable-next-line default-case
+    // switch (e!.inputType) {
+    //   case "insertText":
+    //   case "insertFromPaste": {
+    //     const npos = this.adjustCaret(pos);
+    //     npos !== pos && el.setSelectionRange(npos, npos);
+    //     pos = npos;
+    //   }
+    // }
     el._maskPrev = {
-      position: pos,
+      position: el.selectionStart || 0,
       value: el.value,
       insertText: e.data,
     };
@@ -349,40 +353,41 @@ export default class MaskTextInput {
     const el = e.target as WUP.Text.Mask.HandledInput;
     const v = el.value;
 
-    let position = el.selectionStart || 0;
+    let pos = el.selectionStart || 0;
     let declinedAdd = 0;
 
+    let isProcessed = false;
     const saved = el._maskPrev;
     if (saved) {
-      switch (e!.inputType) {
-        case "insertText":
-        case "insertFromPaste":
-          position = this.insert(saved.insertText!, saved.position);
-          declinedAdd = Math.max(v.length - this.value.length, 0);
-          break;
+      switch (e.inputType) {
         case "deleteContentForward":
-          position = this.deleteAfter(saved.position);
+          pos = this.deleteAfter(saved.position);
           declinedAdd = Math.min(v.length - this.value.length, 0);
+          isProcessed = true;
           break;
         case "deleteContentBackward":
-          position = this.deleteBefore(saved.position);
+          pos = this.deleteBefore(saved.position);
           declinedAdd = Math.min(v.length - this.value.length, 0);
+          isProcessed = true;
           break;
         default:
-          // console.warn(e!.inputType);
-          this.parse(v, false);
           break;
       }
-    } else {
-      this.parse(v, false);
+    }
+
+    if (!isProcessed) {
+      const lazy = e.inputType !== "insertText" ? false : this.options!.lazy;
+      pos = this.parse(v, lazy, pos); // WARN: maybe its wrong "$ 123a| USD" => "$ 123 USD|"
+      pos = this.adjustCaret(pos);
+      declinedAdd = Math.max(v.length - this.value.length, 0);
     }
     delete el._maskPrev;
 
-    return { position, declinedAdd };
+    return { position: pos, declinedAdd };
   }
 
   /** Returns chunk according to pointed cursor position + position inside chunk */
-  findChunkByCursor(pos: number): { chunk: WUP.Text.Mask.InputChunk; posChunk: number } {
+  findChunkByCaret(pos: number): { chunk: WUP.Text.Mask.InputChunk; posChunk: number } {
     const chunk = this.chunks.find((c) => {
       pos -= (c.value ?? c.pattern).length;
       return pos <= 0;
@@ -392,51 +397,32 @@ export default class MaskTextInput {
 
   /** Leap through static chunk if required */
   adjustCaret(pos: number): number {
-    const r = this.findChunkByCursor(pos);
-
+    const r = this.findChunkByCaret(pos);
     if (
       r.chunk.isVar &&
       r.chunk.value.length === r.chunk.max &&
       r.posChunk === r.chunk.max &&
-      r.chunk.index !== this.chunks.length - 2
+      r.chunk.index < this.chunks.length - 2
     ) {
       pos += r.chunk.max - r.posChunk;
       r.chunk = this.chunks[r.chunk.index + 1]; // leap through the full var chunk if caret at the end
       r.posChunk = r.chunk.pattern.length; // `|+0 (000)` & '1' => `+1 (|000)`
       pos += r.posChunk;
     }
+
     if (!r.chunk.isVar) {
-      const shiftRight = (r.chunk.value ?? r.chunk.pattern).length - r.posChunk;
-      pos += shiftRight; // leap through the static chunk (except posftix)
-    }
-    return pos;
-  }
-
-  /** Add char at pointed position;
-   *  @returns next cursor position */
-  insert(char: string, pos: number): number {
-    const prevPos = pos;
-
-    const atTheEnd = pos >= this.value.length;
-    pos = atTheEnd ? pos : this.adjustCaret(pos); // leap through the static chunk
-    const prev = this.value;
-    const next = prev.substring(0, pos) + char + prev.substring(pos);
-    this.parse(next, char.length !== 1 ? false : undefined); //  parse without lazy if it was insertFromPaste
-
-    if (this.value === prev) {
-      return prevPos; // return prevPosition if char isn't appended
-    }
-    if (atTheEnd) {
-      pos = this.value.length;
-      if (this.isCompletedFull && !this.lastChunk.isVar) {
-        pos -= this.lastChunk.pattern.length;
+      if (r.chunk.index === this.chunks.length - 1) {
+        pos -= r.posChunk; // leap through the static chunk (only posfix)
+      } else {
+        const shiftRight = (r.chunk.value ?? r.chunk.pattern).length - r.posChunk;
+        pos += shiftRight; // leap through the static chunk (except postfix)
       }
-    } else {
-      pos = this.adjustCaret(pos + 1); // leap through the static chunk
     }
+
     return pos;
   }
 
+  /** Clear chunk state */
   resetChunk(c: WUP.Text.Mask.InputChunk): void {
     if (!c) {
       return;
@@ -453,7 +439,7 @@ export default class MaskTextInput {
      * +1(234) 343|-: remove char, shiftDigits. if lastDigit incompleted: remove separator chunk
      * +1(234) 343-4|: remove char, shiftDigits. if lastDigit incompleted: remove next separator chunk
      */
-    let { chunk, posChunk } = this.findChunkByCursor(pos);
+    let { chunk, posChunk } = this.findChunkByCaret(pos);
     if (!isBefore && chunk.isVar && chunk.value.length === posChunk && this.chunks[chunk.index + 1]) {
       chunk = this.chunks[chunk.index + 1]; // go to next chunk when '4|.789' + Delete
       posChunk = 0;

@@ -35,7 +35,10 @@ describe("control.text: mask", () => {
   test("0000-00-00 (dateMask yyyy-MM-dd)", async () => {
     const mask = "0000-00-00";
     const mi = new MaskTextInput(mask, "");
-    const proc = (v) => mi.parse(v);
+    const proc = (v) => {
+      mi.parse(v);
+      return mi.value;
+    };
 
     expect(proc("12")).toBe("12");
     expect(proc("12345")).toBe("1234-5");
@@ -165,7 +168,10 @@ describe("control.text: mask", () => {
   test("0000/#0/#0 (dateMask yyyy-M-d)", async () => {
     const mask = "0000/#0/#0";
     const mi = new MaskTextInput(mask, "");
-    const proc = (v) => mi.parse(v);
+    const proc = (v) => {
+      mi.parse(v);
+      return mi.value;
+    };
 
     expect(proc("12")).toBe("12");
     expect(proc("12345")).toBe("1234/5");
@@ -265,7 +271,10 @@ describe("control.text: mask", () => {
   test("0000--0", () => {
     const mask = "0000--0";
     const mi = new MaskTextInput(mask, "");
-    const proc = (v) => mi.parse(v);
+    const proc = (v) => {
+      mi.parse(v);
+      return mi.value;
+    };
 
     expect(proc("1234--5")).toBe("1234--5");
     expect(proc("1234--5b")).toBe("1234--5");
@@ -276,7 +285,10 @@ describe("control.text: mask", () => {
   test("##0.##0.##0.##0 (IP addess)", async () => {
     const mask = "##0.##0.##0.##0";
     const mi = new MaskTextInput(mask, "");
-    const proc = (v) => mi.parse(v);
+    const proc = (v) => {
+      mi.parse(v);
+      return mi.value;
+    };
 
     expect(proc("192.168.255.254")).toBe("192.168.255.254");
     expect(proc("1.2.3.4")).toBe("1.2.3.4");
@@ -413,7 +425,10 @@ describe("control.text: mask", () => {
   test("+1(000) 000-0000", async () => {
     const mask = "+1(000) 000-0000";
     const mi = new MaskTextInput(mask, "");
-    const proc = (v) => mi.parse(v);
+    const proc = (v) => {
+      mi.parse(v);
+      return mi.value;
+    };
 
     expect(proc("+1(234) 975-1234")).toBe("+1(234) 975-1234");
     expect(proc("2")).toBe("+1(2");
@@ -530,10 +545,10 @@ describe("control.text: mask", () => {
     h.setInputCursor(el.$refInput, "+1 (1|11) 111-1111");
     await h.userInsertText(el.$refInput, "23456");
     await h.wait();
-    expect(h.getInputCursor(el.$refInput)).toBe("+1 (12|3) 456-1111"); // todo caret is wrong - will be fixed soon
-    // todo fix this
-    // h.setInputCursor(el.$refInput, "|+2 (345) 67|");
-    // expect(await h.userTypeText(el.$refInput, "8", { clearPrevious: false })).toBe("+8 (|");
+    expect(h.getInputCursor(el.$refInput)).toBe("+1 (123) 456-|1111");
+
+    h.setInputCursor(el.$refInput, "|+2 (345) 67|", { skipEvent: true });
+    expect(await h.userTypeText(el.$refInput, "8", { clearPrevious: false })).toBe("+8 (|");
   });
 
   test("#.#", async () => {
@@ -544,7 +559,10 @@ describe("control.text: mask", () => {
   test("$ #####0 USD", async () => {
     const mask = "$ #####0 USD";
     const mi = new MaskTextInput(mask, "");
-    const proc = (v) => mi.parse(v);
+    const proc = (v) => {
+      mi.parse(v);
+      return mi.value;
+    };
 
     expect(proc("$ 123456 USD")).toBe("$ 123456 USD");
     expect(proc("$ 123450 USD")).toBe("$ 123450 USD");
@@ -624,7 +642,10 @@ describe("control.text: mask", () => {
 
     const mask = "0 *{1,2} suf";
     const mi = new MaskTextInput(mask, "");
-    const proc = (v = "") => mi.parse(v);
+    const proc = (v = "") => {
+      mi.parse(v);
+      return mi.value;
+    };
 
     expect(proc("2 ab suf")).toBe("2 ab suf");
     expect(proc("2 ab")).toBe("2 ab suf");
@@ -675,7 +696,10 @@ describe("control.text: mask", () => {
 
     const mask = "0 //[a-c]//";
     const mi = new MaskTextInput(mask, "");
-    const proc = (v = "") => mi.parse(v);
+    const proc = (v = "") => {
+      mi.parse(v);
+      return mi.value;
+    };
 
     expect(proc("2 a")).toBe("2 a");
     expect(proc("2 c")).toBe("2 c");
