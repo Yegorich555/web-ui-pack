@@ -201,7 +201,6 @@ export default abstract class WUPBaseControl<
   /** Text announced by screen-readers; @defaultValue `Error for` */
   static $ariaError = "Error for";
 
-  /* Array of options names to listen for changes */
   static get observedOptions(): Array<string> {
     return <Array<keyof WUP.BaseControl.Options>>[
       "label",
@@ -214,7 +213,10 @@ export default abstract class WUPBaseControl<
     ];
   }
 
-  /* Array of attribute names to listen for changes */
+  static get observedExcludeNested(): Array<string> | undefined {
+    return ["items"]; // exclude items[x] from observed - for Select & Radio
+  }
+
   static get observedAttributes(): Array<string> {
     return <Array<LowerKeys<WUP.BaseControl.Attributes>>>[
       "label", //

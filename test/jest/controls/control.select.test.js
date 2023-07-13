@@ -1,5 +1,6 @@
 import { WUPSelectControl } from "web-ui-pack";
 import { ShowCases } from "web-ui-pack/controls/baseCombo";
+import observer from "web-ui-pack/helpers/observer";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
 
@@ -115,9 +116,12 @@ describe("control.select", () => {
     expect(onErr).not.toBeCalled();
     expect(el.$refInput.value).toBe("Harry");
 
-    el.$options.items = [{ text: "Helica", value: 5 }];
+    const item = { text: "Helica", value: 5 };
+    el.$options.items = [item];
     jest.advanceTimersByTime(2);
     expect(onErr).toBeCalledTimes(1); // because it doesn't fit value 11
+    expect(el.$options.items[0]).toBe(item); // nested items must be not observed
+    expect(observer.isObserved(el.$options.items)).toBe(true); // but Array items itself must be observed
   });
 
   test("pending state", async () => {

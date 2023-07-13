@@ -39,7 +39,6 @@ declare global {
       showCase: ShowCases;
     }
     interface Options<T = any, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, Defaults<T, VM> {
-      // todo need somehow notify Proxy not to wrap the Array: same behavior for radio
       /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data! */
       items: MenuItems<T> | (() => MenuItems<T> | Promise<MenuItems<T>>) | Promise<MenuItems<T>>;
       /** Set true to make input not editable but allow to user select items via popup-menu (ordinary dropdown mode)

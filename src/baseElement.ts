@@ -66,6 +66,21 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
     return "wup-hidden";
   }
 
+  /* Array of options names to listen for changes */
+  static get observedOptions(): Array<string> | undefined {
+    return undefined;
+  }
+
+  /** Array of nested-props of options.names to exclude from observed */
+  static get observedExcludeNested(): Array<string> | undefined {
+    return undefined;
+  }
+
+  /* Array of attribute names to listen for changes */
+  static get observedAttributes(): Array<string> | undefined {
+    return undefined;
+  }
+
   /** Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item */
   static $defaults: Record<string, any>;
   /** Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally */
@@ -91,7 +106,6 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
       // get from cache
       let o = allObservedOptions.get(this.#ctr);
       if (o === undefined) {
-        // @ts-ignore
         const arr = this.#ctr.observedOptions;
         o = arr?.length ? new Set(arr) : null;
         allObservedOptions.set(this.#ctr, o);
@@ -106,7 +120,7 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
           }
           // cast to observed only if option was retrieved: to optimize init-performance
           if (!this.#optsObserved) {
-            this.#optsObserved = observer.make(this._opts);
+            this.#optsObserved = observer.make(this._opts, { excludeNested: this.#ctr.observedExcludeNested });
             this.#removeObserved = observer.onChanged(this.#optsObserved, (e) => {
               this.#isReady && e.props.some((p) => watched.has(p)) && this.gotOptionsChanged(e);
             });
@@ -375,7 +389,7 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
         return v;
       };
     }
-    // @ts-expect-error
+    // @ts-ignore - different TS versions can throw here
     const r = onEvent(...args);
     this.disposeLst.push(r);
     const remove = (): void => {
