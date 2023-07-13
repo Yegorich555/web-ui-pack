@@ -41,7 +41,7 @@ export namespace Observer {
     isObserved(obj: any): boolean;
     /** Make observable object to detect changes;
      * @see {@link Proxy} */
-    make<T extends object>(obj: T): Observer.Observed<T>;
+    make<T extends object>(obj: T, opts?: Options<T>): Observer.Observed<T>;
     /** Listen for any props changing on the observed; callback is called per each prop-changing
      * @returns callback to removeListener */
     onPropChanged<T extends Observer.Observed<object>>(
@@ -55,6 +55,13 @@ export namespace Observer {
       callback: Observer.Callback<T>
       // options: { once?: boolean }
     ): () => void;
+  }
+  export interface Options<T> {
+    /** Point array of nested prop-names to exclude from observer or true to exclude every nested property of object
+     * @tutorial Troubleshooting
+     * * point ['items'] to exclude any nested props of property with name `items` from obsserved of obj.items
+     * * obj.nested.items - will be also fit the rule */
+    excludeNested?: Array<keyof T> | boolean;
   }
   export type Observed<T extends object = object> = {
     [K in keyof T]: T[K] extends Record<string, unknown> ? Observed<T[K]> : T[K];
@@ -160,7 +167,7 @@ function isObserved(obj: any): boolean {
   return obj && lstObserved.has(obj);
 }
 
-function appenCallback<T extends Observer.Observed<object>, K extends "listeners" | "propListeners">(
+function appendCallback<T extends Observer.Observed<object>, K extends "listeners" | "propListeners">(
   proxy: T,
   callback: K extends "propListeners" ? Observer.PropCallback<T> : Observer.Callback<T>,
   setKey: K
@@ -180,7 +187,8 @@ function appenCallback<T extends Observer.Observed<object>, K extends "listeners
 
 function make<T extends object>(
   obj: T,
-  parentRef: { key: string; ref: Ref<Observer.Observed<any>> } | undefined
+  parentRef: { key: string; ref: Ref<Observer.Observed<any>> } | undefined,
+  opts: Observer.Options<T> | undefined | null
 ): Observer.Observed<T> {
   // checking if object is already observed
   const prevProxy = lstObjProxy.get(obj);
@@ -261,7 +269,10 @@ function make<T extends object>(
         // next can be Proxy or Raw
         lstObserved.get(prev)?.parentRefs.delete(ref);
         if (isRecord(next)) {
-          next = make(next, { key: prop as string, ref });
+          const exclude = opts?.excludeNested;
+          const optsDeep =
+            Array.isArray(exclude) && exclude.includes(prop as any) ? { ...opts, excludeNested: true } : opts;
+          next = make(next, { key: prop as string, ref }, optsDeep);
         }
       }
 
@@ -319,13 +330,17 @@ function make<T extends object>(
   }
 
   // scan recursive
-  // it doesn't required because object keys is null: if (!isDate && !(obj instanceof Map || obj instanceof Set)) {
-  Object.keys(obj).forEach((k) => {
-    const v = obj[k] as any;
-    if (isRecord(v)) {
-      proxy[k] = make(v, { ref, key: k }) as never;
-    }
-  });
+  const exclude = opts?.excludeNested;
+  if (exclude !== true) {
+    // not required because object keys is null: if (!isDate && !(obj instanceof Map || obj instanceof Set)) {
+    Object.keys(obj).forEach((k) => {
+      const v = obj[k] as any;
+      if (isRecord(v)) {
+        const optsDeep = exclude && exclude.includes(k) ? { ...opts, excludeNested: true } : opts;
+        proxy[k] = make(v, { ref, key: k }, optsDeep) as never;
+      }
+    });
+  }
   // }
   isReady = true; // required to avoid double make() on same proxy
   return proxy;
@@ -340,19 +355,18 @@ function make<T extends object>(
  * const removeListener2 = observer.onChanged(obj, (e) => console.warn(e));
  * obj.period = 5; // events are fired after 1ms
  * removeListener();
- * removeListener2();
- */
+ * removeListener2(); */
 const observer: Observer.IObserver = {
   isObserved,
-  make<T extends object>(obj: T): Observer.Observed<T> {
-    return make(obj, undefined);
+  make<T extends object>(obj: T, opts: Observer.Options<T>): Observer.Observed<T> {
+    return make(obj, undefined, opts);
   },
   onPropChanged<T extends Observer.Observed<object>>(
     target: T,
     callback: Observer.PropCallback<T>
     // options: { once?: boolean }
   ) {
-    return appenCallback(target, callback, "propListeners");
+    return appendCallback(target, callback, "propListeners");
   },
 
   onChanged<T extends Observer.Observed<object>>(
@@ -360,7 +374,7 @@ const observer: Observer.IObserver = {
     callback: Observer.Callback<T>
     // options: { once?: boolean }
   ) {
-    return appenCallback(target, callback, "listeners");
+    return appendCallback(target, callback, "listeners");
   },
 };
 

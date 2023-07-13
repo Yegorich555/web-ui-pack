@@ -10,6 +10,10 @@
 - [DateControl](src/controls/date.ts). _Menu isn't closed if click on the selected date_
 - **Text based controls**. **Mask** Fixed behavior when user removes/inserts text in the middle
 
+**New/Features**:
+
+- helper [observer](src/helpers/observer.ts). Added option `excludeNested` to exclude some nested properties from observer
+
 ## 0.6.1 (Jun 26, 2023)
 
 **Fixes**:
