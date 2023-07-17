@@ -10,7 +10,8 @@
 - [RadioControl](src/controls/radio.ts). _$options.items[0] !== items[0] because wrapped to observer_
 - [CalendarControl](src/controls/calendar.ts). _Wrong size of monthPicker if previously scroll dayPicker to min/max date_
 - [DateControl](src/controls/date.ts). _Menu isn't closed if click on the selected date_
-- **Text based controls**. **Mask** Fixed behavior when user removes/inserts text in the middle
+- **Text based controls**. **Mask**. Fixed behavior when user removes/inserts text in the middle
+- **Text based controls**. **Mask**. _Ctrl+Z sometimes is wrong_
 
 **New/Features**:
 

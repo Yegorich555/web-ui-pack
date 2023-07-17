@@ -617,20 +617,21 @@ export default class WUPTextControl<
   protected gotBeforeInput(e: WUP.Text.GotInputEvent): void {
     this.#declineInputEnd?.call(this);
 
+    let preventInput = false; // inputEvent must be prevented if history is empty - possible when browser calls historyUndo
     if (this.canHandleUndo()) {
       switch (e!.inputType) {
         case "historyUndo": // Ctrl+Z
-          this.historyUndoRedo(false);
+          preventInput = !this.historyUndoRedo(false);
           break;
         case "historyRedo": // Ctrl+Shift+Z
-          this.historyUndoRedo(true);
+          preventInput = !this.historyUndoRedo(true);
           break;
         default:
           {
             if (!this._histUndo) {
               this._histUndo = [];
             }
-            const snap = this.historyToSnapshot(e.target.value, e.target.selectionStart || 0);
+            const snap = this.historyToSnapshot(e.target.value, e.target.selectionEnd || 0);
             const isChanged = this._histUndo[this._histUndo.length - 1] !== snap;
             isChanged && this._histUndo!.push(snap);
           }
@@ -638,7 +639,9 @@ export default class WUPTextControl<
       }
     }
 
-    if (this._opts.mask) {
+    if (preventInput) {
+      e.preventDefault();
+    } else if (this._opts.mask) {
       this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask, e.target.value);
       this.refMask.handleBeforInput(e);
     }
@@ -804,7 +807,7 @@ export default class WUPTextControl<
   /** Make undo for input after 100ms when user types not allowed chars
    * @tutorial Troubleshooting
    * * declineInput doesn't trigger beforeinput & input events (do it manually if required) */
-  protected declineInput(nextCursorPos?: number): void {
+  protected declineInput(nextCaretPos?: number): void {
     if (!this.canHandleUndo()) {
       throw new Error(`${this.tagName}. Custom history disabled (canHandleUndo must return true)`);
     }
@@ -814,7 +817,7 @@ export default class WUPTextControl<
       const hist = this.historyFromSnapshot(this._histUndo!.pop()!);
       const el = this.$refInput;
       el.value = hist.v;
-      const pos = nextCursorPos ?? hist.pos;
+      const pos = nextCaretPos ?? hist.pos;
       el.setSelectionRange(pos, pos);
       this.refMask && this.renderMaskHolder(this._opts.maskholder, this.refMask.leftLength);
       this.renderPostfix(this._opts.postfix);

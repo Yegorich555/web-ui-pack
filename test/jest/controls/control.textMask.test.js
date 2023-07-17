@@ -829,7 +829,6 @@ describe("control.text: mask", () => {
     el = document.body.appendChild(document.createElement("wup-text"));
     el.$options.mask = "+1(000) 000";
     await h.wait(1);
-    el.focus();
     h.setInputCursor(el.$refInput, "+1(|");
     await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
     expect(await h.userUndo(el.$refInput)).toBe("+1(|");
@@ -877,6 +876,22 @@ describe("control.text: mask", () => {
     expect(el.$refInput.value).toBe("2");
     await h.wait(150);
     expect(el.$refInput.value).toBe("");
+
+    // more tests
+    el = document.body.appendChild(document.createElement("wup-text"));
+    el.$options.mask = "+0 (000) 000-0000";
+    const onGotInput = jest.spyOn(WUPTextControl.prototype, "gotInput");
+    await h.wait(1);
+    h.setInputCursor(el.$refInput, "+|");
+    expect(await h.userInsertText(el.$refInput, "12345678901", { clearPrevious: false })).toBe("+1 (234) 567-8901|");
+    h.setInputCursor(el.$refInput, "|+1 (234) 567-8901|"); // select all
+    expect(await h.userRemove(el.$refInput)).toBe("+|");
+    expect(await h.userUndo(el.$refInput)).toBe("+1 (234) 567-8901|");
+    expect(await h.userUndo(el.$refInput)).toBe("+|");
+    expect(onGotInput).toBeCalled();
+    onGotInput.mockClear();
+    expect(await h.userUndo(el.$refInput)).toBe("+|");
+    expect(onGotInput).not.toBeCalled(); // because history is cleared
   });
 
   test("$opions.mask works properly", async () => {
