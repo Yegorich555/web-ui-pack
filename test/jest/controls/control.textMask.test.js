@@ -820,7 +820,7 @@ describe("control.text: mask", () => {
     expect(await h.userUndo(el.$refInput)).toBe("123.4.5|");
 
     // cover Ctrl+Shift+Z
-    expect(await h.userRedo(el.$refInput)).toBe("123.4.5.|");
+    expect(await h.userRedo(el.$refInput, { useCtrlY: true })).toBe("123.4.5.|");
     expect(await h.userRedo(el.$refInput)).toBe("123.4.5.6|");
     expect(await h.userRedo(el.$refInput)).toBe("123.4.5.67|");
     expect(await h.userRedo(el.$refInput)).toBe("1|23.4.5.6");
@@ -841,7 +841,14 @@ describe("control.text: mask", () => {
 
     // cover ctrl+z+alt
     const isHandled = !el.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "z", ctrlKey: true, altKey: true, bubbles: true, cancelable: true })
+      new KeyboardEvent("keydown", {
+        code: "KeyZ",
+        key: "z",
+        ctrlKey: true,
+        altKey: true,
+        bubbles: true,
+        cancelable: true,
+      })
     );
     expect(isHandled).toBe(false); // because altKey
 

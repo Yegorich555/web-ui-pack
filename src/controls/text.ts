@@ -397,7 +397,8 @@ export default class WUPTextControl<
 
   /** Returns true if need to use custom undo/redo (required when input somehow formatted/masked) */
   protected canHandleUndo(): boolean {
-    return !!this._opts.mask;
+    // todo auto-disable it for mobile devices
+    return !!this._opts.mask; // todo it's wrong for all controls that must handle btnClear
   }
 
   protected get validations(): WUP.Text.Options["validations"] {
@@ -586,22 +587,19 @@ export default class WUPTextControl<
   protected override gotKeyDown(e: KeyboardEvent): void {
     super.gotKeyDown(e);
 
-    if (this.canHandleUndo()) {
-      if (e.altKey) {
-        return;
-      }
-
-      // otherwise custom redo/undo works wrong (browser stores to history big chunks and not fired events if history emptied)
-      const isUndo = (e.ctrlKey || e.metaKey) && e.key === "z";
-      const isRedo = ((e.ctrlKey || e.metaKey) && e.key === "Z") || (e.ctrlKey && e.key === "y" && !e.metaKey);
-      if (isRedo || isUndo) {
+    if (!e.altKey) {
+      let isUndo = (e.ctrlKey || e.metaKey) && e.code === "KeyZ";
+      const isRedo = (isUndo && e.shiftKey) || (e.ctrlKey && e.code === "KeyY" && !e.metaKey);
+      isUndo &&= !isRedo;
+      if ((isUndo || isRedo) && this.canHandleUndo()) {
+        e.preventDefault();
+        // otherwise custom redo/undo works wrong (browser stores to history big chunks and not fired events if history emptied)
         if (isRedo && !this._histRedo?.length) {
           return;
         }
         if (isUndo && !this._histUndo?.length) {
           return;
         }
-        e.preventDefault();
         const inputType = isRedo ? "historyRedo" : "historyUndo";
         setTimeout(() => {
           this.$refInput.dispatchEvent(new InputEvent("beforeinput", { cancelable: true, bubbles: true, inputType })) &&

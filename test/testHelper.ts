@@ -596,43 +596,52 @@ export async function userTap(el: HTMLElement, opts?: MouseEventInit) {
  * @return cursor snapshot (getInputCursor) */
 export async function userUndo(el: HTMLInputElement): Promise<string> {
   el.dispatchEvent(
-    new KeyboardEvent("keydown", { key: "z", ctrlKey: true, metaKey: true, bubbles: true, cancelable: true })
+    new KeyboardEvent("keydown", {
+      key: "я",
+      code: "KeyZ",
+      ctrlKey: true,
+      metaKey: true,
+      bubbles: true,
+      cancelable: true,
+    })
   ) &&
     el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, inputType: "historyUndo", cancelable: true })) &&
     el.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "historyUndo" }));
 
-  jest.advanceTimersByTime(20);
-  await Promise.resolve();
-  el.dispatchEvent(new KeyboardEvent("keyup", { key: "z", bubbles: true }));
+  await wait(20);
+  el.dispatchEvent(new KeyboardEvent("keyup", { key: "я", code: "KeyZ", bubbles: true }));
   return getInputCursor(el);
 }
 
 /** Simulate user press Ctrl+Y on input;
  * WARN: in reality onBeforeInput event calls only if history.legth >= 1
  * @return cursor snapshot (getInputCursor) */
-export async function userRedo(el: HTMLInputElement): Promise<string> {
-  const okCtrlY = el.dispatchEvent(
-    new KeyboardEvent("keydown", { key: "y", ctrlKey: true, bubbles: true, cancelable: true })
-  );
-  const okCtrlShiftZ = el.dispatchEvent(
-    new KeyboardEvent("keydown", {
-      key: "Y",
-      ctrlKey: true,
-      metaKey: true,
-      shiftKey: true,
-      bubbles: true,
-      cancelable: true,
-    })
-  );
-  okCtrlY &&
-    okCtrlShiftZ &&
+export async function userRedo(el: HTMLInputElement, opts?: { useCtrlY?: boolean }): Promise<string> {
+  const okCtrlY =
+    opts?.useCtrlY &&
+    el.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "н", code: "KeyY", ctrlKey: true, bubbles: true, cancelable: true })
+    );
+  const okCtrlShiftZ =
+    !opts?.useCtrlY &&
+    el.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Я",
+        code: "KeyZ",
+        ctrlKey: true,
+        metaKey: true,
+        shiftKey: true,
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+  (okCtrlY || okCtrlShiftZ) &&
     el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, inputType: "historyRedo", cancelable: true })) &&
     el.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "historyRedo" }));
-  jest.advanceTimersByTime(20);
+  await wait(20);
 
-  await Promise.resolve();
-  el.dispatchEvent(new KeyboardEvent("keyup", { key: "y", bubbles: true }));
-  el.dispatchEvent(new KeyboardEvent("keyup", { key: "z", bubbles: true }));
+  opts?.useCtrlY && el.dispatchEvent(new KeyboardEvent("keyup", { key: "н", code: "KeyY", bubbles: true }));
+  !opts?.useCtrlY && el.dispatchEvent(new KeyboardEvent("keyup", { key: "Я", code: "KeyZ", bubbles: true }));
 
   return getInputCursor(el);
 }
