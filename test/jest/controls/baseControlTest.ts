@@ -651,7 +651,6 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       if (cfg.emptyValue === cfg.emptyInitValue) {
         el.focus();
         await h.wait(1);
-        // todo some exception for textarea here
         el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
         (el as any).$refPopup && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
         expect(el.$isEmpty).toBe(true);
