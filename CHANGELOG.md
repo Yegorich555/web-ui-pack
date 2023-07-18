@@ -12,7 +12,8 @@
 - [DateControl](src/controls/date.ts). _Menu isn't closed if click on the selected date_
 - **Text based controls**. **Mask**. Fixed behavior when user removes/inserts text in the middle
 - **Text based controls**. **Mask**. _Ctrl+Z sometimes is wrong_
-- **Text based controls**. **Mask**. _Ctrl+Я doesn't work. Need support for different languages_
+- **Text based controls**. _Ctrl+Я doesn't work. Need support for different languages_
+- **Text based controls**. _Press Escape, Ctrl+Z => no history undo_
 
 **New/Features**:
 

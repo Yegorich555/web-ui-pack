@@ -324,7 +324,7 @@ export default class MaskTextInput {
   }
 
   /* Call it on 'beforeinput' event to improve logic */
-  handleBeforInput(e: InputEvent): void {
+  handleBeforeInput(e: InputEvent): void {
     const el = e.target as WUP.Text.Mask.HandledInput;
     if (el.selectionStart !== el.selectionEnd) {
       delete el._maskPrev;

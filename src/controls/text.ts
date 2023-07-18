@@ -397,8 +397,10 @@ export default class WUPTextControl<
 
   /** Returns true if need to use custom undo/redo (required when input somehow formatted/masked) */
   protected canHandleUndo(): boolean {
-    // todo auto-disable it for mobile devices
-    return !!this._opts.mask; // todo it's wrong for all controls that must handle btnClear
+    // todo auto-disable it for mobile devices ???
+    // todo optimize for textarea and maybe other controls
+    // todo it doesn't work for textarea
+    return true; // !!this._opts.mask; // otherwise it's wrong for all controls that must handle btnClear Or Esc key
   }
 
   protected get validations(): WUP.Text.Options["validations"] {
@@ -619,29 +621,22 @@ export default class WUPTextControl<
     if (this.canHandleUndo()) {
       switch (e!.inputType) {
         case "historyUndo": // Ctrl+Z
+          // WARN: historyUndo can be fired is user shakes iPhone - todo need prevent default and call input event manually: in this case undo can be fired forever
           preventInput = !this.historyUndoRedo(false);
           break;
         case "historyRedo": // Ctrl+Shift+Z
           preventInput = !this.historyUndoRedo(true);
           break;
         default:
-          {
-            if (!this._histUndo) {
-              this._histUndo = [];
-            }
-            const snap = this.historyToSnapshot(e.target.value, e.target.selectionEnd || 0);
-            const isChanged = this._histUndo[this._histUndo.length - 1] !== snap;
-            isChanged && this._histUndo!.push(snap);
-          }
+          this.historySave(e.target.value, e.target.selectionEnd);
           break;
       }
+      preventInput && e.preventDefault(); // prevent input changes because no-changes
     }
 
-    if (preventInput) {
-      e.preventDefault();
-    } else if (this._opts.mask) {
+    if (!preventInput && this._opts.mask) {
       this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask, e.target.value);
-      this.refMask.handleBeforInput(e);
+      this.refMask.handleBeforeInput(e);
     }
   }
 
@@ -779,17 +774,14 @@ export default class WUPTextControl<
   _histRedo?: Array<string>;
   /** Undo/redo input value (only if canHandleUndo() === true)
    * @returns true if action succeed (history not empty) */
-  historyUndoRedo(toNext: boolean): boolean {
-    if (!this.canHandleUndo()) {
-      throw new Error(`${this.tagName}. Custom history disabled (canHandleUndo must return true)`);
-    }
-    const from = toNext ? this._histRedo : this._histUndo;
+  historyUndoRedo(isRedo: boolean): boolean {
+    const from = isRedo ? this._histRedo : this._histUndo;
     if (from?.length) {
       const el = this.$refInput;
       if (!this._histRedo) {
         this._histRedo = [];
       }
-      const to = !toNext ? this._histRedo! : this._histUndo!;
+      const to = !isRedo ? this._histRedo! : this._histUndo!;
       to.push(this.historyToSnapshot(el.value, el.selectionStart || 0));
 
       const hist = this.historyFromSnapshot(from.pop()!);
@@ -799,6 +791,16 @@ export default class WUPTextControl<
     }
 
     return false;
+  }
+
+  /** Save to history value & caret position */
+  protected historySave(value: string, selectionEnd: number | null): void {
+    if (!this._histUndo) {
+      this._histUndo = [];
+    }
+    const snap = this.historyToSnapshot(value, selectionEnd || 0);
+    const isChanged = this._histUndo[this._histUndo.length - 1] !== snap;
+    isChanged && this._histUndo!.push(snap);
   }
 
   #declineInputEnd?: () => void;
@@ -834,6 +836,12 @@ export default class WUPTextControl<
   /** Called to update/reset value for <input/> */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected setInputValue(v: ValueType | undefined | string, reason: SetValueReasons): void {
+    if (reason === SetValueReasons.clear) {
+      if (this.canHandleUndo()) {
+        this.historySave(this.$refInput.value, this.$refInput.selectionEnd);
+      }
+    }
+
     const str = v != null ? (v as any).toString() : "";
     this.$refInput.value = str;
     this._opts.mask && this.maskInputProcess(null);

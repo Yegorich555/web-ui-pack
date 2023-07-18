@@ -868,14 +868,17 @@ describe("control.text: mask", () => {
     expect(await h.userUndo(el.$refInput)).toBe("|");
     expect(await h.userRedo(el.$refInput)).toBe("|2");
 
-    // cover case when no-mask but user called historyUndo
+    // cover case when not canHandleUndo
     el.$value = "";
     el.$options.mask = undefined;
+    el.canHandleUndo = () => false;
     await h.wait(1);
     expect(el.canHandleUndo()).toBe(false);
-    expect(() => el.historyUndoRedo()).toThrow();
+    expect(() => el.historyUndoRedo()).not.toThrow();
     expect(() => el.declineInput()).toThrow();
 
+    el.$value = "";
+    await h.wait(1);
     el.canHandleUndo = () => true;
     await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
     expect(el.$refInput.value).toBe("2");
@@ -888,7 +891,15 @@ describe("control.text: mask", () => {
     el = document.body.appendChild(document.createElement("wup-text"));
     el.$options.mask = "+0 (000) 000-0000";
     const onGotInput = jest.spyOn(WUPTextControl.prototype, "gotInput");
+    el.focus();
     await h.wait(1);
+    // undo when hist is empty
+    const isPrevented = !el.$refInput.dispatchEvent(
+      new InputEvent("beforeinput", { bubbles: true, inputType: "historyUndo", cancelable: true })
+    );
+    expect(isPrevented).toBe(true);
+    await h.wait(1);
+    // test ordinary replace behavior
     h.setInputCursor(el.$refInput, "+|");
     expect(await h.userInsertText(el.$refInput, "12345678901", { clearPrevious: false })).toBe("+1 (234) 567-8901|");
     h.setInputCursor(el.$refInput, "|+1 (234) 567-8901|"); // select all

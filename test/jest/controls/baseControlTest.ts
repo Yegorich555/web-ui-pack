@@ -1,6 +1,5 @@
 /* eslint-disable jest/no-conditional-expect */
 /* eslint-disable jest/no-export */
-import WUPBaseComboControl from "web-ui-pack/controls/baseCombo";
 import WUPBaseControl, { ClearActions, ValidationCases, ValidateFromCases } from "web-ui-pack/controls/baseControl";
 import * as h from "../../testHelper";
 import { BaseTestOptions } from "../../testHelper";
@@ -239,7 +238,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.focus();
       await h.wait(1);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
+      (el as any).$refPopup && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
       expect(el.$value).toBe(cfg.emptyValue);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       expect(el.$value).toBe(cfg.initValues[0].value); // rollback to previous value
@@ -581,7 +580,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.focus();
       await h.wait(1);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
-      el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened and prev-Esc closed it but not affect on input clearing
+      (el as any).$refPopup && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened and prev-Esc closed it but not affect on input clearing
 
       expect(el.$isEmpty).toBe(true);
       el.blur();
@@ -652,8 +651,9 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       if (cfg.emptyValue === cfg.emptyInitValue) {
         el.focus();
         await h.wait(1);
+        // todo some exception for textarea here
         el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
-        el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
+        (el as any).$refPopup && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
         expect(el.$isEmpty).toBe(true);
         await h.wait();
         expect(el.$refError).toBeDefined(); // because previously was valid and now need to show invalid state
