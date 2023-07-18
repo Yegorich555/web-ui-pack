@@ -586,55 +586,34 @@ export default class WUPTextControl<
     }
   }
 
-  protected override gotKeyDown(e: KeyboardEvent): void {
-    super.gotKeyDown(e);
-
-    if (!e.altKey) {
-      let isUndo = (e.ctrlKey || e.metaKey) && e.code === "KeyZ";
-      const isRedo = (isUndo && e.shiftKey) || (e.ctrlKey && e.code === "KeyY" && !e.metaKey);
-      isUndo &&= !isRedo;
-      if ((isUndo || isRedo) && this.canHandleUndo()) {
-        e.preventDefault();
-        // otherwise custom redo/undo works wrong (browser stores to history big chunks and not fired events if history emptied)
-        if (isRedo && !this._histRedo?.length) {
-          return;
-        }
-        if (isUndo && !this._histUndo?.length) {
-          return;
-        }
-        const inputType = isRedo ? "historyRedo" : "historyUndo";
-        setTimeout(() => {
-          this.$refInput.dispatchEvent(new InputEvent("beforeinput", { cancelable: true, bubbles: true, inputType })) &&
-            setTimeout(() =>
-              this.$refInput.dispatchEvent(new InputEvent("input", { cancelable: false, bubbles: true, inputType }))
-            );
-        });
-      }
-    }
-  }
-
   /** Handler of 'beforeinput' event */
   protected gotBeforeInput(e: WUP.Text.GotInputEvent): void {
     this.#declineInputEnd?.call(this);
 
-    let preventInput = false; // inputEvent must be prevented if history is empty - possible when browser calls historyUndo
-    if (this.canHandleUndo()) {
-      switch (e!.inputType) {
-        case "historyUndo": // Ctrl+Z
-          // WARN: historyUndo can be fired is user shakes iPhone - todo need prevent default and call input event manually: in this case undo can be fired forever
-          preventInput = !this.historyUndoRedo(false);
-          break;
-        case "historyRedo": // Ctrl+Shift+Z
-          preventInput = !this.historyUndoRedo(true);
-          break;
-        default:
-          this.historySave(e.target.value, e.target.selectionEnd);
-          break;
-      }
-      preventInput && e.preventDefault(); // prevent input changes because no-changes
+    let isHandle = false; // inputEvent must be prevented if history is empty - possible when browser calls historyUndo
+    let isUndoRedoSuccess = false;
+    let isRedo = false;
+    switch (e!.inputType) {
+      case "historyRedo": // Ctrl+Shift+Z
+        isRedo = true;
+      // eslint-disable-next-line no-fallthrough
+      case "historyUndo": // Ctrl+Z
+        // WARN: historyUndo can be fired is user shakes iPhone or click Undo button in editMenu
+        isHandle = this.canHandleUndo();
+        isUndoRedoSuccess = isHandle && this.historyUndoRedo(isRedo);
+        break;
+      default:
+        this.canHandleUndo() && this.historySave(e.target.value, e.target.selectionEnd);
+        break;
     }
 
-    if (!preventInput && this._opts.mask) {
+    if (isHandle) {
+      e.preventDefault(); // prevent default to avoid browser-internal-history cleaning
+      isUndoRedoSuccess &&
+        this.$refInput.dispatchEvent(
+          new InputEvent("input", { cancelable: false, bubbles: true, inputType: e.inputType })
+        ); // fire manually because need to process undo/redo (but without browser-internal history)
+    } else if (this._opts.mask) {
       this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask, e.target.value);
       this.refMask.handleBeforeInput(e);
     }
@@ -770,10 +749,12 @@ export default class WUPTextControl<
     return { pos, v };
   }
 
+  /** Array of history input changes */
   _histUndo?: Array<string>;
+  /** Array of history-back input changes */
   _histRedo?: Array<string>;
   /** Undo/redo input value (only if canHandleUndo() === true)
-   * @returns true if action succeed (history not empty) */
+   * @returns true if action succeeded (history allowed & not empty) */
   historyUndoRedo(isRedo: boolean): boolean {
     const from = isRedo ? this._histRedo : this._histUndo;
     if (from?.length) {
@@ -836,10 +817,8 @@ export default class WUPTextControl<
   /** Called to update/reset value for <input/> */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected setInputValue(v: ValueType | undefined | string, reason: SetValueReasons): void {
-    if (reason === SetValueReasons.clear) {
-      if (this.canHandleUndo()) {
-        this.historySave(this.$refInput.value, this.$refInput.selectionEnd);
-      }
+    if (reason === SetValueReasons.clear && this.canHandleUndo()) {
+      this.historySave(this.$refInput.value, this.$refInput.selectionEnd);
     }
 
     const str = v != null ? (v as any).toString() : "";

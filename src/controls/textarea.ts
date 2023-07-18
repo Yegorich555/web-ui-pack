@@ -119,6 +119,8 @@ export default class WUPTextareaControl<
     // not supported
   }
 
+  // todo undor/redo doesn't work here
+
   // protected override gotBeforeInput(e: WUP.Text.GotInputEvent): void {
   //   super.gotBeforeInput(e);
   //   let data: string | null = null;
