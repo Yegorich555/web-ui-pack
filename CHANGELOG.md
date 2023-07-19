@@ -17,6 +17,7 @@
   - _Ctrl+Я doesn't work. Need support for different languages_
   - _Press Escape, Ctrl+Z => no undo-action_
   - _No undo-action when shake iPhone_
+- [TextareaControl](src/controls/textarea.ts). _`Ctrl + Z` doesn't revert changes_
 
 **New/Features**:
 

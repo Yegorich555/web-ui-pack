@@ -397,9 +397,6 @@ export default class WUPTextControl<
 
   /** Returns true if need to use custom undo/redo (required when input somehow formatted/masked) */
   protected canHandleUndo(): boolean {
-    // todo auto-disable it for mobile devices ???
-    // todo optimize for textarea and maybe other controls
-    // todo it doesn't work for textarea
     return true; // !!this._opts.mask; // otherwise it's wrong for all controls that must handle btnClear Or Esc key
   }
 
