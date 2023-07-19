@@ -57,7 +57,7 @@ declare global {
       max?: Date;
       /** Picker that must be rendered at first; if undefined then when isEmpty - year, otherwise - day;
        * @not observed (affects only on init) */
-      startWith?: PickersEnum;
+      startWith?: PickersEnum; // NiceToHave: allow string value where "2012" - start from year 2012, "10/2012" - start from 10th months 2012 etc.
       /** Dates that user can't choose (disabled dates) */
       exclude?: Date[];
       /** Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this
@@ -323,10 +323,15 @@ export default class WUPCalendarControl<
       r.prev = { from, to };
       dt.setDate(from);
     }
-    r.first = dt.valueOf() - dt.getTimezoneOffset() * 60000; // store in UTC
+    r.first = this.$dateToUTC(dt).valueOf(); // store in UTC
     const weeksDays = 42; // const weeksDays = Math.ceil((r.total + $1) / 7) * 7; // Generate days for 35 or 42 cells with previous month dates for placeholders
     r.nextTo = weeksDays - shift - r.total;
     return r;
+  }
+
+  /** Converts/shifts localDate to UTCdate @returns new Date */
+  static $dateToUTC(localDate: Date): Date {
+    return new Date(localDate.valueOf() - localDate.getTimezoneOffset() * 60000);
   }
 
   /** Parse string to Date
@@ -461,7 +466,7 @@ export default class WUPCalendarControl<
   }
 
   /** Called when need set/change day/month/year picker */
-  protected async changePicker(v: Date, pickerNext: PickersEnum): Promise<void> {
+  protected async changePicker(utcVal: Date, pickerNext: PickersEnum): Promise<void> {
     await this.#clearPicker?.call(this, pickerNext - this._picker > 0);
     this._picker = pickerNext;
 
@@ -470,12 +475,12 @@ export default class WUPCalendarControl<
     switch (pickerNext) {
       case PickersEnum.Year:
         type = "year";
-        r = this.getYearPicker(v);
+        r = this.getYearPicker(utcVal);
         this.$refCalenarTitle.disabled = true;
         break;
       case PickersEnum.Month:
         type = "month";
-        r = this.getMonthPicker(v);
+        r = this.getMonthPicker(utcVal);
         this.$refCalenarTitle.disabled = false;
         break;
       default:
@@ -493,17 +498,14 @@ export default class WUPCalendarControl<
       this.$refCalenarItems._items = a;
 
       const first = a[0]._value;
-      const now = new Date();
-      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      const now = this.#ctr.$dateToUTC(new Date());
       let i = r.getIndex(now, first);
       a[i]?.setAttribute("aria-current", "date");
 
       this.#refreshSelected = () => {
         let uv = this.$value as Date;
         if (uv) {
-          if (!this._opts.utc) {
-            uv = new Date(uv.valueOf() - uv.getTimezoneOffset() * 60000);
-          }
+          uv = this.normalizeToUTC(uv);
           i = r.getIndex(uv, first);
           this.selectItem(a[i]);
         }
@@ -516,17 +518,17 @@ export default class WUPCalendarControl<
       return a;
     };
 
-    renderPicker(v);
+    renderPicker(utcVal);
 
     const scrollObj = new WUPScrolled(this.$refCalenarItems, {
       onRender: (n) => {
-        const nextDate = r.next(v, n);
+        const nextDate = r.next(utcVal, n);
         const { scrollFrom: from, scrollTo: to } = this.#disabled!;
         /* istanbul ignore else */
         if (from != null || to !== null) {
-          const nextDateEnd = r.next(new Date(v), 1).setUTCMilliseconds(-1);
+          const nextDateEnd = r.next(new Date(utcVal), 1).setUTCMilliseconds(-1);
           if ((from as unknown as number) > nextDateEnd || (to as unknown as Date) < nextDate) {
-            r.next(v, (-1 * n) as 1);
+            r.next(utcVal, (-1 * n) as 1);
             return null;
           }
         }
@@ -809,10 +811,8 @@ export default class WUPCalendarControl<
 
     // eslint-disable-next-line prefer-const
     let { min, max, utc } = this._opts;
-    if (!utc) {
-      min = min ? new Date(min.valueOf() - min.getTimezoneOffset() * 60000) : min;
-      max = max ? new Date(max.valueOf() - max.getTimezoneOffset() * 60000) : max;
-    }
+    min = this.normalizeToUTC(min);
+    max = this.normalizeToUTC(max);
 
     let ex = this._opts.exclude;
     if (ex?.length) {
@@ -822,8 +822,8 @@ export default class WUPCalendarControl<
       let prevY: number | null = null;
       let mCnt = 0;
       const last = ex.length - 1;
-      if (!this._opts.utc) {
-        ex = ex.map((v) => new Date(v.valueOf() - v.getTimezoneOffset() * 60000));
+      if (!utc) {
+        ex = ex.map((v) => this.normalizeToUTC(v));
       }
       for (let i = 0; i < ex.length; ++i) {
         const iStart = i;
@@ -852,6 +852,7 @@ export default class WUPCalendarControl<
       }
     }
 
+    // todo user can't scroll and leave red-area when initValue:"2012" but max:"1990"
     return {
       months,
       years,
@@ -960,11 +961,19 @@ export default class WUPCalendarControl<
     this.$isEmpty && this.selectItem(undefined);
   }
 
+  /** Shift pointed date to UTC if $options.utc is false and user pointed localDate; @returns new object-date */
+  private normalizeToUTC(v: Date | undefined): Date;
+  private normalizeToUTC(v: Date | undefined): Date | undefined {
+    if (v == null || this._opts.utc) {
+      return v;
+    }
+    return this.#ctr.$dateToUTC(v);
+  }
+
   protected override gotReady(): void {
     super.gotReady();
 
-    const v = this.$value ? new Date(this.$value.valueOf()) : new Date();
-    (!this.$value || !this._opts.utc) && v.setMinutes(v.getMinutes() - v.getTimezoneOffset());
+    const v = this.$value ? this.normalizeToUTC(new Date(this.$value)) : this.#ctr.$dateToUTC(new Date());
     v.setUTCHours(0, 0, 0, 0); // otherwise month increment works wrong for the last days of the month
     v.setUTCDate(1);
     this.changePicker(v, this._opts.startWith ?? (this.$isEmpty ? PickersEnum.Year : PickersEnum.Day));
@@ -1008,6 +1017,7 @@ export default class WUPCalendarControl<
     /* istanbul ignore else */
     if (!propsChanged || isNeedRecalc) {
       this.#disabled = this.calcDisabled();
+      this._opts.name === "testMe" && console.warn(this.#disabled);
     }
     isNeedRecalc && this.$refreshPicker();
   }
