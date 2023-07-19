@@ -162,7 +162,7 @@ declare global {
        * * Expected value can be converted toString & parsed from string itself.
        * Override valueFromUrl & valueToUrl to change serializing (for complex objects, arrays etc.)
        * @see {@link WUP.BaseControl.Defaults.storage} */
-      skey?: boolean | string; // todo issue in React: it affects on ini but need to develop way to gather initModel and send to api request
+      skey?: boolean | string; // todo issue (most noticable in React): it affects on ini but need to develop way to gather initModel and send to api request
     }
 
     interface Attributes
@@ -412,7 +412,7 @@ export default abstract class WUPBaseControl<
     return v === "" || v === undefined;
   }
 
-  // todo changing global-common-defaults from anouther project doesn't affect on controls
+  // todo changing global-common-defaults from another project doesn't affect on controls
   static $defaults: WUP.BaseControl.Defaults = {
     clearActions: ClearActions.clear /* | ClearActions.resetToInit */,
     validateDebounceMs: 500,
