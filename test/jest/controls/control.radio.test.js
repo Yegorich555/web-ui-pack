@@ -91,7 +91,7 @@ describe("control.radio", () => {
 
   test("$options.items & $value", () => {
     testEl = document.body.appendChild(document.createElement(testEl.tagName));
-    const el = testEl;
+    let el = testEl;
     const onErr = h.mockConsoleError();
     // before ready
     el.$options.items = [{ text: "Helica", value: 10 }];
@@ -116,6 +116,18 @@ describe("control.radio", () => {
     expect(onErr).toBeCalledTimes(1); // because it doesn't fit value 11
     expect(el.$options.items[0]).toBe(item); // nested items must be not observed
     expect(observer.isObserved(el.$options.items)).toBe(true); // but Array items itself must be observed
+
+    // complex values with id's
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.items = [
+      { text: "Helica", value: { id: 1, name: "He" } },
+      { text: "Diana", value: { id: 2, name: "Di" } },
+    ];
+    el.$value = { id: 2 };
+    jest.advanceTimersByTime(2);
+    expect(el.innerHTML).toMatchInlineSnapshot(
+      `"<fieldset><legend><strong></strong></legend><label for="txt13"><input id="txt13" type="radio" name="txt12473" tabindex="0"><span>Helica</span></label><label for="txt14"><input id="txt14" type="radio" name="txt12473"><span>Diana</span></label></fieldset>"`
+    );
   });
 
   test("$options.items is complex object", async () => {

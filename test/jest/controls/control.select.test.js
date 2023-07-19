@@ -122,6 +122,16 @@ describe("control.select", () => {
     expect(onErr).toBeCalledTimes(1); // because it doesn't fit value 11
     expect(el.$options.items[0]).toBe(item); // nested items must be not observed
     expect(observer.isObserved(el.$options.items)).toBe(true); // but Array items itself must be observed
+
+    // complex values with id's
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.items = [
+      { text: "Helica", value: { id: 1, name: "He" } },
+      { text: "Diana", value: { id: 2, name: "Di" } },
+    ];
+    el.$value = { id: 2 };
+    jest.advanceTimersByTime(2);
+    expect(el.$refInput.value).toBe("Diana");
   });
 
   test("pending state", async () => {

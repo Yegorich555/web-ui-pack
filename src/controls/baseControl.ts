@@ -401,10 +401,10 @@ export default abstract class WUPBaseControl<
       }`;
   }
 
-  /** Default function to compare values/changes;
-   *  Redefine it or define valueOf for values; By default values compared by valueOf if it's possible */
+  /** Default function to compare values/changes; It compares by valueOf() & by {id}
+   *  Redefine/define `valueOf()` for complex values to improve comparison */
   static $isEqual(v1: unknown, v2: unknown): boolean {
-    return isEqual(v1, v2);
+    return isEqual(v1, v2) || (v1 != null && (v1 as any).id != null && v2 != null && (v1 as any).id === (v2 as any).id);
   }
 
   /** Provide logic to check if control is empty (by comparison with value) */
