@@ -647,8 +647,13 @@ export default abstract class WUPBaseControl<
   setupInput(): void {
     const i = this.$refInput;
     i.disabled = this.$isDisabled;
-    i.readOnly = this.$isReadOnly;
     i.autocomplete = this.$autoComplete || "off";
+    this.setupInputReadonly();
+  }
+
+  /** Called to update readonly option on input */
+  setupInputReadonly(): void {
+    this.$refInput.readOnly = this.$isReadOnly;
   }
 
   /** Called on Init and options/attributes changes to update $initValue */

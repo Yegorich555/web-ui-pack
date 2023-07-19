@@ -1269,6 +1269,31 @@ describe("control.select", () => {
       await h.wait(1);
       expect(el.$value).toStrictEqual([20, 10]);
     });
+
+    test("readOnlyInput", async () => {
+      el.$options.readOnlyInput = true;
+      await h.wait(1);
+      expect(el.$refInput.readOnly).toBe(true);
+
+      el.$options.readOnlyInput = false;
+      await h.wait(1);
+      expect(el.$refInput.readOnly).toBe(false);
+
+      el.$options.readOnlyInput = getItems().length - 2;
+      await h.wait(1);
+      expect(el.$refInput.readOnly).toBe(true);
+
+      el.$options.readOnlyInput = getItems().length + 1;
+      await h.wait(1);
+      expect(el.$refInput.readOnly).toBe(false);
+
+      el.$options.items = Promise.resolve(getItems());
+      jest.advanceTimersByTime(1);
+      expect(el.$isPending).toBe(true);
+      expect(el.$refInput.readOnly).toBe(true); // because isPending
+      await h.wait();
+      expect(el.$refInput.readOnly).toBe(false);
+    });
   });
 });
 

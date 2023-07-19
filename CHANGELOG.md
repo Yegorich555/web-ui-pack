@@ -24,7 +24,9 @@
 **New/Features**:
 
 - helper [observer](src/helpers/observer.ts). Added option `excludeNested` to exclude some nested properties from observer
-- **Controls**
+- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). `$options.readOnlyInput` can be number X to enable autoMode where input.readOnly = items.length < X.
+- **Combobox controls (Select, Date, Time)**. _readOnlyInput moved to $defaults_
+- **Controls.Global**
   - Improved value comparison (static method `$isEqual`) to compare by `.id`. So now don't need to worry about complex objects with **id's** (mostly related to `SelectControl.$options.items` & `RadioControl.$options.items`)
   - Added readonly property `$isRequired` based on `$options.validations.required`
 

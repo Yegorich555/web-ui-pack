@@ -43,11 +43,10 @@ declare global {
       /** Case when menu-popup to show; WARN ShowCases.inputClick doesn't work without ShowCases.click
        * @defaultValue onPressArrowKey | onClick | onFocus */
       showCase: ShowCases;
+      /** Set true to make input not editable but allow select items via popup-menu (ordinary dropdown mode) */
+      readOnlyInput?: boolean | number;
     }
-    interface Options<T = string, VM = ValidityMap> extends WUP.Text.Options<T, VM>, Defaults<T, VM> {
-      /** Set true to make input not editable but allow to user select items via popup-menu (ordinary dropdown mode) */
-      readOnlyInput?: boolean;
-    }
+    interface Options<T = string, VM = ValidityMap> extends WUP.Text.Options<T, VM>, Defaults<T, VM> {}
     interface Attributes extends WUP.Text.Attributes {}
     interface JSXProps<C = WUPBaseComboControl> extends WUP.Text.JSXProps<C>, Attributes {}
   }
@@ -167,10 +166,13 @@ export default abstract class WUPBaseComboControl<
 
   override gotFormChanges(propsChanged: Array<keyof WUP.Form.Options | keyof WUP.BaseCombo.Options> | null): void {
     super.gotFormChanges(propsChanged);
-    this.$refInput.readOnly = this.$refInput.readOnly || (this._opts.readOnlyInput as boolean);
 
     const isMenuEnabled = !this.$isDisabled && !this.$isReadOnly;
     !isMenuEnabled && this.removePopup();
+  }
+
+  override setupInputReadonly(): void {
+    this.$refInput.readOnly = this.$isReadOnly || !!this._opts.readOnlyInput;
   }
 
   /** Called when need to create menu in opened popup */
