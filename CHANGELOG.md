@@ -23,7 +23,9 @@
 **New/Features**:
 
 - helper [observer](src/helpers/observer.ts). Added option `excludeNested` to exclude some nested properties from observer
-- **Controls**. Improved value comparison (static method `$isEqual`) to compare by `.id`. So now don't need to worry about complex objects with **id's** (mostly related to `SelectControl.$options.items` & `RadioControl.$options.items`)
+- **Controls**
+  - Improved value comparison (static method `$isEqual`) to compare by `.id`. So now don't need to worry about complex objects with **id's** (mostly related to `SelectControl.$options.items` & `RadioControl.$options.items`)
+  - Added readonly property `$isRequired` based on `$options.validations.required`
 
 ## 0.6.1 (Jun 26, 2023)
 

@@ -511,6 +511,11 @@ export default abstract class WUPBaseControl<
     return this.$form?.$options.readOnly || this._opts.readOnly || false;
   }
 
+  /** Returns if value is required - can't be undefined (depends on $options.validations.required) */
+  get $isRequired(): boolean {
+    return !!this.validations?.required;
+  }
+
   /** Returns autoComplete name if related form or control option is enabled (and control.$options.autoComplete !== false ) */
   get $autoComplete(): string | false {
     const af = this._opts.autoComplete ?? (this.$form?.$options.autoComplete || false);
@@ -623,9 +628,9 @@ export default abstract class WUPBaseControl<
     // set other props
     this.setAttr("disabled", this._opts.disabled, true);
     this.setAttr("readonly", this._opts.readOnly, true);
-    const isRequired = !!this.validations?.required;
-    this.setAttr("required", isRequired, true);
-    this.setAttr.call(this.$refInput, "aria-required", isRequired);
+    const isReq = this.$isRequired;
+    this.setAttr("required", isReq, true);
+    this.setAttr.call(this.$refInput, "aria-required", isReq);
 
     this.setupInitValue(propsChanged);
     this.gotFormChanges(propsChanged);
