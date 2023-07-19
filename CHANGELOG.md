@@ -18,6 +18,7 @@
   - _Press Escape, Ctrl+Z => no undo-action_
   - _No undo-action when shake iPhone_
 - [TextareaControl](src/controls/textarea.ts). _`Ctrl + Z` doesn't revert changes_
+- **Controls.Styles**. _button[clear] has shifted icon on hover_
 
 **New/Features**:
 
