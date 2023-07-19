@@ -793,4 +793,3 @@ customElements.define(tagName, WUPSelectControl);
 // NiceToHave: option to allow autoselect item without pressing Enter
 // WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation
 // todo setup readOnlyInput: 7 - where need to set readOnly only when items.length < 7
-// todo user unable to deselect if clear input with backspace

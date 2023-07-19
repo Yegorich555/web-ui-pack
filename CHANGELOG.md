@@ -6,6 +6,7 @@
 
 - [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). _Menu scrolled to 1st selected item if even select last one (when multiple is allowed)_
 - [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). _$options.items[0] !== items[0] because wrapped to observer_
+- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). _Unable to clear value with Backspace+Enter_
 - [SelectManyControl](src/controls/selectMany.ts). _Menu hides when user selects all items - but it's maybe wrong_
 - [RadioControl](src/controls/radio.ts). _$options.items[0] !== items[0] because wrapped to observer_
 - [CalendarControl](src/controls/calendar.ts). _Wrong size of monthPicker if previously scroll dayPicker to min/max date_

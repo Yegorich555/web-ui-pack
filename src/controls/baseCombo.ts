@@ -416,10 +416,12 @@ export default abstract class WUPBaseComboControl<
           setTimeout(() => {
             const isPrevented =
               el &&
-              !el.hasAttribute("disabled") &&
+              // !el.hasAttribute("disabled") && // looks impossible case
               !el.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }));
             if (!isPrevented) {
-              this.resetInputValue();
+              this.$refInput.value || this.$isRequired
+                ? this.resetInputValue()
+                : this.setValue(undefined, SetValueReasons.userInput, true); // reset only when input not empty otherwise user cleared this manually
               this.goHideMenu(HideCases.OnPressEnter);
             }
           });
@@ -486,7 +488,7 @@ export default abstract class WUPBaseComboControl<
     canHideMenu && setTimeout(() => this.goHideMenu(HideCases.onSelect)); // without timeout it handles click by listener and opens again
   }
 
-  /* Reset input to currentValue; called on focusOut, press Escape, Enter */
+  /** Reset input to currentValue; called on focusOut, pressing Escape or Enter */
   protected resetInputValue(): void {
     this.setInputValue(this.$value, SetValueReasons.clear);
   }

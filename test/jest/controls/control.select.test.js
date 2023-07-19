@@ -869,6 +869,50 @@ describe("control.select", () => {
     expect(el.$value).toBe(20);
   });
 
+  test("clear by Backspace+Enter", async () => {
+    el.$value = getItems()[0].value;
+    el.focus();
+    await h.wait();
+    expect(el.$isShown).toBe(true);
+
+    // remove whole text + press Enter => set value to undefined
+    expect(el.$isRequired).toBe(false);
+    expect(el.$refInput.value).toBe(getItems()[0].text);
+    h.setInputCursor(el.$refInput, `|${el.$refInput.value}|`); // select all
+    expect(await h.userRemove(el.$refInput)).toBe("|");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(el.$value).toBe(undefined); // value resets when input empty & notRequired
+    expect(el.$refInput.value).toBe("");
+    expect(el.$isShown).toBe(false);
+
+    // remove partially text + press Enter => reset to prev value
+    el.$value = getItems()[0].value;
+    await h.wait(1);
+    expect(el.$refInput.value).toBe(getItems()[0].text);
+    h.setInputCursor(el.$refInput, `${el.$refInput.value}|`);
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(el.$value).toBe(getItems()[0].value); // value reverted because partially removed
+    expect(el.$refInput.value).toBe(getItems()[0].text);
+
+    // remove whole text + press Enter when required => reset to prev value
+    el.$options.validations = { required: true };
+    el.$value = getItems()[1].value;
+    await h.wait(1);
+    el.$showMenu();
+    expect(el.$isRequired).toBe(true);
+    await h.wait(1);
+    expect(el.$refInput.value).toBe(getItems()[1].text);
+    h.setInputCursor(el.$refInput, `|${el.$refInput.value}|`); // select all
+    expect(await h.userRemove(el.$refInput)).toBe("|");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(el.$value).toBe(getItems()[1].value); // value reverted because isRequired
+    expect(el.$refInput.value).toBe(getItems()[1].text);
+    expect(el.$isShown).toBe(false);
+  });
+
   test("no opening by click on btnClear", async () => {
     el.$value = 10;
     await h.wait(1);
