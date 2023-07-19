@@ -597,13 +597,14 @@ mask-image: var(--ctrl-icon-img);
           contain: strict;
           position: relative;
           z-index: 1;
+          font-size: inherit;
         }
         WUP-SELECTMANY label&gt;span + button {
           margin-right: -0.5em;
         }
         WUP-SELECTMANY button[clear] {
-          background: none;
           align-self: center;
+          background: none;
           cursor: pointer;
         }
         WUP-SELECTMANY button[clear]:after {

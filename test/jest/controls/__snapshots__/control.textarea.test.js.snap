@@ -571,13 +571,14 @@ mask-image: var(--ctrl-icon-img);
           contain: strict;
           position: relative;
           z-index: 1;
+          font-size: inherit;
         }
         WUP-TEXTAREA label&gt;span + button {
           margin-right: -0.5em;
         }
         WUP-TEXTAREA button[clear] {
-          background: none;
           align-self: center;
+          background: none;
           cursor: pointer;
         }
         WUP-TEXTAREA button[clear]:after {

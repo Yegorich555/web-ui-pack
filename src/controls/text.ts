@@ -294,13 +294,14 @@ export default class WUPTextControl<
           contain: strict;
           position: relative;
           z-index: 1;
+          font-size: inherit;
         }
         :host label>span + button {
           margin-right: -0.5em;
         }
         :host button[clear] {
-          background: none;
           align-self: center;
+          background: none;
           cursor: pointer;
         }
         :host button[clear]:after {
