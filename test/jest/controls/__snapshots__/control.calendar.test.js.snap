@@ -1272,6 +1272,9 @@ padding:0;}
         color: var(--ctrl-err-text);
         background-color: var(--ctrl-err-bg);
       }
+      WUP-CALENDAR li[disabled][aria-selected] {
+        font-weight: bold;
+      }
       @media not all and (prefers-reduced-motion) {
         @keyframes WUP-ZOOM-OUT-1 {
           0% { transform: scale(1); opacity: 1; }

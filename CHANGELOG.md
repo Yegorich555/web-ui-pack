@@ -4,22 +4,26 @@
 
 **Fixes**:
 
-- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). _Menu scrolled to 1st selected item if even select last one (when multiple is allowed)_
-- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). _$options.items[0] !== items[0] because wrapped to observer_
-- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). _Unable to clear value with Backspace+Enter_
+- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts).
+  - _Menu scrolled to 1st selected item if even select last one (when multiple is allowed)_
+  - _$options.items[0] !== items[0] because wrapped to observer_
+  - _Unable to clear value with Backspace+Enter_
 - [SelectManyControl](src/controls/selectMany.ts). _Menu hides when user selects all items - but it's maybe wrong_
 - [RadioControl](src/controls/radio.ts). _$options.items[0] !== items[0] because wrapped to observer_
-- [CalendarControl](src/controls/calendar.ts). _Wrong size of monthPicker if previously scroll dayPicker to min/max date_
+- [CalendarControl](src/controls/calendar.ts).
+  - _Wrong size of monthPicker if previously scroll dayPicker to min/max date_
+  - _User can't scroll when `$initValue` > `$options.max`_
 - [DateControl](src/controls/date.ts). _Menu isn't closed if click on the selected date_
-- [TextareaControl](src/controls/textarea.ts). _Exception when try to clear empty control_
+- [TextareaControl](src/controls/textarea.ts).
+  - _Exception when try to clear empty control_
+  - _`Ctrl + Z` doesn't revert changes_
 - **Text based controls**. **Mask**. _Wrong behavior_when user removes/inserts text in the middle_
 - **Text based controls** - Improved undo/redo overall
   - _Ctrl+Z sometimes is wrong_
   - _Ctrl+Я doesn't work. Need support for different languages_
   - _Press Escape, Ctrl+Z => no undo-action_
   - _No undo-action when shake iPhone_
-- [TextareaControl](src/controls/textarea.ts). _`Ctrl + Z` doesn't revert changes_
-- **Controls.Styles**. _button[clear] has shifted icon on hover_
+- **Controls.Styles**. _button[clear] has shifted icon when mouse hover_
 
 **New/Features**:
 

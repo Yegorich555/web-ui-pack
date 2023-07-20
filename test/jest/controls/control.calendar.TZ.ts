@@ -464,6 +464,26 @@ export default function calendarTZtest() {
         await showNext(true);
         expect(el.$refCalenarTitle.textContent).toBe("2034 ... 2049");
         expect(el.$refCalenarItems).toMatchSnapshot();
+
+        // start with $options.max
+        jest.setSystemTime(new Date(2022, 9, 15));
+        el.remove();
+        el.$options.utc = opt.utc;
+        el.$options.min = undefined;
+        el.$options.max = initDate(1990, 0, 1); // 1 Jan
+        el.$options.startWith = PickersEnum.Year | 0;
+        el.$value = initDate(2022, 9, 15);
+        document.body.appendChild(el);
+        await h.wait();
+        expect(el.$refCalenarTitle.textContent).toBe("1986 ... 2001");
+        // start with $options.min
+        el.remove();
+        el.$options.min = initDate(2003, 5, 1);
+        el.$options.max = undefined;
+        el.$value = initDate(1990, 0, 1);
+        document.body.appendChild(el);
+        await h.wait();
+        expect(el.$refCalenarTitle.textContent).toBe("2002 ... 2017");
       });
 
       test("$options.exclude (attr [disabled])", async () => {

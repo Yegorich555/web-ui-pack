@@ -263,6 +263,9 @@ export default class WUPCalendarControl<
         color: var(--ctrl-err-text);
         background-color: var(--ctrl-err-bg);
       }
+      :host li[disabled][aria-selected] {
+        font-weight: bold;
+      }
       @media not all and (prefers-reduced-motion) {
         @keyframes WUP-ZOOM-OUT-1 {
           0% { transform: scale(1); opacity: 1; }
@@ -852,7 +855,6 @@ export default class WUPCalendarControl<
       }
     }
 
-    // todo user can't scroll and leave red-area when initValue:"2012" but max:"1990"
     return {
       months,
       years,
@@ -973,7 +975,12 @@ export default class WUPCalendarControl<
   protected override gotReady(): void {
     super.gotReady();
 
-    const v = this.$value ? this.normalizeToUTC(new Date(this.$value)) : this.#ctr.$dateToUTC(new Date());
+    let v = this.$value ? this.normalizeToUTC(new Date(this.$value)) : this.#ctr.$dateToUTC(new Date());
+    const max = this.normalizeToUTC(this._opts.max);
+    const min = this.normalizeToUTC(this._opts.min);
+    v = max && max < v ? max : v; // don't allow to be in disabled area even if value is disabled
+    v = min && min > v ? min : v;
+    v = new Date(v); // clone otherwise changing affects on original
     v.setUTCHours(0, 0, 0, 0); // otherwise month increment works wrong for the last days of the month
     v.setUTCDate(1);
     this.changePicker(v, this._opts.startWith ?? (this.$isEmpty ? PickersEnum.Year : PickersEnum.Day));
@@ -1017,7 +1024,6 @@ export default class WUPCalendarControl<
     /* istanbul ignore else */
     if (!propsChanged || isNeedRecalc) {
       this.#disabled = this.calcDisabled();
-      this._opts.name === "testMe" && console.warn(this.#disabled);
     }
     isNeedRecalc && this.$refreshPicker();
   }
@@ -1159,4 +1165,3 @@ customElements.define(tagName, WUPCalendarControl);
  */
 
 // todo add ability to select range
-// todo when min & max pointed need to startWith from 1st available year OR even need option for this
