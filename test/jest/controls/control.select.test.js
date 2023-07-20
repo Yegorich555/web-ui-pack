@@ -1288,7 +1288,7 @@ describe("control.select", () => {
       expect(el.$refInput.readOnly).toBe(false);
 
       el.$options.items = Promise.resolve(getItems());
-      jest.advanceTimersByTime(1);
+      jest.advanceTimersByTime(1); // WARN: jest can catch exception here after tests are finished
       expect(el.$isPending).toBe(true);
       expect(el.$refInput.readOnly).toBe(true); // because isPending
       await h.wait();

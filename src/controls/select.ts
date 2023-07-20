@@ -304,7 +304,6 @@ export default class WUPSelectControl<
     const isUpdateItems = !propsChanged || propsChanged.includes("items");
     if (isUpdateItems) {
       this.removePopup();
-      this._cachedItems = undefined;
       // it's important to be before super otherwise initValue won't work
       this._opts.items = this.getAttr<WUP.Radio.Options["items"]>("items", "ref") || [];
       this.fetchItems();
@@ -318,7 +317,10 @@ export default class WUPSelectControl<
   override setupInputReadonly(): void {
     const r = this._opts.readOnlyInput;
     this.$refInput.readOnly =
-      this.$isReadOnly || this.$isPending || r === true || (typeof r === "number" && r < this._cachedItems!.length);
+      this.$isReadOnly ||
+      this.$isPending ||
+      r === true ||
+      (typeof r === "number" && r < (this._cachedItems?.length || 0)); // WARN: _cached items can be undefined when fetching not started yet
   }
 
   override setupInitValue(propsChanged: Array<keyof WUP.Select.Options> | null): void {
