@@ -55,9 +55,14 @@ declare global {
       min?: Date;
       /** User can't select date more than max; point new Date(Date.UTC(2022,1,25)) for `utc:true`, or new Date(2022,1,25) */
       max?: Date;
-      /** Picker that must be rendered at first; if undefined then when isEmpty - year, otherwise - day;
+      /** Picker that must be rendered at first; if undefined & isEmpty - year, otherwise - day;
+       * @tutorial
+       * * point "2012" to start from year2012
+       * * point "2012-05" to start from month5 year2012
+       * * point "2012-05-02" to start from day2 month5 year2012
+       * * shows picker according to pointed but range according to $value ($value has higher priority then pointed date here)
        * @not observed (affects only on init) */
-      startWith?: PickersEnum; // NiceToHave: allow string value where "2012" - start from year 2012, "10/2012" - start from 10th months 2012 etc.
+      startWith?: PickersEnum | string;
       /** Dates that user can't choose (disabled dates) */
       exclude?: Date[];
       /** Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this
@@ -67,7 +72,7 @@ declare global {
     }
     interface Attributes extends WUP.BaseControl.Attributes, Pick<Options, "utc"> {
       /** Picker that must be rendered at first */
-      startWith?: "year" | "month" | "day";
+      startWith?: "year" | "month" | "day" | string;
       /** User can't select date less than min; format yyyy-MM-dd */
       min?: string;
       /** User can't select date more than max; format yyyy-MM-dd  */
@@ -974,8 +979,25 @@ export default class WUPCalendarControl<
 
   protected override gotReady(): void {
     super.gotReady();
-
-    let v = this.$value ? this.normalizeToUTC(new Date(this.$value)) : this.#ctr.$dateToUTC(new Date());
+    // define startPicker
+    let { startWith } = this._opts;
+    let startDate: Date | null = null;
+    if (typeof startWith === "string") {
+      const arr = startWith.split("-");
+      // prettier-ignore
+      switch (arr.length) {
+        case 1: startWith = PickersEnum.Year; break;
+        case 2: startWith = PickersEnum.Month; break;
+        case 3: startWith = PickersEnum.Day; break;
+        default: startWith = undefined; break;
+      }
+      if (startWith != null) {
+        startDate = new Date(Date.UTC(+arr[0] || new Date().getFullYear(), (+arr[1] || 1) - 1, +arr[2] || 1));
+      }
+    }
+    startWith ??= this.$isEmpty ? PickersEnum.Year : PickersEnum.Day;
+    // define startDate
+    let v = this.$value ? this.normalizeToUTC(this.$value) : startDate || this.#ctr.$dateToUTC(new Date());
     const max = this.normalizeToUTC(this._opts.max);
     const min = this.normalizeToUTC(this._opts.min);
     v = max && max < v ? max : v; // don't allow to be in disabled area even if value is disabled
@@ -983,11 +1005,12 @@ export default class WUPCalendarControl<
     v = new Date(v); // clone otherwise changing affects on original
     v.setUTCHours(0, 0, 0, 0); // otherwise month increment works wrong for the last days of the month
     v.setUTCDate(1);
-    this.changePicker(v, this._opts.startWith ?? (this.$isEmpty ? PickersEnum.Year : PickersEnum.Day));
+
+    this.changePicker(v, startWith);
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Calendar.Options> | null): void {
-    this._opts.utc = this.getAttr("utc", "bool");
+    this.gotChangesSharable();
     super.gotChanges(propsChanged);
 
     (this.$isReadOnly || this.$isDisabled) && this.focusItem(null);
@@ -998,20 +1021,6 @@ export default class WUPCalendarControl<
       this.$refTitle.classList.remove(this.#ctr.classNameHidden);
     }
 
-    const attr = this.getAttribute("startwith");
-    if (attr != null) {
-      // prettier-ignore
-      switch (attr.toLowerCase()) {
-        case "year": this._opts.startWith = PickersEnum.Year; break;
-        case "month": this._opts.startWith = PickersEnum.Month; break;
-        case "day": this._opts.startWith = PickersEnum.Day; break;
-        default: delete this._opts.startWith;
-      }
-    }
-
-    this._opts.min = this.getAttr("min", "obj");
-    this._opts.max = this.getAttr("max", "obj");
-    this._opts.exclude = this.getAttr<Date[]>("exclude", "ref");
     if (!propsChanged || propsChanged.includes("exclude")) {
       this._opts.exclude?.sort((a, b) => a.valueOf() - b.valueOf());
     }
@@ -1026,6 +1035,25 @@ export default class WUPCalendarControl<
       this.#disabled = this.calcDisabled();
     }
     isNeedRecalc && this.$refreshPicker();
+  }
+
+  gotChangesSharable(): void {
+    this._opts.utc = this.getAttr("utc", "bool");
+    this._opts.min = this.getAttr("min", "obj");
+    this._opts.max = this.getAttr("max", "obj");
+    this._opts.exclude = this.getAttr<Date[]>("exclude", "ref");
+
+    const attr = this.getAttribute("startwith");
+    if (attr != null) {
+      // prettier-ignore
+      switch (attr.toLowerCase()) {
+        case "year": this._opts.startWith = PickersEnum.Year; break;
+        case "month": this._opts.startWith = PickersEnum.Month; break;
+        case "day": this._opts.startWith = PickersEnum.Day; break;
+        case "": delete this._opts.startWith; break;
+        default: this._opts.startWith = attr; break;
+      }
+    }
   }
 
   override gotFormChanges(propsChanged: Array<keyof WUP.Form.Options> | null): void {
