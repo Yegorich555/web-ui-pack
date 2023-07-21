@@ -303,12 +303,16 @@ export default class WUPTextControl<
           align-self: center;
           background: none;
           cursor: pointer;
+          --ctrl-icon-img: var(--wup-icon-cross);
         }
         :host button[clear]:after {
           content: "";
           padding: 0;
-          -webkit-mask-image: var(--wup-icon-cross);
-          mask-image: var(--wup-icon-cross);
+          -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+        }
+        :host button[clear=back]:after {
+          --ctrl-icon-img: var(--wup-icon-back);
         }
         :host button[clear]:after,
         :host button[clear]:before {
@@ -564,7 +568,6 @@ export default class WUPTextControl<
 
     super.gotChanges(propsChanged as any);
 
-    /* istanbul ignore else */
     if (this._opts.clearButton) {
       this.$refBtnClear = this.$refBtnClear || this.renderBtnClear();
     } else if (this.$refBtnClear) {
@@ -821,6 +824,14 @@ export default class WUPTextControl<
     this._opts.mask && this.maskInputProcess(null);
     this.renderPostfix(this._opts.postfix);
     this._onceErrName === this._errName && this.goHideError(); // hide mask-message because value has higher priority than inputValue
+  }
+
+  protected override setClearState(): ValueType | undefined {
+    const next = super.setClearState();
+    if (this.$refBtnClear) {
+      this.$refBtnClear.setAttribute("clear", this.#ctr.$isEmpty(next) ? "" : "back");
+    }
+    return next;
   }
 
   _onceErrName?: string;

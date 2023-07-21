@@ -2,6 +2,10 @@
 
 ## 0.6.2 (\_\_\_/)
 
+**BREAKING CHANGES**:
+
+- **Controls**. `$options.clearAction` => refactored enum-names & improved behavior/dynamic-icon for `button[clear]`
+
 **Fixes**:
 
 - [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts).

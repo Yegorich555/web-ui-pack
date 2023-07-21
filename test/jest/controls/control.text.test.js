@@ -210,4 +210,18 @@ describe("control.text", () => {
     // just for coverage
     expect(el.parse("")).toBe(undefined);
   });
+
+  test("options.clearButton is changed", async () => {
+    el.$options.clearButton = true;
+    await h.wait(1);
+    expect(el.$refBtnClear).toBeDefined();
+
+    el.$options.clearButton = false;
+    await h.wait(1);
+    expect(el.$refBtnClear).toBeUndefined();
+
+    el.$options.label = "sdas"; // trigger gotChanges
+    await h.wait(1);
+    expect(el.$refBtnClear).toBeUndefined();
+  });
 });

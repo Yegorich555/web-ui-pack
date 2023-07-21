@@ -40,12 +40,12 @@ export const enum ValidationCases {
 
 /** Actions when user pressed ESC or button-clear */
 export const enum ClearActions {
-  /** Disable action */
-  none = 0,
-  /** Make control empty; pressing Esc again rollback action (it helps to avoid accidental action) */
-  clear = 1 << 1,
-  /** Return to init value; pressing Esc again rollback action (it helps to avoid accidental action) */
-  resetToInit = 1 << 2,
+  /** Only clear without extra logic */
+  clear = 0,
+  /** Pressing Esc/buttonClear: 1st: clear, 2nd: revert clearing (it helps to avoid accidental action) */
+  clearBack = 1,
+  /** Pressing Esc/buttonClear: 1st: rollback to init, 2nd: clear, 3rd: revert clearing (it helps to avoid accidental action) */
+  initClearBack = 2,
 }
 
 /** Points on what called validation */
@@ -95,7 +95,8 @@ declare global {
        * @defaultValue 100ms */
       focusDebounceMs?: number;
       /** Behavior that expected for clearing value inside control (via pressEsc or btnClear)
-       * @defaultValue clear | resetToInit (both means: resetToInit if exists, 2nd time - clear etc.) */
+       * @defaultValue ClearActions.initClearBack
+       * @not observed */
       clearActions: ClearActions;
       /** Rules defined for control;
        * * all functions must return error-message when value === undefined
@@ -162,7 +163,7 @@ declare global {
        * * Expected value can be converted toString & parsed from string itself.
        * Override valueFromUrl & valueToUrl to change serializing (for complex objects, arrays etc.)
        * @see {@link WUP.BaseControl.Defaults.storage} */
-      skey?: boolean | string; // todo issue (most noticable in React): it affects on ini but need to develop way to gather initModel and send to api request
+      skey?: boolean | string; // todo issue (most noticeable in React): it affects on ini but need to develop way to gather initModel and send to api request
     }
 
     interface Attributes
@@ -254,6 +255,7 @@ export default abstract class WUPBaseControl<
         --wup-icon-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M674.515 93.949a45.925 45.925 0 0 0-65.022 0L384.001 318.981 158.509 93.487a45.928 45.928 0 0 0-65.022 0c-17.984 17.984-17.984 47.034 0 65.018l225.492 225.494L93.487 609.491c-17.984 17.984-17.984 47.034 0 65.018s47.034 17.984 65.018 0l225.492-225.492 225.492 225.492c17.984 17.984 47.034 17.984 65.018 0s17.984-47.034 0-65.018L449.015 383.999l225.492-225.494c17.521-17.521 17.521-47.034 0-64.559z'/%3E%3C/svg%3E");
         --wup-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M37.691 450.599 224.76 635.864c21.528 21.32 56.11 21.425 77.478 0l428.035-426.23c21.47-21.38 21.425-56.11 0-77.478s-56.11-21.425-77.478 0L263.5 519.647 115.168 373.12c-21.555-21.293-56.108-21.425-77.478 0s-21.425 56.108 0 77.478z'/%3E%3C/svg%3E");
         --wup-icon-dot: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='20'/%3E%3C/svg%3E");
+        --wup-icon-back: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m509.8 16.068-329.14 329.14c-21.449 21.449-21.449 56.174 0 77.567l329.14 329.14c21.449 21.449 56.174 21.449 77.567 0s21.449-56.174 0-77.567l-290.36-290.36 290.36-290.36c21.449-21.449 21.449-56.173 0-77.567-21.449-21.394-56.173-21.449-77.567 0z'/%3E%3C/svg%3E");
       }`;
     // NiceToHave: change icons to fonts: wupfont
   }
@@ -414,7 +416,7 @@ export default abstract class WUPBaseControl<
 
   // todo changing global-common-defaults from another project doesn't affect on controls
   static $defaults: WUP.BaseControl.Defaults = {
-    clearActions: ClearActions.clear /* | ClearActions.resetToInit */,
+    clearActions: ClearActions.initClearBack,
     validateDebounceMs: 500,
     validationCase: ValidationCases.onChangeSmart | ValidationCases.onFocusLost | ValidationCases.onFocusWithValue,
     validationRules: {
@@ -633,6 +635,7 @@ export default abstract class WUPBaseControl<
     this.setAttr.call(this.$refInput, "aria-required", isReq);
 
     this.setupInitValue(propsChanged);
+    propsChanged?.includes("clearActions") && this.setClearState();
     this.gotFormChanges(propsChanged);
   }
 
@@ -1096,6 +1099,7 @@ export default abstract class WUPBaseControl<
     const prev = this.#value;
     this.#value = v;
     if (!this.$isReady) {
+      this.setClearState();
       return null;
     }
 
@@ -1105,6 +1109,7 @@ export default abstract class WUPBaseControl<
       return false;
     }
 
+    this.setClearState();
     this._isValid = undefined;
     const canVld = reason !== SetValueReasons.manual;
     (canVld || this.$refError) && this.validateAfterChange();
@@ -1122,26 +1127,37 @@ export default abstract class WUPBaseControl<
     }
   }
 
-  #prevValue = this.#value;
-  /* Called when user pressed Esc-key or button-clear */
-  clearValue(): void {
-    const was = this.#value;
+  _nextClearValue?: ValueType;
+  /** Called every time on value-change to update clear-state & buttonClear
+   * @returns nextClearValue */
+  protected setClearState(): ValueType | undefined {
+    const clr = this._opts.clearActions;
 
-    let v: ValueType | undefined;
-    /* istanbul ignore else */
-    if (this._opts.clearActions & ClearActions.resetToInit) {
-      if (this.$isChanged) {
-        v = this.$initValue;
-      } else if (!(this._opts.clearActions & ClearActions.clear && !this.$isEmpty)) {
-        v = this.#prevValue;
-      }
-    } else if (this._opts.clearActions & ClearActions.clear) {
-      v = this.$isEmpty ? this.#prevValue : undefined; // todo ClearActions.clear must ONLY clear
+    switch (clr) {
+      case ClearActions.clearBack:
+        if (!this.$isEmpty) {
+          delete this._nextClearValue;
+        }
+        break;
+      case ClearActions.initClearBack:
+        if (this.$isChanged) {
+          this._nextClearValue = this.$initValue;
+        } else if (!this.$isEmpty) {
+          delete this._nextClearValue;
+        }
+        break;
+      default:
+        delete this._nextClearValue;
+        break;
     }
+    return this._nextClearValue;
+  }
 
-    this.setValue(v, SetValueReasons.clear);
-    this.#prevValue = was;
-
+  /* Called when user pressed Esc-key or button-clear */
+  protected clearValue(): void {
+    const next = this._nextClearValue;
+    this._nextClearValue = this.#value;
+    this.setValue(next, SetValueReasons.clear);
     this.$isEmpty ? this.$ariaSpeak(this.#ctr.$ariaCleared) : this.$refInput.select();
   }
 
