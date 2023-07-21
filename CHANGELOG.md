@@ -9,7 +9,9 @@
   - _$options.items[0] !== items[0] because wrapped to observer_
   - _Unable to clear value with Backspace+Enter_
 - [SelectManyControl](src/controls/selectMany.ts). _Menu hides when user selects all items - but it's maybe wrong_
-- [RadioControl](src/controls/radio.ts). _$options.items[0] !== items[0] because wrapped to observer_
+- [RadioControl](src/controls/radio.ts).
+  - _$options.items[0] !== items[0] because wrapped to observer_
+  - _`$options.readOnly` doesn't work - user able to change value_
 - [CalendarControl](src/controls/calendar.ts).
   - _Wrong size of monthPicker if previously scroll dayPicker to min/max date_
   - _User can't scroll when `$initValue` > `$options.max`_

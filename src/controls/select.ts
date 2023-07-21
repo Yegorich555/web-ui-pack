@@ -797,3 +797,4 @@ customElements.define(tagName, WUPSelectControl);
 
 // NiceToHave: option to allow autoselect item without pressing Enter
 // WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation
+// todo label for="" in Chrome sometimes enables autosuggestion - need to remove it for all controls - need to double-check ???

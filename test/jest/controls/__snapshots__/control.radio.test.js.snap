@@ -474,6 +474,7 @@ exports[`control.radio base options readonly 1`] = `
         autocomplete="off"
         id="txt2"
         name="txt1473"
+        readonly=""
         tabindex="0"
         type="radio"
       />
@@ -487,6 +488,7 @@ exports[`control.radio base options readonly 1`] = `
       <input
         id="txt3"
         name="txt1473"
+        readonly=""
         type="radio"
       />
       <span>
@@ -499,6 +501,7 @@ exports[`control.radio base options readonly 1`] = `
       <input
         id="txt4"
         name="txt1473"
+        readonly=""
         type="radio"
       />
       <span>
@@ -511,6 +514,7 @@ exports[`control.radio base options readonly 1`] = `
       <input
         id="txt5"
         name="txt1473"
+        readonly=""
         type="radio"
       />
       <span>
@@ -1523,6 +1527,7 @@ exports[`control.radio with form 2`] = `
         autocomplete="off"
         id="txt7"
         name="txt6473"
+        readonly=""
         tabindex="0"
         type="radio"
       />
@@ -1536,6 +1541,7 @@ exports[`control.radio with form 2`] = `
       <input
         id="txt8"
         name="txt6473"
+        readonly=""
         type="radio"
       />
       <span>
@@ -1548,6 +1554,7 @@ exports[`control.radio with form 2`] = `
       <input
         id="txt9"
         name="txt6473"
+        readonly=""
         type="radio"
       />
       <span>
@@ -1560,6 +1567,7 @@ exports[`control.radio with form 2`] = `
       <input
         id="txt10"
         name="txt6473"
+        readonly=""
         type="radio"
       />
       <span>

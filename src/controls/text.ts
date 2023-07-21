@@ -409,10 +409,7 @@ export default class WUPTextControl<
   }
 
   protected override renderControl(): void {
-    /* istanbul ignore else */
-    if (this.$refInput.type !== "textarea") {
-      (this.$refInput as HTMLInputElement).type = "text";
-    }
+    (this.$refInput as HTMLInputElement).type = "text";
     this.$refInput.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", this.$refInput.id);
 
