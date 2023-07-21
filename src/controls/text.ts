@@ -706,7 +706,7 @@ export default class WUPTextControl<
     }
 
     if (declinedAdd) {
-      this._histUndo![this._histUndo!.length - 1] = this.historyToSnapshot(mi.value, pos); // fix when ###: "12|" + "3b" => 123|
+      this.historySave(mi.value, pos); // fix when ###: "12|" + "3b" => 123|
       this.declineInput(pos);
     } else {
       el.value = mi.value;

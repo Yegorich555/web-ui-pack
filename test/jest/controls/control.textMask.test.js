@@ -901,7 +901,7 @@ describe("control.text: mask", () => {
     await h.wait(1);
     // test ordinary replace behavior
     h.setInputCursor(el.$refInput, "+|");
-    expect(await h.userInsertText(el.$refInput, "12345678901", { clearPrevious: false })).toBe("+1 (234) 567-8901|");
+    expect(await h.userInsertText(el.$refInput, "12345678901")).toBe("+1 (234) 567-8901|");
     h.setInputCursor(el.$refInput, "|+1 (234) 567-8901|"); // select all
     expect(await h.userRemove(el.$refInput)).toBe("+|");
     expect(await h.userUndo(el.$refInput)).toBe("+1 (234) 567-8901|");
@@ -910,6 +910,14 @@ describe("control.text: mask", () => {
     onGotInput.mockClear();
     expect(await h.userUndo(el.$refInput)).toBe("+|");
     expect(onGotInput).not.toBeCalled(); // because history is cleared
+
+    el.$value = "+1 (234) 567-8921";
+    await h.wait(1);
+    h.setInputCursor(el.$refInput, "+1 (2|34) 567-8921");
+    expect(await h.userTypeText(el.$refInput, "1", { clearPrevious: false })).toBe("+1 (21|34) 567-8921");
+    await h.wait();
+    expect(h.getInputCursor(el.$refInput)).toBe("+1 (21|3) 456-7892");
+    expect(await h.userUndo(el.$refInput)).toBe("+1 (2|34) 567-8921"); // +1 (21|3) 456-7892
   });
 
   test("$opions.mask works properly", async () => {
