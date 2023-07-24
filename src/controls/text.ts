@@ -584,6 +584,27 @@ export default class WUPTextControl<
     }
   }
 
+  protected override gotKeyDown(e: KeyboardEvent): void {
+    super.gotKeyDown(e);
+
+    if (!e.altKey) {
+      // WARN: need handle only redo because undo works from browser-side itself but undo - doesn't still beforeInput.preventDefault()
+      const isUndo = (e.ctrlKey || e.metaKey) && e.code === "KeyZ";
+      const isRedo = (isUndo && e.shiftKey) || (e.ctrlKey && e.code === "KeyY" && !e.metaKey);
+      // isUndo &&= !isRedo;
+      if (isRedo && this.canHandleUndo()) {
+        e.preventDefault();
+        // otherwise custom redo/undo works wrong (browser stores to history big chunks and not fired events if history emptied)
+        if (isRedo && !this._histRedo?.length) {
+          return;
+        }
+        this.$refInput.dispatchEvent(
+          new InputEvent("beforeinput", { cancelable: true, bubbles: true, inputType: "historyRedo" })
+        );
+      }
+    }
+  }
+
   /** Handler of 'beforeinput' event */
   protected gotBeforeInput(e: WUP.Text.GotInputEvent): void {
     this.#declineInputEnd?.call(this);
@@ -623,7 +644,6 @@ export default class WUPTextControl<
     const el = e.target as WUP.Text.Mask.HandledInput;
     let txt = el.value;
 
-    /* istanbul ignore else */
     if (this._opts.mask) {
       const prev = el._maskPrev?.value;
       txt = this.maskInputProcess(e);
@@ -633,7 +653,6 @@ export default class WUPTextControl<
       }
     }
 
-    // /* istanbul ignore else */
     // if (e.setValuePrevented) { // use canParse instead
     //   return;
     // }
