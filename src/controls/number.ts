@@ -252,7 +252,9 @@ export default class WUPNumberControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Number.Options> | null): void {
     super.gotChanges(propsChanged as any);
-    propsChanged?.includes("format") && this.setInputValue(this.$value, SetValueReasons.userInput);
+    if ((!propsChanged && this._opts.format) || propsChanged?.includes("format")) {
+      this.setInputValue(this.$value, SetValueReasons.userInput);
+    }
   }
 
   protected override gotBeforeInput(e: WUP.Text.GotInputEvent): void {

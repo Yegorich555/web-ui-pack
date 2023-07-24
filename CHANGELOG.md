@@ -23,6 +23,7 @@
 - [TextareaControl](src/controls/textarea.ts).
   - _Exception when try to clear empty control_
   - _`Ctrl + Z` doesn't revert changes_
+- [NumberControl](src/controls/number.ts). _option `format` isn't applied on init_
 - **Text based controls**. **Mask**. _Wrong behavior_when user removes/inserts text in the middle_
 - **Text based controls** - Improved undo/redo overall
   - _Ctrl+Z sometimes is wrong_

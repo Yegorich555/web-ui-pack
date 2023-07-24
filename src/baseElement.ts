@@ -200,7 +200,7 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
           props.push(k);
         }
       }
-
+      // WARN: it doesn't filter options according to observedOptions
       props.length && this.gotOptionsChanged({ props, target: this._opts });
     }
   }
