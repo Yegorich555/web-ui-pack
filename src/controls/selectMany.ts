@@ -520,7 +520,6 @@ export default class WUPSelectManyControl<
 
   // @ts-expect-error - because expected v: ValueType[]
   protected override selectValue(v: ValueType, canHideMenu = true): void {
-    canHideMenu = canHideMenu || (this.$value !== undefined && this.$value.length + 1 === this._menuItems!.all!.length);
     super.selectValue(v as any, canHideMenu);
     this._opts.hideSelected && this.focusMenuItem(null);
   }
@@ -745,8 +744,8 @@ customElements.define(tagName, WUPSelectManyControl);
  *  </span>
  * 01. NVDA. Reads only first line (the same issue for textarea)
  * 02. NVDA. Reads only first item in Firefox (when :after exists)
- * 1. Firefox. Carret position is wrong/missed between Items is use try to use ArrowKeys
- * 2. Firefox. Carret position is missed if no empty spans between items
+ * 1. Firefox. Caret position is wrong/missed between Items is use try to use ArrowKeys
+ * 2. Firefox. Caret position is missed if no empty spans between items
  * 3. Without contenteditalbe='false' browser moves cursor into item, but it should be outside
  */
 

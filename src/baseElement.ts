@@ -66,6 +66,21 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
     return "wup-hidden";
   }
 
+  /* Array of options names to listen for changes */
+  static get observedOptions(): Array<string> | undefined {
+    return undefined;
+  }
+
+  /** Array of nested-props of options.names to exclude from observed */
+  static get observedExcludeNested(): Array<string> | undefined {
+    return undefined;
+  }
+
+  /* Array of attribute names to listen for changes */
+  static get observedAttributes(): Array<string> | undefined {
+    return undefined;
+  }
+
   /** Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item */
   static $defaults: Record<string, any>;
   /** Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally */
@@ -91,7 +106,6 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
       // get from cache
       let o = allObservedOptions.get(this.#ctr);
       if (o === undefined) {
-        // @ts-ignore
         const arr = this.#ctr.observedOptions;
         o = arr?.length ? new Set(arr) : null;
         allObservedOptions.set(this.#ctr, o);
@@ -106,7 +120,7 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
           }
           // cast to observed only if option was retrieved: to optimize init-performance
           if (!this.#optsObserved) {
-            this.#optsObserved = observer.make(this._opts);
+            this.#optsObserved = observer.make(this._opts, { excludeNested: this.#ctr.observedExcludeNested });
             this.#removeObserved = observer.onChanged(this.#optsObserved, (e) => {
               this.#isReady && e.props.some((p) => watched.has(p)) && this.gotOptionsChanged(e);
             });
@@ -186,7 +200,7 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
           props.push(k);
         }
       }
-
+      // WARN: it doesn't filter options according to observedOptions
       props.length && this.gotOptionsChanged({ props, target: this._opts });
     }
   }
@@ -336,22 +350,25 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
   }
   /* eslint-enable max-len */
 
-  /** Inits customEvent & calls dispatchEvent and returns created event */
+  /** Inits customEvent & calls dispatchEvent and returns created event
+   * @tutorial Troubleshooting
+   * * Default event bubbling: el.event.click > el.onclick >>> parent.event.click > parent.onclick etc.
+   * * Custom event bubbling: el.$onclick > el.event.$click >>> parent.event.$click otherwise impossible to stop propagation from on['event] of target directly */
   fireEvent<K extends keyof Events>(type: K, eventInit?: CustomEventInit): Event {
-    let isStopped = false;
     const ev = new CustomEvent(type as string, eventInit);
-    ev.stopImmediatePropagation = () => {
-      isStopped = true;
-      CustomEvent.prototype.stopImmediatePropagation.call(ev);
-    };
-    super.dispatchEvent(ev);
-    if (!isStopped) {
-      const isCustom = (type as string).startsWith("$");
-      if (isCustom) {
-        const str = (type as string).substring(1, 2).toUpperCase() + (type as string).substring(2);
-        (this as any)[`$on${str}`]?.call(this, ev);
-      }
+
+    let sip = false;
+    const isCustom = (type as string).startsWith("$");
+    if (isCustom) {
+      ev.stopImmediatePropagation = () => {
+        sip = true;
+        CustomEvent.prototype.stopImmediatePropagation.call(ev);
+      };
+      const str = (type as string).substring(1, 2).toUpperCase() + (type as string).substring(2);
+      (this as any)[`$on${str}`]?.call(this, ev);
     }
+
+    !sip && super.dispatchEvent(ev);
     return ev;
   }
 
@@ -372,7 +389,7 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
         return v;
       };
     }
-    // @ts-expect-error
+    // @ts-ignore - different TS versions can throw here
     const r = onEvent(...args);
     this.disposeLst.push(r);
     const remove = (): void => {

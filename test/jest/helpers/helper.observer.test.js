@@ -741,4 +741,27 @@ describe("helper.observer", () => {
     expect(observer.isObserved(obj.pr)).toBe(false);
     expect(observer.isObserved(obj.el)).toBe(false);
   });
+
+  test("option 'excludeNested'", async () => {
+    const raw = { v: 1, items: [{ v: 2 }, { v: 3 }] };
+    const obj = observer.make(raw, { excludeNested: ["items"] });
+    expect(observer.isObserved(obj.items)).toBe(true);
+    expect(observer.isObserved(obj.items[0])).toBe(false);
+
+    const fn = jest.fn();
+    observer.onPropChanged(obj, fn);
+    obj.v = 6;
+    jest.advanceTimersToNextTimer();
+    expect(fn).toBeCalledTimes(1);
+
+    fn.mockClear();
+    obj.items[0].v = 22;
+    jest.advanceTimersToNextTimer();
+    expect(fn).toBeCalledTimes(0);
+    obj.items = [{ v: "h" }];
+    jest.advanceTimersToNextTimer();
+    expect(fn).toBeCalledTimes(1);
+    expect(observer.isObserved(obj.items)).toBe(true);
+    expect(observer.isObserved(obj.items[0])).toBe(false);
+  });
 });

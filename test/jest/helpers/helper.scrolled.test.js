@@ -138,23 +138,15 @@ describe("helper.onScrollStop", () => {
     // no new items - no scroll
     onRender.mockImplementation(() => []);
     ul.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: 100 }));
-    expect(ul.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="overflow: hidden; max-height: 100px;"><li num="0"></li></ul>"`
-    );
+    expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="0"></li></ul>"`);
     await nextFrame(5);
-    expect(ul.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="overflow: hidden; max-height: 100px;"><li num="0"></li></ul>"`
-    );
+    expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="0"></li></ul>"`);
 
     onRender.mockImplementation(() => null);
     ul.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: 100 }));
-    expect(ul.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="overflow: hidden; max-height: 100px;"><li num="0"></li></ul>"`
-    );
+    expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="0"></li></ul>"`);
     await nextFrame(5);
-    expect(ul.outerHTML).toMatchInlineSnapshot(
-      `"<ul style="overflow: hidden; max-height: 100px;"><li num="0"></li></ul>"`
-    );
+    expect(ul.outerHTML).toMatchInlineSnapshot(`"<ul style="overflow: hidden;"><li num="0"></li></ul>"`);
   });
 
   test("keyboard", async () => {

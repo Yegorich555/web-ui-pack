@@ -1,6 +1,5 @@
 /* eslint-disable jest/no-conditional-expect */
 /* eslint-disable jest/no-export */
-import WUPBaseComboControl from "web-ui-pack/controls/baseCombo";
 import WUPBaseControl, { ClearActions, ValidationCases, ValidateFromCases } from "web-ui-pack/controls/baseControl";
 import * as h from "../../testHelper";
 import { BaseTestOptions } from "../../testHelper";
@@ -239,50 +238,42 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.focus();
       await h.wait(1);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
+      (el as any).$refPopup && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
       expect(el.$value).toBe(cfg.emptyValue);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      expect(el.$value).toBe(cfg.initValues[0].value); // rollback to previous value
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       expect(el.$value).toBe(cfg.emptyValue);
-
-      el.$value = cfg.initValues[2].value;
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      expect(el.$value).toBe(cfg.emptyValue);
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      expect(el.$value).toBe(cfg.initValues[2].value);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       expect(el.$value).toBe(cfg.emptyValue);
 
-      // only reset to init
-      el.$value = cfg.initValues[0].value;
-      el.$initValue = cfg.initValues[1].value;
-      el.$options.clearActions = ClearActions.resetToInit as any;
+      // clear > back
+      const val = cfg.initValues[0].value;
+      const initVal = cfg.initValues[1].value;
+      el.$value = val;
+      el.$initValue = initVal;
+      el.$options.clearActions = ClearActions.clearBack | 0;
       await h.wait(1);
-
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      expect(el.$value).toBe(cfg.initValues[1].value);
+      expect(el.$value).toBe(cfg.emptyValue);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      expect(el.$value).toBe(cfg.initValues[0].value);
+      expect(el.$value).toBe(val);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      expect(el.$value).toBe(cfg.initValues[1].value);
+      expect(el.$value).toBe(cfg.emptyValue);
       if (!cfg.noInputSelection) {
         expect(el.$refInput.selectionStart).toBe(0);
         expect(el.$refInput.selectionEnd).toBe(el.$refInput.value.length);
       }
 
-      // clear + resetToInit
-      el.$value = cfg.initValues[0].value;
-      el.$initValue = cfg.initValues[1].value;
-      el.$options.clearActions = ClearActions.clear | ClearActions.resetToInit;
-      await h.wait(1);
+      // reset to init > clear > back
+      el.$options.clearActions = ClearActions.initClearBack | 0;
+      el.$initValue = initVal;
+      el.$value = val;
+      await h.wait();
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      expect(el.$value).toBe(cfg.initValues[1].value);
+      expect(el.$value).toBe(initVal);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       expect(el.$value).toBe(cfg.emptyValue);
-
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      expect(el.$value).toBe(cfg.initValues[1].value);
+      expect(el.$value).toBe(initVal);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       expect(el.$value).toBe(cfg.emptyValue);
     });
@@ -571,7 +562,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
     test("options.validationCase", async () => {
       el.$options.name = "firstInput";
-      el.$options.clearActions = ClearActions.clear | 0;
+      el.$options.clearActions = ClearActions.clearBack | 0;
       el.$options.validations = { required: true };
       el.$value = cfg.initValues[0].value;
 
@@ -581,7 +572,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.focus();
       await h.wait(1);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
-      el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened and prev-Esc closed it but not affect on input clearing
+      (el as any).$refPopup && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened and prev-Esc closed it but not affect on input clearing
 
       expect(el.$isEmpty).toBe(true);
       el.blur();
@@ -645,7 +636,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       cfg.onCreateNew?.call(cfg, el);
       el.$options.validationCase = ValidationCases.onChangeSmart | 0;
       el.$options.validations = { required: true };
-      el.$options.clearActions = ClearActions.clear | 0;
+      el.$options.clearActions = ClearActions.clearBack | 0;
       el.$value = cfg.initValues[0].value;
       await h.wait();
 
@@ -653,7 +644,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
         el.focus();
         await h.wait(1);
         el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
-        el instanceof WUPBaseComboControl && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
+        (el as any).$refPopup && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
         expect(el.$isEmpty).toBe(true);
         await h.wait();
         expect(el.$refError).toBeDefined(); // because previously was valid and now need to show invalid state

@@ -232,11 +232,7 @@ export default class WUPRadioControl<
 
   /** Called when user touches inputs */
   protected gotInput(e: Event & { target: ExtInputElement }): void {
-    if (this.$isReadOnly) {
-      e.target.checked = !e.target.checked;
-    } else {
-      this.setValue(this.getItems()[e.target._index].value, SetValueReasons.userInput);
-    }
+    this.setValue(this.getItems()[e.target._index].value, SetValueReasons.userInput);
   }
 
   /** Items resolved from options */
@@ -342,7 +338,6 @@ export default class WUPRadioControl<
   override gotFormChanges(propsChanged: Array<keyof WUP.Form.Options> | null): void {
     super.gotFormChanges(propsChanged);
     this.$refInput.disabled = false;
-    this.$refInput.readOnly = false;
     this.$refFieldset.disabled = this.$isDisabled as boolean;
     this.$ariaDetails(this.$isReadOnly ? this.#ctr.$ariaReadonly : null);
   }
@@ -351,6 +346,12 @@ export default class WUPRadioControl<
     this._isStopChanges = true;
     e.props.includes("reverse") && this.setAttr("reverse", this._opts.reverse, true);
     super.gotOptionsChanged(e);
+  }
+
+  override setupInputReadonly(): void {
+    const r = this.$isReadOnly;
+    this.$refItems.forEach((a) => (a.readOnly = r)); // just for WA
+    this.$refFieldset.onclick = r ? (e) => e.preventDefault() : null; // prevent changing input-readonly; attr readonly doesn't work for radio
   }
 
   override focus(): boolean {

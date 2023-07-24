@@ -92,7 +92,7 @@ describe("control.textarea", () => {
     el.focus();
     await h.wait(1);
     const isPrevented = !el.$refInput.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "B", ctrlKey: true, bubbles: true, cancelable: true })
+      new InputEvent("beforeinput", { inputType: "formatBold", bubbles: true, cancelable: true })
     );
     expect(isPrevented).toBe(true);
   });

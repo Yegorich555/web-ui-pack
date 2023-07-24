@@ -232,6 +232,39 @@ export default function calendarTZtest() {
             await h.userClick(item);
             expect(item.getAttribute("aria-selected")).toBe("true");
             expect(el.$value).toEqual(initDate(2022, 5, item.textContent!, 23, 50));
+            // option startWith: string
+            el.remove();
+            el.$options.utc = opt.utc;
+            el.$value = undefined;
+            el.$initValue = undefined;
+            el.$options.startWith = "1990-02-01";
+            document.body.appendChild(el);
+            await h.wait();
+            expect(el.$refCalenarTitle.textContent).toBe("February 1990");
+            // option startWith: is whole date
+            el.remove();
+            el.$options.startWith = "1990-01-01 10:55";
+            document.body.appendChild(el);
+            await h.wait();
+            expect(el.$refCalenarTitle.textContent).toBe("January 1990");
+            // option startWith: is wrong
+            el.remove();
+            el.$options.startWith = "a-b-c";
+            document.body.appendChild(el);
+            await h.wait();
+            expect(el.$refCalenarTitle.textContent).toBe("January 2023");
+            // option startWith: is wrong
+            el.remove();
+            el.$options.startWith = "1990-01-01-06";
+            document.body.appendChild(el);
+            await h.wait();
+            expect(el.$refCalenarTitle.textContent).toBe("2018 ... 2033");
+            // option startWith: is empty
+            el.remove();
+            el.$options.startWith = "";
+            document.body.appendChild(el);
+            await h.wait();
+            expect(el.$refCalenarTitle.textContent).toBe("2018 ... 2033");
           });
         });
       });
@@ -264,6 +297,16 @@ export default function calendarTZtest() {
         expect(el.querySelector("[calendar='day']")).toBeTruthy();
         expect(el.$refCalenarTitle.textContent).toBe("January 2022");
         // other click tests see in 'navigation between pickers'
+
+        // option startWith: string
+        el.remove();
+        el.$options.utc = opt.utc;
+        el.$value = undefined;
+        el.$initValue = undefined;
+        el.$options.startWith = "1990-01";
+        document.body.appendChild(el);
+        await h.wait();
+        expect(el.$refCalenarTitle.textContent).toBe("1990");
       });
 
       test("year picker", async () => {
@@ -295,6 +338,16 @@ export default function calendarTZtest() {
         expect(el.querySelector("[calendar='month']")).toBeTruthy();
         expect(el.$refCalenarTitle.textContent).toBe("2018");
         // other click tests see in 'navigation between pickers'
+
+        // option startWith: string
+        el.remove();
+        el.$options.utc = opt.utc;
+        el.$value = undefined;
+        el.$initValue = undefined;
+        el.setAttribute("startwith", "1990");
+        document.body.appendChild(el);
+        await h.wait();
+        expect(el.$refCalenarTitle.textContent).toBe("1986 ... 2001");
       });
 
       test("navigation between pickers", async () => {
@@ -464,6 +517,26 @@ export default function calendarTZtest() {
         await showNext(true);
         expect(el.$refCalenarTitle.textContent).toBe("2034 ... 2049");
         expect(el.$refCalenarItems).toMatchSnapshot();
+
+        // start with $options.max
+        jest.setSystemTime(new Date(2022, 9, 15));
+        el.remove();
+        el.$options.utc = opt.utc;
+        el.$options.min = undefined;
+        el.$options.max = initDate(1990, 0, 1); // 1 Jan
+        el.$options.startWith = PickersEnum.Year | 0;
+        el.$value = initDate(2022, 9, 15);
+        document.body.appendChild(el);
+        await h.wait();
+        expect(el.$refCalenarTitle.textContent).toBe("1986 ... 2001");
+        // start with $options.min
+        el.remove();
+        el.$options.min = initDate(2003, 5, 1);
+        el.$options.max = undefined;
+        el.$value = initDate(1990, 0, 1);
+        document.body.appendChild(el);
+        await h.wait();
+        expect(el.$refCalenarTitle.textContent).toBe("2002 ... 2017");
       });
 
       test("$options.exclude (attr [disabled])", async () => {

@@ -107,7 +107,7 @@ export default class WUPTextareaInput extends HTMLElement {
       return null;
     }
     const sel = window.getSelection();
-    if (!sel) {
+    if (!sel || sel.rangeCount < 1) {
       return null;
     }
     const range = sel.getRangeAt(0);

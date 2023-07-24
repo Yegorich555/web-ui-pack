@@ -35,7 +35,10 @@ describe("control.text: mask", () => {
   test("0000-00-00 (dateMask yyyy-MM-dd)", async () => {
     const mask = "0000-00-00";
     const mi = new MaskTextInput(mask, "");
-    const proc = (v) => mi.parse(v);
+    const proc = (v) => {
+      mi.parse(v);
+      return mi.value;
+    };
 
     expect(proc("12")).toBe("12");
     expect(proc("12345")).toBe("1234-5");
@@ -165,7 +168,10 @@ describe("control.text: mask", () => {
   test("0000/#0/#0 (dateMask yyyy-M-d)", async () => {
     const mask = "0000/#0/#0";
     const mi = new MaskTextInput(mask, "");
-    const proc = (v) => mi.parse(v);
+    const proc = (v) => {
+      mi.parse(v);
+      return mi.value;
+    };
 
     expect(proc("12")).toBe("12");
     expect(proc("12345")).toBe("1234/5");
@@ -235,14 +241,12 @@ describe("control.text: mask", () => {
 
     // append wrong chars when cursor in the middle
     h.setInputCursor(el.$refInput, "1|234/56/78");
-    await h.userTypeText(el.$refInput, "ab", { clearPrevious: false });
-    expect(h.getInputCursor(el.$refInput)).toBe("1b|234/56/78");
+    expect(await h.userTypeText(el.$refInput, "ab", { clearPrevious: false })).toBe("1b|234/56/78");
     await h.wait(150); // when user types invalid char it shows and hides after a time
     expect(h.getInputCursor(el.$refInput)).toBe("1|234/56/78");
 
     h.setInputCursor(el.$refInput, "|123");
-    await h.userTypeText(el.$refInput, "ab", { clearPrevious: false });
-    expect(h.getInputCursor(el.$refInput)).toBe("b|123");
+    expect(await h.userTypeText(el.$refInput, "ab", { clearPrevious: false })).toBe("b|123");
     await h.wait(150); // when user types invalid char it shows and hides after a time
     expect(h.getInputCursor(el.$refInput)).toBe("|123");
 
@@ -265,7 +269,10 @@ describe("control.text: mask", () => {
   test("0000--0", () => {
     const mask = "0000--0";
     const mi = new MaskTextInput(mask, "");
-    const proc = (v) => mi.parse(v);
+    const proc = (v) => {
+      mi.parse(v);
+      return mi.value;
+    };
 
     expect(proc("1234--5")).toBe("1234--5");
     expect(proc("1234--5b")).toBe("1234--5");
@@ -276,7 +283,10 @@ describe("control.text: mask", () => {
   test("##0.##0.##0.##0 (IP addess)", async () => {
     const mask = "##0.##0.##0.##0";
     const mi = new MaskTextInput(mask, "");
-    const proc = (v) => mi.parse(v);
+    const proc = (v) => {
+      mi.parse(v);
+      return mi.value;
+    };
 
     expect(proc("192.168.255.254")).toBe("192.168.255.254");
     expect(proc("1.2.3.4")).toBe("1.2.3.4");
@@ -413,7 +423,10 @@ describe("control.text: mask", () => {
   test("+1(000) 000-0000", async () => {
     const mask = "+1(000) 000-0000";
     const mi = new MaskTextInput(mask, "");
-    const proc = (v) => mi.parse(v);
+    const proc = (v) => {
+      mi.parse(v);
+      return mi.value;
+    };
 
     expect(proc("+1(234) 975-1234")).toBe("+1(234) 975-1234");
     expect(proc("2")).toBe("+1(2");
@@ -452,16 +465,14 @@ describe("control.text: mask", () => {
     // type in the middle
     h.setInputCursor(el.$refInput, "+1(234) 9|75-123");
     // type 'ab'
-    await h.userTypeText(el.$refInput, "ab", { clearPrevious: false });
-    expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 9b|75-123");
+    expect(await h.userTypeText(el.$refInput, "ab", { clearPrevious: false })).toBe("+1(234) 9b|75-123");
     expect(el.$refMaskholder.innerHTML).toBe("<i>+1(234) 9b75-123</i>");
     await h.wait(150);
     expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 9|75-123");
     expect(el.$refMaskholder.innerHTML).toBe("<i>+1(234) 975-123</i>0");
     // type digits
     h.setInputCursor(el.$refInput, "+1(234) 9|75-123");
-    await h.userTypeText(el.$refInput, "4", { clearPrevious: false });
-    expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 94|7-5123"); // digits must be shifted
+    expect(await h.userTypeText(el.$refInput, "4", { clearPrevious: false })).toBe("+1(234) 94|7-5123"); // digits must be shifted
 
     const arr = [
       { from: "|+1(", add: "2", to: "+1(2|" },
@@ -474,8 +485,7 @@ describe("control.text: mask", () => {
     for (let i = 0; i < arr.length; ++i) {
       const a = arr[i];
       h.setInputCursor(el.$refInput, a.from);
-      await h.userTypeText(el.$refInput, a.add, { clearPrevious: false });
-      expect(h.getInputCursor(el.$refInput)).toBe(a.to); // cursor must be shifted with digits
+      expect(await h.userTypeText(el.$refInput, a.add, { clearPrevious: false })).toBe(a.to);
     }
 
     // removing
@@ -507,8 +517,32 @@ describe("control.text: mask", () => {
     expect(await remove({ key: "Delete" })).toBe("+1(|3");
 
     h.setInputCursor(el.$refInput, "|+1(");
-    await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
-    expect(h.getInputCursor(el.$refInput)).toBe("+1(2|");
+    expect(await h.userTypeText(el.$refInput, "2", { clearPrevious: false })).toBe("+1(2|");
+  });
+
+  test("+0 (000) 000-0000", async () => {
+    const mask = "+0 (000) 000-0000";
+    el.$options.mask = mask;
+    el.$options.maskholder = mask;
+    el.focus();
+    await h.wait(1);
+    h.setInputCursor(el.$refInput, "|");
+    expect(await h.userTypeText(el.$refInput, "1", { clearPrevious: false })).toBe("+1 (|");
+    expect(await h.userTypeText(el.$refInput, "234", { clearPrevious: false })).toBe("+1 (234) |");
+
+    expect(await h.userTypeText(el.$refInput, "567", { clearPrevious: false })).toBe("+1 (234) 567-|");
+    h.setInputCursor(el.$refInput, "+1 (|234) 567-");
+    expect(await h.userRemove(el.$refInput)).toBe("+|2 (345) 67");
+
+    h.setInputCursor(el.$refInput, "+|");
+    expect(await h.userTypeText(el.$refInput, "11111111111", { clearPrevious: false })).toBe("+1 (111) 111-1111|");
+    h.setInputCursor(el.$refInput, "+1 (1|11) 111-1111");
+    await h.userInsertText(el.$refInput, "23456");
+    await h.wait();
+    expect(h.getInputCursor(el.$refInput)).toBe("+1 (123) 456-|1111");
+
+    h.setInputCursor(el.$refInput, "|+2 (345) 67|", { skipEvent: true });
+    expect(await h.userTypeText(el.$refInput, "8", { clearPrevious: false })).toBe("+8 (|");
   });
 
   test("#.#", async () => {
@@ -519,7 +553,10 @@ describe("control.text: mask", () => {
   test("$ #####0 USD", async () => {
     const mask = "$ #####0 USD";
     const mi = new MaskTextInput(mask, "");
-    const proc = (v) => mi.parse(v);
+    const proc = (v) => {
+      mi.parse(v);
+      return mi.value;
+    };
 
     expect(proc("$ 123456 USD")).toBe("$ 123456 USD");
     expect(proc("$ 123450 USD")).toBe("$ 123450 USD");
@@ -564,8 +601,7 @@ describe("control.text: mask", () => {
     expect(h.getInputCursor(el.$refInput)).toBe("$ 52| USD");
 
     h.setInputCursor(el.$refInput, "$ 123456 USD|");
-    await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
-    expect(h.getInputCursor(el.$refInput)).toBe("$ 1234562| USD");
+    expect(await h.userTypeText(el.$refInput, "2", { clearPrevious: false })).toBe("$ 1234562| USD");
     await h.wait(150);
     expect(h.getInputCursor(el.$refInput)).toBe("$ 123456| USD");
 
@@ -599,7 +635,10 @@ describe("control.text: mask", () => {
 
     const mask = "0 *{1,2} suf";
     const mi = new MaskTextInput(mask, "");
-    const proc = (v = "") => mi.parse(v);
+    const proc = (v = "") => {
+      mi.parse(v);
+      return mi.value;
+    };
 
     expect(proc("2 ab suf")).toBe("2 ab suf");
     expect(proc("2 ab")).toBe("2 ab suf");
@@ -650,7 +689,10 @@ describe("control.text: mask", () => {
 
     const mask = "0 //[a-c]//";
     const mi = new MaskTextInput(mask, "");
-    const proc = (v = "") => mi.parse(v);
+    const proc = (v = "") => {
+      mi.parse(v);
+      return mi.value;
+    };
 
     expect(proc("2 a")).toBe("2 a");
     expect(proc("2 c")).toBe("2 c");
@@ -703,10 +745,9 @@ describe("control.text: mask", () => {
     expect(el.$value).toBe("15:67 am");
 
     jest.spyOn(el, "canParseInput").mockReturnValueOnce(false);
-    await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
-    expect(h.getInputCursor(el.$refInput)).toBe("12|5:67 am");
+    expect(await h.userTypeText(el.$refInput, "2", { clearPrevious: false })).toBe("12|5:67 am");
     await h.wait(150);
-    expect(h.getInputCursor(el.$refInput)).toBe("12|:56 am");
+    expect(h.getInputCursor(el.$refInput)).toBe("12:|56 am");
     expect(el.$value).toBe("15:67 am"); // because canParse false and char is declined
 
     h.setInputCursor(el.$refInput, "|15:67 am");
@@ -763,8 +804,7 @@ describe("control.text: mask", () => {
     await h.wait(1);
 
     // make different actions before undo
-    await h.userTypeText(el.$refInput, "1234.5.67", { clearPrevious: false }); // #1 type long text
-    expect(h.getInputCursor(el.$refInput)).toBe("123.4.5.67|");
+    expect(await h.userTypeText(el.$refInput, "1234.5.67", { clearPrevious: false })).toBe("123.4.5.67|"); // #1 type long text
     expect(await h.userRemove(el.$refInput)).toBe("123.4.5.6|"); // #2 remove last char
     h.setInputCursor(el.$refInput, "1|23.4.5.6");
     expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("1|3.4.5.6"); // #3 remove middle char
@@ -780,7 +820,7 @@ describe("control.text: mask", () => {
     expect(await h.userUndo(el.$refInput)).toBe("123.4.5|");
 
     // cover Ctrl+Shift+Z
-    expect(await h.userRedo(el.$refInput)).toBe("123.4.5.|");
+    expect(await h.userRedo(el.$refInput, { useCtrlY: true })).toBe("123.4.5.|");
     expect(await h.userRedo(el.$refInput)).toBe("123.4.5.6|");
     expect(await h.userRedo(el.$refInput)).toBe("123.4.5.67|");
     expect(await h.userRedo(el.$refInput)).toBe("1|23.4.5.6");
@@ -789,7 +829,6 @@ describe("control.text: mask", () => {
     el = document.body.appendChild(document.createElement("wup-text"));
     el.$options.mask = "+1(000) 000";
     await h.wait(1);
-    el.focus();
     h.setInputCursor(el.$refInput, "+1(|");
     await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
     expect(await h.userUndo(el.$refInput)).toBe("+1(|");
@@ -802,7 +841,14 @@ describe("control.text: mask", () => {
 
     // cover ctrl+z+alt
     const isHandled = !el.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "z", ctrlKey: true, altKey: true, bubbles: true, cancelable: true })
+      new KeyboardEvent("keydown", {
+        code: "KeyZ",
+        key: "z",
+        ctrlKey: true,
+        altKey: true,
+        bubbles: true,
+        cancelable: true,
+      })
     );
     expect(isHandled).toBe(false); // because altKey
 
@@ -822,14 +868,17 @@ describe("control.text: mask", () => {
     expect(await h.userUndo(el.$refInput)).toBe("|");
     expect(await h.userRedo(el.$refInput)).toBe("|2");
 
-    // cover case when no-mask but user called historyUndo
+    // cover case when not canHandleUndo
     el.$value = "";
     el.$options.mask = undefined;
+    el.canHandleUndo = () => false;
     await h.wait(1);
     expect(el.canHandleUndo()).toBe(false);
-    expect(() => el.historyUndoRedo()).toThrow();
+    expect(() => el.historyUndoRedo()).not.toThrow();
     expect(() => el.declineInput()).toThrow();
 
+    el.$value = "";
+    await h.wait(1);
     el.canHandleUndo = () => true;
     await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
     expect(el.$refInput.value).toBe("2");
@@ -837,6 +886,38 @@ describe("control.text: mask", () => {
     expect(el.$refInput.value).toBe("2");
     await h.wait(150);
     expect(el.$refInput.value).toBe("");
+
+    // more tests
+    el = document.body.appendChild(document.createElement("wup-text"));
+    el.$options.mask = "+0 (000) 000-0000";
+    const onGotInput = jest.spyOn(WUPTextControl.prototype, "gotInput");
+    el.focus();
+    await h.wait(1);
+    // undo when hist is empty
+    const isPrevented = !el.$refInput.dispatchEvent(
+      new InputEvent("beforeinput", { bubbles: true, inputType: "historyUndo", cancelable: true })
+    );
+    expect(isPrevented).toBe(true);
+    await h.wait(1);
+    // test ordinary replace behavior
+    h.setInputCursor(el.$refInput, "+|");
+    expect(await h.userInsertText(el.$refInput, "12345678901")).toBe("+1 (234) 567-8901|");
+    h.setInputCursor(el.$refInput, "|+1 (234) 567-8901|"); // select all
+    expect(await h.userRemove(el.$refInput)).toBe("+|");
+    expect(await h.userUndo(el.$refInput)).toBe("+1 (234) 567-8901|");
+    expect(await h.userUndo(el.$refInput)).toBe("+|");
+    expect(onGotInput).toBeCalled();
+    onGotInput.mockClear();
+    expect(await h.userUndo(el.$refInput)).toBe("+|");
+    expect(onGotInput).not.toBeCalled(); // because history is cleared
+
+    el.$value = "+1 (234) 567-8921";
+    await h.wait(1);
+    h.setInputCursor(el.$refInput, "+1 (2|34) 567-8921");
+    expect(await h.userTypeText(el.$refInput, "1", { clearPrevious: false })).toBe("+1 (21|34) 567-8921");
+    await h.wait();
+    expect(h.getInputCursor(el.$refInput)).toBe("+1 (21|3) 456-7892");
+    expect(await h.userUndo(el.$refInput)).toBe("+1 (2|34) 567-8921"); // +1 (21|3) 456-7892
   });
 
   test("$opions.mask works properly", async () => {

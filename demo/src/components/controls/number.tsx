@@ -59,12 +59,12 @@ export default function NumberControlView() {
         <wup-num
           name="prefixPostfix"
           label="With postfix prefix"
-          initValue="120.20"
           prefix="$ "
           postfix=" USD"
           ref={(el) => {
             if (el) {
-              el.$options.format = { maxDecimal: 2, minDecimal: 2 };
+              el.$options = { ...el.$options, format: { maxDecimal: 2 } };
+              el.$initValue = 120.58; // WARN: was issue here
             }
           }}
         />

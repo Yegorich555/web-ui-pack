@@ -37,14 +37,14 @@ declare global {
       /** Case when menu-popup to show
        * @defaultValue onPressArrowKey | onClick | onFocus | onInput */
       showCase: ShowCases;
+      /** Set true to make input not editable but allow select items via popup-menu (ordinary dropdown mode)
+       * @tutorial
+       * * set number X to enable autoMode where input.readOnly = items.length < X */
+      readOnlyInput?: boolean | number;
     }
     interface Options<T = any, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, Defaults<T, VM> {
-      // todo need somehow notify Proxy not to wrap the Array: same behavior for radio
       /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data! */
       items: MenuItems<T> | (() => MenuItems<T> | Promise<MenuItems<T>>) | Promise<MenuItems<T>>;
-      /** Set true to make input not editable but allow to user select items via popup-menu (ordinary dropdown mode)
-       *  @defaultValue false */
-      readOnlyInput?: boolean;
       /** Allow user to create new value if value not found in items
        * @defaultValue false */
       allowNewValue?: boolean;
@@ -285,6 +285,7 @@ export default class WUPSelectControl<
       this._onPendingInitValue?.call(this);
       delete this._onPendingInitValue;
       this.setInputValue(this.$value, SetValueReasons.clear);
+      this.setupInputReadonly(); // call it because opt readonlyInput can depends on items.length
     };
     if (d instanceof Promise) {
       return promiseWait(d, 300, (v) => this.changePending(v)).then((data) => {
@@ -303,7 +304,6 @@ export default class WUPSelectControl<
     const isUpdateItems = !propsChanged || propsChanged.includes("items");
     if (isUpdateItems) {
       this.removePopup();
-      this._cachedItems = undefined;
       // it's important to be before super otherwise initValue won't work
       this._opts.items = this.getAttr<WUP.Radio.Options["items"]>("items", "ref") || [];
       this.fetchItems();
@@ -314,9 +314,13 @@ export default class WUPSelectControl<
     super.gotChanges(propsChanged as any);
   }
 
-  override gotFormChanges(propsChanged: Array<keyof WUP.Form.Options> | null): void {
-    super.gotFormChanges(propsChanged);
-    this.$refInput.readOnly = this.$refInput.readOnly || (this.$isPending as boolean);
+  override setupInputReadonly(): void {
+    const r = this._opts.readOnlyInput;
+    this.$refInput.readOnly =
+      this.$isReadOnly ||
+      this.$isPending ||
+      r === true ||
+      (typeof r === "number" && r < (this._cachedItems?.length || 0)); // WARN: _cached items can be undefined when fetching not started yet
   }
 
   override setupInitValue(propsChanged: Array<keyof WUP.Select.Options> | null): void {
@@ -516,8 +520,10 @@ export default class WUPSelectControl<
     const i = this._menuItems!.all.indexOf(item);
     const o = this._cachedItems![i];
     const canOff = this._opts.multiple && item.getAttribute("aria-selected") === "true";
-    this.selectValue(o.value, !this._opts.multiple);
+    this.selectMenuItem(canOff ? null : item); // select/deselect
     canOff && item.setAttribute("aria-selected", "false");
+
+    this.selectValue(o.value, !this._opts.multiple);
   }
 
   protected override selectValue(v: ValueType, canHideMenu = true): void {
@@ -586,7 +592,7 @@ export default class WUPSelectControl<
 
   protected override selectMenuItem(next: HTMLElement | null): void {
     if (this._opts.multiple) {
-      this._selectedMenuItem = undefined; // othewise multiple selection not allowed in combobox
+      this._selectedMenuItem = undefined; // otherwise multiple selection not allowed in combobox
     }
     super.selectMenuItem(next);
   }
@@ -777,7 +783,7 @@ export default class WUPSelectControl<
 
   protected override setValue(v: ValueType | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
     const r = super.setValue(v, reason, skipInput);
-    r && this.selectMenuItemByValue(v);
+    r && reason !== SetValueReasons.userSelect && this.selectMenuItemByValue(v);
     return r;
   }
 
@@ -791,4 +797,4 @@ customElements.define(tagName, WUPSelectControl);
 
 // NiceToHave: option to allow autoselect item without pressing Enter
 // WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation
-// todo search value by {id} for complex object - the same for radio
+// todo label for="" in Chrome sometimes enables autosuggestion - need to remove it for all controls - need to double-check ???

@@ -49,7 +49,7 @@ export default function CalendarControlView() {
           utc
           validations="window.myCalendarValidations"
         />
-        <wup-calendar name="disabled" label="Disabled" disabled utc />
+        <wup-calendar name="disabled" label="Disabled" disabled utc startWith="1990-01-01" />
         <wup-calendar name="readonly" label="Readonly" readOnly utc />
         <wup-calendar //
           name="saveUrlClnd"

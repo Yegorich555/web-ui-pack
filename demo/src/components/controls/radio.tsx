@@ -62,10 +62,10 @@ export default function RadioControlView() {
           autoFocus={false}
         />
         <wup-radio
+          name="disabled"
+          disabled
           ref={(el) => {
             if (el) {
-              el.$options.name = "disabled";
-              el.$options.disabled = true;
               el.$options.items = items.slice(0, 4);
               el.$initValue = el.$options.items[1].value;
             }
@@ -73,9 +73,10 @@ export default function RadioControlView() {
         />
         <wup-radio
           initValue="13"
+          readOnly
+          name="readonly"
           ref={(el) => {
             if (el) {
-              el.$options.name = "readonly";
               el.$options.items = items.slice(0, 4);
             }
           }}

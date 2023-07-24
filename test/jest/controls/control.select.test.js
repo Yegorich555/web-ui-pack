@@ -1,5 +1,6 @@
 import { WUPSelectControl } from "web-ui-pack";
 import { ShowCases } from "web-ui-pack/controls/baseCombo";
+import observer from "web-ui-pack/helpers/observer";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
 
@@ -115,9 +116,22 @@ describe("control.select", () => {
     expect(onErr).not.toBeCalled();
     expect(el.$refInput.value).toBe("Harry");
 
-    el.$options.items = [{ text: "Helica", value: 5 }];
+    const item = { text: "Helica", value: 5 };
+    el.$options.items = [item];
     jest.advanceTimersByTime(2);
     expect(onErr).toBeCalledTimes(1); // because it doesn't fit value 11
+    expect(el.$options.items[0]).toBe(item); // nested items must be not observed
+    expect(observer.isObserved(el.$options.items)).toBe(true); // but Array items itself must be observed
+
+    // complex values with id's
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.items = [
+      { text: "Helica", value: { id: 1, name: "He" } },
+      { text: "Diana", value: { id: 2, name: "Di" } },
+    ];
+    el.$value = { id: 2 };
+    jest.advanceTimersByTime(2);
+    expect(el.$refInput.value).toBe("Diana");
   });
 
   test("pending state", async () => {
@@ -340,7 +354,7 @@ describe("control.select", () => {
     expect(el.$refInput.readOnly).toBe(true);
     expect(el.$refInput.value).toBeTruthy();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-owns="txt2" aria-controls="txt2" readonly=""><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-select>"`
+      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-owns="txt2" aria-controls="txt2" readonly=""><strong></strong></span><button clear="back" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-select>"`
     );
     await h.userClick(el.$refInput);
     await h.wait();
@@ -855,6 +869,50 @@ describe("control.select", () => {
     expect(el.$value).toBe(20);
   });
 
+  test("clear by Backspace+Enter", async () => {
+    el.$value = getItems()[0].value;
+    el.focus();
+    await h.wait();
+    expect(el.$isShown).toBe(true);
+
+    // remove whole text + press Enter => set value to undefined
+    expect(el.$isRequired).toBe(false);
+    expect(el.$refInput.value).toBe(getItems()[0].text);
+    h.setInputCursor(el.$refInput, `|${el.$refInput.value}|`); // select all
+    expect(await h.userRemove(el.$refInput)).toBe("|");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(el.$value).toBe(undefined); // value resets when input empty & notRequired
+    expect(el.$refInput.value).toBe("");
+    expect(el.$isShown).toBe(false);
+
+    // remove partially text + press Enter => reset to prev value
+    el.$value = getItems()[0].value;
+    await h.wait(1);
+    expect(el.$refInput.value).toBe(getItems()[0].text);
+    h.setInputCursor(el.$refInput, `${el.$refInput.value}|`);
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(el.$value).toBe(getItems()[0].value); // value reverted because partially removed
+    expect(el.$refInput.value).toBe(getItems()[0].text);
+
+    // remove whole text + press Enter when required => reset to prev value
+    el.$options.validations = { required: true };
+    el.$value = getItems()[1].value;
+    await h.wait(1);
+    el.$showMenu();
+    expect(el.$isRequired).toBe(true);
+    await h.wait(1);
+    expect(el.$refInput.value).toBe(getItems()[1].text);
+    h.setInputCursor(el.$refInput, `|${el.$refInput.value}|`); // select all
+    expect(await h.userRemove(el.$refInput)).toBe("|");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(el.$value).toBe(getItems()[1].value); // value reverted because isRequired
+    expect(el.$refInput.value).toBe(getItems()[1].text);
+    expect(el.$isShown).toBe(false);
+  });
+
   test("no opening by click on btnClear", async () => {
     el.$value = 10;
     await h.wait(1);
@@ -1145,7 +1203,7 @@ describe("control.select", () => {
       expect(el.$value).toStrictEqual(undefined);
       expect(el.$refInput.value).toBe("");
       expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-        `"<ul id="txt8" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option">Donny</li><li role="option" aria-selected="false">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
+        `"<ul id="txt8" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="false">Donny</li><li role="option" aria-selected="false">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
       );
 
       await h.userClick(el.querySelectorAll("li")[0]); // select 1st item
@@ -1153,7 +1211,7 @@ describe("control.select", () => {
       expect(el.$value).toStrictEqual([10]);
       expect(el.$refInput.value).toBe("Donny, ");
       expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-        `"<ul id="txt8" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
+        `"<ul id="txt8" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true">Donny</li><li role="option" aria-selected="false">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
       );
       el.selectValue(10); // de-select just for coverage
 
@@ -1210,6 +1268,31 @@ describe("control.select", () => {
       el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); // select focused item in menu
       await h.wait(1);
       expect(el.$value).toStrictEqual([20, 10]);
+    });
+
+    test("readOnlyInput", async () => {
+      el.$options.readOnlyInput = true;
+      await h.wait(1);
+      expect(el.$refInput.readOnly).toBe(true);
+
+      el.$options.readOnlyInput = false;
+      await h.wait(1);
+      expect(el.$refInput.readOnly).toBe(false);
+
+      el.$options.readOnlyInput = getItems().length - 2;
+      await h.wait(1);
+      expect(el.$refInput.readOnly).toBe(true);
+
+      el.$options.readOnlyInput = getItems().length + 1;
+      await h.wait(1);
+      expect(el.$refInput.readOnly).toBe(false);
+
+      el.$options.items = Promise.resolve(getItems());
+      jest.advanceTimersByTime(1); // WARN: jest can catch exception here after tests are finished
+      expect(el.$isPending).toBe(true);
+      expect(el.$refInput.readOnly).toBe(true); // because isPending
+      await h.wait();
+      expect(el.$refInput.readOnly).toBe(false);
     });
   });
 });

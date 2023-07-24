@@ -294,20 +294,25 @@ export default class WUPTextControl<
           contain: strict;
           position: relative;
           z-index: 1;
+          font-size: inherit;
         }
         :host label>span + button {
           margin-right: -0.5em;
         }
         :host button[clear] {
-          background: none;
           align-self: center;
+          background: none;
           cursor: pointer;
+          --ctrl-icon-img: var(--wup-icon-cross);
         }
         :host button[clear]:after {
           content: "";
           padding: 0;
-          -webkit-mask-image: var(--wup-icon-cross);
-          mask-image: var(--wup-icon-cross);
+          -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+        }
+        :host button[clear=back]:after {
+          --ctrl-icon-img: var(--wup-icon-back);
         }
         :host button[clear]:after,
         :host button[clear]:before {
@@ -397,7 +402,7 @@ export default class WUPTextControl<
 
   /** Returns true if need to use custom undo/redo (required when input somehow formatted/masked) */
   protected canHandleUndo(): boolean {
-    return !!this._opts.mask;
+    return true; // !!this._opts.mask; // otherwise it's wrong for all controls that must handle btnClear Or Esc key
   }
 
   protected get validations(): WUP.Text.Options["validations"] {
@@ -408,10 +413,7 @@ export default class WUPTextControl<
   }
 
   protected override renderControl(): void {
-    /* istanbul ignore else */
-    if (this.$refInput.type !== "textarea") {
-      (this.$refInput as HTMLInputElement).type = "text";
-    }
+    (this.$refInput as HTMLInputElement).type = "text";
     this.$refInput.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", this.$refInput.id);
 
@@ -566,7 +568,6 @@ export default class WUPTextControl<
 
     super.gotChanges(propsChanged as any);
 
-    /* istanbul ignore else */
     if (this._opts.clearButton) {
       this.$refBtnClear = this.$refBtnClear || this.renderBtnClear();
     } else if (this.$refBtnClear) {
@@ -586,29 +587,20 @@ export default class WUPTextControl<
   protected override gotKeyDown(e: KeyboardEvent): void {
     super.gotKeyDown(e);
 
-    if (this.canHandleUndo()) {
-      if (e.altKey) {
-        return;
-      }
-
-      // otherwise custom redo/undo works wrong (browser stores to history big chunks and not fired events if history emptied)
-      const isUndo = (e.ctrlKey || e.metaKey) && e.key === "z";
-      const isRedo = ((e.ctrlKey || e.metaKey) && e.key === "Z") || (e.ctrlKey && e.key === "y" && !e.metaKey);
-      if (isRedo || isUndo) {
+    if (!e.altKey) {
+      // WARN: need handle only redo because undo works from browser-side itself but undo - doesn't still beforeInput.preventDefault()
+      const isUndo = (e.ctrlKey || e.metaKey) && e.code === "KeyZ";
+      const isRedo = (isUndo && e.shiftKey) || (e.ctrlKey && e.code === "KeyY" && !e.metaKey);
+      // isUndo &&= !isRedo;
+      if (isRedo && this.canHandleUndo()) {
+        e.preventDefault();
+        // otherwise custom redo/undo works wrong (browser stores to history big chunks and not fired events if history emptied)
         if (isRedo && !this._histRedo?.length) {
           return;
         }
-        if (isUndo && !this._histUndo?.length) {
-          return;
-        }
-        e.preventDefault();
-        const inputType = isRedo ? "historyRedo" : "historyUndo";
-        setTimeout(() => {
-          this.$refInput.dispatchEvent(new InputEvent("beforeinput", { cancelable: true, bubbles: true, inputType })) &&
-            setTimeout(() =>
-              this.$refInput.dispatchEvent(new InputEvent("input", { cancelable: false, bubbles: true, inputType }))
-            );
-        });
+        this.$refInput.dispatchEvent(
+          new InputEvent("beforeinput", { cancelable: true, bubbles: true, inputType: "historyRedo" })
+        );
       }
     }
   }
@@ -617,30 +609,32 @@ export default class WUPTextControl<
   protected gotBeforeInput(e: WUP.Text.GotInputEvent): void {
     this.#declineInputEnd?.call(this);
 
-    if (this.canHandleUndo()) {
-      switch (e!.inputType) {
-        case "historyUndo": // Ctrl+Z
-          this.historyUndoRedo(false);
-          break;
-        case "historyRedo": // Ctrl+Shift+Z
-          this.historyUndoRedo(true);
-          break;
-        default:
-          {
-            if (!this._histUndo) {
-              this._histUndo = [];
-            }
-            const snap = this.historyToSnapshot(e.target.value, e.target.selectionStart || 0);
-            const isChanged = this._histUndo[this._histUndo.length - 1] !== snap;
-            isChanged && this._histUndo!.push(snap);
-          }
-          break;
-      }
+    let isHandle = false; // inputEvent must be prevented if history is empty - possible when browser calls historyUndo
+    let isUndoRedoSuccess = false;
+    let isRedo = false;
+    switch (e!.inputType) {
+      case "historyRedo": // Ctrl+Shift+Z
+        isRedo = true;
+      // eslint-disable-next-line no-fallthrough
+      case "historyUndo": // Ctrl+Z
+        // WARN: historyUndo can be fired is user shakes iPhone or click Undo button in editMenu
+        isHandle = this.canHandleUndo();
+        isUndoRedoSuccess = isHandle && this.historyUndoRedo(isRedo);
+        break;
+      default:
+        this.canHandleUndo() && this.historySave(e.target.value, e.target.selectionEnd);
+        break;
     }
 
-    if (this._opts.mask) {
+    if (isHandle) {
+      e.preventDefault(); // prevent default to avoid browser-internal-history cleaning
+      isUndoRedoSuccess &&
+        this.$refInput.dispatchEvent(
+          new InputEvent("input", { cancelable: false, bubbles: true, inputType: e.inputType })
+        ); // fire manually because need to process undo/redo (but without browser-internal history)
+    } else if (this._opts.mask) {
       this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask, e.target.value);
-      this.refMask.handleBeforInput(e);
+      this.refMask.handleBeforeInput(e);
     }
   }
 
@@ -650,7 +644,6 @@ export default class WUPTextControl<
     const el = e.target as WUP.Text.Mask.HandledInput;
     let txt = el.value;
 
-    /* istanbul ignore else */
     if (this._opts.mask) {
       const prev = el._maskPrev?.value;
       txt = this.maskInputProcess(e);
@@ -660,7 +653,6 @@ export default class WUPTextControl<
       }
     }
 
-    // /* istanbul ignore else */
     // if (e.setValuePrevented) { // use canParse instead
     //   return;
     // }
@@ -733,8 +725,7 @@ export default class WUPTextControl<
     }
 
     if (declinedAdd) {
-      this._histUndo!.pop();
-      this._histUndo!.push(this.historyToSnapshot(mi.value, pos)); // fix when ###: "12|" + "3b" => 123|
+      this.historySave(mi.value, pos); // fix when ###: "12|" + "3b" => 123|
       this.declineInput(pos);
     } else {
       el.value = mi.value;
@@ -775,21 +766,20 @@ export default class WUPTextControl<
     return { pos, v };
   }
 
+  /** Array of history input changes */
   _histUndo?: Array<string>;
+  /** Array of history-back input changes */
   _histRedo?: Array<string>;
   /** Undo/redo input value (only if canHandleUndo() === true)
-   * @returns true if action succeed (history not empty) */
-  historyUndoRedo(toNext: boolean): boolean {
-    if (!this.canHandleUndo()) {
-      throw new Error(`${this.tagName}. Custom history disabled (canHandleUndo must return true)`);
-    }
-    const from = toNext ? this._histRedo : this._histUndo;
+   * @returns true if action succeeded (history allowed & not empty) */
+  historyUndoRedo(isRedo: boolean): boolean {
+    const from = isRedo ? this._histRedo : this._histUndo;
     if (from?.length) {
       const el = this.$refInput;
       if (!this._histRedo) {
         this._histRedo = [];
       }
-      const to = !toNext ? this._histRedo! : this._histUndo!;
+      const to = !isRedo ? this._histRedo! : this._histUndo!;
       to.push(this.historyToSnapshot(el.value, el.selectionStart || 0));
 
       const hist = this.historyFromSnapshot(from.pop()!);
@@ -801,11 +791,21 @@ export default class WUPTextControl<
     return false;
   }
 
+  /** Save to history value & caret position */
+  protected historySave(value: string, selectionEnd: number | null): void {
+    if (!this._histUndo) {
+      this._histUndo = [];
+    }
+    const snap = this.historyToSnapshot(value, selectionEnd || 0);
+    const isChanged = this._histUndo[this._histUndo.length - 1] !== snap;
+    isChanged && this._histUndo!.push(snap);
+  }
+
   #declineInputEnd?: () => void;
   /** Make undo for input after 100ms when user types not allowed chars
    * @tutorial Troubleshooting
    * * declineInput doesn't trigger beforeinput & input events (do it manually if required) */
-  protected declineInput(nextCursorPos?: number): void {
+  protected declineInput(nextCaretPos?: number): void {
     if (!this.canHandleUndo()) {
       throw new Error(`${this.tagName}. Custom history disabled (canHandleUndo must return true)`);
     }
@@ -815,7 +815,7 @@ export default class WUPTextControl<
       const hist = this.historyFromSnapshot(this._histUndo!.pop()!);
       const el = this.$refInput;
       el.value = hist.v;
-      const pos = nextCursorPos ?? hist.pos;
+      const pos = nextCaretPos ?? hist.pos;
       el.setSelectionRange(pos, pos);
       this.refMask && this.renderMaskHolder(this._opts.maskholder, this.refMask.leftLength);
       this.renderPostfix(this._opts.postfix);
@@ -834,11 +834,23 @@ export default class WUPTextControl<
   /** Called to update/reset value for <input/> */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected setInputValue(v: ValueType | undefined | string, reason: SetValueReasons): void {
+    if (reason === SetValueReasons.clear && this.canHandleUndo()) {
+      this.historySave(this.$refInput.value, this.$refInput.selectionEnd);
+    }
+
     const str = v != null ? (v as any).toString() : "";
     this.$refInput.value = str;
     this._opts.mask && this.maskInputProcess(null);
     this.renderPostfix(this._opts.postfix);
     this._onceErrName === this._errName && this.goHideError(); // hide mask-message because value has higher priority than inputValue
+  }
+
+  protected override setClearState(): ValueType | undefined {
+    const next = super.setClearState();
+    if (this.$refBtnClear) {
+      this.$refBtnClear.setAttribute("clear", this.#ctr.$isEmpty(next) ? "" : "back");
+    }
+    return next;
   }
 
   _onceErrName?: string;

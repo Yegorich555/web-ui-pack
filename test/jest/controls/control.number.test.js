@@ -136,6 +136,12 @@ describe("control.number", () => {
     el.$refInput.dispatchEvent(new InputEvent("input", { inputType: "insertFromPaste", bubbles: true }));
     expect(h.getInputCursor(el.$refInput)).toBe("11.53|");
     expect(el.$value).toBe(11.53);
+
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options = { ...el.$options, format: { maxDecimal: 2 } }; // previously was issue with spread
+    el.$initValue = 2.13;
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("2.13");
   });
 
   test("history undo/redo", async () => {

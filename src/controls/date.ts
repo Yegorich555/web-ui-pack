@@ -5,7 +5,7 @@ import localeInfo from "../objects/localeInfo";
 import WUPPopupElement from "../popup/popupElement";
 import WUPBaseComboControl from "./baseCombo";
 import { SetValueReasons, ValidateFromCases } from "./baseControl";
-import WUPCalendarControl, { PickersEnum } from "./calendar";
+import WUPCalendarControl from "./calendar";
 
 /* c8 ignore next */
 /* istanbul ignore next */
@@ -169,7 +169,8 @@ export default class WUPDateControl<
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Date.Options> | null): void {
-    this._opts.utc = this.getAttr("utc", "bool");
+    WUPCalendarControl.prototype.gotChangesSharable.call(this);
+
     this._opts.format = this.getAttr("format") || "YYYY-MM-DD";
     if (this._opts.format.toUpperCase().includes("MMM")) {
       this.throwError(`'MMM' in format isn't supported`);
@@ -184,20 +185,6 @@ export default class WUPDateControl<
         .replace(/mm|MM/, "00")
         .replace(/[mM]/, "#0"); // convert yyyy-mm-dd > 0000-00-00; d/m/yyyy > #0/#0/0000
     this._opts.maskholder = this._opts.maskholder ?? this._opts.format.replace(/([mMdD]){1,2}/g, "$1$1");
-    this._opts.min = this.getAttr("min", "obj");
-    this._opts.max = this.getAttr("max", "obj");
-    this._opts.exclude = this.getAttr<Date[]>("exclude", "ref");
-
-    const attr = this.getAttribute("startwith");
-    if (attr != null) {
-      // prettier-ignore
-      switch (attr.toLowerCase()) {
-        case "year": this._opts.startWith = PickersEnum.Year; break;
-        case "month": this._opts.startWith = PickersEnum.Month; break;
-        case "day": this._opts.startWith = PickersEnum.Day; break;
-        default: delete this._opts.startWith;
-      }
-    }
 
     super.gotChanges(propsChanged as any);
   }
@@ -253,11 +240,14 @@ export default class WUPDateControl<
     el.$options.validationCase = 0; // disable any validations for control
     const v = this.$value;
     el.$initValue = v && !Number.isNaN(v.valueOf()) ? v : undefined;
-    el.addEventListener("$change", (e) => {
-      e.stopPropagation(); // otherwise date change event fired twice
-      !el._isStopChanges && this.selectValue(el.$value as any);
-    });
-
+    el.setValue = (val, reason) => {
+      const r = WUPCalendarControl.prototype.setValue.call(el, val, reason);
+      if (reason === SetValueReasons.userSelect) {
+        this.selectValue(el.$value as any);
+      }
+      return r;
+    };
+    el.$onChange = (e) => e.stopPropagation(); // otherwise date change event fired twice
     popup.appendChild(el);
     return el;
   }

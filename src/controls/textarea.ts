@@ -119,6 +119,11 @@ export default class WUPTextareaControl<
     // not supported
   }
 
+  protected canHandleUndo(): boolean {
+    // todo enable custom history && optimize for textarea and maybe other controls
+    return false; // todo btnClear+undo doesn't work till it returns false
+  }
+
   // protected override gotBeforeInput(e: WUP.Text.GotInputEvent): void {
   //   super.gotBeforeInput(e);
   //   let data: string | null = null;
@@ -175,12 +180,17 @@ export default class WUPTextareaControl<
   // }
 
   protected override gotKeyDown(e: KeyboardEvent & { submitPrevented?: boolean }): void {
-    if (e.ctrlKey || e.metaKey) {
-      e.preventDefault(); // prevent Bold,Italic etc. styles until textrich is developed
-    }
     super.gotKeyDown(e);
     if (e.key === "Enter") {
       e.submitPrevented = true;
+    }
+  }
+
+  protected override gotBeforeInput(e: WUP.Text.GotInputEvent): void {
+    if (e.inputType.startsWith("format")) {
+      e.preventDefault(); // prevent Bold,Italic etc. styles until textrich is developed
+    } else {
+      super.gotBeforeInput(e);
     }
   }
 

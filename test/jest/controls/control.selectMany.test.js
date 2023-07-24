@@ -110,7 +110,7 @@ describe("control.selectMany", () => {
     await h.wait();
     expect(el.$value).toStrictEqual([10, 30, 20, 40]); // because selected Splinter
     expect(el.$refInput.value).toBe("");
-    expect(el.$isShown).toBe(false); // because no-items anymore
+    // deprecated feature: expect(el.$isShown).toBe(false); // because no-items anymore
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
       `"<ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="display: none;">Donny</li><li role="option" aria-selected="false" id="txt4" style="display: none;">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option" style="display: none;" aria-selected="false" id="txt8">Splinter</li><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
     );
@@ -329,7 +329,7 @@ describe("control.selectMany", () => {
     `);
     expect(handledKeydown("ArrowRight")).toBe(false); // nothing to focus
     await h.userTypeText(el.$refInput, "mi");
-    expect(handledKeydown("ArrowLeft")).toBe(false); // because carret at the end of input
+    expect(handledKeydown("ArrowLeft")).toBe(false); // because caret at the end of input
 
     el.$refInput.selectionStart = 0;
     el.$refInput.selectionEnd = 0;
