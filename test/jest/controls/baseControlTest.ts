@@ -1,6 +1,11 @@
 /* eslint-disable jest/no-conditional-expect */
 /* eslint-disable jest/no-export */
-import WUPBaseControl, { ClearActions, ValidationCases, ValidateFromCases } from "web-ui-pack/controls/baseControl";
+import WUPBaseControl, {
+  ClearActions,
+  ValidationCases,
+  ValidateFromCases,
+  SetValueReasons,
+} from "web-ui-pack/controls/baseControl";
 import * as h from "../../testHelper";
 import { BaseTestOptions } from "../../testHelper";
 
@@ -131,6 +136,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$isChanged).toBe(false);
       jest.advanceTimersByTime(1);
       expect(spyChange).toBeCalledTimes(1); // change event happens even via $initValue
+      expect(spyChange.mock.lastCall[0].detail).toBe(SetValueReasons.initValue);
 
       el.$initValue = cfg.initValues[1].value;
       expect(el.$value).toBe(cfg.initValues[1].value);
@@ -146,6 +152,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$isChanged).toBe(true);
       jest.advanceTimersByTime(1);
       expect(spyChange).toBeCalledTimes(3); // change event happens even via $initValue
+      expect(spyChange.mock.lastCall[0].detail).toBe(SetValueReasons.manual);
 
       el.$initValue = cfg.initValues[1].value;
       expect(el.$value).toBe(cfg.initValues[2].value);

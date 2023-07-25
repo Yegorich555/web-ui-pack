@@ -19,6 +19,8 @@ export const enum SetValueReasons {
   userInput,
   /** When user selected existed option on UI and don't need to call selectMenuItem again (for combobox) */
   userSelect,
+  /** When $initValue is changed */
+  initValue,
 }
 
 /** Cases of validation for WUP Controls */
@@ -440,9 +442,7 @@ export default abstract class WUPBaseControl<
   }
 
   set $value(v: ValueType | undefined) {
-    const was = this.#isDirty;
     this.setValue(v, SetValueReasons.manual);
-    this.#isDirty = was;
   }
 
   #initValue?: ValueType;
@@ -458,8 +458,10 @@ export default abstract class WUPBaseControl<
     this.#initValue = v;
     if (canUpdate && !this.#ctr.$isEqual(v, was)) {
       // WARN: comparing required for SelectControl when during the parse it waits for promise
-      this.$value = v; // WARN: it's fire $change event despite on value set from $initValue
+      this.setValue(v, SetValueReasons.initValue);
     }
+    // todo need to call this.setClearState(); // otherwise it's called from setValue
+
     if (!(this as any)._noDelInitValueAttr) {
       this._isStopChanges = true;
       this.removeAttribute("initvalue");
@@ -1102,8 +1104,9 @@ export default abstract class WUPBaseControl<
       this.setClearState();
       return null;
     }
-
-    this.$isDirty = true;
+    if (reason !== SetValueReasons.initValue && reason !== SetValueReasons.manual) {
+      this.$isDirty = true;
+    }
     const isChanged = !this.#ctr.$isEqual(v, prev);
     if (!isChanged) {
       return false;

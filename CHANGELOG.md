@@ -6,6 +6,10 @@
 
 - **Text based controls**. _$initValue + click on button[clear] + Ctrl+Z => history undo does't work_
 
+**New/Features**:
+
+- **Controls**. Event `$change` and callback `$onChange` has prop `SetValueReason.initValue` now
+
 ## 0.7.1 (Jul 24, 2023)
 
 **BREAKING CHANGES**:
