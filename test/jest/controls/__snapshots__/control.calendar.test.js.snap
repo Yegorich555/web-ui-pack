@@ -1252,7 +1252,6 @@ padding:0;}
       }
       WUP-CALENDAR li[focused] {
         box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
-        //box-shadow: 0 0 3px 1px var(--ctrl-focus);
         opacity: 1;
       }
       WUP-CALENDAR li[focused][aria-selected] {
@@ -1263,9 +1262,8 @@ padding:0;}
           background-color: var(--ctrl-clr-selected-bg);
           color: var(--ctrl-clr-selected);
         }
-        ol&gt;li:hover:not([disabled]) {
+        WUP-CALENDAR ol&gt;li:hover:not([disabled]) {
           box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
-          //box-shadow: 0 0 3px 1px var(--ctrl-focus);
           opacity: 1;
         }
       }

@@ -247,7 +247,6 @@ export default class WUPCalendarControl<
       }
       :host li[focused] {
         box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
-        //box-shadow: 0 0 3px 1px var(--ctrl-focus);
         opacity: 1;
       }
       :host li[focused][aria-selected] {
@@ -258,9 +257,8 @@ export default class WUPCalendarControl<
           background-color: var(--ctrl-clr-selected-bg);
           color: var(--ctrl-clr-selected);
         }
-        ol>li:hover:not([disabled]) {
+        :host ol>li:hover:not([disabled]) {
           box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
-          //box-shadow: 0 0 3px 1px var(--ctrl-focus);
           opacity: 1;
         }
       }
