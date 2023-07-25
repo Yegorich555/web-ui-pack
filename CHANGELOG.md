@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.6.2 (\_\_\_/)
+## 0.7.1 (Jul 24, 2023)
 
 **BREAKING CHANGES**:
 
