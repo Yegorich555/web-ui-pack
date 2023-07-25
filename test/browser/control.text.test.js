@@ -30,5 +30,16 @@ describe("control.text", () => {
     expect(await page.evaluate(() => document.getElementById("trueEl").$refInput.value)).toBe("Hi ther");
     await histRedo({ isCtrlY: true, isMeta: false });
     expect(await page.evaluate(() => document.getElementById("trueEl").$refInput.value)).toBe("Hi there");
+
+    await page.evaluate(() => {
+      const el = document.body.appendChild(document.createElement("wup-text"));
+      el.id = "newEl";
+      el.$initValue = "Mike";
+    });
+    await page.waitForTimeout(2); // timeout required because of debounceFilters
+    await page.click("#newEl [clear]");
+    expect(await page.evaluate(() => document.getElementById("newEl").$refInput.value)).toBe("");
+    await histUndo();
+    expect(await page.evaluate(() => document.getElementById("newEl").$refInput.value)).toBe("Mike");
   });
 });

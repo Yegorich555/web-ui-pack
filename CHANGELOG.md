@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.2 (\_\_\_)
+
+**Fixes**:
+
+- **Text based controls**. _$initValue + click on button[clear] + Ctrl+Z => history undo does't work_
+
 ## 0.7.1 (Jul 24, 2023)
 
 **BREAKING CHANGES**:

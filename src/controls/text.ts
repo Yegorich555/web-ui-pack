@@ -588,18 +588,25 @@ export default class WUPTextControl<
     super.gotKeyDown(e);
 
     if (!e.altKey) {
+      // WARN: issue: click btnClear + shake iPhone to call undo - undo isn't called in this case (because no history saved into browser itself)
       // WARN: need handle only redo because undo works from browser-side itself but undo - doesn't still beforeInput.preventDefault()
-      const isUndo = (e.ctrlKey || e.metaKey) && e.code === "KeyZ";
+      let isUndo = (e.ctrlKey || e.metaKey) && e.code === "KeyZ"; // 1st browser undo doesn't work after btnClear
       const isRedo = (isUndo && e.shiftKey) || (e.ctrlKey && e.code === "KeyY" && !e.metaKey);
-      // isUndo &&= !isRedo;
-      if (isRedo && this.canHandleUndo()) {
-        e.preventDefault();
-        // otherwise custom redo/undo works wrong (browser stores to history big chunks and not fired events if history emptied)
+      isUndo &&= !isRedo;
+      if ((isUndo || isRedo) && this.canHandleUndo()) {
+        e.preventDefault(); // prevent original onInput and call manually
+        if (isUndo && !this._histUndo?.length) {
+          return;
+        }
         if (isRedo && !this._histRedo?.length) {
           return;
         }
         this.$refInput.dispatchEvent(
-          new InputEvent("beforeinput", { cancelable: true, bubbles: true, inputType: "historyRedo" })
+          new InputEvent("beforeinput", {
+            cancelable: true,
+            bubbles: true,
+            inputType: isUndo ? "historyUndo" : "historyRedo",
+          })
         );
       }
     }
