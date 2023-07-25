@@ -97,8 +97,7 @@ declare global {
        * @defaultValue 100ms */
       focusDebounceMs?: number;
       /** Behavior that expected for clearing value inside control (via pressEsc or btnClear)
-       * @defaultValue ClearActions.initClearBack
-       * @not observed */
+       * @defaultValue ClearActions.initClearBack */
       clearActions: ClearActions;
       /** Rules defined for control;
        * * all functions must return error-message when value === undefined
@@ -213,6 +212,7 @@ export default abstract class WUPBaseControl<
       "readOnly",
       "validations",
       "skey",
+      "clearActions",
     ];
   }
 
@@ -456,12 +456,11 @@ export default abstract class WUPBaseControl<
     const was = this.#initValue;
     const canUpdate = (!this.$isReady && this.$value === undefined) || (!this.$isDirty && !this.$isChanged);
     this.#initValue = v;
-    if (canUpdate && !this.#ctr.$isEqual(v, was)) {
-      // WARN: comparing required for SelectControl when during the parse it waits for promise
-      this.setValue(v, SetValueReasons.initValue);
+    let needUpdate = !this.#ctr.$isEqual(v, was); // WARN: comparing required for SelectControl when during the parse it waits for promise
+    if (canUpdate && needUpdate) {
+      needUpdate = !this.setValue(v, SetValueReasons.initValue);
     }
-    // todo need to call this.setClearState(); // otherwise it's called from setValue
-
+    needUpdate && this.setClearState();
     if (!(this as any)._noDelInitValueAttr) {
       this._isStopChanges = true;
       this.removeAttribute("initvalue");

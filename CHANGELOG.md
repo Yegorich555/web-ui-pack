@@ -4,7 +4,9 @@
 
 **Fixes**:
 
-- **Text based controls**. _$initValue + click on button[clear] + Ctrl+Z => history undo does't work_
+- **Text based controls**.
+  - _$initValue + click on button[clear] + Ctrl+Z => history undo does't work_
+  - _button[clear] isn't updated on `$initValue` or `$options.clearActions` changing_
 
 **New/Features**:
 

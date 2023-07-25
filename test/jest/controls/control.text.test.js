@@ -224,4 +224,28 @@ describe("control.text", () => {
     await h.wait(1);
     expect(el.$refBtnClear).toBeUndefined();
   });
+
+  test("options.clearActions", async () => {
+    el.$options.clearActions = WUPTextControl.$defaults.clearActions;
+    await h.wait(1);
+    expect(el.$refBtnClear.outerHTML).toMatchInlineSnapshot(
+      `"<button clear="" tabindex="-1" aria-hidden="true" type="button"></button>"`
+    );
+    el.$value = "hello";
+    expect(el.$refBtnClear.outerHTML).toMatchInlineSnapshot(
+      `"<button clear="" tabindex="-1" aria-hidden="true" type="button"></button>"`
+    );
+    el.$initValue = "hello";
+    expect(el.$refBtnClear.outerHTML).toMatchInlineSnapshot(
+      `"<button clear="" tabindex="-1" aria-hidden="true" type="button"></button>"`
+    );
+    el.$value = "123";
+    expect(el.$refBtnClear.outerHTML).toMatchInlineSnapshot(
+      `"<button clear="back" tabindex="-1" aria-hidden="true" type="button"></button>"`
+    );
+    el.$initValue = "123";
+    expect(el.$refBtnClear.outerHTML).toMatchInlineSnapshot(
+      `"<button clear="" tabindex="-1" aria-hidden="true" type="button"></button>"`
+    );
+  });
 });
