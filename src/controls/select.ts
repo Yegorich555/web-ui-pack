@@ -320,7 +320,7 @@ export default class WUPSelectControl<
       this.$isReadOnly ||
       this.$isPending ||
       r === true ||
-      (typeof r === "number" && r < (this._cachedItems?.length || 0) && !this._opts.allowNewValue); // WARN: _cached items can be undefined when fetching not started yet
+      (typeof r === "number" && r > (this._cachedItems?.length || 0) && !this._opts.allowNewValue); // WARN: _cached items can be undefined when fetching not started yet
   }
 
   override setupInitValue(propsChanged: Array<keyof WUP.Select.Options> | null): void {

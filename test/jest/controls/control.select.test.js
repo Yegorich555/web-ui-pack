@@ -1394,6 +1394,10 @@ describe("control.select", () => {
 
       el.$options.readOnlyInput = getItems().length - 2;
       await h.wait(1);
+      expect(el.$refInput.readOnly).toBe(false);
+
+      el.$options.readOnlyInput = getItems().length + 1;
+      await h.wait(1);
       expect(el.$refInput.readOnly).toBe(true);
 
       // num-val must be ignored if allowNewValue: true
@@ -1403,10 +1407,6 @@ describe("control.select", () => {
       el.$options.allowNewValue = false;
       await h.wait(1);
       expect(el.$refInput.readOnly).toBe(true);
-
-      el.$options.readOnlyInput = getItems().length + 1;
-      await h.wait(1);
-      expect(el.$refInput.readOnly).toBe(false);
 
       el.$options.items = Promise.resolve(getItems());
       jest.advanceTimersByTime(1); // WARN: jest can catch exception here after tests are finished
