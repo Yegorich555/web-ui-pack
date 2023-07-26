@@ -510,11 +510,13 @@ export default class WUPCalendarControl<
 
       this.#refreshSelected = () => {
         let uv = this.$value as Date;
+        let item;
         if (uv) {
           uv = this.normalizeToUTC(uv);
           i = r.getIndex(uv, first);
-          this.selectItem(a[i]);
+          item = a[i];
         }
+        this.selectItem(item);
       };
       this.#refreshSelected();
 

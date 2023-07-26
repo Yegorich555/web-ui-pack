@@ -294,7 +294,7 @@ describe("control.date", () => {
     }
     expect(el.$refError).toBe(undefined);
     expect(el.$value).toBe(undefined);
-
+    expect(el.$refPopup.querySelector("[aria-selected=true]")).toBeFalsy();
     // just for coverage (cases impossible in ordinary flow)
     expect(el.parseInput("b022-10-16")).toBe(undefined);
     el.$options.utc = false;

@@ -1124,7 +1124,6 @@ exports[`control.date validations options.validationCase 2`] = `
                 27
               </li>
               <li
-                aria-selected="true"
                 role="gridcell"
               >
                 28

@@ -6115,7 +6115,6 @@ exports[`control.calendar validations $options.validationShowAll 3`] = `
           </li>
           <li
             aria-current="date"
-            aria-selected="true"
             role="gridcell"
           >
             2022
@@ -6705,7 +6704,6 @@ exports[`control.calendar validations options.validationCase 4`] = `
           </li>
           <li
             aria-current="date"
-            aria-selected="true"
             role="gridcell"
           >
             2022
