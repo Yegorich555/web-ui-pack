@@ -39,7 +39,7 @@ declare global {
       showCase: ShowCases;
       /** Set true to make input not editable but allow select items via popup-menu (ordinary dropdown mode)
        * @tutorial
-       * * set number X to enable autoMode where input.readOnly = items.length < X */
+       * * set number X to enable autoMode where `nput.readOnly = items.length < X` */
       readOnlyInput?: boolean | number;
     }
     interface Options<T = any, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, Defaults<T, VM> {
@@ -320,7 +320,7 @@ export default class WUPSelectControl<
       this.$isReadOnly ||
       this.$isPending ||
       r === true ||
-      (typeof r === "number" && r < (this._cachedItems?.length || 0)); // WARN: _cached items can be undefined when fetching not started yet
+      (typeof r === "number" && r < (this._cachedItems?.length || 0) && !this._opts.allowNewValue); // WARN: _cached items can be undefined when fetching not started yet
   }
 
   override setupInitValue(propsChanged: Array<keyof WUP.Select.Options> | null): void {

@@ -4,10 +4,12 @@
 
 **Fixes**:
 
-- **Text based controls**.
+- **Text based controls**
   - _$initValue + click on button[clear] + Ctrl+Z => history undo does't work_
   - _button[clear] isn't updated on `$initValue` or `$options.clearActions` changing_
-- [SelectControl](src/controls/select.ts). _Fix clearing input + click outside doesn't clear value_
+- [SelectControl](src/controls/select.ts)
+  - _clearing input + click outside doesn't clear value_
+  - `$options.readOnlyInput=7` must be ignored when `allowNewValue` enabled_
 - [CalendarControl](src/controls/calendar.ts). _`$value=undefined` doesn't reset selected_
 
 **New/Features**:
@@ -22,19 +24,19 @@
 
 **Fixes**:
 
-- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts).
+- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts)
   - _Menu scrolled to 1st selected item if even select last one (when multiple is allowed)_
   - _$options.items[0] !== items[0] because wrapped to observer_
   - _Unable to clear value with Backspace+Enter_
 - [SelectManyControl](src/controls/selectMany.ts). _Menu hides when user selects all items - but it's maybe wrong_
-- [RadioControl](src/controls/radio.ts).
+- [RadioControl](src/controls/radio.ts)
   - _$options.items[0] !== items[0] because wrapped to observer_
   - _`$options.readOnly` doesn't work - user able to change value_
-- [CalendarControl](src/controls/calendar.ts).
+- [CalendarControl](src/controls/calendar.ts)
   - _Wrong size of monthPicker if previously scroll dayPicker to min/max date_
   - _User can't scroll when `$initValue` > `$options.max`_
 - [DateControl](src/controls/date.ts). _Menu isn't closed if click on the selected date_
-- [TextareaControl](src/controls/textarea.ts).
+- [TextareaControl](src/controls/textarea.ts)
   - _Exception when try to clear empty control_
   - _`Ctrl + Z` doesn't revert changes_
 - [NumberControl](src/controls/number.ts). _option `format` isn't applied on init_

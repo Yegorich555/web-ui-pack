@@ -1315,6 +1315,14 @@ describe("control.select", () => {
       await h.wait(1);
       expect(el.$refInput.readOnly).toBe(true);
 
+      // num-val must be ignored if allowNewValue: true
+      el.$options.allowNewValue = true;
+      await h.wait(1);
+      expect(el.$refInput.readOnly).toBe(false);
+      el.$options.allowNewValue = false;
+      await h.wait(1);
+      expect(el.$refInput.readOnly).toBe(true);
+
       el.$options.readOnlyInput = getItems().length + 1;
       await h.wait(1);
       expect(el.$refInput.readOnly).toBe(false);
