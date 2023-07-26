@@ -573,7 +573,7 @@ export default class WUPSelectControl<
     }
 
     const popup = await super.goShowMenu(showCase, e);
-    popup && this.selectMenuItemByValue(this.$value); // set aria-selected
+    popup && !this.canClearSelection && this.selectMenuItemByValue(this.$value); // set aria-selected only if input not empty
     return popup;
   }
 
@@ -735,13 +735,15 @@ export default class WUPSelectControl<
     return !!this._opts.multiple;
   }
 
+  /** Returns if possible to de-select menu items when input is empty */
+  private get canClearSelection(): boolean {
+    return !this.$refInput.value && !this.$isRequired && !this._opts.multiple;
+  }
+
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
     this.$isShown && this.focusMenuItem(null); // reset virtual focus: // WARN it's not good enough when this._opts.multiple
     super.gotInput(e);
 
-    const filter = (): any => this.$isShown && this.filterMenuItems();
-
-    let isChanged = false;
     // user can append item by ',' at the end or remove immediately
     if (this._opts.multiple && this.canParseInput(this.$refInput.value)) {
       let str = this.$refInput.value;
@@ -755,12 +757,13 @@ export default class WUPSelectControl<
         const next = this.parseInput(str) as Array<ValueType> | undefined;
         // case 1: user removes 'Item1,| Item2|' - setValue [Item1]
         // case 2: user adds `Item1,| Item2,| -- setValue [Item1, Item2]
-        isChanged = (next || []).length !== ((this.$value as Array<ValueType> | undefined) || []).length;
+        const isChanged = (next || []).length !== ((this.$value as Array<ValueType> | undefined) || []).length;
         isChanged && this.setValue(next as any, SetValueReasons.userInput);
       }
     }
 
-    isChanged ? setTimeout(filter, 1) : filter(); // setValue updates input only after Promise and we need to wait for: NiceToHave deprecate value
+    this.$isShown && this.filterMenuItems();
+    this.canClearSelection && this.selectMenuItem(null); // allow user clear value without pressing Enter
   }
 
   protected override gotFocus(e: FocusEvent): Array<() => void> {
@@ -798,3 +801,4 @@ customElements.define(tagName, WUPSelectControl);
 // NiceToHave: option to allow autoselect item without pressing Enter
 // WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation
 // todo label for="" in Chrome sometimes enables autosuggestion - need to remove it for all controls - need to double-check ???
+// todo multiple:true + selectAll + type 'd': input cleared but 'd' doesn't appear

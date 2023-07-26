@@ -492,7 +492,10 @@ export default abstract class WUPBaseComboControl<
 
   /** Reset input to currentValue; called on focusOut, pressing Escape or Enter */
   protected resetInputValue(): void {
-    this.setInputValue(this.$value, SetValueReasons.clear);
+    const isClear = !this.$refInput.value && !this._selectedMenuItem; // if user cleared input and $hided menu - need to clearValue
+    isClear
+      ? this.setValue(undefined, SetValueReasons.clear)
+      : this.setInputValue(this.$value, SetValueReasons.userSelect);
   }
 
   protected override setInputValue(v: ValueType | undefined, reason: SetValueReasons): void {
@@ -541,3 +544,5 @@ export default abstract class WUPBaseComboControl<
  >>> console.warn('done')
  hide-event
  */
+
+// todo mouseDown>select>mouseUp - closes popup -it's wrong behavior because click event is dirty

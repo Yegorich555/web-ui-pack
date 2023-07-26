@@ -896,6 +896,38 @@ describe("control.select", () => {
     expect(el.$value).toBe(getItems()[0].value); // value reverted because partially removed
     expect(el.$refInput.value).toBe(getItems()[0].text);
 
+    // remove whole text + focusOut => clear value
+    el.$value = getItems()[0].value;
+    el.$showMenu();
+    await h.wait(1);
+    h.setInputCursor(el.$refInput, `|${el.$refInput.value}|`);
+    expect(await h.userRemove(el.$refInput)).toBe("|");
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option" aria-selected="false">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
+    );
+    el.blur();
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("");
+    expect(el.$value).toBe(undefined);
+    // again but when menu closed - in this case filterMenuItems not fired & menu opened again by removeText
+    el.$value = getItems()[0].value;
+    el.focus();
+    await h.wait(1);
+    h.setInputCursor(el.$refInput, `|${el.$refInput.value}|`);
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(el.$isShown).toBe(false);
+    expect(await h.userRemove(el.$refInput)).toBe("|");
+    await h.wait(1);
+    expect(el.$isShown).toBe(true);
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt3" role="listbox" aria-label="Items" tabindex="-1"><li role="option" aria-selected="false">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
+    );
+    el.blur();
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("");
+    expect(el.$value).toBe(undefined);
+
     // remove whole text + press Enter when required => reset to prev value
     el.$options.validations = { required: true };
     el.$value = getItems()[1].value;
