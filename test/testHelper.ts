@@ -495,19 +495,24 @@ export async function userRemove(
 
     let v = el.value;
     let caretPos = el.selectionStart ?? v.length;
-    if (key === "Backspace" && caretPos > 0) {
-      --caretPos;
-    }
-    if (el.selectionStart !== el.selectionEnd) {
-      v = v.substring(0, el.selectionStart!) + v.substring(el.selectionEnd!);
-    } else {
-      v = v.substring(0, caretPos) + v.substring(caretPos + 1);
-    }
-    if (el.value !== v) {
-      el.value = v;
-      el.selectionEnd = caretPos;
-      el.selectionStart = caretPos;
-      el.dispatchEvent(new InputEvent("input", { bubbles: true, data: null, inputType }));
+    const isNothing =
+      el.selectionStart === el.selectionEnd &&
+      ((key === "Backspace" && caretPos === 0) || (key === "Delete" && caretPos === v.length));
+    if (!isNothing) {
+      if (key === "Backspace" && caretPos > 0 && caretPos === el.selectionEnd) {
+        --caretPos;
+      }
+      if (el.selectionStart !== el.selectionEnd) {
+        v = v.substring(0, el.selectionStart!) + v.substring(el.selectionEnd!);
+      } else {
+        v = v.substring(0, caretPos) + v.substring(caretPos + 1);
+      }
+      if (el.value !== v) {
+        el.value = v;
+        el.selectionEnd = caretPos;
+        el.selectionStart = caretPos;
+        el.dispatchEvent(new InputEvent("input", { bubbles: true, data: null, inputType }));
+      }
     }
     jest.advanceTimersByTime(20);
     await Promise.resolve();

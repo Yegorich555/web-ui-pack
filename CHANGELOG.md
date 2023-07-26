@@ -10,6 +10,7 @@
 - [SelectControl](src/controls/select.ts)
   - _clearing input + click outside doesn't clear value_
   - `$options.readOnlyInput=7` must be ignored when `allowNewValue` enabled_
+  - improved input delete behavior for `$options.multiple`
 - [CalendarControl](src/controls/calendar.ts). _`$value=undefined` doesn't reset selected_
 
 **New/Features**:

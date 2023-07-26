@@ -619,7 +619,7 @@ export default class WUPTextControl<
     let isHandle = false; // inputEvent must be prevented if history is empty - possible when browser calls historyUndo
     let isUndoRedoSuccess = false;
     let isRedo = false;
-    switch (e!.inputType) {
+    switch (e.inputType) {
       case "historyRedo": // Ctrl+Shift+Z
         isRedo = true;
       // eslint-disable-next-line no-fallthrough

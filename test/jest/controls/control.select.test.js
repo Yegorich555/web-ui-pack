@@ -1184,7 +1184,7 @@ describe("control.select", () => {
       await h.userRemove(el.$refInput);
       await h.wait(1);
       expect(el.$value).toStrictEqual([10, 30]);
-      expect(h.getInputCursor(el.$refInput)).toBe("Donny, Leo, |"); // NiceToHave: move cursor to next/prev according to Backspace/Delete
+      expect(h.getInputCursor(el.$refInput)).toBe("Donny, |Leo, "); // NiceToHave: move cursor to next/prev according to Backspace/Delete
 
       // initvalue
       el = document.body.appendChild(document.createElement("wup-select"));
@@ -1246,6 +1246,8 @@ describe("control.select", () => {
         `"<ul id="txt8" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true">Donny</li><li role="option" aria-selected="false">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
       );
       el.selectValue(10); // de-select just for coverage
+      // just for coverage
+      expect(el.parseInput("donny, mikky, abc")).toStrictEqual([10, 20]); // abc skipped because no-match
 
       // with allownewvalue
       el.blur();
@@ -1300,6 +1302,85 @@ describe("control.select", () => {
       el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); // select focused item in menu
       await h.wait(1);
       expect(el.$value).toStrictEqual([20, 10]);
+
+      // remove in the middle
+      el.$value = [10, 20];
+      await h.wait(1);
+      expect(el.$refInput.value).toBe("Donny, Mikky, ");
+      h.setInputCursor(el.$refInput, "Donny,| Mikky, ");
+      expect(await h.userRemove(el.$refInput)).toBe("|Mikky, ");
+      expect(el.$value).toStrictEqual([20]);
+      expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("|");
+      expect(el.$value).toBe(undefined);
+
+      // type new char instead of selected
+      el.$value = [10, 20];
+      await h.wait(1);
+      expect(el.$refInput.value).toBe("Donny, Mikky, ");
+      h.setInputCursor(el.$refInput, `|${el.$refInput.value}|`);
+      expect(await h.userTypeText(el.$refInput, "L")).toBe("L|");
+      expect(el.$value).toBe(undefined);
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt12" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" id="txt13" style="display: none;">Donny</li><li role="option" style="display: none;">Donny2</li><li role="option" style="display: none;">Mikky</li><li role="option" style="">Leo</li></ul>"`
+      );
+
+      // remove cases
+      el.$value = [10, 20];
+      await h.wait(1);
+      expect(el.$refInput.value).toBe("Donny, Mikky, ");
+      h.setInputCursor(el.$refInput, `|${el.$refInput.value}|`);
+      expect(await h.userRemove(el.$refInput)).toBe("|");
+
+      el.$value = [10, 20];
+      await h.wait(1);
+      expect(el.$refInput.value).toBe("Donny, Mikky, ");
+      h.setInputCursor(el.$refInput, `|${el.$refInput.value}|`);
+      expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("|");
+
+      el.$value = [10, 20];
+      await h.wait(1);
+      expect(el.$refInput.value).toBe("Donny, Mikky, ");
+      h.setInputCursor(el.$refInput, `|${el.$refInput.value}`);
+      expect(await h.userRemove(el.$refInput)).toBe("|Donny, Mikky, ");
+      h.setInputCursor(el.$refInput, `${el.$refInput.value}|`);
+      expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("Donny, Mikky, |");
+
+      el.$value = [10, 20, 30];
+      await h.wait(1);
+      expect(el.$refInput.value).toBe("Donny, Mikky, Leo, ");
+      h.setInputCursor(el.$refInput, "Donny, Mikky,| Leo, ");
+      expect(await h.userRemove(el.$refInput)).toBe("Donny, |Leo, ");
+      expect(el.$value).toStrictEqual([10, 30]);
+      expect(await h.userRemove(el.$refInput)).toBe("|Leo, ");
+      expect(el.$value).toStrictEqual([30]);
+      expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("|");
+      expect(el.$value).toStrictEqual(undefined);
+
+      el.$value = [10, 20, 30];
+      await h.wait(1);
+      expect(el.$refInput.value).toBe("Donny, Mikky, Leo, ");
+      h.setInputCursor(el.$refInput, "Donny, Mi|kky, Leo, ");
+      expect(await h.userRemove(el.$refInput)).toBe("Donny, |Leo, ");
+      expect(el.$value).toStrictEqual([10, 30]);
+      h.setInputCursor(el.$refInput, "Donny|, Leo, ");
+      expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("Donny, |");
+      expect(el.$value).toStrictEqual([10]);
+      h.setInputCursor(el.$refInput, "Don|ny|, ");
+      expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("|");
+      expect(el.$value).toStrictEqual(undefined);
+
+      el.$value = [10, 20];
+      await h.wait(1);
+      expect(el.$refInput.value).toBe("Donny, Mikky, ");
+      expect(await h.userTypeText(el.$refInput, "abc", { clearPrevious: false })).toBe("Donny, Mikky, abc|");
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt12" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" id="txt13" style="display: none;" aria-selected="true">Donny</li><li role="option" style="display: none;">Donny2</li><li role="option" style="display: none;" aria-selected="true">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
+      );
+      h.setInputCursor(el.$refInput, "Donny|, Mikky, abc");
+      expect(await h.userRemove(el.$refInput)).toBe("|Mikky, abc");
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt12" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" id="txt13" style="display: none;">Donny</li><li role="option" style="display: none;">Donny2</li><li role="option" style="display: none;" aria-selected="true">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
+      );
     });
 
     test("readOnlyInput", async () => {

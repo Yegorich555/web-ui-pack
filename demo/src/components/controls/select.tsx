@@ -125,7 +125,7 @@ export default function SelectControlView() {
               el.$options.label = "As dropdown ($options.readOnlyInput)";
               el.$options.items = items;
               // el.$initValue = ir - 3;
-              el.$options.readOnlyInput = true;
+              el.$options.readOnlyInput = 3;
             }
           }}
         />

@@ -740,25 +740,82 @@ export default class WUPSelectControl<
     return !this.$refInput.value && !this.$isRequired && !this._opts.multiple;
   }
 
+  protected gotBeforeInput(e: WUP.Text.GotInputEvent): void {
+    super.gotBeforeInput(e);
+
+    // handle delete-behavior
+    if (this._opts.multiple /* && this.$refInput.value.endsWith(", ") */) {
+      let isDelBack = false;
+      /* prettier-ignore */
+      switch (e.inputType) {
+        case "deleteContentBackward": isDelBack = true; break;
+        case "deleteContentForward": isDelBack = false; break;
+        default: return;
+      }
+      const pos = this.$refInput.selectionStart || 0;
+      let pos2 = this.$refInput.selectionEnd || 0;
+      const str = this.$refInput.value;
+      const isItemPart = pos < str.lastIndexOf(", ") + (isDelBack ? 3 : 2);
+      if (!isItemPart) {
+        return;
+      }
+      const delimitLength = 2; // length of ", "
+      const char = ",".charCodeAt(0);
+      if (isDelBack && !pos) {
+        return;
+      }
+      if (!isDelBack && pos === pos2 && pos2 >= str.length - delimitLength) {
+        this.$refInput.setSelectionRange(str.length, str.length); // select whole items(-s) so input event delete everything itself
+        return;
+      }
+      const start = isDelBack ? pos - 1 : pos;
+      let i = start;
+      for (; i !== 0; --i) {
+        if (str.charCodeAt(i) === char) {
+          if (!isDelBack || start - i >= delimitLength) {
+            i += delimitLength;
+            // case 1: // "Item 1, Item 2, |" => "Item 1, |Item 2, "
+            // case 2: // "Item 1,| Item 2, " => "|Item 1, Item 2, "
+            break;
+          }
+        }
+      }
+      if (pos === pos2) {
+        pos2 = i;
+      }
+
+      let end = str.indexOf(",", pos2);
+      end = end === -1 ? str.length : end + delimitLength;
+      this.$refInput.setSelectionRange(i, end); // select whole items(-s) so input event delete everything itself
+      // e.preventDefault(); // uncomment to check behavior manually
+    }
+  }
+
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
     this.$isShown && this.focusMenuItem(null); // reset virtual focus: // WARN it's not good enough when this._opts.multiple
     super.gotInput(e);
 
     // user can append item by ',' at the end or remove immediately
     if (this._opts.multiple && this.canParseInput(this.$refInput.value)) {
-      let str = this.$refInput.value;
+      const str = this.$refInput.value;
       const isDeleted = e.inputType.startsWith("deleteContent");
-      if (this.$refInput.selectionStart !== str.length && !isDeleted) {
+      const pos = this.$refInput.selectionStart || 0;
+      if (pos !== str.length && !isDeleted) {
         this.declineInput(str.length); // don't allow to type text in the middle
       } else {
-        const isRemove = str.endsWith(",") && isDeleted; // 'Item1, Item2, |' + Backspace => remove 'Item2'
-        const iEnd = str.lastIndexOf(isRemove ? ", " : ",");
-        str = str.substring(0, iEnd); // allow user filter via typing in the end of input => 'Item1, Item2,|'
-        const next = this.parseInput(str) as Array<ValueType> | undefined;
+        const iEnd = str.lastIndexOf(",");
+        const strVal = str.substring(0, iEnd); // allow user filter via typing in the end of input => 'Item1, Item2,|'
+        const next = this.parseInput(strVal) as Array<ValueType> | undefined;
         // case 1: user removes 'Item1,| Item2|' - setValue [Item1]
         // case 2: user adds `Item1,| Item2,| -- setValue [Item1, Item2]
-        const isChanged = (next || []).length !== ((this.$value as Array<ValueType> | undefined) || []).length;
-        isChanged && this.setValue(next as any, SetValueReasons.userInput);
+        const nextLn = (next || []).length;
+        const prevLn = ((this.$value as Array<ValueType> | undefined) || []).length;
+        const isChanged = nextLn !== prevLn;
+        if (isChanged) {
+          isChanged && this.setValue(next as any, SetValueReasons.userInput);
+          this.$refInput.value += str.substring(iEnd + 1).trimStart(); // add search-part after value change
+          nextLn < prevLn && this.$refInput.setSelectionRange(pos, pos); // restore caret only if items removed
+        }
       }
     }
 
@@ -801,4 +858,5 @@ customElements.define(tagName, WUPSelectControl);
 // NiceToHave: option to allow autoselect item without pressing Enter
 // WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation
 // todo label for="" in Chrome sometimes enables autosuggestion - need to remove it for all controls - need to double-check ???
-// todo multiple:true + selectAll + type 'd': input cleared but 'd' doesn't appear
+
+// todo set $initValue + focus + pressEscape + remove last char - menu opens but focusedItem not visible in scrolled content
