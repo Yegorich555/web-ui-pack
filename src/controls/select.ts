@@ -858,5 +858,8 @@ customElements.define(tagName, WUPSelectControl);
 // NiceToHave: option to allow autoselect item without pressing Enter
 // WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation
 // todo label for="" in Chrome sometimes enables autosuggestion - need to remove it for all controls - need to double-check ???
+// todo add support custom items rendering when it's already appended to DOM like it works with
 
 // todo set $initValue + focus + pressEscape + remove last char - menu opens but focusedItem not visible in scrolled content
+// todo type long text when menu shows "noItems" + click btnClear - menu must be refreshed
+// todo selectItem from menu > popupClosed > Ctrl+A+Backspace > input value removed & popupOpened > press Esc > popupClosed+valueChange(undefined) > press Esc > value restored > Ctrl + Z => extra text appended
