@@ -883,8 +883,8 @@ export default class WUPTextControl<
 }
 
 customElements.define(tagName, WUPTextControl);
-// NiceToHave: handle Ctrl+Z wup-select etc. cases
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
 
+// todo: handle Ctrl+Z wup-select etc. cases
 // todo Ctrl+Z reverts changes but selectsAll text - it's wrong

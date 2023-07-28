@@ -106,7 +106,6 @@ export default abstract class WUPBaseElement<
         }
         // cast to observed only if option was retrieved: to optimize init-performance
         this.#optsObserved = observer.make(this._opts, { excludeNested: true });
-        // todo $options.isDirty and a lot of has undefined state - need to remove useless
         this.#removeObserved = observer.onChanged(this.#optsObserved, (e) => {
           this.#isReady && e.props.some((p) => watched.has(p as string)) && this.gotOptionsChanged(e);
         });

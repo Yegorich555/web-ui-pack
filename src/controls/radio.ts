@@ -17,7 +17,7 @@ declare global {
        * setTimeout(()=> console.warn(el.$options.items === items)},1) // returns 'false'
        * setTimeout(()=> console.warn(el.$options.items[0].value === items[0].value)},1) // returns 'true'
        * ``` */
-      items: WUP.Select.MenuItems<T> | (() => WUP.Select.MenuItems<T>); // NiceToHave: remove items from observed options to get/set to avoid Proxy issues
+      items: WUP.Select.MenuItems<T> | (() => WUP.Select.MenuItems<T>);
       /** Reversed-style (radio+label for true vs label+radio)
        * @defaultValue false */
       reverse?: boolean;

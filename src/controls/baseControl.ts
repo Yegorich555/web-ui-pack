@@ -605,6 +605,7 @@ export default abstract class WUPBaseControl<
     this._opts.label = this.getAttr("label");
     this._opts.name = this.getAttr("name");
 
+    // NiceToHave it extends $options object to big size where almost ever prop is undefined - need somehow prettify ot
     this._opts.autoComplete = this.getAttr("autocomplete", "boolOrString", this._opts.autoComplete);
     this._opts.disabled = this.getAttr("disabled", "bool");
     this._opts.readOnly = this.getAttr("readonly", "bool", this._opts.readOnly);
