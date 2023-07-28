@@ -763,10 +763,6 @@ export default class WUPSelectControl<
       if (isDelBack && !pos) {
         return;
       }
-      if (!isDelBack && pos === pos2 && pos2 >= str.length - delimitLength) {
-        this.$refInput.setSelectionRange(str.length, str.length); // select whole items(-s) so input event delete everything itself
-        return;
-      }
       const start = isDelBack ? pos - 1 : pos;
       let i = start;
       for (; i !== 0; --i) {
