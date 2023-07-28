@@ -198,6 +198,13 @@ describe("baseElement", () => {
     tst.$options = { t1: 1, t2: 2 };
     expect(fn).toBeCalledTimes(1);
     expect(fn).toBeCalledWith({ props: ["t1", "t2"], target: tst.$options });
+    fn.mockClear();
+    tst.$options = tst._opts;
+    expect(fn).toBeCalledTimes(0); // because no-changes actually
+    tst.$options = tst.$options;
+    expect(fn).toBeCalledTimes(0); // because no-changes actually
+    tst.$options = { t1: 1, t2: 2 };
+    expect(fn).toBeCalledTimes(0); // because no-changes actually
 
     fn.mockClear();
     tst.$options.t1 += 1;

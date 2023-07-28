@@ -168,7 +168,7 @@ describe("control.date", () => {
       el.$options.exclude = [new Date("2022-07-12")];
       expect(el.validations.exclude).toMatchInlineSnapshot(`
         [
-          "2022-07-12T00:00:00.000Z",
+          2022-07-12T00:00:00.000Z,
         ]
       `);
       await h.wait(1);

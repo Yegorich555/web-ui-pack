@@ -75,11 +75,6 @@ export default abstract class WUPBaseElement<
     return undefined;
   }
 
-  /** Array of nested-props of options.names to exclude from observed */
-  static get observedExcludeNested(): Array<string> | undefined {
-    return undefined;
-  }
-
   /* Array of attribute names to listen for changes */
   static get observedAttributes(): Array<string> | undefined {
     return undefined;
@@ -109,9 +104,9 @@ export default abstract class WUPBaseElement<
         if (!watched?.size) {
           return this._opts;
         }
-        // todo exclude all nested props from observation
         // cast to observed only if option was retrieved: to optimize init-performance
-        this.#optsObserved = observer.make(this._opts, { excludeNested: this.#ctr.observedExcludeNested });
+        this.#optsObserved = observer.make(this._opts, { excludeNested: true });
+        // todo $options.isDirty and a lot of has undefined state - need to remove useless
         this.#removeObserved = observer.onChanged(this.#optsObserved, (e) => {
           this.#isReady && e.props.some((p) => watched.has(p as string)) && this.gotOptionsChanged(e);
         });
@@ -129,7 +124,7 @@ export default abstract class WUPBaseElement<
     }
     const prev = this._opts;
     if (!v) {
-      v = objectClone(this.#ctr.$defaults) as TOptions; // todo maybe merge with defaults only when changed ???
+      v = objectClone(this.#ctr.$defaults) as TOptions;
     }
     this._opts = v;
 
@@ -141,7 +136,7 @@ export default abstract class WUPBaseElement<
 
       const watched = allObservedOptions.get(this.#ctr);
       if (!watched?.size) {
-        return;
+        return; // don't call event if there is nothing to watchFor
       }
       // shallow comparison with filter watched options
       if (prev.valueOf() !== v.valueOf()) {
@@ -149,7 +144,7 @@ export default abstract class WUPBaseElement<
         // eslint-disable-next-line no-restricted-syntax
         for (const [k] of watched.entries()) {
           if (this._opts[k] !== prev[k]) {
-            props.push(k); // WARN: it doesn't filter options according to observedOptions
+            props.push(k);
           }
         }
         props.length && this.gotOptionsChanged({ props, target: this._opts });

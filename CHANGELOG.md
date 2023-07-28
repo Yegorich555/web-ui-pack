@@ -20,6 +20,7 @@
 **New/Features**:
 
 - **Controls**. Event `$change` and callback `$onChange` has prop `SetValueReason.initValue` now
+- **Internals**. Improved memory consumption & performance via excluding nested props of $options to be observed
 
 ## 0.7.1 (Jul 24, 2023)
 

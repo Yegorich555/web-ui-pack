@@ -217,10 +217,6 @@ export default abstract class WUPBaseControl<
     ];
   }
 
-  static get observedExcludeNested(): Array<string> | undefined {
-    return ["items"]; // exclude items[x] from observed - for Select & Radio
-  }
-
   static get observedAttributes(): Array<string> {
     return <Array<LowerKeys<WUP.BaseControl.Attributes>>>[
       "label", //
