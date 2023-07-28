@@ -190,9 +190,10 @@ declare global {
 /** Base abstract form-control */
 export default abstract class WUPBaseControl<
     ValueType = any,
+    TOptions extends WUP.BaseControl.Options = WUP.BaseControl.Options,
     Events extends WUP.BaseControl.EventMap = WUP.BaseControl.EventMap
   >
-  extends WUPBaseElement<Events>
+  extends WUPBaseElement<TOptions, Events>
   implements IBaseControl<ValueType>
 {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
@@ -425,12 +426,6 @@ export default abstract class WUPBaseControl<
       required: (v, setV) => setV === true && this.$isEmpty(v) && "This field is required",
     },
   };
-
-  $options: WUP.BaseControl.Options<any> = {
-    ...this.#ctr.$defaults,
-  };
-
-  protected override _opts = this.$options;
 
   /** Called on value change */
   $onChange?: (e: CustomEvent & { detail: SetValueReasons }) => void;

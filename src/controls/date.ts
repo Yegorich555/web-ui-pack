@@ -68,12 +68,12 @@ declare global {
   // or HTML
   <wup-form>
     <wup-date name="dateOfBirhday" utc initvalue="1990-10-24" min="1930-01-01" max="2010-01-01"/>
-  </wup-form>;
- */
+  </wup-form>; */
 export default class WUPDateControl<
   ValueType extends Date = Date,
+  TOptions extends WUP.Date.Options = WUP.Date.Options,
   EventMap extends WUP.Date.EventMap = WUP.Date.EventMap
-> extends WUPBaseComboControl<ValueType, EventMap> {
+> extends WUPBaseComboControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPDateControl;
 
@@ -128,18 +128,14 @@ export default class WUPDateControl<
     },
     // firstWeekDay: 1,
     // format: localeInfo.date.toLowerCase()
-  };
-
-  // @ts-expect-error reason: validationRules is different
-  $options: WUP.Date.Options = {
-    ...this.#ctr.$defaults,
     utc: true,
-    format: this.#ctr.$defaults.format || localeInfo.date.toLowerCase(),
-    firstWeekDay: this.#ctr.$defaults.firstWeekDay || localeInfo.firstWeekDay,
   };
 
-  // @ts-expect-error reason: validationRules is different
-  protected override _opts = this.$options;
+  constructor() {
+    super();
+    this._opts.format = this.#ctr.$defaults.format || localeInfo.date.toLowerCase();
+    this._opts.firstWeekDay = this.#ctr.$defaults.firstWeekDay || localeInfo.firstWeekDay; // init here to depends on localeInfo
+  }
 
   /** Parse string to Date
    * @see {@link WUPCalendarControl.$parse} */

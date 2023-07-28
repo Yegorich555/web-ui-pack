@@ -49,6 +49,9 @@ declare global {
       /** First day of week in calendar where 1-Monday, 7-Sunday;
        * @defaultValue localeInfo.firstWeekDay */
       firstWeekDay?: number;
+      /** Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this
+       *  @defaultValue true */
+      utc?: boolean;
     }
     interface Options<T = Date, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, Defaults<T, VM> {
       /** User can't select date less than min; point new Date(Date.UTC(2022,1,25)) for `utc:true`, or new Date(2022,1,25) */
@@ -65,9 +68,6 @@ declare global {
       startWith?: PickersEnum | string;
       /** Dates that user can't choose (disabled dates) */
       exclude?: Date[];
-      /** Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this
-       *  @defaultValue true */
-      utc?: boolean;
       firstWeekDay: number;
     }
     interface Attributes extends WUP.BaseControl.Attributes, Pick<Options, "utc"> {
@@ -119,8 +119,9 @@ const add: <K extends keyof HTMLElementTagNameMap>(el: HTMLElement, tagName: K) 
  */
 export default class WUPCalendarControl<
   ValueType extends Date = Date,
+  TOptions extends WUP.Calendar.Options = WUP.Calendar.Options,
   EventMap extends WUP.Calendar.EventMap = WUP.Calendar.EventMap
-> extends WUPBaseControl<ValueType, EventMap> {
+> extends WUPBaseControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPCalendarControl;
 
@@ -364,15 +365,13 @@ export default class WUPCalendarControl<
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
     },
-  };
-
-  $options: WUP.Calendar.Options<ValueType> = {
-    ...this.#ctr.$defaults,
     utc: true,
-    firstWeekDay: this.#ctr.$defaults.firstWeekDay || localeInfo.firstWeekDay,
   };
 
-  protected override _opts = this.$options;
+  constructor() {
+    super();
+    this._opts.firstWeekDay = this.#ctr.$defaults.firstWeekDay || localeInfo.firstWeekDay; // init here to depends on localeInfo
+  }
 
   /** Call when need to re-rended picker (min/max changed etc.) */
   $refreshPicker(): void {

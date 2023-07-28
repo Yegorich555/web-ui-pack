@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.7.2 (\_\_\_)
+## 0.8.1 (\_\_\_)
+
+**BREAKING CHANGES**:
+
+- **Internals**. Refactored `$options` initialization. So all inherrited Elemenents must override only `$defaults` and use `TOptions` as generic instead of overriding $options like it was before. **Note:** If you haven't created custom Elements inherrited from WUP... - don't pay attention on it
 
 **Fixes**:
 
@@ -9,7 +13,7 @@
   - _button[clear] isn't updated on `$initValue` or `$options.clearActions` changing_
 - [SelectControl](src/controls/select.ts)
   - _clearing input + click outside doesn't clear value_
-  - `$options.readOnlyInput=7` must be ignored when `allowNewValue` enabled_
+  - `$options.readOnlyInput=7` must be ignored when `allowNewValue` enabled\_
   - improved input delete behavior for `$options.multiple`
 - [CalendarControl](src/controls/calendar.ts). _`$value=undefined` doesn't reset selected_
 
@@ -135,7 +139,7 @@
 
 **BREAKING CHANGES**:
 
-- Internals. Methods `getNumAttr`, `getRefAttr`, `getBoolAttr` is refactored to single `getAttr`
+- **Internals**. Methods `getNumAttr`, `getRefAttr`, `getBoolAttr` is refactored to single `getAttr`
 - [SelectControl](src/controls/select.ts). Simplified menu styling
 - [PopupElement](src/popup/popupElement.ts). Prop `$isOpen` deprecated in favor of `$isShown`
 

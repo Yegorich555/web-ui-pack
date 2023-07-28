@@ -1,5 +1,4 @@
 import WUPBaseElement from "./baseElement";
-import { objectClone } from "./indexHelpers";
 import WUPPopupElement from "./popup/popupElement";
 import { Animations, HideCases, ShowCases } from "./popup/popupElement.types";
 import { WUPcssButton, WUPcssMenu } from "./styles";
@@ -73,9 +72,10 @@ declare global {
   </wup-dropdown>
  * ```
  * @tutorial Troubleshooting
- * * in comparison with Combobox Dropdown doesn't contain input but can contain in popup any items (like nav-menu etc.)
- */
-export default class WUPDropdownElement extends WUPBaseElement {
+ * * in comparison with Combobox Dropdown doesn't contain input but can contain in popup any items (like nav-menu etc.) */
+export default class WUPDropdownElement<
+  TOptions extends WUP.Dropdown.Options = WUP.Dropdown.Options
+> extends WUPBaseElement<TOptions> {
   #ctr = this.constructor as typeof WUPDropdownElement;
 
   static get nameUnique(): string {
@@ -95,7 +95,9 @@ export default class WUPDropdownElement extends WUPBaseElement {
       }${WUPcssMenu(":host [menu]")}`;
   }
 
-  /** Default options applied to every element. Change it to configure default behavior */
+  /** Default options applied to every element. Change it to configure default behavior
+   * * @tutorial Troubleshooting
+   * * Popup-related options are not observed so to change it use `WUPDropdownElement.$defaults` or `element.$refPopup.$options` direclty */
   static $defaults: WUP.Dropdown.Defaults = {
     ...WUPPopupElement.$defaults,
     animation: Animations.drawer,
@@ -114,12 +116,6 @@ export default class WUPDropdownElement extends WUPBaseElement {
       WUPPopupElement.$placements.$top.$end.$resizeHeight,
     ],
   };
-
-  /** Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally
-   * @tutorial Troubleshooting
-   * * Popup-related options are not observed so to change it use `WUPDropdownElement.$defaults` or `element.$refPopup.$options` direclty */
-  $options: WUP.Dropdown.Options = objectClone(this.#ctr.$defaults);
-  protected override _opts = this.$options;
 
   /** Reference to nested HTMLElement tied with $options.label */
   $refTitle = this.firstElementChild as HTMLElement;

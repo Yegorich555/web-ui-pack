@@ -84,8 +84,9 @@ declare global {
  */
 export default class WUPSelectManyControl<
   ValueType = any,
+  TOptions extends WUP.SelectMany.Options = WUP.SelectMany.Options,
   EventMap extends WUP.SelectMany.EventMap = WUP.SelectMany.EventMap
-> extends WUPSelectControl<ValueType[], ValueType, EventMap> {
+> extends WUPSelectControl<ValueType[], ValueType, TOptions, EventMap> {
   #ctr = this.constructor as typeof WUPSelectManyControl;
 
   static get observedOptions(): Array<string> {
@@ -238,17 +239,10 @@ export default class WUPSelectManyControl<
     return super.$filterMenuItem.call(this, menuItemText, menuItemValue, inputValue, inputRawValue);
   }
 
-  static $defaults: WUP.SelectMany.Defaults = {
-    ...WUPSelectControl.$defaults,
-  };
-
-  $options: WUP.SelectMany.Options = {
-    ...this.#ctr.$defaults,
-    multiple: true,
-    items: [],
-  };
-
-  protected override _opts = this.$options;
+  constructor() {
+    super();
+    this._opts.multiple = true; // init here to depends on localeInfo
+  }
 
   /** Items selected & rendered on control */
   $refItems?: Array<HTMLElement & { _wupValue: ValueType }>;

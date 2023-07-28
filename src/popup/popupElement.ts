@@ -9,7 +9,6 @@ import { getBoundingInternalRect, px2Number, styleTransform } from "../helpers/s
 import animateDropdown from "../helpers/animateDropdown";
 import animateStack from "../helpers/animateStack";
 import isIntoView from "../helpers/isIntoView";
-import objectClone from "../helpers/objectClone";
 import viewportSize from "../helpers/viewportSize";
 
 // import {
@@ -78,8 +77,9 @@ declare global {
  * * Popup can't be more than 100vw & 100vh (impossible to disable the rule)
  */
 export default class WUPPopupElement<
+  TOptions extends WUP.Popup.Options = WUP.Popup.Options,
   Events extends WUP.Popup.EventMap = WUP.Popup.EventMap
-> extends WUPBaseElement<Events> {
+> extends WUPBaseElement<TOptions, Events> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPPopupElement;
 
@@ -128,18 +128,6 @@ export default class WUPPopupElement<
       default:
         return undefined;
     }
-  };
-
-  /** Default options. Change it to configure default behavior */
-  static $defaults: WUP.Popup.Defaults = {
-    placement: [
-      WUPPopupElement.$placements.$top.$middle.$adjust, //
-      WUPPopupElement.$placements.$bottom.$middle.$adjust,
-    ],
-    toFitElement: document.body,
-    showCase: ShowCases.onClick,
-    hoverShowTimeout: 200,
-    hoverHideTimeout: 500,
   };
 
   static get $styleRoot(): string {
@@ -191,6 +179,18 @@ export default class WUPPopupElement<
       }
       ${WUPcssScrollSmall(":host")}`;
   }
+
+  /** Default options. Change it to configure default behavior */
+  static $defaults: WUP.Popup.Defaults = {
+    placement: [
+      WUPPopupElement.$placements.$top.$middle.$adjust, //
+      WUPPopupElement.$placements.$bottom.$middle.$adjust,
+    ],
+    toFitElement: document.body,
+    showCase: ShowCases.onClick,
+    hoverShowTimeout: 200,
+    hoverHideTimeout: 500,
+  };
 
   /** Listen for target according to showCase and create/remove popup when it's required (by show/hide).
    *  This helps to avoid tons of hidden popups on HTML;
@@ -298,11 +298,6 @@ export default class WUPPopupElement<
 
     return detach;
   }
-
-  /** All options for this popup. If you want to change common options
-   *  @see {@link WUPPopupElement.$defaults} */
-  $options: WUP.Popup.Options = objectClone(this.#ctr.$defaults);
-  protected override _opts = this.$options;
 
   /** Fires before show is happened;
    * @tutorial rules

@@ -126,8 +126,9 @@ declare global {
  */
 export default class WUPTextControl<
   ValueType = string,
+  TOptions extends WUP.Text.Options = WUP.Text.Options,
   EventMap extends WUP.Text.EventMap = WUP.Text.EventMap
-> extends WUPBaseControl<ValueType, EventMap> {
+> extends WUPBaseControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextControl;
 
@@ -348,7 +349,6 @@ export default class WUPTextControl<
         }`;
   }
 
-  /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUP.Text.Defaults = {
     ...WUPBaseControl.$defaults,
     selectOnFocus: false,
@@ -366,12 +366,6 @@ export default class WUPTextControl<
       _parse: (_v, setV) => setV || "Invalid value",
     },
   };
-
-  $options: WUP.Text.Options<string> = {
-    ...this.#ctr.$defaults,
-  };
-
-  protected override _opts = this.$options;
 
   $refBtnClear?: HTMLButtonElement;
   $refMaskholder?: HTMLSpanElement;

@@ -5,6 +5,7 @@ import focusFirst from "./helpers/focusFirst";
 import nestedProperty from "./helpers/nestedProperty";
 import observer, { Observer } from "./helpers/observer";
 import onEvent, { onEventType } from "./helpers/onEvent";
+import objectClone from "./helpers/objectClone";
 import { WUPcssHidden } from "./styles";
 
 // theoritcally such single appending is faster than using :host inside shadowComponent
@@ -14,7 +15,10 @@ let lastUniqueNum = 0;
 const allObservedOptions = new WeakMap<typeof WUPBaseElement, Set<string> | null>();
 
 /** Basic abstract class for every component in web-ui-pack */
-export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = WUP.Base.EventMap> extends HTMLElement {
+export default abstract class WUPBaseElement<
+  TOptions extends Record<string, any> = Record<string, any>,
+  Events extends WUP.Base.EventMap = WUP.Base.EventMap
+> extends HTMLElement {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseElement;
 
@@ -82,14 +86,81 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
   }
 
   /** Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item */
-  static $defaults: Record<string, any>;
-  /** Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally */
-  abstract $options: Record<string, any>;
+  static $defaults: Record<string, any> = {};
+
   /** Raw part of $options for internal usage (.$options is Proxy object and better avoid useless extra-calles via Proxy) */
-  protected _opts: Record<string, any> = {};
+  // @ts-expect-error - TS doesn't see that init happens via constructor.$options = null;
+  protected _opts: TOptions; // = objectClone(this.#ctr.$defaults) as TOptions;
+  /* Observed part of $options */
+  #optsObserved?: Observer.Observed<Record<string, any>>;
+  #removeObserved?: () => void;
+  get $options(): TOptions {
+    // return observed options
+    if (this.$isReady) {
+      if (!this.#optsObserved) {
+        // get from cache
+        let o = allObservedOptions.get(this.#ctr);
+        if (o === undefined) {
+          const arr = this.#ctr.observedOptions;
+          o = arr?.length ? new Set(arr) : null;
+          allObservedOptions.set(this.#ctr, o);
+        }
+        const watched = o;
+        if (!watched?.size) {
+          return this._opts;
+        }
+        // todo exclude all nested props from observation
+        // cast to observed only if option was retrieved: to optimize init-performance
+        this.#optsObserved = observer.make(this._opts, { excludeNested: this.#ctr.observedExcludeNested });
+        this.#removeObserved = observer.onChanged(this.#optsObserved, (e) => {
+          this.#isReady && e.props.some((p) => watched.has(p as string)) && this.gotOptionsChanged(e);
+        });
+      }
+      return this.#optsObserved as TOptions;
+    }
+    // OR return original options if element no appended to body - in this case we don't need to track changes
+    return this._opts;
+  }
+
+  /** Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally */
+  set $options(v: TOptions) {
+    if (this._opts === v) {
+      return;
+    }
+    const prev = this._opts;
+    if (!v) {
+      v = objectClone(this.#ctr.$defaults) as TOptions; // todo maybe merge with defaults only when changed ???
+    }
+    this._opts = v;
+
+    if (this.$isReady) {
+      // unsubscribe from previous events here
+      this.#removeObserved?.call(this);
+      this.#optsObserved = undefined;
+      this.#removeObserved = undefined;
+
+      const watched = allObservedOptions.get(this.#ctr);
+      if (!watched?.size) {
+        return;
+      }
+      // shallow comparison with filter watched options
+      if (prev.valueOf() !== v.valueOf()) {
+        const props: string[] = [];
+        // eslint-disable-next-line no-restricted-syntax
+        for (const [k] of watched.entries()) {
+          if (this._opts[k] !== prev[k]) {
+            props.push(k); // WARN: it doesn't filter options according to observedOptions
+          }
+        }
+        props.length && this.gotOptionsChanged({ props, target: this._opts });
+      }
+    }
+  }
 
   constructor() {
     super();
+    // @ts-expect-error - TS doesn't see that init happens in this way;
+    this.$options = null;
 
     if (!this.#ctr.$refStyle) {
       this.#ctr.$refStyle = document.createElement("style");
@@ -98,41 +169,6 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
       document.head.prepend(this.#ctr.$refStyle);
     }
     const refStyle = this.#ctr.$refStyle;
-
-    // setup options to be observable
-    setTimeout(() => {
-      // cast options to observed
-      const prev = this.$options;
-      // get from cache
-      let o = allObservedOptions.get(this.#ctr);
-      if (o === undefined) {
-        const arr = this.#ctr.observedOptions;
-        o = arr?.length ? new Set(arr) : null;
-        allObservedOptions.set(this.#ctr, o);
-      }
-
-      Object.defineProperty(this, "$options", {
-        set: this.#setOptions,
-        get: () => {
-          const watched = o;
-          if (!watched?.size) {
-            return this._opts;
-          }
-          // cast to observed only if option was retrieved: to optimize init-performance
-          if (!this.#optsObserved) {
-            this.#optsObserved = observer.make(this._opts, { excludeNested: this.#ctr.observedExcludeNested });
-            this.#removeObserved = observer.onChanged(this.#optsObserved, (e) => {
-              this.#isReady && e.props.some((p) => watched.has(p)) && this.gotOptionsChanged(e);
-            });
-          }
-
-          return this.#optsObserved;
-        },
-      });
-      this._opts = prev;
-      this.#setOptions(prev);
-    });
-
     // setup styles
     if (!appendedStyles.has(this.tagName)) {
       appendedStyles.add(this.tagName);
@@ -169,39 +205,6 @@ export default abstract class WUPBaseElement<Events extends WUP.Base.EventMap = 
 
       const c = protos[protos.length - 1].$style;
       refStyle.append(c.replace(/:host/g, `${this.tagName}`));
-    }
-  }
-
-  /* rawOptions ($options is observed) */
-  #optsObserved?: Observer.Observed<Record<string, any>>;
-  #removeObserved?: Func;
-  #setOptions(v: Record<string, any>): void {
-    if (!v) {
-      throw new Error("$options can't be empty");
-    }
-    const prev = this._opts;
-    this._opts = v;
-
-    // unsubscribe from previous events here
-    this.#removeObserved?.call(this);
-    this.#optsObserved = undefined;
-    this.#removeObserved = undefined;
-
-    const observedOptions = allObservedOptions.get(this.#ctr);
-    if (!observedOptions?.size) {
-      return;
-    }
-
-    if (this.#isReady && prev.valueOf() !== v.valueOf()) {
-      const props: string[] = [];
-      // eslint-disable-next-line no-restricted-syntax
-      for (const [k] of observedOptions.entries()) {
-        if (this._opts[k] !== prev[k]) {
-          props.push(k);
-        }
-      }
-      // WARN: it doesn't filter options according to observedOptions
-      props.length && this.gotOptionsChanged({ props, target: this._opts });
     }
   }
 

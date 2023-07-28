@@ -1,5 +1,4 @@
 import WUPBaseElement from "./baseElement";
-import objectClone from "./helpers/objectClone";
 import { px2Number, styleTransform } from "./helpers/styleHelpers";
 import { getOffset } from "./popup/popupPlacements";
 
@@ -75,7 +74,9 @@ declare global {
  * </button>
  * ```
  */
-export default class WUPSpinElement extends WUPBaseElement {
+export default class WUPSpinElement<
+  TOptions extends WUP.Spin.Options = WUP.Spin.Options
+> extends WUPBaseElement<TOptions> {
   #ctr = this.constructor as typeof WUPSpinElement;
 
   static get observedOptions(): Array<keyof WUP.Spin.Options> {
@@ -152,9 +153,6 @@ export default class WUPSpinElement extends WUPBaseElement {
   };
 
   static _itemsCount = 1;
-
-  $options: WUP.Spin.Options = objectClone(this.#ctr.$defaults);
-  protected override _opts = this.$options;
 
   /** Force to update position (when options changed) */
   $refresh(): void {

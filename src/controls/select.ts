@@ -109,8 +109,9 @@ declare global {
 export default class WUPSelectControl<
   ValueType = any | any[],
   ItemType = ValueType,
+  TOptions extends WUP.Select.Options = WUP.Select.Options,
   EventMap extends WUP.Select.EventMap = WUP.Select.EventMap
-> extends WUPBaseComboControl<ValueType, EventMap> {
+> extends WUPBaseComboControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPSelectControl;
 
@@ -181,12 +182,10 @@ export default class WUPSelectControl<
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey | ShowCases.onInput,
   };
 
-  $options: WUP.Select.Options = {
-    ...this.#ctr.$defaults,
-    items: [],
-  };
-
-  protected override _opts = this.$options;
+  constructor() {
+    super();
+    this._opts.items = [];
+  }
 
   /** Returns whether control in pending state or not (shows spinner) */
   get $isPending(): boolean {

@@ -88,8 +88,9 @@ declare global {
  */
 export default class WUPTimeControl<
   ValueType extends WUPTimeObject = WUPTimeObject,
+  TOptions extends WUP.Time.Options = WUP.Time.Options,
   EventMap extends WUP.Time.EventMap = WUP.Time.EventMap
-> extends WUPBaseComboControl<ValueType, EventMap> {
+> extends WUPBaseComboControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTimeControl;
 
@@ -279,14 +280,10 @@ export default class WUPTimeControl<
     },
   };
 
-  // @ts-expect-error reason: validationRules is different
-  $options: WUP.Time.Options = {
-    ...this.#ctr.$defaults,
-    format: localeInfo.time,
-  };
-
-  // @ts-expect-error reason: validationRules is different
-  protected override _opts = this.$options;
+  constructor() {
+    super();
+    this._opts.format = this.#ctr.$defaults.format || localeInfo.time; // init here to depends on localeInfo
+  }
 
   /** Parse string to WUPTimeObject */
   override parse(text: string): ValueType | undefined {

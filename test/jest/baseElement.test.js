@@ -180,7 +180,6 @@ describe("baseElement", () => {
 
   test("gotOptionsChanged", () => {
     class Test extends WUPBaseElement {
-      $options = {};
       static get observedOptions() {
         return ["t1", "t2"];
       }
@@ -218,7 +217,7 @@ describe("baseElement", () => {
     tst.$options = { ...tst.$options, another: "s2" };
     expect(fn).not.toBeCalled();
 
-    expect(() => (tst.$options = null)).toThrow();
+    expect(() => (tst.$options = null)).not.toThrow();
 
     // test when no observedOptions
     expect(el.$isReady).toBe(true);
@@ -227,7 +226,6 @@ describe("baseElement", () => {
     // eslint-disable-next-line no-self-compare
     expect(el.$options === el.$options).toBe(true); // just for coverage when observedOptions is empty
     class T2 extends WUPBaseElement {
-      $options = {};
       static get observedOptions() {
         return ["to"];
       }
@@ -243,7 +241,6 @@ describe("baseElement", () => {
 
   test("gotChanges method", async () => {
     class TestEl extends WUPBaseElement {
-      $options = {};
       static get observedOptions() {
         return ["disabled", "disabledReflect"];
       }

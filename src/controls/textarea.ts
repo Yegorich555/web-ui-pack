@@ -57,8 +57,9 @@ declare global {
  * to resolve it set WUPTextareaControl.$defaults.selectOnFocus = true */
 export default class WUPTextareaControl<
   ValueType = string,
+  TOptions extends WUP.Textarea.Options = WUP.Textarea.Options,
   EventMap extends WUP.Textarea.EventMap = WUP.Textarea.EventMap
-> extends WUPTextControl<ValueType, EventMap> {
+> extends WUPTextControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextareaControl;
 
@@ -85,12 +86,6 @@ export default class WUPTextareaControl<
       max: (v, setV, c, r) => WUPTextControl.$defaults.validationRules.max.call!(c, v?.replace(/\n/g, ""), setV, c, r),
     },
   };
-
-  $options: WUP.Textarea.Options = {
-    ...this.#ctr.$defaults,
-  };
-
-  protected override _opts = this.$options;
 
   $refInput = document.createElement("wup-areainput") as HTMLInputElement;
 

@@ -116,7 +116,7 @@ declare global {
  * const el = document.createElement("wup-circle");
  * el.$options.items = [{value:20}]; // etc.
  * document.body.appendChild(el); */
-export default class WUPCircleElement extends WUPBaseElement {
+export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options> {
   #ctr = this.constructor as typeof WUPCircleElement;
 
   static get observedOptions(): Array<keyof WUP.Circle.Options> {
@@ -205,12 +205,10 @@ export default class WUPCircleElement extends WUPBaseElement {
     hoverHideTimeout: 0,
   };
 
-  $options: WUP.Circle.Options = {
-    ...this.#ctr.$defaults,
-    items: [],
-  };
-
-  protected override _opts = this.$options;
+  constructor() {
+    super();
+    this._opts.items = [];
+  }
 
   $refSVG = this.make("svg");
   $refItems = this.make("g");

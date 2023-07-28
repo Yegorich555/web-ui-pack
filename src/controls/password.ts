@@ -80,8 +80,9 @@ declare global {
  * </label> */
 export default class WUPPasswordControl<
   ValueType extends string = string,
+  TOptions extends WUP.Password.Options = WUP.Password.Options,
   EventMap extends WUP.Password.EventMap = WUP.Password.EventMap
-> extends WUPTextControl<ValueType, EventMap> {
+> extends WUPTextControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPPasswordControl;
 
@@ -183,12 +184,6 @@ export default class WUPPasswordControl<
       },
     },
   };
-
-  $options: WUP.Password.Options<string> = {
-    ...this.#ctr.$defaults,
-  };
-
-  protected override _opts = this.$options;
 
   $refBtnEye = document.createElement("button");
   protected override renderControl(): void {

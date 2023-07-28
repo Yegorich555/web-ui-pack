@@ -73,8 +73,9 @@ interface ExtInputElement extends HTMLInputElement {
  * </fieldset> */
 export default class WUPRadioControl<
   ValueType = any,
+  TOptions extends WUP.Radio.Options = WUP.Radio.Options,
   EventMap extends WUP.Radio.EventMap = WUP.Radio.EventMap
-> extends WUPBaseControl<ValueType, EventMap> {
+> extends WUPBaseControl<ValueType, TOptions, EventMap> {
   #ctr = this.constructor as typeof WUPRadioControl;
 
   /** Custom text that announced by screen-readers. Redefine it to use with another language */
@@ -207,12 +208,10 @@ export default class WUPRadioControl<
     validationRules: { ...WUPBaseControl.$defaults.validationRules },
   };
 
-  $options: WUP.Radio.Options = {
-    ...this.#ctr.$defaults,
-    items: [],
-  };
-
-  protected override _opts = this.$options;
+  constructor() {
+    super();
+    this._opts.items = [];
+  }
 
   /** Called when need to parse attr [initValue] */
   override parse(attrValue: string): ValueType | undefined {

@@ -69,10 +69,17 @@ declare global {
     <wup-num name="number" validations="myValidations"/>
   </wup-form>;
  * @see {@link WUPTextControl} */
+// @ts-expect-error - because number & string incompatible
 export default class WUPNumberControl<
   ValueType = number,
+  TOptions extends WUP.Number.Options = WUP.Number.Options,
   EventMap extends WUP.Number.EventMap = WUP.Number.EventMap
-> extends WUPTextControl<ValueType, EventMap> {
+> extends WUPTextControl<
+  ValueType,
+  // @ts-expect-error - because number & string incompatible
+  TOptions,
+  EventMap
+> {
   #ctr = this.constructor as typeof WUPNumberControl;
 
   static get observedOptions(): Array<string> {
@@ -97,14 +104,6 @@ export default class WUPNumberControl<
       max: (v, setV, c) => (v == null || v > setV) && `Max value is ${(c as WUPNumberControl).valueToInput(setV)}`,
     },
   };
-
-  // @ts-expect-error reason: validationRules is different
-  $options: WUP.Number.Options = {
-    ...this.#ctr.$defaults,
-  };
-
-  // @ts-expect-error reason: validationRules is different
-  protected override _opts = this.$options;
 
   /** Returns $options.format joined with defaults */
   get $format(): Required<WUP.Number.Format> {

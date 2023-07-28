@@ -39,24 +39,31 @@ declare global {
       $hideMenu: Event;
     }
     interface ValidityMap extends Omit<WUP.Text.ValidityMap, "min" | "max" | "email"> {}
-    interface Defaults<T = string, VM = ValidityMap> extends WUP.Text.Defaults<T, VM> {
+    interface Defaults<T = any, VM = ValidityMap> extends WUP.Text.Defaults<T, VM> {
       /** Case when menu-popup to show; WARN ShowCases.inputClick doesn't work without ShowCases.click
        * @defaultValue onPressArrowKey | onClick | onFocus */
       showCase: ShowCases;
       /** Set true to make input not editable but allow select items via popup-menu (ordinary dropdown mode) */
       readOnlyInput?: boolean | number;
     }
-    interface Options<T = string, VM = ValidityMap> extends WUP.Text.Options<T, VM>, Defaults<T, VM> {}
+    interface Options<T = any, VM = ValidityMap> extends WUP.Text.Options<T, VM>, Defaults<T, VM> {}
     interface Attributes extends WUP.Text.Attributes {}
     interface JSXProps<C = WUPBaseComboControl> extends WUP.Text.JSXProps<C>, Attributes {}
   }
 }
 
 /** Base abstract form-control for any control with popup-menu (Dropdown, Datepicker etc.) */
+// @ts-expect-error - because validationRules is different
 export default abstract class WUPBaseComboControl<
   ValueType = any,
+  TOptions extends WUP.BaseCombo.Options = WUP.BaseCombo.Options,
   EventMap extends WUP.BaseCombo.EventMap = WUP.BaseCombo.EventMap
-> extends WUPTextControl<ValueType, EventMap> {
+> extends WUPTextControl<
+  ValueType,
+  // @ts-expect-error - because validationRules is different
+  TOptions,
+  EventMap
+> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseComboControl;
 
@@ -111,14 +118,6 @@ export default abstract class WUPBaseComboControl<
     },
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey,
   };
-
-  // @ts-expect-error reason: validationRules is different
-  $options: WUP.BaseCombo.Options = {
-    ...this.#ctr.$defaults,
-  };
-
-  // @ts-expect-error reason: validationRules is different
-  protected override _opts = this.$options;
 
   /** Fires after popup-menu is shown (after animation finishes) */
   $onShowMenu?: (e: Event) => void;
