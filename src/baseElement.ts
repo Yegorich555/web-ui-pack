@@ -151,6 +151,23 @@ export default abstract class WUPBaseElement<
     }
   }
 
+  /* Return all prototypes till HTMLElement */
+  static findAllProtos(t: unknown, protos: typeof WUPBaseElement[]): typeof WUPBaseElement[] {
+    const p = Object.getPrototypeOf(t);
+    if (p !== HTMLElement.prototype) {
+      protos.push(p.constructor);
+      // Object.getOwnPropertyNames(p).forEach((s) => {
+      //   const k = s as keyof Omit<WUPBaseElement, keyof HTMLElement | "$isReady">;
+      //   const desc = Object.getOwnPropertyDescriptor(p, s) as PropertyDescriptor;
+      //   if (typeof desc.value === "function" && s !== "constructor") {
+      //     this[k] = (this[k] as Function).bind(this);
+      //   }
+      // });
+      this.findAllProtos(p, protos);
+    }
+    return protos;
+  }
+
   constructor() {
     super();
     // @ts-expect-error - TS doesn't see that init happens in this way;
@@ -167,24 +184,8 @@ export default abstract class WUPBaseElement<
     if (!appendedStyles.has(this.tagName)) {
       appendedStyles.add(this.tagName);
 
-      // autoBind functions (recursive until HMTLElement)
-      const findAllProtos = (t: unknown, protos: typeof WUPBaseElement[]): typeof WUPBaseElement[] => {
-        const p = Object.getPrototypeOf(t);
-        if (p !== HTMLElement.prototype) {
-          protos.push(p.constructor);
-          // Object.getOwnPropertyNames(p).forEach((s) => {
-          //   const k = s as keyof Omit<WUPBaseElement, keyof HTMLElement | "$isReady">;
-          //   const desc = Object.getOwnPropertyDescriptor(p, s) as PropertyDescriptor;
-          //   if (typeof desc.value === "function" && s !== "constructor") {
-          //     this[k] = (this[k] as Function).bind(this);
-          //   }
-          // });
-          findAllProtos(p, protos);
-        }
-        return protos;
-      };
       // NiceToHave refactor to append styles via CDN or somehow else
-      const protos = findAllProtos(this, []);
+      const protos = this.#ctr.findAllProtos(this, []);
       protos.reverse().forEach((p) => {
         // append $styleRoot
         const nm = p.nameUnique;
