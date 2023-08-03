@@ -869,17 +869,19 @@ describe("control.text: mask", () => {
     expect(await h.userRedo(el.$refInput)).toBe("|2");
 
     // cover case when not canHandleUndo
+    const saved = el._refHistory;
     el.$value = "";
     el.$options.mask = undefined;
     el.canHandleUndo = () => false;
+    el._refHistory = undefined;
     await h.wait(1);
     expect(el.canHandleUndo()).toBe(false);
-    expect(() => el.historyUndoRedo()).not.toThrow();
     expect(() => el.declineInput()).toThrow();
 
     el.$value = "";
     await h.wait(1);
     el.canHandleUndo = () => true;
+    el._refHistory = saved;
     await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
     expect(el.$refInput.value).toBe("2");
     el.declineInput(); // despite on manuall decline

@@ -2,6 +2,7 @@ import MaskTextInput from "./text.mask";
 import { onEvent } from "../indexHelpers";
 import { WUPcssIcon } from "../styles";
 import WUPBaseControl, { SetValueReasons } from "./baseControl";
+import TextHistory from "./text.history";
 
 const emailReg =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -489,8 +490,13 @@ export default class WUPTextControl<
     }
   }
 
+  /** Custom history undo/redo */
+  _refHistory?: TextHistory;
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
     const arr = super.gotFocus(ev);
+    if (this.canHandleUndo()) {
+      this._refHistory = new TextHistory(this.$refInput);
+    }
 
     const r = this.appendEvent(this.$refInput, "input", (e) => {
       // (e as WUP.Text.GotInputEvent).setValuePrevented = false;
@@ -538,8 +544,7 @@ export default class WUPTextControl<
       }
       this.renderPostfix(this._opts.postfix); // postfix depends on maskholder
     }
-    delete this._histRedo;
-    delete this._histUndo;
+    delete this._refHistory;
     super.gotFocusLost();
   }
 
@@ -581,18 +586,18 @@ export default class WUPTextControl<
   protected override gotKeyDown(e: KeyboardEvent): void {
     super.gotKeyDown(e);
 
-    if (!e.altKey) {
+    if (this._refHistory && !e.altKey) {
       // WARN: issue: click btnClear + shake iPhone to call undo - undo isn't called in this case (because no history saved into browser itself)
       // WARN: need handle only redo because undo works from browser-side itself but undo - doesn't still beforeInput.preventDefault()
       let isUndo = (e.ctrlKey || e.metaKey) && e.code === "KeyZ"; // 1st browser undo doesn't work after btnClear
       const isRedo = (isUndo && e.shiftKey) || (e.ctrlKey && e.code === "KeyY" && !e.metaKey);
       isUndo &&= !isRedo;
-      if ((isUndo || isRedo) && this.canHandleUndo()) {
+      if (isUndo || isRedo) {
         e.preventDefault(); // prevent original onInput and call manually
-        if (isUndo && !this._histUndo?.length) {
+        if (isUndo && !this._refHistory._histUndo?.length) {
           return;
         }
-        if (isRedo && !this._histRedo?.length) {
+        if (isRedo && !this._refHistory._histRedo?.length) {
           return;
         }
         this.$refInput.dispatchEvent(
@@ -619,11 +624,11 @@ export default class WUPTextControl<
       // eslint-disable-next-line no-fallthrough
       case "historyUndo": // Ctrl+Z
         // WARN: historyUndo can be fired is user shakes iPhone or click Undo button in editMenu
-        isHandle = this.canHandleUndo();
-        isUndoRedoSuccess = isHandle && this.historyUndoRedo(isRedo);
+        isHandle = !!this._refHistory;
+        isUndoRedoSuccess = isHandle && this._refHistory!.undoRedo(isRedo);
         break;
       default:
-        this.canHandleUndo() && this.historySave(e.target.value, e.target.selectionEnd);
+        this._refHistory?.save();
         break;
     }
 
@@ -726,8 +731,8 @@ export default class WUPTextControl<
     }
 
     if (declinedAdd) {
-      this.historySave(mi.value, pos); // fix when ###: "12|" + "3b" => 123|
-      this.declineInput(pos);
+      this._refHistory!.save(mi.value, pos); // fix when ###: "12|" + "3b" => 123|
+      this.declineInput();
     } else {
       el.value = mi.value;
       document.activeElement === el && el.setSelectionRange(pos, pos); // without checking on focus setSelectionRange sets focus on Safari
@@ -755,69 +760,21 @@ export default class WUPTextControl<
     this.$refMaskholder.lastChild!.textContent = text.substring(text.length - leftLength);
   }
 
-  /** Convert values to history-snapshot; required for undo/redo logic of input */
-  private historyToSnapshot(s: string, pos: number): string {
-    return `${s.substring(0, pos)}\0${s.substring(pos)}`;
-  }
-
-  /** Parse history-snapshot; required for undo/redo logic of input */
-  private historyFromSnapshot(h: string): { v: string; pos: number } {
-    const pos = h.indexOf("\0");
-    const v = h.substring(0, pos) + h.substring(pos + 1);
-    return { pos, v };
-  }
-
-  /** Array of history input changes */
-  _histUndo?: Array<string>;
-  /** Array of history-back input changes */
-  _histRedo?: Array<string>;
-  /** Undo/redo input value (only if canHandleUndo() === true)
-   * @returns true if action succeeded (history allowed & not empty) */
-  historyUndoRedo(isRedo: boolean): boolean {
-    const from = isRedo ? this._histRedo : this._histUndo;
-    if (from?.length) {
-      const el = this.$refInput;
-      if (!this._histRedo) {
-        this._histRedo = [];
-      }
-      const to = !isRedo ? this._histRedo! : this._histUndo!;
-      to.push(this.historyToSnapshot(el.value, el.selectionStart || 0));
-
-      const hist = this.historyFromSnapshot(from.pop()!);
-      el.value = hist.v;
-      el.setSelectionRange(hist.pos, hist.pos);
-      return true;
-    }
-
-    return false;
-  }
-
-  /** Save to history value & caret position */
-  protected historySave(value: string, selectionEnd: number | null): void {
-    if (!this._histUndo) {
-      this._histUndo = [];
-    }
-    const snap = this.historyToSnapshot(value, selectionEnd || 0);
-    const isChanged = this._histUndo[this._histUndo.length - 1] !== snap;
-    isChanged && this._histUndo!.push(snap);
-  }
-
   #declineInputEnd?: () => void;
   /** Make undo for input after 100ms when user types not allowed chars
+   * point nextCaret for custom undo valu
    * @tutorial Troubleshooting
    * * declineInput doesn't trigger beforeinput & input events (do it manually if required) */
-  protected declineInput(nextCaretPos?: number): void {
-    if (!this.canHandleUndo()) {
+  protected declineInput(nextCaret?: number): void {
+    if (!this._refHistory) {
       throw new Error(`${this.tagName}. Custom history disabled (canHandleUndo must return true)`);
     }
+
     this.#declineInputEnd = (): void => {
       this.#declineInputEnd = undefined;
       clearTimeout(t);
-      const hist = this.historyFromSnapshot(this._histUndo!.pop()!);
-      const el = this.$refInput;
-      el.value = hist.v;
-      const pos = nextCaretPos ?? hist.pos;
-      el.setSelectionRange(pos, pos);
+      // todo issue: possible _refHistory undefined when focusOut but timeout isn't finished
+      this._refHistory!.undoRedo(false, nextCaret);
       this.refMask && this.renderMaskHolder(this._opts.maskholder, this.refMask.leftLength);
       this.renderPostfix(this._opts.postfix);
     };
@@ -835,13 +792,14 @@ export default class WUPTextControl<
   /** Called to update/reset value for <input/> */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected setInputValue(v: ValueType | undefined | string, reason: SetValueReasons): void {
-    if (reason === SetValueReasons.clear && this.canHandleUndo()) {
-      this.historySave(this.$refInput.value, this.$refInput.selectionEnd);
+    if (reason === SetValueReasons.clear) {
+      this._refHistory?.save();
     }
 
     const str = v != null ? (v as any).toString() : "";
     this.$refInput.value = str;
     this._opts.mask && this.maskInputProcess(null);
+    // todo need call history save here - when input value is formated
     this.renderPostfix(this._opts.postfix);
     this._onceErrName === this._errName && this.goHideError(); // hide mask-message because value has higher priority than inputValue
   }

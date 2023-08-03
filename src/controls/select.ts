@@ -796,6 +796,7 @@ export default class WUPSelectControl<
       const isDeleted = e.inputType.startsWith("deleteContent");
       const pos = this.$refInput.selectionStart || 0;
       if (pos !== str.length && !isDeleted) {
+        // todo need somehow deprecate customCaretPos ???
         this.declineInput(str.length); // don't allow to type text in the middle
       } else {
         const iEnd = str.lastIndexOf(",");
