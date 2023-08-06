@@ -510,6 +510,7 @@ export default class WUPTextControl<
       { passive: false }
     );
 
+    // todo cover ignore else
     /* istanbul ignore else */
     if (!this.$refInput.readOnly) {
       let canSelectAll = this._opts.selectOnFocus;
@@ -585,60 +586,15 @@ export default class WUPTextControl<
 
   protected override gotKeyDown(e: KeyboardEvent): void {
     super.gotKeyDown(e);
-
-    if (this._refHistory && !e.altKey) {
-      // WARN: issue: click btnClear + shake iPhone to call undo - undo isn't called in this case (because no history saved into browser itself)
-      // WARN: need handle only redo because undo works from browser-side itself but undo - doesn't still beforeInput.preventDefault()
-      let isUndo = (e.ctrlKey || e.metaKey) && e.code === "KeyZ"; // 1st browser undo doesn't work after btnClear
-      const isRedo = (isUndo && e.shiftKey) || (e.ctrlKey && e.code === "KeyY" && !e.metaKey);
-      isUndo &&= !isRedo;
-      if (isUndo || isRedo) {
-        e.preventDefault(); // prevent original onInput and call manually
-        if (isUndo && !this._refHistory._histUndo?.length) {
-          return;
-        }
-        if (isRedo && !this._refHistory._histRedo?.length) {
-          return;
-        }
-        this.$refInput.dispatchEvent(
-          new InputEvent("beforeinput", {
-            cancelable: true,
-            bubbles: true,
-            inputType: isUndo ? "historyUndo" : "historyRedo",
-          })
-        );
-      }
-    }
+    this._refHistory?.handleKeyDown(e);
   }
 
   /** Handler of 'beforeinput' event */
   protected gotBeforeInput(e: WUP.Text.GotInputEvent): void {
     this.#declineInputEnd?.call(this);
 
-    let isHandle = false; // inputEvent must be prevented if history is empty - possible when browser calls historyUndo
-    let isUndoRedoSuccess = false;
-    let isRedo = false;
-    switch (e.inputType) {
-      case "historyRedo": // Ctrl+Shift+Z
-        isRedo = true;
-      // eslint-disable-next-line no-fallthrough
-      case "historyUndo": // Ctrl+Z
-        // WARN: historyUndo can be fired is user shakes iPhone or click Undo button in editMenu
-        isHandle = !!this._refHistory;
-        isUndoRedoSuccess = isHandle && this._refHistory!.undoRedo(isRedo);
-        break;
-      default:
-        this._refHistory?.save();
-        break;
-    }
-
-    if (isHandle) {
-      e.preventDefault(); // prevent default to avoid browser-internal-history cleaning
-      isUndoRedoSuccess &&
-        this.$refInput.dispatchEvent(
-          new InputEvent("input", { cancelable: false, bubbles: true, inputType: e.inputType })
-        ); // fire manually because need to process undo/redo (but without browser-internal history)
-    } else if (this._opts.mask) {
+    const isUndoRedo = this._refHistory?.handleBeforeInput(e);
+    if (!isUndoRedo && this._opts.mask) {
       this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask, e.target.value);
       this.refMask.handleBeforeInput(e);
     }
