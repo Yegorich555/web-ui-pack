@@ -200,8 +200,8 @@ export default class TextHistory {
     this.testMe && console.warn(snap, this._hist);
   }
 
-  /** Call it manually when input value updated outside default input behavior */
-  saveReplaced(newValue: string): void {
+  /** Call it manually when before input value updated outside default events */
+  append(newValue: string): void {
     const state = this.inputState;
     state.inserted = newValue;
     state.selected = this.refInput.value;
@@ -212,8 +212,12 @@ export default class TextHistory {
   /** Call this to remove last history */
   removeLast(): void {
     const lastInd = this._histPos ?? this._hist.length - 1;
-    this._hist.splice(lastInd);
-    // console.warn("updated", this._hist);
+    if (lastInd >= 0) {
+      this._hist.splice(lastInd);
+      if (this._histPos != null) {
+        --this._histPos;
+      }
+    }
   }
 
   /** Returns whether is possible to process undo/redo actions */

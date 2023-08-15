@@ -103,4 +103,30 @@ describe("control.text.hist", () => {
     expect(await h.userUndo(el)).toBe("a|bc|d");
     expect(await h.userRedo(el)).toBe("a|d");
   });
+
+  test("cases with input modifiers (mask etc.)", async () => {
+    // removing last history: possible when need to declineInput changes
+    expect(() => hist.removeLast()).not.toThrow();
+    expect(await h.userInsertText(el, "ab")).toBe("ab|");
+    expect(await h.userInsertText(el, "123")).toBe("ab123|");
+    expect(await h.userInsertText(el, "f")).toBe("ab123f|");
+    expect(await h.userInsertText(el, "04")).toBe("ab123f04|");
+    expect(hist._hist.length).toBe(4);
+    expect(await h.userUndo(el)).toBe("ab123f|");
+    hist.removeLast();
+    expect(hist._hist.length).toBe(2);
+    expect(hist._histPos).toBe(1);
+    h.setInputCursor(el, "ab123|", { skipEvent: true });
+    expect(await h.userUndo(el)).toBe("ab|");
+    expect(await h.userUndo(el)).toBe("|");
+
+    // manual clearing
+    expect(await h.userTypeText(el, "123")).toBe("123|");
+    hist.append("");
+    el.value = "";
+    expect(await h.userUndo(el)).toBe("123|");
+    expect(await h.userRedo(el)).toBe("|");
+    expect(await h.userUndo(el)).toBe("123|");
+    expect(await h.userUndo(el)).toBe("12|");
+  });
 });

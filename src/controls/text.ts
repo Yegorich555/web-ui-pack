@@ -762,7 +762,7 @@ export default class WUPTextControl<
   protected setInputValue(v: ValueType | undefined | string, reason: SetValueReasons): void {
     const str = v != null ? ((v as any).toString() as string) : "";
     if (reason === SetValueReasons.clear) {
-      this._refHistory?.saveReplaced(str); // todo use it every time - not only for clear ???
+      this._refHistory?.append(str); // todo use it every time - not only for clear ???
     }
 
     this.$refInput.value = str;
