@@ -66,4 +66,41 @@ describe("control.text.hist", () => {
     expect(await h.userUndo(el)).toBe("a|bc|d");
     expect(await h.userRedo(el)).toBe("a2|d");
   });
+
+  test("delete text with Backspace", async () => {
+    // at the end
+    expect(await h.userTypeText(el, "abc")).toBe("abc|");
+    expect(await h.userRemove(el, { key: "Backspace" })).toBe("ab|");
+    expect(await h.userUndo(el)).toBe("abc|");
+    expect(await h.userRedo(el)).toBe("ab|");
+    // middle
+    h.setInputCursor(el, "ab|c");
+    expect(await h.userRemove(el, { key: "Backspace" })).toBe("a|c");
+    expect(await h.userUndo(el)).toBe("ab|c");
+    expect(await h.userRedo(el)).toBe("a|c");
+    // when text selected
+    h.setInputCursor(el, "a|bc|d");
+    expect(await h.userRemove(el, { key: "Backspace" })).toBe("a|d");
+    expect(await h.userUndo(el)).toBe("a|bc|d");
+    expect(await h.userRedo(el)).toBe("a|d");
+  });
+
+  test("delete text with Delete", async () => {
+    // at first
+    expect(await h.userTypeText(el, "abc")).toBe("abc|");
+    h.setInputCursor(el, "|abc");
+    expect(await h.userRemove(el, { key: "Delete" })).toBe("|bc");
+    expect(await h.userUndo(el)).toBe("|abc");
+    expect(await h.userRedo(el)).toBe("|bc");
+    // middle
+    h.setInputCursor(el, "a|bc");
+    expect(await h.userRemove(el, { key: "Delete" })).toBe("a|c");
+    expect(await h.userUndo(el)).toBe("a|bc");
+    expect(await h.userRedo(el)).toBe("a|c");
+    // when text selected
+    h.setInputCursor(el, "a|bc|d");
+    expect(await h.userRemove(el, { key: "Delete" })).toBe("a|d");
+    expect(await h.userUndo(el)).toBe("a|bc|d");
+    expect(await h.userRedo(el)).toBe("a|d");
+  });
 });

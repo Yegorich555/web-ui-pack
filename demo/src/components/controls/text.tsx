@@ -118,7 +118,19 @@ export default function TextControlView() {
               }
             }}
           />
-          <wup-text name="ipaddr" label="IPaddress" mask="##0.##0.##0.##0" maskholder="xxx.xxx.xxx.xxx" />
+          <wup-text
+            name="ipaddr"
+            label="IPaddress"
+            mask="##0.##0.##0.##0"
+            maskholder="xxx.xxx.xxx.xxx"
+            initValue="123.4.5.67"
+            ref={(el) => {
+              if (el) {
+                // todo selectAll + Delete + Ctrl-Z+Ctrl-Shift-Z caret at 0: expected whole selection
+                el.$options.autoFocus = true;
+              }
+            }}
+          />
           <wup-text
             name="num"
             label="With prefix/postfix & mask"

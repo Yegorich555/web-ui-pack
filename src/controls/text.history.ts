@@ -250,17 +250,18 @@ export default class TextHistory {
     // eslint-disable-next-line prefer-const
     let { pos1, pos2, inserted, removed, action } = snap;
     removed ??= "";
+    inserted ??= "";
     // undo
     if (isRedo) {
-      // #1: ab|cd|ef + '2' => ab2ef removed 'cd' pos 2:4 inserted '2'
-      // #2: abcd| => abc| => removed 'd' pos 4:4
-      // #3: ab|cd + Backspace=> a|cd => removed 'b' pos 2:2
-      // #3: ab|cd + Delete => a|cd => removed 'b' pos 2:2
-      // v = v.substring(0, inserted ? pos1 : pos1 - rm) + (inserted ?? "") + v.substring(pos1 + rm);
       if (action === InputTypes.replace) {
         pos1 = 0; // because text was completely replaced
         v = inserted;
       } else {
+        if (pos1 === pos2) {
+          if (action === InputTypes.deleteBefore) {
+            pos1 -= removed.length;
+          }
+        }
         v = v.substring(0, pos1) + inserted + v.substring(pos1 + (removed?.length || 0));
       }
       this.refInput.value = v;

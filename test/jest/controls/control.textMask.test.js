@@ -810,6 +810,7 @@ describe("control.text: mask", () => {
     expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("1|3.4.5.6"); // #3 remove middle char
     await h.userTypeText(el.$refInput, "a", { clearPrevious: false });
     await h.wait(150);
+    console.warn({ ...el._refHistory });
 
     // cover Ctrl+Z
     expect(h.getInputCursor(el.$refInput)).toBe("1|3.4.5.6");
@@ -820,10 +821,23 @@ describe("control.text: mask", () => {
     expect(await h.userUndo(el.$refInput)).toBe("123.4.5|");
 
     // cover Ctrl+Shift+Z
+    el._refHistory.testMe = true;
     expect(await h.userRedo(el.$refInput, { useCtrlY: true })).toBe("123.4.5.|");
     expect(await h.userRedo(el.$refInput)).toBe("123.4.5.6|");
     expect(await h.userRedo(el.$refInput)).toBe("123.4.5.67|");
+    console.warn({ ...el._refHistory }, el._refHistory._hist[el._refHistory._histPos + 1]);
     expect(await h.userRedo(el.$refInput)).toBe("1|23.4.5.6");
+
+    expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("1|3.4.5.6"); // #3 remove middle char
+    expect(await h.userUndo(el.$refInput)).toBe("1|23.4.5.6"); // rollback before #3
+    expect(await h.userRedo(el.$refInput)).toBe("1|3.4.5.6");
+    expect(await h.userUndo(el.$refInput)).toBe("1|23.4.5.6");
+
+    h.setInputCursor(el.$refInput, "12|3.4.5.6");
+    expect(await h.userRemove(el.$refInput)).toBe("1|3.4.5.6"); // #3 remove middle char
+    expect(await h.userUndo(el.$refInput)).toBe("12|3.4.5.6"); // rollback before #3
+    expect(await h.userRedo(el.$refInput)).toBe("1|3.4.5.6"); // rollback before #3
+    expect(await h.userUndo(el.$refInput)).toBe("12|3.4.5.6"); // rollback before #3
 
     // test again on simple case
     el = document.body.appendChild(document.createElement("wup-text"));
