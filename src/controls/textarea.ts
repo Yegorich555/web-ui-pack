@@ -114,11 +114,6 @@ export default class WUPTextareaControl<
     // not supported
   }
 
-  protected canHandleUndo(): boolean {
-    // todo enable custom history && optimize for textarea and maybe other controls
-    return false; // todo btnClear+undo doesn't work till it returns false
-  }
-
   // protected override gotBeforeInput(e: WUP.Text.GotInputEvent): void {
   //   super.gotBeforeInput(e);
   //   let data: string | null = null;
@@ -183,6 +178,7 @@ export default class WUPTextareaControl<
 
   protected override gotBeforeInput(e: WUP.Text.GotInputEvent): void {
     if (e.inputType.startsWith("format")) {
+      // todo need to process this for customHistory
       e.preventDefault(); // prevent Bold,Italic etc. styles until textrich is developed
     } else {
       super.gotBeforeInput(e);

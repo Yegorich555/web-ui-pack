@@ -607,7 +607,7 @@ export default class WUPTextControl<
   #inputTimer?: ReturnType<typeof setTimeout>;
   /** Called when user types text OR when need to apply/reset mask (on focusGot, focusLost) */
   protected gotInput(e: WUP.Text.GotInputEvent): void {
-    this._refHistory?.handleInput(e);
+    this._refHistory?.handleInput(e); // todo need to update after bubbling it because mask/formatting can be applied after
     const el = e.target as WUP.Text.Mask.HandledInput;
     let txt = el.value;
 
@@ -627,7 +627,7 @@ export default class WUPTextControl<
     const canParse = !txt || this.canParseInput(txt);
     let v = this.$value;
     let errMsg: boolean | string = "";
-    /* istanbul ignore else */
+    /* istanbul ignore else */ // todo deprecate ignore
     if (canParse) {
       try {
         v = !txt ? undefined : this.parseInput(txt);
@@ -643,7 +643,7 @@ export default class WUPTextControl<
     }
 
     const act = (): void => {
-      /* istanbul ignore else */
+      /* istanbul ignore else */ // todo deprecate ignore
       if (errMsg) {
         this.validateOnce({ _parse: this.validations?._parse || "" }, true);
       } else if (canParse) {
