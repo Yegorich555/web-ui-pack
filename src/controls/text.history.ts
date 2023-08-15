@@ -283,5 +283,5 @@ export default class TextHistory {
     return true;
   }
 
-  testMe = true;
+  testMe = false;
 }
