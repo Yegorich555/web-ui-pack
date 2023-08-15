@@ -731,7 +731,7 @@ export default class WUPSelectControl<
   }
 
   protected override canHandleUndo(): boolean {
-    return !!this._opts.multiple;
+    return !!this._opts.multiple; // todo check this
   }
 
   /** Returns if possible to de-select menu items when input is empty */
@@ -796,7 +796,6 @@ export default class WUPSelectControl<
       const isDeleted = e.inputType.startsWith("deleteContent");
       const pos = this.$refInput.selectionStart || 0;
       if (pos !== str.length && !isDeleted) {
-        // todo need somehow deprecate customCaretPos ???
         this.declineInput(str.length); // don't allow to type text in the middle
       } else {
         const iEnd = str.lastIndexOf(",");
@@ -859,3 +858,4 @@ customElements.define(tagName, WUPSelectControl);
 // todo set $initValue + focus + pressEscape + remove last char - menu opens but focusedItem not visible in scrolled content
 // todo type long text when menu shows "noItems" + click btnClear - menu must be refreshed
 // todo selectItem from menu > popupClosed > Ctrl+A+Backspace > input value removed & popupOpened > press Esc > popupClosed+valueChange(undefined) > press Esc > value restored > Ctrl + Z => extra text appended
+// todo histUndo/histRedo must trigger between initValue & lastValue ???

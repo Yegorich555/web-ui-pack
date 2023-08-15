@@ -947,6 +947,7 @@ describe("control.text: mask", () => {
     expect(el.refMask).toBeDefined();
     el.$options.mask = undefined;
     await h.wait(1);
+    el.$refInput.dispatchEvent(new InputEvent("beforeinput", { bubbles: true }));
     el.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
     expect(el.refMask).toBeUndefined();
 

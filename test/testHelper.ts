@@ -383,7 +383,7 @@ export async function wait(t = 1000) {
   }
 }
 
-/** Simulate user typse text (send values to the end of input): focus + keydown+ keyup + keypress + input events */
+/** Simulate user types text (send values to the end of input): focus + keydown+ keyup + keypress + input events */
 export async function userTypeText(
   el: HTMLInputElement,
   text: string,
@@ -406,8 +406,9 @@ export async function userTypeText(
       continue;
     }
     const v = el.value;
-    let caretPos = el.selectionStart ?? el.value.length;
-    el.value = v.substring(0, caretPos) + key + v.substring(el.selectionEnd ?? caretPos);
+    const { selectionStart, selectionEnd } = el;
+    let caretPos = selectionStart ?? el.value.length;
+    el.value = v.substring(0, caretPos) + key + v.substring(selectionEnd ?? caretPos);
     el.selectionStart = ++caretPos;
     el.selectionEnd = el.selectionStart;
     el.dispatchEvent(new InputEvent("input", { bubbles: true, data: key, inputType }));
@@ -467,9 +468,19 @@ export function setInputCursor(el: HTMLInputElement, cursorPattern: string, opts
   // expect(el.value).toBe(gotValue);
   el.focus();
   el.value = gotValue;
-  el.selectionStart = cursorPattern.indexOf("|");
-  el.selectionEnd = cursorPattern.lastIndexOf("|");
-  was !== gotValue && !opts?.skipEvent && el.dispatchEvent(new InputEvent("input", { bubbles: true }));
+  const pos1 = cursorPattern.indexOf("|");
+  let pos2 = cursorPattern.indexOf("|", pos1 + 1);
+  if (pos2 === -1) {
+    pos2 = pos1;
+  } else {
+    --pos2;
+  }
+  el.selectionStart = pos1;
+  el.selectionEnd = pos2;
+  was !== gotValue &&
+    !opts?.skipEvent &&
+    el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true })) &&
+    el.dispatchEvent(new InputEvent("input", { bubbles: true }));
 }
 
 /** Simulates user removes text via backspace: focus + keydown+ keyup + keypress + input events;

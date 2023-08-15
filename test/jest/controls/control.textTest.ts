@@ -120,7 +120,6 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       expect(spyChange.mock.lastCall[0].detail).toBe(SetValueReasons.userInput); // onUserInput
       expect(el.$onChange).toBeCalledTimes(1);
       expect((el.$onChange as any).mock.lastCall[0]).toBe(spyChange.mock.lastCall[0]);
-      await h.userTypeText(el.$refInput, ""); // just for coverage
 
       el.$options.debounceMs = 0;
       el.$value = undefined;

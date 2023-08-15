@@ -589,9 +589,13 @@ export default class WUPTextControl<
     this._refHistory?.handleKeyDown(e);
   }
 
+  /** Value-text before input changed - used with declineInput */
+  _beforeSnap?: string;
   /** Handler of 'beforeinput' event */
   protected gotBeforeInput(e: WUP.Text.GotInputEvent): void {
     this.#declineInputEnd?.call(this);
+    // todo it's not required for textArea
+    this._beforeSnap = TextHistory.historyToSnapshot(this.$refInput.value, this.$refInput.selectionStart || 0);
 
     const isUndoRedo = this._refHistory?.handleBeforeInput(e);
     if (!isUndoRedo && this._opts.mask) {
@@ -603,6 +607,7 @@ export default class WUPTextControl<
   #inputTimer?: ReturnType<typeof setTimeout>;
   /** Called when user types text OR when need to apply/reset mask (on focusGot, focusLost) */
   protected gotInput(e: WUP.Text.GotInputEvent): void {
+    this._refHistory?.handleInput(e);
     const el = e.target as WUP.Text.Mask.HandledInput;
     let txt = el.value;
 
@@ -687,8 +692,7 @@ export default class WUPTextControl<
     }
 
     if (declinedAdd) {
-      this._refHistory!.save(mi.value, pos); // fix when ###: "12|" + "3b" => 123|
-      this.declineInput();
+      this.declineInput(pos, mi.value); // fix when ###: "12|" + "3b" => 123|
     } else {
       el.value = mi.value;
       document.activeElement === el && el.setSelectionRange(pos, pos); // without checking on focus setSelectionRange sets focus on Safari
@@ -718,21 +722,29 @@ export default class WUPTextControl<
 
   #declineInputEnd?: () => void;
   /** Make undo for input after 100ms when user types not allowed chars
-   * point nextCaret for custom undo valu
+   * point nextCaret for custom undo value
    * @tutorial Troubleshooting
    * * declineInput doesn't trigger beforeinput & input events (do it manually if required) */
-  protected declineInput(nextCaret?: number): void {
-    if (!this._refHistory) {
-      throw new Error(`${this.tagName}. Custom history disabled (canHandleUndo must return true)`);
+  protected declineInput(nextCaret?: number, nextValue?: string): void {
+    if (!this._beforeSnap) {
+      return;
     }
+    const { v, pos } = TextHistory.historyFromSnapshot(this._beforeSnap);
+    nextCaret ??= pos;
+    nextValue ??= v;
+    delete this._beforeSnap;
 
     this.#declineInputEnd = (): void => {
       this.#declineInputEnd = undefined;
       clearTimeout(t);
-      // todo issue: possible _refHistory undefined when focusOut but timeout isn't finished
-      this._refHistory!.undoRedo(false, nextCaret);
+      this.$refInput.value = nextValue!;
+      this.$refInput.setSelectionRange(nextCaret!, nextCaret!);
       this.refMask && this.renderMaskHolder(this._opts.maskholder, this.refMask.leftLength);
       this.renderPostfix(this._opts.postfix);
+
+      if (this._refHistory && v === nextValue) {
+        this._refHistory.removeLast();
+      }
     };
 
     const t = setTimeout(this.#declineInputEnd, 100);
@@ -748,14 +760,13 @@ export default class WUPTextControl<
   /** Called to update/reset value for <input/> */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected setInputValue(v: ValueType | undefined | string, reason: SetValueReasons): void {
+    const str = v != null ? ((v as any).toString() as string) : "";
     if (reason === SetValueReasons.clear) {
-      this._refHistory?.save();
+      this._refHistory?.saveReplaced(str); // todo use it every time - not only for clear ???
     }
 
-    const str = v != null ? (v as any).toString() : "";
     this.$refInput.value = str;
     this._opts.mask && this.maskInputProcess(null);
-    // todo need call history save here - when input value is formated
     this.renderPostfix(this._opts.postfix);
     this._onceErrName === this._errName && this.goHideError(); // hide mask-message because value has higher priority than inputValue
   }
