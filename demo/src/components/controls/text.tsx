@@ -112,6 +112,7 @@ export default function TextControlView() {
             name="phone"
             label="Phone number"
             mask="+0 (000) 000-0000"
+            initValue="+1 (234) 567-8901"
             ref={(el) => {
               if (el) {
                 el.$options.validations = { required: true };
@@ -134,10 +135,10 @@ export default function TextControlView() {
           <wup-text
             name="num"
             label="With prefix/postfix & mask"
-            mask="##0"
-            maskholder="000"
-            prefix="$ "
-            postfix=" USD"
+            mask="##0 USD"
+            maskholder="000 USD"
+            // prefix="$ "
+            // postfix=" USD"
             initValue="12"
           />
           Features:

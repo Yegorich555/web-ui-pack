@@ -424,6 +424,7 @@ export async function userTypeText(
   if (text === "") {
     el.dispatchEvent(new InputEvent("input", { bubbles: true }));
   }
+  await wait(1);
   return getInputCursor(el);
 }
 
@@ -489,6 +490,7 @@ export async function userRemove(
   el: HTMLInputElement,
   opts?: { removeCount: number; key: "Backspace" | "Delete" }
 ): Promise<string> {
+  await wait(10);
   el.focus();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   opts = { removeCount: 1, key: "Backspace", ...opts };
@@ -611,6 +613,8 @@ export async function userTap(el: HTMLElement, opts?: MouseEventInit) {
  * WARN: in reality onBeforeInput event calls only if history.legth >= 1
  * @return cursor snapshot (getInputCursor) */
 export async function userUndo(el: HTMLInputElement): Promise<string> {
+  await wait(10);
+
   el.dispatchEvent(
     new KeyboardEvent("keydown", {
       key: "я",
@@ -633,6 +637,8 @@ export async function userUndo(el: HTMLInputElement): Promise<string> {
  * WARN: in reality onBeforeInput event calls only if history.legth >= 1
  * @return cursor snapshot (getInputCursor) */
 export async function userRedo(el: HTMLInputElement, opts?: { useCtrlY?: boolean }): Promise<string> {
+  await wait(10);
+
   const okCtrlY =
     opts?.useCtrlY &&
     el.dispatchEvent(

@@ -607,7 +607,7 @@ export default class WUPTextControl<
   #inputTimer?: ReturnType<typeof setTimeout>;
   /** Called when user types text OR when need to apply/reset mask (on focusGot, focusLost) */
   protected gotInput(e: WUP.Text.GotInputEvent): void {
-    this._refHistory?.handleInput(e); // todo need to update after bubbling it because mask/formatting can be applied after
+    this._refHistory?.handleInput(e);
     const el = e.target as WUP.Text.Mask.HandledInput;
     let txt = el.value;
 
@@ -693,7 +693,7 @@ export default class WUPTextControl<
 
     if (declinedAdd) {
       this.declineInput(pos, mi.value); // fix when ###: "12|" + "3b" => 123|
-    } else {
+    } else if (el.value !== mi.value) {
       el.value = mi.value;
       document.activeElement === el && el.setSelectionRange(pos, pos); // without checking on focus setSelectionRange sets focus on Safari
     }
@@ -742,8 +742,8 @@ export default class WUPTextControl<
       this.refMask && this.renderMaskHolder(this._opts.maskholder, this.refMask.leftLength);
       this.renderPostfix(this._opts.postfix);
 
-      if (this._refHistory && v === nextValue) {
-        this._refHistory.removeLast();
+      if (this._refHistory) {
+        v === nextValue ? this._refHistory.removeLast() : this._refHistory.updateLast(v);
       }
     };
 
@@ -762,7 +762,9 @@ export default class WUPTextControl<
   protected setInputValue(v: ValueType | undefined | string, reason: SetValueReasons): void {
     const str = v != null ? ((v as any).toString() as string) : "";
     if (reason === SetValueReasons.clear) {
-      this._refHistory?.append(str); // todo use it every time - not only for clear ???
+      // todo use it every time - not only for clear
+      // todo for number.ts: input > histSave > setInputValue... - need to update it ?
+      this._refHistory?.append(str);
     }
 
     this.$refInput.value = str;
@@ -810,6 +812,3 @@ export default class WUPTextControl<
 customElements.define(tagName, WUPTextControl);
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
-
-// todo: handle Ctrl+Z wup-select etc. cases
-// todo Ctrl+Z reverts changes but selectsAll text - it's wrong

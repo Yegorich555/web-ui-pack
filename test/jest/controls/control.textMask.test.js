@@ -597,11 +597,12 @@ describe("control.text: mask", () => {
 
     h.setInputCursor(el.$refInput, "$ 5 USD|");
     await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
+    expect(h.getInputCursor(el.$refInput)).toBe("$ 5 USD2|");
     await h.wait(150);
-    expect(h.getInputCursor(el.$refInput)).toBe("$ 52| USD");
+    expect(h.getInputCursor(el.$refInput)).toBe("$ 5| USD");
 
     h.setInputCursor(el.$refInput, "$ 123456 USD|");
-    expect(await h.userTypeText(el.$refInput, "2", { clearPrevious: false })).toBe("$ 1234562| USD");
+    expect(await h.userTypeText(el.$refInput, "2", { clearPrevious: false })).toBe("$ 123456 USD2|");
     await h.wait(150);
     expect(h.getInputCursor(el.$refInput)).toBe("$ 123456| USD");
 

@@ -129,4 +129,71 @@ describe("control.text.hist", () => {
     expect(await h.userUndo(el)).toBe("123|");
     expect(await h.userUndo(el)).toBe("12|");
   });
+
+  test("findDifference & updateLast", async () => {
+    // appended
+    expect(TextHistory.findDiff("ab", "ab.")).toStrictEqual({ inserted: { v: ".", pos: 2 }, removed: null });
+    expect(TextHistory.findDiff("ab", ".ab")).toStrictEqual({ inserted: { v: ".", pos: 0 }, removed: null });
+    expect(TextHistory.findDiff("ab", "a.b")).toStrictEqual({ inserted: { v: ".", pos: 1 }, removed: null });
+
+    expect(TextHistory.findDiff("ab", "ab12")).toStrictEqual({ inserted: { v: "12", pos: 2 }, removed: null });
+    expect(TextHistory.findDiff("ab", "34ab")).toStrictEqual({ inserted: { v: "34", pos: 0 }, removed: null });
+    expect(TextHistory.findDiff("ab", "a56b")).toStrictEqual({ inserted: { v: "56", pos: 1 }, removed: null });
+
+    // removed
+    expect(TextHistory.findDiff("ab.", "ab")).toStrictEqual({ removed: { v: ".", pos: 2 }, inserted: null });
+    expect(TextHistory.findDiff(".ab", "ab")).toStrictEqual({ removed: { v: ".", pos: 0 }, inserted: null });
+    expect(TextHistory.findDiff("a.b", "ab")).toStrictEqual({ removed: { v: ".", pos: 1 }, inserted: null });
+
+    expect(TextHistory.findDiff("ab12", "ab")).toStrictEqual({ removed: { v: "12", pos: 2 }, inserted: null });
+    expect(TextHistory.findDiff("34ab", "ab")).toStrictEqual({ removed: { v: "34", pos: 0 }, inserted: null });
+    expect(TextHistory.findDiff("a56b", "ab")).toStrictEqual({ removed: { v: "56", pos: 1 }, inserted: null });
+
+    // replaced
+    expect(TextHistory.findDiff("ab.", "ab1")).toStrictEqual({
+      removed: { v: ".", pos: 2 },
+      inserted: { v: "1", pos: 2 },
+    });
+    expect(TextHistory.findDiff("ab.", "ab12")).toStrictEqual({
+      removed: { v: ".", pos: 2 },
+      inserted: { v: "12", pos: 2 },
+    });
+    expect(TextHistory.findDiff("ab12", "ab.")).toStrictEqual({
+      removed: { v: "12", pos: 2 },
+      inserted: { v: ".", pos: 2 },
+    });
+
+    expect(TextHistory.findDiff(".ab", "12ab")).toStrictEqual({
+      removed: { v: ".", pos: 0 },
+      inserted: { v: "12", pos: 0 },
+    });
+    expect(TextHistory.findDiff("12ab", ".ab")).toStrictEqual({
+      removed: { v: "12", pos: 0 },
+      inserted: { v: ".", pos: 0 },
+    });
+
+    // changed if different places
+    // todo cover tests here: changed if different places
+
+    // simulate mask changes
+    expect(await h.userTypeText(el, "12")).toBe("12|");
+    const onInput = jest.fn();
+    onInput.mockImplementationOnce(() => {
+      el.value += ".";
+    });
+    el.addEventListener("input", onInput);
+    expect(await h.userTypeText(el, "3", { clearPrevious: false })).toBe("123.|");
+    expect(await h.userUndo(el)).toBe("12|");
+    expect(await h.userRedo(el)).toBe("123.|");
+
+    // simulate number format
+    expect(await h.userTypeText(el, "123")).toBe("123|");
+    onInput.mockImplementationOnce(() => {
+      el.value = "1,234";
+      el.setSelectionRange(el.value.length, el.value.length);
+    });
+    expect(await h.userTypeText(el, "4", { clearPrevious: false })).toBe("1,234|");
+    expect(await h.userUndo(el)).toBe("123|");
+    expect(await h.userRedo(el)).toBe("1,234|");
+  });
 });

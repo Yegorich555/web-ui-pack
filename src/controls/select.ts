@@ -859,3 +859,4 @@ customElements.define(tagName, WUPSelectControl);
 // todo type long text when menu shows "noItems" + click btnClear - menu must be refreshed
 // todo selectItem from menu > popupClosed > Ctrl+A+Backspace > input value removed & popupOpened > press Esc > popupClosed+valueChange(undefined) > press Esc > value restored > Ctrl + Z => extra text appended
 // todo histUndo/histRedo must trigger between initValue & lastValue ???
+// todo: handle Ctrl+Z wup-select etc. cases

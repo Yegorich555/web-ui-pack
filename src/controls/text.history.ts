@@ -13,6 +13,7 @@ interface InputState {
   after: string;
   inserted: string | null;
   action: InputTypes | null;
+  fullValue?: string;
 }
 
 /** Implements custom history undo/redo for input-text */
@@ -27,6 +28,35 @@ export default class TextHistory {
     const pos = h.indexOf("\0");
     const v = h.substring(0, pos) + h.substring(pos + 1);
     return { pos, v };
+  }
+
+  /** Returns simple changes for 2 strings */
+  static findDiff(
+    prev: string,
+    next: string
+  ): { inserted: { v: string; pos: number } | null; removed: { v: string; pos: number } | null } {
+    const inserted = { v: "", pos: 0 };
+    const removed = { v: "", pos: 0 };
+
+    const len = Math.max(prev.length, next.length);
+    for (let i = 0; i < len; ++i) {
+      if (prev[i] !== next[i]) {
+        // find last changed
+        for (let iPrev = prev.length - 1, iNext = next.length - 1; ; --iPrev, --iNext) {
+          if (prev[iPrev] !== next[iNext]) {
+            // console.log({ i, iPrev, iNext });
+            inserted.pos = i;
+            inserted.v = next.substring(i, iNext + 1);
+            removed.pos = i;
+            removed.v = prev.substring(i, iPrev + 1);
+            break;
+          }
+        }
+        break;
+      }
+    }
+
+    return { inserted: inserted.v ? inserted : null, removed: removed.v ? removed : null };
   }
 
   // eslint-disable-next-line no-useless-constructor
@@ -116,6 +146,7 @@ export default class TextHistory {
           this._stateBeforeInput = this.inputState;
           this._stateBeforeInput.action = action;
           this._stateBeforeInput.inserted = e.data;
+          this._stateBeforeInput.fullValue = this.refInput.value; // todo skip for textArea???
           isHandled = false;
         }
         break;
@@ -138,22 +169,25 @@ export default class TextHistory {
   /** Call this handler on input.on('input'); */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handleInput(e: InputEvent): void {
+    let was: string | undefined;
     if (this._stateBeforeInput) {
+      was = this._stateBeforeInput.fullValue;
       this.save(this._stateBeforeInput);
       this._stateBeforeInput = undefined;
+
+      // todo don't use it for textArea ???
+      const v = this.refInput.value;
+      setTimeout(() => {
+        const isChanged = this.refInput.value !== v;
+        isChanged && this.updateLast(was!); // update last history if input value is changed
+      });
     } else if (this._stateBeforeInput !== false) {
       console.error(
         "WUP-TEXT. History error. Event [input] fired without [beforeinput] event. Undo-history is cleared"
       );
       this._hist = [];
+      this._histPos = null;
     }
-
-    // todo uncomment logic
-    // const v = this.refInput.value;
-    // setTimeout(() => {
-    //   const isModified = v !== this.refInput.value;
-    //   this.save(isModified); // save history only if input is finished
-    // });
   }
 
   _hist: any[] = []; // todo cast to string
@@ -188,7 +222,7 @@ export default class TextHistory {
         }
         snap = { action, pos1, pos2, removed };
         break;
-      default: // full replace - possible when called with mask
+      default: // full replace - possible when input cleared
         snap = { action, pos1, pos2, removed, inserted };
         break;
     }
@@ -209,14 +243,38 @@ export default class TextHistory {
     this.save(state);
   }
 
+  /** Returns last history index */
+  get lastIndex(): number {
+    return this._histPos ?? this._hist.length - 1;
+  }
+
   /** Call this to remove last history */
   removeLast(): void {
-    const lastInd = this._histPos ?? this._hist.length - 1;
-    if (lastInd >= 0) {
-      this._hist.splice(lastInd);
+    const li = this.lastIndex;
+    if (li >= 0) {
+      this._hist.splice(li);
       if (this._histPos != null) {
         --this._histPos;
       }
+    }
+  }
+
+  /** Called to update last history if input-value is modified in input event */
+  updateLast(was: string): void {
+    const h = this._hist[this.lastIndex];
+    if (h) {
+      const diff = TextHistory.findDiff(was, this.refInput.value);
+      // 123| => 1,234|: removed 23 inserted 34
+      if (diff.inserted) {
+        // otherwise need somehow full replace inserted but need beforeState.value compare with new
+        h.inserted = diff.inserted.v;
+        h.posIns = diff.inserted.pos;
+      }
+      if (diff.removed) {
+        h.removed = diff.removed.v;
+        h.posIns = diff.removed.pos;
+      }
+      this.testMe && console.warn("updated", h, diff);
     }
   }
 
@@ -266,13 +324,15 @@ export default class TextHistory {
             pos1 -= removed.length;
           }
         }
-        v = v.substring(0, pos1) + inserted + v.substring(pos1 + (removed?.length || 0));
+        const posIns = snap.posIns ?? pos1;
+        v = v.substring(0, posIns) + inserted + v.substring(posIns + (removed?.length || 0));
       }
       this.refInput.value = v;
       const pos = pos1 + (inserted?.length || 0);
       this.refInput.setSelectionRange(pos, pos);
     } else {
-      const pos = action === InputTypes.deleteBefore && pos1 === pos2 ? pos1 - removed.length : pos1;
+      const posIns = snap.posIns ?? pos1;
+      const pos = action === InputTypes.deleteBefore && pos1 === pos2 ? pos1 - removed.length : posIns;
       v = v.substring(0, pos) + removed + v.substring(pos + (inserted?.length || 0));
       this.refInput.value = v;
       this.refInput.setSelectionRange(pos1, pos2);
@@ -285,3 +345,21 @@ export default class TextHistory {
 
   testMe = false;
 }
+
+// const expect = (actual: any) => ({
+//   toStrictEqual: (expected: any) => {
+//     console.warn(actual, "vs", expected);
+//   },
+// });
+
+// expect(TextHistory.findDiff("ab", "ab.").inserted).toStrictEqual({ v: ".", pos: 2 });
+// expect(TextHistory.findDiff("ab", ".ab").inserted).toStrictEqual({ v: ".", pos: 0 });
+// expect(TextHistory.findDiff("ab", "a.b").inserted).toStrictEqual({ v: ".", pos: 1 });
+
+// expect(TextHistory.findDiff("ab", "ab12").inserted).toStrictEqual({ v: "12", pos: 2 });
+// expect(TextHistory.findDiff("ab", "34ab").inserted).toStrictEqual({ v: "34", pos: 0 });
+// expect(TextHistory.findDiff("ab", "a56b").inserted).toStrictEqual({ v: "56", pos: 1 });
+
+// expect(TextHistory.findDiff("ab.", "ab").removed).toStrictEqual({ v: ".", pos: 2 });
+// expect(TextHistory.findDiff(".ab", "ab").removed).toStrictEqual({ v: ".", pos: 0 });
+// expect(TextHistory.findDiff("a.b", "ab").removed).toStrictEqual({ v: ".", pos: 1 });
