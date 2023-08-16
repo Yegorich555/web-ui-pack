@@ -315,6 +315,7 @@ export default class TextHistory {
     inserted ??= "";
     // undo
     if (isRedo) {
+      let posIns = pos1;
       if (action === InputTypes.replace) {
         pos1 = 0; // because text was completely replaced
         v = inserted;
@@ -324,11 +325,11 @@ export default class TextHistory {
             pos1 -= removed.length;
           }
         }
-        const posIns = snap.posIns ?? pos1;
+        posIns = snap.posIns ?? pos1;
         v = v.substring(0, posIns) + inserted + v.substring(posIns + (removed?.length || 0));
       }
       this.refInput.value = v;
-      const pos = pos1 + (inserted?.length || 0);
+      const pos = posIns + (inserted?.length || 0);
       this.refInput.setSelectionRange(pos, pos);
     } else {
       const posIns = snap.posIns ?? pos1;

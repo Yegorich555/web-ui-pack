@@ -51,7 +51,8 @@ describe("control.number", () => {
     expect(h.getInputCursor(el.$refInput)).toBe("12|");
 
     h.setInputCursor(el.$refInput, "34ab|12");
-    el.$refInput.dispatchEvent(new InputEvent("input", { inputType: "insertFromPaste", bubbles: true }));
+    el.$refInput.dispatchEvent(new InputEvent("beforeinput", { inputType: "insertFromPaste", bubbles: true })) &&
+      el.$refInput.dispatchEvent(new InputEvent("input", { inputType: "insertFromPaste", bubbles: true }));
     expect(h.getInputCursor(el.$refInput)).toBe("3,4|12");
 
     h.setInputCursor(el.$refInput, "|123");
@@ -133,7 +134,8 @@ describe("control.number", () => {
     el.$options.format = { sepDecimal: ".", maxDecimal: 2, minDecimal: 0 };
     await h.wait(1);
     el.$refInput.value = "11.530000000000001";
-    el.$refInput.dispatchEvent(new InputEvent("input", { inputType: "insertFromPaste", bubbles: true }));
+    el.$refInput.dispatchEvent(new InputEvent("beforeinput", { inputType: "insertFromPaste", bubbles: true })) &&
+      el.$refInput.dispatchEvent(new InputEvent("input", { inputType: "insertFromPaste", bubbles: true }));
     expect(h.getInputCursor(el.$refInput)).toBe("11.53|");
     expect(el.$value).toBe(11.53);
 
@@ -166,7 +168,7 @@ describe("control.number", () => {
 
     // cover Ctrl+Shift+Z
     expect(await h.userRedo(el.$refInput)).toBe("1,234.|");
-    expect(await h.userRedo(el.$refInput)).toBe("1,|234");
+    expect(await h.userRedo(el.$refInput)).toBe("1,234|");
     expect(el.$value).toBe(1234);
     expect(await h.userRedo(el.$refInput)).toBe("1|34");
     expect(el.$value).toBe(134);

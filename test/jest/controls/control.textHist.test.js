@@ -195,5 +195,14 @@ describe("control.text.hist", () => {
     expect(await h.userTypeText(el, "4", { clearPrevious: false })).toBe("1,234|");
     expect(await h.userUndo(el)).toBe("123|");
     expect(await h.userRedo(el)).toBe("1,234|");
+
+    onInput.mockImplementationOnce(() => {
+      el.value = "134";
+      el.setSelectionRange(1, 1);
+    });
+    h.setInputCursor(el, "1,|234");
+    expect(await h.userRemove(el, { key: "Delete" })).toBe("1|34");
+    expect(await h.userUndo(el)).toBe("1,|234");
+    expect(await h.userRedo(el)).toBe("1|34");
   });
 });
