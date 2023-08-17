@@ -494,8 +494,9 @@ export default class WUPTextControl<
   _refHistory?: TextHistory;
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
     const arr = super.gotFocus(ev);
+
     if (this.canHandleUndo()) {
-      this._refHistory = new TextHistory(this.$refInput);
+      this._refHistory = this._refHistory ?? new TextHistory(this.$refInput);
     }
 
     const r = this.appendEvent(this.$refInput, "input", (e) => {
@@ -543,7 +544,6 @@ export default class WUPTextControl<
       }
       this.renderPostfix(this._opts.postfix); // postfix depends on maskholder
     }
-    delete this._refHistory; // todo don't delete history anymore only by submit...
     super.gotFocusLost();
   }
 
