@@ -53,7 +53,6 @@ declare global {
 }
 
 /** Base abstract form-control for any control with popup-menu (Dropdown, Datepicker etc.) */
-// @ts-expect-error - because validationRules is different
 export default abstract class WUPBaseComboControl<
   ValueType = any,
   TOptions extends WUP.BaseCombo.Options = WUP.BaseCombo.Options,
@@ -497,6 +496,7 @@ export default abstract class WUPBaseComboControl<
       : this.setInputValue(this.$value, SetValueReasons.userSelect);
   }
 
+  // @ts-expect-error - because expected string
   protected override setInputValue(v: ValueType | undefined, reason: SetValueReasons): void {
     const p = this.valueToInput(v);
     super.setInputValue(p, reason);

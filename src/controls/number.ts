@@ -69,7 +69,6 @@ declare global {
     <wup-num name="number" validations="myValidations"/>
   </wup-form>;
  * @see {@link WUPTextControl} */
-// @ts-expect-error - because number & string incompatible
 export default class WUPNumberControl<
   ValueType = number,
   TOptions extends WUP.Number.Options = WUP.Number.Options,
@@ -239,6 +238,7 @@ export default class WUPNumberControl<
     return true;
   }
 
+  // @ts-expect-error - because expected string
   protected override setInputValue(v: ValueType | undefined, reason: SetValueReasons): void {
     const txt = this.valueToInput(v);
     super.setInputValue(txt, reason);

@@ -539,7 +539,7 @@ export default class WUPTextControl<
         this.$refInput.value = ""; // rollback prefix/postfix if user types nothing
         delete (this.$refInput as WUP.Text.Mask.HandledInput)._maskPrev;
         setTimeout(() => {
-          this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
+          this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true })); // todo it calls error
         });
       }
       this.renderPostfix(this._opts.postfix); // postfix depends on maskholder
@@ -614,7 +614,7 @@ export default class WUPTextControl<
       const prev = el._maskPrev?.value;
       txt = this.maskInputProcess(e);
       if (txt === prev) {
-        this.renderPostfix(this._opts.postfix);
+        // this.renderPostfix(this._opts.postfix);
         return; // skip because no changes from previous action
       }
     }
@@ -749,7 +749,7 @@ export default class WUPTextControl<
   }
 
   protected override setValue(v: ValueType | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
-    !skipInput && this.setInputValue(v, reason);
+    !skipInput && this.setInputValue(v as string, reason);
     const isChanged = super.setValue(v, reason);
     this._isValid !== false && this.goHideError();
     return isChanged;
@@ -757,14 +757,13 @@ export default class WUPTextControl<
 
   /** Called to update/reset value for <input/> */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected setInputValue(v: ValueType | undefined | string, reason: SetValueReasons): void {
+  protected setInputValue(v: string, reason: SetValueReasons): void {
     const prev = this.$refInput.value;
     const str = v != null ? ((v as any).toString() as string) : "";
     this.$refInput.value = str;
 
     this._opts.mask && this.maskInputProcess(null);
     str !== prev && this._refHistory?.save(prev, this.$refInput.value);
-
     this.renderPostfix(this._opts.postfix);
     this._onceErrName === this._errName && this.goHideError(); // hide mask-message because value has higher priority than inputValue
   }
