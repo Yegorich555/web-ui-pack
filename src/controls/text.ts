@@ -538,9 +538,6 @@ export default class WUPTextControl<
       if (this.refMask.prefix && this.refMask.value === this.refMask.prefix) {
         this.$refInput.value = ""; // rollback prefix/postfix if user types nothing
         delete (this.$refInput as WUP.Text.Mask.HandledInput)._maskPrev;
-        setTimeout(() => {
-          this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true })); // todo it calls error
-        });
       }
       this.renderPostfix(this._opts.postfix); // postfix depends on maskholder
     }
