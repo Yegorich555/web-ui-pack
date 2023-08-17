@@ -839,9 +839,6 @@ describe("control.text: mask", () => {
     expect(await h.userRedo(el.$refInput)).toBe("1|3.4.5.6"); // rollback before #3
     expect(await h.userUndo(el.$refInput)).toBe("12|3.4.5.6"); // rollback before #3
 
-    // todo fix this case
-    // el._refHistory.testMe = true;
-    // console.warn({ ...el._refHistory }, el._refHistory._hist[el._refHistory._histPos + 1]);
     expect(await h.userTypeText(el.$refInput, "123")).toBe("123.|");
     expect(await h.userUndo(el.$refInput)).toBe("12|"); // expected that history removes also extra '.' that added by mask
 

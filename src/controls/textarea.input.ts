@@ -60,6 +60,7 @@ export default class WUPTextareaInput extends HTMLElement {
 
   /** Get/set innerHTML (br converted into '\n') */
   get value(): string {
+    // store _v to cache to prevent parse logic
     return (
       this.innerHTML
         // .replace(/\n $/, "\n")

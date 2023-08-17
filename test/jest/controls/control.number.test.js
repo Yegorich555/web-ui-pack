@@ -321,10 +321,9 @@ describe("control.number", () => {
     await h.wait(1);
 
     // todo fix it
-    return;
-    // history undo must work
-    expect(el.$refInput.value).toBe("11.53");
-    expect(await h.userUndo(el.$refInput)).toBe("111.53|");
+    // // history undo must work
+    // expect(el.$refInput.value).toBe("11.53");
+    // expect(await h.userUndo(el.$refInput)).toBe("111.53|");
 
     // MAX_SAFE_INTEGER
     await h.wait();

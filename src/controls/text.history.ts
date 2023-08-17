@@ -8,12 +8,24 @@ const enum InputTypes {
 interface InputState {
   pos1: number;
   pos2: number;
-  selected: string;
-  before: string;
-  after: string;
   inserted: string | null;
-  action: InputTypes | null;
-  fullValue?: string;
+  action: InputTypes;
+  value: string;
+}
+
+interface Snapshot {
+  /** Action applied to input */
+  action: InputTypes;
+  /** selectionStart before input change */
+  pos1: number;
+  /** selectionEnd before input change */
+  pos2: number;
+  /** position where text changed */
+  posIns?: number;
+  /** Removed part of text */
+  removed?: string;
+  /** Inserted part of text */
+  inserted?: string;
 }
 
 /** Implements custom history undo/redo for input-text */
@@ -110,11 +122,9 @@ export default class TextHistory {
     return {
       pos1,
       pos2,
-      selected: v.substring(pos1, pos2),
-      before: v[pos1 - 1] || "",
-      after: v[pos1] || "",
-      inserted: v,
-      action: null,
+      action: InputTypes.replace,
+      inserted: null,
+      value: v,
     };
   }
 
@@ -135,20 +145,17 @@ export default class TextHistory {
         isUndoRedoSuccess = this.undoRedo(isRedo);
         break;
       default:
-        {
-          let action: InputTypes | null = null;
-          if (e.inputType.startsWith("insert")) {
-            // when insert char in ordinary way need to merge it
-            action = InputTypes.insert;
-          } else if (e.inputType.startsWith("delete")) {
-            action = e.inputType === "deleteContentBackward" ? InputTypes.deleteBefore : InputTypes.deleteAfter;
-          }
-          this._stateBeforeInput = this.inputState;
-          this._stateBeforeInput.action = action;
-          this._stateBeforeInput.inserted = e.data;
-          this._stateBeforeInput.fullValue = this.refInput.value; // todo skip for textArea???
-          isHandled = false;
+        this._stateBeforeInput = this.inputState;
+        if (e.inputType.startsWith("insert")) {
+          // when insert char in ordinary way need to merge it
+          this._stateBeforeInput.action = InputTypes.insert;
+        } else if (e.inputType.startsWith("delete")) {
+          this._stateBeforeInput.action =
+            e.inputType === "deleteContentBackward" ? InputTypes.deleteBefore : InputTypes.deleteAfter;
         }
+
+        this._stateBeforeInput.inserted = e.data;
+        isHandled = false;
         break;
     }
 
@@ -169,17 +176,16 @@ export default class TextHistory {
   /** Call this handler on input.on('input'); */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handleInput(e: InputEvent): void {
-    let was: string | undefined;
     if (this._stateBeforeInput) {
-      was = this._stateBeforeInput.fullValue;
+      const was = this._stateBeforeInput.value;
       this.save(this._stateBeforeInput);
-      this._stateBeforeInput = undefined;
 
       // todo don't use it for textArea ???
       const v = this.refInput.value;
       setTimeout(() => {
-        const isChanged = this.refInput.value !== v;
-        isChanged && this.updateLast(was!); // update last history if input value is changed
+        const next = this.refInput.value;
+        const isChanged = next !== v;
+        isChanged && this.save(was, next); // update last history if input value is changed
       });
     } else if (this._stateBeforeInput !== false) {
       console.error(
@@ -190,57 +196,86 @@ export default class TextHistory {
     }
   }
 
-  _hist: any[] = []; // todo cast to string
+  _hist: Snapshot[] = []; // todo cast to string
+  _histTimeout?: ReturnType<typeof setTimeout> | null;
   /** Save to history based on inputState */
-  save(state: InputState): void {
-    const { pos1, pos2, selected, inserted, action } = state;
+  save(prev: string, next: string): void;
+  save(beforeState: InputState): void;
+  save(arg1: InputState | string, arg2?: string): void {
+    // remove undo-part of history because new will be added
+    if (this._histPos != null) {
+      this._hist.splice(this._histPos + 1);
+      this._histPos = null;
+    }
 
-    // prev = "abc|"
-    // next = "123|"
-    // insert & remove
-    // '123' => '12
-    // 1: '12|3' + a => undo: '12a3' -a
-    // 2: '12' + 'abc' => undo "12abc" - a
-    // "" => "a"
-    // "12" > '1.2'
-    let removed = selected;
-    let snap;
-    // todo types + & - are similar
-    switch (state.action) {
+    // define stateBefore: try to get previous or use from args
+    let stateBefore: InputState;
+    if (typeof arg1 === "string") {
+      if (this._stateBeforeInput) {
+        stateBefore = this._stateBeforeInput;
+      } else {
+        stateBefore = this.inputState;
+        stateBefore.value = arg1;
+      }
+      stateBefore.action = InputTypes.replace; // when pointed prev & next this is custom action => out of default input change
+    } else {
+      stateBefore = arg1;
+    }
+    this._stateBeforeInput = stateBefore;
+    const { pos1, pos2, action, value: prev } = stateBefore;
+
+    // init new snapshot or get/udate previous
+    let snap: Snapshot;
+    if (this._histTimeout) {
+      snap = this._hist[this._hist.length - 1]; // need update prev history in this case
+      snap.action = InputTypes.replace;
+    } else {
+      snap = { action, pos1, pos2, removed: prev.substring(pos1, pos2) };
+    }
+
+    switch (snap.action) {
       case InputTypes.insert:
-        snap = { action, pos1, pos2, inserted, removed };
+        snap.inserted = stateBefore.inserted || "";
         break;
       case InputTypes.deleteAfter:
         if (pos1 === pos2) {
-          removed = state.after;
+          snap.removed = prev[pos1];
         }
-        snap = { action, pos1, pos2, removed };
         break;
       case InputTypes.deleteBefore:
         if (pos1 === pos2) {
-          removed = state.before;
+          snap.removed = prev[pos1 - 1];
         }
-        snap = { action, pos1, pos2, removed };
         break;
-      default: // full replace - possible when input cleared
-        snap = { action, pos1, pos2, removed, inserted };
+      default:
+        {
+          const diff = TextHistory.findDiff(prev, arg2 ?? this.refInput.value);
+          // 123| => 1,234|: removed 23 inserted 34
+          if (diff.inserted) {
+            snap.inserted = diff.inserted.v;
+            snap.posIns = diff.inserted.pos;
+          }
+          if (diff.removed) {
+            snap.removed = diff.removed.v;
+            snap.posIns = diff.removed.pos;
+          }
+        }
         break;
     }
-    if (this._histPos != null) {
-      this._hist.splice(this._histPos + 1); // remove undo-part of history because new added
-      this._histPos = null;
-    }
-    this._hist.push(snap); // todo add logic to join chars to prev snapshot: maybe separate by '[space].<\|/:'
-    this.testMe && console.warn(snap, this._hist);
-  }
 
-  /** Call it manually when before input value updated outside default events */
-  append(newValue: string): void {
-    const state = this.inputState;
-    state.inserted = newValue;
-    state.selected = this.refInput.value;
-    state.action = InputTypes.replace;
-    this.save(state);
+    // update prev history if input changes was in 1 loop OR append new
+    if (this._histTimeout) {
+      clearTimeout(this._histTimeout);
+      this._hist[this._hist.length - 1] = snap;
+    } else {
+      this._hist.push(snap); // todo add logic to join chars to prev snapshot: maybe separate by '[space].<\|/:'
+    }
+    this._histTimeout = setTimeout(() => {
+      this._histTimeout = null;
+      this._stateBeforeInput = undefined;
+    }, 1);
+
+    this.testMe && console.warn("saved", snap, this._hist, stateBefore);
   }
 
   /** Returns last history index */
@@ -256,25 +291,7 @@ export default class TextHistory {
       if (this._histPos != null) {
         --this._histPos;
       }
-    }
-  }
-
-  /** Called to update last history if input-value is modified in input event */
-  updateLast(was: string): void {
-    const h = this._hist[this.lastIndex];
-    if (h) {
-      const diff = TextHistory.findDiff(was, this.refInput.value);
-      // 123| => 1,234|: removed 23 inserted 34
-      if (diff.inserted) {
-        // otherwise need somehow full replace inserted but need beforeState.value compare with new
-        h.inserted = diff.inserted.v;
-        h.posIns = diff.inserted.pos;
-      }
-      if (diff.removed) {
-        h.removed = diff.removed.v;
-        h.posIns = diff.removed.pos;
-      }
-      this.testMe && console.warn("updated", h, diff);
+      this.testMe && console.warn("remove last", this._hist);
     }
   }
 
@@ -316,18 +333,13 @@ export default class TextHistory {
     // undo
     if (isRedo) {
       let posIns = pos1;
-      if (action === InputTypes.replace) {
-        pos1 = 0; // because text was completely replaced
-        v = inserted;
-      } else {
-        if (pos1 === pos2) {
-          if (action === InputTypes.deleteBefore) {
-            pos1 -= removed.length;
-          }
+      if (pos1 === pos2) {
+        if (action === InputTypes.deleteBefore) {
+          pos1 -= removed.length;
         }
-        posIns = snap.posIns ?? pos1;
-        v = v.substring(0, posIns) + inserted + v.substring(posIns + (removed?.length || 0));
       }
+      posIns = snap.posIns ?? pos1;
+      v = v.substring(0, posIns) + inserted + v.substring(posIns + (removed?.length || 0));
       this.refInput.value = v;
       const pos = posIns + (inserted?.length || 0);
       this.refInput.setSelectionRange(pos, pos);

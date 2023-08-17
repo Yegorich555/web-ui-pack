@@ -830,6 +830,7 @@ export default class WUPSelectControl<
 
   protected override gotFocusLost(): void {
     if (this._opts.multiple) {
+      // todo maybe call setInputValue instead ???
       this.$refInput.value = this.$refInput.value.replace(/, *$/, ""); // remove delimiter
     }
     this._opts.allowNewValue && this.setValue(this.parseInput(this.$refInput.value), SetValueReasons.userInput); // to allow user left value without pressing Enter

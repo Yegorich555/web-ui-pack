@@ -545,7 +545,7 @@ export default class WUPTextControl<
       }
       this.renderPostfix(this._opts.postfix); // postfix depends on maskholder
     }
-    delete this._refHistory;
+    delete this._refHistory; // todo don't delete history anymore only by submit...
     super.gotFocusLost();
   }
 
@@ -734,6 +734,9 @@ export default class WUPTextControl<
     nextValue ??= v;
     delete this._beforeSnap;
 
+    const isChanged = v !== nextValue;
+    isChanged && nextValue != null && this._refHistory?.save(v, nextValue); // update history if last value is different
+
     this.#declineInputEnd = (): void => {
       this.#declineInputEnd = undefined;
       clearTimeout(t);
@@ -742,9 +745,7 @@ export default class WUPTextControl<
       this.refMask && this.renderMaskHolder(this._opts.maskholder, this.refMask.leftLength);
       this.renderPostfix(this._opts.postfix);
 
-      if (this._refHistory) {
-        v === nextValue ? this._refHistory.removeLast() : this._refHistory.updateLast(v);
-      }
+      v === nextValue && this._refHistory?.removeLast();
     };
 
     const t = setTimeout(this.#declineInputEnd, 100);
@@ -764,10 +765,11 @@ export default class WUPTextControl<
     if (reason === SetValueReasons.clear) {
       // todo use it every time - not only for clear
       // todo for number.ts: input > histSave > setInputValue... - need to update it ?
-      this._refHistory?.append(str);
+      this._refHistory?.save(this.$refInput.value, str);
     }
 
     this.$refInput.value = str;
+
     this._opts.mask && this.maskInputProcess(null);
     this.renderPostfix(this._opts.postfix);
     this._onceErrName === this._errName && this.goHideError(); // hide mask-message because value has higher priority than inputValue

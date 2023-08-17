@@ -61,7 +61,7 @@ describe("control.text.hist", () => {
     expect(await h.userRedo(el)).toBe("2|ab");
     expect(await h.userRedo(el)).toBe("2|ab");
     // when text selected
-    h.setInputCursor(el, "a|bc|d");
+    h.setInputCursor(el, "a|bc|d", { skipEvent: true });
     expect(await h.userTypeText(el, "2", { clearPrevious: false })).toBe("a2|d");
     expect(await h.userUndo(el)).toBe("a|bc|d");
     expect(await h.userRedo(el)).toBe("a2|d");
@@ -74,12 +74,12 @@ describe("control.text.hist", () => {
     expect(await h.userUndo(el)).toBe("abc|");
     expect(await h.userRedo(el)).toBe("ab|");
     // middle
-    h.setInputCursor(el, "ab|c");
+    h.setInputCursor(el, "ab|c", { skipEvent: true });
     expect(await h.userRemove(el, { key: "Backspace" })).toBe("a|c");
     expect(await h.userUndo(el)).toBe("ab|c");
     expect(await h.userRedo(el)).toBe("a|c");
     // when text selected
-    h.setInputCursor(el, "a|bc|d");
+    h.setInputCursor(el, "a|bc|d", { skipEvent: true });
     expect(await h.userRemove(el, { key: "Backspace" })).toBe("a|d");
     expect(await h.userUndo(el)).toBe("a|bc|d");
     expect(await h.userRedo(el)).toBe("a|d");
@@ -93,12 +93,12 @@ describe("control.text.hist", () => {
     expect(await h.userUndo(el)).toBe("|abc");
     expect(await h.userRedo(el)).toBe("|bc");
     // middle
-    h.setInputCursor(el, "a|bc");
+    h.setInputCursor(el, "a|bc", { skipEvent: true });
     expect(await h.userRemove(el, { key: "Delete" })).toBe("a|c");
     expect(await h.userUndo(el)).toBe("a|bc");
     expect(await h.userRedo(el)).toBe("a|c");
     // when text selected
-    h.setInputCursor(el, "a|bc|d");
+    h.setInputCursor(el, "a|bc|d", { skipEvent: true });
     expect(await h.userRemove(el, { key: "Delete" })).toBe("a|d");
     expect(await h.userUndo(el)).toBe("a|bc|d");
     expect(await h.userRedo(el)).toBe("a|d");
@@ -122,7 +122,7 @@ describe("control.text.hist", () => {
 
     // manual clearing
     expect(await h.userTypeText(el, "123")).toBe("123|");
-    hist.append("");
+    hist.save(el.value, "");
     el.value = "";
     expect(await h.userUndo(el)).toBe("123|");
     expect(await h.userRedo(el)).toBe("|");
@@ -172,7 +172,7 @@ describe("control.text.hist", () => {
       inserted: { v: ".", pos: 0 },
     });
 
-    // changed if different places
+    // changed in different places
     // todo cover tests here: changed if different places
 
     // simulate mask changes
@@ -200,7 +200,7 @@ describe("control.text.hist", () => {
       el.value = "134";
       el.setSelectionRange(1, 1);
     });
-    h.setInputCursor(el, "1,|234");
+    h.setInputCursor(el, "1,|234", { skipEvent: true });
     expect(await h.userRemove(el, { key: "Delete" })).toBe("1|34");
     expect(await h.userUndo(el)).toBe("1,|234");
     expect(await h.userRedo(el)).toBe("1|34");
