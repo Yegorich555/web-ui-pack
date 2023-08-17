@@ -52,7 +52,13 @@ export default function CircleView() {
           from={-90}
           to={90}
           corner={0.5}
-          items="window.circleItems"
+          ref={(el) => {
+            if (el) {
+              el.$options.min = 0;
+              el.$options.max = 100;
+              el.$options.items = [{ value: 5 }]; // todo console.err here is wrong because item is single
+            }
+          }}
         />
       </section>
       <section>
