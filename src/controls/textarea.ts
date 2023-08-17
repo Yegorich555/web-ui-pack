@@ -183,6 +183,7 @@ export default class WUPTextareaControl<
     } else {
       super.gotBeforeInput(e);
     }
+    // delete (this.$refInput as unknown as WUPTextareaInput)._cached;
   }
 
   protected override gotFocusLost(): void {

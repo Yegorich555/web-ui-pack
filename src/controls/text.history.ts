@@ -32,14 +32,12 @@ interface Snapshot {
 export default class TextHistory {
   /** Convert values to history-snapshot; required for undo/redo logic of input */
   static historyToSnapshot(s: string, pos: number): string {
-    return `${s.substring(0, pos)}\0${s.substring(pos)}`;
+    return String.fromCharCode(pos) + s;
   }
 
   /** Parse history-snapshot; required for undo/redo logic of input */
   static historyFromSnapshot(h: string): { v: string; pos: number } {
-    const pos = h.indexOf("\0");
-    const v = h.substring(0, pos) + h.substring(pos + 1);
-    return { pos, v };
+    return { pos: h.charCodeAt(0), v: h.substring(1) };
   }
 
   /** Returns simple changes for 2 strings */

@@ -592,7 +592,6 @@ export default class WUPTextControl<
   /** Handler of 'beforeinput' event */
   protected gotBeforeInput(e: WUP.Text.GotInputEvent): void {
     this.#declineInputEnd?.call(this);
-    // todo it's not required for textArea
     this._beforeSnap = TextHistory.historyToSnapshot(this.$refInput.value, this.$refInput.selectionStart || 0);
     setTimeout(() => delete this._beforeSnap);
 

@@ -37,6 +37,9 @@ export default class WUPTextareaInput extends HTMLElement {
       this.setAttribute("role", "textbox");
       this.setAttribute("aria-multiline", "true");
       this.#isInit = false;
+      this.oninput = () => {
+        this._cached = undefined;
+      };
     }
   }
 
@@ -58,28 +61,28 @@ export default class WUPTextareaInput extends HTMLElement {
     WUPBaseElement.prototype.setAttr.call(this, "aria-readonly", v);
   }
 
+  _cached?: string;
   /** Get/set innerHTML (br converted into '\n') */
   get value(): string {
-    // store _v to cache to prevent parse logic
-    return (
-      this.innerHTML
+    if (this._cached == null) {
+      this._cached = this.innerHTML
         // .replace(/\n $/, "\n")
         .replace(/<div><br><\/div>/g, "\n") // Chrome newLine
         .replace(/<br>|<div>/g, "\n")
         .replace(/<\/div>/g, "")
-        .replace(/^&nbsp;/, "")
-    );
+        .replace(/^&nbsp;/, "");
+    }
+    return this._cached;
   }
 
   set value(v: string) {
+    this._cached = undefined;
     this.innerHTML = v;
   }
 
-  /**
-   * Sets the start and end positions of a selection in a text field.
+  /** Sets the start and end positions of a selection in a text field.
    * @param start The offset into the text field for the start of the selection.
-   * @param end The offset into the text field for the end of the selection.
-   */
+   * @param end The offset into the text field for the end of the selection. */
   setSelectionRange(start: number | null, end: number | null): void {
     this.selection = { start: start || 0, end: end || 0 };
   }
