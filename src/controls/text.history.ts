@@ -134,6 +134,10 @@ export default class TextHistory {
   /** Call this handler on input.onBefore;
    * @returns "true" if was processed undo/redo action */
   handleBeforeInput(e: InputEvent): boolean {
+    this.#inpDebounce?.call(this);
+    this._histTimeout && clearTimeout(this._histTimeout);
+    delete this._histTimeout;
+
     // need to handle beforeInput because browser can call it without keyDown events - on IOS need to shake smartphone
     let isUndoRedo = true; // inputEvent must be prevented if history is empty - possible when browser calls historyUndo
     let isUndoRedoSuccess = false;
@@ -172,14 +176,14 @@ export default class TextHistory {
           ); // fire manually because need to process undo/redo (but without browser-internal history)
         }); // fire it in empty timeout so beforeInput can bubble to top at first
 
-      setTimeout(() => {
-        this._stateBeforeInput = undefined;
-      });
+      setTimeout(() => (this._stateBeforeInput = undefined));
     }
 
     return isUndoRedo;
   }
 
+  /* when user types fast beforeInput can be fired stepByStep without timeouts */
+  #inpDebounce?: () => void;
   /** Call this handler on input.on('input'); */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handleInput(e: InputEvent): void {
@@ -187,13 +191,15 @@ export default class TextHistory {
       const was = this._stateBeforeInput.value;
       this.save(this._stateBeforeInput);
 
-      // todo don't use it for textArea ???
       const v = this.refInput.value;
-      setTimeout(() => {
+      this.#inpDebounce = () => {
+        clearTimeout(t);
+        this.#inpDebounce = undefined;
         const next = this.refInput.value;
         const isChanged = next !== v;
-        isChanged && this.save(was, next); // update last history if input value is changed
-      });
+        isChanged && this.save(was, next);
+      };
+      const t = setTimeout(this.#inpDebounce); // update last history if input value is changed during handleInput
     } else if (this._stateBeforeInput !== false) {
       console.error("WUP.History error. Event [input] fired without [beforeinput] event. Undo-history is cleared");
       this._hist = [];
