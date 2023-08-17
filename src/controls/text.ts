@@ -762,15 +762,17 @@ export default class WUPTextControl<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected setInputValue(v: ValueType | undefined | string, reason: SetValueReasons): void {
     const str = v != null ? ((v as any).toString() as string) : "";
-    if (reason === SetValueReasons.clear) {
-      // todo use it every time - not only for clear
-      // todo for number.ts: input > histSave > setInputValue... - need to update it ?
-      this._refHistory?.save(this.$refInput.value, str);
-    }
-
+    // if (reason === SetValueReasons.clear) {
+    //   // todo use it every time - not only for clear
+    //   // todo for number.ts: input > histSave > setInputValue... - need to update it ?
+    //   this._refHistory?.save(this.$refInput.value, str);
+    // }
+    const prev = this.$refInput.value;
     this.$refInput.value = str;
 
     this._opts.mask && this.maskInputProcess(null);
+    this._refHistory?.save(prev, this.$refInput.value);
+
     this.renderPostfix(this._opts.postfix);
     this._onceErrName === this._errName && this.goHideError(); // hide mask-message because value has higher priority than inputValue
   }

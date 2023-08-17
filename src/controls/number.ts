@@ -374,10 +374,13 @@ export default class WUPNumberControl<
       );
       if (!isPrevented) {
         el.value = data;
-        setTimeout(() => el.dispatchEvent(new InputEvent("input", { inputType, bubbles: true })));
+        el.dispatchEvent(new InputEvent("input", { inputType, bubbles: true }));
       }
     });
   }
 }
 
 customElements.define(tagName, WUPNumberControl);
+
+// todo Alt + WheelDown for integer changes value to 0.1 - but it's wrong
+// todo KeyUp: alt => moves focus to browser tabs

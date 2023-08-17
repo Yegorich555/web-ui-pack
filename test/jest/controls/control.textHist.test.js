@@ -139,7 +139,7 @@ describe("control.text.hist", () => {
     expect(TextHistory.findDiff("ab", "ab12")).toStrictEqual({ inserted: { v: "12", pos: 2 }, removed: null });
     expect(TextHistory.findDiff("ab", "34ab")).toStrictEqual({ inserted: { v: "34", pos: 0 }, removed: null });
     expect(TextHistory.findDiff("ab", "a56b")).toStrictEqual({ inserted: { v: "56", pos: 1 }, removed: null });
-
+    expect(TextHistory.findDiff("11.53", "111.53")).toStrictEqual({ inserted: { v: "1", pos: 2 }, removed: null });
     // removed
     expect(TextHistory.findDiff("ab.", "ab")).toStrictEqual({ removed: { v: ".", pos: 2 }, inserted: null });
     expect(TextHistory.findDiff(".ab", "ab")).toStrictEqual({ removed: { v: ".", pos: 0 }, inserted: null });
@@ -148,6 +148,7 @@ describe("control.text.hist", () => {
     expect(TextHistory.findDiff("ab12", "ab")).toStrictEqual({ removed: { v: "12", pos: 2 }, inserted: null });
     expect(TextHistory.findDiff("34ab", "ab")).toStrictEqual({ removed: { v: "34", pos: 0 }, inserted: null });
     expect(TextHistory.findDiff("a56b", "ab")).toStrictEqual({ removed: { v: "56", pos: 1 }, inserted: null });
+    expect(TextHistory.findDiff("111.53", "11.53")).toStrictEqual({ removed: { v: "1", pos: 2 }, inserted: null });
 
     // replaced
     expect(TextHistory.findDiff("ab.", "ab1")).toStrictEqual({
@@ -171,9 +172,6 @@ describe("control.text.hist", () => {
       removed: { v: "12", pos: 0 },
       inserted: { v: ".", pos: 0 },
     });
-
-    // changed in different places
-    // todo cover tests here: changed if different places
 
     // simulate mask changes
     expect(await h.userTypeText(el, "12")).toBe("12|");

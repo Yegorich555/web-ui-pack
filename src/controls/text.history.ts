@@ -57,10 +57,16 @@ export default class TextHistory {
         for (let iPrev = prev.length - 1, iNext = next.length - 1; ; --iPrev, --iNext) {
           if (prev[iPrev] !== next[iNext]) {
             // console.log({ i, iPrev, iNext });
-            inserted.pos = i;
-            inserted.v = next.substring(i, iNext + 1);
-            removed.pos = i;
-            removed.v = prev.substring(i, iPrev + 1);
+            if (iNext > -1) {
+              inserted.pos = i;
+              inserted.v = next.substring(i, iNext + 1);
+            }
+            if (iPrev > -1) {
+              removed.pos = i;
+              removed.v = prev.substring(i, iPrev + 1);
+            }
+            //  console.warn("inserted:", inserted, "removed:", removed);
+            // debugger;
             break;
           }
         }
@@ -132,7 +138,7 @@ export default class TextHistory {
    * @returns "true" if was processed undo/redo action */
   handleBeforeInput(e: InputEvent): boolean {
     // need to handle beforeInput because browser can call it without keyDown events - on IOS need to shake smartphone
-    let isHandled = true; // inputEvent must be prevented if history is empty - possible when browser calls historyUndo
+    let isUndoRedo = true; // inputEvent must be prevented if history is empty - possible when browser calls historyUndo
     let isUndoRedoSuccess = false;
     let isRedo = false;
 
@@ -147,19 +153,18 @@ export default class TextHistory {
       default:
         this._stateBeforeInput = this.inputState;
         if (e.inputType.startsWith("insert")) {
-          // when insert char in ordinary way need to merge it
           this._stateBeforeInput.action = InputTypes.insert;
+          this._stateBeforeInput.inserted = e.data;
         } else if (e.inputType.startsWith("delete")) {
           this._stateBeforeInput.action =
             e.inputType === "deleteContentBackward" ? InputTypes.deleteBefore : InputTypes.deleteAfter;
         }
 
-        this._stateBeforeInput.inserted = e.data;
-        isHandled = false;
+        isUndoRedo = false;
         break;
     }
 
-    if (isHandled) {
+    if (isUndoRedo) {
       this._stateBeforeInput = false;
       e.preventDefault(); // prevent default to avoid browser-internal-history cleaning
       isUndoRedoSuccess &&
@@ -170,7 +175,7 @@ export default class TextHistory {
         }); // fire it in empty timeout so beforeInput can bubble to top at first
     }
 
-    return isHandled;
+    return isUndoRedo;
   }
 
   /** Call this handler on input.on('input'); */
@@ -275,7 +280,7 @@ export default class TextHistory {
       this._stateBeforeInput = undefined;
     }, 1);
 
-    this.testMe && console.warn("saved", snap, this._hist, stateBefore);
+    this.testMe && console.warn("saved", snap, { hist: this._hist, stateBefore });
   }
 
   /** Returns last history index */
@@ -352,7 +357,7 @@ export default class TextHistory {
 
       --this._histPos;
     }
-    this.testMe && console.warn("done", this.refInput.selectionStart, this.refInput.selectionEnd, v);
+    this.testMe && console.warn("done", v);
     return true;
   }
 
