@@ -178,7 +178,7 @@ export default class WUPTextareaControl<
 
   protected override gotBeforeInput(e: WUP.Text.GotInputEvent): void {
     if (e.inputType.startsWith("format")) {
-      // todo need to process this for customHistory
+      // todo need to process this for customHistory in the future
       e.preventDefault(); // prevent Bold,Italic etc. styles until textrich is developed
     } else {
       super.gotBeforeInput(e);

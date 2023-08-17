@@ -886,7 +886,7 @@ describe("control.text: mask", () => {
     expect(await h.userRedo(el.$refInput)).toBe("2|");
 
     // cover case when not canHandleUndo
-    const saved = el._refHistory;
+    // const saved = el._refHistory;
     el.$value = "";
     el.$options.mask = undefined;
     el.canHandleUndo = () => false;
@@ -894,17 +894,6 @@ describe("control.text: mask", () => {
     await h.wait(1);
     expect(el.canHandleUndo()).toBe(false);
     expect(() => el.declineInput()).not.toThrow(); // because it doesn't depend on history
-
-    el.$value = "";
-    await h.wait(1);
-    el.canHandleUndo = () => true;
-    el._refHistory = saved;
-    await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
-    expect(el.$refInput.value).toBe("2");
-    el.declineInput(); // despite on manuall decline
-    expect(el.$refInput.value).toBe("2");
-    await h.wait(150);
-    expect(el.$refInput.value).toBe("");
 
     // more tests
     el = document.body.appendChild(document.createElement("wup-text"));

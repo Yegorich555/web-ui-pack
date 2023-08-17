@@ -652,7 +652,6 @@ describe("control.select", () => {
 
     // when items is function with promise
     await setItems(() => Promise.resolve(getItems()));
-    el.testMe = false;
     expect(el.$isShown).toBe(true);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
       `"<ul id="txt11" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option" aria-selected="true">Splinter</li></ul>"`

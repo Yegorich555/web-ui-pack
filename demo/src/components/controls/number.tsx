@@ -39,7 +39,7 @@ export default function NumberControlView() {
         <wup-num
           name="number"
           label="Number"
-          initValue="123"
+          initValue="1234"
           validations="window.myNumberValidations"
           mask=""
           maskholder=""

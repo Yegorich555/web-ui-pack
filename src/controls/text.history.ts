@@ -56,7 +56,6 @@ export default class TextHistory {
         // find last changed
         for (let iPrev = prev.length - 1, iNext = next.length - 1; ; --iPrev, --iNext) {
           if (prev[iPrev] !== next[iNext]) {
-            // console.log({ i, iPrev, iNext });
             if (iNext > -1) {
               inserted.pos = i;
               inserted.v = next.substring(i, iNext + 1);
@@ -65,8 +64,6 @@ export default class TextHistory {
               removed.pos = i;
               removed.v = prev.substring(i, iPrev + 1);
             }
-            //  console.warn("inserted:", inserted, "removed:", removed);
-            // debugger;
             break;
           }
         }
@@ -166,6 +163,7 @@ export default class TextHistory {
 
     if (isUndoRedo) {
       this._stateBeforeInput = false;
+
       e.preventDefault(); // prevent default to avoid browser-internal-history cleaning
       isUndoRedoSuccess &&
         setTimeout(() => {
@@ -173,6 +171,10 @@ export default class TextHistory {
             new InputEvent("input", { cancelable: false, bubbles: true, inputType: e.inputType })
           ); // fire manually because need to process undo/redo (but without browser-internal history)
         }); // fire it in empty timeout so beforeInput can bubble to top at first
+
+      setTimeout(() => {
+        this._stateBeforeInput = undefined;
+      });
     }
 
     return isUndoRedo;
@@ -193,9 +195,7 @@ export default class TextHistory {
         isChanged && this.save(was, next); // update last history if input value is changed
       });
     } else if (this._stateBeforeInput !== false) {
-      console.error(
-        "WUP-TEXT. History error. Event [input] fired without [beforeinput] event. Undo-history is cleared"
-      );
+      console.error("WUP.History error. Event [input] fired without [beforeinput] event. Undo-history is cleared");
       this._hist = [];
       this._histPos = null;
     }

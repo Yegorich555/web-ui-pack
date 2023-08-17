@@ -510,8 +510,6 @@ export default class WUPTextControl<
       { passive: false }
     );
 
-    // todo cover ignore else
-    /* istanbul ignore else */
     if (!this.$refInput.readOnly) {
       let canSelectAll = this._opts.selectOnFocus;
       if (this._opts.mask) {
@@ -596,6 +594,7 @@ export default class WUPTextControl<
     this.#declineInputEnd?.call(this);
     // todo it's not required for textArea
     this._beforeSnap = TextHistory.historyToSnapshot(this.$refInput.value, this.$refInput.selectionStart || 0);
+    setTimeout(() => delete this._beforeSnap);
 
     const isUndoRedo = this._refHistory?.handleBeforeInput(e);
     if (!isUndoRedo && this._opts.mask) {
@@ -627,7 +626,6 @@ export default class WUPTextControl<
     const canParse = !txt || this.canParseInput(txt);
     let v = this.$value;
     let errMsg: boolean | string = "";
-    /* istanbul ignore else */ // todo deprecate ignore
     if (canParse) {
       try {
         v = !txt ? undefined : this.parseInput(txt);
@@ -643,7 +641,6 @@ export default class WUPTextControl<
     }
 
     const act = (): void => {
-      /* istanbul ignore else */ // todo deprecate ignore
       if (errMsg) {
         this.validateOnce({ _parse: this.validations?._parse || "" }, true);
       } else if (canParse) {
@@ -761,17 +758,12 @@ export default class WUPTextControl<
   /** Called to update/reset value for <input/> */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected setInputValue(v: ValueType | undefined | string, reason: SetValueReasons): void {
-    const str = v != null ? ((v as any).toString() as string) : "";
-    // if (reason === SetValueReasons.clear) {
-    //   // todo use it every time - not only for clear
-    //   // todo for number.ts: input > histSave > setInputValue... - need to update it ?
-    //   this._refHistory?.save(this.$refInput.value, str);
-    // }
     const prev = this.$refInput.value;
+    const str = v != null ? ((v as any).toString() as string) : "";
     this.$refInput.value = str;
 
     this._opts.mask && this.maskInputProcess(null);
-    this._refHistory?.save(prev, this.$refInput.value);
+    str !== prev && this._refHistory?.save(prev, this.$refInput.value);
 
     this.renderPostfix(this._opts.postfix);
     this._onceErrName === this._errName && this.goHideError(); // hide mask-message because value has higher priority than inputValue

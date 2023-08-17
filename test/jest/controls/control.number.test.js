@@ -313,7 +313,6 @@ describe("control.number", () => {
     expect(isPrevented).toBe(true);
     expect(el.$value).toBe(111.53);
 
-    el._refHistory.testMe = true;
     isPrevented = !el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: 100 })); // scrollDown
     await h.wait(1);
     expect(isPrevented).toBe(true);

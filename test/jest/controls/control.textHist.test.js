@@ -202,5 +202,12 @@ describe("control.text.hist", () => {
     expect(await h.userRemove(el, { key: "Delete" })).toBe("1|34");
     expect(await h.userUndo(el)).toBe("1,|234");
     expect(await h.userRedo(el)).toBe("1|34");
+
+    // cover error case
+    await h.wait();
+    const onErr = h.mockConsoleError();
+    el.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "" }));
+    expect(onErr).toBeCalledTimes(1);
+    h.unMockConsoleError();
   });
 });

@@ -112,7 +112,7 @@ export default function TextControlView() {
             name="phone"
             label="Phone number"
             mask="+0 (000) 000-0000"
-            initValue="+1 (234) 567-8901"
+            // initValue="+1 (234) 567-8901"
             ref={(el) => {
               if (el) {
                 el.$options.validations = { required: true };
@@ -124,21 +124,20 @@ export default function TextControlView() {
             label="IPaddress"
             mask="##0.##0.##0.##0"
             maskholder="xxx.xxx.xxx.xxx"
-            initValue="123.4.5.67"
+            // initValue="123.4.5.67"
             ref={(el) => {
               if (el) {
-                // todo selectAll + Delete + Ctrl-Z+Ctrl-Shift-Z caret at 0: expected whole selection
-                el.$options.autoFocus = true;
+                el.$options.autoFocus = false;
               }
             }}
           />
           <wup-text
             name="num"
             label="With prefix/postfix & mask"
-            mask="##0 USD"
-            maskholder="000 USD"
-            // prefix="$ "
-            // postfix=" USD"
+            mask="##0"
+            maskholder="000"
+            prefix="$ "
+            postfix=" USD"
             initValue="12"
           />
           Features:
