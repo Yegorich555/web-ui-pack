@@ -22,7 +22,7 @@
 - **Controls**. Event `$change` and callback `$onChange` has prop `SetValueReason.initValue` now
 - **Internals**. Improved memory consumption & performance via excluding nested props of $options to be observed
 - **Text based controls**
-  - Refactored, fixed & optimized custom history-undo (Ctrl+Z, Ctrl+Shift+Z)
+  - History undo/redo (Ctrl+Z, Ctrl+Y, Ctrl+Shift+Z). Refactored, fixed & optimized via storing only changes
 
 ## 0.7.1 (Jul 24, 2023)
 
