@@ -618,7 +618,7 @@ export default class WUPTimeControl<
   #lastInputChanged = false; // if press Enter: need to get value from last touched field (input OR menu)
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
     this.#lastInputChanged = true;
-    super.gotInput(e, true);
+    super.gotInput(e);
   }
 
   // /** Returns current menu list index that user operates with hours/minutes/h12 */

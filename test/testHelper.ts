@@ -421,9 +421,6 @@ export async function userTypeText(
     }
   }
 
-  if (text === "") {
-    el.dispatchEvent(new InputEvent("input", { bubbles: true }));
-  }
   await wait(1);
   return getInputCursor(el);
 }

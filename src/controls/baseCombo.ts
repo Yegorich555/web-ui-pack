@@ -435,10 +435,14 @@ export default abstract class WUPBaseComboControl<
     }
   }
 
-  protected override gotInput(e: WUP.Text.GotInputEvent, allowSuper = true): void {
+  protected override gotInput(e: WUP.Text.GotInputEvent, preventValueChange?: boolean): void {
     // gotInput possible on browser-autofill so we need filter check if isFocused
     !this.$isShown && this._opts.showCase & ShowCases.onInput && this.$isFocused && this.goShowMenu(ShowCases.onInput);
-    allowSuper && super.gotInput(e);
+    if (preventValueChange) {
+      this._refHistory?.handleInput(e);
+    } else {
+      super.gotInput(e);
+    }
   }
 
   protected override gotFocus(ev: FocusEvent): Array<() => void> {

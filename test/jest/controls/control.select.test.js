@@ -1415,6 +1415,47 @@ describe("control.select", () => {
       expect(el.$refInput.readOnly).toBe(false);
     });
   });
+
+  test("history undo/redo", async () => {
+    expect(el.$value).toBe(undefined);
+    expect(await h.userTypeText(el.$refInput, "Leo", { clearPrevious: false })).toBe("Leo|");
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option" style="display: none;">Donny</li><li role="option" style="display: none;">Mikky</li><li role="option" aria-selected="false" id="txt3" focused="">Leo</li><li role="option" style="display: none;">Splinter</li></ul>"`
+    );
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); // select focused item in menu
+    await h.wait(1);
+    expect(el.$value).toBe(30);
+
+    el.$refInput.select();
+    expect(await h.userRemove(el.$refInput)).toBe("|");
+    expect(await h.userTypeText(el.$refInput, "Donny", { clearPrevious: false })).toBe("Donny|");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); // select focused item in menu
+    await h.wait(1);
+    expect(el.$value).toBe(10);
+
+    expect(el._refHistory._hist).toMatchInlineSnapshot(`
+      [
+        "     Leo",
+        "  Leo ",
+        "     Donny",
+      ]
+    `);
+    expect(await h.userUndo(el.$refInput)).toBe("|");
+    expect(await h.userUndo(el.$refInput)).toBe("|Leo|");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); // select focused item in menu
+    await h.wait(1);
+    expect(el.$value).toBe(30);
+
+    expect(await h.userRedo(el.$refInput)).toBe("|");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); // select focused item in menu
+    await h.wait(1);
+    expect(el.$value).toBe(undefined);
+
+    expect(await h.userRedo(el.$refInput)).toBe("Donny|");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); // select focused item in menu
+    await h.wait(1);
+    expect(el.$value).toBe(10);
+  });
 });
 
 // manual testcase (close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click

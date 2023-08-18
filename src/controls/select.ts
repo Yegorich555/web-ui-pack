@@ -731,7 +731,7 @@ export default class WUPSelectControl<
   }
 
   protected override canHandleUndo(): boolean {
-    return !!this._opts.multiple; // todo check this
+    return !this._opts.multiple; // todo implement for multiple
   }
 
   /** Returns if possible to de-select menu items when input is empty */
@@ -788,7 +788,7 @@ export default class WUPSelectControl<
 
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
     this.$isShown && this.focusMenuItem(null); // reset virtual focus: // WARN it's not good enough when this._opts.multiple
-    super.gotInput(e);
+    super.gotInput(e, true); // prevent ordinary value change
 
     // user can append item by ',' at the end or remove immediately
     if (this._opts.multiple && this.canParseInput(this.$refInput.value)) {
@@ -830,7 +830,6 @@ export default class WUPSelectControl<
 
   protected override gotFocusLost(): void {
     if (this._opts.multiple) {
-      // todo maybe call setInputValue instead ???
       this.$refInput.value = this.$refInput.value.replace(/, *$/, ""); // remove delimiter
     }
     this._opts.allowNewValue && this.setValue(this.parseInput(this.$refInput.value), SetValueReasons.userInput); // to allow user left value without pressing Enter
@@ -851,13 +850,10 @@ export default class WUPSelectControl<
 
 customElements.define(tagName, WUPSelectControl);
 
-// NiceToHave: option to allow autoselect item without pressing Enter
+// todo: option to allow autoselect item without pressing Enter
 // WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation
 // todo label for="" in Chrome sometimes enables autosuggestion - need to remove it for all controls - need to double-check ???
 // todo add support custom items rendering when it's already appended to DOM like it works with
 
 // todo set $initValue + focus + pressEscape + remove last char - menu opens but focusedItem not visible in scrolled content
 // todo type long text when menu shows "noItems" + click btnClear - menu must be refreshed
-// todo selectItem from menu > popupClosed > Ctrl+A+Backspace > input value removed & popupOpened > press Esc > popupClosed+valueChange(undefined) > press Esc > value restored > Ctrl + Z => extra text appended
-
-// todo: handle Ctrl+Z wup-select etc. cases

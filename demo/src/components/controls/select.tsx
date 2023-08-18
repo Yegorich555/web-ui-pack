@@ -76,8 +76,6 @@ export default function SelectControlView() {
           initValue={items[8].value.toString()}
           multiple={false}
           validations="window._someSelectValidations"
-          autoComplete="off"
-          autoFocus={false}
         />
         <wup-select
           name="multiple"
