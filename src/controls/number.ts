@@ -234,10 +234,6 @@ export default class WUPNumberControl<
     return v as any;
   }
 
-  protected override canHandleUndo(): boolean {
-    return true;
-  }
-
   // @ts-expect-error - because expected string
   protected override setInputValue(v: ValueType | undefined, reason: SetValueReasons): void {
     const txt = this.valueToInput(v);

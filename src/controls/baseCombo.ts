@@ -435,7 +435,7 @@ export default abstract class WUPBaseComboControl<
     }
   }
 
-  protected override gotInput(e: WUP.Text.GotInputEvent, allowSuper = false): void {
+  protected override gotInput(e: WUP.Text.GotInputEvent, allowSuper = true): void {
     // gotInput possible on browser-autofill so we need filter check if isFocused
     !this.$isShown && this._opts.showCase & ShowCases.onInput && this.$isFocused && this.goShowMenu(ShowCases.onInput);
     allowSuper && super.gotInput(e);
@@ -499,7 +499,11 @@ export default abstract class WUPBaseComboControl<
   // @ts-expect-error - because expected string
   protected override setInputValue(v: ValueType | undefined, reason: SetValueReasons): void {
     const p = this.valueToInput(v);
-    super.setInputValue(p, reason);
+    this.setInputValueDirect(p, reason);
+  }
+
+  protected setInputValueDirect(v: string, reason: SetValueReasons): void {
+    super.setInputValue(v, reason);
   }
 
   /** Called when popup must be removed (by focus out OR if control removed) */

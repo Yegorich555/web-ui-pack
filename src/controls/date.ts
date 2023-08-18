@@ -276,10 +276,6 @@ export default class WUPDateControl<
     // don't call super because validation is appeared
   }
 
-  protected override gotInput(e: WUP.Text.GotInputEvent): void {
-    super.gotInput(e, true);
-  }
-
   protected override focusMenuItem(next: HTMLElement | null): void {
     // WARN: it's important don't use call super... because the main logic is implemented inside calendar
     // can be fired from baseCombo => when need to clear selection
