@@ -241,11 +241,15 @@ export default class WUPSelectManyControl<
 
   constructor() {
     super();
-    this._opts.multiple = true; // init here to depends on localeInfo
+    this._opts.multiple = true; // init here to depend on localeInfo
   }
 
   /** Items selected & rendered on control */
   $refItems?: Array<HTMLElement & { _wupValue: ValueType }>;
+
+  protected override canHandleUndo(): boolean {
+    return !this._opts.multiple; // todo implement for multiple: clear history when user selects
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override canParseInput(_text: string): boolean {

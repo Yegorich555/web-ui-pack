@@ -1455,6 +1455,54 @@ describe("control.select", () => {
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); // select focused item in menu
     await h.wait(1);
     expect(el.$value).toBe(10);
+
+    // with multiple
+    delete el._refHistory;
+    el.blur();
+    el.$options.multiple = true;
+    el.$options.allowNewValue = true;
+    el.$value = [10];
+    await h.wait(1);
+    el.focus();
+    await h.wait(1);
+    expect(el._refHistory).toBeDefined();
+
+    expect(el.$refInput.value).toBe("Donny, ");
+    expect(await h.userTypeText(el.$refInput, "leo", { clearPrevious: false })).toBe("Donny, leo|");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); // select focused item in menu
+    await h.wait(1);
+    expect(el.$value).toStrictEqual([10, 30]);
+    expect(h.getInputCursor(el.$refInput)).toBe("Donny, Leo, |");
+
+    expect(await h.userTypeText(el.$refInput, "123", { clearPrevious: false })).toBe("Donny, Leo, 123|");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); // select focused item in menu
+    await h.wait(1);
+    expect(el.$value).toStrictEqual([10, 30, "123"]);
+    expect(h.getInputCursor(el.$refInput)).toBe("Donny, Leo, 123, |");
+
+    expect(el._refHistory._hist).toMatchInlineSnapshot(`
+      [
+        " , ",
+        "  leo",
+        "leo Leo, ",
+        "  123",
+        " , ",
+      ]
+    `);
+    // undo
+    expect(await h.userUndo(el.$refInput)).toBe("Donny, Leo, 123|");
+    expect(el.$value).toStrictEqual([10, 30]);
+    expect(await h.userUndo(el.$refInput)).toBe("Donny, Leo, |");
+    expect(el.$value).toStrictEqual([10, 30]);
+    expect(await h.userUndo(el.$refInput)).toBe("Donny, leo|");
+    expect(el.$value).toStrictEqual([10]);
+    // redo
+    expect(await h.userRedo(el.$refInput)).toBe("Donny, Leo, |");
+    expect(el.$value).toStrictEqual([10, 30]);
+    expect(await h.userRedo(el.$refInput)).toBe("Donny, Leo, 123|");
+    expect(el.$value).toStrictEqual([10, 30]);
+    expect(await h.userRedo(el.$refInput)).toBe("Donny, Leo, 123, |");
+    expect(el.$value).toStrictEqual([10, 30, "123"]);
   });
 });
 
