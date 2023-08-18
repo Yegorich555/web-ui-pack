@@ -84,6 +84,26 @@ export default class TextHistory {
     // this.refInput.addEventListener("input", (e) => this.handleInput(e as InputEvent));
   }
 
+  /** Converts snapshot to string representation */
+  snapshotEncode(snap: Snapshot): string {
+    return `${String.fromCharCode(snap.action, snap.pos1, snap.pos2, snap.posIns) + (snap.removed ?? "")}\0${
+      snap.inserted ?? ""
+    }`;
+  }
+
+  /** Converts snapshot from string representation */
+  snapshotDecode(snap: string): Required<Snapshot> {
+    const i = snap.indexOf("\0", 4);
+    return {
+      action: snap.charCodeAt(0),
+      pos1: snap.charCodeAt(1),
+      pos2: snap.charCodeAt(2),
+      posIns: snap.charCodeAt(3),
+      removed: snap.substring(4, i),
+      inserted: snap.substring(i + 1),
+    };
+  }
+
   /** Call this handler on input.on('keydown');
    * @returns "true" if was undo/redo action & history exists */
   handleKeyDown(e: KeyboardEvent): boolean {
@@ -205,7 +225,7 @@ export default class TextHistory {
     }
   }
 
-  _hist: Snapshot[] = []; // todo cast to string
+  _hist: string[] = []; // todo cast to string
   _histTimeout?: ReturnType<typeof setTimeout> | null;
   /** Save to history based on inputState */
   save(prev: string, next: string): void;
@@ -236,7 +256,7 @@ export default class TextHistory {
     // init new snapshot or get/udate previous
     let snap: Snapshot;
     if (this._histTimeout) {
-      snap = this._hist[this._hist.length - 1]; // need update prev history in this case
+      snap = this.snapshotDecode(this._hist[this._hist.length - 1]); // need update prev history in this case
       snap.action = InputTypes.replace;
     } else {
       snap = { action, pos1, pos2, posIns: pos1, removed: prev.substring(pos1, pos2) };
@@ -273,12 +293,13 @@ export default class TextHistory {
         break;
     }
 
+    const sn = this.snapshotEncode(snap);
     // update prev history if input changes was in 1 loop OR append new
     if (this._histTimeout) {
       clearTimeout(this._histTimeout);
-      this._hist[this._hist.length - 1] = snap;
+      this._hist[this._hist.length - 1] = sn;
     } else {
-      this._hist.push(snap); // todo add logic to join chars to prev snapshot: maybe separate by '[space].<\|/:'
+      this._hist.push(sn); // todo add logic to join chars to prev snapshot: maybe separate by '[space].<\|/:'
     }
     this._histTimeout = setTimeout(() => {
       this._histTimeout = null;
@@ -333,21 +354,19 @@ export default class TextHistory {
     if (isRedo) {
       ++this._histPos;
     }
-    const snap = this._hist[this._histPos];
+    const snap = this.snapshotDecode(this._hist[this._histPos]);
     const i = this._histPos;
     this.testMe && console.warn(isRedo ? "redo" : "undo", { snap, i, v: this.refInput.value });
     // eslint-disable-next-line prefer-const
     let { pos1, pos2, posIns, inserted, removed } = snap;
-    removed ??= "";
-    inserted ??= "";
     // undo
     if (isRedo) {
-      v = v.substring(0, posIns) + inserted + v.substring(posIns + (removed?.length || 0));
+      v = v.substring(0, posIns) + inserted + v.substring(posIns + removed.length);
       this.refInput.value = v;
-      const posSel = posIns + (inserted?.length || 0);
+      const posSel = posIns + inserted.length;
       this.refInput.setSelectionRange(posSel, posSel);
     } else {
-      v = v.substring(0, posIns) + removed + v.substring(posIns + (inserted?.length || 0));
+      v = v.substring(0, posIns) + removed + v.substring(posIns + inserted.length);
       this.refInput.value = v;
       this.refInput.setSelectionRange(pos1, pos2);
 

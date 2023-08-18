@@ -28,6 +28,19 @@ afterEach(() => {
 
 describe("control.text.hist", () => {
   test("type text", async () => {
+    // encode/decode
+    const was = {
+      action: 1,
+      pos1: 0,
+      pos2: 2,
+      posIns: 567,
+      removed: "ab",
+      inserted: "cd",
+    };
+    expect(hist.snapshotDecode(hist.snapshotEncode({ ...was }))).toStrictEqual(was);
+    was.removed = null;
+    expect(hist.snapshotDecode(hist.snapshotEncode({ ...was }))).toStrictEqual({ ...was, removed: "" });
+
     // at the end
     expect(await h.userTypeText(el, "a")).toBe("a|");
     expect(await h.userUndo(el)).toBe("|");
@@ -72,7 +85,34 @@ describe("control.text.hist", () => {
     el.value = "";
     h.setInputCursor(el, "|", { skipEvent: true });
     expect(await h.userTypeText(el, "-op", { clearPrevious: true, fast: true })).toBe("-op|");
-    // todo uncomment after changes expect(hist._hist).toMatchInlineSnapshot();
+    expect(hist._hist.map((s) => hist.snapshotDecode(s))).toMatchInlineSnapshot(`
+      [
+        {
+          "action": 0,
+          "inserted": "-",
+          "pos1": 0,
+          "pos2": 0,
+          "posIns": 0,
+          "removed": "",
+        },
+        {
+          "action": 0,
+          "inserted": "o",
+          "pos1": 1,
+          "pos2": 1,
+          "posIns": 1,
+          "removed": "",
+        },
+        {
+          "action": 0,
+          "inserted": "p",
+          "pos1": 2,
+          "pos2": 2,
+          "posIns": 2,
+          "removed": "",
+        },
+      ]
+    `);
   });
 
   test("delete text with Backspace", async () => {
