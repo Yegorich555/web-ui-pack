@@ -21,7 +21,7 @@ interface Snapshot {
   /** selectionEnd before input change */
   pos2: number;
   /** position where text changed */
-  posIns?: number;
+  posIns: number;
   /** Removed part of text */
   removed?: string;
   /** Inserted part of text */
@@ -239,7 +239,7 @@ export default class TextHistory {
       snap = this._hist[this._hist.length - 1]; // need update prev history in this case
       snap.action = InputTypes.replace;
     } else {
-      snap = { action, pos1, pos2, removed: prev.substring(pos1, pos2) };
+      snap = { action, pos1, pos2, posIns: pos1, removed: prev.substring(pos1, pos2) };
     }
 
     switch (snap.action) {
@@ -254,6 +254,7 @@ export default class TextHistory {
       case InputTypes.deleteBefore:
         if (pos1 === pos2) {
           snap.removed = prev[pos1 - 1];
+          snap.posIns = pos1 - 1;
         }
         break;
       default:
@@ -336,26 +337,17 @@ export default class TextHistory {
     const i = this._histPos;
     this.testMe && console.warn(isRedo ? "redo" : "undo", { snap, i, v: this.refInput.value });
     // eslint-disable-next-line prefer-const
-    let { pos1, pos2, inserted, removed, action } = snap;
+    let { pos1, pos2, posIns, inserted, removed } = snap;
     removed ??= "";
     inserted ??= "";
     // undo
     if (isRedo) {
-      let posIns = pos1;
-      if (pos1 === pos2) {
-        if (action === InputTypes.deleteBefore) {
-          pos1 -= removed.length;
-        }
-      }
-      posIns = snap.posIns ?? pos1;
       v = v.substring(0, posIns) + inserted + v.substring(posIns + (removed?.length || 0));
       this.refInput.value = v;
-      const pos = posIns + (inserted?.length || 0);
-      this.refInput.setSelectionRange(pos, pos);
+      const posSel = posIns + (inserted?.length || 0);
+      this.refInput.setSelectionRange(posSel, posSel);
     } else {
-      const posIns = snap.posIns ?? pos1;
-      const pos = action === InputTypes.deleteBefore && pos1 === pos2 ? pos1 - removed.length : posIns;
-      v = v.substring(0, pos) + removed + v.substring(pos + (inserted?.length || 0));
+      v = v.substring(0, posIns) + removed + v.substring(posIns + (inserted?.length || 0));
       this.refInput.value = v;
       this.refInput.setSelectionRange(pos1, pos2);
 
