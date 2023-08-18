@@ -782,6 +782,17 @@ export default class WUPSelectControl<
     }
   }
 
+  /** Called on input change to update menu if possible */
+  protected tryUpdateMenu(): void {
+    this.$isShown && this.filterMenuItems();
+    this.canClearSelection && this.selectMenuItem(null); // allow user clear value without pressing Enter
+  }
+
+  protected override clearValue(): void {
+    super.clearValue();
+    this.tryUpdateMenu();
+  }
+
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
     this.$isShown && this.focusMenuItem(null); // reset virtual focus: // WARN it's not good enough when this._opts.multiple
     super.gotInput(e, true); // prevent ordinary value change
@@ -813,8 +824,7 @@ export default class WUPSelectControl<
       }
     }
 
-    this.$isShown && this.filterMenuItems();
-    this.canClearSelection && this.selectMenuItem(null); // allow user clear value without pressing Enter
+    this.tryUpdateMenu();
   }
 
   protected override gotFocus(e: FocusEvent): Array<() => void> {
@@ -848,10 +858,9 @@ export default class WUPSelectControl<
 
 customElements.define(tagName, WUPSelectControl);
 
-// todo: option to allow autoselect item without pressing Enter
 // WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation
 // todo label for="" in Chrome sometimes enables autosuggestion - need to remove it for all controls - need to double-check ???
 // todo add support custom items rendering when it's already appended to DOM like it works with dropdown
 
 // todo set $initValue + focus + pressEscape + remove last char - menu opens but focusedItem not visible in scrolled content
-// todo type long text when menu shows "noItems" + click btnClear - menu must be refreshed
+// todo: option to allow autoselect item without pressing Enter

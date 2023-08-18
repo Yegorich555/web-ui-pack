@@ -13,8 +13,9 @@
   - _button[clear] isn't updated on `$initValue` or `$options.clearActions` changing_
 - [SelectControl](src/controls/select.ts)
   - _clearing input + click outside doesn't clear value_
-  - `$options.readOnlyInput=7` must be ignored when `allowNewValue` enabled\_
+  - _`$options.readOnlyInput=7` must be ignored when `allowNewValue` enabled_
   - improved input delete behavior for `$options.multiple`
+  - _menu isn't refreshed after button-clear click_
 - [CalendarControl](src/controls/calendar.ts). _`$value=undefined` doesn't reset selected_
 
 **New/Features**:

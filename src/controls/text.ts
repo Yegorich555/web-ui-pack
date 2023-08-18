@@ -397,7 +397,7 @@ export default class WUPTextControl<
 
   /** Returns true if need to use custom undo/redo (required when input somehow formatted/masked) */
   protected canHandleUndo(): boolean {
-    return true; // !!this._opts.mask; // otherwise it's wrong for all controls that must handle btnClear Or Esc key
+    return true;
   }
 
   protected get validations(): WUP.Text.Options["validations"] {

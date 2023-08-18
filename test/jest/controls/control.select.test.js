@@ -1,3 +1,4 @@
+/* eslint-disable no-irregular-whitespace */
 import { WUPSelectControl } from "web-ui-pack";
 import { ShowCases } from "web-ui-pack/controls/baseCombo";
 import observer from "web-ui-pack/helpers/observer";
@@ -735,6 +736,16 @@ describe("control.select", () => {
     expect(el.$isShown).toBe(false);
     expect(el.$value).toBe(was); // previous value because no selected according to filter
     expect(el.$refInput.value).toBe("Dona Rose");
+    // again with button clear
+    el.$options.clearActions = 0;
+    await h.wait(1);
+    await h.userTypeText(el.$refInput, "123");
+    expect(el.$isShown).toBe(true);
+    el.clearValue();
+    expect(el.$refInput.value).toBe("");
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option" aria-selected="false" id="txt3" style="">Donny</li><li role="option" aria-selected="false" id="txt4" style="">Dona Rose</li><li role="option" style="">Leo</li><li role="option" aria-disabled="true" aria-selected="false" style="display: none;">No Items</li></ul>"`
+    );
 
     // filter by other words
     el.$value = 10;
@@ -762,7 +773,7 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isShown).toBe(true);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt5" role="listbox" aria-label="Items" tabindex="-1"><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
+      `"<ul id="txt6" role="listbox" aria-label="Items" tabindex="-1"><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
     );
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
@@ -792,7 +803,7 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isShown).toBe(true);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt7" role="listbox" aria-label="Items" tabindex="-1"><li role="option" aria-selected="false" id="txt8" focused="">Donny</li><li role="option" style="display: none;">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option" style="display: none;">Splinter</li></ul>"`
+      `"<ul id="txt8" role="listbox" aria-label="Items" tabindex="-1"><li role="option" aria-selected="false" id="txt9" focused="">Donny</li><li role="option" style="display: none;">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option" style="display: none;">Splinter</li></ul>"`
     );
   });
 
