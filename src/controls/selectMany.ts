@@ -248,7 +248,7 @@ export default class WUPSelectManyControl<
   $refItems?: Array<HTMLElement & { _wupValue: ValueType }>;
 
   protected override canHandleUndo(): boolean {
-    return !this._opts.multiple; // todo implement for multiple: clear history when user selects
+    return false; // custom history not required for this control
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
