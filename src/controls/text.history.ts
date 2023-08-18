@@ -1,4 +1,6 @@
 const enum InputTypes {
+  /** Same as insert but possible with update last snasphot to merge several append to single */
+  append,
   insert,
   deleteAfter,
   deleteBefore,
@@ -71,6 +73,9 @@ export default class TextHistory {
 
     return { inserted: inserted.v ? inserted : null, removed: removed.v ? removed : null };
   }
+
+  /** Used to separate history when user types text in ordinary way */
+  static delimiters = " .,!?-/\\|_";
 
   // eslint-disable-next-line no-useless-constructor
   constructor(
@@ -171,8 +176,9 @@ export default class TextHistory {
         break;
       default:
         this._stateBeforeInput = this.inputState;
+        // all types here: https://rawgit.com/w3c/input-events/v1/index.html#interface-InputEvent-Attributes
         if (e.inputType.startsWith("insert")) {
-          this._stateBeforeInput.action = InputTypes.insert;
+          this._stateBeforeInput.action = e.inputType === "insertText" ? InputTypes.append : InputTypes.insert;
           this._stateBeforeInput.inserted = e.data;
         } else if (e.inputType.startsWith("delete")) {
           this._stateBeforeInput.action =
@@ -225,7 +231,7 @@ export default class TextHistory {
     }
   }
 
-  _hist: string[] = []; // todo cast to string
+  _hist: string[] = [];
   _histTimeout?: ReturnType<typeof setTimeout> | null;
   /** Save to history based on inputState */
   save(prev: string, next: string): void;
@@ -255,16 +261,44 @@ export default class TextHistory {
 
     // init new snapshot or get/udate previous
     let snap: Snapshot;
+    let isUpdate = false; // update last snapshot
     if (this._histTimeout) {
-      snap = this.snapshotDecode(this._hist[this._hist.length - 1]); // need update prev history in this case
+      isUpdate = true;
+      const ls = this._hist[this._hist.length - 1];
+      snap = this.snapshotDecode(ls); // need update prev history in this case
+      if (snap.action === InputTypes.append && snap.inserted!.length > 1) {
+        // remove last appended char & add to current snapshot (implemented if findDiff below)
+        this._hist[this._hist.length - 1] = ls.substring(0, ls.length - 1);
+        isUpdate = false;
+        snap.pos1 = pos1;
+        snap.pos2 = pos2;
+      }
       snap.action = InputTypes.replace;
     } else {
       snap = { action, pos1, pos2, posIns: pos1, removed: prev.substring(pos1, pos2) };
     }
 
     switch (snap.action) {
+      case InputTypes.append:
+        if (!snap.removed && this._hist.length) {
+          // merge changes in sinle snapshot: when user types 'abc' => it's collected to single snapshot
+          const sl = this.snapshotDecode(this._hist[this._hist.length - 1]);
+          if (
+            sl.action === InputTypes.append &&
+            sl.posIns + sl.inserted.length === snap.posIns &&
+            (!TextHistory.delimiters.includes(stateBefore.inserted!) || // separate by [space] etc.
+              TextHistory.delimiters.includes(sl.inserted[sl.inserted.length - 1])) // but allow to save delimiters all insingle set
+          ) {
+            isUpdate = true;
+            sl.inserted += stateBefore.inserted!;
+            snap = sl;
+            break;
+          }
+        }
+        snap.inserted = stateBefore.inserted!;
+        break;
       case InputTypes.insert:
-        snap.inserted = stateBefore.inserted || "";
+        snap.inserted = stateBefore.inserted!;
         break;
       case InputTypes.deleteAfter:
         if (pos1 === pos2) {
@@ -279,8 +313,9 @@ export default class TextHistory {
         break;
       default:
         {
+          // replace
           const diff = TextHistory.findDiff(prev, arg2 ?? this.refInput.value);
-          // 123| => 1,234|: removed 23 inserted 34
+          // extra case with number format: 123| => 1,234|: removed 23 inserted 34
           if (diff.inserted) {
             snap.inserted = diff.inserted.v;
             snap.posIns = diff.inserted.pos;
@@ -295,18 +330,19 @@ export default class TextHistory {
 
     const sn = this.snapshotEncode(snap);
     // update prev history if input changes was in 1 loop OR append new
-    if (this._histTimeout) {
-      clearTimeout(this._histTimeout);
+    if (isUpdate) {
+      this._histTimeout && clearTimeout(this._histTimeout);
       this._hist[this._hist.length - 1] = sn;
     } else {
-      this._hist.push(sn); // todo add logic to join chars to prev snapshot: maybe separate by '[space].<\|/:'
+      this._hist.push(sn);
     }
     this._histTimeout = setTimeout(() => {
       this._histTimeout = null;
       this._stateBeforeInput = undefined;
     }, 1);
 
-    this.testMe && console.warn("saved", snap, { hist: this._hist, stateBefore });
+    this.testMe && console.warn(isUpdate ? "updated" : "saved", snap);
+    this.testMe && console.log("hist:", this._hist); // "stateBefore:", stateBefore);
   }
 
   /** Returns last history index */

@@ -817,13 +817,13 @@ describe("control.text: mask", () => {
     expect(h.getInputCursor(el.$refInput)).toBe("1|3.4.5.6");
     expect(await h.userUndo(el.$refInput)).toBe("1|23.4.5.6"); // rollback before #3
     expect(await h.userUndo(el.$refInput)).toBe("123.4.5.67|"); // rollback before #2
-    expect(await h.userUndo(el.$refInput)).toBe("123.4.5.6|"); // rollback before #1
-    expect(await h.userUndo(el.$refInput)).toBe("123.4.5.|");
-    expect(await h.userUndo(el.$refInput)).toBe("123.4.5|");
+    expect(await h.userUndo(el.$refInput)).toBe("123.4.5|"); // rollback before #1
+    expect(await h.userUndo(el.$refInput)).toBe("123.4|");
+    expect(await h.userUndo(el.$refInput)).toBe("123.|");
 
     // cover Ctrl+Shift+Z
-    expect(await h.userRedo(el.$refInput, { useCtrlY: true })).toBe("123.4.5.|");
-    expect(await h.userRedo(el.$refInput)).toBe("123.4.5.6|");
+    expect(await h.userRedo(el.$refInput, { useCtrlY: true })).toBe("123.4|");
+    expect(await h.userRedo(el.$refInput)).toBe("123.4.5|");
     expect(await h.userRedo(el.$refInput)).toBe("123.4.5.67|");
     expect(await h.userRedo(el.$refInput)).toBe("123.4.5.6|");
 

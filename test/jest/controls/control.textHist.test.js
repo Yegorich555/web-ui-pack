@@ -53,20 +53,33 @@ describe("control.text.hist", () => {
     expect(await h.userRedo(el)).toBe("a|");
     expect(await h.userRedo(el)).toBe("a|");
 
-    expect(await h.userTypeText(el, "abc")).toBe("abc|");
-    expect(await h.userUndo(el)).toBe("ab|");
-    expect(await h.userUndo(el)).toBe("a|");
+    expect(await h.userTypeText(el, "abc 123")).toBe("abc 123|");
+    expect(await h.userUndo(el)).toBe("abc|");
+    expect(await h.userRedo(el)).toBe("abc 123|");
+    expect(await h.userUndo(el)).toBe("abc|");
     expect(await h.userUndo(el)).toBe("|");
-    expect(await h.userRedo(el)).toBe("a|");
-    expect(await h.userRedo(el)).toBe("ab|");
     expect(await h.userRedo(el)).toBe("abc|");
-    expect(await h.userUndo(el)).toBe("ab|");
+    expect(await h.userRedo(el)).toBe("abc 123|");
+
+    expect(await h.userTypeText(el, " hi .5", { clearPrevious: false })).toBe("abc 123 hi .5|");
+    expect(await h.userUndo(el)).toBe("abc 123 hi|");
+    expect(await h.userUndo(el)).toBe("abc 123|");
+
     // middle
     h.setInputCursor(el, "a|b");
     expect(await h.userTypeText(el, "1", { clearPrevious: false })).toBe("a1|b");
     expect(await h.userUndo(el)).toBe("a|b");
     expect(await h.userRedo(el)).toBe("a1|b");
     expect(await h.userUndo(el)).toBe("a|b");
+
+    expect(await h.userTypeText(el, "72 5", { clearPrevious: false })).toBe("a72 5|b");
+    expect(await h.userUndo(el)).toBe("a72|b");
+    expect(await h.userUndo(el)).toBe("a|b");
+    expect(await h.userRedo(el)).toBe("a72|b");
+    expect(await h.userRedo(el)).toBe("a72 5|b");
+    expect(await h.userUndo(el)).toBe("a72|b");
+    expect(await h.userUndo(el)).toBe("a|b");
+
     // at start
     h.setInputCursor(el, "|ab");
     expect(await h.userTypeText(el, "2", { clearPrevious: false })).toBe("2|ab");
@@ -79,17 +92,25 @@ describe("control.text.hist", () => {
     expect(await h.userUndo(el)).toBe("a|bc|d");
     expect(await h.userRedo(el)).toBe("a2|d");
 
+    // when user continue type text but in another position
+    expect(await h.userTypeText(el, "34", { clearPrevious: false })).toBe("a234|d");
+    h.setInputCursor(el, "a234d|");
+    expect(await h.userTypeText(el, "5", { clearPrevious: false })).toBe("a234d5|");
+    expect(await h.userUndo(el)).toBe("a234d|");
+    expect(await h.userUndo(el)).toBe("a|bc|d");
+
     // type very fast: beforeInput fires without timeouts
     hist._histPos = null;
     hist._hist = [];
     el.value = "";
     h.setInputCursor(el, "|", { skipEvent: true });
-    expect(await h.userTypeText(el, "-op", { clearPrevious: true, fast: true })).toBe("-op|");
+    expect(await h.userTypeText(el, "op. ", { clearPrevious: true, fast: true })).toBe("op. |");
+    expect(await h.userInsertText(el, "56", { clearPrevious: true })).toBe("op. 56|");
     expect(hist._hist.map((s) => hist.snapshotDecode(s))).toMatchInlineSnapshot(`
       [
         {
           "action": 0,
-          "inserted": "-",
+          "inserted": "op",
           "pos1": 0,
           "pos2": 0,
           "posIns": 0,
@@ -97,18 +118,18 @@ describe("control.text.hist", () => {
         },
         {
           "action": 0,
-          "inserted": "o",
-          "pos1": 1,
-          "pos2": 1,
-          "posIns": 1,
-          "removed": "",
-        },
-        {
-          "action": 0,
-          "inserted": "p",
+          "inserted": ". ",
           "pos1": 2,
           "pos2": 2,
           "posIns": 2,
+          "removed": "",
+        },
+        {
+          "action": 1,
+          "inserted": "56",
+          "pos1": 4,
+          "pos2": 4,
+          "posIns": 4,
           "removed": "",
         },
       ]
@@ -175,7 +196,7 @@ describe("control.text.hist", () => {
     expect(await h.userUndo(el)).toBe("123|");
     expect(await h.userRedo(el)).toBe("|");
     expect(await h.userUndo(el)).toBe("123|");
-    expect(await h.userUndo(el)).toBe("12|");
+    expect(await h.userUndo(el)).toBe("|");
   });
 
   test("findDifference & updateLast", async () => {
