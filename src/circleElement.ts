@@ -267,6 +267,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
       }
       return a;
     });
+    // todo if affects on label in the center for single item
     // smash difference to other segments
     if (diff !== 0) {
       let cnt = arr.length - diffCnt;
