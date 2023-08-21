@@ -78,10 +78,6 @@ export default class WUPDropdownElement<
 > extends WUPBaseElement<TOptions> {
   #ctr = this.constructor as typeof WUPDropdownElement;
 
-  static get nameUnique(): string {
-    return "WUPDropdownElement";
-  }
-
   static get $style(): string {
     return `${super.$style}
       :host {

@@ -145,10 +145,6 @@ export default class WUPTextControl<
     return arr;
   }
 
-  static get nameUnique(): string {
-    return "WUPTextControl";
-  }
-
   static get $styleRoot(): string {
     return `:root {
       --ctrl-clear-hover: rgba(255,0,0,0.1);

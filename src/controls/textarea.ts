@@ -63,10 +63,6 @@ export default class WUPTextareaControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextareaControl;
 
-  static get nameUnique(): string {
-    return "WUPTextareaControl";
-  }
-
   static get $style(): string {
     return `${super.$style}
         :host strong { top: 1.6em; }

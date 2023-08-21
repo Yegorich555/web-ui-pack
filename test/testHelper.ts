@@ -142,7 +142,6 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
     if (obj instanceof WUPBaseElement) {
       test("render + styles", () => {
         const c = Object.getPrototypeOf(obj).constructor as typeof WUPBaseElement;
-        expect(c.nameUnique).toBe(c.name); // these names must be matched
         expect(obj).toMatchSnapshot();
         expect(c.$refStyle).toMatchSnapshot();
       });
@@ -184,7 +183,7 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
               }
               obj.setAttribute(a, oa?.value ?? (oa?.refGlobal ? "window._myTestKey" : "true"));
               jest.advanceTimersByTime(1);
-              const key = Object.keys(obj.$options).find((k) => k.toLowerCase() === a) as string;
+              const key = Object.keys(obj.$options).find((k) => (k as string).toLowerCase() === a) as string;
               expect(key).toBeDefined();
               expect(obj.$options[key]).toBeDefined();
               expect(obj.$options[key]).not.toBeFalsy();

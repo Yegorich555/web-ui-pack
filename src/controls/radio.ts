@@ -81,10 +81,6 @@ export default class WUPRadioControl<
   /** Custom text that announced by screen-readers. Redefine it to use with another language */
   static $ariaReadonly = "readonly";
 
-  static get nameUnique(): string {
-    return "WUPRadioControl";
-  }
-
   static get $styleRoot(): string {
     return `:root {
       --ctrl-radio-size: 1em;

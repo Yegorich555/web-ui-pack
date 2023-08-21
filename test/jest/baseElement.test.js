@@ -35,10 +35,6 @@ describe("baseElement", () => {
 
   describe("me", () => {
     class TestMeElement extends WUPBaseElement {
-      static get nameUnique() {
-        return "TestMeElement";
-      }
-
       $options = {};
     }
     customElements.define("test-base-el", TestMeElement);
@@ -75,10 +71,6 @@ describe("baseElement", () => {
     TestA.$refStyle = was;
 
     class TestB extends TestA {
-      static get nameUnique() {
-        return "TestB";
-      }
-
       static get $style() {
         return `${super.$style} :host { position: my-absolute }`;
       }
@@ -94,10 +86,6 @@ describe("baseElement", () => {
     expect(style).toContain(":root { main-color: my-red }");
 
     class TestC extends TestB {
-      static get nameUnique() {
-        return "TestC";
-      }
-
       static get $style() {
         return `${super.$style} :host { z-index: me }`;
       }

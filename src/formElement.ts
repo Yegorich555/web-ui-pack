@@ -171,10 +171,6 @@ export default class WUPFormElement<
     return ["disabled", "readonly", "autocomplete", "autosave"];
   }
 
-  static get nameUnique(): string {
-    return "WUPFormElement";
-  }
-
   static get $styleRoot(): string {
     return `:root {
       --btn-submit-bg: var(--base-btn-bg);

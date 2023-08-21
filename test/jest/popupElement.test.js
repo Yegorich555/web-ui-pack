@@ -103,11 +103,7 @@ describe("popupElement", () => {
   });
 
   describe("inheritance", () => {
-    class TestPopupElement extends WUPPopupElement {
-      static get nameUnique() {
-        return "TestPopupElement";
-      }
-    }
+    class TestPopupElement extends WUPPopupElement {}
     customElements.define("test-el", TestPopupElement);
     h.baseTestComponent(() => document.createElement("test-el"), { skipAttrs: true });
   });

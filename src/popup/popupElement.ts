@@ -92,10 +92,6 @@ export default class WUPPopupElement<
     return ["target", "placement", "animation"];
   }
 
-  static get nameUnique(): string {
-    return "WUPPopupElement";
-  }
-
   static $placements = PopupPlacements;
 
   /** Returns placement */

@@ -95,10 +95,6 @@ export default class WUPPasswordControl<
   /** Text announced by screen-readers when input cleared; @defaultValue `input cleared` */
   static $ariaDescription = "press Alt + V to show/hide password";
 
-  static get nameUnique(): string {
-    return "WUPPasswordControl";
-  }
-
   static get $styleRoot(): string {
     return `:root {
         --wup-icon-eye: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M384 122.182C209.455 122.182 60.392 230.749 0 384c60.392 153.251 209.455 261.818 384 261.818S707.608 537.251 768 384c-60.392-153.251-209.455-261.818-384-261.818zm0 436.363c-96.35 0-174.545-78.197-174.545-174.545S287.651 209.455 384 209.455 558.545 287.651 558.545 384 480.348 558.545 384 558.545zm0-279.272c-57.95 0-104.727 46.778-104.727 104.727S326.051 488.727 384 488.727 488.727 441.949 488.727 384 441.949 279.273 384 279.273z'/%3E%3C/svg%3E");

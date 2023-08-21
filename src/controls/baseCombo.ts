@@ -72,10 +72,6 @@ export default abstract class WUPBaseComboControl<
     return arr;
   }
 
-  static get nameUnique(): string {
-    return "WUPBaseComboControl";
-  }
-
   static get $style(): string {
     return `${super.$style}
       :host {

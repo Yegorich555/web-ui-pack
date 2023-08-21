@@ -10,6 +10,7 @@ import { WUPcssHidden } from "./styles";
 
 // theoritcally such single appending is faster than using :host inside shadowComponent
 const appendedStyles = new Set<string>();
+const appendedRootStyles = new Set<typeof WUPBaseElement>();
 let lastUniqueNum = 0;
 
 const allObservedOptions = new WeakMap<typeof WUPBaseElement, Set<string> | null>();
@@ -21,11 +22,6 @@ export default abstract class WUPBaseElement<
 > extends HTMLElement {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseElement;
-
-  /** Required otherwise constructor name can reduced in optimizator */
-  static get nameUnique(): string {
-    return "WUPBaseElement";
-  }
 
   /** Reference to global style element used by web-ui-pack */
   static get $refStyle(): HTMLStyleElement | null {
@@ -188,9 +184,8 @@ export default abstract class WUPBaseElement<
       const protos = this.#ctr.findAllProtos(this, []);
       protos.reverse().forEach((p) => {
         // append $styleRoot
-        const nm = p.nameUnique;
-        if (!appendedStyles.has(nm)) {
-          appendedStyles.add(nm);
+        if (!appendedRootStyles.has(p)) {
+          appendedRootStyles.add(p);
           if (Object.prototype.hasOwnProperty.call(p, "$styleRoot")) {
             const s = p.$styleRoot;
             s && refStyle.append(s);

@@ -61,10 +61,6 @@ export default class WUPSwitchControl<
 > extends WUPBaseControl<boolean, TOptions, EventMap> {
   #ctr = this.constructor as typeof WUPSwitchControl;
 
-  static get nameUnique(): string {
-    return "WUPSwitchControl";
-  }
-
   static get $styleRoot(): string {
     return `:root {
       --ctrl-switch-padding: 1em;
