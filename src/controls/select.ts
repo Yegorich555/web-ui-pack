@@ -858,5 +858,4 @@ customElements.define(tagName, WUPSelectControl);
 // todo label for="" in Chrome sometimes enables autosuggestion - need to remove it for all controls - need to double-check ???
 // todo add support custom items rendering when it's already appended to DOM like it works with dropdown
 
-// todo set $initValue + focus + pressEscape + remove last char - menu opens but focusedItem not visible in scrolled content
 // todo: option to allow autoselect item without pressing Enter

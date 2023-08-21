@@ -21,6 +21,10 @@ const items = [
   // { text: (v, li, i) => li.append(v.toString()), value: 124 },
 ];
 
+// for (let i = 20; i < 100; ++i) {
+//   items.push({ text: `Item N #${i}`, value: i });
+// }
+
 // for (let i = 20; i < 1000; ++i) {
 //   items.push({ text: `Test ${i}`, value: i });
 // }
@@ -65,7 +69,7 @@ export default function SelectControlView() {
         ref={(el) => {
           if (el) {
             el.$onSubmit = (e) => console.warn("submitted model", e.$model);
-            el.$initModel = { radio: items[3].value };
+            el.$initModel = { asDropdown: items[3].value };
           }
         }}
       >
@@ -73,9 +77,14 @@ export default function SelectControlView() {
           items="window.inputSelect.items"
           name="select"
           label="Select"
-          initValue={items[8].value.toString()}
+          initValue={items[items.length - 3].value.toString()}
           multiple={false}
           validations="window._someSelectValidations"
+          ref={(el) => {
+            if (el) {
+              // el.$options.autoFocus = true;
+            }
+          }}
         />
         <wup-select
           name="multiple"

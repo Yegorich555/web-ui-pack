@@ -510,8 +510,6 @@ describe("control.select", () => {
   });
 
   test("menu navigation", async () => {
-    const was = HTMLElement.prototype.scrollIntoViewIfNeeded;
-    HTMLElement.prototype.scrollIntoViewIfNeeded = () => undefined; // just for coverage
     el.focus();
     await h.wait();
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
@@ -638,8 +636,6 @@ describe("control.select", () => {
     expect(el.$isShown).toBe(true);
     expect(el.querySelector("[aria-selected='true']")?.id).toBe(menuIds[3]);
     expect(el.querySelectorAll("[aria-selected='true']").length).toBe(1);
-
-    HTMLElement.prototype.scrollIntoViewIfNeeded = was;
 
     // when user changed text No Items
     h.mockConsoleError();
@@ -1514,6 +1510,80 @@ describe("control.select", () => {
     expect(el.$value).toStrictEqual([10, 30]);
     expect(await h.userRedo(el.$refInput)).toBe("Donny, Leo, 123, |");
     expect(el.$value).toStrictEqual([10, 30, "123"]);
+  });
+
+  test("tryScroll", async () => {
+    const { nextFrame } = h.useFakeAnimation();
+    const ul = document.body.appendChild(document.createElement("ul"));
+    const li = ul.appendChild(document.createElement("li"));
+    const li2 = ul.appendChild(document.createElement("li2"));
+    li._scrolled = jest.fn();
+    li2._scrolled = jest.fn();
+    function onScrollProto() {
+      this._scrolled();
+    }
+    const onScroll = jest.spyOn(HTMLElement.prototype, "scrollIntoView").mockImplementation(onScrollProto);
+
+    // all at once - filtered
+    el.tryScrollTo(li);
+    el.tryScrollTo(li2);
+    await nextFrame();
+    expect(li._scrolled).toBeCalledTimes(1);
+    expect(li2._scrolled).toBeCalledTimes(0);
+
+    // after debounce 1ms
+    jest.clearAllMocks();
+    el.tryScrollTo(li);
+    await h.wait(1);
+    el.tryScrollTo(li2);
+    await nextFrame();
+    await nextFrame();
+    expect(li._scrolled).toBeCalledTimes(1);
+    expect(li2._scrolled).toBeCalledTimes(1);
+
+    // simulate when parentScrollTop is different
+    let scrollTop = 0;
+    jest.spyOn(ul, "scrollTop", "get").mockImplementation(() => {
+      scrollTop += 5;
+      return scrollTop;
+    });
+
+    jest.clearAllMocks();
+    el.tryScrollTo(li);
+    await h.wait(1);
+    expect(li._scrolled).toBeCalledTimes(1);
+    await nextFrame();
+    expect(li._scrolled).toBeCalledTimes(2);
+    await nextFrame();
+    expect(li._scrolled).toBeCalledTimes(3);
+
+    jest.clearAllMocks();
+    el.tryScrollTo(li2);
+    await h.wait(1);
+    expect(li2._scrolled).toBeCalledTimes(1);
+    await nextFrame();
+    expect(li2._scrolled).toBeCalledTimes(2);
+    expect(li._scrolled).toBeCalledTimes(0);
+
+    jest.spyOn(ul, "scrollTop", "get").mockImplementation(() => scrollTop);
+    await nextFrame();
+    await nextFrame();
+    await nextFrame();
+    await nextFrame();
+    expect(li2._scrolled).toBeCalledTimes(3);
+    expect(li._scrolled).toBeCalledTimes(0);
+
+    // case when scrollIntoViewIfNeeded doesn't exist on component
+    jest.clearAllMocks();
+    HTMLElement.prototype.scrollIntoViewIfNeeded = jest.fn();
+    el.tryScrollTo(li);
+    await h.wait(1);
+    expect(HTMLElement.prototype.scrollIntoViewIfNeeded).toBeCalledTimes(1);
+
+    HTMLElement.prototype.scrollIntoViewIfNeeded = undefined;
+    el.tryScrollTo(li2);
+    await h.wait(1);
+    expect(onScroll).toBeCalledTimes(1);
   });
 });
 
