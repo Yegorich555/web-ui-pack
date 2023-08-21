@@ -460,8 +460,13 @@ export default abstract class WUPBaseComboControl<
 
     let clickAfterFocus = true; // prevent clickAfterFocus
     let lblClick: ReturnType<typeof setTimeout> | false = false; // fix when labelOnClick > inputOnClick > inputOnFocus
-    const dsps = onEvent(this, "click", (e) => {
-      const skip = e.defaultPrevented || e.button || lblClick; // e.button > 0 if not left-click
+    let onInputStartClick = false; // mouseDown>selectText>mouseUp - without filter it closes/opens popup when user tries to select text
+    const dsps0 = onEvent(this.$refInput, "mousedown", () => {
+      const allow = !this.$refInput.readOnly && !(this._opts.showCase & ShowCases.onClickInput);
+      onInputStartClick = allow;
+    });
+    const dsps1 = onEvent(this, "click", (e) => {
+      const skip = e.defaultPrevented || e.button || lblClick || onInputStartClick; // e.button > 0 if not left-click
       if (!skip) {
         if (clickAfterFocus) {
           r.finally(() => this.$isFocused && this.goShowMenu(ShowCases.onClick, e)); // menu must be opened if openByFocus is rejected
@@ -473,7 +478,8 @@ export default abstract class WUPBaseComboControl<
     });
 
     const dsps2 = onEvent(document, "click", (e) => {
-      !lblClick && setTimeout(() => this.$isFocused && this.goHideMenu(HideCases.onClick, e)); // timeout to prevent show before focusLost
+      !lblClick && !onInputStartClick && setTimeout(() => this.$isFocused && this.goHideMenu(HideCases.onClick, e)); // timeout to prevent show before focusLost
+      onInputStartClick = false;
     });
 
     document.addEventListener(
@@ -484,7 +490,7 @@ export default abstract class WUPBaseComboControl<
       { once: true, passive: true, capture: true }
     );
 
-    arr.push(dsps, dsps2);
+    arr.push(dsps0, dsps1, dsps2);
     return arr;
   }
 
@@ -560,5 +566,3 @@ export default abstract class WUPBaseComboControl<
  >>> console.warn('done')
  hide-event
  */
-
-// todo mouseDown>select>mouseUp - closes popup -it's wrong behavior because click event is dirty

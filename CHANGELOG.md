@@ -19,6 +19,7 @@
   - improved input delete behavior for `$options.multiple`
   - _menu isn't refreshed after button-clear click_
   - _selected menu-item isn't into view sometimes with 1st opening popup_
+- **Combobox controls (Select, Date, Time)**. _Popup shows/hides when user select text with mouseUp on label (outside input)_
 - [CalendarControl](src/controls/calendar.ts). _`$value=undefined` doesn't reset selected_
 
 **New/Features**:

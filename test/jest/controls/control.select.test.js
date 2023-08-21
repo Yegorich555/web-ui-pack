@@ -1019,6 +1019,23 @@ describe("control.select", () => {
       await h.userClick(el);
       await h.wait();
       expect(el.$isShown).toBe(false);
+
+      // case when user select text in input but mouseUp outside input
+      expect(el.$isShown).toBe(false);
+      el.$refInput.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
+      el.$refInput.dispatchEvent(new MouseEvent("mousemove", { cancelable: true, bubbles: true }));
+      el.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
+      el.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true })); // click inside control but outside input
+      await h.wait();
+      expect(el.$isShown).toBe(false);
+      // again with outside control
+      el.$refInput.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
+      el.$refInput.dispatchEvent(new MouseEvent("mousemove", { cancelable: true, bubbles: true }));
+      document.body.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
+      document.body.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true })); // click outside control
+      await h.wait();
+      expect(el.$isShown).toBe(false);
+
       el.$options.showCase &= ~ShowCases.onClick; // remove option
       el.click();
       await h.wait();
