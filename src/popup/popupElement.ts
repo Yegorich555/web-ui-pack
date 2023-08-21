@@ -427,17 +427,18 @@ export default class WUPPopupElement<
     if (this.#attach) {
       this.#refListener = this.#attach();
     } else {
-      this._opts.target = this.#defineTarget();
-
       if (!this._opts.showCase /* always */) {
         this.goShow(ShowCases.always, null);
         return;
       }
-      this.#refListener = new PopupListener(
-        this._opts as typeof this._opts & { target: HTMLElement },
-        (v, e) => (this.goShow(v, e) ? this : null),
-        (v, e) => !!this.goHide(v, e)
-      );
+      if (this._opts.showCase !== ShowCases.alwaysOff) {
+        this._opts.target = this.defineTarget();
+        this.#refListener = new PopupListener(
+          this._opts as typeof this._opts & { target: HTMLElement },
+          (v, e) => (this.goShow(v, e) ? this : null),
+          (v, e) => !!this.goHide(v, e)
+        );
+      }
     }
   }
 
@@ -476,7 +477,7 @@ export default class WUPPopupElement<
   }
 
   /** Defines target on show; @returns Element | Error */
-  #defineTarget(): HTMLElement | SVGElement {
+  defineTarget(): HTMLElement | SVGElement {
     let el: Element | null;
     const attrTrg = this.getAttribute("target");
     if (attrTrg) {
@@ -538,8 +539,8 @@ export default class WUPPopupElement<
     this.style.minWidth = ""; // reset styles to default to avoid bugs and previous state
     this.style.minHeight = ""; // reset styles to default to avoid bugs and previous state
 
-    this._opts.target = this._opts.target || this.#defineTarget();
-    if (!this._opts.target!.isConnected) {
+    const target = this._opts.target as HTMLElement;
+    if (!target!.isConnected) {
       throw new Error(`${this.tagName}. Target is not appended to document`);
     }
 
@@ -567,7 +568,7 @@ export default class WUPPopupElement<
       animTime: Number.parseFloat(style.animationDuration.substring(0, style.animationDuration.length - 1)) * 1000,
     };
 
-    this.#state!.scrollParents = findScrollParentAll(this._opts.target) ?? undefined;
+    this.#state!.scrollParents = findScrollParentAll(target) ?? undefined;
     // get arrowSize
     if (this._opts.arrowEnable) {
       const el = this.#refArrow || document.createElement(WUPPopupArrowElement.tagName);
@@ -677,6 +678,7 @@ export default class WUPPopupElement<
     if (this.#whenShow) {
       return this.#whenShow;
     }
+    this._opts.target = this.defineTarget();
     const e = this.fireEvent("$willShow", { cancelable: true, detail: { showCase } });
     if (e.defaultPrevented) {
       return false;
@@ -685,6 +687,7 @@ export default class WUPPopupElement<
     this.#isHiding = undefined;
     this._stopAnimation?.call(this);
     this.#state && window.cancelAnimationFrame(this.#state.frameId);
+
     this.buildState();
     const wasClosed = !this.#isShown;
     this.#isShown = true;

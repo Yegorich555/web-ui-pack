@@ -26,6 +26,7 @@
 - **Internals**. Improved memory consumption & performance via excluding nested props of $options to be observed
 - **Text based controls**
   - History undo/redo (Ctrl+Z, Ctrl+Y, Ctrl+Shift+Z). Refactored, fixed & optimized via storing only changes
+- [PopupElement](src/popup/popupElement.ts). Added showCase **alwaysOff** (popup hidden by default)
 
 ## 0.7.1 (Jul 24, 2023)
 
