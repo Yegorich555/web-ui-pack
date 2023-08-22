@@ -56,7 +56,7 @@ export default function CircleView() {
             if (el) {
               el.$options.min = 0;
               el.$options.max = 100;
-              el.$options.items = [{ value: 5 }]; // todo console.err here is wrong because item is single
+              el.$options.items = [{ value: 5 }];
             }
           }}
         />
@@ -74,7 +74,8 @@ export default function CircleView() {
           ref={(el) => {
             if (el) {
               el.$options.items = [
-                { value: 12, tooltip: "Item 1\nvalue: {#}" },
+                // todo allow to show percentage
+                { value: 1, tooltip: "Item 1\nvalue: {#}" },
                 { value: 100, tooltip: (item) => `Custom tooltip\nvalue: ${item.value}` },
                 { value: 13, tooltip: "Item 3\nvalue: {#}" },
                 { value: 27, tooltip: "Item 4\nvalue: {#}" },

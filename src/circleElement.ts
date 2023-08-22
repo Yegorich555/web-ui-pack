@@ -265,7 +265,6 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     });
     // smash difference to other segments
     if (diff !== 0 && arr.length !== 1) {
-      // todo if affects on label in the center for single item
       let cnt = arr.length - diffCnt;
       arr.forEach((a) => {
         if (a.v > minSize) {
@@ -368,7 +367,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     if (items.length === 1) {
       this.$refLabel = this.$refLabel ?? this.appendChild(document.createElement("strong"));
       const rawV = items[0].value;
-      const perc = Math.round(((arr[0].angleTo - this._opts.from) * 100) / (this._opts.to - this._opts.from));
+      const perc = mathScaleValue(rawV, vMin, vMax, 0, 100);
       this.renderLabel(this.$refLabel, perc, rawV);
       ariaLbl = this.$refLabel.textContent!;
     } else {
@@ -465,7 +464,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
   /** Called every time as need text-value */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   renderLabel(label: HTMLElement, percent: number, rawValue: number): void {
-    label.textContent = `${percent}%`;
+    label.textContent = `${Math.round(percent)}%`;
   }
 
   /** Returns svg-path for Arc according to options */

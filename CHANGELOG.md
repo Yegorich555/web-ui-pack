@@ -26,6 +26,7 @@
   - _Alt+MouseWheel changes ±0.1 but Alt-keyUp moves focus to browser panel_
 - [CircleElement](src/circleElement.ts). _Wrong tooltip position when segment is half of circle_
   - _Wrong console.error when `items=[{value:2}]`_
+  - _Wrong label-value when item value < opion **minsize**_
 
 **New/Features**:
 
