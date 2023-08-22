@@ -24,7 +24,8 @@
 - [NumberControl](src/controls/number.ts).
   - _Alt+MouseWheel changes ±0.1 when decimal isn't allowed_
   - _Alt+MouseWheel changes ±0.1 but Alt-keyUp moves focus to browser panel_
-- [CircleElement](src/circleElement.ts). _Wrong tooltip position when segment is half of circle_
+- [CircleElement](src/circleElement.ts).
+  - _Wrong tooltip position when segment is half of circle_
   - _Wrong console.error when `items=[{value:2}]`_
   - _Wrong label-value when item value < opion **minsize**_
 
@@ -35,6 +36,7 @@
 - **Text based controls**
   - History undo/redo (Ctrl+Z, Ctrl+Y, Ctrl+Shift+Z). Refactored, fixed & optimized via storing only changes
 - [PopupElement](src/popup/popupElement.ts). Added showCase **alwaysOff** (popup hidden by default)
+- [CircleElement](src/circleElement.ts). Added percentage for tooltips
 
 ## 0.7.1 (Jul 24, 2023)
 

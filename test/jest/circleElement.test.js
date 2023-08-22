@@ -348,12 +348,12 @@ describe("circleElement", () => {
     el.$options.hoverHideTimeout = 50;
     el.$options.hoverShowTimeout = 200;
     el.$options.items = [
-      { value: 5, tooltip: "Item 1; value {#}%" },
+      { value: 5, tooltip: "Item 1; value {#}, percent {#%}" },
       {
         value: 24,
         tooltip: (item, popup) => {
           popup.style.background = "red";
-          return `Me ${item.value}`;
+          return `Me ${item.value} & ${item.percentage} %`;
         },
       },
     ];
@@ -373,7 +373,7 @@ describe("circleElement", () => {
     expect(onTooltip).toBeCalledTimes(0); // because waiting for 200ms
     await h.wait(200);
     expect(onTooltip).toBeCalledTimes(1);
-    expect(el.querySelector("wup-popup").innerHTML).toMatchInlineSnapshot(`"Item 1; value 5%"`);
+    expect(el.querySelector("wup-popup").innerHTML).toMatchInlineSnapshot(`"Item 1; value 5, percent 17.2%"`);
 
     el.$refItems.children[0].dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
     await h.wait(40);
@@ -386,7 +386,7 @@ describe("circleElement", () => {
     await h.wait(300);
     expect(onTooltip).toBeCalledTimes(2);
     expect(el.querySelector("wup-popup").outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="background: red;">Me 24</wup-popup>"`
+      `"<wup-popup style="background: red;">Me 24 &amp; 82.75862068965517 %</wup-popup>"`
     );
 
     // checking debounce timeouts

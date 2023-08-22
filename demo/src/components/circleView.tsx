@@ -57,6 +57,11 @@ export default function CircleView() {
               el.$options.min = 0;
               el.$options.max = 100;
               el.$options.items = [{ value: 5 }];
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              el.renderLabel = (label, percent, _value) => {
+                // use to override default label
+                label.textContent = `${Math.round(percent)} %`;
+              };
             }
           }}
         />
@@ -65,7 +70,9 @@ export default function CircleView() {
         <h3>Segmented</h3>
         <small>(point several items in $options.items)</small>
         <br />
-        <small>(point label per item to show tooltip)</small>
+        <small>
+          (point <b>label</b> per item to show tooltip)
+        </small>
         <wup-circle
           back={false}
           style={{ maxWidth: "120px" }}
@@ -74,9 +81,12 @@ export default function CircleView() {
           ref={(el) => {
             if (el) {
               el.$options.items = [
-                // todo allow to show percentage
-                { value: 1, tooltip: "Item 1\nvalue: {#}" },
-                { value: 100, tooltip: (item) => `Custom tooltip\nvalue: ${item.value}` },
+                { value: 1, tooltip: "Item 1\nvalue: {#}, percent: {#%}" },
+                {
+                  value: 100,
+                  tooltip: (item) =>
+                    `Custom tooltip\nvalue: ${item.value}, percent: ${Math.round(item.percentage * 10) / 10}%`,
+                },
                 { value: 13, tooltip: "Item 3\nvalue: {#}" },
                 { value: 27, tooltip: "Item 4\nvalue: {#}" },
                 { value: 15, tooltip: "Item 5\nvalue: {#}" },
