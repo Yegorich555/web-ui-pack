@@ -1187,3 +1187,4 @@ export default abstract class WUPBaseControl<
 
 // NiceToHave when control is disabled need to show tooltip with reason
 // NiceToHave when control is readonly need to show tooltip with reason
+// todo if control small then popupError is small also but there is enough space
