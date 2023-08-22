@@ -13,6 +13,7 @@
 - **Text based controls**
   - _$initValue + click on button[clear] + Ctrl+Z => history undo does't work_
   - _button[clear] isn't updated on `$initValue` or `$options.clearActions` changing_
+  - _wrong behavior_when user removes/inserts text in the start_
 - [SelectControl](src/controls/select.ts)
   - _clearing input + click outside doesn't clear value_
   - _`$options.readOnlyInput=7` must be ignored when `allowNewValue` enabled_
@@ -25,10 +26,10 @@
   - _Alt+MouseWheel changes ±0.1 when decimal isn't allowed_
   - _Alt+MouseWheel changes ±0.1 but Alt-keyUp moves focus to browser panel_
 - [CircleElement](src/circleElement.ts).
-  - _Wrong tooltip position when segment is half of circle_
-  - _Wrong console.error when `items=[{value:2}]`_
-  - _Wrong label-value when item value < opion **minsize**_
-  - _Edges of small segment are not rounded according to corner_
+  - _wrong tooltip position when segment is half of circle_
+  - _wrong console.error when `items=[{value:2}]`_
+  - _wrong label-value when item value < opion **minsize**_
+  - _edges of small segment are not rounded according to corner_
 
 **New/Features**:
 

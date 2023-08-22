@@ -474,20 +474,19 @@ describe("control.text: mask", () => {
     h.setInputCursor(el.$refInput, "+1(234) 9|75-123");
     expect(await h.userTypeText(el.$refInput, "4", { clearPrevious: false })).toBe("+1(234) 94|7-5123"); // digits must be shifted
 
-    // todo need fix commented
-    // const arr = [
-    //   { from: "|+1(", add: "2", to: "+1(2|" },
-    //   { from: "|+1(2", add: "3", to: "+1(3|2" },
-    //   { from: "|+1(32", add: "4", to: "+1(4|32) " },
-    //   { from: "|+1(432) ", add: "5", to: "+1(5|43) 2" },
-    //   { from: "|+1(543) 2", add: "6", to: "+1(6|54) 32" },
-    //   { from: "+|1(2", add: "3", to: "+1(3|2" },
-    // ];
-    // for (let i = 0; i < arr.length; ++i) {
-    //   const a = arr[i];
-    //   h.setInputCursor(el.$refInput, a.from);
-    //   expect(await h.userTypeText(el.$refInput, a.add, { clearPrevious: false })).toBe(a.to);
-    // }
+    const arr = [
+      { from: "|+1(", add: "2", to: "+1(2|" },
+      { from: "|+1(2", add: "3", to: "+1(3|2" },
+      { from: "|+1(32", add: "4", to: "+1(4|32) " },
+      { from: "|+1(432) ", add: "5", to: "+1(5|43) 2" },
+      { from: "|+1(543) 2", add: "6", to: "+1(6|54) 32" },
+      { from: "+|1(2", add: "3", to: "+1(3|2" },
+    ];
+    for (let i = 0; i < arr.length; ++i) {
+      const a = arr[i];
+      h.setInputCursor(el.$refInput, a.from);
+      expect(await h.userTypeText(el.$refInput, a.add, { clearPrevious: false })).toBe(a.to);
+    }
 
     // removing
     h.setInputCursor(el.$refInput, "+1(|");
@@ -598,12 +597,12 @@ describe("control.text: mask", () => {
 
     h.setInputCursor(el.$refInput, "$ 5 USD|");
     await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
-    expect(h.getInputCursor(el.$refInput)).toBe("$ 5 USD2|");
+    expect(h.getInputCursor(el.$refInput)).toBe("$ 52| USD");
     await h.wait(150);
-    expect(h.getInputCursor(el.$refInput)).toBe("$ 5| USD");
+    expect(h.getInputCursor(el.$refInput)).toBe("$ 52| USD");
 
     h.setInputCursor(el.$refInput, "$ 123456 USD|");
-    expect(await h.userTypeText(el.$refInput, "2", { clearPrevious: false })).toBe("$ 123456 USD2|");
+    expect(await h.userTypeText(el.$refInput, "2", { clearPrevious: false })).toBe("$ 1234562| USD");
     await h.wait(150);
     expect(h.getInputCursor(el.$refInput)).toBe("$ 123456| USD");
 
