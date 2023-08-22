@@ -263,9 +263,9 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
       }
       return a;
     });
-    // todo if affects on label in the center for single item
     // smash difference to other segments
-    if (diff !== 0) {
+    if (diff !== 0 && arr.length !== 1) {
+      // todo if affects on label in the center for single item
       let cnt = arr.length - diffCnt;
       arr.forEach((a) => {
         if (a.v > minSize) {
@@ -280,18 +280,20 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
           --cnt;
         }
       });
+
+      if (diff > 0) {
+        // possible issue when items so many that we don't have enough-space
+        console.error(
+          "WUP-CIRCLE. Impossible to increase segments up to $options.minSize. Change [minSize] or filter items yourself. arguments:",
+          { valueMin, valueMax, angleMin, angleMax, space, minSize, animTime, items }
+        );
+        // assign values without minSize
+        items.forEach((s, i) => {
+          arr[i].v = mathScaleValue(s.value, valueMin, valueMax, angleMin, angleMax) - angleMin;
+        });
+      }
     }
-    if (diff > 0) {
-      // possible issue when items so many that we don't have enough-space
-      console.error(
-        "WUP-CIRCLE. Impossible to increase segments up to $options.minSize. Change [minSize] or filter items yourself. arguments:",
-        { valueMin, valueMax, angleMin, angleMax, space, minSize, animTime, items }
-      );
-      // assign values without minSize
-      items.forEach((s, i) => {
-        arr[i].v = mathScaleValue(s.value, valueMin, valueMax, angleMin, angleMax) - angleMin;
-      });
-    }
+
     // calc result
     const totalAngle = angleMax - angleMin;
     arr.forEach((a) => {

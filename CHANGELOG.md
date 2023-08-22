@@ -24,6 +24,8 @@
 - [NumberControl](src/controls/number.ts).
   - _Alt+MouseWheel changes ±0.1 when decimal isn't allowed_
   - _Alt+MouseWheel changes ±0.1 but Alt-keyUp moves focus to browser panel_
+- [CircleElement](src/circleElement.ts). _Wrong tooltip position when segment is half of circle_
+  - _Wrong console.error when `items=[{value:2}]`_
 
 **New/Features**:
 
@@ -145,7 +147,7 @@
 **Fixes**:
 
 - **Controls**. _Need to add border by default otherwise it's invisible on the white body_
-- **CircleElement**. _Wrong tooltip position when segment is half of circle_
+- [CircleElement](src/circleElement.ts). _Wrong tooltip position when segment is half of circle_
 
 ## 0.5.0 (Mar 27, 2023)
 
