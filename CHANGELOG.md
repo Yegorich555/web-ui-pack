@@ -22,7 +22,8 @@
 - **Combobox controls (Select, Date, Time)**. _Popup shows/hides when user select text with mouseUp on label (outside input)_
 - [CalendarControl](src/controls/calendar.ts). _`$value=undefined` doesn't reset selected_
 - [NumberControl](src/controls/number.ts).
-  - _Alt+MouseWheel changes +-0.1 when decimal isn't allowed_
+  - _Alt+MouseWheel changes ±0.1 when decimal isn't allowed_
+  - _Alt+MouseWheel changes ±0.1 but Alt-keyUp moves focus to browser panel_
 
 **New/Features**:
 

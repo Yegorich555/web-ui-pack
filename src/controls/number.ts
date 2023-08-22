@@ -303,13 +303,23 @@ export default class WUPNumberControl<
     ); // allow inc/dec via scroll/swipe
     this.style.overflow = ""; // disable inline-style from onScroll helper
     r.push(
-      onEvent(this, "keyup", (e) => {
-        if (!e.altKey) delete this._isAltDown;
-        if (!e.shiftKey) delete this._isShiftDown;
-        if (!e.ctrlKey) delete this._isCtrlDown;
-      })
+      onEvent(
+        this,
+        "keyup",
+        (e) => {
+          if (!e.altKey) {
+            delete this._isAltDown;
+            e.key === "Alt" && this._wasInc && e.preventDefault(); // otherwise focus moves to browser
+            delete this._wasInc;
+          }
+          if (!e.shiftKey) delete this._isShiftDown;
+          if (!e.ctrlKey) delete this._isCtrlDown;
+        },
+        { passive: false }
+      )
     );
     r.push(() => {
+      delete this._wasInc;
       delete this._isAltDown;
       delete this._isShiftDown;
       delete this._isCtrlDown;
@@ -317,6 +327,8 @@ export default class WUPNumberControl<
     return r;
   }
 
+  /** To prevent focus to browser panel by Alt key */
+  _wasInc?: boolean;
   _isAltDown?: true;
   _isShiftDown?: true;
   _isCtrlDown?: true;
@@ -346,6 +358,7 @@ export default class WUPNumberControl<
 
   /** Called when user tries to increment/decrement value (via ArrowKeys/Mouse/Swipe) */
   protected gotIncrement(dval: number): void {
+    this._wasInc = true;
     if (this._isAltDown) {
       dval *= 0.1;
       if (this.$format.maxDecimal < 1) {
@@ -374,5 +387,3 @@ export default class WUPNumberControl<
 }
 
 customElements.define(tagName, WUPNumberControl);
-
-// todo KeyUp: alt => moves focus to browser tabs
