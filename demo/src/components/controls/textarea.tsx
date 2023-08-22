@@ -15,6 +15,7 @@ export default function TextControlView() {
       link="src/controls/textarea.ts"
       details={{
         tag: "wup-textarea",
+        linkDemo: "demo/src/components/controls/textarea.tsx",
         cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
       }}
       features={[

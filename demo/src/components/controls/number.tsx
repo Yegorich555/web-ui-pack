@@ -25,6 +25,7 @@ export default function NumberControlView() {
       ]}
       details={{
         tag: "wup-num",
+        linkDemo: "demo/src/components/controls/number.tsx",
         cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
       }}
     >

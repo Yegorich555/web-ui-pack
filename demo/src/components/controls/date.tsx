@@ -18,6 +18,7 @@ export default function DateControlView() {
       link="src/controls/date.ts"
       details={{
         tag: "wup-date",
+        linkDemo: "demo/src/components/controls/date.tsx",
         cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
         excludeCssVars: ["--ctrl-clr-cell-day-w", "--ctrl-clr-cell-h", "--ctrl-clr-cell-w", "--ctrl-clr-h"],
       }}

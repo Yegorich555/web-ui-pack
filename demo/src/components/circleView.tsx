@@ -15,6 +15,7 @@ export default function CircleView() {
       link="src/circleElement.ts"
       details={{
         tag: "wup-circle",
+        linkDemo: "demo/src/components/circleView.tsx",
       }}
       features={[
         "With rounded corners (use $options.corner)", //

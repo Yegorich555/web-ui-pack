@@ -33,6 +33,7 @@ export default function SelectManyControlView() {
       link="src/controls/selectMany.ts"
       details={{
         tag: "wup-selectmany",
+        linkDemo: "demo/src/components/controls/selectMany.tsx",
         cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
       }}
       features={[

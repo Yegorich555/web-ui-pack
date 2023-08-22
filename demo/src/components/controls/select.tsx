@@ -55,6 +55,7 @@ export default function SelectControlView() {
       link="src/controls/select.ts"
       details={{
         tag: "wup-select",
+        linkDemo: "demo/src/components/controls/select.tsx",
         cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
       }}
       features={[

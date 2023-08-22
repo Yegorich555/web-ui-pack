@@ -13,6 +13,7 @@ export default function TimeControlView() {
       link="src/controls/time.ts"
       details={{
         tag: "wup-time",
+        linkDemo: "demo/src/components/controls/time.tsx",
         cssVarAlt: new Map([
           ["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."],
           ["--ctrl-time-icon-img-lg", "Use this svg for icon > 16px"],
