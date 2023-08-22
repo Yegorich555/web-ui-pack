@@ -47,25 +47,67 @@ export default function CircleView() {
           <br />
           <b>WARN:</b> don't forget to reduce height in half of size (via styles)
         </small>
-        <wup-circle
-          style={{ maxWidth: "100px" }}
-          class={styles.half}
-          from={-90}
-          to={90}
-          corner={0.5}
-          ref={(el) => {
-            if (el) {
-              el.$options.min = 0;
-              el.$options.max = 100;
-              el.$options.items = [{ value: 5 }];
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
-              el.renderLabel = (label, percent, _value) => {
-                // use to override default label
-                label.textContent = `${Math.round(percent)} %`;
-              };
-            }
-          }}
-        />
+        <div className={styles.group}>
+          <wup-circle
+            class={styles.half}
+            from={-90}
+            to={90}
+            corner={0.5}
+            width={20}
+            ref={(el) => {
+              if (el) {
+                el.$options.items = [{ value: 2 }];
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                el.renderLabel = (label, percent, _value) => {
+                  // use to override default label
+                  label.textContent = `${Math.round(percent)} %`;
+                };
+                setTimeout(() => {
+                  const path = el.querySelector("g>path")!;
+                  const { width, height } = path.getBoundingClientRect();
+                  if (Math.abs(width - height) > 1) {
+                    // width must be equal height because item reduced to cornerSize that half of size
+                    console.error("Size out of expected range", { width, height });
+                  }
+                }, 700);
+              }
+            }}
+          />
+          <wup-circle
+            class={styles.half}
+            from={-90}
+            to={90}
+            corner={0.5}
+            width={20}
+            ref={(el) => {
+              if (el) {
+                el.$options.items = [{ value: 5 }];
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                el.renderLabel = (label, percent, _value) => {
+                  // use to override default label
+                  label.textContent = `${Math.round(percent)} %`;
+                };
+              }
+            }}
+          />
+          <wup-circle
+            class={styles.half}
+            from={-90}
+            to={90}
+            corner={0.5}
+            width={20}
+            ref={(el) => {
+              if (el) {
+                el.$options.items = [{ value: 30 }];
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                el.renderLabel = (label, percent, _value) => {
+                  // use to override default label
+                  label.textContent = `${Math.round(percent)} %`;
+                };
+              }
+            }}
+          />
+        </div>
       </section>
       <section>
         <h3>Segmented</h3>

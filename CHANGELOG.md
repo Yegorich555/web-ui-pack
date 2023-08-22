@@ -28,6 +28,7 @@
   - _Wrong tooltip position when segment is half of circle_
   - _Wrong console.error when `items=[{value:2}]`_
   - _Wrong label-value when item value < opion **minsize**_
+  - _Edges of small segment are not rounded according to corner_
 
 **New/Features**:
 
