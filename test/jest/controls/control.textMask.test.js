@@ -843,7 +843,7 @@ describe("control.text: mask", () => {
     expect(await h.userUndo(el.$refInput)).toBe("12|"); // expected that history removes also extra '.' that added by mask
 
     // test again on simple case
-    el = document.body.appendChild(document.createElement("wup-text"));
+    el = document.body.appendChild(document.createElement(el.tagName));
     el.$options.mask = "+1(000) 000";
     await h.wait(1);
     h.setInputCursor(el.$refInput, "+1(|");
@@ -876,7 +876,15 @@ describe("control.text: mask", () => {
     await h.wait();
     expect(el.$refInput.value).toBe(""); // input must be cleared by blur if was only prefix
 
+    // declineInput + undo
+    expect(await h.userTypeText(el.$refInput, "2345678", { clearPrevious: false })).toBe("+1(234) 5678|");
+    await h.wait();
+    expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 567|"); // last char is declined
+    expect(await h.userUndo(el.$refInput)).toBe("+1(234) |");
+    expect(await h.userRedo(el.$refInput)).toBe("+1(234) 567|");
+
     // cover case when !selectionStart
+    el = document.body.appendChild(document.createElement(el.tagName));
     el.$options.mask = "##0";
     el.$value = "";
     await h.wait(1);

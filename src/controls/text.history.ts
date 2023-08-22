@@ -354,10 +354,17 @@ export default class TextHistory {
   removeLast(): void {
     const li = this.lastIndex;
     if (li >= 0) {
-      this._hist.splice(li);
-      if (this._histPos != null) {
-        --this._histPos;
+      const snap = this.snapshotDecode(this._hist[li]);
+      if (snap.action === InputTypes.append && snap.inserted.length > 1) {
+        snap.inserted = snap.inserted.substring(0, snap.inserted.length - 1); // remove only last char in such case
+        this._hist[li] = this.snapshotEncode(snap);
+      } else {
+        this._hist.splice(li);
+        if (this._histPos != null) {
+          --this._histPos;
+        }
       }
+
       this.testMe && console.warn("remove last", this._hist);
     }
   }
