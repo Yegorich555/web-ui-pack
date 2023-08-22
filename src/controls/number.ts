@@ -304,11 +304,8 @@ export default class WUPNumberControl<
     this.style.overflow = ""; // disable inline-style from onScroll helper
     r.push(
       onEvent(this, "keyup", (e) => {
-        /* istanbul ignore else */
         if (!e.altKey) delete this._isAltDown;
-        /* istanbul ignore else */
         if (!e.shiftKey) delete this._isShiftDown;
-        /* istanbul ignore else */
         if (!e.ctrlKey) delete this._isCtrlDown;
       })
     );
@@ -349,8 +346,12 @@ export default class WUPNumberControl<
 
   /** Called when user tries to increment/decrement value (via ArrowKeys/Mouse/Swipe) */
   protected gotIncrement(dval: number): void {
-    if (this._isAltDown) dval *= 0.1;
-    else if (this._isShiftDown) dval *= 10;
+    if (this._isAltDown) {
+      dval *= 0.1;
+      if (this.$format.maxDecimal < 1) {
+        return; // don't allow decimal increment
+      }
+    } else if (this._isShiftDown) dval *= 10;
     else if (this._isCtrlDown) dval *= 100;
 
     const v = +(this.$value ?? 0);
@@ -374,5 +375,4 @@ export default class WUPNumberControl<
 
 customElements.define(tagName, WUPNumberControl);
 
-// todo Alt + WheelDown for integer changes value to 0.1 - but it's wrong
 // todo KeyUp: alt => moves focus to browser tabs

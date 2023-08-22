@@ -262,10 +262,42 @@ describe("control.number", () => {
     expect(el.$value).toBe(11.53);
 
     el.dispatchEvent(new KeyboardEvent("keyup", { key: "Alt", bubbles: true, cancelable: true }));
+
+    // Alt not allowed when decimal not allowed
+    el.$options.format = { maxDecimal: 0 };
+    el.$value = 11;
+    await h.wait(1);
+    el.$onChange = jest.fn();
+    expect(el.$refInput.value).toBe("11");
+    // +0.1
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Alt", altKey: true, bubbles: true, cancelable: true }));
+    el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100 })); // scrollUp
+    await h.wait(1);
+    expect(el.$value).toBe(11);
+    // +0.1
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(el.$value).toBe(11);
+    // -0.1
+    el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: 100 })); // scrollDown
+    await h.wait(1);
+    expect(el.$value).toBe(11);
+    // -0.1
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(el.$value).toBe(11);
+    // summary
+    expect(el.$onChange).not.toBeCalled();
+    expect(el.$refInput.value).toBe("11");
+    el.dispatchEvent(new KeyboardEvent("keyup", { key: "Alt", bubbles: true, cancelable: true }));
+
     // Shift +10
+    el.$options.format = { maxDecimal: 2 };
+    el.$value = 11.53;
     await h.wait(1);
     expect(el.$refInput.value).toBe("11.53");
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Shift", shiftKey: true, bubbles: true, cancelable: true }));
+    expect(el.$onChange).toBeCalled();
 
     isPrevented = !el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100 })); // scrollUp
     await h.wait(1);
@@ -319,6 +351,29 @@ describe("control.number", () => {
     expect(el.$value).toBe(11.53);
     el.dispatchEvent(new KeyboardEvent("keyup", { key: "Control", bubbles: true, cancelable: true }));
     await h.wait(2);
+
+    // just for coverage
+    el.focus();
+    el.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "b",
+        bubbles: true,
+        cancelable: true,
+        altKey: true,
+        shiftKey: true,
+        ctrlKey: true,
+      })
+    );
+    el.dispatchEvent(
+      new KeyboardEvent("keyup", {
+        key: "b",
+        bubbles: true,
+        cancelable: true,
+        altKey: true,
+        shiftKey: true,
+        ctrlKey: true,
+      })
+    );
 
     // history undo must work
     expect(el.$refInput.value).toBe("11.53");
