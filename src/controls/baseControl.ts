@@ -162,9 +162,10 @@ declare global {
        * @tutorial rules
        * * Point empty string or `true` to inherit from $options.name
        * * Expected value can be converted toString & parsed from string itself.
-       * Override valueFromUrl & valueToUrl to change serializing (for complex objects, arrays etc.)
+       * * Override valueFromUrl & valueToUrl to change serializing (for complex objects, arrays etc.)
+       * * Before API-call gather form.$model on init
        * @see {@link WUP.BaseControl.Defaults.storage} */
-      skey?: boolean | string; // todo issue (most noticeable in React): it affects on ini but need to develop way to gather initModel and send to api request
+      skey?: boolean | string;
     }
 
     interface Attributes
@@ -409,7 +410,7 @@ export default abstract class WUPBaseControl<
     return v === "" || v === undefined;
   }
 
-  // todo changing global-common-defaults from another project doesn't affect on controls
+  // todo changing global-common-defaults from another project doesn't affect on controls - need to figure out way when user can setup everything in one palce
   static $defaults: WUP.BaseControl.Defaults = {
     clearActions: ClearActions.initClearBack,
     validateDebounceMs: 500,

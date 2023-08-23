@@ -856,5 +856,6 @@ customElements.define(tagName, WUPSelectControl);
 
 // WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation
 // todo label for="" in Chrome sometimes enables autosuggestion - need to remove it for all controls - need to double-check ???
-// todo add support custom items rendering when it's already appended to DOM like it works with dropdown
-// todo: option to allow autoselect item without pressing Enter: option: $autoComplete + aria-autocomplete: true => https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-autocomplete-both/
+// NiceToHave: add support custom items rendering when it's already appended to DOM like it works with dropdown
+
+// NiceToHave: option to allow autoselect item without pressing Enter: option: $autoComplete + aria-autocomplete: true => https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-autocomplete-both/
