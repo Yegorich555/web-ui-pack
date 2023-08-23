@@ -54,6 +54,8 @@ export default function NumberControlView() {
           ref={(el) => {
             if (el) {
               el.$options.format = { maxDecimal: 2, minDecimal: 0 };
+              el.$options.validations = { max: 50 };
+              el.style.maxWidth = "60px";
             }
           }}
         />

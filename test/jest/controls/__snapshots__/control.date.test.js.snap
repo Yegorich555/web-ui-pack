@@ -717,7 +717,7 @@ exports[`control.date validations $options.validationShowAll 1`] = `
     error=""
     id="txt2"
     role="alert"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"
@@ -778,7 +778,7 @@ exports[`control.date validations $options.validationShowAll 2`] = `
     error=""
     id="txt2"
     role="alert"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"
@@ -847,7 +847,7 @@ exports[`control.date validations $options.validationShowAll 3`] = `
     error=""
     id="txt5"
     role="alert"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"
@@ -1218,7 +1218,7 @@ exports[`control.date validations options.validationCase 2`] = `
     error=""
     id="txt4"
     role="alert"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"
@@ -1282,7 +1282,7 @@ exports[`control.date validations options.validationCase 3`] = `
     aria-live="off"
     error=""
     id="txt5"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"
@@ -1626,7 +1626,7 @@ exports[`control.date validations options.validationCase 4`] = `
     error=""
     id="txt8"
     role="alert"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"

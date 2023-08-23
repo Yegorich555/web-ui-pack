@@ -917,7 +917,6 @@ export default abstract class WUPBaseControl<
       WUPPopupElement.$placements.$bottom.$start.$resizeWidth,
       WUPPopupElement.$placements.$top.$start.$resizeWidth,
     ];
-    p.$options.maxWidthByTarget = true;
     p.$options.offset = [-2, 0];
     p.setAttribute("error", "");
     // p.setAttribute("role", "alert");
@@ -1187,4 +1186,3 @@ export default abstract class WUPBaseControl<
 
 // NiceToHave when control is disabled need to show tooltip with reason
 // NiceToHave when control is readonly need to show tooltip with reason
-// todo if control small then popupError is small also but there is enough space
