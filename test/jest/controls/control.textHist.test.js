@@ -104,7 +104,7 @@ describe("control.text.hist", () => {
     hist._hist = [];
     el.value = "";
     h.setInputCursor(el, "|", { skipEvent: true });
-    expect(await h.userTypeText(el, "op. ", { clearPrevious: true, fast: true })).toBe("op. |");
+    expect(await h.userTypeText(el, "op. ", { clearPrevious: true, slow: false })).toBe("op. |");
     expect(await h.userInsertText(el, "56", { clearPrevious: true })).toBe("op. 56|");
     expect(hist._hist.map((s) => hist.snapshotDecode(s))).toMatchInlineSnapshot(`
       [

@@ -386,7 +386,7 @@ export async function wait(t = 1000) {
 export async function userTypeText(
   el: HTMLInputElement,
   text: string,
-  opts = { clearPrevious: true, fast: false }
+  opts = { clearPrevious: true, slow: false }
 ): Promise<string> {
   el.focus();
   await wait(10);
@@ -413,7 +413,7 @@ export async function userTypeText(
     el.dispatchEvent(new InputEvent("input", { bubbles: true, data: key, inputType }));
     el.dispatchEvent(new KeyboardEvent("keyup", { key, bubbles: true }));
 
-    if (!opts.fast && i !== text.length - 1) {
+    if (opts.slow && i !== text.length - 1) {
       await Promise.resolve();
       jest.advanceTimersByTime(20);
       await Promise.resolve();

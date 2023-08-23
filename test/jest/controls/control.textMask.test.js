@@ -876,7 +876,7 @@ describe("control.text: mask", () => {
     expect(el.$refInput.value).toBe(""); // input must be cleared by blur if was only prefix
 
     // declineInput + undo
-    expect(await h.userTypeText(el.$refInput, "23456789", { clearPrevious: false, fast: true })).toBe("+1(234) 5679|");
+    expect(await h.userTypeText(el.$refInput, "23456789", { clearPrevious: false, slow: false })).toBe("+1(234) 5679|");
     await h.wait();
     expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 567|"); // last char is declined
     expect(el._refHistory._hist).toMatchInlineSnapshot(`
