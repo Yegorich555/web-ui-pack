@@ -48,18 +48,6 @@ export default function NumberControlView() {
           postfix=""
         />
         <wup-num
-          name="decimal"
-          label="Decimal (see $options.format)"
-          initValue="99.2"
-          ref={(el) => {
-            if (el) {
-              el.$options.format = { maxDecimal: 2, minDecimal: 0 };
-              el.$options.validations = { max: 50 };
-              el.style.maxWidth = "60px";
-            }
-          }}
-        />
-        <wup-num
           name="prefixPostfix"
           label="With postfix prefix"
           prefix="$ "
