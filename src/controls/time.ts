@@ -32,6 +32,12 @@ declare global {
        * @tutorial Troubleshooting
        * If set step = 5 user still able to set minutes not divisible step */
       step: number;
+      /** Set `false` to hide menu buttons 'Ok' & 'Cancel'
+       * @tutorial Troubleshooting
+       * in this case any changing selection in menu changes value & input; so user don't need to press Enter
+       * but if press escape: menu closed and value reverted to that was before
+       * @defaultValue true */
+      menuButtons?: boolean;
     }
     interface Options<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, Defaults<T, VM> {
       /** User can't select time less than min */
@@ -41,12 +47,6 @@ declare global {
       /** User can't select time in excluded range */
       exclude?: { test: (v: WUPTimeObject) => boolean };
       format: string;
-      /** Set `false` to hide menu buttons 'Ok' & 'Cancel'
-       * @tutorial Troubleshooting
-       * in this case any changing selection in menu changes value & input; so user don't need to press Enter
-       * but if press escape: menu closed and value reverted to that was before
-       * @defaultValue true */
-      menuButtons?: boolean;
     }
     interface Attributes
       extends WUP.BaseCombo.Attributes,
