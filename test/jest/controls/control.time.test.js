@@ -53,6 +53,13 @@ initTestBaseControl({
   },
 });
 
+const isPressKeyPrevented = (key = "Arrow", opts = { shiftKey: false, ctrlKey: false }) => {
+  const isPrevented = !el.$refInput.dispatchEvent(
+    new KeyboardEvent("keydown", { key, cancelable: true, bubbles: true, ...opts })
+  );
+  return isPrevented;
+};
+
 describe("control.time", () => {
   testBaseControl({
     noInputSelection: true,
@@ -94,7 +101,7 @@ describe("control.time", () => {
     validationsSkip: ["_parse", "_mask"],
   });
 
-  describe("extra options", () => {
+  describe("extra", () => {
     test("format", async () => {
       await h.wait(1);
       expect(el.$options.format).toBe("hh:mm A");
@@ -209,7 +216,7 @@ describe("control.time", () => {
     el.addEventListener("$change", onChange);
 
     expect(el.$options.format).toBe("hh:mm A");
-    await h.userTypeText(el.$refInput, "0123a");
+    expect(await h.userTypeText(el.$refInput, "0123a")).toBe("01:23 A|M");
     await h.wait(150);
     expect(el.$isShown).toBe(true);
     expect(el.$refInput.value).toBe("01:23 AM"); // because mask is applied
@@ -297,13 +304,6 @@ describe("control.time", () => {
     );
 
     const { nextFrame } = h.useFakeAnimation();
-
-    const isPressKeyPrevented = (key = "Arrow", opts = { shiftKey: false, ctrlKey: false }) => {
-      const isPrevented = !el.$refInput.dispatchEvent(
-        new KeyboardEvent("keydown", { key, cancelable: true, bubbles: true, ...opts })
-      );
-      return isPrevented;
-    };
 
     // hours
     expect(isPressKeyPrevented("ArrowRight")).toBe(true);
@@ -647,6 +647,92 @@ describe("control.time", () => {
     jest.spyOn(el, "canShowMenu").mockReturnValueOnce(false);
     expect(() => el.focus()).not.toThrow();
     await h.wait();
+    expect(el.$isShown).toBe(false);
+  });
+
+  test("option: menuButtons", async () => {
+    el.$options.menuButtons = false;
+    el.focus();
+    await h.wait();
+    expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
+      [
+        "<li>10</li><li>11</li><li aria-selected="true">12</li><li>01</li><li>02</li>",
+        "<li>21</li><li>22</li><li aria-selected="true">23</li><li>24</li><li>25</li>",
+        "<li aria-hidden="true"></li><li aria-selected="true">AM</li><li>PM</li>",
+      ]
+    `);
+
+    const onChange = jest.fn();
+    el.$onChange = onChange;
+    // Date.now is "2022-10-18T12:23:00.000Z"
+    jest.clearAllMocks();
+    // hh
+    expect(isPressKeyPrevented("ArrowDown")).toBe(true); // 1st time focus & setValue if isEmpty
+    await h.wait(1);
+    expect(el.$onChange).toBeCalledTimes(1);
+    expect(el.$value).toEqual(new WUPTimeObject("0:23"));
+    expect(isPressKeyPrevented("ArrowDown")).toBe(true);
+    await h.wait(1);
+    expect(el.$onChange).toBeCalledTimes(2);
+    expect(el.$value).toEqual(new WUPTimeObject("1:23"));
+    // mm
+    jest.clearAllMocks();
+    expect(isPressKeyPrevented("ArrowRight")).toBe(true);
+    await h.wait(1);
+    expect(el.$onChange).toBeCalledTimes(0);
+    expect(el.$value).toEqual(new WUPTimeObject("1:23"));
+    expect(isPressKeyPrevented("ArrowUp")).toBe(true);
+    await h.wait(1);
+    expect(el.$onChange).toBeCalledTimes(1);
+    expect(el.$value).toEqual(new WUPTimeObject("1:22"));
+    // am/pm
+    jest.clearAllMocks();
+    expect(isPressKeyPrevented("ArrowRight")).toBe(true);
+    await h.wait(1);
+    expect(el.$onChange).toBeCalledTimes(0);
+    expect(el.$value).toEqual(new WUPTimeObject("1:22"));
+    expect(isPressKeyPrevented("ArrowUp")).toBe(true);
+    await h.wait(1);
+    expect(el.$onChange).toBeCalledTimes(1);
+    expect(el.$value).toEqual(new WUPTimeObject("13:22"));
+    // value same on blur
+    el.blur();
+    await h.wait();
+    expect(el.$value).toEqual(new WUPTimeObject("13:22"));
+    expect(el.$isShown).toBe(false);
+
+    // select by Enter - no extra events
+    jest.clearAllMocks();
+    el.focus();
+    await h.wait();
+    expect(isPressKeyPrevented("ArrowDown")).toBe(true); // 1st time focus
+    await h.wait(1);
+    expect(el.$onChange).toBeCalledTimes(0);
+    expect(isPressKeyPrevented("ArrowDown")).toBe(true);
+    await h.wait(1);
+    expect(el.$onChange).toBeCalledTimes(1);
+    expect(el.$value).toEqual(new WUPTimeObject("14:22"));
+    expect(isPressKeyPrevented("Enter")).toBe(true);
+    await h.wait();
+    expect(el.$onChange).toBeCalledTimes(1);
+    expect(el.$value).toEqual(new WUPTimeObject("14:22"));
+    expect(el.$isShown).toBe(false);
+
+    // clear to previous by Escape + close
+    jest.clearAllMocks();
+    el.focus();
+    await h.wait();
+    expect(isPressKeyPrevented("ArrowDown")).toBe(true); // 1st time focus
+    await h.wait(1);
+    expect(el.$onChange).toBeCalledTimes(0);
+    expect(isPressKeyPrevented("ArrowDown")).toBe(true);
+    await h.wait(1);
+    expect(el.$onChange).toBeCalledTimes(1);
+    expect(el.$value).toEqual(new WUPTimeObject("15:22"));
+    expect(isPressKeyPrevented("Escape")).toBe(true);
+    await h.wait();
+    expect(el.$onChange).toBeCalledTimes(2);
+    expect(el.$value).toEqual(new WUPTimeObject("14:22"));
     expect(el.$isShown).toBe(false);
   });
 });

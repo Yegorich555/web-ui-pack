@@ -43,7 +43,37 @@ export default function TimeControlView() {
           exclude="window.myTimeExclude"
           validations="window.myTimeValidations"
         />
-        <wup-time name="empty" />
+        <wup-time
+          label="Without buttons (see $options.menuButtons)"
+          name="customized"
+          min="02:30"
+          max="22:50"
+          exclude="window.myTimeExclude"
+          ref={(el) => {
+            if (el) {
+              el.$options.menuButtons = false;
+            }
+          }}
+        />
+        <wup-time
+          label="Menu in 3 rows (see demo source code)"
+          name="customized2"
+          initValue="23:50"
+          min="02:30"
+          max="22:50"
+          exclude="window.myTimeExclude"
+          ref={(el) => {
+            if (el) {
+              // @ts-expect-error - because protected
+              const orig = el.renderMenu;
+              // @ts-expect-error - because protected
+              el.renderMenu = function renderMenu2(popup, menuId, rows) {
+                rows = 3;
+                orig.call(el, popup, menuId, rows);
+              };
+            }
+          }}
+        />
         <wup-time name="another" label="Another format: h-m (options format)" format="h-m" />
         <wup-time name="disabled" disabled />
         <wup-time name="readonly" readOnly />

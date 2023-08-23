@@ -41,6 +41,12 @@ declare global {
       /** User can't select time in excluded range */
       exclude?: { test: (v: WUPTimeObject) => boolean };
       format: string;
+      /** Set `false` to hide menu buttons 'Ok' & 'Cancel'
+       * @tutorial Troubleshooting
+       * in this case any changing selection in menu changes value & input; so user don't need to press Enter
+       * but if press escape: menu closed and value reverted to that was before
+       * @defaultValue true */
+      menuButtons?: boolean;
     }
     interface Attributes
       extends WUP.BaseCombo.Attributes,
@@ -278,7 +284,7 @@ export default class WUPTimeControl<
 
   constructor() {
     super();
-    this._opts.format = this.#ctr.$defaults.format || localeInfo.time; // init here to depends on localeInfo
+    this._opts.format = this.#ctr.$defaults.format || localeInfo.time; // init here to depend on localeInfo
   }
 
   /** Parse string to WUPTimeObject */
@@ -306,21 +312,17 @@ export default class WUPTimeControl<
   protected override gotChanges(propsChanged: Array<keyof WUP.Time.Options> | null): void {
     this._opts.format = this.getAttr("format")?.replace(/\D{0,1}(ss|SS)/, "") || "hh:mm A";
 
-    this._opts.mask =
-      this._opts.mask ??
-      this._opts.format
-        .replace(/hh|HH/, "00") //
-        .replace(/[hH]/, "#0")
-        .replace(/mm|MM/, "00")
-        .replace(/[mM]/, "#0") // convert hh-mm > 00-00; h/m > #0/#0
-        .replace(/a/, "//[ap]//m")
-        .replace(/A/, "//[AP]//M");
-    this._opts.maskholder =
-      this._opts.maskholder ??
-      this._opts.format
-        .replace(/([mMhH]){1,2}/g, "$1$1")
-        .replace(/a/, "*m")
-        .replace(/A/, "*M");
+    this._opts.mask ??= this._opts.format
+      .replace(/hh|HH/, "00") //
+      .replace(/[hH]/, "#0")
+      .replace(/mm|MM/, "00")
+      .replace(/[mM]/, "#0") // convert hh-mm > 00-00; h/m > #0/#0
+      .replace(/a/, "//[ap]//m")
+      .replace(/A/, "//[AP]//M");
+    this._opts.maskholder ??= this._opts.format
+      .replace(/([mMhH]){1,2}/g, "$1$1")
+      .replace(/a/, "*m")
+      .replace(/A/, "*M");
 
     this._opts.min = this.getAttr("min", "obj");
     this._opts.max = this.getAttr("max", "obj");
@@ -373,12 +375,15 @@ export default class WUPTimeControl<
     }
     const v = this.getMenuValue();
     const isDisabled = v < min! || v > max! || exclude?.test(v);
-    this.setAttr.call(this.$refButtonOk!, "disabled", isDisabled, true);
+    this.$refButtonOk && this.setAttr.call(this.$refButtonOk!, "disabled", isDisabled, true);
   }
 
+  #isMenuInitPhase?: boolean;
+  /** Value before menu is opened */
+  #valueBeforeMenu?: ValueType;
   protected override renderMenu(popup: WUPPopupElement, menuId: string, rows = 5): HTMLElement {
     popup.$options.minWidthByTarget = false;
-    let isInit = true;
+    this.#isMenuInitPhase = true;
     const append = (ul: HTMLElement, v: number | string, twoDigs: boolean, savedV?: number): HTMLElement => {
       const li = ul.appendChild(document.createElement("li"));
       li.textContent = twoDigs && +v < 10 ? `0${v}` : v.toString();
@@ -395,7 +400,7 @@ export default class WUPTimeControl<
         this._selectedMenuItem = undefined; // otherwise selection is cleared after popup-close
         this._focusedMenuItem && this.focusMenuItem(next.items[0]);
       }
-      !isInit && this.$isShown && this.disableItems();
+      !this.#isMenuInitPhase && this.$isShown && this.disableItems();
     };
 
     const drows = Math.round(rows / 2) - 1;
@@ -515,7 +520,12 @@ export default class WUPTimeControl<
     sep.setAttribute("aria-hidden", true);
     sep.textContent = /[hH]([^hH])/.exec(this._opts.format)![1]!;
     parent.appendChild(sep);
+    this._opts.menuButtons !== false && this.renderMenuButtons(popup);
+    this.#isMenuInitPhase = false;
+    return parent;
+  }
 
+  protected renderMenuButtons(popup: WUPPopupElement): void {
     // render Ok/Cancel otherwise we can't define if user is finished
     const btns = popup.appendChild(document.createElement("div"));
     btns.setAttribute("group", "");
@@ -548,9 +558,6 @@ export default class WUPTimeControl<
       },
       { passive: false }
     );
-
-    isInit = false;
-    return parent;
   }
 
   protected override async goShowMenu(
@@ -559,6 +566,7 @@ export default class WUPTimeControl<
   ): Promise<WUPPopupElement | null> {
     const r = await super.goShowMenu(showCase, e);
 
+    this.#valueBeforeMenu = this.$value;
     this.#lastInputChanged = false;
     const v = this.$value;
     if (this.$refMenuLists && v) {
@@ -596,8 +604,25 @@ export default class WUPTimeControl<
     }
   }
 
-  protected override setValue(v: ValueType | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
-    return super.setValue(v, reason, skipInput);
+  /** Set value base on menu-selected if menuButtons is off */
+  protected trySetValue(): void {
+    if (this._opts.menuButtons === false) {
+      !this.#isMenuInitPhase && this.setValue(this.getMenuValue(), SetValueReasons.userSelect);
+    }
+  }
+
+  protected override selectMenuItem(next: HTMLElement | null): void {
+    super.selectMenuItem(next);
+    next !== null && this.trySetValue();
+  }
+
+  protected override goHideMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null | undefined): Promise<boolean> {
+    if (this._opts.menuButtons === false) {
+      if (hideCase === HideCases.OnPressEsc) {
+        this.setValue(this.#valueBeforeMenu, SetValueReasons.clear);
+      }
+    }
+    return super.goHideMenu(hideCase, e);
   }
 
   protected override valueToInput(v: ValueType | undefined): string {
@@ -645,6 +670,7 @@ export default class WUPTimeControl<
 
   protected override focusMenuItem(next: HTMLElement | null): void {
     if (next) {
+      !this.$value && this.trySetValue();
       const v = this.getMenuValue();
       const str = this.valueToInput(v) as string;
       next.setAttribute("aria-label", str);
@@ -698,7 +724,7 @@ export default class WUPTimeControl<
     // handle Enter key when menu is open
     if (!isExtraKey && wasOpen && e.key === "Enter") {
       e.preventDefault();
-      if (this.#lastInputChanged) {
+      if (this.#lastInputChanged || !this.$refButtonOk) {
         this.goHideMenu(HideCases.OnPressEnter);
       } else if (!this.$refButtonOk!.disabled) {
         setTimeout(() =>

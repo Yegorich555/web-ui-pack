@@ -566,3 +566,5 @@ export default abstract class WUPBaseComboControl<
  >>> console.warn('done')
  hide-event
  */
+
+// NiceToHave: option for press-Escape: hideMenu + rollback value to that was before showing OR only hideMenu; now WUPTime.$options.menuButtons changes such behavior
