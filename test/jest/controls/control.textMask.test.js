@@ -876,10 +876,21 @@ describe("control.text: mask", () => {
     expect(el.$refInput.value).toBe(""); // input must be cleared by blur if was only prefix
 
     // declineInput + undo
-    expect(await h.userTypeText(el.$refInput, "2345678", { clearPrevious: false })).toBe("+1(234) 5678|");
+    expect(await h.userTypeText(el.$refInput, "23456789", { clearPrevious: false, fast: true })).toBe("+1(234) 5679|");
     await h.wait();
     expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 567|"); // last char is declined
+    expect(el._refHistory._hist).toMatchInlineSnapshot(`
+      [
+        "  23",
+        " 4) ",
+        "  567",
+      ]
+    `);
     expect(await h.userUndo(el.$refInput)).toBe("+1(234) |");
+    expect(await h.userUndo(el.$refInput)).toBe("+1(23|");
+    expect(await h.userUndo(el.$refInput)).toBe("+1(|");
+    expect(await h.userRedo(el.$refInput)).toBe("+1(23|");
+    expect(await h.userRedo(el.$refInput)).toBe("+1(234) |");
     expect(await h.userRedo(el.$refInput)).toBe("+1(234) 567|");
 
     // cover case when !selectionStart

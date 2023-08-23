@@ -157,9 +157,11 @@ export default class TextHistory {
   /** Call this handler on input.onBefore;
    * @returns "true" if was processed undo/redo action */
   handleBeforeInput(e: InputEvent): boolean {
+    // WARN: input event can be fired 1 by 1 without timeouts: try to avoid any timeouts here
     this.#inpDebounce?.call(this);
     this._histTimeout && clearTimeout(this._histTimeout);
     delete this._histTimeout;
+    this._stateBeforeInput = undefined;
 
     // need to handle beforeInput because browser can call it without keyDown events - on IOS need to shake smartphone
     let isUndoRedo = true; // inputEvent must be prevented if history is empty - possible when browser calls historyUndo
@@ -190,19 +192,16 @@ export default class TextHistory {
     }
 
     if (isUndoRedo) {
-      this._stateBeforeInput = false;
-
       e.preventDefault(); // prevent default to avoid browser-internal-history cleaning
-      isUndoRedoSuccess &&
+      if (isUndoRedoSuccess) {
+        this._stateBeforeInput = false;
         setTimeout(() => {
           this.refInput.dispatchEvent(
             new InputEvent("input", { cancelable: false, bubbles: true, inputType: e.inputType })
           ); // fire manually because need to process undo/redo (but without browser-internal history)
         }); // fire it in empty timeout so beforeInput can bubble to top at first
-
-      setTimeout(() => (this._stateBeforeInput = undefined));
+      }
     }
-
     return isUndoRedo;
   }
 
@@ -221,13 +220,15 @@ export default class TextHistory {
         this.#inpDebounce = undefined;
         const next = this.refInput.value;
         const isChanged = next !== v;
-        isChanged && this.save(was, next);
+        isChanged && this.save(was, next); // if mask/format are applied need to call save again with replace behavior
       };
       const t = setTimeout(this.#inpDebounce); // update last history if input value is changed during handleInput
     } else if (this._stateBeforeInput !== false) {
       console.error("WUP.History error. Event [input] fired without [beforeinput] event. Undo-history is cleared");
       this._hist = [];
       this._histPos = null;
+    } else {
+      this._stateBeforeInput = undefined;
     }
   }
 
@@ -263,11 +264,12 @@ export default class TextHistory {
     let snap: Snapshot;
     let isUpdate = false; // update last snapshot
     if (this._histTimeout) {
-      isUpdate = true;
+      isUpdate = true; // if save fired several times at once then 2nd time: is mask/format changes
       const ls = this._hist[this._hist.length - 1];
       snap = this.snapshotDecode(ls); // need update prev history in this case
       if (snap.action === InputTypes.append && snap.inserted!.length > 1) {
-        // remove last appended char & add to current snapshot (implemented if findDiff below)
+        // remove last appended char & add to current snapshot (implemented in findDiff below)
+        // expected if save fired 2nd time it's mask-changes and need
         this._hist[this._hist.length - 1] = ls.substring(0, ls.length - 1);
         isUpdate = false;
         snap.pos1 = pos1;
@@ -281,7 +283,7 @@ export default class TextHistory {
     switch (snap.action) {
       case InputTypes.append:
         if (!snap.removed && this._hist.length) {
-          // merge changes in sinle snapshot: when user types 'abc' => it's collected to single snapshot
+          // merge changes in single snapshot: when user types 'abc' => it's collected to single snapshot
           const sl = this.snapshotDecode(this._hist[this._hist.length - 1]);
           if (
             sl.action === InputTypes.append &&

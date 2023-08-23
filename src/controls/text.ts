@@ -584,11 +584,12 @@ export default class WUPTextControl<
   _beforeSnap?: string;
   /** Handler of 'beforeinput' event */
   protected gotBeforeInput(e: WUP.Text.GotInputEvent): void {
+    const isUndoRedo = this._refHistory?.handleBeforeInput(e);
+
     this.#declineInputEnd?.call(this);
     this._beforeSnap = TextHistory.historyToSnapshot(this.$refInput.value, this.$refInput.selectionStart || 0);
     setTimeout(() => delete this._beforeSnap);
 
-    const isUndoRedo = this._refHistory?.handleBeforeInput(e);
     if (!isUndoRedo && this._opts.mask) {
       this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask, e.target.value);
       this.refMask.handleBeforeInput(e);

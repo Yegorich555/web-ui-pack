@@ -242,6 +242,11 @@ describe("control.text.hist", () => {
       inserted: { v: ".", pos: 0 },
     });
 
+    expect(TextHistory.findDiff("123", "123")).toStrictEqual({
+      removed: null,
+      inserted: null,
+    });
+
     // simulate mask changes
     expect(await h.userTypeText(el, "12")).toBe("12|");
     const onInput = jest.fn();
