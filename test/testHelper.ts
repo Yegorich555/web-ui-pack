@@ -705,11 +705,11 @@ export class TestMouseMoveEvent extends MouseEvent {
 
 /** Setup width, height and layout position for pointed element */
 export function setupLayout(el: HTMLElement, opts: { x: number; y: number; h: number; w: number }) {
-  jest.spyOn(el, "offsetHeight", "get").mockReturnValue(opts.h);
-  jest.spyOn(el, "clientHeight", "get").mockReturnValue(opts.h);
+  jest.spyOn(el, "offsetHeight", "get").mockReturnValue(Math.round(opts.h));
+  jest.spyOn(el, "clientHeight", "get").mockReturnValue(Math.round(opts.h));
 
-  jest.spyOn(el, "offsetWidth", "get").mockReturnValue(opts.w);
-  jest.spyOn(el, "clientWidth", "get").mockReturnValue(opts.w);
+  jest.spyOn(el, "offsetWidth", "get").mockReturnValue(Math.round(opts.w));
+  jest.spyOn(el, "clientWidth", "get").mockReturnValue(Math.round(opts.w));
   const rect = {
     x: opts.x,
     y: opts.y,

@@ -31,7 +31,9 @@
   - _wrong console.error when `items=[{value:2}]`_
   - _wrong label-value when item value < opion **minsize**_
   - _edges of small segment are not rounded according to corner_
-- [TimeControl](src/controls/time.ts). _Menu items with wrong sizes and text not aligned_
+- [TimeControl](src/controls/time.ts).
+  - _menu items with wrong sizes and text not aligned_
+  - _extra pixel when scrolled if content size is decimal h=239.7_
 
 **New/Features**:
 
@@ -52,7 +54,7 @@
 **Fixes**:
 
 - [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts)
-  - _Menu scrolled to 1st selected item if even select last one (when multiple is allowed)_
+  - _menu scrolled to 1st selected item if even select last one (when multiple is allowed)_
   - _$options.items[0] !== items[0] because wrapped to observer_
   - _Unable to clear value with Backspace+Enter_
 - [SelectManyControl](src/controls/selectMany.ts). _Menu hides when user selects all items - but it's maybe wrong_

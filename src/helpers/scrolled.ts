@@ -176,11 +176,13 @@ export default class WUPScrolled {
       return;
     }
     const { maxHeight, maxWidth } = getComputedStyle(el);
+    // WARN: if Chrome zoom 80%: offsetHeight is 240px but real 239.76px => in this case scrolling can add extra-pixel for small period; to fix use real sizes
+    const { width, height } = el.getBoundingClientRect();
 
     /* istanbul ignore else */
-    if (el.offsetHeight && !isXScroll && !maxHeight?.endsWith("px")) el.style.maxHeight = `${el.offsetHeight}px`;
+    if (el.offsetHeight && !isXScroll && !maxHeight?.endsWith("px")) el.style.maxHeight = `${height}px`;
     /* istanbul ignore else */
-    if (el.offsetWidth && isXScroll && !maxWidth?.endsWith("px")) el.style.maxWidth = `${el.offsetWidth}px`;
+    if (el.offsetWidth && isXScroll && !maxWidth?.endsWith("px")) el.style.maxWidth = `${width}px`;
   }
 
   /** Returns nearest way between prev & next if cycled */
