@@ -104,6 +104,7 @@ export default class WUPSpinElement<
     return "";
   }
 
+  // todo instead of div use wup-seg or somehow else: avoid usage div as selector
   static get $style(): string {
     return `${super.$style}
       @keyframes WUP-SPIN-1 {
@@ -318,14 +319,8 @@ export default class WUPSpinElement<
     if (this.$refFade) {
       styleTransform(this.$refFade, "translate", `${r.left - left}px,${r.top - top}px`);
       styleTransform(this.$refFade, "scale", scale === 1 || !scale ? "" : `${1 / scale}`);
-      /* istanbul ignore else */
-      if (this.$refFade.clientWidth !== r.width) {
-        this.$refFade.style.width = `${r.width}px`;
-      }
-      /* istanbul ignore else */
-      if (this.$refFade.clientWidth !== r.height) {
-        this.$refFade.style.height = `${r.height}px`;
-      }
+      this.$refFade.style.width = `${r.width}px`;
+      this.$refFade.style.height = `${r.height}px`;
     }
 
     return r;

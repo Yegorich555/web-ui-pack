@@ -82,7 +82,6 @@ export default function isIntoView(el: Element, options?: IntoViewOptions): Into
       ((child.left > vp.vw || child.right < 0) && document.documentElement) ||
       ((p().left >= child.right || p().right <= child.left) && !isVisX && scrollParents[i]);
 
-    /* istanbul ignore else */
     if (isHiddenY) {
       r.hiddenY = isHiddenY;
     } else if (!r.hiddenY) {
@@ -90,7 +89,6 @@ export default function isIntoView(el: Element, options?: IntoViewOptions): Into
         ((child.top < 0 || child.bottom > vp.vh) && document.documentElement) ||
         ((child.top < p().top || child.bottom > p().bottom) && !isVisY && scrollParents[i]);
     }
-    /* istanbul ignore else */
     if (isHiddenX) {
       r.hiddenX = isHiddenX;
     } else if (!r.hiddenX) {

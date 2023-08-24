@@ -557,28 +557,24 @@ export default abstract class WUPBaseControl<
   $ariaSpeak(text: string, delayMs = 100): void {
     // don't use speechSynthesis because it's announce despite on screen-reader settings - can be disabled
     // text && speechSynthesis && speechSynthesis.speak(new SpeechSynthesisUtterance(text)); // watchfix: https://stackoverflow.com/questions/72907960/web-accessibility-window-speechsynthesis-vs-role-alert
-    /* istanbul ignore else */
-    if (text) {
-      const el = document.createElement("section");
-      el.setAttribute("aria-live", "off");
-      el.setAttribute("aria-atomic", true);
-      el.className = this.#ctr.classNameHidden;
-      el.id = this.#ctr.$uniqueId;
-      const i = this.$refInput;
-      const an = "aria-describedby";
-      i.setAttribute(an, `${i.getAttribute(an) || ""} ${el.id}`.trimStart());
-      this.appendChild(el);
-      setTimeout(() => (el.textContent = text), delayMs); // otherwise reader doesn't announce section
-      setTimeout(() => {
-        el.remove();
-        const a = i.getAttribute(an);
-        /* istanbul ignore else */
-        if (a != null) {
-          const aNext = a.replace(el.id, "").replace("  ", " ").trim();
-          aNext ? i.setAttribute(an, aNext) : i.removeAttribute(an);
-        }
-      }, 500);
-    }
+    const el = document.createElement("section");
+    el.setAttribute("aria-live", "off");
+    el.setAttribute("aria-atomic", true);
+    el.className = this.#ctr.classNameHidden;
+    el.id = this.#ctr.$uniqueId;
+    const i = this.$refInput;
+    const an = "aria-describedby";
+    i.setAttribute(an, `${i.getAttribute(an) || ""} ${el.id}`.trimStart());
+    this.appendChild(el);
+    setTimeout(() => (el.textContent = text), delayMs); // otherwise reader doesn't announce section
+    setTimeout(() => {
+      el.remove();
+      const a = i.getAttribute(an);
+      if (a != null) {
+        const aNext = a.replace(el.id, "").replace("  ", " ").trim();
+        aNext ? i.setAttribute(an, aNext) : i.removeAttribute(an);
+      }
+    }, 500); // WARN: expected that 500ms is enough to get action from screen-reader
   }
 
   $form?: WUPFormElement;
@@ -881,7 +877,6 @@ export default abstract class WUPBaseControl<
     }
 
     let p: StoredRefError = parent as StoredRefError;
-    /* istanbul ignore else */
     if (!p._wupVldItems) {
       p = parent as StoredRefError;
       p._wupVldItems = [];
@@ -937,6 +932,10 @@ export default abstract class WUPBaseControl<
   #refErrTarget?: HTMLElement;
   /** Method called to show error and set invalid state on input; point null to show all validation rules with checkpoints */
   protected goShowError(err: string, target: HTMLElement): void {
+    if (!err) {
+      this.throwError(new Error("missed error message"));
+      return;
+    }
     if (this._errMsg === err) {
       return;
     }
@@ -953,24 +952,21 @@ export default abstract class WUPBaseControl<
 
     this._opts.validationShowAll && this.renderValidations(this.$refError);
 
-    /* istanbul ignore else */
-    if (err !== null) {
-      this.#refErrTarget = target;
-      (target as HTMLInputElement).setCustomValidity?.call(target, err);
-      this.setAttribute("invalid", "");
-      const lbl = this.$refTitle.textContent;
-      this.$refError.firstElementChild!.textContent = lbl ? `${this.#ctr.$ariaError} ${lbl}:` : "";
-      const el = this.$refError.children.item(1)!;
-      el.textContent = err;
+    this.#refErrTarget = target;
+    (target as HTMLInputElement).setCustomValidity?.call(target, err);
+    this.setAttribute("invalid", "");
+    const lbl = this.$refTitle.textContent;
+    this.$refError.firstElementChild!.textContent = lbl ? `${this.#ctr.$ariaError} ${lbl}:` : "";
+    const el = this.$refError.children.item(1)!;
+    el.textContent = err;
 
-      const renderedErr = (this.$refError as StoredRefError)._wupVldItems?.find((li) => li.textContent === err);
-      this.setAttr.call(el, "class", renderedErr ? this.#ctr.classNameHidden : null);
+    const renderedErr = (this.$refError as StoredRefError)._wupVldItems?.find((li) => li.textContent === err);
+    this.setAttr.call(el, "class", renderedErr ? this.#ctr.classNameHidden : null);
 
-      target.setAttribute("aria-describedby", this.$refError.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
-      if (!this.$isFocused) {
-        this.$refError!.setAttribute("role", "alert"); // force to announce error when focus is already missed
-        renderedErr?.scrollIntoView();
-      }
+    target.setAttribute("aria-describedby", this.$refError.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
+    if (!this.$isFocused) {
+      this.$refError!.setAttribute("role", "alert"); // force to announce error when focus is already missed
+      renderedErr?.scrollIntoView();
     }
   }
 
