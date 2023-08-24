@@ -696,7 +696,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-TIME [menu] mark,
       WUP-TIME [menu] ul:after {
         padding: 1em;
-        height: 1em;
+        line-height: 1em;
       }
       WUP-TIME [menu] mark {
         z-index: -1;
@@ -747,6 +747,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-TIME [menu] li[aria-hidden] {
         pointer-events: none;
         touch-action: none;
+        opacity: 0;
       }
       WUP-TIME [menu] li[disabled] {
         color: var(--ctrl-err-text);
@@ -1106,7 +1107,9 @@ exports[`control.time validations options.validationCase 2`] = `
       >
         <li
           aria-hidden="true"
-        />
+        >
+          PM
+        </li>
         <li
           aria-selected="true"
         >
@@ -1275,7 +1278,9 @@ exports[`control.time validations options.validationCase 3`] = `
       >
         <li
           aria-hidden="true"
-        />
+        >
+          PM
+        </li>
         <li
           aria-selected="true"
         >

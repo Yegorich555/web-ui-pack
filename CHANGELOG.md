@@ -31,6 +31,7 @@
   - _wrong console.error when `items=[{value:2}]`_
   - _wrong label-value when item value < opion **minsize**_
   - _edges of small segment are not rounded according to corner_
+- [TimeControl](src/controls/time.ts). _Menu items with wrong sizes and text not aligned_
 
 **New/Features**:
 

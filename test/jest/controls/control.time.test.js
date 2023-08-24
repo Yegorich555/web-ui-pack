@@ -113,7 +113,7 @@ describe("control.time", () => {
         [
           "<li>10</li><li>11</li><li aria-selected="true">12</li><li>01</li><li>02</li>",
           "<li>21</li><li>22</li><li aria-selected="true">23</li><li>24</li><li>25</li>",
-          "<li aria-hidden="true"></li><li aria-selected="true">AM</li><li>PM</li>",
+          "<li aria-hidden="true">PM</li><li aria-selected="true">AM</li><li>PM</li>",
         ]
       `);
       await h.wait();
@@ -132,7 +132,7 @@ describe("control.time", () => {
         [
           "<li>10</li><li>11</li><li aria-selected="true">12</li><li>01</li><li>02</li>",
           "<li>21</li><li>22</li><li aria-selected="true">23</li><li>24</li><li>25</li>",
-          "<li aria-hidden="true"></li><li aria-selected="true">am</li><li>pm</li>",
+          "<li aria-hidden="true">pm</li><li aria-selected="true">am</li><li>pm</li>",
         ]
       `);
       await h.wait();
@@ -300,7 +300,7 @@ describe("control.time", () => {
     await h.wait();
     expect(h.getInputCursor(el.$refInput)).toBe("|12:59 PM|");
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<div id="txt2" role="application"><ul aria-label="Hours" style="overflow: hidden;"><li>10</li><li>11</li><li aria-selected="true">12</li><li>01</li><li>02</li></ul><ul aria-label="Minutes" style="overflow: hidden;"><li>57</li><li>58</li><li aria-selected="true">59</li><li>00</li><li>01</li></ul><ul aria-label="AM PM" style="overflow: hidden;"><li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true"></li></ul><mark aria-hidden="true">:</mark></div><div group=""><button type="button" aria-label="Ok" tabindex="-1"></button><button type="button" aria-label="Cancel" tabindex="-1"></button></div>"`
+      `"<div id="txt2" role="application"><ul aria-label="Hours" style="overflow: hidden;"><li>10</li><li>11</li><li aria-selected="true">12</li><li>01</li><li>02</li></ul><ul aria-label="Minutes" style="overflow: hidden;"><li>57</li><li>58</li><li aria-selected="true">59</li><li>00</li><li>01</li></ul><ul aria-label="AM PM" style="overflow: hidden;"><li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true">AM</li></ul><mark aria-hidden="true">:</mark></div><div group=""><button type="button" aria-label="Ok" tabindex="-1"></button><button type="button" aria-label="Cancel" tabindex="-1"></button></div>"`
     );
 
     const { nextFrame } = h.useFakeAnimation();
@@ -316,7 +316,7 @@ describe("control.time", () => {
       [
         "<li>11</li><li aria-selected="false" id="txt3">12</li><li aria-selected="true" aria-label="01:59 PM" id="txt4" focused="">01</li><li>02</li><li>03</li>",
         "<li>57</li><li>58</li><li aria-selected="true">59</li><li>00</li><li>01</li>",
-        "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true"></li>",
+        "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true">AM</li>",
       ]
     `);
 
@@ -328,7 +328,7 @@ describe("control.time", () => {
       [
         "<li>09</li><li>10</li><li aria-selected="true" aria-label="11:59 PM" id="txt5" focused="">11</li><li aria-selected="false" id="txt3">12</li><li aria-selected="false" id="txt4">01</li>",
         "<li>57</li><li>58</li><li aria-selected="true">59</li><li>00</li><li>01</li>",
-        "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true"></li>",
+        "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true">AM</li>",
       ]
     `);
 
@@ -347,7 +347,7 @@ describe("control.time", () => {
       [
         "<li>09</li><li>10</li><li aria-selected="true" id="txt5">11</li><li aria-selected="false" id="txt3">12</li><li aria-selected="false" id="txt4">01</li>",
         "<li>58</li><li aria-selected="false" id="txt6">59</li><li aria-selected="true" aria-label="11:00 PM" id="txt7" focused="">00</li><li>01</li><li>02</li>",
-        "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true"></li>",
+        "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true">AM</li>",
       ]
     `);
     expect(isPressKeyPrevented("ArrowUp")).toBe(true);
@@ -358,7 +358,7 @@ describe("control.time", () => {
       [
         "<li>09</li><li>10</li><li aria-selected="true" id="txt5">11</li><li aria-selected="false" id="txt3">12</li><li aria-selected="false" id="txt4">01</li>",
         "<li>56</li><li>57</li><li aria-selected="true" aria-label="11:58 PM" id="txt8" focused="">58</li><li aria-selected="false" id="txt6">59</li><li aria-selected="false" id="txt7">00</li>",
-        "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true"></li>",
+        "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true">AM</li>",
       ]
     `);
 
@@ -375,7 +375,7 @@ describe("control.time", () => {
       [
         "<li>09</li><li>10</li><li aria-selected="true" id="txt5">11</li><li aria-selected="false" id="txt3">12</li><li aria-selected="false" id="txt4">01</li>",
         "<li>56</li><li>57</li><li aria-selected="true" id="txt8">58</li><li aria-selected="false" id="txt6">59</li><li aria-selected="false" id="txt7">00</li>",
-        "<li aria-hidden="true"></li><li aria-selected="true" aria-label="11:58 AM" id="txt10" focused="">AM</li><li aria-selected="false" id="txt9">PM</li>",
+        "<li aria-hidden="true">PM</li><li aria-selected="true" aria-label="11:58 AM" id="txt10" focused="">AM</li><li aria-selected="false" id="txt9">PM</li>",
       ]
     `);
     expect(isPressKeyPrevented("ArrowUp")).toBe(true);
@@ -385,7 +385,7 @@ describe("control.time", () => {
       [
         "<li>09</li><li>10</li><li aria-selected="true" id="txt5">11</li><li aria-selected="false" id="txt3">12</li><li aria-selected="false" id="txt4">01</li>",
         "<li>56</li><li>57</li><li aria-selected="true" id="txt8">58</li><li aria-selected="false" id="txt6">59</li><li aria-selected="false" id="txt7">00</li>",
-        "<li aria-selected="false" id="txt10">AM</li><li aria-selected="true" id="txt9" aria-label="11:58 PM" focused="">PM</li><li aria-hidden="true"></li>",
+        "<li aria-selected="false" id="txt10">AM</li><li aria-selected="true" id="txt9" aria-label="11:58 PM" focused="">PM</li><li aria-hidden="true">AM</li>",
       ]
     `);
     expect(isPressKeyPrevented("ArrowDown")).toBe(true);
@@ -430,7 +430,7 @@ describe("control.time", () => {
       [
         "<li>03</li><li>04</li><li aria-selected="true" aria-label="05:37 PM" id="txt12" focused="">05</li><li>06</li><li>07</li>",
         "<li>35</li><li>36</li><li aria-selected="true">37</li><li>38</li><li>39</li>",
-        "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true"></li>",
+        "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true">AM</li>",
       ]
     `);
 
@@ -441,7 +441,7 @@ describe("control.time", () => {
       [
         "<li>01</li><li>02</li><li aria-selected="true" aria-label="03:37 PM" id="txt14" focused="">03</li><li aria-selected="false" id="txt13">04</li><li aria-selected="false" id="txt12">05</li>",
         "<li>35</li><li>36</li><li aria-selected="true">37</li><li>38</li><li>39</li>",
-        "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true"></li>",
+        "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true">AM</li>",
       ]
     `);
 
@@ -452,7 +452,7 @@ describe("control.time", () => {
       [
         "<li>01</li><li>02</li><li aria-selected="true" id="txt14">03</li><li aria-selected="false" id="txt13">04</li><li aria-selected="false" id="txt12">05</li>",
         "<li aria-selected="false">37</li><li aria-selected="false" id="txt15">38</li><li aria-selected="true" aria-label="03:39 PM" id="txt16" focused="">39</li><li>40</li><li>41</li>",
-        "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true"></li>",
+        "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true">AM</li>",
       ]
     `);
 
@@ -463,7 +463,7 @@ describe("control.time", () => {
       [
         "<li>01</li><li>02</li><li aria-selected="true" id="txt14">03</li><li aria-selected="false" id="txt13">04</li><li aria-selected="false" id="txt12">05</li>",
         "<li aria-selected="false">37</li><li aria-selected="false" id="txt15">38</li><li aria-selected="true" aria-label="03:39 PM" id="txt16" focused="">39</li><li>40</li><li>41</li>",
-        "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true"></li>",
+        "<li>AM</li><li aria-selected="true">PM</li><li aria-hidden="true">AM</li>",
       ]
     `);
 
@@ -496,7 +496,7 @@ describe("control.time", () => {
       [
         "<li>10</li><li>11</li><li aria-selected="true" aria-label="12:00 AM" id="txt19" focused="">12</li><li>01</li><li>02</li>",
         "<li>58</li><li>59</li><li aria-selected="true">00</li><li>01</li><li>02</li>",
-        "<li aria-hidden="true"></li><li aria-selected="true">AM</li><li aria-selected="false">PM</li>",
+        "<li aria-hidden="true">PM</li><li aria-selected="true">AM</li><li aria-selected="false">PM</li>",
       ]
     `);
     el.$refMenuLists[0].dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100 })); // scrollUp
@@ -508,7 +508,7 @@ describe("control.time", () => {
       [
         "<li>09</li><li>10</li><li aria-selected="true" id="txt20">11</li><li aria-selected="false" id="txt19">12</li><li>01</li>",
         "<li>57</li><li>58</li><li aria-selected="true" aria-label="11:59 AM" id="txt21" focused="">59</li><li aria-selected="false">00</li><li>01</li>",
-        "<li aria-hidden="true"></li><li aria-selected="true">AM</li><li aria-selected="false">PM</li>",
+        "<li aria-hidden="true">PM</li><li aria-selected="true">AM</li><li aria-selected="false">PM</li>",
       ]
     `);
 
@@ -585,7 +585,7 @@ describe("control.time", () => {
       [
         "<li>10</li><li>11</li><li aria-selected="true" disabled="">12</li><li disabled="">01</li><li disabled="">02</li>",
         "<li disabled="">21</li><li disabled="">22</li><li aria-selected="true" disabled="">23</li><li disabled="">24</li><li disabled="">25</li>",
-        "<li aria-hidden="true"></li><li aria-selected="true">AM</li><li>PM</li>",
+        "<li aria-hidden="true">PM</li><li aria-selected="true">AM</li><li>PM</li>",
       ]
     `);
     expect(el.$refButtonOk.parentElement.outerHTML).toMatchInlineSnapshot(
@@ -606,7 +606,7 @@ describe("control.time", () => {
       [
         "<li>08</li><li>09</li><li aria-selected="true">10</li><li aria-selected="false">11</li><li aria-selected="false" disabled="">12</li>",
         "<li>21</li><li>22</li><li aria-selected="true">23</li><li>24</li><li>25</li>",
-        "<li aria-hidden="true"></li><li aria-selected="true">AM</li><li>PM</li>",
+        "<li aria-hidden="true">PM</li><li aria-selected="true">AM</li><li>PM</li>",
       ]
     `);
     expect(el.$refButtonOk.disabled).toBe(false);
@@ -621,7 +621,7 @@ describe("control.time", () => {
       [
         "<li>10</li><li>11</li><li aria-selected="true" disabled="">12</li><li disabled="">01</li><li disabled="">02</li>",
         "<li disabled="">21</li><li disabled="">22</li><li aria-selected="true" disabled="">23</li><li disabled="">24</li><li disabled="">25</li>",
-        "<li aria-hidden="true"></li><li aria-selected="true">AM</li><li disabled="">PM</li>",
+        "<li aria-hidden="true">PM</li><li aria-selected="true">AM</li><li disabled="">PM</li>",
       ]
     `);
 
@@ -658,7 +658,7 @@ describe("control.time", () => {
       [
         "<li>10</li><li>11</li><li aria-selected="true">12</li><li>01</li><li>02</li>",
         "<li>21</li><li>22</li><li aria-selected="true">23</li><li>24</li><li>25</li>",
-        "<li aria-hidden="true"></li><li aria-selected="true">AM</li><li>PM</li>",
+        "<li aria-hidden="true">PM</li><li aria-selected="true">AM</li><li>PM</li>",
       ]
     `);
 

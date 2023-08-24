@@ -160,7 +160,7 @@ export default class WUPTimeControl<
       :host [menu] mark,
       :host [menu] ul:after {
         padding: 1em;
-        height: 1em;
+        line-height: 1em;
       }
       :host [menu] mark {
         z-index: -1;
@@ -200,6 +200,7 @@ export default class WUPTimeControl<
       :host [menu] li[aria-hidden] {
         pointer-events: none;
         touch-action: none;
+        opacity: 0;
       }
       :host [menu] li[disabled] {
         color: var(--ctrl-err-text);
@@ -366,11 +367,9 @@ export default class WUPTimeControl<
     if (lst) {
       for (let i = 0; i < lst.children.length; ++i) {
         const el = lst.children.item(i)!;
-        if (el.textContent) {
-          const isPM = (el as any)._value === 2;
-          const isDisabled = (isPM && max! < new WUPTimeObject(12, 0)) || (!isPM && min! > new WUPTimeObject(11, 0));
-          this.setAttr.call(el, "disabled", isDisabled, true);
-        }
+        const isPM = (el as any)._value === 2;
+        const isDisabled = (isPM && max! < new WUPTimeObject(12, 0)) || (!isPM && min! > new WUPTimeObject(11, 0));
+        this.setAttr.call(el, "disabled", isDisabled, true);
       }
     }
     const v = this.getMenuValue();
@@ -497,7 +496,7 @@ export default class WUPTimeControl<
             return null;
           }
           lh12._value = next.index;
-          const txt = (lower ? ["", "am", "pm", ""] : ["", "AM", "PM", ""])[v];
+          const txt = (lower ? ["pm", "am", "pm", "am"] : ["PM", "AM", "PM", "AM"])[v];
           const item = append(lh12, txt, false, v);
           if (v === 0 || v === 3) {
             item.setAttribute("aria-hidden", true);
