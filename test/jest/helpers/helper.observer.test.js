@@ -697,6 +697,7 @@ describe("helper.observer", () => {
     const obj2 = observer.make({ ref });
 
     expect(observer.isObserved(ref)).toBe(true);
+    ref.value = 11; // it's important (for coverage) to call value change before listeners applied
     jest.clearAllMocks();
     jest.clearAllTimers();
     const fn = jest.fn();
@@ -743,10 +744,11 @@ describe("helper.observer", () => {
   });
 
   test("option 'excludeNested'", async () => {
-    const raw = { v: 1, items: [{ v: 2 }, { v: 3 }] };
-    const obj = observer.make(raw, { excludeNested: ["items"] });
+    const getRaw = () => ({ v: 1, items: [{ v: 2 }, { v: 3 }], vobj: { v: 4, s: "str" } });
+    let obj = observer.make(getRaw(), { excludeNested: ["items"] });
     expect(observer.isObserved(obj.items)).toBe(true);
     expect(observer.isObserved(obj.items[0])).toBe(false);
+    expect(observer.isObserved(obj.vobj)).toBe(true);
 
     const fn = jest.fn();
     observer.onPropChanged(obj, fn);
@@ -763,5 +765,20 @@ describe("helper.observer", () => {
     expect(fn).toBeCalledTimes(1);
     expect(observer.isObserved(obj.items)).toBe(true);
     expect(observer.isObserved(obj.items[0])).toBe(false);
+
+    // 'true' excludes every nested
+    obj = observer.make(getRaw(), { excludeNested: true });
+    observer.onPropChanged(obj, fn);
+    fn.mockClear();
+    expect(observer.isObserved(obj)).toBe(true);
+    expect(observer.isObserved(obj.items)).toBe(false);
+    expect(observer.isObserved(obj.vobj)).toBe(false);
+    expect(observer.isObserved(obj.items[0])).toBe(false);
+    obj.vobj.v += 1;
+    jest.advanceTimersToNextTimer();
+    expect(fn).toBeCalledTimes(0);
+    obj.vobj = "nothing new";
+    jest.advanceTimersToNextTimer();
+    expect(fn).toBeCalledTimes(1);
   });
 });

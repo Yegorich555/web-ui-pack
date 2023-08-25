@@ -5,16 +5,12 @@ import isEqual from "./isEqual";
 // #region Helpers
 const arrRemove = <T>(arr: Array<T>, item: T): void => {
   const i = arr.indexOf(item);
-  /* istanbul ignore else */
-  if (i > -1) {
-    arr.splice(i, 1);
-  }
+  arr.splice(i, 1);
 };
 
 const some = <K, V>(m: Map<K, V>, predicate: (key: K, val: V) => boolean): boolean => {
   // eslint-disable-next-line no-restricted-syntax
   for (const [key, value] of m.entries()) {
-    /* istanbul ignore else */
     if (predicate(key, value)) {
       return true;
     }
@@ -60,7 +56,8 @@ export namespace Observer {
     /** Point array of nested prop-names to exclude from observer or true to exclude every nested property of object
      * @tutorial Troubleshooting
      * * point ['items'] to exclude any nested props of property with name `items` from obsserved of obj.items
-     * * obj.nested.items - will be also fit the rule */
+     * * obj.nested.items - will be also fit the rule
+     * * point `true` to exclude all nested */
     excludeNested?: Array<keyof T> | boolean;
   }
   export type Observed<T extends object = object> = {

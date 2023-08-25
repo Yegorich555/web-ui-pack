@@ -14,7 +14,7 @@ function getObj() {
     nested: {
       vn: 2,
       dtn: new Date(Date.parse("2000-10-22")),
-      arr: ["jpg", "txt", "png"],
+      arr: ["jpg", "txt", "png", undefined],
       fn2: (arg2) => arg2,
       nempty1: null,
       nempty2: "",
@@ -61,6 +61,48 @@ describe("helper.objectClone", () => {
 
   test("with option skipUndefined", () => {
     const cloned = objectClone(v, { skipUndefined: true });
+    expect(cloned).toMatchInlineSnapshot(`
+      {
+        "arr": [
+          23,
+          11,
+          9,
+        ],
+        "dt": 2018-10-20T00:00:00.000Z,
+        "empty1": null,
+        "empty2": "",
+        "empty3": 0,
+        "fn": [Function],
+        "nested": {
+          "arr": [
+            "jpg",
+            "txt",
+            "png",
+          ],
+          "dtn": 2000-10-22T00:00:00.000Z,
+          "fn2": [Function],
+          "nempty1": null,
+          "nempty2": "",
+          "nempty3": 0,
+          "next": {
+            "arr": [
+              "jpg",
+              "txt",
+              "png",
+            ],
+            "dtn": 1998-05-02T00:00:00.000Z,
+            "fn3": [Function],
+            "name": "some name",
+            "nnempty1": null,
+            "nnempty2": "",
+            "nnempty3": 0,
+          },
+          "vn": 2,
+        },
+        "s": "text",
+        "v": 1,
+      }
+    `);
 
     expect(Object.prototype.hasOwnProperty.call(v, "empty4")).toBe(true);
     expect(Object.prototype.hasOwnProperty.call(v.nested, "nempty4")).toBe(true);

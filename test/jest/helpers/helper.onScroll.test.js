@@ -65,6 +65,16 @@ describe("helper.onScroll", () => {
       ],
     });
     expect(gotScroll).toBeCalledTimes(2);
+    // has no effect if swipeY several times for a short time
+    gotScroll.mockClear();
+    await h.userSwipe(el, {
+      movements: [
+        { dx: 0, dy: 50 },
+        { dx: 0, dy: 50, delayMs: 10 },
+        { dx: 0, dy: 50, delayMs: 10 },
+      ],
+    });
+    expect(gotScroll).toBeCalledTimes(1);
 
     // no effect if swipeX
     gotScroll.mockClear();
