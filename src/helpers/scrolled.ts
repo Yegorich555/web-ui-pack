@@ -19,6 +19,8 @@ declare global {
       /** Scroll to target of click event;
        * @defaultValue false */
       scrollByClick?: boolean;
+      /** Called when got click on the same item related to current page */
+      onClickSkip?: (e: MouseEvent) => void;
       /** Page options; skip this if rendering on init doesn't required  */
       pages?: {
         /** Current page index */
@@ -145,7 +147,7 @@ export default class WUPScrolled {
         // 11 => 9: inc: -2
         // 11 => 0: inc: +1
         const next = this.pages[iNext].index;
-        next !== this.state.index && this.goTo(next);
+        next !== this.state.index ? this.goTo(next) : this.options.onClickSkip?.call(this, e);
       }
     }
   }

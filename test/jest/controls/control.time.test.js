@@ -734,5 +734,32 @@ describe("control.time", () => {
     expect(el.$onChange).toBeCalledTimes(2);
     expect(el.$value).toEqual(new WUPTimeObject("14:22"));
     expect(el.$isShown).toBe(false);
+
+    // click on centered items must provide change event
+    el.blur();
+    el.$initValue = undefined;
+    el.$value = undefined;
+    await h.wait(1);
+    jest.clearAllMocks();
+    el.focus();
+    await h.wait();
+    expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
+      [
+        "<li>10</li><li>11</li><li aria-selected="true">12</li><li>01</li><li>02</li>",
+        "<li>21</li><li>22</li><li aria-selected="true">23</li><li>24</li><li>25</li>",
+        "<li aria-hidden="true">PM</li><li aria-selected="true">AM</li><li>PM</li>",
+      ]
+    `);
+    expect(el.$refInput.value).toBe("");
+    await h.userClick(el.$refPopup.querySelectorAll("[aria-selected]")[0]);
+    expect(el.$value).toEqual(new WUPTimeObject("12:23 am"));
+
+    el.$value = undefined;
+    await h.userClick(el.$refPopup.querySelectorAll("[aria-selected]")[1]);
+    expect(el.$value).toEqual(new WUPTimeObject("12:23 am"));
+
+    el.$value = undefined;
+    await h.userClick(el.$refPopup.querySelectorAll("[aria-selected]")[2]);
+    expect(el.$value).toEqual(new WUPTimeObject("12:23 am"));
   });
 });

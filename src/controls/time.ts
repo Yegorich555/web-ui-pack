@@ -403,6 +403,11 @@ export default class WUPTimeControl<
     };
 
     const drows = Math.round(rows / 2) - 1;
+    // select value if user click on item but scrollNext isn't processed
+    const onClickSkip =
+      this._opts.menuButtons === false
+        ? () => this.setValue(this.getMenuValue(), SetValueReasons.userSelect)
+        : undefined;
 
     // div required for centering absolute items during the animation
     const parent = popup.appendChild(document.createElement("div"));
@@ -425,6 +430,7 @@ export default class WUPTimeControl<
       // hours 0..23 pages 0..23
       swipeDebounceMs: 100,
       scrollByClick: true,
+      onClickSkip,
       pages: { current: getCurHours(), total: h12 ? 12 : 24, before: drows, after: drows, cycled: true },
       onRender: (_dir, v, prev, next) => {
         v = h12 && v === 0 ? 12 : v;
@@ -453,6 +459,7 @@ export default class WUPTimeControl<
     lm._scrolled = new WUPScrolled(lm, {
       swipeDebounceMs: 100,
       scrollByClick: true,
+      onClickSkip,
       // minutes 0..59 pages 0..12
       pages: {
         current: getCurMinutes(),
@@ -488,6 +495,7 @@ export default class WUPTimeControl<
       lh12._scrolled = new WUPScrolled(lh12, {
         swipeDebounceMs: 100,
         scrollByClick: true,
+        onClickSkip,
         // pm => empty, PM, AM, /*empty*/
         // am => /*empty*/, PM, AM, empty
         pages: { current: this.$value?.isPM ? 2 : 1, total: 4, before: Math.min(drows, 1), after: Math.min(drows, 1) },
