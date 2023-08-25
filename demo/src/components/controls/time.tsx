@@ -44,14 +44,14 @@ export default function TimeControlView() {
           validations="window.myTimeValidations"
         />
         <wup-time
-          label="Without buttons (see $options.menuButtons)"
+          label="Without buttons (see $options.menuButtonsOff)"
           name="customized"
           min="02:30"
           max="22:50"
           exclude="window.myTimeExclude"
           ref={(el) => {
             if (el) {
-              el.$options.menuButtons = false;
+              el.$options.menuButtonsOff = true;
             }
           }}
         />

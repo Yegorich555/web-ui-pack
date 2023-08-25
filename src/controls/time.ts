@@ -36,8 +36,8 @@ declare global {
        * @tutorial Troubleshooting
        * in this case any changing selection in menu changes value & input; so user don't need to press Enter
        * but if press escape: menu closed and value reverted to that was before
-       * @defaultValue true */
-      menuButtons?: boolean;
+       * @defaultValue false */
+      menuButtonsOff?: boolean;
     }
     interface Options<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, Defaults<T, VM> {
       /** User can't select time less than min */
@@ -404,10 +404,9 @@ export default class WUPTimeControl<
 
     const drows = Math.round(rows / 2) - 1;
     // select value if user click on item but scrollNext isn't processed
-    const onClickSkip =
-      this._opts.menuButtons === false
-        ? () => this.setValue(this.getMenuValue(), SetValueReasons.userSelect)
-        : undefined;
+    const onClickSkip = this._opts.menuButtonsOff
+      ? () => this.setValue(this.getMenuValue(), SetValueReasons.userSelect)
+      : undefined;
 
     // div required for centering absolute items during the animation
     const parent = popup.appendChild(document.createElement("div"));
@@ -527,7 +526,7 @@ export default class WUPTimeControl<
     sep.setAttribute("aria-hidden", true);
     sep.textContent = /[hH]([^hH])/.exec(this._opts.format)![1]!;
     parent.appendChild(sep);
-    this._opts.menuButtons !== false && this.renderMenuButtons(popup);
+    !this._opts.menuButtonsOff && this.renderMenuButtons(popup);
     this.#isMenuInitPhase = false;
     return parent;
   }
@@ -613,9 +612,9 @@ export default class WUPTimeControl<
 
   /** Set value base on menu-selected if menuButtons is off */
   protected trySetValue(): void {
-    if (this._opts.menuButtons === false) {
-      !this.#isMenuInitPhase && this.setValue(this.getMenuValue(), SetValueReasons.userSelect);
-    }
+    this._opts.menuButtonsOff &&
+      !this.#isMenuInitPhase &&
+      this.setValue(this.getMenuValue(), SetValueReasons.userSelect);
   }
 
   protected override selectMenuItem(next: HTMLElement | null): void {
@@ -624,11 +623,9 @@ export default class WUPTimeControl<
   }
 
   protected override goHideMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null | undefined): Promise<boolean> {
-    if (this._opts.menuButtons === false) {
-      if (hideCase === HideCases.OnPressEsc) {
-        this.setValue(this.#valueBeforeMenu, SetValueReasons.clear);
-      }
-    }
+    hideCase === HideCases.OnPressEsc &&
+      this._opts.menuButtonsOff &&
+      this.setValue(this.#valueBeforeMenu, SetValueReasons.clear);
     return super.goHideMenu(hideCase, e);
   }
 

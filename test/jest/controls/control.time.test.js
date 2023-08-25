@@ -650,8 +650,8 @@ describe("control.time", () => {
     expect(el.$isShown).toBe(false);
   });
 
-  test("option: menuButtons", async () => {
-    el.$options.menuButtons = false;
+  test("option: menuButtonsOff", async () => {
+    el.$options.menuButtonsOff = true;
     el.focus();
     await h.wait();
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`

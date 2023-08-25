@@ -43,7 +43,7 @@
   - History undo/redo (Ctrl+Z, Ctrl+Y, Ctrl+Shift+Z). Refactored, fixed & optimized via storing only changes
 - [PopupElement](src/popup/popupElement.ts). Added showCase **alwaysOff** (popup hidden by default)
 - [CircleElement](src/circleElement.ts). Added percentage for tooltips
-- [TimeControl](src/controls/time.ts). Added option `menuButtons` to hide buttons
+- [TimeControl](src/controls/time.ts). Added option `menuButtonsOff` to hide buttons
 
 ## 0.7.1 (Jul 24, 2023)
 
