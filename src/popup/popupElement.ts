@@ -708,14 +708,6 @@ export default class WUPPopupElement<
     this.style.opacity = "";
 
     const { animTime } = this.#state!.userStyles;
-    if (!animTime && window.matchMedia("not all and (prefers-reduced-motion)").matches && this._opts.animation) {
-      /* istanbul ignore else */
-      if (this._opts.animation === Animations.drawer) {
-        console.warn(
-          `${this.tagName} style.animationDuration is missed but $options.animation is defined. Please point animation duration via styles`
-        );
-      }
-    }
     if (!animTime) {
       wasClosed && setTimeout(() => this.fireEvent("$show", { cancelable: false }));
       return true;

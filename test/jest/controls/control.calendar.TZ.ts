@@ -628,6 +628,16 @@ export default function calendarTZtest() {
         await h.wait();
         expect(mapContent()).toMatchSnapshot(); // only Feb 2022 must be disabled
 
+        // again but init month is different
+        el.remove();
+        el.$initValue = undefined;
+        el.$value = undefined;
+        el.$options.startWith = "2035-01";
+        el.$options.exclude = arr;
+        document.body.appendChild(el);
+        await h.wait();
+        expect(el.querySelector("[disabled]")).toBeFalsy();
+
         // checking daypicker when the whole month is disabled
         el.remove();
         el.$initValue = initDate(2022, 1, 1);

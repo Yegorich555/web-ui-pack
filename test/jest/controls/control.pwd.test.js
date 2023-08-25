@@ -34,6 +34,12 @@ describe("control.pwd", () => {
     second.$value = "Ab1";
     expect(second.$isValid).toBe(true);
 
+    second.$options.validations = { confirm: false };
+    await h.wait();
+    second.$value = "A";
+    expect(second.$validate()).toMatchInlineSnapshot(`false`);
+    expect(second.$isValid).toBe(true);
+
     document.body.innerHTML = "";
     const secondWithout = document.body.appendChild(document.createElement("wup-pwd"));
     secondWithout.$options.validations = { confirm: true };

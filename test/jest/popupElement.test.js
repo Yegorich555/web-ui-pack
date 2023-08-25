@@ -807,16 +807,14 @@ describe("popupElement", () => {
     await h.wait();
     // checking with default: when browser prefers-reduced-motion = false
     jest.spyOn(window, "matchMedia").mockReturnValueOnce({ matches: true });
-    const spyConsole = h.mockConsoleWarn();
     el.$show();
     await h.wait();
-    h.unMockConsoleWarn();
     expect(el.$isShown).toBe(true);
-    expect(spyConsole).toBeCalled();
     await nextFrame(); // no-animation expected
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style="display: block; transform: translate(140px, 100px);" position="top" animation="drawer"><div style=""></div><div style=""></div></wup-popup>"`
     );
+    h.unMockConsoleWarn();
 
     // testing attr
     el.setAttribute("animation", "default");

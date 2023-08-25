@@ -161,6 +161,12 @@ describe("control.text", () => {
     expect(el.innerHTML).toMatchInlineSnapshot(
       `"<label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong></strong><span prefix="">$ </span></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label>"`
     );
+    // option applies immediately
+    el.$options.prefix = ">>>";
+    await h.wait(1);
+    expect(el.innerHTML).toMatchInlineSnapshot(
+      `"<label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong></strong><span prefix="">&gt;&gt;&gt;</span></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label>"`
+    );
   });
 
   test("postfix", async () => {

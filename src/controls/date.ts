@@ -276,10 +276,10 @@ export default class WUPDateControl<
     // WARN: it's important don't use call super... because the main logic is implemented inside calendar
     // can be fired from baseCombo => when need to clear selection
     const el = this.$refPopup?.firstElementChild as WUPCalendarControl;
-    /* istanbul ignore else */
     if (el) {
       (Object.getPrototypeOf(el) as WUPCalendarControl).focusItem.call(el, next);
-    } else if (!next) {
+    } else {
+      // if (!next)
       this.$refInput.removeAttribute("aria-activedescendant");
     }
     this._focusedMenuItem = next;

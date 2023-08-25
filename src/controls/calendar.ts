@@ -371,10 +371,7 @@ export default class WUPCalendarControl<
 
   /** Call when need to re-rended picker (min/max changed etc.) */
   $refreshPicker(): void {
-    /* istanbul ignore else */
-    if (this._pickerValue != null) {
-      this.changePicker(this._pickerValue, this._picker);
-    }
+    this.changePicker(this._pickerValue, this._picker);
   }
 
   /** Converts date-string into Date according (to $options.utc)
@@ -454,7 +451,7 @@ export default class WUPCalendarControl<
     return el;
   }
 
-  _pickerValue?: Date;
+  _pickerValue: Date = new Date();
   _picker: PickersEnum = 0;
   #refreshSelected?: () => void;
   #clearPicker?: (isIn: boolean) => Promise<void>;
@@ -526,11 +523,10 @@ export default class WUPCalendarControl<
     const scrollObj = new WUPScrolled(this.$refCalenarItems, {
       onRender: (n) => {
         const nextDate = r.next(utcVal, n);
-        const { scrollFrom: from, scrollTo: to } = this.#disabled!;
-        /* istanbul ignore else */
-        if (from != null || to !== null) {
+        const { scrollFrom, scrollTo } = this.#disabled!;
+        if (scrollFrom != null || scrollTo != null) {
           const nextDateEnd = r.next(new Date(utcVal), 1).setUTCMilliseconds(-1);
-          if ((from as unknown as number) > nextDateEnd || (to as unknown as Date) < nextDate) {
+          if ((scrollFrom as unknown as number) > nextDateEnd || (scrollTo as unknown as Date) < nextDate) {
             r.next(utcVal, (-1 * n) as 1);
             return null;
           }
@@ -792,7 +788,6 @@ export default class WUPCalendarControl<
       for (i = 0; i < items.length && k < arr.length; ++i) {
         const el = items[i];
         for (; k < arr.length; ++k) {
-          /* istanbul ignore else */
           if (arr[k] > el._value) {
             break;
           } else if (arr[k] === el._value) {
@@ -1025,7 +1020,6 @@ export default class WUPCalendarControl<
         propsChanged.includes("max") ||
         propsChanged.includes("exclude") ||
         propsChanged.includes("utc"));
-    /* istanbul ignore else */
     if (!propsChanged || isNeedRecalc) {
       this.#disabled = this.calcDisabled();
     }
@@ -1085,14 +1079,12 @@ export default class WUPCalendarControl<
       return; // only left button
     }
     let t = e.target as Node | HTMLElement;
-    /* istanbul ignore else */
     if (this.$refCalenarTitle === t || this.$refCalenarTitle.contains(t)) {
       e.preventDefault();
-      this._picker !== PickersEnum.Year && this.changePicker(this._pickerValue!, this._picker + 1);
+      this._picker !== PickersEnum.Year && this.changePicker(this._pickerValue, this._picker + 1);
     } else if (this.$refCalenarItems.contains(t)) {
       while (t !== this.$refCalenarItems) {
         const v = (t as any)._value;
-        /* istanbul ignore else */
         if (v !== undefined) {
           e.preventDefault();
           !(t as HTMLElement).hasAttribute("disabled") &&
