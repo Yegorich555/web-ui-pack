@@ -160,6 +160,7 @@ export default class TextHistory {
     // WARN: input event can be fired 1 by 1 without timeouts: try to avoid any timeouts here
     this.#inpDebounce?.call(this);
     this._histTimeout && clearTimeout(this._histTimeout);
+    this.#inpBubble?.call(this);
     delete this._histTimeout;
     this._stateBeforeInput = undefined;
 
@@ -195,16 +196,21 @@ export default class TextHistory {
       e.preventDefault(); // prevent default to avoid browser-internal-history cleaning
       if (isUndoRedoSuccess) {
         this._stateBeforeInput = false;
-        setTimeout(() => {
+        this.#inpBubble = () => {
+          clearTimeout(tid);
+          this.#inpBubble = undefined;
           this.refInput.dispatchEvent(
             new InputEvent("input", { cancelable: false, bubbles: true, inputType: e.inputType })
           ); // fire manually because need to process undo/redo (but without browser-internal history)
-        }); // fire it in empty timeout so beforeInput can bubble to top at first
+        };
+        const tid = setTimeout(this.#inpBubble); // fire it in empty timeout so beforeInput can bubble to top at first
       }
     }
     return isUndoRedo;
   }
 
+  /** required to fix custom bubbling with timetout */
+  #inpBubble?: () => void;
   /* when user types fast beforeInput can be fired stepByStep without timeouts */
   #inpDebounce?: () => void;
   /** Call this handler on input.on('input'); */

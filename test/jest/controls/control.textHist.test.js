@@ -249,7 +249,7 @@ describe("control.text.hist", () => {
 
     // simulate mask changes
     expect(await h.userTypeText(el, "12")).toBe("12|");
-    const onInput = jest.fn();
+    let onInput = jest.fn();
     onInput.mockImplementationOnce(() => {
       el.value += ".";
     });
@@ -279,9 +279,24 @@ describe("control.text.hist", () => {
 
     // cover error case
     await h.wait();
-    const onErr = h.mockConsoleError();
+    let onErr = h.mockConsoleError();
     el.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "" }));
     expect(onErr).toBeCalledTimes(1);
     h.unMockConsoleError();
+
+    // extra case when beforeInput fired several times at once
+    onErr = h.mockConsoleError();
+    expect(await h.userTypeText(el, "1")).toBe("1|");
+    expect(hist._hist.length).toBe(1);
+    onInput = jest.spyOn(hist, "handleInput");
+    // call 1st to process undo
+    el.dispatchEvent(new InputEvent("beforeinput", { inputType: "historyUndo", bubbles: true, cancelable: true })) &&
+      el.dispatchEvent(new InputEvent("input", { inputType: "historyUndo", bubbles: true, cancelable: true }));
+    // call 2nd to process undo
+    el.dispatchEvent(new InputEvent("beforeinput", { inputType: "historyUndo", bubbles: true, cancelable: true })) &&
+      el.dispatchEvent(new InputEvent("input", { inputType: "historyUndo", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(onInput).toBeCalledTimes(1); // because 2nd time histoy undo impossible
+    expect(onErr).not.toBeCalled();
   });
 });
