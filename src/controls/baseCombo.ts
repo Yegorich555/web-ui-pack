@@ -97,7 +97,7 @@ export default abstract class WUPBaseComboControl<
       :host button[clear] {
         margin: 0;
       }
-      :host [menu] {
+      :host > [menu] {
         padding: 0;
         max-height: 300px;
         z-index: 90010;

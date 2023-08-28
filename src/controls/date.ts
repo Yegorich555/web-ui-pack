@@ -88,11 +88,11 @@ export default class WUPDateControl<
       :host {
         --ctrl-icon-img: var(--ctrl-date-icon-img);
       }
-      :host wup-calendar {
-        margin: 0;
-      }
-      :host [menu] {
+      :host > [menu] {
         overflow: hidden;
+      }
+      :host > [menu] > wup-calendar {
+        margin: 0;
       }`;
   }
 

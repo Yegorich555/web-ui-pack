@@ -673,7 +673,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-SELECTMANY button[clear] {
         margin: 0;
       }
-      WUP-SELECTMANY [menu] {
+      WUP-SELECTMANY &gt; [menu] {
         padding: 0;
         max-height: 300px;
         z-index: 90010;

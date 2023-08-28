@@ -8,6 +8,7 @@
   - Refactored `$options` initialization. So all inherrited Elemenents must override only `$defaults` and use `TOptions` as generic instead of overriding $options like it was before.
   - Deprecated static property **nameUnique**
   - **Controls**. Dsiable `maxWidthByTarget` for error-popup
+  - **Global**. Improved styles performance via refactoring selectors
 
 **Fixes**:
 

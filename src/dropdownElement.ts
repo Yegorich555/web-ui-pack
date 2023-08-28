@@ -88,7 +88,7 @@ export default class WUPDropdownElement<
         min-width: initial;
         margin: 0;
         padding: 0.7em;
-      }${WUPcssMenu(":host [menu]")}`;
+      }${WUPcssMenu(":host>[menu]")}`;
   }
 
   /** Default options applied to every element. Change it to configure default behavior

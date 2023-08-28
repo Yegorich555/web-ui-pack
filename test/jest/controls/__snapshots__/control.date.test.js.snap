@@ -664,7 +664,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-DATE button[clear] {
         margin: 0;
       }
-      WUP-DATE [menu] {
+      WUP-DATE &gt; [menu] {
         padding: 0;
         max-height: 300px;
         z-index: 90010;
@@ -672,11 +672,11 @@ mask-image: var(--ctrl-icon-img);
       WUP-DATE {
         --ctrl-icon-img: var(--ctrl-date-icon-img);
       }
-      WUP-DATE wup-calendar {
-        margin: 0;
-      }
-      WUP-DATE [menu] {
+      WUP-DATE &gt; [menu] {
         overflow: hidden;
+      }
+      WUP-DATE &gt; [menu] &gt; wup-calendar {
+        margin: 0;
       }
 </style>
 `;

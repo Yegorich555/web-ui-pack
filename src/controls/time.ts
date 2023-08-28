@@ -140,13 +140,13 @@ export default class WUPTimeControl<
         --ctrl-icon-img: var(--ctrl-time-icon-img-lg);
         --ctrl-icon-img: var(--ctrl-time-icon-img);
       }
-      :host [menu] {
+      :host > [menu] {
         overflow: hidden;
       }
-      :host [menu]>div:first-child {
+      :host > [menu]>div:first-child {
         position: relative;
       }
-      :host [menu] ul {
+      :host > [menu] ul {
         margin: 0;
         padding: 0;
         list-style-type: none;
@@ -156,13 +156,13 @@ export default class WUPTimeControl<
         display: inline-block;
         vertical-align: middle;
       }
-      :host [menu] li,
-      :host [menu] mark,
-      :host [menu] ul:after {
+      :host > [menu] li,
+      :host > [menu] mark,
+      :host > [menu] ul:after {
         padding: 1em;
         line-height: 1em;
       }
-      :host [menu] mark {
+      :host > [menu] mark {
         z-index: -1;
         position: absolute;
         display: block;
@@ -172,7 +172,7 @@ export default class WUPTimeControl<
         font: inherit;
         background: var(--ctrl-time-current-bg);
       }
-      :host [menu] ul:after {
+      :host > [menu] ul:after {
         content: "99";
         height: 0;
         margin:0; padding-top:0; padding-bottom:0;
@@ -182,38 +182,38 @@ export default class WUPTimeControl<
         pointer-events: none;
         display: block;
       }
-      :host [menu] ul:nth-child(3):after {
+      :host > [menu] ul:nth-child(3):after {
          content: "AM";
       }
-      :host [menu] li[aria-selected=true],
-      :host [menu] mark,
-      :host [menu] ul:after {
+      :host > [menu] li[aria-selected=true],
+      :host > [menu] mark,
+      :host > [menu] ul:after {
         font-weight: bold;
         color: var(--ctrl-time-current);
       }
-      :host [menu] li[focused] {
+      :host > [menu] li[focused] {
         position: relative;
       }
-      :host [menu] li[focused]:after {
+      :host > [menu] li[focused]:after {
         ${focusStyle}
       }
-      :host [menu] li[aria-hidden] {
+      :host > [menu] li[aria-hidden] {
         pointer-events: none;
         touch-action: none;
         opacity: 0;
       }
-      :host [menu] li[disabled] {
+      :host > [menu] li[disabled] {
         color: var(--ctrl-err-text);
         --ctrl-focus: var(--ctrl-err-text);
         //background-color: var(--ctrl-err-bg);
       }
-      :host [menu] [group] {
+      :host > [menu] [group] {
         display: flex;
         gap: 1px;
         padding-top: 1px;
         background: var(--base-sep);
       }
-      :host [menu] button {
+      :host > [menu] button {
         cursor: pointer;
         flex: 1 1 50%;
         display: inline-flex;
@@ -225,33 +225,33 @@ export default class WUPTimeControl<
         padding: 0; margin: 0;
         background: var(--base-btn3-bg);
       }
-      :host [menu] button:first-child {
+      :host > [menu] button:first-child {
         --ctrl-icon-img: var(--wup-icon-check);
         --ctrl-icon: var(--ctrl-err-icon-valid);
         border-bottom-left-radius: var(--border-radius);
       }
-      :host [menu] button:last-child {
+      :host > [menu] button:last-child {
         --ctrl-icon-img: var(--wup-icon-cross);
         --ctrl-icon: var(--ctrl-err-text);
         border-bottom-right-radius: var(--border-radius);
       }
-      :host [menu] button:after {
+      :host > [menu] button:after {
         ${WUPcssIcon}
         content: "";
         padding:0;
       }
       @media (hover: hover) and (pointer: fine) {
-        :host [menu] li:hover {
+        :host > [menu] li:hover {
           position: relative;
         }
-        :host [menu] li:hover:after {
+        :host > [menu] li:hover:after {
          ${focusStyle}
         }
-        :host [menu] button:hover {
+        :host > [menu] button:hover {
           box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 10%);
         }
       }
-      :host [menu] button[disabled] {
+      :host > [menu] button[disabled] {
          box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 5%);
          cursor: not-allowed;
          --ctrl-icon: inherit;
