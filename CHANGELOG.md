@@ -4,10 +4,10 @@
 
 **BREAKING CHANGES**:
 
-- **Internals**.
-  - Refactored `$options` initialization. So all inherrited Elemenents must override only `$defaults` and use `TOptions` as generic instead of overriding $options like it was before. **Note:** If you haven't created custom Elements inherrited from WUP... - don't pay attention on it
+- **Internals** (**Note:** If you haven't created custom Elements inherrited from WUP... - don't pay attention on it).
+  - Refactored `$options` initialization. So all inherrited Elemenents must override only `$defaults` and use `TOptions` as generic instead of overriding $options like it was before.
   - Deprecated static property **nameUnique**
-  - **Controls**. Dsiable maxWidthByTarget for error-popup
+  - **Controls**. Dsiable `maxWidthByTarget` for error-popup
 
 **Fixes**:
 
