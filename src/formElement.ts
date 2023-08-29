@@ -473,12 +473,12 @@ export default class WUPFormElement<
     super.gotOptionsChanged(e);
   }
 
-  protected override gotAttributeChanged(name: string, oldValue: string, newValue: string): void {
+  protected override gotAttributeChanged(name: string, value: string): void {
     if (name === "autocomplete" || name === "readonly") {
       this.#hasControlChanges = true;
     }
 
-    super.gotAttributeChanged(name, oldValue, newValue);
+    super.gotAttributeChanged(name, value);
   }
 
   protected override gotReady(): void {

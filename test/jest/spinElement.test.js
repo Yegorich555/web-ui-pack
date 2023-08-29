@@ -16,21 +16,7 @@ let el;
 
 const orig = window.getComputedStyle;
 function mockTarget(trg, width, height) {
-  jest.spyOn(trg, "getBoundingClientRect").mockReturnValue({
-    x: 0,
-    y: 0,
-    top: 0,
-    left: 0,
-    bottom: height,
-    height,
-    width,
-    right: width,
-    toJSON: () => "",
-  });
-  jest.spyOn(trg, "clientHeight", "get").mockReturnValue(height);
-  jest.spyOn(trg, "offsetHeight", "get").mockReturnValue(height);
-  jest.spyOn(trg, "clientWidth", "get").mockReturnValue(width);
-  jest.spyOn(trg, "offsetWidth", "get").mockReturnValue(width);
+  h.setupLayout(trg, { x: 0, y: 0, h: height, w: width });
 
   jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
     if (elem === trg) {
@@ -81,7 +67,9 @@ afterEach(() => {
 });
 
 describe("spinElement", () => {
-  h.baseTestComponent(() => document.createElement("wup-spin"), { attrs: { fit: { onRemove: true } } });
+  h.baseTestComponent(() => document.createElement("wup-spin"), {
+    attrs: { overflowtarget: { refGlobal: document.body } },
+  });
 
   test("applied styles", () => {
     expect(document.head.innerHTML).toMatchInlineSnapshot(`
@@ -171,7 +159,7 @@ describe("spinElement", () => {
     el.$options.inline = true;
     jest.advanceTimersToNextTimer();
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body aria-busy="true"><wup-spin style="--spin-size: 400px; --spin-item-size: calc(30px * 1);" aria-label="Loading. Please wait"><div></div></wup-spin></body>"`
+      `"<body aria-busy="true"><wup-spin style="" aria-label="Loading. Please wait"><div></div></wup-spin></body>"`
     );
 
     el.$options.inline = false;

@@ -106,7 +106,7 @@ export interface BaseTestOptions {
   attrs: Record<
     string,
     {
-      /** Set true if removing attr doesn't remove option but rollbacks to default */
+      /** @deprecated Set true if removing attr doesn't remove option but rollbacks to default */
       onRemove?: boolean;
       skip?: boolean;
       value?: string;
@@ -155,6 +155,11 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
         el.remove();
         spy.check(); // checking memory leak
       });
+
+      test("snapshot of $defaults", () => {
+        const c = Object.getPrototypeOf(obj).constructor;
+        expect(c.$defaults).toMatchSnapshot();
+      });
     }
 
     if (!opts?.skipAttrs && obj instanceof WUPBaseElement) {
@@ -187,14 +192,15 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
               expect(key).toBeDefined();
               expect(obj.$options[key]).toBeDefined();
               expect(obj.$options[key]).not.toBeFalsy();
-
+              expect(() => {
+                if (oa?.onRemove) {
+                  throw new Error(`On removing attribute [${a}] property must rollback to previous`);
+                }
+              }).not.toThrow();
               obj.removeAttribute(a);
               jest.advanceTimersByTime(1);
-              if (opts?.attrs && opts.attrs[a]?.onRemove) {
-                expect(obj.$options[key]).toBeTruthy();
-              } else {
-                expect(obj.$options[key]).toBeFalsy();
-              }
+
+              expect(obj.$options[key]).toStrictEqual(obj.constructor.$defaults[key]);
               delete (window as any)._myTestKey;
             });
           });

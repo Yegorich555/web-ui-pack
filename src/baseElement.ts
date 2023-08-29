@@ -13,7 +13,17 @@ const appendedStyles = new Set<string>();
 const appendedRootStyles = new Set<typeof WUPBaseElement>();
 let lastUniqueNum = 0;
 
+// Cached data
 const allObservedOptions = new WeakMap<typeof WUPBaseElement, Set<string> | null>();
+const allObservedAttrs = new WeakMap<typeof WUPBaseElement, Array<string>>();
+
+export const enum AttributeTypes {
+  bool,
+  number,
+  string,
+  reference,
+  parsedObject,
+}
 
 /** Basic abstract class for every component in web-ui-pack */
 export default abstract class WUPBaseElement<
@@ -66,14 +76,58 @@ export default abstract class WUPBaseElement<
     return "wup-hidden";
   }
 
-  /* Array of options names to listen for changes */
-  static get observedOptions(): Array<string> | undefined {
-    return undefined;
+  /** Returns map-type based on value */
+  static mapAttribute(value: any): AttributeTypes {
+    if (value == null) {
+      return AttributeTypes.reference;
+    }
+    switch (typeof value) {
+      case "boolean":
+        return AttributeTypes.bool;
+      case "number":
+        return AttributeTypes.number;
+      case "string":
+        return AttributeTypes.string;
+      // case "object": return AttributeTypes.reference;
+      // case "bigint": - not supported
+      // case "symbol": - not supported
+      default:
+        return AttributeTypes.reference;
+    }
   }
 
-  /* Array of attribute names to listen for changes */
+  /** Returns map-model based on $defaults for mapping attributes & options */
+  static get mappedAttributes(): Record<string, { type: AttributeTypes; prop: string }> {
+    const map: Record<string, { type: AttributeTypes; prop: string }> = {};
+
+    const def = this.$defaults;
+    Object.keys(def).forEach((k) => {
+      const attr = k.toLowerCase(); // attributes exists only in lowerCase
+      map[attr] = {
+        type: this.mapAttribute(def[k]),
+        prop: k,
+      };
+    });
+    return map;
+  }
+
+  // todo maybe deprecate it and use for any prop by default ??? - need check this
+  /** Array of options names to listen for changes
+   * @defaultValue every option from $defaults` */
+  static get observedOptions(): Array<string> {
+    return Object.keys(this.$defaults).map((k) => k); // WARN: cache implemented in get $options
+  }
+
+  /** Array of attribute names to listen for changes
+   * @defaultValue every option from $defaults (in lowerCase) */
   static get observedAttributes(): Array<string> | undefined {
-    return undefined;
+    // return cached data
+    let o = allObservedAttrs.get(this);
+    if (o === undefined) {
+      o = this.observedOptions.map((k) => k.toLowerCase());
+      allObservedAttrs.set(this, o);
+    }
+    return o;
   }
 
   /** Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item */
@@ -277,51 +331,38 @@ export default abstract class WUPBaseElement<
     this.gotRemoved();
   }
 
-  _isStopChanges = true;
+  /** Prevent gotChanges call during the some attribute or options custom changes */
+  _isStopChanges = false;
   #attrTimer?: ReturnType<typeof setTimeout>;
   #attrChanged?: string[];
-  /** Called when element isReady and one of observedAttributes is changed */
-  protected gotAttributeChanged(name: string, oldValue: string, newValue: string): void {
-    // debounce filter
-    if (this.#attrTimer) {
-      this.#attrChanged!.push(name);
-      return;
-    }
+  /** Called when any of observedAttributes is changed */
+  protected gotAttributeChanged(name: string, value: string | null): void {
+    // WARN: observedAttribute must returns same colelction as mappedAttributes
+    const m = this.#ctr.mappedAttributes[name] ?? { type: AttributeTypes.bool, prop: name }; // todo cache mappedAttributes object
+    const isRemoved = value == null;
 
-    this.#attrChanged = [name];
-    this.#attrTimer = setTimeout(() => {
-      this.#attrTimer = undefined;
-      this._isStopChanges = true;
-      const keys = Object.keys(this._opts);
-      const keysNormalized: string[] = []; // cache to boost performance via exlcuding extra-lowerCase
-      this.#attrChanged!.forEach((a) => {
-        keys.some((k, i) => {
-          let kn = keysNormalized[i];
-          if (!kn) {
-            kn = k.toLowerCase();
-            keysNormalized.push(kn);
-          }
-          if (kn === a) {
-            delete this._opts[k];
-            return true;
-          }
+    this._opts[m.prop as keyof TOptions] = isRemoved
+      ? objectClone(this.#ctr.$defaults[m.prop]) // value == null when attr is removed, then need to rollback to default
+      : this.parseAttr(m.type, value, m.prop, name);
 
-          return false;
+    if (this.#isReady) {
+      if (!this.#attrTimer) {
+        this.#attrChanged = [];
+        this.#attrTimer = setTimeout(() => {
+          this.#attrTimer = undefined;
+          this._isStopChanges = true;
+          this.gotChanges(this.#attrChanged!);
+          this._isStopChanges = false;
+          this.#attrChanged = undefined;
         });
-      }); // otherwise attr can't override option if attribute removed
-
-      this.gotChanges(this.#attrChanged as Array<keyof WUP.Form.Options>);
-      this._isStopChanges = false;
-      this.#attrChanged = undefined;
-    });
+      }
+      this.#attrChanged!.push(m.prop);
+    }
   }
 
   /** Browser calls this method when attrs pointed in observedAttributes is changed */
-  protected attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
-    this.#isReady &&
-      !this._isStopChanges &&
-      oldValue !== newValue &&
-      this.gotAttributeChanged(name, oldValue, newValue);
+  protected attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
+    !this._isStopChanges && oldValue !== newValue && this.gotAttributeChanged(name, newValue);
   }
 
   // watchfix: how to change  listener: (this: WUPBaseElement) to generic: https://github.com/microsoft/TypeScript/issues/299
@@ -415,6 +456,55 @@ export default abstract class WUPBaseElement<
   includesTarget(e: Event): boolean {
     const t = e.target;
     return this === t || this.includes(t);
+  }
+
+  /** Returns parsed value according to pointed type OR current value if something wrong;
+   * override method for implementation custom parsing OR static method mappedAttributes to redefine map-types
+   */
+  parseAttr(type: AttributeTypes, attrValue: string, propName: string, attrName: string): any {
+    const prev = this._opts[propName];
+    // eslint-disable-next-line default-case
+    switch (attrValue) {
+      case "false":
+        return false;
+      case "":
+      case "true":
+        return true; // empty attr and 'true' is enable`
+    }
+    switch (type) {
+      case AttributeTypes.bool:
+        return attrValue !== "false";
+      case AttributeTypes.number: {
+        const v = +attrValue;
+        if (Number.isNaN(v)) {
+          this.throwError(`Expected number for attribute [${attrName}] but pointed '${attrValue}'`);
+          return prev;
+        }
+        return v;
+      }
+      case AttributeTypes.reference: {
+        const v = nestedProperty.get(window, attrValue);
+        if (v === undefined) {
+          this.throwError(
+            `Value not found according to attribute [${attrName}] in '${
+              attrValue.startsWith("window.") ? attrValue : `window.${attrValue}`
+            }'`
+          );
+          return prev;
+        }
+        return v;
+      }
+      case AttributeTypes.parsedObject: {
+        try {
+          return this.parse(attrValue);
+        } catch (err) {
+          this.throwError(err);
+          return prev;
+        }
+      }
+      default:
+        return attrValue; // string
+    }
   }
 
   /** Parse attribute and return result; if attr missed or invalid => returns pointed alt value OR $options[attr] */
@@ -539,3 +629,5 @@ declare global {
       toJSX<Opts>;
   }
 }
+
+document.body;
