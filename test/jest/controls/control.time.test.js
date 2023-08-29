@@ -761,5 +761,29 @@ describe("control.time", () => {
     el.$value = undefined;
     await h.userClick(el.$refPopup.querySelectorAll("[aria-selected]")[2]);
     expect(el.$value).toEqual(new WUPTimeObject("12:23 am"));
+
+    // closeMenu>type>openMenu => menu must be selected according to input-value
+    el.blur();
+    el.$initValue = undefined;
+    el.$value = undefined;
+    await h.wait();
+    el.focus();
+    await h.wait();
+    expect(el.$isShown).toBe(true);
+    await h.userClick(el.$refLabel);
+    expect(el.$isShown).toBe(false);
+    expect(await h.userTypeText(el.$refInput, "0105p")).toBe("01:05 P|M");
+    expect(el.$value).toStrictEqual(new WUPTimeObject("01:05 pm"));
+    // open and check menu
+    await h.userClick(el.$refLabel);
+    expect(el.$isShown).toBe(true);
+    expect(el.$refInput.value).toBe("01:05 PM");
+    expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
+      [
+        "<li>11</li><li>12</li><li aria-selected="true">01</li><li>02</li><li>03</li>",
+        "<li>03</li><li>04</li><li aria-selected="true">05</li><li>06</li><li>07</li>",
+        "<li aria-hidden="true">PM</li><li aria-selected="false">AM</li><li aria-selected="true">PM</li><li aria-hidden="true">AM</li>",
+      ]
+    `);
   });
 });

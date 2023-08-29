@@ -576,10 +576,12 @@ export default class WUPTimeControl<
     this.#lastInputChanged = false;
     const v = this.$value;
     if (this.$refMenuLists && v) {
+      this.#isMenuInitPhase = true; // to avoid calling trySetaValue on reRender
       const menuV = this.getMenuValue();
       menuV.hours !== v.hours && this.$refMenuLists[0].reinit();
       menuV.minutes !== v.minutes && this.$refMenuLists[1].reinit();
       this.$refMenuLists[2]?._scrolled.goTo(v.isPM ? 2 : 1, false);
+      this.#isMenuInitPhase = false;
     }
     this.disableItems();
 
