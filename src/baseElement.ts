@@ -303,7 +303,21 @@ export default abstract class WUPBaseElement<
   /** Called when element isReady and at least one of observedOptions is changed */
   protected gotOptionsChanged(e: WUP.Base.OptionEvent): void {
     this._isStopChanges = true;
-    e.props.forEach((p) => this.removeAttribute(p)); // remove related attributes otherwise impossible to override
+    e.props.forEach((p) => {
+      this.removeAttribute(p);
+      if (this._opts[p] === undefined) {
+        this._opts[p as keyof TOptions] = objectClone(this.#ctr.$defaults[p]);
+      }
+      if (this._opts[p] === undefined) {
+        // don't allow to have defaults with null // todo remove it after refactoring
+        console.error(`Option [${p}] is removed but in $defaults not defined`, { defaults: this.#ctr.$defaults });
+      }
+    }); // remove related attributes otherwise impossible to override
+    e.props.forEach((p) => {
+      if (this.$options[p] == null && this.#ctr.$defaults[p] == null) {
+        console.error();
+      }
+    });
     this.gotChanges(e.props);
     this._isStopChanges = false;
   }
