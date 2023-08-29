@@ -19,6 +19,7 @@ export default function DropdownView() {
       ]}
       details={{
         tag: "wup-dropdown",
+        linkDemo: "demo/src/components/dropdownView.tsx",
         customHTML: [
           `html
 <wup-dropdown>

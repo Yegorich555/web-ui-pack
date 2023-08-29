@@ -160,6 +160,9 @@ describe("control.calendar", () => {
     await h.wait();
     expect(ev.defaultPrevented).toBe(false);
     expect(el.outerHTML).toBe(was);
+
+    // click between items
+    await expect(h.userClick(el.$refCalenarItems.parentElement)).resolves.not.toThrow();
   });
 
   test("scrolling", async () => {

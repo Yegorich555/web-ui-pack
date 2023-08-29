@@ -1,5 +1,5 @@
 import { WUPPopupElement } from "web-ui-pack";
-import { Animations } from "web-ui-pack/popup/popupElement.types";
+import { Animations, ShowCases } from "web-ui-pack/popup/popupElement.types";
 import * as h from "../testHelper";
 
 /** @type WUPPopupElement */
@@ -103,11 +103,7 @@ describe("popupElement", () => {
   });
 
   describe("inheritance", () => {
-    class TestPopupElement extends WUPPopupElement {
-      static get nameUnique() {
-        return "TestPopupElement";
-      }
-    }
+    class TestPopupElement extends WUPPopupElement {}
     customElements.define("test-el", TestPopupElement);
     h.baseTestComponent(() => document.createElement("test-el"), { skipAttrs: true });
   });
@@ -271,7 +267,7 @@ describe("popupElement", () => {
     a.$show().catch(onErr);
     await h.wait();
     expect(onErr).toBeCalledTimes(1); // to apply options - throw error because target is not defined
-    expect(spyShow).toBeCalledTimes(1);
+    expect(spyShow).toBeCalledTimes(2);
     expect(a.$isShown).toBe(false); // because target is not defined
     jest.advanceTimersToNextTimer(); // onHide has timeout
     expect(onHide).toBeCalledTimes(1); // because it was shown with target and hidden with the next show without target
@@ -301,78 +297,112 @@ describe("popupElement", () => {
 
   test("$options.showCase", async () => {
     /** @type typeof el */
-    const a = document.createElement(el.tagName);
-    const spyShow = jest.spyOn(a, "goShow");
-    const spyHide = jest.spyOn(a, "goHide");
+    el = document.createElement(el.tagName);
+    const spyShow = jest.spyOn(el, "goShow");
+    const spyHide = jest.spyOn(el, "goHide");
     const trgInput = trg.appendChild(document.createElement("input"));
 
-    document.body.appendChild(a);
-    a.$options.showCase = 0b111111111;
-    a.$options.target = trgInput; // only for testing
+    document.body.appendChild(el);
+    el.$options.showCase = 0b111111111;
+    el.$options.target = trgInput; // only for testing
     await h.wait();
-    expect(a.$isShown).toBe(false);
+    expect(el.$isShown).toBe(false);
 
     // open by mouseenter-click-focus
     let ev = new MouseEvent("mouseenter", { bubbles: true });
     trgInput.dispatchEvent(ev);
-    await h.wait(a.$options.hoverShowTimeout); // mouseenter has debounce timeout
-    expect(a.$isShown).toBe(true);
+    await h.wait(el.$options.hoverShowTimeout); // mouseenter has debounce timeout
+    expect(el.$isShown).toBe(true);
     expect(spyShow).lastCalledWith(1, ev);
     trgInput.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
     trgInput.focus();
     trgInput.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
     await h.wait(1); // wait for promise onShow is async
-    expect(a.$isShown).toBe(true); // no changes in state
+    expect(el.$isShown).toBe(true); // no changes in state
     trgInput.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    expect(a.$isShown).toBe(true); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
+    expect(el.$isShown).toBe(true); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
     await h.wait(1); // wait for promise onShow is async
 
     // close by blur
     spyHide.mockClear();
     trgInput.blur();
     await h.wait(1); // wait for promise onHide is async
-    expect(a.$isShown).toBe(false); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
+    expect(el.$isShown).toBe(false); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
     expect(spyHide.mock.calls[0][0]).toBe(2);
 
     // close by mouseleave
     trgInput.dispatchEvent(new Event("mouseenter", { bubbles: true }));
-    await h.wait(a.$options.hoverShowTimeout); // mouseenter has debounce timeout
-    expect(a.$isShown).toBe(true); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
+    await h.wait(el.$options.hoverShowTimeout); // mouseenter has debounce timeout
+    expect(el.$isShown).toBe(true); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
     ev = new MouseEvent("mouseleave", { bubbles: true });
     trgInput.dispatchEvent(ev);
-    await h.wait(a.$options.hoverHideTimeout); // mouseenter has debounce timeout
-    expect(a.$isShown).toBe(false); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
+    await h.wait(el.$options.hoverHideTimeout); // mouseenter has debounce timeout
+    expect(el.$isShown).toBe(false); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
     expect(spyHide).lastCalledWith(1, ev);
 
     // open again by click
     ev = new MouseEvent("click", { bubbles: true });
     trgInput.dispatchEvent(ev);
     await h.wait();
-    expect(a.$isShown).toBe(true); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
+    expect(el.$isShown).toBe(true); // because wasOpened by onHover and can be hidden by focusLost or mouseLeave
     expect(spyShow).lastCalledWith(1 << 2, ev);
 
     // close by click again
     await h.userClick(trgInput);
     await h.wait();
-    expect(a.$isShown).toBe(false);
+    expect(el.$isShown).toBe(false);
     expect(spyHide.mock.lastCall[0]).toBe(5);
     trgInput.blur();
     spyShow.mockClear();
 
     // for coverage
-    a.$options.hoverHideTimeout = 10; // WARN: this time must be less 300ms (debounce for hover-click)
-    a.init();
+    el.$options.hoverHideTimeout = 10; // WARN: this time must be less 300ms (debounce for hover-click)
+    el.init();
     trgInput.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
-    await h.wait(a.$options.hoverShowTimeout);
+    await h.wait(el.$options.hoverShowTimeout);
     trgInput.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
     await h.wait(50);
-    expect(a.$isShown).toBe(false);
-    expect(a.$isOpen).toBe(false); // deprecate it
+    expect(el.$isShown).toBe(false);
+    expect(el.$isOpen).toBe(false); // deprecate it
 
-    a.remove();
-    a.$hide();
+    el.remove();
+    el.$hide();
     await h.wait();
-    expect(a.$isShown).toBe(false); // because remmoved
+    expect(el.$isShown).toBe(false); // because remmoved
+
+    // alwaysOff
+    document.body.innerHTML = "";
+    el = document.createElement(el.tagName);
+    document.body.appendChild(el);
+    document.body.appendChild(trg);
+    el.$options.showCase = ShowCases.alwaysOff;
+    el.$options.target = trg;
+    await h.wait();
+    expect(el.$isShown).toBe(false);
+    el.$show();
+    await h.wait();
+    expect(el.$isShown).toBe(true);
+    el.$hide();
+    await h.wait();
+    expect(el.$isShown).toBe(false);
+    // always
+    el.$options.showCase = ShowCases.always;
+    await h.wait();
+    expect(el.$isShown).toBe(true);
+    el.$hide();
+    await h.wait();
+    expect(el.$isShown).toBe(false);
+    // alwaysOff & target missed
+    el.$options.showCase = ShowCases.alwaysOff;
+    el.$options.target = null;
+    await h.wait();
+    expect(el.$isShown).toBe(false);
+    const onErr = jest.fn();
+    el.$show().catch(onErr);
+    await h.wait();
+    expect(el.$options.target).toBeFalsy();
+    expect(onErr).toBeCalledTimes(1);
+    expect(el.$isShown).toBe(false);
   });
 
   test("$options.minWidth/minHeight/maxWidth by target", async () => {
@@ -777,16 +807,14 @@ describe("popupElement", () => {
     await h.wait();
     // checking with default: when browser prefers-reduced-motion = false
     jest.spyOn(window, "matchMedia").mockReturnValueOnce({ matches: true });
-    const spyConsole = h.mockConsoleWarn();
     el.$show();
     await h.wait();
-    h.unMockConsoleWarn();
     expect(el.$isShown).toBe(true);
-    expect(spyConsole).toBeCalled();
     await nextFrame(); // no-animation expected
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style="display: block; transform: translate(140px, 100px);" position="top" animation="drawer"><div style=""></div><div style=""></div></wup-popup>"`
     );
+    h.unMockConsoleWarn();
 
     // testing attr
     el.setAttribute("animation", "default");

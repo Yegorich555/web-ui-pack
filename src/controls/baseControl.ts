@@ -19,6 +19,8 @@ export const enum SetValueReasons {
   userInput,
   /** When user selected existed option on UI and don't need to call selectMenuItem again (for combobox) */
   userSelect,
+  /** When $initValue is changed */
+  initValue,
 }
 
 /** Cases of validation for WUP Controls */
@@ -95,8 +97,7 @@ declare global {
        * @defaultValue 100ms */
       focusDebounceMs?: number;
       /** Behavior that expected for clearing value inside control (via pressEsc or btnClear)
-       * @defaultValue ClearActions.initClearBack
-       * @not observed */
+       * @defaultValue ClearActions.initClearBack */
       clearActions: ClearActions;
       /** Rules defined for control;
        * * all functions must return error-message when value === undefined
@@ -161,9 +162,10 @@ declare global {
        * @tutorial rules
        * * Point empty string or `true` to inherit from $options.name
        * * Expected value can be converted toString & parsed from string itself.
-       * Override valueFromUrl & valueToUrl to change serializing (for complex objects, arrays etc.)
+       * * Override valueFromUrl & valueToUrl to change serializing (for complex objects, arrays etc.)
+       * * Before API-call gather form.$model on init
        * @see {@link WUP.BaseControl.Defaults.storage} */
-      skey?: boolean | string; // todo issue (most noticeable in React): it affects on ini but need to develop way to gather initModel and send to api request
+      skey?: boolean | string;
     }
 
     interface Attributes
@@ -189,9 +191,10 @@ declare global {
 /** Base abstract form-control */
 export default abstract class WUPBaseControl<
     ValueType = any,
+    TOptions extends WUP.BaseControl.Options = WUP.BaseControl.Options,
     Events extends WUP.BaseControl.EventMap = WUP.BaseControl.EventMap
   >
-  extends WUPBaseElement<Events>
+  extends WUPBaseElement<TOptions, Events>
   implements IBaseControl<ValueType>
 {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
@@ -211,11 +214,8 @@ export default abstract class WUPBaseControl<
       "readOnly",
       "validations",
       "skey",
+      "clearActions",
     ];
-  }
-
-  static get observedExcludeNested(): Array<string> | undefined {
-    return ["items"]; // exclude items[x] from observed - for Select & Radio
   }
 
   static get observedAttributes(): Array<string> {
@@ -229,10 +229,6 @@ export default abstract class WUPBaseControl<
       "skey",
       "storage",
     ];
-  }
-
-  static get nameUnique(): string {
-    return "WUPBaseControl";
   }
 
   /** Css-variables related to component */
@@ -414,7 +410,7 @@ export default abstract class WUPBaseControl<
     return v === "" || v === undefined;
   }
 
-  // todo changing global-common-defaults from another project doesn't affect on controls
+  // todo changing global-common-defaults from another project doesn't affect on controls - need to figure out way when user can setup everything in one palce
   static $defaults: WUP.BaseControl.Defaults = {
     clearActions: ClearActions.initClearBack,
     validateDebounceMs: 500,
@@ -423,12 +419,6 @@ export default abstract class WUPBaseControl<
       required: (v, setV) => setV === true && this.$isEmpty(v) && "This field is required",
     },
   };
-
-  $options: WUP.BaseControl.Options<any> = {
-    ...this.#ctr.$defaults,
-  };
-
-  protected override _opts = this.$options;
 
   /** Called on value change */
   $onChange?: (e: CustomEvent & { detail: SetValueReasons }) => void;
@@ -440,9 +430,7 @@ export default abstract class WUPBaseControl<
   }
 
   set $value(v: ValueType | undefined) {
-    const was = this.#isDirty;
     this.setValue(v, SetValueReasons.manual);
-    this.#isDirty = was;
   }
 
   #initValue?: ValueType;
@@ -456,10 +444,11 @@ export default abstract class WUPBaseControl<
     const was = this.#initValue;
     const canUpdate = (!this.$isReady && this.$value === undefined) || (!this.$isDirty && !this.$isChanged);
     this.#initValue = v;
-    if (canUpdate && !this.#ctr.$isEqual(v, was)) {
-      // WARN: comparing required for SelectControl when during the parse it waits for promise
-      this.$value = v; // WARN: it's fire $change event despite on value set from $initValue
+    let needUpdate = !this.#ctr.$isEqual(v, was); // WARN: comparing required for SelectControl when during the parse it waits for promise
+    if (canUpdate && needUpdate) {
+      needUpdate = !this.setValue(v, SetValueReasons.initValue);
     }
+    needUpdate && this.setClearState();
     if (!(this as any)._noDelInitValueAttr) {
       this._isStopChanges = true;
       this.removeAttribute("initvalue");
@@ -568,28 +557,24 @@ export default abstract class WUPBaseControl<
   $ariaSpeak(text: string, delayMs = 100): void {
     // don't use speechSynthesis because it's announce despite on screen-reader settings - can be disabled
     // text && speechSynthesis && speechSynthesis.speak(new SpeechSynthesisUtterance(text)); // watchfix: https://stackoverflow.com/questions/72907960/web-accessibility-window-speechsynthesis-vs-role-alert
-    /* istanbul ignore else */
-    if (text) {
-      const el = document.createElement("section");
-      el.setAttribute("aria-live", "off");
-      el.setAttribute("aria-atomic", true);
-      el.className = this.#ctr.classNameHidden;
-      el.id = this.#ctr.$uniqueId;
-      const i = this.$refInput;
-      const an = "aria-describedby";
-      i.setAttribute(an, `${i.getAttribute(an) || ""} ${el.id}`.trimStart());
-      this.appendChild(el);
-      setTimeout(() => (el.textContent = text), delayMs); // otherwise reader doesn't announce section
-      setTimeout(() => {
-        el.remove();
-        const a = i.getAttribute(an);
-        /* istanbul ignore else */
-        if (a != null) {
-          const aNext = a.replace(el.id, "").replace("  ", " ").trim();
-          aNext ? i.setAttribute(an, aNext) : i.removeAttribute(an);
-        }
-      }, 500);
-    }
+    const el = document.createElement("section");
+    el.setAttribute("aria-live", "off");
+    el.setAttribute("aria-atomic", true);
+    el.className = this.#ctr.classNameHidden;
+    el.id = this.#ctr.$uniqueId;
+    const i = this.$refInput;
+    const an = "aria-describedby";
+    i.setAttribute(an, `${i.getAttribute(an) || ""} ${el.id}`.trimStart());
+    this.appendChild(el);
+    setTimeout(() => (el.textContent = text), delayMs); // otherwise reader doesn't announce section
+    setTimeout(() => {
+      el.remove();
+      const a = i.getAttribute(an);
+      if (a != null) {
+        const aNext = a.replace(el.id, "").replace("  ", " ").trim();
+        aNext ? i.setAttribute(an, aNext) : i.removeAttribute(an);
+      }
+    }, 500); // WARN: expected that 500ms is enough to get action from screen-reader
   }
 
   $form?: WUPFormElement;
@@ -613,6 +598,7 @@ export default abstract class WUPBaseControl<
     this._opts.label = this.getAttr("label");
     this._opts.name = this.getAttr("name");
 
+    // NiceToHave it extends $options object to big size where almost ever prop is undefined - need somehow prettify ot
     this._opts.autoComplete = this.getAttr("autocomplete", "boolOrString", this._opts.autoComplete);
     this._opts.disabled = this.getAttr("disabled", "bool");
     this._opts.readOnly = this.getAttr("readonly", "bool", this._opts.readOnly);
@@ -891,7 +877,6 @@ export default abstract class WUPBaseControl<
     }
 
     let p: StoredRefError = parent as StoredRefError;
-    /* istanbul ignore else */
     if (!p._wupVldItems) {
       p = parent as StoredRefError;
       p._wupVldItems = [];
@@ -928,7 +913,6 @@ export default abstract class WUPBaseControl<
       WUPPopupElement.$placements.$bottom.$start.$resizeWidth,
       WUPPopupElement.$placements.$top.$start.$resizeWidth,
     ];
-    p.$options.maxWidthByTarget = true;
     p.$options.offset = [-2, 0];
     p.setAttribute("error", "");
     // p.setAttribute("role", "alert");
@@ -948,6 +932,10 @@ export default abstract class WUPBaseControl<
   #refErrTarget?: HTMLElement;
   /** Method called to show error and set invalid state on input; point null to show all validation rules with checkpoints */
   protected goShowError(err: string, target: HTMLElement): void {
+    if (!err) {
+      this.throwError(new Error("missed error message"));
+      return;
+    }
     if (this._errMsg === err) {
       return;
     }
@@ -964,24 +952,21 @@ export default abstract class WUPBaseControl<
 
     this._opts.validationShowAll && this.renderValidations(this.$refError);
 
-    /* istanbul ignore else */
-    if (err !== null) {
-      this.#refErrTarget = target;
-      (target as HTMLInputElement).setCustomValidity?.call(target, err);
-      this.setAttribute("invalid", "");
-      const lbl = this.$refTitle.textContent;
-      this.$refError.firstElementChild!.textContent = lbl ? `${this.#ctr.$ariaError} ${lbl}:` : "";
-      const el = this.$refError.children.item(1)!;
-      el.textContent = err;
+    this.#refErrTarget = target;
+    (target as HTMLInputElement).setCustomValidity?.call(target, err);
+    this.setAttribute("invalid", "");
+    const lbl = this.$refTitle.textContent;
+    this.$refError.firstElementChild!.textContent = lbl ? `${this.#ctr.$ariaError} ${lbl}:` : "";
+    const el = this.$refError.children.item(1)!;
+    el.textContent = err;
 
-      const renderedErr = (this.$refError as StoredRefError)._wupVldItems?.find((li) => li.textContent === err);
-      this.setAttr.call(el, "class", renderedErr ? this.#ctr.classNameHidden : null);
+    const renderedErr = (this.$refError as StoredRefError)._wupVldItems?.find((li) => li.textContent === err);
+    this.setAttr.call(el, "class", renderedErr ? this.#ctr.classNameHidden : null);
 
-      target.setAttribute("aria-describedby", this.$refError.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
-      if (!this.$isFocused) {
-        this.$refError!.setAttribute("role", "alert"); // force to announce error when focus is already missed
-        renderedErr?.scrollIntoView();
-      }
+    target.setAttribute("aria-describedby", this.$refError.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
+    if (!this.$isFocused) {
+      this.$refError!.setAttribute("role", "alert"); // force to announce error when focus is already missed
+      renderedErr?.scrollIntoView();
     }
   }
 
@@ -1102,8 +1087,9 @@ export default abstract class WUPBaseControl<
       this.setClearState();
       return null;
     }
-
-    this.$isDirty = true;
+    if (reason !== SetValueReasons.initValue && reason !== SetValueReasons.manual) {
+      this.$isDirty = true;
+    }
     const isChanged = !this.#ctr.$isEqual(v, prev);
     if (!isChanged) {
       return false;

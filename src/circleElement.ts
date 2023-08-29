@@ -31,7 +31,7 @@ declare global {
        *     setTimeout(()=>popup.innerHTML=...);
        *     return ""
        *  }] */
-      tooltip?: string | ((item: Item, popup: WUPPopupElement) => string);
+      tooltip?: string | ((item: Item & { percentage: number }, popup: WUPPopupElement) => string);
     }
     interface SVGItem extends SVGPathElement {
       _relatedItem: Item;
@@ -116,7 +116,7 @@ declare global {
  * const el = document.createElement("wup-circle");
  * el.$options.items = [{value:20}]; // etc.
  * document.body.appendChild(el); */
-export default class WUPCircleElement extends WUPBaseElement {
+export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options> {
   #ctr = this.constructor as typeof WUPCircleElement;
 
   static get observedOptions(): Array<keyof WUP.Circle.Options> {
@@ -125,10 +125,6 @@ export default class WUPCircleElement extends WUPBaseElement {
 
   static get observedAttributes(): Array<LowerKeys<WUP.Circle.Attributes>> {
     return ["items", "width", "back", "corner", "from", "to", "min", "max", "space", "minsize"];
-  }
-
-  static get nameUnique(): string {
-    return "WUPCircleElement";
   }
 
   static get $styleRoot(): string {
@@ -205,12 +201,10 @@ export default class WUPCircleElement extends WUPBaseElement {
     hoverHideTimeout: 0,
   };
 
-  $options: WUP.Circle.Options = {
-    ...this.#ctr.$defaults,
-    items: [],
-  };
-
-  protected override _opts = this.$options;
+  constructor() {
+    super();
+    this._opts.items = [];
+  }
 
   $refSVG = this.make("svg");
   $refItems = this.make("g");
@@ -244,7 +238,7 @@ export default class WUPCircleElement extends WUPBaseElement {
     angleMin: number,
     angleMax: number,
     space: number,
-    minSize: number,
+    minSizeDeg: number,
     animTime: number,
     items: WUP.Circle.Options["items"]
   ): Array<{ angleFrom: number; angleTo: number; ms: number }> {
@@ -262,41 +256,43 @@ export default class WUPCircleElement extends WUPBaseElement {
     const arr: MappedItem[] = items.map((s) => {
       const v = mathScaleValue(s.value, valueMin, valueMax, angleMin, angleMax) - angleMin;
       const a = { angleFrom: 0, angleTo: 0, ms: 0, v };
-      if (v !== 0 && v < minSize) {
-        diff += minSize - v; // gather sum of difference to apply later
+      if (v !== 0 && v < minSizeDeg) {
+        diff += minSizeDeg - v; // gather sum of difference to apply later
         ++diffCnt;
-        a.v = minSize; // not allow angle to be < minSize
+        a.v = minSizeDeg; // not allow angle to be < minSize
       }
       return a;
     });
     // smash difference to other segments
-    if (diff !== 0) {
+    if (diff !== 0 && arr.length !== 1) {
       let cnt = arr.length - diffCnt;
       arr.forEach((a) => {
-        if (a.v > minSize) {
+        if (a.v > minSizeDeg) {
           let v = diff / cnt;
           let next = a.v - v;
-          if (next < minSize) {
-            v -= minSize - next;
-            next = minSize;
+          if (next < minSizeDeg) {
+            v -= minSizeDeg - next;
+            next = minSizeDeg;
           }
           a.v = next;
           diff -= v;
           --cnt;
         }
       });
+
+      if (diff > 0) {
+        // possible issue when items so many that we don't have enough-space
+        console.error(
+          "WUP-CIRCLE. Impossible to increase segments up to $options.minSize. Change [minSize] or filter items yourself. arguments:",
+          { valueMin, valueMax, angleMin, angleMax, space, minSize: minSizeDeg, animTime, items }
+        );
+        // assign values without minSize
+        items.forEach((s, i) => {
+          arr[i].v = mathScaleValue(s.value, valueMin, valueMax, angleMin, angleMax) - angleMin;
+        });
+      }
     }
-    if (diff > 0) {
-      // possible issue when items so many that we don't have enough-space
-      console.error(
-        "WUP-CIRCLE. Impossible to increase segments up to $options.minSize. Change [minSize] or filter items yourself. arguments:",
-        { valueMin, valueMax, angleMin, angleMax, space, minSize, animTime, items }
-      );
-      // assign values without minSize
-      items.forEach((s, i) => {
-        arr[i].v = mathScaleValue(s.value, valueMin, valueMax, angleMin, angleMax) - angleMin;
-      });
-    }
+
     // calc result
     const totalAngle = angleMax - angleMin;
     arr.forEach((a) => {
@@ -317,12 +313,16 @@ export default class WUPCircleElement extends WUPBaseElement {
     const angleMax = this._opts.to;
     const vMin = this._opts.min ?? 0;
     const vMax = this._opts.max ?? 360;
-    const { items } = this._opts;
+    const { items, minsize, corner, width } = this._opts;
 
     const style = getComputedStyle(this);
     const animTime = parseMsTime(style.getPropertyValue("--anim-time"));
 
-    const arr = this.mapItems(vMin, vMax, angleMin, angleMax, this._opts.space, this._opts.minsize, animTime, items);
+    // calc min possible segment size so cornerR can fit
+    const inR = radius - width + corner * width;
+    const minDegCorner = (Math.min(width, width * 2 * corner) * 180) / Math.PI / inR; // min segment degrees according to corner radius
+    const minDeg = Math.max(minsize, minDegCorner);
+    const arr = this.mapItems(vMin, vMax, angleMin, angleMax, this._opts.space, minDeg, animTime, items);
 
     // render background circle
     if (this._opts.back) {
@@ -371,7 +371,7 @@ export default class WUPCircleElement extends WUPBaseElement {
     if (items.length === 1) {
       this.$refLabel = this.$refLabel ?? this.appendChild(document.createElement("strong"));
       const rawV = items[0].value;
-      const perc = Math.round(((arr[0].angleTo - this._opts.from) * 100) / (this._opts.to - this._opts.from));
+      const perc = mathScaleValue(rawV, vMin, vMax, 0, 100);
       this.renderLabel(this.$refLabel, perc, rawV);
       ariaLbl = this.$refLabel.textContent!;
     } else {
@@ -396,10 +396,16 @@ export default class WUPCircleElement extends WUPBaseElement {
       const y = r.y + segment._center.y * scale;
       return DOMRect.fromRect({ x, y, width: 0.01, height: 0.01 });
     };
-    const item = segment._relatedItem;
+    const total = this.$options.items.reduce((sum, a) => sum + a.value, 0);
+    const item = { ...segment._relatedItem, percentage: mathScaleValue(segment._relatedItem.value, 0, total, 0, 100) };
     const lbl = item.tooltip!;
+
     popup.innerText =
-      typeof lbl === "function" ? lbl.call(this, item, popup) : lbl.replace("{#}", item.value.toString());
+      typeof lbl === "function"
+        ? lbl.call(this, item, popup)
+        : lbl
+            .replace("{#}", item.value.toString())
+            .replace("{#%}", `${(Math.round(item.percentage * 10) / 10).toString()}%`);
 
     return this.appendChild(popup);
   }
@@ -468,7 +474,7 @@ export default class WUPCircleElement extends WUPBaseElement {
   /** Called every time as need text-value */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   renderLabel(label: HTMLElement, percent: number, rawValue: number): void {
-    label.textContent = `${percent}%`;
+    label.textContent = `${Math.round(percent)}%`;
   }
 
   /** Returns svg-path for Arc according to options */
@@ -518,10 +524,8 @@ export function drawArc(
 
   const inR = r - width;
   const circumference = Math.abs(angleTo - angleFrom);
-  cornerR = Math.min(width / 2, width * cornerR);
-  if (360 * (cornerR / (Math.PI * (r - width))) > Math.abs(angleFrom - angleTo)) {
-    cornerR = (circumference / 360) * inR * Math.PI;
-  }
+  const maxCorner = (circumference / 360) * Math.PI * (r - width / 2);
+  cornerR = Math.min(width / 2, width * cornerR, maxCorner);
 
   // inner and outer radiuses
   const inR2 = inR + cornerR;

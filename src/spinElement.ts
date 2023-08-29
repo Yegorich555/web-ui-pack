@@ -1,5 +1,4 @@
 import WUPBaseElement from "./baseElement";
-import objectClone from "./helpers/objectClone";
 import { px2Number, styleTransform } from "./helpers/styleHelpers";
 import { getOffset } from "./popup/popupPlacements";
 
@@ -75,7 +74,9 @@ declare global {
  * </button>
  * ```
  */
-export default class WUPSpinElement extends WUPBaseElement {
+export default class WUPSpinElement<
+  TOptions extends WUP.Spin.Options = WUP.Spin.Options
+> extends WUPBaseElement<TOptions> {
   #ctr = this.constructor as typeof WUPSpinElement;
 
   static get observedOptions(): Array<keyof WUP.Spin.Options> {
@@ -84,10 +85,6 @@ export default class WUPSpinElement extends WUPBaseElement {
 
   static get observedAttributes(): Array<LowerKeys<WUP.Spin.Attributes>> {
     return ["inline", "overflowfade", "fit"];
-  }
-
-  static get nameUnique(): string {
-    return "WUPSpinElement";
   }
 
   static get $styleRoot(): string {
@@ -121,17 +118,17 @@ export default class WUPSpinElement extends WUPBaseElement {
         pointer-events: none;
       }
       :host,
-      :host div {
+      :host>div {
         display: inline-block;
         box-sizing: border-box;
         border-radius: 50%;
       }
-      :host div {
+      :host>div {
         animation: WUP-SPIN-1 var(--spin-speed) linear infinite;
         width: 100%; height: 100%;
         left:0; top:0;
       }
-      :host div[fade] {
+      :host>div[fade] {
          display: block;
          position: absolute;
          left:0; top:0;
@@ -142,7 +139,7 @@ export default class WUPSpinElement extends WUPBaseElement {
          z-index: -1;
          background: var(--spin-fade);
       }
-      :host div[fade]::after { content: none; }
+      :host>div[fade]::after { content: none; }
       ${this.$styleApplied}`;
   }
 
@@ -152,9 +149,6 @@ export default class WUPSpinElement extends WUPBaseElement {
   };
 
   static _itemsCount = 1;
-
-  $options: WUP.Spin.Options = objectClone(this.#ctr.$defaults);
-  protected override _opts = this.$options;
 
   /** Force to update position (when options changed) */
   $refresh(): void {
@@ -324,14 +318,8 @@ export default class WUPSpinElement extends WUPBaseElement {
     if (this.$refFade) {
       styleTransform(this.$refFade, "translate", `${r.left - left}px,${r.top - top}px`);
       styleTransform(this.$refFade, "scale", scale === 1 || !scale ? "" : `${1 / scale}`);
-      /* istanbul ignore else */
-      if (this.$refFade.clientWidth !== r.width) {
-        this.$refFade.style.width = `${r.width}px`;
-      }
-      /* istanbul ignore else */
-      if (this.$refFade.clientWidth !== r.height) {
-        this.$refFade.style.height = `${r.height}px`;
-      }
+      this.$refFade.style.width = `${r.width}px`;
+      this.$refFade.style.height = `${r.height}px`;
     }
 
     return r;
@@ -355,7 +343,7 @@ export function spinUseRing(cls: typeof WUPSpinElement): void {
   spinSetStyle(
     cls,
     1,
-    () => `:host div {
+    () => `:host>div {
         border: var(--spin-item-size) solid var(--spin-1);
         border-top-color: var(--spin-2);
       }`
@@ -369,7 +357,7 @@ export function spinUseDualRing(cls: typeof WUPSpinElement): void {
     1,
     () =>
       `:root { --spin-2: transparent; }
-       :host div {
+       :host>div {
          border: var(--spin-item-size) solid;
          border-color: var(--spin-2) var(--spin-1) var(--spin-2) var(--spin-1);
       }`
@@ -391,11 +379,11 @@ export function spinUseTwinDualRing(cls: typeof WUPSpinElement): void {
           --spin-item-size: max(1px, calc(var(--spin-size) / 12));
        }
        :host { position: relative; }
-       :host div:nth-child(1) {
+       :host>div:nth-child(1) {
           border: var(--spin-item-size) solid;
           border-color: transparent var(--spin-1) transparent var(--spin-1);
        }
-       :host div:nth-child(2) {
+       :host>div:nth-child(2) {
           border: var(--spin-item-size) solid;
           border-color: var(--spin-2) transparent var(--spin-2) transparent;
           position: absolute;
@@ -414,11 +402,11 @@ export function spinUseRoller(cls: typeof WUPSpinElement): void {
   spinSetStyle(cls, cnt, () => {
     let s = "";
     for (let i = 1; i <= cnt - 1; ++i) {
-      s += `:host div:nth-child(${i}) { animation-delay: -0.${15 * (cnt - i)}s }
+      s += `:host>div:nth-child(${i}) { animation-delay: -0.${15 * (cnt - i)}s }
         `;
     }
     return `:host { position: relative; }
-            :host div {
+            :host>div {
               animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
               position: absolute;
               border: var(--spin-item-size) solid;
@@ -434,17 +422,17 @@ export function spinUseDotRoller(cls: typeof WUPSpinElement): void {
   spinSetStyle(cls, cnt, () => {
     let s = "";
     for (let i = 1; i <= cnt; ++i) {
-      s += `:host div:nth-child(${i}) { animation-delay: -${0.036 * i}s; }
-            :host div:nth-child(${i})::after { transform: rotate(calc(45deg + var(--spin-step) * ${i - 1})); }
+      s += `:host>div:nth-child(${i}) { animation-delay: -${0.036 * i}s; }
+            :host>div:nth-child(${i})::after { transform: rotate(calc(45deg + var(--spin-step) * ${i - 1})); }
             `;
     }
     return `:root { --spin-step: 24deg; }
             :host { position: relative; }
-            :host div {
+            :host>div {
               animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
               position: absolute;
             }
-            :host div::after {
+            :host>div::after {
               content: " ";
               display: block;
               position: absolute;
@@ -466,8 +454,8 @@ export function spinUseDotRing(cls: typeof WUPSpinElement): void {
   spinSetStyle(cls, cnt, () => {
     let s = "";
     for (let i = 1; i <= cnt; ++i) {
-      s += `:host div:nth-child(${i})::after { animation-delay: ${0.1 * (i - 1)}s; }
-            :host div:nth-child(${i}) { transform: translate(-50%,-50%) rotate(${(360 / cnt) * (i - 1)}deg) }
+      s += `:host>div:nth-child(${i})::after { animation-delay: ${0.1 * (i - 1)}s; }
+            :host>div:nth-child(${i}) { transform: translate(-50%,-50%) rotate(${(360 / cnt) * (i - 1)}deg) }
             `;
     }
     return `@keyframes WUP-SPIN-2 {
@@ -476,14 +464,14 @@ export function spinUseDotRing(cls: typeof WUPSpinElement): void {
             }
             :root { --spin-2: #ff5200; }
             :host { position: relative; }
-            :host div {
+            :host>div {
               position: absolute;
               width: calc(100% / 1.4142135623730951);
               height: calc(100% / 1.4142135623730951);
               animation: none;
               top:50%; left:50%;
             }
-            :host div::after {
+            :host>div::after {
               animation: WUP-SPIN-2 var(--spin-speed) linear infinite;
               content: " ";
               display: block;
@@ -502,7 +490,7 @@ export function spinUseSpliceRing(cls: typeof WUPSpinElement): void {
   spinSetStyle(cls, cnt, () => {
     let s = "";
     for (let i = 1; i <= cnt; ++i) {
-      s += `:host div:nth-child(${i}) {
+      s += `:host>div:nth-child(${i}) {
                 animation-delay: -${0.1 * (cnt - i)}s;
                 transform: rotate(${(360 / cnt) * (i - 1)}deg);
               }
@@ -513,7 +501,7 @@ export function spinUseSpliceRing(cls: typeof WUPSpinElement): void {
             }
             :root { --spin-item-size: calc(var(--spin-size) / 10); }
             :host { position: relative; }
-            :host div {
+            :host>div {
               animation: WUP-SPIN-3 var(--spin-speed) linear infinite;
               position: absolute;
               width: calc(var(--spin-size) / 4);

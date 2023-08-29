@@ -1,5 +1,51 @@
 # Changelog
 
+## 0.8.1 (\_\_\_)
+
+**BREAKING CHANGES**:
+
+- **Internals** (**Note:** If you haven't created custom Elements inherrited from WUP... - don't pay attention on it).
+  - Refactored `$options` initialization. So all inherrited Elemenents must override only `$defaults` and use `TOptions` as generic instead of overriding $options like it was before.
+  - Deprecated static property **nameUnique**
+  - **Controls**. Dsiable `maxWidthByTarget` for error-popup
+  - **Global**. Improved styles performance via refactoring selectors
+
+**Fixes**:
+
+- **Text based controls**
+  - _$initValue + click on button[clear] + Ctrl+Z => history undo does't work_
+  - _button[clear] isn't updated on `$initValue` or `$options.clearActions` changing_
+  - _wrong behavior_when user removes/inserts text in the start_
+- [SelectControl](src/controls/select.ts)
+  - _clearing input + click outside doesn't clear value_
+  - _`$options.readOnlyInput=7` must be ignored when `allowNewValue` enabled_
+  - improved input delete behavior for `$options.multiple`
+  - _menu isn't refreshed after button-clear click_
+  - _selected menu-item isn't into view sometimes with 1st opening popup_
+- **Combobox controls (Select, Date, Time)**. _Popup shows/hides when user select text with mouseUp on label (outside input)_
+- [CalendarControl](src/controls/calendar.ts). _`$value=undefined` doesn't reset selected_
+- [NumberControl](src/controls/number.ts).
+  - _Alt+MouseWheel changes ±0.1 when decimal isn't allowed_
+  - _Alt+MouseWheel changes ±0.1 but Alt-keyUp moves focus to browser panel_
+- [CircleElement](src/circleElement.ts).
+  - _wrong tooltip position when segment is half of circle_
+  - _wrong console.error when `items=[{value:2}]`_
+  - _wrong label-value when item value < opion **minsize**_
+  - _edges of small segment are not rounded according to corner_
+- [TimeControl](src/controls/time.ts).
+  - _menu items with wrong sizes and text not aligned_
+  - _extra pixel when scrolled if content size is decimal h=239.7_
+
+**New/Features**:
+
+- **Controls**. Event `$change` and callback `$onChange` has prop `SetValueReason.initValue` now
+- **Internals**. Improved memory consumption & performance via excluding nested props of $options to be observed
+- **Text based controls**
+  - History undo/redo (Ctrl+Z, Ctrl+Y, Ctrl+Shift+Z). Refactored, fixed & optimized via storing only changes
+- [PopupElement](src/popup/popupElement.ts). Added showCase **alwaysOff** (popup hidden by default)
+- [CircleElement](src/circleElement.ts). Added percentage for tooltips
+- [TimeControl](src/controls/time.ts). Added option `menuButtonsOff` to hide buttons
+
 ## 0.7.1 (Jul 24, 2023)
 
 **BREAKING CHANGES**:
@@ -8,19 +54,19 @@
 
 **Fixes**:
 
-- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts).
-  - _Menu scrolled to 1st selected item if even select last one (when multiple is allowed)_
+- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts)
+  - _menu scrolled to 1st selected item if even select last one (when multiple is allowed)_
   - _$options.items[0] !== items[0] because wrapped to observer_
   - _Unable to clear value with Backspace+Enter_
 - [SelectManyControl](src/controls/selectMany.ts). _Menu hides when user selects all items - but it's maybe wrong_
-- [RadioControl](src/controls/radio.ts).
+- [RadioControl](src/controls/radio.ts)
   - _$options.items[0] !== items[0] because wrapped to observer_
   - _`$options.readOnly` doesn't work - user able to change value_
-- [CalendarControl](src/controls/calendar.ts).
+- [CalendarControl](src/controls/calendar.ts)
   - _Wrong size of monthPicker if previously scroll dayPicker to min/max date_
   - _User can't scroll when `$initValue` > `$options.max`_
 - [DateControl](src/controls/date.ts). _Menu isn't closed if click on the selected date_
-- [TextareaControl](src/controls/textarea.ts).
+- [TextareaControl](src/controls/textarea.ts)
   - _Exception when try to clear empty control_
   - _`Ctrl + Z` doesn't revert changes_
 - [NumberControl](src/controls/number.ts). _option `format` isn't applied on init_
@@ -112,13 +158,13 @@
 **Fixes**:
 
 - **Controls**. _Need to add border by default otherwise it's invisible on the white body_
-- **CircleElement**. _Wrong tooltip position when segment is half of circle_
+- [CircleElement](src/circleElement.ts). _Wrong tooltip position when segment is half of circle_
 
 ## 0.5.0 (Mar 27, 2023)
 
 **BREAKING CHANGES**:
 
-- Internals. Methods `getNumAttr`, `getRefAttr`, `getBoolAttr` is refactored to single `getAttr`
+- **Internals**. Methods `getNumAttr`, `getRefAttr`, `getBoolAttr` is refactored to single `getAttr`
 - [SelectControl](src/controls/select.ts). Simplified menu styling
 - [PopupElement](src/popup/popupElement.ts). Prop `$isOpen` deprecated in favor of `$isShown`
 

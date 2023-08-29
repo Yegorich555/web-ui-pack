@@ -30,6 +30,7 @@ export default function SpinView() {
       className={styles.pageSpin}
       details={{
         tag: "wup-spin",
+        linkDemo: "demo/src/components/spin/spinView.tsx",
         cssVarAlt: new Map([["--spin-step", "Used for specific types"]]),
       }}
       features={[

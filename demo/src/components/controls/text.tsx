@@ -16,6 +16,7 @@ export default function TextControlView() {
       link="src/controls/text.ts"
       details={{
         tag: "wup-text",
+        linkDemo: "demo/src/components/controls/text.tsx",
         cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
       }}
       features={[
@@ -112,13 +113,25 @@ export default function TextControlView() {
             name="phone"
             label="Phone number"
             mask="+0 (000) 000-0000"
+            // initValue="+1 (234) 567-8901"
             ref={(el) => {
               if (el) {
                 el.$options.validations = { required: true };
               }
             }}
           />
-          <wup-text name="ipaddr" label="IPaddress" mask="##0.##0.##0.##0" maskholder="xxx.xxx.xxx.xxx" />
+          <wup-text
+            name="ipaddr"
+            label="IPaddress"
+            mask="##0.##0.##0.##0"
+            maskholder="xxx.xxx.xxx.xxx"
+            // initValue="123.4.5.67"
+            ref={(el) => {
+              if (el) {
+                el.$options.autoFocus = false;
+              }
+            }}
+          />
           <wup-text
             name="num"
             label="With prefix/postfix & mask"

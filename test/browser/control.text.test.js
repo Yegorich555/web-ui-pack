@@ -23,12 +23,23 @@ describe("control.text", () => {
     await page.type("#trueEl input", "Hi there", { delay: 10 });
     expect(await page.evaluate(() => document.getElementById("trueEl").$refInput.value)).toBe("Hi there");
     await histUndo();
-    expect(await page.evaluate(() => document.getElementById("trueEl").$refInput.value)).toBe("Hi ther");
+    expect(await page.evaluate(() => document.getElementById("trueEl").$refInput.value)).toBe("Hi");
     await histUndo();
-    expect(await page.evaluate(() => document.getElementById("trueEl").$refInput.value)).toBe("Hi the");
+    expect(await page.evaluate(() => document.getElementById("trueEl").$refInput.value)).toBe("");
     await histRedo({ isCtrlY: false, isMeta: true });
-    expect(await page.evaluate(() => document.getElementById("trueEl").$refInput.value)).toBe("Hi ther");
+    expect(await page.evaluate(() => document.getElementById("trueEl").$refInput.value)).toBe("Hi");
     await histRedo({ isCtrlY: true, isMeta: false });
     expect(await page.evaluate(() => document.getElementById("trueEl").$refInput.value)).toBe("Hi there");
+
+    await page.evaluate(() => {
+      const el = document.body.appendChild(document.createElement("wup-text"));
+      el.id = "newEl";
+      el.$initValue = "Mike";
+    });
+    await page.waitForTimeout(2); // timeout required because of debounceFilters
+    await page.click("#newEl [clear]");
+    expect(await page.evaluate(() => document.getElementById("newEl").$refInput.value)).toBe("");
+    await histUndo();
+    expect(await page.evaluate(() => document.getElementById("newEl").$refInput.value)).toBe("Mike");
   });
 });

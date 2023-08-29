@@ -19,8 +19,7 @@ beforeEach(() => {
   jest.useFakeTimers();
   nextFrame = h.useFakeAnimation().nextFrame;
   ul = document.body.appendChild(document.createElement("ul"));
-  jest.spyOn(ul, "offsetHeight", "get").mockImplementation(() => 100);
-  jest.spyOn(ul, "offsetWidth", "get").mockImplementation(() => 60);
+  h.setupLayout(ul, { x: 0, y: 0, h: 100, w: 60 });
 });
 
 afterEach(() => {

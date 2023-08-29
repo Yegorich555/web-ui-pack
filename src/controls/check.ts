@@ -44,13 +44,10 @@ declare global {
  * </label>
  */
 export default class WUPCheckControl<
+  TOptions extends WUP.Check.Options = WUP.Check.Options,
   EventMap extends WUP.Check.EventMap = WUP.Check.EventMap
-> extends WUPSwitchControl<EventMap> {
+> extends WUPSwitchControl<TOptions, EventMap> {
   #ctr = this.constructor as typeof WUPCheckControl;
-
-  static get nameUnique(): string {
-    return "WUPCheckControl";
-  }
 
   static get $styleRoot(): string {
     return `:root {
@@ -111,12 +108,6 @@ export default class WUPCheckControl<
     ...WUPSwitchControl.$defaults,
     validationRules: { ...WUPSwitchControl.$defaults.validationRules },
   };
-
-  $options: WUP.Check.Options = {
-    ...this.#ctr.$defaults,
-  };
-
-  protected override _opts = this.$options;
 }
 
 customElements.define(tagName, WUPCheckControl);

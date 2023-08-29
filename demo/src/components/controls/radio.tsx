@@ -41,6 +41,7 @@ export default function RadioControlView() {
       ]}
       details={{
         tag: "wup-radio",
+        linkDemo: "demo/src/components/controls/radio.tsx",
         cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
       }}
     >

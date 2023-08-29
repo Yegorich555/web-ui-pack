@@ -23,7 +23,7 @@ export default function PopupView() {
 
   function changeOffset(v: number, i: number) {
     const o = opts.offset || [0, 0, 0, 0];
-    o[i] = v;
+    (o as Array<number>)[i] = v;
     setOpts({ offset: o });
   }
 
@@ -39,7 +39,7 @@ export default function PopupView() {
     <Page
       header="PopupElement"
       link="src/popup/popupElement.ts"
-      details={{ tag: "wup-popup" }}
+      details={{ tag: "wup-popup", linkDemo: "demo/src/components/popup/popupView.tsx" }}
       features={[
         "The main goal: place inside visible area without oveflow of target",
         <>
@@ -60,7 +60,7 @@ export default function PopupView() {
             <input
               type="number"
               onChange={(e) => changeOffset(+e.target.value, i)}
-              defaultValue={opts.offset && opts.offset[i]}
+              defaultValue={opts.offset && (opts.offset as Array<number>)[i]}
             />
           </label>
         ))}

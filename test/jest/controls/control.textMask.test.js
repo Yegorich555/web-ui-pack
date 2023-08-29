@@ -597,6 +597,7 @@ describe("control.text: mask", () => {
 
     h.setInputCursor(el.$refInput, "$ 5 USD|");
     await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
+    expect(h.getInputCursor(el.$refInput)).toBe("$ 52| USD");
     await h.wait(150);
     expect(h.getInputCursor(el.$refInput)).toBe("$ 52| USD");
 
@@ -815,18 +816,33 @@ describe("control.text: mask", () => {
     expect(h.getInputCursor(el.$refInput)).toBe("1|3.4.5.6");
     expect(await h.userUndo(el.$refInput)).toBe("1|23.4.5.6"); // rollback before #3
     expect(await h.userUndo(el.$refInput)).toBe("123.4.5.67|"); // rollback before #2
-    expect(await h.userUndo(el.$refInput)).toBe("123.4.5.6|"); // rollback before #1
-    expect(await h.userUndo(el.$refInput)).toBe("123.4.5.|");
-    expect(await h.userUndo(el.$refInput)).toBe("123.4.5|");
+    expect(await h.userUndo(el.$refInput)).toBe("123.4.5|"); // rollback before #1
+    expect(await h.userUndo(el.$refInput)).toBe("123.4|");
+    expect(await h.userUndo(el.$refInput)).toBe("123.|");
 
     // cover Ctrl+Shift+Z
-    expect(await h.userRedo(el.$refInput, { useCtrlY: true })).toBe("123.4.5.|");
-    expect(await h.userRedo(el.$refInput)).toBe("123.4.5.6|");
+    expect(await h.userRedo(el.$refInput, { useCtrlY: true })).toBe("123.4|");
+    expect(await h.userRedo(el.$refInput)).toBe("123.4.5|");
     expect(await h.userRedo(el.$refInput)).toBe("123.4.5.67|");
-    expect(await h.userRedo(el.$refInput)).toBe("1|23.4.5.6");
+    expect(await h.userRedo(el.$refInput)).toBe("123.4.5.6|");
+
+    h.setInputCursor(el.$refInput, "1|23.4.5.6");
+    expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("1|3.4.5.6"); // #3 remove middle char
+    expect(await h.userUndo(el.$refInput)).toBe("1|23.4.5.6"); // rollback before #3
+    expect(await h.userRedo(el.$refInput)).toBe("1|3.4.5.6");
+    expect(await h.userUndo(el.$refInput)).toBe("1|23.4.5.6");
+
+    h.setInputCursor(el.$refInput, "12|3.4.5.6");
+    expect(await h.userRemove(el.$refInput)).toBe("1|3.4.5.6"); // #3 remove middle char
+    expect(await h.userUndo(el.$refInput)).toBe("12|3.4.5.6"); // rollback before #3
+    expect(await h.userRedo(el.$refInput)).toBe("1|3.4.5.6"); // rollback before #3
+    expect(await h.userUndo(el.$refInput)).toBe("12|3.4.5.6"); // rollback before #3
+
+    expect(await h.userTypeText(el.$refInput, "123")).toBe("123.|");
+    expect(await h.userUndo(el.$refInput)).toBe("12|"); // expected that history removes also extra '.' that added by mask
 
     // test again on simple case
-    el = document.body.appendChild(document.createElement("wup-text"));
+    el = document.body.appendChild(document.createElement(el.tagName));
     el.$options.mask = "+1(000) 000";
     await h.wait(1);
     h.setInputCursor(el.$refInput, "+1(|");
@@ -859,33 +875,43 @@ describe("control.text: mask", () => {
     await h.wait();
     expect(el.$refInput.value).toBe(""); // input must be cleared by blur if was only prefix
 
+    // declineInput + undo
+    expect(await h.userTypeText(el.$refInput, "23456789", { clearPrevious: false, slow: false })).toBe("+1(234) 5679|");
+    await h.wait();
+    expect(h.getInputCursor(el.$refInput)).toBe("+1(234) 567|"); // last char is declined
+    expect(el._refHistory._hist).toMatchInlineSnapshot(`
+      [
+        "  23",
+        " 4) ",
+        "  567",
+      ]
+    `);
+    expect(await h.userUndo(el.$refInput)).toBe("+1(234) |");
+    expect(await h.userUndo(el.$refInput)).toBe("+1(23|");
+    expect(await h.userUndo(el.$refInput)).toBe("+1(|");
+    expect(await h.userRedo(el.$refInput)).toBe("+1(23|");
+    expect(await h.userRedo(el.$refInput)).toBe("+1(234) |");
+    expect(await h.userRedo(el.$refInput)).toBe("+1(234) 567|");
+
     // cover case when !selectionStart
+    el = document.body.appendChild(document.createElement(el.tagName));
     el.$options.mask = "##0";
     el.$value = "";
     await h.wait(1);
     await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
     h.setInputCursor(el.$refInput, "|2");
     expect(await h.userUndo(el.$refInput)).toBe("|");
-    expect(await h.userRedo(el.$refInput)).toBe("|2");
+    expect(await h.userRedo(el.$refInput)).toBe("2|");
 
     // cover case when not canHandleUndo
+    // const saved = el._refHistory;
     el.$value = "";
     el.$options.mask = undefined;
     el.canHandleUndo = () => false;
+    el._refHistory = undefined;
     await h.wait(1);
     expect(el.canHandleUndo()).toBe(false);
-    expect(() => el.historyUndoRedo()).not.toThrow();
-    expect(() => el.declineInput()).toThrow();
-
-    el.$value = "";
-    await h.wait(1);
-    el.canHandleUndo = () => true;
-    await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
-    expect(el.$refInput.value).toBe("2");
-    el.declineInput(); // despite on manuall decline
-    expect(el.$refInput.value).toBe("2");
-    await h.wait(150);
-    expect(el.$refInput.value).toBe("");
+    expect(() => el.declineInput()).not.toThrow(); // because it doesn't depend on history
 
     // more tests
     el = document.body.appendChild(document.createElement("wup-text"));
@@ -904,7 +930,7 @@ describe("control.text: mask", () => {
     expect(await h.userInsertText(el.$refInput, "12345678901")).toBe("+1 (234) 567-8901|");
     h.setInputCursor(el.$refInput, "|+1 (234) 567-8901|"); // select all
     expect(await h.userRemove(el.$refInput)).toBe("+|");
-    expect(await h.userUndo(el.$refInput)).toBe("+1 (234) 567-8901|");
+    expect(await h.userUndo(el.$refInput)).toBe("|+1 (234) 567-8901|");
     expect(await h.userUndo(el.$refInput)).toBe("+|");
     expect(onGotInput).toBeCalled();
     onGotInput.mockClear();
@@ -945,6 +971,7 @@ describe("control.text: mask", () => {
     expect(el.refMask).toBeDefined();
     el.$options.mask = undefined;
     await h.wait(1);
+    el.$refInput.dispatchEvent(new InputEvent("beforeinput", { bubbles: true }));
     el.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
     expect(el.refMask).toBeUndefined();
 

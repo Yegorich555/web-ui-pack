@@ -68,18 +68,14 @@ declare global {
   // or HTML
   <wup-form>
     <wup-date name="dateOfBirhday" utc initvalue="1990-10-24" min="1930-01-01" max="2010-01-01"/>
-  </wup-form>;
- */
+  </wup-form>; */
 export default class WUPDateControl<
   ValueType extends Date = Date,
+  TOptions extends WUP.Date.Options = WUP.Date.Options,
   EventMap extends WUP.Date.EventMap = WUP.Date.EventMap
-> extends WUPBaseComboControl<ValueType, EventMap> {
+> extends WUPBaseComboControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPDateControl;
-
-  static get nameUnique(): string {
-    return "WUPDateControl";
-  }
 
   static get $styleRoot(): string {
     return `:root {
@@ -92,11 +88,11 @@ export default class WUPDateControl<
       :host {
         --ctrl-icon-img: var(--ctrl-date-icon-img);
       }
-      :host wup-calendar {
-        margin: 0;
-      }
-      :host [menu] {
+      :host > [menu] {
         overflow: hidden;
+      }
+      :host > [menu] > wup-calendar {
+        margin: 0;
       }`;
   }
 
@@ -128,18 +124,14 @@ export default class WUPDateControl<
     },
     // firstWeekDay: 1,
     // format: localeInfo.date.toLowerCase()
-  };
-
-  // @ts-expect-error reason: validationRules is different
-  $options: WUP.Date.Options = {
-    ...this.#ctr.$defaults,
     utc: true,
-    format: this.#ctr.$defaults.format || localeInfo.date.toLowerCase(),
-    firstWeekDay: this.#ctr.$defaults.firstWeekDay || localeInfo.firstWeekDay,
   };
 
-  // @ts-expect-error reason: validationRules is different
-  protected override _opts = this.$options;
+  constructor() {
+    super();
+    this._opts.format = this.#ctr.$defaults.format || localeInfo.date.toLowerCase();
+    this._opts.firstWeekDay = this.#ctr.$defaults.firstWeekDay || localeInfo.firstWeekDay; // init here to depends on localeInfo
+  }
 
   /** Parse string to Date
    * @see {@link WUPCalendarControl.$parse} */
@@ -280,18 +272,14 @@ export default class WUPDateControl<
     // don't call super because validation is appeared
   }
 
-  protected override gotInput(e: WUP.Text.GotInputEvent): void {
-    super.gotInput(e, true);
-  }
-
   protected override focusMenuItem(next: HTMLElement | null): void {
     // WARN: it's important don't use call super... because the main logic is implemented inside calendar
     // can be fired from baseCombo => when need to clear selection
     const el = this.$refPopup?.firstElementChild as WUPCalendarControl;
-    /* istanbul ignore else */
     if (el) {
       (Object.getPrototypeOf(el) as WUPCalendarControl).focusItem.call(el, next);
-    } else if (!next) {
+    } else {
+      // if (!next)
       this.$refInput.removeAttribute("aria-activedescendant");
     }
     this._focusedMenuItem = next;

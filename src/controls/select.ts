@@ -39,7 +39,7 @@ declare global {
       showCase: ShowCases;
       /** Set true to make input not editable but allow select items via popup-menu (ordinary dropdown mode)
        * @tutorial
-       * * set number X to enable autoMode where input.readOnly = items.length < X */
+       * * set number X to enable autoMode where `nput.readOnly = items.length < X` */
       readOnlyInput?: boolean | number;
     }
     interface Options<T = any, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, Defaults<T, VM> {
@@ -109,8 +109,9 @@ declare global {
 export default class WUPSelectControl<
   ValueType = any | any[],
   ItemType = ValueType,
+  TOptions extends WUP.Select.Options = WUP.Select.Options,
   EventMap extends WUP.Select.EventMap = WUP.Select.EventMap
-> extends WUPBaseComboControl<ValueType, EventMap> {
+> extends WUPBaseComboControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPSelectControl;
 
@@ -124,10 +125,6 @@ export default class WUPSelectControl<
     const arr = super.observedAttributes as Array<LowerKeys<WUP.Select.Attributes>>;
     arr.push("items", "allownewvalue", "multiple");
     return arr;
-  }
-
-  static get nameUnique(): string {
-    return "WUPSelectControl";
   }
 
   static get $styleRoot(): string {
@@ -181,12 +178,10 @@ export default class WUPSelectControl<
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey | ShowCases.onInput,
   };
 
-  $options: WUP.Select.Options = {
-    ...this.#ctr.$defaults,
-    items: [],
-  };
-
-  protected override _opts = this.$options;
+  constructor() {
+    super();
+    this._opts.items = [];
+  }
 
   /** Returns whether control in pending state or not (shows spinner) */
   get $isPending(): boolean {
@@ -320,7 +315,7 @@ export default class WUPSelectControl<
       this.$isReadOnly ||
       this.$isPending ||
       r === true ||
-      (typeof r === "number" && r < (this._cachedItems?.length || 0)); // WARN: _cached items can be undefined when fetching not started yet
+      (typeof r === "number" && r > (this._cachedItems?.length || 0) && !this._opts.allowNewValue); // WARN: _cached items can be undefined when fetching not started yet
   }
 
   override setupInitValue(propsChanged: Array<keyof WUP.Select.Options> | null): void {
@@ -573,7 +568,7 @@ export default class WUPSelectControl<
     }
 
     const popup = await super.goShowMenu(showCase, e);
-    popup && this.selectMenuItemByValue(this.$value); // set aria-selected
+    popup && !this.canClearSelection && this.selectMenuItemByValue(this.$value); // set aria-selected only if input not empty
     return popup;
   }
 
@@ -731,52 +726,116 @@ export default class WUPSelectControl<
     el.style.display = hide ? "none" : "";
   }
 
-  protected override canHandleUndo(): boolean {
-    return !!this._opts.multiple;
+  /** Returns if possible to de-select menu items when input is empty */
+  private get canClearSelection(): boolean {
+    return !this.$refInput.value && !this.$isRequired && !this._opts.multiple;
+  }
+
+  protected gotBeforeInput(e: WUP.Text.GotInputEvent): void {
+    super.gotBeforeInput(e);
+
+    // handle delete-behavior
+    if (this._opts.multiple /* && this.$refInput.value.endsWith(", ") */) {
+      let isDelBack = false;
+      /* prettier-ignore */
+      switch (e.inputType) {
+        case "deleteContentBackward": isDelBack = true; break;
+        case "deleteContentForward": isDelBack = false; break;
+        default: return;
+      }
+      const pos = this.$refInput.selectionStart || 0;
+      let pos2 = this.$refInput.selectionEnd || 0;
+      const str = this.$refInput.value;
+      const isItemPart = pos < str.lastIndexOf(", ") + (isDelBack ? 3 : 2);
+      if (!isItemPart) {
+        return;
+      }
+      const delimitLength = 2; // length of ", "
+      const char = ",".charCodeAt(0);
+      if (isDelBack && !pos) {
+        return;
+      }
+      const start = isDelBack ? pos - 1 : pos;
+      let i = start;
+      for (; i !== 0; --i) {
+        if (str.charCodeAt(i) === char) {
+          if (!isDelBack || start - i >= delimitLength) {
+            i += delimitLength;
+            // case 1: // "Item 1, Item 2, |" => "Item 1, |Item 2, "
+            // case 2: // "Item 1,| Item 2, " => "|Item 1, Item 2, "
+            break;
+          }
+        }
+      }
+      if (pos === pos2) {
+        pos2 = i;
+      }
+
+      let end = str.indexOf(",", pos2);
+      end = end === -1 ? str.length : end + delimitLength;
+      this.$refInput.setSelectionRange(i, end); // select whole items(-s) so input event delete everything itself
+      // e.preventDefault(); // uncomment to check behavior manually
+    }
+  }
+
+  /** Called on input change to update menu if possible */
+  protected tryUpdateMenu(): void {
+    this.$isShown && this.filterMenuItems();
+    this.canClearSelection && this.selectMenuItem(null); // allow user clear value without pressing Enter
+  }
+
+  protected override clearValue(): void {
+    super.clearValue();
+    this.tryUpdateMenu();
   }
 
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
     this.$isShown && this.focusMenuItem(null); // reset virtual focus: // WARN it's not good enough when this._opts.multiple
-    super.gotInput(e);
+    super.gotInput(e, true); // prevent ordinary value change
 
-    const filter = (): any => this.$isShown && this.filterMenuItems();
-
-    let isChanged = false;
     // user can append item by ',' at the end or remove immediately
     if (this._opts.multiple && this.canParseInput(this.$refInput.value)) {
-      let str = this.$refInput.value;
+      const str = this.$refInput.value;
       const isDeleted = e.inputType.startsWith("deleteContent");
-      if (this.$refInput.selectionStart !== str.length && !isDeleted) {
+      const pos = this.$refInput.selectionStart || 0;
+      if (pos !== str.length && !isDeleted) {
         this.declineInput(str.length); // don't allow to type text in the middle
       } else {
-        const isRemove = str.endsWith(",") && isDeleted; // 'Item1, Item2, |' + Backspace => remove 'Item2'
-        const iEnd = str.lastIndexOf(isRemove ? ", " : ",");
-        str = str.substring(0, iEnd); // allow user filter via typing in the end of input => 'Item1, Item2,|'
-        const next = this.parseInput(str) as Array<ValueType> | undefined;
+        const iEnd = str.lastIndexOf(",");
+        const strVal = str.substring(0, iEnd); // allow user filter via typing in the end of input => 'Item1, Item2,|'
+        const next = this.parseInput(strVal) as Array<ValueType> | undefined;
         // case 1: user removes 'Item1,| Item2|' - setValue [Item1]
         // case 2: user adds `Item1,| Item2,| -- setValue [Item1, Item2]
-        isChanged = (next || []).length !== ((this.$value as Array<ValueType> | undefined) || []).length;
-        isChanged && this.setValue(next as any, SetValueReasons.userInput);
+        const nextLn = (next || []).length;
+        const prevLn = ((this.$value as Array<ValueType> | undefined) || []).length;
+        const isChanged = nextLn !== prevLn;
+        if (isChanged) {
+          this.setValue(next as any, SetValueReasons.userInput, true);
+          this.setInputValueDirect(
+            this.valueToInput(next as any) + str.substring(iEnd + 1).trimStart(),
+            SetValueReasons.userInput
+          ); // add search-part after value change
+          nextLn < prevLn && this.$refInput.setSelectionRange(pos, pos); // restore caret only if items removed
+        }
       }
     }
 
-    isChanged ? setTimeout(filter, 1) : filter(); // setValue updates input only after Promise and we need to wait for: NiceToHave deprecate value
+    this.tryUpdateMenu();
   }
 
   protected override gotFocus(e: FocusEvent): Array<() => void> {
     const r = super.gotFocus(e);
     if (this._opts.multiple) {
       if (!this.$isDisabled && !this.$isReadOnly && !this._opts.readOnlyInput && this.$refInput.value) {
-        this.$refInput.value += ", "; // add delimiter at the end
+        this.setInputValueDirect(`${this.$refInput.value}, `, SetValueReasons.userInput); // add delimiter at the end
       }
     }
     return r;
   }
 
   protected override gotFocusLost(): void {
-    if (this._opts.multiple) {
-      this.$refInput.value = this.$refInput.value.replace(/, *$/, ""); // remove delimiter
-    }
+    this._opts.multiple &&
+      this.setInputValueDirect(this.$refInput.value.replace(/, *$/, ""), SetValueReasons.userInput); // remove delimiter
     this._opts.allowNewValue && this.setValue(this.parseInput(this.$refInput.value), SetValueReasons.userInput); // to allow user left value without pressing Enter
     super.gotFocusLost();
   }
@@ -795,6 +854,8 @@ export default class WUPSelectControl<
 
 customElements.define(tagName, WUPSelectControl);
 
-// NiceToHave: option to allow autoselect item without pressing Enter
 // WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation
 // todo label for="" in Chrome sometimes enables autosuggestion - need to remove it for all controls - need to double-check ???
+// NiceToHave: add support custom items rendering when it's already appended to DOM like it works with dropdown
+
+// NiceToHave: option to allow autoselect item without pressing Enter: option: $autoComplete + aria-autocomplete: true => https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-autocomplete-both/

@@ -168,7 +168,7 @@ describe("control.date", () => {
       el.$options.exclude = [new Date("2022-07-12")];
       expect(el.validations.exclude).toMatchInlineSnapshot(`
         [
-          "2022-07-12T00:00:00.000Z",
+          2022-07-12T00:00:00.000Z,
         ]
       `);
       await h.wait(1);
@@ -294,7 +294,7 @@ describe("control.date", () => {
     }
     expect(el.$refError).toBe(undefined);
     expect(el.$value).toBe(undefined);
-
+    expect(el.$refPopup.querySelector("[aria-selected=true]")).toBeFalsy();
     // just for coverage (cases impossible in ordinary flow)
     expect(el.parseInput("b022-10-16")).toBe(undefined);
     el.$options.utc = false;

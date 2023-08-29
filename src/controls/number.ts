@@ -71,18 +71,20 @@ declare global {
  * @see {@link WUPTextControl} */
 export default class WUPNumberControl<
   ValueType = number,
+  TOptions extends WUP.Number.Options = WUP.Number.Options,
   EventMap extends WUP.Number.EventMap = WUP.Number.EventMap
-> extends WUPTextControl<ValueType, EventMap> {
+> extends WUPTextControl<
+  ValueType,
+  // @ts-expect-error - because number & string incompatible
+  TOptions,
+  EventMap
+> {
   #ctr = this.constructor as typeof WUPNumberControl;
 
   static get observedOptions(): Array<string> {
     const arr = super.observedOptions as Array<keyof WUP.Number.Options>;
     arr.push("format");
     return arr;
-  }
-
-  static get nameUnique(): string {
-    return "WUPNumberControl";
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
@@ -97,14 +99,6 @@ export default class WUPNumberControl<
       max: (v, setV, c) => (v == null || v > setV) && `Max value is ${(c as WUPNumberControl).valueToInput(setV)}`,
     },
   };
-
-  // @ts-expect-error reason: validationRules is different
-  $options: WUP.Number.Options = {
-    ...this.#ctr.$defaults,
-  };
-
-  // @ts-expect-error reason: validationRules is different
-  protected override _opts = this.$options;
 
   /** Returns $options.format joined with defaults */
   get $format(): Required<WUP.Number.Format> {
@@ -236,10 +230,7 @@ export default class WUPNumberControl<
     return v as any;
   }
 
-  protected override canHandleUndo(): boolean {
-    return true;
-  }
-
+  // @ts-expect-error - because expected string
   protected override setInputValue(v: ValueType | undefined, reason: SetValueReasons): void {
     const txt = this.valueToInput(v);
     super.setInputValue(txt, reason);
@@ -312,16 +303,23 @@ export default class WUPNumberControl<
     ); // allow inc/dec via scroll/swipe
     this.style.overflow = ""; // disable inline-style from onScroll helper
     r.push(
-      onEvent(this, "keyup", (e) => {
-        /* istanbul ignore else */
-        if (!e.altKey) delete this._isAltDown;
-        /* istanbul ignore else */
-        if (!e.shiftKey) delete this._isShiftDown;
-        /* istanbul ignore else */
-        if (!e.ctrlKey) delete this._isCtrlDown;
-      })
+      onEvent(
+        this,
+        "keyup",
+        (e) => {
+          if (!e.altKey) {
+            delete this._isAltDown;
+            e.key === "Alt" && this._wasInc && e.preventDefault(); // otherwise focus moves to browser
+            delete this._wasInc;
+          }
+          if (!e.shiftKey) delete this._isShiftDown;
+          if (!e.ctrlKey) delete this._isCtrlDown;
+        },
+        { passive: false }
+      )
     );
     r.push(() => {
+      delete this._wasInc;
       delete this._isAltDown;
       delete this._isShiftDown;
       delete this._isCtrlDown;
@@ -329,6 +327,8 @@ export default class WUPNumberControl<
     return r;
   }
 
+  /** To prevent focus to browser panel by Alt key */
+  _wasInc?: boolean;
   _isAltDown?: true;
   _isShiftDown?: true;
   _isCtrlDown?: true;
@@ -358,8 +358,13 @@ export default class WUPNumberControl<
 
   /** Called when user tries to increment/decrement value (via ArrowKeys/Mouse/Swipe) */
   protected gotIncrement(dval: number): void {
-    if (this._isAltDown) dval *= 0.1;
-    else if (this._isShiftDown) dval *= 10;
+    this._wasInc = true;
+    if (this._isAltDown) {
+      dval *= 0.1;
+      if (this.$format.maxDecimal < 1) {
+        return; // don't allow decimal increment
+      }
+    } else if (this._isShiftDown) dval *= 10;
     else if (this._isCtrlDown) dval *= 100;
 
     const v = +(this.$value ?? 0);
@@ -375,7 +380,7 @@ export default class WUPNumberControl<
       );
       if (!isPrevented) {
         el.value = data;
-        setTimeout(() => el.dispatchEvent(new InputEvent("input", { inputType, bubbles: true })));
+        el.dispatchEvent(new InputEvent("input", { inputType, bubbles: true }));
       }
     });
   }

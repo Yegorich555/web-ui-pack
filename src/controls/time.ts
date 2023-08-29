@@ -32,6 +32,12 @@ declare global {
        * @tutorial Troubleshooting
        * If set step = 5 user still able to set minutes not divisible step */
       step: number;
+      /** Set `false` to hide menu buttons 'Ok' & 'Cancel'
+       * @tutorial Troubleshooting
+       * in this case any changing selection in menu changes value & input; so user don't need to press Enter
+       * but if press escape: menu closed and value reverted to that was before
+       * @defaultValue false */
+      menuButtonsOff?: boolean;
     }
     interface Options<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, Defaults<T, VM> {
       /** User can't select time less than min */
@@ -88,8 +94,9 @@ declare global {
  */
 export default class WUPTimeControl<
   ValueType extends WUPTimeObject = WUPTimeObject,
+  TOptions extends WUP.Time.Options = WUP.Time.Options,
   EventMap extends WUP.Time.EventMap = WUP.Time.EventMap
-> extends WUPBaseComboControl<ValueType, EventMap> {
+> extends WUPBaseComboControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTimeControl;
 
@@ -103,10 +110,6 @@ export default class WUPTimeControl<
   static $ariaMinutes = "Minutes";
   /** Aria-label for list in menu; @defaultValue `AM PM` */
   static $ariaHours12 = "AM PM";
-
-  static get nameUnique(): string {
-    return "WUPTimeControl";
-  }
 
   // --ctrl-time-icon-img-png-20: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAABiAAAAYgH4krHQAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAYJJREFUOI2l1L9qVUEQBvCf5+JFUBBbJQi2SSW+gLFV88ck2tmaBJE8gen8h/gCWklInzZ5h4BKIkkUtFD7BDGF91jsHLJe7tl70Q+GPTvzzcfOnJ1lMLq4h3V8xFHYLtawEJyRMI/PqIfYAWZKQh28zBLe4RHGcTZsPHzvM95zVIMEG7FfWGwjBSos4ThynvUT5jKx66Uy+jCZiU43zi4+hfNBS2KN1ZbYcsT3Q8tdJz1rK7Mk2MGH4MxX2VFfo9eSVMJvvInvqQpXY7P1D2INNmO9VuFibL7+h+CXWC9VUu1wakjSTUwM4dQVvsdmrEC8hQvYxiuc74tfjvUbaTZraQJKOIPH+IkfuJ/FVkLjLWnQa2mcOkNE4Qo24iD8fW3mSJfxIBxLIwg2aF6bh5G7h9NNcDacx9I4jYobkdPD7f7gi0x0Wbn8TpysmeMng0hVJlpLfVmRrsq5sInwNT3r4anyy2TWSU9LtoepklCOrvT316Rn/wiH2JGuxh3ZD8jxB6xmcQf6l8SZAAAAAElFTkSuQmCC');
   static get $styleRoot(): string {
@@ -137,13 +140,13 @@ export default class WUPTimeControl<
         --ctrl-icon-img: var(--ctrl-time-icon-img-lg);
         --ctrl-icon-img: var(--ctrl-time-icon-img);
       }
-      :host [menu] {
+      :host > [menu] {
         overflow: hidden;
       }
-      :host [menu]>div:first-child {
+      :host > [menu]>div:first-child {
         position: relative;
       }
-      :host [menu] ul {
+      :host > [menu] ul {
         margin: 0;
         padding: 0;
         list-style-type: none;
@@ -153,13 +156,13 @@ export default class WUPTimeControl<
         display: inline-block;
         vertical-align: middle;
       }
-      :host [menu] li,
-      :host [menu] mark,
-      :host [menu] ul:after {
+      :host > [menu] li,
+      :host > [menu] mark,
+      :host > [menu] ul:after {
         padding: 1em;
-        height: 1em;
+        line-height: 1em;
       }
-      :host [menu] mark {
+      :host > [menu] mark {
         z-index: -1;
         position: absolute;
         display: block;
@@ -169,7 +172,7 @@ export default class WUPTimeControl<
         font: inherit;
         background: var(--ctrl-time-current-bg);
       }
-      :host [menu] ul:after {
+      :host > [menu] ul:after {
         content: "99";
         height: 0;
         margin:0; padding-top:0; padding-bottom:0;
@@ -179,37 +182,38 @@ export default class WUPTimeControl<
         pointer-events: none;
         display: block;
       }
-      :host [menu] ul:nth-child(3):after {
+      :host > [menu] ul:nth-child(3):after {
          content: "AM";
       }
-      :host [menu] li[aria-selected=true],
-      :host [menu] mark,
-      :host [menu] ul:after {
+      :host > [menu] li[aria-selected=true],
+      :host > [menu] mark,
+      :host > [menu] ul:after {
         font-weight: bold;
         color: var(--ctrl-time-current);
       }
-      :host [menu] li[focused] {
+      :host > [menu] li[focused] {
         position: relative;
       }
-      :host [menu] li[focused]:after {
+      :host > [menu] li[focused]:after {
         ${focusStyle}
       }
-      :host [menu] li[aria-hidden] {
+      :host > [menu] li[aria-hidden] {
         pointer-events: none;
         touch-action: none;
+        opacity: 0;
       }
-      :host [menu] li[disabled] {
+      :host > [menu] li[disabled] {
         color: var(--ctrl-err-text);
         --ctrl-focus: var(--ctrl-err-text);
         //background-color: var(--ctrl-err-bg);
       }
-      :host [menu] [group] {
+      :host > [menu] [group] {
         display: flex;
         gap: 1px;
         padding-top: 1px;
         background: var(--base-sep);
       }
-      :host [menu] button {
+      :host > [menu] button {
         cursor: pointer;
         flex: 1 1 50%;
         display: inline-flex;
@@ -221,33 +225,33 @@ export default class WUPTimeControl<
         padding: 0; margin: 0;
         background: var(--base-btn3-bg);
       }
-      :host [menu] button:first-child {
+      :host > [menu] button:first-child {
         --ctrl-icon-img: var(--wup-icon-check);
         --ctrl-icon: var(--ctrl-err-icon-valid);
         border-bottom-left-radius: var(--border-radius);
       }
-      :host [menu] button:last-child {
+      :host > [menu] button:last-child {
         --ctrl-icon-img: var(--wup-icon-cross);
         --ctrl-icon: var(--ctrl-err-text);
         border-bottom-right-radius: var(--border-radius);
       }
-      :host [menu] button:after {
+      :host > [menu] button:after {
         ${WUPcssIcon}
         content: "";
         padding:0;
       }
       @media (hover: hover) and (pointer: fine) {
-        :host [menu] li:hover {
+        :host > [menu] li:hover {
           position: relative;
         }
-        :host [menu] li:hover:after {
+        :host > [menu] li:hover:after {
          ${focusStyle}
         }
-        :host [menu] button:hover {
+        :host > [menu] button:hover {
           box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 10%);
         }
       }
-      :host [menu] button[disabled] {
+      :host > [menu] button[disabled] {
          box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 5%);
          cursor: not-allowed;
          --ctrl-icon: inherit;
@@ -279,14 +283,10 @@ export default class WUPTimeControl<
     },
   };
 
-  // @ts-expect-error reason: validationRules is different
-  $options: WUP.Time.Options = {
-    ...this.#ctr.$defaults,
-    format: localeInfo.time,
-  };
-
-  // @ts-expect-error reason: validationRules is different
-  protected override _opts = this.$options;
+  constructor() {
+    super();
+    this._opts.format = this.#ctr.$defaults.format || localeInfo.time; // init here to depend on localeInfo
+  }
 
   /** Parse string to WUPTimeObject */
   override parse(text: string): ValueType | undefined {
@@ -313,21 +313,17 @@ export default class WUPTimeControl<
   protected override gotChanges(propsChanged: Array<keyof WUP.Time.Options> | null): void {
     this._opts.format = this.getAttr("format")?.replace(/\D{0,1}(ss|SS)/, "") || "hh:mm A";
 
-    this._opts.mask =
-      this._opts.mask ??
-      this._opts.format
-        .replace(/hh|HH/, "00") //
-        .replace(/[hH]/, "#0")
-        .replace(/mm|MM/, "00")
-        .replace(/[mM]/, "#0") // convert hh-mm > 00-00; h/m > #0/#0
-        .replace(/a/, "//[ap]//m")
-        .replace(/A/, "//[AP]//M");
-    this._opts.maskholder =
-      this._opts.maskholder ??
-      this._opts.format
-        .replace(/([mMhH]){1,2}/g, "$1$1")
-        .replace(/a/, "*m")
-        .replace(/A/, "*M");
+    this._opts.mask ??= this._opts.format
+      .replace(/hh|HH/, "00") //
+      .replace(/[hH]/, "#0")
+      .replace(/mm|MM/, "00")
+      .replace(/[mM]/, "#0") // convert hh-mm > 00-00; h/m > #0/#0
+      .replace(/a/, "//[ap]//m")
+      .replace(/A/, "//[AP]//M");
+    this._opts.maskholder ??= this._opts.format
+      .replace(/([mMhH]){1,2}/g, "$1$1")
+      .replace(/a/, "*m")
+      .replace(/A/, "*M");
 
     this._opts.min = this.getAttr("min", "obj");
     this._opts.max = this.getAttr("max", "obj");
@@ -371,21 +367,22 @@ export default class WUPTimeControl<
     if (lst) {
       for (let i = 0; i < lst.children.length; ++i) {
         const el = lst.children.item(i)!;
-        if (el.textContent) {
-          const isPM = (el as any)._value === 2;
-          const isDisabled = (isPM && max! < new WUPTimeObject(12, 0)) || (!isPM && min! > new WUPTimeObject(11, 0));
-          this.setAttr.call(el, "disabled", isDisabled, true);
-        }
+        const isPM = (el as any)._value === 2;
+        const isDisabled = (isPM && max! < new WUPTimeObject(12, 0)) || (!isPM && min! > new WUPTimeObject(11, 0));
+        this.setAttr.call(el, "disabled", isDisabled, true);
       }
     }
     const v = this.getMenuValue();
     const isDisabled = v < min! || v > max! || exclude?.test(v);
-    this.setAttr.call(this.$refButtonOk!, "disabled", isDisabled, true);
+    this.$refButtonOk && this.setAttr.call(this.$refButtonOk!, "disabled", isDisabled, true);
   }
 
+  #isMenuInitPhase?: boolean;
+  /** Value before menu is opened */
+  #valueBeforeMenu?: ValueType;
   protected override renderMenu(popup: WUPPopupElement, menuId: string, rows = 5): HTMLElement {
     popup.$options.minWidthByTarget = false;
-    let isInit = true;
+    this.#isMenuInitPhase = true;
     const append = (ul: HTMLElement, v: number | string, twoDigs: boolean, savedV?: number): HTMLElement => {
       const li = ul.appendChild(document.createElement("li"));
       li.textContent = twoDigs && +v < 10 ? `0${v}` : v.toString();
@@ -402,10 +399,14 @@ export default class WUPTimeControl<
         this._selectedMenuItem = undefined; // otherwise selection is cleared after popup-close
         this._focusedMenuItem && this.focusMenuItem(next.items[0]);
       }
-      !isInit && this.$isShown && this.disableItems();
+      !this.#isMenuInitPhase && this.$isShown && this.disableItems();
     };
 
     const drows = Math.round(rows / 2) - 1;
+    // select value if user click on item but scrollNext isn't processed
+    const onClickSkip = this._opts.menuButtonsOff
+      ? () => this.setValue(this.getMenuValue(), SetValueReasons.userSelect)
+      : undefined;
 
     // div required for centering absolute items during the animation
     const parent = popup.appendChild(document.createElement("div"));
@@ -428,6 +429,7 @@ export default class WUPTimeControl<
       // hours 0..23 pages 0..23
       swipeDebounceMs: 100,
       scrollByClick: true,
+      onClickSkip,
       pages: { current: getCurHours(), total: h12 ? 12 : 24, before: drows, after: drows, cycled: true },
       onRender: (_dir, v, prev, next) => {
         v = h12 && v === 0 ? 12 : v;
@@ -456,6 +458,7 @@ export default class WUPTimeControl<
     lm._scrolled = new WUPScrolled(lm, {
       swipeDebounceMs: 100,
       scrollByClick: true,
+      onClickSkip,
       // minutes 0..59 pages 0..12
       pages: {
         current: getCurMinutes(),
@@ -491,6 +494,7 @@ export default class WUPTimeControl<
       lh12._scrolled = new WUPScrolled(lh12, {
         swipeDebounceMs: 100,
         scrollByClick: true,
+        onClickSkip,
         // pm => empty, PM, AM, /*empty*/
         // am => /*empty*/, PM, AM, empty
         pages: { current: this.$value?.isPM ? 2 : 1, total: 4, before: Math.min(drows, 1), after: Math.min(drows, 1) },
@@ -499,7 +503,7 @@ export default class WUPTimeControl<
             return null;
           }
           lh12._value = next.index;
-          const txt = (lower ? ["", "am", "pm", ""] : ["", "AM", "PM", ""])[v];
+          const txt = (lower ? ["pm", "am", "pm", "am"] : ["PM", "AM", "PM", "AM"])[v];
           const item = append(lh12, txt, false, v);
           if (v === 0 || v === 3) {
             item.setAttribute("aria-hidden", true);
@@ -522,7 +526,12 @@ export default class WUPTimeControl<
     sep.setAttribute("aria-hidden", true);
     sep.textContent = /[hH]([^hH])/.exec(this._opts.format)![1]!;
     parent.appendChild(sep);
+    !this._opts.menuButtonsOff && this.renderMenuButtons(popup);
+    this.#isMenuInitPhase = false;
+    return parent;
+  }
 
+  protected renderMenuButtons(popup: WUPPopupElement): void {
     // render Ok/Cancel otherwise we can't define if user is finished
     const btns = popup.appendChild(document.createElement("div"));
     btns.setAttribute("group", "");
@@ -555,9 +564,6 @@ export default class WUPTimeControl<
       },
       { passive: false }
     );
-
-    isInit = false;
-    return parent;
   }
 
   protected override async goShowMenu(
@@ -566,13 +572,16 @@ export default class WUPTimeControl<
   ): Promise<WUPPopupElement | null> {
     const r = await super.goShowMenu(showCase, e);
 
+    this.#valueBeforeMenu = this.$value;
     this.#lastInputChanged = false;
     const v = this.$value;
     if (this.$refMenuLists && v) {
+      this.#isMenuInitPhase = true; // to avoid calling trySetaValue on reRender
       const menuV = this.getMenuValue();
       menuV.hours !== v.hours && this.$refMenuLists[0].reinit();
       menuV.minutes !== v.minutes && this.$refMenuLists[1].reinit();
       this.$refMenuLists[2]?._scrolled.goTo(v.isPM ? 2 : 1, false);
+      this.#isMenuInitPhase = false;
     }
     this.disableItems();
 
@@ -603,8 +612,23 @@ export default class WUPTimeControl<
     }
   }
 
-  protected override setValue(v: ValueType | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
-    return super.setValue(v, reason, skipInput);
+  /** Set value base on menu-selected if menuButtons is off */
+  protected trySetValue(): void {
+    this._opts.menuButtonsOff &&
+      !this.#isMenuInitPhase &&
+      this.setValue(this.getMenuValue(), SetValueReasons.userSelect);
+  }
+
+  protected override selectMenuItem(next: HTMLElement | null): void {
+    super.selectMenuItem(next);
+    next !== null && this.trySetValue();
+  }
+
+  protected override goHideMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null | undefined): Promise<boolean> {
+    hideCase === HideCases.OnPressEsc &&
+      this._opts.menuButtonsOff &&
+      this.setValue(this.#valueBeforeMenu, SetValueReasons.clear);
+    return super.goHideMenu(hideCase, e);
   }
 
   protected override valueToInput(v: ValueType | undefined): string {
@@ -621,7 +645,7 @@ export default class WUPTimeControl<
   #lastInputChanged = false; // if press Enter: need to get value from last touched field (input OR menu)
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
     this.#lastInputChanged = true;
-    super.gotInput(e, true);
+    super.gotInput(e);
   }
 
   // /** Returns current menu list index that user operates with hours/minutes/h12 */
@@ -652,6 +676,7 @@ export default class WUPTimeControl<
 
   protected override focusMenuItem(next: HTMLElement | null): void {
     if (next) {
+      !this.$value && this.trySetValue();
       const v = this.getMenuValue();
       const str = this.valueToInput(v) as string;
       next.setAttribute("aria-label", str);
@@ -705,7 +730,7 @@ export default class WUPTimeControl<
     // handle Enter key when menu is open
     if (!isExtraKey && wasOpen && e.key === "Enter") {
       e.preventDefault();
-      if (this.#lastInputChanged) {
+      if (this.#lastInputChanged || !this.$refButtonOk) {
         this.goHideMenu(HideCases.OnPressEnter);
       } else if (!this.$refButtonOk!.disabled) {
         setTimeout(() =>

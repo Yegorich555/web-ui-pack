@@ -120,7 +120,12 @@ describe("control.text", () => {
     );
   });
 
-  test("$defaults.validations", () => {
+  test("$defaults.validations", async () => {
+    // cover exception in showError
+    await expect(async () => {
+      el.$showError(null);
+      await h.wait(1);
+    }).rejects.toThrow();
     class TestVldElement extends WUPTextControl {
       $defaults = { ...WUPTextControl.$defaults };
       $options = { ...TestVldElement.$defaults };
@@ -155,6 +160,12 @@ describe("control.text", () => {
     await h.wait(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
       `"<label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong></strong><span prefix="">$ </span></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label>"`
+    );
+    // option applies immediately
+    el.$options.prefix = ">>>";
+    await h.wait(1);
+    expect(el.innerHTML).toMatchInlineSnapshot(
+      `"<label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong></strong><span prefix="">&gt;&gt;&gt;</span></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label>"`
     );
   });
 
@@ -223,5 +234,107 @@ describe("control.text", () => {
     el.$options.label = "sdas"; // trigger gotChanges
     await h.wait(1);
     expect(el.$refBtnClear).toBeUndefined();
+  });
+
+  test("options.clearActions", async () => {
+    el.$options.clearActions = WUPTextControl.$defaults.clearActions;
+    await h.wait(1);
+    expect(el.$refBtnClear.outerHTML).toMatchInlineSnapshot(
+      `"<button clear="" tabindex="-1" aria-hidden="true" type="button"></button>"`
+    );
+    el.$value = "hello";
+    expect(el.$refBtnClear.outerHTML).toMatchInlineSnapshot(
+      `"<button clear="" tabindex="-1" aria-hidden="true" type="button"></button>"`
+    );
+    el.$initValue = "hello";
+    expect(el.$refBtnClear.outerHTML).toMatchInlineSnapshot(
+      `"<button clear="" tabindex="-1" aria-hidden="true" type="button"></button>"`
+    );
+    el.$value = "123";
+    expect(el.$refBtnClear.outerHTML).toMatchInlineSnapshot(
+      `"<button clear="back" tabindex="-1" aria-hidden="true" type="button"></button>"`
+    );
+    el.$initValue = "123";
+    expect(el.$refBtnClear.outerHTML).toMatchInlineSnapshot(
+      `"<button clear="" tabindex="-1" aria-hidden="true" type="button"></button>"`
+    );
+  });
+
+  test("common method $ariaSpeak()", async () => {
+    const prev = el.outerHTML;
+    el.$ariaSpeak("Hello");
+    await h.wait(200);
+    expect(el.querySelectorAll("section")).toMatchInlineSnapshot(`
+      NodeList [
+        <section
+          aria-atomic="true"
+          aria-live="off"
+          class="wup-hidden"
+          id="txt2"
+        >
+          Hello
+        </section>,
+      ]
+    `);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-text><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off" aria-describedby="txt2"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label><section aria-live="off" aria-atomic="true" class="wup-hidden" id="txt2">Hello</section></wup-text>"`
+    );
+    await h.wait(10000);
+    expect(el.querySelector("section")).toMatchInlineSnapshot(`null`);
+    expect(el.outerHTML).toBe(prev); // input state must be returned to prev
+
+    // speak several times at once
+    el.$ariaSpeak("Hello");
+    el.$ariaSpeak("Anna");
+    await h.wait(200);
+    expect(el.querySelectorAll("section")).toMatchInlineSnapshot(`
+      NodeList [
+        <section
+          aria-atomic="true"
+          aria-live="off"
+          class="wup-hidden"
+          id="txt3"
+        >
+          Hello
+        </section>,
+        <section
+          aria-atomic="true"
+          aria-live="off"
+          class="wup-hidden"
+          id="txt4"
+        >
+          Anna
+        </section>,
+      ]
+    `);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-text><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off" aria-describedby="txt3 txt4"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label><section aria-live="off" aria-atomic="true" class="wup-hidden" id="txt3">Hello</section><section aria-live="off" aria-atomic="true" class="wup-hidden" id="txt4">Anna</section></wup-text>"`
+    );
+    await h.wait(10000);
+    expect(el.querySelector("section")).toMatchInlineSnapshot(`null`);
+    expect(el.outerHTML).toBe(prev); // input state must be returned to prev
+
+    // aria-speak shouldn't destroy the "aria-describedby" attribute
+    el.$refInput.setAttribute("aria-describedby", "someId");
+    el.$ariaSpeak("abc");
+    await h.wait(200);
+    expect(el.$refInput.outerHTML).toMatchInlineSnapshot(
+      `"<input placeholder=" " type="text" id="txt1" autocomplete="off" aria-describedby="someId txt5">"`
+    );
+    await h.wait(10000);
+    expect(el.querySelector("section")).toMatchInlineSnapshot(`null`);
+    expect(el.$refInput.outerHTML).toMatchInlineSnapshot(
+      `"<input placeholder=" " type="text" id="txt1" autocomplete="off" aria-describedby="someId">"`
+    );
+
+    // extra case when attr removed outside during the speaking
+    el.$ariaSpeak("abc");
+    await h.wait(200);
+    expect(el.$refInput.outerHTML).toMatchInlineSnapshot(
+      `"<input placeholder=" " type="text" id="txt1" autocomplete="off" aria-describedby="someId txt6">"`
+    );
+    el.$refInput.removeAttribute("aria-describedby");
+    expect(() => jest.advanceTimersByTime(10000)).not.toThrow();
+    expect(el.outerHTML).toBe(prev); // input state must be returned to prev
   });
 });

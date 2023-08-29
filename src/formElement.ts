@@ -155,8 +155,9 @@ const formStore: WUPFormElement[] = [];
  */
 export default class WUPFormElement<
   Model extends Record<string, any> = any,
+  TOptions extends WUP.Form.Options = WUP.Form.Options,
   Events extends WUP.Form.EventMap = WUP.Form.EventMap
-> extends WUPBaseElement<Events> {
+> extends WUPBaseElement<TOptions, Events> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPFormElement;
 
@@ -168,10 +169,6 @@ export default class WUPFormElement<
   /* Array of attribute names to listen for changes */
   static get observedAttributes(): Array<LowerKeys<WUP.Form.Attributes>> {
     return ["disabled", "readonly", "autocomplete", "autosave"];
-  }
-
-  static get nameUnique(): string {
-    return "WUPFormElement";
   }
 
   static get $styleRoot(): string {
@@ -240,12 +237,6 @@ export default class WUPFormElement<
     submitActions:
       SubmitActions.goToError | SubmitActions.validateUntiFirst | SubmitActions.reset | SubmitActions.lockOnPending,
   };
-
-  $options: WUP.Form.Options = {
-    ...this.#ctr.$defaults,
-  };
-
-  protected override _opts = this.$options;
 
   /** Dispatched on submit. Return promise to lock form and show spinner */
   $onSubmit?: (ev: WUP.Form.SubmitEvent<Model>) => void | Promise<unknown>;

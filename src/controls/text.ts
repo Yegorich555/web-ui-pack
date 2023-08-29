@@ -2,6 +2,7 @@ import MaskTextInput from "./text.mask";
 import { onEvent } from "../indexHelpers";
 import { WUPcssIcon } from "../styles";
 import WUPBaseControl, { SetValueReasons } from "./baseControl";
+import TextHistory from "./text.history";
 
 const emailReg =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -126,8 +127,9 @@ declare global {
  */
 export default class WUPTextControl<
   ValueType = string,
+  TOptions extends WUP.Text.Options = WUP.Text.Options,
   EventMap extends WUP.Text.EventMap = WUP.Text.EventMap
-> extends WUPBaseControl<ValueType, EventMap> {
+> extends WUPBaseControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextControl;
 
@@ -141,10 +143,6 @@ export default class WUPTextControl<
     const arr = super.observedAttributes as Array<LowerKeys<WUP.Text.Attributes>>;
     arr.push("maskholder", "mask", "prefix", "postfix");
     return arr;
-  }
-
-  static get nameUnique(): string {
-    return "WUPTextControl";
   }
 
   static get $styleRoot(): string {
@@ -348,7 +346,6 @@ export default class WUPTextControl<
         }`;
   }
 
-  /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUP.Text.Defaults = {
     ...WUPBaseControl.$defaults,
     selectOnFocus: false,
@@ -366,12 +363,6 @@ export default class WUPTextControl<
       _parse: (_v, setV) => setV || "Invalid value",
     },
   };
-
-  $options: WUP.Text.Options<string> = {
-    ...this.#ctr.$defaults,
-  };
-
-  protected override _opts = this.$options;
 
   $refBtnClear?: HTMLButtonElement;
   $refMaskholder?: HTMLSpanElement;
@@ -402,7 +393,7 @@ export default class WUPTextControl<
 
   /** Returns true if need to use custom undo/redo (required when input somehow formatted/masked) */
   protected canHandleUndo(): boolean {
-    return true; // !!this._opts.mask; // otherwise it's wrong for all controls that must handle btnClear Or Esc key
+    return true;
   }
 
   protected get validations(): WUP.Text.Options["validations"] {
@@ -457,7 +448,6 @@ export default class WUPTextControl<
         delete this.$refPrefix;
       }
     } else {
-      /* istanbul ignore else */
       if (!el) {
         el = document.createElement("span");
         el.setAttribute("prefix", "");
@@ -495,8 +485,14 @@ export default class WUPTextControl<
     }
   }
 
+  /** Custom history undo/redo */
+  _refHistory?: TextHistory;
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
     const arr = super.gotFocus(ev);
+
+    if (this.canHandleUndo()) {
+      this._refHistory = this._refHistory ?? new TextHistory(this.$refInput);
+    }
 
     const r = this.appendEvent(this.$refInput, "input", (e) => {
       // (e as WUP.Text.GotInputEvent).setValuePrevented = false;
@@ -510,7 +506,6 @@ export default class WUPTextControl<
       { passive: false }
     );
 
-    /* istanbul ignore else */
     if (!this.$refInput.readOnly) {
       let canSelectAll = this._opts.selectOnFocus;
       if (this._opts.mask) {
@@ -538,14 +533,9 @@ export default class WUPTextControl<
       if (this.refMask.prefix && this.refMask.value === this.refMask.prefix) {
         this.$refInput.value = ""; // rollback prefix/postfix if user types nothing
         delete (this.$refInput as WUP.Text.Mask.HandledInput)._maskPrev;
-        setTimeout(() => {
-          this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
-        });
       }
       this.renderPostfix(this._opts.postfix); // postfix depends on maskholder
     }
-    delete this._histRedo;
-    delete this._histUndo;
     super.gotFocusLost();
   }
 
@@ -586,53 +576,20 @@ export default class WUPTextControl<
 
   protected override gotKeyDown(e: KeyboardEvent): void {
     super.gotKeyDown(e);
-
-    if (!e.altKey) {
-      // WARN: need handle only redo because undo works from browser-side itself but undo - doesn't still beforeInput.preventDefault()
-      const isUndo = (e.ctrlKey || e.metaKey) && e.code === "KeyZ";
-      const isRedo = (isUndo && e.shiftKey) || (e.ctrlKey && e.code === "KeyY" && !e.metaKey);
-      // isUndo &&= !isRedo;
-      if (isRedo && this.canHandleUndo()) {
-        e.preventDefault();
-        // otherwise custom redo/undo works wrong (browser stores to history big chunks and not fired events if history emptied)
-        if (isRedo && !this._histRedo?.length) {
-          return;
-        }
-        this.$refInput.dispatchEvent(
-          new InputEvent("beforeinput", { cancelable: true, bubbles: true, inputType: "historyRedo" })
-        );
-      }
-    }
+    this._refHistory?.handleKeyDown(e);
   }
 
+  /** Value-text before input changed - used with declineInput */
+  _beforeSnap?: string;
   /** Handler of 'beforeinput' event */
   protected gotBeforeInput(e: WUP.Text.GotInputEvent): void {
+    const isUndoRedo = this._refHistory?.handleBeforeInput(e);
+
     this.#declineInputEnd?.call(this);
+    this._beforeSnap = TextHistory.historyToSnapshot(this.$refInput.value, this.$refInput.selectionStart || 0);
+    setTimeout(() => delete this._beforeSnap);
 
-    let isHandle = false; // inputEvent must be prevented if history is empty - possible when browser calls historyUndo
-    let isUndoRedoSuccess = false;
-    let isRedo = false;
-    switch (e!.inputType) {
-      case "historyRedo": // Ctrl+Shift+Z
-        isRedo = true;
-      // eslint-disable-next-line no-fallthrough
-      case "historyUndo": // Ctrl+Z
-        // WARN: historyUndo can be fired is user shakes iPhone or click Undo button in editMenu
-        isHandle = this.canHandleUndo();
-        isUndoRedoSuccess = isHandle && this.historyUndoRedo(isRedo);
-        break;
-      default:
-        this.canHandleUndo() && this.historySave(e.target.value, e.target.selectionEnd);
-        break;
-    }
-
-    if (isHandle) {
-      e.preventDefault(); // prevent default to avoid browser-internal-history cleaning
-      isUndoRedoSuccess &&
-        this.$refInput.dispatchEvent(
-          new InputEvent("input", { cancelable: false, bubbles: true, inputType: e.inputType })
-        ); // fire manually because need to process undo/redo (but without browser-internal history)
-    } else if (this._opts.mask) {
+    if (!isUndoRedo && this._opts.mask) {
       this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask, e.target.value);
       this.refMask.handleBeforeInput(e);
     }
@@ -641,6 +598,7 @@ export default class WUPTextControl<
   #inputTimer?: ReturnType<typeof setTimeout>;
   /** Called when user types text OR when need to apply/reset mask (on focusGot, focusLost) */
   protected gotInput(e: WUP.Text.GotInputEvent): void {
+    this._refHistory?.handleInput(e);
     const el = e.target as WUP.Text.Mask.HandledInput;
     let txt = el.value;
 
@@ -648,7 +606,7 @@ export default class WUPTextControl<
       const prev = el._maskPrev?.value;
       txt = this.maskInputProcess(e);
       if (txt === prev) {
-        this.renderPostfix(this._opts.postfix);
+        // this.renderPostfix(this._opts.postfix);
         return; // skip because no changes from previous action
       }
     }
@@ -660,7 +618,6 @@ export default class WUPTextControl<
     const canParse = !txt || this.canParseInput(txt);
     let v = this.$value;
     let errMsg: boolean | string = "";
-    /* istanbul ignore else */
     if (canParse) {
       try {
         v = !txt ? undefined : this.parseInput(txt);
@@ -676,7 +633,6 @@ export default class WUPTextControl<
     }
 
     const act = (): void => {
-      /* istanbul ignore else */
       if (errMsg) {
         this.validateOnce({ _parse: this.validations?._parse || "" }, true);
       } else if (canParse) {
@@ -725,9 +681,8 @@ export default class WUPTextControl<
     }
 
     if (declinedAdd) {
-      this.historySave(mi.value, pos); // fix when ###: "12|" + "3b" => 123|
-      this.declineInput(pos);
-    } else {
+      this.declineInput(pos, mi.value); // fix when ###: "12|" + "3b" => 123|
+    } else if (el.value !== mi.value) {
       el.value = mi.value;
       document.activeElement === el && el.setSelectionRange(pos, pos); // without checking on focus setSelectionRange sets focus on Safari
     }
@@ -754,78 +709,39 @@ export default class WUPTextControl<
     this.$refMaskholder.lastChild!.textContent = text.substring(text.length - leftLength);
   }
 
-  /** Convert values to history-snapshot; required for undo/redo logic of input */
-  private historyToSnapshot(s: string, pos: number): string {
-    return `${s.substring(0, pos)}\0${s.substring(pos)}`;
-  }
-
-  /** Parse history-snapshot; required for undo/redo logic of input */
-  private historyFromSnapshot(h: string): { v: string; pos: number } {
-    const pos = h.indexOf("\0");
-    const v = h.substring(0, pos) + h.substring(pos + 1);
-    return { pos, v };
-  }
-
-  /** Array of history input changes */
-  _histUndo?: Array<string>;
-  /** Array of history-back input changes */
-  _histRedo?: Array<string>;
-  /** Undo/redo input value (only if canHandleUndo() === true)
-   * @returns true if action succeeded (history allowed & not empty) */
-  historyUndoRedo(isRedo: boolean): boolean {
-    const from = isRedo ? this._histRedo : this._histUndo;
-    if (from?.length) {
-      const el = this.$refInput;
-      if (!this._histRedo) {
-        this._histRedo = [];
-      }
-      const to = !isRedo ? this._histRedo! : this._histUndo!;
-      to.push(this.historyToSnapshot(el.value, el.selectionStart || 0));
-
-      const hist = this.historyFromSnapshot(from.pop()!);
-      el.value = hist.v;
-      el.setSelectionRange(hist.pos, hist.pos);
-      return true;
-    }
-
-    return false;
-  }
-
-  /** Save to history value & caret position */
-  protected historySave(value: string, selectionEnd: number | null): void {
-    if (!this._histUndo) {
-      this._histUndo = [];
-    }
-    const snap = this.historyToSnapshot(value, selectionEnd || 0);
-    const isChanged = this._histUndo[this._histUndo.length - 1] !== snap;
-    isChanged && this._histUndo!.push(snap);
-  }
-
   #declineInputEnd?: () => void;
   /** Make undo for input after 100ms when user types not allowed chars
+   * point nextCaret for custom undo value
    * @tutorial Troubleshooting
    * * declineInput doesn't trigger beforeinput & input events (do it manually if required) */
-  protected declineInput(nextCaretPos?: number): void {
-    if (!this.canHandleUndo()) {
-      throw new Error(`${this.tagName}. Custom history disabled (canHandleUndo must return true)`);
+  protected declineInput(nextCaret?: number, nextValue?: string): void {
+    if (!this._beforeSnap) {
+      return;
     }
+    const { v, pos } = TextHistory.historyFromSnapshot(this._beforeSnap);
+    nextCaret ??= pos;
+    nextValue ??= v;
+    delete this._beforeSnap;
+
+    const isChanged = v !== nextValue;
+    isChanged && nextValue != null && this._refHistory?.save(v, nextValue); // update history if last value is different
+
     this.#declineInputEnd = (): void => {
       this.#declineInputEnd = undefined;
       clearTimeout(t);
-      const hist = this.historyFromSnapshot(this._histUndo!.pop()!);
-      const el = this.$refInput;
-      el.value = hist.v;
-      const pos = nextCaretPos ?? hist.pos;
-      el.setSelectionRange(pos, pos);
+      this.$refInput.value = nextValue!;
+      this.$refInput.setSelectionRange(nextCaret!, nextCaret!);
       this.refMask && this.renderMaskHolder(this._opts.maskholder, this.refMask.leftLength);
       this.renderPostfix(this._opts.postfix);
+
+      v === nextValue && this._refHistory?.removeLast();
     };
 
     const t = setTimeout(this.#declineInputEnd, 100);
   }
 
   protected override setValue(v: ValueType | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
-    !skipInput && this.setInputValue(v, reason);
+    !skipInput && this.setInputValue(v as string, reason);
     const isChanged = super.setValue(v, reason);
     this._isValid !== false && this.goHideError();
     return isChanged;
@@ -833,14 +749,13 @@ export default class WUPTextControl<
 
   /** Called to update/reset value for <input/> */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected setInputValue(v: ValueType | undefined | string, reason: SetValueReasons): void {
-    if (reason === SetValueReasons.clear && this.canHandleUndo()) {
-      this.historySave(this.$refInput.value, this.$refInput.selectionEnd);
-    }
-
-    const str = v != null ? (v as any).toString() : "";
+  protected setInputValue(v: string, reason: SetValueReasons): void {
+    const prev = this.$refInput.value;
+    const str = v != null ? ((v as any).toString() as string) : "";
     this.$refInput.value = str;
+
     this._opts.mask && this.maskInputProcess(null);
+    str !== prev && this._refHistory?.save(prev, this.$refInput.value);
     this.renderPostfix(this._opts.postfix);
     this._onceErrName === this._errName && this.goHideError(); // hide mask-message because value has higher priority than inputValue
   }
@@ -882,6 +797,5 @@ export default class WUPTextControl<
 }
 
 customElements.define(tagName, WUPTextControl);
-// NiceToHave: handle Ctrl+Z wup-select etc. cases
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask

@@ -673,7 +673,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-SELECTMANY button[clear] {
         margin: 0;
       }
-      WUP-SELECTMANY [menu] {
+      WUP-SELECTMANY &gt; [menu] {
         padding: 0;
         max-height: 300px;
         z-index: 90010;
@@ -1152,7 +1152,7 @@ exports[`control.selectMany validations $options.validationShowAll 1`] = `
     error=""
     id="txt2"
     role="alert"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"
@@ -1240,7 +1240,7 @@ exports[`control.selectMany validations $options.validationShowAll 3`] = `
     error=""
     id="txt5"
     role="alert"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"
@@ -1358,7 +1358,7 @@ exports[`control.selectMany validations options.validationCase 2`] = `
     error=""
     id="txt5"
     role="alert"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"
@@ -1419,7 +1419,7 @@ exports[`control.selectMany validations options.validationCase 3`] = `
     aria-live="off"
     error=""
     id="txt6"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"
@@ -1507,7 +1507,7 @@ exports[`control.selectMany validations options.validationCase 4`] = `
     error=""
     id="txt10"
     role="alert"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"

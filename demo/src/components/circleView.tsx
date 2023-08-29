@@ -15,6 +15,7 @@ export default function CircleView() {
       link="src/circleElement.ts"
       details={{
         tag: "wup-circle",
+        linkDemo: "demo/src/components/circleView.tsx",
       }}
       features={[
         "With rounded corners (use $options.corner)", //
@@ -46,20 +47,75 @@ export default function CircleView() {
           <br />
           <b>WARN:</b> don't forget to reduce height in half of size (via styles)
         </small>
-        <wup-circle
-          style={{ maxWidth: "100px" }}
-          class={styles.half}
-          from={-90}
-          to={90}
-          corner={0.5}
-          items="window.circleItems"
-        />
+        <div className={styles.group}>
+          <wup-circle
+            class={styles.half}
+            from={-90}
+            to={90}
+            corner={0.5}
+            width={20}
+            ref={(el) => {
+              if (el) {
+                el.$options.items = [{ value: 2 }];
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                el.renderLabel = (label, percent, _value) => {
+                  // use to override default label
+                  label.textContent = `${Math.round(percent)} %`;
+                };
+                setTimeout(() => {
+                  const path = el.querySelector("g>path")!;
+                  const { width, height } = path.getBoundingClientRect();
+                  if (Math.abs(width - height) > 1) {
+                    // width must be equal height because item reduced to cornerSize that half of size
+                    console.error("Size out of expected range", { width, height });
+                  }
+                }, 700);
+              }
+            }}
+          />
+          <wup-circle
+            class={styles.half}
+            from={-90}
+            to={90}
+            corner={0.5}
+            width={20}
+            ref={(el) => {
+              if (el) {
+                el.$options.items = [{ value: 5 }];
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                el.renderLabel = (label, percent, _value) => {
+                  // use to override default label
+                  label.textContent = `${Math.round(percent)} %`;
+                };
+              }
+            }}
+          />
+          <wup-circle
+            class={styles.half}
+            from={-90}
+            to={90}
+            corner={0.5}
+            width={20}
+            ref={(el) => {
+              if (el) {
+                el.$options.items = [{ value: 30 }];
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                el.renderLabel = (label, percent, _value) => {
+                  // use to override default label
+                  label.textContent = `${Math.round(percent)} %`;
+                };
+              }
+            }}
+          />
+        </div>
       </section>
       <section>
         <h3>Segmented</h3>
         <small>(point several items in $options.items)</small>
         <br />
-        <small>(point label per item to show tooltip)</small>
+        <small>
+          (point <b>label</b> per item to show tooltip)
+        </small>
         <wup-circle
           back={false}
           style={{ maxWidth: "120px" }}
@@ -68,8 +124,12 @@ export default function CircleView() {
           ref={(el) => {
             if (el) {
               el.$options.items = [
-                { value: 12, tooltip: "Item 1\nvalue: {#}" },
-                { value: 100, tooltip: (item) => `Custom tooltip\nvalue: ${item.value}` },
+                { value: 1, tooltip: "Item 1\nvalue: {#}, percent: {#%}" },
+                {
+                  value: 100,
+                  tooltip: (item) =>
+                    `Custom tooltip\nvalue: ${item.value}, percent: ${Math.round(item.percentage * 10) / 10}%`,
+                },
                 { value: 13, tooltip: "Item 3\nvalue: {#}" },
                 { value: 27, tooltip: "Item 4\nvalue: {#}" },
                 { value: 15, tooltip: "Item 5\nvalue: {#}" },

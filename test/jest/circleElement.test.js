@@ -47,6 +47,14 @@ describe("circleElement", () => {
       `"<svg viewBox="0 0 100 100" role="img" aria-label="0%"><path d="M0 50 A50 50 0 1 0 100 50 A50 50 0 1 0 0 50 M14 50 A36 36 0 1 0 86 50 A36 36 0 1 0 14 50 Z"></path><g><path d="M 50 0 A 0 0 0 0 1 50 0 A 50 50 0 0 1 50 0 A 0 0 0 0 1 50 0 L 50 14 A 0 0 0 0 1 50 14 A 36 36 0 0 0 50 14 A 0 0 0 0 1 50 14 Z"></path></g></svg><strong>0%</strong>"`
     );
 
+    const onErr = h.mockConsoleError();
+    el.$options.items = [{ value: 2 }];
+    await nextFrame();
+    expect(el.innerHTML).toMatchInlineSnapshot(
+      `"<svg viewBox="0 0 100 100" role="img" aria-label="2%"><path d="M0 50 A50 50 0 1 0 100 50 A50 50 0 1 0 0 50 M14 50 A36 36 0 1 0 86 50 A36 36 0 1 0 14 50 Z"></path><g><path d="M 50 3.5 A 3.5 3.5 0 0 1 53.497142366876645 0.12244998733601875 A 50 50 0 0 1 55.35049498668092 0.2871022430043553 A 3.5 3.5 0 0 1 58.197441517234004 4.228262513079883 L 56.96341806302674 11.11863159713237 A 3.5 3.5 0 0 1 52.876676627956726 14.115118342424935 A 36 36 0 0 0 53.49448884497292 14.170004916099138 A 3.5 3.5 0 0 1 50 10.5 Z"></path></g></svg><strong>2%</strong>"`
+    );
+    expect(onErr).not.toBeCalled();
+
     el.$options.items = [{ value: 100 }];
     await nextFrame();
     expect(el.innerHTML).toMatchInlineSnapshot(
@@ -340,12 +348,12 @@ describe("circleElement", () => {
     el.$options.hoverHideTimeout = 50;
     el.$options.hoverShowTimeout = 200;
     el.$options.items = [
-      { value: 5, tooltip: "Item 1; value {#}%" },
+      { value: 5, tooltip: "Item 1; value {#}, percent {#%}" },
       {
         value: 24,
         tooltip: (item, popup) => {
           popup.style.background = "red";
-          return `Me ${item.value}`;
+          return `Me ${item.value} & ${item.percentage} %`;
         },
       },
     ];
@@ -365,7 +373,7 @@ describe("circleElement", () => {
     expect(onTooltip).toBeCalledTimes(0); // because waiting for 200ms
     await h.wait(200);
     expect(onTooltip).toBeCalledTimes(1);
-    expect(el.querySelector("wup-popup").innerHTML).toMatchInlineSnapshot(`"Item 1; value 5%"`);
+    expect(el.querySelector("wup-popup").innerHTML).toMatchInlineSnapshot(`"Item 1; value 5, percent 17.2%"`);
 
     el.$refItems.children[0].dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
     await h.wait(40);
@@ -378,7 +386,7 @@ describe("circleElement", () => {
     await h.wait(300);
     expect(onTooltip).toBeCalledTimes(2);
     expect(el.querySelector("wup-popup").outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="background: red;">Me 24</wup-popup>"`
+      `"<wup-popup style="background: red;">Me 24 &amp; 82.75862068965517 %</wup-popup>"`
     );
 
     // checking debounce timeouts

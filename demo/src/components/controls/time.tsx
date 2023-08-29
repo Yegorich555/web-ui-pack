@@ -13,6 +13,7 @@ export default function TimeControlView() {
       link="src/controls/time.ts"
       details={{
         tag: "wup-time",
+        linkDemo: "demo/src/components/controls/time.tsx",
         cssVarAlt: new Map([
           ["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."],
           ["--ctrl-time-icon-img-lg", "Use this svg for icon > 16px"],
@@ -42,7 +43,37 @@ export default function TimeControlView() {
           exclude="window.myTimeExclude"
           validations="window.myTimeValidations"
         />
-        <wup-time name="empty" />
+        <wup-time
+          label="Without buttons (see $options.menuButtonsOff)"
+          name="customized"
+          min="02:30"
+          max="22:50"
+          exclude="window.myTimeExclude"
+          ref={(el) => {
+            if (el) {
+              el.$options.menuButtonsOff = true;
+            }
+          }}
+        />
+        <wup-time
+          label="Menu in 3 rows (see demo source code)"
+          name="customized2"
+          initValue="23:50"
+          min="02:30"
+          max="22:50"
+          exclude="window.myTimeExclude"
+          ref={(el) => {
+            if (el) {
+              // @ts-expect-error - because protected
+              const orig = el.renderMenu;
+              // @ts-expect-error - because protected
+              el.renderMenu = function renderMenu2(popup, menuId, rows) {
+                rows = 3;
+                orig.call(el, popup, menuId, rows);
+              };
+            }
+          }}
+        />
         <wup-time name="another" label="Another format: h-m (options format)" format="h-m" />
         <wup-time name="disabled" disabled />
         <wup-time name="readonly" readOnly />

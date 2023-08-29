@@ -667,7 +667,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-TIME button[clear] {
         margin: 0;
       }
-      WUP-TIME [menu] {
+      WUP-TIME &gt; [menu] {
         padding: 0;
         max-height: 300px;
         z-index: 90010;
@@ -676,13 +676,13 @@ mask-image: var(--ctrl-icon-img);
         --ctrl-icon-img: var(--ctrl-time-icon-img-lg);
         --ctrl-icon-img: var(--ctrl-time-icon-img);
       }
-      WUP-TIME [menu] {
+      WUP-TIME &gt; [menu] {
         overflow: hidden;
       }
-      WUP-TIME [menu]&gt;div:first-child {
+      WUP-TIME &gt; [menu]&gt;div:first-child {
         position: relative;
       }
-      WUP-TIME [menu] ul {
+      WUP-TIME &gt; [menu] ul {
         margin: 0;
         padding: 0;
         list-style-type: none;
@@ -692,13 +692,13 @@ mask-image: var(--ctrl-icon-img);
         display: inline-block;
         vertical-align: middle;
       }
-      WUP-TIME [menu] li,
-      WUP-TIME [menu] mark,
-      WUP-TIME [menu] ul:after {
+      WUP-TIME &gt; [menu] li,
+      WUP-TIME &gt; [menu] mark,
+      WUP-TIME &gt; [menu] ul:after {
         padding: 1em;
-        height: 1em;
+        line-height: 1em;
       }
-      WUP-TIME [menu] mark {
+      WUP-TIME &gt; [menu] mark {
         z-index: -1;
         position: absolute;
         display: block;
@@ -708,7 +708,7 @@ mask-image: var(--ctrl-icon-img);
         font: inherit;
         background: var(--ctrl-time-current-bg);
       }
-      WUP-TIME [menu] ul:after {
+      WUP-TIME &gt; [menu] ul:after {
         content: "99";
         height: 0;
         margin:0; padding-top:0; padding-bottom:0;
@@ -718,19 +718,19 @@ mask-image: var(--ctrl-icon-img);
         pointer-events: none;
         display: block;
       }
-      WUP-TIME [menu] ul:nth-child(3):after {
+      WUP-TIME &gt; [menu] ul:nth-child(3):after {
          content: "AM";
       }
-      WUP-TIME [menu] li[aria-selected=true],
-      WUP-TIME [menu] mark,
-      WUP-TIME [menu] ul:after {
+      WUP-TIME &gt; [menu] li[aria-selected=true],
+      WUP-TIME &gt; [menu] mark,
+      WUP-TIME &gt; [menu] ul:after {
         font-weight: bold;
         color: var(--ctrl-time-current);
       }
-      WUP-TIME [menu] li[focused] {
+      WUP-TIME &gt; [menu] li[focused] {
         position: relative;
       }
-      WUP-TIME [menu] li[focused]:after {
+      WUP-TIME &gt; [menu] li[focused]:after {
         
           content: " ";
           position: absolute;
@@ -744,22 +744,23 @@ mask-image: var(--ctrl-icon-img);
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
     
       }
-      WUP-TIME [menu] li[aria-hidden] {
+      WUP-TIME &gt; [menu] li[aria-hidden] {
         pointer-events: none;
         touch-action: none;
+        opacity: 0;
       }
-      WUP-TIME [menu] li[disabled] {
+      WUP-TIME &gt; [menu] li[disabled] {
         color: var(--ctrl-err-text);
         --ctrl-focus: var(--ctrl-err-text);
         //background-color: var(--ctrl-err-bg);
       }
-      WUP-TIME [menu] [group] {
+      WUP-TIME &gt; [menu] [group] {
         display: flex;
         gap: 1px;
         padding-top: 1px;
         background: var(--base-sep);
       }
-      WUP-TIME [menu] button {
+      WUP-TIME &gt; [menu] button {
         cursor: pointer;
         flex: 1 1 50%;
         display: inline-flex;
@@ -771,17 +772,17 @@ mask-image: var(--ctrl-icon-img);
         padding: 0; margin: 0;
         background: var(--base-btn3-bg);
       }
-      WUP-TIME [menu] button:first-child {
+      WUP-TIME &gt; [menu] button:first-child {
         --ctrl-icon-img: var(--wup-icon-check);
         --ctrl-icon: var(--ctrl-err-icon-valid);
         border-bottom-left-radius: var(--border-radius);
       }
-      WUP-TIME [menu] button:last-child {
+      WUP-TIME &gt; [menu] button:last-child {
         --ctrl-icon-img: var(--wup-icon-cross);
         --ctrl-icon: var(--ctrl-err-text);
         border-bottom-right-radius: var(--border-radius);
       }
-      WUP-TIME [menu] button:after {
+      WUP-TIME &gt; [menu] button:after {
         
 display: inline-block;
 width: var(--ctrl-icon-size);
@@ -806,10 +807,10 @@ mask-image: var(--ctrl-icon-img);
         padding:0;
       }
       @media (hover: hover) and (pointer: fine) {
-        WUP-TIME [menu] li:hover {
+        WUP-TIME &gt; [menu] li:hover {
           position: relative;
         }
-        WUP-TIME [menu] li:hover:after {
+        WUP-TIME &gt; [menu] li:hover:after {
          
           content: " ";
           position: absolute;
@@ -823,11 +824,11 @@ mask-image: var(--ctrl-icon-img);
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
     
         }
-        WUP-TIME [menu] button:hover {
+        WUP-TIME &gt; [menu] button:hover {
           box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 10%);
         }
       }
-      WUP-TIME [menu] button[disabled] {
+      WUP-TIME &gt; [menu] button[disabled] {
          box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 5%);
          cursor: not-allowed;
          --ctrl-icon: inherit;
@@ -871,7 +872,7 @@ exports[`control.time validations $options.validationShowAll 1`] = `
     error=""
     id="txt2"
     role="alert"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"
@@ -965,7 +966,7 @@ exports[`control.time validations $options.validationShowAll 3`] = `
     error=""
     id="txt5"
     role="alert"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"
@@ -1106,7 +1107,9 @@ exports[`control.time validations options.validationCase 2`] = `
       >
         <li
           aria-hidden="true"
-        />
+        >
+          PM
+        </li>
         <li
           aria-selected="true"
         >
@@ -1143,7 +1146,7 @@ exports[`control.time validations options.validationCase 2`] = `
     error=""
     id="txt4"
     role="alert"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"
@@ -1206,7 +1209,7 @@ exports[`control.time validations options.validationCase 3`] = `
     aria-live="off"
     error=""
     id="txt5"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"
@@ -1275,7 +1278,9 @@ exports[`control.time validations options.validationCase 3`] = `
       >
         <li
           aria-hidden="true"
-        />
+        >
+          PM
+        </li>
         <li
           aria-selected="true"
         >
@@ -1356,7 +1361,7 @@ exports[`control.time validations options.validationCase 4`] = `
     error=""
     id="txt8"
     role="alert"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"

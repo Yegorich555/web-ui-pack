@@ -1,5 +1,5 @@
 export const enum ShowCases {
-  /** No listener - only manual call `.$hide()` & `.$show()` */
+  /** No listener - show on init + only manual call `.$hide()` & `.$show()` */
   always = 0,
   /** On `mouseenter` event of target; hide by `mouseleave` */
   onHover = 1,
@@ -7,6 +7,8 @@ export const enum ShowCases {
   onFocus = 1 << 1,
   /** On `click` event of target; hide by click anywhere */
   onClick = 1 << 2,
+  /** No listener - only manual call `.$hide()` & `.$show()` */
+  alwaysOff = 1 << 3,
 }
 
 export const enum HideCases {

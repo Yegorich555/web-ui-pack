@@ -57,14 +57,11 @@ declare global {
  * to resolve it set WUPTextareaControl.$defaults.selectOnFocus = true */
 export default class WUPTextareaControl<
   ValueType = string,
+  TOptions extends WUP.Textarea.Options = WUP.Textarea.Options,
   EventMap extends WUP.Textarea.EventMap = WUP.Textarea.EventMap
-> extends WUPTextControl<ValueType, EventMap> {
+> extends WUPTextControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextareaControl;
-
-  static get nameUnique(): string {
-    return "WUPTextareaControl";
-  }
 
   static get $style(): string {
     return `${super.$style}
@@ -85,12 +82,6 @@ export default class WUPTextareaControl<
       max: (v, setV, c, r) => WUPTextControl.$defaults.validationRules.max.call!(c, v?.replace(/\n/g, ""), setV, c, r),
     },
   };
-
-  $options: WUP.Textarea.Options = {
-    ...this.#ctr.$defaults,
-  };
-
-  protected override _opts = this.$options;
 
   $refInput = document.createElement("wup-areainput") as HTMLInputElement;
 
@@ -117,11 +108,6 @@ export default class WUPTextareaControl<
 
   protected override renderPostfix(): void {
     // not supported
-  }
-
-  protected canHandleUndo(): boolean {
-    // todo enable custom history && optimize for textarea and maybe other controls
-    return false; // todo btnClear+undo doesn't work till it returns false
   }
 
   // protected override gotBeforeInput(e: WUP.Text.GotInputEvent): void {
@@ -188,15 +174,17 @@ export default class WUPTextareaControl<
 
   protected override gotBeforeInput(e: WUP.Text.GotInputEvent): void {
     if (e.inputType.startsWith("format")) {
+      // todo need to process this for customHistory in the future
       e.preventDefault(); // prevent Bold,Italic etc. styles until textrich is developed
     } else {
       super.gotBeforeInput(e);
     }
+    // delete (this.$refInput as unknown as WUPTextareaInput)._cached;
   }
 
   protected override gotFocusLost(): void {
     super.gotFocusLost();
-    this.setInputValue(this.$value, SetValueReasons.userInput); // update because newLine is replaced
+    this.setInputValue(this.$value as string, SetValueReasons.userInput); // update because newLine is replaced
   }
 }
 

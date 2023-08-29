@@ -9,7 +9,6 @@ import { getBoundingInternalRect, px2Number, styleTransform } from "../helpers/s
 import animateDropdown from "../helpers/animateDropdown";
 import animateStack from "../helpers/animateStack";
 import isIntoView from "../helpers/isIntoView";
-import objectClone from "../helpers/objectClone";
 import viewportSize from "../helpers/viewportSize";
 
 // import {
@@ -78,8 +77,9 @@ declare global {
  * * Popup can't be more than 100vw & 100vh (impossible to disable the rule)
  */
 export default class WUPPopupElement<
+  TOptions extends WUP.Popup.Options = WUP.Popup.Options,
   Events extends WUP.Popup.EventMap = WUP.Popup.EventMap
-> extends WUPBaseElement<Events> {
+> extends WUPBaseElement<TOptions, Events> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPPopupElement;
 
@@ -90,10 +90,6 @@ export default class WUPPopupElement<
   /* Array of attribute names to monitor for changes */
   static get observedAttributes(): Array<LowerKeys<WUP.Popup.Options>> {
     return ["target", "placement", "animation"];
-  }
-
-  static get nameUnique(): string {
-    return "WUPPopupElement";
   }
 
   static $placements = PopupPlacements;
@@ -128,18 +124,6 @@ export default class WUPPopupElement<
       default:
         return undefined;
     }
-  };
-
-  /** Default options. Change it to configure default behavior */
-  static $defaults: WUP.Popup.Defaults = {
-    placement: [
-      WUPPopupElement.$placements.$top.$middle.$adjust, //
-      WUPPopupElement.$placements.$bottom.$middle.$adjust,
-    ],
-    toFitElement: document.body,
-    showCase: ShowCases.onClick,
-    hoverShowTimeout: 200,
-    hoverHideTimeout: 500,
   };
 
   static get $styleRoot(): string {
@@ -191,6 +175,18 @@ export default class WUPPopupElement<
       }
       ${WUPcssScrollSmall(":host")}`;
   }
+
+  /** Default options. Change it to configure default behavior */
+  static $defaults: WUP.Popup.Defaults = {
+    placement: [
+      WUPPopupElement.$placements.$top.$middle.$adjust, //
+      WUPPopupElement.$placements.$bottom.$middle.$adjust,
+    ],
+    toFitElement: document.body,
+    showCase: ShowCases.onClick,
+    hoverShowTimeout: 200,
+    hoverHideTimeout: 500,
+  };
 
   /** Listen for target according to showCase and create/remove popup when it's required (by show/hide).
    *  This helps to avoid tons of hidden popups on HTML;
@@ -298,11 +294,6 @@ export default class WUPPopupElement<
 
     return detach;
   }
-
-  /** All options for this popup. If you want to change common options
-   *  @see {@link WUPPopupElement.$defaults} */
-  $options: WUP.Popup.Options = objectClone(this.#ctr.$defaults);
-  protected override _opts = this.$options;
 
   /** Fires before show is happened;
    * @tutorial rules
@@ -436,17 +427,18 @@ export default class WUPPopupElement<
     if (this.#attach) {
       this.#refListener = this.#attach();
     } else {
-      this._opts.target = this.#defineTarget();
-
       if (!this._opts.showCase /* always */) {
         this.goShow(ShowCases.always, null);
         return;
       }
-      this.#refListener = new PopupListener(
-        this._opts as typeof this._opts & { target: HTMLElement },
-        (v, e) => (this.goShow(v, e) ? this : null),
-        (v, e) => !!this.goHide(v, e)
-      );
+      if (this._opts.showCase !== ShowCases.alwaysOff) {
+        this._opts.target = this.defineTarget();
+        this.#refListener = new PopupListener(
+          this._opts as typeof this._opts & { target: HTMLElement },
+          (v, e) => (this.goShow(v, e) ? this : null),
+          (v, e) => !!this.goHide(v, e)
+        );
+      }
     }
   }
 
@@ -485,7 +477,7 @@ export default class WUPPopupElement<
   }
 
   /** Defines target on show; @returns Element | Error */
-  #defineTarget(): HTMLElement | SVGElement {
+  defineTarget(): HTMLElement | SVGElement {
     let el: Element | null;
     const attrTrg = this.getAttribute("target");
     if (attrTrg) {
@@ -547,8 +539,8 @@ export default class WUPPopupElement<
     this.style.minWidth = ""; // reset styles to default to avoid bugs and previous state
     this.style.minHeight = ""; // reset styles to default to avoid bugs and previous state
 
-    this._opts.target = this._opts.target || this.#defineTarget();
-    if (!this._opts.target!.isConnected) {
+    const target = this._opts.target as HTMLElement;
+    if (!target!.isConnected) {
       throw new Error(`${this.tagName}. Target is not appended to document`);
     }
 
@@ -576,7 +568,7 @@ export default class WUPPopupElement<
       animTime: Number.parseFloat(style.animationDuration.substring(0, style.animationDuration.length - 1)) * 1000,
     };
 
-    this.#state!.scrollParents = findScrollParentAll(this._opts.target) ?? undefined;
+    this.#state!.scrollParents = findScrollParentAll(target) ?? undefined;
     // get arrowSize
     if (this._opts.arrowEnable) {
       const el = this.#refArrow || document.createElement(WUPPopupArrowElement.tagName);
@@ -686,6 +678,7 @@ export default class WUPPopupElement<
     if (this.#whenShow) {
       return this.#whenShow;
     }
+    this._opts.target = this.defineTarget();
     const e = this.fireEvent("$willShow", { cancelable: true, detail: { showCase } });
     if (e.defaultPrevented) {
       return false;
@@ -694,6 +687,7 @@ export default class WUPPopupElement<
     this.#isHiding = undefined;
     this._stopAnimation?.call(this);
     this.#state && window.cancelAnimationFrame(this.#state.frameId);
+
     this.buildState();
     const wasClosed = !this.#isShown;
     this.#isShown = true;
@@ -714,14 +708,6 @@ export default class WUPPopupElement<
     this.style.opacity = "";
 
     const { animTime } = this.#state!.userStyles;
-    if (!animTime && window.matchMedia("not all and (prefers-reduced-motion)").matches && this._opts.animation) {
-      /* istanbul ignore else */
-      if (this._opts.animation === Animations.drawer) {
-        console.warn(
-          `${this.tagName} style.animationDuration is missed but $options.animation is defined. Please point animation duration via styles`
-        );
-      }
-    }
     if (!animTime) {
       wasClosed && setTimeout(() => this.fireEvent("$show", { cancelable: false }));
       return true;

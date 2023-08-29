@@ -1,5 +1,4 @@
 import WUPBaseElement from "./baseElement";
-import { objectClone } from "./indexHelpers";
 import WUPPopupElement from "./popup/popupElement";
 import { Animations, HideCases, ShowCases } from "./popup/popupElement.types";
 import { WUPcssButton, WUPcssMenu } from "./styles";
@@ -73,14 +72,11 @@ declare global {
   </wup-dropdown>
  * ```
  * @tutorial Troubleshooting
- * * in comparison with Combobox Dropdown doesn't contain input but can contain in popup any items (like nav-menu etc.)
- */
-export default class WUPDropdownElement extends WUPBaseElement {
+ * * in comparison with Combobox Dropdown doesn't contain input but can contain in popup any items (like nav-menu etc.) */
+export default class WUPDropdownElement<
+  TOptions extends WUP.Dropdown.Options = WUP.Dropdown.Options
+> extends WUPBaseElement<TOptions> {
   #ctr = this.constructor as typeof WUPDropdownElement;
-
-  static get nameUnique(): string {
-    return "WUPDropdownElement";
-  }
 
   static get $style(): string {
     return `${super.$style}
@@ -92,10 +88,12 @@ export default class WUPDropdownElement extends WUPBaseElement {
         min-width: initial;
         margin: 0;
         padding: 0.7em;
-      }${WUPcssMenu(":host [menu]")}`;
+      }${WUPcssMenu(":host>[menu]")}`;
   }
 
-  /** Default options applied to every element. Change it to configure default behavior */
+  /** Default options applied to every element. Change it to configure default behavior
+   * * @tutorial Troubleshooting
+   * * Popup-related options are not observed so to change it use `WUPDropdownElement.$defaults` or `element.$refPopup.$options` direclty */
   static $defaults: WUP.Dropdown.Defaults = {
     ...WUPPopupElement.$defaults,
     animation: Animations.drawer,
@@ -115,12 +113,6 @@ export default class WUPDropdownElement extends WUPBaseElement {
     ],
   };
 
-  /** Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally
-   * @tutorial Troubleshooting
-   * * Popup-related options are not observed so to change it use `WUPDropdownElement.$defaults` or `element.$refPopup.$options` direclty */
-  $options: WUP.Dropdown.Options = objectClone(this.#ctr.$defaults);
-  protected override _opts = this.$options;
-
   /** Reference to nested HTMLElement tied with $options.label */
   $refTitle = this.firstElementChild as HTMLElement;
   /** Reference to popupMenu */
@@ -137,16 +129,7 @@ export default class WUPDropdownElement extends WUPBaseElement {
       this.$refPopup.setAttribute("menu", "");
       this.$refPopup.goShow = this.goShowPopup.bind(this);
       this.$refPopup.goHide = this.goHidePopup.bind(this);
-      // @ts-expect-error - because protected
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      this.$refPopup.init = () => {};
       Object.assign(this.$refPopup.$options, this.$options);
-      setTimeout(() => {
-        // @ts-expect-error - because protected
-        delete this.$refPopup.init;
-        // @ts-expect-error - because protected
-        this.$refPopup.init(); // init manually otherwise it can trigger several times
-      });
 
       // WA
       const menu = (this.$refPopup.querySelector("ul,ol,[items]") as HTMLElement) || this.$refPopup;

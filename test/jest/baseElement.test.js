@@ -35,10 +35,6 @@ describe("baseElement", () => {
 
   describe("me", () => {
     class TestMeElement extends WUPBaseElement {
-      static get nameUnique() {
-        return "TestMeElement";
-      }
-
       $options = {};
     }
     customElements.define("test-base-el", TestMeElement);
@@ -75,10 +71,6 @@ describe("baseElement", () => {
     TestA.$refStyle = was;
 
     class TestB extends TestA {
-      static get nameUnique() {
-        return "TestB";
-      }
-
       static get $style() {
         return `${super.$style} :host { position: my-absolute }`;
       }
@@ -94,10 +86,6 @@ describe("baseElement", () => {
     expect(style).toContain(":root { main-color: my-red }");
 
     class TestC extends TestB {
-      static get nameUnique() {
-        return "TestC";
-      }
-
       static get $style() {
         return `${super.$style} :host { z-index: me }`;
       }
@@ -180,7 +168,6 @@ describe("baseElement", () => {
 
   test("gotOptionsChanged", () => {
     class Test extends WUPBaseElement {
-      $options = {};
       static get observedOptions() {
         return ["t1", "t2"];
       }
@@ -199,6 +186,13 @@ describe("baseElement", () => {
     tst.$options = { t1: 1, t2: 2 };
     expect(fn).toBeCalledTimes(1);
     expect(fn).toBeCalledWith({ props: ["t1", "t2"], target: tst.$options });
+    fn.mockClear();
+    tst.$options = tst._opts;
+    expect(fn).toBeCalledTimes(0); // because no-changes actually
+    tst.$options = tst.$options;
+    expect(fn).toBeCalledTimes(0); // because no-changes actually
+    tst.$options = { t1: 1, t2: 2 };
+    expect(fn).toBeCalledTimes(0); // because no-changes actually
 
     fn.mockClear();
     tst.$options.t1 += 1;
@@ -218,7 +212,7 @@ describe("baseElement", () => {
     tst.$options = { ...tst.$options, another: "s2" };
     expect(fn).not.toBeCalled();
 
-    expect(() => (tst.$options = null)).toThrow();
+    expect(() => (tst.$options = null)).not.toThrow();
 
     // test when no observedOptions
     expect(el.$isReady).toBe(true);
@@ -227,7 +221,6 @@ describe("baseElement", () => {
     // eslint-disable-next-line no-self-compare
     expect(el.$options === el.$options).toBe(true); // just for coverage when observedOptions is empty
     class T2 extends WUPBaseElement {
-      $options = {};
       static get observedOptions() {
         return ["to"];
       }
@@ -243,7 +236,6 @@ describe("baseElement", () => {
 
   test("gotChanges method", async () => {
     class TestEl extends WUPBaseElement {
-      $options = {};
       static get observedOptions() {
         return ["disabled", "disabledReflect"];
       }

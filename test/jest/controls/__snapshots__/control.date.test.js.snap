@@ -664,7 +664,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-DATE button[clear] {
         margin: 0;
       }
-      WUP-DATE [menu] {
+      WUP-DATE &gt; [menu] {
         padding: 0;
         max-height: 300px;
         z-index: 90010;
@@ -672,11 +672,11 @@ mask-image: var(--ctrl-icon-img);
       WUP-DATE {
         --ctrl-icon-img: var(--ctrl-date-icon-img);
       }
-      WUP-DATE wup-calendar {
-        margin: 0;
-      }
-      WUP-DATE [menu] {
+      WUP-DATE &gt; [menu] {
         overflow: hidden;
+      }
+      WUP-DATE &gt; [menu] &gt; wup-calendar {
+        margin: 0;
       }
 </style>
 `;
@@ -717,7 +717,7 @@ exports[`control.date validations $options.validationShowAll 1`] = `
     error=""
     id="txt2"
     role="alert"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"
@@ -778,7 +778,7 @@ exports[`control.date validations $options.validationShowAll 2`] = `
     error=""
     id="txt2"
     role="alert"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"
@@ -847,7 +847,7 @@ exports[`control.date validations $options.validationShowAll 3`] = `
     error=""
     id="txt5"
     role="alert"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"
@@ -1124,7 +1124,6 @@ exports[`control.date validations options.validationCase 2`] = `
                 27
               </li>
               <li
-                aria-selected="true"
                 role="gridcell"
               >
                 28
@@ -1219,7 +1218,7 @@ exports[`control.date validations options.validationCase 2`] = `
     error=""
     id="txt4"
     role="alert"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"
@@ -1283,7 +1282,7 @@ exports[`control.date validations options.validationCase 3`] = `
     aria-live="off"
     error=""
     id="txt5"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"
@@ -1627,7 +1626,7 @@ exports[`control.date validations options.validationCase 4`] = `
     error=""
     id="txt8"
     role="alert"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"

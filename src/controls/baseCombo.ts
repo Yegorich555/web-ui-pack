@@ -39,14 +39,14 @@ declare global {
       $hideMenu: Event;
     }
     interface ValidityMap extends Omit<WUP.Text.ValidityMap, "min" | "max" | "email"> {}
-    interface Defaults<T = string, VM = ValidityMap> extends WUP.Text.Defaults<T, VM> {
+    interface Defaults<T = any, VM = ValidityMap> extends WUP.Text.Defaults<T, VM> {
       /** Case when menu-popup to show; WARN ShowCases.inputClick doesn't work without ShowCases.click
        * @defaultValue onPressArrowKey | onClick | onFocus */
       showCase: ShowCases;
       /** Set true to make input not editable but allow select items via popup-menu (ordinary dropdown mode) */
       readOnlyInput?: boolean | number;
     }
-    interface Options<T = string, VM = ValidityMap> extends WUP.Text.Options<T, VM>, Defaults<T, VM> {}
+    interface Options<T = any, VM = ValidityMap> extends WUP.Text.Options<T, VM>, Defaults<T, VM> {}
     interface Attributes extends WUP.Text.Attributes {}
     interface JSXProps<C = WUPBaseComboControl> extends WUP.Text.JSXProps<C>, Attributes {}
   }
@@ -55,8 +55,14 @@ declare global {
 /** Base abstract form-control for any control with popup-menu (Dropdown, Datepicker etc.) */
 export default abstract class WUPBaseComboControl<
   ValueType = any,
+  TOptions extends WUP.BaseCombo.Options = WUP.BaseCombo.Options,
   EventMap extends WUP.BaseCombo.EventMap = WUP.BaseCombo.EventMap
-> extends WUPTextControl<ValueType, EventMap> {
+> extends WUPTextControl<
+  ValueType,
+  // @ts-expect-error - because validationRules is different
+  TOptions,
+  EventMap
+> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseComboControl;
 
@@ -64,10 +70,6 @@ export default abstract class WUPBaseComboControl<
     const arr = super.observedOptions as Array<keyof WUP.BaseCombo.Options>;
     arr.push("readOnlyInput");
     return arr;
-  }
-
-  static get nameUnique(): string {
-    return "WUPBaseComboControl";
   }
 
   static get $style(): string {
@@ -95,7 +97,7 @@ export default abstract class WUPBaseComboControl<
       :host button[clear] {
         margin: 0;
       }
-      :host [menu] {
+      :host > [menu] {
         padding: 0;
         max-height: 300px;
         z-index: 90010;
@@ -111,14 +113,6 @@ export default abstract class WUPBaseComboControl<
     },
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey,
   };
-
-  // @ts-expect-error reason: validationRules is different
-  $options: WUP.BaseCombo.Options = {
-    ...this.#ctr.$defaults,
-  };
-
-  // @ts-expect-error reason: validationRules is different
-  protected override _opts = this.$options;
 
   /** Fires after popup-menu is shown (after animation finishes) */
   $onShowMenu?: (e: Event) => void;
@@ -245,7 +239,7 @@ export default abstract class WUPBaseComboControl<
     if (!this.$refPopup) {
       const p = document.createElement("wup-popup");
       this.$refPopup = p;
-      p.$options.showCase = PopupShowCases.always;
+      p.$options.showCase = PopupShowCases.alwaysOff;
       p.$options.target = this;
       p.$options.offsetFitElement = [1, 1];
       p.$options.minWidthByTarget = true;
@@ -361,6 +355,7 @@ export default abstract class WUPBaseComboControl<
   }
 
   #scrolltid?: ReturnType<typeof setTimeout>;
+  #scrollFrame?: ReturnType<typeof requestAnimationFrame>;
   /** Scroll to element if previous scroll is not in processing (debounce by empty timeout) */
   tryScrollTo(el: HTMLElement): void {
     if (this.#scrolltid) {
@@ -368,8 +363,20 @@ export default abstract class WUPBaseComboControl<
     }
     this.#scrolltid = setTimeout(() => {
       this.#scrolltid = undefined;
-      const ifneed = (el as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
-      ifneed ? ifneed.call(el, false) : el.scrollIntoView();
+      this.#scrollFrame && window.cancelAnimationFrame(this.#scrollFrame); // cancel previous scrolling
+      this.#scrollFrame = undefined;
+      const act = (): void => {
+        const p = el.parentElement!; // WARN: expected that parent is scrollable
+        const prev = p.scrollTop;
+        const ifneed = (el as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
+        ifneed ? ifneed.call(el, false) : el.scrollIntoView({ behavior: "instant" as ScrollBehavior });
+        if (p.scrollTop !== prev) {
+          this.#scrollFrame = window.requestAnimationFrame(act); // try scroll again later because during the popup animation scrolling can be wrong
+        } else {
+          this.#scrollFrame = undefined;
+        }
+      };
+      act();
     });
   }
 
@@ -437,10 +444,14 @@ export default abstract class WUPBaseComboControl<
     }
   }
 
-  protected override gotInput(e: WUP.Text.GotInputEvent, allowSuper = false): void {
+  protected override gotInput(e: WUP.Text.GotInputEvent, preventValueChange?: boolean): void {
     // gotInput possible on browser-autofill so we need filter check if isFocused
     !this.$isShown && this._opts.showCase & ShowCases.onInput && this.$isFocused && this.goShowMenu(ShowCases.onInput);
-    allowSuper && super.gotInput(e);
+    if (preventValueChange) {
+      this._refHistory?.handleInput(e);
+    } else {
+      super.gotInput(e);
+    }
   }
 
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
@@ -449,8 +460,13 @@ export default abstract class WUPBaseComboControl<
 
     let clickAfterFocus = true; // prevent clickAfterFocus
     let lblClick: ReturnType<typeof setTimeout> | false = false; // fix when labelOnClick > inputOnClick > inputOnFocus
-    const dsps = onEvent(this, "click", (e) => {
-      const skip = e.defaultPrevented || e.button || lblClick; // e.button > 0 if not left-click
+    let onInputStartClick = false; // mouseDown>selectText>mouseUp - without filter it closes/opens popup when user tries to select text
+    const dsps0 = onEvent(this.$refInput, "mousedown", () => {
+      const allow = !this.$refInput.readOnly && !(this._opts.showCase & ShowCases.onClickInput);
+      onInputStartClick = allow;
+    });
+    const dsps1 = onEvent(this, "click", (e) => {
+      const skip = e.defaultPrevented || e.button || lblClick || onInputStartClick; // e.button > 0 if not left-click
       if (!skip) {
         if (clickAfterFocus) {
           r.finally(() => this.$isFocused && this.goShowMenu(ShowCases.onClick, e)); // menu must be opened if openByFocus is rejected
@@ -462,7 +478,8 @@ export default abstract class WUPBaseComboControl<
     });
 
     const dsps2 = onEvent(document, "click", (e) => {
-      !lblClick && setTimeout(() => this.$isFocused && this.goHideMenu(HideCases.onClick, e)); // timeout to prevent show before focusLost
+      !lblClick && !onInputStartClick && setTimeout(() => this.$isFocused && this.goHideMenu(HideCases.onClick, e)); // timeout to prevent show before focusLost
+      onInputStartClick = false;
     });
 
     document.addEventListener(
@@ -473,7 +490,7 @@ export default abstract class WUPBaseComboControl<
       { once: true, passive: true, capture: true }
     );
 
-    arr.push(dsps, dsps2);
+    arr.push(dsps0, dsps1, dsps2);
     return arr;
   }
 
@@ -492,12 +509,20 @@ export default abstract class WUPBaseComboControl<
 
   /** Reset input to currentValue; called on focusOut, pressing Escape or Enter */
   protected resetInputValue(): void {
-    this.setInputValue(this.$value, SetValueReasons.clear);
+    const isClear = !this.$refInput.value && !this._selectedMenuItem; // if user cleared input and $hided menu - need to clearValue
+    isClear
+      ? this.setValue(undefined, SetValueReasons.clear)
+      : this.setInputValue(this.$value, SetValueReasons.userSelect);
   }
 
+  // @ts-expect-error - because expected string
   protected override setInputValue(v: ValueType | undefined, reason: SetValueReasons): void {
     const p = this.valueToInput(v);
-    super.setInputValue(p, reason);
+    this.setInputValueDirect(p, reason);
+  }
+
+  protected setInputValueDirect(v: string, reason: SetValueReasons): void {
+    super.setInputValue(v, reason);
   }
 
   /** Called when popup must be removed (by focus out OR if control removed) */
@@ -541,3 +566,5 @@ export default abstract class WUPBaseComboControl<
  >>> console.warn('done')
  hide-event
  */
+
+// NiceToHave: option for press-Escape: hideMenu + rollback value to that was before showing OR only hideMenu; now WUPTime.$options.menuButtons changes such behavior

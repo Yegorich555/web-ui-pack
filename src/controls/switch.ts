@@ -56,13 +56,10 @@ declare global {
  * </label>
  */
 export default class WUPSwitchControl<
+  TOptions extends WUP.Switch.Options = WUP.Switch.Options,
   EventMap extends WUP.Switch.EventMap = WUP.Switch.EventMap
-> extends WUPBaseControl<boolean, EventMap> {
+> extends WUPBaseControl<boolean, TOptions, EventMap> {
   #ctr = this.constructor as typeof WUPSwitchControl;
-
-  static get nameUnique(): string {
-    return "WUPSwitchControl";
-  }
 
   static get $styleRoot(): string {
     return `:root {
@@ -168,20 +165,6 @@ export default class WUPSwitchControl<
     ...WUPBaseControl.$defaults,
     validationRules: { ...WUPBaseControl.$defaults.validationRules },
   };
-
-  $options: WUP.Switch.Options = {
-    ...this.#ctr.$defaults,
-  };
-
-  protected override _opts = this.$options;
-
-  get $initValue(): boolean | undefined {
-    return super.$initValue;
-  }
-
-  set $initValue(v: boolean | undefined) {
-    super.$initValue = v;
-  }
 
   get $value(): boolean {
     return !!super.$value as boolean;

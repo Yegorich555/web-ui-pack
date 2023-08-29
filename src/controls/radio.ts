@@ -17,7 +17,7 @@ declare global {
        * setTimeout(()=> console.warn(el.$options.items === items)},1) // returns 'false'
        * setTimeout(()=> console.warn(el.$options.items[0].value === items[0].value)},1) // returns 'true'
        * ``` */
-      items: WUP.Select.MenuItems<T> | (() => WUP.Select.MenuItems<T>); // NiceToHave: remove items from observed options to get/set to avoid Proxy issues
+      items: WUP.Select.MenuItems<T> | (() => WUP.Select.MenuItems<T>);
       /** Reversed-style (radio+label for true vs label+radio)
        * @defaultValue false */
       reverse?: boolean;
@@ -73,16 +73,13 @@ interface ExtInputElement extends HTMLInputElement {
  * </fieldset> */
 export default class WUPRadioControl<
   ValueType = any,
+  TOptions extends WUP.Radio.Options = WUP.Radio.Options,
   EventMap extends WUP.Radio.EventMap = WUP.Radio.EventMap
-> extends WUPBaseControl<ValueType, EventMap> {
+> extends WUPBaseControl<ValueType, TOptions, EventMap> {
   #ctr = this.constructor as typeof WUPRadioControl;
 
   /** Custom text that announced by screen-readers. Redefine it to use with another language */
   static $ariaReadonly = "readonly";
-
-  static get nameUnique(): string {
-    return "WUPRadioControl";
-  }
 
   static get $styleRoot(): string {
     return `:root {
@@ -207,12 +204,10 @@ export default class WUPRadioControl<
     validationRules: { ...WUPBaseControl.$defaults.validationRules },
   };
 
-  $options: WUP.Radio.Options = {
-    ...this.#ctr.$defaults,
-    items: [],
-  };
-
-  protected override _opts = this.$options;
+  constructor() {
+    super();
+    this._opts.items = [];
+  }
 
   /** Called when need to parse attr [initValue] */
   override parse(attrValue: string): ValueType | undefined {

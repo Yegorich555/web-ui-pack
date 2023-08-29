@@ -28,6 +28,7 @@ export default function PasswordControlView() {
       ]}
       details={{
         tag: "wup-pwd",
+        linkDemo: "demo/src/components/controls/password.tsx",
         cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
       }}
     >

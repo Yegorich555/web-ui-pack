@@ -25,6 +25,7 @@ export default function NumberControlView() {
       ]}
       details={{
         tag: "wup-num",
+        linkDemo: "demo/src/components/controls/number.tsx",
         cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
       }}
     >
@@ -45,16 +46,6 @@ export default function NumberControlView() {
           maskholder=""
           prefix=""
           postfix=""
-        />
-        <wup-num
-          name="decimal"
-          label="Decimal (see $options.format)"
-          initValue="99.2"
-          ref={(el) => {
-            if (el) {
-              el.$options.format = { maxDecimal: 2, minDecimal: 0 };
-            }
-          }}
         />
         <wup-num
           name="prefixPostfix"

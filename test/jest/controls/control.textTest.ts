@@ -1,5 +1,5 @@
 import { WUPTextControl } from "web-ui-pack";
-import { ValidationCases, ClearActions } from "web-ui-pack/controls/baseControl";
+import { ValidationCases, ClearActions, SetValueReasons } from "web-ui-pack/controls/baseControl";
 import { testBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
 
@@ -86,10 +86,14 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       el.$options.clearButton = true;
       el.$options.clearActions = ClearActions.clear | 0;
       jest.advanceTimersByTime(1);
+      const spyChange = jest.fn();
+      el.$onChange = spyChange;
       expect(el.$refBtnClear).toBeDefined();
       el.$refBtnClear!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       expect(el.$value).toBe(undefined);
       expect(el).toMatchSnapshot();
+      jest.advanceTimersByTime(1);
+      expect(spyChange.mock.lastCall[0].detail).toBe(SetValueReasons.clear);
 
       el.$options.clearButton = false;
       jest.advanceTimersByTime(1);
@@ -113,10 +117,9 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       expect(el.$refInput.value).toBe(initV);
       expect(el.$value).toBe(initV);
       expect(spyChange).toBeCalledTimes(1);
-      expect(spyChange.mock.lastCall[0].detail).toBe(3); // onUserInput
+      expect(spyChange.mock.lastCall[0].detail).toBe(SetValueReasons.userInput); // onUserInput
       expect(el.$onChange).toBeCalledTimes(1);
       expect((el.$onChange as any).mock.lastCall[0]).toBe(spyChange.mock.lastCall[0]);
-      await h.userTypeText(el.$refInput, ""); // just for coverage
 
       el.$options.debounceMs = 0;
       el.$value = undefined;

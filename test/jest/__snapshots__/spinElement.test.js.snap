@@ -48,17 +48,17 @@ padding:0;}
         pointer-events: none;
       }
       WUP-SPIN,
-      WUP-SPIN div {
+      WUP-SPIN&gt;div {
         display: inline-block;
         box-sizing: border-box;
         border-radius: 50%;
       }
-      WUP-SPIN div {
+      WUP-SPIN&gt;div {
         animation: WUP-SPIN-1 var(--spin-speed) linear infinite;
         width: 100%; height: 100%;
         left:0; top:0;
       }
-      WUP-SPIN div[fade] {
+      WUP-SPIN&gt;div[fade] {
          display: block;
          position: absolute;
          left:0; top:0;
@@ -69,8 +69,8 @@ padding:0;}
          z-index: -1;
          background: var(--spin-fade);
       }
-      WUP-SPIN div[fade]::after { content: none; }
-      WUP-SPIN div {
+      WUP-SPIN&gt;div[fade]::after { content: none; }
+      WUP-SPIN&gt;div {
         border: var(--spin-item-size) solid var(--spin-1);
         border-top-color: var(--spin-2);
       }

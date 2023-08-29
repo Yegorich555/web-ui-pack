@@ -330,17 +330,16 @@ export default class MaskTextInput {
       delete el._maskPrev;
       return;
     }
-    // WARN: looks like it's not required - rollback if it's false
-    // const pos = el.selectionStart || 0;
-    // // eslint-disable-next-line default-case
-    // switch (e!.inputType) {
-    //   case "insertText":
-    //   case "insertFromPaste": {
-    //     const npos = this.adjustCaret(pos);
-    //     npos !== pos && el.setSelectionRange(npos, npos);
-    //     pos = npos;
-    //   }
-    // }
+    let pos = el.selectionStart || 0;
+    // eslint-disable-next-line default-case
+    switch (e!.inputType) {
+      case "insertText":
+      case "insertFromPaste": {
+        const npos = this.adjustCaret(pos);
+        npos !== pos && el.setSelectionRange(npos, npos);
+        pos = npos;
+      }
+    }
     el._maskPrev = {
       position: el.selectionStart || 0,
       value: el.value,

@@ -29,18 +29,15 @@ function setEvent(): void {
     { passive: true, capture: true }
   );
 
-  /* istanbul ignore else */
-  if (!rstEvent) {
-    rstEvent = () => {
-      if (--rstCnt === 0) {
-        onMouseUp.length = 0;
-        isMouseDown = false;
-        r1();
-        r2();
-        rstEvent = undefined;
-      }
-    };
-  }
+  rstEvent = () => {
+    if (--rstCnt === 0) {
+      onMouseUp.length = 0;
+      isMouseDown = false;
+      r1();
+      r2();
+      rstEvent = undefined;
+    }
+  };
 }
 
 export interface onFocusLostOptions extends AddEventListenerOptions {

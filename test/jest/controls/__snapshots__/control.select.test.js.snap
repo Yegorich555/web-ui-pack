@@ -664,7 +664,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-SELECT button[clear] {
         margin: 0;
       }
-      WUP-SELECT [menu] {
+      WUP-SELECT &gt; [menu] {
         padding: 0;
         max-height: 300px;
         z-index: 90010;
@@ -803,7 +803,7 @@ exports[`control.select validations $options.validationShowAll 1`] = `
     error=""
     id="txt2"
     role="alert"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"
@@ -884,7 +884,7 @@ exports[`control.select validations $options.validationShowAll 3`] = `
     error=""
     id="txt5"
     role="alert"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"
@@ -999,7 +999,7 @@ exports[`control.select validations options.validationCase 2`] = `
     error=""
     id="txt4"
     role="alert"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"
@@ -1053,7 +1053,7 @@ exports[`control.select validations options.validationCase 3`] = `
     aria-live="off"
     error=""
     id="txt5"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"
@@ -1140,7 +1140,7 @@ exports[`control.select validations options.validationCase 4`] = `
     error=""
     id="txt8"
     role="alert"
-    style="max-width: 100px;"
+    style=""
   >
     <span
       class="wup-hidden"

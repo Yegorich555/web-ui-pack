@@ -64,7 +64,7 @@ export default function ControlsView() {
           Option <b>autoSave</b> prevents losing not-sumbitted data
         </>,
       ]}
-      details={{ tag: "wup-form", customHTML, customJS }}
+      details={{ tag: "wup-form", linkDemo: "demo/src/components/controls/controlsView.tsx", customHTML, customJS }}
     >
       <wup-form
         autoComplete={false}

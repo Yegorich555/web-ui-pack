@@ -1,3 +1,4 @@
+/* eslint-disable no-irregular-whitespace */
 import { WUPSelectControl } from "web-ui-pack";
 import { ShowCases } from "web-ui-pack/controls/baseCombo";
 import observer from "web-ui-pack/helpers/observer";
@@ -509,8 +510,6 @@ describe("control.select", () => {
   });
 
   test("menu navigation", async () => {
-    const was = HTMLElement.prototype.scrollIntoViewIfNeeded;
-    HTMLElement.prototype.scrollIntoViewIfNeeded = () => undefined; // just for coverage
     el.focus();
     await h.wait();
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
@@ -638,8 +637,6 @@ describe("control.select", () => {
     expect(el.querySelector("[aria-selected='true']")?.id).toBe(menuIds[3]);
     expect(el.querySelectorAll("[aria-selected='true']").length).toBe(1);
 
-    HTMLElement.prototype.scrollIntoViewIfNeeded = was;
-
     // when user changed text No Items
     h.mockConsoleError();
     const wasText = WUPSelectControl.$textNoItems;
@@ -652,7 +649,6 @@ describe("control.select", () => {
 
     // when items is function with promise
     await setItems(() => Promise.resolve(getItems()));
-    el.testMe = false;
     expect(el.$isShown).toBe(true);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
       `"<ul id="txt11" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option" aria-selected="true">Splinter</li></ul>"`
@@ -736,6 +732,16 @@ describe("control.select", () => {
     expect(el.$isShown).toBe(false);
     expect(el.$value).toBe(was); // previous value because no selected according to filter
     expect(el.$refInput.value).toBe("Dona Rose");
+    // again with button clear
+    el.$options.clearActions = 0;
+    await h.wait(1);
+    await h.userTypeText(el.$refInput, "123");
+    expect(el.$isShown).toBe(true);
+    el.clearValue();
+    expect(el.$refInput.value).toBe("");
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option" aria-selected="false" id="txt3" style="">Donny</li><li role="option" aria-selected="false" id="txt4" style="">Dona Rose</li><li role="option" style="">Leo</li><li role="option" aria-disabled="true" aria-selected="false" style="display: none;">No Items</li></ul>"`
+    );
 
     // filter by other words
     el.$value = 10;
@@ -763,7 +769,7 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isShown).toBe(true);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt5" role="listbox" aria-label="Items" tabindex="-1"><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
+      `"<ul id="txt6" role="listbox" aria-label="Items" tabindex="-1"><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
     );
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
@@ -793,7 +799,7 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isShown).toBe(true);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt7" role="listbox" aria-label="Items" tabindex="-1"><li role="option" aria-selected="false" id="txt8" focused="">Donny</li><li role="option" style="display: none;">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option" style="display: none;">Splinter</li></ul>"`
+      `"<ul id="txt8" role="listbox" aria-label="Items" tabindex="-1"><li role="option" aria-selected="false" id="txt9" focused="">Donny</li><li role="option" style="display: none;">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option" style="display: none;">Splinter</li></ul>"`
     );
   });
 
@@ -896,6 +902,38 @@ describe("control.select", () => {
     expect(el.$value).toBe(getItems()[0].value); // value reverted because partially removed
     expect(el.$refInput.value).toBe(getItems()[0].text);
 
+    // remove whole text + focusOut => clear value
+    el.$value = getItems()[0].value;
+    el.$showMenu();
+    await h.wait(1);
+    h.setInputCursor(el.$refInput, `|${el.$refInput.value}|`);
+    expect(await h.userRemove(el.$refInput)).toBe("|");
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option" aria-selected="false">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
+    );
+    el.blur();
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("");
+    expect(el.$value).toBe(undefined);
+    // again but when menu closed - in this case filterMenuItems not fired & menu opened again by removeText
+    el.$value = getItems()[0].value;
+    el.focus();
+    await h.wait(1);
+    h.setInputCursor(el.$refInput, `|${el.$refInput.value}|`);
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(el.$isShown).toBe(false);
+    expect(await h.userRemove(el.$refInput)).toBe("|");
+    await h.wait(1);
+    expect(el.$isShown).toBe(true);
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt3" role="listbox" aria-label="Items" tabindex="-1"><li role="option" aria-selected="false">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
+    );
+    el.blur();
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("");
+    expect(el.$value).toBe(undefined);
+
     // remove whole text + press Enter when required => reset to prev value
     el.$options.validations = { required: true };
     el.$value = getItems()[1].value;
@@ -981,6 +1019,23 @@ describe("control.select", () => {
       await h.userClick(el);
       await h.wait();
       expect(el.$isShown).toBe(false);
+
+      // case when user select text in input but mouseUp outside input
+      expect(el.$isShown).toBe(false);
+      el.$refInput.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
+      el.$refInput.dispatchEvent(new MouseEvent("mousemove", { cancelable: true, bubbles: true }));
+      el.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
+      el.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true })); // click inside control but outside input
+      await h.wait();
+      expect(el.$isShown).toBe(false);
+      // again with outside control
+      el.$refInput.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
+      el.$refInput.dispatchEvent(new MouseEvent("mousemove", { cancelable: true, bubbles: true }));
+      document.body.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
+      document.body.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true })); // click outside control
+      await h.wait();
+      expect(el.$isShown).toBe(false);
+
       el.$options.showCase &= ~ShowCases.onClick; // remove option
       el.click();
       await h.wait();
@@ -1152,7 +1207,7 @@ describe("control.select", () => {
       await h.userRemove(el.$refInput);
       await h.wait(1);
       expect(el.$value).toStrictEqual([10, 30]);
-      expect(h.getInputCursor(el.$refInput)).toBe("Donny, Leo, |"); // NiceToHave: move cursor to next/prev according to Backspace/Delete
+      expect(h.getInputCursor(el.$refInput)).toBe("Donny, |Leo, "); // NiceToHave: move cursor to next/prev according to Backspace/Delete
 
       // initvalue
       el = document.body.appendChild(document.createElement("wup-select"));
@@ -1214,6 +1269,8 @@ describe("control.select", () => {
         `"<ul id="txt8" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true">Donny</li><li role="option" aria-selected="false">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
       );
       el.selectValue(10); // de-select just for coverage
+      // just for coverage
+      expect(el.parseInput("donny, mikky, abc")).toStrictEqual([10, 20]); // abc skipped because no-match
 
       // with allownewvalue
       el.blur();
@@ -1268,6 +1325,85 @@ describe("control.select", () => {
       el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); // select focused item in menu
       await h.wait(1);
       expect(el.$value).toStrictEqual([20, 10]);
+
+      // remove in the middle
+      el.$value = [10, 20];
+      await h.wait(1);
+      expect(el.$refInput.value).toBe("Donny, Mikky, ");
+      h.setInputCursor(el.$refInput, "Donny,| Mikky, ");
+      expect(await h.userRemove(el.$refInput)).toBe("|Mikky, ");
+      expect(el.$value).toStrictEqual([20]);
+      expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("|");
+      expect(el.$value).toBe(undefined);
+
+      // type new char instead of selected
+      el.$value = [10, 20];
+      await h.wait(1);
+      expect(el.$refInput.value).toBe("Donny, Mikky, ");
+      h.setInputCursor(el.$refInput, `|${el.$refInput.value}|`);
+      expect(await h.userTypeText(el.$refInput, "L")).toBe("L|");
+      expect(el.$value).toBe(undefined);
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt12" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" id="txt13" style="display: none;">Donny</li><li role="option" style="display: none;">Donny2</li><li role="option" style="display: none;">Mikky</li><li role="option" style="">Leo</li></ul>"`
+      );
+
+      // remove cases
+      el.$value = [10, 20];
+      await h.wait(1);
+      expect(el.$refInput.value).toBe("Donny, Mikky, ");
+      h.setInputCursor(el.$refInput, `|${el.$refInput.value}|`);
+      expect(await h.userRemove(el.$refInput)).toBe("|");
+
+      el.$value = [10, 20];
+      await h.wait(1);
+      expect(el.$refInput.value).toBe("Donny, Mikky, ");
+      h.setInputCursor(el.$refInput, `|${el.$refInput.value}|`);
+      expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("|");
+
+      el.$value = [10, 20];
+      await h.wait(1);
+      expect(el.$refInput.value).toBe("Donny, Mikky, ");
+      h.setInputCursor(el.$refInput, `|${el.$refInput.value}`);
+      expect(await h.userRemove(el.$refInput)).toBe("|Donny, Mikky, ");
+      h.setInputCursor(el.$refInput, `${el.$refInput.value}|`);
+      expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("Donny, Mikky, |");
+
+      el.$value = [10, 20, 30];
+      await h.wait(1);
+      expect(el.$refInput.value).toBe("Donny, Mikky, Leo, ");
+      h.setInputCursor(el.$refInput, "Donny, Mikky,| Leo, ");
+      expect(await h.userRemove(el.$refInput)).toBe("Donny, |Leo, ");
+      expect(el.$value).toStrictEqual([10, 30]);
+      expect(await h.userRemove(el.$refInput)).toBe("|Leo, ");
+      expect(el.$value).toStrictEqual([30]);
+      expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("|");
+      expect(el.$value).toStrictEqual(undefined);
+
+      el.$value = [10, 20, 30];
+      await h.wait(1);
+      expect(el.$refInput.value).toBe("Donny, Mikky, Leo, ");
+      h.setInputCursor(el.$refInput, "Donny, Mi|kky, Leo, ");
+      expect(await h.userRemove(el.$refInput)).toBe("Donny, |Leo, ");
+      expect(el.$value).toStrictEqual([10, 30]);
+      h.setInputCursor(el.$refInput, "Donny|, Leo, ");
+      expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("Donny, |");
+      expect(el.$value).toStrictEqual([10]);
+      h.setInputCursor(el.$refInput, "Don|ny|, ");
+      expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("|");
+      expect(el.$value).toStrictEqual(undefined);
+
+      el.$value = [10, 20];
+      await h.wait(1);
+      expect(el.$refInput.value).toBe("Donny, Mikky, ");
+      expect(await h.userTypeText(el.$refInput, "abc", { clearPrevious: false })).toBe("Donny, Mikky, abc|");
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt12" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" id="txt13" style="display: none;" aria-selected="true">Donny</li><li role="option" style="display: none;">Donny2</li><li role="option" style="display: none;" aria-selected="true">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
+      );
+      h.setInputCursor(el.$refInput, "Donny|, Mikky, abc");
+      expect(await h.userRemove(el.$refInput)).toBe("|Mikky, abc");
+      expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+        `"<ul id="txt12" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" id="txt13" style="display: none;">Donny</li><li role="option" style="display: none;">Donny2</li><li role="option" style="display: none;" aria-selected="true">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
+      );
     });
 
     test("readOnlyInput", async () => {
@@ -1281,11 +1417,19 @@ describe("control.select", () => {
 
       el.$options.readOnlyInput = getItems().length - 2;
       await h.wait(1);
-      expect(el.$refInput.readOnly).toBe(true);
+      expect(el.$refInput.readOnly).toBe(false);
 
       el.$options.readOnlyInput = getItems().length + 1;
       await h.wait(1);
+      expect(el.$refInput.readOnly).toBe(true);
+
+      // num-val must be ignored if allowNewValue: true
+      el.$options.allowNewValue = true;
+      await h.wait(1);
       expect(el.$refInput.readOnly).toBe(false);
+      el.$options.allowNewValue = false;
+      await h.wait(1);
+      expect(el.$refInput.readOnly).toBe(true);
 
       el.$options.items = Promise.resolve(getItems());
       jest.advanceTimersByTime(1); // WARN: jest can catch exception here after tests are finished
@@ -1294,6 +1438,169 @@ describe("control.select", () => {
       await h.wait();
       expect(el.$refInput.readOnly).toBe(false);
     });
+  });
+
+  test("history undo/redo", async () => {
+    expect(el.$value).toBe(undefined);
+    expect(await h.userTypeText(el.$refInput, "Leo", { clearPrevious: false })).toBe("Leo|");
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option" style="display: none;">Donny</li><li role="option" style="display: none;">Mikky</li><li role="option" aria-selected="false" id="txt3" focused="">Leo</li><li role="option" style="display: none;">Splinter</li></ul>"`
+    );
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); // select focused item in menu
+    await h.wait(1);
+    expect(el.$value).toBe(30);
+
+    el.$refInput.select();
+    expect(await h.userRemove(el.$refInput)).toBe("|");
+    expect(await h.userTypeText(el.$refInput, "Donny", { clearPrevious: false })).toBe("Donny|");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); // select focused item in menu
+    await h.wait(1);
+    expect(el.$value).toBe(10);
+
+    expect(el._refHistory._hist).toMatchInlineSnapshot(`
+      [
+        "     Leo",
+        "  Leo ",
+        "     Donny",
+      ]
+    `);
+    expect(await h.userUndo(el.$refInput)).toBe("|");
+    expect(await h.userUndo(el.$refInput)).toBe("|Leo|");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); // select focused item in menu
+    await h.wait(1);
+    expect(el.$value).toBe(30);
+
+    expect(await h.userRedo(el.$refInput)).toBe("|");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); // select focused item in menu
+    await h.wait(1);
+    expect(el.$value).toBe(undefined);
+
+    expect(await h.userRedo(el.$refInput)).toBe("Donny|");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); // select focused item in menu
+    await h.wait(1);
+    expect(el.$value).toBe(10);
+
+    // with multiple
+    delete el._refHistory;
+    el.blur();
+    el.$options.multiple = true;
+    el.$options.allowNewValue = true;
+    el.$value = [10];
+    await h.wait(1);
+    el.focus();
+    await h.wait(1);
+    expect(el._refHistory).toBeDefined();
+
+    expect(el.$refInput.value).toBe("Donny, ");
+    expect(await h.userTypeText(el.$refInput, "leo", { clearPrevious: false })).toBe("Donny, leo|");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); // select focused item in menu
+    await h.wait(1);
+    expect(el.$value).toStrictEqual([10, 30]);
+    expect(h.getInputCursor(el.$refInput)).toBe("Donny, Leo, |");
+
+    expect(await h.userTypeText(el.$refInput, "123", { clearPrevious: false })).toBe("Donny, Leo, 123|");
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })); // select focused item in menu
+    await h.wait(1);
+    expect(el.$value).toStrictEqual([10, 30, "123"]);
+    expect(h.getInputCursor(el.$refInput)).toBe("Donny, Leo, 123, |");
+
+    expect(el._refHistory._hist).toMatchInlineSnapshot(`
+      [
+        " , ",
+        "  leo",
+        "leo Leo, ",
+        "  123",
+        " , ",
+      ]
+    `);
+    // undo
+    expect(await h.userUndo(el.$refInput)).toBe("Donny, Leo, 123|");
+    expect(el.$value).toStrictEqual([10, 30]);
+    expect(await h.userUndo(el.$refInput)).toBe("Donny, Leo, |");
+    expect(el.$value).toStrictEqual([10, 30]);
+    expect(await h.userUndo(el.$refInput)).toBe("Donny, leo|");
+    expect(el.$value).toStrictEqual([10]);
+    // redo
+    expect(await h.userRedo(el.$refInput)).toBe("Donny, Leo, |");
+    expect(el.$value).toStrictEqual([10, 30]);
+    expect(await h.userRedo(el.$refInput)).toBe("Donny, Leo, 123|");
+    expect(el.$value).toStrictEqual([10, 30]);
+    expect(await h.userRedo(el.$refInput)).toBe("Donny, Leo, 123, |");
+    expect(el.$value).toStrictEqual([10, 30, "123"]);
+  });
+
+  test("tryScroll", async () => {
+    const { nextFrame } = h.useFakeAnimation();
+    const ul = document.body.appendChild(document.createElement("ul"));
+    const li = ul.appendChild(document.createElement("li"));
+    const li2 = ul.appendChild(document.createElement("li2"));
+    li._scrolled = jest.fn();
+    li2._scrolled = jest.fn();
+    function onScrollProto() {
+      this._scrolled();
+    }
+    const onScroll = jest.spyOn(HTMLElement.prototype, "scrollIntoView").mockImplementation(onScrollProto);
+
+    // all at once - filtered
+    el.tryScrollTo(li);
+    el.tryScrollTo(li2);
+    await nextFrame();
+    expect(li._scrolled).toBeCalledTimes(1);
+    expect(li2._scrolled).toBeCalledTimes(0);
+
+    // after debounce 1ms
+    jest.clearAllMocks();
+    el.tryScrollTo(li);
+    await h.wait(1);
+    el.tryScrollTo(li2);
+    await nextFrame();
+    await nextFrame();
+    expect(li._scrolled).toBeCalledTimes(1);
+    expect(li2._scrolled).toBeCalledTimes(1);
+
+    // simulate when parentScrollTop is different
+    let scrollTop = 0;
+    jest.spyOn(ul, "scrollTop", "get").mockImplementation(() => {
+      scrollTop += 5;
+      return scrollTop;
+    });
+
+    jest.clearAllMocks();
+    el.tryScrollTo(li);
+    await h.wait(1);
+    expect(li._scrolled).toBeCalledTimes(1);
+    await nextFrame();
+    expect(li._scrolled).toBeCalledTimes(2);
+    await nextFrame();
+    expect(li._scrolled).toBeCalledTimes(3);
+
+    jest.clearAllMocks();
+    el.tryScrollTo(li2);
+    await h.wait(1);
+    expect(li2._scrolled).toBeCalledTimes(1);
+    await nextFrame();
+    expect(li2._scrolled).toBeCalledTimes(2);
+    expect(li._scrolled).toBeCalledTimes(0);
+
+    jest.spyOn(ul, "scrollTop", "get").mockImplementation(() => scrollTop);
+    await nextFrame();
+    await nextFrame();
+    await nextFrame();
+    await nextFrame();
+    expect(li2._scrolled).toBeCalledTimes(3);
+    expect(li._scrolled).toBeCalledTimes(0);
+
+    // case when scrollIntoViewIfNeeded doesn't exist on component
+    jest.clearAllMocks();
+    HTMLElement.prototype.scrollIntoViewIfNeeded = jest.fn();
+    el.tryScrollTo(li);
+    await h.wait(1);
+    expect(HTMLElement.prototype.scrollIntoViewIfNeeded).toBeCalledTimes(1);
+
+    HTMLElement.prototype.scrollIntoViewIfNeeded = undefined;
+    el.tryScrollTo(li2);
+    await h.wait(1);
+    expect(onScroll).toBeCalledTimes(1);
   });
 });
 

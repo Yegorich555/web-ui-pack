@@ -49,6 +49,9 @@ declare global {
       /** First day of week in calendar where 1-Monday, 7-Sunday;
        * @defaultValue localeInfo.firstWeekDay */
       firstWeekDay?: number;
+      /** Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this
+       *  @defaultValue true */
+      utc?: boolean;
     }
     interface Options<T = Date, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, Defaults<T, VM> {
       /** User can't select date less than min; point new Date(Date.UTC(2022,1,25)) for `utc:true`, or new Date(2022,1,25) */
@@ -65,9 +68,6 @@ declare global {
       startWith?: PickersEnum | string;
       /** Dates that user can't choose (disabled dates) */
       exclude?: Date[];
-      /** Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this
-       *  @defaultValue true */
-      utc?: boolean;
       firstWeekDay: number;
     }
     interface Attributes extends WUP.BaseControl.Attributes, Pick<Options, "utc"> {
@@ -119,14 +119,11 @@ const add: <K extends keyof HTMLElementTagNameMap>(el: HTMLElement, tagName: K) 
  */
 export default class WUPCalendarControl<
   ValueType extends Date = Date,
+  TOptions extends WUP.Calendar.Options = WUP.Calendar.Options,
   EventMap extends WUP.Calendar.EventMap = WUP.Calendar.EventMap
-> extends WUPBaseControl<ValueType, EventMap> {
+> extends WUPBaseControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPCalendarControl;
-
-  static get nameUnique(): string {
-    return "WUPCalendarControl";
-  }
 
   static get $styleRoot(): string {
     return `:root {
@@ -247,7 +244,6 @@ export default class WUPCalendarControl<
       }
       :host li[focused] {
         box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
-        //box-shadow: 0 0 3px 1px var(--ctrl-focus);
         opacity: 1;
       }
       :host li[focused][aria-selected] {
@@ -258,9 +254,8 @@ export default class WUPCalendarControl<
           background-color: var(--ctrl-clr-selected-bg);
           color: var(--ctrl-clr-selected);
         }
-        ol>li:hover:not([disabled]) {
+        :host ol>li:hover:not([disabled]) {
           box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
-          //box-shadow: 0 0 3px 1px var(--ctrl-focus);
           opacity: 1;
         }
       }
@@ -366,22 +361,17 @@ export default class WUPCalendarControl<
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
     },
-  };
-
-  $options: WUP.Calendar.Options<ValueType> = {
-    ...this.#ctr.$defaults,
     utc: true,
-    firstWeekDay: this.#ctr.$defaults.firstWeekDay || localeInfo.firstWeekDay,
   };
 
-  protected override _opts = this.$options;
+  constructor() {
+    super();
+    this._opts.firstWeekDay = this.#ctr.$defaults.firstWeekDay || localeInfo.firstWeekDay; // init here to depends on localeInfo
+  }
 
   /** Call when need to re-rended picker (min/max changed etc.) */
   $refreshPicker(): void {
-    /* istanbul ignore else */
-    if (this._pickerValue != null) {
-      this.changePicker(this._pickerValue, this._picker);
-    }
+    this.changePicker(this._pickerValue, this._picker);
   }
 
   /** Converts date-string into Date according (to $options.utc)
@@ -461,7 +451,7 @@ export default class WUPCalendarControl<
     return el;
   }
 
-  _pickerValue?: Date;
+  _pickerValue: Date = new Date();
   _picker: PickersEnum = 0;
   #refreshSelected?: () => void;
   #clearPicker?: (isIn: boolean) => Promise<void>;
@@ -512,11 +502,13 @@ export default class WUPCalendarControl<
 
       this.#refreshSelected = () => {
         let uv = this.$value as Date;
+        let item;
         if (uv) {
           uv = this.normalizeToUTC(uv);
           i = r.getIndex(uv, first);
-          this.selectItem(a[i]);
+          item = a[i];
         }
+        this.selectItem(item);
       };
       this.#refreshSelected();
 
@@ -531,11 +523,10 @@ export default class WUPCalendarControl<
     const scrollObj = new WUPScrolled(this.$refCalenarItems, {
       onRender: (n) => {
         const nextDate = r.next(utcVal, n);
-        const { scrollFrom: from, scrollTo: to } = this.#disabled!;
-        /* istanbul ignore else */
-        if (from != null || to !== null) {
+        const { scrollFrom, scrollTo } = this.#disabled!;
+        if (scrollFrom != null || scrollTo != null) {
           const nextDateEnd = r.next(new Date(utcVal), 1).setUTCMilliseconds(-1);
-          if ((from as unknown as number) > nextDateEnd || (to as unknown as Date) < nextDate) {
+          if ((scrollFrom as unknown as number) > nextDateEnd || (scrollTo as unknown as Date) < nextDate) {
             r.next(utcVal, (-1 * n) as 1);
             return null;
           }
@@ -797,7 +788,6 @@ export default class WUPCalendarControl<
       for (i = 0; i < items.length && k < arr.length; ++i) {
         const el = items[i];
         for (; k < arr.length; ++k) {
-          /* istanbul ignore else */
           if (arr[k] > el._value) {
             break;
           } else if (arr[k] === el._value) {
@@ -1030,7 +1020,6 @@ export default class WUPCalendarControl<
         propsChanged.includes("max") ||
         propsChanged.includes("exclude") ||
         propsChanged.includes("utc"));
-    /* istanbul ignore else */
     if (!propsChanged || isNeedRecalc) {
       this.#disabled = this.calcDisabled();
     }
@@ -1090,14 +1079,12 @@ export default class WUPCalendarControl<
       return; // only left button
     }
     let t = e.target as Node | HTMLElement;
-    /* istanbul ignore else */
     if (this.$refCalenarTitle === t || this.$refCalenarTitle.contains(t)) {
       e.preventDefault();
-      this._picker !== PickersEnum.Year && this.changePicker(this._pickerValue!, this._picker + 1);
+      this._picker !== PickersEnum.Year && this.changePicker(this._pickerValue, this._picker + 1);
     } else if (this.$refCalenarItems.contains(t)) {
       while (t !== this.$refCalenarItems) {
         const v = (t as any)._value;
-        /* istanbul ignore else */
         if (v !== undefined) {
           e.preventDefault();
           !(t as HTMLElement).hasAttribute("disabled") &&

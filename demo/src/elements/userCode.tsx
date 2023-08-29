@@ -15,6 +15,7 @@ export interface UserCodeProps {
   tag?: `wup-${string}`;
   customHTML?: string[];
   customJS?: string;
+  linkDemo: string;
   /** Set of alternative values for css-vars. Possible whe css-var used several times and need to skip the real-value */
   // eslint-disable-next-line react/no-unused-prop-types
   cssVarAlt?: Map<string, string>;
@@ -143,6 +144,10 @@ export default function UserCode(props: React.PropsWithChildren<UserCodeProps>) 
               See common example{" "}
               <a href={linkGit("CODESTYLE.md")} target="_blank" rel="noreferrer">
                 here
+              </a>{" "}
+              and{" "}
+              <a href={linkGit(props.linkDemo)} target="_blank" rel="noreferrer">
+                demo code here
               </a>
             </div>
           ),

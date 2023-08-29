@@ -80,8 +80,9 @@ declare global {
  * </label> */
 export default class WUPPasswordControl<
   ValueType extends string = string,
+  TOptions extends WUP.Password.Options = WUP.Password.Options,
   EventMap extends WUP.Password.EventMap = WUP.Password.EventMap
-> extends WUPTextControl<ValueType, EventMap> {
+> extends WUPTextControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPPasswordControl;
 
@@ -93,10 +94,6 @@ export default class WUPPasswordControl<
 
   /** Text announced by screen-readers when input cleared; @defaultValue `input cleared` */
   static $ariaDescription = "press Alt + V to show/hide password";
-
-  static get nameUnique(): string {
-    return "WUPPasswordControl";
-  }
 
   static get $styleRoot(): string {
     return `:root {
@@ -156,39 +153,32 @@ export default class WUPPasswordControl<
         (!v || ![...setV.chars].reduce((prev, c) => (v.includes(c) ? ++prev : prev), 0)) &&
         `Must contain at least ${setV.min} special character${setV.min === 1 ? "" : "s"}: ${setV.chars}`,
       confirm: (v, setV, c) => {
-        /* istanbul ignore else */
-        if (v && setV) {
-          const selector = c.tagName.toLowerCase();
-          const all = document.querySelectorAll(selector);
-          let i = -1;
-          // eslint-disable-next-line no-restricted-syntax
-          for (const el of all.values()) {
-            if (c === el) {
-              const found = all[i] as WUPPasswordControl;
-              if (!found) {
-                i = -2;
-              } else if (found.$value === c.$value) {
-                return false;
-              }
-              break;
+        if (!setV) {
+          return false;
+        }
+        const selector = c.tagName.toLowerCase();
+        const all = document.querySelectorAll(selector);
+        let i = -1;
+        // eslint-disable-next-line no-restricted-syntax
+        for (const el of all.values()) {
+          if (c === el) {
+            const found = all[i] as WUPPasswordControl;
+            if (!found) {
+              i = -2;
+            } else if (found.$value === v) {
+              return false;
             }
-            ++i;
+            break;
           }
-          /* istanbul ignore else */
-          if (i === -2) {
-            return `Previous "${selector}" not found`;
-          }
+          ++i;
+        }
+        if (i === -2) {
+          return `Previous "${selector}" not found`;
         }
         return "Passwords must be equal";
       },
     },
   };
-
-  $options: WUP.Password.Options<string> = {
-    ...this.#ctr.$defaults,
-  };
-
-  protected override _opts = this.$options;
 
   $refBtnEye = document.createElement("button");
   protected override renderControl(): void {

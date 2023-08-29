@@ -142,7 +142,6 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
     if (obj instanceof WUPBaseElement) {
       test("render + styles", () => {
         const c = Object.getPrototypeOf(obj).constructor as typeof WUPBaseElement;
-        expect(c.nameUnique).toBe(c.name); // these names must be matched
         expect(obj).toMatchSnapshot();
         expect(c.$refStyle).toMatchSnapshot();
       });
@@ -184,7 +183,7 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
               }
               obj.setAttribute(a, oa?.value ?? (oa?.refGlobal ? "window._myTestKey" : "true"));
               jest.advanceTimersByTime(1);
-              const key = Object.keys(obj.$options).find((k) => k.toLowerCase() === a) as string;
+              const key = Object.keys(obj.$options).find((k) => (k as string).toLowerCase() === a) as string;
               expect(key).toBeDefined();
               expect(obj.$options[key]).toBeDefined();
               expect(obj.$options[key]).not.toBeFalsy();
@@ -383,11 +382,11 @@ export async function wait(t = 1000) {
   }
 }
 
-/** Simulate user typse text (send values to the end of input): focus + keydown+ keyup + keypress + input events */
+/** Simulate user types text (send values to the end of input): focus + keydown+ keyup + keypress + input events */
 export async function userTypeText(
   el: HTMLInputElement,
   text: string,
-  opts = { clearPrevious: true }
+  opts = { clearPrevious: true, slow: false }
 ): Promise<string> {
   el.focus();
   await wait(10);
@@ -406,23 +405,22 @@ export async function userTypeText(
       continue;
     }
     const v = el.value;
-    let caretPos = el.selectionStart ?? el.value.length;
-    el.value = v.substring(0, caretPos) + key + v.substring(el.selectionEnd ?? caretPos);
+    const { selectionStart, selectionEnd } = el;
+    let caretPos = selectionStart ?? el.value.length;
+    el.value = v.substring(0, caretPos) + key + v.substring(selectionEnd ?? caretPos);
     el.selectionStart = ++caretPos;
     el.selectionEnd = el.selectionStart;
     el.dispatchEvent(new InputEvent("input", { bubbles: true, data: key, inputType }));
     el.dispatchEvent(new KeyboardEvent("keyup", { key, bubbles: true }));
 
-    if (i !== text.length - 1) {
+    if (opts.slow && i !== text.length - 1) {
       await Promise.resolve();
       jest.advanceTimersByTime(20);
       await Promise.resolve();
     }
   }
 
-  if (text === "") {
-    el.dispatchEvent(new InputEvent("input", { bubbles: true }));
-  }
+  await wait(1);
   return getInputCursor(el);
 }
 
@@ -467,9 +465,19 @@ export function setInputCursor(el: HTMLInputElement, cursorPattern: string, opts
   // expect(el.value).toBe(gotValue);
   el.focus();
   el.value = gotValue;
-  el.selectionStart = cursorPattern.indexOf("|");
-  el.selectionEnd = cursorPattern.lastIndexOf("|");
-  was !== gotValue && !opts?.skipEvent && el.dispatchEvent(new InputEvent("input", { bubbles: true }));
+  const pos1 = cursorPattern.indexOf("|");
+  let pos2 = cursorPattern.indexOf("|", pos1 + 1);
+  if (pos2 === -1) {
+    pos2 = pos1;
+  } else {
+    --pos2;
+  }
+  el.selectionStart = pos1;
+  el.selectionEnd = pos2;
+  was !== gotValue &&
+    !opts?.skipEvent &&
+    el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true })) &&
+    el.dispatchEvent(new InputEvent("input", { bubbles: true }));
 }
 
 /** Simulates user removes text via backspace: focus + keydown+ keyup + keypress + input events;
@@ -478,6 +486,7 @@ export async function userRemove(
   el: HTMLInputElement,
   opts?: { removeCount: number; key: "Backspace" | "Delete" }
 ): Promise<string> {
+  await wait(10);
   el.focus();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   opts = { removeCount: 1, key: "Backspace", ...opts };
@@ -495,19 +504,24 @@ export async function userRemove(
 
     let v = el.value;
     let caretPos = el.selectionStart ?? v.length;
-    if (key === "Backspace" && caretPos > 0) {
-      --caretPos;
-    }
-    if (el.selectionStart !== el.selectionEnd) {
-      v = v.substring(0, el.selectionStart!) + v.substring(el.selectionEnd!);
-    } else {
-      v = v.substring(0, caretPos) + v.substring(caretPos + 1);
-    }
-    if (el.value !== v) {
-      el.value = v;
-      el.selectionEnd = caretPos;
-      el.selectionStart = caretPos;
-      el.dispatchEvent(new InputEvent("input", { bubbles: true, data: null, inputType }));
+    const isNothing =
+      el.selectionStart === el.selectionEnd &&
+      ((key === "Backspace" && caretPos === 0) || (key === "Delete" && caretPos === v.length));
+    if (!isNothing) {
+      if (key === "Backspace" && caretPos > 0 && caretPos === el.selectionEnd) {
+        --caretPos;
+      }
+      if (el.selectionStart !== el.selectionEnd) {
+        v = v.substring(0, el.selectionStart!) + v.substring(el.selectionEnd!);
+      } else {
+        v = v.substring(0, caretPos) + v.substring(caretPos + 1);
+      }
+      if (el.value !== v) {
+        el.value = v;
+        el.selectionEnd = caretPos;
+        el.selectionStart = caretPos;
+        el.dispatchEvent(new InputEvent("input", { bubbles: true, data: null, inputType }));
+      }
     }
     jest.advanceTimersByTime(20);
     await Promise.resolve();
@@ -595,6 +609,8 @@ export async function userTap(el: HTMLElement, opts?: MouseEventInit) {
  * WARN: in reality onBeforeInput event calls only if history.legth >= 1
  * @return cursor snapshot (getInputCursor) */
 export async function userUndo(el: HTMLInputElement): Promise<string> {
+  await wait(10);
+
   el.dispatchEvent(
     new KeyboardEvent("keydown", {
       key: "я",
@@ -617,6 +633,8 @@ export async function userUndo(el: HTMLInputElement): Promise<string> {
  * WARN: in reality onBeforeInput event calls only if history.legth >= 1
  * @return cursor snapshot (getInputCursor) */
 export async function userRedo(el: HTMLInputElement, opts?: { useCtrlY?: boolean }): Promise<string> {
+  await wait(10);
+
   const okCtrlY =
     opts?.useCtrlY &&
     el.dispatchEvent(
@@ -687,11 +705,11 @@ export class TestMouseMoveEvent extends MouseEvent {
 
 /** Setup width, height and layout position for pointed element */
 export function setupLayout(el: HTMLElement, opts: { x: number; y: number; h: number; w: number }) {
-  jest.spyOn(el, "offsetHeight", "get").mockReturnValue(opts.h);
-  jest.spyOn(el, "clientHeight", "get").mockReturnValue(opts.h);
+  jest.spyOn(el, "offsetHeight", "get").mockReturnValue(Math.round(opts.h));
+  jest.spyOn(el, "clientHeight", "get").mockReturnValue(Math.round(opts.h));
 
-  jest.spyOn(el, "offsetWidth", "get").mockReturnValue(opts.w);
-  jest.spyOn(el, "clientWidth", "get").mockReturnValue(opts.w);
+  jest.spyOn(el, "offsetWidth", "get").mockReturnValue(Math.round(opts.w));
+  jest.spyOn(el, "clientWidth", "get").mockReturnValue(Math.round(opts.w));
   const rect = {
     x: opts.x,
     y: opts.y,
