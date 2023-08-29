@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.8.1 (\_\_\_)
+## 0.8.1 (Aug 29, 2023)
 
 **BREAKING CHANGES**:
 
