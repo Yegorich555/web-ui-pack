@@ -348,9 +348,6 @@ export default class TextHistory {
       this._histTimeout = null;
       this._stateBeforeInput = undefined;
     }, 1);
-
-    this.testMe && console.warn(isUpdate ? "updated" : "saved", snap);
-    this.testMe && console.log("hist:", this._hist); // "stateBefore:", stateBefore);
   }
 
   /** Returns last history index */
@@ -372,8 +369,6 @@ export default class TextHistory {
           --this._histPos;
         }
       }
-
-      this.testMe && console.warn("remove last", this._hist);
     }
   }
 
@@ -406,8 +401,6 @@ export default class TextHistory {
       ++this._histPos;
     }
     const snap = this.snapshotDecode(this._hist[this._histPos]);
-    const i = this._histPos;
-    this.testMe && console.warn(isRedo ? "redo" : "undo", { snap, i, v: this.refInput.value });
     // eslint-disable-next-line prefer-const
     let { pos1, pos2, posIns, inserted, removed } = snap;
     // undo
@@ -423,11 +416,8 @@ export default class TextHistory {
 
       --this._histPos;
     }
-    this.testMe && console.warn("done", v);
     return true;
   }
-
-  testMe = false;
 }
 
 // const expect = (actual: any) => ({
