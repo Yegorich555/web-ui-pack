@@ -8,19 +8,19 @@ declare global {
     interface Options {
       /** Place inside parent as inline-block otherwise overflow target in the center (`position: relative` is not required);
        * @defaultValue false */
-      inline?: boolean;
+      inline: boolean;
       /** Virtual padding of parentElement [top, right, bottom, left] or [top/bottom, right/left] in px
        * @defaultValue [4,4] */
-      overflowOffset?: [number, number, number, number] | [number, number];
+      overflowOffset: [number, number, number, number] | [number, number];
       /** Allow to create shadowBox to partially hide target (only for `inline: false`)
        * @defaultValue true */
-      overflowFade?: boolean;
+      overflowFade: boolean;
       /** Allow to reduce size to fit parent (for max-size change css-var --spin-size)
        * @defaultValue `auto` => `false` when inline:true, `true` when inline:false */
-      fit?: boolean | null;
+      fit: boolean | "auto";
       /** Anchor element that need to oveflow by spinner
        * @defaultValue `auto`: parentElement */
-      overflowTarget?: HTMLElement | null;
+      overflowTarget: HTMLElement | "auto";
     }
     // @ts-expect-error
     interface Attributes extends Pick<Options, "fit" | "inline" | "overflowFade"> {
@@ -128,12 +128,12 @@ export default class WUPSpinElement<
       ${this.$styleApplied}`;
   }
 
-  static $defaults: Required<WUP.Spin.Options> = {
+  static $defaults: WUP.Spin.Options = {
     overflowOffset: [4, 4],
     overflowFade: true,
-    overflowTarget: null,
+    overflowTarget: "auto",
     inline: false,
-    fit: null,
+    fit: "auto",
   };
 
   static _itemsCount = 1;
@@ -248,12 +248,14 @@ export default class WUPSpinElement<
 
   /** Returns value based on `$options.fit` */
   get isFitParent(): boolean {
-    return this._opts.fit ?? !this._opts.inline;
+    const o = this._opts.fit;
+    return o === "auto" ? !this._opts.inline : o;
   }
 
   /** Returns target element based on $options */
   get target(): HTMLElement {
-    return (this._opts.inline ? this.parentElement : this._opts.overflowTarget || this.parentElement) as HTMLElement;
+    const trg = this._opts.overflowTarget;
+    return this._opts.inline || trg === "auto" ? this.parentElement! : trg;
   }
 
   /** Returns whether exists parent with position relative */

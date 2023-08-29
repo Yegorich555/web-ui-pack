@@ -79,13 +79,13 @@ padding:0;}
 
 exports[`spinElement common tests snapshot of $defaults 1`] = `
 {
-  "fit": null,
+  "fit": "auto",
   "inline": false,
   "overflowFade": true,
   "overflowOffset": [
     4,
     4,
   ],
-  "overflowTarget": null,
+  "overflowTarget": "auto",
 }
 `;

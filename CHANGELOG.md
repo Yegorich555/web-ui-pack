@@ -8,6 +8,7 @@
   - Added auto-mapping between attributes <=> options based on key-values in `$defaults`
   - Removed interface `Defaults`. Merged with interface `Options` and now contains all fields as required
   - Now removing attributes always rollbacks to value defined in `$defaults`
+- [SpinElement](src/spinElement.ts). Defaults `fit` & `overflowTarget` = `auto` instead of `null`
 
 ## 0.8.1 (Aug 29, 2023)
 

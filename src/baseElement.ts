@@ -78,7 +78,7 @@ export default abstract class WUPBaseElement<
 
   /** Returns map-type based on value */
   static mapAttribute(value: any): AttributeTypes {
-    if (value == null) {
+    if (value == null || value === "auto") {
       return AttributeTypes.reference;
     }
     switch (typeof value) {
