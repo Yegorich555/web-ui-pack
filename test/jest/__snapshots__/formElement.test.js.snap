@@ -456,3 +456,36 @@ mask-image: var(--ctrl-icon-img);
         }
 </style>
 `;
+
+exports[`formElement common tests snapshot of $defaults 1`] = `
+{
+  "autoComplete": false,
+  "autoFocus": true,
+  "autoSave": false,
+  "disabled": false,
+  "readOnly": false,
+  "submitActions": 27,
+}
+`;
+
+exports[`formElement common tests snapshot of $defaults 2`] = `
+[
+  "submitActions",
+  "autoComplete",
+  "autoFocus",
+  "autoSave",
+  "disabled",
+  "readOnly",
+]
+`;
+
+exports[`formElement common tests snapshot of $defaults 3`] = `
+[
+  "submitactions",
+  "autocomplete",
+  "autofocus",
+  "autosave",
+  "disabled",
+  "readonly",
+]
+`;
