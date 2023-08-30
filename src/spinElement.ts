@@ -255,7 +255,7 @@ export default class WUPSpinElement<
   /** Returns target element based on $options */
   get target(): HTMLElement {
     const trg = this._opts.overflowTarget;
-    return this._opts.inline || trg === "auto" ? this.parentElement! : trg;
+    return this._opts.inline || trg === "auto" || !trg ? this.parentElement! : trg;
   }
 
   /** Returns whether exists parent with position relative */

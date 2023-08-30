@@ -159,6 +159,8 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
       test("snapshot of $defaults", () => {
         const c = Object.getPrototypeOf(obj).constructor;
         expect(c.$defaults).toMatchSnapshot();
+        expect(c.observedOptions).toMatchSnapshot();
+        expect(c.observedAttributes).toMatchSnapshot();
       });
     }
 
@@ -219,6 +221,7 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
                 test(`opt [${o}]`, () => {
                   if (!obj.isConnected) {
                     document.body.appendChild(obj);
+                    expect(obj.parentElement).toBeDefined();
                     jest.advanceTimersByTime(1); // wait for ready
                   }
 

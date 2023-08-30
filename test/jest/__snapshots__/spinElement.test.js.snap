@@ -89,3 +89,23 @@ exports[`spinElement common tests snapshot of $defaults 1`] = `
   "overflowTarget": "auto",
 }
 `;
+
+exports[`spinElement common tests snapshot of $defaults 2`] = `
+[
+  "overflowOffset",
+  "overflowFade",
+  "overflowTarget",
+  "inline",
+  "fit",
+]
+`;
+
+exports[`spinElement common tests snapshot of $defaults 3`] = `
+[
+  "overflowoffset",
+  "overflowfade",
+  "overflowtarget",
+  "inline",
+  "fit",
+]
+`;
