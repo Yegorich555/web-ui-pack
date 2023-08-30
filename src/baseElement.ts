@@ -16,7 +16,12 @@ let lastUniqueNum = 0;
 // Cached data
 const allObservedOptions = new WeakMap<typeof WUPBaseElement, Set<string> | null>();
 const allObservedAttrs = new WeakMap<typeof WUPBaseElement, Array<string>>();
+const allMappedAttrs = new WeakMap<typeof WUPBaseElement, Record<string, AttributeMap>>();
 
+interface AttributeMap {
+  type: AttributeTypes;
+  prop: string;
+}
 export const enum AttributeTypes {
   bool,
   number,
@@ -97,18 +102,21 @@ export default abstract class WUPBaseElement<
   }
 
   /** Returns map-model based on $defaults for mapping attributes & options */
-  static get mappedAttributes(): Record<string, { type: AttributeTypes; prop: string }> {
-    const map: Record<string, { type: AttributeTypes; prop: string }> = {};
-
-    const def = this.$defaults;
-    Object.keys(def).forEach((k) => {
-      const attr = k.toLowerCase(); // attributes exists only in lowerCase
-      map[attr] = {
-        type: this.mapAttribute(def[k]),
-        prop: k,
-      };
-    });
-    return map;
+  static get mappedAttributes(): Record<string, AttributeMap> {
+    let o = allMappedAttrs.get(this);
+    if (o === undefined) {
+      o = {};
+      const def = this.$defaults;
+      Object.keys(def).forEach((k) => {
+        const attr = k.toLowerCase(); // attributes exists only in lowerCase
+        o![attr] = {
+          type: this.mapAttribute(def[k]),
+          prop: k,
+        };
+      });
+      allMappedAttrs.set(this, o);
+    }
+    return o;
   }
 
   // todo maybe deprecate it and use for any prop by default ??? - need check this
@@ -162,7 +170,7 @@ export default abstract class WUPBaseElement<
       }
       return this.#optsObserved as TOptions;
     }
-    // OR return original options if element no appended to body - in this case we don't need to track changes
+    // OR return original options if element no appended to body - in this case we don't need to track for changes
     return this._opts;
   }
 
@@ -298,7 +306,15 @@ export default abstract class WUPBaseElement<
   }
 
   /** Called on Init and every time as options/attributes changed */
-  protected gotChanges(propsChanged: Array<string> | null): void {}
+  protected gotChanges(propsChanged: Array<string> | null): void {
+    // replace all undefined with defaults
+    const o = this._opts; // WARN: when user makes ...$options = { item1: ...} then it will be merged with defaults: NiceToHave use getOption(key) every time so don't need to create extra object
+    Object.keys(this.#ctr.$defaults).forEach((k) => {
+      if (o[k] === undefined) {
+        o[k as keyof TOptions] = this.#ctr.$defaults[k];
+      }
+    });
+  }
 
   /** Called when element isReady and at least one of observedOptions is changed */
   protected gotOptionsChanged(e: WUP.Base.OptionEvent): void {
@@ -313,11 +329,6 @@ export default abstract class WUPBaseElement<
         console.error(`Option [${p}] is removed but in $defaults not defined`, { defaults: this.#ctr.$defaults });
       }
     }); // remove related attributes otherwise impossible to override
-    e.props.forEach((p) => {
-      if (this.$options[p] == null && this.#ctr.$defaults[p] == null) {
-        console.error();
-      }
-    });
     this.gotChanges(e.props);
     this._isStopChanges = false;
   }
@@ -351,8 +362,8 @@ export default abstract class WUPBaseElement<
   #attrChanged?: string[];
   /** Called when any of observedAttributes is changed */
   protected gotAttributeChanged(name: string, value: string | null): void {
-    // WARN: observedAttribute must returns same colelction as mappedAttributes
-    const m = this.#ctr.mappedAttributes[name] ?? { type: AttributeTypes.bool, prop: name }; // todo cache mappedAttributes object
+    // WARN: observedAttribute must return same colelction as mappedAttributes
+    const m = this.#ctr.mappedAttributes[name] ?? { type: AttributeTypes.bool, prop: name };
     const isRemoved = value == null;
 
     this._opts[m.prop as keyof TOptions] = isRemoved
@@ -643,5 +654,3 @@ declare global {
       toJSX<Opts>;
   }
 }
-
-document.body;

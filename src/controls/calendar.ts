@@ -1001,7 +1001,7 @@ export default class WUPCalendarControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Calendar.Options> | null): void {
     this.gotChangesSharable();
-    super.gotChanges(propsChanged);
+    super.gotChanges(propsChanged); // todo gotChanges must be called first
 
     (this.$isReadOnly || this.$isDisabled) && this.focusItem(null);
 

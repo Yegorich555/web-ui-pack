@@ -556,7 +556,7 @@ export default class WUPTextControl<
       delete this.$refMaskholder;
     }
 
-    super.gotChanges(propsChanged as any);
+    super.gotChanges(propsChanged as any); // todo gotChanges must be called first
 
     if (this._opts.clearButton) {
       this.$refBtnClear = this.$refBtnClear || this.renderBtnClear();

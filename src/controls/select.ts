@@ -306,7 +306,7 @@ export default class WUPSelectControl<
     this._opts.allowNewValue = this.getAttr("allownewvalue", "bool", this._opts.allowNewValue);
     this._opts.multiple = this.getAttr("multiple", "bool", this._opts.multiple);
 
-    super.gotChanges(propsChanged as any);
+    super.gotChanges(propsChanged as any); // todo gotChanges must be called first
   }
 
   override setupInputReadonly(): void {

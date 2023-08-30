@@ -119,8 +119,15 @@ describe("baseElement", () => {
   test("gotReady/gotRemoved/gotAttributeChanged", () => {
     // somehow spyOn object doesn't work
     const spyAttrChanged = jest.spyOn(TestElement.prototype, "gotAttributeChanged");
+    const spyOptionChanged = jest.spyOn(TestElement.prototype, "gotChanges");
     /** @type TestElement */
     const a = document.createElement("test-inher-el");
+    expect(TestElement.observedAttributes).toMatchInlineSnapshot(`
+      [
+        "testattr",
+      ]
+    `);
+    expect(TestElement.observedOptions).toMatchInlineSnapshot(`[]`);
     const spyReady = jest.spyOn(a, "gotReady");
     const spyRemoved = jest.spyOn(a, "gotRemoved");
     const spyDispose = jest.spyOn(a, "dispose");
@@ -135,35 +142,36 @@ describe("baseElement", () => {
     expect(spyReady).toBeCalled();
     expect(spyRemoved).not.toBeCalled();
     expect(spyDispose).not.toBeCalled();
-    spyReady.mockClear();
+    jest.clearAllMocks();
 
     // test removing
     document.body.removeChild(a);
     expect(spyReady).not.toBeCalled();
     expect(spyRemoved).toBeCalled();
     expect(spyDispose).toBeCalled();
-    spyRemoved.mockClear();
-    spyDispose.mockClear();
 
     // test changing attrs when not added to document
+    jest.clearAllMocks();
     expect(spyAttrChanged).not.toBeCalled();
     a.setAttribute(testAttr, "someThing");
-    expect(spyAttrChanged).not.toBeCalled();
+    expect(spyAttrChanged).toBeCalledTimes(1);
+    jest.advanceTimersToNextTimer();
+    expect(spyOptionChanged).not.toBeCalled(); // because component is not ready
 
     // test appending again
     document.body.appendChild(a);
     a.setAttribute(testAttr, "someThing2");
-    expect(spyAttrChanged).not.toBeCalled(); // because a.isReady false (need wait for timeout)
+    expect(spyAttrChanged).toBeCalled(); // because a.isReady false (need wait for timeout)
     jest.advanceTimersToNextTimer();
     expect(spyReady).toBeCalledTimes(1);
     expect(spyRemoved).not.toBeCalled();
     expect(spyDispose).not.toBeCalled();
-    expect(spyAttrChanged).not.toBeCalled(); // because a.isReady false (need wait for timeout)
+    expect(spyAttrChanged).toBeCalled();
     spyReady.mockClear();
 
     // test attrChange
     a.setAttribute(testAttr, "someThing3");
-    expect(spyAttrChanged).toBeCalledTimes(1);
+    expect(spyAttrChanged).toBeCalledTimes(3);
   });
 
   test("gotOptionsChanged", () => {
@@ -189,6 +197,7 @@ describe("baseElement", () => {
     fn.mockClear();
     tst.$options = tst._opts;
     expect(fn).toBeCalledTimes(0); // because no-changes actually
+    // eslint-disable-next-line no-self-assign
     tst.$options = tst.$options;
     expect(fn).toBeCalledTimes(0); // because no-changes actually
     tst.$options = { t1: 1, t2: 2 };
@@ -234,72 +243,147 @@ describe("baseElement", () => {
     expect(fnT2).toBeCalled(); // just for coverage when observedOptions is empty
   });
 
-  test("gotChanges method", async () => {
+  test("gotChanges", async () => {
     class TestEl extends WUPBaseElement {
-      static get observedOptions() {
-        return ["disabled", "disabledReflect"];
-      }
-
-      static get observedAttributes() {
-        return ["disabled", "disabledreflect", "readonly"];
-      }
-
-      gotChanges(...args) {
-        super.gotChanges(...args);
-        this._opts.disabledReflect = !this._opts.disabledReflect;
-        this.setAttribute("disabled", this._opts.disabled);
-      }
+      static $defaults = {
+        disabled: false,
+        readOnly: false,
+        inline: true,
+        offset: 0,
+        label: "Ctrl",
+        target: null,
+        fitEl: "auto",
+      };
     }
+
+    const onGotChanges = jest.spyOn(TestEl.prototype, "gotChanges");
     customElements.define("test-ch", TestEl);
-
-    const spyAttr = jest.spyOn(TestEl.prototype, "gotAttributeChanged");
-    const spyOpts = jest.spyOn(TestEl.prototype, "gotOptionsChanged");
-    const spyAll = jest.spyOn(TestEl.prototype, "gotChanges");
-
-    const testEl = document.body.appendChild(document.createElement("test-ch"));
-    await h.wait();
-
-    expect(spyAll).toBeCalledTimes(1); // it's called on init
-    expect(spyAll).toBeCalledWith(null);
-    expect(spyAttr).toBeCalledTimes(0); // because of inside gotChanges()
-    expect(spyOpts).toBeCalledTimes(0);
-
-    await h.wait();
+    el = document.body.appendChild(document.createElement("test-ch"));
+    // attributes must be auto-mapped
+    el.setAttribute("disabled", "");
+    el.setAttribute("readonly", "true");
+    el.setAttribute("inline", "false");
+    el.setAttribute("label", "Hi");
+    el.setAttribute("fitEl", "true");
+    window.someTrg = el;
+    el.setAttribute("target", "window.someTrg");
+    await h.wait(1);
+    expect(TestEl.observedAttributes).toMatchInlineSnapshot(`
+      [
+        "disabled",
+        "readonly",
+        "inline",
+        "offset",
+        "label",
+        "target",
+        "fitel",
+      ]
+    `);
+    expect(TestEl.observedOptions).toMatchInlineSnapshot(`
+      [
+        "disabled",
+        "readOnly",
+        "inline",
+        "offset",
+        "label",
+        "target",
+        "fitEl",
+      ]
+    `);
+    expect(onGotChanges).toBeCalledTimes(1); // only 1 time on init
+    expect(el.$options).toMatchInlineSnapshot(`
+      {
+        "disabled": true,
+        "fitEl": true,
+        "inline": false,
+        "label": "Hi",
+        "offset": 0,
+        "readOnly": true,
+        "target": <test-ch
+          disabled=""
+          fitel="true"
+          inline="false"
+          label="Hi"
+          readonly="true"
+          target="window.someTrg"
+        />,
+      }
+    `);
+    // removing attribute rollbacks to default value
     jest.clearAllMocks();
-    testEl.$options.disabled = !testEl.$options.disabled;
-    await h.wait();
-    expect(spyAll).toBeCalledTimes(1);
-    expect(spyAll).toBeCalledWith(["disabled"]);
-    expect(spyAttr).toBeCalledTimes(0);
-    expect(spyOpts).toBeCalledTimes(1);
-
+    el.removeAttribute("disabled");
+    el.removeAttribute("readonly");
+    el.removeAttribute("inline");
+    el.removeAttribute("label");
+    el.removeAttribute("fitEl");
+    el.removeAttribute("target");
+    expect(onGotChanges).toBeCalledTimes(0); // called once after timeout
+    expect(el.$options).toStrictEqual(TestEl.$defaults);
+    await h.wait(1);
+    expect(onGotChanges).toBeCalledTimes(1);
+    expect(onGotChanges.mock.calls[0]).toMatchInlineSnapshot(`
+      [
+        [
+          "disabled",
+          "readOnly",
+          "inline",
+          "label",
+          "fitEl",
+          "target",
+        ],
+      ]
+    `);
+    // works with options
     jest.clearAllMocks();
-    testEl.setAttribute("disabled", "true");
-    await h.wait();
-    expect(spyAll).toBeCalledTimes(0); // because no changes (attr is set before)
-
-    testEl.setAttribute("disabled", "false");
-    await h.wait();
-    expect(spyAll).toBeCalledTimes(1);
-    expect(spyAll).toBeCalledWith(["disabled"]);
-    expect(spyAttr).toBeCalledTimes(1);
-    expect(spyOpts).toBeCalledTimes(0);
-
+    el.$options.disabled = !el.$options.disabled;
+    el.$options.readOnly = !el.$options.readOnly;
+    await h.wait(1);
+    expect(onGotChanges).toBeCalledTimes(1);
+    expect(el.$options).toMatchInlineSnapshot(`
+      {
+        "disabled": true,
+        "fitEl": "auto",
+        "inline": true,
+        "label": "Ctrl",
+        "offset": 0,
+        "readOnly": true,
+        "target": null,
+      }
+    `);
+    // assigning undefined rollbacks to default value
     jest.clearAllMocks();
-    testEl.setAttribute("disabled", "true");
-    testEl.setAttribute("readonly", "false");
-    await h.wait();
-    expect(spyAll).toBeCalledTimes(1);
-    expect(spyAll).toBeCalledWith(["disabled", "readonly"]);
-    expect(spyAttr).toBeCalledTimes(2);
-    expect(spyOpts).toBeCalledTimes(0);
-
+    el.$options.disabled = undefined;
+    el.$options.readOnly = undefined;
+    el.$options.label = undefined;
+    await h.wait(1);
+    expect(onGotChanges).toBeCalledTimes(1);
+    expect(el.$options).toStrictEqual(TestEl.$defaults);
+    // assigning partial object works fine
     jest.clearAllMocks();
-    testEl.$options.disabled = !testEl.$options.disabled;
-    setTimeout(() => (testEl.$options.disabled = !testEl.$options.disabled));
-    setTimeout(() => (testEl.$options.disabled = !testEl.$options.disabled), 10);
-    await h.wait();
-    expect(spyOpts).toBeCalledTimes(3);
+    el.$options = { disabled: !el.$options.disabled, readOnly: !el.$options.readOnly, label: "Hello" };
+    expect(onGotChanges).toBeCalledTimes(1);
+    expect(el.$options).toMatchInlineSnapshot(`
+      {
+        "disabled": true,
+        "fitEl": "auto",
+        "inline": true,
+        "label": "Hello",
+        "offset": 0,
+        "readOnly": true,
+        "target": null,
+      }
+    `);
+    // assigning partially with undefined rollback to defaults
+    jest.clearAllMocks();
+    el.$options = { disabled: undefined, readOnly: undefined, label: undefined };
+    expect(onGotChanges).toBeCalledTimes(1);
+    expect(el.$options).toStrictEqual(TestEl.$defaults);
+    // assigning full undefined rollback to defaults
+    jest.clearAllMocks();
+    el.$options = { target: el };
+    el.$options = null;
+    expect(onGotChanges).toBeCalledTimes(2);
+    expect(el.$options).toStrictEqual(TestEl.$defaults);
   });
 
   test("get/set bool attr", () => {

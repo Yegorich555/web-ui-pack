@@ -321,7 +321,7 @@ export default class WUPRadioControl<
       this.renderItems(this.$refFieldset);
     }
 
-    super.gotChanges(propsChanged as any);
+    super.gotChanges(propsChanged as any); // todo gotChanges must be called first
 
     this._opts.reverse = this.getAttr("reverse", "bool");
     this.setAttr("reverse", this._opts.reverse, true);

@@ -329,7 +329,7 @@ export default class WUPTimeControl<
     this._opts.max = this.getAttr("max", "obj");
     this._opts.exclude = this.getAttr("exclude", "ref");
     this._opts.step = this.getAttr("step", "number") || this.#ctr.$defaults.step;
-    super.gotChanges(propsChanged as any);
+    super.gotChanges(propsChanged as any); // todo gotChanges must be called first
   }
 
   $refMenuLists?: WUP.Time.MenuListElement[];

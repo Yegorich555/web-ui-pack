@@ -31,3 +31,5 @@ padding:0;}
   
 </style>
 `;
+
+exports[`baseElement me common tests snapshot of $defaults 1`] = `{}`;
