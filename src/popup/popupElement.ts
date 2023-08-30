@@ -1,6 +1,6 @@
 import { ShowCases, HideCases, Animations } from "./popupElement.types";
 import { WUPcssScrollSmall } from "../styles";
-import WUPBaseElement from "../baseElement";
+import WUPBaseElement, { AttributeMap, AttributeTypes } from "../baseElement";
 import { getOffset, PopupPlacements } from "./popupPlacements";
 import { findScrollParentAll } from "../helpers/findScrollParent";
 import WUPPopupArrowElement from "./popupArrowElement";
@@ -87,9 +87,34 @@ export default class WUPPopupElement<
     return ["showCase", "target", "placement"];
   }
 
-  /* Array of attribute names to monitor for changes */
   static get observedAttributes(): Array<LowerKeys<WUP.Popup.Options>> {
     return ["target", "placement", "animation"];
+  }
+
+  static get mappedAttributes(): Record<string, AttributeMap> {
+    return {
+      target: {
+        type: AttributeTypes.string,
+      },
+      placement: {
+        type: AttributeTypes.parseCustom,
+        parse: (attrValue) =>
+          this.$placementAttrs(attrValue as WUP.Popup.Attributes["placement"]) ?? [...this.$defaults.placement],
+      },
+      animation: {
+        type: AttributeTypes.parseCustom,
+        parse: (attrValue) => {
+          switch (attrValue) {
+            case "drawer":
+              return Animations.drawer;
+            case "stack":
+              return Animations.stack;
+            default:
+              return Animations.default;
+          }
+        },
+      },
+    }; // completely custom mapping used instead
   }
 
   static $placements = PopupPlacements;
@@ -177,7 +202,7 @@ export default class WUPPopupElement<
   }
 
   /** Default options. Change it to configure default behavior */
-  static $defaults: WUP.Popup.Defaults = {
+  static $defaults: WUP.Popup.Options = {
     placement: [
       WUPPopupElement.$placements.$top.$middle.$adjust, //
       WUPPopupElement.$placements.$bottom.$middle.$adjust,
@@ -444,31 +469,11 @@ export default class WUPPopupElement<
 
   protected override gotChanges(propsChanged: Array<string> | null): void {
     super.gotChanges(propsChanged);
-
-    propsChanged && this.$isShown && this.goHide(HideCases.onOptionChange, null);
-
-    // attr placement
-    const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.$placementAttrs;
-    const p = pAttr && WUPPopupElement.$placementAttrs(pAttr);
-    this._opts.placement = p || this._opts.placement || [...this.#ctr.$defaults.placement];
-    // attr animation
-    const aAnim = this.getAttribute("animation");
-    switch (aAnim) {
-      case "":
-      case "default":
-        this._opts.animation = Animations.default;
-        break;
-      case "drawer":
-        this._opts.animation = Animations.drawer;
-        break;
-      case "stack":
-        this._opts.animation = Animations.stack;
-        break;
-      default:
-        break;
+    if (propsChanged) {
+      // re-init
+      this.$isShown && this.goHide(HideCases.onOptionChange, null);
+      this.init(); // only if popup is hidden
     }
-    // re-init
-    propsChanged && this.init(); // only if popup is hidden
   }
 
   protected override connectedCallback(): void {

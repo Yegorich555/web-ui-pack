@@ -18,16 +18,21 @@ const allObservedOptions = new WeakMap<typeof WUPBaseElement, Set<string> | null
 const allObservedAttrs = new WeakMap<typeof WUPBaseElement, Array<string>>();
 const allMappedAttrs = new WeakMap<typeof WUPBaseElement, Record<string, AttributeMap>>();
 
-interface AttributeMap {
+export interface AttributeMap {
+  /** One of default types with defined parse */
   type: AttributeTypes;
-  prop: string;
+  /** Option[name] realted to related attribute. Point if attrName !== propName */
+  prop?: string;
+  /** Custom parser for related attribute */
+  parse?: (attrValue: string) => any;
 }
 export const enum AttributeTypes {
   bool,
   number,
   string,
   reference,
-  parsedObject,
+  parsedObject, // tod maybe this is useless
+  parseCustom,
 }
 
 /** Basic abstract class for every component in web-ui-pack */
@@ -366,9 +371,13 @@ export default abstract class WUPBaseElement<
     const m = this.#ctr.mappedAttributes[name] ?? { type: AttributeTypes.bool, prop: name };
     const isRemoved = value == null;
 
-    this._opts[m.prop as keyof TOptions] = isRemoved
-      ? objectClone(this.#ctr.$defaults[m.prop]) // value == null when attr is removed, then need to rollback to default
-      : this.parseAttr(m.type, value, m.prop, name);
+    const key = m.prop ?? name;
+    // eslint-disable-next-line no-nested-ternary
+    this._opts[key as keyof TOptions] = isRemoved
+      ? objectClone(this.#ctr.$defaults[key]) // value == null when attr is removed, then need to rollback to default
+      : m.parse
+      ? m.parse(value)
+      : this.parseAttr(m.type, value, key, name);
 
     if (this.#isReady) {
       if (!this.#attrTimer) {
@@ -381,7 +390,7 @@ export default abstract class WUPBaseElement<
           this.#attrChanged = undefined;
         });
       }
-      this.#attrChanged!.push(m.prop);
+      this.#attrChanged!.push(key);
     }
   }
 

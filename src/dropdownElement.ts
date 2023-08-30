@@ -6,7 +6,7 @@ import { WUPcssButton, WUPcssMenu } from "./styles";
 const tagName = "wup-dropdown";
 declare global {
   namespace WUP.Dropdown {
-    interface Defaults extends WUP.Popup.Defaults, Pick<WUP.Popup.Options, "minWidthByTarget" | "minHeightByTarget"> {
+    interface Defaults extends WUP.Popup.Options, Pick<WUP.Popup.Options, "minWidthByTarget" | "minHeightByTarget"> {
       /** Animation that applied to popup;
        * @defaultValue `Animations.drawer`
        * @tutorial Troubleshooting
