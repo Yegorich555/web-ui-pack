@@ -6,8 +6,8 @@ import { WUPcssButton, WUPcssMenu } from "./styles";
 const tagName = "wup-dropdown";
 declare global {
   namespace WUP.Dropdown {
-    interface Defaults extends WUP.Popup.Options, Pick<WUP.Popup.Options, "minWidthByTarget" | "minHeightByTarget"> {
-      /** Animation that applied to popup;
+    interface Options extends WUP.Popup.Options {
+      /** Animation applied to popup;
        * @defaultValue `Animations.drawer`
        * @tutorial Troubleshooting
        * * to change option for specific element change it for `<wup-popup/>` direclty after timeout
@@ -40,7 +40,6 @@ declare global {
        *  @defaultValue true */
       minHeightByTarget: boolean;
     }
-    interface Options extends Defaults {}
     interface Attributes {}
     interface JSXProps<C = WUPDropdownElement> extends WUP.Base.JSXProps<C>, Attributes {}
   }
@@ -94,7 +93,7 @@ export default class WUPDropdownElement<
   /** Default options applied to every element. Change it to configure default behavior
    * * @tutorial Troubleshooting
    * * Popup-related options are not observed so to change it use `WUPDropdownElement.$defaults` or `element.$refPopup.$options` direclty */
-  static $defaults: WUP.Dropdown.Defaults = {
+  static $defaults: WUP.Dropdown.Options = {
     ...WUPPopupElement.$defaults,
     animation: Animations.drawer,
     showCase: ShowCases.onClick | ShowCases.onFocus,
@@ -129,7 +128,23 @@ export default class WUPDropdownElement<
       this.$refPopup.setAttribute("menu", "");
       this.$refPopup.goShow = this.goShowPopup.bind(this);
       this.$refPopup.goHide = this.goHidePopup.bind(this);
-      Object.assign(this.$refPopup.$options, this.$options);
+
+      // find popup props from attributes
+      const excluded = new Set<string>(); // popup props that assigned from attributes
+      const proto = Object.getPrototypeOf(this.$refPopup).constructor as typeof WUPPopupElement;
+      const mappedAttr = proto.mappedAttributes;
+      this.$refPopup.getAttributeNames().forEach((a) => {
+        const m = mappedAttr[a];
+        if (m) {
+          excluded.add(m.prop ?? a);
+        }
+      });
+      Object.keys(this._opts).forEach((k) => {
+        if (!excluded.has(k)) {
+          // @ts-expect-error
+          this.$refPopup.$options[k] = this._opts[k];
+        }
+      });
 
       // WA
       const menu = (this.$refPopup.querySelector("ul,ol,[items]") as HTMLElement) || this.$refPopup;

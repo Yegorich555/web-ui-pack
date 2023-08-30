@@ -92,6 +92,7 @@ export default class WUPPopupElement<
   }
 
   static get mappedAttributes(): Record<string, AttributeMap> {
+    // todo it's not cached
     return {
       target: {
         type: AttributeTypes.string,
