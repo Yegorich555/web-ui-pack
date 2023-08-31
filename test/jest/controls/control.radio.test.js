@@ -33,9 +33,10 @@ describe("control.radio", () => {
       { attrValue: "30", value: 30 },
     ],
     validations: {},
-    attrs: { items: { skip: true } },
-    $options: { items: { skip: true } },
-    // attrs: { defaultchecked: { skip: true } },
+    attrs: {
+      items: { value: getItems() },
+      reverse: { value: true, equalValue: "" },
+    },
     onCreateNew: (e) => (e.$options.items = getItems()),
     testReadonly: { true: (el) => expect(el).toMatchSnapshot(), false: (el) => expect(el).toMatchSnapshot() },
   });
@@ -80,12 +81,13 @@ describe("control.radio", () => {
       `"<fieldset><legend><strong></strong></legend><label for="txt15"><input id="txt15" type="radio" name="txt14473" tabindex="0" autocomplete="off"><span>testVal123_0</span></label></fieldset>"`
     );
 
+    const prev = el.$options.items;
     const onErr = jest.spyOn(el, "throwError").mockImplementationOnce(() => {});
-    el.setAttribute("items", "");
+    el.setAttribute("items", "missedGlobalKey");
     jest.advanceTimersByTime(1);
-    expect(el.$options.items?.length).toBe(0);
+    expect(el.$options.items).toStrictEqual(prev);
     expect(onErr.mock.lastCall[0]).toMatchInlineSnapshot(
-      `"Value not found according to attribute [items] in 'window.'"`
+      `"Value not found according to attribute [items] in 'window.missedGlobalKey'"`
     );
   });
 
