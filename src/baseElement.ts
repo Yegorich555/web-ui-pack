@@ -15,7 +15,6 @@ let lastUniqueNum = 0;
 
 // Cached data
 const allObservedOptions = new WeakMap<typeof WUPBaseElement, Set<string> | null>();
-const allObservedAttrs = new WeakMap<typeof WUPBaseElement, Array<string>>();
 const allMappedAttrs = new WeakMap<typeof WUPBaseElement, Record<string, AttributeMap>>();
 
 export interface AttributeMap {
@@ -124,7 +123,7 @@ export default abstract class WUPBaseElement<
     return o;
   }
 
-  // todo maybe deprecate it and use for any prop by default ??? - need check this
+  // todo deprecate it and use for any prop by default ??? - need check this
   /** Array of options names to listen for changes
    * @defaultValue every option from $defaults` */
   static get observedOptions(): Array<string> {
@@ -133,14 +132,8 @@ export default abstract class WUPBaseElement<
 
   /** Array of attribute names to listen for changes
    * @defaultValue every option from $defaults (in lowerCase) */
-  static get observedAttributes(): Array<string> | undefined {
-    // return cached data
-    let o = allObservedAttrs.get(this);
-    if (o === undefined) {
-      o = this.observedOptions.map((k) => k.toLowerCase());
-      allObservedAttrs.set(this, o);
-    }
-    return o;
+  static get observedAttributes(): Array<string> {
+    return (this.observedOptions || Object.keys(this.$defaults)).map((k) => k.toLowerCase());
   }
 
   /** Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item */
@@ -186,6 +179,7 @@ export default abstract class WUPBaseElement<
     }
     const prev = this._opts;
     if (!v) {
+      // todo skip undefined & nulls to reduce $options.size per each objects & recheck every element again
       v = objectClone(this.#ctr.$defaults) as TOptions;
     }
     this._opts = v;
@@ -330,7 +324,7 @@ export default abstract class WUPBaseElement<
         this._opts[p as keyof TOptions] = objectClone(this.#ctr.$defaults[p]);
       }
       if (this._opts[p] === undefined) {
-        // don't allow to have defaults with null // todo remove it after refactoring
+        // don't allow to have defaults with undefined // todo remove it after refactoring
         console.error(`Option [${p}] is removed but in $defaults not defined`, { defaults: this.#ctr.$defaults });
       }
     }); // remove related attributes otherwise impossible to override
