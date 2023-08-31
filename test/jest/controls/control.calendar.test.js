@@ -51,6 +51,8 @@ describe("control.calendar", () => {
       min: { value: "2022-05-20", parsedValue: new Date("2022-05-20") },
       max: { value: "2022-05-21", parsedValue: new Date("2022-05-21") },
       exclude: { value: [new Date("2009-02-06")] },
+      startwith: { skip: true }, // tested manually
+      firstweekday: { value: 1 },
     },
     $options: { readOnly: { ignoreInput: true } },
   });
@@ -81,7 +83,7 @@ describe("control.calendar", () => {
   });
 
   test("option starWith based on value", async () => {
-    expect(el.$options.startWith).toBeUndefined();
+    expect(el.$options.startWith).toBeFalsy();
     expect(el.$initValue).toBeFalsy();
     expect(el.querySelector("[calendar='year']")).toBeTruthy();
 

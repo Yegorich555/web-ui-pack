@@ -900,7 +900,7 @@ exports[`control.radio common tests snapshot of $defaults 1`] = `
   "name": null,
   "readOnly": false,
   "reverse": false,
-  "skey": false,
+  "skey": null,
   "storage": "local",
   "validateDebounceMs": 500,
   "validationCase": 13,
@@ -920,12 +920,18 @@ exports[`control.radio common tests snapshot of $defaults 2`] = `
   "autoFocus",
   "clearActions",
   "disabled",
+  "focusDebounceMs",
   "items",
   "label",
   "name",
   "readOnly",
   "reverse",
   "skey",
+  "storage",
+  "validateDebounceMs",
+  "validationCase",
+  "validationRules",
+  "validationShowAll",
   "validations",
 ]
 `;
@@ -936,6 +942,7 @@ exports[`control.radio common tests snapshot of $defaults 3`] = `
   "autofocus",
   "clearactions",
   "disabled",
+  "focusdebouncems",
   "initvalue",
   "items",
   "label",
@@ -943,7 +950,12 @@ exports[`control.radio common tests snapshot of $defaults 3`] = `
   "readonly",
   "reverse",
   "skey",
+  "storage",
+  "validatedebouncems",
+  "validationcase",
+  "validationrules",
   "validations",
+  "validationshowall",
 ]
 `;
 

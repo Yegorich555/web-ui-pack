@@ -150,7 +150,7 @@ export default class WUPSwitchControl<
 
   static get observedAttributes(): Array<string> {
     const arr = super.observedAttributes;
-    arr.push("defaultchecked", "reverse");
+    arr.push("defaultchecked");
     return arr;
   }
 

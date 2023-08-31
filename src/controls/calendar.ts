@@ -54,19 +54,18 @@ declare global {
        *  @defaultValue true */
       utc: boolean;
       /** User can't select date less than min; point new Date(Date.UTC(2022,1,25)) for `utc:true`, or new Date(2022,1,25) */
-      min?: Date | null;
+      min: Date | null;
       /** User can't select date more than max; point new Date(Date.UTC(2022,1,25)) for `utc:true`, or new Date(2022,1,25) */
-      max?: Date | null;
+      max: Date | null;
       /** Picker that must be rendered at first; if undefined & isEmpty - year, otherwise - day;
        * @tutorial
        * * point "2012" to start from year2012
        * * point "2012-05" to start from month5 year2012
        * * point "2012-05-02" to start from day2 month5 year2012
-       * * shows picker according to pointed but range according to $value ($value has higher priority then pointed date here)
-       * @not observed (affects only on init) */
-      startWith?: PickersEnum | string;
+       * * shows picker according to pointed but range according to $value ($value has higher priority then pointed date here) */
+      startWith: PickersEnum | string | null;
       /** Dates that user can't choose (disabled dates) */
-      exclude?: Date[] | null;
+      exclude: Date[] | null;
     }
     interface Attributes extends WUP.BaseControl.Attributes, Pick<Options, "utc"> {
       /** Picker that must be rendered at first
@@ -293,12 +292,6 @@ export default class WUPCalendarControl<
       }`;
   }
 
-  static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUP.Calendar.Options>;
-    arr.push("utc", "min", "max", "exclude");
-    return arr;
-  }
-
   /** Returns days of pointed number-of-month with placeholders of prev, next months
    * @param year 2022 etc.
    * @param month index of month (0-11)
@@ -348,6 +341,15 @@ export default class WUPCalendarControl<
     return v!; // null impossible here
   }
 
+  static get mappedAttributes(): Record<string, AttributeMap> {
+    const m = super.mappedAttributes;
+    m.min = { type: AttributeTypes.parsedObject };
+    m.max = { type: AttributeTypes.parsedObject };
+    m.firstweekday = { type: AttributeTypes.number };
+    m.startwith = { type: AttributeTypes.string };
+    return m;
+  }
+
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUP.Calendar.Options = {
     ...WUPBaseControl.$defaults,
@@ -356,21 +358,16 @@ export default class WUPCalendarControl<
     },
     utc: true,
     firstWeekDay: null,
+    startWith: null,
     min: null,
     max: null,
     exclude: null,
   };
 
-  static get mappedAttributes(): Record<string, AttributeMap> {
-    const m = super.mappedAttributes;
-    m.min = { type: AttributeTypes.parsedObject };
-    m.max = { type: AttributeTypes.parsedObject };
-    return m;
-  }
-
   constructor() {
     super();
-    this._opts.firstWeekDay = this.#ctr.$defaults.firstWeekDay || localeInfo.firstWeekDay; // init here to depends on localeInfo
+    this.#ctr.$defaults.firstWeekDay ??= localeInfo.firstWeekDay;
+    this._opts.firstWeekDay ??= this.#ctr.$defaults.firstWeekDay; // init here to depends on localeInfo
   }
 
   /** Call when need to re-rended picker (min/max changed etc.) */
@@ -983,7 +980,7 @@ export default class WUPCalendarControl<
         case 1: startWith = PickersEnum.Year; break;
         case 2: startWith = PickersEnum.Month; break;
         case 3: startWith = PickersEnum.Day; break;
-        default: startWith = undefined; break;
+        default: startWith = null; break;
       }
       if (startWith != null) {
         startDate = new Date(Date.UTC(+arr[0] || new Date().getFullYear(), (+arr[1] || 1) - 1, +arr[2] || 1));
@@ -1020,6 +1017,7 @@ export default class WUPCalendarControl<
     }
     const isNeedRecalc =
       propsChanged &&
+      // todo universal method .inlcudesAny() that can work over params
       (propsChanged.includes("min") ||
         propsChanged.includes("max") ||
         propsChanged.includes("exclude") ||
@@ -1031,6 +1029,8 @@ export default class WUPCalendarControl<
   }
 
   gotChangesSharable(): void {
+    this._opts.firstWeekDay ??= this.#ctr.$defaults.firstWeekDay;
+
     const attr = this.getAttribute("startwith");
     if (attr != null) {
       // prettier-ignore
@@ -1038,7 +1038,7 @@ export default class WUPCalendarControl<
         case "year": this._opts.startWith = PickersEnum.Year; break;
         case "month": this._opts.startWith = PickersEnum.Month; break;
         case "day": this._opts.startWith = PickersEnum.Day; break;
-        case "": delete this._opts.startWith; break;
+        case "": this._opts.startWith = null; break;
         default: this._opts.startWith = attr; break;
       }
     }

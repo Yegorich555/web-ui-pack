@@ -23,7 +23,7 @@ declare global {
       /** Enabled if option [exclude] is pointed; If invalid shows "This date is disabled" */
       exclude: Date[];
     }
-    interface Defaults<T = Date, VM = ValidityMap> extends WUP.Calendar.Defaults<T, VM>, WUP.BaseCombo.Defaults<T, VM> {
+    interface Defaults<T = Date, VM = ValidityMap> extends WUP.Calendar.Options<T, VM>, WUP.BaseCombo.Defaults<T, VM> {
       /** String representation of displayed date (enables mask, - to disable mask set $options.mask="");
        * @defaultValue localeInfo.date
        * @tutorial Troubleshooting
@@ -110,6 +110,7 @@ export default class WUPDateControl<
 
   static $defaults: WUP.Date.Defaults = {
     ...WUPBaseComboControl.$defaults,
+    ...WUPCalendarControl.$defaults,
     // debounceMs: 500,
     validationRules: {
       ...WUPBaseComboControl.$defaults.validationRules,
@@ -124,7 +125,6 @@ export default class WUPDateControl<
     },
     // firstWeekDay: 1,
     // format: localeInfo.date.toLowerCase()
-    utc: true,
   };
 
   constructor() {
@@ -168,15 +168,13 @@ export default class WUPDateControl<
       this.throwError(`'MMM' in format isn't supported`);
       this._opts.format = "YYYY-MM-DD";
     }
-    this._opts.mask =
-      this._opts.mask ??
-      this._opts.format
-        .replace(/[yY]/g, "0")
-        .replace(/dd|DD/, "00")
-        .replace(/[dD]/, "#0")
-        .replace(/mm|MM/, "00")
-        .replace(/[mM]/, "#0"); // convert yyyy-mm-dd > 0000-00-00; d/m/yyyy > #0/#0/0000
-    this._opts.maskholder = this._opts.maskholder ?? this._opts.format.replace(/([mMdD]){1,2}/g, "$1$1");
+    this._opts.mask ??= this._opts.format
+      .replace(/[yY]/g, "0")
+      .replace(/dd|DD/, "00")
+      .replace(/[dD]/, "#0")
+      .replace(/mm|MM/, "00")
+      .replace(/[mM]/, "#0"); // convert yyyy-mm-dd > 0000-00-00; d/m/yyyy > #0/#0/0000
+    this._opts.maskholder ??= this._opts.format.replace(/([mMdD]){1,2}/g, "$1$1");
 
     super.gotChanges(propsChanged as any);
   }

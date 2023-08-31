@@ -92,8 +92,15 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       disabled: { value: true, equalValue: "" },
       readonly: { value: true, equalValue: "" },
       validations: { value: { required: true } },
-      skey: { value: "strg" },
+      validatedebouncems: { value: 13 },
+      validationcase: { value: 1 },
+      validationrules: { skip: true },
+      validationshowall: { value: true },
       clearactions: { value: 1 },
+      focusdebouncems: { value: 12 },
+      skey: { value: "strg" },
+      storage: { value: "session" },
+
       initvalue: { skip: true }, // manual testing
       ...cfg.attrs,
     },

@@ -137,10 +137,6 @@ declare global {
         | { [k: string]: ValidityFunction<T> }
         | null
         | undefined;
-      /** Storage for saving value
-       * @see {@link WUP.BaseControl.Options.storekey}
-       * @defaultValue "local" */
-      storage: "local" | "session" | "url";
       /** Title/label of control;
        * @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string) */
       label: string | undefined | null;
@@ -169,7 +165,11 @@ declare global {
        * * Before API-call gather form.$model on init
        * @see {@link WUP.BaseControl.Options.storage}
        * @defaultValue false */
-      skey: boolean | string;
+      skey: boolean | string | null; // todo rename to storageKey
+      /** Storage for saving value
+       * @see {@link WUP.BaseControl.Options.storekey}
+       * @defaultValue "local" */
+      storage: "local" | "session" | "url";
     }
 
     // @ts-expect-error
@@ -385,20 +385,6 @@ export default abstract class WUPBaseControl<
     return v === "" || v === undefined;
   }
 
-  static get observedOptions(): Array<string> {
-    return <Array<keyof WUP.BaseControl.Options>>[
-      "label",
-      "name",
-      "autoComplete",
-      "autoFocus",
-      "disabled",
-      "readOnly",
-      "validations",
-      "skey",
-      "clearActions",
-    ];
-  }
-
   static get observedAttributes(): Array<string> {
     const a = super.observedAttributes;
     a.push("initvalue");
@@ -429,10 +415,10 @@ export default abstract class WUPBaseControl<
     validationShowAll: false,
     disabled: false,
     readOnly: false,
-    skey: false,
-    storage: "local",
     label: null,
     name: null,
+    storage: "local",
+    skey: null,
   };
 
   /** Called on value change */
