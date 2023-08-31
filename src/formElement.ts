@@ -414,10 +414,7 @@ export default class WUPFormElement<
   /** Auto-safe debounce timeout */
   #autoSaveT?: ReturnType<typeof setTimeout>;
   #autoSaveRemEv?: () => void;
-  #hasControlChanges?: boolean;
-  protected override gotChanges(
-    propsChanged: Array<keyof WUP.Form.Options | LowerKeys<WUP.Form.Options>> | null
-  ): void {
+  protected override gotChanges(propsChanged: Array<keyof WUP.Form.Options> | null): void {
     super.gotChanges(propsChanged);
 
     this.setAttr("readonly", this._opts.readOnly, true);
@@ -448,27 +445,9 @@ export default class WUPFormElement<
     }
 
     const p = propsChanged;
-    if (this.#hasControlChanges || p?.includes("disabled")) {
+    if (p && (p.includes("disabled") || p.includes("autoComplete") || p.includes("readOnly"))) {
       this.$controls.forEach((c) => c.gotFormChanges(propsChanged));
-      this.#hasControlChanges = undefined;
     }
-  }
-
-  protected override gotOptionsChanged(e: WUP.Base.OptionEvent<Record<string, any>>): void {
-    const p = e.props as Array<keyof WUP.Form.Options>;
-    if (p.includes("autoComplete") || p.includes("readOnly")) {
-      this.#hasControlChanges = true;
-    }
-
-    super.gotOptionsChanged(e);
-  }
-
-  protected override gotAttributeChanged(name: string, value: string): void {
-    if (name === "autocomplete" || name === "readonly") {
-      this.#hasControlChanges = true;
-    }
-
-    super.gotAttributeChanged(name, value);
   }
 
   protected override gotReady(): void {
