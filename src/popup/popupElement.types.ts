@@ -73,10 +73,10 @@ declare global {
       hoverHideTimeout: number;
       /** Animation applied to popup
        * @defaultValue `Animations.default (opacity)` */
-      animation?: Animations;
+      animation: Animations;
       /** Anchor that popup uses for placement. If attr.target and $options.target are empty previousSibling will be attached.
        * attr target="{querySelector}" has hire priority than .options.target */
-      target?: HTMLElement | SVGElement | null;
+      target?: HTMLElement | SVGElement | null; // todo change to auto
       /** Virtual margin of targetElement (relative to popup)
        *  [top, right, bottom, left] or [top/bottom, right/left] in px */
       offset?:

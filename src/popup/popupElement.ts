@@ -204,6 +204,7 @@ export default class WUPPopupElement<
 
   /** Default options. Change it to configure default behavior */
   static $defaults: WUP.Popup.Options = {
+    animation: Animations.default,
     placement: [
       WUPPopupElement.$placements.$top.$middle.$adjust, //
       WUPPopupElement.$placements.$bottom.$middle.$adjust,
