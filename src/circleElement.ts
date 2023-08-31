@@ -75,12 +75,7 @@ declare global {
       /** Items related to circle-segments */
       items: Item[];
     }
-    interface Attributes
-      extends WUP.Base.toJSX<
-        Partial<
-          Pick<Options, "back" | "width" | "from" | "to" | "items" | "corner" | "min" | "max" | "space" | "minsize">
-        >
-      > {}
+    interface Attributes extends Omit<Options, "hoverShowTimeout" | "hoverHideTimeout"> {}
     interface JSXProps<C = WUPCircleElement> extends WUP.Base.JSXProps<C>, Attributes {}
   }
 
@@ -116,11 +111,11 @@ declare global {
 export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options> {
   #ctr = this.constructor as typeof WUPCircleElement;
 
-  static get observedOptions(): Array<keyof WUP.Circle.Options> {
+  static get observedOptions(): Array<string> {
     return this.observedAttributes;
   }
 
-  static get observedAttributes(): Array<LowerKeys<WUP.Circle.Attributes>> {
+  static get observedAttributes(): Array<string> {
     return ["items", "width", "back", "corner", "from", "to", "min", "max", "space", "minsize"];
   }
 
@@ -213,7 +208,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     super.gotChanges(propsChanged);
 
     if (propsChanged) {
-      this.removeChildren.call(this.$refItems); // NiceToHave: instead of re-init update/remove required children
+      this.removeChildren.call(this.$refItems); // NiceToHave: instead of re-init update/remove required children + possible to deprecate custom observed attrs here
       this.removeChildren.call(this.$refSVG); // clean before new render
     }
     this.gotRenderItems();
