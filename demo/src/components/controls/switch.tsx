@@ -35,14 +35,6 @@ export default function SwitchControlView() {
           initValue={false}
           reverse={false}
         />
-        <wup-switch
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "required";
-              el.$options.validations = { required: true };
-            }
-          }}
-        />
         <wup-switch label="Very very very incredible long label to check if it has ellipsis rule and it works as expected" />
         <wup-switch name="reversed" reverse="" />
         <wup-switch

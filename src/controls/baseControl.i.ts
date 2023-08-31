@@ -14,11 +14,11 @@ export default interface IBaseControl<ValueType = any> extends HTMLElement {
   $validate: () => string | false;
 
   $options: {
-    label?: string;
-    name?: string;
-    autoComplete?: string | boolean;
-    readOnly?: boolean;
-    disabled?: boolean;
+    label?: string | null;
+    name?: string | null;
+    autoComplete?: string | boolean | null;
+    readOnly?: boolean | null;
+    disabled?: boolean | null;
   };
 
   gotFormChanges: (propsChanged: Array<string> | null) => void;

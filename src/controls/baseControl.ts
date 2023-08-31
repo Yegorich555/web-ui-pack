@@ -1,4 +1,4 @@
-import WUPBaseElement from "../baseElement";
+import WUPBaseElement, { AttributeMap, AttributeTypes } from "../baseElement";
 import WUPFormElement from "../formElement";
 import isEqual from "../helpers/isEqual";
 import nestedProperty from "../helpers/nestedProperty";
@@ -86,7 +86,7 @@ declare global {
       reason: ValidateFromCases | null
     ) => false | string;
 
-    interface Defaults<T = any, VM = ValidityMap> {
+    interface Options<T = any, VM = ValidityMap> {
       /** When to validate control and show error. Validation by onSubmit impossible to disable
        *  @defaultValue onChangeSmart | onFocusLost | onFocusWithValue | onSubmit */
       validationCase: ValidationCases;
@@ -132,48 +132,49 @@ declare global {
        * ```
        * @tutorial Troubleshooting
        ** If setup validations via attr it doesn't affect on $options.validations directly. Instead use el.validations getter instead */
-      validations?: { [K in keyof VM]?: VM[K] | ValidityFunction<T> } | { [k: string]: ValidityFunction<T> };
+      validations:
+        | { [K in keyof VM]?: VM[K] | ValidityFunction<T> }
+        | { [k: string]: ValidityFunction<T> }
+        | null
+        | undefined;
       /** Storage for saving value
        * @see {@link WUP.BaseControl.Options.storekey}
        * @defaultValue "local" */
-      storage?: "local" | "session" | "url";
-    }
-    interface Options<T = any, VM = ValidityMap> extends Defaults<T, VM> {
-      /** Title/label of control; if label is missed it's parsed from option [name]. To skip point `label=''` (empty string) */
-      label?: string;
+      storage: "local" | "session" | "url";
+      /** Title/label of control;
+       * @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string) */
+      label: string | undefined | null;
       /** Property/key of model (collected by form); For name `firstName` >> `model.firstName`; for `nested.firstName` >> `model.nested.firstName` etc.
        * * @tutorial
        * * point `undefined` to completely detach from FormElement
        * * point `''`(empty string) to partially detach (exlcude from `form.$model`, `form.$isChanged`, but included in validations & submit) */
-      name?: string;
-      /** Focus element when it's appended to layout */
-      autoFocus?: boolean;
+      name: string | undefined | null;
+      /** Focus element when it's appended to layout @defaultValue false */
+      autoFocus: boolean;
       /** Name to autocomplete by browser; Point `true` to inherit from $options.name or some string
        *  if control has no autocomplete option then it's inherited from form
-       * @defaultValue false */
-      autoComplete?: string | boolean;
+       * @defaultValue null - means false if form.$options.autoComplete false also */
+      autoComplete: string | boolean | null;
       /** Disallow edit/copy value; adds attr [disabled] for styling */
-      disabled?: boolean;
-      /** Disallow copy value; adds attr [readonly] for styling */
-      readOnly?: boolean;
-      /** Show all validation-rules with checkpoints as list instead of single error */
-      validationShowAll?: boolean;
+      disabled: boolean;
+      /** Disallow copy value; adds attr [readonly] for styling @defaultValue false */
+      readOnly: boolean;
+      /** Show all validation-rules with checkpoints as list instead of single error @defaultValue false */
+      validationShowAll: boolean;
       /** Storage key for auto saving value in storage;
        * @tutorial rules
        * * Point empty string or `true` to inherit from $options.name
        * * Expected value can be converted toString & parsed from string itself.
        * * Override valueFromUrl & valueToUrl to change serializing (for complex objects, arrays etc.)
        * * Before API-call gather form.$model on init
-       * @see {@link WUP.BaseControl.Defaults.storage} */
-      skey?: boolean | string;
+       * @see {@link WUP.BaseControl.Options.storage}
+       * @defaultValue false */
+      skey: boolean | string;
     }
 
-    interface Attributes
-      extends Pick<
-        Options,
-        "label" | "name" | "autoFocus" | "disabled" | "readOnly" | "autoComplete" | "skey" | "storage"
-      > {
-      /** default value in string/boolean or number representation (depends on `control.prototype.parse()`) */
+    // @ts-expect-error
+    interface Attributes extends Partial<Options> {
+      /** default value in string/boolean/number representation (depends on `control.prototype.parse()`) */
       initValue?: string | boolean | number;
       /** Rules enabled for current control. Point global obj-key with validations (use `window.myValidations` where `window.validations = {required: true}` ) */
       validations?: string;
@@ -204,32 +205,6 @@ export default abstract class WUPBaseControl<
   static $ariaCleared = "cleared";
   /** Text announced by screen-readers; @defaultValue `Error for` */
   static $ariaError = "Error for";
-
-  static get observedOptions(): Array<string> {
-    return <Array<keyof WUP.BaseControl.Options>>[
-      "label",
-      "name",
-      "autoComplete",
-      "disabled",
-      "readOnly",
-      "validations",
-      "skey",
-      "clearActions",
-    ];
-  }
-
-  static get observedAttributes(): Array<string> {
-    return <Array<LowerKeys<WUP.BaseControl.Attributes>>>[
-      "label", //
-      "name",
-      "autocomplete",
-      "disabled",
-      "readonly",
-      "initvalue",
-      "skey",
-      "storage",
-    ];
-  }
 
   /** Css-variables related to component */
   static get $styleRoot(): string {
@@ -410,14 +385,54 @@ export default abstract class WUPBaseControl<
     return v === "" || v === undefined;
   }
 
-  // todo changing global-common-defaults from another project doesn't affect on controls - need to figure out way when user can setup everything in one palce
-  static $defaults: WUP.BaseControl.Defaults = {
+  static get observedOptions(): Array<string> {
+    return <Array<keyof WUP.BaseControl.Options>>[
+      "label",
+      "name",
+      "autoComplete",
+      "autoFocus",
+      "disabled",
+      "readOnly",
+      "validations",
+      "skey",
+      "clearActions",
+    ];
+  }
+
+  static get observedAttributes(): Array<string> {
+    const a = super.observedAttributes;
+    a.push("initvalue");
+    return a;
+  }
+
+  static get mappedAttributes(): Record<string, AttributeMap> {
+    const m = super.mappedAttributes;
+    m.skey.type = AttributeTypes.string;
+    m.autocomplete.type = AttributeTypes.string;
+    m.label.type = AttributeTypes.string;
+    m.name.type = AttributeTypes.string;
+    return m;
+  }
+
+  // todo changing global-common-defaults from another project doesn't affect on controls - need to figure out way when user can setup everything in one place
+  static $defaults: WUP.BaseControl.Options = {
+    autoComplete: null, // WARN: without null impossible to use with form.autoComplete: possible to change is user options will be empty/not cloned by default
+    autoFocus: false,
     clearActions: ClearActions.initClearBack,
+    focusDebounceMs: 100,
     validateDebounceMs: 500,
     validationCase: ValidationCases.onChangeSmart | ValidationCases.onFocusLost | ValidationCases.onFocusWithValue,
     validationRules: {
       required: (v, setV) => setV === true && this.$isEmpty(v) && "This field is required",
     },
+    validations: null,
+    validationShowAll: false,
+    disabled: false,
+    readOnly: false,
+    skey: false,
+    storage: "local",
+    label: null,
+    name: null,
   };
 
   /** Called on value change */
@@ -595,17 +610,6 @@ export default abstract class WUPBaseControl<
   protected override gotChanges(propsChanged: Array<keyof WUP.BaseControl.Options | any> | null): void {
     super.gotChanges(propsChanged);
 
-    this._opts.label = this.getAttr("label");
-    this._opts.name = this.getAttr("name");
-
-    // NiceToHave it extends $options object to big size where almost ever prop is undefined - need somehow prettify ot
-    this._opts.autoComplete = this.getAttr("autocomplete", "boolOrString", this._opts.autoComplete);
-    this._opts.disabled = this.getAttr("disabled", "bool");
-    this._opts.readOnly = this.getAttr("readonly", "bool", this._opts.readOnly);
-    this._opts.autoFocus = this.getAttr("autofocus", "bool", this._opts.autoFocus);
-    this._opts.skey = this.getAttr("skey", "boolOrString", this._opts.skey);
-    this._opts.storage = this.getAttr("storage", "string", this._opts.storage) as "local";
-
     const i = this.$refInput;
     // set label
     const label = (this._opts.label ?? (this._opts.name && stringPrettify(this._opts.name))) || null;
@@ -645,23 +649,30 @@ export default abstract class WUPBaseControl<
     this.$refInput.readOnly = this.$isReadOnly;
   }
 
-  /** Called on Init and options/attributes changes to update $initValue */
-  setupInitValue(propsChanged: Array<keyof WUP.BaseControl.Options | any> | null): void {
-    // lowercase for attribute-changes otherwise it's wrong
-    if (!propsChanged || propsChanged.includes("initvalue")) {
-      const attr = this.getAttribute("initvalue");
-      if (attr !== null) {
-        (this as any)._noDelInitValueAttr = true;
+  protected attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
+    if (name === "initvalue") {
+      if (this._isStopChanges) {
+        return;
+      }
+      (this as any)._noDelInitValueAttr = true;
+      if (newValue == null) {
+        this.$initValue = undefined; // removed attr >> remove initValue
+      } else {
         try {
-          this.$initValue = this.parse(attr);
+          this.$initValue = this.parse(newValue);
         } catch (err) {
           this.throwError(err);
         }
-        delete (this as any)._noDelInitValueAttr;
-      } else if (propsChanged) {
-        this.$initValue = undefined; // removed attr >> remove initValue
       }
+      this.setupInitValue(null);
+      delete (this as any)._noDelInitValueAttr;
+    } else {
+      super.attributeChangedCallback(name, oldValue, newValue);
     }
+  }
+
+  /** Called on Init and options/attributes changes to update $initValue */
+  setupInitValue(propsChanged: Array<keyof WUP.BaseControl.Options | any> | null): void {
     // retrieve value from model
     if (this.$initValue === undefined && this.$form && this._opts.name && !this.hasAttribute("initvalue")) {
       if (!propsChanged || propsChanged.includes("name")) {
@@ -1008,7 +1019,7 @@ export default abstract class WUPBaseControl<
   }
 
   /** Returns storage key based on options `skey` and `name` */
-  get storageKey(): string | undefined | false {
+  get storageKey(): string | undefined | null | false {
     return this._opts.skey === true ? this._opts.name : this._opts.skey;
   }
 
@@ -1140,7 +1151,7 @@ export default abstract class WUPBaseControl<
   }
 
   /* Called when user pressed Esc-key or button-clear */
-  protected clearValue(): void {
+  clearValue(): void {
     const next = this._nextClearValue;
     this._nextClearValue = this.#value;
     this.setValue(next, SetValueReasons.clear);

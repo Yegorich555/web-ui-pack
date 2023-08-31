@@ -7,11 +7,10 @@ declare global {
   namespace WUP.Switch {
     interface EventMap extends WUP.BaseControl.EventMap {}
     interface ValidityMap extends WUP.BaseControl.ValidityMap {}
-    interface Defaults<T = boolean, VM = ValidityMap> extends WUP.BaseControl.Defaults<T, VM> {}
-    interface Options<T = boolean, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, Defaults<T, VM> {
+    interface Options<T = boolean, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM> {
       /** Reversed-style (switch+label for true vs label+switch)
        * @defaultValue false */
-      reverse?: boolean;
+      reverse: boolean;
     }
     interface Attributes extends WUP.BaseControl.Attributes {
       /** InitValue for control */
@@ -145,25 +144,20 @@ export default class WUPSwitchControl<
       }`;
   }
 
-  static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUP.Switch.Options>;
-    arr.push("reverse");
-    return arr;
-  }
-
-  static get observedAttributes(): Array<string> {
-    const arr = super.observedAttributes as Array<LowerKeys<WUP.Switch.Attributes>>;
-    arr.push("reverse", "defaultchecked");
-    return arr;
-  }
-
   static $isEqual(v1: boolean | undefined, v2: boolean | undefined): boolean {
     return !!v1 === !!v2;
   }
 
-  static $defaults: WUP.Switch.Defaults = {
+  static get observedAttributes(): Array<string> {
+    const arr = super.observedAttributes;
+    arr.push("defaultchecked");
+    return arr;
+  }
+
+  static $defaults: WUP.Switch.Options = {
     ...WUPBaseControl.$defaults,
     validationRules: { ...WUPBaseControl.$defaults.validationRules },
+    reverse: false,
   };
 
   get $value(): boolean {
@@ -175,7 +169,7 @@ export default class WUPSwitchControl<
   }
 
   override parse(text: string): boolean | undefined {
-    return text === "1" || text.toLowerCase() === "true";
+    return text === "" || text === "1" || text.toLowerCase() === "true";
   }
 
   override valueToUrl(v: boolean): string | null {
@@ -216,26 +210,19 @@ export default class WUPSwitchControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Switch.Options | any> | null): void {
     super.gotChanges(propsChanged as any);
-
-    this._opts.reverse = this.getAttr("reverse", "bool");
     this.setAttr("reverse", this._opts.reverse, true);
-
-    if (!propsChanged) {
-      this.$initValue = this.getAttr("defaultchecked", "bool", this.$initValue);
-    } else if (propsChanged.includes("defaultchecked")) {
-      this.$initValue = this.getAttr("defaultchecked", "bool", undefined);
-    }
-  }
-
-  protected override gotOptionsChanged(e: WUP.Base.OptionEvent): void {
-    this._isStopChanges = true;
-    e.props.includes("reverse") && this.setAttr("reverse", this._opts.reverse, true);
-    super.gotOptionsChanged(e);
   }
 
   override gotFormChanges(propsChanged: Array<keyof WUP.Form.Options> | null): void {
     super.gotFormChanges(propsChanged);
     this.setAttr.call(this.$refInput, "aria-readonly", this.$isReadOnly);
+  }
+
+  protected attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
+    if (name === "defaultchecked") {
+      name = "initvalue";
+    }
+    super.attributeChangedCallback(name, oldValue, newValue);
   }
 }
 

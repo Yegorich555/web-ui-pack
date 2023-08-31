@@ -454,31 +454,31 @@ exports[`control.switch common tests snapshot of $defaults 1`] = `
 
 exports[`control.switch common tests snapshot of $defaults 2`] = `
 [
-  "label",
-  "name",
   "autoComplete",
   "autoFocus",
-  "disabled",
-  "readOnly",
-  "validations",
-  "skey",
   "clearActions",
+  "disabled",
+  "label",
+  "name",
+  "readOnly",
+  "skey",
+  "validations",
 ]
 `;
 
 exports[`control.switch common tests snapshot of $defaults 3`] = `
 [
-  "label",
-  "name",
   "autocomplete",
   "autofocus",
-  "disabled",
-  "readonly",
-  "validations",
-  "skey",
   "clearactions",
-  "initvalue",
   "defaultchecked",
+  "disabled",
+  "initvalue",
+  "label",
+  "name",
+  "readonly",
+  "skey",
+  "validations",
 ]
 `;
 

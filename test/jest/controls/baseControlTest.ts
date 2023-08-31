@@ -84,8 +84,19 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
   const hasVldRequired = !cfg.validationsSkip?.includes("required");
 
   h.baseTestComponent(() => document.createElement(tagName), {
-    attrs: { initvalue: { skip: true }, ...cfg.attrs },
-    $options: cfg.$options,
+    attrs: {
+      label: { value: "First Name" },
+      name: { value: "firstN" },
+      autocomplete: { value: true },
+      autofocus: { value: true },
+      disabled: { value: true, equalValue: "" },
+      readonly: { value: true, equalValue: "" },
+      validations: { value: { required: true } },
+      skey: { value: "strg" },
+      clearactions: { value: 1 },
+      initvalue: { skip: true }, // manual testing
+      ...cfg.attrs,
+    },
   });
 
   describe("$initValue", () => {
@@ -98,8 +109,8 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
       el.$initValue = cfg.initValues[1].value;
       await h.wait(1);
-      expect(el.$initValue).toStrictEqual(cfg.initValues[1].value);
       expect(el.getAttribute("initvalue")).toBe(null);
+      expect(el.$initValue).toStrictEqual(cfg.initValues[1].value);
 
       el.setAttribute("initvalue", cfg.initValues[2].attrValue);
       await h.wait(1);
@@ -111,19 +122,14 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.getAttribute("initvalue")).toBe(null);
       expect(el.$initValue).toStrictEqual(cfg.emptyInitValue);
 
-      await h.wait();
-      el.setAttribute("initvalue", "");
-      expect(() => jest.advanceTimersByTime(1)).not.toThrow();
-      await h.wait(1);
-      expect(el.$initValue).toStrictEqual(cfg.emptyValue);
-
+      const prev = el.$initValue;
       el.parse = () => {
         throw new Error("Test err");
       };
       el.setAttribute("initvalue", "wrong value");
       expect(() => jest.advanceTimersByTime(1)).toThrow();
       await h.wait(1);
-      expect(el.$initValue).toStrictEqual(cfg.emptyValue);
+      expect(el.$initValue).toStrictEqual(prev);
     });
 
     test("$initValue vs $value", () => {
@@ -632,7 +638,6 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$initValue = cfg.initValues[0].value;
       el.$options.validationCase = ValidationCases.onInit | 0;
       el.$options.validations = { custom: () => "custom err here", required: true, c2: () => false };
-      // @ts-expect-error
       const onVld = jest.spyOn(el.$options.validations!, "custom");
       await h.wait();
       expect(el.$refError).toBeDefined();
@@ -776,7 +781,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
         expect(el).toMatchSnapshot();
       });
 
-    ruleNames.forEach((ruleName) => {
+    ruleNames.forEach((ruleName: string) => {
       if ((cfg.validationsSkip as any)?.includes(ruleName)) {
         return;
       }
@@ -794,7 +799,6 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
           expect(el.$refInput.getAttribute("aria-required")).toBe("true");
         }
 
-        // @ts-expect-error
         const defMsg = elType.$defaults.validationRules![ruleName]!(vld.failValue as any, vld.set, el);
         expect(defMsg).toBeTruthy();
         expect(el.$validate()).toBe(defMsg);
@@ -897,7 +901,9 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     expect(el.$autoComplete).toBeFalsy();
     expect(el.$refInput.autocomplete).toBe(cfg.autoCompleteOff);
 
+    // @ts-ignore
     form.$options.autoComplete = undefined;
+    // @ts-ignore
     el.$options.autoComplete = undefined;
     jest.advanceTimersByTime(1);
     expect(el.$autoComplete).toBeFalsy();

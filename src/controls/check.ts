@@ -5,8 +5,7 @@ declare global {
   namespace WUP.Check {
     interface EventMap extends WUP.Switch.EventMap {}
     interface ValidityMap extends WUP.Switch.ValidityMap {}
-    interface Defaults<T = boolean, VM = ValidityMap> extends WUP.BaseControl.Defaults<T, VM> {}
-    interface Options<T = boolean, VM = ValidityMap> extends WUP.Switch.Options<T, VM>, Defaults<T, VM> {}
+    interface Options<T = boolean, VM = ValidityMap> extends WUP.Switch.Options<T, VM> {}
     interface Attributes extends WUP.Switch.Attributes {}
     interface JSXProps<C = WUPCheckControl> extends WUP.Switch.JSXProps<C>, Attributes {}
   }
@@ -104,9 +103,9 @@ export default class WUPCheckControl<
       }`;
   }
 
-  static $defaults: WUP.Check.Defaults = {
+  static $defaults: WUP.Check.Options = {
     ...WUPSwitchControl.$defaults,
-    validationRules: { ...WUPSwitchControl.$defaults.validationRules },
+    // WARN: it's shared =>  validationRules: { ...WUPSwitchControl.$defaults.validationRules },
   };
 }
 
