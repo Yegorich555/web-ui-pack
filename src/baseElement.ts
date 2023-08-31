@@ -107,19 +107,15 @@ export default abstract class WUPBaseElement<
 
   /** Returns map-model based on $defaults for mapping attributes & options */
   static get mappedAttributes(): Record<string, AttributeMap> {
-    let o = allMappedAttrs.get(this);
-    if (o === undefined) {
-      o = {};
-      const def = this.$defaults;
-      Object.keys(def).forEach((k) => {
-        const attr = k.toLowerCase(); // attributes exists only in lowerCase
-        o![attr] = {
-          type: this.mapAttribute(def[k]),
-          prop: k,
-        };
-      });
-      allMappedAttrs.set(this, o);
-    }
+    const o: Record<string, AttributeMap> = {};
+    const def = this.$defaults;
+    Object.keys(def).forEach((k) => {
+      const attr = k.toLowerCase(); // attributes exists only in lowerCase
+      o[attr] = {
+        type: this.mapAttribute(def[k]),
+        prop: k,
+      };
+    });
     return o;
   }
 
@@ -362,7 +358,12 @@ export default abstract class WUPBaseElement<
   /** Called when any of observedAttributes is changed */
   protected gotAttributeChanged(name: string, value: string | null): void {
     // WARN: observedAttribute must return same colelction as mappedAttributes
-    const m = this.#ctr.mappedAttributes[name] ?? { type: AttributeTypes.bool, prop: name };
+    let map = allMappedAttrs.get(this.#ctr); // try to get from cache first
+    if (!map) {
+      map = this.#ctr.mappedAttributes;
+      allMappedAttrs.set(this.#ctr, map);
+    }
+    const m = map[name] ?? { type: AttributeTypes.bool, prop: name };
     const isRemoved = value == null;
 
     const key = m.prop ?? name;
