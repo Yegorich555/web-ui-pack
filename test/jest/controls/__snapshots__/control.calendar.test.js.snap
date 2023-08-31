@@ -1303,6 +1303,72 @@ padding:0;}
 </style>
 `;
 
+exports[`control.calendar common tests snapshot of $defaults 1`] = `
+{
+  "autoComplete": null,
+  "autoFocus": false,
+  "clearActions": 2,
+  "disabled": false,
+  "exclude": null,
+  "firstWeekDay": null,
+  "focusDebounceMs": 100,
+  "label": null,
+  "max": null,
+  "min": null,
+  "name": null,
+  "readOnly": false,
+  "skey": false,
+  "storage": "local",
+  "utc": true,
+  "validateDebounceMs": 500,
+  "validationCase": 13,
+  "validationRules": {
+    "$alwaysInvalid": [Function],
+    "$alwaysValid": [Function],
+    "required": [Function],
+  },
+  "validationShowAll": false,
+  "validations": null,
+}
+`;
+
+exports[`control.calendar common tests snapshot of $defaults 2`] = `
+[
+  "autoComplete",
+  "autoFocus",
+  "clearActions",
+  "disabled",
+  "exclude",
+  "label",
+  "max",
+  "min",
+  "name",
+  "readOnly",
+  "skey",
+  "utc",
+  "validations",
+]
+`;
+
+exports[`control.calendar common tests snapshot of $defaults 3`] = `
+[
+  "autocomplete",
+  "autofocus",
+  "clearactions",
+  "disabled",
+  "exclude",
+  "initvalue",
+  "label",
+  "max",
+  "min",
+  "name",
+  "readonly",
+  "skey",
+  "utc",
+  "validations",
+]
+`;
+
 exports[`control.calendar keyboard 1`] = `
 <input
   aria-activedescendant="txt4"
