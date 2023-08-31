@@ -26,17 +26,19 @@ afterEach(() => {
 describe("circleElement", () => {
   h.baseTestComponent(() => document.createElement("wup-circle"), {
     attrs: {
-      items: { refGlobal: getItems(), skip: true },
-      width: { value: "10" },
-      corner: { value: "0.4" },
-      from: { value: "-90" },
-      to: { value: "90" },
-      min: { value: "4" },
-      max: { value: "20" },
-      space: { value: "2" },
-      minsize: { value: "10" },
+      items: { value: getItems() },
+      width: { value: 10 },
+      corner: { value: 0.4 },
+      from: { value: -90 },
+      to: { value: 90 },
+      min: { value: 4 },
+      max: { value: 20 },
+      space: { value: 2 },
+      minsize: { value: 10 },
+      back: { value: true },
+      // hoverhidetimeout: { value: 100 },
+      // hovershowtimeout: { value: 107 },
     },
-    $options: { items: { refGlobal: getItems() } },
     onCreateNew: (e) => (e.$options.items = getItems()),
   });
 

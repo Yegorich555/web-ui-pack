@@ -103,30 +103,30 @@ exports[`circleElement common tests snapshot of $defaults 1`] = `
 
 exports[`circleElement common tests snapshot of $defaults 2`] = `
 [
-  "items",
-  "width",
   "back",
   "corner",
   "from",
-  "to",
-  "min",
+  "items",
   "max",
-  "space",
+  "min",
   "minsize",
+  "space",
+  "to",
+  "width",
 ]
 `;
 
 exports[`circleElement common tests snapshot of $defaults 3`] = `
 [
-  "items",
-  "width",
   "back",
   "corner",
   "from",
-  "to",
-  "min",
+  "items",
   "max",
-  "space",
+  "min",
   "minsize",
+  "space",
+  "to",
+  "width",
 ]
 `;

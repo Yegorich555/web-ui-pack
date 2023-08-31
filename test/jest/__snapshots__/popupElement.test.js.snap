@@ -194,17 +194,17 @@ exports[`popupElement inheritance common tests snapshot of $defaults 1`] = `
 
 exports[`popupElement inheritance common tests snapshot of $defaults 2`] = `
 [
+  "placement",
   "showCase",
   "target",
-  "placement",
 ]
 `;
 
 exports[`popupElement inheritance common tests snapshot of $defaults 3`] = `
 [
-  "target",
-  "placement",
   "animation",
+  "placement",
+  "target",
 ]
 `;
 
@@ -402,16 +402,16 @@ exports[`popupElement me common tests snapshot of $defaults 1`] = `
 
 exports[`popupElement me common tests snapshot of $defaults 2`] = `
 [
+  "placement",
   "showCase",
   "target",
-  "placement",
 ]
 `;
 
 exports[`popupElement me common tests snapshot of $defaults 3`] = `
 [
-  "target",
-  "placement",
   "animation",
+  "placement",
+  "target",
 ]
 `;

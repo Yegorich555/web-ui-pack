@@ -427,6 +427,61 @@ padding:0; }
 </style>
 `;
 
+exports[`control.switch common tests snapshot of $defaults 1`] = `
+{
+  "autoComplete": null,
+  "autoFocus": false,
+  "clearActions": 2,
+  "disabled": false,
+  "focusDebounceMs": 100,
+  "label": null,
+  "name": null,
+  "readOnly": false,
+  "reverse": false,
+  "skey": false,
+  "storage": "local",
+  "validateDebounceMs": 500,
+  "validationCase": 13,
+  "validationRules": {
+    "$alwaysInvalid": [Function],
+    "$alwaysValid": [Function],
+    "required": [Function],
+  },
+  "validationShowAll": false,
+  "validations": null,
+}
+`;
+
+exports[`control.switch common tests snapshot of $defaults 2`] = `
+[
+  "label",
+  "name",
+  "autoComplete",
+  "autoFocus",
+  "disabled",
+  "readOnly",
+  "validations",
+  "skey",
+  "clearActions",
+]
+`;
+
+exports[`control.switch common tests snapshot of $defaults 3`] = `
+[
+  "label",
+  "name",
+  "autocomplete",
+  "autofocus",
+  "disabled",
+  "readonly",
+  "validations",
+  "skey",
+  "clearactions",
+  "initvalue",
+  "defaultchecked",
+]
+`;
+
 exports[`control.switch validations options.validationCase 1`] = `
 <wup-switch>
   <label

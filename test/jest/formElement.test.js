@@ -38,7 +38,16 @@ afterEach(() => {
 });
 
 describe("formElement", () => {
-  h.baseTestComponent(() => document.createElement("wup-form"));
+  h.baseTestComponent(() => document.createElement("wup-form"), {
+    attrs: {
+      autocomplete: { value: true },
+      autofocus: { value: true },
+      autosave: { value: true },
+      disabled: { value: true, equalValue: "" },
+      readonly: { value: true, equalValue: "" },
+      submitactions: { value: 1 },
+    },
+  });
 
   test("$initModel / $model", () => {
     inputs[0].$initValue = "some text";

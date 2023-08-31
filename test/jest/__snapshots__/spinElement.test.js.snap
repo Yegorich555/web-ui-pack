@@ -92,20 +92,20 @@ exports[`spinElement common tests snapshot of $defaults 1`] = `
 
 exports[`spinElement common tests snapshot of $defaults 2`] = `
 [
-  "overflowOffset",
-  "overflowFade",
-  "overflowTarget",
-  "inline",
   "fit",
+  "inline",
+  "overflowFade",
+  "overflowOffset",
+  "overflowTarget",
 ]
 `;
 
 exports[`spinElement common tests snapshot of $defaults 3`] = `
 [
-  "overflowoffset",
-  "overflowfade",
-  "overflowtarget",
-  "inline",
   "fit",
+  "inline",
+  "overflowfade",
+  "overflowoffset",
+  "overflowtarget",
 ]
 `;

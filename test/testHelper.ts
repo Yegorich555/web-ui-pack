@@ -109,16 +109,12 @@ export interface BaseTestOptions {
       /** @deprecated Set true if removing attr doesn't remove option but rollbacks to default */
       onRemove?: boolean;
       skip?: boolean;
-      value?: string;
-      /** test when attr has key of window */
-      refGlobal?: any;
-    }
-  >;
-  $options: Record<
-    string,
-    {
-      skip?: boolean;
-      ignoreInput?: boolean;
+      value?: string | number | boolean | object;
+      /** Corrected internally attribute value after changing
+       * @example `disabled='true'` changes to `disabled=''` */
+      equalValue?: string;
+      /** Expected value parsed from attribute; point if custom parser implemented here */
+      parsedValue?: any;
     }
   >;
 }
@@ -127,6 +123,7 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
   describe("common tests", () => {
     jest.useFakeTimers();
     const obj = createFunction() as WUPBaseElement | HTMLElement;
+    const c = Object.getPrototypeOf(obj).constructor;
     jest.advanceTimersByTime(1);
 
     test("no arrow functions", () => {
@@ -135,13 +132,8 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
       expect(fns.arrow).toHaveLength(0);
     });
 
-    // it doesn't required anymore because bind costs memory
-    // it("each function are bound", () => {
-    //   expect(fns.notBound).toHaveLength(0);
-    // });
     if (obj instanceof WUPBaseElement) {
       test("render + styles", () => {
-        const c = Object.getPrototypeOf(obj).constructor as typeof WUPBaseElement;
         expect(obj).toMatchSnapshot();
         expect(c.$refStyle).toMatchSnapshot();
       });
@@ -157,93 +149,75 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
       });
 
       test("snapshot of $defaults", () => {
-        const c = Object.getPrototypeOf(obj).constructor;
         expect(c.$defaults).toMatchSnapshot();
-        expect(c.observedOptions).toMatchSnapshot();
-        expect(c.observedAttributes).toMatchSnapshot();
+        expect(c.observedOptions?.sort()).toMatchSnapshot();
+        expect(c.observedAttributes?.sort()).toMatchSnapshot();
       });
     }
 
     if (!opts?.skipAttrs && obj instanceof WUPBaseElement) {
-      const c = Object.getPrototypeOf(obj).constructor as typeof WUPBaseElement;
-      const attrs = ((c as any).observedAttributes || []) as string[];
-      if (attrs.length) {
-        describe("observedAttributes affects on options", () => {
-          attrs.forEach((a) => {
-            const isSkip = opts?.attrs && opts.attrs[a]?.skip;
-            test(`attr [${a}]${isSkip ? " - skipped" : ""}`, () => {
-              expect(a.toLowerCase()).toBe(a); // all observed attrs must be in lowercase otherwise it doesn't work
+      test("observedAttributes & options", () => {
+        // every attribute must be mentioned in cfg
+        const pointed = opts.attrs || {};
+        const pointedAttr = Object.keys(pointed)
+          .map((k) => k)
+          .sort();
+        const observedAttrs = (((c as any).observedAttributes || []) as string[]).sort();
+        expect(pointedAttr).toEqual(observedAttrs);
 
-              if (isSkip) {
-                return;
-              }
-              obj.removeAttribute(a);
-              if (!obj.isConnected) {
-                document.body.appendChild(obj);
-                jest.advanceTimersByTime(1); // wait for ready
-              }
-
-              delete (window as any)._myTestKey;
-              const oa = opts?.attrs[a];
-              if (oa?.refGlobal) {
-                (window as any)._myTestKey = oa?.refGlobal;
-              }
-              obj.setAttribute(a, oa?.value ?? (oa?.refGlobal ? "window._myTestKey" : "true"));
-              jest.advanceTimersByTime(1);
-              const key = Object.keys(obj.$options).find((k) => (k as string).toLowerCase() === a) as string;
-              expect(key).toBeDefined();
-              expect(obj.$options[key]).toBeDefined();
-              expect(obj.$options[key]).not.toBeFalsy();
-              expect(() => {
-                if (oa?.onRemove) {
-                  throw new Error(`On removing attribute [${a}] property must rollback to previous`);
-                }
-              }).not.toThrow();
-              obj.removeAttribute(a);
-              jest.advanceTimersByTime(1);
-
-              expect(obj.$options[key]).toStrictEqual(obj.constructor.$defaults[key]);
-              delete (window as any)._myTestKey;
-            });
-          });
+        if (!obj.isConnected) {
+          document.body.appendChild(obj);
+          expect(obj.parentElement).toBeDefined();
+          jest.advanceTimersByTime(1); // wait for ready
+        }
+        const map: Record<string, string> = {};
+        Object.keys(c.$defaults).forEach((k) => {
+          map[(k as string).toLowerCase()] = k as string;
         });
 
-        const os = (c as any).observedOptions as string[];
-        if (os?.length) {
-          describe("observerOptions affects on attributes", () => {
-            os.forEach((o) => {
-              const attr = attrs.find((a) => a === o.toLowerCase());
-              if (attr) {
-                const isSkip = opts?.$options && opts?.$options[attr]?.skip;
-                if (isSkip) {
-                  return;
-                }
-                test(`opt [${o}]`, () => {
-                  if (!obj.isConnected) {
-                    document.body.appendChild(obj);
-                    expect(obj.parentElement).toBeDefined();
-                    jest.advanceTimersByTime(1); // wait for ready
-                  }
+        observedAttrs.forEach((attrName) => {
+          const pa = pointed[attrName];
+          if (pa.skip) {
+            return;
+          }
+          const propName = map[attrName] ?? attrName;
+          const defVal = c.$defaults[propName];
+          let attrVal = pa.value?.toString();
+          delete (window as any)._myTestKey;
+          if (typeof pa.value === "object") {
+            (window as any)._myTestKey = pa.value;
+            attrVal = "window._myTestKey";
+          }
 
-                  delete (window as any)._myTestKey;
-                  const oa = opts?.attrs[attr];
-                  if (oa?.refGlobal) {
-                    (window as any)._myTestKey = oa?.refGlobal;
-                  }
-                  obj.setAttribute(attr, oa?.value ?? (oa?.refGlobal ? "window._myTestKey" : "true"));
-                  jest.advanceTimersByTime(1);
-                  expect(obj.$options[o]).toBeDefined();
-
-                  obj.$options[o] = null;
-                  jest.advanceTimersByTime(1);
-                  expect(obj.getAttribute(attr)).toBeNull();
-                });
-              }
-            });
+          // changing attribute affects on option
+          obj.setAttribute(attrName, attrVal);
+          jest.advanceTimersByTime(1);
+          expect({ propName, propVal: obj.$options[propName] }).toStrictEqual({
+            propName,
+            propVal: pa.parsedValue ?? pa.value,
           });
-        }
-      }
+          expect({ attrName, attrVal: obj.getAttribute(attrName) }).toStrictEqual({
+            attrName,
+            attrVal: pa.equalValue ?? attrVal,
+          });
 
+          // removing attribute must reset option to default value
+          obj.removeAttribute(attrName);
+          jest.advanceTimersByTime(1);
+          expect({ propName, propVal: obj.$options[propName] }).toStrictEqual({
+            propName,
+            propVal: defVal,
+          });
+
+          // changing option must remove attribute
+          obj.setAttribute(attrName, attrVal);
+          obj.$options[propName] = undefined;
+          jest.advanceTimersByTime(1);
+          expect({ attrName, attrVal: obj.getAttribute(attrName) }).toStrictEqual({ attrName, attrVal: null });
+        });
+        delete (window as any)._myTestKey;
+      });
+      delete (window as any)._myTestKey;
       obj.remove();
     }
   });

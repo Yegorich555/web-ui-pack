@@ -20,6 +20,7 @@ beforeEach(() => {
   jest.spyOn(document.body.parentElement, "scrollTop", "set").mockImplementation(() => 0);
   jest.spyOn(document.body, "scrollLeft", "set").mockImplementation(() => 0);
   jest.spyOn(document.body.parentElement, "scrollLeft", "set").mockImplementation(() => 0);
+  h.setupLayout(document.body, { x: 0, y: 0, h: 400, w: 600 });
 
   // fix case when popup rect must be changed according to transform
   function mockPopupRect() {
@@ -41,40 +42,10 @@ beforeEach(() => {
   }
   jest.spyOn(WUPPopupElement.prototype, "getBoundingClientRect").mockImplementation(mockPopupRect);
 
-  jest.spyOn(document.body, "getBoundingClientRect").mockReturnValue({
-    x: 0,
-    y: 0,
-    top: 0,
-    left: 0,
-    bottom: 400,
-    height: 400,
-    width: 600,
-    right: 600,
-    toJSON: () => "",
-  });
-  jest.spyOn(document.body, "clientHeight", "get").mockReturnValue(400);
-  jest.spyOn(document.body, "clientWidth", "get").mockReturnValue(600);
-
   trg = document.body.appendChild(document.createElement("div"));
   trg.append("some text");
   trg.setAttribute("id", "targetId");
-
-  // simulate layout
-  const height = 50;
-  const width = 100;
-  const x = 140;
-  const y = 100;
-  jest.spyOn(trg, "getBoundingClientRect").mockReturnValue({
-    x,
-    left: x,
-    y,
-    top: y,
-    bottom: y + height,
-    right: x + width,
-    height,
-    width,
-    toJSON: () => "",
-  });
+  h.setupLayout(trg, { x: 140, y: 100, h: 50, w: 100 });
 
   el = document.createElement("wup-popup");
   el.$options.showCase = 0; // always
@@ -99,7 +70,13 @@ afterEach(() => {
 
 describe("popupElement", () => {
   describe("me", () => {
-    h.baseTestComponent(() => document.createElement("wup-popup"), { skipAttrs: true });
+    h.baseTestComponent(() => document.createElement("wup-popup"), {
+      attrs: {
+        animation: { /* value: "drawer", parsedValue: 1, */ skip: true },
+        placement: { value: "top-start", parsedValue: WUPPopupElement.$placementAttrs("top-start") },
+        target: { /* value: "body", parsedValue: document.body, */ skip: true },
+      },
+    });
   });
 
   describe("inheritance", () => {
