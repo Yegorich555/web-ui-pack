@@ -525,6 +525,7 @@ exports[`control.check common tests snapshot of $defaults 3`] = `
   "label",
   "name",
   "readonly",
+  "reverse",
   "skey",
   "validations",
 ]

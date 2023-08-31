@@ -16,7 +16,7 @@ export default function testSwitchControl(getEl: () => WUPSwitchControl, opts: P
     validations: {
       ...opts?.validations,
     },
-    attrs: { defaultchecked: { skip: true } },
+    attrs: { defaultchecked: { skip: true }, reverse: { value: true, equalValue: "" } },
     validationsSkip: ["required"], // because it doesn't make sense for checkbox
   });
 

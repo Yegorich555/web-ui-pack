@@ -477,6 +477,7 @@ exports[`control.switch common tests snapshot of $defaults 3`] = `
   "label",
   "name",
   "readonly",
+  "reverse",
   "skey",
   "validations",
 ]
