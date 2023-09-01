@@ -61,7 +61,7 @@ declare global {
       autoSave: boolean | string;
       /** Focus first possible element when it's appended to layout
        * @defaultValue true */
-      autoFocus: boolean;
+      autoFocus: boolean; // todo change to false
       /** Disallow edit/copy value; adds attr [disabled] for styling
        * @defaultValue false */
       disabled: boolean;

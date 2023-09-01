@@ -257,7 +257,7 @@ export default class WUPSelectManyControl<
     this.removeAttribute("multiple");
     super.gotChanges(propsChanged);
 
-    this._opts.sortable = this.getAttr("sortable", "bool") ?? false;
+    this._opts.sortable ??= false;
     if (this._opts.sortable) {
       !this._disposeDragdrop && this.applyDragdrop();
     } else {

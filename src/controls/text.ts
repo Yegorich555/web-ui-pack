@@ -365,7 +365,7 @@ export default class WUPTextControl<
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override parse(text: string): ValueType | undefined {
-    return (text || undefined) as unknown as ValueType;
+    return (text || undefined) as any;
   }
 
   /** Called before parseInput on gotInput event */

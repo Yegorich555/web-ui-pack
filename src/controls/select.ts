@@ -178,9 +178,6 @@ export default class WUPSelectControl<
     if (this._opts.multiple) {
       return nestedProperty.get(window, attrValue);
     }
-    if (!this._cachedItems) {
-      return attrValue as ValueType;
-    }
     // WARN: parse must be called only after items is fetched
     const arr = this.getItems();
     if (arr?.length) {

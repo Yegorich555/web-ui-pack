@@ -129,14 +129,22 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.getAttribute("initvalue")).toBe(null);
       expect(el.$initValue).toStrictEqual(cfg.emptyInitValue);
 
-      const prev = el.$initValue;
-      el.parse = () => {
+      let prev = el.$initValue;
+      jest.spyOn(el, "parse").mockImplementationOnce(() => {
         throw new Error("Test err");
-      };
+      });
       el.setAttribute("initvalue", "wrong value");
       expect(() => jest.advanceTimersByTime(1)).toThrow();
       await h.wait(1);
       expect(el.$initValue).toStrictEqual(prev);
+
+      el.setAttribute("initvalue", cfg.initValues[0].attrValue);
+      prev = el.$initValue;
+      await h.wait(1);
+      el.setAttribute("initvalue", ""); // set empty value must return undefined
+      await h.wait(1);
+      const isBool = typeof cfg.initValues[0].value === "boolean";
+      expect(el.$initValue).toStrictEqual(isBool ? true : prev);
     });
 
     test("$initValue vs $value", () => {
@@ -375,6 +383,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$options.skey = true;
       el.$value = cfg.initValues[0].value;
       await h.wait(1);
+      expect(el.storageKey).toBe("name1");
       expect(sSet).toBeCalledTimes(1);
       expect(sSet).lastCalledWith("name1", cfg.initValues[0].urlValue ?? (cfg.initValues[0].value as any).toString());
       expect(window.localStorage.getItem("name1")).toBeDefined(); // (cfg.initValues[0].attrValue);
@@ -385,6 +394,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$options.name = "name1";
       el.$options.skey = true;
       await h.wait(1);
+      expect(el.storageKey).toBe("name1");
       expect(sGet).toBeCalledTimes(1);
       expect(sGet).lastCalledWith("name1");
       expect(el.$initValue).toStrictEqual(cfg.initValues[0].value);
@@ -402,6 +412,10 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$options.skey = true;
       await h.wait(1);
       expect(sGet).toBeCalledTimes(0);
+
+      expect(el.storageKey).toBe("");
+      // @ts-ignore
+      expect(el.storageGet()).toStrictEqual(el.$initValue); // cover case when storageKey is falsy
       el.$value = cfg.initValues[2].value;
       await h.wait(1);
       expect(sSet).toBeCalledTimes(0); // because name is missed
@@ -565,7 +579,10 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
         expect(el.$isValid).toBe(true);
 
         (window as any)._testVld = undefined;
+        (window as any)._testVld2 = undefined;
         const onErr = jest.spyOn(el, "throwError");
+        el.setAttribute("validations", "_testVld2");
+        expect(() => jest.advanceTimersByTime(1)).toThrow();
         expect(() => el.$validate()).not.toThrow(); // because key is pointed but value undefined
         expect(onErr).toBeCalled();
         h.unMockConsoleError();

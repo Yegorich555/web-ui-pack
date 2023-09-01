@@ -751,7 +751,7 @@ export default abstract class WUPBaseControl<
   /** Returns validations enabled by user & defaults */
   protected get validations(): WUP.BaseControl.Options["validations"] | undefined {
     const def = this.#ctr.$defaults.validations;
-    const opt = this.getAttr<WUP.BaseControl.Options["validations"]>("validations", "ref");
+    const opt = this._opts.validations;
     return def ? { ...def, ...opt } : opt;
   }
 
