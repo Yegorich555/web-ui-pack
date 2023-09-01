@@ -450,30 +450,26 @@ export default class WUPTextControl<
 
   /** Add/update or remove prefix part */
   protected renderPostfix(text: string | undefined | null): void {
-    try {
-      let el = this.$refPostfix;
-      if (!text) {
-        if (el) {
-          el.remove();
-          delete this.$refPostfix;
-        }
-      } else {
-        if (!el) {
-          el = document.createElement("span");
-          el.setAttribute("postfix", "");
-          el.appendChild(document.createElement("i"));
-          el.append("");
-          this.$refLabel.firstElementChild!.append(el);
-          this.$refPostfix = el;
-        }
-
-        el.firstChild!.textContent =
-          (this.$isFocused && this.$refMaskholder?.textContent) ||
-          (this.$refPrefix?.textContent || "") + this.$refInput.value;
-        el.lastChild!.textContent = text;
+    let el = this.$refPostfix;
+    if (!text) {
+      if (el) {
+        el.remove();
+        delete this.$refPostfix;
       }
-    } catch (error) {
-      debugger;
+    } else {
+      if (!el) {
+        el = document.createElement("span");
+        el.setAttribute("postfix", "");
+        el.appendChild(document.createElement("i"));
+        el.append("");
+        this.$refLabel.firstElementChild!.append(el);
+        this.$refPostfix = el;
+      }
+
+      el.firstChild!.textContent =
+        (this.$isFocused && this.$refMaskholder?.textContent) ||
+        (this.$refPrefix?.textContent || "") + this.$refInput.value;
+      el.lastChild!.textContent = text;
     }
   }
 

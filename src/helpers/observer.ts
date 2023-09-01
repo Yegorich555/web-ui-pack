@@ -282,7 +282,6 @@ function make<T extends object>(
     },
     deleteProperty(t, prop) {
       const prev = t[prop as keyof T];
-      debugger;
       if (!isDateObj && ref.hasListeners()) {
         propChanged({ prev, next: undefined, prop });
       }
