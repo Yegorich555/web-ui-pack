@@ -1,3 +1,4 @@
+import { AttributeMap, AttributeTypes } from "../baseElement";
 import dateCopyTime from "../helpers/dateCopyTime";
 import dateFromString from "../helpers/dateFromString";
 import dateToString from "../helpers/dateToString";
@@ -23,21 +24,17 @@ declare global {
       /** Enabled if option [exclude] is pointed; If invalid shows "This date is disabled" */
       exclude: Date[];
     }
-    interface Defaults<T = Date, VM = ValidityMap> extends WUP.Calendar.Options<T, VM>, WUP.BaseCombo.Defaults<T, VM> {
+    interface Options<T = Date, VM = ValidityMap> extends WUP.Calendar.Options<T, VM>, WUP.BaseCombo.Options<T, VM> {
       /** String representation of displayed date (enables mask, - to disable mask set $options.mask="");
        * @defaultValue localeInfo.date
+       * @example `yyyy-mm-dd` or `dd/mm/yyyy`
        * @tutorial Troubleshooting
        * * with changing $options.format need to change/reset mask/maskholder also */
-      format?: string;
-    }
-    interface Options<T = Date, VM = ValidityMap>
-      extends WUP.Calendar.Options<T, VM>,
-        WUP.BaseCombo.Options<T, VM>,
-        Defaults<T, VM> {
       format: string;
-      firstWeekDay: number;
     }
-    interface Attributes extends WUP.Calendar.Attributes, Pick<Defaults, "format"> {}
+    // @ts-expect-error
+    interface Attributes extends WUP.Calendar.Attributes, Partial<Options> {}
+    // @ts-expect-error
     interface JSXProps<C = WUPDateControl> extends WUP.BaseCombo.JSXProps<C>, WUP.Calendar.JSXProps<C>, Attributes {
       initValue?: string;
     }
@@ -96,19 +93,16 @@ export default class WUPDateControl<
       }`;
   }
 
-  static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUP.Date.Options>;
-    arr.push("format");
-    return arr;
+  static get mappedAttributes(): Record<string, AttributeMap> {
+    const m = super.mappedAttributes;
+    m.min = { type: AttributeTypes.parsedObject };
+    m.max = { type: AttributeTypes.parsedObject };
+    m.firstweekday = { type: AttributeTypes.number };
+    m.startwith = { type: AttributeTypes.string };
+    return m;
   }
 
-  static get observedAttributes(): Array<string> {
-    const arr = super.observedAttributes as Array<LowerKeys<WUP.Date.Attributes>>;
-    arr.push("format", "min", "max", "utc", "exclude");
-    return arr;
-  }
-
-  static $defaults: WUP.Date.Defaults = {
+  static $defaults: WUP.Date.Options = {
     ...WUPBaseComboControl.$defaults,
     ...WUPCalendarControl.$defaults,
     // debounceMs: 500,
@@ -123,14 +117,18 @@ export default class WUPDateControl<
       exclude: (v, setV) =>
         (v === undefined || setV.some((d) => d.valueOf() === v.valueOf())) && `This value is disabled`,
     },
+    format: "",
     // firstWeekDay: 1,
     // format: localeInfo.date.toLowerCase()
   };
 
   constructor() {
     super();
-    this._opts.format = this.#ctr.$defaults.format || localeInfo.date.toLowerCase();
-    this._opts.firstWeekDay = this.#ctr.$defaults.firstWeekDay || localeInfo.firstWeekDay; // init here to depends on localeInfo
+    this.#ctr.$defaults.firstWeekDay ||= localeInfo.firstWeekDay;
+    this._opts.firstWeekDay ||= this.#ctr.$defaults.firstWeekDay; // init here to depends on localeInfo
+
+    this.#ctr.$defaults.format ||= localeInfo.date.toLowerCase();
+    this._opts.format ||= this.#ctr.$defaults.format; // init here to depends on localeInfo
   }
 
   /** Parse string to Date
@@ -163,18 +161,18 @@ export default class WUPDateControl<
   protected override gotChanges(propsChanged: Array<keyof WUP.Date.Options> | null): void {
     WUPCalendarControl.prototype.gotChangesSharable.call(this);
 
-    this._opts.format = this.getAttr("format") || "YYYY-MM-DD";
+    this._opts.format ||= "YYYY-MM-DD";
     if (this._opts.format.toUpperCase().includes("MMM")) {
       this.throwError(`'MMM' in format isn't supported`);
       this._opts.format = "YYYY-MM-DD";
     }
-    this._opts.mask ??= this._opts.format
+    this._opts.mask ||= this._opts.format
       .replace(/[yY]/g, "0")
       .replace(/dd|DD/, "00")
       .replace(/[dD]/, "#0")
       .replace(/mm|MM/, "00")
       .replace(/[mM]/, "#0"); // convert yyyy-mm-dd > 0000-00-00; d/m/yyyy > #0/#0/0000
-    this._opts.maskholder ??= this._opts.format.replace(/([mMdD]){1,2}/g, "$1$1");
+    this._opts.maskholder ||= this._opts.format.replace(/([mMdD]){1,2}/g, "$1$1");
 
     super.gotChanges(propsChanged as any);
   }

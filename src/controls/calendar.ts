@@ -67,7 +67,8 @@ declare global {
       /** Dates that user can't choose (disabled dates) */
       exclude: Date[] | null;
     }
-    interface Attributes extends WUP.BaseControl.Attributes, Pick<Options, "utc"> {
+    // @ts-expect-error
+    interface Attributes extends WUP.BaseControl.Attributes, Partial<Options> {
       /** Picker that must be rendered at first
        * @not observed (affects only on init) */
       startWith?: "year" | "month" | "day" | string;
@@ -366,8 +367,8 @@ export default class WUPCalendarControl<
 
   constructor() {
     super();
-    this.#ctr.$defaults.firstWeekDay ??= localeInfo.firstWeekDay;
-    this._opts.firstWeekDay ??= this.#ctr.$defaults.firstWeekDay; // init here to depends on localeInfo
+    this.#ctr.$defaults.firstWeekDay ||= localeInfo.firstWeekDay;
+    this._opts.firstWeekDay ||= this.#ctr.$defaults.firstWeekDay; // init here to depends on localeInfo
   }
 
   /** Call when need to re-rended picker (min/max changed etc.) */
@@ -1029,7 +1030,7 @@ export default class WUPCalendarControl<
   }
 
   gotChangesSharable(): void {
-    this._opts.firstWeekDay ??= this.#ctr.$defaults.firstWeekDay;
+    this._opts.firstWeekDay ??= (this.constructor as typeof WUPCalendarControl).$defaults.firstWeekDay;
 
     const attr = this.getAttribute("startwith");
     if (attr != null) {

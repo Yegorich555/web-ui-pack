@@ -681,6 +681,124 @@ mask-image: var(--ctrl-icon-img);
 </style>
 `;
 
+exports[`control.date common tests snapshot of $defaults 1`] = `
+{
+  "autoComplete": null,
+  "autoFocus": false,
+  "clearActions": 2,
+  "clearButton": true,
+  "debounceMs": 0,
+  "disabled": false,
+  "exclude": null,
+  "firstWeekDay": 1,
+  "focusDebounceMs": 100,
+  "format": "yyyy-mm-dd",
+  "label": null,
+  "mask": "",
+  "maskholder": "",
+  "max": null,
+  "min": null,
+  "name": null,
+  "postfix": "",
+  "prefix": "",
+  "readOnly": false,
+  "readOnlyInput": false,
+  "selectOnFocus": false,
+  "showCase": 70,
+  "skey": null,
+  "startWith": null,
+  "storage": "local",
+  "utc": true,
+  "validateDebounceMs": 500,
+  "validationCase": 13,
+  "validationRules": {
+    "$alwaysInvalid": [Function],
+    "$alwaysValid": [Function],
+    "_mask": [Function],
+    "_parse": [Function],
+    "exclude": [Function],
+    "max": [Function],
+    "min": [Function],
+    "required": [Function],
+  },
+  "validationShowAll": false,
+  "validations": null,
+}
+`;
+
+exports[`control.date common tests snapshot of $defaults 2`] = `
+[
+  "autoComplete",
+  "autoFocus",
+  "clearActions",
+  "clearButton",
+  "debounceMs",
+  "disabled",
+  "exclude",
+  "firstWeekDay",
+  "focusDebounceMs",
+  "format",
+  "label",
+  "mask",
+  "maskholder",
+  "max",
+  "min",
+  "name",
+  "postfix",
+  "prefix",
+  "readOnly",
+  "readOnlyInput",
+  "selectOnFocus",
+  "showCase",
+  "skey",
+  "startWith",
+  "storage",
+  "utc",
+  "validateDebounceMs",
+  "validationCase",
+  "validationRules",
+  "validationShowAll",
+  "validations",
+]
+`;
+
+exports[`control.date common tests snapshot of $defaults 3`] = `
+[
+  "autocomplete",
+  "autofocus",
+  "clearactions",
+  "clearbutton",
+  "debouncems",
+  "disabled",
+  "exclude",
+  "firstweekday",
+  "focusdebouncems",
+  "format",
+  "initvalue",
+  "label",
+  "mask",
+  "maskholder",
+  "max",
+  "min",
+  "name",
+  "postfix",
+  "prefix",
+  "readonly",
+  "readonlyinput",
+  "selectonfocus",
+  "showcase",
+  "skey",
+  "startwith",
+  "storage",
+  "utc",
+  "validatedebouncems",
+  "validationcase",
+  "validationrules",
+  "validations",
+  "validationshowall",
+]
+`;
+
 exports[`control.date validations $options.validationShowAll 1`] = `
 <wup-date
   invalid=""
@@ -1649,12 +1767,20 @@ exports[`control.date with form 1`] = `
       for="txt1"
     >
       <span>
+        <span
+          aria-hidden="true"
+          maskholder=""
+        >
+          <i />
+          yyyy-mm-dd
+        </span>
         <input
           aria-autocomplete="list"
           aria-expanded="false"
           aria-haspopup="listbox"
           autocomplete="off"
           id="txt1"
+          inputmode="numeric"
           placeholder=" "
           role="combobox"
           type="text"
