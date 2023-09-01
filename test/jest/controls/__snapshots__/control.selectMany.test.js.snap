@@ -896,6 +896,115 @@ mask-image: var(--ctrl-icon-img);
 </style>
 `;
 
+exports[`control.selectMany common tests snapshot of $defaults 1`] = `
+{
+  "allowNewValue": false,
+  "autoComplete": null,
+  "autoFocus": false,
+  "clearActions": 2,
+  "clearButton": true,
+  "debounceMs": 0,
+  "disabled": false,
+  "focusDebounceMs": 100,
+  "hideSelected": false,
+  "items": [],
+  "label": null,
+  "mask": "",
+  "maskholder": "",
+  "multiple": true,
+  "name": null,
+  "postfix": "",
+  "prefix": "",
+  "readOnly": false,
+  "readOnlyInput": false,
+  "selectOnFocus": false,
+  "showCase": 102,
+  "skey": null,
+  "sortable": false,
+  "storage": "local",
+  "validateDebounceMs": 500,
+  "validationCase": 13,
+  "validationRules": {
+    "$alwaysInvalid": [Function],
+    "$alwaysValid": [Function],
+    "_mask": [Function],
+    "_parse": [Function],
+    "required": [Function],
+  },
+  "validationShowAll": false,
+  "validations": null,
+}
+`;
+
+exports[`control.selectMany common tests snapshot of $defaults 2`] = `
+[
+  "allowNewValue",
+  "autoComplete",
+  "autoFocus",
+  "clearActions",
+  "clearButton",
+  "debounceMs",
+  "disabled",
+  "focusDebounceMs",
+  "hideSelected",
+  "items",
+  "label",
+  "mask",
+  "maskholder",
+  "multiple",
+  "name",
+  "postfix",
+  "prefix",
+  "readOnly",
+  "readOnlyInput",
+  "selectOnFocus",
+  "showCase",
+  "skey",
+  "sortable",
+  "storage",
+  "validateDebounceMs",
+  "validationCase",
+  "validationRules",
+  "validationShowAll",
+  "validations",
+]
+`;
+
+exports[`control.selectMany common tests snapshot of $defaults 3`] = `
+[
+  "allownewvalue",
+  "autocomplete",
+  "autofocus",
+  "clearactions",
+  "clearbutton",
+  "debouncems",
+  "disabled",
+  "focusdebouncems",
+  "hideselected",
+  "initvalue",
+  "items",
+  "label",
+  "mask",
+  "maskholder",
+  "multiple",
+  "name",
+  "postfix",
+  "prefix",
+  "readonly",
+  "readonlyinput",
+  "selectonfocus",
+  "showcase",
+  "skey",
+  "sortable",
+  "storage",
+  "validatedebouncems",
+  "validationcase",
+  "validationrules",
+  "validations",
+  "validationshowall",
+]
+`;
+
 exports[`control.selectMany sortable: drag&drop 1`] = `
 <wup-selectmany
   filled=""

@@ -14,20 +14,18 @@ declare global {
   namespace WUP.SelectMany {
     interface EventMap extends WUP.BaseCombo.EventMap {}
     interface ValidityMap extends WUP.BaseCombo.ValidityMap {}
-    interface Defaults<T = any, VM = ValidityMap> extends WUP.Select.Defaults<T, VM> {
+    interface Options<T = any, VM = ValidityMap> extends WUP.Select.Options<T, VM> {
       /** Hide items in menu that selected
        * @defaultValue false */
-      hideSelected?: boolean;
+      hideSelected: boolean;
       /** Allow user to change ordering of items; Use drag&drop or keyboard Shift/Ctrl/Meta + arrows to change item position
        * @defaultValue false */
-      sortable?: boolean;
-    }
-
-    interface Options<T = any, VM = ValidityMap> extends WUP.Select.Options<T, VM>, Defaults<T, VM> {
-      /** Constant value that impossible to change */
+      sortable: boolean;
+      /** @readonly Constant value that impossible to change */
       multiple: true;
     }
-    interface Attributes extends WUP.Select.Attributes, Pick<Partial<Options>, "sortable"> {}
+    // @ts-expect-error
+    interface Attributes extends WUP.Select.Attributes, Partial<Options> {}
     interface JSXProps<C = WUPSelectManyControl> extends WUP.Select.JSXProps<C>, Attributes {}
   }
 
@@ -88,18 +86,6 @@ export default class WUPSelectManyControl<
   EventMap extends WUP.SelectMany.EventMap = WUP.SelectMany.EventMap
 > extends WUPSelectControl<ValueType[], ValueType, TOptions, EventMap> {
   #ctr = this.constructor as typeof WUPSelectManyControl;
-
-  static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUP.SelectMany.Options>;
-    arr.push("sortable");
-    return arr;
-  }
-
-  static get observedAttributes(): Array<string> {
-    const arr = super.observedAttributes as Array<LowerKeys<WUP.SelectMany.Attributes>>;
-    arr.push("sortable");
-    return arr;
-  }
 
   static get $styleRoot(): string {
     return `:root {
@@ -235,10 +221,12 @@ export default class WUPSelectManyControl<
     return super.$filterMenuItem.call(this, menuItemText, menuItemValue, inputValue, inputRawValue);
   }
 
-  constructor() {
-    super();
-    this._opts.multiple = true; // init here to depend on localeInfo
-  }
+  static $defaults: WUP.SelectMany.Options = {
+    ...WUPSelectControl.$defaults,
+    multiple: true,
+    sortable: false,
+    hideSelected: false,
+  };
 
   /** Items selected & rendered on control */
   $refItems?: Array<HTMLElement & { _wupValue: ValueType }>;
