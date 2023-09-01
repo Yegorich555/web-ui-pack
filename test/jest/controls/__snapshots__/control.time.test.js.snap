@@ -836,6 +836,121 @@ mask-image: var(--ctrl-icon-img);
 </style>
 `;
 
+exports[`control.time common tests snapshot of $defaults 1`] = `
+{
+  "autoComplete": null,
+  "autoFocus": false,
+  "clearActions": 2,
+  "clearButton": true,
+  "debounceMs": 0,
+  "disabled": false,
+  "exclude": null,
+  "focusDebounceMs": 100,
+  "format": "",
+  "label": null,
+  "mask": "",
+  "maskholder": "",
+  "max": null,
+  "menuButtonsOff": false,
+  "min": null,
+  "name": null,
+  "postfix": "",
+  "prefix": "",
+  "readOnly": false,
+  "readOnlyInput": false,
+  "selectOnFocus": false,
+  "showCase": 70,
+  "skey": null,
+  "step": 1,
+  "storage": "local",
+  "validateDebounceMs": 500,
+  "validationCase": 13,
+  "validationRules": {
+    "$alwaysInvalid": [Function],
+    "$alwaysValid": [Function],
+    "_mask": [Function],
+    "_parse": [Function],
+    "exclude": [Function],
+    "max": [Function],
+    "min": [Function],
+    "required": [Function],
+  },
+  "validationShowAll": false,
+  "validations": null,
+}
+`;
+
+exports[`control.time common tests snapshot of $defaults 2`] = `
+[
+  "autoComplete",
+  "autoFocus",
+  "clearActions",
+  "clearButton",
+  "debounceMs",
+  "disabled",
+  "exclude",
+  "focusDebounceMs",
+  "format",
+  "label",
+  "mask",
+  "maskholder",
+  "max",
+  "menuButtonsOff",
+  "min",
+  "name",
+  "postfix",
+  "prefix",
+  "readOnly",
+  "readOnlyInput",
+  "selectOnFocus",
+  "showCase",
+  "skey",
+  "step",
+  "storage",
+  "validateDebounceMs",
+  "validationCase",
+  "validationRules",
+  "validationShowAll",
+  "validations",
+]
+`;
+
+exports[`control.time common tests snapshot of $defaults 3`] = `
+[
+  "autocomplete",
+  "autofocus",
+  "clearactions",
+  "clearbutton",
+  "debouncems",
+  "disabled",
+  "exclude",
+  "focusdebouncems",
+  "format",
+  "initvalue",
+  "label",
+  "mask",
+  "maskholder",
+  "max",
+  "menubuttonsoff",
+  "min",
+  "name",
+  "postfix",
+  "prefix",
+  "readonly",
+  "readonlyinput",
+  "selectonfocus",
+  "showcase",
+  "skey",
+  "step",
+  "storage",
+  "validatedebouncems",
+  "validationcase",
+  "validationrules",
+  "validations",
+  "validationshowall",
+]
+`;
+
 exports[`control.time validations $options.validationShowAll 1`] = `
 <wup-time
   invalid=""
@@ -1384,6 +1499,13 @@ exports[`control.time with form 1`] = `
       for="txt1"
     >
       <span>
+        <span
+          aria-hidden="true"
+          maskholder=""
+        >
+          <i />
+          hh:mm *M
+        </span>
         <input
           aria-autocomplete="list"
           aria-expanded="false"

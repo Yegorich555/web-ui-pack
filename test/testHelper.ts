@@ -115,6 +115,8 @@ export interface BaseTestOptions {
       equalValue?: string;
       /** Expected value parsed from attribute; point if custom parser implemented here */
       parsedValue?: any;
+      /** With removing attr option reverted to default till nullValue is defined here */
+      nullValue?: any;
     }
   >;
 }
@@ -208,7 +210,7 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
           jest.advanceTimersByTime(1);
           expect({ propName, propVal: obj.$options[propName] }).toStrictEqual({
             propName,
-            propVal: defVal,
+            propVal: pa.nullValue ?? defVal,
           });
 
           // changing option must remove attribute

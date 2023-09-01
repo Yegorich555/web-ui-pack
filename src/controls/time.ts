@@ -1,4 +1,5 @@
 /* eslint-disable prefer-destructuring */
+import { AttributeMap, AttributeTypes } from "../baseElement";
 import onEvent from "../helpers/onEvent";
 import WUPScrolled from "../helpers/scrolled";
 import localeInfo from "../objects/localeInfo";
@@ -21,12 +22,13 @@ declare global {
       /** User can't select time in excluded range */
       exclude: { test: (v: WUPTimeObject) => boolean };
     }
-    interface Defaults<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Defaults<T, VM> {
+    interface Options<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM> {
       /** String representation of displayed time (enables mask, - to disable mask set $options.mask="");
        * @defaultValue localeInfo.time
+       * @example `hh:mm a` or `h:m`
        * @tutorial Troubleshooting
        * * with changing $options.format need to change/reset mask/maskholder also */
-      format?: string;
+      format: string;
       /** Increment value in minutes
        *  @defaultValue 1
        * @tutorial Troubleshooting
@@ -37,20 +39,16 @@ declare global {
        * in this case any changing selection in menu changes value & input; so user don't need to press Enter
        * but if press escape: menu closed and value reverted to that was before
        * @defaultValue false */
-      menuButtonsOff?: boolean;
-    }
-    interface Options<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, Defaults<T, VM> {
+      menuButtonsOff: boolean;
       /** User can't select time less than min */
-      min?: WUPTimeObject;
+      min: WUPTimeObject | null;
       /** User can't select time more than max */
-      max?: WUPTimeObject;
+      max: WUPTimeObject | null;
       /** User can't select time in excluded range */
-      exclude?: { test: (v: WUPTimeObject) => boolean };
-      format: string;
+      exclude: { test: (v: WUPTimeObject) => boolean } | null;
     }
-    interface Attributes
-      extends WUP.BaseCombo.Attributes,
-        WUP.Base.toJSX<Partial<Pick<Options, "format" | "min" | "max" | "exclude" | "format" | "step">>> {}
+    // @ts-expect-error
+    interface Attributes extends WUP.BaseCombo.Attributes, WUP.Base.toJSX<Partial<Options>> {}
     interface JSXProps<C = WUPTimeControl> extends WUP.BaseCombo.JSXProps<C>, Attributes {
       initValue?: string;
     }
@@ -90,8 +88,7 @@ declare global {
   // or HTML
   <wup-form>
     <wup-time name="time" initvalue="22:15" min="01:05" max="23:00"/>
-  </wup-form>;
- */
+  </wup-form>; */
 export default class WUPTimeControl<
   ValueType extends WUPTimeObject = WUPTimeObject,
   TOptions extends WUP.Time.Options = WUP.Time.Options,
@@ -258,21 +255,15 @@ export default class WUPTimeControl<
       }`;
   }
 
-  static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUP.Time.Options>;
-    arr.push("format", "step");
-    return arr;
+  static get mappedAttributes(): Record<string, AttributeMap> {
+    const m = super.mappedAttributes;
+    m.min.type = AttributeTypes.string;
+    m.max.type = AttributeTypes.string;
+    return m;
   }
 
-  static get observedAttributes(): Array<string> {
-    const arr = super.observedAttributes as Array<LowerKeys<WUP.Time.Attributes>>;
-    arr.push("format", "min", "max", "step");
-    return arr;
-  }
-
-  static $defaults: WUP.Time.Defaults = {
+  static $defaults: WUP.Time.Options = {
     ...WUPBaseComboControl.$defaults,
-    step: 1,
     validationRules: {
       ...WUPBaseComboControl.$defaults.validationRules,
       min: (v, setV, c) =>
@@ -281,6 +272,12 @@ export default class WUPTimeControl<
         (v === undefined || v > setV) && `Max value is ${setV.format((c as WUPTimeControl)._opts.format)}`,
       exclude: (v, fn) => (v === undefined || fn.test(v)) && "This value is disabled",
     },
+    step: 1,
+    format: "",
+    min: null,
+    max: null,
+    exclude: null,
+    menuButtonsOff: false,
   };
 
   constructor() {
@@ -311,25 +308,22 @@ export default class WUPTimeControl<
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Time.Options> | null): void {
-    this._opts.format = this.getAttr("format")?.replace(/\D{0,1}(ss|SS)/, "") || "hh:mm A";
+    this._opts.format = this._opts.format?.replace(/\D{0,1}(ss|SS)/, "") || "hh:mm A";
 
-    this._opts.mask ??= this._opts.format
+    this._opts.mask ||= this._opts.format
       .replace(/hh|HH/, "00") //
       .replace(/[hH]/, "#0")
       .replace(/mm|MM/, "00")
       .replace(/[mM]/, "#0") // convert hh-mm > 00-00; h/m > #0/#0
       .replace(/a/, "//[ap]//m")
       .replace(/A/, "//[AP]//M");
-    this._opts.maskholder ??= this._opts.format
+    this._opts.maskholder ||= this._opts.format
       .replace(/([mMhH]){1,2}/g, "$1$1")
       .replace(/a/, "*m")
       .replace(/A/, "*M");
 
-    this._opts.min = this.getAttr("min", "obj");
-    this._opts.max = this.getAttr("max", "obj");
-    this._opts.exclude = this.getAttr("exclude", "ref");
-    this._opts.step = this.getAttr("step", "number") || this.#ctr.$defaults.step;
-    super.gotChanges(propsChanged as any); // todo gotChanges must be called first
+    this._opts.step ||= this.#ctr.$defaults.step;
+    super.gotChanges(propsChanged as any);
   }
 
   $refMenuLists?: WUP.Time.MenuListElement[];
