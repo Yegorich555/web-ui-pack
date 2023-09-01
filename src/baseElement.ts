@@ -532,65 +532,6 @@ export default abstract class WUPBaseElement<
     }
   }
 
-  /** Parse attribute and return result; if attr missed or invalid => returns pointed alt value OR $options[attr] */
-  getAttr(attr: string, type?: "string", alt?: string): string | undefined;
-  /** Returns `bool if attr is `false` or `true`, `true` if "" or string if exists */
-  getAttr(attr: string, type: "boolOrString", alt?: string | boolean): string | boolean | undefined;
-  getAttr(attr: string, type: "bool", alt?: boolean): boolean | undefined;
-  getAttr(attr: string, type: "number", alt?: number): number | undefined;
-  /** Returns value from window[key] according to [attr]="key"; if attr missed or invalid => returns pointed alt value OR $options[attr] */
-  getAttr<T>(attr: string, type: "obj", alt?: T): T;
-  /** Returns value according to this.parse(); if attr missed or invalid => returns pointed alt value OR $options[attr] */
-  getAttr<T>(attr: string, type: "ref", alt?: T): T;
-  getAttr(attr: string, type?: string, alt?: any): any {
-    const a = this.getAttribute(attr);
-    const nullResult = alt !== undefined ? alt : this._opts[attr];
-    if (a == null) {
-      return nullResult;
-    }
-    switch (type) {
-      case "bool":
-        return a !== "false";
-      case "number": {
-        const v = +a;
-        if (Number.isNaN(v)) {
-          this.throwError(`Expected number for attribute [${attr}] but pointed '${a}'`);
-          return nullResult;
-        }
-        return v;
-      }
-      case "ref": {
-        const v = nestedProperty.get(window, a);
-        if (v === undefined) {
-          this.throwError(
-            `Value not found according to attribute [${attr}] in '${a.startsWith("window.") ? a : `window.${a}`}'`
-          );
-          return nullResult;
-        }
-        return v;
-      }
-      case "obj": {
-        try {
-          return this.parse(a);
-        } catch (err) {
-          this.throwError(err);
-          return nullResult;
-        }
-      }
-      case "boolOrString": {
-        if (a === "" || a === "true") {
-          return true;
-        }
-        if (a === "false") {
-          return false;
-        }
-        return a;
-      }
-      default:
-        return a; // string
-    }
-  }
-
   /** Remove attr if value falseOrEmpty; set '' or 'true' if true for HTMLELement
    * @param isSetEmpty set if need '' instead of 'value' */
   setAttr(attr: string, v: boolean | string | undefined | null, isSetEmpty?: boolean): void {
