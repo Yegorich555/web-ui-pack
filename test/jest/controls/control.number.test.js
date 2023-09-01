@@ -23,13 +23,14 @@ describe("control.number", () => {
       max: { set: 1000, failValue: 1001, trueValue: 1000 },
     },
     attrs: {
-      mask: { skip: true },
-      maskholder: { skip: true },
-      format: { skip: true },
-    },
-    $options: {
-      mask: { skip: true },
-      maskholder: { skip: true },
+      mask: { value: "abc" },
+      maskholder: { value: "abc" },
+      prefix: { value: "$" },
+      postfix: { value: "USD" },
+      clearbutton: { value: true },
+      debouncems: { value: 5 },
+      selectonfocus: { value: true },
+      format: { value: {} },
     },
     validationsSkip: ["_parse", "_mask"],
   });

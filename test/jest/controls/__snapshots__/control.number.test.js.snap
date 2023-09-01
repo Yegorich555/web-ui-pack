@@ -620,6 +620,98 @@ mask-image: var(--ctrl-icon-img);
 </style>
 `;
 
+exports[`control.number common tests snapshot of $defaults 1`] = `
+{
+  "autoComplete": null,
+  "autoFocus": false,
+  "clearActions": 2,
+  "clearButton": true,
+  "debounceMs": 0,
+  "disabled": false,
+  "focusDebounceMs": 100,
+  "format": null,
+  "label": null,
+  "mask": "",
+  "maskholder": "",
+  "name": null,
+  "postfix": "",
+  "prefix": "",
+  "readOnly": false,
+  "selectOnFocus": false,
+  "skey": null,
+  "storage": "local",
+  "validateDebounceMs": 500,
+  "validationCase": 13,
+  "validationRules": {
+    "$alwaysInvalid": [Function],
+    "$alwaysValid": [Function],
+    "_mask": [Function],
+    "max": [Function],
+    "min": [Function],
+    "required": [Function],
+  },
+  "validationShowAll": false,
+  "validations": null,
+}
+`;
+
+exports[`control.number common tests snapshot of $defaults 2`] = `
+[
+  "autoComplete",
+  "autoFocus",
+  "clearActions",
+  "clearButton",
+  "debounceMs",
+  "disabled",
+  "focusDebounceMs",
+  "format",
+  "label",
+  "mask",
+  "maskholder",
+  "name",
+  "postfix",
+  "prefix",
+  "readOnly",
+  "selectOnFocus",
+  "skey",
+  "storage",
+  "validateDebounceMs",
+  "validationCase",
+  "validationRules",
+  "validationShowAll",
+  "validations",
+]
+`;
+
+exports[`control.number common tests snapshot of $defaults 3`] = `
+[
+  "autocomplete",
+  "autofocus",
+  "clearactions",
+  "clearbutton",
+  "debouncems",
+  "disabled",
+  "focusdebouncems",
+  "format",
+  "initvalue",
+  "label",
+  "mask",
+  "maskholder",
+  "name",
+  "postfix",
+  "prefix",
+  "readonly",
+  "selectonfocus",
+  "skey",
+  "storage",
+  "validatedebouncems",
+  "validationcase",
+  "validationrules",
+  "validations",
+  "validationshowall",
+]
+`;
+
 exports[`control.number validations $options.validationShowAll 1`] = `
 <wup-num
   invalid=""
@@ -933,7 +1025,9 @@ exports[`control.number with form 1`] = `
 <wup-form
   role="form"
 >
-  <wup-num>
+  <wup-num
+    style=""
+  >
     <label
       for="txt1"
     >
@@ -941,6 +1035,7 @@ exports[`control.number with form 1`] = `
         <input
           autocomplete="off"
           id="txt1"
+          inputmode="numeric"
           placeholder=" "
           role="spinbutton"
           type="text"

@@ -31,14 +31,14 @@ declare global {
       /** If $value < pointed shows message 'Max value {x}` */
       max: number;
     }
-    interface Defaults<T = number, VM extends ValidityMap = ValidityMap> extends WUP.Text.Defaults<T, VM> {}
-    interface Options<T = number, VM extends ValidityMap = ValidityMap>
-      extends WUP.Text.Options<T, VM>,
-        Defaults<T, VM> {
-      /** String representation of displayed value */
-      format?: Format;
+    interface Options<T = number, VM extends ValidityMap = ValidityMap> extends WUP.Text.Options<T, VM> {
+      /** String representation of displayed value
+       * @defaultValue no-decimal and separators from localeInfo */
+      format: Format | null;
     }
-    interface Attributes extends WUP.Text.Attributes {}
+    interface Attributes extends WUP.Text.Attributes {
+      format?: string;
+    }
     interface JSXProps<C = WUPNumberControl> extends WUP.Text.JSXProps<C>, Attributes {}
   }
   interface HTMLElementTagNameMap {
@@ -79,17 +79,11 @@ export default class WUPNumberControl<
   TOptions,
   EventMap
 > {
-  #ctr = this.constructor as typeof WUPNumberControl;
-
-  static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUP.Number.Options>;
-    arr.push("format");
-    return arr;
-  }
+  // #ctr = this.constructor as typeof WUPNumberControl;
 
   /** Default options - applied to every element. Change it to configure default behavior */
   // @ts-expect-error - min: string & min: number is invalid
-  static $defaults: WUP.Number.Defaults = {
+  static $defaults: WUP.Number.Options = {
     ...WUPTextControl.$defaults,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
@@ -98,6 +92,7 @@ export default class WUPNumberControl<
       min: (v, setV, c) => (v == null || v < setV) && `Min value is ${(c as WUPNumberControl).valueToInput(setV)}`,
       max: (v, setV, c) => (v == null || v > setV) && `Max value is ${(c as WUPNumberControl).valueToInput(setV)}`,
     },
+    format: null,
   };
 
   /** Returns $options.format joined with defaults */
