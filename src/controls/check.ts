@@ -6,7 +6,8 @@ declare global {
     interface EventMap extends WUP.Switch.EventMap {}
     interface ValidityMap extends WUP.Switch.ValidityMap {}
     interface Options<T = boolean, VM = ValidityMap> extends WUP.Switch.Options<T, VM> {}
-    interface Attributes extends WUP.Switch.Attributes {}
+    // @ts-expect-error
+    interface Attributes extends WUP.Switch.Attributes, Partial<Options> {}
     interface JSXProps<C = WUPCheckControl> extends WUP.Switch.JSXProps<C>, Attributes {}
   }
   interface HTMLElementTagNameMap {

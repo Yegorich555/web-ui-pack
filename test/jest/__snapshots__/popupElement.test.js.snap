@@ -171,6 +171,7 @@ TEST-EL::-webkit-scrollbar-track-piece:horizontal:end {
 
 exports[`popupElement inheritance common tests snapshot of $defaults 1`] = `
 {
+  "animation": 0,
   "hoverHideTimeout": 500,
   "hoverShowTimeout": 200,
   "placement": [
@@ -379,6 +380,7 @@ TEST-EL::-webkit-scrollbar-track-piece:horizontal:end {
 
 exports[`popupElement me common tests snapshot of $defaults 1`] = `
 {
+  "animation": 0,
   "hoverHideTimeout": 500,
   "hoverShowTimeout": 200,
   "placement": [

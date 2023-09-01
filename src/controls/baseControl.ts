@@ -171,13 +171,14 @@ declare global {
        * @defaultValue "local" */
       storage: "local" | "session" | "url";
     }
-
     // @ts-expect-error
     interface Attributes extends Partial<Options> {
       /** default value in string/boolean/number representation (depends on `control.prototype.parse()`) */
       initValue?: string | boolean | number;
       /** Rules enabled for current control. Point global obj-key with validations (use `window.myValidations` where `window.validations = {required: true}` ) */
       validations?: string;
+      /** @deprecated Use $defaults.validationRules instead to change for the whole class */
+      validationRules?: never;
       /** @readonly Use [invalid] for styling */
       readonly invalid?: boolean;
     }
@@ -418,7 +419,7 @@ export default abstract class WUPBaseControl<
     label: null,
     name: null,
     storage: "local",
-    skey: null,
+    skey: null, // todo change to empty string and remove from mappedAttrs
   };
 
   /** Called on value change */
@@ -645,9 +646,10 @@ export default abstract class WUPBaseControl<
         this.$initValue = undefined; // removed attr >> remove initValue
       } else {
         try {
-          this.$initValue = this.parse(newValue);
+          const v = this.parse(newValue);
+          this.$initValue = v;
         } catch (err) {
-          this.throwError(err);
+          this.throwError(`Impossible to parse attr [initvalue] '${newValue}'\r\n${err}`);
         }
       }
       this.setupInitValue(null);

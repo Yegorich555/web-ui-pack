@@ -12,7 +12,8 @@ declare global {
        * @defaultValue false */
       reverse: boolean;
     }
-    interface Attributes extends WUP.BaseControl.Attributes {
+    // @ts-expect-error
+    interface Attributes extends WUP.BaseControl.Attributes, Partial<Options> {
       /** InitValue for control */
       defaultChecked?: boolean;
       /** Reversed-style (switch+label vs label+switch) */

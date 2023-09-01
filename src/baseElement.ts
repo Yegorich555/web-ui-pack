@@ -496,7 +496,7 @@ export default abstract class WUPBaseElement<
     switch (attrValue) {
       case "false":
         return false;
-      case "":
+      // case "":
       case "true":
         return true; // empty attr and 'true' is enable`
     }
@@ -650,11 +650,17 @@ declare global {
     };
     type EventMap<T = HTMLElementEventMap> = HTMLElementEventMap & Record<keyof T, Event>;
 
-    type JSXProps<T, Opts extends Record<string, any> = any> = React.DetailedHTMLProps<
+    // type JSXPropsOld<T, Opts extends Record<string, any> = any> = React.DetailedHTMLProps<
+    //   // react doesn't support [className] attr for WebComponents; use [class] instead: https://github.com/facebook/react/issues/4933
+    //   Omit<React.HTMLAttributes<T>, "className"> & { class?: string | undefined },
+    //   T
+    // > &
+    //   toJSX<Opts>;
+
+    type JSXProps<T> = React.DetailedHTMLProps<
       // react doesn't support [className] attr for WebComponents; use [class] instead: https://github.com/facebook/react/issues/4933
       Omit<React.HTMLAttributes<T>, "className"> & { class?: string | undefined },
       T
-    > &
-      toJSX<Opts>;
+    >;
   }
 }
