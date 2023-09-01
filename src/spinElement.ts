@@ -1,4 +1,4 @@
-import WUPBaseElement from "./baseElement";
+import WUPBaseElement, { AttributeMap, AttributeTypes } from "./baseElement";
 import { px2Number, styleTransform } from "./helpers/styleHelpers";
 import { getOffset } from "./popup/popupPlacements";
 
@@ -126,6 +126,12 @@ export default class WUPSpinElement<
       }
       :host>div[fade]::after { content: none; }
       ${this.$styleApplied}`;
+  }
+
+  static get mappedAttributes(): Record<string, AttributeMap> {
+    const m = super.mappedAttributes;
+    m.fit.type = AttributeTypes.bool;
+    return m;
   }
 
   static $defaults: WUP.Spin.Options = {
