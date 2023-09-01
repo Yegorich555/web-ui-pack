@@ -336,3 +336,5 @@ export default class WUPRadioControl<
 }
 
 customElements.define(tagName, WUPRadioControl);
+
+// todo autofocus works on wrong item: expected current item

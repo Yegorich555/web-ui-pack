@@ -59,7 +59,6 @@ export default function RadioControlView() {
           items="storedRadioItems.items"
           validations="window._someRadioValidations"
           reverse={false}
-          autoComplete="off"
           autoFocus={false}
         />
         <wup-radio

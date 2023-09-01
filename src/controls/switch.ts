@@ -219,7 +219,7 @@ export default class WUPSwitchControl<
     this.setAttr.call(this.$refInput, "aria-readonly", this.$isReadOnly);
   }
 
-  protected attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
+  protected override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     if (name === "defaultchecked") {
       name = "initvalue";
     }
