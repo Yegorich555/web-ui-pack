@@ -60,8 +60,8 @@ declare global {
        * @defaultValue false */
       autoSave: boolean | string;
       /** Focus first possible element when it's appended to layout
-       * @defaultValue true */
-      autoFocus: boolean; // todo change to false
+       * @defaultValue false */
+      autoFocus: boolean;
       /** Disallow edit/copy value; adds attr [disabled] for styling
        * @defaultValue false */
       disabled: boolean;
@@ -228,7 +228,7 @@ export default class WUPFormElement<
     submitActions:
       SubmitActions.goToError | SubmitActions.validateUntiFirst | SubmitActions.reset | SubmitActions.lockOnPending,
     autoComplete: false,
-    autoFocus: true,
+    autoFocus: false,
     autoSave: false,
     disabled: false,
     readOnly: false,

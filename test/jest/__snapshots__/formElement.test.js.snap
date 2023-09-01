@@ -460,7 +460,7 @@ mask-image: var(--ctrl-icon-img);
 exports[`formElement common tests snapshot of $defaults 1`] = `
 {
   "autoComplete": false,
-  "autoFocus": true,
+  "autoFocus": false,
   "autoSave": false,
   "disabled": false,
   "readOnly": false,

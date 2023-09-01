@@ -1767,20 +1767,12 @@ exports[`control.date with form 1`] = `
       for="txt1"
     >
       <span>
-        <span
-          aria-hidden="true"
-          maskholder=""
-        >
-          <i />
-          yyyy-mm-dd
-        </span>
         <input
           aria-autocomplete="list"
           aria-expanded="false"
           aria-haspopup="listbox"
           autocomplete="off"
           id="txt1"
-          inputmode="numeric"
           placeholder=" "
           role="combobox"
           type="text"

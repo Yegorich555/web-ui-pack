@@ -1499,13 +1499,6 @@ exports[`control.time with form 1`] = `
       for="txt1"
     >
       <span>
-        <span
-          aria-hidden="true"
-          maskholder=""
-        >
-          <i />
-          hh:mm *M
-        </span>
         <input
           aria-autocomplete="list"
           aria-expanded="false"
