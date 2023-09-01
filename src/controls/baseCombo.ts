@@ -39,14 +39,14 @@ declare global {
       $hideMenu: Event;
     }
     interface ValidityMap extends Omit<WUP.Text.ValidityMap, "min" | "max" | "email"> {}
-    interface Defaults<T = any, VM = ValidityMap> extends WUP.Text.Defaults<T, VM> {
+    interface Options<T = any, VM = ValidityMap> extends WUP.Text.Options<T, VM> {
       /** Case when menu-popup to show; WARN ShowCases.inputClick doesn't work without ShowCases.click
        * @defaultValue onPressArrowKey | onClick | onFocus */
       showCase: ShowCases;
       /** Set true to make input not editable but allow select items via popup-menu (ordinary dropdown mode) */
-      readOnlyInput?: boolean | number;
+      readOnlyInput: boolean | number;
     }
-    interface Options<T = any, VM = ValidityMap> extends WUP.Text.Options<T, VM>, Defaults<T, VM> {}
+
     interface Attributes extends WUP.Text.Attributes {}
     interface JSXProps<C = WUPBaseComboControl> extends WUP.Text.JSXProps<C>, Attributes {}
   }
@@ -65,12 +65,6 @@ export default abstract class WUPBaseComboControl<
 > {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseComboControl;
-
-  static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUP.BaseCombo.Options>;
-    arr.push("readOnlyInput");
-    return arr;
-  }
 
   static get $style(): string {
     return `${super.$style}
@@ -104,7 +98,7 @@ export default abstract class WUPBaseComboControl<
       }`;
   }
 
-  static $defaults: WUP.BaseCombo.Defaults<any> = {
+  static $defaults: WUP.BaseCombo.Options<any> = {
     ...WUPTextControl.$defaults,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
@@ -112,6 +106,7 @@ export default abstract class WUPBaseComboControl<
       _parse: WUPTextControl.$defaults.validationRules._parse,
     },
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey,
+    readOnlyInput: false,
   };
 
   /** Fires after popup-menu is shown (after animation finishes) */

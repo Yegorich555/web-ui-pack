@@ -400,6 +400,10 @@ export default abstract class WUPBaseControl<
     if (m.skey) {
       m.skey.type = AttributeTypes.string; // can be removed for passwordContrl
     }
+    m.initvalue = {
+      type: AttributeTypes.parseCustom, // it's parsed manually on gotChanges
+      parse: (v) => v,
+    };
     return m;
   }
 
@@ -638,31 +642,24 @@ export default abstract class WUPBaseControl<
     this.$refInput.readOnly = this.$isReadOnly;
   }
 
-  protected attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
-    if (name === "initvalue") {
-      if (this._isStopChanges) {
-        return;
-      }
-      (this as any)._noDelInitValueAttr = true;
-      if (newValue == null) {
-        this.$initValue = undefined; // removed attr >> remove initValue
-      } else {
-        try {
-          const v = this.parse(newValue);
-          this.$initValue = v;
-        } catch (err) {
-          this.throwError(`Impossible to parse attr [initvalue] '${newValue}'\r\n${err}`);
-        }
-      }
-      this.setupInitValue(null);
-      delete (this as any)._noDelInitValueAttr;
-    } else {
-      super.attributeChangedCallback(name, oldValue, newValue);
-    }
-  }
-
   /** Called on Init and options/attributes changes to update $initValue */
   setupInitValue(propsChanged: Array<keyof WUP.BaseControl.Options | any> | null): void {
+    // lowercase for attribute-changes otherwise it's wrong
+    if (!propsChanged || propsChanged.includes("initvalue")) {
+      // @ts-expect-error - because initvalue not defined but possible from attributes
+      const attr = this._opts.initvalue; // this value from attribute in string
+      if (attr != null) {
+        (this as any)._noDelInitValueAttr = true;
+        try {
+          this.$initValue = this.parse(attr);
+        } catch (err) {
+          this.throwError(err);
+        }
+        delete (this as any)._noDelInitValueAttr;
+      } else if (propsChanged) {
+        this.$initValue = undefined; // removed attr >> remove initValue
+      }
+    }
     // retrieve value from model
     if (this.$initValue === undefined && this.$form && this._opts.name && !this.hasAttribute("initvalue")) {
       if (!propsChanged || propsChanged.includes("name")) {
