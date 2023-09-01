@@ -92,16 +92,17 @@ describe("control.time", () => {
       debouncems: { value: 5 },
       selectonfocus: { value: true },
       readonlyinput: { value: true },
-      mask: { value: "00:00 am", nullValue: "00:00 //[AP]//M" },
-      maskholder: { value: "00:00 am", nullValue: "hh:mm *M" },
       showcase: { value: 1 },
       menubuttonsoff: { value: true },
+
+      mask: { value: "00:00 am", nullValue: "00:00 //[AP]//M" },
+      maskholder: { value: "00:00 am", nullValue: "hh:mm *M" },
+      format: { value: "hh:mm a", nullValue: "hh:mm A" },
 
       min: { value: "02:28" },
       max: { value: "23:15" },
       step: { value: 5 },
       exclude: { value: { test: (v) => v.valueOf() === new WUPTimeObject("15:40").valueOf() } },
-      format: { value: "hh:mm a", nullValue: "hh:mm A" },
     },
     validationsSkip: ["_parse", "_mask"],
   });

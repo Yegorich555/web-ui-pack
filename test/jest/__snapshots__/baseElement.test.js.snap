@@ -33,3 +33,7 @@ padding:0;}
 `;
 
 exports[`baseElement me common tests snapshot of $defaults 1`] = `{}`;
+
+exports[`baseElement me common tests snapshot of $defaults 2`] = `[]`;
+
+exports[`baseElement me common tests snapshot of $defaults 3`] = `[]`;

@@ -255,7 +255,7 @@ export default class WUPSelectManyControl<
   protected override gotChanges(propsChanged: Array<keyof WUP.Select.Options> | null): void {
     this._opts.multiple = true;
     this.removeAttribute("multiple");
-    super.gotChanges(propsChanged); // todo gotChanges must be called first
+    super.gotChanges(propsChanged);
 
     this._opts.sortable = this.getAttr("sortable", "bool") ?? false;
     if (this._opts.sortable) {

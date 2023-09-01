@@ -78,7 +78,7 @@ describe("control.date", () => {
       showcase: { value: 1 },
 
       mask: { value: "#0-#0-0000", nullValue: "0000-00-00" },
-      maskholder: { value: "dd-mm-yyyy", nullValue: "yyyy-mm-dd" },
+      maskholder: { value: "dd-mm-yyyy", nullValue: "YYYY-MM-DD" },
       format: { value: "dd-mm-yyyy", nullValue: "yyyy-mm-dd" },
 
       utc: { value: true },

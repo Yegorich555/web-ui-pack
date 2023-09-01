@@ -470,22 +470,22 @@ exports[`formElement common tests snapshot of $defaults 1`] = `
 
 exports[`formElement common tests snapshot of $defaults 2`] = `
 [
-  "submitActions",
   "autoComplete",
   "autoFocus",
   "autoSave",
   "disabled",
   "readOnly",
+  "submitActions",
 ]
 `;
 
 exports[`formElement common tests snapshot of $defaults 3`] = `
 [
-  "submitactions",
   "autocomplete",
   "autofocus",
   "autosave",
   "disabled",
   "readonly",
+  "submitactions",
 ]
 `;

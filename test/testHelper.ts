@@ -106,8 +106,6 @@ export interface BaseTestOptions {
   attrs: Record<
     string,
     {
-      /** @deprecated Set true if removing attr doesn't remove option but rollbacks to default */
-      onRemove?: boolean;
       skip?: boolean;
       value?: string | number | boolean | object;
       /** Corrected internally attribute value after changing
@@ -160,7 +158,7 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
     if (!opts?.skipAttrs && obj instanceof WUPBaseElement) {
       test("observedAttributes & options", () => {
         // every attribute must be mentioned in cfg
-        const pointed = opts.attrs || {};
+        const pointed = opts?.attrs || {};
         const pointedAttr = Object.keys(pointed)
           .filter((k) => pointed[k] != null)
           .map((k) => k)

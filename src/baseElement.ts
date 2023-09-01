@@ -319,10 +319,6 @@ export default abstract class WUPBaseElement<
       if (this._opts[p] === undefined) {
         this._opts[p as keyof TOptions] = objectClone(this.#ctr.$defaults[p]);
       }
-      if (this._opts[p] === undefined) {
-        // don't allow to have defaults with undefined // todo remove it after refactoring
-        console.error(`Option [${p}] is removed but in $defaults not defined`, { defaults: this.#ctr.$defaults });
-      }
     }); // remove related attributes otherwise impossible to override
     this.gotChanges(e.props);
     this._isStopChanges = false;
