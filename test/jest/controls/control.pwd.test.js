@@ -17,7 +17,7 @@ describe("control.pwd", () => {
       special: { set: { min: 1, chars: "#!-_?,.@:;'" }, failValue: "relax", trueValue: "re-l-ax" },
     },
     validationsSkip: ["confirm"],
-    attrs: { skey: { skip: true }, storage: { skip: true } },
+    attrs: { skey: null, storage: null, mask: null, maskholder: null, reverse: { value: true, equalValue: "" } },
   });
 
   test("validation confirm", async () => {

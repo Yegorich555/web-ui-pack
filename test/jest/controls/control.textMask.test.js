@@ -957,9 +957,9 @@ describe("control.text: mask", () => {
     el.focus();
     expect(el.$refMaskholder).toBeDefined();
 
-    el.$options.maskholder = "";
+    el.$options.maskholder = false;
     await h.wait(1);
-    expect(el.$options.maskholder).toBe("");
+    expect(el.$options.maskholder).toBeFalsy();
     expect(el.$refMaskholder).toBeUndefined();
 
     // mask works without maskholder

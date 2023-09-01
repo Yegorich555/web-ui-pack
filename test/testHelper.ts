@@ -160,8 +160,10 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
         // every attribute must be mentioned in cfg
         const pointed = opts.attrs || {};
         const pointedAttr = Object.keys(pointed)
+          .filter((k) => pointed[k] != null)
           .map((k) => k)
           .sort();
+
         const observedAttrs = (((c as any).observedAttributes || []) as string[]).sort();
         expect(pointedAttr).toEqual(observedAttrs);
 

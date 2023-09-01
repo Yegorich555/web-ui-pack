@@ -165,11 +165,11 @@ declare global {
        * * Before API-call gather form.$model on init
        * @see {@link WUP.BaseControl.Options.storage}
        * @defaultValue false */
-      skey: boolean | string | null; // todo rename to storageKey
+      skey?: boolean | string | null; // todo rename to storageKey
       /** Storage for saving value
        * @see {@link WUP.BaseControl.Options.storekey}
        * @defaultValue "local" */
-      storage: "local" | "session" | "url";
+      storage?: "local" | "session" | "url";
     }
     // @ts-expect-error
     interface Attributes extends Partial<Options> {
@@ -394,10 +394,12 @@ export default abstract class WUPBaseControl<
 
   static get mappedAttributes(): Record<string, AttributeMap> {
     const m = super.mappedAttributes;
-    m.skey.type = AttributeTypes.string;
     m.autocomplete.type = AttributeTypes.string;
     m.label.type = AttributeTypes.string;
     m.name.type = AttributeTypes.string;
+    if (m.skey) {
+      m.skey.type = AttributeTypes.string; // can be removed for passwordContrl
+    }
     return m;
   }
 

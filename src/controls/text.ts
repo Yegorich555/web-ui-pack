@@ -35,10 +35,10 @@ declare global {
        * * excluded from listing (for $options.validationShowAll) */
       _parse: string;
     }
-    interface Defaults<T = string, VM = ValidityMap> extends WUP.BaseControl.Defaults<T, VM> {
+    interface Options<T = string, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM> {
       /** Debounce time to wait for user finishes typing to start validate and provide $change event
        * @defaultValue 0; */
-      debounceMs?: number;
+      debounceMs: number;
       /** Select whole text when input got focus (when input is not readonly and not disabled);
        * @defaultValue false */
       selectOnFocus: boolean;
@@ -46,9 +46,6 @@ declare global {
        * @see {@link ClearActions} from `web-ui-pack/baseControl`
        * @defaultValue true */
       clearButton: boolean;
-    }
-
-    interface Options<T = string, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, Defaults<T, VM> {
       /** Make input masked
        * @rules when mask is pointed and contains only numeric vars
        * * inputmode='numeric' so mobile device show numeric-keyboard
@@ -67,22 +64,20 @@ declare global {
        * '|0' // or '\x00' - static char '0'
        * '|#' // or '\x01' - static char '#'
        * '|*' // or '\x02' - static char '*'
-       * '|/' // or '\x03' - static char '/'
-       * */
-      mask?: string;
-      /** Placeholder for mask. By default it inherits from mask. To disabled it set 'false' or '' (empty string);
+       * '|/' // or '\x03' - static char '/' */
+      mask?: string | null | undefined;
+      /** Placeholder for mask. By default it inherits from mask. To disabled it set `false`;
        *  for date maskholder can be 'yyyy-mm-dd' */
-      maskholder?: string | false;
+      maskholder?: string | false | null | undefined; // todo set 'true' by default instead of empty string
       /** Part before input; for example for value "$ 123 USD" prefix is "$ " */
-      prefix?: string;
+      prefix?: string | null | undefined;
       /** Part after input; for example for value "$ 123 USD" prefix is " USD" */
-      postfix?: string;
+      postfix?: string | null | undefined;
     }
-
-    interface Attributes
-      extends WUP.BaseControl.Attributes,
-        Pick<Options, "mask" | "maskholder" | "prefix" | "postfix"> {}
-
+    // @ts-expect-error
+    interface Attributes extends WUP.BaseControl.Attributes, Partial<Options> {
+      prefix?: string; // attr prefix exists in React
+    }
     interface JSXProps<C = WUPTextControl> extends WUP.BaseControl.JSXProps<C>, Attributes {}
     interface GotInputEvent extends InputEvent {
       target: HTMLInputElement;
@@ -132,18 +127,6 @@ export default class WUPTextControl<
 > extends WUPBaseControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextControl;
-
-  static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUP.Text.Options>;
-    arr.push("clearButton", "maskholder", "mask", "prefix", "postfix");
-    return arr;
-  }
-
-  static get observedAttributes(): Array<string> {
-    const arr = super.observedAttributes as Array<LowerKeys<WUP.Text.Attributes>>;
-    arr.push("maskholder", "mask", "prefix", "postfix");
-    return arr;
-  }
 
   static get $styleRoot(): string {
     return `:root {
@@ -346,7 +329,7 @@ export default class WUPTextControl<
         }`;
   }
 
-  static $defaults: WUP.Text.Defaults = {
+  static $defaults: WUP.Text.Options = {
     ...WUPBaseControl.$defaults,
     selectOnFocus: false,
     clearButton: true,
@@ -362,6 +345,11 @@ export default class WUPTextControl<
       },
       _parse: (_v, setV) => setV || "Invalid value",
     },
+    debounceMs: 0,
+    mask: "",
+    maskholder: "",
+    prefix: "",
+    postfix: "",
   };
 
   $refBtnClear?: HTMLButtonElement;
@@ -372,7 +360,7 @@ export default class WUPTextControl<
   constructor() {
     super();
 
-    this.$refInput.placeholder = " ";
+    this.$refInput.placeholder = " "; // Without this css related styles doesn't work with browser autofill
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -440,7 +428,7 @@ export default class WUPTextControl<
   }
 
   /** Add/update/remove prefix part */
-  protected renderPrefix(text: string | undefined): void {
+  protected renderPrefix(text: string | undefined | null): void {
     let el = this.$refPrefix;
     if (!text) {
       if (el) {
@@ -461,27 +449,31 @@ export default class WUPTextControl<
   }
 
   /** Add/update or remove prefix part */
-  protected renderPostfix(text: string | undefined): void {
-    let el = this.$refPostfix;
-    if (!text) {
-      if (el) {
-        el.remove();
-        delete this.$refPostfix;
-      }
-    } else {
-      if (!el) {
-        el = document.createElement("span");
-        el.setAttribute("postfix", "");
-        el.appendChild(document.createElement("i"));
-        el.append("");
-        this.$refLabel.firstElementChild!.append(el);
-        this.$refPostfix = el;
-      }
+  protected renderPostfix(text: string | undefined | null): void {
+    try {
+      let el = this.$refPostfix;
+      if (!text) {
+        if (el) {
+          el.remove();
+          delete this.$refPostfix;
+        }
+      } else {
+        if (!el) {
+          el = document.createElement("span");
+          el.setAttribute("postfix", "");
+          el.appendChild(document.createElement("i"));
+          el.append("");
+          this.$refLabel.firstElementChild!.append(el);
+          this.$refPostfix = el;
+        }
 
-      el.firstChild!.textContent =
-        (this.$isFocused && this.$refMaskholder?.textContent) ||
-        (this.$refPrefix?.textContent || "") + this.$refInput.value;
-      el.lastChild!.textContent = text;
+        el.firstChild!.textContent =
+          (this.$isFocused && this.$refMaskholder?.textContent) ||
+          (this.$refPrefix?.textContent || "") + this.$refInput.value;
+        el.lastChild!.textContent = text;
+      }
+    } catch (error) {
+      debugger;
     }
   }
 
@@ -541,13 +533,11 @@ export default class WUPTextControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Text.Options> | null): void {
     // apply mask options
-    this._opts.mask = this.getAttr("mask");
-    this._opts.maskholder = this.getAttr("maskholder");
     if (!this._opts.mask || this._opts.mask !== this.refMask?.pattern) {
       delete this.refMask; // delete if mask is removed or changed (it's recovered again on event)
     }
-    if (this._opts.mask && this._opts.maskholder == null) {
-      this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask, "");
+    if (this._opts.mask && !this._opts.maskholder && this._opts.maskholder !== false) {
+      this.refMask ??= new MaskTextInput(this._opts.mask, "");
       this._opts.maskholder = this.refMask.chunks.map((c) => c.pattern).join("");
     }
 
@@ -556,7 +546,7 @@ export default class WUPTextControl<
       delete this.$refMaskholder;
     }
 
-    super.gotChanges(propsChanged as any); // todo gotChanges must be called first
+    super.gotChanges(propsChanged as any);
 
     if (this._opts.clearButton) {
       this.$refBtnClear = this.$refBtnClear || this.renderBtnClear();
@@ -565,11 +555,9 @@ export default class WUPTextControl<
       this.$refBtnClear = undefined;
     }
     if (!propsChanged || propsChanged.includes("prefix")) {
-      this._opts.prefix = this.getAttr("prefix");
       this.renderPrefix(this._opts.prefix);
     }
     if (!propsChanged || propsChanged.includes("postfix")) {
-      this._opts.postfix = this.getAttr("postfix");
       this.renderPostfix(this._opts.postfix);
     }
   }
@@ -692,7 +680,7 @@ export default class WUPTextControl<
   }
 
   /** Add/update maskholder or skip if it's not defined */
-  private renderMaskHolder(text: string | false | undefined, leftLength: number): void {
+  private renderMaskHolder(text: string | false | undefined | null, leftLength: number): void {
     if (!text) {
       return;
     }
@@ -753,11 +741,13 @@ export default class WUPTextControl<
     const prev = this.$refInput.value;
     const str = v != null ? ((v as any).toString() as string) : "";
     this.$refInput.value = str;
-
-    this._opts.mask && this.maskInputProcess(null);
-    str !== prev && this._refHistory?.save(prev, this.$refInput.value);
-    this.renderPostfix(this._opts.postfix);
-    this._onceErrName === this._errName && this.goHideError(); // hide mask-message because value has higher priority than inputValue
+    // possible when element $initValue changed but element isn't rendered yet
+    if (this.$isReady) {
+      this._opts.mask && this.maskInputProcess(null);
+      str !== prev && this._refHistory?.save(prev, this.$refInput.value);
+      this.renderPostfix(this._opts.postfix);
+      this._onceErrName === this._errName && this.goHideError(); // hide mask-message because value has higher priority than inputValue
+    }
   }
 
   protected override setClearState(): ValueType | undefined {

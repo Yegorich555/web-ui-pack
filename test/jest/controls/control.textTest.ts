@@ -9,6 +9,16 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
 
   testBaseControl({
     ...opts,
+    attrs: {
+      mask: { value: "abc" },
+      maskholder: { value: "abc" },
+      prefix: { value: "$" },
+      postfix: { value: "USD" },
+      clearbutton: { value: true },
+      debouncems: { value: 5 },
+      selectonfocus: { value: true },
+      ...opts?.attrs,
+    },
     initValues: opts?.initValues ?? [
       { attrValue: "123", value: "123" },
       { attrValue: "some txt", value: "some txt" },

@@ -363,7 +363,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
     test("skey", async () => {
       const onThrowErr = jest.spyOn(WUPBaseControl.prototype, "throwError");
-      if (cfg.attrs?.skey?.skip) {
+      if (cfg.attrs?.skey?.skip || cfg.attrs?.skey === null) {
         return; // for password isn't allowed
       }
       // local storage

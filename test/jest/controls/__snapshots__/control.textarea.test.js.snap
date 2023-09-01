@@ -670,6 +670,85 @@ WUP-AREAINPUT::-webkit-scrollbar-track-piece:horizontal:end {
 </style>
 `;
 
+exports[`control.textarea common tests snapshot of $defaults 1`] = `
+{
+  "autoComplete": null,
+  "autoFocus": false,
+  "clearActions": 2,
+  "clearButton": true,
+  "debounceMs": 0,
+  "disabled": false,
+  "focusDebounceMs": 100,
+  "label": null,
+  "name": null,
+  "readOnly": false,
+  "selectOnFocus": false,
+  "skey": null,
+  "storage": "local",
+  "validateDebounceMs": 500,
+  "validationCase": 13,
+  "validationRules": {
+    "$alwaysInvalid": [Function],
+    "$alwaysValid": [Function],
+    "_mask": [Function],
+    "_parse": [Function],
+    "email": [Function],
+    "max": [Function],
+    "min": [Function],
+    "required": [Function],
+  },
+  "validationShowAll": false,
+  "validations": null,
+}
+`;
+
+exports[`control.textarea common tests snapshot of $defaults 2`] = `
+[
+  "autoComplete",
+  "autoFocus",
+  "clearActions",
+  "clearButton",
+  "debounceMs",
+  "disabled",
+  "focusDebounceMs",
+  "label",
+  "name",
+  "readOnly",
+  "selectOnFocus",
+  "skey",
+  "storage",
+  "validateDebounceMs",
+  "validationCase",
+  "validationRules",
+  "validationShowAll",
+  "validations",
+]
+`;
+
+exports[`control.textarea common tests snapshot of $defaults 3`] = `
+[
+  "autocomplete",
+  "autofocus",
+  "clearactions",
+  "clearbutton",
+  "debouncems",
+  "disabled",
+  "focusdebouncems",
+  "initvalue",
+  "label",
+  "name",
+  "readonly",
+  "selectonfocus",
+  "skey",
+  "storage",
+  "validatedebouncems",
+  "validationcase",
+  "validationrules",
+  "validations",
+  "validationshowall",
+]
+`;
+
 exports[`control.textarea options clearButton 1`] = `
 <wup-textarea>
   <label

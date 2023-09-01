@@ -613,6 +613,97 @@ mask-image: var(--ctrl-icon-img);
 </style>
 `;
 
+exports[`control.text common tests snapshot of $defaults 1`] = `
+{
+  "autoComplete": null,
+  "autoFocus": false,
+  "clearActions": 2,
+  "clearButton": true,
+  "debounceMs": 0,
+  "disabled": false,
+  "focusDebounceMs": 100,
+  "label": null,
+  "mask": "",
+  "maskholder": "",
+  "name": null,
+  "postfix": "",
+  "prefix": "",
+  "readOnly": false,
+  "selectOnFocus": false,
+  "skey": null,
+  "storage": "local",
+  "validateDebounceMs": 500,
+  "validationCase": 13,
+  "validationRules": {
+    "$alwaysInvalid": [Function],
+    "$alwaysValid": [Function],
+    "_mask": [Function],
+    "_parse": [Function],
+    "email": [Function],
+    "max": [Function],
+    "min": [Function],
+    "required": [Function],
+  },
+  "validationShowAll": false,
+  "validations": null,
+}
+`;
+
+exports[`control.text common tests snapshot of $defaults 2`] = `
+[
+  "autoComplete",
+  "autoFocus",
+  "clearActions",
+  "clearButton",
+  "debounceMs",
+  "disabled",
+  "focusDebounceMs",
+  "label",
+  "mask",
+  "maskholder",
+  "name",
+  "postfix",
+  "prefix",
+  "readOnly",
+  "selectOnFocus",
+  "skey",
+  "storage",
+  "validateDebounceMs",
+  "validationCase",
+  "validationRules",
+  "validationShowAll",
+  "validations",
+]
+`;
+
+exports[`control.text common tests snapshot of $defaults 3`] = `
+[
+  "autocomplete",
+  "autofocus",
+  "clearactions",
+  "clearbutton",
+  "debouncems",
+  "disabled",
+  "focusdebouncems",
+  "initvalue",
+  "label",
+  "mask",
+  "maskholder",
+  "name",
+  "postfix",
+  "prefix",
+  "readonly",
+  "selectonfocus",
+  "skey",
+  "storage",
+  "validatedebouncems",
+  "validationcase",
+  "validationrules",
+  "validations",
+  "validationshowall",
+]
+`;
+
 exports[`control.text options clearButton 1`] = `
 <wup-text>
   <label
