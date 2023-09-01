@@ -186,12 +186,6 @@ export default class WUPRadioControl<
      `;
   }
 
-  static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUP.Radio.Options>;
-    arr.push("reverse", "items");
-    return arr;
-  }
-
   static $defaults: WUP.Radio.Options = {
     ...WUPBaseControl.$defaults,
     validationRules: { ...WUPBaseControl.$defaults.validationRules },
