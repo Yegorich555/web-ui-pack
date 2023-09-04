@@ -500,26 +500,7 @@ exports[`control.check common tests snapshot of $defaults 1`] = `
 }
 `;
 
-exports[`control.check common tests snapshot of $defaults 2`] = `
-[
-  "autoComplete",
-  "autoFocus",
-  "clearActions",
-  "disabled",
-  "focusDebounceMs",
-  "label",
-  "name",
-  "readOnly",
-  "reverse",
-  "skey",
-  "storage",
-  "validateDebounceMs",
-  "validationCase",
-  "validationRules",
-  "validationShowAll",
-  "validations",
-]
-`;
+exports[`control.check common tests snapshot of $defaults 2`] = `undefined`;
 
 exports[`control.check common tests snapshot of $defaults 3`] = `
 [

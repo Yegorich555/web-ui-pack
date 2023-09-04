@@ -914,27 +914,7 @@ exports[`control.radio common tests snapshot of $defaults 1`] = `
 }
 `;
 
-exports[`control.radio common tests snapshot of $defaults 2`] = `
-[
-  "autoComplete",
-  "autoFocus",
-  "clearActions",
-  "disabled",
-  "focusDebounceMs",
-  "items",
-  "label",
-  "name",
-  "readOnly",
-  "reverse",
-  "skey",
-  "storage",
-  "validateDebounceMs",
-  "validationCase",
-  "validationRules",
-  "validationShowAll",
-  "validations",
-]
-`;
+exports[`control.radio common tests snapshot of $defaults 2`] = `undefined`;
 
 exports[`control.radio common tests snapshot of $defaults 3`] = `
 [

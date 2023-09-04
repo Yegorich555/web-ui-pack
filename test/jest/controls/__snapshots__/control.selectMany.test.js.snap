@@ -936,39 +936,7 @@ exports[`control.selectMany common tests snapshot of $defaults 1`] = `
 }
 `;
 
-exports[`control.selectMany common tests snapshot of $defaults 2`] = `
-[
-  "allowNewValue",
-  "autoComplete",
-  "autoFocus",
-  "clearActions",
-  "clearButton",
-  "debounceMs",
-  "disabled",
-  "focusDebounceMs",
-  "hideSelected",
-  "items",
-  "label",
-  "mask",
-  "maskholder",
-  "multiple",
-  "name",
-  "postfix",
-  "prefix",
-  "readOnly",
-  "readOnlyInput",
-  "selectOnFocus",
-  "showCase",
-  "skey",
-  "sortable",
-  "storage",
-  "validateDebounceMs",
-  "validationCase",
-  "validationRules",
-  "validationShowAll",
-  "validations",
-]
-`;
+exports[`control.selectMany common tests snapshot of $defaults 2`] = `undefined`;
 
 exports[`control.selectMany common tests snapshot of $defaults 3`] = `
 [

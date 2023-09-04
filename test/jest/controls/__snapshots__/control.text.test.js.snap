@@ -649,32 +649,7 @@ exports[`control.text common tests snapshot of $defaults 1`] = `
 }
 `;
 
-exports[`control.text common tests snapshot of $defaults 2`] = `
-[
-  "autoComplete",
-  "autoFocus",
-  "clearActions",
-  "clearButton",
-  "debounceMs",
-  "disabled",
-  "focusDebounceMs",
-  "label",
-  "mask",
-  "maskholder",
-  "name",
-  "postfix",
-  "prefix",
-  "readOnly",
-  "selectOnFocus",
-  "skey",
-  "storage",
-  "validateDebounceMs",
-  "validationCase",
-  "validationRules",
-  "validationShowAll",
-  "validations",
-]
-`;
+exports[`control.text common tests snapshot of $defaults 2`] = `undefined`;
 
 exports[`control.text common tests snapshot of $defaults 3`] = `
 [

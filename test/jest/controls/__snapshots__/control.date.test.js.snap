@@ -726,41 +726,7 @@ exports[`control.date common tests snapshot of $defaults 1`] = `
 }
 `;
 
-exports[`control.date common tests snapshot of $defaults 2`] = `
-[
-  "autoComplete",
-  "autoFocus",
-  "clearActions",
-  "clearButton",
-  "debounceMs",
-  "disabled",
-  "exclude",
-  "firstWeekDay",
-  "focusDebounceMs",
-  "format",
-  "label",
-  "mask",
-  "maskholder",
-  "max",
-  "min",
-  "name",
-  "postfix",
-  "prefix",
-  "readOnly",
-  "readOnlyInput",
-  "selectOnFocus",
-  "showCase",
-  "skey",
-  "startWith",
-  "storage",
-  "utc",
-  "validateDebounceMs",
-  "validationCase",
-  "validationRules",
-  "validationShowAll",
-  "validations",
-]
-`;
+exports[`control.date common tests snapshot of $defaults 2`] = `undefined`;
 
 exports[`control.date common tests snapshot of $defaults 3`] = `
 [

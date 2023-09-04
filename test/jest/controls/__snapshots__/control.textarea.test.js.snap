@@ -702,28 +702,7 @@ exports[`control.textarea common tests snapshot of $defaults 1`] = `
 }
 `;
 
-exports[`control.textarea common tests snapshot of $defaults 2`] = `
-[
-  "autoComplete",
-  "autoFocus",
-  "clearActions",
-  "clearButton",
-  "debounceMs",
-  "disabled",
-  "focusDebounceMs",
-  "label",
-  "name",
-  "readOnly",
-  "selectOnFocus",
-  "skey",
-  "storage",
-  "validateDebounceMs",
-  "validationCase",
-  "validationRules",
-  "validationShowAll",
-  "validations",
-]
-`;
+exports[`control.textarea common tests snapshot of $defaults 2`] = `undefined`;
 
 exports[`control.textarea common tests snapshot of $defaults 3`] = `
 [

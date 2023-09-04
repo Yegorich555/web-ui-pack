@@ -1333,31 +1333,7 @@ exports[`control.calendar common tests snapshot of $defaults 1`] = `
 }
 `;
 
-exports[`control.calendar common tests snapshot of $defaults 2`] = `
-[
-  "autoComplete",
-  "autoFocus",
-  "clearActions",
-  "disabled",
-  "exclude",
-  "firstWeekDay",
-  "focusDebounceMs",
-  "label",
-  "max",
-  "min",
-  "name",
-  "readOnly",
-  "skey",
-  "startWith",
-  "storage",
-  "utc",
-  "validateDebounceMs",
-  "validationCase",
-  "validationRules",
-  "validationShowAll",
-  "validations",
-]
-`;
+exports[`control.calendar common tests snapshot of $defaults 2`] = `undefined`;
 
 exports[`control.calendar common tests snapshot of $defaults 3`] = `
 [

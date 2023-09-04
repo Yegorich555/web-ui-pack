@@ -755,29 +755,7 @@ exports[`control.pwd common tests snapshot of $defaults 1`] = `
 }
 `;
 
-exports[`control.pwd common tests snapshot of $defaults 2`] = `
-[
-  "autoComplete",
-  "autoFocus",
-  "clearActions",
-  "clearButton",
-  "debounceMs",
-  "disabled",
-  "focusDebounceMs",
-  "label",
-  "name",
-  "postfix",
-  "prefix",
-  "readOnly",
-  "reverse",
-  "selectOnFocus",
-  "validateDebounceMs",
-  "validationCase",
-  "validationRules",
-  "validationShowAll",
-  "validations",
-]
-`;
+exports[`control.pwd common tests snapshot of $defaults 2`] = `undefined`;
 
 exports[`control.pwd common tests snapshot of $defaults 3`] = `
 [

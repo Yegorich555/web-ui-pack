@@ -127,7 +127,7 @@ describe("baseElement", () => {
         "testattr",
       ]
     `);
-    expect(TestElement.observedOptions).toMatchInlineSnapshot(`[]`);
+    expect(TestElement.observedOptions).toMatchInlineSnapshot(`null`);
     const spyReady = jest.spyOn(a, "gotReady");
     const spyRemoved = jest.spyOn(a, "gotRemoved");
     const spyDispose = jest.spyOn(a, "dispose");
@@ -279,17 +279,7 @@ describe("baseElement", () => {
         "fitel",
       ]
     `);
-    expect(TestEl.observedOptions).toMatchInlineSnapshot(`
-      [
-        "disabled",
-        "readOnly",
-        "inline",
-        "offset",
-        "label",
-        "target",
-        "fitEl",
-      ]
-    `);
+    expect(TestEl.observedOptions).toMatchInlineSnapshot(`null`);
     expect(onGotChanges).toBeCalledTimes(1); // only 1 time on init
     expect(el.$options).toMatchInlineSnapshot(`
       {

@@ -880,40 +880,7 @@ exports[`control.time common tests snapshot of $defaults 1`] = `
 }
 `;
 
-exports[`control.time common tests snapshot of $defaults 2`] = `
-[
-  "autoComplete",
-  "autoFocus",
-  "clearActions",
-  "clearButton",
-  "debounceMs",
-  "disabled",
-  "exclude",
-  "focusDebounceMs",
-  "format",
-  "label",
-  "mask",
-  "maskholder",
-  "max",
-  "menuButtonsOff",
-  "min",
-  "name",
-  "postfix",
-  "prefix",
-  "readOnly",
-  "readOnlyInput",
-  "selectOnFocus",
-  "showCase",
-  "skey",
-  "step",
-  "storage",
-  "validateDebounceMs",
-  "validationCase",
-  "validationRules",
-  "validationShowAll",
-  "validations",
-]
-`;
+exports[`control.time common tests snapshot of $defaults 2`] = `undefined`;
 
 exports[`control.time common tests snapshot of $defaults 3`] = `
 [

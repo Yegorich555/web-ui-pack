@@ -805,37 +805,7 @@ exports[`control.select common tests snapshot of $defaults 1`] = `
 }
 `;
 
-exports[`control.select common tests snapshot of $defaults 2`] = `
-[
-  "allowNewValue",
-  "autoComplete",
-  "autoFocus",
-  "clearActions",
-  "clearButton",
-  "debounceMs",
-  "disabled",
-  "focusDebounceMs",
-  "items",
-  "label",
-  "mask",
-  "maskholder",
-  "multiple",
-  "name",
-  "postfix",
-  "prefix",
-  "readOnly",
-  "readOnlyInput",
-  "selectOnFocus",
-  "showCase",
-  "skey",
-  "storage",
-  "validateDebounceMs",
-  "validationCase",
-  "validationRules",
-  "validationShowAll",
-  "validations",
-]
-`;
+exports[`control.select common tests snapshot of $defaults 2`] = `undefined`;
 
 exports[`control.select common tests snapshot of $defaults 3`] = `
 [

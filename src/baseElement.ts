@@ -118,11 +118,10 @@ export default abstract class WUPBaseElement<
     return o;
   }
 
-  // todo deprecate it and use for any prop by default ??? - need check this
-  /** Array of options names to listen for changes
+  /** Array of options names to listen for changes; @returns `undefined` if need to observe for every option
    * @defaultValue every option from $defaults` */
-  static get observedOptions(): Array<string> {
-    return Object.keys(this.$defaults).map((k) => k); // WARN: cache implemented in get $options
+  static get observedOptions(): Array<string> | null {
+    return null;
   }
 
   /** Array of attribute names to listen for changes
@@ -189,13 +188,15 @@ export default abstract class WUPBaseElement<
           allObservedOptions.set(this.#ctr, o);
         }
         const watched = o;
-        if (!watched?.size) {
+        if (!watched?.size && watched !== null) {
           return this._opts;
         }
         // cast to observed only if option was retrieved: to optimize init-performance
         this.#optsObserved = observer.make(this._opts, { excludeNested: true });
         this.#removeObserved = observer.onChanged(this.#optsObserved, (e) => {
-          this.#isReady && e.props.some((p) => watched.has(p as string)) && this.gotOptionsChanged(e);
+          this.#isReady &&
+            e.props.some((p) => (watched == null ? Object.hasOwn(this.#ctr.$defaults, p) : watched.has(p as string))) &&
+            this.gotOptionsChanged(e);
         });
       }
       return this.#optsObserved as TOptions;
@@ -222,18 +223,17 @@ export default abstract class WUPBaseElement<
       this.#removeObserved = undefined;
 
       const watched = allObservedOptions.get(this.#ctr);
-      if (!watched?.size) {
+      if (!watched?.size && watched !== null) {
         return; // don't call event if there is nothing to watchFor
       }
       // shallow comparison with filter watched options
       if (prev.valueOf() !== v.valueOf()) {
         const props: string[] = [];
-        // eslint-disable-next-line no-restricted-syntax
-        for (const [k] of watched.entries()) {
+        (watched || Object.keys(this.#ctr.$defaults)).forEach((k) => {
           if (this._opts[k] !== prev[k]) {
             props.push(k);
           }
-        }
+        });
         props.length && this.gotOptionsChanged({ props, target: this._opts });
       }
     }
