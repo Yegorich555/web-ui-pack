@@ -48,8 +48,8 @@ export default function SwitchControlView() {
         <wup-switch name="readonly" readOnly initValue />
         <wup-switch //
           name="saveUrlSwitch"
-          label="With saving to URL (see $options.skey & storage)"
-          skey
+          label="With saving to URL (see $options.storageKey & storage)"
+          storageKey
           storage="url"
         />
         <button type="submit">Submit</button>

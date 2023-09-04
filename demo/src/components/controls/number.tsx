@@ -73,8 +73,8 @@ export default function NumberControlView() {
         <wup-num name="disabled" disabled />
         <wup-num //
           name="saveUrlNum"
-          label="With saving to URL (see $options.skey & storage)"
-          skey
+          label="With saving to URL (see $options.storageKey & storage)"
+          storageKey
           storage="url"
         />
         <button type="submit">Submit</button>

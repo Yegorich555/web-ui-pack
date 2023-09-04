@@ -231,12 +231,12 @@ export default class WUPPasswordControl<
   }
 
   protected override storageSet(): void {
-    console.error("Saving not allowed for password. Remove $options.skey");
+    console.error("Saving not allowed for password. Remove $options.storageKey");
   }
 }
 
 // prettify defaults before create
-let rr: Array<keyof WUP.Text.Options> | undefined = ["mask", "maskholder", "skey", "storage"];
+let rr: Array<keyof WUP.Text.Options> | undefined = ["mask", "maskholder", "storageKey", "storage"];
 rr.forEach((k) => delete WUPPasswordControl.$defaults[k as keyof WUP.Password.Options]);
 rr = undefined;
 

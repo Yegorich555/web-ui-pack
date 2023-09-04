@@ -56,8 +56,8 @@ export default function DateControlView() {
         <wup-date name="readonly" readOnly />
         <wup-date //
           name="saveUrl"
-          label="With saving to URL (see $options.skey & storage)"
-          skey
+          label="With saving to URL (see $options.storageKey & storage)"
+          storageKey
           storage="url"
         />
         <button type="submit">Submit</button>

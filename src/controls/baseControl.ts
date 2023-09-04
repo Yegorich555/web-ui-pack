@@ -165,7 +165,7 @@ declare global {
        * * Before API-call gather form.$model on init
        * @see {@link WUP.BaseControl.Options.storage}
        * @defaultValue false */
-      skey?: boolean | string | null; // todo rename to storageKey
+      storageKey?: boolean | string | null;
       /** Storage for saving value
        * @see {@link WUP.BaseControl.Options.storekey}
        * @defaultValue "local" */
@@ -397,8 +397,8 @@ export default abstract class WUPBaseControl<
     m.autocomplete.type = AttributeTypes.string;
     m.label.type = AttributeTypes.string;
     m.name.type = AttributeTypes.string;
-    if (m.skey) {
-      m.skey.type = AttributeTypes.string; // can be removed for passwordContrl
+    if (m.storagekey) {
+      m.storagekey.type = AttributeTypes.string; // can be removed for passwordContrl
     }
     m.initvalue = {
       type: AttributeTypes.parseCustom, // it's parsed manually on gotChanges
@@ -425,7 +425,7 @@ export default abstract class WUPBaseControl<
     label: null,
     name: null,
     storage: "local",
-    skey: null, // todo change to empty string and remove from mappedAttrs
+    storageKey: null, // todo change to empty string and remove from mappedAttrs
   };
 
   static override cloneDefaults<T extends Record<string, any>>(): T {
@@ -674,7 +674,7 @@ export default abstract class WUPBaseControl<
       }
     }
     // retrieve value from store
-    if (this.$initValue === undefined && this._opts.skey) {
+    if (this.$initValue === undefined && this._opts.storageKey) {
       this.$initValue = this.storageGet();
     }
   }
@@ -1014,7 +1014,7 @@ export default abstract class WUPBaseControl<
 
   /** Returns storage key based on options `skey` and `name` */
   get storageKey(): string | undefined | null | false {
-    return this._opts.skey === true ? this._opts.name : this._opts.skey;
+    return this._opts.storageKey === true ? this._opts.name : this._opts.storageKey;
   }
 
   /** Get & parse value from storage according to options `skey`, `storage` and `name` */
@@ -1105,7 +1105,7 @@ export default abstract class WUPBaseControl<
     const canVld = reason !== SetValueReasons.manual;
     (canVld || this.$refError) && this.validateAfterChange();
     // save to storage
-    this._opts.skey && this.storageSet(v);
+    this._opts.storageKey && this.storageSet(v);
     setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true, detail: reason }));
     return true;
   }

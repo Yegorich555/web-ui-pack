@@ -274,7 +274,7 @@ describe("control.radio", () => {
     const items = getItems();
     items[0].value = null;
 
-    el.$options.skey = "rd";
+    el.$options.storageKey = "rd";
     el.$options.items = items;
     await h.wait(1);
     el.$value = null;
@@ -286,7 +286,7 @@ describe("control.radio", () => {
     el = document.body.appendChild(document.createElement(el.tagName));
     el.$options.items = items;
     expect(el.$value).toBe(undefined);
-    el.$options.skey = "rd";
+    el.$options.storageKey = "rd";
     await h.wait(1);
     expect(el.$value).toBe(null);
     window.localStorage.clear();
@@ -299,7 +299,7 @@ describe("control.radio", () => {
     el = document.body.appendChild(document.createElement(el.tagName));
     el.$options.items = items;
     await h.wait(1);
-    el.$options.skey = "rd";
+    el.$options.storageKey = "rd";
     await h.wait(1);
     onConsoleErr.mockClear();
     // eslint-disable-next-line prefer-destructuring

@@ -98,7 +98,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       validationshowall: { value: true },
       clearactions: { value: 1 },
       focusdebouncems: { value: 12 },
-      skey: { value: "strg" },
+      storagekey: { value: "strg" },
       storage: { value: "session" },
 
       initvalue: { skip: true }, // manual testing
@@ -369,9 +369,9 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$refInput.getAttribute("aria-label")).toBe(null);
     });
 
-    test("skey", async () => {
+    test("storageKey", async () => {
       const onThrowErr = jest.spyOn(WUPBaseControl.prototype, "throwError");
-      if (cfg.attrs?.skey?.skip || cfg.attrs?.skey === null) {
+      if (cfg.attrs?.storagekey?.skip || cfg.attrs?.storagekey === null) {
         return; // for password isn't allowed
       }
       // local storage
@@ -380,7 +380,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       const sRem = jest.spyOn(Storage.prototype, "removeItem");
       el.$options.clearActions = ClearActions.clear | 0;
       el.$options.name = "name1";
-      el.$options.skey = true;
+      el.$options.storageKey = true;
       el.$value = cfg.initValues[0].value;
       await h.wait(1);
       expect(el.storageKey).toBe("name1");
@@ -392,7 +392,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el = document.body.appendChild(document.createElement(el.tagName)) as WUPBaseControl;
       cfg.onCreateNew?.call(cfg, el);
       el.$options.name = "name1";
-      el.$options.skey = true;
+      el.$options.storageKey = true;
       await h.wait(1);
       expect(el.storageKey).toBe("name1");
       expect(sGet).toBeCalledTimes(1);
@@ -409,7 +409,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       // name is empty
       jest.clearAllMocks();
       el.$options.name = "";
-      el.$options.skey = true;
+      el.$options.storageKey = true;
       await h.wait(1);
       expect(sGet).toBeCalledTimes(0);
 
@@ -438,7 +438,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
       // session storage
       el.$options.storage = "session";
-      el.$options.skey = "name2";
+      el.$options.storageKey = "name2";
       await h.wait(1);
       jest.clearAllMocks();
       expect(el.$initValue).toStrictEqual(cfg.initValues[0].value);
@@ -460,7 +460,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el = document.body.appendChild(document.createElement(el.tagName)) as WUPBaseControl;
       cfg.onCreateNew?.call(cfg, el);
       el.$options.storage = "session";
-      el.$options.skey = "name2";
+      el.$options.storageKey = "name2";
       await h.wait(1);
       expect(sGet).toBeCalledTimes(1);
       expect(sGet).lastCalledWith("name2");
@@ -474,7 +474,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       // browser url
       cfg.onCreateNew?.call(cfg, el);
       el.$options.storage = "url";
-      el.$options.skey = "su";
+      el.$options.storageKey = "su";
       await h.wait(1);
       expect(window.location.href).toBe("http://localhost/");
       const testValues = cfg.initValues[1];
@@ -487,7 +487,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el = document.body.appendChild(document.createElement(el.tagName)) as WUPBaseControl;
       cfg.onCreateNew?.call(cfg, el);
       el.$options.storage = "url";
-      el.$options.skey = "su";
+      el.$options.storageKey = "su";
       await h.wait(1);
       expect(el.$initValue).toStrictEqual(cfg.initValues[1].urlValue === null ? undefined : testValues.value);
       expect(onThrowErr).not.toBeCalled();

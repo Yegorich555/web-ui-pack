@@ -452,13 +452,13 @@ describe("control.number", () => {
   });
 
   test("storage with falsy value", async () => {
-    el.$options.skey = "nm";
+    el.$options.storageKey = "nm";
     el.$value = 0;
     await h.wait(1);
     expect(window.localStorage.getItem("nm")).toBe("0");
     el = document.body.appendChild(document.createElement(el.tagName));
     expect(el.$value).toBe(undefined);
-    el.$options.skey = "nm";
+    el.$options.storageKey = "nm";
     await h.wait(1);
     expect(el.$value).toBe(0);
 

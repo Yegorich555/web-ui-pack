@@ -17,7 +17,7 @@ describe("control.pwd", () => {
       special: { set: { min: 1, chars: "#!-_?,.@:;'" }, failValue: "relax", trueValue: "re-l-ax" },
     },
     validationsSkip: ["confirm"],
-    attrs: { skey: null, storage: null, mask: null, maskholder: null, reverse: { value: true, equalValue: "" } },
+    attrs: { storagekey: null, storage: null, mask: null, maskholder: null, reverse: { value: true, equalValue: "" } },
   });
 
   test("validation confirm", async () => {
@@ -128,7 +128,7 @@ describe("control.pwd", () => {
   test("storage not allowed", async () => {
     const onErr = h.mockConsoleError();
     const onSet = jest.spyOn(WUPPasswordControl.prototype, "storageSet");
-    testEl.$options.skey = "pw";
+    testEl.$options.storageKey = "pw";
     await h.wait(1);
     testEl.$value = "abcd";
     await h.wait(1);
