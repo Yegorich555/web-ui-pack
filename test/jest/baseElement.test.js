@@ -231,16 +231,16 @@ describe("baseElement", () => {
     expect(el.$options === el.$options).toBe(true); // just for coverage when observedOptions is empty
     class T2 extends WUPBaseElement {
       static get observedOptions() {
-        return ["to"];
+        return [];
       }
     }
     const fnT2 = jest.spyOn(T2.prototype, "gotOptionsChanged");
     customElements.define("t2-test", T2);
     const t2 = document.body.appendChild(document.createElement("t2-test"));
-    jest.advanceTimersToNextTimer();
+    jest.advanceTimersByTime(1);
     t2.$options.to = "str";
-    jest.advanceTimersToNextTimer();
-    expect(fnT2).toBeCalled(); // just for coverage when observedOptions is empty
+    jest.advanceTimersByTime(1);
+    expect(fnT2).not.toBeCalled(); // just for coverage when observedOptions is empty
   });
 
   test("gotChanges", async () => {
@@ -253,6 +253,7 @@ describe("baseElement", () => {
         label: "Ctrl",
         target: null,
         fitEl: "auto",
+        someFunction: () => "not implemented, but required for testing",
       };
     }
 
@@ -260,11 +261,13 @@ describe("baseElement", () => {
     customElements.define("test-ch", TestEl);
     el = document.body.appendChild(document.createElement("test-ch"));
     // attributes must be auto-mapped
+    expect(el.parse("me")).toBe("me"); // just for coverage
     el.setAttribute("disabled", "");
     el.setAttribute("readonly", "true");
     el.setAttribute("inline", "false");
     el.setAttribute("label", "Hi");
     el.setAttribute("fitEl", "true");
+    el.setAttribute("offset", "12");
     window.someTrg = el;
     el.setAttribute("target", "window.someTrg");
     await h.wait(1);
@@ -277,6 +280,7 @@ describe("baseElement", () => {
         "label",
         "target",
         "fitel",
+        "somefunction",
       ]
     `);
     expect(TestEl.observedOptions).toMatchInlineSnapshot(`null`);
@@ -287,18 +291,25 @@ describe("baseElement", () => {
         "fitEl": true,
         "inline": false,
         "label": "Hi",
-        "offset": 0,
+        "offset": 12,
         "readOnly": true,
+        "someFunction": [Function],
         "target": <test-ch
           disabled=""
           fitel="true"
           inline="false"
           label="Hi"
+          offset="12"
           readonly="true"
           target="window.someTrg"
         />,
       }
     `);
+    // set wrong target
+    el.setAttribute("target", "window.wrongRef");
+    expect(() => jest.advanceTimersByTime(1)).toThrow();
+    el.setAttribute("target", "wrongRef");
+    expect(() => jest.advanceTimersByTime(1)).toThrow();
     // removing attribute rollbacks to default value
     jest.clearAllMocks();
     el.removeAttribute("disabled");
@@ -307,6 +318,7 @@ describe("baseElement", () => {
     el.removeAttribute("label");
     el.removeAttribute("fitEl");
     el.removeAttribute("target");
+    el.removeAttribute("offset");
     expect(onGotChanges).toBeCalledTimes(0); // called once after timeout
     expect(el.$options).toStrictEqual(TestEl.$defaults);
     await h.wait(1);
@@ -320,6 +332,7 @@ describe("baseElement", () => {
           "label",
           "fitEl",
           "target",
+          "offset",
         ],
       ]
     `);
@@ -337,6 +350,7 @@ describe("baseElement", () => {
         "label": "Ctrl",
         "offset": 0,
         "readOnly": true,
+        "someFunction": [Function],
         "target": null,
       }
     `);
@@ -360,6 +374,7 @@ describe("baseElement", () => {
         "label": "Hello",
         "offset": 0,
         "readOnly": true,
+        "someFunction": [Function],
         "target": null,
       }
     `);
@@ -374,6 +389,12 @@ describe("baseElement", () => {
     el.$options = null;
     expect(onGotChanges).toBeCalledTimes(2);
     expect(el.$options).toStrictEqual(TestEl.$defaults);
+
+    // assgin wrong number
+    const prev = el.$options.offset;
+    el.setAttribute("offset", "abc");
+    expect(() => jest.advanceTimersByTime(1)).toThrow();
+    expect(el.$options.offset).toBe(prev);
   });
 
   test("fireEvent", () => {

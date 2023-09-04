@@ -184,7 +184,7 @@ export default abstract class WUPBaseElement<
         let o = allObservedOptions.get(this.#ctr);
         if (o === undefined) {
           const arr = this.#ctr.observedOptions;
-          o = arr?.length ? new Set(arr) : null;
+          o = arr ? new Set(arr) : null;
           allObservedOptions.set(this.#ctr, o);
         }
         const watched = o;
