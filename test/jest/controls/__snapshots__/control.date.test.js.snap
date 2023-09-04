@@ -707,7 +707,7 @@ exports[`control.date common tests snapshot of $defaults 1`] = `
   "showCase": 70,
   "startWith": null,
   "storage": "local",
-  "storageKey": null,
+  "storageKey": "",
   "utc": true,
   "validateDebounceMs": 500,
   "validationCase": 13,

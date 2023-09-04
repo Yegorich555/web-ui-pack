@@ -1319,7 +1319,7 @@ exports[`control.calendar common tests snapshot of $defaults 1`] = `
   "readOnly": false,
   "startWith": null,
   "storage": "local",
-  "storageKey": null,
+  "storageKey": "",
   "utc": true,
   "validateDebounceMs": 500,
   "validationCase": 13,

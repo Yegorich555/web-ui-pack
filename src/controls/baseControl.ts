@@ -164,7 +164,7 @@ declare global {
        * * Override valueFromUrl & valueToUrl to change serializing (for complex objects, arrays etc.)
        * * Before API-call gather form.$model on init
        * @see {@link WUP.BaseControl.Options.storage}
-       * @defaultValue false */
+       * @defaultValue emptyString (means `false`) */
       storageKey?: boolean | string | null;
       /** Storage for saving value
        * @see {@link WUP.BaseControl.Options.storekey}
@@ -397,9 +397,6 @@ export default abstract class WUPBaseControl<
     m.autocomplete.type = AttributeTypes.string;
     m.label.type = AttributeTypes.string;
     m.name.type = AttributeTypes.string;
-    if (m.storagekey) {
-      m.storagekey.type = AttributeTypes.string; // can be removed for passwordContrl
-    }
     m.initvalue = {
       type: AttributeTypes.parseCustom, // it's parsed manually on gotChanges
       parse: (v) => v,
@@ -425,7 +422,7 @@ export default abstract class WUPBaseControl<
     label: null,
     name: null,
     storage: "local",
-    storageKey: null, // todo change to empty string and remove from mappedAttrs
+    storageKey: "",
   };
 
   static override cloneDefaults<T extends Record<string, any>>(): T {

@@ -639,7 +639,7 @@ exports[`control.number common tests snapshot of $defaults 1`] = `
   "readOnly": false,
   "selectOnFocus": false,
   "storage": "local",
-  "storageKey": null,
+  "storageKey": "",
   "validateDebounceMs": 500,
   "validationCase": 13,
   "validationRules": {

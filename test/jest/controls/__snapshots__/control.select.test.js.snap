@@ -790,7 +790,7 @@ exports[`control.select common tests snapshot of $defaults 1`] = `
   "selectOnFocus": false,
   "showCase": 102,
   "storage": "local",
-  "storageKey": null,
+  "storageKey": "",
   "validateDebounceMs": 500,
   "validationCase": 13,
   "validationRules": {

@@ -439,7 +439,7 @@ exports[`control.switch common tests snapshot of $defaults 1`] = `
   "readOnly": false,
   "reverse": false,
   "storage": "local",
-  "storageKey": null,
+  "storageKey": "",
   "validateDebounceMs": 500,
   "validationCase": 13,
   "validationRules": {

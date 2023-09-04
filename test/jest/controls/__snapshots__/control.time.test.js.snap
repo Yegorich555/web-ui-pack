@@ -862,7 +862,7 @@ exports[`control.time common tests snapshot of $defaults 1`] = `
   "showCase": 70,
   "step": 1,
   "storage": "local",
-  "storageKey": null,
+  "storageKey": "",
   "validateDebounceMs": 500,
   "validationCase": 13,
   "validationRules": {
