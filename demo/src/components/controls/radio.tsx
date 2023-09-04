@@ -48,6 +48,7 @@ export default function RadioControlView() {
       <wup-form
         ref={(el) => {
           if (el) {
+            el.setAttribute("autofocus", "");
             el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}

@@ -330,6 +330,13 @@ export default class WUPRadioControl<
     this.$refFieldset.onclick = r ? (e) => e.preventDefault() : null; // prevent changing input-readonly; attr readonly doesn't work for radio
   }
 
+  protected gotFocus(e: FocusEvent): Array<() => void> {
+    if (e.target !== this.$refInput) {
+      this.$refInput.focus(); // focus current input instead of focused 1st - possible when item is focused via form.autofocs
+    }
+    return super.gotFocus(e);
+  }
+
   override focus(): boolean {
     this.$refInput.focus();
     return document.activeElement === this.$refInput || super.focus();
@@ -342,5 +349,3 @@ export default class WUPRadioControl<
 }
 
 customElements.define(tagName, WUPRadioControl);
-
-// todo form:autofocus works on wrong item: expected current item

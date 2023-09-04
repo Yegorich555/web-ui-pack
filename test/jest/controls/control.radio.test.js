@@ -253,7 +253,7 @@ describe("control.radio", () => {
   });
 
   test("focus on current input", () => {
-    const el = testEl;
+    let el = testEl;
     el.$value = 20;
     jest.advanceTimersByTime(1);
     expect(el.$refInput).toBe(el.$refItems[1]);
@@ -264,6 +264,97 @@ describe("control.radio", () => {
     el.$refItems[1].disabled = true;
     el.focus();
     expect(document.activeElement).toBe(el.$refItems[0]);
+
+    el.$refItems[1].disabled = false;
+    el.focus();
+    expect(document.activeElement).toBe(el.$refItems[1]);
+
+    window.items = getItems();
+    document.body.innerHTML = `
+      <wup-form autofocus>
+        <wup-radio initvalue="20" items="window.items"></wup-radio>
+      </wup-form>
+    `;
+    jest.advanceTimersByTime(1);
+    expect(document.body).toMatchInlineSnapshot(`
+      <body>
+        
+            
+        <wup-form
+          autofocus=""
+          role="form"
+        >
+          
+              
+          <wup-radio
+            initvalue="20"
+            items="window.items"
+          >
+            <fieldset>
+              <legend>
+                <strong />
+              </legend>
+              <label
+                for="txt7"
+              >
+                <input
+                  id="txt7"
+                  name="txt6473"
+                  tabindex="0"
+                  type="radio"
+                />
+                <span>
+                  Donny
+                </span>
+              </label>
+              <label
+                for="txt8"
+              >
+                <input
+                  autocomplete="off"
+                  id="txt8"
+                  name="txt6473"
+                  type="radio"
+                />
+                <span>
+                  Mikky
+                </span>
+              </label>
+              <label
+                for="txt9"
+              >
+                <input
+                  id="txt9"
+                  name="txt6473"
+                  type="radio"
+                />
+                <span>
+                  Leo
+                </span>
+              </label>
+              <label
+                for="txt10"
+              >
+                <input
+                  id="txt10"
+                  name="txt6473"
+                  type="radio"
+                />
+                <span>
+                  Splinter
+                </span>
+              </label>
+            </fieldset>
+          </wup-radio>
+          
+            
+        </wup-form>
+        
+          
+      </body>
+    `);
+    el = document.body.querySelector("wup-radio");
+    expect(document.activeElement).toBe(el.$refItems[1]);
   });
 
   test("storage", async () => {

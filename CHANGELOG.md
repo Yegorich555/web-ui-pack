@@ -12,6 +12,10 @@
 - [SpinElement](src/spinElement.ts). Defaults `fit` & `overflowTarget` = `auto` instead of `null`
 - **Controls**. Option `skey` renamed to `storageKey`
 
+**Fixes**:
+
+- [RadioControl](src/controls/radio.ts). _autoFocus makes focused 1st but not active input when `form.$options.autoFocus=true`_
+
 ## 0.8.1 (Aug 29, 2023)
 
 **BREAKING CHANGES**:

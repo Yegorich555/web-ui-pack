@@ -510,8 +510,7 @@ export default abstract class WUPBaseElement<
   }
 
   /** Returns parsed value according to pointed type OR current value if something wrong;
-   * override method for implementation custom parsing OR static method mappedAttributes to redefine map-types
-   */
+   * override method for implementation custom parsing OR static method mappedAttributes to redefine map-types */
   parseAttr(type: AttributeTypes, attrValue: string, propName: string, attrName: string): any {
     const prev = this._opts[propName];
     // eslint-disable-next-line default-case
