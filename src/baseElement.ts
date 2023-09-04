@@ -5,7 +5,6 @@ import focusFirst from "./helpers/focusFirst";
 import nestedProperty from "./helpers/nestedProperty";
 import observer, { Observer } from "./helpers/observer";
 import onEvent, { onEventType } from "./helpers/onEvent";
-import objectClone from "./helpers/objectClone";
 import { WUPcssHidden } from "./styles";
 
 // theoritcally such single appending is faster than using :host inside shadowComponent
@@ -135,6 +134,17 @@ export default abstract class WUPBaseElement<
   /** Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item */
   static $defaults: Record<string, any> = {};
 
+  /** Merge options with $defaults; Object.assign merges values 'undefined' by the method replace undefined with defaults */
+  static mergeDefaults<T extends Record<string, any>>(opts: T): T {
+    const def = this.$defaults;
+    Object.keys(def).forEach((k) => {
+      if (opts[k] === undefined) {
+        opts[k as keyof T] = def[k];
+      }
+    });
+    return opts;
+  }
+
   /** Raw part of $options for internal usage (.$options is Proxy object and better avoid useless extra-calles via Proxy) */
   // @ts-expect-error - TS doesn't see that init happens via constructor.$options = null;
   protected _opts: TOptions; // = objectClone(this.#ctr.$defaults) as TOptions;
@@ -169,16 +179,15 @@ export default abstract class WUPBaseElement<
   }
 
   /** Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally */
-  set $options(v: TOptions) {
+  set $options(v: Partial<TOptions>) {
     if (this._opts === v) {
       return;
     }
     const prev = this._opts;
     if (!v) {
-      // todo skip undefined & nulls to reduce $options.size per each objects & recheck every element again
-      v = objectClone(this.#ctr.$defaults) as TOptions;
+      v = { ...this.#ctr.$defaults } as TOptions;
     }
-    this._opts = v;
+    this._opts = v as TOptions;
 
     if (this.$isReady) {
       // unsubscribe from previous events here
@@ -302,13 +311,7 @@ export default abstract class WUPBaseElement<
 
   /** Called on Init and every time as options/attributes changed */
   protected gotChanges(propsChanged: Array<string> | null): void {
-    // replace all undefined with defaults
-    const o = this._opts; // WARN: when user makes ...$options = { item1: ...} then it will be merged with defaults: NiceToHave use getOption(key) every time so don't need to create extra object
-    Object.keys(this.#ctr.$defaults).forEach((k) => {
-      if (o[k] === undefined) {
-        o[k as keyof TOptions] = this.#ctr.$defaults[k];
-      }
-    });
+    this.#ctr.mergeDefaults(this._opts);
   }
 
   /** Called when element isReady and at least one of observedOptions is changed */
@@ -316,9 +319,6 @@ export default abstract class WUPBaseElement<
     this._isStopChanges = true;
     e.props.forEach((p) => {
       this.removeAttribute(p);
-      if (this._opts[p] === undefined) {
-        this._opts[p as keyof TOptions] = objectClone(this.#ctr.$defaults[p]);
-      }
     }); // remove related attributes otherwise impossible to override
     this.gotChanges(e.props);
     this._isStopChanges = false;
@@ -365,7 +365,7 @@ export default abstract class WUPBaseElement<
     const key = m.prop ?? name;
     // eslint-disable-next-line no-nested-ternary
     this._opts[key as keyof TOptions] = isRemoved
-      ? objectClone(this.#ctr.$defaults[key]) // value == null when attr is removed, then need to rollback to default
+      ? this.#ctr.$defaults[key] // value == null when attr is removed, then need to rollback to default
       : m.parse
       ? m.parse(value)
       : this.parseAttr(m.type, value, key, name);
