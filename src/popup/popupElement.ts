@@ -214,6 +214,12 @@ export default class WUPPopupElement<
     hoverHideTimeout: 500,
   };
 
+  static override cloneDefaults<T extends Record<string, any>>(): T {
+    const d = super.cloneDefaults() as WUP.Popup.Options;
+    d.placement = [...d.placement];
+    return d as unknown as T;
+  }
+
   /** Listen for target according to showCase and create/remove popup when it's required (by show/hide).
    *  This helps to avoid tons of hidden popups on HTML;
    *  Firing detach doesn't required if target removed by target.remove() or target.parent.removeChild(target);
@@ -835,7 +841,7 @@ export default class WUPPopupElement<
     }
     this.#state!.prevScreenSize = { w: screenSize.vw, h: screenSize.vh };
 
-    const fitEl = this._opts.toFitElement || document.body;
+    const fitEl = this._opts.toFitElement; /* || document.body */
     const fit = getBoundingInternalRect(fitEl) as WUP.Popup.Place.Rect;
     fit.el = fitEl;
     const a = this._opts.offsetFitElement;

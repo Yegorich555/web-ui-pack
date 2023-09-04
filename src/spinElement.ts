@@ -142,6 +142,13 @@ export default class WUPSpinElement<
     fit: "auto",
   };
 
+  /** Used to clone defaults to options on init; override it to clone  */
+  static override cloneDefaults<T extends Record<string, any>>(): T {
+    const d = super.cloneDefaults() as WUP.Spin.Options;
+    d.overflowOffset = [...d.overflowOffset];
+    return d as unknown as T;
+  }
+
   static _itemsCount = 1;
 
   /** Force to update position (when options changed) */

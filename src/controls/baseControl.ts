@@ -428,6 +428,13 @@ export default abstract class WUPBaseControl<
     skey: null, // todo change to empty string and remove from mappedAttrs
   };
 
+  static override cloneDefaults<T extends Record<string, any>>(): T {
+    const d = super.cloneDefaults() as WUP.BaseControl.Options;
+    // @ts-expect-error
+    delete d.validationRules;
+    return d as unknown as T;
+  }
+
   /** Called on value change */
   $onChange?: (e: CustomEvent & { detail: SetValueReasons }) => void;
 

@@ -153,6 +153,28 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
         expect(c.observedOptions?.sort()).toMatchSnapshot();
         expect(c.observedAttributes?.sort()).toMatchSnapshot();
       });
+
+      test("$defaults cloned secure", () => {
+        const wrongCloned = Object.keys(c.$defaults)
+          .map((k) => k)
+          .filter((k) => {
+            const def = c.$defaults[k];
+            if (def == null) {
+              return false;
+            }
+            switch (typeof def) {
+              case "function":
+              case "object":
+                if (obj.$options[k] === def && !(def instanceof HTMLElement)) {
+                  return true;
+                }
+                return false;
+              default:
+                return false;
+            }
+          });
+        expect(wrongCloned).toStrictEqual([]); // expected that complex objects & functions properly cloned otherwise user can change defaults via options
+      });
     }
 
     if (!opts?.skipAttrs && obj instanceof WUPBaseElement) {
@@ -192,7 +214,7 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
           }
 
           // changing attribute affects on option
-          obj.setAttribute(attrName, attrVal);
+          obj.setAttribute(attrName, attrVal as string);
           jest.advanceTimersByTime(1);
           expect({ propName, propVal: obj.$options[propName] }).toStrictEqual({
             propName,
@@ -212,7 +234,7 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
           });
 
           // changing option must remove attribute
-          obj.setAttribute(attrName, attrVal);
+          obj.setAttribute(attrName, attrVal as string);
           obj.$options[propName] = undefined;
           jest.advanceTimersByTime(1);
           expect({ attrName, attrVal: obj.getAttribute(attrName) }).toStrictEqual({ attrName, attrVal: null });

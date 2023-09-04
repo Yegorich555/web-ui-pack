@@ -134,12 +134,38 @@ export default abstract class WUPBaseElement<
   /** Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item */
   static $defaults: Record<string, any> = {};
 
+  /** Used to clone single value (from defaults) */
+  static cloneValue<T>(v: T): T {
+    if (v == null) {
+      return v;
+    }
+    switch (typeof v) {
+      case "function":
+        return v;
+      case "object":
+        if (Array.isArray(v)) {
+          return [...v] as T;
+        }
+        if (v instanceof HTMLElement) {
+          return v;
+        }
+        return { ...v };
+      default:
+        return v;
+    }
+  }
+
+  /** Used to clone defaults to options on init; override it to clone  */
+  static cloneDefaults<T extends Record<string, any>>(): T {
+    return { ...this.$defaults } as T;
+  }
+
   /** Merge options with $defaults; Object.assign merges values 'undefined' by the method replace undefined with defaults */
   static mergeDefaults<T extends Record<string, any>>(opts: T): T {
     const def = this.$defaults;
     Object.keys(def).forEach((k) => {
-      if (opts[k] === undefined) {
-        opts[k as keyof T] = def[k];
+      if (opts[k] == null) {
+        opts[k as keyof T] = this.cloneValue(def[k]);
       }
     });
     return opts;
@@ -185,7 +211,7 @@ export default abstract class WUPBaseElement<
     }
     const prev = this._opts;
     if (!v) {
-      v = { ...this.#ctr.$defaults } as TOptions;
+      v = this.#ctr.cloneDefaults() as TOptions;
     }
     this._opts = v as TOptions;
 
@@ -311,7 +337,7 @@ export default abstract class WUPBaseElement<
 
   /** Called on Init and every time as options/attributes changed */
   protected gotChanges(propsChanged: Array<string> | null): void {
-    this.#ctr.mergeDefaults(this._opts);
+    this.#ctr.mergeDefaults(this._opts); // WARN during the init it fired twice: 1st: cloned defaults, 2nd: merge defaults here
   }
 
   /** Called when element isReady and at least one of observedOptions is changed */
@@ -365,7 +391,7 @@ export default abstract class WUPBaseElement<
     const key = m.prop ?? name;
     // eslint-disable-next-line no-nested-ternary
     this._opts[key as keyof TOptions] = isRemoved
-      ? this.#ctr.$defaults[key] // value == null when attr is removed, then need to rollback to default
+      ? this.#ctr.cloneValue(this.#ctr.$defaults[key]) // value == null when attr is removed, then need to rollback to default
       : m.parse
       ? m.parse(value)
       : this.parseAttr(m.type, value, key, name);

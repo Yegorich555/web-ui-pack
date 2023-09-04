@@ -194,6 +194,12 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     items: [],
   };
 
+  static override cloneDefaults<T extends Record<string, any>>(): T {
+    const d = super.cloneDefaults() as WUP.Circle.Options;
+    d.items = [];
+    return d as unknown as T;
+  }
+
   $refSVG = this.make("svg");
   $refItems = this.make("g");
   $refLabel?: HTMLElement;

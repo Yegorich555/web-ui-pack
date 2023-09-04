@@ -193,6 +193,12 @@ export default class WUPRadioControl<
     reverse: false,
   };
 
+  static override cloneDefaults<T extends Record<string, any>>(): T {
+    const d = super.cloneDefaults() as WUP.Radio.Options;
+    d.items = [];
+    return d as unknown as T;
+  }
+
   /** Called when need to parse attr [initValue] */
   override parse(attrValue: string): ValueType | undefined {
     const a = this.getItems() as WUP.Select.MenuItemText<ValueType>[];

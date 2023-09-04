@@ -168,6 +168,12 @@ export default class WUPSelectControl<
     items: [],
   };
 
+  static override cloneDefaults<T extends Record<string, any>>(): T {
+    const d = super.cloneDefaults() as WUP.Select.Options;
+    d.items = [];
+    return d as unknown as T;
+  }
+
   /** Returns whether control in pending state or not (shows spinner) */
   get $isPending(): boolean {
     return !!this.#stopPending;
