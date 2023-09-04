@@ -84,6 +84,8 @@ describe("dropdownElement", () => {
   test("basic usage", async () => {
     expect(el.$refPopup).toBeDefined();
     expect(el.$refPopup.$isShown).toBe(false);
+    expect(el.$refPopup.$options.animation).toBe(1);
+    expect(el.$refPopup.$options.placement).toBe(el.constructor.$defaults.placement);
     await h.userClick(trg);
     expect(el.$refPopup.$isShown).toBe(true);
     expect(el.outerHTML).toMatchInlineSnapshot(`
@@ -111,6 +113,25 @@ describe("dropdownElement", () => {
           </wup-popup>
         </wup-dropdown>"
     `);
+
+    // attrs from popupEl must overide defaults from dropdownEl
+    document.body.innerHTML = `
+      <wup-dropdown>
+        <button>Click me</button>
+        <wup-popup placement="left-middle" animation="stack">
+          <ul>
+            <li><button>A</button></li>
+            <li><button>B</button></li>
+          </ul>
+        </wup-popup>
+      </wup-dropdown>
+      `;
+    el = document.body.querySelector("wup-dropdown");
+    await h.wait();
+    expect(el.$refPopup).toBeDefined();
+    expect(el.$refPopup.$isShown).toBe(false);
+    expect(el.$refPopup.$options.animation).toBe(2);
+    expect(el.$refPopup.$options.placement).toStrictEqual(el.$refPopup.constructor.$placementAttrs("left-middle"));
   });
 
   test("menu is popup itself", async () => {
@@ -126,8 +147,8 @@ describe("dropdownElement", () => {
     expect(document.body.innerHTML).toMatchInlineSnapshot(`
       "
               <wup-dropdown>
-                <button aria-owns="wup3" aria-controls="wup3" aria-haspopup="listbox" aria-expanded="false">Click me</button>
-                <wup-popup style="opacity: 0;" menu="" id="wup3" tabindex="-1">
+                <button aria-owns="wup4" aria-controls="wup4" aria-haspopup="listbox" aria-expanded="false">Click me</button>
+                <wup-popup style="opacity: 0;" menu="" id="wup4" tabindex="-1">
                   <button>A</button>
                   <button>B</button>
                 </wup-popup>
