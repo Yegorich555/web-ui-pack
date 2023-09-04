@@ -68,7 +68,7 @@ declare global {
       mask?: string | null | undefined;
       /** Placeholder for mask. By default it inherits from mask. To disabled it set `false`;
        *  for date maskholder can be 'yyyy-mm-dd' */
-      maskholder?: string | false | null | undefined; // todo set 'true' by default instead of empty string
+      maskholder?: string | false | null | undefined;
       /** Part before input; for example for value "$ 123 USD" prefix is "$ " */
       prefix?: string | null | undefined;
       /** Part after input; for example for value "$ 123 USD" prefix is " USD" */
