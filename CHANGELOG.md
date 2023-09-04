@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.9.1 (\_\_\_)
+
+**BREAKING CHANGES**:
+
+- **Internals** (**Note:** Skip this if you haven't created custon Elements inherrited from WUP...)
+  - Added auto-mapping between attributes <=> options based on key-values in `$defaults`
+  - Removed interface `Defaults`. Merged with interface `Options` and now contains all fields as required
+  - Now removing attributes/options always rollbacks to value defined in `$defaults`
+  - Method `getAttr` changed to `parseAttr`
+- [SpinElement](src/spinElement.ts). Defaults `fit` & `overflowTarget` = `auto` instead of `null`
+- **Controls**. Option `skey` renamed to `storageKey`
+
 ## 0.8.1 (Aug 29, 2023)
 
 **BREAKING CHANGES**:

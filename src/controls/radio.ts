@@ -6,8 +6,7 @@ declare global {
   namespace WUP.Radio {
     interface EventMap extends WUP.BaseControl.EventMap {}
     interface ValidityMap extends WUP.BaseControl.ValidityMap {}
-    interface Defaults<T = any, VM = ValidityMap> extends WUP.BaseControl.Defaults<T, VM> {}
-    interface Options<T = any, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, Defaults<T, VM> {
+    interface Options<T = any, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM> {
       /** Items showed as radio-buttons
        * @tutorial Troubleshooting
        * * array items is converted to Proxy (observer) so
@@ -20,7 +19,7 @@ declare global {
       items: WUP.Select.MenuItems<T> | (() => WUP.Select.MenuItems<T>);
       /** Reversed-style (radio+label for true vs label+radio)
        * @defaultValue false */
-      reverse?: boolean;
+      reverse: boolean;
     }
     interface Attributes extends WUP.BaseControl.Attributes {
       /** Items showed as radio-buttons. Point global obj-key with items (set `window.inputRadio.items` for `window.inputRadio.items = [{value: 1, text: 'Item 1'}]` ) */
@@ -187,26 +186,17 @@ export default class WUPRadioControl<
      `;
   }
 
-  static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUP.Radio.Options>;
-    arr.push("reverse", "items");
-    return arr;
-  }
-
-  static get observedAttributes(): Array<string> {
-    const arr = super.observedAttributes as Array<LowerKeys<WUP.Radio.Attributes>>;
-    arr.push("reverse", "items");
-    return arr;
-  }
-
-  static $defaults: WUP.Radio.Defaults = {
+  static $defaults: WUP.Radio.Options = {
     ...WUPBaseControl.$defaults,
     validationRules: { ...WUPBaseControl.$defaults.validationRules },
+    items: [],
+    reverse: false,
   };
 
-  constructor() {
-    super();
-    this._opts.items = [];
+  static override cloneDefaults<T extends Record<string, any>>(): T {
+    const d = super.cloneDefaults() as WUP.Radio.Options;
+    d.items = [];
+    return d as unknown as T;
   }
 
   /** Called when need to parse attr [initValue] */
@@ -313,17 +303,14 @@ export default class WUPRadioControl<
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Radio.Options> | null): void {
+    this._opts.items ??= [];
     const isNeedRenderItems = !propsChanged || propsChanged.includes("items");
     if (isNeedRenderItems) {
       this.#cachedItems = undefined;
       // it's important to be before super otherwise initValue won't work
-      this._opts.items = this.getAttr<WUP.Radio.Options["items"]>("items", "ref") || [];
       this.renderItems(this.$refFieldset);
     }
-
     super.gotChanges(propsChanged as any);
-
-    this._opts.reverse = this.getAttr("reverse", "bool");
     this.setAttr("reverse", this._opts.reverse, true);
 
     const req = this.validations?.required;
@@ -335,12 +322,6 @@ export default class WUPRadioControl<
     this.$refInput.disabled = false;
     this.$refFieldset.disabled = this.$isDisabled as boolean;
     this.$ariaDetails(this.$isReadOnly ? this.#ctr.$ariaReadonly : null);
-  }
-
-  protected override gotOptionsChanged(e: WUP.Base.OptionEvent): void {
-    this._isStopChanges = true;
-    e.props.includes("reverse") && this.setAttr("reverse", this._opts.reverse, true);
-    super.gotOptionsChanged(e);
   }
 
   override setupInputReadonly(): void {
@@ -361,3 +342,5 @@ export default class WUPRadioControl<
 }
 
 customElements.define(tagName, WUPRadioControl);
+
+// todo form:autofocus works on wrong item: expected current item

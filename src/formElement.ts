@@ -1,4 +1,4 @@
-import WUPBaseElement from "./baseElement";
+import WUPBaseElement, { AttributeMap, AttributeTypes } from "./baseElement";
 import IBaseControl from "./controls/baseControl.i";
 import { nestedProperty, promiseWait, scrollIntoView } from "./indexHelpers";
 import WUPSpinElement from "./spinElement";
@@ -48,7 +48,7 @@ declare global {
       $submit: SubmitEvent<any>;
     }
 
-    interface Defaults {
+    interface Options {
       /** Actions that enabled on submit event; You can point several like: `goToError | collectChanged`
        * @defaultValue goToError | validateUntiFirst | reset | lockOnPending */
       submitActions: SubmitActions;
@@ -56,30 +56,25 @@ declare global {
        * @defaultValue false
        * @tutorial Troubleshooting
        * * It doesn't save values that are complex objects. So `wup-select.$options.items = [{text: "N1",value: {id:1,name:'Nik'} }]` is skipped
-       * * Point string-value if default storage-key doesn't fit: based on `url+control.names` @see{@link WUPFormElement.storageKey} */
-      autoSave?: boolean | string;
-    }
-
-    interface Options extends Defaults {
-      /** Focus first possible element when it's appended to layout */
-      autoFocus?: boolean;
-      /** Disallow edit/copy value; adds attr [disabled] for styling */
-      disabled?: boolean;
-      /** Disallow copy value; adds attr [readonly] for styling */
-      readOnly?: boolean;
+       * * Point string-value if default storage-key doesn't fit: based on `url+control.names` @see{@link WUPFormElement.storageKey}
+       * @defaultValue false */
+      autoSave: boolean | string;
+      /** Focus first possible element when it's appended to layout
+       * @defaultValue false */
+      autoFocus: boolean;
+      /** Disallow edit/copy value; adds attr [disabled] for styling
+       * @defaultValue false */
+      disabled: boolean;
+      /** Disallow copy value; adds attr [readonly] for styling
+       * @defaultValue false */
+      readOnly: boolean;
       /** Enable/disable browser-autocomplete; if control has no autocomplete option then it's inherited from form
        *  @defaultValue false */
-      autoComplete?: boolean;
+      autoComplete: boolean;
     }
 
-    interface Attributes extends Pick<Options, "disabled" | "readOnly" | "autoComplete" | "autoFocus" | "autoSave"> {}
-
+    interface Attributes extends Partial<Options> {}
     interface JSXProps<T extends WUPFormElement> extends WUP.Base.JSXProps<T>, Attributes {
-      /** Whether need to store data in localStorage to prevent losing till submitted;
-       * @defaultValue false
-       * @tutorial Troubleshooting
-       * * It doesn't save values that are complex objects. So `wup-select.$options.items = [{text: "N1",value: {id:1,name:'Nik'} }]` is skipped
-       * * Point string-value if default storage-key doesn't fit: based on `url+control.names` @see{@link WUPFormElement.storageKey} */
       autoSave?: string;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
       onChange?: never;
@@ -161,16 +156,6 @@ export default class WUPFormElement<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPFormElement;
 
-  /** Options that need to watch for changes; use gotOptionsChanged() */
-  static get observedOptions(): Array<keyof WUP.Form.Options> {
-    return ["disabled", "readOnly", "autoComplete", "autoSave"];
-  }
-
-  /* Array of attribute names to listen for changes */
-  static get observedAttributes(): Array<LowerKeys<WUP.Form.Attributes>> {
-    return ["disabled", "readonly", "autocomplete", "autosave"];
-  }
-
   static get $styleRoot(): string {
     return `:root {
       --btn-submit-bg: var(--base-btn-bg);
@@ -188,6 +173,12 @@ export default class WUPFormElement<
           margin: auto;
         }
         ${WUPcssButton(":host [type='submit']")}`;
+  }
+
+  static get mappedAttributes(): Record<string, AttributeMap> {
+    const m = super.mappedAttributes;
+    m.autosave.type = AttributeTypes.string;
+    return m;
   }
 
   /** Find form related to control,register and apply initModel if initValue undefined */
@@ -233,9 +224,14 @@ export default class WUPFormElement<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUP.Form.Defaults = {
+  static $defaults: WUP.Form.Options = {
     submitActions:
       SubmitActions.goToError | SubmitActions.validateUntiFirst | SubmitActions.reset | SubmitActions.lockOnPending,
+    autoComplete: false,
+    autoFocus: false,
+    autoSave: false,
+    disabled: false,
+    readOnly: false,
   };
 
   /** Dispatched on submit. Return promise to lock form and show spinner */
@@ -418,21 +414,12 @@ export default class WUPFormElement<
   /** Auto-safe debounce timeout */
   #autoSaveT?: ReturnType<typeof setTimeout>;
   #autoSaveRemEv?: () => void;
-  #hasControlChanges?: boolean;
-  protected override gotChanges(
-    propsChanged: Array<keyof WUP.Form.Options | LowerKeys<WUP.Form.Options>> | null
-  ): void {
+  protected override gotChanges(propsChanged: Array<keyof WUP.Form.Options> | null): void {
     super.gotChanges(propsChanged);
-
-    this._opts.disabled = this.getAttr("disabled", "bool");
-    this._opts.readOnly = this.getAttr("readonly", "bool", this._opts.readOnly);
-    this._opts.autoComplete = this.getAttr("autocomplete", "bool", this._opts.autoComplete);
-    this._opts.autoFocus = this.getAttr("autofocus", "bool", this._opts.autoFocus);
 
     this.setAttr("readonly", this._opts.readOnly, true);
     this.setAttr("disabled", this._opts.disabled, true);
 
-    this._opts.autoSave = this.getAttr("autosave", "boolOrString", this._opts.autoSave);
     if (this._opts.autoSave) {
       this.#autoSaveRemEv = this.appendEvent(this, "$change", () => {
         if (this._preventStorageSave) {
@@ -458,27 +445,9 @@ export default class WUPFormElement<
     }
 
     const p = propsChanged;
-    if (this.#hasControlChanges || p?.includes("disabled")) {
+    if (p && (p.includes("disabled") || p.includes("autoComplete") || p.includes("readOnly"))) {
       this.$controls.forEach((c) => c.gotFormChanges(propsChanged));
-      this.#hasControlChanges = undefined;
     }
-  }
-
-  protected override gotOptionsChanged(e: WUP.Base.OptionEvent<Record<string, any>>): void {
-    const p = e.props as Array<keyof WUP.Form.Options>;
-    if (p.includes("autoComplete") || p.includes("readOnly")) {
-      this.#hasControlChanges = true;
-    }
-
-    super.gotOptionsChanged(e);
-  }
-
-  protected override gotAttributeChanged(name: string, oldValue: string, newValue: string): void {
-    if (name === "autocomplete" || name === "readonly") {
-      this.#hasControlChanges = true;
-    }
-
-    super.gotAttributeChanged(name, oldValue, newValue);
   }
 
   protected override gotReady(): void {

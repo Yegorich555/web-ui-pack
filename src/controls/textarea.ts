@@ -9,12 +9,15 @@ declare global {
   namespace WUP.Textarea {
     interface EventMap extends WUP.Text.EventMap {}
     interface ValidityMap extends WUP.Text.ValidityMap {}
-    interface Defaults<T = string, VM = ValidityMap> extends WUP.Text.Defaults<T, VM> {}
     interface Options<T = string, VM = ValidityMap>
-      extends Omit<WUP.Text.Options<T, VM>, "mask" | "maskholder" | "prefix" | "postfix">,
-        Defaults<T, VM> {}
-    interface Attributes extends WUP.Text.Attributes {}
-    interface JSXProps<C = WUPTextareaControl> extends WUP.Text.JSXProps<C>, Attributes {}
+      extends Omit<WUP.Text.Options<T, VM>, "mask" | "maskholder" | "prefix" | "postfix"> {}
+    // @ts-expect-error
+    interface Attributes
+      extends Omit<WUP.Text.Attributes, "mask" | "maskholder" | "prefix" | "postfix">,
+        Partial<Options> {}
+    interface JSXProps<C = WUPTextareaControl>
+      extends Omit<WUP.Text.JSXProps<C>, "mask" | "maskholder" | "prefix" | "postfix">,
+        Attributes {}
   }
 
   interface HTMLElementTagNameMap {
@@ -61,7 +64,7 @@ export default class WUPTextareaControl<
   EventMap extends WUP.Textarea.EventMap = WUP.Textarea.EventMap
 > extends WUPTextControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
-  #ctr = this.constructor as typeof WUPTextareaControl;
+  // #ctr = this.constructor as typeof WUPTextareaControl;
 
   static get $style(): string {
     return `${super.$style}
@@ -73,7 +76,7 @@ export default class WUPTextareaControl<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUP.Textarea.Defaults = {
+  static $defaults: WUP.Textarea.Options = {
     ...WUPTextControl.$defaults,
     validationRules: {
       ...WUPTextControl.$defaults.validationRules,
@@ -187,5 +190,10 @@ export default class WUPTextareaControl<
     this.setInputValue(this.$value as string, SetValueReasons.userInput); // update because newLine is replaced
   }
 }
+
+// prettify defaults before create
+let rr: Array<keyof WUP.Text.Options> | undefined = ["mask", "maskholder", "prefix", "postfix"];
+rr.forEach((k) => delete WUPTextareaControl.$defaults[k as keyof WUP.Textarea.Options]);
+rr = undefined;
 
 customElements.define(tagName, WUPTextareaControl);

@@ -122,8 +122,8 @@ export default function SelectManyControlView() {
         />
         <wup-selectmany //
           name="saveUrlSmany"
-          label="With saving to URL (see $options.skey & storage)"
-          skey
+          label="With saving to URL (see $options.storageKey & storage)"
+          storageKey
           storage="url"
           ref={(el) => {
             if (el) {

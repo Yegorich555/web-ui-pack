@@ -76,3 +76,28 @@ padding:0;}
       }
 </style>
 `;
+
+exports[`spinElement common tests snapshot of $defaults 1`] = `
+{
+  "fit": "auto",
+  "inline": false,
+  "overflowFade": true,
+  "overflowOffset": [
+    4,
+    4,
+  ],
+  "overflowTarget": "auto",
+}
+`;
+
+exports[`spinElement common tests snapshot of $defaults 2`] = `undefined`;
+
+exports[`spinElement common tests snapshot of $defaults 3`] = `
+[
+  "fit",
+  "inline",
+  "overflowfade",
+  "overflowoffset",
+  "overflowtarget",
+]
+`;

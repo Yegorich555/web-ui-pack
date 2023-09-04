@@ -69,16 +69,24 @@ describe("control.date", () => {
       exclude: { set: [new Date("2022-07-15")], failValue: new Date("2022-07-15"), trueValue: new Date("2022-07-16") },
     },
     attrs: {
-      min: { value: "2022-05-20" },
-      max: { value: "2022-05-21" },
-      exclude: { refGlobal: [new Date("2009-02-06")] },
-      mask: { skip: true },
-      maskholder: { skip: true },
-      format: { skip: true },
-    },
-    $options: {
-      mask: { skip: true },
-      maskholder: { skip: true },
+      prefix: { value: "$" },
+      postfix: { value: "USD" },
+      clearbutton: { value: true },
+      debouncems: { value: 5 },
+      selectonfocus: { value: true },
+      readonlyinput: { value: true },
+      showcase: { value: 1 },
+
+      mask: { value: "#0-#0-0000", nullValue: "0000-00-00" },
+      maskholder: { value: "dd-mm-yyyy", nullValue: "YYYY-MM-DD" },
+      format: { value: "dd-mm-yyyy", nullValue: "yyyy-mm-dd" },
+
+      utc: { value: true },
+      min: { value: "2022-05-20", parsedValue: new Date("2022-05-20") },
+      max: { value: "2022-05-21", parsedValue: new Date("2022-05-21") },
+      exclude: { value: [new Date("2009-02-06")] },
+      startwith: { skip: true }, // tested manually
+      firstweekday: { value: 1 },
     },
     validationsSkip: ["_parse", "_mask"],
   });
@@ -190,10 +198,11 @@ describe("control.date", () => {
       el.$value = new Date("2022-10-15T12:40:59.000Z"); // utc
       expect(el.$refInput.value).toBe("2022-10-15"); // just for coverage
 
+      const prev = el.$options.min;
       el.setAttribute("min", "abc");
       expect(() => jest.advanceTimersByTime(1)).toThrow();
       await h.wait(1);
-      expect(el.$options.min).toBe(undefined);
+      expect(el.$options.min).toBe(prev);
 
       el.focus();
       await h.wait();

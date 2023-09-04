@@ -717,6 +717,71 @@ mask-image: var(--ctrl-icon-img);
 </style>
 `;
 
+exports[`control.pwd common tests snapshot of $defaults 1`] = `
+{
+  "autoComplete": null,
+  "autoFocus": false,
+  "clearActions": 2,
+  "clearButton": true,
+  "debounceMs": 0,
+  "disabled": false,
+  "focusDebounceMs": 100,
+  "label": null,
+  "name": null,
+  "postfix": "",
+  "prefix": "",
+  "readOnly": false,
+  "reverse": false,
+  "selectOnFocus": false,
+  "validateDebounceMs": 500,
+  "validationCase": 13,
+  "validationRules": {
+    "$alwaysInvalid": [Function],
+    "$alwaysValid": [Function],
+    "_mask": [Function],
+    "_parse": [Function],
+    "confirm": [Function],
+    "email": [Function],
+    "max": [Function],
+    "min": [Function],
+    "minLower": [Function],
+    "minNumber": [Function],
+    "minUpper": [Function],
+    "required": [Function],
+    "special": [Function],
+  },
+  "validationShowAll": false,
+  "validations": null,
+}
+`;
+
+exports[`control.pwd common tests snapshot of $defaults 2`] = `undefined`;
+
+exports[`control.pwd common tests snapshot of $defaults 3`] = `
+[
+  "autocomplete",
+  "autofocus",
+  "clearactions",
+  "clearbutton",
+  "debouncems",
+  "disabled",
+  "focusdebouncems",
+  "initvalue",
+  "label",
+  "name",
+  "postfix",
+  "prefix",
+  "readonly",
+  "reverse",
+  "selectonfocus",
+  "validatedebouncems",
+  "validationcase",
+  "validationrules",
+  "validations",
+  "validationshowall",
+]
+`;
+
 exports[`control.pwd options clearButton 1`] = `
 <wup-pwd>
   <label

@@ -35,14 +35,6 @@ export default function SwitchControlView() {
           initValue={false}
           reverse={false}
         />
-        <wup-switch
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "required";
-              el.$options.validations = { required: true };
-            }
-          }}
-        />
         <wup-switch label="Very very very incredible long label to check if it has ellipsis rule and it works as expected" />
         <wup-switch name="reversed" reverse="" />
         <wup-switch
@@ -56,8 +48,8 @@ export default function SwitchControlView() {
         <wup-switch name="readonly" readOnly initValue />
         <wup-switch //
           name="saveUrlSwitch"
-          label="With saving to URL (see $options.skey & storage)"
-          skey
+          label="With saving to URL (see $options.storageKey & storage)"
+          storageKey
           storage="url"
         />
         <button type="submit">Submit</button>

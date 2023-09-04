@@ -620,6 +620,72 @@ mask-image: var(--ctrl-icon-img);
 </style>
 `;
 
+exports[`control.number common tests snapshot of $defaults 1`] = `
+{
+  "autoComplete": null,
+  "autoFocus": false,
+  "clearActions": 2,
+  "clearButton": true,
+  "debounceMs": 0,
+  "disabled": false,
+  "focusDebounceMs": 100,
+  "format": null,
+  "label": null,
+  "mask": "",
+  "maskholder": "",
+  "name": null,
+  "postfix": "",
+  "prefix": "",
+  "readOnly": false,
+  "selectOnFocus": false,
+  "storage": "local",
+  "storageKey": "",
+  "validateDebounceMs": 500,
+  "validationCase": 13,
+  "validationRules": {
+    "$alwaysInvalid": [Function],
+    "$alwaysValid": [Function],
+    "_mask": [Function],
+    "max": [Function],
+    "min": [Function],
+    "required": [Function],
+  },
+  "validationShowAll": false,
+  "validations": null,
+}
+`;
+
+exports[`control.number common tests snapshot of $defaults 2`] = `undefined`;
+
+exports[`control.number common tests snapshot of $defaults 3`] = `
+[
+  "autocomplete",
+  "autofocus",
+  "clearactions",
+  "clearbutton",
+  "debouncems",
+  "disabled",
+  "focusdebouncems",
+  "format",
+  "initvalue",
+  "label",
+  "mask",
+  "maskholder",
+  "name",
+  "postfix",
+  "prefix",
+  "readonly",
+  "selectonfocus",
+  "storage",
+  "storagekey",
+  "validatedebouncems",
+  "validationcase",
+  "validationrules",
+  "validations",
+  "validationshowall",
+]
+`;
+
 exports[`control.number validations $options.validationShowAll 1`] = `
 <wup-num
   invalid=""

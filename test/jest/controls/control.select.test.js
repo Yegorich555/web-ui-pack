@@ -42,6 +42,20 @@ initTestBaseControl({
 describe("control.select", () => {
   testBaseControl({
     noInputSelection: true,
+    attrs: {
+      mask: { value: "abc" },
+      maskholder: { value: "abc" },
+      prefix: { value: "$" },
+      postfix: { value: "USD" },
+      clearbutton: { value: true },
+      debouncems: { value: 5 },
+      selectonfocus: { value: true },
+      allownewvalue: { value: true },
+      showcase: { value: 1 },
+      readonlyinput: { value: true },
+      multiple: { value: true },
+      items: { value: getItems() },
+    },
     initValues: [
       { attrValue: "10", value: 10 },
       { attrValue: "20", value: 20 },
@@ -49,8 +63,6 @@ describe("control.select", () => {
     ],
     validations: {},
     validationsSkip: ["_parse", "_mask"],
-    attrs: { items: { skip: true } },
-    $options: { items: { skip: true } },
     onCreateNew: (e) => (e.$options.items = getItems()),
   });
 

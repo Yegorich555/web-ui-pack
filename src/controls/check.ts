@@ -5,9 +5,9 @@ declare global {
   namespace WUP.Check {
     interface EventMap extends WUP.Switch.EventMap {}
     interface ValidityMap extends WUP.Switch.ValidityMap {}
-    interface Defaults<T = boolean, VM = ValidityMap> extends WUP.BaseControl.Defaults<T, VM> {}
-    interface Options<T = boolean, VM = ValidityMap> extends WUP.Switch.Options<T, VM>, Defaults<T, VM> {}
-    interface Attributes extends WUP.Switch.Attributes {}
+    interface Options<T = boolean, VM = ValidityMap> extends WUP.Switch.Options<T, VM> {}
+    // @ts-expect-error
+    interface Attributes extends WUP.Switch.Attributes, Partial<Options> {}
     interface JSXProps<C = WUPCheckControl> extends WUP.Switch.JSXProps<C>, Attributes {}
   }
   interface HTMLElementTagNameMap {
@@ -104,12 +104,12 @@ export default class WUPCheckControl<
       }`;
   }
 
-  static $defaults: WUP.Check.Defaults = {
+  static $defaults: WUP.Check.Options = {
     ...WUPSwitchControl.$defaults,
-    validationRules: { ...WUPSwitchControl.$defaults.validationRules },
+    // WARN: it's shared =>  validationRules: { ...WUPSwitchControl.$defaults.validationRules },
   };
 }
 
 customElements.define(tagName, WUPCheckControl);
 
-// todo add logic for checkbox-tree: also cache observedAttrs per each type to reduce memoryConsumption
+// todo add logic for checkbox-tree:

@@ -1,14 +1,14 @@
-import WUPBaseElement from "./baseElement";
+import WUPBaseElement, { AttributeMap, AttributeTypes } from "./baseElement";
 import { px2Number, styleTransform } from "./helpers/styleHelpers";
 import { getOffset } from "./popup/popupPlacements";
 
 const tagName = "wup-spin";
 declare global {
   namespace WUP.Spin {
-    interface Defaults {
+    interface Options {
       /** Place inside parent as inline-block otherwise overflow target in the center (`position: relative` is not required);
        * @defaultValue false */
-      inline?: boolean;
+      inline: boolean;
       /** Virtual padding of parentElement [top, right, bottom, left] or [top/bottom, right/left] in px
        * @defaultValue [4,4] */
       overflowOffset: [number, number, number, number] | [number, number];
@@ -16,22 +16,16 @@ declare global {
        * @defaultValue true */
       overflowFade: boolean;
       /** Allow to reduce size to fit parent (for max-size change css-var --spin-size)
-       * @defaultValue false for inline:true, true for inline:false */
-      fit?: boolean;
+       * @defaultValue `auto` => `false` when inline:true, `true` when inline:false */
+      fit: boolean | "auto";
+      /** Anchor element that need to oveflow by spinner
+       * @defaultValue `auto`: parentElement */
+      overflowTarget: HTMLElement | "auto";
     }
-    interface Options extends Defaults {
-      /** Anchor element that need to oveflow by spinner, by default it's parentElement  */
-      overflowTarget?: HTMLElement | null;
-    }
-    interface Attributes {
-      /** Place inside parent as inline-block or overflow target in the center (`position: relative` isnot  required);
-       * @defaultValue false */
+    // @ts-expect-error
+    interface Attributes extends Pick<Options, "fit" | "inline" | "overflowFade"> {
       inline?: boolean | "";
-      /** Allow to create shadowBox to partially hide target (only for `inline: false`)
-       * @defaultValue true */
       overflowFade?: boolean | "";
-      /** Allow to reduce size to fit parent (for max-size change css-var --spin-size)
-       * @defaultValue false for inline:true, true for inline:false */
       fit?: boolean | "";
     }
     interface JSXProps<T extends WUPSpinElement> extends WUP.Base.JSXProps<T>, Attributes {}
@@ -72,20 +66,11 @@ declare global {
  *  <!-- OR; it's equal to <wup-spin inline="false" fit="true" overflowfade="false"></wup-spin> -->
  *  <wup-spin overflowfade="false"></wup-spin>
  * </button>
- * ```
- */
+ * ``` */
 export default class WUPSpinElement<
   TOptions extends WUP.Spin.Options = WUP.Spin.Options
 > extends WUPBaseElement<TOptions> {
   #ctr = this.constructor as typeof WUPSpinElement;
-
-  static get observedOptions(): Array<keyof WUP.Spin.Options> {
-    return ["inline", "overflowTarget", "overflowOffset", "overflowFade", "fit"];
-  }
-
-  static get observedAttributes(): Array<LowerKeys<WUP.Spin.Attributes>> {
-    return ["inline", "overflowfade", "fit"];
-  }
 
   static get $styleRoot(): string {
     return `:root {
@@ -143,10 +128,26 @@ export default class WUPSpinElement<
       ${this.$styleApplied}`;
   }
 
-  static $defaults: WUP.Spin.Defaults = {
+  static get mappedAttributes(): Record<string, AttributeMap> {
+    const m = super.mappedAttributes;
+    m.fit.type = AttributeTypes.bool;
+    return m;
+  }
+
+  static $defaults: WUP.Spin.Options = {
     overflowOffset: [4, 4],
     overflowFade: true,
+    overflowTarget: "auto",
+    inline: false,
+    fit: "auto",
   };
+
+  /** Used to clone defaults to options on init; override it to clone  */
+  static override cloneDefaults<T extends Record<string, any>>(): T {
+    const d = super.cloneDefaults() as WUP.Spin.Options;
+    d.overflowOffset = [...d.overflowOffset];
+    return d as unknown as T;
+  }
 
   static _itemsCount = 1;
 
@@ -187,10 +188,6 @@ export default class WUPSpinElement<
   protected override gotChanges(propsChanged: Array<keyof WUP.Spin.Options> | null): void {
     super.gotChanges(propsChanged);
 
-    this._opts.inline = this.getAttr("inline", "bool");
-    this._opts.fit = this.getAttr("fit", "bool", this._opts.fit ?? !this._opts.inline);
-    this._opts.overflowFade = this.getAttr("overflowfade", "bool", this._opts.overflowFade)!;
-
     this.style.cssText = "";
     this.#prevRect = undefined;
     this.#frameId && window.cancelAnimationFrame(this.#frameId);
@@ -229,7 +226,7 @@ export default class WUPSpinElement<
       this.$refFade?.remove();
       this.$refFade = undefined;
 
-      if (this._opts.fit) {
+      if (this.isFitParent) {
         const goUpdate = (): void => {
           this.style.display = "none";
           const p = this.parentElement as HTMLElement;
@@ -262,10 +259,19 @@ export default class WUPSpinElement<
     }
   }
 
-  get target(): HTMLElement {
-    return (this._opts.inline ? this.parentElement : this._opts.overflowTarget || this.parentElement) as HTMLElement;
+  /** Returns value based on `$options.fit` */
+  get isFitParent(): boolean {
+    const o = this._opts.fit;
+    return o === "auto" ? !this._opts.inline : o;
   }
 
+  /** Returns target element based on $options */
+  get target(): HTMLElement {
+    const trg = this._opts.overflowTarget;
+    return this._opts.inline || trg === "auto" || !trg ? this.parentElement! : trg;
+  }
+
+  /** Returns whether exists parent with position relative */
   get hasRelativeParent(): boolean {
     const p = this.offsetParent;
     return !!p && getComputedStyle(p).position === "relative";
@@ -308,7 +314,7 @@ export default class WUPSpinElement<
 
     const w = r.width - offset.left - offset.right;
     const h = r.height - offset.top - offset.bottom;
-    const scale = this._opts.fit ? Math.min(Math.min(h, w) / this.clientWidth, 1) : 1;
+    const scale = this.isFitParent ? Math.min(Math.min(h, w) / this.clientWidth, 1) : 1;
 
     const left = Math.round(r.left + offset.left + (w - this.clientWidth) / 2);
     const top = Math.round(r.top + offset.top + (h - this.clientHeight) / 2);

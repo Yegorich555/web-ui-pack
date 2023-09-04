@@ -54,8 +54,8 @@ export default function CalendarControlView() {
         <wup-calendar name="readonly" label="Readonly" readOnly utc />
         <wup-calendar //
           name="saveUrlClnd"
-          label="With saving to URL (see $options.skey & storage)"
-          skey
+          label="With saving to URL (see $options.storageKey & storage)"
+          storageKey
           storage="url"
         />
         <button type="submit">Submit</button>

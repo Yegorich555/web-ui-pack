@@ -72,7 +72,7 @@ function renderHTMLCode(tag: string, customHTML: string[] | undefined): string |
   const attrs = el.attributes;
   for (let i = 0; i < attrs.length; ++i) {
     const name = attrs[i].nodeName;
-    if (name !== "style" && !name.startsWith("aria") && !name.startsWith("role")) {
+    if (name !== "style" && !name.startsWith("aria") && !name.startsWith("role") && name !== "required") {
       parsedAttrs.push({ name, value: attrs[i].nodeValue });
     }
   }

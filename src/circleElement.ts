@@ -38,7 +38,7 @@ declare global {
       _hasTooltip?: true;
       _center: { x: number; y: number };
     }
-    interface Defaults {
+    interface Options {
       /** Width of each segment; expected 1..100 (perecentage)
        * @defaultValue 10 */
       width: number;
@@ -65,25 +65,17 @@ declare global {
       space: number;
       /** Min segment size - to avoid rendering extra-small segments; expected 0..20 (degrees)
        * @defaultValue 10 */
-      minsize: number;
+      minsize: number; // todo change to 'minSize'
       /** Timeout in ms before popup shows on hover of target;
        * @defaultValue inherited from WUPPopupElement.$defaults.hoverShowTimeout */
       hoverShowTimeout: number;
       /** Timeout in ms before popup hides on mouse-leave of target;
        * @defaultValue 0 */
       hoverHideTimeout: number;
-    }
-
-    interface Options extends Defaults {
       /** Items related to circle-segments */
       items: Item[];
     }
-    interface Attributes
-      extends WUP.Base.toJSX<
-        Partial<
-          Pick<Options, "back" | "width" | "from" | "to" | "items" | "corner" | "min" | "max" | "space" | "minsize">
-        >
-      > {}
+    interface Attributes extends Omit<Options, "hoverShowTimeout" | "hoverHideTimeout"> {}
     interface JSXProps<C = WUPCircleElement> extends WUP.Base.JSXProps<C>, Attributes {}
   }
 
@@ -117,13 +109,13 @@ declare global {
  * el.$options.items = [{value:20}]; // etc.
  * document.body.appendChild(el); */
 export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options> {
-  #ctr = this.constructor as typeof WUPCircleElement;
+  // #ctr = this.constructor as typeof WUPCircleElement;
 
-  static get observedOptions(): Array<keyof WUP.Circle.Options> {
+  static get observedOptions(): Array<string> {
     return this.observedAttributes;
   }
 
-  static get observedAttributes(): Array<LowerKeys<WUP.Circle.Attributes>> {
+  static get observedAttributes(): Array<string> {
     return ["items", "width", "back", "corner", "from", "to", "min", "max", "space", "minsize"];
   }
 
@@ -187,7 +179,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
       }`;
   }
 
-  static $defaults: WUP.Circle.Defaults = {
+  static $defaults: WUP.Circle.Options = {
     width: 14,
     corner: 0.25,
     back: true,
@@ -199,11 +191,13 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     minsize: 10,
     hoverShowTimeout: WUPPopupElement.$defaults.hoverShowTimeout,
     hoverHideTimeout: 0,
+    items: [],
   };
 
-  constructor() {
-    super();
-    this._opts.items = [];
+  static override cloneDefaults<T extends Record<string, any>>(): T {
+    const d = super.cloneDefaults() as WUP.Circle.Options;
+    d.items = [];
+    return d as unknown as T;
   }
 
   $refSVG = this.make("svg");
@@ -216,16 +210,11 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Circle.Options> | null): void {
+    this._opts.items ??= [];
     super.gotChanges(propsChanged);
 
-    this._opts.items = this.getAttr("items", "ref") || [];
-    this._opts.back = this.getAttr("back", "bool") || false;
-    ["width", "corner", "from", "to", "min", "max", "space", "minsize"].forEach((key) => {
-      (this._opts as any)[key] = this.getAttr(key, "number")!;
-    });
-
     if (propsChanged) {
-      this.removeChildren.call(this.$refItems); // NiceToHave: instead of re-init update/remove required children
+      this.removeChildren.call(this.$refItems); // NiceToHave: instead of re-init update/remove required children + possible to deprecate custom observed attrs here
       this.removeChildren.call(this.$refSVG); // clean before new render
     }
     this.gotRenderItems();
@@ -311,8 +300,8 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
 
     const angleMin = this._opts.from;
     const angleMax = this._opts.to;
-    const vMin = this._opts.min ?? 0;
-    const vMax = this._opts.max ?? 360;
+    const vMin = this._opts.min;
+    const vMax = this._opts.max;
     const { items, minsize, corner, width } = this._opts;
 
     const style = getComputedStyle(this);

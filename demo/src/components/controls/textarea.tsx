@@ -98,8 +98,8 @@ export default function TextControlView() {
         <wup-textarea name="disabled" disabled />
         <wup-textarea //
           name="saveLsTa"
-          label="With saving to localStorage (see $options.skey & storage)"
-          skey
+          label="With saving to localStorage (see $options.storageKey & storage)"
+          storageKey
           value="Type text & reload page"
         />
         <button type="submit">Submit</button>

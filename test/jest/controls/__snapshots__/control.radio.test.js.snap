@@ -888,6 +888,57 @@ padding:0;}
 </style>
 `;
 
+exports[`control.radio common tests snapshot of $defaults 1`] = `
+{
+  "autoComplete": null,
+  "autoFocus": false,
+  "clearActions": 2,
+  "disabled": false,
+  "focusDebounceMs": 100,
+  "items": [],
+  "label": null,
+  "name": null,
+  "readOnly": false,
+  "reverse": false,
+  "storage": "local",
+  "storageKey": "",
+  "validateDebounceMs": 500,
+  "validationCase": 13,
+  "validationRules": {
+    "$alwaysInvalid": [Function],
+    "$alwaysValid": [Function],
+    "required": [Function],
+  },
+  "validationShowAll": false,
+  "validations": null,
+}
+`;
+
+exports[`control.radio common tests snapshot of $defaults 2`] = `undefined`;
+
+exports[`control.radio common tests snapshot of $defaults 3`] = `
+[
+  "autocomplete",
+  "autofocus",
+  "clearactions",
+  "disabled",
+  "focusdebouncems",
+  "initvalue",
+  "items",
+  "label",
+  "name",
+  "readonly",
+  "reverse",
+  "storage",
+  "storagekey",
+  "validatedebouncems",
+  "validationcase",
+  "validationrules",
+  "validations",
+  "validationshowall",
+]
+`;
+
 exports[`control.radio validations $options.validationShowAll 1`] = `
 <wup-radio
   invalid=""

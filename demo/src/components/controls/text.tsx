@@ -102,8 +102,8 @@ export default function TextControlView() {
         <wup-text name="disabled" disabled />
         <wup-text //
           name="saveUrl"
-          label="With saving to URL (see $options.skey & storage)"
-          skey
+          label="With saving to URL (see $options.storageKey & storage)"
+          storageKey
           storage="url"
         />
         <section>

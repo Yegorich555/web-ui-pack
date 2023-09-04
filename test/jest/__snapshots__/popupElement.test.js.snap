@@ -169,6 +169,46 @@ TEST-EL::-webkit-scrollbar-track-piece:horizontal:end {
 </style>
 `;
 
+exports[`popupElement inheritance common tests snapshot of $defaults 1`] = `
+{
+  "animation": 0,
+  "hoverHideTimeout": 500,
+  "hoverShowTimeout": 200,
+  "placement": [
+    [Function],
+    [Function],
+  ],
+  "showCase": 4,
+  "toFitElement": <body>
+    <div
+      id="targetId"
+    >
+      some text
+    </div>
+    <wup-popup
+      position="top"
+      style="display: block; transform: translate(190px, 100px);"
+    />
+  </body>,
+}
+`;
+
+exports[`popupElement inheritance common tests snapshot of $defaults 2`] = `
+[
+  "placement",
+  "showCase",
+  "target",
+]
+`;
+
+exports[`popupElement inheritance common tests snapshot of $defaults 3`] = `
+[
+  "animation",
+  "placement",
+  "target",
+]
+`;
+
 exports[`popupElement me common tests render + styles 1`] = `<wup-popup />`;
 
 exports[`popupElement me common tests render + styles 2`] = `
@@ -336,4 +376,44 @@ TEST-EL::-webkit-scrollbar-track-piece:horizontal:end {
   }
 }
 </style>
+`;
+
+exports[`popupElement me common tests snapshot of $defaults 1`] = `
+{
+  "animation": 0,
+  "hoverHideTimeout": 500,
+  "hoverShowTimeout": 200,
+  "placement": [
+    [Function],
+    [Function],
+  ],
+  "showCase": 4,
+  "toFitElement": <body>
+    <div
+      id="targetId"
+    >
+      some text
+    </div>
+    <wup-popup
+      position="top"
+      style="display: block; transform: translate(190px, 100px);"
+    />
+  </body>,
+}
+`;
+
+exports[`popupElement me common tests snapshot of $defaults 2`] = `
+[
+  "placement",
+  "showCase",
+  "target",
+]
+`;
+
+exports[`popupElement me common tests snapshot of $defaults 3`] = `
+[
+  "animation",
+  "placement",
+  "target",
+]
 `;
