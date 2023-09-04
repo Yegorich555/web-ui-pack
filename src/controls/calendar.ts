@@ -1016,7 +1016,9 @@ export default class WUPCalendarControl<
     if (!propsChanged || propsChanged.includes("exclude")) {
       this._opts.exclude?.sort((a, b) => a.valueOf() - b.valueOf());
     }
-    const isNeedRecalc = propsChanged && ["min", "max", "exclude", "utc"].some((a) => propsChanged.includes(a));
+    const isNeedRecalc =
+      propsChanged &&
+      (["min", "max", "exclude", "utc"] as Array<keyof WUP.Calendar.Options>).some((a) => propsChanged.includes(a));
     if (!propsChanged || isNeedRecalc) {
       this.#disabled = this.calcDisabled();
     }
