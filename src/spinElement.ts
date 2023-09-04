@@ -336,7 +336,7 @@ spinUseRing(WUPSpinElement);
 customElements.define(tagName, WUPSpinElement);
 
 /** Basic function to change spinner-style */
-export function spinSetStyle(cls: typeof WUPSpinElement, itemsCount: number, getter: () => string): void {
+export function spinSetStyle(cls: typeof WUPSpinElement<any>, itemsCount: number, getter: () => string): void {
   cls._itemsCount = itemsCount;
   Object.defineProperty(cls, "$styleApplied", {
     configurable: true,
@@ -345,7 +345,7 @@ export function spinSetStyle(cls: typeof WUPSpinElement, itemsCount: number, get
 }
 
 /** Apply on class to change spinner-style */
-export function spinUseRing(cls: typeof WUPSpinElement): void {
+export function spinUseRing(cls: typeof WUPSpinElement<any>): void {
   spinSetStyle(
     cls,
     1,
@@ -357,7 +357,7 @@ export function spinUseRing(cls: typeof WUPSpinElement): void {
 }
 
 /** Apply on class to change spinner-style */
-export function spinUseDualRing(cls: typeof WUPSpinElement): void {
+export function spinUseDualRing(cls: typeof WUPSpinElement<any>): void {
   spinSetStyle(
     cls,
     1,
@@ -371,7 +371,7 @@ export function spinUseDualRing(cls: typeof WUPSpinElement): void {
 }
 
 /** Apply on class to change spinner-style */
-export function spinUseTwinDualRing(cls: typeof WUPSpinElement): void {
+export function spinUseTwinDualRing(cls: typeof WUPSpinElement<any>): void {
   spinSetStyle(
     cls,
     2,
@@ -403,7 +403,7 @@ export function spinUseTwinDualRing(cls: typeof WUPSpinElement): void {
 }
 
 /** Apply on class to change spinner-style */
-export function spinUseRoller(cls: typeof WUPSpinElement): void {
+export function spinUseRoller(cls: typeof WUPSpinElement<any>): void {
   const cnt = 4;
   spinSetStyle(cls, cnt, () => {
     let s = "";
@@ -423,7 +423,7 @@ export function spinUseRoller(cls: typeof WUPSpinElement): void {
 }
 
 /** Apply on class to change spinner-style */
-export function spinUseDotRoller(cls: typeof WUPSpinElement): void {
+export function spinUseDotRoller(cls: typeof WUPSpinElement<any>): void {
   const cnt = 7;
   spinSetStyle(cls, cnt, () => {
     let s = "";
@@ -455,7 +455,7 @@ export function spinUseDotRoller(cls: typeof WUPSpinElement): void {
 }
 
 /** Apply on class to change spinner-style */
-export function spinUseDotRing(cls: typeof WUPSpinElement): void {
+export function spinUseDotRing(cls: typeof WUPSpinElement<any>): void {
   const cnt = 10;
   spinSetStyle(cls, cnt, () => {
     let s = "";
@@ -491,7 +491,7 @@ export function spinUseDotRing(cls: typeof WUPSpinElement): void {
 }
 
 /** Apply on class to change spinner-style */
-export function spinUseSpliceRing(cls: typeof WUPSpinElement): void {
+export function spinUseSpliceRing(cls: typeof WUPSpinElement<any>): void {
   const cnt = 12;
   spinSetStyle(cls, cnt, () => {
     let s = "";
@@ -523,7 +523,7 @@ export function spinUseSpliceRing(cls: typeof WUPSpinElement): void {
 }
 
 /** Apply on class to change spinner-style */
-export function spinUseHash(cls: typeof WUPSpinElement): void {
+export function spinUseHash(cls: typeof WUPSpinElement<any>): void {
   spinSetStyle(
     cls,
     2,

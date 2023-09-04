@@ -100,7 +100,7 @@ export default function TextControlView() {
           name="saveLsTa"
           label="With saving to localStorage (see $options.storageKey & storage)"
           storageKey
-          value="Type text & reload page"
+          initValue="Type text & reload page"
         />
         <button type="submit">Submit</button>
       </wup-form>

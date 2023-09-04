@@ -75,7 +75,10 @@ declare global {
       /** Items related to circle-segments */
       items: Item[];
     }
-    interface Attributes extends Omit<Options, "hoverShowTimeout" | "hoverHideTimeout"> {}
+    // @ts-expect-error
+    interface Attributes extends Omit<Partial<Options>, "hoverShowTimeout" | "hoverHideTimeout"> {
+      items?: string;
+    }
     interface JSXProps<C = WUPCircleElement> extends WUP.Base.JSXProps<C>, Attributes {}
   }
 
