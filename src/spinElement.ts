@@ -43,7 +43,7 @@ declare global {
        * <wup-spin items="window.someObj"></wup-spin>
        * ```
        * @defaultValue `auto`: parentElement */
-      overflowTarget?: string;
+      overflowTarget?: string; // NiceToHave: point querySelector like with popup[target]
     }
   }
 

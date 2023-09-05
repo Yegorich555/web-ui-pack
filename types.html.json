@@ -16,7 +16,7 @@
       "attributes": [
         {
           "name": "items",
-          "description": "Global reference to object with array",
+          "description": "Global reference to object with array where `item: {value:any, color?:string, tooltip?:string}`",
           "values": [{ "name": "window.circleItems" }],
           "references": [
             {
