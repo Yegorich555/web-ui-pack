@@ -58,7 +58,7 @@ declare global {
        * * It doesn't save values that are complex objects. So `wup-select.$options.items = [{text: "N1",value: {id:1,name:'Nik'} }]` is skipped
        * * Point string-value if default storage-key doesn't fit: based on `url+control.names` @see{@link WUPFormElement.storageKey}
        * @defaultValue false */
-      // autoSave: boolean | string;
+      autoSave: boolean | string;
       /** Focus first possible element when it's appended to layout
        * @defaultValue false */
       autoFocus: boolean;

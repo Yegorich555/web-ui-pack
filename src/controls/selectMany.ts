@@ -242,7 +242,7 @@ export default class WUPSelectManyControl<
 
   override parseInput(text: string): ValueType[] | undefined {
     // WARN must be called only on allowNewValue
-    // @ts-expect-error: because it's constant true
+    // @ts-expect-error: because declared as constant true
     this._opts.multiple = false;
     const vi = super.parseInput(text) as ValueType | undefined;
     this._opts.multiple = true;

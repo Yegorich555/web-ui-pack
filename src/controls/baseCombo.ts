@@ -59,12 +59,7 @@ export default abstract class WUPBaseComboControl<
   ValueType = any,
   TOptions extends WUP.BaseCombo.Options = WUP.BaseCombo.Options,
   EventMap extends WUP.BaseCombo.EventMap = WUP.BaseCombo.EventMap
-> extends WUPTextControl<
-  ValueType,
-  // @ts-expect-error - because validationRules is different
-  TOptions,
-  EventMap
-> {
+> extends WUPTextControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseComboControl;
 

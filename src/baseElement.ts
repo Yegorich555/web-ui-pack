@@ -473,6 +473,7 @@ export default abstract class WUPBaseElement<
         return v;
       };
     }
+    // @ts-ignore
     const r = onEvent(...args);
     this.disposeLst.push(r);
     const remove = (): void => {

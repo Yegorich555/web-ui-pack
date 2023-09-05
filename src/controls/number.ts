@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import onScroll from "../helpers/onScroll";
 import { mathSumFloat, onEvent } from "../indexHelpers";
 import localeInfo from "../objects/localeInfo";
@@ -23,9 +24,7 @@ declare global {
       minDecimal?: number;
     }
     interface EventMap extends WUP.BaseControl.EventMap {}
-    interface ValidityMap
-      extends WUP.BaseControl.ValidityMap,
-        Pick<WUP.Text.ValidityMap, "_mask" | "min" | "max" /* | "_parse" */> {
+    interface ValidityMap extends WUP.Text.ValidityMap {
       /** If $value < pointed shows message 'Min value {x}` */
       min: number;
       /** If $value < pointed shows message 'Max value {x}` */
@@ -36,7 +35,8 @@ declare global {
        * @defaultValue no-decimal and separators from localeInfo */
       format: Format | null;
     }
-    interface Options<T = number, VM extends ValidityMap = ValidityMap> extends WUP.Text.Options<T, VM>, NewOptions {}
+    interface TextAnyOptions<T = any, VM = ValidityMap> extends WUP.Text.Options<T, VM> {}
+    interface Options<T = number, VM extends ValidityMap = ValidityMap> extends TextAnyOptions<T, VM>, NewOptions {}
     interface JSXProps<C = WUPNumberControl> extends WUP.Text.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       /** String representation of displayed value
        * Point Global reference to object @see {@link Format}
@@ -61,6 +61,12 @@ declare global {
   }
 }
 
+abstract class TextAnyControl<
+  ValueType,
+  TOptions extends WUP.Number.TextAnyOptions,
+  EventMap extends WUP.Text.EventMap
+> extends WUPTextControl<ValueType, TOptions, EventMap> {}
+
 /** Form-control with number-input
  * @example
   const el = document.createElement("wup-num");
@@ -81,18 +87,12 @@ export default class WUPNumberControl<
   ValueType = number,
   TOptions extends WUP.Number.Options = WUP.Number.Options,
   EventMap extends WUP.Number.EventMap = WUP.Number.EventMap
-> extends WUPTextControl<
-  ValueType,
-  // @ts-expect-error - because number & string incompatible
-  TOptions,
-  EventMap
-> {
+> extends TextAnyControl<ValueType, TOptions, EventMap> {
   // #ctr = this.constructor as typeof WUPNumberControl;
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  // @ts-expect-error - min: string & min: number is invalid
   static $defaults: WUP.Number.Options = {
-    ...WUPTextControl.$defaults,
+    ...(WUPTextControl.$defaults as any),
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
       _mask: WUPTextControl.$defaults.validationRules._mask as any,

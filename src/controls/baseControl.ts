@@ -125,7 +125,7 @@ declare global {
         };
        * ``` */
       validationRules: {
-        [K in keyof VM]: (
+        [K in keyof VM]?: (
           this: IBaseControl,
           value: T,
           setValue: VM[K],
