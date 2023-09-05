@@ -166,7 +166,7 @@ declare global {
        * @see {@link WUP.BaseControl.Options.storage}
        * @defaultValue emptyString (means `false`) */
       storageKey?: boolean | string | null;
-      /** Storage for saving value
+      /** Type of storage for saving value (if pointed storageKey)
        * @see {@link WUP.BaseControl.Options.storekey}
        * @defaultValue "local" */
       storage?: "local" | "session" | "url";
