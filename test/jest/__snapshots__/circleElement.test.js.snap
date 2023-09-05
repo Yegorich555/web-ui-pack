@@ -94,33 +94,22 @@ exports[`circleElement common tests snapshot of $defaults 1`] = `
   "items": [],
   "max": 100,
   "min": 0,
-  "minsize": 10,
+  "minSize": 10,
   "space": 2,
   "to": 360,
   "width": 14,
 }
 `;
 
-exports[`circleElement common tests snapshot of $defaults 2`] = `
-[
-  "back",
-  "corner",
-  "from",
-  "items",
-  "max",
-  "min",
-  "minsize",
-  "space",
-  "to",
-  "width",
-]
-`;
+exports[`circleElement common tests snapshot of $defaults 2`] = `undefined`;
 
 exports[`circleElement common tests snapshot of $defaults 3`] = `
 [
   "back",
   "corner",
   "from",
+  "hoverhidetimeout",
+  "hovershowtimeout",
   "items",
   "max",
   "min",

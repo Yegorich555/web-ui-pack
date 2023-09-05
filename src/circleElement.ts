@@ -66,7 +66,7 @@ declare global {
       space: number;
       /** Min segment size - to avoid rendering extra-small segments; expected 0..20 (degrees)
        * @defaultValue 10 */
-      minsize: number; // todo change to 'minSize'
+      minSize: number;
       /** Timeout in ms before popup shows on hover of target;
        * @defaultValue inherited from WUPPopupElement.$defaults.hoverShowTimeout */
       hoverShowTimeout: number;
@@ -121,14 +121,6 @@ declare global {
  * document.body.appendChild(el); */
 export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options> {
   // #ctr = this.constructor as typeof WUPCircleElement;
-
-  static get observedOptions(): Array<string> {
-    return this.observedAttributes;
-  }
-
-  static get observedAttributes(): Array<string> {
-    return ["items", "width", "back", "corner", "from", "to", "min", "max", "space", "minsize"];
-  }
 
   static get $styleRoot(): string {
     return `:root {
@@ -199,7 +191,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     min: 0,
     max: 100,
     space: 2,
-    minsize: 10,
+    minSize: 10,
     hoverShowTimeout: WUPPopupElement.$defaults.hoverShowTimeout,
     hoverHideTimeout: 0,
     items: [],
@@ -313,7 +305,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     const angleMax = this._opts.to;
     const vMin = this._opts.min;
     const vMax = this._opts.max;
-    const { items, minsize, corner, width } = this._opts;
+    const { items, minSize: minsize, corner, width } = this._opts;
 
     const style = getComputedStyle(this);
     const animTime = parseMsTime(style.getPropertyValue("--anim-time"));

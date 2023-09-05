@@ -11,6 +11,7 @@
   - Method `getAttr` changed to `parseAttr`
 - [SpinElement](src/spinElement.ts). Defaults `fit` & `overflowTarget` = `auto` instead of `null`
 - **Controls**. Option `skey` renamed to `storageKey`
+- [CircleElement](src/circleElement.ts). Renamed option`min_s_ize` to `min_S_ize`
 
 **Fixes**:
 

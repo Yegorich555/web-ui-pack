@@ -36,8 +36,8 @@ describe("circleElement", () => {
       space: { value: 2 },
       minsize: { value: 10 },
       back: { value: true },
-      // hoverhidetimeout: { value: 100 },
-      // hovershowtimeout: { value: 107 },
+      hoverhidetimeout: { value: 100 },
+      hovershowtimeout: { value: 107 },
     },
     onCreateNew: (e) => (e.$options.items = getItems()),
   });
@@ -424,7 +424,7 @@ describe("circleElement", () => {
       return orig(elem);
     });
 
-    el.$options.hoverShowTimeout = 0;
+    el._opts.hoverShowTimeout = 0;
     el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
     await h.wait(el.$options.hoverHideTimeout);
     expect(el.querySelector("wup-popup").$isHiding).toBe(true);
