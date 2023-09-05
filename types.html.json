@@ -1184,55 +1184,6 @@
       ]
     },
     {
-      "name": "wup-spin2",
-      "path": "./src\\controls\\select.example.ts",
-      "properties": [
-        {
-          "name": "$refFade",
-          "type": "HTMLDivElement | undefined"
-        },
-        {
-          "name": "override",
-          "description": "Used to clone defaults to options on init; override it to clone"
-        },
-        {
-          "name": "isFitParent",
-          "description": "Returns value based on `$options.fit`",
-          "type": "boolean"
-        },
-        {
-          "name": "target",
-          "description": "Returns target element based on $options",
-          "type": "HTMLElement"
-        },
-        {
-          "name": "hasRelativeParent",
-          "description": "Returns whether exists parent with position relative",
-          "type": "boolean"
-        },
-        {
-          "name": "$refStyle",
-          "type": "HTMLStyleElement | null"
-        },
-        {
-          "name": "$defaults",
-          "description": "Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item",
-          "type": "Options",
-          "default": "{\"overflowOffset\":[4,4],\"overflowFade\":true,\"overflowTarget\":\"auto\",\"inline\":false,\"fit\":\"auto\"}"
-        },
-        {
-          "name": "$isReady",
-          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
-          "type": "boolean"
-        },
-        {
-          "name": "$options",
-          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
-          "type": "TOptions"
-        }
-      ]
-    },
-    {
       "name": "wup-select",
       "path": "./src\\controls\\select.ts",
       "description": "Form-control with dropdown/combobox behavior",
@@ -2780,51 +2731,46 @@
     },
     {
       "name": "wup-spin",
-      "path": "./src\\spinElement.ts",
       "description": "Flexible animated element with ability to place over target element without position relative",
-      "properties": [
+      "references": [
         {
-          "name": "$refFade",
-          "type": "HTMLDivElement | undefined"
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/spin"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "inline",
+          "description": "Place inside parent as inline-block otherwise overflow target in the center (`position: relative` is not required); \n\r @defaultValue false"
         },
         {
-          "name": "override",
-          "description": "Used to clone defaults to options on init; override it to clone"
+          "name": "fit",
+          "description": "Allow to reduce size to fit parent (for max-size change css-var --spin-size) \n\r @defaultValue `auto` => `false` when inline:true, `true` when inline:false"
         },
         {
-          "name": "isFitParent",
-          "description": "Returns value based on `$options.fit`",
-          "type": "boolean"
+          "name": "overflowoffset",
+          "description": "Virtual padding of parentElement [top, right, bottom, left] or [top/bottom, right/left] in px; \n\r Point Global reference to object with array \n\r @defaultValue [4,4]",
+          "values": [{ "name": "window.overflowOffset" }],
+          "references": [
+            {
+              "name": "WUP.Spin.Options['overflowOffset']",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/spinElement.ts"
+            }
+          ]
         },
         {
-          "name": "target",
-          "description": "Returns target element based on $options",
-          "type": "HTMLElement"
+          "name": "overflowfade",
+          "description": "Allow to create shadowBox to partially hide target (only for `inline: false`) @defaultValue false"
         },
         {
-          "name": "hasRelativeParent",
-          "description": "Returns whether exists parent with position relative",
-          "type": "boolean"
-        },
-        {
-          "name": "$refStyle",
-          "type": "HTMLStyleElement | null"
-        },
-        {
-          "name": "$defaults",
-          "description": "Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item",
-          "type": "Options",
-          "default": "{\"overflowOffset\":[4,4],\"overflowFade\":true,\"overflowTarget\":\"auto\",\"inline\":false,\"fit\":\"auto\"}"
-        },
-        {
-          "name": "$isReady",
-          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
-          "type": "boolean"
-        },
-        {
-          "name": "$options",
-          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
-          "type": "TOptions"
+          "name": "overflowtarget",
+          "description": "Anchor element that need to oveflow by spinner \n\r Point Global reference to object with array \n\r @defaultValue 'auto'",
+          "references": [
+            {
+              "name": "WUP.Spin.Options['overflowTarget']",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/spinElement.ts"
+            }
+          ]
         }
       ]
     }

@@ -628,3 +628,5 @@ declare global {
     >;
   }
 }
+
+// todo change all attrs to startsWith '$...' otherwise user can't use attrs
