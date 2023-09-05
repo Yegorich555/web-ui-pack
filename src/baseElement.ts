@@ -630,3 +630,4 @@ declare global {
 }
 
 // todo change all attrs to startsWith '$...' otherwise user can't use attrs
+// NiceToHave: HTML attrs-events like 'onsubmit' & 'onchange'

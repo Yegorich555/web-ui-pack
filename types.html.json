@@ -2462,134 +2462,43 @@
     },
     {
       "name": "wup-form",
-      "path": "./src\\formElement.ts",
       "description": "Wrapper of FormHTMLElement that collect values from controls",
-      "properties": [
+      "references": [
         {
-          "name": "$onSubmit",
-          "description": "Dispatched on submit. Return promise to lock form and show spinner",
-          "type": "((ev: SubmitEvent<Model>) => void | Promise<unknown>) | undefined"
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/controls"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "submitactions",
+          "description": "Actions that enabled on submit event; You can point several like: `goToError | collectChanged` \n\r  @defaultValue goToError | validateUntiFirst | reset | lockOnPending",
+          "references": [
+            {
+              "name": "demo",
+              "url": "https://yegorich555.github.io/web-ui-pack/formElement"
+            }
+          ]
         },
         {
-          "name": "$controls",
-          "description": "Dispatched on submit",
-          "type": "IBaseControl<any>[]",
-          "default": "[]"
+          "name": "autosave",
+          "description": "Enable to store data in localStorage to prevent losing till submitted @defaultValue false"
         },
         {
-          "name": "$controlsAttached",
-          "description": "Returns related to form controls with $options.name != null",
-          "type": "IBaseControl<any>[]"
-        },
-        {
-          "name": "$model",
-          "description": "Model related to every control inside (with $options.name);",
-          "type": "Partial<Model>"
-        },
-        {
-          "name": "$initModel",
-          "description": "Default/init model related to every control inside;",
-          "type": "Partial<Model> | undefined"
-        },
-        {
-          "name": "$isPending",
-          "description": "Pending state (spinner + lock form if SubmitActions.lockOnPending enabled)",
-          "type": "boolean"
-        },
-        {
-          "name": "$isValid",
-          "description": "Returns true if all nested controls (with name) are valid",
-          "type": "boolean"
-        },
-        {
-          "name": "$isChanged",
-          "description": "Returns true if some of controls value is changed by user",
-          "type": "boolean"
-        },
-        {
-          "name": "storageKey",
-          "description": "Returns storage key based on url+control-names or `$options.autoSave` if `string`",
-          "type": "string"
-        },
-        {
-          "name": "submitActions",
-          "type": "number | SubmitActions | undefined"
-        },
-        {
-          "name": "autoSave",
-          "type": "string | boolean | undefined"
-        },
-        {
-          "name": "autoFocus",
-          "type": "boolean | \"\" | undefined",
-          "deprecatedMessage": "React override default behavior - use el.$options.autoFocus instead"
+          "name": "autofocus",
+          "description": "Focus first possible element when it's appended to layout @defaultValue false"
         },
         {
           "name": "disabled",
-          "type": "boolean | \"\" | undefined"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling @defaultValue false"
         },
         {
-          "name": "readOnly",
-          "type": "boolean | \"\" | undefined"
+          "name": "readonly",
+          "description": "Disallow copy value; use attr [readonly] for stylin @defaultValue falseg"
         },
         {
-          "name": "autoComplete",
-          "type": "boolean | \"\" | undefined"
-        },
-        {
-          "name": "onChange",
-          "type": "undefined",
-          "deprecatedMessage": "SyntheticEvent is not supported. Use ref.addEventListener('$change') instead"
-        },
-        {
-          "name": "onWillSubmit",
-          "type": "undefined",
-          "deprecatedMessage": "SyntheticEvent is not supported. Use ref.addEventListener('$willSubmit') instead"
-        },
-        {
-          "name": "onSubmit",
-          "type": "undefined",
-          "deprecatedMessage": "SyntheticEvent is not supported. Use ref.addEventListener('$submit') instead"
-        },
-        {
-          "name": "$refStyle",
-          "type": "HTMLStyleElement | null"
-        },
-        {
-          "name": "$defaults",
-          "description": "Default options - applied to every element. Change it to configure default behavior",
-          "type": "Options",
-          "default": "{\"autoComplete\":false,\"autoFocus\":false,\"autoSave\":false,\"disabled\":false,\"readOnly\":false}"
-        },
-        {
-          "name": "$isReady",
-          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
-          "type": "boolean"
-        },
-        {
-          "name": "$options",
-          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
-          "type": "TOptions"
-        }
-      ],
-      "events": [
-        {
-          "name": "$willSubmit"
-        },
-        {
-          "name": "$submit"
-        }
-      ]
-    },
-    {
-      "name": "wup-popup-arrow",
-      "path": "./src\\popup\\popupArrowElement.ts",
-      "description": "Internal arrow element for {@link WUPPopupElement}",
-      "properties": [
-        {
-          "name": "tagName",
-          "type": "\"wup-popup-arrow\"",
-          "default": "\"wup-popup-arrow\""
+          "name": "autocomplete",
+          "description": "Enable/disable browser-autocomplete; if control has no autocomplete option then it's inherited from form @defaultValue false"
         }
       ]
     },
