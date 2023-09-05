@@ -2451,48 +2451,14 @@
     },
     {
       "name": "wup-dropdown",
-      "path": "./src\\dropdownElement.ts",
       "description": "Dropdown element",
-      "properties": [
+      "references": [
         {
-          "name": "$refTitle",
-          "description": "Reference to nested HTMLElement tied with $options.label",
-          "type": "HTMLElement",
-          "default": "\"firstElementChild\""
-        },
-        {
-          "name": "$refPopup",
-          "description": "Reference to popupMenu",
-          "type": "WUPPopupElement<Options, EventMap>",
-          "default": "\"lastElementChild\""
-        },
-        {
-          "name": "$refMenu",
-          "description": "Reference to list",
-          "type": "HTMLElement",
-          "default": "\"lastElementChild\""
-        },
-        {
-          "name": "$refStyle",
-          "type": "HTMLStyleElement | null"
-        },
-        {
-          "name": "$defaults",
-          "description": "Default options applied to every element. Change it to configure default behavior\n* @tutorial Troubleshooting\n* Popup-related options are not observed so to change it use `WUPDropdownElement.$defaults` or `element.$refPopup.$options` direclty",
-          "type": "Options",
-          "default": "{\"animation\":\"Animations.drawer\",\"hideOnPopupClick\":true,\"minHeightByTarget\":true,\"minWidthByTarget\":true,\"placement\":[\"$start\",\"$end\",\"$start\",\"$end\",\"$resizeHeight\",\"$resizeHeight\",\"$resizeHeight\",\"$resizeHeight\"]}"
-        },
-        {
-          "name": "$isReady",
-          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
-          "type": "boolean"
-        },
-        {
-          "name": "$options",
-          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
-          "type": "TOptions"
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/dropdown"
         }
-      ]
+      ],
+      "attributes": [{ "name": "hideonpopupclick", "description": "Hide menu on popup click \n\r @defaultValue true" }]
     },
     {
       "name": "wup-form",

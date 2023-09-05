@@ -19,7 +19,7 @@ declare global {
        * * to change option for specific element change it for `<wup-popup/>` directly after timeout
        * @example setTimeout(() => this.$refPopup.$options.showCase = ShowCases.onFocus | ShowCases.onClick) */
       showCase: ShowCases;
-      /** Hide on popup click
+      /** Hide menu on popup click
        * @defaultValue true */
       hideOnPopupClick: boolean;
       /** Placement rules relative to target;
