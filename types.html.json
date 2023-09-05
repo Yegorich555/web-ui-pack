@@ -2504,103 +2504,40 @@
     },
     {
       "name": "wup-popup",
-      "path": "./src\\popup\\popupElement.ts",
       "description": "Popup element",
-      "attributes": [
+      "references": [
         {
-          "name": "target"
-        },
-        {
-          "name": "placement"
-        },
-        {
-          "name": "animation"
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/popup"
         }
       ],
-      "properties": [
+      "attributes": [
         {
-          "name": "$placements",
-          "type": "{ $top: EdgeFunc; $bottom: EdgeFunc; $left: EdgeFunc; $right: EdgeFunc; }",
-          "default": "{}"
+          "name": "target",
+          "description": "Anchor that popup uses for placement @defaultValue `previousSibling` Point querySelector, for example `#some-id`"
         },
         {
-          "name": "$placementAttrs",
-          "description": "Returns placement",
-          "type": "(attr: \"top-start\" | \"top-middle\" | \"top-end\" | \"bottom-start\" | \"bottom-middle\" | \"bottom-end\" | \"left-start\" | \"left-middle\" | \"left-end\" | \"right-start\" | \"right-middle\" | \"right-end\" | undefined) => PlaceFunc[] | undefined",
-          "default": "\"(attr: WUP.Popup.Attributes[\\\"placement\\\"]): Array<WUP.Popup.Place.PlaceFunc> | undefined => {\\n    switch (attr) {\\n      case \\\"top-start\\\":\\n        return [PopupPlacements.$top.$start.$adjust, PopupPlacements.$bottom.$start.$adjust];\\n      case \\\"top-middle\\\":\\n        return [PopupPlacements.$top.$middle.$adjust, PopupPlacements.$bottom.$middle.$adjust];\\n      case \\\"top-end\\\":\\n        return [PopupPlacements.$top.$end.$adjust, PopupPlacements.$bottom.$end.$adjust];\\n      case \\\"bottom-start\\\":\\n        return [PopupPlacements.$bottom.$start.$adjust, PopupPlacements.$top.$start.$adjust];\\n      case \\\"bottom-middle\\\":\\n        return [PopupPlacements.$bottom.$middle.$adjust, PopupPlacements.$top.$middle.$adjust];\\n      case \\\"bottom-end\\\":\\n        return [PopupPlacements.$bottom.$end.$adjust, PopupPlacements.$top.$end.$adjust];\\n      case \\\"left-start\\\":\\n        return [PopupPlacements.$left.$start.$adjust, PopupPlacements.$right.$start.$adjust];\\n      case \\\"left-middle\\\":\\n        return [PopupPlacements.$left.$middle.$adjust, PopupPlacements.$right.$middle.$adjust];\\n      case \\\"left-end\\\":\\n        return [PopupPlacements.$left.$end.$adjust, PopupPlacements.$right.$end.$adjust];\\n      case \\\"right-start\\\":\\n        return [PopupPlacements.$right.$start.$adjust, PopupPlacements.$left.$start.$adjust];\\n      case \\\"right-middle\\\":\\n        return [PopupPlacements.$right.$middle.$adjust, PopupPlacements.$left.$middle.$adjust];\\n      case \\\"right-end\\\":\\n        return [PopupPlacements.$right.$end.$adjust, PopupPlacements.$left.$end.$adjust];\\n      default:\\n        return undefined;\\n    }\\n  }\""
+          "name": "placement",
+          "description": " Placement rules relative to target @defaultValue `top-middle`",
+          "values": [
+            { "name": "top-start" },
+            { "name": "top-middle" },
+            { "name": "top-end" },
+            { "name": "bottom-start" },
+            { "name": "bottom-middle" },
+            { "name": "bottom-end" },
+            { "name": "left-start" },
+            { "name": "left-middle" },
+            { "name": "left-end" },
+            { "name": "right-start" },
+            { "name": "right-middle" },
+            { "name": "right-end" }
+          ]
         },
         {
-          "name": "$onWillShow",
-          "description": "Fires before show is happened;",
-          "type": "((e: CustomEvent<any>) => void) | undefined"
-        },
-        {
-          "name": "$onShow",
-          "description": "Fires after popup is shown (after animation finishes)",
-          "type": "((e: Event) => void) | undefined"
-        },
-        {
-          "name": "$onWillHide",
-          "description": "Fires before hide is happened;",
-          "type": "((e: CustomEvent<any>) => void) | undefined"
-        },
-        {
-          "name": "$onHide",
-          "description": "Fires after popup is hidden (after animation finishes)",
-          "type": "((e: Event) => void) | undefined"
-        },
-        {
-          "name": "$isOpen",
-          "type": "boolean",
-          "deprecatedMessage": "use `$isShown`"
-        },
-        {
-          "name": "$isShown",
-          "description": "Returns if popup is opened (before show-animation is started)",
-          "type": "boolean"
-        },
-        {
-          "name": "$isHidden",
-          "description": "Returns if popup is closed (after hide-animation is ended)",
-          "type": "boolean"
-        },
-        {
-          "name": "$isHiding",
-          "description": "Returns if popup is hiding (only if animation enabled)",
-          "type": "boolean"
-        },
-        {
-          "name": "$isShowing",
-          "description": "Returns if popup is showing (only if animation enabled)",
-          "type": "boolean"
-        },
-        {
-          "name": "$refArrow",
-          "description": "Returns arrowElement if $options.arrowEnable=true and after popup $isShown",
-          "type": "WUPPopupArrowElement | null"
-        },
-        {
-          "name": "override"
-        },
-        {
-          "name": "$refStyle",
-          "type": "HTMLStyleElement | null"
-        },
-        {
-          "name": "$defaults",
-          "description": "Default options. Change it to configure default behavior",
-          "type": "Options",
-          "default": "{\"animation\":0,\"placement\":[\"$adjust\",\"$adjust\"],\"toFitElement\":\"body\",\"showCase\":\"onClick\",\"hoverShowTimeout\":200,\"hoverHideTimeout\":500}"
-        },
-        {
-          "name": "$isReady",
-          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
-          "type": "boolean"
-        },
-        {
-          "name": "$options",
-          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
-          "type": "TOptions"
+          "name": "animation",
+          "description": "Animation applied to popup @defaultValue `default`",
+          "values": [{ "name": "" }, { "name": "default" }, { "name": "drawer" }, { "name": "stack" }]
         }
       ]
     },
