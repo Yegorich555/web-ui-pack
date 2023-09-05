@@ -32,13 +32,22 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
 
 It's developed with [Typescript](https://www.typescriptlang.org/) and has huge built-in documentation (JSDoc). Every method,property,event is documented well so you don't need extra resource to take an example to implement or configure elements. In build-result without comments you will see that it's small-enough
 
-## Installing
+## Installing & usage
 
-Using npm:
+1. Install with npm `npm install web-ui-pack`
+2. Add `import WUPPopupElement from "web-ui-pack";` into main.js file
+3. For usage with React see [CODESTYLE.md](CODESTYLE.md)
+4. For usage with HTML + VSCode extend VSCode settings
 
-```npm
-npm install web-ui-pack
-```
+   ```json
+   // .vscode/settings.json
+   {
+     // ...
+     "html.customData": ["node_modules/web-ui-pack/types.html.json"]
+   }
+   ```
+
+5. Type `<wup` to see suggestions (if it doesn't work reload VSCode). More details below
 
 ## TODO
 

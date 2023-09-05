@@ -17,6 +17,10 @@
 - [RadioControl](src/controls/radio.ts). _autoFocus makes focused 1st but not active input when `form.$options.autoFocus=true`_
 - Global. Refactored & fixed TS types
 
+**New/Features**:
+
+- Global. Added support HTML intellisense in VSCode: follow [instructions](README.md#installing--usage)
+
 ## 0.8.1 (Aug 29, 2023)
 
 **BREAKING CHANGES**:
