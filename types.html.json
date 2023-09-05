@@ -1,88 +1,65 @@
 {
   "version": 1.1,
+  "_details": "// https://github.com/microsoft/vscode-html-languageservice/blob/main/docs/customData.schema.json",
+  "_usage": "https://code.visualstudio.com/api/extension-guides/custom-data-extension",
+  "_buildAuto": "https://github.com/runem/web-component-analyzer => run: wca analyze src --format json --outFile custom-elements.json/",
   "tags": [
     {
       "name": "wup-circle",
-      "path": "./src\\circleElement.ts",
       "description": "Arc/circle chart based on SVG",
+      "references": [
+        {
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/circle"
+        }
+      ],
       "attributes": [
         {
           "name": "items",
           "description": "Global reference to object with array",
-          "type": "string | undefined"
+          "values": [{ "name": "window.circleItems" }],
+          "references": [
+            {
+              "name": "WUP.Circle.Item",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/circleElement.ts"
+            }
+          ]
         },
         {
-          "name": "width"
+          "name": "width",
+          "description": "Width of each segment; expected 1..100 (perecentage) \n\r @defaultValue 10"
         },
         {
-          "name": "back"
+          "name": "back",
+          "description": "Enable background circle \n\r @defaultValue true"
         },
         {
-          "name": "corner"
+          "name": "corner",
+          "description": "Border/corner radius of each segment; expected 0..0.5 where 0.5 == 50% of `$options.width` \n\r @defaultValue 0.25"
         },
         {
-          "name": "from"
+          "name": "from",
+          "description": "Angle from that rendering is started -360..360 (degrees) \n\r @defaultValue 0"
         },
         {
-          "name": "to"
+          "name": "to",
+          "description": "Angle to that rendering is finished -360..360 (degrees) \n\r @defaultValue 360"
         },
         {
-          "name": "min"
+          "name": "min",
+          "description": "Min possible value that fits `from` \n\r @defaultValue 0"
         },
         {
-          "name": "max"
+          "name": "max",
+          "description": "Max possible value that fits `to` \n\r @defaultValue 100"
         },
         {
-          "name": "space"
+          "name": "space",
+          "description": "Space between segments; expected 0..20 (degrees), \n\r @defaultValue 2"
         },
         {
-          "name": "minsize"
-        }
-      ],
-      "properties": [
-        {
-          "name": "$refSVG",
-          "type": "SVGSymbolElement | SVGSVGElement | SVGAElement | SVGCircleElement | SVGClipPathElement | ... 51 more ... | SVGViewElement",
-          "default": "\"this.make(\\\"svg\\\")\""
-        },
-        {
-          "name": "$refItems",
-          "type": "SVGSymbolElement | SVGSVGElement | SVGAElement | SVGCircleElement | SVGClipPathElement | ... 51 more ... | SVGViewElement",
-          "default": "\"this.make(\\\"g\\\")\""
-        },
-        {
-          "name": "$refLabel",
-          "type": "HTMLElement | undefined"
-        },
-        {
-          "name": "override",
-          "description": "Called on every changeEvent"
-        },
-        {
-          "name": "items",
-          "attribute": "items",
-          "description": "Global reference to object with array",
-          "type": "string | undefined"
-        },
-        {
-          "name": "$refStyle",
-          "type": "HTMLStyleElement | null"
-        },
-        {
-          "name": "$defaults",
-          "description": "Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item",
-          "type": "Options",
-          "default": "{\"width\":14,\"corner\":0.25,\"back\":true,\"from\":0,\"to\":360,\"min\":0,\"max\":100,\"space\":2,\"minsize\":10,\"hoverShowTimeout\":\"hoverShowTimeout\",\"hoverHideTimeout\":0,\"items\":[]}"
-        },
-        {
-          "name": "$isReady",
-          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
-          "type": "boolean"
-        },
-        {
-          "name": "$options",
-          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
-          "type": "TOptions"
+          "name": "minsize",
+          "description": "Min segment size - to avoid rendering extra-small segments; expected 0..20 (degrees) \n\r @defaultValue 10"
         }
       ]
     },

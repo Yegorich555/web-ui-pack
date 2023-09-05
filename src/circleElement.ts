@@ -43,7 +43,7 @@ declare global {
       /** Width of each segment; expected 1..100 (perecentage)
        * @defaultValue 10 */
       width: number;
-      /** Border/corner radius of each segment; expected 0..0.5 where 0.5 == 50% of `$options.wdith`
+      /** Border/corner radius of each segment; expected 0..0.5 where 0.5 == 50% of `$options.width`
        * @defaultValue 0.25 */
       corner: number;
       /** Enable background circle
@@ -52,7 +52,7 @@ declare global {
       /** Angle from that rendering is started -360..360 (degrees)
        * @defaultValue 0 */
       from: number;
-      /** Angle from that rendering is started -360..360 (degrees)
+      /** Angle to that rendering is finished -360..360 (degrees)
        * @defaultValue 360 */
       to: number;
       /** Min possible value that fits `options.from`
