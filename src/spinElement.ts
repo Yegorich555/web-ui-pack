@@ -9,26 +9,42 @@ declare global {
       /** Place inside parent as inline-block otherwise overflow target in the center (`position: relative` is not required);
        * @defaultValue false */
       inline: boolean;
+      /** Allow to reduce size to fit parent (for max-size change css-var --spin-size)
+       * @defaultValue `auto` => `false` when inline:true, `true` when inline:false */
+      fit: boolean | "auto";
       /** Virtual padding of parentElement [top, right, bottom, left] or [top/bottom, right/left] in px
        * @defaultValue [4,4] */
       overflowOffset: [number, number, number, number] | [number, number];
       /** Allow to create shadowBox to partially hide target (only for `inline: false`)
        * @defaultValue true */
       overflowFade: boolean;
-      /** Allow to reduce size to fit parent (for max-size change css-var --spin-size)
-       * @defaultValue `auto` => `false` when inline:true, `true` when inline:false */
-      fit: boolean | "auto";
       /** Anchor element that need to oveflow by spinner
        * @defaultValue `auto`: parentElement */
       overflowTarget: HTMLElement | "auto";
     }
-    // @ts-expect-error
-    interface Attributes extends Pick<Options, "fit" | "inline" | "overflowFade"> {
+    interface JSXProps<T extends WUPSpinElement> extends WUP.Base.JSXProps<T>, WUP.Base.OnlyNames<Options> {
       inline?: boolean | "";
+      fit?: boolean | "" | "auto";
+      /** Virtual padding of parentElement [top, right, bottom, left] or [top/bottom, right/left] in px;
+       * * Point Global reference to object with array
+       * @example
+       * ```js
+       * window.someObj = [...];
+       * <wup-spin overflowOffset="window.someObj"></wup-spin>
+       * ```
+       * @defaultValue [4,4] */
+      overflowOffset?: string;
       overflowFade?: boolean | "";
-      fit?: boolean | "";
+      /** Anchor element that need to oveflow by spinner
+       * * Point Global reference to object with array
+       * @example
+       * ```js
+       * window.someObj = document.body;
+       * <wup-spin items="window.someObj"></wup-spin>
+       * ```
+       * @defaultValue `auto`: parentElement */
+      overflowTarget?: string;
     }
-    interface JSXProps<T extends WUPSpinElement> extends WUP.Base.JSXProps<T>, Attributes {}
   }
 
   interface HTMLElementTagNameMap {

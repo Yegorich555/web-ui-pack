@@ -258,8 +258,7 @@ export default abstract class WUPBaseElement<
 
   constructor() {
     super();
-    // @ts-expect-error - TS doesn't see that init happens in this way;
-    this.$options = null;
+    this.$options = null as any;
 
     if (!this.#ctr.$refStyle) {
       this.#ctr.$refStyle = document.createElement("style");
@@ -474,7 +473,6 @@ export default abstract class WUPBaseElement<
         return v;
       };
     }
-    // @ts-ignore - different TS versions can throw here
     const r = onEvent(...args);
     this.disposeLst.push(r);
     const remove = (): void => {
@@ -605,6 +603,9 @@ declare global {
     /** Cast not-supported props to optional string */
     type toJSX<T> = {
       [P in keyof T]?: T[P] extends number | boolean | string | undefined ? T[P] : string;
+    };
+    type OnlyNames<T> = {
+      [P in keyof T]?: unknown;
     };
     type OptionEvent<T extends Record<string, any> = Record<string, any>> = {
       props: Array<Extract<keyof T, string>>;

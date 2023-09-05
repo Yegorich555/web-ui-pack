@@ -40,8 +40,10 @@ declare global {
        *  @defaultValue true */
       minHeightByTarget: boolean;
     }
-    interface Attributes {}
-    interface JSXProps<C = WUPDropdownElement> extends WUP.Base.JSXProps<C>, Attributes {}
+    // WARN: all options must be appline
+    interface JSXProps<C = WUPDropdownElement>
+      extends WUP.Base.JSXProps<C>,
+        Partial<Pick<Options, "hideOnPopupClick">> {}
   }
 
   interface HTMLElementTagNameMap {
@@ -141,7 +143,7 @@ export default class WUPDropdownElement<
       });
       Object.keys(this._opts).forEach((k) => {
         if (!excluded.has(k)) {
-          // @ts-expect-error
+          // @ts-expect-error - because hideOnPopupClick not exists on popup
           this.$refPopup.$options[k] = this._opts[k];
         }
       });

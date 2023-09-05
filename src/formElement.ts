@@ -52,13 +52,13 @@ declare global {
       /** Actions that enabled on submit event; You can point several like: `goToError | collectChanged`
        * @defaultValue goToError | validateUntiFirst | reset | lockOnPending */
       submitActions: SubmitActions;
-      /** Whether need to store data in localStorage to prevent losing till submitted;
+      /** Enable to tore data in localStorage to prevent losing till submitted;
        * @defaultValue false
        * @tutorial Troubleshooting
        * * It doesn't save values that are complex objects. So `wup-select.$options.items = [{text: "N1",value: {id:1,name:'Nik'} }]` is skipped
        * * Point string-value if default storage-key doesn't fit: based on `url+control.names` @see{@link WUPFormElement.storageKey}
        * @defaultValue false */
-      autoSave: boolean | string;
+      // autoSave: boolean | string;
       /** Focus first possible element when it's appended to layout
        * @defaultValue false */
       autoFocus: boolean;
@@ -73,9 +73,16 @@ declare global {
       autoComplete: boolean;
     }
 
-    interface Attributes extends Partial<Options> {}
-    interface JSXProps<T extends WUPFormElement> extends WUP.Base.JSXProps<T>, Attributes {
-      autoSave?: string;
+    interface JSXProps<T extends WUPFormElement>
+      extends Omit<WUP.Base.JSXProps<T>, "autoSave">,
+        WUP.Base.OnlyNames<Options> {
+      submitActions?: SubmitActions | number;
+      autoSave?: boolean | string;
+      /** @deprecated React override default behavior - use el.$options.autoFocus instead */
+      autoFocus?: boolean | "";
+      disabled?: boolean | "";
+      readOnly?: boolean | "";
+      autoComplete?: boolean | "";
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
       onChange?: never;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willSubmit') instead */

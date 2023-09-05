@@ -75,11 +75,17 @@ declare global {
       /** Items related to circle-segments */
       items: Item[];
     }
-    // @ts-expect-error
-    interface Attributes extends Omit<Partial<Options>, "hoverShowTimeout" | "hoverHideTimeout"> {
+    interface JSXProps<T = WUPCircleElement>
+      extends WUP.Base.JSXProps<T>,
+        Omit<Partial<Options>, "hoverShowTimeout" | "hoverHideTimeout" | "items"> {
+      /** Global reference to object with array
+       * @example
+       * ```js
+       * window.myItems = [...];
+       * <wup-circle items="window.myItems"></wup-circle>
+       * ``` */
       items?: string;
     }
-    interface JSXProps<C = WUPCircleElement> extends WUP.Base.JSXProps<C>, Attributes {}
   }
 
   interface HTMLElementTagNameMap {
