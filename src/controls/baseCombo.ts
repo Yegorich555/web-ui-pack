@@ -39,16 +39,18 @@ declare global {
       $hideMenu: Event;
     }
     interface ValidityMap extends Omit<WUP.Text.ValidityMap, "min" | "max" | "email"> {}
-    interface Options<T = any, VM = ValidityMap> extends WUP.Text.Options<T, VM> {
+    interface NewOptions {
       /** Case when menu-popup to show; WARN ShowCases.inputClick doesn't work without ShowCases.click
        * @defaultValue onPressArrowKey | onClick | onFocus */
       showCase: ShowCases;
       /** Set true to make input not editable but allow select items via popup-menu (ordinary dropdown mode) */
       readOnlyInput: boolean | number;
     }
-
-    interface Attributes extends WUP.Text.Attributes {}
-    interface JSXProps<C = WUPBaseComboControl> extends WUP.Text.JSXProps<C>, Attributes {}
+    interface Options<T = any, VM = ValidityMap> extends WUP.Text.Options<T, VM>, NewOptions {}
+    interface JSXProps<C = WUPBaseComboControl> extends WUP.Text.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
+      showCase?: ShowCases | number;
+      readOnlyInput?: boolean | number;
+    }
   }
 }
 

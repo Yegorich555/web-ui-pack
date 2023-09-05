@@ -22,7 +22,7 @@ declare global {
       /** User can't select time in excluded range */
       exclude: { test: (v: WUPTimeObject) => boolean };
     }
-    interface Options<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM> {
+    interface NewOptions {
       /** String representation of displayed time (enables mask, - to disable mask set $options.mask="");
        * @defaultValue localeInfo.time
        * @example `hh:mm a` or `h:m`
@@ -47,10 +47,25 @@ declare global {
       /** User can't select time in excluded range */
       exclude: { test: (v: WUPTimeObject) => boolean } | null;
     }
-    // @ts-expect-error
-    interface Attributes extends WUP.BaseCombo.Attributes, WUP.Base.toJSX<Partial<Options>> {}
-    interface JSXProps<C = WUPTimeControl> extends WUP.BaseCombo.JSXProps<C>, Attributes {
+    interface Options<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, NewOptions {}
+    interface JSXProps<C = WUPTimeControl> extends WUP.BaseCombo.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
+      /** Default value in format hh:mm or hh:mm a */
       initValue?: string;
+      format?: string;
+      step?: number;
+      menuButtonsOff?: boolean | "";
+      /** User can't select date less than min; format hh:mm */
+      min?: string;
+      /** User can't select date more than max; format hh:mm */
+      max?: string;
+      /** Points that user can't choose
+      /** Global reference to object with array
+       * @example
+       * ```js
+       * window.exclude = [new WUPTimeObject("02:30"), ...];
+       * <wup-time exclude="window.exclude"></wup-time>
+       * ``` */
+      exclude?: string;
     }
 
     interface MenuListElement extends HTMLElement {

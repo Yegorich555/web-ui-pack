@@ -31,12 +31,13 @@ declare global {
       /** If $value < pointed shows message 'Max value {x}` */
       max: number;
     }
-    interface Options<T = number, VM extends ValidityMap = ValidityMap> extends WUP.Text.Options<T, VM> {
+    interface NewOptions {
       /** String representation of displayed value
        * @defaultValue no-decimal and separators from localeInfo */
       format: Format | null;
     }
-    interface JSXProps<C = WUPNumberControl> extends WUP.Text.JSXProps<C> {
+    interface Options<T = number, VM extends ValidityMap = ValidityMap> extends WUP.Text.Options<T, VM>, NewOptions {}
+    interface JSXProps<C = WUPNumberControl> extends WUP.Text.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       /** String representation of displayed value
        * Point Global reference to object @see {@link Format}
        * @example

@@ -7,14 +7,13 @@ declare global {
   namespace WUP.Switch {
     interface EventMap extends WUP.BaseControl.EventMap {}
     interface ValidityMap extends WUP.BaseControl.ValidityMap {}
-    interface Options<T = boolean, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM> {
+    interface NewOptions {
       /** Reversed-style (switch+label for true vs label+switch)
        * @defaultValue false */
       reverse: boolean;
     }
-    interface JSXProps<C = WUPSwitchControl>
-      extends WUP.BaseControl.JSXProps<C>,
-        WUP.Base.OnlyNames<Pick<Options, "reverse">> {
+    interface Options<T = boolean, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, NewOptions {}
+    interface JSXProps<C = WUPSwitchControl> extends WUP.BaseControl.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       reverse?: boolean | "";
       /** InitValue for control @deprecated use `initValue` instead */
       defaultChecked?: boolean;

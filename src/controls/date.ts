@@ -24,7 +24,7 @@ declare global {
       /** Enabled if option [exclude] is pointed; If invalid shows "This date is disabled" */
       exclude: Date[];
     }
-    interface Options<T = Date, VM = ValidityMap> extends WUP.Calendar.Options<T, VM>, WUP.BaseCombo.Options<T, VM> {
+    interface NewOptions {
       /** String representation of displayed date (enables mask, - to disable mask set $options.mask="");
        * @defaultValue localeInfo.date
        * @example `yyyy-mm-dd` or `dd/mm/yyyy`
@@ -32,11 +32,16 @@ declare global {
        * * with changing $options.format need to change/reset mask/maskholder also */
       format: string;
     }
-    // @ts-expect-error
-    interface Attributes extends WUP.Calendar.Attributes, Partial<Options> {}
-    // @ts-expect-error
-    interface JSXProps<C = WUPDateControl> extends WUP.BaseCombo.JSXProps<C>, WUP.Calendar.JSXProps<C>, Attributes {
+    interface Options<T = Date, VM = ValidityMap>
+      extends WUP.Calendar.Options<T, VM>,
+        WUP.BaseCombo.Options<T, VM>,
+        NewOptions {}
+    interface JSXProps<C = WUPDateControl>
+      extends WUP.BaseCombo.JSXProps<C>,
+        WUP.Calendar.JSXProps<C>,
+        WUP.Base.OnlyNames<NewOptions> {
       initValue?: string;
+      format?: string;
     }
   }
   interface HTMLElementTagNameMap {

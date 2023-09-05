@@ -46,7 +46,7 @@ declare global {
     }
     interface EventMap extends WUP.BaseControl.EventMap {}
     interface ValidityMap extends WUP.BaseControl.ValidityMap {}
-    interface Options<T = Date, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM> {
+    interface NewOptions {
       /** First day of week in calendar where 1-Monday, 7-Sunday;
        * @defaultValue localeInfo.firstWeekDay */
       firstWeekDay: number | null;
@@ -67,23 +67,30 @@ declare global {
       /** Dates that user can't choose (disabled dates) */
       exclude: Date[] | null;
     }
-    interface JSXProps<C = WUPCalendarControl> extends WUP.BaseControl.JSXProps<C> {
-      /** First day of week in calendar where 1-Monday, 7-Sunday;
-       * @defaultValue localeInfo.firstWeekDay */
-      firstWeekDay?: number;
-      /** Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this
-       *  @defaultValue true */
-      utc?: boolean | "";
+    interface Options<T = Date, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, NewOptions {}
+    interface JSXProps<C = WUPCalendarControl> extends WUP.BaseControl.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       /** Default value in strict format yyyy-MM-dd hh:mm:ss.fff */
       initValue?: string;
-      /** Picker that must be rendered at first
-       * @not observed (affects only on init) */
+      firstWeekDay?: number;
+      utc?: boolean | "";
+      /** Picker that must be rendered at first; if undefined & isEmpty - year, otherwise - day;
+       * @tutorial
+       * * point "2012" to start from year2012
+       * * point "2012-05" to start from month5 year2012
+       * * point "2012-05-02" to start from day2 month5 year2012
+       * * shows picker according to pointed but range according to $value ($value has higher priority then pointed date here) */
       startWith?: "year" | "month" | "day" | string;
       /** User can't select date less than min; format yyyy-MM-dd */
       min?: string;
       /** User can't select date more than max; format yyyy-MM-dd  */
       max?: string;
-      /** Dates that user can't choose. Point global obj-key (window.myExclude = [] ) */
+      /** Dates that user can't choose
+      /** Global reference to object with array
+       * @example
+       * ```js
+       * window.exclude = [...];
+       * <wup-calendar exclude="window.exclude"></wup-calendar>
+       * ``` */
       exclude?: string;
     }
   }

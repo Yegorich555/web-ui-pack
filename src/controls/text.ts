@@ -35,7 +35,7 @@ declare global {
        * * excluded from listing (for $options.validationShowAll) */
       _parse: string;
     }
-    interface Options<T = string, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM> {
+    interface NewOptions {
       /** Debounce time to wait for user finishes typing to start validate and provide $change event
        * @defaultValue 0; */
       debounceMs: number;
@@ -74,11 +74,8 @@ declare global {
       /** Part after input; for example for value "$ 123 USD" prefix is " USD" */
       postfix?: string | null | undefined;
     }
-    interface JSXProps<C = WUPTextControl>
-      extends WUP.BaseControl.JSXProps<C>,
-        WUP.Base.OnlyNames<
-          Pick<Options, "debounceMs" | "selectOnFocus" | "clearButton" | "mask" | "maskholder" | "prefix" | "postfix">
-        > {
+    interface Options<T = string, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, NewOptions {}
+    interface JSXProps<C = WUPTextControl> extends WUP.BaseControl.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       debounceMs?: number;
       selectOnFocus?: boolean | "";
       clearButton?: boolean | "";

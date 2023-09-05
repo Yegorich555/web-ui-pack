@@ -14,19 +14,19 @@ declare global {
   namespace WUP.SelectMany {
     interface EventMap extends WUP.BaseCombo.EventMap {}
     interface ValidityMap extends WUP.BaseCombo.ValidityMap {}
-    interface Options<T = any, VM = ValidityMap> extends WUP.Select.Options<T, VM> {
+    interface NewOptions {
       /** Hide items in menu that selected
        * @defaultValue false */
       hideSelected: boolean;
       /** Allow user to change ordering of items; Use drag&drop or keyboard Shift/Ctrl/Meta + arrows to change item position
        * @defaultValue false */
       sortable: boolean;
+    }
+    interface Options<T = any, VM = ValidityMap> extends WUP.Select.Options<T, VM>, NewOptions {
       /** @readonly Constant value that impossible to change */
       multiple: true;
     }
-    // @ts-expect-error
-    interface Attributes extends WUP.Select.Attributes, Partial<Options> {}
-    interface JSXProps<C = WUPSelectManyControl> extends WUP.Select.JSXProps<C>, Attributes {}
+    interface JSXProps<C = WUPSelectManyControl> extends WUP.Select.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {}
   }
 
   interface HTMLElementTagNameMap {

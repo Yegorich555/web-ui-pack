@@ -6,7 +6,7 @@ declare global {
   namespace WUP.Radio {
     interface EventMap extends WUP.BaseControl.EventMap {}
     interface ValidityMap extends WUP.BaseControl.ValidityMap {}
-    interface Options<T = any, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM> {
+    interface NewOptions<T = any> {
       /** Items showed as radio-buttons
        * @tutorial Troubleshooting
        * * array items is converted to Proxy (observer) so
@@ -21,9 +21,8 @@ declare global {
        * @defaultValue false */
       reverse: boolean;
     }
-    interface JSXProps<C = WUPRadioControl>
-      extends WUP.BaseControl.JSXProps<C>,
-        WUP.Base.OnlyNames<Pick<Options, "reverse">> {
+    interface Options<T = any, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, NewOptions<T> {}
+    interface JSXProps<C = WUPRadioControl> extends WUP.BaseControl.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       reverse?: boolean | "";
       /** Global reference to object with array
        * @see  {@link WUP.Select.MenuItems}

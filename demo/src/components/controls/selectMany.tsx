@@ -103,7 +103,7 @@ export default function SelectManyControlView() {
         />
         <wup-selectmany
           label="Allow New Value ($options.allowNewValue)"
-          allownewvalue
+          allowNewValue
           name="allowNewValue"
           items="inputSelectMany.items"
           initValue="window.inputSelectMany.initValue"

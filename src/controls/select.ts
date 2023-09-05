@@ -33,14 +33,7 @@ declare global {
 
     interface EventMap extends WUP.BaseCombo.EventMap {}
     interface ValidityMap extends WUP.BaseCombo.ValidityMap {}
-    interface Options<T = any, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM> {
-      /** Case when menu-popup to show
-       * @defaultValue onPressArrowKey | onClick | onFocus | onInput */
-      showCase: ShowCases;
-      /** Set true to make input not editable but allow select items via popup-menu (ordinary dropdown mode)
-       * @tutorial
-       * * set number X to enable autoMode where `input.readOnly = items.length < X` */
-      readOnlyInput: boolean | number;
+    interface NewOptions<T = any> {
       /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data! */
       items: MenuItems<T> | (() => MenuItems<T> | Promise<MenuItems<T>>) | Promise<MenuItems<T>>;
       /** Allow user to create new value if value not found in items
@@ -50,14 +43,27 @@ declare global {
        * * @defaultValue false */
       multiple: boolean;
     }
-    // @ts-expect-error
-    interface Attributes extends WUP.BaseCombo.Attributes, Partial<Options> {
-      /** Items showed in dropdown-menu. Point global obj-key with items (set `window.items` for `window.items = [{value: 1, text: 'Item 1'}]` ) */
-      items?: string;
-      /** Allow user to create new value if value not found in items */
-      allownewvalue?: boolean | "";
+    interface Options<T = any, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, NewOptions<T> {
+      /** Case when menu-popup to show
+       * @defaultValue onPressArrowKey | onClick | onFocus | onInput */
+      showCase: ShowCases;
+      /** Set true to make input not editable but allow select items via popup-menu (ordinary dropdown mode)
+       * @tutorial
+       * * set number X to enable autoMode where `input.readOnly = items.length < X` */
+      readOnlyInput: boolean | number;
     }
-    interface JSXProps<C = WUPSelectControl> extends WUP.BaseCombo.JSXProps<C>, Attributes {}
+    interface JSXProps<C = WUPSelectControl> extends WUP.BaseCombo.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
+      /** Global reference to object with array
+       * @see  {@link MenuItems}
+       * @example
+       * ```js
+       * window.myItems = [...];
+       * <wup-select items="window.myItems"></wup-select>
+       * ``` */
+      items?: string;
+      allowNewValue?: boolean | "";
+      multiple?: boolean | "";
+    }
   }
 
   interface HTMLElementTagNameMap {
@@ -302,7 +308,7 @@ export default class WUPSelectControl<
       this.$isReadOnly ||
       this.$isPending ||
       r === true ||
-      (typeof r === "number" && r > (this._cachedItems?.length || 0) && !this._opts.allowNewValue); // WARN: _cached items can be undefined when fetching not started yet
+      (typeof r === "number" && r < (this._cachedItems?.length || 0) && !this._opts.allowNewValue); // WARN: _cached items can be undefined when fetching not started yet
   }
 
   override setupInitValue(propsChanged: Array<keyof WUP.Select.Options> | null): void {
