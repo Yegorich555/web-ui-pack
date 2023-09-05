@@ -67,8 +67,15 @@ declare global {
       /** Dates that user can't choose (disabled dates) */
       exclude: Date[] | null;
     }
-    // @ts-expect-error
-    interface Attributes extends WUP.BaseControl.Attributes, Partial<Options> {
+    interface JSXProps<C = WUPCalendarControl> extends WUP.BaseControl.JSXProps<C> {
+      /** First day of week in calendar where 1-Monday, 7-Sunday;
+       * @defaultValue localeInfo.firstWeekDay */
+      firstWeekDay?: number;
+      /** Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this
+       *  @defaultValue true */
+      utc?: boolean | "";
+      /** Default value in strict format yyyy-MM-dd hh:mm:ss.fff */
+      initValue?: string;
       /** Picker that must be rendered at first
        * @not observed (affects only on init) */
       startWith?: "year" | "month" | "day" | string;
@@ -78,11 +85,6 @@ declare global {
       max?: string;
       /** Dates that user can't choose. Point global obj-key (window.myExclude = [] ) */
       exclude?: string;
-      /** default value; format yyyy-MM-dd hh:mm:ss.fff */
-      initValue?: string;
-    }
-    interface JSXProps<C = WUPCalendarControl> extends WUP.BaseControl.JSXProps<C>, Attributes {
-      initValue?: string;
     }
   }
 

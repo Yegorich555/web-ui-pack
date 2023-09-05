@@ -74,11 +74,20 @@ declare global {
       /** Part after input; for example for value "$ 123 USD" prefix is " USD" */
       postfix?: string | null | undefined;
     }
-    // @ts-expect-error
-    interface Attributes extends WUP.BaseControl.Attributes, Partial<Options> {
-      prefix?: string; // attr prefix exists in React
+    interface JSXProps<C = WUPTextControl>
+      extends WUP.BaseControl.JSXProps<C>,
+        WUP.Base.OnlyNames<
+          Pick<Options, "debounceMs" | "selectOnFocus" | "clearButton" | "mask" | "maskholder" | "prefix" | "postfix">
+        > {
+      debounceMs?: number;
+      selectOnFocus?: boolean | "";
+      clearButton?: boolean | "";
+      mask?: string;
+      maskholder?: string | false;
+      prefix?: string;
+      postfix?: string;
     }
-    interface JSXProps<C = WUPTextControl> extends WUP.BaseControl.JSXProps<C>, Attributes {}
+
     interface GotInputEvent extends InputEvent {
       target: HTMLInputElement;
       // /** Call it to prevent calling setValue by input event */

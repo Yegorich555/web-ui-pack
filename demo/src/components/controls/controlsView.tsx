@@ -73,6 +73,7 @@ export default function ControlsView() {
         readOnly={false}
         ref={(el) => {
           if (el) {
+            el.$options.autoFocus = true;
             // el.$initModel = { text: "test-me@google.com" };
             el.$isPending = false;
             el.$onSubmit = (e) => {

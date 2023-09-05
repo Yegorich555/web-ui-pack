@@ -12,14 +12,13 @@ declare global {
        * @defaultValue false */
       reverse: boolean;
     }
-    // @ts-expect-error
-    interface Attributes extends WUP.BaseControl.Attributes, Partial<Options> {
-      /** InitValue for control */
-      defaultChecked?: boolean;
-      /** Reversed-style (switch+label vs label+switch) */
+    interface JSXProps<C = WUPSwitchControl>
+      extends WUP.BaseControl.JSXProps<C>,
+        WUP.Base.OnlyNames<Pick<Options, "reverse">> {
       reverse?: boolean | "";
+      /** InitValue for control @deprecated use `initValue` instead */
+      defaultChecked?: boolean;
     }
-    interface JSXProps<C = WUPSwitchControl> extends WUP.BaseControl.JSXProps<C>, Attributes {}
   }
 
   interface HTMLElementTagNameMap {

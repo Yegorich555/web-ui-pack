@@ -24,14 +24,12 @@ declare global {
        * @defaultValue false */
       reverse: boolean;
     }
-    // @ts-expect-error
-    interface Attributes
-      extends Omit<WUP.Text.Attributes, "mask" | "maskholder" | "skey" | "storage">,
-        Partial<Options> {
-      /** Reversed-style for button-eye */
-      reverse?: boolean | "";
+    interface JSXProps<C = WUPPasswordControl>
+      extends Omit<WUP.Text.JSXProps<C>, "mask" | "maskholder" | "prefix" | "postfix"> {
+      /** Reversed-style for button-eye
+       * @defaultValue false */
+      reverse?: boolean | string;
     }
-    interface JSXProps<C = WUPPasswordControl> extends WUP.Text.JSXProps<C>, Attributes {}
   }
 
   interface HTMLElementTagNameMap {

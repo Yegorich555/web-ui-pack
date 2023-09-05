@@ -531,12 +531,6 @@ describe("control.time", () => {
 
     el.focus();
     await h.wait();
-    const isPressKeyPrevented = (key = "Arrow", opts = { shiftKey: false, ctrlKey: false }) => {
-      const isPrevented = !el.$refInput.dispatchEvent(
-        new KeyboardEvent("keydown", { key, cancelable: true, bubbles: true, ...opts })
-      );
-      return isPrevented;
-    };
 
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [

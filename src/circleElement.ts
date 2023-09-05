@@ -15,6 +15,7 @@ const radius = 50;
 
 declare global {
   namespace WUP.Circle {
+    /** Item object related to */
     interface Item {
       value: number;
       color?: string;
@@ -79,6 +80,7 @@ declare global {
       extends WUP.Base.JSXProps<T>,
         Omit<Partial<Options>, "hoverShowTimeout" | "hoverHideTimeout" | "items"> {
       /** Global reference to object with array
+       * @see {@link Item}
        * @example
        * ```js
        * window.myItems = [...];

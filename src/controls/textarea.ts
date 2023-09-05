@@ -11,13 +11,8 @@ declare global {
     interface ValidityMap extends WUP.Text.ValidityMap {}
     interface Options<T = string, VM = ValidityMap>
       extends Omit<WUP.Text.Options<T, VM>, "mask" | "maskholder" | "prefix" | "postfix"> {}
-    // @ts-expect-error
-    interface Attributes
-      extends Omit<WUP.Text.Attributes, "mask" | "maskholder" | "prefix" | "postfix">,
-        Partial<Options> {}
     interface JSXProps<C = WUPTextareaControl>
-      extends Omit<WUP.Text.JSXProps<C>, "mask" | "maskholder" | "prefix" | "postfix">,
-        Attributes {}
+      extends Omit<WUP.Text.JSXProps<C>, "mask" | "maskholder" | "prefix" | "postfix"> {}
   }
 
   interface HTMLElementTagNameMap {

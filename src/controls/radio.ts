@@ -21,13 +21,19 @@ declare global {
        * @defaultValue false */
       reverse: boolean;
     }
-    interface Attributes extends WUP.BaseControl.Attributes {
-      /** Items showed as radio-buttons. Point global obj-key with items (set `window.inputRadio.items` for `window.inputRadio.items = [{value: 1, text: 'Item 1'}]` ) */
-      items?: string;
-      /** Reversed-style (radio+label vs label+radio) */
+    interface JSXProps<C = WUPRadioControl>
+      extends WUP.BaseControl.JSXProps<C>,
+        WUP.Base.OnlyNames<Pick<Options, "reverse">> {
       reverse?: boolean | "";
+      /** Global reference to object with array
+       * @see  {@link WUP.Select.MenuItems}
+       * @example
+       * ```js
+       * window.myItems = [...];
+       * <wup-radio items="window.myItems"></wup-circle>
+       * ``` */
+      items?: string;
     }
-    interface JSXProps<C = WUPRadioControl> extends WUP.BaseControl.JSXProps<C>, Attributes {}
   }
 
   interface HTMLElementTagNameMap {

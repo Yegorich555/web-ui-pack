@@ -87,15 +87,27 @@ declare global {
     ) => false | string;
 
     interface Options<T = any, VM = ValidityMap> {
-      /** When to validate control and show error. Validation by onSubmit impossible to disable
-       *  @defaultValue onChangeSmart | onFocusLost | onFocusWithValue | onSubmit */
-      validationCase: ValidationCases;
-      /** Wait for pointed time after valueChange before showError (it's sumarized with $options.debounce); WARN: hide error without debounce
-       *  @defaultValue 500 */
-      validateDebounceMs: number;
+      /** Title/label of control;
+       * @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string) */
+      label: string | undefined | null;
+      /** Property/key of model (collected by form); For name `firstName` >> `model.firstName`; for `nested.firstName` >> `model.nested.firstName` etc.
+       * * @tutorial
+       * * point `undefined` to completely detach from FormElement
+       * * point `''`(empty string) to partially detach (exlcude from `form.$model`, `form.$isChanged`, but included in validations & submit) */
+      name: string | undefined | null;
+      /** Focus element when it's appended to layout @defaultValue false */
+      autoFocus: boolean;
+      /** Name to autocomplete by browser; Point `true` to inherit from $options.name or some string
+       *  if control has no autocomplete option then it's inherited from form
+       * @defaultValue null - means false if form.$options.autoComplete false also */
+      autoComplete: string | boolean | null;
+      /** Disallow edit/copy value; adds attr [disabled] for styling */
+      disabled: boolean;
+      /** Disallow copy value; adds attr [readonly] for styling @defaultValue false */
+      readOnly: boolean;
       /** Debounce option for onFocustLost event (for validationCases.onFocusLost); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost;
        * @defaultValue 100ms */
-      focusDebounceMs?: number;
+      focusDebounceMs: number;
       /** Behavior that expected for clearing value inside control (via pressEsc or btnClear)
        * @defaultValue ClearActions.initClearBack */
       clearActions: ClearActions;
@@ -137,24 +149,12 @@ declare global {
         | { [k: string]: ValidityFunction<T> }
         | null
         | undefined;
-      /** Title/label of control;
-       * @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string) */
-      label: string | undefined | null;
-      /** Property/key of model (collected by form); For name `firstName` >> `model.firstName`; for `nested.firstName` >> `model.nested.firstName` etc.
-       * * @tutorial
-       * * point `undefined` to completely detach from FormElement
-       * * point `''`(empty string) to partially detach (exlcude from `form.$model`, `form.$isChanged`, but included in validations & submit) */
-      name: string | undefined | null;
-      /** Focus element when it's appended to layout @defaultValue false */
-      autoFocus: boolean;
-      /** Name to autocomplete by browser; Point `true` to inherit from $options.name or some string
-       *  if control has no autocomplete option then it's inherited from form
-       * @defaultValue null - means false if form.$options.autoComplete false also */
-      autoComplete: string | boolean | null;
-      /** Disallow edit/copy value; adds attr [disabled] for styling */
-      disabled: boolean;
-      /** Disallow copy value; adds attr [readonly] for styling @defaultValue false */
-      readOnly: boolean;
+      /** When to validate control and show error. Validation by onSubmit impossible to disable
+       *  @defaultValue onChangeSmart | onFocusLost | onFocusWithValue | onSubmit */
+      validationCase: ValidationCases;
+      /** Wait for pointed time after valueChange before showError (it's sumarized with $options.debounce); WARN: hide error without debounce
+       *  @defaultValue 500 */
+      validateDebounceMs: number;
       /** Show all validation-rules with checkpoints as list instead of single error @defaultValue false */
       validationShowAll: boolean;
       /** Storage key for auto saving value in storage;
@@ -171,19 +171,41 @@ declare global {
        * @defaultValue "local" */
       storage?: "local" | "session" | "url";
     }
-    // @ts-expect-error
-    interface Attributes extends Partial<Options> {
-      /** default value in string/boolean/number representation (depends on `control.prototype.parse()`) */
+
+    interface JSXProps<C = WUPBaseControl> extends WUP.Base.JSXProps<C>, WUP.Base.OnlyNames<Options> {
+      /** Default value in string/boolean/number representation (depends on `control.prototype.parse()`) */
       initValue?: string | boolean | number;
-      /** Rules enabled for current control. Point global obj-key with validations (use `window.myValidations` where `window.validations = {required: true}` ) */
-      validations?: string;
-      /** @deprecated Use $defaults.validationRules instead to change for the whole class */
+      label?: string;
+      name?: string;
+      /** @deprecated doesn't work directly with React; use `el.$options.autoFocus = true` instead */
+      autoFocus?: boolean;
+      autoComplete?: string | boolean;
+      disabled?: boolean | "";
+      readonly?: boolean | "";
+      clearActions?: ClearActions | number;
+      /** @deprecated use static `.$defaults.validationCase` instead */
+      validationCase?: never;
+      /** @deprecated use static `.$defaults.validationCase` instead */
+      focusDebounceMs?: never;
+      /** @deprecated use static `.$defaults.validationCase` instead */
       validationRules?: never;
+      /** Rules enabled for current control (related to $defaults.validationRules);
+       * * Point Global reference to object
+       * @example
+       * ```js
+       * window.someRules = { required: true };
+       * <wup-text validations="window.someRules"></wup-text>
+       * ```
+       * @defaultValue [4,4] */
+      validations?: string;
+      validateDebounceMs?: number;
+      validationShowAll?: boolean | "";
+      storageKey?: boolean | string;
+      storage?: "local" | "session" | "url";
+      /** @deprecated Use [required] for styling */
+      readonly required?: "";
       /** @readonly Use [invalid] for styling */
       readonly invalid?: boolean;
-    }
-
-    interface JSXProps<C = WUPBaseControl> extends WUP.Base.JSXProps<C>, Attributes {
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
       onChange?: never;
     }

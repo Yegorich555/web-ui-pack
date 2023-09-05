@@ -36,10 +36,17 @@ declare global {
        * @defaultValue no-decimal and separators from localeInfo */
       format: Format | null;
     }
-    interface Attributes extends WUP.Text.Attributes {
+    interface JSXProps<C = WUPNumberControl> extends WUP.Text.JSXProps<C> {
+      /** String representation of displayed value
+       * Point Global reference to object @see {@link Format}
+       * @example
+       * ```js
+       * window.format = {};
+       * <wup-number items="window.format"></wup-number>
+       * ```
+       * @defaultValue no-decimal and separators from localeInfo */
       format?: string;
     }
-    interface JSXProps<C = WUPNumberControl> extends WUP.Text.JSXProps<C>, Attributes {}
   }
   interface HTMLElementTagNameMap {
     [tagName]: WUPNumberControl; // add element to document.createElement
