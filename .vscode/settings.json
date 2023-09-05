@@ -14,9 +14,7 @@
   "css.validate": false,
   "less.validate": false,
   "scss.validate": false,
-  "todo-tree.filtering.excludeGlobs": [
-    "**/node_modules"
-  ],
+  "todo-tree.filtering.excludeGlobs": ["**/node_modules"],
   /*
     if you want fix by format set the following in keybindings.json:
      {
@@ -71,5 +69,9 @@
   "[less]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
-  }
+  },
+  // https://code.visualstudio.com/api/extension-guides/custom-data-extension
+  // https://github.com/runem/web-component-analyzer => run: wca analyze src --format json --outFile custom-elements.json/
+  "html.customData": ["types.html.json"]
+  // "css.customData": ["./css.css-data.json"] // issue: https://github.com/microsoft/vscode-custom-data/issues/82
 }

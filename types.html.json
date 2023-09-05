@@ -1,0 +1,2855 @@
+{
+  "version": 1.1,
+  "tags": [
+    {
+      "name": "wup-circle",
+      "path": "./src\\circleElement.ts",
+      "description": "Arc/circle chart based on SVG",
+      "attributes": [
+        {
+          "name": "items",
+          "description": "Global reference to object with array",
+          "type": "string | undefined"
+        },
+        {
+          "name": "width"
+        },
+        {
+          "name": "back"
+        },
+        {
+          "name": "corner"
+        },
+        {
+          "name": "from"
+        },
+        {
+          "name": "to"
+        },
+        {
+          "name": "min"
+        },
+        {
+          "name": "max"
+        },
+        {
+          "name": "space"
+        },
+        {
+          "name": "minsize"
+        }
+      ],
+      "properties": [
+        {
+          "name": "$refSVG",
+          "type": "SVGSymbolElement | SVGSVGElement | SVGAElement | SVGCircleElement | SVGClipPathElement | ... 51 more ... | SVGViewElement",
+          "default": "\"this.make(\\\"svg\\\")\""
+        },
+        {
+          "name": "$refItems",
+          "type": "SVGSymbolElement | SVGSVGElement | SVGAElement | SVGCircleElement | SVGClipPathElement | ... 51 more ... | SVGViewElement",
+          "default": "\"this.make(\\\"g\\\")\""
+        },
+        {
+          "name": "$refLabel",
+          "type": "HTMLElement | undefined"
+        },
+        {
+          "name": "override",
+          "description": "Called on every changeEvent"
+        },
+        {
+          "name": "items",
+          "attribute": "items",
+          "description": "Global reference to object with array",
+          "type": "string | undefined"
+        },
+        {
+          "name": "$refStyle",
+          "type": "HTMLStyleElement | null"
+        },
+        {
+          "name": "$defaults",
+          "description": "Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item",
+          "type": "Options",
+          "default": "{\"width\":14,\"corner\":0.25,\"back\":true,\"from\":0,\"to\":360,\"min\":0,\"max\":100,\"space\":2,\"minsize\":10,\"hoverShowTimeout\":\"hoverShowTimeout\",\"hoverHideTimeout\":0,\"items\":[]}"
+        },
+        {
+          "name": "$isReady",
+          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
+          "type": "boolean"
+        },
+        {
+          "name": "$options",
+          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
+          "type": "TOptions"
+        }
+      ]
+    },
+    {
+      "name": "wup-calendar",
+      "path": "./src\\controls\\calendar.ts",
+      "description": "Form-control represented by date picker",
+      "properties": [
+        {
+          "name": "$refCalenar",
+          "description": "Reference to calendar-container",
+          "type": "HTMLDivElement",
+          "default": "\"document.createElement(\\\"div\\\")\""
+        },
+        {
+          "name": "$refCalenarTitle",
+          "description": "Reference to header-button",
+          "type": "HTMLButtonElement",
+          "default": "\"document.createElement(\\\"button\\\")\""
+        },
+        {
+          "name": "$refCalenarItems",
+          "description": "Reference to container with items",
+          "type": "HTMLOListElement & { _items?: IItemElement[] | undefined; }",
+          "default": "\"document.createElement(\\\"ol\\\")\""
+        },
+        {
+          "name": "initValue",
+          "description": "Default value in strict format yyyy-MM-dd hh:mm:ss.fff",
+          "type": "string | undefined"
+        },
+        {
+          "name": "firstWeekDay",
+          "type": "number | undefined"
+        },
+        {
+          "name": "utc",
+          "type": "boolean | \"\" | undefined"
+        },
+        {
+          "name": "startWith",
+          "description": "Picker that must be rendered at first; if undefined & isEmpty - year, otherwise - day;",
+          "type": "string | undefined"
+        },
+        {
+          "name": "min",
+          "description": "User can't select date less than min; format yyyy-MM-dd",
+          "type": "string | undefined"
+        },
+        {
+          "name": "max",
+          "description": "User can't select date more than max; format yyyy-MM-dd",
+          "type": "string | undefined"
+        },
+        {
+          "name": "exclude",
+          "description": "Dates that user can't choose\n/** Global reference to object with array",
+          "type": "string | undefined"
+        },
+        {
+          "name": "$ariaCleared",
+          "description": "Text announced by screen-readers when control cleared; @defaultValue `cleared`",
+          "type": "string",
+          "default": "\"cleared\""
+        },
+        {
+          "name": "$ariaError",
+          "description": "Text announced by screen-readers; @defaultValue `Error for`",
+          "type": "string",
+          "default": "\"Error for\""
+        },
+        {
+          "name": "$onChange",
+          "description": "Called on value change",
+          "type": "((e: CustomEvent<any> & { detail: SetValueReasons; }) => void) | undefined"
+        },
+        {
+          "name": "$isEmpty",
+          "description": "Returns true if value is empty string or undefined",
+          "type": "boolean"
+        },
+        {
+          "name": "$isRequired",
+          "description": "Returns if value is required - can't be undefined (depends on $options.validations.required)",
+          "type": "boolean"
+        },
+        {
+          "name": "$form",
+          "type": "WUPFormElement<any, Options, EventMap> | undefined"
+        },
+        {
+          "name": "$refLabel",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLLabelElement",
+          "default": "\"document.createElement(\\\"label\\\")\""
+        },
+        {
+          "name": "$refInput",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLInputElement",
+          "default": "\"document.createElement(\\\"input\\\") as HTMLInputElement\""
+        },
+        {
+          "name": "$refTitle",
+          "description": "Reference to nested HTMLElement tied with $options.label",
+          "type": "HTMLElement",
+          "default": "\"document.createElement(\\\"strong\\\")\""
+        },
+        {
+          "name": "$refError",
+          "description": "Reference to nested HTMLElement tied with errorMessage",
+          "type": "WUPPopupElement<Options, EventMap> | undefined"
+        },
+        {
+          "name": "override",
+          "description": "Converts date-string into Date according (to $options.utc)"
+        },
+        {
+          "name": "storageKey",
+          "description": "Returns storage key based on options `skey` and `name`",
+          "type": "string | false | null | undefined"
+        },
+        {
+          "name": "$value",
+          "description": "Current value of control; You can change it without affecting on $isDirty state",
+          "type": "ValueType | undefined"
+        },
+        {
+          "name": "$initValue",
+          "description": "Default/init value; used to define isChanged & to reset by keyEsc/buttonClear;\nIf control not $isDirty and not changed $value is updated according to $initValue",
+          "type": "ValueType | undefined"
+        },
+        {
+          "name": "$isDirty",
+          "description": "True if control is touched by user",
+          "type": "boolean"
+        },
+        {
+          "name": "$isChanged",
+          "description": "Returns if value changed (by comparisson with $initValue via static.isEqual option)\nBy default values compared by valueOf if it's possible",
+          "type": "boolean"
+        },
+        {
+          "name": "$isValid",
+          "description": "Returns true if control is valid",
+          "type": "boolean"
+        },
+        {
+          "name": "$isFocused",
+          "description": "Returns if current control is active/focused",
+          "type": "boolean"
+        },
+        {
+          "name": "$isDisabled",
+          "description": "Returns if related form or control disabled (true even if form.$options.disabled && !control.$options.disabled)",
+          "type": "boolean"
+        },
+        {
+          "name": "$isReadOnly",
+          "description": "Returns if related form or control readonly (true even if form.$options.readOnly && !control.$options.readOnly)",
+          "type": "boolean"
+        },
+        {
+          "name": "$autoComplete",
+          "description": "Returns autoComplete name if related form or control option is enabled (and control.$options.autoComplete !== false )",
+          "type": "string | false"
+        },
+        {
+          "name": "$validate",
+          "type": "() => string | false"
+        },
+        {
+          "name": "gotFormChanges",
+          "type": "(propsChanged: string[] | null) => void"
+        },
+        {
+          "name": "validateBySubmit",
+          "type": "() => string | false"
+        },
+        {
+          "name": "canShowError",
+          "description": "Returns true on !$isDisabled",
+          "type": "boolean"
+        },
+        {
+          "name": "$refStyle",
+          "type": "HTMLStyleElement | null"
+        },
+        {
+          "name": "$defaults",
+          "description": "Default options - applied to every element. Change it to configure default behavior",
+          "type": "Options<Date, ValidityMap>",
+          "default": "{\"validationRules\":{},\"utc\":true,\"firstWeekDay\":null,\"startWith\":null,\"min\":null,\"max\":null,\"exclude\":null}"
+        },
+        {
+          "name": "$isReady",
+          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
+          "type": "boolean"
+        },
+        {
+          "name": "$options",
+          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
+          "type": "{ label?: string | null | undefined; name?: string | null | undefined; autoComplete?: string | boolean | null | undefined; readOnly?: boolean | null | undefined; disabled?: boolean | null | undefined; }"
+        }
+      ],
+      "events": [
+        {
+          "name": "click"
+        }
+      ]
+    },
+    {
+      "name": "wup-check",
+      "path": "./src\\controls\\check.ts",
+      "description": "Form-control with checkbox",
+      "properties": [
+        {
+          "name": "$ariaCleared",
+          "description": "Text announced by screen-readers when control cleared; @defaultValue `cleared`",
+          "type": "string",
+          "default": "\"cleared\""
+        },
+        {
+          "name": "$ariaError",
+          "description": "Text announced by screen-readers; @defaultValue `Error for`",
+          "type": "string",
+          "default": "\"Error for\""
+        },
+        {
+          "name": "$onChange",
+          "description": "Called on value change",
+          "type": "((e: CustomEvent<any> & { detail: SetValueReasons; }) => void) | undefined"
+        },
+        {
+          "name": "$isEmpty",
+          "description": "Returns true if value is empty string or undefined",
+          "type": "boolean"
+        },
+        {
+          "name": "$isRequired",
+          "description": "Returns if value is required - can't be undefined (depends on $options.validations.required)",
+          "type": "boolean"
+        },
+        {
+          "name": "$form",
+          "type": "WUPFormElement<any, Options, EventMap> | undefined"
+        },
+        {
+          "name": "$refLabel",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLLabelElement",
+          "default": "\"document.createElement(\\\"label\\\")\""
+        },
+        {
+          "name": "$refInput",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLInputElement",
+          "default": "\"document.createElement(\\\"input\\\") as HTMLInputElement\""
+        },
+        {
+          "name": "$refTitle",
+          "description": "Reference to nested HTMLElement tied with $options.label",
+          "type": "HTMLElement",
+          "default": "\"document.createElement(\\\"strong\\\")\""
+        },
+        {
+          "name": "$refError",
+          "description": "Reference to nested HTMLElement tied with errorMessage",
+          "type": "WUPPopupElement<Options, EventMap> | undefined"
+        },
+        {
+          "name": "override"
+        },
+        {
+          "name": "storageKey",
+          "description": "Returns storage key based on options `skey` and `name`",
+          "type": "string | false | null | undefined"
+        },
+        {
+          "name": "$value",
+          "description": "Current value of control; You can change it without affecting on $isDirty state",
+          "type": "boolean"
+        },
+        {
+          "name": "$initValue",
+          "description": "Default/init value; used to define isChanged & to reset by keyEsc/buttonClear;\nIf control not $isDirty and not changed $value is updated according to $initValue",
+          "type": "ValueType | undefined"
+        },
+        {
+          "name": "$isDirty",
+          "description": "True if control is touched by user",
+          "type": "boolean"
+        },
+        {
+          "name": "$isChanged",
+          "description": "Returns if value changed (by comparisson with $initValue via static.isEqual option)\nBy default values compared by valueOf if it's possible",
+          "type": "boolean"
+        },
+        {
+          "name": "$isValid",
+          "description": "Returns true if control is valid",
+          "type": "boolean"
+        },
+        {
+          "name": "$isFocused",
+          "description": "Returns if current control is active/focused",
+          "type": "boolean"
+        },
+        {
+          "name": "$isDisabled",
+          "description": "Returns if related form or control disabled (true even if form.$options.disabled && !control.$options.disabled)",
+          "type": "boolean"
+        },
+        {
+          "name": "$isReadOnly",
+          "description": "Returns if related form or control readonly (true even if form.$options.readOnly && !control.$options.readOnly)",
+          "type": "boolean"
+        },
+        {
+          "name": "$autoComplete",
+          "description": "Returns autoComplete name if related form or control option is enabled (and control.$options.autoComplete !== false )",
+          "type": "string | false"
+        },
+        {
+          "name": "$validate",
+          "type": "() => string | false"
+        },
+        {
+          "name": "gotFormChanges",
+          "type": "(propsChanged: string[] | null) => void"
+        },
+        {
+          "name": "validateBySubmit",
+          "type": "() => string | false"
+        },
+        {
+          "name": "canShowError",
+          "description": "Returns true on !$isDisabled",
+          "type": "boolean"
+        },
+        {
+          "name": "$refStyle",
+          "type": "HTMLStyleElement | null"
+        },
+        {
+          "name": "$defaults",
+          "description": "Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item",
+          "type": "Options<boolean, ValidityMap>",
+          "default": "{}"
+        },
+        {
+          "name": "$isReady",
+          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
+          "type": "boolean"
+        },
+        {
+          "name": "$options",
+          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
+          "type": "{ label?: string | null | undefined; name?: string | null | undefined; autoComplete?: string | boolean | null | undefined; readOnly?: boolean | null | undefined; disabled?: boolean | null | undefined; }"
+        }
+      ]
+    },
+    {
+      "name": "wup-date",
+      "path": "./src\\controls\\date.ts",
+      "description": "Form-control with datepicker",
+      "properties": [
+        {
+          "name": "initValue",
+          "type": "string | undefined"
+        },
+        {
+          "name": "format",
+          "type": "string | undefined"
+        },
+        {
+          "name": "$onShowMenu",
+          "description": "Fires after popup-menu is shown (after animation finishes)",
+          "type": "((e: Event) => void) | undefined"
+        },
+        {
+          "name": "$onHideMenu",
+          "description": "Fires after popup is hidden (after animation finishes)",
+          "type": "((e: Event) => void) | undefined"
+        },
+        {
+          "name": "$isShown",
+          "description": "Returns if popup-menu is opened",
+          "type": "boolean"
+        },
+        {
+          "name": "$refPopup",
+          "description": "Reference to popupMenu",
+          "type": "WUPPopupElement<Options, EventMap> | undefined"
+        },
+        {
+          "name": "$refBtnClear",
+          "type": "HTMLButtonElement | undefined"
+        },
+        {
+          "name": "$refMaskholder",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "$refPrefix",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "$refPostfix",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "refMask",
+          "description": "Mask object to proccess mask on input",
+          "type": "MaskTextInput | undefined"
+        },
+        {
+          "name": "$ariaCleared",
+          "description": "Text announced by screen-readers when control cleared; @defaultValue `cleared`",
+          "type": "string",
+          "default": "\"cleared\""
+        },
+        {
+          "name": "$ariaError",
+          "description": "Text announced by screen-readers; @defaultValue `Error for`",
+          "type": "string",
+          "default": "\"Error for\""
+        },
+        {
+          "name": "$onChange",
+          "description": "Called on value change",
+          "type": "((e: CustomEvent<any> & { detail: SetValueReasons; }) => void) | undefined"
+        },
+        {
+          "name": "$isEmpty",
+          "description": "Returns true if value is empty string or undefined",
+          "type": "boolean"
+        },
+        {
+          "name": "$isRequired",
+          "description": "Returns if value is required - can't be undefined (depends on $options.validations.required)",
+          "type": "boolean"
+        },
+        {
+          "name": "$form",
+          "type": "WUPFormElement<any, Options, EventMap> | undefined"
+        },
+        {
+          "name": "$refLabel",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLLabelElement",
+          "default": "\"document.createElement(\\\"label\\\")\""
+        },
+        {
+          "name": "$refInput",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLInputElement",
+          "default": "\"document.createElement(\\\"input\\\") as HTMLInputElement\""
+        },
+        {
+          "name": "$refTitle",
+          "description": "Reference to nested HTMLElement tied with $options.label",
+          "type": "HTMLElement",
+          "default": "\"document.createElement(\\\"strong\\\")\""
+        },
+        {
+          "name": "$refError",
+          "description": "Reference to nested HTMLElement tied with errorMessage",
+          "type": "WUPPopupElement<Options, EventMap> | undefined"
+        },
+        {
+          "name": "override",
+          "description": "Parse string to Date"
+        },
+        {
+          "name": "storageKey",
+          "description": "Returns storage key based on options `skey` and `name`",
+          "type": "string | false | null | undefined"
+        },
+        {
+          "name": "$value",
+          "description": "Current value of control; You can change it without affecting on $isDirty state",
+          "type": "ValueType | undefined"
+        },
+        {
+          "name": "$initValue",
+          "description": "Default/init value; used to define isChanged & to reset by keyEsc/buttonClear;\nIf control not $isDirty and not changed $value is updated according to $initValue",
+          "type": "ValueType | undefined"
+        },
+        {
+          "name": "$isDirty",
+          "description": "True if control is touched by user",
+          "type": "boolean"
+        },
+        {
+          "name": "$isChanged",
+          "description": "Returns if value changed (by comparisson with $initValue via static.isEqual option)\nBy default values compared by valueOf if it's possible",
+          "type": "boolean"
+        },
+        {
+          "name": "$isValid",
+          "description": "Returns true if control is valid",
+          "type": "boolean"
+        },
+        {
+          "name": "$isFocused",
+          "description": "Returns if current control is active/focused",
+          "type": "boolean"
+        },
+        {
+          "name": "$isDisabled",
+          "description": "Returns if related form or control disabled (true even if form.$options.disabled && !control.$options.disabled)",
+          "type": "boolean"
+        },
+        {
+          "name": "$isReadOnly",
+          "description": "Returns if related form or control readonly (true even if form.$options.readOnly && !control.$options.readOnly)",
+          "type": "boolean"
+        },
+        {
+          "name": "$autoComplete",
+          "description": "Returns autoComplete name if related form or control option is enabled (and control.$options.autoComplete !== false )",
+          "type": "string | false"
+        },
+        {
+          "name": "$validate",
+          "type": "() => string | false"
+        },
+        {
+          "name": "gotFormChanges",
+          "type": "(propsChanged: string[] | null) => void"
+        },
+        {
+          "name": "validateBySubmit",
+          "type": "() => string | false"
+        },
+        {
+          "name": "canShowError",
+          "description": "Returns true on !$isDisabled",
+          "type": "boolean"
+        },
+        {
+          "name": "$refStyle",
+          "type": "HTMLStyleElement | null"
+        },
+        {
+          "name": "$defaults",
+          "description": "Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item",
+          "type": "Options<Date, ValidityMap>",
+          "default": "{\"validationRules\":{},\"format\":\"\"}"
+        },
+        {
+          "name": "$isReady",
+          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
+          "type": "boolean"
+        },
+        {
+          "name": "$options",
+          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
+          "type": "{ label?: string | null | undefined; name?: string | null | undefined; autoComplete?: string | boolean | null | undefined; readOnly?: boolean | null | undefined; disabled?: boolean | null | undefined; }"
+        }
+      ],
+      "events": [
+        {
+          "name": "focusin"
+        },
+        {
+          "name": "click"
+        }
+      ]
+    },
+    {
+      "name": "wup-num",
+      "path": "./src\\controls\\number.ts",
+      "description": "Form-control with number-input",
+      "properties": [
+        {
+          "name": "$format",
+          "description": "Returns $options.format joined with defaults",
+          "type": "Required<Format>"
+        },
+        {
+          "name": "format",
+          "description": "String representation of displayed value\nPoint Global reference to object @see {@link Format}",
+          "type": "string | undefined"
+        },
+        {
+          "name": "$refBtnClear",
+          "type": "HTMLButtonElement | undefined"
+        },
+        {
+          "name": "$refMaskholder",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "$refPrefix",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "$refPostfix",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "refMask",
+          "description": "Mask object to proccess mask on input",
+          "type": "MaskTextInput | undefined"
+        },
+        {
+          "name": "$ariaCleared",
+          "description": "Text announced by screen-readers when control cleared; @defaultValue `cleared`",
+          "type": "string",
+          "default": "\"cleared\""
+        },
+        {
+          "name": "$ariaError",
+          "description": "Text announced by screen-readers; @defaultValue `Error for`",
+          "type": "string",
+          "default": "\"Error for\""
+        },
+        {
+          "name": "$onChange",
+          "description": "Called on value change",
+          "type": "((e: CustomEvent<any> & { detail: SetValueReasons; }) => void) | undefined"
+        },
+        {
+          "name": "$isEmpty",
+          "description": "Returns true if value is empty string or undefined",
+          "type": "boolean"
+        },
+        {
+          "name": "$isRequired",
+          "description": "Returns if value is required - can't be undefined (depends on $options.validations.required)",
+          "type": "boolean"
+        },
+        {
+          "name": "$form",
+          "type": "WUPFormElement<any, Options, EventMap> | undefined"
+        },
+        {
+          "name": "$refLabel",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLLabelElement",
+          "default": "\"document.createElement(\\\"label\\\")\""
+        },
+        {
+          "name": "$refInput",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLInputElement",
+          "default": "\"document.createElement(\\\"input\\\") as HTMLInputElement\""
+        },
+        {
+          "name": "$refTitle",
+          "description": "Reference to nested HTMLElement tied with $options.label",
+          "type": "HTMLElement",
+          "default": "\"document.createElement(\\\"strong\\\")\""
+        },
+        {
+          "name": "$refError",
+          "description": "Reference to nested HTMLElement tied with errorMessage",
+          "type": "WUPPopupElement<Options, EventMap> | undefined"
+        },
+        {
+          "name": "override"
+        },
+        {
+          "name": "storageKey",
+          "description": "Returns storage key based on options `skey` and `name`",
+          "type": "string | false | null | undefined"
+        },
+        {
+          "name": "$value",
+          "description": "Current value of control; You can change it without affecting on $isDirty state",
+          "type": "ValueType | undefined"
+        },
+        {
+          "name": "$initValue",
+          "description": "Default/init value; used to define isChanged & to reset by keyEsc/buttonClear;\nIf control not $isDirty and not changed $value is updated according to $initValue",
+          "type": "ValueType | undefined"
+        },
+        {
+          "name": "$isDirty",
+          "description": "True if control is touched by user",
+          "type": "boolean"
+        },
+        {
+          "name": "$isChanged",
+          "description": "Returns if value changed (by comparisson with $initValue via static.isEqual option)\nBy default values compared by valueOf if it's possible",
+          "type": "boolean"
+        },
+        {
+          "name": "$isValid",
+          "description": "Returns true if control is valid",
+          "type": "boolean"
+        },
+        {
+          "name": "$isFocused",
+          "description": "Returns if current control is active/focused",
+          "type": "boolean"
+        },
+        {
+          "name": "$isDisabled",
+          "description": "Returns if related form or control disabled (true even if form.$options.disabled && !control.$options.disabled)",
+          "type": "boolean"
+        },
+        {
+          "name": "$isReadOnly",
+          "description": "Returns if related form or control readonly (true even if form.$options.readOnly && !control.$options.readOnly)",
+          "type": "boolean"
+        },
+        {
+          "name": "$autoComplete",
+          "description": "Returns autoComplete name if related form or control option is enabled (and control.$options.autoComplete !== false )",
+          "type": "string | false"
+        },
+        {
+          "name": "$validate",
+          "type": "() => string | false"
+        },
+        {
+          "name": "gotFormChanges",
+          "type": "(propsChanged: string[] | null) => void"
+        },
+        {
+          "name": "validateBySubmit",
+          "type": "() => string | false"
+        },
+        {
+          "name": "canShowError",
+          "description": "Returns true on !$isDisabled",
+          "type": "boolean"
+        },
+        {
+          "name": "$refStyle",
+          "type": "HTMLStyleElement | null"
+        },
+        {
+          "name": "$defaults",
+          "description": "Default options - applied to every element. Change it to configure default behavior",
+          "type": "Options<number, ValidityMap>",
+          "default": "{\"validationRules\":{\"_mask\":\"_mask\"},\"format\":null}"
+        },
+        {
+          "name": "$isReady",
+          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
+          "type": "boolean"
+        },
+        {
+          "name": "$options",
+          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
+          "type": "{ label?: string | null | undefined; name?: string | null | undefined; autoComplete?: string | boolean | null | undefined; readOnly?: boolean | null | undefined; disabled?: boolean | null | undefined; }"
+        }
+      ],
+      "events": [
+        {
+          "name": "beforeinput"
+        },
+        {
+          "name": "input"
+        }
+      ]
+    },
+    {
+      "name": "wup-pwd",
+      "path": "./src\\controls\\password.ts",
+      "description": "Form-control with password input",
+      "properties": [
+        {
+          "name": "$ariaDescription",
+          "description": "Text announced by screen-readers when input cleared; @defaultValue `input cleared`",
+          "type": "string",
+          "default": "\"press Alt + V to show/hide password\""
+        },
+        {
+          "name": "$refBtnEye",
+          "type": "HTMLButtonElement",
+          "default": "\"document.createElement(\\\"button\\\")\""
+        },
+        {
+          "name": "reverse",
+          "description": "Reversed-style for button-eye",
+          "type": "string | boolean | undefined"
+        },
+        {
+          "name": "$refBtnClear",
+          "type": "HTMLButtonElement | undefined"
+        },
+        {
+          "name": "$refMaskholder",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "$refPrefix",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "$refPostfix",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "refMask",
+          "description": "Mask object to proccess mask on input",
+          "type": "MaskTextInput | undefined"
+        },
+        {
+          "name": "$ariaCleared",
+          "description": "Text announced by screen-readers when control cleared; @defaultValue `cleared`",
+          "type": "string",
+          "default": "\"cleared\""
+        },
+        {
+          "name": "$ariaError",
+          "description": "Text announced by screen-readers; @defaultValue `Error for`",
+          "type": "string",
+          "default": "\"Error for\""
+        },
+        {
+          "name": "$onChange",
+          "description": "Called on value change",
+          "type": "((e: CustomEvent<any> & { detail: SetValueReasons; }) => void) | undefined"
+        },
+        {
+          "name": "$isEmpty",
+          "description": "Returns true if value is empty string or undefined",
+          "type": "boolean"
+        },
+        {
+          "name": "$isRequired",
+          "description": "Returns if value is required - can't be undefined (depends on $options.validations.required)",
+          "type": "boolean"
+        },
+        {
+          "name": "$form",
+          "type": "WUPFormElement<any, Options, EventMap> | undefined"
+        },
+        {
+          "name": "$refLabel",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLLabelElement",
+          "default": "\"document.createElement(\\\"label\\\")\""
+        },
+        {
+          "name": "$refInput",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLInputElement",
+          "default": "\"document.createElement(\\\"input\\\") as HTMLInputElement\""
+        },
+        {
+          "name": "$refTitle",
+          "description": "Reference to nested HTMLElement tied with $options.label",
+          "type": "HTMLElement",
+          "default": "\"document.createElement(\\\"strong\\\")\""
+        },
+        {
+          "name": "$refError",
+          "description": "Reference to nested HTMLElement tied with errorMessage",
+          "type": "WUPPopupElement<Options, EventMap> | undefined"
+        },
+        {
+          "name": "storageKey",
+          "description": "Returns storage key based on options `skey` and `name`",
+          "type": "string | false | null | undefined"
+        },
+        {
+          "name": "$value",
+          "description": "Current value of control; You can change it without affecting on $isDirty state",
+          "type": "ValueType | undefined"
+        },
+        {
+          "name": "$initValue",
+          "description": "Default/init value; used to define isChanged & to reset by keyEsc/buttonClear;\nIf control not $isDirty and not changed $value is updated according to $initValue",
+          "type": "ValueType | undefined"
+        },
+        {
+          "name": "$isDirty",
+          "description": "True if control is touched by user",
+          "type": "boolean"
+        },
+        {
+          "name": "$isChanged",
+          "description": "Returns if value changed (by comparisson with $initValue via static.isEqual option)\nBy default values compared by valueOf if it's possible",
+          "type": "boolean"
+        },
+        {
+          "name": "$isValid",
+          "description": "Returns true if control is valid",
+          "type": "boolean"
+        },
+        {
+          "name": "$isFocused",
+          "description": "Returns if current control is active/focused",
+          "type": "boolean"
+        },
+        {
+          "name": "$isDisabled",
+          "description": "Returns if related form or control disabled (true even if form.$options.disabled && !control.$options.disabled)",
+          "type": "boolean"
+        },
+        {
+          "name": "$isReadOnly",
+          "description": "Returns if related form or control readonly (true even if form.$options.readOnly && !control.$options.readOnly)",
+          "type": "boolean"
+        },
+        {
+          "name": "$autoComplete",
+          "description": "Returns autoComplete name if related form or control option is enabled (and control.$options.autoComplete !== false )",
+          "type": "string | false"
+        },
+        {
+          "name": "$validate",
+          "type": "() => string | false"
+        },
+        {
+          "name": "gotFormChanges",
+          "type": "(propsChanged: string[] | null) => void"
+        },
+        {
+          "name": "validateBySubmit",
+          "type": "() => string | false"
+        },
+        {
+          "name": "canShowError",
+          "description": "Returns true on !$isDisabled",
+          "type": "boolean"
+        },
+        {
+          "name": "$refStyle",
+          "type": "HTMLStyleElement | null"
+        },
+        {
+          "name": "$defaults",
+          "description": "Default options - applied to every element. Change it to configure default behavior",
+          "type": "Options<string, ValidityMap>",
+          "default": "{\"validationRules\":{},\"reverse\":false}"
+        },
+        {
+          "name": "$isReady",
+          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
+          "type": "boolean"
+        },
+        {
+          "name": "$options",
+          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
+          "type": "{ label?: string | null | undefined; name?: string | null | undefined; autoComplete?: string | boolean | null | undefined; readOnly?: boolean | null | undefined; disabled?: boolean | null | undefined; }"
+        }
+      ]
+    },
+    {
+      "name": "wup-radio",
+      "path": "./src\\controls\\radio.ts",
+      "description": "Form-control with radio buttons",
+      "properties": [
+        {
+          "name": "$ariaReadonly",
+          "description": "Custom text that announced by screen-readers. Redefine it to use with another language",
+          "type": "string",
+          "default": "\"readonly\""
+        },
+        {
+          "name": "$refFieldset",
+          "type": "HTMLFieldSetElement",
+          "default": "\"document.createElement(\\\"fieldset\\\")\""
+        },
+        {
+          "name": "$refItems",
+          "type": "ExtInputElement[]",
+          "default": "[]"
+        },
+        {
+          "name": "reverse",
+          "type": "boolean | \"\" | undefined"
+        },
+        {
+          "name": "items",
+          "description": "Global reference to object with array",
+          "type": "string | undefined"
+        },
+        {
+          "name": "$ariaCleared",
+          "description": "Text announced by screen-readers when control cleared; @defaultValue `cleared`",
+          "type": "string",
+          "default": "\"cleared\""
+        },
+        {
+          "name": "$ariaError",
+          "description": "Text announced by screen-readers; @defaultValue `Error for`",
+          "type": "string",
+          "default": "\"Error for\""
+        },
+        {
+          "name": "$onChange",
+          "description": "Called on value change",
+          "type": "((e: CustomEvent<any> & { detail: SetValueReasons; }) => void) | undefined"
+        },
+        {
+          "name": "$isEmpty",
+          "description": "Returns true if value is empty string or undefined",
+          "type": "boolean"
+        },
+        {
+          "name": "$isRequired",
+          "description": "Returns if value is required - can't be undefined (depends on $options.validations.required)",
+          "type": "boolean"
+        },
+        {
+          "name": "$form",
+          "type": "WUPFormElement<any, Options, EventMap> | undefined"
+        },
+        {
+          "name": "$refLabel",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLLabelElement",
+          "default": "\"document.createElement(\\\"label\\\")\""
+        },
+        {
+          "name": "$refInput",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLInputElement",
+          "default": "\"document.createElement(\\\"input\\\") as HTMLInputElement\""
+        },
+        {
+          "name": "$refTitle",
+          "description": "Reference to nested HTMLElement tied with $options.label",
+          "type": "HTMLElement",
+          "default": "\"document.createElement(\\\"strong\\\")\""
+        },
+        {
+          "name": "$refError",
+          "description": "Reference to nested HTMLElement tied with errorMessage",
+          "type": "WUPPopupElement<Options, EventMap> | undefined"
+        },
+        {
+          "name": "override",
+          "description": "Called when need to parse attr [initValue]"
+        },
+        {
+          "name": "storageKey",
+          "description": "Returns storage key based on options `skey` and `name`",
+          "type": "string | false | null | undefined"
+        },
+        {
+          "name": "$value",
+          "description": "Current value of control; You can change it without affecting on $isDirty state",
+          "type": "ValueType | undefined"
+        },
+        {
+          "name": "$initValue",
+          "description": "Default/init value; used to define isChanged & to reset by keyEsc/buttonClear;\nIf control not $isDirty and not changed $value is updated according to $initValue",
+          "type": "ValueType | undefined"
+        },
+        {
+          "name": "$isDirty",
+          "description": "True if control is touched by user",
+          "type": "boolean"
+        },
+        {
+          "name": "$isChanged",
+          "description": "Returns if value changed (by comparisson with $initValue via static.isEqual option)\nBy default values compared by valueOf if it's possible",
+          "type": "boolean"
+        },
+        {
+          "name": "$isValid",
+          "description": "Returns true if control is valid",
+          "type": "boolean"
+        },
+        {
+          "name": "$isFocused",
+          "description": "Returns if current control is active/focused",
+          "type": "boolean"
+        },
+        {
+          "name": "$isDisabled",
+          "description": "Returns if related form or control disabled (true even if form.$options.disabled && !control.$options.disabled)",
+          "type": "boolean"
+        },
+        {
+          "name": "$isReadOnly",
+          "description": "Returns if related form or control readonly (true even if form.$options.readOnly && !control.$options.readOnly)",
+          "type": "boolean"
+        },
+        {
+          "name": "$autoComplete",
+          "description": "Returns autoComplete name if related form or control option is enabled (and control.$options.autoComplete !== false )",
+          "type": "string | false"
+        },
+        {
+          "name": "$validate",
+          "type": "() => string | false"
+        },
+        {
+          "name": "gotFormChanges",
+          "type": "(propsChanged: string[] | null) => void"
+        },
+        {
+          "name": "validateBySubmit",
+          "type": "() => string | false"
+        },
+        {
+          "name": "canShowError",
+          "description": "Returns true on !$isDisabled",
+          "type": "boolean"
+        },
+        {
+          "name": "$refStyle",
+          "type": "HTMLStyleElement | null"
+        },
+        {
+          "name": "$defaults",
+          "description": "Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item",
+          "type": "Options<any, ValidityMap>",
+          "default": "{\"validationRules\":{},\"items\":[],\"reverse\":false}"
+        },
+        {
+          "name": "$isReady",
+          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
+          "type": "boolean"
+        },
+        {
+          "name": "$options",
+          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
+          "type": "{ label?: string | null | undefined; name?: string | null | undefined; autoComplete?: string | boolean | null | undefined; readOnly?: boolean | null | undefined; disabled?: boolean | null | undefined; }"
+        }
+      ]
+    },
+    {
+      "name": "wup-spin2",
+      "path": "./src\\controls\\select.example.ts",
+      "properties": [
+        {
+          "name": "$refFade",
+          "type": "HTMLDivElement | undefined"
+        },
+        {
+          "name": "override",
+          "description": "Used to clone defaults to options on init; override it to clone"
+        },
+        {
+          "name": "isFitParent",
+          "description": "Returns value based on `$options.fit`",
+          "type": "boolean"
+        },
+        {
+          "name": "target",
+          "description": "Returns target element based on $options",
+          "type": "HTMLElement"
+        },
+        {
+          "name": "hasRelativeParent",
+          "description": "Returns whether exists parent with position relative",
+          "type": "boolean"
+        },
+        {
+          "name": "$refStyle",
+          "type": "HTMLStyleElement | null"
+        },
+        {
+          "name": "$defaults",
+          "description": "Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item",
+          "type": "Options",
+          "default": "{\"overflowOffset\":[4,4],\"overflowFade\":true,\"overflowTarget\":\"auto\",\"inline\":false,\"fit\":\"auto\"}"
+        },
+        {
+          "name": "$isReady",
+          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
+          "type": "boolean"
+        },
+        {
+          "name": "$options",
+          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
+          "type": "TOptions"
+        }
+      ]
+    },
+    {
+      "name": "wup-select",
+      "path": "./src\\controls\\select.ts",
+      "description": "Form-control with dropdown/combobox behavior",
+      "properties": [
+        {
+          "name": "$textNoItems",
+          "description": "Text for listbox when no items are displayed",
+          "type": "string | undefined",
+          "default": "\"No Items\""
+        },
+        {
+          "name": "$ariaLabelItems",
+          "description": "Text for aria-label of <ul> element",
+          "type": "string",
+          "default": "\"Items\""
+        },
+        {
+          "name": "$isPending",
+          "description": "Returns whether control in pending state or not (shows spinner)",
+          "type": "boolean"
+        },
+        {
+          "name": "items",
+          "description": "Global reference to object with array",
+          "type": "string | undefined"
+        },
+        {
+          "name": "allowNewValue",
+          "type": "boolean | \"\" | undefined"
+        },
+        {
+          "name": "multiple",
+          "type": "boolean | \"\" | undefined"
+        },
+        {
+          "name": "$onShowMenu",
+          "description": "Fires after popup-menu is shown (after animation finishes)",
+          "type": "((e: Event) => void) | undefined"
+        },
+        {
+          "name": "$onHideMenu",
+          "description": "Fires after popup is hidden (after animation finishes)",
+          "type": "((e: Event) => void) | undefined"
+        },
+        {
+          "name": "$isShown",
+          "description": "Returns if popup-menu is opened",
+          "type": "boolean"
+        },
+        {
+          "name": "$refPopup",
+          "description": "Reference to popupMenu",
+          "type": "WUPPopupElement<Options, EventMap> | undefined"
+        },
+        {
+          "name": "$refBtnClear",
+          "type": "HTMLButtonElement | undefined"
+        },
+        {
+          "name": "$refMaskholder",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "$refPrefix",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "$refPostfix",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "refMask",
+          "description": "Mask object to proccess mask on input",
+          "type": "MaskTextInput | undefined"
+        },
+        {
+          "name": "$ariaCleared",
+          "description": "Text announced by screen-readers when control cleared; @defaultValue `cleared`",
+          "type": "string",
+          "default": "\"cleared\""
+        },
+        {
+          "name": "$ariaError",
+          "description": "Text announced by screen-readers; @defaultValue `Error for`",
+          "type": "string",
+          "default": "\"Error for\""
+        },
+        {
+          "name": "$onChange",
+          "description": "Called on value change",
+          "type": "((e: CustomEvent<any> & { detail: SetValueReasons; }) => void) | undefined"
+        },
+        {
+          "name": "$isEmpty",
+          "description": "Returns true if value is empty string or undefined",
+          "type": "boolean"
+        },
+        {
+          "name": "$isRequired",
+          "description": "Returns if value is required - can't be undefined (depends on $options.validations.required)",
+          "type": "boolean"
+        },
+        {
+          "name": "$form",
+          "type": "WUPFormElement<any, Options, EventMap> | undefined"
+        },
+        {
+          "name": "$refLabel",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLLabelElement",
+          "default": "\"document.createElement(\\\"label\\\")\""
+        },
+        {
+          "name": "$refInput",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLInputElement",
+          "default": "\"document.createElement(\\\"input\\\") as HTMLInputElement\""
+        },
+        {
+          "name": "$refTitle",
+          "description": "Reference to nested HTMLElement tied with $options.label",
+          "type": "HTMLElement",
+          "default": "\"document.createElement(\\\"strong\\\")\""
+        },
+        {
+          "name": "$refError",
+          "description": "Reference to nested HTMLElement tied with errorMessage",
+          "type": "WUPPopupElement<Options, EventMap> | undefined"
+        },
+        {
+          "name": "override",
+          "description": "Called when need to parse attr [initValue]"
+        },
+        {
+          "name": "storageKey",
+          "description": "Returns storage key based on options `skey` and `name`",
+          "type": "string | false | null | undefined"
+        },
+        {
+          "name": "$value",
+          "description": "Current value of control; You can change it without affecting on $isDirty state",
+          "type": "ValueType | undefined"
+        },
+        {
+          "name": "$initValue",
+          "description": "Default/init value; used to define isChanged & to reset by keyEsc/buttonClear;\nIf control not $isDirty and not changed $value is updated according to $initValue",
+          "type": "ValueType | undefined"
+        },
+        {
+          "name": "$isDirty",
+          "description": "True if control is touched by user",
+          "type": "boolean"
+        },
+        {
+          "name": "$isChanged",
+          "description": "Returns if value changed (by comparisson with $initValue via static.isEqual option)\nBy default values compared by valueOf if it's possible",
+          "type": "boolean"
+        },
+        {
+          "name": "$isValid",
+          "description": "Returns true if control is valid",
+          "type": "boolean"
+        },
+        {
+          "name": "$isFocused",
+          "description": "Returns if current control is active/focused",
+          "type": "boolean"
+        },
+        {
+          "name": "$isDisabled",
+          "description": "Returns if related form or control disabled (true even if form.$options.disabled && !control.$options.disabled)",
+          "type": "boolean"
+        },
+        {
+          "name": "$isReadOnly",
+          "description": "Returns if related form or control readonly (true even if form.$options.readOnly && !control.$options.readOnly)",
+          "type": "boolean"
+        },
+        {
+          "name": "$autoComplete",
+          "description": "Returns autoComplete name if related form or control option is enabled (and control.$options.autoComplete !== false )",
+          "type": "string | false"
+        },
+        {
+          "name": "$validate",
+          "type": "() => string | false"
+        },
+        {
+          "name": "gotFormChanges",
+          "type": "(propsChanged: string[] | null) => void"
+        },
+        {
+          "name": "validateBySubmit",
+          "type": "() => string | false"
+        },
+        {
+          "name": "canShowError",
+          "description": "Returns true on !$isDisabled",
+          "type": "boolean"
+        },
+        {
+          "name": "$refStyle",
+          "type": "HTMLStyleElement | null"
+        },
+        {
+          "name": "$defaults",
+          "description": "Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item",
+          "type": "Options<any, ValidityMap>",
+          "default": "{\"validationRules\":{},\"allowNewValue\":false,\"multiple\":false,\"items\":[]}"
+        },
+        {
+          "name": "$isReady",
+          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
+          "type": "boolean"
+        },
+        {
+          "name": "$options",
+          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
+          "type": "{ label?: string | null | undefined; name?: string | null | undefined; autoComplete?: string | boolean | null | undefined; readOnly?: boolean | null | undefined; disabled?: boolean | null | undefined; }"
+        }
+      ],
+      "events": [
+        {
+          "name": "click"
+        }
+      ]
+    },
+    {
+      "name": "wup-selectmany",
+      "path": "./src\\controls\\selectMany.ts",
+      "description": "Form-control with dropdown/combobox behavior",
+      "properties": [
+        {
+          "name": "$refItems",
+          "description": "Items selected & rendered on control",
+          "type": "(HTMLElement & { _wupValue: ValueType; })[] | undefined"
+        },
+        {
+          "name": "$textNoItems",
+          "description": "Text for listbox when no items are displayed",
+          "type": "string | undefined",
+          "default": "\"No Items\""
+        },
+        {
+          "name": "$ariaLabelItems",
+          "description": "Text for aria-label of <ul> element",
+          "type": "string",
+          "default": "\"Items\""
+        },
+        {
+          "name": "$isPending",
+          "description": "Returns whether control in pending state or not (shows spinner)",
+          "type": "boolean"
+        },
+        {
+          "name": "items",
+          "description": "Global reference to object with array",
+          "type": "string | undefined"
+        },
+        {
+          "name": "allowNewValue",
+          "type": "boolean | \"\" | undefined"
+        },
+        {
+          "name": "multiple",
+          "type": "boolean | \"\" | undefined"
+        },
+        {
+          "name": "$onShowMenu",
+          "description": "Fires after popup-menu is shown (after animation finishes)",
+          "type": "((e: Event) => void) | undefined"
+        },
+        {
+          "name": "$onHideMenu",
+          "description": "Fires after popup is hidden (after animation finishes)",
+          "type": "((e: Event) => void) | undefined"
+        },
+        {
+          "name": "$isShown",
+          "description": "Returns if popup-menu is opened",
+          "type": "boolean"
+        },
+        {
+          "name": "$refPopup",
+          "description": "Reference to popupMenu",
+          "type": "WUPPopupElement<Options, EventMap> | undefined"
+        },
+        {
+          "name": "$refBtnClear",
+          "type": "HTMLButtonElement | undefined"
+        },
+        {
+          "name": "$refMaskholder",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "$refPrefix",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "$refPostfix",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "refMask",
+          "description": "Mask object to proccess mask on input",
+          "type": "MaskTextInput | undefined"
+        },
+        {
+          "name": "$ariaCleared",
+          "description": "Text announced by screen-readers when control cleared; @defaultValue `cleared`",
+          "type": "string",
+          "default": "\"cleared\""
+        },
+        {
+          "name": "$ariaError",
+          "description": "Text announced by screen-readers; @defaultValue `Error for`",
+          "type": "string",
+          "default": "\"Error for\""
+        },
+        {
+          "name": "$onChange",
+          "description": "Called on value change",
+          "type": "((e: CustomEvent<any> & { detail: SetValueReasons; }) => void) | undefined"
+        },
+        {
+          "name": "$isEmpty",
+          "description": "Returns true if value is empty string or undefined",
+          "type": "boolean"
+        },
+        {
+          "name": "$isRequired",
+          "description": "Returns if value is required - can't be undefined (depends on $options.validations.required)",
+          "type": "boolean"
+        },
+        {
+          "name": "$form",
+          "type": "WUPFormElement<any, Options, EventMap> | undefined"
+        },
+        {
+          "name": "$refLabel",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLLabelElement",
+          "default": "\"document.createElement(\\\"label\\\")\""
+        },
+        {
+          "name": "$refInput",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLInputElement",
+          "default": "\"document.createElement(\\\"input\\\") as HTMLInputElement\""
+        },
+        {
+          "name": "$refTitle",
+          "description": "Reference to nested HTMLElement tied with $options.label",
+          "type": "HTMLElement",
+          "default": "\"document.createElement(\\\"strong\\\")\""
+        },
+        {
+          "name": "$refError",
+          "description": "Reference to nested HTMLElement tied with errorMessage",
+          "type": "WUPPopupElement<Options, EventMap> | undefined"
+        },
+        {
+          "name": "override",
+          "description": "Called when need to parse attr [initValue]"
+        },
+        {
+          "name": "storageKey",
+          "description": "Returns storage key based on options `skey` and `name`",
+          "type": "string | false | null | undefined"
+        },
+        {
+          "name": "$value",
+          "description": "Current value of control; You can change it without affecting on $isDirty state",
+          "type": "ValueType | undefined"
+        },
+        {
+          "name": "$initValue",
+          "description": "Default/init value; used to define isChanged & to reset by keyEsc/buttonClear;\nIf control not $isDirty and not changed $value is updated according to $initValue",
+          "type": "ValueType | undefined"
+        },
+        {
+          "name": "$isDirty",
+          "description": "True if control is touched by user",
+          "type": "boolean"
+        },
+        {
+          "name": "$isChanged",
+          "description": "Returns if value changed (by comparisson with $initValue via static.isEqual option)\nBy default values compared by valueOf if it's possible",
+          "type": "boolean"
+        },
+        {
+          "name": "$isValid",
+          "description": "Returns true if control is valid",
+          "type": "boolean"
+        },
+        {
+          "name": "$isFocused",
+          "description": "Returns if current control is active/focused",
+          "type": "boolean"
+        },
+        {
+          "name": "$isDisabled",
+          "description": "Returns if related form or control disabled (true even if form.$options.disabled && !control.$options.disabled)",
+          "type": "boolean"
+        },
+        {
+          "name": "$isReadOnly",
+          "description": "Returns if related form or control readonly (true even if form.$options.readOnly && !control.$options.readOnly)",
+          "type": "boolean"
+        },
+        {
+          "name": "$autoComplete",
+          "description": "Returns autoComplete name if related form or control option is enabled (and control.$options.autoComplete !== false )",
+          "type": "string | false"
+        },
+        {
+          "name": "$validate",
+          "type": "() => string | false"
+        },
+        {
+          "name": "gotFormChanges",
+          "type": "(propsChanged: string[] | null) => void"
+        },
+        {
+          "name": "validateBySubmit",
+          "type": "() => string | false"
+        },
+        {
+          "name": "canShowError",
+          "description": "Returns true on !$isDisabled",
+          "type": "boolean"
+        },
+        {
+          "name": "$refStyle",
+          "type": "HTMLStyleElement | null"
+        },
+        {
+          "name": "$defaults",
+          "description": "Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item",
+          "type": "Options<any, ValidityMap>",
+          "default": "{\"multiple\":true,\"sortable\":false,\"hideSelected\":false}"
+        },
+        {
+          "name": "$isReady",
+          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
+          "type": "boolean"
+        },
+        {
+          "name": "$options",
+          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
+          "type": "{ label?: string | null | undefined; name?: string | null | undefined; autoComplete?: string | boolean | null | undefined; readOnly?: boolean | null | undefined; disabled?: boolean | null | undefined; }"
+        }
+      ],
+      "events": [
+        {
+          "name": "click"
+        }
+      ]
+    },
+    {
+      "name": "wup-switch",
+      "path": "./src\\controls\\switch.ts",
+      "description": "Form-control with toggle button",
+      "properties": [
+        {
+          "name": "$ariaCleared",
+          "description": "Text announced by screen-readers when control cleared; @defaultValue `cleared`",
+          "type": "string",
+          "default": "\"cleared\""
+        },
+        {
+          "name": "$ariaError",
+          "description": "Text announced by screen-readers; @defaultValue `Error for`",
+          "type": "string",
+          "default": "\"Error for\""
+        },
+        {
+          "name": "$onChange",
+          "description": "Called on value change",
+          "type": "((e: CustomEvent<any> & { detail: SetValueReasons; }) => void) | undefined"
+        },
+        {
+          "name": "$isEmpty",
+          "description": "Returns true if value is empty string or undefined",
+          "type": "boolean"
+        },
+        {
+          "name": "$isRequired",
+          "description": "Returns if value is required - can't be undefined (depends on $options.validations.required)",
+          "type": "boolean"
+        },
+        {
+          "name": "$form",
+          "type": "WUPFormElement<any, Options, EventMap> | undefined"
+        },
+        {
+          "name": "$refLabel",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLLabelElement",
+          "default": "\"document.createElement(\\\"label\\\")\""
+        },
+        {
+          "name": "$refInput",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLInputElement",
+          "default": "\"document.createElement(\\\"input\\\") as HTMLInputElement\""
+        },
+        {
+          "name": "$refTitle",
+          "description": "Reference to nested HTMLElement tied with $options.label",
+          "type": "HTMLElement",
+          "default": "\"document.createElement(\\\"strong\\\")\""
+        },
+        {
+          "name": "$refError",
+          "description": "Reference to nested HTMLElement tied with errorMessage",
+          "type": "WUPPopupElement<Options, EventMap> | undefined"
+        },
+        {
+          "name": "override"
+        },
+        {
+          "name": "storageKey",
+          "description": "Returns storage key based on options `skey` and `name`",
+          "type": "string | false | null | undefined"
+        },
+        {
+          "name": "$value",
+          "description": "Current value of control; You can change it without affecting on $isDirty state",
+          "type": "boolean"
+        },
+        {
+          "name": "$initValue",
+          "description": "Default/init value; used to define isChanged & to reset by keyEsc/buttonClear;\nIf control not $isDirty and not changed $value is updated according to $initValue",
+          "type": "ValueType | undefined"
+        },
+        {
+          "name": "$isDirty",
+          "description": "True if control is touched by user",
+          "type": "boolean"
+        },
+        {
+          "name": "$isChanged",
+          "description": "Returns if value changed (by comparisson with $initValue via static.isEqual option)\nBy default values compared by valueOf if it's possible",
+          "type": "boolean"
+        },
+        {
+          "name": "$isValid",
+          "description": "Returns true if control is valid",
+          "type": "boolean"
+        },
+        {
+          "name": "$isFocused",
+          "description": "Returns if current control is active/focused",
+          "type": "boolean"
+        },
+        {
+          "name": "$isDisabled",
+          "description": "Returns if related form or control disabled (true even if form.$options.disabled && !control.$options.disabled)",
+          "type": "boolean"
+        },
+        {
+          "name": "$isReadOnly",
+          "description": "Returns if related form or control readonly (true even if form.$options.readOnly && !control.$options.readOnly)",
+          "type": "boolean"
+        },
+        {
+          "name": "$autoComplete",
+          "description": "Returns autoComplete name if related form or control option is enabled (and control.$options.autoComplete !== false )",
+          "type": "string | false"
+        },
+        {
+          "name": "$validate",
+          "type": "() => string | false"
+        },
+        {
+          "name": "gotFormChanges",
+          "type": "(propsChanged: string[] | null) => void"
+        },
+        {
+          "name": "validateBySubmit",
+          "type": "() => string | false"
+        },
+        {
+          "name": "canShowError",
+          "description": "Returns true on !$isDisabled",
+          "type": "boolean"
+        },
+        {
+          "name": "$refStyle",
+          "type": "HTMLStyleElement | null"
+        },
+        {
+          "name": "$defaults",
+          "description": "Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item",
+          "type": "Options<boolean, ValidityMap>",
+          "default": "{\"validationRules\":{},\"reverse\":false}"
+        },
+        {
+          "name": "$isReady",
+          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
+          "type": "boolean"
+        },
+        {
+          "name": "$options",
+          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
+          "type": "{ label?: string | null | undefined; name?: string | null | undefined; autoComplete?: string | boolean | null | undefined; readOnly?: boolean | null | undefined; disabled?: boolean | null | undefined; }"
+        }
+      ]
+    },
+    {
+      "name": "wup-text",
+      "path": "./src\\controls\\text.ts",
+      "description": "Form-control with text-input",
+      "properties": [
+        {
+          "name": "$refBtnClear",
+          "type": "HTMLButtonElement | undefined"
+        },
+        {
+          "name": "$refMaskholder",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "$refPrefix",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "$refPostfix",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "refMask",
+          "description": "Mask object to proccess mask on input",
+          "type": "MaskTextInput | undefined"
+        },
+        {
+          "name": "$ariaCleared",
+          "description": "Text announced by screen-readers when control cleared; @defaultValue `cleared`",
+          "type": "string",
+          "default": "\"cleared\""
+        },
+        {
+          "name": "$ariaError",
+          "description": "Text announced by screen-readers; @defaultValue `Error for`",
+          "type": "string",
+          "default": "\"Error for\""
+        },
+        {
+          "name": "$onChange",
+          "description": "Called on value change",
+          "type": "((e: CustomEvent<any> & { detail: SetValueReasons; }) => void) | undefined"
+        },
+        {
+          "name": "$isEmpty",
+          "description": "Returns true if value is empty string or undefined",
+          "type": "boolean"
+        },
+        {
+          "name": "$isRequired",
+          "description": "Returns if value is required - can't be undefined (depends on $options.validations.required)",
+          "type": "boolean"
+        },
+        {
+          "name": "$form",
+          "type": "WUPFormElement<any, Options, EventMap> | undefined"
+        },
+        {
+          "name": "$refLabel",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLLabelElement",
+          "default": "\"document.createElement(\\\"label\\\")\""
+        },
+        {
+          "name": "$refInput",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLInputElement",
+          "default": "\"document.createElement(\\\"input\\\") as HTMLInputElement\""
+        },
+        {
+          "name": "$refTitle",
+          "description": "Reference to nested HTMLElement tied with $options.label",
+          "type": "HTMLElement",
+          "default": "\"document.createElement(\\\"strong\\\")\""
+        },
+        {
+          "name": "$refError",
+          "description": "Reference to nested HTMLElement tied with errorMessage",
+          "type": "WUPPopupElement<Options, EventMap> | undefined"
+        },
+        {
+          "name": "override"
+        },
+        {
+          "name": "storageKey",
+          "description": "Returns storage key based on options `skey` and `name`",
+          "type": "string | false | null | undefined"
+        },
+        {
+          "name": "$value",
+          "description": "Current value of control; You can change it without affecting on $isDirty state",
+          "type": "ValueType | undefined"
+        },
+        {
+          "name": "$initValue",
+          "description": "Default/init value; used to define isChanged & to reset by keyEsc/buttonClear;\nIf control not $isDirty and not changed $value is updated according to $initValue",
+          "type": "ValueType | undefined"
+        },
+        {
+          "name": "$isDirty",
+          "description": "True if control is touched by user",
+          "type": "boolean"
+        },
+        {
+          "name": "$isChanged",
+          "description": "Returns if value changed (by comparisson with $initValue via static.isEqual option)\nBy default values compared by valueOf if it's possible",
+          "type": "boolean"
+        },
+        {
+          "name": "$isValid",
+          "description": "Returns true if control is valid",
+          "type": "boolean"
+        },
+        {
+          "name": "$isFocused",
+          "description": "Returns if current control is active/focused",
+          "type": "boolean"
+        },
+        {
+          "name": "$isDisabled",
+          "description": "Returns if related form or control disabled (true even if form.$options.disabled && !control.$options.disabled)",
+          "type": "boolean"
+        },
+        {
+          "name": "$isReadOnly",
+          "description": "Returns if related form or control readonly (true even if form.$options.readOnly && !control.$options.readOnly)",
+          "type": "boolean"
+        },
+        {
+          "name": "$autoComplete",
+          "description": "Returns autoComplete name if related form or control option is enabled (and control.$options.autoComplete !== false )",
+          "type": "string | false"
+        },
+        {
+          "name": "$validate",
+          "type": "() => string | false"
+        },
+        {
+          "name": "gotFormChanges",
+          "type": "(propsChanged: string[] | null) => void"
+        },
+        {
+          "name": "validateBySubmit",
+          "type": "() => string | false"
+        },
+        {
+          "name": "canShowError",
+          "description": "Returns true on !$isDisabled",
+          "type": "boolean"
+        },
+        {
+          "name": "$refStyle",
+          "type": "HTMLStyleElement | null"
+        },
+        {
+          "name": "$defaults",
+          "description": "Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item",
+          "type": "Options<string, ValidityMap>",
+          "default": "{\"selectOnFocus\":false,\"clearButton\":true,\"validationRules\":{},\"debounceMs\":0,\"mask\":\"\",\"maskholder\":\"\",\"prefix\":\"\",\"postfix\":\"\"}"
+        },
+        {
+          "name": "$isReady",
+          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
+          "type": "boolean"
+        },
+        {
+          "name": "$options",
+          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
+          "type": "{ label?: string | null | undefined; name?: string | null | undefined; autoComplete?: string | boolean | null | undefined; readOnly?: boolean | null | undefined; disabled?: boolean | null | undefined; }"
+        }
+      ]
+    },
+    {
+      "name": "wup-areainput",
+      "path": "./src\\controls\\textarea.input.ts",
+      "description": "Represents contenteditable element with custom input props as value, select etc.",
+      "properties": [
+        {
+          "name": "$options",
+          "type": "Record<string, any>",
+          "default": "{}"
+        },
+        {
+          "name": "readOnly",
+          "type": "boolean"
+        },
+        {
+          "name": "value",
+          "description": "Get/set innerHTML (br converted into '\\n')",
+          "type": "string"
+        },
+        {
+          "name": "selectionStart",
+          "description": "Gets or sets the starting position or offset of a text selection.",
+          "type": "number | null"
+        },
+        {
+          "name": "selectionEnd",
+          "description": "Gets or sets the end position or offset of a text selection.",
+          "type": "number | null"
+        },
+        {
+          "name": "selection",
+          "description": "Fix for contenteditable (it doesn't contain selectionStart & selectionEnd props)",
+          "type": "{ start: number; end: number; } | null"
+        }
+      ]
+    },
+    {
+      "name": "wup-textarea",
+      "path": "./src\\controls\\textarea.ts",
+      "description": "Form-control with multiline text-input",
+      "properties": [
+        {
+          "name": "$refBtnClear",
+          "type": "HTMLButtonElement | undefined"
+        },
+        {
+          "name": "$refMaskholder",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "$refPrefix",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "$refPostfix",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "refMask",
+          "description": "Mask object to proccess mask on input",
+          "type": "MaskTextInput | undefined"
+        },
+        {
+          "name": "$ariaCleared",
+          "description": "Text announced by screen-readers when control cleared; @defaultValue `cleared`",
+          "type": "string",
+          "default": "\"cleared\""
+        },
+        {
+          "name": "$ariaError",
+          "description": "Text announced by screen-readers; @defaultValue `Error for`",
+          "type": "string",
+          "default": "\"Error for\""
+        },
+        {
+          "name": "$onChange",
+          "description": "Called on value change",
+          "type": "((e: CustomEvent<any> & { detail: SetValueReasons; }) => void) | undefined"
+        },
+        {
+          "name": "$isEmpty",
+          "description": "Returns true if value is empty string or undefined",
+          "type": "boolean"
+        },
+        {
+          "name": "$isRequired",
+          "description": "Returns if value is required - can't be undefined (depends on $options.validations.required)",
+          "type": "boolean"
+        },
+        {
+          "name": "$form",
+          "type": "WUPFormElement<any, Options, EventMap> | undefined"
+        },
+        {
+          "name": "$refLabel",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLLabelElement",
+          "default": "\"document.createElement(\\\"label\\\")\""
+        },
+        {
+          "name": "$refInput",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLInputElement",
+          "default": "\"document.createElement(\\\"wup-areainput\\\") as HTMLInputElement\""
+        },
+        {
+          "name": "$refTitle",
+          "description": "Reference to nested HTMLElement tied with $options.label",
+          "type": "HTMLElement",
+          "default": "\"document.createElement(\\\"strong\\\")\""
+        },
+        {
+          "name": "$refError",
+          "description": "Reference to nested HTMLElement tied with errorMessage",
+          "type": "WUPPopupElement<Options, EventMap> | undefined"
+        },
+        {
+          "name": "storageKey",
+          "description": "Returns storage key based on options `skey` and `name`",
+          "type": "string | false | null | undefined"
+        },
+        {
+          "name": "$value",
+          "description": "Current value of control; You can change it without affecting on $isDirty state",
+          "type": "ValueType | undefined"
+        },
+        {
+          "name": "$initValue",
+          "description": "Default/init value; used to define isChanged & to reset by keyEsc/buttonClear;\nIf control not $isDirty and not changed $value is updated according to $initValue",
+          "type": "ValueType | undefined"
+        },
+        {
+          "name": "$isDirty",
+          "description": "True if control is touched by user",
+          "type": "boolean"
+        },
+        {
+          "name": "$isChanged",
+          "description": "Returns if value changed (by comparisson with $initValue via static.isEqual option)\nBy default values compared by valueOf if it's possible",
+          "type": "boolean"
+        },
+        {
+          "name": "$isValid",
+          "description": "Returns true if control is valid",
+          "type": "boolean"
+        },
+        {
+          "name": "$isFocused",
+          "description": "Returns if current control is active/focused",
+          "type": "boolean"
+        },
+        {
+          "name": "$isDisabled",
+          "description": "Returns if related form or control disabled (true even if form.$options.disabled && !control.$options.disabled)",
+          "type": "boolean"
+        },
+        {
+          "name": "$isReadOnly",
+          "description": "Returns if related form or control readonly (true even if form.$options.readOnly && !control.$options.readOnly)",
+          "type": "boolean"
+        },
+        {
+          "name": "$autoComplete",
+          "description": "Returns autoComplete name if related form or control option is enabled (and control.$options.autoComplete !== false )",
+          "type": "string | false"
+        },
+        {
+          "name": "$validate",
+          "type": "() => string | false"
+        },
+        {
+          "name": "gotFormChanges",
+          "type": "(propsChanged: string[] | null) => void"
+        },
+        {
+          "name": "validateBySubmit",
+          "type": "() => string | false"
+        },
+        {
+          "name": "canShowError",
+          "description": "Returns true on !$isDisabled",
+          "type": "boolean"
+        },
+        {
+          "name": "$refStyle",
+          "type": "HTMLStyleElement | null"
+        },
+        {
+          "name": "$defaults",
+          "description": "Default options - applied to every element. Change it to configure default behavior",
+          "type": "Options<string, ValidityMap>",
+          "default": "{\"validationRules\":{}}"
+        },
+        {
+          "name": "$isReady",
+          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
+          "type": "boolean"
+        },
+        {
+          "name": "$options",
+          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
+          "type": "{ label?: string | null | undefined; name?: string | null | undefined; autoComplete?: string | boolean | null | undefined; readOnly?: boolean | null | undefined; disabled?: boolean | null | undefined; }"
+        }
+      ]
+    },
+    {
+      "name": "wup-time",
+      "path": "./src\\controls\\time.ts",
+      "description": "Form-control with timepicker",
+      "properties": [
+        {
+          "name": "$ariaOk",
+          "description": "Text announced by screen-readers when button Ok pressed in menu; @defaultValue `Ok`",
+          "type": "string",
+          "default": "\"Ok\""
+        },
+        {
+          "name": "$ariaCancel",
+          "description": "Text announced by screen-readers when button Cancel pressed in menu; @defaultValue `Cancel`",
+          "type": "string",
+          "default": "\"Cancel\""
+        },
+        {
+          "name": "$ariaHours",
+          "description": "Aria-label for list in menu; @defaultValue `Hours`",
+          "type": "string",
+          "default": "\"Hours\""
+        },
+        {
+          "name": "$ariaMinutes",
+          "description": "Aria-label for list in menu; @defaultValue `Minutes`",
+          "type": "string",
+          "default": "\"Minutes\""
+        },
+        {
+          "name": "$ariaHours12",
+          "description": "Aria-label for list in menu; @defaultValue `AM PM`",
+          "type": "string",
+          "default": "\"AM PM\""
+        },
+        {
+          "name": "$refMenuLists",
+          "type": "MenuListElement[] | undefined"
+        },
+        {
+          "name": "$refButtonOk",
+          "type": "HTMLButtonElement | undefined"
+        },
+        {
+          "name": "$refButtonCancel",
+          "type": "HTMLButtonElement | undefined"
+        },
+        {
+          "name": "initValue",
+          "description": "Default value in format hh:mm or hh:mm a",
+          "type": "string | undefined"
+        },
+        {
+          "name": "format",
+          "type": "string | undefined"
+        },
+        {
+          "name": "step",
+          "type": "number | undefined"
+        },
+        {
+          "name": "menuButtonsOff",
+          "type": "boolean | \"\" | undefined"
+        },
+        {
+          "name": "min",
+          "description": "User can't select date less than min; format hh:mm",
+          "type": "string | undefined"
+        },
+        {
+          "name": "max",
+          "description": "User can't select date more than max; format hh:mm",
+          "type": "string | undefined"
+        },
+        {
+          "name": "exclude",
+          "description": "Points that user can't choose\n/** Global reference to object with array",
+          "type": "string | undefined"
+        },
+        {
+          "name": "$onShowMenu",
+          "description": "Fires after popup-menu is shown (after animation finishes)",
+          "type": "((e: Event) => void) | undefined"
+        },
+        {
+          "name": "$onHideMenu",
+          "description": "Fires after popup is hidden (after animation finishes)",
+          "type": "((e: Event) => void) | undefined"
+        },
+        {
+          "name": "$isShown",
+          "description": "Returns if popup-menu is opened",
+          "type": "boolean"
+        },
+        {
+          "name": "$refPopup",
+          "description": "Reference to popupMenu",
+          "type": "WUPPopupElement<Options, EventMap> | undefined"
+        },
+        {
+          "name": "$refBtnClear",
+          "type": "HTMLButtonElement | undefined"
+        },
+        {
+          "name": "$refMaskholder",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "$refPrefix",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "$refPostfix",
+          "type": "HTMLSpanElement | undefined"
+        },
+        {
+          "name": "refMask",
+          "description": "Mask object to proccess mask on input",
+          "type": "MaskTextInput | undefined"
+        },
+        {
+          "name": "$ariaCleared",
+          "description": "Text announced by screen-readers when control cleared; @defaultValue `cleared`",
+          "type": "string",
+          "default": "\"cleared\""
+        },
+        {
+          "name": "$ariaError",
+          "description": "Text announced by screen-readers; @defaultValue `Error for`",
+          "type": "string",
+          "default": "\"Error for\""
+        },
+        {
+          "name": "$onChange",
+          "description": "Called on value change",
+          "type": "((e: CustomEvent<any> & { detail: SetValueReasons; }) => void) | undefined"
+        },
+        {
+          "name": "$isEmpty",
+          "description": "Returns true if value is empty string or undefined",
+          "type": "boolean"
+        },
+        {
+          "name": "$isRequired",
+          "description": "Returns if value is required - can't be undefined (depends on $options.validations.required)",
+          "type": "boolean"
+        },
+        {
+          "name": "$form",
+          "type": "WUPFormElement<any, Options, EventMap> | undefined"
+        },
+        {
+          "name": "$refLabel",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLLabelElement",
+          "default": "\"document.createElement(\\\"label\\\")\""
+        },
+        {
+          "name": "$refInput",
+          "description": "Reference to nested HTMLElement",
+          "type": "HTMLInputElement",
+          "default": "\"document.createElement(\\\"input\\\") as HTMLInputElement\""
+        },
+        {
+          "name": "$refTitle",
+          "description": "Reference to nested HTMLElement tied with $options.label",
+          "type": "HTMLElement",
+          "default": "\"document.createElement(\\\"strong\\\")\""
+        },
+        {
+          "name": "$refError",
+          "description": "Reference to nested HTMLElement tied with errorMessage",
+          "type": "WUPPopupElement<Options, EventMap> | undefined"
+        },
+        {
+          "name": "override",
+          "description": "Parse string to WUPTimeObject"
+        },
+        {
+          "name": "validations",
+          "description": "Returns validations enabled by user & defaults",
+          "type": "{ min?: number | ValidityFunction<string> | undefined; max?: number | ValidityFunction<string> | undefined; email?: boolean | ValidityFunction<string> | undefined; _mask?: string | ... 1 more ... | undefined; _parse?: string | ... 1 more ... | undefined; isNumber?: boolean | ... 1 more ... | undefined; required?: bo..."
+        },
+        {
+          "name": "storageKey",
+          "description": "Returns storage key based on options `skey` and `name`",
+          "type": "string | false | null | undefined"
+        },
+        {
+          "name": "$value",
+          "description": "Current value of control; You can change it without affecting on $isDirty state",
+          "type": "ValueType | undefined"
+        },
+        {
+          "name": "$initValue",
+          "description": "Default/init value; used to define isChanged & to reset by keyEsc/buttonClear;\nIf control not $isDirty and not changed $value is updated according to $initValue",
+          "type": "ValueType | undefined"
+        },
+        {
+          "name": "$isDirty",
+          "description": "True if control is touched by user",
+          "type": "boolean"
+        },
+        {
+          "name": "$isChanged",
+          "description": "Returns if value changed (by comparisson with $initValue via static.isEqual option)\nBy default values compared by valueOf if it's possible",
+          "type": "boolean"
+        },
+        {
+          "name": "$isValid",
+          "description": "Returns true if control is valid",
+          "type": "boolean"
+        },
+        {
+          "name": "$isFocused",
+          "description": "Returns if current control is active/focused",
+          "type": "boolean"
+        },
+        {
+          "name": "$isDisabled",
+          "description": "Returns if related form or control disabled (true even if form.$options.disabled && !control.$options.disabled)",
+          "type": "boolean"
+        },
+        {
+          "name": "$isReadOnly",
+          "description": "Returns if related form or control readonly (true even if form.$options.readOnly && !control.$options.readOnly)",
+          "type": "boolean"
+        },
+        {
+          "name": "$autoComplete",
+          "description": "Returns autoComplete name if related form or control option is enabled (and control.$options.autoComplete !== false )",
+          "type": "string | false"
+        },
+        {
+          "name": "$validate",
+          "type": "() => string | false"
+        },
+        {
+          "name": "gotFormChanges",
+          "type": "(propsChanged: string[] | null) => void"
+        },
+        {
+          "name": "validateBySubmit",
+          "type": "() => string | false"
+        },
+        {
+          "name": "canShowError",
+          "description": "Returns true on !$isDisabled",
+          "type": "boolean"
+        },
+        {
+          "name": "$refStyle",
+          "type": "HTMLStyleElement | null"
+        },
+        {
+          "name": "$defaults",
+          "description": "Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item",
+          "type": "Options<WUPTimeObject, ValidityMap>",
+          "default": "{\"validationRules\":{},\"step\":1,\"format\":\"\",\"min\":null,\"max\":null,\"exclude\":null,\"menuButtonsOff\":false}"
+        },
+        {
+          "name": "$isReady",
+          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
+          "type": "boolean"
+        },
+        {
+          "name": "$options",
+          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
+          "type": "{ label?: string | null | undefined; name?: string | null | undefined; autoComplete?: string | boolean | null | undefined; readOnly?: boolean | null | undefined; disabled?: boolean | null | undefined; }"
+        }
+      ],
+      "events": [
+        {
+          "name": "click"
+        }
+      ]
+    },
+    {
+      "name": "wup-dropdown",
+      "path": "./src\\dropdownElement.ts",
+      "description": "Dropdown element",
+      "properties": [
+        {
+          "name": "$refTitle",
+          "description": "Reference to nested HTMLElement tied with $options.label",
+          "type": "HTMLElement",
+          "default": "\"firstElementChild\""
+        },
+        {
+          "name": "$refPopup",
+          "description": "Reference to popupMenu",
+          "type": "WUPPopupElement<Options, EventMap>",
+          "default": "\"lastElementChild\""
+        },
+        {
+          "name": "$refMenu",
+          "description": "Reference to list",
+          "type": "HTMLElement",
+          "default": "\"lastElementChild\""
+        },
+        {
+          "name": "$refStyle",
+          "type": "HTMLStyleElement | null"
+        },
+        {
+          "name": "$defaults",
+          "description": "Default options applied to every element. Change it to configure default behavior\n* @tutorial Troubleshooting\n* Popup-related options are not observed so to change it use `WUPDropdownElement.$defaults` or `element.$refPopup.$options` direclty",
+          "type": "Options",
+          "default": "{\"animation\":\"Animations.drawer\",\"hideOnPopupClick\":true,\"minHeightByTarget\":true,\"minWidthByTarget\":true,\"placement\":[\"$start\",\"$end\",\"$start\",\"$end\",\"$resizeHeight\",\"$resizeHeight\",\"$resizeHeight\",\"$resizeHeight\"]}"
+        },
+        {
+          "name": "$isReady",
+          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
+          "type": "boolean"
+        },
+        {
+          "name": "$options",
+          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
+          "type": "TOptions"
+        }
+      ]
+    },
+    {
+      "name": "wup-form",
+      "path": "./src\\formElement.ts",
+      "description": "Wrapper of FormHTMLElement that collect values from controls",
+      "properties": [
+        {
+          "name": "$onSubmit",
+          "description": "Dispatched on submit. Return promise to lock form and show spinner",
+          "type": "((ev: SubmitEvent<Model>) => void | Promise<unknown>) | undefined"
+        },
+        {
+          "name": "$controls",
+          "description": "Dispatched on submit",
+          "type": "IBaseControl<any>[]",
+          "default": "[]"
+        },
+        {
+          "name": "$controlsAttached",
+          "description": "Returns related to form controls with $options.name != null",
+          "type": "IBaseControl<any>[]"
+        },
+        {
+          "name": "$model",
+          "description": "Model related to every control inside (with $options.name);",
+          "type": "Partial<Model>"
+        },
+        {
+          "name": "$initModel",
+          "description": "Default/init model related to every control inside;",
+          "type": "Partial<Model> | undefined"
+        },
+        {
+          "name": "$isPending",
+          "description": "Pending state (spinner + lock form if SubmitActions.lockOnPending enabled)",
+          "type": "boolean"
+        },
+        {
+          "name": "$isValid",
+          "description": "Returns true if all nested controls (with name) are valid",
+          "type": "boolean"
+        },
+        {
+          "name": "$isChanged",
+          "description": "Returns true if some of controls value is changed by user",
+          "type": "boolean"
+        },
+        {
+          "name": "storageKey",
+          "description": "Returns storage key based on url+control-names or `$options.autoSave` if `string`",
+          "type": "string"
+        },
+        {
+          "name": "submitActions",
+          "type": "number | SubmitActions | undefined"
+        },
+        {
+          "name": "autoSave",
+          "type": "string | boolean | undefined"
+        },
+        {
+          "name": "autoFocus",
+          "type": "boolean | \"\" | undefined",
+          "deprecatedMessage": "React override default behavior - use el.$options.autoFocus instead"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean | \"\" | undefined"
+        },
+        {
+          "name": "readOnly",
+          "type": "boolean | \"\" | undefined"
+        },
+        {
+          "name": "autoComplete",
+          "type": "boolean | \"\" | undefined"
+        },
+        {
+          "name": "onChange",
+          "type": "undefined",
+          "deprecatedMessage": "SyntheticEvent is not supported. Use ref.addEventListener('$change') instead"
+        },
+        {
+          "name": "onWillSubmit",
+          "type": "undefined",
+          "deprecatedMessage": "SyntheticEvent is not supported. Use ref.addEventListener('$willSubmit') instead"
+        },
+        {
+          "name": "onSubmit",
+          "type": "undefined",
+          "deprecatedMessage": "SyntheticEvent is not supported. Use ref.addEventListener('$submit') instead"
+        },
+        {
+          "name": "$refStyle",
+          "type": "HTMLStyleElement | null"
+        },
+        {
+          "name": "$defaults",
+          "description": "Default options - applied to every element. Change it to configure default behavior",
+          "type": "Options",
+          "default": "{\"autoComplete\":false,\"autoFocus\":false,\"autoSave\":false,\"disabled\":false,\"readOnly\":false}"
+        },
+        {
+          "name": "$isReady",
+          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
+          "type": "boolean"
+        },
+        {
+          "name": "$options",
+          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
+          "type": "TOptions"
+        }
+      ],
+      "events": [
+        {
+          "name": "$willSubmit"
+        },
+        {
+          "name": "$submit"
+        }
+      ]
+    },
+    {
+      "name": "wup-popup-arrow",
+      "path": "./src\\popup\\popupArrowElement.ts",
+      "description": "Internal arrow element for {@link WUPPopupElement}",
+      "properties": [
+        {
+          "name": "tagName",
+          "type": "\"wup-popup-arrow\"",
+          "default": "\"wup-popup-arrow\""
+        }
+      ]
+    },
+    {
+      "name": "wup-popup",
+      "path": "./src\\popup\\popupElement.ts",
+      "description": "Popup element",
+      "attributes": [
+        {
+          "name": "target"
+        },
+        {
+          "name": "placement"
+        },
+        {
+          "name": "animation"
+        }
+      ],
+      "properties": [
+        {
+          "name": "$placements",
+          "type": "{ $top: EdgeFunc; $bottom: EdgeFunc; $left: EdgeFunc; $right: EdgeFunc; }",
+          "default": "{}"
+        },
+        {
+          "name": "$placementAttrs",
+          "description": "Returns placement",
+          "type": "(attr: \"top-start\" | \"top-middle\" | \"top-end\" | \"bottom-start\" | \"bottom-middle\" | \"bottom-end\" | \"left-start\" | \"left-middle\" | \"left-end\" | \"right-start\" | \"right-middle\" | \"right-end\" | undefined) => PlaceFunc[] | undefined",
+          "default": "\"(attr: WUP.Popup.Attributes[\\\"placement\\\"]): Array<WUP.Popup.Place.PlaceFunc> | undefined => {\\n    switch (attr) {\\n      case \\\"top-start\\\":\\n        return [PopupPlacements.$top.$start.$adjust, PopupPlacements.$bottom.$start.$adjust];\\n      case \\\"top-middle\\\":\\n        return [PopupPlacements.$top.$middle.$adjust, PopupPlacements.$bottom.$middle.$adjust];\\n      case \\\"top-end\\\":\\n        return [PopupPlacements.$top.$end.$adjust, PopupPlacements.$bottom.$end.$adjust];\\n      case \\\"bottom-start\\\":\\n        return [PopupPlacements.$bottom.$start.$adjust, PopupPlacements.$top.$start.$adjust];\\n      case \\\"bottom-middle\\\":\\n        return [PopupPlacements.$bottom.$middle.$adjust, PopupPlacements.$top.$middle.$adjust];\\n      case \\\"bottom-end\\\":\\n        return [PopupPlacements.$bottom.$end.$adjust, PopupPlacements.$top.$end.$adjust];\\n      case \\\"left-start\\\":\\n        return [PopupPlacements.$left.$start.$adjust, PopupPlacements.$right.$start.$adjust];\\n      case \\\"left-middle\\\":\\n        return [PopupPlacements.$left.$middle.$adjust, PopupPlacements.$right.$middle.$adjust];\\n      case \\\"left-end\\\":\\n        return [PopupPlacements.$left.$end.$adjust, PopupPlacements.$right.$end.$adjust];\\n      case \\\"right-start\\\":\\n        return [PopupPlacements.$right.$start.$adjust, PopupPlacements.$left.$start.$adjust];\\n      case \\\"right-middle\\\":\\n        return [PopupPlacements.$right.$middle.$adjust, PopupPlacements.$left.$middle.$adjust];\\n      case \\\"right-end\\\":\\n        return [PopupPlacements.$right.$end.$adjust, PopupPlacements.$left.$end.$adjust];\\n      default:\\n        return undefined;\\n    }\\n  }\""
+        },
+        {
+          "name": "$onWillShow",
+          "description": "Fires before show is happened;",
+          "type": "((e: CustomEvent<any>) => void) | undefined"
+        },
+        {
+          "name": "$onShow",
+          "description": "Fires after popup is shown (after animation finishes)",
+          "type": "((e: Event) => void) | undefined"
+        },
+        {
+          "name": "$onWillHide",
+          "description": "Fires before hide is happened;",
+          "type": "((e: CustomEvent<any>) => void) | undefined"
+        },
+        {
+          "name": "$onHide",
+          "description": "Fires after popup is hidden (after animation finishes)",
+          "type": "((e: Event) => void) | undefined"
+        },
+        {
+          "name": "$isOpen",
+          "type": "boolean",
+          "deprecatedMessage": "use `$isShown`"
+        },
+        {
+          "name": "$isShown",
+          "description": "Returns if popup is opened (before show-animation is started)",
+          "type": "boolean"
+        },
+        {
+          "name": "$isHidden",
+          "description": "Returns if popup is closed (after hide-animation is ended)",
+          "type": "boolean"
+        },
+        {
+          "name": "$isHiding",
+          "description": "Returns if popup is hiding (only if animation enabled)",
+          "type": "boolean"
+        },
+        {
+          "name": "$isShowing",
+          "description": "Returns if popup is showing (only if animation enabled)",
+          "type": "boolean"
+        },
+        {
+          "name": "$refArrow",
+          "description": "Returns arrowElement if $options.arrowEnable=true and after popup $isShown",
+          "type": "WUPPopupArrowElement | null"
+        },
+        {
+          "name": "override"
+        },
+        {
+          "name": "$refStyle",
+          "type": "HTMLStyleElement | null"
+        },
+        {
+          "name": "$defaults",
+          "description": "Default options. Change it to configure default behavior",
+          "type": "Options",
+          "default": "{\"animation\":0,\"placement\":[\"$adjust\",\"$adjust\"],\"toFitElement\":\"body\",\"showCase\":\"onClick\",\"hoverShowTimeout\":200,\"hoverHideTimeout\":500}"
+        },
+        {
+          "name": "$isReady",
+          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
+          "type": "boolean"
+        },
+        {
+          "name": "$options",
+          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
+          "type": "TOptions"
+        }
+      ]
+    },
+    {
+      "name": "wup-spin",
+      "path": "./src\\spinElement.ts",
+      "description": "Flexible animated element with ability to place over target element without position relative",
+      "properties": [
+        {
+          "name": "$refFade",
+          "type": "HTMLDivElement | undefined"
+        },
+        {
+          "name": "override",
+          "description": "Used to clone defaults to options on init; override it to clone"
+        },
+        {
+          "name": "isFitParent",
+          "description": "Returns value based on `$options.fit`",
+          "type": "boolean"
+        },
+        {
+          "name": "target",
+          "description": "Returns target element based on $options",
+          "type": "HTMLElement"
+        },
+        {
+          "name": "hasRelativeParent",
+          "description": "Returns whether exists parent with position relative",
+          "type": "boolean"
+        },
+        {
+          "name": "$refStyle",
+          "type": "HTMLStyleElement | null"
+        },
+        {
+          "name": "$defaults",
+          "description": "Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item",
+          "type": "Options",
+          "default": "{\"overflowOffset\":[4,4],\"overflowFade\":true,\"overflowTarget\":\"auto\",\"inline\":false,\"fit\":\"auto\"}"
+        },
+        {
+          "name": "$isReady",
+          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
+          "type": "boolean"
+        },
+        {
+          "name": "$options",
+          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
+          "type": "TOptions"
+        }
+      ]
+    }
+  ]
+}

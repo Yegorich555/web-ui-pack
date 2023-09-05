@@ -157,5 +157,12 @@
     "webpack-merge": "^5.8.0",
     "webpack-mock-server": "^1.0.17"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "contributes": {
+    "html": {
+      "customData": [
+        "html.custom-elements.json"
+      ]
+    }
+  }
 }
