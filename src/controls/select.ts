@@ -47,13 +47,14 @@ declare global {
       /** Case when menu-popup to show
        * @defaultValue onPressArrowKey | onClick | onFocus | onInput */
       showCase: ShowCases;
-      /** Set true to make input not editable but allow select items via popup-menu (ordinary dropdown mode)
+      /** Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode)
        * @tutorial
        * * set number X to enable autoMode where `input.readOnly = items.length < X` */
       readOnlyInput: boolean | number;
     }
     interface JSXProps<C = WUPSelectControl> extends WUP.BaseCombo.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
-      /** Global reference to object with array
+      /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data!
+       * Global reference to object with array
        * @see  {@link MenuItems}
        * @example
        * ```js
