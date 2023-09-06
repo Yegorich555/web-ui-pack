@@ -508,7 +508,7 @@
         },
         {
           "name": "debouncems",
-          "description": " Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
+          "description": "Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
         },
         {
           "name": "clearbutton",
@@ -623,7 +623,7 @@
       "attributes": [
         {
           "name": "debouncems",
-          "description": " Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
+          "description": "Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
         },
         {
           "name": "clearbutton",
@@ -796,229 +796,148 @@
     },
     {
       "name": "wup-select",
-      "path": "./src\\controls\\select.ts",
       "description": "Form-control with dropdown/combobox behavior",
-      "properties": [
+      "references": [
         {
-          "name": "$textNoItems",
-          "description": "Text for listbox when no items are displayed",
-          "type": "string | undefined",
-          "default": "\"No Items\""
-        },
-        {
-          "name": "$ariaLabelItems",
-          "description": "Text for aria-label of <ul> element",
-          "type": "string",
-          "default": "\"Items\""
-        },
-        {
-          "name": "$isPending",
-          "description": "Returns whether control in pending state or not (shows spinner)",
-          "type": "boolean"
-        },
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/control/select"
+        }
+      ],
+      "attributes": [
         {
           "name": "items",
-          "description": "Global reference to object with array",
-          "type": "string | undefined"
+          "description": "Items showed in dropdown-menu. Provide Array OR promise/api-call to show pending status when control retrieves data! \n\r Point key to Global reference",
+          "references": [
+            {
+              "name": "WUP.Select.Item",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/selectElement.ts"
+            }
+          ]
         },
         {
-          "name": "allowNewValue",
-          "type": "boolean | \"\" | undefined"
+          "name": "allownewvalue",
+          "description": "Allow user to create new value if value not found in items @defaultValue false"
         },
         {
           "name": "multiple",
-          "type": "boolean | \"\" | undefined"
+          "description": "Allow to select multiple values; in this case `$value` & `$initValue` must contain `Array<ValueType>` @defaultValue fals"
         },
         {
-          "name": "$onShowMenu",
-          "description": "Fires after popup-menu is shown (after animation finishes)",
-          "type": "((e: Event) => void) | undefined"
+          "name": "showcase",
+          "description": "Case when menu-popup to show @defaultValue `onPressArrowKey | onClick | onFocus | onInput`",
+          "references": [
+            {
+              "name": "@see WUP.BaseCombo.ShowCases",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseCombo.ts"
+            }
+          ]
         },
         {
-          "name": "$onHideMenu",
-          "description": "Fires after popup is hidden (after animation finishes)",
-          "type": "((e: Event) => void) | undefined"
+          "name": "readonlyinput",
+          "description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
         },
         {
-          "name": "$isShown",
-          "description": "Returns if popup-menu is opened",
-          "type": "boolean"
+          "name": "debouncems",
+          "description": "Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
         },
         {
-          "name": "$refPopup",
-          "description": "Reference to popupMenu",
-          "type": "WUPPopupElement<Options, EventMap> | undefined"
+          "name": "clearbutton",
+          "description": "Show/hide clear button"
         },
         {
-          "name": "$refBtnClear",
-          "type": "HTMLButtonElement | undefined"
+          "name": "mask",
+          "description": "Make input masked; 0-required digit, #-optional digit, *-any char, *{1,5} - any 1..5 chars",
+          "references": [
+            {
+              "name": "@see WUP.TextControl.Options[mask]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/select.ts"
+            }
+          ],
+          "values": [
+            { "name": "+1(000) 000-0000" },
+            { "name": "0000-00-00" },
+            { "name": "##0.##0.##0.##0" },
+            { "name": "00:00 /[AP]/M" },
+            { "name": "//[a-zA-Z]//{1,5}" }
+          ]
         },
         {
-          "name": "$refMaskholder",
-          "type": "HTMLSpanElement | undefined"
+          "name": "maskholder",
+          "description": "Placeholder for mask. By default it inherits from mask. To disabled it set `false`; for date maskholder can be 'yyyy-mm-dd'"
         },
         {
-          "name": "$refPrefix",
-          "type": "HTMLSpanElement | undefined"
+          "name": "prefix",
+          "description": "Part before input; for example for value `$ 123 USD` prefix is `$ `"
         },
         {
-          "name": "$refPostfix",
-          "type": "HTMLSpanElement | undefined"
+          "name": "postfix",
+          "description": "Part after input; for example for value `$ 123 USD` postifx is ` USD`"
         },
         {
-          "name": "refMask",
-          "description": "Mask object to proccess mask on input",
-          "type": "MaskTextInput | undefined"
+          "name": "initvalue",
+          "description": "Default value"
         },
         {
-          "name": "$ariaCleared",
-          "description": "Text announced by screen-readers when control cleared; @defaultValue `cleared`",
-          "type": "string",
-          "default": "\"cleared\""
+          "name": "label",
+          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
         },
         {
-          "name": "$ariaError",
-          "description": "Text announced by screen-readers; @defaultValue `Error for`",
-          "type": "string",
-          "default": "\"Error for\""
+          "name": "name",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
         },
         {
-          "name": "$onChange",
-          "description": "Called on value change",
-          "type": "((e: CustomEvent<any> & { detail: SetValueReasons; }) => void) | undefined"
+          "name": "autofocus",
+          "description": "Focus element when it's appended to layout @defaultValue false"
         },
         {
-          "name": "$isEmpty",
-          "description": "Returns true if value is empty string or undefined",
-          "type": "boolean"
+          "name": "autocomplete",
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
         },
         {
-          "name": "$isRequired",
-          "description": "Returns if value is required - can't be undefined (depends on $options.validations.required)",
-          "type": "boolean"
+          "name": "disabled",
+          "description": "Disallow edit/copy value; use attr [disabled] for styling"
         },
         {
-          "name": "$form",
-          "type": "WUPFormElement<any, Options, EventMap> | undefined"
+          "name": "readonly",
+          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
         },
         {
-          "name": "$refLabel",
-          "description": "Reference to nested HTMLElement",
-          "type": "HTMLLabelElement",
-          "default": "\"document.createElement(\\\"label\\\")\""
+          "name": "validations",
+          "description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+          "values": [{ "name": "window.myValidations" }],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[validations]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
         },
         {
-          "name": "$refInput",
-          "description": "Reference to nested HTMLElement",
-          "type": "HTMLInputElement",
-          "default": "\"document.createElement(\\\"input\\\") as HTMLInputElement\""
+          "name": "storagekey",
+          "description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storageKey]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
         },
         {
-          "name": "$refTitle",
-          "description": "Reference to nested HTMLElement tied with $options.label",
-          "type": "HTMLElement",
-          "default": "\"document.createElement(\\\"strong\\\")\""
-        },
-        {
-          "name": "$refError",
-          "description": "Reference to nested HTMLElement tied with errorMessage",
-          "type": "WUPPopupElement<Options, EventMap> | undefined"
-        },
-        {
-          "name": "override",
-          "description": "Called when need to parse attr [initValue]"
-        },
-        {
-          "name": "storageKey",
-          "description": "Returns storage key based on options `skey` and `name`",
-          "type": "string | false | null | undefined"
-        },
-        {
-          "name": "$value",
-          "description": "Current value of control; You can change it without affecting on $isDirty state",
-          "type": "ValueType | undefined"
-        },
-        {
-          "name": "$initValue",
-          "description": "Default/init value; used to define isChanged & to reset by keyEsc/buttonClear;\nIf control not $isDirty and not changed $value is updated according to $initValue",
-          "type": "ValueType | undefined"
-        },
-        {
-          "name": "$isDirty",
-          "description": "True if control is touched by user",
-          "type": "boolean"
-        },
-        {
-          "name": "$isChanged",
-          "description": "Returns if value changed (by comparisson with $initValue via static.isEqual option)\nBy default values compared by valueOf if it's possible",
-          "type": "boolean"
-        },
-        {
-          "name": "$isValid",
-          "description": "Returns true if control is valid",
-          "type": "boolean"
-        },
-        {
-          "name": "$isFocused",
-          "description": "Returns if current control is active/focused",
-          "type": "boolean"
-        },
-        {
-          "name": "$isDisabled",
-          "description": "Returns if related form or control disabled (true even if form.$options.disabled && !control.$options.disabled)",
-          "type": "boolean"
-        },
-        {
-          "name": "$isReadOnly",
-          "description": "Returns if related form or control readonly (true even if form.$options.readOnly && !control.$options.readOnly)",
-          "type": "boolean"
-        },
-        {
-          "name": "$autoComplete",
-          "description": "Returns autoComplete name if related form or control option is enabled (and control.$options.autoComplete !== false )",
-          "type": "string | false"
-        },
-        {
-          "name": "$validate",
-          "type": "() => string | false"
-        },
-        {
-          "name": "gotFormChanges",
-          "type": "(propsChanged: string[] | null) => void"
-        },
-        {
-          "name": "validateBySubmit",
-          "type": "() => string | false"
-        },
-        {
-          "name": "canShowError",
-          "description": "Returns true on !$isDisabled",
-          "type": "boolean"
-        },
-        {
-          "name": "$refStyle",
-          "type": "HTMLStyleElement | null"
-        },
-        {
-          "name": "$defaults",
-          "description": "Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item",
-          "type": "Options<any, ValidityMap>",
-          "default": "{\"validationRules\":{},\"allowNewValue\":false,\"multiple\":false,\"items\":[]}"
-        },
-        {
-          "name": "$isReady",
-          "description": "Returns true if element is appended (result of setTimeout on connectedCallback)",
-          "type": "boolean"
-        },
-        {
-          "name": "$options",
-          "description": "Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally",
-          "type": "{ label?: string | null | undefined; name?: string | null | undefined; autoComplete?: string | boolean | null | undefined; readOnly?: boolean | null | undefined; disabled?: boolean | null | undefined; }"
-        }
-      ],
-      "events": [
-        {
-          "name": "click"
+          "name": "storage",
+          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "values": [{ "name": "local" }, { "name": "session" }, { "name": "url" }],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
         }
       ]
     },
@@ -1056,11 +975,11 @@
         },
         {
           "name": "allowNewValue",
-          "type": "boolean | \"\" | undefined"
+          "type": "boolean | \"\"| undefined"
         },
         {
           "name": "multiple",
-          "type": "boolean | \"\" | undefined"
+          "type": "boolean | \"\"| undefined"
         },
         {
           "name": "$onShowMenu",
@@ -1350,7 +1269,7 @@
       "attributes": [
         {
           "name": "debouncems",
-          "description": " Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
+          "description": "Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
         },
         {
           "name": "clearbutton",
@@ -1465,7 +1384,7 @@
       "attributes": [
         {
           "name": "debouncems",
-          "description": " Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
+          "description": "Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
         },
         {
           "name": "clearbutton",
@@ -1601,7 +1520,7 @@
         },
         {
           "name": "menuButtonsOff",
-          "type": "boolean | \"\" | undefined"
+          "type": "boolean | \"\"| undefined"
         },
         {
           "name": "min",
@@ -1885,7 +1804,7 @@
         },
         {
           "name": "placement",
-          "description": " Placement rules relative to target @defaultValue `top-middle`",
+          "description": "Placement rules relative to target @defaultValue `top-middle`",
           "values": [
             { "name": "top-start" },
             { "name": "top-middle" },
