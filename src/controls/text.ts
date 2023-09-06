@@ -45,7 +45,7 @@ declare global {
       /** Show/hide clear button
        * @see {@link ClearActions} from `web-ui-pack/baseControl`
        * @defaultValue true */
-      clearButton: boolean;
+      clearButton: boolean; // todo need to hide this when nothing to clear
       /** Make input masked
        * @rules when mask is pointed and contains only numeric vars
        * * inputmode='numeric' so mobile device show numeric-keyboard
@@ -71,7 +71,7 @@ declare global {
       maskholder?: string | false | null | undefined;
       /** Part before input; for example for value "$ 123 USD" prefix is "$ " */
       prefix?: string | null | undefined;
-      /** Part after input; for example for value "$ 123 USD" prefix is " USD" */
+      /** Part after input; for example for value "$ 123 USD" postfix is " USD" */
       postfix?: string | null | undefined;
     }
     interface Options<T = string, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, NewOptions {}
