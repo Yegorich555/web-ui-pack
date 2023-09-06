@@ -46,7 +46,7 @@ declare global {
        * <wup-number items="window.format"></wup-number>
        * ```
        * @defaultValue no-decimal and separators from localeInfo */
-      format?: string;
+      format?: string; // NiceToHave: parse from string
     }
   }
   interface HTMLElementTagNameMap {
