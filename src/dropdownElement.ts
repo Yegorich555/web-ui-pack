@@ -40,10 +40,12 @@ declare global {
        *  @defaultValue true */
       minHeightByTarget: boolean;
     }
-    // WARN: all options must be appline
-    interface JSXProps<C = WUPDropdownElement>
-      extends WUP.Base.JSXProps<C>,
-        Partial<Pick<Options, "hideOnPopupClick">> {}
+    // WARN: all options must be applied to wup-popup directly
+    interface JSXProps<C = WUPDropdownElement> extends WUP.Base.JSXProps<C> {
+      /** Hide menu on popup click
+       * @defaultValue true */
+      "w-hideOnPopupClick"?: boolean;
+    }
   }
 
   interface HTMLElementTagNameMap {
@@ -63,7 +65,7 @@ declare global {
  * ```html
   <wup-dropdown class="custom">
     <button type="button">Click Me</button>
-    <wup-popup placement="bottom-middle" animation="stack">
+    <wup-popup w-placement="bottom-middle" w-animation="stack">
       <ul>
         <li><button type="button">A</button></li>
         <li><button type="button">B</button></li>
@@ -136,6 +138,7 @@ export default class WUPDropdownElement<
       const proto = Object.getPrototypeOf(this.$refPopup).constructor as typeof WUPPopupElement;
       const mappedAttr = proto.mappedAttributes;
       this.$refPopup.getAttributeNames().forEach((a) => {
+        a = a.startsWith("w-") ? a.substring(2) : a;
         const m = mappedAttr[a];
         if (m) {
           excluded.add(m.prop ?? a);

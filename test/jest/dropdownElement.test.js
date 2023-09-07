@@ -118,7 +118,7 @@ describe("dropdownElement", () => {
     document.body.innerHTML = `
       <wup-dropdown>
         <button>Click me</button>
-        <wup-popup placement="left-middle" animation="stack">
+        <wup-popup w-placement="left-middle" w-animation="stack">
           <ul>
             <li><button>A</button></li>
             <li><button>B</button></li>

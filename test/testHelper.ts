@@ -196,7 +196,8 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
         }
         const map: Record<string, string> = {};
         Object.keys(c.$defaults).forEach((k) => {
-          map[(k as string).toLowerCase()] = k as string;
+          map[`w-${(k as string).toLowerCase()}`] = k as string;
+          map[`${(k as string).toLowerCase()}`] = k as string;
         });
 
         observedAttrs.forEach((attrName) => {

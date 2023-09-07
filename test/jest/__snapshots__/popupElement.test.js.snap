@@ -63,10 +63,10 @@ padding:0;}
           to {opacity: 0;}
         }
       }
-      WUP-POPUP[animation=drawer] {
+      WUP-POPUP[w-animation=drawer] {
         animation-name: custom;
       }
-      WUP-POPUP[animation=stack] {
+      WUP-POPUP[w-animation=stack] {
         animation-name: custom;
         overflow: visible;
       }
@@ -130,10 +130,10 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
           to {opacity: 0;}
         }
       }
-      TEST-EL[animation=drawer] {
+      TEST-EL[w-animation=drawer] {
         animation-name: custom;
       }
-      TEST-EL[animation=stack] {
+      TEST-EL[w-animation=stack] {
         animation-name: custom;
         overflow: visible;
       }
@@ -203,9 +203,9 @@ exports[`popupElement inheritance common tests snapshot of $defaults 2`] = `
 
 exports[`popupElement inheritance common tests snapshot of $defaults 3`] = `
 [
-  "animation",
-  "placement",
-  "target",
+  "w-animation",
+  "w-placement",
+  "w-target",
 ]
 `;
 
@@ -272,10 +272,10 @@ padding:0;}
           to {opacity: 0;}
         }
       }
-      WUP-POPUP[animation=drawer] {
+      WUP-POPUP[w-animation=drawer] {
         animation-name: custom;
       }
-      WUP-POPUP[animation=stack] {
+      WUP-POPUP[w-animation=stack] {
         animation-name: custom;
         overflow: visible;
       }
@@ -339,10 +339,10 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
           to {opacity: 0;}
         }
       }
-      TEST-EL[animation=drawer] {
+      TEST-EL[w-animation=drawer] {
         animation-name: custom;
       }
-      TEST-EL[animation=stack] {
+      TEST-EL[w-animation=stack] {
         animation-name: custom;
         overflow: visible;
       }
@@ -412,8 +412,8 @@ exports[`popupElement me common tests snapshot of $defaults 2`] = `
 
 exports[`popupElement me common tests snapshot of $defaults 3`] = `
 [
-  "animation",
-  "placement",
-  "target",
+  "w-animation",
+  "w-placement",
+  "w-target",
 ]
 `;

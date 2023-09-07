@@ -26,7 +26,10 @@ declare global {
       /** @readonly Constant value that impossible to change */
       multiple: true;
     }
-    interface JSXProps<C = WUPSelectManyControl> extends WUP.Select.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {}
+    interface JSXProps<C = WUPSelectManyControl> extends WUP.Select.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
+      "w-hideSelected"?: boolean | "";
+      "w-sortable"?: boolean | "";
+    }
   }
 
   interface HTMLElementTagNameMap {
@@ -56,7 +59,7 @@ declare global {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-selectmany name="gender" initvalue="window.myInitValue" validations="myValidations" items="window.myDropdownItems" />
+    <wup-selectmany w-name="gender" w-initvalue="window.myInitValue" w-validations="myValidations" w-items="window.myDropdownItems" />
   </wup-form>;
   @tutorial Troubleshooting
  * * Accessibility. Screen readers announce 'blank' when focus on not-empty control.
@@ -254,7 +257,7 @@ export default class WUPSelectManyControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Select.Options> | null): void {
     this._opts.multiple = true;
-    this.removeAttribute("multiple");
+    this.removeAttribute("w-multiple");
     super.gotChanges(propsChanged);
 
     this._opts.sortable ??= false;

@@ -48,8 +48,8 @@ declare global {
     }
     interface Options<T = any, VM = ValidityMap> extends WUP.Text.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPBaseComboControl> extends WUP.Text.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
-      showCase?: ShowCases | number;
-      readOnlyInput?: boolean | number;
+      "w-showCase"?: ShowCases | number;
+      "w-readOnlyInput"?: boolean | number;
     }
   }
 }

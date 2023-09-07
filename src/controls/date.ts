@@ -40,8 +40,8 @@ declare global {
       extends WUP.BaseCombo.JSXProps<C>,
         WUP.Calendar.JSXProps<C>,
         WUP.Base.OnlyNames<NewOptions> {
-      initValue?: string;
-      format?: string;
+      "w-initValue"?: string;
+      "w-format"?: string;
     }
   }
   interface HTMLElementTagNameMap {
@@ -69,7 +69,7 @@ declare global {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-date name="dateOfBirhday" utc initvalue="1990-10-24" min="1930-01-01" max="2010-01-01"/>
+    <wup-date w-name="dateOfBirhday" w-utc w-initvalue="1990-10-24" w-min="1930-01-01" w-max="2010-01-01"/>
   </wup-form>; */
 export default class WUPDateControl<
   ValueType extends Date = Date,

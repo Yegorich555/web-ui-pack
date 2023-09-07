@@ -67,10 +67,10 @@ export default function ControlsView() {
       details={{ tag: "wup-form", linkDemo: "demo/src/components/controls/controlsView.tsx", customHTML, customJS }}
     >
       <wup-form
-        autoComplete={false}
-        autoSave={false}
+        w-autoComplete={false}
+        w-autoSave={false}
         disabled={false}
-        readOnly={false}
+        readonly={false}
         ref={(el) => {
           if (el) {
             el.$options.autoFocus = true;
@@ -84,8 +84,8 @@ export default function ControlsView() {
           }
         }}
       >
-        <wup-text name="text" />
-        <wup-pwd name="password" />
+        <wup-text w-name="text" />
+        <wup-pwd w-name="password" />
         <wup-select
           ref={(el) => {
             if (el) {
@@ -109,8 +109,8 @@ export default function ControlsView() {
           }}
         />
 
-        <wup-switch name="switch" />
-        <wup-check name="checkbox" />
+        <wup-switch w-name="switch" />
+        <wup-check w-name="checkbox" />
         <wup-radio
           ref={(el) => {
             if (el) {
@@ -119,8 +119,8 @@ export default function ControlsView() {
             }
           }}
         />
-        <wup-date name="date" />
-        <wup-time name="time" />
+        <wup-date w-name="date" />
+        <wup-time w-name="time" />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>
@@ -130,16 +130,16 @@ export default function ControlsView() {
 const customHTML = [
   `html
 <wup-form
-  autoComplete="false"
-  autoSave="false"
-  readOnly="false"
+  w-autocomplete="false"
+  w-autosave="false"
+  w-autofocus="false"
+  readonly="false"
   disabled="false"
-  autoFocus="false"
 >
-  <wup-text name="firstName"/>
-  <wup-text name="lastName" />
-  <wup-text name="email"/>
-  <wup-pwd name="password"/>
+  <wup-text w-name="firstName"/>
+  <wup-text w-name="lastName" />
+  <wup-text w-name="email"/>
+  <wup-pwd w-name="password"/>
   ...
   <button type="submit">Submit</button>
 </wup-form>`,

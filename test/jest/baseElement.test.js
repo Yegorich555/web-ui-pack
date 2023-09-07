@@ -262,25 +262,25 @@ describe("baseElement", () => {
     el = document.body.appendChild(document.createElement("test-ch"));
     // attributes must be auto-mapped
     expect(el.parse("me")).toBe("me"); // just for coverage
-    el.setAttribute("disabled", "");
-    el.setAttribute("readonly", "true");
-    el.setAttribute("inline", "false");
-    el.setAttribute("label", "Hi");
-    el.setAttribute("fitEl", "true");
-    el.setAttribute("offset", "12");
+    el.setAttribute("w-disabled", "");
+    el.setAttribute("w-readonly", "true");
+    el.setAttribute("w-inline", "false");
+    el.setAttribute("w-label", "Hi");
+    el.setAttribute("w-fitEl", "true");
+    el.setAttribute("w-offset", "12");
     window.someTrg = el;
-    el.setAttribute("target", "window.someTrg");
+    el.setAttribute("w-target", "window.someTrg");
     await h.wait(1);
     expect(TestEl.observedAttributes).toMatchInlineSnapshot(`
       [
-        "disabled",
-        "readonly",
-        "inline",
-        "offset",
-        "label",
-        "target",
-        "fitel",
-        "somefunction",
+        "w-disabled",
+        "w-readonly",
+        "w-inline",
+        "w-offset",
+        "w-label",
+        "w-target",
+        "w-fitel",
+        "w-somefunction",
       ]
     `);
     expect(TestEl.observedOptions).toMatchInlineSnapshot(`null`);
@@ -295,30 +295,30 @@ describe("baseElement", () => {
         "readOnly": true,
         "someFunction": [Function],
         "target": <test-ch
-          disabled=""
-          fitel="true"
-          inline="false"
-          label="Hi"
-          offset="12"
-          readonly="true"
-          target="window.someTrg"
+          w-disabled=""
+          w-fitel="true"
+          w-inline="false"
+          w-label="Hi"
+          w-offset="12"
+          w-readonly="true"
+          w-target="window.someTrg"
         />,
       }
     `);
     // set wrong target
-    el.setAttribute("target", "window.wrongRef");
+    el.setAttribute("w-target", "window.wrongRef");
     expect(() => jest.advanceTimersByTime(1)).toThrow();
-    el.setAttribute("target", "wrongRef");
+    el.setAttribute("w-target", "wrongRef");
     expect(() => jest.advanceTimersByTime(1)).toThrow();
     // removing attribute rollbacks to default value
     jest.clearAllMocks();
-    el.removeAttribute("disabled");
-    el.removeAttribute("readonly");
-    el.removeAttribute("inline");
-    el.removeAttribute("label");
-    el.removeAttribute("fitEl");
-    el.removeAttribute("target");
-    el.removeAttribute("offset");
+    el.removeAttribute("w-disabled");
+    el.removeAttribute("w-readonly");
+    el.removeAttribute("w-inline");
+    el.removeAttribute("w-label");
+    el.removeAttribute("w-fitEl");
+    el.removeAttribute("w-target");
+    el.removeAttribute("w-offset");
     expect(onGotChanges).toBeCalledTimes(0); // called once after timeout
     expect(el.$options).toStrictEqual(TestEl.$defaults);
     await h.wait(1);
@@ -392,7 +392,7 @@ describe("baseElement", () => {
 
     // assgin wrong number
     const prev = el.$options.offset;
-    el.setAttribute("offset", "abc");
+    el.setAttribute("w-offset", "abc");
     expect(() => jest.advanceTimersByTime(1)).toThrow();
     expect(el.$options.offset).toBe(prev);
   });

@@ -76,13 +76,18 @@ declare global {
     interface JSXProps<T extends WUPFormElement>
       extends Omit<WUP.Base.JSXProps<T>, "autoSave">,
         WUP.Base.OnlyNames<Options> {
-      submitActions?: SubmitActions | number;
-      autoSave?: boolean | string;
-      /** @deprecated React override default behavior - use el.$options.autoFocus instead */
-      autoFocus?: boolean | "";
+      "w-submitActions"?: SubmitActions | number;
+      "w-autoSave"?: boolean | string;
+      "w-autoFocus"?: boolean | "";
+      "w-autoComplete"?: boolean | "";
+
+      /** @deprecated use [disabled] instead since related to CSS-styles */
+      "w-disabled"?: boolean | "";
       disabled?: boolean | "";
-      readOnly?: boolean | "";
-      autoComplete?: boolean | "";
+      /** @deprecated use [disabled] instead since related to CSS-styles */
+      "w-readonly"?: boolean | "";
+      readonly?: boolean | "";
+
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
       onChange?: never;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willSubmit') instead */
@@ -124,8 +129,8 @@ const formStore: WUPFormElement[] = [];
  *  btn.type = "submit";
  *  document.body.appendChild(form);
  *  // or HTML
- *  <wup-form autoComplete autoFocus>
- *    <wup-text name="email" />
+ *  <wup-form w-autocomplete w-autofocus>
+ *    <wup-text w-name="email" />
  *    <button type="submit">Submit</submit>
  *  </wup-form>;
  * @tutorial Troubleshooting/rules:
@@ -228,6 +233,12 @@ export default class WUPFormElement<
       controls.forEach((c) => c.$options.name && nestedProperty.set(prevModel, c.$options.name, c[prop]));
     }
     return prevModel;
+  }
+
+  static get observedAttributes(): Array<string> {
+    const a = super.observedAttributes;
+    a.push("disabled", "readonly"); // support for `readonly` & `w-readonly`
+    return a;
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */

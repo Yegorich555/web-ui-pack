@@ -47,7 +47,7 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
    }
    ```
 
-5. Type `<wup` to see suggestions (if it doesn't work reload VSCode). More details below
+5. Type `<wup w-` to see suggestions (if it doesn't work reload VSCode). More details below
 
 ## TODO
 
@@ -172,7 +172,7 @@ HTML, JSX, TSX
 ```html
 <button id="btn1">Target</button>
 <!-- You can skip pointing attribute 'target' if popup appended after target -->
-<wup-popup target="#btn1" placement="top-start">Some content here</wup-popup>
+<wup-popup w-target="#btn1" w-placement="top-start">Some content here</wup-popup>
 ```
 
 How to extend/override

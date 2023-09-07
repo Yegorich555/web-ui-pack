@@ -41,24 +41,24 @@ export default function DateControlView() {
         }}
       >
         <wup-date
-          name="date"
-          initValue="2022-03-01 23:50"
-          min="2016-01-02"
-          max="2034-05-01"
-          exclude="window.myDateExcludeDays"
-          startWith="day"
-          utc
-          validations="window.myDateValidations"
+          w-name="date"
+          w-initValue="2022-03-01 23:50"
+          w-min="2016-01-02"
+          w-max="2034-05-01"
+          w-exclude="window.myDateExcludeDays"
+          w-startWith="day"
+          w-utc
+          w-validations="window.myDateValidations"
         />
-        <wup-date name="empty" />
-        <wup-date name="another" label="Another format: yyyy-m-d" format="yyyy-m-d" />
-        <wup-date name="disabled" disabled />
-        <wup-date name="readonly" readOnly />
+        <wup-date w-name="empty" />
+        <wup-date w-name="another" w-label="Another format: yyyy-m-d" w-format="yyyy-m-d" />
+        <wup-date w-name="disabled" disabled />
+        <wup-date w-name="readonly" readonly />
         <wup-date //
-          name="saveUrl"
-          label="With saving to URL (see $options.storageKey & storage)"
-          storageKey
-          storage="url"
+          w-name="saveUrl"
+          w-label="With saving to URL (see $options.storageKey & storage)"
+          w-storageKey
+          w-storage="url"
         />
         <button type="submit">Submit</button>
       </wup-form>

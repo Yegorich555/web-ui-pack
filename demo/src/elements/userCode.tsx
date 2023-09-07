@@ -4,9 +4,9 @@
 import React, { useEffect, useState } from "react";
 import getUsedCssVars from "src/helpers/parseCssVars";
 import WUPBaseElement from "web-ui-pack/baseElement";
-import WUPBaseControl from "web-ui-pack/controls/baseControl";
 import { WUPFormElement, WUPPasswordControl, WUPRadioControl, WUPSwitchControl } from "web-ui-pack";
 import linkGit from "src/helpers/linkGit";
+import WUPBaseControl from "web-ui-pack/controls/baseControl";
 import styles from "./userCode.scss";
 import Code from "./code";
 import Tabs from "./tabs";
@@ -68,7 +68,7 @@ function renderHTMLCode(tag: string, customHTML: string[] | undefined): string |
     return "";
   }
 
-  const parsedAttrs: Array<{ name: string; value: string | null }> = [];
+  let parsedAttrs: Array<{ name: string; value: string | null }> = [];
   const attrs = el.attributes;
   for (let i = 0; i < attrs.length; ++i) {
     const name = attrs[i].nodeName;
@@ -77,19 +77,29 @@ function renderHTMLCode(tag: string, customHTML: string[] | undefined): string |
     }
   }
 
-  if (el instanceof WUPBaseControl || el instanceof WUPFormElement) {
-    parsedAttrs.push({ name: "disabled", value: "false" });
-    parsedAttrs.push({ name: "readonly", value: "false" });
-    parsedAttrs.push({ name: "autofocus", value: "false" });
-  }
+  const addUnique = (a: { name: string; value: string | null }) => {
+    if (!parsedAttrs.some((p) => p.name === a.name)) {
+      parsedAttrs.push(a);
+    }
+  };
+
   if (el instanceof WUPBaseControl) {
-    parsedAttrs.push({ name: "autocomplete", value: "off" });
-    parsedAttrs.push({ name: "storage", value: "local" });
-    parsedAttrs.push({ name: "skey", value: "false" });
+    addUnique({ name: "w-autocomplete", value: "off" });
+    addUnique({ name: "w-storage", value: "local" });
+    addUnique({ name: "w-skey", value: "false" });
   }
   if (el instanceof WUPSwitchControl || el instanceof WUPPasswordControl || el instanceof WUPRadioControl) {
-    parsedAttrs.push({ name: "reverse", value: "false" });
+    addUnique({ name: "w-reverse", value: "false" });
   }
+  if (el instanceof WUPBaseControl || el instanceof WUPFormElement) {
+    addUnique({ name: "w-autofocus", value: "false" });
+    addUnique({ name: "disabled", value: "false" });
+    addUnique({ name: "readonly", value: "false" });
+    parsedAttrs = parsedAttrs.filter((p) => p.name !== "filled");
+  }
+
+  // parsedAttrs.sort((a, b) => (a.name > b.name ? 1 : b.name > a.name ? -1 : 0));
+
   const parsedCode = `html
 <${tag}
   ${parsedAttrs.map((a) => a.name + (!a.value ? "" : `="${a.value}"`)).join("\n  ")}

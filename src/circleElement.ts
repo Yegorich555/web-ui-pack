@@ -78,15 +78,24 @@ declare global {
     }
     interface JSXProps<T = WUPCircleElement>
       extends WUP.Base.JSXProps<T>,
-        Omit<Partial<Options>, "hoverShowTimeout" | "hoverHideTimeout" | "items"> {
+        WUP.Base.OnlyNames<Omit<Options, "hoverShowTimeout" | "hoverHideTimeout" | "items">> {
+      "w-width"?: number;
+      "w-corner"?: number;
+      "w-back"?: boolean | "";
+      "w-from"?: number;
+      "w-to"?: number;
+      "w-min"?: number;
+      "w-max"?: number;
+      "w-space"?: number;
+      "w-minSize"?: number;
       /** Global reference to object with array
        * @see {@link Item}
        * @example
        * ```js
        * window.myItems = [...];
-       * <wup-circle items="window.myItems"></wup-circle>
+       * <wup-circle w-items="window.myItems"></wup-circle>
        * ``` */
-      items?: string;
+      "w-items"?: string;
     }
   }
 
@@ -105,15 +114,15 @@ declare global {
 /** Arc/circle chart based on SVG
  * @example
  * <wup-circle
- *   back="true"
- *   from="0"
- *   to="360"
- *   space="2"
- *   min="0"
- *   max="100"
- *   width="14"
- *   corner="0.25"
- *   items="window.circleItems"
+ *   w-back="true"
+ *   w-from="0"
+ *   w-to="360"
+ *   w-space="2"
+ *   w-min="0"
+ *   w-max="100"
+ *   w-width="14"
+ *   w-corner="0.25"
+ *   w-items="window.circleItems"
  *  ></wup-circle>
  * // or JS/TS
  * const el = document.createElement("wup-circle");

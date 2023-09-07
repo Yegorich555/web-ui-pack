@@ -85,23 +85,25 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
   h.baseTestComponent(() => document.createElement(tagName), {
     attrs: {
-      label: { value: "First Name" },
-      name: { value: "firstN" },
-      autocomplete: { value: true },
-      autofocus: { value: true },
+      "w-label": { value: "First Name" },
+      "w-name": { value: "firstN" },
+      "w-autocomplete": { value: true },
+      "w-autofocus": { value: true },
       disabled: { value: true, equalValue: "" },
+      "w-disabled": { value: true, equalValue: "", skip: true },
       readonly: { value: true, equalValue: "" },
-      validations: { value: { required: true } },
-      validatedebouncems: { value: 13 },
-      validationcase: { value: 1 },
-      validationrules: { skip: true },
-      validationshowall: { value: true },
-      clearactions: { value: 1 },
-      focusdebouncems: { value: 12 },
-      storagekey: { value: "strg" },
-      storage: { value: "session" },
+      "w-readonly": { value: true, equalValue: "", skip: true },
+      "w-validations": { value: { required: true } },
+      "w-validatedebouncems": { value: 13 },
+      "w-validationcase": { value: 1 },
+      "w-validationrules": { skip: true },
+      "w-validationshowall": { value: true },
+      "w-clearactions": { value: 1 },
+      "w-focusdebouncems": { value: 12 },
+      "w-storagekey": { value: "strg" },
+      "w-storage": { value: "session" },
 
-      initvalue: { skip: true }, // manual testing
+      "w-initvalue": { skip: true }, // manual testing
       ...cfg.attrs,
     },
   });
@@ -109,39 +111,39 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
   describe("$initValue", () => {
     test("attr [initvalue] vs $initValue", async () => {
       expect(el.$isReady).toBe(true);
-      el.setAttribute("initvalue", cfg.initValues[0].attrValue);
-      expect(el.getAttribute("initValue")).toStrictEqual(cfg.initValues[0].attrValue);
+      el.setAttribute("w-initvalue", cfg.initValues[0].attrValue);
+      expect(el.getAttribute("w-initvalue")).toStrictEqual(cfg.initValues[0].attrValue);
       await h.wait(1);
       expect(el.$initValue).toStrictEqual(cfg.initValues[0].value);
 
       el.$initValue = cfg.initValues[1].value;
       await h.wait(1);
-      expect(el.getAttribute("initvalue")).toBe(null);
+      expect(el.getAttribute("w-initvalue")).toBe(null);
       expect(el.$initValue).toStrictEqual(cfg.initValues[1].value);
 
-      el.setAttribute("initvalue", cfg.initValues[2].attrValue);
+      el.setAttribute("w-initvalue", cfg.initValues[2].attrValue);
       await h.wait(1);
       expect(el.$initValue).toStrictEqual(cfg.initValues[2].value);
-      expect(el.getAttribute("initvalue")).toStrictEqual(cfg.initValues[2].attrValue);
+      expect(el.getAttribute("w-initvalue")).toStrictEqual(cfg.initValues[2].attrValue);
 
-      el.removeAttribute("initvalue");
+      el.removeAttribute("w-initvalue");
       await h.wait(1);
-      expect(el.getAttribute("initvalue")).toBe(null);
+      expect(el.getAttribute("w-initvalue")).toBe(null);
       expect(el.$initValue).toStrictEqual(cfg.emptyInitValue);
 
       let prev = el.$initValue;
       jest.spyOn(el, "parse").mockImplementationOnce(() => {
         throw new Error("Test err");
       });
-      el.setAttribute("initvalue", "wrong value");
+      el.setAttribute("w-initvalue", "wrong value");
       expect(() => jest.advanceTimersByTime(1)).toThrow();
       await h.wait(1);
       expect(el.$initValue).toStrictEqual(prev);
 
-      el.setAttribute("initvalue", cfg.initValues[0].attrValue);
+      el.setAttribute("w-initvalue", cfg.initValues[0].attrValue);
       prev = el.$initValue;
       await h.wait(1);
-      el.setAttribute("initvalue", ""); // set empty value must return undefined
+      el.setAttribute("w-initvalue", ""); // set empty value must return undefined
       await h.wait(1);
       const isBool = typeof cfg.initValues[0].value === "boolean";
       expect(el.$initValue).toStrictEqual(isBool ? true : prev);
@@ -231,15 +233,15 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       jest.advanceTimersByTime(1);
       expect(el.$refInput.autocomplete).toBe(cfg.autoCompleteOff);
 
-      el.setAttribute("autocomplete", "false");
+      el.setAttribute("w-autocomplete", "false");
       jest.advanceTimersByTime(1);
       expect(el.$options.autoComplete).toBe(false);
 
-      el.setAttribute("autocomplete", "true");
+      el.setAttribute("w-autocomplete", "true");
       jest.advanceTimersByTime(1);
       expect(el.$options.autoComplete).toBe(true);
 
-      el.setAttribute("autocomplete", "email");
+      el.setAttribute("w-autocomplete", "email");
       jest.advanceTimersByTime(1);
       expect(el.$options.autoComplete).toBe("email");
     });
@@ -371,7 +373,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
     test("storageKey", async () => {
       const onThrowErr = jest.spyOn(WUPBaseControl.prototype, "throwError");
-      if (cfg.attrs?.storagekey?.skip || cfg.attrs?.storagekey === null) {
+      if (cfg.attrs?.["w-storagekey"]?.skip || cfg.attrs?.["w-storagekey"] === null) {
         return; // for password isn't allowed
       }
       // local storage
@@ -562,7 +564,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       test("via attr [validations]", () => {
         const vld = { required: true };
         (window as any)._testVld = vld;
-        el.setAttribute("validations", "_testVld");
+        el.setAttribute("w-validations", "_testVld");
         jest.advanceTimersByTime(1);
         expect((el as any).validations).toBe(vld);
 
@@ -581,7 +583,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
         (window as any)._testVld = undefined;
         (window as any)._testVld2 = undefined;
         const onErr = jest.spyOn(el, "throwError");
-        el.setAttribute("validations", "_testVld2");
+        el.setAttribute("w-validations", "_testVld2");
         expect(() => jest.advanceTimersByTime(1)).toThrow();
         expect(() => el.$validate()).not.toThrow(); // because key is pointed but value undefined
         expect(onErr).toBeCalled();

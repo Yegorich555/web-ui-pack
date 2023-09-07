@@ -174,40 +174,45 @@ declare global {
 
     interface JSXProps<C = WUPBaseControl> extends WUP.Base.JSXProps<C>, WUP.Base.OnlyNames<Options> {
       /** Default value in string/boolean/number representation (depends on `control.prototype.parse()`) */
-      initValue?: string | boolean | number;
-      label?: string;
-      name?: string;
-      /** @deprecated doesn't work directly with React; use `el.$options.autoFocus = true` instead */
-      autoFocus?: boolean;
-      autoComplete?: string | boolean;
+      "w-initValue"?: string | boolean | number;
+      "w-label"?: string;
+      "w-name"?: string;
+      "w-autoFocus"?: boolean;
+      "w-autoComplete"?: string | boolean;
+
+      /** @deprecated use [disabled] instead since related to CSS-styles */
+      "w-disabled"?: boolean | "";
       disabled?: boolean | "";
+      /** @deprecated use [disabled] instead since related to CSS-styles */
+      "w-readonly"?: boolean | "";
       readonly?: boolean | "";
-      clearActions?: ClearActions | number;
+
+      "w-clearActions"?: ClearActions | number;
       /** @deprecated use static `.$defaults.validationCase` instead */
-      validationCase?: never;
+      "w-validationCase"?: never;
       /** @deprecated use static `.$defaults.validationCase` instead */
-      focusDebounceMs?: never;
+      "w-focusDebounceMs"?: never;
       /** @deprecated use static `.$defaults.validationCase` instead */
-      validationRules?: never;
+      "w-validationRules"?: never;
       /** Rules enabled for current control (related to $defaults.validationRules);
        * * Point Global reference to object
        * @example
        * ```js
        * window.someRules = { required: true };
-       * <wup-text validations="window.someRules"></wup-text>
+       * <wup-text w-validations="window.someRules"></wup-text>
        * ```
        * @defaultValue [4,4] */
-      validations?: string;
-      validateDebounceMs?: number;
-      validationShowAll?: boolean | "";
-      storageKey?: boolean | string;
-      storage?: "local" | "session" | "url";
+      "w-validations"?: string;
+      "w-validateDebounceMs"?: number;
+      "w-validationShowAll"?: boolean | "";
+      "w-storageKey"?: boolean | string;
+      "w-storage"?: "local" | "session" | "url";
       /** @deprecated Use [required] for styling */
       readonly required?: "";
       /** @readonly Use [invalid] for styling */
       readonly invalid?: boolean;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
-      onChange?: never;
+      "w-onChange"?: never;
     }
   }
 }
@@ -410,7 +415,7 @@ export default abstract class WUPBaseControl<
 
   static get observedAttributes(): Array<string> {
     const a = super.observedAttributes;
-    a.push("initvalue");
+    a.push("w-initvalue", "disabled", "readonly"); // support for `readonly` & `w-readonly`
     return a;
   }
 
@@ -485,7 +490,7 @@ export default abstract class WUPBaseControl<
     needUpdate && this.setClearState();
     if (!(this as any)._noDelInitValueAttr) {
       this._isStopChanges = true;
-      this.removeAttribute("initvalue");
+      this.removeAttribute("w-initvalue");
       this._isStopChanges = false;
     }
   }
@@ -528,12 +533,16 @@ export default abstract class WUPBaseControl<
 
   /** Returns if related form or control disabled (true even if form.$options.disabled && !control.$options.disabled) */
   get $isDisabled(): boolean {
-    return this.$form?.$options.disabled || this._opts.disabled || false;
+    // @ts-expect-error
+    const o = this.$form?._opts;
+    return o?.disabled || this._opts.disabled || false;
   }
 
   /** Returns if related form or control readonly (true even if form.$options.readOnly && !control.$options.readOnly) */
   get $isReadOnly(): boolean {
-    return this.$form?.$options.readOnly || this._opts.readOnly || false;
+    // @ts-expect-error
+    const o = this.$form?._opts;
+    return o?.readOnly || this._opts.readOnly || false;
   }
 
   /** Returns if value is required - can't be undefined (depends on $options.validations.required) */
@@ -543,7 +552,9 @@ export default abstract class WUPBaseControl<
 
   /** Returns autoComplete name if related form or control option is enabled (and control.$options.autoComplete !== false ) */
   get $autoComplete(): string | false {
-    const af = this._opts.autoComplete ?? (this.$form?.$options.autoComplete || false);
+    // @ts-expect-error
+    const o = this.$form?._opts;
+    const af = this._opts.autoComplete ?? (o?.autoComplete || false);
     return (af === true ? this._opts.name : af) || false;
   }
 

@@ -39,16 +39,16 @@ export default function TextControlView() {
         }}
       >
         <wup-text
-          name="email"
-          label="Text control"
-          initValue="test@google.com"
-          validations="window.myTextValidations"
-          mask=""
-          maskholder=""
-          prefix=""
-          postfix=""
+          w-name="email"
+          w-label="Text control"
+          w-initValue="test@google.com"
+          w-validations="window.myTextValidations"
+          w-mask=""
+          w-maskholder=""
+          w-prefix=""
+          w-postfix=""
         />
-        <wup-text name="required" validations="myTextValidations2" />
+        <wup-text w-name="required" w-validations="myTextValidations2" />
         <wup-text
           ref={(el) => {
             if (el) {
@@ -64,9 +64,9 @@ export default function TextControlView() {
           }}
         />
         <wup-text
-          name="withoutClearButton"
-          label="Without clear button"
-          initValue="Use $options.clearButton"
+          w-name="withoutClearButton"
+          w-label="Without clear button"
+          w-initValue="Use $options.clearButton"
           ref={(el) => {
             if (el) {
               el.$options.clearButton = false;
@@ -78,20 +78,20 @@ export default function TextControlView() {
         />
         <wup-text
           class={styles.customIcon}
-          name="icons"
-          label="With custom icon as text (css wup-text>label:before & :after)"
+          w-name="icons"
+          w-label="With custom icon as text (css wup-text>label:before & :after)"
           // initValue="Use css wup-text>label:before & :after"
         />
-        <wup-text name="icons2" label="With custom icon as image" class={styles.customIcon2} />
+        <wup-text w-name="icons2" w-label="With custom icon as image" class={styles.customIcon2} />
         <wup-text
-          name="prefixPostfix"
-          label="With prefix & postfix ($options.prefix & .postfix)"
-          prefix="$ "
-          postfix=" USD"
-          initValue="1234"
+          w-name="prefixPostfix"
+          w-label="With prefix & postfix ($options.prefix & .postfix)"
+          w-prefix="$ "
+          w-postfix=" USD"
+          w-initValue="1234"
         />
         <wup-text
-          initValue="init value here"
+          w-initValue="init value here"
           ref={(el) => {
             if (el) {
               el.$options.name = "readonly";
@@ -99,20 +99,20 @@ export default function TextControlView() {
             }
           }}
         />
-        <wup-text name="disabled" disabled />
+        <wup-text w-name="disabled" disabled />
         <wup-text //
-          name="saveUrl"
-          label="With saving to URL (see $options.storageKey & storage)"
-          storageKey
-          storage="url"
+          w-name="saveUrl"
+          w-label="With saving to URL (see $options.storageKey & storage)"
+          w-storageKey
+          w-storage="url"
         />
         <section>
           <h3>Masked inputs</h3>
           <br />
           <wup-text
-            name="phone"
-            label="Phone number"
-            mask="+0 (000) 000-0000"
+            w-name="phone"
+            w-label="Phone number"
+            w-mask="+0 (000) 000-0000"
             // initValue="+1 (234) 567-8901"
             ref={(el) => {
               if (el) {
@@ -121,10 +121,10 @@ export default function TextControlView() {
             }}
           />
           <wup-text
-            name="ipaddr"
-            label="IPaddress"
-            mask="##0.##0.##0.##0"
-            maskholder="xxx.xxx.xxx.xxx"
+            w-name="ipaddr"
+            w-label="IPaddress"
+            w-mask="##0.##0.##0.##0"
+            w-maskholder="xxx.xxx.xxx.xxx"
             // initValue="123.4.5.67"
             ref={(el) => {
               if (el) {
@@ -133,13 +133,13 @@ export default function TextControlView() {
             }}
           />
           <wup-text
-            name="num"
-            label="With prefix/postfix & mask"
-            mask="##0"
-            maskholder="000"
-            prefix="$ "
-            postfix=" USD"
-            initValue="12"
+            w-name="num"
+            w-label="With prefix/postfix & mask"
+            w-mask="##0"
+            w-maskholder="000"
+            w-prefix="$ "
+            w-postfix=" USD"
+            w-initValue="12"
           />
           Features:
           <ul>

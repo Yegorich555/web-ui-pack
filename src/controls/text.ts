@@ -76,13 +76,13 @@ declare global {
     }
     interface Options<T = string, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPTextControl> extends WUP.BaseControl.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
-      debounceMs?: number;
-      selectOnFocus?: boolean | "";
-      clearButton?: boolean | "";
-      mask?: string;
-      maskholder?: string | false;
-      prefix?: string;
-      postfix?: string;
+      "w-debounceMs"?: number;
+      "w-selectOnFocus"?: boolean | "";
+      "w-clearButton"?: boolean | "";
+      "w-mask"?: string;
+      "w-maskholder"?: string | false;
+      "w-prefix"?: string;
+      "w-postfix"?: string;
     }
 
     interface GotInputEvent extends InputEvent {
@@ -115,7 +115,7 @@ declare global {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-text name="firstName" initvalue="Donny" validations="myValidations"/>
+    <wup-text w-name="firstName" w-initvalue="Donny" w-validations="myValidations"/>
   </wup-form>;
  * @tutorial innerHTML @example
  * <label>

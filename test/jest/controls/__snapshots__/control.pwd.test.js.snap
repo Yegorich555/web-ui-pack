@@ -684,7 +684,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-PWD {
           --ctrl-icon-img: var(--wup-icon-eye);
         }
-        WUP-PWD[reverse] {
+        WUP-PWD[w-reverse] {
           --ctrl-icon-img: var(--wup-icon-eye-off);
         }
         WUP-PWD input[type='password'] {
@@ -702,7 +702,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-PWD button[eye="off"] {
           --ctrl-icon-img: var(--wup-icon-eye-off);
         }
-        WUP-PWD[reverse] button[eye="off"] {
+        WUP-PWD[w-reverse] button[eye="off"] {
           --ctrl-icon-img: var(--wup-icon-eye);
         }
         @media (hover: hover) and (pointer: fine) {
@@ -759,26 +759,28 @@ exports[`control.pwd common tests snapshot of $defaults 2`] = `undefined`;
 
 exports[`control.pwd common tests snapshot of $defaults 3`] = `
 [
-  "autocomplete",
-  "autofocus",
-  "clearactions",
-  "clearbutton",
-  "debouncems",
   "disabled",
-  "focusdebouncems",
-  "initvalue",
-  "label",
-  "name",
-  "postfix",
-  "prefix",
   "readonly",
-  "reverse",
-  "selectonfocus",
-  "validatedebouncems",
-  "validationcase",
-  "validationrules",
-  "validations",
-  "validationshowall",
+  "w-autocomplete",
+  "w-autofocus",
+  "w-clearactions",
+  "w-clearbutton",
+  "w-debouncems",
+  "w-disabled",
+  "w-focusdebouncems",
+  "w-initvalue",
+  "w-label",
+  "w-name",
+  "w-postfix",
+  "w-prefix",
+  "w-readonly",
+  "w-reverse",
+  "w-selectonfocus",
+  "w-validatedebouncems",
+  "w-validationcase",
+  "w-validationrules",
+  "w-validations",
+  "w-validationshowall",
 ]
 `;
 

@@ -34,8 +34,8 @@ describe("control.radio", () => {
     ],
     validations: {},
     attrs: {
-      items: { value: getItems() },
-      reverse: { value: true, equalValue: "" },
+      "w-items": { value: getItems() },
+      "w-reverse": { value: true, equalValue: "" },
     },
     onCreateNew: (e) => (e.$options.items = getItems()),
     testReadonly: { true: (el) => expect(el).toMatchSnapshot(), false: (el) => expect(el).toMatchSnapshot() },
@@ -47,18 +47,18 @@ describe("control.radio", () => {
     el.$options.items = [{ value: "sss", text: "Ms" }];
     jest.advanceTimersByTime(1);
     expect(el.$options.items).toEqual([{ value: "sss", text: "Ms" }]);
-    expect(el.getAttribute("items")).toBeFalsy();
+    expect(el.getAttribute("w-items")).toBeFalsy();
 
     window.testItems = [{ value: 1, text: "Number 1" }];
-    el.setAttribute("items", "testItems");
+    el.setAttribute("w-items", "testItems");
     jest.advanceTimersByTime(1);
     expect(el.$options.items).toEqual([{ value: 1, text: "Number 1" }]);
-    expect(el.getAttribute("items")).toBe("testItems");
+    expect(el.getAttribute("w-items")).toBe("testItems");
 
     el.$options.items = [{ value: 33, text: "#33" }];
     jest.advanceTimersByTime(1);
     expect(el.$options.items).toEqual([{ value: 33, text: "#33" }]);
-    expect(el.getAttribute("items")).toBeFalsy();
+    expect(el.getAttribute("w-items")).toBeFalsy();
 
     el.$options.items = () => [{ value: 234, text: "Don" }]; // checking function
     jest.advanceTimersByTime(1);
@@ -83,7 +83,7 @@ describe("control.radio", () => {
 
     const prev = el.$options.items;
     const onErr = jest.spyOn(el, "throwError").mockImplementationOnce(() => {});
-    el.setAttribute("items", "missedGlobalKey");
+    el.setAttribute("w-items", "missedGlobalKey");
     jest.advanceTimersByTime(1);
     expect(el.$options.items).toStrictEqual(prev);
     expect(onErr.mock.lastCall[0]).toMatchInlineSnapshot(
@@ -160,19 +160,19 @@ describe("control.radio", () => {
   test("parsing $initValue", () => {
     const el = testEl;
     el.$initValue = 20;
-    el.setAttribute("initvalue", "");
+    el.setAttribute("w-initvalue", "");
     jest.advanceTimersByTime(1);
     expect(el.$initValue).toBe(undefined);
 
-    el.setAttribute("initvalue", "10");
+    el.setAttribute("w-initvalue", "10");
     jest.advanceTimersByTime(1);
     expect(el.$initValue).toBe(10);
 
-    el.setAttribute("initvalue", "333");
+    el.setAttribute("w-initvalue", "333");
     jest.advanceTimersByTime(1);
     expect(el.$initValue).toBe(undefined);
 
-    el.setAttribute("initvalue", "20");
+    el.setAttribute("w-initvalue", "20");
     jest.advanceTimersByTime(1);
     expect(el.$initValue).toBe(20);
 
@@ -185,9 +185,9 @@ describe("control.radio", () => {
     jest.advanceTimersByTime(1);
     h.unMockConsoleError();
 
-    el.setAttribute("initvalue", "");
+    el.setAttribute("w-initvalue", "");
     jest.advanceTimersByTime(1);
-    expect(el.getAttribute("initvalue")).toBe("");
+    expect(el.getAttribute("w-initvalue")).toBe("");
     expect(el.$initValue).toBe(null);
 
     // just for coverage
@@ -195,13 +195,13 @@ describe("control.radio", () => {
     jest.advanceTimersByTime(1);
     el.$initValue = undefined;
     expect(el.innerHTML).toMatchInlineSnapshot(`"<fieldset><legend><strong>Test Me</strong></legend></fieldset>"`);
-    el.setAttribute("initvalue", "10");
+    el.setAttribute("w-initvalue", "10");
     jest.advanceTimersByTime(1);
 
     const f = h.mockConsoleError();
     el.$initValue = 13;
     jest.advanceTimersByTime(1);
-    expect(el.hasAttribute("initvalue")).toBe(false);
+    expect(el.hasAttribute("w-initvalue")).toBe(false);
     expect(f).toBeCalled();
     h.unMockConsoleError();
 
@@ -271,8 +271,8 @@ describe("control.radio", () => {
 
     window.items = getItems();
     document.body.innerHTML = `
-      <wup-form autofocus>
-        <wup-radio initvalue="20" items="window.items"></wup-radio>
+      <wup-form w-autofocus>
+        <wup-radio w-initvalue="20" w-items="window.items"></wup-radio>
       </wup-form>
     `;
     jest.advanceTimersByTime(1);
@@ -281,14 +281,14 @@ describe("control.radio", () => {
         
             
         <wup-form
-          autofocus=""
           role="form"
+          w-autofocus=""
         >
           
               
           <wup-radio
-            initvalue="20"
-            items="window.items"
+            w-initvalue="20"
+            w-items="window.items"
           >
             <fieldset>
               <legend>

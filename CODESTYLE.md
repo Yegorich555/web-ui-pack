@@ -10,8 +10,8 @@ Code below shows case when developer desides to use WUPTextControl everywhere.
 // main.ts
 import { WUPTextControl } from "web-ui-pack";
 !WUPTextControl && console.error("!"); // required to avoid side-effects - optimization feature/issue
-// other files..tsx
-<wup-text name="email" />;
+// other files.tsx
+<wup-text w-name="email" />;
 // If remove <wup-text/> everywhere it's still imported in the build because inlcuded in `main.ts`
 ```
 

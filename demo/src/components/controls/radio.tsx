@@ -54,16 +54,16 @@ export default function RadioControlView() {
         }}
       >
         <wup-radio
-          name="radio"
-          label="Radio"
-          initValue={items[1].value.toString()}
-          items="storedRadioItems.items"
-          validations="window._someRadioValidations"
-          reverse={false}
-          autoFocus={false}
+          w-name="radio"
+          w-label="Radio"
+          w-initValue={items[1].value.toString()}
+          w-items="storedRadioItems.items"
+          w-validations="window._someRadioValidations"
+          w-reverse={false}
+          w-autoFocus={false}
         />
         <wup-radio
-          name="disabled"
+          w-name="disabled"
           disabled
           ref={(el) => {
             if (el) {
@@ -73,9 +73,9 @@ export default function RadioControlView() {
           }}
         />
         <wup-radio
-          initValue="13"
-          readOnly
-          name="readonly"
+          w-initValue="13"
+          w-name="readonly"
+          readonly
           ref={(el) => {
             if (el) {
               el.$options.items = items.slice(0, 4);
@@ -92,10 +92,10 @@ export default function RadioControlView() {
           }}
         />
         <wup-radio //
-          name="saveUrlRadio"
-          label="With saving to URL (see $options.storageKey & storage)"
-          storageKey
-          storage="url"
+          w-name="saveUrlRadio"
+          w-label="With saving to URL (see $options.storageKey & storage)"
+          w-storageKey
+          w-storage="url"
           ref={(el) => {
             if (el) {
               el.$options.items = items;

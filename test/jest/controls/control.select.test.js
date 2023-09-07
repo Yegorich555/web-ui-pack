@@ -43,18 +43,18 @@ describe("control.select", () => {
   testBaseControl({
     noInputSelection: true,
     attrs: {
-      mask: { value: "abc" },
-      maskholder: { value: "abc" },
-      prefix: { value: "$" },
-      postfix: { value: "USD" },
-      clearbutton: { value: true },
-      debouncems: { value: 5 },
-      selectonfocus: { value: true },
-      allownewvalue: { value: true },
-      showcase: { value: 1 },
-      readonlyinput: { value: true },
-      multiple: { value: true },
-      items: { value: getItems() },
+      "w-mask": { value: "abc" },
+      "w-maskholder": { value: "abc" },
+      "w-prefix": { value: "$" },
+      "w-postfix": { value: "USD" },
+      "w-clearbutton": { value: true },
+      "w-debouncems": { value: 5 },
+      "w-selectonfocus": { value: true },
+      "w-allownewvalue": { value: true },
+      "w-showcase": { value: 1 },
+      "w-readonlyinput": { value: true },
+      "w-multiple": { value: true },
+      "w-items": { value: getItems() },
     },
     initValues: [
       { attrValue: "10", value: 10 },
@@ -72,18 +72,18 @@ describe("control.select", () => {
       { value: null, text: "Default" },
       { value: 3, text: "Green" },
     ];
-    el.setAttribute("initvalue", "");
+    el.setAttribute("w-initvalue", "");
     await h.wait();
     expect(el.$initValue).toBe(null);
     expect(el.$value).toBe(null);
     expect(el.$refInput.value).toBe("Default");
-    expect(el.getAttribute("initvalue")).toBe("");
+    expect(el.getAttribute("w-initvalue")).toBe("");
 
     // checking when items empty
     h.mockConsoleError();
     el.$options.items = [];
-    el.removeAttribute("initvalue");
-    el.setAttribute("initvalue", ""); // to trigger set value again
+    el.removeAttribute("w-initvalue");
+    el.setAttribute("w-initvalue", ""); // to trigger set value again
     await h.wait();
     expect(el.$value).toBe(undefined);
     expect(el.$initValue).toBe(undefined);
@@ -92,7 +92,7 @@ describe("control.select", () => {
     delete el._cachedItems;
 
     const onErr = jest.spyOn(el, "throwError").mockImplementationOnce(() => {});
-    el.setAttribute("items", "");
+    el.setAttribute("w-items", "");
     jest.advanceTimersByTime(1);
     el.$initValue = undefined;
     expect(el.$options.items?.length).toBe(0);
@@ -105,7 +105,7 @@ describe("control.select", () => {
     document.body.innerHTML = "";
     el = document.body.appendChild(document.createElement(el.tagName));
     el.$options.items = new Promise((res) => setTimeout(() => res(getItems(), 100)));
-    el.setAttribute("initvalue", "10");
+    el.setAttribute("w-initvalue", "10");
     await h.wait();
     expect(el.$isPending).toBe(false);
     expect(el.$initValue).toBe(10);
@@ -1225,8 +1225,8 @@ describe("control.select", () => {
       el = document.body.appendChild(document.createElement("wup-select"));
       el.$options.items = getItems();
       window.initv = [20];
-      el.setAttribute("initvalue", "window.initv");
-      el.setAttribute("multiple", "");
+      el.setAttribute("w-initvalue", "window.initv");
+      el.setAttribute("w-multiple", "");
       await h.wait();
       expect(el.$options.multiple).toBe(true);
       expect(el.$initValue).toStrictEqual([20]);

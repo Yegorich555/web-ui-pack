@@ -43,10 +43,10 @@ describe("control.textarea", () => {
     validations: {},
     noInputSelection: true,
     attrs: {
-      mask: null,
-      maskholder: null,
-      prefix: null,
-      postfix: null,
+      "w-mask": null,
+      "w-maskholder": null,
+      "w-prefix": null,
+      "w-postfix": null,
     },
     // validationsSkip: [],
   });

@@ -113,7 +113,7 @@ declare global {
     }
 
     interface Attributes {
-      placement?:
+      "w-placement"?:
         | "top-start"
         | "top-middle"
         | "top-end"
@@ -131,7 +131,7 @@ declare global {
        * Popup defines target on show()
        *
        * attr `target` has hire priority than ref.options.target */
-      target?: string;
+      "w-target"?: string;
       /** Placement rule (relative to target); applied on show(). Call show() again to apply changed options */
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$show') instead */
       onShow?: never;
@@ -146,7 +146,7 @@ declare global {
       /** @readonly Hide state; use this to hide-animation */
       readonly hide?: "";
       /** Animation applied to popup */
-      animation?: "" | "default" | "drawer" | "stack";
+      "w-animation"?: "" | "default" | "drawer" | "stack";
     }
 
     interface AttachOptions extends Partial<Omit<Options, "target">> {

@@ -23,14 +23,14 @@ describe("control.number", () => {
       max: { set: 1000, failValue: 1001, trueValue: 1000 },
     },
     attrs: {
-      mask: { value: "abc" },
-      maskholder: { value: "abc" },
-      prefix: { value: "$" },
-      postfix: { value: "USD" },
-      clearbutton: { value: true },
-      debouncems: { value: 5 },
-      selectonfocus: { value: true },
-      format: { value: {} },
+      "w-mask": { value: "abc" },
+      "w-maskholder": { value: "abc" },
+      "w-prefix": { value: "$" },
+      "w-postfix": { value: "USD" },
+      "w-clearbutton": { value: true },
+      "w-debouncems": { value: 5 },
+      "w-selectonfocus": { value: true },
+      "w-format": { value: {} },
     },
     validationsSkip: ["_parse", "_mask"],
   });
@@ -119,15 +119,15 @@ describe("control.number", () => {
 
     // attr doesn't depend on format
     el.$options.format = { sep1000: "", sepDecimal: "," };
-    el.setAttribute("initvalue", "1234.5");
+    el.setAttribute("w-initvalue", "1234.5");
     await h.wait(1);
     expect(el.$initValue).toBe(1234.5);
 
-    el.setAttribute("initvalue", "");
+    el.setAttribute("w-initvalue", "");
     await h.wait(1);
     expect(el.$initValue).toBe(undefined);
 
-    el.setAttribute("initvalue", "ab123");
+    el.setAttribute("w-initvalue", "ab123");
     await h.wait(1);
     expect(el.$initValue).toBe(undefined);
 

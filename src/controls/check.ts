@@ -30,7 +30,7 @@ declare global {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-check name="accepted" label="Accept" initvalue="false"/>
+    <wup-check w-name="accepted" w-label="Accept" w-initvalue="false"/>
   </wup-form>;
  * @tutorial innerHTML @example
  * <label>
@@ -45,7 +45,7 @@ export default class WUPCheckControl<
   TOptions extends WUP.Check.Options = WUP.Check.Options,
   EventMap extends WUP.Check.EventMap = WUP.Check.EventMap
 > extends WUPSwitchControl<TOptions, EventMap> {
-  #ctr = this.constructor as typeof WUPCheckControl;
+  // #ctr = this.constructor as typeof WUPCheckControl;
 
   static get $styleRoot(): string {
     return `:root {

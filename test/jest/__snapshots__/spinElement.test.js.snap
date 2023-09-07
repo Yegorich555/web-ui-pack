@@ -94,10 +94,10 @@ exports[`spinElement common tests snapshot of $defaults 2`] = `undefined`;
 
 exports[`spinElement common tests snapshot of $defaults 3`] = `
 [
-  "fit",
-  "inline",
-  "overflowfade",
-  "overflowoffset",
-  "overflowtarget",
+  "w-fit",
+  "w-inline",
+  "w-overflowfade",
+  "w-overflowoffset",
+  "w-overflowtarget",
 ]
 `;

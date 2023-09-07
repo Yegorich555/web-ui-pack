@@ -69,11 +69,11 @@ afterEach(() => {
 describe("spinElement", () => {
   h.baseTestComponent(() => document.createElement("wup-spin"), {
     attrs: {
-      fit: { value: true },
-      inline: { value: true },
-      overflowfade: { value: true },
-      overflowoffset: { value: [2, 3] },
-      overflowtarget: { value: document.body },
+      "w-fit": { value: true },
+      "w-inline": { value: true },
+      "w-overflowfade": { value: true },
+      "w-overflowoffset": { value: [2, 3] },
+      "w-overflowtarget": { value: document.body },
     },
   });
 

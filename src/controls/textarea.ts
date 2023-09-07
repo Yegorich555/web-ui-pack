@@ -40,7 +40,7 @@ declare global {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-textarea name="textarea" validations="myValidations"/>
+    <wup-textarea w-name="textarea" w-validations="myValidations"/>
   </wup-form>;
  * @tutorial innerHTML @example
  * <label>

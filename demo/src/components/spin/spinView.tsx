@@ -47,7 +47,7 @@ export default function SpinView() {
         </small>
         <button className="btn" type="button" style={{ position: "relative" }}>
           Button with relative position
-          <wup-spin overflowFade="" fit="" inline={false} />
+          <wup-spin w-overflowFade="" w-fit="" w-inline={false} />
         </button>
       </section>
       <section>
@@ -98,12 +98,12 @@ export default function SpinView() {
           (use option <b>fit</b> OR css to fix: <b>{`button>wup-spin{ --spin-size: 14px; -spin-item-size: 6px}`}</b>)
         </small>
         <button type="submit" className={[styles.btnAlign, "btn"].join(" ")}>
-          <wup-spin inline />
+          <wup-spin w-inline />
           Pending...
         </button>
         <br />
         <button type="submit" className={[styles.btnAlign, "btn"].join(" ")}>
-          <wup-spin inline="" fit="" />
+          <wup-spin w-inline="" w-fit="" />
           With option 'fit'
         </button>
       </section>
@@ -115,54 +115,54 @@ export default function SpinView() {
         <Code code={codeTypes} />
         <div className={styles.types}>
           <div>
-            Ring <wup-spin inline />
-            <wup-spin inline class={styles.spin11} />
+            Ring <wup-spin w-inline />
+            <wup-spin w-inline class={styles.spin11} />
           </div>
           <div>
-            DualRing <wup-spin2 inline class={styles.spin20} />
-            <wup-spin2 inline class={styles.spin21} />
-            <wup-spin2 inline class={styles.spin22} />
+            DualRing <wup-spin2 w-inline class={styles.spin20} />
+            <wup-spin2 w-inline class={styles.spin21} />
+            <wup-spin2 w-inline class={styles.spin22} />
           </div>
           <div>
             TwinDualRing
-            <wup-spin7 inline class={styles.spin71} />
+            <wup-spin7 w-inline class={styles.spin71} />
           </div>
           <div>
-            Roller <wup-spin3 inline />
+            Roller <wup-spin3 w-inline />
           </div>
           <div>
             DotRoller
-            <wup-spin4 inline />
+            <wup-spin4 w-inline />
           </div>
           <div>
             DotRing
-            <wup-spin5 inline class={styles.spin51} />
-            <wup-spin5 inline class={styles.spin52} />
+            <wup-spin5 w-inline class={styles.spin51} />
+            <wup-spin5 w-inline class={styles.spin52} />
           </div>
 
           <div className={styles.types}>
             SliceRing
             <div>
-              <wup-spin6 inline />
-              <wup-spin6 inline class={styles.spin61} />
-              <wup-spin6 inline class={styles.spin62} />
-              <wup-spin6 inline class={styles.spin63} />
-              <wup-spin6 inline class={styles.spin64} />
-              <wup-spin6 inline class={styles.spin65} />
+              <wup-spin6 w-inline />
+              <wup-spin6 w-inline class={styles.spin61} />
+              <wup-spin6 w-inline class={styles.spin62} />
+              <wup-spin6 w-inline class={styles.spin63} />
+              <wup-spin6 w-inline class={styles.spin64} />
+              <wup-spin6 w-inline class={styles.spin65} />
             </div>
             <div>
-              <wup-spin6 inline class={styles["spin6-2"]} />
-              <wup-spin6 inline class={`${styles.spin61} ${styles["spin6-2"]}`} />
-              <wup-spin6 inline class={`${styles.spin62} ${styles["spin6-2"]}`} />
-              <wup-spin6 inline class={`${styles.spin63} ${styles["spin6-2"]}`} />
-              <wup-spin6 inline class={`${styles.spin64} ${styles["spin6-2"]}`} />
-              <wup-spin6 inline class={`${styles.spin65} ${styles["spin6-2"]}`} />
+              <wup-spin6 w-inline class={styles["spin6-2"]} />
+              <wup-spin6 w-inline class={`${styles.spin61} ${styles["spin6-2"]}`} />
+              <wup-spin6 w-inline class={`${styles.spin62} ${styles["spin6-2"]}`} />
+              <wup-spin6 w-inline class={`${styles.spin63} ${styles["spin6-2"]}`} />
+              <wup-spin6 w-inline class={`${styles.spin64} ${styles["spin6-2"]}`} />
+              <wup-spin6 w-inline class={`${styles.spin65} ${styles["spin6-2"]}`} />
             </div>
           </div>
 
           <div>
             Hash
-            <wup-spin8 inline class={styles.spin82} />
+            <wup-spin8 w-inline class={styles.spin82} />
           </div>
         </div>
       </section>

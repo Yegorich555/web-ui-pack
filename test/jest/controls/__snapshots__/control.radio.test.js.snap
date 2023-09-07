@@ -855,10 +855,10 @@ padding:0;}
       WUP-RADIO fieldset[aria-required="true"] input + span:after {
         content: "";
       }
-      WUP-RADIO[reverse] input + span {
+      WUP-RADIO[w-reverse] input + span {
         flex-direction: row-reverse;
       }
-      WUP-RADIO[reverse] input + span:after {
+      WUP-RADIO[w-reverse] input + span:after {
         margin-left: 0;
         margin-right: 0.5em;
       }
@@ -918,24 +918,26 @@ exports[`control.radio common tests snapshot of $defaults 2`] = `undefined`;
 
 exports[`control.radio common tests snapshot of $defaults 3`] = `
 [
-  "autocomplete",
-  "autofocus",
-  "clearactions",
   "disabled",
-  "focusdebouncems",
-  "initvalue",
-  "items",
-  "label",
-  "name",
   "readonly",
-  "reverse",
-  "storage",
-  "storagekey",
-  "validatedebouncems",
-  "validationcase",
-  "validationrules",
-  "validations",
-  "validationshowall",
+  "w-autocomplete",
+  "w-autofocus",
+  "w-clearactions",
+  "w-disabled",
+  "w-focusdebouncems",
+  "w-initvalue",
+  "w-items",
+  "w-label",
+  "w-name",
+  "w-readonly",
+  "w-reverse",
+  "w-storage",
+  "w-storagekey",
+  "w-validatedebouncems",
+  "w-validationcase",
+  "w-validationrules",
+  "w-validations",
+  "w-validationshowall",
 ]
 `;
 

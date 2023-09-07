@@ -69,24 +69,24 @@ describe("control.date", () => {
       exclude: { set: [new Date("2022-07-15")], failValue: new Date("2022-07-15"), trueValue: new Date("2022-07-16") },
     },
     attrs: {
-      prefix: { value: "$" },
-      postfix: { value: "USD" },
-      clearbutton: { value: true },
-      debouncems: { value: 5 },
-      selectonfocus: { value: true },
-      readonlyinput: { value: true },
-      showcase: { value: 1 },
+      "w-prefix": { value: "$" },
+      "w-postfix": { value: "USD" },
+      "w-clearbutton": { value: true },
+      "w-debouncems": { value: 5 },
+      "w-selectonfocus": { value: true },
+      "w-readonlyinput": { value: true },
+      "w-showcase": { value: 1 },
 
-      mask: { value: "#0-#0-0000", nullValue: "0000-00-00" },
-      maskholder: { value: "dd-mm-yyyy", nullValue: "YYYY-MM-DD" },
-      format: { value: "dd-mm-yyyy", nullValue: "yyyy-mm-dd" },
+      "w-mask": { value: "#0-#0-0000", nullValue: "0000-00-00" },
+      "w-maskholder": { value: "dd-mm-yyyy", nullValue: "YYYY-MM-DD" },
+      "w-format": { value: "dd-mm-yyyy", nullValue: "yyyy-mm-dd" },
 
-      utc: { value: true },
-      min: { value: "2022-05-20", parsedValue: new Date("2022-05-20") },
-      max: { value: "2022-05-21", parsedValue: new Date("2022-05-21") },
-      exclude: { value: [new Date("2009-02-06")] },
-      startwith: { skip: true }, // tested manually
-      firstweekday: { value: 1 },
+      "w-utc": { value: true },
+      "w-min": { value: "2022-05-20", parsedValue: new Date("2022-05-20") },
+      "w-max": { value: "2022-05-21", parsedValue: new Date("2022-05-21") },
+      "w-exclude": { value: [new Date("2009-02-06")] },
+      "w-startwith": { skip: true }, // tested manually
+      "w-firstweekday": { value: 1 },
     },
     validationsSkip: ["_parse", "_mask"],
   });
@@ -133,7 +133,7 @@ describe("control.date", () => {
     test("attr [startWith]", async () => {
       const set = async (s) => {
         el.remove();
-        el.setAttribute("startwith", s);
+        el.setAttribute("w-startwith", s);
         document.body.appendChild(el);
         await h.wait(1);
         el.focus();
@@ -190,7 +190,7 @@ describe("control.date", () => {
 
     test("utc", async () => {
       expect(el.$options.utc).toBe(true);
-      el.setAttribute("min", "2022-10-15");
+      el.setAttribute("w-min", "2022-10-15");
       el.$options.utc = false;
       await h.wait(1);
       expect(el.$options.min.valueOf()).toBe(new Date("2022-10-15T00:00").valueOf()); // parse must be in local time
@@ -199,7 +199,7 @@ describe("control.date", () => {
       expect(el.$refInput.value).toBe("2022-10-15"); // just for coverage
 
       const prev = el.$options.min;
-      el.setAttribute("min", "abc");
+      el.setAttribute("w-min", "abc");
       expect(() => jest.advanceTimersByTime(1)).toThrow();
       await h.wait(1);
       expect(el.$options.min).toBe(prev);

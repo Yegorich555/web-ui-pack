@@ -30,27 +30,27 @@ export default function SwitchControlView() {
         }}
       >
         <wup-switch //
-          name="switch"
-          label="Switch"
-          initValue={false}
-          reverse={false}
+          w-name="switch"
+          w-label="Switch"
+          w-initValue={false}
+          w-reverse={false}
         />
-        <wup-switch label="Very very very incredible long label to check if it has ellipsis rule and it works as expected" />
-        <wup-switch name="reversed" reverse="" />
+        <wup-switch w-label="Very very very incredible long label to check if it has ellipsis rule and it works as expected" />
+        <wup-switch w-name="reversed" w-reverse="" />
         <wup-switch
-          name="reversed2"
-          reverse=""
-          label="Very very very incredible long label to check if it has ellipsis rule and it works as expected"
+          w-name="reversed2"
+          w-reverse=""
+          w-label="Very very very incredible long label to check if it has ellipsis rule and it works as expected"
         />
         {/* otherwise in React inline [defaultChecked] doesn't work */}
-        <wup-switch name="defaultChecked" ref={(el) => el?.setAttribute("defaultChecked", "")} />
-        <wup-switch name="disabled" disabled />
-        <wup-switch name="readonly" readOnly initValue />
+        <wup-switch w-name="defaultChecked" ref={(el) => el?.setAttribute("defaultChecked", "")} />
+        <wup-switch w-name="disabled" disabled />
+        <wup-switch w-name="readonly" readonly w-initValue />
         <wup-switch //
-          name="saveUrlSwitch"
-          label="With saving to URL (see $options.storageKey & storage)"
-          storageKey
-          storage="url"
+          w-name="saveUrlSwitch"
+          w-label="With saving to URL (see $options.storageKey & storage)"
+          w-storageKey
+          w-storage="url"
         />
         <button type="submit">Submit</button>
       </wup-form>

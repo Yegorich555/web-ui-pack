@@ -127,7 +127,7 @@ export default abstract class WUPBaseElement<
   /** Array of attribute names to listen for changes
    * @defaultValue every option from $defaults (in lowerCase) */
   static get observedAttributes(): Array<string> {
-    return (this.observedOptions || Object.keys(this.$defaults)).map((k) => k.toLowerCase());
+    return (this.observedOptions || Object.keys(this.$defaults)).map((k) => `w-${k.toLowerCase()}`);
   }
 
   /** Global default options applied to every element. Change it to configure default behavior OR use `element.$options` to change per item */
@@ -343,7 +343,7 @@ export default abstract class WUPBaseElement<
   protected gotOptionsChanged(e: WUP.Base.OptionEvent): void {
     this._isStopChanges = true;
     e.props.forEach((p) => {
-      this.removeAttribute(p);
+      this.removeAttribute(`w-${p}`);
     }); // remove related attributes otherwise impossible to override
     this.gotChanges(e.props);
     this._isStopChanges = false;
@@ -378,6 +378,9 @@ export default abstract class WUPBaseElement<
   #attrChanged?: string[];
   /** Called when any of observedAttributes is changed */
   protected gotAttributeChanged(name: string, value: string | null): void {
+    if (name.startsWith("w-")) {
+      name = name.substring(2);
+    }
     // WARN: observedAttribute must return same colelction as mappedAttributes
     let map = allMappedAttrs.get(this.#ctr); // try to get from cache first
     if (!map) {
@@ -606,7 +609,8 @@ declare global {
       [P in keyof T]?: T[P] extends number | boolean | string | undefined ? T[P] : string;
     };
     type OnlyNames<T> = {
-      [P in keyof T]?: unknown;
+      // [K in keyof T]?: never;
+      [K in keyof T as K extends string ? `w-${K}` : never]?: unknown; // watchfix https://github.com/microsoft/TypeScript/issues/50715
     };
     type OptionEvent<T extends Record<string, any> = Record<string, any>> = {
       props: Array<Extract<keyof T, string>>;
@@ -629,5 +633,4 @@ declare global {
   }
 }
 
-// todo change all attrs to startsWith '$...' otherwise user can't use attrs
 // NiceToHave: HTML attrs-events like 'onsubmit' & 'onchange'

@@ -41,22 +41,22 @@ export default function CalendarControlView() {
         }}
       >
         <wup-calendar
-          name="calendar"
-          initValue="2022-03-01 23:50"
-          min="2016-01-02"
-          max="2034-05-01"
-          exclude="window.myCalendarExcludeDays"
-          startWith="day"
-          utc
-          validations="window.myCalendarValidations"
+          w-name="calendar"
+          w-initValue="2022-03-01 23:50"
+          w-min="2016-01-02"
+          w-max="2034-05-01"
+          w-exclude="window.myCalendarExcludeDays"
+          w-startWith="day"
+          w-utc
+          w-validations="window.myCalendarValidations"
         />
-        <wup-calendar name="disabled" label="Disabled" disabled utc startWith="1990-01-01" />
-        <wup-calendar name="readonly" label="Readonly" readOnly utc />
+        <wup-calendar w-name="disabled" w-label="Disabled" disabled w-utc w-startWith="1990-01-01" />
+        <wup-calendar w-name="readonly" w-label="Readonly" readonly w-utc />
         <wup-calendar //
-          name="saveUrlClnd"
-          label="With saving to URL (see $options.storageKey & storage)"
-          storageKey
-          storage="url"
+          w-name="saveUrlClnd"
+          w-label="With saving to URL (see $options.storageKey & storage)"
+          w-storageKey
+          w-storage="url"
         />
         <button type="submit">Submit</button>
       </wup-form>

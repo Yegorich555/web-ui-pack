@@ -50,22 +50,22 @@ declare global {
     interface Options<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPTimeControl> extends WUP.BaseCombo.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       /** Default value in format hh:mm or hh:mm a */
-      initValue?: string;
-      format?: string;
-      step?: number;
-      menuButtonsOff?: boolean | "";
+      "w-initValue"?: string;
+      "w-format"?: string;
+      "w-step"?: number;
+      "w-menuButtonsOff"?: boolean | "";
       /** User can't select date less than min; format hh:mm */
-      min?: string;
+      "w-min"?: string;
       /** User can't select date more than max; format hh:mm */
-      max?: string;
+      "w-max"?: string;
       /** Points that user can't choose
       /** Global reference to object with array
        * @example
        * ```js
        * window.exclude = [new WUPTimeObject("02:30"), ...];
-       * <wup-time exclude="window.exclude"></wup-time>
+       * <wup-time w-exclude="window.exclude"></wup-time>
        * ``` */
-      exclude?: string;
+      "w-exclude"?: string;
     }
 
     interface MenuListElement extends HTMLElement {
@@ -102,7 +102,7 @@ declare global {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-time name="time" initvalue="22:15" min="01:05" max="23:00"/>
+    <wup-time w-name="time" w-initvalue="22:15" w-min="01:05" w-max="23:00"/>
   </wup-form>; */
 export default class WUPTimeControl<
   ValueType extends WUPTimeObject = WUPTimeObject,

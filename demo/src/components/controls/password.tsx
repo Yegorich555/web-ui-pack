@@ -41,13 +41,10 @@ export default function PasswordControlView() {
         }}
       >
         <wup-pwd
-          name="pwd"
-          label="Password"
-          initValue="someValue"
-          autoComplete="off"
-          autoFocus={false}
-          validations="window._somePasswordValidations"
-          reverse={false}
+          w-name="pwd"
+          w-label="Password"
+          w-initValue="someValue"
+          w-validations="window._somePasswordValidations"
           ref={(el) => {
             if (el) {
               el.$options.validationShowAll = true;
@@ -55,20 +52,20 @@ export default function PasswordControlView() {
             }
           }}
         />
-        <wup-pwd name="required" validations="myPasswordValidations" />
+        <wup-pwd w-name="required" w-validations="myPasswordValidations" />
         <wup-pwd
-          name="withoutClearButton"
+          w-name="withoutClearButton"
           ref={(el) => {
             if (el) {
               el.$options.clearButton = false;
             }
           }}
         />
-        <wup-pwd name="disabled" disabled />
-        <wup-pwd label="Reversed button eye" name="reversed" reverse initValue="someValue-ForReversed" />
+        <wup-pwd w-name="disabled" disabled />
+        <wup-pwd w-label="Reversed button eye" w-name="reversed" w-reverse w-initValue="someValue-ForReversed" />
         <wup-pwd
-          label="Confirm password"
-          name="confirm"
+          w-label="Confirm password"
+          w-name="confirm"
           ref={(el) => {
             if (el) {
               el.$options.validations = { confirm: true };

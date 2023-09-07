@@ -14,7 +14,7 @@ declare global {
     }
     interface Options<T = boolean, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPSwitchControl> extends WUP.BaseControl.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
-      reverse?: boolean | "";
+      "w-reverse"?: boolean | "";
       /** InitValue for control @deprecated use `initValue` instead */
       defaultChecked?: boolean;
     }
@@ -42,7 +42,7 @@ declare global {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-switch name="isDarkMode" label="Dark Mode" initvalue="false"/>
+    <wup-switch w-name="isDarkMode" w-label="Dark Mode" w-initvalue="false"/>
   </wup-form>;
  * @tutorial innerHTML @example
  * <label>
@@ -122,14 +122,14 @@ export default class WUPSwitchControl<
         background: var(--ctrl-switch-on);
         left: calc(100% - var(--ctrl-switch-size-w) + var(--ctrl-switch-size-spot) + 1px);
       }
-      :host[reverse] label {
+      :host[w-reverse] label {
         flex-direction: row-reverse;
       }
-      :host[reverse] label>span {
+      :host[w-reverse] label>span {
         margin-left: 0;
         margin-right: 0.5em;
       }
-      :host[reverse] label>strong {
+      :host[w-reverse] label>strong {
         margin-right: auto;
       }
       @media not all and (prefers-reduced-motion) {
@@ -209,7 +209,7 @@ export default class WUPSwitchControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Switch.Options | any> | null): void {
     super.gotChanges(propsChanged as any);
-    this.setAttr("reverse", this._opts.reverse, true);
+    this.setAttr("w-reverse", this._opts.reverse, true);
   }
 
   override gotFormChanges(propsChanged: Array<keyof WUP.Form.Options> | null): void {

@@ -28,7 +28,7 @@ declare global {
       extends Omit<WUP.Text.JSXProps<C>, "mask" | "maskholder" | "prefix" | "postfix"> {
       /** Reversed-style for button-eye
        * @defaultValue false */
-      reverse?: boolean | string;
+      "w-reverse"?: boolean | string;
     }
   }
 
@@ -66,8 +66,8 @@ declare global {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-pwd name="password" validations="myValidations"/>
-    <wup-pwd name="passwordConfirm" validations="myValidations2"/>
+    <wup-pwd w-name="password" w-validations="myValidations"/>
+    <wup-pwd w-name="passwordConfirm" w-validations="myValidations2"/>
   </wup-form>;
  * @tutorial innerHTML @example
  * <label>
@@ -100,7 +100,7 @@ export default class WUPPasswordControl<
         :host {
           --ctrl-icon-img: var(--wup-icon-eye);
         }
-        :host[reverse] {
+        :host[w-reverse] {
           --ctrl-icon-img: var(--wup-icon-eye-off);
         }
         :host input[type='password'] {
@@ -118,7 +118,7 @@ export default class WUPPasswordControl<
         :host button[eye="off"] {
           --ctrl-icon-img: var(--wup-icon-eye-off);
         }
-        :host[reverse] button[eye="off"] {
+        :host[w-reverse] button[eye="off"] {
           --ctrl-icon-img: var(--wup-icon-eye);
         }
         @media (hover: hover) and (pointer: fine) {
@@ -218,7 +218,7 @@ export default class WUPPasswordControl<
     // it can be ignored by browsers. To fix > https://stackoverflow.com/questions/2530/how-do-you-disable-browser-autocomplete-on-web-form-field-input-tags
     // https://stackoverflow.com/questions/11708092/detecting-browser-autofill
 
-    this.setAttr("reverse", this._opts.reverse, true);
+    this.setAttr("w-reverse", this._opts.reverse, true);
   }
 
   protected override gotKeyDown(e: KeyboardEvent): void {
@@ -241,3 +241,4 @@ rr = undefined;
 customElements.define(tagName, WUPPasswordControl);
 
 // manual testcase: form with email+password ignores autocomplete: "off" if previously it was saved
+// todo disable css-maxSize for [error] when focus lost

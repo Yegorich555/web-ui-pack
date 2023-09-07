@@ -70,28 +70,28 @@ declare global {
     interface Options<T = Date, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPCalendarControl> extends WUP.BaseControl.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       /** Default value in strict format yyyy-MM-dd hh:mm:ss.fff */
-      initValue?: string;
-      firstWeekDay?: number;
-      utc?: boolean | "";
+      "w-initValue"?: string;
+      "w-firstWeekDay"?: number;
+      "w-utc"?: boolean | "";
       /** Picker that must be rendered at first; if undefined & isEmpty - year, otherwise - day;
        * @tutorial
        * * point "2012" to start from year2012
        * * point "2012-05" to start from month5 year2012
        * * point "2012-05-02" to start from day2 month5 year2012
        * * shows picker according to pointed but range according to $value ($value has higher priority then pointed date here) */
-      startWith?: "year" | "month" | "day" | string;
+      "w-startWith"?: "year" | "month" | "day" | string;
       /** User can't select date less than min; format yyyy-MM-dd */
-      min?: string;
+      "w-min"?: string;
       /** User can't select date more than max; format yyyy-MM-dd  */
-      max?: string;
+      "w-max"?: string;
       /** Dates that user can't choose
       /** Global reference to object with array
        * @example
        * ```js
        * window.exclude = [...];
-       * <wup-calendar exclude="window.exclude"></wup-calendar>
+       * <wup-calendar w-exclude="window.exclude"></wup-calendar>
        * ``` */
-      exclude?: string;
+      "w-exclude"?: string;
     }
   }
 
@@ -122,7 +122,7 @@ const add: <K extends keyof HTMLElementTagNameMap>(el: HTMLElement, tagName: K) 
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-calendar name="dateOfBirhday" utc initvalue="1990-10-24" min="1930-01-01" max="2010-01-01"/>
+    <wup-calendar w-name="dateOfBirhday" w-utc w-initvalue="1990-10-24" w-min="1930-01-01" w-max="2010-01-01"/>
   </wup-form>;
  */
 export default class WUPCalendarControl<
@@ -1037,7 +1037,7 @@ export default class WUPCalendarControl<
   gotChangesSharable(): void {
     this._opts.firstWeekDay ??= (this.constructor as typeof WUPCalendarControl).$defaults.firstWeekDay;
 
-    const attr = this.getAttribute("startwith");
+    const attr = this.getAttribute("w-startwith");
     if (attr != null) {
       // prettier-ignore
       switch (attr.toLowerCase()) {

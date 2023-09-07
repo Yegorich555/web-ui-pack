@@ -413,14 +413,14 @@ padding:0; }
         background: var(--ctrl-switch-on);
         left: calc(100% - var(--ctrl-switch-size-w) + var(--ctrl-switch-size-spot) + 1px);
       }
-      WUP-CHECK[reverse] label {
+      WUP-CHECK[w-reverse] label {
         flex-direction: row-reverse;
       }
-      WUP-CHECK[reverse] label&gt;span {
+      WUP-CHECK[w-reverse] label&gt;span {
         margin-left: 0;
         margin-right: 0.5em;
       }
-      WUP-CHECK[reverse] label&gt;strong {
+      WUP-CHECK[w-reverse] label&gt;strong {
         margin-right: auto;
       }
       @media not all and (prefers-reduced-motion) {
@@ -504,24 +504,26 @@ exports[`control.check common tests snapshot of $defaults 2`] = `undefined`;
 
 exports[`control.check common tests snapshot of $defaults 3`] = `
 [
-  "autocomplete",
-  "autofocus",
-  "clearactions",
   "defaultchecked",
   "disabled",
-  "focusdebouncems",
-  "initvalue",
-  "label",
-  "name",
   "readonly",
-  "reverse",
-  "storage",
-  "storagekey",
-  "validatedebouncems",
-  "validationcase",
-  "validationrules",
-  "validations",
-  "validationshowall",
+  "w-autocomplete",
+  "w-autofocus",
+  "w-clearactions",
+  "w-disabled",
+  "w-focusdebouncems",
+  "w-initvalue",
+  "w-label",
+  "w-name",
+  "w-readonly",
+  "w-reverse",
+  "w-storage",
+  "w-storagekey",
+  "w-validatedebouncems",
+  "w-validationcase",
+  "w-validationrules",
+  "w-validations",
+  "w-validationshowall",
 ]
 `;
 

@@ -75,12 +75,12 @@ export default function SelectControlView() {
         }}
       >
         <wup-select
-          items="window.inputSelect.items"
-          name="select"
-          label="Select"
-          initValue={items[items.length - 3].value.toString()}
-          multiple={false}
-          validations="window._someSelectValidations"
+          w-items="window.inputSelect.items"
+          w-name="select"
+          w-label="Select"
+          w-initValue={items[items.length - 3].value.toString()}
+          w-multiple={false}
+          w-validations="window._someSelectValidations"
           ref={(el) => {
             if (el) {
               // el.$options.autoFocus = true;
@@ -88,10 +88,10 @@ export default function SelectControlView() {
           }}
         />
         <wup-select
-          name="multiple"
-          initValue="window.inputSelect.initArr"
-          items="window.inputSelect.items"
-          multiple
+          w-name="multiple"
+          w-initValue="window.inputSelect.initArr"
+          w-items="window.inputSelect.items"
+          w-multiple
           ref={(el) => {
             if (el) {
               el.$options.allowNewValue = true;
@@ -109,7 +109,7 @@ export default function SelectControlView() {
           }}
         />
         <wup-select
-          initValue={13}
+          w-initValue={13}
           ref={(el) => {
             if (el) {
               el.$options.name = "customSpin";
@@ -156,7 +156,7 @@ export default function SelectControlView() {
           }}
         />
         <wup-select
-          initValue="13"
+          w-initValue="13"
           ref={(el) => {
             if (el) {
               el.$options.name = "withoutClearButton";
@@ -166,7 +166,7 @@ export default function SelectControlView() {
           }}
         />
         <wup-select
-          initValue="14"
+          w-initValue="14"
           ref={(el) => {
             if (el) {
               el.$options.name = "allowNewValue";
@@ -177,10 +177,10 @@ export default function SelectControlView() {
           }}
         />
         <wup-select //
-          name="saveUrlSelect"
-          label="With saving to URL (see $options.storageKey & storage)"
-          storageKey
-          storage="url"
+          w-name="saveUrlSelect"
+          w-label="With saving to URL (see $options.storageKey & storage)"
+          w-storageKey
+          w-storage="url"
           ref={(el) => {
             if (el) {
               el.$options.items = items;

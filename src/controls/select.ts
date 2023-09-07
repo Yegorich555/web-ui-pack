@@ -59,11 +59,11 @@ declare global {
        * @example
        * ```js
        * window.myItems = [...];
-       * <wup-select items="window.myItems"></wup-select>
+       * <wup-select w-items="window.myItems"></wup-select>
        * ``` */
-      items?: string;
-      allowNewValue?: boolean | "";
-      multiple?: boolean | "";
+      "w-items"?: string;
+      "w-allowNewValue"?: boolean | "";
+      "w-multiple"?: boolean | "";
     }
   }
 
@@ -94,7 +94,7 @@ declare global {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-select name="gender" initvalue="3" validations="myValidations" items="myDropdownItems" />
+    <wup-select w-name="gender" w-initvalue="3" w-validations="myValidations" w-items="myDropdownItems" />
   </wup-form>;
  * @tutorial innerHTML @example
  * <label>
@@ -107,7 +107,7 @@ declare global {
  *      <ul>
  *          <li>Item 1</li>
  *          <li>Item 2</li>
- *          // etc/
+ *          // etc. /
  *      </ul>
  *   </wup-popup>
  * </label>

@@ -23,27 +23,27 @@ declare global {
       overflowTarget: HTMLElement | "auto";
     }
     interface JSXProps<T extends WUPSpinElement> extends WUP.Base.JSXProps<T>, WUP.Base.OnlyNames<Options> {
-      inline?: boolean | "";
-      fit?: boolean | "" | "auto";
+      "w-inline"?: boolean | "";
+      "w-fit"?: boolean | "" | "auto";
       /** Virtual padding of parentElement [top, right, bottom, left] or [top/bottom, right/left] in px;
        * * Point Global reference to object with array
        * @example
        * ```js
        * window.someObj = [...];
-       * <wup-spin overflowOffset="window.someObj"></wup-spin>
+       * <wup-spin w-overflowoffset="window.someObj"></wup-spin>
        * ```
        * @defaultValue [4,4] */
-      overflowOffset?: string;
-      overflowFade?: boolean | "";
+      "w-overflowOffset"?: string;
+      "w-overflowFade"?: boolean | "";
       /** Anchor element that need to oveflow by spinner
        * * Point Global reference to object with array
        * @example
        * ```js
        * window.someObj = document.body;
-       * <wup-spin items="window.someObj"></wup-spin>
+       * <wup-spin w-items="window.someObj"></wup-spin>
        * ```
        * @defaultValue `auto`: parentElement */
-      overflowTarget?: string; // NiceToHave: point querySelector like with popup[target]
+      "w-overflowTarget"?: string; // NiceToHave: point querySelector like with popup[target]
     }
   }
 
@@ -76,11 +76,11 @@ declare global {
  * ```html
  * <button> Loading...
  *  <!-- Default; it's equal to <wup-spin></wup-spin>-->
- *  <wup-spin inline="false" fit="true" overflowfade="true"></wup-spin>
+ *  <wup-spin w-inline="false" w-fit="true" w-overflowfade="true"></wup-spin>
  *  <!-- Inline + fit to parent -->
- *  <wup-spin inline fit></wup-spin>
- *  <!-- OR; it's equal to <wup-spin inline="false" fit="true" overflowfade="false"></wup-spin> -->
- *  <wup-spin overflowfade="false"></wup-spin>
+ *  <wup-spin w-inline w-fit></wup-spin>
+ *  <!-- OR; it's equal to <wup-spin w-inline="false" w-fit="true" w-overflowfade="false"></wup-spin> -->
+ *  <wup-spin w-overflowfade="false"></wup-spin>
  * </button>
  * ``` */
 export default class WUPSpinElement<

@@ -43,10 +43,10 @@ declare global {
        * @example
        * ```js
        * window.format = {};
-       * <wup-number items="window.format"></wup-number>
+       * <wup-number w-items="window.format"></wup-number>
        * ```
        * @defaultValue no-decimal and separators from localeInfo */
-      format?: string; // NiceToHave: parse from string
+      "w-format"?: string; // NiceToHave: parse from string
     }
   }
   interface HTMLElementTagNameMap {
@@ -80,7 +80,7 @@ abstract class TextAnyControl<
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-num name="number" validations="myValidations"/>
+    <wup-num w-name="number" w-validations="myValidations"/>
   </wup-form>;
  * @see {@link WUPTextControl} */
 export default class WUPNumberControl<

@@ -105,17 +105,17 @@ exports[`circleElement common tests snapshot of $defaults 2`] = `undefined`;
 
 exports[`circleElement common tests snapshot of $defaults 3`] = `
 [
-  "back",
-  "corner",
-  "from",
-  "hoverhidetimeout",
-  "hovershowtimeout",
-  "items",
-  "max",
-  "min",
-  "minsize",
-  "space",
-  "to",
-  "width",
+  "w-back",
+  "w-corner",
+  "w-from",
+  "w-hoverhidetimeout",
+  "w-hovershowtimeout",
+  "w-items",
+  "w-max",
+  "w-min",
+  "w-minsize",
+  "w-space",
+  "w-to",
+  "w-width",
 ]
 `;

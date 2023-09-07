@@ -40,12 +40,14 @@ afterEach(() => {
 describe("formElement", () => {
   h.baseTestComponent(() => document.createElement("wup-form"), {
     attrs: {
-      autocomplete: { value: true },
-      autofocus: { value: true },
-      autosave: { value: true },
+      "w-autocomplete": { value: true },
+      "w-autofocus": { value: true },
+      "w-autosave": { value: true },
       disabled: { value: true, equalValue: "" },
+      "w-disabled": { value: true, equalValue: "", skip: true },
       readonly: { value: true, equalValue: "" },
-      submitactions: { value: 1 },
+      "w-readonly": { value: true, equalValue: "", skip: true },
+      "w-submitactions": { value: 1 },
     },
   });
 
@@ -105,11 +107,11 @@ describe("formElement", () => {
     // name applied after setModel
     inputs[0].$initValue = undefined;
     el.$initModel = { DOB: "some date", Address: "Walk st." };
-    inputs[0].setAttribute("name", "DOB");
+    inputs[0].setAttribute("w-name", "DOB");
     jest.advanceTimersByTime(1);
     expect(inputs[0].$initValue).toBe("some date");
 
-    inputs[0].setAttribute("name", "Address");
+    inputs[0].setAttribute("w-name", "Address");
     jest.advanceTimersByTime(1);
     expect(inputs[0].$initValue).toBe("some date"); // stay same because prev. $initValue is defined
   });
@@ -196,14 +198,14 @@ describe("formElement", () => {
 
     test("autoComplete", () => {
       expect(inputs[0].$autoComplete).toBe(false);
-      el.setAttribute("autocomplete", "");
+      el.setAttribute("w-autocomplete", "");
       jest.advanceTimersByTime(1);
       expect(inputs[0].$autoComplete).toBe("email");
       expect(inputs[0].$refInput.autocomplete).toBe("email");
       expect(inputs[1].$refInput.autocomplete).toBe("firstName");
       expect(inputs[2].$refInput.autocomplete).toBe("off");
 
-      el.removeAttribute("autocomplete");
+      el.removeAttribute("w-autocomplete");
       jest.advanceTimersByTime(1);
       expect(inputs[0].$autoComplete).toBe(false);
       expect(inputs[0].$refInput.autocomplete).toBe("off");

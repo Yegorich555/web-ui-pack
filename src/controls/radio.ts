@@ -23,15 +23,15 @@ declare global {
     }
     interface Options<T = any, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, NewOptions<T> {}
     interface JSXProps<C = WUPRadioControl> extends WUP.BaseControl.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
-      reverse?: boolean | "";
+      "w-reverse"?: boolean | "";
       /** Global reference to object with array
        * @see  {@link WUP.Select.MenuItems}
        * @example
        * ```js
        * window.myItems = [...];
-       * <wup-radio items="window.myItems"></wup-circle>
+       * <wup-radio w-items="window.myItems"></wup-circle>
        * ``` */
-      items?: string;
+      "w-items"?: string;
     }
   }
 
@@ -66,7 +66,7 @@ interface ExtInputElement extends HTMLInputElement {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-radio name="gender" initvalue="3" validations="myValidations" items="myRadioItems"/>
+    <wup-radio w-name="gender" w-initvalue="3" w-validations="myValidations" w-items="myRadioItems"/>
   </wup-form>;
  * @tutorial innerHTML @example
  * <fieldset>
@@ -159,10 +159,10 @@ export default class WUPRadioControl<
       :host fieldset[aria-required="true"] input + span:after {
         content: "";
       }
-      :host[reverse] input + span {
+      :host[w-reverse] input + span {
         flex-direction: row-reverse;
       }
-      :host[reverse] input + span:after {
+      :host[w-reverse] input + span:after {
         margin-left: 0;
         margin-right: 0.5em;
       }
@@ -316,7 +316,7 @@ export default class WUPRadioControl<
       this.renderItems(this.$refFieldset);
     }
     super.gotChanges(propsChanged as any);
-    this.setAttr("reverse", this._opts.reverse, true);
+    this.setAttr("w-reverse", this._opts.reverse, true);
 
     const req = this.validations?.required;
     this.setAttr.call(this.$refFieldset, "aria-required", !!req);
