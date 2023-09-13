@@ -265,7 +265,7 @@ function make<T extends object>(
         // prev can be Proxy or Raw
         // next can be Proxy or Raw
         lstObserved.get(prev)?.parentRefs.delete(ref);
-        if (isRecord(next)) {
+        if (opts?.excludeNested !== true && isRecord(next)) {
           const exclude = opts?.excludeNested;
           const optsDeep =
             Array.isArray(exclude) && exclude.includes(prop as any) ? { ...opts, excludeNested: true } : opts;
@@ -287,7 +287,7 @@ function make<T extends object>(
       }
 
       // remove parent from this object
-      if (isRecord(prev)) {
+      if (opts?.excludeNested !== true && isRecord(prev)) {
         const v = proxy[prop as keyof T] as unknown as Observer.Observed;
         (lstObserved.get(v) as Ref<object>).parentRefs.delete(ref);
       }
