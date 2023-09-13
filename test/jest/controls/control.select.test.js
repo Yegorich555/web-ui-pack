@@ -62,7 +62,7 @@ describe("control.select", () => {
       { attrValue: "30", value: 30 },
     ],
     validations: {},
-    validationsSkip: ["_parse", "_mask"],
+    validationsSkip: ["_parse", "_mask", "minCount", "maxCount"], // min & max tested with selectMany
     onCreateNew: (e) => (e.$options.items = getItems()),
   });
 

@@ -53,7 +53,10 @@ describe("control.selectMany", () => {
       { attrValue: "window.$2Value", value: [20, 40], urlValue: "20_40" },
       { attrValue: "window.$3Value", value: [30] },
     ],
-    validations: {},
+    validations: {
+      minCount: { set: 2, failValue: [10], trueValue: [10, 20] },
+      maxCount: { set: 3, failValue: [10, 20, 30, 40], trueValue: [10] },
+    },
     validationsSkip: ["_parse", "_mask"],
     attrs: {
       "w-mask": { value: "abc" },

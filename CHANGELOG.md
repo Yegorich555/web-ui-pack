@@ -26,6 +26,7 @@
 
 **New/Features**:
 
+- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). Added validationRules `minCount` & `maxCount`
 - **Global**. Added support HTML intellisense in VSCode: follow [instructions](README.md#installing--usage)
 
 ## 0.8.1 (Aug 29, 2023)

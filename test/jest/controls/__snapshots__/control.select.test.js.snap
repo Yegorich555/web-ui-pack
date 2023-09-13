@@ -791,6 +791,8 @@ exports[`control.select common tests snapshot of $defaults 1`] = `
     "$alwaysValid": [Function],
     "_mask": [Function],
     "_parse": [Function],
+    "maxCount": [Function],
+    "minCount": [Function],
     "required": [Function],
   },
   "validationShowAll": false,

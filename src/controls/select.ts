@@ -32,7 +32,10 @@ declare global {
     }
 
     interface EventMap extends WUP.BaseCombo.EventMap {}
-    interface ValidityMap extends WUP.BaseCombo.ValidityMap {}
+    interface ValidityMap extends WUP.BaseCombo.ValidityMap {
+      minCount: number;
+      maxCount: number;
+    }
     interface NewOptions<T = any> {
       /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data! */
       items: MenuItems<T> | (() => MenuItems<T> | Promise<MenuItems<T>>) | Promise<MenuItems<T>>;
@@ -168,7 +171,11 @@ export default class WUPSelectControl<
 
   static $defaults: WUP.Select.Options = {
     ...WUPBaseComboControl.$defaults,
-    validationRules: { ...WUPBaseComboControl.$defaults.validationRules },
+    validationRules: {
+      ...WUPBaseComboControl.$defaults.validationRules,
+      minCount: (v, setV) => (v == null || v.length < setV) && `Min count is ${setV}`,
+      maxCount: (v, setV) => (v == null || v.length > setV) && `Max count is ${setV}`,
+    },
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey | ShowCases.onInput,
     allowNewValue: false,
     multiple: false,

@@ -922,6 +922,8 @@ exports[`control.selectMany common tests snapshot of $defaults 1`] = `
     "$alwaysValid": [Function],
     "_mask": [Function],
     "_parse": [Function],
+    "maxCount": [Function],
+    "minCount": [Function],
     "required": [Function],
   },
   "validationShowAll": false,
@@ -1232,6 +1234,16 @@ exports[`control.selectMany validations $options.validationShowAll 1`] = `
     <span>
       This field is required
     </span>
+    <ul
+      aria-hidden="true"
+    >
+      <li>
+        Min count is 2
+      </li>
+      <li>
+        Max count is 3
+      </li>
+    </ul>
   </wup-popup>
 </wup-selectmany>
 `;
@@ -1239,6 +1251,7 @@ exports[`control.selectMany validations $options.validationShowAll 1`] = `
 exports[`control.selectMany validations $options.validationShowAll 2`] = `
 <wup-selectmany
   filled=""
+  invalid=""
   required=""
 >
   <label
@@ -1253,6 +1266,7 @@ exports[`control.selectMany validations $options.validationShowAll 2`] = `
       </span>
       <input
         aria-autocomplete="list"
+        aria-describedby="txt2"
         aria-expanded="false"
         aria-haspopup="listbox"
         aria-required="true"
@@ -1271,6 +1285,35 @@ exports[`control.selectMany validations $options.validationShowAll 2`] = `
       type="button"
     />
   </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    role="alert"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span
+      class="wup-hidden"
+    >
+      Min count is 2
+    </span>
+    <ul
+      aria-hidden="true"
+    >
+      <li>
+        Min count is 2
+      </li>
+      <li
+        valid=""
+      >
+        Max count is 3
+      </li>
+    </ul>
+  </wup-popup>
 </wup-selectmany>
 `;
 
