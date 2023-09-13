@@ -1,6 +1,7 @@
 /* eslint-disable no-promise-executor-return */
 import Page from "src/elements/page";
 import { WUPSelectControl, WUPSpinElement } from "web-ui-pack";
+import { ClearActions } from "web-ui-pack/controls/baseControl";
 import { spinUseDualRing } from "web-ui-pack/spinElement";
 
 const sideEffect = WUPSelectControl;
@@ -75,35 +76,17 @@ export default function SelectControlView() {
         }}
       >
         <wup-select
-          // w-items="window.inputSelect.items"
+          w-items="window.inputSelect.items"
           w-name="select"
           w-label="Select"
-          // w-initValue={items[items.length - 3].value.toString()}
+          w-initValue={items[items.length - 3].value.toString()}
           w-multiple={false}
-          w-validations="window._someSelectValidations"
-          ref={(el) => {
-            if (el) {
-              // el.$options.autoFocus = true;
-              setTimeout(() => {
-                el.$options.items = items;
-                // todo without this timeout it throws err: need add debounce in 10ms
-                setTimeout(() => {
-                  el.$initValue = items[items.length - 3].value;
-                });
-              });
-            }
-          }}
         />
         <wup-select
           w-name="multiple"
           w-initValue="window.inputSelect.initArr"
           w-items="window.inputSelect.items"
           w-multiple
-          ref={(el) => {
-            if (el) {
-              el.$options.allowNewValue = true;
-            }
-          }}
         />
         <wup-select
           ref={(el) => {
@@ -141,6 +124,16 @@ export default function SelectControlView() {
               el.$options.items = items;
               // el.$initValue = ir - 3;
               el.$options.readOnlyInput = true;
+
+              // el.$options.autoFocus = true;
+              setTimeout(() => {
+                el.$options.clearActions = ClearActions.clear;
+                el.$options.items = [{ text: "Test", value: 1 }];
+                el.$value = [1];
+
+                el.$options.items = items;
+                el.$value = items[items.length - 3].value;
+              }, 10);
             }
           }}
         />

@@ -125,13 +125,13 @@ describe("control.select", () => {
     // after ready
     el.$options.items = [{ text: "Harry", value: 11 }];
     el.$value = 11;
-    jest.advanceTimersByTime(2);
+    jest.advanceTimersByTime(100);
     expect(onErr).not.toBeCalled();
     expect(el.$refInput.value).toBe("Harry");
 
     const item = { text: "Helica", value: 5 };
     el.$options.items = [item];
-    jest.advanceTimersByTime(2);
+    jest.advanceTimersByTime(100);
     expect(onErr).toBeCalledTimes(1); // because it doesn't fit value 11
     expect(el.$options.items[0]).toBe(item); // nested items must be not observed
     expect(observer.isObserved(el.$options.items)).toBe(true); // but Array items itself must be observed
@@ -906,7 +906,7 @@ describe("control.select", () => {
 
     // remove partially text + press Enter => reset to prev value
     el.$value = getItems()[0].value;
-    await h.wait(1);
+    await h.wait(100);
     expect(el.$refInput.value).toBe(getItems()[0].text);
     h.setInputCursor(el.$refInput, `${el.$refInput.value}|`);
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
@@ -917,7 +917,7 @@ describe("control.select", () => {
     // remove whole text + focusOut => clear value
     el.$value = getItems()[0].value;
     el.$showMenu();
-    await h.wait(1);
+    await h.wait(100);
     h.setInputCursor(el.$refInput, `|${el.$refInput.value}|`);
     expect(await h.userRemove(el.$refInput)).toBe("|");
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
@@ -929,6 +929,7 @@ describe("control.select", () => {
     expect(el.$value).toBe(undefined);
     // again but when menu closed - in this case filterMenuItems not fired & menu opened again by removeText
     el.$value = getItems()[0].value;
+    await h.wait();
     el.focus();
     await h.wait(1);
     h.setInputCursor(el.$refInput, `|${el.$refInput.value}|`);
@@ -949,7 +950,7 @@ describe("control.select", () => {
     // remove whole text + press Enter when required => reset to prev value
     el.$options.validations = { required: true };
     el.$value = getItems()[1].value;
-    await h.wait(1);
+    await h.wait(100);
     el.$showMenu();
     expect(el.$isRequired).toBe(true);
     await h.wait(1);
@@ -1145,10 +1146,10 @@ describe("control.select", () => {
       );
 
       el.$value = 10;
-      await h.wait(1);
+      await h.wait(100);
       expect(el.$refInput.value).toBe("Donny");
       el.$value = null;
-      await h.wait(1);
+      await h.wait(100);
       expect(el.$refInput.value).toBe("");
     });
 
@@ -1208,7 +1209,7 @@ describe("control.select", () => {
 
       // type in the middle - declineInput
       el.$value = [10, 20, 30];
-      await h.wait(1);
+      await h.wait(100);
       expect(el.$refInput.value).toBe("Donny, Mikky, Leo, ");
       h.setInputCursor(el.$refInput, "Donny, Mikky|, Leo, ");
       expect(await h.userTypeText(el.$refInput, "a", { clearPrevious: false })).toBe("Donny, Mikkya|, Leo, ");
@@ -1340,7 +1341,7 @@ describe("control.select", () => {
 
       // remove in the middle
       el.$value = [10, 20];
-      await h.wait(1);
+      await h.wait(10);
       expect(el.$refInput.value).toBe("Donny, Mikky, ");
       h.setInputCursor(el.$refInput, "Donny,| Mikky, ");
       expect(await h.userRemove(el.$refInput)).toBe("|Mikky, ");
@@ -1350,7 +1351,7 @@ describe("control.select", () => {
 
       // type new char instead of selected
       el.$value = [10, 20];
-      await h.wait(1);
+      await h.wait(10);
       expect(el.$refInput.value).toBe("Donny, Mikky, ");
       h.setInputCursor(el.$refInput, `|${el.$refInput.value}|`);
       expect(await h.userTypeText(el.$refInput, "L")).toBe("L|");
@@ -1361,19 +1362,19 @@ describe("control.select", () => {
 
       // remove cases
       el.$value = [10, 20];
-      await h.wait(1);
+      await h.wait(10);
       expect(el.$refInput.value).toBe("Donny, Mikky, ");
       h.setInputCursor(el.$refInput, `|${el.$refInput.value}|`);
       expect(await h.userRemove(el.$refInput)).toBe("|");
 
       el.$value = [10, 20];
-      await h.wait(1);
+      await h.wait(10);
       expect(el.$refInput.value).toBe("Donny, Mikky, ");
       h.setInputCursor(el.$refInput, `|${el.$refInput.value}|`);
       expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("|");
 
       el.$value = [10, 20];
-      await h.wait(1);
+      await h.wait(10);
       expect(el.$refInput.value).toBe("Donny, Mikky, ");
       h.setInputCursor(el.$refInput, `|${el.$refInput.value}`);
       expect(await h.userRemove(el.$refInput)).toBe("|Donny, Mikky, ");
@@ -1381,7 +1382,7 @@ describe("control.select", () => {
       expect(await h.userRemove(el.$refInput, { key: "Delete" })).toBe("Donny, Mikky, |");
 
       el.$value = [10, 20, 30];
-      await h.wait(1);
+      await h.wait(10);
       expect(el.$refInput.value).toBe("Donny, Mikky, Leo, ");
       h.setInputCursor(el.$refInput, "Donny, Mikky,| Leo, ");
       expect(await h.userRemove(el.$refInput)).toBe("Donny, |Leo, ");
@@ -1392,7 +1393,7 @@ describe("control.select", () => {
       expect(el.$value).toStrictEqual(undefined);
 
       el.$value = [10, 20, 30];
-      await h.wait(1);
+      await h.wait(10);
       expect(el.$refInput.value).toBe("Donny, Mikky, Leo, ");
       h.setInputCursor(el.$refInput, "Donny, Mi|kky, Leo, ");
       expect(await h.userRemove(el.$refInput)).toBe("Donny, |Leo, ");
@@ -1405,7 +1406,7 @@ describe("control.select", () => {
       expect(el.$value).toStrictEqual(undefined);
 
       el.$value = [10, 20];
-      await h.wait(1);
+      await h.wait(10);
       expect(el.$refInput.value).toBe("Donny, Mikky, ");
       expect(await h.userTypeText(el.$refInput, "abc", { clearPrevious: false })).toBe("Donny, Mikky, abc|");
       expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(

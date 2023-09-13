@@ -459,11 +459,16 @@ export default class WUPSelectControl<
     return item.text;
   }
 
+  #findValT?: ReturnType<typeof setTimeout>; // need to clear previous to avoid collission
   protected override setInputValue(v: ValueType | undefined, reason: SetValueReasons): void {
+    this.#findValT && clearTimeout(this.#findValT);
+    this.#findValT = undefined;
     if (this._cachedItems) {
-      reason === SetValueReasons.manual
-        ? setTimeout(() => super.setInputValue(v, reason)) // timeout to fix case when el.$options.items=... el.$value=...
-        : super.setInputValue(v, reason);
+      if (reason === SetValueReasons.manual || reason === SetValueReasons.initValue) {
+        this.#findValT = setTimeout(() => super.setInputValue(v, reason), 2); // timeout to fix case when el.$options.items=... el.$value=...
+      } else {
+        super.setInputValue(v, reason);
+      }
     } else {
       // skip because it's fired from fetchItems()
     }

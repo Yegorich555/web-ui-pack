@@ -1411,7 +1411,7 @@ exports[`control.selectMany validations options.validationCase 2`] = `
       <input
         aria-autocomplete="list"
         aria-controls="txt2"
-        aria-describedby="txt5"
+        aria-describedby="txt4"
         aria-expanded="false"
         aria-haspopup="listbox"
         aria-owns="txt2"
@@ -1471,7 +1471,7 @@ exports[`control.selectMany validations options.validationCase 2`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt5"
+    id="txt4"
     role="alert"
     style=""
   >
@@ -1506,11 +1506,11 @@ exports[`control.selectMany validations options.validationCase 3`] = `
       </span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt8"
-        aria-describedby="txt6"
+        aria-controls="txt7"
+        aria-describedby="txt5"
         aria-expanded="true"
         aria-haspopup="listbox"
-        aria-owns="txt8"
+        aria-owns="txt7"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -1533,7 +1533,7 @@ exports[`control.selectMany validations options.validationCase 3`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt6"
+    id="txt5"
     style=""
   >
     <span
@@ -1552,7 +1552,7 @@ exports[`control.selectMany validations options.validationCase 3`] = `
     <ul
       aria-label="Items"
       aria-multiselectable="true"
-      id="txt8"
+      id="txt7"
       role="listbox"
       tabindex="-1"
     >
@@ -1593,11 +1593,11 @@ exports[`control.selectMany validations options.validationCase 4`] = `
     <span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt9"
-        aria-describedby="txt10"
+        aria-controls="txt8"
+        aria-describedby="txt9"
         aria-expanded="false"
         aria-haspopup="listbox"
-        aria-owns="txt9"
+        aria-owns="txt8"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -1620,7 +1620,7 @@ exports[`control.selectMany validations options.validationCase 4`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt10"
+    id="txt9"
     role="alert"
     style=""
   >

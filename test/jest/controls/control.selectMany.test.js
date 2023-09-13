@@ -80,7 +80,7 @@ describe("control.selectMany", () => {
   test("items rendering", async () => {
     el.$options.hideSelected = true;
     el.$initValue = [10, 30];
-    await h.wait(1);
+    await h.wait(10);
     expect(el.innerHTML).toMatchInlineSnapshot(
       `"<label for="txt1"><span><span item="" aria-hidden="true">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label>"`
     );
@@ -118,7 +118,7 @@ describe("control.selectMany", () => {
     expect(el.$value).toStrictEqual([20]);
 
     el.$value = [10, 30, 20];
-    await h.wait(1);
+    await h.wait(10);
     await h.userTypeText(el.$refInput, "s");
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
       `"<ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="display: none;">Donny</li><li role="option" aria-selected="false" id="txt4" style="display: none;">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option" style="" aria-selected="false" id="txt8" focused="">Splinter</li></ul>"`
@@ -235,7 +235,7 @@ describe("control.selectMany", () => {
     });
 
     el.$initValue = [10, 30];
-    await h.wait(1);
+    await h.wait(10);
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
       `"<span item="" aria-hidden="true">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list"><strong></strong>"`
     );
@@ -545,7 +545,7 @@ describe("control.selectMany", () => {
   test("option [allowNewValue]", async () => {
     el.$options.allowNewValue = true;
     el.$value = [40];
-    await h.wait(1);
+    await h.wait(10);
     el.focus();
     await h.wait();
     expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
@@ -601,7 +601,7 @@ describe("control.selectMany", () => {
     const onChanged = jest.fn();
     el.$value = [10, 20, 30];
     el.$options.sortable = true;
-    await h.wait(1);
+    await h.wait(10);
     el.addEventListener("$change", onChanged);
     el.focus();
     await h.wait();
@@ -713,7 +713,7 @@ describe("control.selectMany", () => {
     const onChanged = jest.fn();
     el.$value = [10, 20, 30, 40];
     el.$options.sortable = true;
-    await h.wait(1);
+    await h.wait(10);
     el.addEventListener("$change", onChanged);
     const hi = 30;
     const w = 60;

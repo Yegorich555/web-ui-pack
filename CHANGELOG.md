@@ -9,7 +9,6 @@
   - Removed interface `Defaults`. Merged with interface `Options` and now contains all fields as required
   - Now removing attributes/options always rollbacks to value defined in `$defaults`
   - Method `getAttr` changed to `parseAttr`
-- [SpinElement](src/spinElement.ts). Defaults `fit` & `overflowTarget` = `auto` instead of `null`
 - **Global**.
   - All attributes refactored and starts with `w-...` (attrs `[readonly]` & `[disabled]` without changes)
   - Style rules changed from `[reverse]` to `[w-reverse]` for [RadioControl](src/controls/radio.ts), [SwitchControl](src/controls/switch.ts), [CheckControl](src/controls/check.ts) & [PasswordControl](src/controls/password.ts)
@@ -17,17 +16,18 @@
   - Option `skey` renamed to `storageKey`
   - Removed css `maxHeight` for [error] popup
 - [CircleElement](src/circleElement.ts). Renamed option`min_s_ize` to `min_S_ize`
+- [SpinElement](src/spinElement.ts). Defaults `fit` & `overflowTarget` = `auto` instead of `null`
 
 **Fixes**:
 
-- [RadioControl](src/controls/radio.ts). _autoFocus makes focused 1st but not active input when `form.$options.autoFocus=true`_
 - **Global**. Refactored & fixed TS types
-- **Controls**
+- [RadioControl](src/controls/radio.ts). _autoFocus makes focused 1st but not active input when `form.$options.autoFocus=true`_
+- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). _Wrong error `Not found in items` when re-assign `items`  & `initValue` after a time_
 
 **New/Features**:
 
-- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). Added validationRules `minCount` & `maxCount`
 - **Global**. Added support HTML intellisense in VSCode: follow [instructions](README.md#installing--usage)
+- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). Added validationRules `minCount` & `maxCount`
 
 ## 0.8.1 (Aug 29, 2023)
 
