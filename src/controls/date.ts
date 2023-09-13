@@ -202,6 +202,7 @@ export default class WUPDateControl<
       v[`get${key}Milliseconds`](),
     ];
     v && v[`set${key}Hours`](0, 0, 0, 0);
+    // todo it resets hours for $value. But need also reset for min/max
     const r = super.goValidate(fromCase, silent);
     hh && v[`set${key}Hours`](hh[0], hh[1], hh[2], hh[3]);
     return r;

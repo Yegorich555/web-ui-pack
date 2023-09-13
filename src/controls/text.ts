@@ -618,6 +618,8 @@ export default class WUPTextControl<
 
     this.renderPostfix(this._opts.postfix);
 
+    // todo case #1 it's wrong if user types `11:|50 PM` + '9' => 11:|95 PM = need to show errMsg here
+    // todo case #2 it's wrong if user types `11:|90 PM` + '0' => 11:|09 PM = need to hide errMsg here
     if (this.#declineInputEnd && (!canParse || errMsg)) {
       return; // don't allow changes if user types wrong char
     }
@@ -791,3 +793,5 @@ export default class WUPTextControl<
 customElements.define(tagName, WUPTextControl);
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
+
+// todo btnClear isn't hidden immediately on init: when required & render 1000 controls

@@ -75,15 +75,22 @@ export default function SelectControlView() {
         }}
       >
         <wup-select
-          w-items="window.inputSelect.items"
+          // w-items="window.inputSelect.items"
           w-name="select"
           w-label="Select"
-          w-initValue={items[items.length - 3].value.toString()}
+          // w-initValue={items[items.length - 3].value.toString()}
           w-multiple={false}
           w-validations="window._someSelectValidations"
           ref={(el) => {
             if (el) {
               // el.$options.autoFocus = true;
+              setTimeout(() => {
+                el.$options.items = items;
+                // todo without this timeout it throws err: need add debounce in 10ms
+                setTimeout(() => {
+                  el.$initValue = items[items.length - 3].value;
+                });
+              });
             }
           }}
         />

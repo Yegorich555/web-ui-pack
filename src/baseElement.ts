@@ -634,3 +634,4 @@ declare global {
 }
 
 // NiceToHave: HTML attrs-events like 'onsubmit' & 'onchange'
+// todo options.observer({excludeNested: true}) casts nested 1st level objects to Proxy
