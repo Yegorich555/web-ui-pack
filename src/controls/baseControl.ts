@@ -111,7 +111,7 @@ declare global {
       /** Behavior that expected for clearing value inside control (via pressEsc or btnClear)
        * @defaultValue ClearActions.initClearBack */
       clearActions: ClearActions;
-      /** Rules defined for control;
+      /** Rules defined for control. Impossible to override via `$options`. Use static `$dfaults` instead
        * * all functions must return error-message when value === undefined
        * * all functions must return error-message if setValue is `true/enabled` or value doesn't fit a rule
        * * value can be undefined only when a rule named as 'required' or need to collect error-messages @see $options.validationShowAll
@@ -126,7 +126,6 @@ declare global {
        * ``` */
       validationRules: {
         [K in keyof VM]?: (
-          this: IBaseControl,
           value: T,
           setValue: VM[K],
           control: IBaseControl,
@@ -448,7 +447,7 @@ export default abstract class WUPBaseControl<
   static override cloneDefaults<T extends Record<string, any>>(): T {
     const d = super.cloneDefaults() as WUP.BaseControl.Options;
     // @ts-expect-error
-    delete d.validationRules;
+    d.validationRules = undefined;
     return d as unknown as T;
   }
 
