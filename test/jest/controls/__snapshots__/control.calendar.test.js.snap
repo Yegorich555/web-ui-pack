@@ -1071,7 +1071,6 @@ padding:0;}
         font-size: small;
         color: var(--ctrl-err-text);
         background: var(--ctrl-err-bg);
-        max-height: 3em;
         overflow: auto;
         overflow: overlay;
       }
@@ -1120,12 +1119,6 @@ mask-image: var(--ctrl-icon-img);
         max-height: none;
       }
       @media (hover: hover) and (pointer: fine) {
-        /*WUP-CALENDAR:hover {
-          z-index: 90011;
-        }
-        WUP-CALENDAR:hover [error] {
-          max-height: none;
-        }*/
         WUP-CALENDAR:hover,
         WUP-CALENDAR:hover&gt;[menu],
         WUP-CALENDAR[hovered],

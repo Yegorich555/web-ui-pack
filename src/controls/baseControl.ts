@@ -345,7 +345,6 @@ export default abstract class WUPBaseControl<
         font-size: small;
         color: var(--ctrl-err-text);
         background: var(--ctrl-err-bg);
-        max-height: 3em;
         overflow: auto;
         overflow: overlay;
       }
@@ -375,12 +374,6 @@ export default abstract class WUPBaseControl<
         max-height: none;
       }
       @media (hover: hover) and (pointer: fine) {
-        /*:host:hover {
-          z-index: 90011;
-        }
-        :host:hover [error] {
-          max-height: none;
-        }*/
         :host:hover,
         :host:hover>[menu],
         :host[hovered],

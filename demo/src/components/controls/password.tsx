@@ -5,15 +5,12 @@ const sideEffect = WUPPasswordControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
 
 (window as any)._somePasswordValidations = {
-  required: true,
   min: 8,
   minNumber: 1,
   minUpper: 1,
   minLower: 1,
   special: { min: 1, chars: "#!-_?,.@:;'" },
 } as WUP.Password.Options["validations"];
-
-(window as any).myPasswordValidations = { required: true, min: 4 } as WUP.Password.Options["validations"];
 
 export default function PasswordControlView() {
   return (
@@ -52,7 +49,17 @@ export default function PasswordControlView() {
             }
           }}
         />
-        <wup-pwd w-name="required" w-validations="myPasswordValidations" />
+        <wup-pwd
+          w-name="required"
+          ref={(el) => {
+            if (el) {
+              el.$options.validationShowAll = true;
+              el.$options.validations = {
+                required: true,
+              };
+            }
+          }}
+        />
         <wup-pwd
           w-name="withoutClearButton"
           ref={(el) => {

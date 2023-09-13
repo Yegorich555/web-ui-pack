@@ -10,16 +10,19 @@
   - Now removing attributes/options always rollbacks to value defined in `$defaults`
   - Method `getAttr` changed to `parseAttr`
 - [SpinElement](src/spinElement.ts). Defaults `fit` & `overflowTarget` = `auto` instead of `null`
-- **Controls**. Option `skey` renamed to `storageKey`
-- [CircleElement](src/circleElement.ts). Renamed option`min_s_ize` to `min_S_ize`
 - **Global**.
   - All attributes refactored and starts with `w-...` (attrs `[readonly]` & `[disabled]` without changes)
   - Style rules changed from `[reverse]` to `[w-reverse]` for [RadioControl](src/controls/radio.ts), [SwitchControl](src/controls/switch.ts), [CheckControl](src/controls/check.ts) & [PasswordControl](src/controls/password.ts)
+- **Controls**.
+  - Option `skey` renamed to `storageKey`
+  - Removed css `maxHeight` for [error] popup
+- [CircleElement](src/circleElement.ts). Renamed option`min_s_ize` to `min_S_ize`
 
 **Fixes**:
 
 - [RadioControl](src/controls/radio.ts). _autoFocus makes focused 1st but not active input when `form.$options.autoFocus=true`_
 - **Global**. Refactored & fixed TS types
+- **Controls**
 
 **New/Features**:
 

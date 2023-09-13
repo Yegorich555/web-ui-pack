@@ -347,7 +347,6 @@ padding:0;}
         font-size: small;
         color: var(--ctrl-err-text);
         background: var(--ctrl-err-bg);
-        max-height: 3em;
         overflow: auto;
         overflow: overlay;
       }
@@ -396,12 +395,6 @@ mask-image: var(--ctrl-icon-img);
         max-height: none;
       }
       @media (hover: hover) and (pointer: fine) {
-        /*WUP-TEXTAREA:hover {
-          z-index: 90011;
-        }
-        WUP-TEXTAREA:hover [error] {
-          max-height: none;
-        }*/
         WUP-TEXTAREA:hover,
         WUP-TEXTAREA:hover&gt;[menu],
         WUP-TEXTAREA[hovered],
