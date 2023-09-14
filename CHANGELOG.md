@@ -22,8 +22,9 @@
 
 - **Global**. Refactored & fixed TS types
 - [RadioControl](src/controls/radio.ts). _autoFocus makes focused 1st but not active input when `form.$options.autoFocus=true`_
-- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). _Wrong error `Not found in items` when re-assign `items`  & `initValue` after a time_
+- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). _Wrong error `Not found in items` when re-assign `items` & `initValue` after a time_
 - helper [observer](src/helpers/observer.ts). _excludeNested doesn't exclude when re-assign nested properties_
+- [DateControl](src/controls/date.ts). _Validations min & max doesn't exclude time in comparison_
 
 **New/Features**:
 

@@ -230,6 +230,7 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 
 - [**animateDropdown**](src/helpers/animateDropdown.ts) ⇒ `Animate (show/hide) element as dropdown via scale and counter-scale for children`
 - [**animateStack**](src/helpers/animateDropdown.ts) ⇒ `Animate (show/hide) every element via moving from target to own position`
+- [**dateCompareWithoutTime**](src/helpers/dateCompareWithoutTime.ts) ⇒ `Compare by Date-values without Time`
 - [**dateCopyTime**](src/helpers/dateCopyTime.ts) ⇒ `Copy hh:mm:ss.fff part from B to A`
 - [**dateFromString**](src/helpers/dateFromString.ts) ⇒ `Returns parsed date from string based on pointed format`
 - [**dateToString**](src/helpers/dateToString.ts) ⇒ `Returns a string representation of a date-time according to pointed format`

@@ -1,11 +1,12 @@
 import { AttributeMap, AttributeTypes } from "../baseElement";
+import dateCompareWithoutTime from "../helpers/dateCompareWithoutTime";
 import dateCopyTime from "../helpers/dateCopyTime";
 import dateFromString from "../helpers/dateFromString";
 import dateToString from "../helpers/dateToString";
 import localeInfo from "../objects/localeInfo";
 import WUPPopupElement from "../popup/popupElement";
 import WUPBaseComboControl from "./baseCombo";
-import { SetValueReasons, ValidateFromCases } from "./baseControl";
+import { SetValueReasons } from "./baseControl";
 import WUPCalendarControl from "./calendar";
 
 /* c8 ignore next */
@@ -114,10 +115,10 @@ export default class WUPDateControl<
     validationRules: {
       ...WUPBaseComboControl.$defaults.validationRules,
       min: (v, setV, c) =>
-        (v === undefined || v < setV) &&
+        (v === undefined || dateCompareWithoutTime(v, setV) < 1) &&
         `Min value is ${dateToString(setV, (c as WUPDateControl)._opts.format.toUpperCase())}`,
       max: (v, setV, c) =>
-        (v === undefined || v > setV) &&
+        (v === undefined || dateCompareWithoutTime(v, setV) > -1) &&
         `Max value is ${dateToString(setV, (c as WUPDateControl)._opts.format.toUpperCase())}`,
       exclude: (v, setV) =>
         (v === undefined || setV.some((d) => d.valueOf() === v.valueOf())) && `This value is disabled`,
@@ -189,23 +190,6 @@ export default class WUPDateControl<
     if (this._opts.max) vls.max = this._opts.max;
     if (this._opts.exclude) vls.exclude = this._opts.exclude;
     return vls as WUP.BaseControl.Options["validations"];
-  }
-
-  protected goValidate(fromCase: ValidateFromCases, silent = false): string | false {
-    // reset hours for validations
-    const v = this.$value as Date | undefined;
-    const key = this._opts.utc ? "UTC" : "";
-    const hh = v && [
-      v[`get${key}Hours`](),
-      v[`get${key}Minutes`](),
-      v[`get${key}Seconds`](),
-      v[`get${key}Milliseconds`](),
-    ];
-    v && v[`set${key}Hours`](0, 0, 0, 0);
-    // todo it resets hours for $value. But need also reset for min/max
-    const r = super.goValidate(fromCase, silent);
-    hh && v[`set${key}Hours`](hh[0], hh[1], hh[2], hh[3]);
-    return r;
   }
 
   protected override renderMenu(popup: WUPPopupElement, menuId: string): HTMLElement {
