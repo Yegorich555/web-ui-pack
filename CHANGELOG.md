@@ -29,7 +29,9 @@
 **New/Features**:
 
 - **Global**. Added support HTML intellisense in VSCode: follow [instructions](README.md#installing--usage)
-- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). Added validationRules `minCount` & `maxCount`
+- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts).
+  - Added validationRules `minCount` & `maxCount`
+  - Updated hover style for menu items. User css-var `--ctrl-select-menu-hover` to change
 
 ## 0.8.1 (Aug 29, 2023)
 
