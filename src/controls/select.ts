@@ -867,3 +867,5 @@ customElements.define(tagName, WUPSelectControl);
 // NiceToHave: add support custom items rendering when it's already appended to DOM like it works with dropdown
 
 // NiceToHave: option to allow autoselect item without pressing Enter: option: $autoComplete + aria-autocomplete: true => https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-autocomplete-both/
+
+// todo autofocus on form can set focus to Combobox control as 1st and in this case popup is opens (in modal etc). It looks bad. Need to get focus but not open popup in this case + maybe set autofocus with debounce 200ms: in this case user will see focusing
