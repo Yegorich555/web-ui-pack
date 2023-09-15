@@ -272,8 +272,8 @@ export default class WUPTimeControl<
 
   static get mappedAttributes(): Record<string, AttributeMap> {
     const m = super.mappedAttributes;
-    m.min.type = AttributeTypes.string;
-    m.max.type = AttributeTypes.string;
+    m.min.type = AttributeTypes.parsedObject;
+    m.max.type = AttributeTypes.parsedObject;
     return m;
   }
 
@@ -355,11 +355,14 @@ export default class WUPTimeControl<
 
   /** Set [disabled] for items according to $options.min & max */
   protected disableItems(): void {
-    const { min, max, exclude } = this._opts;
+    // eslint-disable-next-line prefer-const
+    let { min, max, exclude } = this._opts;
     if ((!min && !max && !exclude) || !this.$refMenuLists) {
       return;
     }
 
+    min ??= 0 as unknown as WUPTimeObject;
+    max ??= WUPTimeObject.$maxValue as unknown as WUPTimeObject;
     for (let n = 0; n < 2; ++n) {
       const lst = this.$refMenuLists[n];
       const was = lst._value;
@@ -367,7 +370,7 @@ export default class WUPTimeControl<
         const el = lst.children.item(i)!;
         lst._value = (el as any)._value;
         const v = this.getMenuValue();
-        const isDisabled = v < min! || v > max! || exclude?.test(v);
+        const isDisabled = v < min || v > max || exclude?.test(v);
         this.setAttr.call(el, "disabled", isDisabled, true);
       }
       lst._value = was;
@@ -377,12 +380,12 @@ export default class WUPTimeControl<
       for (let i = 0; i < lst.children.length; ++i) {
         const el = lst.children.item(i)!;
         const isPM = (el as any)._value === 2;
-        const isDisabled = (isPM && max! < new WUPTimeObject(12, 0)) || (!isPM && min! > new WUPTimeObject(11, 0));
+        const isDisabled = (isPM && max < new WUPTimeObject(12, 0)) || (!isPM && min > new WUPTimeObject(11, 0));
         this.setAttr.call(el, "disabled", isDisabled, true);
       }
     }
     const v = this.getMenuValue();
-    const isDisabled = v < min! || v > max! || exclude?.test(v);
+    const isDisabled = v < min || v > max || exclude?.test(v);
     this.$refButtonOk && this.setAttr.call(this.$refButtonOk!, "disabled", isDisabled, true);
   }
 

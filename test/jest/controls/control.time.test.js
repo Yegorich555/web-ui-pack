@@ -99,8 +99,8 @@ describe("control.time", () => {
       "w-maskholder": { value: "00:00 am", nullValue: "hh:mm *M" },
       "w-format": { value: "hh:mm a", nullValue: "hh:mm A" },
 
-      "w-min": { value: "02:28" },
-      "w-max": { value: "23:15" },
+      "w-min": { value: "02:28", parsedValue: new WUPTimeObject(2, 28) },
+      "w-max": { value: "23:15", parsedValue: new WUPTimeObject(23, 15) },
       "w-step": { value: 5 },
       "w-exclude": { value: { test: (v) => v.valueOf() === new WUPTimeObject("15:40").valueOf() } },
     },
@@ -648,6 +648,51 @@ describe("control.time", () => {
     expect(() => el.focus()).not.toThrow();
     await h.wait();
     expect(el.$isShown).toBe(false);
+
+    // only min
+    el.blur();
+    await h.wait();
+    el.$options.max = null;
+    el.$options.min = new WUPTimeObject(11, 22);
+    el.$options.exclude = null;
+    el.focus();
+    await h.wait();
+    expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
+      [
+        "<li disabled="">10</li><li>11</li><li aria-selected="true">12</li><li>13</li><li>14</li>",
+        "<li>21</li><li>22</li><li aria-selected="true">23</li><li>24</li><li>25</li>",
+      ]
+    `);
+
+    // only max
+    el.blur();
+    await h.wait();
+    el.$options.min = null;
+    el.$options.max = new WUPTimeObject(13, 23);
+    el.$options.exclude = null;
+    el.focus();
+    await h.wait();
+    expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
+      [
+        "<li>10</li><li>11</li><li aria-selected="true">12</li><li>13</li><li disabled="">14</li>",
+        "<li>21</li><li>22</li><li aria-selected="true">23</li><li>24</li><li>25</li>",
+      ]
+    `);
+
+    // only exclude
+    el.blur();
+    await h.wait();
+    el.$options.min = null;
+    el.$options.max = null;
+    el.$options.exclude = { test: (v) => v.hours === 12 && v.minutes === 22 };
+    el.focus();
+    await h.wait();
+    expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
+      [
+        "<li>10</li><li>11</li><li aria-selected="true">12</li><li>13</li><li>14</li>",
+        "<li>21</li><li disabled="">22</li><li aria-selected="true">23</li><li>24</li><li>25</li>",
+      ]
+    `);
   });
 
   test("option: menuButtonsOff", async () => {
