@@ -832,3 +832,5 @@ describe("control.time", () => {
     `);
   });
 });
+
+// todo extra tests when user sets invalidValue & lefts focus

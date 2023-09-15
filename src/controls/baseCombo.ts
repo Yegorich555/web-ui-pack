@@ -99,8 +99,6 @@ export default abstract class WUPBaseComboControl<
     ...WUPTextControl.$defaults,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
-      _mask: WUPTextControl.$defaults.validationRules._mask,
-      _parse: WUPTextControl.$defaults.validationRules._parse,
     },
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey,
     readOnlyInput: false,

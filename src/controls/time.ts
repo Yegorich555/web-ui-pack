@@ -14,7 +14,7 @@ const tagName = "wup-time";
 declare global {
   namespace WUP.Time {
     interface EventMap extends WUP.BaseCombo.EventMap {}
-    interface ValidityMap extends WUP.BaseCombo.ValidityMap, Pick<WUP.Text.ValidityMap, "_mask" | "_parse"> {
+    interface ValidityMap extends WUP.BaseCombo.ValidityMap {
       /** Enabled if option [min] is pointed; If $value < pointed shows message 'Min time is {x}` */
       min: WUPTimeObject;
       /** Enabled if option [min] is pointed; if $value > pointed shows message 'Max time is {x}` */

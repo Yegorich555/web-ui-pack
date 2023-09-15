@@ -662,6 +662,7 @@ export default abstract class WUPBaseControl<
   setupInput(): void {
     const i = this.$refInput;
     i.disabled = this.$isDisabled;
+    // todo change to AutoFill according to new spec
     i.autocomplete = this.$autoComplete || "off";
     this.setupInputReadonly();
   }
@@ -789,11 +790,11 @@ export default abstract class WUPBaseControl<
     (v: ValueType | undefined, reason: ValidateFromCases | null) => string | false
   > {
     const vls = this.validations;
-
     if (!vls) {
       return [];
     }
 
+    const rules = this.#ctr.$defaults.validationRules;
     const check = (v: ValueType | undefined, k: string | number, reason: ValidateFromCases | null): string | false => {
       const vl = vls[k as "required"];
 
@@ -801,7 +802,6 @@ export default abstract class WUPBaseControl<
       if (typeof vl === "function") {
         err = vl(v as any, this, reason);
       } else {
-        const rules = this.#ctr.$defaults.validationRules;
         const r = rules[k as "required"];
         if (!r) {
           const n = this._opts.name ? `.[${this._opts.name}]` : "";
@@ -855,6 +855,7 @@ export default abstract class WUPBaseControl<
     const isEmpty = this.$isEmpty;
     this._isValid = !vls.some((fn) => {
       // process empty value only on rule 'required'; for others skip if value is empty
+      // todo webpack can optimize function names. Need to check it
       const skipRule = isEmpty && fn.name[0] !== "_" && fn.name !== "required"; // undefined only for 'required' rule; for others: skip if value = undefined
       const err = !skipRule && fn(v, fromCase);
       if (err) {

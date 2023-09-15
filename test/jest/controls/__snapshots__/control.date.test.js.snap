@@ -707,8 +707,6 @@ exports[`control.date common tests snapshot of $defaults 1`] = `
   "validationRules": {
     "$alwaysInvalid": [Function],
     "$alwaysValid": [Function],
-    "_mask": [Function],
-    "_parse": [Function],
     "exclude": [Function],
     "max": [Function],
     "min": [Function],

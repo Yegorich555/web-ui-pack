@@ -25,6 +25,7 @@
 - [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). _Wrong error `Not found in items` when re-assign `items` & `initValue` after a time_
 - helper [observer](src/helpers/observer.ts). _excludeNested doesn't exclude when re-assign nested properties_
 - [DateControl](src/controls/date.ts). _Validations min & max doesn't exclude time in comparison_
+- [DateControl](src/controls/date.ts). [TimeControl](src/controls/time.ts). _Validation `_parse` doesn't work when added extra char and another char auto-removed (shifted & removed)_
 
 **New/Features**:
 

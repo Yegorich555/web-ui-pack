@@ -1,7 +1,8 @@
+// eslint-disable-next-line max-classes-per-file
 import MaskTextInput from "./text.mask";
 import { onEvent } from "../indexHelpers";
 import { WUPcssIcon } from "../styles";
-import WUPBaseControl, { SetValueReasons } from "./baseControl";
+import WUPBaseControl, { SetValueReasons, ValidateFromCases } from "./baseControl";
 import TextHistory from "./text.history";
 
 const emailReg =
@@ -19,21 +20,6 @@ declare global {
       max: number;
       /** If $value doesn't match email-pattern shows message 'Invalid email address` */
       email: boolean;
-      /** If input value doesn't completely fit pointed mask shows pointed message
-       * @default "Incomplete value"
-       * @Rules
-       * * enabled by default with $options.mask
-       * * excluded from listing (for $options.validationShowAll)
-       * * ignores control value, instead it uses `this.refMask` state based on `$refInput.value`
-       *  */
-      _mask: string;
-      /** If parseInput() throws exception during the input-change is wrong then pointed message shows
-       * @default "Invalid value"
-       * @Rules
-       * * processed only by input change (not value-change)
-       * * removed by focusout (because input rollback to previous valid value)
-       * * excluded from listing (for $options.validationShowAll) */
-      _parse: string;
     }
     interface NewOptions {
       /** Debounce time to wait for user finishes typing to start validate and provide $change event
@@ -335,6 +321,9 @@ export default class WUPTextControl<
         }`;
   }
 
+  static $errorParse = "Invalid value";
+  static $errorMask = "Incomplete value";
+
   static $defaults: WUP.Text.Options = {
     ...WUPBaseControl.$defaults,
     selectOnFocus: false,
@@ -344,12 +333,6 @@ export default class WUPTextControl<
       min: (v, setV) => (v === undefined || v.length < setV) && `Min length is ${setV} characters`,
       max: (v, setV) => (v === undefined || v.length > setV) && `Max length is ${setV} characters`,
       email: (v, setV) => setV && (!v || !emailReg.test(v)) && "Invalid email address",
-      _mask: (_v, setV, c) => {
-        const { refMask } = c as WUPTextControl;
-        // WARN: mask ignores value === undefined otherwise it doesn't work with controls that $value !== input.value
-        return !!refMask && refMask.value !== refMask.prefix && !refMask.isCompleted && (setV || "Incomplete value");
-      },
-      _parse: (_v, setV) => setV || "Invalid value",
     },
     debounceMs: 0,
     mask: "",
@@ -391,9 +374,8 @@ export default class WUPTextControl<
   }
 
   protected get validations(): WUP.Text.Options["validations"] {
-    const vls = (super.validations as WUP.Text.Options["validations"]) || {};
-    if (this._opts.mask && vls._mask === undefined) vls._mask = ""; // enable validation mask based on option mask
-    if (this._onceErrName === "_parse") vls._parse = "";
+    const vls = (super.validations as { [k: string]: WUP.BaseControl.ValidityFunction<any> }) || {};
+    vls._invalidInput = (_v, c) => (c as WUPTextControl)._inputError || false;
     return vls;
   }
 
@@ -585,6 +567,7 @@ export default class WUPTextControl<
     }
   }
 
+  _inputError?: string;
   #inputTimer?: ReturnType<typeof setTimeout>;
   /** Called when user types text OR when need to apply/reset mask (on focusGot, focusLost) */
   protected gotInput(e: WUP.Text.GotInputEvent): void {
@@ -592,46 +575,46 @@ export default class WUPTextControl<
     const el = e.target as WUP.Text.Mask.HandledInput;
     let txt = el.value;
 
+    let errMsg: string | undefined;
     if (this._opts.mask) {
       const prev = el._maskPrev?.value;
-      txt = this.maskInputProcess(e);
+      txt = this.maskInputProcess(e); // returns true value
       if (txt === prev) {
         // this.renderPostfix(this._opts.postfix);
         return; // skip because no changes from previous action
       }
+      const m = this.refMask!;
+      if (m.value !== m.prefix && !m.isCompleted) {
+        errMsg = this.#ctr.$errorMask;
+      }
     }
 
-    // if (e.setValuePrevented) { // use canParse instead
-    //   return;
-    // }
-
-    const canParse = !txt || this.canParseInput(txt);
     let v = this.$value;
-    let errMsg: boolean | string = "";
-    if (canParse) {
-      try {
-        v = !txt ? undefined : this.parseInput(txt);
-      } catch (err) {
-        errMsg = (err as Error).message || true;
+    let isParsedOrEmpty = false;
+    if (txt) {
+      if (this.canParseInput(txt)) {
+        try {
+          v = this.parseInput(txt);
+          isParsedOrEmpty = true;
+        } catch (err) {
+          v = this.$value;
+          errMsg ||= this.#ctr.$errorParse;
+        }
       }
+    } else {
+      isParsedOrEmpty = true;
+      v = undefined;
     }
 
     this.renderPostfix(this._opts.postfix);
-
-    // todo case #1 it's wrong if user types `11:|50 PM` + '9' => 11:|95 PM = need to show errMsg here
-    // todo case #2 it's wrong if user types `11:|90 PM` + '0' => 11:|09 PM = need to hide errMsg here
-    if (this.#declineInputEnd && (!canParse || errMsg)) {
-      return; // don't allow changes if user types wrong char
-    }
-
+    const wasErr = !errMsg && !!this._inputError;
+    this._inputError = errMsg;
     const act = (): void => {
-      if (errMsg) {
-        this.validateOnce({ _parse: this.validations?._parse || "" }, true);
-      } else if (canParse) {
-        this.setValue(v, SetValueReasons.userInput, true);
-      } else if (this._opts.mask) {
-        this.validateOnce({ _mask: this.validations?._mask || "" });
+      if (this._inputError || wasErr) {
+        this.goValidate(ValidateFromCases.onChange);
+        // todo after focusLost value resets to prev valid but message left: combobox controls
       }
+      isParsedOrEmpty && this.setValue(v, SetValueReasons.userInput, true);
     };
 
     this._validTimer && clearTimeout(this._validTimer);
@@ -742,6 +725,7 @@ export default class WUPTextControl<
   /** Called to update/reset value for <input/> */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected setInputValue(v: string, reason: SetValueReasons): void {
+    delete this._inputError;
     const prev = this.$refInput.value;
     const str = v != null ? ((v as any).toString() as string) : "";
     this.$refInput.value = str;
@@ -750,7 +734,6 @@ export default class WUPTextControl<
       this._opts.mask && this.maskInputProcess(null);
       str !== prev && this._refHistory?.save(prev, this.$refInput.value);
       this.renderPostfix(this._opts.postfix);
-      this._onceErrName === this._errName && this.goHideError(); // hide mask-message because value has higher priority than inputValue
     }
   }
 
@@ -760,33 +743,6 @@ export default class WUPTextControl<
       this.$refBtnClear.setAttribute("clear", this.#ctr.$isEmpty(next) ? "" : "back");
     }
     return next;
-  }
-
-  _onceErrName?: string;
-  /** Called when inputValue != $value and need to show error on the fly by input-change */
-  protected validateOnce(
-    rule: { [key: string]: boolean | string | WUP.BaseControl.ValidityFunction<string> },
-    force = false
-  ): void {
-    const prev = this._wasValidNotEmpty;
-    if (force) {
-      this._wasValidNotEmpty = true; // to ignore onChangeSmart and show error anyway
-    }
-
-    // redefine prototype getter once & fire validation
-    Object.defineProperty(this, "validations", { configurable: true, value: rule });
-    this.validateAfterChange();
-    delete (this as any).validations; // rollback to previous
-
-    if (force) {
-      this._wasValidNotEmpty = prev; // rollback to previous
-    }
-    this._onceErrName = this._errName;
-  }
-
-  protected override goHideError(): void {
-    this._onceErrName = undefined;
-    super.goHideError();
   }
 }
 

@@ -731,8 +731,6 @@ exports[`control.pwd common tests snapshot of $defaults 1`] = `
   "validationRules": {
     "$alwaysInvalid": [Function],
     "$alwaysValid": [Function],
-    "_mask": [Function],
-    "_parse": [Function],
     "confirm": [Function],
     "email": [Function],
     "max": [Function],
