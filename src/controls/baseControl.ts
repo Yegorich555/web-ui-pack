@@ -71,6 +71,8 @@ type StoredRefError = HTMLElement & { _wupVldItems?: StoredItem[] };
 
 declare global {
   namespace WUP.BaseControl {
+    // type AutoComplete = AutoFill; // uncomment with new version TS
+    type AutoComplete = string;
     interface EventMap extends WUP.Base.EventMap {
       /** Called on value change */
       $change: CustomEvent & { detail: SetValueReasons };
@@ -101,7 +103,7 @@ declare global {
        *  if control has no autocomplete option then it's inherited from `form`
        * @see {@link HTMLInputElement.autocomplete}
        * @defaultValue null - means false if form.$options.autoComplete false also */
-      autoComplete: AutoFill | boolean | null;
+      autoComplete: AutoComplete | boolean | null;
       /** Disallow edit/copy value; adds attr [disabled] for styling */
       disabled: boolean;
       /** Disallow copy value; adds attr [readonly] for styling @defaultValue false */
@@ -545,11 +547,11 @@ export default abstract class WUPBaseControl<
   }
 
   /** Returns autoComplete name if related form or control option is enabled (and control.$options.autoComplete !== false ) */
-  get $autoComplete(): AutoFill | false {
+  get $autoComplete(): WUP.BaseControl.AutoComplete | false {
     // @ts-expect-error
     const o = this.$form?._opts;
     const af = this._opts.autoComplete ?? (o?.autoComplete || false);
-    return ((af === true ? this._opts.name : af) as AutoFill) || false;
+    return ((af === true ? this._opts.name : af) as WUP.BaseControl.AutoComplete) || false;
   }
 
   /** Check validity and show error if silent is false (by default)

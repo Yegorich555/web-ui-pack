@@ -397,7 +397,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
       const y = r.y + segment._center.y * scale;
       return DOMRect.fromRect({ x, y, width: 0.01, height: 0.01 });
     };
-    const total = this.$options.items.reduce((sum, a) => sum + a.value, 0);
+    const total = this.$options.items!.reduce((sum, a) => sum + a.value, 0);
     const item = { ...segment._relatedItem, percentage: mathScaleValue(segment._relatedItem.value, 0, total, 0, 100) };
     const lbl = item.tooltip!;
 
