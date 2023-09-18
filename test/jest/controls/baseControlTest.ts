@@ -158,15 +158,15 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$isDirty).toBe(false);
       expect(el.$isChanged).toBe(false);
       jest.advanceTimersByTime(1);
-      expect(spyChange).toBeCalledTimes(1); // change event happens even via $initValue
-      expect(spyChange.mock.lastCall[0].detail).toBe(SetValueReasons.initValue);
+      expect(spyChange).toBeCalledTimes(0);
+      // expect(spyChange.mock.lastCall[0].detail).toBe(SetValueReasons.initValue);
 
       el.$initValue = cfg.initValues[1].value;
       expect(el.$value).toBe(cfg.initValues[1].value);
       expect(el.$isDirty).toBe(false);
       expect(el.$isChanged).toBe(false);
       jest.advanceTimersByTime(1);
-      expect(spyChange).toBeCalledTimes(2); // change event happens even via $initValue
+      expect(spyChange).toBeCalledTimes(0);
 
       el.$value = cfg.initValues[2].value;
       expect(el.$initValue).toBe(cfg.initValues[1].value);
@@ -174,14 +174,14 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$isDirty).toBe(false);
       expect(el.$isChanged).toBe(true);
       jest.advanceTimersByTime(1);
-      expect(spyChange).toBeCalledTimes(3); // change event happens even via $initValue
+      expect(spyChange).toBeCalledTimes(1);
       expect(spyChange.mock.lastCall[0].detail).toBe(SetValueReasons.manual);
 
       el.$initValue = cfg.initValues[1].value;
       expect(el.$value).toBe(cfg.initValues[2].value);
       expect(el.$isChanged).toBe(true);
       jest.advanceTimersByTime(1);
-      expect(spyChange).toBeCalledTimes(3);
+      expect(spyChange).toBeCalledTimes(1);
 
       // checking when el not isReady
       spyChange.mockClear();
@@ -376,6 +376,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       if (cfg.attrs?.["w-storagekey"]?.skip || cfg.attrs?.["w-storagekey"] === null) {
         return; // for password isn't allowed
       }
+      const spyChange = jest.fn();
       // local storage
       const sSet = jest.spyOn(Storage.prototype, "setItem");
       const sGet = jest.spyOn(Storage.prototype, "getItem");
@@ -392,6 +393,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       // getItem on init
       jest.clearAllMocks();
       el = document.body.appendChild(document.createElement(el.tagName)) as WUPBaseControl;
+      el.$onChange = spyChange;
       cfg.onCreateNew?.call(cfg, el);
       el.$options.name = "name1";
       el.$options.storageKey = true;
@@ -399,8 +401,11 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.storageKey).toBe("name1");
       expect(sGet).toBeCalledTimes(1);
       expect(sGet).lastCalledWith("name1");
-      expect(el.$initValue).toStrictEqual(cfg.initValues[0].value);
+      expect(el.$value).toStrictEqual(cfg.initValues[0].value);
+      expect(el.$initValue).toBe(undefined);
       expect(onThrowErr).not.toBeCalled();
+      expect(spyChange).toBeCalledTimes(1);
+      expect(spyChange.mock.lastCall[0].detail).toBe(SetValueReasons.storage);
 
       // clearing value
       el.clearValue();
@@ -439,12 +444,15 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       await h.wait();
 
       // session storage
+      el = document.body.appendChild(document.createElement(el.tagName)) as WUPBaseControl;
+      // el.$onChange = spyChange;
+      cfg.onCreateNew?.call(cfg, el);
       el.$options.storage = "session";
       el.$options.storageKey = "name2";
       await h.wait(1);
-      jest.clearAllMocks();
-      expect(el.$initValue).toStrictEqual(cfg.initValues[0].value);
+      expect(el.$value).toStrictEqual(cfg.emptyValue);
       el.$value = cfg.initValues[0].value;
+      jest.clearAllMocks();
       el.$value = cfg.initValues[1].value; // to call change event
       await h.wait();
       if (cfg.initValues[1].urlValue === null) {
@@ -466,7 +474,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       await h.wait(1);
       expect(sGet).toBeCalledTimes(1);
       expect(sGet).lastCalledWith("name2");
-      expect(el.$initValue).toStrictEqual(cfg.initValues[2].value);
+      expect(el.$value).toStrictEqual(cfg.initValues[2].value);
       expect(onThrowErr).not.toBeCalled();
 
       window.localStorage.clear();
@@ -491,7 +499,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$options.storage = "url";
       el.$options.storageKey = "su";
       await h.wait(1);
-      expect(el.$initValue).toStrictEqual(cfg.initValues[1].urlValue === null ? undefined : testValues.value);
+      expect(el.$value).toStrictEqual(cfg.initValues[1].urlValue === null ? cfg.emptyValue : testValues.value);
       expect(onThrowErr).not.toBeCalled();
     });
   });

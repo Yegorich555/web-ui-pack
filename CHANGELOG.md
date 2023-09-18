@@ -15,17 +15,19 @@
 - **Controls**.
   - Option `skey` renamed to `storageKey`
   - Removed css `maxHeight` for [error] popup
-- [CircleElement](src/circleElement.ts). Renamed option`min_s_ize` to `min_S_ize`
+  - Changing `$initValue` isn't fired `$onChange` event anymore
+  - Option `storageKey` changes `$value` instead of `$initValue` and now triggers `$onChange` event on init (added enum-key `SetValueReasons.storage`)
+- [CircleElement](src/circleElement.ts). Renamed option *min**s**ize* to *min**S**ize*
 - [SpinElement](src/spinElement.ts). Defaults `fit` & `overflowTarget` = `auto` instead of `null`
 
 **Fixes**:
 
 - **Global**. Refactored & fixed TS types
-- [RadioControl](src/controls/radio.ts). _autoFocus makes focused 1st but not active input when `form.$options.autoFocus=true`_
-- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). _Wrong error `Not found in items` when re-assign `items` & `initValue` after a time_
-- helper [observer](src/helpers/observer.ts). _excludeNested doesn't exclude when re-assign nested properties_
-- [DateControl](src/controls/date.ts). _Validations min & max doesn't exclude time in comparison_
-- [DateControl](src/controls/date.ts). [TimeControl](src/controls/time.ts). _Validation `_parse` doesn't work when added extra char and another char auto-removed (shifted & removed)_
+- [RadioControl](src/controls/radio.ts). *autoFocus makes focused 1st but not active input when `form.$options.autoFocus=true`*
+- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). *Wrong error `Not found in items` when re-assign `items` & `initValue` after a time*
+- helper [observer](src/helpers/observer.ts). *excludeNested doesn't exclude when re-assign nested properties*
+- [DateControl](src/controls/date.ts). *Validations min & max doesn't exclude time in comparison*
+- [DateControl](src/controls/date.ts). [TimeControl](src/controls/time.ts). *Validation `_parse` doesn't work when added extra char and another char auto-removed (shifted & removed)*
 
 **New/Features**:
 
@@ -47,28 +49,28 @@
 **Fixes**:
 
 - **Text based controls**
-  - _$initValue + click on button[clear] + Ctrl+Z => history undo does't work_
-  - _button[clear] isn't updated on `$initValue` or `$options.clearActions` changing_
-  - _wrong behavior_when user removes/inserts text in the start_
+  - *$initValue + click on button[clear] + Ctrl+Z => history undo does't work*
+  - *button[clear] isn't updated on `$initValue` or `$options.clearActions` changing*
+  - *wrong behavior_when user removes/inserts text in the start*
 - [SelectControl](src/controls/select.ts)
-  - _clearing input + click outside doesn't clear value_
-  - _`$options.readOnlyInput=7` must be ignored when `allowNewValue` enabled_
+  - *clearing input + click outside doesn't clear value*
+  - *`$options.readOnlyInput=7` must be ignored when `allowNewValue` enabled*
   - improved input delete behavior for `$options.multiple`
-  - _menu isn't refreshed after button-clear click_
-  - _selected menu-item isn't into view sometimes with 1st opening popup_
-- **Combobox controls (Select, Date, Time)**. _Popup shows/hides when user select text with mouseUp on label (outside input)_
-- [CalendarControl](src/controls/calendar.ts). _`$value=undefined` doesn't reset selected_
+  - *menu isn't refreshed after button-clear click*
+  - *selected menu-item isn't into view sometimes with 1st opening popup*
+- **Combobox controls (Select, Date, Time)**. *Popup shows/hides when user select text with mouseUp on label (outside input)*
+- [CalendarControl](src/controls/calendar.ts). *`$value=undefined` doesn't reset selected*
 - [NumberControl](src/controls/number.ts).
-  - _Alt+MouseWheel changes ±0.1 when decimal isn't allowed_
-  - _Alt+MouseWheel changes ±0.1 but Alt-keyUp moves focus to browser panel_
+  - *Alt+MouseWheel changes ±0.1 when decimal isn't allowed*
+  - *Alt+MouseWheel changes ±0.1 but Alt-keyUp moves focus to browser panel*
 - [CircleElement](src/circleElement.ts).
-  - _wrong tooltip position when segment is half of circle_
-  - _wrong console.error when `items=[{value:2}]`_
-  - _wrong label-value when item value < opion **minsize**_
-  - _edges of small segment are not rounded according to corner_
+  - *wrong tooltip position when segment is half of circle*
+  - *wrong console.error when `items=[{value:2}]`*
+  - *wrong label-value when item value < opion **minsize***
+  - *edges of small segment are not rounded according to corner*
 - [TimeControl](src/controls/time.ts).
-  - _menu items with wrong sizes and text not aligned_
-  - _extra pixel when scrolled if content size is decimal h=239.7_
+  - *menu items with wrong sizes and text not aligned*
+  - *extra pixel when scrolled if content size is decimal h=239.7*
 
 **New/Features**:
 
@@ -89,34 +91,34 @@
 **Fixes**:
 
 - [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts)
-  - _menu scrolled to 1st selected item if even select last one (when multiple is allowed)_
-  - _$options.items[0] !== items[0] because wrapped to observer_
-  - _Unable to clear value with Backspace+Enter_
-- [SelectManyControl](src/controls/selectMany.ts). _Menu hides when user selects all items - but it's maybe wrong_
+  - *menu scrolled to 1st selected item if even select last one (when multiple is allowed)*
+  - *$options.items[0] !== items[0] because wrapped to observer*
+  - *Unable to clear value with Backspace+Enter*
+- [SelectManyControl](src/controls/selectMany.ts). *Menu hides when user selects all items - but it's maybe wrong*
 - [RadioControl](src/controls/radio.ts)
-  - _$options.items[0] !== items[0] because wrapped to observer_
-  - _`$options.readOnly` doesn't work - user able to change value_
+  - *$options.items[0] !== items[0] because wrapped to observer*
+  - *`$options.readOnly` doesn't work - user able to change value*
 - [CalendarControl](src/controls/calendar.ts)
-  - _Wrong size of monthPicker if previously scroll dayPicker to min/max date_
-  - _User can't scroll when `$initValue` > `$options.max`_
-- [DateControl](src/controls/date.ts). _Menu isn't closed if click on the selected date_
+  - *Wrong size of monthPicker if previously scroll dayPicker to min/max date*
+  - *User can't scroll when `$initValue` > `$options.max`*
+- [DateControl](src/controls/date.ts). *Menu isn't closed if click on the selected date*
 - [TextareaControl](src/controls/textarea.ts)
-  - _Exception when try to clear empty control_
-  - _`Ctrl + Z` doesn't revert changes_
-- [NumberControl](src/controls/number.ts). _option `format` isn't applied on init_
-- **Text based controls**. **Mask**. _Wrong behavior_when user removes/inserts text in the middle_
+  - *Exception when try to clear empty control*
+  - *`Ctrl + Z` doesn't revert changes*
+- [NumberControl](src/controls/number.ts). *option `format` isn't applied on init*
+- **Text based controls**. **Mask**. *Wrong behavior_when user removes/inserts text in the middle*
 - **Text based controls** - Improved undo/redo overall
-  - _Ctrl+Z sometimes is wrong_
-  - _Ctrl+Я doesn't work. Need support for different languages_
-  - _Press Escape, Ctrl+Z => no undo-action_
-  - _No undo-action when shake iPhone_
-- **Controls.Styles**. _button[clear] has shifted icon when mouse hover_
+  - *Ctrl+Z sometimes is wrong*
+  - *Ctrl+Я doesn't work. Need support for different languages*
+  - *Press Escape, Ctrl+Z => no undo-action*
+  - *No undo-action when shake iPhone*
+- **Controls.Styles**. *button[clear] has shifted icon when mouse hover*
 
 **New/Features**:
 
 - helper [observer](src/helpers/observer.ts). Added option `excludeNested` to exclude some nested properties from observer
 - [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). `$options.readOnlyInput` can be number X to enable autoMode where input.readOnly = items.length < X.
-- **Combobox controls (Select, Date, Time)**. _readOnlyInput moved to $defaults_
+- **Combobox controls (Select, Date, Time)**. *readOnlyInput moved to $defaults*
 - **Controls.Global**
   - Improved value comparison (static method `$isEqual`) to compare by `.id`. So now don't need to worry about complex objects with **id's** (mostly related to `SelectControl.$options.items` & `RadioControl.$options.items`)
   - Added readonly property `$isRequired` based on `$options.validations.required`
@@ -126,20 +128,20 @@
 
 **Fixes**:
 
-- **Controls**. _`$initValue` overrides `$value` when it set before_
-- **Combobox controls (Select, SelectMany Date, Time)**. _Menu border is blue when invalid + hover_
-- **Combobox controls (Select, SelectMany, Date, Time)**. _Sometimes menu not scrolled to selected item by opening_
-- [SwitchControl](src/controls/switch.ts). [CheckControl](src/controls/check.ts). _form.$initModel is ignored_
-- [RadioControl](src/controls/radio.ts). _`$options.items` with object-values doesn't work_
-- [RadioControl](src/controls/radio.ts). _set in a row `$options.items=...` and `$value=...` doesn't work_
-- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). _Set in a row `$options.items=...` and `$value=...` doesn't work_
-- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). _Arrow changes control size during rotation_
-- [PopupElement](src/popup/popupElement.ts). _Wrong position if target inside body and html is scrollable instead of body_
-- [NumberControl](src/controls/number.ts). _Pattern `0.#` and value `2` shows error `Incomplete value`_
-- helper [observer](src/helpers/observer.ts). _Exception on promise-property_
-- **Global**. _Sometimes some css-vars not appended to styles in production (as result black Circle)_
-- [CalendarControl](src/controls/calendar.ts). _Wrong autoscroll to top page after 1st focus_
-- [TimeControl](src/controls/time.ts). _Scrollbar is visible when menu opens to top_
+- **Controls**. *`$initValue` overrides `$value` when it set before*
+- **Combobox controls (Select, SelectMany Date, Time)**. *Menu border is blue when invalid + hover*
+- **Combobox controls (Select, SelectMany, Date, Time)**. *Sometimes menu not scrolled to selected item by opening*
+- [SwitchControl](src/controls/switch.ts). [CheckControl](src/controls/check.ts). *form.$initModel is ignored*
+- [RadioControl](src/controls/radio.ts). *`$options.items` with object-values doesn't work*
+- [RadioControl](src/controls/radio.ts). *set in a row `$options.items=...` and `$value=...` doesn't work*
+- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). *Set in a row `$options.items=...` and `$value=...` doesn't work*
+- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). *Arrow changes control size during rotation*
+- [PopupElement](src/popup/popupElement.ts). *Wrong position if target inside body and html is scrollable instead of body*
+- [NumberControl](src/controls/number.ts). *Pattern `0.#` and value `2` shows error `Incomplete value`*
+- helper [observer](src/helpers/observer.ts). *Exception on promise-property*
+- **Global**. *Sometimes some css-vars not appended to styles in production (as result black Circle)*
+- [CalendarControl](src/controls/calendar.ts). *Wrong autoscroll to top page after 1st focus*
+- [TimeControl](src/controls/time.ts). *Scrollbar is visible when menu opens to top*
 
 **New/Features**:
 
@@ -161,14 +163,14 @@
 
 **Fixes**:
 
-- helper [animateDropdown](src/helpers/animate.ts). _Wrong for left,right,top directions_
-- [PopupElement](src/popup/popupElement.ts). _Popup hides by mouseenter if was opened by target.mouseenter_
-- [PopupElement](src/popup/popupElement.ts). _Popup impossible to hide by click if opened by hover_
+- helper [animateDropdown](src/helpers/animate.ts). *Wrong for left,right,top directions*
+- [PopupElement](src/popup/popupElement.ts). *Popup hides by mouseenter if was opened by target.mouseenter*
+- [PopupElement](src/popup/popupElement.ts). *Popup impossible to hide by click if opened by hover*
 - [NumberControl](src/controls/number.ts).
-  - _`-234` showed as `-,234`_
-  - _error message min/max is not formatted as input_
-  - _useless inline style 'overflow' on focus_
-- **Controls**. _Asterisk is visible on empty label when value is required_
+  - *`-234` showed as `-,234`*
+  - *error message min/max is not formatted as input*
+  - *useless inline style 'overflow' on focus*
+- **Controls**. *Asterisk is visible on empty label when value is required*
 
 **New/Features**:
 
@@ -191,8 +193,8 @@
 
 **Fixes**:
 
-- **Controls**. _Need to add border by default otherwise it's invisible on the white body_
-- [CircleElement](src/circleElement.ts). _Wrong tooltip position when segment is half of circle_
+- **Controls**. *Need to add border by default otherwise it's invisible on the white body*
+- [CircleElement](src/circleElement.ts). *Wrong tooltip position when segment is half of circle*
 
 ## 0.5.0 (Mar 27, 2023)
 
@@ -219,32 +221,32 @@
 
 **Fixes**:
 
-- **Global**. _Sometimes events are not disposed_. Fix for helper onEvent (need to remove events with options as is)
-- helper [onFocusLost](src/helpers/onFocusLost.ts). _Isn't fired if stopPropagation is called_
-- [TimeControl](src/controls/time.ts). _Extra margin for menu-buttons on Safari_
-- [SwitchControl](src/controls/switch.ts). [CheckControl](src/controls/check.ts). _Attribute `initvalue=''` sets value to `true` (expected `false`)_
-- [TextareaControl](src/controls/textarea.ts). _`Ctrl + B` makes text bold but it's unexpected for plain textarea_
-- **Controls**. _Hover effect on Android devices (expected: no-hover on touch-screens)_
-- **Controls**. _Focus frame isn't rouned on Safari_
-- **Controls**. _Attributes `initvalue,min,max` for controls Date & Calendar doesn't work on Safari (Date.parse(yyyy-MM-dd) doesn't work by default)_
-- **Controls**. _Controls are not rendered if parsing initvalue is wrong_
-- **Controls**. _Unexpected autofocus on mask-inputs on Safari_
-- **Controls**. _Annoying autoselect on touchscreens._ Now $options.selectOnFocus is disabled by default
+- **Global**. *Sometimes events are not disposed*. Fix for helper onEvent (need to remove events with options as is)
+- helper [onFocusLost](src/helpers/onFocusLost.ts). *Isn't fired if stopPropagation is called*
+- [TimeControl](src/controls/time.ts). *Extra margin for menu-buttons on Safari*
+- [SwitchControl](src/controls/switch.ts). [CheckControl](src/controls/check.ts). *Attribute `initvalue=''` sets value to `true` (expected `false`)*
+- [TextareaControl](src/controls/textarea.ts). *`Ctrl + B` makes text bold but it's unexpected for plain textarea*
+- **Controls**. *Hover effect on Android devices (expected: no-hover on touch-screens)*
+- **Controls**. *Focus frame isn't rouned on Safari*
+- **Controls**. *Attributes `initvalue,min,max` for controls Date & Calendar doesn't work on Safari (Date.parse(yyyy-MM-dd) doesn't work by default)*
+- **Controls**. *Controls are not rendered if parsing initvalue is wrong*
+- **Controls**. *Unexpected autofocus on mask-inputs on Safari*
+- **Controls**. *Annoying autoselect on touchscreens.* Now $options.selectOnFocus is disabled by default
 - **Combobox controls (Select, Date, Time)**. Now popup isn't opened if user clears control and gets focus at the same time
-- **Combobox controls (Select, Date, Time)**. _Click on disabled item throws console.error_
-- **Combobox controls (Select, Date, Time)**. _Focus goes to menu-list by keydown 'Tab' in Firefox_
-- [SelectControl](src/controls/select.ts). _Sometimes popup isn't not scrolled to selected item during the opening_
-- [SpinElement](src/spinElement.ts). _Animation for TwinDualRing doesn't work on Safari 14-_
-- [SpinElement](src/spinElement.ts). _Wrong render on option `fit` on Safari 14-_
-- [PopupElement](src/popup/popupElement.ts). _Animation for opacity doesn't work on Safari 14-_
-- [PopupElement](src/popup/popupElement.ts). _Animation affects on bluring text if user scroll body during the animation_
-- [PopupElement](src/popup/popupElement.ts). _Wrong position during dropdownAnimation and several show/hide at once_
+- **Combobox controls (Select, Date, Time)**. *Click on disabled item throws console.error*
+- **Combobox controls (Select, Date, Time)**. *Focus goes to menu-list by keydown 'Tab' in Firefox*
+- [SelectControl](src/controls/select.ts). *Sometimes popup isn't not scrolled to selected item during the opening*
+- [SpinElement](src/spinElement.ts). *Animation for TwinDualRing doesn't work on Safari 14-*
+- [SpinElement](src/spinElement.ts). *Wrong render on option `fit` on Safari 14-*
+- [PopupElement](src/popup/popupElement.ts). *Animation for opacity doesn't work on Safari 14-*
+- [PopupElement](src/popup/popupElement.ts). *Animation affects on bluring text if user scroll body during the animation*
+- [PopupElement](src/popup/popupElement.ts). *Wrong position during dropdownAnimation and several show/hide at once*
 - [PopupElement](src/popup/popupElement.ts). Allow to show/hide on double-click (because on some browsers double-click works with huge delay)
-- [PopupElement](src/popup/popupElement.ts). _2nd $show() has predefined maxSize & position can be different_
-- [PopupElement](src/popup/popupElement.ts). _Popup could be > 100vw_. Now popup has max size 100vw & 100vh (by default)
-- [PopupElement](src/popup/popupElement.ts). _No-updates on screensize changes._ Now popup position & size changes with device-rotation
-- [PopupElement](src/popup/popupElement.ts). _No popup if mousedown>move>up>click on target_
-- [CircleElement](src/circleElement.ts). _Items **color** doesn't work (because attr `[fill]` can't override css-rule)_
+- [PopupElement](src/popup/popupElement.ts). *2nd $show() has predefined maxSize & position can be different*
+- [PopupElement](src/popup/popupElement.ts). *Popup could be > 100vw*. Now popup has max size 100vw & 100vh (by default)
+- [PopupElement](src/popup/popupElement.ts). *No-updates on screensize changes.* Now popup position & size changes with device-rotation
+- [PopupElement](src/popup/popupElement.ts). *No popup if mousedown>move>up>click on target*
+- [CircleElement](src/circleElement.ts). *Items **color** doesn't work (because attr `[fill]` can't override css-rule)*
 
 ## 0.4.1 (Jan 27, 2023)
 
@@ -323,9 +325,9 @@
 
 **Fixes**:
 
-- helper [promiseWait](src/helpers/promiseWait.ts). _Callback called before time end_
-- [PopupElement](src/popup/popupElement.ts) with arrow. _Firefox bug: css filter `drop-shadow` works wrong with angle 180.0_
-- [SpinElement](src/spinElement.ts). _Impossible to override color via applying css-var to body `--spin-2`_
+- helper [promiseWait](src/helpers/promiseWait.ts). *Callback called before time end*
+- [PopupElement](src/popup/popupElement.ts) with arrow. *Firefox bug: css filter `drop-shadow` works wrong with angle 180.0*
+- [SpinElement](src/spinElement.ts). *Impossible to override color via applying css-var to body `--spin-2`*
 
 ## 0.2.0 (Dec 09, 2022)
 
@@ -346,13 +348,13 @@
 **Fixes**:
 
 - **Controls**. [Blue highlight blink on tap action](https://stackoverflow.com/questions/25704650/disable-blue-highlight-when-touch-press-object-with-cursorpointer)
-- **Controls**. _Click on button `Clear` throws console.error_
-- **Controls**. _Validation gets undefined value but must be skipped in this case (value is undefined only for messages or validations.required)_
-- [SelectControl](src/controls/select.ts). _Click on custom list-item with nested span doesn't call click-event_
-- [SelectControl](src/controls/select.ts). _No scroll to selected element at first opening_
-- [SelectControl](src/controls/select.ts). _Sometimes menu isn't opened_
-- [SelectControl](src/controls/select.ts). _`noItems` appeared on 2nd menu opening when user created a new value_
-- helper [observer](src/helpers/observer.ts). _onChange fired even date.setHours didn't change value_
+- **Controls**. *Click on button `Clear` throws console.error*
+- **Controls**. *Validation gets undefined value but must be skipped in this case (value is undefined only for messages or validations.required)*
+- [SelectControl](src/controls/select.ts). *Click on custom list-item with nested span doesn't call click-event*
+- [SelectControl](src/controls/select.ts). *No scroll to selected element at first opening*
+- [SelectControl](src/controls/select.ts). *Sometimes menu isn't opened*
+- [SelectControl](src/controls/select.ts). *`noItems` appeared on 2nd menu opening when user created a new value*
+- helper [observer](src/helpers/observer.ts). *onChange fired even date.setHours didn't change value*
 
 ## 0.1.2 (Oct 4, 2022)
 

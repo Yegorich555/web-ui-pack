@@ -21,6 +21,8 @@ export const enum SetValueReasons {
   userSelect,
   /** When $initValue is changed */
   initValue,
+  /** When value changed from storage (on init if `$options.storageKey` is pointed) */
+  storage,
 }
 
 /** Cases of validation for WUP Controls */
@@ -162,10 +164,11 @@ declare global {
       validationShowAll: boolean;
       /** Storage key for auto saving value in storage;
        * @tutorial rules
+       * * On init value from storage applies to `$value` and triggers onChange event
        * * Point empty string or `true` to inherit from $options.name
        * * Expected value can be converted toString & parsed from string itself.
-       * * Override valueFromUrl & valueToUrl to change serializing (for complex objects, arrays etc.)
-       * * Before API-call gather form.$model on init
+       * * Override `valueFromUrl` & `valueToUrl` to change serializing (for complex objects, arrays etc.)
+       * * Before API-call gather form.$model on init OR use $onChange event
        * @see {@link WUP.BaseControl.Options.storage}
        * @defaultValue emptyString (means `false`) */
       storageKey?: boolean | string | null;
@@ -651,6 +654,10 @@ export default abstract class WUPBaseControl<
     this.setAttr.call(this.$refInput, "aria-required", isReq);
 
     this.setupInitValue(propsChanged);
+    // retrieve value from store
+    if (!propsChanged && this._opts.storageKey) {
+      this.setValue(this.storageGet(), SetValueReasons.storage);
+    }
     propsChanged?.includes("clearActions") && this.setClearState();
     this.gotFormChanges(propsChanged);
   }
@@ -666,7 +673,6 @@ export default abstract class WUPBaseControl<
   setupInput(): void {
     const i = this.$refInput;
     i.disabled = this.$isDisabled;
-    // todo change to AutoFill according to new spec
     i.autocomplete = this.$autoComplete || "off";
     this.setupInputReadonly();
   }
@@ -699,10 +705,6 @@ export default abstract class WUPBaseControl<
       if (!propsChanged || propsChanged.includes("name")) {
         this.$initValue = nestedProperty.get(this.$form._initModel as any, this._opts.name);
       }
-    }
-    // retrieve value from store
-    if (this.$initValue === undefined && this._opts.storageKey) {
-      this.$initValue = this.storageGet();
     }
   }
 
@@ -1044,7 +1046,7 @@ export default abstract class WUPBaseControl<
     return this._opts.storageKey === true ? this._opts.name : this._opts.storageKey;
   }
 
-  /** Get & parse value from storage according to options `skey`, `storage` and `name` */
+  /** Get & parse value from storage according to options `storageKey`, `storage` and `name` */
   protected storageGet(): ValueType | undefined {
     const key = this.storageKey;
     if (key) {
@@ -1070,6 +1072,7 @@ export default abstract class WUPBaseControl<
 
   /** Save value to storage storage according to options `skey`, `storage` and `name` */
   protected storageSet(v: ValueType | undefined): void {
+    // NiceToHave: option to sync ctrls with same storage & key: if 'personType` is changed need to update all ctrls with same key `personType`
     const key = this.storageKey;
     if (!key) {
       return; // possible when _opts.name is empty
@@ -1119,7 +1122,11 @@ export default abstract class WUPBaseControl<
       this.setClearState();
       return null;
     }
-    if (reason !== SetValueReasons.initValue && reason !== SetValueReasons.manual) {
+    if (
+      reason !== SetValueReasons.initValue &&
+      reason !== SetValueReasons.manual &&
+      reason !== SetValueReasons.storage
+    ) {
       this.$isDirty = true;
     }
     const isChanged = !this.#ctr.$isEqual(v, prev);
@@ -1131,9 +1138,13 @@ export default abstract class WUPBaseControl<
     this._isValid = undefined;
     const canVld = reason !== SetValueReasons.manual;
     (canVld || this.$refError) && this.validateAfterChange();
-    // save to storage
-    this._opts.storageKey && this.storageSet(v);
-    setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true, detail: reason }));
+
+    if (reason !== SetValueReasons.initValue) {
+      // save to storage
+      reason !== SetValueReasons.storage && this._opts.storageKey && this.storageSet(v);
+      setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true, detail: reason }));
+    }
+
     return true;
   }
 
@@ -1215,5 +1226,3 @@ export default abstract class WUPBaseControl<
 
 // NiceToHave when control is disabled need to show tooltip with reason
 // NiceToHave when control is readonly need to show tooltip with reason
-
-// todo $options.storage must change $value, but not initValue & need to skip setValue on $initValue change
