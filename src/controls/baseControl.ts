@@ -861,7 +861,6 @@ export default abstract class WUPBaseControl<
     const isEmpty = this.$isEmpty;
     this._isValid = !vls.some((fn) => {
       // process empty value only on rule 'required'; for others skip if value is empty
-      // todo webpack can optimize function names. Need to check it
       const skipRule = isEmpty && fn.name[0] !== "_" && fn.name !== "required"; // undefined only for 'required' rule; for others: skip if value = undefined
       const err = !skipRule && fn(v, fromCase);
       if (err) {
