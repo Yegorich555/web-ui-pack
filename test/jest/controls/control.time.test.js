@@ -886,4 +886,19 @@ describe("control.time", () => {
       ]
     `);
   });
+
+  test("option [min] vs [validations.min]", async () => {
+    el.$options.min = new WUPTimeObject(10, 20);
+    await h.wait();
+    expect(el.validations.min).toEqual(new WUPTimeObject(10, 20));
+    el.$value = new WUPTimeObject(10, 20);
+    expect(el.$validate()).toBe(false);
+    el.$value = new WUPTimeObject(10, 19);
+    expect(el.$validate()).toBe("Min value is 10:20 AM");
+
+    el.$options.min = undefined;
+    await h.wait();
+    expect(el.validations.min).toBe(undefined);
+    expect(el.$validate()).toBe(false);
+  });
 });
