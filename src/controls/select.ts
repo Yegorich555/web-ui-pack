@@ -844,7 +844,11 @@ export default class WUPSelectControl<
   protected override gotFocusLost(): void {
     this._opts.multiple &&
       this.setInputValueDirect(this.$refInput.value.replace(/, *$/, ""), SetValueReasons.userInput); // remove delimiter
-    this._opts.allowNewValue && this.setValue(this.parseInput(this.$refInput.value), SetValueReasons.userInput); // to allow user left value without pressing Enter
+    if (this._opts.allowNewValue) {
+      this.setValue(this.parseInput(this.$refInput.value), SetValueReasons.userInput); // to allow user left value without pressing Enter
+    } else {
+      this.resetInputValue(); // to update/rollback input according to result
+    }
     super.gotFocusLost();
   }
 

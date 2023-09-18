@@ -612,7 +612,6 @@ export default class WUPTextControl<
     const act = (): void => {
       if (this._inputError || wasErr) {
         this.goValidate(ValidateFromCases.onChange);
-        // todo after focusLost value resets to prev valid but message left: combobox controls
       }
       isParsedOrEmpty && this.setValue(v, SetValueReasons.userInput, true);
     };
@@ -725,6 +724,7 @@ export default class WUPTextControl<
   /** Called to update/reset value for <input/> */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected setInputValue(v: string, reason: SetValueReasons): void {
+    this._inputError && this.goHideError(); // after focusLost value resets to prev valid but message left: combobox controls
     delete this._inputError;
     const prev = this.$refInput.value;
     const str = v != null ? ((v as any).toString() as string) : "";

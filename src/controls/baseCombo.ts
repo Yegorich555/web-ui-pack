@@ -487,7 +487,6 @@ export default abstract class WUPBaseComboControl<
   protected override gotFocusLost(): void {
     !this.#isShown && !this._isHiding && this.removePopup(); // otherwise it's removed by hidingMenu
     this.goHideMenu(HideCases.onFocusLost);
-    this.resetInputValue(); // to update/rollback input according to result
     super.gotFocusLost();
   }
 

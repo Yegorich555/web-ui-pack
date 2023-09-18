@@ -289,6 +289,61 @@ describe("control.time", () => {
     expect(el.$value).toEqual(new WUPTimeObject(1, 36));
     el.blur();
     expect(el.$refInput.value).toBe("1:36");
+    await h.wait();
+  });
+
+  test("user updates input", async () => {
+    const onChanged = jest.fn();
+    el.$onChange = onChanged;
+
+    expect(await h.userTypeText(el.$refInput, "11:50 a")).toBe("11:50 A|M");
+    h.setInputCursor(el.$refInput, "11:|50 AM");
+    h.mockConsoleWarn();
+    onChanged.mockClear();
+
+    // parse error
+    expect(await h.userTypeText(el.$refInput, "9", { clearPrevious: false })).toBe("11:9|50 AM");
+    h.unMockConsoleWarn();
+    await h.wait();
+    expect(el.$refInput.value).toBe("11:95 AM");
+    expect(onChanged).toBeCalledTimes(0);
+    expect(el.$value).toEqual(new WUPTimeObject(11, 50)); // previous value because no changes
+    expect(el.$refError.innerHTML).toMatchInlineSnapshot(
+      `"<span class="wup-hidden"></span><span>Invalid value</span>"`
+    );
+    expect(el.$isValid).toBe(false);
+
+    // decline/shift + change to valid value
+    h.setInputCursor(el.$refInput, "11:|95 AM");
+    await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
+    await h.wait();
+    expect(el.$refInput.value).toBe("11:29 AM");
+    expect(onChanged).toBeCalledTimes(1);
+    expect(el.$value).toEqual(new WUPTimeObject(11, 29));
+    expect(el.$refError).toBeFalsy();
+    expect(el.$isValid).toBe(true);
+
+    // mask-error
+    onChanged.mockClear();
+    h.setInputCursor(el.$refInput, "11:29 AM|");
+    expect(await h.userRemove(el.$refInput, { removeCount: 2 })).toBe("11:2|");
+    await h.wait();
+    expect(el.$refError.innerHTML).toMatchInlineSnapshot(
+      `"<span class="wup-hidden"></span><span>Incomplete value</span>"`
+    );
+    expect(onChanged).toBeCalledTimes(0);
+    expect(el.$isValid).toBe(false);
+
+    // error same when user leaves control
+    el.blur();
+    await h.wait();
+    expect(el.$refInput.value).toBe("11:2"); // AM missed here
+    expect(el.$refError?.innerHTML).toMatchInlineSnapshot(
+      `"<span class="wup-hidden"></span><span>Incomplete value</span>"`
+    );
+    expect(el.$isValid).toBe(false);
+    expect(onChanged).toBeCalledTimes(0);
+    expect(el.$value).toEqual(new WUPTimeObject(11, 29)); // value last parsed
   });
 
   test("menu", async () => {
@@ -832,5 +887,3 @@ describe("control.time", () => {
     `);
   });
 });
-
-// todo extra tests when user sets invalidValue & lefts focus

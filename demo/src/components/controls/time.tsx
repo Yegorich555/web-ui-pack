@@ -39,7 +39,7 @@ export default function TimeControlView() {
           w-name="time"
           w-initValue="23:50"
           w-min="02:30"
-          w-max="22:50"
+          w-max="23:50"
           w-exclude="window.myTimeExclude"
           w-validations="window.myTimeValidations"
         />

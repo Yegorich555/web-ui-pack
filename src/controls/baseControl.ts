@@ -1211,3 +1211,6 @@ export default abstract class WUPBaseControl<
 
 // NiceToHave when control is disabled need to show tooltip with reason
 // NiceToHave when control is readonly need to show tooltip with reason
+
+// todo set wup-time.$options.min = undefined - on value change it can throw err
+// todo $options.storage must change $value, but not initValue & need to skip setValue on $initValue change
