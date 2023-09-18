@@ -97,15 +97,17 @@ declare global {
       name: string | undefined | null;
       /** Focus element when it's appended to layout @defaultValue false */
       autoFocus: boolean;
-      /** Name to autocomplete by browser; Point `true` to inherit from $options.name or some string
-       *  if control has no autocomplete option then it's inherited from form
+      /** Name to autocomplete by browser; Point `true` to inherit from `$options.name` or some string
+       *  if control has no autocomplete option then it's inherited from `form`
+       * @see {@link HTMLInputElement.autocomplete}
        * @defaultValue null - means false if form.$options.autoComplete false also */
-      autoComplete: string | boolean | null;
+      autoComplete: AutoFill | boolean | null;
       /** Disallow edit/copy value; adds attr [disabled] for styling */
       disabled: boolean;
       /** Disallow copy value; adds attr [readonly] for styling @defaultValue false */
       readOnly: boolean;
-      /** Debounce option for onFocustLost event (for validationCases.onFocusLost); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost;
+      /** Debounce option for onFocustLost event (for validationCases.onFocusLost);
+       * @see {@link onFocusLostOptions.debounceMs} in helpers/onFocusLost;
        * @defaultValue 100ms */
       focusDebounceMs: number;
       /** Behavior that expected for clearing value inside control (via pressEsc or btnClear)
@@ -114,7 +116,7 @@ declare global {
       /** Rules defined for control. Impossible to override via `$options`. Use static `$dfaults` instead
        * * all functions must return error-message when value === undefined
        * * all functions must return error-message if setValue is `true/enabled` or value doesn't fit a rule
-       * * value can be undefined only when a rule named as 'required' or need to collect error-messages @see $options.validationShowAll
+       * * value can be undefined only when a rule named as 'required' or need to collect error-messages @see {@link Options.validationShowAll}
        * @example
        * ```
        * WUPTextControl.$defaults.validationRules.isNumber = (v === undefined || !/^[0-9]*$/.test(v)) && "Please enter a valid number";
@@ -543,11 +545,11 @@ export default abstract class WUPBaseControl<
   }
 
   /** Returns autoComplete name if related form or control option is enabled (and control.$options.autoComplete !== false ) */
-  get $autoComplete(): string | false {
+  get $autoComplete(): AutoFill | false {
     // @ts-expect-error
     const o = this.$form?._opts;
     const af = this._opts.autoComplete ?? (o?.autoComplete || false);
-    return (af === true ? this._opts.name : af) || false;
+    return ((af === true ? this._opts.name : af) as AutoFill) || false;
   }
 
   /** Check validity and show error if silent is false (by default)

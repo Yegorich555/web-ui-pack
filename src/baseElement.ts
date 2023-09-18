@@ -176,7 +176,7 @@ export default abstract class WUPBaseElement<
   /* Observed part of $options */
   #optsObserved?: Observer.Observed<Record<string, any>>;
   #removeObserved?: () => void;
-  get $options(): TOptions {
+  get $options(): Partial<TOptions> {
     // return observed options
     if (this.$isReady) {
       if (!this.#optsObserved) {
