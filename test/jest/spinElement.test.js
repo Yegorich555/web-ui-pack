@@ -73,7 +73,7 @@ describe("spinElement", () => {
       "w-inline": { value: true },
       "w-overflowfade": { value: true },
       "w-overflowoffset": { value: [2, 3] },
-      "w-overflowtarget": { value: document.body },
+      "w-overflowtarget": { value: "body", parsedValue: document.body },
     },
   });
 

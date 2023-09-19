@@ -47,7 +47,13 @@ export default function SpinView() {
         </small>
         <button className="btn" type="button" style={{ position: "relative" }}>
           Button with relative position
-          <wup-spin w-overflowFade="" w-fit="" w-inline={false} />
+          <wup-spin //
+            w-fit=""
+            w-inline={false}
+            w-overflowFade=""
+            w-overflowTarget="auto"
+            w-overflowOffset=""
+          />
         </button>
       </section>
       <section>
@@ -80,9 +86,10 @@ export default function SpinView() {
           Button without relative position
         </button>
         <wup-spin
+          w-overflowTarget="#spinTarget"
           ref={(el) => {
             if (el) {
-              el.$options.overflowTarget = el.previousElementSibling as HTMLElement;
+              // el.$options.overflowTarget = el.previousElementSibling as HTMLElement;
               el.$options.overflowFade = false;
             }
           }}

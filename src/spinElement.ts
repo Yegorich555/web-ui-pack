@@ -18,7 +18,7 @@ declare global {
       /** Allow to create shadowBox to partially hide target (only for `inline: false`)
        * @defaultValue true */
       overflowFade: boolean;
-      /** Anchor element that need to oveflow by spinner
+      /** Anchor element that need to oveflow by spinner; ignored if option `inline='true'`
        * @defaultValue `auto`: parentElement */
       overflowTarget: HTMLElement | "auto";
     }
@@ -36,14 +36,14 @@ declare global {
       "w-overflowOffset"?: string;
       "w-overflowFade"?: boolean | "";
       /** Anchor element that need to oveflow by spinner
-       * * Point Global reference to object with array
+       * * Point querySelector to related element
        * @example
-       * ```js
-       * window.someObj = document.body;
-       * <wup-spin w-items="window.someObj"></wup-spin>
+       * ```html
+       * <div id="me"></wup-spin>
+       * <wup-spin "w-overflowTarget="#me"></wup-spin>
        * ```
        * @defaultValue `auto`: parentElement */
-      "w-overflowTarget"?: string; // todo: point querySelector like with popup[target]
+      "w-overflowTarget"?: string;
     }
   }
 
@@ -147,6 +147,7 @@ export default class WUPSpinElement<
   static get mappedAttributes(): Record<string, AttributeMap> {
     const m = super.mappedAttributes;
     m.fit.type = AttributeTypes.bool;
+    m.overflowtarget.type = AttributeTypes.selector;
     return m;
   }
 
