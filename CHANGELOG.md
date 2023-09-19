@@ -28,6 +28,7 @@
 - helper [observer](src/helpers/observer.ts). *excludeNested doesn't exclude when re-assign nested properties*
 - [DateControl](src/controls/date.ts). *Validations min & max doesn't exclude time in comparison*
 - [DateControl](src/controls/date.ts). [TimeControl](src/controls/time.ts). *Validation `_parse` doesn't work when added extra char and another char auto-removed (shifted & removed)*
+- [CalendarControl](src/controls/calendar.ts). Removed useless background for button month in the header
 
 **New/Features**:
 

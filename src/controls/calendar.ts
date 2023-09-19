@@ -206,7 +206,7 @@ export default class WUPCalendarControl<
         border: none;
         border-radius: 2em;
         color: inherit;
-        background-color: white;
+        background: none;
         box-shadow: none;
         text-transform: inherit;
       }
