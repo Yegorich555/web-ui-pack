@@ -1056,6 +1056,7 @@ describe("control.select", () => {
 
       el.$showMenu();
       await h.wait();
+      expect(el.$isShown).toBe(true); // no-hiding when click option is disabled
       el.click();
       await h.wait();
       expect(el.$isShown).toBe(true); // no-hiding when click option is disabled

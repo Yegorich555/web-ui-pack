@@ -187,14 +187,8 @@ export default abstract class WUPBaseComboControl<
       return false; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
     }
 
-    if (showCase === ShowCases.onClick) {
-      if (!(this._opts.showCase & ShowCases.onClick)) {
-        return false;
-      }
-    } else if (showCase === ShowCases.onFocus) {
-      if (!(this._opts.showCase & ShowCases.onFocus)) {
-        return false;
-      }
+    const can = !!(this._opts.showCase & showCase) || showCase === ShowCases.onManualCall;
+    if (can && showCase === ShowCases.onFocus) {
       const was = this.$value;
       return new Promise((res) => {
         // WARN: if click on btnClear with control.emptyValue - no changes and popup appeares
@@ -204,7 +198,8 @@ export default abstract class WUPBaseComboControl<
         });
       });
     }
-    return true;
+
+    return can;
   }
 
   protected async goShowMenu(
