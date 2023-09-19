@@ -1,4 +1,4 @@
-import WUPBaseElement from "web-ui-pack/baseElement";
+import WUPBaseElement, { AttributeTypes } from "web-ui-pack/baseElement";
 import * as h from "../testHelper";
 
 const testAttr = "testattr";
@@ -245,12 +245,19 @@ describe("baseElement", () => {
 
   test("gotChanges", async () => {
     class TestEl extends WUPBaseElement {
+      static get mappedAttributes() {
+        const m = super.mappedAttributes;
+        m.target.type = AttributeTypes.selector;
+        return m;
+      }
+
       static $defaults = {
         disabled: false,
         readOnly: false,
         inline: true,
         offset: 0,
         label: "Ctrl",
+        ref: null,
         target: null,
         fitEl: "auto",
         someFunction: () => "not implemented, but required for testing",
@@ -268,8 +275,9 @@ describe("baseElement", () => {
     el.setAttribute("w-label", "Hi");
     el.setAttribute("w-fitEl", "true");
     el.setAttribute("w-offset", "12");
-    window.someTrg = el;
-    el.setAttribute("w-target", "window.someTrg");
+    window.someRef = el;
+    el.setAttribute("w-ref", "window.someRef");
+    el.setAttribute("w-target", "body");
     await h.wait(1);
     expect(TestEl.observedAttributes).toMatchInlineSnapshot(`
       [
@@ -278,6 +286,7 @@ describe("baseElement", () => {
         "w-inline",
         "w-offset",
         "w-label",
+        "w-ref",
         "w-target",
         "w-fitel",
         "w-somefunction",
@@ -293,23 +302,55 @@ describe("baseElement", () => {
         "label": "Hi",
         "offset": 12,
         "readOnly": true,
-        "someFunction": [Function],
-        "target": <test-ch
+        "ref": <test-ch
           w-disabled=""
           w-fitel="true"
           w-inline="false"
           w-label="Hi"
           w-offset="12"
           w-readonly="true"
-          w-target="window.someTrg"
+          w-ref="window.someRef"
+          w-target="body"
         />,
+        "someFunction": [Function],
+        "target": <body>
+          <test-inher-el />
+          <test-ch
+            w-disabled=""
+            w-fitel="true"
+            w-inline="false"
+            w-label="Hi"
+            w-offset="12"
+            w-readonly="true"
+            w-ref="window.someRef"
+            w-target="body"
+          />
+        </body>,
       }
     `);
-    // set wrong target
-    el.setAttribute("w-target", "window.wrongRef");
+    el.setAttribute("w-fitEl", "auto");
+    expect(el.$options.fitEl).toBe("auto");
+    // set wrong ref
+    el.setAttribute("w-ref", "window.wrongRef");
     expect(() => jest.advanceTimersByTime(1)).toThrow();
-    el.setAttribute("w-target", "wrongRef");
+    el.setAttribute("w-ref", "wrongRef");
     expect(() => jest.advanceTimersByTime(1)).toThrow();
+    el.setAttribute("w-ref", "");
+    expect(el.$options.ref).toBe(undefined);
+    // set target
+    el.setAttribute("w-target", "");
+    expect(el.$options.target).toBe(undefined);
+    el.setAttribute("w-target", "#someId");
+    expect(el.$options.target).toBe("#someId");
+    expect(() => jest.advanceTimersByTime(1)).toThrow(); // because target not found
+    // simulate when element appended after a time
+    el.setAttribute("w-target", "#elid");
+    expect(el.$options.target).toBe("#elid");
+    document.body.id = "elid";
+    await h.wait(1);
+    expect(document.querySelector("#elid")).toBe(document.body);
+    expect(el.$options.target).toBe(document.body);
+
     // removing attribute rollbacks to default value
     jest.clearAllMocks();
     el.removeAttribute("w-disabled");
@@ -317,8 +358,9 @@ describe("baseElement", () => {
     el.removeAttribute("w-inline");
     el.removeAttribute("w-label");
     el.removeAttribute("w-fitEl");
-    el.removeAttribute("w-target");
     el.removeAttribute("w-offset");
+    el.removeAttribute("w-ref");
+    el.removeAttribute("w-target");
     expect(onGotChanges).toBeCalledTimes(0); // called once after timeout
     expect(el.$options).toStrictEqual(TestEl.$defaults);
     await h.wait(1);
@@ -331,8 +373,9 @@ describe("baseElement", () => {
           "inline",
           "label",
           "fitEl",
-          "target",
           "offset",
+          "ref",
+          "target",
         ],
       ]
     `);
@@ -350,6 +393,7 @@ describe("baseElement", () => {
         "label": "Ctrl",
         "offset": 0,
         "readOnly": true,
+        "ref": null,
         "someFunction": [Function],
         "target": null,
       }
@@ -374,6 +418,7 @@ describe("baseElement", () => {
         "label": "Hello",
         "offset": 0,
         "readOnly": true,
+        "ref": null,
         "someFunction": [Function],
         "target": null,
       }

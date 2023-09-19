@@ -25,12 +25,15 @@ export interface AttributeMap {
   parse?: (attrValue: string) => any;
 }
 export const enum AttributeTypes {
+  /** Value presented by `true`, `false` or '' (empty string) */
   bool,
   number,
   string,
   reference,
   parsedObject, // tod maybe this is useless
   parseCustom,
+  /** Element accessed via `document.querySelector` */
+  selector,
 }
 
 /** Basic abstract class for every component in web-ui-pack */
@@ -522,6 +525,8 @@ export default abstract class WUPBaseElement<
       // case "":
       case "true":
         return true; // empty attr and 'true' is enable`
+      case "auto":
+        return attrValue;
     }
     switch (type) {
       case AttributeTypes.bool:
@@ -535,6 +540,9 @@ export default abstract class WUPBaseElement<
         return v;
       }
       case AttributeTypes.reference: {
+        if (!attrValue) {
+          return undefined;
+        }
         const v = nestedProperty.get(window, attrValue);
         if (v === undefined) {
           this.throwError(
@@ -553,6 +561,24 @@ export default abstract class WUPBaseElement<
           this.throwError(err);
           return prev;
         }
+      }
+      case AttributeTypes.selector: {
+        if (!attrValue) {
+          return undefined;
+        }
+        let el = document.querySelector(attrValue);
+        if (!el) {
+          setTimeout(() => {
+            el = document.querySelector(attrValue);
+            if (el) {
+              this._opts[propName as keyof TOptions] = el as any;
+            } else {
+              this.throwError(`Element not found according to attribute [${attrName}]='${attrValue}' `);
+            }
+          }); // on init item can be missed and added after
+          return attrValue;
+        }
+        return el;
       }
       default:
         return attrValue; // string

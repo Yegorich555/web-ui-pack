@@ -493,7 +493,7 @@ export default class WUPPopupElement<
   /** Defines target on show; @returns Element | Error */
   defineTarget(): HTMLElement | SVGElement {
     let el: Element | null;
-    const attrTrg = this.getAttribute("w-target");
+    const attrTrg = this.getAttribute("w-target"); // NiceToHave: re-use automated parseAttr()
     if (attrTrg) {
       el = document.querySelector(attrTrg);
     } else if (this._opts.target) {

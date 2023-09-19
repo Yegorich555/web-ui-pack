@@ -92,13 +92,13 @@ describe("control.select", () => {
     delete el._cachedItems;
 
     const onErr = jest.spyOn(el, "throwError").mockImplementationOnce(() => {});
-    el.setAttribute("w-items", "");
+    el.setAttribute("w-items", "bla-bla");
     jest.advanceTimersByTime(1);
     el.$initValue = undefined;
     expect(el.$options.items?.length).toBe(0);
     expect((await el.getItems())?.length).toBe(0);
     expect(onErr.mock.lastCall[0]).toMatchInlineSnapshot(
-      `"Value not found according to attribute [items] in 'window.'"`
+      `"Value not found according to attribute [items] in 'window.bla-bla'"`
     );
 
     // when need to parse but items must be fetched before
