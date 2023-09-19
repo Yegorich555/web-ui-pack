@@ -177,7 +177,8 @@ export default class WUPSelectControl<
       minCount: (v, setV) => (v == null || v.length < setV) && `Min count is ${setV}`,
       maxCount: (v, setV) => (v == null || v.length > setV) && `Max count is ${setV}`,
     },
-    showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey | ShowCases.onInput,
+    showCase:
+      ShowCases.onClick | ShowCases.onFocus | ShowCases.onFocusAuto | ShowCases.onPressArrowKey | ShowCases.onInput,
     allowNewValue: false,
     multiple: false,
     items: [],

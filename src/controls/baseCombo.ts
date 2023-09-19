@@ -7,11 +7,13 @@ import WUPTextControl from "./text";
 export const enum ShowCases {
   /** When $showMenu() called programmatically; Don't use it for $options (it's for nested cycle) */
   onManualCall = 1,
-  /** When control got focus; ignores case when user changed value by click on item on clearButton
+  /** When control got focus via user interaction; ignores case when user changed value by click on item on clearButton
    * to change such behavior update WUPBaseComboControl.prototype.canShowMenu */
   onFocus = 1 << 1,
+  /** When control got focus programmatically (via option `autofocus` or when called method 'focus()') */
+  onFocusAuto = 1 << 2,
   /** When user clicks on control (beside editable not-empty input) */
-  onClick = 1 << 2,
+  onClick = 1 << 3,
   /** When user clicks on input (by default it's disabled rule to allow user to work with input without popup hide/show blinks) */
   onClickInput = 1 << 4,
   /** When user types text */
@@ -100,7 +102,7 @@ export default abstract class WUPBaseComboControl<
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
     },
-    showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey,
+    showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onFocusAuto | ShowCases.onPressArrowKey,
     readOnlyInput: false,
   };
 
@@ -188,7 +190,7 @@ export default abstract class WUPBaseComboControl<
     }
 
     const can = !!(this._opts.showCase & showCase) || showCase === ShowCases.onManualCall;
-    if (can && showCase === ShowCases.onFocus) {
+    if (can && (showCase === ShowCases.onFocus || showCase === ShowCases.onFocusAuto)) {
       const was = this.$value;
       return new Promise((res) => {
         // WARN: if click on btnClear with control.emptyValue - no changes and popup appeares
@@ -439,9 +441,11 @@ export default abstract class WUPBaseComboControl<
     }
   }
 
+  /** When focus() called manually */
+  _isFocusCall?: boolean;
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
     const arr = super.gotFocus(ev);
-    const r = this.goShowMenu(ShowCases.onFocus, ev);
+    const r = this.goShowMenu(this._isFocusCall ? ShowCases.onFocusAuto : ShowCases.onFocus, ev);
 
     let clickAfterFocus = true; // prevent clickAfterFocus
     let lblClick: ReturnType<typeof setTimeout> | false = false; // fix when labelOnClick > inputOnClick > inputOnFocus
@@ -526,6 +530,13 @@ export default abstract class WUPBaseComboControl<
   protected override gotRemoved(): void {
     this.removePopup();
     super.gotRemoved();
+  }
+
+  override focus(): boolean {
+    this._isFocusCall = true;
+    const r = super.focus();
+    delete this._isFocusCall;
+    return r;
   }
 }
 

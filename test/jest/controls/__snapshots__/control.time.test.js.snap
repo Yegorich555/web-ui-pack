@@ -852,7 +852,7 @@ exports[`control.time common tests snapshot of $defaults 1`] = `
   "readOnly": false,
   "readOnlyInput": false,
   "selectOnFocus": false,
-  "showCase": 70,
+  "showCase": 78,
   "step": 1,
   "storage": "local",
   "storageKey": "",
