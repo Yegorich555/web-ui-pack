@@ -697,7 +697,7 @@ exports[`control.date common tests snapshot of $defaults 1`] = `
   "readOnly": false,
   "readOnlyInput": false,
   "selectOnFocus": false,
-  "showCase": 78,
+  "showCase": 74,
   "startWith": null,
   "storage": "local",
   "storageKey": "",

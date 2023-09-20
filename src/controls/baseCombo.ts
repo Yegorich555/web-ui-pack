@@ -102,7 +102,7 @@ export default abstract class WUPBaseComboControl<
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
     },
-    showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onFocusAuto | ShowCases.onPressArrowKey,
+    showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey,
     readOnlyInput: false,
   };
 
@@ -194,7 +194,7 @@ export default abstract class WUPBaseComboControl<
     if (can && (showCase === ShowCases.onFocus || showCase === ShowCases.onFocusAuto)) {
       const was = this.$value;
       return new Promise((res) => {
-        // WARN: if click on btnClear with control.emptyValue - no changes and popup appeares
+        // WARN: if click on btnClear with control.emptyValue - no changes and popup appears
         setTimeout(() => {
           const isChangedByClick = !this.#ctr.$isEqual(was, this.$value);
           return res(!isChangedByClick); // click on item or btnClear & control gets focus: need to not open menu because user makes action for changing value
@@ -452,11 +452,10 @@ export default abstract class WUPBaseComboControl<
     }
   }
 
-  /** When focus() called manually */
-
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
     const arr = super.gotFocus(ev);
     const r = this.goShowMenu((this.$refInput as any)._isFocusCall ? ShowCases.onFocusAuto : ShowCases.onFocus, ev);
+    // todo test-case: goShow + goHide when canShow returns true (without promise) in one time: must close without events and popup init
     // todo issue: when autofocus: true but browser not in focus: click on page outside controls > popup opens and closes after a time - blink effect
     let clickAfterFocus = true; // prevent clickAfterFocus
     let lblClick: ReturnType<typeof setTimeout> | false = false; // fix when labelOnClick > inputOnClick > inputOnFocus
