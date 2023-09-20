@@ -744,6 +744,14 @@ export default class WUPTextControl<
     }
     return next;
   }
+
+  override focus(): boolean {
+    if (this.$isDisabled) {
+      return false;
+    }
+    this.$refInput.focus();
+    return document.activeElement === this.$refInput;
+  }
 }
 
 customElements.define(tagName, WUPTextControl);
