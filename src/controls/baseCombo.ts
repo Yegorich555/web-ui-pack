@@ -533,7 +533,7 @@ export default abstract class WUPBaseComboControl<
   }
 
   override focus(): boolean {
-    this._isFocusCall = true;
+    this._isFocusCall = true; // todo it doesn't work if some modal tries to autofocus first element: focus gets to input directly
     const r = super.focus();
     delete this._isFocusCall;
     return r;

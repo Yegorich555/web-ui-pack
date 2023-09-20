@@ -1000,6 +1000,7 @@ describe("control.select", () => {
       expect(el.$isShown).toBe(false);
 
       el.$options.showCase &= ~ShowCases.onFocus; // remove option
+      el.$options.showCase &= ~ShowCases.onFocusAuto; // remove option
       el.focus();
       await h.wait();
       expect(el.$isShown).toBe(false);
