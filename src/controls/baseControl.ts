@@ -673,6 +673,7 @@ export default abstract class WUPBaseControl<
   setupInput(): void {
     const i = this.$refInput;
     i.disabled = this.$isDisabled;
+    // @ts-ignore
     i.autocomplete = this.$autoComplete || "off";
     this.setupInputReadonly();
   }

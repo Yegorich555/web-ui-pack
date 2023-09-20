@@ -140,6 +140,7 @@ export default abstract class WUPBaseComboControl<
     i.setAttribute("role", "combobox");
     i.setAttribute("aria-haspopup", "listbox");
     i.setAttribute("aria-expanded", false);
+    i.focus = this.inputFocus; // assign custom method to detect how focus called
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.BaseCombo.Options> | null): void {
@@ -204,6 +205,8 @@ export default abstract class WUPBaseComboControl<
     return can;
   }
 
+  /** Required to properly use with goShow() & goHide() called in one time */
+  protected _willShow?: true;
   protected async goShowMenu(
     showCase: ShowCases,
     e?: MouseEvent | FocusEvent | KeyboardEvent | null
@@ -211,11 +214,15 @@ export default abstract class WUPBaseComboControl<
     if (this.#isShown) {
       return this.$refPopup!;
     }
-
+    this._willShow = true;
     let can = this.canShowMenu(showCase, e);
     if (can instanceof Promise) {
       can = await can;
-    }
+    } /* else {
+      await Promise.resolve(); // to allow goShow(); goHide() don't even init popup in one time
+    } */
+    can &&= this._willShow;
+    delete this._willShow;
     if (!can) {
       return null;
     }
@@ -251,7 +258,7 @@ export default abstract class WUPBaseComboControl<
 
       // const wasFcs = this.$isFocused;
       this.renderMenu(p, menuId);
-      // rollback the logic if renderMenu() returns Promise
+      // WARN: rollback the logic if renderMenu() returns Promise
       // const fcs = this.$isFocused;
       // if (!fcs && wasFcs) {
       //   this.#isShown = false;
@@ -298,6 +305,10 @@ export default abstract class WUPBaseComboControl<
 
   protected _isHiding?: true;
   protected async goHideMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): Promise<boolean> {
+    if (this._willShow) {
+      delete this._willShow;
+      return true;
+    }
     if (!this.#isShown || this._isHiding) {
       return false;
     }
@@ -442,11 +453,11 @@ export default abstract class WUPBaseComboControl<
   }
 
   /** When focus() called manually */
-  _isFocusCall?: boolean;
+
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
     const arr = super.gotFocus(ev);
-    const r = this.goShowMenu(this._isFocusCall ? ShowCases.onFocusAuto : ShowCases.onFocus, ev);
-
+    const r = this.goShowMenu((this.$refInput as any)._isFocusCall ? ShowCases.onFocusAuto : ShowCases.onFocus, ev);
+    // todo issue: when autofocus: true but browser not in focus: click on page outside controls > popup opens and closes after a time - blink effect
     let clickAfterFocus = true; // prevent clickAfterFocus
     let lblClick: ReturnType<typeof setTimeout> | false = false; // fix when labelOnClick > inputOnClick > inputOnFocus
     let onInputStartClick = false; // mouseDown>selectText>mouseUp - without filter it closes/opens popup when user tries to select text
@@ -532,11 +543,10 @@ export default abstract class WUPBaseComboControl<
     super.gotRemoved();
   }
 
-  override focus(): boolean {
-    this._isFocusCall = true; // todo it doesn't work if some modal tries to autofocus first element: focus gets to input directly
-    const r = super.focus();
+  private inputFocus(this: HTMLInputElement & { _isFocusCall?: boolean }): void {
+    this._isFocusCall = true;
+    HTMLInputElement.prototype.focus.call(this);
     delete this._isFocusCall;
-    return r;
   }
 }
 
