@@ -39,6 +39,7 @@ export default function CalendarControlView() {
             el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
+        w-autoFocus
       >
         <wup-calendar
           w-name="calendar"

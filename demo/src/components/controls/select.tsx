@@ -74,6 +74,7 @@ export default function SelectControlView() {
             el.$initModel = { asDropdown: items[3].value };
           }
         }}
+        w-autoFocus
       >
         <wup-select
           w-items="window.inputSelect.items"

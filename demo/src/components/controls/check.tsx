@@ -22,6 +22,7 @@ export default function CheckControlView() {
             el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
+        w-autoFocus
       >
         <wup-check w-name="check" w-label="Check" w-initValue={false} w-reverse={false} />
         <wup-check

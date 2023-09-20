@@ -34,6 +34,7 @@ export default function TimeControlView() {
             el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
+        w-autoFocus
       >
         <wup-time
           w-name="time"

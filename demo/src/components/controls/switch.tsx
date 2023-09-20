@@ -28,6 +28,7 @@ export default function SwitchControlView() {
             el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
+        w-autoFocus
       >
         <wup-switch //
           w-name="switch"

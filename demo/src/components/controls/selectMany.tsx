@@ -50,6 +50,7 @@ export default function SelectManyControlView() {
             el.$onSubmit = (e) => console.warn("sumbitted model", e.$model);
           }
         }}
+        w-autoFocus
       >
         <wup-selectmany
           w-items="window.inputSelectMany.items"

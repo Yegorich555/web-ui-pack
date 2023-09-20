@@ -36,6 +36,7 @@ export default function NumberControlView() {
             el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
+        w-autoFocus
       >
         <wup-num
           w-name="number"

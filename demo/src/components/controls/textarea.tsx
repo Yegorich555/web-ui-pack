@@ -30,6 +30,7 @@ export default function TextControlView() {
             el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
+        w-autoFocus
       >
         <wup-textarea
           w-name="email"

@@ -52,6 +52,7 @@ export default function RadioControlView() {
             el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
+        w-autoFocus
       >
         <wup-radio
           w-name="radio"

@@ -39,6 +39,7 @@ export default function DateControlView() {
             el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
+        w-autoFocus
       >
         <wup-date
           w-name="date"
