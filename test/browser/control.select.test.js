@@ -87,7 +87,7 @@ describe("control.select", () => {
   test("show/hide animation works", async () => {
     await page.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: "no-preference" }]); // allow animations
     // show
-    await page.evaluate(() => document.getElementById("trueEl").focus());
+    await page.evaluate(() => HTMLElement.prototype.focus.call(document.querySelector("#trueEl input")));
     await page.waitForTimeout(310); // animation takes 300ms by default
     let r = await getInfo();
     expect(r.isShown).toBe(true);
@@ -106,11 +106,11 @@ describe("control.select", () => {
     expect(r.isMenuExists).toBe(false); // because removed after animation end
 
     // case: focus again during the closing by focusout must open
-    await page.evaluate(() => document.getElementById("trueEl").focus());
+    await page.evaluate(() => HTMLElement.prototype.focus.call(document.querySelector("#trueEl input")));
     await page.waitForTimeout(200);
     await page.evaluate(() => document.activeElement.blur());
     await page.waitForTimeout(100);
-    await page.evaluate(() => document.getElementById("trueEl").focus());
+    await page.evaluate(() => HTMLElement.prototype.focus.call(document.querySelector("#trueEl input")));
     await page.waitForTimeout(300);
     r = await getInfo();
     expect(r.isMenuExists).toBe(true);

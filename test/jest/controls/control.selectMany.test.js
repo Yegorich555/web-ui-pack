@@ -1,5 +1,6 @@
 /* eslint-disable prefer-destructuring */
 import { WUPSelectManyControl } from "web-ui-pack";
+import { ShowCases } from "web-ui-pack/controls/baseCombo";
 import { isAnimEnabled } from "web-ui-pack/helpers/animate";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
@@ -19,6 +20,8 @@ initTestBaseControl({
   onInit: (e) => {
     el = e;
     el.$options.items = getItems();
+    el.$options.showCase |= ShowCases.onFocusAuto; // without this impossible to test with manual triggering focus()
+
     window.$1Value = [10];
     window.$2Value = [20, 40];
     window.$3Value = [30];
@@ -85,7 +88,7 @@ describe("control.selectMany", () => {
       `"<label for="txt1"><span><span item="" aria-hidden="true">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label>"`
     );
 
-    el.focus(); // opening menu by focus
+    HTMLInputElement.prototype.focus.call(el.$refInput); // opening menu by focus
     await h.wait(1);
     expect(el.$isShown).toBe(true);
     expect(el.innerHTML).toMatchInlineSnapshot(
@@ -193,7 +196,7 @@ describe("control.selectMany", () => {
     // input hidden if readOnlyInput and values exist
     el.blur();
     el.$options.readOnlyInput = true;
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait(1);
     expect(el.$refInput.outerHTML).toMatchInlineSnapshot(
       `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-owns="txt16" aria-controls="txt16" aria-describedby="txt15" readonly="">"`
@@ -275,7 +278,7 @@ describe("control.selectMany", () => {
   test("menu: focus behavior", async () => {
     el.$options.hideSelected = true;
     el.$value = [getItems()[0].value];
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(el.$isShown).toBe(true);
 
@@ -303,7 +306,7 @@ describe("control.selectMany", () => {
   test("option [hideSelected]", async () => {
     el.$options.hideSelected = false; // tests with 'true' see above
     el.$value = [getItems()[0].value];
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(el.$isShown).toBe(true);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
@@ -326,7 +329,7 @@ describe("control.selectMany", () => {
   });
 
   test("keyboard support", async () => {
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait(1);
     expect(handledKeydown("ArrowLeft")).toBe(false); // because no value - no items
     expect(handledKeydown("ArrowRight")).toBe(false);
@@ -336,7 +339,7 @@ describe("control.selectMany", () => {
     await h.wait();
 
     el.$value = [10, 40];
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
       [
@@ -453,7 +456,7 @@ describe("control.selectMany", () => {
 
     // focus between menu & items
     el.$value = [30, 40];
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     // focusing item
     expect(handledKeydown("ArrowLeft")).toBe(true);
@@ -517,7 +520,7 @@ describe("control.selectMany", () => {
 
     // Enter key & menu-item focused
     el.$value = [30];
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(handledKeydown("ArrowDown")).toBe(true);
     expect(handledKeydown("ArrowDown")).toBe(true);
@@ -546,7 +549,7 @@ describe("control.selectMany", () => {
     el.$options.allowNewValue = true;
     el.$value = [40];
     await h.wait(10);
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
       [
@@ -603,7 +606,7 @@ describe("control.selectMany", () => {
     el.$options.sortable = true;
     await h.wait(10);
     el.addEventListener("$change", onChanged);
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     el.$hideMenu();
     await h.wait();
@@ -1042,7 +1045,7 @@ describe("control.selectMany", () => {
     trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
     // simulate focusing when user makes mouse down > move+sort > up
     el.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }));
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await nextFrame(50);
     await expect(h.userTypeText(el.$refInput, "l")).resolves.not.toThrow();
     await h.wait();

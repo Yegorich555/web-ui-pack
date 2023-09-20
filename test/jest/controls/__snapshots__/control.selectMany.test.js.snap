@@ -911,7 +911,7 @@ exports[`control.selectMany common tests snapshot of $defaults 1`] = `
   "readOnly": false,
   "readOnlyInput": false,
   "selectOnFocus": false,
-  "showCase": 110,
+  "showCase": 106,
   "sortable": false,
   "storage": "local",
   "storageKey": "",

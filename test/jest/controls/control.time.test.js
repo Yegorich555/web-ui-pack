@@ -4,6 +4,7 @@
  */
 import { WUPTimeControl, WUPTimeObject } from "web-ui-pack";
 // import { localeInfo } from "web-ui-pack/indexHelpers";
+import { ShowCases } from "web-ui-pack/controls/baseCombo";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
 
@@ -34,6 +35,7 @@ initTestBaseControl({
   onInit: (e) => {
     jest.setSystemTime(new Date("2022-10-18T12:23:00.000Z")); // 18 Oct 2022 12:00 UTC
     el = e;
+    el.$options.showCase |= ShowCases.onFocusAuto; // without this impossible to test with manual triggering focus()
 
     const height = 50;
     const width = 100;
@@ -113,7 +115,7 @@ describe("control.time", () => {
       expect(el.$options.format).toBe("hh:mm A");
       expect(el.$options.mask).toBe("00:00 //[AP]//M");
       expect(el.$options.maskholder).toBe("hh:mm *M");
-      el.focus();
+      HTMLInputElement.prototype.focus.call(el.$refInput);
       await h.wait();
       expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
         [
@@ -132,7 +134,7 @@ describe("control.time", () => {
       await h.wait(1);
       expect(el.$options.mask).toBe("00:00 //[ap]//m");
       expect(el.$options.maskholder).toBe("hh:mm *m");
-      el.focus();
+      HTMLInputElement.prototype.focus.call(el.$refInput);
       await h.wait();
       expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
         [
@@ -152,7 +154,7 @@ describe("control.time", () => {
       await h.wait(1);
       expect(el.$options.mask).toBe("#0-#0");
       expect(el.$options.maskholder).toBe("hh-mm");
-      el.focus();
+      HTMLInputElement.prototype.focus.call(el.$refInput);
       await h.wait();
 
       expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
@@ -185,7 +187,7 @@ describe("control.time", () => {
 
     test("step", async () => {
       expect(el.$options.step).toBe(1);
-      el.focus();
+      HTMLInputElement.prototype.focus.call(el.$refInput);
       await h.wait();
       expect(el.$refMenuLists[1].innerHTML).toMatchInlineSnapshot(
         `"<li>21</li><li>22</li><li aria-selected="true">23</li><li>24</li><li>25</li>"`
@@ -199,7 +201,7 @@ describe("control.time", () => {
       expect(el.$refMenuLists).not.toBeDefined();
 
       el.$options.step = 5;
-      el.focus();
+      HTMLInputElement.prototype.focus.call(el.$refInput);
       await h.wait();
       expect(el.$options.step).toBe(5);
       // WARN: if step == 5 & user can type 15:23 -  25 minutes will be selected in this case
@@ -216,7 +218,7 @@ describe("control.time", () => {
     form.$onSubmit = onSubmit;
     el.$options.name = "test";
     await h.wait(1);
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     const onParse = jest.spyOn(el, "parseInput");
     const onChange = jest.fn();
     el.addEventListener("$change", onChange);
@@ -357,7 +359,7 @@ describe("control.time", () => {
     await h.wait(1);
     const onChanged = jest.fn();
     el.addEventListener("$change", onChanged);
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(h.getInputCursor(el.$refInput)).toBe("|12:59 PM|");
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
@@ -584,7 +586,7 @@ describe("control.time", () => {
       orig.call(el, popup, menuId, rows);
     };
 
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
 
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
@@ -617,7 +619,7 @@ describe("control.time", () => {
   });
 
   test("value change not affects on menu", async () => {
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(el.$isShown).toBe(true);
 
@@ -634,7 +636,7 @@ describe("control.time", () => {
     el.$options.exclude = { test: (v) => v === new WUPTimeObject(14, 0).valueOf() };
     await h.wait(1);
 
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
@@ -670,7 +672,7 @@ describe("control.time", () => {
     el.blur();
     await h.wait();
     el.$options.max = new WUPTimeObject(11, 50);
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
@@ -686,7 +688,7 @@ describe("control.time", () => {
     await h.wait();
     el.$options.format = "hh:mm";
     await h.wait(1);
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
@@ -700,7 +702,7 @@ describe("control.time", () => {
     el.blur();
     await h.wait();
     jest.spyOn(el, "canShowMenu").mockReturnValueOnce(false);
-    expect(() => el.focus()).not.toThrow();
+    expect(() => HTMLInputElement.prototype.focus.call(el.$refInput)).not.toThrow();
     await h.wait();
     expect(el.$isShown).toBe(false);
 
@@ -710,7 +712,7 @@ describe("control.time", () => {
     el.$options.max = null;
     el.$options.min = new WUPTimeObject(11, 22);
     el.$options.exclude = null;
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
@@ -725,7 +727,7 @@ describe("control.time", () => {
     el.$options.min = null;
     el.$options.max = new WUPTimeObject(13, 23);
     el.$options.exclude = null;
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
@@ -740,7 +742,7 @@ describe("control.time", () => {
     el.$options.min = null;
     el.$options.max = null;
     el.$options.exclude = { test: (v) => v.hours === 12 && v.minutes === 22 };
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
@@ -752,7 +754,7 @@ describe("control.time", () => {
 
   test("option: menuButtonsOff", async () => {
     el.$options.menuButtonsOff = true;
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
@@ -803,7 +805,7 @@ describe("control.time", () => {
 
     // select by Enter - no extra events
     jest.clearAllMocks();
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(isPressKeyPrevented("ArrowDown")).toBe(true); // 1st time focus
     await h.wait(1);
@@ -820,7 +822,7 @@ describe("control.time", () => {
 
     // clear to previous by Escape + close
     jest.clearAllMocks();
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(isPressKeyPrevented("ArrowDown")).toBe(true); // 1st time focus
     await h.wait(1);
@@ -841,7 +843,7 @@ describe("control.time", () => {
     el.$value = undefined;
     await h.wait(1);
     jest.clearAllMocks();
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(el.$refMenuLists.map((l) => l.innerHTML)).toMatchInlineSnapshot(`
       [
@@ -867,7 +869,7 @@ describe("control.time", () => {
     el.$initValue = undefined;
     el.$value = undefined;
     await h.wait();
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(el.$isShown).toBe(true);
     await h.userClick(el.$refLabel);

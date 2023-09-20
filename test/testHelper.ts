@@ -396,7 +396,7 @@ export async function userTypeText(
   text: string,
   opts = { clearPrevious: true, slow: false }
 ): Promise<string> {
-  el.focus();
+  HTMLInputElement.prototype.focus.call(el);
   await wait(10);
   if (opts?.clearPrevious) {
     el.value = "";
@@ -434,7 +434,7 @@ export async function userTypeText(
 
 /** Simulate user inserts text */
 export async function userInsertText(el: HTMLInputElement, text: string): Promise<string> {
-  el.focus();
+  HTMLInputElement.prototype.focus.call(el);
   await wait(10);
   const inputType = "insertFromPaste";
 
@@ -471,7 +471,7 @@ export function setInputCursor(el: HTMLInputElement, cursorPattern: string, opts
   const was = el.value;
   const gotValue = cursorPattern.replace(/[|]/g, "");
   // expect(el.value).toBe(gotValue);
-  el.focus();
+  HTMLInputElement.prototype.focus.call(el);
   el.value = gotValue;
   const pos1 = cursorPattern.indexOf("|");
   let pos2 = cursorPattern.indexOf("|", pos1 + 1);
@@ -495,7 +495,7 @@ export async function userRemove(
   opts?: { removeCount: number; key: "Backspace" | "Delete" }
 ): Promise<string> {
   await wait(10);
-  el.focus();
+  HTMLInputElement.prototype.focus.call(el);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   opts = { removeCount: 1, key: "Backspace", ...opts };
   const { key } = opts;
@@ -556,7 +556,7 @@ export async function userClick(el: HTMLElement, opts?: MouseEventInit, timeoutM
   el.dispatchEvent(mouseEvent("pointerdown"));
   const isOk = el.dispatchEvent(mouseEvent("mousedown"));
   if (isOk) {
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el);
     if (document.activeElement !== el) {
       // case when click on div moves focus to body
       (document.activeElement as HTMLElement)?.blur.call(document.activeElement);
@@ -608,7 +608,7 @@ export async function userTap(el: HTMLElement, opts?: MouseEventInit) {
   el.dispatchEvent(new TouchEvent("touchend", { touches: [], ...o() }));
 
   const isOk = el.dispatchEvent(mouseEvent("mousedown"));
-  isOk && el.focus();
+  isOk && HTMLInputElement.prototype.focus.call(el);
   el.dispatchEvent(mouseEvent("mouseup"));
   el.dispatchEvent(mouseEvent("click"));
 }
@@ -768,7 +768,7 @@ export async function userPressTab(next: HTMLElement | null) {
     if (!next) {
       (document.activeElement as HTMLElement)?.blur?.call(document.activeElement);
     } else {
-      next.focus();
+      HTMLElement.prototype.focus.call(next);
       next.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
     }
   });

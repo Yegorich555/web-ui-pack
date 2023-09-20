@@ -20,6 +20,7 @@ initTestBaseControl({
   onInit: (e) => {
     el = e;
     el.$options.items = getItems();
+    el.$options.showCase |= ShowCases.onFocusAuto; // without this impossible to test with manual triggering focus()
 
     const height = 50;
     const width = 100;
@@ -204,7 +205,7 @@ describe("control.select", () => {
       return new Promise((resolve) => setTimeout(() => resolve(getItems()), 100));
     };
     await h.wait(1);
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait(10);
     expect(el.$isShown).toBe(false);
     el.blur();
@@ -232,7 +233,7 @@ describe("control.select", () => {
     el.$onHideMenu = jest.fn();
 
     // opening by focus
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(document.activeElement).toBe(el.$refInput);
     expect(el.$isShown).toBe(true);
@@ -307,7 +308,7 @@ describe("control.select", () => {
     el.$showMenu();
     await h.wait();
     expect(el.$isShown).toBe(true);
-    el.focus(); // without focus click events are not handled
+    HTMLInputElement.prototype.focus.call(el.$refInput); // without focus click events are not handled
     document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     expect(el.$isShown).toBe(false);
@@ -335,7 +336,7 @@ describe("control.select", () => {
     expect(el.$isShown).toBe(true);
 
     // stay open even by popupClick
-    el.focus(); // without focus click events are not handled
+    HTMLInputElement.prototype.focus.call(el.$refInput); // without focus click events are not handled
     el.$refPopup.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();
     expect(el.$isShown).toBe(true);
@@ -445,7 +446,7 @@ describe("control.select", () => {
 
     // checking if sync-call works as expected
     el.$showMenu();
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     el.$hideMenu();
     await h.wait();
     expect(el.$isShown).toBe(false);
@@ -486,12 +487,12 @@ describe("control.select", () => {
     await h.wait();
     const goShowMenu = jest.spyOn(el, "goShowMenu");
     expect(el.$isFocused).toBe(false);
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait(1); // start animation
     expect(el.$isShown).toBe(true);
     expect(goShowMenu).toBeCalled();
 
-    el2.focus();
+    HTMLInputElement.prototype.focus.call(el2.$refInput);
     await h.wait();
     expect(el2.$isShown).toBe(true);
     expect(el.$isShown).toBe(false);
@@ -522,7 +523,7 @@ describe("control.select", () => {
   });
 
   test("menu navigation", async () => {
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup menu="" style="min-width: 100px;"><ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul></wup-popup>"`
@@ -701,7 +702,7 @@ describe("control.select", () => {
     ];
     await h.wait();
     expect(el.$value).toBeFalsy();
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(el.$isShown).toBe(true);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
@@ -803,7 +804,7 @@ describe("control.select", () => {
     el.$options.items = () => new Promise((res) => setTimeout(() => res(getItems()), 100));
     const onCanShow = jest.spyOn(el, "canShowMenu").mockReturnValue(false);
     await h.wait(1);
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(el.$isShown).toBe(false);
     onCanShow.mockRestore();
@@ -822,7 +823,7 @@ describe("control.select", () => {
     form.$onSubmit = onSubmit;
     await h.wait();
 
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(el.$isShown).toBe(true);
 
@@ -854,7 +855,7 @@ describe("control.select", () => {
   });
 
   test("select by click on menu-item", async () => {
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(el.$isShown).toBe(true);
     expect(el.$value).toBe(undefined);
@@ -889,7 +890,7 @@ describe("control.select", () => {
 
   test("clear by Backspace+Enter", async () => {
     el.$value = getItems()[0].value;
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(el.$isShown).toBe(true);
 
@@ -930,7 +931,7 @@ describe("control.select", () => {
     // again but when menu closed - in this case filterMenuItems not fired & menu opened again by removeText
     el.$value = getItems()[0].value;
     await h.wait();
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait(1);
     h.setInputCursor(el.$refInput, `|${el.$refInput.value}|`);
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
@@ -967,7 +968,7 @@ describe("control.select", () => {
   test("no opening by click on btnClear", async () => {
     el.$value = 10;
     await h.wait(1);
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     el.$refBtnClear.click();
     await h.wait();
     expect(el.$isShown).toBe(false);
@@ -990,7 +991,7 @@ describe("control.select", () => {
   describe("options", () => {
     test("showCase", async () => {
       // showCase: focus
-      el.focus();
+      HTMLInputElement.prototype.focus.call(el.$refInput);
       await h.wait();
       await h.wait();
       expect(el.$isShown).toBe(true);
@@ -1001,13 +1002,13 @@ describe("control.select", () => {
 
       el.$options.showCase &= ~ShowCases.onFocus; // remove option
       el.$options.showCase &= ~ShowCases.onFocusAuto; // remove option
-      el.focus();
+      HTMLInputElement.prototype.focus.call(el.$refInput);
       await h.wait();
       expect(el.$isShown).toBe(false);
 
       el.blur();
       await h.wait();
-      el.focus();
+      HTMLInputElement.prototype.focus.call(el.$refInput);
       el.click(); // simulate mouseClick + focus
       await h.wait();
       expect(el.$isShown).toBe(true);
@@ -1027,7 +1028,7 @@ describe("control.select", () => {
       el.click();
       await h.wait();
       expect(el.$isShown).toBe(true);
-      el.focus();
+      HTMLInputElement.prototype.focus.call(el.$refInput);
       await h.wait(1);
 
       await h.userClick(el);
@@ -1234,7 +1235,7 @@ describe("control.select", () => {
       expect(el.$options.multiple).toBe(true);
       expect(el.$initValue).toStrictEqual([20]);
       expect(el.$refInput.value).toBe("Mikky");
-      el.focus();
+      HTMLInputElement.prototype.focus.call(el.$refInput);
       await h.wait();
       expect(h.getInputCursor(el.$refInput)).toBe("Mikky, |");
       expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
@@ -1250,7 +1251,7 @@ describe("control.select", () => {
       expect(el.$refInput.value).toBe("Mikky");
 
       // click-toggle behavior
-      el.focus();
+      HTMLInputElement.prototype.focus.call(el.$refInput);
       await h.wait();
       expect(el.$isShown).toBe(true);
       await h.userClick(el.querySelector("li")); // select 1st item
@@ -1502,7 +1503,7 @@ describe("control.select", () => {
     el.$options.allowNewValue = true;
     el.$value = [10];
     await h.wait(1);
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait(1);
     expect(el._refHistory).toBeDefined();
 
@@ -1617,6 +1618,8 @@ describe("control.select", () => {
     await h.wait(1);
     expect(onScroll).toBeCalledTimes(1);
   });
+
+  // todo cover tests with ShowCases.onFocusAuto;
 });
 
 // manual testcase (close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click

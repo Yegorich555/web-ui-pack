@@ -4,6 +4,7 @@
  */
 import { WUPDateControl } from "web-ui-pack";
 import { PickersEnum } from "web-ui-pack/controls/calendar";
+import { ShowCases } from "web-ui-pack/controls/baseCombo";
 // import { localeInfo } from "web-ui-pack/indexHelpers";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
@@ -36,6 +37,7 @@ initTestBaseControl({
   onInit: (e) => {
     jest.setSystemTime(new Date("2022-10-18T12:00:00.000Z")); // 18 Oct 2022 12:00 UTC
     el = e;
+    el.$options.showCase |= ShowCases.onFocusAuto; // without this impossible to test with manual triggering focus()
 
     const height = 50;
     const width = 100;
@@ -136,7 +138,7 @@ describe("control.date", () => {
         el.setAttribute("w-startwith", s);
         document.body.appendChild(el);
         await h.wait(1);
-        el.focus();
+        HTMLInputElement.prototype.focus.call(el.$refInput);
         await h.wait();
       };
 
@@ -158,7 +160,7 @@ describe("control.date", () => {
       el.$options.startWith = PickersEnum.Month;
       el.blur();
       await h.wait(1);
-      el.focus();
+      HTMLInputElement.prototype.focus.call(el.$refInput);
       await h.wait();
       expect(el.$options.startWith).toBe(PickersEnum.Month);
       expect(el.$refPopup.firstChild.$options.startWith).toBe(PickersEnum.Month);
@@ -180,7 +182,7 @@ describe("control.date", () => {
         ]
       `);
       await h.wait(1);
-      el.focus();
+      HTMLInputElement.prototype.focus.call(el.$refInput);
       await h.wait();
       const clnd = el.$refPopup.firstChild;
       expect(clnd.$options.min).toBe(el.$options.min);
@@ -204,14 +206,14 @@ describe("control.date", () => {
       await h.wait(1);
       expect(el.$options.min).toBe(prev);
 
-      el.focus();
+      HTMLInputElement.prototype.focus.call(el.$refInput);
       await h.wait();
       expect(el.$refPopup.firstChild.$options.utc).toBe(false);
       el.blur();
       await h.wait();
 
       el.$options.utc = true;
-      el.focus();
+      HTMLInputElement.prototype.focus.call(el.$refInput);
       await h.wait();
       expect(el.$refPopup.firstChild.$options.utc).toBe(true);
     });
@@ -225,7 +227,7 @@ describe("control.date", () => {
     el.$options.name = "testDate";
     await h.wait(1);
 
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     const onParse = jest.spyOn(el, "parseInput");
     const onChange = jest.fn();
     el.addEventListener("$change", onChange);
@@ -323,7 +325,7 @@ describe("control.date", () => {
 
     const onChanged = jest.fn();
     el.addEventListener("$change", onChanged);
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(h.getInputCursor(el.$refInput)).toBe("|2022-10-12|");
     expect(el.querySelector("[calendar='year']")).toBeTruthy();
@@ -392,7 +394,7 @@ describe("control.date", () => {
     // force to remove calendar (to startWith year again)
     el.blur();
     await h.wait(1);
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
 
     expect(el.querySelector("[calendar='year']")).toBeTruthy();
@@ -413,7 +415,7 @@ describe("control.date", () => {
   });
 
   test("value change not affects on popup", async () => {
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(el.$isShown).toBe(true);
 
@@ -423,7 +425,7 @@ describe("control.date", () => {
 
     el.blur();
     await h.wait();
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     const cur = el.$refPopup.querySelector("[aria-selected]");
     expect(cur).toBeDefined();
