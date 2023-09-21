@@ -14,8 +14,15 @@ describe("control.text", () => {
     el = document.body.appendChild(document.createElement("wup-text"));
     const spy = jest.spyOn(el, "gotFocus");
     el.focus();
-    await h.wait(1);
+    await h.wait(2);
     expect(spy).toBeCalledTimes(1);
+
+    el.blur();
+    jest.clearAllMocks();
+    el.$options.disabled = true;
+    el.focus();
+    await h.wait(2);
+    expect(spy).toBeCalledTimes(0);
   });
 
   test("validation: _mask", async () => {
