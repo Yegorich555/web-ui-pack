@@ -21,22 +21,7 @@ initTestBaseControl({
     el.$options.items = getItems();
     el.$options.showCase |= ShowCases.onFocusAuto; // without this impossible to test with manual triggering focus()
 
-    // todo replace with setupLayout
-    const height = 50;
-    const width = 100;
-    const x = 140;
-    const y = 100;
-    jest.spyOn(el, "getBoundingClientRect").mockReturnValue({
-      x,
-      left: x,
-      y,
-      top: y,
-      bottom: y + height,
-      right: x + width,
-      height,
-      width,
-      toJSON: () => "",
-    });
+    h.setupLayout(el, { x: 140, y: 100, h: 50, w: 100 });
   },
 });
 
