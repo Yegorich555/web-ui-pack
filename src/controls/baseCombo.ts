@@ -198,7 +198,6 @@ export default abstract class WUPBaseComboControl<
     showCase: ShowCases,
     e?: MouseEvent | FocusEvent | KeyboardEvent | null
   ): Promise<WUPPopupElement | null> {
-    console.warn("will show");
     if (this.#isShown) {
       return this.$refPopup!;
     }
@@ -464,16 +463,17 @@ export default abstract class WUPBaseComboControl<
       onInputStartClick = false;
     });
 
-    // setTimeout(() => {
-    //   this.$isFocused &&
-    document.addEventListener(
-      "pointerdown",
-      () => {
-        clickAfterFocus = false;
-      },
-      { once: true, passive: true, capture: true }
-    );
-    // }, 10); // fix 10ms => testcase: point autofocus > remove browser focus (click outside browser) > reload page outside browser > click on ctrl with autofocus: menu blinks and hidden after a time but need to open in this case. Also ShowCases.onFocusAuto isn't detected in this case
+    setTimeout(
+      () =>
+        document.addEventListener(
+          "pointerdown",
+          () => {
+            clickAfterFocus = false;
+          },
+          { once: true, passive: true, capture: true }
+        ),
+      10
+    ); // fix 10ms => testcase: point autofocus > remove browser focus (click outside browser) > reload page outside browser > click on ctrl with autofocus: menu blinks and hidden after a time but need to open in this case. Also ShowCases.onFocusAuto isn't detected in this case
 
     arr.push(dsps0, dsps1, dsps2);
     return arr;

@@ -327,21 +327,6 @@ describe("control.select common", () => {
     await h.wait();
     await h.wait();
     expect(onShow).toBeCalledTimes(1);
-
-    // todo revert after fixes
-    // test show & hide in 1 loop
-    // el = document.body.appendChild(document.createElement(el.tagName));
-    // el.canShowMenu = () => true;
-    // await h.wait();
-    // expect(el.$refPopup).toBeFalsy();
-    // el.goShowMenu(ShowCases.onManualCall);
-    // el.goHideMenu(HideCases.onManualCall);
-    // await h.wait(1);
-    // expect(el.$isShown).toBe(false);
-    // expect(el.$refPopup).toBeFalsy();
-    // await h.wait();
-    // expect(el.$isShown).toBe(false);
-    // expect(el.$refPopup).toBeFalsy();
   });
 
   test("submit by Enter key", async () => {
