@@ -1209,7 +1209,7 @@ exports[`control.select validations options.validationCase 4`] = `
     <button
       aria-hidden="true"
       clear=""
-      style=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />

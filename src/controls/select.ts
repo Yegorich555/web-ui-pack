@@ -826,7 +826,7 @@ export default class WUPSelectControl<
         }
       }
     }
-
+    this.setClearState();
     this.tryUpdateMenu();
   }
 

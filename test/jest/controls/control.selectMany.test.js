@@ -1113,6 +1113,5 @@ describe("control.selectMany", () => {
     expect(el.$refBtnClear?.style.display).toBe("none");
     expect(await h.userTypeText(el.$refInput, "Do")).toBe("Do|");
     expect(el.$refBtnClear?.style.display).toBeFalsy();
-    // todo add tests: todo it doesn't work if clear everything and type text
   });
 });
