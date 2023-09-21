@@ -394,7 +394,7 @@ export async function wait(t = 1000) {
 export async function userTypeText(
   el: HTMLInputElement,
   text: string,
-  opts = { clearPrevious: true, slow: false }
+  opts: { clearPrevious?: boolean; slow?: boolean } = { clearPrevious: true, slow: false }
 ): Promise<string> {
   HTMLInputElement.prototype.focus.call(el);
   await wait(10);
@@ -492,7 +492,7 @@ export function setInputCursor(el: HTMLInputElement, cursorPattern: string, opts
  * @return cursor snapshot (getInputCursor) */
 export async function userRemove(
   el: HTMLInputElement,
-  opts?: { removeCount: number; key: "Backspace" | "Delete" }
+  opts?: { removeCount?: number; key?: "Backspace" | "Delete" }
 ): Promise<string> {
   await wait(10);
   HTMLInputElement.prototype.focus.call(el);
@@ -500,7 +500,7 @@ export async function userRemove(
   opts = { removeCount: 1, key: "Backspace", ...opts };
   const { key } = opts;
 
-  for (let i = 0; i < opts.removeCount; ++i) {
+  for (let i = 0; i < (opts.removeCount || 1); ++i) {
     if (!el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }))) {
       continue;
     }

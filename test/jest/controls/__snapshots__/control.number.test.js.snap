@@ -23,6 +23,7 @@ exports[`control.number $ariaDetails 1`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -48,6 +49,7 @@ exports[`control.number $ariaDetails 2`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -74,6 +76,7 @@ exports[`control.number $ariaSpeak 1`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -108,6 +111,7 @@ exports[`control.number $ariaSpeak 2`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -133,6 +137,7 @@ exports[`control.number $show/$hide error 1`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -161,6 +166,7 @@ exports[`control.number $show/$hide error 2`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -201,6 +207,7 @@ exports[`control.number $show/$hide error 3`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -702,6 +709,7 @@ exports[`control.number validations $options.validationShowAll 1`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -755,6 +763,7 @@ exports[`control.number validations $options.validationShowAll 2`] = `
     <button
       aria-hidden="true"
       clear=""
+      style=""
       tabindex="-1"
       type="button"
     />
@@ -787,6 +796,7 @@ exports[`control.number validations $options.validationShowAll 3`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -829,6 +839,7 @@ exports[`control.number validations options.validationCase 1`] = `
     <button
       aria-hidden="true"
       clear=""
+      style=""
       tabindex="-1"
       type="button"
     />
@@ -863,6 +874,7 @@ exports[`control.number validations options.validationCase 2`] = `
     <button
       aria-hidden="true"
       clear="back"
+      style=""
       tabindex="-1"
       type="button"
     />
@@ -914,6 +926,7 @@ exports[`control.number validations options.validationCase 3`] = `
     <button
       aria-hidden="true"
       clear=""
+      style=""
       tabindex="-1"
       type="button"
     />
@@ -964,6 +977,7 @@ exports[`control.number validations options.validationCase 4`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -1011,6 +1025,7 @@ exports[`control.number with form 1`] = `
       <button
         aria-hidden="true"
         clear=""
+        style="display: none;"
         tabindex="-1"
         type="button"
       />

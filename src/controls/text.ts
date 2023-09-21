@@ -31,7 +31,7 @@ declare global {
       /** Show/hide clear button
        * @see {@link ClearActions} from `web-ui-pack/baseControl`
        * @defaultValue true */
-      clearButton: boolean; // todo need to hide this when nothing to clear
+      clearButton: boolean;
       /** Make input masked
        * @rules when mask is pointed and contains only numeric vars
        * * inputmode='numeric' so mobile device show numeric-keyboard
@@ -411,6 +411,7 @@ export default class WUPTextControl<
       },
       { passive: false }
     );
+    setTimeout(() => this.setClearState()); // to update btnClear
     return bc;
   }
 
@@ -609,6 +610,7 @@ export default class WUPTextControl<
     const wasErr = !errMsg && !!this._inputError;
     this._inputError = errMsg;
     const act = (): void => {
+      this.setClearState();
       if (this._inputError || wasErr) {
         this.goValidate(ValidateFromCases.onChange);
       }
@@ -739,7 +741,11 @@ export default class WUPTextControl<
   protected override setClearState(): ValueType | undefined {
     const next = super.setClearState();
     if (this.$refBtnClear) {
-      this.$refBtnClear.setAttribute("clear", this.#ctr.$isEmpty(next) ? "" : "back");
+      const isNextEmpty = this.#ctr.$isEmpty(next);
+      this.$refBtnClear.setAttribute("clear", isNextEmpty ? "" : "back");
+      const s = this.$refInput.value;
+      const isInputEmpty = s === "" || s === this.refMask?.prefix;
+      this.$refBtnClear.style.display = isInputEmpty && this.$isEmpty && isNextEmpty ? "none" : "";
     }
     return next;
   }
@@ -756,5 +762,3 @@ export default class WUPTextControl<
 customElements.define(tagName, WUPTextControl);
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
-
-// todo btnClear isn't hidden immediately on init: when required & render 1000 controls

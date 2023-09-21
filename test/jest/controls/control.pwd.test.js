@@ -73,14 +73,14 @@ describe("control.pwd", () => {
     testEl.$value = defValue;
     expect(testEl.$refInput.type).toBe("password");
     expect(testEl.outerHTML).toMatchInlineSnapshot(
-      `"<wup-pwd><label for="txt1"><span><input placeholder=" " type="password" id="txt1" autocomplete="new-password"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button><button eye="" aria-hidden="true" type="button" tabindex="-1"></button></label></wup-pwd>"`
+      `"<wup-pwd><label for="txt1"><span><input placeholder=" " type="password" id="txt1" autocomplete="new-password"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button clear="" tabindex="-1" aria-hidden="true" type="button" style=""></button><button eye="" aria-hidden="true" type="button" tabindex="-1"></button></label></wup-pwd>"`
     );
 
     testEl.$refBtnEye.click();
     await h.wait();
     expect(testEl.$refInput.type).toBe("text");
     expect(testEl.outerHTML).toMatchInlineSnapshot(
-      `"<wup-pwd><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="new-password"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button><button eye="off" aria-hidden="true" type="button" tabindex="-1"></button></label></wup-pwd>"`
+      `"<wup-pwd><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="new-password"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button clear="" tabindex="-1" aria-hidden="true" type="button" style=""></button><button eye="off" aria-hidden="true" type="button" tabindex="-1"></button></label></wup-pwd>"`
     );
     let was = getSelection();
     await anim.nextFrame();
@@ -90,7 +90,7 @@ describe("control.pwd", () => {
     testEl.$refBtnEye.click();
     expect(testEl.$refInput.type).toBe("password");
     expect(testEl.outerHTML).toMatchInlineSnapshot(
-      `"<wup-pwd><label for="txt1"><span><input placeholder=" " type="password" id="txt1" autocomplete="new-password"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button><button eye="" aria-hidden="true" type="button" tabindex="-1"></button></label></wup-pwd>"`
+      `"<wup-pwd><label for="txt1"><span><input placeholder=" " type="password" id="txt1" autocomplete="new-password"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button clear="" tabindex="-1" aria-hidden="true" type="button" style=""></button><button eye="" aria-hidden="true" type="button" tabindex="-1"></button></label></wup-pwd>"`
     );
     await anim.nextFrame();
     expect(getSelection()).toEqual(was);
@@ -121,13 +121,13 @@ describe("control.pwd", () => {
     testEl.$options.reverse = true;
     jest.advanceTimersByTime(1);
     expect(testEl.outerHTML).toMatchInlineSnapshot(
-      `"<wup-pwd w-reverse=""><label for="txt1"><span><input placeholder=" " type="password" id="txt1" autocomplete="new-password"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button><button eye="" aria-hidden="true" type="button" tabindex="-1"></button></label></wup-pwd>"`
+      `"<wup-pwd w-reverse=""><label for="txt1"><span><input placeholder=" " type="password" id="txt1" autocomplete="new-password"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button clear="" tabindex="-1" aria-hidden="true" type="button" style=""></button><button eye="" aria-hidden="true" type="button" tabindex="-1"></button></label></wup-pwd>"`
     );
 
     testEl.$options.reverse = false;
     jest.advanceTimersByTime(1);
     expect(testEl.outerHTML).toMatchInlineSnapshot(
-      `"<wup-pwd><label for="txt1"><span><input placeholder=" " type="password" id="txt1" autocomplete="new-password"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button><button eye="" aria-hidden="true" type="button" tabindex="-1"></button></label></wup-pwd>"`
+      `"<wup-pwd><label for="txt1"><span><input placeholder=" " type="password" id="txt1" autocomplete="new-password"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button clear="" tabindex="-1" aria-hidden="true" type="button" style=""></button><button eye="" aria-hidden="true" type="button" tabindex="-1"></button></label></wup-pwd>"`
     );
   });
 

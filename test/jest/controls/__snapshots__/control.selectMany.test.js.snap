@@ -26,6 +26,7 @@ exports[`control.selectMany $ariaDetails 1`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -54,6 +55,7 @@ exports[`control.selectMany $ariaDetails 2`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -83,6 +85,7 @@ exports[`control.selectMany $ariaSpeak 1`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -120,6 +123,7 @@ exports[`control.selectMany $ariaSpeak 2`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -148,6 +152,7 @@ exports[`control.selectMany $show/$hide error 1`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -179,6 +184,7 @@ exports[`control.selectMany $show/$hide error 2`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -222,6 +228,7 @@ exports[`control.selectMany $show/$hide error 3`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -1014,6 +1021,7 @@ exports[`control.selectMany sortable: drag&drop 1`] = `
     <button
       aria-hidden="true"
       clear=""
+      style=""
       tabindex="-1"
       type="button"
     />
@@ -1078,6 +1086,7 @@ exports[`control.selectMany sortable: drag&drop 3`] = `
     <button
       aria-hidden="true"
       clear=""
+      style=""
       tabindex="-1"
       type="button"
     />
@@ -1132,6 +1141,7 @@ exports[`control.selectMany sortable: drag&drop 14`] = `
     <button
       aria-hidden="true"
       clear=""
+      style=""
       tabindex="-1"
       type="button"
     />
@@ -1180,6 +1190,7 @@ exports[`control.selectMany sortable: drag&drop 16`] = `
     <button
       aria-hidden="true"
       clear=""
+      style=""
       tabindex="-1"
       type="button"
     />
@@ -1213,6 +1224,7 @@ exports[`control.selectMany validations $options.validationShowAll 1`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -1278,6 +1290,7 @@ exports[`control.selectMany validations $options.validationShowAll 2`] = `
     <button
       aria-hidden="true"
       clear=""
+      style=""
       tabindex="-1"
       type="button"
     />
@@ -1342,6 +1355,7 @@ exports[`control.selectMany validations $options.validationShowAll 3`] = `
     <button
       aria-hidden="true"
       clear=""
+      style=""
       tabindex="-1"
       type="button"
     />
@@ -1389,6 +1403,7 @@ exports[`control.selectMany validations options.validationCase 1`] = `
     <button
       aria-hidden="true"
       clear=""
+      style=""
       tabindex="-1"
       type="button"
     />
@@ -1426,6 +1441,7 @@ exports[`control.selectMany validations options.validationCase 2`] = `
     <button
       aria-hidden="true"
       clear="back"
+      style=""
       tabindex="-1"
       type="button"
     />
@@ -1521,6 +1537,7 @@ exports[`control.selectMany validations options.validationCase 3`] = `
     <button
       aria-hidden="true"
       clear=""
+      style=""
       tabindex="-1"
       type="button"
     />
@@ -1608,6 +1625,7 @@ exports[`control.selectMany validations options.validationCase 4`] = `
     <button
       aria-hidden="true"
       clear=""
+      style=""
       tabindex="-1"
       type="button"
     />
@@ -1658,6 +1676,7 @@ exports[`control.selectMany with form 1`] = `
       <button
         aria-hidden="true"
         clear=""
+        style="display: none;"
         tabindex="-1"
         type="button"
       />

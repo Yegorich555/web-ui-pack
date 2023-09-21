@@ -26,6 +26,7 @@ exports[`control.time $ariaDetails 1`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -54,6 +55,7 @@ exports[`control.time $ariaDetails 2`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -83,6 +85,7 @@ exports[`control.time $ariaSpeak 1`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -120,6 +123,7 @@ exports[`control.time $ariaSpeak 2`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -148,6 +152,7 @@ exports[`control.time $show/$hide error 1`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -179,6 +184,7 @@ exports[`control.time $show/$hide error 2`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -222,6 +228,7 @@ exports[`control.time $show/$hide error 3`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -936,6 +943,7 @@ exports[`control.time validations $options.validationShowAll 1`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -995,6 +1003,7 @@ exports[`control.time validations $options.validationShowAll 2`] = `
     <button
       aria-hidden="true"
       clear=""
+      style=""
       tabindex="-1"
       type="button"
     />
@@ -1030,6 +1039,7 @@ exports[`control.time validations $options.validationShowAll 3`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -1075,6 +1085,7 @@ exports[`control.time validations options.validationCase 1`] = `
     <button
       aria-hidden="true"
       clear=""
+      style=""
       tabindex="-1"
       type="button"
     />
@@ -1119,6 +1130,7 @@ exports[`control.time validations options.validationCase 2`] = `
     <button
       aria-hidden="true"
       clear="back"
+      style=""
       tabindex="-1"
       type="button"
     />
@@ -1274,6 +1286,7 @@ exports[`control.time validations options.validationCase 3`] = `
     <button
       aria-hidden="true"
       clear=""
+      style=""
       tabindex="-1"
       type="button"
     />
@@ -1425,6 +1438,7 @@ exports[`control.time validations options.validationCase 4`] = `
     <button
       aria-hidden="true"
       clear=""
+      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -1475,6 +1489,7 @@ exports[`control.time with form 1`] = `
       <button
         aria-hidden="true"
         clear=""
+        style="display: none;"
         tabindex="-1"
         type="button"
       />
