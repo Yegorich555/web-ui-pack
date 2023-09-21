@@ -82,7 +82,6 @@ export default function SelectControlView() {
           w-label="Select"
           w-initValue={items[items.length - 3].value.toString()}
           w-multiple={false}
-          w-autoFocus
         />
         <wup-select
           w-name="multiple"

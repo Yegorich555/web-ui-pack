@@ -556,7 +556,7 @@ export async function userClick(el: HTMLElement, opts?: MouseEventInit, timeoutM
   el.dispatchEvent(mouseEvent("pointerdown"));
   const isOk = el.dispatchEvent(mouseEvent("mousedown"));
   if (isOk) {
-    HTMLInputElement.prototype.focus.call(el);
+    HTMLElement.prototype.focus.call(el);
     if (document.activeElement !== el) {
       // case when click on div moves focus to body
       (document.activeElement as HTMLElement)?.blur.call(document.activeElement);

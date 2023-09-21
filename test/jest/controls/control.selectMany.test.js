@@ -89,7 +89,7 @@ describe("control.selectMany", () => {
     );
 
     HTMLInputElement.prototype.focus.call(el.$refInput); // opening menu by focus
-    await h.wait(1);
+    await h.wait(2);
     expect(el.$isShown).toBe(true);
     expect(el.innerHTML).toMatchInlineSnapshot(
       `"<label for="txt1"><span><span item="" aria-hidden="true">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-describedby="txt2" aria-owns="txt3" aria-controls="txt3"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label><section aria-live="off" aria-atomic="true" class="wup-hidden" id="txt2">Donny,Leo</section><wup-popup menu="" style="min-width: 100px;"><ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="display: none;">Donny</li><li role="option">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option">Splinter</li></ul></wup-popup>"`
@@ -197,7 +197,7 @@ describe("control.selectMany", () => {
     el.blur();
     el.$options.readOnlyInput = true;
     HTMLInputElement.prototype.focus.call(el.$refInput);
-    await h.wait(1);
+    await h.wait(2);
     expect(el.$refInput.outerHTML).toMatchInlineSnapshot(
       `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-owns="txt16" aria-controls="txt16" aria-describedby="txt15" readonly="">"`
     );
@@ -245,17 +245,22 @@ describe("control.selectMany", () => {
 
     // remove item by click
     jest.spyOn(el.$refItems[0], "offsetWidth", "get").mockReturnValue("33px");
+    expect(el.$isShown).toBe(false);
+    await h.wait();
     await h.userClick(el.$refItems[0], undefined);
     expect(el.$value).toStrictEqual([30]);
     // animation for [removed]
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
       `"<span item="" aria-hidden="true" removed="">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-describedby="txt2"><strong></strong>"`
     );
+    expect(el.$isShown).toBe(false); // because not-open by value-change
+    await h.wait();
+    expect(el.$isShown).toBe(false); // because not-open by value-change
+
     await h.wait();
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
       `"<span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list"><strong></strong>"`
     );
-    expect(el.$isShown).toBe(false); // because not-open by value-change
 
     // without animation
     jest.spyOn(window, "matchMedia").mockImplementation(() => ({ matches: true })); // simulate 'prefers-reduced-motion' === true
@@ -283,7 +288,7 @@ describe("control.selectMany", () => {
     expect(el.$isShown).toBe(true);
 
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="display: none;">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
+      `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="display: none;">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
     );
     expect(el.querySelector("[focused]")).toBeFalsy();
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
@@ -310,7 +315,7 @@ describe("control.selectMany", () => {
     await h.wait();
     expect(el.$isShown).toBe(true);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
+      `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
     );
 
     await h.userTypeText(el.$refInput, "m");
@@ -320,7 +325,7 @@ describe("control.selectMany", () => {
     expect(el.$value).toStrictEqual([10, 20]);
     expect(el.$refInput.value).toBe("");
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true" style="">Donny</li><li role="option" aria-selected="true" id="txt4" focused="">Mikky</li><li role="option" style="">Leo</li><li role="option" style="">Splinter</li></ul>"`
+      `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true" style="">Donny</li><li role="option" aria-selected="true" id="txt4" focused="">Mikky</li><li role="option" style="">Leo</li><li role="option" style="">Splinter</li></ul>"`
     );
 
     el.selectValue(30); // just for coverage

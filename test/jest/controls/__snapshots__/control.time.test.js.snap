@@ -1126,7 +1126,7 @@ exports[`control.time validations options.validationCase 2`] = `
   </label>
   <wup-popup
     menu=""
-    style=""
+    style="opacity: 0;"
   >
     <div
       id="txt2"
@@ -1256,11 +1256,11 @@ exports[`control.time validations options.validationCase 3`] = `
       </span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt6"
+        aria-controls="txt2"
         aria-describedby="txt5"
         aria-expanded="true"
         aria-haspopup="listbox"
-        aria-owns="txt6"
+        aria-owns="txt2"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -1280,27 +1280,11 @@ exports[`control.time validations options.validationCase 3`] = `
     />
   </label>
   <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt5"
-    style=""
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      custom err here
-    </span>
-  </wup-popup>
-  <wup-popup
     menu=""
     style=""
   >
     <div
-      id="txt6"
+      id="txt2"
       role="application"
     >
       <ul
@@ -1386,6 +1370,22 @@ exports[`control.time validations options.validationCase 3`] = `
       />
     </div>
   </wup-popup>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt5"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
 </wup-time>
 `;
 
@@ -1407,11 +1407,11 @@ exports[`control.time validations options.validationCase 4`] = `
       </span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt7"
-        aria-describedby="txt8"
+        aria-controls="txt6"
+        aria-describedby="txt7"
         aria-expanded="false"
         aria-haspopup="listbox"
-        aria-owns="txt7"
+        aria-owns="txt6"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -1434,7 +1434,7 @@ exports[`control.time validations options.validationCase 4`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt8"
+    id="txt7"
     role="alert"
     style=""
   >

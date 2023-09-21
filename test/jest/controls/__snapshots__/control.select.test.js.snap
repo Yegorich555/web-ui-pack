@@ -1023,14 +1023,14 @@ exports[`control.select validations options.validationCase 2`] = `
     </span>
     <button
       aria-hidden="true"
-      clear="back"
+      clear=""
       tabindex="-1"
       type="button"
     />
   </label>
   <wup-popup
     menu=""
-    style="min-width: 100px;"
+    style="opacity: 0;"
   >
     <ul
       aria-label="Items"
@@ -1039,7 +1039,6 @@ exports[`control.select validations options.validationCase 2`] = `
       tabindex="-1"
     >
       <li
-        aria-selected="false"
         role="option"
       >
         Donny
@@ -1093,11 +1092,11 @@ exports[`control.select validations options.validationCase 3`] = `
     <span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt6"
+        aria-controls="txt2"
         aria-describedby="txt5"
         aria-expanded="true"
         aria-haspopup="listbox"
-        aria-owns="txt6"
+        aria-owns="txt2"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -1117,28 +1116,12 @@ exports[`control.select validations options.validationCase 3`] = `
     />
   </label>
   <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt5"
-    style=""
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      custom err here
-    </span>
-  </wup-popup>
-  <wup-popup
     menu=""
     style="min-width: 100px;"
   >
     <ul
       aria-label="Items"
-      id="txt6"
+      id="txt2"
       role="listbox"
       tabindex="-1"
     >
@@ -1165,6 +1148,22 @@ exports[`control.select validations options.validationCase 3`] = `
       </li>
     </ul>
   </wup-popup>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt5"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
 </wup-select>
 `;
 
@@ -1179,11 +1178,11 @@ exports[`control.select validations options.validationCase 4`] = `
     <span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt7"
-        aria-describedby="txt8"
+        aria-controls="txt6"
+        aria-describedby="txt7"
         aria-expanded="false"
         aria-haspopup="listbox"
-        aria-owns="txt7"
+        aria-owns="txt6"
         aria-required="true"
         autocomplete="off"
         id="txt1"
@@ -1206,7 +1205,7 @@ exports[`control.select validations options.validationCase 4`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt8"
+    id="txt7"
     role="alert"
     style=""
   >

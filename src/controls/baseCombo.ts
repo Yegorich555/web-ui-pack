@@ -181,7 +181,7 @@ export default abstract class WUPBaseComboControl<
   }
 
   /** Override to change show-behavior */
-  canShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean | Promise<boolean> {
+  canShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean {
     if (this.$isReadOnly || this.$isDisabled) {
       return false;
     }
@@ -191,43 +191,23 @@ export default abstract class WUPBaseComboControl<
     }
 
     const can = !!(this._opts.showCase & showCase) || showCase === ShowCases.onManualCall;
-    if (can && (showCase === ShowCases.onFocus || showCase === ShowCases.onFocusAuto)) {
-      const was = this.$value;
-      return new Promise((res) => {
-        // WARN: if click on btnClear with control.emptyValue - no changes and popup appears
-        setTimeout(() => {
-          const isChangedByClick = !this.#ctr.$isEqual(was, this.$value);
-          return res(!isChangedByClick); // click on item or btnClear & control gets focus: need to not open menu because user makes action for changing value
-        });
-      });
-    }
-
     return can;
   }
 
-  /** Required to properly use with goShow() & goHide() called in one time */
-  protected _willShow?: true;
   protected async goShowMenu(
     showCase: ShowCases,
     e?: MouseEvent | FocusEvent | KeyboardEvent | null
   ): Promise<WUPPopupElement | null> {
+    console.warn("will show");
     if (this.#isShown) {
       return this.$refPopup!;
     }
-    this._willShow = true;
-    let can = this.canShowMenu(showCase, e);
-    if (can instanceof Promise) {
-      can = await can;
-    } /* else {
-      await Promise.resolve(); // to allow goShow(); goHide() don't even init popup in one time
-    } */
-    can &&= this._willShow;
-    delete this._willShow;
+    const can = this.canShowMenu(showCase, e);
     if (!can) {
       return null;
     }
-
     this.#isShown = true;
+
     // this.$hideError(); // it resolves overflow menu vs error
 
     if (!this.$refPopup) {
@@ -273,7 +253,7 @@ export default abstract class WUPBaseComboControl<
       return null; // possible when user calls show & hide sync
     }
     this.$refPopup.$show().then(() => this.fireEvent("$showMenu", { cancelable: false }));
-    this.setAttribute("opened", ""); // possible when user calls show & hide sync
+    this.setAttribute("opened", "");
     this.$refInput.setAttribute("aria-expanded", true);
     // await r; // WARN: it's important don't wait for animation to assign onShow events fast
 
@@ -305,10 +285,6 @@ export default abstract class WUPBaseComboControl<
 
   protected _isHiding?: true;
   protected async goHideMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): Promise<boolean> {
-    if (this._willShow) {
-      delete this._willShow;
-      return true;
-    }
     if (!this.#isShown || this._isHiding) {
       return false;
     }
@@ -454,33 +430,42 @@ export default abstract class WUPBaseComboControl<
 
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
     const arr = super.gotFocus(ev);
-    const r = this.goShowMenu((this.$refInput as any)._isFocusCall ? ShowCases.onFocusAuto : ShowCases.onFocus, ev);
-    // todo test-case: goShow + goHide when canShow returns true (without promise) in one time: must close without events and popup init
-    // todo issue: when autofocus: true but browser not in focus: click on page outside controls > popup opens and closes after a time - blink effect
+
+    // known issue: _isFocusCall missed when el.focus() + browser-tab not active. Reason: 'focusin' called only when browser-tab gets focus
+    const sc = (this.$refInput as any)._isFocusCall ? ShowCases.onFocusAuto : ShowCases.onFocus;
+    delete (this.$refInput as any)._isFocusCall;
+
+    let isPreventedFromClick = false; // possible when user clicks on btnClear or on item inside input to remove it
+    setTimeout(() => this.$isFocused && !isPreventedFromClick && this.goShowMenu(sc, ev), 1); // filter in 1ms to avoid case when focusin + focusout at the same time
+
     let clickAfterFocus = true; // prevent clickAfterFocus
-    let lblClick: ReturnType<typeof setTimeout> | false = false; // fix when labelOnClick > inputOnClick > inputOnFocus
     let onInputStartClick = false; // mouseDown>selectText>mouseUp - without filter it closes/opens popup when user tries to select text
     const dsps0 = onEvent(this.$refInput, "mousedown", () => {
       const allow = !this.$refInput.readOnly && !(this._opts.showCase & ShowCases.onClickInput);
       onInputStartClick = allow;
     });
+
+    let isInsideClick = false; // fix when labelOnClick > inputOnClick (twice in loop)
     const dsps1 = onEvent(this, "click", (e) => {
-      const skip = e.defaultPrevented || e.button || lblClick || onInputStartClick; // e.button > 0 if not left-click
+      isPreventedFromClick = e.defaultPrevented;
+      const skip = e.defaultPrevented || e.button /* only left click */ || isInsideClick || onInputStartClick;
       if (!skip) {
-        if (clickAfterFocus) {
-          r.finally(() => this.$isFocused && this.goShowMenu(ShowCases.onClick, e)); // menu must be opened if openByFocus is rejected
-        } else {
-          !this.#isShown ? this.goShowMenu(ShowCases.onClick, e) : this.goHideMenu(HideCases.onClick, e);
-        }
+        !this.#isShown || clickAfterFocus
+          ? this.goShowMenu(ShowCases.onClick, e)
+          : this.goHideMenu(HideCases.onClick, e);
       }
-      lblClick = setTimeout(() => (lblClick = false));
+      isInsideClick = true;
+      setTimeout(() => (isInsideClick = false), 1);
     });
 
     const dsps2 = onEvent(document, "click", (e) => {
-      !lblClick && !onInputStartClick && setTimeout(() => this.$isFocused && this.goHideMenu(HideCases.onClick, e)); // timeout to prevent show before focusLost
+      // close by outside click
+      !onInputStartClick && !isInsideClick && this.goHideMenu(HideCases.onClick, e);
       onInputStartClick = false;
     });
 
+    // setTimeout(() => {
+    //   this.$isFocused &&
     document.addEventListener(
       "pointerdown",
       () => {
@@ -488,6 +473,7 @@ export default abstract class WUPBaseComboControl<
       },
       { once: true, passive: true, capture: true }
     );
+    // }, 10); // fix 10ms => testcase: point autofocus > remove browser focus (click outside browser) > reload page outside browser > click on ctrl with autofocus: menu blinks and hidden after a time but need to open in this case. Also ShowCases.onFocusAuto isn't detected in this case
 
     arr.push(dsps0, dsps1, dsps2);
     return arr;

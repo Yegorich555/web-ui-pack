@@ -446,10 +446,7 @@ export default class WUPSelectManyControl<
     });
   }
 
-  override canShowMenu(
-    showCase: ShowCases,
-    e?: MouseEvent | FocusEvent | KeyboardEvent | null
-  ): boolean | Promise<boolean> {
+  override canShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean {
     return !this._wasSortAfterClick && super.canShowMenu(showCase, e);
   }
 
