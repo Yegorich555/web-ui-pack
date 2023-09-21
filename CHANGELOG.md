@@ -6,25 +6,25 @@
 
 - **Internals** (**Note:** Skip this if you haven't created custon Elements inherrited from WUP...)
   - Added auto-mapping between attributes <=> options based on key-values in `$defaults`
-  - Removed interface `Defaults`. Merged with interface `Options` and now contains all fields as required
+  - TypeScript. Removed interface `Defaults`. Merged with interface `Options` and now contains all fields as required
   - Now removing attributes/options always rollbacks to value defined in `$defaults`
   - Method `getAttr` changed to `parseAttr`
-- **Global**.
+- **Global**
   - All attributes refactored and starts with `w-...` (attrs `[readonly]` & `[disabled]` without changes)
   - Style rules changed from `[reverse]` to `[w-reverse]` for [RadioControl](src/controls/radio.ts), [SwitchControl](src/controls/switch.ts), [CheckControl](src/controls/check.ts) & [PasswordControl](src/controls/password.ts)
-- **Controls**.
+- **Controls**
   - Option `skey` renamed to `storageKey`
+  - Option `storageKey` changes `$value` instead of `$initValue` and now triggers `$onChange` event on init (added enum-key `SetValueReasons.storage`)
   - Removed css `maxHeight` for [error] popup
   - Changing `$initValue` isn't fired `$onChange` event anymore
-  - Option `storageKey` changes `$value` instead of `$initValue` and now triggers `$onChange` event on init (added enum-key `SetValueReasons.storage`)
 - [CircleElement](src/circleElement.ts). Renamed option _min**s**ize_ to _min**S**ize_
-- [SpinElement](src/spinElement.ts).
-  - Defaults `fit` & `overflowTarget` = `auto` instead of `null`
+- [SpinElement](src/spinElement.ts)
+  - Defaults `fit` & `overflowTarget` = `auto` (was `null`)
   - Attribute `w-overflowtarget` expects `auto` or `querySelector` string (previously expected global-ref `window.someObj`)
 
 **Fixes**:
 
-- **Global**. Refactored & fixed TS types
+- **TypeScript**. Refactored & fixed some types
 - [RadioControl](src/controls/radio.ts). _autoFocus makes focused 1st but not active input when `form.$options.autoFocus=true`_
 - [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). _Wrong error `Not found in items` when re-assign `items` & `initValue` after a time_
 - helper [observer](src/helpers/observer.ts). _excludeNested doesn't exclude when re-assign nested properties_
@@ -34,7 +34,7 @@
 
 **New/Features**:
 
-- **Global**. Added support HTML intellisense in VSCode: follow [instructions](README.md#installing--usage)
+- **Global**. Added support HTML intellisense in VSCode: follow [instructions](README.md#installing--usage) to use this
 - **Combobox controls (Select, Date, Time)**
   - Now menu is hidden by default when `autoFocus` enabled. To revert to previous behavior use `WUPSelectControl.$defaults.showCase |= ShowCases.onFocusAuto`
 - [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts).
