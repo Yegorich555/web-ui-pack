@@ -614,8 +614,7 @@ mask-image: var(--ctrl-icon-img);
           padding-top: var(--ctrl-clear-hover-size);
         }
         WUP-DATE[disabled] button[clear],
-        WUP-DATE[readonly] button[clear],
-        WUP-DATE[required] button[clear] {
+        WUP-DATE[readonly] button[clear] {
           display: none;
         }
         @media (hover: hover) and (pointer: fine) {

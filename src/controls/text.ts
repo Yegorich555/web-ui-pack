@@ -299,8 +299,7 @@ export default class WUPTextControl<
           padding-top: var(--ctrl-clear-hover-size);
         }
         :host[disabled] button[clear],
-        :host[readonly] button[clear],
-        :host[required] button[clear] {
+        :host[readonly] button[clear] {
           display: none;
         }
         @media (hover: hover) and (pointer: fine) {

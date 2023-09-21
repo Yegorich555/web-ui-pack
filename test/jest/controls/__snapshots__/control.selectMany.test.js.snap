@@ -624,8 +624,7 @@ mask-image: var(--ctrl-icon-img);
           padding-top: var(--ctrl-clear-hover-size);
         }
         WUP-SELECTMANY[disabled] button[clear],
-        WUP-SELECTMANY[readonly] button[clear],
-        WUP-SELECTMANY[required] button[clear] {
+        WUP-SELECTMANY[readonly] button[clear] {
           display: none;
         }
         @media (hover: hover) and (pointer: fine) {

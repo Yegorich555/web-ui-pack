@@ -597,8 +597,7 @@ mask-image: var(--ctrl-icon-img);
           padding-top: var(--ctrl-clear-hover-size);
         }
         WUP-TEXTAREA[disabled] button[clear],
-        WUP-TEXTAREA[readonly] button[clear],
-        WUP-TEXTAREA[required] button[clear] {
+        WUP-TEXTAREA[readonly] button[clear] {
           display: none;
         }
         @media (hover: hover) and (pointer: fine) {

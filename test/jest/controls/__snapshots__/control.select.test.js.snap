@@ -615,8 +615,7 @@ mask-image: var(--ctrl-icon-img);
           padding-top: var(--ctrl-clear-hover-size);
         }
         WUP-SELECT[disabled] button[clear],
-        WUP-SELECT[readonly] button[clear],
-        WUP-SELECT[required] button[clear] {
+        WUP-SELECT[readonly] button[clear] {
           display: none;
         }
         @media (hover: hover) and (pointer: fine) {

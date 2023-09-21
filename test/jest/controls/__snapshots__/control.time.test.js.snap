@@ -617,8 +617,7 @@ mask-image: var(--ctrl-icon-img);
           padding-top: var(--ctrl-clear-hover-size);
         }
         WUP-TIME[disabled] button[clear],
-        WUP-TIME[readonly] button[clear],
-        WUP-TIME[required] button[clear] {
+        WUP-TIME[readonly] button[clear] {
           display: none;
         }
         @media (hover: hover) and (pointer: fine) {
