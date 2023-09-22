@@ -332,6 +332,7 @@ padding:0;}
      }
   
       WUP-PWD {
+        --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
         margin-bottom: 20px;
@@ -349,7 +350,7 @@ padding:0;}
       WUP-PWD:focus-within,
       WUP-PWD:focus-within &gt; [menu] {
         z-index: 90010;
-        box-shadow: 0 0 0 1px var(--ctrl-focus);
+        box-shadow: 0 0 0 1px var(--ctrl-focus-border);
       }
       WUP-PWD:focus-within strong,
       WUP-PWD:focus-within legend {
@@ -369,7 +370,7 @@ padding:0;}
       }
       WUP-PWD[invalid],
       WUP-PWD[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+        --ctrl-focus-border: var( --ctrl-invalid-border);
       }
       WUP-PWD label {
         display: flex;
@@ -463,13 +464,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-PWD:hover&gt;[menu],
         WUP-PWD[hovered],
         WUP-PWD[hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
-        }
-        WUP-PWD[invalid]:hover,
-        WUP-PWD[invalid]:hover&gt;[menu],
-        WUP-PWD[invalid][hovered],
-        WUP-PWD[invalid][hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+          box-shadow: 0 0 1px 1px var(--ctrl-focus-border);
         }
       }
         WUP-PWD {

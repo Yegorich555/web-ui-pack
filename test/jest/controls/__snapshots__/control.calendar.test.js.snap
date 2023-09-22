@@ -992,6 +992,7 @@ padding:0;}
     }
   
       WUP-CALENDAR {
+        --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
         margin-bottom: 20px;
@@ -1009,7 +1010,7 @@ padding:0;}
       WUP-CALENDAR:focus-within,
       WUP-CALENDAR:focus-within &gt; [menu] {
         z-index: 90010;
-        box-shadow: 0 0 0 1px var(--ctrl-focus);
+        box-shadow: 0 0 0 1px var(--ctrl-focus-border);
       }
       WUP-CALENDAR:focus-within strong,
       WUP-CALENDAR:focus-within legend {
@@ -1029,7 +1030,7 @@ padding:0;}
       }
       WUP-CALENDAR[invalid],
       WUP-CALENDAR[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+        --ctrl-focus-border: var( --ctrl-invalid-border);
       }
       WUP-CALENDAR label {
         display: flex;
@@ -1123,13 +1124,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-CALENDAR:hover&gt;[menu],
         WUP-CALENDAR[hovered],
         WUP-CALENDAR[hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
-        }
-        WUP-CALENDAR[invalid]:hover,
-        WUP-CALENDAR[invalid]:hover&gt;[menu],
-        WUP-CALENDAR[invalid][hovered],
-        WUP-CALENDAR[invalid][hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+          box-shadow: 0 0 1px 1px var(--ctrl-focus-border);
         }
       }
       WUP-CALENDAR {

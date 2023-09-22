@@ -644,6 +644,7 @@ padding:0;}
      }
   
       WUP-RADIO {
+        --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
         margin-bottom: 20px;
@@ -661,7 +662,7 @@ padding:0;}
       WUP-RADIO:focus-within,
       WUP-RADIO:focus-within &gt; [menu] {
         z-index: 90010;
-        box-shadow: 0 0 0 1px var(--ctrl-focus);
+        box-shadow: 0 0 0 1px var(--ctrl-focus-border);
       }
       WUP-RADIO:focus-within strong,
       WUP-RADIO:focus-within legend {
@@ -681,7 +682,7 @@ padding:0;}
       }
       WUP-RADIO[invalid],
       WUP-RADIO[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+        --ctrl-focus-border: var( --ctrl-invalid-border);
       }
       WUP-RADIO label {
         display: flex;
@@ -775,13 +776,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-RADIO:hover&gt;[menu],
         WUP-RADIO[hovered],
         WUP-RADIO[hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
-        }
-        WUP-RADIO[invalid]:hover,
-        WUP-RADIO[invalid]:hover&gt;[menu],
-        WUP-RADIO[invalid][hovered],
-        WUP-RADIO[invalid][hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+          box-shadow: 0 0 1px 1px var(--ctrl-focus-border);
         }
       }
       WUP-RADIO {

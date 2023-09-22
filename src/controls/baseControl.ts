@@ -270,6 +270,7 @@ export default abstract class WUPBaseControl<
     // WARN: 'contain:style' is tricky rule
     return `${super.$style}
       :host {
+        --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
         margin-bottom: 20px;
@@ -289,7 +290,7 @@ export default abstract class WUPBaseControl<
       :host:focus-within,
       :host:focus-within > [menu] {
         z-index: 90010;
-        box-shadow: 0 0 0 1px var(--ctrl-focus);
+        box-shadow: 0 0 0 1px var(--ctrl-focus-border);
       }
       :host:focus-within strong,
       :host:focus-within legend {
@@ -309,7 +310,7 @@ export default abstract class WUPBaseControl<
       }
       :host[invalid],
       :host[invalid] > [menu] {
-        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+        --ctrl-focus-border: var( --ctrl-invalid-border);
       }
       :host label {
         display: flex;
@@ -384,19 +385,7 @@ export default abstract class WUPBaseControl<
         :host:hover>[menu],
         :host[hovered],
         :host[hovered]>[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
-        }
-        :host[invalid]:hover,
-        :host[invalid]:hover>[menu],
-        :host[invalid][hovered],
-        :host[invalid][hovered]>[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
-        }${
-          //  :host:hover label:before,
-          //  :host:hover label:after {
-          //     background-color: var(--ctrl-focus-label);
-          //  }
-          ""
+          box-shadow: 0 0 1px 1px var(--ctrl-focus-border);
         }
       }`;
   }

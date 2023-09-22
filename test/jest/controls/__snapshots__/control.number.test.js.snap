@@ -268,6 +268,7 @@ padding:0;}
      }
   
       WUP-NUM {
+        --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
         margin-bottom: 20px;
@@ -285,7 +286,7 @@ padding:0;}
       WUP-NUM:focus-within,
       WUP-NUM:focus-within &gt; [menu] {
         z-index: 90010;
-        box-shadow: 0 0 0 1px var(--ctrl-focus);
+        box-shadow: 0 0 0 1px var(--ctrl-focus-border);
       }
       WUP-NUM:focus-within strong,
       WUP-NUM:focus-within legend {
@@ -305,7 +306,7 @@ padding:0;}
       }
       WUP-NUM[invalid],
       WUP-NUM[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+        --ctrl-focus-border: var( --ctrl-invalid-border);
       }
       WUP-NUM label {
         display: flex;
@@ -399,13 +400,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-NUM:hover&gt;[menu],
         WUP-NUM[hovered],
         WUP-NUM[hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
-        }
-        WUP-NUM[invalid]:hover,
-        WUP-NUM[invalid]:hover&gt;[menu],
-        WUP-NUM[invalid][hovered],
-        WUP-NUM[invalid][hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+          box-shadow: 0 0 1px 1px var(--ctrl-focus-border);
         }
       }
         WUP-NUM {

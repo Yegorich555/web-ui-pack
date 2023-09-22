@@ -302,6 +302,7 @@ padding:0;}
       }
   
       WUP-SELECTMANY {
+        --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
         margin-bottom: 20px;
@@ -319,7 +320,7 @@ padding:0;}
       WUP-SELECTMANY:focus-within,
       WUP-SELECTMANY:focus-within &gt; [menu] {
         z-index: 90010;
-        box-shadow: 0 0 0 1px var(--ctrl-focus);
+        box-shadow: 0 0 0 1px var(--ctrl-focus-border);
       }
       WUP-SELECTMANY:focus-within strong,
       WUP-SELECTMANY:focus-within legend {
@@ -339,7 +340,7 @@ padding:0;}
       }
       WUP-SELECTMANY[invalid],
       WUP-SELECTMANY[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+        --ctrl-focus-border: var( --ctrl-invalid-border);
       }
       WUP-SELECTMANY label {
         display: flex;
@@ -433,13 +434,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-SELECTMANY:hover&gt;[menu],
         WUP-SELECTMANY[hovered],
         WUP-SELECTMANY[hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
-        }
-        WUP-SELECTMANY[invalid]:hover,
-        WUP-SELECTMANY[invalid]:hover&gt;[menu],
-        WUP-SELECTMANY[invalid][hovered],
-        WUP-SELECTMANY[invalid][hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+          box-shadow: 0 0 1px 1px var(--ctrl-focus-border);
         }
       }
         WUP-SELECTMANY {
