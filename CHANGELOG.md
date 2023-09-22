@@ -38,6 +38,7 @@
 - **Controls**
   - `button[clear]` not hidden anymore for required controls (user must have ability to clear all at once & put new text). To rollback it use css-rule `wup-text[required] button[clear] { display: none; }`
   - `button[clear]` hidden if nothing to clear
+  - update hover & focus tyles
 - **Combobox controls (Select, Date, Time)**
   - Now menu is hidden by default when `autoFocus` enabled. To revert to previous behavior use `WUPSelectControl.$defaults.showCase |= ShowCases.onFocusAuto`
 - [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts).
