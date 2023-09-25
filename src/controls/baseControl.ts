@@ -290,7 +290,7 @@ export default abstract class WUPBaseControl<
       :host:focus-within,
       :host:focus-within > [menu] {
         z-index: 90010;
-        box-shadow: 0 0 0 1px var(--ctrl-focus-border);
+        box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       :host:focus-within strong,
       :host:focus-within legend {
@@ -385,7 +385,9 @@ export default abstract class WUPBaseControl<
         :host:hover>[menu],
         :host[hovered],
         :host[hovered]>[menu] {
-          box-shadow: 0 0 1px 1px var(--ctrl-focus-border);
+          box-shadow: 0 0 2px 1px var(--ctrl-focus-border);${
+            /* WARN: style the same as for :focus but here just to easy customize */ ""
+          }
         }
       }`;
   }

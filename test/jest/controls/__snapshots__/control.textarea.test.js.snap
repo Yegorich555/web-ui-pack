@@ -293,7 +293,7 @@ padding:0;}
       WUP-TEXTAREA:focus-within,
       WUP-TEXTAREA:focus-within &gt; [menu] {
         z-index: 90010;
-        box-shadow: 0 0 0 1px var(--ctrl-focus-border);
+        box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-TEXTAREA:focus-within strong,
       WUP-TEXTAREA:focus-within legend {
@@ -407,7 +407,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-TEXTAREA:hover&gt;[menu],
         WUP-TEXTAREA[hovered],
         WUP-TEXTAREA[hovered]&gt;[menu] {
-          box-shadow: 0 0 1px 1px var(--ctrl-focus-border);
+          box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
         }
       }
         WUP-TEXTAREA {

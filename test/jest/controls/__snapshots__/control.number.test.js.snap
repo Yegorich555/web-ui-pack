@@ -286,7 +286,7 @@ padding:0;}
       WUP-NUM:focus-within,
       WUP-NUM:focus-within &gt; [menu] {
         z-index: 90010;
-        box-shadow: 0 0 0 1px var(--ctrl-focus-border);
+        box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-NUM:focus-within strong,
       WUP-NUM:focus-within legend {
@@ -400,7 +400,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-NUM:hover&gt;[menu],
         WUP-NUM[hovered],
         WUP-NUM[hovered]&gt;[menu] {
-          box-shadow: 0 0 1px 1px var(--ctrl-focus-border);
+          box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
         }
       }
         WUP-NUM {

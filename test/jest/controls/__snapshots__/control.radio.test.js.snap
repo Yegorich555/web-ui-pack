@@ -662,7 +662,7 @@ padding:0;}
       WUP-RADIO:focus-within,
       WUP-RADIO:focus-within &gt; [menu] {
         z-index: 90010;
-        box-shadow: 0 0 0 1px var(--ctrl-focus-border);
+        box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-RADIO:focus-within strong,
       WUP-RADIO:focus-within legend {
@@ -776,7 +776,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-RADIO:hover&gt;[menu],
         WUP-RADIO[hovered],
         WUP-RADIO[hovered]&gt;[menu] {
-          box-shadow: 0 0 1px 1px var(--ctrl-focus-border);
+          box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
         }
       }
       WUP-RADIO {
