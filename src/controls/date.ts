@@ -116,10 +116,10 @@ export default class WUPDateControl<
       ...WUPBaseComboControl.$defaults.validationRules,
       min: (v, setV, c) =>
         (v === undefined || dateCompareWithoutTime(v, setV) < 1) &&
-        `Min value is ${dateToString(setV, (c as WUPDateControl)._opts.format.toUpperCase())}`,
+        `Min value is ${(c as WUPDateControl).valueToInput(setV)}`,
       max: (v, setV, c) =>
         (v === undefined || dateCompareWithoutTime(v, setV) > -1) &&
-        `Max value is ${dateToString(setV, (c as WUPDateControl)._opts.format.toUpperCase())}`,
+        `Max value is ${(c as WUPDateControl).valueToInput(setV)}`,
       exclude: (v, setV) =>
         (v === undefined || setV.some((d) => d.valueOf() === v.valueOf())) && `This value is disabled`,
     },
@@ -161,7 +161,7 @@ export default class WUPDateControl<
   }
 
   override valueToUrl(v: ValueType): string {
-    return dateToString(v, "yyyy-MM-dd");
+    return dateToString(v, `yyyy-MM-dd${this._opts.utc ? "Z" : ""}`);
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Date.Options> | null): void {
