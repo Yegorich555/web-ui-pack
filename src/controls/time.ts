@@ -650,10 +650,6 @@ export default class WUPTimeControl<
     return v.format(this._opts.format);
   }
 
-  protected override resetInputValue(): void {
-    // don't call super because validation is appeared
-  }
-
   #lastInputChanged = false; // if press Enter: need to get value from last touched field (input OR menu)
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
     this.#lastInputChanged = true;
@@ -744,6 +740,7 @@ export default class WUPTimeControl<
       e.preventDefault();
       if (this.#lastInputChanged || !this.$refButtonOk) {
         this.goHideMenu(HideCases.OnPressEnter);
+        this._inputError && this.resetInputValue(); // it will show err message
       } else if (!this.$refButtonOk!.disabled) {
         setTimeout(() =>
           this.$refButtonOk!.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }))

@@ -292,6 +292,21 @@ describe("control.time", () => {
     el.blur();
     expect(el.$refInput.value).toBe("1:36");
     await h.wait();
+
+    // user types invalid text
+    h.mockConsoleWarn();
+    el = document.body.appendChild(document.createElement(el.tagName));
+    await h.wait(1);
+    expect(await h.userTypeText(el.$refInput, "99999a")).toBe("99:99 A|M");
+    expect(el.$isShown).toBe(true);
+
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    await h.wait();
+    expect(el.$isShown).toBe(false);
+    expect(el.$refError?.innerHTML).toMatchInlineSnapshot(
+      `"<span class="wup-hidden"></span><span>Invalid value</span>"`
+    );
+    h.unMockConsoleWarn();
   });
 
   test("user updates input", async () => {
