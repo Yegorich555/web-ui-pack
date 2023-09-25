@@ -86,7 +86,7 @@ function renderHTMLCode(tag: string, customHTML: string[] | undefined): string |
   if (el instanceof WUPBaseControl) {
     addUnique({ name: "w-autocomplete", value: "off" });
     addUnique({ name: "w-storage", value: "local" });
-    addUnique({ name: "w-skey", value: "false" });
+    addUnique({ name: "w-storageKey", value: "false" });
   }
   if (el instanceof WUPSwitchControl || el instanceof WUPPasswordControl || el instanceof WUPRadioControl) {
     addUnique({ name: "w-reverse", value: "false" });

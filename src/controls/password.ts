@@ -19,7 +19,7 @@ declare global {
       confirm: boolean;
     }
     interface Options<T = string, VM = ValidityMap>
-      extends Omit<WUP.Text.Options<T, VM>, "mask" | "maskholder" | "skey" | "storage"> {
+      extends Omit<WUP.Text.Options<T, VM>, "mask" | "maskholder" | "storageKey" | "storage"> {
       /** Reversed-style for button-eye
        * @defaultValue false */
       reverse: boolean;

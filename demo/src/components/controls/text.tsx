@@ -27,7 +27,7 @@ export default function TextControlView() {
         "Easy to append icons",
         "Mask/maskholder support (options mask & maskholder)",
         "Prefix/postfix support (options prefix & postfix)",
-        "Ability to save value to localStorage, sessionStorage, URL (options skey & storage)",
+        "Ability to save value to localStorage, sessionStorage, URL (options storageKey & storage)",
       ]}
     >
       <wup-form

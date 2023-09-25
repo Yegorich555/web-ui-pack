@@ -1024,7 +1024,7 @@ export default abstract class WUPBaseControl<
     if (typeof v === "object") {
       this.throwError(
         new Error(
-          "Option `skey` with object-values are not supported. Override `valueToUrl` & `valueFromUrl` to fix it"
+          "Option `storageKey` with object-values are not supported. Override `valueToUrl` & `valueFromUrl` to fix it"
         )
       );
       return null;
@@ -1032,7 +1032,7 @@ export default abstract class WUPBaseControl<
     return v.toString();
   }
 
-  /** Returns storage key based on options `skey` and `name` */
+  /** Returns storage key based on options `storageKey` and `name` */
   get storageKey(): string | undefined | null | false {
     return this._opts.storageKey === true ? this._opts.name : this._opts.storageKey;
   }
@@ -1061,7 +1061,7 @@ export default abstract class WUPBaseControl<
     return this.$initValue;
   }
 
-  /** Save value to storage storage according to options `skey`, `storage` and `name` */
+  /** Save value to storage storage according to options `storageKey`, `storage` and `name` */
   protected storageSet(v: ValueType | undefined): void {
     // NiceToHave: option to sync ctrls with same storage & key: if 'personType` is changed need to update all ctrls with same key `personType`
     const key = this.storageKey;
