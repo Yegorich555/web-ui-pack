@@ -1,6 +1,6 @@
 /* eslint-disable no-irregular-whitespace */
 import { WUPSelectControl } from "web-ui-pack";
-import { ShowCases } from "web-ui-pack/controls/baseCombo";
+import WUPBaseComboControl, { ShowCases } from "web-ui-pack/controls/baseCombo";
 import { initTestBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
 
@@ -604,6 +604,17 @@ describe("control.select common", () => {
       expect(el.$isShown).toBe(false);
     });
 
+    test("showCase: focusAuto", async () => {
+      el.$options.showCase |= ShowCases.onFocusAuto;
+      const canShow = jest.spyOn(WUPBaseComboControl.prototype, "canShowMenu");
+      el.focus();
+      await h.wait(1);
+      expect(canShow).toBeCalledTimes(1);
+      expect(canShow.mock.lastCall[0]).toBe(ShowCases.onFocusAuto);
+
+      // WARN: other tests possible only manually: see details directly in the code
+    });
+
     test("readOnlyInput", async () => {
       el.$options.readOnlyInput = true;
       await h.wait(1);
@@ -711,7 +722,6 @@ describe("control.select common", () => {
     await h.wait(1);
     expect(onScroll).toBeCalledTimes(1);
   });
-  // todo cover tests with ShowCases.onFocusAuto;
 });
 
 // manual testcase (close menu by outside click): to reproduce focus > pressEsc > typeText > try close by outside click
