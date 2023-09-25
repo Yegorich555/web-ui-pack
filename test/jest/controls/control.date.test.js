@@ -310,6 +310,21 @@ describe("control.date", () => {
     expect(el.parseInput("b022-10-16")).toBe(undefined);
     el.$options.utc = false;
     expect(el.parseInput("2022-10-16").toISOString()).toBe(new Date("2022-10-16").toISOString());
+
+    // user types invalid text
+    h.mockConsoleWarn();
+    el = document.body.appendChild(document.createElement(el.tagName));
+    await h.wait(1);
+    expect(await h.userTypeText(el.$refInput, "99999999")).toBe("9999-99-99|");
+    expect(el.$isShown).toBe(true);
+
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    await h.wait();
+    expect(el.$isShown).toBe(false);
+    expect(el.$refError?.innerHTML).toMatchInlineSnapshot(
+      `"<span class="wup-hidden"></span><span>Invalid value</span>"`
+    );
+    h.unMockConsoleWarn();
   });
 
   test("menu navigation", async () => {

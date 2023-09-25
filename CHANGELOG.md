@@ -31,6 +31,7 @@
 - [DateControl](src/controls/date.ts).
   - _Validations min & max don't exclude time in comparison_
   - _Validations messages min & max isn't formatted according to `utc`_
+  - _Error message doesn't appear for invalid input by pressing Enter_
 - [DateControl](src/controls/date.ts). [TimeControl](src/controls/time.ts). _Validation `_parse` doesn't work when added extra char and another char auto-removed (shifted & removed)_
 - [CalendarControl](src/controls/calendar.ts). Removed useless background for button month in the header
 

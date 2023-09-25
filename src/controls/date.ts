@@ -254,10 +254,6 @@ export default class WUPDateControl<
     return dateToString(v, this._opts.format.toUpperCase() + (this._opts.utc ? "Z" : ""));
   }
 
-  protected override resetInputValue(): void {
-    // don't call super because validation is appeared
-  }
-
   protected override focusMenuItem(next: HTMLElement | null): void {
     // WARN: it's important don't use call super... because the main logic is implemented inside calendar
     // can be fired from baseCombo => when need to clear selection

@@ -491,8 +491,12 @@ export default abstract class WUPBaseComboControl<
     canHideMenu && setTimeout(() => this.goHideMenu(HideCases.onSelect)); // without timeout it handles click by listener and opens again
   }
 
-  /** Reset input to currentValue; called on focusOut, pressing Escape or Enter */
+  /** Reset input to currentValue; called on pressing Escape or Enter */
   protected resetInputValue(): void {
+    if (this._inputError) {
+      this.$showError(this._inputError); // case when mask/parse applied and need to show input error without changing
+      return;
+    }
     const isClear = !this.$refInput.value && !this._selectedMenuItem; // if user cleared input and $hided menu - need to clearValue
     isClear
       ? this.setValue(undefined, SetValueReasons.clear)
