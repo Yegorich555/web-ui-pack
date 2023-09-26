@@ -24,7 +24,6 @@ exports[`control.textarea $ariaDetails 1`] = `
     <button
       aria-hidden="true"
       clear=""
-      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -51,7 +50,6 @@ exports[`control.textarea $ariaDetails 2`] = `
     <button
       aria-hidden="true"
       clear=""
-      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -79,7 +77,6 @@ exports[`control.textarea $ariaSpeak 1`] = `
     <button
       aria-hidden="true"
       clear=""
-      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -115,7 +112,6 @@ exports[`control.textarea $ariaSpeak 2`] = `
     <button
       aria-hidden="true"
       clear=""
-      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -142,7 +138,6 @@ exports[`control.textarea $show/$hide error 1`] = `
     <button
       aria-hidden="true"
       clear=""
-      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -172,7 +167,6 @@ exports[`control.textarea $show/$hide error 2`] = `
     <button
       aria-hidden="true"
       clear=""
-      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -214,7 +208,6 @@ exports[`control.textarea $show/$hide error 3`] = `
     <button
       aria-hidden="true"
       clear=""
-      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -733,7 +726,6 @@ exports[`control.textarea options clearButton 1`] = `
     <button
       aria-hidden="true"
       clear=""
-      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -798,7 +790,6 @@ exports[`control.textarea validations $options.validationShowAll 1`] = `
     <button
       aria-hidden="true"
       clear=""
-      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -860,7 +851,6 @@ exports[`control.textarea validations $options.validationShowAll 2`] = `
     <button
       aria-hidden="true"
       clear=""
-      style=""
       tabindex="-1"
       type="button"
     />
@@ -928,7 +918,6 @@ exports[`control.textarea validations $options.validationShowAll 3`] = `
     <button
       aria-hidden="true"
       clear=""
-      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -974,7 +963,6 @@ exports[`control.textarea validations options.validationCase 1`] = `
     <button
       aria-hidden="true"
       clear=""
-      style=""
       tabindex="-1"
       type="button"
     />
@@ -1008,7 +996,6 @@ exports[`control.textarea validations options.validationCase 2`] = `
     <button
       aria-hidden="true"
       clear="back"
-      style=""
       tabindex="-1"
       type="button"
     />
@@ -1061,7 +1048,6 @@ exports[`control.textarea validations options.validationCase 3`] = `
     <button
       aria-hidden="true"
       clear=""
-      style=""
       tabindex="-1"
       type="button"
     />
@@ -1111,7 +1097,6 @@ exports[`control.textarea validations options.validationCase 4`] = `
     <button
       aria-hidden="true"
       clear=""
-      style="display: none;"
       tabindex="-1"
       type="button"
     />
@@ -1160,7 +1145,6 @@ exports[`control.textarea with form 1`] = `
       <button
         aria-hidden="true"
         clear=""
-        style="display: none;"
         tabindex="-1"
         type="button"
       />

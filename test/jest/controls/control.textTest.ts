@@ -176,26 +176,4 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       expect(el.$refInput.selectionEnd).toBe(initV.length);
     });
   });
-
-  test("btnClear is hidden when nothing to clear", async () => {
-    const el = getEl();
-    el.$options.clearActions = ClearActions.clear & 0;
-    await h.wait(10);
-    expect(el.$refInput.value).toBe("");
-    expect(el.$refBtnClear?.style.display).toBe("none");
-
-    HTMLInputElement.prototype.focus.call(el.$refInput); // on focus mask with prefix can appear but nothing to clear
-    await h.wait(10);
-    expect(el.$refBtnClear?.style.display).toBe("none");
-
-    await h.userTypeText(el.$refInput, "1", { clearPrevious: false });
-    expect(el.$refBtnClear?.style.display).toBeFalsy(); // button appears
-
-    await h.userRemove(el.$refInput, { key: "Backspace" });
-    expect(el.$refBtnClear?.style.display).toBe("none");
-
-    el.$options.clearActions = ClearActions.initClearBack;
-    await h.wait(10);
-    expect(el.$refBtnClear?.style.display).toBe("none");
-  });
 }

@@ -402,7 +402,6 @@ export default class WUPTextControl<
       },
       { passive: false }
     );
-    setTimeout(() => this.setClearState()); // to update btnClear
     return bc;
   }
 
@@ -601,7 +600,6 @@ export default class WUPTextControl<
     const wasErr = !errMsg && !!this._inputError;
     this._inputError = errMsg;
     const act = (): void => {
-      this.setClearState();
       if (this._inputError || wasErr) {
         this.goValidate(ValidateFromCases.onChange);
       }
@@ -733,11 +731,7 @@ export default class WUPTextControl<
   protected override setClearState(): ValueType | undefined {
     const next = super.setClearState();
     if (this.$refBtnClear) {
-      const isNextEmpty = this.#ctr.$isEmpty(next);
-      this.$refBtnClear.setAttribute("clear", isNextEmpty ? "" : "back");
-      const s = this.$refInput.value;
-      const isInputEmpty = s === "" || s === this.refMask?.prefix;
-      this.$refBtnClear.style.display = isInputEmpty && this.$isEmpty && isNextEmpty ? "none" : "";
+      this.$refBtnClear.setAttribute("clear", this.#ctr.$isEmpty(next) ? "" : "back");
     }
     return next;
   }
