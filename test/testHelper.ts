@@ -165,7 +165,7 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
             switch (typeof def) {
               case "function":
               case "object":
-                if (obj.$options[k] === def && !(def instanceof HTMLElement)) {
+                if (obj.$options[k as string] === def && !(def instanceof HTMLElement)) {
                   return true;
                 }
                 return false;

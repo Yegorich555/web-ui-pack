@@ -73,8 +73,7 @@ type StoredRefError = HTMLElement & { _wupVldItems?: StoredItem[] };
 
 declare global {
   namespace WUP.BaseControl {
-    // type AutoComplete = AutoFill; // uncomment with new version TS
-    type AutoComplete = string;
+    type AutoComplete = AutoFill; // remove after half year with new version TS
     interface EventMap extends WUP.Base.EventMap {
       /** Called on value change */
       $change: CustomEvent & { detail: SetValueReasons };
