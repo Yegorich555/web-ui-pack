@@ -287,9 +287,13 @@ export default abstract class WUPBaseControl<
         color: var(--ctrl-label);
         pointer-events: none;
       }
+      :host[invalid],
+      :host[invalid] > [menu] {
+        --ctrl-focus-border: var( --ctrl-invalid-border);
+        box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
+      }
       :host:focus-within,
       :host:focus-within > [menu] {
-        z-index: 90010;
         box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       :host:focus-within strong,
@@ -307,10 +311,6 @@ export default abstract class WUPBaseControl<
       [disabled] :host > *,
       :host[disabled] > * {
         pointer-events: none;
-      }
-      :host[invalid],
-      :host[invalid] > [menu] {
-        --ctrl-focus-border: var( --ctrl-invalid-border);
       }
       :host label {
         display: flex;
@@ -385,9 +385,7 @@ export default abstract class WUPBaseControl<
         :host:hover>[menu],
         :host[hovered],
         :host[hovered]>[menu] {
-          box-shadow: 0 0 2px 1px var(--ctrl-focus-border);${
-            /* WARN: style the same as for :focus but here just to easy customize */ ""
-          }
+          box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
         }
       }`;
   }

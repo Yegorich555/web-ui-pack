@@ -113,9 +113,13 @@ WUP-FORM [type='submit'][aria-busy] {
         color: var(--ctrl-label);
         pointer-events: none;
       }
+      WUP-TEXT[invalid],
+      WUP-TEXT[invalid] &gt; [menu] {
+        --ctrl-focus-border: var( --ctrl-invalid-border);
+        box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
+      }
       WUP-TEXT:focus-within,
       WUP-TEXT:focus-within &gt; [menu] {
-        z-index: 90010;
         box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-TEXT:focus-within strong,
@@ -133,10 +137,6 @@ WUP-FORM [type='submit'][aria-busy] {
       [disabled] WUP-TEXT &gt; *,
       WUP-TEXT[disabled] &gt; * {
         pointer-events: none;
-      }
-      WUP-TEXT[invalid],
-      WUP-TEXT[invalid] &gt; [menu] {
-        --ctrl-focus-border: var( --ctrl-invalid-border);
       }
       WUP-TEXT label {
         display: flex;

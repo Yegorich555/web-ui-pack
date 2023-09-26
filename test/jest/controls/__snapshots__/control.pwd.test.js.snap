@@ -347,9 +347,13 @@ padding:0;}
         color: var(--ctrl-label);
         pointer-events: none;
       }
+      WUP-PWD[invalid],
+      WUP-PWD[invalid] &gt; [menu] {
+        --ctrl-focus-border: var( --ctrl-invalid-border);
+        box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
+      }
       WUP-PWD:focus-within,
       WUP-PWD:focus-within &gt; [menu] {
-        z-index: 90010;
         box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-PWD:focus-within strong,
@@ -367,10 +371,6 @@ padding:0;}
       [disabled] WUP-PWD &gt; *,
       WUP-PWD[disabled] &gt; * {
         pointer-events: none;
-      }
-      WUP-PWD[invalid],
-      WUP-PWD[invalid] &gt; [menu] {
-        --ctrl-focus-border: var( --ctrl-invalid-border);
       }
       WUP-PWD label {
         display: flex;

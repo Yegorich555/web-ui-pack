@@ -317,9 +317,13 @@ padding:0;}
         color: var(--ctrl-label);
         pointer-events: none;
       }
+      WUP-SELECTMANY[invalid],
+      WUP-SELECTMANY[invalid] &gt; [menu] {
+        --ctrl-focus-border: var( --ctrl-invalid-border);
+        box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
+      }
       WUP-SELECTMANY:focus-within,
       WUP-SELECTMANY:focus-within &gt; [menu] {
-        z-index: 90010;
         box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-SELECTMANY:focus-within strong,
@@ -337,10 +341,6 @@ padding:0;}
       [disabled] WUP-SELECTMANY &gt; *,
       WUP-SELECTMANY[disabled] &gt; * {
         pointer-events: none;
-      }
-      WUP-SELECTMANY[invalid],
-      WUP-SELECTMANY[invalid] &gt; [menu] {
-        --ctrl-focus-border: var( --ctrl-invalid-border);
       }
       WUP-SELECTMANY label {
         display: flex;
