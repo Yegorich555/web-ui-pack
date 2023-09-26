@@ -156,8 +156,8 @@ export default class WUPPopupElement<
   static get $styleRoot(): string {
     return `
       :root {
-        --popup-shadow-size: 4px;
         --popup-anim: 300ms;
+        --popup-bg: white;
       }`;
   }
 
@@ -172,8 +172,8 @@ export default class WUPPopupElement<
         overflow: auto;
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
-        box-shadow: 0 1px var(--popup-shadow-size) 0 #00000033;
-        background: white;
+        box-shadow: 0 1px 4px 0 #00000033;
+        background: var(--popup-bg);
         text-overflow: ellipsis;
       }
       @media not all and (prefers-reduced-motion) {

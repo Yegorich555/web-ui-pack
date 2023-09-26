@@ -39,7 +39,7 @@ export default class WUPPopupArrowElement extends HTMLElement {
             width: 100%; height: 100%;
             clip-path: polygon(0 1px, 0 0, 100% 0, 100% 1px, 50% 100%);
             margin-top: -1px;
-            background: white;
+            background: var(--popup-bg, #fff);
           }
         `;
       document.head.prepend(s);
