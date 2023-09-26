@@ -325,6 +325,21 @@ describe("control.date", () => {
       `"<span class="wup-hidden"></span><span>Invalid value</span>"`
     );
     h.unMockConsoleWarn();
+
+    // user types incomplete text (msg: Incomplete value)
+    el = document.body.appendChild(document.createElement(el.tagName));
+    await h.wait(1);
+    expect(await h.userTypeText(el.$refInput, "99")).toBe("99|");
+    expect(el.$isShown).toBe(true);
+    expect(el.$refError?.innerHTML).toBeFalsy();
+
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    await h.wait();
+    expect(el.$isShown).toBe(false);
+    expect(el.$refError?.innerHTML).toMatchInlineSnapshot(
+      `"<span class="wup-hidden"></span><span>Incomplete value</span>"`
+    );
+    expect(el.$refInput.value).toBe("99");
   });
 
   test("menu navigation", async () => {
