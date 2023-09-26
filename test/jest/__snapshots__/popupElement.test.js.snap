@@ -29,8 +29,8 @@ padding:0;}
         }
   
       :root {
-        --popup-shadow-size: 4px;
         --popup-anim: 300ms;
+        --popup-bg: white;
       }
   
       WUP-POPUP {
@@ -42,8 +42,8 @@ padding:0;}
         overflow: auto;
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
-        box-shadow: 0 1px var(--popup-shadow-size) 0 #00000033;
-        background: white;
+        box-shadow: 0 1px 4px 0 #00000033;
+        background: var(--popup-bg);
         text-overflow: ellipsis;
       }
       @media not all and (prefers-reduced-motion) {
@@ -109,8 +109,8 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
         overflow: auto;
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
-        box-shadow: 0 1px var(--popup-shadow-size) 0 #00000033;
-        background: white;
+        box-shadow: 0 1px 4px 0 #00000033;
+        background: var(--popup-bg);
         text-overflow: ellipsis;
       }
       @media not all and (prefers-reduced-motion) {
@@ -238,8 +238,8 @@ padding:0;}
         }
   
       :root {
-        --popup-shadow-size: 4px;
         --popup-anim: 300ms;
+        --popup-bg: white;
       }
   
       WUP-POPUP {
@@ -251,8 +251,8 @@ padding:0;}
         overflow: auto;
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
-        box-shadow: 0 1px var(--popup-shadow-size) 0 #00000033;
-        background: white;
+        box-shadow: 0 1px 4px 0 #00000033;
+        background: var(--popup-bg);
         text-overflow: ellipsis;
       }
       @media not all and (prefers-reduced-motion) {
@@ -318,8 +318,8 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
         overflow: auto;
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
-        box-shadow: 0 1px var(--popup-shadow-size) 0 #00000033;
-        background: white;
+        box-shadow: 0 1px 4px 0 #00000033;
+        background: var(--popup-bg);
         text-overflow: ellipsis;
       }
       @media not all and (prefers-reduced-motion) {
