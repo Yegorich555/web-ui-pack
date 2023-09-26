@@ -1014,6 +1014,7 @@ padding:0;}
       }
       WUP-CALENDAR:focus-within,
       WUP-CALENDAR:focus-within &gt; [menu] {
+        z-index: 90010;
         box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-CALENDAR:focus-within strong,

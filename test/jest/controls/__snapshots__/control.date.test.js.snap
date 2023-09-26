@@ -306,6 +306,7 @@ padding:0;}
       }
       WUP-DATE:focus-within,
       WUP-DATE:focus-within &gt; [menu] {
+        z-index: 90010;
         box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-DATE:focus-within strong,

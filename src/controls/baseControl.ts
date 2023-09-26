@@ -294,6 +294,7 @@ export default abstract class WUPBaseControl<
       }
       :host:focus-within,
       :host:focus-within > [menu] {
+        z-index: 90010;
         box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       :host:focus-within strong,
