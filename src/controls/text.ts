@@ -123,7 +123,6 @@ export default class WUPTextControl<
   static get $styleRoot(): string {
     return `:root {
       --ctrl-clear-hover: rgba(255,0,0,0.1);
-      --ctrl-clear-hover-size: 22px;
      }`;
   }
 
@@ -247,8 +246,8 @@ export default class WUPTextControl<
           display: inline-block;
         }
         /* style for icons */
-        :host label button,
-        :host label button:after,
+        :host label>button,
+        :host label>button:after,
         :host label:after,
         :host label:before {
           ${WUPcssIcon}
@@ -263,20 +262,23 @@ export default class WUPTextControl<
           cursor: pointer;
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
-        :host label button {
+        :host label>button {
           contain: strict;
-          position: relative;
           z-index: 1;
           font-size: inherit;
         }
-        :host label>span + button {
-          margin-right: -0.5em;
-        }
         :host button[clear] {
+          position: relative;
+          margin-right: -0.5em;
           align-self: center;
-          background: none;
           cursor: pointer;
           --ctrl-icon-img: var(--wup-icon-cross);
+          background: none;
+          mask: none;
+          -webkit-mask: none;
+        }
+        :host button[clear=back] {
+          --ctrl-icon-img: var(--wup-icon-back);
         }
         :host button[clear]:after {
           content: "";
@@ -284,38 +286,27 @@ export default class WUPTextControl<
           -webkit-mask-image: var(--ctrl-icon-img);
           mask-image: var(--ctrl-icon-img);
         }
-        :host button[clear=back]:after {
-          --ctrl-icon-img: var(--wup-icon-back);
-        }
         :host button[clear]:after,
         :host button[clear]:before {
           position: absolute;
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           width: 100%;
-        }
-        :host button[clear]:before {
-          width: var(--ctrl-clear-hover-size);
-          padding-top: var(--ctrl-clear-hover-size);
+          height: 100%;
+          border-radius: 50%;
         }
         :host[disabled] button[clear],
         :host[readonly] button[clear] {
           display: none;
+          pointer-events: none;
         }
         @media (hover: hover) and (pointer: fine) {
-          :host button[clear]:hover {
-            box-shadow: none;
-          }
           :host button[clear]:hover:before {
             content: "";
-            border-radius: 50%;
             box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
           }
           :host button[clear]:hover:after {
-            background-color: var(--ctrl-err-text);
-          }
-          :host[readonly] button[clear] {
-            pointer-events: none;
+            background: var(--ctrl-err-text);
           }
         }`;
   }

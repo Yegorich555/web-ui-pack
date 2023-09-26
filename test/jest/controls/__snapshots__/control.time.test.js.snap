@@ -285,7 +285,6 @@ padding:0;}
       }
   :root {
       --ctrl-clear-hover: rgba(255,0,0,0.1);
-      --ctrl-clear-hover-size: 22px;
      }
   :root {
         --ctrl-time-icon-img-lg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M383.615 0C171.647 0 0 172.032 0 384s171.648 384 383.615 384c212.352 0 384.383-172.032 384.383-384S595.966 0 383.615 0zM384 691.199C214.272 691.199 76.801 553.727 76.801 384S214.273 76.801 384 76.801c169.728 0 307.199 137.472 307.199 307.199S553.727 691.199 384 691.199zm-38.401-499.198h57.6v201.6l172.8 102.528-28.8 47.232-201.6-120.96v-230.4z' /%3E%3C/svg%3E");
@@ -548,8 +547,8 @@ mask-image: var(--ctrl-icon-img);
           display: inline-block;
         }
         /* style for icons */
-        WUP-TIME label button,
-        WUP-TIME label button:after,
+        WUP-TIME label&gt;button,
+        WUP-TIME label&gt;button:after,
         WUP-TIME label:after,
         WUP-TIME label:before {
           
@@ -583,20 +582,23 @@ mask-image: var(--ctrl-icon-img);
           cursor: pointer;
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
-        WUP-TIME label button {
+        WUP-TIME label&gt;button {
           contain: strict;
-          position: relative;
           z-index: 1;
           font-size: inherit;
         }
-        WUP-TIME label&gt;span + button {
-          margin-right: -0.5em;
-        }
         WUP-TIME button[clear] {
+          position: relative;
+          margin-right: -0.5em;
           align-self: center;
-          background: none;
           cursor: pointer;
           --ctrl-icon-img: var(--wup-icon-cross);
+          background: none;
+          mask: none;
+          -webkit-mask: none;
+        }
+        WUP-TIME button[clear=back] {
+          --ctrl-icon-img: var(--wup-icon-back);
         }
         WUP-TIME button[clear]:after {
           content: "";
@@ -604,38 +606,27 @@ mask-image: var(--ctrl-icon-img);
           -webkit-mask-image: var(--ctrl-icon-img);
           mask-image: var(--ctrl-icon-img);
         }
-        WUP-TIME button[clear=back]:after {
-          --ctrl-icon-img: var(--wup-icon-back);
-        }
         WUP-TIME button[clear]:after,
         WUP-TIME button[clear]:before {
           position: absolute;
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           width: 100%;
-        }
-        WUP-TIME button[clear]:before {
-          width: var(--ctrl-clear-hover-size);
-          padding-top: var(--ctrl-clear-hover-size);
+          height: 100%;
+          border-radius: 50%;
         }
         WUP-TIME[disabled] button[clear],
         WUP-TIME[readonly] button[clear] {
           display: none;
+          pointer-events: none;
         }
         @media (hover: hover) and (pointer: fine) {
-          WUP-TIME button[clear]:hover {
-            box-shadow: none;
-          }
           WUP-TIME button[clear]:hover:before {
             content: "";
-            border-radius: 50%;
             box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
           }
           WUP-TIME button[clear]:hover:after {
-            background-color: var(--ctrl-err-text);
-          }
-          WUP-TIME[readonly] button[clear] {
-            pointer-events: none;
+            background: var(--ctrl-err-text);
           }
         }
       WUP-TIME {

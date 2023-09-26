@@ -257,7 +257,6 @@ padding:0;}
       }
   :root {
       --ctrl-clear-hover: rgba(255,0,0,0.1);
-      --ctrl-clear-hover-size: 22px;
      }
   
       WUP-TEXT {
@@ -514,8 +513,8 @@ mask-image: var(--ctrl-icon-img);
           display: inline-block;
         }
         /* style for icons */
-        WUP-TEXT label button,
-        WUP-TEXT label button:after,
+        WUP-TEXT label&gt;button,
+        WUP-TEXT label&gt;button:after,
         WUP-TEXT label:after,
         WUP-TEXT label:before {
           
@@ -549,20 +548,23 @@ mask-image: var(--ctrl-icon-img);
           cursor: pointer;
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
-        WUP-TEXT label button {
+        WUP-TEXT label&gt;button {
           contain: strict;
-          position: relative;
           z-index: 1;
           font-size: inherit;
         }
-        WUP-TEXT label&gt;span + button {
-          margin-right: -0.5em;
-        }
         WUP-TEXT button[clear] {
+          position: relative;
+          margin-right: -0.5em;
           align-self: center;
-          background: none;
           cursor: pointer;
           --ctrl-icon-img: var(--wup-icon-cross);
+          background: none;
+          mask: none;
+          -webkit-mask: none;
+        }
+        WUP-TEXT button[clear=back] {
+          --ctrl-icon-img: var(--wup-icon-back);
         }
         WUP-TEXT button[clear]:after {
           content: "";
@@ -570,38 +572,27 @@ mask-image: var(--ctrl-icon-img);
           -webkit-mask-image: var(--ctrl-icon-img);
           mask-image: var(--ctrl-icon-img);
         }
-        WUP-TEXT button[clear=back]:after {
-          --ctrl-icon-img: var(--wup-icon-back);
-        }
         WUP-TEXT button[clear]:after,
         WUP-TEXT button[clear]:before {
           position: absolute;
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           width: 100%;
-        }
-        WUP-TEXT button[clear]:before {
-          width: var(--ctrl-clear-hover-size);
-          padding-top: var(--ctrl-clear-hover-size);
+          height: 100%;
+          border-radius: 50%;
         }
         WUP-TEXT[disabled] button[clear],
         WUP-TEXT[readonly] button[clear] {
           display: none;
+          pointer-events: none;
         }
         @media (hover: hover) and (pointer: fine) {
-          WUP-TEXT button[clear]:hover {
-            box-shadow: none;
-          }
           WUP-TEXT button[clear]:hover:before {
             content: "";
-            border-radius: 50%;
             box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
           }
           WUP-TEXT button[clear]:hover:after {
-            background-color: var(--ctrl-err-text);
-          }
-          WUP-TEXT[readonly] button[clear] {
-            pointer-events: none;
+            background: var(--ctrl-err-text);
           }
         }
 </style>

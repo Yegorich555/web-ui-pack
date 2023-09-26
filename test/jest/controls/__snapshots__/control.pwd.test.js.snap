@@ -324,7 +324,6 @@ padding:0;}
       }
   :root {
       --ctrl-clear-hover: rgba(255,0,0,0.1);
-      --ctrl-clear-hover-size: 22px;
      }
   :root {
         --wup-icon-eye: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M384 122.182C209.455 122.182 60.392 230.749 0 384c60.392 153.251 209.455 261.818 384 261.818S707.608 537.251 768 384c-60.392-153.251-209.455-261.818-384-261.818zm0 436.363c-96.35 0-174.545-78.197-174.545-174.545S287.651 209.455 384 209.455 558.545 287.651 558.545 384 480.348 558.545 384 558.545zm0-279.272c-57.95 0-104.727 46.778-104.727 104.727S326.051 488.727 384 488.727 488.727 441.949 488.727 384 441.949 279.273 384 279.273z'/%3E%3C/svg%3E");
@@ -585,8 +584,8 @@ mask-image: var(--ctrl-icon-img);
           display: inline-block;
         }
         /* style for icons */
-        WUP-PWD label button,
-        WUP-PWD label button:after,
+        WUP-PWD label&gt;button,
+        WUP-PWD label&gt;button:after,
         WUP-PWD label:after,
         WUP-PWD label:before {
           
@@ -620,20 +619,23 @@ mask-image: var(--ctrl-icon-img);
           cursor: pointer;
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
-        WUP-PWD label button {
+        WUP-PWD label&gt;button {
           contain: strict;
-          position: relative;
           z-index: 1;
           font-size: inherit;
         }
-        WUP-PWD label&gt;span + button {
-          margin-right: -0.5em;
-        }
         WUP-PWD button[clear] {
+          position: relative;
+          margin-right: -0.5em;
           align-self: center;
-          background: none;
           cursor: pointer;
           --ctrl-icon-img: var(--wup-icon-cross);
+          background: none;
+          mask: none;
+          -webkit-mask: none;
+        }
+        WUP-PWD button[clear=back] {
+          --ctrl-icon-img: var(--wup-icon-back);
         }
         WUP-PWD button[clear]:after {
           content: "";
@@ -641,38 +643,27 @@ mask-image: var(--ctrl-icon-img);
           -webkit-mask-image: var(--ctrl-icon-img);
           mask-image: var(--ctrl-icon-img);
         }
-        WUP-PWD button[clear=back]:after {
-          --ctrl-icon-img: var(--wup-icon-back);
-        }
         WUP-PWD button[clear]:after,
         WUP-PWD button[clear]:before {
           position: absolute;
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           width: 100%;
-        }
-        WUP-PWD button[clear]:before {
-          width: var(--ctrl-clear-hover-size);
-          padding-top: var(--ctrl-clear-hover-size);
+          height: 100%;
+          border-radius: 50%;
         }
         WUP-PWD[disabled] button[clear],
         WUP-PWD[readonly] button[clear] {
           display: none;
+          pointer-events: none;
         }
         @media (hover: hover) and (pointer: fine) {
-          WUP-PWD button[clear]:hover {
-            box-shadow: none;
-          }
           WUP-PWD button[clear]:hover:before {
             content: "";
-            border-radius: 50%;
             box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
           }
           WUP-PWD button[clear]:hover:after {
-            background-color: var(--ctrl-err-text);
-          }
-          WUP-PWD[readonly] button[clear] {
-            pointer-events: none;
+            background: var(--ctrl-err-text);
           }
         }
         WUP-PWD {
