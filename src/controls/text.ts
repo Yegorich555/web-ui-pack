@@ -268,6 +268,7 @@ export default class WUPTextControl<
           font-size: inherit;
         }
         :host button[clear] {
+          display: none;
           position: relative;
           margin-right: -0.5em;
           align-self: center;
@@ -276,6 +277,9 @@ export default class WUPTextControl<
           background: none;
           mask: none;
           -webkit-mask: none;
+        }
+        :host:focus-within button[clear] {
+          display: block;
         }
         :host button[clear=back] {
           --ctrl-icon-img: var(--wup-icon-back);
@@ -301,6 +305,9 @@ export default class WUPTextControl<
           pointer-events: none;
         }
         @media (hover: hover) and (pointer: fine) {
+          :host:hover button[clear] {
+            display: block;
+          }
           :host button[clear]:hover:before {
             content: "";
             box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
@@ -747,5 +754,3 @@ export default class WUPTextControl<
 customElements.define(tagName, WUPTextControl);
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
-
-// todo show btnClear only when hover OR focus

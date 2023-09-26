@@ -35,6 +35,7 @@ describe("control.text", () => {
       const el = document.body.appendChild(document.createElement("wup-text"));
       el.id = "newEl";
       el.$initValue = "Mike";
+      el.focus();
     });
     await page.waitForTimeout(2); // timeout required because of debounceFilters
     await page.click("#newEl [clear]");

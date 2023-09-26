@@ -580,6 +580,7 @@ mask-image: var(--ctrl-icon-img);
           font-size: inherit;
         }
         WUP-SELECT button[clear] {
+          display: none;
           position: relative;
           margin-right: -0.5em;
           align-self: center;
@@ -588,6 +589,9 @@ mask-image: var(--ctrl-icon-img);
           background: none;
           mask: none;
           -webkit-mask: none;
+        }
+        WUP-SELECT:focus-within button[clear] {
+          display: block;
         }
         WUP-SELECT button[clear=back] {
           --ctrl-icon-img: var(--wup-icon-back);
@@ -613,6 +617,9 @@ mask-image: var(--ctrl-icon-img);
           pointer-events: none;
         }
         @media (hover: hover) and (pointer: fine) {
+          WUP-SELECT:hover button[clear] {
+            display: block;
+          }
           WUP-SELECT button[clear]:hover:before {
             content: "";
             box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);

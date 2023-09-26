@@ -619,6 +619,7 @@ mask-image: var(--ctrl-icon-img);
           font-size: inherit;
         }
         WUP-PWD button[clear] {
+          display: none;
           position: relative;
           margin-right: -0.5em;
           align-self: center;
@@ -627,6 +628,9 @@ mask-image: var(--ctrl-icon-img);
           background: none;
           mask: none;
           -webkit-mask: none;
+        }
+        WUP-PWD:focus-within button[clear] {
+          display: block;
         }
         WUP-PWD button[clear=back] {
           --ctrl-icon-img: var(--wup-icon-back);
@@ -652,6 +656,9 @@ mask-image: var(--ctrl-icon-img);
           pointer-events: none;
         }
         @media (hover: hover) and (pointer: fine) {
+          WUP-PWD:hover button[clear] {
+            display: block;
+          }
           WUP-PWD button[clear]:hover:before {
             content: "";
             box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
