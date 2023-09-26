@@ -5,10 +5,10 @@ const sideEffect = WUPDateControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
 (window as any).myDateValidations = { required: true } as WUP.Calendar.Options["validations"];
 (window as any).myDateExcludeDays = [
-  new Date("2022-02-28"),
-  new Date("2022-03-16"),
-  new Date("2022-03-18"),
-  new Date("2022-04-01"),
+  new Date("2022-02-28T00:00:00.000Z"),
+  new Date("2022-03-16T00:00:00.000Z"),
+  new Date("2022-03-18T00:00:00.000Z"),
+  new Date("2022-04-01T00:00:00.000Z"),
 ];
 
 export default function DateControlView() {

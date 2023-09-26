@@ -167,20 +167,40 @@ describe("control.date", () => {
     });
 
     test("min/max/exclude affects on validations", async () => {
+      // el.$options.utc = true
       expect(el.validations).toBeTruthy(); // for coverage when el.$options.validations = undefined;
 
-      el.$options.min = new Date("2022-01-01");
-      expect(el.validations.min.valueOf()).toBe(new Date("2022-01-01").valueOf());
+      el.$options.min = new Date("2022-02-01T00:00:00.000Z");
+      expect(el.validations.min.valueOf()).toBe(new Date("2022-02-01T00:00:00.000Z").valueOf());
+      el.$value = new Date("2022-01-31T23:15:00.000Z");
+      expect(el.$validate()).toBe("Min value is 2022-02-01");
+      el.$value = new Date("2022-02-01T00:00:00.000Z");
+      expect(el.$validate()).toBeFalsy();
 
-      el.$options.max = new Date("2023-10-15");
-      expect(el.validations.max.valueOf()).toBe(new Date("2023-10-15").valueOf());
+      el.$options.max = new Date("2023-10-15T00:00:00.000Z");
+      expect(el.validations.max.valueOf()).toBe(new Date("2023-10-15T00:00:00.000Z").valueOf());
+      el.$value = new Date("2023-10-16T00:00:00.000Z");
+      expect(el.$validate()).toBe("Max value is 2023-10-15");
+      el.$value = new Date("2023-10-14T00:00:00.000Z");
+      expect(el.$validate()).toBeFalsy();
+      el.$value = new Date("2023-10-15T00:00:00.000Z");
+      expect(el.$validate()).toBeFalsy();
+      el.$value = new Date("2023-10-15T23:15:00.000Z");
+      expect(el.$validate()).toBeFalsy();
 
-      el.$options.exclude = [new Date("2022-07-12")];
-      expect(el.validations.exclude).toMatchInlineSnapshot(`
-        [
-          2022-07-12T00:00:00.000Z,
-        ]
-      `);
+      el.$options.exclude = [new Date("2022-07-12T00:00:00.000Z")];
+      expect(el.validations.exclude).toEqual([new Date("2022-07-12T00:00:00.000Z")]);
+      el.$value = new Date("2022-07-12T00:00:00.000Z");
+      expect(el.$validate()).toBe("This value is disabled");
+      el.$value = new Date("2022-07-12T23:16:00.000Z");
+      expect(el.$validate()).toBe("This value is disabled");
+      el.$value = new Date("2022-07-11T00:00:00.000Z");
+      expect(el.$validate()).toBeFalsy();
+      el.$value = new Date("2022-07-11T23:15:00.000Z");
+      expect(el.$validate()).toBeFalsy();
+      el.$value = new Date("2022-07-13T00:00:00.000Z");
+      expect(el.$validate()).toBeFalsy();
+
       await h.wait(1);
       HTMLInputElement.prototype.focus.call(el.$refInput);
       await h.wait();

@@ -1,8 +1,15 @@
+function getDateVal(v: Date, utc: boolean): number {
+  if (utc) {
+    return v.getUTCFullYear() * 1000 + v.getUTCMonth() * 32 + v.getUTCDate();
+  }
+  return v.getFullYear() * 1000 + v.getMonth() * 32 + v.getDate();
+}
+
 /** Compare by Date-values without Time
  * @return 1, -1 or 0 */
-export default function dateCompareWithoutTime(v1: Date, v2: Date): number {
-  const d1 = v1.getFullYear() * 1000 + v1.getMonth() * 32 + v1.getDate();
-  const d2 = v2.getFullYear() * 1000 + v2.getMonth() * 32 + v2.getDate();
+export default function dateCompareWithoutTime(v1: Date, v2: Date, utc: boolean): number {
+  const d1 = getDateVal(v1, utc);
+  const d2 = getDateVal(v2, utc);
 
   if (d1 > d2) return 1;
   if (d1 < d2) return -1;
