@@ -707,7 +707,6 @@ export default class WUPTextControl<
   protected override setValue(v: ValueType | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
     !skipInput && this.setInputValue(v as string, reason);
     const isChanged = super.setValue(v, reason);
-    !isChanged && this.setClearState(); // othwerise state updated from setValue
     this._isValid !== false && this.goHideError();
     return isChanged;
   }
