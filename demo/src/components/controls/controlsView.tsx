@@ -69,11 +69,11 @@ export default function ControlsView() {
       <wup-form
         w-autoComplete={false}
         w-autoSave={false}
+        w-autoFocus
         disabled={false}
         readonly={false}
         ref={(el) => {
           if (el) {
-            el.$options.autoFocus = true;
             // el.$initModel = { text: "test-me@google.com" };
             el.$isPending = false;
             el.$onSubmit = (e) => {
@@ -87,23 +87,22 @@ export default function ControlsView() {
         <wup-text w-name="text" />
         <wup-pwd w-name="password" />
         <wup-select
+          w-name="select"
+          w-label="Select (combobox/dropdown)"
           ref={(el) => {
             if (el) {
-              el.$options.label = "Select (combobox/dropdown)";
               el.$options.items = items;
               el.$options.validations = {
                 required: true,
               };
-              el.$options.name = "select";
             }
           }}
         />
         <wup-selectmany
+          w-name="selectMany"
           ref={(el) => {
             if (el) {
               el.$options.items = items;
-              el.$options.name = "selectMany";
-              el.$options.label = "Select Many";
               el.$initValue = [items[0].value, items[2].value];
             }
           }}
@@ -112,9 +111,9 @@ export default function ControlsView() {
         <wup-switch w-name="switch" />
         <wup-check w-name="checkbox" />
         <wup-radio
+          w-name="radioGroup"
           ref={(el) => {
             if (el) {
-              el.$options.name = "radioGroup";
               el.$options.items = items.slice(0, 4);
             }
           }}
