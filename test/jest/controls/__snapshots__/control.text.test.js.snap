@@ -579,11 +579,6 @@ mask-image: var(--ctrl-icon-img);
           height: 100%;
           border-radius: 50%;
         }
-        WUP-TEXT[disabled] button[clear],
-        WUP-TEXT[readonly] button[clear] {
-          display: none;
-          pointer-events: none;
-        }
         @media (hover: hover) and (pointer: fine) {
           WUP-TEXT:hover button[clear] {
             display: block;
@@ -595,6 +590,11 @@ mask-image: var(--ctrl-icon-img);
           WUP-TEXT button[clear]:hover:after {
             background: var(--ctrl-err-text);
           }
+        }
+        WUP-TEXT[disabled] button[clear],
+        WUP-TEXT[readonly] button[clear] {
+          display: none;
+          pointer-events: none;
         }
 </style>
 `;

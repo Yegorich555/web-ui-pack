@@ -593,11 +593,6 @@ mask-image: var(--ctrl-icon-img);
           height: 100%;
           border-radius: 50%;
         }
-        WUP-TEXTAREA[disabled] button[clear],
-        WUP-TEXTAREA[readonly] button[clear] {
-          display: none;
-          pointer-events: none;
-        }
         @media (hover: hover) and (pointer: fine) {
           WUP-TEXTAREA:hover button[clear] {
             display: block;
@@ -609,6 +604,11 @@ mask-image: var(--ctrl-icon-img);
           WUP-TEXTAREA button[clear]:hover:after {
             background: var(--ctrl-err-text);
           }
+        }
+        WUP-TEXTAREA[disabled] button[clear],
+        WUP-TEXTAREA[readonly] button[clear] {
+          display: none;
+          pointer-events: none;
         }
         WUP-TEXTAREA strong { top: 1.6em; }
         WUP-TEXTAREA [contenteditable=true] {

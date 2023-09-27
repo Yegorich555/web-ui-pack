@@ -650,11 +650,6 @@ mask-image: var(--ctrl-icon-img);
           height: 100%;
           border-radius: 50%;
         }
-        WUP-PWD[disabled] button[clear],
-        WUP-PWD[readonly] button[clear] {
-          display: none;
-          pointer-events: none;
-        }
         @media (hover: hover) and (pointer: fine) {
           WUP-PWD:hover button[clear] {
             display: block;
@@ -666,6 +661,11 @@ mask-image: var(--ctrl-icon-img);
           WUP-PWD button[clear]:hover:after {
             background: var(--ctrl-err-text);
           }
+        }
+        WUP-PWD[disabled] button[clear],
+        WUP-PWD[readonly] button[clear] {
+          display: none;
+          pointer-events: none;
         }
         WUP-PWD {
           --ctrl-icon-img: var(--wup-icon-eye);

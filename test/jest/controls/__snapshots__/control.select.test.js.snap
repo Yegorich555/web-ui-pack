@@ -611,11 +611,6 @@ mask-image: var(--ctrl-icon-img);
           height: 100%;
           border-radius: 50%;
         }
-        WUP-SELECT[disabled] button[clear],
-        WUP-SELECT[readonly] button[clear] {
-          display: none;
-          pointer-events: none;
-        }
         @media (hover: hover) and (pointer: fine) {
           WUP-SELECT:hover button[clear] {
             display: block;
@@ -627,6 +622,11 @@ mask-image: var(--ctrl-icon-img);
           WUP-SELECT button[clear]:hover:after {
             background: var(--ctrl-err-text);
           }
+        }
+        WUP-SELECT[disabled] button[clear],
+        WUP-SELECT[readonly] button[clear] {
+          display: none;
+          pointer-events: none;
         }
       WUP-SELECT {
         cursor: pointer;

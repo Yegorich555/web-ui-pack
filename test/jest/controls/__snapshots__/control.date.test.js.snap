@@ -610,11 +610,6 @@ mask-image: var(--ctrl-icon-img);
           height: 100%;
           border-radius: 50%;
         }
-        WUP-DATE[disabled] button[clear],
-        WUP-DATE[readonly] button[clear] {
-          display: none;
-          pointer-events: none;
-        }
         @media (hover: hover) and (pointer: fine) {
           WUP-DATE:hover button[clear] {
             display: block;
@@ -626,6 +621,11 @@ mask-image: var(--ctrl-icon-img);
           WUP-DATE button[clear]:hover:after {
             background: var(--ctrl-err-text);
           }
+        }
+        WUP-DATE[disabled] button[clear],
+        WUP-DATE[readonly] button[clear] {
+          display: none;
+          pointer-events: none;
         }
       WUP-DATE {
         cursor: pointer;

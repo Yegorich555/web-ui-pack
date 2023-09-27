@@ -613,11 +613,6 @@ mask-image: var(--ctrl-icon-img);
           height: 100%;
           border-radius: 50%;
         }
-        WUP-TIME[disabled] button[clear],
-        WUP-TIME[readonly] button[clear] {
-          display: none;
-          pointer-events: none;
-        }
         @media (hover: hover) and (pointer: fine) {
           WUP-TIME:hover button[clear] {
             display: block;
@@ -629,6 +624,11 @@ mask-image: var(--ctrl-icon-img);
           WUP-TIME button[clear]:hover:after {
             background: var(--ctrl-err-text);
           }
+        }
+        WUP-TIME[disabled] button[clear],
+        WUP-TIME[readonly] button[clear] {
+          display: none;
+          pointer-events: none;
         }
       WUP-TIME {
         cursor: pointer;

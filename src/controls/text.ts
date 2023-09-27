@@ -299,11 +299,6 @@ export default class WUPTextControl<
           height: 100%;
           border-radius: 50%;
         }
-        :host[disabled] button[clear],
-        :host[readonly] button[clear] {
-          display: none;
-          pointer-events: none;
-        }
         @media (hover: hover) and (pointer: fine) {
           :host:hover button[clear] {
             display: block;
@@ -315,6 +310,11 @@ export default class WUPTextControl<
           :host button[clear]:hover:after {
             background: var(--ctrl-err-text);
           }
+        }
+        :host[disabled] button[clear],
+        :host[readonly] button[clear] {
+          display: none;
+          pointer-events: none;
         }`;
   }
 

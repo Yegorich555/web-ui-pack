@@ -30,7 +30,7 @@ export const enum AttributeTypes {
   number,
   string,
   reference,
-  parsedObject, // tod maybe this is useless
+  parsedObject,
   parseCustom,
   /** Element accessed via `document.querySelector` */
   selector,

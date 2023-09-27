@@ -586,11 +586,6 @@ mask-image: var(--ctrl-icon-img);
           height: 100%;
           border-radius: 50%;
         }
-        WUP-NUM[disabled] button[clear],
-        WUP-NUM[readonly] button[clear] {
-          display: none;
-          pointer-events: none;
-        }
         @media (hover: hover) and (pointer: fine) {
           WUP-NUM:hover button[clear] {
             display: block;
@@ -602,6 +597,11 @@ mask-image: var(--ctrl-icon-img);
           WUP-NUM button[clear]:hover:after {
             background: var(--ctrl-err-text);
           }
+        }
+        WUP-NUM[disabled] button[clear],
+        WUP-NUM[readonly] button[clear] {
+          display: none;
+          pointer-events: none;
         }
 </style>
 `;

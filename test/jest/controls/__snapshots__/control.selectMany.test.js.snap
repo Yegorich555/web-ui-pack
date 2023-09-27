@@ -620,11 +620,6 @@ mask-image: var(--ctrl-icon-img);
           height: 100%;
           border-radius: 50%;
         }
-        WUP-SELECTMANY[disabled] button[clear],
-        WUP-SELECTMANY[readonly] button[clear] {
-          display: none;
-          pointer-events: none;
-        }
         @media (hover: hover) and (pointer: fine) {
           WUP-SELECTMANY:hover button[clear] {
             display: block;
@@ -636,6 +631,11 @@ mask-image: var(--ctrl-icon-img);
           WUP-SELECTMANY button[clear]:hover:after {
             background: var(--ctrl-err-text);
           }
+        }
+        WUP-SELECTMANY[disabled] button[clear],
+        WUP-SELECTMANY[readonly] button[clear] {
+          display: none;
+          pointer-events: none;
         }
       WUP-SELECTMANY {
         cursor: pointer;
