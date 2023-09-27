@@ -392,7 +392,8 @@ export default abstract class WUPBaseControl<
 
   /** Default function to compare values/changes; It compares by valueOf() & by {id}
    *  Redefine/define `valueOf()` for complex values to improve comparison */
-  static $isEqual(v1: unknown, v2: unknown): boolean {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static $isEqual(v1: unknown, v2: unknown, control: WUPBaseControl): boolean {
     return isEqual(v1, v2) || (v1 != null && (v1 as any).id != null && v2 != null && (v1 as any).id === (v2 as any).id);
   }
 
@@ -471,7 +472,7 @@ export default abstract class WUPBaseControl<
     const was = this.#initValue;
     const canUpdate = (!this.$isReady && this.$value === undefined) || (!this.$isDirty && !this.$isChanged);
     this.#initValue = v;
-    let needUpdate = !this.#ctr.$isEqual(v, was); // WARN: comparing required for SelectControl when during the parse it waits for promise
+    let needUpdate = !this.#ctr.$isEqual(v, was, this); // WARN: comparing required for SelectControl when during the parse it waits for promise
     if (canUpdate && needUpdate) {
       needUpdate = !this.setValue(v, SetValueReasons.initValue);
     }
@@ -501,7 +502,7 @@ export default abstract class WUPBaseControl<
   /** Returns if value changed (by comparisson with $initValue via static.isEqual option)
    *  By default values compared by valueOf if it's possible */
   get $isChanged(): boolean {
-    return !this.#ctr.$isEqual(this.$value, this.#initValue);
+    return !this.#ctr.$isEqual(this.$value, this.#initValue, this);
   }
 
   _isValid?: boolean;
@@ -1118,7 +1119,7 @@ export default abstract class WUPBaseControl<
     ) {
       this.$isDirty = true;
     }
-    const isChanged = !this.#ctr.$isEqual(v, prev);
+    const isChanged = !this.#ctr.$isEqual(v, prev, this);
     if (!isChanged) {
       return false;
     }

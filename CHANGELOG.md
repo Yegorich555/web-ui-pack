@@ -33,6 +33,7 @@
 - [SelectManyControl](src/controls/selectMany.ts)
   - _Wrong error `Not found in items` when re-assign `items` & `initValue` after a time_
   - _Removing item from value affects on `$initValue`_
+  - _$isChanged is wrong if user removed then added same value_
 - [DateControl](src/controls/date.ts)
   - _Validations `min`, `max`, `exclude` don't exclude time in comparison_
   - _Validations messages `min` & `max` isn't formatted according to `utc`_

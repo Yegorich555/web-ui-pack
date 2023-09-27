@@ -249,7 +249,7 @@ export default class WUPSelectManyControl<
     this._opts.multiple = false;
     const vi = super.parseInput(text) as ValueType | undefined;
     this._opts.multiple = true;
-    if (vi === undefined || this.$value?.some((v) => this.#ctr.$isEqual(v, vi))) {
+    if (vi === undefined || this.$value?.some((v) => this.#ctr.$isEqual(v, vi, this))) {
       return this.$value; // no-changes, no-duplicates
     }
     return this.$value ? [...this.$value, vi] : [vi];

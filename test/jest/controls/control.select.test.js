@@ -881,8 +881,8 @@ describe("control.select", () => {
       expect(el.$initValue).toStrictEqual([10, 20]); // initValue must be cloned
       expect(el.$isChanged).toBe(true);
       await h.userRemove(el.$refInput);
-
-      // todo remove 30 and check if isChanged=false
+      expect(el.$value).toStrictEqual([10, 20]);
+      expect(el.$isChanged).toBe(false);
     });
   });
 

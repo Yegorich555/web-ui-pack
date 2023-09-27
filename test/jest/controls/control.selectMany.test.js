@@ -1013,6 +1013,7 @@ describe("control.selectMany", () => {
     trg.dispatchEvent(new MouseEvent("touchend", { cancelable: false, bubbles: true }));
     await h.wait(1);
     expect(onChanged).toBeCalledTimes(0);
+    expect(el.$value).toStrictEqual([30, 40, 10]);
 
     // case when touch event possible to prevent
     trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
@@ -1026,7 +1027,8 @@ describe("control.selectMany", () => {
     trg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
     trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
     await nextFrame(50);
-    expect(onChanged).toBeCalledTimes(1);
+    expect(el.$value).toStrictEqual([30, 40, 10]);
+    expect(onChanged).toBeCalledTimes(0);
 
     // test disposing - no sort listener when option is disabled
     el.$options.sortable = false;

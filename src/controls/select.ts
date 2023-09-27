@@ -152,6 +152,16 @@ export default class WUPSelectControl<
   /** Text for aria-label of <ul> element */
   static $ariaLabelItems = "Items";
 
+  static $isEqual(v1: unknown, v2: unknown, c: WUPSelectControl): boolean {
+    let isEq = super.$isEqual(v1, v2, c);
+    if (!isEq && c._opts.multiple && Array.isArray(v1) && Array.isArray(v2)) {
+      const isSortMatter = (c._opts as Record<string, any>).sortable; // option sortable is defined in selectMany but placed here to simplify logic
+      isEq =
+        v1.length === v2.length && (isSortMatter ? v1.every((v, i) => v2[i] === v) : v1.every((v) => v2.includes(v)));
+    }
+    return isEq;
+  }
+
   /** Function to filter menuItems based on inputValue
    * @param menuItemText textcontent in lowercase
    * @param menuItemValue value related to items[x].value
@@ -439,7 +449,7 @@ export default class WUPSelectControl<
 
   /* Called when need to show text related to value */
   protected valueToText(v: ItemType, items: WUP.Select.MenuItems<ItemType>): string {
-    const i = items.findIndex((o) => this.#ctr.$isEqual(o.value, v));
+    const i = items.findIndex((o) => this.#ctr.$isEqual(o.value, v, this));
     if (i === -1) {
       if (this._opts.allowNewValue) {
         return v != null ? (v as any).toString() : "";
@@ -603,7 +613,7 @@ export default class WUPSelectControl<
   protected selectMenuItemByValue(v: ValueType | undefined): void {
     if (this.$isShown) {
       const findAndSelect = (vi: ValueType): number => {
-        const i = this._cachedItems!.findIndex((item) => this.#ctr.$isEqual(item.value, vi));
+        const i = this._cachedItems!.findIndex((item) => this.#ctr.$isEqual(item.value, vi, this));
         this.selectMenuItem(this._menuItems!.all[i] || null);
         return i;
       };
