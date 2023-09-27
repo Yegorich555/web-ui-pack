@@ -558,8 +558,9 @@ export default class WUPSelectManyControl<
       this._focusIndex === index && this.focusItemByIndex(null);
     }
 
-    this.$value!.splice(index, 1);
-    this.setValue(this.$value!.length ? [...this.$value!] : undefined, SetValueReasons.userInput);
+    const v = [...this.$value!];
+    v.splice(index, 1);
+    this.setValue(v.length ? v : undefined, SetValueReasons.userInput);
   }
 
   protected override setValue(v: ValueType[] | undefined, reason: SetValueReasons, skipInput = false): boolean | null {

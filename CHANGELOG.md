@@ -27,9 +27,12 @@
 - **TypeScript**
   - Updated version & types
   - Refactored & fixed some types
-- [RadioControl](src/controls/radio.ts). _autoFocus makes focused 1st but not active input when `form.$options.autoFocus=true`_
-- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). _Wrong error `Not found in items` when re-assign `items` & `initValue` after a time_
 - helper [observer](src/helpers/observer.ts). _excludeNested doesn't exclude when re-assign nested properties_
+- [RadioControl](src/controls/radio.ts). _autoFocus makes focused 1st but not active input when `form.$options.autoFocus=true`_
+- [SelectControl](src/controls/select.ts). _Wrong error `Not found in items` when re-assign `items` & `initValue` after a time_
+- [SelectManyControl](src/controls/selectMany.ts)
+  - _Wrong error `Not found in items` when re-assign `items` & `initValue` after a time_
+  - _Removing item from value affects on `$initValue`_
 - [DateControl](src/controls/date.ts)
   - _Validations `min`, `max`, `exclude` don't exclude time in comparison_
   - _Validations messages `min` & `max` isn't formatted according to `utc`_

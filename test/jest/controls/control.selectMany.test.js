@@ -249,6 +249,7 @@ describe("control.selectMany", () => {
     await h.wait();
     await h.userClick(el.$refItems[0], undefined);
     expect(el.$value).toStrictEqual([30]);
+    expect(el.$initValue).toStrictEqual([10, 30]);
     // animation for [removed]
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
       `"<span item="" aria-hidden="true" removed="">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-describedby="txt2"><strong></strong>"`
@@ -422,14 +423,14 @@ describe("control.selectMany", () => {
     expect(handledKeydown("ArrowLeft")).toBe(true); // focus 1st
     expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
       [
-        "<span item="" id="txt10" focused="" role="option">Donny</span>",
-        "<span item="" id="txt9" aria-hidden="true">Mikky</span>",
+        "<span item="" id="txt11" focused="" role="option">Donny</span>",
+        "<span item="" id="txt10" aria-hidden="true">Mikky</span>",
       ]
     `);
     expect(handledKeydown("Delete")).toBe(true); // delete 1st, focus on next
     expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
       [
-        "<span item="" id="txt9" focused="" role="option">Mikky</span>",
+        "<span item="" id="txt10" focused="" role="option">Mikky</span>",
       ]
     `);
     expect(el.$value).toStrictEqual([20]);
@@ -450,7 +451,7 @@ describe("control.selectMany", () => {
     await h.wait(10);
     expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
       [
-        "<span item="" id="txt13" focused="" role="option">Donny</span>",
+        "<span item="" id="txt15" focused="" role="option">Donny</span>",
       ]
     `);
     expect(el.$value).toStrictEqual([10]);
@@ -468,7 +469,7 @@ describe("control.selectMany", () => {
     expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
       [
         "<span item="" aria-hidden="true">Leo</span>",
-        "<span item="" id="txt16" focused="" role="option">Splinter</span>",
+        "<span item="" id="txt18" focused="" role="option">Splinter</span>",
       ]
     `);
     expect(el._menuItems.all.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
@@ -484,14 +485,14 @@ describe("control.selectMany", () => {
     expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
       [
         "<span item="" aria-hidden="true">Leo</span>",
-        "<span item="" id="txt16" aria-hidden="true">Splinter</span>",
+        "<span item="" id="txt18" aria-hidden="true">Splinter</span>",
       ]
     `);
     expect(el._menuItems.all.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
       [
         "<li role="option" style="">Donny</li>",
         "<li role="option" id="txt5">Mikky</li>",
-        "<li role="option" style="" aria-selected="true" id="txt17" focused="">Leo</li>",
+        "<li role="option" style="" aria-selected="true" id="txt19" focused="">Leo</li>",
         "<li role="option" style="" aria-selected="true">Splinter</li>",
       ]
     `);
@@ -500,14 +501,14 @@ describe("control.selectMany", () => {
     expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
       [
         "<span item="" aria-hidden="true">Leo</span>",
-        "<span item="" id="txt16" focused="" role="option">Splinter</span>",
+        "<span item="" id="txt18" focused="" role="option">Splinter</span>",
       ]
     `);
     expect(el._menuItems.all.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
       [
         "<li role="option" style="">Donny</li>",
         "<li role="option" id="txt5">Mikky</li>",
-        "<li role="option" style="" aria-selected="true" id="txt17">Leo</li>",
+        "<li role="option" style="" aria-selected="true" id="txt19">Leo</li>",
         "<li role="option" style="" aria-selected="true">Splinter</li>",
       ]
     `);
@@ -519,7 +520,7 @@ describe("control.selectMany", () => {
     expect(el.$refItems.map((a) => a.outerHTML)).toMatchInlineSnapshot(`
       [
         "<span item="" aria-hidden="true">Leo</span>",
-        "<span item="" id="txt16" aria-hidden="true">Splinter</span>",
+        "<span item="" id="txt18" aria-hidden="true">Splinter</span>",
       ]
     `);
 
@@ -530,7 +531,7 @@ describe("control.selectMany", () => {
     expect(handledKeydown("ArrowDown")).toBe(true);
     expect(handledKeydown("ArrowDown")).toBe(true);
     expect(el.querySelector("[focused]").outerHTML).toMatchInlineSnapshot(
-      `"<li role="option" aria-selected="false" id="txt22" focused="">Splinter</li>"`
+      `"<li role="option" aria-selected="false" id="txt24" focused="">Splinter</li>"`
     );
     expect(handledKeydown("Enter")).toBe(true); // select item because Enter == click
     await h.wait();
@@ -544,8 +545,8 @@ describe("control.selectMany", () => {
       [
         "<li role="option">Donny</li>",
         "<li role="option">Mikky</li>",
-        "<li role="option" aria-selected="true" id="txt21">Leo</li>",
-        "<li role="option" aria-selected="true" id="txt22" focused="">Splinter</li>",
+        "<li role="option" aria-selected="true" id="txt23">Leo</li>",
+        "<li role="option" aria-selected="true" id="txt24" focused="">Splinter</li>",
       ]
     `);
   });

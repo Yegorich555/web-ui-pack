@@ -866,6 +866,23 @@ describe("control.select", () => {
       expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
         `"<ul id="txt12" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" id="txt13" style="display: none;">Donny</li><li role="option" style="display: none;">Donny2</li><li role="option" style="display: none;" aria-selected="true">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
       );
+
+      // value must be cloned from initValue
+      el = document.body.appendChild(document.createElement(el.tagName));
+      el.$options.multiple = true;
+      el.$options.items = getItems();
+      el.$initValue = [10, 20];
+      await h.wait(1);
+      expect(el.$isChanged).toBe(false);
+      await h.userTypeText(el.$refInput, "leo", { clearPrevious: false });
+      el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([10, 20, 30]);
+      expect(el.$initValue).toStrictEqual([10, 20]); // initValue must be cloned
+      expect(el.$isChanged).toBe(true);
+      await h.userRemove(el.$refInput);
+
+      // todo remove 30 and check if isChanged=false
     });
   });
 
