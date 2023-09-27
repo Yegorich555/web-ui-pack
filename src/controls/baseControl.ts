@@ -449,7 +449,7 @@ export default abstract class WUPBaseControl<
   }
 
   /** Called on value change */
-  $onChange?: (e: CustomEvent & { detail: SetValueReasons }) => void;
+  $onChange?: (e: CustomEvent<SetValueReasons>) => void;
 
   #value?: ValueType;
   /** Current value of control; You can change it without affecting on $isDirty state */
