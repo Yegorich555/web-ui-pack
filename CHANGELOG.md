@@ -30,12 +30,13 @@
 - [RadioControl](src/controls/radio.ts). _autoFocus makes focused 1st but not active input when `form.$options.autoFocus=true`_
 - [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts). _Wrong error `Not found in items` when re-assign `items` & `initValue` after a time_
 - helper [observer](src/helpers/observer.ts). _excludeNested doesn't exclude when re-assign nested properties_
-- [DateControl](src/controls/date.ts).
+- [DateControl](src/controls/date.ts)
   - _Validations `min`, `max`, `exclude` don't exclude time in comparison_
   - _Validations messages `min` & `max` isn't formatted according to `utc`_
   - _Error message doesn't appear for invalid input by pressing Enter_
   - _Validation `_parse` doesn't work when added extra char and another char auto-removed (shifted & removed)_
-- [TimeControl](src/controls/time.ts).
+  - _History undo works wrong is select all + type new + Ctrl-Z_
+- [TimeControl](src/controls/time.ts)
   - _Validation `_parse` doesn't work when added extra char and another char auto-removed (shifted & removed)_
   - _Error message doesn't appear for invalid input by pressing Enter_
 - [CalendarControl](src/controls/calendar.ts). Removed useless background for button month in the header

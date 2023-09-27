@@ -280,8 +280,7 @@ export default class TextHistory {
         isUpdate = false;
         snap.pos1 = pos1;
         snap.pos2 = pos2;
-        // todo issue here for dateConntrol: type 2016 => it doesn't clean {removed}
-        snap.removed = ""; // todo retest with this new line
+        snap.removed = "";
       }
       snap.action = InputTypes.replace;
     } else {
