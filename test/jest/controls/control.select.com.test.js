@@ -473,8 +473,10 @@ describe("control.select common", () => {
     expect(await h.userRemove(el.$refInput)).toBe("|");
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait(1);
-    expect(el.$value).toBe(getItems()[1].value); // value reverted because isRequired
-    expect(el.$refInput.value).toBe(getItems()[1].text);
+    // expect(el.$value).toBe(getItems()[1].value); // value reverted because isRequired
+    // expect(el.$refInput.value).toBe(getItems()[1].text);
+    expect(el.$value).toBe(undefined);
+    expect(el.$refInput.value).toBe("");
     expect(el.$isShown).toBe(false);
   });
 

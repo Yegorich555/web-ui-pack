@@ -735,7 +735,7 @@ export default class WUPSelectControl<
 
   /** Returns if possible to de-select menu items when input is empty */
   private get canClearSelection(): boolean {
-    return !this.$refInput.value && !this.$isRequired && !this._opts.multiple;
+    return !this.$refInput.value && /*! this.$isRequired && */ !this._opts.multiple;
   }
 
   protected gotBeforeInput(e: WUP.Text.GotInputEvent): void {
