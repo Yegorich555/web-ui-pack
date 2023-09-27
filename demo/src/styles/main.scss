@@ -1,6 +1,7 @@
 body {
   margin: 0;
   padding: 0;
+  color: $basicTextColor;
   background-color: $bodyBgColor;
   font-size: 14px;
 }
@@ -61,7 +62,7 @@ p {
 
 section {
   padding: 6px;
-  box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 4px 1px var(--section-shadow-color, rgba(0, 0, 0, 0.1));
   border-radius: var(--border-radius, 6px);
   margin-bottom: 14px;
 
@@ -79,4 +80,44 @@ code {
   .token.operator {
     background: none;
   }
+}
+
+.code {
+  :not(pre) > code[class*="language-"],
+  pre[class*="language-"] {
+    // background: #f5f2f0;
+    background: none;
+  }
+
+  /* stylelint-disable-next-line no-descending-specificity */
+  code[class*="language-"],
+  pre[class*="language-"] {
+    text-shadow: 0 1px $basicBgColor;
+  }
+
+  .token.tag {
+    color: var(--codeTagColor, #905);
+  }
+}
+
+// todo add toggler on UI
+body[data-theme="dark"] {
+  --basicTextColor: #ababab;
+  --basicTextColor2: #86aba6;
+  --bodyBgColor: #161b24;
+  --basicBgColor: #222a36;
+  --headerBgColor: #104652;
+  --headerBgColor2: #222a36;
+  --borderColor: #161b24;
+  --activeLinkColor: #38b9d6;
+  --activeLinkBgColor: rgba(0, 160, 188, 0.218);
+  --hoverColor: #ababab;
+  --hoverBgColor: rgba(0, 160, 188, 0.15);
+
+  --section-shadow-color: rgba(137, 137, 137, 0.4);
+  --codeTagColor: #e19191;
+  --borderColor2: white;
+
+  // web-ui-pack styles
+  --base-btn-focus: #25a1b6;
 }

@@ -7,7 +7,6 @@ import { WUPHelpers } from "web-ui-pack";
 import { useBuiltinStyle, WUPcssButton, WUPcssScrollSmall } from "web-ui-pack/styles";
 import PopupView from "./components/popup/popupView";
 
-import iconGit from "./assets/gitIcon.svg";
 import imgLogo from "./assets/logo.png";
 import styles from "./main.scss";
 
@@ -29,6 +28,7 @@ import TimeControlView from "./components/controls/time";
 import NumberControlView from "./components/controls/number";
 import FAQView from "./components/FAQView";
 import SelectManyControlView from "./components/controls/selectMany";
+import GitIconLink from "./elements/gitIconLink";
 
 (window as any).WUPHelpers = WUPHelpers;
 
@@ -83,11 +83,13 @@ export default function AppContainer() {
   return (
     <>
       <h1>
-        <img src={imgLogo} alt="logo" />
-        web-ui-pack
-        <a href="https://github.com/Yegorich555/web-ui-pack" target="_blank" rel="noreferrer" aria-label="Go to github">
+        <GitIconLink href="https://github.com/Yegorich555/web-ui-pack" className={styles.headerLink}>
+          <img src={imgLogo} alt="logo" />
+          web-ui-pack
+        </GitIconLink>
+        {/* <a href="https://github.com/Yegorich555/web-ui-pack" target="_blank" rel="noreferrer" aria-label="Go to github">
           <img src={iconGit} alt="github" />
-        </a>
+        </a> */}
       </h1>
       <div className={styles.page}>
         <nav className={`${styles.leftBar} scrolled`}>

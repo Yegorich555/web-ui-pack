@@ -35,6 +35,14 @@
   width: 10px;
   height: 10px;
   user-select: none;
-  box-shadow: 0 0 1px 0 gray;
+  box-shadow: 0 0 1px 0 var(--borderColor2, gray);
   margin: 0 2px;
+}
+
+.defLink {
+  color: $activeLinkColor;
+
+  &:hover {
+    opacity: 0.8;
+  }
 }

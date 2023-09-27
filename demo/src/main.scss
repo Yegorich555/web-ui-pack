@@ -9,7 +9,7 @@ h1 {
   margin: 0;
   border-bottom: 1px solid $borderColor;
   /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
-  background: linear-gradient(270deg, $headerBgColor, #38b9d6);
+  background: linear-gradient(270deg, $headerBgColor, $headerBgColor2);
   color: $headerColor;
 
   display: flex;
@@ -18,30 +18,28 @@ h1 {
   text-align: center;
   position: relative;
 
+  @media (max-width: 410px) {
+    padding: 0 20px;
+    justify-content: flex-start;
+  }
+}
+
+.headerLink {
+  font-size: 24px;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
   > img {
     max-width: 40px;
     max-height: 40px;
     margin-right: 10px;
   }
 
-  > a {
-    position: absolute;
-    transform: translateY(-50%);
-    top: 50%;
-    left: calc(100% - 40px);
-
-    display: flex;
-    text-decoration: none;
-
-    &:hover {
-      /* stylelint-disable-next-line scss/no-global-function-names */
-      filter: invert(0.95);
-    }
-  }
-
-  @media (max-width: 410px) {
-    padding: 0 20px;
-    justify-content: flex-start;
+  &::after {
+    right: 0;
   }
 }
 
