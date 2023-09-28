@@ -18,6 +18,10 @@
   box-sizing: border-box;
   border: 1px solid $basicActiveBgColor;
   border-radius: $borderRadius;
+
+  > button[movable] {
+    background: #bb2b2b;
+  }
 }
 
 .scrollBlock {

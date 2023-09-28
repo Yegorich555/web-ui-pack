@@ -158,7 +158,7 @@ export default class WUPPopupElement<
       :root {
         --popup-anim: 300ms;
         --popup-bg: white;
-        --popup-fg: inherit;
+        --popup: inherit;
       }`;
   }
 
