@@ -93,10 +93,25 @@ code {
   code[class*="language-"],
   pre[class*="language-"] {
     text-shadow: 0 1px $basicBgColor;
+    color: var(--basicTextColor, black);
   }
 
-  .token.tag {
+  .token.property,
+  .token.tag,
+  .token.boolean,
+  .token.number,
+  .token.constant,
+  .token.symbol,
+  .token.deleted {
     color: var(--codeTagColor, #905);
+  }
+}
+
+a {
+  color: var(--activeLinkColor);
+
+  &:hover {
+    opacity: 0.9;
   }
 }
 
