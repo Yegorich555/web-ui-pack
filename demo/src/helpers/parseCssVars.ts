@@ -76,7 +76,7 @@ export function parseReusedVars(usedVars: CssVar[]): Set<string> {
 }
 
 interface Options {
-  /** Skip duplicates kind of --ctrl-icon: var(--ctrl-label); --ctrl-icon: var(--ctrl-err-text); */
+  /** Skip duplicates kind of --ctrl-icon: var(--ctrl-label); --ctrl-icon: var(--ctrl-err); */
   isDistinct?: boolean;
 }
 

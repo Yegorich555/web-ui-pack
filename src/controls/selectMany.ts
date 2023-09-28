@@ -159,9 +159,9 @@ export default class WUPSelectManyControl<
       }
       :host [item][removed],
       :host [item][drag][remove]  {
-        --ctrl-icon: var(--ctrl-err-text);
+        --ctrl-icon: var(--ctrl-err);
         text-decoration: line-through;
-        color: var(--ctrl-err-text);
+        color: var(--ctrl-err);
         background-color: var(--ctrl-err-bg);
       }
       :host[readonly] [item] {
@@ -170,9 +170,9 @@ export default class WUPSelectManyControl<
       }
       @media (hover: hover) and (pointer: fine) {
         :host [item]:hover {
-          --ctrl-icon: var(--ctrl-err-text);
+          --ctrl-icon: var(--ctrl-err);
           text-decoration: line-through;
-          color: var(--ctrl-err-text);
+          color: var(--ctrl-err);
           background-color: var(--ctrl-err-bg);
         }
       }

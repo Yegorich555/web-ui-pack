@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.10.1 (\_\_\_)
+
+**BREAKING CHANGES**:
+
+- **Controls**
+  - Renamed css-var `ctrl-err-text` to `ctrl-err`
+
 ## 0.9.1 (\_\_\_)
 
 **BREAKING CHANGES**:

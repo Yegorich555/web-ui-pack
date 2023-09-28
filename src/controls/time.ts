@@ -215,8 +215,8 @@ export default class WUPTimeControl<
         opacity: 0;
       }
       :host > [menu] li[disabled] {
-        color: var(--ctrl-err-text);
-        --ctrl-focus: var(--ctrl-err-text);
+        color: var(--ctrl-err);
+        --ctrl-focus: var(--ctrl-err);
         //background-color: var(--ctrl-err-bg);
       }
       :host > [menu] [group] {
@@ -244,7 +244,7 @@ export default class WUPTimeControl<
       }
       :host > [menu] button:last-child {
         --ctrl-icon-img: var(--wup-icon-cross);
-        --ctrl-icon: var(--ctrl-err-text);
+        --ctrl-icon: var(--ctrl-err);
         border-bottom-right-radius: var(--border-radius);
       }
       :host > [menu] button:after {

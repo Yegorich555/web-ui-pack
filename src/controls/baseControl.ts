@@ -239,6 +239,7 @@ export default abstract class WUPBaseControl<
   /** Text announced by screen-readers; @defaultValue `Error for` */
   static $ariaError = "Error for";
 
+  // todo ctrl--invalid-border is missed on Demo.cssVars (see userCode.tsx)
   /** Css-variables related to component */
   static get $styleRoot(): string {
     return `:root {
@@ -252,7 +253,7 @@ export default abstract class WUPBaseControl<
         --ctrl-bg: var(--base-bg);
         --ctrl-border: #e6e6e6;
         --ctrl-border-radius: var(--border-radius);
-        --ctrl-err-text: #ad0000;
+        --ctrl-err: #ad0000;
         --ctrl-err-bg: #fff4fa;
         --ctrl-err-icon-valid: green;
         --ctrl-invalid-border: red;
@@ -350,7 +351,7 @@ export default abstract class WUPBaseControl<
       :host [error] {
         cursor: pointer;
         font-size: small;
-        color: var(--ctrl-err-text);
+        color: var(--ctrl-err);
         background: var(--ctrl-err-bg);
         overflow: auto;
         overflow: overlay;
@@ -366,7 +367,7 @@ export default abstract class WUPBaseControl<
       :host [error] li:before {
         content: '';
         --ctrl-icon-img: var(--wup-icon-dot);
-        --ctrl-icon: var(--ctrl-err-text);
+        --ctrl-icon: var(--ctrl-err);
         ${WUPcssIcon}
       }
       :host [error] li[valid] {

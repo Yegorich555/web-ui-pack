@@ -268,7 +268,7 @@ export default class WUPCalendarControl<
         }
       }
       :host li[disabled] {
-        color: var(--ctrl-err-text);
+        color: var(--ctrl-err);
         background-color: var(--ctrl-err-bg);
       }
       :host li[disabled][aria-selected] {

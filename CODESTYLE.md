@@ -162,7 +162,7 @@ body {
   --base-focus: #00778d;
   --border-radius: 6px;
   --ctrl-label: #5e5e5e;
-  --ctrl-err-text: #ad0000;
+  --ctrl-err: #ad0000;
   --ctrl-invalid-border: red;
 }
 /* OR */
@@ -176,7 +176,7 @@ Use css variables per class for specific case
 
 ```css
 .my-custom-class {
-  --ctrl-err-text: red;
+  --ctrl-err: red;
   --ctrl-invalid-border: red;
 }
 ```

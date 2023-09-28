@@ -308,7 +308,7 @@ export default class WUPTextControl<
             box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
           }
           :host button[clear]:hover:after {
-            background: var(--ctrl-err-text);
+            background: var(--ctrl-err);
           }
         }
         :host[disabled] button[clear],
