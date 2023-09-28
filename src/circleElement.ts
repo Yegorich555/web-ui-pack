@@ -181,13 +181,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
         pointer-events: none;
         user-select: none;
         touch-action: none;
-      }
-      :host>wup-popup {
-        background: rgba(255,255,255,0.9)
-      }
-      :host>wup-popup-arrow:before {
         opacity: 0.9;
-        margin: 0;
       }`;
   }
 
